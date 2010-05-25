@@ -1,0 +1,42 @@
+package de.xam.xindex.index;
+
+import java.util.Iterator;
+
+import de.xam.xindex.query.Constraint;
+import de.xam.xindex.query.KeyKeyKeyEntryTuple;
+
+
+/**
+ * A map with triple keys.
+ * 
+ * Exactly one entry can be indexed for a certain key-combination.
+ * 
+ * @param <K>
+ * @param <E>
+ * 
+ * @author dscharrer
+ */
+public interface IMapMapMapIndex<K, L, M, E> extends IIndex {
+	
+	E lookup(K key1, L key2, M key3);
+	
+	boolean containsKey(Constraint<K> c1, Constraint<L> c2, Constraint<M> c3);
+	
+	void deIndex(K key1, L key2, M key3);
+	
+	/**
+	 * Indexes a entry for a key tuple. If there already is an entry for that
+	 * key tuple it will be replace.
+	 */
+	void index(K key1, L key2, M key3, E entry);
+	
+	Iterator<KeyKeyKeyEntryTuple<K,L,M,E>> tupleIterator(Constraint<K> c1, Constraint<L> c2,
+	        Constraint<M> c3);
+	
+	Iterator<K> key1Iterator();
+	
+	Iterator<L> key2Iterator();
+	
+	Iterator<M> key3Iterator();
+	
+}

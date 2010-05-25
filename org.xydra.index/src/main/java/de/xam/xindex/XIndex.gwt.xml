@@ -1,0 +1,9 @@
+<module>
+	
+	<inherits name='com.google.gwt.user.User' />
+	
+	<source path="">
+		<exclude name="index/impl/LowercaseStringKeyMapIndex.java" />
+	</source>
+	
+</module>
