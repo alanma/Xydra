@@ -1,0 +1,9 @@
+<module>
+
+	<inherits name="com.google.gwt.user.User" />
+	<inherits name="org.xydra.minio.Minio" />
+	<inherits name="org.xydra.annotations.Platform" />
+
+	<source path="" />
+
+</module>
