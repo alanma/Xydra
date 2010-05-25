@@ -1,0 +1,18 @@
+<module>
+	
+	<inherits name="com.google.gwt.user.User" />
+	<inherits name="org.xydra.index.XIndex" />
+	<inherits name="org.xydra.json.JSON" />
+	<inherits name="org.xydra.minio.Minio" />
+	<inherits name="org.xydra.annotations.Platform" />
+	
+	<source path="">
+		<exclude name="change/impl/memory/MemoryFieldChangeListener.java" />
+		<exclude name="XY.java" />
+		<exclude name="xml/impl/MiniElementImpl.java" />
+		<exclude name="xml/impl/MiniXMLParserImpl.java" />
+		<exclude name="test/*" />
+		<exclude name="model/state/AbstractStateTest.java" />
+	</source>
+	
+</module>

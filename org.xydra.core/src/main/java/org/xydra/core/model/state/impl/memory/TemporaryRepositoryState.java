@@ -1,0 +1,60 @@
+package org.xydra.core.model.state.impl.memory;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+import org.xydra.core.XX;
+import org.xydra.core.model.XAddress;
+import org.xydra.core.model.XID;
+import org.xydra.core.model.state.XModelState;
+
+
+
+public class TemporaryRepositoryState extends AbstractRepositoryState {
+	
+	private Map<XID,XModelState> modelStates;
+	
+	public TemporaryRepositoryState(XAddress repoAddr) {
+		super(repoAddr);
+		this.modelStates = new HashMap<XID,XModelState>();
+	}
+	
+	public void addModelState(XModelState modelState) {
+		checkModelState(modelState);
+		this.modelStates.put(modelState.getID(), modelState);
+	}
+	
+	public boolean hasModelState(XID modelStateID) {
+		return this.modelStates.containsKey(modelStateID);
+	}
+	
+	public boolean isEmpty() {
+		return this.modelStates.isEmpty();
+	}
+	
+	public Iterator<XID> iterator() {
+		return this.modelStates.keySet().iterator();
+	}
+	
+	public void removeModelState(XID modelId) {
+		this.modelStates.remove(modelId);
+	}
+	
+	public void save() {
+		// nothing to save
+	}
+	
+	public void delete() {
+		// nothing to do here
+	}
+	
+	public XModelState createModelState(XID id) {
+		XAddress modelAddr = XX.resolveModel(getAddress(), id);
+		return new TemporaryModelState(modelAddr, 0);
+	}
+	
+	public XModelState getModelState(XID id) {
+		return this.modelStates.get(id);
+	}
+}

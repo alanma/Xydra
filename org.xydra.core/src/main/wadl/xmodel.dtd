@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!ELEMENT xmodel (xobject*)>
+<!ATTLIST xmodel
+    xid CDATA #REQUIRED
+    revision CDATA #REQUIRED
+>
+
+<!ELEMENT xobject (xfield*)>
+<!ATTLIST xobject
+    xid CDATA #REQUIRED
+    revision CDATA #REQUIRED
+>
+
+<!ELEMENT xfield ((xstring|xlong|xid|xstringlist|xlonglist|xidlist)?)>
+<!ATTLIST xfield
+    xid CDATA #REQUIRED
+    revision CDATA #REQUIRED
+>
+
+<!ELEMENT xstring (#PCDATA)>
+<!ELEMENT xlong (#PCDATA)>
+<!ELEMENT xid (#PCDATA)>
+
+<!ELEMENT xstringlist (xstring*)>
+<!ELEMENT xlonglist (xlong*)>
+<!ELEMENT xidlist (xid*)>
+
+     

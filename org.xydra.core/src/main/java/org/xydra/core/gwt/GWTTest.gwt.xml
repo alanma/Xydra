@@ -1,0 +1,12 @@
+<module>
+
+	<inherits name="org.xydra.core.XModel" />
+	<inherits name="org.xydra.json.JSON" />
+	<inherits name="org.xydra.minio.Minio" />
+	<inherits name="org.xydra.annotations.Platform" />
+
+	<entry-point class="org.xydra.core.gwt.DummyEntryPoint" />
+
+	<source path="" />
+
+</module>

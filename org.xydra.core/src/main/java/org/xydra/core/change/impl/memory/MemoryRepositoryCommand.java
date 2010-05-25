@@ -1,0 +1,145 @@
+package org.xydra.core.change.impl.memory;
+
+import org.xydra.core.change.ChangeType;
+import org.xydra.core.change.XCommand;
+import org.xydra.core.change.XRepositoryCommand;
+import org.xydra.core.model.XAddress;
+import org.xydra.core.model.XID;
+import org.xydra.core.model.XModel;
+
+
+public class MemoryRepositoryCommand extends MemoryAtomicCommand implements XRepositoryCommand {
+	
+	// ID of the model to be added or removed
+	private final XID modelId;
+	
+	@Override
+	public boolean equals(Object object) {
+		
+		if(!super.equals(object))
+			return false;
+		
+		if(!(object instanceof XRepositoryCommand))
+			return false;
+		XRepositoryCommand command = (XRepositoryCommand)object;
+		
+		if(!this.modelId.equals(command.getModelID()))
+			return false;
+		
+		return true;
+	}
+	
+	@Override
+	public int hashCode() {
+		
+		int result = super.hashCode();
+		
+		// newValue
+		result ^= this.modelId.hashCode();
+		
+		return result;
+	}
+	
+	private MemoryRepositoryCommand(XAddress target, ChangeType changeType, long modelRevision,
+	        XID modelId) {
+		super(target, changeType, modelRevision);
+		
+		if(target.getRepository() == null)
+			throw new IllegalArgumentException("target must specify a repository, was:" + target);
+		
+		if(target.getModel() != null)
+			throw new IllegalArgumentException("target must not specify a model, was:" + target);
+		
+		if(target.getObject() != null)
+			throw new IllegalArgumentException("target must not specify an object, was:" + target);
+		
+		if(target.getField() != null)
+			throw new IllegalArgumentException("target must not specify a field, was:" + target);
+		
+		if(modelId == null)
+			throw new IllegalArgumentException("the model id must not be null");
+		
+		this.modelId = modelId;
+		
+	}
+	
+	/**
+	 * Creates a new {@link XRepositoryCommand} of the add-type (adds a new
+	 * model)
+	 * 
+	 * @param target The target of this command - repository ID must not be
+	 *            null, model, object & field ID must be null
+	 * @param isForced determines whether this command will be a forced or a
+	 *            safe command.
+	 * @param modelId The {@link XID} for the {@link XModel} which is to be
+	 *            added
+	 * @return A new {@link XRepositoryCommand} of the add-type
+	 */
+	public static XRepositoryCommand createAddCommand(XAddress target, boolean isForced, XID modelID) {
+		if(isForced) {
+			return createAddCommand(target, XCommand.FORCED, modelID);
+		} else {
+			return createAddCommand(target, XCommand.SAFE, modelID);
+		}
+	}
+	
+	/**
+	 * Creates a new {@link XRepositoryCommand} of the add-type (adds a new
+	 * model)
+	 * 
+	 * @param target The target of this command - repository ID must not be
+	 *            null, model, object & field ID must be null
+	 * @param modelRevision Must be {@link XCommand.FORCED} or
+	 *            {@link XCommand.SAFE} to determine the behavior of this
+	 *            command.
+	 * @param modelId The {@link XID} for the {@link XModel} which is to be
+	 *            added
+	 * @return A new {@link XRepositoryCommand} of the add-type
+	 */
+	public static XRepositoryCommand createAddCommand(XAddress target, long modelRevision,
+	        XID modelId) {
+		
+		if(modelRevision != XCommand.FORCED && modelRevision != XCommand.SAFE)
+			throw new RuntimeException("invalid revision for an XObjectCommand of type ADD: "
+			        + modelRevision);
+		
+		return new MemoryRepositoryCommand(target, ChangeType.ADD, modelRevision, modelId);
+	}
+	
+	/**
+	 * Creates a new {@link XRepositoryCommand} of the remove-type (removes a
+	 * model)
+	 * 
+	 * @param target The target of this command - repository ID must not be
+	 *            null, model, object & field ID must be null
+	 * @param modelRevision Must be {@link XCommand.FORCED} or
+	 *            {@link XCommand.SAFE} to determine the behavior of this
+	 *            command.
+	 * @param modelId The {@link XID} of the {@link XModel} which is to be
+	 *            removed
+	 * @return A new {@link XRepositoryCommand} of the remove-type
+	 */
+	public static XRepositoryCommand createRemoveCommand(XAddress target, long modelRevision,
+	        XID modelId) {
+		return new MemoryRepositoryCommand(target, ChangeType.REMOVE, modelRevision, modelId);
+	}
+	
+	@Override
+	public XID getModelID() {
+		return this.modelId;
+	}
+	
+	@Override
+	public String toString() {
+		String str = "RepositoryCommand: " + getChangeType() + " " + this.modelId;
+		if(isForced())
+			str += " (forced)";
+		else if(getChangeType() == ChangeType.ADD)
+			str += " (safe)";
+		else
+			str += " r" + getRevisionNumber();
+		str += " @" + getTarget();
+		return str;
+	}
+	
+}

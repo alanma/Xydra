@@ -1,0 +1,163 @@
+package org.xydra.core.xml;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.xydra.annotations.RunsInAppEngine;
+import org.xydra.annotations.RunsInGWT;
+import org.xydra.annotations.RunsInJava;
+import org.xydra.core.X;
+import org.xydra.core.access.XAccessDefinition;
+import org.xydra.core.access.XAccessManager;
+import org.xydra.core.access.XGroupDatabase;
+import org.xydra.core.access.impl.memory.MemoryAccessDefinition;
+import org.xydra.core.access.impl.memory.MemoryAccessManager;
+import org.xydra.core.model.XAddress;
+import org.xydra.core.model.XID;
+
+
+
+/**
+ * Collection of methods to (de-)serialize ARM related objects to and from their
+ * XML representation.
+ * 
+ * @author dscharrer
+ */
+@RunsInGWT
+@RunsInAppEngine
+@RunsInJava
+public class XmlAccess {
+	
+	private static final String XACCESSDEFINITION_ELEMENT = "define";
+	private static final String XACCESSDEFS_ELEMENT = "arm";
+	
+	private static final String ACTOR_ATTRIBUTE = "actor";
+	private static final String RESOURCE_ATTRIBUTE = "resource";
+	private static final String ACCESS_ATTRIBUTE = "access";
+	private static final String ALLOWED_ATTRIBUTE = "allowed";
+	
+	private static void checkElementName(MiniElement xml, String expectedName) {
+		if(!xml.getName().equals(expectedName)) {
+			throw new IllegalArgumentException("Given element " + xml + " is not an <"
+			        + expectedName + "> element.");
+		}
+	}
+	
+	private static String getRequiredAttribbute(MiniElement xml, String attribute, String element) {
+		String value = xml.getAttribute(attribute);
+		if(value == null) {
+			throw new IllegalArgumentException("Missing attribute " + attribute + "@<" + element
+			        + ">");
+		}
+		return value;
+	}
+	
+	/**
+	 * 
+	 * @return The access definition represented by the given XML element.
+	 * @throws IllegalArgumentException if the XML element does not represent a
+	 *             valid access definition.
+	 * 
+	 */
+	public static XAccessDefinition toAccessDefinition(MiniElement xml)
+	        throws IllegalArgumentException {
+		
+		checkElementName(xml, XACCESSDEFINITION_ELEMENT);
+		
+		String actorStr = getRequiredAttribbute(xml, ACTOR_ATTRIBUTE, XACCESSDEFINITION_ELEMENT);
+		XID actor = actorStr == null ? null : X.getIDProvider().fromString(actorStr);
+		
+		String resourceStr = getRequiredAttribbute(xml, RESOURCE_ATTRIBUTE,
+		        XACCESSDEFINITION_ELEMENT);
+		XAddress resource = X.getIDProvider().fromAddress(resourceStr);
+		
+		String accessStr = getRequiredAttribbute(xml, ACCESS_ATTRIBUTE, XACCESSDEFINITION_ELEMENT);
+		XID access = X.getIDProvider().fromString(accessStr);
+		
+		String allowedStr = getRequiredAttribbute(xml, ALLOWED_ATTRIBUTE, XACCESSDEFINITION_ELEMENT);
+		boolean allowed = Boolean.parseBoolean(allowedStr);
+		
+		return new MemoryAccessDefinition(access, resource, actor, allowed);
+	}
+	
+	/**
+	 * 
+	 * @return The list of access definition represented by the given XML
+	 *         element.
+	 * @throws IllegalArgumentException if the XML element does not represent a
+	 *             valid access definition list.
+	 * 
+	 */
+	public static List<XAccessDefinition> toAccessDefinitionList(MiniElement xml)
+	        throws IllegalArgumentException {
+		
+		checkElementName(xml, XACCESSDEFS_ELEMENT);
+		
+		List<XAccessDefinition> result = new ArrayList<XAccessDefinition>();
+		
+		Iterator<MiniElement> it = xml.getElements();
+		while(it.hasNext()) {
+			result.add(toAccessDefinition(it.next()));
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * 
+	 * @return The access manager represented by the given XML element.
+	 * @throws IllegalArgumentException if the XML element does not represent a
+	 *             valid access manager.
+	 * 
+	 */
+	public static XAccessManager toAccessManager(MiniElement xml, XGroupDatabase groups)
+	        throws IllegalArgumentException {
+		
+		checkElementName(xml, XACCESSDEFS_ELEMENT);
+		
+		XAccessManager arm = new MemoryAccessManager(groups);
+		
+		Iterator<MiniElement> it = xml.getElements();
+		while(it.hasNext()) {
+			XAccessDefinition def = toAccessDefinition(it.next());
+			arm.setAccess(def.getActor(), def.getResource(), def.getAccess(), def.isAllowed());
+		}
+		
+		return arm;
+	}
+	
+	public static void toXml(XAccessDefinition def, XmlOut out) throws IllegalArgumentException {
+		
+		out.open(XACCESSDEFINITION_ELEMENT);
+		
+		out.attribute(ACCESS_ATTRIBUTE, def.getAccess().toString());
+		out.attribute(RESOURCE_ATTRIBUTE, def.getResource().toString());
+		if(def.getActor() != null)
+			out.attribute(ACTOR_ATTRIBUTE, def.getActor().toString());
+		out.attribute(ALLOWED_ATTRIBUTE, Boolean.toString(def.isAllowed()));
+		
+		out.close(XACCESSDEFINITION_ELEMENT);
+		
+	}
+	
+	public static void toXml(Iterator<XAccessDefinition> defs, XmlOut out)
+	        throws IllegalArgumentException {
+		
+		out.open(XACCESSDEFS_ELEMENT);
+		
+		while(defs.hasNext()) {
+			toXml(defs.next(), out);
+		}
+		
+		out.close(XACCESSDEFS_ELEMENT);
+		
+	}
+	
+	public static void toXml(XAccessManager arm, XmlOut out) throws IllegalArgumentException {
+		
+		toXml(arm.getDefinitions(), out);
+		
+	}
+	
+}
