@@ -186,8 +186,6 @@
 						</link>
 						<!--
 							add our own projects in child-poms
-
-							https://smyle.repositoryhosting.com/webdav/smyle_mavenrepo/...
 						-->
 					</links>
 				</configuration>
