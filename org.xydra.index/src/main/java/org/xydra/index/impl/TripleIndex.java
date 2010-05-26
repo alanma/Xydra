@@ -12,7 +12,6 @@ import org.xydra.index.query.KeyKeyEntryTuple;
 import org.xydra.index.query.Wildcard;
 
 
-
 /**
  * An implementation that uses several indexes internally and chooses among
  * them.
@@ -52,20 +51,12 @@ public class TripleIndex<K, L, M> implements ITripleIndex<K,L,M> {
 		this.index_s_p_o_stmt = new MapMapSetIndex<K,L,M>(new SmallEntrySetFactory<M>());
 	}
 	
-	/*
-	 * JavaDoc: @see de.xam.xindex.index.ITripleIndex#clear()
-	 */
 	public void clear() {
 		this.index_o_s_stmt.clear();
 		this.index_p_o_stmt.clear();
 		this.index_s_p_o_stmt.clear();
 	}
 	
-	/*
-	 * JavaDoc: @see de.xam.xindex.index.ITripleIndex#contains
-	 * (de.xam.xindex.query.Constraint, de.xam.xindex.query.Constraint,
-	 * de.xam.xindex.query.Constraint)
-	 */
 	public boolean contains(Constraint<K> c1, Constraint<L> c2, Constraint<M> c3) {
 		// deal with the eight patterns
 		if(
@@ -108,18 +99,12 @@ public class TripleIndex<K, L, M> implements ITripleIndex<K,L,M> {
 		return this.contains(c1, c2, c3);
 	}
 	
-	/*
-	 * JavaDoc: @see de.xam.xindex.index.ITripleIndex#deIndex(K, K, K)
-	 */
 	public void deIndex(K s, L p, M o) {
 		this.index_s_p_o_stmt.deIndex(s, p, o);
 		this.index_o_s_stmt.deIndex(o, s);
 		this.index_p_o_stmt.deIndex(p, o);
 	}
 	
-	/*
-	 * JavaDoc: @see de.xam.xindex.index.ITripleIndex#dump()
-	 */
 	public void dump() {
 		System.out.println("Dumping s-p-o-index (there are others)");
 		Iterator<KeyKeyEntryTuple<K,L,M>> it = this.index_s_p_o_stmt.tupleIterator(
@@ -149,9 +134,6 @@ public class TripleIndex<K, L, M> implements ITripleIndex<K,L,M> {
 		return tupleIterator;
 	}
 	
-	/*
-	 * JavaDoc: @see de.xam.xindex.index.ITripleIndex#index(K, K, K)
-	 */
 	public void index(K s, L p, M o) {
 		this.index_s_p_o_stmt.index(s, p, o);
 		this.index_o_s_stmt.index(o, s);
