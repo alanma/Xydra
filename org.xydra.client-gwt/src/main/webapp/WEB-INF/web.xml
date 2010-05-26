@@ -1,0 +1,22 @@
+<!DOCTYPE web-app PUBLIC
+ "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+ "http://java.sun.com/dtd/web-app_2_3.dtd" >
+
+<web-app>
+	<display-name>Maven GWT Sample Project</display-name>	
+	
+	<welcome-file-list>
+		<welcome-file>Application.html</welcome-file>
+	</welcome-file-list>
+	
+	<!--  work around same-origin policy -->
+	<servlet>
+		<servlet-name>ProxyServlet</servlet-name>
+		<servlet-class>org.xydra.client.server.ProxyServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ProxyServlet</servlet-name>
+		<url-pattern>/cxm/*</url-pattern>
+	</servlet-mapping>
+	
+</web-app>

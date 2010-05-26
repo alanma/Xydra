@@ -1,0 +1,30 @@
+<!DOCTYPE module PUBLIC "//gwt-module/" "http://google-web-toolkit.googlecode.com/svn/tags/1.6.2/distro-source/core/src/gwt-module.dtd">
+<module rename-to="XClient"> <!-- this setting needs to be mirrored in the pom.xml file -->
+
+      <!-- Inherit the core Web Toolkit stuff. -->
+      <inherits name='com.google.gwt.user.User'/>
+      
+      <!-- Inherit the core GWT XML module. -->
+      <inherits name='com.google.gwt.xml.XML'/>
+      
+      <!-- Inherit the XModel -->
+      <inherits name='org.xydra.core.XydraCore'/>
+      
+	<!-- add gwt-log support -->
+	<inherits name='com.allen_sauer.gwt.log.gwt-log-INFO' />
+        
+    <!--  ENABLED or DISABLED  -->
+    <set-property name="log_DivLogger" value="DISABLED" />
+    <set-property name="log_FirebugLogger" value="ENABLED" />
+    <set-property name="log_GWTLogger" value="ENABLED" />
+	<!-- remember to (de)activate logging in html --> 
+      
+      <source path="">
+      	<exclude name="server/*" />
+      </source>
+      
+      <!-- Specify the app entry point class. -->
+      <entry-point class='org.xydra.client.gwt.client.XClient'/>
+      
+      
+</module>
