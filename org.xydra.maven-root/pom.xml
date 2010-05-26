@@ -21,10 +21,6 @@
 		<maven.compiler.target>1.5</maven.compiler.target>
 	</properties>
 
-
-
-
-
 	<build>
 		<extensions>
 			<extension>
@@ -382,6 +378,10 @@
 			<uniqueVersion>false</uniqueVersion>
 			<url>svn:https://xydra.googlecode.com/svn/snapshots</url>
 		</snapshotRepository>
+		<site>
+			<id>xydra-site</id>
+			<url>svn:https://xydra.googlecode.com/svn/site/org.xydra.maven-root</url>
+		</site>
 	</distributionManagement>
 
 </project>
