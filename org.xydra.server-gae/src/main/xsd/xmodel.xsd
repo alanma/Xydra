@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<xs:element name="xfield">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:choice>
+					<xs:element ref="xstring" />
+					<xs:element ref="xlong" />
+					<xs:element ref="xid" />
+					<xs:element ref="xstringlist" />
+					<xs:element ref="xlonglist" />
+					<xs:element ref="xidlist" />
+				</xs:choice>
+			</xs:sequence>
+			<xs:attribute name="revision" type="xs:string" use="required" />
+			<xs:attribute name="xid" type="xs:string" use="required" />
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="xid">
+		<xs:complexType mixed="true" />
+	</xs:element>
+
+	<xs:element name="xidlist">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="xid" minOccurs="0" maxOccurs="unbounded" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="xlong">
+		<xs:complexType mixed="true" />
+	</xs:element>
+
+	<xs:element name="xlonglist">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="xlong" minOccurs="0" maxOccurs="unbounded" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="xmodel">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="xobject" minOccurs="0" maxOccurs="unbounded" />
+			</xs:sequence>
+			<xs:attribute name="revision" type="xs:long" use="required" />
+			<xs:attribute name="xid" type="xidType" use="required" />
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="xobject">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="xfield" minOccurs="0" maxOccurs="unbounded" />
+			</xs:sequence>
+			<xs:attribute name="revision" type="xs:string" use="required" />
+			<xs:attribute name="xid" type="xidType" use="required" />
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="xstring">
+		<xs:complexType mixed="true" />
+	</xs:element>
+
+	<xs:element name="xstringlist">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="xstring" minOccurs="0" maxOccurs="unbounded" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:simpleType name="xidType">
+		<xs:restriction base="xs:string"></xs:restriction>
+	</xs:simpleType>
+
+</xs:schema>

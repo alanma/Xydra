@@ -1,0 +1,95 @@
+package org.xydra.core.model.state.impl.gae;
+
+import java.util.Iterator;
+
+import org.xydra.core.XX;
+import org.xydra.core.model.XAddress;
+import org.xydra.core.model.XID;
+import org.xydra.core.model.XType;
+import org.xydra.core.model.impl.memory.MemoryAddress;
+import org.xydra.core.model.state.XChangeLogState;
+import org.xydra.core.model.state.XModelState;
+import org.xydra.core.model.state.XObjectState;
+import org.xydra.server.gae.GaeUtils;
+
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
+
+
+
+public class GaeModelState extends AbstractGaeStateWithChildren implements XModelState {
+	
+	private static final long serialVersionUID = 8492473097214011504L;
+	
+	public GaeModelState(XAddress modelAddr) {
+		super(modelAddr);
+		if(MemoryAddress.getAddressedType(modelAddr) != XType.XMODEL) {
+			throw new RuntimeException("must be a model address, was: " + modelAddr);
+		}
+	}
+	
+	public void addObjectState(XObjectState objectState) {
+		loadIfNecessary();
+		this.children.add(objectState.getID());
+	}
+	
+	public boolean hasObjectState(XID id) {
+		loadIfNecessary();
+		return this.children.contains(id);
+	}
+	
+	public boolean isEmpty() {
+		loadIfNecessary();
+		return this.children.isEmpty();
+	}
+	
+	public Iterator<XID> iterator() {
+		loadIfNecessary();
+		return this.children.iterator();
+	}
+	
+	public void removeObjectState(XID objectId) {
+		loadIfNecessary();
+		this.children.remove(objectId);
+	}
+	
+	public XObjectState createObjectState(XID id) {
+		XAddress objectAddr = XX.resolveObject(getAddress(), id);
+		return new GaeObjectState(objectAddr);
+	}
+	
+	public XObjectState getObjectState(XID id) {
+		XAddress objectAddr = XX.resolveObject(getAddress(), id);
+		return GaeObjectState.load(objectAddr);
+	}
+	
+	public static XModelState load(XAddress modelStateAddress) {
+		Key key = GaeUtils.toGaeKey(modelStateAddress);
+		Entity entity = GaeUtils.getEntity(key);
+		if(entity == null) {
+			return null;
+		}
+		GaeModelState modelState = new GaeModelState(modelStateAddress);
+		modelState.loadFromEntity(entity);
+		return modelState;
+	}
+	
+	public XID getID() {
+		return getAddress().getModel();
+	}
+	
+	XChangeLogState log = null;
+	
+	public XChangeLogState getChangeLogState() {
+		if(this.log == null) {
+			this.log = new GaeChangeLogState(getAddress(), getRevisionNumber());
+		}
+		return this.log;
+	}
+	
+	public void initializeChangeLogState(XChangeLogState changeLogState) {
+		// TODO remove?
+		throw new AssertionError("should never be called");
+	}
+	
+}
