@@ -34,7 +34,6 @@ import org.xydra.core.value.XValue;
 import org.xydra.core.value.impl.memory.MemoryIDListValue;
 
 
-
 /**
  * Sub-classes need this code <code>
  * 
@@ -1143,7 +1142,9 @@ public abstract class AbstractTestAPI {
 		
 		// We now created a little repository with some content, so saving makes
 		// sense
-		String filename = "TestAPI-SaveAndLoadRepositoryTest" + XY.fileSuffix;
+		String filename = "./target/test-temp/TestAPI-SaveAndLoadRepositoryTest" + XY.fileSuffix;
+		File f = new File(filename);
+		f.getParentFile().mkdirs();
 		XY.saveRepository(repo, filename);
 		
 		// try to load it
@@ -1180,7 +1181,9 @@ public abstract class AbstractTestAPI {
 		        X.getIDProvider().createUniqueID()).setValue(null,
 		        X.getValueFactory().createStringValue("Another Test!"));
 		
-		String filename = "TestAPI-SaveAndLoadModelTest" + XY.fileSuffix;
+		String filename = "./target/test-temp/TestAPI-SaveAndLoadModelTest" + XY.fileSuffix;
+		File f = new File(filename);
+		f.getParentFile().mkdirs();
 		XY.saveModel(model, filename);
 		
 		XModel loadedModel = XY.loadModel(filename);
