@@ -24,7 +24,7 @@
 	<repositories>
 		<repository>
 			<id>xydra-repo</id>
-			<url>svn:https://xydra.googlecode.com/svn/repository</url>
+			<url>https://xydra.googlecode.com/svn/repository</url>
 			<releases>
 				<enabled>true</enabled>
 				<updatePolicy>always</updatePolicy>
