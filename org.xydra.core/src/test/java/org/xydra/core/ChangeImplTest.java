@@ -1,12 +1,8 @@
 package org.xydra.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import junit.framework.TestCase;
 
 import org.junit.Test;
-import org.xydra.core.X;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.change.XFieldEventListener;
@@ -27,8 +23,7 @@ import org.xydra.core.model.impl.memory.MemoryObject;
 import org.xydra.core.value.impl.memory.MemoryStringValue;
 
 
-
-public class ChangeImplTest {
+public class ChangeImplTest extends TestCase {
 	
 	@Test
 	public void testRepositoryChangeListening() {
