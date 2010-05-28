@@ -1,26 +1,22 @@
 package org.xydra.index.impl;
 
-import static org.junit.Assert.*;
-
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+
+import junit.framework.TestCase;
 
 import org.junit.Test;
 import org.xydra.index.Factory;
 import org.xydra.index.IEntrySet;
 import org.xydra.index.IMapMapSetIndex.IMapMapSetDiff;
 import org.xydra.index.IMapSetIndex.IMapSetDiff;
-import org.xydra.index.impl.FastEntrySetFactory;
-import org.xydra.index.impl.MapMapSetIndex;
-import org.xydra.index.impl.MapSetIndex;
 import org.xydra.index.query.KeyEntryTuple;
 import org.xydra.index.query.KeyKeyEntryTuple;
 import org.xydra.index.query.Wildcard;
 
 
-
-public class TestIndexes {
+public class TestIndexes extends TestCase {
 	
 	public static <E> List<E> toList(Iterator<E> it) {
 		LinkedList<E> list = new LinkedList<E>();
