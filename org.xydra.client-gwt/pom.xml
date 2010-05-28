@@ -38,6 +38,34 @@
 		
 	</properties>
 	
+	<repositories>
+		<!-- xydra repo -->
+		<repository>
+			<id>xydra-repo</id>
+			<url>
+				https://xydra.googlecode.com/svn/repository
+			</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</releases>
+		</repository>
+		<!-- xydra snapshots -->
+		<repository>
+			<id>xydra-snap</id>
+			<url>
+				https://xydra.googlecode.com/svn/snapshots
+			</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+		</repository>
+	</repositories>
+	
 	<dependencies>
 		
 		<!--  GWT dependencies (from central repo) -->
