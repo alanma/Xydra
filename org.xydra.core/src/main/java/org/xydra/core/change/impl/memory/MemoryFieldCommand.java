@@ -119,11 +119,11 @@ public class MemoryFieldCommand extends MemoryAtomicCommand implements XFieldCom
 			suffix += " r" + getRevisionNumber();
 		switch(getChangeType()) {
 		case ADD:
-			return "FieldEvent: ADD " + this.newValue + suffix;
+			return "FieldCommand: ADD " + this.newValue + suffix;
 		case REMOVE:
-			return "FieldEvent: REMOVE value " + suffix;
+			return "FieldCommand: REMOVE value " + suffix;
 		case CHANGE:
-			return "FieldEvent: CHANGE value to " + this.newValue + suffix;
+			return "FieldCommand: CHANGE value to " + this.newValue + suffix;
 		default:
 			throw new RuntimeException("this field event should have never been created");
 		}

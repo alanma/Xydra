@@ -51,9 +51,14 @@ public class DemoModelUtil {
 			return;
 		}
 		
-		XValueFactory vf = X.getValueFactory();
-		
 		XModel model = repository.createModel(ACTOR_ID, PHONEBOOK_ID);
+		
+		setupPhonebook(model);
+	}
+	
+	public static void setupPhonebook(XModel model) {
+		
+		XValueFactory vf = X.getValueFactory();
 		
 		XObject john = model.createObject(ACTOR_ID, JOHN_ID);
 		
@@ -101,6 +106,7 @@ public class DemoModelUtil {
 		lastCallTimes.setValue(ACTOR_ID, vf.createLongListValue(new long[] { 32456L, 7664L, 56L }));
 		
 		john.createField(ACTOR_ID, EMPTYFIELD_ID);
+		
 	}
 	
 }

@@ -2190,24 +2190,6 @@ public class XX {
 	}
 	
 	/**
-	 * Create a {@link XCommand} that undoes the given {@link XEvent} but will
-	 * fail if there have been any conflicting changes since then, even if they
-	 * have also been undone as the revision number remains changed.
-	 * 
-	 * This should only be used for undoing the last event unless you know that
-	 * there have been no conflicting events.
-	 */
-	static public XCommand createImmediateUndoCommand(XEvent event) {
-		
-		if(event instanceof XAtomicEvent)
-			return createImmediateUndoCommand((XAtomicEvent)event);
-		if(event instanceof XTransactionEvent)
-			return createImmediateUndoCommand((XTransactionEvent)event);
-		
-		throw new IllegalArgumentException("unknown command class: " + event);
-	}
-	
-	/**
 	 * Create a {@link XAtomicCommand} that undoes the given
 	 * {@link XAtomicEvent} but will fail if there have been any conflicting
 	 * changes since then, even if they have also been undone as the revision
@@ -2228,26 +2210,6 @@ public class XX {
 			return createImmediateUndoCommand((XRepositoryEvent)event);
 		
 		throw new IllegalArgumentException("unknown command class: " + event);
-	}
-	
-	/**
-	 * Create a {@link XTransaction} that undoes the given
-	 * {@link XTransactionEvent} but will fail if there have been any
-	 * conflicting changes since then, even if they have also been undone as the
-	 * revision number remains changed.
-	 * 
-	 * This should only be used for undoing the last event unless you know that
-	 * there have been no conflicting events.
-	 */
-	static public XTransaction createImmediateUndoCommand(XTransactionEvent event) {
-		
-		XAtomicCommand[] result = new XAtomicCommand[event.size()];
-		
-		for(int i = 0, j = event.size() - 1; j >= 0; i++, j--) {
-			result[i] = createImmediateUndoCommand(event.getEvent(j));
-		}
-		
-		return MemoryTransaction.createTransaction(event.getTarget(), result);
 	}
 	
 	/**

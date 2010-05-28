@@ -37,7 +37,6 @@ import org.xydra.core.model.state.XObjectState;
 import org.xydra.core.model.state.impl.memory.TemporaryObjectState;
 
 
-
 /**
  * An in-memory {@link XObject}.
  * 
@@ -674,7 +673,7 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 			if(command instanceof XFieldCommand) {
 				XField field = getField(command.getTarget().getField());
 				if(field != null) {
-					field.executeFieldCommand(actor, (XFieldCommand)command);
+					return field.executeFieldCommand(actor, (XFieldCommand)command);
 				}
 			}
 			return XCommand.FAILED;

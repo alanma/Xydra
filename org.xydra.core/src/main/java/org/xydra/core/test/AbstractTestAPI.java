@@ -12,7 +12,10 @@ import org.xydra.core.URIFormatException;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.XY;
+import org.xydra.core.change.XCommand;
+import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.MissingPieceException;
+import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
@@ -1187,5 +1190,40 @@ public abstract class AbstractTestAPI extends TestCase {
 		assertEquals(loadedModel, model);
 		
 		new File(filename).delete();
+	}
+	
+	@Test
+	public void testModelRollback() {
+		
+		// create two identical phonebook models
+		XModel model1 = new MemoryModel(DemoModelUtil.PHONEBOOK_ID);
+		XModel model2 = new MemoryModel(DemoModelUtil.PHONEBOOK_ID);
+		DemoModelUtil.setupPhonebook(model1);
+		DemoModelUtil.setupPhonebook(model2);
+		
+		// make some additional changes to the second model
+		assertNotNull(model2.createObject(ACTOR_ID, X.getIDProvider().createUniqueID()));
+		
+		assertTrue(model2.removeObject(ACTOR_ID, DemoModelUtil.JOHN_ID));
+		
+		assertNotNull(model2.getObject(DemoModelUtil.PETER_ID).createField(ACTOR_ID,
+		        X.getIDProvider().createUniqueID()));
+		
+		XTransactionBuilder tb = new XTransactionBuilder(model2.getAddress());
+		XID objId = X.getIDProvider().createUniqueID();
+		tb.addObject(model2.getAddress(), XCommand.SAFE, objId);
+		XAddress objAddr = XX.resolveObject(model2.getAddress(), objId);
+		tb.addField(objAddr, XCommand.SAFE, X.getIDProvider().createUniqueID());
+		assertTrue(model2.executeTransaction(ACTOR_ID, tb.build()) >= 0);
+		
+		assertTrue(model2.removeObject(ACTOR_ID, DemoModelUtil.CLAUDIA_ID));
+		
+		// now rollback the second model and compare the models
+		model2.rollback(model1.getRevisionNumber());
+		
+		assertEquals(model1.getRevisionNumber(), model2.getRevisionNumber());
+		
+		assertTrue(XX.equalState(model1, model2));
+		
 	}
 }

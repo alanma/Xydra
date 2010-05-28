@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -37,7 +36,6 @@ import org.xydra.core.model.XObject;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
 import org.xydra.core.model.state.impl.memory.TemporaryModelState;
-
 
 
 /**
@@ -736,17 +734,15 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 		// stop the change log to prevent the rollback events from being logged
 		this.changeLog.stopLogging(this);
 		
-		List<XEvent> events = this.changeLog.getAllEventsAfter(revision);
-		
 		// rollback each event individually
-		for(int i = events.size() - 1; i >= 0; i++) {
-			XEvent event = events.get(i);
+		for(long i = getRevisionNumber() - 1; i >= revision; i--) {
+			XEvent event = this.changeLog.getEventAt(i);
 			if(event instanceof XAtomicEvent) {
 				rollbackEvent((XAtomicEvent)event);
 			} else {
 				assert event instanceof XTransactionEvent;
 				XTransactionEvent trans = (XTransactionEvent)event;
-				for(int j = trans.size() - 1; j >= 0; j++) {
+				for(int j = trans.size() - 1; j >= 0; j--) {
 					XAtomicEvent atomicEvent = trans.getEvent(j);
 					rollbackEvent(atomicEvent);
 				}
@@ -764,9 +760,9 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 	}
 	
 	private void rollbackEvent(XAtomicEvent event) {
-		XAtomicCommand command = XX.createImmediateUndoCommand(event);
+		XAtomicCommand command = XX.createForcedUndoCommand(event);
 		long result = executeCommand(null, command);
-		assert result > 0;
+		assert result > 0 : "rollback command " + command + " for event " + event + " failed";
 		XAddress target = event.getTarget();
 		
 		// fix revision numbers
@@ -779,7 +775,15 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 				MemoryField field = object.getField(target.getField());
 				field.setRevisionNumber(event.getFieldRevisionNumber());
 				field.save();
+			} else if(event.getChangeType() == ChangeType.REMOVE) {
+				MemoryField field = object.getField(((XObjectEvent)event).getFieldID());
+				field.setRevisionNumber(event.getFieldRevisionNumber());
+				field.save();
 			}
+		} else if(event.getChangeType() == ChangeType.REMOVE) {
+			MemoryObject field = getObject(((XModelEvent)event).getObjectID());
+			field.setRevisionNumber(event.getObjectRevisionNumber());
+			field.save();
 		}
 	}
 	
