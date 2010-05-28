@@ -13,14 +13,12 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Variant;
 import javax.ws.rs.core.Response.Status;
 
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.XTransactionBuilder;
-import org.xydra.core.json.XJson;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.session.XProtectedModel;
@@ -32,7 +30,6 @@ import org.xydra.core.xml.XmlModel;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
 import org.xydra.rest.XIDParam;
-
 
 
 public class XModelResource {
@@ -76,24 +73,10 @@ public class XModelResource {
 	public Response get(@Context Request req, @QueryParam("format") MediaType format,
 	        @QueryParam("callback") String callback) {
 		
-		MediaType mt = XRepositoryResource.selectFormat(req, format);
+		XmlOutStringBuffer xo = new XmlOutStringBuffer();
+		XmlModel.toXml(this.model, xo);
 		
-		String result;
-		
-		if(MediaType.APPLICATION_XML_TYPE.equals(mt)) {
-			XmlOutStringBuffer xo = new XmlOutStringBuffer();
-			XmlModel.toXml(this.model, xo);
-			result = xo.getXml();
-		} else if(MediaType.APPLICATION_JSON_TYPE.equals(mt)) {
-			XRepositoryResource.verifyCallback(callback);
-			result = XJson.asJsonString(this.model);
-			if(callback != null)
-				result = callback + "(" + result + ");";
-		} else
-			throw new WebApplicationException(Response.notAcceptable(
-			        XRepositoryResource.getVariants()).build());
-		
-		return Response.ok(result, new Variant(mt, null, "UTF-8")).build();
+		return Response.ok(xo.getXml()).build();
 	}
 	
 	@POST
