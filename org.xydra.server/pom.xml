@@ -46,7 +46,7 @@
 		<repository>
 			<id>xydra-repo</id>
 			<url>
-				svn:https://xydra.googlecode.com/svn/repository
+				https://xydra.googlecode.com/svn/repository
 			</url>
 			<releases>
 				<enabled>true</enabled>
@@ -58,7 +58,7 @@
 		<repository>
 			<id>xydra-snap</id>
 			<url>
-				svn:https://xydra.googlecode.com/svn/snapshots
+				https://xydra.googlecode.com/svn/snapshots
 			</url>
 			<snapshots>
 				<enabled>true</enabled>
