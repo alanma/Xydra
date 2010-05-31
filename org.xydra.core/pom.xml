@@ -111,6 +111,8 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
+			<!--  for abstract tests in main  -->
+			<scope>compile</scope>
 			<!-- version info taken from parent -->
 		</dependency>
 
