@@ -2,8 +2,6 @@
 	
 	<inherits name="com.google.gwt.user.User" />
 	<inherits name="org.xydra.index.XIndex" />
-	<inherits name="org.xydra.json.JSON" />
-	<inherits name="org.xydra.minio.Minio" />
 	<inherits name="org.xydra.annotations.Platform" />
 	
 	<source path="">
