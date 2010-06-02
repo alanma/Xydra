@@ -6,6 +6,7 @@ import org.xydra.core.change.impl.memory.MemoryCommandFactory;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XIDProvider;
+import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.core.model.impl.memory.MemoryStringIDProvider;
@@ -17,7 +18,7 @@ import org.xydra.core.value.impl.memory.MemoryValueFactory;
 
 /**
  * A utility class that provides helpful methods concerning the set-up of
- * XModels.
+ * {@link XModel}s.
  * 
  * @author Voelkel
  * @author Kaidel
@@ -32,12 +33,16 @@ public class X {
 	private static XCommandFactory commandFactory;
 	
 	/**
-	 * Returns the XIDProvider of the XModel that is currently being used. XIDs
-	 * should only be created using the XIDProvider to ensure, that only unique
-	 * IDs are being used.
+	 * Returns the {@link XIDProvider} instance of the Xydra Instance that is
+	 * currently being used. {@link XID}s should only be created using this
+	 * {@link XIDProvider} instance to ensure, that only unique {@link XID}s are
+	 * being used.
 	 * 
-	 * @return Returns the XIDProvider of the XModel that is currently being
-	 *         used.
+	 * TODO Maybe we should think about a way to persist the XIDProvider in the
+	 * future to really ensure unique random ids
+	 * 
+	 * @return Returns the {@link XIDProvider} instance of the Xydra Instance
+	 *         that is currently being used.
 	 */
 	
 	public static XIDProvider getIDProvider() {
@@ -48,11 +53,12 @@ public class X {
 	}
 	
 	/**
-	 * Returns the XValueFactory of the XModel that is currently being used. The
-	 * XValueFacotry provides methods for creating XValues of all types.
+	 * Returns the {@link XValueFactory} instance of the Xydra Instance that is
+	 * currently being used. An {@link XValueFacotry} provides methods for
+	 * creating {@link XValues} of all types.
 	 * 
-	 * @return Returns the XValueFactory of the XModel that is currently being
-	 *         used.
+	 * @return Returns the {@link XValueFactory} of the Xydra Instance that is
+	 *         currently being used.
 	 */
 	
 	public static XValueFactory getValueFactory() {
@@ -64,11 +70,11 @@ public class X {
 	}
 	
 	/**
-	 * Returns the {@link XCommandFactory} of the XModel that is currently being
-	 * used. The {@link XCommandFactory} provides methods for creating
-	 * {@link XCommand}s of all types.
+	 * Returns the {@link XCommandFactory} instance of the Xydra Instance that
+	 * is currently being used. An {@link XCommandFactory} provides methods for
+	 * creating {@link XCommand}s of all types.
 	 * 
-	 * @return Returns the {@link XCommandFactory} of the XModel that is
+	 * @return Returns the {@link XCommandFactory} of the Xydra Instance that is
 	 *         currently being used.
 	 */
 	
@@ -83,7 +89,7 @@ public class X {
 	public static final String DEFAULT_REPOSITORY_ID = "repo";
 	
 	/**
-	 * Creates an XRepository implementation that lives in-memory. The
+	 * Creates an {@link XRepository} implementation that lives in-memory. The
 	 * underlying {@link XSPI} layer determines where persistence ultimately
 	 * happens.
 	 * 
@@ -96,4 +102,8 @@ public class X {
 		XRepositoryState repoState = XSPI.getStateStore().createRepositoryState(repoAddr);
 		return new MemoryRepository(repoState);
 	}
+	
+	// TODO Maybe we should add a method for creating Repositories with
+	// arbitrary IDs?
 }
+
