@@ -51,26 +51,27 @@ import org.xydra.index.iterator.SingleValueIterator;
 
 
 /**
- * A utility class that uses X to provide convenience methods for working
- * with/editing XModels.
- * 
- * @author voelkel
- * @author Kaidel
- * @author dscharrer
- * 
- */
+* A utility class that uses {@link X} to provide convenience methods for
+* working with/editing Xydra Instances.
+* 
+* @author voelkel
+* @author Kaidel
+* @author dscharrer
+* 
+*/
 
 public class XX {
 	
 	/**
-	 * Sets the value of the given field with the given value. If the given
-	 * field doesn't exist it will be created.
+	 * Sets the value of the given {@link XField} with the given {@link XValue}.
+	 * If the given {@link XField} doesn't exist it will be created.
 	 * 
-	 * @param actorID The ID of the actor
-	 * @param object The object containing the field
-	 * @param fieldID The ID of the field which is to be set
-	 * @param value The new value
-	 * @return The field with newly set value
+	 * @param actorID The {@link XID} of the actor
+	 * @param object The {@link XObject} containing the {@link XField}
+	 * @param fieldID The {@link XID} of the {@link XField} which value is to be
+	 *            set
+	 * @param value The new {@link XValue}
+	 * @return The {@link XField} with newly set {@link XValue}
 	 */
 	public static XField setValue(XID actorID, XObject object, XID fieldID, XValue value) {
 		XField field = object.getField(fieldID);
@@ -82,35 +83,36 @@ public class XX {
 	}
 	
 	/**
-	 * Sets the value of the given field with the given value. If the given
-	 * field doesn't exist it will be created.
+	 * Sets the value of the given {@link XField} with the given {@link XValue}.
+	 * If the given {@link XField} doesn't exist it will be created.
 	 * 
-	 * @param actorID The ID of the actor
-	 * @param model The model containing the object
-	 * @param objectID The ID of the object containing the field
-	 * @param fieldID The ID of the field which is to be set
-	 * @param value The new value
-	 * @return The field with newly set value
+	 * @param actorID The {@link XID} of the actor
+	 * @param model The {@link XModel} containing the {@link XObject}
+	 * @param object The {@link XObject} containing the {@link XField}
+	 * @param fieldID The {@link XID} of the {@link XField} which value is to be
+	 *            set
+	 * @param value The new {@link XValue}
+	 * @return The {@link XField} with newly set {@link XValue}
 	 */
-	
 	public static XField setValue(XID actorID, XModel model, XID objectID, XID fieldID, XValue value) {
 		XObject object = safeGetObject(model, objectID);
 		return setValue(actorID, object, fieldID, value);
 	}
 	
 	/**
-	 * Sets the value of the given field with the given value. If the given
-	 * field doesn't exist it will be created.
+	 * Sets the value of the given {@link XField} with the given {@link XValue}.
+	 * If the given {@link XField} doesn't exist it will be created.
 	 * 
-	 * @param actorID The ID of the actor
-	 * @param repository The repository containing the model
-	 * @param modelID The ID of the model containing the object
-	 * @param objectID The ID of the object containing the field
-	 * @param fieldID The ID of the field which is to be set
-	 * @param value The new value
-	 * @return The field with newly set value
+	 * @param actorID The {@link XID} of the actor
+	 * @param repository The {@link XRepository} containing the {@link XModel}
+	 *            which contains the rest
+	 * @param model The {@link XModel} containing the {@link XObject}
+	 * @param object The {@link XObject} containing the {@link XField}
+	 * @param fieldID The {@link XID} of the {@link XField} which value is to be
+	 *            set
+	 * @param value The new {@link XValue}
+	 * @return The {@link XField} with newly set {@link XValue}
 	 */
-	
 	public static XField setValue(XID actorID, XRepository repository, XID modelID, XID objectID,
 	        XID fieldID, XValue value) {
 		XModel model = safeGetModel(repository, modelID);
@@ -122,9 +124,9 @@ public class XX {
 	 * overwriting some data in targetModel. Existing data in targetModel is not
 	 * deleted.
 	 * 
-	 * @param actorID The XID of the actor.
-	 * @param sourceRepository The repository which is to be copied
-	 * @param targetRepository The repository in which the data of
+	 * @param actorID The {@link XID} of the actor.
+	 * @param sourceRepository The {@link XRepository} which is to be copied
+	 * @param targetRepository The {@link XRepository} in which the data of
 	 *            sourceRepository is to be pasted.
 	 */
 	public static void copy(XID actorID, XRepository sourceRepository, XRepository targetRepository) {
@@ -141,9 +143,9 @@ public class XX {
 	 * overwriting some data in targetModel. Existing data in targetModel is not
 	 * deleted.
 	 * 
-	 * @param actorID The XID of the actor.
-	 * @param sourceModel The model which is to be copied
-	 * @param targetModel The model in which the data of sourceModel is to be
+	 * @param actorID The {@link XID} of the actor.
+	 * @param sourceModel The {@link XModel} which is to be copied
+	 * @param targetModel The {@link XModel} in which the data of sourceModel is to be
 	 *            pasted.
 	 */
 	public static void copy(XID actorID, XModel sourceModel, XModel targetModel) {
@@ -160,9 +162,9 @@ public class XX {
 	 * overwriting some data in targetObject. Existing data in targetObject is
 	 * not deleted.
 	 * 
-	 * @param actorID The XID of the actor.
-	 * @param sourceObject The object which is to be copied
-	 * @param targetObject The object in which the data of sourceObject is to be
+	 * @param actorID The {@link XID} of the actor.
+	 * @param sourceObject The {@link XObject} which is to be copied
+	 * @param targetObject The {@link XObject} in which the data of sourceObject is to be
 	 *            pasted.
 	 */
 	public static void copy(XID actorID, XObject sourceObject, XObject targetObject) {
@@ -174,13 +176,13 @@ public class XX {
 	}
 	
 	/**
-	 * Tries to get the value of the field with 'fieldID' from the given
-	 * 'object'. If field is not present, throws a MissingPieceException
+	 * Tries to get the value of the {@link XField} with {@link XID} 'fieldID' from the given
+	 * {@link XObject}. If the specified field does not exist, a {@link MissingPieceException} will be thrown.
 	 * 
-	 * @param object The object which should contain the field
-	 * @param fieldID The ID of the field
-	 * @return The value of the specified field
-	 * @throws MissingPieceException Will be thrown if the given field doesn't
+	 * @param object The {@link XObject} which should contain the specified {@link XField}
+	 * @param fieldID The {@link XID} of the {@link XField}
+	 * @return The value of the specified {@link XField}
+	 * @throws MissingPieceException Will be thrown if the specified {@link XField} doesn't
 	 *             exist
 	 */
 	
@@ -195,14 +197,14 @@ public class XX {
 	}
 	
 	/**
-	 * Tries to get the value of the field with 'fieldID' from the given
-	 * 'object'. If field is not present, throws a MissingPieceException
+	 * Tries to get the value of the {@link XField} with {@link XID} 'fieldID' from the given
+	 * {@link XObject}. If the specified field does not exist, a {@link MissingPieceException} will be thrown.
 	 * 
-	 * @param model The model which should contain the object
-	 * @param objectID The ID of the object which should contain the field
-	 * @param fieldID The ID of the field
-	 * @return The value of the specified field
-	 * @throws MissingPieceException Will be thrown if the given object/field
+	 * @param model The {@link XModel} which should contain the {@link XObject} specified by 'objectID'.
+	 * @param objectID The {@link XID} of the {@link XObject} which should contain the {@link XField}
+	 * @param fieldID The {@link XID} of the {@link XField}
+	 * @return The value of the specified {@link XField}
+	 * @throws MissingPieceException Will be thrown if the specified {@link XObject}/{@link XField}
 	 *             doesn't exist
 	 */
 	
@@ -212,16 +214,16 @@ public class XX {
 	}
 	
 	/**
-	 * Tries to get the value of the field with 'fieldID' from the given
-	 * 'object'. If field is not present, throws a MissingPieceException
+	 * Tries to get the value of the {@link XField} with {@link XID} 'fieldID' from the given
+	 * {@link XObject}. If the specified field does not exist, a {@link MissingPieceException} will be thrown.
 	 * 
-	 * @param repository The repository which should contain the model
-	 * @param model The ID of the model which should contain the object
-	 * @param objectID The ID of the object which should contain the field
-	 * @param fieldID The ID of the field
-	 * @return The value of the specified field
-	 * @throws MissingPieceException Will be thrown if the given
-	 *             model/object/field doesn't exist
+	 * @param repository The {@link XRepository} which should contain the {@link XModel} specified by 'modelID'
+	 * @param modelID The {@link XID} of the {@link XModel} which should contain the {@link XObject} specified by 'objectID'
+	 * @param objectID The {@link XID} of the {@link XObject} which should contain the {@link XField} specified by 'fieldID'
+	 * @param fieldID The {@link XID} of the {@link XField}
+	 * @return The value of the specified {@link XField}
+	 * @throws MissingPieceException Will be thrown if the specified
+	 *             {@link XModel}/{@link XObject}/{@link XField} doesn't exist
 	 */
 	
 	public static XValue safeGetValue(XRepository repository, XID modelID, XID objectID, XID fieldID) {
@@ -230,13 +232,14 @@ public class XX {
 	}
 	
 	/**
-	 * Tries to get the field with 'fieldID' from the given 'object'. If field
-	 * is not present, throws a MissingPieceException
+	 * Tries to get the {@link XField} with {@link XID} 'fieldID' from the given {@link XObject}. If the specified
+	 * field does not exist, a {@link MissingPieceException} will be thrown.
+	 *  
 	 * 
-	 * @param object The object which should contain the field
-	 * @param fieldID The ID of the field
-	 * @return The specified field
-	 * @throws MissingPieceException Will be thrown if the given field doesn't
+	 * @param object The {@link XObject} which should contain the {@link XField} specified by 'fieldID'
+	 * @param fieldID The {@link XID} of the {@link XField}
+	 * @return The specified {@link XField}
+	 * @throws MissingPieceException Will be thrown if the given {@link XField} doesn't
 	 *             exist
 	 */
 	
@@ -249,14 +252,14 @@ public class XX {
 	}
 	
 	/**
-	 * Tries to get the field with 'fieldID' from the given 'object'. If field
-	 * is not present, throws a MissingPieceException
+	 * Tries to get the {@link XField} with {@link XID} 'fieldID' from the given {@link XObject}. If the specified
+	 * field does not exist, a {@link MissingPieceException} will be thrown.
 	 * 
-	 * @param model The model which should contain the object
-	 * @param objectID The ID of the object which should contain the field
-	 * @param fieldID The ID of the field
-	 * @return The specified field
-	 * @throws MissingPieceException Will be thrown if the given object/field
+	 * @param model The {@link XModel} which should contain the {@link XObject} specified by 'objectID'
+	 * @param objectID The {@link XID} of the {@link XObject} which should contain the {@link XField} specified by 'fieldID'
+	 * @param fieldID The {@link XID} of the {@link XField}
+	 * @return The specified {@link XField}
+	 * @throws MissingPieceException Will be thrown if the given {@link XObject}/{@link XField}
 	 *             doesn't exist
 	 */
 	
@@ -266,8 +269,8 @@ public class XX {
 	}
 	
 	/**
-	 * Tries to get the field with 'fieldID' from the given 'object'. If field
-	 * is not present, throws a MissingPieceException
+	 * Tries to get the {@link XField} with {@link XID} 'fieldID' from the given {@link XObject}. If the specified
+	 * field does not exist, a {@link MissingPieceException} will be thrown.	  
 	 * 
 	 * @param repository The repository which should contain the model
 	 * @param modelID The ID of the model which should contain the object
