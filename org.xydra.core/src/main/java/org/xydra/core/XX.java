@@ -51,14 +51,14 @@ import org.xydra.index.iterator.SingleValueIterator;
 
 
 /**
-* A utility class that uses {@link X} to provide convenience methods for
-* working with/editing Xydra Instances.
-* 
-* @author voelkel
-* @author Kaidel
-* @author dscharrer
-* 
-*/
+ * A utility class that uses {@link X} to provide convenience methods for
+ * working with/editing Xydra Instances.
+ * 
+ * @author voelkel
+ * @author Kaidel
+ * @author dscharrer
+ * 
+ */
 
 public class XX {
 	
@@ -145,8 +145,8 @@ public class XX {
 	 * 
 	 * @param actorID The {@link XID} of the actor.
 	 * @param sourceModel The {@link XModel} which is to be copied
-	 * @param targetModel The {@link XModel} in which the data of sourceModel is to be
-	 *            pasted.
+	 * @param targetModel The {@link XModel} in which the data of sourceModel is
+	 *            to be pasted.
 	 */
 	public static void copy(XID actorID, XModel sourceModel, XModel targetModel) {
 		// copy model to _model
@@ -164,8 +164,8 @@ public class XX {
 	 * 
 	 * @param actorID The {@link XID} of the actor.
 	 * @param sourceObject The {@link XObject} which is to be copied
-	 * @param targetObject The {@link XObject} in which the data of sourceObject is to be
-	 *            pasted.
+	 * @param targetObject The {@link XObject} in which the data of sourceObject
+	 *            is to be pasted.
 	 */
 	public static void copy(XID actorID, XObject sourceObject, XObject targetObject) {
 		for(XID fieldID : sourceObject) {
@@ -176,14 +176,16 @@ public class XX {
 	}
 	
 	/**
-	 * Tries to get the value of the {@link XField} with {@link XID} 'fieldID' from the given
-	 * {@link XObject}. If the specified field does not exist, a {@link MissingPieceException} will be thrown.
+	 * Tries to get the value of the {@link XField} with {@link XID} 'fieldID'
+	 * from the given {@link XObject}. If the specified field does not exist, a
+	 * {@link MissingPieceException} will be thrown.
 	 * 
-	 * @param object The {@link XObject} which should contain the specified {@link XField}
+	 * @param object The {@link XObject} which should contain the specified
+	 *            {@link XField}
 	 * @param fieldID The {@link XID} of the {@link XField}
 	 * @return The value of the specified {@link XField}
-	 * @throws MissingPieceException Will be thrown if the specified {@link XField} doesn't
-	 *             exist
+	 * @throws MissingPieceException Will be thrown if the specified
+	 *             {@link XField} doesn't exist
 	 */
 	
 	public static XValue safeGetValue(XObject object, XID fieldID) throws MissingPieceException {
@@ -197,15 +199,18 @@ public class XX {
 	}
 	
 	/**
-	 * Tries to get the value of the {@link XField} with {@link XID} 'fieldID' from the given
-	 * {@link XObject}. If the specified field does not exist, a {@link MissingPieceException} will be thrown.
+	 * Tries to get the value of the {@link XField} with {@link XID} 'fieldID'
+	 * from the given {@link XObject}. If the specified field does not exist, a
+	 * {@link MissingPieceException} will be thrown.
 	 * 
-	 * @param model The {@link XModel} which should contain the {@link XObject} specified by 'objectID'.
-	 * @param objectID The {@link XID} of the {@link XObject} which should contain the {@link XField}
+	 * @param model The {@link XModel} which should contain the {@link XObject}
+	 *            specified by 'objectID'.
+	 * @param objectID The {@link XID} of the {@link XObject} which should
+	 *            contain the {@link XField}
 	 * @param fieldID The {@link XID} of the {@link XField}
 	 * @return The value of the specified {@link XField}
-	 * @throws MissingPieceException Will be thrown if the specified {@link XObject}/{@link XField}
-	 *             doesn't exist
+	 * @throws MissingPieceException Will be thrown if the specified
+	 *             {@link XObject}/{@link XField} doesn't exist
 	 */
 	
 	public static XValue safeGetValue(XModel model, XID objectID, XID fieldID) {
@@ -214,12 +219,16 @@ public class XX {
 	}
 	
 	/**
-	 * Tries to get the value of the {@link XField} with {@link XID} 'fieldID' from the given
-	 * {@link XObject}. If the specified field does not exist, a {@link MissingPieceException} will be thrown.
+	 * Tries to get the value of the {@link XField} with {@link XID} 'fieldID'
+	 * from the given {@link XObject}. If the specified field does not exist, a
+	 * {@link MissingPieceException} will be thrown.
 	 * 
-	 * @param repository The {@link XRepository} which should contain the {@link XModel} specified by 'modelID'
-	 * @param modelID The {@link XID} of the {@link XModel} which should contain the {@link XObject} specified by 'objectID'
-	 * @param objectID The {@link XID} of the {@link XObject} which should contain the {@link XField} specified by 'fieldID'
+	 * @param repository The {@link XRepository} which should contain the
+	 *            {@link XModel} specified by 'modelID'
+	 * @param modelID The {@link XID} of the {@link XModel} which should contain
+	 *            the {@link XObject} specified by 'objectID'
+	 * @param objectID The {@link XID} of the {@link XObject} which should
+	 *            contain the {@link XField} specified by 'fieldID'
 	 * @param fieldID The {@link XID} of the {@link XField}
 	 * @return The value of the specified {@link XField}
 	 * @throws MissingPieceException Will be thrown if the specified
@@ -232,15 +241,17 @@ public class XX {
 	}
 	
 	/**
-	 * Tries to get the {@link XField} with {@link XID} 'fieldID' from the given {@link XObject}. If the specified
-	 * field does not exist, a {@link MissingPieceException} will be thrown.
-	 *  
+	 * Tries to get the {@link XField} with {@link XID} 'fieldID' from the given
+	 * {@link XObject}. If the specified field does not exist, a
+	 * {@link MissingPieceException} will be thrown.
 	 * 
-	 * @param object The {@link XObject} which should contain the {@link XField} specified by 'fieldID'
+	 * 
+	 * @param object The {@link XObject} which should contain the {@link XField}
+	 *            specified by 'fieldID'
 	 * @param fieldID The {@link XID} of the {@link XField}
 	 * @return The specified {@link XField}
-	 * @throws MissingPieceException Will be thrown if the given {@link XField} doesn't
-	 *             exist
+	 * @throws MissingPieceException Will be thrown if the specified
+	 *             {@link XField} doesn't exist
 	 */
 	
 	public static XField safeGetField(XObject object, XID fieldID) throws MissingPieceException {
@@ -252,15 +263,18 @@ public class XX {
 	}
 	
 	/**
-	 * Tries to get the {@link XField} with {@link XID} 'fieldID' from the given {@link XObject}. If the specified
-	 * field does not exist, a {@link MissingPieceException} will be thrown.
+	 * Tries to get the {@link XField} with {@link XID} 'fieldID' from the given
+	 * {@link XObject}. If the specified field does not exist, a
+	 * {@link MissingPieceException} will be thrown.
 	 * 
-	 * @param model The {@link XModel} which should contain the {@link XObject} specified by 'objectID'
-	 * @param objectID The {@link XID} of the {@link XObject} which should contain the {@link XField} specified by 'fieldID'
+	 * @param model The {@link XModel} which should contain the {@link XObject}
+	 *            specified by 'objectID'
+	 * @param objectID The {@link XID} of the {@link XObject} which should
+	 *            contain the {@link XField} specified by 'fieldID'
 	 * @param fieldID The {@link XID} of the {@link XField}
 	 * @return The specified {@link XField}
-	 * @throws MissingPieceException Will be thrown if the given {@link XObject}/{@link XField}
-	 *             doesn't exist
+	 * @throws MissingPieceException Will be thrown if the specified
+	 *             {@link XObject}/{@link XField} doesn't exist
 	 */
 	
 	public static XField safeGetField(XModel model, XID objectID, XID fieldID) {
@@ -269,16 +283,21 @@ public class XX {
 	}
 	
 	/**
-	 * Tries to get the {@link XField} with {@link XID} 'fieldID' from the given {@link XObject}. If the specified
-	 * field does not exist, a {@link MissingPieceException} will be thrown.	  
+	 * Tries to get the {@link XField} with {@link XID} 'fieldID' from the given
+	 * {@link XObject}. If the specified field does not exist, a
+	 * {@link MissingPieceException} will be thrown.
 	 * 
-	 * @param repository The repository which should contain the model
-	 * @param modelID The ID of the model which should contain the object
-	 * @param objectID The ID of the object which should contain the field
-	 * @param fieldID The ID of the field
-	 * @return The specified field
-	 * @throws MissingPieceException Will be thrown if the given
-	 *             model/object/field doesn't exist
+	 * 
+	 * @param repository The {@link XRepository} which should contain the
+	 *            {@link XModel} specified by 'modelID'
+	 * @param modelID The {@link XID} of the {@link XModel} which should contain
+	 *            the {@link XObject} specified by 'objectID'
+	 * @param objectID The {@link XID} of the {@link XObject} which should
+	 *            contain the {@link XField} specified by 'fieldID'
+	 * @param fieldID The {@link XID} of the {@link XField}
+	 * @return The specified {@link XField}
+	 * @throws MissingPieceException Will be thrown if the specified
+	 *             {@link XModel}/{@link XObject}/{{@link XField} doesn't exist
 	 */
 	
 	public static XField safeGetField(XRepository repository, XID modelID, XID objectID, XID fieldID) {
@@ -287,14 +306,16 @@ public class XX {
 	}
 	
 	/**
-	 * Tries to get the model with 'modelID' from the given 'repository'. If
-	 * model is not presents, throws a MissingPieceException
+	 * Tries to get the {@link XModel} with {@link XID} 'modelID' from the given
+	 * {@link XRepository}. If the specified model is not present, a
+	 * {@link MissingPieceException} will be thrown.
 	 * 
-	 * @param repository The repository which should contain the model
-	 * @param modelID The ID of the model
-	 * @return The specified model
-	 * @throws MissingPieceException Will be thrown if the given model doesn't
-	 *             exist
+	 * @param repository The {@link XRepository} which should contain the
+	 *            {@link XModel} specified by 'modelID'
+	 * @param modelID The {@link XID} of the {@link XModel}
+	 * @return The specified {{@link XModel}
+	 * @throws MissingPieceException Will be thrown if the specified
+	 *             {@link XModel} doesn't exist
 	 */
 	
 	public static XModel safeGetModel(XRepository repository, XID modelID) {
@@ -306,14 +327,16 @@ public class XX {
 	}
 	
 	/**
-	 * Tries to get the object with 'objectID' from the given 'repository'. If
-	 * object is not presents, throws a MissingPieceException
+	 * Tries to get the {@link XObject} with {@link XID} 'objectID' from the
+	 * given {@link XModel}. If the specified object is not present, a
+	 * {@link MissingPieceException} will be thrown.
 	 * 
-	 * @param model The model which should contain the object
-	 * @param objectID The ID of the object
-	 * @return The specified object
-	 * @throws MissingPieceException Will be thrown if the given object doesn't
-	 *             exist
+	 * @param model The {@link XModel} which should contain the {@link XObject}
+	 *            specified by 'objectID'
+	 * @param objectID The {@link XID} of the {@link XObject}
+	 * @return The specified {@link XObject}
+	 * @throws MissingPieceException Will be thrown if the specified
+	 *             {@link XObject} doesn't exist
 	 */
 	
 	public static XObject safeGetObject(XModel model, XID objectID) {
@@ -325,15 +348,18 @@ public class XX {
 	}
 	
 	/**
-	 * Tries to get the object with 'objectID' from the given 'repository'. If
-	 * object is not presents, throws a MissingPieceException
+	 * Tries to get the {@link XObject} with {@link XID} 'objectID' from the
+	 * given {@link XRepository}. If the specified object is not present, a
+	 * {@link MissingPieceException} will be thrown.
 	 * 
-	 * @param repository The repository which should contain the model
-	 * @param modelID The ID of the model which should contain the object
-	 * @param objectID The ID of the object
-	 * @return The specified object
-	 * @throws MissingPieceException Will be thrown if the given model/object
-	 *             doesn't exist
+	 * @param repository The {@link XRepository} which should contain the
+	 *            {@link XModel} specified by 'modelID'
+	 * @param modelID The {@link XID} of the {@link XModel} which should contain
+	 *            the {@link XObject} specified by 'objectID'
+	 * @param objectID The {@link XID} of the {@link XObject}
+	 * @return The specified {@link XObject}
+	 * @throws MissingPieceException Will be thrown if the specified
+	 *             {@link XModel}/{@link XObject} doesn't exist
 	 */
 	
 	public static XObject safeGetObject(XRepository repository, XID modelID, XID objectID) {
@@ -342,13 +368,17 @@ public class XX {
 	}
 	
 	/**
-	 * Set object.fieldID to stringValue on behalf of actorID
+	 * Sets the {@link XField} specified by 'fieldID' of the given
+	 * {@link XObject} to given stringValue on behalf of the actor with
+	 * {@link XID} 'actorID'
 	 * 
-	 * @param actorID The XID of the actor.
-	 * @param object The object containing the field.
-	 * @param fieldID The XID of the field which value is to be set.
+	 * @param actorID The {@link XID} of the actor.
+	 * @param object The {@link XObject} containing the {@link XField} specified
+	 *            by'fieldID'.
+	 * @param fieldID The {@link XID} of the {@link XField} which value is to be
+	 *            set. {@link XField} will be created if it doesn't exist.
 	 * @param stringValue The new String, which will be set as the value of the
-	 *            specified field.
+	 *            specified {@link XField}.
 	 */
 	public static void safeSetStringValue(XID actorID, XObject object, XID fieldID,
 	        String stringValue) {
@@ -382,9 +412,9 @@ public class XX {
 	}
 	
 	/**
-	 * Returns the content of the given XIDListValue as a java.util.list
+	 * Returns the content of the given {@link XIDListValue} as a java.util.list
 	 * 
-	 * @param listValue The XIDListValue
+	 * @param listValue The {@link XIDListValue}
 	 * @return a copy of the listValue as a java.util.List
 	 */
 	public static List<XID> asList(XIDListValue listValue) {
@@ -392,9 +422,10 @@ public class XX {
 	}
 	
 	/**
-	 * Returns the content of the given XBooleanListValue as a java.util.list
+	 * Returns the content of the given {@link XBooleanListValue} as a
+	 * java.util.list
 	 * 
-	 * @param listValue The XBooleanListValue
+	 * @param listValue The {@link XBooleanListValue}
 	 * @return a copy of the listValue as a java.util.List
 	 */
 	public static List<Boolean> asList(XBooleanListValue listValue) {
@@ -402,9 +433,10 @@ public class XX {
 	}
 	
 	/**
-	 * Returns the content of the given XDoubleListValue as a java.util.list
+	 * Returns the content of the given {@link XDoubleListValue} as a
+	 * java.util.list
 	 * 
-	 * @param listValue The XDoubleListValue
+	 * @param listValue The {@link XDoubleListValue}
 	 * @return a copy of the listValue as a java.util.List
 	 */
 	public static List<Double> asList(XDoubleListValue listValue) {
@@ -412,9 +444,10 @@ public class XX {
 	}
 	
 	/**
-	 * Returns the content of the given XIntegerListValue as a java.util.list
+	 * Returns the content of the given {@link XIntegerListValue} as a
+	 * java.util.list
 	 * 
-	 * @param listValue The XIntegerListValue
+	 * @param listValue The {@link XIntegerListValue}
 	 * @return a copy of the listValue as a java.util.List
 	 */
 	public static List<Integer> asList(XIntegerListValue listValue) {
@@ -422,9 +455,10 @@ public class XX {
 	}
 	
 	/**
-	 * Returns the content of the given XLongListValue as a java.util.list
+	 * Returns the content of the given {@link XLongListValue} as a
+	 * java.util.list
 	 * 
-	 * @param listValue The XLongListValue
+	 * @param listValue The {@link XLongListValue}
 	 * @return a copy of the listValue as a java.util.List
 	 */
 	public static List<Long> asList(XLongListValue listValue) {
@@ -432,9 +466,10 @@ public class XX {
 	}
 	
 	/**
-	 * Returns the content of the given XStringListValue as a java.util.list
+	 * Returns the content of the given {@link XStringListValue} as a
+	 * java.util.list
 	 * 
-	 * @param listValue The XStringListValue
+	 * @param listValue The {@link XStringListValue}
 	 * @return a copy of the listValue as a java.util.List
 	 */
 	public static List<String> asList(XStringListValue listValue) {
@@ -442,22 +477,23 @@ public class XX {
 	}
 	
 	/**
-	 * Returns the content of the given java.util.list<XID> as an XIDListValue
+	 * Returns the content of the given java.util.list<XID> as an
+	 * {@link XIDListValue}
 	 * 
 	 * @param list The java.util.list<XID> which is to be converted into an
-	 *            XIDListValue
+	 *            {@link XIDListValue}
 	 * @return an {@link XIDListValue} with the content of the given list
 	 */
 	public static XIDListValue toIDListValue(List<XID> list) {
 		return X.getValueFactory().createIDListValue(list.toArray(new XID[list.size()]));
 	}
 	
-	/**
+/**
 	 * Returns the content of the given java.util.list<Boolean> as an
-	 * XBooleanListValue
+	 * {@link XBooleanListValue]
 	 * 
 	 * @param list The java.util.list<Boolean> which is to be converted into an
-	 *            XBooleanListValue
+	 *            {@link XBooleanListValue}
 	 * @return an {@link XBooleanListValue} with the content of the given list
 	 */
 	public static XBooleanListValue toBooleanListValue(List<Boolean> list) {
@@ -466,10 +502,10 @@ public class XX {
 	
 	/**
 	 * Returns the content of the given java.util.list<Double> as an
-	 * XDoubleListValue
+	 * {@link XDoubleListValue}
 	 * 
 	 * @param list The java.util.list<Double> which is to be converted into an
-	 *            XDoubleListValue
+	 *            {@link XDoubleListValue}
 	 * @return an {@link XDoubleListValue} with the content of the given list
 	 */
 	public static XDoubleListValue toDoubleListValue(List<Double> list) {
@@ -478,10 +514,10 @@ public class XX {
 	
 	/**
 	 * Returns the content of the given java.util.list<Integer> as an
-	 * XIntegerListValue
+	 * {@link XIntegerListValue}
 	 * 
 	 * @param list The java.util.list<Integer> which is to be converted into an
-	 *            XIntegerListValue
+	 *            {@link XIntegerListValue}
 	 * @return an {@link XIntegerListValue} with the content of the given list
 	 */
 	public static XIntegerListValue toIntegerListValue(List<Integer> list) {
@@ -490,10 +526,10 @@ public class XX {
 	
 	/**
 	 * Returns the content of the given java.util.list<Long> as an
-	 * XLongListValue
+	 * {@link XLongListValue}
 	 * 
 	 * @param list The java.util.list<Long> which is to be converted into an
-	 *            XLongListValue
+	 *            {@link XLongListValue}
 	 * @return an {@link XLongListValue} with the content of the given list
 	 */
 	public static XLongListValue toLongListValue(List<Long> list) {
@@ -502,10 +538,10 @@ public class XX {
 	
 	/**
 	 * Returns the content of the given java.util.list<String> as an
-	 * XStringListValue
+	 * {@link XStringListValue}
 	 * 
 	 * @param list The java.util.list<String> which is to be converted into an
-	 *            XStringListValue
+	 *            {@link XStringListValue}
 	 * @return an {@link XStringListValue} with the content of the given list
 	 */
 	public static XStringListValue toStringListValue(List<String> list) {
@@ -513,17 +549,24 @@ public class XX {
 	}
 	
 	/**
-	 * Appends a new XID to the end of the given XIDListValue
+	 * Appends a new {@link XID} to the end of the {@link XIDListValue} of the
+	 * given {@link XField} (only works if the {@link XValue} of the
+	 * {@link XField} actually is a {@link XIDListValue})
 	 * 
-	 * @param actorID The XID of the actor
-	 * @param field The field containing the XIDListValue
-	 * @param id The XID which is to be added
-	 * @return the new XIDListValue which the given XID was added to (null if
-	 *         the given field had no XIDListValue)
+	 * @param actorID The {@link XID} of the actor executing this method
+	 * @param field The {@link XField} containing the {@link XIDListValue}
+	 * @param id The {@link XID} which is to be added
+	 * @return the new {@link XIDListValue} which the given {@link XID} was
+	 *         added to (null if the given {@link XField} had no
+	 *         {@link XIDListValue})
 	 */
 	
 	public static XIDListValue addIDToList(XID actorID, XField field, XID id) {
 		XValue value = field.getValue();
+		
+		if(value == null) {
+			return null;
+		}
 		
 		if(value instanceof XIDListValue) {
 			XIDListValue listValue = (XIDListValue)value;
@@ -538,18 +581,25 @@ public class XX {
 	}
 	
 	/**
-	 * Adds a new XID at the given index to the given XIDListValue
+	 * Adds a new {@link XID} at the given index to the {@link XIDListValue} of
+	 * the given {@link XField} (only works if the {@link XValue} of the
+	 * {@link XField} actually is a {@link XIDListValue})
 	 * 
-	 * @param actorID The XID of the actor
-	 * @param field The field containing the XIDListValue
-	 * @param id The XID which is to be added
+	 * @param actorID The {@link XID} of the actor executing this method
+	 * @param field The {@link XField} containing the {@link XIDListValue}
+	 * @param id The {@link XID} which is to be added
 	 * @param index The index at which the specified element is to be inserted
-	 * @return the new XIDListValue which the given XID was added to (null if
-	 *         the given field had no XIDListValue)
+	 * @return the new {@link XIDListValue} which the given {@link XID} was
+	 *         added to (null if the given {@link XField} had no
+	 *         {@link XIDListValue})
 	 */
 	
 	public static XIDListValue addIDToList(XID actorID, XField field, int index, XID id) {
 		XValue value = field.getValue();
+		
+		if(value == null) {
+			return null;
+		}
 		
 		if(value instanceof XIDListValue) {
 			XIDListValue listValue = (XIDListValue)value;
@@ -564,13 +614,17 @@ public class XX {
 	}
 	
 	/**
-	 * Adds the given XID to the listValue at the specified index.
+	 * Adds the given {@link XID} to the given {@link XIDListValue} at the
+	 * specified index.
 	 * 
-	 * @param listValue The listValue which the given XID is to be added to.
-	 * @param index The index at which the given XID is to be inserted.
-	 * @param id The XID which is to be added.
-	 * @return An XIDListValue in which the given XID was inserted at the given
-	 *         index.
+	 * @param listValue The {@link XIDListValue} which the given {@link XID} is
+	 *            to be added to.
+	 * @param index The index at which the given {@link XID} is to be inserted.
+	 * @param id The {@link XID} which is to be added.
+	 * @return An {@link XIDListValue} in which the given {@link XID }was
+	 *         inserted at the specified index.
+	 * @throws IndexOutOfBoundsException if the index is out of range (index < 0
+	 *             || index >= size())
 	 */
 	
 	private static XIDListValue addIDToList(XIDListValue listValue, int index, XID id) {
@@ -581,17 +635,23 @@ public class XX {
 	}
 	
 	/**
-	 * Removes the first occurrence of the given XID from the given XIDListValue
+	 * Removes the first occurrence of the given {@link XID} from the
+	 * {@link XIDListValue} of the given {@link XField}
 	 * 
-	 * @param actorID The XID of the actor
-	 * @param field The field containing the XIDListValue
-	 * @param id The XID which is to be removed
-	 * @return the new XIDListValue which the given XID was removed from (null
-	 *         if the given field had no XIDListValue)
+	 * @param actorID The {@link XID} of the actor
+	 * @param field The {@link XField} containing the {@link XIDListValue}
+	 * @param id The {@link XID} which is to be removed
+	 * @return the new {@link XIDListValue} which the given {@link XID} was
+	 *         removed from (null if the given {@link XField} had no
+	 *         {@link XIDListValue})
 	 */
 	
 	public static XIDListValue removeIDFromList(XID actorID, XField field, XID id) {
 		XValue value = field.getValue();
+		
+		if(value == null) {
+			return null;
+		}
 		
 		if(value instanceof XIDListValue) {
 			XIDListValue listValue = (XIDListValue)value;
@@ -609,17 +669,25 @@ public class XX {
 	}
 	
 	/**
-	 * Removes an XID from the given XIDListValue
+	 * Removes the {@link XID} at the specified index from the
+	 * {@link XIDListValue} of the given {@link XField}
 	 * 
-	 * @param actorID The XID of the actor
-	 * @param field The field containing the XIDListValue
-	 * @param index The index of the XID which is to be removed
-	 * @return the new XIDListValue which the given XID was removed from (null
-	 *         if the given field had no XIDListValue)
+	 * @param actorID The {@link XID} of the actor
+	 * @param field The {@link XField} containing the {@link XIDListValue}
+	 * @param index The index of the {@link XID} which is to be removed
+	 * @return the new {@link XIDListValue} which the given {@link XID} was
+	 *         removed from (null if the given {@link XField} had no
+	 *         {@link XIDListValue})
+	 * @throws IndexOutOfBoundsException if the index is out of range (index < 0
+	 *             || index >= size())
 	 */
 	
 	public static XIDListValue removeIDFromList(XID actorID, XField field, int index) {
 		XValue value = field.getValue();
+		
+		if(value == null) {
+			return null;
+		}
 		
 		if(value instanceof XIDListValue) {
 			XIDListValue listValue = (XIDListValue)value;
@@ -637,17 +705,23 @@ public class XX {
 	}
 	
 	/**
-	 * Appends a new boolean to end of the given XBooleanListValue
+	 * Appends a new boolean to end of the {@link XBooleanListValue} of the
+	 * given {@link XField}.
 	 * 
-	 * @param actorID The XID of the actor
-	 * @param field The field containing the XBooleanListValue
+	 * @param actorID The {@link XID} of the actor
+	 * @param field The {@link XField} containing the {@link XBooleanListValue}
 	 * @param bool The boolean which is to be added
-	 * @return the new XBooleanListValue which the given Boolean was added to
-	 *         (null if the given field had no XBooleanListValue)
+	 * @return the new {@link XBooleanListValue} which the given Boolean was
+	 *         added to (null if the given {@link XField} had no
+	 *         {@link XBooleanListValue})
 	 */
 	
 	public static XBooleanListValue addBooleanToList(XID actorID, XField field, boolean bool) {
 		XValue value = field.getValue();
+		
+		if(value == null) {
+			return null;
+		}
 		
 		if(value instanceof XBooleanListValue) {
 			XBooleanListValue listValue = (XBooleanListValue)value;
@@ -662,19 +736,25 @@ public class XX {
 	}
 	
 	/**
-	 * Adds a new boolean at the specified index to the given XBooleanListValue
+	 * Adds a new boolean at the specified index to the
+	 * {@link XBooleanListValue} of the given {@link XField}.
 	 * 
-	 * @param actorID The XID of the actor
-	 * @param field The field containing the XBooleanListValue
+	 * @param actorID The {@link XID} of the actor
+	 * @param field The field containing the {@link XBooleanListValue}
 	 * @param bool The boolean which is to be added
 	 * @param index The index at which the specified element is to be inserted
-	 * @return the new XBooleanListValue which the given Boolean was added to
-	 *         (null if the given field had no XBooleanListValue)
+	 * @return the new {@link XBooleanListValue} which the given Boolean was
+	 *         added to (null if the given {@link XField} had no
+	 *         {@link XBooleanListValue})
 	 */
 	
 	public static XBooleanListValue addBooleanToList(XID actorID, XField field, int index,
 	        boolean bool) {
 		XValue value = field.getValue();
+		
+		if(value == null) {
+			return null;
+		}
 		
 		if(value instanceof XBooleanListValue) {
 			XBooleanListValue listValue = (XBooleanListValue)value;
@@ -689,13 +769,14 @@ public class XX {
 	}
 	
 	/**
-	 * Adds a new boolean at the specified index to the given XBooleanListValue
+	 * Adds a new boolean at the specified index to the given
+	 * {@link XBooleanListValue}
 	 * 
-	 * @param listValue The field containing the XBooleanListValue
+	 * @param listValue the {@link XBooleanListValue}
 	 * @param bool The boolean which is to be added
 	 * @param index The index at which the specified element is to be inserted
-	 * @return the new XBooleanListValue which the given Boolean was added to
-	 *         (null if the given field had no XBooleanListValue)
+	 * @return the new {@link XBooleanListValue} which the given Boolean was
+	 *         added to
 	 */
 	
 	private static XBooleanListValue addBooleanToList(XBooleanListValue listValue, int index,
@@ -707,19 +788,24 @@ public class XX {
 	}
 	
 	/**
-	 * Removes the first occurrence of the given boolean from the given
-	 * XBooleanListValue
+	 * Removes the first occurrence of the given boolean from the
+	 * {@link XBooleanListValue} of the given {@link XField}
 	 * 
-	 * @param actorID The XID of the actor
-	 * @param field The field containing the XBooleanListValue
+	 * @param actorID The {@link XID} of the actor
+	 * @param field The {@link XField} containing the {@link XBooleanListValue}
 	 * @param bool The boolean which is to be removed
-	 * @return the new XBooleanListValue which the specified Boolean was removed
-	 *         from (null if the given field had no XBooleanListValue)
+	 * @return the new {@link XBooleanListValue} which the specified Boolean was
+	 *         removed from (null if the given {@link XField} had no
+	 *         {@link XBooleanListValue})
 	 * @throws NullPointerException
 	 */
 	
 	public static XBooleanListValue removeBooleanFromList(XID actorID, XField field, boolean bool) {
 		XValue value = field.getValue();
+		
+		if(value == null) {
+			return null;
+		}
 		
 		if(value instanceof XBooleanListValue) {
 			XBooleanListValue listValue = (XBooleanListValue)value;
@@ -737,18 +823,24 @@ public class XX {
 	}
 	
 	/**
-	 * Removes a boolean from the given XBooleanListValue
+	 * Removes a boolean from the {@link XBooleanListValue} of the given
+	 * {@link XField}.
 	 * 
-	 * @param actorID The XID of the actor
-	 * @param field The field containing the XBooleanListValue
+	 * @param actorID The {@link XID} of the actor
+	 * @param field The {@link XField} containing the {@link XBooleanListValue}
 	 * @param index The index of the boolean which is to be removed
-	 * @return the new XBooleanListValue which the specified Boolean was removed
-	 *         from (null if the given field had no XBooleanListValue)
-	 * @throws NullPointerException
+	 * @return the new {@link XBooleanListValue} which the specified Boolean was
+	 *         removed from (null if the given {@link XField} had no
+	 *         {@link XBooleanListValue})
+	 * @throws IndexOutOfBoundsException if index is out of range (index < 0 ||
+	 *             index >= size())
 	 */
-	
 	public static XBooleanListValue removeBooleanFromList(XID actorID, XField field, int index) {
 		XValue value = field.getValue();
+		
+		if(value == null) {
+			return null;
+		}
 		
 		if(value instanceof XBooleanListValue) {
 			XBooleanListValue listValue = (XBooleanListValue)value;
@@ -766,17 +858,23 @@ public class XX {
 	}
 	
 	/**
-	 * Appends a new Double to end of the given XDoubleListValue
+	 * Appends a new Double to end of the {@link XDoubleListValue} of the given
+	 * {@link XField}
 	 * 
-	 * @param actorID The XID of the actor
-	 * @param field The field containing the XDoubleListValue
+	 * @param actorID The {@link XID} of the actor
+	 * @param field The {@link XField} containing the {@link XDoubleListValue}
 	 * @param doub The Double which is to be added
-	 * @return the new XDoubleListValue which the specified Double was added to
-	 *         (null if the given field had no XDoubleListValue)
+	 * @return the new {@link XDoubleListValue} which the specified Double was
+	 *         added to (null if the given {@link XField} had no
+	 *         {@link XDoubleListValue})
 	 */
 	
 	public static XDoubleListValue addDoubleToList(XID actorID, XField field, double doub) {
 		XValue value = field.getValue();
+		
+		if(value == null) {
+			return null;
+		}
 		
 		if(value instanceof XDoubleListValue) {
 			XDoubleListValue listValue = (XDoubleListValue)value;
@@ -791,18 +889,24 @@ public class XX {
 	}
 	
 	/**
-	 * Adds a new Double at the specified index to the given XDoubleListValue
+	 * Adds a new Double at the specified index to the {@link XDoubleListValue}
+	 * of the given {@link XField}
 	 * 
-	 * @param actorID The XID of the actor
-	 * @param field The field containing the XDoubleListValue
+	 * @param actorID The {@link XID} of the actor
+	 * @param field The {@link XField} containing the {@link XDoubleListValue}
 	 * @param index The index at which the specified element is to be added
 	 * @param doub The Double which is to be added
-	 * @return the new XDoubleListValue which the specified Double was added to
-	 *         (null if the given field had no XDoubleListValue)
+	 * @return the new {@link XDoubleListValue} which the specified Double was
+	 *         added to (null if the given {@link XField} had no
+	 *         {@link XDoubleListValue})
 	 */
 	
 	public static XDoubleListValue addDoubleToList(XID actorID, XField field, int index, double doub) {
 		XValue value = field.getValue();
+		
+		if(value == null) {
+			return null;
+		}
 		
 		if(value instanceof XDoubleListValue) {
 			XDoubleListValue listValue = (XDoubleListValue)value;
@@ -817,13 +921,14 @@ public class XX {
 	}
 	
 	/**
-	 * Adds a new Double at the specified index to the given XDoubleListValue
+	 * Adds a new Double at the specified index to the given
+	 * {@link XDoubleListValue}
 	 * 
-	 * @param listValue The XDoubleListValue
+	 * @param listValue The {@link XDoubleListValue}
 	 * @param index The index at which the specified element is to be added
 	 * @param doub The Double which is to be added
-	 * @return the new XDoubleListValue which the specified Double was added to
-	 *         (null if the given field had no XDoubleListValue)
+	 * @return the new {@link XDoubleListValue} which the specified Double was
+	 *         added to
 	 */
 	
 	private static XDoubleListValue addDoubleToList(XDoubleListValue listValue, int index,
@@ -835,18 +940,23 @@ public class XX {
 	}
 	
 	/**
-	 * Removes the first occurrence of the given Double from the given
-	 * XDoubleListValue
+	 * Removes the first occurrence of the given Double from the
+	 * {@link XDoubleListValue} of the given {@link XField}
 	 * 
-	 * @param actorID The XID of the actor
-	 * @param field The field containing the XDoubleListValue
+	 * @param actorID The {@link XID} of the actor
+	 * @param field The {@link XField} containing the {@link XDoubleListValue}
 	 * @param doubleVal The Double which is to be removed
-	 * @return the new XDoubleListValue which the given Double was removed from
-	 *         (null if the given field had no XDoubleListValue)
+	 * @return the new {@link XDoubleListValue} which the given Double was
+	 *         removed from (null if the given {@link XField} had no
+	 *         {@link XDoubleListValue})
 	 */
 	
 	public static XDoubleListValue removeDoubleFromList(XID actorID, XField field, double doubleVal) {
 		XValue value = field.getValue();
+		
+		if(value == null) {
+			return null;
+		}
 		
 		if(value instanceof XDoubleListValue) {
 			XDoubleListValue listValue = (XDoubleListValue)value;
@@ -864,19 +974,25 @@ public class XX {
 	}
 	
 	/**
-	 * Removes a Double from the given XDoubleListValue
+	 * Removes a Double from the {@link XDoubleListValue} of the given
+	 * {@link XField}
 	 * 
-	 * @param actorID The XID of the actor
-	 * @param field The field containing the XDoubleListValue
+	 * @param actorID The {@link XID} of the actor
+	 * @param field The {@link XField} containing the {@link XDoubleListValue}
 	 * @param index The index of the Double which is to be removed
-	 * @return the new XDoubleListValue which the given Double was removed from
-	 *         (null if the given field had no XDoubleListValue)
+	 * @return the new {@link XDoubleListValue} which the given Double was
+	 *         removed from (null if the given {@link XField} had no
+	 *         {@link XDoubleListValue})
 	 * @throws IndexOutOfBoundsException if the index is out of range (index < 0
 	 *             || index >= size())
 	 */
 	
 	public static XDoubleListValue removeDoubleFromList(XID actorID, XField field, int index) {
 		XValue value = field.getValue();
+		
+		if(value == null) {
+			return null;
+		}
 		
 		if(value instanceof XDoubleListValue) {
 			XDoubleListValue listValue = (XDoubleListValue)value;
@@ -894,17 +1010,23 @@ public class XX {
 	}
 	
 	/**
-	 * Appends a new Integer to end of the given XIntegerListValue
+	 * Appends a new Integer to end of the {@link XIntegerListValue} of the
+	 * given {{@link XField}
 	 * 
-	 * @param actorID The XID of the actor
-	 * @param field The field containing the XIntegerListValue
+	 * @param actorID The {@link XID} of the actor
+	 * @param field The {@link XField} containing the {@link XIntegerListValue}
 	 * @param integer The Integer which is to be added
-	 * @return the new XIntegerListValue which the specified Integer was added
-	 *         to (null if the given field had no XIntegerListValue)
+	 * @return the new {@link XIntegerListValue} which the specified Integer was
+	 *         added to (null if the given {@link XField} had no
+	 *         {@link XIntegerListValue})
 	 */
 	
 	public static XIntegerListValue addIntegerToList(XID actorID, XField field, int integer) {
 		XValue value = field.getValue();
+		
+		if(value == null) {
+			return null;
+		}
 		
 		if(value instanceof XIntegerListValue) {
 			XIntegerListValue listValue = (XIntegerListValue)value;
@@ -932,6 +1054,10 @@ public class XX {
 	public static XIntegerListValue addIntegerToList(XID actorID, XField field, int index,
 	        int integer) {
 		XValue value = field.getValue();
+		
+		if(value == null) {
+			return null;
+		}
 		
 		if(value instanceof XIntegerListValue) {
 			XIntegerListValue listValue = (XIntegerListValue)value;
@@ -977,6 +1103,10 @@ public class XX {
 	public static XIntegerListValue removeIntegerFromList(XID actorID, XField field, int index) {
 		XValue value = field.getValue();
 		
+		if(value == null) {
+			return null;
+		}
+		
 		if(value instanceof XIntegerListValue) {
 			XIntegerListValue listValue = (XIntegerListValue)value;
 			
@@ -1007,6 +1137,10 @@ public class XX {
 	public static XIntegerListValue removeIntegerFromList(XID actorID, XField field, Integer integer) {
 		XValue value = field.getValue();
 		
+		if(value == null) {
+			return null;
+		}
+		
 		if(value instanceof XIntegerListValue) {
 			XIntegerListValue listValue = (XIntegerListValue)value;
 			
@@ -1035,6 +1169,10 @@ public class XX {
 	public static XLongListValue addLongToList(XID actorID, XField field, long longVal) {
 		XValue value = field.getValue();
 		
+		if(value == null) {
+			return null;
+		}
+		
 		if(value instanceof XIntegerListValue) {
 			XLongListValue listValue = (XLongListValue)value;
 			
@@ -1060,6 +1198,10 @@ public class XX {
 	
 	public static XLongListValue addLongToList(XID actorID, XField field, int index, long longVal) {
 		XValue value = field.getValue();
+		
+		if(value == null) {
+			return null;
+		}
 		
 		if(value instanceof XIntegerListValue) {
 			XLongListValue listValue = (XLongListValue)value;
@@ -1103,6 +1245,10 @@ public class XX {
 	public static XLongListValue removeLongFromList(XID actorID, XField field, int index) {
 		XValue value = field.getValue();
 		
+		if(value == null) {
+			return null;
+		}
+		
 		if(value instanceof XLongListValue) {
 			XLongListValue listValue = (XLongListValue)value;
 			
@@ -1134,6 +1280,10 @@ public class XX {
 	public static XLongListValue removeLongFromList(XID actorID, XField field, long longVal) {
 		XValue value = field.getValue();
 		
+		if(value == null) {
+			return null;
+		}
+		
 		if(value instanceof XLongListValue) {
 			XLongListValue listValue = (XLongListValue)value;
 			
@@ -1162,6 +1312,10 @@ public class XX {
 	public static XStringListValue addStringToList(XID actorID, XField field, String string) {
 		XValue value = field.getValue();
 		
+		if(value == null) {
+			return null;
+		}
+		
 		if(value instanceof XStringListValue) {
 			XStringListValue listValue = (XStringListValue)value;
 			
@@ -1188,6 +1342,10 @@ public class XX {
 	public static XStringListValue addStringToList(XID actorID, XField field, int index,
 	        String string) {
 		XValue value = field.getValue();
+		
+		if(value == null) {
+			return null;
+		}
 		
 		if(value instanceof XStringListValue) {
 			XStringListValue listValue = (XStringListValue)value;
@@ -1234,6 +1392,10 @@ public class XX {
 	public static XStringListValue removeStringFromList(XID actorID, XField field, int index) {
 		XValue value = field.getValue();
 		
+		if(value == null) {
+			return null;
+		}
+		
 		if(value instanceof XStringListValue) {
 			XStringListValue listValue = (XStringListValue)value;
 			
@@ -1262,6 +1424,10 @@ public class XX {
 	
 	public static XStringListValue removeStringFromList(XID actorID, XField field, String string) {
 		XValue value = field.getValue();
+		
+		if(value == null) {
+			return null;
+		}
 		
 		if(value instanceof XStringListValue) {
 			XStringListValue listValue = (XStringListValue)value;
