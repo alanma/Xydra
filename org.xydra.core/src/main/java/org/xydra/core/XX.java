@@ -187,7 +187,6 @@ public class XX {
 	 * @throws MissingPieceException Will be thrown if the specified
 	 *             {@link XField} doesn't exist
 	 */
-	
 	public static XValue safeGetValue(XObject object, XID fieldID) throws MissingPieceException {
 		XField field = safeGetField(object, fieldID);
 		XValue value = field.getValue();
@@ -212,7 +211,6 @@ public class XX {
 	 * @throws MissingPieceException Will be thrown if the specified
 	 *             {@link XObject}/{@link XField} doesn't exist
 	 */
-	
 	public static XValue safeGetValue(XModel model, XID objectID, XID fieldID) {
 		XObject object = safeGetObject(model, objectID);
 		return safeGetValue(object, fieldID);
@@ -234,7 +232,6 @@ public class XX {
 	 * @throws MissingPieceException Will be thrown if the specified
 	 *             {@link XModel}/{@link XObject}/{@link XField} doesn't exist
 	 */
-	
 	public static XValue safeGetValue(XRepository repository, XID modelID, XID objectID, XID fieldID) {
 		XObject object = safeGetObject(repository, modelID, objectID);
 		return safeGetValue(object, fieldID);
@@ -253,7 +250,6 @@ public class XX {
 	 * @throws MissingPieceException Will be thrown if the specified
 	 *             {@link XField} doesn't exist
 	 */
-	
 	public static XField safeGetField(XObject object, XID fieldID) throws MissingPieceException {
 		XField field = object.getField(fieldID);
 		if(field == null)
@@ -276,7 +272,6 @@ public class XX {
 	 * @throws MissingPieceException Will be thrown if the specified
 	 *             {@link XObject}/{@link XField} doesn't exist
 	 */
-	
 	public static XField safeGetField(XModel model, XID objectID, XID fieldID) {
 		XObject object = safeGetObject(model, objectID);
 		return safeGetField(object, fieldID);
@@ -299,7 +294,6 @@ public class XX {
 	 * @throws MissingPieceException Will be thrown if the specified
 	 *             {@link XModel}/{@link XObject}/{{@link XField} doesn't exist
 	 */
-	
 	public static XField safeGetField(XRepository repository, XID modelID, XID objectID, XID fieldID) {
 		XModel model = safeGetModel(repository, modelID);
 		return safeGetField(model, objectID, fieldID);
@@ -317,7 +311,6 @@ public class XX {
 	 * @throws MissingPieceException Will be thrown if the specified
 	 *             {@link XModel} doesn't exist
 	 */
-	
 	public static XModel safeGetModel(XRepository repository, XID modelID) {
 		XModel model = repository.getModel(modelID);
 		if(model == null)
@@ -338,7 +331,6 @@ public class XX {
 	 * @throws MissingPieceException Will be thrown if the specified
 	 *             {@link XObject} doesn't exist
 	 */
-	
 	public static XObject safeGetObject(XModel model, XID objectID) {
 		XObject object = model.getObject(objectID);
 		if(object == null)
@@ -361,7 +353,6 @@ public class XX {
 	 * @throws MissingPieceException Will be thrown if the specified
 	 *             {@link XModel}/{@link XObject} doesn't exist
 	 */
-	
 	public static XObject safeGetObject(XRepository repository, XID modelID, XID objectID) {
 		XModel model = safeGetModel(repository, modelID);
 		return safeGetObject(model, objectID);
@@ -400,7 +391,6 @@ public class XX {
 	 * @param array The array which contents will be copied into a list
 	 * @return A list containing copies of the contents of the given array
 	 */
-	
 	private static <E> List<E> asList(E[] array) {
 		ArrayList<E> list = new ArrayList<E>();
 		
@@ -560,7 +550,6 @@ public class XX {
 	 *         added to (null if the given {@link XField} had no
 	 *         {@link XIDListValue})
 	 */
-	
 	public static XIDListValue addIDToList(XID actorID, XField field, XID id) {
 		XValue value = field.getValue();
 		
@@ -593,7 +582,6 @@ public class XX {
 	 *         added to (null if the given {@link XField} had no
 	 *         {@link XIDListValue})
 	 */
-	
 	public static XIDListValue addIDToList(XID actorID, XField field, int index, XID id) {
 		XValue value = field.getValue();
 		
@@ -617,6 +605,10 @@ public class XX {
 	 * Adds the given {@link XID} to the given {@link XIDListValue} at the
 	 * specified index.
 	 * 
+	 * Note: This will actually create a new {@link XIDListValue} with the
+	 * content of the given list value plus the new element, the element will
+	 * not be added directly to the given list value.
+	 * 
 	 * @param listValue The {@link XIDListValue} which the given {@link XID} is
 	 *            to be added to.
 	 * @param index The index at which the given {@link XID} is to be inserted.
@@ -626,7 +618,6 @@ public class XX {
 	 * @throws IndexOutOfBoundsException if the index is out of range (index < 0
 	 *             || index >= size())
 	 */
-	
 	private static XIDListValue addIDToList(XIDListValue listValue, int index, XID id) {
 		List<XID> list = XX.asList(listValue);
 		list.add(index, id);
@@ -645,7 +636,6 @@ public class XX {
 	 *         removed from (null if the given {@link XField} had no
 	 *         {@link XIDListValue})
 	 */
-	
 	public static XIDListValue removeIDFromList(XID actorID, XField field, XID id) {
 		XValue value = field.getValue();
 		
@@ -681,7 +671,6 @@ public class XX {
 	 * @throws IndexOutOfBoundsException if the index is out of range (index < 0
 	 *             || index >= size())
 	 */
-	
 	public static XIDListValue removeIDFromList(XID actorID, XField field, int index) {
 		XValue value = field.getValue();
 		
@@ -715,7 +704,6 @@ public class XX {
 	 *         added to (null if the given {@link XField} had no
 	 *         {@link XBooleanListValue})
 	 */
-	
 	public static XBooleanListValue addBooleanToList(XID actorID, XField field, boolean bool) {
 		XValue value = field.getValue();
 		
@@ -747,7 +735,6 @@ public class XX {
 	 *         added to (null if the given {@link XField} had no
 	 *         {@link XBooleanListValue})
 	 */
-	
 	public static XBooleanListValue addBooleanToList(XID actorID, XField field, int index,
 	        boolean bool) {
 		XValue value = field.getValue();
@@ -772,13 +759,16 @@ public class XX {
 	 * Adds a new boolean at the specified index to the given
 	 * {@link XBooleanListValue}
 	 * 
+	 * Note: This will actually create a new {@link XBooleanListValue} with the
+	 * content of the given list value plus the new element, the element will
+	 * not be added directly to the given list value.
+	 * 
 	 * @param listValue the {@link XBooleanListValue}
 	 * @param bool The boolean which is to be added
 	 * @param index The index at which the specified element is to be inserted
 	 * @return the new {@link XBooleanListValue} which the given Boolean was
 	 *         added to
 	 */
-	
 	private static XBooleanListValue addBooleanToList(XBooleanListValue listValue, int index,
 	        boolean bool) {
 		List<Boolean> list = XX.asList(listValue);
@@ -797,9 +787,7 @@ public class XX {
 	 * @return the new {@link XBooleanListValue} which the specified Boolean was
 	 *         removed from (null if the given {@link XField} had no
 	 *         {@link XBooleanListValue})
-	 * @throws NullPointerException
 	 */
-	
 	public static XBooleanListValue removeBooleanFromList(XID actorID, XField field, boolean bool) {
 		XValue value = field.getValue();
 		
@@ -868,7 +856,6 @@ public class XX {
 	 *         added to (null if the given {@link XField} had no
 	 *         {@link XDoubleListValue})
 	 */
-	
 	public static XDoubleListValue addDoubleToList(XID actorID, XField field, double doub) {
 		XValue value = field.getValue();
 		
@@ -899,8 +886,9 @@ public class XX {
 	 * @return the new {@link XDoubleListValue} which the specified Double was
 	 *         added to (null if the given {@link XField} had no
 	 *         {@link XDoubleListValue})
+	 * @throws IndexOutOfBoundsException if the index is out of range (index < 0
+	 *             || index >= size())
 	 */
-	
 	public static XDoubleListValue addDoubleToList(XID actorID, XField field, int index, double doub) {
 		XValue value = field.getValue();
 		
@@ -924,13 +912,18 @@ public class XX {
 	 * Adds a new Double at the specified index to the given
 	 * {@link XDoubleListValue}
 	 * 
+	 * Note: This will actually create a new {@link XDoubleListValue} with the
+	 * content of the given list value plus the new element, the element will
+	 * not be added directly to the given list value.
+	 * 
 	 * @param listValue The {@link XDoubleListValue}
 	 * @param index The index at which the specified element is to be added
 	 * @param doub The Double which is to be added
 	 * @return the new {@link XDoubleListValue} which the specified Double was
 	 *         added to
+	 * @throws IndexOutOfBoundsException if the index is out of range (index < 0
+	 *             || index >= size())
 	 */
-	
 	private static XDoubleListValue addDoubleToList(XDoubleListValue listValue, int index,
 	        double doub) {
 		List<Double> list = XX.asList(listValue);
@@ -950,7 +943,6 @@ public class XX {
 	 *         removed from (null if the given {@link XField} had no
 	 *         {@link XDoubleListValue})
 	 */
-	
 	public static XDoubleListValue removeDoubleFromList(XID actorID, XField field, double doubleVal) {
 		XValue value = field.getValue();
 		
@@ -986,7 +978,6 @@ public class XX {
 	 * @throws IndexOutOfBoundsException if the index is out of range (index < 0
 	 *             || index >= size())
 	 */
-	
 	public static XDoubleListValue removeDoubleFromList(XID actorID, XField field, int index) {
 		XValue value = field.getValue();
 		
@@ -1020,7 +1011,6 @@ public class XX {
 	 *         added to (null if the given {@link XField} had no
 	 *         {@link XIntegerListValue})
 	 */
-	
 	public static XIntegerListValue addIntegerToList(XID actorID, XField field, int integer) {
 		XValue value = field.getValue();
 		
@@ -1041,16 +1031,19 @@ public class XX {
 	}
 	
 	/**
-	 * Adds a new Integer at the specified index to the given XIntegerListValue
+	 * Adds a new Integer at the specified index to the
+	 * {@link XIntegerListValue} of the given {@link XField}.
 	 * 
-	 * @param actorID The XID of the actor
-	 * @param field The field containing the XIntegerListValue
+	 * @param actorID The {@link XID} of the actor
+	 * @param field The {@link XField} containing the {@link XIntegerListValue}
 	 * @param integer The Integer which is to be added
 	 * @param index The index at which the specified element is to be added
-	 * @return the new XIntegerListValue which the specified Integer was added
-	 *         to (null if the given field had no XIntegerListValue)
+	 * @return the new {@link XIntegerListValue} which the specified Integer was
+	 *         added to (null if the given {@link XField} had no
+	 *         {@link XIntegerListValue})
+	 * @throws IndexOutOfBoundsException if the index is out of range (index < 0
+	 *             || index >= size())
 	 */
-	
 	public static XIntegerListValue addIntegerToList(XID actorID, XField field, int index,
 	        int integer) {
 		XValue value = field.getValue();
@@ -1072,13 +1065,20 @@ public class XX {
 	}
 	
 	/**
-	 * Adds a new Integer at the specified index to the given XIntegerListValue
+	 * Adds a new Integer at the specified index to the given
+	 * {@link XIntegerListValue}
 	 * 
-	 * @param listValue The XIntegerListValue
+	 * Note: This will actually create a new {@link XIntegerListValue} with the
+	 * content of the given list value plus the new element, the element will
+	 * not be added directly to the given list value.
+	 * 
+	 * @param listValue The {@link XIntegerListValue}
 	 * @param integer The Integer which is to be added
 	 * @param index The index at which the specified element is to be added
-	 * @return the new XIntegerListValue which the specified Integer was added
-	 *         to (null if the given field had no XIntegerListValue)
+	 * @return the new {@link XIntegerListValue} which the specified Integer was
+	 *         added to
+	 * @throws IndexOutOfBoundsException if the index is out of range (index < 0
+	 *             || index >= size())
 	 */
 	
 	private static XIntegerListValue addIntegerToList(XIntegerListValue listValue, int index,
@@ -1090,16 +1090,18 @@ public class XX {
 	}
 	
 	/**
-	 * Removes an Integer from the given XIntegerListValue
+	 * Removes an Integer from the {@link XIntegerListValue} of the given
+	 * {@link XField}
 	 * 
-	 * @param actorID The XID of the actor
-	 * @param field The field containing the XIntegerListValue
+	 * @param actorID The {@link XID} of the actor
+	 * @param field The {@link XField} containing the {@link XIntegerListValue}
 	 * @param index The index of the Integer which is to be removed
-	 * @return the new XIntegerListValue which the given Integer was removed
-	 *         from (null if the given field had no XIntegerListValue)
-	 * @throws NullPointerException
+	 * @return the new {@link XIntegerListValue} which the given Integer was
+	 *         removed from (null if the given {@link XField} had no
+	 *         {@link XIntegerListValue})
+	 * @throws IndexOutOfBoundsException if the index is out of range (index < 0
+	 *             || index >= size())
 	 */
-	
 	public static XIntegerListValue removeIntegerFromList(XID actorID, XField field, int index) {
 		XValue value = field.getValue();
 		
@@ -1123,17 +1125,16 @@ public class XX {
 	}
 	
 	/**
-	 * Removes the first occurrences of the given Integer from the given
-	 * XIntegerListValue
+	 * Removes the first occurrence of the given Integer from the
+	 * {@link XIntegerListValue} of the given {@link XField}
 	 * 
-	 * @param actorID The XID of the actor
-	 * @param field The field containing the XIntegerListValue
+	 * @param actorID The {@link XID} of the actor
+	 * @param field The {@link XField} containing the {@link XIntegerListValue}
 	 * @param integer The Integer which is to be removed
-	 * @return the new XIntegerListValue which the given Integer was removed
-	 *         from (null if the given field had no XIntegerListValue)
-	 * @throws NullPointerException
+	 * @return the new {@link XIntegerListValue} which the given Integer was
+	 *         removed from (null if the given field had no
+	 *         {@link XIntegerListValue})
 	 */
-	
 	public static XIntegerListValue removeIntegerFromList(XID actorID, XField field, Integer integer) {
 		XValue value = field.getValue();
 		
@@ -1157,13 +1158,15 @@ public class XX {
 	}
 	
 	/**
-	 * Appends a new Long at the end of the given XLongListValue
+	 * Appends a new Long at the end of the {@link XLongListValue} of the given
+	 * {@link XField}
 	 * 
-	 * @param actorID The XID of the actor
-	 * @param field The field containing the XLongListValue
+	 * @param actorID The {@link XID} of the actor
+	 * @param field The {@link XField} containing the {@link XLongListValue}
 	 * @param longVal The Long which is to be added
-	 * @return the new XLongListValue which the specified Long was added to
-	 *         (null if the given field had no XLongListValue)
+	 * @return the new {@link XLongListValue} which the specified Long was added
+	 *         to (null if the given {@link XField} had no
+	 *         {@link XLongListValue})
 	 */
 	
 	public static XLongListValue addLongToList(XID actorID, XField field, long longVal) {
@@ -1186,16 +1189,19 @@ public class XX {
 	}
 	
 	/**
-	 * Adds a new Long at specified index to the given XLongListValue
+	 * Adds a new Long at specified index to the {@link XLongListValue} of the
+	 * given {@link XField}
 	 * 
-	 * @param actorID The XID of the actor
-	 * @param field The field containing the XLongListValue
+	 * @param actorID The {@link XID} of the actor
+	 * @param field The {@link XField} containing the {@link XLongListValue}
 	 * @param longVal The Long which is to be added
 	 * @param index The index at which the specified element is to be added
-	 * @return the new XLongListValue which the specified Long was added to
-	 *         (null if the given field had no XLongListValue)
+	 * @return the new {@link XLongListValue} which the specified Long was added
+	 *         to (null if the given {@link XField} had no
+	 *         {@link XLongListValue})
+	 * @throws IndexOutOfBoundsException if the index is out of range (index < 0
+	 *             || index >= size())
 	 */
-	
 	public static XLongListValue addLongToList(XID actorID, XField field, int index, long longVal) {
 		XValue value = field.getValue();
 		
@@ -1216,15 +1222,20 @@ public class XX {
 	}
 	
 	/**
-	 * Adds a new Long at specified index to the given XLongListValue
+	 * Adds a new Long at specified index to the given {@link XLongListValue}
 	 * 
-	 * @param listValue The XLongListValue
+	 * Note: This will actually create a new {@link XLongListValue} with the
+	 * content of the given list value plus the new element, the element will
+	 * not be added directly to the given list value.
+	 * 
+	 * @param listValue The {@link XLongListValue}
 	 * @param longVal The Long which is to be added
 	 * @param index The index at which the specified element is to be added
-	 * @return the new XLongListValue which the specified Long was added to
-	 *         (null if the given field had no XLongListValue)
+	 * @return the new {@link XLongListValue} which the specified Long was added
+	 *         to (null if the given field had no {@link XLongListValue})
+	 * @throws IndexOutOfBoundsException if the index is out of range (index < 0
+	 *             || index >= size())
 	 */
-	
 	private static XLongListValue addLongToList(XLongListValue listValue, int index, long longVal) {
 		List<Long> list = XX.asList(listValue);
 		list.add(index, longVal);
@@ -1233,15 +1244,18 @@ public class XX {
 	}
 	
 	/**
-	 * Removes a Long from the given XLongListValue
+	 * Removes a Long from the {@link XLongListValue} of the given
+	 * {@link XField}.
 	 * 
-	 * @param actorID The XID of the actor
-	 * @param field The field containing the XLongListValue
+	 * @param actorID The {@link XID} of the actor
+	 * @param field The {@link XField} containing the {@link XLongListValue}
 	 * @param index The index of the Long which is to be removed
-	 * @return the new XLongListValue which the given Long was removed from
-	 *         (null if the given field had no XLongListValue)
+	 * @return the new {@link XLongListValue} which the given Long was removed
+	 *         from (null if the given {@link XField} had no
+	 *         {@link XLongListValue})
+	 * @throws IndexOutOfBoundsException if the index is out of range (index < 0
+	 *             || index >= size())
 	 */
-	
 	public static XLongListValue removeLongFromList(XID actorID, XField field, int index) {
 		XValue value = field.getValue();
 		
@@ -1266,17 +1280,17 @@ public class XX {
 	
 	/**
 	 * Removes the first occurrence of a given Long from the given
-	 * XLongListValue
+	 * {@link XLongListValue}
 	 * 
-	 * @param actorID The XID of the actor
-	 * @param value The field containing the XLongListValue
+	 * @param actorID The {@link XID} of the actor
+	 * @param value The {@link XField} containing the {@link XLongListValue}
 	 * @param longVal The Long which is to be removed
-	 * @return the new XLongListValue which the given Long was removed from
-	 *         (null if the given field had no XLongListValue)
+	 * @return the new {@link XLongListValue} which the given Long was removed
+	 *         from (null if the given {@link XField} had no
+	 *         {@link XLongListValue})
 	 * @throws IndexOutOfBoundsException if the index is out of range (index < 0
 	 *             || index >= size())
 	 */
-	
 	public static XLongListValue removeLongFromList(XID actorID, XField field, long longVal) {
 		XValue value = field.getValue();
 		
@@ -1300,15 +1314,16 @@ public class XX {
 	}
 	
 	/**
-	 * Appends a new String at the end of the given XStringListValue
+	 * Appends a new String at the end of the {@link XStringListValue} of the
+	 * given {@link XField}
 	 * 
-	 * @param actorID The XID of the actor
-	 * @param field The field containing the XStringListValue
+	 * @param actorID The {@link XID} of the actor
+	 * @param field The {@link XField} containing the {@link XStringListValue}
 	 * @param string The String which is to be added
-	 * @return the new XStringListValue which the specified String was added to
-	 *         (null if the given field had no XStringListValue)
+	 * @return the new {@link XStringListValue} which the specified String was
+	 *         added to (null if the given {@link XField} had no
+	 *         {@link XStringListValue})
 	 */
-	
 	public static XStringListValue addStringToList(XID actorID, XField field, String string) {
 		XValue value = field.getValue();
 		
@@ -1329,16 +1344,19 @@ public class XX {
 	}
 	
 	/**
-	 * Adds a new String at the specified index to the given XStringListValue
+	 * Adds a new String at the specified index to the {@link XStringListValue}
+	 * of the given {@link XField}
 	 * 
-	 * @param actorID The XID of the actor
-	 * @param field The field containing the XStringListValue
+	 * @param actorID The {@link XID} of the actor
+	 * @param field The {@link XField} containing the {@link XStringListValue}
 	 * @param string The String which is to be added
 	 * @param index The index at which the specified element is to be added
-	 * @return the new XStringListValue which the specified String was added to
-	 *         (null if the given field had no XStringListValue)
+	 * @return the new {@link XStringListValue} which the specified String was
+	 *         added to (null if the given {@link XField} had no
+	 *         {@link XStringListValue})
+	 * @throws IndexOutOfBoundsException if the index is out of range (index < 0
+	 *             || index >= size())
 	 */
-	
 	public static XStringListValue addStringToList(XID actorID, XField field, int index,
 	        String string) {
 		XValue value = field.getValue();
@@ -1360,15 +1378,22 @@ public class XX {
 	}
 	
 	/**
-	 * Adds a new String at the specified index to the given XStringListValue
+	 * Adds a new String at the specified index to the given
+	 * {@link XStringListValue}
 	 * 
-	 * @param listValue The XStringListValue
+	 * Note: This will actually create a new {@link XStringListValue} with the
+	 * content of the given list value plus the new element, the element will
+	 * not be added directly to the given list value.
+	 * 
+	 * @param listValue The {@link XStringListValue}
 	 * @param string The String which is to be added
 	 * @param index The index at which the specified element is to be added
-	 * @return the new XStringListValue which the specified String was added to
-	 *         (null if the given field had no XStringListValue)
+	 * @return the new {@link XStringListValue} which the specified String was
+	 *         added to (null if the given field had no {@link XStringListValue}
+	 *         )
+	 * @throws IndexOutOfBoundsException if the index is out of range (index < 0
+	 *             || index >= size())
 	 */
-	
 	private static XStringListValue addStringToList(XStringListValue listValue, int index,
 	        String string) {
 		List<String> list = XX.asList(listValue);
@@ -1378,17 +1403,17 @@ public class XX {
 	}
 	
 	/**
-	 * Removes a String from the given XStringListValue
+	 * Removes a String from the given {@link XStringListValue}
 	 * 
-	 * @param actorID The XID of the actor
-	 * @param field The field containing the XStringListValue
+	 * @param actorID The {@link XID} of the actor
+	 * @param field The {@link XField} containing the {@link XStringListValue}
 	 * @param index The index of the String which is to be removed
-	 * @return the new XStringListValue which the given String was removed from
-	 *         (null if the given field had no XStringListValue)
+	 * @return the new {@link XStringListValue} which the given String was
+	 *         removed from (null if the given {@link XField} had no
+	 *         {@link XStringListValue})
 	 * @throws IndexOutOfBoundsException if the index is out of range (index < 0
 	 *             || index >= size())
 	 */
-	
 	public static XStringListValue removeStringFromList(XID actorID, XField field, int index) {
 		XValue value = field.getValue();
 		
@@ -1412,16 +1437,16 @@ public class XX {
 	}
 	
 	/**
-	 * Removes the first occurrence of the given String from the given
-	 * XStringListValue
+	 * Removes the first occurrence of the given String from the
+	 * {@link XStringListValue} of the given {@link XField}
 	 * 
-	 * @param actorID The XID of the actor
-	 * @param field The field containing the XStringListValue
+	 * @param actorID The {@link XID} of the actor
+	 * @param field The {@link XField} containing the {@link XStringListValue}
 	 * @param string The String which is to be removed
-	 * @return the new XStringListValue which the given String was removed from
-	 *         (null if the given field had no XStringListValue)
+	 * @return the new {@link XStringListValue} which the given String was
+	 *         removed from (null if the given {@link XField} had no
+	 *         {@link XStringListValue})
 	 */
-	
 	public static XStringListValue removeStringFromList(XID actorID, XField field, String string) {
 		XValue value = field.getValue();
 		
@@ -1445,33 +1470,36 @@ public class XX {
 	}
 	
 	/**
-	 * Gets the model with specified URI from the given XRepository
+	 * Gets the {@link XModel} with specified URI from the given
+	 * {@link XRepository}
 	 * 
 	 * A correct URI for this method looks like this:
 	 * 
 	 * URI = modelURI/objectURI/fieldURI (objectURI & fieldURI not needed for
 	 * this method)
 	 * 
-	 * This method will split up the given URI and try to get the model with ID
-	 * modelURI from the given repository.
+	 * This method will split up the given URI and try to get the {@link XModel}
+	 * with {@link XID} modelURI from the given {@link XRepository}.
 	 * 
-	 * @param repository The repository which is supposed to hold the specified
-	 *            model
-	 * @param uri The URI of the model
-	 * @return the model with the given ID. null, if it doesn't exist
+	 * @param repository The {@link XRepository} which is supposed to hold the
+	 *            specified {@link XModel}
+	 * @param uri The URI of the {@link XModel}
+	 * @return the {@link XModel} corresponding to the given URI, null if it
+	 *         doesn't exist
 	 * @throws IllegalArgumentException if any component of the given URI is not
-	 *             a valid XID string (see
+	 *             a valid {@link XID} string (see
 	 *             {@link XIDProvider#fromString(String)} for further
 	 *             information)
 	 * @throws URIFormatException if the given URI contains too many or too few
 	 *             components
 	 */
-	
 	public static XModel getModelFromURI(XRepository repository, String uri) {
 		String[] uriArray = uri.split("/");
 		
-		if(uriArray.length > 3)
+		if(uriArray.length > 3) {
 			throw new URIFormatException("The given URI contains too many components.");
+		}
+		
 		try {
 			XModel model = safeGetModel(repository, X.getIDProvider().fromString(uriArray[0]));
 			
@@ -1483,38 +1511,43 @@ public class XX {
 	}
 	
 	/**
-	 * Gets the object with specified URI from the given XRepository
+	 * Gets the {@link XObject} with specified URI from the given
+	 * {@link XRepository}
 	 * 
 	 * A correct URI for this method looks like this:
 	 * 
 	 * URI = modelURI/objectURI/fieldURI (fieldURI not needed for this method)
 	 * 
-	 * This method will split up the given URI and try to get the object with ID
-	 * objectURI from the model with ID modelURI from the the given repository.
+	 * This method will split up the given URI and try to get the
+	 * {@link XObject} with {@link XID} objectURI from the {@link XModel} with
+	 * {@link XID} modelURI from the the given {@link XRepository}.
 	 * 
-	 * @param repository The repository which is supposed to hold the given
-	 *            object.
-	 * @param uri The URI of the object.
-	 * @return the object with the given ID. null if it doesn't exist.
+	 * @param repository The {@link repository} which is supposed to hold the
+	 *            specified {@link XModel} and {@link XObject}.
+	 * @param uri The URI of the {@link XObject}.
+	 * @return the {@link XObject} corresponding to the given URI, null if it
+	 *         doesn't exist.
 	 * @throws IllegalArgumentException if any component of the given URI is not
-	 *             a valid XID string (see
+	 *             a valid {@link XID} string (see
 	 *             {@link XIDProvider#fromString(String)} for further
 	 *             information)
 	 * @throws URIFormatException if the given URI contains too many or too few
 	 *             components
 	 */
-	
 	public static XObject getObjectFromURI(XRepository repository, String uri) {
 		String[] uriArray = uri.split("/");
-		if(uriArray.length > 3)
+		
+		if(uriArray.length > 3) {
 			throw new URIFormatException("The given URI contains too many components.");
+		}
+		
 		try {
 			XModel model = safeGetModel(repository, X.getIDProvider().fromString(uriArray[0]));
 			XObject object = safeGetObject(model, X.getIDProvider().fromString(uriArray[1]));
 			
 			return object;
 		} catch(ArrayIndexOutOfBoundsException aioobe) {
-			// uriArray.length == 1
+			assert (uriArray.length == 1);
 			throw new URIFormatException("The given URI didn't contain an ID for an object.");
 			
 		} catch(MissingPieceException mpe) {
@@ -1524,26 +1557,27 @@ public class XX {
 	}
 	
 	/**
-	 * Gets the object with specified URI from the given XModel
+	 * Gets the {@link XObject} with specified URI from the given {@link XModel}
 	 * 
 	 * A correct URI for this method looks like this:
 	 * 
 	 * URI = objectURI/fieldURI (fieldURI not needed for this method)
 	 * 
-	 * This method will split up the given URI and try to get the object with ID
-	 * objectURI from the given model.
+	 * This method will split up the given URI and try to get the
+	 * {@link XObject} with {@link XID} objectURI from the given model.
 	 * 
-	 * @param model The model which is supposed to hold the given object.
+	 * @param model The {@link XModel} which is supposed to hold the given
+	 *            {@link XObject}.
 	 * @param uri The URI of the object.
-	 * @return The object with the given ID. null, if it doesn't exist.
+	 * @return The {@link XObject} corresponding to the given URI, null if it
+	 *         doesn't exist.
 	 * @throws IllegalArgumentException if any component of the given URI is not
-	 *             a valid XID string (see
+	 *             a valid {@link XID} string (see
 	 *             {@link XIDProvider#fromString(String)} for further
 	 *             information)
 	 * @throws URIFormatException if the given URI contains too many or too few
 	 *             components
 	 */
-	
 	public static XObject getObjectFromURI(XModel model, String uri) {
 		String[] uriArray = uri.split("/");
 		
@@ -1559,23 +1593,23 @@ public class XX {
 		
 	}
 	
-	/**
-	 * Gets the field with specified URI from the given XRepository
+/**
+	 * Gets the {@link XField} with specified URI from the given {@link XRepository}
 	 * 
 	 * A correct URI for this method looks like this:
 	 * 
 	 * URI = modelURI/objectURI/fieldURI
 	 * 
-	 * This method will split up the given URI and try to get the field with the
-	 * ID fieldID from the object with ID objectURI from the model with ID
-	 * modelURI from the given repository.
+	 * This method will split up the given URI and try to get the {@link XField} with the
+	 * {@link XID} fieldID from the {@link XObject} with {@link XID} objectURI from the {@link XModel} with {@link XID}
+	 * modelURI from the given {@link XRepository}.
 	 * 
-	 * @param repository The repository which is supposed to hold the given
-	 *            field.
-	 * @param uri The URI of the field.
-	 * @return The field with the given ID. null if it doesn't exist.
+	 * @param repository The {@link XRepository} which is supposed to hold the given
+	 *            {@link XField.
+	 * @param uri The URI of the {@link XField}.
+	 * @return The {@link XField} corresponding to the given URI, null if it doesn't exist.
 	 * @throws IllegalArgumentException if any component of the given URI is not
-	 *             a valid XID string (see
+	 *             a valid {@link XID} string (see
 	 *             {@link XIDProvider#fromString(String)} for further
 	 *             information)
 	 * @throws URIFormatException if the given URI contains too many or too few
@@ -1585,8 +1619,10 @@ public class XX {
 	public static XField getFieldFromURI(XRepository repository, String uri) {
 		String[] uriArray = uri.split("/");
 		
-		if(uriArray.length > 3)
+		if(uriArray.length > 3) {
 			throw new URIFormatException("The given URI contains too many components.");
+		}
+		
 		try {
 			XModel model = safeGetModel(repository, X.getIDProvider().fromString(uriArray[0]));
 			XObject object = safeGetObject(model, X.getIDProvider().fromString(uriArray[1]));
@@ -1607,20 +1643,23 @@ public class XX {
 	}
 	
 	/**
-	 * Gets the field with specified id from the given XModel
+	 * Gets the {@link XField} with specified URI from the given {@link XModel}
 	 * 
 	 * A correct URI for this method looks like this:
 	 * 
 	 * URI = objectURI/fieldURI
 	 * 
-	 * This method will split up the given URI and try to get the field with the
-	 * ID fieldID from the object with ID objectURI from the given model.
+	 * This method will split up the given URI and try to get the {@link XField}
+	 * with the {@link XID} fieldID from the {@link XObject} with {@link XID}
+	 * objectURI from the given {@link XModel}.
 	 * 
-	 * @param model The model which is supposed to hold the given field.
-	 * @param uri The URI of the field.
-	 * @return The field with the given ID. null if it doesn't exist.
+	 * @param model The {@link XModel} which is supposed to hold the given
+	 *            {@link XField}.
+	 * @param uri The URI of the {@link XField}.
+	 * @return The {@link XField} corresponding to the given URI, null if it
+	 *         doesn't exist.
 	 * @throws IllegalArgumentException if any component of the given URI is not
-	 *             a valid XID string (see
+	 *             a valid {@link XID} string (see
 	 *             {@link XIDProvider#fromString(String)} for further
 	 *             information)
 	 * @throws URIFormatException if the given URI contains too many or too few
@@ -1628,8 +1667,11 @@ public class XX {
 	 */
 	public static XField getFieldFromURI(XModel model, String uri) {
 		String[] uriArray = uri.split("/");
-		if(uriArray.length > 2)
+		
+		if(uriArray.length > 2) {
 			throw new URIFormatException("The given URI contains too many components.");
+		}
+		
 		try {
 			XObject object = safeGetObject(model, X.getIDProvider().fromString(uriArray[0]));
 			XField field = safeGetField(object, X.getIDProvider().fromString(uriArray[1]));
