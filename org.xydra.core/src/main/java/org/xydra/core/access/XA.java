@@ -7,7 +7,6 @@ import org.xydra.core.X;
 import org.xydra.core.model.XID;
 
 
-
 /**
  * Access management related constants.
  * 
@@ -19,27 +18,28 @@ import org.xydra.core.model.XID;
 public class XA {
 	
 	/**
-	 * Access to read content.
+	 * A constant representing the access right to read content.
 	 */
 	public final static XID ACCESS_READ = X.getIDProvider().fromString("read");
 	
 	/**
-	 * Access to write content.
+	 * A constant representing the access right to write content.
 	 */
 	public final static XID ACCESS_WRITE = X.getIDProvider().fromString("write");
 	
 	/**
-	 * Access to change allow others access.
+	 * Access to change allow others access. FIXME What does this sentence
+	 * mean?!
 	 */
 	public final static XID ACCESS_ALLOW = X.getIDProvider().fromString("allow_access");
 	
 	/**
-	 * Access to change allow others deny.
+	 * Access to change allow others deny. FIXME What does this sentence mean?!
 	 */
 	public final static XID ACCESS_DENY = X.getIDProvider().fromString("deny");
 	
 	/**
-	 * A special group that contains everyone.
+	 * A special group that everyone is part of.
 	 */
 	public static final XID GROUP_ALL = X.getIDProvider().fromString("all");
 	

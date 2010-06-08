@@ -6,7 +6,7 @@ import org.xydra.core.model.XID;
 
 
 /**
- * An event to allow tracking changes to an XAccessManager.
+ * An event to allow tracking changes to an {@link XAccessManager}.
  * 
  * @author dscharrer
  * 
@@ -16,29 +16,46 @@ public interface XAccessEvent {
 	ChangeType getChangeType();
 	
 	/**
-	 * @return the actor for whom an access definition is being modified.
+	 * Returns the {@link XID} of the actor whose access definition has been
+	 * modified.
+	 * 
+	 * @return the {@link XID} of the actor whose access definition has been
+	 *         modified
 	 */
 	XID getActor();
 	
 	/**
-	 * @return the resource for which an access definition is being modified.
+	 * Returns the {@link XAddress} of the resource which access definition has
+	 * been modified.
+	 * 
+	 * @return the {@link XAddress} of the resource which access definition has
+	 *         been modified
 	 */
 	XAddress getResource();
 	
 	/**
+	 * Returns the type of access being modified. See {@link XA} for more
+	 * information.
+	 * 
 	 * @return the type of access being modified.
 	 */
 	XID getAccessType();
 	
 	/**
-	 * @return get the previous value of the access definition. This is
-	 *         undefined for events of type ADD.
+	 * Returns the previous value of the access definition. This is undefined
+	 * for events of the ADD-type.
+	 * 
+	 * @return get the previous value of the access definition.
 	 */
+	// TODO "getOldAllowed" sounds rather strange... what about
+	// "getOldAccessDefinition"?
 	boolean getOldAllowed();
 	
 	/**
-	 * @return get the new value of the access definition. This is undefined for
-	 *         events of type REMOVE.
+	 * Returns the new value of the access definition. This is undefined for
+	 * events of the REMOVE-type.
+	 * 
+	 * @return get the new value of the access definition.
 	 */
 	boolean getNewAllowed();
 	
