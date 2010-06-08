@@ -1686,20 +1686,22 @@ public class XX {
 	}
 	
 	/**
-	 * Gets the field with specified URI from the given XObject
+	 * Gets the {@link XField} with specified URI from the given {@link XObject}
 	 * 
 	 * A correct URI for this method looks like this:
 	 * 
 	 * URI = fieldURI
 	 * 
-	 * This method will split up the given URI and try to get the field with the
-	 * ID fieldID from the given object.
+	 * This method will split up the given URI and try to get the {@link XField}
+	 * with the {@link XID} fieldID from the given {@link XObject}.
 	 * 
-	 * @param object The object which is supposed to hold the given field.
-	 * @param uri The URI of the field.
-	 * @return The field with the given ID. null if it doesn't exist.
+	 * @param object The {@link XObject} which is supposed to hold the specified
+	 *            {@link XField}.
+	 * @param uri The URI of the {@link XField}.
+	 * @return The {@link XField} with the given {@link XID}, null if it doesn't
+	 *         exist.
 	 * @throws IllegalArgumentException if any component of the given URI is not
-	 *             a valid XID string (see
+	 *             a valid {@link XID} string (see
 	 *             {@link XIDProvider#fromString(String)} for further
 	 *             information)
 	 * @throws URIFormatException if the given URI contains too many or too few
@@ -1719,23 +1721,26 @@ public class XX {
 	}
 	
 	/**
-	 * Gets the value of the field with specified URI from the given XRepository
+	 * Gets the {@link XValue} of the {@link XField} with specified URI from the
+	 * given {@link XRepository}
 	 * 
 	 * A correct URI for this method looks like this:
 	 * 
 	 * URI = modelURI/objectURI/fieldURI
 	 * 
-	 * This method will split up the given URI and try to get the value of the
-	 * field with the ID fieldID from the object with ID objectURI from the
-	 * model with ID modelURI from the given repository.
+	 * This method will split up the given URI and try to get the {@link XValue}
+	 * of the {@link XField} with the {@link XID} fieldID from the
+	 * {@link XObject} with {@link XID} objectURI from the {@link XModel} with
+	 * {@link XID} modelURI from the given {@link XRepository}.
 	 * 
-	 * @param repository The repository which is supposed to hold the given
-	 *            value.
+	 * @param repository The {@link XRepository} which is supposed to hold the
+	 *            specified {@link XValue}.
 	 * @param uri The URI of the value.
-	 * @return The value of the field with the given ID. null if the field
-	 *         doesn't exist.
+	 * @return The {@link XValue} of the {@link XField} with the given
+	 *         {@link XID}, null if the {@link XField} doesn't exist or if its
+	 *         {@link XValue} is not set.
 	 * @throws IllegalArgumentException if any component of the given URI is not
-	 *             a valid XID string (see
+	 *             a valid {@link XID} string (see
 	 *             {@link XIDProvider#fromString(String)} for further
 	 *             information)
 	 * @throws URIFormatException if the given URI contains too many or too few
@@ -1767,22 +1772,24 @@ public class XX {
 	}
 	
 	/**
-	 * Gets the value of the field with specified URI from the given XModel
+	 * Gets the {@link XValue} of the {@link XField} with specified URI from the
+	 * given {@link XModel}
 	 * 
 	 * A correct URI for this method looks like this:
 	 * 
 	 * URI = objectURI/fieldURI
 	 * 
-	 * This method will split up the given URI and try to get the value of the
-	 * field with the ID fieldID from the object with ID objectURI from the
-	 * given model.
+	 * This method will split up the given URI and try to get the {@link XValue}
+	 * of the {@link XField} with the {@link XID} fieldID from the
+	 * {@link XObject} with {@link XID} objectURI from the given {@link XModel}.
 	 * 
-	 * @param model The model which is supposed to hold the given value.
-	 * @param uri The URI of the value.
-	 * @return The value of the field with the given ID. null if the field
-	 *         doesn't exist.
+	 * @param model The {@link Xmodel} which is supposed to hold the specified
+	 *            {@link XValue}.
+	 * @param uri The URI of the {@link XValue}.
+	 * @return The {@link XValue} of the {@link XField} with the given
+	 *         {@link XID}, null if the {@link XField} doesn't exist.
 	 * @throws IllegalArgumentException if any component of the given URI is not
-	 *             a valid XID string (see
+	 *             a valid {@link XID} string (see
 	 *             {@link XIDProvider#fromString(String)} for further
 	 *             information)
 	 * @throws URIFormatException if the given URI contains too many or too few
@@ -1808,21 +1815,25 @@ public class XX {
 	}
 	
 	/**
-	 * Gets the value of the field with specified URI from the given XObject
+	 * Gets the {@link XValue} of the {@link XField} with specified URI from the
+	 * given {@link XObject}
 	 * 
 	 * A correct URI for this method looks like this:
 	 * 
 	 * URI = fieldURI
 	 * 
-	 * This method will split up the given URI and try to get the value of field
-	 * with the ID fieldID from the given object.
+	 * This method will split up the given URI and try to get the {@link XValue}
+	 * of the {@link XField} with the {@link XID} fieldID from the given
+	 * {@link XObject}.
 	 * 
-	 * @param object The object which is supposed to hold the given value.
-	 * @param uri The URI of the value.
-	 * @return The value of the field with the given ID. null if the field
-	 *         doesn't exist.
+	 * @param object The {@link XObject} which is supposed to hold the specified
+	 *            {@link XValue}.
+	 * @param uri The URI of the {@link XValue}.
+	 * @return The {@link XValue} of the {@link XField} with the given
+	 *         {@link XID}, null if the field doesn't exist or if its
+	 *         {@link XValue} is not set.
 	 * @throws IllegalArgumentException if any component of the given URI is not
-	 *             a valid XID string (see
+	 *             a valid {@link XID} string (see
 	 *             {@link XIDProvider#fromString(String)} for further
 	 *             information)
 	 * @throws URIFormatException if the given URI contains too many or too few
@@ -1842,15 +1853,16 @@ public class XX {
 	}
 	
 	/**
-	 * Check if two models have the same ID, the same revision and the same
-	 * objects as defined by {@link XX#equalState(XObject, XObject)}.
+	 * Check if two {@link XModel}s have the same {@link XID}, the same revision
+	 * and the same {@link XObjects} as defined by
+	 * {@link XX#equalState(XObject, XObject)}.
 	 * 
 	 * This is similar to {@link XX#equalTree(XModel, XModel)} but also checks
 	 * the revision number.
 	 * 
-	 * Parents, if any, are not compared.
+	 * Parent-{@link XRepository}s, if they exist, are not compared.
 	 * 
-	 * @return true if the two models have the same state.
+	 * @return true if the two {@link XModels} have the same state.
 	 */
 	public static boolean equalState(XModel modelA, XModel modelB) {
 		if(modelA == null && modelB == null)
@@ -1890,13 +1902,16 @@ public class XX {
 	}
 	
 	/**
-	 * Check if two objects have the same ID, the same revision and the same
-	 * fields as defined by {@link XX#equalState(XField, XField)}.
+	 * Check if two {@link XObject}s have the same {@link XID}, the same
+	 * revision and the same {@link XFields} as defined by
+	 * {@link XX#equalState(XField, XField)}.
 	 * 
 	 * This is similar to {@link XX#equalTree(XObject, XObject)} but also checks
 	 * the revision number.
 	 * 
-	 * @return true if the two objects have the same state.
+	 * Parent-{@link XModel}s, if they exist, are not compared
+	 * 
+	 * @return true if the two {@link XObjects} have the same state.
 	 */
 	public static boolean equalState(XObject objectA, XObject objectB) {
 		
@@ -1930,13 +1945,15 @@ public class XX {
 	}
 	
 	/**
-	 * Check if two fields have the same ID, the same revision and the same
-	 * value.
+	 * Check if two {@link XField}s have the same ID, the same revision and the
+	 * same {@link XValue}.
 	 * 
 	 * This is similar to {@link XX#equalTree(XField, XField)} but also checks
 	 * the revision number.
 	 * 
-	 * @return true if the two fields have the same state.
+	 * Parent-{@link XObject}s, if they exist, are not compared
+	 * 
+	 * @return true if the two {@link XField}s have the same state.
 	 */
 	public static boolean equalState(XField fieldA, XField fieldB) {
 		
@@ -1953,13 +1970,15 @@ public class XX {
 	}
 	
 	/**
-	 * Check if two models have the same ID and the same objects as defined by
-	 * {@link XX#equalTree(XObject, XObject)}.
+	 * Check if two {@link XModel}s have the same {@link XID} and the same
+	 * {@link XObject}s as defined by {@link XX#equalTree(XObject, XObject)}.
 	 * 
 	 * This is similar to {@link XX#equalState(XModel, XModel)} but ignores the
 	 * revision number.
 	 * 
-	 * @return true if the two models represent the same tree.
+	 * Parent-{@link XRepository}s, if they exist, are not compared.
+	 * 
+	 * @return true if the two {@link XModel}s represent the same tree.
 	 */
 	public static boolean equalTree(XModel modelA, XModel modelB) {
 		
@@ -1990,13 +2009,15 @@ public class XX {
 	}
 	
 	/**
-	 * Check if two objects have the same ID and the same fields as defined by
-	 * {@link XX#equalTree(XField, XField)}.
+	 * Check if two {@link XObject}s have the same {@link XID} and the same
+	 * {@link XField}s as defined by {@link XX#equalTree(XField, XField)}.
 	 * 
 	 * This is similar to {@link XX#equalState(XObject, XObject)} but ignores
 	 * the revision number.
 	 * 
-	 * @return true if the two objects represent the same subtree.
+	 * Parent-{@link XModel}s, if they exist, are not compared.
+	 * 
+	 * @return true if the two {@link XObject}s represent the same subtree.
 	 */
 	public static boolean equalTree(XObject objectA, XObject objectB) {
 		
@@ -2027,12 +2048,15 @@ public class XX {
 	}
 	
 	/**
-	 * Check if two fields have the same ID and the same value.
+	 * Check if two {@link XField}s have the same {@link XID} and the same
+	 * {@link XValue}.
 	 * 
 	 * This is similar to {@link XX#equalState(XField, XField)} but ignores the
 	 * revision number.
 	 * 
-	 * @return true if the two fields represent the same subtree.
+	 * Parent-{@link XObject}s, if they exist, are not compared.
+	 * 
+	 * @return true if the two {@link XField}s represent the same subtree.
 	 */
 	public static boolean equalTree(XField fieldA, XField fieldB) {
 		
@@ -2049,21 +2073,31 @@ public class XX {
 	 * @return true if either both a and b are null or both are not null and
 	 *         a.equals(b) is true
 	 */
+	// TODO shouldn't his be private?
 	public static boolean equals(Object a, Object b) {
 		return (a == b) || (a != null && a.equals(b));
 	}
 	
 	/**
-	 * @return true of descendant refers to an entity contained in the entity
-	 *         referred to by parent.
+	 * Checks whether the entity referred to by {@link XAdress} descendant is a
+	 * descendant of the entity referred to by {@link XAddress} parent.
+	 * 
+	 * @param parent The {@link XAddress} of the entity which is supposed to be
+	 *            a parent of 'descendant'.
+	 * @param descendent The {@link XAddress} of the entity which is supposed to
+	 *            be a descendant of 'parent'.
+	 * @return true if 'descendant' refers to an entity contained in the entity
+	 *         referred to by 'parent'.
 	 */
 	public static boolean contains(XAddress parent, XAddress descendant) {
 		if(parent.getRepository() == null) {
 			if(!XX.equals(parent.getRepository(), descendant.getRepository()))
 				return false;
+			
 			if(parent.getModel() == null) {
 				if(!XX.equals(parent.getModel(), descendant.getModel()))
 					return false;
+				
 				if(parent.getObject() == null) {
 					return false;
 				} else {
@@ -2103,9 +2137,17 @@ public class XX {
 	}
 	
 	/**
-	 * @return true of descendant refers to an entity contained in the entity
-	 *         referred to by parent or of descendant and parent refer to the
-	 *         same entity.
+	 * Checks whether the entity referred to by {@link XAdress} descendant is a
+	 * child of the entity referred to by {@link XAddress} parent or if both
+	 * {@link XAddress}es refer to the same entity.
+	 * 
+	 * @param parent The {@link XAddress} of the entity which is supposed to be
+	 *            a parent of 'descendant' or the same {@link XAddress}.
+	 * @param descendent The {@link XAddress} of the entity which is supposed to
+	 *            be a descendant of 'parent' or the same {@link XAddress}.
+	 * @return true if 'descendant' refers to an entity contained in the entity
+	 *         referred to by 'parent' or if 'descendant' and 'parent' refer to
+	 *         the same entity.
 	 */
 	public static boolean equalsOrContains(XAddress parent, XAddress descendant) {
 		if(parent.getRepository() == null) {
@@ -2154,9 +2196,14 @@ public class XX {
 		
 	}
 	
-	/**
-	 * @return true of child refers to an entity directly contained in the
-	 *         entity referred to by parent.
+/**
+	 * Checks whether the entity referred to by the {@link XAddress} child is a
+	 * direct child of the entity referred to by the {@link XAddress} parent.
+	 * 
+	 * @param parent The {@link XAddress} of the entity which is supposed to be the direct parent of 'child'
+	 * @param child The {@link XAddress\ of the entity which is supposed to be a direct child of 'parent'
+	 * @return true if 'child' refers to an entity directly contained in the
+	 *         entity referred to by 'parent'.
 	 */
 	public static boolean isChild(XAddress parent, XAddress child) {
 		if(parent.getRepository() == null) {
@@ -2203,6 +2250,10 @@ public class XX {
 		
 	}
 	
+	/*
+	 * TODO Why do we need these "resolve"-Methods? What is their purpose?
+	 */
+
 	public static XAddress resolveModel(XAddress repositoryAddress, XID modelId) {
 		if(repositoryAddress == null)
 			return X.getIDProvider().fromComponents(null, modelId, null, null);
@@ -2244,8 +2295,13 @@ public class XX {
 	/**
 	 * Create a forced {@link XCommand} that undoes the given {@link XEvent}.
 	 * 
-	 * Beware that the given command may still fail to apply if the target it
-	 * operates upon no longer exists.
+	 * Note: Be aware that the given command may still fail to apply if the
+	 * target it operates upon no longer exists.
+	 * 
+	 * @param event The {@link XEvent} which inverse {@link XCommand} is to be
+	 *            calculated
+	 * @return the inverse of the given {@link XEvent}, executing it will
+	 *         basically result in an undo operation
 	 */
 	static public XCommand createForcedUndoCommand(XEvent event) {
 		
@@ -2261,8 +2317,13 @@ public class XX {
 	 * Create a forced {@link XAtomicCommand} that undoes the given
 	 * {@link XAtomicEvent}.
 	 * 
-	 * Beware that the given command may still fail to apply if the target it
-	 * operates upon no longer exists.
+	 * Note: Be aware that the given command may still fail to apply if the
+	 * target it operates upon no longer exists.
+	 * 
+	 * @param event The {@link XAtomicEvent} which inverse
+	 *            {@link XAtomicCommand} is to be calculated
+	 * @return the inverse of the given {@link XAtomicEvent}, executing it will
+	 *         basically result in an undo operation
 	 */
 	static public XAtomicCommand createForcedUndoCommand(XAtomicEvent event) {
 		
@@ -2282,26 +2343,37 @@ public class XX {
 	 * Create a forced {@link XTransaction} that undoes the given
 	 * {@link XTransactionEvent}.
 	 * 
-	 * Beware that the given command may still fail to apply if the targets it
-	 * or only of the contained commands operate upon no longer exist.
+	 * Note: Be aware that the given command may still fail to apply if the
+	 * targets it or only of the contained commands operate upon no longer
+	 * exist.
+	 * 
+	 * @param transaction The {@link XTransactionEvent} which inverse
+	 *            {@link XTransaction} is to be calculated
+	 * @return the inverse of the given {@link XTransaction}, executing it will
+	 *         basically result in an undo operation
 	 */
-	static public XTransaction createForcedUndoCommand(XTransactionEvent event) {
+	static public XTransaction createForcedUndoCommand(XTransactionEvent transaction) {
 		
-		XAtomicCommand[] result = new XAtomicCommand[event.size()];
+		XAtomicCommand[] result = new XAtomicCommand[transaction.size()];
 		
-		for(int i = 0, j = event.size() - 1; j >= 0; i++, j--) {
-			result[i] = createForcedUndoCommand(event.getEvent(j));
+		for(int i = 0, j = transaction.size() - 1; j >= 0; i++, j--) {
+			result[i] = createForcedUndoCommand(transaction.getEvent(j));
 		}
 		
-		return MemoryTransaction.createTransaction(event.getTarget(), result);
+		return MemoryTransaction.createTransaction(transaction.getTarget(), result);
 	}
 	
 	/**
 	 * Create a forced {@link XFieldCommand} that undoes the given
 	 * {@link XFieldEvent}.
 	 * 
-	 * Beware that the given command may still fail to apply if the field it
-	 * operates upon no longer exists.
+	 * Note: Be aware that the given command may still fail to apply if the
+	 * field it operates upon no longer exists.
+	 * 
+	 * @param event The {@link XFieldEvent} which inverse {@link XFieldCommand}
+	 *            is to be calculated.
+	 * @return the inverse of the given {@link XFieldCommand}, executing it will
+	 *         basically result in an undo operation
 	 */
 	static public XFieldCommand createForcedUndoCommand(XFieldEvent event) {
 		
@@ -2329,8 +2401,13 @@ public class XX {
 	 * Create a forced {@link XObjectCommand} that undoes the given
 	 * {@link XObjectEvent}.
 	 * 
-	 * Beware that the given command may still fail to apply if the object it
-	 * operates upon no longer exists.
+	 * Note: Be aware that the given command may still fail to apply if the
+	 * object it operates upon no longer exists.
+	 * 
+	 * @param event The {@link XObjectEvent} which inverse
+	 *            {@link XObjectCommand} is to be calculated
+	 * @return The inverse of the given {@link XObjectEvent}, executing it will
+	 *         basically result in an undo operation
 	 */
 	static public XObjectCommand createForcedUndoCommand(XObjectEvent event) {
 		
@@ -2355,8 +2432,13 @@ public class XX {
 	 * Create a forced {@link XModelCommand} that undoes the given
 	 * {@link XModelEvent}.
 	 * 
-	 * Beware that the given command may still fail to apply if the model it
-	 * operates upon no longer exists.
+	 * Note: Be aware that the given command may still fail to apply if the
+	 * model it operates upon no longer exists.
+	 * 
+	 * @param event The {@link XModelEvent} which inverse {@link XModelCommand}
+	 *            is to be calculated.
+	 * @return The inverse of the given {@link XModelEvent}, executing it will
+	 *         basically result in an undo operation
 	 */
 	static public XModelCommand createForcedUndoCommand(XModelEvent event) {
 		
@@ -2380,6 +2462,11 @@ public class XX {
 	/**
 	 * Create a forced {@link XRepositoryCommand} that undoes the given
 	 * {@link XRepositoryEvent}.
+	 * 
+	 * @param event The {@link XRepositoryEvent} which inverse
+	 *            {@link XRepositoryCommand} is to be calculated.
+	 * @return The inverse of the given {@link XRepositoryEvent}, executing it
+	 *         will basically result in an undo operation
 	 */
 	static public XRepositoryCommand createForcedUndoCommand(XRepositoryEvent event) {
 		
@@ -2408,6 +2495,11 @@ public class XX {
 	 * 
 	 * This should only be used for undoing the last event unless you know that
 	 * there have been no conflicting events.
+	 * 
+	 * @param event The {@link XAtomicEvent} which inverse
+	 *            {@link XAtomicCommand} is to be calculated
+	 * @return The inverse of the given {@link XAtomicEvent}, successfully
+	 *         executing it will basically result in an undo operation
 	 */
 	static public XAtomicCommand createImmediateUndoCommand(XAtomicEvent event) {
 		
@@ -2430,6 +2522,11 @@ public class XX {
 	 * 
 	 * This should only be used for undoing the last event unless you know that
 	 * there have been no conflicting events.
+	 * 
+	 * @param event The {@link XFieldEvent} which inverse {@link XFieldCommand}
+	 *            is to be calculated
+	 * @return the inverse of the given {@link XFieldEvent}, successfully
+	 *         executing it will basically result in an undo operation
 	 */
 	static public XFieldCommand createImmediateUndoCommand(XFieldEvent event) {
 		
@@ -2463,6 +2560,11 @@ public class XX {
 	 * 
 	 * This should only be used for undoing the last event unless you know that
 	 * there have been no conflicting events.
+	 * 
+	 * @param event The {@link XObjectEvent} which inverse
+	 *            {@link XObjectCommand} is to be calculated
+	 * @return The inverse of the given {@link XObjectEvent}, successfully
+	 *         executing it will basically result in an undo operation.
 	 */
 	static public XObjectCommand createImmediateUndoCommand(XObjectEvent event) {
 		
@@ -2492,6 +2594,11 @@ public class XX {
 	 * 
 	 * This should only be used for undoing the last event unless you know that
 	 * there have been no conflicting events.
+	 * 
+	 * @param event The {@link XModelEvent} which inverse {@link XModelCommand}
+	 *            is to be calculated
+	 * @return The inverse of the given {@link XModelEvent}, successfully
+	 *         executing it will basically result in an undo operation
 	 */
 	static public XModelCommand createImmediateUndoCommand(XModelEvent event) {
 		
@@ -2522,6 +2629,11 @@ public class XX {
 	 * 
 	 * This should only be used for undoing the last event unless you know that
 	 * there have been no conflicting events.
+	 * 
+	 * @param event The {@link XRepositoryEvent} which inverse
+	 *            {@link XRepositoryCommand} is to be calculated
+	 * @return The inverse of the given {@link XRepositoryEvent}, successfully
+	 *         executing it will basically result in an undo operation
 	 */
 	static public XRepositoryCommand createImmediateUndoCommand(XRepositoryEvent event) {
 		
@@ -2550,6 +2662,13 @@ public class XX {
 	 * The relevant parts of the given {@link XRepository} must be in the same
 	 * state as they where directly after the event, only the revision numbers
 	 * may differ.
+	 * 
+	 * @param repo The {@link XRepository} on which the given
+	 *            {@link XRepositoryEvent} happened
+	 * @param event The {@link XRepository} which inverse
+	 *            {@link XRepositoryEvent} is to be calculated
+	 * @return The inverse of the given {@link XRepositoryEvent}, successfully
+	 *         executing it will basically result in an undo operation
 	 * 
 	 * @throws IllegalStateException if the given {@link XRepository} is in a
 	 *             different state
@@ -2601,13 +2720,20 @@ public class XX {
 	 * fail if there have been any conflicting changes since then that have not
 	 * been undone already.
 	 * 
-	 * The relevant parts of the given {@link XModel} must be in the same state
-	 * as they where directly after the event, only the revision numbers may
-	 * differ.
+	 * The relevant parts of the given {@link XBaseModel} must be in the same
+	 * state as they where directly after the event, only the revision numbers
+	 * may differ.
 	 * 
-	 * @throws IllegalStateException if the given {@link XModel} is in a
+	 * @param base The {@link XBaseModel} on which the given {@link XEvent}
+	 *            happened
+	 * @param event The {@link XEvent} which inverse {@link XCommand} is to be
+	 *            calculated
+	 * @return the inverse of the given {@link XEvent}, successfully executing
+	 *         it will basically result in an undo operation
+	 * 
+	 * @throws IllegalStateException if the given {@link XBaseModel} is in a
 	 *             different state
-	 * @throws IllegalArgumentException if the given {@link XModel} doesn't
+	 * @throws IllegalArgumentException if the given {@link XBaseModel} doesn't
 	 *             contain the target of the given event or the event is an
 	 *             {@link XRepositoryEvent}
 	 */
@@ -2624,12 +2750,21 @@ public class XX {
 	 * as they where directly after the event, only the revision numbers may
 	 * differ.
 	 * 
+	 * @param base The {@link XBaseModel} on which the given {@link XEvent}s
+	 *            happened.
+	 * @param events an iterator over the {@link XEvent}s which inverse
+	 *            {@link XCommand}s are to be calculated
+	 * @return an {@link XTransaction} (as an {@link XCommand}), which will undo
+	 *         the specified events if it can be successfully executed.
+	 * 
 	 * @throws IllegalStateException if the given {@link XModel} is in a
 	 *             different state
 	 * @throws IllegalArgumentException if the given {@link XModel} doesn't
 	 *             contain the target of any of the events or if any of the
 	 *             events is a {@link XRepositoryEvent}
 	 */
+	// TODO Wouldn't it be clearer (and more useful) to just return a
+	// Transaction object here, instead of an XCommand object?
 	public static XCommand createUndoCommand(XBaseModel base, Iterator<XEvent> events) {
 		
 		ChangedModel model = new ChangedModel(base);
@@ -2660,23 +2795,35 @@ public class XX {
 	}
 	
 	/**
-	 * Undo the changes represented by the given {@link XTransaction} on the
-	 * given delta model.
+	 * Undo the changes represented by the given {@link XTransactionEvent} on
+	 * the given {@link DeltaModel}.
+	 * 
+	 * @param model The {@link DeltaModel} on which the events of the given
+	 *            {@link XTransactionEvent} happened
+	 * @param event The {@link XTransactionEvent} which changes are to be undone
 	 * 
 	 * @throws IllegalStateException if the are conflicting changes between the
 	 *             state the model was in after the event and now.
 	 * @throws IllegalArgumentException if the given {@link XModel} doesn't
 	 *             contain the target of any of the events
 	 */
-	public static void createUndoChanges(DeltaModel model, XTransactionEvent trans) {
-		for(int i = trans.size(); i >= 0; i--) {
-			createUndoChanges(model, trans.getEvent(i));
+	// TODO wouldn't it be better to return false instead of throwing an
+	// exception when the undo operation couldn't be executed?
+	// TODO What kind of name is "createUndoChanges"? They aren't only created,
+	// they're also executed? Maybe rename the methods?
+	public static void createUndoChanges(DeltaModel model, XTransactionEvent event) {
+		for(int i = event.size(); i >= 0; i--) {
+			createUndoChanges(model, event.getEvent(i));
 		}
 	}
 	
 	/**
 	 * Undo the changes represented by the given {@link XAtomicEvent} on the
-	 * given delta model.
+	 * given {@link DeltaModel}.
+	 * 
+	 * @param model The {@link DeltaModel} on which the given
+	 *            {@link XAtomicEvent} happened
+	 * @param event The {@link XAtomicEvent} which is to be undone
 	 * 
 	 * @throws IllegalStateException if the are conflicting changes between the
 	 *             state the model was in after the event and now.
@@ -2702,7 +2849,11 @@ public class XX {
 	
 	/**
 	 * Undo the changes represented by the given {@link XModelEvent} on the
-	 * given delta model.
+	 * given {@link DeltaModel}.
+	 * 
+	 * @param model The {@link DeltaModel} on which the given
+	 *            {@link XModelEvent} happened
+	 * @param event The {@link XModelEvent} which is to be undone
 	 * 
 	 * @throws IllegalStateException if the are conflicting changes between the
 	 *             state the model was in after the event and now.
@@ -2741,7 +2892,11 @@ public class XX {
 	
 	/**
 	 * Undo the changes represented by the given {@link XObjectEvent} on the
-	 * given delta model.
+	 * given {@link DeltaModel}.
+	 * 
+	 * @param model The {@link DeltaModel} on which the given
+	 *            {@link XObjectEvent} happened
+	 * @param event The {@link XObjectEvent} which is to be undone
 	 * 
 	 * @throws IllegalStateException if the are conflicting changes between the
 	 *             state the model was in after the event and now.
@@ -2786,7 +2941,11 @@ public class XX {
 	
 	/**
 	 * Undo the changes represented by the given {@link XFieldEvent} on the
-	 * given delta model.
+	 * given {@link DeltaModel}.
+	 * 
+	 * @param model The {@link DeltaModel} on which the given
+	 *            {@link XObjectEvent} happened
+	 * @param event The {@link XObjectEvent} which is to be undone
 	 * 
 	 * @throws IllegalStateException if the are conflicting changes between the
 	 *             state the model was in after the event and now.
@@ -2820,6 +2979,11 @@ public class XX {
 	
 	/**
 	 * Create a {@link XCommand} that would have caused the given {@link XEvent}
+	 * 
+	 * @param event The {@link XEvent} for which a corresponding
+	 *            {@link XCommand} is to be created
+	 * @return an {@link XCommand} which execution would've created the given
+	 *         {@link XEvent}
 	 */
 	static public XCommand createReplayCommand(XEvent event) {
 		
@@ -2834,6 +2998,11 @@ public class XX {
 	/**
 	 * Create a {@link XAtomicCommand} that would have caused the given
 	 * {@link XAtomicEvent}
+	 * 
+	 * @param event The {@link XAtomicEvent} for which a corresponding
+	 *            {@link XAtomicCommand} is to be created
+	 * @return an {@link XAtomicCommand} which execution would've created the
+	 *         given {@link XAtomicEvent}
 	 */
 	static public XAtomicCommand createReplayCommand(XAtomicEvent event) {
 		
@@ -2852,6 +3021,11 @@ public class XX {
 	/**
 	 * Create a {@link XTransaction} that would have caused the given
 	 * {@link XTransactionEvent}
+	 * 
+	 * @param event The {@link XTransactionEvent} for which a corresponding
+	 *            {@link XTransaction} is to be created
+	 * @return an {@link XTransaction} which execution would've created the
+	 *         given {@link XTransactionEvent}
 	 */
 	static public XTransaction createReplayCommand(XTransactionEvent event) {
 		
@@ -2867,6 +3041,11 @@ public class XX {
 	/**
 	 * Create a {@link XFieldCommand} that would have caused the given
 	 * {@link XFieldEvent}
+	 * 
+	 * @param event The {@link XFieldEvent} for which a corresponding
+	 *            {@link XFieldCommand} is to be created
+	 * @return an {@link XFieldCommand} which execution would've created the
+	 *         given {@link XFieldEvent}
 	 */
 	static public XFieldCommand createReplayCommand(XFieldEvent event) {
 		
@@ -2894,6 +3073,11 @@ public class XX {
 	/**
 	 * Create a {@link XObjectCommand} that would have caused the given
 	 * {@link XObjectEvent}
+	 * 
+	 * @param event The {@link XObjectEvent} for which a corresponding
+	 *            {@link XObjectCommand} is to be created
+	 * @return an {@link XObjectCommand} which execution would've created the
+	 *         given {@link XObjectEvent}
 	 */
 	static public XObjectCommand createReplayCommand(XObjectEvent event) {
 		
@@ -2917,6 +3101,11 @@ public class XX {
 	/**
 	 * Create a {@link XModelCommand} that would have caused the given
 	 * {@link XModelEvent}
+	 * 
+	 * @param event The {@link XModelEvent} for which a corresponding
+	 *            {@link XModelCommand} is to be created
+	 * @return an {@link XModelCommand} which execution would've created the
+	 *         given {@link XModelEvent}
 	 */
 	static public XModelCommand createReplayCommand(XModelEvent event) {
 		
@@ -2940,6 +3129,11 @@ public class XX {
 	/**
 	 * Create a {@link XRepositoryCommand} that would have caused the given
 	 * {@link XRepositoryEvent}
+	 * 
+	 * @param event The {@link XRepositoryEvent} for which a corresponding
+	 *            {@link XRepositoryCommand} is to be created
+	 * @return an {@link XRepositoryCommand} which execution would've created
+	 *         the given {@link XRepositoryEvent}
 	 */
 	static public XRepositoryCommand createReplayCommand(XRepositoryEvent event) {
 		
