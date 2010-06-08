@@ -18,15 +18,14 @@ import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
 
 
-
 /**
- * A utility class which provides methods for serializing XModels and
- * XRepositories.
+ * A utility class which provides simple methods for serializing XModels and
+ * XRepositories into XML.
  * 
  * @author Kaidel
  * 
  */
-
+@Deprecated
 public class XY {
 	public static final String fileSuffix = ".xmd"; // the file suffix for
 	
