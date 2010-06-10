@@ -37,7 +37,7 @@ import org.xydra.index.query.Wildcard;
 @RunsInAppEngine
 @RunsInGWT
 @RunsInJava
-public class MemoryAccessManager extends AbstractAccessManager implements XAccessManager {
+public class MemoryAccessManager extends AbstractAccessManager {
 	
 	private static final long serialVersionUID = -1731169839295825690L;
 	

@@ -14,14 +14,14 @@ import org.xydra.index.query.Pair;
 
 
 /**
- * A combination of two access manages where an inner access manager is
+ * A combination of two access managers where an inner access manager is
  * responsible for a subtree and an outer access manager is responsible for
  * everything else.
  * 
  * @author dscharrer
  * 
  */
-public class CompositeAccessManager extends AbstractAccessManager implements XAccessManager {
+public class CompositeAccessManager extends AbstractAccessManager {
 	
 	private static final long serialVersionUID = 2576314343471791859L;
 	
