@@ -278,4 +278,16 @@ public class MemoryEventQueue {
 		return this.changeLog;
 	}
 	
+	/**
+	 * Suspend and resume logging.
+	 * 
+	 * @param logging True if sending events should be disabled.
+	 * @return True if sending events was disabled before before.
+	 */
+	public boolean setBlockSending(boolean block) {
+		boolean oldBlock = this.sending;
+		this.sending = block;
+		return oldBlock;
+	}
+	
 }

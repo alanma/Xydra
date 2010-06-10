@@ -530,4 +530,8 @@ public class MemoryField implements XField, Serializable {
 		this.state.save();
 	}
 	
+	protected XFieldState getState() {
+		return this.state;
+	}
+	
 }

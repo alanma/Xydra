@@ -1,12 +1,13 @@
 package org.xydra.core.model;
 
 import java.io.Serializable;
+import java.util.List;
 
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.core.change.XCommand;
+import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XModelCommand;
-
 
 
 /**
@@ -82,5 +83,21 @@ public interface XModel extends XLoggedModel, Serializable, XExecutesTransaction
 	 * changes made.
 	 */
 	void rollback(long revision);
+	
+	/**
+	 * Roll back to the given lastRevision, apply the remoteChanges and (re)
+	 * apply the localChanges. Only sends out as few events as possible and
+	 * preserve listeners on entities that are temporarily removed but adjusts
+	 * the change log to look as it will on the server.
+	 * 
+	 * @param remoteChanges The remote changes that since the last sync,
+	 *            including local changes that have been saved remotely.
+	 * @param lastRevision The revision to insert the remoteChanges at.
+	 * @param localChanges Local changes that haven't been saved remotely yet.
+	 *            This list will be modified with updated commands.
+	 * @return the results for the localChanges
+	 */
+	long[] syncChanges(List<XEvent> remoteChanges, long lastRevision, XID actor,
+	        List<XCommand> localChanges);
 	
 }

@@ -1,6 +1,8 @@
 package org.xydra.core.model.impl.memory;
 
-import org.xydra.annotations.ModificationOperation;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XAtomicCommand;
 import org.xydra.core.change.XCommand;
@@ -9,6 +11,7 @@ import org.xydra.core.change.XModelCommand;
 import org.xydra.core.change.XObjectCommand;
 import org.xydra.core.change.XTransaction;
 import org.xydra.core.model.IHasXAddress;
+import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
@@ -27,7 +30,6 @@ import org.xydra.core.model.delta.NewField;
 import org.xydra.core.model.delta.NewObject;
 
 
-
 /**
  * Abstract base class for entities that can execute transactions (
  * {@link XObject} and {@link XModel}) implementing most of the logic behind
@@ -36,6 +38,11 @@ import org.xydra.core.model.delta.NewObject;
  * @author dscharrer
  */
 public abstract class TransactionManager implements IHasXAddress, XExecutesTransactions {
+	
+	protected static class Orphans {
+		Map<XID,MemoryObject> objects = new HashMap<XID,MemoryObject>();
+		Map<XAddress,MemoryField> fields = new HashMap<XAddress,MemoryField>();
+	}
 	
 	protected final MemoryEventQueue eventQueue;
 	/** if this variable equals true, a transaction is currently running */
@@ -49,8 +56,11 @@ public abstract class TransactionManager implements IHasXAddress, XExecutesTrans
 		return this.transactionInProgress;
 	}
 	
-	@ModificationOperation
 	public long executeTransaction(XID actor, XTransaction transaction) {
+		return executeTransaction(actor, transaction, null);
+	}
+	
+	public long executeTransaction(XID actor, XTransaction transaction, Orphans orphans) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -113,14 +123,14 @@ public abstract class TransactionManager implements IHasXAddress, XExecutesTrans
 			// apply changes
 			
 			for(XID objectId : model.getRemovedObjects()) {
-				removeObject(actor, objectId);
+				removeObject(actor, objectId, orphans);
 			}
 			
 			for(NewObject object : model.getNewObjects()) {
-				XObject newObject = createObject(actor, object.getID());
+				MemoryObject newObject = createObject(actor, object.getID(), orphans);
 				for(XID fieldId : object) {
 					XBaseField field = object.getField(fieldId);
-					XField newField = newObject.createField(actor, fieldId);
+					XField newField = newObject.createField(actor, fieldId, orphans);
 					if(!field.isEmpty()) {
 						newField.setValue(actor, field.getValue());
 					}
@@ -128,14 +138,14 @@ public abstract class TransactionManager implements IHasXAddress, XExecutesTrans
 			}
 			
 			for(ChangedObject object : model.getChangedObjects()) {
-				XObject oldObject = getObject(object.getID());
+				MemoryObject oldObject = getObject(object.getID());
 				
 				for(XID fieldId : object.getRemovedFields()) {
-					oldObject.removeField(actor, fieldId);
+					oldObject.removeField(actor, fieldId, orphans);
 				}
 				
 				for(NewField field : object.getNewFields()) {
-					XField newField = oldObject.createField(actor, field.getID());
+					XField newField = oldObject.createField(actor, field.getID(), orphans);
 					if(!field.isEmpty()) {
 						newField.setValue(actor, field.getValue());
 					}
@@ -385,7 +395,7 @@ public abstract class TransactionManager implements IHasXAddress, XExecutesTrans
 	 * If this is already an object this method should never be called.
 	 * 
 	 */
-	protected abstract XObject createObject(XID actor, XID objectId);
+	protected abstract MemoryObject createObject(XID actor, XID objectId, Orphans orphans);
 	
 	/**
 	 * Remove the existing object with the given ID.
@@ -393,7 +403,7 @@ public abstract class TransactionManager implements IHasXAddress, XExecutesTrans
 	 * If this is already an object this method should never be called.
 	 * 
 	 */
-	protected abstract boolean removeObject(XID actor, XID objectId);
+	protected abstract boolean removeObject(XID actor, XID objectId, Orphans orphans);
 	
 	/**
 	 * @return Return the proxy for reading the current state.

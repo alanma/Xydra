@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.core.X;
 import org.xydra.core.XX;
@@ -180,12 +179,6 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 		return this.getID() + "-v" + this.getRevisionNumber() + " " + this.state.toString();
 	}
 	
-	/**
-	 * Returns the XID of this object.
-	 * 
-	 * @return The XID of this object.
-	 */
-	@ReadOperation
 	public XID getID() {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -193,16 +186,11 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 		}
 	}
 	
-	/**
-	 * Removes the given field from this object.
-	 * 
-	 * @param actor The XID of the actor calling this operation
-	 * @param field The field which is to be deleted
-	 * @return true, if removal was successful, false otherwise (i.e. if this
-	 *         object doesn't hold the given field)
-	 */
-	@ModificationOperation
 	public boolean removeField(XID actor, XID fieldID) {
+		return removeField(actor, fieldID, null);
+	}
+	
+	protected boolean removeField(XID actor, XID fieldID, Orphans orphans) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -220,7 +208,11 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 			// actually remove the field
 			this.state.removeFieldState(field.getID());
 			this.loadedFields.remove(field.getID());
-			field.delete();
+			if(orphans != null) {
+				orphans.fields.put(field.getAddress(), field);
+			} else {
+				field.delete();
+			}
 			
 			// event propagation must be handled differently if a
 			// transaction is in progress
@@ -258,15 +250,6 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 		return this.father == null ? null : this.father.getRepositoryId();
 	}
 	
-	/**
-	 * Returns the field in this object corresponding to the given XID (null if
-	 * this object doesn't hold a field with the given XID).
-	 * 
-	 * @param fieldId The XID of the field.
-	 * @return The field in this object corresponding to the given XID (null if
-	 *         this object doesn't hold a field with the given XID).
-	 */
-	@ReadOperation
 	public MemoryField getField(XID fieldID) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -289,15 +272,11 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 		}
 	}
 	
-	/**
-	 * Creates a new XField and adds it to this XObject
-	 * 
-	 * @param actor The XID of the actor.
-	 * @param fieldID The XID of the XField to be created.
-	 * @return the created field or the already existing field with this XID
-	 */
-	@ModificationOperation
 	public MemoryField createField(XID actor, XID fieldID) {
+		return createField(actor, fieldID, null);
+	}
+	
+	protected MemoryField createField(XID actor, XID fieldID, Orphans orphans) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -305,11 +284,20 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 				return getField(fieldID);
 			}
 			
-			XFieldState fieldState = this.state.createFieldState(fieldID);
-			assert XX.contains(getAddress(), fieldState.getAddress());
-			MemoryField field = new MemoryField(this, this.eventQueue, fieldState);
+			MemoryField field = null;
 			
-			this.state.addFieldState(fieldState);
+			if(orphans != null) {
+				XAddress fieldAddr = XX.resolveField(getAddress(), fieldID);
+				field = orphans.fields.remove(fieldAddr);
+			}
+			
+			if(field == null) {
+				XFieldState fieldState = this.state.createFieldState(fieldID);
+				assert XX.contains(getAddress(), fieldState.getAddress());
+				field = new MemoryField(this, this.eventQueue, fieldState);
+			}
+			
+			this.state.addFieldState(field.getState());
 			this.loadedFields.put(field.getID(), field);
 			
 			XObjectEvent event = MemoryObjectEvent.createAddEvent(actor, getAddress(), field
@@ -337,6 +325,10 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 	}
 	
 	public long executeObjectCommand(XID actor, XObjectCommand command) {
+		return executeObjectCommand(actor, command, null);
+	}
+	
+	public long executeObjectCommand(XID actor, XObjectCommand command, Orphans orphans) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -360,7 +352,7 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 				
 				long oldRev = getOldRevisionNumber();
 				
-				createField(actor, command.getFieldID());
+				createField(actor, command.getFieldID(), orphans);
 				
 				return oldRev;
 			}
@@ -388,7 +380,7 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 				
 				long oldRev = getOldRevisionNumber();
 				
-				removeField(actor, command.getFieldID());
+				removeField(actor, command.getFieldID(), orphans);
 				
 				return oldRev;
 			}
@@ -415,12 +407,6 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 		this.state.setRevisionNumber(newRevision);
 	}
 	
-	/**
-	 * Returns an iterator over the XIDs of the field in this object.
-	 * 
-	 * @return An iterator over the XIDs of the field in this object.
-	 */
-	@ReadOperation
 	public Iterator<XID> iterator() {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -450,13 +436,6 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 		return (this.father != null);
 	}
 	
-	/**
-	 * Checks whether the given XID is already taken by a field in this object.
-	 * 
-	 * @param id The XID which is to be checked
-	 * @return true, if the given XID is already taken, false otherwise
-	 */
-	@ReadOperation
 	public boolean hasField(XID id) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -529,78 +508,36 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 		}
 	}
 	
-	/**
-	 * Adds the given listener to this model, if possible
-	 * 
-	 * @param changeListener The listener which is to be added
-	 * @return false, if the given listener is already added on this field, true
-	 *         otherwise
-	 */
 	public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.objectChangeListenerCollection.add(changeListener);
 		}
 	}
 	
-	/**
-	 * Removes the given listener from this model.
-	 * 
-	 * @param changeListener The listener which is to be removed
-	 * @return true, if the given listener was registered on this field, false
-	 *         otherwise
-	 */
 	public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.objectChangeListenerCollection.remove(changeListener);
 		}
 	}
 	
-	/**
-	 * Adds the given listener to this model, if possible
-	 * 
-	 * @param changeListener The listener which is to be added
-	 * @return false, if the given listener is already added on this field, true
-	 *         otherwise
-	 */
 	public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.fieldChangeListenerCollection.add(changeListener);
 		}
 	}
 	
-	/**
-	 * Removes the given listener from this model.
-	 * 
-	 * @param changeListener The listener which is to be removed
-	 * @return true, if the given listener was registered on this field, false
-	 *         otherwise
-	 */
 	public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.fieldChangeListenerCollection.remove(changeListener);
 		}
 	}
 	
-	/**
-	 * Adds the given listener to this model, if possible
-	 * 
-	 * @param changeListener The listener which is to be added
-	 * @return false, if the given listener is already added on this field, true
-	 *         otherwise
-	 */
 	public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.transactionListenerCollection.add(changeListener);
 		}
 	}
 	
-	/**
-	 * Removes the given listener from this model.
-	 * 
-	 * @param changeListener The listener which is to be removed
-	 * @return true, if the given listener was registered on this field, false
-	 *         otherwise
-	 */
 	public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.transactionListenerCollection.remove(changeListener);
@@ -662,13 +599,17 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 	}
 	
 	public long executeCommand(XID actor, XCommand command) {
+		return executeCommand(actor, command, null);
+	}
+	
+	protected long executeCommand(XID actor, XCommand command, Orphans orphans) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			if(command instanceof XTransaction) {
-				return executeTransaction(actor, (XTransaction)command);
+				return executeTransaction(actor, (XTransaction)command, orphans);
 			}
 			if(command instanceof XObjectCommand) {
-				return executeObjectCommand(actor, (XObjectCommand)command);
+				return executeObjectCommand(actor, (XObjectCommand)command, orphans);
 			}
 			if(command instanceof XFieldCommand) {
 				XField field = getField(command.getTarget().getField());
@@ -681,7 +622,7 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 	}
 	
 	@Override
-	protected XObject createObject(XID actor, XID objectId) {
+	protected MemoryObject createObject(XID actor, XID objectId, Orphans orphans) {
 		throw new AssertionError("object transactions cannot create objects");
 	}
 	
@@ -698,7 +639,7 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 	}
 	
 	@Override
-	protected boolean removeObject(XID actor, XID objectId) {
+	protected boolean removeObject(XID actor, XID objectId, Orphans orphans) {
 		throw new AssertionError("object transactions cannot remove objects");
 	}
 	
@@ -718,6 +659,10 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 			return getFather();
 		}
 		return new WrapperModel(this);
+	}
+	
+	protected XObjectState getState() {
+		return this.state;
 	}
 	
 }

@@ -4,10 +4,10 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.core.X;
 import org.xydra.core.XX;
@@ -16,17 +16,22 @@ import org.xydra.core.change.XAtomicCommand;
 import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
+import org.xydra.core.change.XFieldCommand;
 import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.change.XModelCommand;
 import org.xydra.core.change.XModelEvent;
 import org.xydra.core.change.XModelEventListener;
+import org.xydra.core.change.XObjectCommand;
 import org.xydra.core.change.XObjectEvent;
 import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.XTransactionEvent;
 import org.xydra.core.change.XTransactionEventListener;
+import org.xydra.core.change.impl.memory.MemoryFieldCommand;
+import org.xydra.core.change.impl.memory.MemoryModelCommand;
 import org.xydra.core.change.impl.memory.MemoryModelEvent;
+import org.xydra.core.change.impl.memory.MemoryObjectCommand;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XID;
@@ -111,19 +116,12 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 		}
 	}
 	
-	/**
-	 * Creates a new XObject and adds it to this model if the given objectID
-	 * isn't already taken. Returns the corresponding XObject if the objectID is
-	 * already taken.
-	 * 
-	 * @param actor The XID of the actor calling this operation.
-	 * @param objectID The XID for the new object.
-	 * @return the newly created XObject or the already existing XObject
-	 *         corresponding to the given objectID (if it was already taken)
-	 */
-	@Override
-	@ModificationOperation
 	public MemoryObject createObject(XID actor, XID objectID) {
+		return createObject(actor, objectID, null);
+	}
+	
+	@Override
+	protected MemoryObject createObject(XID actor, XID objectID, Orphans orphans) {
 		assert getRevisionNumber() >= 0;
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -132,11 +130,19 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 				return getObject(objectID);
 			}
 			
-			XObjectState objectState = this.state.createObjectState(objectID);
-			assert XX.contains(getAddress(), objectState.getAddress());
-			MemoryObject object = new MemoryObject(this, this.eventQueue, objectState);
+			MemoryObject object = null;
 			
-			this.state.addObjectState(objectState);
+			if(orphans != null) {
+				object = orphans.objects.remove(objectID);
+			}
+			
+			if(object == null) {
+				XObjectState objectState = this.state.createObjectState(objectID);
+				assert XX.contains(getAddress(), objectState.getAddress());
+				object = new MemoryObject(this, this.eventQueue, objectState);
+			}
+			
+			this.state.addObjectState(object.getState());
 			this.loadedObjects.put(object.getID(), object);
 			
 			XModelEvent event = MemoryModelEvent.createAddEvent(actor, getAddress(), objectID,
@@ -166,15 +172,7 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 		return this.father == null ? null : this.father.getID();
 	}
 	
-	/**
-	 * Returns the object corresponding to the given XID or null if the given
-	 * XID isn't taken.
-	 * 
-	 * @return The object corresponding to the given XID or null if the given
-	 *         XID isn't taken.
-	 */
 	@Override
-	@ReadOperation
 	public MemoryObject getObject(XID objectID) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -200,11 +198,6 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 		}
 	}
 	
-	/**
-	 * Returns an iterator over the XIDs of the objects in this model.
-	 * 
-	 * @return An iterator over the XIDs of the objects in this model.
-	 */
 	@ReadOperation
 	public Iterator<XID> iterator() {
 		synchronized(this.eventQueue) {
@@ -213,17 +206,12 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 		}
 	}
 	
-	/**
-	 * Removes the given object from this model.
-	 * 
-	 * @param actor The XID of the actor calling this operations.
-	 * @param object The object which is to be removed.
-	 * @return true, if removal was successful, false otherwise (i.e. if the
-	 *         model doesn't hold the given object)
-	 */
-	@Override
-	@ModificationOperation
 	public boolean removeObject(XID actor, XID objectID) {
+		return removeObject(actor, objectID, null);
+	}
+	
+	@Override
+	protected boolean removeObject(XID actor, XID objectID, Orphans orphans) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -242,7 +230,11 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 			// remove the object
 			this.loadedObjects.remove(object.getID());
 			this.state.removeObjectState(object.getID());
-			object.delete();
+			if(orphans != null) {
+				orphans.objects.put(object.getID(), object);
+			} else {
+				object.delete();
+			}
 			
 			// event propagation and revision number increasing for transactions
 			// happens after all events of a transaction were successful
@@ -266,8 +258,11 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 		}
 	}
 	
-	@ModificationOperation
 	public long executeModelCommand(XID actor, XModelCommand command) {
+		return executeModelCommand(actor, command, null);
+	}
+	
+	public long executeModelCommand(XID actor, XModelCommand command, Orphans orphans) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -291,7 +286,7 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 				
 				long oldRev = getRevisionNumber();
 				
-				createObject(actor, command.getObjectID());
+				createObject(actor, command.getObjectID(), orphans);
 				
 				return oldRev;
 			}
@@ -319,7 +314,7 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 				
 				long oldRev = getRevisionNumber();
 				
-				removeObject(actor, command.getObjectID());
+				removeObject(actor, command.getObjectID(), orphans);
 				
 				return oldRev;
 			}
@@ -328,12 +323,6 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 		}
 	}
 	
-	/**
-	 * Returns the XID of this model.
-	 * 
-	 * @return the XID of this model.
-	 */
-	@ReadOperation
 	public XID getID() {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -341,14 +330,6 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 		}
 	}
 	
-	/**
-	 * Checks whether this model holds an object corresponding to the given XID.
-	 * 
-	 * @param id The ID of the object.
-	 * @return true, if this model holds an object with the given XID, false
-	 *         otherwise
-	 */
-	@ReadOperation
 	public boolean hasObject(XID id) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -374,7 +355,7 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 	 * @return The father of this model (may be null).
 	 */
 	@ReadOperation
-	public MemoryRepository getFather() {
+	protected MemoryRepository getFather() {
 		checkRemoved();
 		return this.father;
 	}
@@ -385,7 +366,7 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 	 * @return true, if this model has a father, false otherwise.
 	 */
 	@ReadOperation
-	public boolean hasFather() {
+	protected boolean hasFather() {
 		checkRemoved();
 		return this.father != null;
 	}
@@ -439,7 +420,7 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 	}
 	
 	@Override
-	public long executeTransaction(XID actor, XTransaction transaction) {
+	public long executeTransaction(XID actor, XTransaction transaction, Orphans orphans) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -458,7 +439,7 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 				}
 			}
 			
-			return super.executeTransaction(actor, transaction);
+			return super.executeTransaction(actor, transaction, orphans);
 			
 		}
 	}
@@ -525,26 +506,11 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 		}
 	}
 	
-	/**
-	 * Adds the given listener to this model, if possible
-	 * 
-	 * @param changeListener The listener which is to be added
-	 * @return false, if the given listener is already added on this field, true
-	 *         otherwise
-	 */
 	public boolean addListenerForModelEvents(XModelEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.modelChangeListenerCollection.add(changeListener);
 		}
 	}
-	
-	/**
-	 * Removes the given listener from this model.
-	 * 
-	 * @param changeListener The listener which is to be removed
-	 * @return true, if the given listener was registered on this field, false
-	 *         otherwise
-	 */
 	
 	public boolean removeListenerForModelEvents(XModelEventListener changeListener) {
 		synchronized(this.eventQueue) {
@@ -552,27 +518,11 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 		}
 	}
 	
-	/**
-	 * Adds the given listener to this model, if possible
-	 * 
-	 * @param changeListener The listener which is to be added
-	 * @return false, if the given listener is already added on this field, true
-	 *         otherwise
-	 */
-	
 	public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.objectChangeListenerCollection.add(changeListener);
 		}
 	}
-	
-	/**
-	 * Removes the given listener from this model.
-	 * 
-	 * @param changeListener The listener which is to be removed
-	 * @return true, if the given listener was registered on this field, false
-	 *         otherwise
-	 */
 	
 	public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
 		synchronized(this.eventQueue) {
@@ -580,27 +530,11 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 		}
 	}
 	
-	/**
-	 * Adds the given listener to this model, if possible
-	 * 
-	 * @param changeListener The listener which is to be added
-	 * @return false, if the given listener is already added on this field, true
-	 *         otherwise
-	 */
-	
 	public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.fieldChangeListenerCollection.add(changeListener);
 		}
 	}
-	
-	/**
-	 * Removes the given listener from this model.
-	 * 
-	 * @param changeListener The listener which is to be removed
-	 * @return true, if the given listener was registered on this field, false
-	 *         otherwise
-	 */
 	
 	public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
 		synchronized(this.eventQueue) {
@@ -608,27 +542,11 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 		}
 	}
 	
-	/**
-	 * Adds the given listener to this model, if possible
-	 * 
-	 * @param changeListener The listener which is to be added
-	 * @return false, if the given listener is already added on this field, true
-	 *         otherwise
-	 */
-	
 	public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.transactionListenerCollection.add(changeListener);
 		}
 	}
-	
-	/**
-	 * Removes the given listener from this model.
-	 * 
-	 * @param changeListener The listener which is to be removed
-	 * @return true, if the given listener was registered on this field, false
-	 *         otherwise
-	 */
 	
 	public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
 		synchronized(this.eventQueue) {
@@ -675,20 +593,24 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 	}
 	
 	public long executeCommand(XID actor, XCommand command) {
+		return executeCommand(actor, command, null);
+	}
+	
+	private long executeCommand(XID actor, XCommand command, Orphans orphans) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
 			if(command instanceof XTransaction) {
-				return executeTransaction(actor, (XTransaction)command);
+				return executeTransaction(actor, (XTransaction)command, orphans);
 			}
 			if(command instanceof XModelCommand) {
-				return executeModelCommand(actor, (XModelCommand)command);
+				return executeModelCommand(actor, (XModelCommand)command, orphans);
 			}
-			XObject object = getObject(command.getTarget().getObject());
+			MemoryObject object = getObject(command.getTarget().getObject());
 			if(object == null) {
 				return XCommand.FAILED;
 			}
-			return object.executeCommand(actor, command);
+			return object.executeCommand(actor, command, orphans);
 		}
 	}
 	
@@ -718,6 +640,14 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 	}
 	
 	public void rollback(long revision) {
+		rollback(revision, null);
+	}
+	
+	private void rollback(long revision, Orphans orphans) {
+		
+		if(revision < 0) {
+			throw new RuntimeException("invalid revision number: " + revision);
+		}
 		
 		if(revision == getRevisionNumber()) {
 			return;
@@ -730,13 +660,13 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 		for(long i = getRevisionNumber() - 1; i >= revision; i--) {
 			XEvent event = getChangeLog().getEventAt(i);
 			if(event instanceof XAtomicEvent) {
-				rollbackEvent((XAtomicEvent)event);
+				rollbackEvent((XAtomicEvent)event, orphans);
 			} else {
 				assert event instanceof XTransactionEvent;
 				XTransactionEvent trans = (XTransactionEvent)event;
 				for(int j = trans.size() - 1; j >= 0; j--) {
 					XAtomicEvent atomicEvent = trans.getEvent(j);
-					rollbackEvent(atomicEvent);
+					rollbackEvent(atomicEvent, orphans);
 				}
 			}
 			
@@ -751,9 +681,9 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 		assert getRevisionNumber() == revision;
 	}
 	
-	private void rollbackEvent(XAtomicEvent event) {
+	private void rollbackEvent(XAtomicEvent event, Orphans orphans) {
 		XAtomicCommand command = XX.createForcedUndoCommand(event);
-		long result = executeCommand(null, command);
+		long result = executeCommand(null, command, orphans);
 		assert result > 0 : "rollback command " + command + " for event " + event + " failed";
 		XAddress target = event.getTarget();
 		
@@ -779,4 +709,103 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 		}
 	}
 	
+	public long[] syncChanges(List<XEvent> remoteChanges, long lastRevision, XID actor,
+	        List<XCommand> localChanges) {
+		
+		long[] results = new long[localChanges.size()];
+		
+		boolean oldBlock = this.eventQueue.setBlockSending(true);
+		
+		try {
+			
+			Orphans orphans = new Orphans();
+			
+			int pos = this.eventQueue.getNextPosition();
+			
+			// Roll back to the old revision and save removed entities.
+			rollback(lastRevision, orphans);
+			
+			// Apply the remote changes.
+			for(XEvent remoteChange : remoteChanges) {
+				long result = executeCommand(remoteChange.getActor(), XX
+				        .createReplayCommand(remoteChange), orphans);
+				if(result < 0) {
+					throw new IllegalStateException("could not apply remote change: "
+					        + remoteChange);
+				}
+			}
+			
+			// Re-apply the local changes.
+			long nRemote = remoteChanges.size();
+			for(int i = 0; i < localChanges.size(); i++) {
+				XCommand command = localChanges.get(i);
+				
+				// Adapt the command if needed.
+				if(command instanceof XModelCommand) {
+					XModelCommand mc = (XModelCommand)command;
+					if(mc.getChangeType() == ChangeType.REMOVE
+					        && mc.getRevisionNumber() > lastRevision) {
+						command = MemoryModelCommand.createRemoveCommand(mc.getTarget(), mc
+						        .getRevisionNumber()
+						        + nRemote, mc.getObjectID());
+						localChanges.set(i, command);
+					}
+				} else if(command instanceof XObjectCommand) {
+					XObjectCommand oc = (XObjectCommand)command;
+					if(oc.getChangeType() == ChangeType.REMOVE
+					        && oc.getRevisionNumber() > lastRevision) {
+						command = MemoryObjectCommand.createRemoveCommand(oc.getTarget(), oc
+						        .getRevisionNumber()
+						        + nRemote, oc.getFieldID());
+						localChanges.set(i, command);
+					}
+				} else if(command instanceof XFieldCommand) {
+					XFieldCommand fc = (XFieldCommand)command;
+					if(fc.getRevisionNumber() > lastRevision) {
+						switch(command.getChangeType()) {
+						case ADD:
+							command = MemoryFieldCommand.createAddCommand(fc.getTarget(), fc
+							        .getRevisionNumber()
+							        + nRemote, fc.getValue());
+							break;
+						case REMOVE:
+							command = MemoryFieldCommand.createRemoveCommand(fc.getTarget(), fc
+							        .getRevisionNumber()
+							        + nRemote);
+							break;
+						case CHANGE:
+							command = MemoryFieldCommand.createChangeCommand(fc.getTarget(), fc
+							        .getRevisionNumber()
+							        + nRemote, fc.getValue());
+							break;
+						default:
+							assert false : "Invalid command: " + fc;
+						}
+						localChanges.set(i, command);
+					}
+				}
+				
+				results[i] = executeCommand(actor, command, orphans);
+			}
+			
+			// Clean unneeded events.
+			this.eventQueue.cleanEvents(pos);
+			
+			for(MemoryObject object : orphans.objects.values()) {
+				object.delete();
+			}
+			
+			for(MemoryField field : orphans.fields.values()) {
+				field.delete();
+			}
+			
+		} finally {
+			
+			this.eventQueue.setBlockSending(oldBlock);
+			this.eventQueue.sendEvents();
+			
+		}
+		
+		return results;
+	}
 }
