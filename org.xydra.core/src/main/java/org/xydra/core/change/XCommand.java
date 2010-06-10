@@ -1,7 +1,18 @@
 package org.xydra.core.change;
 
 import org.xydra.core.model.XAddress;
+import org.xydra.core.model.XModel;
 
+
+/**
+ * XCommands are objects, that represent future change operations on entities,
+ * for example on an {@link XModel}. They can be used to add new entities,
+ * remove entities, execute transactions, change values etc.
+ * 
+ * See the more specific types (for example {@link XModelEvent} for further
+ * explanations)
+ * 
+ */
 
 public interface XCommand {
 	
@@ -45,12 +56,13 @@ public interface XCommand {
 	ChangeType getChangeType();
 	
 	/**
-	 * WHERE will this change happen?
+	 * Returns the {@link XAddress} of the entity that will be changed by this
+	 * command.
 	 * 
 	 * For repository, model and object commands this does NOT include the
 	 * model, object or field being added or removed.
 	 * 
-	 * @return the XAddress of the place where the change happened
+	 * @return the {@link XAddress} of the entity that is to be changed
 	 */
 	XAddress getTarget();
 	

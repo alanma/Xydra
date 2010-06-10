@@ -5,9 +5,8 @@ import java.util.Iterator;
 import org.xydra.core.model.XID;
 
 
-
 /**
- * A central database that stores user groups.
+ * A central database that stores user groups for access right management.
  * 
  * TODO MAX where to persist this information?
  * 
@@ -30,8 +29,10 @@ public interface XGroupDatabase {
 	 * 
 	 * While groups can be added to groups, cycles are not allowed.
 	 * 
-	 * @param actor The actor (or subgroup) to add to the group.
-	 * @param group The group to add the actor to.
+	 * @param actor The {@link XID} of the actor (or subgroup) to add to the
+	 *            group
+	 * @param group The {@link XID} of the group the specified actor will be
+	 *            added to
 	 * 
 	 * @throws CycleException if adding the group membership would produce a
 	 *             cycle
@@ -44,61 +45,103 @@ public interface XGroupDatabase {
 	 * This will not remove the actor from all subgroups and thus he may retain
 	 * membership of this group.
 	 * 
-	 * @param actor The actor for which to revoke group membership.
-	 * @param group The group to remove the actor from.
+	 * @param actor The {@link XID} of the actor for which to revoke group
+	 *            membership.
+	 * @param group The {@link XID} of the group the specified actor will be
+	 *            removed from
 	 */
 	void removeFromGroup(XID actor, XID group);
 	
 	/**
-	 * Check if an actor belongs to a specific group either directly or through
-	 * a subgroup.
+	 * Check if the specified actor is a member of the specific group either
+	 * directly or through a subgroup.
+	 * 
+	 * @param actor The {@link XID} of the actor whose membership status is to
+	 *            be checked
+	 * @param group The {@link XID} of the group for which the membership status
+	 *            of the specified actor is to be checked
+	 * @return true, if the specified actor is a member of the specified group
 	 */
 	boolean hasGroup(XID actor, XID group);
 	
 	/**
-	 * Has actor been added directly to the given group?
+	 * Check if the specified actor is a member of the specific group directly
+	 * (and not just a member of a subgroup of the specified group)
+	 * 
+	 * @param actor The {@link XID} of the actor whose membership status is to
+	 *            be checked
+	 * @param group The {@link XID} of the group for which the membership status
+	 *            of the specified actor is to be checked
+	 * @return true, if the specified actor is a member of the specified group
 	 */
 	boolean hasDirectGroup(XID actor, XID group);
 	
 	/**
-	 * Get all groups an actor is a direct member of but not their subgroups..
-	 * TODO iterator is problematic with concurrent access
+	 * Get all groups an actor is a direct member of (will not contain groups
+	 * the actor is only a member of by being a member of a subgroup of the
+	 * specified group)
+	 * 
+	 * @param actor The {@link XID} of the actor whose groups are to be returned
+	 * @return an iterator over all {@link XID XIDs} of the groups the specified
+	 *         actor is a direct member of
+	 * 
+	 *         TODO iterator is problematic with concurrent access
 	 */
 	Iterator<XID> getGroups(XID actor);
 	
 	/**
-	 * Get all direct members (and direct subgroups) of a group. TODO iterator
-	 * is problematic with concurrent access
+	 * Get all direct members (and direct subgroups) of a group.
+	 * 
+	 * @param group The {@link XID} of the group which members and subgroup
+	 *            {@link XID XIDs} are to be returned
+	 * @return an iterator over all {@link XID XIDs} of the members and
+	 *         subgroups of the specified group
+	 * 
+	 *         TODO iterator is problematic with concurrent access
 	 */
 	Iterator<XID> getMembers(XID group);
 	
 	/**
 	 * Get all groups an actor or subgroup is part of, either directly or
-	 * indirectly. TODO iterator is problematic with concurrent access
+	 * indirectly.
+	 * 
+	 * @param actor The {@link XID} of the actor whose groups are to be returned
+	 * @return an iterator over all {@link XID XIDs} of the groups the specified
+	 *         actor is a member of
+	 * 
+	 *         TODO iterator is problematic with concurrent access
 	 */
 	Iterator<XID> getAllGroups(XID actor);
 	
 	/**
 	 * Get all actors that are either a direct member of the given group or an
-	 * (indirect) member of a subgroup. TODO iterator is problematic with
-	 * concurrent access
+	 * (indirect) member of a subgroup.
+	 * 
+	 * @param group The {@link XID} of the group which members and subgroup
+	 *            {@link XID XIDs} are to be returned
+	 * @return an iterator over all {@link XID XIDs} of the members and
+	 *         subgroups of the specified group
+	 * 
+	 *         TODO iterator is problematic with concurrent access
 	 */
 	Iterator<XID> getAllMembers(XID group);
 	
 	/**
-	 * Add a listener for group events. The listener will only receive events
-	 * for defined group memberships, not for implied group memberships.
+	 * Add a listener for {@link XGroupEvents}. The listener will only receive
+	 * events for defined group memberships, not for implied group memberships.
 	 */
 	void addListener(XGroupListener listener);
 	
 	/**
-	 * Remove a listener for group events.
+	 * Remove a listener for {@link XGroupEvents}.
 	 */
 	void removeListener(XGroupListener listener);
 	
 	/**
-	 * @return all group IDs for which at least one member is defined.
+	 * @return returns an iterator over the {@link XID XIDs} of the groups that
+	 *         have at least one member
 	 */
+	// TODO Comment: Do subgroups count as members here too?
 	Iterator<XID> getGroups();
 	
 }

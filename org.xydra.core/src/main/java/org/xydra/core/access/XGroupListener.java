@@ -1,7 +1,7 @@
 package org.xydra.core.access;
 
 /**
- * An object that is interested in changes to a group database.
+ * A listener that listens for {@link XGroupEvents}
  * 
  * @author dscharrer
  * 
