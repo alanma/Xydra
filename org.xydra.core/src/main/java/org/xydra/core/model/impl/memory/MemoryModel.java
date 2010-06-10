@@ -29,7 +29,6 @@ import org.xydra.core.change.XTransactionEventListener;
 import org.xydra.core.change.impl.memory.MemoryModelEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
@@ -51,7 +50,6 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 	
 	private final XModelState state;
 	private final Map<XID,MemoryObject> loadedObjects = new HashMap<XID,MemoryObject>();
-	private final MemoryChangeLog changeLog;
 	
 	/** The father-repository of this XModel */
 	private final MemoryRepository father;
@@ -90,8 +88,8 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 	 * @param modelState initial state
 	 */
 	protected MemoryModel(MemoryRepository father, XModelState modelState) {
-		super(new MemoryEventQueue());
-		assert modelState != null;
+		super(new MemoryEventQueue(modelState.getChangeLogState() == null ? null
+		        : new MemoryChangeLog(modelState.getChangeLogState())));
 		
 		this.state = modelState;
 		this.father = father;
@@ -100,12 +98,6 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 		this.objectChangeListenerCollection = new HashSet<XObjectEventListener>();
 		this.fieldChangeListenerCollection = new HashSet<XFieldEventListener>();
 		this.transactionListenerCollection = new HashSet<XTransactionEventListener>();
-		
-		if(modelState.getChangeLogState() != null) {
-			this.changeLog = new MemoryChangeLog(this, modelState.getChangeLogState());
-		} else {
-			this.changeLog = null;
-		}
 		
 	}
 	
@@ -721,8 +713,8 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 		return this;
 	}
 	
-	public XChangeLog getChangeLog() {
-		return this.changeLog;
+	public MemoryChangeLog getChangeLog() {
+		return this.eventQueue.getChangeLog();
 	}
 	
 	public void rollback(long revision) {
@@ -732,11 +724,11 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 		}
 		
 		// stop the change log to prevent the rollback events from being logged
-		this.changeLog.stopLogging(this);
+		boolean oldLogging = this.eventQueue.setLogging(false);
 		
 		// rollback each event individually
 		for(long i = getRevisionNumber() - 1; i >= revision; i--) {
-			XEvent event = this.changeLog.getEventAt(i);
+			XEvent event = getChangeLog().getEventAt(i);
 			if(event instanceof XAtomicEvent) {
 				rollbackEvent((XAtomicEvent)event);
 			} else {
@@ -751,8 +743,8 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 		}
 		
 		// reset the change log
-		this.changeLog.truncateToRevision(getRevisionNumber());
-		this.changeLog.startLogging(this);
+		getChangeLog().truncateToRevision(getRevisionNumber());
+		this.eventQueue.setLogging(oldLogging);
 		
 		save();
 		

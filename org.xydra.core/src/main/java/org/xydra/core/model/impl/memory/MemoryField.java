@@ -25,7 +25,6 @@ import org.xydra.core.model.state.impl.memory.TemporaryFieldState;
 import org.xydra.core.value.XValue;
 
 
-
 /**
  * An implementation of {@link XField}.
  * 
@@ -75,7 +74,7 @@ public class MemoryField implements XField, Serializable {
 	 * @param fieldState The {@link XFieldState} for the field.
 	 */
 	public MemoryField(XFieldState fieldState) {
-		this(null, new MemoryEventQueue(), fieldState);
+		this(null, new MemoryEventQueue(null), fieldState);
 	}
 	
 	/**

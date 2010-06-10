@@ -83,7 +83,7 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 	 * @param objectState The {@link XObjectState} for this object
 	 */
 	public MemoryObject(XObjectState objectState) {
-		this(null, new MemoryEventQueue(), objectState);
+		this(null, new MemoryEventQueue(null), objectState);
 	}
 	
 	/**

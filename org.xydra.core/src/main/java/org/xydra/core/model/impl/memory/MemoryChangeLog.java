@@ -5,65 +5,28 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.xydra.core.change.XEvent;
-import org.xydra.core.change.XFieldEvent;
-import org.xydra.core.change.XFieldEventListener;
-import org.xydra.core.change.XModelEvent;
-import org.xydra.core.change.XModelEventListener;
-import org.xydra.core.change.XObjectEvent;
-import org.xydra.core.change.XObjectEventListener;
-import org.xydra.core.change.XTransactionEvent;
-import org.xydra.core.change.XTransactionEventListener;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XChangeLog;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.state.XChangeLogState;
-import org.xydra.core.model.state.impl.memory.MemoryChangeLogState;
-
 
 
 /**
- * Implementation of {@link XChangeLog}.
+ * Implementation of {@link XChangeLog} for use in MemoryModel, MemoryObject and
+ * MemoryField.
  * 
  * @author Kaidel
  * 
  */
-
 public class MemoryChangeLog implements XChangeLog {
+	
 	private XChangeLogState state;
 	
-	private ChangeLogEventListener eventListener;
-	private ChangeLogTransactionListener transactionListener;
-	
-	public MemoryChangeLog(MemoryModel model) {
-		this(model, new MemoryChangeLogState(model.getAddress(), model.getRevisionNumber()));
-	}
-	
-	public MemoryChangeLog(MemoryModel model, XChangeLogState state) {
+	public MemoryChangeLog(XChangeLogState state) {
 		
-		if(!model.getAddress().equals(state.getModelAddress())) {
-			throw new RuntimeException("MemoryChangeLog: Given Model doesn't fit to given state");
-		}
+		assert state != null;
 		
 		this.state = state;
 		
-		this.eventListener = new ChangeLogEventListener();
-		this.transactionListener = new ChangeLogTransactionListener();
-		
-		startLogging(model);
-	}
-	
-	protected void stopLogging(MemoryModel model) {
-		model.removeListenerForFieldEvents(this.eventListener);
-		model.removeListenerForModelEvents(this.eventListener);
-		model.removeListenerForObjectEvents(this.eventListener);
-		model.removeListenerForTransactionEvents(this.transactionListener);
-	}
-	
-	protected void startLogging(MemoryModel model) {
-		model.addListenerForFieldEvents(this.eventListener);
-		model.addListenerForModelEvents(this.eventListener);
-		model.addListenerForObjectEvents(this.eventListener);
-		model.addListenerForTransactionEvents(this.transactionListener);
 	}
 	
 	/**
@@ -71,9 +34,13 @@ public class MemoryChangeLog implements XChangeLog {
 	 * 
 	 * @param event the event which is to be appended
 	 */
-	
-	private void appendEvent(XEvent event) {
+	protected void appendEvent(XEvent event) {
 		assert event.getModelRevisionNumber() == this.getCurrentRevisionNumber();
+		
+		assert !event.inTransaction();
+		// "else": event is part of a transaction and will therefore only be
+		// recorded as part of the transaction (by using a
+		// ChangeLogTransactionListener)
 		
 		this.state.appendEvent(event);
 	}
@@ -87,64 +54,12 @@ public class MemoryChangeLog implements XChangeLog {
 	 *         number was smaller than the current revision number and greater
 	 *         than zero.
 	 */
-	
 	protected boolean truncateToRevision(long revisionNumber) {
 		return this.state.truncateToRevision(revisionNumber);
 	}
 	
-	/**
-	 * Returns the {@link XID} of the {@link MemoryModel} this changelog refers
-	 * to.
-	 * 
-	 * @return the {@link XID} of the {@link MemoryModel} this changelog refers
-	 *         to.
-	 */
-	
 	public XAddress getModelAddress() {
 		return this.state.getModelAddress();
-	}
-	
-	/*
-	 * This class is used for logging Model-, Object- and FieldEvents by the
-	 * MemoryChangeLogs
-	 */
-
-	private class ChangeLogEventListener implements XModelEventListener, XFieldEventListener,
-	        XObjectEventListener {
-		
-		private void onChangeEvent(XEvent event) {
-			if(!event.inTransaction()) {
-				appendEvent(event);
-			}
-			// "else": event is part of a transaction and will therefore only be
-			// recorded as part of the transaction (by using a
-			// ChangeLogTransactionListener)
-		}
-		
-		public void onChangeEvent(XFieldEvent event) {
-			onChangeEvent((XEvent)event);
-		}
-		
-		public void onChangeEvent(XObjectEvent event) {
-			onChangeEvent((XEvent)event);
-		}
-		
-		public void onChangeEvent(XModelEvent event) {
-			onChangeEvent((XEvent)event);
-		}
-		
-	}
-	
-	/*
-	 * This class is used for TransactionEvents by the MemoryChangeLogs
-	 */
-
-	private class ChangeLogTransactionListener implements XTransactionEventListener {
-		
-		public void onChangeEvent(XTransactionEvent event) {
-			appendEvent(event);
-		}
-		
 	}
 	
 	public List<XEvent> getAllEventsAfter(long revisionNumber) {

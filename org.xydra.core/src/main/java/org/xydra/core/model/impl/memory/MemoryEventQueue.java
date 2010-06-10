@@ -14,7 +14,6 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 
 
-
 /*
  * TODO Should the enqueue-Methods check whether the given XEntities actually
  * fit to the XEntities specified by the XIDs in the event? - only though
@@ -23,12 +22,16 @@ import org.xydra.core.model.XID;
 
 public class MemoryEventQueue {
 	
-	private List<EventQueueEntry> eventQueue;
+	private final List<EventQueueEntry> eventQueue;
 	private boolean sending;
+	private final MemoryChangeLog changeLog;
+	private boolean logging;
 	
-	public MemoryEventQueue() {
+	public MemoryEventQueue(MemoryChangeLog log) {
 		// array list to allow indexed access for creating transaction events
 		this.eventQueue = new ArrayList<EventQueueEntry>();
+		this.changeLog = log;
+		this.logging = this.changeLog != null;
 	}
 	
 	/**
@@ -36,15 +39,18 @@ public class MemoryEventQueue {
 	 * 
 	 * @param entry The entry to be enqueued.
 	 */
-	
 	private void enqueueEvent(EventQueueEntry entry) {
+		
+		if(this.logging && !entry.event.inTransaction()) {
+			this.changeLog.appendEvent(entry.event);
+		}
+		
 		this.eventQueue.add(entry);
 	}
 	
 	/**
 	 * Propagates the events in the enqueued entries.
 	 */
-	
 	public void sendEvents() {
 		
 		if(this.sending)
@@ -135,11 +141,8 @@ public class MemoryEventQueue {
 	 * @param model The {@link MemoryModel} in which this event occurred.
 	 * @param event The event.
 	 */
-	
 	public void enqueueModelEvent(MemoryModel model, XModelEvent event) {
-		if(model == null || event == null) {
-			throw new RuntimeException("Neither model nor event may be null!");
-		}
+		assert model != null && event != null : "Neither model nor event may be null!";
 		
 		enqueueEvent(new EventQueueEntry(model.getFather(), model, null, null, event));
 	}
@@ -150,12 +153,8 @@ public class MemoryEventQueue {
 	 * @param object The {@link MemoryObject} in which this event occurred.
 	 * @param event The event.
 	 */
-	
 	public void enqueueObjectEvent(MemoryObject object, XObjectEvent event) {
-		
-		if(object == null || event == null) {
-			throw new RuntimeException("Neither object nor event may be null!");
-		}
+		assert object != null && event != null : "Neither object nor event may be null!";
 		
 		MemoryModel model = object.getFather();
 		MemoryRepository repo = model == null ? null : model.getFather();
@@ -169,11 +168,8 @@ public class MemoryEventQueue {
 	 * @param field The {@link MemoryField} in which this event occurred.
 	 * @param event The event.
 	 */
-	
 	public void enqueueFieldEvent(MemoryField field, XFieldEvent event) {
-		if(field == null || event == null) {
-			throw new RuntimeException("Neither field nor event may be null!");
-		}
+		assert field != null && event != null : "Neither field nor event may be null!";
 		
 		MemoryObject object = field.getFather();
 		MemoryModel model = object == null ? null : object.getFather();
@@ -187,24 +183,19 @@ public class MemoryEventQueue {
 	 * 
 	 * @param field The {@link MemoryField} in which this event occurred.
 	 * @param event The event.
+	 * @Param since The transaction will contain all events after this (value
+	 *        retrieved from getNextPosition())
 	 */
-	
 	@SuppressWarnings("null")
 	public void createTransactionEvent(XID actor, MemoryModel model, MemoryObject object, int since) {
-		if(since < 0 || since >= this.eventQueue.size() - 1) {
-			throw new RuntimeException("invalid since");
-		}
 		
-		if(model == null && object == null) {
-			throw new RuntimeException("either model or object must not be null");
-		}
+		assert since >= 0 && since < this.eventQueue.size() : "Invalid since, have events been sent?";
+		
+		assert since < this.eventQueue.size() - 1 : "Transactions should have more than one event.";
+		
+		assert model != null || object != null : "either model or object must not be null";
 		
 		XAddress target = object != null ? object.getAddress() : model.getAddress();
-		
-		if(this.eventQueue.size() - since <= 1) {
-			// don't create transaction events for single events
-			return;
-		}
 		
 		XAtomicEvent[] events = new XAtomicEvent[this.eventQueue.size() - since];
 		for(int i = since; i < this.eventQueue.size(); ++i) {
@@ -225,7 +216,7 @@ public class MemoryEventQueue {
 	
 	/**
 	 * Get the position to use for the since parameter of
-	 * createTransactionEvent() for using all following events.
+	 * createTransactionEvent() or cleanEvents() for using all following events.
 	 * 
 	 * @return
 	 */
@@ -233,7 +224,7 @@ public class MemoryEventQueue {
 		return this.eventQueue.size();
 	}
 	
-	/*
+	/**
 	 * A container for a given event and the affected XEntities
 	 */
 	private static class EventQueueEntry {
@@ -252,6 +243,39 @@ public class MemoryEventQueue {
 			this.field = field;
 			this.event = event;
 		}
+		
+	}
+	
+	/**
+	 * Suspend and resume logging.
+	 * 
+	 * @param logging True if events should be logged.
+	 * @return True if events were logged before.
+	 */
+	public boolean setLogging(boolean logging) {
+		
+		assert !logging || this.changeLog != null;
+		
+		boolean oldLogging = this.logging;
+		this.logging = logging;
+		return oldLogging;
+	}
+	
+	/**
+	 * Remove events that cancel each other out from the queue.
+	 * 
+	 * @Param since Clean all events after this (value retrieved from
+	 *        getNextPosition())
+	 */
+	public void cleanEvents(int since) {
+		// TODO implement
+	}
+	
+	/**
+	 * @return the {@link MemoryChangeLog} being used for logging.
+	 */
+	public MemoryChangeLog getChangeLog() {
+		return this.changeLog;
 	}
 	
 }
