@@ -1,7 +1,5 @@
 package org.xydra.core.test;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +9,6 @@ import org.junit.Test;
 import org.xydra.core.URIFormatException;
 import org.xydra.core.X;
 import org.xydra.core.XX;
-import org.xydra.core.XY;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.MissingPieceException;
@@ -31,6 +28,10 @@ import org.xydra.core.value.XIDValue;
 import org.xydra.core.value.XStringValue;
 import org.xydra.core.value.XValue;
 import org.xydra.core.value.impl.memory.MemoryIDListValue;
+import org.xydra.core.xml.MiniElement;
+import org.xydra.core.xml.XmlModel;
+import org.xydra.core.xml.impl.MiniXMLParserImpl;
+import org.xydra.core.xml.impl.XmlOutStringBuffer;
 
 
 /**
@@ -1106,7 +1107,7 @@ public abstract class AbstractTestAPI extends TestCase {
 	}
 	
 	@Test
-	public void testSaveAndLoadRepository() throws IOException {
+	public void testSaveAndLoadRepository() {
 		// we'll use our library classes to create a repository with content
 		XRepository repo = X.createMemoryRepository();
 		XID actorID = X.getIDProvider().createUniqueID();
@@ -1141,22 +1142,21 @@ public abstract class AbstractTestAPI extends TestCase {
 		
 		// We now created a little repository with some content, so saving makes
 		// sense
-		String filename = "./target/test-temp/TestAPI-SaveAndLoadRepositoryTest" + XY.fileSuffix;
-		File f = new File(filename);
-		f.getParentFile().mkdirs();
-		XY.saveRepository(repo, filename);
+		XmlOutStringBuffer out = new XmlOutStringBuffer();
+		XmlModel.toXml(repo, out);
 		
 		// try to load it
-		XRepository loadedRepo = XY.loadRepository(filename);
-		assertTrue(loadedRepo != null); // if loadedRepo == null, saving wasn't
-		// successful
-		assertEquals(loadedRepo, repo); // assert that the saving process really
-		// saved our repo
-		new File(filename).delete();
+		MiniElement e = new MiniXMLParserImpl().parseXml(out.getXml());
+		XRepository loadedRepo = XmlModel.toRepository(e);
+		// if loadedRepo == null, saving wasn't successful
+		assertNotNull(loadedRepo);
+		// assert that the saving process really saved our repo
+		assertEquals(loadedRepo, repo);
+		
 	}
 	
 	@Test
-	public void testSaveAndLoadModel() throws IOException {
+	public void testSaveAndLoadModel() {
 		XModel model = new MemoryModel(X.getIDProvider().createUniqueID());
 		model.createObject(null, X.getIDProvider().createUniqueID()).createField(null,
 		        X.getIDProvider().createUniqueID()).setValue(null,
@@ -1180,16 +1180,15 @@ public abstract class AbstractTestAPI extends TestCase {
 		        X.getIDProvider().createUniqueID()).setValue(null,
 		        X.getValueFactory().createStringValue("Another Test!"));
 		
-		String filename = "./target/test-temp/TestAPI-SaveAndLoadModelTest" + XY.fileSuffix;
-		File f = new File(filename);
-		f.getParentFile().mkdirs();
-		XY.saveModel(model, filename);
+		XmlOutStringBuffer out = new XmlOutStringBuffer();
+		XmlModel.toXml(model, out);
 		
-		XModel loadedModel = XY.loadModel(filename);
+		// try to load it
+		MiniElement e = new MiniXMLParserImpl().parseXml(out.getXml());
+		XModel loadedModel = XmlModel.toModel(e);
 		assertTrue(loadedModel != null);
 		assertEquals(loadedModel, model);
 		
-		new File(filename).delete();
 	}
 	
 	@Test
