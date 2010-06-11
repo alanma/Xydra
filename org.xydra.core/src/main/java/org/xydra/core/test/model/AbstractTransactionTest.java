@@ -26,7 +26,6 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.test.ChangeRecorder;
-import org.xydra.core.test.DemoModelUtil;
 import org.xydra.core.test.HasChanged;
 import org.xydra.core.value.XValue;
 
@@ -81,7 +80,7 @@ abstract public class AbstractTransactionTest extends TestCase {
 	@Override
 	@After
 	public void tearDown() {
-		this.repo.removeModel(ACTOR_ID, DemoModelUtil.PHONEBOOK_ID);
+		this.repo.removeModel(ACTOR_ID, MODEL_ID);
 	}
 	
 	@Test
