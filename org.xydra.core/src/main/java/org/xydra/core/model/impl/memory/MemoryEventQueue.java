@@ -1,25 +1,30 @@
 package org.xydra.core.model.impl.memory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.RandomAccess;
 
+import org.xydra.core.XX;
+import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.change.XModelEvent;
 import org.xydra.core.change.XObjectEvent;
 import org.xydra.core.change.XTransactionEvent;
+import org.xydra.core.change.impl.memory.MemoryFieldEvent;
 import org.xydra.core.change.impl.memory.MemoryTransactionEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 
 
-/*
- * TODO Should the enqueue-Methods check whether the given XEntities actually
- * fit to the XEntities specified by the XIDs in the event? - only though
- * assertions (if at all) as this class is completely internal to XModel ~Daniel
+/**
+ * A queue for model, object and fields event to be dispatched after all
+ * operations are complete.
+ * 
  */
-
 public class MemoryEventQueue {
 	
 	private final List<EventQueueEntry> eventQueue;
@@ -189,6 +194,8 @@ public class MemoryEventQueue {
 	@SuppressWarnings("null")
 	public void createTransactionEvent(XID actor, MemoryModel model, MemoryObject object, int since) {
 		
+		assert this.eventQueue instanceof RandomAccess;
+		
 		assert since >= 0 && since < this.eventQueue.size() : "Invalid since, have events been sent?";
 		
 		assert since < this.eventQueue.size() - 1 : "Transactions should have more than one event.";
@@ -261,6 +268,18 @@ public class MemoryEventQueue {
 		return oldLogging;
 	}
 	
+	private static class EventCollision {
+		
+		protected int first;
+		protected int last;
+		
+		public EventCollision(int first) {
+			this.first = first;
+			this.last = -1;
+		}
+		
+	}
+	
 	/**
 	 * Remove events that cancel each other out from the queue.
 	 * 
@@ -268,7 +287,171 @@ public class MemoryEventQueue {
 	 *        getNextPosition())
 	 */
 	public void cleanEvents(int since) {
-		// TODO implement
+		
+		assert this.eventQueue instanceof RandomAccess;
+		
+		if(since + 1 >= this.eventQueue.size()) {
+			// we need more than one event to clean
+			return;
+		}
+		
+		Map<XAddress,EventCollision> fields = new HashMap<XAddress,EventCollision>();
+		Map<XAddress,EventCollision> coll = new HashMap<XAddress,EventCollision>();
+		
+		// Find the first and last event for each entity, set everything else to
+		// null.
+		int size = this.eventQueue.size();
+		for(int i = since; i < size; i++) {
+			
+			XEvent event = this.eventQueue.get(i).event;
+			
+			assert event != null;
+			
+			if(event instanceof XTransactionEvent) {
+				this.eventQueue.set(i, null);
+				continue;
+			}
+			assert !(event instanceof XTransactionEvent);
+			
+			XAddress changed = ((XAtomicEvent)event).getChangedEntity();
+			
+			Map<XAddress,EventCollision> map = (event instanceof XFieldEvent) ? fields : coll;
+			
+			EventCollision ec = map.get(changed);
+			
+			if(ec == null) {
+				map.put(changed, new EventCollision(i));
+			} else {
+				if(ec.last >= 0) {
+					this.eventQueue.set(ec.last, null);
+				}
+				ec.last = i;
+			}
+			
+		}
+		
+		// Merge colliding field events.
+		for(EventCollision ec : fields.values()) {
+			
+			assert this.eventQueue.get(ec.first) != null;
+			if(ec.last < 0) {
+				// no collision
+				continue;
+			}
+			XEvent first = this.eventQueue.get(ec.first).event;
+			
+			EventQueueEntry e = this.eventQueue.get(ec.last);
+			assert e != null;
+			XEvent last = e.event;
+			
+			assert first instanceof XFieldEvent;
+			assert last instanceof XFieldEvent;
+			
+			XEvent merged = mergeFieldEvents((XFieldEvent)first, (XFieldEvent)last);
+			
+			this.eventQueue.set(ec.first, null);
+			
+			if(merged == null) {
+				this.eventQueue.set(ec.last, null);
+			} else if(merged != last) {
+				EventQueueEntry qe = new EventQueueEntry(e.repo, e.model, e.object, e.field, merged);
+				this.eventQueue.set(ec.last, qe);
+			}
+			
+		}
+		
+		// Merge colliding non-field events.
+		for(EventCollision ec : fields.values()) {
+			
+			assert this.eventQueue.get(ec.first) != null;
+			if(ec.last < 0) {
+				// no collision
+				continue;
+			}
+			assert this.eventQueue.get(ec.last) != null;
+			XEvent first = this.eventQueue.get(ec.first).event;
+			XEvent last = this.eventQueue.get(ec.last).event;
+			
+			this.eventQueue.set(ec.first, null);
+			if(first.getChangeType() != last.getChangeType()) {
+				// ADD and REMOVE cancel each other out
+				this.eventQueue.set(ec.last, null);
+			}
+			
+		}
+		
+		// Now remove all non-null entries. This is optimized for an ArrayList.
+		
+		// Find the first null entry.
+		int i = since;
+		while(i < size && this.eventQueue.get(i) != null) {
+			i++;
+		}
+		
+		// Compact all non-null entries.
+		for(int j = i + 1; j < size; j++) {
+			EventQueueEntry e = this.eventQueue.get(j);
+			if(e != null) {
+				this.eventQueue.set(i, e);
+				i++;
+			}
+		}
+		
+		// Remove all null entries from the end of the queue.
+		for(int j = size - 1; j >= i; i--) {
+			this.eventQueue.remove(j);
+		}
+		
+	}
+	
+	XFieldEvent mergeFieldEvents(XFieldEvent event, XFieldEvent other) {
+		
+		assert event.getTarget().equals(other.getTarget());
+		
+		// Matching ADD->REMOVE or CHANGE->CHANGE or REMOVE->ADD
+		// where the value is reset to the old state
+		if(XX.equals(event.getOldValue(), other.getNewValue())) {
+			assert event.getChangeType() != ChangeType.REMOVE;
+			return null;
+		}
+		
+		switch(other.getChangeType()) {
+		case ADD:
+			if(event.getChangeType() == ChangeType.ADD) {
+				return other;
+			}
+			assert event.getChangeType() == ChangeType.REMOVE;
+			// non matching REMOVE -> ADD => merge to CHANGE
+			return MemoryFieldEvent.createChangeEvent(other.getActor(), other.getTarget(), event
+			        .getOldValue(), other.getNewValue(), other.getModelRevisionNumber(), other
+			        .getObjectRevisionNumber(), other.getFieldRevisionNumber(), false);
+		case REMOVE:
+			if(event.getChangeType() == ChangeType.REMOVE) {
+				return other;
+			}
+			assert event.getChangeType() == ChangeType.CHANGE;
+			// (non matching) CHANGE->REMOVE => merge to REMOVE
+			return MemoryFieldEvent.createRemoveEvent(other.getActor(), other.getTarget(), event
+			        .getOldValue(), other.getModelRevisionNumber(),
+			        other.getObjectRevisionNumber(), other.getFieldRevisionNumber(), false);
+		case CHANGE:
+			assert event.getChangeType() != ChangeType.REMOVE;
+			if(event.getChangeType() == ChangeType.CHANGE) {
+				// non-matching CHANGE->CHANGE => merge to CHANGE
+				return MemoryFieldEvent.createChangeEvent(other.getActor(), other.getTarget(),
+				        event.getOldValue(), other.getNewValue(), other.getModelRevisionNumber(),
+				        other.getObjectRevisionNumber(), other.getFieldRevisionNumber(), false);
+			} else {
+				assert event.getChangeType() == ChangeType.ADD;
+				// non-matching ADD->CHANGE => merge to ADD
+				return MemoryFieldEvent.createAddEvent(other.getActor(), other.getTarget(), other
+				        .getNewValue(), other.getModelRevisionNumber(), other
+				        .getObjectRevisionNumber(), other.getFieldRevisionNumber(), false);
+			}
+		default:
+			throw new AssertionError("invalid event: " + other);
+		}
+		
 	}
 	
 	/**
