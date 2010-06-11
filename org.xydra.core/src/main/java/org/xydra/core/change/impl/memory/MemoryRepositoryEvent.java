@@ -1,5 +1,6 @@
 package org.xydra.core.change.impl.memory;
 
+import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XRepositoryEvent;
@@ -135,6 +136,10 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	@Override
 	public XID getModelID() {
 		return this.modelID;
+	}
+	
+	public XAddress getChangedEntity() {
+		return XX.resolveModel(getTarget(), getModelID());
 	}
 	
 }

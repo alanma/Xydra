@@ -16,7 +16,6 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 
 
-
 /**
  * Implementation of the {@XTransaction} interface.
  * 

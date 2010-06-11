@@ -1,5 +1,6 @@
 package org.xydra.core.change.impl.memory;
 
+import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XModelEvent;
@@ -160,6 +161,10 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 	@Override
 	public XID getObjectID() {
 		return this.objectID;
+	}
+	
+	public XAddress getChangedEntity() {
+		return XX.resolveObject(getTarget(), getObjectID());
 	}
 	
 }

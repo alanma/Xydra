@@ -300,4 +300,9 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	public long getObjectRevisionNumber() {
 		return this.objectRevision;
 	}
+	
+	public XAddress getChangedEntity() {
+		return getTarget();
+	}
+	
 }
