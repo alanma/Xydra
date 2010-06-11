@@ -30,7 +30,9 @@ public interface XEvent {
 	/**
 	 * WHERE did the change happen?
 	 * 
-	 * @return the XAddress of the place where the change happened
+	 * @return the XAddress of the place where the change happened: the
+	 *         repository, model or object to which an entity has been added or
+	 *         removed or a field whose walue has changed
 	 */
 	XAddress getTarget();
 	
