@@ -361,7 +361,7 @@ public class MemoryEventQueue {
 		}
 		
 		// Merge colliding non-field events.
-		for(EventCollision ec : fields.values()) {
+		for(EventCollision ec : coll.values()) {
 			
 			assert this.eventQueue.get(ec.first) != null;
 			if(ec.last < 0) {
@@ -404,52 +404,58 @@ public class MemoryEventQueue {
 		
 	}
 	
-	XFieldEvent mergeFieldEvents(XFieldEvent event, XFieldEvent other) {
+	/**
+	 * Merge all field events between first and last.
+	 * 
+	 * @return The merged event (which may be last) or null of the events cancel
+	 *         each other out.
+	 */
+	XFieldEvent mergeFieldEvents(XFieldEvent first, XFieldEvent last) {
 		
-		assert event.getTarget().equals(other.getTarget());
+		assert first.getTarget().equals(last.getTarget());
 		
 		// Matching ADD->REMOVE or CHANGE->CHANGE or REMOVE->ADD
 		// where the value is reset to the old state
-		if(XX.equals(event.getOldValue(), other.getNewValue())) {
-			assert event.getChangeType() != ChangeType.REMOVE;
+		if(XX.equals(first.getOldValue(), last.getNewValue())) {
+			assert first.getChangeType() != ChangeType.REMOVE;
 			return null;
 		}
 		
-		switch(other.getChangeType()) {
+		switch(last.getChangeType()) {
 		case ADD:
-			if(event.getChangeType() == ChangeType.ADD) {
-				return other;
+			if(first.getChangeType() == ChangeType.ADD) {
+				return last;
 			}
-			assert event.getChangeType() == ChangeType.REMOVE;
+			assert first.getChangeType() == ChangeType.REMOVE;
 			// non matching REMOVE -> ADD => merge to CHANGE
-			return MemoryFieldEvent.createChangeEvent(other.getActor(), other.getTarget(), event
-			        .getOldValue(), other.getNewValue(), other.getModelRevisionNumber(), other
-			        .getObjectRevisionNumber(), other.getFieldRevisionNumber(), false);
+			return MemoryFieldEvent.createChangeEvent(last.getActor(), last.getTarget(), first
+			        .getOldValue(), last.getNewValue(), last.getModelRevisionNumber(), last
+			        .getObjectRevisionNumber(), last.getFieldRevisionNumber(), false);
 		case REMOVE:
-			if(event.getChangeType() == ChangeType.REMOVE) {
-				return other;
+			if(first.getChangeType() == ChangeType.REMOVE) {
+				return last;
 			}
-			assert event.getChangeType() == ChangeType.CHANGE;
+			assert first.getChangeType() == ChangeType.CHANGE;
 			// (non matching) CHANGE->REMOVE => merge to REMOVE
-			return MemoryFieldEvent.createRemoveEvent(other.getActor(), other.getTarget(), event
-			        .getOldValue(), other.getModelRevisionNumber(),
-			        other.getObjectRevisionNumber(), other.getFieldRevisionNumber(), false);
+			return MemoryFieldEvent.createRemoveEvent(last.getActor(), last.getTarget(), first
+			        .getOldValue(), last.getModelRevisionNumber(), last.getObjectRevisionNumber(),
+			        last.getFieldRevisionNumber(), false);
 		case CHANGE:
-			assert event.getChangeType() != ChangeType.REMOVE;
-			if(event.getChangeType() == ChangeType.CHANGE) {
+			assert first.getChangeType() != ChangeType.REMOVE;
+			if(first.getChangeType() == ChangeType.CHANGE) {
 				// non-matching CHANGE->CHANGE => merge to CHANGE
-				return MemoryFieldEvent.createChangeEvent(other.getActor(), other.getTarget(),
-				        event.getOldValue(), other.getNewValue(), other.getModelRevisionNumber(),
-				        other.getObjectRevisionNumber(), other.getFieldRevisionNumber(), false);
+				return MemoryFieldEvent.createChangeEvent(last.getActor(), last.getTarget(), first
+				        .getOldValue(), last.getNewValue(), last.getModelRevisionNumber(), last
+				        .getObjectRevisionNumber(), last.getFieldRevisionNumber(), false);
 			} else {
-				assert event.getChangeType() == ChangeType.ADD;
+				assert first.getChangeType() == ChangeType.ADD;
 				// non-matching ADD->CHANGE => merge to ADD
-				return MemoryFieldEvent.createAddEvent(other.getActor(), other.getTarget(), other
-				        .getNewValue(), other.getModelRevisionNumber(), other
-				        .getObjectRevisionNumber(), other.getFieldRevisionNumber(), false);
+				return MemoryFieldEvent.createAddEvent(last.getActor(), last.getTarget(), last
+				        .getNewValue(), last.getModelRevisionNumber(), last
+				        .getObjectRevisionNumber(), last.getFieldRevisionNumber(), false);
 			}
 		default:
-			throw new AssertionError("invalid event: " + other);
+			throw new AssertionError("invalid event: " + last);
 		}
 		
 	}
