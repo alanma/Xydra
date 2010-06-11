@@ -5,6 +5,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.xydra.core.X;
@@ -25,6 +26,7 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.test.ChangeRecorder;
+import org.xydra.core.test.DemoModelUtil;
 import org.xydra.core.test.HasChanged;
 import org.xydra.core.value.XValue;
 
@@ -48,8 +50,7 @@ abstract public class AbstractTransactionTest extends TestCase {
 	private static final XID PHONE_ID = X.getIDProvider().fromString("phone");
 	private static final XID ALIAS_ID = X.getIDProvider().fromString("alias");
 	
-	protected XID repoId;
-	
+	private XRepository repo;
 	protected XModel model;
 	protected XObject john;
 	protected XObject peter;
@@ -66,9 +67,8 @@ abstract public class AbstractTransactionTest extends TestCase {
 	@Before
 	public void setUp() {
 		
-		XRepository repo = X.createMemoryRepository();
-		this.model = repo.createModel(ACTOR_ID, MODEL_ID);
-		this.repoId = repo.getID();
+		this.repo = X.createMemoryRepository();
+		this.model = this.repo.createModel(ACTOR_ID, MODEL_ID);
 		this.john = this.model.createObject(ACTOR_ID, JOHN_ID);
 		XField johnsPhone = this.john.createField(ACTOR_ID, PHONE_ID);
 		johnsPhone.setValue(ACTOR_ID, JOHN_PHONE);
@@ -76,6 +76,12 @@ abstract public class AbstractTransactionTest extends TestCase {
 		XField petersPhone = this.peter.createField(ACTOR_ID, PHONE_ID);
 		petersPhone.setValue(ACTOR_ID, PETER_PHONE);
 		
+	}
+	
+	@Override
+	@After
+	public void tearDown() {
+		this.repo.removeModel(ACTOR_ID, DemoModelUtil.PHONEBOOK_ID);
 	}
 	
 	@Test
