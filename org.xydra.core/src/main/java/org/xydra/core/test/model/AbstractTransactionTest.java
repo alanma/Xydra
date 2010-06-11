@@ -1,6 +1,5 @@
 package org.xydra.core.test.model;
 
-import java.util.Iterator;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -10,7 +9,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xydra.core.X;
 import org.xydra.core.XX;
-import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XTransactionBuilder;
@@ -53,14 +51,6 @@ abstract public class AbstractTransactionTest extends TestCase {
 	protected XModel model;
 	protected XObject john;
 	protected XObject peter;
-	
-	private void equalsIterator(Iterator<XEvent> a, Iterator<XAtomicEvent> b) {
-		while(a.hasNext()) {
-			assertTrue(b.hasNext());
-			assertEquals(a.next(), b.next());
-		}
-		assertFalse(b.hasNext());
-	}
 	
 	@Override
 	@Before
@@ -181,7 +171,7 @@ abstract public class AbstractTransactionTest extends TestCase {
 		
 		assertEquals(received.size(), te.size());
 		
-		equalsIterator(received.iterator(), te.iterator());
+		assertTrue(XX.equalsIterator(received.iterator(), te.iterator()));
 		
 	}
 	
@@ -407,7 +397,7 @@ abstract public class AbstractTransactionTest extends TestCase {
 		
 		assertEquals(received.size(), te.size());
 		
-		equalsIterator(received.iterator(), te.iterator());
+		assertTrue(XX.equalsIterator(received.iterator(), te.iterator()));
 		
 		/* check events received from object */
 

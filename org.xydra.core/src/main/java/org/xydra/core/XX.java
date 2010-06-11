@@ -3031,7 +3031,7 @@ public class XX {
 		
 		XAtomicCommand[] result = new XAtomicCommand[event.size()];
 		
-		for(int i = 0; i <= event.size(); i++) {
+		for(int i = 0; i < event.size(); i++) {
 			result[i] = createReplayCommand(event.getEvent(i));
 		}
 		
@@ -3152,6 +3152,18 @@ public class XX {
 			
 		}
 		
+	}
+	
+	static public boolean equalsIterator(Iterator<?> a, Iterator<?> b) {
+		while(a.hasNext()) {
+			if(!b.hasNext()) {
+				return false;
+			}
+			if(!XX.equals(a.next(), b.next())) {
+				return false;
+			}
+		}
+		return !b.hasNext();
 	}
 	
 }

@@ -66,6 +66,7 @@ public class MemoryEventQueue {
 		while(!this.eventQueue.isEmpty()) {
 			EventQueueEntry entry = this.eventQueue.remove(0);
 			
+			assert entry != null;
 			assert entry.event != null;
 			
 			assert entry.event instanceof XModelEvent || entry.event instanceof XObjectEvent
@@ -398,10 +399,22 @@ public class MemoryEventQueue {
 		}
 		
 		// Remove all null entries from the end of the queue.
-		for(int j = size - 1; j >= i; i--) {
+		for(int j = size - 1; j >= i; j--) {
 			this.eventQueue.remove(j);
 		}
 		
+		assert !containsNullEntries();
+	}
+	
+	private boolean containsNullEntries() {
+		
+		for(EventQueueEntry entry : this.eventQueue) {
+			if(entry == null || entry.event == null) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	/**

@@ -76,8 +76,8 @@ public class MemoryChangeLog implements XChangeLog {
 		
 		ArrayList<XEvent> list = new ArrayList<XEvent>();
 		
-		for(long i = revisionNumber; i <= this.state.getCurrentRevisionNumber(); i++) {
-			list.add(this.state.getEvent(revisionNumber));
+		for(long i = revisionNumber; i < this.state.getCurrentRevisionNumber(); i++) {
+			list.add(this.state.getEvent(i));
 		}
 		
 		return list;
@@ -97,8 +97,8 @@ public class MemoryChangeLog implements XChangeLog {
 		
 		ArrayList<XEvent> list = new ArrayList<XEvent>();
 		
-		for(long i = 0; i <= revisionNumber; i++) {
-			list.add(this.state.getEvent(revisionNumber));
+		for(long i = 0; i < revisionNumber; i++) {
+			list.add(this.state.getEvent(i));
 		}
 		
 		return list;

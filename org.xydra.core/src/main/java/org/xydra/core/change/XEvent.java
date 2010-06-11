@@ -62,4 +62,12 @@ public interface XEvent {
 	 */
 	boolean inTransaction();
 	
+	/**
+	 * WHAT is being changed?
+	 * 
+	 * @return the model, object or field that was added or removed or the field
+	 *         whose value changed; null for transactions.
+	 */
+	XAddress getChangedEntity();
+	
 }

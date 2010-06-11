@@ -61,7 +61,10 @@ public class MemoryTransactionEvent implements XTransactionEvent {
 		
 		for(int i = 0; i < size(); ++i) {
 			
-			if(!this.events[i].equals(trans.getEvent(i)))
+			XAtomicEvent here = this.events[i];
+			XAtomicEvent there = trans.getEvent(i);
+			
+			if(!here.equals(there))
 				return false;
 			
 		}
@@ -199,6 +202,10 @@ public class MemoryTransactionEvent implements XTransactionEvent {
 	
 	public long getModelRevisionNumber() {
 		return this.modelRevision;
+	}
+	
+	public XAddress getChangedEntity() {
+		return getTarget();
 	}
 	
 }

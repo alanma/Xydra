@@ -190,6 +190,18 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 		return removeField(actor, fieldID, null);
 	}
 	
+	protected void removeInternal(Orphans orphans) {
+		// all fields are already loaded for creating events
+		
+		for(MemoryField field : this.loadedFields.values()) {
+			field.getState().setValue(null);
+			orphans.fields.put(field.getAddress(), field);
+			this.state.removeFieldState(field.getID());
+		}
+		
+		this.loadedFields.clear();
+	}
+	
 	protected boolean removeField(XID actor, XID fieldID, Orphans orphans) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -209,6 +221,7 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 			this.state.removeFieldState(field.getID());
 			this.loadedFields.remove(field.getID());
 			if(orphans != null) {
+				field.getState().setValue(null);
 				orphans.fields.put(field.getAddress(), field);
 			} else {
 				field.delete();

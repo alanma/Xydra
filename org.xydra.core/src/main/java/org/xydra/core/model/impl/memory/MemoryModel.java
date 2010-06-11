@@ -231,6 +231,7 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 			this.loadedObjects.remove(object.getID());
 			this.state.removeObjectState(object.getID());
 			if(orphans != null) {
+				object.removeInternal(orphans);
 				orphans.objects.put(object.getID(), object);
 			} else {
 				object.delete();
@@ -727,8 +728,8 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 			
 			// Apply the remote changes.
 			for(XEvent remoteChange : remoteChanges) {
-				long result = executeCommand(remoteChange.getActor(), XX
-				        .createReplayCommand(remoteChange), orphans);
+				XCommand replayCommand = XX.createReplayCommand(remoteChange);
+				long result = executeCommand(remoteChange.getActor(), replayCommand, orphans);
 				if(result < 0) {
 					throw new IllegalStateException("could not apply remote change: "
 					        + remoteChange);

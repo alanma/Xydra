@@ -1,6 +1,5 @@
 package org.xydra.core.change;
 
-import org.xydra.core.model.XAddress;
 
 
 /**
@@ -8,13 +7,5 @@ import org.xydra.core.model.XAddress;
  * 
  */
 public interface XAtomicEvent extends XEvent {
-	
-	/**
-	 * WHAT is being changed?
-	 * 
-	 * @return the model, object or field that was added or removed or the field
-	 *         whose value changed; null for transactions.
-	 */
-	XAddress getChangedEntity();
 	
 }
