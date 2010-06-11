@@ -18,7 +18,6 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Text;
 
 
-
 public class GaeChangeLogState implements XChangeLogState {
 	
 	private static final long serialVersionUID = 6673976783142023642L;
@@ -124,8 +123,6 @@ public class GaeChangeLogState implements XChangeLogState {
 		
 		// IMPROVE cache events
 		
-		// TODO is it ok to save each event as it's own entity?
-		
 		Entity e = GaeUtils.getEntity(getKey(revisionNumber));
 		
 		if(e == null) {
@@ -155,7 +152,17 @@ public class GaeChangeLogState implements XChangeLogState {
 	}
 	
 	public boolean truncateToRevision(long revisionNumber) {
-		throw new AssertionError("the server change log cannot be truncated");
+		
+		if(revisionNumber < this.firstRev) {
+			return false;
+		}
+		
+		while(this.currentRev > revisionNumber) {
+			this.currentRev--;
+			GaeUtils.deleteEntity(getKey(this.currentRev));
+		}
+		
+		return true;
 	}
 	
 }
