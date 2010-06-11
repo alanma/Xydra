@@ -1,6 +1,5 @@
-package org.xydra.core.model;
+package org.xydra.core.test.model;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -13,18 +12,8 @@ import org.xydra.core.XX;
 import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
-import org.xydra.core.change.XFieldEvent;
-import org.xydra.core.change.XFieldEventListener;
-import org.xydra.core.change.XModelEvent;
-import org.xydra.core.change.XModelEventListener;
-import org.xydra.core.change.XObjectEvent;
-import org.xydra.core.change.XObjectEventListener;
-import org.xydra.core.change.XRepositoryEvent;
-import org.xydra.core.change.XRepositoryEventListener;
-import org.xydra.core.change.XSendsTransactionEvents;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.change.XTransactionEvent;
-import org.xydra.core.change.XTransactionEventListener;
 import org.xydra.core.change.impl.memory.MemoryFieldEvent;
 import org.xydra.core.change.impl.memory.MemoryModelEvent;
 import org.xydra.core.change.impl.memory.MemoryObjectEvent;
@@ -35,8 +24,9 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
+import org.xydra.core.test.ChangeRecorder;
+import org.xydra.core.test.HasChanged;
 import org.xydra.core.value.XValue;
-
 
 
 /**
@@ -44,7 +34,7 @@ import org.xydra.core.value.XValue;
  * 
  * @author dscharrer
  */
-public class TransactionTest extends TestCase {
+abstract public class AbstractTransactionTest extends TestCase {
 	
 	private static final XValue JOHN_ALIAS = X.getValueFactory()
 	        .createStringValue("Cookie Monster");
@@ -63,139 +53,6 @@ public class TransactionTest extends TestCase {
 	protected XModel model;
 	protected XObject john;
 	protected XObject peter;
-	
-	private static class HasChanged {
-		
-		boolean eventsReceived = false;
-		
-	}
-	
-	/**
-	 * A listener for events of type T that records in a boolean variable if any
-	 * events have been received.
-	 * 
-	 * @param <T>
-	 */
-	private static class HasChangedListener extends HasChanged implements XRepositoryEventListener,
-	        XModelEventListener, XObjectEventListener, XFieldEventListener,
-	        XTransactionEventListener {
-		
-		public void onChangeEvent(XRepositoryEvent event) {
-			this.eventsReceived = true;
-		}
-		
-		public void onChangeEvent(XModelEvent event) {
-			this.eventsReceived = true;
-		}
-		
-		public void onChangeEvent(XObjectEvent event) {
-			this.eventsReceived = true;
-		}
-		
-		public void onChangeEvent(XFieldEvent event) {
-			this.eventsReceived = true;
-		}
-		
-		public void onChangeEvent(XTransactionEvent event) {
-			this.eventsReceived = true;
-		}
-		
-	}
-	
-	/**
-	 * Listen for any fired change events sent by any object or field in the
-	 * model or the model itself.
-	 */
-	private HasChanged listen(XModel model) {
-		HasChangedListener hc = new HasChangedListener();
-		
-		model.addListenerForModelEvents(hc);
-		model.addListenerForObjectEvents(hc);
-		model.addListenerForFieldEvents(hc);
-		model.addListenerForTransactionEvents(hc);
-		for(XID objectId : model) {
-			XObject object = model.getObject(objectId);
-			object.addListenerForObjectEvents(hc);
-			object.addListenerForFieldEvents(hc);
-			object.addListenerForTransactionEvents(hc);
-			for(XID fieldId : object) {
-				XField field = object.getField(fieldId);
-				field.addListenerForFieldEvents(hc);
-			}
-		}
-		
-		return hc;
-	}
-	
-	/**
-	 * A listener for events of type T that records the received events in a
-	 * transaction.
-	 * 
-	 * @param <T>
-	 */
-	private static class ChangeRecorder implements XRepositoryEventListener, XModelEventListener,
-	        XObjectEventListener, XFieldEventListener, XTransactionEventListener {
-		
-		List<XEvent> eventList;
-		
-		public ChangeRecorder(List<XEvent> eventList) {
-			this.eventList = eventList;
-		}
-		
-		public void onChangeEvent(XRepositoryEvent event) {
-			this.eventList.add(event);
-		}
-		
-		public void onChangeEvent(XModelEvent event) {
-			this.eventList.add(event);
-		}
-		
-		public void onChangeEvent(XObjectEvent event) {
-			this.eventList.add(event);
-		}
-		
-		public void onChangeEvent(XFieldEvent event) {
-			this.eventList.add(event);
-		}
-		
-		public void onChangeEvent(XTransactionEvent event) {
-			this.eventList.add(event);
-		}
-		
-	}
-	
-	/**
-	 * Record all non-transaction events to the given model.
-	 */
-	private List<XEvent> record(XModel model) {
-		List<XEvent> eventList = new ArrayList<XEvent>();
-		ChangeRecorder cr = new ChangeRecorder(eventList);
-		model.addListenerForModelEvents(cr);
-		model.addListenerForObjectEvents(cr);
-		model.addListenerForFieldEvents(cr);
-		return eventList;
-	}
-	
-	/**
-	 * Record all non-transaction events to the given object.
-	 */
-	private List<XEvent> recordObject(XObject object) {
-		List<XEvent> eventList = new ArrayList<XEvent>();
-		ChangeRecorder cr = new ChangeRecorder(eventList);
-		object.addListenerForObjectEvents(cr);
-		object.addListenerForFieldEvents(cr);
-		return eventList;
-	}
-	
-	/**
-	 * Record all events to the given model/object.
-	 */
-	private List<XEvent> recordTransactions(XSendsTransactionEvents entity) {
-		List<XEvent> eventList = new ArrayList<XEvent>();
-		ChangeRecorder cr = new ChangeRecorder(eventList);
-		entity.addListenerForTransactionEvents(cr);
-		return eventList;
-	}
 	
 	private void equalsIterator(Iterator<XEvent> a, Iterator<XAtomicEvent> b) {
 		while(a.hasNext()) {
@@ -247,8 +104,8 @@ public class TransactionTest extends TestCase {
 		
 		// record any changes and check that everything has been changed
 		// correctly when the first event is executed
-		List<XEvent> received = record(this.model);
-		List<XEvent> trans = recordTransactions(this.model);
+		List<XEvent> received = ChangeRecorder.record(this.model);
+		List<XEvent> trans = ChangeRecorder.recordTransactions(this.model);
 		
 		long result = this.model.executeTransaction(ACTOR_ID, tb.build());
 		
@@ -343,7 +200,7 @@ public class TransactionTest extends TestCase {
 		
 		// record any changes and check that everything has been changed
 		// correctly when the first event is executed
-		HasChanged hc = listen(this.model);
+		HasChanged hc = HasChanged.listen(this.model);
 		
 		long result = this.model.executeTransaction(ACTOR_ID, tb.build());
 		
@@ -378,8 +235,8 @@ public class TransactionTest extends TestCase {
 		
 		// record any changes and check that everything has been changed
 		// correctly when the first event is executed
-		List<XEvent> received = record(this.model);
-		List<XEvent> trans = recordTransactions(this.model);
+		List<XEvent> received = ChangeRecorder.record(this.model);
+		List<XEvent> trans = ChangeRecorder.recordTransactions(this.model);
 		
 		long result = this.model.executeTransaction(ACTOR_ID, tb.build());
 		
@@ -435,12 +292,12 @@ public class TransactionTest extends TestCase {
 		
 		// register listeners so we can check if rollback restores the correct
 		// listeners
-		HasChangedListener peterObjectListener = new HasChangedListener();
-		HasChangedListener peterFieldListener = new HasChangedListener();
+		HasChanged peterObjectListener = new HasChanged();
+		HasChanged peterFieldListener = new HasChanged();
 		this.peter.addListenerForObjectEvents(peterObjectListener);
 		this.peter.addListenerForFieldEvents(peterFieldListener);
 		
-		HasChanged hc = listen(this.model);
+		HasChanged hc = HasChanged.listen(this.model);
 		
 		long result = this.model.executeTransaction(ACTOR_ID, tb.build());
 		
@@ -494,10 +351,10 @@ public class TransactionTest extends TestCase {
 		
 		// record any changes and check that everything has been changed
 		// correctly when the first event is executed
-		List<XEvent> received = record(this.model);
-		List<XEvent> receivedFromObject = recordObject(this.john);
-		List<XEvent> trans = recordTransactions(this.model);
-		List<XEvent> transFromObject = recordTransactions(this.john);
+		List<XEvent> received = ChangeRecorder.record(this.model);
+		List<XEvent> receivedFromObject = ChangeRecorder.record(this.john);
+		List<XEvent> trans = ChangeRecorder.recordTransactions(this.model);
+		List<XEvent> transFromObject = ChangeRecorder.recordTransactions(this.john);
 		
 		long result = this.john.executeTransaction(ACTOR_ID, tb.build());
 		
@@ -574,7 +431,7 @@ public class TransactionTest extends TestCase {
 		
 		// record any changes and check that everything has been changed
 		// correctly when the first event is executed
-		HasChanged hc = listen(this.model);
+		HasChanged hc = HasChanged.listen(this.model);
 		
 		long result = this.john.executeTransaction(ACTOR_ID, tb.build());
 		
@@ -609,10 +466,10 @@ public class TransactionTest extends TestCase {
 		
 		// record any changes and check that everything has been changed
 		// correctly when the first event is executed
-		List<XEvent> received = record(this.model);
-		List<XEvent> receivedFromObject = recordObject(this.john);
-		List<XEvent> trans = recordTransactions(this.model);
-		List<XEvent> transFromObject = recordTransactions(this.john);
+		List<XEvent> received = ChangeRecorder.record(this.model);
+		List<XEvent> receivedFromObject = ChangeRecorder.record(this.john);
+		List<XEvent> trans = ChangeRecorder.recordTransactions(this.model);
+		List<XEvent> transFromObject = ChangeRecorder.recordTransactions(this.john);
 		
 		long result = this.john.executeTransaction(ACTOR_ID, tb.build());
 		
@@ -672,9 +529,9 @@ public class TransactionTest extends TestCase {
 		// should fail to execute
 		tb.removeField(johnAddr, phoneRev, PHONE_ID);
 		
-		HasChanged hc = listen(this.model);
+		HasChanged hc = HasChanged.listen(this.model);
 		
-		HasChangedListener phoneListener = new HasChangedListener();
+		HasChanged phoneListener = new HasChanged();
 		johnPhone.addListenerForFieldEvents(phoneListener);
 		
 		long result = this.john.executeTransaction(ACTOR_ID, tb.build());
@@ -734,12 +591,12 @@ public class TransactionTest extends TestCase {
 		
 		// register listeners so we can check if rollback restores the correct
 		// listeners
-		HasChangedListener peterObjectListener = new HasChangedListener();
-		HasChangedListener peterFieldListener = new HasChangedListener();
+		HasChanged peterObjectListener = new HasChanged();
+		HasChanged peterFieldListener = new HasChanged();
 		this.model.getObject(PETER_ID).addListenerForObjectEvents(peterObjectListener);
 		this.model.getObject(PETER_ID).addListenerForFieldEvents(peterFieldListener);
 		
-		HasChanged hc = listen(this.model);
+		HasChanged hc = HasChanged.listen(this.model);
 		
 		long result = this.model.executeTransaction(ACTOR_ID, tb.build());
 		

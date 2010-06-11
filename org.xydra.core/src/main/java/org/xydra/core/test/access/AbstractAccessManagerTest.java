@@ -1,4 +1,4 @@
-package org.xydra.core.test;
+package org.xydra.core.test.access;
 
 import junit.framework.TestCase;
 

@@ -709,7 +709,7 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 		}
 	}
 	
-	public long[] syncChanges(List<XEvent> remoteChanges, long lastRevision, XID actor,
+	public long[] synchronize(List<XEvent> remoteChanges, long lastRevision, XID actor,
 	        List<XCommand> localChanges) {
 		
 		long[] results = new long[localChanges.size()];

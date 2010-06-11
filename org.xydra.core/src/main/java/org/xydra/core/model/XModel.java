@@ -97,7 +97,7 @@ public interface XModel extends XLoggedModel, Serializable, XExecutesTransaction
 	 *            This list will be modified with updated commands.
 	 * @return the results for the localChanges
 	 */
-	long[] syncChanges(List<XEvent> remoteChanges, long lastRevision, XID actor,
+	long[] synchronize(List<XEvent> remoteChanges, long lastRevision, XID actor,
 	        List<XCommand> localChanges);
 	
 }

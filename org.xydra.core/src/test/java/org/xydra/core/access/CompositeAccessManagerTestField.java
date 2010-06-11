@@ -7,7 +7,7 @@ import org.xydra.core.access.impl.memory.MemoryAccessManager;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XType;
 import org.xydra.core.model.impl.memory.MemoryAddress;
-import org.xydra.core.test.AbstractAccessManagerTest;
+import org.xydra.core.test.access.AbstractAccessManagerTest;
 
 
 public class CompositeAccessManagerTestField extends AbstractAccessManagerTest {

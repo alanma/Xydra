@@ -1,4 +1,4 @@
-package org.xydra.core.model.state;
+package org.xydra.core.test.model.state;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -17,7 +17,11 @@ import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
-
+import org.xydra.core.model.state.XFieldState;
+import org.xydra.core.model.state.XModelState;
+import org.xydra.core.model.state.XObjectState;
+import org.xydra.core.model.state.XRepositoryState;
+import org.xydra.core.model.state.XSPI;
 
 
 /**
@@ -31,6 +35,10 @@ import org.xydra.core.model.XID;
  * @author voelkel
  */
 public abstract class AbstractStateTest {
+	
+	protected boolean canPersist() {
+		return true;
+	}
 	
 	static XID REPOID = X.getIDProvider().fromString("testrepo");
 	
@@ -74,12 +82,15 @@ public abstract class AbstractStateTest {
 	 */
 	@Test
 	public void testDeleteExistingFieldStateWithParent() {
+		
 		testSaveFieldStateWithParent();
 		XAddress fieldStateAddress = X.getIDProvider().fromComponents(null, null, o1, f1);
-		XFieldState fieldState = XSPI.getStateStore().loadFieldState(fieldStateAddress);
-		assertNotNull(fieldState);
-		fieldState.delete();
-		assertNull(XSPI.getStateStore().loadFieldState(fieldStateAddress));
+		if(canPersist()) {
+			XFieldState fieldState = XSPI.getStateStore().loadFieldState(fieldStateAddress);
+			assertNotNull(fieldState);
+			fieldState.delete();
+			assertNull(XSPI.getStateStore().loadFieldState(fieldStateAddress));
+		}
 	}
 	
 	@Test
@@ -108,6 +119,7 @@ public abstract class AbstractStateTest {
 	
 	@Test
 	public void testGetModelState() {
+		
 		XID modelState1ID = X.getIDProvider().fromString("testmodel1");
 		XID modelState2ID = X.getIDProvider().fromString("testmodel2");
 		XAddress modelState1Addr = XX.resolveModel(getRepositoryAddress(), modelState1ID);
@@ -127,11 +139,13 @@ public abstract class AbstractStateTest {
 		
 		assertEquals(modelState1ID, modelState1.getID());
 		
-		XModelState modelState1again = XSPI.getStateStore().loadModelState(
-		        XX.resolveModel(getRepositoryAddress(), modelState1ID));
-		assertNotNull(modelState1again);
-		assertTrue(modelState1.equals(modelState1again));
-		assertEquals(modelState1, modelState1again);
+		if(canPersist()) {
+			XModelState modelState1again = XSPI.getStateStore().loadModelState(
+			        XX.resolveModel(getRepositoryAddress(), modelState1ID));
+			assertNotNull(modelState1again);
+			assertTrue(modelState1.equals(modelState1again));
+			assertEquals(modelState1, modelState1again);
+		}
 	}
 	
 	@Test
@@ -243,6 +257,7 @@ public abstract class AbstractStateTest {
 	
 	@Test
 	public void testSaveAndLoad() {
+		
 		XID modelID1 = X.getIDProvider().fromString("testModel1");
 		XAddress modelAddr1 = XX.resolveModel(getRepositoryAddress(), modelID1);
 		XModelState modelState1 = XSPI.getStateStore().createModelState(modelAddr1);
@@ -252,12 +267,16 @@ public abstract class AbstractStateTest {
 		this.repositoryState.save();
 		modelState1.save();
 		
-		this.repositoryState = XSPI.getStateStore().loadRepositoryState(getRepositoryAddress());
-		assertTrue("created with exaclty the same ID and never deleted", this.repositoryState
-		        .hasModelState(modelID1));
-		
-		this.repositoryState = XSPI.getStateStore().loadRepositoryState(getRepositoryAddress());
-		assertTrue(this.repositoryState.hasModelState(modelID1));
+		if(canPersist()) {
+			
+			this.repositoryState = XSPI.getStateStore().loadRepositoryState(getRepositoryAddress());
+			assertTrue("created with exaclty the same ID and never deleted", this.repositoryState
+			        .hasModelState(modelID1));
+			
+			this.repositoryState = XSPI.getStateStore().loadRepositoryState(getRepositoryAddress());
+			assertTrue(this.repositoryState.hasModelState(modelID1));
+			
+		}
 	}
 	
 	/**
@@ -265,6 +284,7 @@ public abstract class AbstractStateTest {
 	 */
 	@Test
 	public void testSaveFieldStateWithParent() {
+		
 		XAddress ao1 = X.getIDProvider().fromComponents(null, null, o1, null);
 		XAddress af1 = XX.resolveField(ao1, f1);
 		
@@ -273,13 +293,15 @@ public abstract class AbstractStateTest {
 		fieldState.setValue(X.getValueFactory().createDoubleValue(3.1415));
 		fieldState.save();
 		
-		XFieldState loadedFieldState = XSPI.getStateStore().loadFieldState(af1);
-		
-		assertEquals(fieldState.getAddress(), loadedFieldState.getAddress());
-		assertEquals(fieldState.getRevisionNumber(), loadedFieldState.getRevisionNumber());
-		assertEquals(fieldState.getValue(), loadedFieldState.getValue());
-		
-		assertNotNull(XSPI.getStateStore().loadFieldState(af1));
+		if(canPersist()) {
+			XFieldState loadedFieldState = XSPI.getStateStore().loadFieldState(af1);
+			
+			assertEquals(fieldState.getAddress(), loadedFieldState.getAddress());
+			assertEquals(fieldState.getRevisionNumber(), loadedFieldState.getRevisionNumber());
+			assertEquals(fieldState.getValue(), loadedFieldState.getValue());
+			
+			assertNotNull(XSPI.getStateStore().loadFieldState(af1));
+		}
 	}
 	
 	@Test
@@ -289,13 +311,19 @@ public abstract class AbstractStateTest {
 		this.repositoryState.addModelState(modelState);
 		modelState.save();
 		this.repositoryState.save();
-		// should not fail now
-		XModelState loadedModelState = XSPI.getStateStore().loadModelState(am1);
 		
-		assertEquals(modelState.getID(), loadedModelState.getID());
-		assertEquals(modelState, loadedModelState);
+		if(canPersist()) {
+			
+			// should not fail now
+			XModelState loadedModelState = XSPI.getStateStore().loadModelState(am1);
+			
+			assertEquals(modelState.getID(), loadedModelState.getID());
+			assertEquals(modelState, loadedModelState);
+			
+			assertEquals(modelState, loadedModelState);
+			
+		}
 		
-		assertEquals(modelState, loadedModelState);
 	}
 	
 	@Test
@@ -316,8 +344,10 @@ public abstract class AbstractStateTest {
 		objectState.save();
 		this.repositoryState.save();
 		
-		XObjectState loadedObjectState = XSPI.getStateStore().loadObjectState(ao1);
-		assertEquals(objectState, loadedObjectState);
+		if(canPersist()) {
+			XObjectState loadedObjectState = XSPI.getStateStore().loadObjectState(ao1);
+			assertEquals(objectState, loadedObjectState);
+		}
 	}
 	
 	@Test
@@ -326,8 +356,10 @@ public abstract class AbstractStateTest {
 		        getRepositoryAddress());
 		repositoryState.save();
 		
-		XRepositoryState loadedRepositoryState = XSPI.getStateStore().loadRepositoryState(
-		        getRepositoryAddress());
-		assertEquals(repositoryState, loadedRepositoryState);
+		if(canPersist()) {
+			XRepositoryState loadedRepositoryState = XSPI.getStateStore().loadRepositoryState(
+			        getRepositoryAddress());
+			assertEquals(repositoryState, loadedRepositoryState);
+		}
 	}
 }

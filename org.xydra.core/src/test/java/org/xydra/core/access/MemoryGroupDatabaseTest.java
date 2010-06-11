@@ -2,7 +2,7 @@ package org.xydra.core.access;
 
 import org.xydra.core.access.XGroupDatabase;
 import org.xydra.core.access.impl.memory.MemoryGroupDatabase;
-import org.xydra.core.test.AbstractGroupDatabaseTest;
+import org.xydra.core.test.access.AbstractGroupDatabaseTest;
 
 
 public class MemoryGroupDatabaseTest extends AbstractGroupDatabaseTest {
