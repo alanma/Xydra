@@ -1,8 +1,9 @@
-package org.xydra.core;
+package org.xydra.core.test.model;
 
 import junit.framework.TestCase;
 
 import org.junit.Test;
+import org.xydra.core.X;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.change.XFieldEventListener;
@@ -23,7 +24,7 @@ import org.xydra.core.model.impl.memory.MemoryObject;
 import org.xydra.core.value.impl.memory.MemoryStringValue;
 
 
-public class ChangeImplTest extends TestCase {
+public abstract class AbstractChangeTest extends TestCase {
 	
 	@Test
 	public void testRepositoryChangeListening() {
