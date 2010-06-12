@@ -33,6 +33,7 @@ import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.test.ChangeRecorder;
 import org.xydra.core.test.DemoModelUtil;
+import org.xydra.core.test.HasChanged;
 import org.xydra.core.value.XValue;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlCommand;
@@ -117,14 +118,19 @@ abstract public class AbstractSynchronizeTest extends TestCase {
 		long lastRevision = this.localModel.getRevisionNumber();
 		assertEquals(lastRevision, this.remoteModel.getRevisionNumber());
 		
-		assertTrue(XX.equalTree(this.remoteModel, this.localModel));
+		assertTrue(XX.equalState(this.remoteModel, this.localModel));
 		
-		// Add some remote changes.
+		// add some remote changes
 		makeAdditionalChanges(this.remoteModel);
 		
+		// get the remote changes
 		List<XEvent> remoteChanges = this.remoteModel.getChangeLog()
 		        .getAllEventsAfter(lastRevision);
+		for(int i = 0; i < remoteChanges.size(); i++) {
+			remoteChanges.set(i, fix(remoteChanges.get(i)));
+		}
 		
+		// create a set of local changes
 		XID newObjectId = X.getIDProvider().fromString("cookiemonster");
 		XID newFieldId = X.getIDProvider().fromString("cookies");
 		XAddress newObjectAddr = XX.resolveObject(this.localModel.getAddress(), newObjectId);
@@ -162,6 +168,7 @@ abstract public class AbstractSynchronizeTest extends TestCase {
 		localChanges.add(removeJohnSafe);
 		localChanges.add(removeJohnForced);
 		
+		// create a model identical to localModel to check events sent on sync
 		XModel checkModel = new MemoryModel(DemoModelUtil.PHONEBOOK_ID);
 		DemoModelUtil.setupPhonebook(checkModel);
 		
@@ -174,15 +181,18 @@ abstract public class AbstractSynchronizeTest extends TestCase {
 			assertTrue("command: " + command, result >= 0 || result == XCommand.NOCHANGE);
 		}
 		
+		// setup listeners
 		List<XEvent> events = ChangeRecorder.record(this.localModel);
+		HasChanged hc = new HasChanged();
+		XObject newObject = this.localModel.getObject(newObjectId);
+		newObject.addListenerForFieldEvents(hc);
+		newObject.addListenerForObjectEvents(hc);
 		
-		for(int i = 0; i < remoteChanges.size(); i++) {
-			remoteChanges.set(i, fix(remoteChanges.get(i)));
-		}
-		
+		// synchronize the remoteChanges into localModel
 		long[] results = this.localModel.synchronize(remoteChanges, lastRevision, ACTOR_ID,
 		        localChanges);
 		
+		// check results
 		assertEquals(localChanges.size(), results.length);
 		assertTrue(results[0] >= 0); // createObject
 		assertTrue(results[1] >= 0); // createField
@@ -193,6 +203,7 @@ abstract public class AbstractSynchronizeTest extends TestCase {
 		assertEquals(XCommand.FAILED, results[6]); // removeJohnSafe
 		assertEquals(XCommand.NOCHANGE, results[7]); // removeJohnForced
 		
+		// check that commands have been properly modified
 		assertEquals(createObject, localChanges.get(0));
 		assertEquals(createField, localChanges.get(1));
 		assertEquals(setValue1.getRevisionNumber() + remoteChanges.size(),
@@ -274,6 +285,11 @@ abstract public class AbstractSynchronizeTest extends TestCase {
 				// FIXME the order of events in a transaction may differ
 			}
 		}
+		
+		// check that listeners are still there
+		assertFalse(hc.eventsReceived);
+		this.localModel.getObject(newObjectId).createField(ACTOR_ID, newFieldId);
+		assertTrue(hc.eventsReceived);
 		
 	}
 	

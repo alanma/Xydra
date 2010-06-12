@@ -90,6 +90,13 @@ public interface XModel extends XLoggedModel, Serializable, XExecutesTransaction
 	 * preserve listeners on entities that are temporarily removed but adjusts
 	 * the change log to look as it will on the server.
 	 * 
+	 * This method will not check that the localChanges have already been
+	 * applied previously. It will just throw away any changes after
+	 * lastRevision, apply the remoteChanges and then apply the localChanges. No
+	 * redundant events are changed and {@link XObject} and {@link XField}
+	 * objects that are temporarily removed are preserved, including any
+	 * registered listeners.
+	 * 
 	 * @param remoteChanges The remote changes that since the last sync,
 	 *            including local changes that have been saved remotely.
 	 * @param lastRevision The revision to insert the remoteChanges at.
