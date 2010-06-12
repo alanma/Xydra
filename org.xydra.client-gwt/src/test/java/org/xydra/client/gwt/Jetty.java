@@ -74,7 +74,7 @@ public class Jetty {
 		String contextPath = "/xclient";
 		
 		// Where to server files from.
-		File docRoot = new File("target/xclient.gwt-1.0-SNAPSHOT");
+		File docRoot = new File("target/xclient-gwt-1.0-SNAPSHOT");
 		File webappRoot = new File("src/main/webapp");
 		
 		/*

@@ -7,7 +7,7 @@ import java.util.Set;
 
 import org.xydra.client.gwt.client.editor.value.XIDEditor;
 import org.xydra.client.gwt.client.editor.value.XValueEditor.EditListener;
-import org.xydra.client.sync.XModelSynchronizer;
+import org.xydra.client.gwt.sync.XModelSynchronizer;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.change.XFieldEventListener;

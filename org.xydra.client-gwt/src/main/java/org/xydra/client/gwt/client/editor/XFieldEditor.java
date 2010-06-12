@@ -4,7 +4,7 @@ import org.xydra.client.gwt.client.editor.value.XListEditor;
 import org.xydra.client.gwt.client.editor.value.XValueEditor;
 import org.xydra.client.gwt.client.editor.value.XValueUtils;
 import org.xydra.client.gwt.client.editor.value.XValueEditor.EditListener;
-import org.xydra.client.sync.XModelSynchronizer;
+import org.xydra.client.gwt.sync.XModelSynchronizer;
 import org.xydra.core.XX;
 import org.xydra.core.change.XFieldCommand;
 import org.xydra.core.change.XFieldEvent;
