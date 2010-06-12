@@ -8,7 +8,6 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.state.XChangeLogState;
 
 
-
 public class MemoryChangeLogState implements XChangeLogState {
 	/** the ID of the model this change log refers to **/
 	private XAddress modelAddr;
@@ -45,7 +44,7 @@ public class MemoryChangeLogState implements XChangeLogState {
 	}
 	
 	public XEvent getEvent(long revisionNumber) {
-		return this.events.get((int)revisionNumber);
+		return this.events.get((int)(revisionNumber - getFirstRevisionNumber()));
 	}
 	
 	public long getFirstRevisionNumber() {
