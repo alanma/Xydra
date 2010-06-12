@@ -33,7 +33,6 @@ import org.xydra.core.model.state.impl.memory.TemporaryRepositoryState;
 import org.xydra.core.value.XValue;
 
 
-
 /**
  * XModel-Implementation agnostic implementation of {@link XmlModelReader} and
  * {@link XmlModelWriter} that uses an {@link XModelFactory} to create
@@ -128,7 +127,7 @@ public class XmlModel {
 		long revision = getRevisionAttribute(xml, XMODEL_ELEMENT);
 		
 		XAddress modelAddr = XX.resolveModel(repoAddr, xid);
-		XModelState modelState = new TemporaryModelState(modelAddr);
+		XModelState modelState = new TemporaryModelState(modelAddr, revision);
 		modelState.setRevisionNumber(revision);
 		
 		Iterator<MiniElement> objectElementIt = xml.getElementsByTagName(XOBJECT_ELEMENT);

@@ -172,10 +172,9 @@ public class MemoryChangeLog implements XChangeLog {
 			        "MemoryChangeLog: revisionNumber may not be less than zero");
 		}
 		
-		if(revisionNumber > this.state.getCurrentRevisionNumber()) {
-			throw new IllegalArgumentException(
-			        "MemoryChangeLog: revisionNumber may not greater than the current revision number of this log");
-			// TODO Exception or return null?
+		if(revisionNumber < getFirstRevisionNumber()
+		        || revisionNumber >= this.state.getCurrentRevisionNumber()) {
+			return null;
 		}
 		return this.state.getEvent(revisionNumber);
 	}
