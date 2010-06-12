@@ -680,6 +680,7 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 		save();
 		
 		assert getRevisionNumber() == revision;
+		assert getRevisionNumber() == getChangeLog().getCurrentRevisionNumber();
 	}
 	
 	private void rollbackEvent(XAtomicEvent event, Orphans orphans) {
@@ -806,6 +807,8 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 			this.eventQueue.sendEvents();
 			
 		}
+		
+		assert getRevisionNumber() == getChangeLog().getCurrentRevisionNumber();
 		
 		return results;
 	}
