@@ -1,8 +1,9 @@
 package org.xydra.core.change;
 
 /**
- * The basic interface for ChangeListeneres that listens for transactions in an
- * XModel/XObject.
+ * A listener interested in {@link XTransactionEvent XTransactionEvents}. Can be
+ * registered on classes implementing the {@link XSendsTransactionEvents}
+ * interface.
  * 
  * @author Kaidel
  */
@@ -10,9 +11,8 @@ package org.xydra.core.change;
 public interface XTransactionEventListener {
 	
 	/**
-	 * A single transaction
-	 * 
-	 * @param event
+	 * Invoked when an {@link XTransactionEvent} occurs on the entity this
+	 * listener is registered on.
 	 */
 	void onChangeEvent(XTransactionEvent event);
 }

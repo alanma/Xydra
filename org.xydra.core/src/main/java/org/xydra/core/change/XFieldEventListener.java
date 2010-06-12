@@ -1,8 +1,8 @@
 package org.xydra.core.change;
 
 /**
- * The basic interface for ChangeListeneres that listens for changes in an
- * XField.
+ * A listener interested in {@link XFieldEvent XFieldEvents}. Can be registered
+ * on classes implementing the {@link XSendsFieldEvents} interface.
  * 
  * @author Kaidel
  */
@@ -10,9 +10,8 @@ package org.xydra.core.change;
 public interface XFieldEventListener {
 	
 	/**
-	 * A single event
-	 * 
-	 * @param event
+	 * Invoked when an {@link XFieldEvent} occurs on the entity this listener is
+	 * registered on.
 	 */
 	void onChangeEvent(XFieldEvent event);
 }

@@ -6,11 +6,11 @@ package org.xydra.core.change;
  */
 
 public enum ChangeType {
-	/** A "child" object is added */
+	/** A "child" entity was added */
 	ADD,
-	/** A "child" object is removed */
+	/** A "child" entity was removed */
 	REMOVE,
-	/** A "child" object is changed */
+	/** A "child" entity was changed */
 	CHANGE,
 	/** The change type for transactions */
 	TRANSACTION

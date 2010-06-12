@@ -1,12 +1,17 @@
 package org.xydra.core.change;
 
 import org.xydra.core.model.XAddress;
+import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XModel;
+import org.xydra.core.model.XRepository;
 
 
 /**
- * Any kind of changes has some entity that did it, a time point when it
- * happened and a change type.
+ * An XEvent represents a change that happened, for example on an {@link XModel}
+ * . It has a {@link ChangeType}, holds an actor (the one who executed the
+ * change that is represented by this event), the revision number of the entity
+ * when this change happened etc.
  * 
  * @author voelkel
  * 
@@ -21,39 +26,44 @@ public interface XEvent {
 	ChangeType getChangeType();
 	
 	/**
-	 * WHO is doing this?
+	 * WHO executed this?
 	 * 
-	 * @return the XID of the actor requesting this change.
+	 * @return the {@link XID} of the actor who executed the change that is
+	 *         represented by this event.
 	 */
 	XID getActor();
 	
 	/**
 	 * WHERE did the change happen?
 	 * 
-	 * @return the XAddress of the place where the change happened: the
-	 *         repository, model or object to which an entity has been added or
-	 *         removed or a field whose walue has changed
+	 * @return the {@link XAddress} of the entity where the change happened: the
+	 *         {@link XAddress} of the {@link XRepository}, {@link XModel} or
+	 *         {@link XObject} to which an entity has been added or was removed
+	 *         from or of an {@link XField} which value has been changed
 	 */
 	XAddress getTarget();
 	
 	/**
-	 * @return The revision number of the model at the time when this event
-	 *         happened (may be -1 if this XEvent refers to something that is
-	 *         not a model or has no father-model)
+	 * @return The revision number of the {@link XModel} holding the changed
+	 *         entity (or which is the changed entity) at the time when this
+	 *         event happened (may be -1 if this XEvent refers to something that
+	 *         is not a model or has no father-model)
 	 */
 	long getModelRevisionNumber();
 	
 	/**
-	 * @return The revision number of the object at the time when this event
-	 *         happened (may be -1 if this XEvent refers to something that is
-	 *         not an object or has no father-object)
+	 * @return The revision number of the {@link XObject} holding the changed
+	 *         entity (or which is the changed entity) at the time when this
+	 *         event happened (may be -1 if this XEvent refers to something that
+	 *         is not an object or has no father-object)
 	 */
 	long getObjectRevisionNumber();
 	
 	/**
-	 * @return The revision number of the field at the time when this event
-	 *         happened (may be -1 if this XEvent refers to something that is
-	 *         not a field)
+	 * @return The revision number of the {@link XField} holding the changed
+	 *         entity (or which is the changed entity) at the time when this
+	 *         event happened (may be -1 if this XEvent refers to something that
+	 *         is not a field)
 	 */
 	long getFieldRevisionNumber();
 	
@@ -63,10 +73,11 @@ public interface XEvent {
 	boolean inTransaction();
 	
 	/**
-	 * WHAT is being changed?
+	 * WHAT has been changed?
 	 * 
-	 * @return the model, object or field that was added or removed or the field
-	 *         whose value changed; null for transactions.
+	 * @return the {@link XAddress} of the {@link XModel}, {@link XObject} or
+	 *         {@link XField} that was added, removed or the {@link XField}
+	 *         which value was changed; null for transactions.
 	 */
 	XAddress getChangedEntity();
 	

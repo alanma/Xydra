@@ -1,8 +1,9 @@
 package org.xydra.core.change;
 
 /**
- * The basic interface for ChangeListeneres that listens for changes in an
- * XRepository.
+ * A listener interested in {@link XRepositoryEvent XRepositoryEvents}. Can be
+ * registered on classes implementing the {@link XSendsRepositoryEvents}
+ * interface.
  * 
  * @author Kaidel
  */
@@ -10,9 +11,8 @@ package org.xydra.core.change;
 public interface XRepositoryEventListener {
 	
 	/**
-	 * A single event
-	 * 
-	 * @param event
+	 * Invoked when an {@link XRepositoryEvent} occurs on the entity this
+	 * listener is registered on.
 	 */
 	void onChangeEvent(XRepositoryEvent event);
 }

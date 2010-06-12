@@ -1,8 +1,8 @@
 package org.xydra.core.change;
 
 /**
- * The basic interface for ChangeListeneres that listens for changes in an
- * XObject.
+ * A listener interested in {@link XObjectEvent XObjectEvents}. Can be
+ * registered on classes implementing the {@link XSendsObjectEvents} interface.
  * 
  * @author Kaidel
  */
@@ -10,9 +10,8 @@ package org.xydra.core.change;
 public interface XObjectEventListener {
 	
 	/**
-	 * A single event
-	 * 
-	 * @param event
+	 * Invoked when an {@link XObjectEvent} occurs on the entity this listener
+	 * is registered on.
 	 */
 	void onChangeEvent(XObjectEvent event);
 }

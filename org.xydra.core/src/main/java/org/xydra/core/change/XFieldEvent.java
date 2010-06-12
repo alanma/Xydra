@@ -1,11 +1,14 @@
 package org.xydra.core.change;
 
+import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XModel;
+import org.xydra.core.model.XRepository;
 import org.xydra.core.value.XValue;
 
 
 /**
- * An event observed by an XField (mostly happening within).
+ * An {@link XEvent} representing changes of {@link XField XFields}
  * 
  * @author Kaidel
  * 
@@ -14,45 +17,48 @@ import org.xydra.core.value.XValue;
 public interface XFieldEvent extends XAtomicEvent {
 	
 	/**
-	 * WHERE is the change?
+	 * WHERE did the change happen?
 	 * 
-	 * @return the XID of the XRepository WHERE the change happens. It may be
-	 *         null.
+	 * @return the {@link XID} of the Parent-{@link XRepository} of the
+	 *         {@link XField} where the change happened. It may be null.
 	 */
 	XID getRepositoryID();
 	
 	/**
-	 * WHERE is the change?
+	 * WHERE did the change happen?
 	 * 
-	 * @return the XID of the XModel WHERE the change happens. It may be null.
+	 * @return the {@link XID} of the Parent-{@link XModel} of the
+	 *         {@link XField} where the change happened. It may be null.
 	 */
 	XID getModelID();
 	
 	/**
-	 * WHERE is the change?
+	 * WHERE did the change happen?
 	 * 
-	 * @return the XID of the XObject WHERE the change happens. It may be null.
+	 * @return the {@link XID} of the Parent-{@link XObject} of the
+	 *         {@link XField} where the change happened. It may be null.
 	 */
 	XID getObjectID();
 	
 	/**
-	 * WHERE is the change?
+	 * WHERE did the change happen?
 	 * 
-	 * @return the XField WHERE the change happens
+	 * @return the {@link XID} of the changed {@link XField}
 	 */
 	XID getFieldID();
 	
 	/**
-	 * WHAT is changed?
+	 * HOW has the {@link XValue} of the {@link XField} been changed?
 	 * 
-	 * @return the new value. null indicates a delete.
+	 * @return the new {@link XValue}. null indicates a remove event.
 	 */
 	XValue getNewValue();
 	
 	/**
-	 * WHAT is changed?
+	 * WHAT was changed?
 	 * 
-	 * @return the old value. null indicates an add.
+	 * @return the old {@link XValue} before the change happened. null indicates
+	 *         an add event.
 	 */
 	XValue getOldValue();
 	

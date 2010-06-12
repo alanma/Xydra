@@ -1,8 +1,8 @@
 package org.xydra.core.change;
 
 /**
- * The basic interface for ChangeListeneres that listens for changes in an
- * XModel.
+ * A listener interested in {@link XModelEvent XModelEvents}. Can be registered
+ * on classes implementing the {@link XSendsModelEvents} interface.
  * 
  * @author Kaidel
  */
@@ -10,9 +10,8 @@ package org.xydra.core.change;
 public interface XModelEventListener {
 	
 	/**
-	 * A single event
-	 * 
-	 * @param event
+	 * Invoked when an {@link XModelEvent} occurs on the entity this listener is
+	 * registered on.
 	 */
 	void onChangeEvent(XModelEvent event);
 }
