@@ -19,8 +19,8 @@ public interface XModelCommand extends XAtomicCommand {
 	 * {@link XObject} exists.
 	 * 
 	 * A forced remove will succeed whether an {@link XObject} with the
-	 * specified {@link XID} exists, while a safe remove will only succeed if
-	 * such an {@link XObject} exists.
+	 * specified {@link XID} exists or not, while a safe remove will only
+	 * succeed if such an {@link XObject} exists.
 	 * 
 	 * Furthermore forced commands will ignore the current revision number of
 	 * the specified {@link XModel} while safe commands can only be executed if
@@ -34,8 +34,8 @@ public interface XModelCommand extends XAtomicCommand {
 	boolean isForced();
 	
 	/**
-	 * @return the {@link XID} of the {@link XRepository} holding the
-	 *         {@link XModel} this command refers to
+	 * @return the {@link XID} of the Parent-{@link XRepository} of the
+	 *         {@link XModel} this command refers to (may be null)
 	 */
 	XID getRepositoryID();
 	
@@ -51,8 +51,8 @@ public interface XModelCommand extends XAtomicCommand {
 	XID getObjectID();
 	
 	/**
-	 * @return the current revision number of the {@link XObject} this XCommand
-	 *         refers to
+	 * @return the current revision number of the {@link XObject} which will be
+	 *         added/removed
 	 */
 	long getRevisionNumber();
 	

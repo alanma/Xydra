@@ -1,8 +1,9 @@
 package org.xydra.core.change;
 
 /**
- * This interface indicated that you can register or remove listeners to listen
- * for {@link XFieldEvent}s
+ * This interface indicates that it is possible to register
+ * {@link XFieldEventListener XFieldEventListeners} to listen for
+ * {@link XFieldEvent XFieldEvents}.
  * 
  * @author voelkel
  * @author Kaidel
@@ -10,7 +11,7 @@ package org.xydra.core.change;
 public interface XSendsFieldEvents {
 	
 	/**
-	 * Adds an XFieldEventListener.
+	 * Adds an {@link XFieldEventListener}.
 	 * 
 	 * @param changeListener The listener which is to be added.
 	 * @return true, if adding the given listener was successful, false
@@ -19,7 +20,7 @@ public interface XSendsFieldEvents {
 	public boolean addListenerForFieldEvents(XFieldEventListener changeListener);
 	
 	/**
-	 * Removes the specified XFieldEventListener.
+	 * Removes the specified {@link XFieldEventListener}.
 	 * 
 	 * @param changeListener The listener which is to be removed.
 	 * @return true, if removing the given listener was successful, false

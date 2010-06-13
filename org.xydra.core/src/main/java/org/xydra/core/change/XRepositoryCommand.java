@@ -1,37 +1,52 @@
 package org.xydra.core.change;
 
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XModel;
+import org.xydra.core.model.XRepository;
 
+
+/**
+ * An {@link XCommand} for adding/removing {@link XModel XModels} to/from the
+ * specified {@link XRepository}
+ * 
+ */
 
 public interface XRepositoryCommand extends XAtomicCommand {
 	
 	/**
-	 * A forced add will succeed even if the added model existed before while a
-	 * safe add will only succeed if the model didn't exist before.
+	 * A forced add will succeed even if an {@link XModel} with the specified
+	 * {@link XID} already exists, while a safe add will only succeed if no such
+	 * {@link XModel} exists.
 	 * 
-	 * A forced remove will succeed whether the model had the specified model
-	 * (ignoring it's revision number) or not while a safe remove will only
-	 * succeed if the model exists and has the specified revision number.
+	 * A forced remove will succeed whether an {@link XModel} with the specified
+	 * {@link XID} exists or not, while a safe remove will only succeed if such
+	 * an {@link XModel} exists.
+	 * 
+	 * Furthermore forced commands will ignore the current revision number of
+	 * the specified {@link XModel} while safe commands can only be executed if
+	 * their revision number fits to the current revision number.
 	 * 
 	 * TODO there is no way to specify a remove that will succeed if the
-	 * revision number was different but fail if the model was already removed.
+	 * revision number was different but fail if the field was already removed.
 	 * 
-	 * @return true if this event is forced.
+	 * @return true, if this event is forced.
 	 */
 	boolean isForced();
 	
 	/**
-	 * @return the XID of the repository this command refers to
+	 * @return the {@link XID} of the {@link XRepository} this command refers to
 	 */
 	XID getRepositoryID();
 	
 	/**
-	 * @return the XID of the model this command will add/remove
+	 * @return the {@link XID} of the {@link XModel} this command will
+	 *         add/remove
 	 */
 	XID getModelID();
 	
 	/**
-	 * @return the current revision number of the model this XCommand refers to
+	 * @return the current revision number of the {@link XModel} which will be
+	 *         added/removed
 	 */
 	long getRevisionNumber();
 	

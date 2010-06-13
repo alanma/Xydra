@@ -1,10 +1,13 @@
 package org.xydra.core.change;
 
+import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XModel;
+import org.xydra.core.model.XRepository;
 
 
 /**
- * An event observed by an XObject (mostly happening within).
+ * An {@link XEvent} representing changes of {@link XObject XObjects}
  * 
  * 
  * @author voelkel
@@ -13,53 +16,32 @@ import org.xydra.core.model.XID;
 public interface XObjectEvent extends XAtomicEvent {
 	
 	/**
-	 * WHERE is the change?
+	 * WHERE did the change happen?
 	 * 
-	 * @return the XID of the XRepository WHERE the change happens. It may be
-	 *         null.
+	 * @return the {@link XID} of the Parent-{@link XRepository} of the
+	 *         {@link XObject} where the change happened. It may be null.
 	 */
 	XID getRepositoryID();
 	
 	/**
-	 * WHERE is the change?
+	 * WHERE did the change happen?
 	 * 
-	 * @return the XID of the XModel WHERE the change happens. It may be null.
+	 * @return the {@link XID} of the Parent-{@link XModel} of the
+	 *         {@link XObject} where the change happened. It may be null.
 	 */
 	XID getModelID();
 	
 	/**
-	 * WHERE is the change?
+	 * WHERE did the change happen?
 	 * 
-	 * @return the XObject WHERE the change happens
+	 * @return the {@link XID} of the changed {@link XObject}
 	 */
 	XID getObjectID();
 	
 	/**
-	 * WHAT is changed?
+	 * WHAT was changed?
 	 * 
-	 * @return the XID of the added/deleted field
+	 * @return the {@link XID} of the added/removed {@link XField}
 	 */
 	XID getFieldID();
-	
-	/**
-	 * @return The revision number of the model at the time when this event
-	 *         happened (may be -1 if this XEvent refers to something that is
-	 *         not a model or has no father-model)
-	 */
-	long getModelRevisionNumber();
-	
-	/**
-	 * @return The revision number of the object at the time when this event
-	 *         happened (may be -1 if this XEvent refers to something that is
-	 *         not an object or has no father-object)
-	 */
-	long getObjectRevisionNumber();
-	
-	/**
-	 * @return The revision number of the field at the time when this event
-	 *         happened (may be -1 if this XEvent refers to something that is
-	 *         not a field)
-	 */
-	long getFieldRevisionNumber();
-	
 }

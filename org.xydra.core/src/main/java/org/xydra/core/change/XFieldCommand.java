@@ -17,12 +17,12 @@ public interface XFieldCommand extends XAtomicCommand {
 	
 	/**
 	 * A forced add will succeed even if the {@link XValue} of the specified
-	 * {@link XField} was set, while a safe add will only succeed if the value
-	 * wasn't set.
+	 * {@link XField} is set, while a safe add will only succeed if the value
+	 * isn't set.
 	 * 
 	 * A forced remove/change will succeed whether the {@link XValue} of the
-	 * specified {@link XField} was set or not while a safe remove/change will
-	 * only succeed if the {@link XValue} was set.
+	 * specified {@link XField} is set or not while a safe remove/change will
+	 * only succeed if the {@link XValue} is set.
 	 * 
 	 * Furthermore forced commands will ignore the current revision number of
 	 * the specified {@link XField} while safe commands can only be executed if
@@ -42,19 +42,19 @@ public interface XFieldCommand extends XAtomicCommand {
 	XValue getValue();
 	
 	/**
-	 * @return the {@link XID} of the {@link XRepository} containing the
+	 * @return the {@link XID} of the Parent-{@link XRepository} of the
 	 *         {@link XField} this command refers to (may be null)
 	 */
 	XID getRepositoryID();
 	
 	/**
-	 * @return the {@link XID} of the {@link XModel} containing the
+	 * @return the {@link XID} of the Parent-{@link XModel} of the
 	 *         {@link XField} this command refers to (may be null)
 	 */
 	XID getModelID();
 	
 	/**
-	 * @return the {@link XID} of the {@link XObject} containing the
+	 * @return the {@link XID} of the Parent-{@link XObject} of the
 	 *         {@link XField} this command refers to (may be null)
 	 */
 	XID getObjectID();
@@ -66,8 +66,8 @@ public interface XFieldCommand extends XAtomicCommand {
 	XID getFieldID();
 	
 	/**
-	 * @return the current revision number of {@link XField} the which value
-	 *         will be changed by this command
+	 * @return the current revision number of {@link XField} which value will be
+	 *         changed by this command
 	 */
 	long getRevisionNumber();
 	

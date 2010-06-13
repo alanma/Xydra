@@ -1,35 +1,31 @@
 package org.xydra.core.change;
 
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XModel;
+import org.xydra.core.model.XRepository;
 
 
 /**
- * A change happening within a repository
+ * An {@link XEvent} representing changes of {@link XRepository XRepositories}.
  * 
  * @author voelkel
  * 
  */
+
 public interface XRepositoryEvent extends XAtomicEvent {
 	
 	/**
-	 * WHERE is the change?
+	 * WHERE did the change happen?
 	 * 
-	 * @return the XID of the XRepository WHERE the change happens
+	 * @return the {@link XID} of the {@link XRepository} where the change
+	 *         happened
 	 */
 	XID getRepositoryID();
 	
 	/**
-	 * WHAT is changed?
+	 * WHAT was changed?
 	 * 
-	 * @return the XID of the model that was added/deleted.
+	 * @return the {@link XID} of the {@link XModel} that was added/removed.
 	 */
 	XID getModelID();
-	
-	/**
-	 * @return The revision number of the model at the time when this event
-	 *         happened (may be -1 if this XEvent refers to something that is
-	 *         not a model or has no father-model)
-	 */
-	long getModelRevisionNumber();
-	
 }

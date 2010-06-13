@@ -1,8 +1,9 @@
 package org.xydra.core.change;
 
 /**
- * This interface indicated that you can register or remove listeners to listen
- * for {@link XObjectEvent}s
+ * This interface indicates that it is possible register
+ * {@link XObjectEventListener XObjectEventListeners} to listen for
+ * {@link XObjectEvent XObjectEvents}.
  * 
  * @author voelkel
  * @author Kaidel
@@ -10,7 +11,7 @@ package org.xydra.core.change;
 public interface XSendsObjectEvents {
 	
 	/**
-	 * Adds an XObjectEventListener.
+	 * Adds an {@link XObjectEventListener}.
 	 * 
 	 * @param changeListener The listener which is to be added.
 	 * @return true, if adding the given listener was successful, false
@@ -20,7 +21,7 @@ public interface XSendsObjectEvents {
 	public boolean addListenerForObjectEvents(XObjectEventListener changeListener);
 	
 	/**
-	 * Removes the specified XObjectEventListener.
+	 * Removes the specified {@link XObjectEventListener}.
 	 * 
 	 * @param changeListener The listener which is to be removed.
 	 * @return true, if removing the given listener was successful, false
