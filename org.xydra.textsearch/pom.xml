@@ -7,7 +7,7 @@
 	<artifactId>textsearch</artifactId>
 	<version>0.0.2-SNAPSHOT</version>
 	<packaging>jar</packaging>
-	<name>pragmatic-textsearch</name>
+	<name>Xydra Textsearch</name>
 
 	<parent>
 		<groupId>de.fzi</groupId>
