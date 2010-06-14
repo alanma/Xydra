@@ -10,11 +10,12 @@
 	<name>Xydra Textsearch</name>
 
 	<parent>
-		<groupId>de.fzi</groupId>
-		<artifactId>maven.config</artifactId>
-		<version>0.1.2</version>
+		<groupId>org.xydra</groupId>
+		<artifactId>maven-root</artifactId>
+		<version>2010.02.19</version>
 	</parent>
-
+	
+	
 	<repositories>
 		<repository>
 			<id>xydra-repo</id>
@@ -40,34 +41,7 @@
 				<enabled>false</enabled>
 			</releases>
 		</repository>
-		<!--  Java.net repo for wagen-svn -->
-		<repository>
-			<id>javanet-repo</id>
-			<url>
-				http://download.java.net/maven/2
-			</url>
-			<releases>
-				<enabled>true</enabled>
-				<updatePolicy>always</updatePolicy>
-				<checksumPolicy>fail</checksumPolicy>
-			</releases>
-		</repository>
-
-		<!-- to find the parent -->
-		<repository>
-			<id>theoretiker-repo</id>
-			<name>Semweb4j.org maven repo</name>
-			<url>http://semweb4j.org/repo/</url>
-			<releases>
-				<enabled>true</enabled>
-				<updatePolicy>always</updatePolicy>
-				<checksumPolicy>fail</checksumPolicy>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-
+		
 	</repositories>
 
 	<dependencies>
@@ -102,24 +76,7 @@
 	</dependencies>
 
 
-	<build>
 
-		<!--  via  https://wagon-svn.dev.java.net/ -->
-		<extensions>
-			<extension>
-				<groupId>org.jvnet.wagon-svn</groupId>
-				<artifactId>wagon-svn</artifactId>
-				<version>1.9</version>
-			</extension>
-
-			<extension>
-				<groupId>org.apache.maven.wagon</groupId>
-				<artifactId>wagon-ssh-external</artifactId>
-				<version>1.0-beta-4</version>
-			</extension>
-		</extensions>
-
-	</build>
 
 		<distributionManagement>
 		<!--
