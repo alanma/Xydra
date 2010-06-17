@@ -106,7 +106,11 @@ public class ExampleEntryPoint implements EntryPoint {
 		sendButton.addClickHandler(handler);
 		nameField.addKeyUpHandler(handler);
 		
-		log.warn("warning you");
+		log.trace("trace you");
+		log.debug("debug you");
+		log.info("info you");
+		log.warn("warn you");
+		log.error("error you");
 		
 	}
 }
