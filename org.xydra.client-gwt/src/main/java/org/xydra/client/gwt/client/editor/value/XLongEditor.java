@@ -1,7 +1,7 @@
 package org.xydra.client.gwt.client.editor.value;
 
 import org.xydra.core.X;
-import org.xydra.core.value.XValue;
+import org.xydra.core.value.XLongValue;
 
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
@@ -9,8 +9,7 @@ import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.ui.TextBox;
 
 
-
-public class XLongEditor extends AtomicXValueEditor implements KeyPressHandler {
+public class XLongEditor extends AtomicXValueEditor<XLongValue> implements KeyPressHandler {
 	
 	private final TextBox editor = new TextBox();
 	
@@ -25,7 +24,7 @@ public class XLongEditor extends AtomicXValueEditor implements KeyPressHandler {
 	}
 	
 	@Override
-	public XValue getValue() {
+	public XLongValue getValue() {
 		long v = 0L;
 		try {
 			v = Long.parseLong(this.editor.getText());

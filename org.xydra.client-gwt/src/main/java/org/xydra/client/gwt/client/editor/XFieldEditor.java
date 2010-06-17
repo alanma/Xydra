@@ -1,17 +1,27 @@
 package org.xydra.client.gwt.client.editor;
 
+import org.xydra.client.gwt.client.editor.value.XBooleanEditor;
+import org.xydra.client.gwt.client.editor.value.XBooleanListEditor;
+import org.xydra.client.gwt.client.editor.value.XDoubleEditor;
+import org.xydra.client.gwt.client.editor.value.XDoubleListEditor;
+import org.xydra.client.gwt.client.editor.value.XIDEditor;
+import org.xydra.client.gwt.client.editor.value.XIDListEditor;
+import org.xydra.client.gwt.client.editor.value.XIntegerEditor;
+import org.xydra.client.gwt.client.editor.value.XIntegerListEditor;
 import org.xydra.client.gwt.client.editor.value.XListEditor;
+import org.xydra.client.gwt.client.editor.value.XLongEditor;
+import org.xydra.client.gwt.client.editor.value.XLongListEditor;
+import org.xydra.client.gwt.client.editor.value.XStringEditor;
+import org.xydra.client.gwt.client.editor.value.XStringListEditor;
 import org.xydra.client.gwt.client.editor.value.XValueEditor;
 import org.xydra.client.gwt.client.editor.value.XValueUtils;
-import org.xydra.client.gwt.client.editor.value.XValueEditor.EditListener;
 import org.xydra.client.gwt.sync.XModelSynchronizer;
 import org.xydra.core.XX;
-import org.xydra.core.change.XFieldCommand;
+import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.change.impl.memory.MemoryFieldCommand;
 import org.xydra.core.change.impl.memory.MemoryObjectCommand;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XLoggedField;
 import org.xydra.core.value.XBooleanListValue;
 import org.xydra.core.value.XBooleanValue;
@@ -28,12 +38,11 @@ import org.xydra.core.value.XStringListValue;
 import org.xydra.core.value.XStringValue;
 import org.xydra.core.value.XValue;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -41,8 +50,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 
-
-public class XFieldEditor extends VerticalPanel implements EditListener, XFieldEventListener {
+public class XFieldEditor extends VerticalPanel implements XFieldEventListener {
 	
 	private static final int IDX_NOVALUE = 0;
 	private static final int IDX_LIST_STRING = 1;
@@ -59,30 +67,171 @@ public class XFieldEditor extends VerticalPanel implements EditListener, XFieldE
 	private static final int IDX_INTEGER = 12;
 	
 	private final XModelSynchronizer manager;
-	private XLoggedField field;
+	private final XLoggedField field;
 	private final Label revision = new Label();
-	private final ListBox type = new ListBox();
 	private final HorizontalPanel inner = new HorizontalPanel();
-	private final Button add = new Button("Add Entry");
 	private final Button delete = new Button("Remove Field");
+	private final Label contents = new Label();
+	private final Button edit = new Button("Edit");
+	private final int innerIndex;
+	
+	private ListBox type;
+	private Button add;
+	private Button save;
+	private Button cancel;
 	private XValueEditor editor;
 	
-	private XValue currentValue;
-	private XValue newValue;
-	private boolean valueChanged;
-	
-	public XFieldEditor(XID fieldId, XModelSynchronizer manager) {
+	public XFieldEditor(XLoggedField field, XModelSynchronizer manager) {
 		
 		this.manager = manager;
+		this.field = field;
+		this.field.addListenerForFieldEvents(this);
 		
 		add(this.inner);
 		
-		this.inner.add(new Label(fieldId.toString() + " ["));
+		this.inner.add(new Label(field.getID().toString() + " ["));
 		this.inner.add(this.revision);
+		this.revision.setText(Long.toString(field.getRevisionNumber()));
 		this.inner.add(new Label("] "));
-		this.inner.add(this.type);
-		this.inner.add(this.add);
+		this.innerIndex = this.inner.getWidgetCount();
 		
+		this.inner.add(this.contents);
+		this.inner.add(this.edit);
+		this.inner.add(this.delete);
+		
+		this.edit.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent e) {
+				showEditor();
+			}
+		});
+		
+		this.delete.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent e) {
+				delete();
+			}
+		});
+		
+		setStyleName("editor-xfield");
+		
+		changeValue(field.getValue());
+	}
+	
+	protected void delete() {
+		this.manager.executeCommand(MemoryObjectCommand.createRemoveCommand(this.field.getAddress()
+		        .getParent(), this.field.getRevisionNumber(), this.field.getID()), null);
+	}
+	
+	protected void changeValue(XValue value) {
+		
+		String str;
+		if(value == null) {
+			str = "(no value)";
+		} else {
+			str = value.toString();
+			if(value instanceof XListValue<?>) {
+				if(value instanceof XStringListValue)
+					str += " (string list)";
+				else if(value instanceof XIDListValue)
+					str += " (xid list)";
+				else if(value instanceof XBooleanListValue)
+					str += " (boolean list)";
+				else if(value instanceof XDoubleListValue)
+					str += " (double list)";
+				else if(value instanceof XLongListValue)
+					str += " (long list)";
+				else if(value instanceof XIntegerListValue)
+					str += " (integer list)";
+				else
+					throw new RuntimeException("Unexpected XListValue type: " + value);
+			} else {
+				if(value instanceof XStringValue)
+					str += " (string)";
+				else if(value instanceof XIDValue)
+					str += " (xid)";
+				else if(value instanceof XBooleanValue)
+					str += " (boolean)";
+				else if(value instanceof XDoubleValue)
+					str += " (double)";
+				else if(value instanceof XLongValue)
+					str += " (long)";
+				else if(value instanceof XIntegerValue)
+					str += " (integer)";
+				else
+					throw new RuntimeException("Unexpected non-list XValue type: " + value);
+			}
+			
+		}
+		
+		this.contents.setText(str);
+		
+	}
+	
+	public void onChangeEvent(XFieldEvent event) {
+		Log.info("editor: got " + event);
+		XValue value = event.getNewValue();
+		changeValue(value);
+		this.revision.setText(Long.toString(event.getFieldRevisionNumber()));
+	}
+	
+	public void removeEditor() {
+		
+		if(this.save == null) {
+			return;
+		}
+		
+		if(this.editor != null) {
+			this.editor.removeFromParent();
+		}
+		if(this.add != null) {
+			this.add.removeFromParent();
+		}
+		this.save.removeFromParent();
+		this.cancel.removeFromParent();
+		this.type.removeFromParent();
+		this.edit.setVisible(true);
+		this.contents.setVisible(true);
+		this.editor = null;
+		this.add = null;
+		this.save = null;
+		this.cancel = null;
+		this.type = null;
+		
+	}
+	
+	public void showEditor() {
+		
+		if(this.save != null) {
+			return;
+		}
+		
+		this.edit.setVisible(false);
+		this.contents.setVisible(false);
+		
+		this.cancel = new Button("Cancel");
+		this.inner.insert(this.cancel, this.innerIndex);
+		this.cancel.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent arg0) {
+				removeEditor();
+			}
+		});
+		
+		this.save = new Button("Save");
+		this.inner.insert(this.save, this.innerIndex);
+		this.save.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent arg0) {
+				saveValue();
+			}
+		});
+		
+		this.add = new Button("Add Entry");
+		this.inner.insert(this.add, this.innerIndex);
+		this.add.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent e) {
+				((XListEditor<?,?>)XFieldEditor.this.editor).add();
+			}
+		});
+		
+		this.type = new ListBox();
 		this.type.addItem("(No Value)");
 		this.type.addItem("string list");
 		this.type.addItem("string");
@@ -96,128 +245,19 @@ public class XFieldEditor extends VerticalPanel implements EditListener, XFieldE
 		this.type.addItem("long");
 		this.type.addItem("integer list");
 		this.type.addItem("integer");
-		
-		this.inner.add(this.delete);
-		
+		this.inner.insert(this.type, this.innerIndex);
 		this.type.addChangeHandler(new ChangeHandler() {
 			public void onChange(ChangeEvent e) {
 				typeChanged();
 			}
 		});
 		
-		this.add.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent e) {
-				add();
-			}
-		});
-		
-		this.delete.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent e) {
-				delete();
-			}
-		});
-		
-		setStyleName("editor-xfield");
-	}
-	
-	protected void delete() {
-		this.manager.executeCommand(MemoryObjectCommand.createRemoveCommand(this.field.getAddress()
-		        .getParent(), this.field.getRevisionNumber(), this.field.getID()), null);
-	}
-	
-	protected void add() {
-		if(this.editor != null && this.editor instanceof XListEditor)
-			((XListEditor)this.editor).add();
-		else
-			this.add.setVisible(false);
-	}
-	
-	protected void typeChanged() {
-		
 		XValue value = this.field.getValue();
-		
-		if(this.editor != null) {
-			this.editor.removeFromParent();
-			this.editor = null;
-		}
-		
-		XValue newValue;
-		switch(this.type.getSelectedIndex()) {
-		case IDX_NOVALUE:
-			newValue = null;
-			break;
-		case IDX_LIST_STRING:
-			newValue = XValueUtils.asStringListValue(value);
-			break;
-		case IDX_LIST_XID:
-			newValue = XValueUtils.asXIDListValue(value);
-			break;
-		case IDX_LIST_BOOLEAN:
-			newValue = XValueUtils.asBooleanListValue(value);
-			break;
-		case IDX_LIST_DOUBLE:
-			newValue = XValueUtils.asDoubleListValue(value);
-			break;
-		case IDX_LIST_LONG:
-			newValue = XValueUtils.asLongListValue(value);
-			break;
-		case IDX_LIST_INTEGER:
-			newValue = XValueUtils.asIntegerListValue(value);
-			break;
-		
-		case IDX_STRING:
-			newValue = XValueUtils.asStringValue(value);
-			break;
-		case IDX_XID:
-			newValue = XValueUtils.asXIDValue(value);
-			break;
-		case IDX_BOOLEAN:
-			newValue = XValueUtils.asBooleanValue(value);
-			break;
-		case IDX_DOUBLE:
-			newValue = XValueUtils.asDoubleValue(value);
-			break;
-		case IDX_LONG:
-			newValue = XValueUtils.asLongValue(value);
-			break;
-		case IDX_INTEGER:
-			newValue = XValueUtils.asIntegerValue(value);
-			break;
-		default:
-			throw new RuntimeException("Unxecpected index from the 'value type' ListBox.");
-		}
-		
-		if(!XX.equals(value, newValue)) {
-			newValue(value);
-		}
-		
-	}
-	
-	public void newValue(XValue value) {
-		XFieldCommand command;
-		if(this.field.isEmpty()) {
-			command = MemoryFieldCommand.createAddCommand(this.field.getAddress(), this.field
-			        .getRevisionNumber(), value);
-		} else {
-			command = MemoryFieldCommand.createChangeCommand(this.field.getAddress(), this.field
-			        .getRevisionNumber(), value);
-		}
-		this.manager.executeCommand(command, null);
-	}
-	
-	protected void changeValue() {
-		
-		if(!this.valueChanged) {
-			return;
-		}
-		
-		XValue value = this.newValue;
-		
 		if(value == null) {
 			this.type.setSelectedIndex(IDX_NOVALUE);
 			this.add.setVisible(false);
 		} else {
-			this.editor = XValueEditor.get(value, this);
+			this.editor = XValueEditor.get(value, null);
 			if(value instanceof XListValue<?>) {
 				if(value instanceof XStringListValue)
 					this.type.setSelectedIndex(IDX_LIST_STRING);
@@ -233,7 +273,6 @@ public class XFieldEditor extends VerticalPanel implements EditListener, XFieldE
 					this.type.setSelectedIndex(IDX_LIST_INTEGER);
 				else
 					throw new RuntimeException("Unexpected XListValue type: " + value);
-				this.add.setVisible(true);
 				add(this.editor);
 			} else {
 				if(value instanceof XStringValue)
@@ -250,49 +289,112 @@ public class XFieldEditor extends VerticalPanel implements EditListener, XFieldE
 					this.type.setSelectedIndex(IDX_INTEGER);
 				else
 					throw new RuntimeException("Unexpected non-list XValue type: " + value);
+				this.inner.insert(this.editor, this.innerIndex + 1);
 				this.add.setVisible(false);
-				this.inner.insert(this.editor, this.inner.getWidgetCount() - 1);
 			}
 			
 		}
 		
-		this.newValue = null;
-		this.valueChanged = false;
 	}
 	
-	public void setField(XLoggedField field) {
-		this.field = field;
-		boolean oldChanged = this.valueChanged;
-		this.newValue = field.getValue();
-		this.valueChanged = true;
-		if(!oldChanged) {
-			DeferredCommand.addCommand(new Command() {
-				public void execute() {
-					changeValue();
-				}
-			});
+	protected void saveValue() {
+		XValue newValue = this.editor == null ? null : this.editor.getValue();
+		
+		Log.info("editor: saving changed value: " + newValue);
+		
+		if(this.editor != null && newValue == null) {
+			// invalid editor contents
+			return;
 		}
-		this.revision.setText(Long.toString(field.getRevisionNumber()));
-	}
-	
-	public void onChangeEvent(XFieldEvent event) {
-		XValue value = event.getNewValue();
-		if(XX.equals(this.currentValue, value)) {
-			this.newValue = null;
-			this.valueChanged = false;
+		
+		removeEditor();
+		
+		if(XX.equals(newValue, this.field.getValue())) {
+			// nothing changed
+			return;
+		}
+		
+		XCommand command;
+		if(this.field.isEmpty()) {
+			command = MemoryFieldCommand.createAddCommand(this.field.getAddress(), this.field
+			        .getRevisionNumber(), newValue);
 		} else {
-			boolean oldChanged = this.valueChanged;
-			this.newValue = value;
-			this.valueChanged = true;
-			if(!oldChanged) {
-				DeferredCommand.addCommand(new Command() {
-					public void execute() {
-						changeValue();
-					}
-				});
+			if(newValue == null) {
+				command = MemoryFieldCommand.createRemoveCommand(this.field.getAddress(),
+				        this.field.getRevisionNumber());
+			} else {
+				command = MemoryFieldCommand.createChangeCommand(this.field.getAddress(),
+				        this.field.getRevisionNumber(), newValue);
 			}
 		}
-		this.revision.setText(Long.toString(event.getFieldRevisionNumber()));
+		this.manager.executeCommand(command, null);
+	}
+	
+	protected void typeChanged() {
+		
+		Log.info("editor: type changed to " + this.type.getSelectedIndex());
+		
+		XValue value = null;
+		if(this.editor != null) {
+			value = this.editor.getValue();
+			this.editor.removeFromParent();
+		}
+		
+		switch(this.type.getSelectedIndex()) {
+		case IDX_NOVALUE:
+			this.editor = null;
+			break;
+		case IDX_LIST_STRING:
+			this.editor = new XStringListEditor(XValueUtils.asStringList(value), null);
+			break;
+		case IDX_LIST_XID:
+			this.editor = new XIDListEditor(XValueUtils.asXIDList(value), null);
+			break;
+		case IDX_LIST_BOOLEAN:
+			this.editor = new XBooleanListEditor(XValueUtils.asBooleanList(value), null);
+			break;
+		case IDX_LIST_DOUBLE:
+			this.editor = new XDoubleListEditor(XValueUtils.asDoubleList(value), null);
+			break;
+		case IDX_LIST_LONG:
+			this.editor = new XLongListEditor(XValueUtils.asLongList(value), null);
+			break;
+		case IDX_LIST_INTEGER:
+			this.editor = new XIntegerListEditor(XValueUtils.asIntegerList(value), null);
+			break;
+		
+		case IDX_STRING:
+			this.editor = new XStringEditor(XValueUtils.asString(value), null);
+			break;
+		case IDX_XID:
+			this.editor = new XIDEditor(XValueUtils.asXID(value), null);
+			break;
+		case IDX_BOOLEAN:
+			this.editor = new XBooleanEditor(XValueUtils.asBoolean(value), null);
+			break;
+		case IDX_DOUBLE:
+			this.editor = new XDoubleEditor(XValueUtils.asDouble(value), null);
+			break;
+		case IDX_LONG:
+			this.editor = new XLongEditor(XValueUtils.asLong(value), null);
+			break;
+		case IDX_INTEGER:
+			this.editor = new XIntegerEditor(XValueUtils.asInteger(value), null);
+			break;
+		default:
+			throw new RuntimeException("Unxecpected index from the 'value type' ListBox.");
+		}
+		
+		if(this.editor != null) {
+			if(this.editor instanceof XListEditor<?,?>) {
+				add(this.editor);
+				this.add.setVisible(true);
+			} else {
+				this.inner.insert(this.editor, this.innerIndex + 1);
+				this.add.setVisible(false);
+			}
+		}
+		
 	}
 	
 }

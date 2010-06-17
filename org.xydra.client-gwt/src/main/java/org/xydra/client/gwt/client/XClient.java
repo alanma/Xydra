@@ -1,9 +1,9 @@
 package org.xydra.client.gwt.client;
 
 import org.xydra.client.gwt.Callback;
+import org.xydra.client.gwt.ServiceException;
 import org.xydra.client.gwt.XChangesService;
 import org.xydra.client.gwt.XDataService;
-import org.xydra.client.gwt.client.editor.DeleteCallback;
 import org.xydra.client.gwt.client.editor.XModelEditor;
 import org.xydra.client.gwt.service.GWTChangesService;
 import org.xydra.client.gwt.service.GWTDataService;
@@ -39,6 +39,8 @@ public class XClient implements EntryPoint {
 	        new GWTMiniXMLParserImpl());
 	
 	VerticalPanel panel = new VerticalPanel();
+	
+	XModelSynchronizer manager;
 	
 	public void onModuleLoad() {
 		// set uncaught exception handler
@@ -99,15 +101,12 @@ public class XClient implements EntryPoint {
 		
 	}
 	
-	abstract private class AbstractCallback<T> implements Callback<T> {
-		
-		public void onFailure(Throwable t) {
-			XClient.this.panel.add(new Label(t.getMessage()));
-		}
-		
-	}
-	
 	protected void loadData(String modelIdStr) {
+		
+		if(this.manager != null) {
+			this.manager.stopRefreshing();
+			this.manager = null;
+		}
 		
 		this.panel.clear();
 		
@@ -120,22 +119,15 @@ public class XClient implements EntryPoint {
 		}
 		
 		try {
-			this.data.getModel(modelId, new AbstractCallback<XModel>() {
+			this.data.getModel(modelId, new Callback<XModel>() {
 				public void onSuccess(final XModel model) {
-					
-					XModelSynchronizer manager = new XModelSynchronizer(model, XClient.this.changes);
-					
-					XClient.this.panel.add(new XModelEditor(manager, new DeleteCallback() {
-						public void delete(XID entity) {
-							XClient.this.data.deleteModel(model.getID(),
-							        new AbstractCallback<Void>() {
-								        public void onSuccess(Void object) {
-									        // model sucessfully removed
-								        }
-							        });
-						}
-					}));
+					loadedModel(model);
 				}
+				
+				public void onFailure(Throwable error) {
+					handleError(error);
+				}
+				
 			});
 			
 		} catch(Exception e) {
@@ -143,4 +135,19 @@ public class XClient implements EntryPoint {
 		}
 		
 	}
+	
+	private void handleError(Throwable error) {
+		if(error instanceof ServiceException) {
+			this.panel.add(new Label(error.getMessage()));
+		} else {
+			this.panel.add(new Label(error.toString()));
+		}
+	}
+	
+	protected void loadedModel(final XModel model) {
+		this.manager = new XModelSynchronizer(model, XClient.this.changes);
+		
+		XClient.this.panel.add(new XModelEditor(model, this.manager));
+	}
+	
 }

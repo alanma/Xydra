@@ -5,12 +5,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.xydra.core.XX;
+import org.xydra.core.value.XBooleanListValue;
 import org.xydra.core.value.XBooleanValue;
-import org.xydra.core.value.XValue;
 
 
-
-public class XBooleanListEditor extends XListEditor {
+public class XBooleanListEditor extends XListEditor<XBooleanValue,XBooleanListValue> {
 	
 	public XBooleanListEditor(Iterator<Boolean> value, EditListener listener) {
 		super(listener);
@@ -24,16 +23,16 @@ public class XBooleanListEditor extends XListEditor {
 	}
 	
 	@Override
-	protected XValue asListValue(Iterator<XValue> entries) {
+	protected XBooleanListValue asListValue(Iterator<XBooleanValue> entries) {
 		List<Boolean> lst = new ArrayList<Boolean>();
 		while(entries.hasNext())
-			lst.add(((XBooleanValue)entries.next()).contents());
+			lst.add(entries.next().contents());
 		return XX.toBooleanListValue(lst);
 	}
 	
 	@Override
 	public void add() {
-		add(new XBooleanEditor(false, this));
+		add(new XBooleanEditor(false, getListenerForEntry()));
 		changed();
 	}
 	

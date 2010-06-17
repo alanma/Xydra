@@ -5,12 +5,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.xydra.core.XX;
+import org.xydra.core.value.XIntegerListValue;
 import org.xydra.core.value.XIntegerValue;
-import org.xydra.core.value.XValue;
 
 
-
-public class XIntegerListEditor extends XListEditor {
+public class XIntegerListEditor extends XListEditor<XIntegerValue,XIntegerListValue> {
 	
 	public XIntegerListEditor(Iterator<Integer> value, EditListener listener) {
 		super(listener);
@@ -24,16 +23,16 @@ public class XIntegerListEditor extends XListEditor {
 	}
 	
 	@Override
-	protected XValue asListValue(Iterator<XValue> entries) {
+	protected XIntegerListValue asListValue(Iterator<XIntegerValue> entries) {
 		List<Integer> lst = new ArrayList<Integer>();
 		while(entries.hasNext())
-			lst.add(((XIntegerValue)entries.next()).contents());
+			lst.add(entries.next().contents());
 		return XX.toIntegerListValue(lst);
 	}
 	
 	@Override
 	public void add() {
-		add(new XIntegerEditor(0, this));
+		add(new XIntegerEditor(0, getListenerForEntry()));
 		changed();
 	}
 	

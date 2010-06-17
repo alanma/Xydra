@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.xydra.client.gwt.Callback;
+import org.xydra.client.gwt.ServiceException;
 import org.xydra.client.gwt.XChangesService;
 import org.xydra.client.gwt.XChangesService.CommandResult;
 import org.xydra.core.X;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XID;
-import org.xydra.core.model.XLoggedModel;
 import org.xydra.core.model.XModel;
 
 import com.allen_sauer.gwt.log.client.Log;
@@ -49,10 +49,12 @@ public class XModelSynchronizer {
 		long result = this.model.executeCommand(LOCAL_ACTOR, command);
 		if(result == XCommand.FAILED) {
 			if(callback != null) {
+				Log.warn("client command failed: " + command);
 				callback.onFailure(null);
 			}
 		} else if(result == XCommand.NOCHANGE) {
 			if(callback != null) {
+				Log.warn("client command doesn't change anything: " + command);
 				callback.onSuccess(result);
 			}
 		} else {
@@ -61,10 +63,6 @@ public class XModelSynchronizer {
 			startRequest();
 		}
 		assert this.callbacks.size() == this.commands.size();
-	}
-	
-	public XLoggedModel getModel() {
-		return this.model;
 	}
 	
 	boolean requestRunning = false;
@@ -76,26 +74,36 @@ public class XModelSynchronizer {
 		}
 		this.requestRunning = true;
 		
-		Log.info("sync: starting request, rev is " + this.syncRevison);
-		
 		assert this.callbacks.size() == this.commands.size();
 		
 		if(!this.commands.isEmpty()) {
+			
+			Log.info("sync: sending command, synced rev is " + this.syncRevison);
 			
 			final XCommand command = this.commands.get(0);
 			final Callback<Long> callback = this.callbacks.get(0);
 			
 			this.service.executeCommand(command, this.syncRevison, new Callback<CommandResult>() {
 				public void onFailure(Throwable error) {
+					if(error instanceof ServiceException) {
+						Log.info("error on client command: " + command + ": " + error.getMessage());
+					} else {
+						Log.info("error on client command: " + command, error);
+					}
 					// TODO handle error;
 					if(callback != null) {
 						callback.onFailure(error);
 					}
-					requestEnded();
+					requestEnded(false);
 				}
 				
 				public void onSuccess(CommandResult res) {
 					if(res.getResult() != XCommand.FAILED) {
+						if(res.getResult() >= 0) {
+							Log.info("client command applied remotely: " + command);
+						} else {
+							Log.warn("client command doesn't change anything: " + command);
+						}
 						if(callback != null) {
 							callback.onSuccess(res.getResult());
 						}
@@ -111,24 +119,26 @@ public class XModelSynchronizer {
 						}
 					}
 					applyEvents(res.getEvents());
-					requestEnded();
+					requestEnded(true);
 				}
 				
 			});
 			
 		} else {
 			
+			Log.info("sync: getting events, synced rev is " + this.syncRevison);
+			
 			this.service.getEvents(this.model.getAddress().getRepository(), this.model.getID(),
 			        this.syncRevison, XChangesService.NONE, new Callback<List<XEvent>>() {
 				        
 				        public void onFailure(Throwable error) {
 					        // TODO handle error;
-					        requestEnded();
+					        requestEnded(false);
 				        }
 				        
 				        public void onSuccess(List<XEvent> events) {
 					        applyEvents(events);
-					        requestEnded();
+					        requestEnded(true);
 				        }
 			        });
 			
@@ -138,6 +148,11 @@ public class XModelSynchronizer {
 	
 	protected void applyEvents(List<XEvent> remoteChanges) {
 		
+		if(remoteChanges.size() == 0) {
+			// no changes to merge
+			return;
+		}
+		
 		long[] results = this.model.synchronize(remoteChanges, this.syncRevison, LOCAL_ACTOR,
 		        this.commands);
 		
@@ -146,8 +161,17 @@ public class XModelSynchronizer {
 		Log.info("sync: merged changes, new rev is " + this.syncRevison);
 		
 		for(int i = 0; i < results.length; i++) {
-			if(results[i] < 0) {
-				this.callbacks.get(i).onSuccess(results[i]);
+			Callback<Long> callback = this.callbacks.get(i);
+			if(results[i] == XCommand.FAILED) {
+				Log.info("client command conflicted: " + this.commands.get(i));
+				if(callback != null) {
+					callback.onFailure(null);
+				}
+			} else if(results[i] == XCommand.NOCHANGE) {
+				Log.info("client command redundant: " + this.commands.get(i));
+				if(callback != null) {
+					callback.onSuccess(results[i]);
+				}
 			}
 		}
 		
@@ -160,12 +184,16 @@ public class XModelSynchronizer {
 		
 	}
 	
-	protected void requestEnded() {
+	protected void requestEnded(boolean immediateRequest) {
 		assert this.callbacks.size() == this.commands.size();
 		this.requestRunning = false;
-		if(!this.commands.isEmpty()) {
+		if(immediateRequest && !this.commands.isEmpty()) {
 			startRequest();
 		}
+	}
+	
+	public void stopRefreshing() {
+		this.timer.cancel();
 	}
 	
 }

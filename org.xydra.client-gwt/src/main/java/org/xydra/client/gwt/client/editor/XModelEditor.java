@@ -1,9 +1,7 @@
 package org.xydra.client.gwt.client.editor;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.xydra.client.gwt.client.editor.value.XIDEditor;
 import org.xydra.client.gwt.client.editor.value.XValueEditor.EditListener;
@@ -18,20 +16,19 @@ import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.change.impl.memory.MemoryModelCommand;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XLoggedModel;
+import org.xydra.core.model.XLoggedObject;
 import org.xydra.core.value.XIDValue;
 import org.xydra.core.value.XValue;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-
 
 
 public class XModelEditor extends Composite implements XModelEventListener, XObjectEventListener,
@@ -43,18 +40,17 @@ public class XModelEditor extends Composite implements XModelEventListener, XObj
 	private final VerticalPanel outer = new VerticalPanel();
 	private final HorizontalPanel inner = new HorizontalPanel();
 	private final Button add = new Button("Add Object");
-	private final Button delete = new Button("Remove Model");
-	private final DeleteCallback callback;
-	private final Map<XID,XObjectEditor> objects = new HashMap<XID,XObjectEditor>();
-	private final Set<XID> orphans = new HashSet<XID>();
 	
-	public XModelEditor(XModelSynchronizer manager, DeleteCallback callback) {
+	private final Map<XID,XObjectEditor> objects = new HashMap<XID,XObjectEditor>();
+	
+	public XModelEditor(XLoggedModel model, XModelSynchronizer manager) {
 		super();
 		
 		this.manager = manager;
-		this.model = manager.getModel();
-		
-		this.callback = callback;
+		this.model = model;
+		this.model.addListenerForModelEvents(this);
+		this.model.addListenerForObjectEvents(this);
+		this.model.addListenerForFieldEvents(this);
 		
 		this.outer.add(this.inner);
 		
@@ -62,7 +58,6 @@ public class XModelEditor extends Composite implements XModelEventListener, XObj
 		this.inner.add(this.revision);
 		this.inner.add(new Label("] "));
 		this.inner.add(this.add);
-		this.inner.add(this.delete);
 		
 		this.revision.setText(Long.toString(this.model.getRevisionNumber()));
 		
@@ -71,7 +66,6 @@ public class XModelEditor extends Composite implements XModelEventListener, XObj
 				final PopupPanel pp = new PopupPanel(false, true);
 				HorizontalPanel layout = new HorizontalPanel();
 				final Button add = new Button("Add Object");
-				add.setEnabled(false);
 				final XIDEditor editor = new XIDEditor(null, new EditListener() {
 					public void newValue(XValue value) {
 						add
@@ -95,10 +89,10 @@ public class XModelEditor extends Composite implements XModelEventListener, XObj
 				});
 				add.addClickHandler(new ClickHandler() {
 					public void onClick(ClickEvent e) {
-						XValue value = editor.getValue();
-						if(value == null || !(value instanceof XIDValue))
+						XIDValue value = editor.getValue();
+						if(value == null)
 							return;
-						XID id = ((XIDValue)value).contents();
+						XID id = value.contents();
 						if(XModelEditor.this.model.hasObject(id))
 							return;
 						pp.hide();
@@ -108,12 +102,6 @@ public class XModelEditor extends Composite implements XModelEventListener, XObj
 				});
 				pp.show();
 				pp.center();
-			}
-		});
-		
-		this.delete.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent e) {
-				delete();
 			}
 		});
 		
@@ -127,34 +115,28 @@ public class XModelEditor extends Composite implements XModelEventListener, XObj
 	}
 	
 	private void newObject(XID objectId) {
-		XObjectEditor editor = this.objects.get(objectId);
-		if(editor == null) {
-			editor = new XObjectEditor(objectId, this.manager);
-			this.objects.put(objectId, editor);
-			// TODO sort
-			this.outer.add(editor);
+		XLoggedObject object = this.model.getObject(objectId);
+		if(object == null) {
+			Log.warn("editor: asked to add object " + objectId + ", which doesn't exist (anymore)");
+			return;
 		}
-		editor.setObject(this.model.getObject(objectId));
-		this.orphans.remove(objectId);
+		XObjectEditor editor = new XObjectEditor(object, this.manager);
+		this.objects.put(objectId, editor);
+		// TODO sort
+		this.outer.add(editor);
 	}
 	
 	private void objectRemoved(XID objectId) {
-		boolean orphaned = this.orphans.isEmpty();
-		this.orphans.add(objectId);
-		if(orphaned) {
-			DeferredCommand.addCommand(new Command() {
-				public void execute() {
-					for(XID id : XModelEditor.this.orphans) {
-						XObjectEditor editor = XModelEditor.this.objects.remove(id);
-						editor.removeFromParent();
-					}
-					XModelEditor.this.orphans.clear();
-				}
-			});
+		XObjectEditor editor = XModelEditor.this.objects.remove(objectId);
+		if(editor == null) {
+			Log.warn("editor: asked to remove object " + objectId + ", which isn't there");
+			return;
 		}
+		editor.removeFromParent();
 	}
 	
 	public void onChangeEvent(XModelEvent event) {
+		Log.info("editor: got " + event);
 		if(event.getChangeType() == ChangeType.ADD) {
 			newObject(event.getObjectID());
 		} else {
@@ -166,12 +148,6 @@ public class XModelEditor extends Composite implements XModelEventListener, XObj
 	private void add(XID id) {
 		this.manager.executeCommand(MemoryModelCommand.createAddCommand(this.model.getAddress(),
 		        true, id), null);
-	}
-	
-	protected void delete() {
-		removeFromParent();
-		if(this.callback != null)
-			this.callback.delete(this.model.getID());
 	}
 	
 	public void onChangeEvent(XObjectEvent event) {

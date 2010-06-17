@@ -3,6 +3,7 @@ package org.xydra.client.gwt.service;
 import java.util.List;
 
 import org.xydra.client.gwt.Callback;
+import org.xydra.client.gwt.ServiceException;
 import org.xydra.client.gwt.XChangesService;
 import org.xydra.core.X;
 import org.xydra.core.change.XCommand;
@@ -76,8 +77,10 @@ public class GWTChangesService extends AbstractGWTHttpService implements XChange
 		rb.setCallback(new RequestCallback() {
 			
 			public void onResponseReceived(Request req, Response resp) {
-				if(handleError(resp, callback)) {
-					return;
+				if(resp.getStatusCode() != Response.SC_CONFLICT) {
+					if(handleError(resp, callback)) {
+						return;
+					}
 				}
 				List<XEvent> events = null;
 				long result;
@@ -118,8 +121,7 @@ public class GWTChangesService extends AbstractGWTHttpService implements XChange
 			}
 			
 			public void onError(Request req, Throwable t) {
-				Log.info("changes service: executing command failed", t);
-				callback.onFailure(t);
+				handleError(t, callback);
 			}
 			
 		});
@@ -150,7 +152,11 @@ public class GWTChangesService extends AbstractGWTHttpService implements XChange
 		getXml(url, new Callback<MiniElement>() {
 			
 			public void onFailure(Throwable error) {
-				Log.info("changes service: getting events failed", error);
+				if(error instanceof ServiceException) {
+					Log.info("changes service: getting events failed: " + error.getMessage());
+				} else {
+					Log.info("changes service: getting events failed", error);
+				}
 				callback.onFailure(error);
 			}
 			

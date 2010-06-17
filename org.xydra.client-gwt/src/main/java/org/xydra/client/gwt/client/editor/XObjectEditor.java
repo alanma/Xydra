@@ -1,9 +1,7 @@
 package org.xydra.client.gwt.client.editor;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.xydra.client.gwt.client.editor.value.XIDEditor;
 import org.xydra.client.gwt.client.editor.value.XValueEditor.EditListener;
@@ -16,14 +14,14 @@ import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.change.impl.memory.MemoryModelCommand;
 import org.xydra.core.change.impl.memory.MemoryObjectCommand;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XLoggedField;
 import org.xydra.core.model.XLoggedObject;
 import org.xydra.core.value.XIDValue;
 import org.xydra.core.value.XValue;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -31,38 +29,47 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 
-
 public class XObjectEditor extends VerticalPanel implements XObjectEventListener,
         XFieldEventListener {
 	
 	private final XModelSynchronizer manager;
-	private XLoggedObject object;
+	private final XLoggedObject object;
 	private final Label revision = new Label();
 	private final HorizontalPanel inner = new HorizontalPanel();
 	private final Button add = new Button("Add Field");
-	private final Button delete = new Button("Remove Object");
 	private final Map<XID,XFieldEditor> fields = new HashMap<XID,XFieldEditor>();
-	private final Set<XID> orphans = new HashSet<XID>();
 	
-	public XObjectEditor(XID objectId, XModelSynchronizer manager) {
+	public XObjectEditor(XLoggedObject object, XModelSynchronizer manager) {
 		super();
 		
 		this.manager = manager;
+		this.object = object;
+		this.object.addListenerForObjectEvents(this);
+		this.object.addListenerForFieldEvents(this);
 		
 		add(this.inner);
 		
-		this.inner.add(new Label(objectId.toString() + " ["));
+		this.inner.add(new Label(object.getID().toString() + " ["));
 		this.inner.add(this.revision);
+		this.revision.setText(Long.toString(object.getRevisionNumber()));
 		this.inner.add(new Label("] "));
 		this.inner.add(this.add);
-		this.inner.add(this.delete);
+		
+		if(this.object.getAddress().getModel() != null) {
+			Button delete = new Button("Remove Object");
+			this.inner.add(delete);
+			delete.addClickHandler(new ClickHandler() {
+				public void onClick(ClickEvent e) {
+					delete();
+				}
+			});
+		}
 		
 		this.add.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent e) {
 				final PopupPanel pp = new PopupPanel(false, true);
 				HorizontalPanel layout = new HorizontalPanel();
 				final Button add = new Button("Add Field");
-				add.setEnabled(false);
 				final XIDEditor editor = new XIDEditor(null, new EditListener() {
 					public void newValue(XValue value) {
 						add.setEnabled(value != null
@@ -85,10 +92,10 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 				});
 				add.addClickHandler(new ClickHandler() {
 					public void onClick(ClickEvent e) {
-						XValue value = editor.getValue();
-						if(value == null || !(value instanceof XIDValue))
+						XIDValue value = editor.getValue();
+						if(value == null)
 							return;
-						XID id = ((XIDValue)value).contents();
+						XID id = value.contents();
 						if(XObjectEditor.this.object.hasField(id))
 							return;
 						add(id);
@@ -101,49 +108,39 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 			}
 		});
 		
-		this.delete.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent e) {
-				delete();
-			}
-		});
-		
 		setStyleName("editor-xobject");
 		
+		for(XID fieldId : this.object)
+			newField(fieldId);
 	}
 	
 	private void newField(XID fieldId) {
-		XFieldEditor editor = this.fields.get(fieldId);
-		if(editor == null) {
-			editor = new XFieldEditor(fieldId, this.manager);
-			this.fields.put(fieldId, editor);
-			// TODO sort
-			add(editor);
+		XLoggedField field = this.object.getField(fieldId);
+		if(field == null) {
+			Log.info("editor: asked to add field " + fieldId + ", which doesn't exist (anymore)");
+			return;
 		}
-		editor.setField(this.object.getField(fieldId));
-		this.orphans.remove(fieldId);
+		XFieldEditor editor = new XFieldEditor(field, this.manager);
+		this.fields.put(fieldId, editor);
+		// TODO sort
+		add(editor);
 	}
 	
-	private void fieldRemoved(XID objectId) {
-		boolean orphaned = this.orphans.isEmpty();
-		this.orphans.add(objectId);
-		if(orphaned) {
-			DeferredCommand.addCommand(new Command() {
-				public void execute() {
-					for(XID id : XObjectEditor.this.orphans) {
-						XFieldEditor editor = XObjectEditor.this.fields.remove(id);
-						editor.removeFromParent();
-					}
-					XObjectEditor.this.orphans.clear();
-				}
-			});
+	private void fieldRemoved(XID fieldId) {
+		XFieldEditor editor = XObjectEditor.this.fields.remove(fieldId);
+		if(editor == null) {
+			Log.warn("editor: asked to remove field " + fieldId + ", which isn't there");
+			return;
 		}
+		editor.removeFromParent();
 	}
 	
 	public void onChangeEvent(XObjectEvent event) {
+		Log.info("editor: got " + event);
 		if(event.getChangeType() == ChangeType.ADD) {
-			newField(event.getObjectID());
+			newField(event.getFieldID());
 		} else {
-			fieldRemoved(event.getObjectID());
+			fieldRemoved(event.getFieldID());
 		}
 		this.revision.setText(Long.toString(event.getObjectRevisionNumber()));
 	}
@@ -156,13 +153,6 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 	protected void delete() {
 		this.manager.executeCommand(MemoryModelCommand.createRemoveCommand(this.object.getAddress()
 		        .getParent(), this.object.getRevisionNumber(), this.object.getID()), null);
-	}
-	
-	public void setObject(XLoggedObject object) {
-		this.object = object;
-		for(XID fieldId : this.object)
-			newField(fieldId);
-		this.revision.setText(Long.toString(object.getRevisionNumber()));
 	}
 	
 	public void onChangeEvent(XFieldEvent event) {

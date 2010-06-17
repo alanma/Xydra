@@ -1,5 +1,7 @@
 package org.xydra.client.gwt.client.editor.value;
 
+import org.xydra.core.value.XValue;
+
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.HasChangeHandlers;
@@ -8,7 +10,8 @@ import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.Widget;
 
 
-abstract public class AtomicXValueEditor extends XValueEditor implements Command, ChangeHandler {
+abstract public class AtomicXValueEditor<E extends XValue> extends XValueEditor implements Command,
+        ChangeHandler {
 	
 	private final EditListener listener;
 	private boolean commandQueued;
@@ -39,5 +42,8 @@ abstract public class AtomicXValueEditor extends XValueEditor implements Command
 		DeferredCommand.addCommand(this);
 		this.commandQueued = true;
 	}
+	
+	@Override
+	public abstract E getValue();
 	
 }

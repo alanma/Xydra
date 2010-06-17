@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.xydra.client.gwt.client.editor.value.XValueEditor.EditListener;
+import org.xydra.core.value.XListValue;
 import org.xydra.core.value.XValue;
 import org.xydra.index.iterator.AbstractTransformingIterator;
 
@@ -15,12 +16,12 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 
 
-
-abstract public class XListEditor extends XValueEditor implements EditListener {
+abstract public class XListEditor<E extends XValue, V extends XListValue<?>> extends XValueEditor
+        implements EditListener {
 	
 	private final EditListener listener;
 	private final FlowPanel list = new FlowPanel();
-	private final List<AtomicXValueEditor> editors = new ArrayList<AtomicXValueEditor>();
+	private final List<AtomicXValueEditor<E>> editors = new ArrayList<AtomicXValueEditor<E>>();
 	
 	public XListEditor(EditListener listener) {
 		super();
@@ -32,7 +33,7 @@ abstract public class XListEditor extends XValueEditor implements EditListener {
 		addStyleName("editor-xvalue-list");
 	}
 	
-	public void add(final AtomicXValueEditor editor) {
+	public void add(final AtomicXValueEditor<E> editor) {
 		final HorizontalPanel entry = new HorizontalPanel();
 		entry.add(editor);
 		Button remove = new Button("-");
@@ -46,7 +47,7 @@ abstract public class XListEditor extends XValueEditor implements EditListener {
 		this.editors.add(editor);
 	}
 	
-	protected void remove(HorizontalPanel entry, AtomicXValueEditor editor) {
+	protected void remove(HorizontalPanel entry, AtomicXValueEditor<E> editor) {
 		this.list.remove(entry);
 		this.editors.remove(editor);
 		changed();
@@ -57,21 +58,27 @@ abstract public class XListEditor extends XValueEditor implements EditListener {
 	}
 	
 	@Override
-	public XValue getValue() {
-		return asListValue(new AbstractTransformingIterator<AtomicXValueEditor,XValue>(this.editors
+	public V getValue() {
+		return asListValue(new AbstractTransformingIterator<AtomicXValueEditor<E>,E>(this.editors
 		        .iterator()) {
 			@Override
-			public XValue transform(AtomicXValueEditor in) {
+			public E transform(AtomicXValueEditor<E> in) {
 				return in.getValue();
 			}
 		});
 	}
 	
-	protected void changed() {
-		this.listener.newValue(getValue());
+	protected EditListener getListenerForEntry() {
+		return this.listener == null ? null : this;
 	}
 	
-	abstract protected XValue asListValue(Iterator<XValue> entries);
+	protected void changed() {
+		if(this.listener != null) {
+			this.listener.newValue(getValue());
+		}
+	}
+	
+	abstract protected V asListValue(Iterator<E> entries);
 	
 	abstract public void add();
 	

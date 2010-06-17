@@ -1,13 +1,12 @@
 package org.xydra.client.gwt.client.editor.value;
 
 import org.xydra.core.X;
-import org.xydra.core.value.XValue;
+import org.xydra.core.value.XStringValue;
 
 import com.google.gwt.user.client.ui.TextBox;
 
 
-
-public class XStringEditor extends AtomicXValueEditor {
+public class XStringEditor extends AtomicXValueEditor<XStringValue> {
 	
 	private final TextBox editor = new TextBox();
 	
@@ -21,7 +20,7 @@ public class XStringEditor extends AtomicXValueEditor {
 	}
 	
 	@Override
-	public XValue getValue() {
+	public XStringValue getValue() {
 		return X.getValueFactory().createStringValue(this.editor.getText());
 	}
 	

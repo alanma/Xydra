@@ -2,7 +2,7 @@ package org.xydra.client.gwt.client.editor.value;
 
 import org.xydra.core.X;
 import org.xydra.core.model.XID;
-import org.xydra.core.value.XValue;
+import org.xydra.core.value.XIDValue;
 
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
@@ -12,8 +12,8 @@ import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.ui.TextBox;
 
 
-
-public class XIDEditor extends AtomicXValueEditor implements KeyPressHandler, KeyDownHandler {
+public class XIDEditor extends AtomicXValueEditor<XIDValue> implements KeyPressHandler,
+        KeyDownHandler {
 	
 	private static final String nameStartChar = "A-Z_a-z\\xC0-\\xD6\\xD8-\\xF6"
 	        + "\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D"
@@ -38,12 +38,15 @@ public class XIDEditor extends AtomicXValueEditor implements KeyPressHandler, Ke
 	}
 	
 	@Override
-	public XValue getValue() {
+	public XIDValue getValue() {
 		XID xid;
 		try {
 			xid = X.getIDProvider().fromString(this.editor.getText());
 		} catch(IllegalArgumentException iae) {
 			xid = XValueUtils.generateXid(this.editor.getText());
+			if(xid == null) {
+				return null;
+			}
 			this.editor.setText(xid.toString());
 		}
 		return X.getValueFactory().createIDValue(xid);

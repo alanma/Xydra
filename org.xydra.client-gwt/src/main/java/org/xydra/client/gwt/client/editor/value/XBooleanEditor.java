@@ -1,15 +1,14 @@
 package org.xydra.client.gwt.client.editor.value;
 
 import org.xydra.core.X;
-import org.xydra.core.value.XValue;
+import org.xydra.core.value.XBooleanValue;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 
 
-
-public class XBooleanEditor extends AtomicXValueEditor {
+public class XBooleanEditor extends AtomicXValueEditor<XBooleanValue> {
 	
 	private final CheckBox editor = new CheckBox();
 	
@@ -29,7 +28,7 @@ public class XBooleanEditor extends AtomicXValueEditor {
 	}
 	
 	@Override
-	public XValue getValue() {
+	public XBooleanValue getValue() {
 		return X.getValueFactory().createBooleanValue(this.editor.getValue());
 	}
 	

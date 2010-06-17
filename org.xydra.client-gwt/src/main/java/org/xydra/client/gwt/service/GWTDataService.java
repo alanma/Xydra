@@ -122,8 +122,7 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 		}
 		
 		public void onError(Request req, Throwable t) {
-			Log.info("data service: deleting failed ", t);
-			this.callback.onFailure(t);
+			handleError(t, this.callback);
 		}
 		
 	}
@@ -145,8 +144,7 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 		}
 		
 		public void onError(Request req, Throwable t) {
-			Log.info("data service: saving failed ", t);
-			this.callback.onFailure(t);
+			handleError(t, this.callback);
 		}
 		
 	}

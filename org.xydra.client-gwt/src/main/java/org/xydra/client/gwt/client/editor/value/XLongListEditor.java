@@ -5,12 +5,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.xydra.core.XX;
+import org.xydra.core.value.XLongListValue;
 import org.xydra.core.value.XLongValue;
-import org.xydra.core.value.XValue;
 
 
-
-public class XLongListEditor extends XListEditor {
+public class XLongListEditor extends XListEditor<XLongValue,XLongListValue> {
 	
 	public XLongListEditor(Iterator<Long> value, EditListener listener) {
 		super(listener);
@@ -24,16 +23,16 @@ public class XLongListEditor extends XListEditor {
 	}
 	
 	@Override
-	protected XValue asListValue(Iterator<XValue> entries) {
+	protected XLongListValue asListValue(Iterator<XLongValue> entries) {
 		List<Long> lst = new ArrayList<Long>();
 		while(entries.hasNext())
-			lst.add(((XLongValue)entries.next()).contents());
+			lst.add(entries.next().contents());
 		return XX.toLongListValue(lst);
 	}
 	
 	@Override
 	public void add() {
-		add(new XLongEditor(0L, this));
+		add(new XLongEditor(0L, getListenerForEntry()));
 		changed();
 	}
 	

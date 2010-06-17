@@ -1,6 +1,6 @@
 package org.xydra.client.gwt;
 
-public class HttpException extends Throwable {
+public class HttpException extends ServiceException {
 	
 	private static final long serialVersionUID = -1316683211161143105L;
 	
