@@ -1,12 +1,14 @@
 package org.xydra.log;
 
+import org.junit.Test;
 
 
 public class UseXydraLog {
 	
-	public static final DefaultLogger log = LoggerFactory.getLogger(UseXydraLog.class);
+	public static final Logger log = LoggerFactory.getLogger(UseXydraLog.class);
 	
-	public static void main(String[] args) {
+	@Test
+	public void simpleTest() {
 		if(log.isTraceEnabled()) {
 			log.trace("42");
 		}

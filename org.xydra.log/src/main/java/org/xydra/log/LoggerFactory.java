@@ -4,7 +4,7 @@ public class LoggerFactory {
 	
 	private static ILoggerFactorySPI loggerFactorySPI;
 	
-	public static DefaultLogger getLogger(Class<?> clazz) {
+	public static Logger getLogger(Class<?> clazz) {
 		if(loggerFactorySPI == null) {
 			loggerFactorySPI = new DefaultLoggerFactorySPI();
 			loggerFactorySPI.getLogger("ROOT").error(
