@@ -4,4 +4,5 @@
 	<inherits name="com.google.gwt.user.User" />
 	<source path="" />
 	<entry-point class="org.xydra.log.DummyEntryPoint" />
+	<public path=""></public>
 </module>
