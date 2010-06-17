@@ -20,6 +20,6 @@ public interface ILoggerFactorySPI {
 	 * 
 	 * @param name the name of the Logger to return
 	 */
-	DefaultLogger getLogger(String name);
+	Logger getLogger(String name);
 	
 }

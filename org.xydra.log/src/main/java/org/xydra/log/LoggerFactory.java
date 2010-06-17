@@ -1,5 +1,6 @@
 package org.xydra.log;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 
 
@@ -12,7 +13,8 @@ public class LoggerFactory {
 			
 			// try to use GWT logger
 			
-			if(gwtEnabled()) {
+			if(gwtEnabled() && gwtLogEnabled()) {
+				loggerFactorySPI = new GwtLoggerFactorySPI();
 				// FIXME
 				System.out.println("Hey, we run GWT!");
 				GWT.log("I can see you", null);
@@ -28,6 +30,18 @@ public class LoggerFactory {
 	public static boolean gwtEnabled() {
 		try {
 			if(GWT.isClient()) {
+				return true;
+			}
+		} catch(Exception e) {
+		} catch(Error e) {
+		}
+		return false;
+	}
+	
+	public static boolean gwtLogEnabled() {
+		try {
+			// any class access would do
+			if(Log.LOG_LEVEL_INFO != 0) {
 				return true;
 			}
 		} catch(Exception e) {
