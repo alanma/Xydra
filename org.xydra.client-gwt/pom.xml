@@ -32,7 +32,7 @@
 		<gwt.output.directory>${basedir}/war</gwt.output.directory>
 		
 		<!-- the value of the rename-to attribute in your GWT module configuration -->
-		<gwt.module.alias>XClient</gwt.module.alias>
+		<gwt.module.alias>XydraEditor</gwt.module.alias>
 		
 		<gwt.compiler.force>true</gwt.compiler.force>
 		
@@ -132,10 +132,11 @@
 				<artifactId>gwt-maven-plugin</artifactId>
 				<version>1.2</version>
 				<configuration>
-					<runTarget>XClient.html</runTarget>
+					<runTarget>XydraEditor.html</runTarget>
 					<output>${gwt.output.directory}</output>
 					<logLevel>INFO</logLevel>
 					<style>DETAILED</style>
+					<module>org.xydra.client.gwt.editor.XydraEditor</module>
 				</configuration>
 				<executions>
 					<execution>

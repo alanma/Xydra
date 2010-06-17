@@ -2,9 +2,8 @@ package org.xydra.client.gwt.service;
 
 import java.util.List;
 
-import org.xydra.client.gwt.Callback;
-import org.xydra.client.gwt.ServiceException;
-import org.xydra.client.gwt.XChangesService;
+import org.xydra.client.Callback;
+import org.xydra.client.XChangesService;
 import org.xydra.core.X;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
@@ -16,7 +15,6 @@ import org.xydra.core.xml.XmlCommand;
 import org.xydra.core.xml.XmlEvent;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -36,7 +34,6 @@ public class GWTChangesService extends AbstractGWTHttpService implements XChange
 	
 	public void executeCommand(XCommand command, final long since,
 	        final Callback<CommandResult> callback) {
-		Log.info("changes service: executing command " + command + ", since=" + since);
 		
 		final XAddress target = command.getTarget();
 		
@@ -111,12 +108,9 @@ public class GWTChangesService extends AbstractGWTHttpService implements XChange
 					}
 					
 				} catch(Exception e) {
-					Log.info("changes service: executing command failed", e);
 					callback.onFailure(e);
 					return;
 				}
-				Log.info("changes service: command executed, "
-				        + (events == null ? "no" : events.size()) + " events loaded");
 				callback.onSuccess(new CommandResult(result, events));
 			}
 			
@@ -131,12 +125,11 @@ public class GWTChangesService extends AbstractGWTHttpService implements XChange
 		} catch(RequestException e) {
 			throw new RuntimeException(e);
 		}
+		
 	}
 	
 	public void getEvents(final XID repoId, final XID modelId, long since, long until,
 	        final Callback<List<XEvent>> callback) {
-		Log.info("changes service: getting events between " + since + " and " + until
-		        + " for model " + modelId.toString());
 		
 		String url = modelId.toString();
 		
@@ -152,11 +145,6 @@ public class GWTChangesService extends AbstractGWTHttpService implements XChange
 		getXml(url, new Callback<MiniElement>() {
 			
 			public void onFailure(Throwable error) {
-				if(error instanceof ServiceException) {
-					Log.info("changes service: getting events failed: " + error.getMessage());
-				} else {
-					Log.info("changes service: getting events failed", error);
-				}
 				callback.onFailure(error);
 			}
 			
@@ -166,11 +154,9 @@ public class GWTChangesService extends AbstractGWTHttpService implements XChange
 				try {
 					events = XmlEvent.toEventList(xml, context);
 				} catch(Exception e) {
-					Log.info("changes service: getting events failed", e);
 					callback.onFailure(e);
 					return;
 				}
-				Log.info("changes service: " + events.size() + " events loaded");
 				callback.onSuccess(events);
 			}
 		});

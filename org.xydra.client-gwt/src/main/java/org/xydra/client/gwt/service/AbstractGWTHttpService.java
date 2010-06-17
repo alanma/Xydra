@@ -1,10 +1,10 @@
 package org.xydra.client.gwt.service;
 
-import org.xydra.client.gwt.Callback;
-import org.xydra.client.gwt.ConnectionException;
-import org.xydra.client.gwt.HttpException;
-import org.xydra.client.gwt.NotFoundException;
-import org.xydra.client.gwt.TimeoutException;
+import org.xydra.client.Callback;
+import org.xydra.client.ConnectionException;
+import org.xydra.client.HttpException;
+import org.xydra.client.NotFoundException;
+import org.xydra.client.TimeoutException;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.MiniXMLParser;
 
@@ -89,5 +89,7 @@ public abstract class AbstractGWTHttpService {
 		} catch(RequestException e) {
 			throw new RuntimeException(e);
 		}
+		
 	}
+	
 }
