@@ -1,19 +1,21 @@
 package org.xydra.core.change;
 
+import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XExecutesTransactions;
 import org.xydra.core.model.XField;
+import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 
 
 /**
- * A class that represents a transaction in the XModel environment.
+ * A class that represents a transaction in the Xydra environment.
  * 
  * @author Kaidel
  * 
  *         A Transaction basically is a list of {@link XCommand}s that need to
  *         be executed in an "all or nothing" manner. If one command of the
  *         Transaction is not executable or an error/exception occurs while it
- *         is being executed, the whole Transaction needs to be rolled back (all
+ *         is being executed, the whole Transaction will be rolled back (all
  *         commands that were already executed need to be undone). The
  *         Transaction itself is not responsible that it will or can be executed
  *         in this manner. Classes that implement the
@@ -26,9 +28,10 @@ import org.xydra.core.model.XModel;
  *         command with index 1 etc.
  * 
  *         All commands need to have the same actor, which is specified by the
- *         actor-XID set by the constructor. Trying to add commands to the
- *         transaction that do not refer to the same actor as the transaction
- *         itself, will not do anything, the commands will not be added.
+ *         actor-{@link XID} set by the constructor. Trying to add commands to
+ *         the transaction that do not refer to the same actor as the
+ *         transaction itself, will not do anything, such commands will not be
+ *         added.
  * 
  *         XTransaction is a subclass of {@link XCommand}, so it is possible to
  *         add a Transaction to a Transaction. Adding a Transaction to another
@@ -50,24 +53,20 @@ import org.xydra.core.model.XModel;
  *         Transactions only operate on {@link XModel}s, {@link XObject}s and
  *         {@link XField}s.
  * 
- *         The XAddress of a transaction is the model or object that contains
- *         all the objects/fields modified by the transaction
+ *         The {@link XAddress} of a transaction is address of the model or
+ *         object that contains all the objects/fields modified by the
+ *         transaction
  * 
  */
 public interface XTransaction extends XCommand, Iterable<XAtomicCommand> {
 	
 	/**
-	 * Returns the command at the given index.
-	 * 
-	 * @param index The command at the given index.
-	 * @return The command at the given index.
+	 * @return The {@link XCommand} at the given index in this transaction.
 	 */
 	XAtomicCommand getCommand(int index);
 	
 	/**
-	 * Returns the number of commands in this Transaction.
-	 * 
-	 * @return the number of commands in this Transaction.
+	 * @return the number of {@link XCommands} in this Transaction.
 	 */
 	int size();
 	

@@ -5,7 +5,10 @@ import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
+import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XModel;
+import org.xydra.core.model.XRepository;
 
 
 abstract public class MemoryAtomicEvent implements XEvent {
@@ -37,18 +40,34 @@ abstract public class MemoryAtomicEvent implements XEvent {
 		return this.target;
 	}
 	
+	/**
+	 * @return the {@link XID} of the {@link XRepository} holding the entity
+	 *         this event refers to (may be null)
+	 */
 	public XID getRepositoryID() {
 		return this.target.getRepository();
 	}
 	
+	/**
+	 * @return the {@link XID} of the {@link XModel} holding the entity this
+	 *         event refers to (may be null)
+	 */
 	public XID getModelID() {
 		return this.target.getModel();
 	}
 	
+	/**
+	 * @return the {@link XID} of the {@link XObject} holding the entity this
+	 *         event refers to (may be null)
+	 */
 	public XID getObjectID() {
 		return this.target.getObject();
 	}
 	
+	/**
+	 * @return the {@link XID} of the {@link XField} holding the entity this
+	 *         event refers to (may be null)
+	 */
 	public XID getFieldID() {
 		return this.target.getField();
 	}

@@ -51,7 +51,7 @@ public interface XCommand {
 	static final long CHANGED = 0;
 	
 	/**
-	 * @return the type of change.
+	 * @return the {@link ChangeType} of this command.
 	 */
 	ChangeType getChangeType();
 	

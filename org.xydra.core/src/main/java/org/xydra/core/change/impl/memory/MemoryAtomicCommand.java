@@ -5,6 +5,8 @@ import org.xydra.core.change.XAtomicCommand;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XModel;
+import org.xydra.core.model.XRepository;
 
 
 abstract public class MemoryAtomicCommand implements XAtomicCommand {
@@ -26,10 +28,18 @@ abstract public class MemoryAtomicCommand implements XAtomicCommand {
 		this.revision = revision;
 	}
 	
+	/**
+	 * @return the {@link XID} of the {@link XRepository} holding the entity
+	 *         this command will change (may be null)
+	 */
 	public XID getRepositoryID() {
 		return this.target.getRepository();
 	}
 	
+	/**
+	 * @return the {@link XID} of the {@link XModel} holding the entity this
+	 *         command will change (may be null)
+	 */
 	public XID getModelID() {
 		return this.target.getModel();
 	}
@@ -38,6 +48,10 @@ abstract public class MemoryAtomicCommand implements XAtomicCommand {
 		return this.target.getField();
 	}
 	
+	/**
+	 * @return the {@link XID} of the {@link XObject} holding the entity this
+	 *         command will change (may be null)
+	 */
 	public XID getObjectID() {
 		return this.target.getObject();
 	}

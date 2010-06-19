@@ -1,7 +1,8 @@
 package org.xydra.core.change;
 
 /**
- * The event-type that represents transactions.
+ * An {@link XEvent} representing changes made by {@link XTransaction
+ * XTransactions}
  * 
  * @author Kaidel
  */
@@ -9,17 +10,17 @@ package org.xydra.core.change;
 public interface XTransactionEvent extends XEvent, Iterable<XAtomicEvent> {
 	
 	/**
-	 * Returns the event at the given index
+	 * Returns the {@link XEvent} at the given index of the {@link XTransaction}
+	 * which caused this event.
 	 * 
-	 * @param index The index of the event that will be returned
+	 * @param index The index of the {@link XEvent} which will be returned
 	 * @return The event at the given index
 	 */
 	XAtomicEvent getEvent(int index);
 	
 	/**
-	 * Returns the number of events of the transaction
-	 * 
-	 * @return the number of events of the transaction
+	 * @return the number of events of the {@link XTransaction} which caused
+	 *         this event.
 	 */
 	int size();
 	
