@@ -5,8 +5,13 @@ import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XFieldCommand;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XField;
+import org.xydra.core.model.XID;
 import org.xydra.core.value.XValue;
 
+
+/**
+ * An implementation of {@link XFieldCommand}
+ */
 
 public class MemoryFieldCommand extends MemoryAtomicCommand implements XFieldCommand {
 	
@@ -51,57 +56,72 @@ public class MemoryFieldCommand extends MemoryAtomicCommand implements XFieldCom
 	}
 	
 	/**
-	 * Creates a new {@link XFieldCommand} of the add-type.
+	 * Creates a new {@link XFieldCommand} of the add-type. Will add the given
+	 * {@link XValue} to the specified {@link XField}, if possible.
 	 * 
 	 * @param target The {@link XAddress} of the {@link XField} which value is
 	 *            to be set.
 	 * @param fieldRevision The current revision number of the {@link XField}
-	 *            which value is to be set. The field ID must not be null
+	 *            which {@link XValue} is to be set. The field {@link XID} of
+	 *            the given address must not be null
 	 * @param newValue The new {@link XValue} for the specified {@link XField} -
 	 *            must not be null
 	 * @return Creates a new {@link XFieldCommand} of the add-type for the
 	 *         specified target.
+	 * @throws IllegalArgumentException if the given {@link XAddress} does not
+	 *             specify an {@link XField} or if the given {@link XValue} is
+	 *             null
 	 */
 	public static XFieldCommand createAddCommand(XAddress target, long fieldRevision,
 	        XValue newValue) {
 		
 		if(newValue == null)
-			throw new NullPointerException("an ADD command must have a non-null value");
+			throw new IllegalArgumentException("an ADD command must have a non-null value");
 		
 		return new MemoryFieldCommand(target, ChangeType.ADD, fieldRevision, newValue);
 	}
 	
 	/**
-	 * Creates a new {@link XFieldCommand} of the remove-type.
+	 * Creates a new {@link XFieldCommand} of the remove-type. Will remove the
+	 * current {@link XValue} from the specified {@link XField}, if possible.
 	 * 
 	 * @param target The {@link XAddress} of the {@link XField} which value is
 	 *            to be set.
 	 * @param fieldRevision The current revision number of the {@link XField}
-	 *            which value is to be set. The field ID must not be null
+	 *            which {@link XValue} is to be set. The field {@link XID} of
+	 *            the given address must not be null
 	 * @return Creates a new {@link XFieldCommand} of the remove-type for the
 	 *         specified target.
+	 * @throws IllegalArgumentException if the given {@link XAddress} does not
+	 *             specify an {@link XField}
 	 */
 	public static XFieldCommand createRemoveCommand(XAddress target, long fieldRevision) {
 		return new MemoryFieldCommand(target, ChangeType.REMOVE, fieldRevision, null);
 	}
 	
 	/**
-	 * Creates a new {@link XFieldCommand} of the change-type.
+	 * Creates a new {@link XFieldCommand} of the change-type. Will change the
+	 * current {@link XValue} of the specified {@link XField} to the given
+	 * {@link XValue}, if possible.
 	 * 
 	 * @param target The {@link XAddress} of the {@link XField} which value is
 	 *            to be set.
 	 * @param fieldRevision The current revision number of the {@link XField}
-	 *            which value is to be set. The field ID must not be null
+	 *            which value is to be set. The field {@link XID} of the given
+	 *            address must not be null
 	 * @param newValue The new {@link XValue} for the specified {@link XField} -
 	 *            must not be null
 	 * @return Creates a new {@link XFieldCommand} of the change-type for the
 	 *         specified target.
+	 * @throws IllegalArgumentException if the given {@link XAddress} does not
+	 *             specify an {@link XField}
+	 * @throws IllegalArgumentExcpetion if newValue is null
 	 */
 	public static XFieldCommand createChangeCommand(XAddress target, long fieldRevision,
 	        XValue newValue) {
 		
 		if(newValue == null)
-			throw new NullPointerException("a CHANGE command must have a non-null value");
+			throw new IllegalArgumentException("a CHANGE command must have a non-null value");
 		
 		return new MemoryFieldCommand(target, ChangeType.CHANGE, fieldRevision, newValue);
 	}

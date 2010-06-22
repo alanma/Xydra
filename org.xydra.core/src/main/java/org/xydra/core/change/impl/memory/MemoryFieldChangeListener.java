@@ -7,9 +7,8 @@ import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.change.XFieldEventListener;
 
 
-
 /**
- * A simple implementation of an XChangeListener for XFieldEvents.
+ * An implementation of {@link XFieldEventListener}
  * 
  * @author voelkel
  * 

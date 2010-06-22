@@ -4,12 +4,15 @@ import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XModelEvent;
+import org.xydra.core.change.XTransaction;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XModel;
+import org.xydra.core.model.XRepository;
 
 
 /**
- * The implementation of XModelEvent.
+ * An implementation of {@link XModelEvent}.
  * 
  * @author Kaidel
  */
@@ -70,20 +73,25 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 	}
 	
 	/**
-	 * Returns an XModelEvent of the add-type (object added)
+	 * Creates a new {@link XModelEvent} of the add-type (an {@link XObject} was
+	 * added to the {@link XModel} this event refers to)
 	 * 
-	 * @param actor The XID of the actor
-	 * @param repositoryID The XID of the XRepository containing the XModel
-	 *            which the object was added to
-	 * @param modelID The XModel which the object was added to - must not be
-	 *            null
-	 * @param objectID The XID of the added object - must not be null
-	 * @param objectRevision the revision number of the model this event applies
-	 *            to
-	 * @param inTransaction sets whether this event occurred during a
-	 *            transaction or not
-	 * @return An XModelEvent of the add-type or null if modelID/objectID was
-	 *         null
+	 * @param actor The {@link XID} of the actor
+	 * @param repositoryID The {@link XID} of the {@link XRepository} containing
+	 *            the {@link XModel} which the {@link XObject} was added to
+	 * @param modelID The {@link XModel} which the {@link XObject} was added to
+	 *            - must not be null
+	 * @param objectID The {@link XID} of the added {@link XObject} - must not
+	 *            be null
+	 * @param objectRevision the revision number of the {@link XModel} this
+	 *            event refers to
+	 * @param inTransaction sets whether this event occurred during an
+	 *            {@link XTransaction} or not
+	 * @return An {@link XModelEvent} of the add-type
+	 * @throws IllegalArgumentException if the given {@link XAddress} does not
+	 *             specify an {@link XModel}, if objectID is null or if the
+	 *             given revision number equals
+	 *             {@link XEvent#RevisionOfEntityNotSet}
 	 */
 	
 	public static XModelEvent createAddEvent(XID actor, XAddress target, XID objectID,
@@ -93,16 +101,22 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 	}
 	
 	/**
-	 * Returns an XModelEvent of the remove-type (object removed)
+	 * Creates a new {@link XModelEvent} of the remove-type (an {@link XObject}
+	 * was removed from the {@link XModel} this event refers to)
 	 * 
-	 * @param actor The XID of the actor
-	 * @param repositoryID The XID of the XRepository containing the XModel
-	 *            which the object was removed from
-	 * @param modelID The XModel which the object was removed from
-	 * @param objectID The XID of the removed object
-	 * @param inTransaction sets whether this event occurred during a
-	 *            transaction or not
+	 * @param actor The {@link XID} of the actor
+	 * @param repositoryID The {@link XID} of the {@link XRepository} containing
+	 *            the {@link XModel} which the {@link XObject} was removed from
+	 * @param modelID The {@link XModel} which the {@link XObject} was removed
+	 *            from
+	 * @param objectID The {@link XID} of the removed {@link XObject}
+	 * @param inTransaction sets whether this event occurred during an
+	 *            {@link XTransaction} or not
 	 * @return An XModelEvent of the remove-type
+	 * @throws IllegalArgumentException if the given {@link XAddress} does not
+	 *             specify an {@link XModel}, if objectID is null or if one of
+	 *             the given revision numbers equals
+	 *             {@link XEvent#RevisionOfEntityNotSet}
 	 */
 	
 	public static XModelEvent createRemoveEvent(XID actor, XAddress target, XID objectID,
@@ -121,7 +135,7 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 	        long modelRevision, long objectRevision, boolean inTransaction) {
 		super(target, changeType, actor);
 		
-		if(target.getModel() == null || target.getObject() != null) {
+		if(target.getModel() == null || target.getObject() != null || target.getField() != null) {
 			throw new IllegalArgumentException("target must refer to a model, was: " + target);
 		}
 		
