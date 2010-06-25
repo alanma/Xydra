@@ -80,11 +80,11 @@ public class MemoryModelCommand extends MemoryAtomicCommand implements XModelCom
 	 * @throws IllegalArgumentException if the given {@link XAddress} doesn't
 	 *             refer to an {@link XModel} or if the given objectID is null
 	 */
-	public static XModelCommand createAddCommand(XAddress target, boolean isForced, XID objectID) {
+	public static XModelCommand createAddCommand(XAddress target, boolean isForced, XID objectId) {
 		if(isForced) {
-			return createAddCommand(target, XCommand.FORCED, objectID);
+			return createAddCommand(target, XCommand.FORCED, objectId);
 		} else {
-			return createAddCommand(target, XCommand.SAFE, objectID);
+			return createAddCommand(target, XCommand.SAFE, objectId);
 		}
 	}
 	
@@ -117,7 +117,8 @@ public class MemoryModelCommand extends MemoryAtomicCommand implements XModelCom
 	
 	/**
 	 * Creates a new {@link XModelCommand} of the remove-type. Will remove the
-	 * specified {@link XObject} from the {@link XModel} this event applies to.
+	 * specified {@link XObject} from the {@link XModel} this event applies to,
+	 * if possible.
 	 * 
 	 * @param target The target of this command - the model {@link XID} must not
 	 *            be null, object & field {@link XID} must be null

@@ -6,7 +6,13 @@ import org.xydra.core.change.XRepositoryCommand;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
+import org.xydra.core.model.XRepository;
 
+
+/**
+ * An implementation of {@link XRepositoryCommand}.
+ * 
+ */
 
 public class MemoryRepositoryCommand extends MemoryAtomicCommand implements XRepositoryCommand {
 	
@@ -64,16 +70,21 @@ public class MemoryRepositoryCommand extends MemoryAtomicCommand implements XRep
 	}
 	
 	/**
-	 * Creates a new {@link XRepositoryCommand} of the add-type (adds a new
-	 * model)
+	 * Creates a new {@link XRepositoryCommand} of the add-type. Will add a new
+	 * {@link XModel} with the specified {@link XID} to the {@link XRepository}
+	 * this event applies to, if possible.
 	 * 
-	 * @param target The target of this command - repository ID must not be
-	 *            null, model, object & field ID must be null
+	 * @param target The {@link XAddress} of the {@link XRepository} this
+	 *            command applies to - repository {@link XID} must not be null,
+	 *            model, object & field {@link XID} must be null
 	 * @param isForced determines whether this command will be a forced or a
 	 *            safe command.
 	 * @param modelId The {@link XID} for the {@link XModel} which is to be
 	 *            added
 	 * @return A new {@link XRepositoryCommand} of the add-type
+	 * @throws IllegalArgumentException if the given {@link XAddress} does not
+	 *             refer to an {@link XRepository} or if the given modelID is
+	 *             null
 	 */
 	public static XRepositoryCommand createAddCommand(XAddress target, boolean isForced, XID modelID) {
 		if(isForced) {
@@ -84,17 +95,22 @@ public class MemoryRepositoryCommand extends MemoryAtomicCommand implements XRep
 	}
 	
 	/**
-	 * Creates a new {@link XRepositoryCommand} of the add-type (adds a new
-	 * model)
+	 * Creates a new {@link XRepositoryCommand} of the add-type. Will add a new
+	 * {@link XModel} with the specified {@link XID} to the {@link XRepository}
+	 * this event applies to, if possible.
 	 * 
-	 * @param target The target of this command - repository ID must not be
-	 *            null, model, object & field ID must be null
+	 * @param target The {@link XAddress} of the {@link XRepository} this
+	 *            command applies to - repository ID must not be null, model,
+	 *            object & field ID must be null
 	 * @param modelRevision Must be {@link XCommand.FORCED} or
 	 *            {@link XCommand.SAFE} to determine the behavior of this
 	 *            command.
 	 * @param modelId The {@link XID} for the {@link XModel} which is to be
 	 *            added
 	 * @return A new {@link XRepositoryCommand} of the add-type
+	 * @throws IllegalArgumentException if the given {@link XAddress} does not
+	 *             refer to an {@link XRepository} or if the given modelID is
+	 *             null
 	 */
 	public static XRepositoryCommand createAddCommand(XAddress target, long modelRevision,
 	        XID modelId) {
@@ -107,17 +123,22 @@ public class MemoryRepositoryCommand extends MemoryAtomicCommand implements XRep
 	}
 	
 	/**
-	 * Creates a new {@link XRepositoryCommand} of the remove-type (removes a
-	 * model)
+	 * Creates a new {@link XRepositoryCommand} of the remove-type. Will remove
+	 * the {@link XModel} with the specified {@link XID} from the
+	 * {@link XRepository} this event applies to, if possible.
 	 * 
-	 * @param target The target of this command - repository ID must not be
-	 *            null, model, object & field ID must be null
+	 * @param target The {@link XAddress} of the {@link XRepository} this
+	 *            command applies to - repository {@link XID} must not be null,
+	 *            model, object & field {@link XID} must be null
 	 * @param modelRevision Must be {@link XCommand.FORCED} or
 	 *            {@link XCommand.SAFE} to determine the behavior of this
 	 *            command.
 	 * @param modelId The {@link XID} of the {@link XModel} which is to be
 	 *            removed
 	 * @return A new {@link XRepositoryCommand} of the remove-type
+	 * @throws IllegalArgumentException if the given {@link XAddress} does not
+	 *             refer to an {@link XRepository} or if the given modelID is
+	 *             null
 	 */
 	public static XRepositoryCommand createRemoveCommand(XAddress target, long modelRevision,
 	        XID modelId) {

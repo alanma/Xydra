@@ -8,7 +8,6 @@ import org.xydra.core.change.XTransaction;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
-import org.xydra.core.model.XRepository;
 
 
 /**
@@ -77,14 +76,12 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 	 * added to the {@link XModel} this event refers to)
 	 * 
 	 * @param actor The {@link XID} of the actor
-	 * @param repositoryID The {@link XID} of the {@link XRepository} containing
-	 *            the {@link XModel} which the {@link XObject} was added to
-	 * @param modelID The {@link XModel} which the {@link XObject} was added to
-	 *            - must not be null
+	 * @param target The {@link XAddress} of the {@link XModel} this event
+	 *            refers to - model {@link XID} must not be null
 	 * @param objectID The {@link XID} of the added {@link XObject} - must not
 	 *            be null
-	 * @param objectRevision the revision number of the {@link XModel} this
-	 *            event refers to
+	 * @param modelRevision the revision number of the {@link XModel} this event
+	 *            refers to
 	 * @param inTransaction sets whether this event occurred during an
 	 *            {@link XTransaction} or not
 	 * @return An {@link XModelEvent} of the add-type
@@ -105,11 +102,13 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 	 * was removed from the {@link XModel} this event refers to)
 	 * 
 	 * @param actor The {@link XID} of the actor
-	 * @param repositoryID The {@link XID} of the {@link XRepository} containing
-	 *            the {@link XModel} which the {@link XObject} was removed from
-	 * @param modelID The {@link XModel} which the {@link XObject} was removed
-	 *            from
+	 * @param target The {@link XAddress} of the {@link XModel} this event
+	 *            refers to - model {@link XID} must not be null
 	 * @param objectID The {@link XID} of the removed {@link XObject}
+	 * @param modelRevision the revision number of the {@link XModel} this event
+	 *            refers to
+	 * @param objectRevision the revision number of the {@link XObject} which
+	 *            was removed
 	 * @param inTransaction sets whether this event occurred during an
 	 *            {@link XTransaction} or not
 	 * @return An XModelEvent of the remove-type
