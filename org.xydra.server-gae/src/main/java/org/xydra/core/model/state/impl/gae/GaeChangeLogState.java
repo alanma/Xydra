@@ -29,20 +29,20 @@ public class GaeChangeLogState implements XChangeLogState {
 	private static final String PREFIX_CHANGELOG = "logs/";
 	private static final String PROP_EVENT = "event";
 	
-	private final XAddress modelAddr;
+	private final XAddress baseAddr;
 	
 	private final String prefix;
 	private final Key key;
 	private long firstRev;
 	private long currentRev;
 	
-	public GaeChangeLogState(XAddress address, long currentRev) {
+	public GaeChangeLogState(XAddress baseAddr, long currentRev) {
 		
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		
-		this.modelAddr = address;
+		this.baseAddr = baseAddr;
 		
-		String name = PREFIX_CHANGELOG + address.toString();
+		String name = PREFIX_CHANGELOG + baseAddr.toString();
 		this.prefix = name + "/";
 		
 		this.key = KeyFactory.createKey(KIND_CHANGELOG, name);
@@ -65,9 +65,9 @@ public class GaeChangeLogState implements XChangeLogState {
 	
 	public void appendEvent(XEvent event) {
 		
-		if(!XX.equalsOrContains(getModelAddress(), event.getTarget())) {
+		if(!XX.equalsOrContains(getBaseAddress(), event.getTarget())) {
 			throw new IllegalArgumentException("cannot store event " + event + "in change log for "
-			        + getModelAddress());
+			        + getBaseAddress());
 		}
 		
 		Entity e = new Entity(getKey(event.getModelRevisionNumber()));
@@ -88,7 +88,7 @@ public class GaeChangeLogState implements XChangeLogState {
 	
 	public void saveEvent(Entity e, XEvent event) {
 		XmlOutStringBuffer out = new XmlOutStringBuffer();
-		XmlEvent.toXml(event, out, this.modelAddr);
+		XmlEvent.toXml(event, out, this.baseAddr);
 		
 		/* using Text to store more than 500 characters */
 		Text text = new Text(out.getXml());
@@ -102,7 +102,7 @@ public class GaeChangeLogState implements XChangeLogState {
 		
 		MiniXMLParser miniXMLParser = new MiniXMLParserImpl();
 		MiniElement miniElement = miniXMLParser.parseXml(eventStr);
-		return XmlEvent.toEvent(miniElement, this.modelAddr);
+		return XmlEvent.toEvent(miniElement, this.baseAddr);
 	}
 	
 	public void delete() {
@@ -136,8 +136,8 @@ public class GaeChangeLogState implements XChangeLogState {
 		return this.firstRev;
 	}
 	
-	public XAddress getModelAddress() {
-		return this.modelAddr;
+	public XAddress getBaseAddress() {
+		return this.baseAddr;
 	}
 	
 	public void save() {

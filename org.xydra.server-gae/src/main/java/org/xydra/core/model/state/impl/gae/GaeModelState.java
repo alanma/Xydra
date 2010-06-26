@@ -16,7 +16,6 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 
 
-
 public class GaeModelState extends AbstractGaeStateWithChildren implements XModelState {
 	
 	private static final long serialVersionUID = 8492473097214011504L;

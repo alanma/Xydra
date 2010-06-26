@@ -7,13 +7,13 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XType;
 import org.xydra.core.model.impl.memory.MemoryAddress;
+import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XFieldState;
 import org.xydra.core.model.state.XObjectState;
 import org.xydra.server.gae.GaeUtils;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
-
 
 
 public class GaeObjectState extends AbstractGaeStateWithChildren implements XObjectState {
@@ -75,6 +75,18 @@ public class GaeObjectState extends AbstractGaeStateWithChildren implements XObj
 	
 	public XID getID() {
 		return getAddress().getObject();
+	}
+	
+	XChangeLogState log = null;
+	
+	public XChangeLogState getChangeLogState() {
+		if(getAddress().getModel() != null) {
+			return null;
+		}
+		if(this.log == null) {
+			this.log = new GaeChangeLogState(getAddress(), getRevisionNumber());
+		}
+		return this.log;
 	}
 	
 }

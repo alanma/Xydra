@@ -1,5 +1,6 @@
 package org.xydra.core.model.state.impl.gae;
 
+import org.xydra.core.model.IHasXID;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.state.impl.memory.AbstractState;
 import org.xydra.server.gae.GaeSchema;
@@ -9,8 +10,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 
 
-
-public abstract class AbstractGaeState extends AbstractState {
+public abstract class AbstractGaeState extends AbstractState implements IHasXID {
 	
 	private boolean loaded;
 	
