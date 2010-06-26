@@ -4,7 +4,7 @@ import org.xydra.annotations.ReadOperation;
 
 
 /**
- * A basic {@link XObject} that at least supports read operations.
+ * A basic object that at least supports read operations.
  * 
  * @author dscharrer
  * 
@@ -12,10 +12,12 @@ import org.xydra.annotations.ReadOperation;
 public interface XBaseObject extends IHasXAddress, IHasXID, Iterable<XID> {
 	
 	/**
-	 * Returns the field corresponding to the given XID in this object.
+	 * Returns the {@link XBaseField} contained in this object with the given
+	 * {@link XID}.
 	 * 
-	 * @param fieldID The XID of the wanted {@link XBaseField}
-	 * @return The {@link XBaseField} with the given XID or null, if no
+	 * @param fieldID The {@link XID} of the {@link XBaseField} which is to be
+	 *            returned
+	 * @return The {@link XBaseField} with the given {@link XID} or null, if no
 	 *         corresponding {@link XBaseField} exists
 	 */
 	@ReadOperation
@@ -23,19 +25,19 @@ public interface XBaseObject extends IHasXAddress, IHasXID, Iterable<XID> {
 	
 	/**
 	 * Checks whether this {@link XBaseObject} contains an {@link XBaseField}
-	 * with the given XID
+	 * with the given {@link XID}
 	 * 
-	 * @param id The XID which is to be checked
+	 * @param id The {@link XID} which is to be checked
 	 * @return true, if this {@link XBaseObject} contains an {@link XBaseField}
-	 *         with the given XID, false otherwise
+	 *         with the given {@link XID}, false otherwise
 	 */
 	@ReadOperation
 	boolean hasField(XID fieldId);
 	
 	/**
-	 * Returns the current revision number of this {@link XBaseObject}.
+	 * Returns the current revision number of this object.
 	 * 
-	 * @return The current revision number of this {@link XBaseObject}.
+	 * @return The current revision number of this object.
 	 */
 	@ReadOperation
 	long getRevisionNumber();

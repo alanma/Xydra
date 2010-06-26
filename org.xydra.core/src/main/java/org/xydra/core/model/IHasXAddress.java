@@ -4,7 +4,7 @@ import org.xydra.annotations.ReadOperation;
 
 
 /**
- * Interface for entities that have a full XAddress.
+ * Interface for entities that have an {@link XAddress}.
  * 
  * @author dscharrer
  * 

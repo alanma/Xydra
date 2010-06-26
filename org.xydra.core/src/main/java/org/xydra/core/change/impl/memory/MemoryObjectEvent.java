@@ -90,8 +90,7 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	 *            event refers to
 	 * @param inTransaction sets whether this event occurred during an
 	 *            {@link XTransaction} or not
-	 * @return Returns an {@link XObjectEvent} of the add-type or null if
-	 *         objectID/fieldID was null
+	 * @return an {@link XObjectEvent} of the add-type
 	 * @throws IllegalArgumentException if the given {@link XAddress} doesn't
 	 *             refer to an {@link XObject}, if the given fieldID is null or
 	 *             if the given objectRevision equals
@@ -119,8 +118,7 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	 *            event refers to
 	 * @param inTransaction sets whether this event occurred during an
 	 *            {@link XTransaction} or not
-	 * @return Returns an {@link XObjectEvent} of the add-type or null if
-	 *         objectID/fieldID was null
+	 * @return an {@link XObjectEvent} of the add-type
 	 * @throws IllegalArgumentException if the given {@link XAddress} doesn't
 	 *             refer to an {@link XObject}, if the given fieldID is null or
 	 *             if the given objectRevision equals
@@ -150,7 +148,7 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	 *            removed
 	 * @param inTransaction sets whether this event occurred during an
 	 *            {@link XTransaction} or not
-	 * @return Returns an {@link XObjectEvent} of the remove-type
+	 * @return an {@link XObjectEvent} of the remove-type
 	 * @throws IllegalArgumentException if the given {@link XAddress} doesn't
 	 *             refer to an {@link XObject}, if the given fieldID is null or
 	 *             if the given objectRevision equals
@@ -182,10 +180,10 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	 *            removed
 	 * @param inTransaction sets whether this event occurred during an
 	 *            {@link XTransaction} or not
-	 * @return Returns an {@link XObjectEvent} of the remove-type
+	 * @return an {@link XObjectEvent} of the remove-type
 	 * @throws IllegalArgumentException if the given {@link XAddress} doesn't
 	 *             refer to an {@link XObject}, if the given fieldID is null or
-	 *             if the given objectRevision equals
+	 *             if the given objectRevision or fieldRevision equals
 	 *             {@link XEvent#RevisionOfEntityNotSet}.
 	 */
 	

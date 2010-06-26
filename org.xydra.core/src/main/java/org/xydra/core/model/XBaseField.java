@@ -4,9 +4,8 @@ import org.xydra.annotations.ReadOperation;
 import org.xydra.core.value.XValue;
 
 
-
 /**
- * A basic {@link XField} that at least supports read operations.
+ * A basic field that at least supports read operations.
  * 
  * @author dscharrer
  * 
@@ -14,23 +13,23 @@ import org.xydra.core.value.XValue;
 public interface XBaseField extends IHasXAddress, IHasXID {
 	
 	/**
-	 * @return the current value
+	 * @return the current {@link XValue} of this field
 	 */
 	@ReadOperation
 	XValue getValue();
 	
 	/**
-	 * Gets the current revision number of this {@link XBaseField}.
+	 * Gets the current revision number of this field
 	 * 
-	 * @return The current revision number of this {@link XBaseField}.
+	 * @return The current revision number of this field
 	 */
 	@ReadOperation
 	long getRevisionNumber();
 	
 	/**
-	 * Returns true, if the value of this field equals null
+	 * Returns true, if the {@link XValue} of this field equals null
 	 * 
-	 * @return true, if the value of this field equals null
+	 * @return true, if the {@link XValue} of this field equals null
 	 */
 	@ReadOperation
 	boolean isEmpty();

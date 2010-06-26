@@ -4,16 +4,16 @@ import org.xydra.annotations.ReadOperation;
 
 
 /**
- * Objects of classes that implement this interface have an XID.
+ * Objects of classes that implement this interface have an {@link XID}.
  * 
  * @author voelkel
  */
 public interface IHasXID {
 	
 	/**
-	 * Returns the XID of the class.
+	 * Returns the {@link XID} of this entity.
 	 * 
-	 * @return The XID of the class
+	 * @return The {@link XID} of this entity.
 	 */
 	@ReadOperation
 	XID getID();

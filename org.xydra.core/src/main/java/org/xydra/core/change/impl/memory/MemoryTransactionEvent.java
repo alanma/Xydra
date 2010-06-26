@@ -11,9 +11,11 @@ import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.change.XModelEvent;
 import org.xydra.core.change.XObjectEvent;
+import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.XTransactionEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XModel;
 
 
 /**
@@ -101,26 +103,29 @@ public class MemoryTransactionEvent implements XTransactionEvent {
 	        long modelRevision, long objectRevision) {
 		
 		if(events.length == 0) {
-			throw new RuntimeException("the event list must not be empty");
+			throw new IllegalArgumentException("the event list must not be empty");
 		}
 		
 		if((target.getModel() == null && target.getObject() == null) || target.getField() != null) {
-			throw new RuntimeException("target must be a model or object, was:" + target);
+			throw new IllegalArgumentException("target must be a model or object, was:" + target);
 		}
 		
 		if(target.getObject() == null) {
 			if(objectRevision != XEvent.RevisionOfEntityNotSet)
-				throw new RuntimeException("object revision must not be set for model transactions");
+				throw new IllegalArgumentException(
+				        "object revision must not be set for model transactions");
 			if(modelRevision == XEvent.RevisionOfEntityNotSet)
-				throw new RuntimeException("model revision must be set for model transactions");
+				throw new IllegalArgumentException(
+				        "model revision must be set for model transactions");
 		} else if(objectRevision == XEvent.RevisionOfEntityNotSet)
-			throw new RuntimeException("object revision must be set for object transactions");
+			throw new IllegalArgumentException(
+			        "object revision must be set for object transactions");
 		
 		for(int i = 0; i < events.length; ++i) {
 			
 			if(!XX.equalsOrContains(target, events[i].getTarget())) {
 				throw new IllegalArgumentException("event #" + i + " " + events[i]
-				        + " is not contained in " + target);
+				        + " target is not contained in " + target);
 			}
 			
 			if(!(events[i] instanceof XModelEvent || events[i] instanceof XObjectEvent || events[i] instanceof XFieldEvent)) {
@@ -137,8 +142,44 @@ public class MemoryTransactionEvent implements XTransactionEvent {
 	}
 	
 	/**
+	 * Creates a new {@link XTransactionEvent} composed of the given array of
+	 * {@link XAtomicEvent XAtomicEvents} referring to the specified target.
+	 * Changes to the passed array will not affect the event after its creation.
+	 * 
+	 * @param actor the {@link XID} of the actor
+	 * @param target the {@link XAddress} of the {@link XModel} or
+	 *            {@link XObject} where the {@link XTransaction} represented by
+	 *            this event was executed
+	 * @param events the {@link XAtomicEvent XAtomicEvens} which were executed
+	 *            by the {@link XTransaction} this event represents
+	 * @param modelRevision the revision number of the {@link XModel} this event
+	 *            refers to - must be set if this event represents an
+	 *            {@link XTransaction} which was executed on an {@link XModel}
+	 * @param objectRevision the revision number of the {@link XObject} this
+	 *            event refers to - must be set if this event represents an
+	 *            {@link XTransaction} which was executed on an {@link XObject}
 	 * @return a new transaction with the specified target and events. Changes
 	 *         to the passed array will not affect the transaction.
+	 * @throws IllegalArgumentException if the given {@link XAddress} does not
+	 *             specify an {@link XModel} or {@link XObject}.
+	 * @throws IllegalArgumentException if the given array of
+	 *             {@link XAtomicEvent XAtomicEvents} was empty
+	 * @throws IllegalArgumentException if the event represents an
+	 *             {@link XTransaction} which was executed on an {@link XModel}
+	 *             and the given modelRevision equals
+	 *             {@link XEvent#RevisionOfEntityNotSet} or the given
+	 *             objectRevision does not equal
+	 *             {@link XEvent#RevisionOfEntityNotSet}
+	 * @throws IllegalArgumentException if the event represents an
+	 *             {@link XTransaction} which was executed on an {@link XObject}
+	 *             and the given objectRevision equals
+	 *             {@link XEvent#RevisionOfEntityNotSet}
+	 * @throws IllegalArgumentException if one of the targets of the given
+	 *             {@link XAtomicEvent XAtomicEvents} is not contained by the
+	 *             entity specified by the given {@link XAddress} 'target'
+	 * @throws IllegalArgumentException if one of the given {@link XAtomicEvent
+	 *             XAtomicEvents} is neither an {@link XModelEvent}, an
+	 *             {@link XObjectEvent} nor an {@link XFieldEvent}
 	 */
 	public static XTransactionEvent createTransactionEvent(XID actor, XAddress target,
 	        XAtomicEvent[] events, long modelRevision, long objectRevision) {
@@ -149,8 +190,44 @@ public class MemoryTransactionEvent implements XTransactionEvent {
 	}
 	
 	/**
+	 * Creates a new {@link XTransactionEvent} composed of the given array of
+	 * {@link XAtomicEvent XAtomicEvents} referring to the specified target.
+	 * Changes to the passed array will not affect the event after its creation.
+	 * 
+	 * @param actor the {@link XID} of the actor
+	 * @param target the {@link XAddress} of the {@link XModel} or
+	 *            {@link XObject} where the {@link XTransaction} represented by
+	 *            this event was executed
+	 * @param events the {@link XAtomicEvent XAtomicEvens} which were executed
+	 *            by the {@link XTransaction} this event represents
+	 * @param modelRevision the revision number of the {@link XModel} this event
+	 *            refers to - must be set if this event represents an
+	 *            {@link XTransaction} which was executed on an {@link XModel}
+	 * @param objectRevision the revision number of the {@link XObject} this
+	 *            event refers to - must be set if this event represents an
+	 *            {@link XTransaction} which was executed on an {@link XObject}
 	 * @return a new transaction with the specified target and events. Changes
-	 *         to the passed {@link List} will not affect the transaction.
+	 *         to the passed array will not affect the transaction.
+	 * @throws IllegalArgumentException if the given {@link XAddress} does not
+	 *             specify an {@link XModel} or {@link XObject}.
+	 * @throws IllegalArgumentException if the given list of
+	 *             {@link XAtomicEvent XAtomicEvents} was empty
+	 * @throws IllegalArgumentException if the event represents an
+	 *             {@link XTransaction} which was executed on an {@link XModel}
+	 *             and the given modelRevision equals
+	 *             {@link XEvent#RevisionOfEntityNotSet} or the given
+	 *             objectRevision does not equal
+	 *             {@link XEvent#RevisionOfEntityNotSet}
+	 * @throws IllegalArgumentException if the event represents an
+	 *             {@link XTransaction} which was executed on an {@link XObject}
+	 *             and the given objectRevision equals
+	 *             {@link XEvent#RevisionOfEntityNotSet}
+	 * @throws IllegalArgumentException if one of the targets of the given
+	 *             {@link XAtomicEvent XAtomicEvents} is not contained by the
+	 *             entity specified by the given {@link XAddress} 'target'
+	 * @throws IllegalArgumentException if one of the given {@link XAtomicEvent
+	 *             XAtomicEvents} is neither an {@link XModelEvent}, an
+	 *             {@link XObjectEvent} nor an {@link XFieldEvent}
 	 */
 	public static XTransactionEvent createTransactionEvent(XID actor, XAddress target,
 	        List<XAtomicEvent> events, long modelRevision, long objectRevision) {

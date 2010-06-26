@@ -4,8 +4,8 @@ import org.xydra.core.XX;
 
 
 /**
- * Thrown by safe... methods of {@link XX} if there are not the expected models,
- * objects, fields or values present.
+ * Thrown by safe... methods of {@link XX} if the expected models, objects,
+ * fields or values are not present.
  * 
  * @author voelkel
  * 
