@@ -11,23 +11,21 @@ import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XObjectState;
 
 
-
 public class TemporaryModelState extends AbstractModelState {
 	
 	private static final long serialVersionUID = 5621101945176337135L;
 	
-	private Map<XID,XObjectState> objectStates;
-	
-	private MemoryChangeLogState changeLogState;
+	private final Map<XID,XObjectState> objectStates = new HashMap<XID,XObjectState>();
+	private final XChangeLogState changeLogState;
 	
 	public TemporaryModelState(XAddress modelAddr) {
 		super(modelAddr);
-		this.objectStates = new HashMap<XID,XObjectState>();
+		this.changeLogState = null;
 	}
 	
-	public TemporaryModelState(XAddress modelAddr, long revisionNumber) {
-		super(modelAddr, revisionNumber);
-		this.objectStates = new HashMap<XID,XObjectState>();
+	public TemporaryModelState(XAddress modelAddr, XChangeLogState changeLogState) {
+		super(modelAddr);
+		this.changeLogState = changeLogState;
 	}
 	
 	public void addObjectState(XObjectState objectState) {
@@ -66,13 +64,6 @@ public class TemporaryModelState extends AbstractModelState {
 	public XObjectState createObjectState(XID id) {
 		XAddress objectAddr = XX.resolveObject(getAddress(), id);
 		return new TemporaryObjectState(objectAddr);
-	}
-	
-	@Override
-	void initializeChangeLogState() {
-		assert this.changeLogState == null;
-		
-		this.changeLogState = new MemoryChangeLogState(getAddress(), getRevisionNumber());
 	}
 	
 	public XChangeLogState getChangeLogState() {

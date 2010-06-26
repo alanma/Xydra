@@ -1,10 +1,10 @@
 package org.xydra.core.model.state.impl.memory;
 
-import org.xydra.core.model.IHasXID;
+import org.xydra.core.model.IHasXAddress;
 import org.xydra.core.model.XAddress;
 
 
-public abstract class AbstractState implements IHasXID {
+public abstract class AbstractState implements IHasXAddress {
 	
 	private final XAddress address;
 	

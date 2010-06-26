@@ -8,7 +8,6 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 
 
-
 /**
  * An {@link XObjectState} is a simple, mutable entity. At runtime,
  * {@link XFieldState}s can be added, removed and changed.
@@ -104,5 +103,11 @@ public interface XObjectState extends IHasXID, Iterable<XID>, IHasXAddress {
 	 * @param revisionNumber
 	 */
 	void setRevisionNumber(long revisionNumber);
+	
+	/**
+	 * @return the state of the change log which is logging this object or null
+	 *         if this object is contained within a model
+	 */
+	XChangeLogState getChangeLogState();
 	
 }

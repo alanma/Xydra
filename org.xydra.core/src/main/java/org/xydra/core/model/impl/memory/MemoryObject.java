@@ -31,8 +31,10 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.delta.WrapperModel;
+import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XFieldState;
 import org.xydra.core.model.state.XObjectState;
+import org.xydra.core.model.state.impl.memory.MemoryChangeLogState;
 import org.xydra.core.model.state.impl.memory.TemporaryObjectState;
 
 
@@ -73,7 +75,13 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 	 * @param objectId The {@link XID} for this object
 	 */
 	public MemoryObject(XID objectId) {
-		this(new TemporaryObjectState(X.getIDProvider().fromComponents(null, null, objectId, null)));
+		this(createObjectState(objectId));
+	}
+	
+	private static XObjectState createObjectState(XID objectId) {
+		XAddress objectAddr = X.getIDProvider().fromComponents(null, null, objectId, null);
+		XChangeLogState changeLogState = new MemoryChangeLogState(objectAddr, 0L);
+		return new TemporaryObjectState(objectAddr, changeLogState);
 	}
 	
 	/**
@@ -82,7 +90,8 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 	 * @param objectState The {@link XObjectState} for this object
 	 */
 	public MemoryObject(XObjectState objectState) {
-		this(null, new MemoryEventQueue(null), objectState);
+		this(null, new MemoryEventQueue(objectState.getChangeLogState() == null ? null
+		        : new MemoryChangeLog(objectState.getChangeLogState())), objectState);
 	}
 	
 	/**

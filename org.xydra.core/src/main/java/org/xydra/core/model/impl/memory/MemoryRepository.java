@@ -33,7 +33,6 @@ import org.xydra.core.model.state.XRepositoryState;
 import org.xydra.core.model.state.impl.memory.TemporaryRepositoryState;
 
 
-
 /**
  * An implementation of {@link XRepository}.
  * 

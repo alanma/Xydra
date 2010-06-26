@@ -18,9 +18,9 @@ public abstract class AbstractFieldState extends AbstractState implements XField
 	
 	private static final long serialVersionUID = -4924597306047670433L;
 	
-	protected long revisionNumber;
+	protected long revisionNumber = 0L;
 	
-	/** maybe null */
+	/** may be null */
 	protected XValue value;
 	
 	public AbstractFieldState(XAddress fieldAddr) {

@@ -62,15 +62,15 @@ public abstract class AbstractObjectState extends AbstractState implements XObje
 	public XID getID() {
 		return getAddress().getObject();
 	}
-
+	
 	protected void checkFieldState(XFieldState fieldState) {
-        if(fieldState == null) {
-    		throw new IllegalArgumentException("fieldState was null");
-    	}
-    	if(!XX.contains(getAddress(), fieldState.getAddress())) {
-    		throw new IllegalArgumentException("cannot add field state " + fieldState.getAddress()
-    		        + " to " + getAddress());
-    	}
-    }
+		if(fieldState == null) {
+			throw new IllegalArgumentException("fieldState was null");
+		}
+		if(!XX.contains(getAddress(), fieldState.getAddress())) {
+			throw new IllegalArgumentException("cannot add field state " + fieldState.getAddress()
+			        + " to " + getAddress());
+		}
+	}
 	
 }

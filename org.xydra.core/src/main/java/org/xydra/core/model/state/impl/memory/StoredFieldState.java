@@ -15,9 +15,9 @@ public class StoredFieldState extends AbstractFieldState {
 	
 	private MemoryStateStore store;
 	
-	public StoredFieldState(XAddress fieldAddr, MemoryStateStore memoryStateStore) {
+	public StoredFieldState(XAddress fieldAddr, MemoryStateStore store) {
 		super(fieldAddr);
-		this.store = memoryStateStore;
+		this.store = store;
 	}
 	
 	public void delete() {

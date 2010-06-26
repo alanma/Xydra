@@ -22,10 +22,12 @@ import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryObject;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.core.model.session.XAccessException;
+import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XFieldState;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
 import org.xydra.core.model.state.XRepositoryState;
+import org.xydra.core.model.state.impl.memory.MemoryChangeLogState;
 import org.xydra.core.model.state.impl.memory.TemporaryFieldState;
 import org.xydra.core.model.state.impl.memory.TemporaryModelState;
 import org.xydra.core.model.state.impl.memory.TemporaryObjectState;
@@ -127,7 +129,8 @@ public class XmlModel {
 		long revision = getRevisionAttribute(xml, XMODEL_ELEMENT);
 		
 		XAddress modelAddr = XX.resolveModel(repoAddr, xid);
-		XModelState modelState = new TemporaryModelState(modelAddr, revision);
+		XChangeLogState changeLogState = new MemoryChangeLogState(modelAddr, revision);
+		XModelState modelState = new TemporaryModelState(modelAddr, changeLogState);
 		modelState.setRevisionNumber(revision);
 		
 		Iterator<MiniElement> objectElementIt = xml.getElementsByTagName(XOBJECT_ELEMENT);
@@ -161,7 +164,9 @@ public class XmlModel {
 		long revision = getRevisionAttribute(xml, XOBJECT_ELEMENT);
 		
 		XAddress objectAddr = XX.resolveObject(modelAddr, xid);
-		XObjectState objectState = new TemporaryObjectState(objectAddr);
+		XChangeLogState changeLogState = modelAddr == null ? null : new MemoryChangeLogState(
+		        modelAddr, revision);
+		XObjectState objectState = new TemporaryObjectState(objectAddr, changeLogState);
 		objectState.setRevisionNumber(revision);
 		
 		Iterator<MiniElement> fieldElementIt = xml.getElementsByTagName(XFIELD_ELEMENT);

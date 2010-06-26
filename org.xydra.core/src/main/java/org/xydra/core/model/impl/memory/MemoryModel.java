@@ -37,8 +37,10 @@ import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
+import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
+import org.xydra.core.model.state.impl.memory.MemoryChangeLogState;
 import org.xydra.core.model.state.impl.memory.TemporaryModelState;
 
 
@@ -73,8 +75,13 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 	 * @param modelId The {@link XID} for the model.
 	 */
 	public MemoryModel(XID modelId) {
-		this(null, new TemporaryModelState(X.getIDProvider().fromComponents(null, modelId, null,
-		        null), 0));
+		this(null, createModelState(modelId));
+	}
+	
+	private static XModelState createModelState(XID modelId) {
+		XAddress modelAddr = X.getIDProvider().fromComponents(null, modelId, null, null);
+		XChangeLogState changeLogState = new MemoryChangeLogState(modelAddr, 0L);
+		return new TemporaryModelState(modelAddr, changeLogState);
 	}
 	
 	/**

@@ -19,20 +19,13 @@ public abstract class AbstractModelState extends AbstractState implements XModel
 	
 	private static final long serialVersionUID = -7700593025637594717L;
 	
-	private long revisionNumber;
+	private long revisionNumber = 0L;
 	
 	public AbstractModelState(XAddress modelAddr) {
 		super(modelAddr);
 		if(MemoryAddress.getAddressedType(modelAddr) != XType.XMODEL) {
 			throw new RuntimeException("must be a model address, was: " + modelAddr);
 		}
-	}
-	
-	public AbstractModelState(XAddress modelAddr, long revisionNumber) {
-		this(modelAddr);
-		
-		this.revisionNumber = revisionNumber;
-		initializeChangeLogState();
 	}
 	
 	public long getRevisionNumber() {
@@ -83,5 +76,4 @@ public abstract class AbstractModelState extends AbstractState implements XModel
 		}
 	}
 	
-	abstract void initializeChangeLogState();
 }

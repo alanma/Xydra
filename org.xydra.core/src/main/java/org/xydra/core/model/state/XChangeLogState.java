@@ -4,11 +4,10 @@ import java.io.Serializable;
 
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
-import org.xydra.core.model.impl.memory.MemoryModel;
-
 
 
 public interface XChangeLogState extends Serializable {
+	
 	/**
 	 * Delete this state information from the attached persistence layer, i.e.
 	 * the one determined by calling {@link XStateFactory}.create...().
@@ -63,13 +62,10 @@ public interface XChangeLogState extends Serializable {
 	boolean truncateToRevision(long revisionNumber);
 	
 	/**
-	 * Returns the {@link XAddress} of the {@link MemoryModel} this changelog
-	 * refers to.
-	 * 
-	 * @return the {@link XAddress} of the {@link MemoryModel} this changelog
-	 *         refers to.
+	 * @return the {@link XAddress} of the {@link XModelState} or
+	 *         {@link XObjectState} this changelog refers to. All contained
+	 *         events have been produced by this entity or a descendant.
 	 */
-	// TODO not sure, if this is necessary
-	XAddress getModelAddress();
+	XAddress getBaseAddress();
 	
 }

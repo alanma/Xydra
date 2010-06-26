@@ -5,7 +5,9 @@ package org.xydra.core.model.state.impl.memory;
  * 
  * @author voelkel
  * 
+ *         FIXME why is this in model.state.impl.memory?
  */
+@Deprecated
 public class Assertions {
 	
 	private static boolean assertionsEnabled = false;

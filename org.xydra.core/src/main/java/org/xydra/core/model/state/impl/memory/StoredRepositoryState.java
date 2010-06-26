@@ -10,19 +10,16 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.state.XModelState;
 
 
-
 public class StoredRepositoryState extends AbstractRepositoryState {
 	
 	private static final long serialVersionUID = 4103085757625902603L;
 	
-	private Set<XID> modelStateIDs;
+	private final Set<XID> modelStateIDs = new HashSet<XID>();
+	private final MemoryStateStore store;
 	
-	private MemoryStateStore store;
-	
-	public StoredRepositoryState(XAddress modelAddr, MemoryStateStore memoryStateStore) {
+	public StoredRepositoryState(XAddress modelAddr, MemoryStateStore store) {
 		super(modelAddr);
-		this.store = memoryStateStore;
-		this.modelStateIDs = new HashSet<XID>();
+		this.store = store;
 	}
 	
 	public void addModelState(XModelState modelState) {

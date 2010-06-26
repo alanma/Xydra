@@ -7,8 +7,8 @@ import java.util.Set;
 import org.xydra.core.XX;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XFieldState;
-
 
 
 /**
@@ -20,13 +20,21 @@ import org.xydra.core.model.state.XFieldState;
  */
 public class StoredObjectState extends AbstractObjectState {
 	
-	private Set<XID> fieldStateIDs;
-	private MemoryStateStore store;
+	private final Set<XID> fieldStateIDs = new HashSet<XID>();
+	private final MemoryStateStore store;
+	private final XChangeLogState changeLogState;
 	
-	public StoredObjectState(XAddress objectAddr, MemoryStateStore memoryStateStore) {
+	public StoredObjectState(XAddress objectAddr, MemoryStateStore store) {
 		super(objectAddr);
-		this.store = memoryStateStore;
-		this.fieldStateIDs = new HashSet<XID>();
+		this.store = store;
+		this.changeLogState = null;
+	}
+	
+	public StoredObjectState(XAddress objectAddr, MemoryStateStore store,
+	        XChangeLogState changeLogState) {
+		super(objectAddr);
+		this.store = store;
+		this.changeLogState = changeLogState;
 	}
 	
 	public void addFieldState(XFieldState fieldState) {
@@ -77,6 +85,10 @@ public class StoredObjectState extends AbstractObjectState {
 	public XFieldState getFieldState(XID id) {
 		XAddress fieldAddr = XX.resolveField(getAddress(), id);
 		return this.store.loadFieldState(fieldAddr);
+	}
+	
+	public XChangeLogState getChangeLogState() {
+		return this.changeLogState;
 	}
 	
 }

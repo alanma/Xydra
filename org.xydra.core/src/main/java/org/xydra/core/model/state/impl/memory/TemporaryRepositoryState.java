@@ -10,14 +10,12 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.state.XModelState;
 
 
-
 public class TemporaryRepositoryState extends AbstractRepositoryState {
 	
-	private Map<XID,XModelState> modelStates;
+	private final Map<XID,XModelState> modelStates = new HashMap<XID,XModelState>();
 	
 	public TemporaryRepositoryState(XAddress repoAddr) {
 		super(repoAddr);
-		this.modelStates = new HashMap<XID,XModelState>();
 	}
 	
 	public void addModelState(XModelState modelState) {
@@ -51,7 +49,7 @@ public class TemporaryRepositoryState extends AbstractRepositoryState {
 	
 	public XModelState createModelState(XID id) {
 		XAddress modelAddr = XX.resolveModel(getAddress(), id);
-		return new TemporaryModelState(modelAddr, 0);
+		return new TemporaryModelState(modelAddr, new MemoryChangeLogState(modelAddr, 0L));
 	}
 	
 	public XModelState getModelState(XID id) {

@@ -11,16 +11,13 @@ import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XObjectState;
 
 
-
 public class StoredModelState extends AbstractModelState {
 	
 	private static final long serialVersionUID = -509532259783788492L;
 	
-	private Set<XID> objectStateIDs;
-	
-	private MemoryStateStore store;
-	
-	private MemoryChangeLogState changeLogState;
+	private final Set<XID> objectStateIDs = new HashSet<XID>();
+	private final MemoryStateStore store;
+	private final XChangeLogState changeLogState;
 	
 	/**
 	 * @param modelStateID
@@ -28,17 +25,17 @@ public class StoredModelState extends AbstractModelState {
 	 *            {@link StoredModelState#save()} and
 	 *            {@link StoredModelState#delete()}.
 	 */
-	public StoredModelState(XAddress modelAddr, MemoryStateStore memoryStateStore) {
+	public StoredModelState(XAddress modelAddr, MemoryStateStore store) {
 		super(modelAddr);
-		this.store = memoryStateStore;
-		this.objectStateIDs = new HashSet<XID>();
+		this.store = store;
+		this.changeLogState = null;
 	}
 	
-	public StoredModelState(XAddress modelAddr, MemoryStateStore memoryStateStore,
-	        long revisionNumber) {
-		super(modelAddr, revisionNumber);
-		this.store = memoryStateStore;
-		this.objectStateIDs = new HashSet<XID>();
+	public StoredModelState(XAddress modelAddr, MemoryStateStore store,
+	        XChangeLogState changeLogState) {
+		super(modelAddr);
+		this.store = store;
+		this.changeLogState = changeLogState;
 	}
 	
 	public void addObjectState(XObjectState objectState) {
@@ -93,13 +90,6 @@ public class StoredModelState extends AbstractModelState {
 	
 	public XChangeLogState getChangeLogState() {
 		return this.changeLogState;
-	}
-	
-	@Override
-	protected void initializeChangeLogState() {
-		assert this.changeLogState == null;
-		
-		this.changeLogState = new MemoryChangeLogState(getAddress(), getRevisionNumber());
 	}
 	
 }

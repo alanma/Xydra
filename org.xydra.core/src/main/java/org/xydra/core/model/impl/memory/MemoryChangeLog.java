@@ -35,7 +35,8 @@ public class MemoryChangeLog implements XChangeLog {
 	 * @param event the event which is to be appended
 	 */
 	protected void appendEvent(XEvent event) {
-		assert event.getModelRevisionNumber() == this.getCurrentRevisionNumber();
+		assert this.state.getBaseAddress().getObject() != null
+		        || event.getModelRevisionNumber() == this.getCurrentRevisionNumber();
 		
 		assert !event.inTransaction();
 		// "else": event is part of a transaction and will therefore only be
@@ -59,7 +60,7 @@ public class MemoryChangeLog implements XChangeLog {
 	}
 	
 	public XAddress getModelAddress() {
-		return this.state.getModelAddress();
+		return this.state.getBaseAddress();
 	}
 	
 	public List<XEvent> getAllEventsAfter(long revisionNumber) {

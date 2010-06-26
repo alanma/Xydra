@@ -5,12 +5,12 @@ import java.util.Map;
 
 import org.xydra.core.X;
 import org.xydra.core.model.XAddress;
+import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XFieldState;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
 import org.xydra.core.model.state.XRepositoryState;
 import org.xydra.core.model.state.XStateStore;
-
 
 
 /**
@@ -37,11 +37,13 @@ public class MemoryStateStore implements XStateStore {
 	}
 	
 	public XModelState createModelState(XAddress modelAddr) {
-		return new StoredModelState(modelAddr, this, 0);
+		return new StoredModelState(modelAddr, this, new MemoryChangeLogState(modelAddr, 0L));
 	}
 	
 	public XObjectState createObjectState(XAddress objectAddr) {
-		return new StoredObjectState(objectAddr, this);
+		XChangeLogState log = objectAddr.getModel() != null ? null : new MemoryChangeLogState(
+		        objectAddr, 0L);
+		return new StoredObjectState(objectAddr, this, log);
 	}
 	
 	public XRepositoryState createRepositoryState(XAddress repoAddr) {

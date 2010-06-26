@@ -1,11 +1,13 @@
 package org.xydra.core;
 
 import org.xydra.core.model.XAddress;
+import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XFieldState;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
 import org.xydra.core.model.state.XRepositoryState;
 import org.xydra.core.model.state.XStateStore;
+import org.xydra.core.model.state.impl.memory.MemoryChangeLogState;
 import org.xydra.core.model.state.impl.memory.TemporaryFieldState;
 import org.xydra.core.model.state.impl.memory.TemporaryModelState;
 import org.xydra.core.model.state.impl.memory.TemporaryObjectState;
@@ -19,11 +21,14 @@ public class TemporaryStateStore implements XStateStore {
 	}
 	
 	public XModelState createModelState(XAddress modelStateAddress) {
-		return new TemporaryModelState(modelStateAddress);
+		return new TemporaryModelState(modelStateAddress, new MemoryChangeLogState(
+		        modelStateAddress, 0L));
 	}
 	
 	public XObjectState createObjectState(XAddress objectStateAddress) {
-		return new TemporaryObjectState(objectStateAddress);
+		XChangeLogState log = objectStateAddress.getModel() != null ? null
+		        : new MemoryChangeLogState(objectStateAddress, 0L);
+		return new TemporaryObjectState(objectStateAddress, log);
 	}
 	
 	public XRepositoryState createRepositoryState(XAddress repositoryStateAddress) {

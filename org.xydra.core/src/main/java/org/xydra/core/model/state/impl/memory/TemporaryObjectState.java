@@ -7,9 +7,9 @@ import java.util.Map;
 import org.xydra.core.XX;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XFieldState;
 import org.xydra.core.model.state.XObjectState;
-
 
 
 /**
@@ -20,11 +20,17 @@ import org.xydra.core.model.state.XObjectState;
  */
 public class TemporaryObjectState extends AbstractObjectState {
 	
-	private Map<XID,XFieldState> fieldStates;
+	private final Map<XID,XFieldState> fieldStates = new HashMap<XID,XFieldState>();
+	private final XChangeLogState changeLogState;
 	
 	public TemporaryObjectState(XAddress objectAddr) {
 		super(objectAddr);
-		this.fieldStates = new HashMap<XID,XFieldState>();
+		this.changeLogState = null;
+	}
+	
+	public TemporaryObjectState(XAddress objectAddr, XChangeLogState changeLogState) {
+		super(objectAddr);
+		this.changeLogState = changeLogState;
 	}
 	
 	public void addFieldState(XFieldState fieldState) {
@@ -63,6 +69,10 @@ public class TemporaryObjectState extends AbstractObjectState {
 	
 	public XFieldState getFieldState(XID id) {
 		return this.fieldStates.get(id);
+	}
+	
+	public XChangeLogState getChangeLogState() {
+		return this.changeLogState;
 	}
 	
 }
