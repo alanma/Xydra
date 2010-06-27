@@ -64,15 +64,14 @@ public class MemoryChangeLog implements XChangeLog {
 	}
 	
 	public List<XEvent> getAllEventsAfter(long revisionNumber) {
-		if(revisionNumber < 0) {
+		if(revisionNumber < getFirstRevisionNumber()) {
 			throw new IllegalArgumentException(
-			        "MemoryChangeLog: revisionNumber may not be less than zero");
+			        "revisionNumber may not be less than the first revision number of this log");
 		}
 		
-		if(revisionNumber > this.state.getCurrentRevisionNumber()) {
-			throw new IllegalArgumentException(
-			        "MemoryChangeLog: revisionNumber may not greater than the current revision number of this log");
-			// TODO Exception or return null?
+		if(revisionNumber >= this.state.getCurrentRevisionNumber()) {
+			throw new IndexOutOfBoundsException("revisionNumber may not greater than or equal to"
+			        + " the current revision number of this log");
 		}
 		
 		ArrayList<XEvent> list = new ArrayList<XEvent>();
@@ -85,15 +84,14 @@ public class MemoryChangeLog implements XChangeLog {
 	}
 	
 	public List<XEvent> getAllEventsUntil(long revisionNumber) {
-		if(revisionNumber < 0) {
-			throw new IllegalArgumentException(
-			        "MemoryChangeLog: revisionNumber may not be less than zero");
+		if(revisionNumber < getFirstRevisionNumber()) {
+			throw new IndexOutOfBoundsException(
+			        "revisionNumber may not be less than the first revision number of this log");
 		}
 		
-		if(revisionNumber > this.state.getCurrentRevisionNumber()) {
+		if(revisionNumber >= this.state.getCurrentRevisionNumber()) {
 			throw new IllegalArgumentException(
-			        "MemoryChangeLog: revisionNumber may not greater than the current revision number of this log");
-			// TODO Exception or return null?
+			        "revisionNumber may not greater than or equal to the current revision number of this log");
 		}
 		
 		ArrayList<XEvent> list = new ArrayList<XEvent>();
@@ -146,19 +144,20 @@ public class MemoryChangeLog implements XChangeLog {
 		long firstRev = getFirstRevisionNumber();
 		long curRev = getCurrentRevisionNumber();
 		
-		if(beginRevision > curRev) {
+		if(beginRevision >= curRev) {
 			throw new IndexOutOfBoundsException(
-			        "beginRevision may not be greater than the current revision, was "
+			        "beginRevision may not be greater than or equal to the current revision number, was "
 			                + beginRevision);
 		}
 		
 		if(endRevision < firstRev) {
 			throw new IndexOutOfBoundsException(
-			        "endRevision may not be less than the first revision, was " + endRevision);
+			        "endRevision may not be less than the first revision number, was "
+			                + endRevision);
 		}
 		
 		if(beginRevision > endRevision) {
-			throw new IndexOutOfBoundsException("beginRevision may not be greater than endRevision");
+			throw new IllegalArgumentException("beginRevision may not be greater than endRevision");
 		}
 		
 		long begin = beginRevision < firstRev ? firstRev : beginRevision;
@@ -169,13 +168,18 @@ public class MemoryChangeLog implements XChangeLog {
 	
 	public XEvent getEventAt(long revisionNumber) {
 		if(revisionNumber < 0) {
-			throw new IllegalArgumentException(
-			        "MemoryChangeLog: revisionNumber may not be less than zero");
+			throw new IllegalArgumentException("revisionNumber may not be less than zero");
 		}
 		
-		if(revisionNumber < getFirstRevisionNumber()
-		        || revisionNumber >= this.state.getCurrentRevisionNumber()) {
-			return null;
+		if(revisionNumber < getFirstRevisionNumber()) {
+			throw new IndexOutOfBoundsException(
+			        "revisionNumber may not be less than the first revision" + "number of this log");
+		}
+		
+		if(revisionNumber >= this.state.getCurrentRevisionNumber()) {
+			throw new IndexOutOfBoundsException(
+			        "revisionNumber may not be greater than or equal to the current revision"
+			                + "number of this log");
 		}
 		return this.state.getEvent(revisionNumber);
 	}
