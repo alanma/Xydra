@@ -32,7 +32,7 @@
 			version pointed to by ${gae.home} property (Typically, one used by
 			your Eclipse plug-in)
 		-->
-		<gae.version>1.3.2</gae.version>
+		<gae.version>1.3.4</gae.version>
 		<!-- /!\ Must point to your local GAE/J installation -->
 		<gae.home>
 			${settings.localRepository}/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}
@@ -133,7 +133,11 @@
 			deprecated <repository> <id>seasar</id> <name>Seasar</name>
 			<url>http://maven.seasar.org/maven2/</url> </repository>
 		-->
-
+		<repository>
+			<id>vosao--for-appengine</id>
+			<url>http://vosao.googlecode.com/svn/repository</url>
+		</repository>
+		
 		<repository>
 			<id>gae-repo</id>
 			<url>http://maven-gae-plugin.googlecode.com/svn/repository/</url>
