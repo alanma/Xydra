@@ -7,10 +7,9 @@ import org.xydra.core.change.XSendsObjectEvents;
 import org.xydra.core.change.XSendsTransactionEvents;
 
 
-
 /**
- * A logged {@link XModel} that at least supports read operations and can send
- * events.
+ * A logged {@link XModel} that at least supports read operations and sends
+ * {@link XEvent XEvents} if something is changed.
  * 
  * @author dscharrer
  * 
@@ -19,15 +18,20 @@ public interface XLoggedModel extends XBaseModel, XSendsModelEvent, XSendsObject
         XSendsFieldEvents, XSendsTransactionEvents {
 	
 	/**
-	 * @param id The XID of the wanted {@link XObject}
-	 * @return The {@link XObject} with the given XID or null, if no
-	 *         corresponding {@link XObject} exists
+	 * Returns the {@link XLoggedObject} contained in this model with the given
+	 * {@link XID}
+	 * 
+	 * @param id The {@link XID} of the {@link XLoggedObject} which is to be
+	 *            returned
+	 * @return The {@link XLoggedObject} with the given {@link XID} or null, if
+	 *         no corresponding {@link XLoggedObject} exists
 	 */
 	@ReadOperation
 	XLoggedObject getObject(XID objectId);
 	
 	/**
-	 * @return the change log for this model
+	 * @return the {@link XChangeLog} which is logging the {@link XEvent
+	 *         XEvents} which happen on this model.
 	 */
 	XChangeLog getChangeLog();
 	
