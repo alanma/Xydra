@@ -4,12 +4,16 @@ import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XObjectCommand;
-
+import org.xydra.core.change.XObjectEvent;
 
 
 /**
- * An {@link XObject} is an extensible object. At runtime, {@link XField}s can
- * be added, removed and changed.
+ * An {@link XObject} is a collection of {@link XField XFields}. {@link XField
+ * XFields} may be added, removed or changed dynamically to an XObject at
+ * runtime. An XObject may be stored in an {@link XModel} or live independently.
+ * 
+ * For example an XObject might be used to model a person if we'd write a
+ * phonebook application.
  * 
  * @author voelkel
  * @author Kaidel
@@ -18,54 +22,63 @@ import org.xydra.core.change.XObjectCommand;
 public interface XObject extends XLoggedObject, XExecutesTransactions, XExecutesCommands {
 	
 	/**
-	 * Returns the field corresponding to the given XID in this object.
+	 * Returns the {@link XField} with the given {@link XID} contained in this
+	 * object.
 	 * 
-	 * @param fieldID The XID of the wanted {@link XField}
-	 * @return The {@link XField} with the given XID or null, if no
+	 * @param fieldID The {@link XID} of the {@link XField} which is to be
+	 *            returned
+	 * @return The {@link XField} with the given {@link XID} or null, if no
 	 *         corresponding {@link XField} exists
 	 */
 	@ReadOperation
 	XField getField(XID fieldId);
 	
 	/**
-	 * Creates a new XField and adds it to this XObject
+	 * Creates a new {@link XField} and adds it to this {@link XObject} or
+	 * returns the already existing {@link XField} if the given {@link XID} was
+	 * already taken.
 	 * 
-	 * @param actor The XID of the actor.
-	 * @param fieldID The XID of the XField to be created.
-	 * @return the created field or the already existing field with this XID
+	 * @param actor The {@link XID} of the actor.
+	 * @param fieldID The {@link XID} for the {@link XField} which is to be
+	 *            created.
+	 * @return the newly created {@link XField} or the already existing
+	 *         {@link XField} with this {@link XID}
 	 */
 	@ModificationOperation
 	XField createField(XID actor, XID fieldID);
 	
 	/**
-	 * Removes the XField from this XObject
+	 * Removes the {@link XField} with the given {@link XID} from this XObject
 	 * 
-	 * @param actor The XID of the actor
-	 * @param fieldID The XID of the XField which is to be removed
-	 * @return true, if the given field did exist in the object and could be
-	 *         removed
+	 * @param actor The {@link XID} of the actor
+	 * @param fieldID The {@link XID} of the {@link XField} which is to be
+	 *            removed
+	 * @return true, if the given {@link XField} did exist and could be removed
 	 */
 	@ModificationOperation
 	boolean removeField(XID actor, XID fieldID);
 	
 	/**
-	 * Executes the given command if possible.
+	 * Executes the given {@link XObjectCommand} if possible.
 	 * 
-	 * This method will fail if,
+	 * This method will fail if, the given {@link XObjectCommand} cannot be
+	 * executed which may occur in the following cases:
 	 * <ul>
-	 * <li>the given command cannot be executed (i.e. the specified object does
-	 * not exist, and therefore cannot be removed [delete], or the given XID is
-	 * already taken and therefore a new model with this XID cannot be created
-	 * [add])
-	 * <li>the model-XID in the command does not concur with the XID of this
-	 * model
+	 * <li>Remove-type {@link XObjectCommand}: the specified {@link XField} does
+	 * not exist and therefore cannot be removed
+	 * <li>Add-type {@link XObjectCommand}: the given {@link XID} is already
+	 * taken and therefore a new {@link XField} with this {@link XID} cannot be
+	 * created
+	 * <li>the object-{@link XID} in the {@link XObjectCommand} does not concur
+	 * with the {@link XID} of this XObject
 	 * </ul>
 	 * 
-	 * @param actor The XID of the actor
-	 * @param command The command to be executed
-	 * @return {@link XCommand#FAILED} if the command failed,
-	 *         {@link XCommand#NOCHANGE} if the command didn't change anything
-	 *         or the revision number of the event caused by the command.
+	 * @param command The {@link XObjectCommand} which to be executed
+	 * @return {@link XCommand#FAILED} if executing the {@link XObjectCommand}
+	 *         failed, {@link XCommand#NOCHANGE} if executing the
+	 *         {@link XObjectCommand} didn't change anything or if executing the
+	 *         {@link XObjectCommand} succeeded the revision number of the
+	 *         {@link XObjectEvent} caused by the {@link XObjectCommand}.
 	 */
 	@ModificationOperation
 	long executeObjectCommand(XID actor, XObjectCommand command);

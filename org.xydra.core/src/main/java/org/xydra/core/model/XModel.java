@@ -42,7 +42,8 @@ public interface XModel extends XLoggedModel, Serializable, XExecutesTransaction
 	
 	/**
 	 * Creates a new {@link XObject} with the given {@link XID} and adds it to
-	 * this XModel.
+	 * this XModel or returns the already existing {@link XObject} if the given
+	 * {@link XID} was already taken.
 	 * 
 	 * @param actor The {@link XID} of the actor
 	 * @param id The {@link XID} for the {@link XObject} which is to be created
@@ -71,12 +72,12 @@ public interface XModel extends XLoggedModel, Serializable, XExecutesTransaction
 	 * executed which may occur in the following cases:
 	 * <ul>
 	 * <li>Remove-type {@link XModelCommand}: the specified {@link XObject} does
-	 * not exist, and therefore cannot be removed
+	 * not exist and therefore cannot be removed
 	 * <li>Add-type {@link XModelCommand}: the given {@link XID} is already
 	 * taken and therefore a new {@link XObject} with this {@link XID} cannot be
 	 * created
 	 * <li>the model-{@link XID} in the {@link XModelCommand} does not concur
-	 * with the current {@link XID} of this XModel
+	 * with the {@link XID} of this XModel
 	 * </ul>
 	 * 
 	 * @param command The {@link XModelCommand} which to be executed

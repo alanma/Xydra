@@ -4,8 +4,7 @@ import org.xydra.core.change.XSendsFieldEvents;
 
 
 /**
- * A logged {@link XField} that at least supports read operations and can send
- * events.
+ * A logged field that at least supports read operations and can send events.
  * 
  * @author dscharrer
  * 

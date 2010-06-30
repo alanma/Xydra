@@ -4,6 +4,7 @@ import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XRepositoryCommand;
+import org.xydra.core.change.XRepositoryEvent;
 import org.xydra.core.change.XSendsFieldEvents;
 import org.xydra.core.change.XSendsModelEvent;
 import org.xydra.core.change.XSendsObjectEvents;
@@ -11,9 +12,8 @@ import org.xydra.core.change.XSendsRepositoryEvents;
 import org.xydra.core.change.XSendsTransactionEvents;
 
 
-
 /**
- * A repository manages a set of {@link XModel}s.
+ * A repository manages a set of {@link XModel XModels}.
  * 
  * @author voelkel
  * 
@@ -22,46 +22,62 @@ public interface XRepository extends XBaseRepository, XSendsRepositoryEvents, XS
         XSendsObjectEvents, XSendsFieldEvents, XSendsTransactionEvents, XExecutesCommands {
 	
 	/**
-	 * @param id
-	 * @return the XModel with the given id or null if no such model exists in
-	 *         this repository.
+	 * Returns the {@link XModel} contained in this repository with the given
+	 * {@link XID}
+	 * 
+	 * @param id The {@link XID} of the {@link XModel} which is to be returned
+	 * @return the {@link XModel} with the given {@link XID} or null if no such
+	 *         {@link XModel} exists in this repository.
 	 */
 	@ReadOperation
 	XModel getModel(XID id);
 	
 	/**
-	 * @param actor
-	 * @param id
-	 * @return an {@link XModel} created in the repository. If the {@link XID}
-	 *         was already in use for another model, that {@link XModel} is
-	 *         returned instead.
+	 * Creates a new {@link XModel} with the given {@link XID} and adds it to
+	 * this XRepository or returns the already existing {@link XModel} if the
+	 * given {@link XID} was already taken.
+	 * 
+	 * @param actor The {@link XID} of the actor
+	 * @param id The {@link XID} for the {@link XModel} which is to be created
+	 * @return the newly created {@link XModel} or the already existing
+	 *         {@link XModel} if the given {@link XID} was already taken
 	 */
 	@ModificationOperation
 	XModel createModel(XID actor, XID id);
 	
 	/**
-	 * Removes the given XModel from this XRepository.
+	 * Removes the specified {@link XModel} from this XRepository.
 	 * 
-	 * @param actor The XID of the actor
-	 * @param model The XID of the XModel which is to be removed
-	 * @return true, if the specified model could be removed, false otherwise
+	 * @param actor The {@link XID} of the actor
+	 * @param model The {@link XID} of the {@link XModel} which is to be removed
+	 * @return true, if the specified {@link XModel} could be removed, false
+	 *         otherwise
 	 */
 	@ModificationOperation
 	boolean removeModel(XID actor, XID modelID);
 	
 	/**
-	 * Executes the given command if possible.
+	 * Executes the given {@link XRepositoryCommand} if possible.
 	 * 
-	 * This method will fail if, - the given command cannot be executed (i.e.
-	 * the specified model does not exist, and therefore cannot be removed
-	 * [delete], or the given XID is already taken and therefore a new model
-	 * with this XID cannot be created [add]) - the repository-XID in the
-	 * command does not concur with the XID of this repository
+	 * This method will fail if, the given {@link XRepositoryCommand} cannot be
+	 * executed which may occur in the following cases:
+	 * <ul>
+	 * <li>Remove-type {@link XRepositoryCommand}: the specified {@link XModel}
+	 * does not exist and therefore cannot be removed
+	 * <li>Add-type {@link XRepositoryCommand}: the given {@link XID} is already
+	 * taken and therefore a new {@link XModel} with this {@link XID} cannot be
+	 * created
+	 * <li>the repository-{@link XID} in the {@link XRepositoryCommand} does not
+	 * concur with the {@link XID} of this XRepository
+	 * </ul>
 	 * 
-	 * @param command The command to be executed
-	 * @return {@link XCommand#FAILED} if the command failed,
-	 *         {@link XCommand#NOCHANGE} if the command didn't change anything
-	 *         or {@link XCommand#CHANGED}.
+	 * @param command The {@link XRepositoryCommand} which to be executed
+	 * @return {@link XCommand#FAILED} if executing the
+	 *         {@link XRepositoryCommand} failed, {@link XCommand#NOCHANGE} if
+	 *         executing the {@link XRepositoryCommand} didn't change anything
+	 *         or if executing the {@link XRepositoryCommand} succeeded the
+	 *         revision number of the {@link XRepositoryEvent} caused by the
+	 *         {@link XRepositoryCommand}.
 	 */
 	@ModificationOperation
 	long executeRepositoryCommand(XID actor, XRepositoryCommand command);

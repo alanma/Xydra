@@ -8,7 +8,7 @@ import org.xydra.core.change.XSendsTransactionEvents;
 
 
 /**
- * A logged {@link XModel} that at least supports read operations and sends
+ * A logged model that at least supports read operations and sends
  * {@link XEvent XEvents} if something is changed.
  * 
  * @author dscharrer
