@@ -27,8 +27,6 @@ public interface XChangeLog {
 	 * @return the revision number the logged {@link XModel} had at the time
 	 *         when this change log began logging
 	 */
-	// TODO Is this still necessary? (currently every model is logged from the
-	// beginning and this method should therefore always return 0)
 	long getFirstRevisionNumber();
 	
 	/**
