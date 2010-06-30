@@ -15,9 +15,14 @@ import org.xydra.core.model.XModel;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
-import com.google.gwt.user.client.Timer;
 
-
+/**
+ * A class that can synchronize local and remote changes made to an
+ * {@link XModel}.
+ * 
+ * @author dscharrer
+ * 
+ */
 public class XModelSynchronizer {
 	
 	private static final Logger log = LoggerFactory.getLogger(XModelSynchronizer.class);
@@ -30,22 +35,27 @@ public class XModelSynchronizer {
 	private final List<XCommand> commands;
 	private final List<Callback<Long>> callbacks;
 	
-	private final Timer timer = new Timer() {
-		@Override
-		public void run() {
-			startRequest();
-		}
-	};
-	
+	/**
+	 * Start synchronizing the given model (which has no local changes) via the
+	 * given service. Any further changes applied directly to the model will be
+	 * lost. To persist changes supply the to the
+	 * {@link #executeCommand(XCommand, Callback)} Method.
+	 */
 	public XModelSynchronizer(XModel model, XChangesService service) {
 		this.model = model;
 		this.service = service;
 		this.commands = new ArrayList<XCommand>();
 		this.callbacks = new ArrayList<Callback<Long>>();
-		this.timer.scheduleRepeating(5000);
 		this.syncRevison = this.model.getRevisionNumber();
 	}
 	
+	/**
+	 * Execute a command. The command will be immediately applied locally.
+	 * 
+	 * @param command The command to apply.
+	 * @param callback A callback that will be notified if the command fails or
+	 *            is permanently applied.
+	 */
 	public void executeCommand(XCommand command, Callback<Long> callback) {
 		assert this.callbacks.size() == this.commands.size();
 		log.info("sync: got command: " + command);
@@ -212,8 +222,12 @@ public class XModelSynchronizer {
 		}
 	}
 	
-	public void stopRefreshing() {
-		this.timer.cancel();
+	/**
+	 * Query the server for new remote changes. Local changes will be sent
+	 * immediately.
+	 */
+	public void synchronize() {
+		startRequest();
 	}
 	
 }

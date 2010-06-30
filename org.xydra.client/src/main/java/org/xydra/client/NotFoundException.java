@@ -4,14 +4,21 @@ import org.xydra.core.X;
 import org.xydra.core.model.XAddress;
 
 
-public class NotFoundException extends HttpException {
+/**
+ * An exception that indicates that the requested resource could not be found on
+ * the server.
+ * 
+ * @author dscharrer
+ * 
+ */
+public class NotFoundException extends RequestException {
 	
 	private static final long serialVersionUID = 3076607855891669653L;
 	
 	private final XAddress address;
 	
 	public NotFoundException(String address) {
-		super(404, address + " not found");
+		super(address + " not found");
 		XAddress addr = null;
 		try {
 			addr = X.getIDProvider().fromAddress(address);

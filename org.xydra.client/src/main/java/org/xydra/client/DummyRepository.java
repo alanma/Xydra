@@ -25,6 +25,7 @@ import org.xydra.index.iterator.SingleValueIterator;
 /**
  * A small repository holding exactly the one model passed to the constructor.
  */
+@Deprecated
 public class DummyRepository implements XRepository {
 	
 	private final List<XRepositoryEventListener> listeners = new ArrayList<XRepositoryEventListener>();
