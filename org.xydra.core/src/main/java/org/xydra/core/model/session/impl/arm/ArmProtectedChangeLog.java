@@ -1,7 +1,6 @@
 package org.xydra.core.model.session.impl.arm;
 
 import java.util.Iterator;
-import java.util.List;
 
 import org.xydra.core.XX;
 import org.xydra.core.access.XAccessManager;
@@ -35,34 +34,12 @@ public class ArmProtectedChangeLog implements XChangeLog {
 		this.actor = actor;
 	}
 	
-	public List<XEvent> getAllEventsAfter(long revisionNumber) {
-		
-		List<XEvent> events = this.log.getAllEventsAfter(revisionNumber);
-		
-		Iterator<XEvent> i = events.iterator();
-		
-		while(i.hasNext()) {
-			if(!canSee(i.next())) {
-				i.remove();
-			}
-		}
-		
-		return events;
+	public Iterator<XEvent> getEventsAfter(long revisionNumber) {
+		return getEventsBetween(revisionNumber, Long.MAX_VALUE);
 	}
 	
-	public List<XEvent> getAllEventsUntil(long revisionNumber) {
-		
-		List<XEvent> events = this.log.getAllEventsUntil(revisionNumber);
-		
-		Iterator<XEvent> i = events.iterator();
-		
-		while(i.hasNext()) {
-			if(!canSee(i.next())) {
-				i.remove();
-			}
-		}
-		
-		return events;
+	public Iterator<XEvent> getEventsUntil(long revisionNumber) {
+		return getEventsBetween(0, revisionNumber);
 	}
 	
 	private void checkReadAccess() throws XAccessException {

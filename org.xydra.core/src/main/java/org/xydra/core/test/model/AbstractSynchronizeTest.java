@@ -1,6 +1,7 @@
 package org.xydra.core.test.model;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -124,10 +125,10 @@ abstract public class AbstractSynchronizeTest extends TestCase {
 		makeAdditionalChanges(this.remoteModel);
 		
 		// get the remote changes
-		List<XEvent> remoteChanges = this.remoteModel.getChangeLog()
-		        .getAllEventsAfter(lastRevision);
-		for(int i = 0; i < remoteChanges.size(); i++) {
-			remoteChanges.set(i, fix(remoteChanges.get(i)));
+		List<XEvent> remoteChanges = new ArrayList<XEvent>();
+		Iterator<XEvent> rCIt = this.remoteModel.getChangeLog().getEventsAfter(lastRevision);
+		while(rCIt.hasNext()) {
+			remoteChanges.add(fix(rCIt.next()));
 		}
 		
 		// create a set of local changes
@@ -271,20 +272,23 @@ abstract public class AbstractSynchronizeTest extends TestCase {
 		assertTrue(XX.equalTree(this.localModel, checkModel));
 		
 		// check the change log
-		List<XEvent> remoteHistory = this.remoteModel.getChangeLog().getAllEventsAfter(0);
-		List<XEvent> localHistory = this.localModel.getChangeLog().getAllEventsAfter(0);
+		Iterator<XEvent> remoteHistory = this.remoteModel.getChangeLog().getEventsAfter(0);
+		Iterator<XEvent> localHistory = this.localModel.getChangeLog().getEventsAfter(0);
 		
-		assertEquals(remoteHistory.size(), localHistory.size());
+		assertEquals(this.remoteModel.getChangeLog().getCurrentRevisionNumber(), this.localModel
+		        .getChangeLog().getCurrentRevisionNumber());
 		
-		for(int i = 0; i < remoteHistory.size(); i++) {
-			XEvent remote = fix(remoteHistory.get(i));
-			XEvent local = localHistory.get(i);
+		while(remoteHistory.hasNext()) {
+			assertTrue(localHistory.hasNext());
+			XEvent remote = fix(remoteHistory.next());
+			XEvent local = localHistory.next();
 			if(!(remote instanceof XTransactionEvent)) {
 				assertEquals(remote, local);
 			} else {
 				// FIXME the order of events in a transaction may differ
 			}
 		}
+		assertFalse(localHistory.hasNext());
 		
 		// check that listeners are still there
 		assertFalse(hc.eventsReceived);

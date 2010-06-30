@@ -1,7 +1,6 @@
 package org.xydra.core.model;
 
 import java.util.Iterator;
-import java.util.List;
 
 import org.xydra.core.change.XEvent;
 
@@ -60,12 +59,9 @@ public interface XChangeLog {
 	 *            {@link XEvent} logged by this change log is to be returned
 	 * @return a list of all {@link XEvent XEvents} that occurred until (but not
 	 *         including) the given revision number.
-	 * @throws IndexOutOfBoundsException if the given revision number is less
-	 *             than the first revision number or greater than or equal to
-	 *             the current revision number of this change log
+	 * @throws IndexOutOfBoundsException if revisionNumber is negative
 	 */
-	
-	public List<XEvent> getAllEventsUntil(long revisionNumber);
+	public Iterator<XEvent> getEventsUntil(long revisionNumber);
 	
 	/**
 	 * Returns a list of all {@link XEvent XEvents} that occurred after (and
@@ -75,15 +71,12 @@ public interface XChangeLog {
 	 *            {@link XEvent} logged by this change log is to be returned
 	 * @return a list of all {@link XEvent XEvents} that occurred after (and
 	 *         including) the given revision number.
-	 * @throws IndexOutOfBoundsException if the given revision number is less
-	 *             than the first revision number or greater than or equal to
-	 *             the current revision number of this change log
+	 * @throws IndexOutOfBoundsException if revisionNumber is negative
 	 */
-	
-	public List<XEvent> getAllEventsAfter(long revisionNumber);
+	public Iterator<XEvent> getEventsAfter(long revisionNumber);
 	
 	/**
-	 * Returns an iterator oer all {@link XEvent XEvents} that occurred after
+	 * Returns an iterator over all {@link XEvent XEvents} that occurred after
 	 * (and including) beginRevision and before (but not including) endRevision.
 	 * 
 	 * @param beginRevision the beginning revision number of the interval from
@@ -96,9 +89,8 @@ public interface XChangeLog {
 	 *            {@link XEvent XEvents} since beginRevision
 	 * @return an iterator over all {@link XEvent XEvents} that occurred during
 	 *         the specified interval of revision numbers
-	 * @throws IndexOutOfBoundsException if beginRevision is greater than or
-	 *             equal to the current revision number or if endRevision is
-	 *             less than the first revision number of this changelog
+	 * @throws IndexOutOfBoundsException if beginRevision or endRevision are
+	 *             negative
 	 * @throws IllegalArgumentException if beginRevision is greater than
 	 *             endRevision
 	 */
