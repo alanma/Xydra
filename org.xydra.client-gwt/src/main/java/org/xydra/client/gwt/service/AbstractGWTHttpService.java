@@ -2,8 +2,9 @@ package org.xydra.client.gwt.service;
 
 import org.xydra.client.Callback;
 import org.xydra.client.ConnectionException;
-import org.xydra.client.HttpException;
 import org.xydra.client.NotFoundException;
+import org.xydra.client.RequestException;
+import org.xydra.client.ServerException;
 import org.xydra.client.TimeoutException;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.MiniXMLParser;
@@ -11,7 +12,6 @@ import org.xydra.core.xml.MiniXMLParser;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.RequestTimeoutException;
 import com.google.gwt.http.client.Response;
 
@@ -34,11 +34,13 @@ public abstract class AbstractGWTHttpService {
 	
 	protected static <T> boolean handleError(Response resp, Callback<T> callback) {
 		int sc = resp.getStatusCode();
-		if(sc >= 400) {
+		if(sc >= 500) {
+			callback.onFailure(new ServerException("HTTP " + sc + ": " + resp.getText()));
+		} else if(sc >= 400) {
 			if(resp.getStatusCode() == Response.SC_NOT_FOUND) {
 				callback.onFailure(new NotFoundException(resp.getText()));
 			} else {
-				callback.onFailure(new HttpException(resp.getStatusCode(), resp.getText()));
+				callback.onFailure(new RequestException("HTTP " + sc + ": " + resp.getText()));
 			}
 			return true;
 		} else if(sc == 0) {
@@ -86,7 +88,7 @@ public abstract class AbstractGWTHttpService {
 		
 		try {
 			rb.send();
-		} catch(RequestException e) {
+		} catch(com.google.gwt.http.client.RequestException e) {
 			throw new RuntimeException(e);
 		}
 		

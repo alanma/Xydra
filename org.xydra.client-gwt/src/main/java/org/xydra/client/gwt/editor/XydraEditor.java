@@ -19,6 +19,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -40,6 +41,13 @@ public class XydraEditor implements EntryPoint {
 	VerticalPanel panel = new VerticalPanel();
 	
 	XModelSynchronizer manager;
+	
+	Timer timer = new Timer() {
+		@Override
+		public void run() {
+			XydraEditor.this.manager.synchronize();
+		}
+	};
 	
 	public void onModuleLoad() {
 		// set uncaught exception handler
@@ -107,7 +115,7 @@ public class XydraEditor implements EntryPoint {
 		Log.info("editor: loading " + modelIdStr);
 		
 		if(this.manager != null) {
-			this.manager.stopRefreshing();
+			this.timer.cancel();
 			this.manager = null;
 		}
 		
@@ -152,6 +160,7 @@ public class XydraEditor implements EntryPoint {
 		Log.info("editor: loaded model, starting synchronizer");
 		
 		this.manager = new XModelSynchronizer(model, XydraEditor.this.changes);
+		this.timer.scheduleRepeating(5000);
 		
 		XydraEditor.this.panel.add(new XModelEditor(model, this.manager));
 	}
