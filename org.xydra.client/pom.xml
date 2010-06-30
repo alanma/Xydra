@@ -45,7 +45,7 @@
 
 	<dependencies>
 
-<!--  Xydra -->
+		<!--  Xydra -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
@@ -54,16 +54,11 @@
 		
 
 		<!-- logging dependencies -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.5.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.5.0</version>
-		</dependency>
+    <dependency>
+      <groupId>org.xydra</groupId>
+       <artifactId>log</artifactId>
+      <version>0.0.1</version>
+    </dependency>
 
 		<!-- testing dependencies -->
 		<dependency>
