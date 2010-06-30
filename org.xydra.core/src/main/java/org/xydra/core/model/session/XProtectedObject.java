@@ -9,7 +9,6 @@ import org.xydra.core.model.XLoggedObject;
 import org.xydra.core.model.XObject;
 
 
-
 /**
  * A wrapper for an {@link XObject} for a specific actor.
  * 

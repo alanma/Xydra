@@ -4,12 +4,10 @@ import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XModelCommand;
-import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XLoggedModel;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
-
 
 
 /**
@@ -69,10 +67,5 @@ public interface XProtectedModel extends XLoggedModel, XProtectedExecutesTransac
 	 */
 	@ModificationOperation
 	long executeModelCommand(XModelCommand command);
-	
-	/**
-	 * @return the change log for this model
-	 */
-	XChangeLog getChangeLog();
 	
 }

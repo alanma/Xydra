@@ -26,6 +26,7 @@ import org.xydra.core.change.impl.memory.MemoryFieldEvent;
 import org.xydra.core.change.impl.memory.MemoryObjectEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
+import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XObject;
@@ -685,6 +686,10 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 	
 	protected XObjectState getState() {
 		return this.state;
+	}
+	
+	public XChangeLog getChangeLog() {
+		return this.eventQueue.getChangeLog();
 	}
 	
 }

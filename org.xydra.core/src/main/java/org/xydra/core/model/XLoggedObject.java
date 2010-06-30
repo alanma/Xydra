@@ -28,4 +28,10 @@ public interface XLoggedObject extends XBaseObject, XSendsObjectEvents, XSendsFi
 	@ReadOperation
 	XLoggedField getField(XID fieldId);
 	
+	/**
+	 * @return the {@link XChangeLog} which is logging the {@link XEvent
+	 *         XEvents} which happen on this object.
+	 */
+	XChangeLog getChangeLog();
+	
 }

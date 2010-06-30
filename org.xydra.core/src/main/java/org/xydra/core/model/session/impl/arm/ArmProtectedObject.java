@@ -10,13 +10,13 @@ import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.XTransactionEventListener;
 import org.xydra.core.model.XAddress;
+import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.session.XAccessException;
 import org.xydra.core.model.session.XProtectedField;
 import org.xydra.core.model.session.XProtectedObject;
-
 
 
 /**
@@ -180,6 +180,10 @@ public class ArmProtectedObject implements XProtectedObject {
 		}
 		
 		return this.object.executeCommand(this.actor, command);
+	}
+	
+	public XChangeLog getChangeLog() {
+		return new ArmProtectedChangeLog(this.object.getChangeLog(), this.arm, this.actor);
 	}
 	
 }
