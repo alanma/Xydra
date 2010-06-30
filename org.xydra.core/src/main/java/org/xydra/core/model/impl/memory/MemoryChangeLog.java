@@ -63,7 +63,7 @@ public class MemoryChangeLog implements XChangeLog {
 		return this.state.getBaseAddress();
 	}
 	
-	public List<XEvent> getAllEventsAfter(long revisionNumber) {
+	synchronized public List<XEvent> getAllEventsAfter(long revisionNumber) {
 		if(revisionNumber < getFirstRevisionNumber()) {
 			throw new IllegalArgumentException(
 			        "revisionNumber may not be less than the first revision number of this log");
@@ -83,7 +83,7 @@ public class MemoryChangeLog implements XChangeLog {
 		return list;
 	}
 	
-	public List<XEvent> getAllEventsUntil(long revisionNumber) {
+	synchronized public List<XEvent> getAllEventsUntil(long revisionNumber) {
 		if(revisionNumber < getFirstRevisionNumber()) {
 			throw new IndexOutOfBoundsException(
 			        "revisionNumber may not be less than the first revision number of this log");
@@ -139,7 +139,7 @@ public class MemoryChangeLog implements XChangeLog {
 		
 	}
 	
-	public Iterator<XEvent> getEventsBetween(long beginRevision, long endRevision) {
+	synchronized public Iterator<XEvent> getEventsBetween(long beginRevision, long endRevision) {
 		
 		long firstRev = getFirstRevisionNumber();
 		long curRev = getCurrentRevisionNumber();
@@ -166,7 +166,7 @@ public class MemoryChangeLog implements XChangeLog {
 		return new EventIterator(begin, end);
 	}
 	
-	public XEvent getEventAt(long revisionNumber) {
+	synchronized public XEvent getEventAt(long revisionNumber) {
 		if(revisionNumber < 0) {
 			throw new IllegalArgumentException("revisionNumber may not be less than zero");
 		}
@@ -184,11 +184,11 @@ public class MemoryChangeLog implements XChangeLog {
 		return this.state.getEvent(revisionNumber);
 	}
 	
-	public long getCurrentRevisionNumber() {
+	synchronized public long getCurrentRevisionNumber() {
 		return this.state.getCurrentRevisionNumber();
 	}
 	
-	public long getFirstRevisionNumber() {
+	synchronized public long getFirstRevisionNumber() {
 		return this.state.getFirstRevisionNumber();
 	}
 	
