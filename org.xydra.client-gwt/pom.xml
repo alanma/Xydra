@@ -123,6 +123,19 @@
 			<classifier>sources</classifier>
 		</dependency>
 		
+		<!--  Xydra Log -->
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>log</artifactId>
+			<version>0.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>log</artifactId>
+			<version>0.0.1</version>
+			<classifier>sources</classifier>
+		</dependency>
+		
 		<!-- gwt-log -->
 		<dependency>
 			<groupId>com.google.code.gwt-log</groupId>
