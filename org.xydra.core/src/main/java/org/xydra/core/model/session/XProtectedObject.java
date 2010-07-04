@@ -15,8 +15,7 @@ import org.xydra.core.model.XObject;
  * @author dscharrer
  * 
  */
-public interface XProtectedObject extends XLoggedObject, XProtectedExecutesTransactions,
-        XProtectedExecutesCommands {
+public interface XProtectedObject extends XLoggedObject, XProtectedSynchronizesChanges {
 	
 	/**
 	 * Returns the field corresponding to the given XID in this object.

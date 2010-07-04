@@ -16,8 +16,7 @@ import org.xydra.core.model.XObject;
  * @author dscharrer
  * 
  */
-public interface XProtectedModel extends XLoggedModel, XProtectedExecutesTransactions,
-        XProtectedExecutesCommands {
+public interface XProtectedModel extends XLoggedModel, XProtectedSynchronizesChanges {
 	
 	/**
 	 * @param id The XID of the wanted object
