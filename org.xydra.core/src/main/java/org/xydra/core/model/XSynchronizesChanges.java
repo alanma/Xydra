@@ -2,7 +2,6 @@ package org.xydra.core.model;
 
 import java.util.List;
 
-import org.xydra.annotations.ModificationOperation;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XTransaction;
@@ -16,23 +15,8 @@ import org.xydra.core.change.XTransaction;
  * @author dscharrer
  * 
  */
-public interface XSynchronizesChanges extends XExecutesCommands, IHasXAddress {
-	
-	/**
-	 * This method executes the given {@link XTransaction}.
-	 * 
-	 * An implementation has to make sure to execute it as describe in the
-	 * documentation of {@link XTransaction}.
-	 * 
-	 * @param actor the {@link XID} of the actor
-	 * @param transaction the {@link XTransaction} which is to be executed
-	 * @return {@link XCommand#FAILED} if the transaction failed,
-	 *         {@link XCommand#NOCHANGE} if the transaction didn't change
-	 *         anything or the revision number of the {@link XEvent} caused by
-	 *         the transaction.
-	 */
-	@ModificationOperation
-	long executeTransaction(XID actor, XTransaction transaction);
+public interface XSynchronizesChanges extends XExecutesCommands, XExecutesTransactions,
+        IHasXAddress {
 	
 	/**
 	 * Roll back the model state (including revisions) to a specific revision.
