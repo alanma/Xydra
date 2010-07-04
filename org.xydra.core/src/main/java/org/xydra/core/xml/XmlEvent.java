@@ -27,7 +27,6 @@ import org.xydra.core.model.XID;
 import org.xydra.core.value.XValue;
 
 
-
 /**
  * Collection of methods to (de-)serialize variants of {@link XEvent} to and
  * from their XML representation.
@@ -45,6 +44,7 @@ public class XmlEvent {
 	private static final String XFIELDEVENT_ELEMENT = "xfieldEvent";
 	private static final String XTRANSACTIONEVENT_ELEMENT = "xtransactionEvent";
 	private static final String XEVENTLIST_ELEMENT = "xevents";
+	private static final String XNULL_ELEMENT = "xnull";
 	
 	private static final String REPOSITORYID_ATTRIBUTE = "repositoryId";
 	private static final String MODELID_ATTRIBUTE = "modelId";
@@ -154,10 +154,11 @@ public class XmlEvent {
 	 */
 	public static XEvent toEvent(MiniElement xml, XAddress context) throws IllegalArgumentException {
 		String name = xml.getName();
-		if(name.equals(XTRANSACTIONEVENT_ELEMENT))
+		if(name.equals(XTRANSACTIONEVENT_ELEMENT)) {
 			return toTransactionEvent(xml, context);
-		else
+		} else {
 			return toAtomicEvent(xml, context);
+		}
 	}
 	
 	/**
@@ -174,16 +175,19 @@ public class XmlEvent {
 	public static XAtomicEvent toAtomicEvent(MiniElement xml, XAddress context)
 	        throws IllegalArgumentException {
 		String name = xml.getName();
-		if(name.equals(XFIELDEVENT_ELEMENT))
+		if(name.equals(XFIELDEVENT_ELEMENT)) {
 			return toFieldEvent(xml, context);
-		else if(name.equals(XOBJECTEVENT_ELEMENT))
+		} else if(name.equals(XOBJECTEVENT_ELEMENT)) {
 			return toObjectEvent(xml, context);
-		else if(name.equals(XMODELEVENT_ELEMENT))
+		} else if(name.equals(XMODELEVENT_ELEMENT)) {
 			return toModelEvent(xml, context);
-		else if(name.equals(XREPOSITORYEVENT_ELEMENT))
+		} else if(name.equals(XREPOSITORYEVENT_ELEMENT)) {
 			return toRepositoryEvent(xml, context);
-		else
+		} else if(name.equals(XNULL_ELEMENT)) {
+			return null;
+		} else {
 			throw new IllegalArgumentException("Unexpected event element: <" + name + ">.");
+		}
 	}
 	
 	/**
@@ -468,7 +472,10 @@ public class XmlEvent {
 	
 	public static void toXml(XEvent event, XmlOut out, XAddress context)
 	        throws IllegalArgumentException {
-		if(event instanceof XTransactionEvent) {
+		if(event == null) {
+			out.open(XNULL_ELEMENT);
+			out.close(XNULL_ELEMENT);
+		} else if(event instanceof XTransactionEvent) {
 			toXml((XTransactionEvent)event, out, context);
 		} else if(event instanceof XFieldEvent) {
 			toXml((XFieldEvent)event, out, context);
