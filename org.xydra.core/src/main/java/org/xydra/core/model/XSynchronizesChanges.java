@@ -51,4 +51,10 @@ public interface XSynchronizesChanges extends XExecutesCommands, XExecutesTransa
 	long[] synchronize(List<XEvent> remoteChanges, long lastRevision, XID actor,
 	        List<XCommand> localChanges, List<? extends XSynchronizationCallback> callbacks);
 	
+	/**
+	 * @return the {@link XChangeLog} which is logging the {@link XEvent
+	 *         XEvents} which happen on this model or object.
+	 */
+	XChangeLog getChangeLog();
+	
 }

@@ -24,8 +24,7 @@ import org.xydra.core.change.XModelEvent;
  * @author Kaidel
  * 
  */
-public interface XModel extends XLoggedModel, Serializable, XSynchronizesChanges,
-        XExecutesCommands {
+public interface XModel extends XLoggedModel, Serializable, XSynchronizesChanges {
 	
 	/**
 	 * Returns the {@link XObject} contained in this model with the given

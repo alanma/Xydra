@@ -19,7 +19,7 @@ import org.xydra.core.change.XObjectEvent;
  * @author Kaidel
  * 
  */
-public interface XObject extends XLoggedObject, XSynchronizesChanges, XExecutesCommands {
+public interface XObject extends XLoggedObject, XSynchronizesChanges {
 	
 	/**
 	 * Returns the {@link XField} with the given {@link XID} contained in this
