@@ -111,10 +111,6 @@ public class XSynchronizer {
 						        log.info("sync: error sending command", error);
 					        }
 					        // TODO handle error;
-					        if(callback != null) {
-						        callback.failed();
-						        callback.failedPost();
-					        }
 					        requestEnded(false);
 				        }
 				        
