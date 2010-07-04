@@ -1,8 +1,10 @@
 package org.xydra.core.test.model;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import junit.framework.TestCase;
 
@@ -12,6 +14,7 @@ import org.junit.Test;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
+import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XFieldCommand;
@@ -285,7 +288,20 @@ abstract public class AbstractSynchronizeTest extends TestCase {
 			if(!(remote instanceof XTransactionEvent)) {
 				assertEquals(remote, local);
 			} else {
-				// FIXME the order of events in a transaction may differ
+				assertTrue(local instanceof XTransactionEvent);
+				// events may be in a different order
+				Set<XAtomicEvent> events1 = new HashSet<XAtomicEvent>();
+				for(XAtomicEvent e1 : (XTransactionEvent)remote) {
+					events1.add(e1);
+				}
+				Set<XAtomicEvent> events2 = new HashSet<XAtomicEvent>();
+				for(XAtomicEvent e2 : (XTransactionEvent)local) {
+					events2.add(e2);
+				}
+				assertEquals(events1, events2);
+				// the order is not completely irrelevant, but assuming the
+				// transaction events are minimal (there are no add-remove /
+				// add-change / change-remove pairs), this should be enough
 			}
 		}
 		assertFalse(localHistory.hasNext());
