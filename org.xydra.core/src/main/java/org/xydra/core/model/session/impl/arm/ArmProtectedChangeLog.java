@@ -12,7 +12,7 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.session.XAccessException;
-import org.xydra.index.iterator.AbstractFilteringIterator;
+import org.xydra.index.iterator.AbstractTransformingIterator;
 
 
 /**
@@ -111,11 +111,11 @@ public class ArmProtectedChangeLog implements XChangeLog {
 	}
 	
 	public Iterator<XEvent> getEventsBetween(long beginRevision, long endRevision) {
-		return new AbstractFilteringIterator<XEvent>(this.log.getEventsBetween(beginRevision,
-		        endRevision)) {
+		return new AbstractTransformingIterator<XEvent,XEvent>(this.log.getEventsBetween(
+		        beginRevision, endRevision)) {
 			@Override
-			protected boolean matchesFilter(XEvent entry) {
-				return canSee(entry);
+			public XEvent transform(XEvent entry) {
+				return canSee(entry) ? entry : null;
 			}
 		};
 	}
