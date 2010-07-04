@@ -55,7 +55,7 @@ public interface XChangesService {
 	 *            will always be the last in the list.
 	 */
 	void executeCommand(XAddress entity, XCommand command, long since,
-	        Callback<CommandResult> callback);
+	        Callback<CommandResult> callback, XAddress context);
 	
 	/**
 	 * Get events from a model.
@@ -66,6 +66,7 @@ public interface XChangesService {
 	 * @param until Revision of the last event to get. NONE for no upper limit.
 	 * @param callback
 	 */
-	void getEvents(XAddress entity, long since, long until, Callback<List<XEvent>> callback);
+	void getEvents(XAddress entity, long since, long until, Callback<List<XEvent>> callback,
+	        XAddress context);
 	
 }

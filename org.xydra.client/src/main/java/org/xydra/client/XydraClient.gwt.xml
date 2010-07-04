@@ -4,9 +4,6 @@
 	<!-- Inherit the Xydra Core -->
 	<inherits name='org.xydra.core.XydraCore'/>
 	
-	<!--  Import the log module -->
-	<inherits name='org.xydra.log.Xlog' />
-	
 	<source path=""/>
 	
 </module>
