@@ -4,8 +4,7 @@ import java.util.List;
 
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
-import org.xydra.core.model.XID;
-
+import org.xydra.core.model.XAddress;
 
 
 /**
@@ -46,6 +45,8 @@ public interface XChangesService {
 	/**
 	 * Execute a command and get events since a specific revision.
 	 * 
+	 * @param entity Address of the model or object to get changes from, must
+	 *            not be null.
 	 * @param command The command to execute.
 	 * @param since Revision of the first event to get. NONE if only the event
 	 *            caused by the given command is wanted.
@@ -53,17 +54,18 @@ public interface XChangesService {
 	 *            command changes something (result >= 0), the resulting event
 	 *            will always be the last in the list.
 	 */
-	void executeCommand(XCommand command, long since, Callback<CommandResult> callback);
+	void executeCommand(XAddress entity, XCommand command, long since,
+	        Callback<CommandResult> callback);
 	
 	/**
 	 * Get events from a model.
 	 * 
-	 * @param repoId RepoId to fill in when de-serializing the commands.
-	 * @param modelId ID of the model to get changes from, must not be null.
+	 * @param entity Address of the model or object to get changes from, must
+	 *            not be null.
 	 * @param since Revision of the first event to get. NONE for no lower limit.
 	 * @param until Revision of the last event to get. NONE for no upper limit.
 	 * @param callback
 	 */
-	void getEvents(XID repoId, XID modelId, long since, long until, Callback<List<XEvent>> callback);
+	void getEvents(XAddress entity, long since, long until, Callback<List<XEvent>> callback);
 	
 }

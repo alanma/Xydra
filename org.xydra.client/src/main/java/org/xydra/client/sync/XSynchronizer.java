@@ -12,6 +12,7 @@ import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
+import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
@@ -23,17 +24,17 @@ import org.xydra.log.LoggerFactory;
  * @author dscharrer
  * 
  */
-public class XModelSynchronizer {
+public class XSynchronizer {
 	
-	private static final Logger log = LoggerFactory.getLogger(XModelSynchronizer.class);
+	private static final Logger log = LoggerFactory.getLogger(XSynchronizer.class);
 	
 	private static final XID LOCAL_ACTOR = X.getIDProvider().fromString("local");
 	
 	private long syncRevison;
-	private final XModel model;
+	private final XSynchronizesChanges entity;
 	private final XChangesService service;
 	private final List<XCommand> commands;
-	private final List<Callback<Long>> callbacks;
+	private final List<XCommandCallback> callbacks;
 	
 	/**
 	 * Start synchronizing the given model (which has no local changes) via the
@@ -41,12 +42,12 @@ public class XModelSynchronizer {
 	 * lost. To persist changes supply the to the
 	 * {@link #executeCommand(XCommand, Callback)} Method.
 	 */
-	public XModelSynchronizer(XModel model, XChangesService service) {
-		this.model = model;
+	public XSynchronizer(XSynchronizesChanges entity, XChangesService service) {
+		this.entity = entity;
 		this.service = service;
 		this.commands = new ArrayList<XCommand>();
-		this.callbacks = new ArrayList<Callback<Long>>();
-		this.syncRevison = this.model.getRevisionNumber();
+		this.callbacks = new ArrayList<XCommandCallback>();
+		this.syncRevison = getLocalRevisionNumber();
 	}
 	
 	/**
@@ -56,19 +57,20 @@ public class XModelSynchronizer {
 	 * @param callback A callback that will be notified if the command fails or
 	 *            is permanently applied.
 	 */
-	public void executeCommand(XCommand command, Callback<Long> callback) {
+	public void executeCommand(XCommand command, XCommandCallback callback) {
 		assert this.callbacks.size() == this.commands.size();
 		log.info("sync: got command: " + command);
-		long result = this.model.executeCommand(LOCAL_ACTOR, command);
+		long result = this.entity.executeCommand(LOCAL_ACTOR, command);
 		if(result == XCommand.FAILED) {
+			log.warn("sync: command failed immediately");
 			if(callback != null) {
-				log.warn("sync: command failed immediately");
-				callback.onFailure(null);
+				callback.failed();
+				callback.failedPost();
 			}
 		} else if(result == XCommand.NOCHANGE) {
+			log.warn("sync: command already redundant");
 			if(callback != null) {
-				log.warn("sync: command already redundant");
-				callback.onSuccess(result);
+				callback.applied(result);
 			}
 		} else {
 			this.commands.add(command);
@@ -76,6 +78,10 @@ public class XModelSynchronizer {
 			startRequest();
 		}
 		assert this.callbacks.size() == this.commands.size();
+	}
+	
+	public long getLocalRevisionNumber() {
+		return this.entity.getChangeLog().getCurrentRevisionNumber();
 	}
 	
 	boolean requestRunning = false;
@@ -92,64 +98,66 @@ public class XModelSynchronizer {
 		if(!this.commands.isEmpty()) {
 			
 			XCommand command = this.commands.get(0);
-			final Callback<Long> callback = this.callbacks.get(0);
+			final XCommandCallback callback = this.callbacks.get(0);
 			
 			log.info("sync: sending command " + command + ", rev is " + this.syncRevison);
 			
-			this.service.executeCommand(command, this.syncRevison, new Callback<CommandResult>() {
-				public void onFailure(Throwable error) {
-					if(error instanceof ServiceException) {
-						log.info("sync: error sending command: " + error.getMessage());
-					} else {
-						log.info("sync: error sending command", error);
-					}
-					// TODO handle error;
-					if(callback != null) {
-						callback.onFailure(error);
-					}
-					requestEnded(false);
-				}
-				
-				public void onSuccess(CommandResult res) {
-					if(res.getResult() != XCommand.FAILED) {
-						if(res.getResult() >= 0) {
-							log.info("sync: command applied remotely");
-						} else {
-							if(res.getEvents().size() == 0) {
-								log.warn("sync: command didn't change anything remotely, "
-								        + "but not new events, sync lost?");
-								// lost sync -> bad!!!
-							} else {
-								log.info("sync: command failed remotely, got new events");
-							}
-							
-						}
-						if(callback != null) {
-							callback.onSuccess(res.getResult());
-						}
-						XModelSynchronizer.this.commands.remove(0);
-						XModelSynchronizer.this.callbacks.remove(0);
-					} else {
-						if(res.getEvents().size() == 0) {
-							log.warn("sync: command failed but no new events, sync lost?");
-							// lost sync -> bad!!!
-						} else {
-							log.info("sync: command failed remotely, got new events");
-							// should fail in applyEvents
-						}
-					}
-					applyEvents(res.getEvents());
-					requestEnded(true);
-				}
-				
-			});
+			this.service.executeCommand(this.entity.getAddress(), command, this.syncRevison,
+			        new Callback<CommandResult>() {
+				        public void onFailure(Throwable error) {
+					        if(error instanceof ServiceException) {
+						        log.info("sync: error sending command: " + error.getMessage());
+					        } else {
+						        log.info("sync: error sending command", error);
+					        }
+					        // TODO handle error;
+					        if(callback != null) {
+						        callback.failed();
+						        callback.failedPost();
+					        }
+					        requestEnded(false);
+				        }
+				        
+				        public void onSuccess(CommandResult res) {
+					        if(res.getResult() != XCommand.FAILED) {
+						        if(res.getResult() >= 0) {
+							        log.info("sync: command applied remotely");
+						        } else {
+							        if(res.getEvents().size() == 0) {
+								        log.warn("sync: command didn't change anything remotely, "
+								                + "but not new events, sync lost?");
+								        // lost sync -> bad!!!
+							        } else {
+								        log.info("sync: command failed remotely, got new events");
+							        }
+							        
+						        }
+						        if(callback != null) {
+							        callback.applied(res.getResult());
+						        }
+						        XSynchronizer.this.commands.remove(0);
+						        XSynchronizer.this.callbacks.remove(0);
+					        } else {
+						        if(res.getEvents().size() == 0) {
+							        log.warn("sync: command failed but no new events, sync lost?");
+							        // lost sync -> bad!!!
+						        } else {
+							        log.info("sync: command failed remotely, got new events");
+							        // should fail in applyEvents
+						        }
+					        }
+					        applyEvents(res.getEvents());
+					        requestEnded(true);
+				        }
+				        
+			        });
 			
 		} else {
 			
 			log.info("sync: getting events, rev is " + this.syncRevison);
 			
-			this.service.getEvents(this.model.getAddress().getRepository(), this.model.getID(),
-			        this.syncRevison, XChangesService.NONE, new Callback<List<XEvent>>() {
+			this.service.getEvents(this.entity.getAddress(), this.syncRevison,
+			        XChangesService.NONE, new Callback<List<XEvent>>() {
 				        
 				        public void onFailure(Throwable error) {
 					        if(error instanceof ServiceException) {
@@ -179,28 +187,28 @@ public class XModelSynchronizer {
 		}
 		
 		log.info("sync: merging " + remoteChanges.size() + " remote and " + this.commands.size()
-		        + " local changes, local rev is " + this.model.getRevisionNumber() + " (synced to "
+		        + " local changes, local rev is " + getLocalRevisionNumber() + " (synced to "
 		        + this.syncRevison + ")");
 		
-		long[] results = this.model.synchronize(remoteChanges, this.syncRevison, LOCAL_ACTOR,
-		        this.commands);
+		long[] results = this.entity.synchronize(remoteChanges, this.syncRevison, LOCAL_ACTOR,
+		        this.commands, null);
 		
 		this.syncRevison += remoteChanges.size();
 		
-		log.info("sync: merged changes, new local rev is " + this.model.getRevisionNumber()
+		log.info("sync: merged changes, new local rev is " + getLocalRevisionNumber()
 		        + " (synced to " + this.syncRevison + ")");
 		
 		for(int i = 0; i < results.length; i++) {
-			Callback<Long> callback = this.callbacks.get(i);
+			XCommandCallback callback = this.callbacks.get(i);
 			if(results[i] == XCommand.FAILED) {
 				log.info("sync: client command conflicted: " + this.commands.get(i));
 				if(callback != null) {
-					callback.onFailure(null);
+					callback.failedPost();
 				}
 			} else if(results[i] == XCommand.NOCHANGE) {
 				log.info("sync: client command redundant: " + this.commands.get(i));
 				if(callback != null) {
-					callback.onSuccess(results[i]);
+					callback.applied(results[i]);
 				}
 			}
 		}
