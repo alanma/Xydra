@@ -194,7 +194,7 @@ abstract public class AbstractSynchronizeTest extends TestCase {
 		
 		// synchronize the remoteChanges into localModel
 		long[] results = this.localModel.synchronize(remoteChanges, lastRevision, ACTOR_ID,
-		        localChanges);
+		        localChanges, null);
 		
 		// check results
 		assertEquals(localChanges.size(), results.length);

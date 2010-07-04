@@ -64,6 +64,6 @@ public interface XSynchronizesChanges {
 	 * @return the results for the localChanges
 	 */
 	long[] synchronize(List<XEvent> remoteChanges, long lastRevision, XID actor,
-	        List<XCommand> localChanges);
+	        List<XCommand> localChanges, List<? extends XSynchronizationCallback> callbacks);
 	
 }

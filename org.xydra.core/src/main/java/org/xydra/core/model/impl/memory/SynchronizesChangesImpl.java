@@ -30,6 +30,7 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
+import org.xydra.core.model.XSynchronizationCallback;
 import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.core.model.delta.ChangedField;
 import org.xydra.core.model.delta.ChangedModel;
@@ -461,7 +462,11 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 	}
 	
 	public long[] synchronize(List<XEvent> remoteChanges, long lastRevision, XID actor,
-	        List<XCommand> localChanges) {
+	        List<XCommand> localChanges, List<? extends XSynchronizationCallback> callbacks) {
+		
+		if(callbacks != null && localChanges.size() != callbacks.size()) {
+			throw new IllegalArgumentException("number of callbacks must equal number of commands");
+		}
 		
 		checkSync();
 		
@@ -545,6 +550,11 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 				}
 				
 				results[i] = executeCommand(actor, command);
+				
+				if(callbacks != null && results[i] == XCommand.FAILED) {
+					callbacks.get(i).failed();
+				}
+				
 			}
 			
 			// Clean unneeded events.
