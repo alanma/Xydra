@@ -10,9 +10,10 @@ import org.xydra.core.change.XTransaction;
 
 /**
  * An interface that indicates that this entity is able to execute
- * {@link XTransaction XTransactions}.
+ * {@link XTransaction XTransactions} and synchronize remote changes.
  * 
  * @author Kaidel
+ * @author dscharrer
  * 
  */
 public interface XSynchronizesChanges extends XExecutesCommands, IHasXAddress {
