@@ -15,7 +15,7 @@ import org.xydra.client.gwt.editor.value.XStringEditor;
 import org.xydra.client.gwt.editor.value.XStringListEditor;
 import org.xydra.client.gwt.editor.value.XValueEditor;
 import org.xydra.client.gwt.editor.value.XValueUtils;
-import org.xydra.client.sync.XModelSynchronizer;
+import org.xydra.client.sync.XSynchronizer;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XFieldEvent;
@@ -66,7 +66,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener {
 	private static final int IDX_LIST_INTEGER = 11;
 	private static final int IDX_INTEGER = 12;
 	
-	private final XModelSynchronizer manager;
+	private final XSynchronizer manager;
 	private final XLoggedField field;
 	private final Label revision = new Label();
 	private final HorizontalPanel inner = new HorizontalPanel();
@@ -81,7 +81,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener {
 	private Button cancel;
 	private XValueEditor editor;
 	
-	public XFieldEditor(XLoggedField field, XModelSynchronizer manager) {
+	public XFieldEditor(XLoggedField field, XSynchronizer manager) {
 		
 		this.manager = manager;
 		this.field = field;

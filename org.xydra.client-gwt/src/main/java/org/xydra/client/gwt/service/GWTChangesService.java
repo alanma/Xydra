@@ -4,11 +4,10 @@ import java.util.List;
 
 import org.xydra.client.Callback;
 import org.xydra.client.XChangesService;
-import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.MiniXMLParser;
 import org.xydra.core.xml.XmlCommand;
@@ -32,37 +31,26 @@ public class GWTChangesService extends AbstractGWTHttpService implements XChange
 		super(baseUrl, parser);
 	}
 	
-	public void executeCommand(XCommand command, final long since,
-	        final Callback<CommandResult> callback) {
+	public void executeCommand(final XAddress entity, XCommand command, final long since,
+	        final Callback<CommandResult> callback, final XAddress context) {
 		
-		final XAddress target = command.getTarget();
+		XAddress target = command.getTarget();
 		
 		if(since != NONE) {
-			if(target.getModel() == null) {
+			if(entity.getModel() == null) {
 				throw new IllegalArgumentException(
-				        "Cannot get events from the whole repository, target was: " + target);
+				        "Cannot get events from the whole repository, target was: " + entity);
 			}
 		}
 		
-		if(target.getModel() == null && (target.getObject() != null || target.getField() != null)) {
-			throw new IllegalArgumentException("target must be relative to repository, was: "
-			        + target);
+		if(!XX.equalsOrContains(context, target)) {
+			throw new IllegalArgumentException("cannot send command " + command + " to entity "
+			        + entity);
 		}
 		
-		String url = this.baseUrl + "/";
+		String url = getUrl(entity, since, Long.MAX_VALUE);
 		
-		if(target.getModel() != null) {
-			url += target.getModel();
-		}
-		
-		if(since >= 0) {
-			url += "?since=" + since;
-		}
-		
-		RequestBuilder rb = new RequestBuilder(RequestBuilder.POST, url);
-		
-		final XAddress context = X.getIDProvider().fromComponents(target.getRepository(),
-		        target.getModel(), null, null);
+		RequestBuilder rb = new RequestBuilder(RequestBuilder.POST, this.baseUrl + "/" + url);
 		
 		XmlOutStringBuffer xo = new XmlOutStringBuffer();
 		XmlCommand.toXml(command, xo, context);
@@ -90,7 +78,7 @@ public class GWTChangesService extends AbstractGWTHttpService implements XChange
 						result = XCommand.NOCHANGE;
 					}
 					
-					if(target.getModel() != null && (result == XCommand.CHANGED || since != NONE)) {
+					if(entity.getModel() != null && (result == XCommand.CHANGED || since != NONE)) {
 						
 						MiniElement element = GWTChangesService.this.parser
 						        .parseXml(resp.getText());
@@ -128,19 +116,15 @@ public class GWTChangesService extends AbstractGWTHttpService implements XChange
 		
 	}
 	
-	public void getEvents(final XID repoId, final XID modelId, long since, long until,
-	        final Callback<List<XEvent>> callback) {
+	public void getEvents(XAddress entity, long since, long until,
+	        final Callback<List<XEvent>> callback, final XAddress context) {
 		
-		String url = modelId.toString();
-		
-		if(since >= 0) {
-			url += "?since=" + since;
-			if(until > 0 && until != Long.MAX_VALUE) {
-				url += "&until=" + until;
-			}
-		} else if(until > 0 && until != Long.MAX_VALUE) {
-			url += "?until=" + until;
+		if(entity.getModel() == null) {
+			throw new IllegalArgumentException("cannot get events for the whole repo, entity was: "
+			        + entity);
 		}
+		
+		String url = getUrl(entity, since, until);
 		
 		getXml(url, new Callback<MiniElement>() {
 			
@@ -150,7 +134,6 @@ public class GWTChangesService extends AbstractGWTHttpService implements XChange
 			
 			public void onSuccess(MiniElement xml) {
 				List<XEvent> events;
-				XAddress context = X.getIDProvider().fromComponents(repoId, modelId, null, null);
 				try {
 					events = XmlEvent.toEventList(xml, context);
 				} catch(Exception e) {
@@ -161,6 +144,28 @@ public class GWTChangesService extends AbstractGWTHttpService implements XChange
 			}
 		});
 		
+	}
+	
+	private String getUrl(final XAddress entity, long since, long until) {
+		
+		if(entity.getField() != null) {
+			throw new IllegalArgumentException("cannot get field events, entity was: " + entity);
+		}
+		String url = entity.getModel().toString();
+		if(entity.getObject() != null) {
+			url += "/" + entity.getObject().toString();
+		}
+		
+		if(since >= 0) {
+			url += "?since=" + since;
+			if(until > 0 && until != Long.MAX_VALUE) {
+				url += "&until=" + until;
+			}
+		} else if(until > 0 && until != Long.MAX_VALUE) {
+			url += "?until=" + until;
+		}
+		
+		return url;
 	}
 	
 }

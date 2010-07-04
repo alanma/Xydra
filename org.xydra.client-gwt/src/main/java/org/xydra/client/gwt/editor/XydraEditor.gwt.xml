@@ -17,7 +17,7 @@
       <inherits name='org.xydra.client.gwt.XydraClientGWT'/>
       
 	    <!-- add gwt-log support -->
-	    <inherits name='com.allen_sauer.gwt.log.gwt-log-INFO' />
+	    <inherits name='com.allen_sauer.gwt.log.gwt-log-DEBUG' />
         
       <!--  ENABLED or DISABLED  -->
       <set-property name="log_DivLogger" value="DISABLED" />

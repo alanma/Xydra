@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.xydra.client.gwt.editor.value.XIDEditor;
 import org.xydra.client.gwt.editor.value.XValueEditor.EditListener;
-import org.xydra.client.sync.XModelSynchronizer;
+import org.xydra.client.sync.XSynchronizer;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.change.XFieldEventListener;
@@ -34,7 +34,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class XModelEditor extends Composite implements XModelEventListener, XObjectEventListener,
         XFieldEventListener {
 	
-	private final XModelSynchronizer manager;
+	private final XSynchronizer manager;
 	private final XLoggedModel model;
 	private final Label revision = new Label();
 	private final VerticalPanel outer = new VerticalPanel();
@@ -43,7 +43,7 @@ public class XModelEditor extends Composite implements XModelEventListener, XObj
 	
 	private final Map<XID,XObjectEditor> objects = new HashMap<XID,XObjectEditor>();
 	
-	public XModelEditor(XLoggedModel model, XModelSynchronizer manager) {
+	public XModelEditor(XLoggedModel model, XSynchronizer manager) {
 		super();
 		
 		this.manager = manager;

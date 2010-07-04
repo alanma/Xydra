@@ -7,10 +7,13 @@ import org.xydra.client.XDataService;
 import org.xydra.client.gwt.service.GWTChangesService;
 import org.xydra.client.gwt.service.GWTDataService;
 import org.xydra.client.gwt.xml.impl.GWTMiniXMLParserImpl;
-import org.xydra.client.sync.XModelSynchronizer;
+import org.xydra.client.sync.XSynchronizer;
 import org.xydra.core.X;
+import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
+import org.xydra.core.model.XObject;
+import org.xydra.core.model.XSynchronizesChanges;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.EntryPoint;
@@ -40,7 +43,7 @@ public class XydraEditor implements EntryPoint {
 	
 	VerticalPanel panel = new VerticalPanel();
 	
-	XModelSynchronizer manager;
+	XSynchronizer manager;
 	
 	Timer timer = new Timer() {
 		@Override
@@ -50,6 +53,7 @@ public class XydraEditor implements EntryPoint {
 	};
 	
 	public void onModuleLoad() {
+		
 		// set uncaught exception handler
 		GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
 			public void onUncaughtException(Throwable throwable) {
@@ -110,9 +114,11 @@ public class XydraEditor implements EntryPoint {
 		
 	}
 	
-	protected void loadData(String modelIdStr) {
+	private XAddress addr;
+	
+	protected void loadData(String addrStr) {
 		
-		Log.info("editor: loading " + modelIdStr);
+		Log.info("editor: loading " + addrStr);
 		
 		if(this.manager != null) {
 			this.timer.cancel();
@@ -122,24 +128,47 @@ public class XydraEditor implements EntryPoint {
 		this.panel.clear();
 		
 		XID modelId;
+		XID objectId;
 		try {
-			modelId = X.getIDProvider().fromString(modelIdStr);
+			int p = addrStr.indexOf('/');
+			if(p >= 0) {
+				modelId = X.getIDProvider().fromString(addrStr.substring(0, p));
+				objectId = X.getIDProvider().fromString(addrStr.substring(p + 1));
+			} else {
+				modelId = X.getIDProvider().fromString(addrStr);
+				objectId = null;
+			}
 		} catch(Exception e) {
-			this.panel.add(new Label("invalid model XID: " + e.getMessage()));
+			this.panel.add(new Label("invalid XID: " + e.getMessage()));
 			return;
 		}
 		
+		this.addr = X.getIDProvider().fromComponents(null, modelId, objectId, null);
+		
 		try {
-			this.data.getModel(modelId, new Callback<XModel>() {
-				public void onSuccess(final XModel model) {
-					loadedModel(model);
-				}
-				
-				public void onFailure(Throwable error) {
-					handleError(error);
-				}
-				
-			});
+			if(objectId != null) {
+				this.data.getObject(modelId, objectId, new Callback<XObject>() {
+					public void onSuccess(final XObject object) {
+						loadedObject(object);
+					}
+					
+					public void onFailure(Throwable error) {
+						handleError(error);
+					}
+					
+				});
+			} else {
+				this.data.getModel(modelId, new Callback<XModel>() {
+					public void onSuccess(final XModel model) {
+						loadedModel(model);
+					}
+					
+					public void onFailure(Throwable error) {
+						handleError(error);
+					}
+					
+				});
+			}
 			
 		} catch(Exception e) {
 			this.panel.add(new Label(e.toString()));
@@ -155,14 +184,27 @@ public class XydraEditor implements EntryPoint {
 		}
 	}
 	
-	protected void loadedModel(final XModel model) {
+	protected void loadedModel(XModel model) {
 		
 		Log.info("editor: loaded model, starting synchronizer");
 		
-		this.manager = new XModelSynchronizer(model, XydraEditor.this.changes);
-		this.timer.scheduleRepeating(5000);
+		startSynchronizer(model);
 		
-		XydraEditor.this.panel.add(new XModelEditor(model, this.manager));
+		this.panel.add(new XModelEditor(model, this.manager));
+	}
+	
+	protected void loadedObject(XObject object) {
+		
+		Log.info("editor: loaded object, starting synchronizer");
+		
+		startSynchronizer(object);
+		
+		this.panel.add(new XObjectEditor(object, this.manager));
+	}
+	
+	private void startSynchronizer(XSynchronizesChanges entity) {
+		this.manager = new XSynchronizer(this.addr, entity, XydraEditor.this.changes);
+		this.timer.scheduleRepeating(5000);
 	}
 	
 }

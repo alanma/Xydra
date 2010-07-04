@@ -13,9 +13,6 @@
       <!-- Inherit the Xydra Client -->
       <inherits name='org.xydra.client.XydraClient'/>
       
-	    <!-- add gwt-log support -->
-	    <inherits name='com.allen_sauer.gwt.log.gwt-log-INFO' />
-      
       <source path="">
       	<exclude name="editor/**" />
       </source>

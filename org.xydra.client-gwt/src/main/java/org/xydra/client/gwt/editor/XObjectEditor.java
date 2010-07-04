@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.xydra.client.gwt.editor.value.XIDEditor;
 import org.xydra.client.gwt.editor.value.XValueEditor.EditListener;
-import org.xydra.client.sync.XModelSynchronizer;
+import org.xydra.client.sync.XSynchronizer;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.change.XFieldEventListener;
@@ -32,14 +32,14 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class XObjectEditor extends VerticalPanel implements XObjectEventListener,
         XFieldEventListener {
 	
-	private final XModelSynchronizer manager;
+	private final XSynchronizer manager;
 	private final XLoggedObject object;
 	private final Label revision = new Label();
 	private final HorizontalPanel inner = new HorizontalPanel();
 	private final Button add = new Button("Add Field");
 	private final Map<XID,XFieldEditor> fields = new HashMap<XID,XFieldEditor>();
 	
-	public XObjectEditor(XLoggedObject object, XModelSynchronizer manager) {
+	public XObjectEditor(XLoggedObject object, XSynchronizer manager) {
 		super();
 		
 		this.manager = manager;
