@@ -164,8 +164,8 @@ public class XmlModel {
 		long revision = getRevisionAttribute(xml, XOBJECT_ELEMENT);
 		
 		XAddress objectAddr = XX.resolveObject(modelAddr, xid);
-		XChangeLogState changeLogState = modelAddr == null ? null : new MemoryChangeLogState(
-		        modelAddr, revision);
+		XChangeLogState changeLogState = modelAddr != null ? null : new MemoryChangeLogState(
+		        objectAddr, revision);
 		XObjectState objectState = new TemporaryObjectState(objectAddr, changeLogState);
 		objectState.setRevisionNumber(revision);
 		

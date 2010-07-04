@@ -91,8 +91,13 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 	 * @param objectState The {@link XObjectState} for this object
 	 */
 	public MemoryObject(XObjectState objectState) {
-		this(null, new MemoryEventQueue(objectState.getChangeLogState() == null ? null
-		        : new MemoryChangeLog(objectState.getChangeLogState())), objectState);
+		this(null, createEventQueue(objectState), objectState);
+	}
+	
+	private static MemoryEventQueue createEventQueue(XObjectState objectState) {
+		XChangeLogState logState = objectState.getChangeLogState();
+		MemoryChangeLog log = logState == null ? null : new MemoryChangeLog(logState);
+		return new MemoryEventQueue(log);
 	}
 	
 	/**
