@@ -23,7 +23,6 @@ import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
 
 
-
 public class XModelChangesResource {
 	
 	private final XProtectedModel model;
@@ -36,7 +35,7 @@ public class XModelChangesResource {
 	@Produces("application/xml")
 	public Response getEvents(@QueryParam("since") Long since, @QueryParam("until") Long until) {
 		
-		long begin = since != null ? since : Long.MIN_VALUE;
+		long begin = since != null ? since : 0;
 		long end = until != null ? until : Long.MAX_VALUE;
 		
 		Iterator<XEvent> events = this.model.getChangeLog().getEventsBetween(begin, end);

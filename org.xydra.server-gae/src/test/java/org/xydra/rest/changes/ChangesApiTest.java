@@ -42,7 +42,6 @@ import org.xydra.core.xml.impl.XmlOutStringBuffer;
 import org.xydra.rest.AbstractRestApiTest;
 
 
-
 /**
  * Test for implementations of {@link IGroupDatabase}.
  * 
@@ -206,7 +205,7 @@ public class ChangesApiTest extends AbstractRestApiTest {
 	@Test
 	public void testGetAllChanges() throws IOException {
 		
-		testGetChanges(Long.MIN_VALUE, Long.MAX_VALUE);
+		testGetChanges(0, Long.MAX_VALUE);
 		
 	}
 	
@@ -221,7 +220,7 @@ public class ChangesApiTest extends AbstractRestApiTest {
 	public void testGetChangesUntil() throws IOException {
 		
 		long now = repo.getModel(DemoModelUtil.PHONEBOOK_ID).getRevisionNumber();
-		testGetChanges(Long.MIN_VALUE, now - 3);
+		testGetChanges(0, now - 3);
 		
 	}
 	
