@@ -44,6 +44,7 @@ import org.xydra.core.value.XBooleanListValue;
 import org.xydra.core.value.XDoubleListValue;
 import org.xydra.core.value.XIDListValue;
 import org.xydra.core.value.XIntegerListValue;
+import org.xydra.core.value.XListValue;
 import org.xydra.core.value.XLongListValue;
 import org.xydra.core.value.XStringListValue;
 import org.xydra.core.value.XValue;
@@ -375,7 +376,7 @@ public class XX {
 	        String stringValue) {
 		if(object != null) {
 			try {
-				XField field = XX.safeGetField(object, fieldID);
+				XField field = safeGetField(object, fieldID);
 				field.setValue(actorID, X.getValueFactory().createStringValue(stringValue));
 			} catch(MissingPieceException mpe) {
 				object.createField(actorID, fieldID).setValue(actorID,
@@ -385,85 +386,18 @@ public class XX {
 	}
 	
 	/**
-	 * A method for copying the contents of an array into a list
+	 * Returns the content of the given {@link XListValue} as a {@link List}
 	 * 
 	 * @param <E> The content type
-	 * @param array The array which contents will be copied into a list
-	 * @return A list containing copies of the contents of the given array
+	 * @param listValue The {@link XListValue}
+	 * @return a copy of the listValue as a {@link List}
 	 */
-	private static <E> List<E> asList(E[] array) {
-		ArrayList<E> list = new ArrayList<E>();
-		
-		for(int i = 0; i < array.length; i++) {
-			list.add(array[i]);
+	public static <E> List<E> asList(XListValue<E> listValue) {
+		ArrayList<E> list = new ArrayList<E>(listValue.size());
+		for(E e : listValue) {
+			list.add(e);
 		}
-		
 		return list;
-	}
-	
-	/**
-	 * Returns the content of the given {@link XIDListValue} as a java.util.list
-	 * 
-	 * @param listValue The {@link XIDListValue}
-	 * @return a copy of the listValue as a java.util.List
-	 */
-	public static List<XID> asList(XIDListValue listValue) {
-		return asList(listValue.contents());
-	}
-	
-	/**
-	 * Returns the content of the given {@link XBooleanListValue} as a
-	 * java.util.list
-	 * 
-	 * @param listValue The {@link XBooleanListValue}
-	 * @return a copy of the listValue as a java.util.List
-	 */
-	public static List<Boolean> asList(XBooleanListValue listValue) {
-		return asList(listValue.contents());
-	}
-	
-	/**
-	 * Returns the content of the given {@link XDoubleListValue} as a
-	 * java.util.list
-	 * 
-	 * @param listValue The {@link XDoubleListValue}
-	 * @return a copy of the listValue as a java.util.List
-	 */
-	public static List<Double> asList(XDoubleListValue listValue) {
-		return asList(listValue.contents());
-	}
-	
-	/**
-	 * Returns the content of the given {@link XIntegerListValue} as a
-	 * java.util.list
-	 * 
-	 * @param listValue The {@link XIntegerListValue}
-	 * @return a copy of the listValue as a java.util.List
-	 */
-	public static List<Integer> asList(XIntegerListValue listValue) {
-		return asList(listValue.contents());
-	}
-	
-	/**
-	 * Returns the content of the given {@link XLongListValue} as a
-	 * java.util.list
-	 * 
-	 * @param listValue The {@link XLongListValue}
-	 * @return a copy of the listValue as a java.util.List
-	 */
-	public static List<Long> asList(XLongListValue listValue) {
-		return asList(listValue.contents());
-	}
-	
-	/**
-	 * Returns the content of the given {@link XStringListValue} as a
-	 * java.util.list
-	 * 
-	 * @param listValue The {@link XStringListValue}
-	 * @return a copy of the listValue as a java.util.List
-	 */
-	public static List<String> asList(XStringListValue listValue) {
-		return asList(listValue.contents());
 	}
 	
 	/**
@@ -619,7 +553,7 @@ public class XX {
 	 *             || index >= size())
 	 */
 	private static XIDListValue addIDToList(XIDListValue listValue, int index, XID id) {
-		List<XID> list = XX.asList(listValue);
+		List<XID> list = asList(listValue);
 		list.add(index, id);
 		
 		return toIDListValue(list);
@@ -647,7 +581,7 @@ public class XX {
 			XIDListValue listValue = (XIDListValue)value;
 			
 			// manipulate the contained list
-			List<XID> list = XX.asList(listValue);
+			List<XID> list = asList(listValue);
 			list.remove(id);
 			
 			listValue = toIDListValue(list);
@@ -682,7 +616,7 @@ public class XX {
 			XIDListValue listValue = (XIDListValue)value;
 			
 			// manipulate the contained list
-			List<XID> list = XX.asList(listValue);
+			List<XID> list = asList(listValue);
 			list.remove(index);
 			
 			listValue = toIDListValue(list);
@@ -771,7 +705,7 @@ public class XX {
 	 */
 	private static XBooleanListValue addBooleanToList(XBooleanListValue listValue, int index,
 	        boolean bool) {
-		List<Boolean> list = XX.asList(listValue);
+		List<Boolean> list = asList(listValue);
 		list.add(index, bool);
 		
 		return toBooleanListValue(list);
@@ -799,7 +733,7 @@ public class XX {
 			XBooleanListValue listValue = (XBooleanListValue)value;
 			
 			// manipulate the contained list
-			List<Boolean> list = XX.asList(listValue);
+			List<Boolean> list = asList(listValue);
 			list.remove(bool);
 			
 			listValue = toBooleanListValue(list);
@@ -834,7 +768,7 @@ public class XX {
 			XBooleanListValue listValue = (XBooleanListValue)value;
 			
 			// manipulate the contained list
-			List<Boolean> list = XX.asList(listValue);
+			List<Boolean> list = asList(listValue);
 			list.remove(index);
 			
 			listValue = toBooleanListValue(list);
@@ -926,7 +860,7 @@ public class XX {
 	 */
 	private static XDoubleListValue addDoubleToList(XDoubleListValue listValue, int index,
 	        double doub) {
-		List<Double> list = XX.asList(listValue);
+		List<Double> list = asList(listValue);
 		list.add(index, doub);
 		
 		return toDoubleListValue(list);
@@ -954,7 +888,7 @@ public class XX {
 			XDoubleListValue listValue = (XDoubleListValue)value;
 			
 			// manipulate the contained list
-			List<Double> list = XX.asList(listValue);
+			List<Double> list = asList(listValue);
 			list.remove(doubleVal);
 			
 			listValue = toDoubleListValue(list);
@@ -989,7 +923,7 @@ public class XX {
 			XDoubleListValue listValue = (XDoubleListValue)value;
 			
 			// manipulate the contained list
-			List<Double> list = XX.asList(listValue);
+			List<Double> list = asList(listValue);
 			list.remove(index);
 			
 			listValue = toDoubleListValue(list);
@@ -1083,7 +1017,7 @@ public class XX {
 	
 	private static XIntegerListValue addIntegerToList(XIntegerListValue listValue, int index,
 	        int integer) {
-		List<Integer> list = XX.asList(listValue);
+		List<Integer> list = asList(listValue);
 		list.add(index, integer);
 		
 		return toIntegerListValue(list);
@@ -1113,7 +1047,7 @@ public class XX {
 			XIntegerListValue listValue = (XIntegerListValue)value;
 			
 			// manipulate the contained list
-			List<Integer> list = XX.asList(listValue);
+			List<Integer> list = asList(listValue);
 			list.remove(index);
 			
 			listValue = toIntegerListValue(list);
@@ -1146,7 +1080,7 @@ public class XX {
 			XIntegerListValue listValue = (XIntegerListValue)value;
 			
 			// manipulate the contained list
-			List<Integer> list = XX.asList(listValue);
+			List<Integer> list = asList(listValue);
 			list.remove(integer);
 			
 			listValue = toIntegerListValue(list);
@@ -1237,7 +1171,7 @@ public class XX {
 	 *             || index >= size())
 	 */
 	private static XLongListValue addLongToList(XLongListValue listValue, int index, long longVal) {
-		List<Long> list = XX.asList(listValue);
+		List<Long> list = asList(listValue);
 		list.add(index, longVal);
 		
 		return toLongListValue(list);
@@ -1267,7 +1201,7 @@ public class XX {
 			XLongListValue listValue = (XLongListValue)value;
 			
 			// manipulate the contained list
-			List<Long> list = XX.asList(listValue);
+			List<Long> list = asList(listValue);
 			list.remove(index);
 			
 			listValue = toLongListValue(list);
@@ -1302,7 +1236,7 @@ public class XX {
 			XLongListValue listValue = (XLongListValue)value;
 			
 			// manipulate the contained list
-			List<Long> list = XX.asList(listValue);
+			List<Long> list = asList(listValue);
 			list.remove(longVal);
 			
 			listValue = toLongListValue(list);
@@ -1396,7 +1330,7 @@ public class XX {
 	 */
 	private static XStringListValue addStringToList(XStringListValue listValue, int index,
 	        String string) {
-		List<String> list = XX.asList(listValue);
+		List<String> list = asList(listValue);
 		list.add(index, string);
 		
 		return toStringListValue(list);
@@ -1425,7 +1359,7 @@ public class XX {
 			XStringListValue listValue = (XStringListValue)value;
 			
 			// manipulate the contained list
-			List<String> list = XX.asList(listValue);
+			List<String> list = asList(listValue);
 			list.remove(index);
 			
 			listValue = toStringListValue(list);
@@ -1458,7 +1392,7 @@ public class XX {
 			XStringListValue listValue = (XStringListValue)value;
 			
 			// manipulate the contained list
-			List<String> list = XX.asList(listValue);
+			List<String> list = asList(listValue);
 			list.remove(string);
 			
 			listValue = toStringListValue(list);
@@ -2091,11 +2025,11 @@ public class XX {
 	 */
 	public static boolean contains(XAddress parent, XAddress descendant) {
 		if(parent.getRepository() == null) {
-			if(!XX.equals(parent.getRepository(), descendant.getRepository()))
+			if(!equals(parent.getRepository(), descendant.getRepository()))
 				return false;
 			
 			if(parent.getModel() == null) {
-				if(!XX.equals(parent.getModel(), descendant.getModel()))
+				if(!equals(parent.getModel(), descendant.getModel()))
 					return false;
 				
 				if(parent.getObject() == null) {
@@ -2159,7 +2093,7 @@ public class XX {
 				if(parent.getObject() == null) {
 					if(descendant.getObject() != null)
 						return false;
-					return XX.equals(parent.getField(), descendant.getField());
+					return equals(parent.getField(), descendant.getField());
 				} else {
 					if(!parent.getObject().equals(descendant.getObject()))
 						return false;
@@ -2207,10 +2141,10 @@ public class XX {
 	 */
 	public static boolean isChild(XAddress parent, XAddress child) {
 		if(parent.getRepository() == null) {
-			if(!XX.equals(parent.getRepository(), child.getRepository()))
+			if(!equals(parent.getRepository(), child.getRepository()))
 				return false;
 			if(parent.getModel() == null) {
-				if(!XX.equals(parent.getModel(), child.getModel()))
+				if(!equals(parent.getModel(), child.getModel()))
 					return false;
 				if(parent.getObject() == null) {
 					return false;
@@ -2862,7 +2796,7 @@ public class XX {
 	 */
 	public static void createUndoChanges(DeltaModel model, XModelEvent event) {
 		
-		if(!XX.equals(model.getAddress(), event.getTarget())) {
+		if(!equals(model.getAddress(), event.getTarget())) {
 			throw new IllegalArgumentException();
 		}
 		
@@ -2905,7 +2839,7 @@ public class XX {
 	 */
 	public static void createUndoChanges(DeltaModel model, XObjectEvent event) {
 		
-		if(!XX.contains(model.getAddress(), event.getTarget())) {
+		if(!contains(model.getAddress(), event.getTarget())) {
 			throw new IllegalArgumentException();
 		}
 		
@@ -2954,7 +2888,7 @@ public class XX {
 	 */
 	public static void createUndoChanges(DeltaModel model, XFieldEvent event) {
 		
-		if(!XX.contains(model.getAddress(), event.getTarget())) {
+		if(!contains(model.getAddress(), event.getTarget())) {
 			throw new IllegalArgumentException();
 		}
 		
@@ -2970,7 +2904,7 @@ public class XX {
 			throw new IllegalStateException();
 		}
 		
-		if(!XX.equals(field.getValue(), event.getNewValue())) {
+		if(!equals(field.getValue(), event.getNewValue())) {
 			throw new IllegalStateException();
 		}
 		
@@ -3154,12 +3088,16 @@ public class XX {
 		
 	}
 	
+	/**
+	 * @return true if both iterators have the same number of elements and each
+	 *         pair of elements is equal.
+	 */
 	static public boolean equalsIterator(Iterator<?> a, Iterator<?> b) {
 		while(a.hasNext()) {
 			if(!b.hasNext()) {
 				return false;
 			}
-			if(!XX.equals(a.next(), b.next())) {
+			if(!equals(a.next(), b.next())) {
 				return false;
 			}
 		}
