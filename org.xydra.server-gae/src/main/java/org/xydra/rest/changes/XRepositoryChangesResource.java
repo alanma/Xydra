@@ -18,6 +18,7 @@ import org.xydra.core.change.XRepositoryCommand;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.session.XProtectedModel;
+import org.xydra.core.model.session.XProtectedObject;
 import org.xydra.core.model.session.XProtectedRepository;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.MiniXMLParser;
@@ -25,7 +26,6 @@ import org.xydra.core.xml.XmlCommand;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.rest.RepositoryManager;
 import org.xydra.rest.XIDParam;
-
 
 
 // The Java class will be hosted at the URI path "/changes"
@@ -36,9 +36,15 @@ import org.xydra.rest.XIDParam;
 public class XRepositoryChangesResource {
 	
 	@Path("{modelId}")
-	public XModelChangesResource getModelChanges(@Context HttpHeaders headers,
+	public XSynchronizeChangesResource getModelChanges(@Context HttpHeaders headers,
 	        @PathParam("modelId") XIDParam modelId) {
 		
+		XProtectedModel model = getModel(headers, modelId);
+		
+		return new XSynchronizeChangesResource(model);
+	}
+	
+	private XProtectedModel getModel(HttpHeaders headers, XIDParam modelId) {
 		XID actor = RepositoryManager.getActor(headers);
 		
 		XProtectedRepository repo = RepositoryManager.getRepository(actor);
@@ -50,8 +56,23 @@ public class XRepositoryChangesResource {
 			throw new WebApplicationException(Response.status(Status.NOT_FOUND).entity(
 			        address.toString()).build());
 		}
+		return model;
+	}
+	
+	@Path("{modelId}/{objectId}")
+	public XSynchronizeChangesResource getObjectChanges(@Context HttpHeaders headers,
+	        @PathParam("modelId") XIDParam modelId, @PathParam("objectId") XIDParam objectId) {
 		
-		return new XModelChangesResource(model);
+		XProtectedModel model = getModel(headers, modelId);
+		XProtectedObject object = model.getObject(objectId.getId());
+		
+		if(object == null) {
+			XAddress address = XX.resolveObject(model.getAddress(), objectId.getId());
+			throw new WebApplicationException(Response.status(Status.NOT_FOUND).entity(
+			        address.toString()).build());
+		}
+		
+		return new XSynchronizeChangesResource(object);
 	}
 	
 	@POST

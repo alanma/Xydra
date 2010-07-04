@@ -39,6 +39,7 @@ import org.xydra.core.xml.XmlCommand;
 import org.xydra.core.xml.XmlEvent;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
+import org.xydra.index.iterator.AbstractTransformingIterator;
 import org.xydra.rest.AbstractRestApiTest;
 
 
@@ -150,9 +151,12 @@ public class ChangesApiTest extends AbstractRestApiTest {
 		return new CommandResponse(result, events);
 	}
 	
-	private List<XEvent> getEvents(XID modelId, long since, long until) throws IOException {
+	private List<XEvent> getEvents(XAddress addr, long since, long until) throws IOException {
 		
-		String name = modelId.toString();
+		String name = addr.getModel().toString();
+		if(addr.getObject() != null) {
+			name += "/" + addr.getObject().toString();
+		}
 		if(since > 0) {
 			name += "?since=" + since;
 			if(until != Long.MAX_VALUE) {
@@ -169,10 +173,8 @@ public class ChangesApiTest extends AbstractRestApiTest {
 			return null;
 		}
 		
-		XAddress context = XX.resolveModel(repo.getAddress(), modelId);
-		
 		try {
-			return XmlEvent.toEventList(eventsElement, context);
+			return XmlEvent.toEventList(eventsElement, addr);
 		} catch(IllegalArgumentException iae) {
 			fail(iae.getMessage());
 			throw new RuntimeException();
@@ -180,15 +182,17 @@ public class ChangesApiTest extends AbstractRestApiTest {
 		
 	}
 	
-	public void testGetChanges(long since, long until) throws IOException {
+	public void testGetChanges(final XAddress addr, long since, long until) throws IOException {
 		
-		List<XEvent> retrievedEvents = getEvents(DemoModelUtil.PHONEBOOK_ID, since, until);
+		List<XEvent> retrievedEvents = getEvents(addr, since, until);
 		assertNotNull(retrievedEvents);
 		// try to read events
 		Iterator<XEvent> it = retrievedEvents.iterator();
 		while(it.hasNext()) {
 			XEvent event = it.next();
-			assertNotNull(event);
+			if(addr.getObject() == null) {
+				assertNotNull(event);
+			}
 		}
 		
 		XModel originalModel = repo.getModel(DemoModelUtil.PHONEBOOK_ID);
@@ -198,21 +202,43 @@ public class ChangesApiTest extends AbstractRestApiTest {
 		        until);
 		Iterator<XEvent> retrievedEventIt = retrievedEvents.iterator();
 		
+		if(addr.getObject() != null) {
+			originalEventIt = new AbstractTransformingIterator<XEvent,XEvent>(originalEventIt) {
+				@Override
+				public XEvent transform(XEvent in) {
+					if(!XX.equalsOrContains(addr, in.getTarget())) {
+						return null;
+					}
+					return in;
+				}
+			};
+		}
+		
 		checkEvents(originalEventIt, retrievedEventIt);
 		
+	}
+	
+	private XAddress model() {
+		return X.getIDProvider().fromComponents(repo.getID(), DemoModelUtil.PHONEBOOK_ID, null,
+		        null);
+	}
+	
+	private XAddress object() {
+		return X.getIDProvider().fromComponents(repo.getID(), DemoModelUtil.PHONEBOOK_ID,
+		        DemoModelUtil.JOHN_ID, null);
 	}
 	
 	@Test
 	public void testGetAllChanges() throws IOException {
 		
-		testGetChanges(0, Long.MAX_VALUE);
+		testGetChanges(model(), 0, Long.MAX_VALUE);
 		
 	}
 	
 	@Test
 	public void testGetChangesSince() throws IOException {
 		
-		testGetChanges(3, Long.MAX_VALUE);
+		testGetChanges(model(), 3, Long.MAX_VALUE);
 		
 	}
 	
@@ -220,7 +246,7 @@ public class ChangesApiTest extends AbstractRestApiTest {
 	public void testGetChangesUntil() throws IOException {
 		
 		long now = repo.getModel(DemoModelUtil.PHONEBOOK_ID).getRevisionNumber();
-		testGetChanges(0, now - 3);
+		testGetChanges(model(), 0, now - 3);
 		
 	}
 	
@@ -228,7 +254,37 @@ public class ChangesApiTest extends AbstractRestApiTest {
 	public void testGetChangesBetween() throws IOException {
 		
 		long now = repo.getModel(DemoModelUtil.PHONEBOOK_ID).getRevisionNumber();
-		testGetChanges(3, now - 3);
+		testGetChanges(model(), 3, now - 3);
+		
+	}
+	
+	@Test
+	public void testGetAllChangesObject() throws IOException {
+		
+		testGetChanges(object(), 0, Long.MAX_VALUE);
+		
+	}
+	
+	@Test
+	public void testGetChangesSinceObject() throws IOException {
+		
+		testGetChanges(object(), 3, Long.MAX_VALUE);
+		
+	}
+	
+	@Test
+	public void testGetChangesUntilObject() throws IOException {
+		
+		long now = repo.getModel(DemoModelUtil.PHONEBOOK_ID).getRevisionNumber();
+		testGetChanges(object(), 0, now - 3);
+		
+	}
+	
+	@Test
+	public void testGetChangesBetweenObject() throws IOException {
+		
+		long now = repo.getModel(DemoModelUtil.PHONEBOOK_ID).getRevisionNumber();
+		testGetChanges(object(), 3, now - 3);
 		
 	}
 	
@@ -268,7 +324,8 @@ public class ChangesApiTest extends AbstractRestApiTest {
 	public void testGetMoreComponentsUrl() throws IOException {
 		
 		URL url = changesapi.resolve(DemoModelUtil.PHONEBOOK_ID.toURI() + "/").resolve(
-		        DemoModelUtil.JOHN_ID.toURI()).toURL();
+		        DemoModelUtil.JOHN_ID.toURI() + "/").resolve(DemoModelUtil.ALIASES_ID.toURI())
+		        .toURL();
 		
 		HttpURLConnection c = (HttpURLConnection)url.openConnection();
 		setLoginDetails(c);
@@ -281,6 +338,19 @@ public class ChangesApiTest extends AbstractRestApiTest {
 	public void testGetChangesMissingModel() throws IOException {
 		
 		URL url = changesapi.resolve(MISSING_ID).toURL();
+		
+		HttpURLConnection c = (HttpURLConnection)url.openConnection();
+		setLoginDetails(c);
+		c.connect();
+		assertEquals(HttpURLConnection.HTTP_NOT_FOUND, c.getResponseCode());
+		
+	}
+	
+	@Test
+	public void testGetChangesMissingObject() throws IOException {
+		
+		URL url = changesapi.resolve(DemoModelUtil.PHONEBOOK_ID.toURI() + "/").resolve(MISSING_ID)
+		        .toURL();
 		
 		HttpURLConnection c = (HttpURLConnection)url.openConnection();
 		setLoginDetails(c);
