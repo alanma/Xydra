@@ -17,7 +17,7 @@ import org.xydra.core.change.impl.memory.MemoryFieldEvent;
 import org.xydra.core.change.impl.memory.MemoryModelEvent;
 import org.xydra.core.change.impl.memory.MemoryObjectEvent;
 import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XExecutesTransactions;
+import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
@@ -29,7 +29,7 @@ import org.xydra.core.value.XValue;
 
 
 /**
- * Tests for implementations of {@link XExecutesTransactions}.
+ * Tests for implementations of {@link XSynchronizesChanges}.
  * 
  * @author dscharrer
  */

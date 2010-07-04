@@ -1,7 +1,7 @@
 package org.xydra.core.change;
 
 import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XExecutesTransactions;
+import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
@@ -19,7 +19,7 @@ import org.xydra.core.model.XModel;
  *         commands that were already executed need to be undone). The
  *         Transaction itself is not responsible that it will or can be executed
  *         in this manner. Classes that implement the
- *         {@link XExecutesTransactions} interfaces provide an
+ *         {@link XSynchronizesChanges} interfaces provide an
  *         executeTransaction() method that needs to be implemented in such a
  *         way that this behavior is guaranteed.
  * 

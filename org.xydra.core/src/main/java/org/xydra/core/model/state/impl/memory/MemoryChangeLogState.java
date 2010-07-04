@@ -51,6 +51,9 @@ public class MemoryChangeLogState implements XChangeLogState {
 	}
 	
 	long getRevisionForEvent(XEvent event) {
+		if(event == null) {
+			return getCurrentRevisionNumber();
+		}
 		long rev = this.baseAddr.getObject() == null ? event.getModelRevisionNumber() : event
 		        .getObjectRevisionNumber();
 		assert rev >= 0;
@@ -59,14 +62,7 @@ public class MemoryChangeLogState implements XChangeLogState {
 	
 	public void appendEvent(XEvent event) {
 		
-		if(this.baseAddr.getObject() != null) {
-			long rev = getRevisionForEvent(event);
-			while(getCurrentRevisionNumber() < rev) {
-				this.events.add(null);
-			}
-		} else {
-			assert getRevisionForEvent(event) == getCurrentRevisionNumber();
-		}
+		assert getRevisionForEvent(event) == getCurrentRevisionNumber();
 		
 		this.events.add(event);
 	}

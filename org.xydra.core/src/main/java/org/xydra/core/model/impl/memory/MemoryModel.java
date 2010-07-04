@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,26 +11,18 @@ import org.xydra.annotations.ReadOperation;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
-import org.xydra.core.change.XAtomicCommand;
-import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XEvent;
-import org.xydra.core.change.XFieldCommand;
 import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.change.XModelCommand;
 import org.xydra.core.change.XModelEvent;
 import org.xydra.core.change.XModelEventListener;
-import org.xydra.core.change.XObjectCommand;
 import org.xydra.core.change.XObjectEvent;
 import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.XTransactionEvent;
 import org.xydra.core.change.XTransactionEventListener;
-import org.xydra.core.change.impl.memory.MemoryFieldCommand;
-import org.xydra.core.change.impl.memory.MemoryModelCommand;
 import org.xydra.core.change.impl.memory.MemoryModelEvent;
-import org.xydra.core.change.impl.memory.MemoryObjectCommand;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XID;
@@ -51,7 +42,7 @@ import org.xydra.core.model.state.impl.memory.TemporaryModelState;
  * @author Kaidel
  * 
  */
-public class MemoryModel extends TransactionManager implements XModel, Serializable {
+public class MemoryModel extends SynchronizesChangesImpl implements XModel, Serializable {
 	
 	private static final long serialVersionUID = -2969189978307340483L;
 	
@@ -123,12 +114,8 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 		}
 	}
 	
-	public MemoryObject createObject(XID actor, XID objectID) {
-		return createObject(actor, objectID, null);
-	}
-	
 	@Override
-	protected MemoryObject createObject(XID actor, XID objectID, Orphans orphans) {
+	public MemoryObject createObject(XID actor, XID objectID) {
 		assert getRevisionNumber() >= 0;
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -139,6 +126,7 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 			
 			MemoryObject object = null;
 			
+			Orphans orphans = getOrphans();
 			if(orphans != null) {
 				object = orphans.objects.remove(objectID);
 			}
@@ -213,12 +201,8 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 		}
 	}
 	
-	public boolean removeObject(XID actor, XID objectID) {
-		return removeObject(actor, objectID, null);
-	}
-	
 	@Override
-	protected boolean removeObject(XID actor, XID objectID, Orphans orphans) {
+	public boolean removeObject(XID actor, XID objectID) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -237,6 +221,7 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 			// remove the object
 			this.loadedObjects.remove(object.getID());
 			this.state.removeObjectState(object.getID());
+			Orphans orphans = getOrphans();
 			if(orphans != null) {
 				object.removeInternal(orphans);
 				orphans.objects.put(object.getID(), object);
@@ -267,10 +252,6 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 	}
 	
 	public long executeModelCommand(XID actor, XModelCommand command) {
-		return executeModelCommand(actor, command, null);
-	}
-	
-	public long executeModelCommand(XID actor, XModelCommand command, Orphans orphans) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -294,7 +275,7 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 				
 				long oldRev = getRevisionNumber();
 				
-				createObject(actor, command.getObjectID(), orphans);
+				createObject(actor, command.getObjectID());
 				
 				return oldRev;
 			}
@@ -322,7 +303,7 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 				
 				long oldRev = getRevisionNumber();
 				
-				removeObject(actor, command.getObjectID(), orphans);
+				removeObject(actor, command.getObjectID());
 				
 				return oldRev;
 			}
@@ -428,7 +409,7 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 	}
 	
 	@Override
-	public long executeTransaction(XID actor, XTransaction transaction, Orphans orphans) {
+	public long executeTransaction(XID actor, XTransaction transaction) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -447,7 +428,7 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 				}
 			}
 			
-			return super.executeTransaction(actor, transaction, orphans);
+			return super.executeTransaction(actor, transaction);
 			
 		}
 	}
@@ -601,24 +582,20 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 	}
 	
 	public long executeCommand(XID actor, XCommand command) {
-		return executeCommand(actor, command, null);
-	}
-	
-	private long executeCommand(XID actor, XCommand command, Orphans orphans) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
 			if(command instanceof XTransaction) {
-				return executeTransaction(actor, (XTransaction)command, orphans);
+				return executeTransaction(actor, (XTransaction)command);
 			}
 			if(command instanceof XModelCommand) {
-				return executeModelCommand(actor, (XModelCommand)command, orphans);
+				return executeModelCommand(actor, (XModelCommand)command);
 			}
 			MemoryObject object = getObject(command.getTarget().getObject());
 			if(object == null) {
 				return XCommand.FAILED;
 			}
-			return object.executeCommand(actor, command, orphans);
+			return object.executeCommand(actor, command);
 		}
 	}
 	
@@ -643,180 +620,19 @@ public class MemoryModel extends TransactionManager implements XModel, Serializa
 		return this;
 	}
 	
-	public MemoryChangeLog getChangeLog() {
-		return this.eventQueue.getChangeLog();
-	}
-	
-	public void rollback(long revision) {
-		rollback(revision, null);
-	}
-	
-	private void rollback(long revision, Orphans orphans) {
-		
-		if(revision < 0) {
-			throw new RuntimeException("invalid revision number: " + revision);
-		}
-		
-		if(revision == getRevisionNumber()) {
-			return;
-		}
-		
-		// stop the change log to prevent the rollback events from being logged
-		boolean oldLogging = this.eventQueue.setLogging(false);
-		
-		// rollback each event individually
-		for(long i = getRevisionNumber() - 1; i >= revision; i--) {
-			XEvent event = getChangeLog().getEventAt(i);
-			if(event instanceof XAtomicEvent) {
-				rollbackEvent((XAtomicEvent)event, orphans);
-			} else {
-				assert event instanceof XTransactionEvent;
-				XTransactionEvent trans = (XTransactionEvent)event;
-				for(int j = trans.size() - 1; j >= 0; j--) {
-					XAtomicEvent atomicEvent = trans.getEvent(j);
-					rollbackEvent(atomicEvent, orphans);
-				}
-			}
-			
-		}
-		
-		// reset the change log
-		getChangeLog().truncateToRevision(getRevisionNumber());
-		this.eventQueue.setLogging(oldLogging);
-		
+	@Override
+	protected void saveIfModel() {
 		save();
-		
-		assert getRevisionNumber() == revision;
-		assert getRevisionNumber() == getChangeLog().getCurrentRevisionNumber();
 	}
 	
-	private void rollbackEvent(XAtomicEvent event, Orphans orphans) {
-		XAtomicCommand command = XX.createForcedUndoCommand(event);
-		long result = executeCommand(null, command, orphans);
-		assert result > 0 : "rollback command " + command + " for event " + event + " failed";
-		XAddress target = event.getTarget();
-		
-		// fix revision numbers
-		this.state.setRevisionNumber(event.getModelRevisionNumber());
-		if(target.getObject() != null) {
-			MemoryObject object = getObject(target.getObject());
-			object.setRevisionNumber(event.getObjectRevisionNumber());
-			object.save();
-			if(target.getField() != null) {
-				MemoryField field = object.getField(target.getField());
-				field.setRevisionNumber(event.getFieldRevisionNumber());
-				field.save();
-			} else if(event.getChangeType() == ChangeType.REMOVE) {
-				MemoryField field = object.getField(((XObjectEvent)event).getFieldID());
-				field.setRevisionNumber(event.getFieldRevisionNumber());
-				field.save();
-			}
-		} else if(event.getChangeType() == ChangeType.REMOVE) {
-			MemoryObject field = getObject(((XModelEvent)event).getObjectID());
-			field.setRevisionNumber(event.getObjectRevisionNumber());
-			field.save();
-		}
+	@Override
+	protected void setRevisionNumberIfModel(long modelRevisionNumber) {
+		this.state.setRevisionNumber(modelRevisionNumber);
 	}
 	
-	public long[] synchronize(List<XEvent> remoteChanges, long lastRevision, XID actor,
-	        List<XCommand> localChanges) {
-		
-		long[] results = new long[localChanges.size()];
-		
-		boolean oldBlock = this.eventQueue.setBlockSending(true);
-		
-		try {
-			
-			Orphans orphans = new Orphans();
-			
-			int pos = this.eventQueue.getNextPosition();
-			
-			// Roll back to the old revision and save removed entities.
-			rollback(lastRevision, orphans);
-			
-			// Apply the remote changes.
-			for(XEvent remoteChange : remoteChanges) {
-				XCommand replayCommand = XX.createReplayCommand(remoteChange);
-				long result = executeCommand(remoteChange.getActor(), replayCommand, orphans);
-				if(result < 0) {
-					throw new IllegalStateException("could not apply remote change: "
-					        + remoteChange);
-				}
-			}
-			
-			// Re-apply the local changes.
-			long nRemote = remoteChanges.size();
-			for(int i = 0; i < localChanges.size(); i++) {
-				XCommand command = localChanges.get(i);
-				
-				// Adapt the command if needed.
-				if(command instanceof XModelCommand) {
-					XModelCommand mc = (XModelCommand)command;
-					if(mc.getChangeType() == ChangeType.REMOVE
-					        && mc.getRevisionNumber() > lastRevision) {
-						command = MemoryModelCommand.createRemoveCommand(mc.getTarget(), mc
-						        .getRevisionNumber()
-						        + nRemote, mc.getObjectID());
-						localChanges.set(i, command);
-					}
-				} else if(command instanceof XObjectCommand) {
-					XObjectCommand oc = (XObjectCommand)command;
-					if(oc.getChangeType() == ChangeType.REMOVE
-					        && oc.getRevisionNumber() > lastRevision) {
-						command = MemoryObjectCommand.createRemoveCommand(oc.getTarget(), oc
-						        .getRevisionNumber()
-						        + nRemote, oc.getFieldID());
-						localChanges.set(i, command);
-					}
-				} else if(command instanceof XFieldCommand) {
-					XFieldCommand fc = (XFieldCommand)command;
-					if(fc.getRevisionNumber() > lastRevision) {
-						switch(command.getChangeType()) {
-						case ADD:
-							command = MemoryFieldCommand.createAddCommand(fc.getTarget(), fc
-							        .getRevisionNumber()
-							        + nRemote, fc.getValue());
-							break;
-						case REMOVE:
-							command = MemoryFieldCommand.createRemoveCommand(fc.getTarget(), fc
-							        .getRevisionNumber()
-							        + nRemote);
-							break;
-						case CHANGE:
-							command = MemoryFieldCommand.createChangeCommand(fc.getTarget(), fc
-							        .getRevisionNumber()
-							        + nRemote, fc.getValue());
-							break;
-						default:
-							assert false : "Invalid command: " + fc;
-						}
-						localChanges.set(i, command);
-					}
-				}
-				
-				results[i] = executeCommand(actor, command, orphans);
-			}
-			
-			// Clean unneeded events.
-			this.eventQueue.cleanEvents(pos);
-			
-			for(MemoryObject object : orphans.objects.values()) {
-				object.delete();
-			}
-			
-			for(MemoryField field : orphans.fields.values()) {
-				field.delete();
-			}
-			
-		} finally {
-			
-			this.eventQueue.setBlockSending(oldBlock);
-			this.eventQueue.sendEvents();
-			
-		}
-		
-		assert getRevisionNumber() == getChangeLog().getCurrentRevisionNumber();
-		
-		return results;
+	@Override
+	protected void checkSync() {
+		// models can always sync
 	}
+	
 }

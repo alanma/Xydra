@@ -46,7 +46,7 @@ import org.xydra.core.model.state.impl.memory.TemporaryObjectState;
  * @author Kaidel
  * 
  */
-public class MemoryObject extends TransactionManager implements XObject, Serializable {
+public class MemoryObject extends SynchronizesChangesImpl implements XObject, Serializable {
 	
 	private static final long serialVersionUID = -808702139986657842L;
 	
@@ -196,10 +196,6 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 		}
 	}
 	
-	public boolean removeField(XID actor, XID fieldID) {
-		return removeField(actor, fieldID, null);
-	}
-	
 	protected void removeInternal(Orphans orphans) {
 		// all fields are already loaded for creating events
 		
@@ -212,7 +208,7 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 		this.loadedFields.clear();
 	}
 	
-	protected boolean removeField(XID actor, XID fieldID, Orphans orphans) {
+	public boolean removeField(XID actor, XID fieldID) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -230,6 +226,7 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 			// actually remove the field
 			this.state.removeFieldState(field.getID());
 			this.loadedFields.remove(field.getID());
+			Orphans orphans = getOrphans();
 			if(orphans != null) {
 				field.getState().setValue(null);
 				orphans.fields.put(field.getAddress(), field);
@@ -248,7 +245,7 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 				}
 				
 				// increment revision number
-				// only increment if this event is no subevent of a
+				// only increment if this event is no sub-event of a
 				// transaction (needs to be handled differently)
 				incrementRevisionAndSave();
 				
@@ -296,10 +293,6 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 	}
 	
 	public MemoryField createField(XID actor, XID fieldID) {
-		return createField(actor, fieldID, null);
-	}
-	
-	protected MemoryField createField(XID actor, XID fieldID, Orphans orphans) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -309,6 +302,7 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 			
 			MemoryField field = null;
 			
+			Orphans orphans = getOrphans();
 			if(orphans != null) {
 				XAddress fieldAddr = XX.resolveField(getAddress(), fieldID);
 				field = orphans.fields.remove(fieldAddr);
@@ -348,10 +342,6 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 	}
 	
 	public long executeObjectCommand(XID actor, XObjectCommand command) {
-		return executeObjectCommand(actor, command, null);
-	}
-	
-	public long executeObjectCommand(XID actor, XObjectCommand command, Orphans orphans) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -375,7 +365,7 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 				
 				long oldRev = getOldRevisionNumber();
 				
-				createField(actor, command.getFieldID(), orphans);
+				createField(actor, command.getFieldID());
 				
 				return oldRev;
 			}
@@ -403,7 +393,7 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 				
 				long oldRev = getOldRevisionNumber();
 				
-				removeField(actor, command.getFieldID(), orphans);
+				removeField(actor, command.getFieldID());
 				
 				return oldRev;
 			}
@@ -421,7 +411,13 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 			this.father.incrementRevisionAndSave();
 			setRevisionNumber(this.father.getRevisionNumber());
 		} else {
-			setRevisionNumber(getRevisionNumber() + 1);
+			XChangeLog log = this.eventQueue.getChangeLog();
+			if(log != null) {
+				assert log.getCurrentRevisionNumber() > getRevisionNumber();
+				setRevisionNumber(log.getCurrentRevisionNumber());
+			} else {
+				setRevisionNumber(getRevisionNumber() + 1);
+			}
 		}
 		save();
 	}
@@ -622,17 +618,13 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 	}
 	
 	public long executeCommand(XID actor, XCommand command) {
-		return executeCommand(actor, command, null);
-	}
-	
-	protected long executeCommand(XID actor, XCommand command, Orphans orphans) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			if(command instanceof XTransaction) {
-				return executeTransaction(actor, (XTransaction)command, orphans);
+				return executeTransaction(actor, (XTransaction)command);
 			}
 			if(command instanceof XObjectCommand) {
-				return executeObjectCommand(actor, (XObjectCommand)command, orphans);
+				return executeObjectCommand(actor, (XObjectCommand)command);
 			}
 			if(command instanceof XFieldCommand) {
 				XField field = getField(command.getTarget().getField());
@@ -645,7 +637,7 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 	}
 	
 	@Override
-	protected MemoryObject createObject(XID actor, XID objectId, Orphans orphans) {
+	protected MemoryObject createObject(XID actor, XID objectId) {
 		throw new AssertionError("object transactions cannot create objects");
 	}
 	
@@ -662,7 +654,7 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 	}
 	
 	@Override
-	protected boolean removeObject(XID actor, XID objectId, Orphans orphans) {
+	protected boolean removeObject(XID actor, XID objectId) {
 		throw new AssertionError("object transactions cannot remove objects");
 	}
 	
@@ -688,8 +680,21 @@ public class MemoryObject extends TransactionManager implements XObject, Seriali
 		return this.state;
 	}
 	
-	public XChangeLog getChangeLog() {
-		return this.eventQueue.getChangeLog();
+	@Override
+	protected void saveIfModel() {
+		// not a model, so nothing to do here
 	}
 	
+	@Override
+	protected void setRevisionNumberIfModel(long modelRevisionNumber) {
+		// not a model, so nothing to do here
+	}
+	
+	@Override
+	protected void checkSync() {
+		if(hasFather()) {
+			throw new IllegalStateException(
+			        "an object that is part of a model cannot be rolled abck / synchronized individualy");
+		}
+	}
 }

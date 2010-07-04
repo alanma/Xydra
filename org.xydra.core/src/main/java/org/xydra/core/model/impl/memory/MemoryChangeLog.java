@@ -35,9 +35,10 @@ public class MemoryChangeLog implements XChangeLog {
 	 */
 	protected void appendEvent(XEvent event) {
 		assert this.state.getBaseAddress().getObject() != null
-		        || event.getModelRevisionNumber() == this.getCurrentRevisionNumber();
+		        || (event != null && event.getModelRevisionNumber() == this
+		                .getCurrentRevisionNumber());
 		
-		assert !event.inTransaction();
+		assert event == null || !event.inTransaction();
 		// "else": event is part of a transaction and will therefore only be
 		// recorded as part of the transaction (by using a
 		// ChangeLogTransactionListener)

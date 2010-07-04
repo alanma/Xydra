@@ -1,25 +1,36 @@
 package org.xydra.core.model.impl.memory;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XAtomicCommand;
+import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XCommand;
+import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XFieldCommand;
 import org.xydra.core.change.XModelCommand;
+import org.xydra.core.change.XModelEvent;
 import org.xydra.core.change.XObjectCommand;
+import org.xydra.core.change.XObjectEvent;
 import org.xydra.core.change.XTransaction;
+import org.xydra.core.change.XTransactionEvent;
+import org.xydra.core.change.impl.memory.MemoryFieldCommand;
+import org.xydra.core.change.impl.memory.MemoryModelCommand;
+import org.xydra.core.change.impl.memory.MemoryObjectCommand;
 import org.xydra.core.model.IHasXAddress;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
-import org.xydra.core.model.XExecutesTransactions;
+import org.xydra.core.model.XExecutesCommands;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
+import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.core.model.delta.ChangedField;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.ChangedObject;
@@ -37,7 +48,8 @@ import org.xydra.core.model.delta.NewObject;
  * 
  * @author dscharrer
  */
-public abstract class TransactionManager implements IHasXAddress, XExecutesTransactions {
+public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchronizesChanges,
+        XExecutesCommands {
 	
 	protected static class Orphans {
 		Map<XID,MemoryObject> objects = new HashMap<XID,MemoryObject>();
@@ -48,7 +60,7 @@ public abstract class TransactionManager implements IHasXAddress, XExecutesTrans
 	/** if this variable equals true, a transaction is currently running */
 	private boolean transactionInProgress = false;
 	
-	public TransactionManager(MemoryEventQueue queue) {
+	public SynchronizesChangesImpl(MemoryEventQueue queue) {
 		this.eventQueue = queue;
 	}
 	
@@ -57,10 +69,6 @@ public abstract class TransactionManager implements IHasXAddress, XExecutesTrans
 	}
 	
 	public long executeTransaction(XID actor, XTransaction transaction) {
-		return executeTransaction(actor, transaction, null);
-	}
-	
-	public long executeTransaction(XID actor, XTransaction transaction, Orphans orphans) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -123,14 +131,14 @@ public abstract class TransactionManager implements IHasXAddress, XExecutesTrans
 			// apply changes
 			
 			for(XID objectId : model.getRemovedObjects()) {
-				removeObject(actor, objectId, orphans);
+				removeObject(actor, objectId);
 			}
 			
 			for(NewObject object : model.getNewObjects()) {
-				MemoryObject newObject = createObject(actor, object.getID(), orphans);
+				MemoryObject newObject = createObject(actor, object.getID());
 				for(XID fieldId : object) {
 					XBaseField field = object.getField(fieldId);
-					XField newField = newObject.createField(actor, fieldId, orphans);
+					XField newField = newObject.createField(actor, fieldId);
 					if(!field.isEmpty()) {
 						newField.setValue(actor, field.getValue());
 					}
@@ -141,11 +149,11 @@ public abstract class TransactionManager implements IHasXAddress, XExecutesTrans
 				MemoryObject oldObject = getObject(object.getID());
 				
 				for(XID fieldId : object.getRemovedFields()) {
-					oldObject.removeField(actor, fieldId, orphans);
+					oldObject.removeField(actor, fieldId);
 				}
 				
 				for(NewField field : object.getNewFields()) {
-					XField newField = oldObject.createField(actor, field.getID(), orphans);
+					XField newField = oldObject.createField(actor, field.getID());
 					if(!field.isEmpty()) {
 						newField.setValue(actor, field.getValue());
 					}
@@ -374,6 +382,195 @@ public abstract class TransactionManager implements IHasXAddress, XExecutesTrans
 		return true;
 	}
 	
+	public MemoryChangeLog getChangeLog() {
+		return this.eventQueue.getChangeLog();
+	}
+	
+	protected Orphans getOrphans() {
+		return this.eventQueue.orphans;
+	}
+	
+	public void rollback(long revision) {
+		
+		checkSync();
+		
+		if(revision < 0) {
+			throw new RuntimeException("invalid revision number: " + revision);
+		}
+		
+		MemoryChangeLog log = getChangeLog();
+		long currentRev = log.getCurrentRevisionNumber();
+		if(revision == currentRev) {
+			return;
+		}
+		
+		// stop the change log to prevent the rollback events from being logged
+		boolean oldLogging = this.eventQueue.setLogging(false);
+		
+		// rollback each event individually
+		for(long i = currentRev - 1; i >= revision; i--) {
+			// TODO: ignore model events
+			XEvent event = log.getEventAt(i);
+			if(event instanceof XAtomicEvent) {
+				rollbackEvent((XAtomicEvent)event);
+			} else {
+				assert event instanceof XTransactionEvent;
+				XTransactionEvent trans = (XTransactionEvent)event;
+				for(int j = trans.size() - 1; j >= 0; j--) {
+					XAtomicEvent atomicEvent = trans.getEvent(j);
+					rollbackEvent(atomicEvent);
+				}
+			}
+			
+		}
+		
+		// reset the change log
+		log.truncateToRevision(revision);
+		this.eventQueue.setLogging(oldLogging);
+		
+		saveIfModel();
+		
+	}
+	
+	private void rollbackEvent(XAtomicEvent event) {
+		XAtomicCommand command = XX.createForcedUndoCommand(event);
+		long result = executeCommand(null, command);
+		assert result > 0 : "rollback command " + command + " for event " + event + " failed";
+		XAddress target = event.getTarget();
+		
+		// fix revision numbers
+		setRevisionNumberIfModel(event.getModelRevisionNumber());
+		if(target.getObject() != null) {
+			MemoryObject object = getObject(target.getObject());
+			object.setRevisionNumber(event.getObjectRevisionNumber());
+			object.save();
+			if(target.getField() != null) {
+				MemoryField field = object.getField(target.getField());
+				field.setRevisionNumber(event.getFieldRevisionNumber());
+				field.save();
+			} else if(event.getChangeType() == ChangeType.REMOVE) {
+				MemoryField field = object.getField(((XObjectEvent)event).getFieldID());
+				field.setRevisionNumber(event.getFieldRevisionNumber());
+				field.save();
+			}
+		} else if(event.getChangeType() == ChangeType.REMOVE) {
+			MemoryObject field = getObject(((XModelEvent)event).getObjectID());
+			field.setRevisionNumber(event.getObjectRevisionNumber());
+			field.save();
+		}
+	}
+	
+	public long[] synchronize(List<XEvent> remoteChanges, long lastRevision, XID actor,
+	        List<XCommand> localChanges) {
+		
+		checkSync();
+		
+		long[] results = new long[localChanges.size()];
+		
+		boolean oldBlock = this.eventQueue.setBlockSending(true);
+		
+		try {
+			
+			assert this.eventQueue.orphans == null;
+			this.eventQueue.orphans = new Orphans();
+			
+			int pos = this.eventQueue.getNextPosition();
+			
+			// Roll back to the old revision and save removed entities.
+			rollback(lastRevision);
+			
+			// Apply the remote changes.
+			for(XEvent remoteChange : remoteChanges) {
+				if(remoteChange == null) {
+					this.eventQueue.getChangeLog().appendEvent(null);
+					continue;
+				}
+				// TODO ignore model events?
+				XCommand replayCommand = XX.createReplayCommand(remoteChange);
+				long result = executeCommand(remoteChange.getActor(), replayCommand);
+				if(result < 0) {
+					throw new IllegalStateException("could not apply remote change: "
+					        + remoteChange);
+				}
+			}
+			
+			// Re-apply the local changes.
+			long nRemote = remoteChanges.size();
+			for(int i = 0; i < localChanges.size(); i++) {
+				XCommand command = localChanges.get(i);
+				
+				// Adapt the command if needed.
+				if(command instanceof XModelCommand) {
+					XModelCommand mc = (XModelCommand)command;
+					if(mc.getChangeType() == ChangeType.REMOVE
+					        && mc.getRevisionNumber() > lastRevision) {
+						command = MemoryModelCommand.createRemoveCommand(mc.getTarget(), mc
+						        .getRevisionNumber()
+						        + nRemote, mc.getObjectID());
+						localChanges.set(i, command);
+					}
+				} else if(command instanceof XObjectCommand) {
+					XObjectCommand oc = (XObjectCommand)command;
+					if(oc.getChangeType() == ChangeType.REMOVE
+					        && oc.getRevisionNumber() > lastRevision) {
+						command = MemoryObjectCommand.createRemoveCommand(oc.getTarget(), oc
+						        .getRevisionNumber()
+						        + nRemote, oc.getFieldID());
+						localChanges.set(i, command);
+					}
+				} else if(command instanceof XFieldCommand) {
+					XFieldCommand fc = (XFieldCommand)command;
+					if(fc.getRevisionNumber() > lastRevision) {
+						switch(command.getChangeType()) {
+						case ADD:
+							command = MemoryFieldCommand.createAddCommand(fc.getTarget(), fc
+							        .getRevisionNumber()
+							        + nRemote, fc.getValue());
+							break;
+						case REMOVE:
+							command = MemoryFieldCommand.createRemoveCommand(fc.getTarget(), fc
+							        .getRevisionNumber()
+							        + nRemote);
+							break;
+						case CHANGE:
+							command = MemoryFieldCommand.createChangeCommand(fc.getTarget(), fc
+							        .getRevisionNumber()
+							        + nRemote, fc.getValue());
+							break;
+						default:
+							assert false : "Invalid command: " + fc;
+						}
+						localChanges.set(i, command);
+					}
+				}
+				
+				results[i] = executeCommand(actor, command);
+			}
+			
+			// Clean unneeded events.
+			this.eventQueue.cleanEvents(pos);
+			
+			Orphans orphans = this.eventQueue.orphans;
+			this.eventQueue.orphans = null;
+			
+			for(MemoryObject object : orphans.objects.values()) {
+				object.delete();
+			}
+			
+			for(MemoryField field : orphans.fields.values()) {
+				field.delete();
+			}
+			
+		} finally {
+			
+			this.eventQueue.setBlockSending(oldBlock);
+			this.eventQueue.sendEvents();
+			
+		}
+		
+		return results;
+	}
+	
 	/**
 	 * Increment this entity's revision number.
 	 */
@@ -395,7 +592,7 @@ public abstract class TransactionManager implements IHasXAddress, XExecutesTrans
 	 * If this is already an object this method should never be called.
 	 * 
 	 */
-	protected abstract MemoryObject createObject(XID actor, XID objectId, Orphans orphans);
+	protected abstract MemoryObject createObject(XID actor, XID objectId);
 	
 	/**
 	 * Remove the existing object with the given ID.
@@ -403,7 +600,7 @@ public abstract class TransactionManager implements IHasXAddress, XExecutesTrans
 	 * If this is already an object this method should never be called.
 	 * 
 	 */
-	protected abstract boolean removeObject(XID actor, XID objectId, Orphans orphans);
+	protected abstract boolean removeObject(XID actor, XID objectId);
 	
 	/**
 	 * @return Return the proxy for reading the current state.
@@ -429,5 +626,20 @@ public abstract class TransactionManager implements IHasXAddress, XExecutesTrans
 	 * @throws IllegalStateException if this entity has already been removed
 	 */
 	protected abstract void checkRemoved() throws IllegalStateException;
+	
+	/**
+	 * Save, if this is a model.
+	 */
+	protected abstract void saveIfModel();
+	
+	/**
+	 * Set the new revision number, if this is a model.
+	 */
+	protected abstract void setRevisionNumberIfModel(long modelRevisionNumber);
+	
+	/**
+	 * Check if this entity may be synchronized.
+	 */
+	protected abstract void checkSync();
 	
 }

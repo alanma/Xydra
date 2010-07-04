@@ -18,6 +18,7 @@ import org.xydra.core.change.impl.memory.MemoryFieldEvent;
 import org.xydra.core.change.impl.memory.MemoryTransactionEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.impl.memory.SynchronizesChangesImpl.Orphans;
 
 
 /**
@@ -31,6 +32,7 @@ public class MemoryEventQueue {
 	private boolean sending;
 	private final MemoryChangeLog changeLog;
 	private boolean logging;
+	protected Orphans orphans;
 	
 	public MemoryEventQueue(MemoryChangeLog log) {
 		// array list to allow indexed access for creating transaction events
