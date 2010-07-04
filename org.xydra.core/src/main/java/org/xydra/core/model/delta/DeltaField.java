@@ -5,7 +5,7 @@ import org.xydra.core.value.XValue;
 
 
 /**
- * A {@link XBaseField} that also allows direct changes.
+ * A subtype of {@link XBaseField} that also supports change operations.
  * 
  * @author dscharrer
  * 
@@ -13,7 +13,12 @@ import org.xydra.core.value.XValue;
 public interface DeltaField extends XBaseField {
 	
 	/**
-	 * Set the value of this field to the one given.
+	 * Sets the {@link XValue} of this field to the given value.
+	 * 
+	 * Passing "null" as the 'value' arguments implies an remove operation (will
+	 * remove the current {@link XValue})
+	 * 
+	 * @param value The new {@link XValue}
 	 */
 	public void setValue(XValue value);
 	

@@ -9,6 +9,7 @@ import java.util.Set;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.model.XAddress;
+import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
@@ -17,7 +18,16 @@ import org.xydra.index.iterator.BagUnionIterator;
 
 
 /**
- * An {@link XBaseModel} that represents changes to a model.
+ * An {@link XBaseField}/{@link DeltaField} that represents changes to an
+ * {@link XBaseField}.
+ * 
+ * An {@link XBaseField} is passed as an argument of the constructor. This
+ * ChangedField will than basically represent the given {@link XBaseField} and
+ * allow changes on its set of {@link XBaseObject XBaseObjects}. The changes do
+ * not happen directly on the passed {@link XBaseField} but rather on a sort of
+ * copy that emulates the passed {@link XBaseModel}. A ChangedModel provides
+ * methods to compare the current state to the state the passed
+ * {@link XBaseModel} was in at creation time.
  * 
  * @author dscharrer
  * 
@@ -30,6 +40,16 @@ public class ChangedModel implements DeltaModel {
 	
 	private final XBaseModel base;
 	
+	/**
+	 * @param base The {@link XBaseModel} this ChangedModel will encapsulate and
+	 *            represent
+	 */
+	/*
+	 * TODO Woudln't it be better to actually copy the given base entitiy?
+	 * (think about synchronization problems - somebody might change the base
+	 * entity while this "changed" entity is being used, which may result in
+	 * complete confusion (?))
+	 */
 	public ChangedModel(XBaseModel base) {
 		this.base = base;
 	}
@@ -42,34 +62,45 @@ public class ChangedModel implements DeltaModel {
 	}
 	
 	/**
-	 * @return the {@link XID}s of the objects that existed in the original
-	 *         model but have been removed
+	 * @return the {@link XID XIDs} of objects that existed in the original
+	 *         model but have been removed from this ChangedModel
 	 */
 	public Iterable<XID> getRemovedObjects() {
 		return this.removed;
 	}
 	
 	/**
-	 * @return the new objects that have been added
+	 * @return the {@link NewObject NewObjects} that have been added to this
+	 *         ChangedModel and were not contained in the original
+	 *         {@link XBaseModel}
 	 */
 	public Iterable<NewObject> getNewObjects() {
 		return this.added.values();
 	}
 	
 	/**
-	 * @return the objects that existed in the original but have been changed.
-	 *         note that their current state might be the same of the original
-	 *         one
+	 * @return an iterable of the objects that already existed in the original
+	 *         {@link XBaseModel} but have been changed. Note: their current
+	 *         state might be the same as the original one
 	 */
 	public Iterable<ChangedObject> getChangedObjects() {
 		return this.changed.values();
 	}
 	
 	/**
-	 * Count the minimal number of {@link XCommand}s that would be needed to
-	 * transform the original model to the the state represented by this changed
-	 * model.
+	 * Count the minimal number of {@link XCommand XCommands} that would be
+	 * needed to transform the original {@link XBaseModel} to the current state
+	 * which is represented by this ChangedModel.
+	 * 
+	 * @param max An upper bound for counting the amount of needed
+	 *            {@link XCommands}. Note that setting this bound to little may
+	 *            result in the return of an integer which does not actually
+	 *            represent the minimal amount of needed {@link XCommand
+	 *            XCommands} for the transformation
+	 * @result the amount of needed {@link XCommand XCommands} for the
+	 *         transformation
 	 */
+	// TODO I'm not sure if I got the purpose of "max" right
 	public int countChanges(int max) {
 		int n = this.removed.size();
 		if(n < max) {
@@ -130,8 +161,10 @@ public class ChangedModel implements DeltaModel {
 	}
 	
 	/**
-	 * Get the revision number of the original model.
+	 * @return the revision number of the original {@link XBaseModel}
 	 */
+	// TODO Maybe a method for returning the revision number this ChangedModel
+	// would have if it would be a real model would be a good idea?
 	public long getRevisionNumber() {
 		return this.base.getRevisionNumber();
 	}
@@ -162,7 +195,8 @@ public class ChangedModel implements DeltaModel {
 	}
 	
 	/**
-	 * Get the object with the given {@link XID} as it exists in the old model.
+	 * @return the {@link XBaseObject} with the given {@link XID} as it exists
+	 *         in the original {@link XBaseModel}.
 	 */
 	public XBaseObject getOldObject(XID objectId) {
 		return this.base.getObject(objectId);

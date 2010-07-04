@@ -5,7 +5,7 @@ import org.xydra.core.model.XID;
 
 
 /**
- * A {@link XBaseModel} that also allows direct changes.
+ * A subtype of {@link XBaseModel} that also supports change operations.
  * 
  * @author dscharrer
  * 
@@ -13,15 +13,32 @@ import org.xydra.core.model.XID;
 public interface DeltaModel extends XBaseModel {
 	
 	/**
-	 * Create an object with the given {@link XID}
+	 * Creates a new {@link DeltaObject} with the given {@link XID} and adds it
+	 * to this DeltaModel if the given {@link XID} was not already taken.
+	 * 
+	 * @param objectId The {@link XID} for the {@link DeltaObject} which is to
+	 *            be created
 	 */
 	public void createObject(XID objectId);
 	
 	/**
-	 * Remove the object with the given {@link XID}
+	 * Removes the {@link DeltaObject} with the given {@link XID} from this
+	 * DeltaModel.
+	 * 
+	 * @param objectId The {@link XID} of the {@link DeltaObject} which is to be
+	 *            removed
 	 */
 	public void removeObject(XID objectId);
 	
+	/**
+	 * Returns the {@link DeltaObject} contained in this model with the given
+	 * {@link XID}
+	 * 
+	 * @param objectId The {@link XID} of the {@link DeltaObject} which is to be
+	 *            returned
+	 * @return The {@link DeltaObject} with the given {@link XID} or null, if no
+	 *         corresponding {@link DeltaObject} exists
+	 */
 	public DeltaObject getObject(XID objectId);
 	
 }

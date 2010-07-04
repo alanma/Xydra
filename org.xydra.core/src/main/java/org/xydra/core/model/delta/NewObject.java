@@ -10,9 +10,8 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 
 
-
 /**
- * A completely new delta object that isn't based on any existing object.
+ * A completely new {@link DeltaObject} that isn't based on any existing object.
  * 
  * @author dscharrer
  * 
@@ -64,7 +63,8 @@ public class NewObject implements DeltaObject {
 	}
 	
 	/**
-	 * Get the number of {@link XCommand}s needed to create this object.
+	 * Get the number of {@link XCommand XCommands} needed to create this
+	 * object.
 	 */
 	public int countChanges(int max) {
 		int n = 1; // one to create the object

@@ -7,7 +7,7 @@ import org.xydra.core.value.XValue;
 
 
 /**
- * A completely new delta field that isn't based on any existing field.
+ * A completely new {@link DeltaField} that isn't based on any existing field.
  * 
  * @author dscharrer
  * 
@@ -46,7 +46,7 @@ public class NewField implements DeltaField {
 	}
 	
 	/**
-	 * Get the number of {@link XCommand}s needed to create this field.
+	 * Get the number of {@link XCommand XCommands} needed to create this field.
 	 */
 	public int countChanges() {
 		return isEmpty() ? 1 : 2;
