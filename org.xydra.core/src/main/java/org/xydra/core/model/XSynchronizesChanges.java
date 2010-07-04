@@ -15,7 +15,7 @@ import org.xydra.core.change.XTransaction;
  * @author Kaidel
  * 
  */
-public interface XSynchronizesChanges {
+public interface XSynchronizesChanges extends XExecutesCommands, IHasXAddress {
 	
 	/**
 	 * This method executes the given {@link XTransaction}.
