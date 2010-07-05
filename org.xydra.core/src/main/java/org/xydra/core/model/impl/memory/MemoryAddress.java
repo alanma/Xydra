@@ -145,7 +145,7 @@ public class MemoryAddress implements XAddress {
 	/**
 	 * @return a unique, complete representation of this {@link XAddress} with
 	 *         the fixed format = '/' + repoID + '/' + modelID + '/' + objectID
-	 *         + '/' + fieldID. Empty IDs are represented by '-'.
+	 *         + '/' + fieldID. Empty {@link XID XIDs} are represented by '-'.
 	 */
 	@Override
 	public String toString() {

@@ -53,8 +53,9 @@ public interface XChangeLog {
 	 * Returns a list of all {@link XEvent XEvents} that occurred until (but not
 	 * including) the given revision number.
 	 * 
-	 * @param revisionNumber the revision number which corresponding
-	 *            {@link XEvent} logged by this change log is to be returned
+	 * @param revisionNumber the revision number determining which
+	 *            {@link XEvent XEvents} logged by this change log are to be
+	 *            returned
 	 * @return a list of all {@link XEvent XEvents} that occurred until (but not
 	 *         including) the given revision number.
 	 * @throws IndexOutOfBoundsException if revisionNumber is negative
@@ -65,8 +66,9 @@ public interface XChangeLog {
 	 * Returns a list of all {@link XEvent XEvents} that occurred after (and
 	 * including) the given revision number.
 	 * 
-	 * @param revisionNumber the revision number which corresponding
-	 *            {@link XEvent} logged by this change log is to be returned
+	 * @param revisionNumber the revision number determining which
+	 *            {@link XEvent XEvents} logged by this change log are to be
+	 *            returned
 	 * @return a list of all {@link XEvent XEvents} that occurred after (and
 	 *         including) the given revision number.
 	 * @throws IndexOutOfBoundsException if revisionNumber is negative

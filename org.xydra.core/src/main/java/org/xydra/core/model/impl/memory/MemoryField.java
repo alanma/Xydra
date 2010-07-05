@@ -60,28 +60,28 @@ public class MemoryField implements XField, Serializable {
 	private Set<XFieldEventListener> fieldChangeListenerCollection;
 	
 	/**
-	 * Creates a new MemoryField without a father-object.
+	 * Creates a new MemoryField without a father-{@link XObject}.
 	 * 
-	 * @param fieldId The {@link XID} for the field.
+	 * @param fieldId The {@link XID} for this MemoryField.
 	 */
 	public MemoryField(XID fieldId) {
 		this(new TemporaryFieldState(X.getIDProvider().fromComponents(null, null, null, fieldId)));
 	}
 	
 	/**
-	 * Creates a new MemoryField without a father-object.
+	 * Creates a new MemoryField without a father-{@link XObject}.
 	 * 
-	 * @param fieldState The {@link XFieldState} for the field.
+	 * @param fieldState The {@link XFieldState} for this MemoryField.
 	 */
 	public MemoryField(XFieldState fieldState) {
 		this(null, new MemoryEventQueue(null), fieldState);
 	}
 	
 	/**
-	 * Creates a new MemoryField with the given father-object.
+	 * Creates a new MemoryField with or without a father-{@link XObject}.
 	 * 
-	 * @param lock The object used for synchronization.
-	 * @param fieldState initial state
+	 * @param parent The father-{@link XObject} of this MemoryField (may be
+	 *            null)
 	 */
 	protected MemoryField(MemoryObject parent, MemoryEventQueue eventQueue, XFieldState fieldState) {
 		this.eventQueue = eventQueue;
@@ -189,9 +189,8 @@ public class MemoryField implements XField, Serializable {
 	}
 	
 	/**
-	 * Returns the XID of this field.
-	 * 
-	 * @return The XID of this field
+	 * @throws IllegalStateException if this method is called after this
+	 *             {@link XField} was already removed
 	 */
 	@ReadOperation
 	public XID getID() {
@@ -202,10 +201,8 @@ public class MemoryField implements XField, Serializable {
 	}
 	
 	/**
-	 * Sets the value of this field.
-	 * 
-	 * @param actor The XID of the actor of this operation.
-	 * @param newValue The value.
+	 * @throws IllegalStateException if this method is called after this
+	 *             {@link XField} was already removed
 	 */
 	@ModificationOperation
 	public boolean setValue(XID actor, XValue newValue) {
@@ -265,6 +262,10 @@ public class MemoryField implements XField, Serializable {
 		}
 	}
 	
+	/**
+	 * @throws IllegalStateException if this method is called after this
+	 *             {@link XField} was already removed
+	 */
 	public long executeFieldCommand(XID actor, XFieldCommand command) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -356,9 +357,8 @@ public class MemoryField implements XField, Serializable {
 	}
 	
 	/**
-	 * Returns the value of this field.
-	 * 
-	 * @return The value of this field
+	 * @throws IllegalStateException if this method is called after this
+	 *             {@link XField} was already removed
 	 */
 	@ReadOperation
 	public XValue getValue() {
@@ -387,11 +387,14 @@ public class MemoryField implements XField, Serializable {
 	}
 	
 	/**
-	 * Returns the father-object of this field.
+	 * Returns the father-{@link XObject} (the {@link XObject} containing this
+	 * MemoryField) of this MemoryField.
 	 * 
-	 * @return The father-object of this field.
+	 * @return The father-{@link XObject} of this MemoryField - may be null if
+	 *         this MemoryField has no father-{@link XObject}
+	 * @throws IllegalStateException if this method is called after this
+	 *             {@link XField} was already removed
 	 */
-	
 	@ReadOperation
 	public MemoryObject getFather() {
 		checkRemoved();
@@ -399,9 +402,11 @@ public class MemoryField implements XField, Serializable {
 	}
 	
 	/**
-	 * Returns whether this field has a father or not.
+	 * Returns whether this MemoryField has a father-{@link XObject} or not.
 	 * 
 	 * @return true, if this field has a father, false otherwise
+	 * @throws IllegalStateException if this method is called after this
+	 *             {@link XField} was already removed
 	 */
 	
 	@ReadOperation
@@ -410,6 +415,10 @@ public class MemoryField implements XField, Serializable {
 		return (this.father != null);
 	}
 	
+	/**
+	 * @throws IllegalStateException if this method is called after this
+	 *             {@link XField} was already removed
+	 */
 	@ReadOperation
 	public long getRevisionNumber() {
 		synchronized(this.eventQueue) {
