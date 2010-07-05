@@ -22,8 +22,9 @@ import org.xydra.core.model.impl.memory.SynchronizesChangesImpl.Orphans;
 
 
 /**
- * A queue for model, object and fields event to be dispatched after all
- * operations are complete.
+ * A queue for {@link XModelEvent XModelEvents}, {@link XObjectEvent
+ * XObjectEvents} and {@link XFieldEvent XFieldEvents} which are to be
+ * dispatched after all current change operations are completed.
  * 
  */
 public class MemoryEventQueue {

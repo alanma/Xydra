@@ -10,8 +10,8 @@ import org.xydra.index.iterator.NoneIterator;
 
 
 /**
- * Implementation of {@link XChangeLog} for use in MemoryModel, MemoryObject and
- * MemoryField.
+ * Implementation of {@link XChangeLog} for use with {@link MemoryModel},
+ * {@link MemoryObject} and {@link MemoryField}.
  * 
  * @author Kaidel
  * 
@@ -29,9 +29,9 @@ public class MemoryChangeLog implements XChangeLog {
 	}
 	
 	/**
-	 * Appends an event to the end of the change log
+	 * Appends an {@link XEvent} to the end of this MemoryChangeLog
 	 * 
-	 * @param event the event which is to be appended
+	 * @param event the {@link XEvent} which is to be appended
 	 */
 	protected void appendEvent(XEvent event) {
 		assert this.state.getBaseAddress().getObject() != null
@@ -47,10 +47,12 @@ public class MemoryChangeLog implements XChangeLog {
 	}
 	
 	/**
-	 * Removes all events that occurred after the given revision number,
-	 * excluding the event that occurred at the given revision number
+	 * Removes all {@link XEvent XEvents} that occurred after the given revision
+	 * number from this MemoryChangeLog, excluding the {@link XEvent} that
+	 * occurred at the given revision number
 	 * 
-	 * @param revisionNumber
+	 * @param revisionNumber the revision number from which on the
+	 *            {@link XEvent XEvents} are to be removed
 	 * @return true, if the operation could be executed, i.e. the given revision
 	 *         number was smaller than the current revision number and greater
 	 *         than zero.
