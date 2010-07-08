@@ -5,7 +5,7 @@
 
 	<groupId>org.xydra</groupId>
 	<artifactId>core</artifactId>
-	<version>0.1.0</version>
+	<version>0.1.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>Xydra Core</name>
 
@@ -72,12 +72,12 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>index</artifactId>
-			<version>0.1.0</version>
+			<version>0.1.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>index</artifactId>
-			<version>0.1.0</version>
+			<version>0.1.1-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
 
