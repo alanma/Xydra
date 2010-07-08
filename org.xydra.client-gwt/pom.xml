@@ -11,7 +11,7 @@
 	<groupId>org.xydra</groupId>
 	<artifactId>xclient-gwt</artifactId>
 	<packaging>jar</packaging>
-	<version>0.1.0</version>
+	<version>0.1.1-SNAPSHOT</version>
 	<name>Xydra GWT Client</name>
 	
 	<pluginRepositories>
@@ -101,12 +101,12 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
-			<version>0.1.0</version>
+			<version>0.1.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
-			<version>0.1.0</version>
+			<version>0.1.1-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
 		
