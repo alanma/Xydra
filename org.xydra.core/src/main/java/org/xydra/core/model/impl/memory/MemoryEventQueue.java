@@ -17,6 +17,7 @@ import org.xydra.core.change.XTransactionEvent;
 import org.xydra.core.change.impl.memory.MemoryFieldEvent;
 import org.xydra.core.change.impl.memory.MemoryTransactionEvent;
 import org.xydra.core.model.XAddress;
+import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.impl.memory.SynchronizesChangesImpl.Orphans;
 
@@ -35,6 +36,12 @@ public class MemoryEventQueue {
 	private boolean logging;
 	protected Orphans orphans;
 	
+	/**
+	 * Creates a new MemoryEventQueue
+	 * 
+	 * @param log The {@link XChangeLog} this MemoryEventQueue will use for
+	 *            logging (may be null)
+	 */
 	public MemoryEventQueue(MemoryChangeLog log) {
 		// array list to allow indexed access for creating transaction events
 		this.eventQueue = new ArrayList<EventQueueEntry>();
@@ -43,9 +50,9 @@ public class MemoryEventQueue {
 	}
 	
 	/**
-	 * Enqueues the given entry.
+	 * Enqueues the given {@link EventQueueEntry}.
 	 * 
-	 * @param entry The entry to be enqueued.
+	 * @param entry The {@link EventQueueEntry} to be enqueued.
 	 */
 	private void enqueueEvent(EventQueueEntry entry) {
 		
@@ -57,7 +64,8 @@ public class MemoryEventQueue {
 	}
 	
 	/**
-	 * Propagates the events in the enqueued entries.
+	 * Propagates the {@link XEvent XEvents} in the enqueued
+	 * {@link EventQueueEntry EventQueueEntries}.
 	 */
 	public void sendEvents() {
 		
@@ -148,7 +156,7 @@ public class MemoryEventQueue {
 	 * Enqueues the given {@link XModelEvent}.
 	 * 
 	 * @param model The {@link MemoryModel} in which this event occurred.
-	 * @param event The event.
+	 * @param event The {@link XModelEvent}.
 	 */
 	public void enqueueModelEvent(MemoryModel model, XModelEvent event) {
 		assert model != null && event != null : "Neither model nor event may be null!";
@@ -160,7 +168,7 @@ public class MemoryEventQueue {
 	 * Enqueues the given {@link XObjectEvent}.
 	 * 
 	 * @param object The {@link MemoryObject} in which this event occurred.
-	 * @param event The event.
+	 * @param event The {@link XObjectEvent}.
 	 */
 	public void enqueueObjectEvent(MemoryObject object, XObjectEvent event) {
 		assert object != null && event != null : "Neither object nor event may be null!";
@@ -175,7 +183,7 @@ public class MemoryEventQueue {
 	 * Enqueues the given {@link XFieldEvent}.
 	 * 
 	 * @param field The {@link MemoryField} in which this event occurred.
-	 * @param event The event.
+	 * @param event The {@link XFieldEvent}.
 	 */
 	public void enqueueFieldEvent(MemoryField field, XFieldEvent event) {
 		assert field != null && event != null : "Neither field nor event may be null!";
@@ -188,19 +196,27 @@ public class MemoryEventQueue {
 	}
 	
 	/**
-	 * Enqueues the given {@link XTransactionEvent}.
+	 * Enqueues the {@link XEvent XEvents} contained in this MemoryEventQueue
+	 * since the given index 'since' as an {@link XTransactionEvent} specified
+	 * by the given parameters.
 	 * 
-	 * @param field The {@link MemoryField} in which this event occurred.
-	 * @param event The event.
-	 * @Param since The transaction will contain all events after this (value
-	 *        retrieved from getNextPosition())
+	 * @param actor The {@link XID} of the actor
+	 * @param model The {@link MemoryModel} in which the {@link XEvent XEvents}
+	 *            occurred (may be null, if 'object' is not null)
+	 * @param object The {@link MemoryObject} in which the {@link XEvent
+	 *            XEvents} occurred (may be null, if 'model' is not null)
+	 * @Param since The created {@link XTransactionEvent} will contain all
+	 *        {@link XEvent XEvents} after the {@link XEvent} with this index in
+	 *        the current MemoryEventQueue (value can be retrieved from
+	 *        getNextPosition())
 	 */
+	// TODO not sure if I got the purpose of this method right
 	@SuppressWarnings("null")
 	public void createTransactionEvent(XID actor, MemoryModel model, MemoryObject object, int since) {
 		
 		assert this.eventQueue instanceof RandomAccess;
 		
-		assert since >= 0 && since < this.eventQueue.size() : "Invalid since, have events been sent?";
+		assert since >= 0 && since < this.eventQueue.size() : "Invalid argument 'since', have events been sent?";
 		
 		assert since < this.eventQueue.size() - 1 : "Transactions should have more than one event.";
 		
@@ -226,17 +242,22 @@ public class MemoryEventQueue {
 	}
 	
 	/**
-	 * Get the position to use for the since parameter of
-	 * createTransactionEvent() or cleanEvents() for using all following events.
+	 * Get the position to use for the 'since' parameter of {@link
+	 * MemoryEventQueue#createTransactionEvent(XID, MemoryModel, MemoryObject,
+	 * int since)} or {@link MemoryEventQueue#cleanEvents(int)} for using all
+	 * {@link XEvent XEvents} that will be enqueued after the returned value.
 	 * 
-	 * @return
+	 * Note: This position equals the current size of this MemoryEventQueue (the
+	 * amount of enqueued {@link XEvent XEvents})
+	 * 
+	 * @return the position to use for the 'since' parameter, as described above
 	 */
 	int getNextPosition() {
 		return this.eventQueue.size();
 	}
 	
 	/**
-	 * A container for a given event and the affected XEntities
+	 * A container for a given {@link XEvent} and the affected entities
 	 */
 	private static class EventQueueEntry {
 		
@@ -260,12 +281,17 @@ public class MemoryEventQueue {
 	/**
 	 * Suspend and resume logging.
 	 * 
-	 * @param logging True if events should be logged.
-	 * @return True if events were logged before.
+	 * @param logging Set to true if events should be logged.
+	 * @return True, if logging was already activated before.
+	 * @throws IllegalArgumentException if logging is set to true, but the
+	 *             {@link XChangeLog} if this MemoryEventQueue is not set
 	 */
 	public boolean setLogging(boolean logging) {
 		
-		assert !logging || this.changeLog != null;
+		if(logging && this.changeLog == null) {
+			throw new IllegalArgumentException(
+			        "Logging was set to true, but the MemoryChangeLog is not set");
+		}
 		
 		boolean oldLogging = this.logging;
 		this.logging = logging;
@@ -285,10 +311,14 @@ public class MemoryEventQueue {
 	}
 	
 	/**
-	 * Remove events that cancel each other out from the queue.
+	 * Remove all {@link XEvent XEvents} after 'since' from this
+	 * MemoryEventQueue that cancel each other out. (for example, remove
+	 * {@link XEvent XEvents} that one after another add and remove the same
+	 * entity)
 	 * 
-	 * @Param since Clean all events after this (value retrieved from
-	 *        getNextPosition())
+	 * @Param since Clean all {@link XEvent XEvents} after the {@link XEvent}
+	 *        with this index in the current MemoryEventQueue (value can be
+	 *        retrieved from getNextPosition())
 	 */
 	public void cleanEvents(int since) {
 		
@@ -409,6 +439,11 @@ public class MemoryEventQueue {
 		assert !containsNullEntries();
 	}
 	
+	/**
+	 * @return true, if this MemoryEventQueue contains null values or
+	 *         {@link EventQueueEntry EventQueueEntries} containing null values
+	 *         as their {@link XEvent}
+	 */
 	private boolean containsNullEntries() {
 		
 		for(EventQueueEntry entry : this.eventQueue) {
@@ -421,10 +456,13 @@ public class MemoryEventQueue {
 	}
 	
 	/**
-	 * Merge all field events between first and last.
+	 * Merges the two given {@link XFieldEvent XFieldEvents} to a single
+	 * equivalent {@link XFieldEvent} representing both events, if possible.
+	 * (for example an 'first' = REMOVE event, 'last' = ADD Event will result in
+	 * a new event of the CHANGE-type)
 	 * 
-	 * @return The merged event (which may be last) or null of the events cancel
-	 *         each other out.
+	 * @return The merged {@link XFieldEvent} (which may be 'last') or null if
+	 *         the given {@link XFieldEvent XFieldEvents} cancel each other out.
 	 */
 	XFieldEvent mergeFieldEvents(XFieldEvent first, XFieldEvent last) {
 		
@@ -484,10 +522,10 @@ public class MemoryEventQueue {
 	}
 	
 	/**
-	 * Suspend and resume logging.
+	 * Suspends and resumes logging.
 	 * 
-	 * @param logging True if sending events should be disabled.
-	 * @return True if sending events was disabled before before.
+	 * @param logging True, to suspend logging, false for resuming.
+	 * @return True, if logging was suspended before this method was called.
 	 */
 	public boolean setBlockSending(boolean block) {
 		boolean oldBlock = this.sending;

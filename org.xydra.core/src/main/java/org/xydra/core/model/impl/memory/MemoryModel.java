@@ -28,6 +28,7 @@ import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
+import org.xydra.core.model.XRepository;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
@@ -52,7 +53,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 	/** The father-repository of this XModel */
 	private final MemoryRepository father;
 	
-	/** Has this object been removed? */
+	/** Has this XModel been removed? */
 	boolean removed = false;
 	
 	private Set<XModelEventListener> modelChangeListenerCollection;
@@ -61,9 +62,9 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 	private Set<XTransactionEventListener> transactionListenerCollection;
 	
 	/**
-	 * Creates a new MemoryModel without father.
+	 * Creates a new MemoryModel without father-{@link XRepository}.
 	 * 
-	 * @param modelId The {@link XID} for the model.
+	 * @param modelId The {@link XID} for this MemoryModel.
 	 */
 	public MemoryModel(XID modelId) {
 		this(null, createModelState(modelId));
@@ -76,19 +77,20 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 	}
 	
 	/**
-	 * Creates a new MemoryModel without father.
+	 * Creates a new MemoryModel without father-{@link XRepository}.
 	 * 
-	 * @param modelState The {@link XModelState} for the model.
+	 * @param modelState The initial {@link XModelState} of this MemoryModel.
 	 */
 	public MemoryModel(XModelState modelState) {
 		this(null, modelState);
 	}
 	
 	/**
-	 * Creates a new MemoryModel with the given repository as its father.
+	 * Creates a new MemoryModel with the given {@link MemoryRepository} as its
+	 * father.
 	 * 
-	 * @param father The father-repository of this model
-	 * @param modelState initial state
+	 * @param father The father-{@link MemoryRepository} for this MemoryModel
+	 * @param modelState The initial {@link XModelState} of this MemoryModel.
 	 */
 	protected MemoryModel(MemoryRepository father, XModelState modelState) {
 		super(new MemoryEventQueue(modelState.getChangeLogState() == null ? null
@@ -105,7 +107,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 	}
 	
 	/**
-	 * @throws IllegalStateException if this model has already been removed
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryModel was already removed
 	 */
 	@Override
 	protected void checkRemoved() throws IllegalStateException {
@@ -114,6 +117,10 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 		}
 	}
 	
+	/**
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryModel was already removed
+	 */
 	@Override
 	public MemoryObject createObject(XID actor, XID objectID) {
 		assert getRevisionNumber() >= 0;
@@ -167,6 +174,10 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 		return this.father == null ? null : this.father.getID();
 	}
 	
+	/**
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryModel was already removed
+	 */
 	@Override
 	public MemoryObject getObject(XID objectID) {
 		synchronized(this.eventQueue) {
@@ -193,6 +204,10 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 		}
 	}
 	
+	/**
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryModel was already removed
+	 */
 	@ReadOperation
 	public Iterator<XID> iterator() {
 		synchronized(this.eventQueue) {
@@ -201,6 +216,10 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 		}
 	}
 	
+	/**
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryModel was already removed
+	 */
 	@Override
 	public boolean removeObject(XID actor, XID objectID) {
 		synchronized(this.eventQueue) {
@@ -251,6 +270,10 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 		}
 	}
 	
+	/**
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryModel was already removed
+	 */
 	public long executeModelCommand(XID actor, XModelCommand command) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -312,6 +335,10 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 		}
 	}
 	
+	/**
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryModel was already removed
+	 */
 	public XID getID() {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -319,6 +346,10 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 		}
 	}
 	
+	/**
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryModel was already removed
+	 */
 	public boolean hasObject(XID id) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -334,14 +365,20 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 		save();
 	}
 	
+	/**
+	 * Saves the current state information of this MemoryModel with the
+	 * currently used persistence layer
+	 */
 	protected void save() {
 		this.state.save();
 	}
 	
 	/**
-	 * Returns the father of this model.
+	 * Returns the father-{@link MemoryRepository} of this MemoryModel.
 	 * 
-	 * @return The father of this model (may be null).
+	 * @return The father of this MemoryModel (may be null).
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryModel was already removed
 	 */
 	@ReadOperation
 	protected MemoryRepository getFather() {
@@ -350,9 +387,12 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 	}
 	
 	/**
-	 * Checks whether this model has a father or not.
+	 * Checks whether this MemoryModel has a father-{@link XRepository} or not.
 	 * 
-	 * @return true, if this model has a father, false otherwise.
+	 * @return true, if this MemoryModel has a father-{@link XRepository}, false
+	 *         otherwise.
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryModel was already removed
 	 */
 	@ReadOperation
 	protected boolean hasFather() {
@@ -400,6 +440,10 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 		return hashCode;
 	}
 	
+	/**
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryModel was already removed
+	 */
 	@ReadOperation
 	public long getRevisionNumber() {
 		synchronized(this.eventQueue) {
@@ -408,6 +452,10 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 		}
 	}
 	
+	/**
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryModel was already removed
+	 */
 	@Override
 	public long executeTransaction(XID actor, XTransaction transaction) {
 		synchronized(this.eventQueue) {
@@ -433,6 +481,10 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 		}
 	}
 	
+	/**
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryModel was already removed
+	 */
 	public boolean isEmpty() {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -440,6 +492,10 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 		}
 	}
 	
+	/**
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryModel was already removed
+	 */
 	public XAddress getAddress() {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -449,9 +505,10 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 	
 	/**
 	 * Notifies all listeners that have registered interest for notification on
-	 * ModelEvents.
+	 * {@link XModelEvent XModelEvents} happening on this MemoryModel.
 	 * 
-	 * @param event The event object.
+	 * @param event The {@link XModelEvent} which will be propagated to the
+	 *            registered listeners.
 	 */
 	protected void fireModelEvent(XModelEvent event) {
 		for(XModelEventListener listener : this.modelChangeListenerCollection) {
@@ -461,9 +518,11 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 	
 	/**
 	 * Notifies all listeners that have registered interest for notification on
-	 * ObjectEvents.
+	 * {@link XObjectEvent XObjectEvents} happening on child-
+	 * {@link MemoryObject MemoryObjects} of this MemoryModel.
 	 * 
-	 * @param event The event object.
+	 * @param event The {@link XObjectEvent} which will be propagated to the
+	 *            registered listeners.
 	 */
 	protected void fireObjectEvent(XObjectEvent event) {
 		for(XObjectEventListener listener : this.objectChangeListenerCollection) {
@@ -472,10 +531,12 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 	}
 	
 	/**
-	 * Notifies all listeners of the object this model holds that have
-	 * registered interest for notification on ObjectEvents.
+	 * Notifies all listeners that have registered interest for notification on
+	 * {@link XFieldEvent XFieldEvents} happening on child-{@link MemoryField
+	 * MemoryFields} of this MemoryModel.
 	 * 
-	 * @param event The event object.
+	 * @param event The {@link XFieldEvent} which will be propagated to the
+	 *            registered listeners.
 	 */
 	protected void fireFieldEvent(XFieldEvent event) {
 		for(XFieldEventListener listener : this.fieldChangeListenerCollection) {
@@ -484,10 +545,12 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 	}
 	
 	/**
-	 * Notifies all listeners of the object this model holds that have
-	 * registered interest for notification on TransactionEvents.
+	 * Notifies all listeners that have registered interest for notification on
+	 * {@link XTransactionEvent XTransactionEvents} happening on this
+	 * MemoryModel.
 	 * 
-	 * @param event The event object.
+	 * @param event The {@link XTransactonEvent} which will be propagated to the
+	 *            registered listeners.
 	 */
 	protected void fireTransactionEvent(XTransactionEvent event) {
 		for(XTransactionEventListener listener : this.transactionListenerCollection) {
@@ -495,48 +558,117 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 		}
 	}
 	
+	/**
+	 * Adds the given {@link XModelEventListener} to this MemoryModel, if
+	 * possible.
+	 * 
+	 * @param changeListener The {@link XModelEventListener} which is to be
+	 *            added
+	 * @return false, if the given {@link XModelEventListener} was already
+	 *         registered on this MemoryModel, true otherwise
+	 */
 	public boolean addListenerForModelEvents(XModelEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.modelChangeListenerCollection.add(changeListener);
 		}
 	}
 	
+	/**
+	 * Removes the given {@link XModelEventListener} from this MemoryModel.
+	 * 
+	 * @param changeListener The {@link XModelEventListener} which is to be
+	 *            removed
+	 * @return true, if the given {@link XModelEventListener} was registered on
+	 *         this MemoryModel, false otherwise
+	 */
 	public boolean removeListenerForModelEvents(XModelEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.modelChangeListenerCollection.remove(changeListener);
 		}
 	}
 	
+	/**
+	 * Adds the given {@link XObjectEventListener} to this MemoryModel, if
+	 * possible.
+	 * 
+	 * @param changeListener The {@link XObjectEventListener} which is to be
+	 *            added
+	 * @return false, if the given {@link XObjectEventListener} was already
+	 *         registered on this MemoryModel, true otherwise
+	 */
 	public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.objectChangeListenerCollection.add(changeListener);
 		}
 	}
 	
+	/**
+	 * Removes the given {@link XObjectEventListener} from this MemoryModel.
+	 * 
+	 * @param changeListener The {@link XObjectEventListener} which is to be
+	 *            removed
+	 * @return true, if the given {@link XObjectEventListener} was registered on
+	 *         this MemoryModel, false otherwise
+	 */
 	public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.objectChangeListenerCollection.remove(changeListener);
 		}
 	}
 	
+	/**
+	 * Adds the given {@link XFieldEventListener} to this MemoryModel, if
+	 * possible.
+	 * 
+	 * @param changeListener The {@link XFieldEventListener} which is to be
+	 *            added
+	 * @return false, if the given {@link XFieldEventListener} was already
+	 *         registered on this MemoryModel, true otherwise
+	 */
 	public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.fieldChangeListenerCollection.add(changeListener);
 		}
 	}
 	
+	/**
+	 * Removes the given {@link XFieldEventListener} from this MemoryModel.
+	 * 
+	 * @param changeListener The {@link XFieldEventListener} which is to be
+	 *            removed
+	 * @return true, if the given {@link XFieldEventListener} was registered on
+	 *         this MemoryModel, false otherwise
+	 */
 	public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.fieldChangeListenerCollection.remove(changeListener);
 		}
 	}
 	
+	/**
+	 * Adds the given {@link XTransactionEventListener} to this MemoryModel, if
+	 * possible.
+	 * 
+	 * @param changeListener The {@link XTransactionEventListener} which is to
+	 *            be added
+	 * @return false, if the given {@link XTransactionEventListener} was already
+	 *         registered on this MemoryModel, true otherwise
+	 */
 	public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.transactionListenerCollection.add(changeListener);
 		}
 	}
 	
+	/**
+	 * Removes the given {@link XTransactionEventListener} from this
+	 * MemoryModel.
+	 * 
+	 * @param changeListener The {@link XTransactionEventListener} which is to
+	 *            be removed
+	 * @return true, if the given {@link XTransactionEventListener} was
+	 *         registered on this MemoryModel, false otherwise
+	 */
 	public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.transactionListenerCollection.remove(changeListener);
@@ -544,19 +676,26 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 	}
 	
 	/**
-	 * Builds a transaction that first removes all values of the given object,
-	 * then all fields of the given object and finally the given object itself.
+	 * Creates all {@link XEvent XEvents} which will represent the removal of
+	 * the given {@link MemoryObject}. All necessary {@link XObjectEvent
+	 * XObjectEvents} of the REMOVE-type will and lastly the {@link XModelEvent}
+	 * representing the actual removal of the {@link MemoryObject} will be
+	 * created to accurately represent the removal. The created {@link XEvent
+	 * XEvents} will then be enqueued into the {@link MemoryEventQueue} used by
+	 * this MemoryModel and then be propagated to the interested listeners.
 	 * 
-	 * @param actor The actor for this transaction
-	 * @param object The object which should be removed by the transaction
-	 * @return An {@link ModelTransaction} that first removes all values of the
-	 *         given object, then all fields of the given object and finally the
-	 *         given object itself.
+	 * @param actor The {@link XID} of the actor
+	 * @param object The {@link MemoryObject} which is to be removed (must not
+	 *            be null)
+	 * @param inTrans true, if the removal of this {@link MemoryObject} occurs
+	 *            during an {@link XTransaction}.
+	 * @throws IllegalArgumentException if the given {@link MemoryOjbect} equals
+	 *             null
 	 */
 	private void enqueueObjectRemoveEvents(XID actor, MemoryObject object, boolean inTrans) {
 		
 		if(object == null) {
-			throw new NullPointerException("object must not be null");
+			throw new IllegalArgumentException("object must not be null");
 		}
 		
 		for(XID fieldID : object) {
@@ -572,6 +711,10 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 		
 	}
 	
+	/**
+	 * Deletes the state information of this MemoryModel from the currently used
+	 * persistence layer
+	 */
 	protected void delete() {
 		for(XID objectId : this) {
 			MemoryObject object = getObject(objectId);
@@ -581,6 +724,10 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 		this.removed = true;
 	}
 	
+	/**
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryModel was already removed
+	 */
 	public long executeCommand(XID actor, XCommand command) {
 		synchronized(this.eventQueue) {
 			checkRemoved();

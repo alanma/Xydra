@@ -48,12 +48,11 @@ public class MemoryField implements XField, Serializable {
 	boolean removed = false;
 	
 	/**
-	 * The object on which this field synchronizes its change operations
+	 * The {@link MemoryEventQueue} used by this MemoryField. Will also be used
+	 * as the lock for synchronizing change operations.
 	 * 
-	 * - if this field has a father-object with a father-model, the father-model
-	 * will be used as the lock - if this field has a father-object with no
-	 * father-model, the father-object will be used as the lock - if this field
-	 * has no father-object it will use itself as the lock
+	 * If this MemoryField is created by an {@link MemoryObject}, the event
+	 * queue used by the {@link MemoryObject} will be used.
 	 */
 	private final MemoryEventQueue eventQueue;
 	
@@ -71,7 +70,7 @@ public class MemoryField implements XField, Serializable {
 	/**
 	 * Creates a new MemoryField without a father-{@link XObject}.
 	 * 
-	 * @param fieldState The {@link XFieldState} for this MemoryField.
+	 * @param fieldState The initial {@link XFieldState} of this MemoryField.
 	 */
 	public MemoryField(XFieldState fieldState) {
 		this(null, new MemoryEventQueue(null), fieldState);
@@ -82,6 +81,8 @@ public class MemoryField implements XField, Serializable {
 	 * 
 	 * @param parent The father-{@link XObject} of this MemoryField (may be
 	 *            null)
+	 * @param eventQueue the {@link MemoryEventQueue} this MemoryField will use
+	 * @param fieldState The initial {@link XFieldState} of this MemoryField.
 	 */
 	protected MemoryField(MemoryObject parent, MemoryEventQueue eventQueue, XFieldState fieldState) {
 		this.eventQueue = eventQueue;
@@ -180,7 +181,8 @@ public class MemoryField implements XField, Serializable {
 	}
 	
 	/**
-	 * @throws IllegalStateException if this field has already been removed
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryField was already removed
 	 */
 	private void checkRemoved() throws IllegalStateException {
 		if(this.removed) {
@@ -190,7 +192,7 @@ public class MemoryField implements XField, Serializable {
 	
 	/**
 	 * @throws IllegalStateException if this method is called after this
-	 *             {@link XField} was already removed
+	 *             MemoryField was already removed
 	 */
 	@ReadOperation
 	public XID getID() {
@@ -202,7 +204,7 @@ public class MemoryField implements XField, Serializable {
 	
 	/**
 	 * @throws IllegalStateException if this method is called after this
-	 *             {@link XField} was already removed
+	 *             MemoryField was already removed
 	 */
 	@ModificationOperation
 	public boolean setValue(XID actor, XValue newValue) {
@@ -264,7 +266,7 @@ public class MemoryField implements XField, Serializable {
 	
 	/**
 	 * @throws IllegalStateException if this method is called after this
-	 *             {@link XField} was already removed
+	 *             MemoryField was already removed
 	 */
 	public long executeFieldCommand(XID actor, XFieldCommand command) {
 		synchronized(this.eventQueue) {
@@ -358,7 +360,7 @@ public class MemoryField implements XField, Serializable {
 	
 	/**
 	 * @throws IllegalStateException if this method is called after this
-	 *             {@link XField} was already removed
+	 *             MemoryField was already removed
 	 */
 	@ReadOperation
 	public XValue getValue() {
@@ -393,7 +395,7 @@ public class MemoryField implements XField, Serializable {
 	 * @return The father-{@link XObject} of this MemoryField - may be null if
 	 *         this MemoryField has no father-{@link XObject}
 	 * @throws IllegalStateException if this method is called after this
-	 *             {@link XField} was already removed
+	 *             MemoryField was already removed
 	 */
 	@ReadOperation
 	public MemoryObject getFather() {
@@ -406,7 +408,7 @@ public class MemoryField implements XField, Serializable {
 	 * 
 	 * @return true, if this field has a father, false otherwise
 	 * @throws IllegalStateException if this method is called after this
-	 *             {@link XField} was already removed
+	 *             MemoryField was already removed
 	 */
 	
 	@ReadOperation
@@ -417,7 +419,7 @@ public class MemoryField implements XField, Serializable {
 	
 	/**
 	 * @throws IllegalStateException if this method is called after this
-	 *             {@link XField} was already removed
+	 *             MemoryField was already removed
 	 */
 	@ReadOperation
 	public long getRevisionNumber() {
@@ -486,9 +488,10 @@ public class MemoryField implements XField, Serializable {
 	
 	/**
 	 * Notifies all listeners that have registered interest for notification on
-	 * FieldEvents.
+	 * {@link XFieldEvent XFieldEvents} happening on this MemoryField.
 	 * 
-	 * @param event The event object.
+	 * @param event The {@link XFieldEvent} which will be propagated to the
+	 *            registered listeners.
 	 */
 	
 	protected void fireFieldEvent(XFieldEvent event) {
@@ -498,11 +501,13 @@ public class MemoryField implements XField, Serializable {
 	}
 	
 	/**
-	 * Adds the given listener to this field, if possible
+	 * Adds the given {@link XFieldEventListener} to this MemoryField, if
+	 * possible.
 	 * 
-	 * @param changeListener The listener which is to be added
-	 * @return false, if the given listener is already added on this field, true
-	 *         otherwise
+	 * @param changeListener The {@link XFieldEventListener} which is to be
+	 *            added
+	 * @return false, if the given {@link XFieldEventListener} was already
+	 *         registered on this MemoryField, true otherwise
 	 */
 	
 	public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
@@ -512,11 +517,12 @@ public class MemoryField implements XField, Serializable {
 	}
 	
 	/**
-	 * Removes the given listener from this field.
+	 * Removes the given {@link XFieldEventListener} from this MemoryField.
 	 * 
-	 * @param changeListener The listener which is to be removed
-	 * @return true, if the given listener was registered on this field, false
-	 *         otherwise
+	 * @param changeListener The {@link XFieldEventListener} which is to be
+	 *            removed
+	 * @return true, if the given {@link XFieldEventListener} was registered on
+	 *         this MemoryField, false otherwise
 	 */
 	
 	public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
@@ -530,15 +536,27 @@ public class MemoryField implements XField, Serializable {
 		return this.getID() + "-v" + this.getRevisionNumber();
 	}
 	
+	/**
+	 * Deletes the state information of this MemoryField from the currently used
+	 * persistence layer
+	 */
 	protected void delete() {
 		this.state.delete();
 		this.removed = true;
 	}
 	
+	/**
+	 * Saves the state information of this MemoryField with the currently used
+	 * persistence layer
+	 */
 	protected void save() {
 		this.state.save();
 	}
 	
+	/**
+	 * @return the {@link XFieldState} object representing the current state of
+	 *         this MemoryField
+	 */
 	protected XFieldState getState() {
 		return this.state;
 	}

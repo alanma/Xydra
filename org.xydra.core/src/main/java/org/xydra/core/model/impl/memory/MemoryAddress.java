@@ -2,7 +2,10 @@ package org.xydra.core.model.impl.memory;
 
 import org.xydra.core.XX;
 import org.xydra.core.model.XAddress;
+import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XModel;
+import org.xydra.core.model.XRepository;
 import org.xydra.core.model.XType;
 
 
@@ -21,6 +24,24 @@ public class MemoryAddress implements XAddress {
 	private final XID object;
 	private final XID field;
 	
+	/**
+	 * Creates a new MemoryAddress.
+	 * 
+	 * @param repository The {@link XID} of the {@link XRepository} which
+	 *            holds/is the element this address refers to (may be null)
+	 * @param model The {@link XID} of the {@link XModel} which holds/is the
+	 *            element this address refers to (may be null)
+	 * @param object The {@link XID} of the {@link XObject} which holds/is the
+	 *            element this address refers to (may be null)
+	 * @param field The {@link XID} of the {@link XField} which is the element
+	 *            this address refers to (may be null)
+	 * 
+	 * @throws IllegalArgumentException if the given tuple of {@link XID XIDs}
+	 *             specify an illegal {@link XAddress}. Illegal {@link XAddress
+	 *             XAddresses} are of the form (null, null, null, null),
+	 *             (repoID, null, objectID, null or fieldID), (repoID, null,
+	 *             null, fieldID) or (repoID or null, modelID, null, fieldID)
+	 */
 	protected MemoryAddress(XID repository, XID model, XID object, XID field) {
 		if((repository != null || model != null) && object == null && field != null) {
 			throw new IllegalArgumentException(
@@ -218,6 +239,20 @@ public class MemoryAddress implements XAddress {
 		return toString();
 	}
 	
+	/**
+	 * Returns the {@link XType} of the entity which the given {@link XAddress}
+	 * refers to.
+	 * 
+	 * @param address The {@link XAddress} which {@link XType} is going to be
+	 *            returned
+	 * @return the {@link XType} of the entity which te given {@link XAddress}
+	 *         refers to
+	 * @throws AssertionError if the given {@link XAddress} is an illegal
+	 *             {@link XAddress}
+	 */
+	// TODO maybe consider putting this method into an utility class (for
+	// example if
+	// XX is going to be split up)
 	public static XType getAddressedType(XAddress address) {
 		// what is this address addressing?
 		if(address.getRepository() == null) {
