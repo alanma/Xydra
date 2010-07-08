@@ -11,7 +11,7 @@
 
 	<groupId>org.xydra</groupId>
 	<artifactId>server-gae</artifactId>
-	<version>0.1.0</version>
+	<version>0.1.1-SNAPSHOT</version>
 	<!--
 		/!\ Needs to be 'jar' for 'mvn deploy' but 'war' for 'gae:deploy'
 	-->
@@ -191,7 +191,7 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
-			<version>0.1.0</version>
+			<version>0.1.1-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
