@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>org.xydra</groupId>
+	<artifactId>restless</artifactId>
+	<version>0.1.0</version>
+	<packaging>jar</packaging>
+	<name>Xydra Restless</name>
+
+	<parent>
+		<groupId>org.xydra</groupId>
+		<artifactId>maven-root</artifactId>
+		<version>2010.02.19</version>
+	</parent>
+
+	<repositories>
+		<!-- xydra repo -->
+		<repository>
+			<id>xydra-repo</id>
+			<url>
+				https://xydra.googlecode.com/svn/repository
+			</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</releases>
+		</repository>
+		<!-- xydra snapshots -->
+		<repository>
+			<id>xydra-snap</id>
+			<url>
+				https://xydra.googlecode.com/svn/snapshots
+			</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+		</repository>
+
+	</repositories>
+
+	<dependencies>
+
+		<!-- logging dependencies -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.5.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.5.0</version>
+		</dependency>
+
+		<!-- testing dependencies -->
+		<dependency>
+			<scope>test</scope>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.3.1</version>
+		</dependency>
+
+
+		<!--
+			J2EE Servlet API. We need it to compile IndexServlet class. You can
+			probably remove it, if you don't explicitly use Servlets
+		-->
+		<dependency>
+			<groupId>org.apache.geronimo.specs</groupId>
+			<artifactId>geronimo-servlet_2.5_spec</artifactId>
+			<version>1.2</version>
+			<scope>compile</scope>
+		</dependency>
+
+
+	</dependencies>
+
+
+	<build>
+
+		<!--  via  https://wagon-svn.dev.java.net/ -->
+		<extensions>
+			<extension>
+				<groupId>org.jvnet.wagon-svn</groupId>
+				<artifactId>wagon-svn</artifactId>
+				<version>1.9</version>
+			</extension>
+
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-ssh-external</artifactId>
+				<version>1.0-beta-4</version>
+			</extension>
+		</extensions>
+
+	</build>
+
+	<distributionManagement>
+		<!--
+			Add this to settings.xml <server> <id>xydra-repo</id>
+			<username>xamde</username> <password>********</password> </server>
+			<server> <id>xydra-snap</id> <username>xamde</username>
+			<password>********</password> </server> <server> <id>xydra-site</id>
+			<username>xamde</username> <password>********</password> </server>
+		-->
+		<repository>
+			<id>xydra-repo</id>
+			<url>svn:https://xydra.googlecode.com/svn/repository</url>
+		</repository>
+		<snapshotRepository>
+			<id>xydra-snap</id>
+			<url>svn:https://xydra.googlecode.com/svn/snapshots</url>
+		</snapshotRepository>
+		<site>
+			<id>xydra-site</id>
+			<url>svn:https://xydra.googlecode.com/svn/site/org.xydra.server</url>
+		</site>
+	</distributionManagement>
+
+	<scm>
+		<connection>svn:https://xydra.googlecode.com/svn/trunk/org.xydra.restless</connection>
+		<developerConnection>svn:https://xydra.googlecode.com/svn/trunk/org.xydra.restless</developerConnection>
+	</scm>
+
+</project>
+
+
+
