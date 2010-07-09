@@ -6,13 +6,12 @@ package org.xydra.core.value;
  * @author Kaidel
  * 
  */
-
 public interface XLongListValue extends XListValue<Long> {
 	
 	/**
 	 * @return the list of long values in order (changes to the returned array
 	 *         won't affect the value)
 	 */
+	long[] contents();
 	
-	Long[] contents();
 }

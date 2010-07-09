@@ -6,12 +6,12 @@ package org.xydra.core.value;
  * @author Kaidel
  * 
  */
-public interface XStringListValue extends XListValue<String> {
+public interface XByteListValue extends XListValue<Byte> {
 	
 	/**
 	 * @return the list of String values in order (changes to the returned array
 	 *         won't affect the value)
 	 */
-	String[] contents();
+	byte[] contents();
 	
 }

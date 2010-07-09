@@ -7,17 +7,7 @@ package org.xydra.core.value;
  * 
  * @param <E> The type of value which is to be stored.
  */
-
-public interface XListValue<E> extends XValue, Iterable<E> {
-	
-	/**
-	 * Checks whether this XListValue contains the given element or not
-	 * 
-	 * @param elem
-	 * @return true, if this XListValue contains the given element, false
-	 *         otherwise.
-	 */
-	boolean contains(Object elem);
+public interface XListValue<E> extends XCollectionValue<E> {
 	
 	/**
 	 * Returns the index of the first occurrence of the given element in this
@@ -39,10 +29,11 @@ public interface XListValue<E> extends XValue, Iterable<E> {
 	 */
 	int lastIndexOf(Object elem);
 	
-	boolean isEmpty();
-	
-	int size();
-	
+	/**
+	 * @return the element at the given index.
+	 * @throws IndexOutOfBoundsException if the given index is less than zero or
+	 *             greater than or equal to size()
+	 */
 	E get(int index);
 	
 }

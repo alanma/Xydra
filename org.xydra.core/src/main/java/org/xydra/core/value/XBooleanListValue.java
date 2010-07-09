@@ -6,13 +6,12 @@ package org.xydra.core.value;
  * @author Kaidel
  * 
  */
-
 public interface XBooleanListValue extends XListValue<Boolean> {
 	
 	/**
 	 * @return the list of boolean values in order (changes to the returned
 	 *         array won't affect the value)
 	 */
-	Boolean[] contents();
+	boolean[] contents();
 	
 }

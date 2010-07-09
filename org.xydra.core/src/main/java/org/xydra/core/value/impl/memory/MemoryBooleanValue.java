@@ -1,8 +1,6 @@
 package org.xydra.core.value.impl.memory;
 
 import org.xydra.core.value.XBooleanValue;
-import org.xydra.core.value.XIDValue;
-import org.xydra.core.value.XStringValue;
 
 
 /**
@@ -11,11 +9,11 @@ import org.xydra.core.value.XStringValue;
  * @author Kaidel
  * 
  */
-
 public class MemoryBooleanValue implements XBooleanValue {
 	
 	private static final long serialVersionUID = 4401350466432317386L;
-	private Boolean content;
+	
+	private final Boolean content;
 	
 	public MemoryBooleanValue(boolean content) {
 		this.content = content;
@@ -23,14 +21,6 @@ public class MemoryBooleanValue implements XBooleanValue {
 	
 	public boolean contents() {
 		return this.content;
-	}
-	
-	public XIDValue asIDValue() {
-		return null;
-	}
-	
-	public XStringValue asStringValue() {
-		return null;
 	}
 	
 	@Override

@@ -1,6 +1,5 @@
 package org.xydra.core.value.impl.memory;
 
-import org.xydra.core.value.XIDValue;
 import org.xydra.core.value.XStringValue;
 
 
@@ -10,12 +9,11 @@ import org.xydra.core.value.XStringValue;
  * @author voelkel
  * 
  */
-
 public class MemoryStringValue implements XStringValue {
 	
 	private static final long serialVersionUID = -7239623174442190402L;
 	
-	private String string;
+	private final String string;
 	
 	public MemoryStringValue(String string) {
 		this.string = string;
@@ -23,14 +21,6 @@ public class MemoryStringValue implements XStringValue {
 	
 	public String contents() {
 		return this.string;
-	}
-	
-	public XStringValue asStringValue() {
-		return this;
-	}
-	
-	public XIDValue asIDValue() {
-		return null;
 	}
 	
 	@Override

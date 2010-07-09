@@ -6,7 +6,6 @@ package org.xydra.core.value;
  * @author Kaidel
  * 
  */
-
 public interface XStringValue extends XValue {
 	
 	/**
@@ -14,7 +13,6 @@ public interface XStringValue extends XValue {
 	 * 
 	 * @return The stored String value.
 	 */
-	
 	String contents();
 	
 }

@@ -1,12 +1,12 @@
 package org.xydra.core.value;
 
 /**
- * An XValue for storing a list of String values.
+ * An XValue for storing a set of String values.
  * 
  * @author Kaidel
  * 
  */
-public interface XStringListValue extends XListValue<String> {
+public interface XStringSetValue extends XSetValue<String> {
 	
 	/**
 	 * @return the list of String values in order (changes to the returned array

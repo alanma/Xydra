@@ -1,13 +1,10 @@
 package org.xydra.core.value.impl.memory;
 
 import java.util.Arrays;
-import java.util.Iterator;
+import java.util.Collection;
 
-import org.xydra.core.value.ArrayIterator;
-import org.xydra.core.value.XIDValue;
+import org.xydra.core.XX;
 import org.xydra.core.value.XLongListValue;
-import org.xydra.core.value.XStringValue;
-
 
 
 /**
@@ -16,128 +13,59 @@ import org.xydra.core.value.XStringValue;
  * @author Kaidel
  * 
  */
-
-public class MemoryLongListValue implements XLongListValue {
+public class MemoryLongListValue extends MemoryListValue<Long> implements XLongListValue {
 	
 	private static final long serialVersionUID = -3294191125211048647L;
 	
-	private Long[] list;
+	private final long[] list;
 	
-	public MemoryLongListValue(Long[] initialContent) {
-		this.list = new Long[initialContent.length];
-		System.arraycopy(initialContent, 0, this.list, 0, initialContent.length);
-	}
-	
-	public MemoryLongListValue(long[] initialContent) {
-		this.list = new Long[initialContent.length];
-		
-		for(int i = 0; i < initialContent.length; i++) {
-			this.list[i] = initialContent[i];
+	public MemoryLongListValue(Collection<Long> content) {
+		this.list = new long[content.size()];
+		int i = 0;
+		for(long b : content) {
+			this.list[i++] = b;
 		}
 	}
 	
-	public Long[] contents() {
-		Long[] copy = new Long[this.list.length];
-		System.arraycopy(this.list, 0, copy, 0, this.list.length);
-		return copy;
+	public MemoryLongListValue(long[] content) {
+		this.list = new long[content.length];
+		System.arraycopy(content, 0, this.list, 0, content.length);
 	}
 	
-	public XIDValue asIDValue() {
-		return null;
+	public long[] contents() {
+		long[] array = new long[this.list.length];
+		System.arraycopy(this.list, 0, array, 0, this.list.length);
+		return array;
 	}
 	
-	public XStringValue asStringValue() {
-		return null;
+	public Long[] toArray() {
+		Long[] array = new Long[this.list.length];
+		fillArray(array);
+		return array;
 	}
 	
 	@Override
-	public boolean equals(Object object) {
-		if(object instanceof MemoryLongListValue) {
-			return Arrays.equals(this.list, ((MemoryLongListValue)object).list);
-		} else {
-			return false;
-		}
+	public boolean equals(Object other) {
+		return other instanceof XLongListValue
+		        && XX.equalsIterator(this.iterator(), ((XLongListValue)other).iterator());
 	}
 	
 	@Override
 	public int hashCode() {
-		int result = 0;
-		
-		if(this.list == null) {
-			return 0;
-		}
-		
-		for(Long l : this.list) {
-			result += l.hashCode();
-		}
-		
-		return result;
+		return Arrays.hashCode(this.list);
 	}
 	
-	public boolean contains(Object elem) {
-		if(elem instanceof Long) {
-			for(int i = 0; i < this.list.length; i++) {
-				if(this.list[i].equals(elem)) {
-					return true;
-				}
-			}
-			
-			// no element equals the given element
-			return false;
-		} else {
-			return false;
-		}
-	}
-	
-	public int indexOf(Object elem) {
-		if(elem instanceof Long) {
-			for(int i = 0; i < this.list.length; i++) {
-				if(this.list[i].equals(elem)) {
-					return i;
-				}
-			}
-			
-			// no element equals the given element
-			return -1;
-		} else {
-			return -1;
-		}
-	}
-	
-	public boolean isEmpty() {
-		return this.list.length == 0;
-	}
-	
-	public int lastIndexOf(Object elem) {
-		if(elem instanceof Long) {
-			for(int i = this.list.length - 1; i >= 0; i--) {
-				if(this.list[i].equals(elem)) {
-					return i;
-				}
-			}
-			
-			// no element equals the given element
-			return -1;
-		} else {
-			return -1;
-		}
-	}
-	
-	public int size() {
-		return this.list.length;
+	@Override
+	public String toString() {
+		return Arrays.toString(this.list);
 	}
 	
 	public Long get(int index) {
 		return this.list[index];
 	}
 	
-	public Iterator<Long> iterator() {
-		return new ArrayIterator<Long>(this.list);
-	}
-	
-	@Override
-	public String toString() {
-		return Arrays.toString(this.list);
+	public int size() {
+		return this.list.length;
 	}
 	
 }

@@ -6,7 +6,6 @@ package org.xydra.core.value;
  * @author Kaidel
  * 
  */
-
 public interface XIntegerValue extends XValue {
 	
 	/**
@@ -14,6 +13,6 @@ public interface XIntegerValue extends XValue {
 	 * 
 	 * @return The stored integer value.
 	 */
-	
 	public int contents();
+	
 }

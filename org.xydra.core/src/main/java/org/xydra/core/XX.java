@@ -421,7 +421,7 @@ public class XX {
 	 * @return an {@link XBooleanListValue} with the content of the given list
 	 */
 	public static XBooleanListValue toBooleanListValue(List<Boolean> list) {
-		return X.getValueFactory().createBooleanListValue(list.toArray(new Boolean[list.size()]));
+		return X.getValueFactory().createBooleanListValue(list);
 	}
 	
 	/**
@@ -433,7 +433,7 @@ public class XX {
 	 * @return an {@link XDoubleListValue} with the content of the given list
 	 */
 	public static XDoubleListValue toDoubleListValue(List<Double> list) {
-		return X.getValueFactory().createDoubleListValue(list.toArray(new Double[list.size()]));
+		return X.getValueFactory().createDoubleListValue(list);
 	}
 	
 	/**
@@ -445,7 +445,7 @@ public class XX {
 	 * @return an {@link XIntegerListValue} with the content of the given list
 	 */
 	public static XIntegerListValue toIntegerListValue(List<Integer> list) {
-		return X.getValueFactory().createIntegerListValue(list.toArray(new Integer[list.size()]));
+		return X.getValueFactory().createIntegerListValue(list);
 	}
 	
 	/**
@@ -457,7 +457,7 @@ public class XX {
 	 * @return an {@link XLongListValue} with the content of the given list
 	 */
 	public static XLongListValue toLongListValue(List<Long> list) {
-		return X.getValueFactory().createLongListValue(list.toArray(new Long[list.size()]));
+		return X.getValueFactory().createLongListValue(list);
 	}
 	
 	/**

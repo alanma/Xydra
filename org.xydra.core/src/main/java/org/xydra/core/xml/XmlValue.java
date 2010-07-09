@@ -11,9 +11,11 @@ import org.xydra.core.X;
 import org.xydra.core.model.XID;
 import org.xydra.core.value.XBooleanListValue;
 import org.xydra.core.value.XBooleanValue;
+import org.xydra.core.value.XByteListValue;
 import org.xydra.core.value.XDoubleListValue;
 import org.xydra.core.value.XDoubleValue;
 import org.xydra.core.value.XIDListValue;
+import org.xydra.core.value.XIDSetValue;
 import org.xydra.core.value.XIDValue;
 import org.xydra.core.value.XIntegerListValue;
 import org.xydra.core.value.XIntegerValue;
@@ -21,10 +23,10 @@ import org.xydra.core.value.XListValue;
 import org.xydra.core.value.XLongListValue;
 import org.xydra.core.value.XLongValue;
 import org.xydra.core.value.XStringListValue;
+import org.xydra.core.value.XStringSetValue;
 import org.xydra.core.value.XStringValue;
 import org.xydra.core.value.XValue;
 import org.xydra.core.value.XValueFactory;
-
 
 
 /**
@@ -50,6 +52,9 @@ public class XmlValue {
 	private static final String XLONG_ELEMENT = "xlong";
 	private static final String XSTRING_ELEMENT = "xstring";
 	private static final String XID_ELEMENT = "xid";
+	private static final String XSTRINGSET_ELEMENT = "xstringSet";
+	private static final String XIDSET_ELEMENT = "xidSet";
+	private static final String XBYTELIST_ELEMENT = "xbyteList";
 	
 	private final static XValueFactory factory = X.getValueFactory();
 	
@@ -91,6 +96,12 @@ public class XmlValue {
 			return toStringListValue(xml);
 		else if(elementName.equals(XIDLIST_ELEMENT))
 			return toIdListValue(xml);
+		else if(elementName.equals(XSTRINGSET_ELEMENT))
+			return toStringSetValue(xml);
+		else if(elementName.equals(XIDSET_ELEMENT))
+			return toIdSetValue(xml);
+		else if(elementName.equals(XBYTELIST_ELEMENT))
+			return toByteListValue(xml);
 		throw new RuntimeException("Cannot deserialize " + xml + " as an XValue.");
 	}
 	
@@ -234,10 +245,7 @@ public class XmlValue {
 			list.add(toBooleanValue(entryElement).contents());
 		}
 		
-		Boolean[] array = new Boolean[list.size()];
-		array = list.toArray(array);
-		
-		return factory.createBooleanListValue(array);
+		return factory.createBooleanListValue(list);
 		
 	}
 	
@@ -260,10 +268,7 @@ public class XmlValue {
 			list.add(toDoubleValue(entryElement).contents());
 		}
 		
-		Double[] array = new Double[list.size()];
-		array = list.toArray(array);
-		
-		return factory.createDoubleListValue(array);
+		return factory.createDoubleListValue(list);
 		
 	}
 	
@@ -286,10 +291,7 @@ public class XmlValue {
 			list.add(toIntegerValue(entryElement).contents());
 		}
 		
-		Integer[] array = new Integer[list.size()];
-		array = list.toArray(array);
-		
-		return factory.createIntegerListValue(array);
+		return factory.createIntegerListValue(list);
 		
 	}
 	
@@ -311,10 +313,7 @@ public class XmlValue {
 			list.add(toLongValue(entryElement).contents());
 		}
 		
-		Long[] array = new Long[list.size()];
-		array = list.toArray(array);
-		
-		return factory.createLongListValue(array);
+		return factory.createLongListValue(list);
 		
 	}
 	
@@ -336,10 +335,7 @@ public class XmlValue {
 			list.add(toStringValue(entryElement).contents());
 		}
 		
-		String[] array = new String[list.size()];
-		array = list.toArray(array);
-		
-		return factory.createStringListValue(array);
+		return factory.createStringListValue(list);
 		
 	}
 	
@@ -360,10 +356,66 @@ public class XmlValue {
 			list.add(toIdValue(entryElement).contents());
 		}
 		
-		XID[] array = new XID[list.size()];
-		array = list.toArray(array);
+		return factory.createIDListValue(list);
 		
-		return factory.createIDListValue(array);
+	}
+	
+	/**
+	 * @return The {@link XStringSetValue} represented by the given XML element.
+	 * @throws IllegalArgumentException if the given XML element is not a valid
+	 *             representation of an {@link XStringSetValue}
+	 */
+	public static XStringSetValue toStringSetValue(MiniElement xml) {
+		
+		checkElementName(xml, XSTRINGSET_ELEMENT);
+		
+		List<String> list = new ArrayList<String>();
+		
+		Iterator<MiniElement> entryIterator = xml.getElementsByTagName(XSTRING_ELEMENT);
+		while(entryIterator.hasNext()) {
+			MiniElement entryElement = entryIterator.next();
+			list.add(toStringValue(entryElement).contents());
+		}
+		
+		return factory.createStringSetValue(list);
+		
+	}
+	
+	/**
+	 * @return The {@link XIDSetValue} represented by the given XML element.
+	 * @throws IllegalArgumentException if the given XML element is not a valid
+	 *             representation of an {@link XIDSetValue}
+	 */
+	public static XIDSetValue toIdSetValue(MiniElement xml) {
+		
+		checkElementName(xml, XIDSET_ELEMENT);
+		
+		List<XID> list = new ArrayList<XID>();
+		
+		Iterator<MiniElement> entryIterator = xml.getElementsByTagName(XID_ELEMENT);
+		while(entryIterator.hasNext()) {
+			MiniElement entryElement = entryIterator.next();
+			list.add(toIdValue(entryElement).contents());
+		}
+		
+		return factory.createIDSetValue(list);
+		
+	}
+	
+	/**
+	 * @return The {@link XByteListValue} represented by the given XML element.
+	 * @throws IllegalArgumentException if the given XML element is not a valid
+	 *             representation of an {@link XByteListValue}
+	 */
+	public static XByteListValue toByteListValue(MiniElement xml) {
+		
+		checkElementName(xml, XBYTELIST_ELEMENT);
+		
+		byte[] array = new byte[0];
+		
+		// TODO read data
+		
+		return factory.createByteListValue(array);
 		
 	}
 	
@@ -499,6 +551,50 @@ public class XmlValue {
 			toXml(value, xo);
 		
 		xo.close(XIDLIST_ELEMENT);
+		
+	}
+	
+	/**
+	 * @return The XML representation of the given {@link XStringSetValue}.
+	 * @throws NullPointerException if xvalue or xo is null.
+	 */
+	public static void toXml(XStringSetValue xvalue, XmlOut xo) {
+		
+		xo.open(XSTRINGSET_ELEMENT);
+		
+		for(String value : xvalue)
+			toXml(value, xo);
+		
+		xo.close(XSTRINGSET_ELEMENT);
+		
+	}
+	
+	/**
+	 * @return The XML representation of the given {@link XIDSetValue}.
+	 * @throws NullPointerException if xvalue or xo is null.
+	 */
+	public static void toXml(XIDSetValue xvalue, XmlOut xo) {
+		
+		xo.open(XIDSET_ELEMENT);
+		
+		for(XID value : xvalue)
+			toXml(value, xo);
+		
+		xo.close(XIDSET_ELEMENT);
+		
+	}
+	
+	/**
+	 * @return The XML representation of the given {@link XByteListValue}.
+	 * @throws NullPointerException if xvalue or xo is null.
+	 */
+	public static void toXml(XByteListValue xvalue, XmlOut xo) {
+		
+		xo.open(XBYTELIST_ELEMENT);
+		
+		// TODO implement encoding byte list as base64
+		
+		xo.close(XBYTELIST_ELEMENT);
 		
 	}
 	

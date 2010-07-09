@@ -1,13 +1,10 @@
 package org.xydra.core.value.impl.memory;
 
 import java.util.Arrays;
-import java.util.Iterator;
+import java.util.Collection;
 
-import org.xydra.core.value.ArrayIterator;
-import org.xydra.core.value.XIDValue;
+import org.xydra.core.XX;
 import org.xydra.core.value.XIntegerListValue;
-import org.xydra.core.value.XStringValue;
-
 
 
 /**
@@ -16,128 +13,59 @@ import org.xydra.core.value.XStringValue;
  * @author Kaidel
  * 
  */
-
-public class MemoryIntegerListValue implements XIntegerListValue {
+public class MemoryIntegerListValue extends MemoryListValue<Integer> implements XIntegerListValue {
 	
 	private static final long serialVersionUID = -2698183990443882191L;
 	
-	private Integer[] list;
+	private final int[] list;
 	
-	public MemoryIntegerListValue(Integer[] initialContent) {
-		this.list = new Integer[initialContent.length];
-		System.arraycopy(initialContent, 0, this.list, 0, initialContent.length);
-	}
-	
-	public MemoryIntegerListValue(int[] initialContent) {
-		this.list = new Integer[initialContent.length];
-		
-		for(int i = 0; i < initialContent.length; i++) {
-			this.list[i] = initialContent[i];
+	public MemoryIntegerListValue(Collection<Integer> content) {
+		this.list = new int[content.size()];
+		int i = 0;
+		for(int b : content) {
+			this.list[i++] = b;
 		}
 	}
 	
-	public Integer[] contents() {
-		Integer[] copy = new Integer[this.list.length];
-		System.arraycopy(this.list, 0, copy, 0, this.list.length);
-		return copy;
+	public MemoryIntegerListValue(int[] content) {
+		this.list = new int[content.length];
+		System.arraycopy(content, 0, this.list, 0, content.length);
 	}
 	
-	public XIDValue asIDValue() {
-		return null;
+	public int[] contents() {
+		int[] array = new int[this.list.length];
+		System.arraycopy(this.list, 0, array, 0, this.list.length);
+		return array;
 	}
 	
-	public XStringValue asStringValue() {
-		return null;
+	public Integer[] toArray() {
+		Integer[] array = new Integer[this.list.length];
+		fillArray(array);
+		return array;
 	}
 	
 	@Override
-	public boolean equals(Object object) {
-		if(object instanceof MemoryIntegerListValue) {
-			return Arrays.equals(this.list, ((MemoryIntegerListValue)object).list);
-		} else {
-			return false;
-		}
+	public boolean equals(Object other) {
+		return other instanceof XIntegerListValue
+		        && XX.equalsIterator(this.iterator(), ((XIntegerListValue)other).iterator());
 	}
 	
 	@Override
 	public int hashCode() {
-		int result = 0;
-		
-		if(this.list == null) {
-			return 0;
-		}
-		
-		for(Integer i : this.list) {
-			result += i.hashCode();
-		}
-		
-		return result;
+		return Arrays.hashCode(this.list);
 	}
 	
-	public boolean contains(Object elem) {
-		if(elem instanceof Integer) {
-			for(int i = 0; i < this.list.length; i++) {
-				if(this.list[i].equals(elem)) {
-					return true;
-				}
-			}
-			
-			// no element equals the given element
-			return false;
-		} else {
-			return false;
-		}
-	}
-	
-	public int indexOf(Object elem) {
-		if(elem instanceof Integer) {
-			for(int i = 0; i < this.list.length; i++) {
-				if(this.list[i].equals(elem)) {
-					return i;
-				}
-			}
-			
-			// no element equals the given element
-			return -1;
-		} else {
-			return -1;
-		}
-	}
-	
-	public boolean isEmpty() {
-		return this.list.length == 0;
-	}
-	
-	public int lastIndexOf(Object elem) {
-		if(elem instanceof Integer) {
-			for(int i = this.list.length - 1; i >= 0; i--) {
-				if(this.list[i].equals(elem)) {
-					return i;
-				}
-			}
-			
-			// no element equals the given element
-			return -1;
-		} else {
-			return -1;
-		}
-	}
-	
-	public int size() {
-		return this.list.length;
+	@Override
+	public String toString() {
+		return Arrays.toString(this.list);
 	}
 	
 	public Integer get(int index) {
 		return this.list[index];
 	}
 	
-	public Iterator<Integer> iterator() {
-		return new ArrayIterator<Integer>(this.list);
-	}
-	
-	@Override
-	public String toString() {
-		return Arrays.toString(this.list);
+	public int size() {
+		return this.list.length;
 	}
 	
 }

@@ -3,6 +3,9 @@ package org.xydra.core.value;
 import org.xydra.core.model.XID;
 
 
+/*
+ * TODO what is this needed for? ~~daniel
+ */
 public class TypeSystem {
 	
 	/**
@@ -59,4 +62,5 @@ public class TypeSystem {
 			throw new RuntimeException("Unknon type " + javaTypeOrXType.getName());
 		}
 	}
+	
 }

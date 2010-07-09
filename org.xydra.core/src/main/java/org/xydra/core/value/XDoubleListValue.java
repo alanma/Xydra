@@ -6,12 +6,12 @@ package org.xydra.core.value;
  * @author Kaidel
  * 
  */
-
 public interface XDoubleListValue extends XListValue<Double> {
 	
 	/**
 	 * @return the list of double values in order (changes to the returned array
 	 *         won't affect the value)
 	 */
-	Double[] contents();
+	double[] contents();
+	
 }

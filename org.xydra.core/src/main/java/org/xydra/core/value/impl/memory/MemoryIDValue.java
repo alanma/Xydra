@@ -2,7 +2,6 @@ package org.xydra.core.value.impl.memory;
 
 import org.xydra.core.model.XID;
 import org.xydra.core.value.XIDValue;
-import org.xydra.core.value.XStringValue;
 
 
 /**
@@ -11,12 +10,11 @@ import org.xydra.core.value.XStringValue;
  * @author voelkel
  * 
  */
-
 public class MemoryIDValue implements XIDValue {
 	
 	private static final long serialVersionUID = -7239623174442190402L;
 	
-	private XID id;
+	private final XID id;
 	
 	public MemoryIDValue(XID id) {
 		this.id = id;
@@ -24,14 +22,6 @@ public class MemoryIDValue implements XIDValue {
 	
 	public XID contents() {
 		return this.id;
-	}
-	
-	public XStringValue asStringValue() {
-		return null;
-	}
-	
-	public XIDValue asIDValue() {
-		return this;
 	}
 	
 	@Override

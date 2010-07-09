@@ -6,7 +6,6 @@ package org.xydra.core.value;
  * @author Kaidel
  * 
  */
-
 public interface XDoubleValue extends XValue {
 	
 	/**
@@ -15,4 +14,5 @@ public interface XDoubleValue extends XValue {
 	 * @return The stored double value.
 	 */
 	double contents();
+	
 }

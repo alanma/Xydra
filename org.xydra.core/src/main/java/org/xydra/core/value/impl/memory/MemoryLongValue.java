@@ -1,8 +1,6 @@
 package org.xydra.core.value.impl.memory;
 
-import org.xydra.core.value.XIDValue;
 import org.xydra.core.value.XLongValue;
-import org.xydra.core.value.XStringValue;
 
 
 /**
@@ -11,11 +9,11 @@ import org.xydra.core.value.XStringValue;
  * @author Kaidel
  * 
  */
-
 public class MemoryLongValue implements XLongValue {
 	
-	private Long content;
 	private static final long serialVersionUID = 2488255853315733958L;
+	
+	private final long content;
 	
 	public MemoryLongValue(long content) {
 		this.content = content;
@@ -23,14 +21,6 @@ public class MemoryLongValue implements XLongValue {
 	
 	public long contents() {
 		return this.content;
-	}
-	
-	public XIDValue asIDValue() {
-		return null;
-	}
-	
-	public XStringValue asStringValue() {
-		return null;
 	}
 	
 	@Override
@@ -44,7 +34,7 @@ public class MemoryLongValue implements XLongValue {
 	
 	@Override
 	public int hashCode() {
-		return this.content.hashCode();
+		return (int)this.content;
 	}
 	
 	@Override

@@ -11,7 +11,8 @@ public interface XBooleanValue extends XValue {
 	/**
 	 * Returns the stored boolean value.
 	 * 
-	 * @return The sotred boolean value.
+	 * @return The stored boolean value.
 	 */
 	boolean contents();
+	
 }

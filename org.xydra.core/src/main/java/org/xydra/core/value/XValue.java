@@ -10,7 +10,6 @@ import java.io.Serializable;
  * @author Kaidel
  * 
  */
-
 public interface XValue extends Serializable {
 	
 }

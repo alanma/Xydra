@@ -13,6 +13,6 @@ public interface XLongValue extends XValue {
 	 * 
 	 * @return The stored long value.
 	 */
-	
 	public long contents();
+	
 }

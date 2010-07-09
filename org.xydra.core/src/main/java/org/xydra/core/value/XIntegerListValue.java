@@ -6,13 +6,12 @@ package org.xydra.core.value;
  * @author Kaidel
  * 
  */
-
 public interface XIntegerListValue extends XListValue<Integer> {
 	
 	/**
 	 * @return the list of integer values in order (changes to the returned
 	 *         array won't affect the value)
 	 */
+	int[] contents();
 	
-	Integer[] contents();
 }

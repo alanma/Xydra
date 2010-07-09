@@ -1,5 +1,7 @@
 package org.xydra.core.value;
 
+import java.util.Collection;
+
 import org.xydra.core.model.XID;
 
 
@@ -12,7 +14,7 @@ import org.xydra.core.model.XID;
 public interface XValueFactory {
 	
 	/**
-	 * Creates an XStringValue.
+	 * Creates an {@link XStringValue}.
 	 * 
 	 * @param string The String which is to be stored in the XStringValue.
 	 * @return a {@link XStringValue} storing the given String.
@@ -20,7 +22,7 @@ public interface XValueFactory {
 	XStringValue createStringValue(String string);
 	
 	/**
-	 * Creates an XIDValue.
+	 * Creates an {@link XIDValue}.
 	 * 
 	 * @param id The XID which is to be stored in the XIDValue.
 	 * @return a {@link XIDValue} storing the given XID.
@@ -28,15 +30,7 @@ public interface XValueFactory {
 	XIDValue createIDValue(XID id);
 	
 	/**
-	 * Creates an XIDListValue.
-	 * 
-	 * @param xids The XIDS which are to be stored in the XIDListValue.
-	 * @return a {@link XIDListValue} with the content given in 'xids'.
-	 */
-	XIDListValue createIDListValue(XID[] xids);
-	
-	/**
-	 * Creates an XBooleanValue.
+	 * Creates an {@link XBooleanValue}.
 	 * 
 	 * @param value .
 	 * @return a {@link XBooleanValue} storing the given boolean value.
@@ -44,7 +38,7 @@ public interface XValueFactory {
 	XBooleanValue createBooleanValue(boolean value);
 	
 	/**
-	 * Creates an XDoubleValue.
+	 * Creates an {@link XDoubleValue}.
 	 * 
 	 * @param value The double value which is to be stored in the XDoubleValue.
 	 * @return a {@link XDoubleValue} storing the given double value.
@@ -52,7 +46,7 @@ public interface XValueFactory {
 	XDoubleValue createDoubleValue(double value);
 	
 	/**
-	 * Creates an XIntegerValue.
+	 * Creates an {@link XIntegerValue}.
 	 * 
 	 * @param value The integer value which is to be stored in the
 	 *            XIntegerValue.
@@ -61,7 +55,7 @@ public interface XValueFactory {
 	XIntegerValue createIntegerValue(int value);
 	
 	/**
-	 * Creates an XLongValue.
+	 * Creates an {@link XLongValue}.
 	 * 
 	 * @param value The long value which is to be stored in the XLongValue.
 	 * @return a {@link XLongValue} storing the given long value.
@@ -69,7 +63,7 @@ public interface XValueFactory {
 	XLongValue createLongValue(long value);
 	
 	/**
-	 * Creates an XStringListValue.
+	 * Creates an {@link XStringListValue}.
 	 * 
 	 * @param strings The Strings which are to be stored in the
 	 *            XStringListValue.
@@ -78,7 +72,32 @@ public interface XValueFactory {
 	XStringListValue createStringListValue(String[] strings);
 	
 	/**
-	 * Creates an XBooleanListValue.
+	 * Creates an {@link XIDListValue}.
+	 * 
+	 * @param xids The XIDS which are to be stored in the XIDListValue.
+	 * @return a {@link XIDListValue} with the content given in 'xids'.
+	 */
+	XIDListValue createIDListValue(XID[] xids);
+	
+	/**
+	 * Creates an {@link XIDListValue}.
+	 * 
+	 * @param xids The XIDS which are to be stored in the XIDListValue.
+	 * @return a {@link XIDListValue} with the content given in 'xids'.
+	 */
+	XIDListValue createIDListValue(Collection<XID> xids);
+	
+	/**
+	 * Creates an {@link XStringListValue}.
+	 * 
+	 * @param strings The Strings which are to be stored in the
+	 *            XStringListValue.
+	 * @return a {@link XStringListValue} storing the given Strings.
+	 */
+	XStringListValue createStringListValue(Collection<String> strings);
+	
+	/**
+	 * Creates an {@link XBooleanListValue}.
 	 * 
 	 * @param values The boolean values which are to be stored in the
 	 *            XBooleanListValue.
@@ -87,16 +106,16 @@ public interface XValueFactory {
 	XBooleanListValue createBooleanListValue(boolean[] values);
 	
 	/**
-	 * Creates an XBooleanListValue.
+	 * Creates an {@link XBooleanListValue}.
 	 * 
 	 * @param values The boolean values which are to be stored in the
 	 *            XBooleanListValue.
 	 * @return a {@link XBooleanListValue} storing the given boolean values.
 	 */
-	XBooleanListValue createBooleanListValue(Boolean[] values);
+	XBooleanListValue createBooleanListValue(Collection<Boolean> values);
 	
 	/**
-	 * Creates an XDoubleListValue.
+	 * Creates an {@link XDoubleListValue}.
 	 * 
 	 * @param values The double values which are to be stored in the
 	 *            XDoubleListValue.
@@ -105,16 +124,16 @@ public interface XValueFactory {
 	XDoubleListValue createDoubleListValue(double[] values);
 	
 	/**
-	 * Creates an XDoubleListValue.
+	 * Creates an {@link XDoubleListValue}.
 	 * 
 	 * @param values The double values which are to be stored in the
 	 *            XDoubleListValue.
 	 * @return a {@link XDoubleListValue} storing the given double values
 	 */
-	XDoubleListValue createDoubleListValue(Double[] values);
+	XDoubleListValue createDoubleListValue(Collection<Double> values);
 	
 	/**
-	 * Creates an XIntegerListValue.
+	 * Creates an {@link XIntegerListValue}.
 	 * 
 	 * @param values The integer values which are to be stored in the
 	 *            XIntegerListValue.
@@ -123,16 +142,16 @@ public interface XValueFactory {
 	XIntegerListValue createIntegerListValue(int[] values);
 	
 	/**
-	 * Creates an XIntegerListValue.
+	 * Creates an {@link XIntegerListValue}.
 	 * 
 	 * @param values The integer values which are to be stored in the
 	 *            XIntegerListValue.
 	 * @return a {@link XIntegerListValue} storing the given integer values.
 	 */
-	XIntegerListValue createIntegerListValue(Integer[] values);
+	XIntegerListValue createIntegerListValue(Collection<Integer> values);
 	
 	/**
-	 * Creates an XLongListValue.
+	 * Creates an {@link XLongListValue}.
 	 * 
 	 * @param values The long values which are to be stored in the
 	 *            XLongListValue.
@@ -141,12 +160,66 @@ public interface XValueFactory {
 	XLongListValue createLongListValue(long[] values);
 	
 	/**
-	 * Creates an XLongListValue.
+	 * Creates an {@link XLongListValue}.
 	 * 
 	 * @param values The long values which are to be stored in the
 	 *            XLongListValue.
 	 * @return a {@link XLongListValue} storing the given long values
 	 */
-	XLongListValue createLongListValue(Long[] values);
+	XLongListValue createLongListValue(Collection<Long> values);
+	
+	/**
+	 * Creates an {@link XByteListValue}.
+	 * 
+	 * @param values The byte values which are to be stored in the
+	 *            {@link XByteListValue}.
+	 * @return a {@link XByteListValue} storing the given byte values
+	 */
+	XByteListValue createByteListValue(byte[] values);
+	
+	/**
+	 * Creates an {@link XByteListValue}.
+	 * 
+	 * @param values The {@link Byte} values which are to be stored in the
+	 *            {@link XByteListValue}.
+	 * @return a {@link XByteListValue} storing the given byte values
+	 */
+	XByteListValue createByteListValue(Collection<Byte> values);
+	
+	/**
+	 * Creates an {@link XStringSetValue}.
+	 * 
+	 * @param values The {@link String} values which are to be stored in the
+	 *            {@link XStringSetValue}.
+	 * @return a {@link XStringSetValue} storing the given {@link String} values
+	 */
+	XStringSetValue createStringSetValue(String[] values);
+	
+	/**
+	 * Creates an {@link XStringSetValue}.
+	 * 
+	 * @param values The {@link String} values which are to be stored in the
+	 *            {@link XStringSetValue}.
+	 * @return a {@link XStringSetValue} storing the given {@link String} values
+	 */
+	XStringSetValue createStringSetValue(Collection<String> values);
+	
+	/**
+	 * Creates an {@link XXIDSetValue}.
+	 * 
+	 * @param values The {@link XID} values which are to be stored in the
+	 *            {@link XXIDSetValue}.
+	 * @return a {@link XXIDSetValue} storing the given {@link XID} values
+	 */
+	XIDSetValue createIDSetValue(XID[] values);
+	
+	/**
+	 * Creates an {@link XXIDSetValue}.
+	 * 
+	 * @param values The {@link XID} values which are to be stored in the
+	 *            {@link XXIDSetValue}.
+	 * @return a {@link XXIDSetValue} storing the given {@link XID} values
+	 */
+	XIDSetValue createIDSetValue(Collection<XID> values);
 	
 }
