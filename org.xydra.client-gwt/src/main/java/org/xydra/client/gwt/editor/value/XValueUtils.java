@@ -271,7 +271,7 @@ abstract public class XValueUtils {
 	
 	static public XDoubleListValue asDoubleListValue(XValue value) {
 		if(value == null) {
-			return X.getValueFactory().createDoubleListValue(new Double[] {});
+			return X.getValueFactory().createDoubleListValue(new double[] {});
 		} else if(value instanceof XDoubleListValue) {
 			return (XDoubleListValue)value;
 		} else if(value instanceof XIntegerListValue) {
