@@ -7,7 +7,6 @@ import java.util.Set;
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.core.X;
-import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
@@ -23,6 +22,7 @@ import org.xydra.core.model.XRepository;
 import org.xydra.core.model.state.XFieldState;
 import org.xydra.core.model.state.impl.memory.TemporaryFieldState;
 import org.xydra.core.value.XValue;
+import org.xydra.index.XI;
 
 
 /**
@@ -215,7 +215,7 @@ public class MemoryField implements XField, Serializable {
 			
 			XValue oldValue = getValue();
 			
-			if(XX.equals(oldValue, newValue)) {
+			if(XI.equals(oldValue, newValue)) {
 				// implies no change
 				return false;
 			}

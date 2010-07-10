@@ -1,12 +1,12 @@
 package org.xydra.core.model.impl.memory;
 
-import org.xydra.core.XX;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.XType;
+import org.xydra.index.XI;
 
 
 /**
@@ -229,10 +229,10 @@ public class MemoryAddress implements XAddress {
 		if(!(obj instanceof XAddress))
 			return false;
 		XAddress other = (XAddress)obj;
-		return XX.equals(this.repository, other.getRepository())
-		        && XX.equals(this.model, other.getModel())
-		        && XX.equals(this.object, other.getObject())
-		        && XX.equals(this.field, other.getField());
+		return XI.equals(this.repository, other.getRepository())
+		        && XI.equals(this.model, other.getModel())
+		        && XI.equals(this.object, other.getObject())
+		        && XI.equals(this.field, other.getField());
 	}
 	
 	public String toURI() {

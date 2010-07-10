@@ -1,6 +1,5 @@
 package org.xydra.core.change.impl.memory;
 
-import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XEvent;
@@ -9,6 +8,7 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
+import org.xydra.index.XI;
 
 
 abstract public class MemoryAtomicEvent implements XEvent {
@@ -82,7 +82,7 @@ abstract public class MemoryAtomicEvent implements XEvent {
 			return false;
 		XAtomicEvent event = (XAtomicEvent)object;
 		
-		return XX.equals(this.actor, event.getActor()) && this.changeType == event.getChangeType()
+		return XI.equals(this.actor, event.getActor()) && this.changeType == event.getChangeType()
 		        && this.target.equals(event.getTarget());
 	}
 	

@@ -27,7 +27,10 @@ import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.core.change.impl.memory.MemoryTransaction;
 import org.xydra.core.model.MissingPieceException;
 import org.xydra.core.model.XAddress;
+import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XBaseModel;
+import org.xydra.core.model.XBaseObject;
+import org.xydra.core.model.XBaseRepository;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XIDProvider;
@@ -48,6 +51,7 @@ import org.xydra.core.value.XListValue;
 import org.xydra.core.value.XLongListValue;
 import org.xydra.core.value.XStringListValue;
 import org.xydra.core.value.XValue;
+import org.xydra.index.XI;
 import org.xydra.index.iterator.SingleValueIterator;
 
 
@@ -1403,6 +1407,9 @@ public class XX {
 		}
 	}
 	
+	// TODO do we still need these URI methods now that we have XAddress?
+	// ~daniel
+	
 	/**
 	 * Gets the {@link XModel} with specified URI from the given
 	 * {@link XRepository}
@@ -1549,7 +1556,6 @@ public class XX {
 	 * @throws URIFormatException if the given URI contains too many or too few
 	 *             components
 	 */
-	
 	public static XField getFieldFromURI(XRepository repository, String uri) {
 		String[] uriArray = uri.split("/");
 		
@@ -1680,7 +1686,6 @@ public class XX {
 	 * @throws URIFormatException if the given URI contains too many or too few
 	 *             components
 	 */
-	
 	public static XValue getValueFromURI(XRepository repository, String uri) {
 		String[] uriArray = uri.split("/");
 		
@@ -1729,7 +1734,6 @@ public class XX {
 	 * @throws URIFormatException if the given URI contains too many or too few
 	 *             components
 	 */
-	
 	public static XValue getValueFromURI(XModel model, String uri) {
 		String[] uriArray = uri.split("/");
 		
@@ -1773,7 +1777,6 @@ public class XX {
 	 * @throws URIFormatException if the given URI contains too many or too few
 	 *             components
 	 */
-	
 	public static XField getValueFromURI(XObject object, String uri) {
 		if(uri.contains("/"))
 			throw new URIFormatException("The given URI contains too many components.");
@@ -1787,91 +1790,52 @@ public class XX {
 	}
 	
 	/**
-	 * Check if two {@link XModel}s have the same {@link XID}, the same revision
-	 * and the same {@link XObjects} as defined by
-	 * {@link XX#equalState(XObject, XObject)}.
+	 * Check if two {@link XRepository}s have the same {@link XID}, the same
+	 * revision and the same {@link XModel}s as defined by
+	 * {@link #equalState(XBaseModel, XBaseModel)}.
 	 * 
-	 * This is similar to {@link XX#equalTree(XModel, XModel)} but also checks
-	 * the revision number.
+	 * This is similar to {@link #equalTree(XModel, XModel)} but also checks the
+	 * revision number.
 	 * 
 	 * Parent-{@link XRepository}s, if they exist, are not compared.
 	 * 
-	 * @return true if the two {@link XModels} have the same state.
+	 * @return true if the two {@link XRepository}s have the same state.
 	 */
-	public static boolean equalState(XModel modelA, XModel modelB) {
-		if(modelA == null && modelB == null)
+	public static boolean equalState(XBaseRepository repoA, XBaseRepository repoB) {
+		
+		if(repoA == null && repoB == null) {
 			return true;
+		}
 		
 		// one of them is null, the other isn't
-		if(modelA == null || modelB == null)
+		if(repoA == null || repoB == null) {
 			return false;
+		}
 		
-		if(!modelA.getID().equals(modelB.getID()))
+		if(!repoA.getID().equals(repoB.getID())) {
 			return false;
+		}
 		
-		if(modelA.getRevisionNumber() != modelB.getRevisionNumber())
-			return false;
-		
-		for(XID objectId : modelA) {
+		for(XID modelId : repoA) {
 			
-			XObject objectA = modelA.getObject(objectId);
-			XObject objectB = modelB.getObject(objectId);
+			XBaseModel modelA = repoA.getModel(modelId);
+			XBaseModel modelB = repoB.getModel(modelId);
 			
-			if(objectB == null)
+			if(modelB == null) {
 				return false;
+			}
 			
-			if(!equalState(objectA, objectB))
+			if(!equalState(modelA, modelB)) {
 				return false;
+			}
 			
 		}
 		
-		for(XID objectId : modelB) {
+		for(XID modelId : repoB) {
 			
-			if(modelA.getObject(objectId) == null)
+			if(repoA.getModel(modelId) == null) {
 				return false;
-			
-		}
-		
-		return true;
-	}
-	
-	/**
-	 * Check if two {@link XObject}s have the same {@link XID}, the same
-	 * revision and the same {@link XFields} as defined by
-	 * {@link XX#equalState(XField, XField)}.
-	 * 
-	 * This is similar to {@link XX#equalTree(XObject, XObject)} but also checks
-	 * the revision number.
-	 * 
-	 * Parent-{@link XModel}s, if they exist, are not compared
-	 * 
-	 * @return true if the two {@link XObjects} have the same state.
-	 */
-	public static boolean equalState(XObject objectA, XObject objectB) {
-		
-		if(!objectA.getID().equals(objectB.getID()))
-			return false;
-		
-		if(objectA.getRevisionNumber() != objectB.getRevisionNumber())
-			return false;
-		
-		for(XID fieldId : objectA) {
-			
-			XField fieldA = objectA.getField(fieldId);
-			XField fieldB = objectB.getField(fieldId);
-			
-			if(fieldB == null)
-				return false;
-			
-			if(!equalState(fieldA, fieldB))
-				return false;
-			
-		}
-		
-		for(XID fieldId : objectB) {
-			
-			if(objectA.getField(fieldId) == null)
-				return false;
+			}
 			
 		}
 		
@@ -1879,63 +1843,56 @@ public class XX {
 	}
 	
 	/**
-	 * Check if two {@link XField}s have the same ID, the same revision and the
-	 * same {@link XValue}.
+	 * Check if two {@link XBaseModel}s have the same {@link XID}, the same
+	 * revision and the same {@link XBaseObject}s as defined by
+	 * {@link #equalState(XBaseObject, XBaseObject)}.
 	 * 
-	 * This is similar to {@link XX#equalTree(XField, XField)} but also checks
-	 * the revision number.
-	 * 
-	 * Parent-{@link XObject}s, if they exist, are not compared
-	 * 
-	 * @return true if the two {@link XField}s have the same state.
-	 */
-	public static boolean equalState(XField fieldA, XField fieldB) {
-		
-		if(!equals(fieldA.getValue(), fieldB.getValue()))
-			return false;
-		
-		if(!fieldA.getID().equals(fieldB.getID()))
-			return false;
-		
-		if(fieldA.getRevisionNumber() != fieldB.getRevisionNumber())
-			return false;
-		
-		return true;
-	}
-	
-	/**
-	 * Check if two {@link XModel}s have the same {@link XID} and the same
-	 * {@link XObject}s as defined by {@link XX#equalTree(XObject, XObject)}.
-	 * 
-	 * This is similar to {@link XX#equalState(XModel, XModel)} but ignores the
-	 * revision number.
+	 * This is similar to {@link #equalTree(XBaseModel, XBaseModel)} but also
+	 * checks the revision number.
 	 * 
 	 * Parent-{@link XRepository}s, if they exist, are not compared.
 	 * 
-	 * @return true if the two {@link XModel}s represent the same tree.
+	 * @return true if the two {@link XBaseModel}s have the same state.
 	 */
-	public static boolean equalTree(XModel modelA, XModel modelB) {
+	public static boolean equalState(XBaseModel modelA, XBaseModel modelB) {
 		
-		if(!modelA.getID().equals(modelB.getID()))
+		if(modelA == null && modelB == null) {
+			return true;
+		}
+		
+		// one of them is null, the other isn't
+		if(modelA == null || modelB == null) {
 			return false;
+		}
+		
+		if(!modelA.getID().equals(modelB.getID())) {
+			return false;
+		}
+		
+		if(modelA.getRevisionNumber() != modelB.getRevisionNumber()) {
+			return false;
+		}
 		
 		for(XID objectId : modelA) {
 			
-			XObject objectA = modelA.getObject(objectId);
-			XObject objectB = modelB.getObject(objectId);
+			XBaseObject objectA = modelA.getObject(objectId);
+			XBaseObject objectB = modelB.getObject(objectId);
 			
-			if(objectB == null)
+			if(objectB == null) {
 				return false;
+			}
 			
-			if(!equalTree(objectA, objectB))
+			if(!equalState(objectA, objectB)) {
 				return false;
+			}
 			
 		}
 		
 		for(XID objectId : modelB) {
 			
-			if(modelA.getObject(objectId) == null)
+			if(modelA.getObject(objectId) == null) {
 				return false;
+			}
 			
 		}
 		
@@ -1943,38 +1900,56 @@ public class XX {
 	}
 	
 	/**
-	 * Check if two {@link XObject}s have the same {@link XID} and the same
-	 * {@link XField}s as defined by {@link XX#equalTree(XField, XField)}.
+	 * Check if two {@link XBaseObject}s have the same {@link XID}, the same
+	 * revision and the same {@link XBaseField}s as defined by
+	 * {@link #equalState(XBaseField, XBaseField)}.
 	 * 
-	 * This is similar to {@link XX#equalState(XObject, XObject)} but ignores
-	 * the revision number.
+	 * This is similar to {@link #equalTree(XBaseObject, XBaseObject)} but also
+	 * checks the revision number.
 	 * 
-	 * Parent-{@link XModel}s, if they exist, are not compared.
+	 * Parent-{@link XBaseModel}s, if they exist, are not compared
 	 * 
-	 * @return true if the two {@link XObject}s represent the same subtree.
+	 * @return true if the two {@link XBaseObject}s have the same state.
 	 */
-	public static boolean equalTree(XObject objectA, XObject objectB) {
+	public static boolean equalState(XBaseObject objectA, XBaseObject objectB) {
 		
-		if(!objectA.getID().equals(objectB.getID()))
+		if(objectA == null && objectB == null) {
+			return true;
+		}
+		
+		// one of them is null, the other isn't
+		if(objectA == null || objectB == null) {
 			return false;
+		}
+		
+		if(!objectA.getID().equals(objectB.getID())) {
+			return false;
+		}
+		
+		if(objectA.getRevisionNumber() != objectB.getRevisionNumber()) {
+			return false;
+		}
 		
 		for(XID fieldId : objectA) {
 			
-			XField fieldA = objectA.getField(fieldId);
-			XField fieldB = objectB.getField(fieldId);
+			XBaseField fieldA = objectA.getField(fieldId);
+			XBaseField fieldB = objectB.getField(fieldId);
 			
-			if(fieldB == null)
+			if(fieldB == null) {
 				return false;
+			}
 			
-			if(!equalTree(fieldA, fieldB))
+			if(!equalState(fieldA, fieldB)) {
 				return false;
+			}
 			
 		}
 		
 		for(XID fieldId : objectB) {
 			
-			if(objectA.getField(fieldId) == null)
+			if(objectA.getField(fieldId) == null) {
 				return false;
+			}
 			
 		}
 		
@@ -1982,34 +1957,232 @@ public class XX {
 	}
 	
 	/**
-	 * Check if two {@link XField}s have the same {@link XID} and the same
-	 * {@link XValue}.
+	 * Check if two {@link XBaseField}s have the same ID, the same revision and
+	 * the same {@link XValue}.
 	 * 
-	 * This is similar to {@link XX#equalState(XField, XField)} but ignores the
-	 * revision number.
+	 * This is similar to {@link #equalTree(XBaseField, XBaseField)} but also
+	 * checks the revision number.
 	 * 
-	 * Parent-{@link XObject}s, if they exist, are not compared.
+	 * Parent-{@link XBaseObject}s, if they exist, are not compared
 	 * 
-	 * @return true if the two {@link XField}s represent the same subtree.
+	 * @return true if the two {@link XBaseField}s have the same state.
 	 */
-	public static boolean equalTree(XField fieldA, XField fieldB) {
+	public static boolean equalState(XBaseField fieldA, XBaseField fieldB) {
 		
-		if(!equals(fieldA.getValue(), fieldB.getValue()))
-			return false;
+		if(fieldA == null && fieldB == null) {
+			return true;
+		}
 		
-		if(!fieldA.getID().equals(fieldB.getID()))
+		// one of them is null, the other isn't
+		if(fieldA == null || fieldB == null) {
 			return false;
+		}
+		
+		if(!XI.equals(fieldA.getValue(), fieldB.getValue())) {
+			return false;
+		}
+		
+		if(!fieldA.getID().equals(fieldB.getID())) {
+			return false;
+		}
+		
+		if(fieldA.getRevisionNumber() != fieldB.getRevisionNumber()) {
+			return false;
+		}
 		
 		return true;
 	}
 	
 	/**
-	 * @return true if either both a and b are null or both are not null and
-	 *         a.equals(b) is true
+	 * Check if two {@link XBaseRepository}s have the same {@link XID} and the
+	 * same {@link XBaseModel}s as defined by
+	 * {@link #equalTree(XBaseModel, XBaseModel)}.
+	 * 
+	 * This is similar to {@link #equalState(XBaseRepository, XBaseRepository)}
+	 * but ignores the revision number.
+	 * 
+	 * Parent-{@link XBaseModel}s, if they exist, are not compared.
+	 * 
+	 * @return true if the two {@link XBaseRepository}s represent the same tree.
 	 */
-	// TODO shouldn't his be private?
-	public static boolean equals(Object a, Object b) {
-		return (a == b) || (a != null && a.equals(b));
+	public static boolean equalTree(XBaseRepository repoA, XBaseRepository repoB) {
+		
+		if(repoA == null && repoB == null) {
+			return true;
+		}
+		
+		// one of them is null, the other isn't
+		if(repoA == null || repoB == null) {
+			return false;
+		}
+		
+		if(!repoA.getID().equals(repoB.getID())) {
+			return false;
+		}
+		
+		for(XID modelId : repoA) {
+			
+			XBaseModel modelA = repoA.getModel(modelId);
+			XBaseModel modelB = repoB.getModel(modelId);
+			
+			if(modelB == null) {
+				return false;
+			}
+			
+			if(!equalTree(modelA, modelB)) {
+				return false;
+			}
+			
+		}
+		
+		for(XID modelId : repoB) {
+			
+			if(repoA.getModel(modelId) == null) {
+				return false;
+			}
+			
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Check if two {@link XBaseModel}s have the same {@link XID} and the same
+	 * {@link XBaseObject}s as defined by
+	 * {@link #equalTree(XBaseObject, XBaseObject)}.
+	 * 
+	 * This is similar to {@link #equalState(XBaseModel, XBaseModel)} but
+	 * ignores the revision number.
+	 * 
+	 * Parent-{@link XBaseRepository}s, if they exist, are not compared.
+	 * 
+	 * @return true if the two {@link XBaseModel}s represent the same tree.
+	 */
+	public static boolean equalTree(XBaseModel modelA, XBaseModel modelB) {
+		
+		if(modelA == null && modelB == null) {
+			return true;
+		}
+		
+		// one of them is null, the other isn't
+		if(modelA == null || modelB == null) {
+			return false;
+		}
+		
+		if(!modelA.getID().equals(modelB.getID())) {
+			return false;
+		}
+		
+		for(XID objectId : modelA) {
+			
+			XBaseObject objectA = modelA.getObject(objectId);
+			XBaseObject objectB = modelB.getObject(objectId);
+			
+			if(objectB == null) {
+				return false;
+			}
+			
+			if(!equalTree(objectA, objectB)) {
+				return false;
+			}
+			
+		}
+		
+		for(XID objectId : modelB) {
+			
+			if(modelA.getObject(objectId) == null) {
+				return false;
+			}
+			
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Check if two {@link XBaseObject}s have the same {@link XID} and the same
+	 * {@link XBaseField}s as defined by
+	 * {@link #equalTree(XBaseField, XBaseField)}.
+	 * 
+	 * This is similar to {@link #equalState(XBaseObject, XBaseObject)} but
+	 * ignores the revision number.
+	 * 
+	 * Parent-{@link XBaseModel}s, if they exist, are not compared.
+	 * 
+	 * @return true if the two {@link XBaseObject}s represent the same subtree.
+	 */
+	public static boolean equalTree(XBaseObject objectA, XBaseObject objectB) {
+		
+		if(objectA == null && objectB == null) {
+			return true;
+		}
+		
+		// one of them is null, the other isn't
+		if(objectA == null || objectB == null) {
+			return false;
+		}
+		
+		if(!objectA.getID().equals(objectB.getID())) {
+			return false;
+		}
+		
+		for(XID fieldId : objectA) {
+			
+			XBaseField fieldA = objectA.getField(fieldId);
+			XBaseField fieldB = objectB.getField(fieldId);
+			
+			if(fieldB == null) {
+				return false;
+			}
+			
+			if(!equalTree(fieldA, fieldB)) {
+				return false;
+			}
+			
+		}
+		
+		for(XID fieldId : objectB) {
+			
+			if(objectA.getField(fieldId) == null) {
+				return false;
+			}
+			
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Check if two {@link XBaseField}s have the same {@link XID} and the same
+	 * {@link XValue}.
+	 * 
+	 * This is similar to {@link #equalState(XBaseField, XBaseField)} but
+	 * ignores the revision number.
+	 * 
+	 * Parent-{@link XBaseObject}s, if they exist, are not compared.
+	 * 
+	 * @return true if the two {@link XBaseField}s represent the same subtree.
+	 */
+	public static boolean equalTree(XBaseField fieldA, XBaseField fieldB) {
+		
+		if(fieldA == null && fieldB == null) {
+			return true;
+		}
+		
+		// one of them is null, the other isn't
+		if(fieldA == null || fieldB == null) {
+			return false;
+		}
+		
+		if(!XI.equals(fieldA.getValue(), fieldB.getValue())) {
+			return false;
+		}
+		
+		if(!fieldA.getID().equals(fieldB.getID())) {
+			return false;
+		}
+		
+		return true;
 	}
 	
 	/**
@@ -2025,11 +2198,11 @@ public class XX {
 	 */
 	public static boolean contains(XAddress parent, XAddress descendant) {
 		if(parent.getRepository() == null) {
-			if(!equals(parent.getRepository(), descendant.getRepository()))
+			if(!XI.equals(parent.getRepository(), descendant.getRepository()))
 				return false;
 			
 			if(parent.getModel() == null) {
-				if(!equals(parent.getModel(), descendant.getModel()))
+				if(!XI.equals(parent.getModel(), descendant.getModel()))
 					return false;
 				
 				if(parent.getObject() == null) {
@@ -2093,7 +2266,7 @@ public class XX {
 				if(parent.getObject() == null) {
 					if(descendant.getObject() != null)
 						return false;
-					return equals(parent.getField(), descendant.getField());
+					return XI.equals(parent.getField(), descendant.getField());
 				} else {
 					if(!parent.getObject().equals(descendant.getObject()))
 						return false;
@@ -2141,10 +2314,10 @@ public class XX {
 	 */
 	public static boolean isChild(XAddress parent, XAddress child) {
 		if(parent.getRepository() == null) {
-			if(!equals(parent.getRepository(), child.getRepository()))
+			if(!XI.equals(parent.getRepository(), child.getRepository()))
 				return false;
 			if(parent.getModel() == null) {
-				if(!equals(parent.getModel(), child.getModel()))
+				if(!XI.equals(parent.getModel(), child.getModel()))
 					return false;
 				if(parent.getObject() == null) {
 					return false;
@@ -2680,6 +2853,10 @@ public class XX {
 	 * order provided by the iterator but will fail if there have been any
 	 * conflicting changes since then that have not been undone already.
 	 * 
+	 * The created command may be a transaction. However, if only one command is
+	 * needed to undo the events, no transaction is created and the command is
+	 * returned directly.
+	 * 
 	 * The relevant parts of the given {@link XModel} must be in the same state
 	 * as they where directly after the event, only the revision numbers may
 	 * differ.
@@ -2697,8 +2874,6 @@ public class XX {
 	 *             contain the target of any of the events or if any of the
 	 *             events is a {@link XRepositoryEvent}
 	 */
-	// TODO Wouldn't it be clearer (and more useful) to just return a
-	// Transaction object here, instead of an XCommand object?
 	public static XCommand createUndoCommand(XBaseModel base, Iterator<XEvent> events) {
 		
 		ChangedModel model = new ChangedModel(base);
@@ -2796,7 +2971,7 @@ public class XX {
 	 */
 	public static void createUndoChanges(DeltaModel model, XModelEvent event) {
 		
-		if(!equals(model.getAddress(), event.getTarget())) {
+		if(!XI.equals(model.getAddress(), event.getTarget())) {
 			throw new IllegalArgumentException();
 		}
 		
@@ -2904,7 +3079,7 @@ public class XX {
 			throw new IllegalStateException();
 		}
 		
-		if(!equals(field.getValue(), event.getNewValue())) {
+		if(!XI.equals(field.getValue(), event.getNewValue())) {
 			throw new IllegalStateException();
 		}
 		
@@ -3097,7 +3272,7 @@ public class XX {
 			if(!b.hasNext()) {
 				return false;
 			}
-			if(!equals(a.next(), b.next())) {
+			if(!XI.equals(a.next(), b.next())) {
 				return false;
 			}
 		}

@@ -1,10 +1,10 @@
 package org.xydra.core.model.delta;
 
-import org.xydra.core.XX;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XID;
 import org.xydra.core.value.XValue;
+import org.xydra.index.XI;
 
 
 /**
@@ -44,7 +44,7 @@ public class ChangedField implements DeltaField {
 	}
 	
 	public void setValue(XValue value) {
-		this.changed = this.changed || !XX.equals(value, this.base.getValue());
+		this.changed = this.changed || !XI.equals(value, this.base.getValue());
 		/*
 		 * TODO I added an disjunction with this.changed to makes sure, that
 		 * this.changed stays true, even if the value gets changed to the

@@ -18,6 +18,7 @@ import org.xydra.core.change.ChangeType;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.index.IMapMapMapIndex;
+import org.xydra.index.XI;
 import org.xydra.index.impl.FastTripleMap;
 import org.xydra.index.iterator.AbstractTransformingIterator;
 import org.xydra.index.query.EqualsConstraint;
@@ -70,13 +71,13 @@ public class MemoryAccessManager extends AbstractAccessManager {
 			KeyKeyKeyEntryTuple<XID,XAddress,XID,Boolean> tuple = it.next();
 			
 			assert tuple.getEntry() != null : "got null entry";
-			assert XX.equals(access, tuple.getKey1()) : "got wrong access type from query";
-			assert XX.equals(resource, tuple.getKey2()) : "got wrong actor from query";
+			assert XI.equals(access, tuple.getKey1()) : "got wrong access type from query";
+			assert XI.equals(resource, tuple.getKey2()) : "got wrong actor from query";
 			
 			XID actor = tuple.getKey3();
 			if(tuple.getEntry().booleanValue())
 				allowed.add(actor);
-			else if(!XX.equals(actor, XA.GROUP_ALL))
+			else if(!XI.equals(actor, XA.GROUP_ALL))
 				denied.add(actor);
 		}
 		
@@ -178,8 +179,8 @@ public class MemoryAccessManager extends AbstractAccessManager {
 			KeyKeyKeyEntryTuple<XID,XAddress,XID,Boolean> tuple = it.next();
 			
 			assert tuple.getEntry() != null : "got null entry";
-			assert XX.equals(access, tuple.getKey1()) : "got wrong access id from query";
-			assert XX.equals(resource, tuple.getKey2()) : "got wrong resource from query";
+			assert XI.equals(access, tuple.getKey1()) : "got wrong access id from query";
+			assert XI.equals(resource, tuple.getKey2()) : "got wrong resource from query";
 			
 			boolean allowed = tuple.getEntry();
 			XID group = tuple.getKey3();
@@ -210,8 +211,8 @@ public class MemoryAccessManager extends AbstractAccessManager {
 			KeyKeyKeyEntryTuple<XID,XAddress,XID,Boolean> tuple = it.next();
 			
 			assert tuple.getEntry() != null : "got null entry";
-			assert XX.equals(access, tuple.getKey1()) : "got wrong access type from query";
-			assert XX.equals(actor, tuple.getKey3()) : "got wrong actor from query";
+			assert XI.equals(access, tuple.getKey1()) : "got wrong access type from query";
+			assert XI.equals(actor, tuple.getKey3()) : "got wrong actor from query";
 			
 			boolean allowed = tuple.getEntry();
 			
@@ -235,8 +236,8 @@ public class MemoryAccessManager extends AbstractAccessManager {
 			KeyKeyKeyEntryTuple<XID,XAddress,XID,Boolean> tuple = it.next();
 			
 			assert tuple.getEntry() != null : "got null entry";
-			assert XX.equals(access, tuple.getKey1()) : "got wrong access type from query";
-			assert XX.equals(XA.GROUP_ALL, tuple.getKey3()) : "got wrong actor from query";
+			assert XI.equals(access, tuple.getKey1()) : "got wrong access type from query";
+			assert XI.equals(XA.GROUP_ALL, tuple.getKey3()) : "got wrong actor from query";
 			
 			boolean allowed = tuple.getEntry();
 			if(allowed) {
@@ -276,7 +277,7 @@ public class MemoryAccessManager extends AbstractAccessManager {
 			KeyKeyKeyEntryTuple<XID,XAddress,XID,Boolean> tuple = it.next();
 			
 			assert tuple.getEntry() != null : "got null entry";
-			assert XX.equals(access, tuple.getKey1()) : "got wrong access type from query";
+			assert XI.equals(access, tuple.getKey1()) : "got wrong access type from query";
 			
 			boolean allowed = tuple.getEntry();
 			if(!allowed) {
@@ -294,7 +295,7 @@ public class MemoryAccessManager extends AbstractAccessManager {
 			}
 			
 			XID group = tuple.getKey3();
-			if(XX.equals(actor, group) || this.groups.hasGroup(actor, group)) {
+			if(XI.equals(actor, group) || this.groups.hasGroup(actor, group)) {
 				return true;
 			}
 			

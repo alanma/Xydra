@@ -1,8 +1,8 @@
 package org.xydra.core.value.impl.memory;
 
-import org.xydra.core.XX;
 import org.xydra.core.model.XID;
 import org.xydra.core.value.XIDValue;
+import org.xydra.index.XI;
 
 
 /**
@@ -28,7 +28,7 @@ public class MemoryIDValue implements XIDValue {
 	@Override
 	public boolean equals(Object object) {
 		if(object instanceof XIDValue) {
-			return XX.equals(this.id, ((XIDValue)object).contents());
+			return XI.equals(this.id, ((XIDValue)object).contents());
 		} else {
 			return false;
 		}

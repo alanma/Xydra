@@ -56,7 +56,7 @@ public class XmlModel {
 	private static final String XID_ATTRIBUTE = "xid";
 	private static final String REVISION_ATTRIBUTE = "revision";
 	
-	private static final long NO_REVISION = -1;
+	public static final long NO_REVISION = -1;
 	
 	private static void checkElementName(MiniElement xml, String expectedName) {
 		if(!xml.getName().equals(expectedName)) {

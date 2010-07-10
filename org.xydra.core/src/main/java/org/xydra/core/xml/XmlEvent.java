@@ -8,7 +8,6 @@ import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.core.X;
-import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XEvent;
@@ -25,6 +24,7 @@ import org.xydra.core.change.impl.memory.MemoryTransactionEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.value.XValue;
+import org.xydra.index.XI;
 
 
 /**
@@ -131,9 +131,9 @@ public class XmlEvent {
 		        .getRepository());
 		XID modelId = getXidAttribute(xml, MODELID_ATTRIBUTE, context == null ? null : context
 		        .getModel());
-		XID objectId = getXidAttribute(xml, OBJECTID_ATTRIBUTE, context == null ? null : (XX
+		XID objectId = getXidAttribute(xml, OBJECTID_ATTRIBUTE, context == null ? null : (XI
 		        .equals(modelId, context.getModel()) ? context.getObject() : null));
-		XID fieldId = getXidAttribute(xml, FIELDID_ATTRIBUTE, context == null ? null : (XX.equals(
+		XID fieldId = getXidAttribute(xml, FIELDID_ATTRIBUTE, context == null ? null : (XI.equals(
 		        objectId, context.getObject()) ? context.getField() : null));
 		
 		return X.getIDProvider().fromComponents(repoId, modelId, objectId, fieldId);
@@ -588,19 +588,19 @@ public class XmlEvent {
 	private static void setBasicAttributes(XEvent event, XmlOut out, XAddress context) {
 		
 		XID repoId = event.getTarget().getRepository();
-		if(repoId != null && (context == null || !XX.equals(context.getRepository(), repoId)))
+		if(repoId != null && (context == null || !XI.equals(context.getRepository(), repoId)))
 			out.attribute(REPOSITORYID_ATTRIBUTE, repoId.toString());
 		
 		XID modelId = event.getTarget().getModel();
-		if(modelId != null && (context == null || !XX.equals(context.getModel(), modelId)))
+		if(modelId != null && (context == null || !XI.equals(context.getModel(), modelId)))
 			out.attribute(MODELID_ATTRIBUTE, modelId.toString());
 		
 		XID objectId = event.getTarget().getObject();
-		if(objectId != null && (context == null || !XX.equals(context.getObject(), objectId)))
+		if(objectId != null && (context == null || !XI.equals(context.getObject(), objectId)))
 			out.attribute(OBJECTID_ATTRIBUTE, objectId.toString());
 		
 		XID fieldId = event.getTarget().getField();
-		if(fieldId != null && (context == null || !XX.equals(context.getField(), fieldId)))
+		if(fieldId != null && (context == null || !XI.equals(context.getField(), fieldId)))
 			out.attribute(FIELDID_ATTRIBUTE, fieldId.toString());
 		
 		if(event.getActor() != null)

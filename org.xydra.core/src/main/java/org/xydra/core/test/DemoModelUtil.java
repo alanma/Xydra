@@ -18,6 +18,8 @@ import org.xydra.core.value.XValueFactory;
  */
 public class DemoModelUtil {
 	
+	static private final XValueFactory vf = X.getValueFactory();
+	
 	public static final XID PHONEBOOK_ID = X.getIDProvider().fromString("phonebook");
 	public static final XID JOHN_ID = X.getIDProvider().fromString("john");
 	public static final XID TITLE_ID = X.getIDProvider().fromString("title");
@@ -58,12 +60,16 @@ public class DemoModelUtil {
 	
 	public static void setupPhonebook(XModel model) {
 		
-		XValueFactory vf = X.getValueFactory();
-		
 		XObject john = model.createObject(ACTOR_ID, JOHN_ID);
 		
 		model.createObject(ACTOR_ID, CLAUDIA_ID);
 		model.createObject(ACTOR_ID, PETER_ID);
+		
+		setupJohn(john);
+		
+	}
+	
+	public static void setupJohn(XObject john) {
 		
 		XField name = john.createField(ACTOR_ID, TITLE_ID);
 		name.setValue(ACTOR_ID, vf.createStringValue("Dr. John Doe"));

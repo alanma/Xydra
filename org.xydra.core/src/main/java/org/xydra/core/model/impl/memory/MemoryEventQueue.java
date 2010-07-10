@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.RandomAccess;
 
-import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XEvent;
@@ -20,6 +19,7 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.impl.memory.SynchronizesChangesImpl.Orphans;
+import org.xydra.index.XI;
 
 
 /**
@@ -470,7 +470,7 @@ public class MemoryEventQueue {
 		
 		// Matching ADD->REMOVE or CHANGE->CHANGE or REMOVE->ADD
 		// where the value is reset to the old state
-		if(XX.equals(first.getOldValue(), last.getNewValue())) {
+		if(XI.equals(first.getOldValue(), last.getNewValue())) {
 			assert first.getChangeType() != ChangeType.REMOVE;
 			return null;
 		}

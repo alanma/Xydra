@@ -16,6 +16,7 @@ import org.xydra.core.change.XTransactionEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
+import org.xydra.index.XI;
 
 
 /**
@@ -52,7 +53,7 @@ public class MemoryTransactionEvent implements XTransactionEvent {
 		if(!this.target.equals(trans.getTarget()))
 			return false;
 		
-		if(!XX.equals(this.actor, trans.getActor()))
+		if(!XI.equals(this.actor, trans.getActor()))
 			return false;
 		
 		if(this.modelRevision != trans.getModelRevisionNumber())

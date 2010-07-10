@@ -7,7 +7,6 @@ import java.util.Set;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
-import org.xydra.core.XX;
 import org.xydra.core.access.XA;
 import org.xydra.core.access.XGroupDatabase;
 import org.xydra.core.access.XGroupEvent;
@@ -17,6 +16,7 @@ import org.xydra.core.model.XID;
 import org.xydra.index.Factory;
 import org.xydra.index.IPairIndex;
 import org.xydra.index.ITransitivePairIndex;
+import org.xydra.index.XI;
 import org.xydra.index.impl.FastStoredTransitivePairIndex;
 import org.xydra.index.impl.MapPairIndex;
 import org.xydra.index.impl.PairIndex;
@@ -110,10 +110,10 @@ public class MemoryGroupDatabase implements XGroupDatabase {
 	}
 	
 	synchronized public boolean hasGroup(XID actor, XID group) {
-		if(XX.equals(group, XA.GROUP_ALL)) {
+		if(XI.equals(group, XA.GROUP_ALL)) {
 			return true;
 		}
-		if(XX.equals(actor, XA.GROUP_ALL)) {
+		if(XI.equals(actor, XA.GROUP_ALL)) {
 			return false;
 		}
 		return this.index.implies(new EqualsConstraint<XID>(actor),
@@ -121,7 +121,7 @@ public class MemoryGroupDatabase implements XGroupDatabase {
 	}
 	
 	synchronized public void addToGroup(XID actor, XID group) throws CycleException {
-		if(XX.equals(actor, XA.GROUP_ALL) || hasGroup(actor, group)) {
+		if(XI.equals(actor, XA.GROUP_ALL) || hasGroup(actor, group)) {
 			// nothing to do
 			return;
 		}
@@ -134,7 +134,7 @@ public class MemoryGroupDatabase implements XGroupDatabase {
 	}
 	
 	synchronized public void removeFromGroup(XID actor, XID group) {
-		if(XX.equals(group, XA.GROUP_ALL) || !hasGroup(actor, group)) {
+		if(XI.equals(group, XA.GROUP_ALL) || !hasGroup(actor, group)) {
 			// nothing to do
 			return;
 		}

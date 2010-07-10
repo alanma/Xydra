@@ -1,6 +1,5 @@
 package org.xydra.core.change.impl.memory;
 
-import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XFieldEvent;
@@ -10,6 +9,7 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.value.XValue;
+import org.xydra.index.XI;
 
 
 /**
@@ -50,10 +50,10 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 			return false;
 		XFieldEvent event = (XFieldEvent)object;
 		
-		if(!XX.equals(this.oldValue, event.getOldValue()))
+		if(!XI.equals(this.oldValue, event.getOldValue()))
 			return false;
 		
-		if(!XX.equals(this.newValue, event.getNewValue()))
+		if(!XI.equals(this.newValue, event.getNewValue()))
 			return false;
 		
 		if(this.modelRevision != event.getModelRevisionNumber())

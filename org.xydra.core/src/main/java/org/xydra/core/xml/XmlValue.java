@@ -57,7 +57,7 @@ public class XmlValue {
 	private static final String XSTRINGSET_ELEMENT = "xstringSet";
 	private static final String XIDSET_ELEMENT = "xidSet";
 	private static final String XBYTELIST_ELEMENT = "xbyteList";
-	private static final String NULL_ATTRIBUTE = "null";
+	private static final String NULL_ATTRIBUTE = "isNull";
 	private static final String NULL_VALUE = "true";
 	
 	private final static XValueFactory factory = X.getValueFactory();

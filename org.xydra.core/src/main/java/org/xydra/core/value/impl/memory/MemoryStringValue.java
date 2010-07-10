@@ -1,7 +1,7 @@
 package org.xydra.core.value.impl.memory;
 
-import org.xydra.core.XX;
 import org.xydra.core.value.XStringValue;
+import org.xydra.index.XI;
 
 
 /**
@@ -27,7 +27,7 @@ public class MemoryStringValue implements XStringValue {
 	@Override
 	public boolean equals(Object object) {
 		if(object instanceof MemoryStringValue) {
-			return XX.equals(this.string, ((MemoryStringValue)object).contents());
+			return XI.equals(this.string, ((MemoryStringValue)object).contents());
 		} else {
 			return false;
 		}

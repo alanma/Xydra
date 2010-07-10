@@ -12,6 +12,12 @@ import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
 
 
+/**
+ * Test serializing {@link XValue} types to/from XML.
+ * 
+ * @author dscharrer
+ * 
+ */
 public class XmlValueTest extends TestCase {
 	
 	private final static XValueFactory fact = X.getValueFactory();
@@ -22,7 +28,7 @@ public class XmlValueTest extends TestCase {
 		XmlValue.toXml(value, out);
 		assertEquals("", out.getOpentags());
 		String xml = out.getXml();
-		System.out.println(xml);
+		// System.out.println(xml);
 		MiniElement e = new MiniXMLParserImpl().parseXml(xml);
 		XValue valueAgain = XmlValue.toValue(e);
 		assertEquals(value, valueAgain);

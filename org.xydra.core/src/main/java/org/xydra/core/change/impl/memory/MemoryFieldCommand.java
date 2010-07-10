@@ -1,12 +1,12 @@
 package org.xydra.core.change.impl.memory;
 
-import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XFieldCommand;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.value.XValue;
+import org.xydra.index.XI;
 
 
 /**
@@ -27,7 +27,7 @@ public class MemoryFieldCommand extends MemoryAtomicCommand implements XFieldCom
 			return false;
 		XFieldCommand command = (XFieldCommand)object;
 		
-		if(!XX.equals(this.newValue, command.getValue()))
+		if(!XI.equals(this.newValue, command.getValue()))
 			return false;
 		
 		return true;

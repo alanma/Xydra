@@ -2,9 +2,9 @@ package org.xydra.core.value.impl.memory;
 
 import java.util.Iterator;
 
-import org.xydra.core.XX;
 import org.xydra.core.value.XListValue;
 import org.xydra.core.value.XListValueIterator;
+import org.xydra.index.XI;
 
 
 /**
@@ -21,7 +21,7 @@ public abstract class MemoryListValue<E> implements XListValue<E> {
 	public int indexOf(Object elem) {
 		int s = size();
 		for(int i = 0; i < s; i++) {
-			if(XX.equals(get(i), elem)) {
+			if(XI.equals(get(i), elem)) {
 				return i;
 			}
 		}
@@ -30,7 +30,7 @@ public abstract class MemoryListValue<E> implements XListValue<E> {
 	
 	public int lastIndexOf(Object elem) {
 		for(int i = size(); i >= 0; i--) {
-			if(XX.equals(get(i), elem)) {
+			if(XI.equals(get(i), elem)) {
 				return i;
 			}
 		}
@@ -40,7 +40,7 @@ public abstract class MemoryListValue<E> implements XListValue<E> {
 	public boolean contains(E elem) {
 		int s = size();
 		for(int i = 0; i < s; i++) {
-			if(XX.equals(get(i), elem)) {
+			if(XI.equals(get(i), elem)) {
 				return true;
 			}
 		}
