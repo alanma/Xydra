@@ -6,7 +6,6 @@ import java.util.Stack;
 import org.xydra.core.xml.XmlOut;
 
 
-
 /**
  * Maps {@link XmlOut} to a {@link StringBuffer}.
  * 
@@ -81,10 +80,11 @@ public class XmlOutStringBuffer implements XmlOut {
 		        + "' but last opened was '" + open + "'";
 		
 		if(this.inElement) {
-			this.buf.append(">");
+			this.buf.append("/>");
 			this.inElement = false;
+		} else {
+			this.buf.append("</" + elementName + ">");
 		}
-		this.buf.append("</" + elementName + ">");
 	}
 	
 	public void comment(String comment) {
