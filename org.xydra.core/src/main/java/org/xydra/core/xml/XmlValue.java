@@ -651,7 +651,7 @@ public class XmlValue {
 		
 		xo.open(XBYTELIST_ELEMENT);
 		
-		xo.content(Base64.encode(xvalue.contents()));
+		xo.content(Base64.encode(xvalue.contents(), true));
 		
 		xo.close(XBYTELIST_ELEMENT);
 		
