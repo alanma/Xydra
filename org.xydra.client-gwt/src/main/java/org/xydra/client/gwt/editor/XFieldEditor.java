@@ -16,7 +16,6 @@ import org.xydra.client.gwt.editor.value.XStringListEditor;
 import org.xydra.client.gwt.editor.value.XValueEditor;
 import org.xydra.client.gwt.editor.value.XValueUtils;
 import org.xydra.client.sync.XSynchronizer;
-import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.change.XFieldEventListener;
@@ -37,6 +36,7 @@ import org.xydra.core.value.XLongValue;
 import org.xydra.core.value.XStringListValue;
 import org.xydra.core.value.XStringValue;
 import org.xydra.core.value.XValue;
+import org.xydra.index.XI;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -309,7 +309,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener {
 		
 		removeEditor();
 		
-		if(XX.equals(newValue, this.field.getValue())) {
+		if(XI.equals(newValue, this.field.getValue())) {
 			// nothing changed
 			return;
 		}

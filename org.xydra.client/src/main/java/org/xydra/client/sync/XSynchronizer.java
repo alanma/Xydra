@@ -8,13 +8,13 @@ import org.xydra.client.ServiceException;
 import org.xydra.client.XChangesService;
 import org.xydra.client.XChangesService.CommandResult;
 import org.xydra.core.X;
-import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XSynchronizesChanges;
+import org.xydra.index.XI;
 
 import com.allen_sauer.gwt.log.client.Log;
 
@@ -55,7 +55,7 @@ public class XSynchronizer {
 		this.syncRevison = getLocalRevisionNumber();
 		assert addr.getField() == null;
 		assert addr.getModel() != null;
-		assert XX.equals(addr.getObject(), entity.getAddress().getObject());
+		assert XI.equals(addr.getObject(), entity.getAddress().getObject());
 	}
 	
 	/**
