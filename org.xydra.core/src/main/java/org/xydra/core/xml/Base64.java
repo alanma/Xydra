@@ -263,9 +263,8 @@ public class Base64 {
 		}
 		
 		if(off + len > source.length) {
-			throw new IllegalArgumentException(String.format(
-			        "Cannot have offset of %d and length of %d with array of length %d", off, len,
-			        source.length));
+			throw new IllegalArgumentException("Cannot have offset of " + off + " and length of "
+			        + len + " with array of length " + source.length);
 		}
 
 		else {
@@ -433,9 +432,8 @@ public class Base64 {
 			throw new NullPointerException("Cannot decode null source array.");
 		}
 		if(off < 0 || off + len > source.length) {
-			throw new IllegalArgumentException(String.format(
-			        "Source array with length %d cannot have offset of %d and process %d bytes.",
-			        source.length, off, len));
+			throw new IllegalArgumentException("Source array with length " + source.length
+			        + " cannot have offset of " + off + " and process " + len + " bytes.");
 		}
 		
 		if(len == 0) {
@@ -465,9 +463,8 @@ public class Base64 {
 			// DECODABETs at the top of the file.
 			if(sbiDecode < WHITE_SPACE_ENC) {
 				// There's a bad input character in the Base64 stream.
-				throw new IllegalArgumentException(String.format(
-				        "Bad Base64 input character decimal %d in array position %d",
-				        source[i] & 0xFF, i));
+				throw new IllegalArgumentException("Bad Base64 input character decimal "
+				        + (source[i] & 0xFF) + " in array position " + i);
 			}
 			if(sbiDecode >= EQUALS_SIGN_ENC) {
 				b4[b4Posn++] = source[i]; // Save non-whitespace
