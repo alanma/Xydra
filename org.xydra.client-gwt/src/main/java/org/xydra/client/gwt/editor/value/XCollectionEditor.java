@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.xydra.client.gwt.editor.value.XValueEditor.EditListener;
-import org.xydra.core.value.XListValue;
+import org.xydra.core.value.XCollectionValue;
 import org.xydra.core.value.XValue;
 import org.xydra.index.iterator.AbstractTransformingIterator;
 
@@ -16,14 +16,14 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 
 
-abstract public class XListEditor<E extends XValue, V extends XListValue<?>> extends XValueEditor
-        implements EditListener {
+abstract public class XCollectionEditor<E extends XValue, V extends XCollectionValue<?>> extends
+        XValueEditor implements EditListener {
 	
 	private final EditListener listener;
 	private final FlowPanel list = new FlowPanel();
 	private final List<AtomicXValueEditor<E>> editors = new ArrayList<AtomicXValueEditor<E>>();
 	
-	public XListEditor(EditListener listener) {
+	public XCollectionEditor(EditListener listener) {
 		super();
 		this.listener = listener;
 		
@@ -59,7 +59,7 @@ abstract public class XListEditor<E extends XValue, V extends XListValue<?>> ext
 	
 	@Override
 	public V getValue() {
-		return asListValue(new AbstractTransformingIterator<AtomicXValueEditor<E>,E>(this.editors
+		return asCollectionValue(new AbstractTransformingIterator<AtomicXValueEditor<E>,E>(this.editors
 		        .iterator()) {
 			@Override
 			public E transform(AtomicXValueEditor<E> in) {
@@ -78,7 +78,7 @@ abstract public class XListEditor<E extends XValue, V extends XListValue<?>> ext
 		}
 	}
 	
-	abstract protected V asListValue(Iterator<E> entries);
+	abstract protected V asCollectionValue(Iterator<E> entries);
 	
 	abstract public void add();
 	

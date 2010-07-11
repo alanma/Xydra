@@ -9,7 +9,7 @@ import org.xydra.core.value.XDoubleListValue;
 import org.xydra.core.value.XDoubleValue;
 
 
-public class XDoubleListEditor extends XListEditor<XDoubleValue,XDoubleListValue> {
+public class XDoubleListEditor extends XCollectionEditor<XDoubleValue,XDoubleListValue> {
 	
 	public XDoubleListEditor(Iterator<Double> value, EditListener listener) {
 		super(listener);
@@ -23,7 +23,7 @@ public class XDoubleListEditor extends XListEditor<XDoubleValue,XDoubleListValue
 	}
 	
 	@Override
-	protected XDoubleListValue asListValue(Iterator<XDoubleValue> entries) {
+	protected XDoubleListValue asCollectionValue(Iterator<XDoubleValue> entries) {
 		List<Double> lst = new ArrayList<Double>();
 		while(entries.hasNext())
 			lst.add(entries.next().contents());

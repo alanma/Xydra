@@ -1,16 +1,16 @@
 package org.xydra.client.gwt.editor.value;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import org.xydra.core.X;
 import org.xydra.core.model.XID;
 import org.xydra.core.value.XBooleanListValue;
 import org.xydra.core.value.XBooleanValue;
+import org.xydra.core.value.XByteListValue;
 import org.xydra.core.value.XDoubleListValue;
 import org.xydra.core.value.XDoubleValue;
 import org.xydra.core.value.XIDListValue;
+import org.xydra.core.value.XIDSetValue;
 import org.xydra.core.value.XIDValue;
 import org.xydra.core.value.XIntegerListValue;
 import org.xydra.core.value.XIntegerValue;
@@ -18,7 +18,7 @@ import org.xydra.core.value.XListValue;
 import org.xydra.core.value.XLongListValue;
 import org.xydra.core.value.XLongValue;
 import org.xydra.core.value.XStringListValue;
-import org.xydra.core.value.XStringValue;
+import org.xydra.core.value.XStringSetValue;
 import org.xydra.core.value.XValue;
 import org.xydra.index.iterator.AbstractFilteringIterator;
 import org.xydra.index.iterator.AbstractTransformingIterator;
@@ -44,35 +44,21 @@ abstract public class XValueUtils {
 		if(value == null) {
 			return "";
 		}
-		if(value instanceof XListValue<?>) {
+		if(value instanceof XByteListValue) {
+			return byteArrayToString(((XByteListValue)value).contents());
+		} else if(value instanceof XListValue<?>) {
 			return listGetFirst((XListValue<?>)value).toString();
 		} else {
 			return value.toString();
 		}
 	}
 	
-	static public XStringValue asStringValue(XValue value) {
-		if(value instanceof XStringValue) {
-			return (XStringValue)value;
+	private static String byteArrayToString(byte[] bytes) {
+		char[] chars = new char[bytes.length];
+		for(int i = 0; i < bytes.length; i++) {
+			chars[i] = (char)bytes[i];
 		}
-		return X.getValueFactory().createStringValue(asString(value));
-	}
-	
-	static public XStringListValue asStringListValue(XValue value) {
-		if(value == null) {
-			return X.getValueFactory().createStringListValue(new String[] {});
-		} else if(value instanceof XStringListValue) {
-			return (XStringListValue)value;
-		} else if(value instanceof XListValue<?>) {
-			XListValue<?> old = (XListValue<?>)value;
-			String[] list = new String[old.size()];
-			for(int i = 0; i < list.length; i++) {
-				list[i] = old.get(i).toString();
-			}
-			return X.getValueFactory().createStringListValue(list);
-		} else {
-			return X.getValueFactory().createStringListValue(new String[] { value.toString() });
-		}
+		return new String(chars);
 	}
 	
 	static public Iterator<String> asStringList(XValue value) {
@@ -80,6 +66,11 @@ abstract public class XValueUtils {
 			return new NoneIterator<String>();
 		} else if(value instanceof XStringListValue) {
 			return ((XStringListValue)value).iterator();
+		} else if(value instanceof XStringSetValue) {
+			return ((XStringSetValue)value).iterator();
+		} else if(value instanceof XByteListValue) {
+			return new SingleValueIterator<String>(byteArrayToString(((XByteListValue)value)
+			        .contents()));
 		} else if(value instanceof XListValue<?>) {
 			return transform((XListValue<?>)value);
 		} else {
@@ -120,19 +111,6 @@ abstract public class XValueUtils {
 		}
 	}
 	
-	static public XIDValue asXIDValue(XValue value) {
-		
-		if(value == null) {
-			return X.getValueFactory().createIDValue(X.getIDProvider().createUniqueID());
-		}
-		
-		if(value instanceof XIDValue) {
-			return (XIDValue)value;
-		} else {
-			return X.getValueFactory().createIDValue(asXID(value));
-		}
-	}
-	
 	private static final String nameStartChar = "A-Z_a-z\\xC0-\\xD6\\xD8-\\xF6"
 	        + "\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D"
 	        + "\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF" + "\\uFDF0-\\uFFFD";
@@ -155,33 +133,14 @@ abstract public class XValueUtils {
 		return X.getIDProvider().fromString(cleaned);
 	}
 	
-	static public XIDListValue asXIDListValue(XValue value) {
-		if(value == null) {
-			return X.getValueFactory().createIDListValue(new XID[] {});
-		} else if(value instanceof XIDListValue) {
-			return (XIDListValue)value;
-		} else if(value instanceof XListValue<?>) {
-			XListValue<?> old = (XListValue<?>)value;
-			List<XID> ids = new ArrayList<XID>();
-			for(Object obj : old) {
-				XID id = generateXid(obj.toString());
-				if(id != null) {
-					ids.add(id);
-				}
-			}
-			XID[] ida = new XID[ids.size()];
-			ida = ids.toArray(ida);
-			return X.getValueFactory().createIDListValue(ida);
-		} else {
-			return X.getValueFactory().createIDListValue(new XID[] { asXID(value) });
-		}
-	}
-	
 	static public Iterator<XID> asXIDList(XValue value) {
 		if(value == null) {
 			return new NoneIterator<XID>();
 		} else if(value instanceof XIDListValue) {
 			return ((XIDListValue)value).iterator();
+		}
+		if(value instanceof XIDSetValue) {
+			return ((XIDSetValue)value).iterator();
 		} else if(value instanceof XListValue<?>) {
 			Iterator<XID> it = new AbstractTransformingIterator<String,XID>(
 			        transform((XListValue<?>)value)) {
@@ -238,20 +197,6 @@ abstract public class XValueUtils {
 		
 	}
 	
-	static public XDoubleValue asDoubleValue(XValue value) {
-		
-		if(value == null) {
-			return X.getValueFactory().createDoubleValue(0.0);
-		}
-		
-		if(value instanceof XDoubleValue) {
-			return (XDoubleValue)value;
-		} else {
-			return X.getValueFactory().createDoubleValue(asDouble(value));
-		}
-		
-	}
-	
 	static public double generateDouble(Object object) {
 		if(object instanceof Number) {
 			return ((Number)object).doubleValue();
@@ -267,38 +212,6 @@ abstract public class XValueUtils {
 				return 0.0;
 			}
 		}
-	}
-	
-	static public XDoubleListValue asDoubleListValue(XValue value) {
-		if(value == null) {
-			return X.getValueFactory().createDoubleListValue(new double[] {});
-		} else if(value instanceof XDoubleListValue) {
-			return (XDoubleListValue)value;
-		} else if(value instanceof XIntegerListValue) {
-			XIntegerListValue old = (XIntegerListValue)value;
-			double[] list = new double[old.size()];
-			for(int i = 0; i < list.length; i++) {
-				list[i] = old.get(i);
-			}
-			return X.getValueFactory().createDoubleListValue(list);
-		} else if(value instanceof XLongListValue) {
-			XLongListValue old = (XLongListValue)value;
-			double[] list = new double[old.size()];
-			for(int i = 0; i < list.length; i++) {
-				list[i] = old.get(i);
-			}
-			return X.getValueFactory().createDoubleListValue(list);
-		} else if(value instanceof XListValue<?>) {
-			XListValue<?> old = (XListValue<?>)value;
-			double[] list = new double[old.size()];
-			for(int i = 0; i < list.length; i++) {
-				list[i] = generateDouble(old.get(i).toString());
-			}
-			return X.getValueFactory().createDoubleListValue(list);
-		} else {
-			return X.getValueFactory().createDoubleListValue(new double[] { asDouble(value) });
-		}
-		
 	}
 	
 	static public <E> Iterator<Double> transformToDoubles(XListValue<E> value) {
@@ -364,68 +277,6 @@ abstract public class XValueUtils {
 		}
 	}
 	
-	static public XIntegerListValue asIntegerListValue(XValue value) {
-		if(value == null) {
-			return X.getValueFactory().createIntegerListValue(new int[] {});
-		} else if(value instanceof XIntegerListValue) {
-			return (XIntegerListValue)value;
-		} else if(value instanceof XDoubleListValue) {
-			XDoubleListValue old = (XDoubleListValue)value;
-			int[] list = new int[old.size()];
-			for(int i = 0; i < list.length; i++) {
-				list[i] = old.get(i).intValue();
-			}
-			return X.getValueFactory().createIntegerListValue(list);
-		} else if(value instanceof XLongListValue) {
-			XLongListValue old = (XLongListValue)value;
-			int[] list = new int[old.size()];
-			for(int i = 0; i < list.length; i++) {
-				list[i] = old.get(i).intValue();
-			}
-			return X.getValueFactory().createIntegerListValue(list);
-		} else if(value instanceof XListValue<?>) {
-			XListValue<?> old = (XListValue<?>)value;
-			int[] list = new int[old.size()];
-			for(int i = 0; i < list.length; i++) {
-				list[i] = (int)generateLong(old.get(i).toString());
-			}
-			return X.getValueFactory().createIntegerListValue(list);
-		} else {
-			return X.getValueFactory().createIntegerListValue(new int[] { asInteger(value) });
-		}
-	}
-	
-	static public XLongListValue asLongListValue(XValue value) {
-		if(value == null) {
-			return X.getValueFactory().createLongListValue(new long[] {});
-		} else if(value instanceof XLongListValue) {
-			return (XLongListValue)value;
-		} else if(value instanceof XIntegerListValue) {
-			XIntegerListValue old = (XIntegerListValue)value;
-			long[] list = new long[old.size()];
-			for(int i = 0; i < list.length; i++) {
-				list[i] = old.get(i);
-			}
-			return X.getValueFactory().createLongListValue(list);
-		} else if(value instanceof XDoubleListValue) {
-			XDoubleListValue old = (XDoubleListValue)value;
-			long[] list = new long[old.size()];
-			for(int i = 0; i < list.length; i++) {
-				list[i] = old.get(i).longValue();
-			}
-			return X.getValueFactory().createLongListValue(list);
-		} else if(value instanceof XListValue<?>) {
-			XListValue<?> old = (XListValue<?>)value;
-			long[] list = new long[old.size()];
-			for(int i = 0; i < list.length; i++) {
-				list[i] = generateLong(old.get(i).toString());
-			}
-			return X.getValueFactory().createLongListValue(list);
-		} else {
-			return X.getValueFactory().createLongListValue(new long[] { asLong(value) });
-		}
-	}
-	
 	static public boolean asBoolean(XValue value) {
 		if(value == null) {
 			return false;
@@ -444,35 +295,11 @@ abstract public class XValueUtils {
 		}
 	}
 	
-	static public XBooleanValue asBooleanValue(XValue value) {
-		if(value != null && value instanceof XBooleanValue) {
-			return (XBooleanValue)value;
-		}
-		return X.getValueFactory().createBooleanValue(asBoolean(value));
-	}
-	
 	public static boolean generateBoolean(String s) {
 		try {
 			return Double.parseDouble(s) != 0;
 		} catch(NumberFormatException nfe) {
 			return Boolean.parseBoolean(s);
-		}
-	}
-	
-	static public XBooleanListValue asBooleanListValue(XValue value) {
-		if(value == null) {
-			return X.getValueFactory().createBooleanListValue(new boolean[] {});
-		} else if(value instanceof XBooleanListValue) {
-			return (XBooleanListValue)value;
-		} else if(value instanceof XListValue<?>) {
-			XListValue<?> old = (XListValue<?>)value;
-			boolean[] list = new boolean[old.size()];
-			for(int i = 0; i < list.length; i++) {
-				list[i] = generateBoolean(old.get(i).toString());
-			}
-			return X.getValueFactory().createBooleanListValue(list);
-		} else {
-			return X.getValueFactory().createBooleanListValue(new boolean[] { asBoolean(value) });
 		}
 	}
 	
@@ -530,30 +357,6 @@ abstract public class XValueUtils {
 		
 	}
 	
-	static public XLongValue asLongValue(XValue value) {
-		
-		if(value == null) {
-			return X.getValueFactory().createLongValue(0L);
-		}
-		
-		if(value instanceof XLongValue) {
-			return (XLongValue)value;
-		}
-		return X.getValueFactory().createLongValue(asLong(value));
-	}
-	
-	static public XIntegerValue asIntegerValue(XValue value) {
-		
-		if(value == null) {
-			return X.getValueFactory().createIntegerValue(0);
-		}
-		
-		if(value instanceof XIntegerValue) {
-			return (XIntegerValue)value;
-		}
-		return X.getValueFactory().createIntegerValue((int)asLong(value));
-	}
-	
 	static public long generateLong(Object object) {
 		if(object instanceof Number) {
 			return ((Number)object).longValue();
@@ -573,6 +376,24 @@ abstract public class XValueUtils {
 	
 	static public int asInteger(XValue value) {
 		return (int)asLong(value);
+	}
+	
+	static public byte[] asByteList(XValue value) {
+		if(value == null) {
+			return new byte[0];
+		}
+		
+		if(value instanceof XByteListValue) {
+			return ((XByteListValue)value).contents();
+		} else {
+			char[] chars = value.toString().toCharArray();
+			byte[] bytes = new byte[chars.length];
+			for(int i = 0; i < chars.length; i++) {
+				bytes[i] = (byte)chars[i];
+			}
+			return bytes;
+		}
+		
 	}
 	
 }

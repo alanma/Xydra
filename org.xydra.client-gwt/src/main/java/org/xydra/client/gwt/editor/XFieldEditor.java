@@ -2,17 +2,20 @@ package org.xydra.client.gwt.editor;
 
 import org.xydra.client.gwt.editor.value.XBooleanEditor;
 import org.xydra.client.gwt.editor.value.XBooleanListEditor;
+import org.xydra.client.gwt.editor.value.XByteListEditor;
+import org.xydra.client.gwt.editor.value.XCollectionEditor;
 import org.xydra.client.gwt.editor.value.XDoubleEditor;
 import org.xydra.client.gwt.editor.value.XDoubleListEditor;
 import org.xydra.client.gwt.editor.value.XIDEditor;
 import org.xydra.client.gwt.editor.value.XIDListEditor;
+import org.xydra.client.gwt.editor.value.XIDSetEditor;
 import org.xydra.client.gwt.editor.value.XIntegerEditor;
 import org.xydra.client.gwt.editor.value.XIntegerListEditor;
-import org.xydra.client.gwt.editor.value.XListEditor;
 import org.xydra.client.gwt.editor.value.XLongEditor;
 import org.xydra.client.gwt.editor.value.XLongListEditor;
 import org.xydra.client.gwt.editor.value.XStringEditor;
 import org.xydra.client.gwt.editor.value.XStringListEditor;
+import org.xydra.client.gwt.editor.value.XStringSetEditor;
 import org.xydra.client.gwt.editor.value.XValueEditor;
 import org.xydra.client.gwt.editor.value.XValueUtils;
 import org.xydra.client.sync.XSynchronizer;
@@ -24,16 +27,21 @@ import org.xydra.core.change.impl.memory.MemoryObjectCommand;
 import org.xydra.core.model.XLoggedField;
 import org.xydra.core.value.XBooleanListValue;
 import org.xydra.core.value.XBooleanValue;
+import org.xydra.core.value.XByteListValue;
+import org.xydra.core.value.XCollectionValue;
 import org.xydra.core.value.XDoubleListValue;
 import org.xydra.core.value.XDoubleValue;
 import org.xydra.core.value.XIDListValue;
+import org.xydra.core.value.XIDSetValue;
 import org.xydra.core.value.XIDValue;
 import org.xydra.core.value.XIntegerListValue;
 import org.xydra.core.value.XIntegerValue;
 import org.xydra.core.value.XListValue;
 import org.xydra.core.value.XLongListValue;
 import org.xydra.core.value.XLongValue;
+import org.xydra.core.value.XSetValue;
 import org.xydra.core.value.XStringListValue;
+import org.xydra.core.value.XStringSetValue;
 import org.xydra.core.value.XStringValue;
 import org.xydra.core.value.XValue;
 import org.xydra.index.XI;
@@ -50,7 +58,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 
-public class XFieldEditor extends VerticalPanel implements XFieldEventListener {
+public class XFieldEditor extends VerticalPanel implements XFieldEventListener, addEditor {
 	
 	private static final int IDX_NOVALUE = 0;
 	private static final int IDX_LIST_STRING = 1;
@@ -65,6 +73,9 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener {
 	private static final int IDX_LONG = 10;
 	private static final int IDX_LIST_INTEGER = 11;
 	private static final int IDX_INTEGER = 12;
+	private static final int IDX_SET_STRING = 13;
+	private static final int IDX_SET_XID = 14;
+	private static final int IDX_LIST_BYTE = 15;
 	
 	private final XSynchronizer manager;
 	private final XLoggedField field;
@@ -128,36 +139,52 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener {
 			str = "(no value)";
 		} else {
 			str = value.toString();
-			if(value instanceof XListValue<?>) {
-				if(value instanceof XStringListValue)
-					str += " (string list)";
-				else if(value instanceof XIDListValue)
-					str += " (xid list)";
-				else if(value instanceof XBooleanListValue)
-					str += " (boolean list)";
-				else if(value instanceof XDoubleListValue)
-					str += " (double list)";
-				else if(value instanceof XLongListValue)
-					str += " (long list)";
-				else if(value instanceof XIntegerListValue)
-					str += " (integer list)";
-				else
-					throw new RuntimeException("Unexpected XListValue type: " + value);
+			if(value instanceof XCollectionValue<?>) {
+				if(value instanceof XListValue<?>) {
+					if(value instanceof XStringListValue) {
+						str += " (string list)";
+					} else if(value instanceof XIDListValue) {
+						str += " (xid list)";
+					} else if(value instanceof XBooleanListValue) {
+						str += " (boolean list)";
+					} else if(value instanceof XDoubleListValue) {
+						str += " (double list)";
+					} else if(value instanceof XLongListValue) {
+						str += " (long list)";
+					} else if(value instanceof XIntegerListValue) {
+						str += " (integer list)";
+					} else if(value instanceof XByteListValue) {
+						str += " (byte list)";
+					} else {
+						throw new RuntimeException("Unexpected XListValue type: " + value);
+					}
+				} else if(value instanceof XSetValue<?>) {
+					if(value instanceof XStringSetValue) {
+						str += " (string set)";
+					} else if(value instanceof XIDSetValue) {
+						str += " (xid set)";
+					} else {
+						throw new RuntimeException("Unexpected XSetValue type: " + value);
+					}
+				} else {
+					throw new RuntimeException("Unexpected XCollectionValue type: " + value);
+				}
 			} else {
-				if(value instanceof XStringValue)
+				if(value instanceof XStringValue) {
 					str += " (string)";
-				else if(value instanceof XIDValue)
+				} else if(value instanceof XIDValue) {
 					str += " (xid)";
-				else if(value instanceof XBooleanValue)
+				} else if(value instanceof XBooleanValue) {
 					str += " (boolean)";
-				else if(value instanceof XDoubleValue)
+				} else if(value instanceof XDoubleValue) {
 					str += " (double)";
-				else if(value instanceof XLongValue)
+				} else if(value instanceof XLongValue) {
 					str += " (long)";
-				else if(value instanceof XIntegerValue)
+				} else if(value instanceof XIntegerValue) {
 					str += " (integer)";
-				else
+				} else {
 					throw new RuntimeException("Unexpected non-list XValue type: " + value);
+				}
 			}
 			
 		}
@@ -227,7 +254,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener {
 		this.inner.insert(this.add, this.innerIndex);
 		this.add.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent e) {
-				((XListEditor<?,?>)XFieldEditor.this.editor).add();
+				((XCollectionEditor<?,?>)XFieldEditor.this.editor).add();
 			}
 		});
 		
@@ -245,6 +272,9 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener {
 		this.type.addItem("long");
 		this.type.addItem("integer list");
 		this.type.addItem("integer");
+		this.type.addItem("string set");
+		this.type.addItem("xid set");
+		this.type.addItem("byte list");
 		this.inner.insert(this.type, this.innerIndex);
 		this.type.addChangeHandler(new ChangeHandler() {
 			public void onChange(ChangeEvent e) {
@@ -258,42 +288,57 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener {
 			this.add.setVisible(false);
 		} else {
 			this.editor = XValueEditor.get(value, null);
-			if(value instanceof XListValue<?>) {
-				if(value instanceof XStringListValue)
-					this.type.setSelectedIndex(IDX_LIST_STRING);
-				else if(value instanceof XIDListValue)
-					this.type.setSelectedIndex(IDX_LIST_XID);
-				else if(value instanceof XBooleanListValue)
-					this.type.setSelectedIndex(IDX_LIST_BOOLEAN);
-				else if(value instanceof XDoubleListValue)
-					this.type.setSelectedIndex(IDX_LIST_DOUBLE);
-				else if(value instanceof XLongListValue)
-					this.type.setSelectedIndex(IDX_LIST_LONG);
-				else if(value instanceof XIntegerListValue)
-					this.type.setSelectedIndex(IDX_LIST_INTEGER);
-				else
-					throw new RuntimeException("Unexpected XListValue type: " + value);
-				add(this.editor);
+			if(value instanceof XCollectionValue<?>) {
+				if(value instanceof XListValue<?>) {
+					if(value instanceof XStringListValue) {
+						this.type.setSelectedIndex(IDX_LIST_STRING);
+					} else if(value instanceof XIDListValue) {
+						this.type.setSelectedIndex(IDX_LIST_XID);
+					} else if(value instanceof XBooleanListValue) {
+						this.type.setSelectedIndex(IDX_LIST_BOOLEAN);
+					} else if(value instanceof XDoubleListValue) {
+						this.type.setSelectedIndex(IDX_LIST_DOUBLE);
+					} else if(value instanceof XLongListValue) {
+						this.type.setSelectedIndex(IDX_LIST_LONG);
+					} else if(value instanceof XIntegerListValue) {
+						this.type.setSelectedIndex(IDX_LIST_INTEGER);
+					} else if(value instanceof XByteListValue) {
+						this.type.setSelectedIndex(IDX_LIST_BYTE);
+					} else {
+						throw new RuntimeException("Unexpected XListValue type: " + value);
+					}
+				} else if(value instanceof XListValue<?>) {
+					if(value instanceof XStringListValue) {
+						this.type.setSelectedIndex(IDX_SET_STRING);
+					} else if(value instanceof XIDListValue) {
+						this.type.setSelectedIndex(IDX_SET_XID);
+					} else {
+						throw new RuntimeException("Unexpected XSetValue type: " + value);
+					}
+				} else {
+					throw new RuntimeException("Unexpected XCollection Value type: " + value);
+				}
 			} else {
-				if(value instanceof XStringValue)
+				if(value instanceof XStringValue) {
 					this.type.setSelectedIndex(IDX_STRING);
-				else if(value instanceof XIDValue)
+				} else if(value instanceof XIDValue) {
 					this.type.setSelectedIndex(IDX_XID);
-				else if(value instanceof XBooleanValue)
+				} else if(value instanceof XBooleanValue) {
 					this.type.setSelectedIndex(IDX_BOOLEAN);
-				else if(value instanceof XDoubleValue)
+				} else if(value instanceof XDoubleValue) {
 					this.type.setSelectedIndex(IDX_DOUBLE);
-				else if(value instanceof XLongValue)
+				} else if(value instanceof XLongValue) {
 					this.type.setSelectedIndex(IDX_LONG);
-				else if(value instanceof XIntegerValue)
+				} else if(value instanceof XIntegerValue) {
 					this.type.setSelectedIndex(IDX_INTEGER);
-				else
-					throw new RuntimeException("Unexpected non-list XValue type: " + value);
-				this.inner.insert(this.editor, this.innerIndex + 1);
-				this.add.setVisible(false);
+				} else {
+					throw new RuntimeException("Unexpected non-collection XValue type: " + value);
+				}
 			}
 			
 		}
+		
+		attachEditor();
 		
 	}
 	
@@ -362,6 +407,9 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener {
 		case IDX_LIST_INTEGER:
 			this.editor = new XIntegerListEditor(XValueUtils.asIntegerList(value), null);
 			break;
+		case IDX_LIST_BYTE:
+			this.editor = new XByteListEditor(XValueUtils.asByteList(value), null);
+			break;
 		
 		case IDX_STRING:
 			this.editor = new XStringEditor(XValueUtils.asString(value), null);
@@ -381,12 +429,25 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener {
 		case IDX_INTEGER:
 			this.editor = new XIntegerEditor(XValueUtils.asInteger(value), null);
 			break;
+		
+		case IDX_SET_STRING:
+			this.editor = new XStringSetEditor(XValueUtils.asStringList(value), null);
+			break;
+		case IDX_SET_XID:
+			this.editor = new XIDSetEditor(XValueUtils.asXIDList(value), null);
+			break;
+		
 		default:
 			throw new RuntimeException("Unxecpected index from the 'value type' ListBox.");
 		}
 		
+		attachEditor();
+		
+	}
+	
+	private void attachEditor() {
 		if(this.editor != null) {
-			if(this.editor instanceof XListEditor<?,?>) {
+			if(this.editor instanceof XCollectionEditor<?,?>) {
 				add(this.editor);
 				this.add.setVisible(true);
 			} else {
@@ -394,7 +455,6 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener {
 				this.add.setVisible(false);
 			}
 		}
-		
 	}
 	
 }

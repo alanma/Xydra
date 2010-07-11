@@ -9,7 +9,7 @@ import org.xydra.core.value.XBooleanListValue;
 import org.xydra.core.value.XBooleanValue;
 
 
-public class XBooleanListEditor extends XListEditor<XBooleanValue,XBooleanListValue> {
+public class XBooleanListEditor extends XCollectionEditor<XBooleanValue,XBooleanListValue> {
 	
 	public XBooleanListEditor(Iterator<Boolean> value, EditListener listener) {
 		super(listener);
@@ -23,7 +23,7 @@ public class XBooleanListEditor extends XListEditor<XBooleanValue,XBooleanListVa
 	}
 	
 	@Override
-	protected XBooleanListValue asListValue(Iterator<XBooleanValue> entries) {
+	protected XBooleanListValue asCollectionValue(Iterator<XBooleanValue> entries) {
 		List<Boolean> lst = new ArrayList<Boolean>();
 		while(entries.hasNext())
 			lst.add(entries.next().contents());

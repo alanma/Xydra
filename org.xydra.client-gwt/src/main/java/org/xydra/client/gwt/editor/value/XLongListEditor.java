@@ -9,7 +9,7 @@ import org.xydra.core.value.XLongListValue;
 import org.xydra.core.value.XLongValue;
 
 
-public class XLongListEditor extends XListEditor<XLongValue,XLongListValue> {
+public class XLongListEditor extends XCollectionEditor<XLongValue,XLongListValue> {
 	
 	public XLongListEditor(Iterator<Long> value, EditListener listener) {
 		super(listener);
@@ -23,7 +23,7 @@ public class XLongListEditor extends XListEditor<XLongValue,XLongListValue> {
 	}
 	
 	@Override
-	protected XLongListValue asListValue(Iterator<XLongValue> entries) {
+	protected XLongListValue asCollectionValue(Iterator<XLongValue> entries) {
 		List<Long> lst = new ArrayList<Long>();
 		while(entries.hasNext())
 			lst.add(entries.next().contents());

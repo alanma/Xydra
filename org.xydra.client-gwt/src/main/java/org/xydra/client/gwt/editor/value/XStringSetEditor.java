@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.xydra.core.XX;
-import org.xydra.core.value.XStringListValue;
+import org.xydra.core.X;
+import org.xydra.core.value.XStringSetValue;
 import org.xydra.core.value.XStringValue;
 
 
-public class XStringListEditor extends XCollectionEditor<XStringValue,XStringListValue> {
+public class XStringSetEditor extends XCollectionEditor<XStringValue,XStringSetValue> {
 	
-	public XStringListEditor(Iterator<String> value, EditListener listener) {
+	public XStringSetEditor(Iterator<String> value, EditListener listener) {
 		super(listener);
 		
 		if(value == null)
@@ -23,11 +23,11 @@ public class XStringListEditor extends XCollectionEditor<XStringValue,XStringLis
 	}
 	
 	@Override
-	protected XStringListValue asCollectionValue(Iterator<XStringValue> entries) {
+	protected XStringSetValue asCollectionValue(Iterator<XStringValue> entries) {
 		List<String> lst = new ArrayList<String>();
 		while(entries.hasNext())
 			lst.add(entries.next().contents());
-		return XX.toStringListValue(lst);
+		return X.getValueFactory().createStringSetValue(lst);
 	}
 	
 	@Override

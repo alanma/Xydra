@@ -9,7 +9,7 @@ import org.xydra.core.value.XIntegerListValue;
 import org.xydra.core.value.XIntegerValue;
 
 
-public class XIntegerListEditor extends XListEditor<XIntegerValue,XIntegerListValue> {
+public class XIntegerListEditor extends XCollectionEditor<XIntegerValue,XIntegerListValue> {
 	
 	public XIntegerListEditor(Iterator<Integer> value, EditListener listener) {
 		super(listener);
@@ -23,7 +23,7 @@ public class XIntegerListEditor extends XListEditor<XIntegerValue,XIntegerListVa
 	}
 	
 	@Override
-	protected XIntegerListValue asListValue(Iterator<XIntegerValue> entries) {
+	protected XIntegerListValue asCollectionValue(Iterator<XIntegerValue> entries) {
 		List<Integer> lst = new ArrayList<Integer>();
 		while(entries.hasNext())
 			lst.add(entries.next().contents());
