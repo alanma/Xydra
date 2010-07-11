@@ -307,10 +307,10 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 					} else {
 						throw new RuntimeException("Unexpected XListValue type: " + value);
 					}
-				} else if(value instanceof XListValue<?>) {
-					if(value instanceof XStringListValue) {
+				} else if(value instanceof XSetValue<?>) {
+					if(value instanceof XStringSetValue) {
 						this.type.setSelectedIndex(IDX_SET_STRING);
-					} else if(value instanceof XIDListValue) {
+					} else if(value instanceof XIDSetValue) {
 						this.type.setSelectedIndex(IDX_SET_XID);
 					} else {
 						throw new RuntimeException("Unexpected XSetValue type: " + value);
