@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * <pre>
  * &lt;servlet&gt;
  *  &lt;servlet-name&gt;restless&lt;/servlet-name&gt;
- *  &lt;servlet-class&gt;de.xam.restless.Restless&lt;/servlet-class&gt;
+ *  &lt;servlet-class&gt;org.xydra.restless.Restless&lt;/servlet-class&gt;
  *   &lt;init-param&gt;
  *    &lt;param-name&gt;app&lt;/param-name&gt;
  *    &lt;param-value&gt;com.example.Application&lt;/param-value&gt;
@@ -81,14 +81,6 @@ import org.slf4j.LoggerFactory;
  * from the request, using the mapping you provide.
  * 
  * 
- * @author voelkel
- * 
- */
-/**
- * @author voelkel
- * 
- */
-/**
  * @author voelkel
  * 
  */
