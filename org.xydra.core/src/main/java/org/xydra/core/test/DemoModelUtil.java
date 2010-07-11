@@ -38,6 +38,11 @@ public class DemoModelUtil {
 	public static final XID MAXCALLTIME_ID = X.getIDProvider().fromString("maxCallTime");
 	public static final XID LASTCALLTIMES_ID = X.getIDProvider().fromString("lastCallTime");
 	public static final XID EMPTYFIELD_ID = X.getIDProvider().fromString("emptyfield");
+	public static final XID SIGNATURE_ID = X.getIDProvider().fromString("signature");
+	public static final XID COOKIES_ID = X.getIDProvider().fromString("cookies");
+	public static final XID COOKIENAMES_ID = X.getIDProvider().fromString("cookienames");
+	public static final XID COOKIE1_ID = X.getIDProvider().fromString("cookie1");
+	public static final XID COOKIE2_ID = X.getIDProvider().fromString("cookie2");
 	
 	public static final XID ACTOR_ID = X.getIDProvider().fromString("DemoModel");
 	
@@ -113,6 +118,16 @@ public class DemoModelUtil {
 		
 		john.createField(ACTOR_ID, EMPTYFIELD_ID);
 		
+		XField signature = john.createField(ACTOR_ID, SIGNATURE_ID);
+		signature.setValue(ACTOR_ID, vf.createByteListValue(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8,
+		        9, 10, 11, 12, 13, 14, 15, 16, (byte)253, (byte)254, (byte)255 }));
+		
+		XField cookies = john.createField(ACTOR_ID, COOKIES_ID);
+		cookies.setValue(ACTOR_ID, vf.createIDSetValue(new XID[] { COOKIE1_ID, COOKIE2_ID }));
+		
+		XField cookieNames = john.createField(ACTOR_ID, COOKIENAMES_ID);
+		cookieNames.setValue(ACTOR_ID, vf.createStringSetValue(new String[] { "Chocolate Chip",
+		        "Almond" }));
+		
 	}
-	
 }
