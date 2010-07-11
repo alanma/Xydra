@@ -50,10 +50,10 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 	private final XModelState state;
 	private final Map<XID,MemoryObject> loadedObjects = new HashMap<XID,MemoryObject>();
 	
-	/** The father-repository of this XModel */
+	/** The father-repository of this MemoryModel */
 	private final MemoryRepository father;
 	
-	/** Has this XModel been removed? */
+	/** Has this MemoryModel been removed? */
 	boolean removed = false;
 	
 	private Set<XModelEventListener> modelChangeListenerCollection;
@@ -170,6 +170,10 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 		}
 	}
 	
+	/**
+	 * @return the {@link XID} of the father-{@link XRepository} of this
+	 *         MemoryModel or null, if this object has no father.
+	 */
 	protected XID getRepositoryId() {
 		return this.father == null ? null : this.father.getID();
 	}

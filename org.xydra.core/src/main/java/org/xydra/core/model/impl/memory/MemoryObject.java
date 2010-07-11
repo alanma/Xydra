@@ -29,6 +29,7 @@ import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.delta.WrapperModel;
@@ -40,7 +41,7 @@ import org.xydra.core.model.state.impl.memory.TemporaryObjectState;
 
 
 /**
- * An in-memory {@link XObject}.
+ * An implementation of {@link XObject}.
  * 
  * @author voelkel
  * @author Kaidel
@@ -53,27 +54,20 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 	private final XObjectState state;
 	private final Map<XID,MemoryField> loadedFields = new HashMap<XID,MemoryField>();
 	
-	/** The father-model of this object */
+	/** The father-model of this MemoryObject */
 	private final MemoryModel father;
 	
-	/** Has this object been removed? */
+	/** Has this MemoryObject been removed? */
 	boolean removed = false;
-	
-	/**
-	 * The object on which this object synchronizes its change operations.
-	 * 
-	 * - if this object has a father-model, it will be used as the lock - if
-	 * this object has no father-model, it will use itself as the lock
-	 */
 	
 	private Set<XObjectEventListener> objectChangeListenerCollection;
 	private Set<XFieldEventListener> fieldChangeListenerCollection;
 	private Set<XTransactionEventListener> transactionListenerCollection;
 	
 	/**
-	 * Creates a new MemoryObject without a father.
+	 * Creates a new MemoryObject without a father-{@link XModel}.
 	 * 
-	 * @param objectId The {@link XID} for this object
+	 * @param objectId The {@link XID} for this MemoryObject
 	 */
 	public MemoryObject(XID objectId) {
 		this(createObjectState(objectId));
@@ -86,9 +80,9 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 	}
 	
 	/**
-	 * Creates a new MemoryObject without a father.
+	 * Creates a new MemoryObject without a father-{@link XModel}.
 	 * 
-	 * @param objectState The {@link XObjectState} for this object
+	 * @param objectState The {@link XObjectState} for this MemoryObject
 	 */
 	public MemoryObject(XObjectState objectState) {
 		this(null, createEventQueue(objectState), objectState);
@@ -101,10 +95,13 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 	}
 	
 	/**
-	 * Creates a new MemoryObject with the given model a its father.
+	 * Creates a new MemoryObject with the given {@link MemoryModel} as its
+	 * father.
 	 * 
-	 * @param lock The object to synchronize operations on.
-	 * @param objectState initial state
+	 * @param parent The father-{@link MemoryModel} of this MemoryObject.
+	 * @param eventQueue The {@link MemoryEventQueue} which will be used by this
+	 *            MemoryObject.
+	 * @param objectState The initial {@link XObjectState} of this MemoryObject.
 	 */
 	protected MemoryObject(MemoryModel parent, MemoryEventQueue eventQueue, XObjectState objectState) {
 		super(eventQueue);
@@ -127,7 +124,8 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 	}
 	
 	/**
-	 * @throws IllegalStateException if this object has already been removed
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryObject was already removed
 	 */
 	@Override
 	protected void checkRemoved() throws IllegalStateException {
@@ -194,6 +192,10 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 		return this.getID() + "-v" + this.getRevisionNumber() + " " + this.state.toString();
 	}
 	
+	/**
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryObject was already removed
+	 */
 	public XID getID() {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -201,6 +203,13 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 		}
 	}
 	
+	/**
+	 * Removes all {@link XField XFields} of this MemoryObject from the
+	 * persistence layer and the MemoryObject itself.
+	 * 
+	 * @param orphans The collection to which the removed {@link XField XFields}
+	 *            are to be added to for server-client synchronization purposes
+	 */
 	protected void removeInternal(Orphans orphans) {
 		// all fields are already loaded for creating events
 		
@@ -213,6 +222,10 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 		this.loadedFields.clear();
 	}
 	
+	/**
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryObject was already removed
+	 */
 	public boolean removeField(XID actor, XID fieldID) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -263,18 +276,34 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 		}
 	}
 	
+	/**
+	 * Saves the current state information of this MemoryObject with the
+	 * currently used persistence layer
+	 */
 	protected void save() {
 		this.state.save();
 	}
 	
+	/**
+	 * @return the {@link XID} of the father-{@link XModel} of this MemoryObject
+	 *         or null, if this object has no father.
+	 */
 	protected XID getModelId() {
 		return this.father == null ? null : this.father.getID();
 	}
 	
+	/**
+	 * @return the {@link XID} of the father-{@link XRepository} of this
+	 *         MemoryObject or null, if this object has no father.
+	 */
 	protected XID getRepositoryId() {
 		return this.father == null ? null : this.father.getRepositoryId();
 	}
 	
+	/**
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryObject was already removed
+	 */
 	public MemoryField getField(XID fieldID) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -297,6 +326,10 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 		}
 	}
 	
+	/**
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryObject was already removed
+	 */
 	public MemoryField createField(XID actor, XID fieldID) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -346,6 +379,10 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 		}
 	}
 	
+	/**
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryObject was already removed
+	 */
 	public long executeObjectCommand(XID actor, XObjectCommand command) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -427,10 +464,19 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 		save();
 	}
 	
+	/**
+	 * Sets the revision number of this MemoryObject
+	 * 
+	 * @param newRevision the new revision number
+	 */
 	protected void setRevisionNumber(long newRevision) {
 		this.state.setRevisionNumber(newRevision);
 	}
 	
+	/**
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryObject was already removed
+	 */
 	public Iterator<XID> iterator() {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -439,9 +485,12 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 	}
 	
 	/**
-	 * Returns the father-model of this object.
+	 * Returns the father-{@link MemoryModel} of this MemoryObject.
 	 * 
-	 * @return The father-model of this object (may be null).
+	 * @return The father-{@link MemoryModel} of this MemoryObject (may be
+	 *         null).
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryObject was already removed
 	 */
 	@ReadOperation
 	public MemoryModel getFather() {
@@ -450,9 +499,11 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 	}
 	
 	/**
-	 * Checks whether this object has a father-model or not.
+	 * Checks whether this object has a father-{@link MemoryModel} or not.
 	 * 
 	 * @return true, if this object has a father-model, false otherwise.
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryObject was already removed
 	 */
 	@ReadOperation
 	public boolean hasFather() {
@@ -460,6 +511,10 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 		return (this.father != null);
 	}
 	
+	/**
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryObject was already removed
+	 */
 	public boolean hasField(XID id) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -467,6 +522,10 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 		}
 	}
 	
+	/**
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryObject was already removed
+	 */
 	@ReadOperation
 	public long getRevisionNumber() {
 		synchronized(this.eventQueue) {
@@ -482,6 +541,10 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 		return super.transactionInProgress();
 	}
 	
+	/**
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryObject was already removed
+	 */
 	public boolean isEmpty() {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -489,6 +552,10 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 		}
 	}
 	
+	/**
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryObject was already removed
+	 */
 	public XAddress getAddress() {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -498,9 +565,10 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 	
 	/**
 	 * Notifies all listeners that have registered interest for notification on
-	 * ObjectEvents.
+	 * {@link XObjectEvent XObjectEvents} happening on this MemoryObject.
 	 * 
-	 * @param event The event object.
+	 * @param event The {@link XObjectEvent} which will be propagated to the
+	 *            registered listeners.
 	 */
 	protected void fireObjectEvent(XObjectEvent event) {
 		for(XObjectEventListener listener : this.objectChangeListenerCollection) {
@@ -510,9 +578,11 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 	
 	/**
 	 * Notifies all listeners that have registered interest for notification on
-	 * FieldEvents.
+	 * {@link XFieldEvent XFieldEvents} happening on child-{@link MemoryField
+	 * MemoryFields} of this MemoryObject.
 	 * 
-	 * @param event The event object.
+	 * @param event The {@link XFieldEvent} which will be propagated to the
+	 *            registered listeners.
 	 */
 	protected void fireFieldEvent(XFieldEvent event) {
 		for(XFieldEventListener listener : this.fieldChangeListenerCollection) {
@@ -522,9 +592,11 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 	
 	/**
 	 * Notifies all listeners that have registered interest for notification on
-	 * TransactionEvents.
+	 * {@link XTransactionEvent XTransactionEvents} happening on this
+	 * MemoryModel.
 	 * 
-	 * @param event The event object.
+	 * @param event The {@link XTransactonEvent} which will be propagated to the
+	 *            registered listeners.
 	 */
 	protected void fireTransactionEvent(XTransactionEvent event) {
 		for(XTransactionEventListener listener : this.transactionListenerCollection) {
@@ -532,42 +604,99 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 		}
 	}
 	
+	/**
+	 * Adds the given {@link XObjectEventListener} to this MemoryObject, if
+	 * possible.
+	 * 
+	 * @param changeListener The {@link XObjectEventListener} which is to be
+	 *            added
+	 * @return false, if the given {@link XObjectEventListener} was already
+	 *         registered on this MemoryObject, true otherwise
+	 */
 	public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.objectChangeListenerCollection.add(changeListener);
 		}
 	}
 	
+	/**
+	 * Removes the given {@link XObjectEventListener} from this MemoryObject.
+	 * 
+	 * @param changeListener The {@link XObjectEventListener} which is to be
+	 *            removed
+	 * @return true, if the given {@link XObjectEventListener} was registered on
+	 *         this MemoryObject, false otherwise
+	 */
 	public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.objectChangeListenerCollection.remove(changeListener);
 		}
 	}
 	
+	/**
+	 * Adds the given {@link XFieldEventListener} to this MemoryObject, if
+	 * possible.
+	 * 
+	 * @param changeListener The {@link XFieldEventListener} which is to be
+	 *            added
+	 * @return false, if the given {@link XFieldEventListener} was already
+	 *         registered on this MemoryObject, true otherwise
+	 */
 	public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.fieldChangeListenerCollection.add(changeListener);
 		}
 	}
 	
+	/**
+	 * Removes the given {@link XFieldEventListener} from this MemoryObject.
+	 * 
+	 * @param changeListener The {@link XFieldEventListener} which is to be
+	 *            removed
+	 * @return true, if the given {@link XFieldEventListener} was registered on
+	 *         this MemoryObject, false otherwise
+	 */
 	public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.fieldChangeListenerCollection.remove(changeListener);
 		}
 	}
 	
+	/**
+	 * Adds the given {@link XTransactionEventListener} to this MemoryObject, if
+	 * possible.
+	 * 
+	 * @param changeListener The {@link XTransactionEventListener} which is to
+	 *            be added
+	 * @return false, if the given {@link XTransactionEventListener} was already
+	 *         registered on this MemoryObject, true otherwise
+	 */
 	public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.transactionListenerCollection.add(changeListener);
 		}
 	}
 	
+	/**
+	 * Removes the given {@link XTransactionEventListener} from this
+	 * MemoryObject.
+	 * 
+	 * @param changeListener The {@link XTransactionEventListener} which is to
+	 *            be removed
+	 * @return true, if the given {@link XTransactionEventListener} was
+	 *         registered on this MemoryObject, false otherwise
+	 */
 	public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.transactionListenerCollection.remove(changeListener);
 		}
 	}
 	
+	/**
+	 * @return the current revision number of the father-{@link MemoryModel} of
+	 *         this MemoryObject or {@link XEvent#RevisionOfEntityNotSet} if
+	 *         this MemoryObject has no father.
+	 */
 	protected long getModelRevisionNumber() {
 		if(hasFather())
 			return this.father.getRevisionNumber();
@@ -613,6 +742,10 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 		
 	}
 	
+	/**
+	 * Deletes the state information of this MemoryObject from the currently
+	 * used persistence layer
+	 */
 	protected void delete() {
 		for(XID fieldId : this) {
 			MemoryField field = getField(fieldId);
@@ -622,6 +755,10 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 		this.removed = true;
 	}
 	
+	/**
+	 * @throws IllegalStateException if this method is called after this
+	 *             MemoryObject was already removed
+	 */
 	public long executeCommand(XID actor, XCommand command) {
 		synchronized(this.eventQueue) {
 			checkRemoved();

@@ -601,6 +601,8 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 	 * 
 	 * If this is already an object this method should never be called.
 	 * 
+	 * @throws Assertion Error if the entity on which this method is called is
+	 *             an {@link XObject}
 	 */
 	protected abstract MemoryObject createObject(XID actor, XID objectId);
 	
@@ -608,6 +610,9 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 	 * Remove the existing object with the given ID.
 	 * 
 	 * If this is already an object this method should never be called.
+	 * 
+	 * @throws Assertion Error if the entity on which this method is called is
+	 *             an {@link XObject}
 	 * 
 	 */
 	protected abstract boolean removeObject(XID actor, XID objectId);
