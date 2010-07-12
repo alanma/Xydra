@@ -1,8 +1,14 @@
 package org.xydra.core.model.session;
 
+import org.xydra.core.model.XField;
+import org.xydra.core.model.XModel;
+import org.xydra.core.model.XRepository;
+
+
 /**
- * An exception thrown on disallowed access to a protected repository, model,
- * object or field.
+ * An exception type which will be thrown if someone tries to access a protected
+ * {@link XRepository}, {@link XModel}, {@link XObject} or {@link XField}
+ * without the allowance to do so.
  * 
  * @author dscharrer
  * 

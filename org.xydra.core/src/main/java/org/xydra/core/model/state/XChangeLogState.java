@@ -4,7 +4,14 @@ import java.io.Serializable;
 
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
+import org.xydra.core.model.XChangeLog;
+import org.xydra.core.model.XModel;
 
+
+/**
+ * XChangeLogStates wrap the state of {@link XChangeLog XChangeLogs} for
+ * persistence purposes.
+ */
 
 public interface XChangeLogState extends Serializable {
 	
@@ -21,38 +28,44 @@ public interface XChangeLogState extends Serializable {
 	void save();
 	
 	/**
-	 * @return the revision number the logged model had at the time when this
-	 *         log began to log
+	 * @return the revision number the logged {@link XModel} had at the time
+	 *         when this change log began logging
 	 */
 	long getFirstRevisionNumber();
 	
 	/**
-	 * @return the current revision number of the logged model as seen from this
-	 *         log
+	 * @return the current revision number of the logged {@link XModel} as seen
+	 *         from this log
 	 */
 	long getCurrentRevisionNumber();
 	
 	/**
-	 * @param revisionNumber the revision number corresponding to the event that
-	 *            is saved in the log
-	 * @return the XEvent with the corresponding revision number, if there is no
-	 *         such element, null will be returned
+	 * Returns the {@link XEvent} this change log logged at the given revision
+	 * number
+	 * 
+	 * @param revisionNumber the revision number which corresponding
+	 *            {@link XEvent} logged by this change log is to be returned
+	 * @return the {@link XEvent} that was logged at the given revision number
+	 *         or null if the {@link XEvent} cannot be accessed.
+	 * @throws IndexOutOfBoundsException if the given revision number is less
+	 *             than the first revision number or greater than or equal to
+	 *             the current revision number of this change log
 	 */
-	
 	XEvent getEvent(long revisionNumber);
 	
 	/**
-	 * Adds the given event to the log
+	 * Appends the given {@link XEvent} to the log
 	 * 
-	 * @param event The event which is to be logged
+	 * @param event The {@link XEvent} which is to be logged
 	 */
 	void appendEvent(XEvent event);
 	
 	/**
-	 * Removes all events from this change log state that occurred after the
-	 * given revision number.
+	 * Removes all {@link XEvent XEvents} from this XChangeLogState that
+	 * occurred after the given revision number.
 	 * 
-	 * @param revisionNumber
+	 * @param revisionNumber the revision number from which on the
+	 *            {@link XEvent XEvents} are to be removed
 	 * @return true, if truncating was successful, false otherwise (may happen
 	 *         if the given revision number was bigger than the current revision
 	 *         number of this change log state or smaller than the revision

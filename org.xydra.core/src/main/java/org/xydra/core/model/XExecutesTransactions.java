@@ -18,7 +18,7 @@ public interface XExecutesTransactions {
 	/**
 	 * This method executes the given {@link XTransaction}.
 	 * 
-	 * An implementation has to make sure to execute it as describe in the
+	 * An implementation has to make sure to execute it as described in the
 	 * documentation of {@link XTransaction}.
 	 * 
 	 * @param actor the {@link XID} of the actor
