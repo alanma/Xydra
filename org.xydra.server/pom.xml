@@ -11,7 +11,7 @@
 
 	<groupId>org.xydra</groupId>
 	<artifactId>server</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.1.1-SNAPSHOT</version>
 	<!-- /!\ Needs to be 'jar' for 'mvn deploy' but 'war' for 'gae:deploy' -->
 	<packaging>jar</packaging>
 	<name>Xydra Server</name>
@@ -103,11 +103,25 @@
 	</repositories>
 
 	<dependencies>
-		<!--  Xydra -->
+		
+		<!-- Xydra Core -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
+			<version>0.1.1-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		
+		<!-- RESTless -->
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>restless</artifactId>
+			<version>0.1.1-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
