@@ -43,9 +43,9 @@ import org.xydra.core.model.delta.NewObject;
 
 
 /**
- * Abstract base class for entities that can execute transactions (
- * {@link XObject} and {@link XModel}) implementing most of the logic behind
- * transactions.
+ * Abstract base class for entities that can execute {@link XTransaction
+ * XTransactions} ( {@link XObject} and {@link XModel}) implementing most of the
+ * logic behind transactions.
  * 
  * @author dscharrer
  */
@@ -65,6 +65,11 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 		this.eventQueue = queue;
 	}
 	
+	/**
+	 * Returns true, if a transaction is running at the moment.
+	 * 
+	 * @return true, if a transaction is running at the moment.
+	 */
 	protected boolean transactionInProgress() {
 		return this.transactionInProgress;
 	}
@@ -244,13 +249,16 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 	}
 	
 	/**
-	 * Check if the given {@link XModelCommand} is valid in a model that is
-	 * given by the current model but with the objects in removedObjects and
-	 * fields in removedFields removed and the the objects in addedObjects and
-	 * fields in addedFields created and values changed to those in
-	 * changedValues and update the delta according to the command.
+	 * Checks if the given {@link XModelCommand} is valid and can be
+	 * successfully executed on the given {@link DeltaModel} or if the attempt
+	 * to execute it will fail.
 	 * 
-	 * @return true if the command is valid.
+	 * @param DeltaModel The {@link DeltaModel} on which the given
+	 *            {@link XModelCommand} is to be executed
+	 * @param command The {@link XModelCommand} which is to be checked.
+	 * 
+	 * @return true, if the {@link XModelCommand} is valid and can be executed,
+	 *         false otherwise
 	 */
 	private boolean transCheckModelCommand(DeltaModel model, XModelCommand command) {
 		
@@ -291,13 +299,16 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 	}
 	
 	/**
-	 * Check if the given {@link XObjectCommand} is valid in a model that is
-	 * given by the current model but with the objects in removedObjects and
-	 * fields in removedFields removed and the the objects in addedObjects and
-	 * fields in addedFields created and values changed to those in
-	 * changedValues and update the delta according to the command.
+	 * Checks if the given {@link XObjectCommand} is valid and can be
+	 * successfully executed on the given {@link DeltaModel} or if the attempt
+	 * to execute it will fail.
 	 * 
-	 * @return true if the command is valid.
+	 * @param DeltaModel The {@link DeltaModel} on which the given
+	 *            {@link XObjectCommand} is to be executed
+	 * @param command The {@link XObjectCommand} which is to be checked.
+	 * 
+	 * @return true, if the {@link XObjectCommand} is valid and can be executed,
+	 *         false otherwise
 	 */
 	private boolean transCheckObjectCommand(DeltaModel model, XObjectCommand command) {
 		
@@ -344,13 +355,16 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 	}
 	
 	/**
-	 * Check if the given {@link XFieldCommand} is valid in a model that is
-	 * given by the current model but with the objects in removedObjects and
-	 * fields in removedFields removed and the the objects in addedObjects and
-	 * fields in addedFields created and values changed to those in
-	 * changedValues and update the delta according to the command.
+	 * Checks if the given {@link XFieldCommand} is valid and can be
+	 * successfully executed on the given {@link DeltaModel} or if the attempt
+	 * to execute it will fail.
 	 * 
-	 * @return true if the command is valid.
+	 * @param DeltaModel The {@link DeltaModel} on which the given
+	 *            {@link XFieldCommand} is to be executed
+	 * @param command The {@link XFieldCommand} which is to be checked.
+	 * 
+	 * @return true, if the {@link XFieldCommand} is valid and can be executed,
+	 *         false otherwise
 	 */
 	private boolean transCheckFieldCommand(DeltaModel model, XFieldCommand command) {
 		
@@ -387,6 +401,16 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 		return this.eventQueue.getChangeLog();
 	}
 	
+	/**
+	 * Returns a collection containing the {@link XField XFields} and
+	 * {@link XObject XObjects} that were removed during the current transaction
+	 * (for synchronization purposes)
+	 * 
+	 * @return Returns a collection containing the {@link XField XFields} and
+	 *         {@link XObject XObjects} that were removed during the current
+	 *         transaction
+	 */
+	// TODO Not sure if I got this right
 	protected Orphans getOrphans() {
 		return this.eventQueue.orphans;
 	}
@@ -433,6 +457,15 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 		
 	}
 	
+	/**
+	 * Rolls back the changes represented by the given {@link XAtomicEvent} and
+	 * will restore the states of the affected entity and its parents to the
+	 * timepoint before the {@link XCommand} which is responsible for this
+	 * {@link XAtomicEvent} was executed.
+	 * 
+	 * @param event The {@link XAtomicEvent} which represented changes will be
+	 *            rolled back
+	 */
 	private void rollbackEvent(XAtomicEvent event) {
 		XAtomicCommand command = XX.createForcedUndoCommand(event);
 		long result = executeCommand(null, command);
@@ -587,33 +620,47 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 	protected abstract void incrementRevisionAndSave();
 	
 	/**
-	 * Get an object with a given ID.
+	 * Get the {@link MemoryObject} with the given {@link XID}.
 	 * 
-	 * If this is already and object the method returns this exactly when the
-	 * given ID matches this object's ID, null otherwise.
+	 * If the entity this method is called on already is an {@link MemoryObject}
+	 * the method returns this entity exactly when the given {@link XID} matches
+	 * its {@link XID} and null otherwise.
 	 * 
-	 * @return true if there is an object with the given ID
+	 * @param objectId The {@link XID} of the {@link MemoryObject} which is to
+	 *            be returned
+	 * 
+	 * @return true if there is an {@link XObject} with the given {@link XID}
 	 */
 	protected abstract MemoryObject getObject(XID objectId);
 	
 	/**
-	 * Create a new object with the given ID.
+	 * Creates a new {@link MemoryObject} with the given {@link XID}.
 	 * 
-	 * If this is already an object this method should never be called.
+	 * This method should never be called on entities that are {@link XObject
+	 * XObjects}.
 	 * 
-	 * @throws Assertion Error if the entity on which this method is called is
-	 *             an {@link XObject}
+	 * @param actor The {@link XID} of the actor
+	 * @param objectId The {@link XID} for the {@link MemoryObject} which is to
+	 *            be created
+	 * @return the newly created {@link MemoryObject} or the already existing
+	 *         {@link MemoryObject}, if the given {@link XID} was already taken.
+	 * @throws AssertionError if the entity on which this method is called is an
+	 *             {@link XObject}
 	 */
 	protected abstract MemoryObject createObject(XID actor, XID objectId);
 	
 	/**
-	 * Remove the existing object with the given ID.
+	 * Removes the {@link MemoryObject} with the given {@link XID}.
 	 * 
-	 * If this is already an object this method should never be called.
+	 * This method should never be called on entities that are {@link XObject
+	 * XObjects}.
 	 * 
-	 * @throws Assertion Error if the entity on which this method is called is
-	 *             an {@link XObject}
-	 * 
+	 * @param actor The {@link XID} of the actor
+	 * @param objectId The {@link XID} of the {@link MemoryObject} which is to
+	 *            be removed
+	 * @return true, if removal is successful.
+	 * @throws AssertionError if the entity on which this method is called is an
+	 *             {@link XObject}
 	 */
 	protected abstract boolean removeObject(XID actor, XID objectId);
 	
@@ -623,17 +670,20 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 	protected abstract XBaseModel getTransactionTarget();
 	
 	/**
-	 * @return the revision number to return when executing commands
+	 * @return the revision number to return when executing {@link XCommand
+	 *         XCommands}.
 	 */
 	protected abstract long getOldRevisionNumber();
 	
 	/**
-	 * @return the model to use for sending transaction events
+	 * @return the {@link MemoryModel} to use for sending
+	 *         {@link XTransactionEvent XTransactionEvents}
 	 */
 	protected abstract MemoryModel getModel();
 	
 	/**
-	 * @return the object to use for sending transaction events
+	 * @return the {@link MemoryObject} to use for sending
+	 *         {@link XTransactionEvent XTransactionEvents}
 	 */
 	protected abstract MemoryObject getObject();
 	
@@ -643,12 +693,12 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 	protected abstract void checkRemoved() throws IllegalStateException;
 	
 	/**
-	 * Save, if this is a model.
+	 * Save using the persistence layer, if this is a subtype of {@link XModel}.
 	 */
 	protected abstract void saveIfModel();
 	
 	/**
-	 * Set the new revision number, if this is a model.
+	 * Set the new revision number, if this is a subtype of {@link XModel}.
 	 */
 	protected abstract void setRevisionNumberIfModel(long modelRevisionNumber);
 	

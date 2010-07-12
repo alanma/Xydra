@@ -5,12 +5,11 @@ import org.xydra.annotations.RunsInJava;
 import org.xydra.core.model.XID;
 
 
-
 /**
- * An implementation of {@link XID}.
+ * An implementation of {@link XID} where an ID is represented by a String
+ * value.
  * 
  * @author voelkel
- * 
  */
 
 @RunsInGWT

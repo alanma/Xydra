@@ -57,9 +57,9 @@ public class MemoryRepository implements XRepository, Serializable {
 	private Set<XTransactionEventListener> transactionListenerCollection;
 	
 	/**
-	 * Create a new {@link MemoryRepository} object.
+	 * Creates a new MemoryRepository.
 	 * 
-	 * @param repositoryId never null.
+	 * @param repositoryId The {@link XID} for this MemoryRepository.
 	 */
 	public MemoryRepository(XID repositoryId) {
 		this(new TemporaryRepositoryState(X.getIDProvider().fromComponents(repositoryId, null,
@@ -67,10 +67,10 @@ public class MemoryRepository implements XRepository, Serializable {
 	}
 	
 	/**
-	 * Create a new {@link MemoryRepository} object wrapping an existing
-	 * {@link XRepositoryState} (Memento Pattern).
+	 * Creates a new {@link MemoryRepository}.
 	 * 
-	 * @param repositoryState never null.
+	 * @param repositoryState The initial {@link XRepositoryState} of this
+	 *            MemoryRepository.
 	 */
 	public MemoryRepository(XRepositoryState repositoryState) {
 		assert repositoryState != null;
@@ -84,15 +84,6 @@ public class MemoryRepository implements XRepository, Serializable {
 		this.transactionListenerCollection = new HashSet<XTransactionEventListener>();
 	}
 	
-	/**
-	 * Creates a new XModel with the given XID and adds it to this repository.
-	 * Returns the already existing XModel, if the given XID was already taken.
-	 * 
-	 * @param actor The XID of the actor calling this operation.
-	 * @param modelID The XID of the new model
-	 * @return A new XModel or the already existing one, if the given XID was
-	 *         already taken.
-	 */
 	@ModificationOperation
 	public synchronized MemoryModel createModel(XID actor, XID modelID) {
 		MemoryModel model = getModel(modelID);
@@ -116,16 +107,14 @@ public class MemoryRepository implements XRepository, Serializable {
 		return model;
 	}
 	
+	/**
+	 * Saves the current state information of this MemoryRepository with the
+	 * currently used persistence layer
+	 */
 	private void save() {
 		this.state.save();
 	}
 	
-	/**
-	 * Returns the model corresponding to the given XID in this repository.
-	 * 
-	 * @return The model corresponding to the given XID in this repository (null
-	 *         if the given XID isn't taken)
-	 */
 	@ReadOperation
 	public synchronized MemoryModel getModel(XID modelID) {
 		
@@ -145,24 +134,11 @@ public class MemoryRepository implements XRepository, Serializable {
 		return model;
 	}
 	
-	/**
-	 * Returns an iterator over the XIDs of the models in this repository.
-	 * 
-	 * @return An iterator over the XIDs of the models in this repository.
-	 */
 	@ReadOperation
 	public synchronized Iterator<XID> iterator() {
 		return this.state.iterator();
 	}
 	
-	/**
-	 * Removes the given model from this repository.
-	 * 
-	 * @param actor The XID of the actor calling this operation.
-	 * @param model The model which is to be removed.
-	 * @return true, if the removal was successful, false otherwise (i.e. if the
-	 *         given model doesn't exist in this repository)
-	 */
 	@ModificationOperation
 	public synchronized boolean removeModel(XID actor, XID modelID) {
 		
@@ -240,23 +216,9 @@ public class MemoryRepository implements XRepository, Serializable {
 		return XCommand.FAILED;
 	}
 	
-	/**
-	 * Returns the XID of this repository.
-	 * 
-	 * @return The XID of this repository.
-	 */
-	
 	public synchronized XID getID() {
 		return this.state.getID();
 	}
-	
-	/**
-	 * Checks whether the given XID is already taken by a model in this
-	 * repository or not.
-	 * 
-	 * @return true, if the given XID is already taken by a model in this
-	 *         repository.
-	 */
 	
 	public synchronized boolean hasModel(XID id) {
 		return this.loadedModels.containsKey(id) || this.state.hasModelState(id);
@@ -282,9 +244,11 @@ public class MemoryRepository implements XRepository, Serializable {
 	
 	/**
 	 * Notifies all listeners that have registered interest for notification on
-	 * RepositoryEvents.
+	 * {@link XRepositoryEvent XRepositoryEvents} happening on this
+	 * MemoryRepository.
 	 * 
-	 * @param event The event object.
+	 * @param event The {@link XRepositoryEvent} which will be propagated to the
+	 *            registered listeners.
 	 */
 	private void fireRepositoryEvent(XRepositoryEvent event) {
 		for(XRepositoryEventListener listener : this.repoChangeListenerCollection) {
@@ -294,9 +258,11 @@ public class MemoryRepository implements XRepository, Serializable {
 	
 	/**
 	 * Notifies all listeners that have registered interest for notification on
-	 * ModelEvents.
+	 * {@link XModelEvent XModelEvents} happening on child- {@link MemoryModel
+	 * MemoryModels} of this MemoryRepository.
 	 * 
-	 * @param event The event object.
+	 * @param event The {@link XModelEvent} which will be propagated to the
+	 *            registered listeners.
 	 */
 	protected void fireModelEvent(XModelEvent event) {
 		for(XModelEventListener listener : this.modelChangeListenerCollection) {
@@ -306,9 +272,11 @@ public class MemoryRepository implements XRepository, Serializable {
 	
 	/**
 	 * Notifies all listeners that have registered interest for notification on
-	 * ObjectEvents.
+	 * {@link XObjectEvent XObjectEvents} happening on child-
+	 * {@link MemoryObject MemoryObjects} of this MemoryRepository.
 	 * 
-	 * @param event The event object.
+	 * @param event The {@link XObjectEvent} which will be propagated to the
+	 *            registered listeners.
 	 */
 	protected void fireObjectEvent(XObjectEvent event) {
 		for(XObjectEventListener listener : this.objectChangeListenerCollection) {
@@ -318,9 +286,11 @@ public class MemoryRepository implements XRepository, Serializable {
 	
 	/**
 	 * Notifies all listeners that have registered interest for notification on
-	 * FieldEvents.
+	 * {@link XFieldEvent XFieldEvents} happening on child- {@link MemoryField
+	 * MemoryFields} of this MemoryRepository.
 	 * 
-	 * @param event The event object.
+	 * @param event The {@link XFieldEvent} which will be propagated to the
+	 *            registered listeners.
 	 */
 	protected void fireFieldEvent(XFieldEvent event) {
 		for(XFieldEventListener listener : this.fieldChangeListenerCollection) {
@@ -330,9 +300,12 @@ public class MemoryRepository implements XRepository, Serializable {
 	
 	/**
 	 * Notifies all listeners that have registered interest for notification on
-	 * TransactionEvents.
+	 * {@link XTransactionEvent XTransactionEvents} happening on child-
+	 * {@link MemoryModel MemoryModels} or child- {@link MemoryObject
+	 * MemoryObjects} of this MemoryRepository.
 	 * 
-	 * @param event The event object.
+	 * @param event The {@link XModelEvent} which will be propagated to the
+	 *            registered listeners.
 	 */
 	protected void fireTransactionEvent(XTransactionEvent event) {
 		for(XTransactionEventListener listener : this.transactionListenerCollection) {
@@ -341,11 +314,13 @@ public class MemoryRepository implements XRepository, Serializable {
 	}
 	
 	/**
-	 * Adds the given listener to this model, if possible
+	 * Adds the given {@link XRepositoryEventListener} to this MemoryRepository,
+	 * if possible.
 	 * 
-	 * @param changeListener The listener which is to be added
-	 * @return false, if the given listener is already added on this field, true
-	 *         otherwise
+	 * @param changeListener The {@link XRepositoryEventListener} which is to be
+	 *            added
+	 * @return false, if the given {@link XRepositoryEventListener} was already
+	 *         registered on this MemoryRepository, true otherwise
 	 */
 	public synchronized boolean addListenerForRepositoryEvents(
 	        XRepositoryEventListener changeListener) {
@@ -353,11 +328,13 @@ public class MemoryRepository implements XRepository, Serializable {
 	}
 	
 	/**
-	 * Removes the given listener from this model.
+	 * Removes the given {@link XRepositoryEventListener} from this
+	 * MemoryRepository.
 	 * 
-	 * @param changeListener The listener which is to be removed
-	 * @return true, if the given listener was registered on this field, false
-	 *         otherwise
+	 * @param changeListener The {@link XRepositoryEventListener} which is to be
+	 *            removed
+	 * @return true, if the given {@link XRepositoryEventListener} was
+	 *         registered on this MemoryRepository, false otherwise
 	 */
 	public synchronized boolean removeListenerForRepositoryEvents(
 	        XRepositoryEventListener changeListener) {
@@ -366,11 +343,13 @@ public class MemoryRepository implements XRepository, Serializable {
 	}
 	
 	/**
-	 * Adds the given listener to this model, if possible
+	 * Adds the given {@link XModelEventListener} to this MemoryRepository, if
+	 * possible.
 	 * 
-	 * @param changeListener The listener which is to be added
-	 * @return false, if the given listener is already added on this field, true
-	 *         otherwise
+	 * @param changeListener The {@link XModelEventListener} which is to be
+	 *            added
+	 * @return false, if the given {@link XModelEventListener} was already
+	 *         registered on this MemoryRepository, true otherwise
 	 */
 	public synchronized boolean addListenerForModelEvents(XModelEventListener changeListener) {
 		return this.modelChangeListenerCollection.add(changeListener);
@@ -378,11 +357,12 @@ public class MemoryRepository implements XRepository, Serializable {
 	}
 	
 	/**
-	 * Removes the given listener from this model.
+	 * Removes the given {@link XModelEventListener} from this MemoryRepository.
 	 * 
-	 * @param changeListener The listener which is to be removed
-	 * @return true, if the given listener was registered on this field, false
-	 *         otherwise
+	 * @param changeListener The {@link XModelEventListener} which is to be
+	 *            removed
+	 * @return true, if the given {@link XModelEventListener} was registered on
+	 *         this MemoryRepository, false otherwise
 	 */
 	public synchronized boolean removeListenerForModelEvents(XModelEventListener changeListener) {
 		return this.modelChangeListenerCollection.remove(changeListener);
@@ -390,11 +370,13 @@ public class MemoryRepository implements XRepository, Serializable {
 	}
 	
 	/**
-	 * Adds the given listener to this model, if possible
+	 * Adds the given {@link XObjectEventListener} to this MemoryRepository, if
+	 * possible.
 	 * 
-	 * @param changeListener The listener which is to be added
-	 * @return false, if the given listener is already added on this field, true
-	 *         otherwise
+	 * @param changeListener The {@link XObjectEventListener} which is to be
+	 *            added
+	 * @return false, if the given {@link XObjectEventListener} was already
+	 *         registered on this MemoryRepository, true otherwise
 	 */
 	public synchronized boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
 		return this.objectChangeListenerCollection.add(changeListener);
@@ -402,11 +384,13 @@ public class MemoryRepository implements XRepository, Serializable {
 	}
 	
 	/**
-	 * Removes the given listener from this model.
+	 * Removes the given {@link XObjectEventListener} from this
+	 * MemoryRepository.
 	 * 
-	 * @param changeListener The listener which is to be removed
-	 * @return true, if the given listener was registered on this field, false
-	 *         otherwise
+	 * @param changeListener The {@link XObjectEventListener} which is to be
+	 *            removed
+	 * @return true, if the given {@link XObjectEventListener} was registered on
+	 *         this MemoryRepository, false otherwise
 	 */
 	public synchronized boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
 		return this.objectChangeListenerCollection.remove(changeListener);
@@ -414,11 +398,13 @@ public class MemoryRepository implements XRepository, Serializable {
 	}
 	
 	/**
-	 * Adds the given listener to this model, if possible
+	 * Adds the given {@link XFieldEventListener} to this MemoryRepository, if
+	 * possible.
 	 * 
-	 * @param changeListener The listener which is to be added
-	 * @return false, if the given listener is already added on this field, true
-	 *         otherwise
+	 * @param changeListener The {@link XFieldEventListener} which is to be
+	 *            added
+	 * @return false, if the given {@link XFieldEventListener} was already
+	 *         registered on this MemoryRepository, true otherwise
 	 */
 	public synchronized boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
 		return this.fieldChangeListenerCollection.add(changeListener);
@@ -426,11 +412,12 @@ public class MemoryRepository implements XRepository, Serializable {
 	}
 	
 	/**
-	 * Removes the given listener from this model.
+	 * Removes the given {@link XFieldEventListener} from this MemoryRepository.
 	 * 
-	 * @param changeListener The listener which is to be removed
-	 * @return true, if the given listener was registered on this field, false
-	 *         otherwise
+	 * @param changeListener The {@link XFieldEventListener} which is to be
+	 *            removed
+	 * @return true, if the given {@link XFieldEventListener} was registered on
+	 *         this MemoryRepository, false otherwise
 	 */
 	public synchronized boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
 		return this.fieldChangeListenerCollection.remove(changeListener);
@@ -441,11 +428,29 @@ public class MemoryRepository implements XRepository, Serializable {
 		return this.state.getAddress();
 	}
 	
+	/**
+	 * Adds the given {@link XTransactionEventListener} to this
+	 * MemoryRepository, if possible.
+	 * 
+	 * @param changeListener The {@link XTransactionEventListener} which is to
+	 *            be added
+	 * @return false, if the given {@link XTransactionEventListener} was already
+	 *         registered on this MemoryRepository, true otherwise
+	 */
 	public synchronized boolean addListenerForTransactionEvents(
 	        XTransactionEventListener changeListener) {
 		return this.transactionListenerCollection.add(changeListener);
 	}
 	
+	/**
+	 * Removes the given {@link XTransactionEventListener} from this
+	 * MemoryRepository.
+	 * 
+	 * @param changeListener The {@link XTransactionEventListener} which is to
+	 *            be removed
+	 * @return true, if the given {@link XTransactionEventListener} was
+	 *         registered on this MemoryRepository, false otherwise
+	 */
 	public synchronized boolean removeListenerForTransactionEvents(
 	        XTransactionEventListener changeListener) {
 		return this.transactionListenerCollection.remove(changeListener);

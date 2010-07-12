@@ -1,5 +1,7 @@
 package org.xydra.core.model;
 
+import java.util.Iterator;
+
 import org.xydra.annotations.ReadOperation;
 
 
@@ -49,5 +51,11 @@ public interface XBaseObject extends IHasXAddress, IHasXID, Iterable<XID> {
 	 */
 	@ReadOperation
 	boolean isEmpty();
+	
+	/**
+	 * @return an iterator over the {@link XID XIDs} of the child-{@link XField
+	 *         XFields} of this XBaseObject.
+	 */
+	Iterator<XID> iterator();
 	
 }
