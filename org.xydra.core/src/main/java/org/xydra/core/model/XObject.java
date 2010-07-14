@@ -5,6 +5,7 @@ import org.xydra.annotations.ReadOperation;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XObjectCommand;
 import org.xydra.core.change.XObjectEvent;
+import org.xydra.core.model.state.XObjectState;
 
 
 /**
@@ -14,6 +15,10 @@ import org.xydra.core.change.XObjectEvent;
  * 
  * For example an XObject might be used to model a person if we'd write a
  * phonebook application.
+ * 
+ * Implementations of XObject should use an {@link XObjectState} for storing and
+ * representing the inner state of the XObject to allow maximum persistence
+ * management flexibility.
  * 
  * @author voelkel
  * @author Kaidel

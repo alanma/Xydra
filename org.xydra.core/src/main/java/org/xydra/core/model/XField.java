@@ -5,6 +5,7 @@ import java.io.Serializable;
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XFieldCommand;
+import org.xydra.core.model.state.XFieldState;
 import org.xydra.core.value.XValue;
 
 
@@ -17,6 +18,9 @@ import org.xydra.core.value.XValue;
  * her name, address, age etc. could be stored in the {@link XField XFields} of
  * this {@link XObject}.
  * 
+ * Implementations of XField should use an {@link XFieldState} for storing and
+ * representing the inner state of the XField to allow maximum persistence
+ * management flexibility.
  * 
  * @author voelkel
  * @author kaidel

@@ -9,8 +9,8 @@ import org.xydra.core.model.XModel;
 
 
 /**
- * XChangeLogStates wrap the state of {@link XChangeLog XChangeLogs} for
- * persistence purposes.
+ * An {@link XChangeLogState} represents the inner state of an
+ * {@link XChangeLog} for example for persistence purposes.
  */
 
 public interface XChangeLogState extends Serializable {

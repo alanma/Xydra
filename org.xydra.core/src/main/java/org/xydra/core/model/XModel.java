@@ -18,7 +18,11 @@ import org.xydra.core.change.XModelEvent;
  * {@link XObject XObjects} to model the persons or we might even model the
  * whole phone book with one simple XModel.
  * 
- * An {@link XModel} can be serialised, and hence can be used e.g. in GWT.
+ * An {@link XModel} can be serialized, and hence can be used e.g. in GWT.
+ * 
+ * Implementations of XModel should use an {@link XMdoelState} for storing and
+ * representing the inner state of the XModel to allow maximum persistence
+ * management flexibility.
  * 
  * @author voelkel
  * @author Kaidel

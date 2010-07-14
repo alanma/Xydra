@@ -10,10 +10,15 @@ import org.xydra.core.change.XSendsModelEvent;
 import org.xydra.core.change.XSendsObjectEvents;
 import org.xydra.core.change.XSendsRepositoryEvents;
 import org.xydra.core.change.XSendsTransactionEvents;
+import org.xydra.core.model.state.XRepositoryState;
 
 
 /**
  * A repository manages a set of {@link XModel XModels}.
+ * 
+ * Implementations of XRepository should use an {@link XRepositoryState} for
+ * storing and representing the inner state of the XRepository to allow maximum
+ * persistence management flexibility.
  * 
  * @author voelkel
  * 
