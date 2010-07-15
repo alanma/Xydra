@@ -94,6 +94,7 @@ public class ArmProtectedField implements XProtectedField {
 	}
 	
 	public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
+		// TODO shouldn't this method check for write access?
 		return this.field.removeListenerForFieldEvents(changeListener);
 	}
 	

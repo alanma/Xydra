@@ -58,7 +58,8 @@ public interface XObject extends XLoggedObject, XSynchronizesChanges {
 	 * @param actor The {@link XID} of the actor
 	 * @param fieldID The {@link XID} of the {@link XField} which is to be
 	 *            removed
-	 * @return true, if the given {@link XField} did exist and could be removed
+	 * @return true, if the specified {@link XField} did exist and could be
+	 *         removed
 	 */
 	@ModificationOperation
 	boolean removeField(XID actor, XID fieldID);
@@ -78,7 +79,7 @@ public interface XObject extends XLoggedObject, XSynchronizesChanges {
 	 * with the {@link XID} of this XObject
 	 * </ul>
 	 * 
-	 * @param command The {@link XObjectCommand} which to be executed
+	 * @param command The {@link XObjectCommand} which is to be executed
 	 * @return {@link XCommand#FAILED} if executing the {@link XObjectCommand}
 	 *         failed, {@link XCommand#NOCHANGE} if executing the
 	 *         {@link XObjectCommand} didn't change anything or if executing the

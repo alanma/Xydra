@@ -4,7 +4,6 @@ import org.xydra.annotations.ModificationOperation;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XTransaction;
-import org.xydra.core.model.XID;
 
 
 /**
@@ -20,7 +19,6 @@ public interface XProtectedExecutesTransactions {
 	 * An implementation has to make sure to execute it as described in the
 	 * documentation of {@link XTransaction}.
 	 * 
-	 * @param actor the {@link XID} of the actor
 	 * @param transaction the {@link XTransaction} which is to be executed
 	 * @return {@link XCommand#FAILED} if the transaction failed,
 	 *         {@link XCommand#NOCHANGE} if the transaction didn't change

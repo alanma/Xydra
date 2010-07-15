@@ -138,6 +138,7 @@ public class ArmProtectedObject implements XProtectedObject {
 		return this.object.addListenerForObjectEvents(changeListener);
 	}
 	
+	// TODO Shouldn't the removeListener... methods check for write access?
 	public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
 		return this.object.removeListenerForObjectEvents(changeListener);
 	}

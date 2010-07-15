@@ -20,7 +20,6 @@ import org.xydra.core.model.session.XProtectedModel;
 import org.xydra.core.model.session.XProtectedObject;
 
 
-
 /**
  * An {@link XProtectedModel} that wraps an {@link XModel} for a specific actor
  * and checks all access against an {@link XAccessManager}.
@@ -139,6 +138,8 @@ public class ArmProtectedModel implements XProtectedModel {
 		
 		return this.model.addListenerForObjectEvents(changeListener);
 	}
+	
+	// TODO shouldn't the removeListener... methods check for write access?
 	
 	public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
 		return this.model.removeListenerForObjectEvents(changeListener);

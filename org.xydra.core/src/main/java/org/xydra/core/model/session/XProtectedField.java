@@ -3,14 +3,20 @@ package org.xydra.core.model.session;
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XFieldCommand;
+import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.model.XField;
+import org.xydra.core.model.XID;
 import org.xydra.core.model.XLoggedField;
 import org.xydra.core.value.XValue;
 
 
-
 /**
- * A wrapper for an {@link XField} for a specific actor.
+ * An XProtectedField is a wrapper (Decorator) for an {@link XField} which links
+ * the {@link XField} with a specific actor (represented by its {@link XID}) and
+ * automatically checks the access rights for this actor on the {@link XField},
+ * if a method is called and only executes the method, if the actor is allowed
+ * to execute it (otherwise {@link XAccessException XAccessExceptions} will be
+ * thrown).
  * 
  * @author dscharrer
  * 
@@ -18,30 +24,71 @@ import org.xydra.core.value.XValue;
 public interface XProtectedField extends XLoggedField {
 	
 	/**
-	 * Set this field to the new value.
+	 * Sets the {@link XValue} of this field to the given value.
 	 * 
-	 * @param value
-	 * @return true if the value changed
+	 * Passing "null" as the 'value' arguments implies an remove operation (will
+	 * remove the current {@link XValue})
+	 * 
+	 * @param value The new {@link XValue}
+	 * @throws XAccessException if the actor linked with this field does not
+	 *             have the necessary access rights (write access) to execute
+	 *             this method
+	 * 
 	 */
 	@ModificationOperation
 	boolean setValue(XValue value);
 	
 	/**
-	 * Executes the given command if possible.
+	 * Executes the given {@link XCommand} if possible.
 	 * 
 	 * This method will fail if,
 	 * <ul>
-	 * <li>the given command cannot be executed
-	 * <li>the field-XID in the command does not concur with the XID of this
-	 * field
+	 * <li>the given {@link XCommand} cannot be executed
+	 * <li>the field-{@link XID} specified in the {@link XCommand} does not
+	 * concur with the {@link XID} of this field
 	 * </ul>
 	 * 
-	 * @param command The command to be executed
-	 * @return {@link XCommand#FAILED} if the command failed,
-	 *         {@link XCommand#NOCHANGE} if the command didn't change anything
-	 *         or the revision number of the event caused by the command.
+	 * @param command The {@link XCommand} which is to be executed
+	 * @return {@link XCommand#FAILED} if the {@link XCommand} failed,
+	 *         {@link XCommand#NOCHANGE} if the {@link XCommand} didn't change
+	 *         anything or the revision number of the {@link XEvent} caused by
+	 *         the {@link XCommand}.
+	 * @throws XAccessException if the actor linked with this field does not
+	 *             have the necessary access rights (write access) to execute
+	 *             this method
 	 */
 	@ModificationOperation
 	long executeFieldCommand(XFieldCommand command);
+	
+	/**
+	 * @throws XAccessException if the actor linked with this field does not
+	 *             have the necessary access rights (read access) to execute
+	 *             this method
+	 */
+	long getRevisionNumber();
+	
+	/**
+	 * @throws XAccessException if the actor linked with this field does not
+	 *             have the necessary access rights (read access) to execute
+	 *             this method
+	 */
+	XValue getValue();
+	
+	/**
+	 * @throws XAccessException if the actor linked with this field does not
+	 *             have the necessary access rights (read access) to execute
+	 *             this method
+	 */
+	boolean isEmpty();
+	
+	/**
+	 * @throws XAccessException if the actor linked with this field does not
+	 *             have the necessary access rights (read access) to execute
+	 *             this method
+	 */
+	boolean addListenerForFieldEvents(XFieldEventListener changeListener);
+	
+	// TODO Maybe add an "getActor" method to make the connection between an
+	// actor and this interface clearer?
 	
 }

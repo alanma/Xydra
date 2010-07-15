@@ -81,7 +81,7 @@ public interface XModel extends XLoggedModel, Serializable, XSynchronizesChanges
 	 * with the {@link XID} of this XModel
 	 * </ul>
 	 * 
-	 * @param command The {@link XModelCommand} which to be executed
+	 * @param command The {@link XModelCommand} which is to be executed
 	 * @return {@link XCommand#FAILED} if executing the {@link XModelCommand}
 	 *         failed, {@link XCommand#NOCHANGE} if executing the
 	 *         {@link XModelCommand} didn't change anything or if executing the
