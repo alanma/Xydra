@@ -194,17 +194,6 @@ public class Restless extends HttpServlet {
 	}
 	
 	/**
-	 * @param req
-	 * @return the local path of the resource
-	 */
-	private static String getRequestPath(HttpServletRequest req) {
-		String servletPath = req.getServletPath();
-		String path = req.getRequestURI();
-		path = path.substring(servletPath.length(), path.length());
-		return path;
-	}
-	
-	/**
 	 * Generic method to map incoming web requests to mapped
 	 * {@link RestlessMethod}. Match path and HTTP method.
 	 * 
@@ -213,7 +202,7 @@ public class Restless extends HttpServlet {
 	 */
 	protected void restlessService(HttpServletRequest req, HttpServletResponse res) {
 		// find class mapped to path
-		String path = getRequestPath(req);
+		String path = req.getPathInfo();
 		boolean foundMethod = false;
 		
 		for(RestlessMethod restlessMethod : methods) {
@@ -456,7 +445,7 @@ public class Restless extends HttpServlet {
 				// build up parameters
 				
 				// extract values from path
-				String path = getRequestPath(req);
+				String path = req.getPathInfo();
 				List<String> variablesFromPath = this.pathTemplate.extractVariables(path);
 				
 				int i = 0;
