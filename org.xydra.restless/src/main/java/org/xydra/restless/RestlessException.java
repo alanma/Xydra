@@ -175,13 +175,16 @@ public class RestlessException extends RuntimeException {
 	
 	private static final long serialVersionUID = -7856139346392732069L;
 	
+	private final int statusCode;
+	
 	/**
 	 * @param statusCode a HTTP status code
 	 * @param message a short message to be displayed to the user. Don't put
 	 *            confidential information here.
 	 */
 	public RestlessException(int statusCode, String message) {
-		super(statusCode + " " + message);
+		super(message);
+		this.statusCode = statusCode;
 	}
 	
 	/**
@@ -192,7 +195,12 @@ public class RestlessException extends RuntimeException {
 	 *            users
 	 */
 	public RestlessException(int statusCode, String message, Throwable t) {
-		super(statusCode + " " + message, t);
+		super(message, t);
+		this.statusCode = statusCode;
+	}
+	
+	public int getStatusCode() {
+		return this.statusCode;
 	}
 	
 }

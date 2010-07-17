@@ -509,6 +509,10 @@ public class Restless extends HttpServlet {
 						}
 						res.getWriter().flush();
 					}
+				} catch(RestlessException re) {
+					res.setStatus(re.getStatusCode());
+					res.setContentType(MIME_TEXT_PLAIN + "; charset=" + CHARSET_UTF8);
+					res.getWriter().print(re.getMessage());
 				} catch(IllegalArgumentException e) {
 					res.sendError(500, e.toString());
 					log.error("", e);
