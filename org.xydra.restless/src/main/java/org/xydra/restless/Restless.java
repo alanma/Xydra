@@ -207,10 +207,15 @@ public class Restless extends HttpServlet {
 		String path = req.getPathInfo();
 		boolean foundMethod = false;
 		
+		String httpMethod = req.getHeader("X-HTTP-Method-Override");
+		if(httpMethod == null) {
+			httpMethod = req.getMethod();
+		}
+		
 		for(RestlessMethod restlessMethod : methods) {
 			if(restlessMethod.pathTemplate.matches(path)) {
 				// run method
-				if(req.getMethod().equalsIgnoreCase(restlessMethod.httpMethod)) {
+				if(httpMethod.equalsIgnoreCase(restlessMethod.httpMethod)) {
 					try {
 						restlessMethod.run(req, res);
 					} catch(IOException e) {
