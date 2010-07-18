@@ -3,27 +3,10 @@ package org.xydra.server;
 import static org.junit.Assert.assertFalse;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
-import java.util.TimeZone;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
-
-import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,9 +14,7 @@ import org.xydra.core.access.XA;
 import org.xydra.core.access.XAccessManager;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.test.DemoModelUtil;
-import org.xydra.rest.RepositoryManager;
 import org.xydra.server.gae.GaeTestfixer;
-
 
 
 /**
@@ -89,50 +70,6 @@ public class Jetty {
 		 */
 		this.webapp = new WebAppContext(docRoot.getAbsolutePath(), contextPath);
 		
-		// Add the servlets.
-		this.webapp.setClassLoader(Thread.currentThread().getContextClassLoader());
-		
-		FilterHolder filterHolder = new FilterHolder();
-		filterHolder.setFilter(new Filter() {
-			
-			public void destroy() {
-				// do nothing
-			}
-			
-			public void doFilter(ServletRequest request, ServletResponse response,
-			        FilterChain filterChain) throws IOException, ServletException {
-				System.out.println("Jetty GET " + ((HttpServletRequest)request).getRequestURI());
-				HttpServletResponseWrapper responseWrapper = new HttpServletResponseWrapper(
-				        (HttpServletResponse)response);
-				
-				// Modify the servlet which serves png and gif files so that it
-				// explicitly sets the Pragma, Cache-Control, and Expires
-				// headers. The Pragma and Cache-Control headers should be
-				// removed. The Expires header should be set according to the
-				// caching recommendations mentioned in the previous section.
-				
-				Calendar cal = Calendar.getInstance();
-				cal.set(Calendar.YEAR, cal.get(Calendar.YEAR) + 1);
-				
-				SimpleDateFormat dateFormatter = new SimpleDateFormat(
-				        "EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
-				TimeZone tz = TimeZone.getTimeZone("GMT");
-				dateFormatter.setTimeZone(tz);
-				String rfc1123 = dateFormatter.format(cal.getTime());
-				((HttpServletResponse)response).addHeader("Expires", rfc1123);
-				((HttpServletResponse)response).addHeader("Cache-Control",
-				        "public; max-age=31536000");
-				filterChain.doFilter(request, responseWrapper);
-			}
-			
-			public void init(FilterConfig filterConfig) {
-				// do nothing
-			}
-		});
-		this.webapp.addFilter(filterHolder, "*.png", Handler.ALL);
-		this.webapp.addFilter(filterHolder, "*.gif", Handler.ALL);
-		this.webapp.addFilter(filterHolder, ".cache.*", Handler.ALL);
-		
 		// Add the webapp to the server.
 		this.server.setHandler(this.webapp);
 		
@@ -165,9 +102,9 @@ public class Jetty {
 	public static void main(String[] args) throws Exception {
 		
 		GaeTestfixer.enable();
-		
-		// initialize GAE
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		
+		GaeXydraServer.initializeRepositoryManager();
 		
 		// add a default model
 		XRepository remoteRepo = RepositoryManager.getRepository();
@@ -181,8 +118,9 @@ public class Jetty {
 		
 		// start jetty
 		Jetty jetty = new Jetty();
-		URI uri = jetty.startServer("/cxm", new File("src/main/webapp"));
+		URI uri = jetty.startServer("/xydra", new File("src/main/webapp"));
 		log.info("Started embedded Jetty server. User interface is at " + uri.toString());
 		
 	}
+	
 }
