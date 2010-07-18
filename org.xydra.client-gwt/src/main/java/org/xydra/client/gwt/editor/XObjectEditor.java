@@ -7,8 +7,6 @@ import org.xydra.client.gwt.editor.value.XIDEditor;
 import org.xydra.client.gwt.editor.value.XValueEditor.EditListener;
 import org.xydra.client.sync.XSynchronizer;
 import org.xydra.core.change.ChangeType;
-import org.xydra.core.change.XFieldEvent;
-import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.change.XObjectEvent;
 import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.change.impl.memory.MemoryModelCommand;
@@ -29,12 +27,10 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 
-public class XObjectEditor extends VerticalPanel implements XObjectEventListener,
-        XFieldEventListener {
+public class XObjectEditor extends VerticalPanel implements XObjectEventListener {
 	
 	private final XSynchronizer manager;
 	private final XLoggedObject object;
-	private final Label revision = new Label();
 	private final HorizontalPanel inner = new HorizontalPanel();
 	private final Button add = new Button("Add Field");
 	private final Map<XID,XFieldEditor> fields = new HashMap<XID,XFieldEditor>();
@@ -45,14 +41,10 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 		this.manager = manager;
 		this.object = object;
 		this.object.addListenerForObjectEvents(this);
-		this.object.addListenerForFieldEvents(this);
 		
 		add(this.inner);
 		
-		this.inner.add(new Label(object.getID().toString() + " ["));
-		this.inner.add(this.revision);
-		this.revision.setText(Long.toString(object.getRevisionNumber()));
-		this.inner.add(new Label("] "));
+		this.inner.add(new Label(object.getID().toString()));
 		this.inner.add(this.add);
 		
 		if(this.object.getAddress().getModel() != null) {
@@ -108,7 +100,8 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 			}
 		});
 		
-		setStyleName("editor-xobject");
+		addStyleName("editor-xobject");
+		addStyleName("editor");
 		
 		for(XID fieldId : this.object)
 			newField(fieldId);
@@ -142,7 +135,6 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 		} else {
 			fieldRemoved(event.getFieldID());
 		}
-		this.revision.setText(Long.toString(event.getObjectRevisionNumber()));
 	}
 	
 	private void add(XID id) {
@@ -153,10 +145,6 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 	protected void delete() {
 		this.manager.executeCommand(MemoryModelCommand.createRemoveCommand(this.object.getAddress()
 		        .getParent(), this.object.getRevisionNumber(), this.object.getID()), null);
-	}
-	
-	public void onChangeEvent(XFieldEvent event) {
-		this.revision.setText(Long.toString(event.getObjectRevisionNumber()));
 	}
 	
 }

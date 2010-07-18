@@ -100,12 +100,9 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		
 		add(this.inner);
 		
-		this.inner.add(new Label(field.getID().toString() + " ["));
-		this.inner.add(this.revision);
-		this.revision.setText(Long.toString(field.getRevisionNumber()));
-		this.inner.add(new Label("] "));
+		this.inner.add(new Label(field.getID().toString()));
+		this.inner.add(new Label("="));
 		this.innerIndex = this.inner.getWidgetCount();
-		
 		this.inner.add(this.contents);
 		this.inner.add(this.edit);
 		this.inner.add(this.delete);

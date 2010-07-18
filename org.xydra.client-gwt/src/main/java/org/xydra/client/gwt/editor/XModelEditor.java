@@ -7,12 +7,8 @@ import org.xydra.client.gwt.editor.value.XIDEditor;
 import org.xydra.client.gwt.editor.value.XValueEditor.EditListener;
 import org.xydra.client.sync.XSynchronizer;
 import org.xydra.core.change.ChangeType;
-import org.xydra.core.change.XFieldEvent;
-import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.change.XModelEvent;
 import org.xydra.core.change.XModelEventListener;
-import org.xydra.core.change.XObjectEvent;
-import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.change.impl.memory.MemoryModelCommand;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XLoggedModel;
@@ -31,12 +27,10 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 
-public class XModelEditor extends Composite implements XModelEventListener, XObjectEventListener,
-        XFieldEventListener {
+public class XModelEditor extends Composite implements XModelEventListener {
 	
 	private final XSynchronizer manager;
 	private final XLoggedModel model;
-	private final Label revision = new Label();
 	private final VerticalPanel outer = new VerticalPanel();
 	private final HorizontalPanel inner = new HorizontalPanel();
 	private final Button add = new Button("Add Object");
@@ -49,17 +43,11 @@ public class XModelEditor extends Composite implements XModelEventListener, XObj
 		this.manager = manager;
 		this.model = model;
 		this.model.addListenerForModelEvents(this);
-		this.model.addListenerForObjectEvents(this);
-		this.model.addListenerForFieldEvents(this);
 		
 		this.outer.add(this.inner);
 		
-		this.inner.add(new Label(this.model.getID().toString() + " ["));
-		this.inner.add(this.revision);
-		this.inner.add(new Label("] "));
+		this.inner.add(new Label(this.model.getID().toString()));
 		this.inner.add(this.add);
-		
-		this.revision.setText(Long.toString(this.model.getRevisionNumber()));
 		
 		this.add.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent e) {
@@ -142,20 +130,11 @@ public class XModelEditor extends Composite implements XModelEventListener, XObj
 		} else {
 			objectRemoved(event.getObjectID());
 		}
-		this.revision.setText(Long.toString(event.getModelRevisionNumber()));
 	}
 	
 	private void add(XID id) {
 		this.manager.executeCommand(MemoryModelCommand.createAddCommand(this.model.getAddress(),
 		        true, id), null);
-	}
-	
-	public void onChangeEvent(XObjectEvent event) {
-		this.revision.setText(Long.toString(event.getModelRevisionNumber()));
-	}
-	
-	public void onChangeEvent(XFieldEvent event) {
-		this.revision.setText(Long.toString(event.getModelRevisionNumber()));
 	}
 	
 }
