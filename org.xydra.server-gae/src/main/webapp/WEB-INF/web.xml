@@ -2,28 +2,24 @@
 <web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
-	<servlet>
-		<servlet-name>Jersey Web Application</servlet-name>
-		<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
-		<init-param>
-			<param-name>com.sun.jersey.config.property.packages</param-name>
-			<param-value>org.xydra.rest</param-value>
-		</init-param>
-		<!-- to allow clients that can only send GET and POST requests to emulate PUT and DELETE -->
-		<init-param>
-			<param-name>com.sun.jersey.spi.container.ContainerRequestFilters</param-name>
-			<param-value>com.sun.jersey.api.container.filter.PostReplaceFilter</param-value>
-		</init-param> 
-		<load-on-startup>1</load-on-startup>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>Jersey Web Application</servlet-name>
-		<url-pattern>/*</url-pattern>
-	</servlet-mapping>
 	
-	  <!-- Default page to serve -->
-  	<welcome-file-list>
-	    <welcome-file>index.html</welcome-file>
-  	</welcome-file-list>
+  <servlet>
+    <servlet-name>XydraServer</servlet-name>
+    <servlet-class>org.xydra.restless.Restless</servlet-class>
+    <init-param>
+      <param-name>app</param-name>
+      <param-value>org.xydra.server.MemoryXydraServer</param-value>
+    </init-param>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>XydraServer</servlet-name>
+    <url-pattern>/*</url-pattern>
+  </servlet-mapping>
+	
+	<!-- Default page to serve -->
+  <welcome-file-list>
+	  <welcome-file>index.html</welcome-file>
+  </welcome-file-list>
   
 </web-app>
