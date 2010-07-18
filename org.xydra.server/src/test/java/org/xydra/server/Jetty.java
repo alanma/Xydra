@@ -69,9 +69,6 @@ public class Jetty {
 		 */
 		this.webapp = new WebAppContext(docRoot.getAbsolutePath(), contextPath);
 		
-		// Add the servlets.
-		// this.webapp.setClassLoader(Thread.currentThread().getContextClassLoader());
-		
 		// Add the webapp to the server.
 		this.server.setHandler(this.webapp);
 		

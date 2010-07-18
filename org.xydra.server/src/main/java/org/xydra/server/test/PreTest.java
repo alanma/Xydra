@@ -33,7 +33,7 @@ public abstract class PreTest {
 	}
 	
 	@After
-	public void cleanup() {
+	public void tearDown() {
 		this.repo.removeModel(null, DemoModelUtil.PHONEBOOK_ID);
 	}
 	

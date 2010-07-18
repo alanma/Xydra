@@ -1,7 +1,6 @@
 package org.xydra.server;
 
 import org.junit.BeforeClass;
-import org.xydra.server.test.ChangesApiTest;
 import org.xydra.server.test.DataApiTest;
 
 
@@ -12,7 +11,7 @@ public class DataApiTestMemory extends DataApiTest {
 		
 		MemoryXydraServer.initializeRepositoryManager();
 		
-		ChangesApiTest.init();
+		DataApiTest.init();
 	}
 	
 }
