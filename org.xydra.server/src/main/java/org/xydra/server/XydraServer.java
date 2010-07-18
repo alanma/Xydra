@@ -104,8 +104,17 @@ public class XydraServer {
 	}
 	
 	public static void xmlResponse(HttpServletResponse res, int statusCode, String xml) {
+		response(res, "application/xml; charset=UTF-8", statusCode, xml);
+	}
+	
+	public static void textResponse(HttpServletResponse res, int statusCode, String xml) {
+		response(res, "text/plain; charset=UTF-8", statusCode, xml);
+	}
+	
+	public static void response(HttpServletResponse res, String contentType, int statusCode,
+	        String xml) {
 		
-		res.setContentType("application/xml; charset=UTF-8");
+		res.setContentType(contentType);
 		res.setStatus(statusCode);
 		try {
 			res.getWriter().write(xml);
