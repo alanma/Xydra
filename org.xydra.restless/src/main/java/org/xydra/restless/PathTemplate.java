@@ -28,6 +28,9 @@ class PathTemplate {
 	/** Matches a group of characters up to the next '/' */
 	static final String VAR_REGEX = "([^/]+)";
 	
+	/** Matches '/' or empty string */
+	static final String END_REGEX = "/?";
+	
 	private transient Pattern p;
 	
 	private String regex;
@@ -69,7 +72,7 @@ class PathTemplate {
 		
 		// turn into regex with groups
 		String[] segments = pathExpression.substring(1).split("/");
-		/* '/way/{id}/step' => '//way/[^/]+//step.*' */
+		/* '/way/{id}/step' => '/way/[^/]+/step.*' */
 		StringBuffer regexBuf = new StringBuffer();
 		for(String segment : segments) {
 			regexBuf.append(PATH_REGEX);
@@ -87,7 +90,16 @@ class PathTemplate {
 				regexBuf.append(segment);
 			}
 		}
-		regexBuf.append(ANY_REGEX);
+		/*
+		 * TODO what use cases are there for matching everything at the end of
+		 * the path? The query part (?a=b...) isn't included in the passed path
+		 * anymore (and is better parsed by the HttpServletRequest
+		 * implementation anyway. This makes sub resources (ie resources "/a"
+		 * and "/a/b" impossible, or at least very annoying and error prone
+		 * ~Daniel
+		 */
+		// regexBuf.append(ANY_REGEX);
+		regexBuf.append(END_REGEX);
 		this.regex = regexBuf.toString();
 		this.p = Pattern.compile(this.regex);
 	}

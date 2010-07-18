@@ -102,6 +102,8 @@ public class Restless extends HttpServlet {
 	 */
 	private static List<RestlessMethod> methods = new LinkedList<RestlessMethod>();
 	
+	private static List<RestlessExceptionHandler> exceptionHandlers = new LinkedList<RestlessExceptionHandler>();
+	
 	/*
 	 * Called from the servlet environment if
 	 * &lt;load-on-startup&gt;1&lt;/load-on-startup&gt; is in web.xml set for
@@ -215,6 +217,7 @@ public class Restless extends HttpServlet {
 						throw new RuntimeException(e);
 					}
 					foundMethod = true;
+					break;
 				}
 			}
 		}
@@ -343,6 +346,14 @@ public class Restless extends HttpServlet {
 		PathTemplate pt = new PathTemplate(pathTemplate);
 		methods.add(new RestlessMethod(object, httpMethod, methodName, pt, parameter));
 		assert methodByName(object, methodName) != null : "method '" + methodName + "' not found";
+	}
+	
+	/**
+	 * Register a handler that will receive exceptions thrown by the executed
+	 * REST methods.
+	 */
+	public static void addExceptionHandler(RestlessExceptionHandler handler) {
+		exceptionHandlers.add(handler);
 	}
 	
 	/**
@@ -498,19 +509,32 @@ public class Restless extends HttpServlet {
 						}
 						res.getWriter().flush();
 					}
-				} catch(RestlessException re) {
-					res.setStatus(re.getStatusCode());
-					res.setContentType(MIME_TEXT_PLAIN + "; charset=" + CHARSET_UTF8);
-					res.getWriter().print(re.getMessage());
 				} catch(IllegalArgumentException e) {
 					res.sendError(500, e.toString());
-					log.error("", e);
+					log.error("RESTless method registered with wrong arguments", e);
 				} catch(IllegalAccessException e) {
 					res.sendError(500, e.toString());
 					log.error("", e);
 				} catch(InvocationTargetException e) {
-					res.sendError(500, e.toString());
-					log.error("", e);
+					Throwable cause = e.getCause();
+					if(cause instanceof RestlessException) {
+						RestlessException re = (RestlessException)cause;
+						res.setStatus(re.getStatusCode());
+						res.setContentType(MIME_TEXT_PLAIN + "; charset=" + CHARSET_UTF8);
+						res.getWriter().print(re.getMessage());
+					} else {
+						boolean handled = false;
+						for(RestlessExceptionHandler handler : exceptionHandlers) {
+							if(handler.handleException(cause, req, res)) {
+								handled = true;
+								break;
+							}
+						}
+						if(!handled) {
+							res.sendError(500, cause.toString());
+							log.error("exception while executing RESTless method", e);
+						}
+					}
 				}
 				
 			}
