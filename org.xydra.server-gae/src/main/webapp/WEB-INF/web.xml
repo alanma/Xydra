@@ -3,23 +3,18 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 	
-  <servlet>
-    <servlet-name>XydraServer</servlet-name>
-    <servlet-class>org.xydra.restless.Restless</servlet-class>
-    <init-param>
-      <param-name>app</param-name>
-      <param-value>org.xydra.server.MemoryXydraServer</param-value>
-    </init-param>
-    <load-on-startup>1</load-on-startup>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>XydraServer</servlet-name>
-    <url-pattern>/*</url-pattern>
-  </servlet-mapping>
+	<servlet>
+		<servlet-name>XydraServer</servlet-name>
+		<servlet-class>org.xydra.restless.Restless</servlet-class>
+		<init-param>
+			<param-name>app</param-name>
+			<param-value>org.xydra.server.GaeXydraServer</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>XydraServer</servlet-name>
+		<url-pattern>/*</url-pattern>
+	</servlet-mapping>
 	
-	<!-- Default page to serve -->
-  <welcome-file-list>
-	  <welcome-file>index.html</welcome-file>
-  </welcome-file-list>
-  
 </web-app>
