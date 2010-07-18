@@ -28,7 +28,7 @@ public class ProxyServlet extends HttpServlet {
 	
 	public ProxyServlet() {
 		try {
-			this.remoteService = new URI("http://localhost:8080/cxm/");
+			this.remoteService = new URI("http://localhost:8080/xydra/");
 		} catch(URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
