@@ -36,7 +36,6 @@ import org.xydra.json.SAJ;
 import org.xydra.minio.MiniStringWriter;
 
 
-
 public class XJson {
 	
 	public static String asJsonString(XBaseField xfield) {
@@ -267,17 +266,29 @@ public class XJson {
 				
 				XListValue<?> listValue = null;
 				if(commonType.equals(XDoubleValue.class)) {
-					listValue = X.getValueFactory().createDoubleListValue(
-					        this.tempList.toArray(new Double[0]));
+					List<Double> doubleList = new LinkedList<Double>();
+					for(Object o : this.tempList) {
+						doubleList.add((Double)o);
+					}
+					listValue = X.getValueFactory().createDoubleListValue(doubleList);
 				} else if(commonType.equals(XIntegerValue.class)) {
-					listValue = X.getValueFactory().createIntegerListValue(
-					        this.tempList.toArray(new Integer[0]));
+					List<Integer> intList = new LinkedList<Integer>();
+					for(Object o : this.tempList) {
+						intList.add((Integer)o);
+					}
+					listValue = X.getValueFactory().createIntegerListValue(intList);
 				} else if(commonType.equals(XLongValue.class)) {
-					listValue = X.getValueFactory().createLongListValue(
-					        this.tempList.toArray(new Long[0]));
+					List<Long> longList = new LinkedList<Long>();
+					for(Object o : this.tempList) {
+						longList.add((Long)o);
+					}
+					listValue = X.getValueFactory().createLongListValue(longList);
 				} else if(commonType.equals(XBooleanValue.class)) {
-					listValue = X.getValueFactory().createBooleanListValue(
-					        this.tempList.toArray(new Boolean[0]));
+					List<Boolean> booleanList = new LinkedList<Boolean>();
+					for(Object o : this.tempList) {
+						booleanList.add((Boolean)o);
+					}
+					listValue = X.getValueFactory().createBooleanListValue(booleanList);
 				} else if(commonType.equals(XStringValue.class)) {
 					listValue = X.getValueFactory().createStringListValue(
 					        this.tempList.toArray(new String[0]));
