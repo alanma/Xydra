@@ -76,7 +76,7 @@ public interface XRepository extends XBaseRepository, XSendsRepositoryEvents, XS
 	 * concur with the {@link XID} of this XRepository
 	 * </ul>
 	 * 
-	 * @param command The {@link XRepositoryCommand} which to be executed
+	 * @param command The {@link XRepositoryCommand} which is to be executed
 	 * @return {@link XCommand#FAILED} if executing the
 	 *         {@link XRepositoryCommand} failed, {@link XCommand#NOCHANGE} if
 	 *         executing the {@link XRepositoryCommand} didn't change anything

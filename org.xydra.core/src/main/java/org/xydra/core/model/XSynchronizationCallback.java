@@ -1,8 +1,10 @@
 package org.xydra.core.model;
 
+import org.xydra.core.change.XCommand;
+
 /**
- * An interface to notify of local commands that failed to re-apply when
- * synchronizing a model/object.
+ * An interface to notify if re-applying local {@link XCommand XCommands} failed
+ * when synchronizing an {@link XModel}/{@link XObject}.
  * 
  * @author dscharrer
  * 

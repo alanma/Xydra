@@ -12,6 +12,7 @@ import org.xydra.core.change.XModelEventListener;
 import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.XTransactionEventListener;
+import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XLoggedModel;
 import org.xydra.core.model.XModel;
@@ -25,6 +26,9 @@ import org.xydra.core.model.XObject;
  * if a method is called and only executes the method, if the actor is allowed
  * to execute it (otherwise {@link XAccessException XAccessExceptions} will be
  * thrown).
+ * 
+ * All change operations like adding new {@link XField XFields} executed on an
+ * XProtectedModel will directly affect the wrapped {@link XModel}.
  * 
  * @author dscharrer
  * 

@@ -25,6 +25,9 @@ import org.xydra.core.model.XObject;
  * actor is allowed to execute it (otherwise {@link XAccessException
  * XAccessExceptions} will be thrown).
  * 
+ * All change operations like adding new {@link XObject XObjects} executed on an
+ * XProtectedObject will directly affect the wrapped {@link XObject}.
+ * 
  * @author dscharrer
  * 
  */

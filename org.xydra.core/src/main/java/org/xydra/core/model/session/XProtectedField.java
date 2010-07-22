@@ -18,6 +18,9 @@ import org.xydra.core.value.XValue;
  * to execute it (otherwise {@link XAccessException XAccessExceptions} will be
  * thrown).
  * 
+ * All change operations like manipulating the stored {@link XValue} executed on
+ * an XProtectedField will directly affect the wrapped {@link XField}.
+ * 
  * @author dscharrer
  * 
  */
