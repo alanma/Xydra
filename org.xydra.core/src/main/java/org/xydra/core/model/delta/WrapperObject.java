@@ -10,7 +10,7 @@ import org.xydra.index.iterator.SingleValueIterator;
 
 
 /**
- * A fake {@link XBaseObject} that holds exactly one object.
+ * A fake {@link XBaseObject} that holds exactly one {@link XBaseField}.
  * 
  * @author dscharrer
  * 
