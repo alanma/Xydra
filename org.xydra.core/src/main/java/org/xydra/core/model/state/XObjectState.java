@@ -5,15 +5,24 @@ import java.util.Iterator;
 import org.xydra.core.model.IHasXAddress;
 import org.xydra.core.model.IHasXID;
 import org.xydra.core.model.XAddress;
+import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XModel;
 
 
 /**
- * An {@link XObjectState} is a simple, mutable entity. At runtime,
- * {@link XFieldState}s can be added, removed and changed.
+ * An {@link XObjectState} represents the inner state of an {@link XObject}, for
+ * example for persistence purposes.
  * 
- * Internally, the {@link XObjectState} references {@link XFieldState}s only by
- * their {@link XID}.
+ * An {@link XObjectState} stores the
+ * <ul>
+ * <li> {@link XID} of the {@link XObject}
+ * <li>the revision number of the {@link XObject}
+ * <li>the child-{@link XField XField} of the {@link XModel} in form of their
+ * {@link XFieldState XFieldStates}
+ * </ul>
+ * 
+ * An {@link XFieldState} can be serialized, and therefore be used e.g. in GWT.
  * 
  * @author voelkel
  * @author Kaidel

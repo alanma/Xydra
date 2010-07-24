@@ -19,12 +19,14 @@ public interface XSynchronizesChanges extends XExecutesCommands, XExecutesTransa
         IHasXAddress {
 	
 	/**
-	 * Roll back the model state (including revisions) to a specific revision.
-	 * This will erase all {@link XEvent XEvents} following this revision from
-	 * the {@link XChangeLog} of this XModel. Listeners that were/are registered
-	 * to the entities that are manipulated by this rollback are not
+	 * Roll back the state (including revisions) to a specific revision. This
+	 * will erase all {@link XEvent XEvents} following this revision from the
+	 * {@link XChangeLog} of this XSynchronizesChanges. Listeners that were/are
+	 * registered to the entities that are manipulated by this rollback are not
 	 * automatically restored or removed, but {@link XEvent XEvents} are sent
 	 * out for all changes made.
+	 * 
+	 * @param revision The revision number to which will be rolled back
 	 */
 	void rollback(long revision);
 	
@@ -37,12 +39,13 @@ public interface XSynchronizesChanges extends XExecutesCommands, XExecutesTransa
 	 * This method will not check that the localChanges have already been
 	 * applied previously. It will just throw away any changes after
 	 * lastRevision, apply the remoteChanges and then apply the localChanges. No
-	 * redundant {@link XEvent XEvents} are changed and {@link XObject} and
-	 * {@link XField} objects that are temporarily removed are preserved,
+	 * redundant {@link XEvent XEvents} are changed and {@link XObject XObjects}
+	 * and {@link XField XFields} that are temporarily removed are preserved,
 	 * including any registered listeners.
 	 * 
-	 * @param remoteChanges The remote changes that happended since the last
-	 *            sync, including local changes that have been saved remotely.
+	 * @param remoteChanges The remote changes that happened since the last
+	 *            Synchronization, including local changes that have been saved
+	 *            remotely.
 	 * @param lastRevision The revision to insert the remoteChanges at.
 	 * @param localChanges Local changes that haven't been saved remotely yet.
 	 *            This list will be modified with updated commands.
@@ -53,7 +56,7 @@ public interface XSynchronizesChanges extends XExecutesCommands, XExecutesTransa
 	
 	/**
 	 * @return the {@link XChangeLog} which is logging the {@link XEvent
-	 *         XEvents} which happen on this model or object.
+	 *         XEvents} which happen on this XSynchronizeChanges
 	 */
 	XChangeLog getChangeLog();
 	
