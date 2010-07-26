@@ -32,6 +32,13 @@ public class MemoryStateStore implements XStateStore {
 		this.repositories = new HashMap<XAddress,XRepositoryState>();
 	}
 	
+	/*
+	 * FIXME create....State methods -> what happens if given address is already
+	 * taken? Currently, a new state object is created, which will probably
+	 * result in overwritting the old state object. Why not return the old and
+	 * already existing state object instead, like in the create... Methods from
+	 * XObject, XModel and XRepository?
+	 */
 	public XFieldState createFieldState(XAddress fieldAddr) {
 		return new StoredFieldState(fieldAddr, this);
 	}

@@ -29,12 +29,12 @@ import org.xydra.core.model.XModel;
  */
 public interface XModelState extends IHasXID, Serializable, Iterable<XID>, IHasXAddress {
 	/**
-	 * Take the {@link XObjectState} and links it as a child of this
-	 * {@link XModelState}, which means that the {@link XObject} represented by
-	 * the given {@link XObjectState} is a child-{@link XObject} of the
-	 * {@link XModel} which is represented by this XModelState. Also sets this
-	 * {@link XModelState} as the parent. Neither this fact nor the
-	 * {@link XObjectState} itself is persisted by this operation.
+	 * Links the given {@link XObjectState} as a child of this XModelState. This
+	 * means that the {@link XObject} represented by the given
+	 * {@link XObjectState} is a child-{@link XObject} of the {@link XModel}
+	 * represented by this XModelState. Also sets this XModelState as the
+	 * parent. Neither this fact nor the {@link XObjectState} itself is
+	 * persisted by this operation.
 	 * 
 	 * @param objectState The {@link XObjectState} which is to be added as a
 	 *            child
@@ -52,59 +52,72 @@ public interface XModelState extends IHasXID, Serializable, Iterable<XID>, IHasX
 	 * being represented by this XModelState.
 	 * 
 	 * @return The current revision number of the {@link XModel} which state is
-	 *         being represented by this XFieldState.
+	 *         being represented by this XModelState.
 	 */
 	long getRevisionNumber();
 	
 	/**
-	 * Checks whether the XModel represented by this {@link XModelState} already
+	 * Checks whether the {@link XModel} represented by this XModelState already
 	 * contains an {@link XObject} with the given {@link XID} by checking
 	 * whether this XModelState is linked with its {@link XObjectState}.
 	 * 
 	 * @param id The {@link XID} which is to be checked
-	 * @return true, if the {@link XModel} already contains an {@link XObject}
-	 *         with the given {@link XID}, false otherwise
+	 * @return true, if the {@link XModel} represented by this XModelState
+	 *         already contains an {@link XObject} with the given {@link XID},
+	 *         false otherwise
 	 */
 	boolean hasObjectState(XID id);
 	
 	/**
+	 * Returns true, if this XModelState has no child-{@link XObjectState
+	 * XObjectStates}
+	 * 
 	 * @return true, if this XModelState has no child-{@link XObjectState
 	 *         XObjectStates}
 	 */
 	boolean isEmpty();
 	
 	/**
-	 * Get a {@link XObjectState} contained in this repository from the
-	 * appropriate persistence layer.
+	 * Get the specified {@link XObjectState} contained in this XModelState from
+	 * the appropriate persistence layer.
 	 * 
 	 * This is only guaranteed to succeed if the {@link XObject} represented by
 	 * the requested {@link XObjectState} is not already deleted AND and was not
 	 * removed from the {@link XModel} represented by this XModelState. It is
 	 * however not guaranteed to fail if only the {@link XObject} was removed.
+	 * 
+	 * @param id The {@link XID} of the {@link XObject} which
+	 *            {@link XObjectState} is to be returned
+	 * @return The {@link XObjectState} corresponding to the given {@link XID}
+	 *         or null if no such {@link XObjectState} exists
 	 */
 	XObjectState getObjectState(XID id);
 	
 	/**
-	 * Create a new {@link XObjectState} in the same persistence layer as this
-	 * XModelState and add it as a child of this state.
+	 * Creates a new {@link XObjectState} in the same persistence layer as this
+	 * XModelState and adds it as a child of this state.
+	 * 
+	 * @param id The {@link XID} for the new {@link XObjectState}
+	 * @return The newly created {@link XObjectState}
 	 */
 	XObjectState createObjectState(XID id);
 	
 	/**
-	 * Removes the given {@link XObjectState} from this {@link XModelState}.
+	 * Removes the specified {@link XObjectState} from this XModelState.
 	 * 
-	 * @param objectState The {@link XObjectState} which is to be removed
+	 * @param objectStateID The {@link XID} of the {@link XObjectState} which is
+	 *            to be removed
 	 */
 	void removeObjectState(XID objectStateId);
 	
 	/**
-	 * Store the data of this object in the attached persistence layer, i.e. the
+	 * Store this state information in the attached persistence layer, i.e. the
 	 * one determined by calling {@link XStateFactory}.create...().
 	 */
 	void save();
 	
 	/**
-	 * Sets the revision number
+	 * Sets the stored revision number
 	 * 
 	 * @param revisionNumber the revision number
 	 */
@@ -112,10 +125,10 @@ public interface XModelState extends IHasXID, Serializable, Iterable<XID>, IHasX
 	
 	/**
 	 * Gets the {@link XChangeLogState} of the {@link XChangeLog} which is
-	 * logging the {@link XModel} represented by this XModelState.
+	 * logging the {@link XObject} represented by this XObjectState.
 	 * 
 	 * @return the {@link XChangeLogState} of the {@link XChangeLog} which is
-	 *         logging the {@link XModel} represented by this XModelState.
+	 *         logging the {@link XObject} represented by this XObjectState.
 	 */
 	XChangeLogState getChangeLogState();
 	

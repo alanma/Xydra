@@ -3,13 +3,24 @@ package org.xydra.core.model.state;
 import org.xydra.core.model.IHasXAddress;
 import org.xydra.core.model.IHasXID;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XModel;
+import org.xydra.core.model.XRepository;
 
 
 /**
- * Manages a set of {@link XModelState}s.
+ * An {@link XRepositoryState} represents the inner state of an
+ * {@link XRepository}, for example for persistence purposes.
  * 
- * It has no revisionNumber and no parent. The repository state's {@link XID} is
- * only for data management purposes, not for referencing.
+ * An {@link XRepositoryState} stores the
+ * <ul>
+ * <li> {@link XID} of the {@link XRepository}
+ * <li>the revision number of the {@link XRepository}
+ * <li>the child-{@link XModel XModels} of the {@link XRepository} in form of
+ * their {@link XModelState XModelStates}
+ * </ul>
+ * 
+ * An {@link XRepositoryState} can be serialized, and therefore be used e.g. in
+ * GWT.
  * 
  * @author voelkel
  * 
@@ -17,68 +28,81 @@ import org.xydra.core.model.XID;
 public interface XRepositoryState extends IHasXID, Iterable<XID>, IHasXAddress {
 	
 	/**
-	 * Store the data of this object in the attached persistence layer, i.e. the
+	 * Store this state information in the attached persistence layer, i.e. the
 	 * one determined by calling {@link XStateStore#c}.create...().
 	 */
 	void save();
 	
 	/**
-	 * Delete the data of this repository from the attached persistence layer,
-	 * i.e. the one determined by calling {@link XStateStore}.create...(). Does
-	 * not delete children (modelStates).
+	 * Delete this state information from the attached persistence layer, i.e.
+	 * the one determined by calling {@link XStateStore}.create...().
 	 */
 	void delete();
 	
 	/**
-	 * Take the {@link XModelState} and links it as a child of this repository.
-	 * Also sets this repository as the parent. Neither this fact nor the
-	 * {@link XModelState} itself is persisted by this operation.
+	 * Links the given {@link XModelState} as a child of this XRepositoryState.
+	 * This means that the {@link XModel} represented by the given
+	 * {@link XModelState} is a child-{@link XModel} of the {@link XRepository}
+	 * represented by this XRepositoryState. Also sets this XRepositoryState as
+	 * the parent. Neither this fact nor the {@link XModelState} itself is
+	 * persisted by this operation.
 	 * 
-	 * @param modelState
+	 * @param modelState The {@link XModelState} which is to be added as a child
 	 */
 	void addModelState(XModelState modelState);
 	
 	/**
-	 * Get a {@link XModelState} contained in this repository from the
-	 * appropriate persistence layer.
+	 * Get the specified {@link XModelState} contained in this XRepositoryState
+	 * from the appropriate persistence layer.
 	 * 
-	 * This is only guaranteed to succeed if the model has not been deleted AND
-	 * not been removed from this repository. It is however not guaranteed to
-	 * fail if the model has been removed.
+	 * This is only guaranteed to succeed if the {@link XModel} represented by
+	 * the requested {@link XModelState} is not already deleted AND and was not
+	 * removed from the {@link XRepository} represented by this
+	 * XRepositoryState. It is however not guaranteed to fail if only the
+	 * {@link XModel} was removed.
 	 * 
+	 * @param id The {@link XID} of the {@link XModel} which {@link XModelState}
+	 *            is to be returned
+	 * @return The {@link XModelState} corresponding to the given {@link XID} or
+	 *         null if no such {@link XModelState} exists
 	 */
 	XModelState getModelState(XID id);
 	
 	/**
-	 * Create a new {@link XModelState} in the same persistence layer as this
-	 * repository state.
+	 * Creates a new {@link XModelState} in the same persistence layer as this
+	 * XRepositoryState and adds it as a child of this state.
 	 * 
-	 * @param id
-	 * @return
+	 * @param id The {@link XID} for the new {@link XModelState}
+	 * @return The newly created {@link XModelState}
 	 */
 	XModelState createModelState(XID id);
 	
 	/**
-	 * Checks whether this XRepository contains an {@link XModelState} with the
-	 * given XID.
+	 * Checks whether the {@link XRepository} represented by this XModelState
+	 * already contains an {@link XModel} with the given {@link XID} by checking
+	 * whether this XRepositoryState is linked with its {@link XModelState}.
 	 * 
-	 * @param id The XID which is to be checked
-	 * @return true, if this XRepository contains an {@link XModelState} with
-	 *         the given XID, false otherwise
+	 * @param id The {@link XID} which is to be checked
+	 * @return true, if the {@link XRepository} represented by this
+	 *         XRepositoryState already contains an {@link XModel} with the
+	 *         given {@link XID}, false otherwise
 	 */
 	boolean hasModelState(XID id);
 	
 	/**
-	 * Returns true, if this repository has no child-modelStates
+	 * Returns true, if this XRepositoryState has no child-{@link XModelState
+	 * XModelStates}
 	 * 
-	 * @return true, if this repository has no child-modelStates
+	 * @return true, if this XRepositoryState has no child-{@link XModelState
+	 *         XModelStates}
 	 */
 	boolean isEmpty();
 	
 	/**
-	 * Removes the given {@link XModelState} from this {@link XRepositoryState}.
+	 * Removes the specified {@link XModelState} from this XRepositoryState.
 	 * 
-	 * @param model The {@link XModelState} to b removed
+	 * @param modelStateID The {@link XID} of the {@link XModelState} which is
+	 *            to be removed
 	 */
 	void removeModelState(XID modelStateId);
 	
