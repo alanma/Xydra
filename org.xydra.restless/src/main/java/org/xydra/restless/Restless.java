@@ -1,6 +1,8 @@
 package org.xydra.restless;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -536,8 +538,13 @@ public class Restless extends HttpServlet {
 							}
 						}
 						if(!handled) {
-							res.sendError(500, cause.toString());
-							log.error("exception while executing RESTless method", e);
+							// TODO hide internal messages better from user
+							StringWriter sw = new StringWriter();
+							PrintWriter pw = new PrintWriter(sw);
+							e.printStackTrace(pw);
+							String stacktrace = sw.toString();
+							res.sendError(500, e + " -- " + stacktrace);
+							log.error("Exception while executing RESTless method.", cause);
 						}
 					}
 				}
