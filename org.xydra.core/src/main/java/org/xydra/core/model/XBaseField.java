@@ -14,6 +14,8 @@ public interface XBaseField extends IHasXAddress, IHasXID {
 	
 	/**
 	 * @return the current {@link XValue} of this field
+	 * 
+	 *         TODO What happens if there is no value? Does it return null then?
 	 */
 	@ReadOperation
 	XValue getValue();
