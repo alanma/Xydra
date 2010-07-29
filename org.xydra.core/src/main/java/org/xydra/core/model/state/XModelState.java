@@ -1,6 +1,7 @@
 package org.xydra.core.model.state;
 
 import java.io.Serializable;
+import java.util.Iterator;
 
 import org.xydra.core.model.IHasXAddress;
 import org.xydra.core.model.IHasXID;
@@ -78,8 +79,8 @@ public interface XModelState extends IHasXID, Serializable, Iterable<XID>, IHasX
 	boolean isEmpty();
 	
 	/**
-	 * Get the specified {@link XObjectState} contained in this XModelState from
-	 * the appropriate persistence layer.
+	 * Gets the specified {@link XObjectState} contained in this XModelState
+	 * from the appropriate persistence layer.
 	 * 
 	 * This is only guaranteed to succeed if the {@link XObject} represented by
 	 * the requested {@link XObjectState} is not already deleted AND and was not
@@ -95,7 +96,7 @@ public interface XModelState extends IHasXID, Serializable, Iterable<XID>, IHasX
 	
 	/**
 	 * Creates a new {@link XObjectState} in the same persistence layer as this
-	 * XModelState and adds it as a child of this state.
+	 * XModelState and adds it as a child of this XModelState.
 	 * 
 	 * @param id The {@link XID} for the new {@link XObjectState}
 	 * @return The newly created {@link XObjectState}
@@ -125,11 +126,20 @@ public interface XModelState extends IHasXID, Serializable, Iterable<XID>, IHasX
 	
 	/**
 	 * Gets the {@link XChangeLogState} of the {@link XChangeLog} which is
-	 * logging the {@link XObject} represented by this XObjectState.
+	 * logging the {@link XModel} represented by this XModelState.
 	 * 
 	 * @return the {@link XChangeLogState} of the {@link XChangeLog} which is
-	 *         logging the {@link XObject} represented by this XObjectState.
+	 *         logging the {@link XModel} represented by this XModelState.
 	 */
 	XChangeLogState getChangeLogState();
+	
+	/**
+	 * Returns an {@link Iterator} over the {@link XID XIDs} of all children-
+	 * {@link XObjectState XObjectStates} of this XModelState
+	 * 
+	 * @returns an {@link Iterator} over the {@link XID XIDs} of all children-
+	 *          {@link XObjectState XObjectStates} of this XModelState
+	 */
+	Iterator<XID> iterator();
 	
 }

@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import org.xydra.core.model.IHasXAddress;
 import org.xydra.core.model.IHasXID;
-import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.value.XValue;
@@ -32,15 +31,12 @@ public interface XFieldState extends IHasXID, Serializable, IHasXAddress {
 	/**
 	 * Delete this state information from the attached persistence layer, i.e.
 	 * the one determined by calling {@link XStateFactory}.create...().
-	 * 
-	 * @throws IllegalStateException if the fieldState has no parent
-	 *             {@link XAddress}.
 	 */
 	void delete();
 	
 	/**
-	 * Store the data of this XFieldState in the attached persistence layer,
-	 * i.e. the one determined by calling {@link XStateFactory}.create...().
+	 * Store this state information in the attached persistence layer, i.e. the
+	 * one determined by calling {@link XStateFactory}.create...().
 	 */
 	void save();
 	
@@ -54,7 +50,11 @@ public interface XFieldState extends IHasXID, Serializable, IHasXAddress {
 	long getRevisionNumber();
 	
 	/**
-	 * @return the current {@link XValue} stored by this XFieldState
+	 * Gets the currently stored {@link XValue} of the {@link XField} which is
+	 * represented by this {@link XFieldState}.
+	 * 
+	 * @return the currently stored {@link XValue} of the {@link XField} which
+	 *         is represented by this {@link XFieldState}.
 	 */
 	XValue getValue();
 	
@@ -66,7 +66,7 @@ public interface XFieldState extends IHasXID, Serializable, IHasXAddress {
 	void setRevisionNumber(long revisionNumber);
 	
 	/**
-	 * Set the stored {@link XValue} to the given {@link XValue}.
+	 * Sets the stored {@link XValue} to the given {@link XValue}.
 	 * 
 	 * @param value The new {@link XValue} (passing 'null' implies a remove of
 	 *            the currently stored {@link XValue})

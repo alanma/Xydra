@@ -13,25 +13,29 @@ import org.xydra.core.value.XValue;
 public interface XBaseField extends IHasXAddress, IHasXID {
 	
 	/**
-	 * @return the current {@link XValue} of this field
+	 * Returns the current {@link XValue} of this XBaseField or null if its
+	 * {@link XValue} is not set
 	 * 
-	 *         TODO What happens if there is no value? Does it return null then?
+	 * @return the current {@link XValue} of this XBaseField or null if its
+	 *         {@link XValue} is not set
 	 */
 	@ReadOperation
 	XValue getValue();
 	
 	/**
-	 * Gets the current revision number of this field
+	 * Gets the current revision number of this XBaseField
 	 * 
-	 * @return The current revision number of this field
+	 * @return The current revision number of this XBaseField
 	 */
 	@ReadOperation
 	long getRevisionNumber();
 	
 	/**
-	 * Returns true, if the {@link XValue} of this field equals null
+	 * Returns true, if the {@link XValue} of this XBaseField is not set (it
+	 * equals null)
 	 * 
-	 * @return true, if the {@link XValue} of this field equals null
+	 * @return true, if the {@link XValue} of this XBaseFieldfield is not set
+	 *         (it equals null)
 	 */
 	@ReadOperation
 	boolean isEmpty();

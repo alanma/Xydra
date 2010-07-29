@@ -1,5 +1,7 @@
 package org.xydra.core.model.state;
 
+import java.util.Iterator;
+
 import org.xydra.core.model.IHasXAddress;
 import org.xydra.core.model.IHasXID;
 import org.xydra.core.model.XID;
@@ -105,5 +107,14 @@ public interface XRepositoryState extends IHasXID, Iterable<XID>, IHasXAddress {
 	 *            to be removed
 	 */
 	void removeModelState(XID modelStateId);
+	
+	/**
+	 * Returns an {@link Iterator} over the {@link XID XIDs} of all children-
+	 * {@link XModelState XModelStates} of this XRepositoryState
+	 * 
+	 * @returns an {@link Iterator} over the {@link XID XIDs} of all children-
+	 *          {@link XModelState XModelStates} of this XRepositoryState
+	 */
+	Iterator<XID> iterator();
 	
 }
