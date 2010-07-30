@@ -455,6 +455,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 		this.eventQueue.truncateLog(revision);
 		
 		if(!hasOrphans) {
+			this.eventQueue.saveLog();
 			endStateTransaction();
 		}
 		
@@ -613,6 +614,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 			
 		} finally {
 			
+			this.eventQueue.saveLog();
 			endStateTransaction();
 			
 			this.eventQueue.setBlockSending(oldBlock);
