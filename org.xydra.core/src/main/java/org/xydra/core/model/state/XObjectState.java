@@ -97,6 +97,9 @@ public interface XObjectState extends IHasXID, Iterable<XID>, IHasXAddress {
 	 * {@link XFieldState} as the parent. Neither this fact nor the
 	 * {@link XFieldState} itself is persisted by this operation.
 	 * 
+	 * Implementations should not persist this change until the corresponding
+	 * save unless they can guarantee that no other state calls will fail.
+	 * 
 	 * @param fieldState The {@link XFieldState} which is to be added as a child
 	 */
 	void addFieldState(XFieldState fieldState);
@@ -165,6 +168,9 @@ public interface XObjectState extends IHasXID, Iterable<XID>, IHasXAddress {
 	 * only the reference from this state. To cleanup the state use
 	 * {@link XFieldState#delete(Object)}
 	 * 
+	 * Implementations should not persist this change until the corresponding
+	 * save unless they can guarantee that no other state calls will fail.
+	 * 
 	 * @param objectStateID The {@link XID} of the {@link XFieldState} which is
 	 *            to be removed
 	 */
@@ -172,6 +178,9 @@ public interface XObjectState extends IHasXID, Iterable<XID>, IHasXAddress {
 	
 	/**
 	 * Sets the stored revision number
+	 * 
+	 * Implementations should not persist this change until the corresponding
+	 * save unless they can guarantee that no other state calls will fail.
 	 * 
 	 * @param revisionNumber the revision number
 	 */

@@ -37,6 +37,9 @@ public interface XModelState extends IHasXID, Serializable, Iterable<XID>, IHasX
 	 * parent. Neither this fact nor the {@link XObjectState} itself is
 	 * persisted by this operation.
 	 * 
+	 * Implementations should not persist this change until the corresponding
+	 * save unless they can guarantee that no other state calls will fail.
+	 * 
 	 * @param objectState The {@link XObjectState} which is to be added as a
 	 *            child
 	 */
@@ -117,6 +120,9 @@ public interface XModelState extends IHasXID, Serializable, Iterable<XID>, IHasX
 	 * only the reference from this state. To cleanup the state use
 	 * {@link XObjectState#delete(Object)}
 	 * 
+	 * Implementations should not persist this change until the corresponding
+	 * save unless they can guarantee that no other state calls will fail.
+	 * 
 	 * @param objectStateID The {@link XID} of the {@link XObjectState} which is
 	 *            to be removed
 	 */
@@ -161,6 +167,9 @@ public interface XModelState extends IHasXID, Serializable, Iterable<XID>, IHasX
 	
 	/**
 	 * Sets the stored revision number
+	 * 
+	 * Implementations should not persist this change until the corresponding
+	 * save unless they can guarantee that no other state calls will fail.
 	 * 
 	 * @param revisionNumber the revision number
 	 */

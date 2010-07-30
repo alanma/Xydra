@@ -86,6 +86,11 @@ public interface XRepositoryState extends IHasXID, Iterable<XID>, IHasXAddress {
 	 * the parent. Neither this fact nor the {@link XModelState} itself is
 	 * persisted by this operation.
 	 * 
+	 * Implementations should not persist this change until the corresponding
+	 * save unless they can guarantee that no other state calls will fail. TODO:
+	 * better to add a transaction parameter so that implementations can persist
+	 * when they want?
+	 * 
 	 * @param modelState The {@link XModelState} which is to be added as a child
 	 */
 	void addModelState(XModelState modelState);
@@ -145,6 +150,9 @@ public interface XRepositoryState extends IHasXID, Iterable<XID>, IHasXAddress {
 	 * This does not remove the actual {@link XModelState} from the state
 	 * backend, only the reference from this state. To cleanup the state use
 	 * {@link XModelState#delete(Object)}
+	 * 
+	 * Implementations should not persist this change until the corresponding
+	 * save unless they can guarantee that no other state calls will fail.
 	 * 
 	 * @param modelStateID The {@link XID} of the {@link XModelState} which is
 	 *            to be removed

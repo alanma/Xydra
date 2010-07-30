@@ -73,12 +73,18 @@ public interface XFieldState extends IHasXID, Serializable, IHasXAddress {
 	/**
 	 * Set the current revision number.
 	 * 
+	 * Implementations should not persist this change until the corresponding
+	 * save unless they can guarantee that no other state calls will fail.
+	 * 
 	 * @param revisionNumber the new revision number
 	 */
 	void setRevisionNumber(long revisionNumber);
 	
 	/**
 	 * Sets the stored {@link XValue} to the given {@link XValue}.
+	 * 
+	 * Implementations should not persist this change until the corresponding
+	 * save unless they can guarantee that no other state calls will fail.
 	 * 
 	 * @param value The new {@link XValue} (passing 'null' implies a remove of
 	 *            the currently stored {@link XValue})
