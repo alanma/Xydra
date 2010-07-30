@@ -426,37 +426,58 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 			return;
 		}
 		
+		boolean oldBlock = this.eventQueue.setBlockSending(true);
+		int pos = this.eventQueue.getNextPosition();
+		
 		// stop the change log to prevent the rollback events from being logged
 		boolean oldLogging = this.eventQueue.setLogging(false);
 		
 		boolean hasOrphans = (this.eventQueue.orphans != null);
 		if(!hasOrphans) {
+			this.eventQueue.orphans = new Orphans();
 			beginStateTransaction();
 		}
 		
-		// rollback each event individually
-		for(long i = currentRev - 1; i >= revision; i--) {
-			// TODO: ignore model events
-			XEvent event = log.getEventAt(i);
-			if(event instanceof XAtomicEvent) {
-				rollbackEvent((XAtomicEvent)event);
-			} else {
-				assert event instanceof XTransactionEvent;
-				XTransactionEvent trans = (XTransactionEvent)event;
-				for(int j = trans.size() - 1; j >= 0; j--) {
-					XAtomicEvent atomicEvent = trans.getEvent(j);
-					rollbackEvent(atomicEvent);
+		try {
+			
+			// rollback each event individually
+			for(long i = currentRev - 1; i >= revision; i--) {
+				// TODO: ignore model events
+				XEvent event = log.getEventAt(i);
+				if(event instanceof XAtomicEvent) {
+					rollbackEvent((XAtomicEvent)event);
+				} else {
+					assert event instanceof XTransactionEvent;
+					XTransactionEvent trans = (XTransactionEvent)event;
+					for(int j = trans.size() - 1; j >= 0; j--) {
+						XAtomicEvent atomicEvent = trans.getEvent(j);
+						rollbackEvent(atomicEvent);
+					}
 				}
+				
 			}
 			
-		}
-		
-		// reset the change log
-		this.eventQueue.truncateLog(revision);
-		
-		if(!hasOrphans) {
-			this.eventQueue.saveLog();
-			endStateTransaction();
+			// reset the change log
+			this.eventQueue.truncateLog(revision);
+			
+			if(!hasOrphans) {
+				// Clean unneeded events.
+				this.eventQueue.cleanEvents(pos);
+				
+				cleanupOrphans();
+				
+				this.eventQueue.saveLog();
+			}
+			
+		} finally {
+			
+			if(!hasOrphans) {
+				endStateTransaction();
+				
+				this.eventQueue.setBlockSending(oldBlock);
+				this.eventQueue.sendEvents();
+			}
+			
 		}
 		
 		this.eventQueue.setLogging(oldLogging);
@@ -601,16 +622,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 			// Clean unneeded events.
 			this.eventQueue.cleanEvents(pos);
 			
-			Orphans orphans = this.eventQueue.orphans;
-			this.eventQueue.orphans = null;
-			
-			for(MemoryObject object : orphans.objects.values()) {
-				object.delete();
-			}
-			
-			for(MemoryField field : orphans.fields.values()) {
-				field.delete();
-			}
+			cleanupOrphans();
 			
 		} finally {
 			
@@ -623,6 +635,19 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 		}
 		
 		return results;
+	}
+	
+	private void cleanupOrphans() {
+		Orphans orphans = this.eventQueue.orphans;
+		this.eventQueue.orphans = null;
+		
+		for(MemoryObject object : orphans.objects.values()) {
+			object.delete();
+		}
+		
+		for(MemoryField field : orphans.fields.values()) {
+			field.delete();
+		}
 	}
 	
 	/**
