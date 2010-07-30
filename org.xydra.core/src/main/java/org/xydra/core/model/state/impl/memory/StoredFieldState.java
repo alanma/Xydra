@@ -20,11 +20,13 @@ public class StoredFieldState extends AbstractFieldState {
 		this.store = store;
 	}
 	
-	public void delete() {
+	public void delete(Object transaction) {
+		assert transaction == null : "no transactions needed/supported";
 		this.store.deleteFieldState(getAddress());
 	}
 	
-	public void save() {
+	public void save(Object transaction) {
+		assert transaction == null : "no transactions needed/supported";
 		this.store.save(this);
 	}
 	

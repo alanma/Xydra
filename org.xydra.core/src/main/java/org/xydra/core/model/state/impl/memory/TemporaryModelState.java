@@ -53,11 +53,13 @@ public class TemporaryModelState extends AbstractModelState {
 		this.objectStates.remove(objectId);
 	}
 	
-	public void delete() {
+	public void delete(Object transaction) {
+		assert transaction == null : "no transactions needed/supported";
 		// nothing to do here
 	}
 	
-	public void save() {
+	public void save(Object transaction) {
+		assert transaction == null : "no transactions needed/supported";
 		// nothing to save
 	}
 	

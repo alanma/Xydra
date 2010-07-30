@@ -16,4 +16,14 @@ public abstract class AbstractState implements IHasXAddress {
 		return this.address;
 	}
 	
+	public Object beginTransaction() {
+		// overwrite, if transactions are needed for the state backend
+		return null;
+	}
+	
+	public void endTransaction(Object transaction) {
+		// overwrite, if transactions are needed for the state backend
+		assert transaction == null;
+	}
+	
 }

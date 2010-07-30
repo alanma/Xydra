@@ -172,7 +172,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 			
 			result = result && (this.father.getID().equals(memoryObject.father.getID()));
 			
-			if(this.father.getFather() != null) {
+			if(this.father.hasFather()) {
 				if(memoryObject.father.getFather() == null) {
 					return false;
 				}
@@ -237,14 +237,19 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 			MemoryField field = getField(fieldID);
 			assert field != null : "we checked above";
 			
+			boolean inTrans = this.eventQueue.transactionInProgess;
 			boolean makeTrans = !field.isEmpty();
 			int since = this.eventQueue.getNextPosition();
-			enqueueFieldRemoveEvents(actor, field, makeTrans || transactionInProgress());
+			enqueueFieldRemoveEvents(actor, field, makeTrans || inTrans);
+			
+			Orphans orphans = getOrphans();
+			if(!inTrans && orphans == null) {
+				beginStateTransaction();
+			}
 			
 			// actually remove the field
 			this.state.removeFieldState(field.getID());
 			this.loadedFields.remove(field.getID());
-			Orphans orphans = getOrphans();
 			if(orphans != null) {
 				field.getState().setValue(null);
 				orphans.fields.put(field.getAddress(), field);
@@ -256,16 +261,20 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 			// transaction is in progress
 			// event propagation and revision number increasing happens
 			// after all events were successful
-			if(!transactionInProgress()) {
+			if(!inTrans) {
 				
 				if(makeTrans) {
-					this.eventQueue.createTransactionEvent(actor, getFather(), this, since);
+					this.eventQueue.createTransactionEvent(actor, this.father, this, since);
 				}
 				
 				// increment revision number
 				// only increment if this event is no sub-event of a
 				// transaction (needs to be handled differently)
 				incrementRevisionAndSave();
+				
+				if(orphans == null) {
+					endStateTransaction();
+				}
 				
 				// propagate events
 				this.eventQueue.sendEvents();
@@ -281,7 +290,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 	 * currently used persistence layer
 	 */
 	protected void save() {
-		this.state.save();
+		this.state.save(this.eventQueue.stateTransaction);
 	}
 	
 	/**
@@ -340,10 +349,13 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 			
 			MemoryField field = null;
 			
+			boolean inTrans = this.eventQueue.transactionInProgess;
 			Orphans orphans = getOrphans();
 			if(orphans != null) {
 				XAddress fieldAddr = XX.resolveField(getAddress(), fieldID);
 				field = orphans.fields.remove(fieldAddr);
+			} else if(!inTrans) {
+				beginStateTransaction();
 			}
 			
 			if(field == null) {
@@ -356,19 +368,22 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 			this.loadedFields.put(field.getID(), field);
 			
 			XObjectEvent event = MemoryObjectEvent.createAddEvent(actor, getAddress(), field
-			        .getID(), getModelRevisionNumber(), getRevisionNumber(),
-			        transactionInProgress());
+			        .getID(), getModelRevisionNumber(), getRevisionNumber(), inTrans);
 			
 			this.eventQueue.enqueueObjectEvent(this, event);
 			
 			// event propagation and revision number increasing happens
 			// after all events were successful
-			if(!transactionInProgress()) {
+			if(!inTrans) {
 				
 				// increment revision number
 				// only increment if this event is no subevent of a transaction
 				// (needs to be handled differently)
 				field.incrementRevisionAndSave();
+				
+				if(orphans == null) {
+					endStateTransaction();
+				}
 				
 				// propagate events
 				this.eventQueue.sendEvents();
@@ -446,8 +461,8 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 	
 	@Override
 	protected void incrementRevisionAndSave() {
-		assert !transactionInProgress();
-		if(hasFather()) {
+		assert !this.eventQueue.transactionInProgess;
+		if(this.father != null) {
 			// this increments the revisionNumber of the father and sets
 			// this revNr to the revNr of the father
 			this.father.incrementRevisionAndSave();
@@ -457,6 +472,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 			if(log != null) {
 				assert log.getCurrentRevisionNumber() > getRevisionNumber();
 				setRevisionNumber(log.getCurrentRevisionNumber());
+				this.eventQueue.saveLog();
 			} else {
 				setRevisionNumber(getRevisionNumber() + 1);
 			}
@@ -485,33 +501,6 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 	}
 	
 	/**
-	 * Returns the father-{@link MemoryModel} of this MemoryObject.
-	 * 
-	 * @return The father-{@link MemoryModel} of this MemoryObject (may be
-	 *         null).
-	 * @throws IllegalStateException if this method is called after this
-	 *             MemoryObject was already removed
-	 */
-	@ReadOperation
-	public MemoryModel getFather() {
-		checkRemoved();
-		return this.father;
-	}
-	
-	/**
-	 * Checks whether this object has a father-{@link MemoryModel} or not.
-	 * 
-	 * @return true, if this object has a father-model, false otherwise.
-	 * @throws IllegalStateException if this method is called after this
-	 *             MemoryObject was already removed
-	 */
-	@ReadOperation
-	public boolean hasFather() {
-		checkRemoved();
-		return (this.father != null);
-	}
-	
-	/**
 	 * @throws IllegalStateException if this method is called after this
 	 *             MemoryObject was already removed
 	 */
@@ -532,13 +521,6 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 			checkRemoved();
 			return this.state.getRevisionNumber();
 		}
-	}
-	
-	@Override
-	protected boolean transactionInProgress() {
-		if(hasFather())
-			return super.transactionInProgress() || this.father.transactionInProgress();
-		return super.transactionInProgress();
 	}
 	
 	/**
@@ -698,7 +680,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 	 *         this MemoryObject has no father.
 	 */
 	protected long getModelRevisionNumber() {
-		if(hasFather())
+		if(this.father != null)
 			return this.father.getRevisionNumber();
 		else
 			return XEvent.RevisionOfEntityNotSet;
@@ -706,7 +688,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 	
 	@Override
 	protected long getOldRevisionNumber() {
-		if(hasFather())
+		if(this.father != null)
 			return this.father.getRevisionNumber();
 		else
 			return getRevisionNumber();
@@ -745,13 +727,18 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 	/**
 	 * Deletes the state information of this MemoryObject from the currently
 	 * used persistence layer
+	 * 
+	 * @param transaction
 	 */
 	protected void delete() {
 		for(XID fieldId : this) {
 			MemoryField field = getField(fieldId);
 			field.delete();
 		}
-		this.state.delete();
+		this.state.delete(this.eventQueue.stateTransaction);
+		if(this.father == null) {
+			this.eventQueue.deleteLog();
+		}
 		this.removed = true;
 	}
 	
@@ -802,7 +789,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 	
 	@Override
 	protected MemoryModel getModel() {
-		return getFather();
+		return this.father;
 	}
 	
 	@Override
@@ -812,8 +799,8 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 	
 	@Override
 	protected XBaseModel getTransactionTarget() {
-		if(hasFather()) {
-			return getFather();
+		if(this.father != null) {
+			return this.father;
 		}
 		return new WrapperModel(this);
 	}
@@ -834,9 +821,30 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 	
 	@Override
 	protected void checkSync() {
-		if(hasFather()) {
+		if(this.father != null) {
 			throw new IllegalStateException(
 			        "an object that is part of a model cannot be rolled abck / synchronized individualy");
 		}
 	}
+	
+	@Override
+	protected void beginStateTransaction() {
+		if(this.father != null) {
+			this.father.beginStateTransaction();
+		} else {
+			assert this.eventQueue.stateTransaction == null : "multiple state transactions detected";
+			this.eventQueue.stateTransaction = this.state.beginTransaction();
+		}
+	}
+	
+	@Override
+	protected void endStateTransaction() {
+		if(this.father != null) {
+			this.father.endStateTransaction();
+		} else {
+			this.state.endTransaction(this.eventQueue.stateTransaction);
+			this.eventQueue.stateTransaction = null;
+		}
+	}
+	
 }

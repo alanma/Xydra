@@ -14,6 +14,15 @@ import org.xydra.core.model.state.impl.memory.TemporaryObjectState;
 import org.xydra.core.model.state.impl.memory.TemporaryRepositoryState;
 
 
+/**
+ * An {@link XStateStore} implementation that creates
+ * {@link TemporaryRepositoryState}s, {@link TemporaryModelState}s,
+ * {@link TemporaryObjectState}s and {@link TemporaryFieldState}s which will not
+ * be persisted. Loading states is not supported.
+ * 
+ * @author dscharrer
+ * 
+ */
 public class TemporaryStateStore implements XStateStore {
 	
 	public XFieldState createFieldState(XAddress fieldStateAddress) {

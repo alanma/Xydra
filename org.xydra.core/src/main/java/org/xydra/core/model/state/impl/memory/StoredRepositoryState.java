@@ -57,11 +57,13 @@ public class StoredRepositoryState extends AbstractRepositoryState {
 		}
 	}
 	
-	public void save() {
+	public void save(Object transaction) {
+		assert transaction == null : "no transactions needed/supported";
 		this.store.save(this);
 	}
 	
-	public void delete() {
+	public void delete(Object transaction) {
+		assert transaction == null : "no transactions needed/supported";
 		this.store.deleteRepositoryState(this.getAddress());
 	}
 	

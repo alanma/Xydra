@@ -31,14 +31,26 @@ public interface XFieldState extends IHasXID, Serializable, IHasXAddress {
 	/**
 	 * Delete this state information from the attached persistence layer, i.e.
 	 * the one determined by calling {@link XStateFactory}.create...().
+	 * 
+	 * @param transaction If not null, persist the change at the end of the
+	 *            given transaction, otherwise persist it now. The transaction
+	 *            object (if not null) must have been created by the containing
+	 *            {@link XObjectState}, {@link XModelState} or
+	 *            {@link XRepositoryState}.
 	 */
-	void delete();
+	void delete(Object transaction);
 	
 	/**
 	 * Store this state information in the attached persistence layer, i.e. the
 	 * one determined by calling {@link XStateFactory}.create...().
+	 * 
+	 * @param transaction If not null, persist the change at the end of the
+	 *            given transaction, otherwise persist it now. The transaction
+	 *            object (if not null) must have been created by the containing
+	 *            {@link XObjectState}, {@link XModelState} or
+	 *            {@link XRepositoryState}.
 	 */
-	void save();
+	void save(Object transaction);
 	
 	/**
 	 * Gets the current revision number of the {@link XField} which state is

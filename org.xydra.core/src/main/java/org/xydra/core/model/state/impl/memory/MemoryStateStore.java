@@ -3,6 +3,7 @@ package org.xydra.core.model.state.impl.memory;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.xydra.core.TemporaryStateStore;
 import org.xydra.core.X;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.state.XChangeLogState;
@@ -14,7 +15,9 @@ import org.xydra.core.model.state.XStateStore;
 
 
 /**
- * A factory and store for State entities that persist only in-memory.
+ * An {@link XStateStore} implementation that creates states that are stored
+ * only in-memory. As opposed to with {@link TemporaryStateStore}, saved states
+ * can be loaded from the store at a later time.
  * 
  * @author voelkel
  */
@@ -32,13 +35,6 @@ public class MemoryStateStore implements XStateStore {
 		this.repositories = new HashMap<XAddress,XRepositoryState>();
 	}
 	
-	/*
-	 * FIXME create....State methods -> what happens if given address is already
-	 * taken? Currently, a new state object is created, which will probably
-	 * result in overwritting the old state object. Why not return the old and
-	 * already existing state object instead, like in the create... Methods from
-	 * XObject, XModel and XRepository?
-	 */
 	public XFieldState createFieldState(XAddress fieldAddr) {
 		return new StoredFieldState(fieldAddr, this);
 	}
@@ -85,44 +81,44 @@ public class MemoryStateStore implements XStateStore {
 		return this.repositories.get(repositoryStateAddress);
 	}
 	
-	public void deleteFieldState(XAddress fieldAddress) {
+	protected void deleteFieldState(XAddress fieldAddress) {
 		this.fields.remove(fieldAddress);
 	}
 	
-	public void deleteModelState(XAddress modelAddress) {
+	protected void deleteModelState(XAddress modelAddress) {
 		this.models.remove(modelAddress);
 	}
 	
-	public void deleteObjectState(XAddress objectAddress) {
+	protected void deleteObjectState(XAddress objectAddress) {
 		this.objects.remove(objectAddress);
 	}
 	
-	public void deleteRepositoryState(XAddress repositoryAddress) {
+	protected void deleteRepositoryState(XAddress repositoryAddress) {
 		this.repositories.remove(repositoryAddress);
 	}
 	
-	public void save(StoredFieldState fieldState) {
+	protected void save(StoredFieldState fieldState) {
 		if(fieldState == null) {
 			throw new IllegalArgumentException("fieldState may not be null");
 		}
 		this.fields.put(fieldState.getAddress(), fieldState);
 	}
 	
-	public void save(AbstractModelState modelState) {
+	protected void save(AbstractModelState modelState) {
 		if(modelState == null) {
 			throw new IllegalArgumentException("modelState may not be null");
 		}
 		this.models.put(modelState.getAddress(), modelState);
 	}
 	
-	public void save(AbstractObjectState objectState) {
+	protected void save(AbstractObjectState objectState) {
 		if(objectState == null) {
 			throw new IllegalArgumentException("objectState may not be null");
 		}
 		this.objects.put(objectState.getAddress(), objectState);
 	}
 	
-	public void save(AbstractRepositoryState repositoryState) {
+	protected void save(AbstractRepositoryState repositoryState) {
 		if(repositoryState == null) {
 			throw new IllegalArgumentException("repositoryState may not be null");
 		}

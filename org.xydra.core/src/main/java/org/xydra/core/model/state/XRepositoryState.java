@@ -30,16 +30,53 @@ import org.xydra.core.model.XRepository;
 public interface XRepositoryState extends IHasXID, Iterable<XID>, IHasXAddress {
 	
 	/**
+	 * Begin a simple transaction to prevent inconsistent states from being
+	 * persisted.
+	 * 
+	 * Only the state backend itself can abort state transactions. null may be
+	 * returned if the backend can guarantee that saving and deleting states is
+	 * always possible. Otherwise, changes performed with this transaction
+	 * object should not be persisted until the transaction object is passed to
+	 * {@link #endTransaction()}.
+	 * 
+	 * Each state may only be part of at most one transaction at any given time.
+	 * 
+	 * The returned transaction object may only be used for this
+	 * {@link XRepositoryState} as well as {@link XModelState}s,
+	 * {@link XObjectState}s and {@link XFieldState}s contained with this
+	 * repository.
+	 */
+	Object beginTransaction();
+	
+	/**
+	 * Persist changes associated with the given transaction.
+	 * 
+	 * @param transaction must have been returned by {@link #beginTransaction()}
+	 *            from this {@link XRepositoryState}
+	 */
+	void endTransaction(Object transaction);
+	
+	/**
 	 * Store this state information in the attached persistence layer, i.e. the
 	 * one determined by calling {@link XStateStore#c}.create...().
+	 * 
+	 * @param transaction If not null, persist the change at the end of the
+	 *            given transaction, otherwise persist it now. The transaction
+	 *            object must have been created by this {@link XRepositoryState}
+	 *            .
 	 */
-	void save();
+	void save(Object transaction);
 	
 	/**
 	 * Delete this state information from the attached persistence layer, i.e.
 	 * the one determined by calling {@link XStateStore}.create...().
+	 * 
+	 * @param transaction If not null, persist the change at the end of the
+	 *            given transaction, otherwise persist it now. The transaction
+	 *            object must have been created by this {@link XRepositoryState}
+	 *            .
 	 */
-	void delete();
+	void delete(Object transaction);
 	
 	/**
 	 * Links the given {@link XModelState} as a child of this XRepositoryState.
@@ -71,8 +108,11 @@ public interface XRepositoryState extends IHasXID, Iterable<XID>, IHasXAddress {
 	XModelState getModelState(XID id);
 	
 	/**
-	 * Creates a new {@link XModelState} in the same persistence layer as this
-	 * XRepositoryState and adds it as a child of this state.
+	 * Create a new {@link XModelState} in the same persistence layer as this
+	 * XRepositoryState and with an address contained within this repository.
+	 * This does not check if there is already such a state and does not add the
+	 * created state as a child. The {@link XRepository} implementation is
+	 * responsible for doing so.
 	 * 
 	 * @param id The {@link XID} for the new {@link XModelState}
 	 * @return The newly created {@link XModelState}
@@ -102,6 +142,9 @@ public interface XRepositoryState extends IHasXID, Iterable<XID>, IHasXAddress {
 	
 	/**
 	 * Removes the specified {@link XModelState} from this XRepositoryState.
+	 * This does not remove the actual {@link XModelState} from the state
+	 * backend, only the reference from this state. To cleanup the state use
+	 * {@link XModelState#delete(Object)}
 	 * 
 	 * @param modelStateID The {@link XID} of the {@link XModelState} which is
 	 *            to be removed

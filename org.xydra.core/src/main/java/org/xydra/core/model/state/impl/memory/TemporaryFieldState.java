@@ -19,11 +19,13 @@ public class TemporaryFieldState extends AbstractFieldState {
 		super(fieldAddr);
 	}
 	
-	public void delete() {
+	public void delete(Object transaction) {
+		assert transaction == null : "no transactions needed/supported";
 		// nothing to do here
 	}
 	
-	public void save() {
+	public void save(Object transaction) {
+		assert transaction == null : "no transactions needed/supported";
 		// nothing to save
 	}
 	

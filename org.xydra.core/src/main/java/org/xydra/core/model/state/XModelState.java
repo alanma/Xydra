@@ -45,8 +45,13 @@ public interface XModelState extends IHasXID, Serializable, Iterable<XID>, IHasX
 	/**
 	 * Delete this state information from the attached persistence layer, i.e.
 	 * the one determined by calling {@link XStateFactory}.create...().
+	 * 
+	 * @param transaction If not null, persist the change at the end of the
+	 *            given transaction, otherwise persist it now. The transaction
+	 *            object must have been created by this {@link XModelState} or
+	 *            the containing {@link XRepositoryState}.
 	 */
-	void delete();
+	void delete(Object transaction);
 	
 	/**
 	 * Gets the current revision number of the {@link XModel} which state is
@@ -96,7 +101,10 @@ public interface XModelState extends IHasXID, Serializable, Iterable<XID>, IHasX
 	
 	/**
 	 * Creates a new {@link XObjectState} in the same persistence layer as this
-	 * XModelState and adds it as a child of this XModelState.
+	 * XModelState and with an address contained within this model. This does
+	 * not check if there is already such a state and does not add the created
+	 * state as a child. The {@link XModel} implementation is responsible for
+	 * doing so.
 	 * 
 	 * @param id The {@link XID} for the new {@link XObjectState}
 	 * @return The newly created {@link XObjectState}
@@ -104,7 +112,10 @@ public interface XModelState extends IHasXID, Serializable, Iterable<XID>, IHasX
 	XObjectState createObjectState(XID id);
 	
 	/**
-	 * Removes the specified {@link XObjectState} from this XModelState.
+	 * Removes the specified {@link XObjectState} from this XModelState. This
+	 * does not remove the actual {@link XObjectState} from the state backend,
+	 * only the reference from this state. To cleanup the state use
+	 * {@link XObjectState#delete(Object)}
 	 * 
 	 * @param objectStateID The {@link XID} of the {@link XObjectState} which is
 	 *            to be removed
@@ -112,10 +123,41 @@ public interface XModelState extends IHasXID, Serializable, Iterable<XID>, IHasX
 	void removeObjectState(XID objectStateId);
 	
 	/**
+	 * Begin a simple transaction to prevent inconsistent states from being
+	 * persisted.
+	 * 
+	 * Only the state backend itself can abort state transactions. null may be
+	 * returned if the backend can guarantee that saving and deleting states is
+	 * always possible. Otherwise, changes performed with this transaction
+	 * object should not be persisted until the transaction object is passed to
+	 * {@link #endTransaction()}.
+	 * 
+	 * Each state may only be part of at most one transaction at any given time.
+	 * 
+	 * The returned transaction object may only be used for this
+	 * {@link XModelState} as well as {@link XObjectState}s and
+	 * {@link XFieldState}s contained with this model.
+	 */
+	Object beginTransaction();
+	
+	/**
+	 * Persist changes associated with the given transaction.
+	 * 
+	 * @param transaction must have been returned by {@link #beginTransaction()}
+	 *            from this {@link XModelState}
+	 */
+	void endTransaction(Object transaction);
+	
+	/**
 	 * Store this state information in the attached persistence layer, i.e. the
 	 * one determined by calling {@link XStateFactory}.create...().
+	 * 
+	 * @param transaction If not null, persist the change at the end of the
+	 *            given transaction, otherwise persist it now. The transaction
+	 *            object must have been created by this {@link XModelState} or
+	 *            the containing {@link XRepositoryState}.
 	 */
-	void save();
+	void save(Object transaction);
 	
 	/**
 	 * Sets the stored revision number

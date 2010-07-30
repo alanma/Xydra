@@ -33,17 +33,20 @@ public class MemoryChangeLog implements XChangeLog {
 	 * 
 	 * @param event the {@link XEvent} which is to be appended
 	 */
-	protected void appendEvent(XEvent event) {
+	protected void appendEvent(XEvent event, Object transaction) {
+		assert this.state.getBaseAddress().getObject() != null || event != null : "cannot add null events to model change log";
 		assert this.state.getBaseAddress().getObject() != null
-		        || (event != null && event.getModelRevisionNumber() == this
-		                .getCurrentRevisionNumber());
+		        || (event.getModelRevisionNumber() == getCurrentRevisionNumber()) : "cannot append event with rev "
+		        + event.getModelRevisionNumber()
+		        + " to model change log at event "
+		        + getCurrentRevisionNumber();
 		
 		assert event == null || !event.inTransaction();
 		// "else": event is part of a transaction and will therefore only be
 		// recorded as part of the transaction (by using a
 		// ChangeLogTransactionListener)
 		
-		this.state.appendEvent(event);
+		this.state.appendEvent(event, transaction);
 	}
 	
 	/**
@@ -57,8 +60,8 @@ public class MemoryChangeLog implements XChangeLog {
 	 *         number was smaller than the current revision number and greater
 	 *         than zero.
 	 */
-	protected boolean truncateToRevision(long revisionNumber) {
-		return this.state.truncateToRevision(revisionNumber);
+	protected boolean truncateToRevision(long revisionNumber, Object transaction) {
+		return this.state.truncateToRevision(revisionNumber, transaction);
 	}
 	
 	public XAddress getModelAddress() {
@@ -162,6 +165,14 @@ public class MemoryChangeLog implements XChangeLog {
 	
 	public Iterator<XEvent> getEventsUntil(long revisionNumber) {
 		return getEventsBetween(0, revisionNumber);
+	}
+	
+	protected void save(Object transaction) {
+		this.state.save(transaction);
+	}
+	
+	protected void delete(Object transaction) {
+		this.state.delete(transaction);
 	}
 	
 }

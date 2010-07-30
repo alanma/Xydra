@@ -133,9 +133,12 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 			
 			MemoryObject object = null;
 			
+			boolean inTrans = this.eventQueue.transactionInProgess;
 			Orphans orphans = getOrphans();
 			if(orphans != null) {
 				object = orphans.objects.remove(objectID);
+			} else if(!inTrans) {
+				beginStateTransaction();
 			}
 			
 			if(object == null) {
@@ -148,18 +151,22 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 			this.loadedObjects.put(object.getID(), object);
 			
 			XModelEvent event = MemoryModelEvent.createAddEvent(actor, getAddress(), objectID,
-			        getRevisionNumber(), transactionInProgress());
+			        getRevisionNumber(), inTrans);
 			
 			this.eventQueue.enqueueModelEvent(this, event);
 			
 			// event propagation and revision number increasing happens after
 			// all events were successful
-			if(!transactionInProgress()) {
+			if(!inTrans) {
 				
 				// increment revision number
 				// only increment if this event is no subevent of a transaction
 				// (needs to be handled differently)
 				object.incrementRevisionAndSave();
+				
+				if(orphans == null) {
+					endStateTransaction();
+				}
 				
 				// propagate events
 				this.eventQueue.sendEvents();
@@ -237,14 +244,19 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 			
 			assert object != null;
 			
+			boolean inTrans = this.eventQueue.transactionInProgess;
 			boolean makeTrans = !object.isEmpty();
 			int since = this.eventQueue.getNextPosition();
-			enqueueObjectRemoveEvents(actor, object, makeTrans || transactionInProgress());
+			enqueueObjectRemoveEvents(actor, object, makeTrans || inTrans);
+			
+			Orphans orphans = getOrphans();
+			if(!inTrans && orphans == null) {
+				beginStateTransaction();
+			}
 			
 			// remove the object
 			this.loadedObjects.remove(object.getID());
 			this.state.removeObjectState(object.getID());
-			Orphans orphans = getOrphans();
 			if(orphans != null) {
 				object.removeInternal(orphans);
 				orphans.objects.put(object.getID(), object);
@@ -254,7 +266,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 			
 			// event propagation and revision number increasing for transactions
 			// happens after all events of a transaction were successful
-			if(!transactionInProgress()) {
+			if(!inTrans) {
 				
 				if(makeTrans) {
 					this.eventQueue.createTransactionEvent(actor, this, null, since);
@@ -264,6 +276,10 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 				// only increment if this event is no subevent of a
 				// transaction (needs to be handled differently)
 				incrementRevisionAndSave();
+				
+				if(orphans == null) {
+					endStateTransaction();
+				}
 				
 				// propagate events
 				this.eventQueue.sendEvents();
@@ -363,18 +379,28 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 	
 	@Override
 	protected void incrementRevisionAndSave() {
-		assert !transactionInProgress();
+		assert !this.eventQueue.transactionInProgess;
 		long newRevision = getRevisionNumber() + 1;
 		this.state.setRevisionNumber(newRevision);
 		save();
+		this.eventQueue.saveLog();
 	}
 	
 	/**
 	 * Saves the current state information of this MemoryModel with the
 	 * currently used persistence layer
 	 */
-	protected void save() {
-		this.state.save();
+	protected void save(Object transaction) {
+		assert this.eventQueue.stateTransaction == null : "double state transaction detected";
+		this.state.save(transaction);
+	}
+	
+	/**
+	 * Saves the current state information of this MemoryModel with the
+	 * currently used persistence layer
+	 */
+	private void save() {
+		this.state.save(this.eventQueue.stateTransaction);
 	}
 	
 	/**
@@ -386,7 +412,6 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 	 */
 	@ReadOperation
 	protected MemoryRepository getFather() {
-		checkRemoved();
 		return this.father;
 	}
 	
@@ -400,7 +425,6 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 	 */
 	@ReadOperation
 	protected boolean hasFather() {
-		checkRemoved();
 		return this.father != null;
 	}
 	
@@ -696,7 +720,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 	 * @throws IllegalArgumentException if the given {@link MemoryOjbect} equals
 	 *             null
 	 */
-	private void enqueueObjectRemoveEvents(XID actor, MemoryObject object, boolean inTrans) {
+	protected void enqueueObjectRemoveEvents(XID actor, MemoryObject object, boolean inTrans) {
 		
 		if(object == null) {
 			throw new IllegalArgumentException("object must not be null");
@@ -719,12 +743,24 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 	 * Deletes the state information of this MemoryModel from the currently used
 	 * persistence layer
 	 */
-	protected void delete() {
+	protected void delete(Object transaction) {
+		assert this.eventQueue.stateTransaction == null : "double state transaction detected";
+		this.eventQueue.stateTransaction = transaction;
+		delete();
+		this.eventQueue.stateTransaction = null;
+	}
+	
+	/**
+	 * Deletes the state information of this MemoryModel from the currently used
+	 * persistence layer
+	 */
+	private void delete() {
 		for(XID objectId : this) {
 			MemoryObject object = getObject(objectId);
 			object.delete();
 		}
-		this.state.delete();
+		this.state.delete(this.eventQueue.stateTransaction);
+		this.eventQueue.deleteLog();
 		this.removed = true;
 	}
 	
@@ -784,6 +820,18 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 	@Override
 	protected void checkSync() {
 		// models can always sync
+	}
+	
+	@Override
+	protected void beginStateTransaction() {
+		assert this.eventQueue.stateTransaction == null : "multiple state transactions detected";
+		this.eventQueue.stateTransaction = this.state.beginTransaction();
+	}
+	
+	@Override
+	protected void endStateTransaction() {
+		this.state.endTransaction(this.eventQueue.stateTransaction);
+		this.eventQueue.stateTransaction = null;
 	}
 	
 }

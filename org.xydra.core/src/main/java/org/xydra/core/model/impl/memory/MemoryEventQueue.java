@@ -33,8 +33,26 @@ public class MemoryEventQueue {
 	private final List<EventQueueEntry> eventQueue;
 	private boolean sending;
 	private final MemoryChangeLog changeLog;
+	
+	/**
+	 * Should events be logged right now?
+	 */
 	private boolean logging;
+	
+	/**
+	 * A list of temporarily removed orphans.
+	 */
 	protected Orphans orphans;
+	
+	/**
+	 * The current transaction of this model, object or field.
+	 */
+	protected Object stateTransaction;
+	
+	/**
+	 * Is there currently a transaction running?
+	 */
+	protected boolean transactionInProgess;
 	
 	/**
 	 * Creates a new MemoryEventQueue
@@ -57,7 +75,7 @@ public class MemoryEventQueue {
 	private void enqueueEvent(EventQueueEntry entry) {
 		
 		if(this.logging && !entry.event.inTransaction()) {
-			this.changeLog.appendEvent(entry.event);
+			this.changeLog.appendEvent(entry.event, this.stateTransaction);
 		}
 		
 		this.eventQueue.add(entry);
@@ -173,7 +191,7 @@ public class MemoryEventQueue {
 	public void enqueueObjectEvent(MemoryObject object, XObjectEvent event) {
 		assert object != null && event != null : "Neither object nor event may be null!";
 		
-		MemoryModel model = object.getFather();
+		MemoryModel model = object.getModel();
 		MemoryRepository repo = model == null ? null : model.getFather();
 		
 		enqueueEvent(new EventQueueEntry(repo, model, object, null, event));
@@ -188,8 +206,8 @@ public class MemoryEventQueue {
 	public void enqueueFieldEvent(MemoryField field, XFieldEvent event) {
 		assert field != null && event != null : "Neither field nor event may be null!";
 		
-		MemoryObject object = field.getFather();
-		MemoryModel model = object == null ? null : object.getFather();
+		MemoryObject object = field.getObject();
+		MemoryModel model = object == null ? null : object.getModel();
 		MemoryRepository repo = model == null ? null : model.getFather();
 		
 		enqueueEvent(new EventQueueEntry(repo, model, object, field, event));
@@ -517,7 +535,7 @@ public class MemoryEventQueue {
 	/**
 	 * @return the {@link MemoryChangeLog} being used for logging.
 	 */
-	public MemoryChangeLog getChangeLog() {
+	public XChangeLog getChangeLog() {
 		return this.changeLog;
 	}
 	
@@ -531,6 +549,22 @@ public class MemoryEventQueue {
 		boolean oldBlock = this.sending;
 		this.sending = block;
 		return oldBlock;
+	}
+	
+	public void logNullEvent() {
+		this.changeLog.appendEvent(null, this.stateTransaction);
+	}
+	
+	public void truncateLog(long revision) {
+		this.changeLog.truncateToRevision(revision, this.stateTransaction);
+	}
+	
+	public void saveLog() {
+		this.changeLog.save(this.stateTransaction);
+	}
+	
+	public void deleteLog() {
+		this.changeLog.delete(this.stateTransaction);
 	}
 	
 }

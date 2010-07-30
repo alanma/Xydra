@@ -25,6 +25,7 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
+import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XExecutesCommands;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
@@ -58,25 +59,16 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 	}
 	
 	protected final MemoryEventQueue eventQueue;
-	/** if this variable equals true, a transaction is currently running */
-	private boolean transactionInProgress = false;
 	
 	public SynchronizesChangesImpl(MemoryEventQueue queue) {
 		this.eventQueue = queue;
 	}
 	
-	/**
-	 * Returns true, if a transaction is running at the moment.
-	 * 
-	 * @return true, if a transaction is running at the moment.
-	 */
-	protected boolean transactionInProgress() {
-		return this.transactionInProgress;
-	}
-	
 	public long executeTransaction(XID actor, XTransaction transaction) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
+			
+			assert !this.eventQueue.transactionInProgess : "double transaction detected";
 			
 			// make sure that the transaction actually refers to this model
 			if(!transaction.getTarget().equals(getAddress())) {
@@ -126,10 +118,16 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 			
 			// only execute as transaction if there actually are multiple
 			// changes
+			boolean hasOrphans = (this.eventQueue.orphans != null);
 			if(nChanges > 1) {
+				
+				if(!hasOrphans) {
+					beginStateTransaction();
+				}
+				
 				// set "transactionInProgress" to true to stop involuntarily
 				// increasing the affected revision numbers
-				this.transactionInProgress = true;
+				this.eventQueue.transactionInProgess = true;
 			}
 			
 			int since = this.eventQueue.getNextPosition();
@@ -230,10 +228,14 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 					
 				}
 				
-				this.transactionInProgress = false;
+				this.eventQueue.transactionInProgess = false;
 				
 				// really increment the model's revision number
 				incrementRevisionAndSave();
+				
+				if(!hasOrphans) {
+					endStateTransaction();
+				}
 				
 				// dispatch events
 				this.eventQueue.sendEvents();
@@ -397,20 +399,15 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 		return true;
 	}
 	
-	public MemoryChangeLog getChangeLog() {
+	public XChangeLog getChangeLog() {
 		return this.eventQueue.getChangeLog();
 	}
 	
 	/**
 	 * Returns a collection containing the {@link XField XFields} and
-	 * {@link XObject XObjects} that were removed during the current transaction
-	 * (for synchronization purposes)
-	 * 
-	 * @return Returns a collection containing the {@link XField XFields} and
-	 *         {@link XObject XObjects} that were removed during the current
-	 *         transaction
+	 * {@link XObject XObjects} that are (temporarily) removed while
+	 * synchronizing.
 	 */
-	// TODO Not sure if I got this right
 	protected Orphans getOrphans() {
 		return this.eventQueue.orphans;
 	}
@@ -423,7 +420,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 			throw new RuntimeException("invalid revision number: " + revision);
 		}
 		
-		MemoryChangeLog log = getChangeLog();
+		XChangeLog log = getChangeLog();
 		long currentRev = log.getCurrentRevisionNumber();
 		if(revision == currentRev) {
 			return;
@@ -431,6 +428,11 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 		
 		// stop the change log to prevent the rollback events from being logged
 		boolean oldLogging = this.eventQueue.setLogging(false);
+		
+		boolean hasOrphans = (this.eventQueue.orphans != null);
+		if(!hasOrphans) {
+			beginStateTransaction();
+		}
 		
 		// rollback each event individually
 		for(long i = currentRev - 1; i >= revision; i--) {
@@ -450,10 +452,13 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 		}
 		
 		// reset the change log
-		log.truncateToRevision(revision);
-		this.eventQueue.setLogging(oldLogging);
+		this.eventQueue.truncateLog(revision);
 		
-		saveIfModel();
+		if(!hasOrphans) {
+			endStateTransaction();
+		}
+		
+		this.eventQueue.setLogging(oldLogging);
 		
 	}
 	
@@ -492,6 +497,8 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 			field.setRevisionNumber(event.getObjectRevisionNumber());
 			field.save();
 		}
+		setRevisionNumberIfModel(event.getModelRevisionNumber());
+		saveIfModel();
 	}
 	
 	public long[] synchronize(List<XEvent> remoteChanges, long lastRevision, XID actor,
@@ -510,6 +517,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 		try {
 			
 			assert this.eventQueue.orphans == null;
+			beginStateTransaction();
 			this.eventQueue.orphans = new Orphans();
 			
 			int pos = this.eventQueue.getNextPosition();
@@ -520,10 +528,9 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 			// Apply the remote changes.
 			for(XEvent remoteChange : remoteChanges) {
 				if(remoteChange == null) {
-					this.eventQueue.getChangeLog().appendEvent(null);
+					this.eventQueue.logNullEvent();
 					continue;
 				}
-				// TODO ignore model events?
 				XCommand replayCommand = XX.createReplayCommand(remoteChange);
 				long result = executeCommand(remoteChange.getActor(), replayCommand);
 				if(result < 0) {
@@ -605,6 +612,8 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 			}
 			
 		} finally {
+			
+			endStateTransaction();
 			
 			this.eventQueue.setBlockSending(oldBlock);
 			this.eventQueue.sendEvents();
@@ -706,5 +715,17 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 	 * Check if this entity may be synchronized.
 	 */
 	protected abstract void checkSync();
+	
+	/**
+	 * Start a new state transaction.
+	 * 
+	 * @return true if a transaction was started and should be ended later.
+	 */
+	protected abstract void beginStateTransaction();
+	
+	/**
+	 * End the current state transaction.
+	 */
+	protected abstract void endStateTransaction();
 	
 }

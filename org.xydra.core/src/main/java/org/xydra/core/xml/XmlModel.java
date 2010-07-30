@@ -98,14 +98,21 @@ public class XmlModel {
 		XAddress repoAddr = X.getIDProvider().fromComponents(xid, null, null, null);
 		XRepositoryState repositoryState = new TemporaryRepositoryState(repoAddr);
 		
+		// TODO can we just (correctly) assume that TemporaryRepositoryState
+		// doesn't need transactions?
+		Object trans = repositoryState.beginTransaction();
+		
 		Iterator<MiniElement> modelElementIt = xml.getElementsByTagName(XMODEL_ELEMENT);
 		while(modelElementIt.hasNext()) {
 			MiniElement modelElement = modelElementIt.next();
-			XModelState modelState = toModelState(modelElement, repoAddr);
+			XModelState modelState = toModelState(modelElement, repoAddr, trans);
 			repositoryState.addModelState(modelState);
 		}
 		
-		repositoryState.save();
+		repositoryState.save(trans);
+		
+		repositoryState.endTransaction(trans);
+		
 		return repositoryState;
 	}
 	
@@ -120,7 +127,7 @@ public class XmlModel {
 		return new MemoryRepository(toRepositoryState(xml));
 	}
 	
-	private static XModelState toModelState(MiniElement xml, XAddress repoAddr) {
+	private static XModelState toModelState(MiniElement xml, XAddress repoAddr, Object trans) {
 		
 		checkElementName(xml, XMODEL_ELEMENT);
 		
@@ -133,14 +140,21 @@ public class XmlModel {
 		XModelState modelState = new TemporaryModelState(modelAddr, changeLogState);
 		modelState.setRevisionNumber(revision);
 		
+		Object t = trans == null ? modelState.beginTransaction() : trans;
+		
 		Iterator<MiniElement> objectElementIt = xml.getElementsByTagName(XOBJECT_ELEMENT);
 		while(objectElementIt.hasNext()) {
 			MiniElement objectElement = objectElementIt.next();
-			XObjectState objectState = toObjectState(objectElement, modelAddr);
+			XObjectState objectState = toObjectState(objectElement, modelAddr, t);
 			modelState.addObjectState(objectState);
 		}
 		
-		modelState.save();
+		modelState.save(null);
+		
+		if(trans == null) {
+			modelState.endTransaction(t);
+		}
+		
 		return modelState;
 	}
 	
@@ -152,10 +166,10 @@ public class XmlModel {
 	 *             XModel element.
 	 */
 	public static XModel toModel(MiniElement xml) {
-		return new MemoryModel(toModelState(xml, null));
+		return new MemoryModel(toModelState(xml, null, null));
 	}
 	
-	private static XObjectState toObjectState(MiniElement xml, XAddress modelAddr) {
+	private static XObjectState toObjectState(MiniElement xml, XAddress modelAddr, Object trans) {
 		
 		checkElementName(xml, XOBJECT_ELEMENT);
 		
@@ -169,14 +183,21 @@ public class XmlModel {
 		XObjectState objectState = new TemporaryObjectState(objectAddr, changeLogState);
 		objectState.setRevisionNumber(revision);
 		
+		Object t = trans == null ? objectState.beginTransaction() : trans;
+		
 		Iterator<MiniElement> fieldElementIt = xml.getElementsByTagName(XFIELD_ELEMENT);
 		while(fieldElementIt.hasNext()) {
 			MiniElement fieldElement = fieldElementIt.next();
-			XFieldState fieldState = toFieldState(fieldElement, objectAddr);
+			XFieldState fieldState = toFieldState(fieldElement, objectAddr, t);
 			objectState.addFieldState(fieldState);
 		}
 		
-		objectState.save();
+		objectState.save(t);
+		
+		if(trans == null) {
+			objectState.endTransaction(t);
+		}
+		
 		return objectState;
 	}
 	
@@ -188,10 +209,10 @@ public class XmlModel {
 	 *             XObject element.
 	 */
 	public static XObject toObject(MiniElement xml) {
-		return new MemoryObject(toObjectState(xml, null));
+		return new MemoryObject(toObjectState(xml, null, null));
 	}
 	
-	private static XFieldState toFieldState(MiniElement xml, XAddress objectAddr) {
+	private static XFieldState toFieldState(MiniElement xml, XAddress objectAddr, Object trans) {
 		
 		checkElementName(xml, XFIELD_ELEMENT);
 		
@@ -212,7 +233,7 @@ public class XmlModel {
 		fieldState.setRevisionNumber(revision);
 		fieldState.setValue(xvalue);
 		
-		fieldState.save();
+		fieldState.save(trans);
 		return fieldState;
 	}
 	
@@ -224,7 +245,7 @@ public class XmlModel {
 	 *             XField element.
 	 */
 	public static XField toField(MiniElement xml) {
-		return new MemoryField(toFieldState(xml, null));
+		return new MemoryField(toFieldState(xml, null, null));
 	}
 	
 	/**

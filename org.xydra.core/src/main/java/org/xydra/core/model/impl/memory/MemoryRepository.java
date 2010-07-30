@@ -91,9 +91,13 @@ public class MemoryRepository implements XRepository, Serializable {
 			XModelState modelState = this.state.createModelState(modelID);
 			model = new MemoryModel(this, modelState);
 			
+			Object trans = beginStateTransaction();
+			
 			this.state.addModelState(modelState);
-			model.save();
-			save();
+			model.save(trans);
+			save(trans);
+			
+			endStateTransaction(trans);
 			
 			// in memory
 			this.loadedModels.put(model.getID(), model);
@@ -111,8 +115,16 @@ public class MemoryRepository implements XRepository, Serializable {
 	 * Saves the current state information of this MemoryRepository with the
 	 * currently used persistence layer
 	 */
-	private void save() {
-		this.state.save();
+	private void save(Object transaction) {
+		this.state.save(transaction);
+	}
+	
+	private Object beginStateTransaction() {
+		return this.state.beginTransaction();
+	}
+	
+	private void endStateTransaction(Object transaction) {
+		this.state.endTransaction(transaction);
 	}
 	
 	@ReadOperation
@@ -147,21 +159,39 @@ public class MemoryRepository implements XRepository, Serializable {
 			return false;
 		}
 		
-		long modelRev = model.getRevisionNumber();
-		model.delete();
-		this.state.removeModelState(modelID);
-		this.loadedModels.remove(modelID);
-		
-		// set father attribute of the removed model to null
-		
-		save();
-		
-		XRepositoryEvent event = MemoryRepositoryEvent.createRemoveEvent(actor, getAddress(),
-		        modelID, modelRev);
-		fireRepositoryEvent(event);
-		// FIXME must also fire events for removed values, fields and objects
+		synchronized(model.eventQueue) {
+			
+			long modelRev = model.getRevisionNumber();
+			
+			enqueueModelRemoveEvents(actor, model);
+			
+			Object trans = beginStateTransaction();
+			
+			model.delete(trans);
+			this.state.removeModelState(modelID);
+			this.loadedModels.remove(modelID);
+			
+			save(trans);
+			
+			endStateTransaction(trans);
+			
+			model.eventQueue.sendEvents();
+			XRepositoryEvent event = MemoryRepositoryEvent.createRemoveEvent(actor, getAddress(),
+			        modelID, modelRev);
+			fireRepositoryEvent(event);
+			
+		}
 		
 		return true;
+	}
+	
+	protected void enqueueModelRemoveEvents(XID actor, MemoryModel model) {
+		
+		for(XID objectId : model) {
+			MemoryObject object = model.getObject(objectId);
+			model.enqueueObjectRemoveEvents(actor, object, true);
+		}
+		
 	}
 	
 	public synchronized long executeRepositoryCommand(XID actor, XRepositoryCommand command) {

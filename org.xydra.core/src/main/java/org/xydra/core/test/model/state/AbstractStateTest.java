@@ -88,7 +88,7 @@ public abstract class AbstractStateTest {
 		if(canPersist()) {
 			XFieldState fieldState = XSPI.getStateStore().loadFieldState(fieldStateAddress);
 			assertNotNull(fieldState);
-			fieldState.delete();
+			fieldState.delete(null);
 			assertNull(XSPI.getStateStore().loadFieldState(fieldStateAddress));
 		}
 	}
@@ -130,8 +130,8 @@ public abstract class AbstractStateTest {
 		this.repositoryState.addModelState(modelState1);
 		assertTrue(this.repositoryState.hasModelState(modelState1ID));
 		
-		this.repositoryState.save();
-		modelState1.save();
+		this.repositoryState.save(null);
+		modelState1.save(null);
 		
 		XModelState modelState2 = XSPI.getStateStore().createModelState(modelState2Addr);
 		this.repositoryState.addModelState(modelState2);
@@ -264,8 +264,8 @@ public abstract class AbstractStateTest {
 		this.repositoryState.addModelState(modelState1);
 		assertTrue(this.repositoryState.hasModelState(modelID1));
 		
-		this.repositoryState.save();
-		modelState1.save();
+		this.repositoryState.save(null);
+		modelState1.save(null);
 		
 		if(canPersist()) {
 			
@@ -291,7 +291,7 @@ public abstract class AbstractStateTest {
 		XSPI.getStateStore().createObjectState(ao1);
 		XFieldState fieldState = XSPI.getStateStore().createFieldState(af1);
 		fieldState.setValue(X.getValueFactory().createDoubleValue(3.1415));
-		fieldState.save();
+		fieldState.save(null);
 		
 		if(canPersist()) {
 			XFieldState loadedFieldState = XSPI.getStateStore().loadFieldState(af1);
@@ -309,8 +309,8 @@ public abstract class AbstractStateTest {
 		XAddress am1 = XX.resolveModel(getRepositoryAddress(), m1);
 		XModelState modelState = XSPI.getStateStore().createModelState(am1);
 		this.repositoryState.addModelState(modelState);
-		modelState.save();
-		this.repositoryState.save();
+		modelState.save(null);
+		this.repositoryState.save(null);
 		
 		if(canPersist()) {
 			
@@ -340,9 +340,9 @@ public abstract class AbstractStateTest {
 		
 		this.repositoryState.addModelState(modelState);
 		
-		modelState.save();
-		objectState.save();
-		this.repositoryState.save();
+		modelState.save(null);
+		objectState.save(null);
+		this.repositoryState.save(null);
 		
 		if(canPersist()) {
 			XObjectState loadedObjectState = XSPI.getStateStore().loadObjectState(ao1);
@@ -354,7 +354,7 @@ public abstract class AbstractStateTest {
 	public void testSaveRepositoryState() {
 		XRepositoryState repositoryState = XSPI.getStateStore().createRepositoryState(
 		        getRepositoryAddress());
-		repositoryState.save();
+		repositoryState.save(null);
 		
 		if(canPersist()) {
 			XRepositoryState loadedRepositoryState = XSPI.getStateStore().loadRepositoryState(

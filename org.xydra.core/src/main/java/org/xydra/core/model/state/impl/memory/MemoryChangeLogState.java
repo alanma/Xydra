@@ -30,11 +30,11 @@ public class MemoryChangeLogState implements XChangeLogState {
 		this.revisionNumber = revisionNumber;
 	}
 	
-	public void save() {
+	public void save(Object transaction) {
 		// memory change log cannot be saved, ignore
 	}
 	
-	public void delete() {
+	public void delete(Object transaction) {
 		// automatically deleted by garbage collector
 	}
 	
@@ -60,7 +60,7 @@ public class MemoryChangeLogState implements XChangeLogState {
 		return rev;
 	}
 	
-	public void appendEvent(XEvent event) {
+	public void appendEvent(XEvent event, Object transaction) {
 		
 		assert getRevisionForEvent(event) == getCurrentRevisionNumber();
 		
@@ -71,7 +71,7 @@ public class MemoryChangeLogState implements XChangeLogState {
 		return this.baseAddr;
 	}
 	
-	public boolean truncateToRevision(long revisionNumber) {
+	public boolean truncateToRevision(long revisionNumber, Object transaction) {
 		if(revisionNumber > getCurrentRevisionNumber()) {
 			return false;
 		}

@@ -8,6 +8,7 @@ import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
+import org.xydra.core.model.XObject;
 
 
 /**
@@ -28,17 +29,56 @@ import org.xydra.core.model.XModel;
  * @author Kaidel
  */
 public interface XObjectState extends IHasXID, Iterable<XID>, IHasXAddress {
+	
+	/**
+	 * Begin a simple transaction to prevent inconsistent states from being
+	 * persisted.
+	 * 
+	 * Only the state backend itself can abort state transactions. null may be
+	 * returned if the backend can guarantee that saving and deleting states is
+	 * always possible. Otherwise, changes performed with this transaction
+	 * object should not be persisted until the transaction object is passed to
+	 * {@link #endTransaction()}.
+	 * 
+	 * Each state may only be part of at most one transaction at any given time.
+	 * 
+	 * The returned transaction object may only be used for this
+	 * {@link XObjectState} as well as {@link XFieldState}s contained with this
+	 * object.
+	 */
+	Object beginTransaction();
+	
+	/**
+	 * Persist changes associated with the given transaction.
+	 * 
+	 * @param transaction must have been returned by {@link #beginTransaction()}
+	 *            from this {@link XObjectState}
+	 */
+	void endTransaction(Object transaction);
+	
 	/**
 	 * Delete this state information from the attached persistence layer, i.e.
 	 * the one determined by calling {@link XStateFactory}.create...().
+	 * 
+	 * @param transaction If not null, persist the change at the end of the
+	 *            given transaction, otherwise persist it now. The transaction
+	 *            object must have been created by this {@link XObjectState} or
+	 *            the containing {@link XModelState} or {@link XRepositoryState}
+	 *            .
 	 */
-	void delete();
+	void delete(Object transaction);
 	
 	/**
 	 * Store this state information in the attached persistence layer, i.e. the
 	 * one determined by calling {@link XStateFactory}.create...().
+	 * 
+	 * @param transaction If not null, persist the change at the end of the
+	 *            given transaction, otherwise persist it now. The transaction
+	 *            object must have been created by this {@link XObjectState} or
+	 *            the containing {@link XModelState} or {@link XRepositoryState}
+	 *            .
 	 */
-	void save();
+	void save(Object transaction);
 	
 	/**
 	 * Returns an {@link Iterator} over the {@link XID}s of all children-
@@ -109,7 +149,10 @@ public interface XObjectState extends IHasXID, Iterable<XID>, IHasXAddress {
 	
 	/**
 	 * Creates a new {@link XFieldState} in the same persistence layer as this
-	 * XObjectState and adds it as a child of this XObjectState.
+	 * XObjectState and with an address contained within this object. This does
+	 * not check if there is already such a state and does not add the created
+	 * state as a child. The {@link XObject} implementation is responsible for
+	 * doing so.
 	 * 
 	 * @param id The {@link XID} for the new {@link XFieldState}
 	 * @return The newly created {@link XFieldState}
@@ -117,7 +160,10 @@ public interface XObjectState extends IHasXID, Iterable<XID>, IHasXAddress {
 	XFieldState createFieldState(XID id);
 	
 	/**
-	 * Removes the specified {@link XFieldState} from this XObjectState.
+	 * Removes the specified {@link XFieldState} from this XObjectState. This
+	 * does not remove the actual {@link XFieldState} from the state backend,
+	 * only the reference from this state. To cleanup the state use
+	 * {@link XFieldState#delete(Object)}
 	 * 
 	 * @param objectStateID The {@link XID} of the {@link XFieldState} which is
 	 *            to be removed

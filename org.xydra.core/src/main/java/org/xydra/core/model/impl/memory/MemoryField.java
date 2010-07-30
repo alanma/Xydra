@@ -120,17 +120,17 @@ public class MemoryField implements XField, Serializable {
 		boolean result = (this.getRevisionNumber() == memoryField.getRevisionNumber())
 		        && (this.getID().equals(memoryField.getID()));
 		
-		if(hasFather()) {
-			if(!memoryField.hasFather()) {
+		if(this.father != null) {
+			if(memoryField.father == null) {
 				return false;
 			}
 			
 			result = result && (this.father.getID().equals(memoryField.father.getID()));
 			
-			MemoryModel fatherModel = this.father.getFather();
+			MemoryModel fatherModel = this.father.getModel();
 			
 			if(fatherModel != null) {
-				MemoryModel memoryFieldModel = memoryField.father.getFather();
+				MemoryModel memoryFieldModel = memoryField.father.getModel();
 				
 				if(memoryFieldModel == null) {
 					return false;
@@ -162,7 +162,7 @@ public class MemoryField implements XField, Serializable {
 		if(this.father != null) {
 			hashCode += this.father.getID().hashCode();
 			
-			XModel fatherModel = this.father.getFather();
+			XModel fatherModel = this.father.getModel();
 			
 			if(fatherModel != null) {
 				hashCode += fatherModel.getID().hashCode();
@@ -220,26 +220,32 @@ public class MemoryField implements XField, Serializable {
 				return false;
 			}
 			
+			boolean inTrans = this.eventQueue.transactionInProgess;
+			boolean hasOrphans = (this.eventQueue.orphans != null);
+			if(!inTrans && !hasOrphans) {
+				beginStateTransaction();
+			}
+			
 			this.state.setValue(newValue);
 			
 			// check for field event type
+			long modelRev = getModelRevisionNumber();
+			long objectRev = getObjectRevisionNumber();
+			long fieldRev = getRevisionNumber();
 			if((oldValue == null)) {
 				assert newValue != null;
-				event = MemoryFieldEvent.createAddEvent(actor, getAddress(), newValue,
-				        getModelRevisionNumber(), getObjectRevisionNumber(), getRevisionNumber(),
-				        transactionInProgress());
+				event = MemoryFieldEvent.createAddEvent(actor, getAddress(), newValue, modelRev,
+				        objectRev, fieldRev, inTrans);
 			} else {
 				if(newValue == null) {
 					// implies remove
 					event = MemoryFieldEvent.createRemoveEvent(actor, getAddress(), oldValue,
-					        getModelRevisionNumber(), getObjectRevisionNumber(),
-					        getRevisionNumber(), transactionInProgress());
+					        modelRev, objectRev, fieldRev, inTrans);
 				} else {
 					assert !newValue.equals(oldValue);
 					// implies change
 					event = MemoryFieldEvent.createChangeEvent(actor, getAddress(), oldValue,
-					        newValue, getModelRevisionNumber(), getObjectRevisionNumber(),
-					        getRevisionNumber(), transactionInProgress());
+					        newValue, modelRev, objectRev, fieldRev, inTrans);
 				}
 			}
 			
@@ -249,15 +255,20 @@ public class MemoryField implements XField, Serializable {
 			
 			// event propagation and revision number increasing happens
 			// after all events were successful for transactions
-			if(!transactionInProgress()) {
+			if(!inTrans) {
 				
 				// increment revision number
 				// only increment if this event is no subevent of a transaction
 				// (needs to be handled differently)
 				incrementRevisionAndSave();
 				
+				if(!hasOrphans) {
+					endStateTransaction();
+				}
+				
 				// dispatch events
 				this.eventQueue.sendEvents();
+				
 			}
 			
 			return true;
@@ -353,7 +364,7 @@ public class MemoryField implements XField, Serializable {
 	}
 	
 	private long getOldRevisionNumber() {
-		if(hasFather())
+		if(this.father != null)
 			return this.father.getOldRevisionNumber();
 		return getRevisionNumber();
 	}
@@ -371,8 +382,8 @@ public class MemoryField implements XField, Serializable {
 	}
 	
 	protected void incrementRevisionAndSave() {
-		assert !transactionInProgress();
-		if(hasFather()) {
+		assert !this.eventQueue.transactionInProgess;
+		if(this.father != null) {
 			// this increments the revisionNumber of the father and sets
 			// this revNr to the
 			// revNr of the father
@@ -398,23 +409,8 @@ public class MemoryField implements XField, Serializable {
 	 *             MemoryField was already removed
 	 */
 	@ReadOperation
-	public MemoryObject getFather() {
-		checkRemoved();
+	protected MemoryObject getObject() {
 		return this.father;
-	}
-	
-	/**
-	 * Returns whether this MemoryField has a father-{@link XObject} or not.
-	 * 
-	 * @return true, if this field has a father, false otherwise
-	 * @throws IllegalStateException if this method is called after this
-	 *             MemoryField was already removed
-	 */
-	
-	@ReadOperation
-	public boolean hasFather() {
-		checkRemoved();
-		return (this.father != null);
 	}
 	
 	/**
@@ -430,24 +426,17 @@ public class MemoryField implements XField, Serializable {
 	}
 	
 	protected long getObjectRevisionNumber() {
-		if(hasFather())
+		if(this.father != null)
 			return this.father.getRevisionNumber();
 		else
 			return XEvent.RevisionOfEntityNotSet;
 	}
 	
 	protected long getModelRevisionNumber() {
-		if(hasFather())
+		if(this.father != null)
 			return this.father.getModelRevisionNumber();
 		else
 			return XEvent.RevisionOfEntityNotSet;
-	}
-	
-	private boolean transactionInProgress() {
-		if(hasFather())
-			return this.father.transactionInProgress();
-		
-		return false;
 	}
 	
 	public boolean isEmpty() {
@@ -461,28 +450,6 @@ public class MemoryField implements XField, Serializable {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			return this.state.getAddress();
-		}
-	}
-	
-	protected void propagateFieldEvent(XFieldEvent event) {
-		fireFieldEvent(event);
-		
-		// propagate this event to the fathers of this field
-		// this also increments the revisionNumber of the fathers
-		if(hasFather()) {
-			MemoryObject tempFather = this.father;
-			tempFather.fireFieldEvent(event);
-			
-			// propagate event to father model
-			if(tempFather.hasFather()) {
-				MemoryModel tempModel = tempFather.getFather();
-				tempModel.fireFieldEvent(event);
-				
-				// propagate event to father repository
-				if(tempModel.hasFather()) {
-					tempModel.getFather().fireFieldEvent(event);
-				}
-			}
 		}
 	}
 	
@@ -539,9 +506,11 @@ public class MemoryField implements XField, Serializable {
 	/**
 	 * Deletes the state information of this MemoryField from the currently used
 	 * persistence layer
+	 * 
+	 * @param transaction
 	 */
 	protected void delete() {
-		this.state.delete();
+		this.state.delete(this.eventQueue.stateTransaction);
 		this.removed = true;
 	}
 	
@@ -550,7 +519,7 @@ public class MemoryField implements XField, Serializable {
 	 * persistence layer
 	 */
 	protected void save() {
-		this.state.save();
+		this.state.save(this.eventQueue.stateTransaction);
 	}
 	
 	/**
@@ -559,6 +528,31 @@ public class MemoryField implements XField, Serializable {
 	 */
 	protected XFieldState getState() {
 		return this.state;
+	}
+	
+	/**
+	 * Start a new state transaction.
+	 * 
+	 * @return true if a transaction was started and should be ended later.
+	 */
+	private void beginStateTransaction() {
+		if(this.father != null) {
+			this.father.beginStateTransaction();
+		} else {
+			assert this.eventQueue.stateTransaction == null : "multiple state transactions detected";
+			// no transaction needed
+		}
+	}
+	
+	/**
+	 * End the current state transaction.
+	 */
+	private void endStateTransaction() {
+		if(this.father != null) {
+			this.father.endStateTransaction();
+		} else {
+			assert this.eventQueue.stateTransaction == null : "unexpected state transaction";
+		}
 	}
 	
 }
