@@ -12,10 +12,15 @@ import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
 import org.xydra.server.gae.GaeUtils;
 
+import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 
 
+/**
+ * An implementation of {@link XModelState} that persists to the Google App
+ * Engine {@link DatastoreService}.
+ */
 public class GaeModelState extends AbstractGaeStateWithChildren implements XModelState {
 	
 	private static final long serialVersionUID = 8492473097214011504L;
@@ -63,7 +68,7 @@ public class GaeModelState extends AbstractGaeStateWithChildren implements XMode
 	}
 	
 	public static XModelState load(XAddress modelStateAddress) {
-		Key key = GaeUtils.toGaeKey(modelStateAddress);
+		Key key = GaeUtils.keyForEntity(modelStateAddress);
 		Entity entity = GaeUtils.getEntity(key);
 		if(entity == null) {
 			return null;

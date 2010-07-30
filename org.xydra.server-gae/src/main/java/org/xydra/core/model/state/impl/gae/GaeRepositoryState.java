@@ -11,11 +11,15 @@ import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XRepositoryState;
 import org.xydra.server.gae.GaeUtils;
 
+import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 
 
-
+/**
+ * An implementation of {@link XRepositoryState} that persists to the Google App
+ * Engine {@link DatastoreService}.
+ */
 public class GaeRepositoryState extends AbstractGaeStateWithChildren implements XRepositoryState {
 	
 	private static final long serialVersionUID = 8492473097214011504L;
@@ -78,7 +82,7 @@ public class GaeRepositoryState extends AbstractGaeStateWithChildren implements 
 	}
 	
 	public static XRepositoryState load(XAddress repositoryStateAddress) {
-		Key key = GaeUtils.toGaeKey(repositoryStateAddress);
+		Key key = GaeUtils.keyForEntity(repositoryStateAddress);
 		Entity entity = GaeUtils.getEntity(key);
 		if(entity == null) {
 			return null;

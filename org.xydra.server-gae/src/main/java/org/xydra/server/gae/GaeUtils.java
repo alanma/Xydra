@@ -8,7 +8,6 @@ import java.util.List;
 import org.xydra.core.X;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
-import org.xydra.core.model.impl.memory.MemoryAddress;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -16,7 +15,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-
+import com.google.appengine.api.datastore.Transaction;
 
 
 /**
@@ -29,42 +28,74 @@ public class GaeUtils {
 	
 	private static DatastoreService datastore;
 	
-	/**
-	 * @param repositoryID
-	 * @param modelID
-	 * @return a GAE key
-	 */
-	public static Key toGaeKey(XAddress address) {
+	private static Key getXydraKey() {
+		/*
+		 * we need a common parent between XEntities and XChangeLog entries so
+		 * we can have both in the same Transaction
+		 */
+		return KeyFactory.createKey("XYDRA", "xydra");
+	}
+	
+	private static Key appendIdToKey(Key key, String kind, XID id) {
+		if(id == null) {
+			return key.getChild("XREPOSITORY", "-");
+		} else {
+			return key.getChild("XREPOSITORY", id.toString());
+		}
+	}
+	
+	private static Key appendAddressToKey(Key key, XAddress address) {
+		
+		Key k = appendIdToKey(key, "XREPOSITORY", address.getRepository());
+		
+		boolean f = address.getField() != null;
+		boolean o = f || address.getObject() != null;
+		boolean m = o || address.getModel() != null;
+		
+		if(m) {
+			
+			k = appendIdToKey(k, "XMODEL", address.getModel());
+			
+			if(o) {
+				
+				k = appendIdToKey(k, "XOBJECT", address.getObject());
+				
+				if(f) {
+					
+					k = appendIdToKey(k, "XFIELD", address.getField());
+					
+				}
+				
+			}
+			
+		}
+		
+		return k;
+	}
+	
+	public static Key keyForEntity(XAddress address) {
+		
 		assert address != null;
-		String kind = MemoryAddress.getAddressedType(address).name();
-		assert kind != null;
-		Key key;
 		
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		
-		// try {
-		key = KeyFactory.createKey(kind, address.toString());
-		// } catch(NullPointerException e) {
-		// if(e.getMessage().equals("No API environment is registered for this thread."))
-		// {
-		// // handle
-		// // FIXME
-		// System.out.println("Sie werden geholfen bei Address " +
-		// address.toString()
-		// + " kind=" + kind);
-		//				
-		// // ApiProxy.setEnvironmentForCurrentThread(new
-		// // LocalStubEnvironment());
-		//				
-		// // LocalServiceTestHelper helper = new LocalServiceTestHelper(
-		// // new LocalDatastoreServiceTestConfig());
-		// // helper.setUp();
-		//				
-		// key = KeyFactory.createKey(kind, address.toString());
-		// } else {
-		// throw new RuntimeException(e);
-		// }
-		// }
+		Key key = getXydraKey();
+		key = key.getChild("XENTITY", "entities");
+		key = appendAddressToKey(key, address);
+		
+		return key;
+	}
+	
+	public static Key keyForLog(XAddress address) {
+		
+		assert address != null;
+		
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		
+		Key key = getXydraKey();
+		key = key.getChild("XLOG", "logs");
+		key = appendAddressToKey(key, address);
+		
 		return key;
 	}
 	
@@ -105,6 +136,31 @@ public class GaeUtils {
 	}
 	
 	/**
+	 * Stores a GAE {@link Entity} in the GAE back-end
+	 * 
+	 * @param entity
+	 */
+	public static void putEntity(Entity entity, Object trans) {
+		putEntity(entity);
+		assert trans == null || datastore.getCurrentTransaction() == trans;
+	}
+	
+	public static Transaction asTransaction(Object trans) {
+		if(!(trans instanceof Transaction)) {
+			throw new IllegalArgumentException("unexpected transaction object");
+		}
+		return (Transaction)trans;
+	}
+	
+	public static Object beginTransaction() {
+		return datastore.beginTransaction();
+	}
+	
+	public static void endTransaction(Object trans) {
+		asTransaction(trans).commit();
+	}
+	
+	/**
 	 * Deletes the {@link Entity} with the given {@link Key} from GAE
 	 * 
 	 * @param key
@@ -113,6 +169,16 @@ public class GaeUtils {
 		makeSureDatestoreServiceIsInitialised();
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		datastore.delete(key);
+	}
+	
+	/**
+	 * Deletes the {@link Entity} with the given {@link Key} from GAE
+	 * 
+	 * @param key
+	 */
+	public static void deleteEntity(Key key, Object trans) {
+		deleteEntity(key);
+		assert trans == null || datastore.getCurrentTransaction() == trans;
 	}
 	
 	/**

@@ -6,10 +6,15 @@ import org.xydra.core.model.state.impl.memory.AbstractState;
 import org.xydra.server.gae.GaeSchema;
 import org.xydra.server.gae.GaeUtils;
 
+import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 
 
+/**
+ * An base for X*State implementations that persist to the Google App Engine
+ * {@link DatastoreService}.
+ */
 public abstract class AbstractGaeState extends AbstractState implements IHasXID {
 	
 	private boolean loaded;
@@ -21,9 +26,9 @@ public abstract class AbstractGaeState extends AbstractState implements IHasXID 
 		this.loaded = false;
 	}
 	
-	public void delete() {
-		Key key = GaeUtils.toGaeKey(getAddress());
-		GaeUtils.deleteEntity(key);
+	public void delete(Object trans) {
+		Key key = GaeUtils.keyForEntity(getAddress());
+		GaeUtils.deleteEntity(key, trans);
 	}
 	
 	public long getRevisionNumber() {
@@ -34,7 +39,7 @@ public abstract class AbstractGaeState extends AbstractState implements IHasXID 
 	
 	protected void loadIfNecessary() {
 		if(!this.loaded) {
-			Key key = GaeUtils.toGaeKey(getAddress());
+			Key key = GaeUtils.keyForEntity(getAddress());
 			Entity e = GaeUtils.getEntity(key);
 			if(e != null) {
 				loadFromEntity(e);
@@ -81,12 +86,12 @@ public abstract class AbstractGaeState extends AbstractState implements IHasXID 
 		 */
 	}
 	
-	public void save() {
+	public void save(Object trans) {
 		
-		Key key = GaeUtils.toGaeKey(getAddress());
+		Key key = GaeUtils.keyForEntity(getAddress());
 		Entity e = new Entity(key);
 		storeInEntity(e);
-		GaeUtils.putEntity(e);
+		GaeUtils.putEntity(e, trans);
 	}
 	
 	public void setRevisionNumber(long revisionNumber) {

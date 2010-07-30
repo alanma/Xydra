@@ -12,26 +12,27 @@ import org.xydra.core.xml.impl.XmlOutStringBuffer;
 import org.xydra.server.gae.GaeTestfixer;
 import org.xydra.server.gae.GaeUtils;
 
+import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Text;
 
 
+/**
+ * An implementation of {@link XChangeLogState} that persists to the Google App
+ * Engine {@link DatastoreService}.
+ */
 public class GaeChangeLogState implements XChangeLogState {
 	
 	private static final long serialVersionUID = 6673976783142023642L;
 	
 	private static final String PROP_FIRST_REVISION = "firstRevision";
 	private static final String PROP_CURRENT_REVISION = "lastRevision";
-	private static final String KIND_CHANGELOG = "changelog";
 	private static final String KIND_XEVENT = "xevent";
-	private static final String PREFIX_CHANGELOG = "logs/";
 	private static final String PROP_EVENT = "event";
 	
 	private final XAddress baseAddr;
 	
-	private final String prefix;
 	private final Key key;
 	private long firstRev;
 	private long currentRev;
@@ -42,13 +43,9 @@ public class GaeChangeLogState implements XChangeLogState {
 		
 		this.baseAddr = baseAddr;
 		
-		String name = PREFIX_CHANGELOG + baseAddr.toString();
-		this.prefix = name + "/";
+		this.key = GaeUtils.keyForLog(baseAddr);
 		
-		this.key = KeyFactory.createKey(KIND_CHANGELOG, name);
-		
-		Key key = KeyFactory.createKey(KIND_CHANGELOG, name);
-		Entity e = GaeUtils.getEntity(key);
+		Entity e = GaeUtils.getEntity(this.key);
 		
 		if(e == null) {
 			this.firstRev = this.currentRev = currentRev;
@@ -60,10 +57,10 @@ public class GaeChangeLogState implements XChangeLogState {
 	}
 	
 	private Key getKey(long rev) {
-		return KeyFactory.createKey(KIND_XEVENT, this.prefix + rev);
+		return this.key.getChild(KIND_XEVENT, Long.toString(rev));
 	}
 	
-	public void appendEvent(XEvent event) {
+	public void appendEvent(XEvent event, Object trans) {
 		
 		if(!XX.equalsOrContains(getBaseAddress(), event.getTarget())) {
 			throw new IllegalArgumentException("cannot store event " + event + "in change log for "
@@ -74,7 +71,7 @@ public class GaeChangeLogState implements XChangeLogState {
 		
 		saveEvent(e, event);
 		
-		GaeUtils.putEntity(e);
+		GaeUtils.putEntity(e, trans);
 		
 		long newRev = event.getModelRevisionNumber() + 1;
 		
@@ -105,13 +102,20 @@ public class GaeChangeLogState implements XChangeLogState {
 		return XmlEvent.toEvent(miniElement, this.baseAddr);
 	}
 	
-	public void delete() {
+	public void delete(Object trans) {
+		
+		boolean newTrans = (trans == null);
+		Object t = newTrans ? GaeUtils.beginTransaction() : trans;
 		
 		for(long i = this.firstRev; i <= this.currentRev; ++i) {
-			GaeUtils.deleteEntity(getKey(i));
+			GaeUtils.deleteEntity(getKey(i), t);
 		}
 		
-		GaeUtils.deleteEntity(this.key);
+		GaeUtils.deleteEntity(this.key, t);
+		
+		if(newTrans) {
+			GaeUtils.endTransaction(t);
+		}
 		
 	}
 	
@@ -140,26 +144,33 @@ public class GaeChangeLogState implements XChangeLogState {
 		return this.baseAddr;
 	}
 	
-	public void save() {
+	public void save(Object trans) {
 		
 		Entity e = new Entity(this.key);
 		
 		e.setUnindexedProperty(PROP_FIRST_REVISION, this.firstRev);
 		e.setUnindexedProperty(PROP_CURRENT_REVISION, this.currentRev);
 		
-		GaeUtils.putEntity(e);
+		GaeUtils.putEntity(e, trans);
 		
 	}
 	
-	public boolean truncateToRevision(long revisionNumber) {
+	public boolean truncateToRevision(long revisionNumber, Object trans) {
 		
 		if(revisionNumber < this.firstRev) {
 			return false;
 		}
 		
+		boolean newTrans = (trans == null);
+		Object t = newTrans ? GaeUtils.beginTransaction() : trans;
+		
 		while(this.currentRev > revisionNumber) {
 			this.currentRev--;
-			GaeUtils.deleteEntity(getKey(this.currentRev));
+			GaeUtils.deleteEntity(getKey(this.currentRev), t);
+		}
+		
+		if(newTrans) {
+			GaeUtils.endTransaction(t);
 		}
 		
 		return true;

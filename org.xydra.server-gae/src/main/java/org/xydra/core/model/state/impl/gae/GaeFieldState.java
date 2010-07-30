@@ -14,12 +14,16 @@ import org.xydra.core.xml.impl.XmlOutStringBuffer;
 import org.xydra.server.gae.GaeSchema;
 import org.xydra.server.gae.GaeUtils;
 
+import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Text;
 
 
-
+/**
+ * An implementation of {@link XFieldState} that persists to the Google App
+ * Engine {@link DatastoreService}.
+ */
 public class GaeFieldState extends AbstractGaeState implements XFieldState {
 	
 	private static final long serialVersionUID = 8492473097214011504L;
@@ -72,7 +76,7 @@ public class GaeFieldState extends AbstractGaeState implements XFieldState {
 	}
 	
 	public static XFieldState load(XAddress fieldStateAddress) {
-		Key key = GaeUtils.toGaeKey(fieldStateAddress);
+		Key key = GaeUtils.keyForEntity(fieldStateAddress);
 		Entity entity = GaeUtils.getEntity(key);
 		if(entity == null) {
 			return null;
