@@ -1,7 +1,7 @@
 package org.xydra.core.model.state;
 
 import org.junit.BeforeClass;
-import org.xydra.core.TemporaryStateStore;
+import org.xydra.core.model.state.impl.memory.TemporaryStateStore;
 import org.xydra.core.test.model.state.AbstractStateTest;
 
 

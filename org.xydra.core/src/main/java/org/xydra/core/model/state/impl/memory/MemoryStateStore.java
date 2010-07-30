@@ -3,7 +3,6 @@ package org.xydra.core.model.state.impl.memory;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.xydra.core.TemporaryStateStore;
 import org.xydra.core.X;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.state.XChangeLogState;

@@ -1,4 +1,4 @@
-package org.xydra.core;
+package org.xydra.core.model.state.impl.memory;
 
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.state.XChangeLogState;
@@ -7,11 +7,6 @@ import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
 import org.xydra.core.model.state.XRepositoryState;
 import org.xydra.core.model.state.XStateStore;
-import org.xydra.core.model.state.impl.memory.MemoryChangeLogState;
-import org.xydra.core.model.state.impl.memory.TemporaryFieldState;
-import org.xydra.core.model.state.impl.memory.TemporaryModelState;
-import org.xydra.core.model.state.impl.memory.TemporaryObjectState;
-import org.xydra.core.model.state.impl.memory.TemporaryRepositoryState;
 
 
 /**
