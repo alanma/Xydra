@@ -1,6 +1,8 @@
 package org.xydra.client.gwt.service;
 
-import com.allen_sauer.gwt.log.client.Log;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
+
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
@@ -14,6 +16,8 @@ import com.google.gwt.http.client.Response;
  */
 class NoCallback implements RequestCallback {
 	
+	static private final Logger log = LoggerFactory.getLogger(NoCallback.class);
+	
 	private static NoCallback instance;
 	
 	private NoCallback() {
@@ -22,12 +26,12 @@ class NoCallback implements RequestCallback {
 	
 	public void onResponseReceived(Request req, Response resp) {
 		// ignore
-		Log.info("no callback: request complete");
+		log.info("no callback: request complete");
 	}
 	
 	public void onError(Request req, Throwable t) {
 		// ignore
-		Log.info("no callback: error: " + t);
+		log.info("no callback: error: " + t);
 	}
 	
 	public static NoCallback getInstance() {

@@ -45,8 +45,9 @@ import org.xydra.core.value.XStringSetValue;
 import org.xydra.core.value.XStringValue;
 import org.xydra.core.value.XValue;
 import org.xydra.index.XI;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -59,6 +60,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 
 public class XFieldEditor extends VerticalPanel implements XFieldEventListener, addEditor {
+	
+	private static final Logger log = LoggerFactory.getLogger(XFieldEditor.class);
 	
 	private static final int IDX_NOVALUE = 0;
 	private static final int IDX_LIST_STRING = 1;
@@ -191,7 +194,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 	}
 	
 	public void onChangeEvent(XFieldEvent event) {
-		Log.info("editor: got " + event);
+		log.info("editor: got " + event);
 		XValue value = event.getNewValue();
 		changeValue(value);
 		this.revision.setText(Long.toString(event.getFieldRevisionNumber()));
@@ -342,7 +345,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 	protected void saveValue() {
 		XValue newValue = this.editor == null ? null : this.editor.getValue();
 		
-		Log.info("editor: saving changed value: " + newValue);
+		log.info("editor: saving changed value: " + newValue);
 		
 		if(this.editor != null && newValue == null) {
 			// invalid editor contents
@@ -374,7 +377,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 	
 	protected void typeChanged() {
 		
-		Log.info("editor: type changed to " + this.type.getSelectedIndex());
+		log.info("editor: type changed to " + this.type.getSelectedIndex());
 		
 		XValue value = null;
 		if(this.editor != null) {

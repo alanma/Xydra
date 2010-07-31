@@ -15,8 +15,9 @@ import org.xydra.core.model.XLoggedModel;
 import org.xydra.core.model.XLoggedObject;
 import org.xydra.core.value.XIDValue;
 import org.xydra.core.value.XValue;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
@@ -28,6 +29,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 
 public class XModelEditor extends Composite implements XModelEventListener {
+	
+	private static final Logger log = LoggerFactory.getLogger(XModelEditor.class);
 	
 	private final XSynchronizer manager;
 	private final XLoggedModel model;
@@ -105,7 +108,7 @@ public class XModelEditor extends Composite implements XModelEventListener {
 	private void newObject(XID objectId) {
 		XLoggedObject object = this.model.getObject(objectId);
 		if(object == null) {
-			Log.warn("editor: asked to add object " + objectId + ", which doesn't exist (anymore)");
+			log.warn("editor: asked to add object " + objectId + ", which doesn't exist (anymore)");
 			return;
 		}
 		XObjectEditor editor = new XObjectEditor(object, this.manager);
@@ -117,14 +120,14 @@ public class XModelEditor extends Composite implements XModelEventListener {
 	private void objectRemoved(XID objectId) {
 		XObjectEditor editor = XModelEditor.this.objects.remove(objectId);
 		if(editor == null) {
-			Log.warn("editor: asked to remove object " + objectId + ", which isn't there");
+			log.warn("editor: asked to remove object " + objectId + ", which isn't there");
 			return;
 		}
 		editor.removeFromParent();
 	}
 	
 	public void onChangeEvent(XModelEvent event) {
-		Log.info("editor: got " + event);
+		log.info("editor: got " + event);
 		if(event.getChangeType() == ChangeType.ADD) {
 			newObject(event.getObjectID());
 		} else {

@@ -13,6 +13,9 @@
       <!-- Inherit the Xydra Client -->
       <inherits name='org.xydra.client.XydraClient'/>
       
+	    <!-- Inherit Xydra Logging -->
+	    <inherits name='org.xydra.log.Xlog'/>
+      
       <source path="">
       	<exclude name="editor/**" />
       </source>

@@ -14,8 +14,9 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XSynchronizesChanges;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -35,6 +36,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  * A minimal CXM client that can load and edit models.
  */
 public class XydraEditor implements EntryPoint {
+	
+	private static final Logger log = LoggerFactory.getLogger(XydraEditor.class);
 	
 	private final XDataService data = new GWTDataService("/xclient/cxm/data",
 	        new GWTMiniXMLParserImpl());
@@ -73,7 +76,7 @@ public class XydraEditor implements EntryPoint {
 					}
 				}
 				
-				Log.error(text, t);
+				log.error(text, t);
 			}
 		});
 		
@@ -87,7 +90,7 @@ public class XydraEditor implements EntryPoint {
 	
 	public void init() {
 		
-		Log.info("starting the xydra editor");
+		log.info("starting the xydra editor");
 		
 		VerticalPanel layout = new VerticalPanel();
 		HorizontalPanel header = new HorizontalPanel();
@@ -118,7 +121,7 @@ public class XydraEditor implements EntryPoint {
 	
 	protected void loadData(String addrStr) {
 		
-		Log.info("editor: loading " + addrStr);
+		log.info("editor: loading " + addrStr);
 		
 		if(this.manager != null) {
 			this.timer.cancel();
@@ -186,7 +189,7 @@ public class XydraEditor implements EntryPoint {
 	
 	protected void loadedModel(XModel model) {
 		
-		Log.info("editor: loaded model, starting synchronizer");
+		log.info("editor: loaded model, starting synchronizer");
 		
 		startSynchronizer(model);
 		
@@ -195,7 +198,7 @@ public class XydraEditor implements EntryPoint {
 	
 	protected void loadedObject(XObject object) {
 		
-		Log.info("editor: loaded object, starting synchronizer");
+		log.info("editor: loaded object, starting synchronizer");
 		
 		startSynchronizer(object);
 		

@@ -10,8 +10,9 @@ import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.MiniXMLParser;
 import org.xydra.core.xml.XmlModel;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -26,6 +27,8 @@ import com.google.gwt.http.client.Response;
  * The delete method is emulated using the "X-HTTP-Method-Override" header.
  */
 public class GWTDataService extends AbstractGWTHttpService implements XDataService {
+	
+	static private final Logger log = LoggerFactory.getLogger(GWTDataService.class);
 	
 	public GWTDataService(String baseUrl, MiniXMLParser parser) {
 		super(baseUrl, parser);
@@ -114,7 +117,7 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 			if(handleError(resp, this.callback)) {
 				return;
 			}
-			Log.info("data service: deleted");
+			log.info("data service: deleted");
 			this.callback.onSuccess(null);
 		}
 		

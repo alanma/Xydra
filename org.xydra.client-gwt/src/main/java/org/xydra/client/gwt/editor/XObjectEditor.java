@@ -16,8 +16,9 @@ import org.xydra.core.model.XLoggedField;
 import org.xydra.core.model.XLoggedObject;
 import org.xydra.core.value.XIDValue;
 import org.xydra.core.value.XValue;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
@@ -28,6 +29,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 
 public class XObjectEditor extends VerticalPanel implements XObjectEventListener {
+	
+	private static final Logger log = LoggerFactory.getLogger(XObjectEditor.class);
 	
 	private final XSynchronizer manager;
 	private final XLoggedObject object;
@@ -110,7 +113,7 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 	private void newField(XID fieldId) {
 		XLoggedField field = this.object.getField(fieldId);
 		if(field == null) {
-			Log.info("editor: asked to add field " + fieldId + ", which doesn't exist (anymore)");
+			log.info("editor: asked to add field " + fieldId + ", which doesn't exist (anymore)");
 			return;
 		}
 		XFieldEditor editor = new XFieldEditor(field, this.manager);
@@ -122,14 +125,14 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 	private void fieldRemoved(XID fieldId) {
 		XFieldEditor editor = XObjectEditor.this.fields.remove(fieldId);
 		if(editor == null) {
-			Log.warn("editor: asked to remove field " + fieldId + ", which isn't there");
+			log.warn("editor: asked to remove field " + fieldId + ", which isn't there");
 			return;
 		}
 		editor.removeFromParent();
 	}
 	
 	public void onChangeEvent(XObjectEvent event) {
-		Log.info("editor: got " + event);
+		log.info("editor: got " + event);
 		if(event.getChangeType() == ChangeType.ADD) {
 			newField(event.getFieldID());
 		} else {

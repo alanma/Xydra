@@ -16,6 +16,9 @@
       <!-- Inherit the GWT-specific Xydra Client bits -->
       <inherits name='org.xydra.client.gwt.XydraClientGWT'/>
       
+	    <!-- Inherit Xydra Logging -->
+	    <inherits name='org.xydra.log.Xlog'/>
+      
 	    <!-- add gwt-log support -->
 	    <inherits name='com.allen_sauer.gwt.log.gwt-log-DEBUG' />
         
