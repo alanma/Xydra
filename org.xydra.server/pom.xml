@@ -155,7 +155,7 @@
 	<build>
 
 		<!-- via  https://wagon-svn.dev.java.net/ -->
-		<extensions>
+		<!--<extensions>
 			<extension>
 				<groupId>org.jvnet.wagon-svn</groupId>
 				<artifactId>wagon-svn</artifactId>
@@ -169,7 +169,7 @@
 			</extension>
 		</extensions>
 
-		<plugins>
+		--><plugins>
 
 			<!-- set encoding to something not platform dependent -->
 			<plugin>
