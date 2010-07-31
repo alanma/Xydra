@@ -233,11 +233,9 @@ public class ChangedModel implements DeltaModel {
 	
 	/**
 	 * Checks if the given {@link XModelCommand} is valid and can be
-	 * successfully executed on this {@link DeltaModel} or if the attempt to
-	 * execute it will fail.
+	 * successfully executed on this ChangedModel or if the attempt to execute
+	 * it will fail.
 	 * 
-	 * @param DeltaModel The {@link DeltaModel} on which the given
-	 *            {@link XModelCommand} is to be executed
 	 * @param command The {@link XModelCommand} which is to be checked.
 	 * 
 	 * @return true, if the {@link XModelCommand} is valid and can be executed,
@@ -283,11 +281,9 @@ public class ChangedModel implements DeltaModel {
 	
 	/**
 	 * Checks if the given {@link XObjectCommand} is valid and can be
-	 * successfully executed on this {@link DeltaModel} or if the attempt to
-	 * execute it will fail.
+	 * successfully executed on this ChangedModel or if the attempt to execute
+	 * it will fail.
 	 * 
-	 * @param DeltaModel The {@link DeltaModel} on which the given
-	 *            {@link XObjectCommand} is to be executed
 	 * @param command The {@link XObjectCommand} which is to be checked.
 	 * 
 	 * @return true, if the {@link XObjectCommand} is valid and can be executed,
@@ -339,11 +335,9 @@ public class ChangedModel implements DeltaModel {
 	
 	/**
 	 * Checks if the given {@link XFieldCommand} is valid and can be
-	 * successfully executed on this {@link DeltaModel} or if the attempt to
-	 * execute it will fail.
+	 * successfully executed on this ChangedModel or if the attempt to execute
+	 * it will fail.
 	 * 
-	 * @param DeltaModel The {@link DeltaModel} on which the given
-	 *            {@link XFieldCommand} is to be executed
 	 * @param command The {@link XFieldCommand} which is to be checked.
 	 * 
 	 * @return true, if the {@link XFieldCommand} is valid and can be executed,
@@ -381,9 +375,19 @@ public class ChangedModel implements DeltaModel {
 	}
 	
 	/**
-	 * Apply the events contained in the transaction and return if all commands
-	 * could be applied. If commands failed, the transaction will remain
-	 * partially applied.
+	 * Apply the {@link XCommand XCommands} contained in the given
+	 * {@link XTransaction} and return true, if all {@link XCommand XCommands}
+	 * could be applied. If one of the {@link XCommand XCommands} failed, the
+	 * {@link XTransactio}n will remain partially applied, already executed
+	 * {@link XCommand XCommands} will not be rolled back.
+	 * 
+	 * @param transaction The {@link XTransaction} which is to be executed
+	 * @return true, if the given {@link XTransaction} could be executed, false
+	 *         otherwise
+	 * 
+	 *         TODO it might be a good idea to tell the caller of this method
+	 *         which commands of the transaction where executed and not only
+	 *         return false
 	 */
 	public boolean executeCommand(XTransaction transaction) {
 		for(int i = 0; i < transaction.size(); i++) {
