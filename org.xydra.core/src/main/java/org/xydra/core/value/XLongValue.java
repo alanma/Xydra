@@ -6,7 +6,7 @@ package org.xydra.core.value;
  * @author Kaidel
  * 
  */
-public interface XLongValue extends XValue {
+public interface XLongValue extends XNumberValue {
 	
 	/**
 	 * Return the stored long value.

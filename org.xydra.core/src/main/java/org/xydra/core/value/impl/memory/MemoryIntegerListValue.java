@@ -68,4 +68,13 @@ public class MemoryIntegerListValue extends MemoryListValue<Integer> implements 
 		return this.list.length;
 	}
 	
+	public Number[] toNumberArray() {
+		Number[] array = new Number[this.list.length];
+		int i = 0;
+		for(Number e : this) {
+			array[i++] = e;
+		}
+		return array;
+	}
+	
 }

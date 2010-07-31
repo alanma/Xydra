@@ -42,4 +42,8 @@ public class MemoryIntegerValue implements XIntegerValue {
 		return Integer.toString(this.content);
 	}
 	
+	public Number asNumber() {
+		return contents();
+	}
+	
 }

@@ -42,4 +42,8 @@ public class MemoryLongValue implements XLongValue {
 		return Long.toString(this.content);
 	}
 	
+	public Number asNumber() {
+		return contents();
+	}
+	
 }

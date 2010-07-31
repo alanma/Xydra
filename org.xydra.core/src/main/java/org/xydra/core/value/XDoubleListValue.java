@@ -6,7 +6,7 @@ package org.xydra.core.value;
  * @author Kaidel
  * 
  */
-public interface XDoubleListValue extends XListValue<Double> {
+public interface XDoubleListValue extends XNumberListValue<Double> {
 	
 	/**
 	 * @return the list of double values in order (changes to the returned array

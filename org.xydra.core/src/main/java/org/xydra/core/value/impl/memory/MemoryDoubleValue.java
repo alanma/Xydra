@@ -42,4 +42,8 @@ public class MemoryDoubleValue implements XDoubleValue {
 		return Double.toString(this.content);
 	}
 	
+	public Number asNumber() {
+		return contents();
+	}
+	
 }

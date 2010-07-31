@@ -68,4 +68,13 @@ public class MemoryLongListValue extends MemoryListValue<Long> implements XLongL
 		return this.list.length;
 	}
 	
+	public Number[] toNumberArray() {
+		Number[] array = new Number[this.list.length];
+		int i = 0;
+		for(Number e : this) {
+			array[i++] = e;
+		}
+		return array;
+	}
+	
 }

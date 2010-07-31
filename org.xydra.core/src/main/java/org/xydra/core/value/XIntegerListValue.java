@@ -6,7 +6,7 @@ package org.xydra.core.value;
  * @author Kaidel
  * 
  */
-public interface XIntegerListValue extends XListValue<Integer> {
+public interface XIntegerListValue extends XNumberListValue<Integer> {
 	
 	/**
 	 * @return the list of integer values in order (changes to the returned
