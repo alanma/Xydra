@@ -24,7 +24,6 @@ import org.xydra.core.model.IHasXAddress;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XExecutesCommands;
 import org.xydra.core.model.XField;
@@ -36,9 +35,6 @@ import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.core.model.delta.ChangedField;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.ChangedObject;
-import org.xydra.core.model.delta.DeltaField;
-import org.xydra.core.model.delta.DeltaModel;
-import org.xydra.core.model.delta.DeltaObject;
 import org.xydra.core.model.delta.NewField;
 import org.xydra.core.model.delta.NewObject;
 
@@ -83,26 +79,8 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 			 * addedObjects, removedFields, addedFields, changedValue) and
 			 * checking the commands against that.
 			 */
-
-			for(int i = 0; i < transaction.size(); i++) {
-				XAtomicCommand command = transaction.getCommand(i);
-				
-				if(command instanceof XModelCommand) {
-					if(!transCheckModelCommand(model, (XModelCommand)command)) {
-						return XCommand.FAILED;
-					}
-				} else if(command instanceof XObjectCommand) {
-					if(!transCheckObjectCommand(model, (XObjectCommand)command)) {
-						return XCommand.FAILED;
-					}
-				} else if(command instanceof XFieldCommand) {
-					if(!transCheckFieldCommand(model, (XFieldCommand)command)) {
-						return XCommand.FAILED;
-					}
-				} else {
-					assert false : "transactions can only contain model, object and field commands";
-				}
-				
+			if(!model.executeCommand(transaction)) {
+				return XCommand.FAILED;
 			}
 			
 			// all commands are OK, count the number of changes
@@ -248,155 +226,6 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 			
 		}
 		
-	}
-	
-	/**
-	 * Checks if the given {@link XModelCommand} is valid and can be
-	 * successfully executed on the given {@link DeltaModel} or if the attempt
-	 * to execute it will fail.
-	 * 
-	 * @param DeltaModel The {@link DeltaModel} on which the given
-	 *            {@link XModelCommand} is to be executed
-	 * @param command The {@link XModelCommand} which is to be checked.
-	 * 
-	 * @return true, if the {@link XModelCommand} is valid and can be executed,
-	 *         false otherwise
-	 */
-	private boolean transCheckModelCommand(DeltaModel model, XModelCommand command) {
-		
-		XID objectId = command.getObjectID();
-		
-		switch(command.getChangeType()) {
-		
-		case ADD:
-			if(model.hasObject(objectId)) {
-				// command is invalid or doesn't change anything
-				return command.isForced();
-			}
-			// command is OK and adds a new object
-			model.createObject(objectId);
-			return true;
-			
-		case REMOVE:
-			XBaseObject object = model.getObject(objectId);
-			
-			if(object == null) {
-				// command is invalid or doesn't change anything
-				return command.isForced();
-			}
-			if(object.getRevisionNumber() != command.getRevisionNumber()) {
-				if(!command.isForced()) {
-					// command is invalid
-					return false;
-				}
-			}
-			// command is OK and removes an existing object
-			model.removeObject(objectId);
-			return true;
-			
-		default:
-			throw new AssertionError("impossible type for model commands");
-		}
-		
-	}
-	
-	/**
-	 * Checks if the given {@link XObjectCommand} is valid and can be
-	 * successfully executed on the given {@link DeltaModel} or if the attempt
-	 * to execute it will fail.
-	 * 
-	 * @param DeltaModel The {@link DeltaModel} on which the given
-	 *            {@link XObjectCommand} is to be executed
-	 * @param command The {@link XObjectCommand} which is to be checked.
-	 * 
-	 * @return true, if the {@link XObjectCommand} is valid and can be executed,
-	 *         false otherwise
-	 */
-	private boolean transCheckObjectCommand(DeltaModel model, XObjectCommand command) {
-		
-		DeltaObject object = model.getObject(command.getObjectID());
-		if(object == null) {
-			// command is invalid
-			return false;
-		}
-		
-		XID fieldId = command.getFieldID();
-		
-		switch(command.getChangeType()) {
-		
-		case ADD:
-			if(object.hasField(fieldId)) {
-				// command is invalid or doesn't change anything
-				return command.isForced();
-			}
-			// command is OK and adds a new field
-			object.createField(fieldId);
-			return true;
-			
-		case REMOVE:
-			XBaseField field = object.getField(fieldId);
-			
-			if(field == null) {
-				// command is invalid or doesn't change anything
-				return command.isForced();
-			}
-			if(field.getRevisionNumber() != command.getRevisionNumber()) {
-				if(!command.isForced()) {
-					// command is invalid
-					return false;
-				}
-			}
-			// command is OK and removes an existing field
-			object.removeField(fieldId);
-			return true;
-			
-		default:
-			throw new AssertionError("impossible type for object commands");
-		}
-		
-	}
-	
-	/**
-	 * Checks if the given {@link XFieldCommand} is valid and can be
-	 * successfully executed on the given {@link DeltaModel} or if the attempt
-	 * to execute it will fail.
-	 * 
-	 * @param DeltaModel The {@link DeltaModel} on which the given
-	 *            {@link XFieldCommand} is to be executed
-	 * @param command The {@link XFieldCommand} which is to be checked.
-	 * 
-	 * @return true, if the {@link XFieldCommand} is valid and can be executed,
-	 *         false otherwise
-	 */
-	private boolean transCheckFieldCommand(DeltaModel model, XFieldCommand command) {
-		
-		DeltaObject object = model.getObject(command.getObjectID());
-		if(object == null) {
-			// command is invalid
-			return false;
-		}
-		
-		DeltaField field = object.getField(command.getFieldID());
-		if(field == null) {
-			// command is invalid
-			return false;
-		}
-		
-		if(!command.isForced()) {
-			if(field.getRevisionNumber() != command.getRevisionNumber()) {
-				// command is invalid (wrong revision)
-				return false;
-			}
-			if((command.getChangeType() == ChangeType.ADD) != field.isEmpty()) {
-				// command is invalid (wrong type)
-				return false;
-			}
-		}
-		
-		// command is OK
-		field.setValue(command.getValue());
-		
-		return true;
 	}
 	
 	public XChangeLog getChangeLog() {
