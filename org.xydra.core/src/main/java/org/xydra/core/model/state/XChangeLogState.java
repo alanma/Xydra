@@ -21,9 +21,9 @@ public interface XChangeLogState extends Serializable {
 	 * 
 	 * @param transaction If not null, persist the change at the end of the
 	 *            given transaction, otherwise persist it now. The transaction
-	 *            object must have been created the containing
-	 *            {@link XObjectState}, {@link XModelState} or
-	 *            {@link XRepositoryState}
+	 *            object must have been created by {@link XObjectState},
+	 *            {@link XModelState} or {@link XRepositoryState} containing the
+	 *            XChangeLog represented by this XChangeLogState
 	 */
 	void delete(Object transaction);
 	
@@ -33,9 +33,9 @@ public interface XChangeLogState extends Serializable {
 	 * 
 	 * @param transaction If not null, persist the change at the end of the
 	 *            given transaction, otherwise persist it now. The transaction
-	 *            object must have been created the containing
-	 *            {@link XObjectState}, {@link XModelState} or
-	 *            {@link XRepositoryState}
+	 *            object must have been created by {@link XObjectState},
+	 *            {@link XModelState} or {@link XRepositoryState} containing the
+	 *            XChangeLog represented by this XChangeLogState
 	 */
 	void save(Object transaction);
 	
@@ -71,9 +71,9 @@ public interface XChangeLogState extends Serializable {
 	 * @param event The {@link XEvent} which is to be logged
 	 * @param transaction If not null, persist the change at the end of the
 	 *            given transaction, otherwise persist it now. The transaction
-	 *            object must have been created the containing
-	 *            {@link XObjectState}, {@link XModelState} or
-	 *            {@link XRepositoryState}
+	 *            object must have been created by {@link XObjectState},
+	 *            {@link XModelState} or {@link XRepositoryState} containing the
+	 *            XChangeLog represented by this XChangeLogState
 	 */
 	void appendEvent(XEvent event, Object transaction);
 	
@@ -85,9 +85,9 @@ public interface XChangeLogState extends Serializable {
 	 *            {@link XEvent XEvents} are to be removed
 	 * @param transaction If not null, persist the change at the end of the
 	 *            given transaction, otherwise persist it now. The transaction
-	 *            object must have been created the containing
-	 *            {@link XObjectState}, {@link XModelState} or
-	 *            {@link XRepositoryState}
+	 *            object must have been created by {@link XObjectState},
+	 *            {@link XModelState} or {@link XRepositoryState} containing the
+	 *            XChangeLog represented by this XChangeLogState
 	 * @return true, if truncating was successful, false otherwise (may happen
 	 *         if the given revision number was bigger than the current revision
 	 *         number of this change log state or smaller than the revision
