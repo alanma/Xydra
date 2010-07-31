@@ -1,7 +1,11 @@
 package org.xydra.core.model.tutorial;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xydra.core.X;
 import org.xydra.core.access.XA;
@@ -31,8 +35,9 @@ import org.xydra.core.model.XIDProvider;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
+import org.xydra.core.model.state.XSPI;
+import org.xydra.core.model.state.impl.memory.TemporaryStateStore;
 import org.xydra.core.value.XValue;
-
 
 
 /**
@@ -71,7 +76,12 @@ import org.xydra.core.value.XValue;
  * 
  * @author Kaidel
  */
-public class XModelBasics extends TestCase {
+public class XModelBasics {
+	
+	@BeforeClass
+	public static void init() {
+		XSPI.setStateStore(new TemporaryStateStore());
+	}
 	
 	/**
 	 * To create an XModel you first have to get an XRepository to hold it, this
@@ -567,4 +577,5 @@ public class XModelBasics extends TestCase {
 		arm.setAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE, false);
 		assertFalse(arm.hasAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE));
 	}
+	
 }

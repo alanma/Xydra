@@ -1,9 +1,14 @@
 package org.xydra.core.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import junit.framework.TestCase;
 
 import org.junit.Test;
 import org.xydra.core.URIFormatException;
@@ -41,7 +46,7 @@ import org.xydra.core.xml.impl.XmlOutStringBuffer;
  *              </code>
  * @author voelkel
  */
-public abstract class AbstractTestAPI extends TestCase {
+public abstract class AbstractTestAPI {
 	
 	public static final XID ACTOR_ID = X.getIDProvider().fromString("urn-test-actorID");
 	

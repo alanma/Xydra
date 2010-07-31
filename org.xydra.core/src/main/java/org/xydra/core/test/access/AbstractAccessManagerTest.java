@@ -1,6 +1,8 @@
 package org.xydra.core.test.access;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -16,14 +18,13 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.XIDProvider;
 
 
-
 /**
  * Test for implementations of {@link XAccessManager}.
  * 
  * @author dscharrer
  * 
  */
-abstract public class AbstractAccessManagerTest extends TestCase {
+abstract public class AbstractAccessManagerTest {
 	
 	private XAccessManager arm;
 	
@@ -44,7 +45,6 @@ abstract public class AbstractAccessManagerTest extends TestCase {
 	
 	abstract protected XAccessManager getAccessManager(XGroupDatabase groups, XAddress rA0);
 	
-	@Override
 	@Before
 	public void setUp() {
 		

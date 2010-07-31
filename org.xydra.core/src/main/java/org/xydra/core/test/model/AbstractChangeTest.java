@@ -1,6 +1,9 @@
 package org.xydra.core.test.model;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.xydra.core.X;
@@ -24,7 +27,7 @@ import org.xydra.core.model.impl.memory.MemoryObject;
 import org.xydra.core.value.impl.memory.MemoryStringValue;
 
 
-public abstract class AbstractChangeTest extends TestCase {
+public abstract class AbstractChangeTest {
 	
 	@Test
 	public void testRepositoryChangeListening() {

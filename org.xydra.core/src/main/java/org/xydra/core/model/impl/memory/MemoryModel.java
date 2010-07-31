@@ -760,6 +760,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 			object.delete();
 		}
 		this.state.delete(this.eventQueue.stateTransaction);
+		this.eventQueue.setBlockSending(true);
 		this.eventQueue.deleteLog();
 		this.removed = true;
 	}

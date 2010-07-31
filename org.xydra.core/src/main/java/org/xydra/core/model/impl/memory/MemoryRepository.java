@@ -93,6 +93,7 @@ public class MemoryRepository implements XRepository, Serializable {
 			
 			Object trans = beginStateTransaction();
 			
+			modelState.getChangeLogState().save(trans);
 			this.state.addModelState(modelState);
 			model.save(trans);
 			save(trans);

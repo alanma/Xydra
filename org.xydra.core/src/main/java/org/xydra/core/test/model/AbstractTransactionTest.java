@@ -1,8 +1,12 @@
 package org.xydra.core.test.model;
 
-import java.util.List;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
-import junit.framework.TestCase;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -17,12 +21,12 @@ import org.xydra.core.change.impl.memory.MemoryFieldEvent;
 import org.xydra.core.change.impl.memory.MemoryModelEvent;
 import org.xydra.core.change.impl.memory.MemoryObjectEvent;
 import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
+import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.core.test.ChangeRecorder;
 import org.xydra.core.test.HasChanged;
 import org.xydra.core.value.XValue;
@@ -33,7 +37,7 @@ import org.xydra.core.value.XValue;
  * 
  * @author dscharrer
  */
-abstract public class AbstractTransactionTest extends TestCase {
+abstract public class AbstractTransactionTest {
 	
 	private static final XValue JOHN_ALIAS = X.getValueFactory()
 	        .createStringValue("Cookie Monster");
@@ -52,7 +56,6 @@ abstract public class AbstractTransactionTest extends TestCase {
 	protected XObject john;
 	protected XObject peter;
 	
-	@Override
 	@Before
 	public void setUp() {
 		
@@ -67,7 +70,6 @@ abstract public class AbstractTransactionTest extends TestCase {
 		
 	}
 	
-	@Override
 	@After
 	public void tearDown() {
 		this.repo.removeModel(ACTOR_ID, MODEL_ID);

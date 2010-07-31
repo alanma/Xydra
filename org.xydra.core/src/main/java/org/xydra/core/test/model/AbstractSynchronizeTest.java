@@ -1,12 +1,15 @@
 package org.xydra.core.test.model;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
-import junit.framework.TestCase;
 
 import org.junit.After;
 import org.junit.Before;
@@ -46,7 +49,7 @@ import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
 
 
-abstract public class AbstractSynchronizeTest extends TestCase {
+abstract public class AbstractSynchronizeTest {
 	
 	private static final XID ACTOR_ID = X.getIDProvider().fromString("tester");
 	
@@ -54,7 +57,6 @@ abstract public class AbstractSynchronizeTest extends TestCase {
 	private XModel remoteModel;
 	private XModel localModel;
 	
-	@Override
 	@Before
 	public void setUp() {
 		
@@ -73,7 +75,6 @@ abstract public class AbstractSynchronizeTest extends TestCase {
 		
 	}
 	
-	@Override
 	@After
 	public void tearDown() {
 		this.localRepo.removeModel(ACTOR_ID, DemoModelUtil.PHONEBOOK_ID);

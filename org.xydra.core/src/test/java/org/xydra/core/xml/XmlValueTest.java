@@ -1,6 +1,6 @@
 package org.xydra.core.xml;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.xydra.core.X;
@@ -18,7 +18,7 @@ import org.xydra.core.xml.impl.XmlOutStringBuffer;
  * @author dscharrer
  * 
  */
-public class XmlValueTest extends TestCase {
+public class XmlValueTest {
 	
 	private final static XValueFactory fact = X.getValueFactory();
 	private final static XIDProvider ids = X.getIDProvider();

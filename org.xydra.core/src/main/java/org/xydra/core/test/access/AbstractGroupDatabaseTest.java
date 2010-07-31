@@ -1,6 +1,7 @@
 package org.xydra.core.test.access;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -11,14 +12,13 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.XIDProvider;
 
 
-
 /**
  * Test for implementations of {@link XGroupDatabase}.
  * 
  * @author dscharrer
  * 
  */
-public abstract class AbstractGroupDatabaseTest extends TestCase {
+public abstract class AbstractGroupDatabaseTest {
 	
 	private XGroupDatabase groups;
 	
@@ -29,7 +29,6 @@ public abstract class AbstractGroupDatabaseTest extends TestCase {
 	
 	protected abstract XGroupDatabase getGroupDB();
 	
-	@Override
 	@Before
 	public void setUp() {
 		this.groups = getGroupDB();
