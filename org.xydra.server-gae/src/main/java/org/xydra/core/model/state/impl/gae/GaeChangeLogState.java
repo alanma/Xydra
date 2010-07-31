@@ -28,7 +28,7 @@ public class GaeChangeLogState implements XChangeLogState {
 	
 	private static final String PROP_FIRST_REVISION = "firstRevision";
 	private static final String PROP_CURRENT_REVISION = "lastRevision";
-	private static final String KIND_XEVENT = "xevent";
+	private static final String KIND_XEVENT = "XEVENT";
 	private static final String PROP_EVENT = "event";
 	
 	private final XAddress baseAddr;

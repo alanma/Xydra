@@ -38,9 +38,9 @@ public class GaeUtils {
 	
 	private static Key appendIdToKey(Key key, String kind, XID id) {
 		if(id == null) {
-			return key.getChild("XREPOSITORY", "-");
+			return key.getChild(kind, "-");
 		} else {
-			return key.getChild("XREPOSITORY", id.toString());
+			return key.getChild(kind, id.toString());
 		}
 	}
 	
