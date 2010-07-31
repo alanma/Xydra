@@ -14,15 +14,20 @@ public class LoggerFactory {
 			// try to use GWT logger
 			
 			if(gwtEnabled() && gwtLogEnabled()) {
+				
 				loggerFactorySPI = new GwtLoggerFactorySPI();
 				// FIXME
 				System.out.println("Hey, we run GWT!");
 				GWT.log("I can see you", null);
+				
+			} else {
+				
+				loggerFactorySPI = new DefaultLoggerFactorySPI();
+				loggerFactorySPI.getLogger("ROOT").error(
+				        "Found no LoggerFactorySPI, using default to std.out");
+				
 			}
 			
-			loggerFactorySPI = new DefaultLoggerFactorySPI();
-			loggerFactorySPI.getLogger("ROOT").error(
-			        "Found no LoggerFactorySPI, using default to std.out");
 		}
 		return loggerFactorySPI.getLogger(clazz.getName());
 	}
