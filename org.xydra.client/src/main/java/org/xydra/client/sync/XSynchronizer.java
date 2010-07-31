@@ -15,8 +15,8 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.index.XI;
-
-import com.allen_sauer.gwt.log.client.Log;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
 
 /**
@@ -27,6 +27,8 @@ import com.allen_sauer.gwt.log.client.Log;
  * 
  */
 public class XSynchronizer {
+	
+	static private final Logger log = LoggerFactory.getLogger(XSynchronizer.class);
 	
 	private static final XID LOCAL_ACTOR = X.getIDProvider().fromString("local");
 	
@@ -46,7 +48,7 @@ public class XSynchronizer {
 	 * {@link #executeCommand(XCommand, Callback)} Method.
 	 */
 	public XSynchronizer(XAddress addr, XSynchronizesChanges entity, XChangesService service) {
-		Log.info("sync: init with entity " + addr + " | " + entity.getAddress());
+		log.info("sync: init with entity " + addr + " | " + entity.getAddress());
 		this.addr = addr;
 		this.entity = entity;
 		this.service = service;
@@ -67,16 +69,16 @@ public class XSynchronizer {
 	 */
 	public void executeCommand(XCommand command, XCommandCallback callback) {
 		assert this.callbacks.size() == this.commands.size();
-		Log.info("sync: got command: " + command);
+		log.info("sync: got command: " + command);
 		long result = this.entity.executeCommand(LOCAL_ACTOR, command);
 		if(result == XCommand.FAILED) {
-			Log.warn("sync: command failed immediately");
+			log.warn("sync: command failed immediately");
 			if(callback != null) {
 				callback.failed();
 				callback.failedPost();
 			}
 		} else if(result == XCommand.NOCHANGE) {
-			Log.warn("sync: command already redundant");
+			log.warn("sync: command already redundant");
 			if(callback != null) {
 				callback.applied(result);
 			}
@@ -106,15 +108,15 @@ public class XSynchronizer {
 			XCommand command = this.commands.get(0);
 			final XCommandCallback callback = this.callbacks.get(0);
 			
-			Log.info("sync: sending command " + command + ", rev is " + this.syncRevison);
+			log.info("sync: sending command " + command + ", rev is " + this.syncRevison);
 			
 			this.service.executeCommand(this.addr, command, this.syncRevison,
 			        new Callback<CommandResult>() {
 				        public void onFailure(Throwable error) {
 					        if(error instanceof ServiceException) {
-						        Log.info("sync: error sending command: " + error.getMessage());
+						        log.info("sync: error sending command: " + error.getMessage());
 					        } else {
-						        Log.info("sync: error sending command", error);
+						        log.info("sync: error sending command", error);
 					        }
 					        // TODO handle error;
 					        requestEnded(false);
@@ -123,14 +125,14 @@ public class XSynchronizer {
 				        public void onSuccess(CommandResult res) {
 					        if(res.getResult() != XCommand.FAILED) {
 						        if(res.getResult() >= 0) {
-							        Log.info("sync: command applied remotely");
+							        log.info("sync: command applied remotely");
 						        } else {
 							        if(res.getEvents().size() == 0) {
-								        Log.warn("sync: command didn't change anything remotely, "
+								        log.warn("sync: command didn't change anything remotely, "
 								                + "but not new events, sync lost?");
 								        // lost sync -> bad!!!
 							        } else {
-								        Log.info("sync: command failed remotely, got new events");
+								        log.info("sync: command failed remotely, got new events");
 							        }
 							        
 						        }
@@ -141,10 +143,10 @@ public class XSynchronizer {
 						        XSynchronizer.this.callbacks.remove(0);
 					        } else {
 						        if(res.getEvents().size() == 0) {
-							        Log.warn("sync: command failed but no new events, sync lost?");
+							        log.warn("sync: command failed but no new events, sync lost?");
 							        // lost sync -> bad!!!
 						        } else {
-							        Log.info("sync: command failed remotely, got new events");
+							        log.info("sync: command failed remotely, got new events");
 							        // should fail in applyEvents
 						        }
 					        }
@@ -156,16 +158,16 @@ public class XSynchronizer {
 			
 		} else {
 			
-			Log.info("sync: getting events, rev is " + this.syncRevison);
+			log.info("sync: getting events, rev is " + this.syncRevison);
 			
 			this.service.getEvents(this.addr, this.syncRevison, XChangesService.NONE,
 			        new Callback<List<XEvent>>() {
 				        
 				        public void onFailure(Throwable error) {
 					        if(error instanceof ServiceException) {
-						        Log.info("sync: error getting events: " + error.getMessage());
+						        log.info("sync: error getting events: " + error.getMessage());
 					        } else {
-						        Log.info("sync: error getting events", error);
+						        log.info("sync: error getting events", error);
 					        }
 					        // TODO handle error;
 					        requestEnded(false);
@@ -188,7 +190,7 @@ public class XSynchronizer {
 			return;
 		}
 		
-		Log.info("sync: merging " + remoteChanges.size() + " remote and " + this.commands.size()
+		log.info("sync: merging " + remoteChanges.size() + " remote and " + this.commands.size()
 		        + " local changes, local rev is " + getLocalRevisionNumber() + " (synced to "
 		        + this.syncRevison + ")");
 		
@@ -197,18 +199,18 @@ public class XSynchronizer {
 		
 		this.syncRevison += remoteChanges.size();
 		
-		Log.info("sync: merged changes, new local rev is " + getLocalRevisionNumber()
+		log.info("sync: merged changes, new local rev is " + getLocalRevisionNumber()
 		        + " (synced to " + this.syncRevison + ")");
 		
 		for(int i = 0; i < results.length; i++) {
 			XCommandCallback callback = this.callbacks.get(i);
 			if(results[i] == XCommand.FAILED) {
-				Log.info("sync: client command conflicted: " + this.commands.get(i));
+				log.info("sync: client command conflicted: " + this.commands.get(i));
 				if(callback != null) {
 					callback.failedPost();
 				}
 			} else if(results[i] == XCommand.NOCHANGE) {
-				Log.info("sync: client command redundant: " + this.commands.get(i));
+				log.info("sync: client command redundant: " + this.commands.get(i));
 				if(callback != null) {
 					callback.applied(results[i]);
 				}
