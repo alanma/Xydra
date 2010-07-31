@@ -407,8 +407,6 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 	 * Returns the father-{@link MemoryRepository} of this MemoryModel.
 	 * 
 	 * @return The father of this MemoryModel (may be null).
-	 * @throws IllegalStateException if this method is called after this
-	 *             MemoryModel was already removed
 	 */
 	@ReadOperation
 	protected MemoryRepository getFather() {
@@ -420,8 +418,6 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 	 * 
 	 * @return true, if this MemoryModel has a father-{@link XRepository}, false
 	 *         otherwise.
-	 * @throws IllegalStateException if this method is called after this
-	 *             MemoryModel was already removed
 	 */
 	@ReadOperation
 	protected boolean hasFather() {
