@@ -33,12 +33,12 @@ public class GwtLogger extends Logger {
 	
 	@Override
 	public void info(String msg) {
-		Log.error(this.name + " " + msg);
+		Log.info(this.name + " " + msg);
 	}
 	
 	@Override
 	public void info(String msg, Throwable t) {
-		Log.error(this.name + " " + msg, t);
+		Log.info(this.name + " " + msg, t);
 	}
 	
 	@Override
