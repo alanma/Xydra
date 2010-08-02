@@ -8,8 +8,14 @@ import org.xydra.core.XX;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.state.XModelState;
+import org.xydra.core.model.state.XRepositoryState;
 
 
+/**
+ * An implementation of {@link XRepositoryState} that only exists in memory and
+ * cannot be stored.
+ * 
+ */
 public class TemporaryRepositoryState extends AbstractRepositoryState {
 	
 	private final Map<XID,XModelState> modelStates = new HashMap<XID,XModelState>();

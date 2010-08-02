@@ -8,8 +8,16 @@ import org.xydra.core.XX;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.state.XModelState;
+import org.xydra.core.model.state.XRepositoryState;
 
 
+/**
+ * A lazy implementation of {@link XRepositoryState}. Only the {@link XID XIDs}
+ * of the child-{@link XModelState XModelStates} are locally stored during
+ * runtime. Child- {@link XModelState XModelStates} are retrieved on demand and
+ * only loaded if they need to be loaded.
+ * 
+ */
 public class StoredRepositoryState extends AbstractRepositoryState {
 	
 	private static final long serialVersionUID = 4103085757625902603L;

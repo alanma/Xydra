@@ -13,7 +13,8 @@ import org.xydra.core.model.state.XObjectState;
 
 
 /**
- * An implementation of {@link XObjectState} that exists only in memory.
+ * An implementation of {@link XObjectState} that only exists in memory and
+ * cannot be stored.
  * 
  * @author dscharrer
  * 

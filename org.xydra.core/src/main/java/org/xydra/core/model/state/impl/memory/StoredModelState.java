@@ -8,9 +8,17 @@ import org.xydra.core.XX;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.state.XChangeLogState;
+import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
 
 
+/**
+ * A lazy implementation of {@link XModelState}. Only the {@link XID XIDs} of
+ * the child-{@link XObjectState XObjectStates} are locally stored during
+ * runtime. Child-{@link XObjectState XObjectStates} are retrieved on demand and
+ * only loaded if they need to be loaded.
+ * 
+ */
 public class StoredModelState extends AbstractModelState {
 	
 	private static final long serialVersionUID = -509532259783788492L;

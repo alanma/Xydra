@@ -10,7 +10,9 @@ import org.xydra.core.model.state.XObjectState;
 
 
 /**
- * Management of children (especially 'iterator()') is implemented by
+ * An abstract and basic implementation of {@link XModelState}.
+ * 
+ * Management of child-{@link XObjectState XObjectStates} must be implemented by
  * sub-classes.
  * 
  * @author voelkel
@@ -66,6 +68,14 @@ public abstract class AbstractModelState extends AbstractState implements XModel
 		return getAddress().getModel();
 	}
 	
+	/**
+	 * Checks whether the given {@link XObjectState} could be added as a child
+	 * of this AbstractModelState.
+	 * 
+	 * @param objectState The {@link XObjectState} which is to be checked
+	 * @throws IllegalArgumentException if the given {@link XObjectState} was
+	 *             null or cannot be added to this AbstractModelState
+	 */
 	protected void checkObjectState(XObjectState objectState) {
 		if(objectState == null) {
 			throw new IllegalArgumentException("objectState was null");

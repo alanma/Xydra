@@ -25,6 +25,16 @@ public class MemoryChangeLogState implements XChangeLogState {
 	
 	private static final long serialVersionUID = 4745987477215964499L;
 	
+	/**
+	 * Creates a new MemoryChangeLogState.
+	 * 
+	 * @param baseAddr The {@link XAddress} of the entity holding the
+	 *            MemoryChangeLog which is represented by this
+	 *            MemoryChangeLogState
+	 * @param revisionNumber The current revision number of the entity holding
+	 *            the MemoryChangeLog which is represented by this
+	 *            MemoryChangeLogState
+	 */
 	public MemoryChangeLogState(XAddress baseAddr, long revisionNumber) {
 		this.baseAddr = baseAddr;
 		this.revisionNumber = revisionNumber;

@@ -1,9 +1,12 @@
 package org.xydra.core.model.state.impl.memory;
 
 import org.xydra.core.model.XAddress;
+import org.xydra.core.model.state.XFieldState;
 
 
 /**
+ * Basic implementation of {@link XFieldState}.
+ * 
  * Here eager and lazy implementation are the same, as there are no children.
  * 
  * @author voelkel

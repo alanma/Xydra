@@ -9,11 +9,14 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XFieldState;
+import org.xydra.core.model.state.XObjectState;
 
 
 /**
- * A lazy implementation. Children are only stored as their IDs and are
- * retrieved on-demand.
+ * A lazy implementation of {@link XObjectState}. Only the {@link XID XIDs} of
+ * the child-{@link XFieldState XFieldStates} are locally stored during runtime.
+ * Child- {@link XFieldState XFieldStates} are retrieved on demand and only
+ * loaded if they need to be loaded.
  * 
  * @author voelkel
  * 

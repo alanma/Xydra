@@ -9,6 +9,8 @@ import org.xydra.core.value.XValue;
 
 
 /**
+ * An abstract and basic implementation of {@link XFieldState}.
+ * 
  * Here eager and lazy implementation are the same, as there are no children.
  * 
  * @author voelkel

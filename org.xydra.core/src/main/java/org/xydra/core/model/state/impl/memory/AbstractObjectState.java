@@ -6,11 +6,15 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.XType;
 import org.xydra.core.model.impl.memory.MemoryAddress;
 import org.xydra.core.model.state.XFieldState;
+import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
 
 
 /**
- * Management of children (iterator()) is implemented by sub-classes.
+ * An abstract and basic implementation of {@link XObjectState}.
+ * 
+ * Management of child-{@link XModelState XModelStates} must be implemented by
+ * sub-classes.
  * 
  * @author voelkel
  */
@@ -63,6 +67,14 @@ public abstract class AbstractObjectState extends AbstractState implements XObje
 		return getAddress().getObject();
 	}
 	
+	/**
+	 * Checks whether the given {@link XFieldState} could be added as a child of
+	 * this AbstractObjectState.
+	 * 
+	 * @param fieldState The {@link XFieldState} which is to be checked
+	 * @throws IllegalArgumentException if the given {@link XFieldState} was
+	 *             null or cannot be added to this AbstractObjectState
+	 */
 	protected void checkFieldState(XFieldState fieldState) {
 		if(fieldState == null) {
 			throw new IllegalArgumentException("fieldState was null");

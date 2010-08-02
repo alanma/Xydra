@@ -6,11 +6,15 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.XType;
 import org.xydra.core.model.impl.memory.MemoryAddress;
 import org.xydra.core.model.state.XModelState;
+import org.xydra.core.model.state.XObjectState;
 import org.xydra.core.model.state.XRepositoryState;
 
 
 /**
- * Management of children (iterator()) is implemented by sub-classes.
+ * An abstract and basic implementation of {@link XModelState}.
+ * 
+ * Management of child-{@link XObjectState XObjectStates} must be implemented by
+ * sub-classes.
  * 
  * @author voelkel
  */
@@ -52,15 +56,23 @@ public abstract class AbstractRepositoryState extends AbstractState implements X
 	public XID getID() {
 		return getAddress().getRepository();
 	}
-
+	
+	/**
+	 * Checks whether the given {@link XModelState} could be added as a child of
+	 * this AbstractRepositoryState.
+	 * 
+	 * @param modelState The {@link XModelState} which is to be checked
+	 * @throws IllegalArgumentException if the given {@link XModelState} was
+	 *             null or cannot be added to this AbstractRepositoryState
+	 */
 	protected void checkModelState(XModelState modelState) {
-        if(modelState == null) {
-    		throw new IllegalArgumentException("modelState was null");
-    	}
-    	if(!XX.contains(getAddress(), modelState.getAddress())) {
-    		throw new IllegalArgumentException("cannot add model state " + modelState.getAddress()
-    		        + " to " + getAddress());
-    	}
-    }
+		if(modelState == null) {
+			throw new IllegalArgumentException("modelState was null");
+		}
+		if(!XX.contains(getAddress(), modelState.getAddress())) {
+			throw new IllegalArgumentException("cannot add model state " + modelState.getAddress()
+			        + " to " + getAddress());
+		}
+	}
 	
 }
