@@ -1,7 +1,7 @@
 package org.xydra.core.value;
 
 /**
- * An XValue for storing a list of values.
+ * An {@link XValue} for storing a list of values.
  * 
  * @author Kaidel
  * 
@@ -13,23 +13,28 @@ public interface XListValue<E> extends XCollectionValue<E> {
 	 * Returns the index of the first occurrence of the given element in this
 	 * XListValue
 	 * 
-	 * @param elem
+	 * @param elem The element which index of its first occurrence in this list
+	 *            is to be returned
 	 * @return The index of the first occurrence of the given element. Returns
 	 *         -1 if this XListValue doesn't contain the given element.
 	 */
-	int indexOf(Object elem);
+	int indexOf(E elem);
 	
 	/**
 	 * Returns the index of the last occurrence of the given element in this
 	 * XListValue
 	 * 
-	 * @param elem
+	 * @param elem The element which index of its last occurrence in this list
+	 *            is to be returned
 	 * @return The index of the last occurrence of the given element. Returns -1
 	 *         if this XListValue doesn't contain the given element.
 	 */
-	int lastIndexOf(Object elem);
+	int lastIndexOf(E elem);
 	
 	/**
+	 * Returns the element at the given index.
+	 * 
+	 * @param index The index of the element which is to be returned
 	 * @return the element at the given index.
 	 * @throws IndexOutOfBoundsException if the given index is less than zero or
 	 *             greater than or equal to size()

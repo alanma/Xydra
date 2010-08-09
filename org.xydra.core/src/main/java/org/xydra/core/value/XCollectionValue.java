@@ -1,7 +1,7 @@
 package org.xydra.core.value;
 
 /**
- * An XValue for storing a collections of values.
+ * An {@link XValue} for storing a collections of values.
  * 
  * @author dscharrer
  * 
@@ -18,16 +18,25 @@ public interface XCollectionValue<E> extends XValue, Iterable<E> {
 	boolean contains(E elem);
 	
 	/**
+	 * Checks whether this XCollectionValue has entries or not.
+	 * 
 	 * @return true, if this {@link XCollectionValue} doesn't have any entries.
 	 */
 	boolean isEmpty();
 	
 	/**
-	 * @return the number of entries in this {@link XCollectionValue}
+	 * Returns the number of entries in this XCollectionValue
+	 * 
+	 * @return the number of entries in this XCollectionValue
 	 */
 	int size();
 	
 	/**
+	 * Returns the contents of this XCollectionValue as an array.
+	 * 
+	 * Note: Changes to the returned array will not affect the XCollectionValue
+	 * itself.
+	 * 
 	 * @return the contents of this {@link XListValue} as an array.
 	 */
 	E[] toArray();

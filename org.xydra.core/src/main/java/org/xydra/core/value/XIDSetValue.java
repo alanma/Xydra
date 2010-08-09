@@ -4,7 +4,7 @@ import org.xydra.core.model.XID;
 
 
 /**
- * An XValue for storing a set of XIDs.
+ * An {@link XValue} for storing a set of {@link XID XIDs}.
  * 
  * @author dscharrer
  * 
@@ -12,8 +12,11 @@ import org.xydra.core.model.XID;
 public interface XIDSetValue extends XSetValue<XID> {
 	
 	/**
-	 * @return the list of XID values in order (changes to the returned array
-	 *         won't affect the value)
+	 * Returns the contents of this XIDSetValue as an array.
+	 * 
+	 * Note: Changes to the returned array will not affect the XIDSetValue.
+	 * 
+	 * @return an array containing the {@link XID} values of this XIDSetValue.
 	 */
 	public XID[] contents();
 	

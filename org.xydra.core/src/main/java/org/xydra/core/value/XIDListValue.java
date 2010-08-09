@@ -4,7 +4,7 @@ import org.xydra.core.model.XID;
 
 
 /**
- * An XValue for storing a list of XIDs.
+ * An {@link XValue} for storing a list of {@link XID XIDs}.
  * 
  * @author Kaidel
  * 
@@ -12,8 +12,13 @@ import org.xydra.core.model.XID;
 public interface XIDListValue extends XListValue<XID> {
 	
 	/**
-	 * @return the list of XID values in order (changes to the returned array
-	 *         won't affect the value)
+	 * Returns the {@link XID} values as an array in the order they were added
+	 * to the list.
+	 * 
+	 * Note: Changes to the returned array will not affect the XIDListValue.
+	 * 
+	 * @return an array containing the list of {@link XID} values in the order
+	 *         they were added to the list
 	 */
 	public XID[] contents();
 	

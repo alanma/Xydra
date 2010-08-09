@@ -4,9 +4,7 @@ import org.xydra.core.model.XID;
 
 
 /**
- * For references
- * 
- * An XValue for storing an XID.
+ * An {@link XValue} for storing an {@link XID}.
  * 
  * @author voelkel
  * 
@@ -16,6 +14,11 @@ import org.xydra.core.model.XID;
  */
 public interface XIDValue extends XValue {
 	
+	/**
+	 * Returns the stored {@link XID} value.
+	 * 
+	 * @return The stored {@link XID} value.
+	 */
 	XID contents();
 	
 }

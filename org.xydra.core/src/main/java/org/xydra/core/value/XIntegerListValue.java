@@ -1,7 +1,7 @@
 package org.xydra.core.value;
 
 /**
- * An XValue for storing a list of integer values.
+ * An {@link XValue} for storing a list of Java Integer values.
  * 
  * @author Kaidel
  * 
@@ -9,8 +9,14 @@ package org.xydra.core.value;
 public interface XIntegerListValue extends XNumberListValue<Integer> {
 	
 	/**
-	 * @return the list of integer values in order (changes to the returned
-	 *         array won't affect the value)
+	 * Returns the Integer values as an array in the order they were added to
+	 * the list.
+	 * 
+	 * Note: Changes to the returned array will not affect the
+	 * XIntegerListValue.
+	 * 
+	 * @return an array containing the list of Integer values in the order they
+	 *         were added to the list
 	 */
 	int[] contents();
 	

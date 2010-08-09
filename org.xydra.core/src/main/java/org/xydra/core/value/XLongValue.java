@@ -1,7 +1,7 @@
 package org.xydra.core.value;
 
 /**
- * An XValue for storing a long value.
+ * An {@link XValue} for storing a single Java Long value.
  * 
  * @author Kaidel
  * 
@@ -9,9 +9,9 @@ package org.xydra.core.value;
 public interface XLongValue extends XNumberValue {
 	
 	/**
-	 * Return the stored long value.
+	 * Return the stored Long value.
 	 * 
-	 * @return The stored long value.
+	 * @return The stored Long value.
 	 */
 	public long contents();
 	

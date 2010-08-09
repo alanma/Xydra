@@ -20,9 +20,8 @@ import org.xydra.core.value.XIDValue;
 import org.xydra.core.value.XValue;
 
 
-
 /**
- * This interface provides de-serialization support for XModel from a Java
+ * This interface provides de-serialization support for Xydra from a Java
  * properties files.
  * 
  * Syntax:
@@ -31,7 +30,7 @@ import org.xydra.core.value.XValue;
  * <li>Key-value pairs must be written as key=value</li>
  * <li>Values are written in JSON syntax
  * <dl>
- * <dt>XID</dt>
+ * <dt>{@link XID}</dt>
  * <dd>":name"</dd>
  * <dt>XString</dt>
  * <dd>"name"</dd>
@@ -50,6 +49,8 @@ import org.xydra.core.value.XValue;
  * <li>Whitespace in key names is not permitted</li>
  * <li>Encoding must be UTF-8</li>
  * </ul>
+ * 
+ * 
  * 
  * The following example uses some syntax constructs: <code><pre>
  * # declares the XObject 'hans' and the property 'phone', sets value of hans.phone to '123'.

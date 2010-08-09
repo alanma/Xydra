@@ -5,15 +5,11 @@ import java.util.NoSuchElementException;
 
 
 /**
- * We've got to write our own ArrayIterator, since there is no standard iterator
- * for simple arrays
+ * An iterator for {@link XListValue XListValues}.
  * 
  * @author Kaidel
  * 
- * @param <E> Content Type of the underlying array
- * 
- *            TODO consider using <code>Arrays.asList(array).iterator()</code>
- *            instead ~~max
+ * @param <E> Content Type of the underlying {@link XListValue} type.
  */
 public class XListValueIterator<E> implements Iterator<E> {
 	
@@ -39,7 +35,8 @@ public class XListValueIterator<E> implements Iterator<E> {
 	}
 	
 	public void remove() {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(
+		        "XListValueIterators do not support the remove() method");
 	}
 	
 }

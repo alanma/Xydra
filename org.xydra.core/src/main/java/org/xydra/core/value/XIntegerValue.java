@@ -1,7 +1,7 @@
 package org.xydra.core.value;
 
 /**
- * An XValue for storing an integer value.
+ * An {@link XValue} for storing a single Java Integer value.
  * 
  * @author Kaidel
  * 

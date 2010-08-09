@@ -1,7 +1,7 @@
 package org.xydra.core.value;
 
 /**
- * An XValue for storing a list of long values.
+ * An {@link XValue} for storing a list of Java Long values.
  * 
  * @author Kaidel
  * 
@@ -9,8 +9,13 @@ package org.xydra.core.value;
 public interface XLongListValue extends XNumberListValue<Long> {
 	
 	/**
-	 * @return the list of long values in order (changes to the returned array
-	 *         won't affect the value)
+	 * Returns the Long values as an array in the order they were added to the
+	 * list.
+	 * 
+	 * Note: Changes to the returned array will not affect the XLongListValue.
+	 * 
+	 * @return an array containing the list of Long values in the order they
+	 *         were added to the list
 	 */
 	long[] contents();
 	
