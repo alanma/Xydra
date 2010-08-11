@@ -1,7 +1,7 @@
 package org.xydra.core.value;
 
 /**
- * An XValue for storing a set of String values.
+ * An {@link XValue} for storing a set of Java String values.
  * 
  * @author Kaidel
  * 
@@ -9,8 +9,11 @@ package org.xydra.core.value;
 public interface XStringSetValue extends XSetValue<String> {
 	
 	/**
-	 * @return the list of String values in order (changes to the returned array
-	 *         won't affect the value)
+	 * Returns the contents of the XStringSetValue as an array.
+	 * 
+	 * Note: Changes to the returned array will not affect the XStringSetValue
+	 * 
+	 * @return the contents of the XStringSetValue as an array
 	 */
 	String[] contents();
 	

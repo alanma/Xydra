@@ -1,7 +1,7 @@
 package org.xydra.core.value;
 
 /**
- * An XValue for storing a String.
+ * An {@link XValue} for storing a single Java String.
  * 
  * @author Kaidel
  * 

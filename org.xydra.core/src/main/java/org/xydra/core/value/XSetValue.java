@@ -4,8 +4,8 @@ import java.util.Set;
 
 
 /**
- * An XValue for storing a set of values. The stored values do not have a
- * specific order, but access to the contains method is fast.
+ * An {@link XValue} for storing a set of values. The stored values do not have
+ * a specific order, but access to the contains() method is fast.
  * 
  * @author dscharrer
  * 
@@ -14,6 +14,10 @@ import java.util.Set;
 public interface XSetValue<E> extends XCollectionValue<E> {
 	
 	/**
+	 * Returns a {@link Set} containing the values in this XSetValue.
+	 * 
+	 * Note: Changes to the returned {@link Set} will not affect the XSetValue.
+	 * 
 	 * @return a {@link Set} containing values in this {@link XSetValue} -
 	 *         changes to the {@link Set} are NOT reflected in this value
 	 */
