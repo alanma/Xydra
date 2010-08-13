@@ -16,6 +16,9 @@ package org.xydra.core.xml;
  */
 public interface XmlOut {
 	
+	/**
+	 * Standard XML header with UTF-8 encoding.
+	 */
 	public static final String XML_DECLARATION = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
 	
 	public void open(String elementName);
@@ -24,6 +27,12 @@ public interface XmlOut {
 	
 	public void content(String rawContent);
 	
+	/**
+	 * Close the element with the given name -- do not confuse with
+	 * {@link #close()}
+	 * 
+	 * @param elementName
+	 */
 	public void close(String elementName);
 	
 	public void comment(String string);
@@ -43,5 +52,9 @@ public interface XmlOut {
 	
 	public void flush();
 	
+	/**
+	 * Close the stream (for steam-based implementations) -- do not confuse with
+	 * {@link #close(String)}
+	 */
 	public void close();
 }
