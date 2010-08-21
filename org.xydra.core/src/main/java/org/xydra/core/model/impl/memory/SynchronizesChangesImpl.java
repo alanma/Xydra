@@ -1,8 +1,10 @@
 package org.xydra.core.model.impl.memory;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
@@ -11,12 +13,19 @@ import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XFieldCommand;
+import org.xydra.core.change.XFieldEvent;
+import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.change.XModelCommand;
 import org.xydra.core.change.XModelEvent;
 import org.xydra.core.change.XObjectCommand;
 import org.xydra.core.change.XObjectEvent;
+import org.xydra.core.change.XObjectEventListener;
+import org.xydra.core.change.XSendsFieldEvents;
+import org.xydra.core.change.XSendsObjectEvents;
+import org.xydra.core.change.XSendsTransactionEvents;
 import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.XTransactionEvent;
+import org.xydra.core.change.XTransactionEventListener;
 import org.xydra.core.change.impl.memory.MemoryFieldCommand;
 import org.xydra.core.change.impl.memory.MemoryModelCommand;
 import org.xydra.core.change.impl.memory.MemoryObjectCommand;
@@ -47,7 +56,7 @@ import org.xydra.core.model.delta.NewObject;
  * @author dscharrer
  */
 public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchronizesChanges,
-        XExecutesCommands {
+        XExecutesCommands, XSendsObjectEvents, XSendsFieldEvents, XSendsTransactionEvents {
 	
 	protected static class Orphans {
 		Map<XID,MemoryObject> objects = new HashMap<XID,MemoryObject>();
@@ -56,8 +65,15 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 	
 	protected final MemoryEventQueue eventQueue;
 	
+	private Set<XObjectEventListener> objectChangeListenerCollection;
+	private Set<XFieldEventListener> fieldChangeListenerCollection;
+	private Set<XTransactionEventListener> transactionListenerCollection;
+	
 	public SynchronizesChangesImpl(MemoryEventQueue queue) {
 		this.eventQueue = queue;
+		this.objectChangeListenerCollection = new HashSet<XObjectEventListener>();
+		this.fieldChangeListenerCollection = new HashSet<XFieldEventListener>();
+		this.transactionListenerCollection = new HashSet<XTransactionEventListener>();
 	}
 	
 	public long executeTransaction(XID actor, XTransaction transaction) {
@@ -583,5 +599,82 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 	 * End the current state transaction.
 	 */
 	protected abstract void endStateTransaction();
+	
+	/**
+	 * Notifies all listeners that have registered interest for notification on
+	 * {@link XObjectEvent XObjectEvents} happening on child-
+	 * {@link MemoryObject MemoryObjects} of this entity.
+	 * 
+	 * @param event The {@link XObjectEvent} which will be propagated to the
+	 *            registered listeners.
+	 */
+	protected void fireObjectEvent(XObjectEvent event) {
+		for(XObjectEventListener listener : this.objectChangeListenerCollection) {
+			listener.onChangeEvent(event);
+		}
+	}
+	
+	/**
+	 * Notifies all listeners that have registered interest for notification on
+	 * {@link XFieldEvent XFieldEvents} happening on child-{@link MemoryField
+	 * MemoryFields} of this entity.
+	 * 
+	 * @param event The {@link XFieldEvent} which will be propagated to the
+	 *            registered listeners.
+	 */
+	protected void fireFieldEvent(XFieldEvent event) {
+		for(XFieldEventListener listener : this.fieldChangeListenerCollection) {
+			listener.onChangeEvent(event);
+		}
+	}
+	
+	/**
+	 * Notifies all listeners that have registered interest for notification on
+	 * {@link XTransactionEvent XTransactionEvents} happening on this entity.
+	 * 
+	 * @param event The {@link XTransactonEvent} which will be propagated to the
+	 *            registered listeners.
+	 */
+	protected void fireTransactionEvent(XTransactionEvent event) {
+		for(XTransactionEventListener listener : this.transactionListenerCollection) {
+			listener.onChangeEvent(event);
+		}
+	}
+	
+	public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
+		synchronized(this.eventQueue) {
+			return this.objectChangeListenerCollection.add(changeListener);
+		}
+	}
+	
+	public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
+		synchronized(this.eventQueue) {
+			return this.objectChangeListenerCollection.remove(changeListener);
+		}
+	}
+	
+	public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
+		synchronized(this.eventQueue) {
+			return this.fieldChangeListenerCollection.add(changeListener);
+		}
+	}
+	
+	public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
+		synchronized(this.eventQueue) {
+			return this.fieldChangeListenerCollection.remove(changeListener);
+		}
+	}
+	
+	public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
+		synchronized(this.eventQueue) {
+			return this.transactionListenerCollection.add(changeListener);
+		}
+	}
+	
+	public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
+		synchronized(this.eventQueue) {
+			return this.transactionListenerCollection.remove(changeListener);
+		}
+	}
 	
 }

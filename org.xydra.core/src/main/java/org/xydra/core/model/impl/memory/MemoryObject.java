@@ -2,10 +2,8 @@ package org.xydra.core.model.impl.memory;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import org.xydra.annotations.ReadOperation;
 import org.xydra.core.X;
@@ -15,13 +13,9 @@ import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XFieldCommand;
 import org.xydra.core.change.XFieldEvent;
-import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.change.XObjectCommand;
 import org.xydra.core.change.XObjectEvent;
-import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.change.XTransaction;
-import org.xydra.core.change.XTransactionEvent;
-import org.xydra.core.change.XTransactionEventListener;
 import org.xydra.core.change.impl.memory.MemoryFieldEvent;
 import org.xydra.core.change.impl.memory.MemoryObjectEvent;
 import org.xydra.core.model.XAddress;
@@ -59,10 +53,6 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 	
 	/** Has this MemoryObject been removed? */
 	boolean removed = false;
-	
-	private Set<XObjectEventListener> objectChangeListenerCollection;
-	private Set<XFieldEventListener> fieldChangeListenerCollection;
-	private Set<XTransactionEventListener> transactionListenerCollection;
 	
 	/**
 	 * Creates a new MemoryObject without a father-{@link XModel}.
@@ -117,10 +107,6 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 			throw new IllegalArgumentException("must load object through containing model");
 		}
 		this.father = parent;
-		
-		this.objectChangeListenerCollection = new HashSet<XObjectEventListener>();
-		this.fieldChangeListenerCollection = new HashSet<XFieldEventListener>();
-		this.transactionListenerCollection = new HashSet<XTransactionEventListener>();
 	}
 	
 	/**
@@ -505,135 +491,6 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 	}
 	
 	/**
-	 * Notifies all listeners that have registered interest for notification on
-	 * {@link XObjectEvent XObjectEvents} happening on this MemoryObject.
-	 * 
-	 * @param event The {@link XObjectEvent} which will be propagated to the
-	 *            registered listeners.
-	 */
-	protected void fireObjectEvent(XObjectEvent event) {
-		for(XObjectEventListener listener : this.objectChangeListenerCollection) {
-			listener.onChangeEvent(event);
-		}
-	}
-	
-	/**
-	 * Notifies all listeners that have registered interest for notification on
-	 * {@link XFieldEvent XFieldEvents} happening on child-{@link MemoryField
-	 * MemoryFields} of this MemoryObject.
-	 * 
-	 * @param event The {@link XFieldEvent} which will be propagated to the
-	 *            registered listeners.
-	 */
-	protected void fireFieldEvent(XFieldEvent event) {
-		for(XFieldEventListener listener : this.fieldChangeListenerCollection) {
-			listener.onChangeEvent(event);
-		}
-	}
-	
-	/**
-	 * Notifies all listeners that have registered interest for notification on
-	 * {@link XTransactionEvent XTransactionEvents} happening on this
-	 * MemoryModel.
-	 * 
-	 * @param event The {@link XTransactonEvent} which will be propagated to the
-	 *            registered listeners.
-	 */
-	protected void fireTransactionEvent(XTransactionEvent event) {
-		for(XTransactionEventListener listener : this.transactionListenerCollection) {
-			listener.onChangeEvent(event);
-		}
-	}
-	
-	/**
-	 * Adds the given {@link XObjectEventListener} to this MemoryObject, if
-	 * possible.
-	 * 
-	 * @param changeListener The {@link XObjectEventListener} which is to be
-	 *            added
-	 * @return false, if the given {@link XObjectEventListener} was already
-	 *         registered on this MemoryObject, true otherwise
-	 */
-	public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
-		synchronized(this.eventQueue) {
-			return this.objectChangeListenerCollection.add(changeListener);
-		}
-	}
-	
-	/**
-	 * Removes the given {@link XObjectEventListener} from this MemoryObject.
-	 * 
-	 * @param changeListener The {@link XObjectEventListener} which is to be
-	 *            removed
-	 * @return true, if the given {@link XObjectEventListener} was registered on
-	 *         this MemoryObject, false otherwise
-	 */
-	public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
-		synchronized(this.eventQueue) {
-			return this.objectChangeListenerCollection.remove(changeListener);
-		}
-	}
-	
-	/**
-	 * Adds the given {@link XFieldEventListener} to this MemoryObject, if
-	 * possible.
-	 * 
-	 * @param changeListener The {@link XFieldEventListener} which is to be
-	 *            added
-	 * @return false, if the given {@link XFieldEventListener} was already
-	 *         registered on this MemoryObject, true otherwise
-	 */
-	public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
-		synchronized(this.eventQueue) {
-			return this.fieldChangeListenerCollection.add(changeListener);
-		}
-	}
-	
-	/**
-	 * Removes the given {@link XFieldEventListener} from this MemoryObject.
-	 * 
-	 * @param changeListener The {@link XFieldEventListener} which is to be
-	 *            removed
-	 * @return true, if the given {@link XFieldEventListener} was registered on
-	 *         this MemoryObject, false otherwise
-	 */
-	public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
-		synchronized(this.eventQueue) {
-			return this.fieldChangeListenerCollection.remove(changeListener);
-		}
-	}
-	
-	/**
-	 * Adds the given {@link XTransactionEventListener} to this MemoryObject, if
-	 * possible.
-	 * 
-	 * @param changeListener The {@link XTransactionEventListener} which is to
-	 *            be added
-	 * @return false, if the given {@link XTransactionEventListener} was already
-	 *         registered on this MemoryObject, true otherwise
-	 */
-	public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
-		synchronized(this.eventQueue) {
-			return this.transactionListenerCollection.add(changeListener);
-		}
-	}
-	
-	/**
-	 * Removes the given {@link XTransactionEventListener} from this
-	 * MemoryObject.
-	 * 
-	 * @param changeListener The {@link XTransactionEventListener} which is to
-	 *            be removed
-	 * @return true, if the given {@link XTransactionEventListener} was
-	 *         registered on this MemoryObject, false otherwise
-	 */
-	public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
-		synchronized(this.eventQueue) {
-			return this.transactionListenerCollection.remove(changeListener);
-		}
-	}
-	
-	/**
 	 * @return the current revision number of the father-{@link MemoryModel} of
 	 *         this MemoryObject or {@link XEvent#RevisionOfEntityNotSet} if
 	 *         this MemoryObject has no father.
@@ -701,10 +558,6 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 		this.removed = true;
 	}
 	
-	/**
-	 * @throws IllegalStateException if this method is called after this
-	 *             MemoryObject was already removed
-	 */
 	public long executeCommand(XID actor, XCommand command) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
