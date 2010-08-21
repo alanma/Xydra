@@ -17,7 +17,6 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 
 
-
 /**
  * Collection of methods to (de-)serialize ARM related objects to and from their
  * XML representation.
@@ -37,22 +36,6 @@ public class XmlAccess {
 	private static final String ACCESS_ATTRIBUTE = "access";
 	private static final String ALLOWED_ATTRIBUTE = "allowed";
 	
-	private static void checkElementName(MiniElement xml, String expectedName) {
-		if(!xml.getName().equals(expectedName)) {
-			throw new IllegalArgumentException("Given element " + xml + " is not an <"
-			        + expectedName + "> element.");
-		}
-	}
-	
-	private static String getRequiredAttribbute(MiniElement xml, String attribute, String element) {
-		String value = xml.getAttribute(attribute);
-		if(value == null) {
-			throw new IllegalArgumentException("Missing attribute " + attribute + "@<" + element
-			        + ">");
-		}
-		return value;
-	}
-	
 	/**
 	 * 
 	 * @return The access definition represented by the given XML element.
@@ -63,19 +46,22 @@ public class XmlAccess {
 	public static XAccessDefinition toAccessDefinition(MiniElement xml)
 	        throws IllegalArgumentException {
 		
-		checkElementName(xml, XACCESSDEFINITION_ELEMENT);
+		XmlUtils.checkElementName(xml, XACCESSDEFINITION_ELEMENT);
 		
-		String actorStr = getRequiredAttribbute(xml, ACTOR_ATTRIBUTE, XACCESSDEFINITION_ELEMENT);
+		String actorStr = XmlUtils.getRequiredAttribbute(xml, ACTOR_ATTRIBUTE,
+		        XACCESSDEFINITION_ELEMENT);
 		XID actor = actorStr == null ? null : X.getIDProvider().fromString(actorStr);
 		
-		String resourceStr = getRequiredAttribbute(xml, RESOURCE_ATTRIBUTE,
+		String resourceStr = XmlUtils.getRequiredAttribbute(xml, RESOURCE_ATTRIBUTE,
 		        XACCESSDEFINITION_ELEMENT);
 		XAddress resource = X.getIDProvider().fromAddress(resourceStr);
 		
-		String accessStr = getRequiredAttribbute(xml, ACCESS_ATTRIBUTE, XACCESSDEFINITION_ELEMENT);
+		String accessStr = XmlUtils.getRequiredAttribbute(xml, ACCESS_ATTRIBUTE,
+		        XACCESSDEFINITION_ELEMENT);
 		XID access = X.getIDProvider().fromString(accessStr);
 		
-		String allowedStr = getRequiredAttribbute(xml, ALLOWED_ATTRIBUTE, XACCESSDEFINITION_ELEMENT);
+		String allowedStr = XmlUtils.getRequiredAttribbute(xml, ALLOWED_ATTRIBUTE,
+		        XACCESSDEFINITION_ELEMENT);
 		boolean allowed = Boolean.parseBoolean(allowedStr);
 		
 		return new MemoryAccessDefinition(access, resource, actor, allowed);
@@ -92,7 +78,7 @@ public class XmlAccess {
 	public static List<XAccessDefinition> toAccessDefinitionList(MiniElement xml)
 	        throws IllegalArgumentException {
 		
-		checkElementName(xml, XACCESSDEFS_ELEMENT);
+		XmlUtils.checkElementName(xml, XACCESSDEFS_ELEMENT);
 		
 		List<XAccessDefinition> result = new ArrayList<XAccessDefinition>();
 		
@@ -114,7 +100,7 @@ public class XmlAccess {
 	public static XAccessManager toAccessManager(MiniElement xml, XGroupDatabase groups)
 	        throws IllegalArgumentException {
 		
-		checkElementName(xml, XACCESSDEFS_ELEMENT);
+		XmlUtils.checkElementName(xml, XACCESSDEFS_ELEMENT);
 		
 		XAccessManager arm = new MemoryAccessManager(groups);
 		
@@ -127,6 +113,11 @@ public class XmlAccess {
 		return arm;
 	}
 	
+	/**
+	 * Encode the given {@link XAccessDefinition} as an XML element.
+	 * 
+	 * @param out The XML encoder to write to.
+	 */
 	public static void toXml(XAccessDefinition def, XmlOut out) throws IllegalArgumentException {
 		
 		out.open(XACCESSDEFINITION_ELEMENT);
@@ -141,6 +132,11 @@ public class XmlAccess {
 		
 	}
 	
+	/**
+	 * Encode the given {@link XAccessDefinition} list as an XML element.
+	 * 
+	 * @param out The XML encoder to write to.
+	 */
 	public static void toXml(Iterator<XAccessDefinition> defs, XmlOut out)
 	        throws IllegalArgumentException {
 		
@@ -154,6 +150,12 @@ public class XmlAccess {
 		
 	}
 	
+	/**
+	 * Encode the given {@link XAccessManager}'s {@link XAccessDefinition
+	 * XAccessDefinitions} as an XML element.
+	 * 
+	 * @param out The XML encoder to write to.
+	 */
 	public static void toXml(XAccessManager arm, XmlOut out) throws IllegalArgumentException {
 		
 		toXml(arm.getDefinitions(), out);

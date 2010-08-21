@@ -7,7 +7,6 @@ import java.util.List;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
-import org.xydra.core.X;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XEvent;
@@ -24,7 +23,6 @@ import org.xydra.core.change.impl.memory.MemoryTransactionEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.value.XValue;
-import org.xydra.index.XI;
 
 
 /**
@@ -46,20 +44,11 @@ public class XmlEvent {
 	private static final String XEVENTLIST_ELEMENT = "xevents";
 	private static final String XNULL_ELEMENT = "xnull";
 	
-	private static final String REPOSITORYID_ATTRIBUTE = "repositoryId";
-	private static final String MODELID_ATTRIBUTE = "modelId";
-	private static final String OBJECTID_ATTRIBUTE = "objectId";
-	private static final String FIELDID_ATTRIBUTE = "fieldId";
 	private static final String FIELDREVISION_ATTRIBUTE = "fieldRevision";
 	private static final String OBJECTREVISION_ATTRIBUTE = "objectRevision";
 	private static final String MODELREVISION_ATTRIBUTE = "modelRevision";
 	private static final String INTRANSACTION_ATTRIBUTE = "inTransaction";
-	private static final String TYPE_ATTRIBUTE = "type";
 	private static final String ACTOR_ATTRIBUTE = "actor";
-	
-	private static final String ADD_VALUE = "ADD";
-	private static final String REMOVE_VALUE = "REMOVE";
-	private static final String CHANGE_VALUE = "CHANGE";
 	
 	private static long getRevision(MiniElement xml, String elementName, String attribute,
 	        boolean required) {
@@ -83,63 +72,13 @@ public class XmlEvent {
 		}
 	}
 	
-	private static ChangeType getTypeAttribute(MiniElement xml, String elementName) {
-		String typeString = xml.getAttribute(TYPE_ATTRIBUTE);
-		if(typeString == null)
-			throw new IllegalArgumentException("<" + elementName + ">@" + TYPE_ATTRIBUTE
-			        + " is missing");
-		if(typeString.equals(ADD_VALUE))
-			return ChangeType.ADD;
-		else if(typeString.equals(REMOVE_VALUE))
-			return ChangeType.REMOVE;
-		else if(typeString.equals(CHANGE_VALUE))
-			return ChangeType.CHANGE;
-		else
-			throw new IllegalArgumentException("<" + elementName + ">@" + TYPE_ATTRIBUTE
-			        + " does not contain a valid type, but '" + typeString + "'");
-	}
-	
-	private static XID getXidAttribute(MiniElement xml, String attributeName, XID def) {
-		String xidString = xml.getAttribute(attributeName);
-		if(xidString == null)
-			return def;
-		return X.getIDProvider().fromString(xidString);
-	}
-	
 	private static boolean getInTransactionAttribute(MiniElement xml) {
 		String booleanString = xml.getAttribute(INTRANSACTION_ATTRIBUTE);
 		return Boolean.parseBoolean(booleanString);
 	}
 	
-	private static void checkElementName(MiniElement xml, String expectedName) {
-		if(!xml.getName().equals(expectedName)) {
-			throw new IllegalArgumentException("Given element " + xml + " is not an <"
-			        + expectedName + "> element.");
-		}
-	}
-	
-	private static void checkHasNoChildren(MiniElement xml, String elementName) {
-		Iterator<MiniElement> it = xml.getElements();
-		if(it.hasNext())
-			throw new IllegalArgumentException("Invalid child of <" + elementName + ">: <"
-			        + it.next().getName() + ">");
-	}
-	
-	private static XAddress getTarget(MiniElement xml, XAddress context) {
-		
-		XID repoId = getXidAttribute(xml, REPOSITORYID_ATTRIBUTE, context == null ? null : context
-		        .getRepository());
-		XID modelId = getXidAttribute(xml, MODELID_ATTRIBUTE, context == null ? null : context
-		        .getModel());
-		XID objectId = getXidAttribute(xml, OBJECTID_ATTRIBUTE, context == null ? null : (XI
-		        .equals(modelId, context.getModel()) ? context.getObject() : null));
-		XID fieldId = getXidAttribute(xml, FIELDID_ATTRIBUTE, context == null ? null : (XI.equals(
-		        objectId, context.getObject()) ? context.getField() : null));
-		
-		return X.getIDProvider().fromComponents(repoId, modelId, objectId, fieldId);
-	}
-	
 	/**
+	 * Get the {@link XEvent} represented by the given XML element.
 	 * 
 	 * @param context The XIDs of the repository, model, object and field to
 	 *            fill in if not specified in the XML. If the given element
@@ -162,6 +101,7 @@ public class XmlEvent {
 	}
 	
 	/**
+	 * Get the {@link XAtomicEvent} represented by the given XML element.
 	 * 
 	 * @param context The XIDs of the repository, model, object and field to
 	 *            fill in if not specified in the XML. If the given element
@@ -191,6 +131,7 @@ public class XmlEvent {
 	}
 	
 	/**
+	 * Get the {@link XTransactionEvent} represented by the given XML element.
 	 * 
 	 * @param context The XIDs of the repository, model, object and field to
 	 *            fill in if not specified in the XML. The context for the
@@ -204,9 +145,9 @@ public class XmlEvent {
 	 */
 	public static XTransactionEvent toTransactionEvent(MiniElement xml, XAddress context) {
 		
-		checkElementName(xml, XTRANSACTIONEVENT_ELEMENT);
+		XmlUtils.checkElementName(xml, XTRANSACTIONEVENT_ELEMENT);
 		
-		XAddress target = getTarget(xml, context);
+		XAddress target = XmlUtils.getTarget(xml, context);
 		
 		if(target.getField() != null || (target.getModel() == null && target.getObject() == null))
 			throw new IllegalArgumentException("TransactionEvent element " + xml
@@ -217,7 +158,7 @@ public class XmlEvent {
 		long modelRev = getRevision(xml, XFIELDEVENT_ELEMENT, MODELREVISION_ATTRIBUTE, target
 		        .getObject() == null);
 		
-		XID actor = getXidAttribute(xml, ACTOR_ATTRIBUTE, null);
+		XID actor = XmlUtils.getOptionalXidAttribute(xml, ACTOR_ATTRIBUTE, null);
 		
 		List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
 		Iterator<MiniElement> it = xml.getElements();
@@ -231,6 +172,7 @@ public class XmlEvent {
 	}
 	
 	/**
+	 * Get the {@link XFieldEvent} represented by the given XML element.
 	 * 
 	 * @param context The XIDs of the repository, model, object and field to
 	 *            fill in if not specified in the XML.
@@ -241,17 +183,17 @@ public class XmlEvent {
 	 */
 	public static XFieldEvent toFieldEvent(MiniElement xml, XAddress context) {
 		
-		checkElementName(xml, XFIELDEVENT_ELEMENT);
+		XmlUtils.checkElementName(xml, XFIELDEVENT_ELEMENT);
 		
-		XAddress target = getTarget(xml, context);
+		XAddress target = XmlUtils.getTarget(xml, context);
 		
-		ChangeType type = getTypeAttribute(xml, XFIELDEVENT_ELEMENT);
+		ChangeType type = XmlUtils.getChangeType(xml, XFIELDEVENT_ELEMENT);
 		
 		long fieldRev = getRevision(xml, XFIELDEVENT_ELEMENT, FIELDREVISION_ATTRIBUTE, true);
 		long objectRev = getRevision(xml, XFIELDEVENT_ELEMENT, OBJECTREVISION_ATTRIBUTE, false);
 		long modelRev = getRevision(xml, XFIELDEVENT_ELEMENT, MODELREVISION_ATTRIBUTE, false);
 		
-		XID actor = getXidAttribute(xml, ACTOR_ATTRIBUTE, null);
+		XID actor = XmlUtils.getOptionalXidAttribute(xml, ACTOR_ATTRIBUTE, null);
 		boolean inTransaction = getInTransactionAttribute(xml);
 		
 		XValue oldValue = null;
@@ -285,11 +227,13 @@ public class XmlEvent {
 			return MemoryFieldEvent.createRemoveEvent(actor, target, oldValue, modelRev, objectRev,
 			        fieldRev, inTransaction);
 		else
-			throw new IllegalArgumentException("<" + XFIELDEVENT_ELEMENT + ">@" + TYPE_ATTRIBUTE
+			throw new IllegalArgumentException("<" + XFIELDEVENT_ELEMENT + ">@"
+			        + XmlUtils.TYPE_ATTRIBUTE
 			        + " does not contain a valid type for field events, but '" + type + "'");
 	}
 	
 	/**
+	 * Get the {@link XObjectEvent} represented by the given XML element.
 	 * 
 	 * @param context The XIDs of the repository, model and object to fill in if
 	 *            not specified in the XML.
@@ -300,32 +244,32 @@ public class XmlEvent {
 	 */
 	public static XObjectEvent toObjectEvent(MiniElement xml, XAddress context) {
 		
-		checkElementName(xml, XOBJECTEVENT_ELEMENT);
+		XmlUtils.checkElementName(xml, XOBJECTEVENT_ELEMENT);
 		
 		if(context.getField() != null)
 			throw new IllegalArgumentException("invalid context for object events: " + context);
 		
-		XAddress address = getTarget(xml, context);
+		XAddress address = XmlUtils.getTarget(xml, context);
 		
 		if(address.getObject() == null)
 			throw new IllegalArgumentException("<" + XOBJECTEVENT_ELEMENT + ">@"
-			        + OBJECTID_ATTRIBUTE + " is missing");
+			        + XmlUtils.OBJECTID_ATTRIBUTE + " is missing");
 		
 		if(address.getField() == null)
 			throw new IllegalArgumentException("<" + XOBJECTEVENT_ELEMENT + ">@"
-			        + FIELDID_ATTRIBUTE + " is missing");
+			        + XmlUtils.FIELDID_ATTRIBUTE + " is missing");
 		
-		ChangeType type = getTypeAttribute(xml, XOBJECTEVENT_ELEMENT);
+		ChangeType type = XmlUtils.getChangeType(xml, XOBJECTEVENT_ELEMENT);
 		
 		long fieldRev = getRevision(xml, XOBJECTEVENT_ELEMENT, FIELDREVISION_ATTRIBUTE,
 		        type == ChangeType.REMOVE);
 		long objectRev = getRevision(xml, XOBJECTEVENT_ELEMENT, OBJECTREVISION_ATTRIBUTE, true);
 		long modelRev = getRevision(xml, XOBJECTEVENT_ELEMENT, MODELREVISION_ATTRIBUTE, false);
 		
-		XID actor = getXidAttribute(xml, ACTOR_ATTRIBUTE, null);
+		XID actor = XmlUtils.getOptionalXidAttribute(xml, ACTOR_ATTRIBUTE, null);
 		boolean inTransaction = getInTransactionAttribute(xml);
 		
-		checkHasNoChildren(xml, XOBJECTEVENT_ELEMENT);
+		XmlUtils.checkHasNoChildren(xml, XOBJECTEVENT_ELEMENT);
 		
 		XAddress target = address.getParent();
 		XID fieldId = address.getField();
@@ -337,11 +281,13 @@ public class XmlEvent {
 			return MemoryObjectEvent.createRemoveEvent(actor, target, fieldId, modelRev, objectRev,
 			        fieldRev, inTransaction);
 		else
-			throw new IllegalArgumentException("<" + XOBJECTEVENT_ELEMENT + ">@" + TYPE_ATTRIBUTE
+			throw new IllegalArgumentException("<" + XOBJECTEVENT_ELEMENT + ">@"
+			        + XmlUtils.TYPE_ATTRIBUTE
 			        + " does not contain a valid type for object events, but '" + type + "'");
 	}
 	
 	/**
+	 * Get the {@link XModelEvent} represented by the given XML element.
 	 * 
 	 * @param context The XIDs of the repository and model to fill in if not
 	 *            specified in the XML.
@@ -352,31 +298,31 @@ public class XmlEvent {
 	 */
 	public static XModelEvent toModelEvent(MiniElement xml, XAddress context) {
 		
-		checkElementName(xml, XMODELEVENT_ELEMENT);
+		XmlUtils.checkElementName(xml, XMODELEVENT_ELEMENT);
 		
 		if(context.getObject() != null || context.getField() != null)
 			throw new IllegalArgumentException("invalid context for model events: " + context);
 		
-		XAddress address = getTarget(xml, context);
+		XAddress address = XmlUtils.getTarget(xml, context);
 		
 		if(address.getModel() == null)
-			throw new IllegalArgumentException("<" + XMODELEVENT_ELEMENT + ">@" + MODELID_ATTRIBUTE
-			        + " is missing");
+			throw new IllegalArgumentException("<" + XMODELEVENT_ELEMENT + ">@"
+			        + XmlUtils.MODELID_ATTRIBUTE + " is missing");
 		
 		if(address.getObject() == null)
 			throw new IllegalArgumentException("<" + XMODELEVENT_ELEMENT + ">@"
-			        + OBJECTID_ATTRIBUTE + " is missing");
+			        + XmlUtils.OBJECTID_ATTRIBUTE + " is missing");
 		
-		ChangeType type = getTypeAttribute(xml, XMODELEVENT_ELEMENT);
+		ChangeType type = XmlUtils.getChangeType(xml, XMODELEVENT_ELEMENT);
 		
 		long objectRev = getRevision(xml, XMODELEVENT_ELEMENT, OBJECTREVISION_ATTRIBUTE,
 		        type == ChangeType.REMOVE);
 		long modelRev = getRevision(xml, XMODELEVENT_ELEMENT, MODELREVISION_ATTRIBUTE, true);
 		
-		XID actor = getXidAttribute(xml, ACTOR_ATTRIBUTE, null);
+		XID actor = XmlUtils.getOptionalXidAttribute(xml, ACTOR_ATTRIBUTE, null);
 		boolean inTransaction = getInTransactionAttribute(xml);
 		
-		checkHasNoChildren(xml, XMODELEVENT_ELEMENT);
+		XmlUtils.checkHasNoChildren(xml, XMODELEVENT_ELEMENT);
 		
 		XAddress target = address.getParent();
 		XID objectId = address.getObject();
@@ -388,11 +334,13 @@ public class XmlEvent {
 			return MemoryModelEvent.createRemoveEvent(actor, target, objectId, modelRev, objectRev,
 			        inTransaction);
 		else
-			throw new IllegalArgumentException("<" + XMODELEVENT_ELEMENT + ">@" + TYPE_ATTRIBUTE
+			throw new IllegalArgumentException("<" + XMODELEVENT_ELEMENT + ">@"
+			        + XmlUtils.TYPE_ATTRIBUTE
 			        + " does not contain a valid type for model events, but '" + type + "'");
 	}
 	
 	/**
+	 * Get the {@link XRepositoryEvent} represented by the given XML element.
 	 * 
 	 * @param context The XID of the repository to fill in if not specified in
 	 *            the XML.
@@ -404,27 +352,27 @@ public class XmlEvent {
 	 */
 	public static XRepositoryEvent toRepositoryEvent(MiniElement xml, XAddress context) {
 		
-		checkElementName(xml, XREPOSITORYEVENT_ELEMENT);
+		XmlUtils.checkElementName(xml, XREPOSITORYEVENT_ELEMENT);
 		
 		if(context.getModel() != null || context.getObject() != null || context.getField() != null)
 			throw new IllegalArgumentException("invalid context for model events: " + context);
 		
-		XAddress address = getTarget(xml, context);
+		XAddress address = XmlUtils.getTarget(xml, context);
 		
 		if(address.getRepository() == null)
 			throw new IllegalArgumentException("<" + XREPOSITORYEVENT_ELEMENT + ">@"
-			        + REPOSITORYID_ATTRIBUTE + " is missing");
+			        + XmlUtils.REPOSITORYID_ATTRIBUTE + " is missing");
 		
 		if(address.getModel() == null)
 			throw new IllegalArgumentException("<" + XREPOSITORYEVENT_ELEMENT + ">@"
-			        + MODELID_ATTRIBUTE + " is missing");
+			        + XmlUtils.MODELID_ATTRIBUTE + " is missing");
 		
-		ChangeType type = getTypeAttribute(xml, XREPOSITORYEVENT_ELEMENT);
+		ChangeType type = XmlUtils.getChangeType(xml, XREPOSITORYEVENT_ELEMENT);
 		
 		long modelRev = getRevision(xml, XREPOSITORYEVENT_ELEMENT, MODELREVISION_ATTRIBUTE,
 		        type == ChangeType.REMOVE);
 		
-		XID actor = getXidAttribute(xml, ACTOR_ATTRIBUTE, null);
+		XID actor = XmlUtils.getOptionalXidAttribute(xml, ACTOR_ATTRIBUTE, null);
 		
 		Iterator<MiniElement> it = xml.getElements();
 		if(it.hasNext())
@@ -440,11 +388,12 @@ public class XmlEvent {
 			return MemoryRepositoryEvent.createRemoveEvent(actor, target, modelId, modelRev);
 		else
 			throw new IllegalArgumentException("<" + XREPOSITORYEVENT_ELEMENT + ">@"
-			        + TYPE_ATTRIBUTE
+			        + XmlUtils.TYPE_ATTRIBUTE
 			        + " does not contain a valid type for repository events, but '" + type + "'");
 	}
 	
 	/**
+	 * Get the {@link XEvent} list represented by the given XML element.
 	 * 
 	 * @param context The XIDs of the repository, model, object and field to
 	 *            fill in if not specified in the XML. The context for the
@@ -458,7 +407,7 @@ public class XmlEvent {
 	 */
 	public static List<XEvent> toEventList(MiniElement xml, XAddress context) {
 		
-		checkElementName(xml, XEVENTLIST_ELEMENT);
+		XmlUtils.checkElementName(xml, XEVENTLIST_ELEMENT);
 		
 		List<XEvent> events = new ArrayList<XEvent>();
 		Iterator<MiniElement> it = xml.getElements();
@@ -470,6 +419,14 @@ public class XmlEvent {
 		return events;
 	}
 	
+	/**
+	 * Encode the given {@link XEvent} as an XML element.
+	 * 
+	 * @param event The event to encode.
+	 * @param out The XML encoder to write to.
+	 * @param context The part of this event's target address that doesn't need
+	 *            to be encoded in the element.
+	 */
 	public static void toXml(XEvent event, XmlOut out, XAddress context)
 	        throws IllegalArgumentException {
 		if(event == null) {
@@ -491,12 +448,20 @@ public class XmlEvent {
 		}
 	}
 	
+	/**
+	 * Encode the given {@link XTransactionEvent} as an XML element.
+	 * 
+	 * @param event The event to encode.
+	 * @param out The XML encoder to write to.
+	 * @param context The part of this event's target address that doesn't need
+	 *            to be encoded in the element.
+	 */
 	public static void toXml(XTransactionEvent trans, XmlOut out, XAddress context)
 	        throws IllegalArgumentException {
 		
 		out.open(XTRANSACTIONEVENT_ELEMENT);
 		
-		setBasicAttributes(trans, out, context);
+		setCommonAttributes(trans, out, context);
 		
 		XAddress newContext = trans.getTarget();
 		
@@ -508,12 +473,20 @@ public class XmlEvent {
 		
 	}
 	
+	/**
+	 * Encode the given {@link XFieldEvent} as an XML element.
+	 * 
+	 * @param event The event to encode.
+	 * @param out The XML encoder to write to.
+	 * @param context The part of this event's target address that doesn't need
+	 *            to be encoded in the element.
+	 */
 	public static void toXml(XFieldEvent event, XmlOut out, XAddress context)
 	        throws IllegalArgumentException {
 		
 		out.open(XFIELDEVENT_ELEMENT);
 		
-		setEventAttributes(event, out, context);
+		setAtomicEventAttributes(event, out, context);
 		
 		if(event.getChangeType() != ChangeType.ADD)
 			XmlValue.toXml(event.getOldValue(), out);
@@ -524,6 +497,14 @@ public class XmlEvent {
 		
 	}
 	
+	/**
+	 * Encode the given {@link XObjectEvent} as an XML element.
+	 * 
+	 * @param event The event to encode.
+	 * @param out The XML encoder to write to.
+	 * @param context The part of this event's target address that doesn't need
+	 *            to be encoded in the element.
+	 */
 	public static void toXml(XObjectEvent event, XmlOut out, XAddress context)
 	        throws IllegalArgumentException {
 		
@@ -532,14 +513,22 @@ public class XmlEvent {
 		
 		out.open(XOBJECTEVENT_ELEMENT);
 		
-		setEventAttributes(event, out, context);
+		setAtomicEventAttributes(event, out, context);
 		
-		out.attribute(FIELDID_ATTRIBUTE, event.getFieldID().toString());
+		out.attribute(XmlUtils.FIELDID_ATTRIBUTE, event.getFieldID().toString());
 		
 		out.close(XOBJECTEVENT_ELEMENT);
 		
 	}
 	
+	/**
+	 * Encode the given {@link XModelEvent} as an XML element.
+	 * 
+	 * @param event The event to encode.
+	 * @param out The XML encoder to write to.
+	 * @param context The part of this event's target address that doesn't need
+	 *            to be encoded in the element.
+	 */
 	public static void toXml(XModelEvent event, XmlOut out, XAddress context)
 	        throws IllegalArgumentException {
 		
@@ -548,14 +537,22 @@ public class XmlEvent {
 		
 		out.open(XMODELEVENT_ELEMENT);
 		
-		setEventAttributes(event, out, context);
+		setAtomicEventAttributes(event, out, context);
 		
-		out.attribute(OBJECTID_ATTRIBUTE, event.getObjectID().toString());
+		out.attribute(XmlUtils.OBJECTID_ATTRIBUTE, event.getObjectID().toString());
 		
 		out.close(XMODELEVENT_ELEMENT);
 		
 	}
 	
+	/**
+	 * Encode the given {@link XRepositoryEvent} as an XML element.
+	 * 
+	 * @param event The event to encode.
+	 * @param out The XML encoder to write to.
+	 * @param context The part of this event's target address that doesn't need
+	 *            to be encoded in the element.
+	 */
 	public static void toXml(XRepositoryEvent event, XmlOut out, XAddress context)
 	        throws IllegalArgumentException {
 		
@@ -564,14 +561,22 @@ public class XmlEvent {
 		
 		out.open(XREPOSITORYEVENT_ELEMENT);
 		
-		setEventAttributes(event, out, context);
+		setAtomicEventAttributes(event, out, context);
 		
-		out.attribute(MODELID_ATTRIBUTE, event.getModelID().toString());
+		out.attribute(XmlUtils.MODELID_ATTRIBUTE, event.getModelID().toString());
 		
 		out.close(XREPOSITORYEVENT_ELEMENT);
 		
 	}
 	
+	/**
+	 * Encode the given {@link XEvent} list as an XML element.
+	 * 
+	 * @param event The event to encode.
+	 * @param out The XML encoder to write to.
+	 * @param context The part of this event's target address that doesn't need
+	 *            to be encoded in the element.
+	 */
 	public static void toXml(Iterator<XEvent> events, XmlOut out, XAddress context)
 	        throws IllegalArgumentException {
 		
@@ -585,23 +590,12 @@ public class XmlEvent {
 		
 	}
 	
-	private static void setBasicAttributes(XEvent event, XmlOut out, XAddress context) {
+	/**
+	 * Encode attributes common to all event types.
+	 */
+	private static void setCommonAttributes(XEvent event, XmlOut out, XAddress context) {
 		
-		XID repoId = event.getTarget().getRepository();
-		if(repoId != null && (context == null || !XI.equals(context.getRepository(), repoId)))
-			out.attribute(REPOSITORYID_ATTRIBUTE, repoId.toString());
-		
-		XID modelId = event.getTarget().getModel();
-		if(modelId != null && (context == null || !XI.equals(context.getModel(), modelId)))
-			out.attribute(MODELID_ATTRIBUTE, modelId.toString());
-		
-		XID objectId = event.getTarget().getObject();
-		if(objectId != null && (context == null || !XI.equals(context.getObject(), objectId)))
-			out.attribute(OBJECTID_ATTRIBUTE, objectId.toString());
-		
-		XID fieldId = event.getTarget().getField();
-		if(fieldId != null && (context == null || !XI.equals(context.getField(), fieldId)))
-			out.attribute(FIELDID_ATTRIBUTE, fieldId.toString());
+		XmlUtils.setTarget(event.getTarget(), out, context);
 		
 		if(event.getActor() != null)
 			out.attribute(ACTOR_ATTRIBUTE, event.getActor().toString());
@@ -617,11 +611,11 @@ public class XmlEvent {
 		
 	}
 	
-	private static void setEventAttributes(XAtomicEvent event, XmlOut out, XAddress context) {
+	private static void setAtomicEventAttributes(XAtomicEvent event, XmlOut out, XAddress context) {
 		
-		out.attribute(TYPE_ATTRIBUTE, event.getChangeType().toString());
+		out.attribute(XmlUtils.TYPE_ATTRIBUTE, event.getChangeType().toString());
 		
-		setBasicAttributes(event, out, context);
+		setCommonAttributes(event, out, context);
 		
 		if(event.inTransaction())
 			out.attribute(INTRANSACTION_ATTRIBUTE, Boolean.toString(true));

@@ -53,27 +53,10 @@ public class XmlModel {
 	private static final String XOBJECT_ELEMENT = "xobject";
 	private static final String XFIELD_ELEMENT = "xfield";
 	
-	private static final String XID_ATTRIBUTE = "xid";
+	static final String XID_ATTRIBUTE = "xid";
 	private static final String REVISION_ATTRIBUTE = "revision";
 	
 	public static final long NO_REVISION = -1;
-	
-	private static void checkElementName(MiniElement xml, String expectedName) {
-		if(!xml.getName().equals(expectedName)) {
-			throw new IllegalArgumentException("Given element " + xml + " is not an <"
-			        + expectedName + "> element.");
-		}
-	}
-	
-	private static XID getXidAttribute(MiniElement xml, String elementName) {
-		String xidString = xml.getAttribute(XID_ATTRIBUTE);
-		if(xidString == null) {
-			throw new IllegalArgumentException("<" + elementName + "> element is missing the "
-			        + XID_ATTRIBUTE + " attribute.");
-		}
-		XID xid = X.getIDProvider().fromString(xidString);
-		return xid;
-	}
 	
 	private static long getRevisionAttribute(MiniElement xml, String elementName) {
 		String revisionString = xml.getAttribute(REVISION_ATTRIBUTE);
@@ -91,9 +74,9 @@ public class XmlModel {
 	
 	private static XRepositoryState toRepositoryState(MiniElement xml) {
 		
-		checkElementName(xml, XREPOSITORY_ELEMENT);
+		XmlUtils.checkElementName(xml, XREPOSITORY_ELEMENT);
 		
-		XID xid = getXidAttribute(xml, XREPOSITORY_ELEMENT);
+		XID xid = XmlUtils.getRequiredXidAttribute(xml, XREPOSITORY_ELEMENT);
 		
 		XAddress repoAddr = X.getIDProvider().fromComponents(xid, null, null, null);
 		XRepositoryState repositoryState = new TemporaryRepositoryState(repoAddr);
@@ -117,8 +100,10 @@ public class XmlModel {
 	}
 	
 	/**
-	 * @param xml a partial XML document starting with <xrepository> and ending
-	 *            with the same </xrepository>
+	 * Get the {@link XRepository} represented by the given XML element.
+	 * 
+	 * @param xml a partial XML document starting with &lt;xrepository&gt; and
+	 *            ending with the same &lt;/xrepository&gt;
 	 * @return an {@link XRepository}
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XRepository element.
@@ -129,9 +114,9 @@ public class XmlModel {
 	
 	private static XModelState toModelState(MiniElement xml, XAddress repoAddr, Object trans) {
 		
-		checkElementName(xml, XMODEL_ELEMENT);
+		XmlUtils.checkElementName(xml, XMODEL_ELEMENT);
 		
-		XID xid = getXidAttribute(xml, XMODEL_ELEMENT);
+		XID xid = XmlUtils.getRequiredXidAttribute(xml, XMODEL_ELEMENT);
 		
 		long revision = getRevisionAttribute(xml, XMODEL_ELEMENT);
 		
@@ -159,8 +144,10 @@ public class XmlModel {
 	}
 	
 	/**
-	 * @param xml a partial XML document starting with <xmodel> and ending with
-	 *            the same </xmodel>
+	 * Get the {@link XModel} represented by the given XML element.
+	 * 
+	 * @param xml a partial XML document starting with &lt;xmodel&gt; and ending
+	 *            with the same &lt;/xmodel&gt;
 	 * @return an {@link XModel}
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XModel element.
@@ -171,9 +158,9 @@ public class XmlModel {
 	
 	private static XObjectState toObjectState(MiniElement xml, XAddress modelAddr, Object trans) {
 		
-		checkElementName(xml, XOBJECT_ELEMENT);
+		XmlUtils.checkElementName(xml, XOBJECT_ELEMENT);
 		
-		XID xid = getXidAttribute(xml, XOBJECT_ELEMENT);
+		XID xid = XmlUtils.getRequiredXidAttribute(xml, XOBJECT_ELEMENT);
 		
 		long revision = getRevisionAttribute(xml, XOBJECT_ELEMENT);
 		
@@ -202,8 +189,10 @@ public class XmlModel {
 	}
 	
 	/**
-	 * @param xml a partial XML document starting with <xobject> and ending with
-	 *            the same </xobject>
+	 * Get the {@link XObject} represented by the given XML element.
+	 * 
+	 * @param xml a partial XML document starting with &lt;xobject&gt; and
+	 *            ending with the same &lt;/xobject&gt;
 	 * @return an {@link XObject}
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XObject element.
@@ -214,9 +203,9 @@ public class XmlModel {
 	
 	private static XFieldState toFieldState(MiniElement xml, XAddress objectAddr, Object trans) {
 		
-		checkElementName(xml, XFIELD_ELEMENT);
+		XmlUtils.checkElementName(xml, XFIELD_ELEMENT);
 		
-		XID xid = getXidAttribute(xml, XFIELD_ELEMENT);
+		XID xid = XmlUtils.getRequiredXidAttribute(xml, XFIELD_ELEMENT);
 		
 		long revision = getRevisionAttribute(xml, XFIELD_ELEMENT);
 		
@@ -238,8 +227,10 @@ public class XmlModel {
 	}
 	
 	/**
-	 * @param xml a partial XML document starting with <xfield> and ending with
-	 *            the same </xfield>
+	 * Get the {@link XField} represented by the given XML element.
+	 * 
+	 * @param xml a partial XML document starting with &lt;xfield&gt; and ending
+	 *            with the same &lt;/xfield&gt;
 	 * @return an {@link XField}
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XField element.
@@ -249,10 +240,13 @@ public class XmlModel {
 	}
 	
 	/**
-	 * @param xmodel an {@link XRepository}
+	 * Encode the given {@link XBaseRepository} as an XML element.
+	 * 
+	 * @param xmodel an {@link XBaseRepository}
 	 * @param out the {@link XmlOut} that a partial XML document starting with
-	 *            <xrepository> and ending with the same </xrepository> is
-	 *            written to. White space is permitted but not required.
+	 *            &lt;xrepository&gt; and ending with the same
+	 *            &lt;/xrepository&gt; is written to. White space is permitted
+	 *            but not required.
 	 * @param saveRevision true if revision numbers should be saved to the xml
 	 *            file.
 	 * @param ignoreInaccessible ignore inaccessible models, objects and fields
@@ -281,10 +275,14 @@ public class XmlModel {
 	}
 	
 	/**
-	 * @param xmodel an {@link XRepository}
+	 * Encode the given {@link XBaseRepository} as an XML element, including
+	 * revision numbers and ignoring inaccessible entities.
+	 * 
+	 * @param xmodel an {@link XBaseRepository}
 	 * @param out the {@link XmlOut} that a partial XML document starting with
-	 *            <xrepository> and ending with the same </xrepository> is
-	 *            written to. White space is permitted but not required.
+	 *            &lt;xrepository&gt; and ending with the same
+	 *            &lt;/xrepository&gt; is written to. White space is permitted
+	 *            but not required.
 	 * @throws IllegalArgumentException if the model contains an unsupported
 	 *             XValue type. See {@link XmlValueWriter} for details.
 	 */
@@ -293,10 +291,12 @@ public class XmlModel {
 	}
 	
 	/**
-	 * @param xmodel an {@link XModel}
+	 * Encode the given {@link XBaseModel} as an XML element.
+	 * 
+	 * @param xmodel an {@link XBaseModel}
 	 * @param out the {@link XmlOut} that a partial XML document starting with
-	 *            <xmodel> and ending with the same </xmodel> is written to.
-	 *            White space is permitted but not required.
+	 *            &lt;xmodel&gt; and ending with the same &lt;/xmodel&gt; is
+	 *            written to. White space is permitted but not required.
 	 * @param saveRevision true if revision numbers should be saved to the xml
 	 *            file.
 	 * @param ignoreInaccessible ignore inaccessible objects and fields instead
@@ -331,10 +331,13 @@ public class XmlModel {
 	}
 	
 	/**
-	 * @param xmodel an {@link XModel}
+	 * Encode the given {@link XBaseModel} as an XML element, including revision
+	 * numbers and ignoring inaccessible entities.
+	 * 
+	 * @param xmodel an {@link XBaseModel}
 	 * @param out the {@link XmlOut} that a partial XML document starting with
-	 *            <xmodel> and ending with the same </xmodel> is written to.
-	 *            White space is permitted but not required.
+	 *            &lt;xmodel&gt; and ending with the same &lt;/xmodel&gt; is
+	 *            written to. White space is permitted but not required.
 	 * @throws IllegalArgumentException if the model contains an unsupported
 	 *             XValue type. See {@link XmlValueWriter} for details.
 	 */
@@ -343,10 +346,12 @@ public class XmlModel {
 	}
 	
 	/**
+	 * Encode the given {@link XBaseObject} as an XML element.
+	 * 
 	 * @param xobject an {@link XObject}
 	 * @param out the {@link XmlOut} that a partial XML document starting with
-	 *            <xobject> and ending with the same </xobject> is written to.
-	 *            White space is permitted but not required.
+	 *            &lt;xobject&gt; and ending with the same &lt;/xobject&gt; is
+	 *            written to. White space is permitted but not required.
 	 * @param saveRevision true if revision numbers should be saved to the xml
 	 *            file.
 	 * @param ignoreInaccessible ignore inaccessible fields instead of throwing
@@ -381,10 +386,13 @@ public class XmlModel {
 	}
 	
 	/**
-	 * @param xobject an {@link XObject}
+	 * Encode the given {@link XBaseObject} as an XML element, including
+	 * revision numbers and ignoring inaccessible entities.
+	 * 
+	 * @param xobject an {@link XBaseObject}
 	 * @param out the {@link XmlOut} that a partial XML document starting with
-	 *            <xobject> and ending with the same </xobject> is written to.
-	 *            White space is permitted but not required.
+	 *            &lt;xobject&gt; and ending with the same &lt;/xobject&gt; is
+	 *            written to. White space is permitted but not required.
 	 * @throws IllegalArgumentException if the object contains an unsupported
 	 *             XValue type. See {@link XmlValueWriter} for details.
 	 */
@@ -393,10 +401,12 @@ public class XmlModel {
 	}
 	
 	/**
-	 * @param xfield an {@link XField}
+	 * Encode the given {@link XBaseField} as an XML element.
+	 * 
+	 * @param xfield an {@link XBaseField}
 	 * @param out the {@link XmlOut} that a partial XML document starting with
-	 *            <xfield> and ending with the same </xfield> is written to.
-	 *            White space is permitted but not required.
+	 *            &lt;xfield&gt; and ending with the same &lt;/xfield&gt; is
+	 *            written to. White space is permitted but not required.
 	 * @param saveRevision true if revision numbers should be saved to the xml
 	 *            file.
 	 * @throws IllegalArgumentException if the field contains an unsupported
@@ -422,10 +432,13 @@ public class XmlModel {
 	}
 	
 	/**
-	 * @param xfield an {@link XField}
+	 * Encode the given {@link XBaseField} as an XML element, including revision
+	 * numbers.
+	 * 
+	 * @param xfield an {@link XBaseField}
 	 * @param out the {@link XmlOut} that a partial XML document starting with
-	 *            <xfield> and ending with the same </xfield> is written to.
-	 *            White space is permitted but not required.
+	 *            &lt;xfield&gt; and ending with the same &lt;/xfield&gt; is
+	 *            written to. White space is permitted but not required.
 	 * @throws IllegalArgumentException if the field contains an unsupported
 	 *             XValue type. See {@link XmlValueWriter} for details.
 	 */

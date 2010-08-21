@@ -62,13 +62,6 @@ public class XmlValue {
 	
 	private final static XValueFactory factory = X.getValueFactory();
 	
-	private static void checkElementName(MiniElement xml, String expectedName) {
-		if(!xml.getName().equals(expectedName)) {
-			throw new IllegalArgumentException("Given element " + xml + " is not an <"
-			        + expectedName + "> element.");
-		}
-	}
-	
 	/**
 	 * @return The {@link XValue} represented by the given XML element.
 	 * @throws IllegalArgumentException if the given XML element is not a valid
@@ -117,7 +110,7 @@ public class XmlValue {
 	 */
 	public static XBooleanValue toBooleanValue(MiniElement xml) {
 		
-		checkElementName(xml, XBOOLEAN_ELEMENT);
+		XmlUtils.checkElementName(xml, XBOOLEAN_ELEMENT);
 		
 		return factory.createBooleanValue(toBoolean(xml));
 	}
@@ -133,7 +126,7 @@ public class XmlValue {
 	 */
 	public static XDoubleValue toDoubleValue(MiniElement xml) {
 		
-		checkElementName(xml, XDOUBLE_ELEMENT);
+		XmlUtils.checkElementName(xml, XDOUBLE_ELEMENT);
 		
 		return factory.createDoubleValue(toDouble(xml));
 	}
@@ -158,7 +151,7 @@ public class XmlValue {
 	 */
 	public static XIntegerValue toIntegerValue(MiniElement xml) {
 		
-		checkElementName(xml, XINTEGER_ELEMENT);
+		XmlUtils.checkElementName(xml, XINTEGER_ELEMENT);
 		
 		return factory.createIntegerValue(toInteger(xml));
 	}
@@ -183,7 +176,7 @@ public class XmlValue {
 	 */
 	public static XLongValue toLongValue(MiniElement xml) {
 		
-		checkElementName(xml, XLONG_ELEMENT);
+		XmlUtils.checkElementName(xml, XLONG_ELEMENT);
 		
 		return factory.createLongValue(toLong(xml));
 	}
@@ -208,7 +201,7 @@ public class XmlValue {
 	 */
 	public static XStringValue toStringValue(MiniElement xml) {
 		
-		checkElementName(xml, XSTRING_ELEMENT);
+		XmlUtils.checkElementName(xml, XSTRING_ELEMENT);
 		
 		return factory.createStringValue(toString(xml));
 	}
@@ -230,7 +223,7 @@ public class XmlValue {
 	 */
 	public static XIDValue toIdValue(MiniElement xml) {
 		
-		checkElementName(xml, XID_ELEMENT);
+		XmlUtils.checkElementName(xml, XID_ELEMENT);
 		
 		return factory.createIDValue(toId(xml));
 	}
@@ -261,7 +254,7 @@ public class XmlValue {
 	@SuppressWarnings("boxing")
 	public static XBooleanListValue toBooleanListValue(MiniElement xml) {
 		
-		checkElementName(xml, XBOOLEANLIST_ELEMENT);
+		XmlUtils.checkElementName(xml, XBOOLEANLIST_ELEMENT);
 		
 		List<Boolean> list = new ArrayList<Boolean>();
 		
@@ -284,7 +277,7 @@ public class XmlValue {
 	@SuppressWarnings("boxing")
 	public static XDoubleListValue toDoubleListValue(MiniElement xml) {
 		
-		checkElementName(xml, XDOUBLELIST_ELEMENT);
+		XmlUtils.checkElementName(xml, XDOUBLELIST_ELEMENT);
 		
 		List<Double> list = new ArrayList<Double>();
 		
@@ -307,7 +300,7 @@ public class XmlValue {
 	@SuppressWarnings("boxing")
 	public static XIntegerListValue toIntegerListValue(MiniElement xml) {
 		
-		checkElementName(xml, XINTEGERLIST_ELEMENT);
+		XmlUtils.checkElementName(xml, XINTEGERLIST_ELEMENT);
 		
 		List<Integer> list = new ArrayList<Integer>();
 		
@@ -329,7 +322,7 @@ public class XmlValue {
 	@SuppressWarnings("boxing")
 	public static XLongListValue toLongListValue(MiniElement xml) {
 		
-		checkElementName(xml, XLONGLIST_ELEMENT);
+		XmlUtils.checkElementName(xml, XLONGLIST_ELEMENT);
 		
 		List<Long> list = new ArrayList<Long>();
 		
@@ -351,7 +344,7 @@ public class XmlValue {
 	 */
 	public static XStringListValue toStringListValue(MiniElement xml) {
 		
-		checkElementName(xml, XSTRINGLIST_ELEMENT);
+		XmlUtils.checkElementName(xml, XSTRINGLIST_ELEMENT);
 		
 		List<String> list = new ArrayList<String>();
 		
@@ -372,7 +365,7 @@ public class XmlValue {
 	 */
 	public static XIDListValue toIdListValue(MiniElement xml) {
 		
-		checkElementName(xml, XIDLIST_ELEMENT);
+		XmlUtils.checkElementName(xml, XIDLIST_ELEMENT);
 		
 		List<XID> list = new ArrayList<XID>();
 		
@@ -393,7 +386,7 @@ public class XmlValue {
 	 */
 	public static XStringSetValue toStringSetValue(MiniElement xml) {
 		
-		checkElementName(xml, XSTRINGSET_ELEMENT);
+		XmlUtils.checkElementName(xml, XSTRINGSET_ELEMENT);
 		
 		List<String> list = new ArrayList<String>();
 		
@@ -414,7 +407,7 @@ public class XmlValue {
 	 */
 	public static XIDSetValue toIdSetValue(MiniElement xml) {
 		
-		checkElementName(xml, XIDSET_ELEMENT);
+		XmlUtils.checkElementName(xml, XIDSET_ELEMENT);
 		
 		List<XID> list = new ArrayList<XID>();
 		
@@ -435,7 +428,7 @@ public class XmlValue {
 	 */
 	public static XByteListValue toByteListValue(MiniElement xml) {
 		
-		checkElementName(xml, XBYTELIST_ELEMENT);
+		XmlUtils.checkElementName(xml, XBYTELIST_ELEMENT);
 		
 		byte[] array = Base64.decode(xml.getData());
 		
@@ -489,35 +482,67 @@ public class XmlValue {
 		}
 		
 		if(xvalue instanceof XListValue<?>) {
-			if(xvalue instanceof XBooleanListValue) {
-				toXml((XBooleanListValue)xvalue, xo);
-			} else if(xvalue instanceof XDoubleListValue) {
-				toXml((XDoubleListValue)xvalue, xo);
-			} else if(xvalue instanceof XIntegerListValue) {
-				toXml((XIntegerListValue)xvalue, xo);
-			} else if(xvalue instanceof XLongListValue) {
-				toXml((XLongListValue)xvalue, xo);
-			} else if(xvalue instanceof XStringListValue) {
-				toXml((XStringListValue)xvalue, xo);
-			} else if(xvalue instanceof XIDListValue) {
-				toXml((XIDListValue)xvalue, xo);
-			} else if(xvalue instanceof XByteListValue) {
-				toXml((XByteListValue)xvalue, xo);
-			} else {
-				throw new IllegalArgumentException("Cannot serialize XListValue " + xvalue
-				        + " (unknown type: " + xvalue.getClass().getName() + ")");
-			}
+			toXml((XListValue<?>)xvalue, xo);
 		} else if(xvalue instanceof XSetValue<?>) {
-			if(xvalue instanceof XIDSetValue) {
-				toXml((XIDSetValue)xvalue, xo);
-			} else if(xvalue instanceof XStringSetValue) {
-				toXml((XStringSetValue)xvalue, xo);
-			} else {
-				throw new IllegalArgumentException("Cannot serialize XSetValue " + xvalue
-				        + " (unknown type: " + xvalue.getClass().getName() + ")");
-			}
+			toXml((XSetValue<?>)xvalue, xo);
 		} else {
 			throw new IllegalArgumentException("Cannot serialize XCollectionValue " + xvalue
+			        + " (unknown type: " + xvalue.getClass().getName() + ")");
+		}
+		
+	}
+	
+	/**
+	 * @return The XML representation of the given {@link XListValue}.
+	 * @throws IllegalArgumentException if given {@link XListValue} is an
+	 *             unrecognized type.
+	 * @throws NullPointerException if xvalue or xo is null.
+	 */
+	public static void toXml(XListValue<?> xvalue, XmlOut xo) {
+		
+		if(xvalue == null) {
+			throw new NullPointerException("value is null");
+		}
+		
+		if(xvalue instanceof XBooleanListValue) {
+			toXml((XBooleanListValue)xvalue, xo);
+		} else if(xvalue instanceof XDoubleListValue) {
+			toXml((XDoubleListValue)xvalue, xo);
+		} else if(xvalue instanceof XIntegerListValue) {
+			toXml((XIntegerListValue)xvalue, xo);
+		} else if(xvalue instanceof XLongListValue) {
+			toXml((XLongListValue)xvalue, xo);
+		} else if(xvalue instanceof XStringListValue) {
+			toXml((XStringListValue)xvalue, xo);
+		} else if(xvalue instanceof XIDListValue) {
+			toXml((XIDListValue)xvalue, xo);
+		} else if(xvalue instanceof XByteListValue) {
+			toXml((XByteListValue)xvalue, xo);
+		} else {
+			throw new IllegalArgumentException("Cannot serialize XListValue " + xvalue
+			        + " (unknown type: " + xvalue.getClass().getName() + ")");
+		}
+		
+	}
+	
+	/**
+	 * @return The XML representation of the given {@link XSetValue}.
+	 * @throws IllegalArgumentException if given {@link XSetValue} is an
+	 *             unrecognized type.
+	 * @throws NullPointerException if xvalue or xo is null.
+	 */
+	public static void toXml(XSetValue<?> xvalue, XmlOut xo) {
+		
+		if(xvalue == null) {
+			throw new NullPointerException("value is null");
+		}
+		
+		if(xvalue instanceof XIDSetValue) {
+			toXml((XIDSetValue)xvalue, xo);
+		} else if(xvalue instanceof XStringSetValue) {
+			toXml((XStringSetValue)xvalue, xo);
+		} else {
+			throw new IllegalArgumentException("Cannot serialize XSetValue " + xvalue
 			        + " (unknown type: " + xvalue.getClass().getName() + ")");
 		}
 		
