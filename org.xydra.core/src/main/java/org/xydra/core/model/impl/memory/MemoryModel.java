@@ -117,10 +117,6 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 		}
 	}
 	
-	/**
-	 * @throws IllegalStateException if this method is called after this
-	 *             MemoryModel was already removed
-	 */
 	@Override
 	public MemoryObject createObject(XID actor, XID objectID) {
 		assert getRevisionNumber() >= 0;
@@ -185,10 +181,6 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 		return this.father == null ? null : this.father.getID();
 	}
 	
-	/**
-	 * @throws IllegalStateException if this method is called after this
-	 *             MemoryModel was already removed
-	 */
 	@Override
 	public MemoryObject getObject(XID objectID) {
 		synchronized(this.eventQueue) {
@@ -215,11 +207,6 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 		}
 	}
 	
-	/**
-	 * @throws IllegalStateException if this method is called after this
-	 *             MemoryModel was already removed
-	 */
-	@ReadOperation
 	public Iterator<XID> iterator() {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -227,10 +214,6 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 		}
 	}
 	
-	/**
-	 * @throws IllegalStateException if this method is called after this
-	 *             MemoryModel was already removed
-	 */
 	@Override
 	public boolean removeObject(XID actor, XID objectID) {
 		synchronized(this.eventQueue) {
@@ -290,10 +273,6 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 		}
 	}
 	
-	/**
-	 * @throws IllegalStateException if this method is called after this
-	 *             MemoryModel was already removed
-	 */
 	public long executeModelCommand(XID actor, XModelCommand command) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -355,10 +334,6 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 		}
 	}
 	
-	/**
-	 * @throws IllegalStateException if this method is called after this
-	 *             MemoryModel was already removed
-	 */
 	public XID getID() {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -366,10 +341,6 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 		}
 	}
 	
-	/**
-	 * @throws IllegalStateException if this method is called after this
-	 *             MemoryModel was already removed
-	 */
 	public boolean hasObject(XID id) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -464,11 +435,6 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 		return hashCode;
 	}
 	
-	/**
-	 * @throws IllegalStateException if this method is called after this
-	 *             MemoryModel was already removed
-	 */
-	@ReadOperation
 	public long getRevisionNumber() {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -476,10 +442,6 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 		}
 	}
 	
-	/**
-	 * @throws IllegalStateException if this method is called after this
-	 *             MemoryModel was already removed
-	 */
 	@Override
 	public long executeTransaction(XID actor, XTransaction transaction) {
 		synchronized(this.eventQueue) {
@@ -505,10 +467,6 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 		}
 	}
 	
-	/**
-	 * @throws IllegalStateException if this method is called after this
-	 *             MemoryModel was already removed
-	 */
 	public boolean isEmpty() {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -516,10 +474,6 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, Seri
 		}
 	}
 	
-	/**
-	 * @throws IllegalStateException if this method is called after this
-	 *             MemoryModel was already removed
-	 */
 	public XAddress getAddress() {
 		synchronized(this.eventQueue) {
 			checkRemoved();

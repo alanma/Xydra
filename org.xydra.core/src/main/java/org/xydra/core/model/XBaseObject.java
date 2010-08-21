@@ -21,6 +21,7 @@ public interface XBaseObject extends IHasXAddress, IHasXID, Iterable<XID> {
 	 *            returned
 	 * @return The {@link XBaseField} with the given {@link XID} or null, if no
 	 *         corresponding {@link XBaseField} exists
+	 * @throws IllegalStateException if this object has already been removed
 	 */
 	@ReadOperation
 	XBaseField getField(XID fieldId);
@@ -32,6 +33,7 @@ public interface XBaseObject extends IHasXAddress, IHasXID, Iterable<XID> {
 	 * @param id The {@link XID} which is to be checked
 	 * @return true, if this {@link XBaseObject} contains an {@link XBaseField}
 	 *         with the given {@link XID}, false otherwise
+	 * @throws IllegalStateException if this object has already been removed
 	 */
 	@ReadOperation
 	boolean hasField(XID fieldId);
@@ -40,6 +42,7 @@ public interface XBaseObject extends IHasXAddress, IHasXID, Iterable<XID> {
 	 * Returns the current revision number of this object.
 	 * 
 	 * @return The current revision number of this object.
+	 * @throws IllegalStateException if this object has already been removed
 	 */
 	@ReadOperation
 	long getRevisionNumber();
@@ -48,6 +51,7 @@ public interface XBaseObject extends IHasXAddress, IHasXID, Iterable<XID> {
 	 * Returns true, if this object has no child-fields
 	 * 
 	 * @return true, if this object has no child-fields
+	 * @throws IllegalStateException if this object has already been removed
 	 */
 	@ReadOperation
 	boolean isEmpty();
@@ -55,7 +59,9 @@ public interface XBaseObject extends IHasXAddress, IHasXID, Iterable<XID> {
 	/**
 	 * @return an iterator over the {@link XID XIDs} of the child-{@link XField
 	 *         XFields} of this XBaseObject.
+	 * @throws IllegalStateException if this object has already been removed
 	 */
+	@ReadOperation
 	Iterator<XID> iterator();
 	
 }

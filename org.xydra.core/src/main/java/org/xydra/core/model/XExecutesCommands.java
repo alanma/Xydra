@@ -21,6 +21,7 @@ public interface XExecutesCommands {
 	 *         {@link XCommand#NOCHANGE} if the command didn't change anything
 	 *         or the revision number of the {@link XEvent} caused by the
 	 *         command.
+	 * @throws IllegalStateException if this entity has already been removed
 	 */
 	@ModificationOperation
 	long executeCommand(XID actor, XCommand command);

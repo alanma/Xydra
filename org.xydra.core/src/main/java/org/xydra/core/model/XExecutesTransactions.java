@@ -27,6 +27,7 @@ public interface XExecutesTransactions {
 	 *         {@link XCommand#NOCHANGE} if the transaction didn't change
 	 *         anything or the revision number of the {@link XEvent} caused by
 	 *         the transaction.
+	 * @throws IllegalStateException if this entity has already been removed
 	 */
 	@ModificationOperation
 	long executeTransaction(XID actor, XTransaction transaction);

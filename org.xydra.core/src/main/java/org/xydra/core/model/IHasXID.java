@@ -14,6 +14,7 @@ public interface IHasXID {
 	 * Returns the {@link XID} of this entity.
 	 * 
 	 * @return The {@link XID} of this entity.
+	 * @throws IllegalStateException if this entity has already been removed
 	 */
 	@ReadOperation
 	XID getID();

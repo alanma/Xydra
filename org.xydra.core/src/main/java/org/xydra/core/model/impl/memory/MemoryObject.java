@@ -192,10 +192,6 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 		return this.getID() + "-v" + this.getRevisionNumber() + " " + this.state.toString();
 	}
 	
-	/**
-	 * @throws IllegalStateException if this method is called after this
-	 *             MemoryObject was already removed
-	 */
 	public XID getID() {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -222,10 +218,6 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 		this.loadedFields.clear();
 	}
 	
-	/**
-	 * @throws IllegalStateException if this method is called after this
-	 *             MemoryObject was already removed
-	 */
 	public boolean removeField(XID actor, XID fieldID) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -309,10 +301,6 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 		return this.father == null ? null : this.father.getRepositoryId();
 	}
 	
-	/**
-	 * @throws IllegalStateException if this method is called after this
-	 *             MemoryObject was already removed
-	 */
 	public MemoryField getField(XID fieldID) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -335,10 +323,6 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 		}
 	}
 	
-	/**
-	 * @throws IllegalStateException if this method is called after this
-	 *             MemoryObject was already removed
-	 */
 	public MemoryField createField(XID actor, XID fieldID) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -394,10 +378,6 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 		}
 	}
 	
-	/**
-	 * @throws IllegalStateException if this method is called after this
-	 *             MemoryObject was already removed
-	 */
 	public long executeObjectCommand(XID actor, XObjectCommand command) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -489,10 +469,6 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 		this.state.setRevisionNumber(newRevision);
 	}
 	
-	/**
-	 * @throws IllegalStateException if this method is called after this
-	 *             MemoryObject was already removed
-	 */
 	public Iterator<XID> iterator() {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -500,10 +476,6 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 		}
 	}
 	
-	/**
-	 * @throws IllegalStateException if this method is called after this
-	 *             MemoryObject was already removed
-	 */
 	public boolean hasField(XID id) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -511,11 +483,6 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 		}
 	}
 	
-	/**
-	 * @throws IllegalStateException if this method is called after this
-	 *             MemoryObject was already removed
-	 */
-	@ReadOperation
 	public long getRevisionNumber() {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -523,10 +490,6 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 		}
 	}
 	
-	/**
-	 * @throws IllegalStateException if this method is called after this
-	 *             MemoryObject was already removed
-	 */
 	public boolean isEmpty() {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -534,10 +497,6 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject, Se
 		}
 	}
 	
-	/**
-	 * @throws IllegalStateException if this method is called after this
-	 *             MemoryObject was already removed
-	 */
 	public XAddress getAddress() {
 		synchronized(this.eventQueue) {
 			checkRemoved();

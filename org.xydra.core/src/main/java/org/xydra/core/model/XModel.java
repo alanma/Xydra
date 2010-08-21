@@ -37,6 +37,7 @@ public interface XModel extends XLoggedModel, Serializable, XSynchronizesChanges
 	 * @param id The {@link XID} of the {@link XObject} which is to be returned
 	 * @return The {@link XObject} with the given {@link XID} or null, if no
 	 *         corresponding {@link XObject} exists
+	 * @throws IllegalStateException if this model has already been removed
 	 */
 	@ReadOperation
 	XObject getObject(XID objectId);
@@ -50,6 +51,7 @@ public interface XModel extends XLoggedModel, Serializable, XSynchronizesChanges
 	 * @param id The {@link XID} for the {@link XObject} which is to be created
 	 * @return the newly created {@link XObject} or the already existing
 	 *         {@link XObject} if the given {@link XID} was already taken
+	 * @throws IllegalStateException if this model has already been removed
 	 */
 	@ModificationOperation
 	XObject createObject(XID actor, XID id);
@@ -62,6 +64,7 @@ public interface XModel extends XLoggedModel, Serializable, XSynchronizesChanges
 	 *            removed
 	 * @return true, if an {@link XObject} with the given {@link XID} did exist
 	 *         in this XModel and could be removed
+	 * @throws IllegalStateException if this model has already been removed
 	 */
 	@ModificationOperation
 	boolean removeObject(XID actor, XID objectID);
@@ -87,6 +90,7 @@ public interface XModel extends XLoggedModel, Serializable, XSynchronizesChanges
 	 *         {@link XModelCommand} didn't change anything or if executing the
 	 *         {@link XModelCommand} succeeded the revision number of the
 	 *         {@link XModelEvent} caused by the {@link XModelCommand}.
+	 * @throws IllegalStateException if this model has already been removed
 	 */
 	@ModificationOperation
 	long executeModelCommand(XID actor, XModelCommand command);

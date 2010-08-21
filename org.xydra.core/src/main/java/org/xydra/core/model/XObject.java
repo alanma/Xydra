@@ -34,6 +34,7 @@ public interface XObject extends XLoggedObject, XSynchronizesChanges {
 	 *            returned
 	 * @return The {@link XField} with the given {@link XID} or null, if no
 	 *         corresponding {@link XField} exists
+	 * @throws IllegalStateException if this object has already been removed
 	 */
 	@ReadOperation
 	XField getField(XID fieldId);
@@ -48,6 +49,7 @@ public interface XObject extends XLoggedObject, XSynchronizesChanges {
 	 *            created.
 	 * @return the newly created {@link XField} or the already existing
 	 *         {@link XField} with this {@link XID}
+	 * @throws IllegalStateException if this object has already been removed
 	 */
 	@ModificationOperation
 	XField createField(XID actor, XID fieldID);
@@ -60,6 +62,8 @@ public interface XObject extends XLoggedObject, XSynchronizesChanges {
 	 *            removed
 	 * @return true, if the specified {@link XField} did exist and could be
 	 *         removed
+	 * @throws IllegalStateException if this object has already been removed
+	 *             itself
 	 */
 	@ModificationOperation
 	boolean removeField(XID actor, XID fieldID);
@@ -85,6 +89,7 @@ public interface XObject extends XLoggedObject, XSynchronizesChanges {
 	 *         {@link XObjectCommand} didn't change anything or if executing the
 	 *         {@link XObjectCommand} succeeded the revision number of the
 	 *         {@link XObjectEvent} caused by the {@link XObjectCommand}.
+	 * @throws IllegalStateException if this object has already been removed
 	 */
 	@ModificationOperation
 	long executeObjectCommand(XID actor, XObjectCommand command);

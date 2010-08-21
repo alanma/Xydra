@@ -27,6 +27,7 @@ public interface XSynchronizesChanges extends XExecutesCommands, XExecutesTransa
 	 * out for all changes made.
 	 * 
 	 * @param revision The revision number to which will be rolled back
+	 * @throws IllegalStateException if this entity has already been removed
 	 */
 	void rollback(long revision);
 	
@@ -50,6 +51,7 @@ public interface XSynchronizesChanges extends XExecutesCommands, XExecutesTransa
 	 * @param localChanges Local changes that haven't been saved remotely yet.
 	 *            This list will be modified with updated commands.
 	 * @return the results for the localChanges
+	 * @throws IllegalStateException if this entity has already been removed
 	 */
 	long[] synchronize(List<XEvent> remoteChanges, long lastRevision, XID actor,
 	        List<XCommand> localChanges, List<? extends XSynchronizationCallback> callbacks);

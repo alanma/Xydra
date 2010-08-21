@@ -21,6 +21,7 @@ public interface XBaseModel extends IHasXAddress, IHasXID, Iterable<XID> {
 	 *            returned
 	 * @return The {@link XBaseObject} with the given {@link XID} or null, if no
 	 *         corresponding {@link XBaseObject} exists
+	 * @throws IllegalStateException if this model has already been removed
 	 */
 	@ReadOperation
 	XBaseObject getObject(XID objectId);
@@ -32,6 +33,7 @@ public interface XBaseModel extends IHasXAddress, IHasXID, Iterable<XID> {
 	 * @param id The {@link XID} which is to be checked
 	 * @return true, if this {@link XBaseModel} already contains an
 	 *         {@link XBaseObject} with the given {@link XID}, false otherwise
+	 * @throws IllegalStateException if this model has already been removed
 	 */
 	@ReadOperation
 	boolean hasObject(XID objectId);
@@ -40,6 +42,7 @@ public interface XBaseModel extends IHasXAddress, IHasXID, Iterable<XID> {
 	 * Returns the current revision number of this {@link XBaseModel}.
 	 * 
 	 * @return The current revision number of this {@link XBaseModel}.
+	 * @throws IllegalStateException if this model has already been removed
 	 */
 	@ReadOperation
 	long getRevisionNumber();
@@ -48,6 +51,7 @@ public interface XBaseModel extends IHasXAddress, IHasXID, Iterable<XID> {
 	 * Returns true, if this model has no child-objects
 	 * 
 	 * @return true, if this model has no child-objects
+	 * @throws IllegalStateException if this model has already been removed
 	 */
 	@ReadOperation
 	boolean isEmpty();
@@ -55,7 +59,9 @@ public interface XBaseModel extends IHasXAddress, IHasXID, Iterable<XID> {
 	/**
 	 * @return an iterator over the {@link XID XIDs} of the child-
 	 *         {@link XObject XObjects} of this XBaseModel.
+	 * @throws IllegalStateException if this model has already been removed
 	 */
+	@ReadOperation
 	Iterator<XID> iterator();
 	
 }

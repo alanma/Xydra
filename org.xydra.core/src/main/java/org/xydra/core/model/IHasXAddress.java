@@ -13,6 +13,7 @@ public interface IHasXAddress {
 	
 	/**
 	 * @return The {@link XAddress} of this entity
+	 * @throws IllegalStateException if this entity has already been removed
 	 */
 	@ReadOperation
 	XAddress getAddress();
