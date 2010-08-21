@@ -9,7 +9,6 @@ import org.xydra.core.change.ChangeType;
 import org.xydra.core.model.XID;
 
 
-
 /**
  * Memory implementation of {@link XAccessEvent}
  * 
@@ -27,7 +26,7 @@ public class MemoryGroupEvent implements XGroupEvent {
 	
 	public MemoryGroupEvent(ChangeType type, XID actor, XID group) {
 		if(type != ChangeType.ADD && type != ChangeType.REMOVE)
-			throw new IllegalArgumentException("invalid type for group events: " + this.type);
+			throw new IllegalArgumentException("invalid type for group events: " + type);
 		this.type = type;
 		this.actor = actor;
 		this.group = group;

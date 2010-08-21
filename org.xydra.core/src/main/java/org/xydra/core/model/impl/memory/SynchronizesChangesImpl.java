@@ -1,5 +1,6 @@
 package org.xydra.core.model.impl.memory;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -56,11 +57,18 @@ import org.xydra.core.model.delta.NewObject;
  * @author dscharrer
  */
 public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchronizesChanges,
-        XExecutesCommands, XSendsObjectEvents, XSendsFieldEvents, XSendsTransactionEvents {
+        XExecutesCommands, XSendsObjectEvents, XSendsFieldEvents, XSendsTransactionEvents,
+        Serializable {
 	
-	protected static class Orphans {
+	private static final long serialVersionUID = -5649382238597273583L;
+	
+	protected static class Orphans implements Serializable {
+		
+		private static final long serialVersionUID = -146971665894476381L;
+		
 		Map<XID,MemoryObject> objects = new HashMap<XID,MemoryObject>();
 		Map<XAddress,MemoryField> fields = new HashMap<XAddress,MemoryField>();
+		
 	}
 	
 	protected final MemoryEventQueue eventQueue;

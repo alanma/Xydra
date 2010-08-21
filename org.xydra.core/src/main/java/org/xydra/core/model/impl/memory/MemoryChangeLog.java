@@ -18,6 +18,8 @@ import org.xydra.index.iterator.NoneIterator;
  */
 public class MemoryChangeLog implements XChangeLog {
 	
+	private static final long serialVersionUID = -3242936915355886858L;
+	
 	private XChangeLogState state;
 	
 	public MemoryChangeLog(XChangeLogState state) {

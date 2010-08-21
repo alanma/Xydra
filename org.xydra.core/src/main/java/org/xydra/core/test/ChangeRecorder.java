@@ -37,6 +37,7 @@ public class ChangeRecorder implements XRepositoryEventListener, XModelEventList
 	
 	public ChangeRecorder(List<XEvent> eventList, boolean filter) {
 		this.eventList = eventList;
+		this.filter = filter;
 	}
 	
 	public void onChangeEvent(XRepositoryEvent event) {

@@ -1,5 +1,7 @@
 package org.xydra.core.model.impl.memory;
 
+import java.util.Random;
+
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
 
@@ -53,6 +55,8 @@ public class UUID {
 	private static final char[] CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 	        .toCharArray();
 	
+	private static final Random random = new Random();
+	
 	/**
 	 * Generate a random uuid of the specified length. Example: uuid(15) returns
 	 * "VcydxgltxrVZSTV"
@@ -82,7 +86,7 @@ public class UUID {
 		char[] uuid = new char[len];
 		// Compact form
 		for(int i = 0; i < len; i++) {
-			uuid[i] = CHARS[(int)(Math.random() * radix)];
+			uuid[i] = CHARS[random.nextInt(radix)];
 		}
 		return new String(uuid);
 	}
@@ -103,7 +107,7 @@ public class UUID {
 		// per rfc4122, sec. 4.1.5
 		for(int i = 0; i < 36; i++) {
 			if(uuid[i] == 0) {
-				r = (int)(Math.random() * 16);
+				r = random.nextInt(16);
 				uuid[i] = CHARS[(i == 19) ? (r & 0x3) | 0x8 : r & 0xf];
 			}
 		}

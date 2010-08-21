@@ -9,6 +9,8 @@ import org.xydra.core.model.state.XRepositoryState;
 
 public class TestRepositoryState extends TestState implements XRepositoryState {
 	
+	private static final long serialVersionUID = 8197909976435793933L;
+	
 	public TestRepositoryState(TestStateStore store, XAddress address) {
 		super(store, address);
 	}

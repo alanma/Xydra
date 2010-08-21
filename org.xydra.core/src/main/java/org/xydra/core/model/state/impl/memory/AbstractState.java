@@ -1,5 +1,7 @@
 package org.xydra.core.model.state.impl.memory;
 
+import java.io.Serializable;
+
 import org.xydra.core.model.IHasXAddress;
 import org.xydra.core.model.XAddress;
 
@@ -11,7 +13,9 @@ import org.xydra.core.model.XAddress;
  * @author dscharrer
  * 
  */
-public abstract class AbstractState implements IHasXAddress {
+public abstract class AbstractState implements IHasXAddress, Serializable {
+	
+	private static final long serialVersionUID = -3431932927218751276L;
 	
 	private final XAddress address;
 	

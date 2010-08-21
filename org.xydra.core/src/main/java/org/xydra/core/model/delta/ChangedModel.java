@@ -263,11 +263,9 @@ public class ChangedModel implements DeltaModel {
 				// command is invalid or doesn't change anything
 				return command.isForced();
 			}
-			if(object.getRevisionNumber() != command.getRevisionNumber()) {
-				if(!command.isForced()) {
-					// command is invalid
-					return false;
-				}
+			if(object.getRevisionNumber() != command.getRevisionNumber() && !command.isForced()) {
+				// command is invalid
+				return false;
 			}
 			// command is OK and removes an existing object
 			removeObject(objectId);
@@ -317,11 +315,9 @@ public class ChangedModel implements DeltaModel {
 				// command is invalid or doesn't change anything
 				return command.isForced();
 			}
-			if(field.getRevisionNumber() != command.getRevisionNumber()) {
-				if(!command.isForced()) {
-					// command is invalid
-					return false;
-				}
+			if(field.getRevisionNumber() != command.getRevisionNumber() && !command.isForced()) {
+				// command is invalid
+				return false;
 			}
 			// command is OK and removes an existing field
 			object.removeField(fieldId);

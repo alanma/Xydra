@@ -1,5 +1,6 @@
 package org.xydra.core.test.model.state;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -11,7 +12,9 @@ import org.xydra.core.value.XValue;
 import org.xydra.index.XI;
 
 
-public abstract class TestState {
+public abstract class TestState implements Serializable {
+	
+	private static final long serialVersionUID = 7707154420739741167L;
 	
 	TestStateStore store;
 	XAddress address;

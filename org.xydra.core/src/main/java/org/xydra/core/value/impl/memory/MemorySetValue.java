@@ -87,8 +87,7 @@ public abstract class MemorySetValue<E> implements XSetValue<E> {
 		return true;
 	}
 	
-	@Override
-	public int hashCode() {
+	protected int getHashCode() {
 		return this.set.hashCode();
 	}
 	

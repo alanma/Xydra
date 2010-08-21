@@ -36,4 +36,9 @@ public class MemoryStringSetValue extends MemorySetValue<String> implements XStr
 		return other instanceof XStringSetValue && checkEquals((XStringSetValue)other);
 	}
 	
+	@Override
+	public int hashCode() {
+		return getHashCode();
+	}
+	
 }

@@ -1,5 +1,6 @@
 package org.xydra.core.test.model.state;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,7 +28,9 @@ import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.Wildcard;
 
 
-public class TestStateStore implements XStateStore {
+public class TestStateStore implements XStateStore, Serializable {
+	
+	private static final long serialVersionUID = 5790667556879966890L;
 	
 	public List<TestState> allStates = new ArrayList<TestState>();
 	public List<TestChangeLogState> allLogs = new ArrayList<TestChangeLogState>();

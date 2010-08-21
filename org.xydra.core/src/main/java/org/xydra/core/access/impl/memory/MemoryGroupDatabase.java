@@ -40,6 +40,8 @@ import org.xydra.index.query.Wildcard;
 @RunsInJava
 public class MemoryGroupDatabase implements XGroupDatabase {
 	
+	private static final long serialVersionUID = 4404147651476087029L;
+	
 	// map of actor->group relationships
 	private final ITransitivePairIndex<XID> index;
 	private final Set<XGroupListener> listeners;

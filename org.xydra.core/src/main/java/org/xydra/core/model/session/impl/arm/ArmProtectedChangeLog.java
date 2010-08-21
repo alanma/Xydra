@@ -24,6 +24,8 @@ import org.xydra.index.iterator.AbstractTransformingIterator;
  */
 public class ArmProtectedChangeLog implements XChangeLog {
 	
+	private static final long serialVersionUID = -1236561973087579785L;
+	
 	private final XChangeLog log;
 	private final XAccessManager arm;
 	private final XID actor;

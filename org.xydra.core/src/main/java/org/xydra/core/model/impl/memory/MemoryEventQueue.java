@@ -1,5 +1,6 @@
 package org.xydra.core.model.impl.memory;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +29,9 @@ import org.xydra.index.XI;
  * dispatched after all current change operations are completed.
  * 
  */
-public class MemoryEventQueue {
+public class MemoryEventQueue implements Serializable {
+	
+	private static final long serialVersionUID = -4839276542320739074L;
 	
 	private final List<EventQueueEntry> eventQueue;
 	private boolean sending;

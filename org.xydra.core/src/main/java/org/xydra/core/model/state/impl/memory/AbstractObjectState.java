@@ -20,6 +20,8 @@ import org.xydra.core.model.state.XObjectState;
  */
 public abstract class AbstractObjectState extends AbstractState implements XObjectState {
 	
+	private static final long serialVersionUID = -5023507446999380441L;
+	
 	private long revisionNumber;
 	
 	public AbstractObjectState(XAddress objectAddr) {

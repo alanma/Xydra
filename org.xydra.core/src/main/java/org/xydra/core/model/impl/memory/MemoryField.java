@@ -296,13 +296,12 @@ public class MemoryField implements XField, Serializable {
 			
 			if(command.getChangeType() == ChangeType.ADD) {
 				if(this.getValue() != null) {
-					if(command.isForced()) {
-						/*
-						 * the forced event only cares about the postcondition -
-						 * that there is the given value set, not about that
-						 * there was no value before
-						 */
-					} else {
+					/*
+					 * the forced event only cares about the postcondition -
+					 * that there is the given value set, not about that there
+					 * was no value before
+					 */
+					if(!command.isForced()) {
 						// value already set
 						return XCommand.FAILED;
 					}
@@ -339,13 +338,12 @@ public class MemoryField implements XField, Serializable {
 			
 			if(command.getChangeType() == ChangeType.CHANGE) {
 				if(this.getValue() == null) {
-					if(command.isForced()) {
-						/*
-						 * the forced event only cares about the postcondition -
-						 * that there is the given value set, not about that
-						 * there was no value before
-						 */
-					} else {
+					/*
+					 * the forced event only cares about the postcondition -
+					 * that there is the given value set, not about that there
+					 * was no value before
+					 */
+					if(!command.isForced()) {
 						// given old value does not concur with the current
 						// value
 						return XCommand.FAILED;

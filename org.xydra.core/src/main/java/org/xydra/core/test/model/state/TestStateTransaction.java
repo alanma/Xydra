@@ -1,5 +1,6 @@
 package org.xydra.core.test.model.state;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -9,7 +10,9 @@ import org.xydra.index.impl.MapPairIndex;
 import org.xydra.index.query.Pair;
 
 
-public class TestStateTransaction {
+public class TestStateTransaction implements Serializable {
+	
+	private static final long serialVersionUID = 2872941127240669775L;
 	
 	final XAddress base;
 	final Set<TestState> saved = new HashSet<TestState>();

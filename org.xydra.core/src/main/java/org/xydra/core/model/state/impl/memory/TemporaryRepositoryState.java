@@ -18,6 +18,8 @@ import org.xydra.core.model.state.XRepositoryState;
  */
 public class TemporaryRepositoryState extends AbstractRepositoryState {
 	
+	private static final long serialVersionUID = 3209744380682066522L;
+	
 	private final Map<XID,XModelState> modelStates = new HashMap<XID,XModelState>();
 	
 	public TemporaryRepositoryState(XAddress repoAddr) {

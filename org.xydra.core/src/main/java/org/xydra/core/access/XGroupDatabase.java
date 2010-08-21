@@ -1,5 +1,6 @@
 package org.xydra.core.access;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import org.xydra.core.model.XID;
@@ -12,7 +13,7 @@ import org.xydra.core.model.XID;
  * 
  * @author dscharrer
  */
-public interface XGroupDatabase {
+public interface XGroupDatabase extends Serializable {
 	
 	public class CycleException extends IllegalArgumentException {
 		

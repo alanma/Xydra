@@ -23,6 +23,8 @@ import org.xydra.core.model.state.XObjectState;
  */
 public class StoredObjectState extends AbstractObjectState {
 	
+	private static final long serialVersionUID = 144975610485120472L;
+	
 	private final Set<XID> fieldStateIDs = new HashSet<XID>();
 	private final MemoryStateStore store;
 	private final XChangeLogState changeLogState;

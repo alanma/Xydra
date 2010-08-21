@@ -1,5 +1,6 @@
 package org.xydra.core.model.state;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import org.xydra.core.model.IHasXAddress;
@@ -28,7 +29,7 @@ import org.xydra.core.model.XObject;
  * @author voelkel
  * @author Kaidel
  */
-public interface XObjectState extends IHasXID, Iterable<XID>, IHasXAddress {
+public interface XObjectState extends IHasXID, Iterable<XID>, IHasXAddress, Serializable {
 	
 	/**
 	 * Begin a simple transaction to prevent inconsistent states from being

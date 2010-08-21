@@ -1,5 +1,6 @@
 package org.xydra.core.model.state.impl.memory;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,7 +21,9 @@ import org.xydra.core.model.state.XStateStore;
  * 
  * @author voelkel
  */
-public class MemoryStateStore implements XStateStore {
+public class MemoryStateStore implements XStateStore, Serializable {
+	
+	private static final long serialVersionUID = 4486561293132414895L;
 	
 	private Map<XAddress,XFieldState> fields;
 	private Map<XAddress,XObjectState> objects;

@@ -21,6 +21,8 @@ import org.xydra.core.model.state.XObjectState;
  */
 public class TemporaryObjectState extends AbstractObjectState {
 	
+	private static final long serialVersionUID = 728023809328377428L;
+	
 	private final Map<XID,XFieldState> fieldStates = new HashMap<XID,XFieldState>();
 	private final XChangeLogState changeLogState;
 	

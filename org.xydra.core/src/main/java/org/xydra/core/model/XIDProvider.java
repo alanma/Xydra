@@ -42,7 +42,7 @@ public interface XIDProvider {
 	 * @throws URIFormatException if the given address contains too many
 	 *             components.
 	 */
-	XAddress fromAddress(String address) throws IllegalArgumentException;
+	XAddress fromAddress(String address) throws IllegalArgumentException, URIFormatException;
 	
 	/**
 	 * Creates a new {@link XAddress} from the given components. The

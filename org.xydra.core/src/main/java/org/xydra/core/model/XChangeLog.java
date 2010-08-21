@@ -1,5 +1,6 @@
 package org.xydra.core.model;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import org.xydra.core.change.XEvent;
@@ -12,7 +13,7 @@ import org.xydra.core.change.XEvent;
  * @author Kaidel
  */
 
-public interface XChangeLog {
+public interface XChangeLog extends Serializable {
 	
 	/**
 	 * Returns the {@link XAddress} of the {@link XModel} this change log refers

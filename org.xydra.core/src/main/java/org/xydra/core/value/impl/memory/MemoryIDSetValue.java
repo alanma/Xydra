@@ -37,4 +37,9 @@ public class MemoryIDSetValue extends MemorySetValue<XID> implements XIDSetValue
 		return other instanceof XIDSetValue && checkEquals((XIDSetValue)other);
 	}
 	
+	@Override
+	public int hashCode() {
+		return getHashCode();
+	}
+	
 }

@@ -310,7 +310,7 @@ public abstract class AbstractChangeTest {
 	
 	// - - - - Dummy implementation of the listeners - - - -
 	
-	private class DummyRepositoryChangeListener implements XRepositoryEventListener {
+	private static class DummyRepositoryChangeListener implements XRepositoryEventListener {
 		private ChangeType type;
 		private XID repo;
 		public boolean fired = false;
@@ -340,7 +340,7 @@ public abstract class AbstractChangeTest {
 		}
 	}
 	
-	private class DummyModelChangeListener implements XModelEventListener {
+	private static class DummyModelChangeListener implements XModelEventListener {
 		private ChangeType type;
 		private XID repo;
 		private XID model;
@@ -377,7 +377,7 @@ public abstract class AbstractChangeTest {
 		}
 	}
 	
-	private class DummyObjectChangeListener implements XObjectEventListener {
+	private static class DummyObjectChangeListener implements XObjectEventListener {
 		private ChangeType type;
 		private XID repoID;
 		private XID modelID;
@@ -421,7 +421,7 @@ public abstract class AbstractChangeTest {
 		}
 	}
 	
-	private class DummyFieldChangeListener implements XFieldEventListener {
+	private static class DummyFieldChangeListener implements XFieldEventListener {
 		private ChangeType type;
 		private XID repo;
 		private XID model;

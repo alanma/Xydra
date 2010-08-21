@@ -10,6 +10,8 @@ import org.xydra.core.model.state.XObjectState;
 
 public class TestObjectState extends TestState implements XObjectState {
 	
+	private static final long serialVersionUID = -6505722468701048503L;
+	
 	XChangeLogState log;
 	
 	public TestObjectState(TestStateStore store, XAddress addr, XChangeLogState log) {

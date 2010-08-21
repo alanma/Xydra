@@ -1,5 +1,8 @@
 package org.xydra.core.model;
 
+import java.io.Serializable;
+
+
 /**
  * An identifier for a specific instance of an {@link XRepository},
  * {@link XModel}, {@link XObject} or {@link XField}. An XAddress allows to
@@ -7,7 +10,7 @@ package org.xydra.core.model;
  * 
  * @author dscharrer
  */
-public interface XAddress {
+public interface XAddress extends Serializable {
 	
 	/**
 	 * @return the {@link XID} of the {@link XField} identified by this address
