@@ -80,17 +80,7 @@ abstract public class AbstractAccessManagerTest {
 	@Test
 	public void testEmptyDatabase() {
 		
-		assertNull(this.arm.hasAccess(this.actorAlpha, this.r, this.access));
-		assertNull(this.arm.hasAccess(this.actorAlpha, this.rA, this.access));
-		assertNull(this.arm.hasAccess(this.actorAlpha, this.rA0, this.access));
-		
-		assertNull(this.arm.hasAccessToSubtree(this.actorAlpha, this.r, this.access));
-		assertNull(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA, this.access));
-		assertNull(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA0, this.access));
-		
-		assertNull(this.arm.hasAccessToSubresource(this.actorAlpha, this.r, this.access));
-		assertNull(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA, this.access));
-		assertNull(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA0, this.access));
+		checkHasUndefinedAccess(this.actorAlpha);
 		
 		assertFalse(this.arm.isAccessDefined(this.actorAlpha, this.r, this.access));
 		assertFalse(this.arm.isAccessDefined(this.actorAlpha, this.rA, this.access));
@@ -107,34 +97,11 @@ abstract public class AbstractAccessManagerTest {
 		assertFalse(this.arm.isAccessDefined(this.actorAlpha, this.rA, this.access));
 		assertTrue(this.arm.getAccessDefinition(this.actorAlpha, this.r, this.access));
 		
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.r, this.access));
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.rA, this.access));
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.rA0, this.access));
-		
-		assertNull(this.arm.hasAccess(this.actorBeta, this.r, this.access));
-		assertNull(this.arm.hasAccess(this.actorBeta, this.rA, this.access));
-		assertNull(this.arm.hasAccess(this.actorBeta, this.rA0, this.access));
+		checkHasAllAccess(this.actorAlpha);
+		checkHasUndefinedAccess(this.actorBeta);
 		
 		assertNull(this.arm.hasAccess(this.actorAlpha, this.r, this.access2));
-		
-		assertTrue(this.arm.hasAccessToSubtree(this.actorAlpha, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA0, this.access));
-		
-		assertNull(this.arm.hasAccessToSubtree(this.actorBeta, this.r, this.access));
-		assertNull(this.arm.hasAccessToSubtree(this.actorBeta, this.rA, this.access));
-		assertNull(this.arm.hasAccessToSubtree(this.actorBeta, this.rA0, this.access));
-		
 		assertNull(this.arm.hasAccessToSubtree(this.actorAlpha, this.r, this.access2));
-		
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA0, this.access));
-		
-		assertNull(this.arm.hasAccessToSubresource(this.actorBeta, this.r, this.access));
-		assertNull(this.arm.hasAccessToSubresource(this.actorBeta, this.rA, this.access));
-		assertNull(this.arm.hasAccessToSubresource(this.actorBeta, this.rA0, this.access));
-		
 		assertNull(this.arm.hasAccessToSubresource(this.actorAlpha, this.r, this.access2));
 		
 	}
@@ -171,17 +138,7 @@ abstract public class AbstractAccessManagerTest {
 		this.arm.setAccess(this.actorAlpha, this.r, this.access, true);
 		this.arm.setAccess(this.actorAlpha, this.r, this.access, false);
 		
-		assertFalse(this.arm.hasAccess(this.actorAlpha, this.r, this.access));
-		assertFalse(this.arm.hasAccess(this.actorAlpha, this.rA, this.access));
-		assertFalse(this.arm.hasAccess(this.actorAlpha, this.rA0, this.access));
-		
-		assertFalse(this.arm.hasAccessToSubtree(this.actorAlpha, this.r, this.access));
-		assertFalse(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA, this.access));
-		assertFalse(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA0, this.access));
-		
-		assertFalse(this.arm.hasAccessToSubresource(this.actorAlpha, this.r, this.access));
-		assertFalse(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA, this.access));
-		assertFalse(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA0, this.access));
+		checkHasNoAccess(this.actorAlpha);
 		
 	}
 	
@@ -193,31 +150,11 @@ abstract public class AbstractAccessManagerTest {
 		
 		this.arm.resetAccess(this.actorAlpha, this.rA, this.access);
 		
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.r, this.access));
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.rA, this.access));
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.rA0, this.access));
-		
-		assertTrue(this.arm.hasAccessToSubtree(this.actorAlpha, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA0, this.access));
-		
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA0, this.access));
+		checkHasAllAccess(this.actorAlpha);
 		
 		this.arm.resetAccess(this.actorAlpha, this.r, this.access);
 		
-		assertNull(this.arm.hasAccess(this.actorAlpha, this.r, this.access));
-		assertNull(this.arm.hasAccess(this.actorAlpha, this.rA, this.access));
-		assertNull(this.arm.hasAccess(this.actorAlpha, this.rA0, this.access));
-		
-		assertNull(this.arm.hasAccessToSubtree(this.actorAlpha, this.r, this.access));
-		assertNull(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA, this.access));
-		assertNull(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA0, this.access));
-		
-		assertNull(this.arm.hasAccessToSubresource(this.actorAlpha, this.r, this.access));
-		assertNull(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA, this.access));
-		assertNull(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA0, this.access));
+		checkHasUndefinedAccess(this.actorAlpha);
 		
 	}
 	
@@ -226,53 +163,11 @@ abstract public class AbstractAccessManagerTest {
 		
 		this.arm.setAccess(this.groupZero, this.r, this.access, true);
 		
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.r, this.access));
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.rA, this.access));
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.rA0, this.access));
+		checkHasAllAccess(this.actorAlpha);
+		checkHasAllAccess(this.actorBeta);
+		checkHasAllAccess(this.groupZero);
 		
-		assertTrue(this.arm.hasAccess(this.groupZero, this.r, this.access));
-		assertTrue(this.arm.hasAccess(this.groupZero, this.rA, this.access));
-		assertTrue(this.arm.hasAccess(this.groupZero, this.rA0, this.access));
-		
-		assertTrue(this.arm.hasAccess(this.actorBeta, this.r, this.access));
-		assertTrue(this.arm.hasAccess(this.actorBeta, this.rA, this.access));
-		assertTrue(this.arm.hasAccess(this.actorBeta, this.rA0, this.access));
-		
-		assertNull(this.arm.hasAccess(this.groupOne, this.r, this.access));
-		assertNull(this.arm.hasAccess(this.groupOne, this.rA, this.access));
-		assertNull(this.arm.hasAccess(this.groupOne, this.rA0, this.access));
-		
-		assertTrue(this.arm.hasAccessToSubtree(this.actorAlpha, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA0, this.access));
-		
-		assertTrue(this.arm.hasAccessToSubtree(this.groupZero, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(this.groupZero, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(this.groupZero, this.rA0, this.access));
-		
-		assertTrue(this.arm.hasAccessToSubtree(this.actorBeta, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(this.actorBeta, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(this.actorBeta, this.rA0, this.access));
-		
-		assertNull(this.arm.hasAccessToSubtree(this.groupOne, this.r, this.access));
-		assertNull(this.arm.hasAccessToSubtree(this.groupOne, this.rA, this.access));
-		assertNull(this.arm.hasAccessToSubtree(this.groupOne, this.rA0, this.access));
-		
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA0, this.access));
-		
-		assertTrue(this.arm.hasAccessToSubresource(this.groupZero, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.groupZero, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.groupZero, this.rA0, this.access));
-		
-		assertTrue(this.arm.hasAccessToSubresource(this.actorBeta, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.actorBeta, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.actorBeta, this.rA0, this.access));
-		
-		assertNull(this.arm.hasAccessToSubresource(this.groupOne, this.r, this.access));
-		assertNull(this.arm.hasAccessToSubresource(this.groupOne, this.rA, this.access));
-		assertNull(this.arm.hasAccessToSubresource(this.groupOne, this.rA0, this.access));
+		checkHasUndefinedAccess(this.groupOne);
 		
 	}
 	
@@ -282,41 +177,10 @@ abstract public class AbstractAccessManagerTest {
 		this.arm.setAccess(this.groupZero, this.r, this.access, true);
 		this.arm.setAccess(this.actorAlpha, this.r, this.access, false);
 		
-		assertFalse(this.arm.hasAccess(this.actorAlpha, this.r, this.access));
-		assertFalse(this.arm.hasAccess(this.actorAlpha, this.rA, this.access));
-		assertFalse(this.arm.hasAccess(this.actorAlpha, this.rA0, this.access));
+		checkHasNoAccess(this.actorAlpha);
 		
-		assertTrue(this.arm.hasAccess(this.groupZero, this.r, this.access));
-		assertTrue(this.arm.hasAccess(this.groupZero, this.rA, this.access));
-		assertTrue(this.arm.hasAccess(this.groupZero, this.rA0, this.access));
-		
-		assertTrue(this.arm.hasAccess(this.actorBeta, this.r, this.access));
-		assertTrue(this.arm.hasAccess(this.actorBeta, this.rA, this.access));
-		assertTrue(this.arm.hasAccess(this.actorBeta, this.rA0, this.access));
-		
-		assertFalse(this.arm.hasAccessToSubtree(this.actorAlpha, this.r, this.access));
-		assertFalse(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA, this.access));
-		assertFalse(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA0, this.access));
-		
-		assertTrue(this.arm.hasAccessToSubtree(this.groupZero, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(this.groupZero, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(this.groupZero, this.rA0, this.access));
-		
-		assertTrue(this.arm.hasAccessToSubtree(this.actorBeta, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(this.actorBeta, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(this.actorBeta, this.rA0, this.access));
-		
-		assertFalse(this.arm.hasAccessToSubresource(this.actorAlpha, this.r, this.access));
-		assertFalse(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA, this.access));
-		assertFalse(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA0, this.access));
-		
-		assertTrue(this.arm.hasAccessToSubresource(this.groupZero, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.groupZero, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.groupZero, this.rA0, this.access));
-		
-		assertTrue(this.arm.hasAccessToSubresource(this.actorBeta, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.actorBeta, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.actorBeta, this.rA0, this.access));
+		checkHasAllAccess(this.groupZero);
+		checkHasAllAccess(this.actorBeta);
 		
 	}
 	
@@ -326,17 +190,7 @@ abstract public class AbstractAccessManagerTest {
 		this.arm.setAccess(this.groupZero, this.r, this.access, true);
 		this.arm.setAccess(this.groupOne, this.r, this.access, false);
 		
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.r, this.access));
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.rA, this.access));
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.rA0, this.access));
-		
-		assertTrue(this.arm.hasAccessToSubtree(this.actorAlpha, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA0, this.access));
-		
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA0, this.access));
+		checkHasAllAccess(this.actorAlpha);
 		
 	}
 	
@@ -381,29 +235,8 @@ abstract public class AbstractAccessManagerTest {
 		this.arm.setAccess(this.groupZero, this.rA, this.access, false);
 		this.arm.setAccess(this.groupOne, this.rA0, this.access, true);
 		
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.r, this.access));
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.rA, this.access));
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.rA0, this.access));
-		
-		assertTrue(this.arm.hasAccess(this.actorBeta, this.r, this.access));
-		assertTrue(this.arm.hasAccess(this.actorBeta, this.rA, this.access));
-		assertTrue(this.arm.hasAccess(this.actorBeta, this.rA0, this.access));
-		
-		assertTrue(this.arm.hasAccessToSubtree(this.actorAlpha, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA0, this.access));
-		
-		assertTrue(this.arm.hasAccessToSubtree(this.actorBeta, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(this.actorBeta, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(this.actorBeta, this.rA0, this.access));
-		
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA0, this.access));
-		
-		assertTrue(this.arm.hasAccessToSubresource(this.actorBeta, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.actorBeta, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.actorBeta, this.rA0, this.access));
+		checkHasAllAccess(this.actorAlpha);
+		checkHasAllAccess(this.actorBeta);
 		
 	}
 	
@@ -473,17 +306,7 @@ abstract public class AbstractAccessManagerTest {
 		this.arm.setAccess(XA.GROUP_ALL, this.rA, this.access, false);
 		this.arm.setAccess(this.actorAlpha, this.rA, this.access, true);
 		
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.r, this.access));
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.rA, this.access));
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.rA0, this.access));
-		
-		assertTrue(this.arm.hasAccessToSubtree(this.actorAlpha, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA0, this.access));
-		
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA0, this.access));
+		checkHasAllAccess(this.actorAlpha);
 		
 	}
 	
@@ -494,17 +317,7 @@ abstract public class AbstractAccessManagerTest {
 		this.arm.setAccess(XA.GROUP_ALL, this.rA, this.access, false);
 		this.arm.setAccess(this.groupZero, this.rA, this.access, true);
 		
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.r, this.access));
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.rA, this.access));
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.rA0, this.access));
-		
-		assertTrue(this.arm.hasAccessToSubtree(this.actorAlpha, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA0, this.access));
-		
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA0, this.access));
+		checkHasAllAccess(this.actorAlpha);
 		
 	}
 	
@@ -529,6 +342,52 @@ abstract public class AbstractAccessManagerTest {
 		
 	}
 	
-	// TODO test more methods
+	private void checkHasAllAccess(XID actor) {
+		
+		assertTrue(this.arm.hasAccess(actor, this.r, this.access));
+		assertTrue(this.arm.hasAccess(actor, this.rA, this.access));
+		assertTrue(this.arm.hasAccess(actor, this.rA0, this.access));
+		
+		assertTrue(this.arm.hasAccessToSubtree(actor, this.r, this.access));
+		assertTrue(this.arm.hasAccessToSubtree(actor, this.rA, this.access));
+		assertTrue(this.arm.hasAccessToSubtree(actor, this.rA0, this.access));
+		
+		assertTrue(this.arm.hasAccessToSubresource(actor, this.r, this.access));
+		assertTrue(this.arm.hasAccessToSubresource(actor, this.rA, this.access));
+		assertTrue(this.arm.hasAccessToSubresource(actor, this.rA0, this.access));
+		
+	}
+	
+	private void checkHasNoAccess(XID actor) {
+		
+		assertFalse(this.arm.hasAccess(actor, this.r, this.access));
+		assertFalse(this.arm.hasAccess(actor, this.rA, this.access));
+		assertFalse(this.arm.hasAccess(actor, this.rA0, this.access));
+		
+		assertFalse(this.arm.hasAccessToSubtree(actor, this.r, this.access));
+		assertFalse(this.arm.hasAccessToSubtree(actor, this.rA, this.access));
+		assertFalse(this.arm.hasAccessToSubtree(actor, this.rA0, this.access));
+		
+		assertFalse(this.arm.hasAccessToSubresource(actor, this.r, this.access));
+		assertFalse(this.arm.hasAccessToSubresource(actor, this.rA, this.access));
+		assertFalse(this.arm.hasAccessToSubresource(actor, this.rA0, this.access));
+		
+	}
+	
+	private void checkHasUndefinedAccess(XID actor) {
+		
+		assertNull(this.arm.hasAccess(actor, this.r, this.access));
+		assertNull(this.arm.hasAccess(actor, this.rA, this.access));
+		assertNull(this.arm.hasAccess(actor, this.rA0, this.access));
+		
+		assertNull(this.arm.hasAccessToSubtree(actor, this.r, this.access));
+		assertNull(this.arm.hasAccessToSubtree(actor, this.rA, this.access));
+		assertNull(this.arm.hasAccessToSubtree(actor, this.rA0, this.access));
+		
+		assertNull(this.arm.hasAccessToSubresource(actor, this.r, this.access));
+		assertNull(this.arm.hasAccessToSubresource(actor, this.rA, this.access));
+		assertNull(this.arm.hasAccessToSubresource(actor, this.rA0, this.access));
+		
+	}
 	
 }
