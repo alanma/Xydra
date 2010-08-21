@@ -1,7 +1,6 @@
 package org.xydra.core.model.tutorial;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -540,11 +539,11 @@ public class XModelBasics {
 		// arm.setAccess(user1ID, XA.ACCESS_WRITE, true, XID...path);
 		
 		arm.setAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE, true);
-		assertTrue(arm.hasAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE));
+		assertTrue(arm.hasAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE).isAllowed());
 		
 		// depriving user1ID from his read-access again
 		arm.resetAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE);
-		assertEquals(arm.hasAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE), null);
+		assertTrue(!arm.hasAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE).isDefined());
 		
 		/*
 		 * Note that the hasAccess method does not return false, but null now,
@@ -563,9 +562,9 @@ public class XModelBasics {
 		groups.addToGroup(user3ID, groupID);
 		
 		arm.setAccess(groupID, model.getAddress(), XA.ACCESS_WRITE, true);
-		assertTrue(arm.hasAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE));
-		assertTrue(arm.hasAccess(user2ID, model.getAddress(), XA.ACCESS_WRITE));
-		assertTrue(arm.hasAccess(user3ID, model.getAddress(), XA.ACCESS_WRITE));
+		assertTrue(arm.hasAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE).isAllowed());
+		assertTrue(arm.hasAccess(user2ID, model.getAddress(), XA.ACCESS_WRITE).isAllowed());
+		assertTrue(arm.hasAccess(user3ID, model.getAddress(), XA.ACCESS_WRITE).isAllowed());
 		
 		/*
 		 * Note that individual access right definitions take precedence before
@@ -575,7 +574,7 @@ public class XModelBasics {
 		 */
 
 		arm.setAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE, false);
-		assertFalse(arm.hasAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE));
+		assertTrue(arm.hasAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE).isDenied());
 	}
 	
 }

@@ -41,13 +41,13 @@ public abstract class AbstractAccessManager implements XAccessManager {
 	}
 	
 	public boolean canExecute(XID actor, XFieldCommand command) {
-		return hasAccess(actor, command.getTarget(), XA.ACCESS_WRITE) == Boolean.TRUE;
+		return hasAccess(actor, command.getTarget(), XA.ACCESS_WRITE).isAllowed();
 	}
 	
 	public boolean canExecute(XID actor, XObjectCommand command) {
 		switch(command.getChangeType()) {
 		case ADD:
-			return hasAccess(actor, command.getTarget(), XA.ACCESS_WRITE) == Boolean.TRUE;
+			return hasAccess(actor, command.getTarget(), XA.ACCESS_WRITE).isAllowed();
 		case REMOVE:
 			return canRemoveField(actor, command.getTarget(), command.getFieldID());
 		default:
@@ -58,7 +58,7 @@ public abstract class AbstractAccessManager implements XAccessManager {
 	public boolean canExecute(XID actor, XModelCommand command) {
 		switch(command.getChangeType()) {
 		case ADD:
-			return hasAccess(actor, command.getTarget(), XA.ACCESS_WRITE) == Boolean.TRUE;
+			return hasAccess(actor, command.getTarget(), XA.ACCESS_WRITE).isAllowed();
 		case REMOVE:
 			return canRemoveObject(actor, command.getTarget(), command.getObjectID());
 		default:
@@ -69,7 +69,7 @@ public abstract class AbstractAccessManager implements XAccessManager {
 	public boolean canExecute(XID actor, XRepositoryCommand command) {
 		switch(command.getChangeType()) {
 		case ADD:
-			return hasAccess(actor, command.getTarget(), XA.ACCESS_WRITE) == Boolean.TRUE;
+			return hasAccess(actor, command.getTarget(), XA.ACCESS_WRITE).isAllowed();
 		case REMOVE:
 			return canRemoveModel(actor, command.getTarget(), command.getModelID());
 		default:
@@ -91,49 +91,49 @@ public abstract class AbstractAccessManager implements XAccessManager {
 	
 	public boolean canRemoveModel(XID actor, XAddress repoAddr, XID modelId) {
 		XAddress modelAddr = XX.resolveModel(repoAddr, modelId);
-		return hasAccessToSubtree(actor, modelAddr, XA.ACCESS_WRITE) == Boolean.TRUE
-		        && hasAccess(actor, repoAddr, XA.ACCESS_WRITE) == Boolean.TRUE;
+		return hasAccessToSubtree(actor, modelAddr, XA.ACCESS_WRITE).isAllowed()
+		        && hasAccess(actor, repoAddr, XA.ACCESS_WRITE).isAllowed();
 	}
 	
 	public boolean canRemoveObject(XID actor, XAddress modelAddr, XID objectId) {
 		XAddress objectAddr = XX.resolveObject(modelAddr, objectId);
-		return hasAccessToSubtree(actor, objectAddr, XA.ACCESS_WRITE) == Boolean.TRUE
-		        && hasAccess(actor, modelAddr, XA.ACCESS_WRITE) == Boolean.TRUE;
+		return hasAccessToSubtree(actor, objectAddr, XA.ACCESS_WRITE).isAllowed()
+		        && hasAccess(actor, modelAddr, XA.ACCESS_WRITE).isAllowed();
 	}
 	
 	public boolean canRemoveField(XID actor, XAddress objectAddr, XID fieldId) {
 		XAddress fieldAddr = XX.resolveField(objectAddr, fieldId);
-		return hasAccess(actor, fieldAddr, XA.ACCESS_WRITE) == Boolean.TRUE
-		        && hasAccess(actor, objectAddr, XA.ACCESS_WRITE) == Boolean.TRUE;
+		return hasAccess(actor, fieldAddr, XA.ACCESS_WRITE).isAllowed()
+		        && hasAccess(actor, objectAddr, XA.ACCESS_WRITE).isAllowed();
 	}
 	
 	public boolean canRead(XID actor, XAddress resource) {
-		return hasAccess(actor, resource, XA.ACCESS_READ) == Boolean.TRUE;
+		return hasAccess(actor, resource, XA.ACCESS_READ).isAllowed();
 	}
 	
 	public boolean canWrite(XID actor, XAddress resource) {
-		return hasAccess(actor, resource, XA.ACCESS_WRITE) == Boolean.TRUE;
+		return hasAccess(actor, resource, XA.ACCESS_WRITE).isAllowed();
 	}
 	
 	public boolean canKnowAboutField(XID actor, XAddress objectAddr, XID fieldId) {
 		XAddress fieldAddr = XX.resolveField(objectAddr, fieldId);
-		return hasAccess(actor, objectAddr, XA.ACCESS_READ) == Boolean.TRUE
-		        || hasAccess(actor, fieldAddr, XA.ACCESS_READ) == Boolean.TRUE
-		        || hasAccess(actor, fieldAddr, XA.ACCESS_WRITE) == Boolean.TRUE;
+		return hasAccess(actor, objectAddr, XA.ACCESS_READ).isAllowed()
+		        || hasAccess(actor, fieldAddr, XA.ACCESS_READ).isAllowed()
+		        || hasAccess(actor, fieldAddr, XA.ACCESS_WRITE).isAllowed();
 	}
 	
 	public boolean canKnowAboutObject(XID actor, XAddress modelAddr, XID objectId) {
 		XAddress objectAddr = XX.resolveObject(modelAddr, objectId);
-		return hasAccess(actor, modelAddr, XA.ACCESS_READ) == Boolean.TRUE
-		        || hasAccessToSubresource(actor, objectAddr, XA.ACCESS_READ) == Boolean.TRUE
-		        || hasAccessToSubresource(actor, objectAddr, XA.ACCESS_WRITE) == Boolean.TRUE;
+		return hasAccess(actor, modelAddr, XA.ACCESS_READ).isAllowed()
+		        || hasAccessToSubresource(actor, objectAddr, XA.ACCESS_READ).isAllowed()
+		        || hasAccessToSubresource(actor, objectAddr, XA.ACCESS_WRITE).isAllowed();
 	}
 	
 	public boolean canKnowAboutModel(XID actor, XAddress repoAddr, XID modelId) {
 		XAddress modelAddr = XX.resolveModel(repoAddr, modelId);
-		return hasAccess(actor, repoAddr, XA.ACCESS_READ) == Boolean.TRUE
-		        || hasAccessToSubresource(actor, modelAddr, XA.ACCESS_READ) == Boolean.TRUE
-		        || hasAccessToSubresource(actor, modelAddr, XA.ACCESS_WRITE) == Boolean.TRUE;
+		return hasAccess(actor, repoAddr, XA.ACCESS_READ).isAllowed()
+		        || hasAccessToSubresource(actor, modelAddr, XA.ACCESS_READ).isAllowed()
+		        || hasAccessToSubresource(actor, modelAddr, XA.ACCESS_WRITE).isAllowed();
 	}
 	
 }

@@ -7,6 +7,7 @@ import org.xydra.core.XX;
 import org.xydra.core.access.XAccessDefinition;
 import org.xydra.core.access.XAccessListener;
 import org.xydra.core.access.XAccessManager;
+import org.xydra.core.access.XAccessValue;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.index.iterator.BagUnionIterator;
@@ -40,7 +41,7 @@ public class CompositeAccessManager extends AbstractAccessManager {
 		this.inner.addListener(listener);
 	}
 	
-	public Boolean getAccessDefinition(XID actor, XAddress resource, XID access)
+	public XAccessValue getAccessDefinition(XID actor, XAddress resource, XID access)
 	        throws IllegalArgumentException {
 		if(XX.equalsOrContains(this.mountPoint, resource)) {
 			return this.inner.getAccessDefinition(actor, resource, access);
@@ -64,33 +65,33 @@ public class CompositeAccessManager extends AbstractAccessManager {
 		throw new UnsupportedOperationException();
 	}
 	
-	public Boolean hasAccess(XID actor, XAddress resource, XID access) {
+	public XAccessValue hasAccess(XID actor, XAddress resource, XID access) {
 		if(XX.equalsOrContains(this.mountPoint, resource)) {
-			Boolean allowed = this.inner.hasAccess(actor, resource, access);
-			if(allowed != null) {
+			XAccessValue allowed = this.inner.hasAccess(actor, resource, access);
+			if(allowed.isDefined()) {
 				return allowed;
 			}
 		}
 		return this.outer.hasAccess(actor, resource, access);
 	}
 	
-	public Boolean hasAccessToSubtree(XID actor, XAddress rootResource, XID access) {
+	public XAccessValue hasAccessToSubtree(XID actor, XAddress rootResource, XID access) {
 		
 		if(XX.equalsOrContains(this.mountPoint, rootResource)) {
 			
-			Boolean allowed = this.inner.hasAccessToSubtree(actor, rootResource, access);
+			XAccessValue allowed = this.inner.hasAccessToSubtree(actor, rootResource, access);
 			
-			if(allowed == null) {
-				return this.outer.hasAccess(actor, rootResource, access);
+			if(allowed.isDefined()) {
+				return allowed;
 			}
-			return allowed;
+			return this.outer.hasAccess(actor, rootResource, access);
 			
 		} else if(XX.contains(rootResource, this.mountPoint)) {
 			
-			Boolean allowed = this.inner.hasAccessToSubtree(actor, rootResource, access);
+			XAccessValue allowed = this.inner.hasAccessToSubtree(actor, rootResource, access);
 			
-			if(allowed == Boolean.FALSE) {
-				return Boolean.FALSE;
+			if(allowed.isDenied()) {
+				return allowed;
 			}
 			
 		}
@@ -98,13 +99,13 @@ public class CompositeAccessManager extends AbstractAccessManager {
 		return this.outer.hasAccessToSubtree(actor, rootResource, access);
 	}
 	
-	public Boolean hasAccessToSubresource(XID actor, XAddress rootResource, XID access) {
+	public XAccessValue hasAccessToSubresource(XID actor, XAddress rootResource, XID access) {
 		
 		if(XX.equalsOrContains(this.mountPoint, rootResource)) {
 			
-			Boolean allowed = this.inner.hasAccessToSubresource(actor, rootResource, access);
+			XAccessValue allowed = this.inner.hasAccessToSubresource(actor, rootResource, access);
 			
-			if(allowed != null) {
+			if(allowed.isDefined()) {
 				return allowed;
 			}
 			
@@ -112,10 +113,10 @@ public class CompositeAccessManager extends AbstractAccessManager {
 			
 		} else if(XX.contains(rootResource, this.mountPoint)) {
 			
-			Boolean allowed = this.inner.hasAccessToSubresource(actor, rootResource, access);
+			XAccessValue allowed = this.inner.hasAccessToSubresource(actor, rootResource, access);
 			
-			if(allowed == Boolean.TRUE) {
-				return Boolean.TRUE;
+			if(allowed.isAllowed()) {
+				return allowed;
 			}
 			
 		}

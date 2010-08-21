@@ -64,7 +64,7 @@ public interface XAccessManager extends Serializable {
 	 *         undefined
 	 * 
 	 */
-	Boolean hasAccess(XID actor, XAddress resource, XID access);
+	XAccessValue hasAccess(XID actor, XAddress resource, XID access);
 	
 	/**
 	 * Check if an actor has access rights to a whole resource subtree.
@@ -85,7 +85,7 @@ public interface XAccessManager extends Serializable {
 	 *         any resource
 	 * 
 	 */
-	Boolean hasAccessToSubtree(XID actor, XAddress rootResource, XID access);
+	XAccessValue hasAccessToSubtree(XID actor, XAddress rootResource, XID access);
 	
 	/**
 	 * Check if an actor has access rights to any resource in a subtree.
@@ -106,7 +106,7 @@ public interface XAccessManager extends Serializable {
 	 *         any resource
 	 * 
 	 */
-	Boolean hasAccessToSubresource(XID actor, XAddress rootResource, XID access);
+	XAccessValue hasAccessToSubresource(XID actor, XAddress rootResource, XID access);
 	
 	/**
 	 * Define access rights to a given resource and its descendants for an
@@ -171,7 +171,7 @@ public interface XAccessManager extends Serializable {
 	 * @throws IllegalArgumentException if there is no access right defined for
 	 *             this (actor,resource,access) combination.
 	 */
-	Boolean getAccessDefinition(XID actor, XAddress resource, XID access)
+	XAccessValue getAccessDefinition(XID actor, XAddress resource, XID access)
 	        throws IllegalArgumentException;
 	
 	/**

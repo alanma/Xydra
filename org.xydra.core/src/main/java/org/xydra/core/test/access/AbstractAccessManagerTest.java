@@ -1,7 +1,7 @@
 package org.xydra.core.test.access;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
@@ -10,6 +10,7 @@ import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.access.XA;
 import org.xydra.core.access.XAccessManager;
+import org.xydra.core.access.XAccessValue;
 import org.xydra.core.access.XGroupDatabase;
 import org.xydra.core.access.impl.memory.MemoryAccessManager;
 import org.xydra.core.access.impl.memory.MemoryGroupDatabase;
@@ -77,6 +78,18 @@ abstract public class AbstractAccessManagerTest {
 		
 	}
 	
+	private void assertAllowed(XAccessValue a) {
+		assertEquals(XAccessValue.ALLOWED, a);
+	}
+	
+	private void assertDenied(XAccessValue a) {
+		assertEquals(XAccessValue.DENIED, a);
+	}
+	
+	private void assertUndefined(XAccessValue a) {
+		assertEquals(XAccessValue.UNDEFINED, a);
+	}
+	
 	@Test
 	public void testEmptyDatabase() {
 		
@@ -95,14 +108,14 @@ abstract public class AbstractAccessManagerTest {
 		
 		assertTrue(this.arm.isAccessDefined(this.actorAlpha, this.r, this.access));
 		assertFalse(this.arm.isAccessDefined(this.actorAlpha, this.rA, this.access));
-		assertTrue(this.arm.getAccessDefinition(this.actorAlpha, this.r, this.access));
+		assertAllowed(this.arm.getAccessDefinition(this.actorAlpha, this.r, this.access));
 		
 		checkHasAllAccess(this.actorAlpha);
 		checkHasUndefinedAccess(this.actorBeta);
 		
-		assertNull(this.arm.hasAccess(this.actorAlpha, this.r, this.access2));
-		assertNull(this.arm.hasAccessToSubtree(this.actorAlpha, this.r, this.access2));
-		assertNull(this.arm.hasAccessToSubresource(this.actorAlpha, this.r, this.access2));
+		assertUndefined(this.arm.hasAccess(this.actorAlpha, this.r, this.access2));
+		assertUndefined(this.arm.hasAccessToSubtree(this.actorAlpha, this.r, this.access2));
+		assertUndefined(this.arm.hasAccessToSubresource(this.actorAlpha, this.r, this.access2));
 		
 	}
 	
@@ -112,23 +125,23 @@ abstract public class AbstractAccessManagerTest {
 		this.arm.setAccess(this.actorAlpha, this.r, this.access, true);
 		this.arm.setAccess(this.actorAlpha, this.rA, this.access, false);
 		
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.r, this.access));
-		assertFalse(this.arm.hasAccess(this.actorAlpha, this.rA, this.access));
-		assertFalse(this.arm.hasAccess(this.actorAlpha, this.rA0, this.access));
+		assertAllowed(this.arm.hasAccess(this.actorAlpha, this.r, this.access));
+		assertDenied(this.arm.hasAccess(this.actorAlpha, this.rA, this.access));
+		assertDenied(this.arm.hasAccess(this.actorAlpha, this.rA0, this.access));
 		
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.rB, this.access));
+		assertAllowed(this.arm.hasAccess(this.actorAlpha, this.rB, this.access));
 		
-		assertFalse(this.arm.hasAccessToSubtree(this.actorAlpha, this.r, this.access));
-		assertFalse(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA, this.access));
-		assertFalse(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA0, this.access));
+		assertDenied(this.arm.hasAccessToSubtree(this.actorAlpha, this.r, this.access));
+		assertDenied(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA, this.access));
+		assertDenied(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA0, this.access));
 		
-		assertTrue(this.arm.hasAccessToSubtree(this.actorAlpha, this.rB, this.access));
+		assertAllowed(this.arm.hasAccessToSubtree(this.actorAlpha, this.rB, this.access));
 		
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.r, this.access));
-		assertFalse(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA, this.access));
-		assertFalse(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA0, this.access));
+		assertAllowed(this.arm.hasAccessToSubresource(this.actorAlpha, this.r, this.access));
+		assertDenied(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA, this.access));
+		assertDenied(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA0, this.access));
 		
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.rB, this.access));
+		assertAllowed(this.arm.hasAccessToSubresource(this.actorAlpha, this.rB, this.access));
 		
 	}
 	
@@ -201,29 +214,29 @@ abstract public class AbstractAccessManagerTest {
 		this.arm.setAccess(this.actorAlpha, this.rA, this.access, false);
 		this.arm.setAccess(this.actorBeta, this.rA0, this.access, false);
 		
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.r, this.access));
-		assertFalse(this.arm.hasAccess(this.actorAlpha, this.rA, this.access));
-		assertFalse(this.arm.hasAccess(this.actorAlpha, this.rA0, this.access));
+		assertAllowed(this.arm.hasAccess(this.actorAlpha, this.r, this.access));
+		assertDenied(this.arm.hasAccess(this.actorAlpha, this.rA, this.access));
+		assertDenied(this.arm.hasAccess(this.actorAlpha, this.rA0, this.access));
 		
-		assertTrue(this.arm.hasAccess(this.actorBeta, this.r, this.access));
-		assertTrue(this.arm.hasAccess(this.actorBeta, this.rA, this.access));
-		assertFalse(this.arm.hasAccess(this.actorBeta, this.rA0, this.access));
+		assertAllowed(this.arm.hasAccess(this.actorBeta, this.r, this.access));
+		assertAllowed(this.arm.hasAccess(this.actorBeta, this.rA, this.access));
+		assertDenied(this.arm.hasAccess(this.actorBeta, this.rA0, this.access));
 		
-		assertFalse(this.arm.hasAccessToSubtree(this.actorAlpha, this.r, this.access));
-		assertFalse(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA, this.access));
-		assertFalse(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA0, this.access));
+		assertDenied(this.arm.hasAccessToSubtree(this.actorAlpha, this.r, this.access));
+		assertDenied(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA, this.access));
+		assertDenied(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA0, this.access));
 		
-		assertFalse(this.arm.hasAccessToSubtree(this.actorBeta, this.r, this.access));
-		assertFalse(this.arm.hasAccessToSubtree(this.actorBeta, this.rA, this.access));
-		assertFalse(this.arm.hasAccessToSubtree(this.actorBeta, this.rA0, this.access));
+		assertDenied(this.arm.hasAccessToSubtree(this.actorBeta, this.r, this.access));
+		assertDenied(this.arm.hasAccessToSubtree(this.actorBeta, this.rA, this.access));
+		assertDenied(this.arm.hasAccessToSubtree(this.actorBeta, this.rA0, this.access));
 		
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.r, this.access));
-		assertFalse(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA, this.access));
-		assertFalse(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA0, this.access));
+		assertAllowed(this.arm.hasAccessToSubresource(this.actorAlpha, this.r, this.access));
+		assertDenied(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA, this.access));
+		assertDenied(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA0, this.access));
 		
-		assertTrue(this.arm.hasAccessToSubresource(this.actorBeta, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.actorBeta, this.rA, this.access));
-		assertFalse(this.arm.hasAccessToSubresource(this.actorBeta, this.rA0, this.access));
+		assertAllowed(this.arm.hasAccessToSubresource(this.actorBeta, this.r, this.access));
+		assertAllowed(this.arm.hasAccessToSubresource(this.actorBeta, this.rA, this.access));
+		assertDenied(this.arm.hasAccessToSubresource(this.actorBeta, this.rA0, this.access));
 		
 	}
 	
@@ -245,17 +258,17 @@ abstract public class AbstractAccessManagerTest {
 		
 		this.arm.setAccess(this.actorAlpha, this.rA, this.access, true);
 		
-		assertNull(this.arm.hasAccess(this.actorAlpha, this.r, this.access));
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.rA, this.access));
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.rA0, this.access));
+		assertUndefined(this.arm.hasAccess(this.actorAlpha, this.r, this.access));
+		assertAllowed(this.arm.hasAccess(this.actorAlpha, this.rA, this.access));
+		assertAllowed(this.arm.hasAccess(this.actorAlpha, this.rA0, this.access));
 		
-		assertNull(this.arm.hasAccessToSubtree(this.actorAlpha, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA0, this.access));
+		assertUndefined(this.arm.hasAccessToSubtree(this.actorAlpha, this.r, this.access));
+		assertAllowed(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA, this.access));
+		assertAllowed(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA0, this.access));
 		
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA0, this.access));
+		assertAllowed(this.arm.hasAccessToSubresource(this.actorAlpha, this.r, this.access));
+		assertAllowed(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA, this.access));
+		assertAllowed(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA0, this.access));
 		
 	}
 	
@@ -265,17 +278,17 @@ abstract public class AbstractAccessManagerTest {
 		this.arm.setAccess(this.actorAlpha, this.rA, this.access, true);
 		this.arm.setAccess(this.actorAlpha, this.rA0, this.access, false);
 		
-		assertNull(this.arm.hasAccess(this.actorAlpha, this.r, this.access));
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.rA, this.access));
-		assertFalse(this.arm.hasAccess(this.actorAlpha, this.rA0, this.access));
+		assertUndefined(this.arm.hasAccess(this.actorAlpha, this.r, this.access));
+		assertAllowed(this.arm.hasAccess(this.actorAlpha, this.rA, this.access));
+		assertDenied(this.arm.hasAccess(this.actorAlpha, this.rA0, this.access));
 		
-		assertFalse(this.arm.hasAccessToSubtree(this.actorAlpha, this.r, this.access));
-		assertFalse(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA, this.access));
-		assertFalse(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA0, this.access));
+		assertDenied(this.arm.hasAccessToSubtree(this.actorAlpha, this.r, this.access));
+		assertDenied(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA, this.access));
+		assertDenied(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA0, this.access));
 		
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA, this.access));
-		assertFalse(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA0, this.access));
+		assertAllowed(this.arm.hasAccessToSubresource(this.actorAlpha, this.r, this.access));
+		assertAllowed(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA, this.access));
+		assertDenied(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA0, this.access));
 		
 	}
 	
@@ -285,17 +298,17 @@ abstract public class AbstractAccessManagerTest {
 		this.arm.setAccess(this.actorAlpha, this.r, this.access, true);
 		this.arm.setAccess(XA.GROUP_ALL, this.rA, this.access, false);
 		
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.r, this.access));
-		assertFalse(this.arm.hasAccess(this.actorAlpha, this.rA, this.access));
-		assertFalse(this.arm.hasAccess(this.actorAlpha, this.rA0, this.access));
+		assertAllowed(this.arm.hasAccess(this.actorAlpha, this.r, this.access));
+		assertDenied(this.arm.hasAccess(this.actorAlpha, this.rA, this.access));
+		assertDenied(this.arm.hasAccess(this.actorAlpha, this.rA0, this.access));
 		
-		assertFalse(this.arm.hasAccessToSubtree(this.actorAlpha, this.r, this.access));
-		assertFalse(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA, this.access));
-		assertFalse(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA0, this.access));
+		assertDenied(this.arm.hasAccessToSubtree(this.actorAlpha, this.r, this.access));
+		assertDenied(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA, this.access));
+		assertDenied(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA0, this.access));
 		
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.r, this.access));
-		assertFalse(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA, this.access));
-		assertFalse(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA0, this.access));
+		assertAllowed(this.arm.hasAccessToSubresource(this.actorAlpha, this.r, this.access));
+		assertDenied(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA, this.access));
+		assertDenied(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA0, this.access));
 		
 	}
 	
@@ -322,71 +335,71 @@ abstract public class AbstractAccessManagerTest {
 	}
 	
 	@Test
-	public void testNoInheritRefine() {
+	public void testNoInheritRefined() {
 		
 		this.arm.setAccess(this.actorAlpha, this.r, this.access, true);
 		this.arm.setAccess(XA.GROUP_ALL, this.rA, this.access, false);
 		this.arm.setAccess(this.actorAlpha, this.rA0, this.access, true);
 		
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.r, this.access));
-		assertFalse(this.arm.hasAccess(this.actorAlpha, this.rA, this.access));
-		assertTrue(this.arm.hasAccess(this.actorAlpha, this.rA0, this.access));
+		assertAllowed(this.arm.hasAccess(this.actorAlpha, this.r, this.access));
+		assertDenied(this.arm.hasAccess(this.actorAlpha, this.rA, this.access));
+		assertAllowed(this.arm.hasAccess(this.actorAlpha, this.rA0, this.access));
 		
-		assertFalse(this.arm.hasAccessToSubtree(this.actorAlpha, this.r, this.access));
-		assertFalse(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA0, this.access));
+		assertDenied(this.arm.hasAccessToSubtree(this.actorAlpha, this.r, this.access));
+		assertDenied(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA, this.access));
+		assertAllowed(this.arm.hasAccessToSubtree(this.actorAlpha, this.rA0, this.access));
 		
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA0, this.access));
+		assertAllowed(this.arm.hasAccessToSubresource(this.actorAlpha, this.r, this.access));
+		assertAllowed(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA, this.access));
+		assertAllowed(this.arm.hasAccessToSubresource(this.actorAlpha, this.rA0, this.access));
 		
 	}
 	
 	private void checkHasAllAccess(XID actor) {
 		
-		assertTrue(this.arm.hasAccess(actor, this.r, this.access));
-		assertTrue(this.arm.hasAccess(actor, this.rA, this.access));
-		assertTrue(this.arm.hasAccess(actor, this.rA0, this.access));
+		assertAllowed(this.arm.hasAccess(actor, this.r, this.access));
+		assertAllowed(this.arm.hasAccess(actor, this.rA, this.access));
+		assertAllowed(this.arm.hasAccess(actor, this.rA0, this.access));
 		
-		assertTrue(this.arm.hasAccessToSubtree(actor, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(actor, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubtree(actor, this.rA0, this.access));
+		assertAllowed(this.arm.hasAccessToSubtree(actor, this.r, this.access));
+		assertAllowed(this.arm.hasAccessToSubtree(actor, this.rA, this.access));
+		assertAllowed(this.arm.hasAccessToSubtree(actor, this.rA0, this.access));
 		
-		assertTrue(this.arm.hasAccessToSubresource(actor, this.r, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(actor, this.rA, this.access));
-		assertTrue(this.arm.hasAccessToSubresource(actor, this.rA0, this.access));
+		assertAllowed(this.arm.hasAccessToSubresource(actor, this.r, this.access));
+		assertAllowed(this.arm.hasAccessToSubresource(actor, this.rA, this.access));
+		assertAllowed(this.arm.hasAccessToSubresource(actor, this.rA0, this.access));
 		
 	}
 	
 	private void checkHasNoAccess(XID actor) {
 		
-		assertFalse(this.arm.hasAccess(actor, this.r, this.access));
-		assertFalse(this.arm.hasAccess(actor, this.rA, this.access));
-		assertFalse(this.arm.hasAccess(actor, this.rA0, this.access));
+		assertDenied(this.arm.hasAccess(actor, this.r, this.access));
+		assertDenied(this.arm.hasAccess(actor, this.rA, this.access));
+		assertDenied(this.arm.hasAccess(actor, this.rA0, this.access));
 		
-		assertFalse(this.arm.hasAccessToSubtree(actor, this.r, this.access));
-		assertFalse(this.arm.hasAccessToSubtree(actor, this.rA, this.access));
-		assertFalse(this.arm.hasAccessToSubtree(actor, this.rA0, this.access));
+		assertDenied(this.arm.hasAccessToSubtree(actor, this.r, this.access));
+		assertDenied(this.arm.hasAccessToSubtree(actor, this.rA, this.access));
+		assertDenied(this.arm.hasAccessToSubtree(actor, this.rA0, this.access));
 		
-		assertFalse(this.arm.hasAccessToSubresource(actor, this.r, this.access));
-		assertFalse(this.arm.hasAccessToSubresource(actor, this.rA, this.access));
-		assertFalse(this.arm.hasAccessToSubresource(actor, this.rA0, this.access));
+		assertDenied(this.arm.hasAccessToSubresource(actor, this.r, this.access));
+		assertDenied(this.arm.hasAccessToSubresource(actor, this.rA, this.access));
+		assertDenied(this.arm.hasAccessToSubresource(actor, this.rA0, this.access));
 		
 	}
 	
 	private void checkHasUndefinedAccess(XID actor) {
 		
-		assertNull(this.arm.hasAccess(actor, this.r, this.access));
-		assertNull(this.arm.hasAccess(actor, this.rA, this.access));
-		assertNull(this.arm.hasAccess(actor, this.rA0, this.access));
+		assertUndefined(this.arm.hasAccess(actor, this.r, this.access));
+		assertUndefined(this.arm.hasAccess(actor, this.rA, this.access));
+		assertUndefined(this.arm.hasAccess(actor, this.rA0, this.access));
 		
-		assertNull(this.arm.hasAccessToSubtree(actor, this.r, this.access));
-		assertNull(this.arm.hasAccessToSubtree(actor, this.rA, this.access));
-		assertNull(this.arm.hasAccessToSubtree(actor, this.rA0, this.access));
+		assertUndefined(this.arm.hasAccessToSubtree(actor, this.r, this.access));
+		assertUndefined(this.arm.hasAccessToSubtree(actor, this.rA, this.access));
+		assertUndefined(this.arm.hasAccessToSubtree(actor, this.rA0, this.access));
 		
-		assertNull(this.arm.hasAccessToSubresource(actor, this.r, this.access));
-		assertNull(this.arm.hasAccessToSubresource(actor, this.rA, this.access));
-		assertNull(this.arm.hasAccessToSubresource(actor, this.rA0, this.access));
+		assertUndefined(this.arm.hasAccessToSubresource(actor, this.r, this.access));
+		assertUndefined(this.arm.hasAccessToSubresource(actor, this.rA, this.access));
+		assertUndefined(this.arm.hasAccessToSubresource(actor, this.rA0, this.access));
 		
 	}
 	

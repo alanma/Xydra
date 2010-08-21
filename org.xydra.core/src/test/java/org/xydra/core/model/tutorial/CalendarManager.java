@@ -289,7 +289,7 @@ public class CalendarManager {
 		
 		// check whether the user is allowed to read the specified calendar or
 		// not
-		if(!this.arm.hasAccess(userID, userCalendar.getAddress(), XA.ACCESS_READ)) {
+		if(!this.arm.canRead(userID, userCalendar.getAddress())) {
 			// user has no right access!
 			return "Error!";
 		}

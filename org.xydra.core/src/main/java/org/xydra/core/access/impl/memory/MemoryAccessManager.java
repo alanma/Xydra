@@ -13,6 +13,7 @@ import org.xydra.core.access.XAccessDefinition;
 import org.xydra.core.access.XAccessEvent;
 import org.xydra.core.access.XAccessListener;
 import org.xydra.core.access.XAccessManager;
+import org.xydra.core.access.XAccessValue;
 import org.xydra.core.access.XGroupDatabase;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.model.XAddress;
@@ -53,9 +54,16 @@ public class MemoryAccessManager extends AbstractAccessManager {
 		this.listeners = new HashSet<XAccessListener>();
 	}
 	
-	synchronized public Boolean getAccessDefinition(XID actor, XAddress resource, XID access)
+	synchronized public XAccessValue getAccessDefinition(XID actor, XAddress resource, XID access)
 	        throws IllegalArgumentException {
-		return this.rights.lookup(access, resource, actor);
+		Boolean b = this.rights.lookup(access, resource, actor);
+		if(b == null) {
+			return XAccessValue.UNDEFINED;
+		} else if(b) {
+			return XAccessValue.ALLOWED;
+		} else {
+			return XAccessValue.DENIED;
+		}
 	}
 	
 	synchronized public Pair<Set<XID>,Set<XID>> getActorsWithPermission(XAddress resource,
@@ -127,26 +135,26 @@ public class MemoryAccessManager extends AbstractAccessManager {
 		Iterator<XID> it = this.rights.key1Iterator();
 		while(it.hasNext()) {
 			XID access = it.next();
-			if(hasAccess(actor, resource, access) == Boolean.TRUE)
+			if(hasAccess(actor, resource, access).isAllowed())
 				res.add(access);
 		}
-		// IMPROVE can this be done better?
+		// IMPROVE can this be done more efficiently?
 		
 		return res;
 	}
 	
-	synchronized public Boolean hasAccess(XID actor, XAddress resource, XID access) {
+	synchronized public XAccessValue hasAccess(XID actor, XAddress resource, XID access) {
 		
 		// check if access is defined for this resource
-		Boolean def = accessForResource(actor, resource, access);
-		if(def != null) {
+		XAccessValue def = accessForResource(actor, resource, access);
+		if(def.isDefined()) {
 			return def;
 		}
 		
 		// check if access is reset for this group
-		Boolean reset = getAccessDefinition(XA.GROUP_ALL, resource, access);
-		if(reset == Boolean.FALSE) {
-			return Boolean.FALSE;
+		XAccessValue reset = getAccessDefinition(XA.GROUP_ALL, resource, access);
+		if(reset.isDenied()) {
+			return reset;
 		}
 		
 		// check the parent resource
@@ -156,18 +164,18 @@ public class MemoryAccessManager extends AbstractAccessManager {
 			return hasAccess(actor, parent, access);
 		}
 		
-		return null;
+		return XAccessValue.UNDEFINED;
 	}
 	
 	/**
 	 * Get the access defined for the actor on this resource or the access
 	 * allowed for any of the actor's groups.
 	 */
-	private Boolean accessForResource(XID actor, XAddress resource, XID access) {
+	private XAccessValue accessForResource(XID actor, XAddress resource, XID access) {
 		
 		// check if access is specifically granted or denied for this actor
-		Boolean def = getAccessDefinition(actor, resource, access);
-		if(def != null) {
+		XAccessValue def = getAccessDefinition(actor, resource, access);
+		if(def.isDefined()) {
 			return def;
 		}
 		
@@ -185,21 +193,22 @@ public class MemoryAccessManager extends AbstractAccessManager {
 			boolean allowed = tuple.getEntry();
 			XID group = tuple.getKey3();
 			
-			if(allowed && this.groups.hasGroup(actor, group))
-				return true;
+			if(allowed && this.groups.hasGroup(actor, group)) {
+				return XAccessValue.ALLOWED;
+			}
 		}
 		
 		// nothing defined
-		return null;
+		return XAccessValue.UNDEFINED;
 		
 	}
 	
-	synchronized public Boolean hasAccessToSubtree(XID actor, XAddress rootResource, XID access) {
+	synchronized public XAccessValue hasAccessToSubtree(XID actor, XAddress rootResource, XID access) {
 		
 		// check if the actor has access to the root resource
-		Boolean def = hasAccess(actor, rootResource, access);
-		if(def == Boolean.FALSE) {
-			return Boolean.FALSE;
+		XAccessValue def = hasAccess(actor, rootResource, access);
+		if(def.isDenied()) {
+			return def;
 		}
 		
 		// check if access is denied for any resource
@@ -221,7 +230,7 @@ public class MemoryAccessManager extends AbstractAccessManager {
 				XAddress resource = tuple.getKey2();
 				if(XX.equalsOrContains(rootResource, resource)) {
 					// denied for at least one resource
-					return Boolean.FALSE;
+					return XAccessValue.DENIED;
 				}
 				
 			}
@@ -250,10 +259,10 @@ public class MemoryAccessManager extends AbstractAccessManager {
 			}
 			
 			// access reset for this resource
-			Boolean localAccess = accessForResource(actor, resource, access);
-			if(localAccess != Boolean.TRUE) {
+			XAccessValue localAccess = accessForResource(actor, resource, access);
+			if(!localAccess.isAllowed()) {
 				// access reset and not granted again for at least one resource
-				return Boolean.FALSE;
+				return XAccessValue.DENIED;
 			}
 			
 		}
@@ -261,12 +270,12 @@ public class MemoryAccessManager extends AbstractAccessManager {
 		return def;
 	}
 	
-	public Boolean hasAccessToSubresource(XID actor, XAddress rootResource, XID access) {
+	public XAccessValue hasAccessToSubresource(XID actor, XAddress rootResource, XID access) {
 		
 		// check if the actor has access to the root resource
-		Boolean def = hasAccess(actor, rootResource, access);
-		if(def == Boolean.TRUE) {
-			return true;
+		XAccessValue def = hasAccess(actor, rootResource, access);
+		if(def.isAllowed()) {
+			return def;
 		}
 		
 		// check if access is granted for any subresource
@@ -290,13 +299,13 @@ public class MemoryAccessManager extends AbstractAccessManager {
 			}
 			
 			// check that the actor is not denied access here
-			if(getAccessDefinition(actor, resource, access) == Boolean.FALSE) {
+			if(getAccessDefinition(actor, resource, access).isDenied()) {
 				continue;
 			}
 			
 			XID group = tuple.getKey3();
 			if(XI.equals(actor, group) || this.groups.hasGroup(actor, group)) {
-				return true;
+				return XAccessValue.ALLOWED;
 			}
 			
 		}
@@ -310,13 +319,14 @@ public class MemoryAccessManager extends AbstractAccessManager {
 	}
 	
 	synchronized public void resetAccess(XID actor, XAddress resource, XID access) {
-		Boolean old = getAccessDefinition(actor, resource, access);
-		if(old == null) {
+		XAccessValue old = getAccessDefinition(actor, resource, access);
+		if(!old.isDefined()) {
 			// no right defined => nothing to remove
 			return;
 		}
 		this.rights.deIndex(access, resource, actor);
-		dispatchEvent(new MemoryAccessEvent(ChangeType.REMOVE, actor, resource, access, old, false));
+		dispatchEvent(new MemoryAccessEvent(ChangeType.REMOVE, actor, resource, access, old
+		        .isAllowed(), false));
 	}
 	
 	synchronized public void setAccess(XID actor, XAddress resource, XID access, boolean allowed) {
