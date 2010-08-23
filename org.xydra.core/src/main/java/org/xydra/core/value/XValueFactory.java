@@ -70,7 +70,7 @@ public interface XValueFactory {
 	/**
 	 * Creates an {@link XStringListValue}.
 	 * 
-	 * The returned {@link XStringListValue} will contain the given String in
+	 * The returned {@link XStringListValue} will contain the given Strings in
 	 * the order of their occurrence in the given array.
 	 * 
 	 * @param strings The array containing the Strings which are to be stored by
@@ -78,6 +78,19 @@ public interface XValueFactory {
 	 * @return a {@link XStringListValue} storing the given Strings.
 	 */
 	XStringListValue createStringListValue(String[] strings);
+	
+	/**
+	 * Creates an {@link XStringListValue}.
+	 * 
+	 * The returned {@link XStringListValue} will contain the given Strings in
+	 * the order of their occurrence in the given {@link Collection}.
+	 * 
+	 * @param xids The {@link Collection} containing the Strings which are to be
+	 *            stored by the {@link XStringListValue} this method will
+	 *            create.
+	 * @return an {@link XStringListValue} storing the given Strings.
+	 */
+	XStringListValue createStringListValue(Collection<String> strings);
 	
 	/**
 	 * Creates an {@link XIDListValue}.
@@ -105,18 +118,6 @@ public interface XValueFactory {
 	XIDListValue createIDListValue(Collection<XID> xids);
 	
 	/**
-	 * Creates an {@link XStringListValue}.
-	 * 
-	 * The returned {@link XStringListValue} will contain the given Strings in
-	 * the order of their occurrence in the given array.
-	 * 
-	 * @param xids The array containing the Strings which are to be stored by
-	 *            the {@link XStringListValue} this method will create.
-	 * @return an {@link XStringListValue} storing the given Strings.
-	 */
-	XStringListValue createStringListValue(Collection<String> strings);
-	
-	/**
 	 * Creates an {@link XBooleanListValue}.
 	 * 
 	 * The returned {@link XBooleanListValue} will contain the given boolean
@@ -133,11 +134,11 @@ public interface XValueFactory {
 	 * Creates an {@link XBooleanListValue}.
 	 * 
 	 * The returned {@link XBooleanListValue} will contain the given boolean
-	 * values in the order of their occurrence in the given Collection.
+	 * values in the order of their occurrence in the given {@link Collection}.
 	 * 
-	 * @param values The Collection containing the boolean values which are to
-	 *            be stored by the {@link XBooleanListValue} this method will
-	 *            create.
+	 * @param values The {@link Collection} containing the boolean values which
+	 *            are to be stored by the {@link XBooleanListValue} this method
+	 *            will create.
 	 * @return an {@link XBooleanListValue} storing the given boolean values.
 	 */
 	XBooleanListValue createBooleanListValue(Collection<Boolean> values);
@@ -159,11 +160,11 @@ public interface XValueFactory {
 	 * Creates an {@link XDoubleListValue}.
 	 * 
 	 * The returned {@link XDoubleListValue} will contain the given double
-	 * values in the order of their occurrence in the given Collection.
+	 * values in the order of their occurrence in the given {@link Collection}.
 	 * 
-	 * @param values The Collection containing the double values which are to be
-	 *            stored by the {@link XDoubleListValue} this method will
-	 *            create.
+	 * @param values The {@link Collection} containing the double values which
+	 *            are to be stored by the {@link XDoubleListValue} this method
+	 *            will create.
 	 * @return an {@link XDoubleListValue} storing the given double values.
 	 */
 	
@@ -186,11 +187,11 @@ public interface XValueFactory {
 	 * Creates an {@link XIntegerListValue}.
 	 * 
 	 * The returned {@link XIntegerListValue} will contain the given integer
-	 * values in the order of their occurrence in the given Collection.
+	 * values in the order of their occurrence in the given {@link Collection}.
 	 * 
-	 * @param values The Collection containing the integer values which are to
-	 *            be stored by the {@link XIntegerListValue} this method will
-	 *            create.
+	 * @param values The {@link Collection} containing the integer values which
+	 *            are to be stored by the {@link XIntegerListValue} this method
+	 *            will create.
 	 * @return an {@link XIntegerListValue} storing the given integer values.
 	 */
 	XIntegerListValue createIntegerListValue(Collection<Integer> values);
@@ -211,10 +212,11 @@ public interface XValueFactory {
 	 * Creates an {@link XLongListValue}.
 	 * 
 	 * The returned {@link XLongListValue} will contain the given long values in
-	 * the order of their occurrence in the given Collection.
+	 * the order of their occurrence in the given {@link Collection}.
 	 * 
-	 * @param values The Collection containing the long values which are to be
-	 *            stored by the {@link XLongListValue} this method will create.
+	 * @param values The {@link Collection} containing the long values which are
+	 *            to be stored by the {@link XLongListValue} this method will
+	 *            create.
 	 * @return an {@link XLongListValue} storing the given long values.
 	 */
 	XLongListValue createLongListValue(Collection<Long> values);
@@ -234,9 +236,13 @@ public interface XValueFactory {
 	/**
 	 * Creates an {@link XByteListValue}.
 	 * 
-	 * @param values The {@link Byte} values which are to be stored in the
-	 *            {@link XByteListValue}.
-	 * @return a {@link XByteListValue} storing the given byte values
+	 * The returned {@link XByteListValue} will contain the given byte values in
+	 * the order of their occurrence in the given {@link Collection}.
+	 * 
+	 * @param values The {@link Collection} containing the byte values which are
+	 *            to be stored by the {@link XByteListValue} this method will
+	 *            create.
+	 * @return an {@link XByteListValue} storing the given long values.
 	 */
 	XByteListValue createByteListValue(Collection<Byte> values);
 	
@@ -254,11 +260,15 @@ public interface XValueFactory {
 	XStringSetValue createStringSetValue(String[] values);
 	
 	/**
-	 * Creates an {@link XStringSetValue}.
+	 * Creates an {@link XStringListValue}.
 	 * 
-	 * @param values The {@link String} values which are to be stored in the
-	 *            {@link XStringSetValue}.
-	 * @return a {@link XStringSetValue} storing the given {@link String} values
+	 * The returned {@link XStringListValue} will contain the given String
+	 * values in the order of their occurrence in the given {@link Collection}.
+	 * 
+	 * @param values The {@link Collection} containing the String values which
+	 *            are to be stored by the {@link XStringListValue} this method
+	 *            will create.
+	 * @return an {@link XStringListValue} storing the given String values.
 	 */
 	XStringSetValue createStringSetValue(Collection<String> values);
 	
@@ -272,11 +282,12 @@ public interface XValueFactory {
 	XIDSetValue createIDSetValue(XID[] values);
 	
 	/**
-	 * Creates an {@link XXIDSetValue}.
+	 * Creates an {@link XIDSetValue}.
 	 * 
-	 * @param values The {@link XID} values which are to be stored in the
-	 *            {@link XXIDSetValue}.
-	 * @return a {@link XXIDSetValue} storing the given {@link XID} values
+	 * @param values The {@link Collection} containing the {@link XID XIDs}
+	 *            which are to be stored by the {@link XIDListValue} this method
+	 *            will create.
+	 * @return an {@link XIDListValue} storing the given {@link XID XIDs}.
 	 */
 	XIDSetValue createIDSetValue(Collection<XID> values);
 	
