@@ -16,6 +16,15 @@ public enum ChangeType {
 	/** The change type for transactions */
 	TRANSACTION;
 	
+	/**
+	 * Returns the fitting ChangeType enumeration value to a given string.
+	 * 
+	 * @param str The string for which the fitting ChangeTpye enumeration value
+	 *            is to be returned
+	 * @return the ChangeType enumeration value of the specified type or null if
+	 *         the given String is neither "ADD", "REMOVE", "CHANGE" or
+	 *         "TRANSACTION"
+	 */
 	public static ChangeType fromString(String str) {
 		if(ADD.toString().equals(str)) {
 			return ADD;
