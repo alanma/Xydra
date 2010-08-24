@@ -1,6 +1,5 @@
 package org.xydra.core.model.impl.memory;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -41,7 +40,7 @@ import org.xydra.core.model.state.impl.memory.TemporaryObjectState;
  * @author Kaidel
  * 
  */
-public class MemoryObject extends SynchronizesChangesImpl implements XObject, Serializable {
+public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	
 	private static final long serialVersionUID = -808702139986657842L;
 	
