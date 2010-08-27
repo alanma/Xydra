@@ -7,6 +7,7 @@ import org.xydra.annotations.ReadOperation;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XModelCommand;
 import org.xydra.core.change.XModelEvent;
+import org.xydra.core.model.state.XModelState;
 
 
 /**
@@ -20,7 +21,7 @@ import org.xydra.core.change.XModelEvent;
  * 
  * An {@link XModel} can be serialized, and hence can be used e.g. in GWT.
  * 
- * Implementations of XModel should use an {@link XMdoelState} for storing and
+ * Implementations of XModel should use an {@link XModelState} for storing and
  * representing the inner state of the XModel to allow maximum persistence
  * management flexibility.
  * 
