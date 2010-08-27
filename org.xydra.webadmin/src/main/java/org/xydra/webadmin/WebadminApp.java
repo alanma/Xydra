@@ -30,11 +30,11 @@ public class WebadminApp {
 		});
 		
 		WebadminApp webadminApp = new WebadminApp();
-		Restless.addGet("/index.html", webadminApp, "indexHtml");
+		Restless.addGet("/backup", webadminApp, "backup");
 		
 	}
 	
-	public void indexHtml() {
+	public void backup(HttpServletRequest req, HttpServletResponse res) {
 		
 	}
 	
