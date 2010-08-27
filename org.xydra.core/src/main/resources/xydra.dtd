@@ -1,7 +1,7 @@
 <!ELEMENT xrepository ( xmodel ) >
 <!ATTLIST xrepository xid NMTOKEN #REQUIRED >
 
-<!ELEMENT xmodel ( xobject+ ) >
+<!ELEMENT xmodel ( xobject* ) >
 <!ATTLIST xmodel revision NMTOKEN #REQUIRED >
 <!ATTLIST xmodel xid NMTOKEN #REQUIRED >
 
@@ -9,29 +9,31 @@
 <!ATTLIST xobject revision NMTOKEN #REQUIRED >
 <!ATTLIST xobject xid NMTOKEN #REQUIRED >
 
-<!ELEMENT xfield ( xstring?, xlong?, xintegerList?, xidList?, xidSet?, xinteger?, xbyteList?, xdouble?, xlongList?, xboolean?, xid?, xstringSet?, xbooleanList?, xstringList?, xdoubleList? ) >
+<!ELEMENT xfield ( xstring | xlong | xintegerList | xidList | xidSet | xinteger | 
+xbyteList | xdouble | xlongList | xboolean | xid | xstringSet | xbooleanList 
+| xstringList | xdoubleList ) >
 <!ATTLIST xfield revision NMTOKEN #REQUIRED >
 <!ATTLIST xfield xid ID #REQUIRED >
 
 <!ELEMENT xboolean ( #PCDATA ) >
-<!ELEMENT xbooleanList ( xboolean+ ) >
+<!ELEMENT xbooleanList ( xboolean* ) >
 
 <!ELEMENT xbyteList ( #PCDATA ) >
 
 <!ELEMENT xdouble ( #PCDATA ) >
-<!ELEMENT xdoubleList ( xdouble+ ) >
+<!ELEMENT xdoubleList ( xdouble* ) >
 
 <!ELEMENT xid ( #PCDATA ) >
-<!ELEMENT xidList ( xid+ ) >
-<!ELEMENT xidSet ( xid+ ) >
+<!ELEMENT xidList ( xid* ) >
+<!ELEMENT xidSet ( xid* ) >
 
 <!ELEMENT xinteger ( #PCDATA ) >
-<!ELEMENT xintegerList ( xinteger+ ) >
+<!ELEMENT xintegerList ( xinteger* ) >
 
 <!ELEMENT xlong ( #PCDATA ) >
-<!ELEMENT xlongList ( xlong+ ) >
+<!ELEMENT xlongList ( xlong* ) >
 
 
 <!ELEMENT xstring ( #PCDATA ) >
-<!ELEMENT xstringList ( xstring+ ) >
-<!ELEMENT xstringSet ( xstring+ ) >
+<!ELEMENT xstringList ( xstring* ) >
+<!ELEMENT xstringSet ( xstring* ) >
