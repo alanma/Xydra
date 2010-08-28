@@ -21,7 +21,7 @@ public class GSetupResource {
 		
 		// TODO IMRPOVE return very short XHTML document that tells user what
 		// happened
-		XydraServer.xmlResponse(res, HttpServletResponse.SC_OK, "done");
+		XydraServer.textResponse(res, HttpServletResponse.SC_OK, "done");
 	}
 	
 }
