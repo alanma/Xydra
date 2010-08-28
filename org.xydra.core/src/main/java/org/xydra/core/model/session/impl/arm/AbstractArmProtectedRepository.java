@@ -19,7 +19,6 @@ import org.xydra.core.model.session.XProtectedModel;
 import org.xydra.core.model.session.XProtectedRepository;
 
 
-
 /**
  * An abstract {@link XProtectedRepository} that wraps an {@link XRepository}
  * for a specific actor and checks all access against an {@link XAccessManager}.
@@ -201,6 +200,10 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 	
 	public boolean removeListenerForRepositoryEvents(XRepositoryEventListener changeListener) {
 		return this.repo.removeListenerForRepositoryEvents(changeListener);
+	}
+	
+	public XID getActor() {
+		return this.actor;
 	}
 	
 }

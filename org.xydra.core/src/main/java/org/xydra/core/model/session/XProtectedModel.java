@@ -181,7 +181,11 @@ public interface XProtectedModel extends XLoggedModel, XProtectedSynchronizesCha
 	 */
 	long executeCommand(XCommand command);
 	
-	// TODO Maybe add an "getActor" method to make the connection between an
-	// actor and this interface clearer?
+	/**
+	 * @return the actor that is represented by this interface. This is the
+	 *         actor that is recorded for change operations. Operations will
+	 *         only succeed if this actor has access.
+	 */
+	XID getActor();
 	
 }

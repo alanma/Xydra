@@ -108,4 +108,11 @@ public interface XProtectedRepository extends XBaseRepository, XSendsRepositoryE
 	@ModificationOperation
 	long executeRepositoryCommand(XRepositoryCommand command);
 	
+	/**
+	 * @return the actor that is represented by this interface. This is the
+	 *         actor that is recorded for change operations. Operations will
+	 *         only succeed if this actor has access.
+	 */
+	XID getActor();
+	
 }

@@ -139,8 +139,6 @@ public class ArmProtectedModel implements XProtectedModel {
 		return this.model.addListenerForObjectEvents(changeListener);
 	}
 	
-	// TODO shouldn't the removeListener... methods check for write access?
-	
 	public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
 		return this.model.removeListenerForObjectEvents(changeListener);
 	}
@@ -198,6 +196,10 @@ public class ArmProtectedModel implements XProtectedModel {
 	
 	public XChangeLog getChangeLog() {
 		return new ArmProtectedChangeLog(this.model.getChangeLog(), this.arm, this.actor);
+	}
+	
+	public XID getActor() {
+		return this.actor;
 	}
 	
 }

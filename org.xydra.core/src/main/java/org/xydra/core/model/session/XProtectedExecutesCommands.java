@@ -2,6 +2,7 @@ package org.xydra.core.model.session;
 
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.core.change.XCommand;
+import org.xydra.core.model.XID;
 
 
 /**
@@ -23,5 +24,12 @@ public interface XProtectedExecutesCommands {
 	 */
 	@ModificationOperation
 	long executeCommand(XCommand command);
+	
+	/**
+	 * @return the actor that is represented by this interface. This is the
+	 *         actor that is recorded for change operations. Operations will
+	 *         only succeed if this actor has access.
+	 */
+	XID getActor();
 	
 }
