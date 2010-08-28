@@ -57,10 +57,6 @@ public abstract class AbstractGaeState extends AbstractState implements IHasXID 
 		
 		// revision Number
 		e.setUnindexedProperty(GaeSchema.PROP_REVISION_NUMBER, this.revisionNumber);
-		// parent
-		// TODO is this needed?
-		// e.setUnindexedProperty(GaeSchema.PROP_PARENT_ADDRESS,
-		// this.getParentAddress().toString());
 	}
 	
 	/**

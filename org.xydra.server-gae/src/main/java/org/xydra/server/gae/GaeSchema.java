@@ -27,7 +27,5 @@ public class GaeSchema {
 	public static final String PROP_VALUE = "value";
 	/** A property name, GAE type {@link Long} */
 	public static final String PROP_REVISION_NUMBER = "revisionNumber";
-	/** A property name, GAE type String */
-	public static final String PROP_PARENT_ADDRESS = "parentAddress";
 	
 }
