@@ -75,13 +75,6 @@ public abstract class AbstractGaeState extends AbstractState implements IHasXID 
 		}
 		this.revisionNumber = revNr;
 		assert this.revisionNumber >= 0;
-		// parent
-		/*
-		 * TODO is this needed? String addressString =
-		 * (String)e.getProperty(GaeSchema.PROP_PARENT_ADDRESS);
-		 * if(addressString != null) {
-		 * setParentAddress(X.getIDProvider().fromAddress(addressString)); }
-		 */
 	}
 	
 	public void save(Object trans) {
