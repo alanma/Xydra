@@ -104,8 +104,6 @@ public class XmlModel {
 			repositoryState = store.createRepositoryState(repoAddr);
 		}
 		
-		// TODO can we just (correctly) assume that TemporaryRepositoryState
-		// doesn't need transactions?
 		Object trans = repositoryState.beginTransaction();
 		
 		Iterator<MiniElement> modelElementIt = xml.getElementsByTagName(XMODEL_ELEMENT);
