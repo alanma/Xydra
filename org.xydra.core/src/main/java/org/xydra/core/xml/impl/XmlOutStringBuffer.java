@@ -27,11 +27,11 @@ public class XmlOutStringBuffer extends AbstractXmlOut {
 	}
 	
 	public void close() {
-		// TODO Auto-generated method stub
+		// only needed for stream based implementations
 	}
 	
 	public void flush() {
-		// TODO Auto-generated method stub
+		// only needed for stream based implementations
 	}
 	
 	public String getXml() {
