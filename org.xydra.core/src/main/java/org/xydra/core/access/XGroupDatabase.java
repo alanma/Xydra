@@ -139,10 +139,10 @@ public interface XGroupDatabase extends Serializable {
 	void removeListener(XGroupListener listener);
 	
 	/**
-	 * @return returns an iterator over the {@link XID XIDs} of the groups that
-	 *         have at least one member
+	 * @return returns an iterator over the {@link XID XIDs} of the defined
+	 *         groups. Groups are defined as long as they have at least one
+	 *         member or subgroup.
 	 */
-	// TODO Comment: Do subgroups count as members here too?
 	Iterator<XID> getGroups();
 	
 }
