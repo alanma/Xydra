@@ -176,4 +176,11 @@ public class GaeChangeLogState implements XChangeLogState {
 		return true;
 	}
 	
+	public void setFirstRevisionNumber(long rev) {
+		if(this.currentRev != this.firstRev) {
+			throw new IllegalStateException(
+			        "cannot set start revision number of non-empty change log");
+		}
+		this.currentRev = this.firstRev = rev;
+	}
 }
