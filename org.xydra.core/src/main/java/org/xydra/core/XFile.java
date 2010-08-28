@@ -237,6 +237,4 @@ public class XFile {
 		return XmlModel.toModel(element);
 	}
 	
-	// TODO load/save change log
-	
 }
