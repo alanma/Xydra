@@ -91,9 +91,4 @@ public class GaeModelState extends AbstractGaeStateWithChildren implements XMode
 		return this.log;
 	}
 	
-	public void initializeChangeLogState(XChangeLogState changeLogState) {
-		// TODO remove?
-		throw new AssertionError("should never be called");
-	}
-	
 }
