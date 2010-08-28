@@ -48,6 +48,8 @@ import org.xydra.core.value.XValue;
 @RunsInJava
 public class XmlModel {
 	
+	// TODO save and load change log
+	
 	private static final String XREPOSITORY_ELEMENT = "xrepository";
 	private static final String XMODEL_ELEMENT = "xmodel";
 	private static final String XOBJECT_ELEMENT = "xobject";
