@@ -159,7 +159,15 @@ public interface XAccessManager extends Serializable {
 	boolean isAccessDefined(XID actor, XAddress resource, XID access);
 	
 	/**
-	 * TODO Where is the difference to "hasAccess"?
+	 * Get the access value that is defined for this (actor, resource, access)
+	 * combination. As opposed to {@link #hasAccess(XID, XAddress, XID)} this
+	 * method only returns the definition for the exact parameters (if there is
+	 * any) and does not check for any inherited access rights. This will return
+	 * a value not equal to {@link XAccessValue#UNDEFINED} exactly if the access
+	 * has been set with {@link #setAccess(XID, XAddress, XID, boolean)} for the
+	 * exact same parameters and not reset with
+	 * {@link #resetAccess(XID, XAddress, XID)}. In this case the value set with
+	 * setAccess() is returned.
 	 * 
 	 * @return the access right defined for this (actor,resource,access)
 	 *         combination or null if there is no such definition

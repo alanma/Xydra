@@ -2357,10 +2357,16 @@ public class XX {
 		
 	}
 	
-	/*
-	 * TODO Why do we need these "resolve"-Methods? What is their purpose?
+	/**
+	 * Constructs an {@link XAddress} that refers to the {@link XModel} with the
+	 * given modelId in the {@link XRepository} with the given
+	 * repositoryAddress.
+	 * 
+	 * @param repositoryAddress An address of an {@link XRepository}. If this is
+	 *            null an address for a model without a parent is constructed.
+	 * @throws IllegalArgumentException if repositoryAddress doesn't refer to an
+	 *             {@link XRepository}
 	 */
-
 	public static XAddress resolveModel(XAddress repositoryAddress, XID modelId) {
 		if(repositoryAddress == null)
 			return X.getIDProvider().fromComponents(null, modelId, null, null);
@@ -2371,6 +2377,15 @@ public class XX {
 		        null);
 	}
 	
+	/**
+	 * Constructs an {@link XAddress} that refers to the {@link XObject} with
+	 * the given objectId in the {@link XModel} with the given modelAddress.
+	 * 
+	 * @param modelAddress An address of an {@link XModel}. If this is null an
+	 *            address for an object without a parent is constructed.
+	 * @throws IllegalArgumentException if modelAddress doesn't refer to an
+	 *             {@link XModel}
+	 */
 	public static XAddress resolveObject(XAddress modelAddress, XID objectId) {
 		if(modelAddress == null)
 			return X.getIDProvider().fromComponents(null, null, objectId, null);
@@ -2382,18 +2397,20 @@ public class XX {
 	}
 	
 	/**
-	 * @param objectAddress may be null, if not null must be a valid object
-	 *            address
-	 * @param fieldId never null
-	 * @return
+	 * Constructs an {@link XAddress} that refers to the {@link XField} with the
+	 * given fieldId in the {@link XObject} with the given objectAddress.
+	 * 
+	 * @param objectAddress An address of an {@link XObject}. If this is null an
+	 *            address for a field without a parent is constructed.
+	 * @throws IllegalArgumentException if objectAddress doesn't refer to an
+	 *             {@link XObject}
 	 */
 	public static XAddress resolveField(XAddress objectAddress, XID fieldId) {
 		if(objectAddress == null)
 			return X.getIDProvider().fromComponents(null, null, null, fieldId);
 		
 		if(MemoryAddress.getAddressedType(objectAddress) != XType.XOBJECT) {
-			throw new IllegalArgumentException(objectAddress
-			        + " is not an object address. Field should be null.");
+			throw new IllegalArgumentException(objectAddress + " is not an object address");
 		}
 		return X.getIDProvider().fromComponents(objectAddress.getRepository(),
 		        objectAddress.getModel(), objectAddress.getObject(), fieldId);

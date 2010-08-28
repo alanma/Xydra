@@ -26,9 +26,6 @@ public interface XModelCommand extends XAtomicCommand {
 	 * the specified {@link XModel} while safe commands can only be executed if
 	 * their revision number fits to the current revision number.
 	 * 
-	 * TODO there is no way to specify a remove that will succeed if the
-	 * revision number was different but fail if the object was already removed.
-	 * 
 	 * @return true, if this event is forced.
 	 */
 	boolean isForced();

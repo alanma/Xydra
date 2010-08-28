@@ -28,14 +28,16 @@ public abstract class AbstractState implements IHasXAddress, Serializable {
 	}
 	
 	/*
-	 * TODO What is the purpose of the beginTransaction() & endTransaction()
-	 * method? Why should they be overwritten?
+	 * See {@link XModelState#beginTransaction()}, etc.
 	 */
 	public Object beginTransaction() {
 		// overwrite, if transactions are needed for the state backend
 		return null;
 	}
 	
+	/*
+	 * See {@link XModelState#endTransaction()}, etc.
+	 */
 	public void endTransaction(Object transaction) {
 		// overwrite, if transactions are needed for the state backend
 		assert transaction == null;
