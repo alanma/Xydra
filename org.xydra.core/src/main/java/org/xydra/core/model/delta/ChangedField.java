@@ -44,16 +44,8 @@ public class ChangedField implements DeltaField {
 	}
 	
 	public void setValue(XValue value) {
-		this.changed = this.changed || !XI.equals(value, this.base.getValue());
-		/*
-		 * TODO I added an disjunction with this.changed to makes sure, that
-		 * this.changed stays true, even if the value gets changed to the
-		 * original value again - due to a lack of documentation I don't know if
-		 * it was actually the purpose of this method to reset this.changed to
-		 * false if this happens, but to me it seems like this is not the case
-		 * and this.changed should stay true after at least one real change
-		 * happened
-		 */
+		// reset changed flag if the value is reset to the base field's value
+		this.changed = !XI.equals(value, this.base.getValue());
 		this.value = value;
 	}
 	
@@ -96,15 +88,6 @@ public class ChangedField implements DeltaField {
 	
 	public boolean isEmpty() {
 		return this.value == null;
-	}
-	
-	/*
-	 * TODO What is the purpose of this method? It currently does not provide
-	 * the functionality suggested by its name. Furthermore, the passed argument
-	 * is not used at all.
-	 */
-	public int countChanges(int i) {
-		return isChanged() ? 1 : 0;
 	}
 	
 }

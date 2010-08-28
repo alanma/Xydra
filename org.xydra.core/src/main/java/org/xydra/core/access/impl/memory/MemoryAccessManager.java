@@ -131,20 +131,25 @@ public class MemoryAccessManager extends AbstractAccessManager {
 		return new Pair<Set<XID>,Set<XID>>(allowed, denied);
 	}
 	
-	synchronized public Set<XID> getPermissions(XID actor, XAddress resource) {
+	synchronized public Pair<Set<XID>,Set<XID>> getPermissions(XID actor, XAddress resource) {
 		
-		Set<XID> res = new HashSet<XID>();
+		Set<XID> allowed = new HashSet<XID>();
+		Set<XID> denied = new HashSet<XID>();
 		
 		// iterator over defined access types
 		Iterator<XID> it = this.rights.key1Iterator();
 		while(it.hasNext()) {
 			XID access = it.next();
-			if(hasAccess(actor, resource, access).isAllowed())
-				res.add(access);
+			XAccessValue v = hasAccess(actor, resource, access);
+			if(v.isAllowed()) {
+				allowed.add(access);
+			} else if(v.isDenied()) {
+				denied.add(access);
+			}
 		}
 		// IMPROVE can this be done more efficiently?
 		
-		return res;
+		return new Pair<Set<XID>,Set<XID>>(allowed, denied);
 	}
 	
 	synchronized public XAccessValue hasAccess(XID actor, XAddress resource, XID access) {

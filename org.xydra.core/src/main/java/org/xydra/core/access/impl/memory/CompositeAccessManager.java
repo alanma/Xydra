@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.xydra.core.XX;
+import org.xydra.core.access.XA;
 import org.xydra.core.access.XAccessDefinition;
 import org.xydra.core.access.XAccessListener;
 import org.xydra.core.access.XAccessManager;
@@ -51,8 +52,18 @@ public class CompositeAccessManager extends AbstractAccessManager {
 	}
 	
 	public Pair<Set<XID>,Set<XID>> getActorsWithPermission(XAddress resource, XID access) {
-		// TODO implement me
-		throw new UnsupportedOperationException();
+		if(XX.equalsOrContains(this.mountPoint, resource)) {
+			Pair<Set<XID>,Set<XID>> i = this.inner.getActorsWithPermission(resource, access);
+			Pair<Set<XID>,Set<XID>> o = this.inner.getActorsWithPermission(resource, access);
+			o.getFirst().removeAll(i.getSecond());
+			o.getSecond().removeAll(i.getFirst());
+			if(!i.getSecond().contains(XA.GROUP_ALL) && !i.getFirst().contains(XA.GROUP_ALL)) {
+				i.getFirst().addAll(o.getFirst());
+				i.getSecond().addAll(o.getSecond());
+			}
+			return i;
+		}
+		return this.outer.getActorsWithPermission(resource, access);
 	}
 	
 	public Iterator<XAccessDefinition> getDefinitions() {
@@ -60,9 +71,17 @@ public class CompositeAccessManager extends AbstractAccessManager {
 		        .getDefinitions());
 	}
 	
-	public Set<XID> getPermissions(XID actor, XAddress resource) {
-		// TODO implement me
-		throw new UnsupportedOperationException();
+	public Pair<Set<XID>,Set<XID>> getPermissions(XID actor, XAddress resource) {
+		if(XX.equalsOrContains(this.mountPoint, resource)) {
+			Pair<Set<XID>,Set<XID>> i = this.inner.getPermissions(actor, resource);
+			Pair<Set<XID>,Set<XID>> o = this.inner.getPermissions(actor, resource);
+			o.getFirst().removeAll(i.getSecond());
+			o.getSecond().removeAll(i.getFirst());
+			i.getFirst().addAll(o.getFirst());
+			i.getSecond().addAll(o.getSecond());
+			return i;
+		}
+		return this.outer.getPermissions(actor, resource);
 	}
 	
 	public XAccessValue hasAccess(XID actor, XAddress resource, XID access) {

@@ -102,11 +102,10 @@ public class ChangedModel implements DeltaModel {
 	 *            {@link XCommands}. Note that setting this bound to little may
 	 *            result in the return of an integer which does not actually
 	 *            represent the minimal amount of needed {@link XCommand
-	 *            XCommands} for the transformation
+	 *            XCommands} for the transformation.
 	 * @result the amount of needed {@link XCommand XCommands} for the
 	 *         transformation
 	 */
-	// TODO I'm not sure if I got the purpose of "max" right
 	public int countChanges(int max) {
 		int n = this.removed.size();
 		if(n < max) {

@@ -176,10 +176,11 @@ public interface XAccessManager extends Serializable {
 	 *            to be returned.
 	 * @param resource The {@link XAddress} of the resource of which the access
 	 *            rights of the given actor are to be returned.
-	 * @return All access types for which hasPermission(actor,resource,access)
-	 *         returns true.
+	 * @return Returns two sets of permissions. Permissions in the first set are
+	 *         explicitly allowed while permissions in the second set are
+	 *         explicitly denied.
 	 */
-	Set<XID> getPermissions(XID actor, XAddress resource);
+	Pair<Set<XID>,Set<XID>> getPermissions(XID actor, XAddress resource);
 	
 	/**
 	 * Get all actors that have access to a resource.
