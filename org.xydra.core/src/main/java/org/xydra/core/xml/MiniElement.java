@@ -6,7 +6,6 @@ import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
 
 
-
 /**
  * A minimal XML DOM-like API
  * 
@@ -36,8 +35,8 @@ public interface MiniElement {
 	public Iterator<MiniElement> getElements();
 	
 	/**
-	 * @return return the contained character data TODO document - what about
-	 *         <em>this<b>bla</b></em> - what exactly is returned?
+	 * @return return the contained character data. If this element contains
+	 *         additional children, the return value is undefined.
 	 */
 	public String getData();
 	

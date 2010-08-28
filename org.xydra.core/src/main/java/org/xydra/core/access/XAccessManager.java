@@ -25,11 +25,6 @@ import org.xydra.index.query.Pair;
  * TODO how are users notified of changes to access rights? keep a history? can
  * this be put into the same history storing XEvents for the model?
  * 
- * TODO how does the ARM query the Group database? is there an internal
- * reference to it (bad for serializing the arm and sending it to the client)
- * -or- do we pass the group db for each call -or- change actor to a class that
- * provides hasGroup()?
- * 
  * @author dscharrer
  */
 public interface XAccessManager extends Serializable {
