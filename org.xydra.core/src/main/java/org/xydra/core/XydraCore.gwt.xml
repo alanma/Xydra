@@ -4,14 +4,15 @@
 	<inherits name="org.xydra.index.XydraIndex" />
 	<inherits name="org.xydra.annotations.Platform" />
 	
+	<!-- Inherit Xydra Logging -->
+	<inherits name='org.xydra.log.Xlog'/>
+	
 	<source path="">
-		<exclude name="change/impl/memory/MemoryFieldChangeListener.java" />
 		<exclude name="XFile.java" />
 		<exclude name="xml/impl/MiniElementImpl.java" />
 		<exclude name="xml/impl/MiniXMLParserImpl.java" />
 		<exclude name="xml/impl/XmlOutStream.java" />
 		<exclude name="test/**" />
-		<exclude name="model/state/AbstractStateTest.java" />
 	</source>
 	
 </module>

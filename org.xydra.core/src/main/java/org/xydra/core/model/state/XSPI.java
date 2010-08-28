@@ -1,6 +1,8 @@
 package org.xydra.core.model.state;
 
 import org.xydra.core.model.state.impl.memory.MemoryStateStore;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
 
 /**
@@ -11,11 +13,8 @@ import org.xydra.core.model.state.impl.memory.MemoryStateStore;
  */
 public class XSPI {
 	
-	/*
-	 * FIXME slf4j sources need to be available for GWT private static Logger
-	 * log = LoggerFactory.getLogger(XSPI.class);
-	 */
-
+	final static private Logger log = LoggerFactory.getLogger(XSPI.class);
+	
 	private static XStateStore stateStore_;
 	
 	private static XStateStore memoryStateStore_;
@@ -29,11 +28,10 @@ public class XSPI {
 	 */
 	public static XStateStore getStateStore() {
 		if(stateStore_ == null) {
-			/*
-			 * FIXME slf4j sources need to be available for GWT log.warn(
-			 * "No XStateStore has been set, defaulting to in-memory persistence. YOUR CHANGES WILL NOT BE PERSISTED ON DISK/CLOUD."
-			 * );
-			 */
+			
+			log
+			        .warn("No XStateStore has been set, defaulting to in-memory persistence. YOUR CHANGES WILL NOT BE PERSISTED ON DISK/CLOUD.");
+			
 			stateStore_ = getMemoryStateStore();
 		}
 		return stateStore_;

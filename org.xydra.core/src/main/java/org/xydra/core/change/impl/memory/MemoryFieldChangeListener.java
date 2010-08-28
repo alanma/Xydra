@@ -1,10 +1,10 @@
 package org.xydra.core.change.impl.memory;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.change.XFieldEventListener;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
 
 /**
