@@ -17,6 +17,8 @@ import com.google.appengine.api.datastore.Key;
  */
 public abstract class AbstractGaeState extends AbstractState implements IHasXID {
 	
+	private static final long serialVersionUID = 937578882150219792L;
+	
 	private boolean loaded;
 	
 	private long revisionNumber;

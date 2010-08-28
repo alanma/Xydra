@@ -22,6 +22,8 @@ import com.google.appengine.api.datastore.Entity;
  */
 public abstract class AbstractGaeStateWithChildren extends AbstractGaeState {
 	
+	private static final long serialVersionUID = 6460812487322233403L;
+	
 	protected Set<XID> children;
 	
 	public AbstractGaeStateWithChildren(XAddress address) {
