@@ -88,9 +88,10 @@ public interface XRepositoryState extends IHasXID, Iterable<XID>, IHasXAddress, 
 	 * persisted by this operation.
 	 * 
 	 * Implementations should not persist this change until the corresponding
-	 * save unless they can guarantee that no other state calls will fail. TODO:
-	 * better to add a transaction parameter so that implementations can persist
-	 * when they want?
+	 * save unless they can guarantee that no other state calls will fail.
+	 * 
+	 * TODO: better to add a transaction parameter so that implementations can
+	 * persist whenever they want?
 	 * 
 	 * @param modelState The {@link XModelState} which is to be added as a child
 	 */
