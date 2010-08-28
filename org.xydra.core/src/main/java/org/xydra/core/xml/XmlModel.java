@@ -6,13 +6,17 @@ import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.core.X;
+import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XBaseRepository;
+import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XLoggedModel;
+import org.xydra.core.model.XLoggedObject;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
@@ -54,13 +58,15 @@ public class XmlModel {
 	private static final String XMODEL_ELEMENT = "xmodel";
 	private static final String XOBJECT_ELEMENT = "xobject";
 	private static final String XFIELD_ELEMENT = "xfield";
+	private static final String XCHANGELOG_ELEMENT = "xlog";
 	
-	static final String XID_ATTRIBUTE = "xid";
 	private static final String REVISION_ATTRIBUTE = "revision";
+	private static final String STARTREVISION_ATTRIBUTE = "startRevision";
 	
 	public static final long NO_REVISION = -1;
 	
 	private static long getRevisionAttribute(MiniElement xml, String elementName) {
+		
 		String revisionString = xml.getAttribute(REVISION_ATTRIBUTE);
 		
 		if(revisionString == null)
@@ -84,7 +90,7 @@ public class XmlModel {
 	 * 
 	 * @return the created {@link XRepositoryState}
 	 */
-	private static XRepositoryState toRepositoryState(MiniElement xml, XStateStore store) {
+	public static XRepositoryState toRepositoryState(MiniElement xml, XStateStore store) {
 		
 		XmlUtils.checkElementName(xml, XREPOSITORY_ELEMENT);
 		
@@ -139,7 +145,7 @@ public class XmlModel {
 	 * @param trans The state transaction to use for creating the model.
 	 * @return the created {@link XModelState}
 	 */
-	private static XModelState toModelState(MiniElement xml, XRepositoryState parent, Object trans) {
+	public static XModelState toModelState(MiniElement xml, XRepositoryState parent, Object trans) {
 		
 		XmlUtils.checkElementName(xml, XMODEL_ELEMENT);
 		
@@ -150,7 +156,7 @@ public class XmlModel {
 		XModelState modelState;
 		if(parent == null) {
 			XAddress modelAddr = X.getIDProvider().fromComponents(null, xid, null, null);
-			XChangeLogState changeLogState = new MemoryChangeLogState(modelAddr, revision);
+			XChangeLogState changeLogState = new MemoryChangeLogState(modelAddr);
 			modelState = new TemporaryModelState(modelAddr, changeLogState);
 		} else {
 			modelState = parent.createModelState(xid);
@@ -166,6 +172,17 @@ public class XmlModel {
 			modelState.addObjectState(objectState);
 		}
 		
+		Iterator<MiniElement> logElementIt = xml.getElementsByTagName(XCHANGELOG_ELEMENT);
+		if(logElementIt.hasNext()) {
+			loadChangeLogState(logElementIt.next(), modelState.getChangeLogState(), t);
+			if(logElementIt.hasNext()) {
+				throw new IllegalArgumentException("xml model " + modelState.getAddress()
+				        + " contains multiple change logs");
+			}
+		} else {
+			modelState.getChangeLogState().setFirstRevisionNumber(revision);
+		}
+		
 		modelState.save(null);
 		
 		if(trans == null) {
@@ -173,6 +190,43 @@ public class XmlModel {
 		}
 		
 		return modelState;
+	}
+	
+	/**
+	 * Load the model represented by the given XML element into an
+	 * {@link XModelState}.
+	 * 
+	 * @param parent If parent is null, the field is loaded into a
+	 *            {@link TemporaryModelState}, otherwise it is loaded into a
+	 *            child state of parent.
+	 * @param trans The state transaction to use for creating the model.
+	 * @return the created {@link XModelState}
+	 */
+	public static void loadChangeLogState(MiniElement xml, XChangeLogState state, Object trans) {
+		
+		XmlUtils.checkElementName(xml, XCHANGELOG_ELEMENT);
+		
+		long startRev = 0L;
+		String revisionString = xml.getAttribute(STARTREVISION_ATTRIBUTE);
+		if(revisionString != null) {
+			try {
+				startRev = Long.parseLong(revisionString);
+			} catch(NumberFormatException e) {
+				throw new IllegalArgumentException("<" + XCHANGELOG_ELEMENT + ">@"
+				        + STARTREVISION_ATTRIBUTE + " does not contain a long, but '"
+				        + revisionString + "'");
+			}
+		}
+		
+		state.setFirstRevisionNumber(startRev);
+		
+		Iterator<MiniElement> eventElementIt = xml.getElements();
+		while(eventElementIt.hasNext()) {
+			MiniElement eventElement = eventElementIt.next();
+			XEvent event = XmlEvent.toEvent(eventElement, state.getBaseAddress());
+			state.appendEvent(event, trans);
+		}
+		
 	}
 	
 	/**
@@ -209,7 +263,7 @@ public class XmlModel {
 		XObjectState objectState;
 		if(parent == null) {
 			XAddress objectAddr = X.getIDProvider().fromComponents(null, null, xid, null);
-			XChangeLogState changeLogState = new MemoryChangeLogState(objectAddr, revision);
+			XChangeLogState changeLogState = new MemoryChangeLogState(objectAddr);
 			objectState = new TemporaryObjectState(objectAddr, changeLogState);
 		} else {
 			objectState = parent.createObjectState(xid);
@@ -224,6 +278,21 @@ public class XmlModel {
 			MiniElement fieldElement = fieldElementIt.next();
 			XFieldState fieldState = toFieldState(fieldElement, objectState, t);
 			objectState.addFieldState(fieldState);
+		}
+		
+		Iterator<MiniElement> logElementIt = xml.getElementsByTagName(XCHANGELOG_ELEMENT);
+		if(logElementIt.hasNext()) {
+			if(parent != null) {
+				throw new IllegalArgumentException("xml object " + objectState.getAddress()
+				        + " has a change log, but is contained in a model");
+			}
+			loadChangeLogState(logElementIt.next(), objectState.getChangeLogState(), t);
+			if(logElementIt.hasNext()) {
+				throw new IllegalArgumentException("xml object " + objectState.getAddress()
+				        + " contains multiple change logs");
+			}
+		} else if(parent == null) {
+			objectState.getChangeLogState().setFirstRevisionNumber(revision);
 		}
 		
 		objectState.save(t);
@@ -313,18 +382,20 @@ public class XmlModel {
 	 *            file.
 	 * @param ignoreInaccessible ignore inaccessible models, objects and fields
 	 *            instead of throwing an exception
+	 * @param saveChangeLog if true, any model change logs are saved
 	 * @throws IllegalArgumentException if the model contains an unsupported
 	 *             XValue type. See {@link XmlValueWriter} for details.
 	 */
 	public static void toXml(XBaseRepository xrepository, XmlOut xo, boolean saveRevision,
-	        boolean ignoreInaccessible) {
+	        boolean ignoreInaccessible, boolean saveChangeLog) {
 		
 		xo.open(XREPOSITORY_ELEMENT);
-		xo.attribute(XID_ATTRIBUTE, xrepository.getID().toURI());
+		xo.attribute(XmlUtils.XID_ATTRIBUTE, xrepository.getID().toURI());
 		
 		for(XID modelOd : xrepository) {
 			try {
-				toXml(xrepository.getModel(modelOd), xo, saveRevision, ignoreInaccessible);
+				toXml(xrepository.getModel(modelOd), xo, saveRevision, ignoreInaccessible,
+				        saveChangeLog);
 			} catch(XAccessException ae) {
 				if(!ignoreInaccessible) {
 					throw ae;
@@ -349,7 +420,7 @@ public class XmlModel {
 	 *             XValue type. See {@link XmlValueWriter} for details.
 	 */
 	public static void toXml(XBaseRepository xrepository, XmlOut xo) {
-		toXml(xrepository, xo, true, true);
+		toXml(xrepository, xo, true, true, true);
 	}
 	
 	/**
@@ -363,28 +434,37 @@ public class XmlModel {
 	 *            file.
 	 * @param ignoreInaccessible ignore inaccessible objects and fields instead
 	 *            of throwing an exception
+	 * @param saveChangeLog if true, the change log is saved
 	 * @throws IllegalArgumentException if the model contains an unsupported
 	 *             XValue type. See {@link XmlValueWriter} for details.
 	 */
 	public static void toXml(XBaseModel xmodel, XmlOut xo, boolean saveRevision,
-	        boolean ignoreInaccessible) {
+	        boolean ignoreInaccessible, boolean saveChangeLog) {
 		
 		// get revision before outputting anything to prevent incomplete XML
 		// elements on errors
 		long rev = xmodel.getRevisionNumber();
 		
 		xo.open(XMODEL_ELEMENT);
-		xo.attribute(XID_ATTRIBUTE, xmodel.getID().toURI());
-		if(saveRevision)
-			xo.attribute(REVISION_ATTRIBUTE, "" + rev);
+		xo.attribute(XmlUtils.XID_ATTRIBUTE, xmodel.getID().toURI());
+		if(saveRevision) {
+			xo.attribute(REVISION_ATTRIBUTE, Long.toString(rev));
+		}
 		
 		for(XID objectId : xmodel) {
 			try {
-				toXml(xmodel.getObject(objectId), xo, saveRevision, ignoreInaccessible);
+				toXml(xmodel.getObject(objectId), xo, saveRevision, ignoreInaccessible, false);
 			} catch(XAccessException ae) {
 				if(!ignoreInaccessible) {
 					throw ae;
 				}
+			}
+		}
+		
+		if(saveChangeLog && xmodel instanceof XLoggedModel) {
+			XChangeLog log = ((XLoggedModel)xmodel).getChangeLog();
+			if(log != null) {
+				toXml(log, xo);
 			}
 		}
 		
@@ -404,7 +484,7 @@ public class XmlModel {
 	 *             XValue type. See {@link XmlValueWriter} for details.
 	 */
 	public static void toXml(XBaseModel xmodel, XmlOut xo) {
-		toXml(xmodel, xo, true, true);
+		toXml(xmodel, xo, true, true, true);
 	}
 	
 	/**
@@ -418,20 +498,22 @@ public class XmlModel {
 	 *            file.
 	 * @param ignoreInaccessible ignore inaccessible fields instead of throwing
 	 *            an exception
+	 * @param saveChangeLog if true, any object change log is saved
 	 * @throws IllegalArgumentException if the object contains an unsupported
 	 *             XValue type. See {@link XmlValueWriter} for details.
 	 */
 	public static void toXml(XBaseObject xobject, XmlOut xo, boolean saveRevision,
-	        boolean ignoreInaccessible) {
+	        boolean ignoreInaccessible, boolean saveChangeLog) {
 		
 		// get revision before outputting anything to prevent incomplete XML
 		// elements on errors
 		long rev = xobject.getRevisionNumber();
 		
 		xo.open(XOBJECT_ELEMENT);
-		xo.attribute(XID_ATTRIBUTE, xobject.getID().toURI());
-		if(saveRevision)
-			xo.attribute(REVISION_ATTRIBUTE, "" + rev);
+		xo.attribute(XmlUtils.XID_ATTRIBUTE, xobject.getID().toURI());
+		if(saveRevision) {
+			xo.attribute(REVISION_ATTRIBUTE, Long.toString(rev));
+		}
 		
 		for(XID fieldId : xobject) {
 			try {
@@ -440,6 +522,13 @@ public class XmlModel {
 				if(!ignoreInaccessible) {
 					throw ae;
 				}
+			}
+		}
+		
+		if(saveChangeLog && xobject instanceof XLoggedObject) {
+			XChangeLog log = ((XLoggedObject)xobject).getChangeLog();
+			if(log != null && log.getBaseAddress().equals(xobject.getAddress())) {
+				toXml(log, xo);
 			}
 		}
 		
@@ -459,7 +548,7 @@ public class XmlModel {
 	 *             XValue type. See {@link XmlValueWriter} for details.
 	 */
 	public static void toXml(XBaseObject xobject, XmlOut xo) {
-		toXml(xobject, xo, true, true);
+		toXml(xobject, xo, true, true, true);
 	}
 	
 	/**
@@ -482,12 +571,14 @@ public class XmlModel {
 		long rev = xfield.getRevisionNumber();
 		
 		xo.open(XFIELD_ELEMENT);
-		xo.attribute(XID_ATTRIBUTE, xfield.getID().toURI());
-		if(saveRevision)
-			xo.attribute(REVISION_ATTRIBUTE, "" + rev);
+		xo.attribute(XmlUtils.XID_ATTRIBUTE, xfield.getID().toURI());
+		if(saveRevision) {
+			xo.attribute(REVISION_ATTRIBUTE, Long.toString(rev));
+		}
 		
-		if(xvalue != null)
+		if(xvalue != null) {
 			XmlValue.toXml(xvalue, xo);
+		}
 		
 		xo.close(XFIELD_ELEMENT);
 		
@@ -506,6 +597,34 @@ public class XmlModel {
 	 */
 	public static void toXml(XBaseField xfield, XmlOut xo) {
 		toXml(xfield, xo, true);
+	}
+	
+	/**
+	 * Encode the given {@link XChangeLog} as an XML element.
+	 * 
+	 * @param log an {@link XChangeLog}
+	 * @param out the {@link XmlOut} that a partial XML document starting with
+	 *            &lt;xfield&gt; and ending with the same &lt;/xfield&gt; is
+	 *            written to. White space is permitted but not required.
+	 */
+	public static void toXml(XChangeLog log, XmlOut xo) {
+		
+		// get values before outputting anything to prevent incomplete XML
+		// elements on errors
+		long rev = log.getFirstRevisionNumber();
+		Iterator<XEvent> events = log.getEventsBetween(0, Long.MAX_VALUE);
+		
+		xo.open(XCHANGELOG_ELEMENT);
+		if(rev != 0) {
+			xo.attribute(STARTREVISION_ATTRIBUTE, Long.toString(rev));
+		}
+		
+		while(events.hasNext()) {
+			XmlEvent.toXml(events.next(), xo, log.getBaseAddress());
+		}
+		
+		xo.close(XCHANGELOG_ELEMENT);
+		
 	}
 	
 }

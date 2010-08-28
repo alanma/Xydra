@@ -22,6 +22,7 @@ class XmlUtils {
 	protected static final String OBJECTID_ATTRIBUTE = "objectId";
 	protected static final String FIELDID_ATTRIBUTE = "fieldId";
 	protected static final String TYPE_ATTRIBUTE = "type";
+	protected static final String XID_ATTRIBUTE = "xid";
 	
 	protected static void checkElementName(MiniElement xml, String expectedName) {
 		if(!xml.getName().equals(expectedName)) {
@@ -51,14 +52,17 @@ class XmlUtils {
 		
 		boolean match = (context != null);
 		
-		XID repoId = getOptionalXidAttribute(xml, REPOSITORYID_ATTRIBUTE, match ? context.getRepository()
-		        : null);
+		XID repoId = getOptionalXidAttribute(xml, REPOSITORYID_ATTRIBUTE, match ? context
+		        .getRepository() : null);
 		match = match && XI.equals(repoId, context.getRepository());
-		XID modelId = getOptionalXidAttribute(xml, MODELID_ATTRIBUTE, match ? context.getModel() : null);
+		XID modelId = getOptionalXidAttribute(xml, MODELID_ATTRIBUTE, match ? context.getModel()
+		        : null);
 		match = match && XI.equals(modelId, context.getModel());
-		XID objectId = getOptionalXidAttribute(xml, OBJECTID_ATTRIBUTE, match ? context.getObject() : null);
+		XID objectId = getOptionalXidAttribute(xml, OBJECTID_ATTRIBUTE, match ? context.getObject()
+		        : null);
 		match = match && XI.equals(objectId, context.getObject());
-		XID fieldId = getOptionalXidAttribute(xml, FIELDID_ATTRIBUTE, match ? context.getField() : null);
+		XID fieldId = getOptionalXidAttribute(xml, FIELDID_ATTRIBUTE, match ? context.getField()
+		        : null);
 		
 		return X.getIDProvider().fromComponents(repoId, modelId, objectId, fieldId);
 	}
@@ -112,15 +116,15 @@ class XmlUtils {
 		}
 		return value;
 	}
-
+	
 	static XID getRequiredXidAttribute(MiniElement xml, String elementName) {
-    	String xidString = xml.getAttribute(XmlModel.XID_ATTRIBUTE);
-    	if(xidString == null) {
-    		throw new IllegalArgumentException("<" + elementName + "> element is missing the "
-    		        + XmlModel.XID_ATTRIBUTE + " attribute.");
-    	}
-    	XID xid = X.getIDProvider().fromString(xidString);
-    	return xid;
-    }
+		String xidString = xml.getAttribute(XID_ATTRIBUTE);
+		if(xidString == null) {
+			throw new IllegalArgumentException("<" + elementName + "> element is missing the "
+			        + XID_ATTRIBUTE + " attribute.");
+		}
+		XID xid = X.getIDProvider().fromString(xidString);
+		return xid;
+	}
 	
 }

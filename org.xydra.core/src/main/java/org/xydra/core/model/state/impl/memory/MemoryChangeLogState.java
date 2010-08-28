@@ -18,7 +18,7 @@ public class MemoryChangeLogState implements XChangeLogState {
 	 * event at index i equals the event that occurred at the time of the
 	 * revision number which equals this.revisionNumber + this.events.length
 	 **/
-	private final long revisionNumber;
+	private long revisionNumber = 0L;
 	
 	/** the event list **/
 	private List<XEvent> events = new ArrayList<XEvent>();
@@ -35,9 +35,8 @@ public class MemoryChangeLogState implements XChangeLogState {
 	 *            the MemoryChangeLog which is represented by this
 	 *            MemoryChangeLogState
 	 */
-	public MemoryChangeLogState(XAddress baseAddr, long revisionNumber) {
+	public MemoryChangeLogState(XAddress baseAddr) {
 		this.baseAddr = baseAddr;
-		this.revisionNumber = revisionNumber;
 	}
 	
 	public void save(Object transaction) {
@@ -97,6 +96,14 @@ public class MemoryChangeLogState implements XChangeLogState {
 		assert revisionNumber == getCurrentRevisionNumber();
 		
 		return true;
+	}
+	
+	public void setFirstRevisionNumber(long rev) {
+		if(!this.events.isEmpty()) {
+			throw new IllegalStateException(
+			        "cannot set start revision number of non-empty change log");
+		}
+		this.revisionNumber = rev;
 	}
 	
 }

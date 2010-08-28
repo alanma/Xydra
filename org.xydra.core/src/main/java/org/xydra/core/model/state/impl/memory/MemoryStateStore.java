@@ -42,12 +42,12 @@ public class MemoryStateStore implements XStateStore, Serializable {
 	}
 	
 	public XModelState createModelState(XAddress modelAddr) {
-		return new StoredModelState(modelAddr, this, new MemoryChangeLogState(modelAddr, 0L));
+		return new StoredModelState(modelAddr, this, new MemoryChangeLogState(modelAddr));
 	}
 	
 	public XObjectState createObjectState(XAddress objectAddr) {
 		XChangeLogState log = objectAddr.getModel() != null ? null : new MemoryChangeLogState(
-		        objectAddr, 0L);
+		        objectAddr);
 		return new StoredObjectState(objectAddr, this, log);
 	}
 	

@@ -63,7 +63,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	
 	private static XModelState createModelState(XID modelId) {
 		XAddress modelAddr = X.getIDProvider().fromComponents(null, modelId, null, null);
-		XChangeLogState changeLogState = new MemoryChangeLogState(modelAddr, 0L);
+		XChangeLogState changeLogState = new MemoryChangeLogState(modelAddr);
 		return new TemporaryModelState(modelAddr, changeLogState);
 	}
 	

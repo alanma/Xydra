@@ -7,10 +7,8 @@ import org.junit.Test;
 import org.xydra.core.X;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
-import org.xydra.core.util.SimpleSyntaxUtils;
 import org.xydra.core.xml.XmlModel;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
-
 
 
 public class SimpleSyntaxUtilsTest {
@@ -58,7 +56,7 @@ public class SimpleSyntaxUtilsTest {
 	
 	public static final void dump(XModel model) {
 		XmlOutStringBuffer xo = new XmlOutStringBuffer();
-		XmlModel.toXml(model, xo, true, false);
+		XmlModel.toXml(model, xo, true, false, true);
 		System.out.println(xo.getXml());
 	}
 	

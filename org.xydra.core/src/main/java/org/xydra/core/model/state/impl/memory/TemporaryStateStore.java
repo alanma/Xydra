@@ -26,12 +26,12 @@ public class TemporaryStateStore implements XStateStore {
 	
 	public XModelState createModelState(XAddress modelStateAddress) {
 		return new TemporaryModelState(modelStateAddress, new MemoryChangeLogState(
-		        modelStateAddress, 0L));
+		        modelStateAddress));
 	}
 	
 	public XObjectState createObjectState(XAddress objectStateAddress) {
 		XChangeLogState log = objectStateAddress.getModel() != null ? null
-		        : new MemoryChangeLogState(objectStateAddress, 0L);
+		        : new MemoryChangeLogState(objectStateAddress);
 		return new TemporaryObjectState(objectStateAddress, log);
 	}
 	

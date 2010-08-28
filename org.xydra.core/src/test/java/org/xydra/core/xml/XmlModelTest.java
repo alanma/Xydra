@@ -54,7 +54,7 @@ public class XmlModelTest {
 		
 		// test serializing without revisions
 		out = new XmlOutStringBuffer();
-		XmlModel.toXml(repo, out, false, true);
+		XmlModel.toXml(repo, out, false, true, true);
 		assertEquals("", out.getOpentags());
 		xml = out.getXml();
 		System.out.println(xml);
@@ -77,14 +77,13 @@ public class XmlModelTest {
 		XModel modelAgain = XmlModel.toModel(e);
 		assertTrue(XX.equalState(model, modelAgain));
 		
-		// check that there is an empty change log
+		// check that there is a change log
 		XChangeLog log = modelAgain.getChangeLog();
 		assertNotNull(log);
-		assertEquals(log.getFirstRevisionNumber(), log.getCurrentRevisionNumber());
 		
 		// test serializing without revisions
 		out = new XmlOutStringBuffer();
-		XmlModel.toXml(model, out, false, true);
+		XmlModel.toXml(model, out, false, true, true);
 		assertEquals("", out.getOpentags());
 		xml = out.getXml();
 		System.out.println(xml);
@@ -107,14 +106,13 @@ public class XmlModelTest {
 		XObject objectAgain = XmlModel.toObject(e);
 		assertTrue(XX.equalState(object, objectAgain));
 		
-		// check that there is an empty change log
+		// check that there is a change log
 		XChangeLog log = objectAgain.getChangeLog();
 		assertNotNull(log);
-		assertEquals(log.getFirstRevisionNumber(), log.getCurrentRevisionNumber());
 		
 		// test serializing without revisions
 		out = new XmlOutStringBuffer();
-		XmlModel.toXml(object, out, false, true);
+		XmlModel.toXml(object, out, false, true, true);
 		assertEquals("", out.getOpentags());
 		xml = out.getXml();
 		System.out.println(xml);

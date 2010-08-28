@@ -66,7 +66,7 @@ public class MemoryChangeLog implements XChangeLog {
 		return this.state.truncateToRevision(revisionNumber, transaction);
 	}
 	
-	public XAddress getModelAddress() {
+	public XAddress getBaseAddress() {
 		return this.state.getBaseAddress();
 	}
 	

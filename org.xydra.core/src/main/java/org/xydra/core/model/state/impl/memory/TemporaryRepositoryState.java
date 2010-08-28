@@ -59,7 +59,7 @@ public class TemporaryRepositoryState extends AbstractRepositoryState {
 	
 	public XModelState createModelState(XID id) {
 		XAddress modelAddr = XX.resolveModel(getAddress(), id);
-		return new TemporaryModelState(modelAddr, new MemoryChangeLogState(modelAddr, 0L));
+		return new TemporaryModelState(modelAddr, new MemoryChangeLogState(modelAddr));
 	}
 	
 	public XModelState getModelState(XID id) {

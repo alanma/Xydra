@@ -64,7 +64,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	
 	private static XObjectState createObjectState(XID objectId) {
 		XAddress objectAddr = X.getIDProvider().fromComponents(null, null, objectId, null);
-		XChangeLogState changeLogState = new MemoryChangeLogState(objectAddr, 0L);
+		XChangeLogState changeLogState = new MemoryChangeLogState(objectAddr);
 		return new TemporaryObjectState(objectAddr, changeLogState);
 	}
 	

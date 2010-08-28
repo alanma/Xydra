@@ -45,8 +45,8 @@ public class ArmProtectedChangeLog implements XChangeLog {
 	}
 	
 	private void checkReadAccess() throws XAccessException {
-		if(!this.arm.canRead(this.actor, getModelAddress())) {
-			throw new XAccessException(this.actor + " cannot read " + getModelAddress());
+		if(!this.arm.canRead(this.actor, getBaseAddress())) {
+			throw new XAccessException(this.actor + " cannot read " + getBaseAddress());
 		}
 	}
 	
@@ -108,8 +108,8 @@ public class ArmProtectedChangeLog implements XChangeLog {
 		return this.log.getCurrentRevisionNumber();
 	}
 	
-	public XAddress getModelAddress() {
-		return this.log.getModelAddress();
+	public XAddress getBaseAddress() {
+		return this.log.getBaseAddress();
 	}
 	
 	public Iterator<XEvent> getEventsBetween(long beginRevision, long endRevision) {

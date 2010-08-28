@@ -16,7 +16,7 @@ public class TestChangeLogState implements XChangeLogState {
 	/** the ID of the model this change log refers to **/
 	private XAddress baseAddr;
 	
-	long first;
+	long first = 0L;
 	long last;
 	
 	int saveCount;
@@ -176,6 +176,14 @@ public class TestChangeLogState implements XChangeLogState {
 		assert revisionNumber == this.last;
 		
 		return true;
+	}
+	
+	public void setFirstRevisionNumber(long rev) {
+		if(!this.events.isEmpty()) {
+			throw new IllegalStateException(
+			        "cannot set start revision number of non-empty change log");
+		}
+		this.first = rev;
 	}
 	
 }

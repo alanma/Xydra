@@ -81,7 +81,7 @@ public class XFile {
 		FileOutputStream fos = new FileOutputStream(file);
 		
 		XmlOut out = new XmlOutStream(fos);
-		XmlModel.toXml(repository, out, true, false);
+		XmlModel.toXml(repository, out, true, false, true);
 		
 		fos.close();
 	}
@@ -133,7 +133,7 @@ public class XFile {
 		FileOutputStream fos = new FileOutputStream(file);
 		
 		XmlOut out = new XmlOutStream(fos);
-		XmlModel.toXml(model, out, true, false);
+		XmlModel.toXml(model, out, true, false, true);
 		
 		fos.close();
 	}

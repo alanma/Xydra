@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Iterator;
 
 import org.xydra.core.change.XEvent;
+import org.xydra.core.model.state.XModelState;
+import org.xydra.core.model.state.XObjectState;
 
 
 /**
@@ -16,13 +18,11 @@ import org.xydra.core.change.XEvent;
 public interface XChangeLog extends Serializable {
 	
 	/**
-	 * Returns the {@link XAddress} of the {@link XModel} this change log refers
-	 * to.
-	 * 
-	 * @return the {@link XAddress} of the {@link XModel} this change log refers
-	 *         to.
+	 * @return the {@link XAddress} of the {@link XModelState} or
+	 *         {@link XObjectState} this change log refers to. All contained
+	 *         events have been produced by this entity or a descendant.
 	 */
-	public XAddress getModelAddress();
+	public XAddress getBaseAddress();
 	
 	/**
 	 * @return the revision number the logged {@link XModel} had at the time
