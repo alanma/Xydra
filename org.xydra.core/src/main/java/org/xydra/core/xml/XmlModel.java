@@ -6,7 +6,6 @@ import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.core.X;
-import org.xydra.core.XX;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XBaseModel;
@@ -27,6 +26,7 @@ import org.xydra.core.model.state.XFieldState;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
 import org.xydra.core.model.state.XRepositoryState;
+import org.xydra.core.model.state.XStateStore;
 import org.xydra.core.model.state.impl.memory.MemoryChangeLogState;
 import org.xydra.core.model.state.impl.memory.TemporaryFieldState;
 import org.xydra.core.model.state.impl.memory.TemporaryModelState;
@@ -74,7 +74,17 @@ public class XmlModel {
 		}
 	}
 	
-	private static XRepositoryState toRepositoryState(MiniElement xml) {
+	/**
+	 * Load the repository represented by the given XML element into an
+	 * {@link XRepositoryState}.
+	 * 
+	 * @param If this is not null the given store will be used to create the
+	 *            reository state, otherwise a {@link TemporaryRepositoryState}
+	 *            ist created
+	 * 
+	 * @return the created {@link XRepositoryState}
+	 */
+	private static XRepositoryState toRepositoryState(MiniElement xml, XStateStore store) {
 		
 		XmlUtils.checkElementName(xml, XREPOSITORY_ELEMENT);
 		
@@ -82,6 +92,11 @@ public class XmlModel {
 		
 		XAddress repoAddr = X.getIDProvider().fromComponents(xid, null, null, null);
 		XRepositoryState repositoryState = new TemporaryRepositoryState(repoAddr);
+		if(store == null) {
+			repositoryState = new TemporaryRepositoryState(repoAddr);
+		} else {
+			repositoryState = store.createRepositoryState(repoAddr);
+		}
 		
 		// TODO can we just (correctly) assume that TemporaryRepositoryState
 		// doesn't need transactions?
@@ -90,7 +105,7 @@ public class XmlModel {
 		Iterator<MiniElement> modelElementIt = xml.getElementsByTagName(XMODEL_ELEMENT);
 		while(modelElementIt.hasNext()) {
 			MiniElement modelElement = modelElementIt.next();
-			XModelState modelState = toModelState(modelElement, repoAddr, trans);
+			XModelState modelState = toModelState(modelElement, repositoryState, trans);
 			repositoryState.addModelState(modelState);
 		}
 		
@@ -111,10 +126,20 @@ public class XmlModel {
 	 *             XRepository element.
 	 */
 	public static XRepository toRepository(MiniElement xml) {
-		return new MemoryRepository(toRepositoryState(xml));
+		return new MemoryRepository(toRepositoryState(xml, null));
 	}
 	
-	private static XModelState toModelState(MiniElement xml, XAddress repoAddr, Object trans) {
+	/**
+	 * Load the model represented by the given XML element into an
+	 * {@link XModelState}.
+	 * 
+	 * @param parent If parent is null, the field is loaded into a
+	 *            {@link TemporaryModelState}, otherwise it is loaded into a
+	 *            child state of parent.
+	 * @param trans The state transaction to use for creating the model.
+	 * @return the created {@link XModelState}
+	 */
+	private static XModelState toModelState(MiniElement xml, XRepositoryState parent, Object trans) {
 		
 		XmlUtils.checkElementName(xml, XMODEL_ELEMENT);
 		
@@ -122,9 +147,14 @@ public class XmlModel {
 		
 		long revision = getRevisionAttribute(xml, XMODEL_ELEMENT);
 		
-		XAddress modelAddr = XX.resolveModel(repoAddr, xid);
-		XChangeLogState changeLogState = new MemoryChangeLogState(modelAddr, revision);
-		XModelState modelState = new TemporaryModelState(modelAddr, changeLogState);
+		XModelState modelState;
+		if(parent == null) {
+			XAddress modelAddr = X.getIDProvider().fromComponents(null, xid, null, null);
+			XChangeLogState changeLogState = new MemoryChangeLogState(modelAddr, revision);
+			modelState = new TemporaryModelState(modelAddr, changeLogState);
+		} else {
+			modelState = parent.createModelState(xid);
+		}
 		modelState.setRevisionNumber(revision);
 		
 		Object t = trans == null ? modelState.beginTransaction() : trans;
@@ -132,7 +162,7 @@ public class XmlModel {
 		Iterator<MiniElement> objectElementIt = xml.getElementsByTagName(XOBJECT_ELEMENT);
 		while(objectElementIt.hasNext()) {
 			MiniElement objectElement = objectElementIt.next();
-			XObjectState objectState = toObjectState(objectElement, modelAddr, t);
+			XObjectState objectState = toObjectState(objectElement, modelState, t);
 			modelState.addObjectState(objectState);
 		}
 		
@@ -158,7 +188,17 @@ public class XmlModel {
 		return new MemoryModel(toModelState(xml, null, null));
 	}
 	
-	private static XObjectState toObjectState(MiniElement xml, XAddress modelAddr, Object trans) {
+	/**
+	 * Load the object represented by the given XML element into an
+	 * {@link XObjectState}.
+	 * 
+	 * @param parent If parent is null, the field is loaded into a
+	 *            {@link TemporaryObjectState}, otherwise it is loaded into a
+	 *            child state of parent.
+	 * @param trans The state transaction to use for creating the object.
+	 * @return the created {@link XObjectState}
+	 */
+	public static XObjectState toObjectState(MiniElement xml, XModelState parent, Object trans) {
 		
 		XmlUtils.checkElementName(xml, XOBJECT_ELEMENT);
 		
@@ -166,10 +206,15 @@ public class XmlModel {
 		
 		long revision = getRevisionAttribute(xml, XOBJECT_ELEMENT);
 		
-		XAddress objectAddr = XX.resolveObject(modelAddr, xid);
-		XChangeLogState changeLogState = modelAddr != null ? null : new MemoryChangeLogState(
-		        objectAddr, revision);
-		XObjectState objectState = new TemporaryObjectState(objectAddr, changeLogState);
+		XObjectState objectState;
+		if(parent == null) {
+			XAddress objectAddr = X.getIDProvider().fromComponents(null, null, xid, null);
+			XChangeLogState changeLogState = new MemoryChangeLogState(objectAddr, revision);
+			objectState = new TemporaryObjectState(objectAddr, changeLogState);
+		} else {
+			objectState = parent.createObjectState(xid);
+		}
+		
 		objectState.setRevisionNumber(revision);
 		
 		Object t = trans == null ? objectState.beginTransaction() : trans;
@@ -177,7 +222,7 @@ public class XmlModel {
 		Iterator<MiniElement> fieldElementIt = xml.getElementsByTagName(XFIELD_ELEMENT);
 		while(fieldElementIt.hasNext()) {
 			MiniElement fieldElement = fieldElementIt.next();
-			XFieldState fieldState = toFieldState(fieldElement, objectAddr, t);
+			XFieldState fieldState = toFieldState(fieldElement, objectState, t);
 			objectState.addFieldState(fieldState);
 		}
 		
@@ -203,7 +248,17 @@ public class XmlModel {
 		return new MemoryObject(toObjectState(xml, null, null));
 	}
 	
-	private static XFieldState toFieldState(MiniElement xml, XAddress objectAddr, Object trans) {
+	/**
+	 * Load the field represented by the given XML element into an
+	 * {@link XFieldState}.
+	 * 
+	 * @param parent If parent is null, the field is loaded into a
+	 *            {@link TemporaryFieldState}, otherwise it is loaded into a
+	 *            child state of parent.
+	 * @param trans The state transaction to use for creating the field.
+	 * @return the created {@link XFieldState}
+	 */
+	public static XFieldState toFieldState(MiniElement xml, XObjectState parent, Object trans) {
 		
 		XmlUtils.checkElementName(xml, XFIELD_ELEMENT);
 		
@@ -219,8 +274,13 @@ public class XmlModel {
 			xvalue = XmlValue.toValue(valueElement);
 		}
 		
-		XAddress fieldAddr = XX.resolveField(objectAddr, xid);
-		XFieldState fieldState = new TemporaryFieldState(fieldAddr);
+		XFieldState fieldState;
+		if(parent == null) {
+			XAddress fieldAddr = X.getIDProvider().fromComponents(null, null, null, xid);
+			fieldState = new TemporaryFieldState(fieldAddr);
+		} else {
+			fieldState = parent.createFieldState(xid);
+		}
 		fieldState.setRevisionNumber(revision);
 		fieldState.setValue(xvalue);
 		
