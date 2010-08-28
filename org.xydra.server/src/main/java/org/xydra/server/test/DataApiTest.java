@@ -237,7 +237,7 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		model.removeObject(null, DemoModelUtil.PETER_ID);
 		
 		XmlOutStringBuffer out = new XmlOutStringBuffer();
-		XmlModel.toXml(model, out, false, false);
+		XmlModel.toXml(model, out, false, false, false);
 		postData(dataapi.toURL(), out.getXml());
 		
 		XModel updatedModel = getRemoteModel(DemoModelUtil.PHONEBOOK_ID);
@@ -279,7 +279,7 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		phone.setValue(null, X.getValueFactory().createStringValue("342-170984-7892"));
 		
 		XmlOutStringBuffer out = new XmlOutStringBuffer();
-		XmlModel.toXml(john, out, false, false);
+		XmlModel.toXml(john, out, false, false, false);
 		postData(dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toURI()).toURL(), out.getXml());
 		
 		XModel updatedModel = getRemoteModel(DemoModelUtil.PHONEBOOK_ID);

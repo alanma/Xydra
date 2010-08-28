@@ -34,7 +34,7 @@ public class XFieldResource {
 		XProtectedField field = XydraServer.getField(req, modelId, objectId, fieldId);
 		
 		XmlOutStringBuffer xo = new XmlOutStringBuffer();
-		XmlModel.toXml(field, xo);
+		XmlModel.toXml(field, xo, true);
 		
 		XydraServer.xmlResponse(res, HttpServletResponse.SC_OK, xo.getXml());
 	}

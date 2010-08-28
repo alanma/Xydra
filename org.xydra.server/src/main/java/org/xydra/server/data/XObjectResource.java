@@ -41,7 +41,7 @@ public class XObjectResource {
 		XProtectedObject object = XydraServer.getObject(req, modelId, objectId);
 		
 		XmlOutStringBuffer xo = new XmlOutStringBuffer();
-		XmlModel.toXml(object, xo);
+		XmlModel.toXml(object, xo, true, true, false);
 		
 		XydraServer.xmlResponse(res, HttpServletResponse.SC_OK, xo.getXml());
 	}

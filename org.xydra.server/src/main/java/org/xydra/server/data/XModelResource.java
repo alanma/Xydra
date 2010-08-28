@@ -40,7 +40,7 @@ public class XModelResource {
 		XProtectedModel model = XydraServer.getModel(req, modelId);
 		
 		XmlOutStringBuffer xo = new XmlOutStringBuffer();
-		XmlModel.toXml(model, xo);
+		XmlModel.toXml(model, xo, true, true, false);
 		
 		XydraServer.xmlResponse(res, HttpServletResponse.SC_OK, xo.getXml());
 	}
