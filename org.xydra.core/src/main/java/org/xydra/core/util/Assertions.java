@@ -1,11 +1,10 @@
-package org.xydra.core.model.state.impl.memory;
+package org.xydra.core.util;
 
 /**
  * Small helper to determine if java assertions are enabled.
  * 
  * @author voelkel
  * 
- *         FIXME why is this in model.state.impl.memory?
  */
 @Deprecated
 public class Assertions {
