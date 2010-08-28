@@ -17,7 +17,7 @@ public class TestChangeLogState implements XChangeLogState {
 	private XAddress baseAddr;
 	
 	long first = 0L;
-	long last;
+	long last = 0L;
 	
 	int saveCount;
 	
@@ -183,7 +183,7 @@ public class TestChangeLogState implements XChangeLogState {
 			throw new IllegalStateException(
 			        "cannot set start revision number of non-empty change log");
 		}
-		this.first = rev;
+		this.last = this.first = rev;
 	}
 	
 }
