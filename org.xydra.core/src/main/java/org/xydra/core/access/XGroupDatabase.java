@@ -9,8 +9,6 @@ import org.xydra.core.model.XID;
 /**
  * A central database that stores user groups for access right management.
  * 
- * TODO MAX where to persist this information?
- * 
  * @author dscharrer
  */
 public interface XGroupDatabase extends Serializable {
