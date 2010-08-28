@@ -172,7 +172,7 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 	public void setModel(XModel model, Callback<Boolean> callback) {
 		
 		XmlOutStringBuffer xo = new XmlOutStringBuffer();
-		XmlModel.toXml(model, xo, false, false);
+		XmlModel.toXml(model, xo, false, false, false);
 		
 		send("", xo.getXml(), callback);
 		
@@ -181,7 +181,7 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 	public void setObject(XID modelId, XObject object, Callback<Boolean> callback) {
 		
 		XmlOutStringBuffer xo = new XmlOutStringBuffer();
-		XmlModel.toXml(object, xo, false, false);
+		XmlModel.toXml(object, xo, false, false, false);
 		
 		send(modelId.toURI(), xo.getXml(), callback);
 		
