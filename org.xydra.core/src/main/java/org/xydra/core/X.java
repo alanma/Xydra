@@ -44,7 +44,6 @@ public class X {
 	 * @return Returns the {@link XIDProvider} instance of the Xydra Instance
 	 *         that is currently being used.
 	 */
-	
 	public static XIDProvider getIDProvider() {
 		if(idProvider == null) {
 			idProvider = new MemoryStringIDProvider();
@@ -60,7 +59,6 @@ public class X {
 	 * @return Returns the {@link XValueFactory} of the Xydra Instance that is
 	 *         currently being used.
 	 */
-	
 	public static XValueFactory getValueFactory() {
 		if(valueFactory == null) {
 			valueFactory = new MemoryValueFactory();
@@ -77,7 +75,6 @@ public class X {
 	 * @return Returns the {@link XCommandFactory} of the Xydra Instance that is
 	 *         currently being used.
 	 */
-	
 	public static XCommandFactory getCommandFactory() {
 		if(commandFactory == null) {
 			commandFactory = new MemoryCommandFactory();
@@ -95,7 +92,6 @@ public class X {
 	 * 
 	 * @return the new repository with ID = {@link X}#DEFAULT_REPOSITORY_ID.
 	 */
-	
 	public static XRepository createMemoryRepository() {
 		XID repoId = getIDProvider().fromString(DEFAULT_REPOSITORY_ID);
 		XAddress repoAddr = getIDProvider().fromComponents(repoId, null, null, null);
@@ -106,4 +102,3 @@ public class X {
 	// TODO Maybe we should add a method for creating Repositories with
 	// arbitrary IDs?
 }
-

@@ -217,9 +217,10 @@ public class MemoryEventQueue implements Serializable {
 	}
 	
 	/**
-	 * Enqueues the {@link XEvent XEvents} contained in this MemoryEventQueue
-	 * since the given index 'since' as an {@link XTransactionEvent} specified
-	 * by the given parameters.
+	 * Creates an {@link XTransactionEvent} containing the {@link XEvent
+	 * XEvents} in this MemoryEventQueue since the given index 'since' as
+	 * specified by the given parameters. The created transaction is enqueued
+	 * and logged if logging is enabled.
 	 * 
 	 * @param actor The {@link XID} of the actor
 	 * @param model The {@link MemoryModel} in which the {@link XEvent XEvents}
@@ -231,7 +232,6 @@ public class MemoryEventQueue implements Serializable {
 	 *        the current MemoryEventQueue (value can be retrieved from
 	 *        getNextPosition())
 	 */
-	// TODO not sure if I got the purpose of this method right
 	@SuppressWarnings("null")
 	public void createTransactionEvent(XID actor, MemoryModel model, MemoryObject object, int since) {
 		
