@@ -18,23 +18,22 @@ import org.xydra.core.model.XID;
 public class XA {
 	
 	/**
-	 * A constant representing the access right to read content.
+	 * The access right to read content.
 	 */
 	public final static XID ACCESS_READ = X.getIDProvider().fromString("read");
 	
 	/**
-	 * A constant representing the access right to write content.
+	 * The access right to write content.
 	 */
 	public final static XID ACCESS_WRITE = X.getIDProvider().fromString("write");
 	
 	/**
-	 * Access to change allow others access. FIXME What does this sentence
-	 * mean?!
+	 * The access right to allow others access.
 	 */
 	public final static XID ACCESS_ALLOW = X.getIDProvider().fromString("allow_access");
 	
 	/**
-	 * Access to change allow others deny. FIXME What does this sentence mean?!
+	 * The access right to deny others access.
 	 */
 	public final static XID ACCESS_DENY = X.getIDProvider().fromString("deny");
 	
