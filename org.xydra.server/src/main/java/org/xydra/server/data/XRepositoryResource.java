@@ -46,8 +46,9 @@ public class XRepositoryResource {
 		}
 		
 		boolean hadModel = repo.hasModel(newModel.getID());
-		// FIXME race condition
 		XProtectedModel model = repo.createModel(newModel.getID());
+		
+		// here someone else might modify the model, but we don't care
 		
 		long result;
 		synchronized(model.getChangeLog()) {
