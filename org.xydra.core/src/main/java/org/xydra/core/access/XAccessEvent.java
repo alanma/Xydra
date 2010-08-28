@@ -47,9 +47,7 @@ public interface XAccessEvent {
 	 * 
 	 * @return get the previous value of the access definition.
 	 */
-	// TODO "getOldAllowed" sounds rather strange... what about
-	// "getOldAccessDefinition"?
-	boolean getOldAllowed();
+	XAccessValue getOldAccessValue();
 	
 	/**
 	 * Returns the new value of the access definition. This is undefined for
@@ -57,6 +55,6 @@ public interface XAccessEvent {
 	 * 
 	 * @return get the new value of the access definition.
 	 */
-	boolean getNewAllowed();
+	XAccessValue getNewAccessValue();
 	
 }

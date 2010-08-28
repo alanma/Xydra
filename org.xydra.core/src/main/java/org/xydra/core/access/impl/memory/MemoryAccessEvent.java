@@ -4,10 +4,10 @@ import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.core.access.XAccessEvent;
+import org.xydra.core.access.XAccessValue;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
-
 
 
 /**
@@ -25,19 +25,19 @@ public class MemoryAccessEvent implements XAccessEvent {
 	private final XID actor;
 	private final XAddress resource;
 	private final ChangeType type;
-	private final boolean oldAllowed;
-	private final boolean newAllowed;
+	private final XAccessValue oldAccess;
+	private final XAccessValue newAccess;
 	
 	public MemoryAccessEvent(ChangeType type, XID actor, XAddress resource, XID access,
-	        boolean oldAllowed, boolean newAllowed) {
+	        XAccessValue oldAccess, XAccessValue newAccess) {
 		if(type != ChangeType.ADD && type != ChangeType.CHANGE && type != ChangeType.REMOVE)
 			throw new IllegalArgumentException("invalid type for access events: " + type);
 		this.type = type;
 		this.actor = actor;
 		this.resource = resource;
 		this.access = access;
-		this.oldAllowed = oldAllowed;
-		this.newAllowed = newAllowed;
+		this.oldAccess = oldAccess;
+		this.newAccess = newAccess;
 	}
 	
 	public XID getAccessType() {
@@ -48,12 +48,12 @@ public class MemoryAccessEvent implements XAccessEvent {
 		return this.actor;
 	}
 	
-	public boolean getNewAllowed() {
-		return this.newAllowed;
+	public XAccessValue getNewAccessValue() {
+		return this.newAccess;
 	}
 	
-	public boolean getOldAllowed() {
-		return this.oldAllowed;
+	public XAccessValue getOldAccessValue() {
+		return this.oldAccess;
 	}
 	
 	public XAddress getResource() {
@@ -69,14 +69,13 @@ public class MemoryAccessEvent implements XAccessEvent {
 		String prefix;
 		switch(this.type) {
 		case ADD:
-			prefix = "add " + (this.newAllowed ? "ALLOW" : "DENY");
+			prefix = "add " + this.newAccess;
 			break;
 		case CHANGE:
-			prefix = "change " + (this.oldAllowed ? "ALLOW" : "DENY") + " to "
-			        + (this.newAllowed ? "ALLOW" : "DENY");
+			prefix = "change " + this.oldAccess + " to " + this.newAccess;
 			break;
 		case REMOVE:
-			prefix = "remove " + (this.oldAllowed ? "ALLOW" : "DENY");
+			prefix = "remove " + this.oldAccess;
 			break;
 		default:
 			throw new AssertionError("unexpected type for access events: " + this.type);

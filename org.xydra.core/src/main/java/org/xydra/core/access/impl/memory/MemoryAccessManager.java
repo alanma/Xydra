@@ -57,6 +57,10 @@ public class MemoryAccessManager extends AbstractAccessManager {
 	synchronized public XAccessValue getAccessDefinition(XID actor, XAddress resource, XID access)
 	        throws IllegalArgumentException {
 		Boolean b = this.rights.lookup(access, resource, actor);
+		return toAccessValue(b);
+	}
+	
+	private XAccessValue toAccessValue(Boolean b) {
 		if(b == null) {
 			return XAccessValue.UNDEFINED;
 		} else if(b) {
@@ -325,23 +329,22 @@ public class MemoryAccessManager extends AbstractAccessManager {
 			return;
 		}
 		this.rights.deIndex(access, resource, actor);
-		dispatchEvent(new MemoryAccessEvent(ChangeType.REMOVE, actor, resource, access, old
-		        .isAllowed(), false));
+		dispatchEvent(new MemoryAccessEvent(ChangeType.REMOVE, actor, resource, access, old,
+		        XAccessValue.UNDEFINED));
 	}
 	
 	synchronized public void setAccess(XID actor, XAddress resource, XID access, boolean allowed) {
-		Boolean old = this.rights.lookup(access, resource, actor);
-		if(old != null && old == allowed) {
+		XAccessValue old = getAccessDefinition(actor, resource, access);
+		XAccessValue na = toAccessValue(allowed);
+		if(old == na) {
 			// right already defined => nothing to change
 			return;
 		}
 		this.rights.index(access, resource, actor, allowed);
-		if(old == null) {
-			dispatchEvent(new MemoryAccessEvent(ChangeType.ADD, actor, resource, access, false,
-			        allowed));
+		if(!old.isDefined()) {
+			dispatchEvent(new MemoryAccessEvent(ChangeType.ADD, actor, resource, access, old, na));
 		} else {
-			dispatchEvent(new MemoryAccessEvent(ChangeType.CHANGE, actor, resource, access, old,
-			        allowed));
+			dispatchEvent(new MemoryAccessEvent(ChangeType.CHANGE, actor, resource, access, old, na));
 		}
 	}
 	

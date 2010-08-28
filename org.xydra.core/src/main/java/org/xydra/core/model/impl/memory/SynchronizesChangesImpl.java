@@ -295,7 +295,6 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 			
 			// rollback each event individually
 			for(long i = currentRev - 1; i >= revision; i--) {
-				// TODO: ignore model events
 				XEvent event = log.getEventAt(i);
 				if(event instanceof XAtomicEvent) {
 					rollbackEvent((XAtomicEvent)event);
