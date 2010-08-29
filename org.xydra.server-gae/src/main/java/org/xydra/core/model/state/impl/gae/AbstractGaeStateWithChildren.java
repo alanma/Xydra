@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.server.gae.GaeSchema;
@@ -40,7 +40,7 @@ public abstract class AbstractGaeStateWithChildren extends AbstractGaeState {
 		List<String> children = (List<String>)e.getProperty(GaeSchema.PROP_CHILD_IDS);
 		if(children != null) {
 			for(String s : children) {
-				this.children.add(X.getIDProvider().fromString(s));
+				this.children.add(XX.toId(s));
 			}
 		}
 	}

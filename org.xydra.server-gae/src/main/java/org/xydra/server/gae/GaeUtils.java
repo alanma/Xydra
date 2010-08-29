@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 
@@ -226,7 +226,7 @@ public class GaeUtils {
 			if(idString.equals("")) {
 				// skip
 			} else {
-				XID id = X.getIDProvider().fromString(idString);
+				XID id = XX.toId(idString);
 				ids.add(id);
 			}
 		}
@@ -240,7 +240,7 @@ public class GaeUtils {
 		List<XID> idList = new LinkedList<XID>();
 		for(String s : stringList) {
 			assert s != null;
-			idList.add(X.getIDProvider().fromString(s));
+			idList.add(XX.toId(s));
 		}
 		return idList;
 	}

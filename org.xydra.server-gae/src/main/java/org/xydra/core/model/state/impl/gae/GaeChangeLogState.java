@@ -1,6 +1,5 @@
 package org.xydra.core.model.state.impl.gae;
 
-import org.xydra.core.XX;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.state.XChangeLogState;
@@ -62,7 +61,7 @@ public class GaeChangeLogState implements XChangeLogState {
 	
 	public void appendEvent(XEvent event, Object trans) {
 		
-		if(!XX.equalsOrContains(getBaseAddress(), event.getTarget())) {
+		if(!getBaseAddress().equalsOrContains(event.getTarget())) {
 			throw new IllegalArgumentException("cannot store event " + event + "in change log for "
 			        + getBaseAddress());
 		}

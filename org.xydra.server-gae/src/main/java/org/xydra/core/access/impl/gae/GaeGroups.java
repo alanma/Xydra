@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.access.XGroupDatabase;
 import org.xydra.core.access.XGroupEvent;
 import org.xydra.core.access.XGroupListener;
@@ -17,7 +17,6 @@ import org.xydra.server.gae.GaeUtils;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-
 
 
 public class GaeGroups {
@@ -50,7 +49,7 @@ public class GaeGroups {
 		
 		for(String groupIdStr : groupIdStrs) {
 			
-			XID groupId = X.getIDProvider().fromString(groupIdStr);
+			XID groupId = XX.toId(groupIdStr);
 			
 			Key groupKey = getGroupKey(groupId);
 			
@@ -60,7 +59,7 @@ public class GaeGroups {
 			
 			for(String actorIdStr : actorIdStrs) {
 				
-				XID actorId = actorIdStr == null ? null : X.getIDProvider().fromString(actorIdStr);
+				XID actorId = actorIdStr == null ? null : XX.toId(actorIdStr);
 				
 				groups.addToGroup(actorId, groupId);
 				

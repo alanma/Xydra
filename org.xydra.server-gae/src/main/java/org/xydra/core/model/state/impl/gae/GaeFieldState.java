@@ -3,7 +3,6 @@ package org.xydra.core.model.state.impl.gae;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XType;
-import org.xydra.core.model.impl.memory.MemoryAddress;
 import org.xydra.core.model.state.XFieldState;
 import org.xydra.core.value.XValue;
 import org.xydra.core.xml.MiniElement;
@@ -32,7 +31,7 @@ public class GaeFieldState extends AbstractGaeState implements XFieldState {
 	
 	public GaeFieldState(XAddress fieldAddr) {
 		super(fieldAddr);
-		if(MemoryAddress.getAddressedType(fieldAddr) != XType.XFIELD) {
+		if(fieldAddr.getAddressedType() != XType.XFIELD) {
 			throw new RuntimeException("must be a field address, was: " + fieldAddr);
 		}
 	}

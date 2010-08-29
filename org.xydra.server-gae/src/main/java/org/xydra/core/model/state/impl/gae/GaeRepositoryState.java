@@ -6,7 +6,6 @@ import org.xydra.core.XX;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XType;
-import org.xydra.core.model.impl.memory.MemoryAddress;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XRepositoryState;
 import org.xydra.server.gae.GaeUtils;
@@ -26,7 +25,7 @@ public class GaeRepositoryState extends AbstractGaeStateWithChildren implements 
 	
 	public GaeRepositoryState(XAddress repoAddr) {
 		super(repoAddr);
-		if(MemoryAddress.getAddressedType(repoAddr) != XType.XREPOSITORY) {
+		if(repoAddr.getAddressedType() != XType.XREPOSITORY) {
 			throw new RuntimeException("must be a repository address, was: " + repoAddr);
 		}
 	}

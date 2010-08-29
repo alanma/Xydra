@@ -6,7 +6,6 @@ import org.xydra.core.XX;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XType;
-import org.xydra.core.model.impl.memory.MemoryAddress;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
@@ -27,7 +26,7 @@ public class GaeModelState extends AbstractGaeStateWithChildren implements XMode
 	
 	public GaeModelState(XAddress modelAddr) {
 		super(modelAddr);
-		if(MemoryAddress.getAddressedType(modelAddr) != XType.XMODEL) {
+		if(modelAddr.getAddressedType() != XType.XMODEL) {
 			throw new RuntimeException("must be a model address, was: " + modelAddr);
 		}
 	}
