@@ -7,7 +7,7 @@ import org.xydra.client.Callback;
 import org.xydra.client.ServiceException;
 import org.xydra.client.XChangesService;
 import org.xydra.client.XChangesService.CommandResult;
-import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
@@ -30,7 +30,7 @@ public class XSynchronizer {
 	
 	static private final Logger log = LoggerFactory.getLogger(XSynchronizer.class);
 	
-	private static final XID LOCAL_ACTOR = X.getIDProvider().fromString("local");
+	private static final XID LOCAL_ACTOR = XX.toId("local");
 	
 	private long syncRevison;
 	private final XSynchronizesChanges entity;

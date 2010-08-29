@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.change.XModelEventListener;
@@ -30,7 +30,7 @@ public class DummyRepository implements XRepository {
 	
 	private final List<XRepositoryEventListener> listeners = new ArrayList<XRepositoryEventListener>();
 	private XModel model;
-	private final XID repoId = X.getIDProvider().fromString("dummyRepo");
+	private final XID repoId = XX.toId("dummyRepo");
 	
 	public DummyRepository(XModel model) {
 		this.model = model;
@@ -119,7 +119,7 @@ public class DummyRepository implements XRepository {
 	}
 	
 	public XAddress getAddress() {
-		return X.getIDProvider().fromComponents(getID(), null, null, null);
+		return XX.toAddress(getID(), null, null, null);
 	}
 	
 	public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {

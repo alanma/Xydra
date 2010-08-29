@@ -1,6 +1,6 @@
 package org.xydra.client;
 
-import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.model.XAddress;
 
 
@@ -21,7 +21,7 @@ public class NotFoundException extends RequestException {
 		super(address + " not found");
 		XAddress addr = null;
 		try {
-			addr = X.getIDProvider().fromAddress(address);
+			addr = XX.toAddress(address);
 		} catch(Exception e) {
 			// do nothing
 		}
