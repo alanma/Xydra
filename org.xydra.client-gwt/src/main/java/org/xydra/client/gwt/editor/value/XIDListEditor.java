@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.xydra.core.XX;
 import org.xydra.core.model.XID;
 import org.xydra.core.value.XIDListValue;
 import org.xydra.core.value.XIDValue;
+import org.xydra.core.value.XV;
 
 
 public class XIDListEditor extends XCollectionEditor<XIDValue,XIDListValue> {
@@ -28,7 +28,7 @@ public class XIDListEditor extends XCollectionEditor<XIDValue,XIDListValue> {
 		List<XID> lst = new ArrayList<XID>();
 		while(entries.hasNext())
 			lst.add(entries.next().contents());
-		return XX.toIDListValue(lst);
+		return XV.toValue(lst);
 	}
 	
 	@Override

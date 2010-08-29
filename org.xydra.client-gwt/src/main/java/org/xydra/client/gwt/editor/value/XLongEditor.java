@@ -1,7 +1,7 @@
 package org.xydra.client.gwt.editor.value;
 
-import org.xydra.core.X;
 import org.xydra.core.value.XLongValue;
+import org.xydra.core.value.XV;
 
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
@@ -32,7 +32,7 @@ public class XLongEditor extends AtomicXValueEditor<XLongValue> implements KeyPr
 			v = XValueUtils.generateLong(this.editor.getText());
 			this.editor.setText(Long.toString(v));
 		}
-		return X.getValueFactory().createLongValue(v);
+		return XV.toValue(v);
 	}
 	
 	public void onKeyPress(KeyPressEvent e) {

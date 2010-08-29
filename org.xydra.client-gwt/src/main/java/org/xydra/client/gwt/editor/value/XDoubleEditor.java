@@ -1,7 +1,7 @@
 package org.xydra.client.gwt.editor.value;
 
-import org.xydra.core.X;
 import org.xydra.core.value.XDoubleValue;
+import org.xydra.core.value.XV;
 
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
@@ -32,7 +32,7 @@ public class XDoubleEditor extends AtomicXValueEditor<XDoubleValue> implements K
 			v = XValueUtils.generateDouble(this.editor.getText());
 			this.editor.setText(Double.toString(v));
 		}
-		return X.getValueFactory().createDoubleValue(v);
+		return XV.toValue(v);
 	}
 	
 	public void onKeyPress(KeyPressEvent e) {

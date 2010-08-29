@@ -1,7 +1,7 @@
 package org.xydra.client.gwt.editor.value;
 
-import org.xydra.core.X;
 import org.xydra.core.value.XByteListValue;
+import org.xydra.core.value.XV;
 
 import com.google.gwt.user.client.ui.Label;
 
@@ -21,7 +21,7 @@ public class XByteListEditor extends XValueEditor {
 	
 	@Override
 	public XByteListValue getValue() {
-		return X.getValueFactory().createByteListValue(this.value);
+		return XV.toValue(this.value);
 	}
 	
 }

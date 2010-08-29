@@ -2,7 +2,7 @@ package org.xydra.client.gwt.editor.value;
 
 import java.util.Iterator;
 
-import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.model.XID;
 import org.xydra.core.value.XBooleanListValue;
 import org.xydra.core.value.XBooleanValue;
@@ -90,7 +90,7 @@ abstract public class XValueUtils {
 	static public XID asXID(XValue value) {
 		
 		if(value == null) {
-			return X.getIDProvider().createUniqueID();
+			return XX.createUniqueID();
 		}
 		
 		if(value instanceof XIDValue) {
@@ -100,12 +100,12 @@ abstract public class XValueUtils {
 			if(!lv.isEmpty()) {
 				return lv.get(0);
 			} else {
-				return X.getIDProvider().createUniqueID();
+				return XX.createUniqueID();
 			}
 		} else {
 			XID id = generateXid(asString(value));
 			if(id == null) {
-				return X.getIDProvider().createUniqueID();
+				return XX.createUniqueID();
 			}
 			return id;
 		}
@@ -130,7 +130,7 @@ abstract public class XValueUtils {
 			cleaned = "_" + cleaned;
 		}
 		
-		return X.getIDProvider().fromString(cleaned);
+		return XX.toId(cleaned);
 	}
 	
 	static public Iterator<XID> asXIDList(XValue value) {

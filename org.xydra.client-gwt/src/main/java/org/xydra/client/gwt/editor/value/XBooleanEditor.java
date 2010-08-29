@@ -1,7 +1,7 @@
 package org.xydra.client.gwt.editor.value;
 
-import org.xydra.core.X;
 import org.xydra.core.value.XBooleanValue;
+import org.xydra.core.value.XV;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -31,7 +31,7 @@ public class XBooleanEditor extends AtomicXValueEditor<XBooleanValue> {
 	
 	@Override
 	public XBooleanValue getValue() {
-		return X.getValueFactory().createBooleanValue(this.editor.getValue());
+		return XV.toValue(this.editor.getValue());
 	}
 	
 }

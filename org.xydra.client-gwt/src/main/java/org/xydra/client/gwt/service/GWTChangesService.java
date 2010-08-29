@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.xydra.client.Callback;
 import org.xydra.client.XChangesService;
-import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
@@ -43,7 +42,7 @@ public class GWTChangesService extends AbstractGWTHttpService implements XChange
 			}
 		}
 		
-		if(!XX.equalsOrContains(context, target)) {
+		if(!context.equalsOrContains(target)) {
 			throw new IllegalArgumentException("cannot send command " + command + " to entity "
 			        + entity);
 		}

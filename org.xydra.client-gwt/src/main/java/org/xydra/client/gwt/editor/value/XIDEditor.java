@@ -1,8 +1,9 @@
 package org.xydra.client.gwt.editor.value;
 
-import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.model.XID;
 import org.xydra.core.value.XIDValue;
+import org.xydra.core.value.XV;
 
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
@@ -41,7 +42,7 @@ public class XIDEditor extends AtomicXValueEditor<XIDValue> implements KeyPressH
 	public XIDValue getValue() {
 		XID xid;
 		try {
-			xid = X.getIDProvider().fromString(this.editor.getText());
+			xid = XX.toId(this.editor.getText());
 		} catch(IllegalArgumentException iae) {
 			xid = XValueUtils.generateXid(this.editor.getText());
 			if(xid == null) {
@@ -49,7 +50,7 @@ public class XIDEditor extends AtomicXValueEditor<XIDValue> implements KeyPressH
 			}
 			this.editor.setText(xid.toString());
 		}
-		return X.getValueFactory().createIDValue(xid);
+		return XV.toValue(xid);
 	}
 	
 	public void onKeyPress(KeyPressEvent e) {

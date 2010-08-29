@@ -8,7 +8,7 @@ import org.xydra.client.gwt.service.GWTChangesService;
 import org.xydra.client.gwt.service.GWTDataService;
 import org.xydra.client.gwt.xml.impl.GWTMiniXMLParserImpl;
 import org.xydra.client.sync.XSynchronizer;
-import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
@@ -135,10 +135,10 @@ public class XydraEditor implements EntryPoint {
 		try {
 			int p = addrStr.indexOf('/');
 			if(p >= 0) {
-				modelId = X.getIDProvider().fromString(addrStr.substring(0, p));
-				objectId = X.getIDProvider().fromString(addrStr.substring(p + 1));
+				modelId = XX.toId(addrStr.substring(0, p));
+				objectId = XX.toId(addrStr.substring(p + 1));
 			} else {
-				modelId = X.getIDProvider().fromString(addrStr);
+				modelId = XX.toId(addrStr);
 				objectId = null;
 			}
 		} catch(Exception e) {
@@ -146,7 +146,7 @@ public class XydraEditor implements EntryPoint {
 			return;
 		}
 		
-		this.addr = X.getIDProvider().fromComponents(null, modelId, objectId, null);
+		this.addr = XX.toAddress(null, modelId, objectId, null);
 		
 		try {
 			if(objectId != null) {

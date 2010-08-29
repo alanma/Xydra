@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.xydra.core.XX;
 import org.xydra.core.value.XBooleanListValue;
 import org.xydra.core.value.XBooleanValue;
+import org.xydra.core.value.XV;
 
 
 public class XBooleanListEditor extends XCollectionEditor<XBooleanValue,XBooleanListValue> {
@@ -27,7 +27,7 @@ public class XBooleanListEditor extends XCollectionEditor<XBooleanValue,XBoolean
 		List<Boolean> lst = new ArrayList<Boolean>();
 		while(entries.hasNext())
 			lst.add(entries.next().contents());
-		return XX.toBooleanListValue(lst);
+		return XV.toValue(lst);
 	}
 	
 	@Override

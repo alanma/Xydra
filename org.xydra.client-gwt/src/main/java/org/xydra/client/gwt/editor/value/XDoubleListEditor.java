@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.xydra.core.XX;
 import org.xydra.core.value.XDoubleListValue;
 import org.xydra.core.value.XDoubleValue;
+import org.xydra.core.value.XV;
 
 
 public class XDoubleListEditor extends XCollectionEditor<XDoubleValue,XDoubleListValue> {
@@ -27,7 +27,7 @@ public class XDoubleListEditor extends XCollectionEditor<XDoubleValue,XDoubleLis
 		List<Double> lst = new ArrayList<Double>();
 		while(entries.hasNext())
 			lst.add(entries.next().contents());
-		return XX.toDoubleListValue(lst);
+		return XV.toValue(lst);
 	}
 	
 	@Override

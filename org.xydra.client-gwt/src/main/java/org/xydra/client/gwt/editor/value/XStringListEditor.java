@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.xydra.core.XX;
 import org.xydra.core.value.XStringListValue;
 import org.xydra.core.value.XStringValue;
+import org.xydra.core.value.XV;
 
 
 public class XStringListEditor extends XCollectionEditor<XStringValue,XStringListValue> {
@@ -27,7 +27,7 @@ public class XStringListEditor extends XCollectionEditor<XStringValue,XStringLis
 		List<String> lst = new ArrayList<String>();
 		while(entries.hasNext())
 			lst.add(entries.next().contents());
-		return XX.toStringListValue(lst);
+		return XV.toValue(lst);
 	}
 	
 	@Override

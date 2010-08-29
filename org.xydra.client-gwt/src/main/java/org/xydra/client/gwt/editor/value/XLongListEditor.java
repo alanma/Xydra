@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.xydra.core.XX;
 import org.xydra.core.value.XLongListValue;
 import org.xydra.core.value.XLongValue;
+import org.xydra.core.value.XV;
 
 
 public class XLongListEditor extends XCollectionEditor<XLongValue,XLongListValue> {
@@ -27,7 +27,7 @@ public class XLongListEditor extends XCollectionEditor<XLongValue,XLongListValue
 		List<Long> lst = new ArrayList<Long>();
 		while(entries.hasNext())
 			lst.add(entries.next().contents());
-		return XX.toLongListValue(lst);
+		return XV.toValue(lst);
 	}
 	
 	@Override

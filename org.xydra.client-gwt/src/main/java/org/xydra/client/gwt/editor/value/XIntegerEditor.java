@@ -1,7 +1,7 @@
 package org.xydra.client.gwt.editor.value;
 
-import org.xydra.core.X;
 import org.xydra.core.value.XIntegerValue;
+import org.xydra.core.value.XV;
 
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
@@ -32,7 +32,7 @@ public class XIntegerEditor extends AtomicXValueEditor<XIntegerValue> implements
 			v = (int)XValueUtils.generateLong(this.editor.getText());
 			this.editor.setText(Integer.toString(v));
 		}
-		return X.getValueFactory().createIntegerValue(v);
+		return XV.toValue(v);
 	}
 	
 	public void onKeyPress(KeyPressEvent e) {
