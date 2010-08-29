@@ -123,8 +123,8 @@ public class GaeMyAdminApp {
 			String kind = statKind.getProperty("kind_name").toString();
 			msg.append("* Kind: " + kind + "\n");
 			for(Entity e : datastore.prepare(new Query(kind).setKeysOnly()).asIterable()) {
-				msg.append("** kind:" + kind + " appid:" + e.getAppId() + " namespace:"
-				        + e.getNamespace() + " props:" + e.getProperties().keySet() + "\n");
+				msg.append("** appid:" + e.getAppId() + " namespace:" + e.getNamespace()
+				        + " props:" + e.getProperties().keySet() + "\n");
 				Map<String,Object> props = e.getProperties();
 				for(Map.Entry<String,Object> me : props.entrySet()) {
 					msg.append("*** " + me.getKey() + " = " + me.getValue() + "\n");
