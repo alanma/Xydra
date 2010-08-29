@@ -1,6 +1,7 @@
 package org.xydra.core.model.tutorial;
 
 import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.access.XA;
 import org.xydra.core.access.XAccessManager;
 import org.xydra.core.access.XGroupDatabase;
@@ -50,21 +51,21 @@ public class CalendarManager {
 	 * event-XObject has the same structure.
 	 */
 
-	private static XID nameFieldID = X.getIDProvider().fromString("name");
-	private static XID placeFieldID = X.getIDProvider().fromString("place");
-	private static XID dayFieldID = X.getIDProvider().fromString("day");
-	private static XID monthFieldID = X.getIDProvider().fromString("month");
-	private static XID yearFieldID = X.getIDProvider().fromString("year");
-	private static XID beginFieldID = X.getIDProvider().fromString("begin");
-	private static XID endFieldID = X.getIDProvider().fromString("end");
-	private static XID descFieldID = X.getIDProvider().fromString("description");
+	private static XID nameFieldID = XX.toId("name");
+	private static XID placeFieldID = XX.toId("place");
+	private static XID dayFieldID = XX.toId("day");
+	private static XID monthFieldID = XX.toId("month");
+	private static XID yearFieldID = XX.toId("year");
+	private static XID beginFieldID = XX.toId("begin");
+	private static XID endFieldID = XX.toId("end");
+	private static XID descFieldID = XX.toId("description");
 	
 	/*
 	 * We'll also use a simple user account management. Were going to use a
 	 * special XModel for that, where every XObject represents a user and only
 	 * holds one XField for saving its password.
 	 */
-	private static XID pwdFieldID = X.getIDProvider().fromString("pwd");
+	private static XID pwdFieldID = XX.toId("pwd");
 	
 	private XModel accountModel;
 	
@@ -86,10 +87,10 @@ public class CalendarManager {
 	 * We'll need an ID for our program to distinguish between changes made by
 	 * the user and changes made by the program.
 	 */
-	private static XID managerID = X.getIDProvider().fromString("calendarManager");
+	private static XID managerID = XX.toId("calendarManager");
 	
 	public CalendarManager() {
-		this.accountModel = new MemoryModel(X.getIDProvider().createUniqueID());
+		this.accountModel = new MemoryModel(XX.createUniqueID());
 		
 		this.calendarRepo = X.createMemoryRepository();
 		this.calendarRepoID = this.calendarRepo.getID();
@@ -112,7 +113,7 @@ public class CalendarManager {
 		 * whether there already exists an XObject in our accountModel with an
 		 * XID that equals the name of the user who wants to register.
 		 */
-		XID userID = X.getIDProvider().fromString(userName);
+		XID userID = XX.toId(userName);
 		
 		if(this.accountModel.getObject(userID) != null) {
 			return false;
@@ -171,14 +172,14 @@ public class CalendarManager {
 			return false;
 		}
 		
-		XID userID = X.getIDProvider().fromString(userName);
+		XID userID = XX.toId(userName);
 		
 		XModel userCalendar = this.calendarRepo.getModel(userID);
 		
 		// we'll use commands to execute the changes
 		XCommandFactory cmdFactory = X.getCommandFactory();
 		
-		XID eventID = X.getIDProvider().createUniqueID();
+		XID eventID = XX.createUniqueID();
 		XCommand addEvent = cmdFactory.createAddObjectCommand(this.calendarRepoID, userID, eventID,
 		        false);
 		
@@ -283,8 +284,8 @@ public class CalendarManager {
 			return "Error";
 		}
 		
-		XID userID = X.getIDProvider().fromString(userName);
-		XID calendarID = X.getIDProvider().fromString(calendar);
+		XID userID = XX.toId(userName);
+		XID calendarID = XX.toId(calendar);
 		
 		XModel userCalendar = this.calendarRepo.getModel(calendarID);
 		
@@ -346,10 +347,10 @@ public class CalendarManager {
 			return false;
 		}
 		
-		XID user1ID = X.getIDProvider().fromString(userName);
+		XID user1ID = XX.toId(userName);
 		
 		// check whether the second specified user actualy exists
-		XID user2ID = X.getIDProvider().fromString(userName2);
+		XID user2ID = XX.toId(userName2);
 		if(this.accountModel.getObject(user2ID) == null) {
 			return false;
 		}
@@ -377,8 +378,8 @@ public class CalendarManager {
 			return false;
 		}
 		
-		XID user1ID = X.getIDProvider().fromString(userName);
-		XID user2ID = X.getIDProvider().fromString(userName2);
+		XID user1ID = XX.toId(userName);
+		XID user2ID = XX.toId(userName2);
 		if(this.accountModel.getObject(user2ID) == null) {
 			return false;
 		}
@@ -399,7 +400,7 @@ public class CalendarManager {
 	 * @return true, if the user exists and the given password is correct
 	 */
 	private boolean checkUserNameAndPassword(String userName, String pwd) {
-		XID userID = X.getIDProvider().fromString(userName);
+		XID userID = XX.toId(userName);
 		
 		// check if the user exists
 		XObject usrAccount = this.accountModel.getObject(userID);

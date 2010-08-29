@@ -9,7 +9,7 @@ import java.util.Set;
 
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
-import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XFieldEvent;
@@ -62,8 +62,7 @@ public class MemoryRepository implements XRepository, Serializable {
 	 * @param repositoryId The {@link XID} for this MemoryRepository.
 	 */
 	public MemoryRepository(XID repositoryId) {
-		this(new TemporaryRepositoryState(X.getIDProvider().fromComponents(repositoryId, null,
-		        null, null)));
+		this(new TemporaryRepositoryState(XX.toAddress(repositoryId, null, null, null)));
 	}
 	
 	/**

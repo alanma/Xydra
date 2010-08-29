@@ -117,7 +117,7 @@ public class StrictStateTest {
 		
 		tb.removeObject(object);
 		
-		tb.addObject(model.getAddress(), XCommand.SAFE, X.getIDProvider().createUniqueID());
+		tb.addObject(model.getAddress(), XCommand.SAFE, XX.createUniqueID());
 		
 		model.executeTransaction(null, tb.build());
 		

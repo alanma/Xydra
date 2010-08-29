@@ -7,7 +7,7 @@ import java.util.List;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
-import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.model.XID;
 import org.xydra.core.value.XBooleanListValue;
 import org.xydra.core.value.XBooleanValue;
@@ -235,7 +235,7 @@ public class XmlValue {
 		String data = xml.getData();
 		
 		try {
-			return X.getIDProvider().fromString(data);
+			return XX.toId(data);
 		} catch(Exception e) {
 			throw new RuntimeException("An <" + XID_ELEMENT
 			        + "> element must contain a valid XID, got " + data, e);

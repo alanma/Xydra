@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.xml.XmlModel;
@@ -13,7 +13,7 @@ import org.xydra.core.xml.impl.XmlOutStringBuffer;
 
 public class SimpleSyntaxUtilsTest {
 	
-	static final XID PHONEBOOK = X.getIDProvider().fromString("phonebook");
+	static final XID PHONEBOOK = XX.toId("phonebook");
 	
 	static String test = "# declares the XObject 'hans' and the property 'phone', sets value of hans.phone to '123'.\n"
 	        + "hans.phone=123\n"
@@ -26,8 +26,8 @@ public class SimpleSyntaxUtilsTest {
 	@Test
 	public void testParsing() {
 		XModel model = SimpleSyntaxUtils.toModel(PHONEBOOK, test);
-		assertTrue(model.hasObject(X.getIDProvider().fromString("hans")));
-		assertTrue(model.hasObject(X.getIDProvider().fromString("peter")));
+		assertTrue(model.hasObject(XX.toId("hans")));
+		assertTrue(model.hasObject(XX.toId("peter")));
 	}
 	
 	@Test

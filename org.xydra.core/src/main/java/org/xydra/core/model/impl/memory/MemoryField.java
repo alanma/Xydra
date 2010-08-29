@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
-import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
@@ -64,7 +64,7 @@ public class MemoryField implements XField, Serializable {
 	 * @param fieldId The {@link XID} for this MemoryField.
 	 */
 	public MemoryField(XID fieldId) {
-		this(new TemporaryFieldState(X.getIDProvider().fromComponents(null, null, null, fieldId)));
+		this(new TemporaryFieldState(XX.toAddress(null, null, null, fieldId)));
 	}
 	
 	/**

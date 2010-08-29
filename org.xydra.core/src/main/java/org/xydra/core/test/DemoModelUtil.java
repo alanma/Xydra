@@ -1,6 +1,6 @@
 package org.xydra.core.test;
 
-import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
@@ -18,31 +18,31 @@ import org.xydra.core.value.XV;
  */
 public class DemoModelUtil {
 	
-	public static final XID PHONEBOOK_ID = X.getIDProvider().fromString("phonebook");
-	public static final XID JOHN_ID = X.getIDProvider().fromString("john");
-	public static final XID TITLE_ID = X.getIDProvider().fromString("title");
-	public static final XID PHONE_ID = X.getIDProvider().fromString("phone");
-	public static final XID CLAUDIA_ID = X.getIDProvider().fromString("claudia");
-	public static final XID ALIASES_ID = X.getIDProvider().fromString("aliases");
-	public static final XID FRIENDS_ID = X.getIDProvider().fromString("friends");
-	public static final XID SPOUSE_ID = X.getIDProvider().fromString("spouse");
-	public static final XID HIDDEN_ID = X.getIDProvider().fromString("hidden");
-	public static final XID PETER_ID = X.getIDProvider().fromString("peter");
-	public static final XID FLAGS_ID = X.getIDProvider().fromString("flags");
-	public static final XID AGE_ID = X.getIDProvider().fromString("age");
-	public static final XID HEIGHT_ID = X.getIDProvider().fromString("height");
-	public static final XID COORDIANTES_ID = X.getIDProvider().fromString("coordinates");
-	public static final XID SCORES_ID = X.getIDProvider().fromString("scores");
-	public static final XID MAXCALLTIME_ID = X.getIDProvider().fromString("maxCallTime");
-	public static final XID LASTCALLTIMES_ID = X.getIDProvider().fromString("lastCallTime");
-	public static final XID EMPTYFIELD_ID = X.getIDProvider().fromString("emptyfield");
-	public static final XID SIGNATURE_ID = X.getIDProvider().fromString("signature");
-	public static final XID COOKIES_ID = X.getIDProvider().fromString("cookies");
-	public static final XID COOKIENAMES_ID = X.getIDProvider().fromString("cookienames");
-	public static final XID COOKIE1_ID = X.getIDProvider().fromString("cookie1");
-	public static final XID COOKIE2_ID = X.getIDProvider().fromString("cookie2");
+	public static final XID PHONEBOOK_ID = XX.toId("phonebook");
+	public static final XID JOHN_ID = XX.toId("john");
+	public static final XID TITLE_ID = XX.toId("title");
+	public static final XID PHONE_ID = XX.toId("phone");
+	public static final XID CLAUDIA_ID = XX.toId("claudia");
+	public static final XID ALIASES_ID = XX.toId("aliases");
+	public static final XID FRIENDS_ID = XX.toId("friends");
+	public static final XID SPOUSE_ID = XX.toId("spouse");
+	public static final XID HIDDEN_ID = XX.toId("hidden");
+	public static final XID PETER_ID = XX.toId("peter");
+	public static final XID FLAGS_ID = XX.toId("flags");
+	public static final XID AGE_ID = XX.toId("age");
+	public static final XID HEIGHT_ID = XX.toId("height");
+	public static final XID COORDIANTES_ID = XX.toId("coordinates");
+	public static final XID SCORES_ID = XX.toId("scores");
+	public static final XID MAXCALLTIME_ID = XX.toId("maxCallTime");
+	public static final XID LASTCALLTIMES_ID = XX.toId("lastCallTime");
+	public static final XID EMPTYFIELD_ID = XX.toId("emptyfield");
+	public static final XID SIGNATURE_ID = XX.toId("signature");
+	public static final XID COOKIES_ID = XX.toId("cookies");
+	public static final XID COOKIENAMES_ID = XX.toId("cookienames");
+	public static final XID COOKIE1_ID = XX.toId("cookie1");
+	public static final XID COOKIE2_ID = XX.toId("cookie2");
 	
-	public static final XID ACTOR_ID = X.getIDProvider().fromString("DemoModel");
+	public static final XID ACTOR_ID = XX.toId("DemoModel");
 	
 	/**
 	 * Add the phonebook-demo model with ID "phonebook" to the given repository.

@@ -2,7 +2,7 @@ package org.xydra.core.xml;
 
 import java.util.Iterator;
 
-import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
@@ -44,7 +44,7 @@ class XmlUtils {
 		if(xidString == null) {
 			return def;
 		}
-		return X.getIDProvider().fromString(xidString);
+		return XX.toId(xidString);
 	}
 	
 	@SuppressWarnings("null")
@@ -64,7 +64,7 @@ class XmlUtils {
 		XID fieldId = getOptionalXidAttribute(xml, FIELDID_ATTRIBUTE, match ? context.getField()
 		        : null);
 		
-		return X.getIDProvider().fromComponents(repoId, modelId, objectId, fieldId);
+		return XX.toAddress(repoId, modelId, objectId, fieldId);
 	}
 	
 	@SuppressWarnings("null")
@@ -123,7 +123,7 @@ class XmlUtils {
 			throw new IllegalArgumentException("<" + elementName + "> element is missing the "
 			        + XID_ATTRIBUTE + " attribute.");
 		}
-		XID xid = X.getIDProvider().fromString(xidString);
+		XID xid = XX.toId(xidString);
 		return xid;
 	}
 	

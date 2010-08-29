@@ -192,7 +192,7 @@ public class XModelBasics {
 	public void testUsingCommands() {
 		
 		// setting up an actor ID
-		XID actorID = X.getIDProvider().fromString("TutorialActor");
+		XID actorID = XX.toId("TutorialActor");
 		
 		// getting an XRepository
 		XRepository repository = X.createMemoryRepository();
@@ -224,7 +224,7 @@ public class XModelBasics {
 		 * Here's how we'd to the above using XCommands:
 		 */
 
-		XID modelID = X.getIDProvider().createUniqueID();
+		XID modelID = XX.createUniqueID();
 		XRepositoryCommand repositoryCommand = commandFactory.createAddModelCommand(repositoryID,
 		        modelID, false);
 		
@@ -238,8 +238,8 @@ public class XModelBasics {
 		// ITransactionAdapter t = model.getAdapter(ITransactionAdapter.class);
 		
 		// adding the objects
-		XID object1ID = X.getIDProvider().createUniqueID();
-		XID object2ID = X.getIDProvider().createUniqueID();
+		XID object1ID = XX.createUniqueID();
+		XID object2ID = XX.createUniqueID();
 		
 		XModelCommand modelCommand1 = commandFactory.createAddObjectCommand(repositoryID, modelID,
 		        object1ID, false);
@@ -286,7 +286,7 @@ public class XModelBasics {
 		assertEquals(model.getObject(object2ID), null);
 		
 		// lets add a field to object1
-		XID fieldID = X.getIDProvider().createUniqueID();
+		XID fieldID = XX.createUniqueID();
 		XObjectCommand objectCommand = commandFactory.createAddFieldCommand(repositoryID, modelID,
 		        object1ID, fieldID, false);
 		object1.executeCommand(actorID, objectCommand);
@@ -319,7 +319,7 @@ public class XModelBasics {
 	public void testUsingTransactions() {
 		
 		// setting up an actor ID
-		XID actorID = X.getIDProvider().fromString("TutorialActor");
+		XID actorID = XX.toId("TutorialActor");
 		
 		// getting an XRepository
 		XRepository repository = X.createMemoryRepository();
@@ -328,7 +328,7 @@ public class XModelBasics {
 		// creating the XModel
 		XCommandFactory commandFactory = X.getCommandFactory();
 		
-		XID modelID = X.getIDProvider().createUniqueID();
+		XID modelID = XX.createUniqueID();
 		XRepositoryCommand repositoryCommand = commandFactory.createAddModelCommand(repositoryID,
 		        modelID, false);
 		
@@ -339,8 +339,8 @@ public class XModelBasics {
 		assertNotNull(model);
 		
 		// building the commands
-		XID objectID = X.getIDProvider().createUniqueID();
-		XID fieldID = X.getIDProvider().createUniqueID();
+		XID objectID = XX.createUniqueID();
+		XID fieldID = XX.createUniqueID();
 		XValue doubleValue = XV.toValue(3.14159);
 		
 		XModelCommand addObjectCommandCommand = commandFactory.createAddObjectCommand(repositoryID,
@@ -415,9 +415,9 @@ public class XModelBasics {
 	@Test
 	public void testUsingEventsAndListeners() {
 		
-		XID actorID = X.getIDProvider().fromString("ExampleActor");
+		XID actorID = XX.toId("ExampleActor");
 		XRepository repository = X.createMemoryRepository();
-		XModel model = repository.createModel(actorID, X.getIDProvider().createUniqueID());
+		XModel model = repository.createModel(actorID, XX.createUniqueID());
 		
 		/*
 		 * For example, if we want to be notified when objects are added to or
@@ -446,8 +446,8 @@ public class XModelBasics {
 		model.addListenerForModelEvents(modelListener);
 		
 		// lets add some objects to see if our listener works
-		XID object1ID = X.getIDProvider().fromString("Object1");
-		XID object2ID = X.getIDProvider().fromString("Object2");
+		XID object1ID = XX.toId("Object1");
+		XID object2ID = XX.toId("Object2");
 		
 		model.createObject(actorID, object1ID);
 		model.createObject(actorID, object2ID);
@@ -484,8 +484,8 @@ public class XModelBasics {
 		// holds
 		XObject object = model.getObject(object1ID);
 		
-		object.createField(actorID, X.getIDProvider().fromString("IWillBeRemoved"));
-		object.removeField(actorID, X.getIDProvider().fromString("IWillBeRemoved"));
+		object.createField(actorID, XX.toId("IWillBeRemoved"));
+		object.removeField(actorID, XX.toId("IWillBeRemoved"));
 		
 		/*
 		 * Note: XEvents are also logged by the XModel which can be used for
@@ -519,13 +519,13 @@ public class XModelBasics {
 	@Test
 	public void testUsingAccessRights() {
 		/* Here's a little example: */
-		XID actorID = X.getIDProvider().fromString("ExampleActor");
-		XID user1ID = X.getIDProvider().fromString("ExampleUser1");
-		XID user2ID = X.getIDProvider().fromString("ExampleUser2");
-		XID user3ID = X.getIDProvider().fromString("ExampleUser3");
+		XID actorID = XX.toId("ExampleActor");
+		XID user1ID = XX.toId("ExampleUser1");
+		XID user2ID = XX.toId("ExampleUser2");
+		XID user3ID = XX.toId("ExampleUser3");
 		
 		XRepository repo = X.createMemoryRepository();
-		XModel model = repo.createModel(actorID, X.getIDProvider().createUniqueID());
+		XModel model = repo.createModel(actorID, XX.createUniqueID());
 		
 		// creating an XAccessManager and an XGroupDatabase
 		XGroupDatabase groups = new MemoryGroupDatabase();
@@ -555,7 +555,7 @@ public class XModelBasics {
 
 		// grouping user1ID, user2ID and user3ID and granting read-access to the
 		// group
-		XID groupID = X.getIDProvider().fromString("ExampleGroup");
+		XID groupID = XX.toId("ExampleGroup");
 		groups.addToGroup(user1ID, groupID);
 		groups.addToGroup(user2ID, groupID);
 		groups.addToGroup(user3ID, groupID);

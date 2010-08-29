@@ -52,7 +52,7 @@ import org.xydra.core.xml.impl.XmlOutStringBuffer;
 
 abstract public class AbstractSynchronizeTest {
 	
-	private static final XID ACTOR_ID = X.getIDProvider().fromString("tester");
+	private static final XID ACTOR_ID = XX.toId("tester");
 	
 	private XRepository localRepo;
 	private XModel remoteModel;
@@ -98,18 +98,18 @@ abstract public class AbstractSynchronizeTest {
 	
 	private void makeAdditionalChanges(XModel model) {
 		
-		assertNotNull(model.createObject(ACTOR_ID, X.getIDProvider().createUniqueID()));
+		assertNotNull(model.createObject(ACTOR_ID, XX.createUniqueID()));
 		
 		assertTrue(model.removeObject(ACTOR_ID, DemoModelUtil.JOHN_ID));
 		
 		assertNotNull(model.getObject(DemoModelUtil.PETER_ID).createField(ACTOR_ID,
-		        X.getIDProvider().createUniqueID()));
+		        XX.createUniqueID()));
 		
 		XTransactionBuilder tb = new XTransactionBuilder(model.getAddress());
-		XID objId = X.getIDProvider().createUniqueID();
+		XID objId = XX.createUniqueID();
 		tb.addObject(model.getAddress(), XCommand.SAFE, objId);
 		XAddress objAddr = XX.resolveObject(model.getAddress(), objId);
-		tb.addField(objAddr, XCommand.SAFE, X.getIDProvider().createUniqueID());
+		tb.addField(objAddr, XCommand.SAFE, XX.createUniqueID());
 		assertTrue(model.executeTransaction(ACTOR_ID, tb.build()) >= 0);
 		
 		assertTrue(model.removeObject(ACTOR_ID, DemoModelUtil.CLAUDIA_ID));
@@ -137,8 +137,8 @@ abstract public class AbstractSynchronizeTest {
 		}
 		
 		// create a set of local changes
-		XID newObjectId = X.getIDProvider().fromString("cookiemonster");
-		XID newFieldId = X.getIDProvider().fromString("cookies");
+		XID newObjectId = XX.toId("cookiemonster");
+		XID newFieldId = XX.toId("cookies");
 		XAddress newObjectAddr = XX.resolveObject(this.localModel.getAddress(), newObjectId);
 		XAddress newFieldAddr = XX.resolveField(newObjectAddr, newFieldId);
 		XValue newValue1 = XV.toValue("chocolate chip");

@@ -9,7 +9,7 @@ import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.core.URIFormatException;
-import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
@@ -72,7 +72,7 @@ import org.xydra.core.value.XValue;
 @RunsInGWT
 public class SimpleSyntaxUtils {
 	
-	private static final XID ACTOR_THIS = X.getIDProvider().fromString("SimpleSyntaxUtils");
+	private static final XID ACTOR_THIS = XX.toId("SimpleSyntaxUtils");
 	
 	/**
 	 * @param simpleSyntax a String in a restricted syntax, inspired from Java
@@ -112,7 +112,7 @@ public class SimpleSyntaxUtils {
 				
 				XID objectID = null;
 				try {
-					objectID = X.getIDProvider().fromString(keyComponents[0].trim());
+					objectID = XX.toId(keyComponents[0].trim());
 				} catch(URIFormatException e) {
 					throw new IllegalArgumentException("Line " + lineNo + ": Key name syntax '"
 					        + keyComponents[0].trim() + "' is not a valid XID.");
@@ -123,7 +123,7 @@ public class SimpleSyntaxUtils {
 				XField field = null;
 				if(keyComponents.length == 2) {
 					try {
-						fieldID = X.getIDProvider().fromString(keyComponents[1].trim());
+						fieldID = XX.toId(keyComponents[1].trim());
 					} catch(URIFormatException e) {
 						throw new IllegalArgumentException("Line " + lineNo + ": Key name syntax '"
 						        + keyComponents[1].trim() + "' is not a valid XID.");
@@ -152,11 +152,11 @@ public class SimpleSyntaxUtils {
 						String idValue = value.substring(1, value.length() - 1);
 						String[] ids = idValue.split(",");
 						if(ids.length == 1) {
-							xvalue = XV.toValue(X.getIDProvider().fromString(ids[0]));
+							xvalue = XV.toValue(XX.toId(ids[0]));
 						} else {
 							XID[] xids = new XID[ids.length];
 							for(int i = 0; i < xids.length; i++) {
-								xids[i] = X.getIDProvider().fromString(ids[i].trim());
+								xids[i] = XX.toId(ids[i].trim());
 							}
 							xvalue = XV.toValue(xids);
 						}

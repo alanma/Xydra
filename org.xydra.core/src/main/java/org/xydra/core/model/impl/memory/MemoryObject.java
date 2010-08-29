@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.xydra.annotations.ReadOperation;
-import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XCommand;
@@ -63,7 +62,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	}
 	
 	private static XObjectState createObjectState(XID objectId) {
-		XAddress objectAddr = X.getIDProvider().fromComponents(null, null, objectId, null);
+		XAddress objectAddr = XX.toAddress(null, null, objectId, null);
 		XChangeLogState changeLogState = new MemoryChangeLogState(objectAddr);
 		return new TemporaryObjectState(objectAddr, changeLogState);
 	}

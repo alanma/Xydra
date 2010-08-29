@@ -5,7 +5,7 @@ import java.util.Iterator;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
-import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseField;
@@ -94,7 +94,7 @@ public class XmlModel {
 		
 		XID xid = XmlUtils.getRequiredXidAttribute(xml, XREPOSITORY_ELEMENT);
 		
-		XAddress repoAddr = X.getIDProvider().fromComponents(xid, null, null, null);
+		XAddress repoAddr = XX.toAddress(xid, null, null, null);
 		XRepositoryState repositoryState = new TemporaryRepositoryState(repoAddr);
 		if(store == null) {
 			repositoryState = new TemporaryRepositoryState(repoAddr);
@@ -151,7 +151,7 @@ public class XmlModel {
 		
 		XModelState modelState;
 		if(parent == null) {
-			XAddress modelAddr = X.getIDProvider().fromComponents(null, xid, null, null);
+			XAddress modelAddr = XX.toAddress(null, xid, null, null);
 			XChangeLogState changeLogState = new MemoryChangeLogState(modelAddr);
 			modelState = new TemporaryModelState(modelAddr, changeLogState);
 		} else {
@@ -258,7 +258,7 @@ public class XmlModel {
 		
 		XObjectState objectState;
 		if(parent == null) {
-			XAddress objectAddr = X.getIDProvider().fromComponents(null, null, xid, null);
+			XAddress objectAddr = XX.toAddress(null, null, xid, null);
 			XChangeLogState changeLogState = new MemoryChangeLogState(objectAddr);
 			objectState = new TemporaryObjectState(objectAddr, changeLogState);
 		} else {
@@ -341,7 +341,7 @@ public class XmlModel {
 		
 		XFieldState fieldState;
 		if(parent == null) {
-			XAddress fieldAddr = X.getIDProvider().fromComponents(null, null, null, xid);
+			XAddress fieldAddr = XX.toAddress(null, null, null, xid);
 			fieldState = new TemporaryFieldState(fieldAddr);
 		} else {
 			fieldState = parent.createFieldState(xid);

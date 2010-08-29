@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.xydra.annotations.ReadOperation;
-import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XCommand;
@@ -62,7 +61,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	}
 	
 	private static XModelState createModelState(XID modelId) {
-		XAddress modelAddr = X.getIDProvider().fromComponents(null, modelId, null, null);
+		XAddress modelAddr = XX.toAddress(null, modelId, null, null);
 		XChangeLogState changeLogState = new MemoryChangeLogState(modelAddr);
 		return new TemporaryModelState(modelAddr, changeLogState);
 	}

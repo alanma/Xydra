@@ -7,7 +7,7 @@ import java.util.List;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
-import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.access.XAccessDefinition;
 import org.xydra.core.access.XAccessManager;
 import org.xydra.core.access.XGroupDatabase;
@@ -50,15 +50,15 @@ public class XmlAccess {
 		
 		String actorStr = XmlUtils.getRequiredAttribbute(xml, ACTOR_ATTRIBUTE,
 		        XACCESSDEFINITION_ELEMENT);
-		XID actor = actorStr == null ? null : X.getIDProvider().fromString(actorStr);
+		XID actor = actorStr == null ? null : XX.toId(actorStr);
 		
 		String resourceStr = XmlUtils.getRequiredAttribbute(xml, RESOURCE_ATTRIBUTE,
 		        XACCESSDEFINITION_ELEMENT);
-		XAddress resource = X.getIDProvider().fromAddress(resourceStr);
+		XAddress resource = XX.toAddress(resourceStr);
 		
 		String accessStr = XmlUtils.getRequiredAttribbute(xml, ACCESS_ATTRIBUTE,
 		        XACCESSDEFINITION_ELEMENT);
-		XID access = X.getIDProvider().fromString(accessStr);
+		XID access = XX.toId(accessStr);
 		
 		String allowedStr = XmlUtils.getRequiredAttribbute(xml, ALLOWED_ATTRIBUTE,
 		        XACCESSDEFINITION_ELEMENT);

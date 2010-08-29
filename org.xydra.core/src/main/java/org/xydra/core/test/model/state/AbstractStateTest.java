@@ -13,7 +13,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
@@ -41,15 +40,15 @@ public abstract class AbstractStateTest {
 		return true;
 	}
 	
-	static XID REPOID = X.getIDProvider().fromString("testrepo");
+	static XID REPOID = XX.toId("testrepo");
 	
-	static XID f1 = X.getIDProvider().fromString("field1");
-	static XID m1 = X.getIDProvider().fromString("model1");
-	static XID o1 = X.getIDProvider().fromString("object1");
-	static XID repo1 = X.getIDProvider().fromString("repo1");
+	static XID f1 = XX.toId("field1");
+	static XID m1 = XX.toId("model1");
+	static XID o1 = XX.toId("object1");
+	static XID repo1 = XX.toId("repo1");
 	
 	static XAddress getRepositoryAddress() {
-		return X.getIDProvider().fromComponents(REPOID, null, null, null);
+		return XX.toAddress(REPOID, null, null, null);
 	}
 	
 	private XRepositoryState repositoryState;
@@ -61,7 +60,7 @@ public abstract class AbstractStateTest {
 	
 	@Test
 	public void testAddModelStateWithParent() {
-		XID modelId = X.getIDProvider().fromString("testmodel1");
+		XID modelId = XX.toId("testmodel1");
 		XAddress modelAddr = XX.resolveModel(getRepositoryAddress(), modelId);
 		XModelState modelState = XSPI.getStateStore().createModelState(modelAddr);
 		this.repositoryState.addModelState(modelState);
@@ -72,7 +71,7 @@ public abstract class AbstractStateTest {
 		/*
 		 * FIXME how is this different from testAddModelStateWithParent()
 		 * XModelState modelState = XSPI.getStateStore().createModelState(
-		 * X.getIDProvider().fromString("testmodel1"));
+		 * XX.toId("testmodel1"));
 		 * this.repositoryState.addModelState(modelState);
 		 */
 	}
@@ -85,7 +84,7 @@ public abstract class AbstractStateTest {
 	public void testDeleteExistingFieldStateWithParent() {
 		
 		testSaveFieldStateWithParent();
-		XAddress fieldStateAddress = X.getIDProvider().fromComponents(null, null, o1, f1);
+		XAddress fieldStateAddress = XX.toAddress(null, null, o1, f1);
 		if(canPersist()) {
 			XFieldState fieldState = XSPI.getStateStore().loadFieldState(fieldStateAddress);
 			assertNotNull(fieldState);
@@ -121,8 +120,8 @@ public abstract class AbstractStateTest {
 	@Test
 	public void testGetModelState() {
 		
-		XID modelState1ID = X.getIDProvider().fromString("testmodel1");
-		XID modelState2ID = X.getIDProvider().fromString("testmodel2");
+		XID modelState1ID = XX.toId("testmodel1");
+		XID modelState2ID = XX.toId("testmodel2");
 		XAddress modelState1Addr = XX.resolveModel(getRepositoryAddress(), modelState1ID);
 		XAddress modelState2Addr = XX.resolveModel(getRepositoryAddress(), modelState2ID);
 		
@@ -151,7 +150,7 @@ public abstract class AbstractStateTest {
 	
 	@Test
 	public void testHasModelState() {
-		XID modelId = X.getIDProvider().fromString("testmodel1");
+		XID modelId = XX.toId("testmodel1");
 		XAddress modelAddr = XX.resolveModel(getRepositoryAddress(), modelId);
 		XModelState modelState1 = XSPI.getStateStore().createModelState(modelAddr);
 		assertFalse(this.repositoryState.hasModelState(modelState1.getID()));
@@ -162,7 +161,7 @@ public abstract class AbstractStateTest {
 	@Test
 	public void testIsEmpty() {
 		// create modelState without parent
-		XID modelId = X.getIDProvider().fromString("testmodel1");
+		XID modelId = XX.toId("testmodel1");
 		XAddress modelAddr = XX.resolveModel(getRepositoryAddress(), modelId);
 		XModelState modelState1 = XSPI.getStateStore().createModelState(modelAddr);
 		assertTrue(this.repositoryState.isEmpty());
@@ -172,8 +171,8 @@ public abstract class AbstractStateTest {
 	
 	@Test
 	public void testIterator() {
-		XID modelState1ID = X.getIDProvider().fromString("testmodel1");
-		XID modelState2ID = X.getIDProvider().fromString("testmodel2");
+		XID modelState1ID = XX.toId("testmodel1");
+		XID modelState2ID = XX.toId("testmodel2");
 		XAddress modelState1Addr = XX.resolveModel(getRepositoryAddress(), modelState1ID);
 		XAddress modelState2Addr = XX.resolveModel(getRepositoryAddress(), modelState2ID);
 		
@@ -240,8 +239,8 @@ public abstract class AbstractStateTest {
 	
 	@Test
 	public void testRemoveModelState() {
-		XID modelState1ID = X.getIDProvider().fromString("testmodel1");
-		XID modelState2ID = X.getIDProvider().fromString("testmodel2");
+		XID modelState1ID = XX.toId("testmodel1");
+		XID modelState2ID = XX.toId("testmodel2");
 		XAddress modelState1Addr = XX.resolveModel(getRepositoryAddress(), modelState1ID);
 		XAddress modelState2Addr = XX.resolveModel(getRepositoryAddress(), modelState2ID);
 		
@@ -259,7 +258,7 @@ public abstract class AbstractStateTest {
 	@Test
 	public void testSaveAndLoad() {
 		
-		XID modelID1 = X.getIDProvider().fromString("testModel1");
+		XID modelID1 = XX.toId("testModel1");
 		XAddress modelAddr1 = XX.resolveModel(getRepositoryAddress(), modelID1);
 		XModelState modelState1 = XSPI.getStateStore().createModelState(modelAddr1);
 		this.repositoryState.addModelState(modelState1);
@@ -286,7 +285,7 @@ public abstract class AbstractStateTest {
 	@Test
 	public void testSaveFieldStateWithParent() {
 		
-		XAddress ao1 = X.getIDProvider().fromComponents(null, null, o1, null);
+		XAddress ao1 = XX.toAddress(null, null, o1, null);
 		XAddress af1 = XX.resolveField(ao1, f1);
 		
 		XSPI.getStateStore().createObjectState(ao1);
@@ -329,7 +328,7 @@ public abstract class AbstractStateTest {
 	
 	@Test
 	public void testSaveObjectState() {
-		XID modelId = X.getIDProvider().fromString("testmodel");
+		XID modelId = XX.toId("testmodel");
 		XAddress modelAddr = XX.resolveModel(getRepositoryAddress(), modelId);
 		XAddress ao1 = XX.resolveObject(modelAddr, o1);
 		

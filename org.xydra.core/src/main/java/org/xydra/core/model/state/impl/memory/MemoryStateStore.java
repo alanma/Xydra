@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XFieldState;
@@ -124,8 +124,8 @@ public class MemoryStateStore implements XStateStore, Serializable {
 		if(repositoryState == null) {
 			throw new IllegalArgumentException("repositoryState may not be null");
 		}
-		this.repositories.put(X.getIDProvider().fromComponents(repositoryState.getID(), null, null,
-		        null), repositoryState);
+		this.repositories.put(XX.toAddress(repositoryState.getID(), null, null, null),
+		        repositoryState);
 	}
 	
 }

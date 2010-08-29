@@ -45,12 +45,12 @@ abstract public class AbstractTransactionTest {
 	private static final XValue PETER_PHONE = XV.toValue("934-253-2");
 	private static final XValue JOHN_PHONE = XV.toValue("87589-876");
 	
-	private static final XID MODEL_ID = X.getIDProvider().fromString("model");
-	private static final XID ACTOR_ID = X.getIDProvider().fromString("actor");
-	private static final XID JOHN_ID = X.getIDProvider().fromString("john");
-	private static final XID PETER_ID = X.getIDProvider().fromString("peter");
-	private static final XID PHONE_ID = X.getIDProvider().fromString("phone");
-	private static final XID ALIAS_ID = X.getIDProvider().fromString("alias");
+	private static final XID MODEL_ID = XX.toId("model");
+	private static final XID ACTOR_ID = XX.toId("actor");
+	private static final XID JOHN_ID = XX.toId("john");
+	private static final XID PETER_ID = XX.toId("peter");
+	private static final XID PHONE_ID = XX.toId("phone");
+	private static final XID ALIAS_ID = XX.toId("alias");
 	
 	private XRepository repo;
 	protected XModel model;
