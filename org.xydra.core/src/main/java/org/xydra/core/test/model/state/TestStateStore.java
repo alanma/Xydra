@@ -14,7 +14,6 @@ import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XType;
-import org.xydra.core.model.impl.memory.MemoryAddress;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XFieldState;
 import org.xydra.core.model.state.XModelState;
@@ -70,30 +69,30 @@ public class TestStateStore implements XStateStore, Serializable {
 	final Map<XAddress,TestChangeLogState> loadedLogs = new HashMap<XAddress,TestChangeLogState>();
 	
 	public TestFieldState createFieldState(XAddress fieldAddr) {
-		assert MemoryAddress.getAddressedType(fieldAddr) == XType.XFIELD;
+		assert fieldAddr.getAddressedType() == XType.XFIELD;
 		return new TestFieldState(this, fieldAddr);
 	}
 	
 	public TestModelState createModelState(XAddress modelAddr) {
-		assert MemoryAddress.getAddressedType(modelAddr) == XType.XMODEL;
+		assert modelAddr.getAddressedType() == XType.XMODEL;
 		XChangeLogState log = new TestChangeLogState(this, modelAddr);
 		return new TestModelState(this, modelAddr, log);
 	}
 	
 	public TestObjectState createObjectState(XAddress objectAddr) {
-		assert MemoryAddress.getAddressedType(objectAddr) == XType.XOBJECT;
+		assert objectAddr.getAddressedType() == XType.XOBJECT;
 		XChangeLogState log = objectAddr.getModel() == null ? new TestChangeLogState(this,
 		        objectAddr) : null;
 		return new TestObjectState(this, objectAddr, log);
 	}
 	
 	public TestRepositoryState createRepositoryState(XAddress repoAddr) {
-		assert MemoryAddress.getAddressedType(repoAddr) == XType.XREPOSITORY;
+		assert repoAddr.getAddressedType() == XType.XREPOSITORY;
 		return new TestRepositoryState(this, repoAddr);
 	}
 	
 	public XFieldState loadFieldState(XAddress fieldAddr) {
-		assert MemoryAddress.getAddressedType(fieldAddr) == XType.XFIELD;
+		assert fieldAddr.getAddressedType() == XType.XFIELD;
 		State s = this.states.get(fieldAddr);
 		if(s == null) {
 			return null;
@@ -104,7 +103,7 @@ public class TestStateStore implements XStateStore, Serializable {
 	}
 	
 	public XModelState loadModelState(XAddress modelAddr) {
-		assert MemoryAddress.getAddressedType(modelAddr) == XType.XMODEL;
+		assert modelAddr.getAddressedType() == XType.XMODEL;
 		State s = this.states.get(modelAddr);
 		if(s == null) {
 			return null;
@@ -116,7 +115,7 @@ public class TestStateStore implements XStateStore, Serializable {
 	}
 	
 	public XObjectState loadObjectState(XAddress objectAddr) {
-		assert MemoryAddress.getAddressedType(objectAddr) == XType.XOBJECT;
+		assert objectAddr.getAddressedType() == XType.XOBJECT;
 		State s = this.states.get(objectAddr);
 		if(s == null) {
 			return null;
@@ -128,7 +127,7 @@ public class TestStateStore implements XStateStore, Serializable {
 	}
 	
 	public XRepositoryState loadRepositoryState(XAddress repoAddr) {
-		assert MemoryAddress.getAddressedType(repoAddr) == XType.XREPOSITORY;
+		assert repoAddr.getAddressedType() == XType.XREPOSITORY;
 		State s = this.states.get(repoAddr);
 		if(s == null) {
 			return null;
@@ -203,7 +202,7 @@ public class TestStateStore implements XStateStore, Serializable {
 			XAddress a = s.getKey();
 			for(XID id : s.getValue().children) {
 				XAddress c = null;
-				switch(MemoryAddress.getAddressedType(a)) {
+				switch(a.getAddressedType()) {
 				case XREPOSITORY:
 					c = XX.resolveModel(a, id);
 					break;
@@ -220,9 +219,9 @@ public class TestStateStore implements XStateStore, Serializable {
 			}
 			XAddress p = a.getParent();
 			assert p == null || this.states.containsKey(p) : "missing parent for: " + a;
-			if(MemoryAddress.getAddressedType(a) == XType.XMODEL) {
+			if(a.getAddressedType() == XType.XMODEL) {
 				assert this.logs.containsKey(a) : "missing log for model: " + a;
-			} else if(MemoryAddress.getAddressedType(a) == XType.XOBJECT && a.getModel() == null) {
+			} else if(a.getAddressedType() == XType.XOBJECT && a.getModel() == null) {
 				assert this.logs.containsKey(a) : "missing log for object: " + a;
 			}
 		}

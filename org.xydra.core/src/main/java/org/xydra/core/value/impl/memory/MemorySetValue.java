@@ -21,7 +21,7 @@ public abstract class MemorySetValue<E> implements XSetValue<E> {
 	
 	private static final long serialVersionUID = -5921208010230423103L;
 	
-	private final Set<E> set = new HashSet<E>();
+	protected final Set<E> set = new HashSet<E>();
 	
 	public MemorySetValue(E[] contents) {
 		this(Arrays.asList(contents));

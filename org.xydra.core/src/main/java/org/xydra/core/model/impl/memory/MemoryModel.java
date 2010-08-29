@@ -127,7 +127,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 			
 			if(object == null) {
 				XObjectState objectState = this.state.createObjectState(objectID);
-				assert XX.contains(getAddress(), objectState.getAddress());
+				assert getAddress().contains(objectState.getAddress());
 				object = new MemoryObject(this, this.eventQueue, objectState);
 			}
 			

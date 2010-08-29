@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XAtomicCommand;
 import org.xydra.core.change.XFieldCommand;
@@ -12,7 +11,6 @@ import org.xydra.core.change.XModelCommand;
 import org.xydra.core.change.XObjectCommand;
 import org.xydra.core.change.XTransaction;
 import org.xydra.core.model.XAddress;
-
 
 
 /**
@@ -79,7 +77,7 @@ public class MemoryTransaction implements XTransaction {
 		
 		for(int i = 0; i < commands.length; ++i) {
 			
-			if(!XX.equalsOrContains(target, commands[i].getTarget())) {
+			if(!target.equalsOrContains(commands[i].getTarget())) {
 				throw new IllegalArgumentException("command #" + i + " " + commands[i]
 				        + " is not contained in " + target);
 			}

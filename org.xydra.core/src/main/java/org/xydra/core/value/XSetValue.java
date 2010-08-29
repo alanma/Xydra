@@ -23,4 +23,16 @@ public interface XSetValue<E> extends XCollectionValue<E> {
 	 */
 	public Set<E> toSet();
 	
+	/**
+	 * Create a new {@link XSetValue} contains all entries from this value as
+	 * well as the specified entry. This value is not modified.
+	 */
+	XSetValue<E> add(E entry);
+	
+	/**
+	 * Create a new {@link XSetValue} contains all entries from this value
+	 * except the specified entry. This value is not modified.
+	 */
+	XSetValue<E> remove(E entry);
+	
 }

@@ -41,4 +41,16 @@ public interface XCollectionValue<E> extends XValue, Iterable<E> {
 	 */
 	E[] toArray();
 	
+	/**
+	 * Create a new {@link XCollectionValue} contains all entries from this
+	 * value as well as the specified entry. This value is not modified.
+	 */
+	XCollectionValue<E> add(E entry);
+	
+	/**
+	 * Create a new {@link XCollectionValue} contains all entries from this
+	 * value except the specified entry. This value is not modified.
+	 */
+	XCollectionValue<E> remove(E entry);
+	
 }

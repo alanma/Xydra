@@ -18,7 +18,7 @@ public abstract class MemoryListValue<E> implements XListValue<E> {
 	
 	private static final long serialVersionUID = 7285839520276137162L;
 	
-	public int indexOf(Object elem) {
+	public int indexOf(E elem) {
 		int s = size();
 		for(int i = 0; i < s; i++) {
 			if(XI.equals(get(i), elem)) {
@@ -28,7 +28,7 @@ public abstract class MemoryListValue<E> implements XListValue<E> {
 		return -1;
 	}
 	
-	public int lastIndexOf(Object elem) {
+	public int lastIndexOf(E elem) {
 		for(int i = size(); i >= 0; i--) {
 			if(XI.equals(get(i), elem)) {
 				return i;

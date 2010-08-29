@@ -8,6 +8,9 @@ import org.xydra.core.model.XID;
 /**
  * A class for creating instances of the different [@link XValue} types.
  * 
+ * Convenience functions for creating {@link XValue XValues} can be found in
+ * {@link XV}.
+ * 
  * @author Kaidel
  * 
  */

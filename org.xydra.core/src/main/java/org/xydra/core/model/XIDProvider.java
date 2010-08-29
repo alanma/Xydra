@@ -66,8 +66,8 @@ public interface XIDProvider {
 	 * @return an {@link XAddress} with the given components.
 	 * @throws IllegalArgumentException if the given set of {@link XID XIDs}
 	 *             does not fit into one of the patterns described above (for
-	 *             example if repository Id ist set, modelId not set and
-	 *             objectId ist set)
+	 *             example if repositoryId is set, modelId not set and objectId
+	 *             is set)
 	 */
 	XAddress fromComponents(XID repositoryId, XID modelId, XID objectId, XID fieldId);
 	

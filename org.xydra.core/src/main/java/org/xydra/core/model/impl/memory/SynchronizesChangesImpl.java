@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XAtomicCommand;
 import org.xydra.core.change.XAtomicEvent;
+import org.xydra.core.change.XChanges;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XFieldCommand;
@@ -346,7 +346,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 	 *            rolled back
 	 */
 	private void rollbackEvent(XAtomicEvent event) {
-		XAtomicCommand command = XX.createForcedUndoCommand(event);
+		XAtomicCommand command = XChanges.createForcedUndoCommand(event);
 		long result = executeCommand(null, command);
 		assert result > 0 : "rollback command " + command + " for event " + event + " failed";
 		XAddress target = event.getTarget();
@@ -405,7 +405,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 					this.eventQueue.logNullEvent();
 					continue;
 				}
-				XCommand replayCommand = XX.createReplayCommand(remoteChange);
+				XCommand replayCommand = XChanges.createReplayCommand(remoteChange);
 				long result = executeCommand(remoteChange.getActor(), replayCommand);
 				if(result < 0) {
 					throw new IllegalStateException("could not apply remote change: "

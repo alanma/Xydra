@@ -41,6 +41,7 @@ import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.test.ChangeRecorder;
 import org.xydra.core.test.DemoModelUtil;
 import org.xydra.core.test.HasChanged;
+import org.xydra.core.value.XV;
 import org.xydra.core.value.XValue;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlCommand;
@@ -140,8 +141,8 @@ abstract public class AbstractSynchronizeTest {
 		XID newFieldId = X.getIDProvider().fromString("cookies");
 		XAddress newObjectAddr = XX.resolveObject(this.localModel.getAddress(), newObjectId);
 		XAddress newFieldAddr = XX.resolveField(newObjectAddr, newFieldId);
-		XValue newValue1 = X.getValueFactory().createStringValue("chocolate chip");
-		XValue newValue2 = X.getValueFactory().createStringValue("almond");
+		XValue newValue1 = XV.toValue("chocolate chip");
+		XValue newValue2 = XV.toValue("almond");
 		XModelCommand createObject = MemoryModelCommand.createAddCommand(this.localModel
 		        .getAddress(), false, newObjectId);
 		XObjectCommand createField = MemoryObjectCommand.createAddCommand(newObjectAddr, false,
@@ -237,8 +238,8 @@ abstract public class AbstractSynchronizeTest {
 		// check that there are enough but no redundant events sent
 		for(XEvent event : events) {
 			
-			assertFalse(XX.equalsOrContains(johnAddr, event.getChangedEntity()));
-			assertFalse(XX.equalsOrContains(newObjectAddr, event.getChangedEntity()));
+			assertFalse(johnAddr.equalsOrContains(event.getChangedEntity()));
+			assertFalse(newObjectAddr.equalsOrContains(event.getChangedEntity()));
 			
 			if(event instanceof XModelEvent) {
 				XModelEvent me = (XModelEvent)event;

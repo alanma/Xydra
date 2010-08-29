@@ -20,4 +20,40 @@ public interface XIntegerListValue extends XNumberListValue<Integer> {
 	 */
 	int[] contents();
 	
+	/**
+	 * Create a new {@link XIntegerListValue} contains all entries from this
+	 * value as well as the specified entry. The order od existing entries is
+	 * preserved and the new entry is added to the end of the list. This value
+	 * is not modified.
+	 */
+	XIntegerListValue add(Integer entry);
+	
+	/**
+	 * Create a new {@link XIntegerListValue} contains all entries from this
+	 * value as well as the specified entry. The order od existing entries is
+	 * preserved and the new entry is added at the specified index This value is
+	 * not modified.
+	 * 
+	 * @throws IndexOutOfBoundsException if index is negative or greater than
+	 *             size()
+	 */
+	XIntegerListValue add(int index, Integer entry);
+	
+	/**
+	 * Create a new {@link XIntegerListValue} contains all entries from this
+	 * value except the specified entry. If the entry is contained multiple
+	 * times, only the first occurrence is removed. This value is not modified.
+	 */
+	XIntegerListValue remove(Integer entry);
+	
+	/**
+	 * Create a new {@link XIntegerListValue} contains all entries from this
+	 * value except the entry at the specified index. This value is not
+	 * modified.
+	 * 
+	 * @throws IndexOutOfBoundsException if index is negative or greater than or
+	 *             equal to size()
+	 */
+	XIntegerListValue remove(int index);
+	
 }

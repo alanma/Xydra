@@ -111,7 +111,7 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	public void addCommand(int index, XCommand command) throws IllegalArgumentException,
 	        NullPointerException, IndexOutOfBoundsException {
 		
-		if(!XX.equalsOrContains(this.target, command.getTarget())) {
+		if(!this.target.equalsOrContains(command.getTarget())) {
 			throw new IllegalArgumentException(command + " is not contained in " + this.target);
 		}
 		

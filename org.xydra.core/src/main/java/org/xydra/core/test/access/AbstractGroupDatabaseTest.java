@@ -5,11 +5,10 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.access.XA;
 import org.xydra.core.access.XGroupDatabase;
 import org.xydra.core.model.XID;
-import org.xydra.core.model.XIDProvider;
 
 
 /**
@@ -32,11 +31,10 @@ public abstract class AbstractGroupDatabaseTest {
 	@Before
 	public void setUp() {
 		this.groups = getGroupDB();
-		XIDProvider p = X.getIDProvider();
-		this.actorAlpha = p.fromString("Alpha");
-		this.actorBeta = p.fromString("Beta");
-		this.groupZero = p.fromString("Zero");
-		this.groupOne = p.fromString("One");
+		this.actorAlpha = XX.toId("Alpha");
+		this.actorBeta = XX.toId("Beta");
+		this.groupZero = XX.toId("Zero");
+		this.groupOne = XX.toId("One");
 	}
 	
 	@Test

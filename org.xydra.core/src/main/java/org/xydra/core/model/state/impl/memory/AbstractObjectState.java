@@ -1,10 +1,8 @@
 package org.xydra.core.model.state.impl.memory;
 
-import org.xydra.core.XX;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XType;
-import org.xydra.core.model.impl.memory.MemoryAddress;
 import org.xydra.core.model.state.XFieldState;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
@@ -26,7 +24,7 @@ public abstract class AbstractObjectState extends AbstractState implements XObje
 	
 	public AbstractObjectState(XAddress objectAddr) {
 		super(objectAddr);
-		if(MemoryAddress.getAddressedType(objectAddr) != XType.XOBJECT) {
+		if(objectAddr.getAddressedType() != XType.XOBJECT) {
 			throw new RuntimeException("must be an object address, was: " + objectAddr);
 		}
 	}
@@ -81,7 +79,7 @@ public abstract class AbstractObjectState extends AbstractState implements XObje
 		if(fieldState == null) {
 			throw new IllegalArgumentException("fieldState was null");
 		}
-		if(!XX.contains(getAddress(), fieldState.getAddress())) {
+		if(!getAddress().contains(fieldState.getAddress())) {
 			throw new IllegalArgumentException("cannot add field state " + fieldState.getAddress()
 			        + " to " + getAddress());
 		}

@@ -1,6 +1,6 @@
 package org.xydra.core.change.impl.memory;
 
-import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XCommandFactory;
 import org.xydra.core.change.XFieldCommand;
@@ -113,7 +113,7 @@ public class MemoryCommandFactory implements XCommandFactory {
 			revNr = XCommand.FORCED;
 		}
 		
-		XAddress target = X.getIDProvider().fromComponents(repositoryID, modelID, objectID, null);
+		XAddress target = XX.toAddress(repositoryID, modelID, objectID, null);
 		
 		return MemoryObjectCommand.createAddCommand(target, revNr, fieldID);
 	}
@@ -138,7 +138,7 @@ public class MemoryCommandFactory implements XCommandFactory {
 			revNr = XCommand.FORCED;
 		}
 		
-		XAddress target = X.getIDProvider().fromComponents(repositoryID, null, null, null);
+		XAddress target = XX.toAddress(repositoryID, null, null, null);
 		
 		return MemoryRepositoryCommand.createAddCommand(target, revNr, modelID);
 	}
@@ -195,7 +195,7 @@ public class MemoryCommandFactory implements XCommandFactory {
 			revNr = XCommand.FORCED;
 		}
 		
-		XAddress target = X.getIDProvider().fromComponents(repositoryID, modelID, null, null);
+		XAddress target = XX.toAddress(repositoryID, modelID, null, null);
 		
 		return MemoryModelCommand.createAddCommand(target, revNr, objectID);
 	}
@@ -310,7 +310,7 @@ public class MemoryCommandFactory implements XCommandFactory {
 			revNr = XCommand.FORCED;
 		}
 		
-		XAddress target = X.getIDProvider().fromComponents(repositoryID, modelID, objectID, null);
+		XAddress target = XX.toAddress(repositoryID, modelID, objectID, null);
 		
 		return MemoryObjectCommand.createRemoveCommand(target, revNr, fieldID);
 	}
@@ -340,7 +340,7 @@ public class MemoryCommandFactory implements XCommandFactory {
 			revNr = XCommand.FORCED;
 		}
 		
-		XAddress target = X.getIDProvider().fromComponents(repositoryID, null, null, null);
+		XAddress target = XX.toAddress(repositoryID, null, null, null);
 		
 		return MemoryRepositoryCommand.createRemoveCommand(target, revNr, modelID);
 	}
@@ -408,7 +408,7 @@ public class MemoryCommandFactory implements XCommandFactory {
 			revNr = XCommand.FORCED;
 		}
 		
-		XAddress target = X.getIDProvider().fromComponents(repositoryID, modelID, null, null);
+		XAddress target = XX.toAddress(repositoryID, modelID, null, null);
 		
 		return MemoryModelCommand.createRemoveCommand(target, revNr, objectID);
 	}
@@ -563,8 +563,7 @@ public class MemoryCommandFactory implements XCommandFactory {
 			revNr = XCommand.FORCED;
 		}
 		
-		XAddress target = X.getIDProvider()
-		        .fromComponents(repositoryID, modelID, objectID, fieldID);
+		XAddress target = XX.toAddress(repositoryID, modelID, objectID, fieldID);
 		
 		return MemoryFieldCommand.createAddCommand(target, revNr, value);
 	}
@@ -715,8 +714,7 @@ public class MemoryCommandFactory implements XCommandFactory {
 			revNr = XCommand.FORCED;
 		}
 		
-		XAddress target = X.getIDProvider()
-		        .fromComponents(repositoryID, modelID, objectID, fieldID);
+		XAddress target = XX.toAddress(repositoryID, modelID, objectID, fieldID);
 		
 		return MemoryFieldCommand.createRemoveCommand(target, revNr);
 	}
@@ -873,8 +871,7 @@ public class MemoryCommandFactory implements XCommandFactory {
 			revNr = XCommand.FORCED;
 		}
 		
-		XAddress target = X.getIDProvider()
-		        .fromComponents(repositoryID, modelID, objectID, fieldID);
+		XAddress target = XX.toAddress(repositoryID, modelID, objectID, fieldID);
 		
 		return MemoryFieldCommand.createChangeCommand(target, revNr, value);
 	}

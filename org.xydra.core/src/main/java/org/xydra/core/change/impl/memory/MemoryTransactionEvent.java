@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XEvent;
@@ -124,7 +123,7 @@ public class MemoryTransactionEvent implements XTransactionEvent {
 		
 		for(int i = 0; i < events.length; ++i) {
 			
-			if(!XX.equalsOrContains(target, events[i].getTarget())) {
+			if(!target.equalsOrContains(events[i].getTarget())) {
 				throw new IllegalArgumentException("event #" + i + " " + events[i]
 				        + " target is not contained in " + target);
 			}

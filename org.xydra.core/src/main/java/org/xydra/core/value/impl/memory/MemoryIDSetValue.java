@@ -42,4 +42,16 @@ public class MemoryIDSetValue extends MemorySetValue<XID> implements XIDSetValue
 		return getHashCode();
 	}
 	
+	public XIDSetValue add(XID entry) {
+		MemoryIDSetValue v = new MemoryIDSetValue(this.set);
+		v.set.add(entry);
+		return v;
+	}
+	
+	public XIDSetValue remove(XID entry) {
+		MemoryIDSetValue v = new MemoryIDSetValue(this.set);
+		v.set.remove(entry);
+		return v;
+	}
+	
 }

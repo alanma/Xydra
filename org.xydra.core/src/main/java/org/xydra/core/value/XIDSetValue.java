@@ -20,4 +20,16 @@ public interface XIDSetValue extends XSetValue<XID> {
 	 */
 	public XID[] contents();
 	
+	/**
+	 * Create a new {@link XIDSetValue} contains all entries from this value as
+	 * well as the specified entry. This value is not modified.
+	 */
+	XIDSetValue add(XID entry);
+	
+	/**
+	 * Create a new {@link XIDSetValue} contains all entries from this value
+	 * except the specified entry. This value is not modified.
+	 */
+	XIDSetValue remove(XID entry);
+	
 }

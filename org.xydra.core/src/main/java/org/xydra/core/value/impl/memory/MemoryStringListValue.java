@@ -3,8 +3,8 @@ package org.xydra.core.value.impl.memory;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.xydra.core.XX;
 import org.xydra.core.value.XStringListValue;
+import org.xydra.index.XI;
 
 
 /**
@@ -28,6 +28,10 @@ public class MemoryStringListValue extends MemoryListValue<String> implements XS
 		System.arraycopy(content, 0, this.list, 0, content.length);
 	}
 	
+	private MemoryStringListValue(int length) {
+		this.list = new String[length];
+	}
+	
 	public String[] contents() {
 		String[] array = new String[this.list.length];
 		System.arraycopy(this.list, 0, array, 0, this.list.length);
@@ -41,7 +45,7 @@ public class MemoryStringListValue extends MemoryListValue<String> implements XS
 	@Override
 	public boolean equals(Object other) {
 		return other instanceof XStringListValue
-		        && XX.equalsIterator(this.iterator(), ((XStringListValue)other).iterator());
+		        && XI.equalsIterator(this.iterator(), ((XStringListValue)other).iterator());
 	}
 	
 	@Override
@@ -60,6 +64,41 @@ public class MemoryStringListValue extends MemoryListValue<String> implements XS
 	
 	public int size() {
 		return this.list.length;
+	}
+	
+	public XStringListValue add(String entry) {
+		return add(this.list.length, entry);
+	}
+	
+	public XStringListValue add(int index, String entry) {
+		int size = this.list.length;
+		if(index < 0 || index > size) {
+			throw new IndexOutOfBoundsException();
+		}
+		MemoryStringListValue v = new MemoryStringListValue(size + 1);
+		System.arraycopy(this.list, 0, v.list, 0, index);
+		v.list[index] = entry;
+		System.arraycopy(this.list, index, v.list, index + 1, size - index);
+		return v;
+	}
+	
+	public XStringListValue remove(String entry) {
+		int index = indexOf(entry);
+		if(index < 0) {
+			return this;
+		}
+		return remove(index);
+	}
+	
+	public XStringListValue remove(int index) {
+		int size = this.list.length;
+		if(index < 0 || index >= size) {
+			throw new IndexOutOfBoundsException();
+		}
+		MemoryStringListValue v = new MemoryStringListValue(size - 1);
+		System.arraycopy(this.list, 0, v.list, 0, index);
+		System.arraycopy(this.list, index + 1, v.list, index, size - index - 1);
+		return v;
 	}
 	
 }

@@ -329,7 +329,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 			
 			if(field == null) {
 				XFieldState fieldState = this.state.createFieldState(fieldID);
-				assert XX.contains(getAddress(), fieldState.getAddress());
+				assert getAddress().contains(fieldState.getAddress());
 				field = new MemoryField(this, this.eventQueue, fieldState);
 			}
 			

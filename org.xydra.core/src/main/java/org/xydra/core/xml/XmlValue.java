@@ -27,8 +27,8 @@ import org.xydra.core.value.XSetValue;
 import org.xydra.core.value.XStringListValue;
 import org.xydra.core.value.XStringSetValue;
 import org.xydra.core.value.XStringValue;
+import org.xydra.core.value.XV;
 import org.xydra.core.value.XValue;
-import org.xydra.core.value.XValueFactory;
 
 
 /**
@@ -59,8 +59,6 @@ public class XmlValue {
 	private static final String XBYTELIST_ELEMENT = "xbyteList";
 	private static final String NULL_ATTRIBUTE = "isNull";
 	private static final String NULL_VALUE = "true";
-	
-	private final static XValueFactory factory = X.getValueFactory();
 	
 	/**
 	 * @return The {@link XValue} represented by the given XML element.
@@ -112,7 +110,7 @@ public class XmlValue {
 		
 		XmlUtils.checkElementName(xml, XBOOLEAN_ELEMENT);
 		
-		return factory.createBooleanValue(toBoolean(xml));
+		return XV.toValue(toBoolean(xml));
 	}
 	
 	private static boolean toBoolean(MiniElement xml) {
@@ -128,7 +126,7 @@ public class XmlValue {
 		
 		XmlUtils.checkElementName(xml, XDOUBLE_ELEMENT);
 		
-		return factory.createDoubleValue(toDouble(xml));
+		return XV.toValue(toDouble(xml));
 	}
 	
 	private static double toDouble(MiniElement xml) {
@@ -153,7 +151,7 @@ public class XmlValue {
 		
 		XmlUtils.checkElementName(xml, XINTEGER_ELEMENT);
 		
-		return factory.createIntegerValue(toInteger(xml));
+		return XV.toValue(toInteger(xml));
 	}
 	
 	private static int toInteger(MiniElement xml) {
@@ -178,7 +176,7 @@ public class XmlValue {
 		
 		XmlUtils.checkElementName(xml, XLONG_ELEMENT);
 		
-		return factory.createLongValue(toLong(xml));
+		return XV.toValue(toLong(xml));
 	}
 	
 	private static long toLong(MiniElement xml) {
@@ -203,7 +201,7 @@ public class XmlValue {
 		
 		XmlUtils.checkElementName(xml, XSTRING_ELEMENT);
 		
-		return factory.createStringValue(toString(xml));
+		return XV.toValue(toString(xml));
 	}
 	
 	private static String toString(MiniElement xml) {
@@ -225,7 +223,7 @@ public class XmlValue {
 		
 		XmlUtils.checkElementName(xml, XID_ELEMENT);
 		
-		return factory.createIDValue(toId(xml));
+		return XV.toValue(toId(xml));
 	}
 	
 	private static XID toId(MiniElement xml) {
@@ -264,7 +262,7 @@ public class XmlValue {
 			list.add(toBoolean(entryElement));
 		}
 		
-		return factory.createBooleanListValue(list);
+		return XV.toValue(list);
 		
 	}
 	
@@ -287,7 +285,7 @@ public class XmlValue {
 			list.add(toDouble(entryElement));
 		}
 		
-		return factory.createDoubleListValue(list);
+		return XV.toValue(list);
 		
 	}
 	
@@ -310,7 +308,7 @@ public class XmlValue {
 			list.add(toInteger(entryElement));
 		}
 		
-		return factory.createIntegerListValue(list);
+		return XV.toValue(list);
 		
 	}
 	
@@ -332,7 +330,7 @@ public class XmlValue {
 			list.add(toLong(entryElement));
 		}
 		
-		return factory.createLongListValue(list);
+		return XV.toValue(list);
 		
 	}
 	
@@ -354,7 +352,7 @@ public class XmlValue {
 			list.add(toString(entryElement));
 		}
 		
-		return factory.createStringListValue(list);
+		return XV.toValue(list);
 		
 	}
 	
@@ -375,7 +373,7 @@ public class XmlValue {
 			list.add(toId(entryElement));
 		}
 		
-		return factory.createIDListValue(list);
+		return XV.toValue(list);
 		
 	}
 	
@@ -396,7 +394,7 @@ public class XmlValue {
 			list.add(toString(entryElement));
 		}
 		
-		return factory.createStringSetValue(list);
+		return XV.toSetValue(list);
 		
 	}
 	
@@ -417,7 +415,7 @@ public class XmlValue {
 			list.add(toId(entryElement));
 		}
 		
-		return factory.createIDSetValue(list);
+		return XV.toSetValue(list);
 		
 	}
 	
@@ -432,7 +430,7 @@ public class XmlValue {
 		
 		byte[] array = Base64.decode(xml.getData());
 		
-		return factory.createByteListValue(array);
+		return XV.toValue(array);
 		
 	}
 	

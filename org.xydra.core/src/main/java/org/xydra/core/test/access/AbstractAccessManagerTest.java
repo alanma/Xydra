@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.access.XA;
 import org.xydra.core.access.XAccessManager;
@@ -16,7 +15,6 @@ import org.xydra.core.access.impl.memory.MemoryAccessManager;
 import org.xydra.core.access.impl.memory.MemoryGroupDatabase;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
-import org.xydra.core.model.XIDProvider;
 
 
 /**
@@ -52,29 +50,27 @@ abstract public class AbstractAccessManagerTest {
 		final XGroupDatabase groups = new MemoryGroupDatabase();
 		this.arm = new MemoryAccessManager(groups);
 		
-		final XIDProvider p = X.getIDProvider();
-		
 		// setup groups
-		this.actorAlpha = p.fromString("Alpha");
-		this.actorBeta = p.fromString("Beta");
-		this.groupZero = p.fromString("Zero");
-		this.groupOne = p.fromString("One");
+		this.actorAlpha = XX.toId("Alpha");
+		this.actorBeta = XX.toId("Beta");
+		this.groupZero = XX.toId("Zero");
+		this.groupOne = XX.toId("One");
 		groups.addToGroup(this.actorAlpha, this.groupZero);
 		groups.addToGroup(this.actorAlpha, this.groupOne);
 		groups.addToGroup(this.actorBeta, this.groupZero);
 		
-		this.r = p.fromAddress("/repo/cookie");
-		this.rA = p.fromAddress("/repo/cookie/objectA");
-		this.rB = p.fromAddress("/repo/cookie/objectB");
-		this.rA0 = p.fromAddress("/repo/cookie/objectA/field0");
+		this.r = XX.toAddress("/repo/cookie");
+		this.rA = XX.toAddress("/repo/cookie/objectA");
+		this.rB = XX.toAddress("/repo/cookie/objectB");
+		this.rA0 = XX.toAddress("/repo/cookie/objectA/field0");
 		
-		assert XX.contains(this.r, this.rA);
-		assert XX.contains(this.r, this.rA0);
-		assert XX.contains(this.r, this.rB);
-		assert XX.contains(this.rA, this.rA0);
+		assert this.r.contains(this.rA);
+		assert this.r.contains(this.rA0);
+		assert this.r.contains(this.rB);
+		assert this.rA.contains(this.rA0);
 		
-		this.access = p.fromString("foo");
-		this.access2 = p.fromString("bar");
+		this.access = XX.toId("foo");
+		this.access2 = XX.toId("bar");
 		
 	}
 	

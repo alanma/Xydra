@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.xydra.core.XX;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.value.XValue;
@@ -61,7 +60,7 @@ public abstract class TestState implements Serializable {
 		assert trans instanceof TestStateTransaction : "unexpected transaction object";
 		TestStateTransaction t = (TestStateTransaction)trans;
 		assert t.store == this.store;
-		assert XX.equalsOrContains(t.base, this.address);
+		assert t.base.equalsOrContains(this.address);
 		return t;
 	}
 	

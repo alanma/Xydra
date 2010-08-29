@@ -3,8 +3,8 @@ package org.xydra.core.value.impl.memory;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.xydra.core.XX;
 import org.xydra.core.value.XBooleanListValue;
+import org.xydra.index.XI;
 
 
 /**
@@ -33,6 +33,10 @@ public class MemoryBooleanListValue extends MemoryListValue<Boolean> implements 
 		System.arraycopy(content, 0, this.list, 0, content.length);
 	}
 	
+	private MemoryBooleanListValue(int length) {
+		this.list = new boolean[length];
+	}
+	
 	public boolean[] contents() {
 		boolean[] array = new boolean[this.list.length];
 		System.arraycopy(this.list, 0, array, 0, this.list.length);
@@ -48,7 +52,7 @@ public class MemoryBooleanListValue extends MemoryListValue<Boolean> implements 
 	@Override
 	public boolean equals(Object other) {
 		return other instanceof XBooleanListValue
-		        && XX.equalsIterator(this.iterator(), ((XBooleanListValue)other).iterator());
+		        && XI.equalsIterator(this.iterator(), ((XBooleanListValue)other).iterator());
 	}
 	
 	@Override
@@ -67,6 +71,41 @@ public class MemoryBooleanListValue extends MemoryListValue<Boolean> implements 
 	
 	public int size() {
 		return this.list.length;
+	}
+	
+	public XBooleanListValue add(Boolean entry) {
+		return add(this.list.length, entry);
+	}
+	
+	public XBooleanListValue add(int index, Boolean entry) {
+		int size = this.list.length;
+		if(index < 0 || index > size) {
+			throw new IndexOutOfBoundsException();
+		}
+		MemoryBooleanListValue v = new MemoryBooleanListValue(size + 1);
+		System.arraycopy(this.list, 0, v.list, 0, index);
+		v.list[index] = entry;
+		System.arraycopy(this.list, index, v.list, index + 1, size - index);
+		return v;
+	}
+	
+	public XBooleanListValue remove(Boolean entry) {
+		int index = indexOf(entry);
+		if(index < 0) {
+			return this;
+		}
+		return remove(index);
+	}
+	
+	public XBooleanListValue remove(int index) {
+		int size = this.list.length;
+		if(index < 0 || index >= size) {
+			throw new IndexOutOfBoundsException();
+		}
+		MemoryBooleanListValue v = new MemoryBooleanListValue(size - 1);
+		System.arraycopy(this.list, 0, v.list, 0, index);
+		System.arraycopy(this.list, index + 1, v.list, index, size - index - 1);
+		return v;
 	}
 	
 }

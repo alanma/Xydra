@@ -17,6 +17,7 @@ import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.value.XIntegerValue;
 import org.xydra.core.value.XStringValue;
+import org.xydra.core.value.XV;
 
 
 /**
@@ -122,7 +123,7 @@ public class CalendarManager {
 		XObject userObject = this.accountModel.createObject(managerID, userID);
 		XField pwdField = userObject.createField(managerID, pwdFieldID);
 		
-		XStringValue pwdValue = X.getValueFactory().createStringValue(pwd);
+		XStringValue pwdValue = XV.toValue(pwd);
 		
 		pwdField.setValue(managerID, pwdValue);
 		
@@ -184,42 +185,42 @@ public class CalendarManager {
 		XCommand addName = cmdFactory.createAddFieldCommand(this.calendarRepoID, userID, eventID,
 		        nameFieldID, false);
 		XCommand setName = cmdFactory.createAddValueCommand(this.calendarRepoID, userID, eventID,
-		        nameFieldID, 0, X.getValueFactory().createStringValue(name), false);
+		        nameFieldID, 0, XV.toValue(name), false);
 		
 		XCommand addPlace = cmdFactory.createAddFieldCommand(this.calendarRepoID, userID, eventID,
 		        placeFieldID, false);
 		XCommand setPlace = cmdFactory.createAddValueCommand(this.calendarRepoID, userID, eventID,
-		        placeFieldID, 0, X.getValueFactory().createStringValue(place), false);
+		        placeFieldID, 0, XV.toValue(place), false);
 		
 		XCommand addYear = cmdFactory.createAddFieldCommand(this.calendarRepoID, userID, eventID,
 		        yearFieldID, false);
 		XCommand setYear = cmdFactory.createAddValueCommand(this.calendarRepoID, userID, eventID,
-		        yearFieldID, 0, X.getValueFactory().createIntegerValue(year), false);
+		        yearFieldID, 0, XV.toValue(year), false);
 		
 		XCommand addMonth = cmdFactory.createAddFieldCommand(this.calendarRepoID, userID, eventID,
 		        monthFieldID, false);
 		XCommand setMonth = cmdFactory.createAddValueCommand(this.calendarRepoID, userID, eventID,
-		        monthFieldID, 0, X.getValueFactory().createIntegerValue(month), false);
+		        monthFieldID, 0, XV.toValue(month), false);
 		
 		XCommand addDay = cmdFactory.createAddFieldCommand(this.calendarRepoID, userID, eventID,
 		        dayFieldID, false);
 		XCommand setDay = cmdFactory.createAddValueCommand(this.calendarRepoID, userID, eventID,
-		        dayFieldID, 0, X.getValueFactory().createIntegerValue(day), false);
+		        dayFieldID, 0, XV.toValue(day), false);
 		
 		XCommand addDescription = cmdFactory.createAddFieldCommand(this.calendarRepoID, userID,
 		        eventID, descFieldID, false);
 		XCommand setDescription = cmdFactory.createAddValueCommand(this.calendarRepoID, userID,
-		        eventID, descFieldID, 0, X.getValueFactory().createStringValue(description), false);
+		        eventID, descFieldID, 0, XV.toValue(description), false);
 		
 		XCommand addBegin = cmdFactory.createAddFieldCommand(this.calendarRepoID, userID, eventID,
 		        beginFieldID, false);
 		XCommand setBegin = cmdFactory.createAddValueCommand(this.calendarRepoID, userID, eventID,
-		        beginFieldID, 0, X.getValueFactory().createIntegerValue(begin), false);
+		        beginFieldID, 0, XV.toValue(begin), false);
 		
 		XCommand addEnd = cmdFactory.createAddFieldCommand(this.calendarRepoID, userID, eventID,
 		        endFieldID, false);
 		XCommand setEnd = cmdFactory.createAddValueCommand(this.calendarRepoID, userID, eventID,
-		        endFieldID, 0, X.getValueFactory().createIntegerValue(end), false);
+		        endFieldID, 0, XV.toValue(end), false);
 		
 		// put the commands into a transaction
 		XTransactionBuilder transBuilder = new XTransactionBuilder(userCalendar.getAddress());

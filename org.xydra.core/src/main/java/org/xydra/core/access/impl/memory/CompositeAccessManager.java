@@ -3,7 +3,6 @@ package org.xydra.core.access.impl.memory;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.xydra.core.XX;
 import org.xydra.core.access.XA;
 import org.xydra.core.access.XAccessDefinition;
 import org.xydra.core.access.XAccessListener;
@@ -44,7 +43,7 @@ public class CompositeAccessManager extends AbstractAccessManager {
 	
 	public XAccessValue getAccessDefinition(XID actor, XAddress resource, XID access)
 	        throws IllegalArgumentException {
-		if(XX.equalsOrContains(this.mountPoint, resource)) {
+		if(this.mountPoint.equalsOrContains(resource)) {
 			return this.inner.getAccessDefinition(actor, resource, access);
 		} else {
 			return this.outer.getAccessDefinition(actor, resource, access);
@@ -52,7 +51,7 @@ public class CompositeAccessManager extends AbstractAccessManager {
 	}
 	
 	public Pair<Set<XID>,Set<XID>> getActorsWithPermission(XAddress resource, XID access) {
-		if(XX.equalsOrContains(this.mountPoint, resource)) {
+		if(this.mountPoint.equalsOrContains(resource)) {
 			Pair<Set<XID>,Set<XID>> i = this.inner.getActorsWithPermission(resource, access);
 			Pair<Set<XID>,Set<XID>> o = this.inner.getActorsWithPermission(resource, access);
 			o.getFirst().removeAll(i.getSecond());
@@ -72,7 +71,7 @@ public class CompositeAccessManager extends AbstractAccessManager {
 	}
 	
 	public Pair<Set<XID>,Set<XID>> getPermissions(XID actor, XAddress resource) {
-		if(XX.equalsOrContains(this.mountPoint, resource)) {
+		if(this.mountPoint.equalsOrContains(resource)) {
 			Pair<Set<XID>,Set<XID>> i = this.inner.getPermissions(actor, resource);
 			Pair<Set<XID>,Set<XID>> o = this.inner.getPermissions(actor, resource);
 			o.getFirst().removeAll(i.getSecond());
@@ -85,7 +84,7 @@ public class CompositeAccessManager extends AbstractAccessManager {
 	}
 	
 	public XAccessValue hasAccess(XID actor, XAddress resource, XID access) {
-		if(XX.equalsOrContains(this.mountPoint, resource)) {
+		if(this.mountPoint.equalsOrContains(resource)) {
 			XAccessValue allowed = this.inner.hasAccess(actor, resource, access);
 			if(allowed.isDefined()) {
 				return allowed;
@@ -96,7 +95,7 @@ public class CompositeAccessManager extends AbstractAccessManager {
 	
 	public XAccessValue hasAccessToSubtree(XID actor, XAddress rootResource, XID access) {
 		
-		if(XX.equalsOrContains(this.mountPoint, rootResource)) {
+		if(this.mountPoint.equalsOrContains(rootResource)) {
 			
 			XAccessValue allowed = this.inner.hasAccessToSubtree(actor, rootResource, access);
 			
@@ -105,7 +104,7 @@ public class CompositeAccessManager extends AbstractAccessManager {
 			}
 			return this.outer.hasAccess(actor, rootResource, access);
 			
-		} else if(XX.contains(rootResource, this.mountPoint)) {
+		} else if(rootResource.contains(this.mountPoint)) {
 			
 			XAccessValue allowed = this.inner.hasAccessToSubtree(actor, rootResource, access);
 			
@@ -120,7 +119,7 @@ public class CompositeAccessManager extends AbstractAccessManager {
 	
 	public XAccessValue hasAccessToSubresource(XID actor, XAddress rootResource, XID access) {
 		
-		if(XX.equalsOrContains(this.mountPoint, rootResource)) {
+		if(this.mountPoint.equalsOrContains(rootResource)) {
 			
 			XAccessValue allowed = this.inner.hasAccessToSubresource(actor, rootResource, access);
 			
@@ -130,7 +129,7 @@ public class CompositeAccessManager extends AbstractAccessManager {
 			
 			return hasAccess(actor, rootResource, access);
 			
-		} else if(XX.contains(rootResource, this.mountPoint)) {
+		} else if(rootResource.contains(this.mountPoint)) {
 			
 			XAccessValue allowed = this.inner.hasAccessToSubresource(actor, rootResource, access);
 			
@@ -144,7 +143,7 @@ public class CompositeAccessManager extends AbstractAccessManager {
 	}
 	
 	public boolean isAccessDefined(XID actor, XAddress resource, XID access) {
-		if(XX.equalsOrContains(this.mountPoint, resource)) {
+		if(this.mountPoint.equalsOrContains(resource)) {
 			return this.inner.isAccessDefined(actor, resource, access);
 		} else {
 			return this.outer.isAccessDefined(actor, resource, access);
@@ -157,7 +156,7 @@ public class CompositeAccessManager extends AbstractAccessManager {
 	}
 	
 	public void resetAccess(XID actor, XAddress resource, XID access) {
-		if(XX.equalsOrContains(this.mountPoint, resource)) {
+		if(this.mountPoint.equalsOrContains(resource)) {
 			this.inner.resetAccess(actor, resource, access);
 		} else {
 			this.outer.resetAccess(actor, resource, access);
@@ -165,7 +164,7 @@ public class CompositeAccessManager extends AbstractAccessManager {
 	}
 	
 	public void setAccess(XID actor, XAddress resource, XID access, boolean allowed) {
-		if(XX.equalsOrContains(this.mountPoint, resource)) {
+		if(this.mountPoint.equalsOrContains(resource)) {
 			this.inner.setAccess(actor, resource, access, allowed);
 		} else {
 			this.outer.setAccess(actor, resource, access, allowed);

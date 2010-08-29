@@ -17,6 +17,7 @@ import org.xydra.core.model.XObject;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.value.XIDListValue;
 import org.xydra.core.value.XIDValue;
+import org.xydra.core.value.XV;
 import org.xydra.core.value.XValue;
 
 
@@ -151,17 +152,16 @@ public class SimpleSyntaxUtils {
 						String idValue = value.substring(1, value.length() - 1);
 						String[] ids = idValue.split(",");
 						if(ids.length == 1) {
-							xvalue = X.getValueFactory().createIDValue(
-							        X.getIDProvider().fromString(ids[0]));
+							xvalue = XV.toValue(X.getIDProvider().fromString(ids[0]));
 						} else {
 							XID[] xids = new XID[ids.length];
 							for(int i = 0; i < xids.length; i++) {
 								xids[i] = X.getIDProvider().fromString(ids[i].trim());
 							}
-							xvalue = X.getValueFactory().createIDListValue(xids);
+							xvalue = XV.toValue(xids);
 						}
 					} else {
-						xvalue = X.getValueFactory().createStringValue(value);
+						xvalue = XV.toValue(value);
 					}
 					field.setValue(ACTOR_THIS, xvalue);
 				}

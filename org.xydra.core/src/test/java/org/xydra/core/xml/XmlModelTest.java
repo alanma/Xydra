@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XBaseModel;
@@ -14,7 +13,6 @@ import org.xydra.core.model.XBaseRepository;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
-import org.xydra.core.model.XIDProvider;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
@@ -23,7 +21,7 @@ import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryObject;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.core.test.DemoModelUtil;
-import org.xydra.core.value.XValueFactory;
+import org.xydra.core.value.XV;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
 
@@ -36,9 +34,6 @@ import org.xydra.core.xml.impl.XmlOutStringBuffer;
  * 
  */
 public class XmlModelTest {
-	
-	private final static XValueFactory fact = X.getValueFactory();
-	private final static XIDProvider ids = X.getIDProvider();
 	
 	private void testRepository(XBaseRepository repo) {
 		
@@ -174,12 +169,12 @@ public class XmlModelTest {
 	
 	@Test
 	public void testEmptyRepository() {
-		testRepository(new MemoryRepository(ids.fromString("repo")));
+		testRepository(new MemoryRepository(XX.toId("repo")));
 	}
 	
 	@Test
 	public void testFullRepository() {
-		XRepository repo = new MemoryRepository(ids.fromString("repo"));
+		XRepository repo = new MemoryRepository(XX.toId("repo"));
 		DemoModelUtil.addPhonebookModel(repo);
 		testRepository(repo);
 	}
@@ -216,8 +211,7 @@ public class XmlModelTest {
 	@Test
 	public void testFullField() {
 		XField field = new MemoryField(DemoModelUtil.ALIASES_ID);
-		field.setValue(DemoModelUtil.ACTOR_ID, fact
-		        .createStringSetValue(new String[] { "Cookie Monster" }));
+		field.setValue(DemoModelUtil.ACTOR_ID, XV.toSetValue(new String[] { "Cookie Monster" }));
 		testField(field);
 	}
 	

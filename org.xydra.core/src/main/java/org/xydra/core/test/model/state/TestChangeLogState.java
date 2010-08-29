@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.xydra.core.XX;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.state.XChangeLogState;
@@ -61,7 +60,7 @@ public class TestChangeLogState implements XChangeLogState {
 		assert trans instanceof TestStateTransaction : "unexpected transaction object";
 		TestStateTransaction t = (TestStateTransaction)trans;
 		assert t.store == this.store;
-		assert XX.equalsOrContains(t.base, this.baseAddr);
+		assert t.base.equalsOrContains(this.baseAddr);
 		return t;
 	}
 	

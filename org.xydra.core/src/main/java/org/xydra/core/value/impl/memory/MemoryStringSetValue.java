@@ -41,4 +41,16 @@ public class MemoryStringSetValue extends MemorySetValue<String> implements XStr
 		return getHashCode();
 	}
 	
+	public MemoryStringSetValue add(String entry) {
+		MemoryStringSetValue v = new MemoryStringSetValue(this.set);
+		v.set.add(entry);
+		return v;
+	}
+	
+	public MemoryStringSetValue remove(String entry) {
+		MemoryStringSetValue v = new MemoryStringSetValue(this.set);
+		v.set.remove(entry);
+		return v;
+	}
+	
 }

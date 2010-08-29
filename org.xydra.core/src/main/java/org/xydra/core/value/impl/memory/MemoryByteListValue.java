@@ -3,8 +3,8 @@ package org.xydra.core.value.impl.memory;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.xydra.core.XX;
 import org.xydra.core.value.XByteListValue;
+import org.xydra.index.XI;
 
 
 /**
@@ -32,6 +32,10 @@ public class MemoryByteListValue extends MemoryListValue<Byte> implements XByteL
 		System.arraycopy(content, 0, this.list, 0, content.length);
 	}
 	
+	private MemoryByteListValue(int length) {
+		this.list = new byte[length];
+	}
+	
 	public byte[] contents() {
 		byte[] array = new byte[this.list.length];
 		System.arraycopy(this.list, 0, array, 0, this.list.length);
@@ -47,7 +51,7 @@ public class MemoryByteListValue extends MemoryListValue<Byte> implements XByteL
 	@Override
 	public boolean equals(Object other) {
 		return other instanceof XByteListValue
-		        && XX.equalsIterator(this.iterator(), ((XByteListValue)other).iterator());
+		        && XI.equalsIterator(this.iterator(), ((XByteListValue)other).iterator());
 	}
 	
 	@Override
@@ -66,6 +70,41 @@ public class MemoryByteListValue extends MemoryListValue<Byte> implements XByteL
 	
 	public int size() {
 		return this.list.length;
+	}
+	
+	public XByteListValue add(Byte entry) {
+		return add(this.list.length, entry);
+	}
+	
+	public XByteListValue add(int index, Byte entry) {
+		int size = this.list.length;
+		if(index < 0 || index > size) {
+			throw new IndexOutOfBoundsException();
+		}
+		MemoryByteListValue v = new MemoryByteListValue(size + 1);
+		System.arraycopy(this.list, 0, v.list, 0, index);
+		v.list[index] = entry;
+		System.arraycopy(this.list, index, v.list, index + 1, size - index);
+		return v;
+	}
+	
+	public XByteListValue remove(Byte entry) {
+		int index = indexOf(entry);
+		if(index < 0) {
+			return this;
+		}
+		return remove(index);
+	}
+	
+	public XByteListValue remove(int index) {
+		int size = this.list.length;
+		if(index < 0 || index >= size) {
+			throw new IndexOutOfBoundsException();
+		}
+		MemoryByteListValue v = new MemoryByteListValue(size - 1);
+		System.arraycopy(this.list, 0, v.list, 0, index);
+		System.arraycopy(this.list, index + 1, v.list, index, size - index - 1);
+		return v;
 	}
 	
 }

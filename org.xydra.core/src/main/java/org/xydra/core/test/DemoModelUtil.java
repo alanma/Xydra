@@ -6,7 +6,7 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.value.XValueFactory;
+import org.xydra.core.value.XV;
 
 
 /**
@@ -17,8 +17,6 @@ import org.xydra.core.value.XValueFactory;
  * 
  */
 public class DemoModelUtil {
-	
-	static private final XValueFactory vf = X.getValueFactory();
 	
 	public static final XID PHONEBOOK_ID = X.getIDProvider().fromString("phonebook");
 	public static final XID JOHN_ID = X.getIDProvider().fromString("john");
@@ -77,57 +75,55 @@ public class DemoModelUtil {
 	public static void setupJohn(XObject john) {
 		
 		XField name = john.createField(ACTOR_ID, TITLE_ID);
-		name.setValue(ACTOR_ID, vf.createStringValue("Dr. John Doe"));
+		name.setValue(ACTOR_ID, XV.toValue("Dr. John Doe"));
 		XField phoneNumber = john.createField(ACTOR_ID, PHONE_ID);
-		phoneNumber.setValue(ACTOR_ID, vf.createStringValue("3463-2346"));
+		phoneNumber.setValue(ACTOR_ID, XV.toValue("3463-2346"));
 		
 		XField aliases = john.createField(ACTOR_ID, ALIASES_ID);
-		aliases.setValue(ACTOR_ID, vf.createStringListValue(new String[] { "Johnny",
-		        "John the Man", "Cookie Monster" }));
+		aliases.setValue(ACTOR_ID, XV.toValue(new String[] { "Johnny", "John the Man",
+		        "Cookie Monster" }));
 		
 		XField friends = john.createField(ACTOR_ID, FRIENDS_ID);
-		friends.setValue(ACTOR_ID, vf.createIDListValue(new XID[] { CLAUDIA_ID, PETER_ID }));
+		friends.setValue(ACTOR_ID, XV.toValue(new XID[] { CLAUDIA_ID, PETER_ID }));
 		
 		XField spouse = john.createField(ACTOR_ID, SPOUSE_ID);
-		spouse.setValue(ACTOR_ID, vf.createIDValue(CLAUDIA_ID));
+		spouse.setValue(ACTOR_ID, XV.toValue(CLAUDIA_ID));
 		
 		XField hidden = john.createField(ACTOR_ID, HIDDEN_ID);
-		hidden.setValue(ACTOR_ID, vf.createBooleanValue(false));
+		hidden.setValue(ACTOR_ID, XV.toValue(false));
 		
 		XField flags = john.createField(ACTOR_ID, FLAGS_ID);
-		flags.setValue(ACTOR_ID, vf.createBooleanListValue(new boolean[] { true, false, true, true,
-		        false }));
+		flags.setValue(ACTOR_ID, XV.toValue(new boolean[] { true, false, true, true, false }));
 		
 		XField height = john.createField(ACTOR_ID, HEIGHT_ID);
-		height.setValue(ACTOR_ID, vf.createDoubleValue(121.3));
+		height.setValue(ACTOR_ID, XV.toValue(121.3));
 		
 		XField coordinates = john.createField(ACTOR_ID, COORDIANTES_ID);
-		coordinates.setValue(ACTOR_ID, vf.createDoubleListValue(new double[] { 32.465, 19.34 }));
+		coordinates.setValue(ACTOR_ID, XV.toValue(new double[] { 32.465, 19.34 }));
 		
 		XField age = john.createField(ACTOR_ID, AGE_ID);
-		age.setValue(ACTOR_ID, vf.createIntegerValue(42));
+		age.setValue(ACTOR_ID, XV.toValue(42));
 		
 		XField scores = john.createField(ACTOR_ID, SCORES_ID);
-		scores.setValue(ACTOR_ID, vf.createIntegerListValue(new int[] { 34, 234, 34 }));
+		scores.setValue(ACTOR_ID, XV.toValue(new int[] { 34, 234, 34 }));
 		
 		XField maxCallTime = john.createField(ACTOR_ID, MAXCALLTIME_ID);
-		maxCallTime.setValue(ACTOR_ID, vf.createLongValue(675874678478467L));
+		maxCallTime.setValue(ACTOR_ID, XV.toValue(675874678478467L));
 		
 		XField lastCallTimes = john.createField(ACTOR_ID, LASTCALLTIMES_ID);
-		lastCallTimes.setValue(ACTOR_ID, vf.createLongListValue(new long[] { 32456L, 7664L, 56L }));
+		lastCallTimes.setValue(ACTOR_ID, XV.toValue(new long[] { 32456L, 7664L, 56L }));
 		
 		john.createField(ACTOR_ID, EMPTYFIELD_ID);
 		
 		XField signature = john.createField(ACTOR_ID, SIGNATURE_ID);
-		signature.setValue(ACTOR_ID, vf.createByteListValue(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8,
-		        9, 10, 11, 12, 13, 14, 15, 16, (byte)253, (byte)254, (byte)255 }));
+		signature.setValue(ACTOR_ID, XV.toValue(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+		        12, 13, 14, 15, 16, (byte)253, (byte)254, (byte)255 }));
 		
 		XField cookies = john.createField(ACTOR_ID, COOKIES_ID);
-		cookies.setValue(ACTOR_ID, vf.createIDSetValue(new XID[] { COOKIE1_ID, COOKIE2_ID }));
+		cookies.setValue(ACTOR_ID, XV.toSetValue(new XID[] { COOKIE1_ID, COOKIE2_ID }));
 		
 		XField cookieNames = john.createField(ACTOR_ID, COOKIENAMES_ID);
-		cookieNames.setValue(ACTOR_ID, vf.createStringSetValue(new String[] { "Chocolate Chip",
-		        "Almond" }));
+		cookieNames.setValue(ACTOR_ID, XV.toSetValue(new String[] { "Chocolate Chip", "Almond" }));
 		
 	}
 }

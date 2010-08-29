@@ -48,4 +48,39 @@ public interface XAddress extends Serializable {
 	 */
 	XAddress getParent();
 	
+	/**
+	 * @return the {@link XType} of the entity which this {@link XAddress}
+	 *         refers to.
+	 */
+	XType getAddressedType();
+	
+	/**
+	 * Checks whether the entity referred to by {@link XAdress} descendant is a
+	 * descendant of the entity referred to by this address.
+	 * 
+	 * @return true if 'descendant' refers to an entity contained in the entity
+	 *         referred to by this address.
+	 */
+	boolean contains(XAddress descendant);
+	
+	/**
+	 * Checks whether the entity referred to by {@link XAdress} descendant is a
+	 * child of the entity referred to by this address or if both
+	 * {@link XAddress}es refer to the same entity.
+	 * 
+	 * @return true if 'descendant' refers to an entity contained in the entity
+	 *         referred to by this address or if 'descendant' refers to the same
+	 *         entity as this address.
+	 */
+	boolean equalsOrContains(XAddress descendant);
+	
+	/**
+	 * Checks whether the entity referred to by the {@link XAddress} child is a
+	 * direct child of the entity referred to by this address.
+	 * 
+	 * @return true if 'child' refers to an entity directly contained in the
+	 *         entity referred to by this address.
+	 */
+	boolean isParentOf(XAddress child);
+	
 }

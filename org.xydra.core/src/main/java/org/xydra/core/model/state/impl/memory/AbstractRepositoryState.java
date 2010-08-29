@@ -1,10 +1,8 @@
 package org.xydra.core.model.state.impl.memory;
 
-import org.xydra.core.XX;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XType;
-import org.xydra.core.model.impl.memory.MemoryAddress;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
 import org.xydra.core.model.state.XRepositoryState;
@@ -24,7 +22,7 @@ public abstract class AbstractRepositoryState extends AbstractState implements X
 	
 	public AbstractRepositoryState(XAddress repoAddr) {
 		super(repoAddr);
-		if(MemoryAddress.getAddressedType(repoAddr) != XType.XREPOSITORY) {
+		if(repoAddr.getAddressedType() != XType.XREPOSITORY) {
 			throw new RuntimeException("must be a repository address, was: " + repoAddr);
 		}
 	}
@@ -69,7 +67,7 @@ public abstract class AbstractRepositoryState extends AbstractState implements X
 		if(modelState == null) {
 			throw new IllegalArgumentException("modelState was null");
 		}
-		if(!XX.contains(getAddress(), modelState.getAddress())) {
+		if(!getAddress().contains(modelState.getAddress())) {
 			throw new IllegalArgumentException("cannot add model state " + modelState.getAddress()
 			        + " to " + getAddress());
 		}

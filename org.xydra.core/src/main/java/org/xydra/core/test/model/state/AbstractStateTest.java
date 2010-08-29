@@ -22,6 +22,7 @@ import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
 import org.xydra.core.model.state.XRepositoryState;
 import org.xydra.core.model.state.XSPI;
+import org.xydra.core.value.XV;
 
 
 /**
@@ -290,7 +291,7 @@ public abstract class AbstractStateTest {
 		
 		XSPI.getStateStore().createObjectState(ao1);
 		XFieldState fieldState = XSPI.getStateStore().createFieldState(af1);
-		fieldState.setValue(X.getValueFactory().createDoubleValue(3.1415));
+		fieldState.setValue(XV.toValue(3.1415));
 		fieldState.save(null);
 		
 		if(canPersist()) {

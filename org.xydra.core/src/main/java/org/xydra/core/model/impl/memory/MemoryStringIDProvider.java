@@ -8,7 +8,6 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.XIDProvider;
 
 
-
 /**
  * An implementation of {@link XIDProvider}
  * 
@@ -37,27 +36,32 @@ public class MemoryStringIDProvider implements XIDProvider {
 	}
 	
 	public XID fromString(String uriString) {
-		if(uriString.matches(nameRegex)) {
-			return new MemoryStringID(uriString);
-		} else
+		
+		if(!uriString.matches(nameRegex)) {
 			throw new IllegalArgumentException("'" + uriString
 			        + "' is not a valid XML name or contains ':', cannot create XID");
+		}
+		
+		return new MemoryStringID(uriString);
 	}
 	
 	public XAddress fromAddress(String address) {
+		
 		if(address == null) {
 			throw new IllegalArgumentException("address may not be null");
 		}
 		String[] components = address.split("/");
 		// TODO this strips any trailing slashes - is that OK?
 		
-		if(components.length > 5)
+		if(components.length > 5) {
 			throw new URIFormatException("The address \"" + address
 			        + "\" contains too many components.");
+		}
 		
-		if(components.length < 2 || components[0].length() > 0)
+		if(components.length < 2 || components[0].length() > 0) {
 			throw new URIFormatException("The address \"" + address
 			        + "\" does not start with a slash ('/').");
+		}
 		
 		XID repository = null;
 		if(components.length >= 2 && !components[1].equals("-")) {

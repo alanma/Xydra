@@ -43,6 +43,7 @@ public class MemoryAddress implements XAddress {
 	 *             null, fieldID) or (repoID or null, modelID, null, fieldID)
 	 */
 	protected MemoryAddress(XID repository, XID model, XID object, XID field) {
+		
 		if((repository != null || model != null) && object == null && field != null) {
 			throw new IllegalArgumentException(
 			        "Repository or model, and field not null, but object is null. This is not allowed!");
@@ -81,86 +82,43 @@ public class MemoryAddress implements XAddress {
 		return this.repository;
 	}
 	
-	/*
-	 * M=Model, O = Object, F = Field, - = null.
-	 * 
-	 * From Address to Parent:
-	 * 
-	 * RMOF -> RMO
-	 * 
-	 * RMO- -> RM
-	 * 
-	 * RM-- -> R
-	 * 
-	 * R--- -> null, no parent defined
-	 * 
-	 * -MOF -> -MO-
-	 * 
-	 * -MO- -> -M--
-	 * 
-	 * -M-- -> null, no parent defined
-	 * 
-	 * --OF -> --O-
-	 * 
-	 * --O- -> null, no parent defined
-	 * 
-	 * ---F -> null, no parent defined
-	 */
 	public XAddress getParent() {
-		// start looking at highest entity
-		if(this.repository == null) {
-			if(this.model == null) {
-				if(this.object == null) {
-					// ---F => no parent defined
-					return null;
-				} else {
-					// object is defined
-					if(this.field == null) {
-						// --O- => no parent defined
-						return null;
-					} else {
-						// --OF => O
-						return new MemoryAddress(null, null, this.object, null);
-					}
-				}
-			} else {
-				// model is defined
-				if(this.object == null) {
-					// -M-- -> no parent defined
-					return null;
-				} else {
-					// object is defined
-					if(this.field == null) {
-						// -MO- => M
-						return new MemoryAddress(null, this.model, null, null);
-					} else {
-						// -MOF => O
-						return new MemoryAddress(null, this.model, this.object, null);
-					}
-				}
-			}
-		} else {
-			// repository != null
-			if(this.model == null) {
-				// R--- => a repository has no parent
+		
+		if(this.field != null) {
+			// ???F
+			if(this.object == null) {
+				// ---F => no parent
+				assert this.model == null && this.repository == null;
 				return null;
-			} else {
-				// model is defined
-				if(this.object == null) {
-					// RM-- -> parent is repo
-					return new MemoryAddress(this.repository, null, null, null);
-				} else {
-					// object is defined
-					if(this.field == null) {
-						// RMO- => M
-						return new MemoryAddress(this.repository, this.model, null, null);
-					} else {
-						// RMOF => O
-						return new MemoryAddress(this.repository, this.model, this.object, null);
-					}
-				}
 			}
+			// ??OF => ??O-
+			return new MemoryAddress(this.repository, this.model, this.object, null);
 		}
+		
+		if(this.object != null) {
+			// ??O-
+			if(this.model == null) {
+				// --O- => no parent
+				assert this.repository == null;
+				return null;
+			}
+			// ?MO- => ?M--
+			return new MemoryAddress(this.repository, this.model, null, null);
+		}
+		
+		if(this.model != null) {
+			// ?M--
+			if(this.repository == null) {
+				// -M-- => no parent
+				return null;
+			}
+			// RM-- => R---
+			return new MemoryAddress(this.repository, null, null, null);
+		}
+		
+		// R---
+		assert this.repository != null;
+		return null;
 	}
 	
 	/**
@@ -170,6 +128,7 @@ public class MemoryAddress implements XAddress {
 	 */
 	@Override
 	public String toString() {
+		
 		StringBuffer uri = new StringBuffer();
 		
 		uri.append('/');
@@ -205,6 +164,7 @@ public class MemoryAddress implements XAddress {
 	
 	@Override
 	public int hashCode() {
+		
 		int hash = 0;
 		
 		if(this.repository != null) {
@@ -224,10 +184,10 @@ public class MemoryAddress implements XAddress {
 	
 	@Override
 	public boolean equals(Object obj) {
-		if(obj == null)
+		
+		if(!(obj instanceof XAddress)) {
 			return false;
-		if(!(obj instanceof XAddress))
-			return false;
+		}
 		XAddress other = (XAddress)obj;
 		return XI.equals(this.repository, other.getRepository())
 		        && XI.equals(this.model, other.getModel())
@@ -239,99 +199,95 @@ public class MemoryAddress implements XAddress {
 		return toString();
 	}
 	
-	/**
-	 * Returns the {@link XType} of the entity which the given {@link XAddress}
-	 * refers to.
-	 * 
-	 * @param address The {@link XAddress} which {@link XType} is going to be
-	 *            returned
-	 * @return the {@link XType} of the entity which te given {@link XAddress}
-	 *         refers to
-	 * @throws AssertionError if the given {@link XAddress} is an illegal
-	 *             {@link XAddress}
-	 */
-	// TODO maybe consider putting this method into an utility class (for
-	// example if
-	// XX is going to be split up)
-	public static XType getAddressedType(XAddress address) {
-		// what is this address addressing?
-		if(address.getRepository() == null) {
-			if(address.getModel() == null) {
-				if(address.getObject() == null) {
-					if(address.getField() == null) {
-						// (-,-,-,-) ERROR
-						throw new AssertionError("This Address should never have been created");
-					} else {
-						// (-,-,-,+) FIELD
-						return XType.XFIELD;
-					}
-				} else {
-					if(address.getField() == null) {
-						// (-,-,+,-) OBJECT
-						return XType.XOBJECT;
-					} else {
-						// (-,-,+,+) FIELD
-						return XType.XFIELD;
-					}
-				}
-			} else {
-				if(address.getObject() == null) {
-					if(address.getField() == null) {
-						// (-,+,-,-) MODEL
-						return XType.XMODEL;
-					} else {
-						// (-,+,-,+) ERROR
-						throw new AssertionError("This Address should never have been created");
-					}
-				} else {
-					if(address.getField() == null) {
-						// (-,+,+,-) OBJECT
-						return XType.XOBJECT;
-					} else {
-						// (-,+,+,+) FIELD
-						return XType.XFIELD;
-					}
-				}
-			}
+	public XType getAddressedType() {
+		
+		if(this.field != null) {
+			// ???F => field
+			return XType.XFIELD;
+		} else if(this.object != null) {
+			// ??O- => object
+			return XType.XOBJECT;
+		} else if(this.model != null) {
+			// ?M-- => model
+			return XType.XMODEL;
 		} else {
-			if(address.getModel() == null) {
-				if(address.getObject() == null) {
-					if(address.getField() == null) {
-						// (+,-,-,-) REPO
-						return XType.XREPOSITORY;
-					} else {
-						// (+,-,-,+) ERROR
-						throw new AssertionError("This Address should never have been created");
-					}
-				} else {
-					if(address.getField() == null) {
-						// (+,-,+,-) ERROR
-						throw new AssertionError("This Address should never have been created");
-					} else {
-						// (+,-,+,+) ERROR
-						throw new AssertionError("This Address should never have been created");
-					}
-				}
-			} else {
-				if(address.getObject() == null) {
-					if(address.getField() == null) {
-						// (+,+,-,-) MODEL
-						return XType.XMODEL;
-					} else {
-						// (+,+,-,+) ERROR
-						throw new AssertionError("This Address should never have been created");
-					}
-				} else {
-					if(address.getField() == null) {
-						// (+,+,+,-) OBJECT
-						return XType.XOBJECT;
-					} else {
-						// (+,+,+,+) FIELD
-						return XType.XFIELD;
-					}
-				}
-			}
+			// R--- => repository
+			assert this.repository != null;
+			return XType.XREPOSITORY;
 		}
+	}
+	
+	public boolean contains(XAddress descendant) {
+		
+		if(!XI.equals(this.repository, descendant.getRepository())) {
+			return false;
+		}
+		
+		// same repository (may be null)
+		
+		if(!XI.equals(this.model, descendant.getModel())) {
+			return this.repository != null && this.model == null;
+		}
+		
+		// same repository and model (may be null)
+		
+		if(!XI.equals(this.object, descendant.getObject())) {
+			return this.model != null && this.object == null;
+		}
+		
+		// same repository, model and object (may be null)
+		
+		return this.object != null && this.field == null && descendant.getField() != null;
+		
+	}
+	
+	public boolean equalsOrContains(XAddress descendant) {
+		
+		if(!XI.equals(this.repository, descendant.getRepository())) {
+			return false;
+		}
+		
+		// same repository (may be null)
+		
+		if(!XI.equals(this.model, descendant.getModel())) {
+			return this.repository != null && this.model == null;
+		}
+		
+		// same repository and model (may be null)
+		
+		if(!XI.equals(this.object, descendant.getObject())) {
+			return this.model != null && this.object == null;
+		}
+		
+		// same repository, model and object (may be null)
+		
+		return XI.equals(this.field, descendant.getField())
+		        || (this.object != null && this.field == null);
+		
+	}
+	
+	public boolean isParentOf(XAddress child) {
+		
+		if(!XI.equals(this.repository, child.getRepository())) {
+			return false;
+		}
+		
+		// same repository (may be null)
+		
+		if(!XI.equals(this.model, child.getModel())) {
+			return this.repository != null && this.model == null && child.getObject() == null;
+		}
+		
+		// same repository and model (may be null)
+		
+		if(!XI.equals(this.object, child.getObject())) {
+			return this.model != null && this.object == null && child.getField() == null;
+		}
+		
+		// same repository, model and object (may be null)
+		
+		return this.object != null && this.field == null && child.getField() != null;
+		
 	}
 	
 }

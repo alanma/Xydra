@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.access.XA;
 import org.xydra.core.access.XAccessManager;
 import org.xydra.core.access.XGroupDatabase;
@@ -30,12 +31,12 @@ import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
-import org.xydra.core.model.XIDProvider;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.state.XSPI;
 import org.xydra.core.model.state.impl.memory.TemporaryStateStore;
+import org.xydra.core.value.XV;
 import org.xydra.core.value.XValue;
 
 
@@ -99,21 +100,18 @@ public class XModelBasics {
 		 * XID.
 		 */
 
-		// getting the XIDProvider
-		XIDProvider xidProvider = X.getIDProvider();
-		
 		// creating an ID from a string
-		XID stringID = xidProvider.fromString("ExampleModel");
+		XID stringID = XX.toId("ExampleModel");
 		
 		// creating a random & unique ID
-		xidProvider.createUniqueID();
+		XX.createUniqueID();
 		
 		/*
 		 * If you want to create a new XModel you also have to specify who or
 		 * what creates the XModel by passing a so called actor ID, which also
 		 * is an XID
 		 */
-		XID actorID = xidProvider.fromString("ExampleActor");
+		XID actorID = XX.toId("ExampleActor");
 		
 		// actually creating the model
 		XModel model = repository.createModel(actorID, stringID);
@@ -137,7 +135,7 @@ public class XModelBasics {
 		 */
 
 		// creating the XObject
-		XID objectID = xidProvider.fromString("ExampleObject");
+		XID objectID = XX.toId("ExampleObject");
 		model.createObject(actorID, objectID);
 		
 		/*
@@ -152,17 +150,18 @@ public class XModelBasics {
 		 * works the same as creating an XObject.
 		 */
 
-		XID fieldID = xidProvider.fromString("ExampleField");
+		XID fieldID = XX.toId("ExampleField");
 		XField field = object.createField(actorID, fieldID);
 		
 		/*
 		 * Setting the value of a field is just as simple, but first we have to
-		 * create a new XValue using the XValueFactory. The are many different
+		 * create a new XValue. This can be done by using the XValueFactory or
+		 * the convenience functions in the XV class. The are many different
 		 * XValue types, as an example we'll create a String value and pass it
 		 * to the field.
 		 */
 
-		XValue stringValue = X.getValueFactory().createStringValue("StringValue");
+		XValue stringValue = XV.toValue("StringValue");
 		field.setValue(actorID, stringValue);
 		
 		/*
@@ -170,7 +169,7 @@ public class XModelBasics {
 		 * change the value-type of our XField to an Integer, if we wanted to.
 		 */
 
-		XValue integerValue = X.getValueFactory().createIntegerValue(42);
+		XValue integerValue = XV.toValue(42);
 		field.setValue(actorID, integerValue);
 		
 		/*
@@ -298,7 +297,7 @@ public class XModelBasics {
 		assertNotNull(field);
 		
 		// and, finally, lets set the value of the field
-		XValue doubleValue = X.getValueFactory().createDoubleValue(3.14159);
+		XValue doubleValue = XV.toValue(3.14159);
 		XFieldCommand fieldCommand = commandFactory.createAddValueCommand(repositoryID, modelID,
 		        object1ID, fieldID, field.getRevisionNumber(), doubleValue, false);
 		
@@ -342,7 +341,7 @@ public class XModelBasics {
 		// building the commands
 		XID objectID = X.getIDProvider().createUniqueID();
 		XID fieldID = X.getIDProvider().createUniqueID();
-		XValue doubleValue = X.getValueFactory().createDoubleValue(3.14159);
+		XValue doubleValue = XV.toValue(3.14159);
 		
 		XModelCommand addObjectCommandCommand = commandFactory.createAddObjectCommand(repositoryID,
 		        modelID, objectID, false);

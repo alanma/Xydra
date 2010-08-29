@@ -3,11 +3,10 @@ package org.xydra.core.xml;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.model.XID;
-import org.xydra.core.model.XIDProvider;
+import org.xydra.core.value.XV;
 import org.xydra.core.value.XValue;
-import org.xydra.core.value.XValueFactory;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
 
@@ -19,9 +18,6 @@ import org.xydra.core.xml.impl.XmlOutStringBuffer;
  * 
  */
 public class XmlValueTest {
-	
-	private final static XValueFactory fact = X.getValueFactory();
-	private final static XIDProvider ids = X.getIDProvider();
 	
 	private void testValue(XValue value) {
 		XmlOutStringBuffer out = new XmlOutStringBuffer();
@@ -36,82 +32,82 @@ public class XmlValueTest {
 	
 	@Test
 	public void testBooleanValueTrue() {
-		testValue(fact.createBooleanValue(true));
+		testValue(XV.toValue(true));
 	}
 	
 	@Test
 	public void testBooleanValueFalse() {
-		testValue(fact.createBooleanValue(false));
+		testValue(XV.toValue(false));
 	}
 	
 	@Test
 	public void testDoubleValue() {
-		testValue(fact.createDoubleValue(3054.24358989015234));
+		testValue(XV.toValue(3054.24358989015234));
 	}
 	
 	@Test
 	public void testIdValue() {
-		testValue(fact.createIDValue(ids.createUniqueID()));
+		testValue(XV.toValue(XX.createUniqueID()));
 	}
 	
 	@Test
 	public void testIdValueNull() {
-		testValue(fact.createIDValue(null));
+		testValue(XV.toValue((XID)null));
 	}
 	
 	@Test
 	public void testIntegerValue() {
-		testValue(fact.createIntegerValue(314));
+		testValue(XV.toValue(314));
 	}
 	
 	@Test
 	public void testLongValue() {
-		testValue(fact.createLongValue(1236987216398637867L));
+		testValue(XV.toValue(1236987216398637867L));
 	}
 	
 	@Test
 	public void testStringValue() {
-		testValue(fact.createStringValue("cookie monster"));
+		testValue(XV.toValue("cookie monster"));
 	}
 	
 	@Test
 	public void testStringValueEmpty() {
-		testValue(fact.createStringValue(""));
+		testValue(XV.toValue(""));
 	}
 	
 	@Test
 	public void testStringValueUnsafe() {
-		testValue(fact.createStringValue("&gt;<"));
+		testValue(XV.toValue("&gt;<"));
 	}
 	
 	@Test
 	public void testStringValueSpace() {
-		testValue(fact.createStringValue("  test  "));
+		testValue(XV.toValue("  test  "));
 	}
 	
 	@Test
 	public void testStringValueTabs() {
-		testValue(fact.createStringValue("\t\ttest\t\t"));
+		testValue(XV.toValue("\t\ttest\t\t"));
 	}
 	
 	@Test
 	public void testStringValueNewlines() {
-		testValue(fact.createStringValue("\n\ntest\n\n"));
+		testValue(XV.toValue("\n\ntest\n\n"));
 	}
 	
 	@Test
 	public void testStringValueNull() {
-		testValue(fact.createStringValue(null));
+		testValue(XV.toValue((String)null));
 	}
 	
 	@Test
 	public void testBooleanListValue() {
-		testValue(fact.createBooleanListValue(new boolean[] { true, true, false }));
+		testValue(XV.toValue(new boolean[] { true, true, false }));
 	}
 	
 	@Test
 	public void testBooleanListValueEmpty() {
-		testValue(fact.createBooleanListValue(new boolean[] {}));
+		testValue(XV.toValue(new boolean[] {}));
 	}
 	
 	@Test
@@ -121,144 +117,142 @@ public class XmlValueTest {
 			bytes[i] = (byte)i;
 			bytes[bytes.length - i - 1] = (byte)i;
 		}
-		testValue(fact.createByteListValue(bytes));
+		testValue(XV.toValue(bytes));
 	}
 	
 	@Test
 	public void testByteListValueEmpty() {
-		testValue(fact.createByteListValue(new byte[] {}));
+		testValue(XV.toValue(new byte[] {}));
 	}
 	
 	@Test
 	public void testDoubleListValue() {
-		testValue(fact.createDoubleListValue(new double[] { 1.0, -2.1, 23.2342346, 42.0 }));
+		testValue(XV.toValue(new double[] { 1.0, -2.1, 23.2342346, 42.0 }));
 	}
 	
 	@Test
 	public void testDoubleListValueEmpty() {
-		testValue(fact.createDoubleListValue(new double[] {}));
+		testValue(XV.toValue(new double[] {}));
 	}
 	
 	@Test
 	public void testIdListValue() {
-		testValue(fact
-		        .createIDListValue(new XID[] { ids.createUniqueID(), ids.fromString("cookie") }));
+		testValue(XV.toValue(new XID[] { XX.createUniqueID(), XX.toId("cookie") }));
 	}
 	
 	@Test
 	public void testIdListValueNull() {
-		testValue(fact.createIDListValue(new XID[] { null }));
+		testValue(XV.toValue(new XID[] { null }));
 	}
 	
 	@Test
 	public void testIdListValueEmpty() {
-		testValue(fact.createIDListValue(new XID[] {}));
+		testValue(XV.toValue(new XID[] {}));
 	}
 	
 	@Test
 	public void testIntegerListValue() {
-		testValue(fact.createIntegerListValue(new int[] { 1, 42, -8 }));
+		testValue(XV.toValue(new int[] { 1, 42, -8 }));
 	}
 	
 	@Test
 	public void testIntegerListValueEmpty() {
-		testValue(fact.createIntegerListValue(new int[] {}));
+		testValue(XV.toValue(new int[] {}));
 	}
 	
 	@Test
 	public void testLongListValue() {
-		testValue(fact.createLongListValue(new long[] { 2385672643864235434L, -324L }));
+		testValue(XV.toValue(new long[] { 2385672643864235434L, -324L }));
 	}
 	
 	@Test
 	public void testLongListValueEmpty() {
-		testValue(fact.createLongListValue(new long[] {}));
+		testValue(XV.toValue(new long[] {}));
 	}
 	
 	@Test
 	public void testStringListValue() {
-		testValue(fact.createStringListValue(new String[] { "cookie", "monster" }));
+		testValue(XV.toValue(new String[] { "cookie", "monster" }));
 	}
 	
 	@Test
 	public void testStringListValueNull() {
-		testValue(fact.createStringListValue(new String[] { null }));
+		testValue(XV.toValue(new String[] { null }));
 	}
 	
 	@Test
 	public void testStringListValueEmpty() {
-		testValue(fact.createStringListValue(new String[] {}));
+		testValue(XV.toValue(new String[] {}));
 	}
 	
 	@Test
 	public void testStringListValueUnsafe() {
-		testValue(fact.createStringListValue(new String[] { "&gt;<" }));
+		testValue(XV.toValue(new String[] { "&gt;<" }));
 	}
 	
 	@Test
 	public void testStringListValueSpace() {
-		testValue(fact.createStringListValue(new String[] { "  test  " }));
+		testValue(XV.toValue(new String[] { "  test  " }));
 	}
 	
 	@Test
 	public void testStringListValueTabs() {
-		testValue(fact.createStringListValue(new String[] { "\t\ttest\t\t" }));
+		testValue(XV.toValue(new String[] { "\t\ttest\t\t" }));
 	}
 	
 	@Test
 	public void testStringListValueNewlines() {
-		testValue(fact.createStringListValue(new String[] { "\n\ntest\n\n" }));
+		testValue(XV.toValue(new String[] { "\n\ntest\n\n" }));
 	}
 	
 	@Test
 	public void testIdSetValue() {
-		testValue(fact
-		        .createIDSetValue(new XID[] { ids.createUniqueID(), ids.fromString("cookie") }));
+		testValue(XV.toSetValue(new XID[] { XX.createUniqueID(), XX.toId("cookie") }));
 	}
 	
 	@Test
 	public void testIdSetValueNull() {
-		testValue(fact.createIDSetValue(new XID[] { null }));
+		testValue(XV.toSetValue(new XID[] { null }));
 	}
 	
 	@Test
 	public void testIdSetValueEmpty() {
-		testValue(fact.createIDSetValue(new XID[] {}));
+		testValue(XV.toSetValue(new XID[] {}));
 	}
 	
 	@Test
 	public void testStringSetValue() {
-		testValue(fact.createStringSetValue(new String[] { "cookie", "monster" }));
+		testValue(XV.toSetValue(new String[] { "cookie", "monster" }));
 	}
 	
 	@Test
 	public void testStringSetValueNull() {
-		testValue(fact.createStringSetValue(new String[] { null }));
+		testValue(XV.toSetValue(new String[] { null }));
 	}
 	
 	@Test
 	public void testStringSetValueEmpty() {
-		testValue(fact.createStringSetValue(new String[] {}));
+		testValue(XV.toSetValue(new String[] {}));
 	}
 	
 	@Test
 	public void testStringSetValueUnsafe() {
-		testValue(fact.createStringSetValue(new String[] { "&gt;<" }));
+		testValue(XV.toSetValue(new String[] { "&gt;<" }));
 	}
 	
 	@Test
 	public void testStringSetValueSpace() {
-		testValue(fact.createStringSetValue(new String[] { "  test  " }));
+		testValue(XV.toSetValue(new String[] { "  test  " }));
 	}
 	
 	@Test
 	public void testStringSetValueTabs() {
-		testValue(fact.createStringSetValue(new String[] { "\t\ttest\t\t" }));
+		testValue(XV.toSetValue(new String[] { "\t\ttest\t\t" }));
 	}
 	
 	@Test
 	public void testStringSetValueNewlines() {
-		testValue(fact.createStringSetValue(new String[] { "\n\ntest\n\n" }));
+		testValue(XV.toSetValue(new String[] { "\n\ntest\n\n" }));
 	}
 	
 }

@@ -7,7 +7,6 @@ import java.util.Set;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
-import org.xydra.core.XX;
 import org.xydra.core.access.XA;
 import org.xydra.core.access.XAccessDefinition;
 import org.xydra.core.access.XAccessEvent;
@@ -237,7 +236,7 @@ public class MemoryAccessManager extends AbstractAccessManager {
 			if(!allowed) {
 				
 				XAddress resource = tuple.getKey2();
-				if(XX.equalsOrContains(rootResource, resource)) {
+				if(rootResource.equalsOrContains(resource)) {
 					// denied for at least one resource
 					return XAccessValue.DENIED;
 				}
@@ -263,7 +262,7 @@ public class MemoryAccessManager extends AbstractAccessManager {
 			}
 			
 			XAddress resource = tuple.getKey2();
-			if(!XX.contains(rootResource, resource)) {
+			if(!rootResource.contains(resource)) {
 				continue;
 			}
 			
@@ -303,7 +302,7 @@ public class MemoryAccessManager extends AbstractAccessManager {
 			}
 			
 			XAddress resource = tuple.getKey2();
-			if(!XX.contains(rootResource, resource)) {
+			if(!rootResource.contains(resource)) {
 				continue;
 			}
 			

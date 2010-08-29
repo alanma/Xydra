@@ -8,10 +8,12 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.state.XSPI;
 import org.xydra.core.test.model.state.TestStateStore;
+import org.xydra.core.value.XV;
 
 
 /**
@@ -37,10 +39,10 @@ public class StrictStateTest {
 	
 	@Before
 	public void setUp() {
-		model = repo.createModel(null, X.getIDProvider().createUniqueID());
-		object = model.createObject(null, X.getIDProvider().createUniqueID());
-		field = object.createField(null, X.getIDProvider().createUniqueID());
-		field.setValue(null, X.getValueFactory().createStringValue("Cookie Monster"));
+		model = repo.createModel(null, XX.createUniqueID());
+		object = model.createObject(null, XX.createUniqueID());
+		field = object.createField(null, XX.createUniqueID());
+		field.setValue(null, XV.toValue("Cookie Monster"));
 		try {
 			store.checkConsistency();
 		} finally {
@@ -70,23 +72,22 @@ public class StrictStateTest {
 	
 	@Test
 	public void testCreateModel() {
-		repo.createModel(null, X.getIDProvider().createUniqueID());
+		repo.createModel(null, XX.createUniqueID());
 	}
 	
 	@Test
 	public void testCreateObject() {
-		model.createObject(null, X.getIDProvider().createUniqueID());
+		model.createObject(null, XX.createUniqueID());
 	}
 	
 	@Test
 	public void testCreateField() {
-		object.createField(null, X.getIDProvider().createUniqueID());
+		object.createField(null, XX.createUniqueID());
 	}
 	
 	@Test
 	public void testSetValue() {
-		field.setValue(null, X.getValueFactory().createByteListValue(
-		        new byte[] { 'C', 'O', 'O', 'K', 'I', 'E', '!' }));
+		field.setValue(null, XV.toValue(new byte[] { 'C', 'O', 'O', 'K', 'I', 'E', '!' }));
 	}
 	
 	@Test

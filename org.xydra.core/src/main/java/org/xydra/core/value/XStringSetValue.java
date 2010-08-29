@@ -17,4 +17,16 @@ public interface XStringSetValue extends XSetValue<String> {
 	 */
 	String[] contents();
 	
+	/**
+	 * Create a new {@link XStringSetValue} contains all entries from this value
+	 * as well as the specified entry. This value is not modified.
+	 */
+	XStringSetValue add(String entry);
+	
+	/**
+	 * Create a new {@link XSetValue} contains all entries from this value
+	 * except the specified entry. This value is not modified.
+	 */
+	XStringSetValue remove(String entry);
+	
 }

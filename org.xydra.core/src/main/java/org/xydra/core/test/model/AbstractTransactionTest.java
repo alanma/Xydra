@@ -29,7 +29,9 @@ import org.xydra.core.model.XRepository;
 import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.core.test.ChangeRecorder;
 import org.xydra.core.test.HasChanged;
+import org.xydra.core.value.XV;
 import org.xydra.core.value.XValue;
+import org.xydra.index.XI;
 
 
 /**
@@ -39,10 +41,9 @@ import org.xydra.core.value.XValue;
  */
 abstract public class AbstractTransactionTest {
 	
-	private static final XValue JOHN_ALIAS = X.getValueFactory()
-	        .createStringValue("Cookie Monster");
-	private static final XValue PETER_PHONE = X.getValueFactory().createStringValue("934-253-2");
-	private static final XValue JOHN_PHONE = X.getValueFactory().createStringValue("87589-876");
+	private static final XValue JOHN_ALIAS = XV.toValue("Cookie Monster");
+	private static final XValue PETER_PHONE = XV.toValue("934-253-2");
+	private static final XValue JOHN_PHONE = XV.toValue("87589-876");
 	
 	private static final XID MODEL_ID = X.getIDProvider().fromString("model");
 	private static final XID ACTOR_ID = X.getIDProvider().fromString("actor");
@@ -173,7 +174,7 @@ abstract public class AbstractTransactionTest {
 		
 		assertEquals(received.size(), te.size());
 		
-		assertTrue(XX.equalsIterator(received.iterator(), te.iterator()));
+		assertTrue(XI.equalsIterator(received.iterator(), te.iterator()));
 		
 	}
 	
@@ -321,7 +322,7 @@ abstract public class AbstractTransactionTest {
 		assertFalse(peterObjectListener.eventsReceived);
 		assertFalse(peterFieldListener.eventsReceived);
 		XField peterAlias = this.model.getObject(PETER_ID).createField(ACTOR_ID, ALIAS_ID);
-		peterAlias.setValue(ACTOR_ID, X.getValueFactory().createStringValue("nomnomnom"));
+		peterAlias.setValue(ACTOR_ID, XV.toValue("nomnomnom"));
 		assertTrue(peterObjectListener.eventsReceived);
 		assertTrue(peterFieldListener.eventsReceived);
 		
@@ -399,7 +400,7 @@ abstract public class AbstractTransactionTest {
 		
 		assertEquals(received.size(), te.size());
 		
-		assertTrue(XX.equalsIterator(received.iterator(), te.iterator()));
+		assertTrue(XI.equalsIterator(received.iterator(), te.iterator()));
 		
 		/* check events received from object */
 
@@ -556,7 +557,7 @@ abstract public class AbstractTransactionTest {
 		
 		// test if the event listeners are still there
 		assertFalse(phoneListener.eventsReceived);
-		XValue newPhone = X.getValueFactory().createStringValue("0-NEW-PHONE");
+		XValue newPhone = XV.toValue("0-NEW-PHONE");
 		phone.setValue(ACTOR_ID, newPhone);
 		assertTrue(phoneListener.eventsReceived);
 		
@@ -618,7 +619,7 @@ abstract public class AbstractTransactionTest {
 		assertFalse(peterObjectListener.eventsReceived);
 		assertFalse(peterFieldListener.eventsReceived);
 		XField peterAlias = this.model.getObject(PETER_ID).createField(ACTOR_ID, ALIAS_ID);
-		peterAlias.setValue(ACTOR_ID, X.getValueFactory().createStringValue("nomnomnom"));
+		peterAlias.setValue(ACTOR_ID, XV.toValue("nomnomnom"));
 		assertTrue(peterObjectListener.eventsReceived);
 		assertTrue(peterFieldListener.eventsReceived);
 		
