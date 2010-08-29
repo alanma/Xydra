@@ -5,7 +5,6 @@ import java.util.Iterator;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
@@ -129,7 +128,7 @@ public class XSynchronizeChangesResource {
 			events = new AbstractTransformingIterator<XEvent,XEvent>(events) {
 				@Override
 				public XEvent transform(XEvent in) {
-					if(!XX.equalsOrContains(addr, in.getTarget())) {
+					if(!addr.equalsOrContains(in.getTarget())) {
 						return null;
 					}
 					return in;

@@ -19,7 +19,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.access.XA;
 import org.xydra.core.access.XAccessManager;
 import org.xydra.core.model.XID;
@@ -43,9 +43,9 @@ import org.xydra.server.RepositoryManager;
  */
 public abstract class AbstractRestApiTest {
 	
-	protected static final XID REPO_ID = X.getIDProvider().fromString("localrepo");
+	protected static final XID REPO_ID = XX.toId("localrepo");
 	
-	protected static final XID ACTOR_TESTER = X.getIDProvider().fromString("tester");
+	protected static final XID ACTOR_TESTER = XX.toId("tester");
 	
 	@BeforeClass
 	public static void init() {
@@ -70,7 +70,7 @@ public abstract class AbstractRestApiTest {
 	
 	public static final String MISSING_ID = "cookiemonster";
 	
-	public static final XID NEW_ID = X.getIDProvider().fromString("new");
+	public static final XID NEW_ID = XX.toId("new");
 	
 	@Before
 	public void setUp() {

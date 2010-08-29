@@ -7,7 +7,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.session.XProtectedField;
 import org.xydra.core.model.session.XProtectedModel;
@@ -97,7 +97,7 @@ public class XydraServer {
 	
 	public static XID getId(String idStr) {
 		try {
-			return X.getIDProvider().fromString(idStr);
+			return XX.toId(idStr);
 		} catch(Exception e) {
 			throw new RestlessException(RestlessException.Bad_request, "invalid XID: " + idStr);
 		}
@@ -183,7 +183,7 @@ public class XydraServer {
 				
 				try {
 					// TODO authenticate
-					return X.getIDProvider().fromString(cookie.getValue());
+					return XX.toId(cookie.getValue());
 				} catch(Exception e) {
 					throw new RestlessException(RestlessException.Unauthorized,
 					        "actor is invalid XID: " + cookie.getValue());

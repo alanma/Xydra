@@ -14,13 +14,13 @@ import java.net.URL;
 import java.util.Iterator;
 
 import org.junit.Test;
-import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.test.DemoModelUtil;
+import org.xydra.core.value.XV;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlModel;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
@@ -34,7 +34,7 @@ import org.xydra.core.xml.impl.XmlOutStringBuffer;
  */
 public abstract class DataApiTest extends AbstractRestApiTest {
 	
-	private static final XID JANE_ID = X.getIDProvider().fromString("jane");
+	private static final XID JANE_ID = XX.toId("jane");
 	
 	@Test
 	public void testGetModelTrivial() throws IOException {
@@ -232,7 +232,7 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		// change model
 		john.removeField(null, DemoModelUtil.ALIASES_ID);
 		john.createField(null, AbstractRestApiTest.NEW_ID);
-		phone.setValue(null, X.getValueFactory().createStringValue("342-170984-7892"));
+		phone.setValue(null, XV.toValue("342-170984-7892"));
 		model.createObject(null, JANE_ID);
 		model.removeObject(null, DemoModelUtil.PETER_ID);
 		
@@ -276,7 +276,7 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		// change object
 		john.removeField(null, DemoModelUtil.ALIASES_ID);
 		john.createField(null, AbstractRestApiTest.NEW_ID);
-		phone.setValue(null, X.getValueFactory().createStringValue("342-170984-7892"));
+		phone.setValue(null, XV.toValue("342-170984-7892"));
 		
 		XmlOutStringBuffer out = new XmlOutStringBuffer();
 		XmlModel.toXml(john, out, false, false, false);
@@ -312,7 +312,7 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		XObject john = model.getObject(DemoModelUtil.JOHN_ID);
 		long titleRev = john.getField(DemoModelUtil.TITLE_ID).getRevisionNumber();
 		XField phone = john.getField(DemoModelUtil.PHONE_ID);
-		phone.setValue(null, X.getValueFactory().createStringValue("342-170984-7892"));
+		phone.setValue(null, XV.toValue("342-170984-7892"));
 		
 		XmlOutStringBuffer out = new XmlOutStringBuffer();
 		XmlModel.toXml(phone, out, false);

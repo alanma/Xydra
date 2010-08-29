@@ -18,7 +18,6 @@ import java.util.List;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
@@ -34,6 +33,8 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.test.DemoModelUtil;
+import org.xydra.core.value.XStringValue;
+import org.xydra.core.value.XV;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlCommand;
 import org.xydra.core.xml.XmlEvent;
@@ -50,6 +51,8 @@ import org.xydra.index.iterator.AbstractTransformingIterator;
  */
 public abstract class ChangesApiTest extends AbstractRestApiTest {
 	
+	private static final XStringValue VALUE_COOKIE = XV.toValue("Cookie!");
+
 	@BeforeClass
 	public static void init() {
 		AbstractRestApiTest.init();
@@ -90,8 +93,7 @@ public abstract class ChangesApiTest extends AbstractRestApiTest {
 		
 		XAddress context = target;
 		if(target.getObject() != null) {
-			context = X.getIDProvider().fromComponents(target.getRepository(), target.getModel(),
-			        null, null);
+			context = XX.toAddress(target.getRepository(), target.getModel(), null, null);
 		}
 		
 		XmlOutStringBuffer out = new XmlOutStringBuffer();
@@ -202,7 +204,7 @@ public abstract class ChangesApiTest extends AbstractRestApiTest {
 			originalEventIt = new AbstractTransformingIterator<XEvent,XEvent>(originalEventIt) {
 				@Override
 				public XEvent transform(XEvent in) {
-					if(!XX.equalsOrContains(addr, in.getTarget())) {
+					if(!addr.equalsOrContains(in.getTarget())) {
 						return null;
 					}
 					return in;
@@ -215,13 +217,11 @@ public abstract class ChangesApiTest extends AbstractRestApiTest {
 	}
 	
 	private XAddress model() {
-		return X.getIDProvider().fromComponents(repo.getID(), DemoModelUtil.PHONEBOOK_ID, null,
-		        null);
+		return XX.toAddress(repo.getID(), DemoModelUtil.PHONEBOOK_ID, null, null);
 	}
 	
 	private XAddress object() {
-		return X.getIDProvider().fromComponents(repo.getID(), DemoModelUtil.PHONEBOOK_ID,
-		        DemoModelUtil.JOHN_ID, null);
+		return XX.toAddress(repo.getID(), DemoModelUtil.PHONEBOOK_ID, DemoModelUtil.JOHN_ID, null);
 	}
 	
 	@Test
@@ -731,7 +731,7 @@ public abstract class ChangesApiTest extends AbstractRestApiTest {
 		XField field = object.getField(DemoModelUtil.EMPTYFIELD_ID);
 		
 		XCommand command = MemoryFieldCommand.createAddCommand(field.getAddress(), field
-		        .getRevisionNumber(), X.getValueFactory().createStringValue("Cookie!"));
+		        .getRevisionNumber(), VALUE_COOKIE);
 		
 		testSendCommand(command);
 		
@@ -745,7 +745,7 @@ public abstract class ChangesApiTest extends AbstractRestApiTest {
 		XField field = object.getField(DemoModelUtil.ALIASES_ID);
 		
 		XCommand command = MemoryFieldCommand.createAddCommand(field.getAddress(), field
-		        .getRevisionNumber(), X.getValueFactory().createStringValue("Cookie!"));
+		        .getRevisionNumber(), VALUE_COOKIE);
 		
 		testSendCommand(command);
 		
@@ -759,7 +759,7 @@ public abstract class ChangesApiTest extends AbstractRestApiTest {
 		XField field = object.getField(DemoModelUtil.ALIASES_ID);
 		
 		XCommand command = MemoryFieldCommand.createAddCommand(field.getAddress(), XCommand.FORCED,
-		        X.getValueFactory().createStringValue("Cookie!"));
+		        VALUE_COOKIE);
 		
 		testSendCommand(command);
 		
@@ -773,7 +773,7 @@ public abstract class ChangesApiTest extends AbstractRestApiTest {
 		XField field = object.getField(DemoModelUtil.ALIASES_ID);
 		
 		XCommand command = MemoryFieldCommand.createChangeCommand(field.getAddress(), field
-		        .getRevisionNumber(), X.getValueFactory().createStringValue("Cookie!"));
+		        .getRevisionNumber(), VALUE_COOKIE);
 		
 		testSendCommand(command);
 		
@@ -787,7 +787,7 @@ public abstract class ChangesApiTest extends AbstractRestApiTest {
 		XField field = object.getField(DemoModelUtil.EMPTYFIELD_ID);
 		
 		XCommand command = MemoryFieldCommand.createChangeCommand(field.getAddress(), field
-		        .getRevisionNumber(), X.getValueFactory().createStringValue("Cookie!"));
+		        .getRevisionNumber(), VALUE_COOKIE);
 		
 		testSendCommand(command);
 		
@@ -801,7 +801,7 @@ public abstract class ChangesApiTest extends AbstractRestApiTest {
 		XField field = object.getField(DemoModelUtil.EMPTYFIELD_ID);
 		
 		XCommand command = MemoryFieldCommand.createChangeCommand(field.getAddress(),
-		        XCommand.FORCED, X.getValueFactory().createStringValue("Cookie!"));
+		        XCommand.FORCED, VALUE_COOKIE);
 		
 		testSendCommand(command);
 		
