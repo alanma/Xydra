@@ -1,0 +1,31 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>org.xydra</groupId>
+	<artifactId>buildmaster</artifactId>
+	<version>0.1.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>Xydra Buildmaster</name>
+	<inceptionYear>2010</inceptionYear>
+
+	<modules>
+		<module>../org.xydra.client</module>
+		<module>../org.xydra.client-gwt/</module>
+		<module>../org.xydra.core/</module>
+		<module>../org.xydra.dev/</module>
+		<module>../org.xydra.gaeclient/</module>
+		<module>../org.xydra.gaemyadmin/</module>
+		<module>../org.xydra.index/</module>
+		<module>../org.xydra.log/</module>
+		<module>../org.xydra.log.howto/</module>
+		<module>../org.xydra.restless/</module>
+		<module>../org.xydra.schema/</module>
+		<module>../org.xydra.server/</module>
+		<module>../org.xydra.server-gae/</module>
+		<module>../org.xydra.textsearch/</module>
+		<module>../org.xydra.webadmin/</module>
+	</modules>
+
+</project>
