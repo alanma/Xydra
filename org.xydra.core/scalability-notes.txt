@@ -1,3 +1,15 @@
+Transition plan:
+- create old.export changelog as xml on server
+- create old.export model snapshot as xml on server
+- create old.import model snapshot as xml on server
+-- create artificial add events (via txn)
+- write new server
+- create new.export changelog as xml on server
+- create new.import changelog as xml on server (deletes all data first)
+- migrate server to new api & transform data (via export/import)
+- later: move state* into model*
+
+
 Every command does:
 
 
@@ -39,4 +51,9 @@ idea:
 idea: put in each event what XAddresses you want to lock,
   look back in history what other pending events have locked
   memcache: last known commited position
+  
+  
+index: do it yourself (hash of index value as XID)
+
+large sets: use model as a set of XIDs (the objects)  
    
