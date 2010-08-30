@@ -122,6 +122,7 @@ public class Restless extends HttpServlet {
 		String app = servletConfig.getInitParameter("app");
 		try {
 			Class<?> clazz = Class.forName(app);
+			// TODO call restless() static method instead
 			// trigger it to make sure static blocks are run
 			log.info("Configured with " + clazz.getName());
 		} catch(ClassNotFoundException e) {
@@ -207,6 +208,7 @@ public class Restless extends HttpServlet {
 	protected void restlessService(HttpServletRequest req, HttpServletResponse res) {
 		// find class mapped to path
 		String path = req.getPathInfo();
+		boolean foundPath = false;
 		boolean foundMethod = false;
 		
 		String httpMethod = req.getHeader("X-HTTP-Method-Override");
@@ -216,6 +218,7 @@ public class Restless extends HttpServlet {
 		
 		for(RestlessMethod restlessMethod : methods) {
 			if(restlessMethod.pathTemplate.matches(path)) {
+				foundPath = true;
 				// run method
 				if(httpMethod.equalsIgnoreCase(restlessMethod.httpMethod)) {
 					try {
@@ -230,8 +233,13 @@ public class Restless extends HttpServlet {
 		}
 		if(!foundMethod) {
 			try {
-				res.sendError(404, "No handler matched your " + req.getMethod() + "-request path '"
-				        + path + "'");
+				res.sendError(404, "No handler matched your "
+				        + req.getMethod()
+				        + "-request path '"
+				        + path
+				        + "'. "
+				        + (foundPath ? "Found at least a path mapping."
+				                : "Found also no path mapping."));
 			} catch(IOException e) {
 				throw new RuntimeException(e);
 			}
