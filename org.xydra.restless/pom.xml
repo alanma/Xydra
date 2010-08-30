@@ -12,7 +12,7 @@
 	<parent>
 		<groupId>org.xydra</groupId>
 		<artifactId>maven-root</artifactId>
-		<version>2010.02.19</version>
+		<version>2010.08.30</version>
 	</parent>
 
 	<repositories>
@@ -160,7 +160,7 @@
 		</snapshotRepository>
 		<site>
 			<id>xydra-site</id>
-			<url>svn:https://xydra.googlecode.com/svn/site/org.xydra.restless</url>
+			<url>scp://${xydra.site}/${artifactId}</url>
 		</site>
 	</distributionManagement>
 
