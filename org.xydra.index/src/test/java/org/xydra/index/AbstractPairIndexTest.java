@@ -11,12 +11,10 @@ import junit.framework.TestCase;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xydra.index.IPairIndex;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.Pair;
 import org.xydra.index.query.Wildcard;
-
 
 
 /**
@@ -93,13 +91,16 @@ abstract public class AbstractPairIndexTest extends TestCase {
 		
 	}
 	
+	/**
+	 * TODO this test is slow and not documented well enough to improve it
+	 */
 	@Test
 	public void testRandomOperations() {
 		
 		// number of actors/groups
-		int nKeys = 500;
+		int nKeys = 50;
 		// number of operations
-		int nOperations = 1500;
+		int nOperations = 150;
 		// proportion of operations to be add operations
 		double pAdd = 0.7;
 		// check interval
