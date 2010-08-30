@@ -4,7 +4,7 @@
 
 	<groupId>org.xydra</groupId>
 	<artifactId>maven-root</artifactId>
-	<version>2010.02.19</version>
+	<version>2010.08.30</version>
 	<packaging>pom</packaging>
 
 	<name>Xydra Maven Root</name>
@@ -160,32 +160,6 @@
 				</reportSets>
 			</plugin>
 
-			<!--
-				provide links to several famous projects see: Better builds with
-				maven, p.185
-			-->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<configuration>
-					<!--  do not aggregate javadocs from child elements-->
-					<links>
-						<link>
-							http://java.sun.com/j2se/1.5.0/docs/api/
-						</link>
-						<link>
-							http://jakarta.apache.org/commons/collections/apidocs-COLLECTIONS_3_0/
-						</link>
-						<link>http://www.junit.org/junit/javadoc/</link>
-						<link>
-							http://jakarta.apache.org/velocity/api/
-						</link>
-						<!--
-							add our own projects in child-poms
-						-->
-					</links>
-				</configuration>
-			</plugin>
 
 			<!-- display surefire results on site -->
 			<plugin>
@@ -217,7 +191,7 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>taglist-maven-plugin</artifactId>
 				<version>2.4</version>
-				<!--  Latest version as of 2010-09-19 -->
+				<!--  Latest version as of 2010-08-30 -->
 				<configuration>
 					<tags>
 						<tag>TODO</tag>
@@ -226,6 +200,7 @@
 						<tag>XXX</tag>
 						<tag>@@</tag>
 					</tags>
+					<encoding>UTF-8</encoding>
 				</configuration>
 			</plugin>
 
@@ -316,13 +291,79 @@
 					<keywords>true</keywords>
 					<additionalparam>
 						-sourceclasspath ${project.build.outputDirectory}
-          </additionalparam>
+          			</additionalparam>
+					<!--
+						provide links to several famous projects see: Better builds with
+						maven, p.185
+					-->
+					<!--  do not aggregate javadocs from child elements-->
+					<links>
+						<link>
+							http://java.sun.com/j2se/1.5.0/docs/api/
+						</link>
+						<link>
+							http://jakarta.apache.org/commons/collections/apidocs-COLLECTIONS_3_0/
+						</link>
+						<link>http://www.junit.org/junit/javadoc/</link>
+						<link>
+							http://jakarta.apache.org/velocity/api/
+						</link>
+						<!--
+							aggregate java doc of sub-projects and provide links to several
+							famous projects see: Better builds with maven, p.185
+						-->
+						<link>
+							http://site.xydra.org/client/
+						</link>
+						<link>
+							http://site.xydra.org/client-gwt/
+						</link>
+						<link>
+							http://site.xydra.org/core/
+						</link>
+						<link>
+							http://site.xydra.org/dev/
+						</link>
+						<link>
+							http://site.xydra.org/gaeclient/
+						</link>
+						<link>
+							http://site.xydra.org/gaemyadmin/
+						</link>
+						<link>
+							http://site.xydra.org/index/
+						</link>
+						<link>
+							http://site.xydra.org/log/
+						</link>
+						<link>
+							http://site.xydra.org/log.howto/
+						</link>
+						<link>
+							http://site.xydra.org/restless/
+						</link>
+						<link>
+							http://site.xydra.org/schema/
+						</link>
+						<link>
+							http://site.xydra.org/server/
+						</link>
+						<link>
+							http://site.xydra.org/server-gae/
+						</link>
+						<link>
+							http://site.xydra.org/textsearch/
+						</link>
+						<link>
+							http://site.xydra.org/webadmin/
+						</link>
+					</links>
 				</configuration>
 			</plugin>
 
-
 		</plugins>
 	</reporting>
+
 
 	<!-- proposing dependencies and their versions -->
 	<dependencyManagement>
@@ -380,7 +421,7 @@
 		</snapshotRepository>
 		<site>
 			<id>xydra-site</id>
-			<url>svn:https://xydra.googlecode.com/svn/site/org.xydra.maven-root</url>
+			<url>scp://${xydra.site}/${artifactId}</url>
 		</site>
 	</distributionManagement>
 
