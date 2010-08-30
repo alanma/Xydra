@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.xydra</groupId>
+		<artifactId>maven-root</artifactId>
+		<version>2010.08.30</version>
+	</parent>
+
+	<groupId>org.xydra</groupId>
+	<artifactId>doc</artifactId>
+	<version>0.1.1-SNAPSHOT</version>
+	<!--
+		/!\ Needs to be 'jar' for 'mvn deploy' but 'war' for 'gae:deploy'
+	-->
+	<packaging>jar</packaging>
+	<name>Xydra Documentation and Tutorial</name>
+
+	<!-- Specify hard-coded project properties here -->
+	<properties>
+
+		<!--
+			This is just for "eclipse:eclipse" goal to always attempt downloading
+			sources
+		-->
+		<downloadSources>false</downloadSources>
+
+		<!--  tell the compiler we can use 1.5 -->
+		<maven.compiler.source>1.5</maven.compiler.source>
+		<maven.compiler.target>1.5</maven.compiler.target>
+
+	</properties>
+
+	<pluginRepositories>
+
+		<pluginRepository>
+			<id>maven2-repository.dev.java.net</id>
+			<url>http://download.java.net/maven/2</url>
+			<layout>default</layout>
+		</pluginRepository>
+
+	</pluginRepositories>
+
+	<repositories>
+		<!-- xydra repo -->
+		<repository>
+			<id>xydra-repo</id>
+			<url>
+				https://xydra.googlecode.com/svn/repository
+			</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</releases>
+		</repository>
+		<!-- xydra snapshots -->
+		<repository>
+			<id>xydra-snap</id>
+			<url>
+				https://xydra.googlecode.com/svn/snapshots
+			</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+		</repository>
+		<!--  For API VIZ -->
+		<repository>
+			<id>jboss.releases</id>
+			<name>JBoss releases</name>
+			<url>http://repository.jboss.org/maven2</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+
+		<!--  Java.net repo for wagon-svn -->
+		<repository>
+			<id>javanet-repo</id>
+			<url>
+				http://download.java.net/maven/2
+			</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</releases>
+		</repository>
+
+
+		<repository>
+			<id>maven2-repository.dev.java.net</id>
+			<url>http://download.java.net/maven/2</url>
+			<layout>default</layout>
+		</repository>
+
+	</repositories>
+
+	<dependencies>
+
+		<!-- Xydra Core -->
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>core</artifactId>
+			<version>0.1.1-SNAPSHOT</version>
+		</dependency>
+
+		<!-- logging -->
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>log</artifactId>
+			<version>0.1.1-SNAPSHOT</version>
+		</dependency>
+
+		<!-- testing dependencies -->
+		<dependency>
+			<scope>test</scope>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+
+		<!-- via  https://wagon-svn.dev.java.net/ -->
+		<!--
+			<extensions> <extension> <groupId>org.jvnet.wagon-svn</groupId>
+			<artifactId>wagon-svn</artifactId> <version>1.9</version>
+			</extension> <extension> <groupId>org.apache.maven.wagon</groupId>
+			<artifactId>wagon-ssh-external</artifactId>
+			<version>1.0-beta-2</version> </extension> </extensions>
+		-->
+		<plugins>
+
+			<!-- set encoding to something not platform dependent -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.3</version>
+				<configuration>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.0.2</version>
+				<configuration>
+					<source>${maven.compiler.source}</source>
+					<target>${maven.compiler.target}</target>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+
+		</plugins>
+	</build>
+
+
+	<distributionManagement>
+		<!--
+			Add this to settings.xml <server> <id>xydra-repo</id>
+			<username>xamde</username> <password>********</password> </server>
+			<server> <id>xydra-snap</id> <username>xamde</username>
+			<password>********</password> </server> <server> <id>xydra-site</id>
+			<username>xamde</username> <password>********</password> </server>
+		-->
+		<repository>
+			<id>xydra-repo</id>
+			<url>svn:https://xydra.googlecode.com/svn/repository</url>
+		</repository>
+		<snapshotRepository>
+			<id>xydra-snap</id>
+			<url>svn:https://xydra.googlecode.com/svn/snapshots</url>
+		</snapshotRepository>
+		<site>
+			<id>xydra-site</id>
+			<url>scp://${xydra.site}/${artifactId}</url>
+		</site>
+	</distributionManagement>
+
+	<scm>
+		<connection>svn:https://xydra.googlecode.com/svn/trunk/org.xydra.doc</connection>
+		<developerConnection>svn:https://xydra.googlecode.com/svn/trunk/org.xydra.doc</developerConnection>
+	</scm>
+
+</project>
