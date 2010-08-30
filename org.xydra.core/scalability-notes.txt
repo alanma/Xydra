@@ -1,0 +1,42 @@
+Every command does:
+
+
+algo for executing commands:
+- create new event with next revision number + timestamp of now
+-- write Lock addresses in the event: *, objectId/* or objectId/fieldId
+--- use hierarchical placeholders to also lock complete models, objects
+-- compute key from last known highest revNr,
+--- try until you find the next free key
+--- tell also memcache
+- check previous uncommited events (have lower revNrs) and compute what locks they need
+-- if they dont need my locks, proceed
+-- if they have locks that I need: 
+--- check how old they are
+---- if quite old (> 3 * GAE maxtime) then resume event (maybe via task queue)
+----- only one thread should try to fix it: use local txn on timestamp (set again to now)
+---- else: wait  
+- Check preconditions
+-- if object.delete 
+--- lock object/*
+--- compute objectRvNr as Math.max( fieldRevNrs )
+-- if not match: fail
+-- else: 
+--- list all planned changes in event object
+--- mark as 'readyToExecute'
+--- we could tell client data will be there
+- do internal changes on the locked objects
+- remove locks
+
+
+to read the a complete model/object snapshot:
+- find the latest existing snapshot
+- 
+
+idea:
+ use sorted keys for revision numbers
+ store a quite revent quite high revision number in memcache
+ 
+idea: put in each event what XAddresses you want to lock,
+  look back in history what other pending events have locked
+  memcache: last known commited position
+   
