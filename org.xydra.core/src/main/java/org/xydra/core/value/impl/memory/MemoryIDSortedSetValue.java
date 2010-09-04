@@ -3,6 +3,8 @@ package org.xydra.core.value.impl.memory;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.xydra.core.model.XID;
 import org.xydra.core.value.XIDSortedSetValue;
@@ -44,6 +46,15 @@ public class MemoryIDSortedSetValue extends MemoryIDListValue implements XIDSort
 	
 	public Set<XID> toSet() {
 		Set<XID> copy = new HashSet<XID>();
+		XID[] list = this.contents();
+		for(int i = 0; i < list.length; i++) {
+			copy.add(list[i]);
+		}
+		return copy;
+	}
+	
+	public SortedSet<XID> toSortedSet() {
+		SortedSet<XID> copy = new TreeSet<XID>();
 		XID[] list = this.contents();
 		for(int i = 0; i < list.length; i++) {
 			copy.add(list[i]);

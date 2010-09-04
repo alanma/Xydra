@@ -1,5 +1,8 @@
 package org.xydra.core.value;
 
+import java.util.Set;
+import java.util.SortedSet;
+
 import org.xydra.core.model.XID;
 
 
@@ -33,5 +36,15 @@ public interface XIDSortedSetValue extends XIDSetValue {
 	 * value except the specified entry. This value is not modified.
 	 */
 	XIDSortedSetValue remove(XID entry);
+	
+	/**
+	 * Note: Changes to the returned {@link Set} will not affect the
+	 * XIDSortedSetValue.
+	 * 
+	 * @return a {@link SortedSet} containing all {@link XID} entries in this
+	 *         {@link XIDSortedSetValue} - changes to the {@link SortedSet} are
+	 *         NOT reflected in this value
+	 */
+	SortedSet<XID> toSortedSet();
 	
 }

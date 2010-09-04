@@ -21,10 +21,11 @@ import org.xydra.core.value.XValue;
 @RunsInJava
 public abstract class AbstractObjectIndex {
 	
+	private static final String CLASSNAME = "org.xydra.core.index.impl.memory.AbstractObjectIndex";
+	
 	protected XID fieldID;
 	protected XObject indexObject;
-	protected XID actor = X.getIDProvider()
-	        .fromString(AbstractObjectIndex.class.getCanonicalName());
+	protected XID actor = X.getIDProvider().fromString(CLASSNAME);
 	
 	/**
 	 * @param fieldID
@@ -66,9 +67,9 @@ public abstract class AbstractObjectIndex {
 		} else {
 			// collection types
 			assert (value instanceof XCollectionValue<?>) : "Support for indexing type "
-			        + value.getClass().getCanonicalName() + " has not been implemented yet";
+			        + value.getClass().getName() + " has not been implemented yet";
 			throw new RuntimeException("Indexing collection types such as "
-			        + value.getClass().getCanonicalName() + " is not supported.");
+			        + value.getClass().getName() + " is not supported.");
 		}
 		XID xid = X.getIDProvider().fromString(key);
 		return xid;
