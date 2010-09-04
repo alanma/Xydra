@@ -10,6 +10,7 @@ import org.xydra.core.value.XDoubleListValue;
 import org.xydra.core.value.XDoubleValue;
 import org.xydra.core.value.XIDListValue;
 import org.xydra.core.value.XIDSetValue;
+import org.xydra.core.value.XIDSortedSetValue;
 import org.xydra.core.value.XIDValue;
 import org.xydra.core.value.XIntegerListValue;
 import org.xydra.core.value.XIntegerValue;
@@ -127,4 +128,11 @@ public class MemoryValueFactory implements XValueFactory {
 		return new MemoryIDSetValue(values);
 	}
 	
+	public XIDSortedSetValue createIDSortedSetValue(XID[] values) {
+		return new MemoryIDSortedSetValue(values);
+	}
+	
+	public XIDSortedSetValue createIDSortedSetValue(Collection<XID> values) {
+		return new MemoryIDSortedSetValue(values);
+	}
 }

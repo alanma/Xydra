@@ -294,4 +294,25 @@ public interface XValueFactory {
 	 */
 	XIDSetValue createIDSetValue(Collection<XID> values);
 	
+	/**
+	 * Creates an {@link XIDSortedSetValue}.
+	 * 
+	 * @param values The array containing the {@link XID XIDs} which are to be
+	 *            stored by the {@link XIDListValue} this method will create.
+	 * @return an {@link XIDSortedSetValue} storing the given {@link XID XIDs},
+	 *         keeping the given order.
+	 */
+	XIDSortedSetValue createIDSortedSetValue(XID[] values);
+	
+	/**
+	 * Creates an {@link XIDSortedSetValue}.
+	 * 
+	 * @param values The {@link Collection} containing the {@link XID XIDs}
+	 *            which are to be stored by the {@link XIDListValue} this method
+	 *            will create.
+	 * @return an {@link XIDSortedSetValue} storing the given {@link XID XIDs}m
+	 *         keeping the given order.
+	 */
+	XIDSortedSetValue createIDSortedSetValue(Collection<XID> values);
+	
 }
