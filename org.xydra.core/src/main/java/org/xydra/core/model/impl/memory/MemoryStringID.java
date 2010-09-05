@@ -49,4 +49,8 @@ public class MemoryStringID implements XID {
 		return toURI();
 	}
 	
+	public int compareTo(XID o) {
+		return this.toURI().compareTo(o.toURI());
+	}
+	
 }

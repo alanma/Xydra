@@ -10,11 +10,8 @@ import java.io.Serializable;
  * and <tt>hashCode</tt> correctly.
  * 
  * @author voelkel
- * 
- *         TODO consider XID extends Comparable
- * 
  */
-public interface XID extends Serializable {
+public interface XID extends Serializable, Comparable<XID> {
 	
 	// TODO conversion to URI, byte[] and String
 	
