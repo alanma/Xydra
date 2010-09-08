@@ -429,9 +429,9 @@ public class Restless extends HttpServlet {
 	}
 	
 	public static void addGenericStatic(String pathTemplate, String httpMethod, Class<?> clazz,
-	        String methodName, RestlessParameter ... parameter) {
+	        String methodName, boolean adminOnly, RestlessParameter ... parameter) {
 		PathTemplate pt = new PathTemplate(pathTemplate);
-		methods.add(new RestlessMethod(clazz, httpMethod, methodName, pt, false, parameter));
+		methods.add(new RestlessMethod(clazz, httpMethod, methodName, pt, adminOnly, parameter));
 		assert methodByName(clazz, methodName) != null : "method '" + methodName + "' not found";
 	}
 	

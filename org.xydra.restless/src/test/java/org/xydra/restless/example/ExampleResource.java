@@ -34,9 +34,9 @@ public class ExampleResource {
 		// add static
 		Restless.addGenericStatic("/bar", "GET", ExampleResource.class, "getName",
 
-		new RestlessParameter("name", null),
+		false,
 
-		new RestlessParameter("age", "23")
+		new RestlessParameter("name", null), new RestlessParameter("age", "23")
 
 		);
 	}
