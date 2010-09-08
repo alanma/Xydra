@@ -8,12 +8,9 @@ import java.util.regex.Pattern;
 
 
 /**
- * Internal class to represent a .. TODO
+ * Internal class to represent a URL path that gets mapped to a set of variables
+ * via regular expressions. Syntax inspired from JRS-311.
  * 
- * @author voelkel
- * 
- */
-/**
  * @author voelkel
  * 
  */
@@ -72,7 +69,7 @@ class PathTemplate {
 		
 		// turn into regex with groups
 		String[] segments = pathExpression.substring(1).split("/");
-		/* '/way/{id}/step' => '/way/[^/]+/step.*' */
+		/* '/way/{id}/step' => '/way/[^/]+/step' */
 		StringBuffer regexBuf = new StringBuffer();
 		for(String segment : segments) {
 			regexBuf.append(PATH_REGEX);
@@ -90,15 +87,6 @@ class PathTemplate {
 				regexBuf.append(segment);
 			}
 		}
-		/*
-		 * TODO what use cases are there for matching everything at the end of
-		 * the path? The query part (?a=b...) isn't included in the passed path
-		 * anymore (and is better parsed by the HttpServletRequest
-		 * implementation anyway. This makes sub resources (ie resources "/a"
-		 * and "/a/b" impossible, or at least very annoying and error prone
-		 * ~Daniel
-		 */
-		// regexBuf.append(ANY_REGEX);
 		regexBuf.append(END_REGEX);
 		this.regex = regexBuf.toString();
 		this.p = Pattern.compile(this.regex);
