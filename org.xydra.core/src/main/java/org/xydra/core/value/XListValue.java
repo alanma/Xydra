@@ -43,7 +43,7 @@ public interface XListValue<E> extends XCollectionValue<E> {
 	
 	/**
 	 * Create a new {@link XCollectionValue} contains all entries from this
-	 * value as well as the specified entry. The order od existing entries is
+	 * value as well as the specified entry. The order of existing entries is
 	 * preserved and the new entry is added to the end of the list. This value
 	 * is not modified.
 	 */
@@ -51,7 +51,7 @@ public interface XListValue<E> extends XCollectionValue<E> {
 	
 	/**
 	 * Create a new {@link XCollectionValue} contains all entries from this
-	 * value as well as the specified entry. The order od existing entries is
+	 * value as well as the specified entry. The order of existing entries is
 	 * preserved and the new entry is added at the specified index This value is
 	 * not modified.
 	 * 
