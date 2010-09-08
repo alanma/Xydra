@@ -3,17 +3,24 @@ package org.xydra.restless;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -94,6 +101,7 @@ import org.xydra.log.LoggerFactory;
  */
 public class Restless extends HttpServlet {
 	
+	private static final long serialVersionUID = -1906300614203565189L;
 	/**
 	 * Methods registered with the
 	 * {@link #addAdminOnlyMethod(String, String, Object, String, RestlessParameter...)}
@@ -150,7 +158,12 @@ public class Restless extends HttpServlet {
 		}
 		
 		/**
-		 * Executes the method on the mapped instance
+		 * Executes the method on the mapped instance.
+		 * 
+		 * Precedence of variable extraction: urlPath (before questionmark) >
+		 * httpParams (query params + POST params ) > default value
+		 * 
+		 * TODO distinguish query params from POST params
 		 * 
 		 * @param req
 		 * @param res
@@ -167,42 +180,80 @@ public class Restless extends HttpServlet {
 				// build up parameters
 				
 				// extract values from path
-				String path = req.getPathInfo();
-				List<String> variablesFromPath = this.pathTemplate.extractVariables(path);
+				String urlPath = req.getPathInfo();
+				List<String> variablesFromUrlPath = this.pathTemplate.extractVariables(urlPath);
+				Map<String,String> urlParameter = new HashMap<String,String>();
+				for(int i = 0; i < this.pathTemplate.variableNames.size(); i++) {
+					urlParameter.put(this.pathTemplate.variableNames.get(i), variablesFromUrlPath
+					        .get(i));
+				}
 				
-				int i = 0;
+				// extract Cookie values
+				Map<String,String> cookieMap = getCookiesAsMap(req);
+				
+				int parameterNumber = 0;
 				boolean hasHttpServletResponseParameter = false;
 				for(Class<?> paramType : method.getParameterTypes()) {
-					// HttpServletResponse
+					
+					// try to fill each parameter
 					if(paramType.equals(HttpServletResponse.class)) {
+						// HttpServletResponse
 						args.add(res);
 						hasHttpServletResponseParameter = true;
 					} else if(paramType.equals(HttpServletRequest.class)) {
+						// HttpServletRequest
 						args.add(req);
 					} else {
-						RestlessParameter param = this.parameter[i];
-						// try to get from request
-						String[] values = req.getParameterValues(param.name);
-						if(values == null) {
-							// look in path template
-							int pos = this.pathTemplate.variableNames.indexOf(param.name);
-							if(pos >= 0) {
-								String value = variablesFromPath.get(pos);
-								args.add(value);
-							} else {
-								// using default
-								args.add(param.defaultValue);
-							}
-						} else {
-							if(values.length > 1) {
-								log.warn("Multiple values for parameter '" + param.name
-								        + "', using default");
-								args.add(param.defaultValue);
-							} else {
-								args.add(values[0]);
+						RestlessParameter param = this.parameter[parameterNumber];
+						/* 1) look in urlParameters (not query params) */
+						String value = urlParameter.get(param.name);
+						
+						/* 2) look in POST params and query params */
+						if(value == null) {
+							String[] values = req.getParameterValues(param.name);
+							if(values != null) {
+								// handle POST and query param values
+								if(values.length > 1) {
+									// remove redundant
+									Set<String> uniqueValues = new HashSet<String>();
+									for(String s : values) {
+										uniqueValues.add(s);
+									}
+									if(uniqueValues.size() > 1) {
+										StringBuffer buf = new StringBuffer();
+										for(int j = 0; j < values.length; j++) {
+											buf.append(values[j]);
+											buf.append(", ");
+										}
+										log
+										        .warn("Multiple values for parameter '"
+										                + param.name
+										                + "' (values="
+										                + buf.toString()
+										                + ") from queryString and POST params, using default ("
+										                + param.defaultValue + ")");
+										value = param.defaultValue;
+									} else {
+										value = uniqueValues.iterator().next();
+									}
+									
+								} else {
+									value = values[0];
+								}
 							}
 						}
-						i++;
+						
+						/* 3) look in cookies */
+						if(value == null) {
+							value = cookieMap.get(param.name);
+						}
+						
+						/* 4) use default */
+						if(value == null) {
+							value = param.defaultValue;
+						}
+						args.add(value);
+						parameterNumber++;
 					}
 				}
 				
@@ -255,6 +306,7 @@ public class Restless extends HttpServlet {
 				
 			}
 		}
+		
 	}
 	
 	public static final String CHARSET_UTF8 = "utf-8";
@@ -268,8 +320,6 @@ public class Restless extends HttpServlet {
 	private static List<RestlessMethod> methods = new LinkedList<RestlessMethod>();
 	public static final String MIME_TEXT_PLAIN = "text/plain";
 	public static final String MIME_XHTML = "application/xhtml+xml";
-	
-	private static final long serialVersionUID = 1670927362109153417L;
 	
 	private static ServletContext servletContext;
 	
@@ -679,6 +729,85 @@ public class Restless extends HttpServlet {
 		} catch(IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	/**
+	 * Turn all cookies that the request contains into a map, cookie name as
+	 * key, cookie value as map value.
+	 * 
+	 * @param req
+	 * @return never null
+	 */
+	public static Map<String,String> getCookiesAsMap(HttpServletRequest req) {
+		Cookie[] cookies = req.getCookies();
+		Map<String,String> cookieMap = new HashMap<String,String>();
+		if(cookies != null) {
+			for(Cookie cookie : cookies) {
+				String name = cookie.getName();
+				String value = cookie.getValue();
+				// ignoring:
+				// cookie.getComment()
+				// cookie.getDomain()
+				// cookie.getMaxAge()
+				// cookie.getPath()
+				// cookie.getSecure()
+				// cookie.getVersion()
+				cookieMap.put(name, value);
+			}
+		}
+		return cookieMap;
+	}
+	
+	/**
+	 * Map contains key=value from a query string in a URL (the part after the
+	 * '?'). Multiple values for the same key are put in order of appearance in
+	 * the list. Duplicate values are omitted.
+	 * 
+	 * The members of the {@link SortedSet} may be null if the query string was
+	 * just 'a=&b=foo'.
+	 * 
+	 * Encoding UTF-8 is used for URLDecoding the key and value strings.
+	 * 
+	 * Keys and values get URL-decoded.
+	 * 
+	 * @param queryString
+	 * @return
+	 */
+	public static Map<String,SortedSet<String>> getQueryStringAsMap(String queryString) {
+		Map<String,SortedSet<String>> map = new HashMap<String,SortedSet<String>>();
+		if(queryString == null) {
+			return map;
+		}
+		
+		String[] pairs = queryString.split("&");
+		for(String pair : pairs) {
+			String[] keyvalue = pair.split("=");
+			if(keyvalue.length > 2) {
+				// invalid pair, give up on unreliable parsing
+				throw new IllegalArgumentException("Malformed query string " + queryString);
+			} else {
+				String encKey = keyvalue[0];
+				String key;
+				try {
+					key = URLDecoder.decode(encKey, "utf-8");
+					SortedSet<String> values = map.get(key);
+					if(values == null) {
+						values = new TreeSet<String>();
+						map.put(key, values);
+					}
+					if(keyvalue.length == 2) {
+						String rawValue = keyvalue[1];
+						String value = URLDecoder.decode(rawValue, "utf-8");
+						values.add(value);
+					} else {
+						values.add(null);
+					}
+				} catch(UnsupportedEncodingException e) {
+					throw new RuntimeException("No utf-8 on this system?", e);
+				}
+			}
+		}
+		return map;
 	}
 	
 }
