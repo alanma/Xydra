@@ -111,13 +111,13 @@
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-servlet</artifactId>
 			<version>${gwt.version}</version>
-			<scope>compile</scope>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-user</artifactId>
 			<version>${gwt.version}</version>
-			<scope>compile</scope>
+			<scope>test</scope>
 		</dependency>
 		
 		<!-- gwt-log -->
@@ -154,7 +154,6 @@
 						<id>gwt-test</id>
 						<phase>test</phase>
 						<goals>
-							<goal>compile</goal>
 							<goal>test</goal>
 						</goals>
 					</execution>
