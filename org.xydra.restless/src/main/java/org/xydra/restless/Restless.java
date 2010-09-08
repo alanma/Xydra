@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
@@ -121,14 +122,15 @@ public class Restless extends HttpServlet {
 		 * GET, PUT, POST, DELETE
 		 */
 		private String httpMethod;
-		private Object instance;
+		private Object instanceOrClass;
 		private String methodName;
 		private RestlessParameter[] parameter;
 		private PathTemplate pathTemplate;
 		private boolean adminOnly;
 		
 		/**
-		 * @param object instance to be called when web method is used
+		 * @param object instance to be called when web method is used - or
+		 *            class to be instantiated
 		 * @param httpMethod
 		 * @param methodName instance method to be called. This method may not
 		 *            have several signatures with the same name.
@@ -143,13 +145,14 @@ public class Restless extends HttpServlet {
 		 *            type is expected to be of type String. This facility is
 		 *            designer to return status information at development time.
 		 * @param pathTemplate
-		 * @param adminOnly TODO
+		 * @param adminOnly if true, this method can only be executed it the
+		 *            request URL starts with '/admin'.
 		 * @param parameter in order of variables in 'method'. See
 		 *            {@link RestlessParameter}.
 		 */
 		public RestlessMethod(Object object, String httpMethod, String methodName,
 		        PathTemplate pathTemplate, boolean adminOnly, RestlessParameter[] parameter) {
-			this.instance = object;
+			this.instanceOrClass = object;
 			this.httpMethod = httpMethod;
 			this.methodName = methodName;
 			this.pathTemplate = pathTemplate;
@@ -170,10 +173,13 @@ public class Restless extends HttpServlet {
 		 * @throws IOException
 		 */
 		public void run(HttpServletRequest req, HttpServletResponse res) throws IOException {
-			Method method = methodByName(this.instance, this.methodName);
+			Object instance = toInstance(this.instanceOrClass);
+			
+			Method method = methodByName(instance, this.methodName);
 			if(method == null) {
 				res.sendError(500, "Malconfigured server. Method '" + this.methodName
-				        + "' not found in '" + this.instance.getClass().getName() + "'");
+				        + "' not found in '" + instanceOrClass_className(this.instanceOrClass)
+				        + "'");
 			} else {
 				// try to call it
 				List<Object> args = new ArrayList<Object>();
@@ -258,25 +264,19 @@ public class Restless extends HttpServlet {
 				}
 				
 				try {
-					Object result = method.invoke(this.instance, args.toArray(new Object[0]));
+					Object result = method.invoke(instance, args.toArray(new Object[0]));
 					if(!hasHttpServletResponseParameter) {
 						res.setContentType(MIME_TEXT_PLAIN + "; charset=" + CHARSET_UTF8);
 						res.setStatus(200);
 						// we need to send back something standard ourselves
 						res.getWriter().print(
-						        "Executed " + this.instance.getClass().getSimpleName() + "."
+						        "Executed " + instance.getClass().getSimpleName() + "."
 						                + this.methodName + "\n");
 						if(result != null && result instanceof String) {
 							res.getWriter().print("Result: " + result);
 						}
 						res.getWriter().flush();
 					}
-				} catch(IllegalArgumentException e) {
-					res.sendError(500, e.toString());
-					log.error("RESTless method registered with wrong arguments", e);
-				} catch(IllegalAccessException e) {
-					res.sendError(500, e.toString());
-					log.error("", e);
 				} catch(InvocationTargetException e) {
 					Throwable cause = e.getCause();
 					if(cause instanceof RestlessException) {
@@ -302,11 +302,63 @@ public class Restless extends HttpServlet {
 							log.error("Exception while executing RESTless method.", cause);
 						}
 					}
+				} catch(IllegalArgumentException e) {
+					res.sendError(500, e.toString());
+					log.error("RESTless method registered with wrong arguments: ", e);
+				} catch(IllegalAccessException e) {
+					res.sendError(500, e.toString());
+					log.error("", e);
 				}
 				
 			}
 		}
 		
+		/**
+		 * If the given parameter is a Class, return an instance of it,
+		 * otherwise simply return the given parameter itself.
+		 * 
+		 * @param instanceOrClass
+		 * @return an instance
+		 */
+		private Object toInstance(Object instanceOrClass) {
+			if(instanceOrClass instanceof Class<?>) {
+				// need to created instance
+				Class<?> clazz = (Class<?>)instanceOrClass;
+				try {
+					Constructor<?> constructor = clazz.getConstructor();
+					try {
+						Object instance = constructor.newInstance();
+						return instance;
+					} catch(IllegalArgumentException e) {
+						throw new RestlessException(500,
+						        "Server misconfigured - constructor needs to have no parameters", e);
+					} catch(InstantiationException e) {
+						throw new RestlessException(500, "Server misconfigured", e);
+					} catch(IllegalAccessException e) {
+						throw new RestlessException(500, "Server misconfigured", e);
+					} catch(InvocationTargetException e) {
+						throw new RestlessException(500, "Server misconfigured", e);
+					}
+				} catch(SecurityException e) {
+					throw new RestlessException(500, "Server misconfigured", e);
+				} catch(NoSuchMethodException e) {
+					throw new RestlessException(500,
+					        "Server misconfigured - constructor needs to have no parameters", e);
+				}
+				
+			} else {
+				return instanceOrClass;
+			}
+		}
+		
+	}
+	
+	protected static final String instanceOrClass_className(Object instanceOrClass) {
+		if(instanceOrClass instanceof Class<?>) {
+			return ((Class<?>)instanceOrClass).getCanonicalName();
+		} else {
+			return instanceOrClass.getClass().getName();
+		}
 	}
 	
 	public static final String CHARSET_UTF8 = "utf-8";
@@ -374,6 +426,13 @@ public class Restless extends HttpServlet {
 		PathTemplate pt = new PathTemplate(pathTemplate);
 		methods.add(new RestlessMethod(object, httpMethod, methodName, pt, false, parameter));
 		assert methodByName(object, methodName) != null : "method '" + methodName + "' not found";
+	}
+	
+	public static void addGenericStatic(String pathTemplate, String httpMethod, Class<?> clazz,
+	        String methodName, RestlessParameter ... parameter) {
+		PathTemplate pt = new PathTemplate(pathTemplate);
+		methods.add(new RestlessMethod(clazz, httpMethod, methodName, pt, false, parameter));
+		assert methodByName(clazz, methodName) != null : "method '" + methodName + "' not found";
 	}
 	
 	public static void addAdminOnlyMethod(String pathTemplate, String httpMethod, Object object,
@@ -456,7 +515,16 @@ public class Restless extends HttpServlet {
 	 * @return a java.lang.reflect.{@link Method} from a String
 	 */
 	private static Method methodByName(Object object, String methodName) {
-		for(Method method : object.getClass().getMethods()) {
+		return methodByName(object.getClass(), methodName);
+	}
+	
+	/**
+	 * @param object
+	 * @param methodName
+	 * @return a java.lang.reflect.{@link Method} from a String
+	 */
+	private static Method methodByName(Class<?> clazz, String methodName) {
+		for(Method method : clazz.getMethods()) {
 			if(method.getName().equals(methodName)) {
 				return method;
 			}
@@ -536,7 +604,8 @@ public class Restless extends HttpServlet {
 				        "Mapping " + rm.httpMethod + " <a href='"
 				                + xmlEncode(rm.pathTemplate.getRegex()) + "'>"
 				                + xmlEncode(rm.pathTemplate.getRegex()) + "</a> --&gt; ");
-				res.getWriter().print(rm.instance.getClass().getName() + "#" + rm.methodName);
+				res.getWriter().print(
+				        instanceOrClass_className(rm.instanceOrClass) + "#" + rm.methodName);
 				res.getWriter().println(" access:" + (rm.adminOnly ? "ADMIN ONLY" : "PUBLIC"));
 				res.getWriter().println("</li>");
 			}

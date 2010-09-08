@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Restless :: Test</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+<div class="center">
+<h1>RESTless Test</h1>
+<b>This file is ...</b><br/>
+- not intended to run in production<br />
+- stored in <code>/src/test/resources/index.html</code> (in a normal webapp it would be in /src/main/webapp)<br/>
+- mapped in web.xml as a welcome-file<rr/>
+
+<h4>Security</h4>
+All urls starting with <code>/admin</code> are secured so that only GAE
+admins can access the page. <b>Register admin-only resources via <code>Restless.addAdminOnly(...)</code></b><br/>
+Go to Login Form on <a href="/s/login.html">local Jetty</a> or <a href="/_ah/admin/">local appengine</a>
+
+<dl>
+	<dt>RESTless config</dt>
+	<dd><a href="/admin/restless">/admin/restless</a></dd>
+</dl>
+
+</div>
+</body>
+</html>
