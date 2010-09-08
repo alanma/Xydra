@@ -30,6 +30,7 @@ public class MemoryIDListValue extends MemoryListValue<XID> implements XIDListVa
 		System.arraycopy(content, 0, this.list, 0, content.length);
 	}
 	
+	@SuppressWarnings("unused")
 	private MemoryIDListValue(int length) {
 		this.list = new XID[length];
 	}
@@ -72,16 +73,22 @@ public class MemoryIDListValue extends MemoryListValue<XID> implements XIDListVa
 		return add(this.list.length, entry);
 	}
 	
-	public XIDListValue add(int index, XID entry) {
-		int size = this.list.length;
-		if(index < 0 || index > size) {
+	public static final XID[] createArrayWithEntryInsertedAtPosition(XID[] array, int position,
+	        XID entry) {
+		int size = array.length;
+		if(position < 0 || position > size) {
 			throw new IndexOutOfBoundsException();
 		}
-		MemoryIDListValue v = new MemoryIDListValue(size + 1);
-		System.arraycopy(this.list, 0, v.list, 0, index);
-		v.list[index] = entry;
-		System.arraycopy(this.list, index, v.list, index + 1, size - index);
-		return v;
+		XID[] newList = new XID[size + 1];
+		System.arraycopy(array, 0, newList, 0, position);
+		newList[position] = entry;
+		System.arraycopy(array, position, newList, position + 1, size - position);
+		return newList;
+	}
+	
+	public XIDListValue add(int index, XID entry) {
+		XID[] newList = createArrayWithEntryInsertedAtPosition(this.list, index, entry);
+		return new MemoryIDListValue(newList);
 	}
 	
 	public XIDListValue remove(XID entry) {
@@ -93,14 +100,19 @@ public class MemoryIDListValue extends MemoryListValue<XID> implements XIDListVa
 	}
 	
 	public XIDListValue remove(int index) {
-		int size = this.list.length;
-		if(index < 0 || index >= size) {
+		XID[] newList = createArrayWithEntryRemovedAtPosition(this.contents(), index);
+		return new MemoryIDListValue(newList);
+	}
+	
+	public static final XID[] createArrayWithEntryRemovedAtPosition(XID[] array, int position) {
+		int size = array.length;
+		if(position < 0 || position >= size) {
 			throw new IndexOutOfBoundsException();
 		}
-		MemoryIDListValue v = new MemoryIDListValue(size - 1);
-		System.arraycopy(this.list, 0, v.list, 0, index);
-		System.arraycopy(this.list, index + 1, v.list, index, size - index - 1);
-		return v;
+		XID[] newList = new XID[size - 1];
+		System.arraycopy(array, 0, newList, 0, position);
+		System.arraycopy(array, position + 1, newList, position, size - position - 1);
+		return newList;
 	}
 	
 }

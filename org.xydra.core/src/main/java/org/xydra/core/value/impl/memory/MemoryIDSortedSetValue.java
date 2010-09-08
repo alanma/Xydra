@@ -30,18 +30,28 @@ public class MemoryIDSortedSetValue extends MemoryIDListValue implements XIDSort
 	
 	@Override
 	public MemoryIDSortedSetValue add(XID entry) {
-		MemoryIDSortedSetValue v = new MemoryIDSortedSetValue(this.contents());
-		if(!v.contains(entry)) {
-			v.add(entry);
+		if(this.contains(entry)) {
+			// no need to add it
+			return this;
+		} else {
+			XID[] newList = MemoryIDListValue.createArrayWithEntryInsertedAtPosition(this
+			        .contents(), this.contents().length, entry);
+			return new MemoryIDSortedSetValue(newList);
 		}
-		return v;
 	}
 	
 	@Override
 	public MemoryIDSortedSetValue remove(XID entry) {
-		MemoryIDSortedSetValue v = new MemoryIDSortedSetValue(this.contents());
-		v.remove(entry);
-		return v;
+		// find it
+		int index = this.indexOf(entry);
+		if(index == -1) {
+			// not possible to remove it
+			return this;
+		} else {
+			XID[] newList = MemoryIDListValue.createArrayWithEntryRemovedAtPosition(
+			        this.contents(), index);
+			return new MemoryIDSortedSetValue(newList);
+		}
 	}
 	
 	public Set<XID> toSet() {
