@@ -14,6 +14,8 @@ public class DataApiTestGae extends DataApiTest {
 	public static void init() {
 		
 		GaeTestfixer.enable();
+		// must also run already before DataApiTest.init
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		GaeXydraServer.initializeRepositoryManager();
 		
 		DataApiTest.init();

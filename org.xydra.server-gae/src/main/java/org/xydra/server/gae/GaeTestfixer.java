@@ -22,9 +22,8 @@ import com.google.apphosting.api.ApiProxy.Environment;
  * about the GAE-test-setup
  * 
  * TODO Remove class if AppEngine issue is ever fixed by Google
- * http://code.google
- * .com/p/googleappengine/issues/detail?id=2201&q=junit&colspec
- * =ID%20Type%20Status%20Priority%20Stars%20Owner%20Summary%20Log%20Component
+ * 
+ * http://code.google.com/p/googleappengine/issues/detail?id=2201
  * 
  * @author voelkel
  */
