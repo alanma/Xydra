@@ -91,7 +91,7 @@ public class GaeMyAdminApp {
 					keys.add(entity.getKey());
 				}
 				w.write("Bulk delete ... ");
-				datastore.delete();
+				datastore.delete(keys);
 				w.write("Deleted all '" + kind + "'.\n");
 			}
 		} else {
