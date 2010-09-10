@@ -14,7 +14,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>GaeMyAdmin</servlet-name>
-		<url-pattern>/*</url-pattern>
+		<url-pattern>/admin/*</url-pattern>
 	</servlet-mapping>
 
 	<!-- Add this to your web.xml to enable remote API on Java. -->

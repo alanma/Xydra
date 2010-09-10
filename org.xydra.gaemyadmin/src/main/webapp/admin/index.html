@@ -15,8 +15,24 @@
 
 <p>
 <ul>
-	<li><a href="/admin/index.html">Enter restricted area of GaeMyAdmin</a></li>
+	<li><a href="stats">stats</a></li>
+	<li><a href="deleteAll">deleteAll</a> - <b>Warning: Deletes
+	ALL data in the datastore (shared by all versions)</b></li>
 </ul>
+</p>
+
+<hr />
+<h1>Planned</h1>
+<h2>Backup</h2>
+<p><a href="backup">Download entire data store</a></p>
+
+<h2>Restore From Backup</h2>
+<p>
+<form name="restore" action="restore" enctype="multipart/form-data"
+	method="post" target="_top" accept-charset="UTF-8" id="restore"><label
+	for="archive">Backup File:</label> <input type="file" name="archive"
+	accept="application/zip"></input><br />
+<input type="submit" value="Upload"></form>
 </p>
 
 </div>

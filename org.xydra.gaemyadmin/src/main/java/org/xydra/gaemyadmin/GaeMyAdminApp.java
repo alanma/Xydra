@@ -1,13 +1,17 @@
 package org.xydra.gaemyadmin;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.restless.Restless;
+import org.xydra.restless.RestlessParameter;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceConfig;
@@ -16,6 +20,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.memcache.MemcacheService;
@@ -45,8 +50,70 @@ public class GaeMyAdminApp {
 	public static void restless() {
 		GaeMyAdminApp app = new GaeMyAdminApp();
 		
-		Restless.addGet("/stats", app, "stats");
-		Restless.addGet("/backup", app, "backup");
+		Restless.addAdminOnlyMethod("/stats", "GET", app, "stats");
+		Restless.addAdminOnlyMethod("/backup", "GET", app, "backup");
+		Restless.addAdminOnlyMethod("/deleteAll", "GET", app, "deleteAll", new RestlessParameter(
+		        "sure", "no"));
+	}
+	
+	public String backup() {
+		return "not yet implemented";
+	}
+	
+	/**
+	 * Delete all data in the data store
+	 * 
+	 * @throws IOException
+	 */
+	public void deleteAll(HttpServletResponse res, String sure) throws IOException {
+		res.setContentType("text/plain");
+		res.setCharacterEncoding("utf-8");
+		Writer w = res.getWriter();
+		
+		// Get a handle on the datastore itself
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		List<String> kinds = getAllKinds();
+		for(String kind : kinds) {
+			w.write("Kind '" + kind + "'. Counting ... ");
+			Query q = new Query(kind).setKeysOnly();
+			PreparedQuery pq = datastore.prepare(q);
+			int count = pq.countEntities();
+			w.write(count + "\n");
+		}
+		
+		if(sure.equalsIgnoreCase("yes")) {
+			for(String kind : kinds) {
+				w.write("Deleting kind " + kind + ". Getting keys ... ");
+				List<Key> keys = new LinkedList<Key>();
+				Query q = new Query(kind).setKeysOnly();
+				PreparedQuery pq = datastore.prepare(q);
+				for(Entity entity : pq.asIterable()) {
+					keys.add(entity.getKey());
+				}
+				w.write("Bulk delete ... ");
+				datastore.delete();
+				w.write("Deleted all '" + kind + "'.\n");
+			}
+		} else {
+			w
+			        .write("Ok, did not delete anything. If you are really sure, add '?sure=yes' to this url.");
+		}
+		
+		w.flush();
+		w.close();
+	}
+	
+	public List<String> getAllKinds() {
+		List<String> kinds = new LinkedList<String>();
+		
+		// Get a handle on the datastore itself
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		Iterable<Entity> statKinds = datastore.prepare(new Query("__Stat_Kind__")).asIterable();
+		for(Entity statKind : statKinds) {
+			String kind = statKind.getProperty("kind_name").toString();
+			kinds.add(kind);
+		}
+		return kinds;
 	}
 	
 	public void stats(HttpServletRequest req, HttpServletResponse res) throws IOException {
