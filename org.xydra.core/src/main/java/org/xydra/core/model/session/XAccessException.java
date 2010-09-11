@@ -2,6 +2,7 @@ package org.xydra.core.model.session;
 
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
+import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 
 

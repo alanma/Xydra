@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.core.change.XCommand;
+import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XFieldCommand;
 import org.xydra.core.model.state.XFieldState;
 import org.xydra.core.value.XValue;

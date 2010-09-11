@@ -1,6 +1,7 @@
 package org.xydra.core.model;
 
 import org.xydra.annotations.ReadOperation;
+import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XSendsFieldEvents;
 import org.xydra.core.change.XSendsModelEvent;
 import org.xydra.core.change.XSendsObjectEvents;

@@ -15,6 +15,7 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
+import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.index.query.Pair;
 
@@ -293,7 +294,7 @@ public interface XAccessManager extends Serializable {
 	 * {@link XTransaction}
 	 * 
 	 * @param actor The {@link XID} of the actor
-	 * @param command The {@link XTransaction} which is to be checked
+	 * @param trans The {@link XTransaction} which is to be checked
 	 * @return return if the actor is allowed to execute the
 	 *         {@link XTransaction}
 	 */
@@ -306,7 +307,7 @@ public interface XAccessManager extends Serializable {
 	 * @param actor The {@link XID} of the actor
 	 * @param repoAddr The {@link XAddress} of the {@link XRepository} for which
 	 *            the allowance of the remove-operation is to be checked.
-	 * @param modelID The {@link XID} of the {@link XModel} the actor would like
+	 * @param modelId The {@link XID} of the {@link XModel} the actor would like
 	 *            to remove
 	 * @return true if the actor is allowed to remove the {@link XModel} with
 	 *         the given {@link XID} from the specified {@link XRepository}

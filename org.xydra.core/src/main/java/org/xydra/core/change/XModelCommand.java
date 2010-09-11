@@ -2,6 +2,7 @@ package org.xydra.core.change;
 
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
+import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 
 

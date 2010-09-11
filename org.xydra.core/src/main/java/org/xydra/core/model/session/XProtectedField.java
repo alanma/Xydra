@@ -2,6 +2,7 @@ package org.xydra.core.model.session;
 
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.core.change.XCommand;
+import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XFieldCommand;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.model.XField;

@@ -10,6 +10,7 @@ import org.xydra.annotations.ReadOperation;
 import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XCommand;
+import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XModelCommand;
 import org.xydra.core.change.XModelEvent;
 import org.xydra.core.change.XModelEventListener;
