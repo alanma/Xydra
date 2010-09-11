@@ -120,10 +120,11 @@ public class DemoModelUtil {
 		        12, 13, 14, 15, 16, (byte)253, (byte)254, (byte)255 }));
 		
 		XField cookies = john.createField(ACTOR_ID, COOKIES_ID);
-		cookies.setValue(ACTOR_ID, XV.toSetValue(new XID[] { COOKIE1_ID, COOKIE2_ID }));
+		cookies.setValue(ACTOR_ID, XV.toIDSetValue(new XID[] { COOKIE1_ID, COOKIE2_ID }));
 		
 		XField cookieNames = john.createField(ACTOR_ID, COOKIENAMES_ID);
-		cookieNames.setValue(ACTOR_ID, XV.toSetValue(new String[] { "Chocolate Chip", "Almond" }));
+		cookieNames.setValue(ACTOR_ID, XV.toStringSetValue(new String[] { "Chocolate Chip",
+		        "Almond" }));
 		
 	}
 }

@@ -34,7 +34,7 @@ public class XV {
 	 * Returns the content of the given {@link Collection} as an
 	 * {@link XIDListValue}
 	 * 
-	 * Not that this is overloaded so that {@link Set Sets} are converted to
+	 * Note that this is overloaded so that {@link Set Sets} are converted to
 	 * {@link XSetValue XSetValues}. To specifically create a set value use
 	 * {@link #toSetValue(Collection)}. To specifically create a list value use
 	 * {@link #toListValue(Collection)}.
@@ -43,7 +43,7 @@ public class XV {
 	 *            {@link XIDListValue}
 	 * @return an {@link XIDListValue} with the content of the given list
 	 */
-	public static XIDListValue toValue(Collection<XID> list) {
+	public static XIDListValue toIDListValue(Collection<XID> list) {
 		return vf.createIDListValue(list);
 	}
 	
@@ -55,7 +55,7 @@ public class XV {
 	 *            {@link XIDListValue}
 	 * @return an {@link XIDListValue} with the content of the given list
 	 */
-	public static XByteListValue toValue(Collection<Byte> list) {
+	public static XByteListValue toByteListValue(Collection<Byte> list) {
 		return vf.createByteListValue(list);
 	}
 	
@@ -67,7 +67,7 @@ public class XV {
 	 *            {@link XBooleanListValue}
 	 * @return an {@link XBooleanListValue} with the content of the given list
 	 */
-	public static XBooleanListValue toValue(Collection<Boolean> list) {
+	public static XBooleanListValue toBooleanListValue(Collection<Boolean> list) {
 		return vf.createBooleanListValue(list);
 	}
 	
@@ -79,7 +79,7 @@ public class XV {
 	 *            {@link XDoubleListValue}
 	 * @return an {@link XDoubleListValue} with the content of the given list
 	 */
-	public static XDoubleListValue toValue(Collection<Double> list) {
+	public static XDoubleListValue toDoubleListValue(Collection<Double> list) {
 		return vf.createDoubleListValue(list);
 	}
 	
@@ -91,7 +91,7 @@ public class XV {
 	 *            {@link XIntegerListValue}
 	 * @return an {@link XIntegerListValue} with the content of the given list
 	 */
-	public static XIntegerListValue toValue(Collection<Integer> list) {
+	public static XIntegerListValue toIntegerListValue(Collection<Integer> list) {
 		return vf.createIntegerListValue(list);
 	}
 	
@@ -103,7 +103,7 @@ public class XV {
 	 *            {@link XLongListValue}
 	 * @return an {@link XLongListValue} with the content of the given list
 	 */
-	public static XLongListValue toValue(Collection<Long> list) {
+	public static XLongListValue toLongListValue(Collection<Long> list) {
 		return vf.createLongListValue(list);
 	}
 	
@@ -111,7 +111,7 @@ public class XV {
 	 * Returns the content of the given {@link Collection} as an
 	 * {@link XStringListValue}
 	 * 
-	 * Not that this is overloaded so that {@link Set Sets} are converted to
+	 * Note that this is overloaded so that {@link Set Sets} are converted to
 	 * {@link XSetValue XSetValues}. To specifically create a set value use
 	 * {@link #toSetValue(Collection)}. To specifically create a list value use
 	 * {@link #toListValue(Collection)}.
@@ -120,7 +120,7 @@ public class XV {
 	 *            {@link XStringListValue}
 	 * @return an {@link XStringListValue} with the content of the given list
 	 */
-	public static XStringListValue toValue(Collection<String> list) {
+	public static XStringListValue toStringListValue(Collection<String> list) {
 		return vf.createStringListValue(list);
 	}
 	
@@ -132,7 +132,7 @@ public class XV {
 	 *            {@link XStringSetValue}
 	 * @return an {@link XStringSetValue} with the content of the given list
 	 */
-	public static XStringSetValue toSetValue(Collection<String> list) {
+	public static XStringSetValue toStringSetValue(Collection<String> list) {
 		return vf.createStringSetValue(list);
 	}
 	
@@ -144,7 +144,7 @@ public class XV {
 	 *            {@link XIDSetValue}
 	 * @return an {@link XIDSetValue} with the content of the given list
 	 */
-	public static XIDSetValue toSetValue(Collection<XID> list) {
+	public static XIDSetValue toIDSetValue(Collection<XID> list) {
 		return vf.createIDSetValue(list);
 	}
 	
@@ -156,7 +156,7 @@ public class XV {
 	 *            {@link XStringSetValue}
 	 * @return an {@link XStringSetValue} with the content of the given list
 	 */
-	public static XStringSetValue toValue(Set<String> list) {
+	public static XStringSetValue toStringSetValue(Set<String> list) {
 		return vf.createStringSetValue(list);
 	}
 	
@@ -168,32 +168,8 @@ public class XV {
 	 *            {@link XIDSetValue}
 	 * @return an {@link XIDSetValue} with the content of the given list
 	 */
-	public static XIDSetValue toValue(Set<XID> list) {
+	public static XIDSetValue toIDSetValue(Set<XID> list) {
 		return vf.createIDSetValue(list);
-	}
-	
-	/**
-	 * Returns the content of the given {@link Collection} as an
-	 * {@link XStringSetValue}
-	 * 
-	 * @param list The {@link Collection} which is to be converted into an
-	 *            {@link XStringSetValue}
-	 * @return an {@link XStringSetValue} with the content of the given list
-	 */
-	public static XStringListValue toListValue(Collection<String> list) {
-		return vf.createStringListValue(list);
-	}
-	
-	/**
-	 * Returns the content of the given {@link Collection} as an
-	 * {@link XIDSetValue}
-	 * 
-	 * @param list The {@link Collection} which is to be converted into an
-	 *            {@link XIDSetValue}
-	 * @return an {@link XIDSetValue} with the content of the given list
-	 */
-	public static XIDListValue toListValue(Collection<XID> list) {
-		return vf.createIDListValue(list);
 	}
 	
 	/**
@@ -345,7 +321,7 @@ public class XV {
 	 *            {@link XStringSetValue}
 	 * @return an {@link XStringSetValue} with the content of the given list
 	 */
-	public static XStringSetValue toSetValue(String[] list) {
+	public static XStringSetValue toStringSetValue(String[] list) {
 		return vf.createStringSetValue(list);
 	}
 	
@@ -357,7 +333,7 @@ public class XV {
 	 *            {@link XIDSetValue}
 	 * @return an {@link XIDSetValue} with the content of the given list
 	 */
-	public static XIDSetValue toSetValue(XID[] list) {
+	public static XIDSetValue toIDSetValue(XID[] list) {
 		return vf.createIDSetValue(list);
 	}
 	

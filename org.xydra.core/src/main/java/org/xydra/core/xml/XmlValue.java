@@ -262,7 +262,7 @@ public class XmlValue {
 			list.add(toBoolean(entryElement));
 		}
 		
-		return XV.toValue(list);
+		return XV.toBooleanListValue(list);
 		
 	}
 	
@@ -285,7 +285,7 @@ public class XmlValue {
 			list.add(toDouble(entryElement));
 		}
 		
-		return XV.toValue(list);
+		return XV.toDoubleListValue(list);
 		
 	}
 	
@@ -308,7 +308,7 @@ public class XmlValue {
 			list.add(toInteger(entryElement));
 		}
 		
-		return XV.toValue(list);
+		return XV.toIntegerListValue(list);
 		
 	}
 	
@@ -330,7 +330,7 @@ public class XmlValue {
 			list.add(toLong(entryElement));
 		}
 		
-		return XV.toValue(list);
+		return XV.toLongListValue(list);
 		
 	}
 	
@@ -352,7 +352,7 @@ public class XmlValue {
 			list.add(toString(entryElement));
 		}
 		
-		return XV.toValue(list);
+		return XV.toStringListValue(list);
 		
 	}
 	
@@ -373,7 +373,7 @@ public class XmlValue {
 			list.add(toId(entryElement));
 		}
 		
-		return XV.toValue(list);
+		return XV.toIDListValue(list);
 		
 	}
 	
@@ -394,7 +394,7 @@ public class XmlValue {
 			list.add(toString(entryElement));
 		}
 		
-		return XV.toSetValue(list);
+		return XV.toStringSetValue(list);
 		
 	}
 	
@@ -415,7 +415,7 @@ public class XmlValue {
 			list.add(toId(entryElement));
 		}
 		
-		return XV.toSetValue(list);
+		return XV.toIDSetValue(list);
 		
 	}
 	

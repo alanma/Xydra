@@ -207,52 +207,52 @@ public class XmlValueTest {
 	
 	@Test
 	public void testIdSetValue() {
-		testValue(XV.toSetValue(new XID[] { XX.createUniqueID(), XX.toId("cookie") }));
+		testValue(XV.toIDSetValue(new XID[] { XX.createUniqueID(), XX.toId("cookie") }));
 	}
 	
 	@Test
 	public void testIdSetValueNull() {
-		testValue(XV.toSetValue(new XID[] { null }));
+		testValue(XV.toIDSetValue(new XID[] { null }));
 	}
 	
 	@Test
 	public void testIdSetValueEmpty() {
-		testValue(XV.toSetValue(new XID[] {}));
+		testValue(XV.toIDSetValue(new XID[] {}));
 	}
 	
 	@Test
 	public void testStringSetValue() {
-		testValue(XV.toSetValue(new String[] { "cookie", "monster" }));
+		testValue(XV.toStringSetValue(new String[] { "cookie", "monster" }));
 	}
 	
 	@Test
 	public void testStringSetValueNull() {
-		testValue(XV.toSetValue(new String[] { null }));
+		testValue(XV.toStringSetValue(new String[] { null }));
 	}
 	
 	@Test
 	public void testStringSetValueEmpty() {
-		testValue(XV.toSetValue(new String[] {}));
+		testValue(XV.toStringSetValue(new String[] {}));
 	}
 	
 	@Test
 	public void testStringSetValueUnsafe() {
-		testValue(XV.toSetValue(new String[] { "&gt;<" }));
+		testValue(XV.toStringSetValue(new String[] { "&gt;<" }));
 	}
 	
 	@Test
 	public void testStringSetValueSpace() {
-		testValue(XV.toSetValue(new String[] { "  test  " }));
+		testValue(XV.toStringSetValue(new String[] { "  test  " }));
 	}
 	
 	@Test
 	public void testStringSetValueTabs() {
-		testValue(XV.toSetValue(new String[] { "\t\ttest\t\t" }));
+		testValue(XV.toStringSetValue(new String[] { "\t\ttest\t\t" }));
 	}
 	
 	@Test
 	public void testStringSetValueNewlines() {
-		testValue(XV.toSetValue(new String[] { "\n\ntest\n\n" }));
+		testValue(XV.toStringSetValue(new String[] { "\n\ntest\n\n" }));
 	}
 	
 }

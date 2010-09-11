@@ -211,7 +211,8 @@ public class XmlModelTest {
 	@Test
 	public void testFullField() {
 		XField field = new MemoryField(DemoModelUtil.ALIASES_ID);
-		field.setValue(DemoModelUtil.ACTOR_ID, XV.toSetValue(new String[] { "Cookie Monster" }));
+		field.setValue(DemoModelUtil.ACTOR_ID, XV
+		        .toStringSetValue(new String[] { "Cookie Monster" }));
 		testField(field);
 	}
 	
