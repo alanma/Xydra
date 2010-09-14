@@ -125,9 +125,9 @@
 			<version>0.1.1-SNAPSHOT</version>
 		</dependency>
 
-		<!-- testing dependencies -->
+		<!-- testing dependencies, scope compile as some tests are exposed to be sub-classed -->
 		<dependency>
-			<scope>test</scope>
+			<scope>compile</scope>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 		</dependency>
