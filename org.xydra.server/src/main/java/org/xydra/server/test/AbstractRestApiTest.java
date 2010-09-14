@@ -31,7 +31,6 @@ import org.xydra.core.test.DemoModelUtil;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlModel;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
-import org.xydra.server.Jetty;
 import org.xydra.server.RepositoryManager;
 
 

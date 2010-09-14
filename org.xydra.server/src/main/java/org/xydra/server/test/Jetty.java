@@ -1,4 +1,4 @@
-package org.xydra.server;
+package org.xydra.server.test;
 
 import static org.junit.Assert.assertFalse;
 
@@ -14,6 +14,8 @@ import org.xydra.core.access.XA;
 import org.xydra.core.access.XAccessManager;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.test.DemoModelUtil;
+import org.xydra.server.MemoryXydraServer;
+import org.xydra.server.RepositoryManager;
 
 
 /**
