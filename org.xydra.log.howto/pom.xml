@@ -53,11 +53,8 @@
 		<maven.compiler.target>1.5</maven.compiler.target>
 
 		<!-- define a transient output directory for gwt -->
-		<gwt.output.directory>${basedir}/war</gwt.output.directory>
+		<gwt.output.directory>./war</gwt.output.directory>
 		
-		<!-- the value of the rename-to attribute in your GWT module configuration -->
-		<gwt.module.alias>example_module</gwt.module.alias>
-
 	</properties>
 
 	<dependencies>
