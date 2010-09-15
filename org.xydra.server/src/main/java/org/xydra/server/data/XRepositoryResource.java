@@ -20,10 +20,8 @@ import org.xydra.server.XydraServer;
 
 public class XRepositoryResource {
 	
-	public void restless(String prefix) {
-		
-		Restless.addPost(prefix, this, "setModel");
-		
+	public static void restless(String prefix) {
+		Restless.addGenericStatic(prefix, "POST", XRepositoryResource.class, "setModel", false);
 	}
 	
 	public void setModel(HttpServletRequest req, HttpServletResponse res) {

@@ -9,6 +9,9 @@ import org.xydra.core.model.session.XAccessException;
 import org.xydra.restless.RestlessExceptionHandler;
 
 
+/**
+ * Handles {@link XAccessException} by sending appropriate HTTP status code
+ **/
 public class XAccessExceptionHandler implements RestlessExceptionHandler {
 	
 	public boolean handleException(Throwable t, HttpServletRequest req, HttpServletResponse res) {
@@ -17,10 +20,11 @@ public class XAccessExceptionHandler implements RestlessExceptionHandler {
 			try {
 				res.sendError(HttpServletResponse.SC_FORBIDDEN);
 			} catch(IOException e) {
-				throw new RuntimeException("error while sending response for XAccessException", e);
+				throw new RuntimeException("Error while sending response for XAccessException", e);
 			}
 		}
 		
+		/* let other handlers see this exception */
 		return false;
 	}
 	

@@ -15,17 +15,17 @@ import org.xydra.server.XydraServer;
 
 public class XFieldResource {
 	
-	public void restless(String prefix) {
-		
+	public static void restless(String prefix) {
 		RestlessParameter modelId = new RestlessParameter("modelId");
 		RestlessParameter objectId = new RestlessParameter("objectId");
 		RestlessParameter fieldId = new RestlessParameter("fieldId");
 		
 		String path = prefix + "/{modelId}/{objectId}/{fieldId}";
 		
-		Restless.addGet(path, this, "get", modelId, objectId, fieldId);
-		Restless.addDelete(path, this, "delete", modelId, objectId, fieldId);
-		
+		Restless.addGenericStatic(path, "GET", XFieldResource.class, "get", false, modelId,
+		        objectId, fieldId);
+		Restless.addGenericStatic(path, "DELETE", XFieldResource.class, "delete", false, modelId,
+		        objectId, fieldId);
 	}
 	
 	public void get(HttpServletRequest req, HttpServletResponse res, String modelId,

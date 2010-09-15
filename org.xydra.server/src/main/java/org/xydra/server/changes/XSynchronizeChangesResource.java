@@ -24,19 +24,22 @@ import org.xydra.server.XydraServer;
 
 public class XSynchronizeChangesResource {
 	
-	public void restless(String prefix) {
+	public static void restless(String prefix) {
 		
 		RestlessParameter modelId = new RestlessParameter("modelId");
 		RestlessParameter objectId = new RestlessParameter("objectId");
 		
 		String modelPath = prefix + "/{modelId}";
+		Restless.addGenericStatic(modelPath, "GET", XSynchronizeChangesResource.class,
+		        "getEventsModel", false, modelId);
+		Restless.addGenericStatic(modelPath, "POST", XSynchronizeChangesResource.class,
+		        "executeCommandModel", false, modelId);
+		
 		String objectPath = modelPath + "/{objectId}";
-		
-		Restless.addGet(modelPath, this, "getEventsModel", modelId);
-		Restless.addPost(modelPath, this, "executeCommandModel", modelId);
-		Restless.addGet(objectPath, this, "getEventsObject", modelId, objectId);
-		Restless.addPost(objectPath, this, "executeCommandObject", modelId, objectId);
-		
+		Restless.addGenericStatic(objectPath, "GET", XSynchronizeChangesResource.class,
+		        "getEventsObject", false, modelId, objectId);
+		Restless.addGenericStatic(objectPath, "POST", XSynchronizeChangesResource.class,
+		        "executeCommandObject", false, modelId, objectId);
 	}
 	
 	public void getEventsModel(HttpServletRequest req, HttpServletResponse res, String modelId) {

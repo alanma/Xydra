@@ -23,6 +23,11 @@ import org.xydra.server.data.XObjectResource;
 import org.xydra.server.data.XRepositoryResource;
 
 
+/**
+ * Exposed via Restless over HTTP
+ * 
+ * @author dscharrer, voelkel
+ */
 public class XydraServer {
 	
 	private XydraServer() {
@@ -42,15 +47,14 @@ public class XydraServer {
 		Restless.addExceptionHandler(new XAccessExceptionHandler());
 		
 		String dataPrefix = prefix + "/data";
-		new XRepositoryResource().restless(dataPrefix);
-		new XModelResource().restless(dataPrefix);
-		new XObjectResource().restless(dataPrefix);
-		new XFieldResource().restless(dataPrefix);
+		XRepositoryResource.restless(dataPrefix);
+		XModelResource.restless(dataPrefix);
+		XObjectResource.restless(dataPrefix);
+		XFieldResource.restless(dataPrefix);
 		
 		String changesPrefix = prefix + "/changes";
-		new XSynchronizeChangesResource().restless(changesPrefix);
-		new XRepositoryChangesResource().restless(changesPrefix);
-		
+		XSynchronizeChangesResource.restless(changesPrefix);
+		XRepositoryChangesResource.restless(changesPrefix);
 	}
 	
 	public static XProtectedRepository getRepository(HttpServletRequest req) {

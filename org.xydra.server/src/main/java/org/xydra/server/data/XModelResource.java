@@ -23,16 +23,14 @@ import org.xydra.server.XydraServer;
 
 public class XModelResource {
 	
-	public void restless(String prefix) {
-		
+	public static void restless(String prefix) {
 		RestlessParameter modelId = new RestlessParameter("modelId");
 		
 		String path = prefix + "/{modelId}";
 		
-		Restless.addGet(path, this, "get", modelId);
-		Restless.addPost(path, this, "setObject", modelId);
-		Restless.addDelete(path, this, "delete", modelId);
-		
+		Restless.addGenericStatic(path, "GET", XModelResource.class, "get", false, modelId);
+		Restless.addGenericStatic(path, "POST", XModelResource.class, "setObject", false, modelId);
+		Restless.addGenericStatic(path, "DELETE", XModelResource.class, "delete", false, modelId);
 	}
 	
 	public void get(HttpServletRequest req, HttpServletResponse res, String modelId) {

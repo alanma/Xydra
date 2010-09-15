@@ -17,10 +17,9 @@ import org.xydra.server.XydraServer;
 
 public class XRepositoryChangesResource {
 	
-	public void restless(String prefix) {
-		
-		Restless.addPost(prefix, this, "executeRepositoryCommand");
-		
+	public static void restless(String prefix) {
+		Restless.addGenericStatic(prefix, "POST", XRepositoryChangesResource.class,
+		        "executeRepositoryCommand", false);
 	}
 	
 	public void executeRepositoryCommand(HttpServletRequest req, HttpServletResponse res) {
