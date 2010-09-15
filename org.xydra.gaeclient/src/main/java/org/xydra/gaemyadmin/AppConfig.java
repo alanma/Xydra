@@ -5,6 +5,12 @@ import java.io.File;
 import com.google.appengine.tools.admin.AppCfg;
 
 
+/**
+ * An attempt to create a wrapper for the Google AppEngine client.
+ * 
+ * @author voelkel
+ * 
+ */
 public class AppConfig {
 	
 	static abstract class Command {

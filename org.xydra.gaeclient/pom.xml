@@ -151,13 +151,6 @@
 
 	<dependencies>
 
-		<!-- RESTless -->
-		<dependency>
-			<groupId>org.xydra</groupId>
-			<artifactId>restless</artifactId>
-			<version>0.1.1-SNAPSHOT</version>
-		</dependency>
-
 		<!-- test server -->
 		<dependency>
 			<groupId>org.mortbay.jetty</groupId>
