@@ -57,14 +57,22 @@
 
 	<properties>
 
-		<!-- convenience to define GWT version in one place -->
-		<gwt.version>2.0.0</gwt.version>
-
 		<!--  tell the compiler we use 1.5 -->
 		<maven.compiler.source>1.5</maven.compiler.source>
 		<maven.compiler.target>1.5</maven.compiler.target>
 
-	</properties>
+		<!-- convenience to define GWT version in one place -->
+		<gwt.version>2.0.4</gwt.version>
+		
+		<!-- define a transient output directory for gwt -->
+		<gwt.output.directory>./war</gwt.output.directory>
+		
+		<!-- the value of the rename-to attribute in your GWT module configuration -->
+		<gwt.module.alias>XydraEditor</gwt.module.alias>
+		
+		<gwt.compiler.force>true</gwt.compiler.force>
+		
+	</properties>	
 
 	<dependencies>
 

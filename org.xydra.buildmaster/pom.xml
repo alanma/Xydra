@@ -10,22 +10,66 @@
 	<name>Xydra Buildmaster</name>
 	<inceptionYear>2010</inceptionYear>
 
+	<!--
+
+		Run 'mvn clean compile site:site site:deploy' to re-create all sites
+		and deploy them
+	-->
+
 	<modules>
-		<module>../org.xydra.client</module>
-		<module>../org.xydra.client-gwt/</module>
-		<module>../org.xydra.core/</module>
-		<module>../org.xydra.dev/</module>
-		<module>../org.xydra.gaeclient/</module>
-		<module>../org.xydra.gaemyadmin/</module>
-		<module>../org.xydra.index/</module>
+		<!-- No Xydra dependencies -->
 		<module>../org.xydra.log/</module>
+
+		<!-- Depends on: .log, GWT -->
 		<module>../org.xydra.log.howto/</module>
-		<module>../org.xydra.restless/</module>
-		<module>../org.xydra.schema/</module>
-		<module>../org.xydra.server/</module>
-		<module>../org.xydra.server-gae/</module>
+
+		<!-- No Xydra dependencies -->
+		<module>../org.xydra.index/</module>
+
+		<!-- Depends on .index -->
 		<module>../org.xydra.textsearch/</module>
+
+		<!-- Depends on: .index, .log -->
+		<module>../org.xydra.core/</module>
+
+		<!-- Depends on: .core, .log -->
+		<module>../org.xydra.client</module>
+
+		<!-- Depends on: .client, GWT -->
+		<module>../org.xydra.client-gwt/</module>
+
+		<!-- No Xydra dependencies -->
+		<module>../org.xydra.restless/</module>
+
+		<!-- Depends on: .core, .restless, .client, GWT -->
 		<module>../org.xydra.webadmin/</module>
+
+		<!-- Depends on: .core, .log, .restless -->
+		<module>../org.xydra.server/</module>
+
+		<!-- Depends on: .server, GAE -->
+		<module>../org.xydra.server-gae/</module>
+
+		<!-- Depends on: .restless, GAE -->
+		<module>../org.xydra.gaemyadmin/</module>
+
+		<!-- Experimental. Depends on: .core -->
+		<module>../org.xydra.schema/</module>
+
+		<!-- Experimental. Depends on: .core, GWT -->
+		<!-- Commented out due to test failures -->
+		<!--
+			<module>../org.xydra.dev/</module>
+		-->
+
+		<!-- Experimental. Depends on: GAE -->
+		<!--
+			Commented out due to site generation error: package
+			com.google.appengine.tools.admin does not exist
+		--><!--
+		<module>../org.xydra.gaeclient/</module>
+
+	-->
 	</modules>
 
 </project>
