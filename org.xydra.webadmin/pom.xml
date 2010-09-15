@@ -14,6 +14,21 @@
 	<version>0.1.1-SNAPSHOT</version>
 	<name>Xydra Webadmin</name>
 	
+	<properties>
+		
+		<!-- convenience to define GWT version in one place -->
+		<gwt.version>2.0.4</gwt.version>
+		
+		<!-- define a transient output directory for gwt -->
+		<gwt.output.directory>./war</gwt.output.directory>
+		
+		<!-- the value of the rename-to attribute in your GWT module configuration -->
+		<gwt.module.alias>XydraEditor</gwt.module.alias>
+		
+		<gwt.compiler.force>true</gwt.compiler.force>
+		
+	</properties>	
+	
 	<repositories>
 		<!-- xydra repo -->
 		<repository>
@@ -170,7 +185,7 @@
 		</snapshotRepository>
 		<site>
 			<id>xydra-site</id>
-			<url>svn:https://xydra.googlecode.com/svn/site/org.xydra.webadmin</url>
+			<url>scp://${xydra.site}/${artifactId}</url>
 		</site>
 	</distributionManagement>
 
