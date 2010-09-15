@@ -324,10 +324,21 @@ public class Restless extends HttpServlet {
 			if(instanceOrClass instanceof Class<?>) {
 				// need to created instance
 				Class<?> clazz = (Class<?>)instanceOrClass;
+				
+				Object instance;
+				
+				// look in cache
+				instance = instanceCache.get(clazz);
+				if(instance != null) {
+					return instance;
+				}
+				
 				try {
 					Constructor<?> constructor = clazz.getConstructor();
 					try {
-						Object instance = constructor.newInstance();
+						instance = constructor.newInstance();
+						// cache and return
+						instanceCache.put(clazz, instance);
 						return instance;
 					} catch(IllegalArgumentException e) {
 						throw new RestlessException(500,
@@ -352,6 +363,8 @@ public class Restless extends HttpServlet {
 		}
 		
 	}
+	
+	private static Map<Class<?>,Object> instanceCache = new HashMap<Class<?>,Object>();
 	
 	protected static final String instanceOrClass_className(Object instanceOrClass) {
 		if(instanceOrClass instanceof Class<?>) {
