@@ -126,8 +126,9 @@ public interface XGroupDatabase extends Serializable {
 	Iterator<XID> getAllMembers(XID group);
 	
 	/**
-	 * Add a listener for {@link XGroupEvent}s. The listener will only receive
-	 * events for defined group memberships, not for implied group memberships.
+	 * Add a listener for {@link XGroupEvent XGroupEvents}. The listener will
+	 * only receive events for defined group memberships, not for implied group
+	 * memberships.
 	 */
 	void addListener(XGroupListener listener);
 	

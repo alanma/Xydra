@@ -1,7 +1,7 @@
 package org.xydra.core.access;
 
 /**
- * A listener that listens for {@link #XAccessEvent}s.
+ * A listener that listens for {@link XAccessEvent XAccessEvents}.
  * 
  * @author dscharrer
  * 
