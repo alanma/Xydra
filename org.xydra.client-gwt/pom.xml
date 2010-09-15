@@ -29,7 +29,7 @@
 		<gwt.version>2.0.4</gwt.version>
 		
 		<!-- define a transient output directory for gwt -->
-		<gwt.output.directory>${basedir}/war</gwt.output.directory>
+		<gwt.output.directory>./war</gwt.output.directory>
 		
 		<!-- the value of the rename-to attribute in your GWT module configuration -->
 		<gwt.module.alias>XydraEditor</gwt.module.alias>
