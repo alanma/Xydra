@@ -21,7 +21,6 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 
 
-
 public class GaeAccess {
 	
 	private static final String PREFIX_ARM = "access/";
@@ -29,31 +28,21 @@ public class GaeAccess {
 	private static final String KIND_ARM = "arm";
 	
 	public static XAccessManager loadAccessManager(XAddress addr, XGroupDatabase groups) {
-		
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		
 		Key armKey = getAccessManagerKey(addr);
-		
 		Entity e = GaeUtils.getEntity(armKey);
-		
 		XAccessManager arm;
 		
 		if(e == null) {
 			// empty ARM
 			arm = new MemoryAccessManager(groups);
-			
 		} else {
-			
 			String defsStr = (String)e.getProperty(PROP_DEFS);
-			
 			MiniElement xml = new MiniXMLParserImpl().parseXml(defsStr);
 			arm = XmlAccess.toAccessManager(xml, groups);
 		}
-		
 		arm.addListener(new Persister(addr, arm));
-		
 		return arm;
-		
 	}
 	
 	private static Key getAccessManagerKey(XAddress addr) {
@@ -61,16 +50,13 @@ public class GaeAccess {
 	}
 	
 	private static void saveAccessManager(XAddress addr, Iterator<XAccessDefinition> defs) {
-		
 		Key armKey = getAccessManagerKey(addr);
-		
 		Entity e = new Entity(armKey);
 		
 		XmlOutStringBuffer out = new XmlOutStringBuffer();
 		XmlAccess.toXml(defs, out);
 		
 		e.setUnindexedProperty(PROP_DEFS, out.getXml());
-		
 		GaeUtils.putEntity(e);
 	}
 	

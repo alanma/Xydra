@@ -30,43 +30,27 @@ public class GaeGroups {
 	
 	@SuppressWarnings("unchecked")
 	public static XGroupDatabase loadGroups() {
-		
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		
 		Key groupdbKey = getGroupDBKey();
-		
 		Entity groupdb = GaeUtils.getEntity(groupdbKey);
-		
 		XGroupDatabase groups = new MemoryGroupDatabase();
 		groups.addListener(new Persister(groups));
-		
 		if(groupdb == null) {
 			// new group database
 			return groups;
 		}
 		
 		List<String> groupIdStrs = (List<String>)groupdb.getProperty(PROP_GROUPS);
-		
 		for(String groupIdStr : groupIdStrs) {
-			
 			XID groupId = XX.toId(groupIdStr);
-			
 			Key groupKey = getGroupKey(groupId);
-			
 			Entity group = GaeUtils.getEntity(groupKey);
-			
 			List<String> actorIdStrs = (List<String>)group.getProperty(PROP_ACTORS);
-			
 			for(String actorIdStr : actorIdStrs) {
-				
 				XID actorId = actorIdStr == null ? null : XX.toId(actorIdStr);
-				
 				groups.addToGroup(actorId, groupId);
-				
 			}
-			
 		}
-		
 		return groups;
 	}
 	
@@ -79,13 +63,9 @@ public class GaeGroups {
 	}
 	
 	private static void saveGroups(Iterator<XID> groups) {
-		
 		Key key = getGroupDBKey();
-		
 		Entity e = new Entity(key);
-		
 		e.setUnindexedProperty(PROP_GROUPS, asStringList(groups));
-		
 		GaeUtils.putEntity(e);
 	}
 	
@@ -99,13 +79,9 @@ public class GaeGroups {
 	}
 	
 	private static void saveGroup(XID groupId, Iterator<XID> actors) {
-		
 		Key key = getGroupKey(groupId);
-		
 		Entity e = new Entity(key);
-		
 		e.setUnindexedProperty(PROP_GROUPS, asStringList(actors));
-		
 		GaeUtils.putEntity(e);
 	}
 	
@@ -113,6 +89,11 @@ public class GaeGroups {
 		GaeUtils.deleteEntity(getGroupKey(groupId));
 	}
 	
+	/**
+	 * Listen to {@link XGroupEvent} and persist in data store immediately.
+	 * 
+	 * @author dscharrer
+	 */
 	private static class Persister implements XGroupListener {
 		
 		private final XGroupDatabase groups;
