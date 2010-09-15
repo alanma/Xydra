@@ -1,0 +1,16 @@
+ /**
+ * name:            XSchemaParser.jj
+ * modified:        2010-08-26
+ * author:          Max Voelkel
+ * email:           dev@xam.de
+ */options{  DEBUG_PARSER = true;
+  STATIC = false;}PARSER_BEGIN(XSchemaParser)package org.xydra.schema.parser;import java.io.InputStream;import java.io.FileInputStream;import java.io.FileNotFoundException;import org.xydra.schema.model.*;import org.xydra.core.X;public class XSchemaParser{  public static void parse(InputStream aInSt) throws ParseException  {    // create a parser (this object)
+    XSchemaParser parser = new XSchemaParser(aInSt);    // parse!
+    parser.repository();  }}PARSER_END(XSchemaParser)TOKEN :{  < LETTER : [ "A"-"Z", "a"-"z" ] >| < DIGIT : [ "0"-"9" ] >| < NAMECHAR :    (      < LETTER >    | < DIGIT >    | "."    | "-"    | "_"    ) >| < LISTSTART : "[" >| < LISTEND : "]" >| < ENTITYSTART : "{" >| < ENTITYEND : "}" >| < COMMA : "," >| < SEMICOLON : ";" >| < QUOTEDSTR :    (      "'" (~[ "'" ])* "'"    ) >| < SPACE : " " >| < BOOL :
+    "true"
+  | "false" >
+| < NAME : < LETTER > (< NAMECHAR >)* >| < NUMBER : (< DIGIT >)+ >| < DOUBLE : < NUMBER > "." < NUMBER > >}SKIP :{  < COMMENT :    "<!--"    (      ~[ "-" ]    | ("-" ~[ "-" ])    )*    "-->" >| < WHITESPACE :    (      "\t"    | "\n"    | "\r"    )+ >}void spaces() :{}{  (< SPACE >)*}SRepository repository() :{  Token nameToken;  SRepository repo;}{  nameToken = < NAME >  {    SName name = new SName(nameToken.image);    repo = new SRepository(name);  }  spaces() "=" spaces()  (    model() spaces() ";" spaces()  )*  {    return repo;  }  < EOF >}void model() :{}{  < NAME > spaces() "=" spaces()  (    object() spaces() ";" spaces()  )*}SObject object() :{  SObject object;  SName name;  SField field;}{  name = name()  {    object = new SObject(name);  }  spaces() "=" spaces() < ENTITYSTART > spaces()    (      field = field()      {        object.fields.add(field);      }      spaces() ";" spaces()    )*  spaces() < ENTITYEND > spaces()  {    return object;  }}SName name() :{  Token nameToken;}{  nameToken = < NAME >  {    SName name = new SName(nameToken.image);    return name;  }}SField field() :{  SField field;  Token typeToken;  SType type;  SName name;  SValue value;}{  typeToken = < NAME >  {    type = new SType(typeToken.image);  }  < SPACE > spaces() name = name() spaces() "=" spaces() value = value()  {    field = new SField(type, name, value);    return field;  }}SValue value() :{  SValue value;  Token t;}{  (    t = < QUOTEDSTR >    {      value = SString.parse(t.image);    }  | t = < NAME >    {      value = new SID(X.getIDProvider().fromString(t.image));    }  | t = < DOUBLE >
+    {
+      value = SDouble.parse(t.image);
+    }
+  | t = < NUMBER >    {      value = SNumber.parse(t.image);    }  | t = < BOOL >    {      value = SBoolean.parse(t.image);    }  )  {    return value;  }}

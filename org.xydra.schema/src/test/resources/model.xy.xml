@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xrepository xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xydra.googlecode.com/svn/trunk/org.xydra.core/src/main/resources/xydra.dtd">
+	xid="repo">
+	<xmodel xid="phonebook" revision="36">
+		<xobject xid="john" revision="36">
+			<xfield xid="phone" revision="7">
+				<xstring>3463-2346</xstring>
+			</xfield>
+			<xfield xid="maxCallTime" revision="27">
+				<xlong>675874678478467</xlong>
+			</xfield>
+			<xfield xid="title" revision="5">
+				<xstring>Dr. John Doe</xstring>
+			</xfield>
+			<xfield xid="scores" revision="25">
+				<xintegerList>
+					<xinteger>34</xinteger>
+					<xinteger>234</xinteger>
+					<xinteger>34</xinteger>
+				</xintegerList>
+			</xfield>
+			<xfield xid="emptyfield" revision="30" />
+			<xfield xid="friends" revision="11">
+				<xidList>
+					<xid>claudia</xid>
+					<xid>peter</xid>
+				</xidList>
+			</xfield>
+			<xfield xid="cookies" revision="34">
+				<xidSet>
+					<xid>cookie2</xid>
+					<xid>cookie1</xid>
+				</xidSet>
+			</xfield>
+			<xfield xid="age" revision="23">
+				<xinteger>42</xinteger>
+			</xfield>
+			<xfield xid="signature" revision="32">
+				<xbyteList>AAECAwQFBgcICQoLDA0ODxD9/v8=</xbyteList>
+			</xfield>
+			<xfield xid="height" revision="19">
+				<xdouble>121.3</xdouble>
+			</xfield>
+			<xfield xid="lastCallTime" revision="29">
+				<xlongList>
+					<xlong>32456</xlong>
+					<xlong>7664</xlong>
+					<xlong>56</xlong>
+				</xlongList>
+			</xfield>
+			<xfield xid="hidden" revision="15">
+				<xboolean>false</xboolean>
+			</xfield>
+			<xfield xid="spouse" revision="13">
+				<xid>claudia</xid>
+			</xfield>
+			<xfield xid="cookienames" revision="36">
+				<xstringSet>
+					<xstring>Chocolate Chip</xstring>
+					<xstring>Almond</xstring>
+				</xstringSet>
+			</xfield>
+			<xfield xid="flags" revision="17">
+				<xbooleanList>
+					<xboolean>true</xboolean>
+					<xboolean>false</xboolean>
+					<xboolean>true</xboolean>
+					<xboolean>true</xboolean>
+					<xboolean>false</xboolean>
+				</xbooleanList>
+			</xfield>
+			<xfield xid="aliases" revision="9">
+				<xstringList>
+					<xstring>Johnny</xstring>
+					<xstring>John the Man</xstring>
+					<xstring>Cookie Monster</xstring>
+				</xstringList>
+			</xfield>
+			<xfield xid="coordinates" revision="21">
+				<xdoubleList>
+					<xdouble>32.465</xdouble>
+					<xdouble>19.34</xdouble>
+				</xdoubleList>
+			</xfield>
+		</xobject>
+		<xobject xid="peter" revision="3" />
+		<xobject xid="claudia" revision="2" />
+	</xmodel>
+</xrepository>
