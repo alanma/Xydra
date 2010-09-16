@@ -338,13 +338,6 @@ public class XV {
 	}
 	
 	/**
-	 * @return the {@link XID} wrapped in an {@link XIDValue}
-	 */
-	public static XIDValue toValue(XID value) {
-		return vf.createIDValue(value);
-	}
-	
-	/**
 	 * @return the boolean wrapped in an {@link XBooleanValue}
 	 */
 	public static XBooleanValue toValue(boolean value) {

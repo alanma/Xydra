@@ -11,7 +11,6 @@ import org.xydra.core.value.XDoubleValue;
 import org.xydra.core.value.XIDListValue;
 import org.xydra.core.value.XIDSetValue;
 import org.xydra.core.value.XIDSortedSetValue;
-import org.xydra.core.value.XIDValue;
 import org.xydra.core.value.XIntegerListValue;
 import org.xydra.core.value.XIntegerValue;
 import org.xydra.core.value.XLongListValue;
@@ -34,10 +33,6 @@ public class MemoryValueFactory implements XValueFactory {
 	
 	public XStringValue createStringValue(String string) {
 		return new MemoryStringValue(string);
-	}
-	
-	public XIDValue createIDValue(XID id) {
-		return new MemoryIDValue(id);
 	}
 	
 	public XBooleanValue createBooleanValue(boolean value) {

@@ -14,7 +14,6 @@ import org.xydra.core.change.impl.memory.MemoryObjectCommand;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XLoggedField;
 import org.xydra.core.model.XLoggedObject;
-import org.xydra.core.value.XIDValue;
 import org.xydra.core.value.XValue;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -67,10 +66,8 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 				final Button add = new Button("Add Field");
 				final XIDEditor editor = new XIDEditor(null, new EditListener() {
 					public void newValue(XValue value) {
-						add.setEnabled(value != null
-						        && value instanceof XIDValue
-						        && !XObjectEditor.this.object
-						                .hasField(((XIDValue)value).contents()));
+						add.setEnabled(value != null && value instanceof XID
+						        && !XObjectEditor.this.object.hasField(((XID)value)));
 					}
 				});
 				Button cancel = new Button("Cancel");
@@ -87,10 +84,11 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 				});
 				add.addClickHandler(new ClickHandler() {
 					public void onClick(ClickEvent e) {
-						XIDValue value = editor.getValue();
+						// TODO simply this block now that XID=XIDValue
+						XID value = editor.getValue();
 						if(value == null)
 							return;
-						XID id = value.contents();
+						XID id = value;
 						if(XObjectEditor.this.object.hasField(id))
 							return;
 						add(id);

@@ -27,7 +27,7 @@ public class XLongListEditor extends XCollectionEditor<XLongValue,XLongListValue
 		List<Long> lst = new ArrayList<Long>();
 		while(entries.hasNext())
 			lst.add(entries.next().contents());
-		return XV.toValue(lst);
+		return XV.toLongListValue(lst);
 	}
 	
 	@Override

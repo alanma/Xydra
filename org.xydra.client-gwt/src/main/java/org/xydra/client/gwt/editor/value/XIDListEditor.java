@@ -6,11 +6,10 @@ import java.util.List;
 
 import org.xydra.core.model.XID;
 import org.xydra.core.value.XIDListValue;
-import org.xydra.core.value.XIDValue;
 import org.xydra.core.value.XV;
 
 
-public class XIDListEditor extends XCollectionEditor<XIDValue,XIDListValue> {
+public class XIDListEditor extends XCollectionEditor<XID,XIDListValue> {
 	
 	public XIDListEditor(Iterator<XID> value, EditListener listener) {
 		super(listener);
@@ -24,11 +23,11 @@ public class XIDListEditor extends XCollectionEditor<XIDValue,XIDListValue> {
 	}
 	
 	@Override
-	protected XIDListValue asCollectionValue(Iterator<XIDValue> entries) {
+	protected XIDListValue asCollectionValue(Iterator<XID> entries) {
 		List<XID> lst = new ArrayList<XID>();
 		while(entries.hasNext())
-			lst.add(entries.next().contents());
-		return XV.toValue(lst);
+			lst.add(entries.next());
+		return XV.toIDListValue(lst);
 	}
 	
 	@Override

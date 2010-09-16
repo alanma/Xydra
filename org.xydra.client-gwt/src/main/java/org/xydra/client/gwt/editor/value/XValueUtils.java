@@ -11,7 +11,6 @@ import org.xydra.core.value.XDoubleListValue;
 import org.xydra.core.value.XDoubleValue;
 import org.xydra.core.value.XIDListValue;
 import org.xydra.core.value.XIDSetValue;
-import org.xydra.core.value.XIDValue;
 import org.xydra.core.value.XIntegerListValue;
 import org.xydra.core.value.XIntegerValue;
 import org.xydra.core.value.XListValue;
@@ -93,8 +92,8 @@ abstract public class XValueUtils {
 			return XX.createUniqueID();
 		}
 		
-		if(value instanceof XIDValue) {
-			return ((XIDValue)value).contents();
+		if(value instanceof XID) {
+			return ((XID)value);
 		} else if(value instanceof XIDListValue) {
 			XIDListValue lv = (XIDListValue)value;
 			if(!lv.isEmpty()) {

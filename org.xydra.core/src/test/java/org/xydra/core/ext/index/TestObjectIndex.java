@@ -122,7 +122,7 @@ public class TestObjectIndex {
 		LinkedList<XValue> list = new LinkedList<XValue>();
 		list.add(X.getValueFactory().createBooleanValue(true));
 		list.add(X.getValueFactory().createDoubleValue(3.1415));
-		list.add(X.getValueFactory().createIDValue(id1));
+		list.add(id1);
 		list.add(X.getValueFactory().createIntegerValue(42));
 		list.add(X.getValueFactory().createLongValue(1234567));
 		list.add(X.getValueFactory().createStringValue(a));

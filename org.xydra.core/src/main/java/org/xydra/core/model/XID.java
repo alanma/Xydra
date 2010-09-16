@@ -2,6 +2,8 @@ package org.xydra.core.model;
 
 import java.io.Serializable;
 
+import org.xydra.core.value.XValue;
+
 
 /**
  * A identification object that can be serialised.
@@ -11,7 +13,7 @@ import java.io.Serializable;
  * 
  * @author voelkel
  */
-public interface XID extends Serializable, Comparable<XID> {
+public interface XID extends XValue, Serializable, Comparable<XID> {
 	
 	// TODO conversion to URI, byte[] and String
 	

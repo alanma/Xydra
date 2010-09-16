@@ -87,7 +87,7 @@ public class DemoModelUtil {
 		friends.setValue(ACTOR_ID, XV.toValue(new XID[] { CLAUDIA_ID, PETER_ID }));
 		
 		XField spouse = john.createField(ACTOR_ID, SPOUSE_ID);
-		spouse.setValue(ACTOR_ID, XV.toValue(CLAUDIA_ID));
+		spouse.setValue(ACTOR_ID, CLAUDIA_ID);
 		
 		XField hidden = john.createField(ACTOR_ID, HIDDEN_ID);
 		hidden.setValue(ACTOR_ID, XV.toValue(false));

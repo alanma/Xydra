@@ -24,6 +24,7 @@ import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.change.impl.memory.MemoryFieldCommand;
 import org.xydra.core.change.impl.memory.MemoryObjectCommand;
+import org.xydra.core.model.XID;
 import org.xydra.core.model.XLoggedField;
 import org.xydra.core.value.XBooleanListValue;
 import org.xydra.core.value.XBooleanValue;
@@ -33,7 +34,6 @@ import org.xydra.core.value.XDoubleListValue;
 import org.xydra.core.value.XDoubleValue;
 import org.xydra.core.value.XIDListValue;
 import org.xydra.core.value.XIDSetValue;
-import org.xydra.core.value.XIDValue;
 import org.xydra.core.value.XIntegerListValue;
 import org.xydra.core.value.XIntegerValue;
 import org.xydra.core.value.XListValue;
@@ -172,7 +172,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 			} else {
 				if(value instanceof XStringValue) {
 					str += " (string)";
-				} else if(value instanceof XIDValue) {
+				} else if(value instanceof XID) {
 					str += " (xid)";
 				} else if(value instanceof XBooleanValue) {
 					str += " (boolean)";
@@ -321,7 +321,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 			} else {
 				if(value instanceof XStringValue) {
 					this.type.setSelectedIndex(IDX_STRING);
-				} else if(value instanceof XIDValue) {
+				} else if(value instanceof XID) {
 					this.type.setSelectedIndex(IDX_XID);
 				} else if(value instanceof XBooleanValue) {
 					this.type.setSelectedIndex(IDX_BOOLEAN);

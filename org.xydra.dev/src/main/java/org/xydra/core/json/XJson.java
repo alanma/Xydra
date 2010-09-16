@@ -18,7 +18,6 @@ import org.xydra.core.value.XBooleanValue;
 import org.xydra.core.value.XDoubleListValue;
 import org.xydra.core.value.XDoubleValue;
 import org.xydra.core.value.XIDListValue;
-import org.xydra.core.value.XIDValue;
 import org.xydra.core.value.XIntegerListValue;
 import org.xydra.core.value.XIntegerValue;
 import org.xydra.core.value.XListValue;
@@ -119,8 +118,8 @@ public class XJson {
 				jsonWriter.value(((XBooleanValue)xvalue).contents());
 			} else if(xvalue instanceof XDoubleValue) {
 				jsonWriter.value(((XDoubleValue)xvalue).contents());
-			} else if(xvalue instanceof XIDValue) {
-				jsonWriter.value(((XIDValue)xvalue).contents().toURI());
+			} else if(xvalue instanceof XID) {
+				jsonWriter.value(((XID)xvalue).toURI());
 			} else if(xvalue instanceof XIntegerValue) {
 				jsonWriter.value(((XIntegerValue)xvalue).contents());
 			} else if(xvalue instanceof XLongValue) {
@@ -244,7 +243,7 @@ public class XJson {
 				} else if(o instanceof XStringValue) {
 					this.onString((String)o);
 				} else if(o instanceof XID) {
-					this.field.setValue(this.actor, X.getValueFactory().createIDValue((XID)o));
+					this.field.setValue(this.actor, (XID)o);
 				}
 			} else {
 				// real array
@@ -292,7 +291,7 @@ public class XJson {
 				} else if(commonType.equals(XStringValue.class)) {
 					listValue = X.getValueFactory().createStringListValue(
 					        this.tempList.toArray(new String[0]));
-				} else if(commonType.equals(XIDValue.class)) {
+				} else if(commonType.equals(XID.class)) {
 					listValue = X.getValueFactory().createIDListValue(
 					        this.tempList.toArray(new XID[0]));
 				} else {

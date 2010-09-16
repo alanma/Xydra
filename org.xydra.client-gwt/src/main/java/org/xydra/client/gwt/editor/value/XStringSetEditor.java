@@ -27,7 +27,7 @@ public class XStringSetEditor extends XCollectionEditor<XStringValue,XStringSetV
 		List<String> lst = new ArrayList<String>();
 		while(entries.hasNext())
 			lst.add(entries.next().contents());
-		return XV.toSetValue(lst);
+		return XV.toStringSetValue(lst);
 	}
 	
 	@Override

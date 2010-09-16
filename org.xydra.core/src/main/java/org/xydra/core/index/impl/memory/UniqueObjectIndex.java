@@ -3,13 +3,11 @@ package org.xydra.core.index.impl.memory;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
-import org.xydra.core.X;
 import org.xydra.core.index.IUniqueObjectIndex;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
-import org.xydra.core.value.XIDValue;
 import org.xydra.core.value.XValue;
 
 
@@ -47,14 +45,14 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 		}
 		XID xid = valueToXID(key);
 		XField indexField = this.indexObject.createField(this.actor, xid);
-		XIDValue indexValue = (XIDValue)indexField.getValue();
+		XID indexValue = (XID)indexField.getValue();
 		XID previous;
 		if(indexValue == null) {
 			previous = null;
 		} else {
-			previous = indexValue.contents();
+			previous = indexValue;
 		}
-		indexField.setValue(this.actor, X.getValueFactory().createIDValue(value));
+		indexField.setValue(this.actor, value);
 		return previous;
 	}
 	
@@ -70,9 +68,9 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 		if(indexField == null) {
 			return null;
 		}
-		XIDValue indexValue = (XIDValue)indexField.getValue();
+		XID indexValue = (XID)indexField.getValue();
 		assert indexValue != null;
-		XID previous = indexValue.contents();
+		XID previous = indexValue;
 		this.indexObject.removeField(this.actor, xid);
 		return previous;
 	}
@@ -83,9 +81,9 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 		if(indexField == null) {
 			return null;
 		}
-		XIDValue indexValue = (XIDValue)indexField.getValue();
+		XID indexValue = (XID)indexField.getValue();
 		assert indexValue != null;
-		return indexValue.contents();
+		return indexValue;
 	}
 	
 	public XObject lookup(XModel model, XValue indexKey) {

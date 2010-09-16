@@ -47,12 +47,12 @@ public class XmlValueTest {
 	
 	@Test
 	public void testIdValue() {
-		testValue(XV.toValue(XX.createUniqueID()));
+		testValue(XX.createUniqueID());
 	}
 	
-	@Test
+	@Test(expected = NullPointerException.class)
 	public void testIdValueNull() {
-		testValue(XV.toValue((XID)null));
+		testValue((XID)null);
 	}
 	
 	@Test

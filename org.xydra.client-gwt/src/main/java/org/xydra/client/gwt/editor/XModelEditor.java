@@ -13,7 +13,6 @@ import org.xydra.core.change.impl.memory.MemoryModelCommand;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XLoggedModel;
 import org.xydra.core.model.XLoggedObject;
-import org.xydra.core.value.XIDValue;
 import org.xydra.core.value.XValue;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -59,11 +58,8 @@ public class XModelEditor extends Composite implements XModelEventListener {
 				final Button add = new Button("Add Object");
 				final XIDEditor editor = new XIDEditor(null, new EditListener() {
 					public void newValue(XValue value) {
-						add
-						        .setEnabled(value != null
-						                && value instanceof XIDValue
-						                && !XModelEditor.this.model.hasObject(((XIDValue)value)
-						                        .contents()));
+						add.setEnabled(value != null && value instanceof XID
+						        && !XModelEditor.this.model.hasObject(((XID)value)));
 					}
 				});
 				Button cancel = new Button("Cancel");
@@ -80,10 +76,11 @@ public class XModelEditor extends Composite implements XModelEventListener {
 				});
 				add.addClickHandler(new ClickHandler() {
 					public void onClick(ClickEvent e) {
-						XIDValue value = editor.getValue();
+						// TODO simplify this code block now that XID=XIDValue
+						XID value = editor.getValue();
 						if(value == null)
 							return;
-						XID id = value.contents();
+						XID id = value;
 						if(XModelEditor.this.model.hasObject(id))
 							return;
 						pp.hide();

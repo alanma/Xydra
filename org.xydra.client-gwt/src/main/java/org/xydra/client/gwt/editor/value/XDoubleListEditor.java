@@ -27,7 +27,7 @@ public class XDoubleListEditor extends XCollectionEditor<XDoubleValue,XDoubleLis
 		List<Double> lst = new ArrayList<Double>();
 		while(entries.hasNext())
 			lst.add(entries.next().contents());
-		return XV.toValue(lst);
+		return XV.toDoubleListValue(lst);
 	}
 	
 	@Override

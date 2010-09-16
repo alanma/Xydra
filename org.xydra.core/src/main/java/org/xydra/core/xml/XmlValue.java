@@ -17,7 +17,6 @@ import org.xydra.core.value.XDoubleListValue;
 import org.xydra.core.value.XDoubleValue;
 import org.xydra.core.value.XIDListValue;
 import org.xydra.core.value.XIDSetValue;
-import org.xydra.core.value.XIDValue;
 import org.xydra.core.value.XIntegerListValue;
 import org.xydra.core.value.XIntegerValue;
 import org.xydra.core.value.XListValue;
@@ -219,11 +218,11 @@ public class XmlValue {
 	 * @throws IllegalArgumentException if the given XML element is not a valid
 	 *             representation of an {@link XIDValue}
 	 */
-	public static XIDValue toIdValue(MiniElement xml) {
+	public static XID toIdValue(MiniElement xml) {
 		
 		XmlUtils.checkElementName(xml, XID_ELEMENT);
 		
-		return XV.toValue(toId(xml));
+		return toId(xml);
 	}
 	
 	private static XID toId(MiniElement xml) {
@@ -458,8 +457,8 @@ public class XmlValue {
 			toXml((XLongValue)xvalue, xo);
 		} else if(xvalue instanceof XStringValue) {
 			toXml((XStringValue)xvalue, xo);
-		} else if(xvalue instanceof XIDValue) {
-			toXml((XIDValue)xvalue, xo);
+		} else if(xvalue instanceof XID) {
+			toXml((XID)xvalue, xo);
 		} else {
 			throw new IllegalArgumentException("Cannot serialize non-list XValue " + xvalue
 			        + " (unknown type: " + xvalue.getClass().getName() + ")");
@@ -720,14 +719,6 @@ public class XmlValue {
 		toXml(xvalue.contents(), xo);
 	}
 	
-	/**
-	 * @return The XML representation of the given {@link XIDValue}.
-	 * @throws NullPointerException if xvalue or xo is null.
-	 */
-	public static void toXml(XIDValue xvalue, XmlOut xo) {
-		toXml(xvalue.contents(), xo);
-	}
-	
 	private static void toXml(boolean xvalue, XmlOut xo) {
 		
 		xo.open(XBOOLEAN_ELEMENT);
@@ -782,7 +773,11 @@ public class XmlValue {
 		
 	}
 	
-	private static void toXml(XID xvalue, XmlOut xo) {
+	/**
+	 * @return The XML representation of the given {@link XIDValue}.
+	 * @throws NullPointerException if xvalue or xo is null.
+	 */
+	public static void toXml(XID xvalue, XmlOut xo) {
 		
 		xo.open(XID_ELEMENT);
 		

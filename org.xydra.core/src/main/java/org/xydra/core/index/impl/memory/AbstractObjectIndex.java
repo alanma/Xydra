@@ -9,7 +9,6 @@ import org.xydra.core.model.XObject;
 import org.xydra.core.value.XBooleanValue;
 import org.xydra.core.value.XCollectionValue;
 import org.xydra.core.value.XDoubleValue;
-import org.xydra.core.value.XIDValue;
 import org.xydra.core.value.XIntegerValue;
 import org.xydra.core.value.XLongValue;
 import org.xydra.core.value.XStringValue;
@@ -61,9 +60,9 @@ public abstract class AbstractObjectIndex {
 			key = "" + ((XBooleanValue)value).contents();
 		} else if(value instanceof XLongValue) {
 			key = "a" + ((XLongValue)value).contents();
-		} else if(value instanceof XIDValue) {
+		} else if(value instanceof XID) {
 			// trivial
-			return ((XIDValue)value).contents();
+			return ((XID)value);
 		} else {
 			// collection types
 			assert (value instanceof XCollectionValue<?>) : "Support for indexing type "

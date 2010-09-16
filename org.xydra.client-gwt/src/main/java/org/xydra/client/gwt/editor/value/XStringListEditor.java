@@ -27,7 +27,7 @@ public class XStringListEditor extends XCollectionEditor<XStringValue,XStringLis
 		List<String> lst = new ArrayList<String>();
 		while(entries.hasNext())
 			lst.add(entries.next().contents());
-		return XV.toValue(lst);
+		return XV.toStringListValue(lst);
 	}
 	
 	@Override

@@ -26,7 +26,6 @@ import org.xydra.core.model.impl.memory.MemoryObject;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.core.value.XBooleanValue;
 import org.xydra.core.value.XIDListValue;
-import org.xydra.core.value.XIDValue;
 import org.xydra.core.value.XStringValue;
 import org.xydra.core.value.XV;
 import org.xydra.core.value.XValue;
@@ -841,15 +840,15 @@ public abstract class AbstractTestAPI {
 		
 		// a method for setting the XID this bookCopy is a copy of
 		public void setCopyOf(XID actorID, XID bookID) {
-			this.bookCopy.getField(copyOfID).setValue(actorID, XV.toValue(bookID));
+			this.bookCopy.getField(copyOfID).setValue(actorID, bookID);
 		}
 		
 		// a method for getting the XID this bookCopy is a copy of
 		public XID getCopyOf() {
 			XValue value = this.bookCopy.getField(copyOfID).getValue();
 			
-			if(value instanceof XIDValue) {
-				return ((XIDValue)value).contents();
+			if(value instanceof XID) {
+				return ((XID)value);
 			} else {
 				return null; // the copyOf-Field should hold an XID
 			}

@@ -1,8 +1,5 @@
 package org.xydra.core.value;
 
-import org.xydra.core.model.XID;
-
-
 /*
  * TODO what is this needed for? ~~daniel
  */
@@ -31,9 +28,9 @@ public class TypeSystem {
 
 		        (x.equals(XLongValue.class) && y.equals(Long.class)) ||
 
-		        (x.equals(XBooleanValue.class) && y.equals(Boolean.class)) ||
+		        (x.equals(XBooleanValue.class) && y.equals(Boolean.class))
 
-		        (x.equals(XIDValue.class) && y.equals(XID.class));
+		;
 	}
 	
 	public static Class<?> getXType(Class<?> javaTypeOrXType) {
@@ -45,8 +42,6 @@ public class TypeSystem {
 			return XLongValue.class;
 		} else if(javaTypeOrXType.equals(Double.class)) {
 			return XDoubleValue.class;
-		} else if(javaTypeOrXType.equals(XID.class)) {
-			return XIDValue.class;
 		} else if(javaTypeOrXType.equals(Boolean.class)) {
 			return XBooleanValue.class;
 			
@@ -55,8 +50,7 @@ public class TypeSystem {
 		if(javaTypeOrXType.equals(XIntegerValue.class) || javaTypeOrXType.equals(XLongValue.class)
 		        || javaTypeOrXType.equals(XDoubleValue.class)
 		        || javaTypeOrXType.equals(XBooleanValue.class)
-		        || javaTypeOrXType.equals(XStringValue.class)
-		        || javaTypeOrXType.equals(XIDValue.class)) {
+		        || javaTypeOrXType.equals(XStringValue.class)) {
 			return javaTypeOrXType;
 		} else {
 			throw new RuntimeException("Unknon type " + javaTypeOrXType.getName());

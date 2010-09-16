@@ -27,7 +27,7 @@ public class XIntegerListEditor extends XCollectionEditor<XIntegerValue,XInteger
 		List<Integer> lst = new ArrayList<Integer>();
 		while(entries.hasNext())
 			lst.add(entries.next().contents());
-		return XV.toValue(lst);
+		return XV.toIntegerListValue(lst);
 	}
 	
 	@Override

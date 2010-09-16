@@ -26,15 +26,6 @@ public interface XValueFactory {
 	XStringValue createStringValue(String string);
 	
 	/**
-	 * Creates an {@link XIDValue}.
-	 * 
-	 * @param id The {@link XID} which is to be stored by the {@link XIDValue}
-	 *            this method will create.
-	 * @return a {@link XIDValue} storing the given {@link XID}.
-	 */
-	XIDValue createIDValue(XID id);
-	
-	/**
 	 * Creates an {@link XBooleanValue}.
 	 * 
 	 * @param value The boolean value which is to be stored by the

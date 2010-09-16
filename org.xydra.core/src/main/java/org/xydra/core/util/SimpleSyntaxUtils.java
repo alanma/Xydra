@@ -16,7 +16,6 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.value.XIDListValue;
-import org.xydra.core.value.XIDValue;
 import org.xydra.core.value.XV;
 import org.xydra.core.value.XValue;
 
@@ -152,7 +151,7 @@ public class SimpleSyntaxUtils {
 						String idValue = value.substring(1, value.length() - 1);
 						String[] ids = idValue.split(",");
 						if(ids.length == 1) {
-							xvalue = XV.toValue(XX.toId(ids[0]));
+							xvalue = XX.toId(ids[0]);
 						} else {
 							XID[] xids = new XID[ids.length];
 							for(int i = 0; i < xids.length; i++) {
@@ -232,10 +231,10 @@ public class SimpleSyntaxUtils {
 		
 	}
 	
-	public static String toSimpleSyntax(XIDValue xidValue) {
+	public static String toSimpleSyntax(XID xid) {
 		StringBuffer buf = new StringBuffer();
 		buf.append("[");
-		buf.append(xidValue.toString());
+		buf.append(xid.toString());
 		buf.append("]");
 		return buf.toString();
 	}

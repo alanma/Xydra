@@ -27,7 +27,7 @@ public class XBooleanListEditor extends XCollectionEditor<XBooleanValue,XBoolean
 		List<Boolean> lst = new ArrayList<Boolean>();
 		while(entries.hasNext())
 			lst.add(entries.next().contents());
-		return XV.toValue(lst);
+		return XV.toBooleanListValue(lst);
 	}
 	
 	@Override
