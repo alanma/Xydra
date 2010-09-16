@@ -31,6 +31,7 @@ import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
 import org.xydra.core.model.state.XRepositoryState;
 import org.xydra.core.model.state.XStateStore;
+import org.xydra.core.model.state.XStateTransaction;
 import org.xydra.core.model.state.impl.memory.MemoryChangeLogState;
 import org.xydra.core.model.state.impl.memory.TemporaryFieldState;
 import org.xydra.core.model.state.impl.memory.TemporaryModelState;
@@ -102,7 +103,7 @@ public class XmlModel {
 			repositoryState = store.createRepositoryState(repoAddr);
 		}
 		
-		Object trans = repositoryState.beginTransaction();
+		XStateTransaction trans = repositoryState.beginTransaction();
 		
 		Iterator<MiniElement> modelElementIt = xml.getElementsByTagName(XMODEL_ELEMENT);
 		while(modelElementIt.hasNext()) {
@@ -141,7 +142,8 @@ public class XmlModel {
 	 * @param trans The state transaction to use for creating the model.
 	 * @return the created {@link XModelState}
 	 */
-	public static XModelState toModelState(MiniElement xml, XRepositoryState parent, Object trans) {
+	public static XModelState toModelState(MiniElement xml, XRepositoryState parent,
+	        XStateTransaction trans) {
 		
 		XmlUtils.checkElementName(xml, XMODEL_ELEMENT);
 		
@@ -159,7 +161,7 @@ public class XmlModel {
 		}
 		modelState.setRevisionNumber(revision);
 		
-		Object t = trans == null ? modelState.beginTransaction() : trans;
+		XStateTransaction t = trans == null ? modelState.beginTransaction() : trans;
 		
 		Iterator<MiniElement> objectElementIt = xml.getElementsByTagName(XOBJECT_ELEMENT);
 		while(objectElementIt.hasNext()) {
@@ -198,7 +200,8 @@ public class XmlModel {
 	 * @param trans The state transaction to use for creating the model.
 	 * @return the created {@link XModelState}
 	 */
-	public static void loadChangeLogState(MiniElement xml, XChangeLogState state, Object trans) {
+	public static void loadChangeLogState(MiniElement xml, XChangeLogState state,
+	        XStateTransaction trans) {
 		
 		XmlUtils.checkElementName(xml, XCHANGELOG_ELEMENT);
 		
@@ -248,7 +251,8 @@ public class XmlModel {
 	 * @param trans The state transaction to use for creating the object.
 	 * @return the created {@link XObjectState}
 	 */
-	public static XObjectState toObjectState(MiniElement xml, XModelState parent, Object trans) {
+	public static XObjectState toObjectState(MiniElement xml, XModelState parent,
+	        XStateTransaction trans) {
 		
 		XmlUtils.checkElementName(xml, XOBJECT_ELEMENT);
 		
@@ -267,7 +271,7 @@ public class XmlModel {
 		
 		objectState.setRevisionNumber(revision);
 		
-		Object t = trans == null ? objectState.beginTransaction() : trans;
+		XStateTransaction t = trans == null ? objectState.beginTransaction() : trans;
 		
 		Iterator<MiniElement> fieldElementIt = xml.getElementsByTagName(XFIELD_ELEMENT);
 		while(fieldElementIt.hasNext()) {
@@ -323,7 +327,8 @@ public class XmlModel {
 	 * @param trans The state transaction to use for creating the field.
 	 * @return the created {@link XFieldState}
 	 */
-	public static XFieldState toFieldState(MiniElement xml, XObjectState parent, Object trans) {
+	public static XFieldState toFieldState(MiniElement xml, XObjectState parent,
+	        XStateTransaction trans) {
 		
 		XmlUtils.checkElementName(xml, XFIELD_ELEMENT);
 		

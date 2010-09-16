@@ -2,6 +2,7 @@ package org.xydra.core.model.state.impl.memory;
 
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.state.XFieldState;
+import org.xydra.core.model.state.XStateTransaction;
 
 
 /**
@@ -19,12 +20,12 @@ public class TemporaryFieldState extends AbstractFieldState {
 		super(fieldAddr);
 	}
 	
-	public void delete(Object transaction) {
+	public void delete(XStateTransaction transaction) {
 		assert transaction == null : "no transactions needed/supported";
 		// nothing to do here
 	}
 	
-	public void save(Object transaction) {
+	public void save(XStateTransaction transaction) {
 		assert transaction == null : "no transactions needed/supported";
 		// nothing to save
 	}

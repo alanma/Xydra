@@ -6,6 +6,7 @@ import java.util.List;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.state.XChangeLogState;
+import org.xydra.core.model.state.XStateTransaction;
 
 
 public class MemoryChangeLogState implements XChangeLogState {
@@ -39,11 +40,11 @@ public class MemoryChangeLogState implements XChangeLogState {
 		this.baseAddr = baseAddr;
 	}
 	
-	public void save(Object transaction) {
+	public void save(XStateTransaction transaction) {
 		// memory change log cannot be saved, ignore
 	}
 	
-	public void delete(Object transaction) {
+	public void delete(XStateTransaction transaction) {
 		// automatically deleted by garbage collector
 	}
 	
@@ -69,7 +70,7 @@ public class MemoryChangeLogState implements XChangeLogState {
 		return rev;
 	}
 	
-	public void appendEvent(XEvent event, Object transaction) {
+	public void appendEvent(XEvent event, XStateTransaction transaction) {
 		
 		assert getRevisionForEvent(event) == getCurrentRevisionNumber();
 		
@@ -80,7 +81,7 @@ public class MemoryChangeLogState implements XChangeLogState {
 		return this.baseAddr;
 	}
 	
-	public boolean truncateToRevision(long revisionNumber, Object transaction) {
+	public boolean truncateToRevision(long revisionNumber, XStateTransaction transaction) {
 		if(revisionNumber > getCurrentRevisionNumber()) {
 			return false;
 		}

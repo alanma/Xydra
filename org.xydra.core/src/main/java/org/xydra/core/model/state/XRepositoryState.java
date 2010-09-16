@@ -47,7 +47,7 @@ public interface XRepositoryState extends IHasXID, Iterable<XID>, IHasXAddress, 
 	 * {@link XObjectState}s and {@link XFieldState}s contained with this
 	 * repository.
 	 */
-	Object beginTransaction();
+	XStateTransaction beginTransaction();
 	
 	/**
 	 * Persist changes associated with the given transaction.
@@ -55,7 +55,7 @@ public interface XRepositoryState extends IHasXID, Iterable<XID>, IHasXAddress, 
 	 * @param transaction must have been returned by {@link #beginTransaction()}
 	 *            from this {@link XRepositoryState}
 	 */
-	void endTransaction(Object transaction);
+	void endTransaction(XStateTransaction transaction);
 	
 	/**
 	 * Store this state information in the attached persistence layer, i.e. the
@@ -66,7 +66,7 @@ public interface XRepositoryState extends IHasXID, Iterable<XID>, IHasXAddress, 
 	 *            object must have been created by this {@link XRepositoryState}
 	 *            .
 	 */
-	void save(Object transaction);
+	void save(XStateTransaction transaction);
 	
 	/**
 	 * Delete this state information from the attached persistence layer, i.e.
@@ -77,7 +77,7 @@ public interface XRepositoryState extends IHasXID, Iterable<XID>, IHasXAddress, 
 	 *            object must have been created by this {@link XRepositoryState}
 	 *            .
 	 */
-	void delete(Object transaction);
+	void delete(XStateTransaction transaction);
 	
 	/**
 	 * Links the given {@link XModelState} as a child of this XRepositoryState.

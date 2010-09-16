@@ -11,8 +11,10 @@ import org.xydra.core.model.XModel;
 /**
  * An {@link XChangeLogState} represents the inner state of an
  * {@link XChangeLog} for example for persistence purposes.
+ * 
+ * @author voelkel
+ * 
  */
-
 public interface XChangeLogState extends Serializable {
 	
 	/**
@@ -25,7 +27,7 @@ public interface XChangeLogState extends Serializable {
 	 *            {@link XModelState} or {@link XRepositoryState} containing the
 	 *            XChangeLog represented by this XChangeLogState
 	 */
-	void delete(Object transaction);
+	void delete(XStateTransaction transaction);
 	
 	/**
 	 * Store the data of this object in the attached persistence layer, i.e. the
@@ -37,7 +39,7 @@ public interface XChangeLogState extends Serializable {
 	 *            {@link XModelState} or {@link XRepositoryState} containing the
 	 *            XChangeLog represented by this XChangeLogState
 	 */
-	void save(Object transaction);
+	void save(XStateTransaction transaction);
 	
 	/**
 	 * @return the revision number the logged {@link XModel} had at the time
@@ -75,7 +77,7 @@ public interface XChangeLogState extends Serializable {
 	 *            {@link XModelState} or {@link XRepositoryState} containing the
 	 *            XChangeLog represented by this XChangeLogState
 	 */
-	void appendEvent(XEvent event, Object transaction);
+	void appendEvent(XEvent event, XStateTransaction transaction);
 	
 	/**
 	 * Removes all {@link XEvent XEvents} from this XChangeLogState that
@@ -94,7 +96,7 @@ public interface XChangeLogState extends Serializable {
 	 *         number when this change log began logging)
 	 */
 	
-	boolean truncateToRevision(long revisionNumber, Object transaction);
+	boolean truncateToRevision(long revisionNumber, XStateTransaction transaction);
 	
 	/**
 	 * @return the {@link XAddress} of the {@link XModelState} or

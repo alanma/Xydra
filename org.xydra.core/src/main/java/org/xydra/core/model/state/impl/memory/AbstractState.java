@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import org.xydra.core.model.IHasXAddress;
 import org.xydra.core.model.XAddress;
+import org.xydra.core.model.state.XStateTransaction;
 
 
 /**
@@ -30,7 +31,7 @@ public abstract class AbstractState implements IHasXAddress, Serializable {
 	/*
 	 * See {@link XModelState#beginTransaction()}, etc.
 	 */
-	public Object beginTransaction() {
+	public XStateTransaction beginTransaction() {
 		// overwrite, if transactions are needed for the state backend
 		return null;
 	}
@@ -38,7 +39,7 @@ public abstract class AbstractState implements IHasXAddress, Serializable {
 	/*
 	 * See {@link XModelState#endTransaction()}, etc.
 	 */
-	public void endTransaction(Object transaction) {
+	public void endTransaction(XStateTransaction transaction) {
 		// overwrite, if transactions are needed for the state backend
 		assert transaction == null;
 	}

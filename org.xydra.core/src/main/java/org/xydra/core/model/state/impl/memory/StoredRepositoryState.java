@@ -9,6 +9,7 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XRepositoryState;
+import org.xydra.core.model.state.XStateTransaction;
 
 
 /**
@@ -65,12 +66,12 @@ public class StoredRepositoryState extends AbstractRepositoryState {
 		}
 	}
 	
-	public void save(Object transaction) {
+	public void save(XStateTransaction transaction) {
 		assert transaction == null : "no transactions needed/supported";
 		this.store.save(this);
 	}
 	
-	public void delete(Object transaction) {
+	public void delete(XStateTransaction transaction) {
 		assert transaction == null : "no transactions needed/supported";
 		this.store.deleteRepositoryState(this.getAddress());
 	}

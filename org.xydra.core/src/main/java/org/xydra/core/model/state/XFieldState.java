@@ -38,7 +38,7 @@ public interface XFieldState extends IHasXID, Serializable, IHasXAddress {
 	 *            {@link XObjectState}, {@link XModelState} or
 	 *            {@link XRepositoryState}.
 	 */
-	void delete(Object transaction);
+	void delete(XStateTransaction transaction);
 	
 	/**
 	 * Store this state information in the attached persistence layer, i.e. the
@@ -50,7 +50,7 @@ public interface XFieldState extends IHasXID, Serializable, IHasXAddress {
 	 *            {@link XObjectState}, {@link XModelState} or
 	 *            {@link XRepositoryState}.
 	 */
-	void save(Object transaction);
+	void save(XStateTransaction transaction);
 	
 	/**
 	 * Gets the current revision number of the {@link XField} which state is

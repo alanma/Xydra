@@ -10,6 +10,7 @@ import org.xydra.log.LoggerFactory;
  * 
  * @author voelkel
  * 
+ * @param <T> the transaction object type
  */
 public class XSPI {
 	

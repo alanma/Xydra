@@ -6,6 +6,7 @@ import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.state.XChangeLogState;
+import org.xydra.core.model.state.XStateTransaction;
 import org.xydra.index.iterator.NoneIterator;
 
 
@@ -35,7 +36,7 @@ public class MemoryChangeLog implements XChangeLog {
 	 * 
 	 * @param event the {@link XEvent} which is to be appended
 	 */
-	protected void appendEvent(XEvent event, Object transaction) {
+	protected void appendEvent(XEvent event, XStateTransaction transaction) {
 		assert this.state.getBaseAddress().getObject() != null || event != null : "cannot add null events to model change log";
 		assert this.state.getBaseAddress().getObject() != null
 		        || (event.getModelRevisionNumber() == getCurrentRevisionNumber()) : "cannot append event with rev "
@@ -62,7 +63,7 @@ public class MemoryChangeLog implements XChangeLog {
 	 *         number was smaller than the current revision number and greater
 	 *         than zero.
 	 */
-	protected boolean truncateToRevision(long revisionNumber, Object transaction) {
+	protected boolean truncateToRevision(long revisionNumber, XStateTransaction transaction) {
 		return this.state.truncateToRevision(revisionNumber, transaction);
 	}
 	
@@ -169,11 +170,11 @@ public class MemoryChangeLog implements XChangeLog {
 		return getEventsBetween(0, revisionNumber);
 	}
 	
-	protected void save(Object transaction) {
+	protected void save(XStateTransaction transaction) {
 		this.state.save(transaction);
 	}
 	
-	protected void delete(Object transaction) {
+	protected void delete(XStateTransaction transaction) {
 		this.state.delete(transaction);
 	}
 	

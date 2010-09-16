@@ -20,6 +20,7 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.impl.memory.SynchronizesChangesImpl.Orphans;
+import org.xydra.core.model.state.XStateTransaction;
 import org.xydra.index.XI;
 
 
@@ -50,7 +51,7 @@ public class MemoryEventQueue implements Serializable {
 	/**
 	 * The current transaction of this model, object or field.
 	 */
-	protected Object stateTransaction;
+	protected XStateTransaction stateTransaction;
 	
 	/**
 	 * Is there currently a transaction running?
@@ -265,7 +266,7 @@ public class MemoryEventQueue implements Serializable {
 	/**
 	 * Get the position to use for the 'since' parameter of {@link
 	 * MemoryEventQueue#createTransactionEvent(XID, MemoryModel, MemoryObject,
-	 * int since)} or {@link MemoryEventQueue#cleanEvents(int)} for using all
+	 * int since)} or {@link MemoryEventQueue<T>#cleanEvents(int)} for using all
 	 * {@link XEvent XEvents} that will be enqueued after the returned value.
 	 * 
 	 * Note: This position equals the current size of this MemoryEventQueue (the

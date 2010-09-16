@@ -54,7 +54,7 @@ public interface XModelState extends IHasXID, Serializable, Iterable<XID>, IHasX
 	 *            object must have been created by this {@link XModelState} or
 	 *            the containing {@link XRepositoryState}.
 	 */
-	void delete(Object transaction);
+	void delete(XStateTransaction transaction);
 	
 	/**
 	 * Gets the current revision number of the {@link XModel} which state is
@@ -144,7 +144,7 @@ public interface XModelState extends IHasXID, Serializable, Iterable<XID>, IHasX
 	 * {@link XModelState} as well as {@link XObjectState}s and
 	 * {@link XFieldState}s contained with this model.
 	 */
-	Object beginTransaction();
+	XStateTransaction beginTransaction();
 	
 	/**
 	 * Persist changes associated with the given transaction.
@@ -152,7 +152,7 @@ public interface XModelState extends IHasXID, Serializable, Iterable<XID>, IHasX
 	 * @param transaction must have been returned by {@link #beginTransaction()}
 	 *            from this {@link XModelState}
 	 */
-	void endTransaction(Object transaction);
+	void endTransaction(XStateTransaction transaction);
 	
 	/**
 	 * Store this state information in the attached persistence layer, i.e. the
@@ -163,7 +163,7 @@ public interface XModelState extends IHasXID, Serializable, Iterable<XID>, IHasX
 	 *            object must have been created by this {@link XModelState} or
 	 *            the containing {@link XRepositoryState}.
 	 */
-	void save(Object transaction);
+	void save(XStateTransaction transaction);
 	
 	/**
 	 * Sets the stored revision number

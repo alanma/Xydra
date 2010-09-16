@@ -11,6 +11,7 @@ import org.xydra.core.model.XAddress;
  * differently.
  * 
  * @author voelkel
+ * 
  */
 public interface XStateStore {
 	

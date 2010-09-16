@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.state.XStateTransaction;
 import org.xydra.core.value.XValue;
 import org.xydra.index.XI;
 
@@ -37,12 +38,12 @@ public abstract class TestState implements Serializable {
 		assert this.store.loadedStates.get(this.address) == this : "newer state loaded";
 	}
 	
-	public Object beginTransaction() {
+	public XStateTransaction beginTransaction() {
 		checkActive();
 		return new TestStateTransaction(this.store, this.address);
 	}
 	
-	public void endTransaction(Object trans) {
+	public void endTransaction(XStateTransaction trans) {
 		checkActive();
 		assert trans instanceof TestStateTransaction : "unexpected transaction object";
 		TestStateTransaction t = (TestStateTransaction)trans;
@@ -50,7 +51,7 @@ public abstract class TestState implements Serializable {
 		t.commit();
 	}
 	
-	TestStateTransaction getTrans(Object trans) {
+	TestStateTransaction getTrans(XStateTransaction trans) {
 		if(this.currentTrans != null) {
 			assert this.currentTrans == trans : "each entity may only be part of one transaction at a time";
 		}
@@ -64,7 +65,7 @@ public abstract class TestState implements Serializable {
 		return t;
 	}
 	
-	public void delete(Object trans) {
+	public void delete(XStateTransaction trans) {
 		checkActive();
 		TestStateTransaction t = getTrans(trans);
 		this.currentTrans = t;
@@ -77,7 +78,7 @@ public abstract class TestState implements Serializable {
 		this.saveCount++;
 	}
 	
-	public void save(Object trans) {
+	public void save(XStateTransaction trans) {
 		checkActive();
 		TestStateTransaction t = getTrans(trans);
 		this.currentTrans = t;

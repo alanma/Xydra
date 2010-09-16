@@ -5,12 +5,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.xydra.core.model.XAddress;
+import org.xydra.core.model.state.XStateTransaction;
 import org.xydra.index.IPairIndex;
 import org.xydra.index.impl.MapPairIndex;
 import org.xydra.index.query.Pair;
 
 
-public class TestStateTransaction implements Serializable {
+public class TestStateTransaction implements Serializable, XStateTransaction {
 	
 	private static final long serialVersionUID = 2872941127240669775L;
 	

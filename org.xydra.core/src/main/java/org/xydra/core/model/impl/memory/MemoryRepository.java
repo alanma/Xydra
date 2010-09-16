@@ -30,6 +30,7 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XRepositoryState;
+import org.xydra.core.model.state.XStateTransaction;
 import org.xydra.core.model.state.impl.memory.TemporaryRepositoryState;
 
 
@@ -90,7 +91,7 @@ public class MemoryRepository implements XRepository, Serializable {
 			XModelState modelState = this.state.createModelState(modelID);
 			model = new MemoryModel(this, modelState);
 			
-			Object trans = beginStateTransaction();
+			XStateTransaction trans = beginStateTransaction();
 			
 			modelState.getChangeLogState().save(trans);
 			this.state.addModelState(modelState);
@@ -115,15 +116,15 @@ public class MemoryRepository implements XRepository, Serializable {
 	 * Saves the current state information of this MemoryRepository with the
 	 * currently used persistence layer
 	 */
-	private void save(Object transaction) {
+	private void save(XStateTransaction transaction) {
 		this.state.save(transaction);
 	}
 	
-	private Object beginStateTransaction() {
+	private XStateTransaction beginStateTransaction() {
 		return this.state.beginTransaction();
 	}
 	
-	private void endStateTransaction(Object transaction) {
+	private void endStateTransaction(XStateTransaction transaction) {
 		this.state.endTransaction(transaction);
 	}
 	
@@ -165,7 +166,7 @@ public class MemoryRepository implements XRepository, Serializable {
 			
 			enqueueModelRemoveEvents(actor, model);
 			
-			Object trans = beginStateTransaction();
+			XStateTransaction trans = beginStateTransaction();
 			
 			model.delete(trans);
 			this.state.removeModelState(modelID);

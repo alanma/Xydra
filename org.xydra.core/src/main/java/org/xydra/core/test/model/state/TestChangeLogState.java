@@ -7,6 +7,7 @@ import java.util.Map;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.state.XChangeLogState;
+import org.xydra.core.model.state.XStateTransaction;
 import org.xydra.index.query.KeyKeyEntryTuple;
 
 
@@ -64,7 +65,7 @@ public class TestChangeLogState implements XChangeLogState {
 		return t;
 	}
 	
-	public void delete(Object trans) {
+	public void delete(XStateTransaction trans) {
 		checkActive();
 		TestStateTransaction t = getTrans(trans);
 		this.currentTrans = t;
@@ -78,7 +79,7 @@ public class TestChangeLogState implements XChangeLogState {
 		this.saveCount++;
 	}
 	
-	public void save(Object trans) {
+	public void save(XStateTransaction trans) {
 		checkActive();
 		TestStateTransaction t = getTrans(trans);
 		this.currentTrans = t;
@@ -116,7 +117,7 @@ public class TestChangeLogState implements XChangeLogState {
 		return rev;
 	}
 	
-	public void appendEvent(XEvent event, Object transaction) {
+	public void appendEvent(XEvent event, XStateTransaction transaction) {
 		checkActive();
 		
 		assert getRevisionForEvent(event) == this.last;
@@ -147,7 +148,7 @@ public class TestChangeLogState implements XChangeLogState {
 		return this.baseAddr;
 	}
 	
-	public boolean truncateToRevision(long revisionNumber, Object transaction) {
+	public boolean truncateToRevision(long revisionNumber, XStateTransaction transaction) {
 		checkActive();
 		if(revisionNumber > getCurrentRevisionNumber()) {
 			return false;

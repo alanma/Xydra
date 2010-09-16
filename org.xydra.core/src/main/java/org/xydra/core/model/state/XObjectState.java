@@ -28,6 +28,7 @@ import org.xydra.core.model.XObject;
  * 
  * @author voelkel
  * @author Kaidel
+ * 
  */
 public interface XObjectState extends IHasXID, Iterable<XID>, IHasXAddress, Serializable {
 	
@@ -47,7 +48,7 @@ public interface XObjectState extends IHasXID, Iterable<XID>, IHasXAddress, Seri
 	 * {@link XObjectState} as well as {@link XFieldState}s contained with this
 	 * object.
 	 */
-	Object beginTransaction();
+	XStateTransaction beginTransaction();
 	
 	/**
 	 * Persist changes associated with the given transaction.
@@ -55,7 +56,7 @@ public interface XObjectState extends IHasXID, Iterable<XID>, IHasXAddress, Seri
 	 * @param transaction must have been returned by {@link #beginTransaction()}
 	 *            from this {@link XObjectState}
 	 */
-	void endTransaction(Object transaction);
+	void endTransaction(XStateTransaction transaction);
 	
 	/**
 	 * Delete this state information from the attached persistence layer, i.e.
@@ -67,7 +68,7 @@ public interface XObjectState extends IHasXID, Iterable<XID>, IHasXAddress, Seri
 	 *            the containing {@link XModelState} or {@link XRepositoryState}
 	 *            .
 	 */
-	void delete(Object transaction);
+	void delete(XStateTransaction transaction);
 	
 	/**
 	 * Store this state information in the attached persistence layer, i.e. the
@@ -79,7 +80,7 @@ public interface XObjectState extends IHasXID, Iterable<XID>, IHasXAddress, Seri
 	 *            the containing {@link XModelState} or {@link XRepositoryState}
 	 *            .
 	 */
-	void save(Object transaction);
+	void save(XStateTransaction transaction);
 	
 	/**
 	 * Returns an {@link Iterator} over the {@link XID}s of all children-

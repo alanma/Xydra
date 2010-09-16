@@ -10,6 +10,7 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
+import org.xydra.core.model.state.XStateTransaction;
 
 
 /**
@@ -59,12 +60,12 @@ public class TemporaryModelState extends AbstractModelState {
 		this.objectStates.remove(objectId);
 	}
 	
-	public void delete(Object transaction) {
+	public void delete(XStateTransaction transaction) {
 		assert transaction == null : "no transactions needed/supported";
 		// nothing to do here
 	}
 	
-	public void save(Object transaction) {
+	public void save(XStateTransaction transaction) {
 		assert transaction == null : "no transactions needed/supported";
 		// nothing to save
 	}
