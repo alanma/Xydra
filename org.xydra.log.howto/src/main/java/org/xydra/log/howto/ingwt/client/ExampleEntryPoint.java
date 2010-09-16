@@ -1,4 +1,4 @@
-package org.xydra.log.howto.client;
+package org.xydra.log.howto.ingwt.client;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;

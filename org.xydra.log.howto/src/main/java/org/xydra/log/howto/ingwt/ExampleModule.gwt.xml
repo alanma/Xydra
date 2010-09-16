@@ -20,7 +20,7 @@
 	<!-- Other module inherits                                      -->
 
 	<!-- Specify the app entry point class.                         -->
-	<entry-point class='org.xydra.log.howto.client.ExampleEntryPoint' />
+	<entry-point class='org.xydra.log.howto.ingwt.client.ExampleEntryPoint' />
 
 	<!-- Specify the paths for translatable code                    -->
 	<source path='client' />

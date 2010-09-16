@@ -54,16 +54,19 @@
 
 		<!-- define a transient output directory for gwt -->
 		<gwt.output.directory>./war</gwt.output.directory>
-		
+
 	</properties>
 
 	<dependencies>
 
+		<!-- This dependency is required whenever you use XydraLog -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+		
+		<!--  This is only required for logging in GWT -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
@@ -71,12 +74,14 @@
 			<classifier>sources</classifier>
 		</dependency>
 
-
+		<!--  Only required for using GWT -->
 		<dependency>
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-servlet</artifactId>
 			<version>${gwt.version}</version>
 		</dependency>
+
+		<!--  Only required for using GWT -->
 		<dependency>
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-user</artifactId>
@@ -92,6 +97,7 @@
 			<!-- version info taken from parent -->
 		</dependency>
 
+		<!--  This is only required for logging in GWT -->
 		<!-- gwt-log -->
 		<dependency>
 			<groupId>com.google.code.gwt-log</groupId>
@@ -103,7 +109,10 @@
 
 
 	<build>
-		<!-- Compile classes into the war transient directory for hosted mode live editing -->
+		<!--
+			Compile classes into the war transient directory for hosted mode live
+			editing
+		-->
 		<!-- This confuses the maven site generation -->
 		<outputDirectory>${gwt.output.directory}/WEB-INF/classes</outputDirectory>
 
@@ -152,7 +161,7 @@
 					</excludes>
 				</configuration>
 			</plugin>
-			
+
 			<!-- set encoding to something not platform dependent -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -162,13 +171,16 @@
 					<encoding>UTF-8</encoding>
 				</configuration>
 			</plugin>
-			
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<version>1.2</version>
 				<executions>
-					<!-- This execution copies the war folder to the gwt transient output directory -->
+					<!--
+						This execution copies the war folder to the gwt transient output
+						directory
+					-->
 					<execution>
 						<id>war-folder-creation</id>
 						<phase>process-resources</phase>
@@ -185,7 +197,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
@@ -194,7 +206,7 @@
 					<packagingExcludes>**/.*,**/.*/**,**/client/**,**/server/*</packagingExcludes>
 				</configuration>
 			</plugin>
-			
+
 			<!--  Jetty Plugin -->
 			<plugin>
 				<groupId>org.mortbay.jetty</groupId>
