@@ -3,6 +3,7 @@ package org.xydra.core.model.state.impl.gae;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.state.XChangeLogState;
+import org.xydra.core.model.state.XStateTransaction;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.MiniXMLParser;
 import org.xydra.core.xml.XmlEvent;
@@ -59,7 +60,7 @@ public class GaeChangeLogState implements XChangeLogState {
 		return this.key.getChild(KIND_XEVENT, Long.toString(rev));
 	}
 	
-	public void appendEvent(XEvent event, Object trans) {
+	public void appendEvent(XEvent event, XStateTransaction trans) {
 		
 		if(!getBaseAddress().equalsOrContains(event.getTarget())) {
 			throw new IllegalArgumentException("cannot store event " + event + "in change log for "
@@ -101,10 +102,10 @@ public class GaeChangeLogState implements XChangeLogState {
 		return XmlEvent.toEvent(miniElement, this.baseAddr);
 	}
 	
-	public void delete(Object trans) {
+	public void delete(XStateTransaction trans) {
 		
 		boolean newTrans = (trans == null);
-		Object t = newTrans ? GaeUtils.beginTransaction() : trans;
+		XStateTransaction t = newTrans ? GaeUtils.beginTransaction() : trans;
 		
 		for(long i = this.firstRev; i <= this.currentRev; ++i) {
 			GaeUtils.deleteEntity(getKey(i), t);
@@ -143,7 +144,7 @@ public class GaeChangeLogState implements XChangeLogState {
 		return this.baseAddr;
 	}
 	
-	public void save(Object trans) {
+	public void save(XStateTransaction trans) {
 		
 		Entity e = new Entity(this.key);
 		
@@ -154,14 +155,14 @@ public class GaeChangeLogState implements XChangeLogState {
 		
 	}
 	
-	public boolean truncateToRevision(long revisionNumber, Object trans) {
+	public boolean truncateToRevision(long revisionNumber, XStateTransaction trans) {
 		
 		if(revisionNumber < this.firstRev) {
 			return false;
 		}
 		
 		boolean newTrans = (trans == null);
-		Object t = newTrans ? GaeUtils.beginTransaction() : trans;
+		XStateTransaction t = newTrans ? GaeUtils.beginTransaction() : trans;
 		
 		while(this.currentRev > revisionNumber) {
 			this.currentRev--;

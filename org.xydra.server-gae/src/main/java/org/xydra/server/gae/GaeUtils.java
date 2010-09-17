@@ -8,6 +8,7 @@ import java.util.List;
 import org.xydra.core.XX;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.state.XStateTransaction;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -140,23 +141,44 @@ public class GaeUtils {
 	 * 
 	 * @param entity
 	 */
-	public static void putEntity(Entity entity, Object trans) {
+	public static void putEntity(Entity entity, XStateTransaction trans) {
 		putEntity(entity);
 		assert trans == null || datastore.getCurrentTransaction() == trans;
 	}
 	
-	public static Transaction asTransaction(Object trans) {
+	public static Transaction asTransaction(XStateTransaction trans) {
 		if(!(trans instanceof Transaction)) {
 			throw new IllegalArgumentException("unexpected transaction object");
 		}
 		return (Transaction)trans;
 	}
 	
-	public static Object beginTransaction() {
-		return datastore.beginTransaction();
+	public static XStateTransaction beginTransaction() {
+		return new StateTransactionImpl(datastore.beginTransaction());
 	}
 	
-	public static void endTransaction(Object trans) {
+	public static class StateTransactionImpl implements XStateTransaction {
+		
+		private Transaction object;
+		
+		public StateTransactionImpl(Transaction transaction) {
+			this.object = transaction;
+		}
+		
+		@Override
+		public int hashCode() {
+			return this.object.hashCode();
+		}
+		
+		@Override
+		public boolean equals(Object other) {
+			return other instanceof StateTransactionImpl
+			        && ((StateTransactionImpl)other).object.equals(this.object);
+		}
+		
+	}
+	
+	public static void endTransaction(XStateTransaction trans) {
 		asTransaction(trans).commit();
 	}
 	
@@ -176,7 +198,7 @@ public class GaeUtils {
 	 * 
 	 * @param key
 	 */
-	public static void deleteEntity(Key key, Object trans) {
+	public static void deleteEntity(Key key, XStateTransaction trans) {
 		deleteEntity(key);
 		assert trans == null || datastore.getCurrentTransaction() == trans;
 	}

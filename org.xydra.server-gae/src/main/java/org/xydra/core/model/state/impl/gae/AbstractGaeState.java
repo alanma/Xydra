@@ -2,6 +2,7 @@ package org.xydra.core.model.state.impl.gae;
 
 import org.xydra.core.model.IHasXID;
 import org.xydra.core.model.XAddress;
+import org.xydra.core.model.state.XStateTransaction;
 import org.xydra.core.model.state.impl.memory.AbstractState;
 import org.xydra.server.gae.GaeSchema;
 import org.xydra.server.gae.GaeUtils;
@@ -28,7 +29,7 @@ public abstract class AbstractGaeState extends AbstractState implements IHasXID 
 		this.loaded = false;
 	}
 	
-	public void delete(Object trans) {
+	public void delete(XStateTransaction trans) {
 		Key key = GaeUtils.keyForEntity(getAddress());
 		GaeUtils.deleteEntity(key, trans);
 	}
@@ -77,7 +78,7 @@ public abstract class AbstractGaeState extends AbstractState implements IHasXID 
 		assert this.revisionNumber >= 0;
 	}
 	
-	public void save(Object trans) {
+	public void save(XStateTransaction trans) {
 		
 		Key key = GaeUtils.keyForEntity(getAddress());
 		Entity e = new Entity(key);
