@@ -17,9 +17,9 @@ public class WebadminApp {
 	
 	public static final Logger log = LoggerFactory.getLogger(WebadminApp.class);
 	
-	public static void restless(String prefix) {
+	public static void restless(Restless restless, String prefix) {
 		
-		Restless.addExceptionHandler(new RestlessExceptionHandler() {
+		restless.addExceptionHandler(new RestlessExceptionHandler() {
 			
 			public boolean handleException(Throwable t, HttpServletRequest req,
 			        HttpServletResponse res) {
@@ -30,7 +30,7 @@ public class WebadminApp {
 		});
 		
 		WebadminApp webadminApp = new WebadminApp();
-		Restless.addGet("/backup", webadminApp, "backup");
+		restless.addGet("/backup", webadminApp, "backup");
 		
 	}
 	

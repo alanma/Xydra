@@ -43,11 +43,7 @@ import com.google.apphosting.api.ApiProxy;
  */
 public class GaeMyAdminApp {
 	
-	static {
-		restless();
-	}
-	
-	public static void restless() {
+	public static void restless(Restless restless) {
 		GaeMyAdminApp app = new GaeMyAdminApp();
 		
 		Restless.addAdminOnlyMethod("/stats", "GET", app, "stats");
