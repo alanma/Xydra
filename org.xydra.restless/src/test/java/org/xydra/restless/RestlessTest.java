@@ -18,10 +18,10 @@ public class RestlessTest {
 	@Ignore
 	// TODO need stub objects for req and res
 	public void testMatching() {
-		// setup
-		Restless.addGet("/my/path", new RestlessTest(), "getMe");
-		// execution
 		Restless restless = new Restless();
+		// setup
+		restless.addGet("/my/path", new RestlessTest(), "getMe");
+		// execution
 		restless.restlessService(null, null);
 	}
 	

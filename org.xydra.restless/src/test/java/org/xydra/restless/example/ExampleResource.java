@@ -1,10 +1,14 @@
 package org.xydra.restless.example;
 
 import java.io.IOException;
+import java.util.Enumeration;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.xydra.restless.IRestlessContext;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
 
@@ -21,9 +25,11 @@ public class ExampleResource {
 	/**
 	 * Naming this method 'restless()' is just a convention
 	 */
-	public static void restless() {
+	public static void restless(Restless restless) {
+		ExampleResource exampleResource = new ExampleResource();
+		/** Optional: Initialization and configuration of exampleResource */
 		// add dynamic
-		Restless.addGet("/foo", new ExampleResource(), "getName",
+		restless.addMethod("/foo", "GET", exampleResource, "getName", false,
 
 		new RestlessParameter("name", null),
 
@@ -31,14 +37,17 @@ public class ExampleResource {
 
 		);
 		
-		// add static
-		Restless.addGenericStatic("/bar", "GET", ExampleResource.class, "getName",
+		// add static, slightly faster startup times for large apps
+		restless.addMethod("/bar", "GET", ExampleResource.class, "getName", false,
 
-		false,
+		new RestlessParameter("name", null),
 
-		new RestlessParameter("name", null), new RestlessParameter("age", "23")
+		new RestlessParameter("age", "23")
 
 		);
+		
+		// add static, slightly faster startup times for large apps
+		restless.addMethod("/silly", "GET", ExampleResource.class, "silly", false);
 	}
 	
 	private String name;
@@ -63,6 +72,16 @@ public class ExampleResource {
 		res.getWriter().println(
 		        "<body><p>name = " + this.name + ", age = " + this.age + "</p></body>");
 		res.getWriter().println("</html>");
+	}
+	
+	public String silly(IRestlessContext restlessContext) {
+		Enumeration<?> names = restlessContext.getRestless().getInitParameterNames();
+		List<String> list = new LinkedList<String>();
+		while(names.hasMoreElements()) {
+			String name = (String)names.nextElement();
+			list.add(name);
+		}
+		return "As an example, these are the init parameter names: " + list;
 	}
 	
 }

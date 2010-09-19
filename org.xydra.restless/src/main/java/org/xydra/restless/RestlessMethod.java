@@ -24,6 +24,9 @@ import org.xydra.log.LoggerFactory;
  * A HTTP method (GET, PUT,.... ) and a {@link PathTemplate} mapped to an object
  * and a method name.
  * 
+ * Restless can inject {@link HttpServletRequest}, {@link HttpServletResponse},
+ * and {@link Restless} (which gives access to servlet context etc).
+ * 
  * @author voelkel
  */
 public class RestlessMethod {
@@ -85,7 +88,8 @@ public class RestlessMethod {
 	 * @param res
 	 * @throws IOException
 	 */
-	public void run(HttpServletRequest req, HttpServletResponse res) throws IOException {
+	public void run(final Restless restless, final HttpServletRequest req,
+	        final HttpServletResponse res) throws IOException {
 		Object instance = toInstance(this.instanceOrClass);
 		
 		Method method = Restless.methodByName(instance, this.methodName);
@@ -115,13 +119,31 @@ public class RestlessMethod {
 			for(Class<?> paramType : method.getParameterTypes()) {
 				
 				// try to fill each parameter
+				
+				// fill predefined types
 				if(paramType.equals(HttpServletResponse.class)) {
-					// HttpServletResponse
 					args.add(res);
 					hasHttpServletResponseParameter = true;
 				} else if(paramType.equals(HttpServletRequest.class)) {
-					// HttpServletRequest
 					args.add(req);
+				} else if(paramType.equals(Restless.class)) {
+					args.add(restless);
+				} else if(paramType.equals(IRestlessContext.class)) {
+					IRestlessContext restlessContext = new IRestlessContext() {
+						
+						public Restless getRestless() {
+							return restless;
+						}
+						
+						public HttpServletResponse getResponse() {
+							return res;
+						}
+						
+						public HttpServletRequest getRequest() {
+							return req;
+						}
+					};
+					args.add(restlessContext);
 				} else {
 					RestlessParameter param = this.parameter[parameterNumber];
 					/* 1) look in urlParameters (not query params) */
@@ -198,7 +220,7 @@ public class RestlessMethod {
 					res.getWriter().print(re.getMessage());
 				} else {
 					boolean handled = false;
-					for(RestlessExceptionHandler handler : Restless.exceptionHandlers) {
+					for(RestlessExceptionHandler handler : restless.exceptionHandlers) {
 						if(handler.handleException(cause, req, res)) {
 							handled = true;
 							break;

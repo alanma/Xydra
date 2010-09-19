@@ -2,19 +2,23 @@ package org.xydra.restless;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -37,7 +41,7 @@ import org.xydra.log.LoggerFactory;
  *  &lt;servlet-class&gt;org.xydra.restless.Restless&lt;/servlet-class&gt;
  *   &lt;init-param&gt;
  *    &lt;param-name&gt;app&lt;/param-name&gt;
- *    &lt;param-value&gt;com.example.Application&lt;/param-value&gt;
+ *    &lt;param-value&gt;org.xydra.example.ExampleApp&lt;/param-value&gt;
  *   &lt;/init-param&gt;
  *  &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
  * &lt;/servlet&gt;
@@ -47,50 +51,18 @@ import org.xydra.log.LoggerFactory;
  * &lt;/servlet-mapping&gt;
  * </pre>
  * 
- * 2) create a corresponding class com.example.Application
+ * 2) create a corresponding class org.xydra.example.ExampleApp. See
+ * {@link ExampleApp}.
  * 
- * It should look like this:
- * 
- * <pre>
- * public class Application {
- * 	
- * 	static {
- * 		new Foo().restless();
- * 		new Bar().restless();
- * 		// ... add more
- * 	}
- * 	
- * }
- * </pre>
- * 
- * 3) In your domain classes (Foo, Bar) add the mapping:
- * 
- * <pre>
- * public void restless() {
- * 	Restless.addGet(
- * 
- * 	&quot;/mysubpath/&quot;, //or any path you like
- * 	        
- * 	        this, &quot;getBaz&quot;, // the method name to call
- * 	        
- * 	        new RestlessParameter(&quot;source&quot;, // the query param name
- * 	                
- * 	                null // the default value of the param
- * 	        )
- * 
- * 	// or further RestlessParameter
- * 	        
- * 	        );
- * }
- * </pre>
- * 
- * The method "getBaz" needs to have at least one parameter of type
- * {@link HttpServletResponse}. All other parameters are filled with the values
- * from the request, using the mapping you provide.
+ * 3) {@link ExampleApp} initializes the resources of your application. See
+ * {@link ExampleResource} for an example.
  * 
  * 4) The configuration can be accessed at the URL "/admin/restless"
  * 
+ * @author voelkel
  * 
+ */
+/**
  * @author voelkel
  * 
  */
@@ -103,123 +75,17 @@ public class Restless extends HttpServlet {
 	 */
 	public static final String ADMIN_ONLY_URL_PREFIX = "/admin";
 	public static final String CHARSET_UTF8 = "utf-8";
-	
-	static List<RestlessExceptionHandler> exceptionHandlers = new LinkedList<RestlessExceptionHandler>();
-	
-	private static Map<String,String> initParams = new HashMap<String,String>();
-	
-	private static Logger log = LoggerFactory.getLogger(Restless.class);
-	/**
-	 * All publicly exposed methods
-	 */
-	private static List<RestlessMethod> methods = new LinkedList<RestlessMethod>();
 	public static final String MIME_TEXT_PLAIN = "text/plain";
 	public static final String MIME_XHTML = "application/xhtml+xml";
-	private static final long serialVersionUID = -1906300614203565189L;
-	private static ServletContext servletContext;
-	
 	public static final String XHTML_DOCTYPE = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">";
-	
 	public static final String XHTML_NS = "xmlns=\"http://www.w3.org/1999/xhtml\"";
-	
 	public static final String XML_DECLARATION = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	
-	public static void addAdminOnlyMethod(String pathTemplate, String httpMethod, Object object,
-	        String methodName, RestlessParameter ... parameter) {
-		PathTemplate pt = new PathTemplate(pathTemplate);
-		methods.add(new RestlessMethod(object, httpMethod, methodName, pt, true, parameter));
-		assert methodByName(object, methodName) != null : "method '" + methodName + "' not found";
-	}
+	private static Logger log = LoggerFactory.getLogger(Restless.class);
 	
-	/**
-	 * Add a method to be called if an HTTP DELETE matches the given
-	 * pathPattern.
-	 * 
-	 * See
-	 * {@link Restless#addGeneric(String, String, Object, String, RestlessParameter...)}
-	 * for details.
-	 */
-	public static void addDelete(String pathPattern, Object object, String methodName,
-	        RestlessParameter ... parameter) {
-		addGeneric(pathPattern, "DELETE", object, methodName, parameter);
-	}
+	private static final long serialVersionUID = -1906300614203565189L;
 	
-	/**
-	 * Register a handler that will receive exceptions thrown by the executed
-	 * REST methods.
-	 */
-	public static void addExceptionHandler(RestlessExceptionHandler handler) {
-		exceptionHandlers.add(handler);
-	}
-	
-	/**
-	 * If the method must have a parameter of type {@link HttpServletResponse},
-	 * Restless hands over the response object and ignores the method response.
-	 * 
-	 * @param pathPrefix starts always with /
-	 * @param methodName
-	 * @param restlessParameter
-	 * 
-	 * @param pathTemplate see {@link PathTemplate} for syntax
-	 * @param httpMethod one of 'GET', 'PUT', 'POST', or 'DELETE'
-	 * @param object Java instance to be called
-	 * @param methodName to be called on the Java instance. This method may not
-	 *            have several signatures.
-	 * @param parameter in the order in which they are used in the Java method.
-	 *            The Java method may additionally use
-	 *            {@link HttpServletRequest} and {@link HttpServletResponse} at
-	 *            any position in the Java method. {@link HttpServletResponse}
-	 *            should be used to send a response.
-	 */
-	public static void addGeneric(String pathTemplate, String httpMethod, Object object,
-	        String methodName, RestlessParameter ... parameter) {
-		PathTemplate pt = new PathTemplate(pathTemplate);
-		methods.add(new RestlessMethod(object, httpMethod, methodName, pt, false, parameter));
-		assert methodByName(object, methodName) != null : "method '" + methodName + "' not found";
-	}
-	
-	public static void addGenericStatic(String pathTemplate, String httpMethod, Class<?> clazz,
-	        String methodName, boolean adminOnly, RestlessParameter ... parameter) {
-		PathTemplate pt = new PathTemplate(pathTemplate);
-		methods.add(new RestlessMethod(clazz, httpMethod, methodName, pt, adminOnly, parameter));
-		assert methodByName(clazz, methodName) != null : "method '" + methodName + "' not found";
-	}
-	
-	/**
-	 * Add a method to be called if an HTTP GET matches the given pathPattern.
-	 * 
-	 * See
-	 * {@link Restless#addGeneric(String, String, Object, String, RestlessParameter...)}
-	 * for details.
-	 */
-	public static void addGet(String pathPattern, Object object, String methodName,
-	        RestlessParameter ... parameter) {
-		addGeneric(pathPattern, "GET", object, methodName, parameter);
-	}
-	
-	/**
-	 * Add a method to be called if an HTTP POST matches the given pathPattern.
-	 * 
-	 * See
-	 * {@link Restless#addGeneric(String, String, Object, String, RestlessParameter...)}
-	 * for details.
-	 */
-	public static void addPost(String pathPattern, Object object, String methodName,
-	        RestlessParameter ... parameter) {
-		addGeneric(pathPattern, "POST", object, methodName, parameter);
-	}
-	
-	/**
-	 * Add a method to be called if an HTTP PUT matches the given pathPattern.
-	 * 
-	 * See
-	 * {@link Restless#addGeneric(String, String, Object, String, RestlessParameter...)}
-	 * for details.
-	 */
-	public static void addPut(String pathPattern, Object object, String methodName,
-	        RestlessParameter ... parameter) {
-		addGeneric(pathPattern, "PUT", object, methodName, parameter);
-	}
+	/** =========== Utilities ================ */
 	
 	/**
 	 * Turn all cookies that the request contains into a map, cookie name as
@@ -300,37 +166,6 @@ public class Restless extends HttpServlet {
 		return map;
 	}
 	
-	public static ServletContext getServletContextFromInit() {
-		return servletContext;
-	}
-	
-	public static Map<String,String> getWebXmlInitParameter() {
-		return initParams;
-	}
-	
-	/**
-	 * @param object
-	 * @param methodName
-	 * @return true if the Java method with the given name has a parameter of
-	 *         type {@link HttpServletResponse}
-	 */
-	@SuppressWarnings("unused")
-	private static boolean hasHttpServletResponseParameter(Object object, String methodName) {
-		// probe for consistency
-		Method method = methodByName(object, methodName);
-		if(method == null) {
-			return false;
-		}
-		
-		for(Class<?> paramType : method.getParameterTypes()) {
-			if(paramType.equals(HttpServletResponse.class)) {
-				// ok
-				return true;
-			}
-		}
-		return false;
-	}
-	
 	protected static final String instanceOrClass_className(Object instanceOrClass) {
 		if(instanceOrClass instanceof Class<?>) {
 			return ((Class<?>)instanceOrClass).getCanonicalName();
@@ -344,7 +179,21 @@ public class Restless extends HttpServlet {
 	 * @param methodName
 	 * @return a java.lang.reflect.{@link Method} from a String
 	 */
-	private static Method methodByName(Class<?> clazz, String methodName) {
+	public static Method methodByName(Object object, String methodName) {
+		if(object instanceof Class<?>) {
+			return methodByName((Class<?>)object, methodName);
+		} else {
+			return methodByName(object.getClass(), methodName);
+		}
+	}
+	
+	/**
+	 * @param object
+	 * @param methodName
+	 * @return a java.lang.reflect.{@link Method} from a Class with a given
+	 *         methodName
+	 */
+	public static Method methodByName(Class<?> clazz, String methodName) {
 		for(Method method : clazz.getMethods()) {
 			if(method.getName().equals(methodName)) {
 				return method;
@@ -354,19 +203,10 @@ public class Restless extends HttpServlet {
 	}
 	
 	/**
-	 * @param object
-	 * @param methodName
-	 * @return a java.lang.reflect.{@link Method} from a String
-	 */
-	static Method methodByName(Object object, String methodName) {
-		return methodByName(object.getClass(), methodName);
-	}
-	
-	/**
 	 * @param raw
 	 * @return the input string with XML escaping
 	 */
-	private static final String xmlEncode(String raw) {
+	public static final String xmlEncode(String raw) {
 		String safe = raw;
 		safe = safe.replace("&", "&amp;");
 		safe = safe.replace("<", "&lt;");
@@ -376,7 +216,67 @@ public class Restless extends HttpServlet {
 		return safe;
 	}
 	
-	private String app;
+	/** =========== Instance code ================ */
+	
+	private String apps;
+	
+	List<RestlessExceptionHandler> exceptionHandlers = new LinkedList<RestlessExceptionHandler>();
+	
+	private Map<String,String> initParams = new HashMap<String,String>();
+	
+	/**
+	 * All publicly exposed methods
+	 */
+	private List<RestlessMethod> methods = new LinkedList<RestlessMethod>();
+	
+	private ServletContext servletContext;
+	
+	/**
+	 * Register a handler that will receive exceptions thrown by the executed
+	 * REST methods.
+	 */
+	public void addExceptionHandler(RestlessExceptionHandler handler) {
+		this.exceptionHandlers.add(handler);
+	}
+	
+	/**
+	 * Shortcut for adding addMethod( method = 'GET', admin-only = 'false' )
+	 * 
+	 * @param pathTemplate
+	 * @param instanceOrClass
+	 * @param javaMethodName
+	 */
+	public void addGet(String pathTemplate, Object instanceOrClass, String javaMethodName,
+	        RestlessParameter ... parameter) {
+		addMethod(pathTemplate, "GET", instanceOrClass, javaMethodName, false, parameter);
+	}
+	
+	/**
+	 * If the method has a parameter of type {@link HttpServletResponse},
+	 * Restless hands over the response object and ignores the method response,
+	 * if any. Otherwise the method return value is converted toString() and
+	 * returned as text/plain.
+	 * 
+	 * @param pathTemplate see {@link PathTemplate} for syntax
+	 * @param httpMethod one of 'GET', 'PUT', 'POST', or 'DELETE'
+	 * @param instanceOrClass Java instance to be called or Java class to be
+	 *            instantiated
+	 * @param javaMethodName to be called on the Java instance. This method may
+	 *            not have several signatures.
+	 * @param parameter in the order in which they are used in the Java method.
+	 *            The Java method may additionally use
+	 *            {@link HttpServletRequest} and {@link HttpServletResponse} at
+	 *            any position in the Java method. {@link HttpServletResponse}
+	 *            should be used to send a response.
+	 */
+	public void addMethod(String pathTemplate, String httpMethod, Object instanceOrClass,
+	        String javaMethodName, boolean adminOnly, RestlessParameter ... parameter) {
+		PathTemplate pt = new PathTemplate(pathTemplate);
+		this.methods.add(new RestlessMethod(instanceOrClass, httpMethod, javaMethodName, pt,
+		        adminOnly, parameter));
+		assert methodByName(instanceOrClass, javaMethodName) != null : "method '" + javaMethodName
+		        + "' not found";
+	}
 	
 	/*
 	 * Called from servlet environment.
@@ -428,7 +328,7 @@ public class Restless extends HttpServlet {
 			                + "><head><title>Restless Configuration</title></head><body>");
 			res.getWriter().println("<h3>Restless configuration</h3>");
 			res.getWriter().println("<p><ol>");
-			for(RestlessMethod rm : Restless.methods) {
+			for(RestlessMethod rm : this.methods) {
 				res.getWriter().print("<li>");
 				res.getWriter().print(
 				        "Mapping " + rm.httpMethod + " <a href='"
@@ -480,7 +380,15 @@ public class Restless extends HttpServlet {
 	 * @return the configured Application class
 	 */
 	public String getApp() {
-		return this.app;
+		return this.apps;
+	}
+	
+	public ServletContext getServletContextFromInit() {
+		return this.servletContext;
+	}
+	
+	public Map<String,String> getWebXmlInitParameter() {
+		return this.initParams;
 	}
 	
 	/*
@@ -494,56 +402,123 @@ public class Restless extends HttpServlet {
 	 */
 	@Override
 	public void init(ServletConfig servletConfig) {
+		try {
+			super.init(servletConfig);
+		} catch(ServletException e) {
+			throw new RuntimeException("Could not initialise super servlet", e);
+		}
 		log.info("Restless init...");
 		
 		/** provide servletContext object for other parts of the application */
-		servletContext = servletConfig.getServletContext();
+		this.servletContext = servletConfig.getServletContext();
 		
 		/** copy init parameters for others to use */
 		Enumeration<?> enumeration = servletConfig.getInitParameterNames();
 		while(enumeration.hasMoreElements()) {
 			String key = (String)enumeration.nextElement();
 			String value = servletConfig.getInitParameter(key);
-			initParams.put(key, value);
+			this.initParams.put(key, value);
 		}
 		
-		initParams.put("context:contextPath", servletConfig.getServletContext().getContextPath());
-		initParams.put("context:realPath of '/'", servletConfig.getServletContext()
+		this.initParams.put("context:contextPath", servletConfig.getServletContext()
+		        .getContextPath());
+		this.initParams.put("context:realPath of '/'", servletConfig.getServletContext()
 		        .getRealPath("/"));
-		initParams.put("context:servletContextName", servletConfig.getServletContext()
+		this.initParams.put("context:servletContextName", servletConfig.getServletContext()
 		        .getServletContextName());
-		initParams.put("context:serverInfo", servletConfig.getServletContext().getServerInfo());
+		this.initParams
+		        .put("context:serverInfo", servletConfig.getServletContext().getServerInfo());
 		
-		/** invoke restless('/') on configured application class */
-		this.app = servletConfig.getInitParameter("app");
+		/** invoke restless(this,'/') on configured application class */
+		this.apps = servletConfig.getInitParameter("app");
+		
+		Set<String> appClassNames = parseToSet(this.apps);
+		for(String appClassName : appClassNames) {
+			instatiateAndInit(appClassName);
+		}
+		
+		log.info(">>> Done Restless init at context path '"
+		        + this.initParams.get("context:contextPath") + "'. Admin interface at '"
+		        + this.initParams.get("context:contextPath") + "/admin/restless'");
+		if(log.isInfoEnabled()) {
+			for(RestlessMethod rm : this.methods) {
+				log.info("Mapping " + rm.httpMethod + " " + rm.pathTemplate.getRegex() + " --> "
+				        + instanceOrClass_className(rm.instanceOrClass) + "#" + rm.methodName
+				        + " access:" + (rm.adminOnly ? "ADMIN ONLY" : "PUBLIC"));
+			}
+			
+		}
+	}
+	
+	private void instatiateAndInit(String appClassName) {
 		try {
-			Class<?> clazz = Class.forName(this.app);
+			Class<?> clazz = Class.forName(appClassName);
 			try {
-				Method restlessMethod = clazz.getMethod("restless", String.class);
+				Constructor<?> cons = clazz.getConstructor();
 				try {
-					restlessMethod.invoke(null, "/");
+					Object appInstance = cons.newInstance();
+					try {
+						Method restlessMethod = clazz.getMethod("restless", Restless.class,
+						        String.class);
+						try {
+							restlessMethod.invoke(appInstance, this, "");
+						} catch(IllegalArgumentException e) {
+							throw new RuntimeException("Class '" + appClassName
+							        + ".restless(Restless,String prefix)' failed", e);
+						} catch(IllegalAccessException e) {
+							throw new RuntimeException("Class '" + appClassName
+							        + ".restless(Restless,String prefix)' failed", e);
+						} catch(InvocationTargetException e) {
+							throw new RuntimeException("Class '" + appClassName
+							        + ".restless(Restless,String prefix)' failed", e);
+						}
+					} catch(NoSuchMethodException e) {
+						log
+						        .warn("Class '"
+						                + this.apps
+						                + "' has no restless( Restless restless, String prefix ) method. Relying on static initializer.");
+						// trigger it to make sure static blocks are run
+						log.info("Configured with " + clazz.getName());
+					}
 				} catch(IllegalArgumentException e) {
-					throw new RuntimeException("Class '" + this.app + ".restless(String)' failed",
-					        e);
+					throw new RuntimeException("new '" + appClassName + "() failed", e);
+				} catch(InstantiationException e) {
+					throw new RuntimeException("new '" + appClassName + "() failed", e);
 				} catch(IllegalAccessException e) {
-					throw new RuntimeException("Class '" + this.app + ".restless(String)' failed",
-					        e);
+					throw new RuntimeException("new '" + appClassName + "() failed", e);
 				} catch(InvocationTargetException e) {
-					throw new RuntimeException("Class '" + this.app + ".restless(String)' failed",
-					        e);
+					throw new RuntimeException("new '" + appClassName + "() failed", e);
 				}
+			} catch(SecurityException e) {
+				throw new RuntimeException("Class '" + appClassName + " failed to get constructor",
+				        e);
 			} catch(NoSuchMethodException e) {
-				log
-				        .warn("Class '"
-				                + this.app
-				                + "' has no restless( String prefix ) method. Relying on static initializer.");
-				// trigger it to make sure static blocks are run
-				log.info("Configured with " + clazz.getName());
+				throw new RuntimeException("Class '" + appClassName
+				        + " has no parameterless constructor", e);
 			}
 		} catch(ClassNotFoundException e) {
-			throw new RuntimeException("Class '" + this.app + "' not found");
+			throw new RuntimeException("Class '" + appClassName + "' not found");
 		}
-		log.info("Done Restless init.");
+	}
+	
+	/**
+	 * @param commaSeparatedClassnames
+	 * @return a set of classnames
+	 */
+	private Set<String> parseToSet(String commaSeparatedClassnames) {
+		
+		Set<String> set = new HashSet<String>();
+		if(commaSeparatedClassnames == null) {
+			return set;
+		}
+		
+		String[] parts = commaSeparatedClassnames.split(",");
+		for(int i = 0; i < parts.length; i++) {
+			String classname = parts[i].trim();
+			assert !classname.contains(",");
+			set.add(classname);
+		}
+		return set;
 	}
 	
 	/**
@@ -569,7 +544,7 @@ public class Restless extends HttpServlet {
 		}
 		
 		// look through all registered methods
-		for(RestlessMethod restlessMethod : methods) {
+		for(RestlessMethod restlessMethod : this.methods) {
 			// if path matches
 			if(restlessMethod.pathTemplate.matches(path)) {
 				foundPath = true;
@@ -583,7 +558,7 @@ public class Restless extends HttpServlet {
 							// calling from potentially secured url, run
 							mayAccess = true;
 							try {
-								restlessMethod.run(req, res);
+								restlessMethod.run(this, req, res);
 							} catch(IOException e) {
 								throw new RuntimeException(e);
 							}
@@ -596,7 +571,7 @@ public class Restless extends HttpServlet {
 						mayAccess = true;
 						// just run
 						try {
-							restlessMethod.run(req, res);
+							restlessMethod.run(this, req, res);
 						} catch(IOException e) {
 							throw new RuntimeException(e);
 						}

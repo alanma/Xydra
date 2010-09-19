@@ -59,12 +59,12 @@ class PathTemplate {
 	 */
 	public PathTemplate(String pathExpression) {
 		if(!pathExpression.startsWith("/")) {
-			throw new IllegalArgumentException("Path must start with /. Path ='" + pathExpression
+			throw new IllegalArgumentException("Path must start with '/'. Path ='" + pathExpression
 			        + "'");
 		}
 		if(pathExpression.contains("//")) {
-			throw new IllegalArgumentException("Path may not contain //. Path ='" + pathExpression
-			        + "'");
+			throw new IllegalArgumentException("Path may not contain '//'. Path ='"
+			        + pathExpression + "'");
 		}
 		
 		// turn into regex with groups

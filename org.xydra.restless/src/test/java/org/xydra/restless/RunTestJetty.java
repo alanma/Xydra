@@ -3,9 +3,6 @@ package org.xydra.restless;
 import java.io.File;
 import java.net.URI;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +14,7 @@ import org.slf4j.LoggerFactory;
  * 
  * <p>
  * If only static files have been modified, no call is neccesary as this Jetty
- * is configured to load the directly from src/main/webapp.
+ * is configured to load resources directly from src/test/resources
  * 
  * @author voelkel
  * 
@@ -27,16 +24,6 @@ public class RunTestJetty {
 	private static final Logger log = LoggerFactory.getLogger(RunTestJetty.class);
 	
 	public static void main(String[] args) throws Exception {
-		
-		Restless.addExceptionHandler(new RestlessExceptionHandler() {
-			
-			public boolean handleException(Throwable t, HttpServletRequest req,
-			        HttpServletResponse res) {
-				System.err.println("Restless error");
-				throw new RuntimeException("" + req, t);
-			}
-		});
-		
 		Jetty jetty = new Jetty();
 		
 		URI uri = jetty.startServer("", new File("src/test/resources"));
