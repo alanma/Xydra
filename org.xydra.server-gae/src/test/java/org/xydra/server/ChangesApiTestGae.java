@@ -13,39 +13,29 @@ public class ChangesApiTestGae extends ChangesApiTest {
 	
 	@BeforeClass
 	public static void init() {
-		
 		GaeTestfixer.enable();
-		GaeXydraServer.initializeRepositoryManager();
-		
 		ChangesApiTest.init();
 	}
 	
 	@Override
 	@Before
 	public void setUp() {
-		
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		
 		super.setUp();
 	}
 	
 	@Override
 	@After
 	public void tearDown() {
-		
 		super.tearDown();
-		
 		GaeTestfixer.tearDown();
-		
 	}
 	
 	@AfterClass
 	public static void cleanup() {
-		
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		DataApiTest.cleanup();
 		GaeTestfixer.tearDown();
-		
 	}
 	
 }

@@ -143,39 +143,53 @@ public class GaeUtils {
 	 */
 	public static void putEntity(Entity entity, XStateTransaction trans) {
 		putEntity(entity);
-		assert trans == null || datastore.getCurrentTransaction() == trans;
+		assert assertTransaction(trans);
 	}
 	
-	public static Transaction asTransaction(XStateTransaction trans) {
-		if(!(trans instanceof Transaction)) {
-			throw new IllegalArgumentException("unexpected transaction object");
+	private static boolean assertTransaction(XStateTransaction trans) {
+		// sanity checks
+		boolean inAnyTransaction = (trans != null);
+		boolean inThisTransaction = false;
+		if(inAnyTransaction) {
+			inThisTransaction = (datastore.getCurrentTransaction() == asTransaction(trans));
 		}
-		return (Transaction)trans;
+		assert !inAnyTransaction || inThisTransaction : "there should be no transaction or this transaction. In transaction? "
+		        + inAnyTransaction + " In this transaction? " + inThisTransaction;
+		return true;
 	}
 	
 	public static XStateTransaction beginTransaction() {
-		return new StateTransactionImpl(datastore.beginTransaction());
+		return new GaeStateTransactionImpl(datastore.beginTransaction());
 	}
 	
-	public static class StateTransactionImpl implements XStateTransaction {
+	public static class GaeStateTransactionImpl implements XStateTransaction {
 		
-		private Transaction object;
+		Transaction gaeTransaction;
 		
-		public StateTransactionImpl(Transaction transaction) {
-			this.object = transaction;
+		public GaeStateTransactionImpl(Transaction transaction) {
+			this.gaeTransaction = transaction;
 		}
 		
 		@Override
 		public int hashCode() {
-			return this.object.hashCode();
+			return this.gaeTransaction.hashCode();
 		}
 		
 		@Override
 		public boolean equals(Object other) {
-			return other instanceof StateTransactionImpl
-			        && ((StateTransactionImpl)other).object.equals(this.object);
+			return other instanceof GaeStateTransactionImpl
+			        && ((GaeStateTransactionImpl)other).gaeTransaction.equals(this.gaeTransaction);
 		}
 		
+	}
+	
+	public static Transaction asTransaction(XStateTransaction trans) {
+		if(!(trans instanceof GaeStateTransactionImpl)) {
+			throw new IllegalArgumentException("unexpected transaction object oy type "
+			        + trans.getClass());
+		}
+		
+		return ((GaeStateTransactionImpl)trans).gaeTransaction;
 	}
 	
 	public static void endTransaction(XStateTransaction trans) {
@@ -200,7 +214,7 @@ public class GaeUtils {
 	 */
 	public static void deleteEntity(Key key, XStateTransaction trans) {
 		deleteEntity(key);
-		assert trans == null || datastore.getCurrentTransaction() == trans;
+		assert assertTransaction(trans);
 	}
 	
 	/**

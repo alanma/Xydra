@@ -9,7 +9,6 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.state.XSPI;
 import org.xydra.core.model.state.impl.gae.GaeStateStore;
-import org.xydra.server.RepositoryManager.ArmLoader;
 
 
 /**
@@ -18,44 +17,35 @@ import org.xydra.server.RepositoryManager.ArmLoader;
  * @author dscharrer
  * 
  */
-public class GaeXydraServer {
+public class GaeXydraServer implements IXydraServer {
 	
-	static {
-		
-		// Initialize the repository manager.
-		initializeRepositoryManager();
-		
-		// Initialize the REST API.
-		XydraServer.restless("");
-		
-		// TODO are these needed?
-		new GSetupResource().restless("");
-		new LogTestResource().restless("");
+	private XGroupDatabase groups;
+	private XRepository repo;
+	private XAccessManager accessManager;
+	
+	public GaeXydraServer() {
+		// Set the repository, group DB and access manager
+		XSPI.setStateStore(new GaeStateStore());
+		this.repo = X.createMemoryRepository();
+		this.groups = GaeGroups.loadGroups();
+		this.accessManager = GaeAccess.loadAccessManager(this.repo.getAddress(), this.groups);
 		
 	}
 	
-	public synchronized static void initializeRepositoryManager() {
-		
-		if(!RepositoryManager.isInitialized()) {
-			
-			// Set the repository, group DB and access manager
-			XSPI.setStateStore(new GaeStateStore());
-			XRepository repo = X.createMemoryRepository();
-			RepositoryManager.setRepository(repo);
-			XGroupDatabase groups = GaeGroups.loadGroups();
-			RepositoryManager.setGroups(groups);
-			XAccessManager arm = GaeAccess.loadAccessManager(repo.getAddress(), groups);
-			RepositoryManager.setAccessManager(arm, new GaeArmLoader());
-			
-		}
+	public XAccessManager getAccessManagerForModel(XAddress modelAddr, XGroupDatabase groups) {
+		return GaeAccess.loadAccessManager(modelAddr, groups);
 	}
 	
-	private static class GaeArmLoader implements ArmLoader {
-		
-		public XAccessManager loadArmForModel(XAddress modelAddr, XGroupDatabase groups) {
-			return GaeAccess.loadAccessManager(modelAddr, groups);
-		}
-		
+	public XAccessManager getAccessManager() {
+		return this.accessManager;
+	}
+	
+	public XGroupDatabase getGroups() {
+		return this.groups;
+	}
+	
+	public XRepository getRepository() {
+		return this.repo;
 	}
 	
 }

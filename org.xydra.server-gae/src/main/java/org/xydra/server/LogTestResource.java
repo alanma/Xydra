@@ -7,13 +7,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.restless.Restless;
 import org.xydra.server.gae.util.Logtest;
+import org.xydra.server.rest.XydraRestServer;
 
 
 public class LogTestResource {
 	
-	public void restless(String prefix) {
+	public void restless(Restless restless, String prefix) {
 		
-		Restless.addGet(prefix + "/logtest", this, "init");
+		restless.addGet(prefix + "/logtest", this, "init");
 		
 	}
 	
@@ -37,7 +38,7 @@ public class LogTestResource {
 			depth++;
 		}
 		
-		XydraServer.textResponse(res, HttpServletResponse.SC_OK, result);
+		XydraRestServer.textResponse(res, HttpServletResponse.SC_OK, result);
 	}
 	
 }

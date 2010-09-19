@@ -100,19 +100,18 @@ public class Jetty {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		
 		GaeTestfixer.enable();
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		
-		GaeXydraServer.initializeRepositoryManager();
+		IXydraServer xydraServer = XydraServerDefaultConfiguration.getInMemoryServer();
 		
 		// add a default model
-		XRepository remoteRepo = RepositoryManager.getRepository();
+		XRepository remoteRepo = xydraServer.getRepository();
 		assertFalse(remoteRepo.hasModel(DemoModelUtil.PHONEBOOK_ID));
 		DemoModelUtil.addPhonebookModel(remoteRepo);
 		
 		// allow access to everyone
-		XAccessManager arm = RepositoryManager.getArmForRepository();
+		XAccessManager arm = xydraServer.getAccessManager();
 		arm.setAccess(XA.GROUP_ALL, remoteRepo.getAddress(), XA.ACCESS_READ, true);
 		arm.setAccess(XA.GROUP_ALL, remoteRepo.getAddress(), XA.ACCESS_WRITE, true);
 		

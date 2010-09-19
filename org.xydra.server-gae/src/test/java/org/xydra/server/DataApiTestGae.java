@@ -12,41 +12,31 @@ public class DataApiTestGae extends DataApiTest {
 	
 	@BeforeClass
 	public static void init() {
-		
 		GaeTestfixer.enable();
 		// must also run already before DataApiTest.init
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		GaeXydraServer.initializeRepositoryManager();
-		
 		DataApiTest.init();
 	}
 	
 	@Override
 	@Before
 	public void setUp() {
-		
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		
 		super.setUp();
 	}
 	
 	@Override
 	@After
 	public void tearDown() {
-		
 		super.tearDown();
-		
 		GaeTestfixer.tearDown();
-		
 	}
 	
 	@AfterClass
 	public static void cleanup() {
-		
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		DataApiTest.cleanup();
 		GaeTestfixer.tearDown();
-		
 	}
 	
 }

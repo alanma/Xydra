@@ -11,27 +11,19 @@ public class PreTestGae extends PreTest {
 	
 	@BeforeClass
 	public static void init() {
-		
 		GaeTestfixer.enable();
-		GaeXydraServer.initializeRepositoryManager();
-		
 	}
 	
 	@Before
 	public void setUp() {
-		
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		
 	}
 	
 	@Override
 	@After
 	public void tearDown() {
-		
 		super.tearDown();
-		
 		GaeTestfixer.tearDown();
-		
 	}
 	
 }
