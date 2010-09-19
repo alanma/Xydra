@@ -8,7 +8,7 @@
 		<servlet-class>org.xydra.restless.Restless</servlet-class>
 		<init-param>
 			<param-name>app</param-name>
-			<param-value>org.xydra.server.MemoryXydraServer</param-value>
+			<param-value>org.xydra.server.rest.XydraRestServer</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>

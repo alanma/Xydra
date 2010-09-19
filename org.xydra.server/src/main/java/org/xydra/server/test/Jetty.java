@@ -14,8 +14,8 @@ import org.xydra.core.access.XA;
 import org.xydra.core.access.XAccessManager;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.test.DemoModelUtil;
-import org.xydra.server.MemoryXydraServer;
-import org.xydra.server.RepositoryManager;
+import org.xydra.server.IXydraServer;
+import org.xydra.server.XydraServerDefaultConfiguration;
 
 
 /**
@@ -102,15 +102,15 @@ public class Jetty {
 	
 	public static void main(String[] args) throws Exception {
 		
-		MemoryXydraServer.initializeRepositoryManager();
+		IXydraServer xydraServer = XydraServerDefaultConfiguration.getInMemoryServer();
 		
 		// add a default model
-		XRepository remoteRepo = RepositoryManager.getRepository();
+		XRepository remoteRepo = xydraServer.getRepository();
 		assertFalse(remoteRepo.hasModel(DemoModelUtil.PHONEBOOK_ID));
 		DemoModelUtil.addPhonebookModel(remoteRepo);
 		
 		// allow access to everyone
-		XAccessManager arm = RepositoryManager.getArmForRepository();
+		XAccessManager arm = xydraServer.getAccessManager();
 		arm.setAccess(XA.GROUP_ALL, remoteRepo.getAddress(), XA.ACCESS_READ, true);
 		arm.setAccess(XA.GROUP_ALL, remoteRepo.getAddress(), XA.ACCESS_WRITE, true);
 		

@@ -6,7 +6,8 @@ import org.junit.After;
 import org.junit.Test;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.test.DemoModelUtil;
-import org.xydra.server.RepositoryManager;
+import org.xydra.server.IXydraServer;
+import org.xydra.server.XydraServerDefaultConfiguration;
 
 
 /**
@@ -23,12 +24,16 @@ public abstract class PreTest {
 	@Test
 	public void testTheSetupItself() {
 		
+		IXydraServer xydraServer = XydraServerDefaultConfiguration.getInMemoryServer();
+		assertNotNull(xydraServer);
+		
 		// initialize XModel
-		this.repo = RepositoryManager.getRepository();
+		this.repo = xydraServer.getRepository();
+		assertNotNull(this.repo);
 		
 		DemoModelUtil.addPhonebookModel(this.repo);
 		
-		assertNotNull(RepositoryManager.getRepository().getModel(DemoModelUtil.PHONEBOOK_ID));
+		assertNotNull(xydraServer.getRepository().getModel(DemoModelUtil.PHONEBOOK_ID));
 		
 	}
 	

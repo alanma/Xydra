@@ -9,8 +9,6 @@ public class DataApiTestMemory extends DataApiTest {
 	@BeforeClass
 	public static void init() {
 		
-		MemoryXydraServer.initializeRepositoryManager();
-		
 		DataApiTest.init();
 	}
 	

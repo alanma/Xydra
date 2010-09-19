@@ -9,8 +9,6 @@ public class PreTestMemory extends PreTest {
 	@BeforeClass
 	public static void init() {
 		
-		MemoryXydraServer.initializeRepositoryManager();
-		
 	}
 	
 }

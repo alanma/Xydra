@@ -3,6 +3,7 @@ package org.xydra.server.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -14,6 +15,7 @@ import java.net.URL;
 import java.util.Iterator;
 
 import org.junit.Test;
+import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
@@ -37,8 +39,28 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 	private static final XID JANE_ID = XX.toId("jane");
 	
 	@Test
+	public void testPing() throws IOException {
+		int result = getPing();
+		assertEquals("Is the Test-server running?", 200, result);
+	}
+	
+	@Test
 	public void testGetModelTrivial() throws IOException {
-		assertNotNull(getRemoteModel(DemoModelUtil.PHONEBOOK_ID));
+		XModel model = getRemoteModel(X.getIDProvider().createUniqueID());
+		assertNull(model);
+		
+		model = getRemoteModel(DemoModelUtil.PHONEBOOK_ID);
+		
+		while(true) {
+			try {
+				Thread.sleep(1000);
+			} catch(InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		// assertNotNull(model);
 	}
 	
 	@Test

@@ -9,8 +9,6 @@ public class ChangesApiTestMemory extends ChangesApiTest {
 	@BeforeClass
 	public static void init() {
 		
-		MemoryXydraServer.initializeRepositoryManager();
-		
 		ChangesApiTest.init();
 	}
 	

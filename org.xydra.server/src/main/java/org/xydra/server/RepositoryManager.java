@@ -12,11 +12,19 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.session.XProtectedRepository;
 import org.xydra.core.model.session.impl.arm.AbstractArmProtectedRepository;
+import org.xydra.server.impl.memory.MemoryXydraServer;
 
 
+/**
+ * @author voelkel
+ * 
+ * 
+ *@deprecated use {@link IXydraServer} and {@link MemoryXydraServer} instead
+ */
+@Deprecated
 public class RepositoryManager {
 	
-	static final Object COOKIE_ACTOR = "actor";
+	public static final Object COOKIE_ACTOR = "actor";
 	
 	static private XRepository repository;
 	

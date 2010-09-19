@@ -26,12 +26,14 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryRepository;
-import org.xydra.core.model.session.XProtectedRepository;
 import org.xydra.core.test.DemoModelUtil;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlModel;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
-import org.xydra.server.RepositoryManager;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
+import org.xydra.server.IXydraServer;
+import org.xydra.server.XydraServerDefaultConfiguration;
 
 
 /**
@@ -42,9 +44,15 @@ import org.xydra.server.RepositoryManager;
  */
 public abstract class AbstractRestApiTest {
 	
+	private static final Logger log = LoggerFactory.getLogger(AbstractRestApiTest.class);
+	
 	protected static final XID REPO_ID = XX.toId("localrepo");
 	
 	protected static final XID ACTOR_TESTER = XX.toId("tester");
+	
+	private static IXydraServer xydraServer;
+	
+	private static URI ping;
 	
 	@BeforeClass
 	public static void init() {
@@ -55,11 +63,24 @@ public abstract class AbstractRestApiTest {
 		
 		apiprefix = server.startServer("/xydra", new File("src/main/webapp"));
 		
+		log.info("Using apiprefix = " + apiprefix.toASCIIString());
+		
+		/**
+		 * Note: resolve implicitly creates a sub-url as if it had started with
+		 * a '/'. However, local urls starting with a slash '/' are resolved as
+		 * the webapp root. Therefore we leave the slash out here.
+		 */
+		
 		dataapi = apiprefix.resolve("data/");
+		log.info("Using data API url = " + dataapi.toASCIIString());
+		
+		ping = apiprefix.resolve("ping/");
 		
 		// set access rights to ALLOW for all users
-		XProtectedRepository remoteRepo = RepositoryManager.getRepository(null);
-		XAccessManager arm = RepositoryManager.getArmForRepository();
+		xydraServer = XydraServerDefaultConfiguration.getInMemoryServer();
+		
+		XRepository remoteRepo = xydraServer.getRepository();
+		XAccessManager arm = xydraServer.getAccessManager();
 		arm.setAccess(ACTOR_TESTER, remoteRepo.getAddress(), XA.ACCESS_READ, true);
 		arm.setAccess(ACTOR_TESTER, remoteRepo.getAddress(), XA.ACCESS_WRITE, true);
 		
@@ -81,7 +102,7 @@ public abstract class AbstractRestApiTest {
 		DemoModelUtil.addPhonebookModel(repo);
 		
 		// add something to the server for testing
-		XRepository remoteRepo = RepositoryManager.getRepository();
+		XRepository remoteRepo = xydraServer.getRepository();
 		assertFalse(remoteRepo.hasModel(DemoModelUtil.PHONEBOOK_ID));
 		DemoModelUtil.addPhonebookModel(remoteRepo);
 		
@@ -90,7 +111,7 @@ public abstract class AbstractRestApiTest {
 	@After
 	public void tearDown() {
 		
-		XRepository remoteRepo = RepositoryManager.getRepository();
+		XRepository remoteRepo = xydraServer.getRepository();
 		remoteRepo.removeModel(null, DemoModelUtil.PHONEBOOK_ID);
 		
 	}
@@ -99,8 +120,8 @@ public abstract class AbstractRestApiTest {
 	public static void cleanup() {
 		
 		// cleanup access rights
-		XRepository remoteRepo = RepositoryManager.getRepository();
-		XAccessManager arm = RepositoryManager.getArmForRepository();
+		XRepository remoteRepo = xydraServer.getRepository();
+		XAccessManager arm = xydraServer.getAccessManager();
 		arm.resetAccess(ACTOR_TESTER, remoteRepo.getAddress(), XA.ACCESS_READ);
 		arm.resetAccess(ACTOR_TESTER, remoteRepo.getAddress(), XA.ACCESS_WRITE);
 		
@@ -128,6 +149,15 @@ public abstract class AbstractRestApiTest {
 		while((nRead = reader.read(buf)) != -1)
 			sb.append(buf, 0, nRead);
 		return sb.toString();
+	}
+	
+	protected int getPing() throws IOException {
+		URL pingurl = ping.toURL();
+		HttpURLConnection c = (HttpURLConnection)pingurl.openConnection();
+		setLoginDetails(c);
+		c.connect();
+		int resp = c.getResponseCode();
+		return resp;
 	}
 	
 	protected MiniElement loadXml(URL url) throws IOException {

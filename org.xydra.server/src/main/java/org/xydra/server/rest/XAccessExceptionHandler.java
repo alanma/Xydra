@@ -1,4 +1,4 @@
-package org.xydra.server;
+package org.xydra.server.rest;
 
 import java.io.IOException;
 
