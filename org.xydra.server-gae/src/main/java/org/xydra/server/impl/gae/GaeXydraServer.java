@@ -1,4 +1,4 @@
-package org.xydra.server;
+package org.xydra.server.impl.gae;
 
 import org.xydra.core.X;
 import org.xydra.core.access.XAccessManager;
@@ -9,6 +9,7 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.state.XSPI;
 import org.xydra.core.model.state.impl.gae.GaeStateStore;
+import org.xydra.server.IXydraServer;
 
 
 /**
@@ -24,6 +25,7 @@ public class GaeXydraServer implements IXydraServer {
 	private XAccessManager accessManager;
 	
 	public GaeXydraServer() {
+		
 		// Set the repository, group DB and access manager
 		XSPI.setStateStore(new GaeStateStore());
 		this.repo = X.createMemoryRepository();

@@ -7,7 +7,6 @@ import org.junit.Test;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.test.DemoModelUtil;
 import org.xydra.server.IXydraServer;
-import org.xydra.server.XydraServerDefaultConfiguration;
 
 
 /**
@@ -18,13 +17,15 @@ public abstract class PreTest {
 	
 	XRepository repo;
 	
+	// to be initialized by subclasses
+	protected static IXydraServer xydraServer;
+	
 	/**
 	 * Expect a run without errors, thats all.
 	 */
 	@Test
 	public void testTheSetupItself() {
 		
-		IXydraServer xydraServer = XydraServerDefaultConfiguration.getInMemoryServer();
 		assertNotNull(xydraServer);
 		
 		// initialize XModel

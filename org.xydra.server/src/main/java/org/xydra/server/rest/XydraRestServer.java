@@ -23,7 +23,6 @@ import org.xydra.core.model.session.impl.arm.ArmProtectedRepository;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessException;
 import org.xydra.server.IXydraServer;
-import org.xydra.server.XydraServerDefaultConfiguration;
 import org.xydra.server.rest.changes.XRepositoryChangesResource;
 import org.xydra.server.rest.changes.XSynchronizeChangesResource;
 import org.xydra.server.rest.data.XFieldResource;
@@ -94,9 +93,9 @@ public class XydraRestServer {
 				        + serverClassName + "'", e);
 			}
 		} else {
-			// use default
-			serverInstance = XydraServerDefaultConfiguration.getInMemoryServer();
+			throw new RuntimeException("no xydra server backend configured in web.xml");
 		}
+		
 		// store in context
 		restless.getServletContext().setAttribute(SERVLET_CONTEXT_ATTRIBUTE_XYDRASERVER,
 		        serverInstance);

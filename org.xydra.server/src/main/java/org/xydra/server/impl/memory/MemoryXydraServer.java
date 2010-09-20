@@ -6,6 +6,8 @@ import org.xydra.core.access.XGroupDatabase;
 import org.xydra.core.access.impl.memory.MemoryAccessManager;
 import org.xydra.core.access.impl.memory.MemoryGroupDatabase;
 import org.xydra.core.model.XRepository;
+import org.xydra.core.model.state.XSPI;
+import org.xydra.core.model.state.impl.memory.MemoryStateStore;
 import org.xydra.server.IXydraServer;
 import org.xydra.server.rest.XydraRestServer;
 
@@ -23,6 +25,7 @@ public class MemoryXydraServer implements IXydraServer {
 	 */
 	public MemoryXydraServer() {
 		// Set the repository, group DB and access manager
+		XSPI.setStateStore(new MemoryStateStore());
 		this.repository = X.createMemoryRepository();
 		this.groups = new MemoryGroupDatabase();
 		this.accessManager = new MemoryAccessManager(this.groups);

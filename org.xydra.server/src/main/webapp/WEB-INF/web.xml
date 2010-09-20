@@ -10,6 +10,10 @@
 			<param-name>app</param-name>
 			<param-value>org.xydra.server.rest.XydraRestServer</param-value>
 		</init-param>
+		<init-param>
+			<param-name>org.xydra.server</param-name>
+			<param-value>org.xydra.server.impl.memory.MemoryXydraServer</param-value>
+		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 	<servlet-mapping>

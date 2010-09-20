@@ -12,7 +12,7 @@
 		</init-param>
 		<init-param>
 			<param-name>org.xydra.server</param-name>
-			<param-value>org.xydra.server.GaeXydraServer</param-value>
+			<param-value>org.xydra.server.impl.gae.GaeXydraServer</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>

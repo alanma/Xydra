@@ -6,6 +6,8 @@ import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import javax.servlet.ServletContext;
+
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
@@ -15,7 +17,7 @@ import org.xydra.core.access.XAccessManager;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.test.DemoModelUtil;
 import org.xydra.server.IXydraServer;
-import org.xydra.server.XydraServerDefaultConfiguration;
+import org.xydra.server.rest.XydraRestServer;
 
 
 /**
@@ -100,9 +102,21 @@ public class TestServer {
 		}
 	}
 	
-	public static void startServer() throws Exception {
+	public IXydraServer getBackend() {
+		if(this.webapp == null) {
+			throw new RuntimeException("cannot get backend before server is started");
+		}
+		ServletContext sc = this.webapp.getServletContext();
+		return (IXydraServer)sc.getAttribute(XydraRestServer.SERVLET_CONTEXT_ATTRIBUTE_XYDRASERVER);
+	}
+	
+	public static void main(String[] args) throws Exception {
 		
-		IXydraServer xydraServer = XydraServerDefaultConfiguration.getInMemoryServer();
+		// start jetty
+		TestServer server = new TestServer();
+		URI uri = server.startServer("/xydra", new File("src/main/webapp"));
+		
+		IXydraServer xydraServer = server.getBackend();
 		
 		// add a default model
 		XRepository remoteRepo = xydraServer.getRepository();
@@ -114,17 +128,7 @@ public class TestServer {
 		arm.setAccess(XA.GROUP_ALL, remoteRepo.getAddress(), XA.ACCESS_READ, true);
 		arm.setAccess(XA.GROUP_ALL, remoteRepo.getAddress(), XA.ACCESS_WRITE, true);
 		
-		// start jetty
-		TestServer jetty = new TestServer();
-		URI uri = jetty.startServer("/xydra", new File("src/main/webapp"));
-		
 		log.info("Started embedded Jetty server. User interface is at " + uri.toString());
-		
-	}
-	
-	public static void main(String[] args) throws Exception {
-		
-		startServer();
 		
 	}
 	

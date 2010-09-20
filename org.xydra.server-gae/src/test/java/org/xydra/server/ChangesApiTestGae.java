@@ -13,6 +13,9 @@ public class ChangesApiTestGae extends ChangesApiTest {
 	
 	@BeforeClass
 	public static void init() {
+		
+		// Backend is selected by init-param "org.xydra.server" in web.xml
+		
 		GaeTestfixer.enable();
 		ChangesApiTest.init();
 	}

@@ -33,7 +33,6 @@ import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.server.IXydraServer;
-import org.xydra.server.XydraServerDefaultConfiguration;
 
 
 /**
@@ -77,7 +76,7 @@ public abstract class AbstractRestApiTest {
 		ping = apiprefix.resolve("ping/");
 		
 		// set access rights to ALLOW for all users
-		xydraServer = XydraServerDefaultConfiguration.getInMemoryServer();
+		xydraServer = server.getBackend();
 		
 		XRepository remoteRepo = xydraServer.getRepository();
 		XAccessManager arm = xydraServer.getAccessManager();

@@ -12,6 +12,9 @@ public class DataApiTestGae extends DataApiTest {
 	
 	@BeforeClass
 	public static void init() {
+		
+		// Backend is selected by init-param "org.xydra.server" in web.xml
+		
 		GaeTestfixer.enable();
 		// must also run already before DataApiTest.init
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
