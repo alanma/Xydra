@@ -39,9 +39,9 @@ import org.xydra.server.XydraServerDefaultConfiguration;
  * @author voelkel
  * 
  */
-public class Jetty {
+public class TestServer {
 	
-	private static Logger log = LoggerFactory.getLogger(Jetty.class);
+	private static Logger log = LoggerFactory.getLogger(TestServer.class);
 	
 	private int port;
 	
@@ -49,11 +49,11 @@ public class Jetty {
 	
 	private WebAppContext webapp;
 	
-	public Jetty() {
+	public TestServer() {
 		this(8080);
 	}
 	
-	public Jetty(int port) {
+	public TestServer(int port) {
 		this.port = port;
 	}
 	
@@ -100,7 +100,7 @@ public class Jetty {
 		}
 	}
 	
-	public static void main(String[] args) throws Exception {
+	public static void startServer() throws Exception {
 		
 		IXydraServer xydraServer = XydraServerDefaultConfiguration.getInMemoryServer();
 		
@@ -115,9 +115,16 @@ public class Jetty {
 		arm.setAccess(XA.GROUP_ALL, remoteRepo.getAddress(), XA.ACCESS_WRITE, true);
 		
 		// start jetty
-		Jetty jetty = new Jetty();
+		TestServer jetty = new TestServer();
 		URI uri = jetty.startServer("/xydra", new File("src/main/webapp"));
+		
 		log.info("Started embedded Jetty server. User interface is at " + uri.toString());
+		
+	}
+	
+	public static void main(String[] args) throws Exception {
+		
+		startServer();
 		
 	}
 	

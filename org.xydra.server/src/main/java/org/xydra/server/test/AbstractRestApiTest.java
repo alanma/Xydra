@@ -59,7 +59,7 @@ public abstract class AbstractRestApiTest {
 		
 		// initialize Jersey
 		assertNull(server);
-		server = new Jetty(8973);
+		server = new TestServer(8973);
 		
 		apiprefix = server.startServer("/xydra", new File("src/main/webapp"));
 		
@@ -136,7 +136,7 @@ public abstract class AbstractRestApiTest {
 		// TODO set password once the server supports it
 	}
 	
-	protected static Jetty server;
+	protected static TestServer server;
 	protected static XRepository repo;
 	protected static URI dataapi;
 	protected static URI apiprefix;

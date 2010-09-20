@@ -22,23 +22,22 @@ public class XydraServerDefaultConfiguration {
 	/**
 	 * @param xydraServer use null to unregister
 	 */
-	public static void setDefaultXydraServer(IXydraServer xydraServer) {
-		synchronized(xydraServer) {
-			if(defaultXydraServer_ != null) {
-				throw new IllegalStateException("the xydraServer can only be set once");
-			}
-			defaultXydraServer_ = xydraServer;
+	public synchronized static void setDefaultXydraServer(IXydraServer xydraServer) {
+		if(defaultXydraServer_ != null && xydraServer != null) {
+			throw new IllegalStateException("the xydraServer can only be set once");
 		}
+		defaultXydraServer_ = xydraServer;
 	}
 	
 	/**
 	 * @return a new instance of the default in-memory server
 	 */
 	public synchronized static IXydraServer getInMemoryServer() {
-		IXydraServer builtInServer = new MemoryXydraServer();
 		if(defaultXydraServer_ == null) {
+			IXydraServer builtInServer = new MemoryXydraServer();
 			log.warn("No IXydraServer has been registered, using default server = "
 			        + builtInServer.getClass().getCanonicalName());
+			defaultXydraServer_ = builtInServer;
 			return builtInServer;
 		}
 		return defaultXydraServer_;

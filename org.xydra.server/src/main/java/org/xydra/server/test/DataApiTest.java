@@ -51,16 +51,7 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		
 		model = getRemoteModel(DemoModelUtil.PHONEBOOK_ID);
 		
-		while(true) {
-			try {
-				Thread.sleep(1000);
-			} catch(InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		
-		// assertNotNull(model);
+		assertNotNull(model);
 	}
 	
 	@Test
