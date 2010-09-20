@@ -38,7 +38,6 @@ public class XydraServerDefaultConfiguration {
 			log.warn("No IXydraServer has been registered, using default server = "
 			        + builtInServer.getClass().getCanonicalName());
 			defaultXydraServer_ = builtInServer;
-			return builtInServer;
 		}
 		return defaultXydraServer_;
 	}
