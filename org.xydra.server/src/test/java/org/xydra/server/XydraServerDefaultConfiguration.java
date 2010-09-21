@@ -22,24 +22,29 @@ public class XydraServerDefaultConfiguration {
 	/**
 	 * @param xydraServer use null to unregister
 	 */
-	public static void setDefaultXydraServer(IXydraServer xydraServer) {
-		synchronized(xydraServer) {
-			if(defaultXydraServer_ != null) {
-				throw new IllegalStateException("the xydraServer can only be set once");
-			}
-			defaultXydraServer_ = xydraServer;
+	public synchronized static void setDefaultXydraServer(IXydraServer xydraServer) {
+		/*
+		 * FIXME "use null to unregister" will not work, as the
+		 * IllegalStateException is thrown when a default server is set
+		 * regardless of the parameter - add "&& xydraServer != null" to the if
+		 * clause or better add a separate unregister function to avoid
+		 * accidentally un-setting?
+		 */
+		if(defaultXydraServer_ != null) {
+			throw new IllegalStateException("the xydraServer can only be set once");
 		}
+		defaultXydraServer_ = xydraServer;
 	}
 	
 	/**
 	 * @return a new instance of the default in-memory server
 	 */
 	public synchronized static IXydraServer getInMemoryServer() {
-		IXydraServer builtInServer = new MemoryXydraServer();
 		if(defaultXydraServer_ == null) {
+			IXydraServer builtInServer = new MemoryXydraServer();
 			log.warn("No IXydraServer has been registered, using default server = "
 			        + builtInServer.getClass().getCanonicalName());
-			return builtInServer;
+			defaultXydraServer_ = builtInServer;
 		}
 		return defaultXydraServer_;
 	}
