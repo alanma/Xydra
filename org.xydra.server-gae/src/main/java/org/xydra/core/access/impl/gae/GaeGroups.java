@@ -19,6 +19,22 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 
 
+/**
+ * Utility that can persist and load an {@link XGroupDatabase} in the GAE
+ * datastore.
+ * 
+ * The XGroupDatabase is represented by a root entity containing the {@link XID}
+ * s of all known groups. There is also one entity for each group containing the
+ * {@link XID}s of the actors in that group. The group/actor lists are both
+ * saved as an unindexed property containing a String List.
+ * 
+ * IMPROVE create a real GAE XGroupDatabase implementation to lower startup
+ * costs
+ * 
+ * 
+ * @author dscharrer
+ * 
+ */
 public class GaeGroups {
 	
 	private static final String NAME_GROUPDB = "groups";
@@ -28,29 +44,45 @@ public class GaeGroups {
 	private static final String PREFIX_GROUP = NAME_GROUPDB + "/";
 	private static final String PROP_ACTORS = "actors";
 	
+	/**
+	 * Load the whole group membership database from the GAE datastore into
+	 * memory. Changes to the returned {@link XGroupDatabase} are persisted.
+	 */
 	@SuppressWarnings("unchecked")
 	public static XGroupDatabase loadGroups() {
+		
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		
+		// Load the root entity of the group database.
 		Key groupdbKey = getGroupDBKey();
 		Entity groupdb = GaeUtils.getEntity(groupdbKey);
 		XGroupDatabase groups = new MemoryGroupDatabase();
-		groups.addListener(new Persister(groups));
-		if(groupdb == null) {
-			// new group database
-			return groups;
+		
+		if(groupdb != null) {
+			
+			// For each known group load the list of actors and record the
+			// membership.
+			List<String> groupIdStrs = (List<String>)groupdb.getProperty(PROP_GROUPS);
+			for(String groupIdStr : groupIdStrs) {
+				XID groupId = XX.toId(groupIdStr);
+				Key groupKey = getGroupKey(groupId);
+				Entity group = GaeUtils.getEntity(groupKey);
+				List<String> actorIdStrs = (List<String>)group.getProperty(PROP_ACTORS);
+				for(String actorIdStr : actorIdStrs) {
+					XID actorId = actorIdStr == null ? null : XX.toId(actorIdStr);
+					groups.addToGroup(actorId, groupId);
+				}
+			}
+			
+		} else {
+			// There was no group db in the state store, so just return an
+			// empty one.
+			// The entity will be created by the Persister when adding groups.
 		}
 		
-		List<String> groupIdStrs = (List<String>)groupdb.getProperty(PROP_GROUPS);
-		for(String groupIdStr : groupIdStrs) {
-			XID groupId = XX.toId(groupIdStr);
-			Key groupKey = getGroupKey(groupId);
-			Entity group = GaeUtils.getEntity(groupKey);
-			List<String> actorIdStrs = (List<String>)group.getProperty(PROP_ACTORS);
-			for(String actorIdStr : actorIdStrs) {
-				XID actorId = actorIdStr == null ? null : XX.toId(actorIdStr);
-				groups.addToGroup(actorId, groupId);
-			}
-		}
+		// Listen to changes made so they can be persisted.
+		groups.addListener(new Persister(groups));
+		
 		return groups;
 	}
 	
@@ -62,7 +94,10 @@ public class GaeGroups {
 		return KeyFactory.createKey(KIND_GROUP, PREFIX_GROUP + groupId.toString());
 	}
 	
-	private static void saveGroups(Iterator<XID> groups) {
+	/**
+	 * Save the given list of known groups in the root entity.
+	 */
+	private static void saveGroupList(Iterator<XID> groups) {
 		Key key = getGroupDBKey();
 		Entity e = new Entity(key);
 		e.setUnindexedProperty(PROP_GROUPS, asStringList(groups));
@@ -78,6 +113,9 @@ public class GaeGroups {
 		return list;
 	}
 	
+	/**
+	 * Save the given list of actors in the entity for the given group.
+	 */
 	private static void saveGroup(XID groupId, Iterator<XID> actors) {
 		Key key = getGroupKey(groupId);
 		Entity e = new Entity(key);
@@ -90,7 +128,7 @@ public class GaeGroups {
 	}
 	
 	/**
-	 * Listen to {@link XGroupEvent} and persist in data store immediately.
+	 * Listen to {@link XGroupEvent}s and persist in data store immediately.
 	 * 
 	 * @author dscharrer
 	 */
@@ -103,24 +141,32 @@ public class GaeGroups {
 		}
 		
 		public void onGroupEvent(XGroupEvent event) {
+			
+			// Get the actors that are now in the changed group.
 			XID groupId = event.getGroup();
 			Iterator<XID> it = this.groups.getMembers(groupId);
 			
-			// update the group
+			// FIXME handle concurrency
+			
+			// Update the group.
 			if(it.hasNext()) {
 				saveGroup(groupId, it);
+				
+				// If this is an add event and the group has only one actor, the
+				// group must be new, so add it to the group list.
+				if(event.getChangeType() == ChangeType.ADD) {
+					it = this.groups.getMembers(groupId);
+					it.next();
+					if(!it.hasNext()) {
+						saveGroupList(this.groups.getGroups());
+					}
+				}
+				
 			} else {
 				deleteGroup(groupId);
+				saveGroupList(this.groups.getGroups());
 			}
 			
-			if(event.getChangeType() == ChangeType.ADD) {
-				it = this.groups.getMembers(groupId);
-				it.next();
-				if(!it.hasNext()) {
-					// this is the only and first element, add group to DB
-					saveGroups(this.groups.getGroups());
-				}
-			}
 		}
 	}
 	
