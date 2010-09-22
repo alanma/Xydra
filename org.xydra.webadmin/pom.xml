@@ -95,11 +95,25 @@
 			<version>0.1.1-SNAPSHOT</version>
 		</dependency>
 		
+		<!--  Xydra Server -->
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>server</artifactId>
+			<version>0.1.1-SNAPSHOT</version>
+		</dependency>
+		
 		<!-- gwt-log -->
 		<dependency>
 			<groupId>com.google.code.gwt-log</groupId>
 			<artifactId>gwt-log</artifactId>
 			<version>2.6.2</version>
+		</dependency>
+		
+		<!-- FileUpload utilities from http://commons.apache.org/fileupload/ -->
+		<dependency>
+			<groupId>commons-fileupload</groupId>
+			<artifactId>commons-fileupload</artifactId>
+			<version>1.2</version>
 		</dependency>
 		
 	</dependencies>
