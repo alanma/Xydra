@@ -216,7 +216,12 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		
 	}
 	
-	private void postData(URL url, String data) throws IOException {
+	/**
+	 * @param url
+	 * @param data to be posted
+	 * @throws IOException
+	 */
+	private void postDataAndExpectHttpCreatedResponse(URL url, String data) throws IOException {
 		HttpURLConnection c = (HttpURLConnection)url.openConnection();
 		setLoginDetails(c);
 		c.setDoOutput(true);
@@ -251,7 +256,7 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		
 		XmlOutStringBuffer out = new XmlOutStringBuffer();
 		XmlModel.toXml(model, out, false, false, false);
-		postData(dataapi.toURL(), out.getXml());
+		postDataAndExpectHttpCreatedResponse(dataapi.toURL(), out.getXml());
 		
 		XModel updatedModel = getRemoteModel(DemoModelUtil.PHONEBOOK_ID);
 		assertNotNull(updatedModel);
@@ -293,7 +298,7 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		
 		XmlOutStringBuffer out = new XmlOutStringBuffer();
 		XmlModel.toXml(john, out, false, false, false);
-		postData(dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toURI()).toURL(), out.getXml());
+		postDataAndExpectHttpCreatedResponse(dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toURI()).toURL(), out.getXml());
 		
 		XModel updatedModel = getRemoteModel(DemoModelUtil.PHONEBOOK_ID);
 		assertNotNull(updatedModel);
@@ -329,7 +334,7 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		
 		XmlOutStringBuffer out = new XmlOutStringBuffer();
 		XmlModel.toXml(phone, out, false);
-		postData(dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toURI() + "/").resolve(
+		postDataAndExpectHttpCreatedResponse(dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toURI() + "/").resolve(
 		        DemoModelUtil.JOHN_ID.toURI()).toURL(), out.getXml());
 		
 		XModel updatedModel = getRemoteModel(DemoModelUtil.PHONEBOOK_ID);
