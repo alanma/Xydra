@@ -159,6 +159,8 @@ public class GaeUtils {
 	}
 	
 	public static XStateTransaction beginTransaction() {
+		// work around error in DataApiTest
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		return new GaeStateTransactionImpl(datastore.beginTransaction());
 	}
 	
