@@ -14,15 +14,6 @@
 	<version>0.1.1-SNAPSHOT</version>
 	<name>Xydra GWT Client</name>
 	
-	<pluginRepositories>
-		
-		<pluginRepository>
-			<id>Codehaus Mojo Snapshot</id>
-			<url>http://snapshots.repository.codehaus.org/</url>
-		</pluginRepository>
-		
-	</pluginRepositories>
-	
 	<properties>
 		
 		<!-- convenience to define GWT version in one place -->
