@@ -1138,6 +1138,8 @@ public abstract class AbstractTestAPI {
 		// assert that the saving process really saved our repo
 		assertEquals(loadedRepo, repo);
 		
+		assertTrue(XX.equalState(loadedRepo, repo));
+		
 	}
 	
 	@Test
@@ -1166,6 +1168,7 @@ public abstract class AbstractTestAPI {
 		XModel loadedModel = XmlModel.toModel(e);
 		assertTrue(loadedModel != null);
 		assertEquals(loadedModel, model);
+		assertTrue(XX.equalState(loadedModel, model));
 		
 	}
 	

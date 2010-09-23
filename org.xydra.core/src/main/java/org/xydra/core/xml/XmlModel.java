@@ -221,8 +221,8 @@ public class XmlModel {
 		
 		Iterator<MiniElement> eventElementIt = xml.getElements();
 		while(eventElementIt.hasNext()) {
-			MiniElement eventElement = eventElementIt.next();
-			XEvent event = XmlEvent.toEvent(eventElement, state.getBaseAddress());
+			MiniElement e = eventElementIt.next();
+			XEvent event = XmlEvent.toEvent(e, state.getBaseAddress(), state);
 			state.appendEvent(event, trans);
 		}
 		
@@ -621,7 +621,7 @@ public class XmlModel {
 		}
 		
 		while(events.hasNext()) {
-			XmlEvent.toXml(events.next(), xo, log.getBaseAddress());
+			XmlEvent.toXml(events.next(), xo, log.getBaseAddress(), log);
 		}
 		
 		xo.close(XCHANGELOG_ELEMENT);
