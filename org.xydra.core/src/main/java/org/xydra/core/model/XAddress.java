@@ -2,6 +2,8 @@ package org.xydra.core.model;
 
 import java.io.Serializable;
 
+import org.xydra.core.XX;
+
 
 /**
  * An identifier for a specific instance of an {@link XRepository},
@@ -82,5 +84,11 @@ public interface XAddress extends Serializable {
 	 *         entity referred to by this address.
 	 */
 	boolean isParentOf(XAddress child);
+	
+	/**
+	 * @return a web-safe String (needs no URL encoding). Can be parsed via
+	 *         {@link XX#toAddress(String)}
+	 */
+	String toURI();
 	
 }

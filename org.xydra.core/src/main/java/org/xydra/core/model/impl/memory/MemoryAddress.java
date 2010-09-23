@@ -121,45 +121,9 @@ public class MemoryAddress implements XAddress {
 		return null;
 	}
 	
-	/**
-	 * @return a unique, complete representation of this {@link XAddress} with
-	 *         the fixed format = '/' + repoID + '/' + modelID + '/' + objectID
-	 *         + '/' + fieldID. Empty {@link XID XIDs} are represented by '-'.
-	 */
 	@Override
 	public String toString() {
-		
-		StringBuffer uri = new StringBuffer();
-		
-		uri.append('/');
-		if(this.repository != null) {
-			uri.append(this.repository.toString());
-		} else {
-			uri.append("-");
-		}
-		
-		uri.append('/');
-		if(this.model != null) {
-			uri.append(this.model.toString());
-		} else {
-			uri.append("-");
-		}
-		
-		uri.append('/');
-		if(this.object != null) {
-			uri.append(this.object.toString());
-		} else {
-			uri.append("-");
-		}
-		
-		uri.append('/');
-		if(this.field != null) {
-			uri.append(this.field.toString());
-		} else {
-			uri.append("-");
-		}
-		
-		return uri.toString();
+		return toURI();
 	}
 	
 	@Override
@@ -195,8 +159,43 @@ public class MemoryAddress implements XAddress {
 		        && XI.equals(this.field, other.getField());
 	}
 	
+	/**
+	 * @return a unique, complete representation of this {@link XAddress} with
+	 *         the fixed format = '/' + repoID + '/' + modelID + '/' + objectID
+	 *         + '/' + fieldID. Empty {@link XID XIDs} are represented by '-'.
+	 */
 	public String toURI() {
-		return toString();
+		StringBuffer uri = new StringBuffer();
+		
+		uri.append('/');
+		if(this.repository != null) {
+			uri.append(this.repository.toString());
+		} else {
+			uri.append("-");
+		}
+		
+		uri.append('/');
+		if(this.model != null) {
+			uri.append(this.model.toString());
+		} else {
+			uri.append("-");
+		}
+		
+		uri.append('/');
+		if(this.object != null) {
+			uri.append(this.object.toString());
+		} else {
+			uri.append("-");
+		}
+		
+		uri.append('/');
+		if(this.field != null) {
+			uri.append(this.field.toString());
+		} else {
+			uri.append("-");
+		}
+		
+		return uri.toString();
 	}
 	
 	public XType getAddressedType() {
