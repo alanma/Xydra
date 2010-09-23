@@ -23,12 +23,15 @@ import org.xydra.core.model.session.impl.arm.ArmProtectedRepository;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessException;
 import org.xydra.server.IXydraServer;
+import org.xydra.server.XydraServerDefaultConfiguration;
 import org.xydra.server.rest.changes.XRepositoryChangesResource;
 import org.xydra.server.rest.changes.XSynchronizeChangesResource;
 import org.xydra.server.rest.data.XFieldResource;
 import org.xydra.server.rest.data.XModelResource;
 import org.xydra.server.rest.data.XObjectResource;
 import org.xydra.server.rest.data.XRepositoryResource;
+import org.xydra.server.rest.demo.AddDemoDataResource;
+import org.xydra.server.rest.log.LogTestResource;
 
 
 /**
@@ -116,6 +119,8 @@ public class XydraRestServer {
 		
 		// for debugging purposes
 		restless.addMethod(prefix + "/ping", "GET", this, "ping", false);
+		AddDemoDataResource.restless(restless, prefix);
+		LogTestResource.restless(restless, prefix);
 	}
 	
 	public void ping(HttpServletResponse res) throws IOException {
