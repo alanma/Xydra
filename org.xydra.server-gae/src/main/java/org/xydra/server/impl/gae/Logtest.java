@@ -1,4 +1,4 @@
-package org.xydra.server.gae.util;
+package org.xydra.server.impl.gae;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

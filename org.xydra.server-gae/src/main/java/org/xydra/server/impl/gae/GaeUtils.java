@@ -1,4 +1,4 @@
-package org.xydra.server.gae;
+package org.xydra.server.impl.gae;
 
 import java.util.Collections;
 import java.util.Iterator;

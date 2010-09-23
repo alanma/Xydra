@@ -1,4 +1,4 @@
-package org.xydra.server.gae;
+package org.xydra.server.impl.gae;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Text;

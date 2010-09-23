@@ -1,14 +1,14 @@
-package org.xydra.server;
+package org.xydra.server.impl.gae;
 
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.xydra.server.gae.GaeTestfixer;
+import org.xydra.server.test.ChangesApiTest;
 import org.xydra.server.test.DataApiTest;
 
 
-public class DataApiTestGae extends DataApiTest {
+public class ChangesApiTestGae extends ChangesApiTest {
 	
 	@BeforeClass
 	public static void init() {
@@ -16,9 +16,7 @@ public class DataApiTestGae extends DataApiTest {
 		// Backend is selected by init-param "org.xydra.server" in web.xml
 		
 		GaeTestfixer.enable();
-		// must also run already before DataApiTest.init
-		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		DataApiTest.init();
+		ChangesApiTest.init();
 	}
 	
 	@Override

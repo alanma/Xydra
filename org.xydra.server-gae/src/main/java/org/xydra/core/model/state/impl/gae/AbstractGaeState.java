@@ -4,8 +4,8 @@ import org.xydra.core.model.IHasXID;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.state.XStateTransaction;
 import org.xydra.core.model.state.impl.memory.AbstractState;
-import org.xydra.server.gae.GaeSchema;
-import org.xydra.server.gae.GaeUtils;
+import org.xydra.server.impl.gae.GaeSchema;
+import org.xydra.server.impl.gae.GaeUtils;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;

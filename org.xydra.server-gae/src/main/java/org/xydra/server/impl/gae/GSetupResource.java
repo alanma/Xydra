@@ -1,9 +1,10 @@
-package org.xydra.server;
+package org.xydra.server.impl.gae;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.core.test.DemoModelUtil;
 import org.xydra.restless.Restless;
+import org.xydra.server.IXydraServer;
 import org.xydra.server.rest.XydraRestServer;
 
 

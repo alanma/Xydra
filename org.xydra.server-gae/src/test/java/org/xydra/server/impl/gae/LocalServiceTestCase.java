@@ -1,4 +1,4 @@
-package org.xydra.server.gae;
+package org.xydra.server.impl.gae;
 
 import org.junit.After;
 import org.junit.Before;

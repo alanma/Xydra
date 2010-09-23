@@ -1,7 +1,6 @@
-package org.xydra.server;
+package org.xydra.server.impl.gae;
 
 import org.xydra.restless.Restless;
-import org.xydra.server.impl.gae.GaeXydraServer;
 
 
 /**

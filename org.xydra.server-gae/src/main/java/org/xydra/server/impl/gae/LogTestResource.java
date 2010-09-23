@@ -1,4 +1,4 @@
-package org.xydra.server;
+package org.xydra.server.impl.gae;
 
 import java.util.logging.Handler;
 import java.util.logging.Logger;
@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.restless.Restless;
-import org.xydra.server.gae.util.Logtest;
 import org.xydra.server.rest.XydraRestServer;
 
 

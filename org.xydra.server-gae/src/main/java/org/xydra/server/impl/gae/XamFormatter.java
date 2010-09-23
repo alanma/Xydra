@@ -1,4 +1,4 @@
-package org.xydra.server.gae.util;
+package org.xydra.server.impl.gae;
 
 import java.util.logging.LogRecord;
 

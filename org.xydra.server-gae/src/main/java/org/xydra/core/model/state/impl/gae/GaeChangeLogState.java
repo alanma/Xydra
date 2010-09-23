@@ -9,8 +9,8 @@ import org.xydra.core.xml.MiniXMLParser;
 import org.xydra.core.xml.XmlEvent;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
-import org.xydra.server.gae.GaeTestfixer;
-import org.xydra.server.gae.GaeUtils;
+import org.xydra.server.impl.gae.GaeTestfixer;
+import org.xydra.server.impl.gae.GaeUtils;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
