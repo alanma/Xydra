@@ -608,7 +608,7 @@ public class XmlEvent {
 			
 		} else if(oldEvent instanceof XTransactionEvent) {
 			XTransactionEvent te = (XTransactionEvent)oldEvent;
-			for(int i = te.size() - 1; i > 0; i++) {
+			for(int i = te.size() - 1; i > 0; i--) {
 				XAtomicEvent ae = te.getEvent(i);
 				if(ae instanceof XFieldEvent && target.equals(ae.getTarget())) {
 					ChangeType ct = ae.getChangeType();
