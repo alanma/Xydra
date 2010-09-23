@@ -303,7 +303,7 @@ public class Restless extends HttpServlet {
 	 */
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse res) {
-		if(req.getRequestURI().contains("admin/restless")) {
+		if("/admin/restless".equals(req.getPathInfo())) {
 			doIntrospection(req, res);
 		} else {
 			restlessService(req, res);
@@ -553,8 +553,7 @@ public class Restless extends HttpServlet {
 					foundMethod = true;
 					if(restlessMethod.adminOnly) {
 						// check security
-						String accessUrl = req.getRequestURI();
-						if(accessUrl.startsWith(ADMIN_ONLY_URL_PREFIX)) {
+						if(path.startsWith(ADMIN_ONLY_URL_PREFIX)) {
 							// calling from potentially secured url, run
 							mayAccess = true;
 							try {
@@ -565,7 +564,7 @@ public class Restless extends HttpServlet {
 						} else {
 							// access denied
 							mayAccess = false;
-							log.warn("Someone tried to access '" + accessUrl + "'");
+							log.warn("Someone tried to access '" + path + "'");
 						}
 					} else {
 						mayAccess = true;
