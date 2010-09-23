@@ -86,7 +86,7 @@ public class XydraRestServer {
 		LogTestResource.restless(restless, prefix);
 	}
 	
-	public synchronized void initializeServer(Restless restless) {
+	public static synchronized void initializeServer(Restless restless) {
 		
 		if(getXydraServer(restless) != null) {
 			// server already initialized
