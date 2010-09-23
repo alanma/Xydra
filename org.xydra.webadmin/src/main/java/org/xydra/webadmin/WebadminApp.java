@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Writer;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -24,6 +23,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.core.XFile;
+import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
@@ -165,9 +165,6 @@ public class WebadminApp {
 				ignoreSuffix++;
 				continue;
 			}
-			name = name.substring(0, name.length() - XFile.MODEL_SUFFIX.length());
-			
-			name = URLDecoder.decode(name, "UTF-8");
 			
 			// Read the file into a string.
 			Reader r = new InputStreamReader(zis, "UTF-8");
@@ -178,11 +175,14 @@ public class WebadminApp {
 				b.append(buf, 0, read);
 			}
 			
-			// TODO handle errors
-			
 			// Parse the model.
-			MiniElement e = new MiniXMLParserImpl().parseXml(b.toString());
-			XModel model = XmlModel.toModel(e);
+			XModel model;
+			try {
+				MiniElement e = new MiniXMLParserImpl().parseXml(b.toString());
+				model = XmlModel.toModel(e);
+			} catch(Exception e) {
+				throw new RuntimeException("error parsing model file \"" + name + "\"", e);
+			}
 			
 			boolean existed = false;
 			if(repo.hasModel(model.getID())) {
@@ -206,7 +206,14 @@ public class WebadminApp {
 				continue;
 			}
 			
-			oldModel.executeTransaction(actor, tb.build());
+			long result = oldModel.executeTransaction(actor, tb.build());
+			
+			if(result == XCommand.FAILED) {
+				// can only happen if model changed since
+				// tb.changeModel(oldModel, model);
+				throw new RuntimeException("error restoring model \"" + name + "\" ("
+				        + model.getID() + "), transaction failed");
+			}
 			
 			// Check if a discussion with that name already exists.
 			
