@@ -4,7 +4,7 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 
 	<welcome-file-list>
-		<welcome-file>index.html</welcome-file>
+		<welcome-file>admin/index.html</welcome-file>
 	</welcome-file-list>
 
 	<servlet>
@@ -12,7 +12,7 @@
 		<servlet-class>org.xydra.restless.Restless</servlet-class>
 		<init-param>
 			<param-name>app</param-name>
-			<param-value>org.xydra.server.rest.XydraRestServer,org.xydra.webadmin.WebadminApp</param-value>
+			<param-value>org.xydra.webadmin.WebadminApp</param-value>
 		</init-param>
 		<init-param>
 			<param-name>org.xydra.server</param-name>
@@ -21,10 +21,10 @@
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 	
-<servlet-mapping>
- <servlet-name>default</servlet-name>
- <url-pattern>/index.html</url-pattern>
-</servlet-mapping>
+	<servlet-mapping>
+ 		<servlet-name>default</servlet-name>
+ 		<url-pattern>/admin/index.html</url-pattern>
+	</servlet-mapping>
 	
 	<servlet-mapping>
 		<servlet-name>XydraWebadmin</servlet-name>

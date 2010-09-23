@@ -49,26 +49,17 @@ public class WebadminApp {
 	
 	public void restless(Restless restless, String prefix) {
 		
-		/*
-		 * restless.addExceptionHandler(new RestlessExceptionHandler() {
-		 * 
-		 * public boolean handleException(Throwable t, HttpServletRequest req,
-		 * HttpServletResponse res) { log.error(t.getLocalizedMessage(), t); //
-		 * eat all exceptions return true; } });
-		 */
-
-		// FIXME adminOnly should probably be true, but doesn't work if the
-		// restless servlet is not at the root of the dimain name.
-		restless.addMethod("/admin/backup", "GET", WebadminApp.class, "backup", false,
-		        new RestlessParameter("logs") {
-		        });
-		restless.addMethod("/admin/restore", "POST", WebadminApp.class, "restore", false);
+		XydraRestServer.initializeServer(restless);
+		
+		restless.addMethod("/admin/backup", "GET", WebadminApp.class, "backup", true,
+		        new RestlessParameter("logs"));
+		restless.addMethod("/admin/restore", "POST", WebadminApp.class, "restore", true);
 		
 	}
 	
 	public void backup(Restless restless, HttpServletResponse res, String logs) throws IOException {
 		
-		// TODO download without logs
+		boolean includeLogs = logs == null ? false : Boolean.valueOf(logs);
 		
 		IXydraServer server = XydraRestServer.getXydraServer(restless);
 		XRepository repo = server.getRepository();
@@ -83,8 +74,14 @@ public class WebadminApp {
 		// Suggest an appropriate filename.
 		Date now = new Date();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
-		res.addHeader("Content-Disposition", "attachment; filename=\"xydra-backup-"
-		        + sdf.format(now) + ".zip\"");
+		
+		String archiveName = "xydra-backup";
+		if(includeLogs) {
+			archiveName += "+logs";
+		}
+		archiveName += "-" + sdf.format(now) + ".zip";
+		
+		res.addHeader("Content-Disposition", "attachment; filename=\"" + archiveName + "\"");
 		
 		// Add the models to the zip archive.
 		for(XID modelId : repo) {
@@ -98,7 +95,7 @@ public class WebadminApp {
 			log.info("adding model \"" + modelId.toString() + "\" as \"" + filename + "\"");
 			
 			XmlOut out = new XmlOutStream(zos);
-			XmlModel.toXml(repo.getModel(modelId), out, true, false, true);
+			XmlModel.toXml(repo.getModel(modelId), out, true, false, includeLogs);
 			out.flush();
 			
 			zos.closeEntry();
@@ -209,7 +206,7 @@ public class WebadminApp {
 				continue;
 			}
 			
-			oldModel.executeTransaction(null, tb.build());
+			oldModel.executeTransaction(actor, tb.build());
 			
 			// Check if a discussion with that name already exists.
 			
@@ -220,14 +217,14 @@ public class WebadminApp {
 		
 		w.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>"
 		        + "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\""
-		        + "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">"
+		        + " \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">"
 		        + "<html xmlns=\"http://www.w3.org/1999/xhtml\">"
 		        + "<head><title>Xydra Webadmin - Restored</title></head><body>");
 		
-		w.write("Restored " + count + " models</br>");
-		w.write("Overwritten: " + count + "</br>");
-		w.write("Files ignored: " + ignoreSuffix + "</br>");
-		w.write("Unchanged: " + nochange + "</br>");
+		w.write("Restored " + count + " models<br/>");
+		w.write("Overwritten: " + count + "<br/>");
+		w.write("Files ignored: " + ignoreSuffix + "<br/>");
+		w.write("Unchanged: " + nochange + "<br/>");
 		
 		w.write("</body></html>");
 		
