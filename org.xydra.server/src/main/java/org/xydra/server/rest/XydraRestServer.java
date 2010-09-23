@@ -62,7 +62,37 @@ public class XydraRestServer {
 	 * {@link XydraServerDefaultConfiguration}.
 	 */
 	public void restless(Restless restless, String prefix) {
+		
 		// configure
+		initializeServer(restless);
+		
+		restless.addExceptionHandler(new XAccessExceptionHandler());
+		
+		// init data/snapshot handling resources
+		String dataPrefix = prefix + "/data";
+		XRepositoryResource.restless(restless, dataPrefix);
+		XModelResource.restless(restless, dataPrefix);
+		XObjectResource.restless(restless, dataPrefix);
+		XFieldResource.restless(restless, dataPrefix);
+		
+		// init change handling resources
+		String changesPrefix = prefix + "/changes";
+		XSynchronizeChangesResource.restless(restless, changesPrefix);
+		XRepositoryChangesResource.restless(restless, changesPrefix);
+		
+		// for debugging purposes
+		restless.addMethod(prefix + "/ping", "GET", this, "ping", false);
+		AddDemoDataResource.restless(restless, prefix);
+		LogTestResource.restless(restless, prefix);
+	}
+	
+	private synchronized void initializeServer(Restless restless) {
+		
+		if(getXydraServer(restless) != null) {
+			// server already initialized
+			return;
+		}
+		
 		String serverClassName = restless.getInitParameter(INIT_PARAM_XYDRASERVER);
 		IXydraServer serverInstance;
 		if(serverClassName != null) {
@@ -102,25 +132,6 @@ public class XydraRestServer {
 		// store in context
 		restless.getServletContext().setAttribute(SERVLET_CONTEXT_ATTRIBUTE_XYDRASERVER,
 		        serverInstance);
-		
-		restless.addExceptionHandler(new XAccessExceptionHandler());
-		
-		// init data/snapshot handling resources
-		String dataPrefix = prefix + "/data";
-		XRepositoryResource.restless(restless, dataPrefix);
-		XModelResource.restless(restless, dataPrefix);
-		XObjectResource.restless(restless, dataPrefix);
-		XFieldResource.restless(restless, dataPrefix);
-		
-		// init change handling resources
-		String changesPrefix = prefix + "/changes";
-		XSynchronizeChangesResource.restless(restless, changesPrefix);
-		XRepositoryChangesResource.restless(restless, changesPrefix);
-		
-		// for debugging purposes
-		restless.addMethod(prefix + "/ping", "GET", this, "ping", false);
-		AddDemoDataResource.restless(restless, prefix);
-		LogTestResource.restless(restless, prefix);
 	}
 	
 	public void ping(HttpServletResponse res) throws IOException {
