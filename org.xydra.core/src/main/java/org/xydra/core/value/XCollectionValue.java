@@ -42,14 +42,22 @@ public interface XCollectionValue<E> extends XValue, Iterable<E> {
 	E[] toArray();
 	
 	/**
-	 * Create a new {@link XCollectionValue} contains all entries from this
+	 * Create a new {@link XCollectionValue} containing all entries from this
 	 * value as well as the specified entry. This value is not modified.
+	 * 
+	 * @param entry The new entry.
+	 * @return a new {@link XCollectionValue} containing all entries from this
+	 *         value as well as the specified entry.
 	 */
 	XCollectionValue<E> add(E entry);
 	
 	/**
-	 * Create a new {@link XCollectionValue} contains all entries from this
+	 * Create a new {@link XCollectionValue} containing all entries from this
 	 * value except the specified entry. This value is not modified.
+	 * 
+	 * @param entry The entry which is to be removed
+	 * @return a new {@link XCollectionValue} containing all entries from this
+	 *         value except the given entry
 	 */
 	XCollectionValue<E> remove(E entry);
 	

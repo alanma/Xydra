@@ -21,35 +21,52 @@ public interface XBooleanListValue extends XListValue<Boolean> {
 	boolean[] contents();
 	
 	/**
-	 * Create a new {@link XBooleanListValue} contains all entries from this
-	 * value as well as the specified entry. The order od existing entries is
-	 * preserved and the new entry is added to the end of the list. This value
-	 * is not modified.
+	 * Creates a new {@link XBooleanListValue} containing all entries from this
+	 * value as well as the specified entry. The order of the already existing
+	 * entries is preserved and the new entry is added to the end of the list.
+	 * This value is not modified.
+	 * 
+	 * @param entry The new entry.
+	 * @return a new {@link XBooleanListValue} containing all entries from this
+	 *         value as well as the specified entry.
 	 */
 	XBooleanListValue add(Boolean entry);
 	
 	/**
-	 * Create a new {@link XBooleanListValue} contains all entries from this
-	 * value as well as the specified entry. The order od existing entries is
-	 * preserved and the new entry is added at the specified index This value is
-	 * not modified.
+	 * Creates a new {@link XBooleanListValue} containing all entries from this
+	 * value as well as the specified entry. The order of the already existing
+	 * entries is preserved and the new entry is added at the specified index
+	 * This value is not modified.
 	 * 
+	 * @param index The index at which the new entry is to be added
+	 * @param entry The new entry
+	 * @return a new {@link XBooleanListValue} containing all entries from this
+	 *         value as well as the specified entry at the given index
 	 * @throws IndexOutOfBoundsException if index is negative or greater than
 	 *             size()
 	 */
 	XBooleanListValue add(int index, Boolean entry);
 	
 	/**
-	 * Create a new {@link XBooleanListValue} contains all entries from this
-	 * value except the specified entry. If the entry is contained multiple
-	 * times, only the first occurrence is removed. This value is not modified.
+	 * Creates a new {@link XBooleanListValue} containing all entries from this
+	 * value except the specified entry. Only the first occurrence of the entry
+	 * is removed, if this list contains it multiple times. This value is not
+	 * modified.
+	 * 
+	 * @param entry The entry which is to be removed
+	 * @return a new {@link XBooleanListValue} containing all entries from this
+	 *         value except the given entry
 	 */
 	XBooleanListValue remove(Boolean entry);
 	
 	/**
-	 * Create a new {@link XCollectionValue} contains all entries from this
+	 * Creates a new {@link XBooleanListValue} containing all entries from this
 	 * value except the entry at the specified index. This value is not
 	 * modified.
+	 * 
+	 * @param index The index of the entry which is to be removed
+	 * @return a new {@link XBooleanListValue} containing all entries from this
+	 *         value except the entry at the given index.
 	 * 
 	 * @throws IndexOutOfBoundsException if index is negative or greater than or
 	 *             equal to size()

@@ -1,5 +1,7 @@
 package org.xydra.core.value;
 
+
+
 /**
  * An {@link XValue} for storing a set of Java String values.
  * 
@@ -18,14 +20,22 @@ public interface XStringSetValue extends XSetValue<String> {
 	String[] contents();
 	
 	/**
-	 * Create a new {@link XStringSetValue} contains all entries from this value
-	 * as well as the specified entry. This value is not modified.
+	 * Creates a new {@link XStringSetValue} containing all entries from this
+	 * value as well as the specified entry. This value is not modified.
+	 * 
+	 * @param entry The new entry
+	 * @return a new {@link XStringSetValue} containing all entries from this
+	 *         value as well as the given entry
 	 */
 	XStringSetValue add(String entry);
 	
 	/**
-	 * Create a new {@link XSetValue} contains all entries from this value
-	 * except the specified entry. This value is not modified.
+	 * Creates a new {@link XStringSetValue} containing all entries from this
+	 * value except the specified entry. This value is not modified.
+	 * 
+	 * @param entry The entry which is to be removed
+	 * @return a new {@link XStringSetValue} containing all entries from this
+	 *         value expect the given entry
 	 */
 	XStringSetValue remove(String entry);
 	

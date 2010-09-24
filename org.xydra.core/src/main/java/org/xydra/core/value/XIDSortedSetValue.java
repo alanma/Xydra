@@ -1,6 +1,5 @@
 package org.xydra.core.value;
 
-import java.util.Set;
 import java.util.SortedSet;
 
 import org.xydra.core.model.XID;
@@ -16,34 +15,44 @@ import org.xydra.core.model.XID;
 public interface XIDSortedSetValue extends XIDSetValue {
 	
 	/**
-	 * Returns the contents of this XIDSetValue as an array.
+	 * Returns the contents of this XIDSortedSetValue as an array.
 	 * 
-	 * Note: Changes to the returned array will not affect the XIDSetValue.
+	 * Note: Changes to the returned array will not affect the
+	 * XIDSortedSetValue.
 	 * 
-	 * @return an array containing the {@link XID} values of this XIDSetValue in
-	 *         insertion order
+	 * @return an array containing the {@link XID} values of this
+	 *         XIDSortedSetValue in insertion order
 	 */
 	public XID[] contents();
 	
 	/**
-	 * Create a new {@link XIDSortedSetValue} contains all entries from this
+	 * Creates a new {@link XIDSortedSetValue} containing all entries from this
 	 * value as well as the specified entry. This value is not modified.
+	 * 
+	 * @param entry The new entry
+	 * @return a new {@link XIDSortedSetValue} containing all entries from this
+	 *         value as well as the given entry
 	 */
 	XIDSortedSetValue add(XID entry);
 	
 	/**
-	 * Create a new {@link XIDSortedSetValue} contains all entries from this
+	 * Creates a new {@link XIDSortedSetValue} containing all entries from this
 	 * value except the specified entry. This value is not modified.
+	 * 
+	 * @param entry The entry which is to be removed
+	 * @return a new {@link XIDSortedSetValue} containing all entries from this
+	 *         value expect the given entry
 	 */
 	XIDSortedSetValue remove(XID entry);
 	
 	/**
-	 * Note: Changes to the returned {@link Set} will not affect the
-	 * XIDSortedSetValue.
+	 * Creates a {@link SortedSet} containing all {@link XID} entries in this
+	 * {@link XIDSortedSetValue}.
+	 * 
+	 * Note: changes to the {@link SortedSet} are NOT reflected in this value
 	 * 
 	 * @return a {@link SortedSet} containing all {@link XID} entries in this
-	 *         {@link XIDSortedSetValue} - changes to the {@link SortedSet} are
-	 *         NOT reflected in this value
+	 *         {@link XIDSortedSetValue}
 	 */
 	SortedSet<XID> toSortedSet();
 	
