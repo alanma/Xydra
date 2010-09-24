@@ -148,4 +148,8 @@ public class MemoryFieldCommand extends MemoryAtomicCommand implements XFieldCom
 			throw new RuntimeException("this field event should have never been created");
 		}
 	}
+	
+	public XAddress getChangedEntity() {
+		return getTarget();
+	}
 }

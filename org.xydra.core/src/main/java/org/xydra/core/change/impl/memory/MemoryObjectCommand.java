@@ -1,5 +1,6 @@
 package org.xydra.core.change.impl.memory;
 
+import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XObjectCommand;
@@ -146,6 +147,10 @@ public class MemoryObjectCommand extends MemoryAtomicCommand implements XObjectC
 			str += " r" + getRevisionNumber();
 		str += " @" + getTarget();
 		return str;
+	}
+	
+	public XAddress getChangedEntity() {
+		return XX.resolveField(getTarget(), getFieldID());
 	}
 	
 }

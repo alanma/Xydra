@@ -282,7 +282,7 @@ public class MemoryTransactionEvent implements XTransactionEvent {
 	}
 	
 	public XAddress getChangedEntity() {
-		return getTarget();
+		return null;
 	}
 	
 }

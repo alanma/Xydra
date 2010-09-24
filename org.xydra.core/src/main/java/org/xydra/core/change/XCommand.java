@@ -1,6 +1,7 @@
 package org.xydra.core.change;
 
 import org.xydra.core.model.XAddress;
+import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 
 
@@ -65,5 +66,14 @@ public interface XCommand {
 	 * @return the {@link XAddress} of the entity that is to be changed
 	 */
 	XAddress getTarget();
+	
+	/**
+	 * WHAT will be changed?
+	 * 
+	 * @return the {@link XAddress} of the {@link XModel}, {@link XObject} or
+	 *         {@link XField} that will be added, removed or the {@link XField}
+	 *         which value was changed; null for transactions.
+	 */
+	XAddress getChangedEntity();
 	
 }

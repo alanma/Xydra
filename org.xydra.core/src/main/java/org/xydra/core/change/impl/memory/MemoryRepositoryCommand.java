@@ -1,5 +1,6 @@
 package org.xydra.core.change.impl.memory;
 
+import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XRepositoryCommand;
@@ -161,6 +162,10 @@ public class MemoryRepositoryCommand extends MemoryAtomicCommand implements XRep
 			str += " r" + getRevisionNumber();
 		str += " @" + getTarget();
 		return str;
+	}
+	
+	public XAddress getChangedEntity() {
+		return XX.resolveModel(getTarget(), getModelID());
 	}
 	
 }

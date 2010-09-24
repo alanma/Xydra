@@ -1,5 +1,6 @@
 package org.xydra.core.change.impl.memory;
 
+import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XModelCommand;
@@ -151,6 +152,10 @@ public class MemoryModelCommand extends MemoryAtomicCommand implements XModelCom
 			str += " r" + getRevisionNumber();
 		str += " @" + getTarget();
 		return str;
+	}
+	
+	public XAddress getChangedEntity() {
+		return XX.resolveObject(getTarget(), getObjectID());
 	}
 	
 }
