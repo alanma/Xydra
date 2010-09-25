@@ -142,8 +142,17 @@ public class GaeUtils {
 	 * @param entity
 	 */
 	public static void putEntity(Entity entity, XStateTransaction trans) {
-		putEntity(entity);
 		assert assertTransaction(trans);
+		putEntity(entity);
+	}
+	
+	/**
+	 * @param key
+	 * @return the GAE Entity for the given key from the store or null
+	 */
+	public static Entity getEntity(Key key, XStateTransaction trans) {
+		assert assertTransaction(trans);
+		return getEntity(key);
 	}
 	
 	private static boolean assertTransaction(XStateTransaction trans) {
