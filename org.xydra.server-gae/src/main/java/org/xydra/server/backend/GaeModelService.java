@@ -26,6 +26,7 @@ public class GaeModelService {
 	
 	private static final String PROP_LOCKS = "locks";
 	private static final String PROP_STATUS = "status";
+	private static final String PROP_ACTOR = "actor";
 	
 	// assigned revision, waiting for locks
 	private static final int STATUS_CREATING = 0;
@@ -63,14 +64,13 @@ public class GaeModelService {
 		
 		// IMPROVE maybe let the caller provide an XID that can be used to check
 		// the status in case there is a GAE timeout?
-		// TODO record actor
 		
 		assert this.modelAddr.contains(command.getChangedEntity() == null ? command.getTarget()
 		        : command.getChangedEntity());
 		
 		Set<XAddress> locks = calculateRequiredLocks(command);
 		
-		Pair<Long,Entity> result = grabRevisionAndRegisterLocks(locks);
+		Pair<Long,Entity> result = grabRevisionAndRegisterLocks(locks, actorId);
 		long rev = result.getFirst();
 		Entity changeEntity = result.getSecond();
 		
@@ -97,7 +97,7 @@ public class GaeModelService {
 		// TODO Auto-generated method stub
 	}
 	
-	private Pair<Long,Entity> grabRevisionAndRegisterLocks(Set<XAddress> locks) {
+	private Pair<Long,Entity> grabRevisionAndRegisterLocks(Set<XAddress> locks, XID actorId) {
 		
 		// Prepare locks to be saved in GAE entity.
 		List<String> lockStrs = new ArrayList<String>(locks.size());
@@ -121,6 +121,7 @@ public class GaeModelService {
 					newChange.setUnindexedProperty(PROP_LOCKS, lockStrs);
 					newChange.setUnindexedProperty(PROP_STATUS, STATUS_CREATING);
 					newChange.setUnindexedProperty(PROP_LAST_ACTIVITY, now());
+					newChange.setUnindexedProperty(PROP_ACTOR, actorId.toURI());
 					
 					GaeUtils.putEntity(newChange, trans);
 					GaeUtils.endTransaction(trans);
