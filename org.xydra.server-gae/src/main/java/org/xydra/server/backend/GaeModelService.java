@@ -1,19 +1,30 @@
 package org.xydra.server.backend;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.xydra.core.XX;
 import org.xydra.core.change.XAtomicCommand;
 import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XCommand;
+import org.xydra.core.change.XFieldEvent;
+import org.xydra.core.change.XRepositoryCommand;
 import org.xydra.core.change.XTransaction;
 import org.xydra.core.model.XAddress;
+import org.xydra.core.model.XBaseField;
+import org.xydra.core.model.XBaseModel;
+import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XType;
+import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.state.XStateTransaction;
 import org.xydra.core.model.state.impl.gae.KeyStructure;
+import org.xydra.core.value.XValue;
 import org.xydra.index.query.Pair;
 import org.xydra.server.impl.gae.GaeUtils;
 
@@ -313,7 +324,26 @@ public class GaeModelService {
 		
 		List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
 		
-		// TODO check preconditions and generate events
+		if(command instanceof XRepositoryCommand) {
+			
+			// TODO check repository command and generate events
+			
+		} else {
+			
+			// TODO check if model actually exists
+			
+			XBaseModel currentModel = new GaeModel(this.modelAddr, rev - 1);
+			ChangedModel changedModel = new ChangedModel(currentModel);
+			
+			if(!changedModel.executeCommand(command)) {
+				// preconditions failed
+				cleanupChangeEntity(changeEntity, STATUS_FAILED_PRECONDITIONS);
+				return null;
+			}
+			
+			// TODO generate events
+			
+		}
 		
 		if(events.isEmpty()) {
 			cleanupChangeEntity(changeEntity, STATUS_SUCCESS_NOCHANGE);
@@ -476,6 +506,229 @@ public class GaeModelService {
 			}
 		}
 		return false;
+	}
+	
+	private static final String PROP_REVISION = "revision";
+	private static final String PROP_TRANSINDEX = "transindex";
+	
+	private class GaeField implements XBaseField {
+		
+		private final XAddress fieldAddr;
+		private final long fieldRev;
+		private final int transindex;
+		private XFieldEvent valueEvent;
+		
+		private GaeField(XAddress fieldAddr, long fieldRev, int transindex) {
+			assert fieldAddr.getAddressedType() == XType.XFIELD;
+			this.fieldAddr = fieldAddr;
+			this.fieldRev = fieldRev;
+			this.transindex = transindex;
+		}
+		
+		public long getRevisionNumber() {
+			// TODO Auto-generated method stub
+			return 0;
+		}
+		
+		public XValue getValue() {
+			if(this.valueEvent == null) {
+				XAtomicEvent event = GaeModelService.getAtomicEvent(this.fieldRev, this.transindex);
+				if(!(event instanceof XFieldEvent)) {
+					throw new RuntimeException(
+					        "field refers to an event that is not an XFieldEvent: " + event);
+				}
+				this.valueEvent = (XFieldEvent)event;
+			}
+			return this.valueEvent.getNewValue();
+		}
+		
+		public boolean isEmpty() {
+			return getValue() == null;
+		}
+		
+		public XAddress getAddress() {
+			return this.fieldAddr;
+		}
+		
+		public XID getID() {
+			return this.fieldAddr.getField();
+		}
+		
+	}
+	
+	private abstract class GaeContainer<C> {
+		
+		private final Map<XID,C> cachedChildren = new HashMap<XID,C>();
+		private final XAddress addr;
+		Set<XID> cachedIds;
+		Set<XID> cachedMisses = new HashSet<XID>();
+		
+		private GaeContainer(XAddress addr) {
+			// TODO checkLocks
+			assert addr.getAddressedType() != XType.XFIELD;
+			this.addr = addr;
+		}
+		
+		public boolean isEmpty() {
+			return !iterator().hasNext();
+		}
+		
+		public XAddress getAddress() {
+			return this.addr;
+		}
+		
+		protected abstract XAddress resolveChild(XAddress addr, XID childId);
+		
+		protected abstract C loadChild(XAddress childAddr, Entity childEntity);
+		
+		public C getChild(XID fieldId) {
+			
+			if(this.cachedIds != null ? !this.cachedIds.contains(fieldId) : this.cachedMisses
+			        .contains(fieldId)) {
+				return null;
+			}
+			
+			C gf = this.cachedChildren.get(fieldId);
+			if(gf != null) {
+				return gf;
+			}
+			
+			XAddress childAddr = resolveChild(this.addr, fieldId);
+			
+			Entity e = GaeUtils.getEntity(KeyStructure.createCombinedKey(childAddr));
+			if(e == null) {
+				if(this.cachedMisses != null) {
+					this.cachedMisses.add(fieldId);
+				}
+				return null;
+			}
+			
+			gf = loadChild(childAddr, e);
+			this.cachedChildren.put(fieldId, gf);
+			return gf;
+		}
+		
+		public boolean hasChild(XID fieldId) {
+			return this.cachedIds != null ? this.cachedIds.contains(fieldId)
+			        : getChild(fieldId) != null;
+		}
+		
+		public Iterator<XID> iterator() {
+			if(this.cachedIds == null) {
+				// TODO query child IDs
+				this.cachedMisses = null;
+			}
+			return this.cachedIds.iterator();
+		}
+		
+	}
+	
+	public class GaeObject extends GaeContainer<GaeField> implements XBaseObject {
+		
+		private long objectRev = -1;
+		
+		private GaeObject(XAddress objectAddr) {
+			super(objectAddr);
+			assert objectAddr.getAddressedType() == XType.XOBJECT;
+		}
+		
+		public long getRevisionNumber() {
+			if(this.objectRev < 0) {
+				// TODO calculate objectRev
+			}
+			return this.objectRev;
+		}
+		
+		public XID getID() {
+			return getAddress().getObject();
+		}
+		
+		public XBaseField getField(XID fieldId) {
+			return getChild(fieldId);
+		}
+		
+		public boolean hasField(XID fieldId) {
+			return hasChild(fieldId);
+		}
+		
+		@Override
+		protected GaeField loadChild(XAddress childAddr, Entity childEntity) {
+			
+			long fieldRev = (Long)childEntity.getProperty(PROP_REVISION);
+			int transindex = (Integer)childEntity.getProperty(PROP_TRANSINDEX);
+			
+			return new GaeField(childAddr, fieldRev, transindex);
+		}
+		
+		@Override
+		protected XAddress resolveChild(XAddress addr, XID childId) {
+			return XX.resolveField(addr, childId);
+		}
+		
+	}
+	
+	public class GaeModel extends GaeContainer<GaeObject> implements XBaseModel {
+		
+		private final long modelRev;
+		
+		private GaeModel(XAddress modelAddr, long modelRev) {
+			super(modelAddr);
+			assert modelAddr.getAddressedType() == XType.XMODEL;
+			this.modelRev = modelRev;
+		}
+		
+		public long getRevisionNumber() {
+			return this.modelRev;
+		}
+		
+		public XID getID() {
+			return getAddress().getObject();
+		}
+		
+		public XBaseObject getObject(XID objectId) {
+			return getChild(objectId);
+		}
+		
+		public boolean hasObject(XID objectId) {
+			return hasChild(objectId);
+		}
+		
+		@Override
+		protected GaeObject loadChild(XAddress childAddr, Entity childEntity) {
+			return new GaeObject(childAddr);
+		}
+		
+		@Override
+		protected XAddress resolveChild(XAddress addr, XID childId) {
+			return XX.resolveObject(addr, childId);
+		}
+		
+	}
+	
+	public static void createEntity(XAddress modelOrObjectAddr) {
+		assert modelOrObjectAddr.getAddressedType() == XType.XMODEL
+		        || modelOrObjectAddr.getAddressedType() == XType.XOBJECT;
+		Entity e = new Entity(KeyStructure.createCombinedKey(modelOrObjectAddr));
+		GaeUtils.putEntity(e);
+	}
+	
+	public static void removeEntity(XAddress modelOrObjectAddr) {
+		assert modelOrObjectAddr.getAddressedType() == XType.XMODEL
+		        || modelOrObjectAddr.getAddressedType() == XType.XOBJECT;
+		GaeUtils.deleteEntity(KeyStructure.createCombinedKey(modelOrObjectAddr));
+	}
+	
+	public static void setField(XAddress fieldAddr, long fieldRev, int transindex) {
+		assert fieldAddr.getAddressedType() == XType.XFIELD;
+		Entity e = new Entity(KeyStructure.createCombinedKey(fieldAddr));
+		e.setUnindexedProperty(PROP_REVISION, fieldRev);
+		e.setUnindexedProperty(PROP_TRANSINDEX, transindex);
+		GaeUtils.putEntity(e);
+	}
+	
+	public static XAtomicEvent getAtomicEvent(long revisionNumber, int transindex) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }
