@@ -24,27 +24,59 @@ import com.google.appengine.api.datastore.Key;
 
 public class GaeModelService {
 	
+	// GAE Entity (type=XCHANGE) property keys.
+	
+	private static final String PROP_LAST_ACTIVITY = "lastActivity";
 	private static final String PROP_LOCKS = "locks";
 	private static final String PROP_STATUS = "status";
 	private static final String PROP_ACTOR = "actor";
 	
-	// assigned revision, waiting for locks
+	// status IDs
+	
+	/**
+	 * Possible status progression:
+	 * 
+	 * <pre>
+	 * 
+	 *  STATUS_CREATING ------> STATUS_FAILED_TIMEOUT
+	 *    |       |
+	 *    |       v
+	 *    | STATUS_CHECKING
+	 *    |       |
+	 *    \---+---/
+	 *        |
+	 *        |----> STATUS_EXECUTING ----> STATUS_SUCCESS_EXECUTED
+	 *        |
+	 *        |----> STATUS_SUCCESS_NOCHANGE
+	 *        |
+	 *        \----> STATUS_FAILED_PRECONDITIONS
+	 * 
+	 * </pre>
+	 */
+	
+	/** assigned revision, waiting for locks */
 	private static final int STATUS_CREATING = 0;
-	// wrote command, waiting for locks and/or checking preconditions
-	/*
-	 * TODO needed? (maybe only if waiting for locks takes too long?), otherwise
-	 * skipped
+	/**
+	 * wrote command, waiting for locks and/or checking preconditions
+	 * 
+	 * This is needed to prevent cascading timeouts if one change takes too
+	 * long. Normally the command will not be written, only if waiting for locks
+	 * takes too long / before we start to roll forward another change.
 	 */
 	private static final int STATUS_CHECKING = 1;
-	// events written, making changes
+	/** events written, making changes, a.k.a. readyToExecute */
 	private static final int STATUS_EXECUTING = 2;
-	// changes made, locks freed
-	private static final int STATUS_EXECUTED = 3;
+	
+	/** changes made, locks freed */
+	private static final int STATUS_SUCCESS_EXECUTED = 3;
+	/** there was nothing to change */
+	private static final int STATUS_SUCCESS_NOCHANGE = 4;
 	
 	private static final int STATUS_FAILED_PRECONDITIONS = 100;
-	// timed out before saving command/events (status was STATUS_CREATING)
+	/** timed out before saving command/events (status was STATUS_CREATING) */
 	private static final int STATUS_FAILED_TIMEOUT = 101;
-	private static final String PROP_LAST_ACTIVITY = "lastActivity";
+	
+	// Parameters for waiting for other changes.
 	
 	// timeout for changes in milliseconds
 	private static final long TIMEOUT = 3000; // TODO set
@@ -53,6 +85,8 @@ public class GaeModelService {
 	private static final long WAIT_INITIAL = 100;
 	// Maximum time to wait before checking status again.
 	private static final long WAIT_MAX = 1000; // TODO set
+	
+	// Implementation.
 	
 	private final XAddress modelAddr;
 	
@@ -83,18 +117,38 @@ public class GaeModelService {
 		if(events == null) {
 			return XCommand.FAILED;
 		}
+		// TODO handle STATUS_SUCCESS_NOCHANGE
 		
 		executeAndUnlock(rev, changeEntity, events);
 		
 		return rev;
 	}
 	
+	/**
+	 * @return a revision number such that all changes up to and including that
+	 *         revision number are guaranteed to be committed. This is not
+	 *         guaranteed to be the highest revision number that fits this
+	 *         requirement.
+	 */
 	private long getCachedLastCommitedRevision() {
-		return -1L;
+		return -1L; // TODO implement
 	}
 	
 	private void setCachedLastCommitedRevision(long l) {
-		// TODO Auto-generated method stub
+		// TODO implement
+	}
+	
+	/**
+	 * @return the last known revision number that has been grabbed by a change.
+	 *         No guarantees are made that no higher revision numbers aren't
+	 *         taken already.
+	 */
+	private long getCachedLastTakenRevision() {
+		return -1L; // TODO implement
+	}
+	
+	private void setCachedLastTakenRevision(long rev) {
+		// TODO implement
 	}
 	
 	private Pair<Long,Entity> grabRevisionAndRegisterLocks(Set<XAddress> locks, XID actorId) {
@@ -105,8 +159,7 @@ public class GaeModelService {
 			lockStrs.add(a.toURI());
 		}
 		
-		boolean allCommitted = true;
-		for(long rev = getCachedLastCommitedRevision() + 1;; rev++) {
+		for(long rev = getCachedLastTakenRevision() + 1;; rev++) {
 			
 			// Try to grab this revision.
 			try {
@@ -126,9 +179,7 @@ public class GaeModelService {
 					GaeUtils.putEntity(newChange, trans);
 					GaeUtils.endTransaction(trans);
 					
-					if(allCommitted) {
-						setCachedLastCommitedRevision(rev - 1);
-					}
+					setCachedLastTakenRevision(rev);
 					
 					// transaction succeeded, we have a revision
 					return new Pair<Long,Entity>(rev, newChange);
@@ -137,34 +188,24 @@ public class GaeModelService {
 					
 					// Revision already taken.
 					
+					// IMPROVE check if commit() can fail for read-only
+					// transactions, maybe use abort()?
 					GaeUtils.endTransaction(trans);
+					
+					// IMPROVE cache this entity for later use in
+					// waitForLocks()? / lastKnownCommitted calculation?
 					
 					// Since we read the entity anyway, might as well use that
 					// information.
 					int status = (Integer)changeEntity.getProperty(PROP_STATUS);
-					if(!isCommitted(status)) {
-						if(!canRollForward(status) && isTimedOut(changeEntity)) {
-							cleanupTimedOutChange(changeEntity);
-							// now committed
-						} else if(allCommitted) {
-							allCommitted = false;
-							setCachedLastCommitedRevision(rev - 1);
-						}
+					if(!isCommitted(status) && !canRollForward(status) && isTimedOut(changeEntity)) {
+						cleanupChangeEntity(changeEntity, STATUS_FAILED_TIMEOUT);
 					}
 					
 				}
 				
 			} catch(DatastoreFailureException dfe) {
-				
 				// transaction failed, continue to next revision
-				
-				// we don't know if the new change that caused our transaction
-				// to fail is committed, so assume it is not
-				if(allCommitted) {
-					allCommitted = false;
-					setCachedLastCommitedRevision(rev - 1);
-				}
-				
 			}
 			
 		}
@@ -248,7 +289,7 @@ public class GaeModelService {
 					// forward in case of timeout
 					rollForward(otherRev, otherChange);
 				} else {
-					cleanupTimedOutChange(otherChange);
+					cleanupChangeEntity(otherChange, STATUS_FAILED_TIMEOUT);
 				}
 			}
 			
@@ -257,6 +298,7 @@ public class GaeModelService {
 				newCommitedRev = otherRev;
 			}
 			
+			// IMPROVE: maybe re-read commitedRev?
 		}
 		
 		if(newCommitedRev > 0) {
@@ -267,11 +309,17 @@ public class GaeModelService {
 	private List<XAtomicEvent> checkPreconditionsAndSaveEvents(long rev, Entity changeEntity,
 	        XCommand command) {
 		
-		// TODO check preconditions
-		List<XAtomicEvent> events = null;
+		List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
 		
-		// TODO list planned changes
-		// IMPROVE free uneeded locks?
+		// TODO check preconditions and generate events
+		
+		if(events.isEmpty()) {
+			cleanupChangeEntity(changeEntity, STATUS_SUCCESS_NOCHANGE);
+			return events;
+		}
+		
+		// TODO write events
+		// IMPROVE free unneeded locks?
 		
 		changeEntity.setUnindexedProperty(PROP_STATUS, STATUS_EXECUTING);
 		GaeUtils.putEntity(changeEntity);
@@ -283,9 +331,7 @@ public class GaeModelService {
 		
 		// TODO execute
 		
-		changeEntity.removeProperty(PROP_LOCKS);
-		changeEntity.setUnindexedProperty(PROP_STATUS, STATUS_EXECUTED);
-		GaeUtils.putEntity(changeEntity);
+		cleanupChangeEntity(changeEntity, STATUS_SUCCESS_EXECUTED);
 	}
 	
 	long getRevisionFromKey(Key key) {
@@ -312,6 +358,9 @@ public class GaeModelService {
 			if(events == null) {
 				return false;
 			}
+			
+			// TODO handle STATUS_SUCCESS_NOCHANGE
+			
 		} else {
 			assert status == STATUS_EXECUTING;
 			events = loadEvents(rev, changeEntity);
@@ -332,13 +381,9 @@ public class GaeModelService {
 		return null;
 	}
 	
-	private void cleanupTimedOutChange(Entity changeEntity) {
+	private void cleanupChangeEntity(Entity changeEntity, int status) {
 		changeEntity.removeProperty(PROP_LOCKS);
-		changeEntity.setUnindexedProperty(PROP_STATUS, STATUS_FAILED_TIMEOUT);
-		/*
-		 * don't worry about synchronization, as (assuming the change really
-		 * timed out) this is the only thing that the change will be changed to
-		 */
+		changeEntity.setUnindexedProperty(PROP_STATUS, status);
 		GaeUtils.putEntity(changeEntity);
 	}
 	
@@ -351,11 +396,18 @@ public class GaeModelService {
 	}
 	
 	/**
-	 * Is the status either "executed" or "failed".
+	 * Is the status either "success" or "failed".
 	 */
 	private boolean isCommitted(int status) {
-		return status == STATUS_EXECUTED || status == STATUS_FAILED_PRECONDITIONS
-		        || status == STATUS_FAILED_TIMEOUT;
+		return (isSuccess(status) || isFailure(status));
+	}
+	
+	private boolean isSuccess(int status) {
+		return (status == STATUS_SUCCESS_EXECUTED || status == STATUS_SUCCESS_NOCHANGE);
+	}
+	
+	private boolean isFailure(int status) {
+		return (status == STATUS_FAILED_PRECONDITIONS || status == STATUS_FAILED_TIMEOUT);
 	}
 	
 	private boolean isTimedOut(Entity changeEntity) {
