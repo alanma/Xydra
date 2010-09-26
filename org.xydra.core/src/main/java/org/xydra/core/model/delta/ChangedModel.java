@@ -407,4 +407,24 @@ public class ChangedModel implements DeltaModel {
 		return true;
 	}
 	
+	/**
+	 * Apply the given command to this changed mode. Failed commands may be left
+	 * partially applied.
+	 * 
+	 * @return true if the command succeeded, false otherwise.
+	 */
+	public boolean executeCommand(XCommand command) {
+		if(command instanceof XTransaction) {
+			return executeCommand((XTransaction)command);
+		} else if(command instanceof XModelCommand) {
+			return executeCommand((XModelCommand)command);
+		} else if(command instanceof XObjectCommand) {
+			return executeCommand((XObjectCommand)command);
+		} else if(command instanceof XFieldCommand) {
+			return executeCommand((XFieldCommand)command);
+		} else {
+			throw new IllegalArgumentException("unexpected command type: " + command);
+		}
+	}
+	
 }
