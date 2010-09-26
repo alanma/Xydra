@@ -116,8 +116,10 @@ public class GaeModelService {
 		List<XAtomicEvent> events = checkPreconditionsAndSaveEvents(rev, changeEntity, command);
 		if(events == null) {
 			return XCommand.FAILED;
+		} else if(events.isEmpty()) {
+			// TODO maybe return revision?
+			return XCommand.NOCHANGE;
 		}
-		// TODO handle STATUS_SUCCESS_NOCHANGE
 		
 		executeAndUnlock(rev, changeEntity, events);
 		
@@ -357,10 +359,9 @@ public class GaeModelService {
 			events = checkPreconditionsAndSaveEvents(rev, changeEntity, command);
 			if(events == null) {
 				return false;
+			} else if(events.isEmpty()) {
+				return true;
 			}
-			
-			// TODO handle STATUS_SUCCESS_NOCHANGE
-			
 		} else {
 			assert status == STATUS_EXECUTING;
 			events = loadEvents(rev, changeEntity);
