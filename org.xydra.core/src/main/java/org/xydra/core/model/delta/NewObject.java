@@ -34,7 +34,7 @@ public class NewObject implements DeltaObject {
 		this.fields.remove(fieldId);
 	}
 	
-	public DeltaField getField(XID fieldId) {
+	public NewField getField(XID fieldId) {
 		return this.fields.get(fieldId);
 	}
 	
