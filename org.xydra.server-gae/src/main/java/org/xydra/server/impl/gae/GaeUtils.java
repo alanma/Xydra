@@ -16,6 +16,8 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Transaction;
 
 
@@ -228,58 +230,6 @@ public class GaeUtils {
 		assert assertTransaction(trans);
 	}
 	
-	/**
-	 * A pure in-memory String manipulation method
-	 * 
-	 * @param idList
-	 * @return the {@link XID}s as a single string, separated by a colon.
-	 * @deprecated Store Collections directly in GAE
-	 */
-	@Deprecated
-	public static String toString(List<XID> idList) {
-		return toString(idList.iterator());
-	}
-	
-	/**
-	 * A pure in-memory String manipulation method
-	 * 
-	 * @param idList
-	 * @return the {@link XID}s as a single string, separated by a colon.
-	 * @deprecated Store Collections directly in GAE
-	 */
-	@Deprecated
-	public static String toString(Iterator<XID> idList) {
-		StringBuffer buf = new StringBuffer();
-		while(idList.hasNext()) {
-			XID id = idList.next();
-			buf.append(id.toString());
-			buf.append(":");
-		}
-		return buf.toString();
-	}
-	
-	/**
-	 * A pure in-memory String manipulation method
-	 * 
-	 * @param idListAsString
-	 * @return List of {@link XID}s parsed from a single colon-separated string
-	 * @deprecated Store Collections directly in GAE
-	 */
-	@Deprecated
-	public static List<XID> toIdList(String idListAsString) {
-		String[] idStrings = idListAsString.split(":");
-		LinkedList<XID> ids = new LinkedList<XID>();
-		for(String idString : idStrings) {
-			if(idString.equals("")) {
-				// skip
-			} else {
-				XID id = XX.toId(idString);
-				ids.add(id);
-			}
-		}
-		return ids;
-	}
-	
 	public static List<XID> toListOfXID(List<String> stringList) {
 		if(stringList == null)
 			return Collections.emptyList();
@@ -298,6 +248,10 @@ public class GaeUtils {
 			stringList.add(iterator.next().toString());
 		}
 		return stringList;
+	}
+	
+	public static PreparedQuery prepareQuety(Query query) {
+		return datastore.prepare(query);
 	}
 	
 }

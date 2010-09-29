@@ -1,6 +1,6 @@
 package org.xydra.core.model.state.impl.gae;
 
-import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XType;
 
@@ -10,7 +10,8 @@ import com.google.appengine.api.datastore.KeyFactory;
 
 public class KeyStructure {
 	
-	public static String KIND_XCHANGE = "XCHANGE";
+	public static final String KIND_XEVENT = "XEVENT";
+	public static final String KIND_XCHANGE = "XCHANGE";
 	
 	public static Key createCombinedKey(XAddress address) {
 		String kind = address.getAddressedType().name();
@@ -20,7 +21,8 @@ public class KeyStructure {
 	
 	public static XAddress toAddress(Key combinedKey) {
 		String combinedKeyString = combinedKey.getName();
-		XAddress address = X.getIDProvider().fromAddress(combinedKeyString);
+		XAddress address = XX.toAddress(combinedKeyString);
+		assert address.getAddressedType().toString().equals(combinedKey.getKind());
 		return address;
 	}
 	
