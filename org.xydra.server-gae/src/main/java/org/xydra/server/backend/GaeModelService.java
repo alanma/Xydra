@@ -14,30 +14,28 @@ import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XAtomicCommand;
 import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XCommand;
+import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.change.XObjectEvent;
 import org.xydra.core.change.XRepositoryCommand;
 import org.xydra.core.change.XTransaction;
-import org.xydra.core.change.impl.memory.MemoryFieldEvent;
-import org.xydra.core.change.impl.memory.MemoryModelEvent;
-import org.xydra.core.change.impl.memory.MemoryObjectEvent;
-import org.xydra.core.change.impl.memory.MemoryRepositoryEvent;
+import org.xydra.core.change.XTransactionEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
+import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XType;
-import org.xydra.core.model.delta.ChangedField;
 import org.xydra.core.model.delta.ChangedModel;
-import org.xydra.core.model.delta.ChangedObject;
-import org.xydra.core.model.delta.NewField;
-import org.xydra.core.model.delta.NewObject;
 import org.xydra.core.model.state.XStateTransaction;
 import org.xydra.core.model.state.impl.gae.KeyStructure;
 import org.xydra.core.value.XValue;
+import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlEvent;
+import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
+import org.xydra.index.XI;
 import org.xydra.index.query.Pair;
 import org.xydra.server.impl.gae.GaeUtils;
 
@@ -48,14 +46,27 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 
 
-public class GaeModelService {
+public class GaeModelService implements XChangeLog {
+	
+	private static final long serialVersionUID = -2080744796962188941L;
 	
 	// GAE Entity (type=XCHANGE) property keys.
 	
 	private static final String PROP_LAST_ACTIVITY = "lastActivity";
+	/**
+	 * Set when entering {@link #STATUS_CREATING}, removed when entering
+	 * {@link #STATUS_SUCCESS_EXECUTED}, {@link #STATUS_SUCCESS_NOCHANGE},
+	 * {@link #STATUS_FAILED_TIMEOUT} or {@link #STATUS_FAILED_PRECONDITIONS}.
+	 */
 	private static final String PROP_LOCKS = "locks";
 	private static final String PROP_STATUS = "status";
+	/**
+	 * Set when entering {@link #STATUS_CREATING}, never removed.
+	 */
 	private static final String PROP_ACTOR = "actor";
+	/**
+	 * Set when entering {@link #STATUS_EXECUTING}, never removed.
+	 */
 	private static final String PROP_EVENTCOUNT = "eventCount";
 	
 	// GAE Entity (type=XMODEL/XOBJECT/XFIELD) property keys.
@@ -364,33 +375,10 @@ public class GaeModelService {
 		if(command instanceof XRepositoryCommand) {
 			XRepositoryCommand rc = (XRepositoryCommand)command;
 			
-			switch(rc.getChangeType()) {
-			case ADD:
-				if(currentModel == null) {
-					events.add(MemoryRepositoryEvent.createAddEvent(actorId, rc.getTarget(), rc
-					        .getModelID()));
-				} else if(!rc.isForced()) {
-					cleanupChangeEntity(changeEntity, STATUS_FAILED_PRECONDITIONS);
-					return null;
-				}
-				break;
-			
-			case REMOVE:
-				if(currentModel == null || rev != rc.getRevisionNumber()) {
-					if(!rc.isForced()) {
-						cleanupChangeEntity(changeEntity, STATUS_FAILED_PRECONDITIONS);
-						return null;
-					}
-				}
-				if(currentModel != null) {
-					// TODO create remove events for objects and fields
-					events.add(MemoryRepositoryEvent.createRemoveEvent(actorId, rc.getTarget(), rc
-					        .getModelID(), rev));
-				}
-				break;
-			
-			default:
-				throw new AssertionError("XRepositoryCommand with unexpected type: " + command);
+			if(!GaeEventHelper.checkRepositoryCommandAndCreateEvents(events, currentModel, actorId,
+			        rc)) {
+				cleanupChangeEntity(changeEntity, STATUS_FAILED_PRECONDITIONS);
+				return null;
 			}
 			
 		} else {
@@ -410,7 +398,7 @@ public class GaeModelService {
 			
 			// create events
 			
-			createEventsForChangedModel(events, rev, actorId, changedModel);
+			GaeEventHelper.createEventsForChangedModel(events, actorId, changedModel);
 			
 		}
 		
@@ -437,7 +425,8 @@ public class GaeModelService {
 		
 		// IMPROVE free unneeded locks?
 		
-		changeEntity.setUnindexedProperty(PROP_EVENTCOUNT, events.size());
+		Integer eventCount = events.size();
+		changeEntity.setUnindexedProperty(PROP_EVENTCOUNT, eventCount);
 		
 		changeEntity.setUnindexedProperty(PROP_STATUS, STATUS_EXECUTING);
 		GaeUtils.putEntity(changeEntity, trans);
@@ -445,91 +434,6 @@ public class GaeModelService {
 		GaeUtils.endTransaction(trans);
 		
 		return events;
-	}
-	
-	private void createEventsForChangedModel(List<XAtomicEvent> events, long rev, XID actorId,
-	        ChangedModel changedModel) {
-		
-		// FIXME this counts commands, we need events
-		boolean inTrans = changedModel.countChanges(2) > 1;
-		
-		for(XID objectId : changedModel.getRemovedObjects()) {
-			XBaseObject removedObject = changedModel.getOldObject(objectId);
-			events.add(MemoryModelEvent.createRemoveEvent(actorId, this.modelAddr, objectId, rev,
-			        removedObject.getRevisionNumber(), inTrans));
-			for(XID fieldId : removedObject) {
-				createEventsForRemovedField(events, rev, actorId, removedObject, removedObject
-				        .getField(fieldId), inTrans);
-			}
-		}
-		
-		for(NewObject object : changedModel.getNewObjects()) {
-			events.add(MemoryModelEvent.createAddEvent(actorId, this.modelAddr, object.getID(),
-			        rev, inTrans));
-			for(XID fieldId : object) {
-				createEventsForNewField(events, rev, actorId, object, object.getField(fieldId),
-				        inTrans);
-			}
-		}
-		
-		for(ChangedObject object : changedModel.getChangedObjects()) {
-			
-			for(XID fieldId : object.getRemovedFields()) {
-				createEventsForRemovedField(events, rev, actorId, object, object
-				        .getOldField(fieldId), inTrans);
-			}
-			
-			for(NewField field : object.getNewFields()) {
-				createEventsForNewField(events, rev, actorId, object, field, inTrans);
-			}
-			
-			for(ChangedField field : object.getChangedFields()) {
-				if(field.isChanged()) {
-					XValue oldValue = field.getOldValue();
-					XValue newValue = field.getValue();
-					XAddress target = field.getAddress();
-					long objectRev = object.getRevisionNumber();
-					long fieldRev = field.getRevisionNumber();
-					if(newValue == null) {
-						assert oldValue != null;
-						events.add(MemoryFieldEvent.createRemoveEvent(actorId, target, oldValue,
-						        rev, objectRev, fieldRev, inTrans));
-					} else if(oldValue == null) {
-						events.add(MemoryFieldEvent.createAddEvent(actorId, target, newValue, rev,
-						        objectRev, fieldRev, inTrans));
-					} else {
-						events.add(MemoryFieldEvent.createChangeEvent(actorId, target, oldValue,
-						        newValue, rev, objectRev, fieldRev, inTrans));
-					}
-					
-				}
-			}
-			
-		}
-		
-	}
-	
-	private void createEventsForNewField(List<XAtomicEvent> events, long rev, XID actorId,
-	        XBaseObject object, XBaseField field, boolean inTrans) {
-		long objectRev = object.getRevisionNumber();
-		events.add(MemoryObjectEvent.createAddEvent(actorId, object.getAddress(), field.getID(),
-		        rev, objectRev, inTrans));
-		if(!field.isEmpty()) {
-			events.add(MemoryFieldEvent.createAddEvent(actorId, field.getAddress(), field
-			        .getValue(), rev, objectRev, field.getRevisionNumber(), inTrans));
-		}
-	}
-	
-	private void createEventsForRemovedField(List<XAtomicEvent> events, long rev, XID actorId,
-	        XBaseObject object, XBaseField field, boolean inTrans) {
-		long objectRev = object.getRevisionNumber();
-		long fieldRev = field.getRevisionNumber();
-		if(!field.isEmpty()) {
-			events.add(MemoryFieldEvent.createRemoveEvent(actorId, field.getAddress(), field
-			        .getValue(), rev, objectRev, fieldRev, inTrans));
-		}
-		events.add(MemoryObjectEvent.createRemoveEvent(actorId, object.getAddress(), field.getID(),
-		        rev, objectRev, fieldRev, inTrans));
 	}
 	
 	private void executeAndUnlock(long rev, Entity changeEntity, List<XAtomicEvent> events) {
@@ -579,7 +483,7 @@ public class GaeModelService {
 			XCommand command = loadCommand(rev, changeEntity);
 			waitForLocks(rev, locks);
 			assert command != null;
-			XID actorId = null; // TODO load
+			XID actorId = XX.toId((String)changeEntity.getProperty(PROP_ACTOR));
 			events = checkPreconditionsAndSaveEvents(rev, changeEntity, command, locks, actorId);
 			if(events == null) {
 				return false;
@@ -597,12 +501,29 @@ public class GaeModelService {
 	}
 	
 	private List<XAtomicEvent> loadEvents(long rev, Entity eventEntity) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		assert Arrays.asList(STATUS_EXECUTING, STATUS_SUCCESS_EXECUTED).contains(
+		        eventEntity.getProperty(PROP_STATUS));
+		assert eventEntity.getProperty(PROP_EVENTCOUNT) != null;
+		
+		List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
+		
+		int eventCount = (Integer)eventEntity.getProperty(PROP_EVENTCOUNT);
+		
+		for(int i = 0; i < eventCount; i++) {
+			events.add(getAtomicEvent(rev, i));
+		}
+		
+		return events;
 	}
 	
 	private XCommand loadCommand(long rev, Entity eventEntity) {
-		// TODO Auto-generated method stub
+		
+		assert (Integer)eventEntity.getProperty(PROP_STATUS) == STATUS_CHECKING;
+		
+		// TODO implement when commands are saved
+		assert false : "commands are not saved yet";
+		
 		return null;
 	}
 	
@@ -717,8 +638,7 @@ public class GaeModelService {
 		}
 		
 		public long getRevisionNumber() {
-			// TODO Auto-generated method stub
-			return 0;
+			return this.fieldRev;
 		}
 		
 		public XValue getValue() {
@@ -726,13 +646,14 @@ public class GaeModelService {
 				return null;
 			}
 			if(this.valueEvent == null) {
-				XAtomicEvent event = GaeModelService.getAtomicEvent(this.fieldRev, this.transindex);
+				XAtomicEvent event = getAtomicEvent(this.fieldRev, this.transindex);
 				if(!(event instanceof XFieldEvent)) {
 					throw new RuntimeException(
 					        "field refers to an event that is not an XFieldEvent: " + event);
 				}
 				this.valueEvent = (XFieldEvent)event;
 			}
+			assert this.valueEvent != null;
 			return this.valueEvent.getNewValue();
 		}
 		
@@ -843,7 +764,15 @@ public class GaeModelService {
 		
 		public long getRevisionNumber() {
 			if(this.objectRev < 0) {
-				// TODO calculate objectRev
+				// FIXME we don't always have the locks to get the objectRev
+				// this way
+				for(XID fieldId : this) {
+					XBaseField field = getField(fieldId);
+					long fieldRev = field.getRevisionNumber();
+					if(fieldRev > this.objectRev) {
+						this.objectRev = fieldRev;
+					}
+				}
 			}
 			return this.objectRev;
 		}
@@ -852,7 +781,7 @@ public class GaeModelService {
 			return getAddress().getObject();
 		}
 		
-		public XBaseField getField(XID fieldId) {
+		public GaeField getField(XID fieldId) {
 			return getChild(fieldId);
 		}
 		
@@ -970,7 +899,7 @@ public class GaeModelService {
 		GaeUtils.deleteEntity(KeyStructure.createCombinedKey(modelOrObjectOrFieldAddr));
 	}
 	
-	public static void setField(XAddress fieldAddr, long fieldRev, int transindex) {
+	private static void setField(XAddress fieldAddr, long fieldRev, int transindex) {
 		assert fieldAddr.getAddressedType() == XType.XFIELD;
 		Entity e = new Entity(KeyStructure.createCombinedKey(fieldAddr));
 		e.setProperty(PROP_PARENT, fieldAddr.getParent().toURI());
@@ -979,9 +908,164 @@ public class GaeModelService {
 		GaeUtils.putEntity(e);
 	}
 	
-	public static XAtomicEvent getAtomicEvent(long revisionNumber, int transindex) {
+	public XAtomicEvent getAtomicEvent(long revisionNumber, int transindex) {
+		
+		Key changeKey = KeyStructure.createChangetKey(this.modelAddr, revisionNumber);
+		Key eventKey = changeKey.getChild(KeyStructure.KIND_XEVENT, transindex);
+		
+		// IMPROVE cache events
+		Entity eventEntity = GaeUtils.getEntity(eventKey);
+		if(eventEntity == null) {
+			return null;
+		}
+		String eventData = (String)eventEntity.getProperty(PROP_EVENTCONTENT);
+		
+		MiniElement eventElement = new MiniXMLParserImpl().parseXml(eventData);
+		
+		return XmlEvent.toAtomicEvent(eventElement, this.modelAddr);
+	}
+	
+	public XAddress getBaseAddress() {
+		return this.modelAddr;
+	}
+	
+	public long getCurrentRevisionNumber() {
+		// TODO is this enough?
+		return getCachedLastCommitedRevision() + 1;
+	}
+	
+	private class GaeTransactionEvent implements XTransactionEvent {
+		
+		private final long modelRev;
+		private final XAtomicEvent[] events;
+		private final XID actor;
+		
+		public GaeTransactionEvent(int size, XID actor, long modelRev) {
+			this.events = new XAtomicEvent[size];
+			this.actor = actor;
+			this.modelRev = modelRev;
+		}
+		
+		public XAtomicEvent getEvent(int index) {
+			
+			if(index < 0 || index >= size()) {
+				throw new IndexOutOfBoundsException();
+			}
+			
+			XAtomicEvent ae = this.events[index];
+			
+			if(ae == null) {
+				ae = this.events[index] = getAtomicEvent(this.modelRev, index);
+				
+				assert ae != null;
+				assert XI.equals(this.actor, ae.getActor());
+				assert getTarget().equalsOrContains(ae.getTarget());
+				assert ae.getChangeType() != ChangeType.TRANSACTION;
+				assert ae.inTransaction();
+			}
+			
+			return ae;
+		}
+		
+		public int size() {
+			return this.events.length;
+		}
+		
+		public XID getActor() {
+			return this.actor;
+		}
+		
+		public ChangeType getChangeType() {
+			return ChangeType.TRANSACTION;
+		}
+		
+		public XAddress getChangedEntity() {
+			return null;
+		}
+		
+		public long getFieldRevisionNumber() {
+			return XEvent.RevisionOfEntityNotSet;
+		}
+		
+		public long getModelRevisionNumber() {
+			return this.modelRev;
+		}
+		
+		public long getObjectRevisionNumber() {
+			return XEvent.RevisionOfEntityNotSet;
+		}
+		
+		public XAddress getTarget() {
+			return GaeModelService.this.modelAddr;
+		}
+		
+		public boolean inTransaction() {
+			return true;
+		}
+		
+		public Iterator<XAtomicEvent> iterator() {
+			return Arrays.asList(this.events).iterator();
+		}
+		
+	}
+	
+	public XEvent getEventAt(long rev) {
+		
+		Entity changeEntity = GaeUtils
+		        .getEntity(KeyStructure.createChangetKey(this.modelAddr, rev));
+		
+		if(changeEntity == null) {
+			return null;
+		}
+		
+		int status = (Integer)changeEntity.getProperty(PROP_STATUS);
+		
+		if(status != STATUS_EXECUTING && status != STATUS_SUCCESS_EXECUTED) {
+			// no events available yet.
+			return null;
+		}
+		
+		assert changeEntity.getProperty(PROP_EVENTCOUNT) != null;
+		
+		int eventCount = (Integer)changeEntity.getProperty(PROP_EVENTCOUNT);
+		assert eventCount > 0;
+		
+		XID actor = XX.toId((String)changeEntity.getProperty(PROP_ACTOR));
+		
+		if(eventCount > 1) {
+			
+			// IMPROVE cache transaction event
+			return new GaeTransactionEvent(eventCount, actor, rev);
+			
+		} else {
+			
+			XAtomicEvent ae = getAtomicEvent(rev, 0);
+			assert ae != null;
+			assert XI.equals(actor, ae.getActor());
+			assert this.modelAddr.equalsOrContains(ae.getTarget());
+			assert ae.getChangeType() != ChangeType.TRANSACTION;
+			assert !ae.inTransaction();
+			return ae;
+			
+		}
+		
+	}
+	
+	public Iterator<XEvent> getEventsAfter(long revisionNumber) {
+		return getEventsBetween(revisionNumber, Long.MAX_VALUE);
+	}
+	
+	public Iterator<XEvent> getEventsBetween(long beginRevision, long endRevision) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	public Iterator<XEvent> getEventsUntil(long revisionNumber) {
+		return getEventsBetween(Long.MIN_VALUE, revisionNumber);
+	}
+	
+	public long getFirstRevisionNumber() {
+		return 0;
 	}
 	
 }
