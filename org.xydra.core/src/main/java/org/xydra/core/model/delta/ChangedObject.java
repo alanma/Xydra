@@ -10,6 +10,7 @@ import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseField;
+import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
 import org.xydra.index.iterator.AbstractFilteringIterator;
@@ -99,21 +100,64 @@ public class ChangedObject implements DeltaObject {
 	 * @result the amount of needed {@link XCommand XCommands} for the
 	 *         transformation
 	 */
-	public int countChanges(int max) {
-		int n = this.removed.size();
+	public int countCommandsNeeded(int max) {
+		int n = this.removed.size() + this.added.size();
 		if(n < max) {
 			for(NewField field : this.added.values()) {
-				n += field.countChanges();
+				n += field.countChanges() - 1;
 				if(n >= max) {
-					break;
+					return n;
 				}
 			}
-			if(n < max) {
-				for(ChangedField field : this.changed.values()) {
-					n += field.isChanged() ? 1 : 0;
+			for(ChangedField field : this.changed.values()) {
+				n += field.isChanged() ? 1 : 0;
+				if(n >= max) {
+					return n;
+				}
+			}
+		}
+		return n;
+	}
+	
+	/**
+	 * Count the number of {@link XEvents XEvents} that would be needed to log
+	 * the transformation of the original {@link XBaseModel} to the current
+	 * state which is represented by this ChangedModel.
+	 * 
+	 * This is different to {@link #countCommandsNeeded} in that a removed
+	 * object or field may cause several events while only needing one command.
+	 * 
+	 * @param max An upper bound for counting the amount of needed
+	 *            {@link XEvents XEvents}. Note that setting this bound to
+	 *            little may result in the return of an integer which does not
+	 *            actually represent the minimal amount of needed
+	 *            {@link XEvents XEvents} for the transformation.
+	 * @result the amount of needed {@link XEvents XEvents} for the
+	 *         transformation
+	 */
+	public int countEventsNeeded(int max) {
+		int n = this.removed.size() + this.added.size();
+		if(n < max) {
+			for(XID fieldId : this.removed) {
+				// removing field itself already counted
+				XBaseField oldField = getOldField(fieldId);
+				if(!oldField.isEmpty()) {
+					n++; // removing the value
 					if(n >= max) {
-						break;
+						return n;
 					}
+				}
+			}
+			for(NewField field : this.added.values()) {
+				n += field.countChanges() - 1;
+				if(n >= max) {
+					return n;
+				}
+			}
+			for(ChangedField field : this.changed.values()) {
+				n += field.isChanged() ? 1 : 0;
+				if(n >= max) {
+					return n;
 				}
 			}
 		}

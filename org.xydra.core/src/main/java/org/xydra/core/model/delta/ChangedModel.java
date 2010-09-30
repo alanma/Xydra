@@ -98,6 +98,9 @@ public class ChangedModel implements DeltaModel {
 	 * needed to transform the original {@link XBaseModel} to the current state
 	 * which is represented by this ChangedModel.
 	 * 
+	 * This is different to {@link #countEventsNeeded} in that a removed object
+	 * or field may cause several events while only needing one command.
+	 * 
 	 * @param max An upper bound for counting the amount of needed
 	 *            {@link XCommands}. Note that setting this bound to little may
 	 *            result in the return of an integer which does not actually
@@ -106,18 +109,70 @@ public class ChangedModel implements DeltaModel {
 	 * @result the amount of needed {@link XCommand XCommands} for the
 	 *         transformation
 	 */
-	public int countChanges(int max) {
-		int n = this.removed.size();
+	public int countCommandsNeeded(int max) {
+		int n = this.removed.size() + this.added.size();
 		if(n < max) {
 			for(NewObject object : this.added.values()) {
-				n += object.countChanges(max - n);
+				n += object.countChanges(max - n + 1) - 1;
+				if(n >= max) {
+					return n;
+				}
+			}
+			for(ChangedObject object : this.changed.values()) {
+				n += object.countCommandsNeeded(max - n);
+				if(n >= max) {
+					return n;
+				}
+			}
+		}
+		return n;
+	}
+	
+	/**
+	 * Count the number of {@link XEvents XEvents} that would be needed to log
+	 * the transformation of the original {@link XBaseModel} to the current
+	 * state which is represented by this ChangedModel.
+	 * 
+	 * This is different to {@link #countCommandsNeeded} in that a removed
+	 * object or field may cause several events while only needing one command.
+	 * 
+	 * @param max An upper bound for counting the amount of needed
+	 *            {@link XEvents XEvents}. Note that setting this bound to
+	 *            little may result in the return of an integer which does not
+	 *            actually represent the minimal amount of needed
+	 *            {@link XEvents XEvents} for the transformation.
+	 * @result the amount of needed {@link XEvents XEvents} for the
+	 *         transformation
+	 */
+	public int countEventsNeeded(int max) {
+		int n = this.removed.size() + this.added.size();
+		if(n < max) {
+			for(XID objectId : this.removed) {
+				// removing object itself already counted
+				XBaseObject oldObject = getOldObject(objectId);
+				for(XID fieldId : this.removed) {
+					n++; // removing the field
+					if(n >= max) {
+						return n;
+					}
+					XBaseField oldField = oldObject.getField(fieldId);
+					if(!oldField.isEmpty()) {
+						n++; // removing the value
+						if(n >= max) {
+							return n;
+						}
+					}
+				}
+			}
+			for(NewObject object : this.added.values()) {
+				n += object.countChanges(max - n + 1) - 1;
 				if(n >= max) {
 					break;
 				}
 			}
 			if(n < max) {
 				for(ChangedObject object : this.changed.values()) {
-					n += object.countChanges(max - n);
+					n += object.countEventsNeeded(max - n);
 					if(n >= max) {
 						break;
 					}

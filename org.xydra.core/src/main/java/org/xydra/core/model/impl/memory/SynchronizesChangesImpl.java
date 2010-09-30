@@ -109,7 +109,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 			
 			// all commands are OK, count the number of changes
 			
-			long nChanges = model.countChanges(2);
+			long nChanges = model.countCommandsNeeded(2);
 			
 			if(nChanges == 0) {
 				// nothing to change
