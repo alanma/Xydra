@@ -34,11 +34,6 @@ public class XV {
 	 * Returns the content of the given {@link Collection} as an
 	 * {@link XIDListValue}
 	 * 
-	 * Note that this is overloaded so that {@link Set Sets} are converted to
-	 * {@link XSetValue XSetValues}. To specifically create a set value use
-	 * {@link #toSetValue(Collection)}. To specifically create a list value use
-	 * {@link #toListValue(Collection)}.
-	 * 
 	 * @param list The {@link Collection} which is to be converted into an
 	 *            {@link XIDListValue}
 	 * @return an {@link XIDListValue} with the content of the given list
@@ -110,11 +105,6 @@ public class XV {
 	/**
 	 * Returns the content of the given {@link Collection} as an
 	 * {@link XStringListValue}
-	 * 
-	 * Note that this is overloaded so that {@link Set Sets} are converted to
-	 * {@link XSetValue XSetValues}. To specifically create a set value use
-	 * {@link #toSetValue(Collection)}. To specifically create a list value use
-	 * {@link #toListValue(Collection)}.
 	 * 
 	 * @param list The {@link Collection} which is to be converted into an
 	 *            {@link XStringListValue}
