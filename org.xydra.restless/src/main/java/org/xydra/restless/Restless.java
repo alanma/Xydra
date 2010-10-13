@@ -6,13 +6,12 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -26,6 +25,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.restless.example.ExampleApp;
+import org.xydra.restless.example.ExampleResource;
 
 
 /**
@@ -59,10 +60,6 @@ import org.xydra.log.LoggerFactory;
  * 
  * 4) The configuration can be accessed at the URL "/admin/restless"
  * 
- * @author voelkel
- * 
- */
-/**
  * @author voelkel
  * 
  */
@@ -303,7 +300,7 @@ public class Restless extends HttpServlet {
 	 */
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse res) {
-		if("/admin/restless".equals(req.getPathInfo())) {
+		if(req.getRequestURI().startsWith("/admin/restless")) {
 			doIntrospection(req, res);
 		} else {
 			restlessService(req, res);
@@ -318,6 +315,7 @@ public class Restless extends HttpServlet {
 	 * @param res
 	 */
 	private void doIntrospection(HttpServletRequest req, HttpServletResponse res) {
+		String servletPath = getServletPath(req);
 		res.setContentType(MIME_XHTML);
 		res.setCharacterEncoding(CHARSET_UTF8);
 		try {
@@ -330,10 +328,10 @@ public class Restless extends HttpServlet {
 			res.getWriter().println("<p><ol>");
 			for(RestlessMethod rm : this.methods) {
 				res.getWriter().print("<li>");
+				String url = servletPath + xmlEncode(rm.pathTemplate.getRegex());
 				res.getWriter().print(
-				        "Mapping " + rm.httpMethod + " <a href='"
-				                + xmlEncode(rm.pathTemplate.getRegex()) + "'>"
-				                + xmlEncode(rm.pathTemplate.getRegex()) + "</a> --&gt; ");
+				        "Mapping " + rm.httpMethod + " <a href='" + url + "'>" + url
+				                + "</a> --&gt; ");
 				res.getWriter().print(
 				        instanceOrClass_className(rm.instanceOrClass) + "#" + rm.methodName);
 				res.getWriter().println(" access:" + (rm.adminOnly ? "ADMIN ONLY" : "PUBLIC"));
@@ -346,6 +344,21 @@ public class Restless extends HttpServlet {
 			throw new RuntimeException(e);
 		}
 		res.setStatus(200);
+	}
+	
+	/**
+	 * @param req
+	 * @return "/foo/" for a request uri of "/foo/bar" with a pathInfo of "bar"
+	 */
+	public static String getServletPath(HttpServletRequest req) {
+		String uri = req.getRequestURI();
+		String path = req.getPathInfo();
+		String servletPath = uri.substring(0, uri.length() - path.length());
+		
+		// FIXME
+		System.out.println("uri=" + uri + "\npath=" + path + "->" + servletPath);
+		
+		return servletPath;
 	}
 	
 	/*
@@ -432,9 +445,11 @@ public class Restless extends HttpServlet {
 		/** invoke restless(this,'/') on configured application class */
 		this.apps = servletConfig.getInitParameter("app");
 		
-		Set<String> appClassNames = parseToSet(this.apps);
+		List<String> appClassNames = parseToList(this.apps);
 		for(String appClassName : appClassNames) {
+			log.info("Loading restless app '" + appClassName + "'...");
 			instatiateAndInit(appClassName);
+			log.info("... done.");
 		}
 		
 		log.info(">>> Done Restless init at context path '"
@@ -503,22 +518,22 @@ public class Restless extends HttpServlet {
 	
 	/**
 	 * @param commaSeparatedClassnames
-	 * @return a set of classnames
+	 * @return a list of classnames in order of appearance
 	 */
-	private Set<String> parseToSet(String commaSeparatedClassnames) {
+	private List<String> parseToList(String commaSeparatedClassnames) {
 		
-		Set<String> set = new HashSet<String>();
+		List<String> list = new ArrayList<String>();
 		if(commaSeparatedClassnames == null) {
-			return set;
+			return list;
 		}
 		
 		String[] parts = commaSeparatedClassnames.split(",");
 		for(int i = 0; i < parts.length; i++) {
 			String classname = parts[i].trim();
 			assert !classname.contains(",");
-			set.add(classname);
+			list.add(classname);
 		}
-		return set;
+		return list;
 	}
 	
 	/**
