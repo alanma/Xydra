@@ -20,6 +20,8 @@ import org.xydra.core.model.session.XProtectedModel;
 import org.xydra.core.model.session.XProtectedObject;
 import org.xydra.core.model.session.XProtectedRepository;
 import org.xydra.core.model.session.impl.arm.ArmProtectedRepository;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessException;
 import org.xydra.server.IXydraServer;
@@ -46,10 +48,18 @@ import org.xydra.server.rest.log.LogTestResource;
 @RunsInJava
 public class XydraRestServer {
 	
+	private static final Logger log = LoggerFactory.getLogger(XydraRestServer.class);
+	
 	public static final String INIT_PARAM_XYDRASERVER = "org.xydra.server";
 	
 	public static final String SERVLET_CONTEXT_ATTRIBUTE_XYDRASERVER = "org.xydra.server";
 	
+	/**
+	 * @param restless
+	 * @return an instance of {@link IXydraServer} from the current servlet
+	 *         context that has hopefully been put there by a previous call of
+	 *         restless().
+	 */
 	public static IXydraServer getXydraServer(Restless restless) {
 		return (IXydraServer)restless.getServletContext().getAttribute(
 		        SERVLET_CONTEXT_ATTRIBUTE_XYDRASERVER);
@@ -132,6 +142,8 @@ public class XydraRestServer {
 		// store in context
 		restless.getServletContext().setAttribute(SERVLET_CONTEXT_ATTRIBUTE_XYDRASERVER,
 		        serverInstance);
+		log.info("XydraServer instance stored in servletContext at key '"
+		        + SERVLET_CONTEXT_ATTRIBUTE_XYDRASERVER + "'");
 	}
 	
 	public void ping(HttpServletResponse res) throws IOException {
