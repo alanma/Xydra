@@ -61,8 +61,18 @@ public class XydraRestServer {
 	 *         restless().
 	 */
 	public static IXydraServer getXydraServer(Restless restless) {
-		return (IXydraServer)restless.getServletContext().getAttribute(
+		IXydraServer xydraServer = getXydraServerInternal(restless);
+		if(xydraServer == null) {
+			log
+			        .warn("XydraRestServer.restless hasn't been run properly before calling this method.");
+		}
+		return xydraServer;
+	}
+	
+	private static IXydraServer getXydraServerInternal(Restless restless) {
+		IXydraServer xydraServer = (IXydraServer)restless.getServletContext().getAttribute(
 		        SERVLET_CONTEXT_ATTRIBUTE_XYDRASERVER);
+		return xydraServer;
 	}
 	
 	/**
@@ -98,7 +108,7 @@ public class XydraRestServer {
 	
 	public static synchronized void initializeServer(Restless restless) {
 		
-		if(getXydraServer(restless) != null) {
+		if(getXydraServerInternal(restless) != null) {
 			// server already initialized
 			return;
 		}
