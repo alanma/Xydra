@@ -1,7 +1,5 @@
 package org.xydra.core.model.session.impl.arm;
 
-import java.util.Iterator;
-
 import org.xydra.core.access.XAccessManager;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XFieldEventListener;
@@ -10,7 +8,6 @@ import org.xydra.core.change.XModelEventListener;
 import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.XTransactionEventListener;
-import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
@@ -27,25 +24,13 @@ import org.xydra.core.model.session.XProtectedObject;
  * @author dscharrer
  * 
  */
-public class ArmProtectedModel implements XProtectedModel {
+public class ArmProtectedModel extends ArmProtectedBaseModel implements XProtectedModel {
 	
 	private final XModel model;
-	private final XAccessManager arm;
-	private final XID actor;
 	
 	public ArmProtectedModel(XModel model, XAccessManager arm, XID actor) {
+		super(model, arm, actor);
 		this.model = model;
-		this.arm = arm;
-		this.actor = actor;
-		
-		assert model != null;
-		assert arm != null;
-	}
-	
-	private void checkReadAccess() throws XAccessException {
-		if(!this.arm.canRead(this.actor, getAddress())) {
-			throw new XAccessException(this.actor + " cannot read " + getAddress());
-		}
 	}
 	
 	public XProtectedObject createObject(XID objectId) {
@@ -70,12 +55,10 @@ public class ArmProtectedModel implements XProtectedModel {
 		return this.model.executeModelCommand(this.actor, command);
 	}
 	
+	@Override
 	public XProtectedObject getObject(XID objectId) {
 		
-		if(!this.arm.canKnowAboutObject(this.actor, getAddress(), objectId)) {
-			throw new XAccessException(this.actor + " cannot read object " + objectId + " in "
-			        + getAddress());
-		}
+		checkCanKnowAboutObject(objectId);
 		
 		XObject object = this.model.getObject(objectId);
 		
@@ -94,42 +77,6 @@ public class ArmProtectedModel implements XProtectedModel {
 		}
 		
 		return this.model.removeObject(this.actor, objectId);
-	}
-	
-	public long getRevisionNumber() {
-		
-		checkReadAccess();
-		
-		return this.model.getRevisionNumber();
-	}
-	
-	public boolean hasObject(XID objectId) {
-		
-		checkReadAccess();
-		
-		return this.model.hasObject(objectId);
-	}
-	
-	public boolean isEmpty() {
-		
-		checkReadAccess();
-		
-		return this.model.isEmpty();
-	}
-	
-	public XAddress getAddress() {
-		return this.model.getAddress();
-	}
-	
-	public XID getID() {
-		return this.model.getID();
-	}
-	
-	public Iterator<XID> iterator() {
-		
-		checkReadAccess();
-		
-		return this.model.iterator();
 	}
 	
 	public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
@@ -196,10 +143,6 @@ public class ArmProtectedModel implements XProtectedModel {
 	
 	public XChangeLog getChangeLog() {
 		return new ArmProtectedChangeLog(this.model.getChangeLog(), this.arm, this.actor);
-	}
-	
-	public XID getActor() {
-		return this.actor;
 	}
 	
 }

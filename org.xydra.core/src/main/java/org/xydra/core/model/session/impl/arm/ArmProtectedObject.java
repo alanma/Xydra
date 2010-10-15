@@ -1,7 +1,5 @@
 package org.xydra.core.model.session.impl.arm;
 
-import java.util.Iterator;
-
 import org.xydra.core.access.XAccessManager;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XFieldEventListener;
@@ -9,7 +7,6 @@ import org.xydra.core.change.XObjectCommand;
 import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.XTransactionEventListener;
-import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
@@ -26,25 +23,13 @@ import org.xydra.core.model.session.XProtectedObject;
  * @author dscharrer
  * 
  */
-public class ArmProtectedObject implements XProtectedObject {
+public class ArmProtectedObject extends ArmProtectedBaseObject implements XProtectedObject {
 	
 	private final XObject object;
-	private final XAccessManager arm;
-	private final XID actor;
 	
 	public ArmProtectedObject(XObject object, XAccessManager arm, XID actor) {
+		super(object, arm, actor);
 		this.object = object;
-		this.arm = arm;
-		this.actor = actor;
-		
-		assert object != null;
-		assert arm != null;
-	}
-	
-	private void checkReadAccess() throws XAccessException {
-		if(!this.arm.canRead(this.actor, getAddress())) {
-			throw new XAccessException(this.actor + " cannot read " + getAddress());
-		}
 	}
 	
 	public XProtectedField createField(XID fieldId) {
@@ -69,12 +54,10 @@ public class ArmProtectedObject implements XProtectedObject {
 		return this.object.executeObjectCommand(this.actor, command);
 	}
 	
+	@Override
 	public XProtectedField getField(XID fieldId) {
 		
-		if(!this.arm.canKnowAboutField(this.actor, getAddress(), fieldId)) {
-			throw new XAccessException(this.actor + " cannot read field " + fieldId + " in "
-			        + getAddress());
-		}
+		checkCanKnowAboutField(fieldId);
 		
 		XField field = this.object.getField(fieldId);
 		
@@ -93,42 +76,6 @@ public class ArmProtectedObject implements XProtectedObject {
 		}
 		
 		return this.object.removeField(this.actor, fieldId);
-	}
-	
-	public long getRevisionNumber() {
-		
-		checkReadAccess();
-		
-		return this.object.getRevisionNumber();
-	}
-	
-	public boolean hasField(XID fieldId) {
-		
-		checkReadAccess();
-		
-		return this.object.hasField(fieldId);
-	}
-	
-	public boolean isEmpty() {
-		
-		checkReadAccess();
-		
-		return this.object.isEmpty();
-	}
-	
-	public XAddress getAddress() {
-		return this.object.getAddress();
-	}
-	
-	public XID getID() {
-		return this.object.getID();
-	}
-	
-	public Iterator<XID> iterator() {
-		
-		checkReadAccess();
-		
-		return this.object.iterator();
 	}
 	
 	public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
@@ -184,10 +131,6 @@ public class ArmProtectedObject implements XProtectedObject {
 	
 	public XChangeLog getChangeLog() {
 		return new ArmProtectedChangeLog(this.object.getChangeLog(), this.arm, this.actor);
-	}
-	
-	public XID getActor() {
-		return this.actor;
 	}
 	
 }
