@@ -81,7 +81,7 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	
 	public static XRepositoryEvent createAddEvent(XID actor, XAddress target, XID modelID) {
 		return new MemoryRepositoryEvent(actor, target, modelID, ChangeType.ADD,
-		        XEvent.RevisionOfEntityNotSet);
+		        RevisionOfEntityNotSet);
 	}
 	
 	/**
@@ -104,7 +104,7 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	
 	public static XRepositoryEvent createRemoveEvent(XID actor, XAddress target, XID modelID,
 	        long modelRevison) {
-		if(modelRevison == XEvent.RevisionOfEntityNotSet) {
+		if(modelRevison < 0) {
 			throw new IllegalArgumentException(
 			        "model revision must be set for repository REMOVE events");
 		}
@@ -126,6 +126,10 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 			throw new IllegalArgumentException("model ID must be set for repository events");
 		}
 		
+		if(modelRevision < 0 && modelRevision != RevisionOfEntityNotSet) {
+			throw new IllegalArgumentException("invalid modelRevision: " + modelRevision);
+		}
+		
 		this.modelID = modelID;
 		this.modelRevision = modelRevision;
 	}
@@ -133,7 +137,7 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	@Override
 	public String toString() {
 		String str = "RepositoryEvent: " + getChangeType() + " " + this.modelID;
-		if(this.modelRevision != XEvent.RevisionOfEntityNotSet)
+		if(this.modelRevision >= 0)
 			str += " r" + this.modelRevision;
 		str += " @" + getTarget();
 		return str;

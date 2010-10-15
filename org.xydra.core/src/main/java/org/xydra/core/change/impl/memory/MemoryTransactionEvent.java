@@ -111,13 +111,13 @@ public class MemoryTransactionEvent implements XTransactionEvent {
 		}
 		
 		if(target.getObject() == null) {
-			if(objectRevision != XEvent.RevisionOfEntityNotSet)
+			if(objectRevision >= 0)
 				throw new IllegalArgumentException(
 				        "object revision must not be set for model transactions");
-			if(modelRevision == XEvent.RevisionOfEntityNotSet)
+			if(modelRevision < 0)
 				throw new IllegalArgumentException(
 				        "model revision must be set for model transactions");
-		} else if(objectRevision == XEvent.RevisionOfEntityNotSet)
+		} else if(objectRevision < 0)
 			throw new IllegalArgumentException(
 			        "object revision must be set for object transactions");
 		
@@ -255,8 +255,8 @@ public class MemoryTransactionEvent implements XTransactionEvent {
 	@Override
 	public String toString() {
 		String str = "TransactionEvent @" + this.target + " r";
-		str += (this.modelRevision == XEvent.RevisionOfEntityNotSet ? "-" : this.modelRevision);
-		if(this.objectRevision != XEvent.RevisionOfEntityNotSet)
+		str += (this.modelRevision < 0 ? "-" : this.modelRevision);
+		if(this.objectRevision >= 0)
 			str += "/" + this.objectRevision;
 		return str + ": " + Arrays.toString(this.events);
 	}

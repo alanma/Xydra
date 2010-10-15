@@ -99,8 +99,8 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	
 	public static XObjectEvent createAddEvent(XID actor, XAddress target, XID fieldID,
 	        long objectRevision, boolean inTransaction) {
-		return createAddEvent(actor, target, fieldID, XEvent.RevisionOfEntityNotSet,
-		        objectRevision, inTransaction);
+		return createAddEvent(actor, target, fieldID, RevisionOfEntityNotSet, objectRevision,
+		        inTransaction);
 	}
 	
 	/**
@@ -129,7 +129,7 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	        long modelRevision, long objectRevision, boolean inTransaction) {
 		
 		return new MemoryObjectEvent(actor, target, fieldID, ChangeType.ADD, modelRevision,
-		        objectRevision, XEvent.RevisionOfEntityNotSet, inTransaction);
+		        objectRevision, RevisionOfEntityNotSet, inTransaction);
 	}
 	
 	/**
@@ -157,8 +157,8 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	
 	public static XObjectEvent createRemoveEvent(XID actor, XAddress target, XID fieldID,
 	        long objectRevision, long fieldRevision, boolean inTransaction) {
-		return createRemoveEvent(actor, target, fieldID, XEvent.RevisionOfEntityNotSet,
-		        objectRevision, fieldRevision, inTransaction);
+		return createRemoveEvent(actor, target, fieldID, RevisionOfEntityNotSet, objectRevision,
+		        fieldRevision, inTransaction);
 		
 	}
 	
@@ -189,7 +189,7 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	
 	public static XObjectEvent createRemoveEvent(XID actor, XAddress target, XID fieldID,
 	        long modelRevision, long objectRevision, long fieldRevision, boolean inTransaction) {
-		if(fieldRevision == XEvent.RevisionOfEntityNotSet) {
+		if(fieldRevision < 0) {
 			throw new IllegalArgumentException(
 			        "field revision must be set for object REMOVE events");
 		}
@@ -208,9 +208,20 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 			throw new IllegalArgumentException("target must refer to an object, was: " + target);
 		}
 		
-		if(fieldID == null || objectRevision == XEvent.RevisionOfEntityNotSet) {
-			throw new IllegalArgumentException(
-			        "field ID and object revision must be set for object events");
+		if(fieldID == null || objectRevision < 0) {
+			throw new IllegalArgumentException("field ID must be set for object events");
+		}
+		
+		if(objectRevision < 0 && objectRevision != RevisionNotAvailable) {
+			throw new IllegalArgumentException("object revision must be set for object events");
+		}
+		
+		if(fieldRevision < 0 && fieldRevision != RevisionOfEntityNotSet) {
+			throw new IllegalArgumentException("invalid fieldRevision: " + fieldRevision);
+		}
+		
+		if(modelRevision < 0 && modelRevision != RevisionOfEntityNotSet) {
+			throw new IllegalArgumentException("invalid modelRevision: " + modelRevision);
 		}
 		
 		this.fieldID = fieldID;
@@ -223,12 +234,11 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	@Override
 	public String toString() {
 		String str = "ObjectEvent: " + getChangeType() + " " + this.fieldID;
-		if(this.fieldRevision != XEvent.RevisionOfEntityNotSet)
+		if(this.fieldRevision >= 0)
 			str += " r" + this.fieldRevision;
 		str += " @" + getTarget();
-		str += " r"
-		        + (this.modelRevision == XEvent.RevisionOfEntityNotSet ? "-" : this.modelRevision)
-		        + "/" + this.objectRevision;
+		str += " r" + (this.modelRevision < 0 ? "-" : this.modelRevision) + "/"
+		        + this.objectRevision;
 		return str;
 	}
 	

@@ -19,6 +19,7 @@ import org.xydra.core.model.XRepository;
 public interface XEvent {
 	
 	public static long RevisionOfEntityNotSet = -1;
+	public static long RevisionNotAvailable = -2;
 	
 	/**
 	 * @return the type of change.
@@ -46,24 +47,27 @@ public interface XEvent {
 	/**
 	 * @return The revision number of the {@link XModel} holding the changed
 	 *         entity (or which is the changed entity) at the time when this
-	 *         event happened (may be -1 if this XEvent refers to something that
-	 *         is not a model or has no father-model)
+	 *         event happened (may be {@link #RevisionOfEntityNotSet} if this
+	 *         XEvent refers to something that is not a model or has no
+	 *         father-model)
 	 */
 	long getModelRevisionNumber();
 	
 	/**
 	 * @return The revision number of the {@link XObject} holding the changed
 	 *         entity (or which is the changed entity) at the time when this
-	 *         event happened (may be -1 if this XEvent refers to something that
-	 *         is not an object or has no father-object)
+	 *         event happened (may be {@link #RevisionOfEntityNotSet} if this
+	 *         XEvent refers to something that is not an object or has no
+	 *         father-object; may be {@link #RevisionNotAvailable} if the object
+	 *         revision cannot be efficiently calculated)
 	 */
 	long getObjectRevisionNumber();
 	
 	/**
 	 * @return The revision number of the {@link XField} holding the changed
 	 *         entity (or which is the changed entity) at the time when this
-	 *         event happened (may be -1 if this XEvent refers to something that
-	 *         is not a field)
+	 *         event happened (may be {@link #RevisionOfEntityNotSet} if this
+	 *         XEvent refers to something that is not a field)
 	 */
 	long getFieldRevisionNumber();
 	

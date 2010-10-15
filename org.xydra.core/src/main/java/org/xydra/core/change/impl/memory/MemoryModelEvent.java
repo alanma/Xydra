@@ -94,7 +94,7 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 	public static XModelEvent createAddEvent(XID actor, XAddress target, XID objectID,
 	        long modelRevision, boolean inTransaction) {
 		return new MemoryModelEvent(actor, target, objectID, ChangeType.ADD, modelRevision,
-		        XEvent.RevisionOfEntityNotSet, inTransaction);
+		        RevisionOfEntityNotSet, inTransaction);
 	}
 	
 	/**
@@ -120,7 +120,7 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 	
 	public static XModelEvent createRemoveEvent(XID actor, XAddress target, XID objectID,
 	        long modelRevision, long objectRevision, boolean inTransaction) {
-		if(objectRevision == XEvent.RevisionOfEntityNotSet) {
+		if(objectRevision < 0) {
 			throw new IllegalArgumentException(
 			        "object revision must be set for model REMOVE events");
 		}
@@ -141,8 +141,13 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 		if(objectID == null) {
 			throw new IllegalArgumentException("object ID must be set for model events, is null");
 		}
-		if(modelRevision == XEvent.RevisionOfEntityNotSet) {
+		if(modelRevision < 0) {
 			throw new IllegalArgumentException("revision must be set for model events");
+		}
+		
+		if(objectRevision < 0 && objectRevision != RevisionOfEntityNotSet
+		        && objectRevision != RevisionNotAvailable) {
+			throw new IllegalArgumentException("invalid objectRevision: " + objectRevision);
 		}
 		
 		this.objectID = objectID;
@@ -154,7 +159,7 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 	@Override
 	public String toString() {
 		String str = "ModelEvent: " + getChangeType() + " " + this.objectID;
-		if(this.objectRevision != XEvent.RevisionOfEntityNotSet)
+		if(this.objectRevision >= 0)
 			str += " r" + this.objectRevision;
 		str += " @" + getTarget();
 		str += " r" + this.modelRevision;

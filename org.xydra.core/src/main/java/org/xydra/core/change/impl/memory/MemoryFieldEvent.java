@@ -117,7 +117,7 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	 */
 	public static XFieldEvent createChangeEvent(XID actor, XAddress target, XValue oldValue,
 	        XValue newValue, long objectRevision, long fieldRevision, boolean inTransaction) {
-		return createChangeEvent(actor, target, oldValue, newValue, XEvent.RevisionOfEntityNotSet,
+		return createChangeEvent(actor, target, oldValue, newValue, RevisionOfEntityNotSet,
 		        objectRevision, fieldRevision, inTransaction);
 	}
 	
@@ -179,8 +179,8 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	 */
 	public static XFieldEvent createAddEvent(XID actor, XAddress target, XValue newValue,
 	        long objectRevision, long fieldRevision, boolean inTransaction) {
-		return createAddEvent(actor, target, newValue, XEvent.RevisionOfEntityNotSet,
-		        objectRevision, fieldRevision, inTransaction);
+		return createAddEvent(actor, target, newValue, RevisionOfEntityNotSet, objectRevision,
+		        fieldRevision, inTransaction);
 	}
 	
 	/**
@@ -238,8 +238,8 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	 */
 	public static XFieldEvent createRemoveEvent(XID actor, XAddress target, XValue oldValue,
 	        long objectRevision, long fieldRevision, boolean inTransaction) {
-		return createRemoveEvent(actor, target, oldValue, XEvent.RevisionOfEntityNotSet,
-		        objectRevision, fieldRevision, inTransaction);
+		return createRemoveEvent(actor, target, oldValue, RevisionOfEntityNotSet, objectRevision,
+		        fieldRevision, inTransaction);
 	}
 	
 	/**
@@ -282,8 +282,17 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	        boolean inTransaction) {
 		super(target, changeType, actor);
 		
-		if(target.getField() == null || fieldRevision == XEvent.RevisionOfEntityNotSet) {
+		if(target.getField() == null || fieldRevision < 0) {
 			throw new IllegalArgumentException("field ID and revision must be set for field events");
+		}
+		
+		if(objectRevision < 0 && objectRevision != RevisionOfEntityNotSet
+		        && objectRevision != RevisionNotAvailable) {
+			throw new IllegalArgumentException("invalid objectRevision: " + objectRevision);
+		}
+		
+		if(modelRevision < 0 && modelRevision != RevisionOfEntityNotSet) {
+			throw new IllegalArgumentException("invalid modelRevision: " + modelRevision);
 		}
 		
 		this.oldValue = oldValue;
@@ -297,13 +306,9 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	
 	@Override
 	public String toString() {
-		String suffix = " @"
-		        + getTarget()
-		        + " r"
-		        + (this.modelRevision == XEvent.RevisionOfEntityNotSet ? "-" : this.modelRevision)
-		        + "/"
-		        + (this.objectRevision == XEvent.RevisionOfEntityNotSet ? "-" : this.objectRevision)
-		        + "/" + this.fieldRevision;
+		String suffix = " @" + getTarget() + " r"
+		        + (this.modelRevision < 0 ? "-" : this.modelRevision) + "/"
+		        + (this.objectRevision < 0 ? "-" : this.objectRevision) + "/" + this.fieldRevision;
 		switch(getChangeType()) {
 		case ADD:
 			return "FieldEvent: ADD " + this.newValue + suffix;
