@@ -214,6 +214,52 @@ abstract public class AbstractTransactionTest {
 	}
 	
 	@Test
+	public void testModelTransactionNoChangeRemoveAdd() {
+		
+		final long modelRev = this.model.getRevisionNumber();
+		final long johnRev = this.john.getRevisionNumber();
+		final long peterRev = this.peter.getRevisionNumber();
+		final long johnPhoneRev = this.john.getField(PHONE_ID).getRevisionNumber();
+		final long peterPhoneRev = this.peter.getField(PHONE_ID).getRevisionNumber();
+		
+		XAddress johnAddr = this.john.getAddress();
+		XAddress peterAddr = this.peter.getAddress();
+		XAddress johnPhoneAddr = this.john.getField(PHONE_ID).getAddress();
+		XAddress peterPhoneAddr = this.peter.getField(PHONE_ID).getAddress();
+		
+		XTransactionBuilder tb = new XTransactionBuilder(this.model.getAddress());
+		
+		tb.removeField(johnAddr, XCommand.FORCED, PHONE_ID);
+		tb.removeObject(this.model.getAddress(), XCommand.FORCED, JOHN_ID);
+		tb.addObject(this.model.getAddress(), XCommand.SAFE, JOHN_ID);
+		tb.addField(johnAddr, XCommand.SAFE, PHONE_ID);
+		tb.addValue(johnPhoneAddr, XCommand.FORCED, JOHN_PHONE);
+		
+		tb.removeField(peterAddr, XCommand.FORCED, PHONE_ID);
+		tb.addField(peterAddr, XCommand.SAFE, PHONE_ID);
+		tb.addValue(peterPhoneAddr, XCommand.FORCED, PETER_PHONE);
+		
+		// record any changes and check that everything has been changed
+		// correctly when the first event is executed
+		HasChanged hc = HasChanged.listen(this.model);
+		
+		long result = this.model.executeTransaction(ACTOR_ID, tb.build());
+		
+		assertEquals(XCommand.NOCHANGE, result);
+		
+		// check that everything is correct after the transaction has executed.
+		
+		assertEquals(modelRev, this.model.getRevisionNumber());
+		assertEquals(johnRev, this.john.getRevisionNumber());
+		assertEquals(peterRev, this.peter.getRevisionNumber());
+		assertEquals(johnPhoneRev, this.john.getField(PHONE_ID).getRevisionNumber());
+		assertEquals(peterPhoneRev, this.peter.getField(PHONE_ID).getRevisionNumber());
+		
+		assertFalse(hc.eventsReceived);
+		
+	}
+	
+	@Test
 	public void testModelTransactionSingleChange() {
 		
 		final long modelRev = this.model.getRevisionNumber();
