@@ -79,4 +79,8 @@ public class NewObject implements DeltaObject {
 		return n;
 	}
 	
+	public void clear() {
+		this.fields.clear();
+	}
+	
 }

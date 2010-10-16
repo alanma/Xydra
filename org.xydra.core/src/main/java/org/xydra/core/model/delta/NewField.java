@@ -52,4 +52,8 @@ public class NewField implements DeltaField {
 		return isEmpty() ? 1 : 2;
 	}
 	
+	public void clear() {
+		setValue(null);
+	}
+	
 }

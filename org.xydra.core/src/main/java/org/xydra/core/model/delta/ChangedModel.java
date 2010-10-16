@@ -40,31 +40,83 @@ import org.xydra.index.iterator.BagUnionIterator;
  */
 public class ChangedModel implements DeltaModel {
 	
+	// Fields that are in base but have been removed.
+	// Contains no XIDs that are in added or changed.
 	private final Set<XID> removed = new HashSet<XID>();
+	
+	// Fields that are not in base and have been added.
+	// Contains no XIDs that are in removed or changed.
 	private final Map<XID,NewObject> added = new HashMap<XID,NewObject>();
+	
+	// Fields that are in base and have not been removed.
+	// While they were changed once, those changes might have been reverted.
+	// Contains no XIDs that are in added or removed.
 	private final Map<XID,ChangedObject> changed = new HashMap<XID,ChangedObject>();
 	
 	private final XBaseModel base;
 	
 	/**
+	 * Wrap an {@link XBaseModel} to record a set of changes made. Multiple
+	 * changes will be combined as much as possible such that a minimal set of
+	 * changes remains.
+	 * 
+	 * Note that this is a very lightweight wrapper intended for a short
+	 * lifetime. As a consequence, the wrapped {@link XBaseModel} is not copied
+	 * and changes to it or any contained objects and fields (as opposed to this
+	 * {@link ChangedModel}) may result in undefined behavior of the
+	 * {@link ChangedModel}.
+	 * 
 	 * @param base The {@link XBaseModel} this ChangedModel will encapsulate and
 	 *            represent
-	 */
-	/*
-	 * TODO Woudln't it be better to actually copy the given base entitiy?
-	 * (think about synchronization problems - somebody might change the base
-	 * entity while this "changed" entity is being used, which may result in
-	 * complete confusion (?))
 	 */
 	public ChangedModel(XBaseModel base) {
 		this.base = base;
 	}
 	
-	public void createObject(XID objectId) {
-		if(!hasObject(objectId)) {
-			XAddress objectAddr = XX.resolveObject(getAddress(), objectId);
-			this.added.put(objectId, new NewObject(objectAddr));
+	private boolean checkSetInvariants() {
+		
+		for(XID id : this.removed) {
+			assert !this.added.containsKey(id) && !this.changed.containsKey(id);
+			assert this.base.hasObject(id);
 		}
+		
+		for(XID id : this.added.keySet()) {
+			assert !this.removed.contains(id) && !this.changed.containsKey(id);
+			assert !this.base.hasObject(id);
+			assert id.equals(this.added.get(id).getID());
+		}
+		
+		for(XID id : this.changed.keySet()) {
+			assert !this.removed.contains(id) && !this.added.containsKey(id);
+			assert this.base.hasObject(id);
+			assert id.equals(this.changed.get(id).getID());
+		}
+		
+		return true;
+	}
+	
+	public void createObject(XID objectId) {
+		
+		if(!hasObject(objectId)) {
+			XBaseObject object = this.base.getObject(objectId);
+			if(object != null) {
+				// If the field previously existed it must have been removed
+				// previously and we can merge the remove and add changes.
+				assert this.removed.contains(objectId);
+				this.removed.remove(objectId);
+				if(!object.isEmpty()) {
+					ChangedObject cf = new ChangedObject(object);
+					cf.clear();
+					this.changed.put(objectId, cf);
+				}
+			} else {
+				// Otherwise, the field is completely new.
+				XAddress fieldAddr = XX.resolveObject(getAddress(), objectId);
+				this.added.put(objectId, new NewObject(fieldAddr));
+			}
+		}
+		
+		assert checkSetInvariants();
 	}
 	
 	/**
@@ -206,25 +258,44 @@ public class ChangedModel implements DeltaModel {
 		changedObject = new ChangedObject(object);
 		this.changed.put(objectId, changedObject);
 		
+		assert checkSetInvariants();
+		
 		return changedObject;
 	}
 	
 	public void removeObject(XID objectId) {
-		if(hasObject(objectId)) {
-			if(!this.added.containsKey(objectId)) {
-				this.removed.add(objectId);
-			} else {
-				this.added.remove(objectId);
-			}
+		
+		if(this.added.containsKey(objectId)) {
+			
+			// Never existed in base, so removing from added is sufficient.
+			assert !this.base.hasObject(objectId) && !this.changed.containsKey(objectId);
+			assert !this.removed.contains(objectId);
+			
+			this.added.remove(objectId);
+			
+			assert checkSetInvariants();
+			
+		} else if(!this.removed.contains(objectId) && this.base.hasObject(objectId)) {
+			
+			// Exists in base and not removed yet.
+			assert !this.added.containsKey(objectId);
+			
+			this.removed.add(objectId);
 			this.changed.remove(objectId);
+			
+			assert checkSetInvariants();
+			
 		}
+		
 	}
 	
 	/**
+	 * Return the revision number of the wrapped {@link XBaseModel}. The
+	 * revision number does not increase with changes to this
+	 * {@link ChangedModel}.
+	 * 
 	 * @return the revision number of the original {@link XBaseModel}
 	 */
-	// TODO Maybe a method for returning the revision number this ChangedModel
-	// would have if it would be a real model would be a good idea?
 	public long getRevisionNumber() {
 		return this.base.getRevisionNumber();
 	}
@@ -480,6 +551,19 @@ public class ChangedModel implements DeltaModel {
 		} else {
 			throw new IllegalArgumentException("unexpected command type: " + command);
 		}
+	}
+	
+	public void clear() {
+		
+		this.added.clear();
+		this.changed.clear();
+		for(XID id : this.base) {
+			// IMPROVE maybe add a "cleared" flag to remove all fields more
+			// efficiently?
+			this.removed.add(id);
+		}
+		
+		assert checkSetInvariants();
 	}
 	
 }

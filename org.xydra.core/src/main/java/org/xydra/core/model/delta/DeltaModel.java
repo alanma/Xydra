@@ -41,4 +41,9 @@ public interface DeltaModel extends XBaseModel {
 	 */
 	public DeltaObject getObject(XID objectId);
 	
+	/**
+	 * Remove all objects.
+	 */
+	void clear();
+	
 }

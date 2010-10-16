@@ -20,6 +20,11 @@ public interface DeltaField extends XBaseField {
 	 * 
 	 * @param value The new {@link XValue}
 	 */
-	public void setValue(XValue value);
+	void setValue(XValue value);
+	
+	/**
+	 * Remove any value.
+	 */
+	void clear();
 	
 }

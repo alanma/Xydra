@@ -34,31 +34,83 @@ import org.xydra.index.iterator.BagUnionIterator;
  */
 public class ChangedObject implements DeltaObject {
 	
+	// Fields that are in base but have been removed.
+	// Contains no XIDs that are in added or changed.
 	private final Set<XID> removed = new HashSet<XID>();
+	
+	// Fields that are not in base and have been added.
+	// Contains no XIDs that are in removed or changed.
 	private final Map<XID,NewField> added = new HashMap<XID,NewField>();
+	
+	// Fields that are in base and have not been removed.
+	// While they were changed once, those changes might have been reverted.
+	// Contains no XIDs that are in added or removed.
 	private final Map<XID,ChangedField> changed = new HashMap<XID,ChangedField>();
 	
 	private final XBaseObject base;
 	
 	/**
+	 * Wrap an {@link XBaseObject} to record a set of changes made. Multiple
+	 * changes will be combined as much as possible such that a minimal set of
+	 * changes remains.
+	 * 
+	 * Note that this is a very lightweight wrapper intended for a short
+	 * lifetime. As a consequence, the wrapped {@link XBaseObject} is not copied
+	 * and changes to it or any contained fields (as opposed to this
+	 * {@link ChangedObject}) may result in undefined behavior of the
+	 * {@link ChangedObject}.
+	 * 
 	 * @param base The {@link XBaseObject} this ChangedObject will encapsulate
 	 *            and represent
-	 */
-	/*
-	 * TODO Woudln't it be better to actually copy the given base entitiy?
-	 * (think about synchronization problems - somebody might change the base
-	 * entity while this "changed" entity is being used, which may result in
-	 * complete confusion (?))
 	 */
 	public ChangedObject(XBaseObject base) {
 		this.base = base;
 	}
 	
-	public void createField(XID fieldId) {
-		if(!hasField(fieldId)) {
-			XAddress fieldAddr = XX.resolveField(getAddress(), fieldId);
-			this.added.put(fieldId, new NewField(fieldAddr));
+	private boolean checkSetInvariants() {
+		
+		for(XID id : this.removed) {
+			assert !this.added.containsKey(id) && !this.changed.containsKey(id);
+			assert this.base.hasField(id);
 		}
+		
+		for(XID id : this.added.keySet()) {
+			assert !this.removed.contains(id) && !this.changed.containsKey(id);
+			assert !this.base.hasField(id);
+			assert id.equals(this.added.get(id).getID());
+		}
+		
+		for(XID id : this.changed.keySet()) {
+			assert !this.removed.contains(id) && !this.added.containsKey(id);
+			assert this.base.hasField(id);
+			assert id.equals(this.changed.get(id).getID());
+		}
+		
+		return true;
+	}
+	
+	public void createField(XID fieldId) {
+		
+		if(!hasField(fieldId)) {
+			XBaseField field = this.base.getField(fieldId);
+			if(field != null) {
+				// If the field previously existed it must have been removed
+				// previously and we can merge the remove and add changes.
+				assert this.removed.contains(fieldId);
+				this.removed.remove(fieldId);
+				if(!field.isEmpty()) {
+					ChangedField cf = new ChangedField(field);
+					cf.clear();
+					this.changed.put(fieldId, cf);
+				}
+			} else {
+				// Otherwise, the field is completely new.
+				XAddress fieldAddr = XX.resolveField(getAddress(), fieldId);
+				this.added.put(fieldId, new NewField(fieldAddr));
+			}
+		}
+		
+		assert checkSetInvariants();
 	}
 	
 	/**
@@ -79,9 +131,11 @@ public class ChangedObject implements DeltaObject {
 	}
 	
 	/**
-	 * @return an iterable of the fields that already existed in the original
-	 *         {@link XBaseObject} but have been changed. Note: their current
-	 *         state might be the same as the original one
+	 * @return an {@link Iterable} of the fields that already existed in the
+	 *         original {@link XBaseObject} but have been changed. Note: their
+	 *         current state might be the same as the original one. Use
+	 *         {@link ChangedField#isChanged()} to check if they are actually
+	 *         different form the original field.
 	 */
 	public Iterable<ChangedField> getChangedFields() {
 		return this.changed.values();
@@ -188,25 +242,44 @@ public class ChangedObject implements DeltaObject {
 		changedField = new ChangedField(field);
 		this.changed.put(fieldId, changedField);
 		
+		assert checkSetInvariants();
+		
 		return changedField;
 	}
 	
 	public void removeField(XID fieldId) {
-		if(hasField(fieldId)) {
-			if(!this.added.containsKey(fieldId)) {
-				this.removed.add(fieldId);
-			} else {
-				this.added.remove(fieldId);
-			}
+		
+		if(this.added.containsKey(fieldId)) {
+			
+			// Never existed in base, so removing from added is sufficient.
+			assert !this.base.hasField(fieldId) && !this.changed.containsKey(fieldId);
+			assert !this.removed.contains(fieldId);
+			
+			this.added.remove(fieldId);
+			
+			assert checkSetInvariants();
+			
+		} else if(!this.removed.contains(fieldId) && this.base.hasField(fieldId)) {
+			
+			// Exists in base and not removed yet.
+			assert !this.added.containsKey(fieldId);
+			
+			this.removed.add(fieldId);
 			this.changed.remove(fieldId);
+			
+			assert checkSetInvariants();
+			
 		}
+		
 	}
 	
 	/**
+	 * Return the revision number of the wrapped {@link XBaseObject}. The
+	 * revision number does not increase with changes to this
+	 * {@link ChangedObject}.
+	 * 
 	 * @return the revision number of the original {@link XBaseObject}
 	 */
-	// TODO Maybe a method for returning the revision number this ChangedObject
-	// would have if it would be a real object would be a good idea?
 	public long getRevisionNumber() {
 		return this.base.getRevisionNumber();
 	}
@@ -265,6 +338,19 @@ public class ChangedObject implements DeltaObject {
 		}
 		
 		return true;
+	}
+	
+	public void clear() {
+		
+		this.added.clear();
+		this.changed.clear();
+		for(XID id : this.base) {
+			// IMPROVE maybe add a "cleared" flag to remove all fields more
+			// efficiently?
+			this.removed.add(id);
+		}
+		
+		assert checkSetInvariants();
 	}
 	
 }

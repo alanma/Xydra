@@ -29,14 +29,17 @@ public class ChangedField implements DeltaField {
 	boolean changed = false;
 	
 	/**
+	 * Wrap an {@link XBaseField} to record a set of changes made. Multiple
+	 * changes will be combined as much as possible such that a minimal set of
+	 * changes remains.
+	 * 
+	 * Note that this is a very lightweight wrapper intended for a short
+	 * lifetime. As a consequence, the wrapped {@link XBaseField} is not copied
+	 * and changes to it (as opposed to this {@link ChangedField}) may result in
+	 * undefined behavior of the {@link ChangedField}.
+	 * 
 	 * @param base The {@link XBaseField} this ChangedField will encapsulate and
 	 *            represent
-	 */
-	/*
-	 * TODO Woudln't it be better to actually copy the given base entitiy?
-	 * (think about synchronization problems - somebody might change the base
-	 * entity while this "changed" entity is being used, which may result in
-	 * complete confusion (?))
 	 */
 	public ChangedField(XBaseField base) {
 		this.value = base.getValue();
@@ -54,10 +57,12 @@ public class ChangedField implements DeltaField {
 	}
 	
 	/**
+	 * Return the revision number of the wrapped {@link XBaseField}. The
+	 * revision number does not increase with changes to this
+	 * {@link ChangedField}.
+	 * 
 	 * @return the revision number of the original {@link XBaseField}
 	 */
-	// TODO Maybe a method for returning the revision number this ChangedField
-	// would have if it would be a real field would be a good idea?
 	public long getRevisionNumber() {
 		return this.base.getRevisionNumber();
 	}
@@ -75,8 +80,8 @@ public class ChangedField implements DeltaField {
 	}
 	
 	/**
-	 * @return true, if the current {@link XValue} of this ChangedField was
-	 *         changed since its creation time.
+	 * @return true, if the current {@link XValue} of this ChangedField is
+	 *         different from the value of the underlying {@link XBaseField}
 	 */
 	public boolean isChanged() {
 		return this.changed;
@@ -88,6 +93,10 @@ public class ChangedField implements DeltaField {
 	
 	public boolean isEmpty() {
 		return this.value == null;
+	}
+	
+	public void clear() {
+		setValue(null);
 	}
 	
 }

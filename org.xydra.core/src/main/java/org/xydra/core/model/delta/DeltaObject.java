@@ -19,7 +19,7 @@ public interface DeltaObject extends XBaseObject {
 	 * @param fieldId The {@link XID} for the {@link DeltaField} which is to be
 	 *            created
 	 */
-	public void createField(XID fieldId);
+	void createField(XID fieldId);
 	
 	/**
 	 * Removes the {@link DeltaField} with the given {@link XID} from this
@@ -28,7 +28,7 @@ public interface DeltaObject extends XBaseObject {
 	 * @param fieldId The {@link XID} of the {@link DeltaField} which is to be
 	 *            removed
 	 */
-	public void removeField(XID fieldId);
+	void removeField(XID fieldId);
 	
 	/**
 	 * Returns the {@link DeltaField} contained in this object with the given
@@ -39,6 +39,11 @@ public interface DeltaObject extends XBaseObject {
 	 * @return The {@link DeltaField} with the given {@link XID} or null, if no
 	 *         corresponding {@link DeltaField} exists
 	 */
-	public DeltaField getField(XID fieldId);
+	DeltaField getField(XID fieldId);
+	
+	/**
+	 * Remove all fields.
+	 */
+	void clear();
 	
 }
