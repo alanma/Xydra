@@ -286,11 +286,13 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	public void changeModel(XBaseModel oldModel, XBaseModel newModel)
 	        throws IllegalArgumentException {
 		for(XID oldObjectId : oldModel) {
-			if(!newModel.hasObject(oldObjectId))
+			if(!newModel.hasObject(oldObjectId)) {
 				removeObject(oldModel.getObject(oldObjectId));
+			}
 		}
-		for(XID newObjectId : newModel)
+		for(XID newObjectId : newModel) {
 			setObject(oldModel, newModel.getObject(newObjectId));
+		}
 	}
 	
 	/**
@@ -316,10 +318,11 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	public void setObject(XBaseModel oldModel, XBaseObject newObject)
 	        throws IllegalArgumentException {
 		XBaseObject oldObject = oldModel.getObject(newObject.getID());
-		if(oldObject == null)
+		if(oldObject == null) {
 			addObject(oldModel.getAddress(), newObject);
-		else
+		} else {
 			changeObject(oldObject, newObject);
+		}
 	}
 	
 	/**
@@ -345,10 +348,11 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	public void setField(XBaseObject oldObject, XBaseField newField)
 	        throws IllegalArgumentException {
 		XBaseField oldField = oldObject.getField(newField.getID());
-		if(oldField == null)
+		if(oldField == null) {
 			addField(oldObject.getAddress(), newField);
-		else
+		} else {
 			changeField(oldField, newField);
+		}
 	}
 	
 	/**
@@ -411,11 +415,13 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 */
 	public void changeObject(XBaseObject oldObject, XBaseObject newObject) {
 		for(XID oldFieldId : oldObject) {
-			if(!newObject.hasField(oldFieldId))
+			if(!newObject.hasField(oldFieldId)) {
 				removeField(oldObject.getField(oldFieldId));
+			}
 		}
-		for(XID newFieldId : newObject)
+		for(XID newFieldId : newObject) {
 			setField(oldObject, newObject.getField(newFieldId));
+		}
 	}
 	
 	/**
@@ -451,7 +457,7 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 		addField(objectAddr, XCommand.SAFE, newField.getID());
 		if(newField.getValue() != null) {
 			XAddress fieldAddr = XX.resolveField(objectAddr, newField.getID());
-			addValue(fieldAddr, XCommand.NEW, newField.getValue());
+			addValue(fieldAddr, XCommand.FORCED, newField.getValue());
 		}
 	}
 	
@@ -495,8 +501,9 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 */
 	public void changeValue(XAddress fieldAddr, long revision, XValue oldValue, XValue newValue) {
 		if(oldValue == null) {
-			if(newValue != null)
+			if(newValue != null) {
 				addValue(fieldAddr, revision, newValue);
+			}
 		} else if(!oldValue.equals(newValue)) {
 			if(newValue == null) {
 				removeValue(fieldAddr, revision);
@@ -760,6 +767,26 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 		XAddress target = field.getAddress();
 		long revision = field.getRevisionNumber();
 		changeValue(target, revision, field.getOldValue(), field.getValue());
+	}
+	
+	/**
+	 * Ensures that there is a field with the state of newField in the object
+	 * addressed by objectAddr. Overwrites any existing field with the same ID
+	 * and only fails if the given object doesn't exist.
+	 */
+	public void setField(XAddress objectAddr, XBaseField newField) {
+		removeField(objectAddr, XCommand.FORCED, newField.getID());
+		addField(objectAddr, newField);
+	}
+	
+	/**
+	 * Ensures that there is an object with the state of newObject in the model
+	 * addressed by modelAddr. Overwrites any existing object with the same ID
+	 * and only fails if the given model doesn't exist.
+	 */
+	public void setObject(XAddress modelAddr, XBaseObject newObject) {
+		removeObject(modelAddr, XCommand.FORCED, newObject.getID());
+		addObject(modelAddr, newObject);
 	}
 	
 }
