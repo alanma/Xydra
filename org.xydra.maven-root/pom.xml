@@ -31,6 +31,18 @@
 		</extensions>
 
 		<plugins>
+			<!--
+				the eclipse plugin tries to integrate missing sources to the
+				.classpath
+			-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<configuration>
+					<downloadSources>true</downloadSources>
+				</configuration>
+			</plugin>
+
 			<!-- set encoding to UTF8 (not something platform dependent) -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
