@@ -1068,4 +1068,9 @@ public class GaeModelService implements XChangeLog {
 		return 0;
 	}
 	
+	public XBaseModel getSnapshot() {
+		// TODO implement me
+		return null;
+	}
+	
 }
