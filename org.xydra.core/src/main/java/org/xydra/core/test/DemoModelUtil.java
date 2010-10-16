@@ -1,11 +1,28 @@
 package org.xydra.core.test;
 
 import org.xydra.core.XX;
+import org.xydra.core.change.XCommand;
+import org.xydra.core.change.XTransactionBuilder;
+import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
+import org.xydra.core.value.XBooleanListValue;
+import org.xydra.core.value.XBooleanValue;
+import org.xydra.core.value.XByteListValue;
+import org.xydra.core.value.XDoubleListValue;
+import org.xydra.core.value.XDoubleValue;
+import org.xydra.core.value.XIDListValue;
+import org.xydra.core.value.XIDSetValue;
+import org.xydra.core.value.XIntegerListValue;
+import org.xydra.core.value.XIntegerValue;
+import org.xydra.core.value.XLongListValue;
+import org.xydra.core.value.XLongValue;
+import org.xydra.core.value.XStringListValue;
+import org.xydra.core.value.XStringSetValue;
+import org.xydra.core.value.XStringValue;
 import org.xydra.core.value.XV;
 
 
@@ -31,7 +48,7 @@ public class DemoModelUtil {
 	public static final XID FLAGS_ID = XX.toId("flags");
 	public static final XID AGE_ID = XX.toId("age");
 	public static final XID HEIGHT_ID = XX.toId("height");
-	public static final XID COORDIANTES_ID = XX.toId("coordinates");
+	public static final XID COORDINATES_ID = XX.toId("coordinates");
 	public static final XID SCORES_ID = XX.toId("scores");
 	public static final XID MAXCALLTIME_ID = XX.toId("maxCallTime");
 	public static final XID LASTCALLTIMES_ID = XX.toId("lastCallTime");
@@ -41,6 +58,29 @@ public class DemoModelUtil {
 	public static final XID COOKIENAMES_ID = XX.toId("cookienames");
 	public static final XID COOKIE1_ID = XX.toId("cookie1");
 	public static final XID COOKIE2_ID = XX.toId("cookie2");
+	
+	public static final XStringSetValue COOKIENAMES_VALUE = XV.toStringSetValue(new String[] {
+	        "Chocolate Chip", "Almond" });
+	public static final XByteListValue SIGNATURE_VALUE = XV.toValue(new byte[] { 0, 1, 2, 3, 4, 5,
+	        6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, (byte)253, (byte)254, (byte)255 });
+	public static final XLongListValue LASTCALLTIMES_VALUE = XV.toValue(new long[] { 32456L, 7664L,
+	        56L });
+	public static final XLongValue MAXCALLTIME_VALUE = XV.toValue(675874678478467L);
+	public static final XIntegerListValue SCORES_VALUE = XV.toValue(new int[] { 34, 234, 34 });
+	public static final XIntegerValue AGE_VALUE = XV.toValue(42);
+	public static final XDoubleListValue COORDINATES_VALUE = XV.toValue(new double[] { 32.465,
+	        19.34 });
+	public static final XDoubleValue HEIGHT_VALUE = XV.toValue(121.3);
+	public static final XBooleanListValue FLAGS_VALUE = XV.toValue(new boolean[] { true, false,
+	        true, true, false });
+	public static final XBooleanValue HIDDEN_VALUE = XV.toValue(false);
+	public static final XStringListValue ALIASES_VALUE = XV.toValue(new String[] { "Johnny",
+	        "John the Man", "Cookie Monster" });
+	public static final XStringValue PHONE_VALUE = XV.toValue("3463-2346");
+	public static final XStringValue TITLE_VALUE = XV.toValue("Dr. John Doe");
+	public static final XIDListValue FRIENDS_VALUE = XV.toValue(new XID[] { CLAUDIA_ID, PETER_ID });
+	public static final XIDSetValue COOKIES_VALUE = XV.toIDSetValue(new XID[] { COOKIE1_ID,
+	        COOKIE2_ID });
 	
 	public static final XID ACTOR_ID = XX.toId("DemoModel");
 	
@@ -61,6 +101,18 @@ public class DemoModelUtil {
 		setupPhonebook(model);
 	}
 	
+	public static void setupPhonebook(XAddress modelAddr, XTransactionBuilder tb) {
+		
+		tb.addObject(modelAddr, XCommand.SAFE, JOHN_ID);
+		tb.addObject(modelAddr, XCommand.SAFE, CLAUDIA_ID);
+		tb.addObject(modelAddr, XCommand.SAFE, PETER_ID);
+		
+		XAddress johnAddr = XX.resolveObject(modelAddr, JOHN_ID);
+		
+		setupJohn(johnAddr, tb);
+		
+	}
+	
 	public static void setupPhonebook(XModel model) {
 		
 		XObject john = model.createObject(ACTOR_ID, JOHN_ID);
@@ -72,59 +124,128 @@ public class DemoModelUtil {
 		
 	}
 	
+	public static void setupJohn(XAddress objectAddr, XTransactionBuilder tb) {
+		
+		tb.addField(objectAddr, XCommand.SAFE, TITLE_ID);
+		XAddress titleAddr = XX.resolveField(objectAddr, TITLE_ID);
+		tb.addValue(titleAddr, XCommand.FORCED, TITLE_VALUE);
+		
+		tb.addField(objectAddr, XCommand.SAFE, PHONE_ID);
+		XAddress phoneAddr = XX.resolveField(objectAddr, PHONE_ID);
+		tb.addValue(phoneAddr, XCommand.FORCED, PHONE_VALUE);
+		
+		tb.addField(objectAddr, XCommand.SAFE, ALIASES_ID);
+		XAddress aliasesAddr = XX.resolveField(objectAddr, ALIASES_ID);
+		tb.addValue(aliasesAddr, XCommand.FORCED, ALIASES_VALUE);
+		
+		tb.addField(objectAddr, XCommand.SAFE, FRIENDS_ID);
+		XAddress friendsAddr = XX.resolveField(objectAddr, FRIENDS_ID);
+		tb.addValue(friendsAddr, XCommand.FORCED, FRIENDS_VALUE);
+		
+		tb.addField(objectAddr, XCommand.SAFE, SPOUSE_ID);
+		XAddress spouseAddr = XX.resolveField(objectAddr, SPOUSE_ID);
+		tb.addValue(spouseAddr, XCommand.FORCED, CLAUDIA_ID);
+		
+		tb.addField(objectAddr, XCommand.SAFE, HIDDEN_ID);
+		XAddress hiddenAddr = XX.resolveField(objectAddr, HIDDEN_ID);
+		tb.addValue(hiddenAddr, XCommand.FORCED, HIDDEN_VALUE);
+		
+		tb.addField(objectAddr, XCommand.SAFE, FLAGS_ID);
+		XAddress flagsAddr = XX.resolveField(objectAddr, FLAGS_ID);
+		tb.addValue(flagsAddr, XCommand.FORCED, FLAGS_VALUE);
+		
+		tb.addField(objectAddr, XCommand.SAFE, HEIGHT_ID);
+		XAddress heightAddr = XX.resolveField(objectAddr, HEIGHT_ID);
+		tb.addValue(heightAddr, XCommand.FORCED, HEIGHT_VALUE);
+		
+		tb.addField(objectAddr, XCommand.SAFE, COORDINATES_ID);
+		XAddress coordinatesAddr = XX.resolveField(objectAddr, COORDINATES_ID);
+		tb.addValue(coordinatesAddr, XCommand.FORCED, COORDINATES_VALUE);
+		
+		tb.addField(objectAddr, XCommand.SAFE, AGE_ID);
+		XAddress ageAddr = XX.resolveField(objectAddr, AGE_ID);
+		tb.addValue(ageAddr, XCommand.FORCED, AGE_VALUE);
+		
+		tb.addField(objectAddr, XCommand.SAFE, SCORES_ID);
+		XAddress scoresAddr = XX.resolveField(objectAddr, SCORES_ID);
+		tb.addValue(scoresAddr, XCommand.FORCED, SCORES_VALUE);
+		
+		tb.addField(objectAddr, XCommand.SAFE, MAXCALLTIME_ID);
+		XAddress maxcalltimeAddr = XX.resolveField(objectAddr, MAXCALLTIME_ID);
+		tb.addValue(maxcalltimeAddr, XCommand.FORCED, MAXCALLTIME_VALUE);
+		
+		tb.addField(objectAddr, XCommand.SAFE, LASTCALLTIMES_ID);
+		XAddress lastcalltimesAddr = XX.resolveField(objectAddr, LASTCALLTIMES_ID);
+		tb.addValue(lastcalltimesAddr, XCommand.FORCED, LASTCALLTIMES_VALUE);
+		
+		tb.addField(objectAddr, XCommand.SAFE, EMPTYFIELD_ID);
+		
+		tb.addField(objectAddr, XCommand.SAFE, SIGNATURE_ID);
+		XAddress signatureAddr = XX.resolveField(objectAddr, SIGNATURE_ID);
+		tb.addValue(signatureAddr, XCommand.FORCED, SIGNATURE_VALUE);
+		
+		tb.addField(objectAddr, XCommand.SAFE, COOKIES_ID);
+		XAddress cookiesAddr = XX.resolveField(objectAddr, COOKIES_ID);
+		tb.addValue(cookiesAddr, XCommand.FORCED, COOKIES_VALUE);
+		
+		tb.addField(objectAddr, XCommand.SAFE, COOKIENAMES_ID);
+		XAddress cookienamesAddr = XX.resolveField(objectAddr, COOKIENAMES_ID);
+		tb.addValue(cookienamesAddr, XCommand.FORCED, COOKIENAMES_VALUE);
+		
+	}
+	
 	public static void setupJohn(XObject john) {
 		
 		XField name = john.createField(ACTOR_ID, TITLE_ID);
-		name.setValue(ACTOR_ID, XV.toValue("Dr. John Doe"));
+		name.setValue(ACTOR_ID, TITLE_VALUE);
+		
 		XField phoneNumber = john.createField(ACTOR_ID, PHONE_ID);
-		phoneNumber.setValue(ACTOR_ID, XV.toValue("3463-2346"));
+		phoneNumber.setValue(ACTOR_ID, PHONE_VALUE);
 		
 		XField aliases = john.createField(ACTOR_ID, ALIASES_ID);
-		aliases.setValue(ACTOR_ID, XV.toValue(new String[] { "Johnny", "John the Man",
-		        "Cookie Monster" }));
+		aliases.setValue(ACTOR_ID, ALIASES_VALUE);
 		
 		XField friends = john.createField(ACTOR_ID, FRIENDS_ID);
-		friends.setValue(ACTOR_ID, XV.toValue(new XID[] { CLAUDIA_ID, PETER_ID }));
+		friends.setValue(ACTOR_ID, FRIENDS_VALUE);
 		
 		XField spouse = john.createField(ACTOR_ID, SPOUSE_ID);
 		spouse.setValue(ACTOR_ID, CLAUDIA_ID);
 		
 		XField hidden = john.createField(ACTOR_ID, HIDDEN_ID);
-		hidden.setValue(ACTOR_ID, XV.toValue(false));
+		hidden.setValue(ACTOR_ID, HIDDEN_VALUE);
 		
 		XField flags = john.createField(ACTOR_ID, FLAGS_ID);
-		flags.setValue(ACTOR_ID, XV.toValue(new boolean[] { true, false, true, true, false }));
+		flags.setValue(ACTOR_ID, FLAGS_VALUE);
 		
 		XField height = john.createField(ACTOR_ID, HEIGHT_ID);
-		height.setValue(ACTOR_ID, XV.toValue(121.3));
+		height.setValue(ACTOR_ID, HEIGHT_VALUE);
 		
-		XField coordinates = john.createField(ACTOR_ID, COORDIANTES_ID);
-		coordinates.setValue(ACTOR_ID, XV.toValue(new double[] { 32.465, 19.34 }));
+		XField coordinates = john.createField(ACTOR_ID, COORDINATES_ID);
+		coordinates.setValue(ACTOR_ID, COORDINATES_VALUE);
 		
 		XField age = john.createField(ACTOR_ID, AGE_ID);
-		age.setValue(ACTOR_ID, XV.toValue(42));
+		age.setValue(ACTOR_ID, AGE_VALUE);
 		
 		XField scores = john.createField(ACTOR_ID, SCORES_ID);
-		scores.setValue(ACTOR_ID, XV.toValue(new int[] { 34, 234, 34 }));
+		scores.setValue(ACTOR_ID, SCORES_VALUE);
 		
 		XField maxCallTime = john.createField(ACTOR_ID, MAXCALLTIME_ID);
-		maxCallTime.setValue(ACTOR_ID, XV.toValue(675874678478467L));
+		maxCallTime.setValue(ACTOR_ID, MAXCALLTIME_VALUE);
 		
 		XField lastCallTimes = john.createField(ACTOR_ID, LASTCALLTIMES_ID);
-		lastCallTimes.setValue(ACTOR_ID, XV.toValue(new long[] { 32456L, 7664L, 56L }));
+		lastCallTimes.setValue(ACTOR_ID, LASTCALLTIMES_VALUE);
 		
 		john.createField(ACTOR_ID, EMPTYFIELD_ID);
 		
 		XField signature = john.createField(ACTOR_ID, SIGNATURE_ID);
-		signature.setValue(ACTOR_ID, XV.toValue(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
-		        12, 13, 14, 15, 16, (byte)253, (byte)254, (byte)255 }));
+		signature.setValue(ACTOR_ID, SIGNATURE_VALUE);
 		
 		XField cookies = john.createField(ACTOR_ID, COOKIES_ID);
-		cookies.setValue(ACTOR_ID, XV.toIDSetValue(new XID[] { COOKIE1_ID, COOKIE2_ID }));
+		cookies.setValue(ACTOR_ID, COOKIES_VALUE);
 		
 		XField cookieNames = john.createField(ACTOR_ID, COOKIENAMES_ID);
-		cookieNames.setValue(ACTOR_ID, XV.toStringSetValue(new String[] { "Chocolate Chip",
-		        "Almond" }));
+		cookieNames.setValue(ACTOR_ID, COOKIENAMES_VALUE);
 		
 	}
+	
 }
