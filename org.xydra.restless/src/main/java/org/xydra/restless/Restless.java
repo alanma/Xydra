@@ -300,7 +300,8 @@ public class Restless extends HttpServlet {
 	 */
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse res) {
-		if(req.getRequestURI().startsWith("/admin/restless")) {
+		String uri = req.getRequestURI();
+		if(uri.startsWith("/admin/restless")) {
 			doIntrospection(req, res);
 		} else {
 			restlessService(req, res);
