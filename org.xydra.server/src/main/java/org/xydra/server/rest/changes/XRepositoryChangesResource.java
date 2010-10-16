@@ -5,14 +5,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XRepositoryCommand;
-import org.xydra.core.model.session.XProtectedRepository;
+import org.xydra.core.model.XAddress;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.MiniXMLParser;
 import org.xydra.core.xml.XmlCommand;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessException;
-import org.xydra.server.IXydraServer;
+import org.xydra.server.IXydraSession;
 import org.xydra.server.rest.XydraRestServer;
 
 
@@ -25,8 +25,7 @@ public class XRepositoryChangesResource {
 	
 	public void executeRepositoryCommand(Restless restless, HttpServletRequest req,
 	        HttpServletResponse res) {
-		IXydraServer server = XydraRestServer.getXydraServer(restless);
-		XProtectedRepository repo = XydraRestServer.getProtectedRepository(server, req);
+		IXydraSession session = XydraRestServer.getSession(restless, req);
 		
 		String commandXml = XydraRestServer.readPostData(req);
 		
@@ -36,14 +35,16 @@ public class XRepositoryChangesResource {
 			MiniXMLParser parser = new MiniXMLParserImpl();
 			MiniElement commandElement = parser.parseXml(commandXml);
 			
-			command = XmlCommand.toRepositoryCommand(commandElement, repo.getAddress());
+			XAddress repoAddr = session.getRepositoryAddress();
+			command = XmlCommand.toRepositoryCommand(commandElement, repoAddr);
+			// TODO allow other command types?
 			
 		} catch(IllegalArgumentException iae) {
 			throw new RestlessException(RestlessException.Bad_request,
 			        "could not parse the provided XRepositoryCommand: " + iae.getMessage());
 		}
 		
-		long result = repo.executeRepositoryCommand(command);
+		long result = session.executeCommand(command);
 		
 		if(result == XCommand.FAILED) {
 			res.setStatus(HttpServletResponse.SC_CONFLICT);
@@ -53,4 +54,5 @@ public class XRepositoryChangesResource {
 			res.setStatus(HttpServletResponse.SC_CREATED);
 		}
 	}
+	
 }

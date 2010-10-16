@@ -1,9 +1,15 @@
 package org.xydra.server.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.junit.After;
 import org.junit.Test;
+import org.xydra.core.change.XCommand;
+import org.xydra.core.change.XRepositoryCommand;
+import org.xydra.core.change.XTransactionBuilder;
+import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
+import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.test.DemoModelUtil;
 import org.xydra.server.IXydraServer;
@@ -29,18 +35,25 @@ public abstract class PreTest {
 		assertNotNull(xydraServer);
 		
 		// initialize XModel
-		this.repo = xydraServer.getRepository();
-		assertNotNull(this.repo);
+		// TODO move command into transaction
+		XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(xydraServer
+		        .getRepositoryAddress(), XCommand.SAFE, DemoModelUtil.PHONEBOOK_ID);
+		assertEquals(XCommand.CHANGED, xydraServer.executeCommand(createCommand, null));
+		XAddress modelAddr = createCommand.getChangedEntity();
+		XTransactionBuilder tb = new XTransactionBuilder(modelAddr);
+		DemoModelUtil.setupPhonebook(modelAddr, tb);
+		xydraServer.executeCommand(tb.build(), null);
 		
-		DemoModelUtil.addPhonebookModel(this.repo);
-		
-		assertNotNull(xydraServer.getRepository().getModel(DemoModelUtil.PHONEBOOK_ID));
+		assertNotNull(xydraServer.getModelSnapshot(DemoModelUtil.PHONEBOOK_ID));
 		
 	}
 	
 	@After
 	public void tearDown() {
-		this.repo.removeModel(null, DemoModelUtil.PHONEBOOK_ID);
+		XCommand removeCommand = MemoryRepositoryCommand.createRemoveCommand(xydraServer
+		        .getRepositoryAddress(), XCommand.FORCED, DemoModelUtil.PHONEBOOK_ID);
+		long result = xydraServer.executeCommand(removeCommand, null);
+		assert result != XCommand.FAILED;
 	}
 	
 }

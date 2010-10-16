@@ -24,10 +24,12 @@ import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.core.XFile;
 import org.xydra.core.change.XCommand;
+import org.xydra.core.change.XRepositoryCommand;
 import org.xydra.core.change.XTransactionBuilder;
+import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
+import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
-import org.xydra.core.model.XRepository;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlModel;
 import org.xydra.core.xml.XmlOut;
@@ -62,7 +64,6 @@ public class WebadminApp {
 		boolean includeLogs = logs == null ? false : Boolean.valueOf(logs);
 		
 		IXydraServer server = XydraRestServer.getXydraServer(restless);
-		XRepository repo = server.getRepository();
 		
 		log.info("request for xydra backup");
 		
@@ -84,7 +85,7 @@ public class WebadminApp {
 		res.addHeader("Content-Disposition", "attachment; filename=\"" + archiveName + "\"");
 		
 		// Add the models to the zip archive.
-		for(XID modelId : repo) {
+		for(XID modelId : server) {
 			
 			String filename = URLEncoder.encode(modelId.toURI(), "UTF-8") + XFile.MODEL_SUFFIX;
 			
@@ -95,7 +96,7 @@ public class WebadminApp {
 			log.info("adding model \"" + modelId.toString() + "\" as \"" + filename + "\"");
 			
 			XmlOut out = new XmlOutStream(zos);
-			XmlModel.toXml(repo.getModel(modelId), out, true, false, includeLogs);
+			XmlModel.toXml(server.getModelSnapshot(modelId), out, true, false, includeLogs);
 			out.flush();
 			
 			zos.closeEntry();
@@ -111,7 +112,6 @@ public class WebadminApp {
 	        throws IOException {
 		
 		IXydraServer server = XydraRestServer.getXydraServer(restless);
-		XRepository repo = server.getRepository();
 		
 		log.debug("restore from backup request");
 		
@@ -184,14 +184,21 @@ public class WebadminApp {
 				throw new RuntimeException("error parsing model file \"" + name + "\"", e);
 			}
 			
+			XID actor = null; // TODO
+			
 			boolean existed = false;
-			if(repo.hasModel(model.getID())) {
+			XBaseModel oldModel = server.getModelSnapshot(model.getID());
+			if(oldModel != null) {
 				existed = true;
 				overwritten++;
+			} else {
+				XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(server
+				        .getRepositoryAddress(), XCommand.FORCED, model.getID());
+				server.executeCommand(createCommand, actor);
+				oldModel = server.getModelSnapshot(model.getID());
 			}
 			
-			XID actor = null; // TODO
-			XModel oldModel = repo.createModel(actor, model.getID());
+			// FIXME concurrency: move createCommand into transaction
 			
 			XTransactionBuilder tb = new XTransactionBuilder(oldModel.getAddress());
 			tb.changeModel(oldModel, model);
@@ -206,7 +213,7 @@ public class WebadminApp {
 				continue;
 			}
 			
-			long result = oldModel.executeTransaction(actor, tb.build());
+			long result = server.executeCommand(tb.build(), actor);
 			
 			if(result == XCommand.FAILED) {
 				// can only happen if model changed since

@@ -1,7 +1,6 @@
 package org.xydra.server.test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -22,6 +21,13 @@ import org.junit.BeforeClass;
 import org.xydra.core.XX;
 import org.xydra.core.access.XA;
 import org.xydra.core.access.XAccessManager;
+import org.xydra.core.change.XAtomicCommand;
+import org.xydra.core.change.XCommand;
+import org.xydra.core.change.XRepositoryCommand;
+import org.xydra.core.change.XTransaction;
+import org.xydra.core.change.XTransactionBuilder;
+import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
+import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
@@ -78,10 +84,10 @@ public abstract class AbstractRestApiTest {
 		// set access rights to ALLOW for all users
 		xydraServer = server.getBackend();
 		
-		XRepository remoteRepo = xydraServer.getRepository();
+		XAddress repoAddr = xydraServer.getRepositoryAddress();
 		XAccessManager arm = xydraServer.getAccessManager();
-		arm.setAccess(ACTOR_TESTER, remoteRepo.getAddress(), XA.ACCESS_READ, true);
-		arm.setAccess(ACTOR_TESTER, remoteRepo.getAddress(), XA.ACCESS_WRITE, true);
+		arm.setAccess(ACTOR_TESTER, repoAddr, XA.ACCESS_READ, true);
+		arm.setAccess(ACTOR_TESTER, repoAddr, XA.ACCESS_WRITE, true);
 		
 	}
 	
@@ -98,20 +104,44 @@ public abstract class AbstractRestApiTest {
 		// make sure that we don't write to the server's persistence backend
 		repo = new MemoryRepository(REPO_ID);
 		
-		DemoModelUtil.addPhonebookModel(repo);
-		
 		// add something to the server for testing
-		XRepository remoteRepo = xydraServer.getRepository();
-		assertFalse(remoteRepo.hasModel(DemoModelUtil.PHONEBOOK_ID));
-		DemoModelUtil.addPhonebookModel(remoteRepo);
+		
+		XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(xydraServer
+		        .getRepositoryAddress(), XCommand.SAFE, DemoModelUtil.PHONEBOOK_ID);
+		assertEquals(XCommand.CHANGED, xydraServer.executeCommand(createCommand, ACTOR_TESTER));
+		XAddress modelAddr = createCommand.getChangedEntity();
+		XTransactionBuilder tb = new XTransactionBuilder(modelAddr);
+		DemoModelUtil.setupPhonebook(modelAddr, tb);
+		XTransaction trans = tb.build();
+		//  Apply events individually so there is something in the change log to
+		// test
+		for(XAtomicCommand ac : trans) {
+			assertTrue(xydraServer.executeCommand(ac, ACTOR_TESTER) != XCommand.FAILED);
+		}
+		
+		XRepositoryCommand createCommand2 = MemoryRepositoryCommand.createAddCommand(repo
+		        .getAddress(), XCommand.SAFE, DemoModelUtil.PHONEBOOK_ID);
+		assertEquals(XCommand.CHANGED, repo.executeCommand(ACTOR_TESTER, createCommand2));
+		XAddress localModelAddr = createCommand2.getChangedEntity();
+		XTransactionBuilder tb2 = new XTransactionBuilder(localModelAddr);
+		DemoModelUtil.setupPhonebook(localModelAddr, tb2);
+		XTransaction trans2 = tb2.build();
+		for(XAtomicCommand ac : trans2) {
+			assertTrue(repo.executeCommand(ACTOR_TESTER, ac) != XCommand.FAILED);
+		}
 		
 	}
 	
 	@After
 	public void tearDown() {
 		
-		XRepository remoteRepo = xydraServer.getRepository();
-		remoteRepo.removeModel(null, DemoModelUtil.PHONEBOOK_ID);
+		XCommand removeCommand2 = MemoryRepositoryCommand.createRemoveCommand(repo.getAddress(),
+		        XCommand.FORCED, DemoModelUtil.PHONEBOOK_ID);
+		assertTrue(repo.executeCommand(ACTOR_TESTER, removeCommand2) != XCommand.FAILED);
+		
+		XCommand removeCommand = MemoryRepositoryCommand.createRemoveCommand(xydraServer
+		        .getRepositoryAddress(), XCommand.FORCED, DemoModelUtil.PHONEBOOK_ID);
+		assertTrue(xydraServer.executeCommand(removeCommand, ACTOR_TESTER) != XCommand.FAILED);
 		
 	}
 	
@@ -119,10 +149,10 @@ public abstract class AbstractRestApiTest {
 	public static void cleanup() {
 		
 		// cleanup access rights
-		XRepository remoteRepo = xydraServer.getRepository();
+		XAddress repoAddr = xydraServer.getRepositoryAddress();
 		XAccessManager arm = xydraServer.getAccessManager();
-		arm.resetAccess(ACTOR_TESTER, remoteRepo.getAddress(), XA.ACCESS_READ);
-		arm.resetAccess(ACTOR_TESTER, remoteRepo.getAddress(), XA.ACCESS_WRITE);
+		arm.resetAccess(ACTOR_TESTER, repoAddr, XA.ACCESS_READ);
+		arm.resetAccess(ACTOR_TESTER, repoAddr, XA.ACCESS_WRITE);
 		
 		// stop Jersey
 		server.stopServer();

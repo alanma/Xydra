@@ -12,20 +12,18 @@ import javax.servlet.http.HttpServletResponse;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.core.XX;
-import org.xydra.core.access.XAccessManager;
+import org.xydra.core.model.XBaseField;
+import org.xydra.core.model.XBaseModel;
+import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
-import org.xydra.core.model.XRepository;
-import org.xydra.core.model.session.XProtectedField;
-import org.xydra.core.model.session.XProtectedModel;
-import org.xydra.core.model.session.XProtectedObject;
-import org.xydra.core.model.session.XProtectedRepository;
-import org.xydra.core.model.session.impl.arm.ArmProtectedRepository;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessException;
 import org.xydra.server.IXydraServer;
+import org.xydra.server.IXydraSession;
 import org.xydra.server.XydraServerDefaultConfiguration;
+import org.xydra.server.impl.memory.ArmXydraSession;
 import org.xydra.server.rest.changes.XRepositoryChangesResource;
 import org.xydra.server.rest.changes.XSynchronizeChangesResource;
 import org.xydra.server.rest.data.XFieldResource;
@@ -269,34 +267,26 @@ public class XydraRestServer {
 		
 	}
 	
-	public static XProtectedRepository getProtectedRepository(IXydraServer server,
-	        HttpServletRequest req) {
-		assert server != null;
+	public static IXydraSession getSession(Restless restless, HttpServletRequest req) {
 		XID actor = getActor(req);
-		XRepository repo = server.getRepository();
-		XAccessManager arm = server.getAccessManager();
-		ArmProtectedRepository protectedRepository = new ArmProtectedRepository(repo, arm, actor);
-		return protectedRepository;
+		IXydraServer server = getXydraServer(restless);
+		return new ArmXydraSession(server, actor);
 	}
 	
-	public static XProtectedModel getProtectedModel(IXydraServer server, HttpServletRequest req,
-	        String modelIdStr) {
-		assert server != null;
+	public static XBaseModel getModel(IXydraSession session, String modelIdStr) {
 		XID modelId = getId(modelIdStr);
-		XProtectedRepository repo = getProtectedRepository(server, req);
-		XProtectedModel model = repo.getModel(modelId);
+		XBaseModel model = session.getModelSnapshot(modelId);
 		if(model == null) {
 			throw new RestlessException(RestlessException.Not_found, "no such model " + modelIdStr
-			        + " in " + repo.getAddress());
+			        + " in " + session.getRepositoryAddress());
 		}
 		return model;
 	}
 	
-	public static XProtectedObject getProtectedObject(IXydraServer server, HttpServletRequest req,
-	        String modelIdStr, String objectIdStr) {
+	public static XBaseObject getObject(IXydraSession session, String modelIdStr, String objectIdStr) {
 		XID objectId = getId(objectIdStr);
-		XProtectedModel model = getProtectedModel(server, req, modelIdStr);
-		XProtectedObject object = model.getObject(objectId);
+		XBaseModel model = getModel(session, modelIdStr);
+		XBaseObject object = model.getObject(objectId);
 		if(object == null) {
 			throw new RestlessException(RestlessException.Not_found, "no such object "
 			        + objectIdStr + " in " + model.getAddress());
@@ -304,11 +294,11 @@ public class XydraRestServer {
 		return object;
 	}
 	
-	public static XProtectedField getProtectedField(IXydraServer server, HttpServletRequest req,
-	        String modelIdStr, String objectIdStr, String fieldIdStr) {
+	public static XBaseField getField(IXydraSession session, String modelIdStr, String objectIdStr,
+	        String fieldIdStr) {
 		XID fieldId = getId(fieldIdStr);
-		XProtectedObject object = getProtectedObject(server, req, modelIdStr, objectIdStr);
-		XProtectedField field = object.getField(fieldId);
+		XBaseObject object = getObject(session, modelIdStr, objectIdStr);
+		XBaseField field = object.getField(fieldId);
 		if(field == null) {
 			throw new RestlessException(RestlessException.Not_found, "no field object "
 			        + fieldIdStr + " in " + object.getAddress());

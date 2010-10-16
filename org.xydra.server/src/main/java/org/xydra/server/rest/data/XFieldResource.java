@@ -3,14 +3,17 @@ package org.xydra.server.rest.data;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.xydra.core.model.XID;
-import org.xydra.core.model.session.XProtectedField;
-import org.xydra.core.model.session.XProtectedObject;
+import org.xydra.core.XX;
+import org.xydra.core.change.XCommand;
+import org.xydra.core.change.XObjectCommand;
+import org.xydra.core.change.impl.memory.MemoryObjectCommand;
+import org.xydra.core.model.XAddress;
+import org.xydra.core.model.XBaseField;
 import org.xydra.core.xml.XmlModel;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
-import org.xydra.server.IXydraServer;
+import org.xydra.server.IXydraSession;
 import org.xydra.server.rest.XydraRestServer;
 
 
@@ -31,9 +34,8 @@ public class XFieldResource {
 	
 	public void get(Restless restless, HttpServletRequest req, HttpServletResponse res,
 	        String modelId, String objectId, String fieldId) {
-		IXydraServer server = XydraRestServer.getXydraServer(restless);
-		XProtectedField field = XydraRestServer.getProtectedField(server, req, modelId, objectId,
-		        fieldId);
+		IXydraSession session = XydraRestServer.getSession(restless, req);
+		XBaseField field = XydraRestServer.getField(session, modelId, objectId, fieldId);
 		
 		XmlOutStringBuffer xo = new XmlOutStringBuffer();
 		XmlModel.toXml(field, xo, true);
@@ -42,15 +44,17 @@ public class XFieldResource {
 	}
 	
 	public void delete(Restless restless, HttpServletRequest req, HttpServletResponse res,
-	        String modelId, String objectId, String fieldIdStr) {
-		IXydraServer server = XydraRestServer.getXydraServer(restless);
-		XProtectedObject object = XydraRestServer
-		        .getProtectedObject(server, req, modelId, objectId);
-		XID fieldId = XydraRestServer.getId(fieldIdStr);
+	        String modelId, String objectId, String fieldId) {
+		IXydraSession session = XydraRestServer.getSession(restless, req);
 		
-		boolean wasThere = object.removeField(fieldId);
+		XAddress target = XX.toAddress(session.getRepositoryAddress().getRepository(),
+		        XydraRestServer.getId(modelId), XydraRestServer.getId(objectId), null);
+		XObjectCommand removeCommand = MemoryObjectCommand.createRemoveCommand(target,
+		        XCommand.FORCED, XydraRestServer.getId(fieldId));
 		
-		if(!wasThere) {
+		long result = session.executeCommand(removeCommand);
+		
+		if(result == XCommand.FAILED || result == XCommand.NOCHANGE) {
 			res.setStatus(HttpServletResponse.SC_NOT_FOUND);
 		} else {
 			res.setStatus(HttpServletResponse.SC_NO_CONTENT);

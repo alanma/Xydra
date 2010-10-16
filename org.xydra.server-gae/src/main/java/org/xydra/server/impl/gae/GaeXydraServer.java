@@ -1,11 +1,18 @@
 package org.xydra.server.impl.gae;
 
+import java.util.Iterator;
+
 import org.xydra.core.X;
 import org.xydra.core.access.XAccessManager;
 import org.xydra.core.access.XGroupDatabase;
 import org.xydra.core.access.impl.gae.GaeAccess;
 import org.xydra.core.access.impl.gae.GaeGroups;
+import org.xydra.core.change.XCommand;
 import org.xydra.core.model.XAddress;
+import org.xydra.core.model.XBaseModel;
+import org.xydra.core.model.XChangeLog;
+import org.xydra.core.model.XID;
+import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.state.XSPI;
 import org.xydra.core.model.state.impl.gae.GaeStateStore;
@@ -46,8 +53,30 @@ public class GaeXydraServer implements IXydraServer {
 		return this.groups;
 	}
 	
-	public XRepository getRepository() {
-		return this.repo;
+	public long executeCommand(XCommand command, XID actorId) {
+		return this.repo.executeCommand(actorId, command);
+	}
+	
+	public XChangeLog getChangeLog(XID modelId) {
+		
+		XModel model = this.repo.getModel(modelId);
+		if(model == null) {
+			return null;
+		}
+		
+		return model.getChangeLog();
+	}
+	
+	public XBaseModel getModelSnapshot(XID modelId) {
+		return this.repo.getModel(modelId);
+	}
+	
+	public XAddress getRepositoryAddress() {
+		return this.repo.getAddress();
+	}
+	
+	public Iterator<XID> iterator() {
+		return this.repo.iterator();
 	}
 	
 }

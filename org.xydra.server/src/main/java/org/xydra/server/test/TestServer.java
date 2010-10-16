@@ -1,7 +1,5 @@
 package org.xydra.server.test;
 
-import static org.junit.Assert.assertFalse;
-
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -14,7 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xydra.core.access.XA;
 import org.xydra.core.access.XAccessManager;
-import org.xydra.core.model.XRepository;
+import org.xydra.core.change.XCommand;
+import org.xydra.core.change.XRepositoryCommand;
+import org.xydra.core.change.XTransactionBuilder;
+import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
+import org.xydra.core.model.XAddress;
 import org.xydra.core.test.DemoModelUtil;
 import org.xydra.server.IXydraServer;
 import org.xydra.server.rest.XydraRestServer;
@@ -119,14 +121,20 @@ public class TestServer {
 		IXydraServer xydraServer = server.getBackend();
 		
 		// add a default model
-		XRepository remoteRepo = xydraServer.getRepository();
-		assertFalse(remoteRepo.hasModel(DemoModelUtil.PHONEBOOK_ID));
-		DemoModelUtil.addPhonebookModel(remoteRepo);
+		// TODO move command into transaction
+		XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(xydraServer
+		        .getRepositoryAddress(), XCommand.SAFE, DemoModelUtil.PHONEBOOK_ID);
+		xydraServer.executeCommand(createCommand, null);
+		XAddress modelAddr = createCommand.getChangedEntity();
+		XTransactionBuilder tb = new XTransactionBuilder(modelAddr);
+		DemoModelUtil.setupPhonebook(modelAddr, tb);
+		xydraServer.executeCommand(tb.build(), null);
 		
 		// allow access to everyone
+		XAddress repoAddr = xydraServer.getRepositoryAddress();
 		XAccessManager arm = xydraServer.getAccessManager();
-		arm.setAccess(XA.GROUP_ALL, remoteRepo.getAddress(), XA.ACCESS_READ, true);
-		arm.setAccess(XA.GROUP_ALL, remoteRepo.getAddress(), XA.ACCESS_WRITE, true);
+		arm.setAccess(XA.GROUP_ALL, repoAddr, XA.ACCESS_READ, true);
+		arm.setAccess(XA.GROUP_ALL, repoAddr, XA.ACCESS_WRITE, true);
 		
 		log.info("Started embedded Jetty server. User interface is at " + uri.toString());
 		

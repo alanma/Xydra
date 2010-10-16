@@ -5,10 +5,12 @@ import java.util.Iterator;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
-import org.xydra.core.model.session.XProtectedSynchronizesChanges;
+import org.xydra.core.model.XChangeLog;
+import org.xydra.core.model.XID;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.MiniXMLParser;
 import org.xydra.core.xml.XmlCommand;
@@ -19,7 +21,7 @@ import org.xydra.index.iterator.AbstractTransformingIterator;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessException;
 import org.xydra.restless.RestlessParameter;
-import org.xydra.server.IXydraServer;
+import org.xydra.server.IXydraSession;
 import org.xydra.server.rest.XydraRestServer;
 
 
@@ -45,18 +47,20 @@ public class XSynchronizeChangesResource {
 	
 	public void getEventsModel(Restless restless, HttpServletRequest req, HttpServletResponse res,
 	        String modelId) {
-		IXydraServer server = XydraRestServer.getXydraServer(restless);
-		getEvents(req, res, XydraRestServer.getProtectedModel(server, req, modelId));
+		getEvents(restless, req, res, XydraRestServer.getId(modelId), null);
 	}
 	
 	public void getEventsObject(Restless restless, HttpServletRequest req, HttpServletResponse res,
 	        String modelId, String objectId) {
-		IXydraServer server = XydraRestServer.getXydraServer(restless);
-		getEvents(req, res, XydraRestServer.getProtectedObject(server, req, modelId, objectId));
+		getEvents(restless, req, res, XydraRestServer.getId(modelId), XydraRestServer
+		        .getId(objectId));
 	}
 	
-	public void getEvents(HttpServletRequest req, HttpServletResponse res,
-	        XProtectedSynchronizesChanges entity) {
+	public void getEvents(Restless restless, HttpServletRequest req, HttpServletResponse res,
+	        XID modelId, XID objectId) {
+		IXydraSession session = XydraRestServer.getSession(restless, req);
+		XAddress addr = XX.toAddress(session.getRepositoryAddress().getRepository(), modelId,
+		        objectId, null);
 		
 		Long since = XydraRestServer.getLongParameter(req, "since");
 		Long until = XydraRestServer.getLongParameter(req, "until");
@@ -69,24 +73,31 @@ public class XSynchronizeChangesResource {
 			        "invalid since/until combination: " + since + "/" + until);
 		}
 		
-		XydraRestServer.xmlResponse(res, HttpServletResponse.SC_OK, getEventsAsXml(entity, begin,
-		        end));
+		String changes = getEventsAsXml(session.getChangeLog(modelId), addr, begin, end);
+		if(changes == null) {
+			// ...
+			res.setStatus(HttpServletResponse.SC_NOT_FOUND);
+		} else {
+			XydraRestServer.xmlResponse(res, HttpServletResponse.SC_OK, changes);
+		}
 	}
 	
 	public void executeCommandModel(Restless restless, HttpServletRequest req,
 	        HttpServletResponse res, String modelId) {
-		IXydraServer server = XydraRestServer.getXydraServer(restless);
-		executeCommand(req, res, XydraRestServer.getProtectedModel(server, req, modelId));
+		executeCommand(restless, req, res, XydraRestServer.getId(modelId), null);
 	}
 	
 	public void executeCommandObject(Restless restless, HttpServletRequest req,
 	        HttpServletResponse res, String modelId, String objectId) {
-		IXydraServer server = XydraRestServer.getXydraServer(restless);
-		executeCommand(req, res, XydraRestServer.getProtectedObject(server, req, modelId, objectId));
+		executeCommand(restless, req, res, XydraRestServer.getId(modelId), XydraRestServer
+		        .getId(objectId));
 	}
 	
-	public void executeCommand(HttpServletRequest req, HttpServletResponse res,
-	        XProtectedSynchronizesChanges entity) {
+	public void executeCommand(Restless restless, HttpServletRequest req, HttpServletResponse res,
+	        XID modelId, XID objectId) {
+		IXydraSession session = XydraRestServer.getSession(restless, req);
+		XAddress addr = XX.toAddress(session.getRepositoryAddress().getRepository(), modelId,
+		        objectId, null);
 		
 		Long since = XydraRestServer.getLongParameter(req, "since");
 		
@@ -102,14 +113,14 @@ public class XSynchronizeChangesResource {
 			MiniXMLParser parser = new MiniXMLParserImpl();
 			MiniElement commandElement = parser.parseXml(commandXml);
 			
-			command = XmlCommand.toCommand(commandElement, entity.getAddress());
+			command = XmlCommand.toCommand(commandElement, addr);
 			
 		} catch(IllegalArgumentException iae) {
 			throw new RestlessException(RestlessException.Bad_request,
 			        "could not parse the provided XCommand: " + iae.getMessage());
 		}
 		
-		long result = entity.executeCommand(command);
+		long result = session.executeCommand(command);
 		
 		int sc;
 		if(result == XCommand.FAILED) {
@@ -123,22 +134,31 @@ public class XSynchronizeChangesResource {
 		if(since != null || result >= 0) {
 			long begin = since != null ? since : result;
 			long end = (result >= 0) ? result + 1 : Long.MAX_VALUE;
-			XydraRestServer.xmlResponse(res, sc, getEventsAsXml(entity, begin, end));
+			String changes = getEventsAsXml(session.getChangeLog(modelId), addr, begin, end);
+			if(changes == null) {
+				// TODO what to do here?
+				res.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			} else {
+				XydraRestServer.xmlResponse(res, sc, changes);
+			}
 		} else {
 			res.setStatus(sc);
 		}
 	}
 	
-	private String getEventsAsXml(XProtectedSynchronizesChanges entity, long begin, long end) {
+	private String getEventsAsXml(XChangeLog log, final XAddress addr, long begin, long end) {
 		
-		Iterator<XEvent> events = entity.getChangeLog().getEventsBetween(begin, end);
+		if(log == null) {
+			return null;
+		}
 		
-		final XAddress addr = entity.getAddress();
+		Iterator<XEvent> events = log.getEventsBetween(begin, end);
 		
 		if(addr.getObject() != null) {
 			events = new AbstractTransformingIterator<XEvent,XEvent>(events) {
 				@Override
 				public XEvent transform(XEvent in) {
+					// TODO transform transaction events
 					if(!addr.equalsOrContains(in.getTarget())) {
 						return null;
 					}
