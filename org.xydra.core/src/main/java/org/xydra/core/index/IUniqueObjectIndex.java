@@ -32,10 +32,20 @@ public interface IUniqueObjectIndex {
 	XID index(XObject xo) throws IllegalStateException;
 	
 	/**
+	 * De-index the given object. A lookup on the index-field is performed.
+	 * 
 	 * @param xo the given object by the fieldID configured for this index
 	 * @return XID of indexed object, if found. Null otherwise.
 	 */
 	XID deindex(XObject xo);
+	
+	/**
+	 * De-index the object with the given value.
+	 * 
+	 * @param value
+	 * @return XID of indexed object, if found. Null otherwise.
+	 */
+	XID deindex(XValue value);
 	
 	/**
 	 * @param model used to load objects from internally stored XIDs
@@ -44,5 +54,11 @@ public interface IUniqueObjectIndex {
 	 *         'value' as the value of the fieldID configured for this index
 	 */
 	XObject lookup(XModel model, XValue value);
+	
+	/**
+	 * @param value
+	 * @return true if the index contains an entry for the given value
+	 */
+	boolean contains(XValue value);
 	
 }

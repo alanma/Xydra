@@ -58,18 +58,23 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 	
 	public XID deindex(XObject xo) {
 		XField field = xo.getField(this.fieldID);
+		if(field == null) {
+			return null;
+		}
 		XValue keyValue = field.getValue();
-		return deindex(keyValue, xo.getID());
+		return deindex(keyValue);
 	}
 	
-	public XID deindex(XValue key, XID value) {
+	public XID deindex(XValue key) {
 		XID xid = valueToXID(key);
-		XField indexField = this.indexObject.createField(this.actor, xid);
+		XField indexField = this.indexObject.getField(xid);
 		if(indexField == null) {
+			// nothing to do to deindex
 			return null;
 		}
 		XID indexValue = (XID)indexField.getValue();
-		assert indexValue != null;
+		assert indexValue != null : "IndexField " + indexField.getID()
+		        + " has a null value. Key = " + key;
 		XID previous = indexValue;
 		this.indexObject.removeField(this.actor, xid);
 		return previous;
@@ -90,6 +95,15 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 		XID id = lookupID(indexKey);
 		XObject object = model.getObject(id);
 		return object;
+	}
+	
+	public boolean contains(XValue indexKey) {
+		XID key = valueToXID(indexKey);
+		XField indexField = this.indexObject.getField(key);
+		if(indexField == null) {
+			return false;
+		}
+		return true;
 	}
 	
 }
