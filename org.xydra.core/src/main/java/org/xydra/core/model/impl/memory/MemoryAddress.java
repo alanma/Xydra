@@ -159,6 +159,67 @@ public class MemoryAddress implements XAddress {
 		        && XI.equals(this.field, other.getField());
 	}
 	
+	public int compareTo(XAddress other) {
+		// compare repos
+		if(this.getRepository() == null) {
+			if(other.getRepository() != null) {
+				return 1;
+			}
+		} else {
+			if(other.getRepository() == null) {
+				return -1;
+			}
+			int comparison = this.getRepository().compareTo(other.getRepository());
+			if(comparison != 0) {
+				return comparison;
+			}
+		}
+		/* repos are either both null or equal => compare models */
+		if(this.getModel() == null) {
+			if(other.getModel() != null) {
+				return 1;
+			}
+		} else {
+			if(other.getModel() == null) {
+				return -1;
+			}
+			int comparison = this.getModel().compareTo(other.getModel());
+			if(comparison != 0) {
+				return comparison;
+			}
+		}
+		/* models are either both null or equal => compare objects */
+		if(this.getObject() == null) {
+			if(other.getObject() != null) {
+				return 1;
+			}
+		} else {
+			if(other.getObject() == null) {
+				return -1;
+			}
+			int comparison = this.getObject().compareTo(other.getObject());
+			if(comparison != 0) {
+				return comparison;
+			}
+		}
+		/* objects are either both null or equal => compare fields */
+		if(this.getField() == null) {
+			if(other.getField() != null) {
+				return 1;
+			}
+		} else {
+			if(other.getField() == null) {
+				return -1;
+			}
+			int comparison = this.getField().compareTo(other.getField());
+			if(comparison != 0) {
+				return comparison;
+			}
+		}
+		/* all entities have been each either null or equal */
+		return 0;
+	}
+	
 	/**
 	 * @return a unique, complete representation of this {@link XAddress} with
 	 *         the fixed format = '/' + repoID + '/' + modelID + '/' + objectID

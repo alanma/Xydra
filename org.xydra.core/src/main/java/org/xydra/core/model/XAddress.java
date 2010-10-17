@@ -3,6 +3,7 @@ package org.xydra.core.model;
 import java.io.Serializable;
 
 import org.xydra.core.XX;
+import org.xydra.core.value.XValue;
 
 
 /**
@@ -12,7 +13,7 @@ import org.xydra.core.XX;
  * 
  * @author dscharrer
  */
-public interface XAddress extends Serializable {
+public interface XAddress extends Serializable, XValue, Comparable<XAddress> {
 	
 	/**
 	 * @return the {@link XID} of the {@link XField} identified by this address
