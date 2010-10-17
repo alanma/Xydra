@@ -323,19 +323,35 @@ public class Restless extends HttpServlet {
 			res.getWriter().println(XML_DECLARATION);
 			res.getWriter().println(XHTML_DOCTYPE);
 			res.getWriter().println(
-			        "<html " + XHTML_NS
-			                + "><head><title>Restless Configuration</title></head><body>");
+			        "<html " + XHTML_NS + "><head><title>Restless Configuration</title>" +
+			        /* styling */
+			        "<style type='text/css'> <!-- \n" +
+
+			        "body { font-family: Verdana,sans-serif; }" +
+
+			        "\n" + "--> </style>\n" +
+
+			        "</head><body>");
 			res.getWriter().println("<h3>Restless configuration</h3>");
 			res.getWriter().println("<p><ol>");
 			for(RestlessMethod rm : this.methods) {
 				res.getWriter().print("<li>");
 				String url = servletPath + xmlEncode(rm.pathTemplate.getRegex());
 				res.getWriter().print(
-				        "Mapping " + rm.httpMethod + " <a href='" + url + "'>" + url
-				                + "</a> --&gt; ");
+				        (rm.adminOnly ? "ADMIN ONLY" : "PUBLIC") + " resource <b class='resource'>"
+				                + url + "</b>: " + rm.httpMethod + " =&gt; ");
 				res.getWriter().print(
 				        instanceOrClass_className(rm.instanceOrClass) + "#" + rm.methodName);
-				res.getWriter().println(" access:" + (rm.adminOnly ? "ADMIN ONLY" : "PUBLIC"));
+				
+				/* list parameters */
+				res.getWriter().print("<form action='" + url + "' method='" + rm.httpMethod + "'>");
+				for(RestlessParameter parameter : rm.parameter) {
+					res.getWriter().print(
+					        parameter.name + " <input type='text' name='" + parameter.name
+					                + "' value='" + parameter.defaultValue + "' />");
+				}
+				res.getWriter().print("<input type='submit' name='Send' /></form>");
+				
 				res.getWriter().println("</li>");
 			}
 			res.getWriter().println("</ol></p>");
