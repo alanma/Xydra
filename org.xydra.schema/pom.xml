@@ -6,12 +6,12 @@
 	<parent>
 		<groupId>org.xydra</groupId>
 		<artifactId>maven-root</artifactId>
-		<version>2010.09.14</version>
+		<version>2010.10.16</version>
 	</parent>
 
 	<groupId>org.xydra</groupId>
 	<artifactId>schema</artifactId>
-	<version>0.1.1-SNAPSHOT</version>
+	<version>0.1.2-SNAPSHOT</version>
 	<!--
 		/!\ Needs to be 'jar' for 'mvn deploy' but 'war' for 'gae:deploy'
 	-->
@@ -26,10 +26,6 @@
 			sources
 		-->
 		<downloadSources>false</downloadSources>
-
-		<!--  tell the compiler we can use 1.5 -->
-		<maven.compiler.source>1.5</maven.compiler.source>
-		<maven.compiler.target>1.5</maven.compiler.target>
 
 	</properties>
 
@@ -110,7 +106,7 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
-			<version>0.1.1-SNAPSHOT</version>
+			<version>0.1.2-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -123,7 +119,7 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
-			<version>0.1.1-SNAPSHOT</version>
+			<version>0.1.2-SNAPSHOT</version>
 		</dependency>
 
 		<!-- testing dependencies -->
@@ -161,7 +157,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.0.2</version>
 				<configuration>
 					<source>${maven.compiler.source}</source>
 					<target>${maven.compiler.target}</target>
