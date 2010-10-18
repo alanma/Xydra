@@ -12,7 +12,7 @@
 	<parent>
 		<groupId>org.xydra</groupId>
 		<artifactId>maven-root</artifactId>
-		<version>2010.09.14</version>
+		<version>2010.10.16</version>
 	</parent>
 
 	<repositories>
@@ -42,7 +42,7 @@
 			</releases>
 		</repository>
 
-		<!--  Java.net repo for wagon-svn -->
+		<!--  Java.net repo for wagon-svn --><!--
 		<repository>
 			<id>javanet-repo</id>
 			<url>
@@ -62,7 +62,7 @@
 			<layout>default</layout>
 		</repository>
 
-	</repositories>
+	--></repositories>
 
 	<dependencies>
 
@@ -70,7 +70,7 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
-			<version>0.1.1-SNAPSHOT</version>
+			<version>0.1.2-SNAPSHOT</version>
 		</dependency>
 
 		<!-- testing dependencies -->
@@ -78,7 +78,6 @@
 			<scope>test</scope>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.3.1</version>
 		</dependency>
 
 
@@ -108,7 +107,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
-			<!-- ... log4j12  vs.  jdk14 -->
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>1.5.11</version>
 		</dependency>
@@ -152,11 +150,9 @@
 				</configuration>
 			</plugin>
 
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.0.2</version>
 				<configuration>
 					<source>${maven.compiler.source}</source>
 					<target>${maven.compiler.target}</target>
