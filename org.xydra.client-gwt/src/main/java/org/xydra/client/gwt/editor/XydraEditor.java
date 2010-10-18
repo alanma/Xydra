@@ -207,6 +207,7 @@ public class XydraEditor implements EntryPoint {
 	
 	private void startSynchronizer(XSynchronizesChanges entity) {
 		this.manager = new XSynchronizer(this.addr, entity, XydraEditor.this.changes);
+		this.manager.setAutomaticSynchronize(true);
 		this.timer.scheduleRepeating(5000);
 	}
 	
