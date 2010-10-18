@@ -24,20 +24,22 @@ public interface IXydraServer extends Iterable<XID> {
 	/**
 	 * @return a read-only interface to the snapshot for the model this time.
 	 *         Individual parts of the model are loaded into memory as-needed.
-	 * 
-	 *         TODO what is returned if there is no XModel with the given id?
+	 *         Returns null if no such model exists.
 	 */
 	XBaseModel getModelSnapshot(XID modelId);
 	
 	/**
 	 * @return an interface to read the change log entries for the given model.
+	 *         This may be null if the model doesn't exist.
 	 */
 	XChangeLog getChangeLog(XID modelId);
 	
 	/**
 	 * Execute the given command and log the actorId. No
-	 * authentication/authorization checks are done. TODO replace actorId with a
-	 * more general context to allow logging time, IP Address, etc.
+	 * authentication/authorization checks are done.
+	 * 
+	 * TODO replace actorId with a more general context to allow logging time,
+	 * IP Address, etc.
 	 */
 	long executeCommand(XCommand command, XID actorId);
 	
