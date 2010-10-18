@@ -101,7 +101,7 @@ public abstract class SynchronizerTest {
 				// Now synchronize with the server.
 				sync.synchronize();
 				
-				// command may not be applied yet!
+				// command may not be applied remotely yet!
 				
 				// Manually synchronizing is tedious, so send all commands
 				// immediately from now on.
@@ -125,6 +125,8 @@ public abstract class SynchronizerTest {
 				// Now apply the command locally. It should be automatically
 				// sent to the server.
 				sync.executeCommand(autoCommand, cc);
+				
+				// both commands may still not be applied remotely
 				
 			}
 			
