@@ -242,6 +242,31 @@ public interface XValueFactory {
 	XByteListValue createByteListValue(Collection<Byte> values);
 	
 	/**
+	 * Creates an {@link XAddressListValue}.
+	 * 
+	 * The returned {@link XAddressListValue} will contain the given byte values
+	 * in the order of their occurrence in the given array.
+	 * 
+	 * @param values The array containing the byte values which are to be stored
+	 *            by the {@link XAddressListValue} this method will create.
+	 * @return an {@link XAddressListValue} storing the given long values.
+	 */
+	XAddressListValue createAddressListValue(XAddress[] values);
+	
+	/**
+	 * Creates an {@link XAddressListValue}.
+	 * 
+	 * The returned {@link XAddressListValue} will contain the given byte values
+	 * in the order of their occurrence in the given {@link Collection}.
+	 * 
+	 * @param values The {@link Collection} containing the byte values which are
+	 *            to be stored by the {@link XAddressListValue} this method will
+	 *            create.
+	 * @return an {@link XAddressListValue} storing the given long values.
+	 */
+	XAddressListValue createAddressListValue(Collection<XAddress> values);
+	
+	/**
 	 * Creates an {@link XStringListValue}.
 	 * 
 	 * The returned {@link XStringListValue} will contain the given String
@@ -326,4 +351,25 @@ public interface XValueFactory {
 	 *         {@link XAddress XAddresss}, keeping the given order.
 	 */
 	XAddressSortedSetValue createAddressSortedSetValue(Collection<XAddress> values);
+	
+	/**
+	 * Creates an {@link XAddressSetValue}.
+	 * 
+	 * @param values The array containing the {@link XAddress XAddresss} which
+	 *            are to be stored.
+	 * @return an {@link XAddressSetValue} storing the given {@link XAddress
+	 *         XAddresss}
+	 */
+	XAddressSetValue createAddressSetValue(XAddress[] values);
+	
+	/**
+	 * Creates an {@link XAddressSetValue}.
+	 * 
+	 * @param values The {@link Collection} containing the {@link XID XIDs}
+	 *            which are to be stored.
+	 * @return an {@link XAddressSetValue} storing the given {@link XAddress
+	 *         XAddresss}
+	 */
+	XAddressSetValue createAddressSetValue(Collection<XAddress> values);
+	
 }

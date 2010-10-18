@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.xydra.core.X;
+import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 
 
@@ -44,11 +45,23 @@ public class XV {
 	
 	/**
 	 * Returns the content of the given {@link Collection} as an
+	 * {@link XAddressListValue}
+	 * 
+	 * @param list The {@link Collection} which is to be converted into an
+	 *            {@link XAddressListValue}
+	 * @return an {@link XAddressListValue} with the content of the given list
+	 */
+	public static XAddressListValue toAddressListValue(Collection<XAddress> list) {
+		return vf.createAddressListValue(list);
+	}
+	
+	/**
+	 * Returns the content of the given {@link Collection} as an
 	 * {@link XByteListValue}
 	 * 
 	 * @param list The {@link Collection} which is to be converted into an
-	 *            {@link XIDListValue}
-	 * @return an {@link XIDListValue} with the content of the given list
+	 *            {@link XByteListValue}
+	 * @return an {@link XByteListValue} with the content of the given list
 	 */
 	public static XByteListValue toByteListValue(Collection<Byte> list) {
 		return vf.createByteListValue(list);
@@ -140,6 +153,44 @@ public class XV {
 	
 	/**
 	 * Returns the content of the given {@link Collection} as an
+	 * {@link XAddressSetValue}
+	 * 
+	 * @param list The {@link Collection} which is to be converted into an
+	 *            {@link XAddressSetValue}
+	 * @return an {@link XAddressSetValue} with the content of the given list
+	 */
+	public static XAddressSetValue toAddressSetValue(Collection<XAddress> list) {
+		return vf.createAddressSetValue(list);
+	}
+	
+	/**
+	 * Returns the content of the given {@link Collection} as an
+	 * {@link XIDSortedSetValue}
+	 * 
+	 * @param list The {@link Collection} which is to be converted into an
+	 *            {@link XIDSortedSetValue}
+	 * @return an {@link XIDSortedSetValue} with the content of the given list,
+	 *         preserving sort oder.
+	 */
+	public static XIDSortedSetValue toIDSortedSetValue(Collection<XID> list) {
+		return vf.createIDSortedSetValue(list);
+	}
+	
+	/**
+	 * Returns the content of the given {@link Collection} as an
+	 * {@link XAddressSortedSetValue}
+	 * 
+	 * @param list The {@link Collection} which is to be converted into an
+	 *            {@link XAddressSortedSetValue}
+	 * @return an {@link XAddressSortedSetValue} with the content of the given
+	 *         list, preserving sort oder.
+	 */
+	public static XAddressSortedSetValue toAddressSortedSetValue(Collection<XAddress> list) {
+		return vf.createAddressSortedSetValue(list);
+	}
+	
+	/**
+	 * Returns the content of the given {@link Collection} as an
 	 * {@link XStringSetValue}
 	 * 
 	 * @param list The {@link Collection} which is to be converted into an
@@ -163,9 +214,10 @@ public class XV {
 	}
 	
 	/**
-	 * Returns the content of the given XID array as an {@link XIDListValue}
+	 * Returns the content of the given {@link XID} array as an
+	 * {@link XIDListValue}
 	 * 
-	 * @param list The XID array which is to be converted into an
+	 * @param list The {@link XID} array which is to be converted into an
 	 *            {@link XIDListValue}
 	 * @return an {@link XIDListValue} with the content of the given list
 	 */
@@ -174,11 +226,23 @@ public class XV {
 	}
 	
 	/**
+	 * Returns the content of the given {@link XAddress} array as an
+	 * {@link XAddressListValue}
+	 * 
+	 * @param list The {@link XAddress} array which is to be converted into an
+	 *            {@link XAddressListValue}
+	 * @return an {@link XAddressListValue} with the content of the given list
+	 */
+	public static XAddressListValue toValue(XAddress[] list) {
+		return vf.createAddressListValue(list);
+	}
+	
+	/**
 	 * Returns the content of the given byte array as an {@link XByteListValue}
 	 * 
 	 * @param list The byte array which is to be converted into an
-	 *            {@link XIDListValue}
-	 * @return an {@link XIDListValue} with the content of the given list
+	 *            {@link XByteListValue}
+	 * @return an {@link XByteListValue} with the content of the given list
 	 */
 	public static XByteListValue toValue(byte[] list) {
 		return vf.createByteListValue(list);
@@ -189,8 +253,8 @@ public class XV {
 	 * {@link XByteListValue}
 	 * 
 	 * @param list The {@link Byte} array which is to be converted into an
-	 *            {@link XIDListValue}
-	 * @return an {@link XIDListValue} with the content of the given list
+	 *            {@link XByteListValue}
+	 * @return an {@link XByteListValue} with the content of the given list
 	 */
 	public static XByteListValue toValue(Byte[] list) {
 		return vf.createByteListValue(Arrays.asList(list));
@@ -325,6 +389,44 @@ public class XV {
 	 */
 	public static XIDSetValue toIDSetValue(XID[] list) {
 		return vf.createIDSetValue(list);
+	}
+	
+	/**
+	 * Returns the content of the given {@link XAddress} array as an
+	 * {@link XAddressSetValue}
+	 * 
+	 * @param list The {@link XAddress} array which is to be converted into an
+	 *            {@link XAddressSetValue}
+	 * @return an {@link XAddressSetValue} with the content of the given list
+	 */
+	public static XAddressSetValue toAddressSetValue(XAddress[] list) {
+		return vf.createAddressSetValue(list);
+	}
+	
+	/**
+	 * Returns the content of the given {@link XID} array as an
+	 * {@link XIDSortedSetValue}
+	 * 
+	 * @param list The {@link XID} array which is to be converted into an
+	 *            {@link XIDSortedSetValue}
+	 * @return an {@link XIDSortedSetValue} with the content of the given list,
+	 *         maintaining sort oder.
+	 */
+	public static XIDSortedSetValue toIDSortedSetValue(XID[] list) {
+		return vf.createIDSortedSetValue(list);
+	}
+	
+	/**
+	 * Returns the content of the given {@link XAddress} array as an
+	 * {@link XAddressSortedSetValue}
+	 * 
+	 * @param list The {@link XAddress} array which is to be converted into an
+	 *            {@link XAddressSortedSetValue}
+	 * @return an {@link XAddressSortedSetValue} with the content of the given
+	 *         list, maintaining sort oder.
+	 */
+	public static XAddressSortedSetValue toAddressSortedSetValue(XAddress[] list) {
+		return vf.createAddressSortedSetValue(list);
 	}
 	
 	/**

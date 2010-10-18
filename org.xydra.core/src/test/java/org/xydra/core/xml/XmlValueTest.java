@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.xydra.core.XX;
+import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.value.XV;
 import org.xydra.core.value.XValue;
@@ -48,6 +49,11 @@ public class XmlValueTest {
 	@Test
 	public void testIdValue() {
 		testValue(XX.createUniqueID());
+	}
+	
+	@Test
+	public void testAddressValue() {
+		testValue(XX.toAddress(XX.createUniqueID(), null, null, null));
 	}
 	
 	@Test(expected = NullPointerException.class)
@@ -151,6 +157,22 @@ public class XmlValueTest {
 	}
 	
 	@Test
+	public void testAddressListValue() {
+		testValue(XV.toValue(new XAddress[] { XX.toAddress(XX.createUniqueID(), null, null, null),
+		        XX.toAddress("/cookie/monster/-/-") }));
+	}
+	
+	@Test
+	public void testAddressListValueNull() {
+		testValue(XV.toValue(new XAddress[] { null }));
+	}
+	
+	@Test
+	public void testAddressListValueEmpty() {
+		testValue(XV.toValue(new XAddress[] {}));
+	}
+	
+	@Test
 	public void testIntegerListValue() {
 		testValue(XV.toValue(new int[] { 1, 42, -8 }));
 	}
@@ -218,6 +240,55 @@ public class XmlValueTest {
 	@Test
 	public void testIdSetValueEmpty() {
 		testValue(XV.toIDSetValue(new XID[] {}));
+	}
+	
+	@Test
+	public void testIdSortedSetValue() {
+		testValue(XV.toIDSortedSetValue(new XID[] { XX.createUniqueID(), XX.toId("cookie") }));
+	}
+	
+	@Test
+	public void testIdSortedSetValueNull() {
+		testValue(XV.toIDSortedSetValue(new XID[] { null }));
+	}
+	
+	@Test
+	public void testIdSortedSetValueEmpty() {
+		testValue(XV.toIDSortedSetValue(new XID[] {}));
+	}
+	
+	@Test
+	public void testAddressSetValue() {
+		testValue(XV.toAddressSetValue(new XAddress[] {
+		        XX.toAddress(XX.createUniqueID(), null, null, null),
+		        XX.toAddress("/cookie/monster/-/-") }));
+	}
+	
+	@Test
+	public void testAddressSetValueNull() {
+		testValue(XV.toAddressSetValue(new XAddress[] { null }));
+	}
+	
+	@Test
+	public void testAddressSetValueEmpty() {
+		testValue(XV.toAddressSetValue(new XAddress[] {}));
+	}
+	
+	@Test
+	public void testAddressSortedSetValue() {
+		testValue(XV.toAddressSortedSetValue(new XAddress[] {
+		        XX.toAddress(XX.createUniqueID(), null, null, null),
+		        XX.toAddress("/cookie/monster/-/-") }));
+	}
+	
+	@Test
+	public void testAddressSortedSetValueNull() {
+		testValue(XV.toAddressSetValue(new XAddress[] { null }));
+	}
+	
+	@Test
+	public void testAddressSortedSetValueEmpty() {
+		testValue(XV.toAddressSetValue(new XAddress[] {}));
 	}
 	
 	@Test

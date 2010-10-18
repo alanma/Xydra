@@ -8,7 +8,11 @@ import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.core.XX;
+import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
+import org.xydra.core.value.XAddressListValue;
+import org.xydra.core.value.XAddressSetValue;
+import org.xydra.core.value.XAddressSortedSetValue;
 import org.xydra.core.value.XBooleanListValue;
 import org.xydra.core.value.XBooleanValue;
 import org.xydra.core.value.XByteListValue;
@@ -17,6 +21,7 @@ import org.xydra.core.value.XDoubleListValue;
 import org.xydra.core.value.XDoubleValue;
 import org.xydra.core.value.XIDListValue;
 import org.xydra.core.value.XIDSetValue;
+import org.xydra.core.value.XIDSortedSetValue;
 import org.xydra.core.value.XIntegerListValue;
 import org.xydra.core.value.XIntegerValue;
 import org.xydra.core.value.XListValue;
@@ -58,6 +63,11 @@ public class XmlValue {
 	private static final String XBYTELIST_ELEMENT = "xbyteList";
 	private static final String NULL_ATTRIBUTE = "isNull";
 	private static final String NULL_VALUE = "true";
+	private static final String XIDSORTEDSET_ELEMENT = "xidSortedSet";
+	private static final String XADDRESSLIST_ELEMENT = "xaddressList";
+	private static final String XADDRESSSET_ELEMENT = "xaddressSet";
+	private static final String XADDRESSSORTEDSET_ELEMENT = "xaddressSortedSet";
+	private static final String XADDRESS_ELEMENT = "xaddress";
 	
 	/**
 	 * @return The {@link XValue} represented by the given XML element.
@@ -65,6 +75,8 @@ public class XmlValue {
 	 *             representation of an {@link XValue}
 	 */
 	public static XValue toValue(MiniElement xml) {
+		// IMPROVE consider using a (hash)map as the number of XValue types
+		// increases
 		String elementName = xml.getName();
 		if(elementName.equals(XBOOLEAN_ELEMENT)) {
 			return toBooleanValue(xml);
@@ -77,7 +89,9 @@ public class XmlValue {
 		} else if(elementName.equals(XSTRING_ELEMENT)) {
 			return toStringValue(xml);
 		} else if(elementName.equals(XID_ELEMENT)) {
-			return toIdValue(xml);
+			return toId(xml);
+		} else if(elementName.equals(XADDRESS_ELEMENT)) {
+			return toAddress(xml);
 		} else if(elementName.equals(XBOOLEANLIST_ELEMENT)) {
 			return toBooleanListValue(xml);
 		} else if(elementName.equals(XDOUBLELIST_ELEMENT)) {
@@ -90,12 +104,20 @@ public class XmlValue {
 			return toStringListValue(xml);
 		} else if(elementName.equals(XIDLIST_ELEMENT)) {
 			return toIdListValue(xml);
+		} else if(elementName.equals(XADDRESSLIST_ELEMENT)) {
+			return toAddressListValue(xml);
 		} else if(elementName.equals(XSTRINGSET_ELEMENT)) {
 			return toStringSetValue(xml);
 		} else if(elementName.equals(XIDSET_ELEMENT)) {
 			return toIdSetValue(xml);
+		} else if(elementName.equals(XADDRESSSET_ELEMENT)) {
+			return toAddressSetValue(xml);
 		} else if(elementName.equals(XBYTELIST_ELEMENT)) {
 			return toByteListValue(xml);
+		} else if(elementName.equals(XIDSORTEDSET_ELEMENT)) {
+			return toIdSortedSetValue(xml);
+		} else if(elementName.equals(XADDRESSSORTEDSET_ELEMENT)) {
+			return toAddressSortedSetValue(xml);
 		}
 		throw new RuntimeException("Cannot deserialize " + xml + " as an XValue.");
 	}
@@ -214,18 +236,24 @@ public class XmlValue {
 	}
 	
 	/**
-	 * @return The {@link XIDValue} represented by the given XML element.
-	 * @throws IllegalArgumentException if the given XML element is not a valid
-	 *             representation of an {@link XIDValue}
+	 * use {@link #toId(MiniElement)} instead
+	 * 
+	 * @param xml
+	 * @return
 	 */
+	@Deprecated
 	public static XID toIdValue(MiniElement xml) {
-		
-		XmlUtils.checkElementName(xml, XID_ELEMENT);
-		
 		return toId(xml);
 	}
 	
-	private static XID toId(MiniElement xml) {
+	/**
+	 * @return The {@link XID} represented by the given XML element.
+	 * @throws IllegalArgumentException if the given XML element is not a valid
+	 *             representation of an {@link XID}
+	 */
+	public static XID toId(MiniElement xml) {
+		
+		XmlUtils.checkElementName(xml, XID_ELEMENT);
 		
 		if(xml.getAttribute(NULL_ATTRIBUTE) != null) {
 			return null;
@@ -238,6 +266,30 @@ public class XmlValue {
 		} catch(Exception e) {
 			throw new RuntimeException("An <" + XID_ELEMENT
 			        + "> element must contain a valid XID, got " + data, e);
+		}
+		
+	}
+	
+	/**
+	 * @return The {@link XAddress} represented by the given XML element.
+	 * @throws IllegalArgumentException if the given XML element is not a valid
+	 *             representation of an {@link XAddress}
+	 */
+	public static XAddress toAddress(MiniElement xml) {
+		
+		XmlUtils.checkElementName(xml, XADDRESS_ELEMENT);
+		
+		if(xml.getAttribute(NULL_ATTRIBUTE) != null) {
+			return null;
+		}
+		
+		String data = xml.getData();
+		
+		try {
+			return XX.toAddress(data);
+		} catch(Exception e) {
+			throw new RuntimeException("An <" + XADDRESS_ELEMENT
+			        + "> element must contain a valid XAddress, got " + data, e);
 		}
 		
 	}
@@ -343,36 +395,9 @@ public class XmlValue {
 		
 		XmlUtils.checkElementName(xml, XSTRINGLIST_ELEMENT);
 		
-		List<String> list = new ArrayList<String>();
-		
-		Iterator<MiniElement> entryIterator = xml.getElementsByTagName(XSTRING_ELEMENT);
-		while(entryIterator.hasNext()) {
-			MiniElement entryElement = entryIterator.next();
-			list.add(toString(entryElement));
-		}
+		List<String> list = getStringListContents(xml);
 		
 		return XV.toStringListValue(list);
-		
-	}
-	
-	/**
-	 * @return The {@link XIDListValue} represented by the given XML element.
-	 * @throws IllegalArgumentException if the given XML element is not a valid
-	 *             representation of an {@link XIDListValue}
-	 */
-	public static XIDListValue toIdListValue(MiniElement xml) {
-		
-		XmlUtils.checkElementName(xml, XIDLIST_ELEMENT);
-		
-		List<XID> list = new ArrayList<XID>();
-		
-		Iterator<MiniElement> entryIterator = xml.getElementsByTagName(XID_ELEMENT);
-		while(entryIterator.hasNext()) {
-			MiniElement entryElement = entryIterator.next();
-			list.add(toId(entryElement));
-		}
-		
-		return XV.toIDListValue(list);
 		
 	}
 	
@@ -385,6 +410,13 @@ public class XmlValue {
 		
 		XmlUtils.checkElementName(xml, XSTRINGSET_ELEMENT);
 		
+		List<String> list = getStringListContents(xml);
+		
+		return XV.toStringSetValue(list);
+		
+	}
+	
+	private static List<String> getStringListContents(MiniElement xml) {
 		List<String> list = new ArrayList<String>();
 		
 		Iterator<MiniElement> entryIterator = xml.getElementsByTagName(XSTRING_ELEMENT);
@@ -392,8 +424,21 @@ public class XmlValue {
 			MiniElement entryElement = entryIterator.next();
 			list.add(toString(entryElement));
 		}
+		return list;
+	}
+	
+	/**
+	 * @return The {@link XIDListValue} represented by the given XML element.
+	 * @throws IllegalArgumentException if the given XML element is not a valid
+	 *             representation of an {@link XIDListValue}
+	 */
+	public static XIDListValue toIdListValue(MiniElement xml) {
 		
-		return XV.toStringSetValue(list);
+		XmlUtils.checkElementName(xml, XIDLIST_ELEMENT);
+		
+		List<XID> list = getIdListContents(xml);
+		
+		return XV.toIDListValue(list);
 		
 	}
 	
@@ -404,7 +449,35 @@ public class XmlValue {
 	 */
 	public static XIDSetValue toIdSetValue(MiniElement xml) {
 		
+		if(xml.getName().equals(XIDSORTEDSET_ELEMENT)) {
+			return toIdSortedSetValue(xml);
+		}
+		
 		XmlUtils.checkElementName(xml, XIDSET_ELEMENT);
+		
+		List<XID> list = getIdListContents(xml);
+		
+		return XV.toIDSetValue(list);
+		
+	}
+	
+	/**
+	 * @return The {@link XIDSortedSetValue} represented by the given XML
+	 *         element.
+	 * @throws IllegalArgumentException if the given XML element is not a valid
+	 *             representation of an {@link XIDSortedSetValue}
+	 */
+	public static XIDSortedSetValue toIdSortedSetValue(MiniElement xml) {
+		
+		XmlUtils.checkElementName(xml, XIDSORTEDSET_ELEMENT);
+		
+		List<XID> list = getIdListContents(xml);
+		
+		return XV.toIDSortedSetValue(list);
+		
+	}
+	
+	private static List<XID> getIdListContents(MiniElement xml) {
 		
 		List<XID> list = new ArrayList<XID>();
 		
@@ -413,9 +486,71 @@ public class XmlValue {
 			MiniElement entryElement = entryIterator.next();
 			list.add(toId(entryElement));
 		}
+		return list;
+	}
+	
+	/**
+	 * @return The {@link XAddressListValue} represented by the given XML
+	 *         element.
+	 * @throws IllegalArgumentException if the given XML element is not a valid
+	 *             representation of an {@link XAddressListValue}
+	 */
+	public static XAddressListValue toAddressListValue(MiniElement xml) {
 		
-		return XV.toIDSetValue(list);
+		XmlUtils.checkElementName(xml, XADDRESSLIST_ELEMENT);
 		
+		List<XAddress> list = getAddressListContents(xml);
+		
+		return XV.toAddressListValue(list);
+		
+	}
+	
+	/**
+	 * @return The {@link XAddressSetValue} represented by the given XML
+	 *         element.
+	 * @throws IllegalArgumentException if the given XML element is not a valid
+	 *             representation of an {@link XAddressSetValue}
+	 */
+	public static XAddressSetValue toAddressSetValue(MiniElement xml) {
+		
+		if(xml.getName().equals(XADDRESSSORTEDSET_ELEMENT)) {
+			return toAddressSortedSetValue(xml);
+		}
+		
+		XmlUtils.checkElementName(xml, XADDRESSSET_ELEMENT);
+		
+		List<XAddress> list = getAddressListContents(xml);
+		
+		return XV.toAddressSetValue(list);
+		
+	}
+	
+	/**
+	 * @return The {@link XAddressSortedSetValue} represented by the given XML
+	 *         element.
+	 * @throws IllegalArgumentException if the given XML element is not a valid
+	 *             representation of an {@link XAddressSortedSetValue}
+	 */
+	public static XAddressSortedSetValue toAddressSortedSetValue(MiniElement xml) {
+		
+		XmlUtils.checkElementName(xml, XADDRESSSORTEDSET_ELEMENT);
+		
+		List<XAddress> list = getAddressListContents(xml);
+		
+		return XV.toAddressSortedSetValue(list);
+		
+	}
+	
+	private static List<XAddress> getAddressListContents(MiniElement xml) {
+		
+		List<XAddress> list = new ArrayList<XAddress>();
+		
+		Iterator<MiniElement> entryIterator = xml.getElementsByTagName(XADDRESS_ELEMENT);
+		while(entryIterator.hasNext()) {
+			MiniElement entryElement = entryIterator.next();
+			list.add(toAddress(entryElement));
+		}
+		return list;
 	}
 	
 	/**
@@ -459,6 +594,8 @@ public class XmlValue {
 			toXml((XStringValue)xvalue, xo);
 		} else if(xvalue instanceof XID) {
 			toXml((XID)xvalue, xo);
+		} else if(xvalue instanceof XAddress) {
+			toXml((XAddress)xvalue, xo);
 		} else {
 			throw new IllegalArgumentException("Cannot serialize non-list XValue " + xvalue
 			        + " (unknown type: " + xvalue.getClass().getName() + ")");
@@ -515,6 +652,8 @@ public class XmlValue {
 			toXml((XIDListValue)xvalue, xo);
 		} else if(xvalue instanceof XByteListValue) {
 			toXml((XByteListValue)xvalue, xo);
+		} else if(xvalue instanceof XAddressListValue) {
+			toXml((XAddressListValue)xvalue, xo);
 		} else {
 			throw new IllegalArgumentException("Cannot serialize XListValue " + xvalue
 			        + " (unknown type: " + xvalue.getClass().getName() + ")");
@@ -536,6 +675,8 @@ public class XmlValue {
 		
 		if(xvalue instanceof XIDSetValue) {
 			toXml((XIDSetValue)xvalue, xo);
+		} else if(xvalue instanceof XAddressSetValue) {
+			toXml((XAddressSetValue)xvalue, xo);
 		} else if(xvalue instanceof XStringSetValue) {
 			toXml((XStringSetValue)xvalue, xo);
 		} else {
@@ -656,12 +797,83 @@ public class XmlValue {
 	 */
 	public static void toXml(XIDSetValue xvalue, XmlOut xo) {
 		
+		if(xvalue instanceof XIDSortedSetValue) {
+			toXml((XIDSortedSetValue)xvalue, xo);
+			return;
+		}
+		
 		xo.open(XIDSET_ELEMENT);
 		
 		for(XID value : xvalue)
 			toXml(value, xo);
 		
 		xo.close(XIDSET_ELEMENT);
+		
+	}
+	
+	/**
+	 * @return The XML representation of the given {@link XIDSortedSetValue}.
+	 * @throws NullPointerException if xvalue or xo is null.
+	 */
+	public static void toXml(XIDSortedSetValue xvalue, XmlOut xo) {
+		
+		xo.open(XIDSORTEDSET_ELEMENT);
+		
+		for(XID value : xvalue)
+			toXml(value, xo);
+		
+		xo.close(XIDSORTEDSET_ELEMENT);
+		
+	}
+	
+	/**
+	 * @return The XML representation of the given {@link XAddressSetValue}.
+	 * @throws NullPointerException if xvalue or xo is null.
+	 */
+	public static void toXml(XAddressSetValue xvalue, XmlOut xo) {
+		
+		if(xvalue instanceof XAddressSortedSetValue) {
+			toXml((XAddressSortedSetValue)xvalue, xo);
+			return;
+		}
+		
+		xo.open(XADDRESSSET_ELEMENT);
+		
+		for(XAddress value : xvalue)
+			toXml(value, xo);
+		
+		xo.close(XADDRESSSET_ELEMENT);
+		
+	}
+	
+	/**
+	 * @return The XML representation of the given
+	 *         {@link XAddressSortedSetValue}.
+	 * @throws NullPointerException if xvalue or xo is null.
+	 */
+	public static void toXml(XAddressSortedSetValue xvalue, XmlOut xo) {
+		
+		xo.open(XADDRESSSORTEDSET_ELEMENT);
+		
+		for(XAddress value : xvalue)
+			toXml(value, xo);
+		
+		xo.close(XADDRESSSORTEDSET_ELEMENT);
+		
+	}
+	
+	/**
+	 * @return The XML representation of the given {@link XAddressListValue}.
+	 * @throws NullPointerException if xvalue or xo is null.
+	 */
+	public static void toXml(XAddressListValue xvalue, XmlOut xo) {
+		
+		xo.open(XADDRESSLIST_ELEMENT);
+		
+		for(XAddress value : xvalue)
+			toXml(value, xo);
+		
+		xo.close(XADDRESSLIST_ELEMENT);
 		
 	}
 	
@@ -775,19 +987,35 @@ public class XmlValue {
 	
 	/**
 	 * @return The XML representation of the given {@link XIDValue}.
-	 * @throws NullPointerException if xvalue or xo is null.
 	 */
 	public static void toXml(XID xvalue, XmlOut xo) {
 		
 		xo.open(XID_ELEMENT);
 		
 		if(xvalue != null) {
-			xo.content(xvalue.toString());
+			xo.content(xvalue.toURI());
 		} else {
 			xo.attribute(NULL_ATTRIBUTE, NULL_VALUE);
 		}
 		
 		xo.close(XID_ELEMENT);
+		
+	}
+	
+	/**
+	 * @return The XML representation of the given {@link XAddress}.
+	 */
+	public static void toXml(XAddress xvalue, XmlOut xo) {
+		
+		xo.open(XADDRESS_ELEMENT);
+		
+		if(xvalue != null) {
+			xo.content(xvalue.toURI());
+		} else {
+			xo.attribute(NULL_ATTRIBUTE, NULL_VALUE);
+		}
+		
+		xo.close(XADDRESS_ELEMENT);
 		
 	}
 	
