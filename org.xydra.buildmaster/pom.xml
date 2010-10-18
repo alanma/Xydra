@@ -4,7 +4,7 @@
 
 	<groupId>org.xydra</groupId>
 	<artifactId>buildmaster</artifactId>
-	<version>0.1.1-SNAPSHOT</version>
+	<version>0.1.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Xydra Buildmaster</name>
@@ -19,48 +19,69 @@
 	<modules>
 		<!-- No Xydra dependencies -->
 		<module>../org.xydra.log/</module>
+		<!--  DONE -->
 
 		<!-- Depends on: .log, GWT -->
 		<module>../org.xydra.log.howto/</module>
+		<!--  DONE -->
 
-		<!-- No Xydra dependencies -->
+		<!-- Depends on: .log -->
 		<module>../org.xydra.index/</module>
+		<!--  DONE -->
 
-		<!-- Depends on .index -->
+		<!-- Depends on .index, .log -->
 		<module>../org.xydra.textsearch/</module>
+		<!--  DONE -->
 
 		<!-- Depends on: .index, .log -->
 		<module>../org.xydra.core/</module>
+		<!--  DONE -->
 
 		<!-- Depends on: .core, .log -->
 		<module>../org.xydra.client</module>
+		<!--  DONE -->
 
 		<!-- Depends on: .client, GWT -->
 		<module>../org.xydra.client-gwt/</module>
+		<!--  DONE -->
 
 		<!-- No Xydra dependencies -->
 		<module>../org.xydra.restless/</module>
-
-		<!-- Depends on: .core, .restless, .client, GWT -->
-		<module>../org.xydra.webadmin/</module>
+		<!--  DONE -->
 
 		<!-- Depends on: .core, .log, .restless -->
 		<module>../org.xydra.server/</module>
+		<!--  DONE -->
+
+		<!-- Depends on: .server, .core, .restless, .client, GWT -->
+		<module>../org.xydra.webadmin/</module>
+		<!--  DONE -->
 
 		<!-- Depends on: .server, GAE -->
 		<module>../org.xydra.server-gae/</module>
+		<!--  DONE -->
 
 		<!-- Depends on: .restless, GAE -->
 		<module>../org.xydra.gaemyadmin/</module>
+		<!--  DONE -->
+
+		<!--  Documentation. Depends on: .core -->
+		<module>../org.xydra.doc/</module>
+		<!--  DONE -->
 
 		<!-- Experimental. Depends on: .core -->
 		<module>../org.xydra.schema/</module>
+		<!--  DONE -->
 
 		<!-- Experimental. Depends on: .core, GWT -->
 		<!-- Commented out due to test failures -->
 		<!--
 			<module>../org.xydra.dev/</module>
 		-->
+		<!--  DONE -->
+
+
+
 
 		<!-- Experimental. Depends on: GAE -->
 		<!--
@@ -68,6 +89,7 @@
 			com.google.appengine.tools.admin does not exist
 		--><!--
 		<module>../org.xydra.gaeclient/</module>
+		<!--  DONE -->
 
 	-->
 	</modules>
