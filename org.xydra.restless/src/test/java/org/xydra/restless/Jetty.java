@@ -26,8 +26,8 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.webapp.WebAppContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
 
 /**

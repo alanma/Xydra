@@ -99,7 +99,7 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- logging -->
+		<!-- logging --><!--
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -118,7 +118,7 @@
 			<scope>compile</scope>
 		</dependency>
 
-	</dependencies>
+	--></dependencies>
 
 
 	<build>

@@ -3,8 +3,8 @@ package org.xydra.restless;
 import java.io.File;
 import java.net.URI;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
 
 /**
