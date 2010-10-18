@@ -6,7 +6,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.slf4j.LoggerFactory;
 import org.xydra.index.IMapIndex;
 import org.xydra.index.iterator.AbstractTransformingIterator;
 import org.xydra.index.iterator.NoneIterator;
@@ -14,7 +13,7 @@ import org.xydra.index.iterator.SingleValueIterator;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.KeyEntryTuple;
-
+import org.xydra.log.LoggerFactory;
 
 
 /**
