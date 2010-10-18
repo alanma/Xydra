@@ -25,8 +25,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.restless.example.ExampleApp;
-import org.xydra.restless.example.ExampleResource;
 
 
 /**
@@ -53,10 +51,10 @@ import org.xydra.restless.example.ExampleResource;
  * </pre>
  * 
  * 2) create a corresponding class org.xydra.example.ExampleApp. See
- * {@link ExampleApp}.
+ * org.xydra.restless.example.ExampleApp in test sources.
  * 
- * 3) {@link ExampleApp} initializes the resources of your application. See
- * {@link ExampleResource} for an example.
+ * 3) The ExampleApp initializes the resources of your application. See
+ * org.xydra.restless.example.ExampleResource in test sources for an example.
  * 
  * 4) The configuration can be accessed at the URL "/admin/restless"
  * 
