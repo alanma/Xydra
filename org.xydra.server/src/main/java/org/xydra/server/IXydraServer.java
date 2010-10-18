@@ -22,13 +22,15 @@ public interface IXydraServer extends Iterable<XID> {
 	XAddress getRepositoryAddress();
 	
 	/**
-	 * Return a read-only interface to the snapshot for the model this time.
-	 * Individual parts of the model are loaded into memory as-needed.
+	 * @return a read-only interface to the snapshot for the model this time.
+	 *         Individual parts of the model are loaded into memory as-needed.
+	 * 
+	 *         TODO what is returned if there is no XModel with the given id?
 	 */
 	XBaseModel getModelSnapshot(XID modelId);
 	
 	/**
-	 * Return an interface to read the change log entries for the given model.
+	 * @return an interface to read the change log entries for the given model.
 	 */
 	XChangeLog getChangeLog(XID modelId);
 	
@@ -51,8 +53,11 @@ public interface IXydraServer extends Iterable<XID> {
 	XAccessManager getAccessManager();
 	
 	/**
-	 * Get the available model IDs. TODO Iterators are problematic with
-	 * synchronization
+	 * Get the available model IDs.
+	 * 
+	 * Implements {@link Iterable} interface.
+	 * 
+	 * TODO Iterators are problematic with synchronization
 	 */
 	Iterator<XID> iterator();
 	
