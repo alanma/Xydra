@@ -13,6 +13,7 @@ import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
+import org.xydra.core.model.XObject;
 import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.index.XI;
 import org.xydra.log.Logger;
@@ -21,7 +22,11 @@ import org.xydra.log.LoggerFactory;
 
 /**
  * A class that can synchronize local and remote changes made to an
- * {@link XModel}.
+ * {@link XModel}. If an {@link XModel} or {@link XObject} is wrapped in the
+ * {@link XSynchronizer}, it should no longer be used directly, so that all
+ * events can be synchronized.
+ * 
+ * TODO handle timeouts (retry), other server/HTTP errors
  * 
  * @author dscharrer
  * 
@@ -41,11 +46,18 @@ public class XSynchronizer {
 	
 	boolean requestRunning = false;
 	
+	private boolean autoSync = false;
+	
 	/**
 	 * Start synchronizing the given model (which has no local changes) via the
 	 * given service. Any further changes applied directly to the model will be
 	 * lost. To persist changes supply the to the
 	 * {@link #executeCommand(XCommand, Callback)} Method.
+	 * 
+	 * @param addr The address of the entity on the server. This is needed for
+	 *            synchronizing single XObjects as the local copy of the entity
+	 *            will not have a parent model and thus no model XID in it's
+	 *            address.
 	 */
 	public XSynchronizer(XAddress addr, XSynchronizesChanges entity, XChangesService service) {
 		log.info("sync: init with entity " + addr + " | " + entity.getAddress());
@@ -58,6 +70,16 @@ public class XSynchronizer {
 		assert addr.getField() == null;
 		assert addr.getModel() != null;
 		assert XI.equals(addr.getObject(), entity.getAddress().getObject());
+	}
+	
+	/**
+	 * Start synchronizing the given model (which has no local changes) via the
+	 * given service. Any further changes applied directly to the model will be
+	 * lost. To persist changes supply the to the
+	 * {@link #executeCommand(XCommand, Callback)} Method.
+	 */
+	public XSynchronizer(XModel entity, XChangesService service) {
+		this(entity.getAddress(), entity, service);
 	}
 	
 	/**
@@ -85,7 +107,9 @@ public class XSynchronizer {
 		} else {
 			this.commands.add(command);
 			this.callbacks.add(callback);
-			startRequest();
+			if(this.autoSync) {
+				startRequest();
+			}
 		}
 		assert this.callbacks.size() == this.commands.size();
 	}
@@ -229,6 +253,7 @@ public class XSynchronizer {
 	protected void requestEnded(boolean immediateRequest) {
 		assert this.callbacks.size() == this.commands.size();
 		this.requestRunning = false;
+		// TODO should this only be done when autoSync == true?
 		if(immediateRequest && !this.commands.isEmpty()) {
 			startRequest();
 		}
@@ -240,6 +265,20 @@ public class XSynchronizer {
 	 */
 	public void synchronize() {
 		startRequest();
+	}
+	
+	/**
+	 * @param autoSync true if commands should be automatically sent to the
+	 *            server as they are added. The default is false (off). Even
+	 *            with auto sync on, no requests are made unless there are
+	 *            commands in the queue. Thus synchronize() still needs to be
+	 *            called from time to time to get updates from the server.
+	 */
+	public void setAutomaticSynchronize(boolean autoSync) {
+		this.autoSync = autoSync;
+		if(autoSync && !this.commands.isEmpty()) {
+			startRequest();
+		}
 	}
 	
 }
