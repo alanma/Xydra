@@ -89,9 +89,8 @@
 			com.google.appengine.tools.admin does not exist
 		--><!--
 		<module>../org.xydra.gaeclient/</module>
-		<!--  DONE -->
-
 	-->
+		<!--  DONE -->
 	</modules>
 
 </project>
