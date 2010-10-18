@@ -45,6 +45,9 @@ public interface XDataService {
 	/**
 	 * Set the remote state of the object with the given ID.
 	 * 
+	 * TODO What is the expected behaviour if the remote model does not exist
+	 * yet? Create it silently or fail?
+	 * 
 	 * @param callback Callback to receive if the operation succeeded, may be
 	 *            null. The callback's onSuccess() method's parameter signifies
 	 *            if the action changed anything (true) or if the remote
@@ -54,6 +57,9 @@ public interface XDataService {
 	
 	/**
 	 * Set the remote state of the field with the given ID.
+	 * 
+	 * TODO What is the expected behaviour if the remote model/object does not
+	 * exist yet? Create it silently or fail?
 	 * 
 	 * @param callback Callback to receive if the operation succeeded, may be
 	 *            null. The callback's onSuccess() method's parameter signifies
