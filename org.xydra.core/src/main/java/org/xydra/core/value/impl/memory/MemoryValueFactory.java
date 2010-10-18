@@ -2,7 +2,9 @@ package org.xydra.core.value.impl.memory;
 
 import java.util.Collection;
 
+import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
+import org.xydra.core.value.XAddressSortedSetValue;
 import org.xydra.core.value.XBooleanListValue;
 import org.xydra.core.value.XBooleanValue;
 import org.xydra.core.value.XByteListValue;
@@ -129,5 +131,13 @@ public class MemoryValueFactory implements XValueFactory {
 	
 	public XIDSortedSetValue createIDSortedSetValue(Collection<XID> values) {
 		return new MemoryIDSortedSetValue(values);
+	}
+	
+	public XAddressSortedSetValue createAddressSortedSetValue(XAddress[] values) {
+		return new MemoryAddressSortedSetValue(values);
+	}
+	
+	public XAddressSortedSetValue createAddressSortedSetValue(Collection<XAddress> values) {
+		return new MemoryAddressSortedSetValue(values);
 	}
 }

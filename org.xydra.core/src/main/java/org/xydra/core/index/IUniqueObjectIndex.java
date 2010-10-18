@@ -61,4 +61,9 @@ public interface IUniqueObjectIndex {
 	 */
 	boolean contains(XValue value);
 	
+	/**
+	 * Delete all data.
+	 */
+	void clear();
+	
 }

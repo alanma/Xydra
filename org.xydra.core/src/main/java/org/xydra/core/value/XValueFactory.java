@@ -2,6 +2,7 @@ package org.xydra.core.value;
 
 import java.util.Collection;
 
+import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 
 
@@ -306,4 +307,23 @@ public interface XValueFactory {
 	 */
 	XIDSortedSetValue createIDSortedSetValue(Collection<XID> values);
 	
+	/**
+	 * Creates an {@link XAddressSortedSetValue}.
+	 * 
+	 * @param values The array containing the {@link XAddress XAddresss} which
+	 *            are to be stored.
+	 * @return an {@link XAddressSortedSetValue} storing the given
+	 *         {@link XAddress XAddresss}, keeping the given order.
+	 */
+	XAddressSortedSetValue createAddressSortedSetValue(XAddress[] values);
+	
+	/**
+	 * Creates an {@link XAddressSortedSetValue}.
+	 * 
+	 * @param values The {@link Collection} containing the {@link XID XIDs}
+	 *            which are to be stored.
+	 * @return an {@link XAddressSortedSetValue} storing the given
+	 *         {@link XAddress XAddresss}, keeping the given order.
+	 */
+	XAddressSortedSetValue createAddressSortedSetValue(Collection<XAddress> values);
 }

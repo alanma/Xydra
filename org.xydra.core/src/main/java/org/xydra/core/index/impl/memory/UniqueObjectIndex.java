@@ -106,4 +106,10 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 		return true;
 	}
 	
+	public void clear() {
+		for(XID fieldID : this.indexObject) {
+			this.indexObject.removeField(this.actor, fieldID);
+		}
+	}
+	
 }
