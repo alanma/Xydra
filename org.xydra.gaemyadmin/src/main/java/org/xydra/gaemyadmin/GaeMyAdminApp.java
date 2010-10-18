@@ -44,12 +44,10 @@ import com.google.apphosting.api.ApiProxy;
 public class GaeMyAdminApp {
 	
 	public static void restless(Restless restless) {
-		GaeMyAdminApp app = new GaeMyAdminApp();
-		
-		Restless.addAdminOnlyMethod("/stats", "GET", app, "stats");
-		Restless.addAdminOnlyMethod("/backup", "GET", app, "backup");
-		Restless.addAdminOnlyMethod("/deleteAll", "GET", app, "deleteAll", new RestlessParameter(
-		        "sure", "no"));
+		restless.addMethod("/stats", "GET", GaeMyAdminApp.class, "stats", true);
+		restless.addMethod("/backup", "GET", GaeMyAdminApp.class, "backup", true);
+		restless.addMethod("/deleteAll", "GET", GaeMyAdminApp.class, "deleteAll", true,
+		        new RestlessParameter("sure", "no"));
 	}
 	
 	public String backup() {
