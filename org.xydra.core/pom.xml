@@ -76,8 +76,8 @@
 			<version>0.1.2-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
-		
-	  <!--  Xlog -->
+
+		<!--  Xlog -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
@@ -103,7 +103,7 @@
 			<version>${gwt.version}</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<!-- gwt-log -->
 		<dependency>
 			<groupId>com.google.code.gwt-log</groupId>
