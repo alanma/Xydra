@@ -5,14 +5,14 @@
 
 	<groupId>org.xydra</groupId>
 	<artifactId>core</artifactId>
-	<version>0.1.1-SNAPSHOT</version>
+	<version>0.1.2-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>Xydra Core</name>
 
 	<parent>
 		<groupId>org.xydra</groupId>
 		<artifactId>maven-root</artifactId>
-		<version>2010.09.14</version>
+		<version>2010.10.16</version>
 	</parent>
 
 	<repositories>
@@ -60,10 +60,6 @@
 		<!-- convenience to define GWT version in one place -->
 		<gwt.version>2.0.4</gwt.version>
 
-		<!--  tell the compiler we use 1.5 -->
-		<maven.compiler.source>1.5</maven.compiler.source>
-		<maven.compiler.target>1.5</maven.compiler.target>
-
 	</properties>
 
 	<dependencies>
@@ -72,12 +68,12 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>index</artifactId>
-			<version>0.1.1-SNAPSHOT</version>
+			<version>0.1.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>index</artifactId>
-			<version>0.1.1-SNAPSHOT</version>
+			<version>0.1.2-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
 		
@@ -90,20 +86,8 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
-			<version>0.1.1-SNAPSHOT</version>
+			<version>0.1.2-SNAPSHOT</version>
 			<classifier>sources</classifier>
-		</dependency>
-
-		<!-- logging dependencies -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<!-- version info taken from parent -->
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<!-- version info taken from parent -->
 		</dependency>
 
 		<!--  for testing the GWT compatibility -->
@@ -124,7 +108,7 @@
 		<dependency>
 			<groupId>com.google.code.gwt-log</groupId>
 			<artifactId>gwt-log</artifactId>
-			<version>2.6.2</version>
+			<version>3.0.3</version>
 			<scope>provided</scope>
 		</dependency>
 
