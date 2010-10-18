@@ -325,11 +325,11 @@ public class Restless extends HttpServlet {
 			res.getWriter().println(
 			        "<html " + XHTML_NS + "><head><title>Restless Configuration</title>" +
 			        /* styling */
-			        "<style type='text/css'> <!-- \n" +
+			        "<style type='text/css'> \n" +
 
-			        "body { font-family: Verdana,sans-serif; }" +
+			        "body { font-family: Verdana,sans-serif; }" + "\n"
 
-			        "\n" + "--> </style>\n" +
+			        + "</style>\n" +
 
 			        "</head><body>");
 			res.getWriter().println("<h3>Restless configuration</h3>");
@@ -350,7 +350,7 @@ public class Restless extends HttpServlet {
 					        parameter.name + " <input type='text' name='" + parameter.name
 					                + "' value='" + parameter.defaultValue + "' />");
 				}
-				res.getWriter().print("<input type='submit' name='Send' /></form>");
+				res.getWriter().print("<input type='submit' value='Send' /></form>");
 				
 				res.getWriter().println("</li>");
 			}
@@ -585,7 +585,7 @@ public class Restless extends HttpServlet {
 					foundMethod = true;
 					if(restlessMethod.adminOnly) {
 						// check security
-						if(path.startsWith(ADMIN_ONLY_URL_PREFIX)) {
+						if(requestIsViaAdminUrl(req)) {
 							// calling from potentially secured url, run
 							mayAccess = true;
 							try {
@@ -636,4 +636,7 @@ public class Restless extends HttpServlet {
 		}
 	}
 	
+	private boolean requestIsViaAdminUrl(HttpServletRequest req) {
+		return req.getRequestURI().startsWith(ADMIN_ONLY_URL_PREFIX);
+	}
 }
