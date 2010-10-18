@@ -4,15 +4,15 @@ import java.util.logging.Handler;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
 import org.xydra.server.rest.XydraRestServer;
 
 
 public class LogTestResource {
 	
-	static Logger slf4jLog = LoggerFactory.getLogger(LogTestResource.class);
+	static Logger log = LoggerFactory.getLogger(LogTestResource.class);
 	
 	public static void restless(Restless restless, String prefix) {
 		restless.addGet(prefix + "/logtest", LogTestResource.class, "init");
@@ -39,19 +39,19 @@ public class LogTestResource {
 	}
 	
 	public static void log() {
-		slf4jLog.trace("this is trace");
-		slf4jLog.debug("this is debug");
-		slf4jLog.info("this is info");
-		slf4jLog.warn("this is warn");
-		slf4jLog.error("this is error");
+		log.trace("this is trace");
+		log.debug("this is debug");
+		log.info("this is info");
+		log.warn("this is warn");
+		log.error("this is error");
 		System.out.println("this is sysout");
 		System.err.println("this is syserr");
 		
-		System.err.println("Log is traceEnabled? " + slf4jLog.isTraceEnabled());
-		System.err.println("Log is debugEnabled? " + slf4jLog.isDebugEnabled());
-		System.err.println("Log is infoEnabled? " + slf4jLog.isInfoEnabled());
-		System.err.println("Log is warnEnabled? " + slf4jLog.isWarnEnabled());
-		System.err.println("Log is errorEnabled? " + slf4jLog.isErrorEnabled());
+		System.err.println("Log is traceEnabled? " + log.isTraceEnabled());
+		System.err.println("Log is debugEnabled? " + log.isDebugEnabled());
+		System.err.println("Log is infoEnabled? " + log.isInfoEnabled());
+		System.err.println("Log is warnEnabled? " + log.isWarnEnabled());
+		System.err.println("Log is errorEnabled? " + log.isErrorEnabled());
 	}
 	
 	public static void main(String[] args) {
