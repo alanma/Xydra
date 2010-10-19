@@ -1,14 +1,36 @@
 package org.xydra.client.impl.direct;
 
 import org.xydra.client.Callback;
+import org.xydra.client.NotFoundException;
 import org.xydra.client.XDataService;
-import org.xydra.core.X;
+import org.xydra.core.XX;
+import org.xydra.core.change.XCommand;
+import org.xydra.core.change.XTransactionBuilder;
+import org.xydra.core.model.XAddress;
+import org.xydra.core.model.XBaseField;
+import org.xydra.core.model.XBaseModel;
+import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.value.XValue;
+import org.xydra.core.model.impl.memory.MemoryField;
+import org.xydra.core.model.impl.memory.MemoryModel;
+import org.xydra.core.model.impl.memory.MemoryObject;
+import org.xydra.core.model.session.XAccessException;
+import org.xydra.core.model.session.XProtectedField;
+import org.xydra.core.model.session.XProtectedModel;
+import org.xydra.core.model.session.XProtectedObject;
+import org.xydra.core.model.session.XProtectedRepository;
+import org.xydra.core.model.state.XChangeLogState;
+import org.xydra.core.model.state.XFieldState;
+import org.xydra.core.model.state.XModelState;
+import org.xydra.core.model.state.XObjectState;
+import org.xydra.core.model.state.impl.memory.MemoryChangeLogState;
+import org.xydra.core.model.state.impl.memory.TemporaryFieldState;
+import org.xydra.core.model.state.impl.memory.TemporaryModelState;
+import org.xydra.core.model.state.impl.memory.TemporaryObjectState;
 
 
 /**
@@ -19,185 +41,236 @@ import org.xydra.core.value.XValue;
  */
 public class DirectDataService implements XDataService {
 	
-	private static final XID ACTOR = X.getIDProvider().fromString(
-	        DirectDataService.class.toString());
+	private XProtectedRepository repo;
 	
-	private XRepository repo;
-	
-	public DirectDataService(XRepository repository) {
+	public DirectDataService(XProtectedRepository repository) {
 		this.repo = repository;
 	}
 	
 	@Override
 	public void deleteField(XID modelId, XID objectId, XID fieldId, Callback<Void> callback) {
-		XModel model = this.repo.getModel(modelId);
-		if(model == null) {
-			callback.onFailure(new IllegalArgumentException("There is no model with id '" + modelId
-			        + "'"));
-			return;
-		}
-		XObject xo = model.getObject(objectId);
-		if(xo == null) {
-			callback.onFailure(new IllegalArgumentException("There is no object with id '"
-			        + objectId + "'"));
-			return;
-		}
-		boolean success = xo.removeField(ACTOR, objectId);
-		if(success) {
+		
+		try {
+			
+			XProtectedModel model = this.repo.getModel(modelId);
+			if(model == null) {
+				XAddress modelAddr = XX.toAddress(null, modelId, null, null);
+				callback.onFailure(new NotFoundException(modelAddr.toURI()));
+				return;
+			}
+			
+			XProtectedObject object = model.getObject(objectId);
+			if(object == null) {
+				XAddress objectAddr = XX.toAddress(null, modelId, objectId, null);
+				callback.onFailure(new NotFoundException(objectAddr.toURI()));
+				return;
+			}
+			
+			object.removeField(fieldId);
+			
 			callback.onSuccess(null);
-			return;
-		} else {
-			callback.onFailure(new IllegalStateException("There was no field with id '" + fieldId
-			        + "'"));
+			
+		} catch(XAccessException ae) {
+			callback.onFailure(ae);
 			return;
 		}
 	}
 	
 	@Override
 	public void deleteModel(XID modelId, Callback<Void> callback) {
-		boolean success = this.repo.removeModel(ACTOR, modelId);
-		if(success) {
+		
+		try {
+			this.repo.removeModel(modelId);
 			callback.onSuccess(null);
-			return;
-		} else {
-			callback.onFailure(new IllegalStateException("There was no model with id '" + modelId
-			        + "'"));
+			
+		} catch(XAccessException ae) {
+			callback.onFailure(ae);
 			return;
 		}
 	}
 	
 	@Override
 	public void deleteObject(XID modelId, XID objectId, Callback<Void> callback) {
-		XModel model = this.repo.getModel(modelId);
-		if(model == null) {
-			callback.onFailure(new IllegalArgumentException("There is no model with id '" + modelId
-			        + "'"));
-			return;
-		}
-		boolean success = model.removeObject(ACTOR, objectId);
-		if(success) {
+		
+		try {
+			
+			XProtectedModel model = this.repo.getModel(modelId);
+			if(model == null) {
+				XAddress modelAddr = XX.toAddress(null, modelId, null, null);
+				callback.onFailure(new NotFoundException(modelAddr.toURI()));
+				return;
+			}
+			
+			model.removeObject(objectId);
+			
 			callback.onSuccess(null);
-			return;
-		} else {
-			callback.onFailure(new IllegalStateException("There was no object with id '" + objectId
-			        + "'"));
+			
+		} catch(XAccessException ae) {
+			callback.onFailure(ae);
 			return;
 		}
 	}
 	
 	@Override
 	public void getField(XID modelId, XID objectId, XID fieldId, Callback<XField> callback) {
-		XModel model = this.repo.getModel(modelId);
-		if(model == null) {
-			callback.onFailure(new IllegalArgumentException("There is no model with id '" + modelId
-			        + "'"));
+		
+		XAddress fieldAddr = XX.toAddress(null, modelId, objectId, fieldId);
+		
+		try {
+			
+			XProtectedModel model = this.repo.getModel(modelId);
+			if(model == null) {
+				XAddress modelAddr = XX.toAddress(null, modelId, null, null);
+				callback.onFailure(new NotFoundException(modelAddr.toURI()));
+				return;
+			}
+			
+			XProtectedObject object = model.getObject(objectId);
+			if(object == null) {
+				XAddress objectAddr = XX.toAddress(null, modelId, objectId, null);
+				callback.onFailure(new NotFoundException(objectAddr.toURI()));
+				return;
+			}
+			
+			XProtectedField field = object.getField(fieldId);
+			if(field == null) {
+				callback.onFailure(new NotFoundException(fieldAddr.toURI()));
+				return;
+			}
+			
+			XFieldState fieldState = new TemporaryFieldState(fieldAddr);
+			
+			XField fieldCopy = new MemoryField(fieldState);
+			
+			callback.onSuccess(fieldCopy);
+			
+		} catch(XAccessException ae) {
+			callback.onFailure(ae);
 			return;
 		}
-		XObject xo = model.getObject(objectId);
-		if(xo == null) {
-			callback.onFailure(new IllegalArgumentException("There is no object with id '"
-			        + objectId + "'"));
-			return;
-		}
-		XField xfield = xo.getField(fieldId);
-		if(xfield == null) {
-			callback.onFailure(new IllegalArgumentException("There is no object with id '"
-			        + objectId + "'"));
-			return;
-		}
-		callback.onSuccess(xfield);
 	}
 	
 	@Override
 	public void getModel(XID modelId, Callback<XModel> callback) {
-		XModel model = this.repo.getModel(modelId);
-		if(model == null) {
-			callback.onFailure(new IllegalArgumentException("There is no model with id '" + modelId
-			        + "'"));
+		
+		XAddress modelAddr = XX.toAddress(null, modelId, null, null);
+		
+		try {
+			
+			XProtectedModel model = this.repo.getModel(modelId);
+			if(model == null) {
+				callback.onFailure(new NotFoundException(modelAddr.toURI()));
+				return;
+			}
+			
+			XChangeLogState changeLogState = new MemoryChangeLogState(modelAddr);
+			XModelState modelState = new TemporaryModelState(modelAddr, changeLogState);
+			
+			XModel modelCopy = new MemoryModel(modelState);
+			
+			callback.onSuccess(modelCopy);
+			
+		} catch(XAccessException ae) {
+			callback.onFailure(ae);
 			return;
 		}
-		callback.onSuccess(model);
 	}
 	
 	@Override
 	public void getObject(XID modelId, XID objectId, Callback<XObject> callback) {
-		XModel model = this.repo.getModel(modelId);
-		if(model == null) {
-			callback.onFailure(new IllegalArgumentException("There is no model with id '" + modelId
-			        + "'"));
+		
+		XAddress objectAddr = XX.toAddress(null, modelId, objectId, null);
+		
+		try {
+			
+			XProtectedModel model = this.repo.getModel(modelId);
+			if(model == null) {
+				XAddress modelAddr = XX.toAddress(null, modelId, null, null);
+				callback.onFailure(new NotFoundException(modelAddr.toURI()));
+				return;
+			}
+			
+			XProtectedObject object = model.getObject(objectId);
+			if(object == null) {
+				callback.onFailure(new NotFoundException(objectAddr.toURI()));
+				return;
+			}
+			
+			XChangeLogState changeLogState = new MemoryChangeLogState(objectAddr);
+			XObjectState objectState = new TemporaryObjectState(objectAddr, changeLogState);
+			
+			XObject objectCopy = new MemoryObject(objectState);
+			
+			callback.onSuccess(objectCopy);
+			
+		} catch(XAccessException ae) {
+			callback.onFailure(ae);
 			return;
 		}
-		XObject xo = model.getObject(objectId);
-		if(xo == null) {
-			callback.onFailure(new IllegalArgumentException("There is no object with id '"
-			        + objectId + "'"));
+	}
+	
+	@Override
+	public void setModel(XBaseModel model, Callback<Boolean> callback) {
+		
+		XProtectedModel oldModel = this.repo.createModel(model.getID());
+		
+		XTransactionBuilder tb = new XTransactionBuilder(oldModel.getAddress());
+		tb.changeModel(oldModel, model);
+		
+		long result;
+		try {
+			result = oldModel.executeCommand(tb.buildCommand());
+		} catch(XAccessException ae) {
+			callback.onFailure(ae);
 			return;
 		}
-		callback.onSuccess(xo);
-	}
-	
-	@Override
-	public void setModel(XModel model, Callback<Boolean> callback) {
-		XModel currentModel = this.repo.createModel(ACTOR, model.getID());
-		boolean changes = copy(model, currentModel);
-		callback.onSuccess(changes);
-	}
-	
-	@Override
-	public void setObject(XID modelId, XObject object, Callback<Boolean> callback) {
-		// TODO silently create - is this the expected behaviour?
-		XModel model = this.repo.createModel(ACTOR, modelId);
-		XObject currentObject = model.createObject(ACTOR, object.getID());
-		boolean changes = copy(object, currentObject);
-		callback.onSuccess(changes);
-	}
-	
-	@Override
-	public void setField(XID modelId, XID objectId, XField field, Callback<Boolean> callback) {
-		// TODO silently create - is this the expected behaviour?
-		XModel model = this.repo.createModel(ACTOR, modelId);
-		// TODO silently create - is this the expected behaviour?
-		XObject object = model.createObject(ACTOR, objectId);
 		
-		XField currentField = object.createField(ACTOR, field.getID());
-		boolean changes = copy(field, currentField);
-		callback.onSuccess(changes);
+		callback.onSuccess(result != XCommand.FAILED && result != XCommand.NOCHANGE);
+	}
+	
+	@Override
+	public void setObject(XID modelId, XBaseObject object, Callback<Boolean> callback) {
 		
-	}
-	
-	public static boolean copy(XModel sourceModel, XModel targetModel) {
-		boolean changes = false;
-		for(XID objectId : sourceModel) {
-			XObject sourceObject = sourceModel.getObject(objectId);
-			if(!targetModel.hasObject(objectId)) {
-				changes = true;
-			}
-			XObject targetObject = targetModel.createObject(ACTOR, objectId);
-			changes |= copy(sourceObject, targetObject);
+		XAddress modelAddr = XX.resolveModel(this.repo.getAddress(), modelId);
+		XTransactionBuilder tb = new XTransactionBuilder(modelAddr);
+		tb.setObject(modelAddr, object);
+		
+		long result;
+		try {
+			result = this.repo.executeCommand(tb.buildCommand());
+		} catch(XAccessException ae) {
+			callback.onFailure(ae);
+			return;
 		}
-		return changes;
-	}
-	
-	public static boolean copy(XObject sourceObject, XObject targetObject) {
-		boolean changes = false;
-		for(XID fieldId : sourceObject) {
-			XField sourceField = sourceObject.getField(fieldId);
-			if(!targetObject.hasField(fieldId)) {
-				changes = true;
-			}
-			XField targetField = targetObject.createField(ACTOR, fieldId);
-			changes |= copy(sourceField, targetField);
-		}
-		return changes;
-	}
-	
-	public static boolean copy(XField sourceField, XField targetField) {
-		XValue value = sourceField.getValue();
-		if(targetField.getValue() != null && targetField.getValue().equals(value)) {
-			return false;
+		
+		if(result == XCommand.FAILED) {
+			callback.onFailure(new NotFoundException(modelAddr.toURI()));
 		} else {
-			targetField.setValue(ACTOR, value);
-			return true;
+			callback.onSuccess(result != XCommand.NOCHANGE);
+		}
+	}
+	
+	@Override
+	public void setField(XID modelId, XID objectId, XBaseField field, Callback<Boolean> callback) {
+		
+		XAddress objectAddr = XX.resolveObject(this.repo.getAddress(), modelId, objectId);
+		XTransactionBuilder tb = new XTransactionBuilder(objectAddr);
+		tb.setField(objectAddr, field);
+		
+		long result;
+		try {
+			result = this.repo.executeCommand(tb.buildCommand());
+		} catch(XAccessException ae) {
+			callback.onFailure(ae);
+			return;
+		}
+		
+		if(result == XCommand.FAILED) {
+			// cannot determine if the model existed or not
+			// object definitely doesn't exist
+			callback.onFailure(new NotFoundException(null));
+		} else {
+			callback.onSuccess(result != XCommand.NOCHANGE);
 		}
 	}
 	

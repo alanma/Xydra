@@ -1,6 +1,8 @@
 package org.xydra.client;
 
-import org.xydra.core.model.XAddress;
+import org.xydra.core.model.XBaseField;
+import org.xydra.core.model.XBaseModel;
+import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
@@ -19,7 +21,7 @@ import org.xydra.core.model.session.XAccessException;
  * Any unauthorized operation will result in a {@link XAccessException} being
  * passed to the callback's {@link Callback#onFailure(Throwable)}.
  * 
- * TODO use {@link XAddress} instead of multiple {@link XID} parameters?
+ * The callback may or may not be called before the method returns.
  * 
  * TODO merge this with {@link XChangesService} service?
  */
@@ -28,8 +30,12 @@ public interface XDataService {
 	/**
 	 * Get a snapshot of the model with the given ID.
 	 * 
-	 * If the model doesn't exist on the server, the call will fail and pass as
-	 * {@link NotFoundException} to the callbacks
+	 * The model that is passed to the callback's
+	 * {@link Callback#onSuccess(Object)} method is a local copy and changing it
+	 * will not affect the repository on the server.
+	 * 
+	 * If the {@link XModel} doesn't exist on the server, the call will fail and
+	 * pass as {@link NotFoundException} to the callbacks
 	 * {@link Callback#onFailure(Throwable)} method.
 	 * 
 	 * @param callback Callback to receive the XModel, may not be null.
@@ -39,8 +45,12 @@ public interface XDataService {
 	/**
 	 * Get a snapshot of the object with the given ID.
 	 * 
+	 * The {@link XObject} that is passed to the callback's
+	 * {@link Callback#onSuccess(Object)} method is a local copy and changing it
+	 * will not affect the repository on the server.
+	 * 
 	 * If the model or object doesn't exist on the server, the call will fail
-	 * and pass as {@link NotFoundException} to the callbacks
+	 * and pass as {@link NotFoundException} to the callback's
 	 * {@link Callback#onFailure(Throwable)} method.
 	 * 
 	 * @param callback Callback to receive the XObject, may not be null.
@@ -50,8 +60,12 @@ public interface XDataService {
 	/**
 	 * Get a snapshot of the field with the given ID.
 	 * 
+	 * The {@link XField} that is passed to the callback's
+	 * {@link Callback#onSuccess(Object)} method is a local copy and changing it
+	 * will not affect the repository on the server.
+	 * 
 	 * If the model, object or field doesn't exist on the server, the call will
-	 * fail and pass as {@link NotFoundException} to the callbacks
+	 * fail and pass as {@link NotFoundException} to the callback's
 	 * {@link Callback#onFailure(Throwable)} method.
 	 * 
 	 * @param callback Callback to receive the XField, may not be null.
@@ -72,13 +86,13 @@ public interface XDataService {
 	 *            if the action changed anything (true) or if the remote model's
 	 *            state was equal to the passed one.
 	 */
-	void setModel(XModel model, Callback<Boolean> callback);
+	void setModel(XBaseModel model, Callback<Boolean> callback);
 	
 	/**
 	 * Set the remote state of the object with the given ID.
 	 * 
 	 * If the model doesn't exist on the server, the call will fail and pass as
-	 * {@link NotFoundException} to the callbacks
+	 * {@link NotFoundException} to the callback's
 	 * {@link Callback#onFailure(Throwable)} method.
 	 * 
 	 * If the object doesn't exist already it will be automatically created.
@@ -88,13 +102,13 @@ public interface XDataService {
 	 *            if the action changed anything (true) or if the remote
 	 *            object's state was equal to the passed one.
 	 */
-	void setObject(XID modelId, XObject object, Callback<Boolean> callback);
+	void setObject(XID modelId, XBaseObject object, Callback<Boolean> callback);
 	
 	/**
 	 * Set the remote state of the field with the given ID.
 	 * 
 	 * If the model or object doesn't exist on the server, the call will fail
-	 * and pass as {@link NotFoundException} to the callbacks
+	 * and pass as {@link NotFoundException} to the callback's
 	 * {@link Callback#onFailure(Throwable)} method.
 	 * 
 	 * If the field doesn't exist already it will be automatically created.
@@ -107,7 +121,7 @@ public interface XDataService {
 	 *            if the action changed anything (true) or if the remote field's
 	 *            state was equal to the passed one.
 	 */
-	void setField(XID modelId, XID objectId, XField field, Callback<Boolean> callback);
+	void setField(XID modelId, XID objectId, XBaseField field, Callback<Boolean> callback);
 	
 	/**
 	 * Remove the model with the given ID.
@@ -129,7 +143,7 @@ public interface XDataService {
 	 * detect this.
 	 * 
 	 * If the model doesn't exist on the server, the call will fail and pass as
-	 * {@link NotFoundException} to the callbacks
+	 * {@link NotFoundException} to the callback's
 	 * {@link Callback#onFailure(Throwable)} method.
 	 * 
 	 * @param callback Callback to receive if the operation succeeded, may be
@@ -145,7 +159,7 @@ public interface XDataService {
 	 * detect this.
 	 * 
 	 * If the model or object doesn't exist on the server, the call will fail
-	 * and pass as {@link NotFoundException} to the callbacks
+	 * and pass as {@link NotFoundException} to the callback's
 	 * {@link Callback#onFailure(Throwable)} method.
 	 * 
 	 * @param callback Callback to receive if the operation succeeded, may be

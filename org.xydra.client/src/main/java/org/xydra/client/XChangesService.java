@@ -5,10 +5,22 @@ import java.util.List;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
+import org.xydra.core.model.session.XAccessException;
 
 
 /**
  * An interface for interacting with the "/data" API on remote CXM servers.
+ * 
+ * Errors while executing the operation (except those caused by illegal
+ * arguments) are passed to the callback's {@link Callback#onFailure(Throwable)}
+ * method. With the exception of {@link XAccessException}, foreseeable modes of
+ * failure should be mapped to a subclass of {@link ServiceException}.
+ * 
+ * Any unauthorized operation will result in a {@link XAccessException} being
+ * passed to the callback's {@link Callback#onFailure(Throwable)}.
+ * 
+ * The callback may or may not be called before the method returns.
+ * 
  */
 public interface XChangesService {
 	

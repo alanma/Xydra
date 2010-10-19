@@ -4,28 +4,25 @@ import java.util.List;
 
 import org.xydra.client.Callback;
 import org.xydra.client.XChangesService;
-import org.xydra.core.X;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
-import org.xydra.core.model.XRepository;
+import org.xydra.core.model.session.XProtectedRepository;
 
 
 public class DirectChangesService implements XChangesService {
 	
-	private static final XID ACTOR = X.getIDProvider().fromString(
-	        DirectDataService.class.toString());
+	private XProtectedRepository repo;
 	
-	private XRepository repo;
-	
-	public DirectChangesService(XRepository repository) {
+	public DirectChangesService(XProtectedRepository repository) {
 		this.repo = repository;
 	}
 	
 	@Override
 	public void executeCommand(XAddress entity, XCommand command, long since,
 	        Callback<CommandResult> callback, XAddress context) {
+		
+		this.repo.executeCommand(command);
 		
 		// TODO Auto-generated method stub
 		
