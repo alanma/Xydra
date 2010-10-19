@@ -16,6 +16,7 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.state.XSPI;
 import org.xydra.core.model.state.impl.memory.MemoryStateStore;
+import org.xydra.log.gae.GaeLoggerFactorySPI;
 import org.xydra.server.IXydraServer;
 import org.xydra.server.rest.XydraRestServer;
 
@@ -32,6 +33,8 @@ public class MemoryXydraServer implements IXydraServer {
 	 * Parameter-less constructor. Called form {@link XydraRestServer}.
 	 */
 	public MemoryXydraServer() {
+		// setup logging
+		GaeLoggerFactorySPI.init();
 		// Set the repository, group DB and access manager
 		XSPI.setStateStore(new MemoryStateStore());
 		this.repo = X.createMemoryRepository();

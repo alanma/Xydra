@@ -120,6 +120,11 @@
 			<artifactId>log</artifactId>
 			<version>0.1.2-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>log.gae</artifactId>
+			<version>0.1.2-SNAPSHOT</version>
+		</dependency>
 
 		<!-- testing dependencies, scope compile as some tests are exposed to be sub-classed -->
 		<dependency>
