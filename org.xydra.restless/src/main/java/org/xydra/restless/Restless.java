@@ -101,8 +101,13 @@ public class Restless extends HttpServlet {
 				// cookie.getDomain()
 				// cookie.getMaxAge()
 				// cookie.getPath()
-				// cookie.getSecure()
-				// cookie.getVersion()
+				// cookie.getSecure() if true, sent only over HTTPS
+				// cookie.getVersion() usually = 1
+				if(cookieMap.containsKey(name)) {
+					log.warn("Found multiple cookies with the name '" + name
+					        + "' with values, e.g., '" + cookieMap.get(name) + "' or '" + value
+					        + "'");
+				}
 				cookieMap.put(name, value);
 			}
 		}
