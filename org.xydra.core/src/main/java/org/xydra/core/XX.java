@@ -1,5 +1,8 @@
 package org.xydra.core;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.xydra.core.model.MissingPieceException;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseField;
@@ -13,6 +16,9 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.XType;
+import org.xydra.core.model.state.XFieldState;
+import org.xydra.core.model.state.XModelState;
+import org.xydra.core.model.state.XObjectState;
 import org.xydra.core.value.XBooleanListValue;
 import org.xydra.core.value.XDoubleListValue;
 import org.xydra.core.value.XIDListValue;
@@ -99,14 +105,15 @@ public class XX {
 	 * deleted.
 	 * 
 	 * @param actorID The {@link XID} of the actor.
-	 * @param sourceRepository The {@link XRepository} which is to be copied
+	 * @param sourceRepository The {@link XBaseRepository} which is to be copied
 	 * @param targetRepository The {@link XRepository} in which the data of
 	 *            sourceRepository is to be pasted.
 	 */
-	public static void copy(XID actorID, XRepository sourceRepository, XRepository targetRepository) {
+	public static void copy(XID actorID, XBaseRepository sourceRepository,
+	        XRepository targetRepository) {
 		// copy repository to _repository
 		for(XID modelID : sourceRepository) {
-			XModel model = sourceRepository.getModel(modelID);
+			XBaseModel model = sourceRepository.getModel(modelID);
 			XModel localModel = targetRepository.createModel(actorID, model.getID());
 			copy(actorID, model, localModel);
 		}
@@ -118,14 +125,14 @@ public class XX {
 	 * deleted.
 	 * 
 	 * @param actorID The {@link XID} of the actor.
-	 * @param sourceModel The {@link XModel} which is to be copied
+	 * @param sourceModel The {@link XBaseModel} which is to be copied
 	 * @param targetModel The {@link XModel} in which the data of sourceModel is
 	 *            to be pasted.
 	 */
-	public static void copy(XID actorID, XModel sourceModel, XModel targetModel) {
+	public static void copy(XID actorID, XBaseModel sourceModel, XModel targetModel) {
 		// copy model to _model
 		for(XID objectID : sourceModel) {
-			XObject object = sourceModel.getObject(objectID);
+			XBaseObject object = sourceModel.getObject(objectID);
 			XObject localObject = targetModel.createObject(actorID, object.getID());
 			copy(actorID, object, localObject);
 		}
@@ -137,16 +144,85 @@ public class XX {
 	 * not deleted.
 	 * 
 	 * @param actorID The {@link XID} of the actor.
-	 * @param sourceObject The {@link XObject} which is to be copied
+	 * @param sourceObject The {@link XBaseObject} which is to be copied
 	 * @param targetObject The {@link XObject} in which the data of sourceObject
 	 *            is to be pasted.
 	 */
-	public static void copy(XID actorID, XObject sourceObject, XObject targetObject) {
+	public static void copy(XID actorID, XBaseObject sourceObject, XObject targetObject) {
 		for(XID fieldID : sourceObject) {
-			XField field = sourceObject.getField(fieldID);
+			XBaseField field = sourceObject.getField(fieldID);
 			XField localField = targetObject.createField(actorID, fieldID);
 			localField.setValue(actorID, field.getValue());
 		}
+	}
+	
+	/**
+	 * Copies the source field's state to the target. Doesn't copy the change
+	 * log.
+	 */
+	public static void copy(XBaseModel source, XModelState target) {
+		target.setRevisionNumber(source.getRevisionNumber());
+		if(!target.isEmpty()) {
+			Set<XID> toRemove = new HashSet<XID>();
+			for(XID objectId : target) {
+				if(!source.hasObject(objectId)) {
+					XObjectState os = target.getObjectState(objectId);
+					os.delete(null);
+					toRemove.add(objectId);
+				}
+			}
+			for(XID objectId : toRemove) {
+				target.removeObjectState(objectId);
+			}
+		}
+		for(XID objectId : source) {
+			XObjectState os = target.getObjectState(objectId);
+			if(os == null) {
+				os = target.createObjectState(objectId);
+				target.addObjectState(os);
+			}
+			copy(source.getObject(objectId), os);
+		}
+		target.save(null);
+	}
+	
+	/**
+	 * Copies the source field's state to the target. Doesn't copy the change
+	 * log.
+	 */
+	public static void copy(XBaseObject source, XObjectState target) {
+		target.setRevisionNumber(source.getRevisionNumber());
+		if(!target.isEmpty()) {
+			Set<XID> toRemove = new HashSet<XID>();
+			for(XID fieldId : target) {
+				if(!source.hasField(fieldId)) {
+					XFieldState fs = target.getFieldState(fieldId);
+					fs.delete(null);
+					toRemove.add(fieldId);
+				}
+			}
+			for(XID fieldId : toRemove) {
+				target.removeFieldState(fieldId);
+			}
+		}
+		for(XID fieldId : source) {
+			XFieldState fs = target.getFieldState(fieldId);
+			if(fs == null) {
+				fs = target.createFieldState(fieldId);
+				target.addFieldState(fs);
+			}
+			copy(source.getField(fieldId), fs);
+		}
+		target.save(null);
+	}
+	
+	/**
+	 * Copies the source field's state to the target.
+	 */
+	public static void copy(XBaseField source, XFieldState target) {
+		target.setRevisionNumber(source.getRevisionNumber());
+		target.setValue(source.getValue());
+		target.save(null);
 	}
 	
 	/**
