@@ -1,10 +1,10 @@
 package org.xydra.log.gae;
 
 import org.junit.BeforeClass;
-import org.xydra.log.UseXydraLog;
+import org.xydra.log.XydraLogTest;
 
 
-public class GaeLogTest extends UseXydraLog {
+public class GaeLogTest extends XydraLogTest {
 	
 	@BeforeClass
 	public static void init() {
