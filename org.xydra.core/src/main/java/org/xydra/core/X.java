@@ -18,7 +18,7 @@ import org.xydra.core.value.impl.memory.MemoryValueFactory;
 
 /**
  * A utility class that provides helpful methods concerning the set-up of
- * {@link XModel}s.
+ * {@link Xydra}.
  * 
  * @author Voelkel
  * @author Kaidel
