@@ -22,7 +22,7 @@ public class GaeLoggerFactorySPI implements ILoggerFactorySPI {
 	}
 	
 	/* create an register appropriate factory */
-	static void init() {
+	public static void init() {
 		if(inProduction()) {
 			factory = new JulLoggerFactory();
 		} else {
