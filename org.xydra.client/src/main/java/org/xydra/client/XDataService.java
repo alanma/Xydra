@@ -1,32 +1,58 @@
 package org.xydra.client;
 
+import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
+import org.xydra.core.model.session.XAccessException;
 
 
 /**
  * An interface for interacting with the "/data" API on remote CXM servers.
+ * 
+ * Errors while executing the operation (except those caused by illegal
+ * arguments) are passed to the callback's {@link Callback#onFailure(Throwable)}
+ * method. With the exception of {@link XAccessException}, foreseeable modes of
+ * failure should be mapped to a subclass of {@link ServiceException}.
+ * 
+ * Any unauthorized operation will result in a {@link XAccessException} being
+ * passed to the callback's {@link Callback#onFailure(Throwable)}.
+ * 
+ * TODO use {@link XAddress} instead of multiple {@link XID} parameters?
+ * 
+ * TODO merge this with {@link XChangesService} service?
  */
 public interface XDataService {
 	
 	/**
-	 * Get the model with the given ID.
+	 * Get a snapshot of the model with the given ID.
+	 * 
+	 * If the model doesn't exist on the server, the call will fail and pass as
+	 * {@link NotFoundException} to the callbacks
+	 * {@link Callback#onFailure(Throwable)} method.
 	 * 
 	 * @param callback Callback to receive the XModel, may not be null.
 	 */
 	void getModel(XID modelId, Callback<XModel> callback);
 	
 	/**
-	 * Get the object with the given ID.
+	 * Get a snapshot of the object with the given ID.
+	 * 
+	 * If the model or object doesn't exist on the server, the call will fail
+	 * and pass as {@link NotFoundException} to the callbacks
+	 * {@link Callback#onFailure(Throwable)} method.
 	 * 
 	 * @param callback Callback to receive the XObject, may not be null.
 	 */
 	void getObject(XID modelId, XID objectId, Callback<XObject> callback);
 	
 	/**
-	 * Get the field with the given ID.
+	 * Get a snapshot of the field with the given ID.
+	 * 
+	 * If the model, object or field doesn't exist on the server, the call will
+	 * fail and pass as {@link NotFoundException} to the callbacks
+	 * {@link Callback#onFailure(Throwable)} method.
 	 * 
 	 * @param callback Callback to receive the XField, may not be null.
 	 */
@@ -34,6 +60,12 @@ public interface XDataService {
 	
 	/**
 	 * Set the remote state of the model with the given ID.
+	 * 
+	 * If the model doesn't exist already it will be automatically created.
+	 * 
+	 * Changes are applied in a transaction.
+	 * 
+	 * FIXME cannot create model in a transaction
 	 * 
 	 * @param callback Callback to receive if the operation succeeded, may be
 	 *            null. The callback's onSuccess() method's parameter signifies
@@ -45,8 +77,11 @@ public interface XDataService {
 	/**
 	 * Set the remote state of the object with the given ID.
 	 * 
-	 * TODO What is the expected behaviour if the remote model does not exist
-	 * yet? Create it silently or fail?
+	 * If the model doesn't exist on the server, the call will fail and pass as
+	 * {@link NotFoundException} to the callbacks
+	 * {@link Callback#onFailure(Throwable)} method.
+	 * 
+	 * If the object doesn't exist already it will be automatically created.
 	 * 
 	 * @param callback Callback to receive if the operation succeeded, may be
 	 *            null. The callback's onSuccess() method's parameter signifies
@@ -57,6 +92,12 @@ public interface XDataService {
 	
 	/**
 	 * Set the remote state of the field with the given ID.
+	 * 
+	 * If the model or object doesn't exist on the server, the call will fail
+	 * and pass as {@link NotFoundException} to the callbacks
+	 * {@link Callback#onFailure(Throwable)} method.
+	 * 
+	 * If the field doesn't exist already it will be automatically created.
 	 * 
 	 * TODO What is the expected behaviour if the remote model/object does not
 	 * exist yet? Create it silently or fail?
@@ -71,6 +112,10 @@ public interface XDataService {
 	/**
 	 * Remove the model with the given ID.
 	 * 
+	 * Fails silently if the model doesn't exist. Use
+	 * {@link XChangesService#executeCommand()} with a non-forced command to
+	 * detect this.
+	 * 
 	 * @param callback Callback to receive if the operation succeeded, may be
 	 *            null.
 	 */
@@ -79,6 +124,14 @@ public interface XDataService {
 	/**
 	 * Remove the object with the given ID.
 	 * 
+	 * Fails silently if the object doesn't exist. Use
+	 * {@link XChangesService#executeCommand()} with a non-forced command to
+	 * detect this.
+	 * 
+	 * If the model doesn't exist on the server, the call will fail and pass as
+	 * {@link NotFoundException} to the callbacks
+	 * {@link Callback#onFailure(Throwable)} method.
+	 * 
 	 * @param callback Callback to receive if the operation succeeded, may be
 	 *            null.
 	 */
@@ -86,6 +139,14 @@ public interface XDataService {
 	
 	/**
 	 * Remove the field with the given ID.
+	 * 
+	 * Fails silently if the model doesn't exist. Use
+	 * {@link XChangesService#executeCommand()} with a non-forced command to
+	 * detect this.
+	 * 
+	 * If the model or object doesn't exist on the server, the call will fail
+	 * and pass as {@link NotFoundException} to the callbacks
+	 * {@link Callback#onFailure(Throwable)} method.
 	 * 
 	 * @param callback Callback to receive if the operation succeeded, may be
 	 *            null.

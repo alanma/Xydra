@@ -4,6 +4,10 @@ package org.xydra.client;
  * An exception that indicates that there was a problem reaching the Xydra
  * Server.
  * 
+ * Implementations that connect to remote servers should map DNS, dropped
+ * connections, etc. to this exception. Connection timeouts should be mapped to
+ * a {@link TimeoutException}.
+ * 
  * @author dscharrer
  * 
  */

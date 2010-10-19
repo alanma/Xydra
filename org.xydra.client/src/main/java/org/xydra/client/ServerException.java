@@ -4,6 +4,9 @@ package org.xydra.client;
  * An exception that indicates that there was an internal problem in the Xydra
  * Server.
  * 
+ * HTTP based implementations might map HTTP/500+ response codes to this
+ * exception.
+ * 
  * @author dscharrer
  * 
  */

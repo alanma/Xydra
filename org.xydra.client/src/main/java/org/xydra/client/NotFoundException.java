@@ -8,6 +8,9 @@ import org.xydra.core.model.XAddress;
  * An exception that indicates that the requested resource could not be found on
  * the server.
  * 
+ * HTTP implementations should map any HTTP 404 response codes to this
+ * exception.
+ * 
  * @author dscharrer
  * 
  */
@@ -28,6 +31,12 @@ public class NotFoundException extends RequestException {
 		this.address = addr;
 	}
 	
+	/**
+	 * @return the address of the entity that could not be found or null if not
+	 *         available. The availability of this information depends on the
+	 *         server and service implementation and should only be used for
+	 *         debugging purposes.
+	 */
 	public XAddress getAddress() {
 		return this.address;
 	}
