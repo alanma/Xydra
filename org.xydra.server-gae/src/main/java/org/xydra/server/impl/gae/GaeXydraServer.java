@@ -32,6 +32,7 @@ public class GaeXydraServer implements IXydraServer {
 	private XAccessManager accessManager;
 	
 	public GaeXydraServer() {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		
 		// Set the repository, group DB and access manager
 		XSPI.setStateStore(new GaeStateStore());
