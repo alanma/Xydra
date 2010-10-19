@@ -55,4 +55,8 @@ public class LoggerFactory {
 		return false;
 	}
 	
+	public static void setLoggerFactorySPI(ILoggerFactorySPI spi) {
+		loggerFactorySPI = spi;
+	}
+	
 }
