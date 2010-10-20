@@ -469,15 +469,15 @@ public class Restless extends HttpServlet {
 		for(String appClassName : appClassNames) {
 			log.info("Loading restless app '" + appClassName + "'...");
 			instatiateAndInit(appClassName);
-			log.info("... done.");
+			log.info("... done loading restless app '" + appClassName + "'.");
 		}
 		
 		log.info(">>> Done Restless init at context path '"
 		        + this.initParams.get("context:contextPath") + "'. Admin interface at '"
 		        + this.initParams.get("context:contextPath") + "/admin/restless'");
-		if(log.isInfoEnabled()) {
+		if(log.isDebugEnabled()) {
 			for(RestlessMethod rm : this.methods) {
-				log.info("Mapping " + rm.httpMethod + " " + rm.pathTemplate.getRegex() + " --> "
+				log.debug("Mapping " + rm.httpMethod + " " + rm.pathTemplate.getRegex() + " --> "
 				        + instanceOrClass_className(rm.instanceOrClass) + "#" + rm.methodName
 				        + " access:" + (rm.adminOnly ? "ADMIN ONLY" : "PUBLIC"));
 			}
@@ -512,8 +512,7 @@ public class Restless extends HttpServlet {
 						        .warn("Class '"
 						                + this.apps
 						                + "' has no restless( Restless restless, String prefix ) method. Relying on static initializer.");
-						// trigger it to make sure static blocks are run
-						log.info("Configured with " + clazz.getName());
+						log.debug("Configured with " + clazz.getName());
 					}
 				} catch(IllegalArgumentException e) {
 					throw new RuntimeException("new '" + appClassName + "() failed", e);
