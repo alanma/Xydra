@@ -57,6 +57,8 @@ public class LoggerFactory {
 	
 	public static void setLoggerFactorySPI(ILoggerFactorySPI spi) {
 		loggerFactorySPI = spi;
+		loggerFactorySPI.getLogger("ROOT").error(
+		        "Configured XydraLog with " + spi.getClass().getName());
 	}
 	
 }
