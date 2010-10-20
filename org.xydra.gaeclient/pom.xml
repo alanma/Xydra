@@ -183,7 +183,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.google.appengine</groupId>
-			<artifactId>appengine-tools-api</artifactId>
+			<artifactId>appengine-tools-sdk</artifactId>
 			<version>${gae.version}</version>
 			<scope>runtime,compile</scope>
 		</dependency>
