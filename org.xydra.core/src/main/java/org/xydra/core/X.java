@@ -6,7 +6,6 @@ import org.xydra.core.change.impl.memory.MemoryCommandFactory;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XIDProvider;
-import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.core.model.impl.memory.MemoryStringIDProvider;
