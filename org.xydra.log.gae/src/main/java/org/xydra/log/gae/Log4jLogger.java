@@ -29,32 +29,32 @@ public class Log4jLogger extends Logger {
 	
 	@Override
 	public void debug(String msg) {
-		this.log4j.debug(msg);
+		this.log4j.log(Log4jLogger.class.getName(), org.apache.log4j.Level.DEBUG, msg, null);
 	}
 	
 	@Override
 	public void debug(String msg, Throwable t) {
-		this.log4j.debug(msg, t);
+		this.log4j.log(Log4jLogger.class.getName(), org.apache.log4j.Level.DEBUG, msg, t);
 	}
 	
 	@Override
 	public void error(String msg) {
-		this.log4j.error(msg);
+		this.log4j.log(Log4jLogger.class.getName(), org.apache.log4j.Level.ERROR, msg, null);
 	}
 	
 	@Override
 	public void error(String msg, Throwable t) {
-		this.log4j.error(msg, t);
+		this.log4j.log(Log4jLogger.class.getName(), org.apache.log4j.Level.ERROR, msg, t);
 	}
 	
 	@Override
 	public void info(String msg) {
-		this.log4j.info(msg);
+		this.log4j.log(Log4jLogger.class.getName(), org.apache.log4j.Level.INFO, msg, null);
 	}
 	
 	@Override
 	public void info(String msg, Throwable t) {
-		this.log4j.info(msg, t);
+		this.log4j.log(Log4jLogger.class.getName(), org.apache.log4j.Level.INFO, msg, t);
 	}
 	
 	@Override
@@ -84,22 +84,22 @@ public class Log4jLogger extends Logger {
 	
 	@Override
 	public void trace(String msg) {
-		this.log4j.trace(msg);
+		this.log4j.log(Log4jLogger.class.getName(), org.apache.log4j.Level.TRACE, msg, null);
 	}
 	
 	@Override
 	public void trace(String msg, Throwable t) {
-		this.log4j.trace(msg, t);
+		this.log4j.log(Log4jLogger.class.getName(), org.apache.log4j.Level.TRACE, msg, t);
 	}
 	
 	@Override
 	public void warn(String msg) {
-		this.log4j.warn(msg);
+		this.log4j.log(Log4jLogger.class.getName(), org.apache.log4j.Level.WARN, msg, null);
 	}
 	
 	@Override
 	public void warn(String msg, Throwable t) {
-		this.log4j.warn(msg, t);
+		this.log4j.log(Log4jLogger.class.getName(), org.apache.log4j.Level.WARN, msg, t);
 	}
 	
 }
