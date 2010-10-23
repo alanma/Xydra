@@ -1,9 +1,12 @@
 <module>
-	
+	<!-- 
+	This is 
+		<inherits name="org.xydra.core.XydraCore" />
+	 -->
 	<inherits name="com.google.gwt.user.User" />
 	<inherits name="org.xydra.index.XydraIndex" />
 	<inherits name="org.xydra.annotations.Platform" />
-	
+
 	<!-- Inherit Xydra Logging -->
 	<inherits name='org.xydra.log.Xlog'/>
 	
