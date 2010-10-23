@@ -15,8 +15,14 @@
 		<version>2010.10.16</version>
 	</parent>
 
+	<properties>
+
+		<!-- convenience to define GWT version in one place -->
+		<gwt.version>2.0.4</gwt.version>
+
+	</properties>
+
 	<repositories>
-		<!-- xydra repo -->
 		<repository>
 			<id>xydra-repo</id>
 			<url>
@@ -28,7 +34,6 @@
 				<checksumPolicy>fail</checksumPolicy>
 			</releases>
 		</repository>
-		<!-- xydra snapshots -->
 		<repository>
 			<id>xydra-snap</id>
 			<url>
@@ -55,12 +60,6 @@
 		</repository>
 	</repositories>
 
-	<properties>
-
-		<!-- convenience to define GWT version in one place -->
-		<gwt.version>2.0.4</gwt.version>
-
-	</properties>
 
 	<dependencies>
 
