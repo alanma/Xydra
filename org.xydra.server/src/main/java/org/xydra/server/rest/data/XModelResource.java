@@ -65,8 +65,8 @@ public class XModelResource {
 			        "could not parse the provided XObject: " + iae.getMessage());
 		}
 		
-		XAddress modelAddr = XX.toAddress(session.getRepositoryAddress().getRepository(),
-		        XydraRestServer.getId(modelId), null, null);
+		XAddress modelAddr = XX.resolveModel(session.getRepositoryAddress(), XydraRestServer
+		        .getId(modelId));
 		XTransactionBuilder tb = new XTransactionBuilder(modelAddr);
 		tb.setObject(modelAddr, newObject);
 		

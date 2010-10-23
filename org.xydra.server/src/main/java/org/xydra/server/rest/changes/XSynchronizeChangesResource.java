@@ -59,8 +59,7 @@ public class XSynchronizeChangesResource {
 	public void getEvents(Restless restless, HttpServletRequest req, HttpServletResponse res,
 	        XID modelId, XID objectId) {
 		IXydraSession session = XydraRestServer.getSession(restless, req);
-		XAddress addr = XX.toAddress(session.getRepositoryAddress().getRepository(), modelId,
-		        objectId, null);
+		XAddress addr = XX.resolveObject(session.getRepositoryAddress(), modelId, objectId);
 		
 		Long since = XydraRestServer.getLongParameter(req, "since");
 		Long until = XydraRestServer.getLongParameter(req, "until");
@@ -96,8 +95,7 @@ public class XSynchronizeChangesResource {
 	public void executeCommand(Restless restless, HttpServletRequest req, HttpServletResponse res,
 	        XID modelId, XID objectId) {
 		IXydraSession session = XydraRestServer.getSession(restless, req);
-		XAddress addr = XX.toAddress(session.getRepositoryAddress().getRepository(), modelId,
-		        objectId, null);
+		XAddress addr = XX.resolveObject(session.getRepositoryAddress(), modelId, objectId);
 		
 		Long since = XydraRestServer.getLongParameter(req, "since");
 		

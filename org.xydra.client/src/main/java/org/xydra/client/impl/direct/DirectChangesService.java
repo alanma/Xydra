@@ -69,8 +69,8 @@ public class DirectChangesService implements XChangesService {
 			}
 		}
 		assert clientContext.equalsOrContains(target);
-		XAddress serverContext = XX.toAddress(this.repo.getAddress().getRepository(), entity
-		        .getModel(), entity.getObject(), null);
+		XAddress serverContext = XX.resolveObject(this.repo.getAddress(), entity.getModel(), entity
+		        .getObject());
 		
 		XCommand serverCommand = mapCommand(command, clientContext, serverContext);
 		
@@ -152,8 +152,8 @@ public class DirectChangesService implements XChangesService {
 	public void getEvents(XAddress entity, long since, long until, Callback<List<XEvent>> callback,
 	        XAddress context) {
 		
-		XAddress serverContext = XX.toAddress(this.repo.getAddress().getRepository(), entity
-		        .getModel(), entity.getObject(), null);
+		XAddress serverContext = XX.resolveObject(this.repo.getAddress(), entity.getModel(), entity
+		        .getObject());
 		
 		long begin = since >= 0 ? since : 0;
 		long end = until > 0 ? until : Long.MAX_VALUE;

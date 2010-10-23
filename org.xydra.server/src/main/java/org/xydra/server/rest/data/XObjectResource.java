@@ -68,8 +68,8 @@ public class XObjectResource {
 			        "could not parse the provided XField: " + iae.getMessage());
 		}
 		
-		XAddress objectAddr = XX.toAddress(session.getRepositoryAddress().getRepository(),
-		        XydraRestServer.getId(modelId), XydraRestServer.getId(objectId), null);
+		XAddress objectAddr = XX.resolveObject(session.getRepositoryAddress(), XydraRestServer
+		        .getId(modelId), XydraRestServer.getId(objectId));
 		XTransactionBuilder tb = new XTransactionBuilder(objectAddr);
 		tb.setField(objectAddr, newField);
 		
@@ -90,8 +90,8 @@ public class XObjectResource {
 	        String modelId, String objectId) {
 		IXydraSession session = XydraRestServer.getSession(restless, req);
 		
-		XAddress target = XX.toAddress(session.getRepositoryAddress().getRepository(),
-		        XydraRestServer.getId(modelId), null, null);
+		XAddress target = XX.resolveModel(session.getRepositoryAddress(), XydraRestServer
+		        .getId(modelId));
 		XModelCommand removeCommand = MemoryModelCommand.createRemoveCommand(target,
 		        XCommand.FORCED, XydraRestServer.getId(objectId));
 		

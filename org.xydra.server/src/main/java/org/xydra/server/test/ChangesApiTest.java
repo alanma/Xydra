@@ -217,11 +217,12 @@ public abstract class ChangesApiTest extends AbstractRestApiTest {
 	}
 	
 	private XAddress model() {
-		return XX.toAddress(repo.getID(), DemoModelUtil.PHONEBOOK_ID, null, null);
+		return XX.resolveModel(repo.getAddress(), DemoModelUtil.PHONEBOOK_ID);
 	}
 	
 	private XAddress object() {
-		return XX.toAddress(repo.getID(), DemoModelUtil.PHONEBOOK_ID, DemoModelUtil.JOHN_ID, null);
+		return XX.resolveObject(repo.getAddress(), DemoModelUtil.PHONEBOOK_ID,
+		        DemoModelUtil.JOHN_ID);
 	}
 	
 	@Test

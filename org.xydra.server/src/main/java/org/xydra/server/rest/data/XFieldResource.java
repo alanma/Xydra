@@ -47,8 +47,8 @@ public class XFieldResource {
 	        String modelId, String objectId, String fieldId) {
 		IXydraSession session = XydraRestServer.getSession(restless, req);
 		
-		XAddress target = XX.toAddress(session.getRepositoryAddress().getRepository(),
-		        XydraRestServer.getId(modelId), XydraRestServer.getId(objectId), null);
+		XAddress target = XX.resolveObject(session.getRepositoryAddress(), XydraRestServer
+		        .getId(modelId), XydraRestServer.getId(objectId));
 		XObjectCommand removeCommand = MemoryObjectCommand.createRemoveCommand(target,
 		        XCommand.FORCED, XydraRestServer.getId(fieldId));
 		
