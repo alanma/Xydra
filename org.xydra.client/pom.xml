@@ -51,7 +51,7 @@
 			<artifactId>core</artifactId>
 			<version>0.1.2-SNAPSHOT</version>
 		</dependency>
-		
+
 		<!-- gwt-log -->
 		<dependency>
 			<groupId>org.xydra</groupId>
@@ -64,9 +64,26 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 		</dependency>
-		
+
 	</dependencies>
 
+	<build>
+		<plugins>
+			<plugin>
+				<inherited>true</inherited>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 
 	<distributionManagement>
 		<!--
@@ -94,6 +111,5 @@
 		<connection>svn:https://xydra.googlecode.com/svn/trunk/org.xydra.client</connection>
 		<developerConnection>svn:https://xydra.googlecode.com/svn/trunk/org.xydra.client</developerConnection>
 	</scm>
-
 
 </project>
