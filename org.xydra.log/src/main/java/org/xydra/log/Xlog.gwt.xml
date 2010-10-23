@@ -6,5 +6,7 @@
 	<!-- add gwt-log support -->
 	<inherits name='com.allen_sauer.gwt.log.gwt-log-OFF' />
 	
-	<source path="" />
+	<source path="" >
+		<exclude name="XydraLogTest.java"/>
+	</source>
 </module>
