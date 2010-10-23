@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.xydra.client.Callback;
 import org.xydra.client.XChangesService;
+import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
@@ -31,7 +32,7 @@ public class GWTChangesService extends AbstractGWTHttpService implements XChange
 	}
 	
 	public void executeCommand(final XAddress entity, XCommand command, final long since,
-	        final Callback<CommandResult> callback, final XAddress context) {
+	        final Callback<CommandResult> callback) {
 		
 		XAddress target = command.getTarget();
 		
@@ -42,10 +43,39 @@ public class GWTChangesService extends AbstractGWTHttpService implements XChange
 			}
 		}
 		
-		if(!context.equalsOrContains(target)) {
-			throw new IllegalArgumentException("cannot send command " + command + " to entity "
-			        + entity);
+		final XAddress context;
+		if(entity.getModel() == null) {
+			if(since != NONE) {
+				throw new IllegalArgumentException(
+				        "Cannot get events from the whole repository, target was: " + entity);
+			}
+			if(target.getModel() != null || target.getObject() != null || target.getField() != null) {
+				throw new IllegalArgumentException(
+				        "can only send XRepositoryCommands to the repository entity");
+			}
+			context = target;
+		} else if(entity.getObject() == null) {
+			if(target.getModel() == null) {
+				throw new IllegalArgumentException(
+				        "cannnot send XRepositoryCommands to model/object entities");
+			}
+			if(target.getObject() == null) {
+				context = target;
+			} else {
+				context = XX.toAddress(target.getRepository(), target.getModel(), null, null);
+			}
+		} else {
+			if(target.getObject() == null) {
+				throw new IllegalArgumentException(
+				        "cannnot send model or repository commands to object entities");
+			}
+			if(target.getField() == null) {
+				context = target;
+			} else {
+				context = target.getParent();
+			}
 		}
+		assert context.equalsOrContains(target);
 		
 		String url = getUrl(entity, since, Long.MAX_VALUE);
 		

@@ -178,7 +178,7 @@ public class XSynchronizer {
 					        requestEnded(true);
 				        }
 				        
-			        }, this.entity.getAddress());
+			        });
 			
 		} else {
 			

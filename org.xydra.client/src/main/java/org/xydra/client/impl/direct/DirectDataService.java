@@ -6,6 +6,8 @@ import org.xydra.client.XDataService;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XTransactionBuilder;
+import org.xydra.core.change.impl.memory.MemoryModelCommand;
+import org.xydra.core.change.impl.memory.MemoryObjectCommand;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XBaseModel;
@@ -50,29 +52,24 @@ public class DirectDataService implements XDataService {
 	@Override
 	public void deleteField(XID modelId, XID objectId, XID fieldId, Callback<Void> callback) {
 		
+		XAddress objectAddr = XX.resolveObject(this.repo.getAddress(), modelId, objectId);
+		XCommand removeCommand = MemoryObjectCommand.createRemoveCommand(objectAddr,
+		        XCommand.FORCED, fieldId);
+		
+		long result;
 		try {
-			
-			XProtectedModel model = this.repo.getModel(modelId);
-			if(model == null) {
-				XAddress modelAddr = XX.toAddress(null, modelId, null, null);
-				callback.onFailure(new NotFoundException(modelAddr.toURI()));
-				return;
-			}
-			
-			XProtectedObject object = model.getObject(objectId);
-			if(object == null) {
-				XAddress objectAddr = XX.toAddress(null, modelId, objectId, null);
-				callback.onFailure(new NotFoundException(objectAddr.toURI()));
-				return;
-			}
-			
-			object.removeField(fieldId);
-			
-			callback.onSuccess(null);
-			
+			result = this.repo.executeCommand(removeCommand);
 		} catch(XAccessException ae) {
 			callback.onFailure(ae);
 			return;
+		}
+		
+		if(result == XCommand.FAILED) {
+			// cannot determine if the model existed or not
+			// object definitely doesn't exist
+			callback.onFailure(new NotFoundException(null));
+		} else {
+			callback.onSuccess(null);
 		}
 	}
 	
@@ -92,22 +89,22 @@ public class DirectDataService implements XDataService {
 	@Override
 	public void deleteObject(XID modelId, XID objectId, Callback<Void> callback) {
 		
+		XAddress modelAddr = XX.resolveModel(this.repo.getAddress(), modelId);
+		XCommand removeCommand = MemoryModelCommand.createRemoveCommand(modelAddr, XCommand.FORCED,
+		        objectId);
+		
+		long result;
 		try {
-			
-			XProtectedModel model = this.repo.getModel(modelId);
-			if(model == null) {
-				XAddress modelAddr = XX.toAddress(null, modelId, null, null);
-				callback.onFailure(new NotFoundException(modelAddr.toURI()));
-				return;
-			}
-			
-			model.removeObject(objectId);
-			
-			callback.onSuccess(null);
-			
+			result = this.repo.executeCommand(removeCommand);
 		} catch(XAccessException ae) {
 			callback.onFailure(ae);
 			return;
+		}
+		
+		if(result == XCommand.FAILED) {
+			callback.onFailure(new NotFoundException(modelAddr.toURI()));
+		} else {
+			callback.onSuccess(null);
 		}
 	}
 	
@@ -139,6 +136,8 @@ public class DirectDataService implements XDataService {
 			}
 			
 			XFieldState fieldState = new TemporaryFieldState(fieldAddr);
+			// FIXME concurrency: field may be changed during copy
+			XX.copy(field, fieldState);
 			
 			XField fieldCopy = new MemoryField(fieldState);
 			
@@ -164,7 +163,10 @@ public class DirectDataService implements XDataService {
 			}
 			
 			XChangeLogState changeLogState = new MemoryChangeLogState(modelAddr);
+			changeLogState.setFirstRevisionNumber(model.getRevisionNumber());
 			XModelState modelState = new TemporaryModelState(modelAddr, changeLogState);
+			// FIXME concurrency: model may be changed during copy
+			XX.copy(model, modelState);
 			
 			XModel modelCopy = new MemoryModel(modelState);
 			
@@ -197,7 +199,10 @@ public class DirectDataService implements XDataService {
 			}
 			
 			XChangeLogState changeLogState = new MemoryChangeLogState(objectAddr);
+			changeLogState.setFirstRevisionNumber(model.getRevisionNumber());
 			XObjectState objectState = new TemporaryObjectState(objectAddr, changeLogState);
+			// FIXME concurrency: object may be changed during copy
+			XX.copy(object, objectState);
 			
 			XObject objectCopy = new MemoryObject(objectState);
 			
