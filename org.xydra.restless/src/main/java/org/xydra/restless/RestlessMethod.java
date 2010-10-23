@@ -192,6 +192,10 @@ public class RestlessMethod {
 					}
 					args.add(value);
 					parameterNumber++;
+					if(parameterNumber > this.parameter.length) {
+						throw new IllegalArgumentException(
+						        "More non-trivial parameter required by Java method than mapped via RestlessParameters");
+					}
 				}
 			}
 			
