@@ -54,10 +54,7 @@ public class XX {
 	 * @return The {@link XField} with newly set {@link XValue}
 	 */
 	public static XField setValue(XID actorID, XObject object, XID fieldID, XValue value) {
-		XField field = object.getField(fieldID);
-		if(field == null) {
-			field = object.createField(actorID, fieldID);
-		}
+		XField field = object.createField(actorID, fieldID);
 		field.setValue(actorID, value);
 		return field;
 	}
@@ -427,12 +424,7 @@ public class XX {
 	public static void safeSetStringValue(XID actorID, XObject object, XID fieldID,
 	        String stringValue) {
 		if(object != null) {
-			try {
-				XField field = safeGetField(object, fieldID);
-				field.setValue(actorID, XV.toValue(stringValue));
-			} catch(MissingPieceException mpe) {
-				object.createField(actorID, fieldID).setValue(actorID, XV.toValue(stringValue));
-			}
+			setValue(actorID, object, fieldID, XV.toValue(stringValue));
 		}
 	}
 	
