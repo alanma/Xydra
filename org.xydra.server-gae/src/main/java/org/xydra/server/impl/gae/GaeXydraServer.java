@@ -17,6 +17,7 @@ import org.xydra.core.model.XRepository;
 import org.xydra.core.model.state.XSPI;
 import org.xydra.core.model.state.impl.gae.GaeStateStore;
 import org.xydra.server.IXydraServer;
+import org.xydra.server.impl.InfrastructureServiceFactory;
 
 
 /**
@@ -32,7 +33,11 @@ public class GaeXydraServer implements IXydraServer {
 	private XAccessManager accessManager;
 	
 	public GaeXydraServer() {
+		// To enable local JUnit testing with multiple threads
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		
+		// Register AppEngine infrastructure services
+		InfrastructureServiceFactory.setProvider(new GaeInfrastructureProvider());
 		
 		// Set the repository, group DB and access manager
 		XSPI.setStateStore(new GaeStateStore());
