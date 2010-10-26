@@ -22,7 +22,6 @@ import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessException;
 import org.xydra.server.IXydraServer;
 import org.xydra.server.IXydraSession;
-import org.xydra.server.XydraServerDefaultConfiguration;
 import org.xydra.server.impl.memory.ArmXydraSession;
 import org.xydra.server.rest.changes.XRepositoryChangesResource;
 import org.xydra.server.rest.changes.XSynchronizeChangesResource;

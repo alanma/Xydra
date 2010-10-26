@@ -1,7 +1,8 @@
-package org.xydra.server;
+package org.xydra.server.rest;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.server.IXydraServer;
 import org.xydra.server.impl.memory.MemoryXydraServer;
 
 
