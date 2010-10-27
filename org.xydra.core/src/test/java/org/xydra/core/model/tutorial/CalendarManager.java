@@ -19,6 +19,8 @@ import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.value.XIntegerValue;
 import org.xydra.core.value.XStringValue;
 import org.xydra.core.value.XV;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
 
 /**
@@ -33,8 +35,9 @@ import org.xydra.core.value.XV;
  * @author Kaidel
  * 
  */
-
 public class CalendarManager {
+	
+	private static final Logger log = LoggerFactory.getLogger(CalendarManager.class);
 	
 	/*
 	 * Before we can begin we need to think about how we want to organize the
@@ -423,7 +426,7 @@ public class CalendarManager {
 		cm.addEvent("john", "superman", "Brush Teeth", "at home", 2010, 4, 14,
 		        "Brush teeth for 2 minutes", 2200, 2203);
 		String events = cm.getEvents("john", "superman", "john", 2000, 1, 1, 2020, 12, 31);
-		System.out.println(events);
+		log.info(events);
 		
 		// alice registers
 		cm.registerNewUser("alice", "wonderwomen");
@@ -433,6 +436,6 @@ public class CalendarManager {
 		
 		// alice looks up johns events
 		String aliceEvents = cm.getEvents("alice", "wonderwomen", "john", 2000, 1, 1, 2020, 12, 31);
-		System.out.println(aliceEvents);
+		log.info(aliceEvents);
 	}
 }

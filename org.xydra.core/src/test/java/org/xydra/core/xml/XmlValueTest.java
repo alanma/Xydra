@@ -25,7 +25,6 @@ public class XmlValueTest {
 		XmlValue.toXml(value, out);
 		assertEquals("", out.getOpentags());
 		String xml = out.getXml();
-		// System.out.println(xml);
 		MiniElement e = new MiniXMLParserImpl().parseXml(xml);
 		XValue valueAgain = XmlValue.toValue(e);
 		assertEquals(value, valueAgain);

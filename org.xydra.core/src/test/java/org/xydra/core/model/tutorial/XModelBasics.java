@@ -38,6 +38,8 @@ import org.xydra.core.model.state.XSPI;
 import org.xydra.core.model.state.impl.memory.TemporaryStateStore;
 import org.xydra.core.value.XV;
 import org.xydra.core.value.XValue;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
 
 /**
@@ -77,6 +79,8 @@ import org.xydra.core.value.XValue;
  * @author Kaidel
  */
 public class XModelBasics {
+	
+	private static final Logger log = LoggerFactory.getLogger(XModelBasics.class);
 	
 	@BeforeClass
 	public static void init() {
@@ -434,10 +438,10 @@ public class XModelBasics {
 			public void onChangeEvent(XModelEvent event) {
 				if(event.getChangeType() == ChangeType.ADD) {
 					this.objectCount++;
-					System.out.println("Our model now holds " + this.objectCount + " XObjects!");
+					log.info("Our model now holds " + this.objectCount + " XObjects!");
 				} else if(event.getChangeType() == ChangeType.REMOVE) {
 					this.objectCount--;
-					System.out.println("Our model now holds " + this.objectCount + " XObjects!");
+					log.info("Our model now holds " + this.objectCount + " XObjects!");
 				}
 				
 			}
@@ -466,10 +470,10 @@ public class XModelBasics {
 			
 			public void onChangeEvent(XObjectEvent event) {
 				if(event.getChangeType() == ChangeType.ADD) {
-					System.out.println("An XField with ID " + event.getFieldID()
+					log.info("An XField with ID " + event.getFieldID()
 					        + " was added to the XObject with ID " + event.getObjectID() + "!");
 				} else if(event.getChangeType() == ChangeType.REMOVE) {
-					System.out.println("An XField with ID " + event.getFieldID()
+					log.info("An XField with ID " + event.getFieldID()
 					        + " was removed from the XObject with ID " + event.getObjectID() + "!");
 				}
 			}

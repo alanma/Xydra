@@ -9,9 +9,13 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.xml.XmlModel;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
 
 public class SimpleSyntaxUtilsTest {
+	
+	private static final Logger log = LoggerFactory.getLogger(SimpleSyntaxUtilsTest.class);
 	
 	static final XID PHONEBOOK = XX.toId("phonebook");
 	
@@ -57,7 +61,7 @@ public class SimpleSyntaxUtilsTest {
 	public static final void dump(XModel model) {
 		XmlOutStringBuffer xo = new XmlOutStringBuffer();
 		XmlModel.toXml(model, xo, true, false, true);
-		System.out.println(xo.getXml());
+		log.debug(xo.getXml());
 	}
 	
 }

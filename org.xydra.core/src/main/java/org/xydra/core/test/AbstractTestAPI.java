@@ -5,13 +5,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
-import org.xydra.core.URIFormatException;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.model.MissingPieceException;
@@ -575,7 +573,8 @@ public abstract class AbstractTestAPI {
 		XIDListValue listValue = (XIDListValue)field1.getValue();
 		assertFalse(listValue.contains(newID));
 		// add the new id
-		XX.addIDToList(ACTOR_ID, field1, newID);
+		listValue = listValue.add(newID);
+		field1.setValue(ACTOR_ID, listValue);
 		
 		// check that the id was added
 		listValue = (XIDListValue)field1.getValue();
@@ -583,7 +582,8 @@ public abstract class AbstractTestAPI {
 		assertTrue(listValue.contains(newID));
 		
 		// remove it
-		XX.removeIDFromList(ACTOR_ID, field1, newID);
+		listValue = listValue.remove(newID);
+		field1.setValue(ACTOR_ID, listValue);
 		
 		// check that it was removed
 		listValue = (XIDListValue)field1.getValue();
@@ -600,107 +600,6 @@ public abstract class AbstractTestAPI {
 		XField testField = testObject.createField(ACTOR_ID, XX.toId(fieldIDString));
 		XValue testValue = XV.toValue("TestValue");
 		testField.setValue(ACTOR_ID, testValue);
-		
-		// - - Method: XModel getModelFromURI(XRepository repository, String
-		// uri) - -
-		assertEquals(testModel, XX.getModelFromURI(testRepository, modelIDString));
-		assertEquals(testModel, XX.getModelFromURI(testRepository, modelIDString + "/"
-		        + objectIDString));
-		assertEquals(testModel, XX.getModelFromURI(testRepository, modelIDString + "/"
-		        + objectIDString + "/" + fieldIDString));
-		assertNull(XX.getModelFromURI(testRepository, "NonsenseURI"));
-		
-		// - - Method: XObject getObjectFromURI(XRepository repository, String
-		// uri) - -
-		assertEquals(testObject, XX.getObjectFromURI(testRepository, modelIDString + "/"
-		        + objectIDString));
-		assertEquals(testObject, XX.getObjectFromURI(testRepository, modelIDString + "/"
-		        + objectIDString + "/" + fieldIDString));
-		assertNull(XX.getObjectFromURI(testRepository, "Nonsense/URI"));
-		
-		try {
-			XX.getObjectFromURI(testRepository, modelIDString);
-			fail(); // fail if no exception is thrown
-		} catch(URIFormatException ufe) {
-			// success
-		}
-		
-		// - - Method: XObject getObjectFromURI(Model model, String uri) - -
-		assertEquals(testObject, XX.getObjectFromURI(testModel, objectIDString));
-		assertEquals(testObject, XX.getObjectFromURI(testModel, objectIDString + "/"
-		        + fieldIDString));
-		assertNull(XX.getObjectFromURI(testModel, "NonsenseURI"));
-		
-		// - - XField getFieldFromURI(XRepository repository, String uri) - -
-		assertEquals(testField, XX.getFieldFromURI(testRepository, modelIDString + "/"
-		        + objectIDString + "/" + fieldIDString));
-		assertNull(XX.getFieldFromURI(testModel, "Nonsense/URI"));
-		
-		try {
-			XX.getFieldFromURI(testRepository, modelIDString + "/" + objectIDString);
-			fail(); // fail if no exception is thrown
-		} catch(URIFormatException ufe) {
-			// success
-		}
-		
-		try {
-			XX.getFieldFromURI(testRepository, modelIDString);
-			fail(); // fail if no exception is thrown
-		} catch(URIFormatException ufe) {
-			// success
-		}
-		
-		// - - XField getFieldFromURI(XModel model, String uri) - -
-		assertEquals(testField, XX.getFieldFromURI(testModel, objectIDString + "/" + fieldIDString));
-		assertNull(XX.getFieldFromURI(testModel, "Nonsense/URI"));
-		
-		try {
-			XX.getFieldFromURI(testModel, objectIDString);
-			fail(); // fail if no exception is thrown
-		} catch(URIFormatException ufe) {
-			// success
-		}
-		
-		// - - XField getFieldFromURI(XObject model, String uri) - -
-		assertEquals(testField, XX.getFieldFromURI(testObject, fieldIDString));
-		assertNull(XX.getFieldFromURI(testObject, "NonsenseURI"));
-		
-		// - - XField getValueFromURI(XRepository repository, String uri) - -
-		assertEquals(testValue, XX.getValueFromURI(testRepository, modelIDString + "/"
-		        + objectIDString + "/" + fieldIDString));
-		assertNull(XX.getValueFromURI(testModel, "Nonsense/URI"));
-		
-		try {
-			XX.getValueFromURI(testRepository, modelIDString + "/" + objectIDString);
-			fail(); // fail if no exception is thrown
-		} catch(URIFormatException ufe) {
-			// success
-		}
-		
-		try {
-			XX.getValueFromURI(testRepository, modelIDString);
-			fail(); // fail if no exception is thrown
-		} catch(URIFormatException ufe) {
-			// success
-		}
-		
-		// - - XField getValueFromURI(XModel model, String uri) - -
-		assertEquals(testValue, XX.getValueFromURI(testModel, objectIDString + "/" + fieldIDString));
-		assertNull(XX.getValueFromURI(testModel, "Nonsense/URI"));
-		
-		try {
-			XX.getValueFromURI(testModel, objectIDString);
-			fail(); // fail if no exception is thrown
-		} catch(URIFormatException ufe) {
-			// success
-		}
-		
-		// - - XField getValueFromURI(XObject model, String uri) - -
-		assertEquals(testField, XX.getFieldFromURI(testObject, fieldIDString));
-		assertEquals(testValue, XX.getValueFromURI(testObject, fieldIDString));
-		assertNull(XX.getValueFromURI(testObject, "NonsenseURI"));
-		
-		// TODO test nonsense-URI cases more thoroughly
 	}
 	
 	/*
@@ -802,7 +701,10 @@ public abstract class AbstractTestAPI {
 		
 		// a method for adding a copy
 		public void addCopy(XID actorID, XID copyID) {
-			XX.addIDToList(actorID, this.book.getField(copiesID), copyID);
+			XField copies = this.book.getField(copiesID);
+			XIDListValue copiesList = (XIDListValue)copies.getValue();
+			copiesList = copiesList.add(copyID);
+			copies.setValue(actorID, copiesList);
 		}
 		
 		// a method for getting the XIDs of the copies of this book

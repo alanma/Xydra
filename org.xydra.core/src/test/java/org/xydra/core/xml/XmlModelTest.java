@@ -24,6 +24,8 @@ import org.xydra.core.test.DemoModelUtil;
 import org.xydra.core.value.XV;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
 
 /**
@@ -35,6 +37,8 @@ import org.xydra.core.xml.impl.XmlOutStringBuffer;
  */
 public class XmlModelTest {
 	
+	private static final Logger log = LoggerFactory.getLogger(XmlModelTest.class);
+	
 	private void testRepository(XBaseRepository repo) {
 		
 		// test serializing with revisions
@@ -42,7 +46,7 @@ public class XmlModelTest {
 		XmlModel.toXml(repo, out);
 		assertEquals("", out.getOpentags());
 		String xml = out.getXml();
-		System.out.println(xml);
+		log.debug(xml);
 		MiniElement e = new MiniXMLParserImpl().parseXml(xml);
 		XRepository repoAgain = XmlModel.toRepository(e);
 		assertTrue(XX.equalState(repo, repoAgain));
@@ -52,7 +56,7 @@ public class XmlModelTest {
 		XmlModel.toXml(repo, out, false, true, true);
 		assertEquals("", out.getOpentags());
 		xml = out.getXml();
-		System.out.println(xml);
+		log.debug(xml);
 		e = new MiniXMLParserImpl().parseXml(xml);
 		repoAgain = XmlModel.toRepository(e);
 		assertTrue(XX.equalTree(repo, repoAgain));
@@ -67,21 +71,21 @@ public class XmlModelTest {
 		XmlModel.toXml(model, out);
 		assertEquals("", out.getOpentags());
 		String xml = out.getXml();
-		System.out.println(xml);
+		log.debug(xml);
 		MiniElement e = new MiniXMLParserImpl().parseXml(xml);
 		XModel modelAgain = XmlModel.toModel(e);
 		assertTrue(XX.equalState(model, modelAgain));
 		
 		// check that there is a change log
-		XChangeLog log = modelAgain.getChangeLog();
-		assertNotNull(log);
+		XChangeLog changeLog = modelAgain.getChangeLog();
+		assertNotNull(changeLog);
 		
 		// test serializing without revisions
 		out = new XmlOutStringBuffer();
 		XmlModel.toXml(model, out, false, true, true);
 		assertEquals("", out.getOpentags());
 		xml = out.getXml();
-		System.out.println(xml);
+		log.debug(xml);
 		e = new MiniXMLParserImpl().parseXml(xml);
 		modelAgain = XmlModel.toModel(e);
 		assertTrue(XX.equalTree(model, modelAgain));
@@ -96,21 +100,21 @@ public class XmlModelTest {
 		XmlModel.toXml(object, out);
 		assertEquals("", out.getOpentags());
 		String xml = out.getXml();
-		System.out.println(xml);
+		log.debug(xml);
 		MiniElement e = new MiniXMLParserImpl().parseXml(xml);
 		XObject objectAgain = XmlModel.toObject(e);
 		assertTrue(XX.equalState(object, objectAgain));
 		
 		// check that there is a change log
-		XChangeLog log = objectAgain.getChangeLog();
-		assertNotNull(log);
+		XChangeLog changeLog = objectAgain.getChangeLog();
+		assertNotNull(changeLog);
 		
 		// test serializing without revisions
 		out = new XmlOutStringBuffer();
 		XmlModel.toXml(object, out, false, true, true);
 		assertEquals("", out.getOpentags());
 		xml = out.getXml();
-		System.out.println(xml);
+		log.debug(xml);
 		e = new MiniXMLParserImpl().parseXml(xml);
 		objectAgain = XmlModel.toObject(e);
 		assertTrue(XX.equalTree(object, objectAgain));
@@ -125,7 +129,7 @@ public class XmlModelTest {
 		XmlModel.toXml(field, out);
 		assertEquals("", out.getOpentags());
 		String xml = out.getXml();
-		System.out.println(xml);
+		log.debug(xml);
 		MiniElement e = new MiniXMLParserImpl().parseXml(xml);
 		XField fieldAgain = XmlModel.toField(e);
 		assertTrue(XX.equalState(field, fieldAgain));
@@ -135,7 +139,7 @@ public class XmlModelTest {
 		XmlModel.toXml(field, out, false);
 		assertEquals("", out.getOpentags());
 		xml = out.getXml();
-		System.out.println(xml);
+		log.debug(xml);
 		e = new MiniXMLParserImpl().parseXml(xml);
 		fieldAgain = XmlModel.toField(e);
 		assertTrue(XX.equalTree(field, fieldAgain));
