@@ -53,6 +53,7 @@ public class XX {
 	 * @param value The new {@link XValue}
 	 * @return The {@link XField} with newly set {@link XValue}
 	 */
+	// 2010-10-27: used only in tests
 	public static XField setValue(XID actorID, XObject object, XID fieldID, XValue value) {
 		XField field = object.createField(actorID, fieldID);
 		field.setValue(actorID, value);
@@ -71,6 +72,7 @@ public class XX {
 	 * @param value The new {@link XValue}
 	 * @return The {@link XField} with newly set {@link XValue}
 	 */
+	// 2010-10-27: used only in this class
 	public static XField setValue(XID actorID, XModel model, XID objectID, XID fieldID, XValue value) {
 		XObject object = safeGetObject(model, objectID);
 		return setValue(actorID, object, fieldID, value);
@@ -90,6 +92,7 @@ public class XX {
 	 * @param value The new {@link XValue}
 	 * @return The {@link XField} with newly set {@link XValue}
 	 */
+	// 2010-10-27: not used anywhere
 	public static XField setValue(XID actorID, XRepository repository, XID modelID, XID objectID,
 	        XID fieldID, XValue value) {
 		XModel model = safeGetModel(repository, modelID);
@@ -106,6 +109,7 @@ public class XX {
 	 * @param targetRepository The {@link XRepository} in which the data of
 	 *            sourceRepository is to be pasted.
 	 */
+	// 2010-10-27: not used anywhere
 	public static void copy(XID actorID, XBaseRepository sourceRepository,
 	        XRepository targetRepository) {
 		// copy repository to _repository
@@ -126,6 +130,7 @@ public class XX {
 	 * @param targetModel The {@link XModel} in which the data of sourceModel is
 	 *            to be pasted.
 	 */
+	// 2010-10-27: used only in this class
 	public static void copy(XID actorID, XBaseModel sourceModel, XModel targetModel) {
 		// copy model to _model
 		for(XID objectID : sourceModel) {
@@ -145,6 +150,7 @@ public class XX {
 	 * @param targetObject The {@link XObject} in which the data of sourceObject
 	 *            is to be pasted.
 	 */
+	// 2010-10-27: used only in tests
 	public static void copy(XID actorID, XBaseObject sourceObject, XObject targetObject) {
 		for(XID fieldID : sourceObject) {
 			XBaseField field = sourceObject.getField(fieldID);
@@ -157,6 +163,7 @@ public class XX {
 	 * Copies the source field's state to the target. Doesn't copy the change
 	 * log.
 	 */
+	// 2010-10-27: used only in this class
 	public static void copy(XBaseModel source, XModelState target) {
 		target.setRevisionNumber(source.getRevisionNumber());
 		if(!target.isEmpty()) {
@@ -187,6 +194,7 @@ public class XX {
 	 * Copies the source field's state to the target. Doesn't copy the change
 	 * log.
 	 */
+	// 2010-10-27: used in this class + DirectDataService
 	public static void copy(XBaseObject source, XObjectState target) {
 		target.setRevisionNumber(source.getRevisionNumber());
 		if(!target.isEmpty()) {
@@ -216,6 +224,7 @@ public class XX {
 	/**
 	 * Copies the source field's state to the target.
 	 */
+	// 2010-10-27: used in this class + DirectDataService
 	public static void copy(XBaseField source, XFieldState target) {
 		target.setRevisionNumber(source.getRevisionNumber());
 		target.setValue(source.getValue());
@@ -234,6 +243,7 @@ public class XX {
 	 * @throws MissingPieceException Will be thrown if the specified
 	 *             {@link XField} doesn't exist
 	 */
+	// 2010-10-27: used only in this class + tests
 	public static XValue safeGetValue(XObject object, XID fieldID) throws MissingPieceException {
 		XField field = safeGetField(object, fieldID);
 		XValue value = field.getValue();
