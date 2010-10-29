@@ -120,7 +120,7 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 	
 	public static XModelEvent createRemoveEvent(XID actor, XAddress target, XID objectID,
 	        long modelRevision, long objectRevision, boolean inTransaction) {
-		if(objectRevision < 0) {
+		if(objectRevision < 0 && objectRevision != XEvent.RevisionNotAvailable) {
 			throw new IllegalArgumentException(
 			        "object revision must be set for model REMOVE events");
 		}
