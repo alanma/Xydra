@@ -208,7 +208,7 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 			throw new IllegalArgumentException("target must refer to an object, was: " + target);
 		}
 		
-		if(fieldID == null || objectRevision < 0) {
+		if(fieldID == null) {
 			throw new IllegalArgumentException("field ID must be set for object events");
 		}
 		
