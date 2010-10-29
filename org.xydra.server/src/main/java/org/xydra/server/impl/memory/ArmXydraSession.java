@@ -14,8 +14,9 @@ import org.xydra.server.IXydraSession;
 
 
 /**
- * {@link IXydraServer} implementation that checks all access against an
- * {@link XAccessManager}.
+ * {@link IXydraSession} implementation that checks all access against an
+ * {@link XAccessManager} and forwards allowed operations to an
+ * {@link IXydraServer}.
  * 
  * @author dscharrer
  * 

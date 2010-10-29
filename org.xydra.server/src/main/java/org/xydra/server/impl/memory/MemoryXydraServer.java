@@ -21,6 +21,13 @@ import org.xydra.server.IXydraServer;
 import org.xydra.server.rest.XydraRestServer;
 
 
+/**
+ * An {@link IXydraServer} backend that uses an in-memory {@link XRepository}
+ * and does not persist changes.
+ * 
+ * @author dscharrer
+ * 
+ */
 public class MemoryXydraServer implements IXydraServer {
 	
 	private XRepository repo;
@@ -34,6 +41,7 @@ public class MemoryXydraServer implements IXydraServer {
 	 */
 	public MemoryXydraServer() {
 		// setup logging
+		// FIXME why does the in-memory server need GAE logging? ~Daniel
 		GaeLoggerFactorySPI.init();
 		// Set the repository, group DB and access manager
 		XSPI.setStateStore(new MemoryStateStore());
@@ -65,6 +73,7 @@ public class MemoryXydraServer implements IXydraServer {
 	}
 	
 	public XBaseModel getModelSnapshot(XID modelId) {
+		// FIXME this is not a real snapshot
 		return this.repo.getModel(modelId);
 	}
 	
