@@ -12,15 +12,6 @@ import com.google.appengine.api.datastore.Text;
  */
 public class GaeSchema {
 	
-	/** A kind of {@link Entity}, GAE kind */
-	public static final String XREPOSITORY = "xrepository";
-	/** A kind of {@link Entity}, GAE kind */
-	public static final String XMODEL = "xmodel";
-	/** A kind of {@link Entity}, GAE kind */
-	public static final String XOBJECT = "xobject";
-	/** A kind of {@link Entity}, GAE kind */
-	public static final String XFIELD = "xfield";
-	
 	/** A property name, GAE type List<String> */
 	public static final String PROP_CHILD_IDS = "childIDs";
 	/** A property name, GAE type {@link Text} */

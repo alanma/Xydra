@@ -16,6 +16,7 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Text;
+import com.google.appengine.api.datastore.Transaction;
 
 
 /**
@@ -71,7 +72,7 @@ public class GaeChangeLogState implements XChangeLogState {
 		
 		saveEvent(e, event);
 		
-		GaeUtils.putEntity(e, trans);
+		GaeUtils.putEntity(e, GaeStateTransaction.asTransaction(trans));
 		
 		long newRev = event.getModelRevisionNumber() + 1;
 		
@@ -104,8 +105,7 @@ public class GaeChangeLogState implements XChangeLogState {
 	
 	public void delete(XStateTransaction trans) {
 		
-		boolean newTrans = (trans == null);
-		XStateTransaction t = newTrans ? GaeUtils.beginTransaction() : trans;
+		Transaction t = GaeStateTransaction.getOrBeginTransaction(trans);
 		
 		for(long i = this.firstRev; i <= this.currentRev; ++i) {
 			GaeUtils.deleteEntity(getKey(i), t);
@@ -113,7 +113,7 @@ public class GaeChangeLogState implements XChangeLogState {
 		
 		GaeUtils.deleteEntity(this.key, t);
 		
-		if(newTrans) {
+		if(trans == null) {
 			GaeUtils.endTransaction(t);
 		}
 		
@@ -151,7 +151,7 @@ public class GaeChangeLogState implements XChangeLogState {
 		e.setUnindexedProperty(PROP_FIRST_REVISION, this.firstRev);
 		e.setUnindexedProperty(PROP_CURRENT_REVISION, this.currentRev);
 		
-		GaeUtils.putEntity(e, trans);
+		GaeUtils.putEntity(e, GaeStateTransaction.asTransaction(trans));
 		
 	}
 	
@@ -161,15 +161,14 @@ public class GaeChangeLogState implements XChangeLogState {
 			return false;
 		}
 		
-		boolean newTrans = (trans == null);
-		XStateTransaction t = newTrans ? GaeUtils.beginTransaction() : trans;
+		Transaction t = GaeStateTransaction.getOrBeginTransaction(trans);
 		
 		while(this.currentRev > revisionNumber) {
 			this.currentRev--;
 			GaeUtils.deleteEntity(getKey(this.currentRev), t);
 		}
 		
-		if(newTrans) {
+		if(trans == null) {
 			GaeUtils.endTransaction(t);
 		}
 		

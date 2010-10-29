@@ -1,4 +1,4 @@
-package org.xydra.server.backend;
+package org.xydra.server.impl.newgae;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,6 +18,7 @@ import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.change.XObjectEvent;
 import org.xydra.core.change.XRepositoryCommand;
+import org.xydra.core.change.XRepositoryEvent;
 import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.XTransactionEvent;
 import org.xydra.core.model.XAddress;
@@ -28,8 +29,6 @@ import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XType;
 import org.xydra.core.model.delta.ChangedModel;
-import org.xydra.core.model.state.XStateTransaction;
-import org.xydra.core.model.state.impl.gae.KeyStructure;
 import org.xydra.core.value.XValue;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlEvent;
@@ -37,16 +36,25 @@ import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
 import org.xydra.index.XI;
 import org.xydra.index.query.Pair;
+import org.xydra.server.impl.gae.GaeTestfixer;
 import org.xydra.server.impl.gae.GaeUtils;
 
 import com.google.appengine.api.datastore.DatastoreFailureException;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 
 
-public class GaeModelService implements XChangeLog {
+/**
+ * A class responsible for executing and logging changes to a specific XModel in
+ * the GAE datastore.
+ * 
+ * @author dscharrer
+ * 
+ */
+public class GaeChangesService implements XChangeLog {
 	
 	private static final long serialVersionUID = -2080744796962188941L;
 	
@@ -138,7 +146,7 @@ public class GaeModelService implements XChangeLog {
 	
 	private final XAddress modelAddr;
 	
-	public GaeModelService(XAddress modelAddr) {
+	public GaeChangesService(XAddress modelAddr) {
 		this.modelAddr = modelAddr;
 	}
 	
@@ -147,8 +155,8 @@ public class GaeModelService implements XChangeLog {
 		// IMPROVE maybe let the caller provide an XID that can be used to check
 		// the status in case there is a GAE timeout?
 		
-		assert this.modelAddr.contains(command.getChangedEntity() == null ? command.getTarget()
-		        : command.getChangedEntity());
+		assert this.modelAddr.equalsOrContains(command.getChangedEntity() == null ? command
+		        .getTarget() : command.getChangedEntity()) : "cannot handle command " + command;
 		
 		Set<XAddress> locks = calculateRequiredLocks(command);
 		
@@ -215,7 +223,7 @@ public class GaeModelService implements XChangeLog {
 			// Try to grab this revision.
 			try {
 				Key key = KeyStructure.createChangetKey(this.modelAddr, rev);
-				XStateTransaction trans = GaeUtils.beginTransaction();
+				Transaction trans = GaeUtils.beginTransaction();
 				
 				Entity changeEntity = GaeUtils.getEntity(key, trans);
 				
@@ -248,7 +256,7 @@ public class GaeModelService implements XChangeLog {
 					
 					// Since we read the entity anyway, might as well use that
 					// information.
-					int status = (Integer)changeEntity.getProperty(PROP_STATUS);
+					int status = getStatus(changeEntity);
 					if(!isCommitted(status) && !canRollForward(status) && isTimedOut(changeEntity)) {
 						cleanupChangeEntity(changeEntity, STATUS_FAILED_TIMEOUT);
 					}
@@ -262,6 +270,12 @@ public class GaeModelService implements XChangeLog {
 		}
 		
 		// unreachable
+	}
+	
+	private int getStatus(Entity changeEntity) {
+		Number n = (Number)changeEntity.getProperty(PROP_STATUS);
+		assert n != null : "All change entities should have a status";
+		return n.intValue();
 	}
 	
 	private void waitForLocks(long ownRev, Set<XAddress> ownLocks) {
@@ -278,7 +292,7 @@ public class GaeModelService implements XChangeLog {
 			assert otherChange != null;
 			
 			// Check if the change is committed.
-			int status = (Integer)otherChange.getProperty(PROP_STATUS);
+			int status = getStatus(otherChange);
 			if(isCommitted(status)) {
 				if(newCommitedRev < 0) {
 					newCommitedRev = otherRev;
@@ -314,7 +328,7 @@ public class GaeModelService implements XChangeLog {
 				otherChange = GaeUtils.getEntity(key);
 				assert otherChange != null;
 				
-				status = (Integer)otherChange.getProperty(PROP_STATUS);
+				status = getStatus(otherChange);
 				if(isCommitted(status)) {
 					// now finished, so should have no locks anymore
 					break;
@@ -407,16 +421,20 @@ public class GaeModelService implements XChangeLog {
 			return events;
 		}
 		
-		XStateTransaction trans = GaeUtils.beginTransaction();
+		Transaction trans = GaeUtils.beginTransaction();
 		
 		Key baseKey = changeEntity.getKey();
 		for(int i = 0; i < events.size(); i++) {
 			XAtomicEvent ae = events.get(i);
-			Entity eventEntity = new Entity(baseKey.getChild(KeyStructure.KIND_XEVENT, i));
+			Entity eventEntity = new Entity(KeyStructure.getEventKey(baseKey, i));
 			
 			// IMPROVE save event in a GAE-specific format
 			XmlOutStringBuffer out = new XmlOutStringBuffer();
-			XmlEvent.toXml(ae, out, this.modelAddr);
+			XAddress context = this.modelAddr;
+			if(ae instanceof XRepositoryEvent) {
+				context = this.modelAddr.getParent();
+			}
+			XmlEvent.toXml(ae, out, context);
 			eventEntity.setUnindexedProperty(PROP_EVENTCONTENT, out.getXml());
 			
 			GaeUtils.putEntity(eventEntity, trans);
@@ -462,7 +480,7 @@ public class GaeModelService implements XChangeLog {
 	}
 	
 	long getRevisionFromKey(Key key) {
-		assert key.getKind() == KeyStructure.KIND_XCHANGE;
+		assert KeyStructure.isChangeKey(key);
 		String keyStr = key.getName();
 		int p = keyStr.lastIndexOf("/");
 		assert p > 0;
@@ -472,7 +490,7 @@ public class GaeModelService implements XChangeLog {
 	
 	private boolean rollForward(long rev, Entity changeEntity) {
 		
-		int status = (Integer)changeEntity.getProperty(PROP_STATUS);
+		int status = getStatus(changeEntity);
 		assert !isCommitted(status) && canRollForward(status);
 		
 		assert getRevisionFromKey(changeEntity.getKey()) == rev;
@@ -508,7 +526,7 @@ public class GaeModelService implements XChangeLog {
 		
 		List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
 		
-		int eventCount = (Integer)eventEntity.getProperty(PROP_EVENTCOUNT);
+		int eventCount = getEventCount(eventEntity);
 		
 		for(int i = 0; i < eventCount; i++) {
 			events.add(getAtomicEvent(rev, i));
@@ -519,7 +537,7 @@ public class GaeModelService implements XChangeLog {
 	
 	private XCommand loadCommand(long rev, Entity eventEntity) {
 		
-		assert (Integer)eventEntity.getProperty(PROP_STATUS) == STATUS_CHECKING;
+		assert getStatus(eventEntity) == STATUS_CHECKING;
 		
 		// TODO implement when commands are saved
 		assert false : "commands are not saved yet";
@@ -736,11 +754,10 @@ public class GaeModelService implements XChangeLog {
 				Query q = new Query(this.addr.getAddressedType().getChildType().toString())
 				        .addFilter(PROP_PARENT, FilterOperator.EQUAL, this.addr.toURI())
 				        .setKeysOnly();
-				for(Entity e : GaeUtils.prepareQuety(q).asIterable()) {
+				for(Entity e : GaeUtils.prepareQuery(q).asIterable()) {
 					XAddress childAddr = KeyStructure.toAddress(e.getKey());
 					this.cachedIds.add(getChildId(childAddr));
 				}
-				// FIXME query may return old information
 			}
 			return this.cachedIds.iterator();
 		}
@@ -755,7 +772,7 @@ public class GaeModelService implements XChangeLog {
 	
 	public class GaeObject extends GaeContainer<GaeField> implements XBaseObject {
 		
-		private long objectRev = -1;
+		private long objectRev = XEvent.RevisionNotAvailable;
 		
 		private GaeObject(XAddress objectAddr, Set<XAddress> locks) {
 			super(objectAddr, locks);
@@ -763,7 +780,8 @@ public class GaeModelService implements XChangeLog {
 		}
 		
 		public long getRevisionNumber() {
-			if(this.objectRev < 0) {
+			if(this.objectRev == XEvent.RevisionNotAvailable && getLocks().contains(getAddress())) {
+				
 				// FIXME we don't always have the locks to get the objectRev
 				// this way
 				for(XID fieldId : this) {
@@ -773,6 +791,7 @@ public class GaeModelService implements XChangeLog {
 						this.objectRev = fieldRev;
 					}
 				}
+				// FIXME this won't work for empty objects
 			}
 			return this.objectRev;
 		}
@@ -793,9 +812,9 @@ public class GaeModelService implements XChangeLog {
 		protected GaeField loadChild(XAddress childAddr, Entity childEntity) {
 			
 			long fieldRev = (Long)childEntity.getProperty(PROP_REVISION);
-			int transindex = (Integer)childEntity.getProperty(PROP_TRANSINDEX);
+			Number transindex = (Number)childEntity.getProperty(PROP_TRANSINDEX);
 			
-			return new GaeField(childAddr, fieldRev, transindex);
+			return new GaeField(childAddr, fieldRev, transindex.intValue());
 		}
 		
 		@Override
@@ -837,7 +856,7 @@ public class GaeModelService implements XChangeLog {
 		}
 		
 		public XID getID() {
-			return getAddress().getObject();
+			return getAddress().getModel();
 		}
 		
 		public XBaseObject getObject(XID objectId) {
@@ -911,7 +930,7 @@ public class GaeModelService implements XChangeLog {
 	public XAtomicEvent getAtomicEvent(long revisionNumber, int transindex) {
 		
 		Key changeKey = KeyStructure.createChangetKey(this.modelAddr, revisionNumber);
-		Key eventKey = changeKey.getChild(KeyStructure.KIND_XEVENT, transindex);
+		Key eventKey = KeyStructure.getEventKey(changeKey, transindex);
 		
 		// IMPROVE cache events
 		Entity eventEntity = GaeUtils.getEntity(eventKey);
@@ -930,7 +949,7 @@ public class GaeModelService implements XChangeLog {
 	}
 	
 	public long getCurrentRevisionNumber() {
-		// TODO is this enough?
+		// FIXME check if the cached rev is up to date
 		return getCachedLastCommitedRevision() + 1;
 	}
 	
@@ -996,7 +1015,7 @@ public class GaeModelService implements XChangeLog {
 		}
 		
 		public XAddress getTarget() {
-			return GaeModelService.this.modelAddr;
+			return GaeChangesService.this.modelAddr;
 		}
 		
 		public boolean inTransaction() {
@@ -1018,7 +1037,7 @@ public class GaeModelService implements XChangeLog {
 			return null;
 		}
 		
-		int status = (Integer)changeEntity.getProperty(PROP_STATUS);
+		int status = getStatus(changeEntity);
 		
 		if(status != STATUS_EXECUTING && status != STATUS_SUCCESS_EXECUTED) {
 			// no events available yet.
@@ -1027,7 +1046,7 @@ public class GaeModelService implements XChangeLog {
 		
 		assert changeEntity.getProperty(PROP_EVENTCOUNT) != null;
 		
-		int eventCount = (Integer)changeEntity.getProperty(PROP_EVENTCOUNT);
+		int eventCount = getEventCount(changeEntity);
 		assert eventCount > 0;
 		
 		XID actor = XX.toId((String)changeEntity.getProperty(PROP_ACTOR));
@@ -1051,6 +1070,14 @@ public class GaeModelService implements XChangeLog {
 		
 	}
 	
+	private int getEventCount(Entity changeEntity) {
+		Number n = (Number)changeEntity.getProperty(PROP_EVENTCOUNT);
+		if(n == null) {
+			return 0;
+		}
+		return n.intValue();
+	}
+	
 	public Iterator<XEvent> getEventsAfter(long revisionNumber) {
 		return getEventsBetween(revisionNumber, Long.MAX_VALUE);
 	}
@@ -1069,8 +1096,19 @@ public class GaeModelService implements XChangeLog {
 	}
 	
 	public XBaseModel getSnapshot() {
-		// TODO implement me
-		return null;
+		// TODO move this somewhere else
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		
+		Entity e = GaeUtils.getEntity(KeyStructure.createCombinedKey(this.modelAddr));
+		
+		if(e == null) {
+			return null;
+		}
+		
+		// FIXME this is completely wrong
+		Set<XAddress> locks = new HashSet<XAddress>();
+		locks.add(this.modelAddr);
+		return new GaeModel(this.modelAddr, getCurrentRevisionNumber(), locks);
 	}
 	
 }

@@ -31,7 +31,7 @@ public abstract class AbstractGaeState extends AbstractState implements IHasXID 
 	
 	public void delete(XStateTransaction trans) {
 		Key key = GaeUtils.keyForEntity(getAddress());
-		GaeUtils.deleteEntity(key, trans);
+		GaeUtils.deleteEntity(key, GaeStateTransaction.asTransaction(trans));
 	}
 	
 	public long getRevisionNumber() {
@@ -83,7 +83,7 @@ public abstract class AbstractGaeState extends AbstractState implements IHasXID 
 		Key key = GaeUtils.keyForEntity(getAddress());
 		Entity e = new Entity(key);
 		storeInEntity(e);
-		GaeUtils.putEntity(e, trans);
+		GaeUtils.putEntity(e, GaeStateTransaction.asTransaction(trans));
 	}
 	
 	public void setRevisionNumber(long revisionNumber) {

@@ -1,14 +1,7 @@
 package org.xydra.server.impl.gae;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-
-import org.xydra.core.XX;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
-import org.xydra.core.model.state.XStateTransaction;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -143,7 +136,7 @@ public class GaeUtils {
 	 * 
 	 * @param entity
 	 */
-	public static void putEntity(Entity entity, XStateTransaction trans) {
+	public static void putEntity(Entity entity, Transaction trans) {
 		assert assertTransaction(trans);
 		putEntity(entity);
 	}
@@ -152,61 +145,41 @@ public class GaeUtils {
 	 * @param key
 	 * @return the GAE Entity for the given key from the store or null
 	 */
-	public static Entity getEntity(Key key, XStateTransaction trans) {
+	public static Entity getEntity(Key key, Transaction trans) {
 		assert assertTransaction(trans);
 		return getEntity(key);
 	}
 	
-	private static boolean assertTransaction(XStateTransaction trans) {
+	private static boolean assertTransaction(Transaction trans) {
 		// sanity checks
 		boolean inAnyTransaction = (trans != null);
 		boolean inThisTransaction = false;
 		if(inAnyTransaction) {
-			inThisTransaction = (datastore.getCurrentTransaction() == asTransaction(trans));
+			inThisTransaction = (datastore.getCurrentTransaction() == trans);
 		}
 		assert !inAnyTransaction || inThisTransaction : "there should be no transaction or this transaction. In transaction? "
 		        + inAnyTransaction + " In this transaction? " + inThisTransaction;
 		return true;
 	}
 	
-	public static XStateTransaction beginTransaction() {
-		// work around error in DataApiTest
+	/**
+	 * Begin a GAE transaction.
+	 * 
+	 * @return The started transaction.
+	 */
+	public static Transaction beginTransaction() {
+		makeSureDatestoreServiceIsInitialised();
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		return new GaeStateTransactionImpl(datastore.beginTransaction());
+		return datastore.beginTransaction();
 	}
 	
-	public static class GaeStateTransactionImpl implements XStateTransaction {
-		
-		Transaction gaeTransaction;
-		
-		public GaeStateTransactionImpl(Transaction transaction) {
-			this.gaeTransaction = transaction;
-		}
-		
-		@Override
-		public int hashCode() {
-			return this.gaeTransaction.hashCode();
-		}
-		
-		@Override
-		public boolean equals(Object other) {
-			return other instanceof GaeStateTransactionImpl
-			        && ((GaeStateTransactionImpl)other).gaeTransaction.equals(this.gaeTransaction);
-		}
-		
-	}
-	
-	public static Transaction asTransaction(XStateTransaction trans) {
-		if(!(trans instanceof GaeStateTransactionImpl)) {
-			throw new IllegalArgumentException("unexpected transaction object oy type "
-			        + trans.getClass());
-		}
-		
-		return ((GaeStateTransactionImpl)trans).gaeTransaction;
-	}
-	
-	public static void endTransaction(XStateTransaction trans) {
-		asTransaction(trans).commit();
+	/**
+	 * Commit the given GAE transaction.
+	 * 
+	 * @param trans
+	 */
+	public static void endTransaction(Transaction trans) {
+		trans.commit();
 	}
 	
 	/**
@@ -225,32 +198,21 @@ public class GaeUtils {
 	 * 
 	 * @param key
 	 */
-	public static void deleteEntity(Key key, XStateTransaction trans) {
+	public static void deleteEntity(Key key, Transaction trans) {
 		deleteEntity(key);
 		assert assertTransaction(trans);
 	}
 	
-	public static List<XID> toListOfXID(List<String> stringList) {
-		if(stringList == null)
-			return Collections.emptyList();
+	/**
+	 * Prepares the given GAE query.
+	 * 
+	 * @param query
+	 * @return
+	 */
+	public static PreparedQuery prepareQuery(Query query) {
 		
-		List<XID> idList = new LinkedList<XID>();
-		for(String s : stringList) {
-			assert s != null;
-			idList.add(XX.toId(s));
-		}
-		return idList;
-	}
-	
-	public static List<String> toListOfString(Iterator<XID> iterator) {
-		List<String> stringList = new LinkedList<String>();
-		while(iterator.hasNext()) {
-			stringList.add(iterator.next().toString());
-		}
-		return stringList;
-	}
-	
-	public static PreparedQuery prepareQuety(Query query) {
+		makeSureDatestoreServiceIsInitialised();
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		return datastore.prepare(query);
 	}
 	

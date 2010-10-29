@@ -32,7 +32,6 @@ public class LocalStubEnvironment implements ApiProxy.Environment {
 		throw new UnsupportedOperationException();
 	}
 	
-	@SuppressWarnings("deprecation")
 	@Deprecated
 	public String getRequestNamespace() {
 		return "";

@@ -60,12 +60,12 @@ public abstract class AbstractGaeStateWithChildren extends AbstractGaeState {
 	
 	@Override
 	public XStateTransaction beginTransaction() {
-		return GaeUtils.beginTransaction();
+		return GaeStateTransaction.beginTransaction();
 	}
 	
 	@Override
 	public void endTransaction(XStateTransaction trans) {
-		GaeUtils.endTransaction(trans);
+		GaeUtils.endTransaction(GaeStateTransaction.asTransaction(trans));
 	}
 	
 }
