@@ -64,11 +64,15 @@ public class TestStateTransaction implements Serializable, XStateTransaction {
 		}
 		
 		for(Pair<TestChangeLogState,Long> s : this.savedEvents) {
+			assert this.savedLogs.contains(s.getFirst())
+			        || this.store.logs.containsKey(s.getFirst().getBaseAddress()) : "must save log in same transaction or before adding events";
 			this.store.save(s.getFirst(), s.getSecond());
 			s.getFirst().currentTrans = null;
 		}
 		
 		for(Pair<TestChangeLogState,Long> s : this.deletedEvents) {
+			assert this.deletedLogs.contains(s.getFirst())
+			        || this.store.logs.containsKey(s.getFirst().getBaseAddress()) : "must delete or save log in same transaction or before removing events";
 			this.store.delete(s.getFirst(), s.getSecond());
 			s.getFirst().currentTrans = null;
 		}

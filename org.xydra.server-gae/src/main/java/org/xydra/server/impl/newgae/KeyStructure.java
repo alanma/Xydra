@@ -26,7 +26,7 @@ public class KeyStructure {
 		return address;
 	}
 	
-	public static Key createChangetKey(XAddress modelAddr, long revision) {
+	public static Key createChangeKey(XAddress modelAddr, long revision) {
 		assert modelAddr.getAddressedType() == XType.XMODEL;
 		return KeyFactory.createKey(KIND_XCHANGE, modelAddr.toURI() + "/" + revision);
 	}

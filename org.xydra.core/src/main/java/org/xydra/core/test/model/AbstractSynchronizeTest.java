@@ -37,7 +37,7 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.model.impl.memory.MemoryModel;
+import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.core.test.ChangeRecorder;
 import org.xydra.core.test.DemoModelUtil;
 import org.xydra.core.test.HasChanged;
@@ -66,8 +66,9 @@ abstract public class AbstractSynchronizeTest {
 		assertFalse(this.localRepo.hasModel(DemoModelUtil.PHONEBOOK_ID));
 		
 		// create two identical phonebook models
-		this.remoteModel = new MemoryModel(DemoModelUtil.PHONEBOOK_ID);
-		DemoModelUtil.setupPhonebook(this.remoteModel);
+		XRepository remoteRepo = new MemoryRepository(XX.toId("remoteRepo"));
+		DemoModelUtil.addPhonebookModel(remoteRepo);
+		this.remoteModel = remoteRepo.getModel(DemoModelUtil.PHONEBOOK_ID);
 		DemoModelUtil.addPhonebookModel(this.localRepo);
 		this.localModel = this.localRepo.getModel(DemoModelUtil.PHONEBOOK_ID);
 		assertNotNull(this.localModel);
@@ -131,7 +132,7 @@ abstract public class AbstractSynchronizeTest {
 		
 		// get the remote changes
 		List<XEvent> remoteChanges = new ArrayList<XEvent>();
-		Iterator<XEvent> rCIt = this.remoteModel.getChangeLog().getEventsAfter(lastRevision);
+		Iterator<XEvent> rCIt = this.remoteModel.getChangeLog().getEventsSince(lastRevision + 1);
 		while(rCIt.hasNext()) {
 			remoteChanges.add(fix(rCIt.next()));
 		}
@@ -165,23 +166,24 @@ abstract public class AbstractSynchronizeTest {
 		        .getAddress(), XCommand.FORCED, john.getID());
 		
 		List<XCommand> localChanges = new ArrayList<XCommand>();
-		localChanges.add(createObject);
-		localChanges.add(createField);
-		localChanges.add(setValue1);
-		localChanges.add(setValue2);
-		localChanges.add(removeField);
-		localChanges.add(removePeter);
-		localChanges.add(removeJohnSafe);
-		localChanges.add(removeJohnForced);
+		localChanges.add(createObject); // 0
+		localChanges.add(createField); // 1
+		localChanges.add(setValue1); // 2
+		localChanges.add(setValue2); // 3
+		localChanges.add(removeField); // 4
+		localChanges.add(removePeter); // 5
+		localChanges.add(removeJohnSafe); // 6
+		localChanges.add(removeJohnForced); // 7
 		
 		// create a model identical to localModel to check events sent on sync
-		XModel checkModel = new MemoryModel(DemoModelUtil.PHONEBOOK_ID);
-		DemoModelUtil.setupPhonebook(checkModel);
+		XRepository checkRepo = new MemoryRepository(this.localRepo.getID());
+		DemoModelUtil.addPhonebookModel(checkRepo);
+		XModel checkModel = checkRepo.getModel(DemoModelUtil.PHONEBOOK_ID);
 		
 		// apply the commands locally
 		for(XCommand command : localChanges) {
 			long result = 0;
-			checkModel.executeCommand(ACTOR_ID, fix(command));
+			result = checkModel.executeCommand(ACTOR_ID, command);
 			assertTrue("command: " + fix(command), result >= 0 || result == XCommand.NOCHANGE);
 			result = this.localModel.executeCommand(ACTOR_ID, command);
 			assertTrue("command: " + command, result >= 0 || result == XCommand.NOCHANGE);
@@ -277,8 +279,8 @@ abstract public class AbstractSynchronizeTest {
 		assertTrue(XX.equalTree(this.localModel, checkModel));
 		
 		// check the change log
-		Iterator<XEvent> remoteHistory = this.remoteModel.getChangeLog().getEventsAfter(0);
-		Iterator<XEvent> localHistory = this.localModel.getChangeLog().getEventsAfter(0);
+		Iterator<XEvent> remoteHistory = this.remoteModel.getChangeLog().getEventsSince(0);
+		Iterator<XEvent> localHistory = this.localModel.getChangeLog().getEventsSince(0);
 		
 		assertEquals(this.remoteModel.getChangeLog().getCurrentRevisionNumber(), this.localModel
 		        .getChangeLog().getCurrentRevisionNumber());

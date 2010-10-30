@@ -294,7 +294,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 		try {
 			
 			// rollback each event individually
-			for(long i = currentRev - 1; i >= revision; i--) {
+			for(long i = currentRev; i > revision; i--) {
 				XEvent event = log.getEventAt(i);
 				if(event instanceof XAtomicEvent) {
 					rollbackEvent((XAtomicEvent)event);
@@ -352,26 +352,26 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 		XAddress target = event.getTarget();
 		
 		// fix revision numbers
-		setRevisionNumberIfModel(event.getModelRevisionNumber());
+		setRevisionNumberIfModel(event.getOldModelRevision());
 		if(target.getObject() != null) {
 			MemoryObject object = getObject(target.getObject());
-			object.setRevisionNumber(event.getObjectRevisionNumber());
+			object.setRevisionNumber(event.getOldObjectRevision());
 			object.save();
 			if(target.getField() != null) {
 				MemoryField field = object.getField(target.getField());
-				field.setRevisionNumber(event.getFieldRevisionNumber());
+				field.setRevisionNumber(event.getOldFieldRevision());
 				field.save();
 			} else if(event.getChangeType() == ChangeType.REMOVE) {
 				MemoryField field = object.getField(((XObjectEvent)event).getFieldID());
-				field.setRevisionNumber(event.getFieldRevisionNumber());
+				field.setRevisionNumber(event.getOldFieldRevision());
 				field.save();
 			}
 		} else if(event.getChangeType() == ChangeType.REMOVE) {
 			MemoryObject field = getObject(((XModelEvent)event).getObjectID());
-			field.setRevisionNumber(event.getObjectRevisionNumber());
+			field.setRevisionNumber(event.getOldObjectRevision());
 			field.save();
 		}
-		setRevisionNumberIfModel(event.getModelRevisionNumber());
+		setRevisionNumberIfModel(event.getOldModelRevision());
 		saveIfModel();
 	}
 	

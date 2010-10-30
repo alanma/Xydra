@@ -20,6 +20,6 @@ public class MemoryFieldChangeListener implements XFieldEventListener {
 	
 	public void onChangeEvent(XFieldEvent event) {
 		log.info("Value of field " + event.getFieldID() + "with revision number "
-		        + event.getFieldRevisionNumber() + " changed to " + event.getNewValue());
+		        + event.getOldFieldRevision() + " changed to " + event.getNewValue());
 	}
 }

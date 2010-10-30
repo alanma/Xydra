@@ -39,8 +39,8 @@ public class MemoryChangeLog implements XChangeLog {
 	protected void appendEvent(XEvent event, XStateTransaction transaction) {
 		assert this.state.getBaseAddress().getObject() != null || event != null : "cannot add null events to model change log";
 		assert this.state.getBaseAddress().getObject() != null
-		        || (event.getModelRevisionNumber() == getCurrentRevisionNumber()) : "cannot append event with rev "
-		        + event.getModelRevisionNumber()
+		        || (event.getOldModelRevision() == getCurrentRevisionNumber()) : "cannot append event with rev "
+		        + event.getOldModelRevision()
 		        + " to model change log at event "
 		        + getCurrentRevisionNumber();
 		
@@ -118,20 +118,20 @@ public class MemoryChangeLog implements XChangeLog {
 		}
 		
 		if(endRevision < 0) {
-			throw new IndexOutOfBoundsException(
-			        "beginRevision is not a valid revision number, was " + beginRevision);
+			throw new IndexOutOfBoundsException("endRevision is not a valid revision number, was "
+			        + endRevision);
 		}
 		
 		if(beginRevision > endRevision) {
 			throw new IllegalArgumentException("beginRevision may not be greater than endRevision");
 		}
 		
-		if(beginRevision >= endRevision || endRevision < firstRev) {
+		if(beginRevision >= endRevision || endRevision <= firstRev) {
 			return new NoneIterator<XEvent>();
 		}
 		
 		long begin = beginRevision < firstRev ? firstRev : beginRevision;
-		long end = endRevision > curRev ? curRev : endRevision;
+		long end = endRevision > curRev ? curRev + 1 : endRevision;
 		
 		return new EventIterator(begin, end);
 	}
@@ -146,12 +146,14 @@ public class MemoryChangeLog implements XChangeLog {
 			        "revisionNumber may not be less than the first revision" + "number of this log");
 		}
 		
-		if(revisionNumber >= this.state.getCurrentRevisionNumber()) {
+		if(revisionNumber > this.state.getCurrentRevisionNumber()) {
 			throw new IndexOutOfBoundsException(
 			        "revisionNumber may not be greater than or equal to the current revision"
 			                + "number of this log");
 		}
-		return this.state.getEvent(revisionNumber);
+		XEvent event = this.state.getEvent(revisionNumber);
+		assert event == null || event.getRevisionNumber() == revisionNumber;
+		return event;
 	}
 	
 	synchronized public long getCurrentRevisionNumber() {
@@ -162,7 +164,7 @@ public class MemoryChangeLog implements XChangeLog {
 		return this.state.getFirstRevisionNumber();
 	}
 	
-	public Iterator<XEvent> getEventsAfter(long revisionNumber) {
+	public Iterator<XEvent> getEventsSince(long revisionNumber) {
 		return getEventsBetween(revisionNumber, Long.MAX_VALUE);
 	}
 	

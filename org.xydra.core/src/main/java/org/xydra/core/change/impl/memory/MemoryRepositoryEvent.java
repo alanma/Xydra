@@ -38,7 +38,7 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 		if(!this.modelID.equals(event.getModelID()))
 			return false;
 		
-		if(this.modelRevision != event.getModelRevisionNumber())
+		if(this.modelRevision != event.getOldModelRevision())
 			return false;
 		
 		return true;
@@ -144,7 +144,7 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	}
 	
 	@Override
-	public long getModelRevisionNumber() {
+	public long getOldModelRevision() {
 		return this.modelRevision;
 	}
 	

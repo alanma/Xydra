@@ -46,12 +46,11 @@ public interface XEvent {
 	
 	/**
 	 * @return The revision number of the {@link XModel} holding the changed
-	 *         entity (or which is the changed entity) at the time when this
-	 *         event happened (may be {@link #RevisionOfEntityNotSet} if this
-	 *         XEvent refers to something that is not a model or has no
-	 *         father-model)
+	 *         entity (or which is the changed entity) before this event
+	 *         happened (may be {@link #RevisionOfEntityNotSet} if this XEvent
+	 *         refers to something that is not a model or has no father-model)
 	 */
-	long getModelRevisionNumber();
+	long getOldModelRevision();
 	
 	/**
 	 * @return The revision number of the {@link XObject} holding the changed
@@ -61,7 +60,7 @@ public interface XEvent {
 	 *         father-object; may be {@link #RevisionNotAvailable} if the object
 	 *         revision cannot be efficiently calculated)
 	 */
-	long getObjectRevisionNumber();
+	long getOldObjectRevision();
 	
 	/**
 	 * @return The revision number of the {@link XField} holding the changed
@@ -69,7 +68,13 @@ public interface XEvent {
 	 *         event happened (may be {@link #RevisionOfEntityNotSet} if this
 	 *         XEvent refers to something that is not a field)
 	 */
-	long getFieldRevisionNumber();
+	long getOldFieldRevision();
+	
+	/**
+	 * @return the index of this event (or the containing
+	 *         {@link XTransactionEvent}) in the change log.
+	 */
+	long getRevisionNumber();
 	
 	/**
 	 * @return true, if this event occurred during a transaction.

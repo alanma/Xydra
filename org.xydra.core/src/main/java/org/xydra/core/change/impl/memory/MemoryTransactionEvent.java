@@ -55,10 +55,10 @@ public class MemoryTransactionEvent implements XTransactionEvent {
 		if(!XI.equals(this.actor, trans.getActor()))
 			return false;
 		
-		if(this.modelRevision != trans.getModelRevisionNumber())
+		if(this.modelRevision != trans.getOldModelRevision())
 			return false;
 		
-		if(this.objectRevision != trans.getObjectRevisionNumber())
+		if(this.objectRevision != trans.getOldObjectRevision())
 			return false;
 		
 		for(int i = 0; i < size(); ++i) {
@@ -269,20 +269,34 @@ public class MemoryTransactionEvent implements XTransactionEvent {
 		return this.actor;
 	}
 	
-	public long getFieldRevisionNumber() {
+	public long getOldFieldRevision() {
 		return XEvent.RevisionOfEntityNotSet;
 	}
 	
-	public long getObjectRevisionNumber() {
+	public long getOldObjectRevision() {
 		return this.objectRevision;
 	}
 	
-	public long getModelRevisionNumber() {
+	public long getOldModelRevision() {
 		return this.modelRevision;
 	}
 	
 	public XAddress getChangedEntity() {
 		return null;
+	}
+	
+	@Override
+	public long getRevisionNumber() {
+		
+		if(this.modelRevision >= 0) {
+			return this.modelRevision + 1;
+		}
+		
+		if(this.objectRevision >= 0) {
+			return this.objectRevision + 1;
+		}
+		
+		return 0;
 	}
 	
 }

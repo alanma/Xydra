@@ -36,7 +36,7 @@ public class ArmProtectedChangeLog implements XChangeLog {
 		this.actor = actor;
 	}
 	
-	public Iterator<XEvent> getEventsAfter(long revisionNumber) {
+	public Iterator<XEvent> getEventsSince(long revisionNumber) {
 		return getEventsBetween(revisionNumber, Long.MAX_VALUE);
 	}
 	

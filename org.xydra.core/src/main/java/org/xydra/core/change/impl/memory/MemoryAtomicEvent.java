@@ -103,16 +103,37 @@ abstract public class MemoryAtomicEvent implements XEvent {
 		return result;
 	}
 	
-	public long getModelRevisionNumber() {
+	public long getOldModelRevision() {
 		return XEvent.RevisionOfEntityNotSet;
 	}
 	
-	public long getObjectRevisionNumber() {
+	public long getOldObjectRevision() {
 		return XEvent.RevisionOfEntityNotSet;
 	}
 	
-	public long getFieldRevisionNumber() {
+	public long getOldFieldRevision() {
 		return XEvent.RevisionOfEntityNotSet;
+	}
+	
+	@Override
+	public long getRevisionNumber() {
+		
+		long rev = getOldModelRevision();
+		if(rev >= 0) {
+			return rev + 1;
+		}
+		
+		rev = getOldObjectRevision();
+		if(rev >= 0) {
+			return rev + 1;
+		}
+		
+		rev = getOldFieldRevision();
+		if(rev >= 0) {
+			return rev + 1;
+		}
+		
+		return 0;
 	}
 	
 }

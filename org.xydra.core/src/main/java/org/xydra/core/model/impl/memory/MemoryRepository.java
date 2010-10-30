@@ -28,6 +28,7 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
+import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XRepositoryState;
 import org.xydra.core.model.state.XStateTransaction;
@@ -88,12 +89,21 @@ public class MemoryRepository implements XRepository, Serializable {
 	public synchronized MemoryModel createModel(XID actor, XID modelID) {
 		MemoryModel model = getModel(modelID);
 		if(model == null) {
+			XRepositoryEvent event = MemoryRepositoryEvent.createAddEvent(actor, getAddress(),
+			        modelID);
+			
 			XModelState modelState = this.state.createModelState(modelID);
+			
 			model = new MemoryModel(this, modelState);
 			
 			XStateTransaction trans = beginStateTransaction();
 			
-			modelState.getChangeLogState().save(trans);
+			XChangeLogState log = modelState.getChangeLogState();
+			if(log != null) {
+				log.appendEvent(event, trans);
+				log.save(trans);
+			}
+			
 			this.state.addModelState(modelState);
 			model.save(trans);
 			save(trans);
@@ -103,8 +113,6 @@ public class MemoryRepository implements XRepository, Serializable {
 			// in memory
 			this.loadedModels.put(model.getID(), model);
 			
-			XRepositoryEvent event = MemoryRepositoryEvent.createAddEvent(actor, getAddress(),
-			        modelID);
 			fireRepositoryEvent(event);
 			
 		}

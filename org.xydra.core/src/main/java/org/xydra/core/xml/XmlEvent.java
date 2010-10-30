@@ -228,7 +228,7 @@ public class XmlEvent {
 			// try to get the old value from a previous event
 			if(cl != null && fieldRev > cl.getFirstRevisionNumber()
 			        && fieldRev <= cl.getCurrentRevisionNumber()) {
-				XEvent oldEvent = cl.getEvent(fieldRev - 1);
+				XEvent oldEvent = cl.getEvent(fieldRev);
 				oldValue = getOldValue(oldEvent, target);
 				loadedOldValueFromChangeLog = true;
 			} else {
@@ -406,7 +406,7 @@ public class XmlEvent {
 		
 		XmlUtils.checkElementName(xml, XREPOSITORYEVENT_ELEMENT);
 		
-		if(context.getModel() != null || context.getObject() != null || context.getField() != null) {
+		if(context.getObject() != null || context.getField() != null) {
 			throw new IllegalArgumentException("invalid context for model events: " + context);
 		}
 		
@@ -575,10 +575,10 @@ public class XmlEvent {
 		
 		if(event.getChangeType() != ChangeType.ADD) {
 			// don't save the old value if it is already saved in an old event
-			long fieldRev = event.getFieldRevisionNumber();
+			long fieldRev = event.getOldFieldRevision();
 			if(cl != null && fieldRev > cl.getFirstRevisionNumber()
 			        && fieldRev <= cl.getCurrentRevisionNumber()) {
-				XEvent oldEvent = cl.getEventAt(fieldRev - 1);
+				XEvent oldEvent = cl.getEventAt(fieldRev);
 				XValue oldValue = getOldValue(oldEvent, event.getTarget());
 				assert XI.equals(event.getOldValue(), oldValue);
 			} else {
@@ -689,7 +689,7 @@ public class XmlEvent {
 	public static void toXml(XRepositoryEvent event, XmlOut out, XAddress context)
 	        throws IllegalArgumentException {
 		
-		if(context.getModel() != null || context.getObject() != null || context.getField() != null) {
+		if(context.getObject() != null || context.getField() != null) {
 			throw new IllegalArgumentException("invalid context for repository events: " + context);
 		}
 		
@@ -735,16 +735,16 @@ public class XmlEvent {
 			out.attribute(ACTOR_ATTRIBUTE, event.getActor().toString());
 		}
 		
-		if(event.getModelRevisionNumber() != XEvent.RevisionOfEntityNotSet) {
-			out.attribute(MODELREVISION_ATTRIBUTE, Long.toString(event.getModelRevisionNumber()));
+		if(event.getOldModelRevision() != XEvent.RevisionOfEntityNotSet) {
+			out.attribute(MODELREVISION_ATTRIBUTE, Long.toString(event.getOldModelRevision()));
 		}
 		
-		if(event.getObjectRevisionNumber() != XEvent.RevisionOfEntityNotSet) {
-			out.attribute(OBJECTREVISION_ATTRIBUTE, Long.toString(event.getObjectRevisionNumber()));
+		if(event.getOldObjectRevision() != XEvent.RevisionOfEntityNotSet) {
+			out.attribute(OBJECTREVISION_ATTRIBUTE, Long.toString(event.getOldObjectRevision()));
 		}
 		
-		if(event.getFieldRevisionNumber() != XEvent.RevisionOfEntityNotSet) {
-			out.attribute(FIELDREVISION_ATTRIBUTE, Long.toString(event.getFieldRevisionNumber()));
+		if(event.getOldFieldRevision() != XEvent.RevisionOfEntityNotSet) {
+			out.attribute(FIELDREVISION_ATTRIBUTE, Long.toString(event.getOldFieldRevision()));
 		}
 		
 	}

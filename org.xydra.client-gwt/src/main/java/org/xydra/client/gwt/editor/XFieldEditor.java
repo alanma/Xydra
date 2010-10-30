@@ -197,7 +197,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		log.info("editor: got " + event);
 		XValue value = event.getNewValue();
 		changeValue(value);
-		this.revision.setText(Long.toString(event.getFieldRevisionNumber()));
+		this.revision.setText(Long.toString(event.getOldFieldRevision()));
 	}
 	
 	public void removeEditor() {

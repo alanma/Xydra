@@ -117,8 +117,8 @@ public class GWTChangesService extends AbstractGWTHttpService implements XChange
 						// XCommand.CHANGED if possible
 						if(result == XCommand.CHANGED && !events.isEmpty()) {
 							XEvent event = events.get(events.size() - 1);
-							if(event.getModelRevisionNumber() >= 0) {
-								result = event.getModelRevisionNumber();
+							if(event.getOldModelRevision() >= 0) {
+								result = event.getOldModelRevision();
 							}
 						}
 						

@@ -178,7 +178,7 @@ public class XmlModel {
 				        + " contains multiple change logs");
 			}
 		} else {
-			modelState.getChangeLogState().setFirstRevisionNumber(revision);
+			modelState.getChangeLogState().setFirstRevisionNumber(revision + 1);
 		}
 		
 		modelState.save(null);

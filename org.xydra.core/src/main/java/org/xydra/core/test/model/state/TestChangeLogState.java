@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.state.XChangeLogState;
@@ -17,7 +18,7 @@ public class TestChangeLogState implements XChangeLogState {
 	private XAddress baseAddr;
 	
 	long first = 0L;
-	long last = 0L;
+	long last = -1L;
 	
 	int saveCount;
 	
@@ -69,7 +70,8 @@ public class TestChangeLogState implements XChangeLogState {
 		checkActive();
 		TestStateTransaction t = getTrans(trans);
 		this.currentTrans = t;
-		this.truncateToRevision(this.first, t);
+		boolean ret = this.truncateToRevision(this.first - 1, t);
+		assert ret;
 		t.savedLogs.remove(this);
 		t.deletedLogs.add(this);
 		this.saved = true;
@@ -99,7 +101,9 @@ public class TestChangeLogState implements XChangeLogState {
 	
 	public XEvent getEvent(long revisionNumber) {
 		checkActive();
-		return this.events.get(revisionNumber);
+		XEvent event = this.events.get(revisionNumber);
+		assert event == null || event.getRevisionNumber() == revisionNumber;
+		return event;
 	}
 	
 	public long getFirstRevisionNumber() {
@@ -107,29 +111,25 @@ public class TestChangeLogState implements XChangeLogState {
 		return this.first;
 	}
 	
-	long getRevisionForEvent(XEvent event) {
-		if(event == null) {
-			return getCurrentRevisionNumber();
-		}
-		long rev = this.baseAddr.getObject() == null ? event.getModelRevisionNumber() : event
-		        .getObjectRevisionNumber();
-		assert rev >= 0;
-		return rev;
-	}
-	
 	public void appendEvent(XEvent event, XStateTransaction transaction) {
 		checkActive();
 		
-		assert getRevisionForEvent(event) == this.last;
+		if(event == null) {
+			this.saved = false;
+			this.last++;
+			return;
+		}
 		
-		long i = this.last;
+		assert this.baseAddr
+		        .equalsOrContains(event.getChangeType() == ChangeType.TRANSACTION ? event
+		                .getTarget() : event.getChangedEntity());
+		assert event.getRevisionNumber() == getCurrentRevisionNumber() + 1;
+		assert !event.inTransaction();
+		
+		long i = event.getRevisionNumber();
 		
 		this.saved = false;
 		this.last++;
-		
-		if(event == null) {
-			return;
-		}
 		
 		TestStateTransaction t = getTrans(transaction);
 		this.currentTrans = t;
@@ -141,6 +141,8 @@ public class TestChangeLogState implements XChangeLogState {
 		if(t != transaction) {
 			t.commit();
 		}
+		
+		assert this.last == event.getRevisionNumber();
 		
 	}
 	
@@ -154,26 +156,24 @@ public class TestChangeLogState implements XChangeLogState {
 			return false;
 		}
 		
-		if(revisionNumber < this.first) {
-			return false;
-		}
-		
 		TestStateTransaction t = getTrans(transaction);
 		this.currentTrans = t;
 		
 		this.saved = false;
 		while(revisionNumber < this.last) {
+			XEvent event = this.events.remove(this.last); // remove last element
+			if(event != null) {
+				t.savedEvents.deIndex(this, this.last);
+				t.deletedEvents.index(this, this.last);
+			}
 			this.last--;
-			this.events.remove(this.last); // remove last element
-			t.savedEvents.deIndex(this, this.last);
-			t.deletedEvents.index(this, this.last);
 		}
 		
 		if(t != transaction) {
 			t.commit();
 		}
 		
-		assert revisionNumber == this.last;
+		assert revisionNumber == getCurrentRevisionNumber();
 		
 		return true;
 	}
@@ -183,7 +183,8 @@ public class TestChangeLogState implements XChangeLogState {
 			throw new IllegalStateException(
 			        "cannot set start revision number of non-empty change log");
 		}
-		this.last = this.first = rev;
+		this.first = rev;
+		this.last = rev - 1;
 	}
 	
 }

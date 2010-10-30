@@ -266,7 +266,7 @@ public class XChanges {
 	 */
 	static public XFieldCommand createImmediateUndoCommand(XFieldEvent event) {
 		
-		long newRev = event.getModelRevisionNumber() + 1;
+		long newRev = event.getOldModelRevision() + 1;
 		
 		switch(event.getChangeType()) {
 		
@@ -314,7 +314,7 @@ public class XChanges {
 			assert event.getChangeType() == ChangeType.ADD : "unexpected change type for object events: "
 			        + event.getChangeType();
 			
-			long newRev = event.getModelRevisionNumber() + 1;
+			long newRev = event.getOldModelRevision() + 1;
 			
 			return MemoryObjectCommand.createRemoveCommand(event.getTarget(), newRev, event
 			        .getFieldID());
@@ -348,7 +348,7 @@ public class XChanges {
 			assert event.getChangeType() == ChangeType.ADD : "unexpected change type for model events: "
 			        + event.getChangeType();
 			
-			long newRev = event.getModelRevisionNumber() + 1;
+			long newRev = event.getOldModelRevision() + 1;
 			
 			return MemoryModelCommand.createRemoveCommand(event.getTarget(), newRev, event
 			        .getObjectID());
@@ -445,7 +445,7 @@ public class XChanges {
 			}
 			
 			return MemoryRepositoryCommand.createRemoveCommand(event.getTarget(), event
-			        .getModelRevisionNumber(), event.getRepositoryID());
+			        .getOldModelRevision(), event.getRepositoryID());
 			
 		}
 		
@@ -804,15 +804,15 @@ public class XChanges {
 		
 		case ADD:
 			return MemoryFieldCommand.createAddCommand(event.getTarget(), event
-			        .getFieldRevisionNumber(), event.getNewValue());
+			        .getOldFieldRevision(), event.getNewValue());
 			
 		case CHANGE:
 			return MemoryFieldCommand.createChangeCommand(event.getTarget(), event
-			        .getFieldRevisionNumber(), event.getNewValue());
+			        .getOldFieldRevision(), event.getNewValue());
 			
 		case REMOVE:
 			return MemoryFieldCommand.createRemoveCommand(event.getTarget(), event
-			        .getFieldRevisionNumber());
+			        .getOldFieldRevision());
 			
 		default:
 			throw new AssertionError("unexpected type for field events: " + event.getChangeType());
@@ -843,7 +843,7 @@ public class XChanges {
 			        + event.getChangeType();
 			
 			return MemoryObjectCommand.createRemoveCommand(event.getTarget(), event
-			        .getFieldRevisionNumber(), event.getFieldID());
+			        .getOldFieldRevision(), event.getFieldID());
 			
 		}
 		
@@ -871,7 +871,7 @@ public class XChanges {
 			        + event.getChangeType();
 			
 			return MemoryModelCommand.createRemoveCommand(event.getTarget(), event
-			        .getObjectRevisionNumber(), event.getObjectID());
+			        .getOldObjectRevision(), event.getObjectID());
 			
 		}
 		
@@ -899,7 +899,7 @@ public class XChanges {
 			        + event.getChangeType();
 			
 			return MemoryRepositoryCommand.createRemoveCommand(event.getTarget(), event
-			        .getModelRevisionNumber(), event.getRepositoryID());
+			        .getOldModelRevision(), event.getRepositoryID());
 			
 		}
 		

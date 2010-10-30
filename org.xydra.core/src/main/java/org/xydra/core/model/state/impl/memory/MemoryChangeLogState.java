@@ -3,6 +3,7 @@ package org.xydra.core.model.state.impl.memory;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.state.XChangeLogState;
@@ -49,32 +50,33 @@ public class MemoryChangeLogState implements XChangeLogState {
 	}
 	
 	public long getCurrentRevisionNumber() {
-		return this.revisionNumber + this.events.size();
+		return this.revisionNumber + this.events.size() - 1;
 	}
 	
 	public XEvent getEvent(long revisionNumber) {
-		return this.events.get((int)(revisionNumber - getFirstRevisionNumber()));
+		XEvent event = this.events.get((int)(revisionNumber - this.revisionNumber));
+		assert event == null || event.getRevisionNumber() == revisionNumber;
+		return event;
 	}
 	
 	public long getFirstRevisionNumber() {
 		return this.revisionNumber;
 	}
 	
-	long getRevisionForEvent(XEvent event) {
-		if(event == null) {
-			return getCurrentRevisionNumber();
-		}
-		long rev = this.baseAddr.getObject() == null ? event.getModelRevisionNumber() : event
-		        .getObjectRevisionNumber();
-		assert rev >= 0;
-		return rev;
-	}
-	
 	public void appendEvent(XEvent event, XStateTransaction transaction) {
 		
-		assert getRevisionForEvent(event) == getCurrentRevisionNumber();
-		
-		this.events.add(event);
+		if(event == null) {
+			this.events.add(null);
+		} else {
+			
+			assert this.baseAddr
+			        .equalsOrContains(event.getChangeType() == ChangeType.TRANSACTION ? event
+			                .getTarget() : event.getChangedEntity());
+			assert event.getRevisionNumber() == getCurrentRevisionNumber() + 1;
+			assert !event.inTransaction();
+			
+			this.events.add(event);
+		}
 	}
 	
 	public XAddress getBaseAddress() {
@@ -109,7 +111,7 @@ public class MemoryChangeLogState implements XChangeLogState {
 	
 	@Override
 	public String toString() {
-		return "change log for " + getBaseAddress() + ": baseRev=" + getFirstRevisionNumber()
+		return "change log for " + getBaseAddress() + ": baseRev=" + this.revisionNumber
 		        + " currentRev=" + getCurrentRevisionNumber() + " events=" + this.events.toString();
 	}
 }

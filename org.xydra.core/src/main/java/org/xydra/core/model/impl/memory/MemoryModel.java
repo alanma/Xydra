@@ -65,6 +65,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	private static XModelState createModelState(XID modelId) {
 		XAddress modelAddr = XX.toAddress(null, modelId, null, null);
 		XChangeLogState changeLogState = new MemoryChangeLogState(modelAddr);
+		// Bump the log revision since we're missing this object's create event.
+		changeLogState.setFirstRevisionNumber(1);
 		return new TemporaryModelState(modelAddr, changeLogState);
 	}
 	

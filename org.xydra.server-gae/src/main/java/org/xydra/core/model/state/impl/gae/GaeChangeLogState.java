@@ -1,5 +1,6 @@
 package org.xydra.core.model.state.impl.gae;
 
+import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.state.XChangeLogState;
@@ -36,7 +37,7 @@ public class GaeChangeLogState implements XChangeLogState {
 	
 	private final Key key;
 	private long firstRev;
-	private long currentRev;
+	private long lastRev;
 	
 	public GaeChangeLogState(XAddress baseAddr, long currentRev) {
 		
@@ -49,10 +50,11 @@ public class GaeChangeLogState implements XChangeLogState {
 		Entity e = GaeUtils.getEntity(this.key);
 		
 		if(e == null) {
-			this.firstRev = this.currentRev = currentRev;
+			this.firstRev = currentRev;
+			this.lastRev = currentRev - 1;
 		} else {
 			this.firstRev = (Long)e.getProperty(PROP_FIRST_REVISION);
-			this.currentRev = (Long)e.getProperty(PROP_CURRENT_REVISION);
+			this.lastRev = (Long)e.getProperty(PROP_CURRENT_REVISION);
 		}
 		
 	}
@@ -63,23 +65,25 @@ public class GaeChangeLogState implements XChangeLogState {
 	
 	public void appendEvent(XEvent event, XStateTransaction trans) {
 		
-		if(!getBaseAddress().equalsOrContains(event.getTarget())) {
+		if(!getBaseAddress().equalsOrContains(
+		        event.getChangeType() == ChangeType.TRANSACTION ? event.getTarget() : event
+		                .getChangedEntity())) {
 			throw new IllegalArgumentException("cannot store event " + event + "in change log for "
 			        + getBaseAddress());
 		}
 		
-		Entity e = new Entity(getKey(event.getModelRevisionNumber()));
+		Entity e = new Entity(getKey(event.getRevisionNumber()));
 		
 		saveEvent(e, event);
 		
 		GaeUtils.putEntity(e, GaeStateTransaction.asTransaction(trans));
 		
-		long newRev = event.getModelRevisionNumber() + 1;
+		long newRev = event.getRevisionNumber();
 		
-		assert newRev > 0;
+		assert newRev >= 0;
 		
-		if(newRev > this.currentRev) {
-			this.currentRev = newRev;
+		if(newRev > this.lastRev) {
+			this.lastRev = newRev;
 		}
 		
 	}
@@ -107,7 +111,7 @@ public class GaeChangeLogState implements XChangeLogState {
 		
 		Transaction t = GaeStateTransaction.getOrBeginTransaction(trans);
 		
-		for(long i = this.firstRev; i <= this.currentRev; ++i) {
+		for(long i = this.firstRev; i <= this.lastRev; ++i) {
 			GaeUtils.deleteEntity(getKey(i), t);
 		}
 		
@@ -120,7 +124,7 @@ public class GaeChangeLogState implements XChangeLogState {
 	}
 	
 	public long getCurrentRevisionNumber() {
-		return this.currentRev;
+		return this.lastRev;
 	}
 	
 	public XEvent getEvent(long revisionNumber) {
@@ -149,7 +153,7 @@ public class GaeChangeLogState implements XChangeLogState {
 		Entity e = new Entity(this.key);
 		
 		e.setUnindexedProperty(PROP_FIRST_REVISION, this.firstRev);
-		e.setUnindexedProperty(PROP_CURRENT_REVISION, this.currentRev);
+		e.setUnindexedProperty(PROP_CURRENT_REVISION, this.lastRev);
 		
 		GaeUtils.putEntity(e, GaeStateTransaction.asTransaction(trans));
 		
@@ -163,9 +167,9 @@ public class GaeChangeLogState implements XChangeLogState {
 		
 		Transaction t = GaeStateTransaction.getOrBeginTransaction(trans);
 		
-		while(this.currentRev > revisionNumber) {
-			this.currentRev--;
-			GaeUtils.deleteEntity(getKey(this.currentRev), t);
+		while(this.lastRev > revisionNumber) {
+			GaeUtils.deleteEntity(getKey(this.lastRev), t);
+			this.lastRev--;
 		}
 		
 		if(trans == null) {
@@ -176,10 +180,10 @@ public class GaeChangeLogState implements XChangeLogState {
 	}
 	
 	public void setFirstRevisionNumber(long rev) {
-		if(this.currentRev != this.firstRev) {
+		if(this.lastRev != this.firstRev) {
 			throw new IllegalStateException(
 			        "cannot set start revision number of non-empty change log");
 		}
-		this.currentRev = this.firstRev = rev;
+		this.lastRev = this.firstRev = rev;
 	}
 }

@@ -18,7 +18,6 @@ import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.change.XObjectEvent;
 import org.xydra.core.change.XRepositoryCommand;
-import org.xydra.core.change.XRepositoryEvent;
 import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.XTransactionEvent;
 import org.xydra.core.model.XAddress;
@@ -43,6 +42,7 @@ import com.google.appengine.api.datastore.DatastoreFailureException;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Text;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 
@@ -222,7 +222,7 @@ public class GaeChangesService implements XChangeLog {
 			
 			// Try to grab this revision.
 			try {
-				Key key = KeyStructure.createChangetKey(this.modelAddr, rev);
+				Key key = KeyStructure.createChangeKey(this.modelAddr, rev);
 				Transaction trans = GaeUtils.beginTransaction();
 				
 				Entity changeEntity = GaeUtils.getEntity(key, trans);
@@ -287,7 +287,7 @@ public class GaeChangesService implements XChangeLog {
 		
 		for(long otherRev = ownRev - 1; otherRev > commitedRev; otherRev--) {
 			
-			Key key = KeyStructure.createChangetKey(this.modelAddr, otherRev);
+			Key key = KeyStructure.createChangeKey(this.modelAddr, otherRev);
 			Entity otherChange = GaeUtils.getEntity(key);
 			assert otherChange != null;
 			
@@ -430,12 +430,9 @@ public class GaeChangesService implements XChangeLog {
 			
 			// IMPROVE save event in a GAE-specific format
 			XmlOutStringBuffer out = new XmlOutStringBuffer();
-			XAddress context = this.modelAddr;
-			if(ae instanceof XRepositoryEvent) {
-				context = this.modelAddr.getParent();
-			}
-			XmlEvent.toXml(ae, out, context);
-			eventEntity.setUnindexedProperty(PROP_EVENTCONTENT, out.getXml());
+			XmlEvent.toXml(ae, out, this.modelAddr);
+			Text text = new Text(out.getXml());
+			eventEntity.setUnindexedProperty(PROP_EVENTCONTENT, text);
 			
 			GaeUtils.putEntity(eventEntity, trans);
 			
@@ -929,7 +926,7 @@ public class GaeChangesService implements XChangeLog {
 	
 	public XAtomicEvent getAtomicEvent(long revisionNumber, int transindex) {
 		
-		Key changeKey = KeyStructure.createChangetKey(this.modelAddr, revisionNumber);
+		Key changeKey = KeyStructure.createChangeKey(this.modelAddr, revisionNumber);
 		Key eventKey = KeyStructure.getEventKey(changeKey, transindex);
 		
 		// IMPROVE cache events
@@ -937,9 +934,9 @@ public class GaeChangesService implements XChangeLog {
 		if(eventEntity == null) {
 			return null;
 		}
-		String eventData = (String)eventEntity.getProperty(PROP_EVENTCONTENT);
+		Text eventData = (Text)eventEntity.getProperty(PROP_EVENTCONTENT);
 		
-		MiniElement eventElement = new MiniXMLParserImpl().parseXml(eventData);
+		MiniElement eventElement = new MiniXMLParserImpl().parseXml(eventData.getValue());
 		
 		return XmlEvent.toAtomicEvent(eventElement, this.modelAddr);
 	}
@@ -949,8 +946,28 @@ public class GaeChangesService implements XChangeLog {
 	}
 	
 	public long getCurrentRevisionNumber() {
-		// FIXME check if the cached rev is up to date
-		return getCachedLastCommitedRevision() + 1;
+		
+		long currentRev = getCachedLastCommitedRevision();
+		
+		while(true) {
+			
+			Key key = KeyStructure.createChangeKey(this.modelAddr, currentRev + 1);
+			Entity changeEntity = GaeUtils.getEntity(key);
+			if(changeEntity == null) {
+				break;
+			}
+			
+			int status = getStatus(changeEntity);
+			if(!isCommitted(status)) {
+				break;
+			}
+			
+			currentRev++;
+		}
+		
+		setCachedLastCommitedRevision(currentRev);
+		
+		return currentRev;
 	}
 	
 	private class GaeTransactionEvent implements XTransactionEvent {
@@ -1002,15 +1019,15 @@ public class GaeChangesService implements XChangeLog {
 			return null;
 		}
 		
-		public long getFieldRevisionNumber() {
+		public long getOldFieldRevision() {
 			return XEvent.RevisionOfEntityNotSet;
 		}
 		
-		public long getModelRevisionNumber() {
+		public long getOldModelRevision() {
 			return this.modelRev;
 		}
 		
-		public long getObjectRevisionNumber() {
+		public long getOldObjectRevision() {
 			return XEvent.RevisionOfEntityNotSet;
 		}
 		
@@ -1026,12 +1043,16 @@ public class GaeChangesService implements XChangeLog {
 			return Arrays.asList(this.events).iterator();
 		}
 		
+		@Override
+		public long getRevisionNumber() {
+			return this.modelRev + 1;
+		}
+		
 	}
 	
 	public XEvent getEventAt(long rev) {
 		
-		Entity changeEntity = GaeUtils
-		        .getEntity(KeyStructure.createChangetKey(this.modelAddr, rev));
+		Entity changeEntity = GaeUtils.getEntity(KeyStructure.createChangeKey(this.modelAddr, rev));
 		
 		if(changeEntity == null) {
 			return null;
@@ -1078,7 +1099,7 @@ public class GaeChangesService implements XChangeLog {
 		return n.intValue();
 	}
 	
-	public Iterator<XEvent> getEventsAfter(long revisionNumber) {
+	public Iterator<XEvent> getEventsSince(long revisionNumber) {
 		return getEventsBetween(revisionNumber, Long.MAX_VALUE);
 	}
 	
@@ -1096,6 +1117,7 @@ public class GaeChangesService implements XChangeLog {
 	}
 	
 	public XBaseModel getSnapshot() {
+		
 		// TODO move this somewhere else
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		
@@ -1110,5 +1132,4 @@ public class GaeChangesService implements XChangeLog {
 		locks.add(this.modelAddr);
 		return new GaeModel(this.modelAddr, getCurrentRevisionNumber(), locks);
 	}
-	
 }

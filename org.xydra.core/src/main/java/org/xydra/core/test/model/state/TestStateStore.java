@@ -24,6 +24,7 @@ import org.xydra.core.value.XValue;
 import org.xydra.index.IMapMapIndex;
 import org.xydra.index.impl.MapMapIndex;
 import org.xydra.index.query.EqualsConstraint;
+import org.xydra.index.query.KeyKeyEntryTuple;
 import org.xydra.index.query.Wildcard;
 
 
@@ -233,7 +234,12 @@ public class TestStateStore implements XStateStore, Serializable {
 		Iterator<XAddress> it = this.events.key1Iterator();
 		while(it.hasNext()) {
 			XAddress a = it.next();
-			assert this.logs.containsKey(a) : "missing log for event: " + a;
+			if(!this.logs.containsKey(a)) {
+				Iterator<KeyKeyEntryTuple<XAddress,Long,XEvent>> it2 = this.events.tupleIterator(
+				        new EqualsConstraint<XAddress>(a), new Wildcard<Long>());
+				assert it.hasNext();
+				assert this.logs.containsKey(a) : "missing log for event: " + it2.next();
+			}
 		}
 		
 	}

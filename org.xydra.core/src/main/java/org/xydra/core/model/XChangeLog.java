@@ -74,7 +74,7 @@ public interface XChangeLog extends Serializable {
 	 *         including) the given revision number.
 	 * @throws IndexOutOfBoundsException if revisionNumber is negative
 	 */
-	public Iterator<XEvent> getEventsAfter(long revisionNumber);
+	public Iterator<XEvent> getEventsSince(long revisionNumber);
 	
 	/**
 	 * Returns an iterator over all {@link XEvent XEvents} that occurred after

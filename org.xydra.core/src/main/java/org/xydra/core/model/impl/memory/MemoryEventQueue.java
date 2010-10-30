@@ -505,8 +505,8 @@ public class MemoryEventQueue implements Serializable {
 			assert first.getChangeType() == ChangeType.REMOVE;
 			// non matching REMOVE -> ADD => merge to CHANGE
 			return MemoryFieldEvent.createChangeEvent(last.getActor(), last.getTarget(), first
-			        .getOldValue(), last.getNewValue(), last.getModelRevisionNumber(), last
-			        .getObjectRevisionNumber(), last.getFieldRevisionNumber(), false);
+			        .getOldValue(), last.getNewValue(), last.getOldModelRevision(), last
+			        .getOldObjectRevision(), last.getOldFieldRevision(), false);
 		case REMOVE:
 			if(first.getChangeType() == ChangeType.REMOVE) {
 				return last;
@@ -514,21 +514,21 @@ public class MemoryEventQueue implements Serializable {
 			assert first.getChangeType() == ChangeType.CHANGE;
 			// (non matching) CHANGE->REMOVE => merge to REMOVE
 			return MemoryFieldEvent.createRemoveEvent(last.getActor(), last.getTarget(), first
-			        .getOldValue(), last.getModelRevisionNumber(), last.getObjectRevisionNumber(),
-			        last.getFieldRevisionNumber(), false);
+			        .getOldValue(), last.getOldModelRevision(), last.getOldObjectRevision(),
+			        last.getOldFieldRevision(), false);
 		case CHANGE:
 			assert first.getChangeType() != ChangeType.REMOVE;
 			if(first.getChangeType() == ChangeType.CHANGE) {
 				// non-matching CHANGE->CHANGE => merge to CHANGE
 				return MemoryFieldEvent.createChangeEvent(last.getActor(), last.getTarget(), first
-				        .getOldValue(), last.getNewValue(), last.getModelRevisionNumber(), last
-				        .getObjectRevisionNumber(), last.getFieldRevisionNumber(), false);
+				        .getOldValue(), last.getNewValue(), last.getOldModelRevision(), last
+				        .getOldObjectRevision(), last.getOldFieldRevision(), false);
 			} else {
 				assert first.getChangeType() == ChangeType.ADD;
 				// non-matching ADD->CHANGE => merge to ADD
 				return MemoryFieldEvent.createAddEvent(last.getActor(), last.getTarget(), last
-				        .getNewValue(), last.getModelRevisionNumber(), last
-				        .getObjectRevisionNumber(), last.getFieldRevisionNumber(), false);
+				        .getNewValue(), last.getOldModelRevision(), last
+				        .getOldObjectRevision(), last.getOldFieldRevision(), false);
 			}
 		default:
 			throw new AssertionError("invalid event: " + last);

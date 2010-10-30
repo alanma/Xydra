@@ -40,10 +40,10 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 		if(!this.objectID.equals(event.getObjectID()))
 			return false;
 		
-		if(this.modelRevision != event.getModelRevisionNumber())
+		if(this.modelRevision != event.getOldModelRevision())
 			return false;
 		
-		if(this.objectRevision != event.getObjectRevisionNumber())
+		if(this.objectRevision != event.getOldObjectRevision())
 			return false;
 		
 		if(this.inTransaction != event.inTransaction())
@@ -167,12 +167,12 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 	}
 	
 	@Override
-	public long getObjectRevisionNumber() {
+	public long getOldObjectRevision() {
 		return this.objectRevision;
 	}
 	
 	@Override
-	public long getModelRevisionNumber() {
+	public long getOldModelRevision() {
 		return this.modelRevision;
 	}
 	
