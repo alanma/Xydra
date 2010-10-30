@@ -62,24 +62,30 @@ public class NewGaeXydraServer implements IXydraServer {
 		
 		XID modelId = command.getChangedEntity().getModel();
 		
-		return getModelService(modelId).executeCommand(command, actorId);
+		return getChangesService(modelId).executeCommand(command, actorId);
 	}
 	
 	private XAddress getModelAddress(XID modelId) {
 		return XX.resolveModel(this.repoAddr, modelId);
 	}
 	
-	private GaeChangesService getModelService(XID modelId) {
-		// IMPROVE cache GaeModelService instances
+	private GaeChangesService getChangesService(XID modelId) {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		// IMPROVE cache GaeChangesService instances?
 		return new GaeChangesService(getModelAddress(modelId));
 	}
 	
+	private GaeSnapshotService getSnapshotService(XID modelId) {
+		// IMPROVE cache GaeSnapshotService instances?
+		return new GaeSnapshotService(getChangesService(modelId));
+	}
+	
 	public XChangeLog getChangeLog(XID modelId) {
-		return getModelService(modelId);
+		return getChangesService(modelId);
 	}
 	
 	public XBaseModel getModelSnapshot(XID modelId) {
-		return getModelService(modelId).getSnapshot();
+		return getSnapshotService(modelId).getSnapshot();
 	}
 	
 	@Override

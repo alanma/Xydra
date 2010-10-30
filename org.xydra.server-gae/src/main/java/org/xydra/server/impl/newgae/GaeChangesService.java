@@ -2,11 +2,8 @@ package org.xydra.server.impl.newgae;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.xydra.core.XX;
@@ -16,35 +13,30 @@ import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XFieldEvent;
+import org.xydra.core.change.XModelEvent;
 import org.xydra.core.change.XObjectEvent;
 import org.xydra.core.change.XRepositoryCommand;
+import org.xydra.core.change.XRepositoryEvent;
 import org.xydra.core.change.XTransaction;
-import org.xydra.core.change.XTransactionEvent;
 import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XID;
-import org.xydra.core.model.XType;
 import org.xydra.core.model.delta.ChangedModel;
-import org.xydra.core.value.XValue;
+import org.xydra.core.model.impl.memory.AbstractChangeLog;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlEvent;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
 import org.xydra.index.XI;
 import org.xydra.index.query.Pair;
-import org.xydra.server.impl.gae.GaeTestfixer;
 import org.xydra.server.impl.gae.GaeUtils;
 
 import com.google.appengine.api.datastore.DatastoreFailureException;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Text;
 import com.google.appengine.api.datastore.Transaction;
-import com.google.appengine.api.datastore.Query.FilterOperator;
 
 
 /**
@@ -54,7 +46,7 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
  * @author dscharrer
  * 
  */
-public class GaeChangesService implements XChangeLog {
+public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	
 	private static final long serialVersionUID = -2080744796962188941L;
 	
@@ -77,13 +69,7 @@ public class GaeChangesService implements XChangeLog {
 	 */
 	private static final String PROP_EVENTCOUNT = "eventCount";
 	
-	// GAE Entity (type=XMODEL/XOBJECT/XFIELD) property keys.
-	
-	private static final String PROP_REVISION = "revision";
-	private static final String PROP_TRANSINDEX = "transindex";
-	// Value for PROP_TRANSINDEX_NONE if there hasn't been any XFieldEvent yet
-	private static final int TRANSINDEX_NONE = -1;
-	private static final String PROP_PARENT = "parent";
+	// GAE Entity (type=XEVENT) property keys.
 	
 	private static final String PROP_EVENTCONTENT = "eventContent";
 	
@@ -97,7 +83,7 @@ public class GaeChangesService implements XChangeLog {
 	 *  STATUS_CREATING ------> STATUS_FAILED_TIMEOUT
 	 *    |       |
 	 *    |       v
-	 *    | STATUS_CHECKING
+	 *    | STATUS_CHECKING (IMPROVE not implemented yet)
 	 *    |       |
 	 *    \---+---/
 	 *        |
@@ -160,6 +146,7 @@ public class GaeChangesService implements XChangeLog {
 		
 		Set<XAddress> locks = calculateRequiredLocks(command);
 		
+		// TODO keep track of own timeout and give up if exceeded
 		Pair<Long,Entity> result = grabRevisionAndRegisterLocks(locks, actorId);
 		long rev = result.getFirst();
 		Entity changeEntity = result.getSecond();
@@ -384,7 +371,7 @@ public class GaeChangesService implements XChangeLog {
 		
 		List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
 		
-		XBaseModel currentModel = getModel(rev, locks);
+		XBaseModel currentModel = InternalGaeModel.get(this, rev, locks);
 		
 		if(command instanceof XRepositoryCommand) {
 			XRepositoryCommand rc = (XRepositoryCommand)command;
@@ -429,6 +416,7 @@ public class GaeChangesService implements XChangeLog {
 			Entity eventEntity = new Entity(KeyStructure.getEventKey(baseKey, i));
 			
 			// IMPROVE save event in a GAE-specific format
+			// TODO don't save the "oldValue" again
 			XmlOutStringBuffer out = new XmlOutStringBuffer();
 			XmlEvent.toXml(ae, out, this.modelAddr);
 			Text text = new Text(out.getXml());
@@ -459,16 +447,20 @@ public class GaeChangesService implements XChangeLog {
 			if(event instanceof XFieldEvent) {
 				assert Arrays.asList(ChangeType.REMOVE, ChangeType.ADD, ChangeType.CHANGE)
 				        .contains(event.getChangeType());
-				int transindex = ((XFieldEvent)event).getNewValue() == null ? TRANSINDEX_NONE : i;
-				setField(event.getTarget(), rev, transindex);
+				if(((XFieldEvent)event).getNewValue() == null) {
+					InternalGaeField.set(event.getTarget(), rev);
+				} else {
+					InternalGaeField.set(event.getTarget(), rev, i);
+				}
 			} else if(event.getChangeType() == ChangeType.REMOVE) {
-				removeEntity(event.getChangedEntity());
+				InternalGaeXEntity.remove(event.getChangedEntity());
 			} else if(event instanceof XObjectEvent) {
 				assert event.getChangeType() == ChangeType.ADD;
-				setField(event.getChangedEntity(), rev, TRANSINDEX_NONE);
+				InternalGaeField.set(event.getChangedEntity(), rev);
 			} else {
 				assert event.getChangeType() == ChangeType.ADD;
-				createEntity(event.getChangedEntity());
+				assert event instanceof XModelEvent || event instanceof XRepositoryEvent;
+				InternalGaeXEntity.createContainer(event.getChangedEntity());
 			}
 			
 		}
@@ -638,251 +630,7 @@ public class GaeChangesService implements XChangeLog {
 		return false;
 	}
 	
-	private class GaeField implements XBaseField {
-		
-		private final XAddress fieldAddr;
-		private final long fieldRev;
-		private final int transindex;
-		private XFieldEvent valueEvent;
-		
-		private GaeField(XAddress fieldAddr, long fieldRev, int transindex) {
-			assert fieldAddr.getAddressedType() == XType.XFIELD;
-			this.fieldAddr = fieldAddr;
-			this.fieldRev = fieldRev;
-			this.transindex = transindex;
-		}
-		
-		public long getRevisionNumber() {
-			return this.fieldRev;
-		}
-		
-		public XValue getValue() {
-			if(this.transindex < 0) {
-				return null;
-			}
-			if(this.valueEvent == null) {
-				XAtomicEvent event = getAtomicEvent(this.fieldRev, this.transindex);
-				if(!(event instanceof XFieldEvent)) {
-					throw new RuntimeException(
-					        "field refers to an event that is not an XFieldEvent: " + event);
-				}
-				this.valueEvent = (XFieldEvent)event;
-			}
-			assert this.valueEvent != null;
-			return this.valueEvent.getNewValue();
-		}
-		
-		public boolean isEmpty() {
-			return getValue() == null;
-		}
-		
-		public XAddress getAddress() {
-			return this.fieldAddr;
-		}
-		
-		public XID getID() {
-			return this.fieldAddr.getField();
-		}
-		
-	}
-	
-	private abstract class GaeContainer<C> {
-		
-		private final Map<XID,C> cachedChildren = new HashMap<XID,C>();
-		private final XAddress addr;
-		private Set<XID> cachedIds;
-		private final Set<XID> cachedMisses = new HashSet<XID>();
-		private final Set<XAddress> locks;
-		
-		private GaeContainer(XAddress addr, Set<XAddress> locks) {
-			assert addr.getAddressedType() != XType.XFIELD;
-			assert canRead(addr, locks);
-			this.addr = addr;
-			this.locks = locks;
-		}
-		
-		public boolean isEmpty() {
-			return !iterator().hasNext();
-		}
-		
-		public XAddress getAddress() {
-			return this.addr;
-		}
-		
-		protected abstract XAddress resolveChild(XAddress addr, XID childId);
-		
-		protected abstract C loadChild(XAddress childAddr, Entity childEntity);
-		
-		public C getChild(XID fieldId) {
-			
-			// don't look in this.cachedIds, as this might contain outdated
-			// information due to being based on GAE queries
-			if(this.cachedMisses.contains(fieldId)) {
-				return null;
-			}
-			
-			C gf = this.cachedChildren.get(fieldId);
-			if(gf != null) {
-				return gf;
-			}
-			
-			XAddress childAddr = resolveChild(this.addr, fieldId);
-			assert canRead(childAddr, this.locks);
-			
-			Entity e = GaeUtils.getEntity(KeyStructure.createCombinedKey(childAddr));
-			if(e == null) {
-				this.cachedMisses.add(fieldId);
-				return null;
-			}
-			
-			gf = loadChild(childAddr, e);
-			this.cachedChildren.put(fieldId, gf);
-			return gf;
-		}
-		
-		public boolean hasChild(XID fieldId) {
-			return this.cachedIds != null ? this.cachedIds.contains(fieldId)
-			        : getChild(fieldId) != null;
-		}
-		
-		public Iterator<XID> iterator() {
-			if(this.cachedIds == null) {
-				this.cachedIds = new HashSet<XID>();
-				Query q = new Query(this.addr.getAddressedType().getChildType().toString())
-				        .addFilter(PROP_PARENT, FilterOperator.EQUAL, this.addr.toURI())
-				        .setKeysOnly();
-				for(Entity e : GaeUtils.prepareQuery(q).asIterable()) {
-					XAddress childAddr = KeyStructure.toAddress(e.getKey());
-					this.cachedIds.add(getChildId(childAddr));
-				}
-			}
-			return this.cachedIds.iterator();
-		}
-		
-		abstract protected XID getChildId(XAddress childAddr);
-		
-		protected Set<XAddress> getLocks() {
-			return this.locks;
-		}
-		
-	}
-	
-	public class GaeObject extends GaeContainer<GaeField> implements XBaseObject {
-		
-		private long objectRev = XEvent.RevisionNotAvailable;
-		
-		private GaeObject(XAddress objectAddr, Set<XAddress> locks) {
-			super(objectAddr, locks);
-			assert objectAddr.getAddressedType() == XType.XOBJECT;
-		}
-		
-		public long getRevisionNumber() {
-			if(this.objectRev == XEvent.RevisionNotAvailable && getLocks().contains(getAddress())) {
-				
-				// FIXME we don't always have the locks to get the objectRev
-				// this way
-				for(XID fieldId : this) {
-					XBaseField field = getField(fieldId);
-					long fieldRev = field.getRevisionNumber();
-					if(fieldRev > this.objectRev) {
-						this.objectRev = fieldRev;
-					}
-				}
-				// FIXME this won't work for empty objects
-			}
-			return this.objectRev;
-		}
-		
-		public XID getID() {
-			return getAddress().getObject();
-		}
-		
-		public GaeField getField(XID fieldId) {
-			return getChild(fieldId);
-		}
-		
-		public boolean hasField(XID fieldId) {
-			return hasChild(fieldId);
-		}
-		
-		@Override
-		protected GaeField loadChild(XAddress childAddr, Entity childEntity) {
-			
-			long fieldRev = (Long)childEntity.getProperty(PROP_REVISION);
-			Number transindex = (Number)childEntity.getProperty(PROP_TRANSINDEX);
-			
-			return new GaeField(childAddr, fieldRev, transindex.intValue());
-		}
-		
-		@Override
-		protected XAddress resolveChild(XAddress addr, XID childId) {
-			return XX.resolveField(addr, childId);
-		}
-		
-		@Override
-		protected XID getChildId(XAddress childAddr) {
-			assert childAddr.getAddressedType() == XType.XFIELD;
-			return childAddr.getField();
-		}
-		
-	}
-	
-	private GaeModel getModel(long modelRev, Set<XAddress> locks) {
-		
-		assert canRead(this.modelAddr, locks);
-		Entity e = GaeUtils.getEntity(KeyStructure.createCombinedKey(this.modelAddr));
-		if(e == null) {
-			return null;
-		}
-		
-		return new GaeModel(this.modelAddr, modelRev, locks);
-	}
-	
-	public class GaeModel extends GaeContainer<GaeObject> implements XBaseModel {
-		
-		private final long modelRev;
-		
-		private GaeModel(XAddress modelAddr, long modelRev, Set<XAddress> locks) {
-			super(modelAddr, locks);
-			assert modelAddr.getAddressedType() == XType.XMODEL;
-			this.modelRev = modelRev;
-		}
-		
-		public long getRevisionNumber() {
-			return this.modelRev;
-		}
-		
-		public XID getID() {
-			return getAddress().getModel();
-		}
-		
-		public XBaseObject getObject(XID objectId) {
-			return getChild(objectId);
-		}
-		
-		public boolean hasObject(XID objectId) {
-			return hasChild(objectId);
-		}
-		
-		@Override
-		protected GaeObject loadChild(XAddress childAddr, Entity childEntity) {
-			return new GaeObject(childAddr, getLocks());
-		}
-		
-		@Override
-		protected XAddress resolveChild(XAddress addr, XID childId) {
-			return XX.resolveObject(addr, childId);
-		}
-		
-		@Override
-		protected XID getChildId(XAddress childAddr) {
-			assert childAddr.getAddressedType() == XType.XOBJECT;
-			return childAddr.getObject();
-		}
-		
-	}
-	
-	public boolean canRead(XAddress addr, Set<XAddress> locks) {
+	protected static boolean canRead(XAddress addr, Set<XAddress> locks) {
 		for(XAddress lock : locks) {
 			if(addr.equalsOrContains(lock) || lock.contains(addr)) {
 				return true;
@@ -891,37 +639,13 @@ public class GaeChangesService implements XChangeLog {
 		return false;
 	}
 	
-	public boolean canWrite(XAddress addr, Set<XAddress> locks) {
+	protected static boolean canWrite(XAddress addr, Set<XAddress> locks) {
 		for(XAddress lock : locks) {
 			if(lock.equalsOrContains(addr)) {
 				return true;
 			}
 		}
 		return false;
-	}
-	
-	public static void createEntity(XAddress modelOrObjectAddr) {
-		assert modelOrObjectAddr.getAddressedType() == XType.XMODEL
-		        || modelOrObjectAddr.getAddressedType() == XType.XOBJECT;
-		Entity e = new Entity(KeyStructure.createCombinedKey(modelOrObjectAddr));
-		e.setProperty(PROP_PARENT, modelOrObjectAddr.getParent().toURI());
-		GaeUtils.putEntity(e);
-	}
-	
-	public static void removeEntity(XAddress modelOrObjectOrFieldAddr) {
-		assert modelOrObjectOrFieldAddr.getAddressedType() == XType.XMODEL
-		        || modelOrObjectOrFieldAddr.getAddressedType() == XType.XOBJECT
-		        || modelOrObjectOrFieldAddr.getAddressedType() == XType.XFIELD;
-		GaeUtils.deleteEntity(KeyStructure.createCombinedKey(modelOrObjectOrFieldAddr));
-	}
-	
-	private static void setField(XAddress fieldAddr, long fieldRev, int transindex) {
-		assert fieldAddr.getAddressedType() == XType.XFIELD;
-		Entity e = new Entity(KeyStructure.createCombinedKey(fieldAddr));
-		e.setProperty(PROP_PARENT, fieldAddr.getParent().toURI());
-		e.setUnindexedProperty(PROP_REVISION, fieldRev);
-		e.setUnindexedProperty(PROP_TRANSINDEX, transindex);
-		GaeUtils.putEntity(e);
 	}
 	
 	public XAtomicEvent getAtomicEvent(long revisionNumber, int transindex) {
@@ -949,6 +673,7 @@ public class GaeChangesService implements XChangeLog {
 		
 		long currentRev = getCachedLastCommitedRevision();
 		
+		// Check if the revision is up to date.
 		while(true) {
 			
 			Key key = KeyStructure.createChangeKey(this.modelAddr, currentRev + 1);
@@ -970,86 +695,6 @@ public class GaeChangesService implements XChangeLog {
 		return currentRev;
 	}
 	
-	private class GaeTransactionEvent implements XTransactionEvent {
-		
-		private final long modelRev;
-		private final XAtomicEvent[] events;
-		private final XID actor;
-		
-		public GaeTransactionEvent(int size, XID actor, long modelRev) {
-			this.events = new XAtomicEvent[size];
-			this.actor = actor;
-			this.modelRev = modelRev;
-		}
-		
-		public XAtomicEvent getEvent(int index) {
-			
-			if(index < 0 || index >= size()) {
-				throw new IndexOutOfBoundsException();
-			}
-			
-			XAtomicEvent ae = this.events[index];
-			
-			if(ae == null) {
-				ae = this.events[index] = getAtomicEvent(this.modelRev, index);
-				
-				assert ae != null;
-				assert XI.equals(this.actor, ae.getActor());
-				assert getTarget().equalsOrContains(ae.getTarget());
-				assert ae.getChangeType() != ChangeType.TRANSACTION;
-				assert ae.inTransaction();
-			}
-			
-			return ae;
-		}
-		
-		public int size() {
-			return this.events.length;
-		}
-		
-		public XID getActor() {
-			return this.actor;
-		}
-		
-		public ChangeType getChangeType() {
-			return ChangeType.TRANSACTION;
-		}
-		
-		public XAddress getChangedEntity() {
-			return null;
-		}
-		
-		public long getOldFieldRevision() {
-			return XEvent.RevisionOfEntityNotSet;
-		}
-		
-		public long getOldModelRevision() {
-			return this.modelRev;
-		}
-		
-		public long getOldObjectRevision() {
-			return XEvent.RevisionOfEntityNotSet;
-		}
-		
-		public XAddress getTarget() {
-			return GaeChangesService.this.modelAddr;
-		}
-		
-		public boolean inTransaction() {
-			return true;
-		}
-		
-		public Iterator<XAtomicEvent> iterator() {
-			return Arrays.asList(this.events).iterator();
-		}
-		
-		@Override
-		public long getRevisionNumber() {
-			return this.modelRev + 1;
-		}
-		
-	}
-	
 	public XEvent getEventAt(long rev) {
 		
 		Entity changeEntity = GaeUtils.getEntity(KeyStructure.createChangeKey(this.modelAddr, rev));
@@ -1061,11 +706,9 @@ public class GaeChangesService implements XChangeLog {
 		int status = getStatus(changeEntity);
 		
 		if(status != STATUS_EXECUTING && status != STATUS_SUCCESS_EXECUTED) {
-			// no events available yet.
+			// no events available (yet) for this revision.
 			return null;
 		}
-		
-		assert changeEntity.getProperty(PROP_EVENTCOUNT) != null;
 		
 		int eventCount = getEventCount(changeEntity);
 		assert eventCount > 0;
@@ -1075,14 +718,14 @@ public class GaeChangesService implements XChangeLog {
 		if(eventCount > 1) {
 			
 			// IMPROVE cache transaction event
-			return new GaeTransactionEvent(eventCount, actor, rev);
+			return new GaeTransactionEvent(this, eventCount, actor, rev);
 			
 		} else {
 			
 			XAtomicEvent ae = getAtomicEvent(rev, 0);
 			assert ae != null;
 			assert XI.equals(actor, ae.getActor());
-			assert this.modelAddr.equalsOrContains(ae.getTarget());
+			assert this.modelAddr.equalsOrContains(ae.getChangedEntity());
 			assert ae.getChangeType() != ChangeType.TRANSACTION;
 			assert !ae.inTransaction();
 			return ae;
@@ -1099,37 +742,8 @@ public class GaeChangesService implements XChangeLog {
 		return n.intValue();
 	}
 	
-	public Iterator<XEvent> getEventsSince(long revisionNumber) {
-		return getEventsBetween(revisionNumber, Long.MAX_VALUE);
-	}
-	
-	public Iterator<XEvent> getEventsBetween(long beginRevision, long endRevision) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	public Iterator<XEvent> getEventsUntil(long revisionNumber) {
-		return getEventsBetween(Long.MIN_VALUE, revisionNumber);
-	}
-	
 	public long getFirstRevisionNumber() {
 		return 0;
 	}
 	
-	public XBaseModel getSnapshot() {
-		
-		// TODO move this somewhere else
-		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		
-		Entity e = GaeUtils.getEntity(KeyStructure.createCombinedKey(this.modelAddr));
-		
-		if(e == null) {
-			return null;
-		}
-		
-		// FIXME this is completely wrong
-		Set<XAddress> locks = new HashSet<XAddress>();
-		locks.add(this.modelAddr);
-		return new GaeModel(this.modelAddr, getCurrentRevisionNumber(), locks);
-	}
 }
