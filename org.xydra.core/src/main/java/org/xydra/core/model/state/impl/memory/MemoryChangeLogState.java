@@ -107,4 +107,9 @@ public class MemoryChangeLogState implements XChangeLogState {
 		this.revisionNumber = rev;
 	}
 	
+	@Override
+	public String toString() {
+		return "change log for " + getBaseAddress() + ": baseRev=" + getFirstRevisionNumber()
+		        + " currentRev=" + getCurrentRevisionNumber() + " events=" + this.events.toString();
+	}
 }

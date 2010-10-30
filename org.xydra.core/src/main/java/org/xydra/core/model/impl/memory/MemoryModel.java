@@ -623,4 +623,9 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		this.eventQueue.stateTransaction = null;
 	}
 	
+	@Override
+	public String toString() {
+		return this.state.toString();
+	}
+	
 }

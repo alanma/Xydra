@@ -178,4 +178,9 @@ public class MemoryChangeLog implements XChangeLog {
 		this.state.delete(transaction);
 	}
 	
+	@Override
+	public String toString() {
+		return this.state.toString();
+	}
+	
 }
