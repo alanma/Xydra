@@ -1,13 +1,10 @@
 package org.xydra.core.model.impl.memory;
 
-import java.util.Iterator;
-
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XStateTransaction;
-import org.xydra.index.iterator.NoneIterator;
 
 
 /**
@@ -17,7 +14,7 @@ import org.xydra.index.iterator.NoneIterator;
  * @author Kaidel
  * 
  */
-public class MemoryChangeLog implements XChangeLog {
+public class MemoryChangeLog extends AbstractChangeLog implements XChangeLog {
 	
 	private static final long serialVersionUID = -3242936915355886858L;
 	
@@ -71,71 +68,6 @@ public class MemoryChangeLog implements XChangeLog {
 		return this.state.getBaseAddress();
 	}
 	
-	private class EventIterator implements Iterator<XEvent> {
-		
-		private final long end;
-		private long i;
-		private XEvent next;
-		
-		public EventIterator(long begin, long end) {
-			this.i = begin;
-			this.end = end;
-		}
-		
-		public boolean hasNext() {
-			getNext();
-			return this.next != null;
-		}
-		
-		public XEvent next() {
-			XEvent event = this.next;
-			this.next = null;
-			getNext();
-			return event;
-		}
-		
-		private void getNext() {
-			while(this.i < this.end && this.next == null) {
-				this.next = getEventAt(this.i);
-				this.i++;
-			}
-		}
-		
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
-		
-	}
-	
-	synchronized public Iterator<XEvent> getEventsBetween(long beginRevision, long endRevision) {
-		
-		long firstRev = getFirstRevisionNumber();
-		long curRev = getCurrentRevisionNumber();
-		
-		if(beginRevision < 0) {
-			throw new IndexOutOfBoundsException(
-			        "beginRevision is not a valid revision number, was " + beginRevision);
-		}
-		
-		if(endRevision < 0) {
-			throw new IndexOutOfBoundsException("endRevision is not a valid revision number, was "
-			        + endRevision);
-		}
-		
-		if(beginRevision > endRevision) {
-			throw new IllegalArgumentException("beginRevision may not be greater than endRevision");
-		}
-		
-		if(beginRevision >= endRevision || endRevision <= firstRev) {
-			return new NoneIterator<XEvent>();
-		}
-		
-		long begin = beginRevision < firstRev ? firstRev : beginRevision;
-		long end = endRevision > curRev ? curRev + 1 : endRevision;
-		
-		return new EventIterator(begin, end);
-	}
-	
 	synchronized public XEvent getEventAt(long revisionNumber) {
 		if(revisionNumber < 0) {
 			throw new IllegalArgumentException("revisionNumber may not be less than zero");
@@ -162,14 +94,6 @@ public class MemoryChangeLog implements XChangeLog {
 	
 	synchronized public long getFirstRevisionNumber() {
 		return this.state.getFirstRevisionNumber();
-	}
-	
-	public Iterator<XEvent> getEventsSince(long revisionNumber) {
-		return getEventsBetween(revisionNumber, Long.MAX_VALUE);
-	}
-	
-	public Iterator<XEvent> getEventsUntil(long revisionNumber) {
-		return getEventsBetween(0, revisionNumber);
 	}
 	
 	protected void save(XStateTransaction transaction) {
