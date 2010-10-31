@@ -18,6 +18,8 @@ import org.xydra.core.model.state.XSPI;
 import org.xydra.core.model.state.impl.gae.GaeStateStore;
 import org.xydra.server.IXydraServer;
 import org.xydra.server.impl.InfrastructureServiceFactory;
+import org.xydra.server.impl.newgae.GaeInfrastructureProvider;
+import org.xydra.server.impl.newgae.GaeTestfixer;
 
 
 /**

@@ -9,8 +9,7 @@ import org.xydra.core.XX;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.state.XStateTransaction;
-import org.xydra.server.impl.gae.GaeSchema;
-import org.xydra.server.impl.gae.GaeUtils;
+import org.xydra.server.impl.newgae.GaeUtils;
 
 import com.google.appengine.api.datastore.Entity;
 

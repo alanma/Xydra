@@ -71,7 +71,7 @@ public class DummyRepository implements XRepository {
 		if(!hasModel(modelID))
 			return false;
 		XRepositoryEvent event = MemoryRepositoryEvent.createRemoveEvent(actor, getAddress(),
-		        modelID, this.model.getRevisionNumber());
+		        modelID, this.model.getRevisionNumber(), false);
 		this.model = null;
 		for(XRepositoryEventListener listener : this.listeners)
 			listener.onChangeEvent(event);

@@ -789,4 +789,9 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 		addObject(modelAddr, newObject);
 	}
 	
+	@Override
+	public String toString() {
+		return "TransactionBuilder for " + this.target + ": " + this.commands.toString();
+	}
+	
 }

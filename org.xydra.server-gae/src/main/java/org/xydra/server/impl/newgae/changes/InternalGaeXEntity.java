@@ -1,8 +1,8 @@
-package org.xydra.server.impl.newgae;
+package org.xydra.server.impl.newgae.changes;
 
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XType;
-import org.xydra.server.impl.gae.GaeUtils;
+import org.xydra.server.impl.newgae.GaeUtils;
 
 import com.google.appengine.api.datastore.Entity;
 

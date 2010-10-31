@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.xydra.server.impl.newgae;
+package org.xydra.server.impl.newgae.changes;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,7 +12,7 @@ import java.util.Set;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XType;
-import org.xydra.server.impl.gae.GaeUtils;
+import org.xydra.server.impl.newgae.GaeUtils;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Query;

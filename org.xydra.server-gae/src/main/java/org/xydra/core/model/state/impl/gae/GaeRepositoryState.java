@@ -8,7 +8,7 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.XType;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XRepositoryState;
-import org.xydra.server.impl.gae.GaeUtils;
+import org.xydra.server.impl.newgae.GaeUtils;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;

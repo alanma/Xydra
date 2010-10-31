@@ -290,7 +290,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 				
 				createObject(actor, command.getObjectID());
 				
-				return oldRev;
+				return oldRev + 1;
 			}
 			
 			if(command.getChangeType() == ChangeType.REMOVE) {
@@ -318,7 +318,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 				
 				removeObject(actor, command.getObjectID());
 				
-				return oldRev;
+				return oldRev + 1;
 			}
 			
 			return XCommand.FAILED;

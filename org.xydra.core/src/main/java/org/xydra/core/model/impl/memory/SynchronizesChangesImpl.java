@@ -246,7 +246,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 				assert getOldRevisionNumber() == oldRev + 1 : "there should have been exactly one change";
 			}
 			
-			return oldRev;
+			return oldRev + 1;
 			
 		}
 		

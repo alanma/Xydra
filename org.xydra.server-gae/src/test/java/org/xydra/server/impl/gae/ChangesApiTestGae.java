@@ -4,6 +4,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.xydra.server.impl.newgae.GaeTestfixer;
 import org.xydra.server.test.ChangesApiTest;
 import org.xydra.server.test.DataApiTest;
 

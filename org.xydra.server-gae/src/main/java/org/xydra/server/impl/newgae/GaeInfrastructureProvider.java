@@ -1,4 +1,4 @@
-package org.xydra.server.impl.gae;
+package org.xydra.server.impl.newgae;
 
 import org.xydra.server.impl.IInfrastructureProvider;
 import org.xydra.server.impl.IMemCache;

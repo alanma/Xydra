@@ -3,7 +3,6 @@ package org.xydra.core.model.state.impl.memory;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.state.XChangeLogState;
@@ -69,9 +68,7 @@ public class MemoryChangeLogState implements XChangeLogState {
 			this.events.add(null);
 		} else {
 			
-			assert this.baseAddr
-			        .equalsOrContains(event.getChangeType() == ChangeType.TRANSACTION ? event
-			                .getTarget() : event.getChangedEntity());
+			assert this.baseAddr.equalsOrContains(event.getChangedEntity());
 			assert event.getRevisionNumber() == getCurrentRevisionNumber() + 1;
 			assert !event.inTransaction();
 			

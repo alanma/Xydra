@@ -160,9 +160,9 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 	public String toString() {
 		String str = "ModelEvent: " + getChangeType() + " " + this.objectID;
 		if(this.objectRevision >= 0)
-			str += " r" + this.objectRevision;
+			str += " r" + rev2str(this.objectRevision);
 		str += " @" + getTarget();
-		str += " r" + this.modelRevision;
+		str += " r" + rev2str(this.modelRevision);
 		return str;
 	}
 	

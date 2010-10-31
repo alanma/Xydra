@@ -107,7 +107,7 @@ abstract public class AbstractTransactionTest {
 		
 		long result = this.model.executeTransaction(ACTOR_ID, tb.build());
 		
-		assertEquals(modelRev, result);
+		assertEquals(modelRev + 1, result);
 		
 		// check that everything is correct after the transaction has executed.
 		
@@ -284,7 +284,7 @@ abstract public class AbstractTransactionTest {
 		
 		long result = this.model.executeTransaction(ACTOR_ID, tb.build());
 		
-		assertEquals(modelRev, result);
+		assertEquals(modelRev + 1, result);
 		
 		// check that everything is correct after the transaction has executed.
 		
@@ -402,7 +402,7 @@ abstract public class AbstractTransactionTest {
 		
 		long result = this.john.executeTransaction(ACTOR_ID, tb.build());
 		
-		assertEquals(modelRev, result);
+		assertEquals(modelRev + 1, result);
 		
 		// check that everything is correct after the transaction has executed.
 		
@@ -517,7 +517,7 @@ abstract public class AbstractTransactionTest {
 		
 		long result = this.john.executeTransaction(ACTOR_ID, tb.build());
 		
-		assertEquals(modelRev, result);
+		assertEquals(modelRev + 1, result);
 		
 		// check that everything is correct after the transaction has executed.
 		

@@ -86,7 +86,7 @@ public interface XEvent {
 	 * 
 	 * @return the {@link XAddress} of the {@link XModel}, {@link XObject} or
 	 *         {@link XField} that was added, removed or the {@link XField}
-	 *         which value was changed; null for transactions.
+	 *         which value was changed; same as getTarget() for transactions
 	 */
 	XAddress getChangedEntity();
 	

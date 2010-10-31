@@ -3,12 +3,10 @@ package org.xydra.server.rest.data;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XRepositoryCommand;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
-import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.MiniXMLParser;
@@ -54,8 +52,7 @@ public class XRepositoryResource {
 		}
 		// FIXME synchronization issues that can only be resolved by moving the
 		// create command into the transaction (which isn't currently possible)
-		XAddress modelAddr = XX.resolveModel(session.getRepositoryAddress(), newModel.getID());
-		XTransactionBuilder tb = new XTransactionBuilder(modelAddr);
+		XTransactionBuilder tb = new XTransactionBuilder(oldModel.getAddress());
 		tb.changeModel(oldModel, newModel);
 		
 		if(tb.isEmpty()) {
@@ -70,7 +67,8 @@ public class XRepositoryResource {
 		long result = session.executeCommand(tb.buildCommand());
 		
 		if(result == XCommand.FAILED) {
-			throw new RestlessException(500, "failed to execute generated transaction");
+			throw new RestlessException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+			        "failed to execute generated transaction");
 		} else if(result == XCommand.NOCHANGE) {
 			res.setStatus(HttpServletResponse.SC_NO_CONTENT);
 		} else {

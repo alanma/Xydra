@@ -390,7 +390,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 				
 				createField(actor, command.getFieldID());
 				
-				return oldRev;
+				return oldRev + 1;
 			}
 			
 			if(command.getChangeType() == ChangeType.REMOVE) {
@@ -418,7 +418,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 				
 				removeField(actor, command.getFieldID());
 				
-				return oldRev;
+				return oldRev + 1;
 			}
 			
 			return XCommand.FAILED;

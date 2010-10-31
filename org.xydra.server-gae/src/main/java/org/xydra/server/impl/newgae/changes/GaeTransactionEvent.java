@@ -1,9 +1,8 @@
 /**
  * 
  */
-package org.xydra.server.impl.newgae;
+package org.xydra.server.impl.newgae.changes;
 
-import java.util.Arrays;
 import java.util.Iterator;
 
 import org.xydra.core.change.ChangeType;
@@ -25,15 +24,16 @@ import org.xydra.index.XI;
 class GaeTransactionEvent implements XTransactionEvent {
 	
 	private final GaeChangesService changesService;
-	private final long modelRev;
+	private final long rev;
 	private final XAtomicEvent[] events;
 	private final XID actor;
 	
-	public GaeTransactionEvent(GaeChangesService changesService, int size, XID actor, long modelRev) {
+	public GaeTransactionEvent(GaeChangesService changesService, int size, XID actor, long rev) {
 		this.changesService = changesService;
 		this.events = new XAtomicEvent[size];
 		this.actor = actor;
-		this.modelRev = modelRev;
+		this.rev = rev;
+		assert size > 1;
 	}
 	
 	public XAtomicEvent getEvent(int index) {
@@ -45,11 +45,11 @@ class GaeTransactionEvent implements XTransactionEvent {
 		XAtomicEvent ae = this.events[index];
 		
 		if(ae == null) {
-			ae = this.events[index] = this.changesService.getAtomicEvent(this.modelRev, index);
+			ae = this.events[index] = this.changesService.getAtomicEvent(this.rev, index);
 			
 			assert ae != null;
 			assert XI.equals(this.actor, ae.getActor());
-			assert getTarget().equalsOrContains(ae.getTarget());
+			assert getTarget().equalsOrContains(ae.getChangedEntity());
 			assert ae.getChangeType() != ChangeType.TRANSACTION;
 			assert ae.inTransaction();
 		}
@@ -78,7 +78,7 @@ class GaeTransactionEvent implements XTransactionEvent {
 	}
 	
 	public long getOldModelRevision() {
-		return this.modelRev;
+		return this.rev - 1;
 	}
 	
 	public long getOldObjectRevision() {
@@ -90,16 +90,46 @@ class GaeTransactionEvent implements XTransactionEvent {
 	}
 	
 	public boolean inTransaction() {
-		return true;
+		return false;
+	}
+	
+	class EventIterator implements Iterator<XAtomicEvent> {
+		
+		private int i = 0;
+		private XAtomicEvent next;
+		
+		public boolean hasNext() {
+			getNext();
+			return this.next != null;
+		}
+		
+		public XAtomicEvent next() {
+			XAtomicEvent event = this.next;
+			this.next = null;
+			getNext();
+			return event;
+		}
+		
+		private void getNext() {
+			while(this.i < size() && this.next == null) {
+				this.next = getEvent(this.i);
+				this.i++;
+			}
+		}
+		
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
+		
 	}
 	
 	public Iterator<XAtomicEvent> iterator() {
-		return Arrays.asList(this.events).iterator();
+		return new EventIterator();
 	}
 	
 	@Override
 	public long getRevisionNumber() {
-		return this.modelRev + 1;
+		return this.rev + 1;
 	}
 	
 }

@@ -45,8 +45,12 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 		if(this.modelRevision != event.getOldModelRevision())
 			return false;
 		
-		if(this.objectRevision != event.getOldObjectRevision())
-			return false;
+		long otherObjectRev = event.getOldObjectRevision();
+		if(this.objectRevision != otherObjectRev) {
+			if((this.objectRevision != XEvent.RevisionNotAvailable && otherObjectRev != XEvent.RevisionNotAvailable)) {
+				return false;
+			}
+		}
 		
 		if(this.fieldRevision != event.getOldFieldRevision())
 			return false;
@@ -235,10 +239,9 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	public String toString() {
 		String str = "ObjectEvent: " + getChangeType() + " " + this.fieldID;
 		if(this.fieldRevision >= 0)
-			str += " r" + this.fieldRevision;
+			str += " r" + rev2str(this.fieldRevision);
 		str += " @" + getTarget();
-		str += " r" + (this.modelRevision < 0 ? "-" : this.modelRevision) + "/"
-		        + this.objectRevision;
+		str += " r" + rev2str(this.modelRevision) + "/" + rev2str(this.objectRevision);
 		return str;
 	}
 	

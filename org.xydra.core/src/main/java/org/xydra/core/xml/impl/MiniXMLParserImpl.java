@@ -2,14 +2,15 @@ package org.xydra.core.xml.impl;
 
 import java.io.StringReader;
 
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.MiniXMLParser;
-
 
 
 /**
@@ -21,11 +22,20 @@ import org.xydra.core.xml.MiniXMLParser;
 @RunsInJava
 public class MiniXMLParserImpl implements MiniXMLParser {
 	
+	private static DocumentBuilder parser = null;
+	
+	private synchronized DocumentBuilder getParser() throws ParserConfigurationException {
+		if(parser == null) {
+			parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		}
+		return parser;
+	}
+	
 	public MiniElement parseXml(String string) {
 		InputSource is = new InputSource(new StringReader(string));
 		Document document;
 		try {
-			document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(is);
+			document = getParser().parse(is);
 		} catch(Exception e) {
 			throw new IllegalArgumentException(e);
 		}

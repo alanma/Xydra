@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.xydra.server.impl.newgae;
+package org.xydra.server.impl.newgae.changes;
 
 import java.util.Set;
 
@@ -38,7 +38,7 @@ public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeFi
 		if(this.objectRev == XEvent.RevisionNotAvailable && getLocks().contains(getAddress())) {
 			
 			// FIXME we don't always have the locks to get the objectRev
-			// this way
+			// this way => some events may be missing the objectRev
 			for(XID fieldId : this) {
 				XBaseField field = getField(fieldId);
 				long fieldRev = field.getRevisionNumber();
@@ -46,7 +46,11 @@ public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeFi
 					this.objectRev = fieldRev;
 				}
 			}
-			// FIXME this won't work for empty objects
+			/*
+			 * FIXME this won't work for empty objects
+			 * 
+			 * causes DataApiTestGae#testPostModel to fail
+			 */
 		}
 		return this.objectRev;
 	}

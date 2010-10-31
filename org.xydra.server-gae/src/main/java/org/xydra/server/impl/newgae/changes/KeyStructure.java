@@ -1,4 +1,4 @@
-package org.xydra.server.impl.newgae;
+package org.xydra.server.impl.newgae.changes;
 
 import org.xydra.core.XX;
 import org.xydra.core.model.XAddress;

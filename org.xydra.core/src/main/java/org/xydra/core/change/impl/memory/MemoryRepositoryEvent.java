@@ -25,6 +25,8 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	// the model revision before this event happened
 	private final long modelRevision;
 	
+	private final boolean inTransaction;
+	
 	@Override
 	public boolean equals(Object object) {
 		
@@ -59,8 +61,7 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	}
 	
 	public boolean inTransaction() {
-		// repository events never occur in transactions
-		return false;
+		return this.inTransaction;
 	}
 	
 	/**
@@ -78,10 +79,29 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	 *             refer to an {@link XRepository} or if the given modelID is
 	 *             null
 	 */
-	
 	public static XRepositoryEvent createAddEvent(XID actor, XAddress target, XID modelID) {
 		return new MemoryRepositoryEvent(actor, target, modelID, ChangeType.ADD,
-		        RevisionOfEntityNotSet);
+		        RevisionOfEntityNotSet, false);
+	}
+	
+	/**
+	 * Creates a new {@link XRepositoryEvent} of the add-type (an {@link XModel}
+	 * was added to the {@link XRepository} this event refers to)
+	 * 
+	 * @param actor The {@link XID} of the actor
+	 * @param target The {@link XAddress} of the {@link XRepository} which the
+	 *            {@link XModel} was added to - repository {@link XID} must not
+	 *            be null
+	 * @param modelID The {@link XID} of the added {@link XModel} - must not be
+	 *            null
+	 * @return An {@link XRepositoryEvent} of the add-type
+	 * @throws IllegalArgumentException if the given {@link XAddress} doesn't
+	 *             refer to an {@link XRepository} or if the given modelID is
+	 *             null
+	 */
+	public static XRepositoryEvent createAddEvent(XID actor, XAddress target, XID modelID,
+	        long modelRev, boolean inTrans) {
+		return new MemoryRepositoryEvent(actor, target, modelID, ChangeType.ADD, modelRev, inTrans);
 	}
 	
 	/**
@@ -101,21 +121,21 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	 *             or if the given modelRevision equals
 	 *             {@link XEvent#RevisionOfEntityNotSet}
 	 */
-	
 	public static XRepositoryEvent createRemoveEvent(XID actor, XAddress target, XID modelID,
-	        long modelRevison) {
+	        long modelRevison, boolean inTrans) {
 		if(modelRevison < 0) {
 			throw new IllegalArgumentException(
 			        "model revision must be set for repository REMOVE events");
 		}
 		
-		return new MemoryRepositoryEvent(actor, target, modelID, ChangeType.REMOVE, modelRevison);
+		return new MemoryRepositoryEvent(actor, target, modelID, ChangeType.REMOVE, modelRevison,
+		        inTrans);
 	}
 	
 	// private constructor, use the createEvent methods for instantiating a
 	// MemRepositoryEvent
 	private MemoryRepositoryEvent(XID actor, XAddress target, XID modelID, ChangeType changeType,
-	        long modelRevision) {
+	        long modelRevision, boolean inTrans) {
 		super(target, changeType, actor);
 		
 		if(target.getRepository() == null || target.getModel() != null) {
@@ -132,13 +152,14 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 		
 		this.modelID = modelID;
 		this.modelRevision = modelRevision;
+		this.inTransaction = inTrans;
 	}
 	
 	@Override
 	public String toString() {
 		String str = "RepositoryEvent: " + getChangeType() + " " + this.modelID;
 		if(this.modelRevision >= 0)
-			str += " r" + this.modelRevision;
+			str += " r" + rev2str(this.modelRevision);
 		str += " @" + getTarget();
 		return str;
 	}

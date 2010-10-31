@@ -1,4 +1,4 @@
-package org.xydra.server.impl.newgae;
+package org.xydra.server.impl.newgae.snapshot;
 
 import java.util.Iterator;
 
@@ -11,14 +11,15 @@ import org.xydra.core.change.XObjectEvent;
 import org.xydra.core.change.XRepositoryEvent;
 import org.xydra.core.change.XTransactionEvent;
 import org.xydra.core.model.XBaseModel;
+import org.xydra.core.model.XChangeLog;
 
 
 public class GaeSnapshotService {
 	
-	private final GaeChangesService changesService;
+	private final XChangeLog log;
 	
-	public GaeSnapshotService(GaeChangesService changesService) {
-		this.changesService = changesService;
+	public GaeSnapshotService(XChangeLog changesService) {
+		this.log = changesService;
 	}
 	
 	public XBaseModel getSnapshot() {
@@ -27,7 +28,7 @@ public class GaeSnapshotService {
 		
 		ModelSnapshot model = null;
 		
-		Iterator<XEvent> events = this.changesService.getEventsSince(0);
+		Iterator<XEvent> events = this.log.getEventsSince(0);
 		
 		while(events.hasNext()) {
 			XEvent event = events.next();
@@ -50,10 +51,12 @@ public class GaeSnapshotService {
 	
 	private ModelSnapshot applyEvent(ModelSnapshot model, XAtomicEvent event) {
 		
+		long rev = event.getRevisionNumber();
+		
 		if(event instanceof XRepositoryEvent) {
 			if(event.getChangeType() == ChangeType.ADD) {
 				assert model == null;
-				return new ModelSnapshot(event.getChangedEntity(), event.getRevisionNumber());
+				return new ModelSnapshot(event.getChangedEntity(), rev);
 			} else {
 				assert event.getChangeType() == ChangeType.REMOVE;
 				assert model != null;
@@ -62,13 +65,13 @@ public class GaeSnapshotService {
 		}
 		
 		assert model != null;
+		model.rev = rev;
 		
 		if(event instanceof XModelEvent) {
 			XModelEvent me = (XModelEvent)event;
 			if(me.getChangeType() == ChangeType.ADD) {
 				assert !model.hasObject(me.getObjectID());
-				ObjectSnapshot object = new ObjectSnapshot(me.getChangedEntity(), me
-				        .getRevisionNumber());
+				ObjectSnapshot object = new ObjectSnapshot(me.getChangedEntity(), rev);
 				model.objects.put(me.getObjectID(), object);
 			} else {
 				assert me.getChangeType() == ChangeType.REMOVE;
@@ -80,13 +83,13 @@ public class GaeSnapshotService {
 		
 		ObjectSnapshot object = model.getObject(event.getTarget().getObject());
 		assert object != null;
+		object.rev = rev;
 		
 		if(event instanceof XObjectEvent) {
 			XObjectEvent oe = (XObjectEvent)event;
 			if(oe.getChangeType() == ChangeType.ADD) {
 				assert !object.hasField(oe.getFieldID());
-				FieldSnapshot field = new FieldSnapshot(oe.getChangedEntity(), oe
-				        .getRevisionNumber());
+				FieldSnapshot field = new FieldSnapshot(oe.getChangedEntity(), rev);
 				object.fields.put(oe.getFieldID(), field);
 			} else {
 				assert oe.getChangeType() == ChangeType.REMOVE;
@@ -98,6 +101,7 @@ public class GaeSnapshotService {
 		
 		FieldSnapshot field = object.getField(event.getTarget().getField());
 		assert field != null;
+		field.rev = rev;
 		
 		assert event instanceof XFieldEvent;
 		XFieldEvent fe = (XFieldEvent)event;

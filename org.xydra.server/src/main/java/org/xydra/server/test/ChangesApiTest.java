@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
-import org.xydra.core.change.XRepositoryCommand;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.change.impl.memory.MemoryFieldCommand;
 import org.xydra.core.change.impl.memory.MemoryModelCommand;
@@ -399,8 +398,7 @@ public abstract class ChangesApiTest extends AbstractRestApiTest {
 			assertNull(resp.events);
 		}
 		
-		XID modelId = command instanceof XRepositoryCommand ? ((XRepositoryCommand)command)
-		        .getModelID() : target.getModel();
+		XID modelId = command.getChangedEntity().getModel();
 		
 		XModel localModel = repo.getModel(modelId);
 		XModel remoteModel = getRemoteModel(modelId);

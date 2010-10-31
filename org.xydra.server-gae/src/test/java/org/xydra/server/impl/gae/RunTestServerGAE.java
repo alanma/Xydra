@@ -1,5 +1,6 @@
 package org.xydra.server.impl.gae;
 
+import org.xydra.server.impl.newgae.GaeTestfixer;
 import org.xydra.server.test.TestServer;
 
 

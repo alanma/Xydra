@@ -308,7 +308,7 @@ public class MemoryField implements XField, Serializable {
 				}
 				
 				if(setValue(actor, command.getValue())) {
-					return oldRev;
+					return oldRev + 1;
 				} else {
 					return XCommand.NOCHANGE;
 				}
@@ -333,7 +333,7 @@ public class MemoryField implements XField, Serializable {
 				
 				setValue(actor, null);
 				
-				return oldRev;
+				return oldRev + 1;
 			}
 			
 			if(command.getChangeType() == ChangeType.CHANGE) {
@@ -351,7 +351,7 @@ public class MemoryField implements XField, Serializable {
 				}
 				
 				if(setValue(actor, command.getValue())) {
-					return oldRev;
+					return oldRev + 1;
 				} else {
 					return XCommand.NOCHANGE;
 				}

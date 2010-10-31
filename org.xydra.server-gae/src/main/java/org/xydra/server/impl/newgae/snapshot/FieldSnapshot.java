@@ -1,4 +1,4 @@
-package org.xydra.server.impl.newgae;
+package org.xydra.server.impl.newgae.snapshot;
 
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseField;

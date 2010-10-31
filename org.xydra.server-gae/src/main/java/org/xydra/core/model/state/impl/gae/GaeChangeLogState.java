@@ -1,6 +1,5 @@
 package org.xydra.core.model.state.impl.gae;
 
-import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.state.XChangeLogState;
@@ -10,8 +9,8 @@ import org.xydra.core.xml.MiniXMLParser;
 import org.xydra.core.xml.XmlEvent;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
-import org.xydra.server.impl.gae.GaeTestfixer;
-import org.xydra.server.impl.gae.GaeUtils;
+import org.xydra.server.impl.newgae.GaeTestfixer;
+import org.xydra.server.impl.newgae.GaeUtils;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
@@ -65,9 +64,7 @@ public class GaeChangeLogState implements XChangeLogState {
 	
 	public void appendEvent(XEvent event, XStateTransaction trans) {
 		
-		if(!getBaseAddress().equalsOrContains(
-		        event.getChangeType() == ChangeType.TRANSACTION ? event.getTarget() : event
-		                .getChangedEntity())) {
+		if(!getBaseAddress().equalsOrContains(event.getChangedEntity())) {
 			throw new IllegalArgumentException("cannot store event " + event + "in change log for "
 			        + getBaseAddress());
 		}

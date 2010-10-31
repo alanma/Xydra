@@ -139,7 +139,7 @@ public class MemoryTransaction implements XTransaction {
 	}
 	
 	public XAddress getChangedEntity() {
-		return null;
+		return this.target;
 	}
 	
 }

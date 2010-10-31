@@ -369,7 +369,7 @@ public class MemoryEventQueue implements Serializable {
 			}
 			assert !(event instanceof XTransactionEvent);
 			
-			XAddress changed = ((XAtomicEvent)event).getChangedEntity();
+			XAddress changed = event.getChangedEntity();
 			
 			Map<XAddress,EventCollision> map = (event instanceof XFieldEvent) ? fields : coll;
 			
@@ -514,8 +514,8 @@ public class MemoryEventQueue implements Serializable {
 			assert first.getChangeType() == ChangeType.CHANGE;
 			// (non matching) CHANGE->REMOVE => merge to REMOVE
 			return MemoryFieldEvent.createRemoveEvent(last.getActor(), last.getTarget(), first
-			        .getOldValue(), last.getOldModelRevision(), last.getOldObjectRevision(),
-			        last.getOldFieldRevision(), false);
+			        .getOldValue(), last.getOldModelRevision(), last.getOldObjectRevision(), last
+			        .getOldFieldRevision(), false);
 		case CHANGE:
 			assert first.getChangeType() != ChangeType.REMOVE;
 			if(first.getChangeType() == ChangeType.CHANGE) {
@@ -527,8 +527,8 @@ public class MemoryEventQueue implements Serializable {
 				assert first.getChangeType() == ChangeType.ADD;
 				// non-matching ADD->CHANGE => merge to ADD
 				return MemoryFieldEvent.createAddEvent(last.getActor(), last.getTarget(), last
-				        .getNewValue(), last.getOldModelRevision(), last
-				        .getOldObjectRevision(), last.getOldFieldRevision(), false);
+				        .getNewValue(), last.getOldModelRevision(), last.getOldObjectRevision(),
+				        last.getOldFieldRevision(), false);
 			}
 		default:
 			throw new AssertionError("invalid event: " + last);

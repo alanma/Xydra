@@ -59,8 +59,12 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 		if(this.modelRevision != event.getOldModelRevision())
 			return false;
 		
-		if(this.objectRevision != event.getOldObjectRevision())
-			return false;
+		long otherObjectRev = event.getOldObjectRevision();
+		if(this.objectRevision != otherObjectRev) {
+			if((this.objectRevision != XEvent.RevisionNotAvailable && otherObjectRev != XEvent.RevisionNotAvailable)) {
+				return false;
+			}
+		}
 		
 		if(this.fieldRevision != event.getOldFieldRevision())
 			return false;
@@ -306,9 +310,8 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	
 	@Override
 	public String toString() {
-		String suffix = " @" + getTarget() + " r"
-		        + (this.modelRevision < 0 ? "-" : this.modelRevision) + "/"
-		        + (this.objectRevision < 0 ? "-" : this.objectRevision) + "/" + this.fieldRevision;
+		String suffix = " @" + getTarget() + " r" + rev2str(this.modelRevision) + "/"
+		        + rev2str(this.objectRevision) + "/" + rev2str(this.fieldRevision);
 		switch(getChangeType()) {
 		case ADD:
 			return "FieldEvent: ADD " + this.newValue + suffix;

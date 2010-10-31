@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.state.XChangeLogState;
@@ -120,9 +119,7 @@ public class TestChangeLogState implements XChangeLogState {
 			return;
 		}
 		
-		assert this.baseAddr
-		        .equalsOrContains(event.getChangeType() == ChangeType.TRANSACTION ? event
-		                .getTarget() : event.getChangedEntity());
+		assert this.baseAddr.equalsOrContains(event.getChangedEntity());
 		assert event.getRevisionNumber() == getCurrentRevisionNumber() + 1;
 		assert !event.inTransaction();
 		

@@ -1,4 +1,4 @@
-package org.xydra.server.impl.gae;
+package org.xydra.server.impl.newgae;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;

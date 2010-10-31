@@ -1,4 +1,4 @@
-package org.xydra.server.impl.newgae;
+package org.xydra.server.impl.newgae.changes;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,14 +15,12 @@ import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.change.XModelEvent;
 import org.xydra.core.change.XObjectEvent;
-import org.xydra.core.change.XRepositoryCommand;
 import org.xydra.core.change.XRepositoryEvent;
 import org.xydra.core.change.XTransaction;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XID;
-import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.impl.memory.AbstractChangeLog;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlEvent;
@@ -30,7 +28,7 @@ import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
 import org.xydra.index.XI;
 import org.xydra.index.query.Pair;
-import org.xydra.server.impl.gae.GaeUtils;
+import org.xydra.server.impl.newgae.GaeUtils;
 
 import com.google.appengine.api.datastore.DatastoreFailureException;
 import com.google.appengine.api.datastore.Entity;
@@ -141,8 +139,8 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 		// IMPROVE maybe let the caller provide an XID that can be used to check
 		// the status in case there is a GAE timeout?
 		
-		assert this.modelAddr.equalsOrContains(command.getChangedEntity() == null ? command
-		        .getTarget() : command.getChangedEntity()) : "cannot handle command " + command;
+		assert this.modelAddr.equalsOrContains(command.getChangedEntity()) : "cannot handle command "
+		        + command;
 		
 		Set<XAddress> locks = calculateRequiredLocks(command);
 		
@@ -190,7 +188,7 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	 *         taken already.
 	 */
 	private long getCachedLastTakenRevision() {
-		return -1L; // TODO implement
+		return getCachedLastCommitedRevision(); // TODO implement
 	}
 	
 	private void setCachedLastTakenRevision(long rev) {
@@ -220,7 +218,9 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 					newChange.setUnindexedProperty(PROP_LOCKS, lockStrs);
 					newChange.setUnindexedProperty(PROP_STATUS, STATUS_CREATING);
 					newChange.setUnindexedProperty(PROP_LAST_ACTIVITY, now());
-					newChange.setUnindexedProperty(PROP_ACTOR, actorId.toURI());
+					if(actorId != null) {
+						newChange.setUnindexedProperty(PROP_ACTOR, actorId.toURI());
+					}
 					
 					GaeUtils.putEntity(newChange, trans);
 					GaeUtils.endTransaction(trans);
@@ -369,38 +369,14 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	private List<XAtomicEvent> checkPreconditionsAndSaveEvents(long rev, Entity changeEntity,
 	        XCommand command, Set<XAddress> locks, XID actorId) {
 		
-		List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
+		XBaseModel currentModel = InternalGaeModel.get(this, rev - 1, locks);
 		
-		XBaseModel currentModel = InternalGaeModel.get(this, rev, locks);
+		List<XAtomicEvent> events = GaeEventHelper.checkCommandAndCreateEvents(currentModel,
+		        command, actorId, rev);
 		
-		if(command instanceof XRepositoryCommand) {
-			XRepositoryCommand rc = (XRepositoryCommand)command;
-			
-			if(!GaeEventHelper.checkRepositoryCommandAndCreateEvents(events, currentModel, actorId,
-			        rc)) {
-				cleanupChangeEntity(changeEntity, STATUS_FAILED_PRECONDITIONS);
-				return null;
-			}
-			
-		} else {
-			
-			if(currentModel == null) {
-				cleanupChangeEntity(changeEntity, STATUS_FAILED_PRECONDITIONS);
-				return null;
-			}
-			
-			ChangedModel changedModel = new ChangedModel(currentModel);
-			
-			// apply changes to the delta-model
-			if(!changedModel.executeCommand(command)) {
-				cleanupChangeEntity(changeEntity, STATUS_FAILED_PRECONDITIONS);
-				return null;
-			}
-			
-			// create events
-			
-			GaeEventHelper.createEventsForChangedModel(events, actorId, changedModel);
-			
+		if(events == null) {
+			cleanupChangeEntity(changeEntity, STATUS_FAILED_PRECONDITIONS);
+			return null;
 		}
 		
 		if(events.isEmpty()) {
@@ -490,7 +466,7 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 			XCommand command = loadCommand(rev, changeEntity);
 			waitForLocks(rev, locks);
 			assert command != null;
-			XID actorId = XX.toId((String)changeEntity.getProperty(PROP_ACTOR));
+			XID actorId = getActor(changeEntity);
 			events = checkPreconditionsAndSaveEvents(rev, changeEntity, command, locks, actorId);
 			if(events == null) {
 				return false;
@@ -505,6 +481,14 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 		executeAndUnlock(rev, changeEntity, events);
 		
 		return true;
+	}
+	
+	private XID getActor(Entity changeEntity) {
+		String actorStr = (String)changeEntity.getProperty(PROP_ACTOR);
+		if(actorStr == null) {
+			return null;
+		}
+		return XX.toId(actorStr);
 	}
 	
 	private List<XAtomicEvent> loadEvents(long rev, Entity eventEntity) {
@@ -595,6 +579,8 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 			Set<XAddress> tempLocks = new HashSet<XAddress>();
 			for(XAtomicCommand ac : trans) {
 				XAddress lock = ac.getChangedEntity();
+				// IMPROVE ADD events don't need to lock the whole added entity
+				// (they don't care if children change)
 				assert lock != null;
 				tempLocks.add(lock);
 			}
@@ -711,9 +697,9 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 		}
 		
 		int eventCount = getEventCount(changeEntity);
-		assert eventCount > 0;
+		assert eventCount > 0 : "executed changes should have at least one event";
 		
-		XID actor = XX.toId((String)changeEntity.getProperty(PROP_ACTOR));
+		XID actor = getActor(changeEntity);
 		
 		if(eventCount > 1) {
 			

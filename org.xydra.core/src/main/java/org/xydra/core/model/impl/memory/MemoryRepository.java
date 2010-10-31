@@ -186,7 +186,7 @@ public class MemoryRepository implements XRepository, Serializable {
 			
 			model.eventQueue.sendEvents();
 			XRepositoryEvent event = MemoryRepositoryEvent.createRemoveEvent(actor, getAddress(),
-			        modelID, modelRev);
+			        modelID, modelRev, false);
 			fireRepositoryEvent(event);
 			
 		}
@@ -224,9 +224,9 @@ public class MemoryRepository implements XRepository, Serializable {
 				return XCommand.FAILED;
 			}
 			
-			createModel(actor, command.getModelID());
+			XModel model = createModel(actor, command.getModelID());
 			
-			return XCommand.CHANGED;
+			return model.getRevisionNumber();
 		}
 		
 		if(command.getChangeType() == ChangeType.REMOVE) {

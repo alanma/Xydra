@@ -17,8 +17,8 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.log.gae.GaeLoggerFactorySPI;
 import org.xydra.server.IXydraServer;
 import org.xydra.server.impl.InfrastructureServiceFactory;
-import org.xydra.server.impl.gae.GaeInfrastructureProvider;
-import org.xydra.server.impl.gae.GaeTestfixer;
+import org.xydra.server.impl.newgae.changes.GaeChangesService;
+import org.xydra.server.impl.newgae.snapshot.GaeSnapshotService;
 
 
 /**
@@ -77,10 +77,16 @@ public class NewGaeXydraServer implements IXydraServer {
 	
 	private GaeSnapshotService getSnapshotService(XID modelId) {
 		// IMPROVE cache GaeSnapshotService instances?
-		return new GaeSnapshotService(getChangesService(modelId));
+		return new GaeSnapshotService(getChangeLog(modelId));
 	}
 	
 	public XChangeLog getChangeLog(XID modelId) {
+		/*
+		 * FIXME check if the model exists? if it ever existed? or remove
+		 * offending test?
+		 * 
+		 * causes ChangesApiTestGae#testGetChangesMissingModel to fail
+		 */
 		return getChangesService(modelId);
 	}
 	

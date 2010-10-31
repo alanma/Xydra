@@ -428,6 +428,7 @@ public class XmlEvent {
 		        type == ChangeType.REMOVE);
 		
 		XID actor = XmlUtils.getOptionalXidAttribute(xml, ACTOR_ATTRIBUTE, null);
+		boolean inTransaction = getInTransactionAttribute(xml);
 		
 		Iterator<MiniElement> it = xml.getElements();
 		if(it.hasNext()) {
@@ -441,7 +442,8 @@ public class XmlEvent {
 		if(type == ChangeType.ADD) {
 			return MemoryRepositoryEvent.createAddEvent(actor, target, modelId);
 		} else if(type == ChangeType.REMOVE) {
-			return MemoryRepositoryEvent.createRemoveEvent(actor, target, modelId, modelRev);
+			return MemoryRepositoryEvent.createRemoveEvent(actor, target, modelId, modelRev,
+			        inTransaction);
 		} else {
 			throw new IllegalArgumentException("<" + XREPOSITORYEVENT_ELEMENT + ">@"
 			        + XmlUtils.TYPE_ATTRIBUTE
@@ -533,6 +535,7 @@ public class XmlEvent {
 		XAddress newContext = trans.getTarget();
 		
 		for(XAtomicEvent event : trans) {
+			assert event != null;
 			toXml(event, out, newContext, cl);
 		}
 		

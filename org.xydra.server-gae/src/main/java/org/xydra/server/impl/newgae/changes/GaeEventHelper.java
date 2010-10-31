@@ -1,8 +1,10 @@
-package org.xydra.server.impl.newgae;
+package org.xydra.server.impl.newgae.changes;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.xydra.core.change.XAtomicEvent;
+import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XRepositoryCommand;
 import org.xydra.core.change.impl.memory.MemoryFieldEvent;
 import org.xydra.core.change.impl.memory.MemoryModelEvent;
@@ -32,47 +34,52 @@ import org.xydra.core.value.XValue;
  */
 public abstract class GaeEventHelper {
 	
-	public static boolean checkRepositoryCommandAndCreateEvents(List<XAtomicEvent> events,
-	        XBaseModel currentModel, XID actorId, XRepositoryCommand rc) throws AssertionError {
+	public static List<XAtomicEvent> checkRepositoryCommandAndCreateEvents(XBaseModel currentModel,
+	        XRepositoryCommand rc, XID actorId, long rev) throws AssertionError {
+		
+		List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
+		
 		switch(rc.getChangeType()) {
 		case ADD:
 			if(currentModel == null) {
 				events.add(MemoryRepositoryEvent.createAddEvent(actorId, rc.getTarget(), rc
-				        .getModelID()));
+				        .getModelID(), rev - 1, false));
 			} else if(!rc.isForced()) {
-				return false;
+				return null;
 			}
 			break;
 		
 		case REMOVE:
 			if(currentModel == null || currentModel.getRevisionNumber() != rc.getRevisionNumber()) {
 				if(!rc.isForced()) {
-					return false;
+					return null;
 				}
 			}
 			if(currentModel != null) {
-				long rev = currentModel.getRevisionNumber();
+				assert rev - 1 == currentModel.getRevisionNumber();
 				boolean inTrans = false;
+				
 				for(XID objectId : currentModel) {
 					inTrans = true;
-					GaeEventHelper.createEventsForRemovedObject(events, rev, actorId, currentModel
-					        .getObject(objectId), inTrans);
+					GaeEventHelper.createEventsForRemovedObject(events, rev - 1, actorId,
+					        currentModel.getObject(objectId), inTrans);
 				}
-				// FIXME this needs to be in the same transaction too if inTrans
-				// = true
 				events.add(MemoryRepositoryEvent.createRemoveEvent(actorId, rc.getTarget(), rc
-				        .getModelID(), rev));
+				        .getModelID(), rev, inTrans));
 			}
 			break;
 		
 		default:
 			throw new AssertionError("XRepositoryCommand with unexpected type: " + rc);
 		}
-		return true;
+		
+		return events;
 	}
 	
-	public static void createEventsForChangedModel(List<XAtomicEvent> events, XID actorId,
+	public static List<XAtomicEvent> createEventsForChangedModel(XID actorId,
 	        ChangedModel changedModel) {
+		
+		List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
 		
 		boolean inTrans = changedModel.countEventsNeeded(2) > 1;
 		long rev = changedModel.getRevisionNumber();
@@ -128,6 +135,7 @@ public abstract class GaeEventHelper {
 			
 		}
 		
+		return events;
 	}
 	
 	public static void createEventsForNewField(List<XAtomicEvent> events, long rev, XID actorId,
@@ -161,6 +169,37 @@ public abstract class GaeEventHelper {
 		}
 		events.add(MemoryObjectEvent.createRemoveEvent(actorId, object.getAddress(), field.getID(),
 		        modelRev, objectRev, fieldRev, inTrans));
+	}
+	
+	public static List<XAtomicEvent> checkCommandAndCreateEvents(XBaseModel currentModel,
+	        XCommand command, XID actorId, long rev) {
+		
+		if(command instanceof XRepositoryCommand) {
+			XRepositoryCommand rc = (XRepositoryCommand)command;
+			
+			return checkRepositoryCommandAndCreateEvents(currentModel, rc, actorId, rev);
+			
+		} else {
+			
+			if(currentModel == null) {
+				return null;
+			}
+			
+			assert rev - 1 == currentModel.getRevisionNumber();
+			
+			ChangedModel changedModel = new ChangedModel(currentModel);
+			
+			// apply changes to the delta-model
+			if(!changedModel.executeCommand(command)) {
+				return null;
+			}
+			
+			// create events
+			
+			return createEventsForChangedModel(actorId, changedModel);
+			
+		}
+		
 	}
 	
 }

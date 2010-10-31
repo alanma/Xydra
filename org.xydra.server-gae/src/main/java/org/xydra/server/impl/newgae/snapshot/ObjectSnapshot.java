@@ -1,11 +1,11 @@
-package org.xydra.server.impl.newgae;
+package org.xydra.server.impl.newgae.snapshot;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseModel;
+import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XType;
@@ -17,21 +17,21 @@ import org.xydra.core.model.XType;
  * @author dscharrer
  * 
  */
-public class ModelSnapshot implements XBaseModel {
+public class ObjectSnapshot implements XBaseObject {
 	
 	private final XAddress addr;
 	protected long rev;
-	protected Map<XID,ObjectSnapshot> objects = new HashMap<XID,ObjectSnapshot>();
+	protected Map<XID,FieldSnapshot> fields = new HashMap<XID,FieldSnapshot>();
 	
-	protected ModelSnapshot(XAddress addr, long rev) {
-		assert addr.getAddressedType() == XType.XMODEL;
+	protected ObjectSnapshot(XAddress addr, long rev) {
+		assert addr.getAddressedType() == XType.XOBJECT;
 		this.addr = addr;
 		this.rev = rev;
 	}
 	
 	@Override
-	public ObjectSnapshot getObject(XID objectId) {
-		return this.objects.get(objectId);
+	public FieldSnapshot getField(XID fieldId) {
+		return this.fields.get(fieldId);
 	}
 	
 	@Override
@@ -40,18 +40,18 @@ public class ModelSnapshot implements XBaseModel {
 	}
 	
 	@Override
-	public boolean hasObject(XID objectId) {
-		return this.objects.containsKey(objectId);
+	public boolean hasField(XID fieldId) {
+		return this.fields.containsKey(fieldId);
 	}
 	
 	@Override
 	public boolean isEmpty() {
-		return this.objects.isEmpty();
+		return this.fields.isEmpty();
 	}
 	
 	@Override
 	public Iterator<XID> iterator() {
-		return this.objects.keySet().iterator();
+		return this.fields.keySet().iterator();
 	}
 	
 	@Override
@@ -61,7 +61,7 @@ public class ModelSnapshot implements XBaseModel {
 	
 	@Override
 	public XID getID() {
-		return this.addr.getModel();
+		return this.addr.getObject();
 	}
 	
 }
