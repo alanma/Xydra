@@ -3,6 +3,8 @@
  */
 package org.xydra.server.impl.newgae.changes;
 
+import java.util.Set;
+
 import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.model.XAddress;
@@ -24,7 +26,6 @@ import com.google.appengine.api.datastore.Entity;
  */
 class InternalGaeField extends InternalGaeXEntity implements XBaseField {
 	
-	private static final String PROP_REVISION = "revision";
 	private static final String PROP_TRANSINDEX = "transindex";
 	// Value for PROP_TRANSINDEX if there hasn't been any XFieldEvent yet
 	private static final int TRANSINDEX_NONE = -1;
@@ -76,7 +77,8 @@ class InternalGaeField extends InternalGaeXEntity implements XBaseField {
 		return this.fieldAddr.getField();
 	}
 	
-	protected static void set(XAddress fieldAddr, long fieldRev, int transindex) {
+	protected static void set(XAddress fieldAddr, long fieldRev, int transindex, Set<XAddress> locks) {
+		assert GaeChangesService.canWrite(fieldAddr, locks);
 		assert fieldAddr.getAddressedType() == XType.XFIELD;
 		Entity e = new Entity(KeyStructure.createCombinedKey(fieldAddr));
 		e.setProperty(PROP_PARENT, fieldAddr.getParent().toURI());
@@ -85,8 +87,8 @@ class InternalGaeField extends InternalGaeXEntity implements XBaseField {
 		GaeUtils.putEntity(e);
 	}
 	
-	protected static void set(XAddress fieldAddr, long fieldRev) {
-		set(fieldAddr, fieldRev, TRANSINDEX_NONE);
+	protected static void set(XAddress fieldAddr, long fieldRev, Set<XAddress> locks) {
+		set(fieldAddr, fieldRev, TRANSINDEX_NONE, locks);
 	}
 	
 	protected static InternalGaeField get(GaeChangesService changesService, XAddress fieldAddr,

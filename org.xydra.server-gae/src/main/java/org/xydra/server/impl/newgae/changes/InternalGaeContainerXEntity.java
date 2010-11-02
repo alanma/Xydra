@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XType;
@@ -35,14 +36,18 @@ abstract class InternalGaeContainerXEntity<C> extends InternalGaeXEntity {
 	private Set<XID> cachedIds;
 	private final Set<XID> cachedMisses = new HashSet<XID>();
 	private final Set<XAddress> locks;
+	private final long rev;
 	
 	protected InternalGaeContainerXEntity(GaeChangesService changesService, XAddress addr,
-	        Set<XAddress> locks) {
+	        long rev, Set<XAddress> locks) {
+		assert rev >= 0
+		        || (rev == XEvent.RevisionNotAvailable && addr.getAddressedType() == XType.XOBJECT);
 		this.changesService = changesService;
-		assert addr.getAddressedType() != XType.XFIELD;
+		assert addr.getAddressedType() == XType.XMODEL || addr.getAddressedType() == XType.XOBJECT;
 		assert GaeChangesService.canRead(addr, locks);
 		this.addr = addr;
 		this.locks = locks;
+		this.rev = rev;
 	}
 	
 	public boolean isEmpty() {
@@ -110,6 +115,10 @@ abstract class InternalGaeContainerXEntity<C> extends InternalGaeXEntity {
 	
 	protected GaeChangesService getChangesService() {
 		return this.changesService;
+	}
+	
+	public long getRevisionNumber() {
+		return this.rev;
 	}
 	
 }

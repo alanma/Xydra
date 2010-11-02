@@ -163,7 +163,7 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 			return XCommand.NOCHANGE;
 		}
 		
-		executeAndUnlock(rev, changeEntity, events);
+		executeAndUnlock(rev, changeEntity, events, locks);
 		
 		return rev;
 	}
@@ -415,30 +415,67 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 		return events;
 	}
 	
-	private void executeAndUnlock(long rev, Entity changeEntity, List<XAtomicEvent> events) {
+	private void executeAndUnlock(long rev, Entity changeEntity, List<XAtomicEvent> events,
+	        Set<XAddress> locks) {
+		
+		Set<XID> createdObjects = new HashSet<XID>();
+		Set<XID> touchedObjects = new HashSet<XID>();
 		
 		for(int i = 0; i < events.size(); i++) {
 			XAtomicEvent event = events.get(i);
+			
+			assert this.modelAddr.equalsOrContains(event.getChangedEntity());
 			
 			if(event instanceof XFieldEvent) {
 				assert Arrays.asList(ChangeType.REMOVE, ChangeType.ADD, ChangeType.CHANGE)
 				        .contains(event.getChangeType());
 				if(((XFieldEvent)event).getNewValue() == null) {
-					InternalGaeField.set(event.getTarget(), rev);
+					InternalGaeField.set(event.getTarget(), rev, locks);
 				} else {
-					InternalGaeField.set(event.getTarget(), rev, i);
+					InternalGaeField.set(event.getTarget(), rev, i, locks);
 				}
-			} else if(event.getChangeType() == ChangeType.REMOVE) {
-				InternalGaeXEntity.remove(event.getChangedEntity());
+				assert event.getTarget().getObject() != null;
+				touchedObjects.add(event.getTarget().getObject());
+				
 			} else if(event instanceof XObjectEvent) {
-				assert event.getChangeType() == ChangeType.ADD;
-				InternalGaeField.set(event.getChangedEntity(), rev);
+				if(event.getChangeType() == ChangeType.REMOVE) {
+					InternalGaeXEntity.remove(event.getChangedEntity(), locks);
+				} else {
+					assert event.getChangeType() == ChangeType.ADD;
+					InternalGaeField.set(event.getChangedEntity(), rev, locks);
+				}
+				assert event.getTarget().getObject() != null;
+				touchedObjects.add(event.getTarget().getObject());
+				
+			} else if(event instanceof XModelEvent) {
+				XID objectId = ((XModelEvent)event).getObjectID();
+				if(event.getChangeType() == ChangeType.REMOVE) {
+					InternalGaeXEntity.remove(event.getChangedEntity(), locks);
+					assert !createdObjects.contains(objectId);
+					touchedObjects.remove(objectId);
+				} else {
+					assert event.getChangeType() == ChangeType.ADD;
+					InternalGaeObject.createObject(event.getChangedEntity(), locks, rev);
+					createdObjects.add(objectId);
+				}
+				
 			} else {
-				assert event.getChangeType() == ChangeType.ADD;
-				assert event instanceof XModelEvent || event instanceof XRepositoryEvent;
-				InternalGaeXEntity.createContainer(event.getChangedEntity());
+				assert event instanceof XRepositoryEvent;
+				if(event.getChangeType() == ChangeType.REMOVE) {
+					InternalGaeXEntity.remove(event.getChangedEntity(), locks);
+				} else {
+					assert event.getChangeType() == ChangeType.ADD;
+					InternalGaeModel.createModel(event.getChangedEntity(), locks);
+				}
 			}
 			
+		}
+		
+		for(XID objectId : touchedObjects) {
+			if(!createdObjects.contains(objectId)) {
+				XAddress objectAddr = XX.resolveObject(this.modelAddr, objectId);
+				InternalGaeObject.updateObjectRev(objectAddr, locks, rev);
+			}
 		}
 		
 		cleanupChangeEntity(changeEntity, STATUS_SUCCESS_EXECUTED);
@@ -460,9 +497,10 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 		
 		assert getRevisionFromKey(changeEntity.getKey()) == rev;
 		
+		Set<XAddress> locks = loadLocks(changeEntity);
+		
 		List<XAtomicEvent> events;
 		if(status == STATUS_CHECKING) {
-			Set<XAddress> locks = loadLocks(changeEntity);
 			XCommand command = loadCommand(rev, changeEntity);
 			waitForLocks(rev, locks);
 			assert command != null;
@@ -478,7 +516,7 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 			events = loadEvents(rev, changeEntity);
 		}
 		
-		executeAndUnlock(rev, changeEntity, events);
+		executeAndUnlock(rev, changeEntity, events, locks);
 		
 		return true;
 	}

@@ -3,6 +3,7 @@ package org.xydra.server.impl.newgae;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 
+import com.google.appengine.api.datastore.DatastoreFailureException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -178,7 +179,7 @@ public class GaeUtils {
 	 * 
 	 * @param trans
 	 */
-	public static void endTransaction(Transaction trans) {
+	public static void endTransaction(Transaction trans) throws DatastoreFailureException {
 		trans.commit();
 	}
 	

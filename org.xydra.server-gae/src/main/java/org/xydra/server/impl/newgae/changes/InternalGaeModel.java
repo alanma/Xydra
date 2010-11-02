@@ -26,17 +26,10 @@ import com.google.appengine.api.datastore.Entity;
 public class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObject> implements
         XBaseModel {
 	
-	private final long modelRev;
-	
 	private InternalGaeModel(GaeChangesService changesService, XAddress modelAddr, long modelRev,
 	        Set<XAddress> locks) {
-		super(changesService, modelAddr, locks);
+		super(changesService, modelAddr, modelRev, locks);
 		assert modelAddr.getAddressedType() == XType.XMODEL;
-		this.modelRev = modelRev;
-	}
-	
-	public long getRevisionNumber() {
-		return this.modelRev;
 	}
 	
 	public XID getID() {
@@ -53,7 +46,7 @@ public class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObj
 	
 	@Override
 	protected InternalGaeObject loadChild(XAddress childAddr, Entity childEntity) {
-		return new InternalGaeObject(getChangesService(), childAddr, getLocks());
+		return InternalGaeObject.get(getChangesService(), childAddr, childEntity, getLocks());
 	}
 	
 	@Override
@@ -79,6 +72,14 @@ public class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObj
 		
 		return new InternalGaeModel(changesService, changesService.getBaseAddress(), modelRev,
 		        locks);
+	}
+	
+	public static void createModel(XAddress modelAddr, Set<XAddress> locks) {
+		assert GaeChangesService.canWrite(modelAddr, locks);
+		assert modelAddr.getAddressedType() == XType.XMODEL;
+		Entity e = new Entity(KeyStructure.createCombinedKey(modelAddr));
+		e.setProperty(PROP_PARENT, modelAddr.getParent().toURI());
+		GaeUtils.putEntity(e);
 	}
 	
 }
