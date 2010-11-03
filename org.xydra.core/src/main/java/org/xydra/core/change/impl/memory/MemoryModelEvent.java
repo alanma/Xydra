@@ -30,24 +30,30 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 	@Override
 	public boolean equals(Object object) {
 		
-		if(!super.equals(object))
+		if(!super.equals(object)) {
 			return false;
+		}
 		
-		if(!(object instanceof XModelEvent))
+		if(!(object instanceof XModelEvent)) {
 			return false;
+		}
 		XModelEvent event = (XModelEvent)object;
 		
-		if(!this.objectID.equals(event.getObjectID()))
+		if(!this.objectID.equals(event.getObjectID())) {
 			return false;
+		}
 		
-		if(this.modelRevision != event.getOldModelRevision())
+		if(this.modelRevision != event.getOldModelRevision()) {
 			return false;
+		}
 		
-		if(this.objectRevision != event.getOldObjectRevision())
+		if(this.objectRevision != event.getOldObjectRevision()) {
 			return false;
+		}
 		
-		if(this.inTransaction != event.inTransaction())
+		if(this.inTransaction != event.inTransaction()) {
 			return false;
+		}
 		
 		return true;
 	}
@@ -145,8 +151,7 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 			throw new IllegalArgumentException("revision must be set for model events");
 		}
 		
-		if(objectRevision < 0 && objectRevision != RevisionOfEntityNotSet
-		        && objectRevision != RevisionNotAvailable) {
+		if(objectRevision < 0 && objectRevision != RevisionOfEntityNotSet) {
 			throw new IllegalArgumentException("invalid objectRevision: " + objectRevision);
 		}
 		

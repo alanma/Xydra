@@ -43,21 +43,26 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	@Override
 	public boolean equals(Object object) {
 		
-		if(!super.equals(object))
+		if(!super.equals(object)) {
 			return false;
+		}
 		
-		if(!(object instanceof XFieldEvent))
+		if(!(object instanceof XFieldEvent)) {
 			return false;
+		}
 		XFieldEvent event = (XFieldEvent)object;
 		
-		if(!XI.equals(this.oldValue, event.getOldValue()))
+		if(!XI.equals(this.oldValue, event.getOldValue())) {
 			return false;
+		}
 		
-		if(!XI.equals(this.newValue, event.getNewValue()))
+		if(!XI.equals(this.newValue, event.getNewValue())) {
 			return false;
+		}
 		
-		if(this.modelRevision != event.getOldModelRevision())
+		if(this.modelRevision != event.getOldModelRevision()) {
 			return false;
+		}
 		
 		long otherObjectRev = event.getOldObjectRevision();
 		if(this.objectRevision != otherObjectRev) {
@@ -66,11 +71,13 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 			}
 		}
 		
-		if(this.fieldRevision != event.getOldFieldRevision())
+		if(this.fieldRevision != event.getOldFieldRevision()) {
 			return false;
+		}
 		
-		if(this.inTransaction != event.inTransaction())
+		if(this.inTransaction != event.inTransaction()) {
 			return false;
+		}
 		
 		return true;
 	}
@@ -88,7 +95,9 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 		
 		// old revisions
 		result += this.modelRevision;
-		result += this.objectRevision;
+		if(this.objectRevision != XEvent.RevisionOfEntityNotSet) {
+			result += 0x3472089;
+		}
 		result += this.fieldRevision;
 		
 		return result;

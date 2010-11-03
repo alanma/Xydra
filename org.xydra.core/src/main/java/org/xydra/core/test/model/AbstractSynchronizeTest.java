@@ -6,10 +6,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.junit.After;
 import org.junit.Before;
@@ -17,7 +15,6 @@ import org.junit.Test;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
-import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XFieldCommand;
@@ -27,7 +24,6 @@ import org.xydra.core.change.XModelEvent;
 import org.xydra.core.change.XObjectCommand;
 import org.xydra.core.change.XObjectEvent;
 import org.xydra.core.change.XTransactionBuilder;
-import org.xydra.core.change.XTransactionEvent;
 import org.xydra.core.change.impl.memory.MemoryFieldCommand;
 import org.xydra.core.change.impl.memory.MemoryModelCommand;
 import org.xydra.core.change.impl.memory.MemoryObjectCommand;
@@ -289,24 +285,7 @@ abstract public class AbstractSynchronizeTest {
 			assertTrue(localHistory.hasNext());
 			XEvent remote = fix(remoteHistory.next());
 			XEvent local = localHistory.next();
-			if(!(remote instanceof XTransactionEvent)) {
-				assertEquals(remote, local);
-			} else {
-				assertTrue(local instanceof XTransactionEvent);
-				// events may be in a different order
-				Set<XAtomicEvent> events1 = new HashSet<XAtomicEvent>();
-				for(XAtomicEvent e1 : (XTransactionEvent)remote) {
-					events1.add(e1);
-				}
-				Set<XAtomicEvent> events2 = new HashSet<XAtomicEvent>();
-				for(XAtomicEvent e2 : (XTransactionEvent)local) {
-					events2.add(e2);
-				}
-				assertEquals(events1, events2);
-				// the order is not completely irrelevant, but assuming the
-				// transaction events are minimal (there are no add-remove /
-				// add-change / change-remove pairs), this should be enough
-			}
+			assertEquals(remote, local);
 		}
 		assertFalse(localHistory.hasNext());
 		

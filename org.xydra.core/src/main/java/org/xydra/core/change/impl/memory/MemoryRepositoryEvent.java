@@ -30,18 +30,22 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	@Override
 	public boolean equals(Object object) {
 		
-		if(!super.equals(object))
+		if(!super.equals(object)) {
 			return false;
+		}
 		
-		if(!(object instanceof XRepositoryEvent))
+		if(!(object instanceof XRepositoryEvent)) {
 			return false;
+		}
 		XRepositoryEvent event = (XRepositoryEvent)object;
 		
-		if(!this.modelID.equals(event.getModelID()))
+		if(!this.modelID.equals(event.getModelID())) {
 			return false;
+		}
 		
-		if(this.modelRevision != event.getOldModelRevision())
+		if(this.modelRevision != event.getOldModelRevision()) {
 			return false;
+		}
 		
 		return true;
 	}

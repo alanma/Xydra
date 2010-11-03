@@ -1,8 +1,12 @@
 package org.xydra.core.change.impl.memory;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XAtomicEvent;
@@ -16,6 +20,8 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.index.XI;
+
+import com.sun.org.apache.xpath.internal.objects.XObject;
 
 
 /**
@@ -39,35 +45,113 @@ public class MemoryTransactionEvent implements XTransactionEvent {
 	@Override
 	public boolean equals(Object object) {
 		
-		if(object == null)
+		if(object == null) {
 			return false;
+		}
 		
-		if(!(object instanceof XTransactionEvent))
+		if(!(object instanceof XTransactionEvent)) {
 			return false;
+		}
 		XTransactionEvent trans = (XTransactionEvent)object;
 		
-		if(size() != trans.size())
+		if(this.events.length != trans.size()) {
 			return false;
+		}
 		
-		if(!this.target.equals(trans.getTarget()))
+		if(!this.target.equalsOrContains(trans.getTarget())
+		        && !trans.getTarget().contains(this.target)) {
 			return false;
+		}
 		
-		if(!XI.equals(this.actor, trans.getActor()))
+		if(!XI.equals(this.actor, trans.getActor())) {
 			return false;
+		}
 		
-		if(this.modelRevision != trans.getOldModelRevision())
+		if(this.modelRevision != trans.getOldModelRevision()) {
 			return false;
+		}
 		
-		if(this.objectRevision != trans.getOldObjectRevision())
-			return false;
-		
-		for(int i = 0; i < size(); ++i) {
-			
-			XAtomicEvent here = this.events[i];
-			XAtomicEvent there = trans.getEvent(i);
-			
-			if(!here.equals(there))
+		if(this.modelRevision == XEvent.RevisionOfEntityNotSet) {
+			if(this.objectRevision != trans.getOldObjectRevision()) {
 				return false;
+			}
+		} else {
+			long otherObjectRev = trans.getOldObjectRevision();
+			if(this.objectRevision != otherObjectRev) {
+				if((this.objectRevision != XEvent.RevisionNotAvailable && otherObjectRev != XEvent.RevisionNotAvailable)) {
+					return false;
+				}
+			}
+		}
+		
+		// assumes this transaction is minimal
+		// otherwise the order is not completely irrelevant
+		
+		Set<XAtomicEvent> events = new HashSet<XAtomicEvent>();
+		events.addAll(Arrays.asList(this.events));
+		for(XAtomicEvent event : trans) {
+			if(!events.contains(event)) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * @return true if this transaction event cannot be the result of a valid
+	 *         {@link XModel} / {@link XObject} transaction. Assumes the
+	 *         transaction is minimal.
+	 */
+	private boolean isCorrect() {
+		
+		Map<XAddress,Boolean> entities = new HashMap<XAddress,Boolean>();
+		
+		for(XAtomicEvent event : this) {
+			
+			for(XAddress addr = event.getTarget(); addr != null; addr = addr.getParent()) {
+				if(Boolean.FALSE.equals(entities.get(addr))) {
+					assert false : "modified entity after remove";
+				}
+				entities.put(addr, true);
+			}
+			
+			if(!(event instanceof XFieldEvent)) {
+				Boolean value;
+				XAddress entity = event.getChangedEntity();
+				if(event.getChangeType() == ChangeType.REMOVE) {
+					value = Boolean.FALSE;
+				} else {
+					value = Boolean.TRUE;
+					assert !Boolean.TRUE.equals(entities.get(entity)) : "adding already touched entity";
+				}
+				entities.put(entity, value);
+			}
+			
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * @return true if this transaction contains any redundant events.
+	 */
+	private boolean assertIsMinimal() {
+		
+		Set<XAddress> entities = new HashSet<XAddress>();
+		Set<XAddress> values = new HashSet<XAddress>();
+		
+		for(XAtomicEvent event : this) {
+			
+			if(event instanceof XFieldEvent) {
+				assert !values.contains(event.getTarget()) : "changed value of field twice";
+				values.add(event.getTarget());
+			} else {
+				XAddress addr = event.getChangedEntity();
+				assert !entities.contains(addr) : "added and removed entity in same transaction "
+				        + "or added / removed entity twice";
+				entities.add(addr);
+			}
 			
 		}
 		
@@ -79,17 +163,30 @@ public class MemoryTransactionEvent implements XTransactionEvent {
 		
 		int result = 0;
 		
-		result ^= Arrays.hashCode(this.events);
+		result ^= this.events.length;
 		
 		// target
-		result ^= this.target.hashCode();
+		XID repoId = this.target.getRepository();
+		if(repoId != null) {
+			result ^= repoId.hashCode();
+		}
+		XID modelId = this.target.getModel();
+		if(modelId != null) {
+			result ^= modelId.hashCode();
+		}
 		
 		// actor
 		result ^= (this.actor != null) ? this.actor.hashCode() : 0;
 		
 		// old revisions
 		result += this.modelRevision;
-		result += this.objectRevision;
+		if(this.modelRevision == XEvent.RevisionOfEntityNotSet) {
+			if(this.objectRevision != XEvent.RevisionOfEntityNotSet) {
+				result += 0x3472089;
+			}
+		} else {
+			result += this.objectRevision;
+		}
 		
 		return result;
 	}
@@ -139,6 +236,9 @@ public class MemoryTransactionEvent implements XTransactionEvent {
 		this.target = target;
 		this.modelRevision = modelRevision;
 		this.objectRevision = objectRevision;
+		
+		assert assertIsMinimal() : "redundant events in transaction: " + toString();
+		assert isCorrect() : "impossible transaction event: " + toString();
 	}
 	
 	/**

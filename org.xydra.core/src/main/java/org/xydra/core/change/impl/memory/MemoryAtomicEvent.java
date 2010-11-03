@@ -75,11 +75,13 @@ abstract public class MemoryAtomicEvent implements XEvent {
 	@Override
 	public boolean equals(Object object) {
 		
-		if(object == null)
+		if(object == null) {
 			return false;
+		}
 		
-		if(!(object instanceof XAtomicEvent))
+		if(!(object instanceof XAtomicEvent)) {
 			return false;
+		}
 		XAtomicEvent event = (XAtomicEvent)object;
 		
 		return XI.equals(this.actor, event.getActor()) && this.changeType == event.getChangeType()

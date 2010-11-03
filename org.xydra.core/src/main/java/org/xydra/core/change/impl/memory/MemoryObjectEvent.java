@@ -32,18 +32,22 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	@Override
 	public boolean equals(Object object) {
 		
-		if(!super.equals(object))
+		if(!super.equals(object)) {
 			return false;
+		}
 		
-		if(!(object instanceof XObjectEvent))
+		if(!(object instanceof XObjectEvent)) {
 			return false;
+		}
 		XObjectEvent event = (XObjectEvent)object;
 		
-		if(!this.fieldID.equals(event.getFieldID()))
+		if(!this.fieldID.equals(event.getFieldID())) {
 			return false;
+		}
 		
-		if(this.modelRevision != event.getOldModelRevision())
+		if(this.modelRevision != event.getOldModelRevision()) {
 			return false;
+		}
 		
 		long otherObjectRev = event.getOldObjectRevision();
 		if(this.objectRevision != otherObjectRev) {
@@ -52,11 +56,13 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 			}
 		}
 		
-		if(this.fieldRevision != event.getOldFieldRevision())
+		if(this.fieldRevision != event.getOldFieldRevision()) {
 			return false;
+		}
 		
-		if(this.inTransaction != event.inTransaction())
+		if(this.inTransaction != event.inTransaction()) {
 			return false;
+		}
 		
 		return true;
 	}
@@ -71,7 +77,9 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 		
 		// old revisions
 		result += this.modelRevision;
-		result += this.objectRevision;
+		if(this.objectRevision != XEvent.RevisionOfEntityNotSet) {
+			result += 0x3472089;
+		}
 		result += this.fieldRevision;
 		
 		return result;
