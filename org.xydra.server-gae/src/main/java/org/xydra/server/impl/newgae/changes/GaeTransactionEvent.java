@@ -3,7 +3,9 @@
  */
 package org.xydra.server.impl.newgae.changes;
 
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XAtomicEvent;
@@ -132,4 +134,84 @@ class GaeTransactionEvent implements XTransactionEvent {
 		return this.rev + 1;
 	}
 	
+	@Override
+	public int hashCode() {
+		
+		// TODO share this code with MemoryTransactionEvent?
+		
+		int result = 0;
+		
+		result ^= this.events.length;
+		
+		// target
+		XID repoId = getTarget().getRepository();
+		if(repoId != null) {
+			result ^= repoId.hashCode();
+		}
+		XID modelId = getTarget().getModel();
+		if(modelId != null) {
+			result ^= modelId.hashCode();
+		}
+		
+		// actor
+		result ^= (this.actor != null) ? this.actor.hashCode() : 0;
+		
+		// old revisions
+		result += this.rev;
+		
+		return result;
+	}
+	
+	@Override
+	public boolean equals(Object object) {
+		
+		// TODO share this code with MemoryTransactionEvent?
+		
+		if(object == null) {
+			return false;
+		}
+		
+		if(!(object instanceof XTransactionEvent)) {
+			return false;
+		}
+		XTransactionEvent trans = (XTransactionEvent)object;
+		
+		if(this.events.length != trans.size()) {
+			return false;
+		}
+		
+		if(!getTarget().equalsOrContains(trans.getTarget())
+		        && !trans.getTarget().contains(getTarget())) {
+			return false;
+		}
+		
+		if(!XI.equals(this.actor, trans.getActor())) {
+			return false;
+		}
+		
+		if(this.rev != trans.getOldModelRevision()) {
+			return false;
+		}
+		
+		if(getTarget().getObject() != null && trans.getTarget().getObject() != null) {
+			if(trans.getOldObjectRevision() != XEvent.RevisionOfEntityNotSet) {
+				return false;
+			}
+		}
+		
+		// assumes this transaction is minimal
+		// otherwise the order is not completely irrelevant
+		
+		Set<XAtomicEvent> events = new HashSet<XAtomicEvent>();
+		for(XAtomicEvent event : this) {
+			events.add(event);
+		}
+		for(XAtomicEvent event : trans) {
+			if(!events.contains(event)) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
 }

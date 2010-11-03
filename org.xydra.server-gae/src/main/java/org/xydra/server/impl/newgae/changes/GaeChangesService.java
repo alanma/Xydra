@@ -770,4 +770,11 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 		return 0;
 	}
 	
+	public boolean hasLog() {
+		
+		// TODO cache - or remove?
+		
+		Key key = KeyStructure.createChangeKey(this.modelAddr, 0L);
+		return (GaeUtils.getEntity(key) != null);
+	}
 }

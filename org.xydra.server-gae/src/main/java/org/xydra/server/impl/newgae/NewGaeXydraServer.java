@@ -48,7 +48,9 @@ public class NewGaeXydraServer implements IXydraServer {
 		// FIXME this is too late, logging will already be initialized
 		GaeLoggerFactorySPI.init();
 		
+		// TODO remove once it's stable
 		log.warn("Using the new, incomplete GAE IXydraServer backend");
+		
 		// TODO create better GAE group DB and ARM implementations
 		this.groups = GaeGroups.loadGroups();
 		this.arm = GaeAccess.loadAccessManager(this.repoAddr, this.groups);
@@ -76,22 +78,38 @@ public class NewGaeXydraServer implements IXydraServer {
 	}
 	
 	private GaeSnapshotService getSnapshotService(XID modelId) {
+		
+		XChangeLog log = getChangeLog(modelId);
+		
+		if(log == null) {
+			return null;
+		}
+		
 		// IMPROVE cache GaeSnapshotService instances?
-		return new GaeSnapshotService(getChangeLog(modelId));
+		return new GaeSnapshotService(log);
 	}
 	
 	public XChangeLog getChangeLog(XID modelId) {
-		/*
-		 * FIXME check if the model exists? if it ever existed? or remove
-		 * offending test?
-		 * 
-		 * causes ChangesApiTestGae#testGetChangesMissingModel to fail
-		 */
-		return getChangesService(modelId);
+		
+		GaeChangesService cs = getChangesService(modelId);
+		
+		// TODO is this really neccessary?
+		if(!cs.hasLog()) {
+			return null;
+		}
+		
+		return cs;
 	}
 	
 	public XBaseModel getModelSnapshot(XID modelId) {
-		return getSnapshotService(modelId).getSnapshot();
+		
+		GaeSnapshotService s = getSnapshotService(modelId);
+		
+		if(s == null) {
+			return null;
+		}
+		
+		return s.getSnapshot();
 	}
 	
 	@Override
