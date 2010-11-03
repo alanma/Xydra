@@ -71,17 +71,8 @@ public class MemoryTransactionEvent implements XTransactionEvent {
 			return false;
 		}
 		
-		if(this.modelRevision == XEvent.RevisionOfEntityNotSet) {
-			if(this.objectRevision != trans.getOldObjectRevision()) {
-				return false;
-			}
-		} else {
-			long otherObjectRev = trans.getOldObjectRevision();
-			if(this.objectRevision != otherObjectRev) {
-				if((this.objectRevision != XEvent.RevisionNotAvailable && otherObjectRev != XEvent.RevisionNotAvailable)) {
-					return false;
-				}
-			}
+		if(this.objectRevision != trans.getOldObjectRevision()) {
+			return false;
 		}
 		
 		// assumes this transaction is minimal
@@ -180,13 +171,7 @@ public class MemoryTransactionEvent implements XTransactionEvent {
 		
 		// old revisions
 		result += this.modelRevision;
-		if(this.modelRevision == XEvent.RevisionOfEntityNotSet) {
-			if(this.objectRevision != XEvent.RevisionOfEntityNotSet) {
-				result += 0x3472089;
-			}
-		} else {
-			result += this.objectRevision;
-		}
+		result += this.objectRevision;
 		
 		return result;
 	}
