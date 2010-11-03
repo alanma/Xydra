@@ -71,8 +71,10 @@ public class MemoryTransactionEvent implements XTransactionEvent {
 			return false;
 		}
 		
-		if(this.objectRevision != trans.getOldObjectRevision()) {
-			return false;
+		if(this.target.getObject() != null && trans.getTarget().getObject() != null) {
+			if(this.objectRevision != trans.getOldObjectRevision()) {
+				return false;
+			}
 		}
 		
 		// assumes this transaction is minimal
@@ -171,7 +173,9 @@ public class MemoryTransactionEvent implements XTransactionEvent {
 		
 		// old revisions
 		result += this.modelRevision;
-		result += this.objectRevision;
+		if(this.modelRevision == XEvent.RevisionOfEntityNotSet) {
+			result += this.objectRevision;
+		}
 		
 		return result;
 	}
