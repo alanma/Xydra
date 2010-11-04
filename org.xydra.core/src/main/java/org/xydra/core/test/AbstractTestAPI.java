@@ -11,6 +11,8 @@ import java.util.List;
 
 import org.junit.Test;
 import org.xydra.core.X;
+import org.xydra.core.XCompareUtils;
+import org.xydra.core.XCopyUtils;
 import org.xydra.core.XX;
 import org.xydra.core.model.MissingPieceException;
 import org.xydra.core.model.XField;
@@ -293,10 +295,10 @@ public abstract class AbstractTestAPI {
 		// copy it!
 		XModel copyModel = new MemoryModel(model.getID());
 		
-		XX.copy(ACTOR_ID, model, copyModel);
+		XCopyUtils.copy(ACTOR_ID, model, copyModel);
 		
 		// do both models have the same content? (revision numbers may differ)
-		assertTrue(XX.equalTree(model, copyModel));
+		assertTrue(XCompareUtils.equalTree(model, copyModel));
 		
 		// - - Method: void copy(XID actorID, XObject sourceObject, XObject
 		// targetObject) - -
@@ -317,10 +319,10 @@ public abstract class AbstractTestAPI {
 		// copy it!
 		XObject copyObject = new MemoryObject(object.getID());
 		
-		XX.copy(ACTOR_ID, object, copyObject);
+		XCopyUtils.copy(ACTOR_ID, object, copyObject);
 		
 		// do both objects have the same content? (revision numbers may differ)
-		assertTrue(XX.equalTree(object, copyObject));
+		assertTrue(XCompareUtils.equalTree(object, copyObject));
 		
 		// - - Method: XValue safeGetValue(XObject object, XID fieldID) - -
 		object = model.createObject(ACTOR_ID, XX.createUniqueID());
@@ -550,14 +552,14 @@ public abstract class AbstractTestAPI {
 		field1 = object.createField(ACTOR_ID, fieldID);
 		
 		// set the value of an existing field
-		XX.safeSetStringValue(ACTOR_ID, object, fieldID, "Test");
+		AbstractTestAPI.safeSetStringValue(ACTOR_ID, object, fieldID, "Test");
 		assertTrue(field1.getValue() instanceof XStringValue);
 		assertEquals("Test", ((XStringValue)field1.getValue()).contents());
 		
 		// set the value of a not existing field
 		newID = XX.createUniqueID();
 		assertFalse(object.hasField(newID));
-		XX.safeSetStringValue(ACTOR_ID, object, newID, "Test");
+		AbstractTestAPI.safeSetStringValue(ACTOR_ID, object, newID, "Test");
 		assertTrue(object.hasField(newID));
 		assertTrue(object.getField(newID).getValue() instanceof XStringValue);
 		assertEquals("Test", ((XStringValue)object.getField(newID).getValue()).contents());
@@ -1040,7 +1042,7 @@ public abstract class AbstractTestAPI {
 		// assert that the saving process really saved our repo
 		assertEquals(loadedRepo, repo);
 		
-		assertTrue(XX.equalState(loadedRepo, repo));
+		assertTrue(XCompareUtils.equalState(loadedRepo, repo));
 		
 	}
 	
@@ -1070,8 +1072,28 @@ public abstract class AbstractTestAPI {
 		XModel loadedModel = XmlModel.toModel(e);
 		assertTrue(loadedModel != null);
 		assertEquals(loadedModel, model);
-		assertTrue(XX.equalState(loadedModel, model));
+		assertTrue(XCompareUtils.equalState(loadedModel, model));
 		
+	}
+
+	/**
+	 * Sets the {@link XField} specified by 'fieldID' of the given
+	 * {@link XObject} to given stringValue on behalf of the actor with
+	 * {@link XID} 'actorID'
+	 * 
+	 * @param actorID The {@link XID} of the actor.
+	 * @param object The {@link XObject} containing the {@link XField} specified
+	 *            by'fieldID'.
+	 * @param fieldID The {@link XID} of the {@link XField} which value is to be
+	 *            set. {@link XField} will be created if it doesn't exist.
+	 * @param stringValue The new String, which will be set as the value of the
+	 *            specified {@link XField}.
+	 */
+	public static void safeSetStringValue(XID actorID, XObject object, XID fieldID,
+	        String stringValue) {
+		if(object != null) {
+			XX.setValue(actorID, object, fieldID, XV.toValue(stringValue));
+		}
 	}
 	
 }

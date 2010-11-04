@@ -13,6 +13,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.xydra.core.X;
+import org.xydra.core.XCompareUtils;
 import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XCommand;
@@ -69,7 +70,7 @@ abstract public class AbstractSynchronizeTest {
 		this.localModel = this.localRepo.getModel(DemoModelUtil.PHONEBOOK_ID);
 		assertNotNull(this.localModel);
 		
-		assertTrue(XX.equalState(this.localModel, this.remoteModel));
+		assertTrue(XCompareUtils.equalState(this.localModel, this.remoteModel));
 		
 	}
 	
@@ -89,7 +90,7 @@ abstract public class AbstractSynchronizeTest {
 		
 		assertEquals(this.remoteModel.getRevisionNumber(), this.localModel.getRevisionNumber());
 		
-		assertTrue(XX.equalState(this.remoteModel, this.localModel));
+		assertTrue(XCompareUtils.equalState(this.remoteModel, this.localModel));
 		
 	}
 	
@@ -121,7 +122,7 @@ abstract public class AbstractSynchronizeTest {
 		long lastRevision = this.localModel.getRevisionNumber();
 		assertEquals(lastRevision, this.remoteModel.getRevisionNumber());
 		
-		assertTrue(XX.equalState(this.remoteModel, this.localModel));
+		assertTrue(XCompareUtils.equalState(this.remoteModel, this.localModel));
 		
 		// add some remote changes
 		makeAdditionalChanges(this.remoteModel);
@@ -231,7 +232,7 @@ abstract public class AbstractSynchronizeTest {
 		        .get(6))));
 		// removeJohnForced not sent as it was NOCHANGE already
 		
-		assertTrue(XX.equalState(this.remoteModel, this.localModel));
+		assertTrue(XCompareUtils.equalState(this.remoteModel, this.localModel));
 		
 		// check that there are enough but no redundant events sent
 		for(XEvent event : events) {
@@ -272,7 +273,7 @@ abstract public class AbstractSynchronizeTest {
 			}
 			
 		}
-		assertTrue(XX.equalTree(this.localModel, checkModel));
+		assertTrue(XCompareUtils.equalTree(this.localModel, checkModel));
 		
 		// check the change log
 		Iterator<XEvent> remoteHistory = this.remoteModel.getChangeLog().getEventsSince(0);

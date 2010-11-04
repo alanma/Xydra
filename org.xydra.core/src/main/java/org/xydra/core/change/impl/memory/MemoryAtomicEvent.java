@@ -117,6 +117,7 @@ abstract public class MemoryAtomicEvent implements XEvent {
 		return XEvent.RevisionOfEntityNotSet;
 	}
 	
+	@Override
 	public long getRevisionNumber() {
 		
 		long rev = getOldModelRevision();

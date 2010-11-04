@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.xydra.core.XCompareUtils;
 import org.xydra.core.XX;
 import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XBaseModel;
@@ -49,7 +50,7 @@ public class XmlModelTest {
 		log.debug(xml);
 		MiniElement e = new MiniXMLParserImpl().parseXml(xml);
 		XRepository repoAgain = XmlModel.toRepository(e);
-		assertTrue(XX.equalState(repo, repoAgain));
+		assertTrue(XCompareUtils.equalState(repo, repoAgain));
 		
 		// test serializing without revisions
 		out = new XmlOutStringBuffer();
@@ -59,7 +60,7 @@ public class XmlModelTest {
 		log.debug(xml);
 		e = new MiniXMLParserImpl().parseXml(xml);
 		repoAgain = XmlModel.toRepository(e);
-		assertTrue(XX.equalTree(repo, repoAgain));
+		assertTrue(XCompareUtils.equalTree(repo, repoAgain));
 		checkNoRevisions(repoAgain);
 		
 	}
@@ -74,7 +75,7 @@ public class XmlModelTest {
 		log.debug(xml);
 		MiniElement e = new MiniXMLParserImpl().parseXml(xml);
 		XModel modelAgain = XmlModel.toModel(e);
-		assertTrue(XX.equalState(model, modelAgain));
+		assertTrue(XCompareUtils.equalState(model, modelAgain));
 		
 		// check that there is a change log
 		XChangeLog changeLog = modelAgain.getChangeLog();
@@ -88,7 +89,7 @@ public class XmlModelTest {
 		log.debug(xml);
 		e = new MiniXMLParserImpl().parseXml(xml);
 		modelAgain = XmlModel.toModel(e);
-		assertTrue(XX.equalTree(model, modelAgain));
+		assertTrue(XCompareUtils.equalTree(model, modelAgain));
 		checkNoRevisions(modelAgain);
 		
 	}
@@ -103,7 +104,7 @@ public class XmlModelTest {
 		log.debug(xml);
 		MiniElement e = new MiniXMLParserImpl().parseXml(xml);
 		XObject objectAgain = XmlModel.toObject(e);
-		assertTrue(XX.equalState(object, objectAgain));
+		assertTrue(XCompareUtils.equalState(object, objectAgain));
 		
 		// check that there is a change log
 		XChangeLog changeLog = objectAgain.getChangeLog();
@@ -117,7 +118,7 @@ public class XmlModelTest {
 		log.debug(xml);
 		e = new MiniXMLParserImpl().parseXml(xml);
 		objectAgain = XmlModel.toObject(e);
-		assertTrue(XX.equalTree(object, objectAgain));
+		assertTrue(XCompareUtils.equalTree(object, objectAgain));
 		checkNoRevisions(objectAgain);
 		
 	}
@@ -132,7 +133,7 @@ public class XmlModelTest {
 		log.debug(xml);
 		MiniElement e = new MiniXMLParserImpl().parseXml(xml);
 		XField fieldAgain = XmlModel.toField(e);
-		assertTrue(XX.equalState(field, fieldAgain));
+		assertTrue(XCompareUtils.equalState(field, fieldAgain));
 		
 		// test serializing without revisions
 		out = new XmlOutStringBuffer();
@@ -142,7 +143,7 @@ public class XmlModelTest {
 		log.debug(xml);
 		e = new MiniXMLParserImpl().parseXml(xml);
 		fieldAgain = XmlModel.toField(e);
-		assertTrue(XX.equalTree(field, fieldAgain));
+		assertTrue(XCompareUtils.equalTree(field, fieldAgain));
 		checkNoRevisions(fieldAgain);
 		
 	}

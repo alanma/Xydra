@@ -39,7 +39,7 @@ public abstract class AbstractModelState extends AbstractState implements XModel
 	@Override
 	public String toString() {
 		return "xmodel" + getAddress() + " [" + getRevisionNumber() + "]" + " = "
-		        + Utils.toString(iterator(), ",");
+		        + XStateUtils.toString(iterator(), ",");
 	}
 	
 	/* Content of model is ignored for hashCode */
@@ -59,7 +59,7 @@ public abstract class AbstractModelState extends AbstractState implements XModel
 			return false;
 		}
 		// compare content
-		return Utils.equals(this.iterator(), otherModel.iterator());
+		return XStateUtils.equals(this.iterator(), otherModel.iterator());
 	}
 	
 	public XID getID() {

@@ -29,7 +29,7 @@ public abstract class AbstractRepositoryState extends AbstractState implements X
 	
 	@Override
 	public String toString() {
-		return "xrepository" + getAddress().toString() + " = " + Utils.toString(iterator(), ",");
+		return "xrepository" + getAddress().toString() + " = " + XStateUtils.toString(iterator(), ",");
 	}
 	
 	/* Content of repository is ignored for hashCode */
@@ -48,7 +48,7 @@ public abstract class AbstractRepositoryState extends AbstractState implements X
 			return false;
 		}
 		// compare content
-		return Utils.equals(iterator(), otherRepository.iterator());
+		return XStateUtils.equals(iterator(), otherRepository.iterator());
 	}
 	
 	public XID getID() {

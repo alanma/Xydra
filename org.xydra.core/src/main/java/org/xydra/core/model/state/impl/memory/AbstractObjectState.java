@@ -40,7 +40,7 @@ public abstract class AbstractObjectState extends AbstractState implements XObje
 	@Override
 	public String toString() {
 		return "xobject " + getAddress() + " [" + getRevisionNumber() + "]" + " = "
-		        + Utils.toString(iterator(), ",");
+		        + XStateUtils.toString(iterator(), ",");
 	}
 	
 	/* Content of object is ignored for hashCode */
@@ -60,7 +60,7 @@ public abstract class AbstractObjectState extends AbstractState implements XObje
 			return false;
 		}
 		// compare content
-		return Utils.equals(this.iterator(), otherObject.iterator());
+		return XStateUtils.equals(this.iterator(), otherObject.iterator());
 	}
 	
 	public XID getID() {
