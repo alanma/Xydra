@@ -18,6 +18,7 @@ import java.util.List;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xydra.core.XCompareUtils;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
@@ -402,7 +403,7 @@ public abstract class ChangesApiTest extends AbstractRestApiTest {
 		
 		XModel localModel = repo.getModel(modelId);
 		XModel remoteModel = getRemoteModel(modelId);
-		assertTrue(XX.equalState(localModel, remoteModel));
+		assertTrue(XCompareUtils.equalState(localModel, remoteModel));
 		
 	}
 	

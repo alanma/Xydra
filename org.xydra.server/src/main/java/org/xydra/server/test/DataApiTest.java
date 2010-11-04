@@ -16,6 +16,7 @@ import java.util.Iterator;
 
 import org.junit.Test;
 import org.xydra.core.X;
+import org.xydra.core.XCompareUtils;
 import org.xydra.core.XX;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
@@ -69,7 +70,7 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		XModel originalModel = repo.getModel(DemoModelUtil.PHONEBOOK_ID);
 		assertNotNull(originalModel);
 		
-		assertTrue(XX.equalState(originalModel, retrievedModel));
+		assertTrue(XCompareUtils.equalState(originalModel, retrievedModel));
 	}
 	
 	@Test
@@ -92,7 +93,7 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		XObject originalObject = repo.getModel(DemoModelUtil.PHONEBOOK_ID).getObject(
 		        DemoModelUtil.JOHN_ID);
 		
-		assertTrue(XX.equalState(originalObject, retrievedObject));
+		assertTrue(XCompareUtils.equalState(originalObject, retrievedObject));
 		
 	}
 	
@@ -121,7 +122,7 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		assertNotNull(originalObject);
 		XField originalField = originalObject.getField(DemoModelUtil.PHONE_ID);
 		
-		assertTrue(XX.equalState(originalField, retrievedField));
+		assertTrue(XCompareUtils.equalState(originalField, retrievedField));
 		
 	}
 	
@@ -261,7 +262,7 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		XModel updatedModel = getRemoteModel(DemoModelUtil.PHONEBOOK_ID);
 		assertNotNull(updatedModel);
 		
-		assertTrue(XX.equalTree(model, updatedModel));
+		assertTrue(XCompareUtils.equalTree(model, updatedModel));
 		
 		assertEquals(newRev, updatedModel.getRevisionNumber());
 		
@@ -303,7 +304,7 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		XModel updatedModel = getRemoteModel(DemoModelUtil.PHONEBOOK_ID);
 		assertNotNull(updatedModel);
 		
-		assertTrue(XX.equalTree(model, updatedModel));
+		assertTrue(XCompareUtils.equalTree(model, updatedModel));
 		
 		assertEquals(newRev, updatedModel.getRevisionNumber());
 		
@@ -340,7 +341,7 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		XModel updatedModel = getRemoteModel(DemoModelUtil.PHONEBOOK_ID);
 		assertNotNull(updatedModel);
 		
-		assertTrue(XX.equalTree(model, updatedModel));
+		assertTrue(XCompareUtils.equalTree(model, updatedModel));
 		
 		assertEquals(newRev, updatedModel.getRevisionNumber());
 		
