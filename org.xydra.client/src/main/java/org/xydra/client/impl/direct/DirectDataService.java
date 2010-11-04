@@ -33,6 +33,7 @@ import org.xydra.core.model.state.impl.memory.MemoryChangeLogState;
 import org.xydra.core.model.state.impl.memory.TemporaryFieldState;
 import org.xydra.core.model.state.impl.memory.TemporaryModelState;
 import org.xydra.core.model.state.impl.memory.TemporaryObjectState;
+import org.xydra.core.model.state.impl.memory.XStateUtils;
 
 
 /**
@@ -137,7 +138,7 @@ public class DirectDataService implements XDataService {
 			
 			XFieldState fieldState = new TemporaryFieldState(fieldAddr);
 			// FIXME concurrency: field may be changed during copy
-			XX.copy(field, fieldState);
+			XStateUtils.copy(field, fieldState);
 			
 			XField fieldCopy = new MemoryField(fieldState);
 			
@@ -166,7 +167,7 @@ public class DirectDataService implements XDataService {
 			changeLogState.setFirstRevisionNumber(model.getRevisionNumber());
 			XModelState modelState = new TemporaryModelState(modelAddr, changeLogState);
 			// FIXME concurrency: model may be changed during copy
-			XX.copy(model, modelState);
+			XStateUtils.copy(model, modelState);
 			
 			XModel modelCopy = new MemoryModel(modelState);
 			
@@ -202,7 +203,7 @@ public class DirectDataService implements XDataService {
 			changeLogState.setFirstRevisionNumber(model.getRevisionNumber());
 			XObjectState objectState = new TemporaryObjectState(objectAddr, changeLogState);
 			// FIXME concurrency: object may be changed during copy
-			XX.copy(object, objectState);
+			XStateUtils.copy(object, objectState);
 			
 			XObject objectCopy = new MemoryObject(objectState);
 			
