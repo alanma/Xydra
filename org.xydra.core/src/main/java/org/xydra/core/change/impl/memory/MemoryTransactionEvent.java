@@ -374,7 +374,6 @@ public class MemoryTransactionEvent implements XTransactionEvent {
 		return this.target;
 	}
 	
-	@Override
 	public long getRevisionNumber() {
 		
 		if(this.modelRevision >= 0) {
