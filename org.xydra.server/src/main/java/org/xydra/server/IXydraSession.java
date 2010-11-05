@@ -19,7 +19,6 @@ public interface IXydraSession {
 	
 	/**
 	 * @return a read-only interface to the snapshot for the model this time.
-	 *         Individual parts of the model are loaded into memory as-needed.
 	 *         Returns null if no such model exists.
 	 */
 	XBaseModel getModelSnapshot(XID modelId);
