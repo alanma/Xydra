@@ -5,13 +5,11 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.core.X;
-import org.xydra.core.XX;
-import org.xydra.core.json.XJson;
+import org.xydra.core.XCompareUtils;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.test.DemoModelUtil;
 import org.xydra.json.JSONException;
-
 
 
 @RunsInJava
@@ -83,7 +81,7 @@ public class XJsonTest {
 		XJson.addToXRepository(X.getIDProvider().fromString("test-actor"), json, repo2);
 		XModel phonebook2 = repo2.getModel(DemoModelUtil.PHONEBOOK_ID);
 		
-		assertTrue(XX.equalTree(phonebook, phonebook2));
+		assertTrue(XCompareUtils.equalTree(phonebook, phonebook2));
 	}
 	
 }
