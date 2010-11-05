@@ -495,8 +495,11 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	 */
 	private void executeAndUnlock(ChangeInProgress change, List<XAtomicEvent> events) {
 		
-		Set<XID> createdObjects = new HashSet<XID>();
-		Set<XID> touchedObjects = new HashSet<XID>();
+		// Track which object's revision numbers we have already saved and and
+		// which ones we still need to save.
+		// This assumes that the events are minimal (which they are!).
+		Set<XID> objectsWithSavedRev = new HashSet<XID>();
+		Set<XID> objectsWithPossiblyUnsavedRev = new HashSet<XID>();
 		
 		for(int i = 0; i < events.size(); i++) {
 			XAtomicEvent event = events.get(i);
@@ -515,29 +518,34 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 					InternalGaeField.set(event.getTarget(), change.rev, i, change.locks);
 				}
 				assert event.getTarget().getObject() != null;
-				touchedObjects.add(event.getTarget().getObject());
+				// revision saved in changed field.
+				objectsWithSavedRev.add(event.getTarget().getObject());
 				
 			} else if(event instanceof XObjectEvent) {
 				if(event.getChangeType() == ChangeType.REMOVE) {
 					InternalGaeXEntity.remove(event.getChangedEntity(), change.locks);
+					// cannot save revision in the removed field
+					objectsWithPossiblyUnsavedRev.add(event.getTarget().getObject());
 				} else {
 					assert event.getChangeType() == ChangeType.ADD;
 					InternalGaeField.set(event.getChangedEntity(), change.rev, change.locks);
+					// revision saved in created field
+					objectsWithSavedRev.add(event.getTarget().getObject());
 				}
 				assert event.getTarget().getObject() != null;
-				touchedObjects.add(event.getTarget().getObject());
 				
 			} else if(event instanceof XModelEvent) {
 				XID objectId = ((XModelEvent)event).getObjectID();
 				if(event.getChangeType() == ChangeType.REMOVE) {
 					InternalGaeXEntity.remove(event.getChangedEntity(), change.locks);
-					assert !createdObjects.contains(objectId);
-					touchedObjects.remove(objectId);
+					// object removed, so revision is of no interest
+					objectsWithPossiblyUnsavedRev.remove(objectId);
 				} else {
 					assert event.getChangeType() == ChangeType.ADD;
 					InternalGaeObject.createObject(event.getChangedEntity(), change.locks,
 					        change.rev);
-					createdObjects.add(objectId);
+					// revision saved in new object
+					objectsWithSavedRev.add(objectId);
 				}
 				
 			} else {
@@ -552,8 +560,8 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 			
 		}
 		
-		for(XID objectId : touchedObjects) {
-			if(!createdObjects.contains(objectId)) {
+		for(XID objectId : objectsWithPossiblyUnsavedRev) {
+			if(!objectsWithSavedRev.contains(objectId)) {
 				XAddress objectAddr = XX.resolveObject(this.modelAddr, objectId);
 				
 				giveUpIfTimeoutCritical(change.startTime);

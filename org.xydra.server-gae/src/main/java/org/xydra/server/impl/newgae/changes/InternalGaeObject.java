@@ -9,6 +9,7 @@ import java.util.Set;
 import org.xydra.core.XX;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
+import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XType;
@@ -35,6 +36,35 @@ public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeFi
 	        long objectRev, Set<XAddress> locks) {
 		super(changesService, objectAddr, objectRev, locks);
 		assert objectAddr.getAddressedType() == XType.XOBJECT;
+	}
+	
+	@Override
+	public long getRevisionNumber() {
+		
+		long rev = super.getRevisionNumber();
+		
+		if(rev == XEvent.RevisionNotAvailable) {
+			// We don't have enough locks to get the objectRev.
+			return XEvent.RevisionNotAvailable;
+		}
+		
+		// There may be fields with a newer revision.
+		if(this.objectRev == XEvent.RevisionNotAvailable) {
+			
+			for(XID fieldId : this) {
+				XBaseField field = getField(fieldId);
+				assert field != null;
+				long fieldRev = field.getRevisionNumber();
+				assert fieldRev >= 0;
+				if(fieldRev > rev) {
+					rev = fieldRev;
+				}
+			}
+			
+			this.objectRev = rev;
+		}
+		
+		return this.objectRev;
 	}
 	
 	public XID getID() {

@@ -95,7 +95,11 @@ abstract class InternalGaeContainerXEntity<C> extends InternalGaeXEntity {
 	}
 	
 	public Iterator<XID> iterator() {
+		
 		if(this.cachedIds == null) {
+			
+			assert GaeChangesService.canWrite(this.addr, this.locks);
+			
 			this.cachedIds = new HashSet<XID>();
 			Query q = new Query(this.addr.getAddressedType().getChildType().toString()).addFilter(
 			        PROP_PARENT, FilterOperator.EQUAL, this.addr.toURI()).setKeysOnly();
