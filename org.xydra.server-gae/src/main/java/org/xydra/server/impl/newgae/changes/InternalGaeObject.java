@@ -3,6 +3,7 @@
  */
 package org.xydra.server.impl.newgae.changes;
 
+import java.util.ConcurrentModificationException;
 import java.util.Set;
 
 import org.xydra.core.XX;
@@ -13,7 +14,6 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.XType;
 import org.xydra.server.impl.newgae.GaeUtils;
 
-import com.google.appengine.api.datastore.DatastoreFailureException;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
@@ -101,7 +101,7 @@ public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeFi
 				// Update successful.
 				return;
 				
-			} catch(DatastoreFailureException dfe) {
+			} catch(ConcurrentModificationException cme) {
 				
 				// Conflicting update => try again.
 				try {

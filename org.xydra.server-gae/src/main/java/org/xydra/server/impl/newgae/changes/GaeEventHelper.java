@@ -65,7 +65,7 @@ public abstract class GaeEventHelper {
 					        currentModel.getObject(objectId), inTrans);
 				}
 				events.add(MemoryRepositoryEvent.createRemoveEvent(actorId, rc.getTarget(), rc
-				        .getModelID(), rev, inTrans));
+				        .getModelID(), rev - 1, inTrans));
 			}
 			break;
 		
