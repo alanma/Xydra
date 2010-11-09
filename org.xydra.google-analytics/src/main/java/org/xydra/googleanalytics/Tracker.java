@@ -69,10 +69,6 @@ public class Tracker {
 	boolean warnedAbout500Events = false;
 	
 	/**
-	 * FIXME use only one thread that works on a queue of URLs
-	 * 
-	 * Track asynchronously
-	 * 
 	 * @param focusPoint
 	 * @param refererURL
 	 * @param userinfo
