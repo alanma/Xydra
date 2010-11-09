@@ -1,7 +1,17 @@
 package org.xydra.log;
 
+/**
+ * Abstract base class for Xydra loggers
+ * 
+ * @author voelkel
+ */
 public abstract class Logger {
 	
+	/**
+	 * The classic set of warning levels as found in log4j and slf4j.
+	 * 
+	 * @author voelkel
+	 */
 	public static enum Level {
 		Trace, Debug, Info, Warn, Error;
 	}
