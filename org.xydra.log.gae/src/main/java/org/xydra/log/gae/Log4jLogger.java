@@ -102,4 +102,9 @@ public class Log4jLogger extends Logger {
 		this.log4j.log(Log4jLogger.class.getName(), org.apache.log4j.Level.WARN, msg, t);
 	}
 	
+	@Override
+	public String toString() {
+		return this.log4j.getName();
+	}
+	
 }

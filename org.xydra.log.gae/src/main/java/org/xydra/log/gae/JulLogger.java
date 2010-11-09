@@ -101,4 +101,10 @@ public class JulLogger extends Logger {
 	public boolean isWarnEnabled() {
 		return this.jul.isLoggable(java.util.logging.Level.WARNING);
 	}
+	
+	@Override
+	public String toString() {
+		return this.jul.getName();
+	}
+	
 }
