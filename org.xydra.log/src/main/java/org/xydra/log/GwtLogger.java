@@ -86,4 +86,9 @@ public class GwtLogger extends Logger {
 		Log.warn(this.name + " " + msg, t);
 	}
 	
+	@Override
+	public String toString() {
+		return this.name;
+	}
+	
 }

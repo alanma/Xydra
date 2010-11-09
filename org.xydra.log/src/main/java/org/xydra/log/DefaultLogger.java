@@ -115,72 +115,77 @@ public class DefaultLogger extends Logger {
 	}
 	
 	@Override
-    public void trace(String msg) {
+	public void trace(String msg) {
 		if(!isTraceEnabled())
 			return;
 		log(Level.Trace, msg);
 	}
 	
 	@Override
-    public void trace(String msg, Throwable t) {
+	public void trace(String msg, Throwable t) {
 		if(!isTraceEnabled())
 			return;
 		log(Level.Trace, msg, t);
 	}
 	
 	@Override
-    public void debug(String msg) {
+	public void debug(String msg) {
 		if(!isDebugEnabled())
 			return;
 		log(Level.Debug, msg);
 	}
 	
 	@Override
-    public void debug(String msg, Throwable t) {
+	public void debug(String msg, Throwable t) {
 		if(!isDebugEnabled())
 			return;
 		log(Level.Debug, msg, t);
 	}
 	
 	@Override
-    public void info(String msg) {
+	public void info(String msg) {
 		if(!isInfoEnabled())
 			return;
 		log(Level.Info, msg);
 	}
 	
 	@Override
-    public void info(String msg, Throwable t) {
+	public void info(String msg, Throwable t) {
 		if(!isInfoEnabled())
 			return;
 		log(Level.Info, msg, t);
 	}
 	
 	@Override
-    public void warn(String msg) {
+	public void warn(String msg) {
 		if(!isWarnEnabled())
 			return;
 		log(Level.Warn, msg);
 	}
 	
 	@Override
-    public void warn(String msg, Throwable t) {
+	public void warn(String msg, Throwable t) {
 		if(!isWarnEnabled())
 			return;
 		log(Level.Warn, msg, t);
 	}
 	
 	@Override
-    public void error(String msg) {
+	public void error(String msg) {
 		if(!isErrorEnabled())
 			return;
 		log(Level.Error, msg);
 	}
 	
 	@Override
-    public void error(String msg, Throwable t) {
+	public void error(String msg, Throwable t) {
 		if(!isErrorEnabled())
 			return;
 		log(Level.Error, msg, t);
+	}
+	
+	@Override
+	public String toString() {
+		return this.name;
 	}
 }
