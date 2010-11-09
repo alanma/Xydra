@@ -8,7 +8,7 @@ import com.google.appengine.api.utils.SystemProperty;
 
 
 /**
- * In development mode log4j is uses. In production, j.u.l. is used.
+ * In development mode log4j is used. In production, j.u.l. is used.
  * 
  * @author voelkel
  * 
@@ -21,7 +21,9 @@ public class GaeLoggerFactorySPI implements ILoggerFactorySPI {
 		init();
 	}
 	
-	/* create an register appropriate factory */
+	/**
+	 * Create and register appropriate factory.
+	 */
 	public static void init() {
 		if(inProduction()) {
 			factory = new JulLoggerFactory();
