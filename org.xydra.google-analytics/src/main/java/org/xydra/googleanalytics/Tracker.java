@@ -21,7 +21,7 @@ import org.xydra.log.LoggerFactory;
  */
 public class Tracker {
 	
-	public static final String CLIENT_ID = "$Revision$";
+	public static final String CLIENT_ID = "$Revision$".replace(" ", "_");
 	
 	public static final String HTTP_HEADER_SET_COOKIE = "Set-Cookie";
 	
