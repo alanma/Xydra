@@ -232,20 +232,21 @@ public class GaeMyAdminApp {
 					row.setValue("namespace", e.getNamespace(), true);
 					row.setValue("kind", e.getKind(), true);
 					if(e.getParent() != null) {
-						row.setValue(e.getParent().toString(), "parentkey", true);
+						row.setValue("parentkey", e.getParent().toString(), true);
 					}
 					
 					// handle properties
 					Map<String,Object> props = e.getProperties();
 					for(Map.Entry<String,Object> me : props.entrySet()) {
-						row.setValue("prop-" + me.getKey(), me.getValue().toString(), true);
+						String value = me.getValue() != null ? me.getValue().toString() : null;
+						row.setValue("prop-" + me.getKey(), value, true);
 					}
 				}
 			}
 			
-			res.getWriter().write("--------- >8 ----- CSV ");
+			res.getWriter().write("--------- >8 ----- CSV \n");
 			csv.writeTo(res.getWriter());
-			res.getWriter().write("--------- >8 ----- CSV ");
+			res.getWriter().write("--------- >8 ----- CSV \n");
 		}
 		
 		// __Stat_Kind_IsRootEntity__
