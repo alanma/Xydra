@@ -10,6 +10,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.xydra.csv.CsvTable;
+import org.xydra.csv.CsvTable.Row;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
 
@@ -43,11 +45,22 @@ import com.google.apphosting.api.ApiProxy;
  */
 public class GaeMyAdminApp {
 	
-	public static void restless(Restless restless) {
-		restless.addMethod("/stats", "GET", GaeMyAdminApp.class, "stats", true);
+	public static void restless(Restless restless, String prefix) {
+		restless.addMethod("/stats", "GET", GaeMyAdminApp.class, "stats", true,
+
+		new RestlessParameter("resultFormat", "text")
+
+		);
 		restless.addMethod("/backup", "GET", GaeMyAdminApp.class, "backup", true);
 		restless.addMethod("/deleteAll", "GET", GaeMyAdminApp.class, "deleteAll", true,
 		        new RestlessParameter("sure", "no"));
+	}
+	
+	private DatastoreService datastore;
+	
+	public GaeMyAdminApp() {
+		// Get a handle on the datastore itself
+		this.datastore = DatastoreServiceFactory.getDatastoreService();
 	}
 	
 	public String backup() {
@@ -110,33 +123,43 @@ public class GaeMyAdminApp {
 		return kinds;
 	}
 	
-	public void stats(HttpServletRequest req, HttpServletResponse res) throws IOException {
-		StringBuffer msg = new StringBuffer();
-		msg.append("=== Version 2010-08-29 14:27\n");
+	/**
+	 * TODO add pagination
+	 * 
+	 * @param kind
+	 * @return
+	 */
+	public Iterable<Entity> getEntitiesOfKind(String kind) {
+		return this.datastore.prepare(new Query(kind)).asIterable();
+	}
+	
+	public void stats(HttpServletRequest req, String resultFormat, HttpServletResponse res)
+	        throws IOException {
+		long start = System.currentTimeMillis();
+		
+		res.getWriter().write("=== Version 2010-11-10 $Revision$\n");
 		
 		DatastoreServiceConfig defaultConfig = DatastoreServiceConfig.Builder.withDefaults();
-		msg.append("Default datastore config\n"
+		res.getWriter().write(
+		        "Default datastore config\n"
 
-		+ "* deadline: " + defaultConfig.getDeadline() + "\n"
+		        + "* deadline: " + defaultConfig.getDeadline() + "\n"
 
-		+ "* implicitTransactionManagementPolicy: "
-		        + defaultConfig.getImplicitTransactionManagementPolicy().name() + "\n"
+		        + "* implicitTransactionManagementPolicy: "
+		                + defaultConfig.getImplicitTransactionManagementPolicy().name() + "\n"
 
-		        + "* readPolicy: " + defaultConfig.getReadPolicy().getConsistency() + "\n"
+		                + "* readPolicy: " + defaultConfig.getReadPolicy().getConsistency() + "\n"
 
 		);
-		
-		// Get a handle on the datastore itself
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		
 		// put dummy entity to test datastore health
 		Key key = KeyFactory.createKey("dummy", "dummyEntity");
 		Entity dummyEntity = new Entity(key);
 		try {
-			datastore.put(dummyEntity);
-			msg.append("Datastore health: Fully functional and writeable\n");
+			this.datastore.put(dummyEntity);
+			res.getWriter().write("Datastore health: Fully functional and writeable\n");
 		} catch(ApiProxy.CapabilityDisabledException e) {
-			msg.append("Datastore health: /!\\ READ-ONLY MODE /!\\ \n");
+			res.getWriter().write("Datastore health: /!\\ READ-ONLY MODE /!\\ \n");
 		}
 		
 		MemcacheService ms = MemcacheServiceFactory.getMemcacheService();
@@ -144,17 +167,18 @@ public class GaeMyAdminApp {
 		
 		try {
 			ms.put("dummy", "dummy");
-			msg.append("Memcache health: Fully functional and writeable\n");
+			res.getWriter().write("Memcache health:  Fully functional and writeable\n");
 		} catch(com.google.appengine.api.memcache.MemcacheServiceException e) {
 			// Memcache is down, degrade gracefully
-			msg.append("Memcache health: /!\\ READ-ONLY MODE /!\\ Will return no hits\n");
+			res.getWriter().write(
+			        "Memcache health:  /!\\ READ-ONLY MODE /!\\ Will return no hits\n");
 		}
 		
 		Collection<Transaction> txns = datastore.getActiveTransactions();
-		msg.append("Active transactions: " + txns.size() + "\n");
+		res.getWriter().write("Active transactions: " + txns.size() + "\n");
 		
 		FetchOptions defaultFetchOptions = FetchOptions.Builder.withDefaults();
-		msg.append("Default fetchOptions\n"
+		res.getWriter().write("Default fetchOptions\n"
 
 		+ "* chunkSize: " + defaultFetchOptions.getChunkSize() + "\n"
 
@@ -178,19 +202,50 @@ public class GaeMyAdminApp {
 		// Entities of a kind; one stat entity for each kind of entity stored.
 		// props: kind_name, the name of the kind represented (a string)
 		
-		msg.append("All kinds of entities\n");
-		Iterable<Entity> statKinds = datastore.prepare(new Query("__Stat_Kind__")).asIterable();
-		for(Entity statKind : statKinds) {
-			String kind = statKind.getProperty("kind_name").toString();
-			msg.append("* Kind: " + kind + "\n");
-			for(Entity e : datastore.prepare(new Query(kind).setKeysOnly()).asIterable()) {
-				msg.append("** appid:" + e.getAppId() + " namespace:" + e.getNamespace()
-				        + " props:" + e.getProperties().keySet() + "\n");
-				Map<String,Object> props = e.getProperties();
-				for(Map.Entry<String,Object> me : props.entrySet()) {
-					msg.append("*** " + me.getKey() + " = " + me.getValue() + "\n");
+		if(resultFormat.equals("text")) {
+			res.getWriter().write("All kinds of entities\n");
+			for(String kind : getAllKinds()) {
+				res.getWriter().write("* Kind: " + kind + "\n");
+				
+				for(Entity e : getEntitiesOfKind(kind)) {
+					// handle entity
+					res.getWriter().write(
+					        "** appid:" + e.getAppId() + " namespace:" + e.getNamespace()
+					                + " props:" + e.getProperties().keySet() + "\n");
+					
+					// handle properties
+					Map<String,Object> props = e.getProperties();
+					for(Map.Entry<String,Object> me : props.entrySet()) {
+						res.getWriter().write("*** " + me.getKey() + " = " + me.getValue() + "\n");
+					}
 				}
 			}
+		} else {
+			CsvTable csv = new CsvTable();
+			res.getWriter().write("Fetching kind names...\n");
+			for(String kind : getAllKinds()) {
+				res.getWriter().write("Processing all elements of kind: " + kind + "\n");
+				for(Entity e : getEntitiesOfKind(kind)) {
+					// handle entity
+					Row row = csv.getOrCreateRow(e.getKey().toString(), true);
+					row.setValue("appid", e.getAppId(), true);
+					row.setValue("namespace", e.getNamespace(), true);
+					row.setValue("kind", e.getKind(), true);
+					if(e.getParent() != null) {
+						row.setValue(e.getParent().toString(), "parentkey", true);
+					}
+					
+					// handle properties
+					Map<String,Object> props = e.getProperties();
+					for(Map.Entry<String,Object> me : props.entrySet()) {
+						row.setValue("prop-" + me.getKey(), me.getValue().toString(), true);
+					}
+				}
+			}
+			
+			res.getWriter().write("--------- >8 ----- CSV ");
+			csv.writeTo(res.getWriter());
+			res.getWriter().write("--------- >8 ----- CSV ");
 		}
 		
 		// __Stat_Kind_IsRootEntity__
@@ -260,21 +315,26 @@ public class GaeMyAdminApp {
 		// * "Text"
 		// * "User"
 		
-		Entity statTotal = datastore.prepare(new Query("__Stat_Total__")).asSingleEntity();
+		Entity statTotal = this.datastore.prepare(new Query("__Stat_Total__")).asSingleEntity();
 		if(statTotal != null) {
 			Long totalBytes = (Long)statTotal.getProperty("bytes");
 			Long totalEntities = (Long)statTotal.getProperty("count");
-			msg.append("Datastore contains " + totalBytes + " bytes in " + totalEntities
-			        + " entities");
+			res.getWriter()
+			        .write(
+			                "Datastore contains " + totalBytes + " bytes in " + totalEntities
+			                        + " entities");
 		} else {
-			msg
-			        .append("No entity named '__Stat_Total__' found. Works maybe only in production. Stats are computed only once a day.");
+			res
+			        .getWriter()
+			        .write(
+			                "No entity named '__Stat_Total__' found. Works maybe only in production. Stats are computed only once a day.");
 		}
-		System.out.println(msg);
+		
+		long stop = System.currentTimeMillis();
+		res.getWriter().write("Done processing in " + ((stop - start) / 1000) + " seconds");
 		
 		res.setContentType("text/plain");
 		res.setCharacterEncoding("utf-8");
-		res.getWriter().println(msg);
 		res.getWriter().flush();
 		res.getWriter().close();
 	}

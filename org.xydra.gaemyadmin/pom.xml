@@ -152,6 +152,12 @@
 			<version>6.1.11</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>csv</artifactId>
+			<version>0.1.2-SNAPSHOT</version>
+		</dependency>
+
 		<!-- logging -->
 		<dependency>
 			<groupId>org.xydra</groupId>
