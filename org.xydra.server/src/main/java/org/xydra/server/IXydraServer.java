@@ -23,6 +23,7 @@ public interface IXydraServer extends Iterable<XID> {
 	
 	/**
 	 * @return a read-only interface to the snapshot for the model this time.
+	 *         Individual parts of the model are loaded into memory as-needed.
 	 *         Returns null if no such model exists.
 	 */
 	XBaseModel getModelSnapshot(XID modelId);
@@ -39,6 +40,11 @@ public interface IXydraServer extends Iterable<XID> {
 	 * 
 	 * TODO replace actorId with a more general context to allow logging time,
 	 * IP Address, etc.
+	 * 
+	 * @return TODO document die long return value verhält sich wie bei allen anderen
+	 * #executeCommand methoden in core (z.B. in XModel) -> XCommand#FAILED für
+	 * fehler, XCommand#NOCHANGE wenn sich nichts geändert hat, revision number
+	 * sonst
 	 */
 	long executeCommand(XCommand command, XID actorId);
 	
