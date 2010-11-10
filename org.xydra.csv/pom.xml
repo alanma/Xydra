@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>org.xydra</groupId>
+	<artifactId>csv</artifactId>
+	<version>0.1.2-SNAPSHOT</version>
+	<packaging>jar</packaging>
+	<name>csv</name>
+
+	<parent>
+		<groupId>org.xydra</groupId>
+		<artifactId>maven-root</artifactId>
+		<version>2010.10.16</version>
+	</parent>
+
+	<!-- to find the parent -->
+	<repositories>
+		<repository>
+			<id>smyle-repo</id>
+			<url>
+				https://smyle.repositoryhosting.com/svn/smyle_mavenrepo/trunk/mavenrepo
+			</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</releases>
+		</repository>
+		<repository>
+			<id>smyle-snap</id>
+			<url>
+				https://smyle.repositoryhosting.com/svn/smyle_mavenrepo/trunk/mavensnap
+			</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+		</repository>
+	</repositories>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>1.4</version>
+		</dependency>
+
+		<!-- logging dependencies -->
+
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>log</artifactId>
+			<version>0.1.2-SNAPSHOT</version>
+		</dependency>
+
+		<!--  for LogConfManager -->
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.14</version>
+			<scope>compile</scope>
+		</dependency>
+
+		<!-- testing dependencies -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+
+	</dependencies>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>semweb4j-repo</id>
+			<name>Semweb4j.org maven repo</name>
+			<url>http://semweb4j.org/repo/</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</pluginRepository>
+		<pluginRepository>
+			<id>semweb4j-snapshots</id>
+			<name>Semweb4j.org maven snapshots</name>
+			<url>http://semweb4j.org/snapshots/</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</snapshots>
+		</pluginRepository>
+	</pluginRepositories>
+
+	<distributionManagement>
+		<!--
+			Add this to settings.xml <server> <id>smyle-repo</id>
+			<username>xamde</username> <password>********</password> </server>
+			<server> <id>smyle-snap</id> <username>xamde</username>
+			<password>********</password> </server> <server> <id>smyle-site</id>
+			<username>xamde</username> <password>********</password> </server>
+		-->
+		<repository>
+			<id>smyle-repo</id>
+			<url>dav:https://smyle.repositoryhosting.com/svn/smyle_mavenrepo/trunk/mavenrepo/</url>
+		</repository>
+		<snapshotRepository>
+			<id>smyle-snap</id>
+			<url>dav:https://smyle.repositoryhosting.com/svn/smyle_mavenrepo/trunk/mavensnap/</url>
+		</snapshotRepository>
+		<site>
+			<id>smyle-site</id>
+			<url>dav:https://smyle.repositoryhosting.com/svn/smyle_mavenrepo/trunk/site/com.calpano.common</url>
+			<!--
+				view at
+				https://smyle.repositoryhosting.com/trac/smyle_mavenrepo/browser/trunk/site
+			-->
+		</site>
+	</distributionManagement>
+
+</project>
