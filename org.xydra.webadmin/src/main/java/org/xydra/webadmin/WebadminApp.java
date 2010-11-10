@@ -1,5 +1,6 @@
 package org.xydra.webadmin;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,6 +10,7 @@ import java.io.Writer;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -43,20 +45,45 @@ import org.xydra.server.IXydraServer;
 import org.xydra.server.rest.XydraRestServer;
 
 
+/**
+ * Run this either by configuring your Restless servlet to run this
+ * {@link WebadminApp} or call the
+ * {@link WebadminApp#restless(Restless, String)} init method from your other
+ * restless init code.
+ * 
+ * @author voelkel
+ * 
+ */
 @RunsInAppEngine
 @RunsInJava
 public class WebadminApp {
 	
 	public static final Logger log = LoggerFactory.getLogger(WebadminApp.class);
 	
-	public void restless(Restless restless, String prefix) {
+	public static void restless(Restless restless, String prefix) {
 		
 		XydraRestServer.initializeServer(restless);
 		
-		restless.addMethod("/admin/backup", "GET", WebadminApp.class, "backup", true,
+		restless.addMethod(prefix + "/backup", "GET", WebadminApp.class, "backup", true,
 		        new RestlessParameter("logs"));
-		restless.addMethod("/admin/restore", "POST", WebadminApp.class, "restore", true);
 		
+		restless.addMethod(prefix + "/restore", "POST", WebadminApp.class, "restore", true);
+		
+		restless.addMethod(prefix + "/", "GET", WebadminApp.class, "index", true);
+	}
+	
+	public void index(HttpServletResponse res) throws IOException {
+		// load index.html and return
+		InputStream in = WebadminApp.class.getClassLoader().getResourceAsStream(
+		        "org/xydra/webadmin/index.html");
+		InputStreamReader isr = new InputStreamReader(in, "utf-8");
+		BufferedReader br = new BufferedReader(isr);
+		String line = br.readLine();
+		while(line != null) {
+			// copy line & output
+			res.getWriter().write(line + "\r\n");
+			line = br.readLine();
+		}
 	}
 	
 	public void backup(Restless restless, HttpServletResponse res, String logs) throws IOException {
@@ -66,6 +93,13 @@ public class WebadminApp {
 		IXydraServer server = XydraRestServer.getXydraServer(restless);
 		
 		log.info("request for xydra backup");
+		int count = 0;
+		Iterator<XID> it = server.iterator();
+		while(it.hasNext()) {
+			it.next();
+			count++;
+		}
+		log.info("backing up " + count + " models");
 		
 		ZipOutputStream zos = new ZipOutputStream(res.getOutputStream());
 		
