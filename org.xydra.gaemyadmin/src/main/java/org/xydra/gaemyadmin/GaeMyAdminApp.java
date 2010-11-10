@@ -24,6 +24,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Text;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
@@ -238,8 +239,20 @@ public class GaeMyAdminApp {
 					// handle properties
 					Map<String,Object> props = e.getProperties();
 					for(Map.Entry<String,Object> me : props.entrySet()) {
-						String value = me.getValue() != null ? me.getValue().toString() : null;
+						Object o = me.getValue();
+						String value = null;
+						if(o == null) {
+							// keep null
+						} else if(o instanceof Text) {
+							value = ((Text)o).getValue();
+						} else {
+							value = o.toString();
+						}
 						row.setValue("prop-" + me.getKey(), value, true);
+						if(o != null) {
+							row.setValue("prop-" + me.getKey() + "-type", o.getClass().getName(),
+							        true);
+						}
 					}
 				}
 			}
