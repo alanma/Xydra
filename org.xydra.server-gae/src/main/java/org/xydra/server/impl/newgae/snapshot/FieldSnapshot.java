@@ -1,5 +1,7 @@
 package org.xydra.server.impl.newgae.snapshot;
 
+import java.io.Serializable;
+
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XField;
@@ -9,7 +11,10 @@ import org.xydra.core.value.XValue;
 
 
 /**
- * A snapshot of an {@link XField}.
+ * A snapshot (read-only data transfer object) of an {@link XField}.
+ * 
+ * FIXME Why are neither {@link FieldSnapshot} nor {@link XBaseField}
+ * {@link Serializable}? ~max
  * 
  * @author dscharrer
  * 
@@ -17,6 +22,7 @@ import org.xydra.core.value.XValue;
 public class FieldSnapshot implements XBaseField {
 	
 	private final XAddress addr;
+	/** Set by {@link GaeSnapshotService} */
 	protected XValue value;
 	protected long rev;
 	

@@ -12,7 +12,7 @@ import org.xydra.core.model.XType;
 
 
 /**
- * A snapshot of an {@link XObject}.
+ * A snapshot (read-only data transfer object) of an {@link XObject}.
  * 
  * @author dscharrer
  * 

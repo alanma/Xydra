@@ -38,6 +38,13 @@ public class GaeTestfixer {
 		enabled = true;
 	}
 	
+	/**
+	 * Fix testing in development mode which spawns multiple threads, which may
+	 * not happen on AppEngien in production mode.
+	 * 
+	 * This method just returns, doing nothing if {@link GaeTestfixer#enable()}
+	 * is not called from main code.
+	 */
 	public static void initialiseHelperAndAttachToCurrentThread() {
 		if(!enabled) {
 			return;

@@ -22,14 +22,23 @@ import com.google.appengine.api.datastore.Transaction;
  * @author voelkel
  * 
  */
+/**
+ * @author voelkel
+ * 
+ */
 public class GaeUtils {
 	
 	private static DatastoreService datastore;
 	
+	/**
+	 * @return a common parent key, never null
+	 */
 	private static Key getXydraKey() {
 		/*
 		 * we need a common parent between XEntities and XChangeLog entries so
 		 * we can have both in the same Transaction
+		 * 
+		 * TODO isn't this causing datastore contention? ~max
 		 */
 		return KeyFactory.createKey("XYDRA", "xydra");
 	}
@@ -71,29 +80,33 @@ public class GaeUtils {
 		return k;
 	}
 	
+	/**
+	 * @param address
+	 * @return a GAE {@link Key} for an entity (repo,object,model,field) with
+	 *         the given address. Never null.
+	 */
 	public static Key keyForEntity(XAddress address) {
-		
 		assert address != null;
-		
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		
 		Key key = getXydraKey();
 		key = key.getChild("XENTITY", "entities");
 		key = appendAddressToKey(key, address);
-		
 		return key;
 	}
 	
+	/**
+	 * @param address
+	 * @return a GAE {@link Key} for a change log of an entity with the given
+	 *         address. Never null.
+	 */
 	public static Key keyForLog(XAddress address) {
-		
 		assert address != null;
-		
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		
 		Key key = getXydraKey();
 		key = key.getChild("XLOG", "logs");
 		key = appendAddressToKey(key, address);
-		
 		return key;
 	}
 	
@@ -152,6 +165,14 @@ public class GaeUtils {
 		return getEntity(key);
 	}
 	
+	/**
+	 * TODO ~max: document if our own transactions or GAE transactions are meant
+	 * here. If GAE transactions, why can there not be several of them running
+	 * in parallel?
+	 * 
+	 * @param trans
+	 * @return TODO document
+	 */
 	private static boolean assertTransaction(Transaction trans) {
 		// sanity checks
 		boolean inAnyTransaction = (trans != null);

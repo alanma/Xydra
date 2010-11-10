@@ -25,8 +25,10 @@ import org.xydra.server.impl.newgae.snapshot.GaeSnapshotService;
  * An {@link IXydraServer} backend that persists changes in the Google Appengine
  * datastore.
  * 
- * @author dscharrer
+ * FIXME MAX LOOK AT THIS schaust ob da irgendwas komisch aussieht bzw. nicht
+ * gut dokumentiert ist
  * 
+ * @author dscharrer
  */
 public class NewGaeXydraServer implements IXydraServer {
 	
@@ -37,6 +39,12 @@ public class NewGaeXydraServer implements IXydraServer {
 	XGroupDatabase groups;
 	XAccessManager arm;
 	
+	static {
+		// FIXME ~max: is this still too late and logging will already be
+		// initialized?
+		GaeLoggerFactorySPI.init();
+	}
+	
 	public NewGaeXydraServer() {
 		
 		// To enable local JUnit testing with multiple threads
@@ -44,9 +52,6 @@ public class NewGaeXydraServer implements IXydraServer {
 		
 		// Register AppEngine infrastructure services
 		InfrastructureServiceFactory.setProvider(new GaeInfrastructureProvider());
-		
-		// FIXME this is too late, logging will already be initialized
-		GaeLoggerFactorySPI.init();
 		
 		// TODO remove once it's stable
 		log.warn("Using the new, incomplete GAE IXydraServer backend");

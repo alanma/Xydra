@@ -40,6 +40,20 @@ import com.google.appengine.api.datastore.Transaction;
  * A class responsible for executing and logging changes to a specific XModel in
  * the GAE datastore.
  * 
+ * Possible status progression:
+ * 
+ * <pre>
+ * 
+ *  STATUS_CREATING ------> STATUS_FAILED_TIMEOUT
+ *        |
+ *        |----> STATUS_EXECUTING ----> STATUS_SUCCESS_EXECUTED
+ *        |
+ *        |----> STATUS_SUCCESS_NOCHANGE
+ *        |
+ *        \----> STATUS_FAILED_PRECONDITIONS
+ * 
+ * </pre>
+ * 
  * @author dscharrer
  * 
  */
@@ -56,9 +70,10 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	private static final String PROP_LAST_ACTIVITY = "lastActivity";
 	
 	/**
-	 * Set when entering {@link #STATUS_CREATING}, removed when entering
-	 * {@link #STATUS_SUCCESS_EXECUTED}, {@link #STATUS_SUCCESS_NOCHANGE},
-	 * {@link #STATUS_FAILED_TIMEOUT} or {@link #STATUS_FAILED_PRECONDITIONS}.
+	 * Locks are set when entering {@link #STATUS_CREATING}, removed when
+	 * entering {@link #STATUS_SUCCESS_EXECUTED},
+	 * {@link #STATUS_SUCCESS_NOCHANGE}, {@link #STATUS_FAILED_TIMEOUT} or
+	 * {@link #STATUS_FAILED_PRECONDITIONS}.
 	 */
 	private static final String PROP_LOCKS = "locks";
 	
@@ -79,22 +94,6 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	private static final String PROP_EVENTCONTENT = "eventContent";
 	
 	// status IDs
-	
-	/**
-	 * Possible status progression:
-	 * 
-	 * <pre>
-	 * 
-	 *  STATUS_CREATING ------> STATUS_FAILED_TIMEOUT
-	 *        |
-	 *        |----> STATUS_EXECUTING ----> STATUS_SUCCESS_EXECUTED
-	 *        |
-	 *        |----> STATUS_SUCCESS_NOCHANGE
-	 *        |
-	 *        \----> STATUS_FAILED_PRECONDITIONS
-	 * 
-	 * </pre>
-	 */
 	
 	/**
 	 * assigned revision
@@ -164,6 +163,9 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	 * Internal helper class to track information of a change that is being
 	 * executed.
 	 * 
+	 * Manages rev, startTime, a GAE entity, and a Set of {@link XAddress} (the
+	 * locks)
+	 * 
 	 * @author dscharrer
 	 * 
 	 */
@@ -187,6 +189,7 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	/**
 	 * Execute the given {@link XCommand} as a transaction.
 	 * 
+	 * @param command
 	 * @param actorId The actor to log in the resulting event.
 	 * @return If the command executed successfully, the revision of the
 	 *         resulting {@link XEvent} or {@link XCommand#NOCHANGE} if the
@@ -253,8 +256,8 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	 * Grabs the first available revision number and registers a change for that
 	 * revision number with the provided locks.
 	 * 
+	 * @param locks which locks to get
 	 * @param actorId The actor to record in the change {@link Entity}.
-	 * 
 	 * @return Information associated with the change such as the grabbed
 	 *         revision, the locks, the start time and the change {@link Entity}
 	 *         .
@@ -312,8 +315,10 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 				
 			} catch(ConcurrentModificationException cme) {
 				// transaction failed
+				
 				// IMPROVE if we can assume that at least one thread was
 				// successful, we go ahead to the next revision.
+				
 				// Check this revision again
 				rev--;
 			}
@@ -325,6 +330,8 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	
 	/**
 	 * Wait for all locks needed to execute the given change.
+	 * 
+	 * @param change which lists a Set of required locks
 	 */
 	private void waitForLocks(ChangeInProgress change) {
 		
@@ -332,6 +339,12 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 		
 		// Track if we find a greater last commitedRev.
 		long newCommitedRev = -1;
+		
+		/**
+		 * TODO ~max: If several locks are required but some are locked by
+		 * somebody else - are already acquired locks released before entering
+		 * waiting mode?
+		 */
 		
 		for(long otherRev = change.rev - 1; otherRev > commitedRev; otherRev--) {
 			
@@ -427,6 +440,7 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	 * Assumes that we have all the required locks.
 	 * 
 	 * @param change The change that the command belongs to.
+	 * @param command
 	 * @param actorId The actor to log in the created events.
 	 * @return a copy of the created events or null if the command cannot be
 	 *         applied.
@@ -492,12 +506,18 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	/**
 	 * Apply the changes described by the given locks and free any locks held by
 	 * this change.
+	 * 
+	 * @param change
+	 * @param events
 	 */
 	private void executeAndUnlock(ChangeInProgress change, List<XAtomicEvent> events) {
 		
-		// Track which object's revision numbers we have already saved and and
-		// which ones we still need to save.
-		// This assumes that the events are minimal (which they are!).
+		/*
+		 * Track which object's revision numbers we have already saved and which
+		 * ones we still need to save. This assumes that the events are minimal
+		 * [TODO ~max: minimal in what respect? minimal amount of events to do
+		 * the required operation?] (which they are!).
+		 */
 		Set<XID> objectsWithSavedRev = new HashSet<XID>();
 		Set<XID> objectsWithPossiblyUnsavedRev = new HashSet<XID>();
 		
@@ -512,6 +532,10 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 			if(event instanceof XFieldEvent) {
 				assert Arrays.asList(ChangeType.REMOVE, ChangeType.ADD, ChangeType.CHANGE)
 				        .contains(event.getChangeType());
+				/*
+				 * TODO ~max: why does the fact if the new value is null
+				 * determine whether we use a transaction index or not?
+				 */
 				if(((XFieldEvent)event).getNewValue() == null) {
 					InternalGaeField.set(event.getTarget(), change.rev, change.locks);
 				} else {
@@ -573,6 +597,11 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 		cleanupChangeEntity(change.entity, STATUS_SUCCESS_EXECUTED);
 	}
 	
+	/**
+	 * @param key
+	 * @return the revision number which is encoded in the given {@link Key}
+	 *         name
+	 */
 	long getRevisionFromKey(Key key) {
 		assert KeyStructure.isChangeKey(key);
 		String keyStr = key.getName();
@@ -582,6 +611,13 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 		return Long.parseLong(revStr);
 	}
 	
+	/**
+	 * TODO ~max: document
+	 * 
+	 * @param rev
+	 * @param key
+	 * @return
+	 */
 	private boolean rollForward(long rev, Key key) {
 		
 		assert getRevisionFromKey(key) == rev;
@@ -591,7 +627,10 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 		Entity changeEntity = GaeUtils.getEntity(key, trans);
 		assert changeEntity != null;
 		long now = now();
-		// TODO use the PROP_LAST_ACTIVITY of our own change instead?
+		/*
+		 * TODO use the PROP_LAST_ACTIVITY of our own change instead? ~max: I
+		 * believe not. The invariant is only about the entity itself.
+		 */
 		changeEntity.setProperty(PROP_LAST_ACTIVITY, now);
 		GaeUtils.putEntity(changeEntity, trans);
 		try {
@@ -621,6 +660,8 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	 * working on it.
 	 * 
 	 * @param startTime
+	 * @throws RuntimeException TODO ~max: docu... How is this supposed to be
+	 *             handled?
 	 */
 	private void giveUpIfTimeoutCritical(long startTime) {
 		long now = now();
@@ -668,6 +709,12 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 		return XX.toId(actorStr);
 	}
 	
+	/**
+	 * @param rev
+	 * @param changeEntity
+	 * @return a List of {@link XAtomicEvent} which is stored as a number of GAE
+	 *         entities
+	 */
 	private List<XAtomicEvent> loadEvents(long rev, Entity changeEntity) {
 		
 		assert Arrays.asList(STATUS_EXECUTING, STATUS_SUCCESS_EXECUTED).contains(
@@ -708,7 +755,7 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	}
 	
 	/**
-	 * Is the status either "success" or "failed".
+	 * @return if the status is either "success" or "failed".
 	 */
 	private boolean isCommitted(int status) {
 		return (isSuccess(status) || isFailure(status));
@@ -722,12 +769,19 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 		return (status == STATUS_FAILED_PRECONDITIONS || status == STATUS_FAILED_TIMEOUT);
 	}
 	
+	/**
+	 * @param changeEntity
+	 * @return true if more than {@link #TIMEOUT} milliseconds elapsed since a
+	 *         thread started working with the given changeEntity
+	 */
 	private boolean isTimedOut(Entity changeEntity) {
 		long timer = (Long)changeEntity.getProperty(PROP_LAST_ACTIVITY);
 		return now() - timer > TIMEOUT;
 	}
 	
 	/**
+	 * Handles wild-cards in locks.
+	 * 
 	 * @return true if the given set contains any locks that imply the given
 	 *         lock (but are not the same).
 	 */
@@ -743,11 +797,12 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	}
 	
 	/**
-	 * Calculate the locks required to execute the given command.
-	 * 
 	 * An address in the locks means that exclusive access is required to the
 	 * entity referred to by that address, as well as all descendant entities.
 	 * Also, a read lock on the ancestors of that entity is implied.
+	 * 
+	 * @param command
+	 * @return the calculated locks required to execute the given command.
 	 */
 	private static Set<XAddress> calculateRequiredLocks(XCommand command) {
 		
@@ -779,7 +834,11 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	}
 	
 	/**
-	 * Check if the two sets of locks conflict.
+	 * @param a
+	 * @param b
+	 * @return if the two sets of locks conflict, i.e. one of them requires a
+	 *         lock that is implied by the other set (wild-card locks are
+	 *         respected).
 	 */
 	private static boolean isConflicting(Set<XAddress> a, Set<XAddress> b) {
 		for(XAddress lock : a) {
@@ -796,6 +855,8 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	}
 	
 	/**
+	 * @param addr
+	 * @param locks
 	 * @return true if the specified locks are sufficient to read from the
 	 *         entity at the given address.
 	 */
@@ -809,6 +870,8 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	}
 	
 	/**
+	 * @param addr
+	 * @param locks
 	 * @return true if the specified locks are sufficient to write to the entity
 	 *         at the given address.
 	 */
@@ -822,8 +885,10 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	}
 	
 	/**
-	 * Get the {@link XAtomicEvent} with the given index in the change with the
-	 * given revision number.
+	 * @param revisionNumber
+	 * @param transindex
+	 * @return the {@link XAtomicEvent} with the given index in the change with
+	 *         the given revisionNumber.
 	 */
 	public XAtomicEvent getAtomicEvent(long revisionNumber, int transindex) {
 		

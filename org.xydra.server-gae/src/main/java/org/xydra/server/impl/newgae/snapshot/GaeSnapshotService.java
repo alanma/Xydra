@@ -14,14 +14,28 @@ import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XChangeLog;
 
 
+/**
+ * Computes *Snapshots ( {@link FieldSnapshot}, {@link ObjectSnapshot},
+ * {@link ModelSnapshot}) from a given {@link XChangeLog}.
+ * 
+ * @author scharrer
+ * 
+ */
 public class GaeSnapshotService {
 	
 	private final XChangeLog log;
 	
-	public GaeSnapshotService(XChangeLog changesService) {
-		this.log = changesService;
+	/**
+	 * @param changeLog
+	 */
+	public GaeSnapshotService(XChangeLog changeLog) {
+		this.log = changeLog;
 	}
 	
+	/**
+	 * @return an {@link XBaseModel} by applying all events in the
+	 *         {@link XChangeLog}
+	 */
 	public XBaseModel getSnapshot() {
 		
 		// IMPROVE save & cache snapshots
@@ -53,6 +67,7 @@ public class GaeSnapshotService {
 		
 		long rev = event.getRevisionNumber();
 		
+		// repository events
 		if(event instanceof XRepositoryEvent) {
 			if(event.getChangeType() == ChangeType.ADD) {
 				assert model == null;
@@ -67,6 +82,7 @@ public class GaeSnapshotService {
 		assert model != null;
 		model.rev = rev;
 		
+		// model events
 		if(event instanceof XModelEvent) {
 			XModelEvent me = (XModelEvent)event;
 			if(me.getChangeType() == ChangeType.ADD) {
@@ -81,6 +97,7 @@ public class GaeSnapshotService {
 			return model;
 		}
 		
+		// object events
 		ObjectSnapshot object = model.getObject(event.getTarget().getObject());
 		assert object != null;
 		object.rev = rev;
@@ -99,6 +116,7 @@ public class GaeSnapshotService {
 			return model;
 		}
 		
+		// field events
 		FieldSnapshot field = object.getField(event.getTarget().getField());
 		assert field != null;
 		field.rev = rev;

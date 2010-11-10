@@ -13,6 +13,8 @@ import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XType;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.server.impl.newgae.GaeUtils;
 
 import com.google.appengine.api.datastore.Entity;
@@ -29,6 +31,8 @@ import com.google.appengine.api.datastore.Transaction;
  */
 public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> implements
         XBaseObject {
+	
+	private static final Logger log = LoggerFactory.getLogger(InternalGaeObject.class);
 	
 	long objectRev = XEvent.RevisionNotAvailable;
 	
@@ -95,6 +99,11 @@ public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeFi
 		return childAddr.getField();
 	}
 	
+	/**
+	 * @param objectAddr
+	 * @param locks
+	 * @param rev
+	 */
 	public static void createObject(XAddress objectAddr, Set<XAddress> locks, long rev) {
 		assert GaeChangesService.canWrite(objectAddr, locks);
 		assert objectAddr.getAddressedType() == XType.XOBJECT;
@@ -104,6 +113,11 @@ public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeFi
 		GaeUtils.putEntity(e);
 	}
 	
+	/**
+	 * @param objectAddr
+	 * @param locks
+	 * @param rev
+	 */
 	public static void updateObjectRev(XAddress objectAddr, Set<XAddress> locks, long rev) {
 		assert GaeChangesService.canRead(objectAddr, locks);
 		assert objectAddr.getAddressedType() == XType.XOBJECT;
@@ -132,6 +146,7 @@ public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeFi
 				return;
 				
 			} catch(ConcurrentModificationException cme) {
+				log.error("Could not update object revision", cme);
 				
 				// Conflicting update => try again.
 				try {
