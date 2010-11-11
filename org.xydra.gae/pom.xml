@@ -10,7 +10,7 @@
 	</parent>
 
 	<groupId>org.xydra</groupId>
-	<artifactId>server-gae</artifactId>
+	<artifactId>gae</artifactId>
 	<version>0.1.2-SNAPSHOT</version>
 	<!--
 		/!\ Needs to be 'jar' for 'mvn deploy' but 'war' for 'gae:deploy'
