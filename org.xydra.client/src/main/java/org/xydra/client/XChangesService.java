@@ -22,6 +22,8 @@ import org.xydra.core.model.session.XAccessException;
  * 
  * The callback may or may not be called before the method returns.
  * 
+ * TODO The server should implement this interface, too (and interface belongs
+ * to server project)
  */
 public interface XChangesService {
 	
