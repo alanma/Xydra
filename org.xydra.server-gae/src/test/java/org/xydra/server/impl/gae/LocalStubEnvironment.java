@@ -32,6 +32,15 @@ public class LocalStubEnvironment implements ApiProxy.Environment {
 		throw new UnsupportedOperationException();
 	}
 	
+	/*
+	 * The method LocalStubEnvironment.getRequestNamespace() overrides a
+	 * deprecated method from ApiProxy.Environment - however we need to have it
+	 * to implement the Java interface
+	 * 
+	 * (non-Javadoc)
+	 * 
+	 * @see com.google.apphosting.api.ApiProxy.Environment#getRequestNamespace()
+	 */
 	@SuppressWarnings("deprecation")
 	@Deprecated
 	public String getRequestNamespace() {
