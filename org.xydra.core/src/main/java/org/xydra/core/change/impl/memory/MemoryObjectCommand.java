@@ -13,7 +13,6 @@ import org.xydra.core.model.XID;
  * An implementation of {@link XObjectCommand}
  * 
  */
-
 public class MemoryObjectCommand extends MemoryAtomicCommand implements XObjectCommand {
 	
 	// ID of the field being added or removed

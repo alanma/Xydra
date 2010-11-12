@@ -11,7 +11,6 @@ import org.xydra.core.model.XRepository;
  * specified {@link XModel}
  * 
  */
-
 public interface XModelCommand extends XAtomicCommand {
 	
 	/**

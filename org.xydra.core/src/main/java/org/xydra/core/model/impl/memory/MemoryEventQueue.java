@@ -177,6 +177,9 @@ public class MemoryEventQueue implements Serializable {
 	/**
 	 * Enqueues the given {@link XModelEvent}.
 	 * 
+	 * TODO check whether the given XEntities actually fit to the XEntities
+	 * specified by the XIDs in the event
+	 * 
 	 * @param model The {@link MemoryModel} in which this event occurred.
 	 * @param event The {@link XModelEvent}.
 	 */
@@ -188,6 +191,9 @@ public class MemoryEventQueue implements Serializable {
 	
 	/**
 	 * Enqueues the given {@link XObjectEvent}.
+	 * 
+	 * TODO check whether the given XEntities actually fit to the XEntities
+	 * specified by the XIDs in the event
 	 * 
 	 * @param object The {@link MemoryObject} in which this event occurred.
 	 * @param event The {@link XObjectEvent}.
@@ -203,6 +209,9 @@ public class MemoryEventQueue implements Serializable {
 	
 	/**
 	 * Enqueues the given {@link XFieldEvent}.
+	 * 
+	 * TODO check whether the given XEntities actually fit to the XEntities
+	 * specified by the XIDs in the event
 	 * 
 	 * @param field The {@link MemoryField} in which this event occurred.
 	 * @param event The {@link XFieldEvent}.
