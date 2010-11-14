@@ -40,8 +40,8 @@ public class NewGaeXydraServer implements IXydraServer {
 	XAccessManager arm;
 	
 	static {
-		// FIXME ~max: is this still too late and logging will already be
-		// initialized?
+		// FIXME this still too late and logging will already be
+		// initialized ~Daniel
 		GaeLoggerFactorySPI.init();
 	}
 	
@@ -98,7 +98,7 @@ public class NewGaeXydraServer implements IXydraServer {
 		
 		GaeChangesService cs = getChangesService(modelId);
 		
-		// TODO is this really neccessary?
+		// TODO is this really necessary?
 		if(!cs.hasLog()) {
 			return null;
 		}

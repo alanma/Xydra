@@ -28,6 +28,7 @@ import org.xydra.core.xml.XmlEvent;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
 import org.xydra.index.XI;
+import org.xydra.server.IXydraServer;
 import org.xydra.server.impl.newgae.GaeUtils;
 
 import com.google.appengine.api.datastore.Entity;
@@ -40,7 +41,49 @@ import com.google.appengine.api.datastore.Transaction;
  * A class responsible for executing and logging changes to a specific XModel in
  * the GAE datastore.
  * 
- * Possible status progression:
+ * This class is the core of the GAE {@link IXydraServer} implementation.
+ * 
+ * There are five different kinds of GAE Entities that are used by this class:
+ * 
+ * - Entity type XMODEL: These are used to represent the internal state of a
+ * model and are managed by {@link InternalGaeModel}. The model entities only
+ * store the repository address (for queries). Individual objects are stored
+ * separately and the model revision is not stored at all. In fact, the
+ * contained object might not all correspond to the same object revision at the
+ * same time.
+ * 
+ * - Entity type XOBJECT: Like XMODEL. Used to represent objects and managed by
+ * {@link InternalGaeObject}. XOBJECT Entities store a revision number, but it
+ * is not guaranteed to be up to date. An objects actual revision number can
+ * only be calculated by locking the whole object and then calculating the
+ * maximum of the stored revision and the revision numbers of all contained
+ * fields.
+ * 
+ * - Entity type XFIELD: Represent fields and managed by
+ * {@link InternalGaeField}. The value is not stored in the field entity.
+ * Instead, additionally to the field revision, an index into the transaction
+ * (or zero) is stored that identifies the {@link XAtomicEvent} containing the
+ * corresponding value.
+ * 
+ * Keys for XMODEL, XOBJEC and XFIELD entities are encoded according to
+ * {@link KeyStructure#createCombinedKey(XAddress)}.
+ * 
+ * - Entity type XCHANGE: These represent a change to the model resulting from a
+ * single {@link XCommand} (which may be a {@link XTransaction}). These entities
+ * represent both an entry into the {@link XChangeLog} as well as a change that
+ * is currently in progress. Keys are encoded according to
+ * {@link KeyStructure#createChangeKey(XAddress, long)}
+ * 
+ * The XCHANGE entities are managed directly by this class stores the status of
+ * the change ( {@link #PROP_STATUS}), the required locks ({@link #PROP_ACTOR},
+ * the time the (last) process started working on the change (
+ * {@link #PROP_LAST_ACTIVITY}).
+ * 
+ * If there are events associated with this change, {@link #PROP_EVENTCOUNT}
+ * will specify how many. This property will not be set before the change has
+ * reached {@link #STATUS_EXECUTING}
+ * 
+ * Possible status progression for XCHANGE Entities:
  * 
  * <pre>
  * 
@@ -54,6 +97,14 @@ import com.google.appengine.api.datastore.Transaction;
  * 
  * </pre>
  * 
+ * - Entity type XEVENT: Stores a single {@link XAtomicEvent} assiciated with a
+ * XCHANGE entity. Keys are encoded according to
+ * {@link KeyStructure#getEventKey(Key, int)}. Currently events are simply
+ * dumped as a XML-Encoded {@link String} using
+ * {@link XmlEvent#toXml(XEvent, org.xydra.core.xml.XmlOut, XAddress)}.
+ * 
+ * Locking: TODO
+ * 
  * @author dscharrer
  * 
  */
@@ -64,12 +115,16 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	// GAE Entity (type=XCHANGE) property keys.
 	
 	/**
-	 * Timestamp (in milliseconds) when the last thread started working on this
-	 * entity.
+	 * GAE Property key for the timestamp (in milliseconds) when the last thread
+	 * started working on this entity.
 	 */
 	private static final String PROP_LAST_ACTIVITY = "lastActivity";
 	
 	/**
+	 * GAE Property key for the locks held by a change. The locks are stored as
+	 * a {@link List} of the {@link String} representations of the locked
+	 * {@link XAddress XAddresses}.
+	 * 
 	 * Locks are set when entering {@link #STATUS_CREATING}, removed when
 	 * entering {@link #STATUS_SUCCESS_EXECUTED},
 	 * {@link #STATUS_SUCCESS_NOCHANGE}, {@link #STATUS_FAILED_TIMEOUT} or
@@ -77,20 +132,33 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	 */
 	private static final String PROP_LOCKS = "locks";
 	
+	/**
+	 * GAE Property key for the status of a change. See the STATUS_* constants
+	 * for possible status values.
+	 */
 	private static final String PROP_STATUS = "status";
 	
 	/**
+	 * GAE Property key for the actor that is responsible for the change. The
+	 * actor's {@link XID} is stored as a {@link String}.
+	 * 
 	 * Set when entering {@link #STATUS_CREATING}, never removed.
 	 */
 	private static final String PROP_ACTOR = "actor";
 	
 	/**
+	 * GAE Property key for the number of events that are associated with this
+	 * change.
+	 * 
 	 * Set when entering {@link #STATUS_EXECUTING}, never removed.
 	 */
 	private static final String PROP_EVENTCOUNT = "eventCount";
 	
 	// GAE Entity (type=XEVENT) property keys.
 	
+	/**
+	 * GAE Property key for the content of an individual event.
+	 */
 	private static final String PROP_EVENTCONTENT = "eventContent";
 	
 	// status IDs
@@ -125,7 +193,13 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	
 	// Parameters for waiting for other changes.
 	
-	/** timeout for changes in milliseconds */
+	/**
+	 * timeout for changes in milliseconds
+	 * 
+	 * If this is set too low, longer commands may not be executed successfully.
+	 * A too long timeout however might cause the model to "starve" as processes
+	 * are be aborted by GAE while waiting for other changes.
+	 * */
 	private static final long TIMEOUT = 3000; // TODO set
 	
 	/**
