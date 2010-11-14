@@ -8,6 +8,7 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.XType;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XRepositoryState;
+import org.xydra.server.impl.gae.OldGaeUtils;
 import org.xydra.server.impl.newgae.GaeUtils;
 
 import com.google.appengine.api.datastore.DatastoreService;
@@ -81,7 +82,7 @@ public class GaeRepositoryState extends AbstractGaeStateWithChildren implements 
 	}
 	
 	public static XRepositoryState load(XAddress repositoryStateAddress) {
-		Key key = GaeUtils.keyForEntity(repositoryStateAddress);
+		Key key = OldGaeUtils.keyForEntity(repositoryStateAddress);
 		Entity entity = GaeUtils.getEntity(key);
 		if(entity == null) {
 			return null;

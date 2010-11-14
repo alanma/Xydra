@@ -9,6 +9,7 @@ import org.xydra.core.xml.MiniXMLParser;
 import org.xydra.core.xml.XmlEvent;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
+import org.xydra.server.impl.gae.OldGaeUtils;
 import org.xydra.server.impl.newgae.GaeTestfixer;
 import org.xydra.server.impl.newgae.GaeUtils;
 
@@ -44,7 +45,7 @@ public class GaeChangeLogState implements XChangeLogState {
 		
 		this.baseAddr = baseAddr;
 		
-		this.key = GaeUtils.keyForLog(baseAddr);
+		this.key = OldGaeUtils.keyForLog(baseAddr);
 		
 		Entity e = GaeUtils.getEntity(this.key);
 		

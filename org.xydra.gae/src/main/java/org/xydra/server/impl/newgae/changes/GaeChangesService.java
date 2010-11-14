@@ -612,11 +612,23 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	}
 	
 	/**
-	 * TODO ~max: document
+	 * Try to roll forward the change with the given revision number. All saved
+	 * events will be executed on the {@link InternalGaeModel}, after which the
+	 * locks held by the change are freed.
 	 * 
-	 * @param rev
-	 * @param key
-	 * @return
+	 * As multiple processes might try to roll forward the event at the same
+	 * time, the change is grabbed safely before rolling forward. If the change
+	 * was grabbed by another process first, false is returned.
+	 * 
+	 * It is the responsibility of the caller to make sure that the change has
+	 * enough information to be rolled forward (all events are saved). See
+	 * {@link #canRollForward(int)}.
+	 * 
+	 * @param rev The revision number of the change to roll forward.
+	 * @param key The key of the corresponding change entity.
+	 * 
+	 * @return True if the change was rolled forward or false if the change was
+	 *         grabbed by another process.
 	 */
 	private boolean rollForward(long rev, Key key) {
 		
@@ -626,6 +638,10 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 		Transaction trans = GaeUtils.beginTransaction();
 		Entity changeEntity = GaeUtils.getEntity(key, trans);
 		assert changeEntity != null;
+		if(!isTimedOut(changeEntity)) {
+			// Cannot roll forward, change was grabbed by another process.
+			return false;
+		}
 		long now = now();
 		/*
 		 * TODO use the PROP_LAST_ACTIVITY of our own change instead? ~max: I
@@ -640,6 +656,7 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 			return false;
 		}
 		
+		assert canRollForward(getStatus(changeEntity));
 		assert getStatus(changeEntity) == STATUS_EXECUTING;
 		
 		Set<XAddress> locks = getLocks(changeEntity);

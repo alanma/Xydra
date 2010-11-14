@@ -4,6 +4,7 @@ import org.xydra.core.model.IHasXID;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.state.XStateTransaction;
 import org.xydra.core.model.state.impl.memory.AbstractState;
+import org.xydra.server.impl.gae.OldGaeUtils;
 import org.xydra.server.impl.newgae.GaeUtils;
 
 import com.google.appengine.api.datastore.DatastoreService;
@@ -29,7 +30,7 @@ public abstract class AbstractGaeState extends AbstractState implements IHasXID 
 	}
 	
 	public void delete(XStateTransaction trans) {
-		Key key = GaeUtils.keyForEntity(getAddress());
+		Key key = OldGaeUtils.keyForEntity(getAddress());
 		GaeUtils.deleteEntity(key, GaeStateTransaction.asTransaction(trans));
 	}
 	
@@ -41,7 +42,7 @@ public abstract class AbstractGaeState extends AbstractState implements IHasXID 
 	
 	protected void loadIfNecessary() {
 		if(!this.loaded) {
-			Key key = GaeUtils.keyForEntity(getAddress());
+			Key key = OldGaeUtils.keyForEntity(getAddress());
 			Entity e = GaeUtils.getEntity(key);
 			if(e != null) {
 				loadFromEntity(e);
@@ -79,7 +80,7 @@ public abstract class AbstractGaeState extends AbstractState implements IHasXID 
 	
 	public void save(XStateTransaction trans) {
 		
-		Key key = GaeUtils.keyForEntity(getAddress());
+		Key key = OldGaeUtils.keyForEntity(getAddress());
 		Entity e = new Entity(key);
 		storeInEntity(e);
 		GaeUtils.putEntity(e, GaeStateTransaction.asTransaction(trans));

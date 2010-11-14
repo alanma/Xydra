@@ -10,6 +10,7 @@ import org.xydra.core.xml.MiniXMLParser;
 import org.xydra.core.xml.XmlValue;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
+import org.xydra.server.impl.gae.OldGaeUtils;
 import org.xydra.server.impl.newgae.GaeUtils;
 
 import com.google.appengine.api.datastore.DatastoreService;
@@ -74,7 +75,7 @@ public class GaeFieldState extends AbstractGaeState implements XFieldState {
 	}
 	
 	public static XFieldState load(XAddress fieldStateAddress) {
-		Key key = GaeUtils.keyForEntity(fieldStateAddress);
+		Key key = OldGaeUtils.keyForEntity(fieldStateAddress);
 		Entity entity = GaeUtils.getEntity(key);
 		if(entity == null) {
 			return null;

@@ -9,6 +9,7 @@ import org.xydra.core.model.XType;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
+import org.xydra.server.impl.gae.OldGaeUtils;
 import org.xydra.server.impl.newgae.GaeUtils;
 
 import com.google.appengine.api.datastore.DatastoreService;
@@ -67,7 +68,7 @@ public class GaeModelState extends AbstractGaeStateWithChildren implements XMode
 	}
 	
 	public static XModelState load(XAddress modelStateAddress) {
-		Key key = GaeUtils.keyForEntity(modelStateAddress);
+		Key key = OldGaeUtils.keyForEntity(modelStateAddress);
 		Entity entity = GaeUtils.getEntity(key);
 		if(entity == null) {
 			return null;
