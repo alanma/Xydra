@@ -53,7 +53,7 @@ public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeFi
 	protected InternalGaeObject(GaeChangesService changesService, XAddress objectAddr,
 	        Entity objectEntity, Set<XAddress> locks) {
 		super(changesService, objectAddr, getSavedRevison(objectAddr, objectEntity, locks), locks);
-		assert KeyStructure.toAddress(objectEntity.getKey()).equals(objectEntity);
+		assert KeyStructure.toAddress(objectEntity.getKey()).equals(objectAddr);
 		assert objectAddr.getAddressedType() == XType.XOBJECT;
 	}
 	

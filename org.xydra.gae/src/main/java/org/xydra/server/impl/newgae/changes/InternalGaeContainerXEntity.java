@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.xydra.core.XX;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
@@ -83,6 +84,8 @@ abstract class InternalGaeContainerXEntity<C> extends InternalGaeXEntity {
 			this.cachedMisses.add(fieldId);
 			return null;
 		}
+		
+		assert this.addr.equals(XX.toAddress((String)e.getProperty(PROP_PARENT)));
 		
 		gf = loadChild(childAddr, e);
 		this.cachedChildren.put(fieldId, gf);

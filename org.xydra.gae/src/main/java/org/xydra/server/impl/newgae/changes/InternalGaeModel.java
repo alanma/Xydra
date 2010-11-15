@@ -85,8 +85,11 @@ public class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObj
 			return null;
 		}
 		
-		return new InternalGaeModel(changesService, changesService.getBaseAddress(), modelRev,
-		        locks);
+		XAddress modelAddr = changesService.getBaseAddress();
+		
+		assert modelAddr.getParent().equals(XX.toAddress((String)e.getProperty(PROP_PARENT)));
+		
+		return new InternalGaeModel(changesService, modelAddr, modelRev, locks);
 	}
 	
 	/**
