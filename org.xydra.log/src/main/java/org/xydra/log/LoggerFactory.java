@@ -32,27 +32,26 @@ public class LoggerFactory {
 		if(loggerFactorySPI == null) {
 			init();
 		}
-		
-		Logger logger = loggerFactorySPI.getLogger(clazz.getName());
-		
-		if(logListener_ != null) {
-			// wrap
-			return new LoggerWithListener(logger, logListener_);
-		} else
-			return logger;
+		return loggerFactorySPI.getLogger(clazz.getName(), logListener_);
 	}
 	
 	private static void init() {
 		// try to use GWT logger
 		if(gwtEnabled() && gwtLogEnabled()) {
 			loggerFactorySPI = new GwtLoggerFactorySPI();
-			loggerFactorySPI.getLogger("ROOT").info("Found no LoggerFactorySPI, using GWT Log");
+			loggerFactorySPI.getLogger("ROOT", null).info(
+			        "Found no LoggerFactorySPI, using GWT Log");
 		} else {
-			
 			loggerFactorySPI = new DefaultLoggerFactorySPI();
-			loggerFactorySPI.getLogger("ROOT").error(
+			loggerFactorySPI.getLogger("ROOT", null).error(
 			        "Found no LoggerFactorySPI, using default to std.out");
-			
+			try {
+				throw new RuntimeException("this stacktrace caused the log init()");
+			} catch(RuntimeException e) {
+				loggerFactorySPI.getLogger("ROOT", null).info("Printing caller to System.out", e);
+				e.fillInStackTrace();
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -90,7 +89,7 @@ public class LoggerFactory {
 	 */
 	public static void setLoggerFactorySPI(ILoggerFactorySPI spi) {
 		loggerFactorySPI = spi;
-		loggerFactorySPI.getLogger("ROOT").info(
+		loggerFactorySPI.getLogger("ROOT", null).info(
 		        "Configured XydraLog with " + spi.getClass().getName());
 	}
 	

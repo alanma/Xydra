@@ -19,7 +19,18 @@ public interface ILoggerFactorySPI {
 	 * same logger instance regardless of the requested name.
 	 * 
 	 * @param name the name of the Logger to return
+	 * @param logListener if not null, send all log events also to listener
 	 */
-	Logger getLogger(String name);
+	Logger getLogger(String name, ILogListener logListener);
+	
+	/**
+	 * OPTIONAL OPERATION
+	 * 
+	 * @param name
+	 * @param fullyQualifiedNameOfDelegatingLoggerClass TODO
+	 * @return a logger wrapped in a delegating class (which should not appear
+	 *         in stack traces)
+	 */
+	Logger getWrappedLogger(String name, String fullyQualifiedNameOfDelegatingLoggerClass);
 	
 }
