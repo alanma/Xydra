@@ -52,12 +52,15 @@ public class GALogListener implements ILogListener, UserInfo {
 	}
 	
 	private void track(Logger log, String logLevel, String msg, Throwable t) {
-		this.tracker.track(new FocusPoint(log.toString()), "-", this, new GaEvent(logLevel, msg, t
-		        .getMessage()));
+		track(log, new GaEvent(logLevel, msg, t.getMessage()));
 	}
 	
 	private void track(Logger log, String logLevel, String msg) {
-		this.tracker.track(new FocusPoint(log.toString()), "-", this, new GaEvent(logLevel, msg));
+		track(log, new GaEvent(logLevel, msg));
+	}
+	
+	private void track(Logger log, GaEvent gaEvent) {
+		this.tracker.track(new FocusPoint(log.toString()), "-", this, gaEvent);
 	}
 	
 	@Override

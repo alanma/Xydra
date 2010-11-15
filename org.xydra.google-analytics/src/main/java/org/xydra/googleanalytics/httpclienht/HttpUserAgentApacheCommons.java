@@ -62,11 +62,13 @@ public class HttpUserAgentApacheCommons implements HttpUserAgent {
 			while(true) {
 				try {
 					Job job = HttpUserAgentApacheCommons.this.jobQueue.take();
-					int status = HttpUserAgentApacheCommons.this.httpGet(job);
+					int status = HttpUserAgentApacheCommons.httpGet(
+					        HttpUserAgentApacheCommons.this.httpClient, job);
 					// retry every 30 seconds
 					while(!isOkStatus(status)) {
 						Thread.sleep(30000);
-						status = HttpUserAgentApacheCommons.this.httpGet(job);
+						status = HttpUserAgentApacheCommons.httpGet(
+						        HttpUserAgentApacheCommons.this.httpClient, job);
 					}
 				} catch(InterruptedException e) {
 					log.debug("waiting for urls to track", e);
@@ -79,11 +81,11 @@ public class HttpUserAgentApacheCommons implements HttpUserAgent {
 		return 200 <= status && status < 300;
 	}
 	
-	private int httpGet(Job job) {
+	private static int httpGet(HttpClient httpClient, Job job) {
 		log.debug("GET: " + job.url);
 		GetMethod get = new GetMethod(job.url);
 		try {
-			int status = this.httpClient.executeMethod(get);
+			int status = httpClient.executeMethod(get);
 			job.status = status;
 			if(isOkStatus(status)) {
 				log.trace("Status " + status);

@@ -86,9 +86,10 @@ public class Tracker {
 		this.trackCount++;
 		
 		// check every 50 requests if they work
-		if(this.trackCount % 50 == 1) {
+		if(this.trackCount % 50 == 10) {
+			log.debug("Verifying HTTP GET to Google Analytics");
 			try {
-				result.get(5000, TimeUnit.MILLISECONDS);
+				result.get(500, TimeUnit.MILLISECONDS);
 			} catch(InterruptedException e) {
 			} catch(ExecutionException e) {
 				log.warn("Could not finish HTTP GET", e);
