@@ -21,40 +21,42 @@ import org.xydra.log.Logger;
 public class Log4jLogger extends Logger {
 	
 	private org.apache.log4j.Logger log4j;
+	private String callerClassToHideFromStacktrace;
 	
-	public Log4jLogger(org.apache.log4j.Logger log4jLogger) {
+	public Log4jLogger(String callerClassToHideFromStacktrace, org.apache.log4j.Logger log4jLogger) {
 		super();
+		this.callerClassToHideFromStacktrace = callerClassToHideFromStacktrace;
 		this.log4j = log4jLogger;
 	}
 	
 	@Override
 	public void debug(String msg) {
-		this.log4j.log(Log4jLogger.class.getName(), org.apache.log4j.Level.DEBUG, msg, null);
+		this.log4j.log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.DEBUG, msg, null);
 	}
 	
 	@Override
 	public void debug(String msg, Throwable t) {
-		this.log4j.log(Log4jLogger.class.getName(), org.apache.log4j.Level.DEBUG, msg, t);
+		this.log4j.log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.DEBUG, msg, t);
 	}
 	
 	@Override
 	public void error(String msg) {
-		this.log4j.log(Log4jLogger.class.getName(), org.apache.log4j.Level.ERROR, msg, null);
+		this.log4j.log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.ERROR, msg, null);
 	}
 	
 	@Override
 	public void error(String msg, Throwable t) {
-		this.log4j.log(Log4jLogger.class.getName(), org.apache.log4j.Level.ERROR, msg, t);
+		this.log4j.log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.ERROR, msg, t);
 	}
 	
 	@Override
 	public void info(String msg) {
-		this.log4j.log(Log4jLogger.class.getName(), org.apache.log4j.Level.INFO, msg, null);
+		this.log4j.log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.INFO, msg, null);
 	}
 	
 	@Override
 	public void info(String msg, Throwable t) {
-		this.log4j.log(Log4jLogger.class.getName(), org.apache.log4j.Level.INFO, msg, t);
+		this.log4j.log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.INFO, msg, t);
 	}
 	
 	@Override
@@ -84,22 +86,22 @@ public class Log4jLogger extends Logger {
 	
 	@Override
 	public void trace(String msg) {
-		this.log4j.log(Log4jLogger.class.getName(), org.apache.log4j.Level.TRACE, msg, null);
+		this.log4j.log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.TRACE, msg, null);
 	}
 	
 	@Override
 	public void trace(String msg, Throwable t) {
-		this.log4j.log(Log4jLogger.class.getName(), org.apache.log4j.Level.TRACE, msg, t);
+		this.log4j.log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.TRACE, msg, t);
 	}
 	
 	@Override
 	public void warn(String msg) {
-		this.log4j.log(Log4jLogger.class.getName(), org.apache.log4j.Level.WARN, msg, null);
+		this.log4j.log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.WARN, msg, null);
 	}
 	
 	@Override
 	public void warn(String msg, Throwable t) {
-		this.log4j.log(Log4jLogger.class.getName(), org.apache.log4j.Level.WARN, msg, t);
+		this.log4j.log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.WARN, msg, t);
 	}
 	
 	@Override

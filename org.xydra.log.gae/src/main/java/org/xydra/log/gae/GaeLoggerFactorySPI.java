@@ -1,5 +1,6 @@
 package org.xydra.log.gae;
 
+import org.xydra.log.ILogListener;
 import org.xydra.log.ILoggerFactorySPI;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -34,8 +35,12 @@ public class GaeLoggerFactorySPI implements ILoggerFactorySPI {
 	}
 	
 	@Override
-	public Logger getLogger(String name) {
-		return factory.getLogger(name);
+	public Logger getLogger(String name, ILogListener logListener) {
+		return factory.getLogger(name, logListener);
+	}
+	
+	public Logger getWrappedLogger(String name, String fullyQualifiedNameOfDelegatingLoggerClass) {
+		return factory.getWrappedLogger(name, fullyQualifiedNameOfDelegatingLoggerClass);
 	}
 	
 	/**
