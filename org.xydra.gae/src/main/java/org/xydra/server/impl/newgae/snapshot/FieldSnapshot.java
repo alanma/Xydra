@@ -13,13 +13,12 @@ import org.xydra.core.value.XValue;
 /**
  * A snapshot (read-only data transfer object) of an {@link XField}.
  * 
- * FIXME Why are neither {@link FieldSnapshot} nor {@link XBaseField}
- * {@link Serializable}? ~max
- * 
  * @author dscharrer
  * 
  */
-public class FieldSnapshot implements XBaseField {
+public class FieldSnapshot implements XBaseField, Serializable {
+	
+	private static final long serialVersionUID = -6014779550527350829L;
 	
 	private final XAddress addr;
 	/** Set by {@link GaeSnapshotService} */

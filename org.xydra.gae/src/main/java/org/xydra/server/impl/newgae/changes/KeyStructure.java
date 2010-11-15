@@ -54,18 +54,18 @@ public class KeyStructure {
 	/**
 	 * @param changeKey
 	 * @param transindex
-	 * @return a GAE key representing an internal part of a Xydra change entity
+	 * @return a GAE {@link Key} representing an internal part of a Xydra change
+	 *         entity
 	 */
-	public static Key getEventKey(Key changeKey, int transindex) {
+	public static Key createEventKey(Key changeKey, int transindex) {
 		assert isChangeKey(changeKey);
 		return changeKey.getChild(KeyStructure.KIND_XEVENT, Integer.toString(transindex));
 	}
 	
 	/**
 	 * @param key
-	 * @return true if the given key represents a Xydra change entity (which is
-	 *         also true, if the key represents a specific a part within a Xydra
-	 *         change entity)
+	 * @return true if the given GAE {@link Key} represents a Xydra change
+	 *         entity
 	 */
 	public static boolean isChangeKey(Key key) {
 		return key.getKind() == KeyStructure.KIND_XCHANGE;

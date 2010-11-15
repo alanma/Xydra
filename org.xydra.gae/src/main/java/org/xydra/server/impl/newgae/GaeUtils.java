@@ -132,4 +132,11 @@ public class GaeUtils {
 		return datastore.prepare(trans, query);
 	}
 	
+	/**
+	 * @return true if there are transactions active, so that tests can check if
+	 *         all transactions are terminated properly.
+	 */
+	public static boolean transactionsActive() {
+		return !datastore.getActiveTransactions().isEmpty();
+	}
 }

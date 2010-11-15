@@ -99,7 +99,7 @@ import com.google.appengine.api.datastore.Transaction;
  * 
  * - Entity type XEVENT: Stores a single {@link XAtomicEvent} assiciated with a
  * XCHANGE entity. Keys are encoded according to
- * {@link KeyStructure#getEventKey(Key, int)}. Currently events are simply
+ * {@link KeyStructure#createEventKey(Key, int)}. Currently events are simply
  * dumped as a XML-Encoded {@link String} using
  * {@link XmlEvent#toXml(XEvent, org.xydra.core.xml.XmlOut, XAddress)}.
  * 
@@ -347,54 +347,57 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 		for(long rev = getCachedLastTakenRevision() + 1;; rev++) {
 			
 			// Try to grab this revision.
-			try {
-				Key key = KeyStructure.createChangeKey(this.modelAddr, rev);
-				Transaction trans = GaeUtils.beginTransaction();
+			
+			Key key = KeyStructure.createChangeKey(this.modelAddr, rev);
+			Transaction trans = GaeUtils.beginTransaction();
+			
+			Entity changeEntity = GaeUtils.getEntity(key, trans);
+			
+			if(changeEntity == null) {
 				
-				Entity changeEntity = GaeUtils.getEntity(key, trans);
-				
-				if(changeEntity == null) {
-					
-					Entity newChange = new Entity(key);
-					newChange.setUnindexedProperty(PROP_LOCKS, lockStrs);
-					newChange.setUnindexedProperty(PROP_STATUS, STATUS_CREATING);
-					long startTime = now();
-					newChange.setUnindexedProperty(PROP_LAST_ACTIVITY, startTime);
-					if(actorId != null) {
-						newChange.setUnindexedProperty(PROP_ACTOR, actorId.toURI());
-					}
-					
-					GaeUtils.putEntity(newChange, trans);
-					GaeUtils.endTransaction(trans);
-					
-					setCachedLastTakenRevision(rev);
-					
-					// transaction succeeded, we have a revision
-					return new ChangeInProgress(rev, startTime, locks, newChange);
-					
-				} else {
-					
-					// Revision already taken.
-					
-					GaeUtils.endTransaction(trans);
-					
-					// Since we read the entity anyway, might as well use that
-					// information.
-					int status = getStatus(changeEntity);
-					if(!isCommitted(status) && !canRollForward(status) && isTimedOut(changeEntity)) {
-						cleanupChangeEntity(changeEntity, STATUS_FAILED_TIMEOUT);
-					}
-					
+				Entity newChange = new Entity(key);
+				newChange.setUnindexedProperty(PROP_LOCKS, lockStrs);
+				newChange.setUnindexedProperty(PROP_STATUS, STATUS_CREATING);
+				long startTime = now();
+				newChange.setUnindexedProperty(PROP_LAST_ACTIVITY, startTime);
+				if(actorId != null) {
+					newChange.setUnindexedProperty(PROP_ACTOR, actorId.toURI());
 				}
 				
-			} catch(ConcurrentModificationException cme) {
-				// transaction failed
+				GaeUtils.putEntity(newChange, trans);
 				
-				// IMPROVE if we can assume that at least one thread was
-				// successful, we go ahead to the next revision.
+				try {
+					GaeUtils.endTransaction(trans);
+				} catch(ConcurrentModificationException cme) {
+					// transaction failed as another process wrote to this
+					// entity
+					
+					// IMPROVE if we can assume that at least one thread was
+					// successful, we go ahead to the next revision.
+					
+					// Check this revision again
+					rev--;
+					continue;
+				}
 				
-				// Check this revision again
-				rev--;
+				setCachedLastTakenRevision(rev);
+				
+				// transaction succeeded, we have a revision
+				return new ChangeInProgress(rev, startTime, locks, newChange);
+				
+			} else {
+				
+				// Revision already taken.
+				
+				GaeUtils.endTransaction(trans);
+				
+				// Since we read the entity anyway, might as well use that
+				// information.
+				int status = getStatus(changeEntity);
+				if(!isCommitted(status) && !canRollForward(status) && isTimedOut(changeEntity)) {
+					cleanupChangeEntity(changeEntity, STATUS_FAILED_TIMEOUT);
+				}
+				
 			}
 			
 		}
@@ -544,7 +547,7 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 		Key baseKey = change.entity.getKey();
 		for(int i = 0; i < events.size(); i++) {
 			XAtomicEvent ae = events.get(i);
-			Entity eventEntity = new Entity(KeyStructure.getEventKey(baseKey, i));
+			Entity eventEntity = new Entity(KeyStructure.createEventKey(baseKey, i));
 			
 			// IMPROVE save event in a GAE-specific format:
 			// - don't save the "oldValue" again
@@ -617,6 +620,8 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 				}
 				assert event.getTarget().getObject() != null;
 				// revision saved in changed field.
+				// this assumes (correctly) that the field is not also removed
+				// in the same transaction
 				objectsWithSavedRev.add(event.getTarget().getObject());
 				
 			} else if(event instanceof XObjectEvent) {
@@ -708,14 +713,21 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 		
 		assert getRevisionFromKey(key) == rev;
 		
-		// Try to "grab" the change entity.
+		// Try to "grab" the change entity to prevent multiple processes from
+		// rolling forward the same entity.
 		Transaction trans = GaeUtils.beginTransaction();
 		Entity changeEntity = GaeUtils.getEntity(key, trans);
 		assert changeEntity != null;
+		
 		if(!isTimedOut(changeEntity)) {
 			// Cannot roll forward, change was grabbed by another process.
+			
+			// Cleanup the transaction.
+			GaeUtils.endTransaction(trans);
+			
 			return false;
 		}
+		
 		long now = now();
 		/*
 		 * TODO use the PROP_LAST_ACTIVITY of our own change instead? ~max: I
@@ -984,7 +996,7 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	public XAtomicEvent getAtomicEvent(long revisionNumber, int transindex) {
 		
 		Key changeKey = KeyStructure.createChangeKey(this.modelAddr, revisionNumber);
-		Key eventKey = KeyStructure.getEventKey(changeKey, transindex);
+		Key eventKey = KeyStructure.createEventKey(changeKey, transindex);
 		
 		// IMPROVE cache events
 		Entity eventEntity = GaeUtils.getEntity(eventKey);

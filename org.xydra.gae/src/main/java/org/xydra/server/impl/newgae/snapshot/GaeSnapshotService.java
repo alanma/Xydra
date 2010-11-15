@@ -18,7 +18,7 @@ import org.xydra.core.model.XChangeLog;
  * Computes *Snapshots ( {@link FieldSnapshot}, {@link ObjectSnapshot},
  * {@link ModelSnapshot}) from a given {@link XChangeLog}.
  * 
- * @author scharrer
+ * @author dscharrer
  * 
  */
 public class GaeSnapshotService {
@@ -79,10 +79,10 @@ public class GaeSnapshotService {
 			}
 		}
 		
+		// model, object and field events
 		assert model != null;
 		model.rev = rev;
 		
-		// model events
 		if(event instanceof XModelEvent) {
 			XModelEvent me = (XModelEvent)event;
 			if(me.getChangeType() == ChangeType.ADD) {
@@ -97,7 +97,7 @@ public class GaeSnapshotService {
 			return model;
 		}
 		
-		// object events
+		// object and field events
 		ObjectSnapshot object = model.getObject(event.getTarget().getObject());
 		assert object != null;
 		object.rev = rev;

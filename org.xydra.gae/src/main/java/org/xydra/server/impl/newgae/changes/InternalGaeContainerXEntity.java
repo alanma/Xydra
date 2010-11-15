@@ -26,7 +26,7 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
  * 
  * @author dscharrer
  * 
- * @param <C> type of child items
+ * @param <C> type of child entities
  */
 abstract class InternalGaeContainerXEntity<C> extends InternalGaeXEntity {
 	

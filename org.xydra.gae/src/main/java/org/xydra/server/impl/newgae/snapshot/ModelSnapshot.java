@@ -1,5 +1,6 @@
 package org.xydra.server.impl.newgae.snapshot;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -7,17 +8,19 @@ import java.util.Map;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XID;
-import org.xydra.core.model.XObject;
+import org.xydra.core.model.XModel;
 import org.xydra.core.model.XType;
 
 
 /**
- * A snapshot (read-only data transfer object) of an {@link XObject}.
+ * A snapshot (read-only data transfer object) of an {@link XModel}.
  * 
  * @author dscharrer
  * 
  */
-public class ModelSnapshot implements XBaseModel {
+public class ModelSnapshot implements XBaseModel, Serializable {
+	
+	private static final long serialVersionUID = 2234329418396820686L;
 	
 	private final XAddress addr;
 	protected long rev;

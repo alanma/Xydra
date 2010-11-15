@@ -1,5 +1,6 @@
 package org.xydra.server.impl.newgae.snapshot;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -17,7 +18,9 @@ import org.xydra.core.model.XType;
  * @author dscharrer
  * 
  */
-public class ObjectSnapshot implements XBaseObject {
+public class ObjectSnapshot implements XBaseObject, Serializable {
+	
+	private static final long serialVersionUID = 3435719513297598376L;
 	
 	private final XAddress addr;
 	protected long rev;
