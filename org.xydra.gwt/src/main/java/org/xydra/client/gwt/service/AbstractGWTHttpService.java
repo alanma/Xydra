@@ -1,13 +1,13 @@
 package org.xydra.client.gwt.service;
 
 import org.xydra.client.Callback;
-import org.xydra.client.ConnectionException;
 import org.xydra.client.NotFoundException;
-import org.xydra.client.RequestException;
-import org.xydra.client.ServerException;
-import org.xydra.client.TimeoutException;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.MiniXMLParser;
+import org.xydra.store.ConnectionException;
+import org.xydra.store.RequestException;
+import org.xydra.store.InternalStoreException;
+import org.xydra.store.TimeoutException;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
@@ -35,7 +35,7 @@ public abstract class AbstractGWTHttpService {
 	protected static <T> boolean handleError(Response resp, Callback<T> callback) {
 		int sc = resp.getStatusCode();
 		if(sc >= 500) {
-			callback.onFailure(new ServerException("HTTP " + sc + ": " + resp.getText()));
+			callback.onFailure(new InternalStoreException("HTTP " + sc + ": " + resp.getText()));
 		} else if(sc >= 400) {
 			if(resp.getStatusCode() == Response.SC_NOT_FOUND) {
 				callback.onFailure(new NotFoundException(resp.getText()));
