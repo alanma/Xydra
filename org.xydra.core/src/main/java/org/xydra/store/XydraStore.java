@@ -4,9 +4,11 @@ import java.util.Set;
 
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
+import org.xydra.core.change.XTransaction;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
+import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.index.query.Pair;
@@ -49,9 +51,12 @@ import com.sun.org.apache.xpath.internal.objects.XObject;
  * <li></li>
  * </ul>
  * 
- * <h3>Implementation guidelines</h3> TODO Prevent brute-force attacks by
- * throwing an exception when too many operations per time use the wrong
- * actorId/passwordHash combination.
+ * <h3>Implementation guidelines</h3>
+ * 
+ * TODO Prevent brute-force attacks by throwing an exception when too many
+ * operations per time use the wrong actorId/passwordHash combination.
+ * 
+ * For anonymous users over HTTP, the IP-Address could be used as an actorId.
  * 
  * @author voelkel
  * @author dscharrer
@@ -166,28 +171,35 @@ public interface XydraStore {
 	 */
 	void getModelIds(XID actorId, String passwordHash, XID repositoryId, Callback<Set<XID>> callback);
 	
-	// ------------------ documented until here
-	
 	/* commands */
 
 	/**
-	 * Execute the given command and log the actorId. No
-	 * authentication/authorization checks are done.
+	 * Check permissions, command pre-conditions, execute the command and log
+	 * the resulting events.
 	 * 
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
 	 *            with "Xydra" to avoid transmitting the same string over the
 	 *            network if the user uses the same password for multiple
-	 *            services. TODO replace actorId with a more general context to
-	 *            allow logging time, IP Address, etc.
+	 *            services.
+	 * @param commands An array of commands that are executed in the given
+	 *            order. Note that no transaction semantics are applied. Each
+	 *            individual command might fail or succeed. For transaction
+	 *            semantics, wrap commands in a {@link XTransaction}.
+	 * @param callback Asynchronous callback to signal success or failure. On
+	 *            success, the supplied arrray contains in the same order as the
+	 *            supplied commands the result of executing the command. A
+	 *            non-negative number indicates the resulting number of the
+	 *            changed entity.
 	 * 
-	 * @return TODO document die long return value verhält sich wie bei allen
-	 *         anderen #executeCommand methoden in core (z.B. in XModel) ->
-	 *         {@link XCommand#FAILED} für fehler, {@link XCommand#NOCHANGE}
-	 *         wenn sich nichts geändert hat, revision number sonst
-	 * @param callback Asynchronous callback to signal success or failure.
+	 *            TODO Which revision number is returned if the command is an
+	 *            {@link XTransaction}?
+	 * 
+	 *            Negative numbers special result: {@link XCommand#FAILED}
+	 *            signals a failure, {@link XCommand#NOCHANGE} signals that the
+	 *            command did not change anything.
 	 */
-	void executeCommand(XID actorId, String passwordHash, XCommand[] command,
+	void executeCommand(XID actorId, String passwordHash, XCommand[] commands,
 	        Callback<long[]> callback);
 	
 	/* events */
@@ -196,6 +208,15 @@ public interface XydraStore {
 	 * Returns an iterator over all {@link XEvent XEvents} that occurred after
 	 * (and including) beginRevision and before (but not including) endRevision.
 	 * 
+	 * @param actorId The actor who is performing this operation.
+	 * @param passwordHash The MD5 hash of the secret actor password prefixed
+	 *            with "Xydra" to avoid transmitting the same string over the
+	 *            network if the user uses the same password for multiple
+	 *            services.
+	 * @param addresses of {@link XModel} (repositoryId/modelId/-/-),
+	 *            {@link XObject} (repositoryId/modelId/objectId/-), or
+	 *            {@link XField} (repositoryId/modelId/objectId/fieldId) for
+	 *            which to return change events.
 	 * @param beginRevision the beginning revision number of the interval from
 	 *            which all {@link XEvent XEvents} are to be returned - can be
 	 *            less than {@link #getFirstRevisionNumber()} to get all
@@ -204,6 +225,10 @@ public interface XydraStore {
 	 *            {@link XEvent XEvents} are to be returned - can be greater
 	 *            than {@link #getCurrentRevisionNumber()} to get all
 	 *            {@link XEvent XEvents} since beginRevision
+	 * @param callback Asynchronous callback to signal success or failure. On
+	 *            success, this callback returns an array which has one entry
+	 *            for each requested XAddress. Each entry is itself an array of
+	 *            XEvents, in the order in which they happened.
 	 * @return an iterator over all {@link XEvent XEvents} that occurred during
 	 *         the specified interval of revision numbers
 	 * @throws IndexOutOfBoundsException if beginRevision or endRevision are
@@ -211,39 +236,41 @@ public interface XydraStore {
 	 * @throws IllegalArgumentException if beginRevision is greater than
 	 *             endRevision
 	 */
-	/**
-	 * @param actorId The actor who is performing this operation.
-	 * @param passwordHash The MD5 hash of the secret actor password prefixed
-	 *            with "Xydra" to avoid transmitting the same string over the
-	 *            network if the user uses the same password for multiple
-	 *            services.
-	 * @param address model, object or field
-	 * @param beginRevision
-	 * @param endRevision
-	 * @param callback Asynchronous callback to signal success or failure.
-	 * @param callback for each model, a list of changes
-	 */
-	void getEvents(XID actorId, String passwordHash, XAddress[] address, long beginRevision,
+	void getEvents(XID actorId, String passwordHash, XAddress[] addresses, long beginRevision,
 	        long endRevision, Callback<XEvent[][]> callback);
 	
+	// ------------------ documented until here
+	
 	/**
-	 * Redundant, but network-optimised method.
+	 * Redundant, network-optimised method to combine in one method call the
+	 * effects of {@link #executeCommand(XID, String, XCommand[], Callback)} and
+	 * {@link #getEvents(XID, String, XAddress[], long, long, Callback)}.
 	 * 
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
 	 *            with "Xydra" to avoid transmitting the same string over the
 	 *            network if the user uses the same password for multiple
 	 *            services.
-	 * @param command
-	 * @param addressToGetEventsFor
-	 * @param beginRevision
-	 * @param endRevision
-	 * @param callback Asynchronous callback to signal success or failure.
+	 * @param commands See
+	 *            {@link #executeCommand(XID, String, XCommand[], Callback)}
+	 * @param addressesToGetEventsFor See
+	 *            {@link #getEvents(XID, String, XAddress[], long, long, Callback)}
+	 * @param beginRevision See
+	 *            {@link #getEvents(XID, String, XAddress[], long, long, Callback)}
+	 * @param endRevision See
+	 *            {@link #getEvents(XID, String, XAddress[], long, long, Callback)}
+	 * @param callback Asynchronous callback to signal success or failure. On
+	 *            success, this method returns a {@link Pair} where the first
+	 *            component is the the same as the result of
+	 *            {@link #executeCommand(XID, String, XCommand[], Callback)} and
+	 *            the second is the same as the result of
+	 *            {@link #getEvents(XID, String, XAddress[], long, long, Callback)}
+	 *            .
 	 */
-	void executeCommandAndGetEvents(XID actorId, String passwordHash, XCommand[] command,
-	        XAddress[] addressToGetEventsFor, long beginRevision, long endRevision,
+	void executeCommandAndGetEvents(XID actorId, String passwordHash, XCommand[] commands,
+	        XAddress[] addressesToGetEventsFor, long beginRevision, long endRevision,
 	        Callback<Pair<long[],XEvent[][]>> callback);
 	
-	/* rights by convention __ */
+	/* rights by convention */
 
 }
