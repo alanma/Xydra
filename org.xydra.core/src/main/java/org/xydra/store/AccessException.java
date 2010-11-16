@@ -7,12 +7,11 @@ import org.xydra.core.model.XRepository;
 
 
 /**
- * An exception type which will be thrown if someone tries to access a protected
- * {@link XRepository}, {@link XModel}, {@link XObject} or {@link XField}
- * without the allowance to do so.
+ * An exception type which will be thrown if someone tries to access (e.g. read,
+ * write or administer) a protected {@link XRepository}, {@link XModel},
+ * {@link XObject} or {@link XField} without the allowance to do so.
  * 
  * @author dscharrer
- * 
  */
 public class AccessException extends StoreException {
 	

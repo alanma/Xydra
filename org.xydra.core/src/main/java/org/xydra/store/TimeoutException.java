@@ -1,11 +1,10 @@
 package org.xydra.store;
 
 /**
- * An exception that indicates that the connection to the Xydra Server timed
- * out.
+ * An exception that indicates that the connection to the (potentially remote)
+ * {@link XydraStore} implementation timed out.
  * 
  * @author dscharrer
- * 
  */
 public class TimeoutException extends ConnectionException {
 	

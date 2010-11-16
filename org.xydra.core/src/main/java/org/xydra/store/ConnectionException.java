@@ -9,7 +9,6 @@ package org.xydra.store;
  * a {@link TimeoutException}.
  * 
  * @author dscharrer
- * 
  */
 public class ConnectionException extends StoreException {
 	

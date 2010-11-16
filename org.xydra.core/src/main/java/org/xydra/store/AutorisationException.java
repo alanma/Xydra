@@ -1,10 +1,10 @@
 package org.xydra.store;
 
 /**
- * An exception type which will be thrown if someone TODO
+ * This exception signals that the supplied authorisation credentials (i.e.
+ * actorId and passwordHash) do not match.
  * 
  * @author dscharrer
- * 
  */
 public class AutorisationException extends StoreException {
 	

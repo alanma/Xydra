@@ -8,7 +8,6 @@ package org.xydra.store;
  * exception.
  * 
  * @author dscharrer
- * 
  */
 public class InternalStoreException extends StoreException {
 	

@@ -8,8 +8,11 @@ package org.xydra.store;
  * HTTP-based implementations might map unexplained HTTP/400 Bad Request
  * responses to this exception.
  * 
- * @author dscharrer
+ * This is similar to an {@link IllegalArgumentException} which could only be
+ * detected by a remote implementation. Local implementations should
+ * synchronously throw an {@link IllegalArgumentException} instead.
  * 
+ * @author dscharrer
  */
 public class RequestException extends StoreException {
 	
