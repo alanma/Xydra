@@ -5,18 +5,18 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.xydra.core.model.session.XAccessException;
 import org.xydra.restless.RestlessExceptionHandler;
+import org.xydra.store.AccessException;
 
 
 /**
- * Handles {@link XAccessException} by sending appropriate HTTP status code
+ * Handles {@link AccessException} by sending appropriate HTTP status code
  **/
 public class XAccessExceptionHandler implements RestlessExceptionHandler {
 	
 	public boolean handleException(Throwable t, HttpServletRequest req, HttpServletResponse res) {
 		
-		if(t instanceof XAccessException) {
+		if(t instanceof AccessException) {
 			try {
 				res.sendError(HttpServletResponse.SC_FORBIDDEN);
 			} catch(IOException e) {

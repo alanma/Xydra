@@ -5,7 +5,7 @@ import org.xydra.core.model.XID;
 
 
 /**
- * An event to allow tracking changes to an {@link XGroupDatabase}.
+ * An event to allow tracking changes to an {@link XGroupDatabaseWithListeners}.
  * 
  * @author dscharrer
  * 

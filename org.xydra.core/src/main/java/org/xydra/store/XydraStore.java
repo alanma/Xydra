@@ -171,6 +171,17 @@ public interface XydraStore {
 	 */
 	void getModelIds(XID actorId, String passwordHash, XID repositoryId, Callback<Set<XID>> callback);
 	
+	/**
+	 * @param actorId The actor who is performing this operation.
+	 * @param passwordHash The MD5 hash of the secret actor password prefixed
+	 *            with "Xydra" to avoid transmitting the same string over the
+	 *            network if the user uses the same password for multiple
+	 *            services.
+	 * @param callback Asynchronous callback to signal success or failure. On
+	 *            success, the repositoryId of this store is returned.
+	 */
+	void getRepositoryId(XID actorId, String passwordHash, Callback<XID> callback);
+	
 	/* commands */
 
 	/**

@@ -6,11 +6,11 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XID;
-import org.xydra.core.model.session.XAccessException;
 import org.xydra.core.model.session.impl.arm.ArmProtectedBaseModel;
 import org.xydra.core.model.session.impl.arm.ArmProtectedChangeLog;
 import org.xydra.server.IXydraServer;
 import org.xydra.server.IXydraSession;
+import org.xydra.store.AccessException;
 
 
 /**
@@ -34,7 +34,7 @@ public class ArmXydraSession implements IXydraSession {
 	public long executeCommand(XCommand command) {
 		
 		if(!this.server.getAccessManager().canExecute(this.actor, command)) {
-			throw new XAccessException("cannot execute command: " + command);
+			throw new AccessException("cannot execute command: " + command);
 		}
 		
 		return this.server.executeCommand(command, this.actor);
@@ -45,7 +45,7 @@ public class ArmXydraSession implements IXydraSession {
 		XAccessManager arm = this.server.getAccessManager();
 		
 		if(!arm.canKnowAboutModel(this.actor, getRepositoryAddress(), modelId)) {
-			throw new XAccessException(this.actor + " cannot read modelId " + modelId + " in "
+			throw new AccessException(this.actor + " cannot read modelId " + modelId + " in "
 			        + getRepositoryAddress());
 		}
 		
@@ -62,7 +62,7 @@ public class ArmXydraSession implements IXydraSession {
 		XAccessManager arm = this.server.getAccessManager();
 		
 		if(!arm.canKnowAboutModel(this.actor, getRepositoryAddress(), modelId)) {
-			throw new XAccessException(this.actor + " cannot read modelId " + modelId + " in "
+			throw new AccessException(this.actor + " cannot read modelId " + modelId + " in "
 			        + getRepositoryAddress());
 		}
 		

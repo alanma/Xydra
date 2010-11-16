@@ -3,7 +3,7 @@ package org.xydra.server;
 import java.util.Iterator;
 
 import org.xydra.core.access.XAccessManager;
-import org.xydra.core.access.XGroupDatabase;
+import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
@@ -54,7 +54,7 @@ public interface IXydraServer extends Iterable<XID> {
 	/**
 	 * @return the group database for this server.
 	 */
-	XGroupDatabase getGroups();
+	XGroupDatabaseWithListeners getGroups();
 	
 	/**
 	 * @return the {@link XAccessManager} responsible for accesses to the

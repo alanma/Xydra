@@ -8,7 +8,7 @@ import org.xydra.core.test.access.AbstractAccessManagerTest;
 public class MemoryAccessManagerTest extends AbstractAccessManagerTest {
 	
 	@Override
-	protected XAccessManager getAccessManager(XGroupDatabase groups, XAddress rA0) {
+	protected XAccessManager getAccessManager(XGroupDatabaseWithListeners groups, XAddress rA0) {
 		return new MemoryAccessManager(groups);
 	}
 	

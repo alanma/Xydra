@@ -10,7 +10,7 @@ import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.access.XA;
 import org.xydra.core.access.XAccessManager;
-import org.xydra.core.access.XGroupDatabase;
+import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.access.impl.memory.MemoryAccessManager;
 import org.xydra.core.access.impl.memory.MemoryGroupDatabase;
 import org.xydra.core.change.ChangeType;
@@ -507,7 +507,7 @@ public class XModelBasics {
 	 * group users and grant access rights to a whole group.
 	 * 
 	 * There are 2 main interfaces for this purpose: {@link XAccessManager} and
-	 * {@link XGroupDatabase}.
+	 * {@link XGroupDatabaseWithListeners}.
 	 * 
 	 * The {@link XAccessManager} actually manages the access rights.
 	 * 
@@ -532,7 +532,7 @@ public class XModelBasics {
 		XModel model = repo.createModel(actorID, XX.createUniqueID());
 		
 		// creating an XAccessManager and an XGroupDatabase
-		XGroupDatabase groups = new MemoryGroupDatabase();
+		XGroupDatabaseWithListeners groups = new MemoryGroupDatabase();
 		XAccessManager arm = new MemoryAccessManager(groups);
 		
 		// granting write access to the user with the XID user1ID on model

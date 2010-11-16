@@ -7,26 +7,26 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xydra.core.XX;
 import org.xydra.core.access.XA;
-import org.xydra.core.access.XGroupDatabase;
+import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.model.XID;
 
 
 /**
- * Test for implementations of {@link XGroupDatabase}.
+ * Test for implementations of {@link XGroupDatabaseWithListeners}.
  * 
  * @author dscharrer
  * 
  */
 public abstract class AbstractGroupDatabaseTest {
 	
-	private XGroupDatabase groups;
+	private XGroupDatabaseWithListeners groups;
 	
 	XID actorAlpha;
 	XID actorBeta;
 	XID groupZero;
 	XID groupOne;
 	
-	protected abstract XGroupDatabase getGroupDB();
+	protected abstract XGroupDatabaseWithListeners getGroupDB();
 	
 	@Before
 	public void setUp() {

@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.xydra.core.XX;
-import org.xydra.core.access.XGroupDatabase;
+import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.access.XGroupEvent;
 import org.xydra.core.access.XGroupListener;
 import org.xydra.core.access.impl.memory.MemoryGroupDatabase;
@@ -20,7 +20,7 @@ import com.google.appengine.api.datastore.KeyFactory;
 
 
 /**
- * Utility that can persist and load an {@link XGroupDatabase} in the GAE
+ * Utility that can persist and load an {@link XGroupDatabaseWithListeners} in the GAE
  * datastore.
  * 
  * The XGroupDatabase is represented by a root entity containing the {@link XID}
@@ -46,17 +46,17 @@ public class GaeGroups {
 	
 	/**
 	 * Load the whole group membership database from the GAE datastore into
-	 * memory. Changes to the returned {@link XGroupDatabase} are persisted.
+	 * memory. Changes to the returned {@link XGroupDatabaseWithListeners} are persisted.
 	 */
 	@SuppressWarnings("unchecked")
-	public static XGroupDatabase loadGroups() {
+	public static XGroupDatabaseWithListeners loadGroups() {
 		
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		
 		// Load the root entity of the group database.
 		Key groupdbKey = getGroupDBKey();
 		Entity groupdb = GaeUtils.getEntity(groupdbKey);
-		XGroupDatabase groups = new MemoryGroupDatabase();
+		XGroupDatabaseWithListeners groups = new MemoryGroupDatabase();
 		
 		if(groupdb != null) {
 			
@@ -134,9 +134,9 @@ public class GaeGroups {
 	 */
 	private static class Persister implements XGroupListener {
 		
-		private final XGroupDatabase groups;
+		private final XGroupDatabaseWithListeners groups;
 		
-		public Persister(XGroupDatabase groups) {
+		public Persister(XGroupDatabaseWithListeners groups) {
 			this.groups = groups;
 		}
 		

@@ -7,7 +7,7 @@ import org.xydra.core.test.access.AbstractGroupDatabaseTest;
 public class MemoryGroupDatabaseTest extends AbstractGroupDatabaseTest {
 	
 	@Override
-	protected XGroupDatabase getGroupDB() {
+	protected XGroupDatabaseWithListeners getGroupDB() {
 		return new MemoryGroupDatabase();
 	}
 	

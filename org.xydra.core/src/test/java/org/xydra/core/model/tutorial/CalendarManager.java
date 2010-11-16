@@ -4,7 +4,7 @@ import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.access.XA;
 import org.xydra.core.access.XAccessManager;
-import org.xydra.core.access.XGroupDatabase;
+import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.access.impl.memory.MemoryAccessManager;
 import org.xydra.core.access.impl.memory.MemoryGroupDatabase;
 import org.xydra.core.change.XCommand;
@@ -84,7 +84,7 @@ public class CalendarManager {
 	 * users, so we'll need access right management too.
 	 */
 	private XAccessManager arm;
-	private XGroupDatabase groups;
+	private XGroupDatabaseWithListeners groups;
 	
 	/*
 	 * We'll need an ID for our program to distinguish between changes made by

@@ -10,7 +10,7 @@ import org.xydra.core.test.access.AbstractAccessManagerTest;
 public class CompositeAccessManagerTestModel extends AbstractAccessManagerTest {
 	
 	@Override
-	protected XAccessManager getAccessManager(XGroupDatabase groups, XAddress rA0) {
+	protected XAccessManager getAccessManager(XGroupDatabaseWithListeners groups, XAddress rA0) {
 		XAccessManager outer = new MemoryAccessManager(groups);
 		XAccessManager inner = new MemoryAccessManager(groups);
 		XAddress addr = rA0.getParent().getParent().getParent();

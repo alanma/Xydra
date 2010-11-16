@@ -13,7 +13,7 @@ import org.xydra.core.access.XAccessEvent;
 import org.xydra.core.access.XAccessListener;
 import org.xydra.core.access.XAccessManager;
 import org.xydra.core.access.XAccessValue;
-import org.xydra.core.access.XGroupDatabase;
+import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
@@ -42,12 +42,12 @@ public class MemoryAccessManager extends AbstractAccessManager {
 	
 	private static final long serialVersionUID = -1731169839295825690L;
 	
-	private final XGroupDatabase groups;
+	private final XGroupDatabaseWithListeners groups;
 	// map of access -> resource -> actor
 	private final IMapMapMapIndex<XID,XAddress,XID,Boolean> rights;
 	private final Set<XAccessListener> listeners;
 	
-	public MemoryAccessManager(XGroupDatabase groups) {
+	public MemoryAccessManager(XGroupDatabaseWithListeners groups) {
 		this.groups = groups;
 		this.rights = new FastTripleMap<XID,XAddress,XID,Boolean>();
 		this.listeners = new HashSet<XAccessListener>();

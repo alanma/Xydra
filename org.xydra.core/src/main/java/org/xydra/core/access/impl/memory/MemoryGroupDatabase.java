@@ -8,7 +8,7 @@ import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.core.access.XA;
-import org.xydra.core.access.XGroupDatabase;
+import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.access.XGroupEvent;
 import org.xydra.core.access.XGroupListener;
 import org.xydra.core.change.ChangeType;
@@ -27,7 +27,7 @@ import org.xydra.index.query.Wildcard;
 
 
 /**
- * In-memory implementation of {@link XGroupDatabase}.
+ * In-memory implementation of {@link XGroupDatabaseWithListeners}.
  * 
  * IMPROVE using standard java monitor for now, reader-writer lock may be more
  * appropriate
@@ -38,7 +38,7 @@ import org.xydra.index.query.Wildcard;
 @RunsInAppEngine
 @RunsInGWT
 @RunsInJava
-public class MemoryGroupDatabase implements XGroupDatabase {
+public class MemoryGroupDatabase implements XGroupDatabaseWithListeners {
 	
 	private static final long serialVersionUID = 4404147651476087029L;
 	

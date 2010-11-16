@@ -1,4 +1,4 @@
-package org.xydra.core.access;
+package org.xydra.store.access;
 
 import java.io.Serializable;
 import java.util.Iterator;
@@ -124,18 +124,6 @@ public interface XGroupDatabase extends Serializable {
 	 *         TODO iterator is problematic with concurrent access
 	 */
 	Iterator<XID> getAllMembers(XID group);
-	
-	/**
-	 * Add a listener for {@link XGroupEvent XGroupEvents}. The listener will
-	 * only receive events for defined group memberships, not for implied group
-	 * memberships.
-	 */
-	void addListener(XGroupListener listener);
-	
-	/**
-	 * Remove a listener for {@link XGroupEvent}s.
-	 */
-	void removeListener(XGroupListener listener);
 	
 	/**
 	 * @return returns an iterator over the {@link XID XIDs} of the defined

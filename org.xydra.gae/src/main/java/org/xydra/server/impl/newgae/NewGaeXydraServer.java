@@ -4,7 +4,7 @@ import java.util.Iterator;
 
 import org.xydra.core.XX;
 import org.xydra.core.access.XAccessManager;
-import org.xydra.core.access.XGroupDatabase;
+import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.access.impl.gae.GaeAccess;
 import org.xydra.core.access.impl.gae.GaeGroups;
 import org.xydra.core.change.XCommand;
@@ -36,7 +36,7 @@ public class NewGaeXydraServer implements IXydraServer {
 	
 	private final XAddress repoAddr = XX.toAddress(XX.toId("repo"), null, null, null);
 	
-	XGroupDatabase groups;
+	XGroupDatabaseWithListeners groups;
 	XAccessManager arm;
 	
 	static {
@@ -123,7 +123,7 @@ public class NewGaeXydraServer implements IXydraServer {
 	}
 	
 	@Override
-	public XGroupDatabase getGroups() {
+	public XGroupDatabaseWithListeners getGroups() {
 		return this.groups;
 	}
 	

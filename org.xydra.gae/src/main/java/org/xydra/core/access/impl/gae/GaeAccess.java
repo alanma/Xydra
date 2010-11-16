@@ -6,7 +6,7 @@ import org.xydra.core.access.XAccessDefinition;
 import org.xydra.core.access.XAccessEvent;
 import org.xydra.core.access.XAccessListener;
 import org.xydra.core.access.XAccessManager;
-import org.xydra.core.access.XGroupDatabase;
+import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.access.impl.memory.MemoryAccessManager;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.xml.MiniElement;
@@ -46,7 +46,7 @@ public class GaeAccess {
 	 * Load the whole access manager from the GAE datastore into memory. Changes
 	 * to the returned {@link XAccessManager} are persisted.
 	 */
-	public static XAccessManager loadAccessManager(XAddress addr, XGroupDatabase groups) {
+	public static XAccessManager loadAccessManager(XAddress addr, XGroupDatabaseWithListeners groups) {
 		
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		

@@ -10,7 +10,7 @@ import org.xydra.annotations.RunsInJava;
 import org.xydra.core.XX;
 import org.xydra.core.access.XAccessDefinition;
 import org.xydra.core.access.XAccessManager;
-import org.xydra.core.access.XGroupDatabase;
+import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.access.impl.memory.MemoryAccessDefinition;
 import org.xydra.core.access.impl.memory.MemoryAccessManager;
 import org.xydra.core.model.XAddress;
@@ -97,7 +97,7 @@ public class XmlAccess {
 	 *             valid access manager.
 	 * 
 	 */
-	public static XAccessManager toAccessManager(MiniElement xml, XGroupDatabase groups)
+	public static XAccessManager toAccessManager(MiniElement xml, XGroupDatabaseWithListeners groups)
 	        throws IllegalArgumentException {
 		
 		XmlUtils.checkElementName(xml, XACCESSDEFS_ELEMENT);

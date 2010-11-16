@@ -30,7 +30,7 @@ public class XA {
 	/**
 	 * The access right to allow others access.
 	 */
-	public final static XID ACCESS_ALLOW = XX.toId("allow_access");
+	public final static XID ACCESS_ALLOW = XX.toId("admin");
 	
 	/**
 	 * The access right to deny others access.
