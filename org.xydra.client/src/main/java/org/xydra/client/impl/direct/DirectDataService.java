@@ -20,7 +20,6 @@ import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryField;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryObject;
-import org.xydra.core.model.session.XAccessException;
 import org.xydra.core.model.session.XProtectedField;
 import org.xydra.core.model.session.XProtectedModel;
 import org.xydra.core.model.session.XProtectedObject;
@@ -34,6 +33,7 @@ import org.xydra.core.model.state.impl.memory.TemporaryFieldState;
 import org.xydra.core.model.state.impl.memory.TemporaryModelState;
 import org.xydra.core.model.state.impl.memory.TemporaryObjectState;
 import org.xydra.core.model.state.impl.memory.XStateUtils;
+import org.xydra.store.AccessException;
 
 
 /**
@@ -60,7 +60,7 @@ public class DirectDataService implements XDataService {
 		long result;
 		try {
 			result = this.repo.executeCommand(removeCommand);
-		} catch(XAccessException ae) {
+		} catch(AccessException ae) {
 			callback.onFailure(ae);
 			return;
 		}
@@ -81,7 +81,7 @@ public class DirectDataService implements XDataService {
 			this.repo.removeModel(modelId);
 			callback.onSuccess(null);
 			
-		} catch(XAccessException ae) {
+		} catch(AccessException ae) {
 			callback.onFailure(ae);
 			return;
 		}
@@ -97,7 +97,7 @@ public class DirectDataService implements XDataService {
 		long result;
 		try {
 			result = this.repo.executeCommand(removeCommand);
-		} catch(XAccessException ae) {
+		} catch(AccessException ae) {
 			callback.onFailure(ae);
 			return;
 		}
@@ -144,7 +144,7 @@ public class DirectDataService implements XDataService {
 			
 			callback.onSuccess(fieldCopy);
 			
-		} catch(XAccessException ae) {
+		} catch(AccessException ae) {
 			callback.onFailure(ae);
 			return;
 		}
@@ -173,7 +173,7 @@ public class DirectDataService implements XDataService {
 			
 			callback.onSuccess(modelCopy);
 			
-		} catch(XAccessException ae) {
+		} catch(AccessException ae) {
 			callback.onFailure(ae);
 			return;
 		}
@@ -209,7 +209,7 @@ public class DirectDataService implements XDataService {
 			
 			callback.onSuccess(objectCopy);
 			
-		} catch(XAccessException ae) {
+		} catch(AccessException ae) {
 			callback.onFailure(ae);
 			return;
 		}
@@ -226,7 +226,7 @@ public class DirectDataService implements XDataService {
 		long result;
 		try {
 			result = oldModel.executeCommand(tb.buildCommand());
-		} catch(XAccessException ae) {
+		} catch(AccessException ae) {
 			callback.onFailure(ae);
 			return;
 		}
@@ -244,7 +244,7 @@ public class DirectDataService implements XDataService {
 		long result;
 		try {
 			result = this.repo.executeCommand(tb.buildCommand());
-		} catch(XAccessException ae) {
+		} catch(AccessException ae) {
 			callback.onFailure(ae);
 			return;
 		}
@@ -266,7 +266,7 @@ public class DirectDataService implements XDataService {
 		long result;
 		try {
 			result = this.repo.executeCommand(tb.buildCommand());
-		} catch(XAccessException ae) {
+		} catch(AccessException ae) {
 			callback.onFailure(ae);
 			return;
 		}

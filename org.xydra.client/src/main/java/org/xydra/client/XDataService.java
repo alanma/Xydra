@@ -7,7 +7,7 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
-import org.xydra.core.model.session.XAccessException;
+import org.xydra.store.AccessException;
 
 
 /**
@@ -15,10 +15,10 @@ import org.xydra.core.model.session.XAccessException;
  * 
  * Errors while executing the operation (except those caused by illegal
  * arguments) are passed to the callback's {@link Callback#onFailure(Throwable)}
- * method. With the exception of {@link XAccessException}, foreseeable modes of
+ * method. With the exception of {@link AccessException}, foreseeable modes of
  * failure should be mapped to a subclass of {@link ServiceException}.
  * 
- * Any unauthorized operation will result in a {@link XAccessException} being
+ * Any unauthorized operation will result in a {@link AccessException} being
  * passed to the callback's {@link Callback#onFailure(Throwable)}.
  * 
  * The callback may or may not be called before the method returns.

@@ -12,7 +12,6 @@ import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XChangeLog;
-import org.xydra.core.model.session.XAccessException;
 import org.xydra.core.model.session.XProtectedModel;
 import org.xydra.core.model.session.XProtectedRepository;
 import org.xydra.core.xml.MiniElement;
@@ -20,6 +19,7 @@ import org.xydra.core.xml.XmlCommand;
 import org.xydra.core.xml.XmlEvent;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
+import org.xydra.store.AccessException;
 
 
 public class DirectChangesService implements XChangesService {
@@ -90,7 +90,7 @@ public class DirectChangesService implements XChangesService {
 				}
 			}
 			
-		} catch(XAccessException ae) {
+		} catch(AccessException ae) {
 			callback.onFailure(ae);
 			return;
 		}
@@ -167,7 +167,7 @@ public class DirectChangesService implements XChangesService {
 				return;
 			}
 			
-		} catch(XAccessException ae) {
+		} catch(AccessException ae) {
 			callback.onFailure(ae);
 			return;
 		}
