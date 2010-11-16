@@ -14,9 +14,9 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.model.session.XAccessException;
 import org.xydra.core.model.session.XProtectedModel;
 import org.xydra.core.model.session.XProtectedRepository;
+import org.xydra.store.AccessException;
 
 
 /**
@@ -47,16 +47,16 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 	
 	abstract protected XAccessManager getArmForModel(XID modelId);
 	
-	private void checkReadAccess() throws XAccessException {
+	private void checkReadAccess() throws AccessException {
 		if(!this.arm.canRead(this.actor, getAddress())) {
-			throw new XAccessException(this.actor + " cannot read " + getAddress());
+			throw new AccessException(this.actor + " cannot read " + getAddress());
 		}
 	}
 	
 	public XProtectedModel createModel(XID modelId) {
 		
 		if(!this.arm.canWrite(this.actor, getAddress())) {
-			throw new XAccessException(this.actor + " cannot write to " + getAddress());
+			throw new AccessException(this.actor + " cannot write to " + getAddress());
 		}
 		
 		XModel model = this.repo.createModel(this.actor, modelId);
@@ -69,7 +69,7 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 	public long executeRepositoryCommand(XRepositoryCommand command) {
 		
 		if(!getArmForModel(command.getModelID()).canExecute(this.actor, command)) {
-			throw new XAccessException(this.actor + " cannot execute " + command);
+			throw new AccessException(this.actor + " cannot execute " + command);
 		}
 		
 		return this.repo.executeRepositoryCommand(this.actor, command);
@@ -80,7 +80,7 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 		XAccessManager modelArm = getArmForModel(modelId);
 		
 		if(!modelArm.canKnowAboutModel(this.actor, getAddress(), modelId)) {
-			throw new XAccessException(this.actor + " cannot read modelId " + modelId + " in "
+			throw new AccessException(this.actor + " cannot read modelId " + modelId + " in "
 			        + getAddress());
 		}
 		
@@ -96,7 +96,7 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 	public boolean removeModel(XID modelId) {
 		
 		if(!getArmForModel(modelId).canRemoveModel(this.actor, getAddress(), modelId)) {
-			throw new XAccessException(this.actor + " cannot remove " + modelId + " from "
+			throw new AccessException(this.actor + " cannot remove " + modelId + " from "
 			        + getAddress());
 		}
 		
@@ -174,7 +174,7 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 		assert command.getTarget().getModel() != null;
 		
 		if(!getArmForModel(command.getTarget().getModel()).canExecute(this.actor, command)) {
-			throw new XAccessException(this.actor + " cannot execute " + command);
+			throw new AccessException(this.actor + " cannot execute " + command);
 		}
 		
 		return this.repo.executeCommand(this.actor, command);

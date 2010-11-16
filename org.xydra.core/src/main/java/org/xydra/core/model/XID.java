@@ -8,6 +8,8 @@ import org.xydra.core.value.XValue;
 /**
  * A identification object that can be serialised.
  * 
+ * TODO specify syntax rules
+ * 
  * <em>Important:</em> Implementations of XID must implement <tt>equals()</tt>
  * and <tt>hashCode</tt> correctly.
  * 

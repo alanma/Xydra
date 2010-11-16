@@ -7,7 +7,7 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
-import org.xydra.core.model.session.XAccessException;
+import org.xydra.store.AccessException;
 
 
 /**
@@ -32,10 +32,10 @@ public class ArmProtectedBaseModel implements XBaseModel {
 		assert arm != null;
 	}
 	
-	protected void checkReadAccess() throws XAccessException {
+	protected void checkReadAccess() throws AccessException {
 		// IMPROVE cache this
 		if(!this.arm.canRead(this.actor, getAddress())) {
-			throw new XAccessException(this.actor + " cannot read " + getAddress());
+			throw new AccessException(this.actor + " cannot read " + getAddress());
 		}
 	}
 	
@@ -54,7 +54,7 @@ public class ArmProtectedBaseModel implements XBaseModel {
 	
 	protected void checkCanKnowAboutObject(XID objectId) {
 		if(!this.arm.canKnowAboutObject(this.actor, getAddress(), objectId)) {
-			throw new XAccessException(this.actor + " cannot read object " + objectId + " in "
+			throw new AccessException(this.actor + " cannot read object " + objectId + " in "
 			        + getAddress());
 		}
 	}

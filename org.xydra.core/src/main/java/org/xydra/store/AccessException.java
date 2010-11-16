@@ -1,4 +1,4 @@
-package org.xydra.core.model.session;
+package org.xydra.store;
 
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
@@ -14,15 +14,11 @@ import org.xydra.core.model.XRepository;
  * @author dscharrer
  * 
  */
-public class XAccessException extends RuntimeException {
+public class AccessException extends StoreException {
 	
 	private static final long serialVersionUID = -5273702667318966040L;
 	
-	public XAccessException() {
-		super();
-	}
-	
-	public XAccessException(String message) {
+	public AccessException(String message) {
 		super(message);
 	}
 	

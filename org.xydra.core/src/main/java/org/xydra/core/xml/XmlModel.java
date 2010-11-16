@@ -24,7 +24,6 @@ import org.xydra.core.model.impl.memory.MemoryField;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryObject;
 import org.xydra.core.model.impl.memory.MemoryRepository;
-import org.xydra.core.model.session.XAccessException;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XFieldState;
 import org.xydra.core.model.state.XModelState;
@@ -38,6 +37,7 @@ import org.xydra.core.model.state.impl.memory.TemporaryModelState;
 import org.xydra.core.model.state.impl.memory.TemporaryObjectState;
 import org.xydra.core.model.state.impl.memory.TemporaryRepositoryState;
 import org.xydra.core.value.XValue;
+import org.xydra.store.AccessException;
 
 
 /**
@@ -397,7 +397,7 @@ public class XmlModel {
 			try {
 				toXml(xrepository.getModel(modelOd), xo, saveRevision, ignoreInaccessible,
 				        saveChangeLog);
-			} catch(XAccessException ae) {
+			} catch(AccessException ae) {
 				if(!ignoreInaccessible) {
 					throw ae;
 				}
@@ -455,7 +455,7 @@ public class XmlModel {
 		for(XID objectId : xmodel) {
 			try {
 				toXml(xmodel.getObject(objectId), xo, saveRevision, ignoreInaccessible, false);
-			} catch(XAccessException ae) {
+			} catch(AccessException ae) {
 				if(!ignoreInaccessible) {
 					throw ae;
 				}
@@ -519,7 +519,7 @@ public class XmlModel {
 		for(XID fieldId : xobject) {
 			try {
 				toXml(xobject.getField(fieldId), xo, saveRevision);
-			} catch(XAccessException ae) {
+			} catch(AccessException ae) {
 				if(!ignoreInaccessible) {
 					throw ae;
 				}

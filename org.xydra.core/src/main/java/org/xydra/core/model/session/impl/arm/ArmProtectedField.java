@@ -5,9 +5,9 @@ import org.xydra.core.change.XFieldCommand;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
-import org.xydra.core.model.session.XAccessException;
 import org.xydra.core.model.session.XProtectedField;
 import org.xydra.core.value.XValue;
+import org.xydra.store.AccessException;
 
 
 /**
@@ -29,7 +29,7 @@ public class ArmProtectedField extends ArmProtectedBaseField implements XProtect
 	public long executeFieldCommand(XFieldCommand command) {
 		
 		if(!this.arm.canExecute(this.actor, command)) {
-			throw new XAccessException(this.actor + " cannot execute " + command);
+			throw new AccessException(this.actor + " cannot execute " + command);
 		}
 		
 		return this.field.executeFieldCommand(this.actor, command);
@@ -38,7 +38,7 @@ public class ArmProtectedField extends ArmProtectedBaseField implements XProtect
 	public boolean setValue(XValue value) {
 		
 		if(!this.arm.canWrite(this.actor, getAddress())) {
-			throw new XAccessException(this.actor + " cannot write to " + getAddress());
+			throw new AccessException(this.actor + " cannot write to " + getAddress());
 		}
 		
 		return this.field.setValue(this.actor, value);

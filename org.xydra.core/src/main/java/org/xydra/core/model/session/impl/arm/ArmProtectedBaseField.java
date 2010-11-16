@@ -4,8 +4,8 @@ import org.xydra.core.access.XAccessManager;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XID;
-import org.xydra.core.model.session.XAccessException;
 import org.xydra.core.value.XValue;
+import org.xydra.store.AccessException;
 
 
 /**
@@ -51,10 +51,10 @@ public class ArmProtectedBaseField implements XBaseField {
 		return this.field.isEmpty();
 	}
 	
-	protected void checkReadAccess() throws XAccessException {
+	protected void checkReadAccess() throws AccessException {
 		// IMPROVE cache this?
 		if(!this.arm.canRead(this.actor, getAddress())) {
-			throw new XAccessException(this.actor + " cannot read " + getAddress());
+			throw new AccessException(this.actor + " cannot read " + getAddress());
 		}
 	}
 	

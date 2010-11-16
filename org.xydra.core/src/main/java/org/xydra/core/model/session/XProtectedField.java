@@ -9,6 +9,7 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XLoggedField;
 import org.xydra.core.value.XValue;
+import org.xydra.store.AccessException;
 
 
 /**
@@ -16,7 +17,7 @@ import org.xydra.core.value.XValue;
  * the {@link XField} with a specific actor (represented by its {@link XID}) and
  * automatically checks the access rights for this actor on the {@link XField},
  * if a method is called and only executes the method, if the actor is allowed
- * to execute it (otherwise {@link XAccessException XAccessExceptions} will be
+ * to execute it (otherwise {@link AccessException XAccessExceptions} will be
  * thrown).
  * 
  * All change operations like manipulating the stored {@link XValue} executed on
@@ -34,7 +35,7 @@ public interface XProtectedField extends XLoggedField {
 	 * remove the current {@link XValue})
 	 * 
 	 * @param value The new {@link XValue}
-	 * @throws XAccessException if the actor linked with this field does not
+	 * @throws AccessException if the actor linked with this field does not
 	 *             have the necessary access rights (write access) to execute
 	 *             this method
 	 * 
@@ -57,7 +58,7 @@ public interface XProtectedField extends XLoggedField {
 	 *         {@link XCommand#NOCHANGE} if the {@link XCommand} didn't change
 	 *         anything or the revision number of the {@link XEvent} caused by
 	 *         the {@link XCommand}.
-	 * @throws XAccessException if the actor linked with this field does not
+	 * @throws AccessException if the actor linked with this field does not
 	 *             have the necessary access rights (write access) to execute
 	 *             this method
 	 */
@@ -65,28 +66,28 @@ public interface XProtectedField extends XLoggedField {
 	long executeFieldCommand(XFieldCommand command);
 	
 	/**
-	 * @throws XAccessException if the actor linked with this field does not
+	 * @throws AccessException if the actor linked with this field does not
 	 *             have the necessary access rights (read access) to execute
 	 *             this method
 	 */
 	long getRevisionNumber();
 	
 	/**
-	 * @throws XAccessException if the actor linked with this field does not
+	 * @throws AccessException if the actor linked with this field does not
 	 *             have the necessary access rights (read access) to execute
 	 *             this method
 	 */
 	XValue getValue();
 	
 	/**
-	 * @throws XAccessException if the actor linked with this field does not
+	 * @throws AccessException if the actor linked with this field does not
 	 *             have the necessary access rights (read access) to execute
 	 *             this method
 	 */
 	boolean isEmpty();
 	
 	/**
-	 * @throws XAccessException if the actor linked with this field does not
+	 * @throws AccessException if the actor linked with this field does not
 	 *             have the necessary access rights (read access) to execute
 	 *             this method
 	 */

@@ -11,8 +11,8 @@ import org.xydra.core.change.XRepositoryEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XID;
-import org.xydra.core.model.session.XAccessException;
 import org.xydra.index.iterator.AbstractTransformingIterator;
+import org.xydra.store.AccessException;
 
 
 /**
@@ -44,9 +44,9 @@ public class ArmProtectedChangeLog implements XChangeLog {
 		return getEventsBetween(0, revisionNumber);
 	}
 	
-	private void checkReadAccess() throws XAccessException {
+	private void checkReadAccess() throws AccessException {
 		if(!this.arm.canRead(this.actor, getBaseAddress())) {
-			throw new XAccessException(this.actor + " cannot read " + getBaseAddress());
+			throw new AccessException(this.actor + " cannot read " + getBaseAddress());
 		}
 	}
 	

@@ -11,9 +11,9 @@ import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XObject;
-import org.xydra.core.model.session.XAccessException;
 import org.xydra.core.model.session.XProtectedField;
 import org.xydra.core.model.session.XProtectedObject;
+import org.xydra.store.AccessException;
 
 
 /**
@@ -35,7 +35,7 @@ public class ArmProtectedObject extends ArmProtectedBaseObject implements XProte
 	public XProtectedField createField(XID fieldId) {
 		
 		if(!this.arm.canWrite(this.actor, getAddress())) {
-			throw new XAccessException(this.actor + " cannot write to " + getAddress());
+			throw new AccessException(this.actor + " cannot write to " + getAddress());
 		}
 		
 		XField field = this.object.createField(this.actor, fieldId);
@@ -48,7 +48,7 @@ public class ArmProtectedObject extends ArmProtectedBaseObject implements XProte
 	public long executeObjectCommand(XObjectCommand command) {
 		
 		if(!this.arm.canExecute(this.actor, command)) {
-			throw new XAccessException(this.actor + " cannot execute " + command);
+			throw new AccessException(this.actor + " cannot execute " + command);
 		}
 		
 		return this.object.executeObjectCommand(this.actor, command);
@@ -71,7 +71,7 @@ public class ArmProtectedObject extends ArmProtectedBaseObject implements XProte
 	public boolean removeField(XID fieldId) {
 		
 		if(!this.arm.canRemoveField(this.actor, getAddress(), fieldId)) {
-			throw new XAccessException(this.actor + " cannot remove " + fieldId + " from "
+			throw new AccessException(this.actor + " cannot remove " + fieldId + " from "
 			        + getAddress());
 		}
 		
@@ -114,7 +114,7 @@ public class ArmProtectedObject extends ArmProtectedBaseObject implements XProte
 	public long executeTransaction(XTransaction transaction) {
 		
 		if(!this.arm.canExecute(this.actor, transaction)) {
-			throw new XAccessException(this.actor + " cannot execute " + transaction);
+			throw new AccessException(this.actor + " cannot execute " + transaction);
 		}
 		
 		return this.object.executeTransaction(this.actor, transaction);
@@ -123,7 +123,7 @@ public class ArmProtectedObject extends ArmProtectedBaseObject implements XProte
 	public long executeCommand(XCommand command) {
 		
 		if(!this.arm.canExecute(this.actor, command)) {
-			throw new XAccessException(this.actor + " cannot execute " + command);
+			throw new AccessException(this.actor + " cannot execute " + command);
 		}
 		
 		return this.object.executeCommand(this.actor, command);

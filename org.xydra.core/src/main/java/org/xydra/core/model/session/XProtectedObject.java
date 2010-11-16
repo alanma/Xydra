@@ -15,6 +15,7 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XLoggedObject;
 import org.xydra.core.model.XObject;
+import org.xydra.store.AccessException;
 
 
 /**
@@ -22,7 +23,7 @@ import org.xydra.core.model.XObject;
  * links the {@link XObject} with a specific actor (represented by its
  * {@link XID}) and automatically checks the access rights for this actor on the
  * {@link XObject}, if a method is called and only executes the method, if the
- * actor is allowed to execute it (otherwise {@link XAccessException
+ * actor is allowed to execute it (otherwise {@link AccessException
  * XAccessExceptions} will be thrown).
  * 
  * All change operations like adding new {@link XObject XObjects} executed on an
@@ -44,7 +45,7 @@ public interface XProtectedObject extends XLoggedObject, XProtectedSynchronizesC
 	 *         {@link XProtectedField} linked with the actor of this
 	 *         XProtectedObject or null, if no corresponding {@link XField}
 	 *         exists
-	 * @throws XAccessException if the actor linked with this field does not
+	 * @throws AccessException if the actor linked with this field does not
 	 *             have the necessary access rights (read access) to execute
 	 *             this method
 	 */
@@ -63,7 +64,7 @@ public interface XProtectedObject extends XLoggedObject, XProtectedSynchronizesC
 	 *         {@link XField} with this {@link XID} (both as an
 	 *         {@link XProtectedField} linked with the actor of this
 	 *         XProtectedObject)
-	 * @throws XAccessException if the actor linked with this field does not
+	 * @throws AccessException if the actor linked with this field does not
 	 *             have the necessary access rights (write access) to execute
 	 *             this method
 	 */
@@ -78,7 +79,7 @@ public interface XProtectedObject extends XLoggedObject, XProtectedSynchronizesC
 	 *            removed
 	 * @return true, if the specified {@link XField} did exist and could be
 	 *         removed
-	 * @throws XAccessException if the actor linked with this field does not
+	 * @throws AccessException if the actor linked with this field does not
 	 *             have the necessary access rights (write access) to execute
 	 *             this method
 	 */
@@ -106,7 +107,7 @@ public interface XProtectedObject extends XLoggedObject, XProtectedSynchronizesC
 	 *         {@link XObjectCommand} didn't change anything or if executing the
 	 *         {@link XObjectCommand} succeeded the revision number of the
 	 *         {@link XObjectEvent} caused by the {@link XObjectCommand}.
-	 * @throws XAccessException if the actor linked with this field does not
+	 * @throws AccessException if the actor linked with this field does not
 	 *             have the necessary access rights (write access) to execute
 	 *             this method
 	 */
@@ -114,56 +115,56 @@ public interface XProtectedObject extends XLoggedObject, XProtectedSynchronizesC
 	long executeObjectCommand(XObjectCommand command);
 	
 	/**
-	 * @throws XAccessException if the actor linked with this field does not
+	 * @throws AccessException if the actor linked with this field does not
 	 *             have the necessary access rights (read access) to execute
 	 *             this method
 	 */
 	long getRevisionNumber();
 	
 	/**
-	 * @throws XAccessException if the actor linked with this field does not
+	 * @throws AccessException if the actor linked with this field does not
 	 *             have the necessary access rights (read access) to execute
 	 *             this method
 	 */
 	boolean hasField(XID objectID);
 	
 	/**
-	 * @throws XAccessException if the actor linked with this field does not
+	 * @throws AccessException if the actor linked with this field does not
 	 *             have the necessary access rights (read access) to execute
 	 *             this method
 	 */
 	boolean isEmpty();
 	
 	/**
-	 * @throws XAccessException if the actor linked with this field does not
+	 * @throws AccessException if the actor linked with this field does not
 	 *             have the necessary access rights (read access) to execute
 	 *             this method
 	 */
 	Iterator<XID> iterator();
 	
 	/**
-	 * @throws XAccessException if the actor linked with this field does not
+	 * @throws AccessException if the actor linked with this field does not
 	 *             have the necessary access rights (read access) to execute
 	 *             this method
 	 */
 	boolean addListenerForObjectEvents(XObjectEventListener changeListener);
 	
 	/**
-	 * @throws XAccessException if the actor linked with this field does not
+	 * @throws AccessException if the actor linked with this field does not
 	 *             have the necessary access rights (read access) to execute
 	 *             this method
 	 */
 	boolean addListenerForFieldEvents(XFieldEventListener changeListener);
 	
 	/**
-	 * @throws XAccessException if the actor linked with this field does not
+	 * @throws AccessException if the actor linked with this field does not
 	 *             have the necessary access rights (read access) to execute
 	 *             this method
 	 */
 	boolean addListenerForTransactionEvents(XTransactionEventListener changeListener);
 	
 	/**
-	 * @throws XAccessException if the actor linked with this field does not
+	 * @throws AccessException if the actor linked with this field does not
 	 *             have the necessary access rights (read or write access,
 	 *             depending on the {@link XCommand XCommands} in the
 	 *             {@link XTransaction}) to execute this method
@@ -171,7 +172,7 @@ public interface XProtectedObject extends XLoggedObject, XProtectedSynchronizesC
 	long executeTransaction(XTransaction transaction);
 	
 	/**
-	 * @throws XAccessException if the actor linked with this field does not
+	 * @throws AccessException if the actor linked with this field does not
 	 *             have the necessary access rights (read or write access,
 	 *             depending on the {@link XCommand}) to execute this method
 	 */

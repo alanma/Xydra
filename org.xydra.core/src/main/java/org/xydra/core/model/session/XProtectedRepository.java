@@ -15,6 +15,7 @@ import org.xydra.core.model.XBaseRepository;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
+import org.xydra.store.AccessException;
 
 
 /**
@@ -22,7 +23,7 @@ import org.xydra.core.model.XRepository;
  * which links the {@link XRepository} with a specific actor (represented by its
  * {@link XID}) and automatically checks the access rights for this actor on the
  * {@link XRepository}, if a method is called and only executes the method, if
- * the actor is allowed to execute it (otherwise {@link XAccessException
+ * the actor is allowed to execute it (otherwise {@link AccessException
  * XAccessExceptions} will be thrown).
  * 
  * All change operations like adding new {@link XModel XModels} executed on an
@@ -45,7 +46,7 @@ public interface XProtectedRepository extends XBaseRepository, XSendsRepositoryE
 	 *         {@link XProtectedModel} linked with the actor of this
 	 *         XProtectedRepository or null if no such {@link XBaseModel} exists
 	 *         in this repository
-	 * @throws XAccessException if the actor linked with this field does not
+	 * @throws AccessException if the actor linked with this field does not
 	 *             have the necessary access rights (read access) to execute
 	 *             this method
 	 */
@@ -62,7 +63,7 @@ public interface XProtectedRepository extends XBaseRepository, XSendsRepositoryE
 	 *         {@link XModel} if the given {@link XID} was already taken (both
 	 *         as an {@link XProtected} linked with the actor of this
 	 *         XProtectedObject)
-	 * @throws XAccessException if the actor linked with this field does not
+	 * @throws AccessException if the actor linked with this field does not
 	 *             have the necessary access rights (write access) to execute
 	 *             this method
 	 */
@@ -101,7 +102,7 @@ public interface XProtectedRepository extends XBaseRepository, XSendsRepositoryE
 	 *         or if executing the {@link XRepositoryCommand} succeeded the
 	 *         revision number of the {@link XRepositoryEvent} caused by the
 	 *         {@link XRepositoryCommand}.
-	 * @throws XAccessException if the actor linked with this field does not
+	 * @throws AccessException if the actor linked with this field does not
 	 *             have the necessary access rights (write access) to execute
 	 *             this method
 	 */

@@ -14,10 +14,19 @@ import org.xydra.core.model.XID;
  */
 public interface XAccessDefinition {
 	
+	/**
+	 * @return never null
+	 */
 	XID getActor();
 	
+	/**
+	 * @return never null
+	 */
 	XAddress getResource();
 	
+	/**
+	 * @return never null
+	 */
 	XID getAccess();
 	
 	boolean isAllowed();
