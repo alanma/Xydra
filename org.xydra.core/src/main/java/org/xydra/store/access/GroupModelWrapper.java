@@ -2,9 +2,16 @@ package org.xydra.store.access;
 
 import java.util.Iterator;
 
+import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XWritableField;
+import org.xydra.core.model.XWritableObject;
 import org.xydra.core.value.XIDSetValue;
+import org.xydra.core.value.XValue;
 import org.xydra.store.XydraStore;
+import org.xydra.store.base.Credentials;
+import org.xydra.store.base.WritableModel;
 
 
 /**
@@ -23,69 +30,118 @@ import org.xydra.store.XydraStore;
  */
 public class GroupModelWrapper implements XGroupDatabase {
 	
+	public static final XID hasMember = XX.toId("hasMember");
+	
 	private static final long serialVersionUID = 3858107275113200924L;
 	
-	private XydraStore store;
+	// FIXME get credentials from config settings
+	private Credentials credentials = new Credentials(XX.toId("__accessManager"), "TODO");
 	
-	public GroupModelWrapper(XydraStore store) {
-		this.store = store;
+	private WritableModel writableModel;
+	
+	public GroupModelWrapper(XydraStore store, XID repositoryId, XID modelId) {
+		this.writableModel = new WritableModel(this.credentials, store, X.getIDProvider()
+		        .fromComponents(repositoryId, modelId, null, null));
 		
 	}
 	
 	@Override
 	public void addToGroup(XID actor, XID group) throws CycleException {
-		// force create object, ignore if no change
-		// retrieve field
-		// add new member
-		// store field
+		XWritableObject groupObject = this.writableModel.getObject(group);
+		if(groupObject == null) {
+			groupObject = this.writableModel.createObject(group);
+		}
+		XWritableField actorsInGroupField = groupObject.getField(hasMember);
+		if(actorsInGroupField == null) {
+			actorsInGroupField = groupObject.createField(hasMember);
+		}
+		XValue actorsInGroupValue = actorsInGroupField.getValue();
+		if(actorsInGroupValue == null) {
+			actorsInGroupValue = X.getValueFactory().createIDSetValue(new XID[] { actor });
+		} else {
+			actorsInGroupValue = ((XIDSetValue)actorsInGroupValue).add(actor);
+		}
+		actorsInGroupField.setValue(actorsInGroupValue);
 	}
 	
 	@Override
 	public Iterator<XID> getAllGroups(XID actor) {
-		// TODO Auto-generated method stub
+		// TODO Auto-generated method stub - requires index
 		return null;
 	}
 	
 	@Override
 	public Iterator<XID> getAllMembers(XID group) {
-		// TODO Auto-generated method stub
-		return null;
+		XWritableObject groupObject = this.writableModel.getObject(group);
+		if(groupObject == null) {
+			return null;
+		} else {
+			return ((XIDSetValue)groupObject.getField(hasMember).getValue()).iterator();
+		}
 	}
 	
 	@Override
 	public Iterator<XID> getGroups(XID actor) {
-		// TODO Auto-generated method stub
+		// TODO Auto-generated method stub - requires index
 		return null;
 	}
 	
 	@Override
 	public Iterator<XID> getGroups() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.writableModel.iterator();
 	}
 	
 	@Override
 	public Iterator<XID> getMembers(XID group) {
-		// TODO Auto-generated method stub
-		return null;
+		XWritableObject groupObject = this.writableModel.getObject(group);
+		if(groupObject == null) {
+			return null;
+		}
+		XWritableField actorsInGroupField = groupObject.getField(hasMember);
+		if(actorsInGroupField == null) {
+			return null;
+		}
+		XValue actorsInGroupValue = actorsInGroupField.getValue();
+		return ((XIDSetValue)actorsInGroupValue).iterator();
 	}
 	
 	@Override
 	public boolean hasDirectGroup(XID actor, XID group) {
-		// TODO Auto-generated method stub
-		return false;
+		XWritableObject groupObject = this.writableModel.getObject(group);
+		if(groupObject == null) {
+			throw new IllegalArgumentException("Group " + group + " not found");
+		}
+		XWritableField actorsInGroupField = groupObject.getField(hasMember);
+		if(actorsInGroupField == null) {
+			return false;
+		}
+		XValue actorsInGroupValue = actorsInGroupField.getValue();
+		return ((XIDSetValue)actorsInGroupValue).contains(actor);
 	}
 	
 	@Override
 	public boolean hasGroup(XID actor, XID group) {
-		// TODO Auto-generated method stub
+		// TODO Auto-generated method stub - requires index
 		return false;
 	}
 	
 	@Override
 	public void removeFromGroup(XID actor, XID group) {
-		// TODO Auto-generated method stub
-		
+		XWritableObject groupObject = this.writableModel.getObject(group);
+		if(groupObject == null) {
+			return;
+		}
+		XWritableField actorsInGroupField = groupObject.getField(hasMember);
+		if(actorsInGroupField == null) {
+			return;
+		}
+		XValue actorsInGroupValue = actorsInGroupField.getValue();
+		if(actorsInGroupValue == null) {
+			return;
+		} else {
+			actorsInGroupValue = ((XIDSetValue)actorsInGroupValue).remove(actor);
+			actorsInGroupField.setValue(actorsInGroupValue);
+		}
 	}
 	
 }

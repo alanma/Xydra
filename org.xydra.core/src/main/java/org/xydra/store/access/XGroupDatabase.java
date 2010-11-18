@@ -122,6 +122,8 @@ public interface XGroupDatabase extends Serializable {
 	 *         subgroups of the specified group
 	 * 
 	 *         TODO iterator is problematic with concurrent access
+	 * 
+	 *         TODO can return null?
 	 */
 	Iterator<XID> getAllMembers(XID group);
 	
