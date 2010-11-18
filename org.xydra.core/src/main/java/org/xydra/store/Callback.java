@@ -34,8 +34,8 @@ public interface Callback<T> {
 	 * This method should not be called after {@link #onSuccess(Object)} has
 	 * been called.
 	 * 
-	 * @param error An object describing the error that occurred.
+	 * @param exception An object describing the exception that occurred.
 	 */
-	void onFailure(Throwable error);
+	void onFailure(Throwable exception);
 	
 }
