@@ -63,6 +63,8 @@ public class MemoryField implements XField, Serializable {
 	/**
 	 * Creates a new MemoryField without a father-{@link XObject}.
 	 * 
+	 * TODO What can I do with it? Can I ever add it to an XObject?
+	 * 
 	 * @param actorId TODO
 	 * @param fieldId The {@link XID} for this MemoryField.
 	 */
@@ -72,6 +74,8 @@ public class MemoryField implements XField, Serializable {
 	
 	/**
 	 * Creates a new MemoryField without a father-{@link XObject}.
+	 * 
+	 * TODO What can I do with it? Can I ever add it to an XObject?
 	 * 
 	 * @param actorId TODO
 	 * @param fieldState The initial {@link XFieldState} of this MemoryField.
@@ -86,7 +90,8 @@ public class MemoryField implements XField, Serializable {
 	 * @param actorId TODO
 	 * @param parent The father-{@link XObject} of this MemoryField (may be
 	 *            null)
-	 * @param eventQueue the {@link MemoryEventQueue} this MemoryField will use
+	 * @param eventQueue the {@link MemoryEventQueue} this MemoryField will use;
+	 *            never null.
 	 * @param fieldState The initial {@link XFieldState} of this MemoryField.
 	 */
 	protected MemoryField(XID actorId, MemoryObject parent, MemoryEventQueue eventQueue,
@@ -216,6 +221,7 @@ public class MemoryField implements XField, Serializable {
 	 */
 	@ModificationOperation
 	public boolean setValue(XValue newValue) {
+		
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
