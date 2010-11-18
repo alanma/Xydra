@@ -58,36 +58,44 @@ public class MemoryField implements XField, Serializable {
 	
 	private Set<XFieldEventListener> fieldChangeListenerCollection;
 	
+	private XID actorId;
+	
 	/**
 	 * Creates a new MemoryField without a father-{@link XObject}.
 	 * 
+	 * @param actorId TODO
 	 * @param fieldId The {@link XID} for this MemoryField.
 	 */
-	public MemoryField(XID fieldId) {
-		this(new TemporaryFieldState(XX.toAddress(null, null, null, fieldId)));
+	public MemoryField(XID actorId, XID fieldId) {
+		this(actorId, new TemporaryFieldState(XX.toAddress(null, null, null, fieldId)));
 	}
 	
 	/**
 	 * Creates a new MemoryField without a father-{@link XObject}.
 	 * 
+	 * @param actorId TODO
 	 * @param fieldState The initial {@link XFieldState} of this MemoryField.
 	 */
-	public MemoryField(XFieldState fieldState) {
-		this(null, new MemoryEventQueue(null), fieldState);
+	public MemoryField(XID actorId, XFieldState fieldState) {
+		this(actorId, null, new MemoryEventQueue(null), fieldState);
 	}
 	
 	/**
 	 * Creates a new MemoryField with or without a father-{@link XObject}.
 	 * 
+	 * @param actorId TODO
 	 * @param parent The father-{@link XObject} of this MemoryField (may be
 	 *            null)
 	 * @param eventQueue the {@link MemoryEventQueue} this MemoryField will use
 	 * @param fieldState The initial {@link XFieldState} of this MemoryField.
 	 */
-	protected MemoryField(MemoryObject parent, MemoryEventQueue eventQueue, XFieldState fieldState) {
-		this.eventQueue = eventQueue;
-		
+	protected MemoryField(XID actorId, MemoryObject parent, MemoryEventQueue eventQueue,
+	        XFieldState fieldState) {
 		assert eventQueue != null;
+		
+		this.eventQueue = eventQueue;
+		assert actorId != null;
+		this.actorId = actorId;
 		
 		if(fieldState == null) {
 			throw new IllegalArgumentException("objectState may not be null");
@@ -207,7 +215,7 @@ public class MemoryField implements XField, Serializable {
 	 *             MemoryField was already removed
 	 */
 	@ModificationOperation
-	public boolean setValue(XID actor, XValue newValue) {
+	public boolean setValue(XValue newValue) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -234,17 +242,17 @@ public class MemoryField implements XField, Serializable {
 			long fieldRev = getRevisionNumber();
 			if((oldValue == null)) {
 				assert newValue != null;
-				event = MemoryFieldEvent.createAddEvent(actor, getAddress(), newValue, modelRev,
+				event = MemoryFieldEvent.createAddEvent(this.actorId, getAddress(), newValue, modelRev,
 				        objectRev, fieldRev, inTrans);
 			} else {
 				if(newValue == null) {
 					// implies remove
-					event = MemoryFieldEvent.createRemoveEvent(actor, getAddress(), oldValue,
+					event = MemoryFieldEvent.createRemoveEvent(this.actorId, getAddress(), oldValue,
 					        modelRev, objectRev, fieldRev, inTrans);
 				} else {
 					assert !newValue.equals(oldValue);
 					// implies change
-					event = MemoryFieldEvent.createChangeEvent(actor, getAddress(), oldValue,
+					event = MemoryFieldEvent.createChangeEvent(this.actorId, getAddress(), oldValue,
 					        newValue, modelRev, objectRev, fieldRev, inTrans);
 				}
 			}
@@ -279,7 +287,7 @@ public class MemoryField implements XField, Serializable {
 	 * @throws IllegalStateException if this method is called after this
 	 *             MemoryField was already removed
 	 */
-	public long executeFieldCommand(XID actor, XFieldCommand command) {
+	public long executeFieldCommand(XFieldCommand command) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -307,7 +315,7 @@ public class MemoryField implements XField, Serializable {
 					}
 				}
 				
-				if(setValue(actor, command.getValue())) {
+				if(setValue(command.getValue())) {
 					return oldRev + 1;
 				} else {
 					return XCommand.NOCHANGE;
@@ -331,7 +339,7 @@ public class MemoryField implements XField, Serializable {
 					}
 				}
 				
-				setValue(actor, null);
+				setValue(null);
 				
 				return oldRev + 1;
 			}
@@ -350,7 +358,7 @@ public class MemoryField implements XField, Serializable {
 					}
 				}
 				
-				if(setValue(actor, command.getValue())) {
+				if(setValue(command.getValue())) {
 					return oldRev + 1;
 				} else {
 					return XCommand.NOCHANGE;

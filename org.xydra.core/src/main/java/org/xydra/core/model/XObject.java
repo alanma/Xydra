@@ -43,30 +43,28 @@ public interface XObject extends XLoggedObject, XSynchronizesChanges {
 	 * Creates a new {@link XField} and adds it to this {@link XObject} or
 	 * returns the already existing {@link XField} if the given {@link XID} was
 	 * already taken.
-	 * 
-	 * @param actor The {@link XID} of the actor.
 	 * @param fieldID The {@link XID} for the {@link XField} which is to be
 	 *            created.
+	 * 
 	 * @return the newly created {@link XField} or the already existing
 	 *         {@link XField} with this {@link XID}
 	 * @throws IllegalStateException if this object has already been removed
 	 */
 	@ModificationOperation
-	XField createField(XID actor, XID fieldID);
+	XField createField(XID fieldID);
 	
 	/**
 	 * Removes the {@link XField} with the given {@link XID} from this XObject
-	 * 
-	 * @param actor The {@link XID} of the actor
 	 * @param fieldID The {@link XID} of the {@link XField} which is to be
 	 *            removed
+	 * 
 	 * @return true, if the specified {@link XField} did exist and could be
 	 *         removed
 	 * @throws IllegalStateException if this object has already been removed
 	 *             itself
 	 */
 	@ModificationOperation
-	boolean removeField(XID actor, XID fieldID);
+	boolean removeField(XID fieldID);
 	
 	/**
 	 * Executes the given {@link XObjectCommand} if possible.
@@ -82,8 +80,8 @@ public interface XObject extends XLoggedObject, XSynchronizesChanges {
 	 * <li>the object-{@link XID} in the {@link XObjectCommand} does not concur
 	 * with the {@link XID} of this XObject
 	 * </ul>
-	 * 
 	 * @param command The {@link XObjectCommand} which is to be executed
+	 * 
 	 * @return {@link XCommand#FAILED} if executing the {@link XObjectCommand}
 	 *         failed, {@link XCommand#NOCHANGE} if executing the
 	 *         {@link XObjectCommand} didn't change anything or if executing the
@@ -92,6 +90,6 @@ public interface XObject extends XLoggedObject, XSynchronizesChanges {
 	 * @throws IllegalStateException if this object has already been removed
 	 */
 	@ModificationOperation
-	long executeObjectCommand(XID actor, XObjectCommand command);
+	long executeObjectCommand(XObjectCommand command);
 	
 }

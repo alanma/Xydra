@@ -52,13 +52,16 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	/** Has this MemoryObject been removed? */
 	boolean removed = false;
 	
+	private XID actorId;
+	
 	/**
 	 * Creates a new MemoryObject without a father-{@link XModel}.
 	 * 
+	 * @param actorId TODO
 	 * @param objectId The {@link XID} for this MemoryObject
 	 */
-	public MemoryObject(XID objectId) {
-		this(createObjectState(objectId));
+	public MemoryObject(XID actorId, XID objectId) {
+		this(actorId, createObjectState(objectId));
 	}
 	
 	private static XObjectState createObjectState(XID objectId) {
@@ -72,10 +75,11 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	/**
 	 * Creates a new MemoryObject without a father-{@link XModel}.
 	 * 
+	 * @param actorId TODO
 	 * @param objectState The {@link XObjectState} for this MemoryObject
 	 */
-	public MemoryObject(XObjectState objectState) {
-		this(null, createEventQueue(objectState), objectState);
+	public MemoryObject(XID actorId, XObjectState objectState) {
+		this(actorId, null, createEventQueue(objectState), objectState);
 	}
 	
 	private static MemoryEventQueue createEventQueue(XObjectState objectState) {
@@ -88,15 +92,18 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	 * Creates a new MemoryObject with the given {@link MemoryModel} as its
 	 * father.
 	 * 
+	 * @param actorId TODO
 	 * @param parent The father-{@link MemoryModel} of this MemoryObject.
 	 * @param eventQueue The {@link MemoryEventQueue} which will be used by this
 	 *            MemoryObject.
 	 * @param objectState The initial {@link XObjectState} of this MemoryObject.
 	 */
-	protected MemoryObject(MemoryModel parent, MemoryEventQueue eventQueue, XObjectState objectState) {
+	protected MemoryObject(XID actorId, MemoryModel parent, MemoryEventQueue eventQueue,
+	        XObjectState objectState) {
 		super(eventQueue);
-		
 		assert eventQueue != null;
+		
+		this.actorId = actorId;
 		
 		if(objectState == null) {
 			throw new IllegalArgumentException("objectState may not be null");
@@ -204,7 +211,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		this.loadedFields.clear();
 	}
 	
-	public boolean removeField(XID actor, XID fieldID) {
+	public boolean removeField(XID fieldID) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -218,7 +225,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 			boolean inTrans = this.eventQueue.transactionInProgess;
 			boolean makeTrans = !field.isEmpty();
 			int since = this.eventQueue.getNextPosition();
-			enqueueFieldRemoveEvents(actor, field, makeTrans || inTrans);
+			enqueueFieldRemoveEvents(this.actorId, field, makeTrans || inTrans);
 			
 			Orphans orphans = getOrphans();
 			if(!inTrans && orphans == null) {
@@ -242,7 +249,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 			if(!inTrans) {
 				
 				if(makeTrans) {
-					this.eventQueue.createTransactionEvent(actor, this.father, this, since);
+					this.eventQueue.createTransactionEvent(this.actorId, this.father, this, since);
 				}
 				
 				// increment revision number
@@ -302,14 +309,14 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 			
 			XFieldState fieldState = this.state.getFieldState(fieldID);
 			assert fieldState != null;
-			field = new MemoryField(this, this.eventQueue, fieldState);
+			field = new MemoryField(this.actorId, this, this.eventQueue, fieldState);
 			this.loadedFields.put(fieldID, field);
 			
 			return field;
 		}
 	}
 	
-	public MemoryField createField(XID actor, XID fieldID) {
+	public MemoryField createField(XID fieldID) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -331,13 +338,13 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 			if(field == null) {
 				XFieldState fieldState = this.state.createFieldState(fieldID);
 				assert getAddress().contains(fieldState.getAddress());
-				field = new MemoryField(this, this.eventQueue, fieldState);
+				field = new MemoryField(this.actorId, this, this.eventQueue, fieldState);
 			}
 			
 			this.state.addFieldState(field.getState());
 			this.loadedFields.put(field.getID(), field);
 			
-			XObjectEvent event = MemoryObjectEvent.createAddEvent(actor, getAddress(), field
+			XObjectEvent event = MemoryObjectEvent.createAddEvent(this.actorId, getAddress(), field
 			        .getID(), getModelRevisionNumber(), getRevisionNumber(), inTrans);
 			
 			this.eventQueue.enqueueObjectEvent(this, event);
@@ -364,7 +371,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		}
 	}
 	
-	public long executeObjectCommand(XID actor, XObjectCommand command) {
+	public long executeObjectCommand(XObjectCommand command) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -388,7 +395,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 				
 				long oldRev = getOldRevisionNumber();
 				
-				createField(actor, command.getFieldID());
+				createField(command.getFieldID());
 				
 				return oldRev + 1;
 			}
@@ -416,7 +423,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 				
 				long oldRev = getOldRevisionNumber();
 				
-				removeField(actor, command.getFieldID());
+				removeField(command.getFieldID());
 				
 				return oldRev + 1;
 			}
@@ -565,12 +572,12 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 				return executeTransaction(actor, (XTransaction)command);
 			}
 			if(command instanceof XObjectCommand) {
-				return executeObjectCommand(actor, (XObjectCommand)command);
+				return executeObjectCommand((XObjectCommand)command);
 			}
 			if(command instanceof XFieldCommand) {
 				XField field = getField(command.getTarget().getField());
 				if(field != null) {
-					return field.executeFieldCommand(actor, (XFieldCommand)command);
+					return field.executeFieldCommand((XFieldCommand)command);
 				}
 			}
 			return XCommand.FAILED;
@@ -578,7 +585,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	}
 	
 	@Override
-	protected MemoryObject createObject(XID actor, XID objectId) {
+	protected MemoryObject createObject(XID objectId) {
 		throw new AssertionError("object transactions cannot create objects");
 	}
 	
@@ -595,7 +602,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	}
 	
 	@Override
-	protected boolean removeObject(XID actor, XID objectId) {
+	protected boolean removeObject(XID objectId) {
 		throw new AssertionError("object transactions cannot remove objects");
 	}
 	

@@ -38,14 +38,15 @@ public class MemoryXydraServer implements IXydraServer {
 	
 	/**
 	 * Parameter-less constructor. Called form {@link XydraRestServer}.
+	 * @param actorId TODO
 	 */
-	public MemoryXydraServer() {
+	public MemoryXydraServer(XID actorId) {
 		// setup logging
 		// FIXME why does the in-memory server need GAE logging? ~Daniel
 		GaeLoggerFactorySPI.init();
 		// Set the repository, group DB and access manager
 		XSPI.setStateStore(new MemoryStateStore());
-		this.repo = X.createMemoryRepository();
+		this.repo = X.createMemoryRepository(actorId);
 		this.groups = new MemoryGroupDatabase();
 		this.accessManager = new MemoryAccessManager(this.groups);
 	}

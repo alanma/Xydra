@@ -38,7 +38,7 @@ public class ArmProtectedObject extends ArmProtectedBaseObject implements XProte
 			throw new AccessException(this.actor + " cannot write to " + getAddress());
 		}
 		
-		XField field = this.object.createField(this.actor, fieldId);
+		XField field = this.object.createField(fieldId);
 		
 		assert field != null;
 		
@@ -51,7 +51,7 @@ public class ArmProtectedObject extends ArmProtectedBaseObject implements XProte
 			throw new AccessException(this.actor + " cannot execute " + command);
 		}
 		
-		return this.object.executeObjectCommand(this.actor, command);
+		return this.object.executeObjectCommand(command);
 	}
 	
 	@Override
@@ -75,7 +75,7 @@ public class ArmProtectedObject extends ArmProtectedBaseObject implements XProte
 			        + getAddress());
 		}
 		
-		return this.object.removeField(this.actor, fieldId);
+		return this.object.removeField(fieldId);
 	}
 	
 	public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {

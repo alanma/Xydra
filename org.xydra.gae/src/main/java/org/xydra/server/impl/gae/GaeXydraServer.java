@@ -3,6 +3,7 @@ package org.xydra.server.impl.gae;
 import java.util.Iterator;
 
 import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.access.XAccessManager;
 import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.access.impl.gae.GaeAccess;
@@ -43,13 +44,14 @@ public class GaeXydraServer implements IXydraServer {
 		
 		// Set the repository, group DB and access manager
 		XSPI.setStateStore(new GaeStateStore());
-		this.repo = X.createMemoryRepository();
+		this.repo = X.createMemoryRepository(XX.toId(GaeXydraServer.class.getName()));
 		this.groups = GaeGroups.loadGroups();
 		this.accessManager = GaeAccess.loadAccessManager(this.repo.getAddress(), this.groups);
 		
 	}
 	
-	public XAccessManager getAccessManagerForModel(XAddress modelAddr, XGroupDatabaseWithListeners groups) {
+	public XAccessManager getAccessManagerForModel(XAddress modelAddr,
+	        XGroupDatabaseWithListeners groups) {
 		return GaeAccess.loadAccessManager(modelAddr, groups);
 	}
 	

@@ -11,6 +11,7 @@ import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
+import org.xydra.core.model.XID;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.MiniXMLParser;
 import org.xydra.core.xml.XmlModel;
@@ -24,6 +25,8 @@ import org.xydra.server.rest.XydraRestServer;
 
 
 public class XModelResource {
+	
+	static private final XID actorId = XX.toId(XModelResource.class.getName());
 	
 	public static void restless(Restless restless, String prefix) {
 		RestlessParameter modelId = new RestlessParameter("modelId");
@@ -58,7 +61,7 @@ public class XModelResource {
 			MiniXMLParser parser = new MiniXMLParserImpl();
 			MiniElement objectElement = parser.parseXml(objectXml);
 			
-			newObject = XmlModel.toObject(objectElement);
+			newObject = XmlModel.toObject(actorId, objectElement);
 			
 		} catch(IllegalArgumentException iae) {
 			throw new RestlessException(RestlessException.Bad_request,

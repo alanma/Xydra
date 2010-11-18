@@ -15,31 +15,31 @@ import org.xydra.core.value.XValueFactory;
 public class X5MinuteTutorial {
 	
 	public static void main(String[] args) {
-		XRepository exampleRepo = X.createMemoryRepository();
-		
 		// getting an XIDProvider will save us the work of creating XIDs
 		// ourselves
 		XIDProvider idProvider = X.getIDProvider();
-		// creating a random and unique XID for our phonebook XModel
-		XID phonebookID = idProvider.createUniqueID();
-		
 		// instead of creating a random XID, we will create one from a String
 		XID actorID = idProvider.fromString("exampleActor");
 		
-		XModel phonebook = exampleRepo.createModel(actorID, phonebookID);
+		XRepository exampleRepo = X.createMemoryRepository(actorID);
+		
+		// creating a random and unique XID for our phonebook XModel
+		XID phonebookID = idProvider.createUniqueID();
+		
+		XModel phonebook = exampleRepo.createModel(phonebookID);
 		
 		// adding an object representing an entry in the phonebook for a person
 		// named "John"
 		XID johnID = idProvider.fromString("john");
-		XObject johnEntry = phonebook.createObject(actorID, johnID);
+		XObject johnEntry = phonebook.createObject(johnID);
 		
 		// adding fields to the john-XObject which will the name and phonenumber
 		// of "John"
 		XID nameID = idProvider.fromString("name");
-		XField nameField = johnEntry.createField(actorID, nameID);
+		XField nameField = johnEntry.createField(nameID);
 		
 		XID phonenrID = idProvider.fromString("phonenr");
-		XField phonenrField = johnEntry.createField(actorID, phonenrID);
+		XField phonenrField = johnEntry.createField(phonenrID);
 		
 		// getting an XValueFactory using X
 		XValueFactory valueFactory = X.getValueFactory();
@@ -52,8 +52,8 @@ public class X5MinuteTutorial {
 		XIntegerValue phonenrValue = valueFactory.createIntegerValue(1234567);
 		
 		// lets add these values to our XFields
-		nameField.setValue(actorID, nameValue);
-		phonenrField.setValue(actorID, phonenrValue);
+		nameField.setValue(nameValue);
+		phonenrField.setValue(phonenrValue);
 	}
 	
 }

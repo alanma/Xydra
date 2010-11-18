@@ -56,24 +56,25 @@ abstract public class AbstractTransactionTest {
 	protected XModel model;
 	protected XObject john;
 	protected XObject peter;
+	private XID actorId;
 	
 	@Before
 	public void setUp() {
-		
-		this.repo = X.createMemoryRepository();
-		this.model = this.repo.createModel(ACTOR_ID, MODEL_ID);
-		this.john = this.model.createObject(ACTOR_ID, JOHN_ID);
-		XField johnsPhone = this.john.createField(ACTOR_ID, PHONE_ID);
-		johnsPhone.setValue(ACTOR_ID, JOHN_PHONE);
-		this.peter = this.model.createObject(ACTOR_ID, PETER_ID);
-		XField petersPhone = this.peter.createField(ACTOR_ID, PHONE_ID);
-		petersPhone.setValue(ACTOR_ID, PETER_PHONE);
+		this.actorId = XX.toId("AbstractTransactionTest");
+		this.repo = X.createMemoryRepository(this.actorId);
+		this.model = this.repo.createModel(MODEL_ID);
+		this.john = this.model.createObject(JOHN_ID);
+		XField johnsPhone = this.john.createField(PHONE_ID);
+		johnsPhone.setValue(JOHN_PHONE);
+		this.peter = this.model.createObject(PETER_ID);
+		XField petersPhone = this.peter.createField(PHONE_ID);
+		petersPhone.setValue(PETER_PHONE);
 		
 	}
 	
 	@After
 	public void tearDown() {
-		this.repo.removeModel(ACTOR_ID, MODEL_ID);
+		this.repo.removeModel(MODEL_ID);
 	}
 	
 	@Test
@@ -367,15 +368,15 @@ abstract public class AbstractTransactionTest {
 		// test if the event listeners are still there
 		assertFalse(peterObjectListener.eventsReceived);
 		assertFalse(peterFieldListener.eventsReceived);
-		XField peterAlias = this.model.getObject(PETER_ID).createField(ACTOR_ID, ALIAS_ID);
-		peterAlias.setValue(ACTOR_ID, XV.toValue("nomnomnom"));
+		XField peterAlias = this.model.getObject(PETER_ID).createField(ALIAS_ID);
+		peterAlias.setValue(XV.toValue("nomnomnom"));
 		assertTrue(peterObjectListener.eventsReceived);
 		assertTrue(peterFieldListener.eventsReceived);
 		
 		// check that the peter we have now and the peter we had before are the
 		// same or at least modifications to one affect the other.
 		assertTrue(this.peter.hasField(ALIAS_ID));
-		this.peter.removeField(ACTOR_ID, ALIAS_ID);
+		this.peter.removeField(ALIAS_ID);
 		assertFalse(this.model.getObject(PETER_ID).hasField(ALIAS_ID));
 		
 	}
@@ -604,13 +605,13 @@ abstract public class AbstractTransactionTest {
 		// test if the event listeners are still there
 		assertFalse(phoneListener.eventsReceived);
 		XValue newPhone = XV.toValue("0-NEW-PHONE");
-		phone.setValue(ACTOR_ID, newPhone);
+		phone.setValue(newPhone);
 		assertTrue(phoneListener.eventsReceived);
 		
 		// check that the phone we have now and the phone we had before are the
 		// same or at least modifications to one affect the other.
 		assertEquals(newPhone, johnPhone.getValue());
-		johnPhone.setValue(ACTOR_ID, null);
+		johnPhone.setValue(null);
 		assertNull(phone.getValue());
 		
 	}
@@ -664,15 +665,15 @@ abstract public class AbstractTransactionTest {
 		// test if the event listeners are still there
 		assertFalse(peterObjectListener.eventsReceived);
 		assertFalse(peterFieldListener.eventsReceived);
-		XField peterAlias = this.model.getObject(PETER_ID).createField(ACTOR_ID, ALIAS_ID);
-		peterAlias.setValue(ACTOR_ID, XV.toValue("nomnomnom"));
+		XField peterAlias = this.model.getObject(PETER_ID).createField(ALIAS_ID);
+		peterAlias.setValue(XV.toValue("nomnomnom"));
 		assertTrue(peterObjectListener.eventsReceived);
 		assertTrue(peterFieldListener.eventsReceived);
 		
 		// check that the peter we have now and the peter we had before are the
 		// same or at least modifications to one affect the other.
 		assertTrue(this.peter.hasField(ALIAS_ID));
-		this.peter.removeField(ACTOR_ID, ALIAS_ID);
+		this.peter.removeField(ALIAS_ID);
 		assertFalse(this.model.getObject(PETER_ID).hasField(ALIAS_ID));
 		
 	}

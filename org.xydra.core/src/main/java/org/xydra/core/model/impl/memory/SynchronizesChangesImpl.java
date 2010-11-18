@@ -137,16 +137,16 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 			// apply changes
 			
 			for(XID objectId : model.getRemovedObjects()) {
-				removeObject(actor, objectId);
+				removeObject(objectId);
 			}
 			
 			for(NewObject object : model.getNewObjects()) {
-				MemoryObject newObject = createObject(actor, object.getID());
+				MemoryObject newObject = createObject(object.getID());
 				for(XID fieldId : object) {
 					XBaseField field = object.getField(fieldId);
-					XField newField = newObject.createField(actor, fieldId);
+					XField newField = newObject.createField(fieldId);
 					if(!field.isEmpty()) {
-						newField.setValue(actor, field.getValue());
+						newField.setValue(field.getValue());
 					}
 				}
 			}
@@ -155,20 +155,20 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 				MemoryObject oldObject = getObject(object.getID());
 				
 				for(XID fieldId : object.getRemovedFields()) {
-					oldObject.removeField(actor, fieldId);
+					oldObject.removeField(fieldId);
 				}
 				
 				for(NewField field : object.getNewFields()) {
-					XField newField = oldObject.createField(actor, field.getID());
+					XField newField = oldObject.createField(field.getID());
 					if(!field.isEmpty()) {
-						newField.setValue(actor, field.getValue());
+						newField.setValue(field.getValue());
 					}
 				}
 				
 				for(ChangedField field : object.getChangedFields()) {
 					if(field.isChanged()) {
 						XField oldField = oldObject.getField(field.getID());
-						oldField.setValue(actor, field.getValue());
+						oldField.setValue(field.getValue());
 					}
 				}
 				
@@ -526,31 +526,29 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 	 * 
 	 * This method should never be called on entities that are {@link XObject
 	 * XObjects}.
-	 * 
-	 * @param actor The {@link XID} of the actor
 	 * @param objectId The {@link XID} for the {@link MemoryObject} which is to
 	 *            be created
+	 * 
 	 * @return the newly created {@link MemoryObject} or the already existing
 	 *         {@link MemoryObject}, if the given {@link XID} was already taken.
 	 * @throws AssertionError if the entity on which this method is called is an
 	 *             {@link XObject}
 	 */
-	protected abstract MemoryObject createObject(XID actor, XID objectId);
+	protected abstract MemoryObject createObject(XID objectId);
 	
 	/**
 	 * Removes the {@link MemoryObject} with the given {@link XID}.
 	 * 
 	 * This method should never be called on entities that are {@link XObject
 	 * XObjects}.
-	 * 
-	 * @param actor The {@link XID} of the actor
 	 * @param objectId The {@link XID} of the {@link MemoryObject} which is to
 	 *            be removed
+	 * 
 	 * @return true, if removal is successful.
 	 * @throws AssertionError if the entity on which this method is called is an
 	 *             {@link XObject}
 	 */
-	protected abstract boolean removeObject(XID actor, XID objectId);
+	protected abstract boolean removeObject(XID objectId);
 	
 	/**
 	 * @return Return the proxy for reading the current state.

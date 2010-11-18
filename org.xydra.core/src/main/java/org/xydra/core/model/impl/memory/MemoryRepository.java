@@ -58,24 +58,29 @@ public class MemoryRepository implements XRepository, Serializable {
 	private Set<XFieldEventListener> fieldChangeListenerCollection;
 	private Set<XTransactionEventListener> transactionListenerCollection;
 	
+	private XID actorId;
+	
 	/**
 	 * Creates a new MemoryRepository.
 	 * 
+	 * @param actorId TODO
 	 * @param repositoryId The {@link XID} for this MemoryRepository.
 	 */
-	public MemoryRepository(XID repositoryId) {
-		this(new TemporaryRepositoryState(XX.toAddress(repositoryId, null, null, null)));
+	public MemoryRepository(XID actorId, XID repositoryId) {
+		this(actorId, new TemporaryRepositoryState(XX.toAddress(repositoryId, null, null, null)));
 	}
 	
 	/**
 	 * Creates a new {@link MemoryRepository}.
 	 * 
+	 * @param actorId TODO
 	 * @param repositoryState The initial {@link XRepositoryState} of this
 	 *            MemoryRepository.
 	 */
-	public MemoryRepository(XRepositoryState repositoryState) {
+	public MemoryRepository(XID actorId, XRepositoryState repositoryState) {
 		assert repositoryState != null;
 		
+		this.actorId = actorId;
 		this.state = repositoryState;
 		
 		this.repoChangeListenerCollection = new HashSet<XRepositoryEventListener>();
@@ -86,15 +91,15 @@ public class MemoryRepository implements XRepository, Serializable {
 	}
 	
 	@ModificationOperation
-	public synchronized MemoryModel createModel(XID actor, XID modelID) {
+	public synchronized MemoryModel createModel(XID modelID) {
 		MemoryModel model = getModel(modelID);
 		if(model == null) {
-			XRepositoryEvent event = MemoryRepositoryEvent.createAddEvent(actor, getAddress(),
+			XRepositoryEvent event = MemoryRepositoryEvent.createAddEvent(this.actorId, getAddress(),
 			        modelID);
 			
 			XModelState modelState = this.state.createModelState(modelID);
 			
-			model = new MemoryModel(this, modelState);
+			model = new MemoryModel(this.actorId, this, modelState);
 			
 			XStateTransaction trans = beginStateTransaction();
 			
@@ -149,7 +154,7 @@ public class MemoryRepository implements XRepository, Serializable {
 		}
 		
 		XModelState modelState = this.state.getModelState(modelID);
-		model = new MemoryModel(this, modelState);
+		model = new MemoryModel(this.actorId, this, modelState);
 		this.loadedModels.put(modelID, model);
 		
 		return model;
@@ -161,7 +166,7 @@ public class MemoryRepository implements XRepository, Serializable {
 	}
 	
 	@ModificationOperation
-	public synchronized boolean removeModel(XID actor, XID modelID) {
+	public synchronized boolean removeModel(XID modelID) {
 		
 		MemoryModel model = getModel(modelID);
 		if(model == null) {
@@ -172,7 +177,7 @@ public class MemoryRepository implements XRepository, Serializable {
 			
 			long modelRev = model.getRevisionNumber();
 			
-			enqueueModelRemoveEvents(actor, model);
+			enqueueModelRemoveEvents(this.actorId, model);
 			
 			XStateTransaction trans = beginStateTransaction();
 			
@@ -185,7 +190,7 @@ public class MemoryRepository implements XRepository, Serializable {
 			endStateTransaction(trans);
 			
 			model.eventQueue.sendEvents();
-			XRepositoryEvent event = MemoryRepositoryEvent.createRemoveEvent(actor, getAddress(),
+			XRepositoryEvent event = MemoryRepositoryEvent.createRemoveEvent(this.actorId, getAddress(),
 			        modelID, modelRev, false);
 			fireRepositoryEvent(event);
 			
@@ -203,7 +208,7 @@ public class MemoryRepository implements XRepository, Serializable {
 		
 	}
 	
-	public synchronized long executeRepositoryCommand(XID actor, XRepositoryCommand command) {
+	public synchronized long executeRepositoryCommand(XRepositoryCommand command) {
 		
 		if(!command.getRepositoryID().equals(getID())) {
 			// given given repository-id are not consistent
@@ -224,7 +229,7 @@ public class MemoryRepository implements XRepository, Serializable {
 				return XCommand.FAILED;
 			}
 			
-			XModel model = createModel(actor, command.getModelID());
+			XModel model = createModel(command.getModelID());
 			
 			return model.getRevisionNumber();
 		}
@@ -247,7 +252,7 @@ public class MemoryRepository implements XRepository, Serializable {
 				return XCommand.FAILED;
 			}
 			
-			removeModel(actor, command.getModelID());
+			removeModel(command.getModelID());
 			
 			return XCommand.CHANGED;
 		}
@@ -497,7 +502,7 @@ public class MemoryRepository implements XRepository, Serializable {
 	
 	public synchronized long executeCommand(XID actor, XCommand command) {
 		if(command instanceof XRepositoryCommand) {
-			return executeRepositoryCommand(actor, (XRepositoryCommand)command);
+			return executeRepositoryCommand((XRepositoryCommand)command);
 		}
 		XModel model = getModel(command.getTarget().getModel());
 		if(model == null) {

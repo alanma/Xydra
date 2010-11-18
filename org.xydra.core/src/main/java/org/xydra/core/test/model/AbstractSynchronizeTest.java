@@ -55,15 +55,17 @@ abstract public class AbstractSynchronizeTest {
 	private XModel remoteModel;
 	private XModel localModel;
 	
+	private XID actorId;
+	
 	@Before
 	public void setUp() {
-		
-		this.localRepo = X.createMemoryRepository();
+		this.actorId = XX.toId("AbstractSynchronizeTest");
+		this.localRepo = X.createMemoryRepository(this.actorId);
 		
 		assertFalse(this.localRepo.hasModel(DemoModelUtil.PHONEBOOK_ID));
 		
 		// create two identical phonebook models
-		XRepository remoteRepo = new MemoryRepository(XX.toId("remoteRepo"));
+		XRepository remoteRepo = new MemoryRepository(this.actorId, XX.toId("remoteRepo"));
 		DemoModelUtil.addPhonebookModel(remoteRepo);
 		this.remoteModel = remoteRepo.getModel(DemoModelUtil.PHONEBOOK_ID);
 		DemoModelUtil.addPhonebookModel(this.localRepo);
@@ -76,7 +78,7 @@ abstract public class AbstractSynchronizeTest {
 	
 	@After
 	public void tearDown() {
-		this.localRepo.removeModel(ACTOR_ID, DemoModelUtil.PHONEBOOK_ID);
+		this.localRepo.removeModel(DemoModelUtil.PHONEBOOK_ID);
 	}
 	
 	@Test
@@ -96,12 +98,11 @@ abstract public class AbstractSynchronizeTest {
 	
 	private void makeAdditionalChanges(XModel model) {
 		
-		assertNotNull(model.createObject(ACTOR_ID, XX.createUniqueID()));
+		assertNotNull(model.createObject(XX.createUniqueID()));
 		
-		assertTrue(model.removeObject(ACTOR_ID, DemoModelUtil.JOHN_ID));
+		assertTrue(model.removeObject(DemoModelUtil.JOHN_ID));
 		
-		assertNotNull(model.getObject(DemoModelUtil.PETER_ID).createField(ACTOR_ID,
-		        XX.createUniqueID()));
+		assertNotNull(model.getObject(DemoModelUtil.PETER_ID).createField(XX.createUniqueID()));
 		
 		XTransactionBuilder tb = new XTransactionBuilder(model.getAddress());
 		XID objId = XX.createUniqueID();
@@ -110,7 +111,7 @@ abstract public class AbstractSynchronizeTest {
 		tb.addField(objAddr, XCommand.SAFE, XX.createUniqueID());
 		assertTrue(model.executeTransaction(ACTOR_ID, tb.build()) >= 0);
 		
-		assertTrue(model.removeObject(ACTOR_ID, DemoModelUtil.CLAUDIA_ID));
+		assertTrue(model.removeObject(DemoModelUtil.CLAUDIA_ID));
 		
 	}
 	
@@ -173,7 +174,7 @@ abstract public class AbstractSynchronizeTest {
 		localChanges.add(removeJohnForced); // 7
 		
 		// create a model identical to localModel to check events sent on sync
-		XRepository checkRepo = new MemoryRepository(this.localRepo.getID());
+		XRepository checkRepo = new MemoryRepository(this.actorId, this.localRepo.getID());
 		DemoModelUtil.addPhonebookModel(checkRepo);
 		XModel checkModel = checkRepo.getModel(DemoModelUtil.PHONEBOOK_ID);
 		
@@ -244,11 +245,11 @@ abstract public class AbstractSynchronizeTest {
 				XModelEvent me = (XModelEvent)event;
 				if(me.getChangeType() == ChangeType.ADD) {
 					assertFalse(checkModel.hasObject(me.getObjectID()));
-					checkModel.createObject(ACTOR_ID, me.getObjectID());
+					checkModel.createObject(me.getObjectID());
 				} else {
 					assertTrue(checkModel.hasObject(me.getObjectID()));
 					assertTrue(checkModel.getObject(me.getObjectID()).isEmpty());
-					checkModel.removeObject(ACTOR_ID, me.getObjectID());
+					checkModel.removeObject(me.getObjectID());
 				}
 			} else if(event instanceof XObjectEvent) {
 				XObjectEvent oe = (XObjectEvent)event;
@@ -256,11 +257,11 @@ abstract public class AbstractSynchronizeTest {
 				assertNotNull(obj);
 				if(oe.getChangeType() == ChangeType.ADD) {
 					assertFalse(obj.hasField(oe.getFieldID()));
-					obj.createField(ACTOR_ID, oe.getFieldID());
+					obj.createField(oe.getFieldID());
 				} else {
 					assertTrue(obj.hasField(oe.getFieldID()));
 					assertTrue(obj.getField(oe.getFieldID()).isEmpty());
-					obj.removeField(ACTOR_ID, oe.getFieldID());
+					obj.removeField(oe.getFieldID());
 				}
 			} else if(event instanceof XFieldEvent) {
 				XFieldEvent fe = (XFieldEvent)event;
@@ -269,7 +270,7 @@ abstract public class AbstractSynchronizeTest {
 				XField fld = obj.getField(fe.getFieldID());
 				assertNotNull(fld);
 				assertEquals(fld.getValue(), fe.getOldValue());
-				fld.setValue(ACTOR_ID, fe.getNewValue());
+				fld.setValue(fe.getNewValue());
 			}
 			
 		}
@@ -292,7 +293,7 @@ abstract public class AbstractSynchronizeTest {
 		
 		// check that listeners are still there
 		assertFalse(hc.eventsReceived);
-		this.localModel.getObject(newObjectId).createField(ACTOR_ID, newFieldId);
+		this.localModel.getObject(newObjectId).createField(newFieldId);
 		assertTrue(hc.eventsReceived);
 		
 	}

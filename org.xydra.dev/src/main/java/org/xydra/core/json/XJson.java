@@ -203,6 +203,7 @@ public class XJson {
 		private ParseState parseState;
 		
 		private List<Object> tempList;
+		@SuppressWarnings("unused")
 		private XID actor;
 		private XRepository repository;
 		private XModel model;
@@ -243,7 +244,7 @@ public class XJson {
 				} else if(o instanceof XStringValue) {
 					this.onString((String)o);
 				} else if(o instanceof XID) {
-					this.field.setValue(this.actor, (XID)o);
+					this.field.setValue((XID)o);
 				}
 			} else {
 				// real array
@@ -297,7 +298,7 @@ public class XJson {
 				} else {
 					throw new RuntimeException("Unknown common type " + commonType.getName());
 				}
-				this.field.setValue(this.actor, listValue);
+				this.field.setValue(listValue);
 				
 			}
 			
@@ -344,7 +345,7 @@ public class XJson {
 			} else {
 				assert this.field != null;
 				XValue value = X.getValueFactory().createBooleanValue(b);
-				this.field.setValue(this.actor, value);
+				this.field.setValue(value);
 			}
 		}
 		
@@ -355,7 +356,7 @@ public class XJson {
 			} else {
 				assert this.field != null;
 				XValue value = X.getValueFactory().createDoubleValue(d);
-				this.field.setValue(this.actor, value);
+				this.field.setValue(value);
 			}
 		}
 		
@@ -366,7 +367,7 @@ public class XJson {
 			} else {
 				assert this.field != null;
 				XValue value = X.getValueFactory().createIntegerValue(i);
-				this.field.setValue(this.actor, value);
+				this.field.setValue(value);
 			}
 		}
 		
@@ -375,17 +376,17 @@ public class XJson {
 			switch(this.parseState) {
 			case REPO: // add model
 				assert this.repository != null;
-				this.model = this.repository.createModel(this.actor, xid);
+				this.model = this.repository.createModel(xid);
 				this.parseState = ParseState.MODEL;
 				break;
 			case MODEL: // add object
 				assert this.model != null;
-				this.object = this.model.createObject(this.actor, xid);
+				this.object = this.model.createObject(xid);
 				this.parseState = ParseState.OBJECT;
 				break;
 			case OBJECT: // create field
 				assert this.object != null;
-				this.field = this.object.createField(this.actor, xid);
+				this.field = this.object.createField(xid);
 				this.parseState = ParseState.FIELD;
 				break;
 			case FIELD:
@@ -400,7 +401,7 @@ public class XJson {
 			} else {
 				assert this.field != null;
 				XValue value = X.getValueFactory().createLongValue(l);
-				this.field.setValue(this.actor, value);
+				this.field.setValue(value);
 			}
 		}
 		
@@ -423,7 +424,7 @@ public class XJson {
 			} else {
 				assert this.field != null;
 				XValue value = X.getValueFactory().createStringValue(s);
-				this.field.setValue(this.actor, value);
+				this.field.setValue(value);
 			}
 		}
 		

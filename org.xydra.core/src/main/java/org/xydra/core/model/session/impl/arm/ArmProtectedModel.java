@@ -39,7 +39,7 @@ public class ArmProtectedModel extends ArmProtectedBaseModel implements XProtect
 			throw new AccessException(this.actor + " cannot write to " + getAddress());
 		}
 		
-		XObject object = this.model.createObject(this.actor, objectId);
+		XObject object = this.model.createObject(objectId);
 		
 		assert object != null;
 		
@@ -52,7 +52,7 @@ public class ArmProtectedModel extends ArmProtectedBaseModel implements XProtect
 			throw new AccessException(this.actor + " cannot execute " + command);
 		}
 		
-		return this.model.executeModelCommand(this.actor, command);
+		return this.model.executeModelCommand(command);
 	}
 	
 	@Override
@@ -76,7 +76,7 @@ public class ArmProtectedModel extends ArmProtectedBaseModel implements XProtect
 			        + getAddress());
 		}
 		
-		return this.model.removeObject(this.actor, objectId);
+		return this.model.removeObject(objectId);
 	}
 	
 	public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {

@@ -44,7 +44,7 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 			throw new IllegalArgumentException("value may not be null");
 		}
 		XID xid = valueToXID(key);
-		XField indexField = this.indexObject.createField(this.actor, xid);
+		XField indexField = this.indexObject.createField(xid);
 		XID indexValue = (XID)indexField.getValue();
 		XID previous;
 		if(indexValue == null) {
@@ -52,7 +52,7 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 		} else {
 			previous = indexValue;
 		}
-		indexField.setValue(this.actor, value);
+		indexField.setValue(value);
 		return previous;
 	}
 	
@@ -76,7 +76,7 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 		assert indexValue != null : "IndexField " + indexField.getID()
 		        + " has a null value. Key = " + key;
 		XID previous = indexValue;
-		this.indexObject.removeField(this.actor, xid);
+		this.indexObject.removeField(xid);
 		return previous;
 	}
 	
@@ -108,7 +108,7 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 	
 	public void clear() {
 		for(XID fieldID : this.indexObject) {
-			this.indexObject.removeField(this.actor, fieldID);
+			this.indexObject.removeField(fieldID);
 		}
 	}
 	

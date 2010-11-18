@@ -121,15 +121,16 @@ public class XmlModel {
 	
 	/**
 	 * Get the {@link XRepository} represented by the given XML element.
-	 * 
+	 * @param actorId TODO
 	 * @param xml a partial XML document starting with &lt;xrepository&gt; and
 	 *            ending with the same &lt;/xrepository&gt;
+	 * 
 	 * @return an {@link XRepository}
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XRepository element.
 	 */
-	public static XRepository toRepository(MiniElement xml) {
-		return new MemoryRepository(toRepositoryState(xml, null));
+	public static XRepository toRepository(XID actorId, MiniElement xml) {
+		return new MemoryRepository(actorId, toRepositoryState(xml, null));
 	}
 	
 	/**
@@ -230,15 +231,16 @@ public class XmlModel {
 	
 	/**
 	 * Get the {@link XModel} represented by the given XML element.
-	 * 
+	 * @param actorId TODO
 	 * @param xml a partial XML document starting with &lt;xmodel&gt; and ending
 	 *            with the same &lt;/xmodel&gt;
+	 * 
 	 * @return an {@link XModel}
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XModel element.
 	 */
-	public static XModel toModel(MiniElement xml) {
-		return new MemoryModel(toModelState(xml, null, null));
+	public static XModel toModel(XID actorId, MiniElement xml) {
+		return new MemoryModel(actorId, toModelState(xml, null, null));
 	}
 	
 	/**
@@ -306,15 +308,16 @@ public class XmlModel {
 	
 	/**
 	 * Get the {@link XObject} represented by the given XML element.
-	 * 
+	 * @param actorId TODO
 	 * @param xml a partial XML document starting with &lt;xobject&gt; and
 	 *            ending with the same &lt;/xobject&gt;
+	 * 
 	 * @return an {@link XObject}
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XObject element.
 	 */
-	public static XObject toObject(MiniElement xml) {
-		return new MemoryObject(toObjectState(xml, null, null));
+	public static XObject toObject(XID actorId, MiniElement xml) {
+		return new MemoryObject(actorId, toObjectState(xml, null, null));
 	}
 	
 	/**
@@ -360,15 +363,16 @@ public class XmlModel {
 	
 	/**
 	 * Get the {@link XField} represented by the given XML element.
-	 * 
+	 * @param actorId TODO
 	 * @param xml a partial XML document starting with &lt;xfield&gt; and ending
 	 *            with the same &lt;/xfield&gt;
+	 * 
 	 * @return an {@link XField}
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XField element.
 	 */
-	public static XField toField(MiniElement xml) {
-		return new MemoryField(toFieldState(xml, null, null));
+	public static XField toField(XID actorId, MiniElement xml) {
+		return new MemoryField(actorId, toFieldState(xml, null, null));
 	}
 	
 	/**

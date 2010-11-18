@@ -84,7 +84,7 @@ public class SimpleSyntaxUtils {
 		PseudoBufferedReader br = new PseudoBufferedReader(simpleSyntax);
 		String line;
 		
-		XModel model = new MemoryModel(modelID);
+		XModel model = new MemoryModel(ACTOR_THIS, modelID);
 		int lineNo = 1;
 		line = br.readLine();
 		while(line != null) {
@@ -116,7 +116,7 @@ public class SimpleSyntaxUtils {
 					throw new IllegalArgumentException("Line " + lineNo + ": Key name syntax '"
 					        + keyComponents[0].trim() + "' is not a valid XID.");
 				}
-				XObject object = model.createObject(ACTOR_THIS, objectID);
+				XObject object = model.createObject(objectID);
 				
 				XID fieldID = null;
 				XField field = null;
@@ -127,7 +127,7 @@ public class SimpleSyntaxUtils {
 						throw new IllegalArgumentException("Line " + lineNo + ": Key name syntax '"
 						        + keyComponents[1].trim() + "' is not a valid XID.");
 					}
-					field = object.createField(ACTOR_THIS, fieldID);
+					field = object.createField(fieldID);
 				} else {
 					if(value != null) {
 						throw new IllegalArgumentException("Line " + lineNo
@@ -162,7 +162,7 @@ public class SimpleSyntaxUtils {
 					} else {
 						xvalue = XV.toValue(value);
 					}
-					field.setValue(ACTOR_THIS, xvalue);
+					field.setValue(xvalue);
 				}
 			}
 			line = br.readLine();

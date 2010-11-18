@@ -41,7 +41,7 @@ public class ObjectIndex extends AbstractObjectIndex implements IObjectIndex {
 	
 	public void index(XValue key, XID value) {
 		XID xid = valueToXID(key);
-		XField indexField = this.indexObject.createField(this.actor, xid);
+		XField indexField = this.indexObject.createField(xid);
 		XValue indexValue = indexField.getValue();
 		XIDSetValue indexedIds;
 		if(indexValue == null) {
@@ -50,7 +50,7 @@ public class ObjectIndex extends AbstractObjectIndex implements IObjectIndex {
 			XIDSetValue currentIndexedIds = (XIDSetValue)indexValue;
 			indexedIds = currentIndexedIds.add(value);
 		}
-		indexField.setValue(this.actor, indexedIds);
+		indexField.setValue(indexedIds);
 	}
 	
 	public void deindex(XObject xo) {
@@ -61,7 +61,7 @@ public class ObjectIndex extends AbstractObjectIndex implements IObjectIndex {
 	
 	public void deindex(XValue key, XID value) {
 		XID xid = valueToXID(key);
-		XField indexField = this.indexObject.createField(this.actor, xid);
+		XField indexField = this.indexObject.createField(xid);
 		XValue indexValue = indexField.getValue();
 		XIDSetValue indexedIds;
 		assert indexValue != null;
@@ -69,10 +69,10 @@ public class ObjectIndex extends AbstractObjectIndex implements IObjectIndex {
 		indexedIds = currentIndexedIds.remove(value);
 		if(indexedIds.size() == 0) {
 			// remove empty field
-			this.indexObject.removeField(value, xid);
+			this.indexObject.removeField(xid);
 		} else {
 			// set remaining entries
-			indexField.setValue(this.actor, indexedIds);
+			indexField.setValue(indexedIds);
 		}
 	}
 	

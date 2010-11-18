@@ -34,7 +34,7 @@ public class XCopyUtils {
 		// copy model to _model
 		for(XID objectID : sourceModel) {
 			XBaseObject object = sourceModel.getObject(objectID);
-			XObject localObject = targetModel.createObject(actorID, object.getID());
+			XObject localObject = targetModel.createObject(object.getID());
 			XCopyUtils.copy(actorID, object, localObject);
 		}
 	}
@@ -54,7 +54,7 @@ public class XCopyUtils {
 		// copy repository to _repository
 		for(XID modelID : sourceRepository) {
 			XBaseModel model = sourceRepository.getModel(modelID);
-			XModel localModel = targetRepository.createModel(actorID, model.getID());
+			XModel localModel = targetRepository.createModel(model.getID());
 			copy(actorID, model, localModel);
 		}
 	}
@@ -72,8 +72,8 @@ public class XCopyUtils {
 	public static void copy(XID actorID, XBaseObject sourceObject, XObject targetObject) {
 		for(XID fieldID : sourceObject) {
 			XBaseField field = sourceObject.getField(fieldID);
-			XField localField = targetObject.createField(actorID, fieldID);
-			localField.setValue(actorID, field.getValue());
+			XField localField = targetObject.createField(fieldID);
+			localField.setValue(field.getValue());
 		}
 	}
 

@@ -74,14 +74,14 @@ public class MetaModel {
 		XID id = X.getIDProvider().fromString(prefix);
 		if(expansion == null) {
 			// delete value
-			this.metaModel.removeObject(ACTOR, id);
+			this.metaModel.removeObject(id);
 		}
 		
 		XObject prefixObject = this.getOrCreateAnnotationForObject(id, true);
 		assert prefixObject != null;
 		
-		XField expField = prefixObject.createField(ACTOR, NAMESPACE_EXPANSION);
-		expField.setValue(ACTOR, X.getValueFactory().createStringValue(expansion));
+		XField expField = prefixObject.createField(NAMESPACE_EXPANSION);
+		expField.setValue(X.getValueFactory().createStringValue(expansion));
 	}
 	
 	/**
@@ -94,7 +94,7 @@ public class MetaModel {
 	public MetaModel(XRepository repository, XModel baseModel) {
 		this.baseModel = baseModel;
 		XID metaModelID = X.getIDProvider().fromString(baseModel.getID().toURI() + "-meta");
-		this.metaModel = repository.createModel(ACTOR, metaModelID);
+		this.metaModel = repository.createModel(metaModelID);
 		// add built-ins
 		setNamespaceExpansion("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
 	}
@@ -164,7 +164,7 @@ public class MetaModel {
 		String metaID = escapeDots(modelID);
 		XID xid = X.getIDProvider().fromString(metaID);
 		if(create) {
-			return this.metaModel.createObject(ACTOR, xid);
+			return this.metaModel.createObject(xid);
 		} else {
 			return this.metaModel.getObject(xid);
 		}
@@ -181,7 +181,7 @@ public class MetaModel {
 		String metaID = escapeDots(modelID) + "." + escapeDots(objectID);
 		XID xid = X.getIDProvider().fromString(metaID);
 		if(create) {
-			return this.metaModel.createObject(ACTOR, xid);
+			return this.metaModel.createObject(xid);
 		} else {
 			return this.metaModel.getObject(xid);
 		}
@@ -207,7 +207,7 @@ public class MetaModel {
 		        + escapeDots(fieldId);
 		XID xid = X.getIDProvider().fromString(metaID);
 		if(create) {
-			return this.metaModel.createObject(ACTOR, xid);
+			return this.metaModel.createObject(xid);
 		} else {
 			return this.metaModel.getObject(xid);
 		}

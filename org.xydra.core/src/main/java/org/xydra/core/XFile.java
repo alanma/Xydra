@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 
 import org.xydra.core.model.XBaseRepository;
+import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.xml.MiniElement;
@@ -140,14 +141,15 @@ public class XFile {
 	
 	/**
 	 * Loads the given XRepository.
-	 * 
+	 * @param actorId TODO
 	 * @param filename The filename of the repository to be loaded.
+	 * 
 	 * @return The repository. null if the given filename doesn't exist or
 	 *         doesn't hold a correct XRepository
 	 * @throws IOException
 	 */
-	public static XRepository loadRepository(String filename) throws IOException {
-		return loadRepository(null, filename);
+	public static XRepository loadRepository(XID actorId, String filename) throws IOException {
+		return loadRepository(actorId, null, filename);
 	}
 	
 	private static String readAll(InputStream stream) throws IOException {
@@ -163,50 +165,57 @@ public class XFile {
 	/**
 	 * Loads the given XRepository.
 	 * 
+	 * @param actorId TODO
 	 * @param path The path of the file to be loaded.
 	 * @param filename The filename of the repository to be loaded.
+	 * 
 	 * @return The repository. null if the given filename doesn't exist or
 	 *         doesn't hold a correct XRepository
 	 * @throws IOException
 	 */
-	public static XRepository loadRepository(String path, String name) throws IOException {
-		return loadRepository(getFileForRepository(path, name));
+	public static XRepository loadRepository(XID actorId, String path, String name)
+	        throws IOException {
+		return loadRepository(actorId, getFileForRepository(path, name));
 	}
 	
 	/**
 	 * Loads the given XRepository.
 	 * 
+	 * @param actorId TODO
 	 * @param file The file containing the repository to be loaded.
+	 * 
 	 * @return The repository. null if the given file doesn't exist or doesn't
 	 *         hold a correct XRepository
 	 * @throws IOException
 	 */
-	public static XRepository loadRepository(File file) throws IOException {
+	public static XRepository loadRepository(XID actorId, File file) throws IOException {
 		
 		FileInputStream fin = new FileInputStream(file);
 		
 		String data = readAll(fin);
 		MiniElement element = new MiniXMLParserImpl().parseXml(data);
 		
-		return XmlModel.toRepository(element);
+		return XmlModel.toRepository(actorId, element);
 	}
 	
 	/**
 	 * Loads the given XModel.
 	 * 
+	 * @param actorId TODO
 	 * @param filename The filename of the model to be loaded.
 	 * 
 	 * @return The model. null if the given filename doesn't exist or doesn't
 	 *         hold a correct XModel
 	 * @throws IOException
 	 */
-	public static XModel loadModel(String filename) throws IOException {
-		return loadModel(null, filename);
+	public static XModel loadModel(XID actorId, String filename) throws IOException {
+		return loadModel(actorId, null, filename);
 	}
 	
 	/**
 	 * Loads the given XModel.
 	 * 
+	 * @param actorId TODO
 	 * @param path The path of the file to be loaded.
 	 * @param name The filename of the model to be loaded.
 	 * 
@@ -214,27 +223,28 @@ public class XFile {
 	 *         hold a correct XModel
 	 * @throws IOException
 	 */
-	public static XModel loadModel(String path, String name) throws IOException {
-		return loadModel(getFileForModel(path, name));
+	public static XModel loadModel(XID actorId, String path, String name) throws IOException {
+		return loadModel(actorId, getFileForModel(path, name));
 	}
 	
 	/**
 	 * Loads the given XModel.
 	 * 
+	 * @param actorId TODO
 	 * @param file The file containing the model to be loaded.
 	 * 
 	 * @return The model. null if the given filename doesn't exist or doesn't
 	 *         hold a correct XModel
 	 * @throws IOException
 	 */
-	public static XModel loadModel(File file) throws IOException {
+	public static XModel loadModel(XID actorId, File file) throws IOException {
 		
 		FileInputStream fin = new FileInputStream(file);
 		
 		String data = readAll(fin);
 		MiniElement element = new MiniXMLParserImpl().parseXml(data);
 		
-		return XmlModel.toModel(element);
+		return XmlModel.toModel(actorId, element);
 	}
 	
 }

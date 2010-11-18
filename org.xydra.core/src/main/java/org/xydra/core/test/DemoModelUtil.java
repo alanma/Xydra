@@ -136,7 +136,7 @@ public class DemoModelUtil {
 			return;
 		}
 		
-		XModel model = repository.createModel(ACTOR_ID, PHONEBOOK_ID);
+		XModel model = repository.createModel(PHONEBOOK_ID);
 		
 		setupPhonebook(model);
 	}

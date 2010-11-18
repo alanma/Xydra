@@ -32,7 +32,7 @@ public class ArmProtectedField extends ArmProtectedBaseField implements XProtect
 			throw new AccessException(this.actor + " cannot execute " + command);
 		}
 		
-		return this.field.executeFieldCommand(this.actor, command);
+		return this.field.executeFieldCommand(command);
 	}
 	
 	public boolean setValue(XValue value) {
@@ -41,7 +41,7 @@ public class ArmProtectedField extends ArmProtectedBaseField implements XProtect
 			throw new AccessException(this.actor + " cannot write to " + getAddress());
 		}
 		
-		return this.field.setValue(this.actor, value);
+		return this.field.setValue(value);
 	}
 	
 	public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {

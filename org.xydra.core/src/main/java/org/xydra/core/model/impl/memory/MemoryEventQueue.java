@@ -242,6 +242,7 @@ public class MemoryEventQueue implements Serializable {
 	 *        the current MemoryEventQueue (value can be retrieved from
 	 *        getNextPosition())
 	 */
+	@SuppressWarnings("null")
 	public void createTransactionEvent(XID actor, MemoryModel model, MemoryObject object, int since) {
 		
 		assert this.eventQueue instanceof RandomAccess;

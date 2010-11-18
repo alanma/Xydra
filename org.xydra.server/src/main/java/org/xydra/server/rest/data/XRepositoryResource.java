@@ -3,11 +3,13 @@ package org.xydra.server.rest.data;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XRepositoryCommand;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.core.model.XBaseModel;
+import org.xydra.core.model.XID;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.MiniXMLParser;
 import org.xydra.core.xml.XmlModel;
@@ -19,6 +21,8 @@ import org.xydra.server.rest.XydraRestServer;
 
 
 public class XRepositoryResource {
+	
+	static private final XID actorId = XX.toId(XRepositoryResource.class.getName());
 	
 	public static void restless(Restless restless, String prefix) {
 		restless.addMethod(prefix + "/", "POST", XRepositoryResource.class, "setModel", false);
@@ -35,7 +39,7 @@ public class XRepositoryResource {
 			MiniXMLParser parser = new MiniXMLParserImpl();
 			MiniElement modelElement = parser.parseXml(modelXml);
 			
-			newModel = XmlModel.toModel(modelElement);
+			newModel = XmlModel.toModel(actorId, modelElement);
 			
 		} catch(IllegalArgumentException iae) {
 			throw new RestlessException(RestlessException.Bad_request,

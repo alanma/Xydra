@@ -30,14 +30,17 @@ import org.xydra.core.value.impl.memory.MemoryStringValue;
 
 public abstract class AbstractChangeTest {
 	
+	private XID actorId;
+	
 	@Test
 	public void testRepositoryChangeListening() {
-		XRepository repo = X.createMemoryRepository();
+		this.actorId = XX.toId("AbstractChangeTest");
+		XRepository repo = X.createMemoryRepository(this.actorId);
 		DummyRepositoryChangeListener repoListener = new DummyRepositoryChangeListener();
 		repo.addListenerForRepositoryEvents(repoListener);
 		
 		// Test add-event
-		XModel addModel = repo.createModel(null, XX.createUniqueID());
+		XModel addModel = repo.createModel(XX.createUniqueID());
 		// check if the listener has fired
 		assertTrue(repoListener.hasFired());
 		// check if the event has the right type
@@ -46,29 +49,29 @@ public abstract class AbstractChangeTest {
 		assertTrue(repo.getID().equals(repoListener.getRepository()));
 		repoListener.reset();
 		
-		repo.createModel(null, XX.createUniqueID());
+		repo.createModel(XX.createUniqueID());
 		assertTrue(repoListener.hasFired());
 		assertTrue(repoListener.getType() == ChangeType.ADD);
 		repoListener.reset();
 		
 		// Test remove-event
-		repo.removeModel(null, addModel.getID());
+		repo.removeModel(addModel.getID());
 		assertTrue(repoListener.hasFired());
 		assertTrue(repoListener.getType() == ChangeType.REMOVE);
 		repoListener.reset();
 		
 		// Test if event-propagating works
-		repo.createModel(null, XX.createUniqueID());
+		repo.createModel(XX.createUniqueID());
 		
 		// Test add-event
-		addModel = repo.createModel(null, XX.createUniqueID());
+		addModel = repo.createModel(XX.createUniqueID());
 		assertTrue(repoListener.hasFired());
 		assertTrue(repoListener.getType() == ChangeType.ADD);
 		
 		repoListener.reset();
 		
 		// Test remove-event
-		repo.removeModel(null, addModel.getID());
+		repo.removeModel(addModel.getID());
 		assertTrue(repoListener.hasFired());
 		assertTrue(repoListener.getType() == ChangeType.REMOVE);
 	}
@@ -76,12 +79,12 @@ public abstract class AbstractChangeTest {
 	@Test
 	public void testModelChangeListenening() {
 		
-		XModel model = new MemoryModel(XX.createUniqueID());
+		XModel model = new MemoryModel(this.actorId, XX.createUniqueID());
 		DummyModelChangeListener modelListener = new DummyModelChangeListener();
 		model.addListenerForModelEvents(modelListener);
 		
 		// Test add-event
-		XObject addObject = model.createObject(null, XX.createUniqueID());
+		XObject addObject = model.createObject(XX.createUniqueID());
 		assertTrue(modelListener.hasFired()); // check if the listener has fired
 		assertTrue(modelListener.getType() == ChangeType.ADD); // check if the
 		// event
@@ -94,13 +97,13 @@ public abstract class AbstractChangeTest {
 		assertNull(modelListener.getRepository());
 		modelListener.reset();
 		
-		model.createObject(null, XX.createUniqueID());
+		model.createObject(XX.createUniqueID());
 		assertTrue(modelListener.hasFired());
 		assertTrue(modelListener.getType() == ChangeType.ADD);
 		modelListener.reset();
 		
 		// Test remove-event
-		model.removeObject(null, addObject.getID());
+		model.removeObject(addObject.getID());
 		assertTrue(modelListener.hasFired());
 		assertTrue(modelListener.getType() == ChangeType.REMOVE);
 		modelListener.reset();
@@ -111,9 +114,9 @@ public abstract class AbstractChangeTest {
 	public void testModelChangePropagation() {
 		
 		// Test if event-propagating works
-		XRepository repo = X.createMemoryRepository();
-		XModel model = repo.createModel(null, XX.createUniqueID());
-		model.createObject(null, XX.createUniqueID());
+		XRepository repo = X.createMemoryRepository(this.actorId);
+		XModel model = repo.createModel(XX.createUniqueID());
+		model.createObject(XX.createUniqueID());
 		
 		DummyModelChangeListener modelListener = new DummyModelChangeListener();
 		DummyModelChangeListener repoListener = new DummyModelChangeListener();
@@ -122,7 +125,7 @@ public abstract class AbstractChangeTest {
 		model.addListenerForModelEvents(modelListener);
 		
 		// Test add-event
-		XObject addObject = model.createObject(null, XX.createUniqueID());
+		XObject addObject = model.createObject(XX.createUniqueID());
 		assertTrue(repoListener.hasFired());
 		assertTrue(repoListener.getType() == ChangeType.ADD);
 		assertTrue(modelListener.hasFired());
@@ -132,7 +135,7 @@ public abstract class AbstractChangeTest {
 		modelListener.reset();
 		
 		// Test remove-event
-		model.removeObject(null, addObject.getID());
+		model.removeObject(addObject.getID());
 		assertTrue(repoListener.hasFired());
 		assertTrue(repoListener.getType() == ChangeType.REMOVE);
 		assertTrue(modelListener.hasFired());
@@ -143,13 +146,13 @@ public abstract class AbstractChangeTest {
 	@Test
 	public void testObjectChangeListening() {
 		
-		MemoryObject object1 = new MemoryObject(XX.createUniqueID());
+		MemoryObject object1 = new MemoryObject(this.actorId, XX.createUniqueID());
 		DummyObjectChangeListener listener1 = new DummyObjectChangeListener();
 		object1.addListenerForObjectEvents(listener1);
 		
 		// Test add-event
 		// create field and fire event
-		MemoryField field1 = object1.createField(null, XX.createUniqueID());
+		MemoryField field1 = object1.createField(XX.createUniqueID());
 		
 		assertTrue("check if the listener has fired", listener1.hasFired());
 		assertEquals("check if the event has the right type", ChangeType.ADD, listener1.getType());
@@ -160,13 +163,13 @@ public abstract class AbstractChangeTest {
 		assertEquals(listener1.getRepositoryID(), null);
 		listener1.reset();
 		
-		object1.createField(null, XX.createUniqueID());
+		object1.createField(XX.createUniqueID());
 		assertTrue(listener1.hasFired());
 		assertEquals(ChangeType.ADD, listener1.getType());
 		listener1.reset();
 		
 		// Test remove-event
-		object1.removeField(null, field1.getID());
+		object1.removeField(field1.getID());
 		assertTrue(listener1.hasFired());
 		assertTrue(listener1.getType() == ChangeType.REMOVE);
 		
@@ -176,10 +179,10 @@ public abstract class AbstractChangeTest {
 	public void testObjectChangePropagation() {
 		
 		// Test if event-propagating works
-		XRepository repo = X.createMemoryRepository();
-		XModel model = repo.createModel(null, XX.createUniqueID());
-		XObject object2 = model.createObject(null, XX.createUniqueID());
-		object2.createField(null, XX.createUniqueID());
+		XRepository repo = X.createMemoryRepository(this.actorId);
+		XModel model = repo.createModel(XX.createUniqueID());
+		XObject object2 = model.createObject(XX.createUniqueID());
+		object2.createField(XX.createUniqueID());
 		
 		DummyObjectChangeListener repoListener = new DummyObjectChangeListener();
 		repo.addListenerForObjectEvents(repoListener);
@@ -190,7 +193,7 @@ public abstract class AbstractChangeTest {
 		DummyObjectChangeListener objectListener = new DummyObjectChangeListener();
 		object2.addListenerForObjectEvents(objectListener);
 		
-		XField field3 = object2.createField(null, XX.createUniqueID());
+		XField field3 = object2.createField(XX.createUniqueID());
 		assertTrue(repoListener.hasFired()); // event was propagated to the
 		// father repository
 		assertTrue(repoListener.getType() == ChangeType.ADD);
@@ -204,7 +207,7 @@ public abstract class AbstractChangeTest {
 		modelListener.reset();
 		objectListener.reset();
 		
-		object2.removeField(null, field3.getID());
+		object2.removeField(field3.getID());
 		assertTrue(repoListener.hasFired());
 		assertTrue(repoListener.getType() == ChangeType.REMOVE);
 		assertTrue(modelListener.hasFired());
@@ -217,16 +220,16 @@ public abstract class AbstractChangeTest {
 	@Test
 	public void testFieldChangeListening() {
 		// Prepare other objects for event propagating test later
-		XRepository repo = X.createMemoryRepository();
-		XModel model = repo.createModel(null, XX.createUniqueID());
-		XObject object = model.createObject(null, XX.createUniqueID());
-		XField field = object.createField(null, XX.createUniqueID());
+		XRepository repo = X.createMemoryRepository(this.actorId);
+		XModel model = repo.createModel(XX.createUniqueID());
+		XObject object = model.createObject(XX.createUniqueID());
+		XField field = object.createField(XX.createUniqueID());
 		
 		DummyFieldChangeListener fieldListener = new DummyFieldChangeListener();
 		field.addListenerForFieldEvents(fieldListener);
 		
 		// Test add-event
-		field.setValue(field.getID(), new MemoryStringValue("Test"));
+		field.setValue(new MemoryStringValue("Test"));
 		assertTrue(fieldListener.hasFired());
 		assertTrue(fieldListener.getType() == ChangeType.ADD);
 		assertEquals(fieldListener.getFieldID(), field.getID());
@@ -236,18 +239,18 @@ public abstract class AbstractChangeTest {
 		fieldListener.reset();
 		
 		// Test change-event
-		field.setValue(field.getID(), new MemoryStringValue("Test 2"));
+		field.setValue(new MemoryStringValue("Test 2"));
 		assertTrue(fieldListener.hasFired());
 		assertTrue(fieldListener.getType() == ChangeType.CHANGE);
 		fieldListener.reset();
 		
-		field.setValue(field.getID(), new MemoryStringValue("Test 2"));
+		field.setValue(new MemoryStringValue("Test 2"));
 		assertFalse(fieldListener.hasFired()); // no changes occurs, therefore
 		// no event should be fired
 		fieldListener.reset();
 		
 		// Test remove-event
-		field.setValue(field.getID(), null);
+		field.setValue(null);
 		assertTrue(fieldListener.hasFired());
 		assertTrue(fieldListener.getType() == ChangeType.REMOVE);
 		assertTrue(field.getValue() == null);
@@ -264,7 +267,7 @@ public abstract class AbstractChangeTest {
 		object.addListenerForFieldEvents(objectListener);
 		
 		// Add
-		field.setValue(field.getID(), new MemoryStringValue("Test"));
+		field.setValue(new MemoryStringValue("Test"));
 		assertTrue(fieldListener.hasFired());
 		assertTrue(fieldListener.getType() == ChangeType.ADD);
 		assertTrue(objectListener.hasFired());
@@ -279,7 +282,7 @@ public abstract class AbstractChangeTest {
 		repoListener.reset();
 		
 		// Change
-		field.setValue(field.getID(), new MemoryStringValue("Test 2"));
+		field.setValue(new MemoryStringValue("Test 2"));
 		assertTrue(fieldListener.hasFired());
 		assertTrue(fieldListener.getType() == ChangeType.CHANGE);
 		assertTrue(objectListener.hasFired());
@@ -294,7 +297,7 @@ public abstract class AbstractChangeTest {
 		repoListener.reset();
 		
 		// Change
-		field.setValue(field.getID(), null);
+		field.setValue(null);
 		assertTrue(fieldListener.hasFired());
 		assertTrue(fieldListener.getType() == ChangeType.REMOVE);
 		assertTrue(objectListener.hasFired());

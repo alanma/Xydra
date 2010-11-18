@@ -102,7 +102,7 @@ public abstract class AbstractRestApiTest {
 		
 		// initialize XModel
 		// make sure that we don't write to the server's persistence backend
-		repo = new MemoryRepository(REPO_ID);
+		repo = new MemoryRepository(ACTOR_TESTER, REPO_ID);
 		
 		// add something to the server for testing
 		
@@ -220,7 +220,7 @@ public abstract class AbstractRestApiTest {
 		}
 		
 		try {
-			return XmlModel.toModel(modelElement);
+			return XmlModel.toModel(ACTOR_TESTER, modelElement);
 		} catch(IllegalArgumentException iae) {
 			fail(iae.getMessage());
 			throw new RuntimeException();

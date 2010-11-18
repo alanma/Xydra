@@ -6,6 +6,8 @@ import org.junit.Test;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.core.X;
 import org.xydra.core.XCompareUtils;
+import org.xydra.core.XX;
+import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.test.DemoModelUtil;
@@ -14,6 +16,8 @@ import org.xydra.json.JSONException;
 
 @RunsInJava
 public class XJsonTest {
+	
+	XID actorId = XX.toId("XJsonTest");
 	
 	public static final String PHONEBOOK_MODEL_JSON = "{\r\n" + "    \"phonebook\": [\r\n"
 	        + "        {\r\n" + "            \"john\": [\r\n" + "                {\r\n"
@@ -55,7 +59,7 @@ public class XJsonTest {
 	
 	@Test
 	public void testAsJsonStringXModel() {
-		XRepository repo = X.createMemoryRepository();
+		XRepository repo = X.createMemoryRepository(this.actorId);
 		DemoModelUtil.addPhonebookModel(repo);
 		XModel phonebook = repo.getModel(DemoModelUtil.PHONEBOOK_ID);
 		String json = XJson.asJsonString(phonebook);
@@ -64,20 +68,20 @@ public class XJsonTest {
 	
 	@Test
 	public void testParseJsonModel() throws IllegalArgumentException, JSONException {
-		XRepository repo = X.createMemoryRepository();
+		XRepository repo = X.createMemoryRepository(this.actorId);
 		XJson.addToXRepository(X.getIDProvider().fromString("test-actor"), PHONEBOOK_MODEL_JSON,
 		        repo);
 	}
 	
 	@Test
 	public void serialiseAndParse() throws IllegalArgumentException, JSONException {
-		XRepository repo = X.createMemoryRepository();
+		XRepository repo = X.createMemoryRepository(this.actorId);
 		XJson.addToXRepository(X.getIDProvider().fromString("test-actor"), PHONEBOOK_MODEL_JSON,
 		        repo);
 		XModel phonebook = repo.getModel(DemoModelUtil.PHONEBOOK_ID);
 		String json = XJson.asJsonString(phonebook);
 		
-		XRepository repo2 = X.createMemoryRepository();
+		XRepository repo2 = X.createMemoryRepository(this.actorId);
 		XJson.addToXRepository(X.getIDProvider().fromString("test-actor"), json, repo2);
 		XModel phonebook2 = repo2.getModel(DemoModelUtil.PHONEBOOK_ID);
 		

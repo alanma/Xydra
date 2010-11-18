@@ -34,22 +34,21 @@ public class TestObjectIndex {
 	
 	@Before
 	public void before() {
-		this.indexFactory = new IndexFactoryImpl();
-		this.repo = X.createMemoryRepository();
 		this.actor = X.getIDProvider().fromString("testIndexXObject");
-		this.model = this.repo.createModel(this.actor, X.getIDProvider().createUniqueID());
-		this.indexObject = this.model.createObject(this.actor, X.getIDProvider().fromString(
-		        "index-email"));
+		this.indexFactory = new IndexFactoryImpl();
+		this.repo = X.createMemoryRepository(this.actor);
+		this.model = this.repo.createModel(X.getIDProvider().createUniqueID());
+		this.indexObject = this.model.createObject(X.getIDProvider().fromString("index-email"));
 		
 		this.emailFieldId = X.getIDProvider().fromString("email");
-		this.user1 = this.model.createObject(this.actor, X.getIDProvider().fromString("user1"));
-		this.user1.createField(this.actor, this.emailFieldId).setValue(this.actor,
+		this.user1 = this.model.createObject(X.getIDProvider().fromString("user1"));
+		this.user1.createField(this.emailFieldId).setValue(
 		        X.getValueFactory().createStringValue("john@doe.com"));
-		this.user2 = this.model.createObject(this.actor, X.getIDProvider().fromString("user2"));
-		this.user2.createField(this.actor, this.emailFieldId).setValue(this.actor,
+		this.user2 = this.model.createObject(X.getIDProvider().fromString("user2"));
+		this.user2.createField(this.emailFieldId).setValue(
 		        X.getValueFactory().createStringValue("mary@jane.com"));
-		this.user3 = this.model.createObject(this.actor, X.getIDProvider().fromString("user3"));
-		this.user3.createField(this.actor, this.emailFieldId).setValue(this.actor,
+		this.user3 = this.model.createObject(X.getIDProvider().fromString("user3"));
+		this.user3.createField(this.emailFieldId).setValue(
 		        X.getValueFactory().createStringValue("some@one.com"));
 		
 	}

@@ -84,7 +84,7 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		
 		XObject retrievedObject;
 		try {
-			retrievedObject = XmlModel.toObject(objectElement);
+			retrievedObject = XmlModel.toObject(JANE_ID, objectElement);
 		} catch(IllegalArgumentException iae) {
 			fail(iae.getMessage());
 			throw new RuntimeException();
@@ -109,7 +109,7 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		
 		XField retrievedField;
 		try {
-			retrievedField = XmlModel.toField(fieldElement);
+			retrievedField = XmlModel.toField(JANE_ID, fieldElement);
 		} catch(IllegalArgumentException iae) {
 			fail(iae.getMessage());
 			throw new RuntimeException();
@@ -249,11 +249,11 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		XField phone = john.getField(DemoModelUtil.PHONE_ID);
 		
 		// change model
-		john.removeField(null, DemoModelUtil.ALIASES_ID);
-		john.createField(null, AbstractRestApiTest.NEW_ID);
-		phone.setValue(null, XV.toValue("342-170984-7892"));
-		model.createObject(null, JANE_ID);
-		model.removeObject(null, DemoModelUtil.PETER_ID);
+		john.removeField(DemoModelUtil.ALIASES_ID);
+		john.createField(AbstractRestApiTest.NEW_ID);
+		phone.setValue(XV.toValue("342-170984-7892"));
+		model.createObject(JANE_ID);
+		model.removeObject(DemoModelUtil.PETER_ID);
 		
 		XmlOutStringBuffer out = new XmlOutStringBuffer();
 		XmlModel.toXml(model, out, false, false, false);
@@ -293,13 +293,14 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		XField phone = john.getField(DemoModelUtil.PHONE_ID);
 		
 		// change object
-		john.removeField(null, DemoModelUtil.ALIASES_ID);
-		john.createField(null, AbstractRestApiTest.NEW_ID);
-		phone.setValue(null, XV.toValue("342-170984-7892"));
+		john.removeField(DemoModelUtil.ALIASES_ID);
+		john.createField(AbstractRestApiTest.NEW_ID);
+		phone.setValue(XV.toValue("342-170984-7892"));
 		
 		XmlOutStringBuffer out = new XmlOutStringBuffer();
 		XmlModel.toXml(john, out, false, false, false);
-		postDataAndExpectHttpCreatedResponse(dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toURI()).toURL(), out.getXml());
+		postDataAndExpectHttpCreatedResponse(dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toURI())
+		        .toURL(), out.getXml());
 		
 		XModel updatedModel = getRemoteModel(DemoModelUtil.PHONEBOOK_ID);
 		assertNotNull(updatedModel);
@@ -331,12 +332,13 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		XObject john = model.getObject(DemoModelUtil.JOHN_ID);
 		long titleRev = john.getField(DemoModelUtil.TITLE_ID).getRevisionNumber();
 		XField phone = john.getField(DemoModelUtil.PHONE_ID);
-		phone.setValue(null, XV.toValue("342-170984-7892"));
+		phone.setValue(XV.toValue("342-170984-7892"));
 		
 		XmlOutStringBuffer out = new XmlOutStringBuffer();
 		XmlModel.toXml(phone, out, false);
-		postDataAndExpectHttpCreatedResponse(dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toURI() + "/").resolve(
-		        DemoModelUtil.JOHN_ID.toURI()).toURL(), out.getXml());
+		postDataAndExpectHttpCreatedResponse(dataapi.resolve(
+		        DemoModelUtil.PHONEBOOK_ID.toURI() + "/").resolve(DemoModelUtil.JOHN_ID.toURI())
+		        .toURL(), out.getXml());
 		
 		XModel updatedModel = getRemoteModel(DemoModelUtil.PHONEBOOK_ID);
 		assertNotNull(updatedModel);

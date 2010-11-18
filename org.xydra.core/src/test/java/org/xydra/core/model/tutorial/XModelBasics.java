@@ -95,8 +95,15 @@ public class XModelBasics {
 	@Test
 	public void testBasicStructure() {
 		
+		/*
+		 * If you want to do anything in Xydra you also have to specify who or
+		 * what does the action by passing a so called actor ID, which also is
+		 * an XID
+		 */
+		XID actorID = XX.toId("ExampleActor");
+		
 		// creating a new repository
-		XRepository repository = X.createMemoryRepository();
+		XRepository repository = X.createMemoryRepository(actorID);
 		
 		/*
 		 * Every XModel needs a specific XID. You can either create an XID from
@@ -110,15 +117,8 @@ public class XModelBasics {
 		// creating a random & unique ID
 		XX.createUniqueID();
 		
-		/*
-		 * If you want to create a new XModel you also have to specify who or
-		 * what creates the XModel by passing a so called actor ID, which also
-		 * is an XID
-		 */
-		XID actorID = XX.toId("ExampleActor");
-		
 		// actually creating the model
-		XModel model = repository.createModel(actorID, stringID);
+		XModel model = repository.createModel(stringID);
 		
 		/*
 		 * Now that we have an XModel we can start to create XObjects. Just like
@@ -140,7 +140,7 @@ public class XModelBasics {
 
 		// creating the XObject
 		XID objectID = XX.toId("ExampleObject");
-		model.createObject(actorID, objectID);
+		model.createObject(objectID);
 		
 		/*
 		 * We forgot to save the XObject into a variable! So how can we get a
@@ -155,7 +155,7 @@ public class XModelBasics {
 		 */
 
 		XID fieldID = XX.toId("ExampleField");
-		XField field = object.createField(actorID, fieldID);
+		XField field = object.createField(fieldID);
 		
 		/*
 		 * Setting the value of a field is just as simple, but first we have to
@@ -166,7 +166,7 @@ public class XModelBasics {
 		 */
 
 		XValue stringValue = XV.toValue("StringValue");
-		field.setValue(actorID, stringValue);
+		field.setValue(stringValue);
 		
 		/*
 		 * Please note that the value-type of an XField is not fixed. We could
@@ -174,14 +174,14 @@ public class XModelBasics {
 		 */
 
 		XValue integerValue = XV.toValue(42);
-		field.setValue(actorID, integerValue);
+		field.setValue(integerValue);
 		
 		/*
 		 * Removing any part of our XModel structure is just as easy.
 		 */
 
 		// removing our field from our object
-		object.removeField(actorID, fieldID);
+		object.removeField(fieldID);
 	}
 	
 	/**
@@ -199,7 +199,7 @@ public class XModelBasics {
 		XID actorID = XX.toId("TutorialActor");
 		
 		// getting an XRepository
-		XRepository repository = X.createMemoryRepository();
+		XRepository repository = X.createMemoryRepository(actorID);
 		XID repositoryID = repository.getID();
 		
 		/*
@@ -305,7 +305,7 @@ public class XModelBasics {
 		XFieldCommand fieldCommand = commandFactory.createAddValueCommand(repositoryID, modelID,
 		        object1ID, fieldID, field.getRevisionNumber(), doubleValue, false);
 		
-		field.executeFieldCommand(actorID, fieldCommand);
+		field.executeFieldCommand(fieldCommand);
 		
 		// lets see if the value was set
 		assertEquals(doubleValue, field.getValue());
@@ -326,7 +326,7 @@ public class XModelBasics {
 		XID actorID = XX.toId("TutorialActor");
 		
 		// getting an XRepository
-		XRepository repository = X.createMemoryRepository();
+		XRepository repository = X.createMemoryRepository(actorID);
 		XID repositoryID = repository.getID();
 		
 		// creating the XModel
@@ -420,8 +420,8 @@ public class XModelBasics {
 	public void testUsingEventsAndListeners() {
 		
 		XID actorID = XX.toId("ExampleActor");
-		XRepository repository = X.createMemoryRepository();
-		XModel model = repository.createModel(actorID, XX.createUniqueID());
+		XRepository repository = X.createMemoryRepository(actorID);
+		XModel model = repository.createModel(XX.createUniqueID());
 		
 		/*
 		 * For example, if we want to be notified when objects are added to or
@@ -453,10 +453,10 @@ public class XModelBasics {
 		XID object1ID = XX.toId("Object1");
 		XID object2ID = XX.toId("Object2");
 		
-		model.createObject(actorID, object1ID);
-		model.createObject(actorID, object2ID);
+		model.createObject(object1ID);
+		model.createObject(object2ID);
 		
-		model.removeObject(actorID, object2ID);
+		model.removeObject(object2ID);
 		
 		/*
 		 * XEvents are also propagated to the higher entities in the XModel
@@ -488,8 +488,8 @@ public class XModelBasics {
 		// holds
 		XObject object = model.getObject(object1ID);
 		
-		object.createField(actorID, XX.toId("IWillBeRemoved"));
-		object.removeField(actorID, XX.toId("IWillBeRemoved"));
+		object.createField(XX.toId("IWillBeRemoved"));
+		object.removeField(XX.toId("IWillBeRemoved"));
 		
 		/*
 		 * Note: XEvents are also logged by the XModel which can be used for
@@ -528,8 +528,8 @@ public class XModelBasics {
 		XID user2ID = XX.toId("ExampleUser2");
 		XID user3ID = XX.toId("ExampleUser3");
 		
-		XRepository repo = X.createMemoryRepository();
-		XModel model = repo.createModel(actorID, XX.createUniqueID());
+		XRepository repo = X.createMemoryRepository(actorID);
+		XModel model = repo.createModel(XX.createUniqueID());
 		
 		// creating an XAccessManager and an XGroupDatabase
 		XGroupDatabaseWithListeners groups = new MemoryGroupDatabase();

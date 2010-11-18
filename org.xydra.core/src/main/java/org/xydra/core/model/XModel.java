@@ -47,28 +47,26 @@ public interface XModel extends XLoggedModel, Serializable, XSynchronizesChanges
 	 * Creates a new {@link XObject} with the given {@link XID} and adds it to
 	 * this XModel or returns the already existing {@link XObject} if the given
 	 * {@link XID} was already taken.
-	 * 
-	 * @param actor The {@link XID} of the actor
 	 * @param id The {@link XID} for the {@link XObject} which is to be created
+	 * 
 	 * @return the newly created {@link XObject} or the already existing
 	 *         {@link XObject} if the given {@link XID} was already taken
 	 * @throws IllegalStateException if this model has already been removed
 	 */
 	@ModificationOperation
-	XObject createObject(XID actor, XID id);
+	XObject createObject(XID id);
 	
 	/**
 	 * Removes the {@link XObject} with the given {@link XID} from this XModel.
-	 * 
-	 * @param actor The {@link XID} of the actor
 	 * @param object The {@link XID} of the {@link XObject} which is to be
 	 *            removed
+	 * 
 	 * @return true, if an {@link XObject} with the given {@link XID} did exist
 	 *         in this XModel and could be removed
 	 * @throws IllegalStateException if this model has already been removed
 	 */
 	@ModificationOperation
-	boolean removeObject(XID actor, XID objectID);
+	boolean removeObject(XID objectID);
 	
 	/**
 	 * Executes the given {@link XModelCommand} if possible.
@@ -84,8 +82,8 @@ public interface XModel extends XLoggedModel, Serializable, XSynchronizesChanges
 	 * <li>the model-{@link XID} in the {@link XModelCommand} does not concur
 	 * with the {@link XID} of this XModel
 	 * </ul>
-	 * 
 	 * @param command The {@link XModelCommand} which is to be executed
+	 * 
 	 * @return {@link XCommand#FAILED} if executing the {@link XModelCommand}
 	 *         failed, {@link XCommand#NOCHANGE} if executing the
 	 *         {@link XModelCommand} didn't change anything or if executing the
@@ -94,6 +92,6 @@ public interface XModel extends XLoggedModel, Serializable, XSynchronizesChanges
 	 * @throws IllegalStateException if this model has already been removed
 	 */
 	@ModificationOperation
-	long executeModelCommand(XID actor, XModelCommand command);
+	long executeModelCommand(XModelCommand command);
 	
 }

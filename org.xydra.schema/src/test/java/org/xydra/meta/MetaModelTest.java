@@ -20,8 +20,8 @@ public class MetaModelTest {
 	@Before
 	public void init() {
 		XID actor = X.getIDProvider().fromString("actor");
-		XRepository repo = X.createMemoryRepository();
-		XModel baseModel = repo.createModel(actor, X.getIDProvider().fromString("basemodel"));
+		XRepository repo = X.createMemoryRepository(actor);
+		XModel baseModel = repo.createModel(X.getIDProvider().fromString("basemodel"));
 		this.metamodel = new MetaModel(repo, baseModel);
 	}
 	

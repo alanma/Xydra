@@ -31,6 +31,7 @@ public class DummyRepository implements XRepository {
 	private final List<XRepositoryEventListener> listeners = new ArrayList<XRepositoryEventListener>();
 	private XModel model;
 	private final XID repoId = XX.toId("dummyRepo");
+	private final XID actorId = XX.toId("actorId");
 	
 	public DummyRepository(XModel model) {
 		this.model = model;
@@ -39,17 +40,17 @@ public class DummyRepository implements XRepository {
 	public DummyRepository() {
 	}
 	
-	public XModel createModel(XID actor, XID id) {
+	public XModel createModel(XID id) {
 		if(this.model != null)
 			throw new RuntimeException("Can only hold one model.");
-		this.model = new MemoryModel(id);
-		XRepositoryEvent event = MemoryRepositoryEvent.createAddEvent(actor, null, id);
+		this.model = new MemoryModel(this.actorId, id);
+		XRepositoryEvent event = MemoryRepositoryEvent.createAddEvent(this.actorId, null, id);
 		for(XRepositoryEventListener listener : this.listeners)
 			listener.onChangeEvent(event);
 		return this.model;
 	}
 	
-	public long executeRepositoryCommand(XID actor, XRepositoryCommand event) {
+	public long executeRepositoryCommand(XRepositoryCommand event) {
 		return XCommand.FAILED;
 	}
 	
@@ -67,10 +68,10 @@ public class DummyRepository implements XRepository {
 		return false;
 	}
 	
-	public boolean removeModel(XID actor, XID modelID) {
+	public boolean removeModel(XID modelID) {
 		if(!hasModel(modelID))
 			return false;
-		XRepositoryEvent event = MemoryRepositoryEvent.createRemoveEvent(actor, getAddress(),
+		XRepositoryEvent event = MemoryRepositoryEvent.createRemoveEvent(this.actorId, getAddress(),
 		        modelID, this.model.getRevisionNumber(), false);
 		this.model = null;
 		for(XRepositoryEventListener listener : this.listeners)

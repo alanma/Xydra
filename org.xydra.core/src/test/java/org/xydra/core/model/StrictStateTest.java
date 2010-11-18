@@ -29,20 +29,22 @@ public class StrictStateTest {
 	static XModel model;
 	static XObject object;
 	static XField field;
+	static XID actorId;
 	
 	@BeforeClass
 	public static void init() {
 		store = new TestStateStore();
 		XSPI.setStateStore(store);
-		repo = X.createMemoryRepository();
+		actorId = XX.toId("StrictStateTest");
+		repo = X.createMemoryRepository(actorId);
 	}
 	
 	@Before
 	public void setUp() {
-		model = repo.createModel(null, XX.createUniqueID());
-		object = model.createObject(null, XX.createUniqueID());
-		field = object.createField(null, XX.createUniqueID());
-		field.setValue(null, XV.toValue("Cookie Monster"));
+		model = repo.createModel(XX.createUniqueID());
+		object = model.createObject(XX.createUniqueID());
+		field = object.createField(XX.createUniqueID());
+		field.setValue(XV.toValue("Cookie Monster"));
 		try {
 			store.checkConsistency();
 		} finally {
@@ -65,49 +67,49 @@ public class StrictStateTest {
 				s.add(id);
 			}
 			for(XID id : s) {
-				repo.removeModel(null, id);
+				repo.removeModel(id);
 			}
 		}
 	}
 	
 	@Test
 	public void testCreateModel() {
-		repo.createModel(null, XX.createUniqueID());
+		repo.createModel(XX.createUniqueID());
 	}
 	
 	@Test
 	public void testCreateObject() {
-		model.createObject(null, XX.createUniqueID());
+		model.createObject(XX.createUniqueID());
 	}
 	
 	@Test
 	public void testCreateField() {
-		object.createField(null, XX.createUniqueID());
+		object.createField(XX.createUniqueID());
 	}
 	
 	@Test
 	public void testSetValue() {
-		field.setValue(null, XV.toValue(new byte[] { 'C', 'O', 'O', 'K', 'I', 'E', '!' }));
+		field.setValue(XV.toValue(new byte[] { 'C', 'O', 'O', 'K', 'I', 'E', '!' }));
 	}
 	
 	@Test
 	public void testRemoveValue() {
-		field.setValue(null, null);
+		field.setValue(null);
 	}
 	
 	@Test
 	public void testRemoveField() {
-		object.removeField(null, field.getID());
+		object.removeField(field.getID());
 	}
 	
 	@Test
 	public void testReoveObject() {
-		model.removeObject(null, object.getID());
+		model.removeObject(object.getID());
 	}
 	
 	@Test
 	public void testRemoveModel() {
-		repo.removeModel(null, model.getID());
+		repo.removeModel(model.getID());
 	}
 	
 	@Test

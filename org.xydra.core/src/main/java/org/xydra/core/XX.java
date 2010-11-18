@@ -38,8 +38,8 @@ public class XX {
 	 */
 	// 2010-10-27: used only in tests
 	public static XField setValue(XID actorID, XObject object, XID fieldID, XValue value) {
-		XField field = object.createField(actorID, fieldID);
-		field.setValue(actorID, value);
+		XField field = object.createField(fieldID);
+		field.setValue(value);
 		return field;
 	}
 	

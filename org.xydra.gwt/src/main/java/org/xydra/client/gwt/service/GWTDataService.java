@@ -2,6 +2,7 @@ package org.xydra.client.gwt.service;
 
 import org.xydra.client.Callback;
 import org.xydra.client.XDataService;
+import org.xydra.core.XX;
 import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
@@ -33,6 +34,8 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 	
 	static private final Logger log = LoggerFactory.getLogger(GWTDataService.class);
 	
+	static private final XID actorId = XX.toId(GWTDataService.class.getName());
+	
 	public GWTDataService(String baseUrl, MiniXMLParser parser) {
 		super(baseUrl, parser);
 	}
@@ -48,7 +51,7 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 			public void onSuccess(MiniElement xml) {
 				XModel model;
 				try {
-					model = XmlModel.toModel(xml);
+					model = XmlModel.toModel(actorId, xml);
 				} catch(Exception e) {
 					callback.onFailure(e);
 					return;
@@ -72,7 +75,7 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 			public void onSuccess(MiniElement xml) {
 				XObject object;
 				try {
-					object = XmlModel.toObject(xml);
+					object = XmlModel.toObject(actorId, xml);
 				} catch(Exception e) {
 					callback.onFailure(e);
 					return;
@@ -96,7 +99,7 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 			public void onSuccess(MiniElement xml) {
 				XField field;
 				try {
-					field = XmlModel.toField(xml);
+					field = XmlModel.toField(actorId, xml);
 				} catch(Exception e) {
 					callback.onFailure(e);
 					return;

@@ -93,9 +93,9 @@ public class CalendarManager {
 	private static XID managerID = XX.toId("calendarManager");
 	
 	public CalendarManager() {
-		this.accountModel = new MemoryModel(XX.createUniqueID());
+		this.accountModel = new MemoryModel(managerID, XX.createUniqueID());
 		
-		this.calendarRepo = X.createMemoryRepository();
+		this.calendarRepo = X.createMemoryRepository(managerID);
 		this.calendarRepoID = this.calendarRepo.getID();
 		
 		this.groups = new MemoryGroupDatabase();
@@ -124,15 +124,15 @@ public class CalendarManager {
 		
 		// create the entry for the user in the accountModel and save the
 		// password
-		XObject userObject = this.accountModel.createObject(managerID, userID);
-		XField pwdField = userObject.createField(managerID, pwdFieldID);
+		XObject userObject = this.accountModel.createObject(userID);
+		XField pwdField = userObject.createField(pwdFieldID);
 		
 		XStringValue pwdValue = XV.toValue(pwd);
 		
-		pwdField.setValue(managerID, pwdValue);
+		pwdField.setValue(pwdValue);
 		
 		// create the calendar for the user
-		XModel usrCalendar = this.calendarRepo.createModel(managerID, userID);
+		XModel usrCalendar = this.calendarRepo.createModel(userID);
 		
 		// set access rights for the user
 		this.arm.setAccess(userID, usrCalendar.getAddress(), XA.ACCESS_READ, true);

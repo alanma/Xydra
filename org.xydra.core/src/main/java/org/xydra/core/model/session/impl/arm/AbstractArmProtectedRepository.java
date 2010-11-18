@@ -59,7 +59,7 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 			throw new AccessException(this.actor + " cannot write to " + getAddress());
 		}
 		
-		XModel model = this.repo.createModel(this.actor, modelId);
+		XModel model = this.repo.createModel(modelId);
 		
 		assert model != null;
 		
@@ -72,7 +72,7 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 			throw new AccessException(this.actor + " cannot execute " + command);
 		}
 		
-		return this.repo.executeRepositoryCommand(this.actor, command);
+		return this.repo.executeRepositoryCommand(command);
 	}
 	
 	public XProtectedModel getModel(XID modelId) {
@@ -100,7 +100,7 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 			        + getAddress());
 		}
 		
-		return this.repo.removeModel(this.actor, modelId);
+		return this.repo.removeModel(modelId);
 	}
 	
 	public boolean hasModel(XID modelId) {

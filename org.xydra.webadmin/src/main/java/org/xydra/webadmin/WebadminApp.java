@@ -25,6 +25,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.core.XFile;
+import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XRepositoryCommand;
 import org.xydra.core.change.XTransactionBuilder;
@@ -213,7 +214,7 @@ public class WebadminApp {
 			XModel model;
 			try {
 				MiniElement e = new MiniXMLParserImpl().parseXml(b.toString());
-				model = XmlModel.toModel(e);
+				model = XmlModel.toModel(XX.toId("WebadminApp"), e);
 			} catch(Exception e) {
 				throw new RuntimeException("error parsing model file \"" + name + "\"", e);
 			}

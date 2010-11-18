@@ -140,7 +140,7 @@ public class DirectDataService implements XDataService {
 			// FIXME concurrency: field may be changed during copy
 			XStateUtils.copy(field, fieldState);
 			
-			XField fieldCopy = new MemoryField(fieldState);
+			XField fieldCopy = new MemoryField(this.repo.getActor(), fieldState);
 			
 			callback.onSuccess(fieldCopy);
 			
@@ -169,7 +169,7 @@ public class DirectDataService implements XDataService {
 			// FIXME concurrency: model may be changed during copy
 			XStateUtils.copy(model, modelState);
 			
-			XModel modelCopy = new MemoryModel(modelState);
+			XModel modelCopy = new MemoryModel(this.repo.getActor(), modelState);
 			
 			callback.onSuccess(modelCopy);
 			
@@ -205,7 +205,7 @@ public class DirectDataService implements XDataService {
 			// FIXME concurrency: object may be changed during copy
 			XStateUtils.copy(object, objectState);
 			
-			XObject objectCopy = new MemoryObject(objectState);
+			XObject objectCopy = new MemoryObject(this.repo.getActor(), objectState);
 			
 			callback.onSuccess(objectCopy);
 			
