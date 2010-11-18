@@ -3,6 +3,7 @@ package org.xydra.server.impl.memory;
 import java.util.Iterator;
 
 import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.access.XAccessManager;
 import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.access.impl.memory.MemoryAccessManager;
@@ -38,14 +39,17 @@ public class MemoryXydraServer implements IXydraServer {
 	
 	/**
 	 * Parameter-less constructor. Called form {@link XydraRestServer}.
+	 * 
 	 * @param actorId TODO
 	 */
-	public MemoryXydraServer(XID actorId) {
+	public MemoryXydraServer() {
 		// setup logging
 		// FIXME why does the in-memory server need GAE logging? ~Daniel
 		GaeLoggerFactorySPI.init();
 		// Set the repository, group DB and access manager
 		XSPI.setStateStore(new MemoryStateStore());
+		// TODO use an id from config
+		XID actorId = XX.toId("MemoryXydraServer");
 		this.repo = X.createMemoryRepository(actorId);
 		this.groups = new MemoryGroupDatabase();
 		this.accessManager = new MemoryAccessManager(this.groups);

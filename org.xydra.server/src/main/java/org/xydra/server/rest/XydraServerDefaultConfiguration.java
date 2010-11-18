@@ -1,6 +1,5 @@
 package org.xydra.server.rest;
 
-import org.xydra.core.model.XID;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.server.IXydraServer;
@@ -39,12 +38,11 @@ public class XydraServerDefaultConfiguration {
 	}
 	
 	/**
-	 * @param actorId TODO
 	 * @return a new instance of the default in-memory server
 	 */
-	public synchronized static IXydraServer getInMemoryServer(XID actorId) {
+	public synchronized static IXydraServer getInMemoryServer() {
 		if(defaultXydraServer_ == null) {
-			IXydraServer builtInServer = new MemoryXydraServer(actorId);
+			IXydraServer builtInServer = new MemoryXydraServer();
 			log.warn("No IXydraServer has been registered, using default server = "
 			        + builtInServer.getClass().getCanonicalName());
 			defaultXydraServer_ = builtInServer;
