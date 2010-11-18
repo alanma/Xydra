@@ -46,8 +46,9 @@ public interface XCommand {
 	static final long NOCHANGE = -2;
 	
 	/**
-	 * returned when executing repository commands to indicate that the command
-	 * succeeded and changed something
+	 * returned when executing repository commands (TODO you mean
+	 * {@link XRepositoryCommand}?) to indicate that the command succeeded and
+	 * changed something
 	 * 
 	 * TODO Or is the resulting revision number returned?
 	 */
