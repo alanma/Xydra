@@ -24,7 +24,7 @@ import org.xydra.core.model.state.XObjectState;
  * @author Kaidel
  * 
  */
-public interface XObject extends XLoggedObject, XSynchronizesChanges {
+public interface XObject extends XLoggedObject, XWritableObject, XSynchronizesChanges {
 	
 	/**
 	 * Returns the {@link XField} with the given {@link XID} contained in this

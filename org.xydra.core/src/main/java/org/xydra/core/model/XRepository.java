@@ -23,8 +23,9 @@ import org.xydra.core.model.state.XRepositoryState;
  * @author voelkel
  * 
  */
-public interface XRepository extends XBaseRepository, XSendsRepositoryEvents, XSendsModelEvent,
-        XSendsObjectEvents, XSendsFieldEvents, XSendsTransactionEvents, XExecutesCommands {
+public interface XRepository extends XBaseRepository, XWritableRepository, XSendsRepositoryEvents,
+        XSendsModelEvent, XSendsObjectEvents, XSendsFieldEvents, XSendsTransactionEvents,
+        XExecutesCommands {
 	
 	/**
 	 * Returns the {@link XModel} contained in this repository with the given
@@ -53,7 +54,8 @@ public interface XRepository extends XBaseRepository, XSendsRepositoryEvents, XS
 	/**
 	 * Removes the specified {@link XModel} from this XRepository.
 	 * 
-	 * @param model The {@link XID} of the {@link XModel} which is to be removed
+	 * @param repository The {@link XID} of the {@link XModel} which is to be
+	 *            removed
 	 * 
 	 * @return true, if the specified {@link XModel} could be removed, false
 	 *         otherwise

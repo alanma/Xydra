@@ -29,7 +29,7 @@ import org.xydra.core.model.state.XModelState;
  * @author Kaidel
  * 
  */
-public interface XModel extends XLoggedModel, Serializable, XSynchronizesChanges {
+public interface XModel extends XLoggedModel, XWritableModel, Serializable, XSynchronizesChanges {
 	
 	/**
 	 * Returns the {@link XObject} contained in this model with the given

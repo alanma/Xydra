@@ -27,7 +27,7 @@ import org.xydra.core.value.XValue;
  * @author kaidel
  * 
  */
-public interface XField extends XLoggedField, Serializable {
+public interface XField extends XLoggedField, XWritableField, Serializable {
 	
 	/**
 	 * Sets the {@link XValue} of this field to the given value.
