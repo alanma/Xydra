@@ -198,10 +198,14 @@ public interface XydraStore {
 	 *            individual command might fail or succeed. For transaction
 	 *            semantics, wrap commands in a {@link XTransaction}.
 	 * @param callback Asynchronous callback to signal success or failure. On
-	 *            success, the supplied arrray contains in the same order as the
+	 *            success, the supplied array contains in the same order as the
 	 *            supplied commands the result of executing the command. A
 	 *            non-negative number indicates the resulting number of the
 	 *            changed entity.
+	 * 
+	 *            FIXME In {@link XCommand} there is {@link XCommand#CHANGED}
+	 *            which is returned if things changed - so is the revision
+	 *            number or this special marker returned?
 	 * 
 	 *            TODO Which revision number is returned if the command is an
 	 *            {@link XTransaction}?
