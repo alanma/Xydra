@@ -41,6 +41,7 @@ public interface XRepository extends XBaseRepository, XSendsRepositoryEvents, XS
 	 * Creates a new {@link XModel} with the given {@link XID} and adds it to
 	 * this XRepository or returns the already existing {@link XModel} if the
 	 * given {@link XID} was already taken.
+	 * 
 	 * @param id The {@link XID} for the {@link XModel} which is to be created
 	 * 
 	 * @return the newly created {@link XModel} or the already existing
@@ -51,6 +52,7 @@ public interface XRepository extends XBaseRepository, XSendsRepositoryEvents, XS
 	
 	/**
 	 * Removes the specified {@link XModel} from this XRepository.
+	 * 
 	 * @param model The {@link XID} of the {@link XModel} which is to be removed
 	 * 
 	 * @return true, if the specified {@link XModel} could be removed, false
@@ -73,6 +75,7 @@ public interface XRepository extends XBaseRepository, XSendsRepositoryEvents, XS
 	 * <li>the repository-{@link XID} in the {@link XRepositoryCommand} does not
 	 * concur with the {@link XID} of this XRepository
 	 * </ul>
+	 * 
 	 * @param command The {@link XRepositoryCommand} which is to be executed
 	 * 
 	 * @return {@link XCommand#FAILED} if executing the
@@ -84,5 +87,20 @@ public interface XRepository extends XBaseRepository, XSendsRepositoryEvents, XS
 	 */
 	@ModificationOperation
 	long executeRepositoryCommand(XRepositoryCommand command);
+	
+	/**
+	 * @return the actor that is represented by this interface. This is the
+	 *         actor that is recorded for change operations. Operations will
+	 *         only succeed if this actor has access.
+	 */
+	XID getActor();
+	
+	/**
+	 * Set a new actor to be used when building commands for changes to this
+	 * repository.
+	 * 
+	 * @param actor for this repository and its children, if any.
+	 */
+	void setActor(XID actor);
 	
 }

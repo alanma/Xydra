@@ -242,18 +242,18 @@ public class MemoryField implements XField, Serializable {
 			long fieldRev = getRevisionNumber();
 			if((oldValue == null)) {
 				assert newValue != null;
-				event = MemoryFieldEvent.createAddEvent(this.actorId, getAddress(), newValue, modelRev,
-				        objectRev, fieldRev, inTrans);
+				event = MemoryFieldEvent.createAddEvent(this.actorId, getAddress(), newValue,
+				        modelRev, objectRev, fieldRev, inTrans);
 			} else {
 				if(newValue == null) {
 					// implies remove
-					event = MemoryFieldEvent.createRemoveEvent(this.actorId, getAddress(), oldValue,
-					        modelRev, objectRev, fieldRev, inTrans);
+					event = MemoryFieldEvent.createRemoveEvent(this.actorId, getAddress(),
+					        oldValue, modelRev, objectRev, fieldRev, inTrans);
 				} else {
 					assert !newValue.equals(oldValue);
 					// implies change
-					event = MemoryFieldEvent.createChangeEvent(this.actorId, getAddress(), oldValue,
-					        newValue, modelRev, objectRev, fieldRev, inTrans);
+					event = MemoryFieldEvent.createChangeEvent(this.actorId, getAddress(),
+					        oldValue, newValue, modelRev, objectRev, fieldRev, inTrans);
 				}
 			}
 			
@@ -559,6 +559,16 @@ public class MemoryField implements XField, Serializable {
 		} else {
 			assert this.eventQueue.stateTransaction == null : "unexpected state transaction";
 		}
+	}
+	
+	@Override
+	public XID getActor() {
+		return this.actorId;
+	}
+	
+	@Override
+	public void setActor(XID actor) {
+		this.actorId = actor;
 	}
 	
 }

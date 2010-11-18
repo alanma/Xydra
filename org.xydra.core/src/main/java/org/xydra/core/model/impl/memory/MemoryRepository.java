@@ -94,8 +94,8 @@ public class MemoryRepository implements XRepository, Serializable {
 	public synchronized MemoryModel createModel(XID modelID) {
 		MemoryModel model = getModel(modelID);
 		if(model == null) {
-			XRepositoryEvent event = MemoryRepositoryEvent.createAddEvent(this.actorId, getAddress(),
-			        modelID);
+			XRepositoryEvent event = MemoryRepositoryEvent.createAddEvent(this.actorId,
+			        getAddress(), modelID);
 			
 			XModelState modelState = this.state.createModelState(modelID);
 			
@@ -190,8 +190,8 @@ public class MemoryRepository implements XRepository, Serializable {
 			endStateTransaction(trans);
 			
 			model.eventQueue.sendEvents();
-			XRepositoryEvent event = MemoryRepositoryEvent.createRemoveEvent(this.actorId, getAddress(),
-			        modelID, modelRev, false);
+			XRepositoryEvent event = MemoryRepositoryEvent.createRemoveEvent(this.actorId,
+			        getAddress(), modelID, modelRev, false);
 			fireRepositoryEvent(event);
 			
 		}
@@ -509,6 +509,19 @@ public class MemoryRepository implements XRepository, Serializable {
 			return XCommand.FAILED;
 		}
 		return model.executeCommand(actor, command);
+	}
+	
+	@Override
+	public XID getActor() {
+		return this.actorId;
+	}
+	
+	@Override
+	public void setActor(XID actor) {
+		this.actorId = actor;
+		for(XModel model : this.loadedModels.values()) {
+			model.setActor(actor);
+		}
 	}
 	
 }

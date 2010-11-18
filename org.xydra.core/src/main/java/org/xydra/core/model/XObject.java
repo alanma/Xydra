@@ -43,6 +43,7 @@ public interface XObject extends XLoggedObject, XSynchronizesChanges {
 	 * Creates a new {@link XField} and adds it to this {@link XObject} or
 	 * returns the already existing {@link XField} if the given {@link XID} was
 	 * already taken.
+	 * 
 	 * @param fieldID The {@link XID} for the {@link XField} which is to be
 	 *            created.
 	 * 
@@ -55,6 +56,7 @@ public interface XObject extends XLoggedObject, XSynchronizesChanges {
 	
 	/**
 	 * Removes the {@link XField} with the given {@link XID} from this XObject
+	 * 
 	 * @param fieldID The {@link XID} of the {@link XField} which is to be
 	 *            removed
 	 * 
@@ -80,6 +82,7 @@ public interface XObject extends XLoggedObject, XSynchronizesChanges {
 	 * <li>the object-{@link XID} in the {@link XObjectCommand} does not concur
 	 * with the {@link XID} of this XObject
 	 * </ul>
+	 * 
 	 * @param command The {@link XObjectCommand} which is to be executed
 	 * 
 	 * @return {@link XCommand#FAILED} if executing the {@link XObjectCommand}
@@ -91,5 +94,20 @@ public interface XObject extends XLoggedObject, XSynchronizesChanges {
 	 */
 	@ModificationOperation
 	long executeObjectCommand(XObjectCommand command);
+	
+	/**
+	 * @return the actor that is represented by this interface. This is the
+	 *         actor that is recorded for change operations. Operations will
+	 *         only succeed if this actor has access.
+	 */
+	XID getActor();
+	
+	/**
+	 * Set a new actor to be used when building commands for changes to this
+	 * object.
+	 * 
+	 * @param actor for this object and its children, if any.
+	 */
+	void setActor(XID actor);
 	
 }

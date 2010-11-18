@@ -666,4 +666,17 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		}
 	}
 	
+	@Override
+	public XID getActor() {
+		return this.actorId;
+	}
+	
+	@Override
+	public void setActor(XID actor) {
+		this.actorId = actor;
+		for(XField field : this.loadedFields.values()) {
+			field.setActor(actor);
+		}
+	}
+	
 }

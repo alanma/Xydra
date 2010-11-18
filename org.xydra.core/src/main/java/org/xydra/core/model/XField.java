@@ -34,6 +34,7 @@ public interface XField extends XLoggedField, Serializable {
 	 * 
 	 * Passing "null" as the 'value' arguments implies an remove operation (will
 	 * remove the current {@link XValue})
+	 * 
 	 * @param value The new {@link XValue}
 	 * 
 	 * @return true, if this operation actually changed the current
@@ -51,6 +52,7 @@ public interface XField extends XLoggedField, Serializable {
 	 * <li>the field-{@link XID} specified in the {@link XCommand} does not
 	 * concur with the {@link XID} of this field
 	 * </ul>
+	 * 
 	 * @param command The {@link XCommand} which is to be executed
 	 * 
 	 * @return {@link XCommand#FAILED} if the {@link XCommand} failed,
@@ -60,5 +62,20 @@ public interface XField extends XLoggedField, Serializable {
 	 */
 	@ModificationOperation
 	long executeFieldCommand(XFieldCommand command);
+	
+	/**
+	 * @return the actor that is represented by this interface. This is the
+	 *         actor that is recorded for change operations. Operations will
+	 *         only succeed if this actor has access.
+	 */
+	XID getActor();
+	
+	/**
+	 * Set a new actor to be used when building commands for changes to this
+	 * field.
+	 * 
+	 * @param actor for this field.
+	 */
+	void setActor(XID actor);
 	
 }

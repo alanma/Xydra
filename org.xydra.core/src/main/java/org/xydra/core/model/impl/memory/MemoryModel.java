@@ -143,8 +143,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 			this.state.addObjectState(object.getState());
 			this.loadedObjects.put(object.getID(), object);
 			
-			XModelEvent event = MemoryModelEvent.createAddEvent(this.actorId, getAddress(), objectID,
-			        getRevisionNumber(), inTrans);
+			XModelEvent event = MemoryModelEvent.createAddEvent(this.actorId, getAddress(),
+			        objectID, getRevisionNumber(), inTrans);
 			
 			this.eventQueue.enqueueModelEvent(this, event);
 			
@@ -634,6 +634,19 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	@Override
 	public String toString() {
 		return this.state.toString();
+	}
+	
+	@Override
+	public XID getActor() {
+		return this.actorId;
+	}
+	
+	@Override
+	public void setActor(XID actor) {
+		this.actorId = actor;
+		for(XObject object : this.loadedObjects.values()) {
+			object.setActor(actor);
+		}
 	}
 	
 }

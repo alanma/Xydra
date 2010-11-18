@@ -47,6 +47,7 @@ public interface XModel extends XLoggedModel, Serializable, XSynchronizesChanges
 	 * Creates a new {@link XObject} with the given {@link XID} and adds it to
 	 * this XModel or returns the already existing {@link XObject} if the given
 	 * {@link XID} was already taken.
+	 * 
 	 * @param id The {@link XID} for the {@link XObject} which is to be created
 	 * 
 	 * @return the newly created {@link XObject} or the already existing
@@ -58,6 +59,7 @@ public interface XModel extends XLoggedModel, Serializable, XSynchronizesChanges
 	
 	/**
 	 * Removes the {@link XObject} with the given {@link XID} from this XModel.
+	 * 
 	 * @param object The {@link XID} of the {@link XObject} which is to be
 	 *            removed
 	 * 
@@ -82,6 +84,7 @@ public interface XModel extends XLoggedModel, Serializable, XSynchronizesChanges
 	 * <li>the model-{@link XID} in the {@link XModelCommand} does not concur
 	 * with the {@link XID} of this XModel
 	 * </ul>
+	 * 
 	 * @param command The {@link XModelCommand} which is to be executed
 	 * 
 	 * @return {@link XCommand#FAILED} if executing the {@link XModelCommand}
@@ -93,5 +96,20 @@ public interface XModel extends XLoggedModel, Serializable, XSynchronizesChanges
 	 */
 	@ModificationOperation
 	long executeModelCommand(XModelCommand command);
+	
+	/**
+	 * @return the actor that is represented by this interface. This is the
+	 *         actor that is recorded for change operations. Operations will
+	 *         only succeed if this actor has access.
+	 */
+	XID getActor();
+	
+	/**
+	 * Set a new actor to be used when building commands for changes to this
+	 * model.
+	 * 
+	 * @param actor for this model and its children, if any.
+	 */
+	void setActor(XID actor);
 	
 }
