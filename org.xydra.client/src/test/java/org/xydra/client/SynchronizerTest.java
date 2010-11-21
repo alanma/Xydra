@@ -11,7 +11,7 @@ import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.access.XA;
 import org.xydra.core.access.XAccessManager;
-import org.xydra.core.access.XGroupDatabase;
+import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.access.impl.memory.MemoryAccessManager;
 import org.xydra.core.access.impl.memory.MemoryGroupDatabase;
 import org.xydra.core.change.XCommand;
@@ -41,10 +41,11 @@ public class SynchronizerTest extends TestCase {
 	public SynchronizerTest() {
 		
 		// Setup a "server" repository.
-		XRepository repo = X.createMemoryRepository();
-		DemoModelUtil.addPhonebookModel(repo);
-		XGroupDatabase groups = new MemoryGroupDatabase();
 		XID actorId = XX.toId("TestActor");
+		XRepository repo = X.createMemoryRepository(actorId);
+		DemoModelUtil.addPhonebookModel(repo);
+		XGroupDatabaseWithListeners groups = new MemoryGroupDatabase();
+		
 		XAccessManager arm = new MemoryAccessManager(groups);
 		arm.setAccess(actorId, repo.getAddress(), XA.ACCESS_READ, true);
 		arm.setAccess(actorId, repo.getAddress(), XA.ACCESS_WRITE, true);
