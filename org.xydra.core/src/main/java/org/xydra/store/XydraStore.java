@@ -2,9 +2,14 @@ package org.xydra.store;
 
 import java.util.Set;
 
+import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
+import org.xydra.core.change.XModelCommand;
+import org.xydra.core.change.XObjectCommand;
+import org.xydra.core.change.XRepositoryCommand;
 import org.xydra.core.change.XTransaction;
+import org.xydra.core.change.XTransactionEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
@@ -123,7 +128,7 @@ public interface XydraStore {
 	 *            success, the returned array contains in the same order as in
 	 *            the request array (modelAddresses) the revision number of the
 	 *            addressed model as a long. Non-existing models (and those for
-	 *            which the actorId has no read-access) are signalled as
+	 *            which the actorId has no read-access) are signaled as
 	 *            {@link #MODEL_DOES_NOT_EXIST}.
 	 * @throws IllegalArgumentException
 	 */
@@ -179,6 +184,8 @@ public interface XydraStore {
 	 *            services.
 	 * @param callback Asynchronous callback to signal success or failure. On
 	 *            success, the repositoryId of this store is returned.
+	 * 
+	 *            TODO Why only restrict this to a single repository ID?
 	 */
 	void getRepositoryId(XID actorId, String passwordHash, Callback<XID> callback);
 	
@@ -207,8 +214,14 @@ public interface XydraStore {
 	 *            value is always a revision number that can be used to retrieve
 	 *            the corresponding event using {@link #getEvents()}
 	 * 
-	 *            TODO Which revision number is returned if the command is an
-	 *            {@link XTransaction}?
+	 *            Like any other {@link XCommand}, {@link XTransaction}s only
+	 *            "take up" a single revision, which is the one passed to the
+	 *            callback. For {@link XTransaction}s as well as
+	 *            {@link XRepositoryCommand}s, {@link XModelCommand}s and
+	 *            {@link XObjectCommand}s of type remove, the event saved in the
+	 *            change log may be either a {@link XTransactionEvent} or an
+	 *            {@link XAtomicEvent}, depending on whether there are actually
+	 *            multiple changes.
 	 * 
 	 *            Negative numbers indicate a special result:
 	 *            {@link XCommand#FAILED} signals a failure,
@@ -220,6 +233,17 @@ public interface XydraStore {
 	 *            skip a revision number. This means that there can be revision
 	 *            numbers without any associated events. The revision of the
 	 *            model however is only updated if anything actually changed.
+	 * 
+	 *            Even after a the callback's {@link Callback#onSuccess(Object)}
+	 *            method has been called, the change may not actually be
+	 *            returned yet by {@link #getModelSnapshots()},
+	 *            {@link #getModelIds()}, {@link #getModelRevisions()} and
+	 *            {@link #getObjectSnapshots()} yet. The change will however
+	 *            eventually be returned by those methods, and will stay
+	 *            persistent once it does. Also, no changes with greater
+	 *            revision numbers will become visible before this one, but
+	 *            their callbacks' {@link Callback#onSuccess(Object)} method
+	 *            might be called before this one.
 	 */
 	void executeCommand(XID actorId, String passwordHash, XCommand[] commands,
 	        Callback<long[]> callback);
