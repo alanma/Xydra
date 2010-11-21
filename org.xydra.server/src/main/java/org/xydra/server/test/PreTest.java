@@ -1,7 +1,7 @@
 package org.xydra.server.test;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.Test;
@@ -38,7 +38,7 @@ public abstract class PreTest {
 		// TODO move command into transaction
 		XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(xydraServer
 		        .getRepositoryAddress(), XCommand.SAFE, DemoModelUtil.PHONEBOOK_ID);
-		assertEquals(XCommand.CHANGED, xydraServer.executeCommand(createCommand, null));
+		assertTrue(xydraServer.executeCommand(createCommand, null) >= 0);
 		XAddress modelAddr = createCommand.getChangedEntity();
 		XTransactionBuilder tb = new XTransactionBuilder(modelAddr);
 		DemoModelUtil.setupPhonebook(modelAddr, tb);
