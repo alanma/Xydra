@@ -200,19 +200,26 @@ public interface XydraStore {
 	 * @param callback Asynchronous callback to signal success or failure. On
 	 *            success, the supplied array contains in the same order as the
 	 *            supplied commands the result of executing the command. A
-	 *            non-negative number indicates the resulting number of the
-	 *            changed entity.
+	 *            non-negative number indicates the resulting revision number of
+	 *            the changed entity.
 	 * 
-	 *            FIXME In {@link XCommand} there is {@link XCommand#CHANGED}
-	 *            which is returned if things changed - so is the revision
-	 *            number or this special marker returned?
+	 *            For successful commands that changed something, the the return
+	 *            value is always a revision number that can be used to retrieve
+	 *            the corresponding event using {@link #getEvents()}
 	 * 
 	 *            TODO Which revision number is returned if the command is an
 	 *            {@link XTransaction}?
 	 * 
-	 *            Negative numbers special result: {@link XCommand#FAILED}
-	 *            signals a failure, {@link XCommand#NOCHANGE} signals that the
-	 *            command did not change anything.
+	 *            Negative numbers indicate a special result:
+	 *            {@link XCommand#FAILED} signals a failure,
+	 *            {@link XCommand#NOCHANGE} signals that the command did not
+	 *            change anything.
+	 * 
+	 *            Commands may still "take up" a revision number, even if they
+	 *            failed or didn't change anything, causing the next command to
+	 *            skip a revision number. This means that there can be revision
+	 *            numbers without any associated events. The revision of the
+	 *            model however is only updated if anything actually changed.
 	 */
 	void executeCommand(XID actorId, String passwordHash, XCommand[] commands,
 	        Callback<long[]> callback);

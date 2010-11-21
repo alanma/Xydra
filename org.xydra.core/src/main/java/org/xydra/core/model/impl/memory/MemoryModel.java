@@ -26,7 +26,6 @@ import org.xydra.core.model.XRepository;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
-import org.xydra.core.model.state.XStateTransaction;
 import org.xydra.core.model.state.impl.memory.MemoryChangeLogState;
 import org.xydra.core.model.state.impl.memory.TemporaryModelState;
 
@@ -94,6 +93,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	protected MemoryModel(XID actorId, MemoryRepository father, XModelState modelState) {
 		super(new MemoryEventQueue(modelState.getChangeLogState() == null ? null
 		        : new MemoryChangeLog(modelState.getChangeLogState())));
+		
+		assert actorId != null;
 		this.actorId = actorId;
 		
 		this.state = modelState;
@@ -358,16 +359,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	 * Saves the current state information of this MemoryModel with the
 	 * currently used persistence layer
 	 */
-	protected void save(XStateTransaction transaction) {
-		assert this.eventQueue.stateTransaction == null : "double state transaction detected";
-		this.state.save(transaction);
-	}
-	
-	/**
-	 * Saves the current state information of this MemoryModel with the
-	 * currently used persistence layer
-	 */
-	private void save() {
+	protected void save() {
 		this.state.save(this.eventQueue.stateTransaction);
 	}
 	
@@ -543,24 +535,12 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	 * Deletes the state information of this MemoryModel from the currently used
 	 * persistence layer
 	 */
-	protected void delete(XStateTransaction transaction) {
-		assert this.eventQueue.stateTransaction == null : "double state transaction detected";
-		this.eventQueue.stateTransaction = transaction;
-		delete();
-		this.eventQueue.stateTransaction = null;
-	}
-	
-	/**
-	 * Deletes the state information of this MemoryModel from the currently used
-	 * persistence layer
-	 */
-	private void delete() {
+	protected void delete() {
 		for(XID objectId : this) {
 			MemoryObject object = getObject(objectId);
 			object.delete();
 		}
 		this.state.delete(this.eventQueue.stateTransaction);
-		this.eventQueue.setBlockSending(true);
 		this.eventQueue.deleteLog();
 		this.removed = true;
 	}
@@ -642,10 +622,11 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	}
 	
 	@Override
-	public void setActor(XID actor) {
-		this.actorId = actor;
+	public void setActor(XID actorId) {
+		assert actorId != null;
+		this.actorId = actorId;
 		for(XObject object : this.loadedObjects.values()) {
-			object.setActor(actor);
+			object.setActor(actorId);
 		}
 	}
 	

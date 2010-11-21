@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xydra.core.XCompareUtils;
 import org.xydra.core.XX;
@@ -40,12 +39,7 @@ import org.xydra.log.LoggerFactory;
 public class XmlModelTest {
 	
 	private static final Logger log = LoggerFactory.getLogger(XmlModelTest.class);
-	private XID actorId;
-	
-	@BeforeClass
-	public void setUp() {
-		this.actorId = XX.toId("a-test-user");
-	}
+	private XID actorId = XX.toId("a-test-user");
 	
 	private void testRepository(XBaseRepository repo) {
 		

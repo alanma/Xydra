@@ -46,7 +46,6 @@ abstract public class AbstractTransactionTest {
 	private static final XValue JOHN_PHONE = XV.toValue("87589-876");
 	
 	private static final XID MODEL_ID = XX.toId("model");
-	private static final XID ACTOR_ID = XX.toId("actor");
 	private static final XID JOHN_ID = XX.toId("john");
 	private static final XID PETER_ID = XX.toId("peter");
 	private static final XID PHONE_ID = XX.toId("phone");
@@ -56,7 +55,7 @@ abstract public class AbstractTransactionTest {
 	protected XModel model;
 	protected XObject john;
 	protected XObject peter;
-	private XID actorId;
+	private XID actorId = XX.toId("actor");
 	
 	@Before
 	public void setUp() {
@@ -106,7 +105,7 @@ abstract public class AbstractTransactionTest {
 		List<XEvent> received = ChangeRecorder.record(this.model);
 		List<XEvent> trans = ChangeRecorder.recordTransactions(this.model);
 		
-		long result = this.model.executeTransaction(ACTOR_ID, tb.build());
+		long result = this.model.executeTransaction(this.actorId, tb.build());
 		
 		assertEquals(modelRev + 1, result);
 		
@@ -130,11 +129,11 @@ abstract public class AbstractTransactionTest {
 
 		XAddress peterAddr = XX.resolveObject(modelAddr, PETER_ID);
 		XAddress peterPhoneAddr = XX.resolveField(peterAddr, PHONE_ID);
-		XEvent removePeterPhoneValue = MemoryFieldEvent.createRemoveEvent(ACTOR_ID, peterPhoneAddr,
-		        PETER_PHONE, modelRev, peterRev, peterPhoneRev, true);
-		XEvent removePeterPhone = MemoryObjectEvent.createRemoveEvent(ACTOR_ID, peterAddr,
+		XEvent removePeterPhoneValue = MemoryFieldEvent.createRemoveEvent(this.actorId,
+		        peterPhoneAddr, PETER_PHONE, modelRev, peterRev, peterPhoneRev, true);
+		XEvent removePeterPhone = MemoryObjectEvent.createRemoveEvent(this.actorId, peterAddr,
 		        PHONE_ID, modelRev, peterRev, peterPhoneRev, true);
-		XEvent removePeter = MemoryModelEvent.createRemoveEvent(ACTOR_ID, modelAddr, PETER_ID,
+		XEvent removePeter = MemoryModelEvent.createRemoveEvent(this.actorId, modelAddr, PETER_ID,
 		        modelRev, peterRev, true);
 		
 		int x1 = received.indexOf(removePeterPhoneValue);
@@ -149,7 +148,7 @@ abstract public class AbstractTransactionTest {
 		
 		/* check events received for adding alias to john */
 
-		XEvent addJohnAlias = MemoryObjectEvent.createAddEvent(ACTOR_ID, johnAddr, ALIAS_ID,
+		XEvent addJohnAlias = MemoryObjectEvent.createAddEvent(this.actorId, johnAddr, ALIAS_ID,
 		        modelRev, johnRev, true);
 		
 		int x4 = received.indexOf(addJohnAlias);
@@ -157,8 +156,8 @@ abstract public class AbstractTransactionTest {
 		
 		/* check events received for setting john/alias */
 
-		XEvent addJohnAliasValue = MemoryFieldEvent.createAddEvent(ACTOR_ID, aliasAddr, JOHN_ALIAS,
-		        modelRev, johnRev, XCommand.NEW, true);
+		XEvent addJohnAliasValue = MemoryFieldEvent.createAddEvent(this.actorId, aliasAddr,
+		        JOHN_ALIAS, modelRev, johnRev, XCommand.NEW, true);
 		
 		int x5 = received.indexOf(addJohnAliasValue);
 		assertTrue(x5 >= 0);
@@ -201,7 +200,7 @@ abstract public class AbstractTransactionTest {
 		// correctly when the first event is executed
 		HasChanged hc = HasChanged.listen(this.model);
 		
-		long result = this.model.executeTransaction(ACTOR_ID, tb.build());
+		long result = this.model.executeTransaction(this.actorId, tb.build());
 		
 		assertEquals(XCommand.NOCHANGE, result);
 		
@@ -244,7 +243,7 @@ abstract public class AbstractTransactionTest {
 		// correctly when the first event is executed
 		HasChanged hc = HasChanged.listen(this.model);
 		
-		long result = this.model.executeTransaction(ACTOR_ID, tb.build());
+		long result = this.model.executeTransaction(this.actorId, tb.build());
 		
 		assertEquals(XCommand.NOCHANGE, result);
 		
@@ -283,7 +282,7 @@ abstract public class AbstractTransactionTest {
 		List<XEvent> received = ChangeRecorder.record(this.model);
 		List<XEvent> trans = ChangeRecorder.recordTransactions(this.model);
 		
-		long result = this.model.executeTransaction(ACTOR_ID, tb.build());
+		long result = this.model.executeTransaction(this.actorId, tb.build());
 		
 		assertEquals(modelRev + 1, result);
 		
@@ -301,7 +300,7 @@ abstract public class AbstractTransactionTest {
 
 		/* check events received for adding alias to john */
 
-		XEvent addJohnAlias = MemoryObjectEvent.createAddEvent(ACTOR_ID, johnAddr, ALIAS_ID,
+		XEvent addJohnAlias = MemoryObjectEvent.createAddEvent(this.actorId, johnAddr, ALIAS_ID,
 		        modelRev, johnRev, false);
 		
 		int x4 = received.indexOf(addJohnAlias);
@@ -344,7 +343,7 @@ abstract public class AbstractTransactionTest {
 		
 		HasChanged hc = HasChanged.listen(this.model);
 		
-		long result = this.model.executeTransaction(ACTOR_ID, tb.build());
+		long result = this.model.executeTransaction(this.actorId, tb.build());
 		
 		assertEquals(XCommand.FAILED, result);
 		
@@ -401,7 +400,7 @@ abstract public class AbstractTransactionTest {
 		List<XEvent> trans = ChangeRecorder.recordTransactions(this.model);
 		List<XEvent> transFromObject = ChangeRecorder.recordTransactions(this.john);
 		
-		long result = this.john.executeTransaction(ACTOR_ID, tb.build());
+		long result = this.john.executeTransaction(this.actorId, tb.build());
 		
 		assertEquals(modelRev + 1, result);
 		
@@ -421,7 +420,7 @@ abstract public class AbstractTransactionTest {
 
 		/* check events received for adding alias to john */
 
-		XEvent addJohnAlias = MemoryObjectEvent.createAddEvent(ACTOR_ID, johnAddr, ALIAS_ID,
+		XEvent addJohnAlias = MemoryObjectEvent.createAddEvent(this.actorId, johnAddr, ALIAS_ID,
 		        modelRev, johnRev, true);
 		
 		int x1 = received.indexOf(addJohnAlias);
@@ -429,8 +428,8 @@ abstract public class AbstractTransactionTest {
 		
 		/* check events received for setting john/alias */
 
-		XEvent addJohnAliasValue = MemoryFieldEvent.createAddEvent(ACTOR_ID, aliasAddr, JOHN_ALIAS,
-		        modelRev, johnRev, XCommand.NEW, true);
+		XEvent addJohnAliasValue = MemoryFieldEvent.createAddEvent(this.actorId, aliasAddr,
+		        JOHN_ALIAS, modelRev, johnRev, XCommand.NEW, true);
 		
 		int x2 = received.indexOf(addJohnAliasValue);
 		assertTrue(x2 >= 0);
@@ -478,7 +477,7 @@ abstract public class AbstractTransactionTest {
 		// correctly when the first event is executed
 		HasChanged hc = HasChanged.listen(this.model);
 		
-		long result = this.john.executeTransaction(ACTOR_ID, tb.build());
+		long result = this.john.executeTransaction(this.actorId, tb.build());
 		
 		assertEquals(XCommand.NOCHANGE, result);
 		
@@ -516,7 +515,7 @@ abstract public class AbstractTransactionTest {
 		List<XEvent> trans = ChangeRecorder.recordTransactions(this.model);
 		List<XEvent> transFromObject = ChangeRecorder.recordTransactions(this.john);
 		
-		long result = this.john.executeTransaction(ACTOR_ID, tb.build());
+		long result = this.john.executeTransaction(this.actorId, tb.build());
 		
 		assertEquals(modelRev + 1, result);
 		
@@ -534,7 +533,7 @@ abstract public class AbstractTransactionTest {
 
 		/* check events received for adding alias to john */
 
-		XEvent addJohnAlias = MemoryObjectEvent.createAddEvent(ACTOR_ID, johnAddr, ALIAS_ID,
+		XEvent addJohnAlias = MemoryObjectEvent.createAddEvent(this.actorId, johnAddr, ALIAS_ID,
 		        modelRev, johnRev, false);
 		
 		int x4 = received.indexOf(addJohnAlias);
@@ -579,7 +578,7 @@ abstract public class AbstractTransactionTest {
 		HasChanged phoneListener = new HasChanged();
 		johnPhone.addListenerForFieldEvents(phoneListener);
 		
-		long result = this.john.executeTransaction(ACTOR_ID, tb.build());
+		long result = this.john.executeTransaction(this.actorId, tb.build());
 		
 		assertEquals(XCommand.FAILED, result);
 		
@@ -643,7 +642,7 @@ abstract public class AbstractTransactionTest {
 		
 		HasChanged hc = HasChanged.listen(this.model);
 		
-		long result = this.model.executeTransaction(ACTOR_ID, tb.build());
+		long result = this.model.executeTransaction(this.actorId, tb.build());
 		
 		assertEquals(XCommand.FAILED, result);
 		

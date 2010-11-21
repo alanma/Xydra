@@ -49,11 +49,10 @@ import org.xydra.core.xml.impl.XmlOutStringBuffer;
 public abstract class AbstractTestAPI {
 	
 	public static final XID ACTOR_ID = XX.toId("urn-test-actorID");
-	private XID actorId;
+	private XID actorId = XX.toId("AbstractTestAPI");
 	
 	@Test
 	public void testRepository() {
-		this.actorId = XX.toId("AbstractTestAPI");
 		
 		// create a repository
 		XRepository repo = new MemoryRepository(this.actorId, XX.createUniqueID());

@@ -30,11 +30,11 @@ import org.xydra.core.value.impl.memory.MemoryStringValue;
 
 public abstract class AbstractChangeTest {
 	
-	private XID actorId;
+	private XID actorId = XX.toId("AbstractChangeTest");
 	
 	@Test
 	public void testRepositoryChangeListening() {
-		this.actorId = XX.toId("AbstractChangeTest");
+		
 		XRepository repo = X.createMemoryRepository(this.actorId);
 		DummyRepositoryChangeListener repoListener = new DummyRepositoryChangeListener();
 		repo.addListenerForRepositoryEvents(repoListener);

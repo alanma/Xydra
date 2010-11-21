@@ -103,6 +103,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		super(eventQueue);
 		assert eventQueue != null;
 		
+		assert actorId != null;
 		this.actorId = actorId;
 		
 		if(objectState == null) {
@@ -672,10 +673,11 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	}
 	
 	@Override
-	public void setActor(XID actor) {
-		this.actorId = actor;
+	public void setActor(XID actorId) {
+		assert actorId != null;
+		this.actorId = actorId;
 		for(XField field : this.loadedFields.values()) {
-			field.setActor(actor);
+			field.setActor(actorId);
 		}
 	}
 	

@@ -526,6 +526,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 	 * 
 	 * This method should never be called on entities that are {@link XObject
 	 * XObjects}.
+	 * 
 	 * @param objectId The {@link XID} for the {@link MemoryObject} which is to
 	 *            be created
 	 * 
@@ -541,6 +542,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 	 * 
 	 * This method should never be called on entities that are {@link XObject
 	 * XObjects}.
+	 * 
 	 * @param objectId The {@link XID} of the {@link MemoryObject} which is to
 	 *            be removed
 	 * 

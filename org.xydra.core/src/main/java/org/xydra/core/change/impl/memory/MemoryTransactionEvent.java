@@ -14,6 +14,7 @@ import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.change.XModelEvent;
 import org.xydra.core.change.XObjectEvent;
+import org.xydra.core.change.XRepositoryEvent;
 import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.XTransactionEvent;
 import org.xydra.core.model.XAddress;
@@ -209,12 +210,13 @@ public class MemoryTransactionEvent implements XTransactionEvent {
 		
 		for(int i = 0; i < events.length; ++i) {
 			
-			if(!target.equalsOrContains(events[i].getTarget())) {
+			if(!target.equalsOrContains(events[i].getChangedEntity())) {
 				throw new IllegalArgumentException("event #" + i + " " + events[i]
 				        + " target is not contained in " + target);
 			}
 			
-			if(!(events[i] instanceof XModelEvent || events[i] instanceof XObjectEvent || events[i] instanceof XFieldEvent)) {
+			if(!(events[i] instanceof XRepositoryEvent || events[i] instanceof XModelEvent
+			        || events[i] instanceof XObjectEvent || events[i] instanceof XFieldEvent)) {
 				throw new IllegalArgumentException("event #" + i + " " + events[i]
 				        + " is not an XModelEvent, XObjectEvent or XFieldEvent.");
 			}

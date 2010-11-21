@@ -28,7 +28,6 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XRepositoryState;
 import org.xydra.core.model.state.XStateTransaction;
@@ -80,6 +79,7 @@ public class MemoryRepository implements XRepository, Serializable {
 	public MemoryRepository(XID actorId, XRepositoryState repositoryState) {
 		assert repositoryState != null;
 		
+		assert actorId != null;
 		this.actorId = actorId;
 		this.state = repositoryState;
 		
@@ -100,25 +100,26 @@ public class MemoryRepository implements XRepository, Serializable {
 			XModelState modelState = this.state.createModelState(modelID);
 			
 			model = new MemoryModel(this.actorId, this, modelState);
+			assert model.getRevisionNumber() == 0;
 			
 			XStateTransaction trans = beginStateTransaction();
+			assert model.eventQueue.stateTransaction == null;
+			model.eventQueue.stateTransaction = trans;
 			
-			XChangeLogState log = modelState.getChangeLogState();
-			if(log != null) {
-				log.appendEvent(event, trans);
-				log.save(trans);
-			}
+			model.eventQueue.enqueueRepositoryEvent(this, event);
+			model.eventQueue.saveLog();
 			
 			this.state.addModelState(modelState);
-			model.save(trans);
+			model.save();
 			save(trans);
 			
 			endStateTransaction(trans);
+			model.eventQueue.stateTransaction = null;
 			
 			// in memory
 			this.loadedModels.put(model.getID(), model);
 			
-			fireRepositoryEvent(event);
+			model.eventQueue.sendEvents();
 			
 		}
 		
@@ -173,39 +174,58 @@ public class MemoryRepository implements XRepository, Serializable {
 			return false;
 		}
 		
-		synchronized(model.eventQueue) {
-			
-			long modelRev = model.getRevisionNumber();
-			
-			enqueueModelRemoveEvents(this.actorId, model);
-			
-			XStateTransaction trans = beginStateTransaction();
-			
-			model.delete(trans);
-			this.state.removeModelState(modelID);
-			this.loadedModels.remove(modelID);
-			
-			save(trans);
-			
-			endStateTransaction(trans);
-			
-			model.eventQueue.sendEvents();
-			XRepositoryEvent event = MemoryRepositoryEvent.createRemoveEvent(this.actorId,
-			        getAddress(), modelID, modelRev, false);
-			fireRepositoryEvent(event);
-			
-		}
+		removeModelInternal(model);
 		
 		return true;
 	}
 	
-	protected void enqueueModelRemoveEvents(XID actor, MemoryModel model) {
+	private long removeModelInternal(MemoryModel model) {
+		synchronized(model.eventQueue) {
+			
+			XID modelId = model.getID();
+			
+			long rev = model.getRevisionNumber() + 1;
+			
+			XStateTransaction trans = beginStateTransaction();
+			assert model.eventQueue.stateTransaction == null;
+			model.eventQueue.stateTransaction = trans;
+			
+			int since = model.eventQueue.getNextPosition();
+			boolean inTrans = enqueueModelRemoveEvents(model);
+			if(inTrans) {
+				model.eventQueue.createTransactionEvent(this.actorId, model, null, since);
+			}
+			
+			model.delete();
+			this.state.removeModelState(modelId);
+			this.loadedModels.remove(modelId);
+			
+			save(trans);
+			
+			endStateTransaction(trans);
+			model.eventQueue.stateTransaction = null;
+			
+			model.eventQueue.sendEvents();
+			model.eventQueue.setBlockSending(true);
+			
+			return rev;
+		}
+	}
+	
+	protected boolean enqueueModelRemoveEvents(MemoryModel model) {
 		
+		boolean inTrans = false;
 		for(XID objectId : model) {
 			MemoryObject object = model.getObject(objectId);
-			model.enqueueObjectRemoveEvents(actor, object, true);
+			model.enqueueObjectRemoveEvents(this.actorId, object, true);
+			inTrans = true;
 		}
 		
+		XRepositoryEvent event = MemoryRepositoryEvent.createRemoveEvent(this.actorId,
+		        getAddress(), model.getID(), model.getOldRevisionNumber(), inTrans);
+		model.eventQueue.enqueueRepositoryEvent(this, event);
+		
+		return inTrans;
 	}
 	
 	public synchronized long executeRepositoryCommand(XRepositoryCommand command) {
@@ -229,13 +249,14 @@ public class MemoryRepository implements XRepository, Serializable {
 				return XCommand.FAILED;
 			}
 			
-			XModel model = createModel(command.getModelID());
+			createModel(command.getModelID());
 			
-			return model.getRevisionNumber();
+			// Models are always created at the revision number 0.
+			return 0;
 		}
 		
 		if(command.getChangeType() == ChangeType.REMOVE) {
-			XModel oldModel = getModel(command.getModelID());
+			MemoryModel oldModel = getModel(command.getModelID());
 			if(oldModel == null) {
 				// ID not taken
 				if(command.isForced()) {
@@ -252,9 +273,7 @@ public class MemoryRepository implements XRepository, Serializable {
 				return XCommand.FAILED;
 			}
 			
-			removeModel(command.getModelID());
-			
-			return XCommand.CHANGED;
+			return removeModelInternal(oldModel);
 		}
 		
 		return XCommand.FAILED;
@@ -294,7 +313,7 @@ public class MemoryRepository implements XRepository, Serializable {
 	 * @param event The {@link XRepositoryEvent} which will be propagated to the
 	 *            registered listeners.
 	 */
-	private void fireRepositoryEvent(XRepositoryEvent event) {
+	protected void fireRepositoryEvent(XRepositoryEvent event) {
 		for(XRepositoryEventListener listener : this.repoChangeListenerCollection) {
 			listener.onChangeEvent(event);
 		}
@@ -517,10 +536,11 @@ public class MemoryRepository implements XRepository, Serializable {
 	}
 	
 	@Override
-	public void setActor(XID actor) {
-		this.actorId = actor;
+	public void setActor(XID actorId) {
+		assert actorId != null;
+		this.actorId = actorId;
 		for(XModel model : this.loadedModels.values()) {
-			model.setActor(actor);
+			model.setActor(actorId);
 		}
 	}
 	

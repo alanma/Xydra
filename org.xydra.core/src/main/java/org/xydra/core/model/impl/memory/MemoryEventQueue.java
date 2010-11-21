@@ -13,6 +13,7 @@ import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.change.XModelEvent;
 import org.xydra.core.change.XObjectEvent;
+import org.xydra.core.change.XRepositoryEvent;
 import org.xydra.core.change.XTransactionEvent;
 import org.xydra.core.change.impl.memory.MemoryFieldEvent;
 import org.xydra.core.change.impl.memory.MemoryTransactionEvent;
@@ -102,11 +103,18 @@ public class MemoryEventQueue implements Serializable {
 			assert entry != null;
 			assert entry.event != null;
 			
-			assert entry.event instanceof XModelEvent || entry.event instanceof XObjectEvent
-			        || entry.event instanceof XFieldEvent
+			assert entry.event instanceof XRepositoryEvent || entry.event instanceof XModelEvent
+			        || entry.event instanceof XObjectEvent || entry.event instanceof XFieldEvent
 			        || entry.event instanceof XTransactionEvent;
 			
-			if(entry.event instanceof XModelEvent) {
+			if(entry.event instanceof XRepositoryEvent) {
+				assert entry.repo != null;
+				
+				// fire repo event
+				
+				entry.repo.fireRepositoryEvent((XRepositoryEvent)entry.event);
+				
+			} else if(entry.event instanceof XModelEvent) {
 				assert entry.model != null;
 				
 				// fire model event and propagate to fathers if necessary.
@@ -172,6 +180,21 @@ public class MemoryEventQueue implements Serializable {
 		}
 		
 		this.sending = false;
+	}
+	
+	/**
+	 * Enqueues the given {@link XRepositoryEvent}.
+	 * 
+	 * TODO check whether the given XEntities actually fit to the XEntities
+	 * specified by the XIDs in the event
+	 * 
+	 * @param model The {@link MemoryModel} in which this event occurred.
+	 * @param event The {@link XModelEvent}.
+	 */
+	public void enqueueRepositoryEvent(MemoryRepository repo, XRepositoryEvent event) {
+		assert repo != null && event != null : "Neither repo nor event may be null!";
+		
+		enqueueEvent(new EventQueueEntry(repo, null, null, null, event));
 	}
 	
 	/**
