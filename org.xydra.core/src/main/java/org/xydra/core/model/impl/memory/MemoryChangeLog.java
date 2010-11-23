@@ -36,7 +36,7 @@ public class MemoryChangeLog extends AbstractChangeLog implements XChangeLog {
 	protected void appendEvent(XEvent event, XStateTransaction transaction) {
 		assert this.state.getBaseAddress().getObject() != null || event != null : "cannot add null events to model change log";
 		assert this.state.getBaseAddress().getObject() != null
-		        || (event.getOldModelRevision() == getCurrentRevisionNumber()) : "cannot append event with rev "
+		        || (event.getOldModelRevision() == getCurrentRevisionNumber()) : "cannot append event with old rev "
 		        + event.getOldModelRevision()
 		        + " to model change log at event "
 		        + getCurrentRevisionNumber();
