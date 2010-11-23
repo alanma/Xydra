@@ -527,6 +527,11 @@ public class MemoryRepository implements XRepository, Serializable {
 		if(model == null) {
 			return XCommand.FAILED;
 		}
+		/*
+		 * TODO using the actor set on the model instead of the one set on the
+		 * repository (on which the user called the #executeCommand() method) -
+		 * this is counter-intuitive for an API user
+		 */
 		return model.executeCommand(command);
 	}
 	

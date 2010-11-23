@@ -447,6 +447,12 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 					return XCommand.FAILED;
 				} else {
 					// let the object handle the transaction execution
+					/*
+					 * TODO using the actor set on the object instead of the one
+					 * set on the model (on which the user called the
+					 * #executeTransaction() method) - this is counter-intuitive
+					 * for an API user
+					 */
 					return object.executeTransaction(transaction);
 				}
 			}
@@ -559,6 +565,11 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 			if(object == null) {
 				return XCommand.FAILED;
 			}
+			/*
+			 * TODO using the actor set on the object instead of the one set on
+			 * the model (on which the user called the #executeCommand() method)
+			 * - this is counter-intuitive for an API user
+			 */
 			return object.executeCommand(command);
 		}
 	}

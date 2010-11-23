@@ -51,8 +51,8 @@ import org.xydra.core.model.delta.NewObject;
 
 /**
  * Abstract base class for entities that can execute {@link XTransaction
- * XTransactions} ( {@link XObject} and {@link XModel}) implementing most of the
- * logic behind transactions.
+ * XTransactions} ({@link XObject} and {@link XModel}) implementing most of the
+ * logic behind transactions and synchronization.
  * 
  * @author dscharrer
  */
@@ -180,10 +180,13 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 				
 				long newRevision = oldRev + 1;
 				
-				// TODO perform change under the actorId of the sending model --
-				// good idea?
-				this.eventQueue.createTransactionEvent(getModel().getActor(), getModel(),
-				        getObject(), since);
+				/*
+				 * FIXME this may fail, changes to objects and fields will use
+				 * their own actor when creating the events, which may be
+				 * different from the one of this model (object) - but
+				 * transactions can only contain events from the same actor.
+				 */
+				this.eventQueue.createTransactionEvent(getActor(), getModel(), getObject(), since);
 				
 				// new objects
 				for(NewObject object : model.getNewObjects()) {
@@ -408,6 +411,10 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 					this.eventQueue.logNullEvent();
 					continue;
 				}
+				/*
+				 * FIXME the remove changes should be applied as the actor
+				 * specified in the event
+				 */
 				XCommand replayCommand = XChanges.createReplayCommand(remoteChange);
 				long result = executeCommand(replayCommand);
 				if(result < 0) {
@@ -466,6 +473,10 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 					}
 				}
 				
+				/*
+				 * Applying all local commands as the current actor, ignoring
+				 * what actor was used when they were originally executed.
+				 */
 				results[i] = executeCommand(command);
 				
 				if(callbacks != null && results[i] == XCommand.FAILED) {
@@ -504,6 +515,11 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 			field.delete();
 		}
 	}
+	
+	/**
+	 * @see XModel#getActor()
+	 */
+	abstract public XID getActor();
 	
 	/**
 	 * Increment this entity's revision number.

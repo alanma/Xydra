@@ -578,6 +578,12 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 			if(command instanceof XFieldCommand) {
 				XField field = getField(command.getTarget().getField());
 				if(field != null) {
+					/*
+					 * TODO using the actor set on the field instead of the one
+					 * set on the object (on which the user called the
+					 * #executeCommand() method) - this is counter-intuitive for
+					 * an API user
+					 */
 					return field.executeFieldCommand((XFieldCommand)command);
 				}
 			}
