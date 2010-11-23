@@ -177,7 +177,7 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 			throw new AccessException(this.actor + " cannot execute " + command);
 		}
 		
-		return this.repo.executeCommand(this.actor, command);
+		return this.repo.executeCommand(command);
 	}
 	
 	public boolean addListenerForModelEvents(XModelEventListener changeListener) {

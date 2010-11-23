@@ -432,7 +432,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	}
 	
 	@Override
-	public long executeTransaction(XID actor, XTransaction transaction) {
+	public long executeTransaction(XTransaction transaction) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -447,11 +447,11 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 					return XCommand.FAILED;
 				} else {
 					// let the object handle the transaction execution
-					return object.executeTransaction(actor, transaction);
+					return object.executeTransaction(transaction);
 				}
 			}
 			
-			return super.executeTransaction(actor, transaction);
+			return super.executeTransaction(transaction);
 			
 		}
 	}
@@ -545,12 +545,12 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		this.removed = true;
 	}
 	
-	public long executeCommand(XID actor, XCommand command) {
+	public long executeCommand(XCommand command) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
 			if(command instanceof XTransaction) {
-				return executeTransaction(actor, (XTransaction)command);
+				return executeTransaction((XTransaction)command);
 			}
 			if(command instanceof XModelCommand) {
 				return executeModelCommand((XModelCommand)command);
@@ -559,7 +559,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 			if(object == null) {
 				return XCommand.FAILED;
 			}
-			return object.executeCommand(actor, command);
+			return object.executeCommand(command);
 		}
 	}
 	

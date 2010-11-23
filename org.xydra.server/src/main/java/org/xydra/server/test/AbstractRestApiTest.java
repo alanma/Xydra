@@ -121,13 +121,13 @@ public abstract class AbstractRestApiTest {
 		
 		XRepositoryCommand createCommand2 = MemoryRepositoryCommand.createAddCommand(repo
 		        .getAddress(), XCommand.SAFE, DemoModelUtil.PHONEBOOK_ID);
-		assertTrue(repo.executeCommand(ACTOR_TESTER, createCommand2) >= 0);
+		assertTrue(repo.executeCommand(createCommand2) >= 0);
 		XAddress localModelAddr = createCommand2.getChangedEntity();
 		XTransactionBuilder tb2 = new XTransactionBuilder(localModelAddr);
 		DemoModelUtil.setupPhonebook(localModelAddr, tb2);
 		XTransaction trans2 = tb2.build();
 		for(XAtomicCommand ac : trans2) {
-			assertTrue(repo.executeCommand(ACTOR_TESTER, ac) != XCommand.FAILED);
+			assertTrue(repo.executeCommand(ac) != XCommand.FAILED);
 		}
 		
 	}
@@ -137,7 +137,7 @@ public abstract class AbstractRestApiTest {
 		
 		XCommand removeCommand2 = MemoryRepositoryCommand.createRemoveCommand(repo.getAddress(),
 		        XCommand.FORCED, DemoModelUtil.PHONEBOOK_ID);
-		assertTrue(repo.executeCommand(ACTOR_TESTER, removeCommand2) != XCommand.FAILED);
+		assertTrue(repo.executeCommand(removeCommand2) != XCommand.FAILED);
 		
 		XCommand removeCommand = MemoryRepositoryCommand.createRemoveCommand(xydraServer
 		        .getRepositoryAddress(), XCommand.FORCED, DemoModelUtil.PHONEBOOK_ID);

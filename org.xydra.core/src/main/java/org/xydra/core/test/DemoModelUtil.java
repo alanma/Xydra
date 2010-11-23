@@ -160,7 +160,7 @@ public class DemoModelUtil {
 		
 		// Execute commands individually.
 		for(int i = 0; i < tb.size(); i++) {
-			model.executeCommand(ACTOR_ID, tb.getCommand(i));
+			model.executeCommand(tb.getCommand(i));
 		}
 		
 	}
@@ -262,7 +262,7 @@ public class DemoModelUtil {
 		
 		// Execute commands individually.
 		for(int i = 0; i < tb.size(); i++) {
-			john.executeCommand(ACTOR_ID, tb.getCommand(i));
+			john.executeCommand(tb.getCommand(i));
 		}
 		
 	}

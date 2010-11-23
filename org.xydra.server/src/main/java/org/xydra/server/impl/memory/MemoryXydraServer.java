@@ -64,7 +64,7 @@ public class MemoryXydraServer implements IXydraServer {
 	}
 	
 	public long executeCommand(XCommand command, XID actorId) {
-		return this.repo.executeCommand(actorId, command);
+		return this.repo.executeCommand(command);
 	}
 	
 	public XChangeLog getChangeLog(XID modelId) {

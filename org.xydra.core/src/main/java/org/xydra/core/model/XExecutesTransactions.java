@@ -20,9 +20,8 @@ public interface XExecutesTransactions {
 	 * 
 	 * An implementation has to make sure to execute it as described in the
 	 * documentation of {@link XTransaction}.
-	 * 
-	 * @param actor the {@link XID} of the actor
 	 * @param transaction the {@link XTransaction} which is to be executed
+	 * 
 	 * @return {@link XCommand#FAILED} if the transaction failed,
 	 *         {@link XCommand#NOCHANGE} if the transaction didn't change
 	 *         anything or the revision number of the {@link XEvent} caused by
@@ -30,6 +29,6 @@ public interface XExecutesTransactions {
 	 * @throws IllegalStateException if this entity has already been removed
 	 */
 	@ModificationOperation
-	long executeTransaction(XID actor, XTransaction transaction);
+	long executeTransaction(XTransaction transaction);
 	
 }

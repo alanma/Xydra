@@ -117,7 +117,7 @@ public class ArmProtectedObject extends ArmProtectedBaseObject implements XProte
 			throw new AccessException(this.actor + " cannot execute " + transaction);
 		}
 		
-		return this.object.executeTransaction(this.actor, transaction);
+		return this.object.executeTransaction(transaction);
 	}
 	
 	public long executeCommand(XCommand command) {
@@ -126,7 +126,7 @@ public class ArmProtectedObject extends ArmProtectedBaseObject implements XProte
 			throw new AccessException(this.actor + " cannot execute " + command);
 		}
 		
-		return this.object.executeCommand(this.actor, command);
+		return this.object.executeCommand(command);
 	}
 	
 	public XChangeLog getChangeLog() {

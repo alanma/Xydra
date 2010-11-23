@@ -118,7 +118,7 @@ public class ArmProtectedModel extends ArmProtectedBaseModel implements XProtect
 			throw new AccessException(this.actor + " cannot execute " + transaction);
 		}
 		
-		return this.model.executeTransaction(this.actor, transaction);
+		return this.model.executeTransaction(transaction);
 	}
 	
 	public long executeCommand(XCommand command) {
@@ -127,7 +127,7 @@ public class ArmProtectedModel extends ArmProtectedBaseModel implements XProtect
 			throw new AccessException(this.actor + " cannot execute " + command);
 		}
 		
-		return this.model.executeCommand(this.actor, command);
+		return this.model.executeCommand(command);
 	}
 	
 	public boolean addListenerForModelEvents(XModelEventListener changeListener) {

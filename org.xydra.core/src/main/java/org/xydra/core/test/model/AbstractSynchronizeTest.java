@@ -109,7 +109,7 @@ abstract public class AbstractSynchronizeTest {
 		tb.addObject(model.getAddress(), XCommand.SAFE, objId);
 		XAddress objAddr = XX.resolveObject(model.getAddress(), objId);
 		tb.addField(objAddr, XCommand.SAFE, XX.createUniqueID());
-		assertTrue(model.executeTransaction(ACTOR_ID, tb.build()) >= 0);
+		assertTrue(model.executeTransaction(tb.build()) >= 0);
 		
 		assertTrue(model.removeObject(DemoModelUtil.CLAUDIA_ID));
 		
@@ -181,9 +181,9 @@ abstract public class AbstractSynchronizeTest {
 		// apply the commands locally
 		for(XCommand command : localChanges) {
 			long result = 0;
-			result = checkModel.executeCommand(ACTOR_ID, command);
+			result = checkModel.executeCommand(command);
 			assertTrue("command: " + fix(command), result >= 0 || result == XCommand.NOCHANGE);
-			result = this.localModel.executeCommand(ACTOR_ID, command);
+			result = this.localModel.executeCommand(command);
 			assertTrue("command: " + command, result >= 0 || result == XCommand.NOCHANGE);
 		}
 		
@@ -222,14 +222,14 @@ abstract public class AbstractSynchronizeTest {
 		assertEquals(removeJohnForced, localChanges.get(7));
 		
 		// apply the commands remotely
-		assertTrue(this.remoteModel.executeCommand(ACTOR_ID, fix(localChanges.get(0))) >= 0);
-		assertTrue(this.remoteModel.executeCommand(ACTOR_ID, fix(localChanges.get(1))) >= 0);
-		assertTrue(this.remoteModel.executeCommand(ACTOR_ID, fix(localChanges.get(2))) >= 0);
-		assertTrue(this.remoteModel.executeCommand(ACTOR_ID, fix(localChanges.get(3))) >= 0);
-		assertTrue(this.remoteModel.executeCommand(ACTOR_ID, fix(localChanges.get(4))) >= 0);
-		assertEquals(XCommand.FAILED, this.remoteModel.executeCommand(ACTOR_ID, fix(localChanges
+		assertTrue(this.remoteModel.executeCommand(fix(localChanges.get(0))) >= 0);
+		assertTrue(this.remoteModel.executeCommand(fix(localChanges.get(1))) >= 0);
+		assertTrue(this.remoteModel.executeCommand(fix(localChanges.get(2))) >= 0);
+		assertTrue(this.remoteModel.executeCommand(fix(localChanges.get(3))) >= 0);
+		assertTrue(this.remoteModel.executeCommand(fix(localChanges.get(4))) >= 0);
+		assertEquals(XCommand.FAILED, this.remoteModel.executeCommand(fix(localChanges
 		        .get(5))));
-		assertEquals(XCommand.FAILED, this.remoteModel.executeCommand(ACTOR_ID, fix(localChanges
+		assertEquals(XCommand.FAILED, this.remoteModel.executeCommand(fix(localChanges
 		        .get(6))));
 		// removeJohnForced not sent as it was NOCHANGE already
 		

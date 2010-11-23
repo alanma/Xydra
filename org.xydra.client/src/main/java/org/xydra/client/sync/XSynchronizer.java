@@ -92,7 +92,7 @@ public class XSynchronizer {
 	public void executeCommand(XCommand command, XCommandCallback callback) {
 		assert this.callbacks.size() == this.commands.size();
 		log.info("sync: got command: " + command);
-		long result = this.entity.executeCommand(LOCAL_ACTOR, command);
+		long result = this.entity.executeCommand(command);
 		if(result == XCommand.FAILED) {
 			log.warn("sync: command failed immediately");
 			if(callback != null) {

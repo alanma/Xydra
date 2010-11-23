@@ -519,7 +519,7 @@ public class MemoryRepository implements XRepository, Serializable {
 		return this.transactionListenerCollection.remove(changeListener);
 	}
 	
-	public synchronized long executeCommand(XID actor, XCommand command) {
+	public synchronized long executeCommand(XCommand command) {
 		if(command instanceof XRepositoryCommand) {
 			return executeRepositoryCommand((XRepositoryCommand)command);
 		}
@@ -527,7 +527,7 @@ public class MemoryRepository implements XRepository, Serializable {
 		if(model == null) {
 			return XCommand.FAILED;
 		}
-		return model.executeCommand(actor, command);
+		return model.executeCommand(command);
 	}
 	
 	@Override

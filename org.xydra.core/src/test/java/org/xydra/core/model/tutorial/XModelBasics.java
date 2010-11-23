@@ -233,7 +233,7 @@ public class XModelBasics {
 		        modelID, false);
 		
 		// execute the command, therefore adding an XModel
-		repository.executeCommand(actorID, repositoryCommand);
+		repository.executeCommand(repositoryCommand);
 		
 		XModel model = repository.getModel(modelID);
 		assertNotNull(model);
@@ -250,8 +250,8 @@ public class XModelBasics {
 		XModelCommand modelCommand2 = commandFactory.createAddObjectCommand(repositoryID, modelID,
 		        object2ID, false);
 		
-		model.executeCommand(actorID, modelCommand1);
-		model.executeCommand(actorID, modelCommand2);
+		model.executeCommand(modelCommand1);
+		model.executeCommand(modelCommand2);
 		
 		// lets see if the objects were actually added :)
 		XObject object1 = model.getObject(object1ID);
@@ -284,7 +284,7 @@ public class XModelBasics {
 		XModelCommand removeObject2Command = commandFactory.createRemoveObjectCommand(repositoryID,
 		        modelID, object2ID, object2.getRevisionNumber(), false);
 		
-		model.executeCommand(actorID, removeObject2Command);
+		model.executeCommand(removeObject2Command);
 		
 		// lets see if object2 was actually removed
 		assertEquals(model.getObject(object2ID), null);
@@ -293,7 +293,7 @@ public class XModelBasics {
 		XID fieldID = XX.createUniqueID();
 		XObjectCommand objectCommand = commandFactory.createAddFieldCommand(repositoryID, modelID,
 		        object1ID, fieldID, false);
-		object1.executeCommand(actorID, objectCommand);
+		object1.executeCommand(objectCommand);
 		
 		// lets see if the field was actually added
 		XField field = object1.getField(fieldID);
@@ -337,7 +337,7 @@ public class XModelBasics {
 		        modelID, false);
 		
 		// execute the command, therefore adding an XModel
-		repository.executeCommand(actorID, repositoryCommand);
+		repository.executeCommand(repositoryCommand);
 		
 		XModel model = repository.getModel(modelID);
 		assertNotNull(model);
@@ -379,7 +379,7 @@ public class XModelBasics {
 		// transaction.execute(model)
 		
 		// executing the transaction on the model
-		model.executeTransaction(actorID, transaction);
+		model.executeTransaction(transaction);
 		
 		// checking whether the transaction was actually executed or not
 		XObject object = model.getObject(objectID);

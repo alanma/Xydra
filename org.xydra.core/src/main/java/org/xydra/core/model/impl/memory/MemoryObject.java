@@ -566,11 +566,11 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		this.removed = true;
 	}
 	
-	public long executeCommand(XID actor, XCommand command) {
+	public long executeCommand(XCommand command) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			if(command instanceof XTransaction) {
-				return executeTransaction(actor, (XTransaction)command);
+				return executeTransaction((XTransaction)command);
 			}
 			if(command instanceof XObjectCommand) {
 				return executeObjectCommand((XObjectCommand)command);

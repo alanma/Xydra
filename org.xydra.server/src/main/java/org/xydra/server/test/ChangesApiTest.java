@@ -366,7 +366,7 @@ public abstract class ChangesApiTest extends AbstractRestApiTest {
 		XAddress target = command.getTarget();
 		CommandResponse resp = sendCommand(command, Long.MAX_VALUE);
 		
-		long result = repo.executeCommand(ACTOR_TESTER, command);
+		long result = repo.executeCommand(command);
 		
 		if(result == XCommand.FAILED) {
 			assertEquals(CommandResult.FAILED, resp.result);

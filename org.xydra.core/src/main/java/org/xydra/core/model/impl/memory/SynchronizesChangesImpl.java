@@ -84,7 +84,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 		this.transactionListenerCollection = new HashSet<XTransactionEventListener>();
 	}
 	
-	public long executeTransaction(XID actor, XTransaction transaction) {
+	public long executeTransaction(XTransaction transaction) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -180,7 +180,10 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 				
 				long newRevision = oldRev + 1;
 				
-				this.eventQueue.createTransactionEvent(actor, getModel(), getObject(), since);
+				// TODO perform change under the actorId of the sending model --
+				// good idea?
+				this.eventQueue.createTransactionEvent(getModel().getActor(), getModel(),
+				        getObject(), since);
 				
 				// new objects
 				for(NewObject object : model.getNewObjects()) {
@@ -347,7 +350,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 	 */
 	private void rollbackEvent(XAtomicEvent event) {
 		XAtomicCommand command = XChanges.createForcedUndoCommand(event);
-		long result = executeCommand(null, command);
+		long result = executeCommand(command);
 		assert result > 0 : "rollback command " + command + " for event " + event + " failed";
 		XAddress target = event.getTarget();
 		
@@ -406,7 +409,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 					continue;
 				}
 				XCommand replayCommand = XChanges.createReplayCommand(remoteChange);
-				long result = executeCommand(remoteChange.getActor(), replayCommand);
+				long result = executeCommand(replayCommand);
 				if(result < 0) {
 					throw new IllegalStateException("could not apply remote change: "
 					        + remoteChange);
@@ -463,7 +466,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 					}
 				}
 				
-				results[i] = executeCommand(actor, command);
+				results[i] = executeCommand(command);
 				
 				if(callbacks != null && results[i] == XCommand.FAILED) {
 					callbacks.get(i).failed();

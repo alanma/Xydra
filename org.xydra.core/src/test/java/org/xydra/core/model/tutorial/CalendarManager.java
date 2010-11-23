@@ -247,7 +247,7 @@ public class CalendarManager {
 		transBuilder.addCommand(setEnd);
 		
 		// execute the transaction
-		long result = userCalendar.executeTransaction(userID, transBuilder.build());
+		long result = userCalendar.executeTransaction(transBuilder.build());
 		
 		return result != XCommand.FAILED;
 	}
