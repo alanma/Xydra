@@ -102,12 +102,12 @@ public class GWTChangesService extends AbstractGWTHttpService implements XChange
 					if(resp.getStatusCode() == Response.SC_CONFLICT) {
 						result = XCommand.FAILED;
 					} else if(resp.getStatusCode() == Response.SC_CREATED) {
-						result = XCommand.CHANGED;
+						result = 0;
 					} else {
 						result = XCommand.NOCHANGE;
 					}
 					
-					if(entity.getModel() != null && (result == XCommand.CHANGED || since != NONE)) {
+					if(entity.getModel() != null && (result == 0 || since != NONE)) {
 						
 						MiniElement element = GWTChangesService.this.parser
 						        .parseXml(resp.getText());
@@ -115,7 +115,7 @@ public class GWTChangesService extends AbstractGWTHttpService implements XChange
 						
 						// fill in a concrete revision number instead of
 						// XCommand.CHANGED if possible
-						if(result == XCommand.CHANGED && !events.isEmpty()) {
+						if(result == 0 && !events.isEmpty()) {
 							XEvent event = events.get(events.size() - 1);
 							if(event.getOldModelRevision() >= 0) {
 								result = event.getOldModelRevision();
