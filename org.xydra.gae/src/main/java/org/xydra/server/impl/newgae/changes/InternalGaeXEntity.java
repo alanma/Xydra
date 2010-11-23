@@ -40,7 +40,7 @@ public class InternalGaeXEntity {
 		assert modelOrObjectOrFieldAddr.getAddressedType() == XType.XMODEL
 		        || modelOrObjectOrFieldAddr.getAddressedType() == XType.XOBJECT
 		        || modelOrObjectOrFieldAddr.getAddressedType() == XType.XFIELD;
-		GaeUtils.deleteEntity(KeyStructure.createCombinedKey(modelOrObjectOrFieldAddr));
+		GaeUtils.deleteEntity(KeyStructure.createEntityKey(modelOrObjectOrFieldAddr));
 	}
 	
 }

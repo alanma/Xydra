@@ -30,6 +30,7 @@ import org.xydra.core.xml.impl.XmlOutStringBuffer;
 import org.xydra.index.XI;
 import org.xydra.server.IXydraServer;
 import org.xydra.server.impl.newgae.GaeUtils;
+import org.xydra.store.XydraStore;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -66,7 +67,7 @@ import com.google.appengine.api.datastore.Transaction;
  * corresponding value.
  * 
  * Keys for XMODEL, XOBJEC and XFIELD entities are encoded according to
- * {@link KeyStructure#createCombinedKey(XAddress)}.
+ * {@link KeyStructure#createEntityKey(XAddress)}.
  * 
  * - Entity type XCHANGE: These represent a change to the model resulting from a
  * single {@link XCommand} (which may be a {@link XTransaction}). These entities
@@ -97,7 +98,7 @@ import com.google.appengine.api.datastore.Transaction;
  * 
  * </pre>
  * 
- * - Entity type XEVENT: Stores a single {@link XAtomicEvent} assiciated with a
+ * - Entity type XEVENT: Stores a single {@link XAtomicEvent} associated with a
  * XCHANGE entity. Keys are encoded according to
  * {@link KeyStructure#createEventKey(Key, int)}. Currently events are simply
  * dumped as a XML-Encoded {@link String} using
@@ -206,6 +207,12 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	 * critical time (in milliseconds) after which a process will voluntarily
 	 * give up it's change to prevent another process from rolling it forward
 	 * while the change is still active
+	 * 
+	 * To prevent unnecessary timeouts, this should be set close enough to the
+	 * GAE timeout.
+	 * 
+	 * However, setting this too close to TIMEOUT might result in two processes
+	 * executing the same change.
 	 */
 	private static final long TIME_CRITICAL = TIMEOUT / 2;
 	
@@ -237,8 +244,8 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	 * Internal helper class to track information of a change that is being
 	 * executed.
 	 * 
-	 * Manages rev, startTime, a GAE entity, and a Set of {@link XAddress} (the
-	 * locks)
+	 * Manages revision, startTime, the GAE entity of the change, and a Set of
+	 * {@link XAddress} (the locks)
 	 * 
 	 * @author dscharrer
 	 * 
@@ -263,11 +270,20 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	/**
 	 * Execute the given {@link XCommand} as a transaction.
 	 * 
-	 * @param command
+	 * @param command The command to execute. (can be a {@link XTransaction})
 	 * @param actorId The actor to log in the resulting event.
 	 * @return If the command executed successfully, the revision of the
 	 *         resulting {@link XEvent} or {@link XCommand#NOCHANGE} if the
 	 *         command din't change anything; {@link XCommand#FAILED} otherwise.
+	 * 
+	 * @throws VoluntaryTimeoutException if we came too close to the timeout
+	 *             while executing the command. A caller may catch this
+	 *             exception and try again, but doing so may just result in a
+	 *             timeout from GAE if TIME_CRITICAL is set to more than half
+	 *             the GAE timeout.
+	 * 
+	 * @see XydraStore#executeCommands(XID, String, XCommand[],
+	 *      org.xydra.store.Callback)
 	 */
 	public long executeCommand(XCommand command, XID actorId) {
 		
@@ -417,12 +433,6 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 		// Track if we find a greater last commitedRev.
 		long newCommitedRev = -1;
 		
-		/**
-		 * TODO ~max: If several locks are required but some are locked by
-		 * somebody else - are already acquired locks released before entering
-		 * waiting mode?
-		 */
-		
 		for(long otherRev = change.rev - 1; otherRev > commitedRev; otherRev--) {
 			
 			Key key = KeyStructure.createChangeKey(this.modelAddr, otherRev);
@@ -448,8 +458,19 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 				continue;
 			}
 			
-			// uncommitted, conflicting locks => need to wait
-			
+			/*
+			 * The otherChange is uncommitted and holds conflicting locks, so we
+			 * need to wait.
+			 * 
+			 * Waiting is done by sleeping increasing intervals and then
+			 * checking the change entity again.
+			 * 
+			 * The locks that we already "acquired" cannot be released before
+			 * entering the waiting mode, as releasing them before completely
+			 * executing our own change would allow other changes with
+			 * conflicting locks and a revision greater than ours to execute
+			 * before our own change.
+			 */
 			long waitTime = WAIT_INITIAL;
 			boolean timedOut;
 			while(!(timedOut = isTimedOut(otherChange))) {
@@ -464,11 +485,12 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 				// IMPROVE update own lastActivity?
 				
 				otherChange = GaeUtils.getEntity(key);
-				assert otherChange != null;
+				assert otherChange != null : "change entities should not vanish";
 				
 				status = getStatus(otherChange);
 				if(isCommitted(status)) {
 					// now finished, so should have no locks anymore
+					assert otherChange.getProperty(PROP_LOCKS) == null;
 					break;
 				}
 				
@@ -485,6 +507,13 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 				if(canRollForward(status)) {
 					// IMPROVE save own command so that we can be rolled
 					// forward in case of timeout
+					
+					// Don't catch any VoluntaryTimeoutException thrown while
+					// rolling forward, as rolling forward will have a start
+					// time equal to or greater than that of our own change. So
+					// if the roll forward is close to timeout, our own change
+					// is vent more so.
+					
 					if(!rollForward(otherRev, otherChange.getKey())) {
 						// Someone else grabbed the revision, check again if it
 						// is rolled forward.
@@ -530,52 +559,64 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 		List<XAtomicEvent> events = GaeEventHelper.checkCommandAndCreateEvents(currentModel,
 		        command, actorId, change.rev);
 		
-		if(events == null) {
+		try {
+			
+			if(events == null) {
+				giveUpIfTimeoutCritical(change.startTime);
+				cleanupChangeEntity(change.entity, STATUS_FAILED_PRECONDITIONS);
+				return null;
+			}
+			
+			if(events.isEmpty()) {
+				giveUpIfTimeoutCritical(change.startTime);
+				cleanupChangeEntity(change.entity, STATUS_SUCCESS_NOCHANGE);
+				return events;
+			}
+			
+			Transaction trans = GaeUtils.beginTransaction();
+			
+			Key baseKey = change.entity.getKey();
+			for(int i = 0; i < events.size(); i++) {
+				XAtomicEvent ae = events.get(i);
+				Entity eventEntity = new Entity(KeyStructure.createEventKey(baseKey, i));
+				
+				// IMPROVE save event in a GAE-specific format:
+				// - don't save the "oldValue" again
+				// - don't save the actor again, as it's already in the change
+				// entity
+				// - don't save the model rev, as it is already in the key
+				XmlOutStringBuffer out = new XmlOutStringBuffer();
+				XmlEvent.toXml(ae, out, this.modelAddr);
+				Text text = new Text(out.getXml());
+				eventEntity.setUnindexedProperty(PROP_EVENTCONTENT, text);
+				
+				/*
+				 * Ignore if we are in danger of timing out (by not calling
+				 * giveUpIfTimeoutCritical()), as the events won't be read by
+				 * anyone until the change's status is set to STATUS_EXECUTING
+				 * (or STATUS_SUCCESS_EXECUTED)
+				 */
+				GaeUtils.putEntity(eventEntity, trans);
+				
+			}
+			
+			// IMPROVE free unneeded locks?
+			
+			Integer eventCount = events.size();
+			change.entity.setUnindexedProperty(PROP_EVENTCOUNT, eventCount);
+			
+			change.entity.setUnindexedProperty(PROP_STATUS, STATUS_EXECUTING);
+			GaeUtils.putEntity(change.entity, trans);
+			
 			giveUpIfTimeoutCritical(change.startTime);
-			cleanupChangeEntity(change.entity, STATUS_FAILED_PRECONDITIONS);
-			return null;
-		}
-		
-		if(events.isEmpty()) {
-			giveUpIfTimeoutCritical(change.startTime);
-			cleanupChangeEntity(change.entity, STATUS_SUCCESS_NOCHANGE);
-			return events;
-		}
-		
-		Transaction trans = GaeUtils.beginTransaction();
-		
-		Key baseKey = change.entity.getKey();
-		for(int i = 0; i < events.size(); i++) {
-			XAtomicEvent ae = events.get(i);
-			Entity eventEntity = new Entity(KeyStructure.createEventKey(baseKey, i));
+			GaeUtils.endTransaction(trans);
 			
-			// IMPROVE save event in a GAE-specific format:
-			// - don't save the "oldValue" again
-			// - don't save the actor again, as it's already in the change
-			// entity
-			// - don't save the model rev, as it is already in the key
-			XmlOutStringBuffer out = new XmlOutStringBuffer();
-			XmlEvent.toXml(ae, out, this.modelAddr);
-			Text text = new Text(out.getXml());
-			eventEntity.setUnindexedProperty(PROP_EVENTCONTENT, text);
-			
-			// Ignore if we are timing out, as the events won't be read by
-			// anyone until the change's status is set to STATUS_EXECUTING (or
-			// STATUS_SUCCESS_EXECUTED)
-			GaeUtils.putEntity(eventEntity, trans);
-			
+		} catch(VoluntaryTimeoutException vte) {
+			// Since we have not changed the status to EXEUTING, no thread will
+			// be able to roll this change forward and we might as well clean it
+			// up to prevent unnecessary waits.
+			cleanupChangeEntity(change.entity, STATUS_FAILED_TIMEOUT);
 		}
-		
-		// IMPROVE free unneeded locks?
-		
-		Integer eventCount = events.size();
-		change.entity.setUnindexedProperty(PROP_EVENTCOUNT, eventCount);
-		
-		change.entity.setUnindexedProperty(PROP_STATUS, STATUS_EXECUTING);
-		GaeUtils.putEntity(change.entity, trans);
-		
-		giveUpIfTimeoutCritical(change.startTime);
-		GaeUtils.endTransaction(trans);
 		
 		return events;
 	}
@@ -591,9 +632,16 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 		
 		/*
 		 * Track which object's revision numbers we have already saved and which
-		 * ones we still need to save. This assumes that the events are minimal
-		 * [TODO ~max: minimal in what respect? minimal amount of events to do
-		 * the required operation?] (which they are!).
+		 * ones we still need to save.
+		 * 
+		 * This assumes that the events are minimal: A set of events are
+		 * "minimal", if: a) if there is an event of type RMOVE, the set
+		 * contains no other events for the same XEvent#getChangedEntity();, b)
+		 * no models, object or fields are added more than once. and c) the
+		 * value of no field is added/changed more than once. </ul>
+		 * 
+		 * Events generated from a ChangedModel (as used here and in the XModel
+		 * transaction code) are always minimal.
 		 */
 		Set<XID> objectsWithSavedRev = new HashSet<XID>();
 		Set<XID> objectsWithPossiblyUnsavedRev = new HashSet<XID>();
@@ -604,18 +652,20 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 			assert this.modelAddr.equalsOrContains(event.getChangedEntity());
 			assert event.getRevisionNumber() == change.rev;
 			
+			// Don't cleanup the change when timing out, as another process
+			// might still roll it forward.
 			giveUpIfTimeoutCritical(change.startTime);
 			
 			if(event instanceof XFieldEvent) {
 				assert Arrays.asList(ChangeType.REMOVE, ChangeType.ADD, ChangeType.CHANGE)
 				        .contains(event.getChangeType());
-				/*
-				 * TODO ~max: why does the fact if the new value is null
-				 * determine whether we use a transaction index or not?
-				 */
+				
 				if(((XFieldEvent)event).getNewValue() == null) {
+					// Set the field as existing but empty.
 					InternalGaeField.set(event.getTarget(), change.rev, change.locks);
 				} else {
+					// Set the field as empty and containing the XValue stored
+					// at the specified transaction index.
 					InternalGaeField.set(event.getTarget(), change.rev, i, change.locks);
 				}
 				assert event.getTarget().getObject() != null;
@@ -667,6 +717,8 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 			if(!objectsWithSavedRev.contains(objectId)) {
 				XAddress objectAddr = XX.resolveObject(this.modelAddr, objectId);
 				
+				// Don't cleanup the change when timing out, as another process
+				// might still roll it forward.
 				giveUpIfTimeoutCritical(change.startTime);
 				
 				InternalGaeObject.updateObjectRev(objectAddr, change.locks, change.rev);
@@ -677,17 +729,20 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	}
 	
 	/**
-	 * @param key
-	 * @return the revision number which is encoded in the given {@link Key}
-	 *         name
+	 * Check that the revision encoded in the given key matches the given
+	 * revision.
+	 * 
+	 * @param key A key for a change entity as returned by
+	 *            {@link KeyStructure#createChangeKey(XAddress, long)}.
+	 * @param key The key to check
 	 */
-	long getRevisionFromKey(Key key) {
+	private boolean assertRevisionInKey(Key key, long rev) {
 		assert KeyStructure.isChangeKey(key);
 		String keyStr = key.getName();
 		int p = keyStr.lastIndexOf("/");
 		assert p > 0;
 		String revStr = keyStr.substring(p + 1);
-		return Long.parseLong(revStr);
+		return (Long.parseLong(revStr) == rev);
 	}
 	
 	/**
@@ -711,7 +766,7 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	 */
 	private boolean rollForward(long rev, Key key) {
 		
-		assert getRevisionFromKey(key) == rev;
+		assert assertRevisionInKey(key, rev);
 		
 		// Try to "grab" the change entity to prevent multiple processes from
 		// rolling forward the same entity.
@@ -730,8 +785,15 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 		
 		long now = now();
 		/*
-		 * TODO use the PROP_LAST_ACTIVITY of our own change instead? ~max: I
-		 * believe not. The invariant is only about the entity itself.
+		 * IMPROVE use the PROP_LAST_ACTIVITY of our own change instead? Both
+		 * now() and the last activity of our own change are "correct" as
+		 * whatever we set will be used for
+		 * giveUpIfTimeoutCritical(change.startTime); However if TIME_CRITICAL
+		 * is set close to the GAE timeout (as it should be to reduce
+		 * unnecessary voluntary timeouts), setting this higher than our own
+		 * start time might cause other changes to wait longer for this one
+		 * while not actually reducing the chance of the roll forward timing out
+		 * (only changing it from a voluntary timeout to a GAE enforced timeout)
 		 */
 		changeEntity.setProperty(PROP_LAST_ACTIVITY, now);
 		GaeUtils.putEntity(changeEntity, trans);
@@ -749,7 +811,7 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 		
 		ChangeInProgress change = new ChangeInProgress(rev, now, locks, changeEntity);
 		
-		List<XAtomicEvent> events = loadEvents(rev, changeEntity);
+		List<XAtomicEvent> events = loadEvents(change);
 		
 		executeAndUnlock(change, events);
 		
@@ -762,15 +824,14 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	 * prevent another process rolling forward our change while we are still
 	 * working on it.
 	 * 
-	 * @param startTime
-	 * @throws RuntimeException TODO ~max: docu... How is this supposed to be
-	 *             handled?
+	 * @param startTime The time when we started working on the change.
+	 * @throws VoluntaryTimeoutException to abort the current change
 	 */
-	private void giveUpIfTimeoutCritical(long startTime) {
+	private void giveUpIfTimeoutCritical(long startTime) throws VoluntaryTimeoutException {
 		long now = now();
 		if(now - startTime > TIME_CRITICAL) {
 			// TODO use a better exception type?
-			throw new RuntimeException("voluntarily timing out to prevent"
+			throw new VoluntaryTimeoutException("voluntarily timing out to prevent"
 			        + " multiple processes working in the same thread; " + " start time was "
 			        + startTime + "; now is " + now);
 		}
@@ -813,23 +874,25 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	}
 	
 	/**
-	 * @param rev
-	 * @param changeEntity
+	 * Load the individual events associated with the given change.
+	 * 
+	 * @param change The change whose events should be loaded.
 	 * @return a List of {@link XAtomicEvent} which is stored as a number of GAE
 	 *         entities
 	 */
-	private List<XAtomicEvent> loadEvents(long rev, Entity changeEntity) {
+	private List<XAtomicEvent> loadEvents(ChangeInProgress change) {
 		
+		assert assertRevisionInKey(change.entity.getKey(), change.rev);
 		assert Arrays.asList(STATUS_EXECUTING, STATUS_SUCCESS_EXECUTED).contains(
-		        changeEntity.getProperty(PROP_STATUS));
-		assert changeEntity.getProperty(PROP_EVENTCOUNT) != null;
+		        change.entity.getProperty(PROP_STATUS));
+		assert change.entity.getProperty(PROP_EVENTCOUNT) != null;
 		
 		List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
 		
-		int eventCount = getEventCount(changeEntity);
+		int eventCount = getEventCount(change.entity);
 		
 		for(int i = 0; i < eventCount; i++) {
-			events.add(getAtomicEvent(rev, i));
+			events.add(getAtomicEvent(change.rev, i));
 		}
 		
 		return events;
@@ -838,7 +901,7 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	private void cleanupChangeEntity(Entity changeEntity, int status) {
 		changeEntity.removeProperty(PROP_LOCKS);
 		changeEntity.setUnindexedProperty(PROP_STATUS, status);
-		// TODO remove saved events?
+		// IMPROVE remove saved events?
 		GaeUtils.putEntity(changeEntity);
 	}
 	
@@ -858,7 +921,7 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	}
 	
 	/**
-	 * @return if the status is either "success" or "failed".
+	 * @return true, if the status is either "success" or "failed".
 	 */
 	private boolean isCommitted(int status) {
 		return (isSuccess(status) || isFailure(status));
@@ -904,7 +967,7 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	 * entity referred to by that address, as well as all descendant entities.
 	 * Also, a read lock on the ancestors of that entity is implied.
 	 * 
-	 * @param command
+	 * @param command The command to calculate the locks for.
 	 * @return the calculated locks required to execute the given command.
 	 */
 	private static Set<XAddress> calculateRequiredLocks(XCommand command) {
@@ -1014,18 +1077,31 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 		return ae;
 	}
 	
+	/**
+	 * @return the {@link XAddress} of the model managed by this
+	 *         {@link GaeChangesService} instance.
+	 */
 	public XAddress getBaseAddress() {
 		return this.modelAddr;
 	}
 	
+	/**
+	 * Get the model's current revision number.
+	 * 
+	 * @see XydraStore#getModelRevisions(XID, String, XAddress[],
+	 *      org.xydra.store.Callback)
+	 */
 	public long getCurrentRevisionNumber() {
 		
-		long currentRev = getCachedLastCommitedRevision();
+		// IMPROVE cache the current revision
+		long currentRev = -1;
+		
+		long rev = currentRev;
 		
 		// Check if the revision is up to date.
-		while(true) {
+		for(rev = currentRev;; rev++) {
 			
-			Key key = KeyStructure.createChangeKey(this.modelAddr, currentRev + 1);
+			Key key = KeyStructure.createChangeKey(this.modelAddr, rev + 1);
 			Entity changeEntity = GaeUtils.getEntity(key);
 			if(changeEntity == null) {
 				break;
@@ -1036,14 +1112,25 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 				break;
 			}
 			
-			currentRev++;
+			// Only update the current revision if the command actually changed
+			// something.
+			if(status == STATUS_SUCCESS_EXECUTED) {
+				currentRev = rev + 1;
+			}
+			
 		}
 		
-		setCachedLastCommitedRevision(currentRev);
+		setCachedLastCommitedRevision(rev);
 		
 		return currentRev;
 	}
 	
+	/**
+	 * Get the event at the specified revision number.
+	 * 
+	 * @see XydraStore#getEvents(XID, String, XAddress[], long, long,
+	 *      org.xydra.store.Callback)
+	 */
 	public XEvent getEventAt(long rev) {
 		
 		Entity changeEntity = GaeUtils.getEntity(KeyStructure.createChangeKey(this.modelAddr, rev));
@@ -1105,7 +1192,9 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	 */
 	public boolean hasLog() {
 		
-		// TODO cache - or remove?
+		if(getCachedLastTakenRevision() >= 0) {
+			return true;
+		}
 		
 		Key key = KeyStructure.createChangeKey(this.modelAddr, 0L);
 		return (GaeUtils.getEntity(key) != null);

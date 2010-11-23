@@ -79,7 +79,7 @@ abstract class InternalGaeContainerXEntity<C> extends InternalGaeXEntity {
 		XAddress childAddr = resolveChild(this.addr, fieldId);
 		assert GaeChangesService.canRead(childAddr, this.locks);
 		
-		Entity e = GaeUtils.getEntity(KeyStructure.createCombinedKey(childAddr));
+		Entity e = GaeUtils.getEntity(KeyStructure.createEntityKey(childAddr));
 		if(e == null) {
 			this.cachedMisses.add(fieldId);
 			return null;

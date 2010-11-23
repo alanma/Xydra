@@ -20,30 +20,33 @@ public class KeyStructure {
 	private static final String KIND_XCHANGE = "XCHANGE";
 	
 	/**
-	 * @param address
-	 * @return a GAE {@link Key} representing a Xydra {@link XAddress}
+	 * @param address The {@link XAddress} of the entity that the key should
+	 *            point to.
+	 * @return a GAE {@link Key} addressing an internal Xydra entity (not a
+	 *         snapshot entity)
 	 */
-	public static Key createCombinedKey(XAddress address) {
+	public static Key createEntityKey(XAddress address) {
 		String kind = address.getAddressedType().name();
 		Key key = KeyFactory.createKey(kind, address.toURI());
 		return key;
 	}
 	
 	/**
-	 * @param combinedKey
-	 * @return a Xydra {@link XAddress} from a combined (via
-	 *         {@link #createCombinedKey(XAddress)}) GAE {@link Key}
+	 * @param entityKey A key as returned by {@link #createEntityKey(XAddress)}
+	 * @return a Xydra {@link XAddress} from a entity (via
+	 *         {@link #createEntityKey(XAddress)}) GAE {@link Key}
 	 */
-	public static XAddress toAddress(Key combinedKey) {
-		String combinedKeyString = combinedKey.getName();
+	public static XAddress toAddress(Key entityKey) {
+		String combinedKeyString = entityKey.getName();
 		XAddress address = XX.toAddress(combinedKeyString);
-		assert address.getAddressedType().toString().equals(combinedKey.getKind());
+		assert address.getAddressedType().toString().equals(entityKey.getKind());
 		return address;
 	}
 	
 	/**
-	 * @param modelAddr
-	 * @param revision
+	 * @param modelAddr The address of the model containing the entity modified
+	 *            by the change.
+	 * @param revision The revision number of the change.
 	 * @return a GAE {@link Key} representing a Xydra change entity
 	 */
 	public static Key createChangeKey(XAddress modelAddr, long revision) {
@@ -52,8 +55,10 @@ public class KeyStructure {
 	}
 	
 	/**
-	 * @param changeKey
-	 * @param transindex
+	 * @param changeKey The key of the "change" (as returned by
+	 *            {@link #createChangeKey(XAddress, long)}) that contains the
+	 *            desired event.
+	 * @param transindex The index of the event in the change.
 	 * @return a GAE {@link Key} representing an internal part of a Xydra change
 	 *         entity
 	 */
@@ -63,7 +68,7 @@ public class KeyStructure {
 	}
 	
 	/**
-	 * @param key
+	 * @param key The GAE {@link Key} who'se type to check.
 	 * @return true if the given GAE {@link Key} represents a Xydra change
 	 *         entity
 	 */

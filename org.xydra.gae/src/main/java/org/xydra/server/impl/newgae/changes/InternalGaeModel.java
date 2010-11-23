@@ -79,7 +79,7 @@ public class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObj
 	        Set<XAddress> locks) {
 		
 		assert GaeChangesService.canRead(changesService.getBaseAddress(), locks);
-		Entity e = GaeUtils.getEntity(KeyStructure.createCombinedKey(changesService
+		Entity e = GaeUtils.getEntity(KeyStructure.createEntityKey(changesService
 		        .getBaseAddress()));
 		if(e == null) {
 			return null;
@@ -106,7 +106,7 @@ public class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObj
 	public static void createModel(XAddress modelAddr, Set<XAddress> locks) {
 		assert GaeChangesService.canWrite(modelAddr, locks);
 		assert modelAddr.getAddressedType() == XType.XMODEL;
-		Entity e = new Entity(KeyStructure.createCombinedKey(modelAddr));
+		Entity e = new Entity(KeyStructure.createEntityKey(modelAddr));
 		e.setProperty(PROP_PARENT, modelAddr.getParent().toURI());
 		GaeUtils.putEntity(e);
 	}

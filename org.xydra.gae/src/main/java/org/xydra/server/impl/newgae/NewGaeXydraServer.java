@@ -69,6 +69,8 @@ public class NewGaeXydraServer implements IXydraServer {
 		
 		XID modelId = command.getChangedEntity().getModel();
 		
+		// TODO wrap GAE exceptions in InternalStoreExceptions
+		
 		return getChangesService(modelId).executeCommand(command, actorId);
 	}
 	

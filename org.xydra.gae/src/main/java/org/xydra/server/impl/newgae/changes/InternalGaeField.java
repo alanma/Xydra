@@ -76,7 +76,7 @@ class InternalGaeField extends InternalGaeXEntity implements XBaseField {
 	}
 	
 	public boolean isEmpty() {
-		return getValue() == null;
+		return this.transindex != TRANSINDEX_NONE;
 	}
 	
 	public XAddress getAddress() {
@@ -106,7 +106,7 @@ class InternalGaeField extends InternalGaeXEntity implements XBaseField {
 	protected static void set(XAddress fieldAddr, long fieldRev, int transindex, Set<XAddress> locks) {
 		assert GaeChangesService.canWrite(fieldAddr, locks);
 		assert fieldAddr.getAddressedType() == XType.XFIELD;
-		Entity e = new Entity(KeyStructure.createCombinedKey(fieldAddr));
+		Entity e = new Entity(KeyStructure.createEntityKey(fieldAddr));
 		e.setProperty(PROP_PARENT, fieldAddr.getParent().toURI());
 		e.setUnindexedProperty(PROP_REVISION, fieldRev);
 		e.setUnindexedProperty(PROP_TRANSINDEX, transindex);

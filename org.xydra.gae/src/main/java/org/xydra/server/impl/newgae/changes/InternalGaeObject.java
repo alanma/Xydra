@@ -148,7 +148,7 @@ public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeFi
 	public static void createObject(XAddress objectAddr, Set<XAddress> locks, long rev) {
 		assert GaeChangesService.canWrite(objectAddr, locks);
 		assert objectAddr.getAddressedType() == XType.XOBJECT;
-		Entity e = new Entity(KeyStructure.createCombinedKey(objectAddr));
+		Entity e = new Entity(KeyStructure.createEntityKey(objectAddr));
 		e.setProperty(PROP_PARENT, objectAddr.getParent().toURI());
 		e.setUnindexedProperty(PROP_REVISION, rev);
 		GaeUtils.putEntity(e);
@@ -179,7 +179,7 @@ public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeFi
 		// suffices.
 		assert GaeChangesService.canRead(objectAddr, locks);
 		assert objectAddr.getAddressedType() == XType.XOBJECT;
-		Key key = KeyStructure.createCombinedKey(objectAddr);
+		Key key = KeyStructure.createEntityKey(objectAddr);
 		
 		while(true) {
 			Transaction trans = GaeUtils.beginTransaction();
