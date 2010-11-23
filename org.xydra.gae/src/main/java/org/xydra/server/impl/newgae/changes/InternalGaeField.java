@@ -76,7 +76,7 @@ class InternalGaeField extends InternalGaeXEntity implements XBaseField {
 	}
 	
 	public boolean isEmpty() {
-		return this.transindex != TRANSINDEX_NONE;
+		return this.transindex == TRANSINDEX_NONE;
 	}
 	
 	public XAddress getAddress() {
