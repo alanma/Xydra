@@ -387,10 +387,11 @@ public class MemoryTransactionEvent implements XTransactionEvent {
 	
 	@Override
 	public String toString() {
-		String str = "TransactionEvent @" + this.target + " r";
+		String str = "TransactionEvent by " + this.actor + " @" + this.target + " r";
 		str += (this.modelRevision < 0 ? "-" : this.modelRevision);
-		if(this.objectRevision >= 0)
+		if(this.objectRevision >= 0) {
 			str += "/" + this.objectRevision;
+		}
 		return str + ": " + Arrays.toString(this.events);
 	}
 	

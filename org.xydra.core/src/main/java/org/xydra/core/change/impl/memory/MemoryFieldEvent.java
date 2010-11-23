@@ -314,16 +314,16 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	
 	@Override
 	public String toString() {
+		String prefix = "FieldEvent by " + getActor() + ": ";
 		String suffix = " @" + getTarget() + " r" + rev2str(this.modelRevision) + "/"
 		        + rev2str(this.objectRevision) + "/" + rev2str(this.fieldRevision);
 		switch(getChangeType()) {
 		case ADD:
-			return "FieldEvent: ADD " + this.newValue + suffix;
+			return prefix + "ADD " + this.newValue + suffix;
 		case REMOVE:
-			return "FieldEvent: REMOVE " + this.oldValue + suffix
-			        + (isImplied() ? " [implied]" : "");
+			return prefix + "REMOVE " + this.oldValue + suffix + (isImplied() ? " [implied]" : "");
 		case CHANGE:
-			return "FieldEvent: CHANGE " + this.oldValue + " to " + this.newValue + suffix;
+			return prefix + "CHANGE " + this.oldValue + " to " + this.newValue + suffix;
 		default:
 			throw new RuntimeException("this field event should have never been created");
 		}
