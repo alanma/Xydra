@@ -245,7 +245,7 @@ public interface XydraStore {
 	 *            their callbacks' {@link Callback#onSuccess(Object)} method
 	 *            might be called before this one.
 	 */
-	void executeCommand(XID actorId, String passwordHash, XCommand[] commands,
+	void executeCommands(XID actorId, String passwordHash, XCommand[] commands,
 	        Callback<long[]> callback);
 	
 	/* events */
@@ -289,7 +289,7 @@ public interface XydraStore {
 	
 	/**
 	 * Redundant, network-optimised method to combine in one method call the
-	 * effects of {@link #executeCommand(XID, String, XCommand[], Callback)} and
+	 * effects of {@link #executeCommands(XID, String, XCommand[], Callback)} and
 	 * {@link #getEvents(XID, String, XAddress[], long, long, Callback)}.
 	 * 
 	 * @param actorId The actor who is performing this operation.
@@ -298,7 +298,7 @@ public interface XydraStore {
 	 *            network if the user uses the same password for multiple
 	 *            services.
 	 * @param commands See
-	 *            {@link #executeCommand(XID, String, XCommand[], Callback)}
+	 *            {@link #executeCommands(XID, String, XCommand[], Callback)}
 	 * @param addressesToGetEventsFor See
 	 *            {@link #getEvents(XID, String, XAddress[], long, long, Callback)}
 	 * @param beginRevision See
@@ -308,12 +308,12 @@ public interface XydraStore {
 	 * @param callback Asynchronous callback to signal success or failure. On
 	 *            success, this method returns a {@link Pair} where the first
 	 *            component is the the same as the result of
-	 *            {@link #executeCommand(XID, String, XCommand[], Callback)} and
+	 *            {@link #executeCommands(XID, String, XCommand[], Callback)} and
 	 *            the second is the same as the result of
 	 *            {@link #getEvents(XID, String, XAddress[], long, long, Callback)}
 	 *            .
 	 */
-	void executeCommandAndGetEvents(XID actorId, String passwordHash, XCommand[] commands,
+	void executeCommandsAndGetEvents(XID actorId, String passwordHash, XCommand[] commands,
 	        XAddress[] addressesToGetEventsFor, long beginRevision, long endRevision,
 	        Callback<Pair<long[],XEvent[][]>> callback);
 	

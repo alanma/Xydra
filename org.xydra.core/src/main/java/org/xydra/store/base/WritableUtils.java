@@ -20,7 +20,7 @@ public class WritableUtils {
 	 */
 	public static synchronized long executeCommand(Credentials credentials, XydraStore store,
 	        XCommand command) {
-		store.executeCommand(credentials.actorId, credentials.passwordHash,
+		store.executeCommands(credentials.actorId, credentials.passwordHash,
 		        new XCommand[] { command }, new Callback<long[]>() {
 			        
 			        @Override
