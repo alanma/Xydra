@@ -215,11 +215,34 @@ public class MemoryTransactionEvent implements XTransactionEvent {
 				        + " target is not contained in " + target);
 			}
 			
-			if(!(events[i] instanceof XRepositoryEvent || events[i] instanceof XModelEvent
-			        || events[i] instanceof XObjectEvent || events[i] instanceof XFieldEvent)) {
-				throw new IllegalArgumentException("event #" + i + " " + events[i]
-				        + " is not an XModelEvent, XObjectEvent or XFieldEvent.");
+			if(!XI.equals(events[i].getActor(), actor)) {
+				throw new IllegalArgumentException("cannot add event " + events[i]
+				        + " to transaction with actorId=" + actor);
 			}
+			
+			if(events[i] instanceof XRepositoryEvent) {
+				if(i == 0) {
+					if(events[i].getChangeType() != ChangeType.ADD) {
+						throw new IllegalArgumentException(
+						        "can only add the model at the beginning of a transaction");
+					}
+				} else if(i == events.length - 1) {
+					if(events[i].getChangeType() != ChangeType.REMOVE) {
+						throw new IllegalArgumentException(
+						        "can only remove the model at the end of a transaction");
+					}
+				} else {
+					throw new IllegalArgumentException(
+					        "Repository events shold only occur at the beginning or end of a transaction");
+				}
+			}
+			
+			if(!events[i].inTransaction()) {
+				throw new IllegalArgumentException("cannot add event " + events[i]
+				        + " to a transaction event, as it is not marked as inTransaction");
+			}
+			
+			assert events[i].getChangeType() != ChangeType.TRANSACTION;
 		}
 		
 		this.actor = actor;

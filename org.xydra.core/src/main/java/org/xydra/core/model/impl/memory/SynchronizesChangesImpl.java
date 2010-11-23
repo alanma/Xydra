@@ -181,10 +181,11 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 				long newRevision = oldRev + 1;
 				
 				/*
-				 * FIXME this may fail, changes to objects and fields will use
+				 * FIXME this may fail: changes to objects and fields will use
 				 * their own actor when creating the events, which may be
 				 * different from the one of this model (object) - but
-				 * transactions can only contain events from the same actor.
+				 * transaction(event)s should only contain events from the same
+				 * actor.
 				 */
 				this.eventQueue.createTransactionEvent(getActor(), getModel(), getObject(), since);
 				
