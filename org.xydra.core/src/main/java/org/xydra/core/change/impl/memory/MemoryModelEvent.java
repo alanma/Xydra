@@ -24,9 +24,6 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 	// the revision numbers before the event happened
 	private final long modelRevision, objectRevision;
 	
-	// was this event part of a transaction or not?
-	private final boolean inTransaction;
-	
 	@Override
 	public boolean equals(Object object) {
 		
@@ -51,10 +48,6 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 			return false;
 		}
 		
-		if(this.inTransaction != event.inTransaction()) {
-			return false;
-		}
-		
 		return true;
 	}
 	
@@ -71,10 +64,6 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 		result += this.objectRevision;
 		
 		return result;
-	}
-	
-	public boolean inTransaction() {
-		return this.inTransaction;
 	}
 	
 	/**
@@ -96,11 +85,10 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 	 *             given revision number equals
 	 *             {@link XEvent#RevisionOfEntityNotSet}
 	 */
-	
 	public static XModelEvent createAddEvent(XID actor, XAddress target, XID objectID,
 	        long modelRevision, boolean inTransaction) {
 		return new MemoryModelEvent(actor, target, objectID, ChangeType.ADD, modelRevision,
-		        RevisionOfEntityNotSet, inTransaction);
+		        RevisionOfEntityNotSet, inTransaction, false);
 	}
 	
 	/**
@@ -117,28 +105,29 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 	 *            was removed
 	 * @param inTransaction sets whether this event occurred during an
 	 *            {@link XTransaction} or not
+	 * @param implied sets whether this event describes removing an object whose
+	 *            containing model is also removed in the same transaction
 	 * @return An XModelEvent of the remove-type
 	 * @throws IllegalArgumentException if the given {@link XAddress} does not
 	 *             specify an {@link XModel}, if objectID is null or if one of
 	 *             the given revision numbers equals
 	 *             {@link XEvent#RevisionOfEntityNotSet}
 	 */
-	
 	public static XModelEvent createRemoveEvent(XID actor, XAddress target, XID objectID,
-	        long modelRevision, long objectRevision, boolean inTransaction) {
+	        long modelRevision, long objectRevision, boolean inTransaction, boolean implied) {
 		if(objectRevision < 0 && objectRevision != XEvent.RevisionNotAvailable) {
 			throw new IllegalArgumentException(
 			        "object revision must be set for model REMOVE events");
 		}
 		
 		return new MemoryModelEvent(actor, target, objectID, ChangeType.REMOVE, modelRevision,
-		        objectRevision, inTransaction);
+		        objectRevision, inTransaction, implied);
 	}
 	
 	// private constructor, use the createEvent for instantiating MemModelEvents
 	private MemoryModelEvent(XID actor, XAddress target, XID objectID, ChangeType changeType,
-	        long modelRevision, long objectRevision, boolean inTransaction) {
-		super(target, changeType, actor);
+	        long modelRevision, long objectRevision, boolean inTransaction, boolean implied) {
+		super(target, changeType, actor, inTransaction, implied);
 		
 		if(target.getModel() == null || target.getObject() != null || target.getField() != null) {
 			throw new IllegalArgumentException("target must refer to a model, was: " + target);
@@ -158,7 +147,6 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 		this.objectID = objectID;
 		this.objectRevision = objectRevision;
 		this.modelRevision = modelRevision;
-		this.inTransaction = inTransaction;
 	}
 	
 	@Override
@@ -168,6 +156,9 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 			str += " r" + rev2str(this.objectRevision);
 		str += " @" + getTarget();
 		str += " r" + rev2str(this.modelRevision);
+		if(isImplied()) {
+			str += " [implied]";
+		}
 		return str;
 	}
 	

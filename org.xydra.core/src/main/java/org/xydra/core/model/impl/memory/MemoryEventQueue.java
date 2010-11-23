@@ -547,7 +547,7 @@ public class MemoryEventQueue implements Serializable {
 			// (non matching) CHANGE->REMOVE => merge to REMOVE
 			return MemoryFieldEvent.createRemoveEvent(last.getActor(), last.getTarget(), first
 			        .getOldValue(), last.getOldModelRevision(), last.getOldObjectRevision(), last
-			        .getOldFieldRevision(), false);
+			        .getOldFieldRevision(), false, false);
 		case CHANGE:
 			assert first.getChangeType() != ChangeType.REMOVE;
 			if(first.getChangeType() == ChangeType.CHANGE) {

@@ -51,6 +51,7 @@ public class XmlEvent {
 	private static final String OBJECTREVISION_ATTRIBUTE = "objectRevision";
 	private static final String MODELREVISION_ATTRIBUTE = "modelRevision";
 	private static final String INTRANSACTION_ATTRIBUTE = "inTransaction";
+	private static final String IMPLIED_ATTRIBUTE = "implied";
 	private static final String ACTOR_ATTRIBUTE = "actor";
 	
 	private static long getRevision(MiniElement xml, String elementName, String attribute,
@@ -78,6 +79,11 @@ public class XmlEvent {
 	
 	private static boolean getInTransactionAttribute(MiniElement xml) {
 		String booleanString = xml.getAttribute(INTRANSACTION_ATTRIBUTE);
+		return Boolean.parseBoolean(booleanString);
+	}
+	
+	private static boolean getImpliedAttribute(MiniElement xml) {
+		String booleanString = xml.getAttribute(IMPLIED_ATTRIBUTE);
 		return Boolean.parseBoolean(booleanString);
 	}
 	
@@ -258,8 +264,9 @@ public class XmlEvent {
 			return MemoryFieldEvent.createChangeEvent(actor, target, oldValue, newValue, modelRev,
 			        objectRev, fieldRev, inTransaction);
 		} else if(type == ChangeType.REMOVE) {
+			boolean implied = getImpliedAttribute(xml);
 			return MemoryFieldEvent.createRemoveEvent(actor, target, oldValue, modelRev, objectRev,
-			        fieldRev, inTransaction);
+			        fieldRev, inTransaction, implied);
 		} else {
 			throw new IllegalArgumentException("<" + XFIELDEVENT_ELEMENT + ">@"
 			        + XmlUtils.TYPE_ATTRIBUTE
@@ -325,8 +332,9 @@ public class XmlEvent {
 			return MemoryObjectEvent.createAddEvent(actor, target, fieldId, modelRev, objectRev,
 			        inTransaction);
 		} else if(type == ChangeType.REMOVE) {
+			boolean implied = getImpliedAttribute(xml);
 			return MemoryObjectEvent.createRemoveEvent(actor, target, fieldId, modelRev, objectRev,
-			        fieldRev, inTransaction);
+			        fieldRev, inTransaction, implied);
 		} else {
 			throw new IllegalArgumentException("<" + XOBJECTEVENT_ELEMENT + ">@"
 			        + XmlUtils.TYPE_ATTRIBUTE
@@ -382,8 +390,9 @@ public class XmlEvent {
 			return MemoryModelEvent
 			        .createAddEvent(actor, target, objectId, modelRev, inTransaction);
 		} else if(type == ChangeType.REMOVE) {
+			boolean implied = getImpliedAttribute(xml);
 			return MemoryModelEvent.createRemoveEvent(actor, target, objectId, modelRev, objectRev,
-			        inTransaction);
+			        inTransaction, implied);
 		} else {
 			throw new IllegalArgumentException("<" + XMODELEVENT_ELEMENT + ">@"
 			        + XmlUtils.TYPE_ATTRIBUTE
@@ -760,6 +769,10 @@ public class XmlEvent {
 		
 		if(event.inTransaction()) {
 			out.attribute(INTRANSACTION_ATTRIBUTE, Boolean.toString(true));
+		}
+		
+		if(event.isImplied()) {
+			out.attribute(IMPLIED_ATTRIBUTE, Boolean.toString(true));
 		}
 		
 	}

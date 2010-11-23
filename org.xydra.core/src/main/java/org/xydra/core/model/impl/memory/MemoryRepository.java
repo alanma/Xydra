@@ -217,7 +217,7 @@ public class MemoryRepository implements XRepository, Serializable {
 		boolean inTrans = false;
 		for(XID objectId : model) {
 			MemoryObject object = model.getObject(objectId);
-			model.enqueueObjectRemoveEvents(this.actorId, object, true);
+			model.enqueueObjectRemoveEvents(this.actorId, object, true, true);
 			inTrans = true;
 		}
 		

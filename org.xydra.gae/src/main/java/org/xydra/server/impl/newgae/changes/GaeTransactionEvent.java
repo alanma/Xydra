@@ -223,4 +223,10 @@ class GaeTransactionEvent implements XTransactionEvent {
 		
 		return true;
 	}
+	
+	@Override
+	public boolean isImplied() {
+		return false;
+	}
+	
 }

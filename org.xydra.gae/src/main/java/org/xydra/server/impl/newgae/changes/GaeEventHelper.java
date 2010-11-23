@@ -62,7 +62,7 @@ public abstract class GaeEventHelper {
 				for(XID objectId : currentModel) {
 					inTrans = true;
 					GaeEventHelper.createEventsForRemovedObject(events, rev - 1, actorId,
-					        currentModel.getObject(objectId), inTrans);
+					        currentModel.getObject(objectId), inTrans, true);
 				}
 				events.add(MemoryRepositoryEvent.createRemoveEvent(actorId, rc.getTarget(), rc
 				        .getModelID(), rev - 1, inTrans));
@@ -87,7 +87,7 @@ public abstract class GaeEventHelper {
 		for(XID objectId : changedModel.getRemovedObjects()) {
 			XBaseObject removedObject = changedModel.getOldObject(objectId);
 			GaeEventHelper.createEventsForRemovedObject(events, rev, actorId, removedObject,
-			        inTrans);
+			        inTrans, false);
 		}
 		
 		for(NewObject object : changedModel.getNewObjects()) {
@@ -103,7 +103,7 @@ public abstract class GaeEventHelper {
 			
 			for(XID fieldId : object.getRemovedFields()) {
 				GaeEventHelper.createEventsForRemovedField(events, rev, actorId, object, object
-				        .getOldField(fieldId), inTrans);
+				        .getOldField(fieldId), inTrans, false);
 			}
 			
 			for(NewField field : object.getNewFields()) {
@@ -121,7 +121,7 @@ public abstract class GaeEventHelper {
 					if(newValue == null) {
 						assert oldValue != null;
 						events.add(MemoryFieldEvent.createRemoveEvent(actorId, target, oldValue,
-						        rev, objectRev, fieldRev, inTrans));
+						        rev, objectRev, fieldRev, inTrans, false));
 					} else if(oldValue == null) {
 						events.add(MemoryFieldEvent.createAddEvent(actorId, target, newValue, rev,
 						        objectRev, fieldRev, inTrans));
@@ -150,25 +150,25 @@ public abstract class GaeEventHelper {
 	}
 	
 	public static void createEventsForRemovedObject(List<XAtomicEvent> events, long modelRev,
-	        XID actorId, XBaseObject object, boolean inTrans) {
+	        XID actorId, XBaseObject object, boolean inTrans, boolean implied) {
 		for(XID fieldId : object) {
 			GaeEventHelper.createEventsForRemovedField(events, modelRev, actorId, object, object
-			        .getField(fieldId), inTrans);
+			        .getField(fieldId), inTrans, true);
 		}
 		events.add(MemoryModelEvent.createRemoveEvent(actorId, object.getAddress().getParent(),
-		        object.getID(), modelRev, object.getRevisionNumber(), inTrans));
+		        object.getID(), modelRev, object.getRevisionNumber(), inTrans, implied));
 	}
 	
 	public static void createEventsForRemovedField(List<XAtomicEvent> events, long modelRev,
-	        XID actorId, XBaseObject object, XBaseField field, boolean inTrans) {
+	        XID actorId, XBaseObject object, XBaseField field, boolean inTrans, boolean implied) {
 		long objectRev = object.getRevisionNumber();
 		long fieldRev = field.getRevisionNumber();
 		if(!field.isEmpty()) {
 			events.add(MemoryFieldEvent.createRemoveEvent(actorId, field.getAddress(), field
-			        .getValue(), modelRev, objectRev, fieldRev, inTrans));
+			        .getValue(), modelRev, objectRev, fieldRev, inTrans, true));
 		}
 		events.add(MemoryObjectEvent.createRemoveEvent(actorId, object.getAddress(), field.getID(),
-		        modelRev, objectRev, fieldRev, inTrans));
+		        modelRev, objectRev, fieldRev, inTrans, implied));
 	}
 	
 	public static List<XAtomicEvent> checkCommandAndCreateEvents(XBaseModel currentModel,

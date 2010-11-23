@@ -94,10 +94,11 @@ public class MemoryTransactionEvent implements XTransactionEvent {
 	
 	/**
 	 * @return true if this transaction event cannot be the result of a valid
-	 *         {@link XModel} / {@link XObject} transaction. Assumes the
-	 *         transaction is minimal.
+	 *         {@link XModel} / {@link XObject} transaction. Throws an
+	 *         {@link AssertionError} otherwise. Assumes the transaction is
+	 *         minimal.
 	 */
-	private boolean isCorrect() {
+	private boolean assertIsCorrect() {
 		
 		Map<XAddress,Boolean> entities = new HashMap<XAddress,Boolean>();
 		
@@ -117,18 +118,36 @@ public class MemoryTransactionEvent implements XTransactionEvent {
 					value = Boolean.FALSE;
 				} else {
 					value = Boolean.TRUE;
-					assert !Boolean.TRUE.equals(entities.get(entity)) : "adding already touched entity";
+					assert entities.get(entity) == null : "adding already touched entity";
 				}
 				entities.put(entity, value);
 			}
 			
 		}
 		
+		// check if implied events are marked correctly
+		for(XAtomicEvent event : this) {
+			
+			boolean implied = false;
+			boolean b = true;
+			for(XAddress addr = event.getTarget(); addr != null; addr = addr.getParent()) {
+				if(Boolean.FALSE.equals(entities.get(addr))) {
+					implied = true;
+					assert b : "removed the an entity but not all children";
+				} else {
+					b = false;
+				}
+			}
+			
+			assert event.isImplied() == implied : "event has incorrect implied flag: " + event;
+		}
+		
 		return true;
 	}
 	
 	/**
-	 * @return true if this transaction contains any redundant events.
+	 * @return true if this transaction contains any redundant events. Throws an
+	 *         {@link AssertionError} otherwise.
 	 */
 	private boolean assertIsMinimal() {
 		
@@ -252,7 +271,7 @@ public class MemoryTransactionEvent implements XTransactionEvent {
 		this.objectRevision = objectRevision;
 		
 		assert assertIsMinimal() : "redundant events in transaction: " + toString();
-		assert isCorrect() : "impossible transaction event: " + toString();
+		assert assertIsCorrect() : "impossible transaction event: " + toString();
 	}
 	
 	/**
@@ -410,6 +429,11 @@ public class MemoryTransactionEvent implements XTransactionEvent {
 		}
 		
 		return 0;
+	}
+	
+	@Override
+	public boolean isImplied() {
+		return false;
 	}
 	
 }

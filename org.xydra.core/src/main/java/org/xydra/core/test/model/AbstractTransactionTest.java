@@ -130,11 +130,11 @@ abstract public class AbstractTransactionTest {
 		XAddress peterAddr = XX.resolveObject(modelAddr, PETER_ID);
 		XAddress peterPhoneAddr = XX.resolveField(peterAddr, PHONE_ID);
 		XEvent removePeterPhoneValue = MemoryFieldEvent.createRemoveEvent(this.actorId,
-		        peterPhoneAddr, PETER_PHONE, modelRev, peterRev, peterPhoneRev, true);
+		        peterPhoneAddr, PETER_PHONE, modelRev, peterRev, peterPhoneRev, true, true);
 		XEvent removePeterPhone = MemoryObjectEvent.createRemoveEvent(this.actorId, peterAddr,
-		        PHONE_ID, modelRev, peterRev, peterPhoneRev, true);
+		        PHONE_ID, modelRev, peterRev, peterPhoneRev, true, true);
 		XEvent removePeter = MemoryModelEvent.createRemoveEvent(this.actorId, modelAddr, PETER_ID,
-		        modelRev, peterRev, true);
+		        modelRev, peterRev, true, false);
 		
 		int x1 = received.indexOf(removePeterPhoneValue);
 		assertTrue(x1 >= 0);

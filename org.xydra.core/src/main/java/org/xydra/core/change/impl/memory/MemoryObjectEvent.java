@@ -26,9 +26,6 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	// the revision numbers before the event happened
 	private final long fieldRevision, objectRevision, modelRevision;
 	
-	// was this event part of a transaction or not?
-	private final boolean inTransaction;
-	
 	@Override
 	public boolean equals(Object object) {
 		
@@ -60,10 +57,6 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 			return false;
 		}
 		
-		if(this.inTransaction != event.inTransaction()) {
-			return false;
-		}
-		
 		return true;
 	}
 	
@@ -85,10 +78,6 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 		return result;
 	}
 	
-	public boolean inTransaction() {
-		return this.inTransaction;
-	}
-	
 	/**
 	 * Creates a new {@link XObjectEvent} of the add-type (an {@link XField} was
 	 * added to the {@link XObject} this event refers to)
@@ -108,7 +97,6 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	 *             if the given objectRevision equals
 	 *             {@link XEvent#RevisionOfEntityNotSet}.
 	 */
-	
 	public static XObjectEvent createAddEvent(XID actor, XAddress target, XID fieldID,
 	        long objectRevision, boolean inTransaction) {
 		return createAddEvent(actor, target, fieldID, RevisionOfEntityNotSet, objectRevision,
@@ -136,12 +124,11 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	 *             if the given objectRevision equals
 	 *             {@link XEvent#RevisionOfEntityNotSet}.
 	 */
-	
 	public static XObjectEvent createAddEvent(XID actor, XAddress target, XID fieldID,
 	        long modelRevision, long objectRevision, boolean inTransaction) {
 		
 		return new MemoryObjectEvent(actor, target, fieldID, ChangeType.ADD, modelRevision,
-		        objectRevision, RevisionOfEntityNotSet, inTransaction);
+		        objectRevision, RevisionOfEntityNotSet, inTransaction, false);
 	}
 	
 	/**
@@ -160,17 +147,18 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	 *            removed
 	 * @param inTransaction sets whether this event occurred during an
 	 *            {@link XTransaction} or not
+	 * @param implied sets whether this event describes removing a field whose
+	 *            containing object is also removed in the same transaction
 	 * @return an {@link XObjectEvent} of the remove-type
 	 * @throws IllegalArgumentException if the given {@link XAddress} doesn't
 	 *             refer to an {@link XObject}, if the given fieldID is null or
 	 *             if the given objectRevision equals
 	 *             {@link XEvent#RevisionOfEntityNotSet}.
 	 */
-	
 	public static XObjectEvent createRemoveEvent(XID actor, XAddress target, XID fieldID,
-	        long objectRevision, long fieldRevision, boolean inTransaction) {
+	        long objectRevision, long fieldRevision, boolean inTransaction, boolean implied) {
 		return createRemoveEvent(actor, target, fieldID, RevisionOfEntityNotSet, objectRevision,
-		        fieldRevision, inTransaction);
+		        fieldRevision, inTransaction, implied);
 		
 	}
 	
@@ -192,29 +180,32 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	 *            removed
 	 * @param inTransaction sets whether this event occurred during an
 	 *            {@link XTransaction} or not
+	 * @param implied sets whether this event describes removing a field whose
+	 *            containing object is also removed in the same transaction
 	 * @return an {@link XObjectEvent} of the remove-type
 	 * @throws IllegalArgumentException if the given {@link XAddress} doesn't
 	 *             refer to an {@link XObject}, if the given fieldID is null or
 	 *             if the given objectRevision or fieldRevision equals
 	 *             {@link XEvent#RevisionOfEntityNotSet}.
 	 */
-	
 	public static XObjectEvent createRemoveEvent(XID actor, XAddress target, XID fieldID,
-	        long modelRevision, long objectRevision, long fieldRevision, boolean inTransaction) {
+	        long modelRevision, long objectRevision, long fieldRevision, boolean inTransaction,
+	        boolean implied) {
 		if(fieldRevision < 0) {
 			throw new IllegalArgumentException(
 			        "field revision must be set for object REMOVE events");
 		}
 		
 		return new MemoryObjectEvent(actor, target, fieldID, ChangeType.REMOVE, modelRevision,
-		        objectRevision, fieldRevision, inTransaction);
+		        objectRevision, fieldRevision, inTransaction, implied);
 	}
 	
 	// private constructor, use the createEvent methods for instantiating a
 	// MemObjectEvent
 	private MemoryObjectEvent(XID actor, XAddress target, XID fieldID, ChangeType changeType,
-	        long modelRevision, long objectRevision, long fieldRevision, boolean inTransaction) {
-		super(target, changeType, actor);
+	        long modelRevision, long objectRevision, long fieldRevision, boolean inTransaction,
+	        boolean implied) {
+		super(target, changeType, actor, inTransaction, implied);
 		
 		if(target.getObject() == null || target.getField() != null) {
 			throw new IllegalArgumentException("target must refer to an object, was: " + target);
@@ -240,7 +231,6 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 		this.modelRevision = modelRevision;
 		this.objectRevision = objectRevision;
 		this.fieldRevision = fieldRevision;
-		this.inTransaction = inTransaction;
 	}
 	
 	@Override
@@ -250,6 +240,9 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 			str += " r" + rev2str(this.fieldRevision);
 		str += " @" + getTarget();
 		str += " r" + rev2str(this.modelRevision) + "/" + rev2str(this.objectRevision);
+		if(isImplied()) {
+			str += " [implied]";
+		}
 		return str;
 	}
 	

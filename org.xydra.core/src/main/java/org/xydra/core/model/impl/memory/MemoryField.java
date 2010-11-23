@@ -254,7 +254,7 @@ public class MemoryField implements XField, Serializable {
 				if(newValue == null) {
 					// implies remove
 					event = MemoryFieldEvent.createRemoveEvent(this.actorId, getAddress(),
-					        oldValue, modelRev, objectRev, fieldRev, inTrans);
+					        oldValue, modelRev, objectRev, fieldRev, inTrans, false);
 				} else {
 					assert !newValue.equals(oldValue);
 					// implies change

@@ -29,9 +29,6 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	// the revision numbers before the event happened
 	private final long modelRevision, objectRevision, fieldRevision;
 	
-	// was this event part of a transaction or not?
-	private final boolean inTransaction;
-	
 	public XValue getNewValue() {
 		return this.newValue;
 	}
@@ -75,10 +72,6 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 			return false;
 		}
 		
-		if(this.inTransaction != event.inTransaction()) {
-			return false;
-		}
-		
 		return true;
 	}
 	
@@ -101,10 +94,6 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 		result += this.fieldRevision;
 		
 		return result;
-	}
-	
-	public boolean inTransaction() {
-		return this.inTransaction;
 	}
 	
 	/**
@@ -167,7 +156,7 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 		}
 		
 		return new MemoryFieldEvent(actor, target, oldValue, newValue, ChangeType.CHANGE,
-		        modelRevision, objectRevision, fieldRevision, inTransaction);
+		        modelRevision, objectRevision, fieldRevision, inTransaction, false);
 	}
 	
 	/**
@@ -226,7 +215,7 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 		}
 		
 		return new MemoryFieldEvent(actor, target, null, newValue, ChangeType.ADD, modelRevision,
-		        objectRevision, fieldRevision, inTransaction);
+		        objectRevision, fieldRevision, inTransaction, false);
 	}
 	
 	/**
@@ -243,6 +232,9 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	 *            refers to
 	 * @param inTransaction sets whether this event occurred during an
 	 *            {@link XTransaction} or not
+	 * @param implied sets whether this event describes removing the value of a
+	 *            field whose containing object is also removed in the same
+	 *            transaction
 	 * @return An {@link XFieldEvent} of the remove-type
 	 * @throws IllegalArgumentException if the given {@link XAddress} does not
 	 *             specify an {@link XField} or if the given revision number
@@ -250,9 +242,9 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	 * @throws IllegalArgumentException if oldValue is null
 	 */
 	public static XFieldEvent createRemoveEvent(XID actor, XAddress target, XValue oldValue,
-	        long objectRevision, long fieldRevision, boolean inTransaction) {
+	        long objectRevision, long fieldRevision, boolean inTransaction, boolean implied) {
 		return createRemoveEvent(actor, target, oldValue, RevisionOfEntityNotSet, objectRevision,
-		        fieldRevision, inTransaction);
+		        fieldRevision, inTransaction, implied);
 	}
 	
 	/**
@@ -272,6 +264,9 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	 *            refers to
 	 * @param inTransaction sets whether this event occurred during an
 	 *            {@link XTransaction} or not
+	 * @param implied sets whether this event describes removing the value of a
+	 *            field whose containing object is also removed in the same
+	 *            transaction
 	 * @return An {@link XFieldEvent} of the remove-type
 	 * @throws IllegalArgumentException if the given {@link XAddress} does not
 	 *             specify an {@link XField} or if the given revision number
@@ -279,21 +274,22 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	 * @throws IllegalArgumentException if oldValue is null
 	 */
 	public static XFieldEvent createRemoveEvent(XID actor, XAddress target, XValue oldValue,
-	        long modelRevision, long objectRevision, long fieldRevision, boolean inTransaction) {
+	        long modelRevision, long objectRevision, long fieldRevision, boolean inTransaction,
+	        boolean implied) {
 		if(oldValue == null) {
 			throw new IllegalArgumentException("oldValue must not be null for field REMOVE events");
 		}
 		
 		return new MemoryFieldEvent(actor, target, oldValue, null, ChangeType.REMOVE,
-		        modelRevision, objectRevision, fieldRevision, inTransaction);
+		        modelRevision, objectRevision, fieldRevision, inTransaction, implied);
 	}
 	
 	// private constructor, use the createEvent-methods for instantiating a
 	// MemoryFieldEvent.
 	private MemoryFieldEvent(XID actor, XAddress target, XValue oldValue, XValue newValue,
 	        ChangeType changeType, long modelRevision, long objectRevision, long fieldRevision,
-	        boolean inTransaction) {
-		super(target, changeType, actor);
+	        boolean inTransaction, boolean implied) {
+		super(target, changeType, actor, inTransaction, implied);
 		
 		if(target.getField() == null || fieldRevision < 0) {
 			throw new IllegalArgumentException("field ID and revision must be set for field events");
@@ -314,7 +310,6 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 		this.modelRevision = modelRevision;
 		this.objectRevision = objectRevision;
 		this.fieldRevision = fieldRevision;
-		this.inTransaction = inTransaction;
 	}
 	
 	@Override
@@ -325,7 +320,8 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 		case ADD:
 			return "FieldEvent: ADD " + this.newValue + suffix;
 		case REMOVE:
-			return "FieldEvent: REMOVE " + this.oldValue + suffix;
+			return "FieldEvent: REMOVE " + this.oldValue + suffix
+			        + (isImplied() ? " [implied]" : "");
 		case CHANGE:
 			return "FieldEvent: CHANGE " + this.oldValue + " to " + this.newValue + suffix;
 		default:

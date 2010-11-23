@@ -90,4 +90,15 @@ public interface XEvent {
 	 */
 	XAddress getChangedEntity();
 	
+	/**
+	 * @return true if this event describes removing an entity (
+	 *         {@link #getChangedEntity()}) whose parent is also removed in the
+	 *         same transaction event; false for transactions or events where
+	 *         {@link #getChangeType()} is not {@link ChangeType#REMOVE}.
+	 * 
+	 *         Repository events are never implied, as the repository cannot be
+	 *         removed, only individual models.
+	 */
+	boolean isImplied();
+	
 }

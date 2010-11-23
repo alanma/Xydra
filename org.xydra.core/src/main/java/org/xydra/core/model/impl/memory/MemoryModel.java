@@ -228,7 +228,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 			boolean inTrans = this.eventQueue.transactionInProgess;
 			boolean makeTrans = !object.isEmpty();
 			int since = this.eventQueue.getNextPosition();
-			enqueueObjectRemoveEvents(this.actorId, object, makeTrans || inTrans);
+			enqueueObjectRemoveEvents(this.actorId, object, makeTrans || inTrans, false);
 			
 			Orphans orphans = getOrphans();
 			if(!inTrans && orphans == null) {
@@ -515,10 +515,12 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	 *            be null)
 	 * @param inTrans true, if the removal of this {@link MemoryObject} occurs
 	 *            during an {@link XTransaction}.
+	 * @param implied true if this model is also removed in the same transaction
 	 * @throws IllegalArgumentException if the given {@link MemoryOjbect} equals
 	 *             null
 	 */
-	protected void enqueueObjectRemoveEvents(XID actor, MemoryObject object, boolean inTrans) {
+	protected void enqueueObjectRemoveEvents(XID actor, MemoryObject object, boolean inTrans,
+	        boolean implied) {
 		
 		if(object == null) {
 			throw new IllegalArgumentException("object must not be null");
@@ -527,12 +529,12 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		for(XID fieldID : object) {
 			assert inTrans;
 			MemoryField field = object.getField(fieldID);
-			object.enqueueFieldRemoveEvents(actor, field, inTrans);
+			object.enqueueFieldRemoveEvents(actor, field, inTrans, true);
 		}
 		
 		// add event to remove the object
 		XModelEvent event = MemoryModelEvent.createRemoveEvent(actor, getAddress(), object.getID(),
-		        getRevisionNumber(), object.getRevisionNumber(), inTrans);
+		        getRevisionNumber(), object.getRevisionNumber(), inTrans, implied);
 		this.eventQueue.enqueueModelEvent(this, event);
 		
 	}

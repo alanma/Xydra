@@ -25,8 +25,6 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	// the model revision before this event happened
 	private final long modelRevision;
 	
-	private final boolean inTransaction;
-	
 	@Override
 	public boolean equals(Object object) {
 		
@@ -62,10 +60,6 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 		result += this.modelRevision;
 		
 		return result;
-	}
-	
-	public boolean inTransaction() {
-		return this.inTransaction;
 	}
 	
 	/**
@@ -137,10 +131,10 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	}
 	
 	// private constructor, use the createEvent methods for instantiating a
-	// MemRepositoryEvent
+	// MemoryRepositoryEvent
 	private MemoryRepositoryEvent(XID actor, XAddress target, XID modelID, ChangeType changeType,
 	        long modelRevision, boolean inTrans) {
-		super(target, changeType, actor);
+		super(target, changeType, actor, inTrans, false);
 		
 		if(target.getRepository() == null || target.getModel() != null) {
 			throw new IllegalArgumentException("target must refer to a repository, was: " + target);
@@ -156,7 +150,6 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 		
 		this.modelID = modelID;
 		this.modelRevision = modelRevision;
-		this.inTransaction = inTrans;
 	}
 	
 	@Override

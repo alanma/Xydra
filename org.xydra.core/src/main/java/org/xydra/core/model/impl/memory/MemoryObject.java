@@ -226,7 +226,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 			boolean inTrans = this.eventQueue.transactionInProgess;
 			boolean makeTrans = !field.isEmpty();
 			int since = this.eventQueue.getNextPosition();
-			enqueueFieldRemoveEvents(this.actorId, field, makeTrans || inTrans);
+			enqueueFieldRemoveEvents(this.actorId, field, makeTrans || inTrans, false);
 			
 			Orphans orphans = getOrphans();
 			if(!inTrans && orphans == null) {
@@ -524,10 +524,15 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	 * 
 	 * @param actor The actor for this transaction
 	 * @param field The field which should be removed by the transaction
+	 * @param inTrans true, if the removal of this {@link MemoryField} occurs
+	 *            during an {@link XTransaction}.
+	 * @param implied true if this object is also removed in the same
+	 *            transaction
 	 * @return An {@link ObjectTransaction} that first removes the value of the
 	 *         given field and then the given field itself.
 	 */
-	protected void enqueueFieldRemoveEvents(XID actor, MemoryField field, boolean inTrans) {
+	protected void enqueueFieldRemoveEvents(XID actor, MemoryField field, boolean inTrans,
+	        boolean implied) {
 		
 		if(field == null) {
 			throw new NullPointerException("field must not be null");
@@ -538,12 +543,14 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		if(field.getValue() != null) {
 			assert inTrans;
 			XFieldEvent event = MemoryFieldEvent.createRemoveEvent(actor, field.getAddress(), field
-			        .getValue(), modelRev, getRevisionNumber(), field.getRevisionNumber(), inTrans);
+			        .getValue(), modelRev, getRevisionNumber(), field.getRevisionNumber(), inTrans,
+			        true);
 			this.eventQueue.enqueueFieldEvent(field, event);
 		}
 		
 		XObjectEvent event = MemoryObjectEvent.createRemoveEvent(actor, getAddress(),
-		        field.getID(), modelRev, getRevisionNumber(), field.getRevisionNumber(), inTrans);
+		        field.getID(), modelRev, getRevisionNumber(), field.getRevisionNumber(), inTrans,
+		        implied);
 		this.eventQueue.enqueueObjectEvent(this, event);
 		
 	}

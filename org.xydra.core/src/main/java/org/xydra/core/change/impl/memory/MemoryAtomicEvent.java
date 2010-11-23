@@ -14,18 +14,35 @@ import org.xydra.index.XI;
 abstract public class MemoryAtomicEvent implements XEvent {
 	
 	private final XAddress target;
-	private final ChangeType changeType; // The ChangeType
-	private final XID actor; // The XID of the actor of this event.
 	
-	protected MemoryAtomicEvent(XAddress target, ChangeType changeType, XID actor) {
+	// The ChangeType
+	private final ChangeType changeType;
+	
+	// The XID of the actor of this event.
+	private final XID actor;
+	
+	// was this event part of a transaction or not?
+	private final boolean inTransaction;
+	
+	// is this remove event implied by another event in the same transaction
+	private final boolean implied;
+	
+	protected MemoryAtomicEvent(XAddress target, ChangeType changeType, XID actor, boolean inTrans,
+	        boolean implied) {
 		
 		if(target == null) {
 			throw new IllegalArgumentException("target must not be null");
 		}
 		
+		assert !implied
+		        || (inTrans && changeType == ChangeType.REMOVE && target.getParent() != null);
+		assert changeType != ChangeType.TRANSACTION;
+		
 		this.target = target;
 		this.changeType = changeType;
 		this.actor = actor;
+		this.inTransaction = inTrans;
+		this.implied = implied;
 	}
 	
 	public ChangeType getChangeType() {
@@ -83,6 +100,14 @@ abstract public class MemoryAtomicEvent implements XEvent {
 			return false;
 		}
 		XAtomicEvent event = (XAtomicEvent)object;
+		
+		if(this.inTransaction != event.inTransaction()) {
+			return false;
+		}
+		
+		if(this.implied != event.isImplied()) {
+			return false;
+		}
 		
 		return XI.equals(this.actor, event.getActor()) && this.changeType == event.getChangeType()
 		        && this.target.equals(event.getTarget());
@@ -147,6 +172,14 @@ abstract public class MemoryAtomicEvent implements XEvent {
 			assert rev >= 0;
 			return Long.toString(rev);
 		}
+	}
+	
+	public boolean inTransaction() {
+		return this.inTransaction;
+	}
+	
+	public boolean isImplied() {
+		return this.implied;
 	}
 	
 }
