@@ -10,9 +10,11 @@ import java.util.Set;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XEvent;
+import org.xydra.core.change.XRepositoryEvent;
 import org.xydra.core.change.XTransactionEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XType;
 import org.xydra.index.XI;
 
 
@@ -36,6 +38,8 @@ class GaeTransactionEvent implements XTransactionEvent {
 		this.actor = actor;
 		this.rev = rev;
 		assert size > 1;
+		assert changesService.getBaseAddress().getAddressedType() == XType.XMODEL;
+		assert rev >= 0;
 	}
 	
 	public XAtomicEvent getEvent(int index) {
@@ -54,6 +58,11 @@ class GaeTransactionEvent implements XTransactionEvent {
 			assert getTarget().equalsOrContains(ae.getChangedEntity());
 			assert ae.getChangeType() != ChangeType.TRANSACTION;
 			assert ae.inTransaction();
+			
+			assert (!(ae instanceof XRepositoryEvent))
+			        || ((index == 0 || index == size() - 1) && ae.getChangeType() == (index == 0 ? ChangeType.ADD
+			                : ChangeType.REMOVE));
+			
 		}
 		
 		return ae;
