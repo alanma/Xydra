@@ -185,7 +185,9 @@ public interface XydraStore {
 	 * @param callback Asynchronous callback to signal success or failure. On
 	 *            success, the repositoryId of this store is returned.
 	 * 
-	 *            TODO Why only restrict this to a single repository ID?
+	 *            TODO Why only restrict this to a single repository ID? max:
+	 *            One XydraStore should represent exactly one repository which
+	 *            in turn can have only one id.
 	 */
 	void getRepositoryId(XID actorId, String passwordHash, Callback<XID> callback);
 	
@@ -289,8 +291,8 @@ public interface XydraStore {
 	
 	/**
 	 * Redundant, network-optimised method to combine in one method call the
-	 * effects of {@link #executeCommands(XID, String, XCommand[], Callback)} and
-	 * {@link #getEvents(XID, String, XAddress[], long, long, Callback)}.
+	 * effects of {@link #executeCommands(XID, String, XCommand[], Callback)}
+	 * and {@link #getEvents(XID, String, XAddress[], long, long, Callback)}.
 	 * 
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
@@ -308,8 +310,8 @@ public interface XydraStore {
 	 * @param callback Asynchronous callback to signal success or failure. On
 	 *            success, this method returns a {@link Pair} where the first
 	 *            component is the the same as the result of
-	 *            {@link #executeCommands(XID, String, XCommand[], Callback)} and
-	 *            the second is the same as the result of
+	 *            {@link #executeCommands(XID, String, XCommand[], Callback)}
+	 *            and the second is the same as the result of
 	 *            {@link #getEvents(XID, String, XAddress[], long, long, Callback)}
 	 *            .
 	 */
