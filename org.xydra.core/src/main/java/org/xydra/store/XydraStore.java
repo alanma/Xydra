@@ -168,7 +168,9 @@ public interface XydraStore {
 	 *            network if the user uses the same password for multiple
 	 *            services.
 	 * @param repositoryId The id of the repository for which to return the list
-	 *            of all modelIds stored in it.
+	 *            of all modelIds stored in it. TODO This parameter should be
+	 *            removed since one XydraStore represents exactly one
+	 *            repository.
 	 * @param callback Asynchronous callback to signal success or failure. On
 	 *            success a Set of all {@link XID} of all {@link XModel} for
 	 *            which the given actorId has read-access in the repository is
