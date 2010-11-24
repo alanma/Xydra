@@ -29,6 +29,10 @@ public class SimpleRepository implements XWritableRepository, Serializable {
 		this.modelIds = modelIds;
 	}
 	
+	public Set<XID> getModelIds() {
+		return this.modelIds;
+	}
+	
 	@Override
 	public XAddress getAddress() {
 		return this.address;

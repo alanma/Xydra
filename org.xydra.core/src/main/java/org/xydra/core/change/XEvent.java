@@ -96,6 +96,8 @@ public interface XEvent {
 	 *         same transaction event; false for transactions or events where
 	 *         {@link #getChangeType()} is not {@link ChangeType#REMOVE}.
 	 * 
+	 *         TODO clarify: can this every be true for {@link XAtomicEvent}?
+	 * 
 	 *         Repository events are never implied, as the repository cannot be
 	 *         removed, only individual models.
 	 */
