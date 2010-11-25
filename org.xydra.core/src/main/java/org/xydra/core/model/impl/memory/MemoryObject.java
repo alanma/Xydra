@@ -688,9 +688,18 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	@Override
 	public void setSessionActor(XID actorId) {
 		assert actorId != null;
+		if(this.getModel() == null) {
+			setSessionActorLocalAndInChildren(actorId);
+		} else {
+			this.getModel().setSessionActor(actorId);
+		}
+	}
+	
+	protected void setSessionActorLocalAndInChildren(XID actorId) {
+		assert actorId != null;
 		this.actorId = actorId;
-		for(XField field : this.loadedFields.values()) {
-			field.setSessionActor(actorId);
+		for(MemoryField field : this.loadedFields.values()) {
+			field.setSessionActorLocal(actorId);
 		}
 	}
 	

@@ -638,8 +638,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	public void setSessionActor(XID actorId) {
 		assert actorId != null;
 		this.actorId = actorId;
-		for(XObject object : this.loadedObjects.values()) {
-			object.setSessionActor(actorId);
+		for(MemoryObject object : this.loadedObjects.values()) {
+			object.setSessionActorLocalAndInChildren(actorId);
 		}
 	}
 	

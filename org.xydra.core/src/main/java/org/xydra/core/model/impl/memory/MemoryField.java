@@ -575,6 +575,16 @@ public class MemoryField implements XField, Serializable {
 	@Override
 	public void setSessionActor(XID actor) {
 		this.actorId = actor;
+		if(this.getObject() == null) {
+			setSessionActorLocal(actor);
+		} else {
+			this.getObject().setSessionActor(actor);
+		}
+	}
+	
+	protected void setSessionActorLocal(XID actorId) {
+		assert actorId != null;
+		this.actorId = actorId;
 	}
 	
 }
