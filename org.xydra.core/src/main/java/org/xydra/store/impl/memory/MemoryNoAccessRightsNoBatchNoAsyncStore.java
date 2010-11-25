@@ -31,7 +31,7 @@ public class MemoryNoAccessRightsNoBatchNoAsyncStore implements
 	}
 	
 	@Override
-	public long executeCommand(XCommand command) {
+	public long executeCommand(XID actorId, XCommand command) {
 		XID actor = null; // TODO fix
 		boolean implied = false; // TODO calculate
 		long oldFieldRevision = 0; // TODO calculate

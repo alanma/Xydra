@@ -100,14 +100,15 @@ public interface XObject extends XLoggedObject, XWritableObject, XSynchronizesCh
 	 *         actor that is recorded for change operations. Operations will
 	 *         only succeed if this actor has access.
 	 */
-	XID getActor();
+	XID getSessionActor();
 	
 	/**
 	 * Set a new actor to be used when building commands for changes to this
-	 * object.
+	 * object and its children. If the object has a parent model, the session
+	 * actor of the parent model is also set to the given actor.
 	 * 
 	 * @param actor for this object and its children, if any.
 	 */
-	void setActor(XID actor);
+	void setSessionActor(XID actor);
 	
 }

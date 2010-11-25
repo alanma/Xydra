@@ -95,14 +95,15 @@ public interface XRepository extends XBaseRepository, XWritableRepository, XSend
 	 *         actor that is recorded for change operations. Operations will
 	 *         only succeed if this actor has access.
 	 */
-	XID getActor();
+	XID getSessionActor();
 	
 	/**
 	 * Set a new actor to be used when building commands for changes to this
-	 * repository.
+	 * repository. Recursively sets the session actor for all child
+	 * {@link XModel}, {@link XObject}, and {@link XField}.
 	 * 
 	 * @param actor for this repository and its children, if any.
 	 */
-	void setActor(XID actor);
+	void setSessionActor(XID actor);
 	
 }

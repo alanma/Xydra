@@ -14,7 +14,7 @@ import org.xydra.store.Callback;
 
 public interface XydraNoAccessRightsStore {
 	
-	void executeCommands(XCommand[] commands, Callback<long[]> callback);
+	void executeCommands(XID actorId, XCommand[] commands, Callback<long[]> callback);
 	
 	void executeCommandsAndGetEvents(XCommand[] commands, XAddress[] addressesToGetEventsFor,
 	        long beginRevision, long endRevision, Callback<Pair<long[],XEvent[][]>> callback);

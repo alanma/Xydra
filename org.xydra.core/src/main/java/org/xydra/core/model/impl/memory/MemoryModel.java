@@ -630,16 +630,16 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	}
 	
 	@Override
-	public XID getActor() {
+	public XID getSessionActor() {
 		return this.actorId;
 	}
 	
 	@Override
-	public void setActor(XID actorId) {
+	public void setSessionActor(XID actorId) {
 		assert actorId != null;
 		this.actorId = actorId;
 		for(XObject object : this.loadedObjects.values()) {
-			object.setActor(actorId);
+			object.setSessionActor(actorId);
 		}
 	}
 	

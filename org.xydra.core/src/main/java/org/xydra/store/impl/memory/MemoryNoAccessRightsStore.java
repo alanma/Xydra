@@ -21,10 +21,10 @@ public class MemoryNoAccessRightsStore implements XydraNoAccessRightsStore {
 	}
 	
 	@Override
-	public void executeCommands(XCommand[] commands, Callback<long[]> callback) {
+	public void executeCommands(XID actorId, XCommand[] commands, Callback<long[]> callback) {
 		long[] results = new long[commands.length];
 		for(int i = 0; i < commands.length; i++) {
-			results[i] = this.noBatchStore.executeCommand(commands[i]);
+			results[i] = this.noBatchStore.executeCommand(actorId, commands[i]);
 		}
 		callback.onSuccess(results);
 	}

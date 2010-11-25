@@ -568,12 +568,12 @@ public class MemoryField implements XField, Serializable {
 	}
 	
 	@Override
-	public XID getActor() {
+	public XID getSessionActor() {
 		return this.actorId;
 	}
 	
 	@Override
-	public void setActor(XID actor) {
+	public void setSessionActor(XID actor) {
 		this.actorId = actor;
 	}
 	

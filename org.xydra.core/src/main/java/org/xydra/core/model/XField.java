@@ -68,14 +68,16 @@ public interface XField extends XLoggedField, XWritableField, Serializable {
 	 *         actor that is recorded for change operations. Operations will
 	 *         only succeed if this actor has access.
 	 */
-	XID getActor();
+	XID getSessionActor();
 	
 	/**
 	 * Set a new actor to be used when building commands for changes to this
-	 * field.
+	 * field. This method also sets the session actor for the parent
+	 * {@link XObject} and recursively to its parent {@link XModel}, if there is
+	 * one.
 	 * 
 	 * @param actor for this field.
 	 */
-	void setActor(XID actor);
+	void setSessionActor(XID actor);
 	
 }

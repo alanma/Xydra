@@ -12,7 +12,7 @@ import org.xydra.core.model.XID;
 
 public interface XydraNoAccessRightsNoBatchNoAsyncStore {
 	
-	long executeCommand(XCommand xCommand);
+	long executeCommand(XID actorId, XCommand xCommand);
 	
 	XEvent[] getEvents(XAddress xAddress, long beginRevision, long endRevision);
 	

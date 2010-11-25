@@ -187,7 +187,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 				 * transaction(event)s should only contain events from the same
 				 * actor.
 				 */
-				this.eventQueue.createTransactionEvent(getActor(), getModel(), getObject(), since);
+				this.eventQueue.createTransactionEvent(getSessionActor(), getModel(), getObject(), since);
 				
 				// new objects
 				for(NewObject object : model.getNewObjects()) {
@@ -518,9 +518,9 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 	}
 	
 	/**
-	 * @see XModel#getActor()
+	 * @see XModel#getSessionActor()
 	 */
-	abstract public XID getActor();
+	abstract public XID getSessionActor();
 	
 	/**
 	 * Increment this entity's revision number.

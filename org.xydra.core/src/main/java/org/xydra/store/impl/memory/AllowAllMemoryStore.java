@@ -38,7 +38,7 @@ public class AllowAllMemoryStore implements XydraStore {
 	@Override
 	public void executeCommands(XID actorId, String passwordHash, XCommand[] commands,
 	        Callback<long[]> callback) {
-		this.storeWithoutAccessRights.executeCommands(commands, callback);
+		this.storeWithoutAccessRights.executeCommands(actorId, commands, callback);
 	}
 	
 	@Override

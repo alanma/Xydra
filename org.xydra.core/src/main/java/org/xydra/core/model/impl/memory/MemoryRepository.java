@@ -536,16 +536,16 @@ public class MemoryRepository implements XRepository, Serializable {
 	}
 	
 	@Override
-	public XID getActor() {
+	public XID getSessionActor() {
 		return this.actorId;
 	}
 	
 	@Override
-	public void setActor(XID actorId) {
+	public void setSessionActor(XID actorId) {
 		assert actorId != null;
 		this.actorId = actorId;
 		for(XModel model : this.loadedModels.values()) {
-			model.setActor(actorId);
+			model.setSessionActor(actorId);
 		}
 	}
 	
