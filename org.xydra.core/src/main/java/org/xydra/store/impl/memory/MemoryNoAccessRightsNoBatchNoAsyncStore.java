@@ -11,6 +11,7 @@ import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XTransaction;
 import org.xydra.core.model.XAddress;
+import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
@@ -32,16 +33,53 @@ public class MemoryNoAccessRightsNoBatchNoAsyncStore implements
 	
 	@Override
 	public long executeCommand(XID actorId, XCommand command) {
-		XID actor = null; // TODO fix
-		boolean implied = false; // TODO calculate
-		long oldFieldRevision = 0; // TODO calculate
-		long oldObjectRevision = 0; // TODO calculate
-		long oldModelRevision = 0; // TODO calculate
-		long revisionNumber = 0; // TODO calculate
+		return executeCommand(actorId, command, false);
+	}
+	
+	public long executeCommand(XID actorId, XCommand command, boolean implied) {
+		long oldFieldRevision = XEvent.RevisionOfEntityNotSet;
+		long oldObjectRevision = XEvent.RevisionOfEntityNotSet;
+		long oldModelRevision = XEvent.RevisionOfEntityNotSet;
 		
-		SimpleEvent event = new SimpleEvent(actor, command.getChangeType(), command
+		switch(command.getChangedEntity().getAddressedType()) {
+		case XFIELD: {
+			XBaseModel oldModel = this.getModelSnapshot(command.getChangedEntity().getParent()
+			        .getParent());
+			oldModelRevision = oldModel.getRevisionNumber();
+			XBaseObject oldObject = oldModel.getObject(command.getChangedEntity().getObject());
+			oldObjectRevision = oldObject.getRevisionNumber();
+			XBaseField oldField = oldObject.getField(command.getChangedEntity().getField());
+			oldFieldRevision = oldField.getRevisionNumber();
+		}
+			break;
+		case XOBJECT: {
+			XBaseModel oldModel = this.getModelSnapshot(command.getChangedEntity().getParent()
+			        .getParent());
+			oldModelRevision = oldModel.getRevisionNumber();
+			XBaseObject oldObject = oldModel.getObject(command.getChangedEntity().getObject());
+			oldObjectRevision = oldObject.getRevisionNumber();
+		}
+			break;
+		case XMODEL: {
+			XBaseModel oldModel = this.getModelSnapshot(command.getChangedEntity().getParent()
+			        .getParent());
+			oldModelRevision = oldModel.getRevisionNumber();
+		}
+			break;
+		case XREPOSITORY: {
+			// do nothing
+		}
+			break;
+		}
+		
+		long revisionNumber = this.events.size();
+		SimpleEvent event = new SimpleEvent(actorId, command.getChangeType(), command
 		        .getChangedEntity(), oldFieldRevision, oldModelRevision, oldObjectRevision,
 		        revisionNumber, command.getTarget(), command instanceof XTransaction, implied);
+		this.events.add(event);
+		
+		// FIXME do the actual requested change, possibly causing many more
+		// changes
 		
 		// TODO Auto-generated method stub
 		return 0;
@@ -74,6 +112,12 @@ public class MemoryNoAccessRightsNoBatchNoAsyncStore implements
 	public XBaseObject getObjectSnapshot(XAddress address) {
 		XBaseModel baseModel = getModelSnapshot(XX.resolveModel(address, getRepositoryId()));
 		return baseModel.getObject(address.getObject());
+	}
+	
+	public XBaseField getFieldSnapshot(XAddress address) {
+		XBaseObject baseObject = getObjectSnapshot(X.getIDProvider().fromComponents(
+		        address.getRepository(), address.getModel(), address.getObject(), null));
+		return baseObject.getField(address.getField());
 	}
 	
 	@Override

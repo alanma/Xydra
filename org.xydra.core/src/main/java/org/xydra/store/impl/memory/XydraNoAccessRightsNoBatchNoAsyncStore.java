@@ -12,6 +12,13 @@ import org.xydra.core.model.XID;
 
 public interface XydraNoAccessRightsNoBatchNoAsyncStore {
 	
+	/**
+	 * Execute a non-implied command.
+	 * 
+	 * @param actorId
+	 * @param xCommand
+	 * @return
+	 */
 	long executeCommand(XID actorId, XCommand xCommand);
 	
 	XEvent[] getEvents(XAddress xAddress, long beginRevision, long endRevision);
