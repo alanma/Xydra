@@ -9,6 +9,15 @@ import org.xydra.core.model.XID;
 /**
  * A central database that stores user groups for access right management.
  * 
+ * <h2>Scalability</h2>
+ * 
+ * Retrieving all members of a group is limited by two factors: (a) 1 MB limit
+ * for a single data store call on GAE. (b) 1MB Limit for size of XValue object
+ * on GAE.
+ * 
+ * Assuming an average XID has 16 characters in a Java String, with a typical
+ * Java overhead of factor 2, we can save only 32K XIDs in 1 MB.
+ * 
  * @author dscharrer
  */
 public interface XGroupDatabase extends Serializable {
@@ -28,15 +37,15 @@ public interface XGroupDatabase extends Serializable {
 	 * 
 	 * While groups can be added to groups, cycles are not allowed.
 	 * 
-	 * @param actor The {@link XID} of the actor (or subgroup) to add to the
+	 * @param actorOrGroupId The {@link XID} of the actor (or subgroup) to add to the
 	 *            group
-	 * @param group The {@link XID} of the group the specified actor will be
+	 * @param groupId The {@link XID} of the group the specified actor will be
 	 *            added to
 	 * 
 	 * @throws CycleException if adding the group membership would produce a
 	 *             cycle
 	 */
-	void addToGroup(XID actor, XID group) throws CycleException;
+	void addToGroup(XID actorOrGroupId, XID groupId) throws CycleException;
 	
 	/**
 	 * Remove an actor from a group.
@@ -44,79 +53,79 @@ public interface XGroupDatabase extends Serializable {
 	 * This will not remove the actor from all subgroups and thus he may retain
 	 * membership of this group.
 	 * 
-	 * @param actor The {@link XID} of the actor for which to revoke group
+	 * @param actorId The {@link XID} of the actor for which to revoke group
 	 *            membership.
-	 * @param group The {@link XID} of the group the specified actor will be
+	 * @param groupId The {@link XID} of the group the specified actor will be
 	 *            removed from
 	 */
-	void removeFromGroup(XID actor, XID group);
+	void removeFromGroup(XID actorId, XID groupId);
 	
 	/**
 	 * Check if the specified actor is a member of the specific group either
 	 * directly or through a subgroup.
 	 * 
-	 * @param actor The {@link XID} of the actor whose membership status is to
+	 * @param actorId The {@link XID} of the actor whose membership status is to
 	 *            be checked
-	 * @param group The {@link XID} of the group for which the membership status
+	 * @param groupId The {@link XID} of the group for which the membership status
 	 *            of the specified actor is to be checked
 	 * @return true, if the specified actor is a member of the specified group
 	 */
-	boolean hasGroup(XID actor, XID group);
+	boolean hasGroup(XID actorId, XID groupId);
 	
 	/**
 	 * Check if the specified actor is a member of the specific group directly
 	 * (and not just a member of a subgroup of the specified group)
 	 * 
-	 * @param actor The {@link XID} of the actor whose membership status is to
+	 * @param actorId The {@link XID} of the actor whose membership status is to
 	 *            be checked
-	 * @param group The {@link XID} of the group for which the membership status
+	 * @param groupId The {@link XID} of the group for which the membership status
 	 *            of the specified actor is to be checked
 	 * @return true, if the specified actor is a member of the specified group
 	 */
-	boolean hasDirectGroup(XID actor, XID group);
+	boolean hasDirectGroup(XID actorId, XID groupId);
 	
 	/**
 	 * Get all groups an actor is a direct member of (will not contain groups
 	 * the actor is only a member of by being a member of a subgroup of the
 	 * specified group)
 	 * 
-	 * @param actor The {@link XID} of the actor whose groups are to be returned
+	 * @param actorId The {@link XID} of the actor whose groups are to be returned
 	 * @return an iterator over all {@link XID XIDs} of the groups the specified
 	 *         actor is a direct member of
 	 * 
 	 *         TODO iterator is problematic with concurrent access
 	 */
-	Iterator<XID> getGroups(XID actor);
+	Iterator<XID> getDirectGroups(XID actorId);
 	
 	/**
 	 * Get all direct members (and direct subgroups) of a group.
 	 * 
-	 * @param group The {@link XID} of the group which members and subgroup
+	 * @param groupId The {@link XID} of the group which members and subgroup
 	 *            {@link XID XIDs} are to be returned
 	 * @return an iterator over all {@link XID XIDs} of the members and
 	 *         subgroups of the specified group
 	 * 
 	 *         TODO iterator is problematic with concurrent access
 	 */
-	Iterator<XID> getMembers(XID group);
+	Iterator<XID> getDirectMembers(XID groupId);
 	
 	/**
 	 * Get all groups an actor or subgroup is part of, either directly or
 	 * indirectly.
 	 * 
-	 * @param actor The {@link XID} of the actor whose groups are to be returned
+	 * @param actorOrGroupId The {@link XID} of the actor whose groups are to be returned
 	 * @return an iterator over all {@link XID XIDs} of the groups the specified
 	 *         actor is a member of
 	 * 
 	 *         TODO iterator is problematic with concurrent access
 	 */
-	Iterator<XID> getAllGroups(XID actor);
+	Iterator<XID> getAllGroups(XID actorOrGroupId);
 	
 	/**
 	 * Get all actors that are either a direct member of the given group or an
 	 * (indirect) member of a subgroup.
 	 * 
-	 * @param group The {@link XID} of the group which members and subgroup
+	 * @param groupId The {@link XID} of the group which members and subgroup
 	 *            {@link XID XIDs} are to be returned
 	 * @return an iterator over all {@link XID XIDs} of the members and
 	 *         subgroups of the specified group
@@ -125,13 +134,13 @@ public interface XGroupDatabase extends Serializable {
 	 * 
 	 *         TODO can return null?
 	 */
-	Iterator<XID> getAllMembers(XID group);
+	Iterator<XID> getAllMembers(XID groupId);
 	
 	/**
 	 * @return returns an iterator over the {@link XID XIDs} of the defined
 	 *         groups. Groups are defined as long as they have at least one
 	 *         member or subgroup.
 	 */
-	Iterator<XID> getGroups();
+	Iterator<XID> getDirectGroups();
 	
 }

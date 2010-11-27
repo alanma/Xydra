@@ -82,7 +82,7 @@ public class MemoryGroupDatabase implements XGroupDatabaseWithListeners {
 		};
 	}
 	
-	synchronized public Iterator<XID> getGroups(XID actor) {
+	synchronized public Iterator<XID> getDirectGroups(XID actor) {
 		return new AbstractTransformingIterator<Pair<XID,XID>,XID>(this.index.constraintIterator(
 		        new EqualsConstraint<XID>(actor), new Wildcard<XID>())) {
 			
@@ -94,7 +94,7 @@ public class MemoryGroupDatabase implements XGroupDatabaseWithListeners {
 		};
 	}
 	
-	synchronized public Iterator<XID> getMembers(XID group) {
+	synchronized public Iterator<XID> getDirectMembers(XID group) {
 		return new AbstractTransformingIterator<Pair<XID,XID>,XID>(this.index.constraintIterator(
 		        new Wildcard<XID>(), new EqualsConstraint<XID>(group))) {
 			
@@ -163,7 +163,7 @@ public class MemoryGroupDatabase implements XGroupDatabaseWithListeners {
 		this.listeners.remove(listener);
 	}
 	
-	public Iterator<XID> getGroups() {
+	public Iterator<XID> getDirectGroups() {
 		return this.index.key2Iterator();
 	}
 }
