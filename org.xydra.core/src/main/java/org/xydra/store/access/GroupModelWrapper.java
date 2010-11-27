@@ -1,6 +1,8 @@
 package org.xydra.store.access;
 
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.xydra.core.X;
 import org.xydra.core.XX;
@@ -64,8 +66,7 @@ public class GroupModelWrapper implements XGroupDatabase {
 		
 	}
 	
-	private static Iterator<XID> getXIDSetValueIterator(WritableModel model, XID objectId,
-	        XID fieldId) {
+	private static Set<XID> getXIDSetValue(WritableModel model, XID objectId, XID fieldId) {
 		XWritableObject object = model.getObject(objectId);
 		if(object == null) {
 			return null;
@@ -75,7 +76,7 @@ public class GroupModelWrapper implements XGroupDatabase {
 			return null;
 		}
 		XValue value = field.getValue();
-		return ((XIDSetValue)value).iterator();
+		return ((XIDSetValue)value).toSet();
 	}
 	
 	private static boolean valueContainsId(WritableModel model, XID objectId, XID fieldId,
@@ -111,12 +112,12 @@ public class GroupModelWrapper implements XGroupDatabase {
 		 * more updates if we just added a group-subgroup link = all members of
 		 * actorOrGroupId are now also members of groupId
 		 */
-		Iterator<XID> transitiveMemberIt = this.getAllMembers(actorOrGroupId);
+		Iterator<XID> transitiveMemberIt = this.getAllMembers(actorOrGroupId).iterator();
 		while(transitiveMemberIt.hasNext()) {
 			XID transitiveMemberId = transitiveMemberIt.next();
 			this.addToGroupNonTransitive(transitiveMemberId, groupId);
 		}
-		Iterator<XID> transitiveGroupsIt = this.getAllGroups(actorOrGroupId);
+		Iterator<XID> transitiveGroupsIt = this.getAllGroups(actorOrGroupId).iterator();
 		while(transitiveGroupsIt.hasNext()) {
 			XID transitiveGroupId = transitiveGroupsIt.next();
 			this.addToGroupNonTransitive(transitiveGroupId, groupId);
@@ -135,37 +136,43 @@ public class GroupModelWrapper implements XGroupDatabase {
 	
 	/* transitive */
 	@Override
-	public Iterator<XID> getAllGroups(XID actor) {
+	public Set<XID> getAllGroups(XID actor) {
 		XWritableObject actorObject = this.indexByActor.getObject(actor);
 		if(actorObject == null) {
 			return null;
 		} else {
-			return ((XIDSetValue)actorObject.getField(isMemberOf).getValue()).iterator();
+			return ((XIDSetValue)actorObject.getField(isMemberOf).getValue()).toSet();
 		}
 	}
 	
 	/* transitive */
 	@Override
-	public Iterator<XID> getAllMembers(XID group) {
-		return getXIDSetValueIterator(this.dataModel, group, hasTransitiveMember);
+	public Set<XID> getAllMembers(XID group) {
+		return getXIDSetValue(this.dataModel, group, hasTransitiveMember);
 	}
 	
 	/* direct */
 	@Override
-	public Iterator<XID> getDirectGroups() {
-		return this.dataModel.iterator();
+	public Set<XID> getDirectGroups() {
+		Iterator<XID> it = this.dataModel.iterator();
+		Set<XID> set = new HashSet<XID>();
+		while(it.hasNext()) {
+			XID xid = it.next();
+			set.add(xid);
+		}
+		return set;
 	}
 	
 	/* direct */
 	@Override
-	public Iterator<XID> getDirectGroups(XID actor) {
-		return getXIDSetValueIterator(this.indexByActor, actor, isMemberOf);
+	public Set<XID> getDirectGroups(XID actor) {
+		return getXIDSetValue(this.indexByActor, actor, isMemberOf);
 	}
 	
 	/* direct */
 	@Override
-	public Iterator<XID> getDirectMembers(XID group) {
-		return getXIDSetValueIterator(this.dataModel, group, hasMember);
+	public Set<XID> getDirectMembers(XID group) {
+		return getXIDSetValue(this.dataModel, group, hasMember);
 	}
 	
 	@Override

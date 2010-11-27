@@ -1,7 +1,7 @@
 package org.xydra.store.access;
 
 import java.io.Serializable;
-import java.util.Iterator;
+import java.util.Set;
 
 import org.xydra.core.model.XID;
 
@@ -95,7 +95,7 @@ public interface XGroupDatabase extends Serializable {
 	 * 
 	 *         TODO iterator is problematic with concurrent access
 	 */
-	Iterator<XID> getDirectGroups(XID actorId);
+	Set<XID> getDirectGroups(XID actorId);
 	
 	/**
 	 * Get all direct members (and direct subgroups) of a group.
@@ -107,7 +107,7 @@ public interface XGroupDatabase extends Serializable {
 	 * 
 	 *         TODO iterator is problematic with concurrent access
 	 */
-	Iterator<XID> getDirectMembers(XID groupId);
+	Set<XID> getDirectMembers(XID groupId);
 	
 	/**
 	 * Get all groups an actor or subgroup is part of, either directly or
@@ -119,7 +119,7 @@ public interface XGroupDatabase extends Serializable {
 	 * 
 	 *         TODO iterator is problematic with concurrent access
 	 */
-	Iterator<XID> getAllGroups(XID actorOrGroupId);
+	Set<XID> getAllGroups(XID actorOrGroupId);
 	
 	/**
 	 * Get all actors that are either a direct member of the given group or an
@@ -134,13 +134,13 @@ public interface XGroupDatabase extends Serializable {
 	 * 
 	 *         TODO can return null?
 	 */
-	Iterator<XID> getAllMembers(XID groupId);
+	Set<XID> getAllMembers(XID groupId);
 	
 	/**
 	 * @return returns an iterator over the {@link XID XIDs} of the defined
 	 *         groups. Groups are defined as long as they have at least one
 	 *         member or subgroup.
 	 */
-	Iterator<XID> getDirectGroups();
+	Set<XID> getDirectGroups();
 	
 }

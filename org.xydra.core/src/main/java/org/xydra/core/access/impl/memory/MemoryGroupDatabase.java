@@ -58,52 +58,60 @@ public class MemoryGroupDatabase implements XGroupDatabaseWithListeners {
 		this.listeners = new HashSet<XGroupListener>();
 	}
 	
-	synchronized public Iterator<XID> getAllGroups(XID actor) {
-		return new AbstractTransformingIterator<Pair<XID,XID>,XID>(this.index.transitiveIterator(
-		        new EqualsConstraint<XID>(actor), new Wildcard<XID>())) {
+	private Set<XID> toSet(Iterator<XID> it) {
+		Set<XID> set = new HashSet<XID>();
+		while(it.hasNext()) {
+			set.add(it.next());
+		}
+		return set;
+	}
+	
+	synchronized public Set<XID> getAllGroups(XID actor) {
+		return toSet(new AbstractTransformingIterator<Pair<XID,XID>,XID>(this.index
+		        .transitiveIterator(new EqualsConstraint<XID>(actor), new Wildcard<XID>())) {
 			
 			@Override
 			public XID transform(Pair<XID,XID> in) {
 				return in.getSecond();
 			}
 			
-		};
+		});
 	}
 	
-	synchronized public Iterator<XID> getAllMembers(XID group) {
-		return new AbstractTransformingIterator<Pair<XID,XID>,XID>(this.index.transitiveIterator(
-		        new Wildcard<XID>(), new EqualsConstraint<XID>(group))) {
+	synchronized public Set<XID> getAllMembers(XID group) {
+		return toSet(new AbstractTransformingIterator<Pair<XID,XID>,XID>(this.index
+		        .transitiveIterator(new Wildcard<XID>(), new EqualsConstraint<XID>(group))) {
 			
 			@Override
 			public XID transform(Pair<XID,XID> in) {
 				return in.getFirst();
 			}
 			
-		};
+		});
 	}
 	
-	synchronized public Iterator<XID> getDirectGroups(XID actor) {
-		return new AbstractTransformingIterator<Pair<XID,XID>,XID>(this.index.constraintIterator(
-		        new EqualsConstraint<XID>(actor), new Wildcard<XID>())) {
+	synchronized public Set<XID> getDirectGroups(XID actor) {
+		return toSet(new AbstractTransformingIterator<Pair<XID,XID>,XID>(this.index
+		        .constraintIterator(new EqualsConstraint<XID>(actor), new Wildcard<XID>())) {
 			
 			@Override
 			public XID transform(Pair<XID,XID> in) {
 				return in.getSecond();
 			}
 			
-		};
+		});
 	}
 	
-	synchronized public Iterator<XID> getDirectMembers(XID group) {
-		return new AbstractTransformingIterator<Pair<XID,XID>,XID>(this.index.constraintIterator(
-		        new Wildcard<XID>(), new EqualsConstraint<XID>(group))) {
+	synchronized public Set<XID> getDirectMembers(XID group) {
+		return toSet(new AbstractTransformingIterator<Pair<XID,XID>,XID>(this.index
+		        .constraintIterator(new Wildcard<XID>(), new EqualsConstraint<XID>(group))) {
 			
 			@Override
 			public XID transform(Pair<XID,XID> in) {
 				return in.getFirst();
 			}
 			
-		};
+		});
 	}
 	
 	synchronized public boolean hasDirectGroup(XID actor, XID group) {
@@ -163,7 +171,7 @@ public class MemoryGroupDatabase implements XGroupDatabaseWithListeners {
 		this.listeners.remove(listener);
 	}
 	
-	public Iterator<XID> getDirectGroups() {
-		return this.index.key2Iterator();
+	public Set<XID> getDirectGroups() {
+		return toSet(this.index.key2Iterator());
 	}
 }

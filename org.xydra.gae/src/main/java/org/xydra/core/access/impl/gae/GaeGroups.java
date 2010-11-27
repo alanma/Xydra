@@ -3,6 +3,7 @@ package org.xydra.core.access.impl.gae;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.xydra.core.XX;
 import org.xydra.core.access.XGroupDatabaseWithListeners;
@@ -20,8 +21,8 @@ import com.google.appengine.api.datastore.KeyFactory;
 
 
 /**
- * Utility that can persist and load an {@link XGroupDatabaseWithListeners} in the GAE
- * datastore.
+ * Utility that can persist and load an {@link XGroupDatabaseWithListeners} in
+ * the GAE datastore.
  * 
  * The XGroupDatabase is represented by a root entity containing the {@link XID}
  * s of all known groups. There is also one entity for each group containing the
@@ -46,7 +47,8 @@ public class GaeGroups {
 	
 	/**
 	 * Load the whole group membership database from the GAE datastore into
-	 * memory. Changes to the returned {@link XGroupDatabaseWithListeners} are persisted.
+	 * memory. Changes to the returned {@link XGroupDatabaseWithListeners} are
+	 * persisted.
 	 */
 	@SuppressWarnings("unchecked")
 	public static XGroupDatabaseWithListeners loadGroups() {
@@ -97,10 +99,10 @@ public class GaeGroups {
 	/**
 	 * Save the given list of known groups in the root entity.
 	 */
-	private static void saveGroupList(Iterator<XID> groups) {
+	private static void saveGroupList(Set<XID> groups) {
 		Key key = getGroupDBKey();
 		Entity e = new Entity(key);
-		e.setUnindexedProperty(PROP_GROUPS, asStringList(groups));
+		e.setUnindexedProperty(PROP_GROUPS, asStringList(groups.iterator()));
 		GaeUtils.putEntity(e);
 	}
 	
@@ -144,7 +146,7 @@ public class GaeGroups {
 			
 			// Get the actors that are now in the changed group.
 			XID groupId = event.getGroup();
-			Iterator<XID> it = this.groups.getMembers(groupId);
+			Iterator<XID> it = this.groups.getDirectMembers(groupId).iterator();
 			
 			// FIXME handle concurrency
 			
@@ -155,16 +157,16 @@ public class GaeGroups {
 				// If this is an add event and the group has only one actor, the
 				// group must be new, so add it to the group list.
 				if(event.getChangeType() == ChangeType.ADD) {
-					it = this.groups.getMembers(groupId);
+					it = this.groups.getDirectMembers(groupId).iterator();
 					it.next();
 					if(!it.hasNext()) {
-						saveGroupList(this.groups.getGroups());
+						saveGroupList(this.groups.getDirectGroups());
 					}
 				}
 				
 			} else {
 				deleteGroup(groupId);
-				saveGroupList(this.groups.getGroups());
+				saveGroupList(this.groups.getDirectGroups());
 			}
 			
 		}
