@@ -9,7 +9,7 @@ import org.xydra.core.value.XValue;
 
 
 /**
- * A simple data container.
+ * A simple data container for {@link XWritableField}
  * 
  * @author voelkel
  */
@@ -18,7 +18,7 @@ public class SimpleField implements XWritableField, Serializable {
 	/**
      * 
      */
-    private static final long serialVersionUID = -4704907115751969328L;
+	private static final long serialVersionUID = -4704907115751969328L;
 	protected XAddress address;
 	private long revisionNumber;
 	private XValue value;

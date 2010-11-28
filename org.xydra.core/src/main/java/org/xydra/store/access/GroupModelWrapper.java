@@ -5,6 +5,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.xydra.annotations.RunsInAppEngine;
+import org.xydra.annotations.RunsInGWT;
+import org.xydra.annotations.RunsInJava;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.model.XID;
@@ -13,6 +16,7 @@ import org.xydra.core.model.XWritableField;
 import org.xydra.core.model.XWritableModel;
 import org.xydra.core.model.XWritableObject;
 import org.xydra.core.value.XIDSetValue;
+import org.xydra.core.value.XStringValue;
 import org.xydra.core.value.XValue;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -42,12 +46,16 @@ import org.xydra.store.base.WritableModel;
  * 
  * @author voelkel
  */
-public class GroupModelWrapper implements XGroupDatabase {
+@RunsInAppEngine
+@RunsInGWT
+@RunsInJava
+public class GroupModelWrapper implements XGroupDatabase, XPasswordDatabase {
 	
 	private static final Logger log = LoggerFactory.getLogger(GroupModelWrapper.class);
 	
 	public static final XID hasMember = XX.toId("hasMember");
 	public static final XID isMemberOf = XX.toId("isMemberOf");
+	public static final XID hasPasswordHash = XX.toId("hasPasswordHash");
 	
 	private static final long serialVersionUID = 3858107275113200924L;
 	
@@ -192,6 +200,49 @@ public class GroupModelWrapper implements XGroupDatabase {
 		System.out.println("=== " + groupId);
 		System.out.println("*     All groups: " + getGroupsOf(groupId));
 		System.out.println("*    All members: " + getMembersOf(groupId));
+	}
+	
+	@Override
+	public void removePasswordHash(XID actorId) {
+		XWritableObject actor = this.dataModel.getObject(actorId);
+		if(actor == null) {
+			return;
+		}
+		XWritableField field = actor.getField(hasPasswordHash);
+		if(field == null) {
+			return;
+		}
+		field.setValue(null);
+	}
+	
+	@Override
+	public void setPasswordHash(XID actorId, String passwordHash) {
+		XWritableObject actor = this.dataModel.getObject(actorId);
+		if(actor == null) {
+			actor = this.dataModel.createObject(actorId);
+		}
+		XWritableField field = actor.getField(hasPasswordHash);
+		if(field == null) {
+			field = actor.createField(hasPasswordHash);
+		}
+		field.setValue(X.getValueFactory().createStringValue(passwordHash));
+	}
+	
+	@Override
+	public boolean isValidLogin(XID actorId, String passwordHash) {
+		XWritableObject actor = this.dataModel.getObject(actorId);
+		if(actor == null) {
+			return false;
+		}
+		XWritableField field = actor.getField(hasPasswordHash);
+		if(field == null) {
+			return false;
+		}
+		XValue value = field.getValue();
+		if(value == null) {
+			return false;
+		}
+		return ((XStringValue)value).contents().equals(passwordHash);
 	}
 	
 }

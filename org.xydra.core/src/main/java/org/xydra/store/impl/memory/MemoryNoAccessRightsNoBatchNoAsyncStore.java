@@ -15,9 +15,15 @@ import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XWritableRepository;
 import org.xydra.store.base.SimpleRepository;
 
 
+/**
+ * Mapping all calls to an underlying {@link XWritableRepository}.
+ * 
+ * @author voelkel
+ */
 public class MemoryNoAccessRightsNoBatchNoAsyncStore implements
         XydraNoAccessRightsNoBatchNoAsyncStore {
 	

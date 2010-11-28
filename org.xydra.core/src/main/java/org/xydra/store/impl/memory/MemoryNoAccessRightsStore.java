@@ -12,9 +12,16 @@ import org.xydra.index.query.Pair;
 import org.xydra.store.Callback;
 
 
+/**
+ * An implementation of {@link XydraNoAccessRightsStore} that maps all async
+ * batch calls to an instance of {@link XydraNoAccessRightsNoBatchNoAsyncStore}
+ * which treats them as single-op blocking call.
+ * 
+ * @author voelkel
+ */
 public class MemoryNoAccessRightsStore implements XydraNoAccessRightsStore {
 	
-	private XydraNoAccessRightsNoBatchNoAsyncStore noBatchStore;
+	protected MemoryNoAccessRightsNoBatchNoAsyncStore noBatchStore;
 	
 	public MemoryNoAccessRightsStore(XID repositoryId) {
 		this.noBatchStore = new MemoryNoAccessRightsNoBatchNoAsyncStore(repositoryId);

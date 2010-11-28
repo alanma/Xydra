@@ -3,6 +3,9 @@ package org.xydra.store.access;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.xydra.annotations.RunsInAppEngine;
+import org.xydra.annotations.RunsInGWT;
+import org.xydra.annotations.RunsInJava;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.access.impl.memory.MemoryAccessDefinition;
@@ -23,7 +26,7 @@ import org.xydra.store.base.WritableModel;
 
 
 /**
- * Wraps a XydraStore model to model groups and their members.
+ * Wraps a XydraStore model to represent access right definitions.
  * 
  * Data modelling:
  * 
@@ -35,16 +38,16 @@ import org.xydra.store.base.WritableModel;
  * 
  * Rights can be READ, WRITE, ADMIN.
  * 
- * Non-eisting field: right not defined.
+ * Non-existing field: right not defined.
  * 
  * @author voelkel
  */
+@RunsInAppEngine
+@RunsInGWT
+@RunsInJava
 public class AccessModelWrapper implements XAccessDatabase {
 	
 	private static final Logger log = LoggerFactory.getLogger(AccessModelWrapper.class);
-	
-	public static final XID hasMember = XX.toId("hasMember");
-	public static final XID isMemberOf = XX.toId("isMemberOf");
 	
 	private static final long serialVersionUID = 3858107275113200924L;
 	

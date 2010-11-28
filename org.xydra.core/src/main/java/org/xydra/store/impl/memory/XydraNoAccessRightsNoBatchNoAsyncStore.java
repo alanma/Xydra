@@ -8,8 +8,16 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
+import org.xydra.store.XydraStore;
 
 
+/**
+ * A variant of {@link XydraStore} without access rights parameters, single
+ * operations instead of batch operations, and blocking (synchronous) operations
+ * instead of asnychronous one.
+ * 
+ * @author voelkel
+ */
 public interface XydraNoAccessRightsNoBatchNoAsyncStore {
 	
 	/**

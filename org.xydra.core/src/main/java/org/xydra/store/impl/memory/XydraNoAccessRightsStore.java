@@ -10,8 +10,14 @@ import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
 import org.xydra.index.query.Pair;
 import org.xydra.store.Callback;
+import org.xydra.store.XydraStore;
 
 
+/**
+ * A variant of the {@link XydraStore} without access rights parameters.
+ * 
+ * @author voelkel
+ */
 public interface XydraNoAccessRightsStore {
 	
 	void executeCommands(XID actorId, XCommand[] commands, Callback<long[]> callback);

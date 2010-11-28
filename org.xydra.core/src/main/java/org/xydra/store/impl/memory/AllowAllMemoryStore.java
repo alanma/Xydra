@@ -15,7 +15,9 @@ import org.xydra.store.XydraStore;
 
 /**
  * A simple in-memory implementation of {@link XydraStore} that allows
- * everything.
+ * everything and simply ignores all actorId and passwordHash parameters.
+ * 
+ * Delegates all calls to a simpler {@link XydraNoAccessRightsStore}.
  * 
  * TODO should share code with gae impl
  * 
@@ -24,7 +26,7 @@ import org.xydra.store.XydraStore;
  */
 public class AllowAllMemoryStore implements XydraStore {
 	
-	private XydraNoAccessRightsStore storeWithoutAccessRights;
+	protected MemoryNoAccessRightsStore storeWithoutAccessRights;
 	
 	public AllowAllMemoryStore(XID repositoryId) {
 		this.storeWithoutAccessRights = new MemoryNoAccessRightsStore(repositoryId);

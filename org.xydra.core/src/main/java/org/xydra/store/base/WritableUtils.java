@@ -6,6 +6,12 @@ import org.xydra.store.StoreException;
 import org.xydra.store.XydraStore;
 
 
+/**
+ * Utility for executing commands synchronously.
+ * 
+ * @author voelkel
+ * 
+ */
 public class WritableUtils {
 	
 	private static long result;

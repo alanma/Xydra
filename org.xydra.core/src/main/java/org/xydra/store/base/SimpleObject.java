@@ -11,7 +11,7 @@ import org.xydra.core.model.XWritableObject;
 
 
 /**
- * A simple data container.
+ * A simple data container for {@link XWritableObject}.
  * 
  * @author voelkel
  */

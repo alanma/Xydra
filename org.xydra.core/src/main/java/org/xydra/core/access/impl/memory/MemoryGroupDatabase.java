@@ -174,4 +174,5 @@ public class MemoryGroupDatabase implements XGroupDatabaseWithListeners {
 	public Set<XID> getGroups() {
 		return toSet(this.index.key2Iterator());
 	}
+	
 }
