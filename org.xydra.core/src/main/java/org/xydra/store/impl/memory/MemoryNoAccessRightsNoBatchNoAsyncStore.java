@@ -87,8 +87,19 @@ public class MemoryNoAccessRightsNoBatchNoAsyncStore implements
 	
 	@Override
 	public XEvent[] getEvents(XAddress address, long beginRevision, long endRevision) {
-		// TODO Auto-generated method stub
-		return null;
+		ArrayList<XEvent> result = new ArrayList<XEvent>();
+		
+		// filter a sub-list
+		// TODO IMROVE can handle max. Integer.MAX events
+		for(XEvent xe : this.events.subList((int)beginRevision, (int)endRevision)) {
+			
+			// FIXME return also events in sub-entitites?
+			if(xe.getChangedEntity().equals(address)) {
+				result.add(xe);
+			}
+		}
+		
+		return result.toArray(new XEvent[result.size()]);
 	}
 	
 	@Override

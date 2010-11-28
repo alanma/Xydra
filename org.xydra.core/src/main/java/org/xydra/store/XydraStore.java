@@ -267,6 +267,10 @@ public interface XydraStore {
 	 *            {@link XObject} (repositoryId/modelId/objectId/-), or
 	 *            {@link XField} (repositoryId/modelId/objectId/fieldId) for
 	 *            which to return change events.
+	 * 
+	 *            TODO if the given address is a model, are object and field
+	 *            events within this model returned as well?
+	 * 
 	 * @param beginRevision the beginning revision number of the interval from
 	 *            which all {@link XEvent XEvents} are to be returned - can be
 	 *            less than {@link #getFirstRevisionNumber()} to get all
@@ -279,8 +283,8 @@ public interface XydraStore {
 	 *            success, this callback returns an array which has one entry
 	 *            for each requested XAddress. Each entry is itself an array of
 	 *            XEvents, in the order in which they happened.
-	 * @return an iterator over all {@link XEvent XEvents} that occurred during
-	 *         the specified interval of revision numbers
+	 * @return all {@link XEvent XEvents} that occurred during the specified
+	 *         interval of revision numbers
 	 * @throws IndexOutOfBoundsException if beginRevision or endRevision are
 	 *             negative
 	 * @throws IllegalArgumentException if beginRevision is greater than
