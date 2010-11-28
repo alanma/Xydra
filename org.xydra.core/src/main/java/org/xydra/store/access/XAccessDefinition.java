@@ -1,13 +1,14 @@
-package org.xydra.core.access;
+package org.xydra.store.access;
 
+import org.xydra.core.access.XAccessManagerWithListeners;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 
 
 /**
- * An Access right definition as recorded in an {@link XAccessManager}. This is
+ * An Access right definition as recorded in an {@link XAccessManagerWithListeners}. This is
  * used to allow iterating over all access definitions in an
- * {@link XAccessManager}.
+ * {@link XAccessManagerWithListeners}.
  * 
  * @author dscharrer
  * 

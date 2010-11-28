@@ -3,10 +3,12 @@ package org.xydra.core.access;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
+import org.xydra.store.access.XA;
+import org.xydra.store.access.XAccessValue;
 
 
 /**
- * An event to allow tracking changes to an {@link XAccessManager}.
+ * An event to allow tracking changes to an {@link XAccessManagerWithListeners}.
  * 
  * @author dscharrer
  * 

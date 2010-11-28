@@ -2,8 +2,7 @@ package org.xydra.core.model.tutorial;
 
 import org.xydra.core.X;
 import org.xydra.core.XX;
-import org.xydra.core.access.XA;
-import org.xydra.core.access.XAccessManager;
+import org.xydra.core.access.XAccessManagerWithListeners;
 import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.access.impl.memory.MemoryAccessManager;
 import org.xydra.core.access.impl.memory.MemoryGroupDatabase;
@@ -21,6 +20,7 @@ import org.xydra.core.value.XStringValue;
 import org.xydra.core.value.XV;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.access.XA;
 
 
 /**
@@ -83,7 +83,7 @@ public class CalendarManager {
 	 * Sometimes users may or may not want to share their calendar with other
 	 * users, so we'll need access right management too.
 	 */
-	private XAccessManager arm;
+	private XAccessManagerWithListeners arm;
 	private XGroupDatabaseWithListeners groups;
 	
 	/*

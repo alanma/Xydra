@@ -4,10 +4,10 @@ import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.core.access.XAccessEvent;
-import org.xydra.core.access.XAccessValue;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
+import org.xydra.store.access.XAccessValue;
 
 
 /**

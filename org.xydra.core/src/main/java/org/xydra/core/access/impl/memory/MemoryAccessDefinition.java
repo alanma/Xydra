@@ -1,8 +1,8 @@
 package org.xydra.core.access.impl.memory;
 
-import org.xydra.core.access.XAccessDefinition;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
+import org.xydra.store.access.XAccessDefinition;
 
 
 public class MemoryAccessDefinition implements XAccessDefinition {

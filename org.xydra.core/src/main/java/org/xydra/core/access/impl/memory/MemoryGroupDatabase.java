@@ -7,7 +7,6 @@ import java.util.Set;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
-import org.xydra.core.access.XA;
 import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.access.XGroupEvent;
 import org.xydra.core.access.XGroupListener;
@@ -24,6 +23,7 @@ import org.xydra.index.iterator.AbstractTransformingIterator;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.Pair;
 import org.xydra.index.query.Wildcard;
+import org.xydra.store.access.XA;
 
 
 /**

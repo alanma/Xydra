@@ -1,6 +1,6 @@
 package org.xydra.core.model.session.impl.arm;
 
-import org.xydra.core.access.XAccessManager;
+import org.xydra.core.access.XAccessManagerWithListeners;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XID;
@@ -10,7 +10,7 @@ import org.xydra.store.AccessException;
 
 /**
  * An {@link XBaseField} that wraps an {@link XBaseField} for a specific actor
- * and checks all access against an {@link XAccessManager}.
+ * and checks all access against an {@link XAccessManagerWithListeners}.
  * 
  * @author dscharrer
  * 
@@ -18,10 +18,10 @@ import org.xydra.store.AccessException;
 public class ArmProtectedBaseField implements XBaseField {
 	
 	private final XBaseField field;
-	protected final XAccessManager arm;
+	protected final XAccessManagerWithListeners arm;
 	protected final XID actor;
 	
-	public ArmProtectedBaseField(XBaseField field, XAccessManager arm, XID actor) {
+	public ArmProtectedBaseField(XBaseField field, XAccessManagerWithListeners arm, XID actor) {
 		this.field = field;
 		this.arm = arm;
 		this.actor = actor;

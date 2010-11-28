@@ -1,7 +1,9 @@
-package org.xydra.core.access;
+package org.xydra.store.access;
+
+import org.xydra.core.access.XAccessManagerWithListeners;
 
 /**
- * XAccessValues are used by {@link XAccessManager XAccessManagers} to define
+ * XAccessValues are used by {@link XAccessManagerWithListeners XAccessManagers} to define
  * access rights.
  */
 public enum XAccessValue {

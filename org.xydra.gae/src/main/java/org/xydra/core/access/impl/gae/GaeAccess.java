@@ -1,11 +1,10 @@
 package org.xydra.core.access.impl.gae;
 
-import java.util.Iterator;
+import java.util.Set;
 
-import org.xydra.core.access.XAccessDefinition;
 import org.xydra.core.access.XAccessEvent;
 import org.xydra.core.access.XAccessListener;
-import org.xydra.core.access.XAccessManager;
+import org.xydra.core.access.XAccessManagerWithListeners;
 import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.access.impl.memory.MemoryAccessManager;
 import org.xydra.core.model.XAddress;
@@ -15,6 +14,7 @@ import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
 import org.xydra.server.impl.newgae.GaeTestfixer;
 import org.xydra.server.impl.newgae.GaeUtils;
+import org.xydra.store.access.XAccessDefinition;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -22,8 +22,8 @@ import com.google.appengine.api.datastore.KeyFactory;
 
 
 /**
- * Utility that can persist and load an {@link XAccessManager} in the GAE
- * datastore.
+ * Utility that can persist and load an {@link XAccessManagerWithListeners} in
+ * the GAE datastore.
  * 
  * The XAccessManager is represented by a single entity that contains an
  * XML-encoded list of {@link XAccessDefinition}s. The whole ARM iw serialized
@@ -44,16 +44,17 @@ public class GaeAccess {
 	
 	/**
 	 * Load the whole access manager from the GAE datastore into memory. Changes
-	 * to the returned {@link XAccessManager} are persisted.
+	 * to the returned {@link XAccessManagerWithListeners} are persisted.
 	 */
-	public static XAccessManager loadAccessManager(XAddress addr, XGroupDatabaseWithListeners groups) {
+	public static XAccessManagerWithListeners loadAccessManager(XAddress addr,
+	        XGroupDatabaseWithListeners groups) {
 		
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		
 		// Load entity containing the access definitions for ARM.
 		Key armKey = getAccessManagerKey(addr);
 		Entity e = GaeUtils.getEntity(armKey);
-		XAccessManager arm;
+		XAccessManagerWithListeners arm;
 		
 		if(e == null) {
 			// There was no ARM for the given access in the state store, so
@@ -81,7 +82,7 @@ public class GaeAccess {
 	 * Store the given list of access definitions in the ARM entity for the
 	 * given XAddress.
 	 */
-	private static void saveAccessManager(XAddress addr, Iterator<XAccessDefinition> defs) {
+	private static void saveAccessManager(XAddress addr, Set<XAccessDefinition> defs) {
 		Key armKey = getAccessManagerKey(addr);
 		Entity e = new Entity(armKey);
 		
@@ -104,9 +105,9 @@ public class GaeAccess {
 	private static class Persister implements XAccessListener {
 		
 		private final XAddress addr;
-		private final XAccessManager arm;
+		private final XAccessManagerWithListeners arm;
 		
-		public Persister(XAddress addr, XAccessManager arm) {
+		public Persister(XAddress addr, XAccessManagerWithListeners arm) {
 			this.addr = addr;
 			this.arm = arm;
 		}
@@ -115,9 +116,9 @@ public class GaeAccess {
 			
 			// FIXME handle concurrency
 			
-			Iterator<XAccessDefinition> it = this.arm.getDefinitions();
-			if(it.hasNext()) {
-				saveAccessManager(this.addr, it);
+			Set<XAccessDefinition> set = this.arm.getDefinitions();
+			if(!set.isEmpty()) {
+				saveAccessManager(this.addr, set);
 			} else {
 				deleteAccessManager(this.addr);
 			}

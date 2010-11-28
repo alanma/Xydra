@@ -1,6 +1,6 @@
 package org.xydra.core.model.session.impl.arm;
 
-import org.xydra.core.access.XAccessManager;
+import org.xydra.core.access.XAccessManagerWithListeners;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.change.XModelCommand;
@@ -19,7 +19,7 @@ import org.xydra.store.AccessException;
 
 /**
  * An {@link XProtectedModel} that wraps an {@link XModel} for a specific actor
- * and checks all access against an {@link XAccessManager}.
+ * and checks all access against an {@link XAccessManagerWithListeners}.
  * 
  * @author dscharrer
  * 
@@ -28,7 +28,7 @@ public class ArmProtectedModel extends ArmProtectedBaseModel implements XProtect
 	
 	private final XModel model;
 	
-	public ArmProtectedModel(XModel model, XAccessManager arm, XID actor) {
+	public ArmProtectedModel(XModel model, XAccessManagerWithListeners arm, XID actor) {
 		super(model, arm, actor);
 		this.model = model;
 	}

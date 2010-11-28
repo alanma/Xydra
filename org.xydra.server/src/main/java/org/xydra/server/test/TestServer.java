@@ -8,8 +8,7 @@ import javax.servlet.ServletContext;
 
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.webapp.WebAppContext;
-import org.xydra.core.access.XA;
-import org.xydra.core.access.XAccessManager;
+import org.xydra.core.access.XAccessManagerWithListeners;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XRepositoryCommand;
 import org.xydra.core.change.XTransactionBuilder;
@@ -20,6 +19,7 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.server.IXydraServer;
 import org.xydra.server.rest.XydraRestServer;
+import org.xydra.store.access.XA;
 
 
 /**
@@ -132,7 +132,7 @@ public class TestServer {
 		
 		// allow access to everyone
 		XAddress repoAddr = xydraServer.getRepositoryAddress();
-		XAccessManager arm = xydraServer.getAccessManager();
+		XAccessManagerWithListeners arm = xydraServer.getAccessManager();
 		arm.setAccess(XA.GROUP_ALL, repoAddr, XA.ACCESS_READ, true);
 		arm.setAccess(XA.GROUP_ALL, repoAddr, XA.ACCESS_WRITE, true);
 		

@@ -3,7 +3,7 @@ package org.xydra.server.impl.newgae;
 import java.util.Iterator;
 
 import org.xydra.core.XX;
-import org.xydra.core.access.XAccessManager;
+import org.xydra.core.access.XAccessManagerWithListeners;
 import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.access.impl.gae.GaeAccess;
 import org.xydra.core.access.impl.gae.GaeGroups;
@@ -37,7 +37,7 @@ public class NewGaeXydraServer implements IXydraServer {
 	private final XAddress repoAddr = XX.toAddress(XX.toId("repo"), null, null, null);
 	
 	XGroupDatabaseWithListeners groups;
-	XAccessManager arm;
+	XAccessManagerWithListeners arm;
 	
 	static {
 		// FIXME this still too late and logging will already be
@@ -120,7 +120,7 @@ public class NewGaeXydraServer implements IXydraServer {
 	}
 	
 	@Override
-	public XAccessManager getAccessManager() {
+	public XAccessManagerWithListeners getAccessManager() {
 		return this.arm;
 	}
 	

@@ -1,8 +1,7 @@
 package org.xydra.core.access.impl.memory;
 
 import org.xydra.core.XX;
-import org.xydra.core.access.XA;
-import org.xydra.core.access.XAccessManager;
+import org.xydra.core.access.XAccessManagerWithListeners;
 import org.xydra.core.change.XAtomicCommand;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XFieldCommand;
@@ -12,9 +11,10 @@ import org.xydra.core.change.XRepositoryCommand;
 import org.xydra.core.change.XTransaction;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
+import org.xydra.store.access.XA;
 
 
-public abstract class AbstractAccessManager implements XAccessManager {
+public abstract class AbstractAccessManager implements XAccessManagerWithListeners {
 	
 	private static final long serialVersionUID = 8774282865481424604L;
 	

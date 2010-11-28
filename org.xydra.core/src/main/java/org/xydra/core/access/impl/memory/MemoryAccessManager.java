@@ -7,12 +7,9 @@ import java.util.Set;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
-import org.xydra.core.access.XA;
-import org.xydra.core.access.XAccessDefinition;
 import org.xydra.core.access.XAccessEvent;
 import org.xydra.core.access.XAccessListener;
-import org.xydra.core.access.XAccessManager;
-import org.xydra.core.access.XAccessValue;
+import org.xydra.core.access.XAccessManagerWithListeners;
 import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.model.XAddress;
@@ -25,10 +22,13 @@ import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.KeyKeyKeyEntryTuple;
 import org.xydra.index.query.Pair;
 import org.xydra.index.query.Wildcard;
+import org.xydra.store.access.XA;
+import org.xydra.store.access.XAccessDefinition;
+import org.xydra.store.access.XAccessValue;
 
 
 /**
- * Implementation of {@link XAccessManager}.
+ * Implementation of {@link XAccessManagerWithListeners}.
  * 
  * IMPROVE using standard java monitor for now, reader-writer lock may be more
  * appropriate
@@ -357,9 +357,8 @@ public class MemoryAccessManager extends AbstractAccessManager {
 		return this.rights.toString();
 	}
 	
-	synchronized public Iterator<XAccessDefinition> getDefinitions() {
-		
-		return new AbstractTransformingIterator<KeyKeyKeyEntryTuple<XID,XAddress,XID,Boolean>,XAccessDefinition>(
+	synchronized public Set<XAccessDefinition> getDefinitions() {
+		AbstractTransformingIterator<KeyKeyKeyEntryTuple<XID,XAddress,XID,Boolean>,XAccessDefinition> it = new AbstractTransformingIterator<KeyKeyKeyEntryTuple<XID,XAddress,XID,Boolean>,XAccessDefinition>(
 		        this.rights.tupleIterator(new Wildcard<XID>(), new Wildcard<XAddress>(),
 		                new Wildcard<XID>())) {
 			
@@ -370,6 +369,11 @@ public class MemoryAccessManager extends AbstractAccessManager {
 			}
 			
 		};
+		Set<XAccessDefinition> result = new HashSet<XAccessDefinition>();
+		while(it.hasNext()) {
+			result.add(it.next());
+		}
+		return result;
 	}
 	
 	private void dispatchEvent(XAccessEvent event) {

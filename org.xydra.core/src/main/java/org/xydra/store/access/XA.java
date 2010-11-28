@@ -1,4 +1,4 @@
-package org.xydra.core.access;
+package org.xydra.store.access;
 
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;

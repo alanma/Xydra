@@ -1,17 +1,16 @@
 package org.xydra.core.access.impl.memory;
 
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.Set;
 
-import org.xydra.core.access.XA;
-import org.xydra.core.access.XAccessDefinition;
 import org.xydra.core.access.XAccessListener;
-import org.xydra.core.access.XAccessManager;
-import org.xydra.core.access.XAccessValue;
+import org.xydra.core.access.XAccessManagerWithListeners;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
-import org.xydra.index.iterator.BagUnionIterator;
 import org.xydra.index.query.Pair;
+import org.xydra.store.access.XA;
+import org.xydra.store.access.XAccessDefinition;
+import org.xydra.store.access.XAccessValue;
 
 
 /**
@@ -26,11 +25,12 @@ public class CompositeAccessManager extends AbstractAccessManager {
 	
 	private static final long serialVersionUID = 2576314343471791859L;
 	
-	private final XAccessManager outer;
-	private final XAccessManager inner;
+	private final XAccessManagerWithListeners outer;
+	private final XAccessManagerWithListeners inner;
 	private final XAddress mountPoint;
 	
-	public CompositeAccessManager(XAddress mountPoint, XAccessManager outer, XAccessManager inner) {
+	public CompositeAccessManager(XAddress mountPoint, XAccessManagerWithListeners outer,
+	        XAccessManagerWithListeners inner) {
 		this.mountPoint = mountPoint;
 		this.outer = outer;
 		this.inner = inner;
@@ -65,9 +65,11 @@ public class CompositeAccessManager extends AbstractAccessManager {
 		return this.outer.getActorsWithPermission(resource, access);
 	}
 	
-	public Iterator<XAccessDefinition> getDefinitions() {
-		return new BagUnionIterator<XAccessDefinition>(this.outer.getDefinitions(), this.inner
-		        .getDefinitions());
+	public Set<XAccessDefinition> getDefinitions() {
+		Set<XAccessDefinition> definitions = new HashSet<XAccessDefinition>();
+		definitions.addAll(this.outer.getDefinitions());
+		definitions.addAll(this.inner.getDefinitions());
+		return definitions;
 	}
 	
 	public Pair<Set<XID>,Set<XID>> getPermissions(XID actor, XAddress resource) {

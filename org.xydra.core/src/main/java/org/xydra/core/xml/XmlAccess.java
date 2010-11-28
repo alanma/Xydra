@@ -3,18 +3,19 @@ package org.xydra.core.xml;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.core.XX;
-import org.xydra.core.access.XAccessDefinition;
-import org.xydra.core.access.XAccessManager;
+import org.xydra.core.access.XAccessManagerWithListeners;
 import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.access.impl.memory.MemoryAccessDefinition;
 import org.xydra.core.access.impl.memory.MemoryAccessManager;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
+import org.xydra.store.access.XAccessDefinition;
 
 
 /**
@@ -97,12 +98,12 @@ public class XmlAccess {
 	 *             valid access manager.
 	 * 
 	 */
-	public static XAccessManager toAccessManager(MiniElement xml, XGroupDatabaseWithListeners groups)
-	        throws IllegalArgumentException {
+	public static XAccessManagerWithListeners toAccessManager(MiniElement xml,
+	        XGroupDatabaseWithListeners groups) throws IllegalArgumentException {
 		
 		XmlUtils.checkElementName(xml, XACCESSDEFS_ELEMENT);
 		
-		XAccessManager arm = new MemoryAccessManager(groups);
+		XAccessManagerWithListeners arm = new MemoryAccessManager(groups);
 		
 		Iterator<MiniElement> it = xml.getElements();
 		while(it.hasNext()) {
@@ -137,13 +138,13 @@ public class XmlAccess {
 	 * 
 	 * @param out The XML encoder to write to.
 	 */
-	public static void toXml(Iterator<XAccessDefinition> defs, XmlOut out)
+	public static void toXml(Set<XAccessDefinition> defs, XmlOut out)
 	        throws IllegalArgumentException {
 		
 		out.open(XACCESSDEFS_ELEMENT);
 		
-		while(defs.hasNext()) {
-			toXml(defs.next(), out);
+		for(XAccessDefinition def : defs) {
+			toXml(def, out);
 		}
 		
 		out.close(XACCESSDEFS_ELEMENT);
@@ -151,12 +152,13 @@ public class XmlAccess {
 	}
 	
 	/**
-	 * Encode the given {@link XAccessManager}'s {@link XAccessDefinition
-	 * XAccessDefinitions} as an XML element.
+	 * Encode the given {@link XAccessManagerWithListeners}'s
+	 * {@link XAccessDefinition XAccessDefinitions} as an XML element.
 	 * 
 	 * @param out The XML encoder to write to.
 	 */
-	public static void toXml(XAccessManager arm, XmlOut out) throws IllegalArgumentException {
+	public static void toXml(XAccessManagerWithListeners arm, XmlOut out)
+	        throws IllegalArgumentException {
 		
 		toXml(arm.getDefinitions(), out);
 		

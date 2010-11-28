@@ -6,9 +6,9 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import org.xydra.core.XX;
-import org.xydra.core.access.XA;
 import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.model.XID;
+import org.xydra.store.access.XA;
 
 
 /**
