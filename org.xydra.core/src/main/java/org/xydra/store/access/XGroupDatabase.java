@@ -37,8 +37,8 @@ public interface XGroupDatabase extends Serializable {
 	 * 
 	 * While groups can be added to groups, cycles are not allowed.
 	 * 
-	 * @param actorOrGroupId The {@link XID} of the actor (or subgroup) to add to the
-	 *            group
+	 * @param actorOrGroupId The {@link XID} of the actor (or subgroup) to add
+	 *            to the group
 	 * @param groupId The {@link XID} of the group the specified actor will be
 	 *            added to
 	 * 
@@ -66,8 +66,8 @@ public interface XGroupDatabase extends Serializable {
 	 * 
 	 * @param actorId The {@link XID} of the actor whose membership status is to
 	 *            be checked
-	 * @param groupId The {@link XID} of the group for which the membership status
-	 *            of the specified actor is to be checked
+	 * @param groupId The {@link XID} of the group for which the membership
+	 *            status of the specified actor is to be checked
 	 * @return true, if the specified actor is a member of the specified group
 	 */
 	boolean hasGroup(XID actorId, XID groupId);
@@ -78,34 +78,31 @@ public interface XGroupDatabase extends Serializable {
 	 * 
 	 * @param actorId The {@link XID} of the actor whose membership status is to
 	 *            be checked
-	 * @param groupId The {@link XID} of the group for which the membership status
-	 *            of the specified actor is to be checked
+	 * @param groupId The {@link XID} of the group for which the membership
+	 *            status of the specified actor is to be checked
 	 * @return true, if the specified actor is a member of the specified group
 	 */
 	boolean hasDirectGroup(XID actorId, XID groupId);
 	
 	/**
-	 * Get all groups an actor is a direct member of (will not contain groups
-	 * the actor is only a member of by being a member of a subgroup of the
-	 * specified group)
+	 * Get all groups an actor or group is a direct member of (will not contain
+	 * groups the actor or group is only a member of by being a member of a
+	 * subgroup of the specified group)
 	 * 
-	 * @param actorId The {@link XID} of the actor whose groups are to be returned
-	 * @return an iterator over all {@link XID XIDs} of the groups the specified
-	 *         actor is a direct member of
-	 * 
-	 *         TODO iterator is problematic with concurrent access
+	 * @param actorOrGroupId The {@link XID} of the actor whose groups are to be
+	 *            returned
+	 * @return a set containing all {@link XID XIDs} of the groups the specified
+	 *         actor is a direct member of. Never null.
 	 */
-	Set<XID> getDirectGroups(XID actorId);
+	Set<XID> getDirectGroups(XID actorOrGroupId);
 	
 	/**
 	 * Get all direct members (and direct subgroups) of a group.
 	 * 
 	 * @param groupId The {@link XID} of the group which members and subgroup
 	 *            {@link XID XIDs} are to be returned
-	 * @return an iterator over all {@link XID XIDs} of the members and
-	 *         subgroups of the specified group
-	 * 
-	 *         TODO iterator is problematic with concurrent access
+	 * @return a set containing all {@link XID XIDs} of the members and
+	 *         subgroups of the specified group. Never null.
 	 */
 	Set<XID> getDirectMembers(XID groupId);
 	
@@ -113,11 +110,10 @@ public interface XGroupDatabase extends Serializable {
 	 * Get all groups an actor or subgroup is part of, either directly or
 	 * indirectly.
 	 * 
-	 * @param actorOrGroupId The {@link XID} of the actor whose groups are to be returned
-	 * @return an iterator over all {@link XID XIDs} of the groups the specified
-	 *         actor is a member of
-	 * 
-	 *         TODO iterator is problematic with concurrent access
+	 * @param actorOrGroupId The {@link XID} of the actor whose groups are to be
+	 *            returned
+	 * @return a set with all {@link XID XIDs} of the groups the specified actor
+	 *         is a member of. Never null.
 	 */
 	Set<XID> getAllGroups(XID actorOrGroupId);
 	
@@ -127,19 +123,15 @@ public interface XGroupDatabase extends Serializable {
 	 * 
 	 * @param groupId The {@link XID} of the group which members and subgroup
 	 *            {@link XID XIDs} are to be returned
-	 * @return an iterator over all {@link XID XIDs} of the members and
-	 *         subgroups of the specified group
-	 * 
-	 *         TODO iterator is problematic with concurrent access
-	 * 
-	 *         TODO can return null?
+	 * @return a set containing all {@link XID XIDs} of the members and
+	 *         subgroups of the specified group. Never null.
 	 */
 	Set<XID> getAllMembers(XID groupId);
 	
 	/**
 	 * @return returns an iterator over the {@link XID XIDs} of the defined
 	 *         groups. Groups are defined as long as they have at least one
-	 *         member or subgroup.
+	 *         member or subgroup. Never null.
 	 */
 	Set<XID> getDirectGroups();
 	
