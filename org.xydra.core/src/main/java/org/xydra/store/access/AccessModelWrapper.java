@@ -130,22 +130,6 @@ public class AccessModelWrapper implements XAccessDatabase {
 		field.setValue(null);
 	}
 	
-	private static boolean getValue(XWritableModel model, XID objectId, XID fieldId) {
-		XWritableObject object = model.getObject(objectId);
-		if(object == null) {
-			return false;
-		}
-		XWritableField field = object.getField(fieldId);
-		if(field == null) {
-			return false;
-		}
-		XValue value = field.getValue();
-		if(value == null) {
-			return false;
-		}
-		return ((XBooleanValue)value).contents();
-	}
-	
 	private static boolean hasValue(XWritableModel model, XID objectId, XID fieldId) {
 		XWritableObject object = model.getObject(objectId);
 		if(object == null) {
@@ -161,6 +145,7 @@ public class AccessModelWrapper implements XAccessDatabase {
 	// FIXME get credentials from config settings
 	private Credentials credentials = new Credentials(XX.toId("__accessManager"), "TODO");
 	
+	@SuppressWarnings("unused")
 	private XWritableModel dataModel, indexModel;
 	
 	public AccessModelWrapper(XydraStore store, XID repositoryId, XID modelId) {
