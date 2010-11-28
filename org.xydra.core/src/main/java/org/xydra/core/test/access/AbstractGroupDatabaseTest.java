@@ -67,15 +67,10 @@ public abstract class AbstractGroupDatabaseTest {
 	
 	@Test
 	public void testNestedGroups() {
-		
 		this.groups.addToGroup(this.actorAlpha, this.groupZero);
-		this.groups.addToGroup(this.groupZero, this.groupOne);
 		
-		assertTrue(this.groups.hasGroup(this.actorAlpha, this.groupOne));
-		assertFalse(this.groups.hasDirectGroup(this.actorAlpha, this.groupOne));
-		assertTrue(this.groups.hasDirectGroup(this.actorAlpha, this.groupZero));
-		assertTrue(this.groups.hasDirectGroup(this.groupZero, this.groupOne));
-		
+		assertFalse(this.groups.hasGroup(this.actorAlpha, this.groupOne));
+		assertTrue(this.groups.hasGroup(this.actorAlpha, this.groupZero));
 	}
 	
 	@Test

@@ -66,7 +66,7 @@ public class MemoryGroupDatabase implements XGroupDatabaseWithListeners {
 		return set;
 	}
 	
-	synchronized public Set<XID> getAllGroups(XID actor) {
+	synchronized public Set<XID> getGroupsOf(XID actor) {
 		return toSet(new AbstractTransformingIterator<Pair<XID,XID>,XID>(this.index
 		        .transitiveIterator(new EqualsConstraint<XID>(actor), new Wildcard<XID>())) {
 			
@@ -78,7 +78,7 @@ public class MemoryGroupDatabase implements XGroupDatabaseWithListeners {
 		});
 	}
 	
-	synchronized public Set<XID> getAllMembers(XID group) {
+	synchronized public Set<XID> getMembersOf(XID group) {
 		return toSet(new AbstractTransformingIterator<Pair<XID,XID>,XID>(this.index
 		        .transitiveIterator(new Wildcard<XID>(), new EqualsConstraint<XID>(group))) {
 			
@@ -130,7 +130,7 @@ public class MemoryGroupDatabase implements XGroupDatabaseWithListeners {
 		        new EqualsConstraint<XID>(group));
 	}
 	
-	synchronized public void addToGroup(XID actor, XID group) throws CycleException {
+	synchronized public void addToGroup(XID actor, XID group) {
 		if(XI.equals(actor, XA.GROUP_ALL) || hasGroup(actor, group)) {
 			// nothing to do
 			return;
@@ -138,7 +138,7 @@ public class MemoryGroupDatabase implements XGroupDatabaseWithListeners {
 		try {
 			this.index.index(actor, group);
 		} catch(ITransitivePairIndex.CycleException e) {
-			throw new CycleException();
+			throw new AssertionError("cannot happen");
 		}
 		dispatchEvent(new MemoryGroupEvent(ChangeType.ADD, actor, group));
 	}
@@ -171,7 +171,7 @@ public class MemoryGroupDatabase implements XGroupDatabaseWithListeners {
 		this.listeners.remove(listener);
 	}
 	
-	public Set<XID> getDirectGroups() {
+	public Set<XID> getGroups() {
 		return toSet(this.index.key2Iterator());
 	}
 }

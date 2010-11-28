@@ -146,7 +146,7 @@ public class GaeGroups {
 			
 			// Get the actors that are now in the changed group.
 			XID groupId = event.getGroup();
-			Iterator<XID> it = this.groups.getDirectMembers(groupId).iterator();
+			Iterator<XID> it = this.groups.getMembersOf(groupId).iterator();
 			
 			// FIXME handle concurrency
 			
@@ -157,16 +157,16 @@ public class GaeGroups {
 				// If this is an add event and the group has only one actor, the
 				// group must be new, so add it to the group list.
 				if(event.getChangeType() == ChangeType.ADD) {
-					it = this.groups.getDirectMembers(groupId).iterator();
+					it = this.groups.getMembersOf(groupId).iterator();
 					it.next();
 					if(!it.hasNext()) {
-						saveGroupList(this.groups.getDirectGroups());
+						saveGroupList(this.groups.getGroups());
 					}
 				}
 				
 			} else {
 				deleteGroup(groupId);
-				saveGroupList(this.groups.getDirectGroups());
+				saveGroupList(this.groups.getGroups());
 			}
 			
 		}

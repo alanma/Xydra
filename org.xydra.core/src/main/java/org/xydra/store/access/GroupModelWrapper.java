@@ -47,9 +47,7 @@ public class GroupModelWrapper implements XGroupDatabase {
 	private static final Logger log = LoggerFactory.getLogger(GroupModelWrapper.class);
 	
 	public static final XID hasMember = XX.toId("hasMember");
-	public static final XID hasTransitiveMember = XX.toId("hasTransitiveMember");
 	public static final XID isMemberOf = XX.toId("isMemberOf");
-	public static final XID isTransitiveMemberOf = XX.toId("isTransitiveMemberOf");
 	
 	private static final long serialVersionUID = 3858107275113200924L;
 	
@@ -144,126 +142,25 @@ public class GroupModelWrapper implements XGroupDatabase {
 	}
 	
 	@Override
-	public void addToGroup(XID actorOrGroupId, XID groupId) throws CycleException {
-		log.trace("=== " + actorOrGroupId + " subGroupOf " + groupId);
-		
-		/**
-		 * In general, we have the following situation:
-		 * 
-		 * <pre>
-		 * A -> B -> C ... D -> E -> F
-		 * </pre>
-		 * 
-		 * where '->' denotes subGroup and '...' is the link we are just
-		 * creating.
-		 */
-		
-		/**
-		 * for clarity of the algorithm, we rename the inputs. Instead of
-		 * 'isMemberOf' we says 'subGroup' and instead of 'group' we say
-		 * 'superGroup'.
-		 */
-		XID c = actorOrGroupId;
-		XID d = groupId;
-		
-		/**
-		 * (1) The direct links and its inverse:
-		 * 
-		 * <pre>
-		 * C.directSupergroup -> ADD D 
-		 * D.directSubGroup   -> ADD C
-		 * </pre>
-		 */
-		addToXIDSetValueInObject(this.indexModel, c, isMemberOf, d);
-		addToXIDSetValueInObject(this.dataModel, d, hasMember, c);
-		
-		/**
-		 * (2) add direct links additionally as transitive links
-		 * 
-		 * <pre>
-		 * C.transitiveSupergroup -> ADD D.transitiveSupergroup 
-		 * D.transitiveSubgroup   -> ADD C.transitiveSubgroup
-		 * </pre>
-		 */
-		addToXIDSetValueInObject(this.indexModel, c, isTransitiveMemberOf, d);
-		addToXIDSetValueInObject(this.indexModel, d, hasTransitiveMember, c);
-		
-		/**
-		 * (3a) Each transitive superGroup of D is a transitive superGroup of [C
-		 * and all it transitive subGroups].
-		 * 
-		 * <pre>
-		 * C.transitiveSuperGroup -> ADD D.transitiveSuperGroups
-		 * for all A in C.transitiveSubGroup: 
-		 *   A.transitiveSuperGroup -> ADD D.transitiveSuperGroups
-		 * </pre>
-		 */
-		for(XID f : getAllGroups(d)) {
-			log.trace(":: " + f + " hasSuperGroup " + f);
-			addToXIDSetValueInObject(this.indexModel, f, hasTransitiveMember, c);
-			addToXIDSetValueInObject(this.indexModel, c, isTransitiveMemberOf, f);
-			for(XID a : this.getAllMembers(c)) {
-				addToXIDSetValueInObject(this.indexModel, d, hasTransitiveMember, a);
-				addToXIDSetValueInObject(this.indexModel, a, isTransitiveMemberOf, d);
-				addToXIDSetValueInObject(this.indexModel, f, hasTransitiveMember, a);
-				addToXIDSetValueInObject(this.indexModel, a, isTransitiveMemberOf, f);
-			}
-		}
-		
-		/**
-		 * (3b) Each transitive subGroup of C is a transitive subGroup of [D and
-		 * all its transitive superGroups].
-		 * 
-		 * <pre>
-		 * D.transitiveSubGroup -> ADD C.transitiveSubGroup
-		 * for all F in D.transitiveSuperGroup: 
-		 *   F.transitiveSubGroup: ADD C.transitiveSubGroup
-		 * </pre>
-		 */
-		for(XID a : getAllMembers(c)) {
-			log.trace(":: " + c + " hasSubGroup " + a);
-			addToXIDSetValueInObject(this.indexModel, a, isTransitiveMemberOf, d);
-			addToXIDSetValueInObject(this.indexModel, d, hasTransitiveMember, a);
-			for(XID f : this.getAllGroups(d)) {
-				addToXIDSetValueInObject(this.indexModel, c, isTransitiveMemberOf, f);
-				addToXIDSetValueInObject(this.indexModel, f, hasTransitiveMember, c);
-				addToXIDSetValueInObject(this.indexModel, a, isTransitiveMemberOf, f);
-				addToXIDSetValueInObject(this.indexModel, f, hasTransitiveMember, a);
-			}
-		}
-		
+	public void addToGroup(XID actorId, XID groupId) {
+		addToXIDSetValueInObject(this.dataModel, groupId, hasMember, actorId);
+		addToXIDSetValueInObject(this.indexModel, actorId, isMemberOf, groupId);
+	}
+	
+	@Override
+	public Set<XID> getGroupsOf(XID actor) {
+		return getXIDSetValue(this.indexModel, actor, isMemberOf);
 	}
 	
 	/* transitive */
 	@Override
-	public Set<XID> getAllGroups(XID actor) {
-		XWritableObject actorObject = this.indexModel.getObject(actor);
-		if(actorObject == null) {
-			return Collections.emptySet();
-		}
-		
-		XWritableField field = actorObject.getField(isTransitiveMemberOf);
-		if(field == null) {
-			return Collections.emptySet();
-		}
-		
-		XValue value = field.getValue();
-		if(value == null) {
-			return Collections.emptySet();
-		}
-		
-		return ((XIDSetValue)value).toSet();
-	}
-	
-	/* transitive */
-	@Override
-	public Set<XID> getAllMembers(XID group) {
-		return getXIDSetValue(this.indexModel, group, hasTransitiveMember);
+	public Set<XID> getMembersOf(XID group) {
+		return getXIDSetValue(this.dataModel, group, hasMember);
 	}
 	
 	/* direct */
 	@Override
-	public Set<XID> getDirectGroups() {
+	public Set<XID> getGroups() {
 		Iterator<XID> it = this.dataModel.iterator();
 		Set<XID> set = new HashSet<XID>();
 		while(it.hasNext()) {
@@ -273,87 +170,28 @@ public class GroupModelWrapper implements XGroupDatabase {
 		return set;
 	}
 	
-	/* direct */
-	@Override
-	public Set<XID> getDirectGroups(XID actorOrGroupId) {
-		return getXIDSetValue(this.indexModel, actorOrGroupId, isMemberOf);
-	}
-	
-	/* direct */
-	@Override
-	public Set<XID> getDirectMembers(XID group) {
-		return getXIDSetValue(this.dataModel, group, hasMember);
-	}
-	
-	@Override
-	public boolean hasDirectGroup(XID actor, XID group) {
-		return valueContainsId(this.dataModel, actor, isMemberOf, group);
-	}
-	
-	/* transitive */
 	@Override
 	public boolean hasGroup(XID actor, XID group) {
-		return valueContainsId(this.indexModel, actor, isTransitiveMemberOf, group);
-	}
-	
-	private void removeFromGroupNonTransitive(XID actorOrGroupId, XID groupId) {
-		removeFromXIDSetValueInObject(this.dataModel, groupId, hasMember, actorOrGroupId);
-		// update indexes
-		removeFromXIDSetValueInObject(this.indexModel, actorOrGroupId, isMemberOf, groupId);
-		// update transitive indexes
-		removeFromXIDSetValueInObject(this.indexModel, actorOrGroupId, isTransitiveMemberOf,
-		        groupId);
-		removeFromXIDSetValueInObject(this.indexModel, groupId, hasTransitiveMember, actorOrGroupId);
+		return valueContainsId(this.indexModel, actor, isMemberOf, group);
 	}
 	
 	@Override
-	public void removeFromGroup(XID actorOrGroupId, XID groupId) {
-		/**
-		 * In general, we have the following situation:
-		 * 
-		 * <pre>
-		 * A -> B -> C ... D -> E -> F
-		 * </pre>
-		 * 
-		 * where '->' denotes subGroup and '...' is the link we are just
-		 * removing.
-		 */
-		
-		/**
-		 * for clarity of the algorithm, we rename the inputs. Instead of
-		 * 'isMemberOf' we says 'subGroup' and instead of 'group' we say
-		 * 'superGroup'.
-		 */
-		XID c = actorOrGroupId;
-		XID d = groupId;
-		
-		/* (1) removed direct links */
-		removeFromXIDSetValueInObject(this.indexModel, c, isMemberOf, d);
-		removeFromXIDSetValueInObject(this.dataModel, d, hasMember, c);
-		
-		/*
-		 * 
-		 * removeFromGroupNonTransitive(actorOrGroupId, groupId); // TODO fix
-		 * transitive sets if we just removed a group-group link
-		 * 
-		 * /* re-build transitive sets
-		 */
-
+	public void removeFromGroup(XID actorId, XID groupId) {
+		removeFromXIDSetValueInObject(this.dataModel, groupId, hasMember, actorId);
+		removeFromXIDSetValueInObject(this.indexModel, actorId, isMemberOf, groupId);
 	}
 	
 	public void dump() {
 		System.out.println("All groups:");
-		for(XID groupId : getDirectGroups()) {
+		for(XID groupId : getGroups()) {
 			dumpGroupId(groupId);
 		}
 	}
 	
 	public void dumpGroupId(XID groupId) {
 		System.out.println("=== " + groupId);
-		System.out.println("*     All groups: " + getAllGroups(groupId));
-		System.out.println("*    All members: " + getAllMembers(groupId));
-		System.out.println("*  Direct groups: " + getDirectGroups(groupId));
-		System.out.println("* Direct members: " + getDirectMembers(groupId));
+		System.out.println("*     All groups: " + getGroupsOf(groupId));
+		System.out.println("*    All members: " + getMembersOf(groupId));
 	}
 	
 }

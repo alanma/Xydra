@@ -32,19 +32,21 @@ public class GroupDatabaseTest {
 	
 	@Test
 	public void testAddAndRemoveOneActor() {
-		assertTrue(this.wrapper.getAllGroups(actor1).isEmpty());
-		assertFalse(this.wrapper.getAllMembers(group1).contains(actor1));
+		assertTrue(this.wrapper.getGroupsOf(actor1).isEmpty());
+		assertFalse(this.wrapper.getMembersOf(group1).contains(actor1));
 		this.wrapper.addToGroup(actor1, group1);
-		assertFalse(this.wrapper.getAllGroups(actor1).isEmpty());
-		assertTrue(this.wrapper.getAllGroups(actor1).contains(group1));
-		assertTrue(this.wrapper.getAllMembers(group1).contains(actor1));
+		
+		this.wrapper.dump();
+		
+		assertFalse(this.wrapper.getGroupsOf(actor1).isEmpty());
+		assertTrue(this.wrapper.getGroupsOf(actor1).contains(group1));
+		assertTrue(this.wrapper.getMembersOf(group1).contains(actor1));
 		this.wrapper.removeFromGroup(actor1, group1);
-		assertTrue(this.wrapper.getAllGroups(actor1).isEmpty());
-		assertFalse(this.wrapper.getAllMembers(group1).contains(actor1));
+		assertTrue(this.wrapper.getGroupsOf(actor1).isEmpty());
+		assertFalse(this.wrapper.getMembersOf(group1).contains(actor1));
 	}
 	
-	@Test
-	public void testAddingTransitiveGroups1() {
+	public void deprecatedTestAddingTransitiveGroups1() {
 		this.wrapper.addToGroup(group1, group2);
 		this.wrapper.addToGroup(group2, group3);
 		this.wrapper.addToGroup(group4, group5);
@@ -53,123 +55,122 @@ public class GroupDatabaseTest {
 		
 		/* transitive super-groups */
 
-		assertFalse(this.wrapper.getAllGroups(group1).contains(group1));
-		assertTrue(this.wrapper.getAllGroups(group1).contains(group2));
-		assertTrue(this.wrapper.getAllGroups(group1).contains(group3));
-		assertTrue(this.wrapper.getAllGroups(group1).contains(group4));
-		assertTrue(this.wrapper.getAllGroups(group1).contains(group5));
-		assertTrue(this.wrapper.getAllGroups(group1).contains(group6));
+		assertFalse(this.wrapper.getGroupsOf(group1).contains(group1));
+		assertTrue(this.wrapper.getGroupsOf(group1).contains(group2));
+		assertTrue(this.wrapper.getGroupsOf(group1).contains(group3));
+		assertTrue(this.wrapper.getGroupsOf(group1).contains(group4));
+		assertTrue(this.wrapper.getGroupsOf(group1).contains(group5));
+		assertTrue(this.wrapper.getGroupsOf(group1).contains(group6));
 		
-		assertFalse(this.wrapper.getAllGroups(group2).contains(group1));
-		assertFalse(this.wrapper.getAllGroups(group2).contains(group2));
-		assertTrue(this.wrapper.getAllGroups(group2).contains(group3));
-		assertTrue(this.wrapper.getAllGroups(group2).contains(group4));
-		assertTrue(this.wrapper.getAllGroups(group2).contains(group5));
-		assertTrue(this.wrapper.getAllGroups(group2).contains(group6));
+		assertFalse(this.wrapper.getGroupsOf(group2).contains(group1));
+		assertFalse(this.wrapper.getGroupsOf(group2).contains(group2));
+		assertTrue(this.wrapper.getGroupsOf(group2).contains(group3));
+		assertTrue(this.wrapper.getGroupsOf(group2).contains(group4));
+		assertTrue(this.wrapper.getGroupsOf(group2).contains(group5));
+		assertTrue(this.wrapper.getGroupsOf(group2).contains(group6));
 		
-		assertFalse(this.wrapper.getAllGroups(group3).contains(group1));
-		assertFalse(this.wrapper.getAllGroups(group3).contains(group2));
-		assertFalse(this.wrapper.getAllGroups(group3).contains(group3));
-		assertTrue(this.wrapper.getAllGroups(group3).contains(group4));
-		assertTrue(this.wrapper.getAllGroups(group3).contains(group5));
-		assertTrue(this.wrapper.getAllGroups(group3).contains(group6));
+		assertFalse(this.wrapper.getGroupsOf(group3).contains(group1));
+		assertFalse(this.wrapper.getGroupsOf(group3).contains(group2));
+		assertFalse(this.wrapper.getGroupsOf(group3).contains(group3));
+		assertTrue(this.wrapper.getGroupsOf(group3).contains(group4));
+		assertTrue(this.wrapper.getGroupsOf(group3).contains(group5));
+		assertTrue(this.wrapper.getGroupsOf(group3).contains(group6));
 		
-		assertFalse(this.wrapper.getAllGroups(group4).contains(group1));
-		assertFalse(this.wrapper.getAllGroups(group4).contains(group2));
-		assertFalse(this.wrapper.getAllGroups(group4).contains(group3));
-		assertFalse(this.wrapper.getAllGroups(group4).contains(group4));
-		assertTrue(this.wrapper.getAllGroups(group4).contains(group5));
-		assertTrue(this.wrapper.getAllGroups(group4).contains(group6));
+		assertFalse(this.wrapper.getGroupsOf(group4).contains(group1));
+		assertFalse(this.wrapper.getGroupsOf(group4).contains(group2));
+		assertFalse(this.wrapper.getGroupsOf(group4).contains(group3));
+		assertFalse(this.wrapper.getGroupsOf(group4).contains(group4));
+		assertTrue(this.wrapper.getGroupsOf(group4).contains(group5));
+		assertTrue(this.wrapper.getGroupsOf(group4).contains(group6));
 		
-		assertFalse(this.wrapper.getAllGroups(group5).contains(group1));
-		assertFalse(this.wrapper.getAllGroups(group5).contains(group2));
-		assertFalse(this.wrapper.getAllGroups(group5).contains(group3));
-		assertFalse(this.wrapper.getAllGroups(group5).contains(group4));
-		assertFalse(this.wrapper.getAllGroups(group5).contains(group5));
-		assertTrue(this.wrapper.getAllGroups(group5).contains(group6));
+		assertFalse(this.wrapper.getGroupsOf(group5).contains(group1));
+		assertFalse(this.wrapper.getGroupsOf(group5).contains(group2));
+		assertFalse(this.wrapper.getGroupsOf(group5).contains(group3));
+		assertFalse(this.wrapper.getGroupsOf(group5).contains(group4));
+		assertFalse(this.wrapper.getGroupsOf(group5).contains(group5));
+		assertTrue(this.wrapper.getGroupsOf(group5).contains(group6));
 		
-		assertFalse(this.wrapper.getAllGroups(group6).contains(group1));
-		assertFalse(this.wrapper.getAllGroups(group6).contains(group2));
-		assertFalse(this.wrapper.getAllGroups(group6).contains(group3));
-		assertFalse(this.wrapper.getAllGroups(group6).contains(group4));
-		assertFalse(this.wrapper.getAllGroups(group6).contains(group5));
-		assertFalse(this.wrapper.getAllGroups(group6).contains(group6));
+		assertFalse(this.wrapper.getGroupsOf(group6).contains(group1));
+		assertFalse(this.wrapper.getGroupsOf(group6).contains(group2));
+		assertFalse(this.wrapper.getGroupsOf(group6).contains(group3));
+		assertFalse(this.wrapper.getGroupsOf(group6).contains(group4));
+		assertFalse(this.wrapper.getGroupsOf(group6).contains(group5));
+		assertFalse(this.wrapper.getGroupsOf(group6).contains(group6));
 		
 		/* transitive sub-groups */
 
-		assertFalse(this.wrapper.getAllMembers(group1).contains(group1));
-		assertFalse(this.wrapper.getAllMembers(group1).contains(group2));
-		assertFalse(this.wrapper.getAllMembers(group1).contains(group3));
-		assertFalse(this.wrapper.getAllMembers(group1).contains(group4));
-		assertFalse(this.wrapper.getAllMembers(group1).contains(group5));
-		assertFalse(this.wrapper.getAllMembers(group1).contains(group6));
+		assertFalse(this.wrapper.getMembersOf(group1).contains(group1));
+		assertFalse(this.wrapper.getMembersOf(group1).contains(group2));
+		assertFalse(this.wrapper.getMembersOf(group1).contains(group3));
+		assertFalse(this.wrapper.getMembersOf(group1).contains(group4));
+		assertFalse(this.wrapper.getMembersOf(group1).contains(group5));
+		assertFalse(this.wrapper.getMembersOf(group1).contains(group6));
 		
-		assertTrue(this.wrapper.getAllMembers(group2).contains(group1));
-		assertFalse(this.wrapper.getAllMembers(group2).contains(group2));
-		assertFalse(this.wrapper.getAllMembers(group2).contains(group3));
-		assertFalse(this.wrapper.getAllMembers(group2).contains(group4));
-		assertFalse(this.wrapper.getAllMembers(group2).contains(group5));
-		assertFalse(this.wrapper.getAllMembers(group2).contains(group6));
+		assertTrue(this.wrapper.getMembersOf(group2).contains(group1));
+		assertFalse(this.wrapper.getMembersOf(group2).contains(group2));
+		assertFalse(this.wrapper.getMembersOf(group2).contains(group3));
+		assertFalse(this.wrapper.getMembersOf(group2).contains(group4));
+		assertFalse(this.wrapper.getMembersOf(group2).contains(group5));
+		assertFalse(this.wrapper.getMembersOf(group2).contains(group6));
 		
-		assertTrue(this.wrapper.getAllMembers(group3).contains(group1));
-		assertTrue(this.wrapper.getAllMembers(group3).contains(group2));
-		assertFalse(this.wrapper.getAllMembers(group3).contains(group3));
-		assertFalse(this.wrapper.getAllMembers(group3).contains(group4));
-		assertFalse(this.wrapper.getAllMembers(group3).contains(group5));
-		assertFalse(this.wrapper.getAllMembers(group3).contains(group6));
+		assertTrue(this.wrapper.getMembersOf(group3).contains(group1));
+		assertTrue(this.wrapper.getMembersOf(group3).contains(group2));
+		assertFalse(this.wrapper.getMembersOf(group3).contains(group3));
+		assertFalse(this.wrapper.getMembersOf(group3).contains(group4));
+		assertFalse(this.wrapper.getMembersOf(group3).contains(group5));
+		assertFalse(this.wrapper.getMembersOf(group3).contains(group6));
 		
-		assertTrue(this.wrapper.getAllMembers(group4).contains(group1));
-		assertTrue(this.wrapper.getAllMembers(group4).contains(group2));
-		assertTrue(this.wrapper.getAllMembers(group4).contains(group3));
-		assertFalse(this.wrapper.getAllMembers(group4).contains(group4));
-		assertFalse(this.wrapper.getAllMembers(group4).contains(group5));
-		assertFalse(this.wrapper.getAllMembers(group4).contains(group6));
+		assertTrue(this.wrapper.getMembersOf(group4).contains(group1));
+		assertTrue(this.wrapper.getMembersOf(group4).contains(group2));
+		assertTrue(this.wrapper.getMembersOf(group4).contains(group3));
+		assertFalse(this.wrapper.getMembersOf(group4).contains(group4));
+		assertFalse(this.wrapper.getMembersOf(group4).contains(group5));
+		assertFalse(this.wrapper.getMembersOf(group4).contains(group6));
 		
-		assertTrue(this.wrapper.getAllMembers(group5).contains(group1));
-		assertTrue(this.wrapper.getAllMembers(group5).contains(group2));
-		assertTrue(this.wrapper.getAllMembers(group5).contains(group3));
-		assertTrue(this.wrapper.getAllMembers(group5).contains(group4));
-		assertFalse(this.wrapper.getAllMembers(group5).contains(group5));
-		assertFalse(this.wrapper.getAllMembers(group5).contains(group6));
+		assertTrue(this.wrapper.getMembersOf(group5).contains(group1));
+		assertTrue(this.wrapper.getMembersOf(group5).contains(group2));
+		assertTrue(this.wrapper.getMembersOf(group5).contains(group3));
+		assertTrue(this.wrapper.getMembersOf(group5).contains(group4));
+		assertFalse(this.wrapper.getMembersOf(group5).contains(group5));
+		assertFalse(this.wrapper.getMembersOf(group5).contains(group6));
 		
-		assertTrue(this.wrapper.getAllMembers(group6).contains(group1));
-		assertTrue(this.wrapper.getAllMembers(group6).contains(group2));
-		assertTrue(this.wrapper.getAllMembers(group6).contains(group3));
-		assertTrue(this.wrapper.getAllMembers(group6).contains(group4));
-		assertTrue(this.wrapper.getAllMembers(group6).contains(group5));
-		assertFalse(this.wrapper.getAllMembers(group6).contains(group6));
+		assertTrue(this.wrapper.getMembersOf(group6).contains(group1));
+		assertTrue(this.wrapper.getMembersOf(group6).contains(group2));
+		assertTrue(this.wrapper.getMembersOf(group6).contains(group3));
+		assertTrue(this.wrapper.getMembersOf(group6).contains(group4));
+		assertTrue(this.wrapper.getMembersOf(group6).contains(group5));
+		assertFalse(this.wrapper.getMembersOf(group6).contains(group6));
 		
 	}
 	
-	@Test
-	public void testAddingTransitiveGroups() {
-		assertFalse(this.wrapper.getDirectGroups().contains(group1));
+	public void deprecatedTestAddingTransitiveGroups() {
+		assertFalse(this.wrapper.getGroups().contains(group1));
 		this.wrapper.addToGroup(actor1, group1);
-		assertTrue(this.wrapper.getDirectGroups().contains(group1));
+		assertTrue(this.wrapper.getGroups().contains(group1));
 		this.wrapper.addToGroup(actor1, group2);
-		assertTrue(this.wrapper.getDirectGroups().contains(group2));
+		assertTrue(this.wrapper.getGroups().contains(group2));
 		this.wrapper.addToGroup(group2, group3);
-		assertTrue(this.wrapper.getDirectGroups().contains(group3));
-		assertFalse(this.wrapper.getAllGroups(group4).contains(group5));
-		assertFalse(this.wrapper.getAllGroups(group4).contains(group6));
+		assertTrue(this.wrapper.getGroups().contains(group3));
+		assertFalse(this.wrapper.getGroupsOf(group4).contains(group5));
+		assertFalse(this.wrapper.getGroupsOf(group4).contains(group6));
 		this.wrapper.addToGroup(group4, group5);
-		assertFalse("its not a group yet because it has no members", this.wrapper.getDirectGroups()
+		assertFalse("its not a group yet because it has no members", this.wrapper.getGroups()
 		        .contains(group4));
-		assertTrue(this.wrapper.getDirectGroups().contains(group5));
-		assertFalse(this.wrapper.getAllMembers(group6).contains(group5));
-		assertFalse(this.wrapper.getAllMembers(group6).contains(group4));
-		assertTrue(this.wrapper.getAllGroups(group4).contains(group5));
-		assertFalse(this.wrapper.getAllGroups(group4).contains(group6));
+		assertTrue(this.wrapper.getGroups().contains(group5));
+		assertFalse(this.wrapper.getMembersOf(group6).contains(group5));
+		assertFalse(this.wrapper.getMembersOf(group6).contains(group4));
+		assertTrue(this.wrapper.getGroupsOf(group4).contains(group5));
+		assertFalse(this.wrapper.getGroupsOf(group4).contains(group6));
 		this.wrapper.addToGroup(group5, group6);
-		assertTrue(this.wrapper.getDirectGroups().contains(group6));
+		assertTrue(this.wrapper.getGroups().contains(group6));
 		
 		this.wrapper.dump();
 		this.wrapper.dumpGroupId(group4);
 		
-		assertTrue(this.wrapper.getAllMembers(group6).contains(group5));
-		assertTrue(this.wrapper.getAllMembers(group6).contains(group4));
-		assertTrue(this.wrapper.getAllGroups(group4).contains(group5));
-		assertTrue(this.wrapper.getAllGroups(group4).contains(group6));
+		assertTrue(this.wrapper.getMembersOf(group6).contains(group5));
+		assertTrue(this.wrapper.getMembersOf(group6).contains(group4));
+		assertTrue(this.wrapper.getGroupsOf(group4).contains(group5));
+		assertTrue(this.wrapper.getGroupsOf(group4).contains(group6));
 		
 		/*
 		 * <pre> A1 -memberOf-> G1, G2 G2 -memberOf-> G3 G4 -memberOf-> G5
@@ -178,24 +179,24 @@ public class GroupDatabaseTest {
 		 * Now add G3 -memberOf-> G4 </pre>
 		 */
 
-		assertTrue(this.wrapper.getAllMembers(group3).contains(actor1));
-		assertFalse(this.wrapper.getAllMembers(group4).contains(actor1));
-		assertFalse(this.wrapper.getAllMembers(group5).contains(actor1));
-		assertFalse(this.wrapper.getAllMembers(group6).contains(actor1));
+		assertTrue(this.wrapper.getMembersOf(group3).contains(actor1));
+		assertFalse(this.wrapper.getMembersOf(group4).contains(actor1));
+		assertFalse(this.wrapper.getMembersOf(group5).contains(actor1));
+		assertFalse(this.wrapper.getMembersOf(group6).contains(actor1));
 		
 		this.wrapper.addToGroup(group3, group4);
 		
-		assertTrue(this.wrapper.getAllMembers(group3).contains(actor1));
-		assertTrue(this.wrapper.getAllMembers(group4).contains(actor1));
-		assertTrue(this.wrapper.getAllMembers(group5).contains(actor1));
-		assertTrue(this.wrapper.getAllMembers(group6).contains(actor1));
+		assertTrue(this.wrapper.getMembersOf(group3).contains(actor1));
+		assertTrue(this.wrapper.getMembersOf(group4).contains(actor1));
+		assertTrue(this.wrapper.getMembersOf(group5).contains(actor1));
+		assertTrue(this.wrapper.getMembersOf(group6).contains(actor1));
 		
 		this.wrapper.removeFromGroup(group3, group4);
 		
-		assertTrue(this.wrapper.getAllMembers(group3).contains(actor1));
-		assertFalse(this.wrapper.getAllMembers(group4).contains(actor1));
-		assertFalse(this.wrapper.getAllMembers(group5).contains(actor1));
-		assertFalse(this.wrapper.getAllMembers(group6).contains(actor1));
+		assertTrue(this.wrapper.getMembersOf(group3).contains(actor1));
+		assertFalse(this.wrapper.getMembersOf(group4).contains(actor1));
+		assertFalse(this.wrapper.getMembersOf(group5).contains(actor1));
+		assertFalse(this.wrapper.getMembersOf(group6).contains(actor1));
 	}
 	
 	/**

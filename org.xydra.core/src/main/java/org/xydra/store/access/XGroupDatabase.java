@@ -19,39 +19,23 @@ import org.xydra.core.model.XID;
  * Java overhead of factor 2, we can save only 32K XIDs in 1 MB.
  * 
  * @author dscharrer
+ * @author voelkel
  */
 public interface XGroupDatabase extends Serializable {
-	
-	public class CycleException extends IllegalArgumentException {
-		
-		private static final long serialVersionUID = -1021218459315159856L;
-		
-	}
 	
 	/**
 	 * Add an actor to a group.
 	 * 
-	 * The actor will become a direct member of this group and an indirect
-	 * member of all the groups this group belongs to (and all groups they
-	 * belong to).
+	 * The actor will become a direct member of this group.
 	 * 
-	 * While groups can be added to groups, cycles are not allowed.
-	 * 
-	 * @param actorOrGroupId The {@link XID} of the actor (or subgroup) to add
-	 *            to the group
+	 * @param actorId The {@link XID} of the actor to add to the group
 	 * @param groupId The {@link XID} of the group the specified actor will be
 	 *            added to
-	 * 
-	 * @throws CycleException if adding the group membership would produce a
-	 *             cycle
 	 */
-	void addToGroup(XID actorOrGroupId, XID groupId) throws CycleException;
+	void addToGroup(XID actorId, XID groupId);
 	
 	/**
 	 * Remove an actor from a group.
-	 * 
-	 * This will not remove the actor from all subgroups and thus he may retain
-	 * membership of this group.
 	 * 
 	 * @param actorId The {@link XID} of the actor for which to revoke group
 	 *            membership.
@@ -61,8 +45,7 @@ public interface XGroupDatabase extends Serializable {
 	void removeFromGroup(XID actorId, XID groupId);
 	
 	/**
-	 * Check if the specified actor is a member of the specific group either
-	 * directly or through a subgroup.
+	 * Check if the specified actor is a member of the specific group.
 	 * 
 	 * @param actorId The {@link XID} of the actor whose membership status is to
 	 *            be checked
@@ -73,66 +56,30 @@ public interface XGroupDatabase extends Serializable {
 	boolean hasGroup(XID actorId, XID groupId);
 	
 	/**
-	 * Check if the specified actor is a member of the specific group directly
-	 * (and not just a member of a subgroup of the specified group)
-	 * 
-	 * @param actorId The {@link XID} of the actor whose membership status is to
-	 *            be checked
-	 * @param groupId The {@link XID} of the group for which the membership
-	 *            status of the specified actor is to be checked
-	 * @return true, if the specified actor is a member of the specified group
-	 */
-	boolean hasDirectGroup(XID actorId, XID groupId);
-	
-	/**
-	 * Get all groups an actor or group is a direct member of (will not contain
-	 * groups the actor or group is only a member of by being a member of a
-	 * subgroup of the specified group)
-	 * 
-	 * @param actorOrGroupId The {@link XID} of the actor whose groups are to be
-	 *            returned
-	 * @return a set containing all {@link XID XIDs} of the groups the specified
-	 *         actor is a direct member of. Never null.
-	 */
-	Set<XID> getDirectGroups(XID actorOrGroupId);
-	
-	/**
-	 * Get all direct members (and direct subgroups) of a group.
-	 * 
-	 * @param groupId The {@link XID} of the group which members and subgroup
-	 *            {@link XID XIDs} are to be returned
-	 * @return a set containing all {@link XID XIDs} of the members and
-	 *         subgroups of the specified group. Never null.
-	 */
-	Set<XID> getDirectMembers(XID groupId);
-	
-	/**
-	 * Get all groups an actor or subgroup is part of, either directly or
-	 * indirectly.
+	 * Get all groups an actor is part of.
 	 * 
 	 * @param actorOrGroupId The {@link XID} of the actor whose groups are to be
 	 *            returned
 	 * @return a set with all {@link XID XIDs} of the groups the specified actor
 	 *         is a member of. Never null.
 	 */
-	Set<XID> getAllGroups(XID actorOrGroupId);
+	Set<XID> getGroupsOf(XID actorOrGroupId);
 	
 	/**
-	 * Get all actors that are either a direct member of the given group or an
-	 * (indirect) member of a subgroup.
+	 * Get all actors that are a member of the given group.
 	 * 
-	 * @param groupId The {@link XID} of the group which members and subgroup
-	 *            {@link XID XIDs} are to be returned
-	 * @return a set containing all {@link XID XIDs} of the members and
-	 *         subgroups of the specified group. Never null.
+	 * @param groupId The {@link XID} of the group which members {@link XID
+	 *            XIDs} are to be returned
+	 * @return a set containing all {@link XID XIDs} of the members of the
+	 *         specified group. Never null.
 	 */
-	Set<XID> getAllMembers(XID groupId);
+	Set<XID> getMembersOf(XID groupId);
 	
 	/**
-	 * @return returns an iterator over the {@link XID XIDs} of the defined
+	 * @return returns an set containing the {@link XID XIDs} of the defined
 	 *         groups. Groups are defined as long as they have at least one
-	 *         member or subgroup. Never null.
+	 *         member. Never null.
 	 */
-	Set<XID> getDirectGroups();
+	Set<XID> getGroups();
 	
 }
