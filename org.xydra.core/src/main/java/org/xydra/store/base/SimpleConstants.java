@@ -1,5 +1,7 @@
 package org.xydra.store.base;
 
+
+
 /**
  * Constants used in Simple*Implementations
  * 

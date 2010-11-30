@@ -266,10 +266,16 @@ public interface XydraStore {
 	 * @param addresses of {@link XModel} (repositoryId/modelId/-/-),
 	 *            {@link XObject} (repositoryId/modelId/objectId/-), or
 	 *            {@link XField} (repositoryId/modelId/objectId/fieldId) for
-	 *            which to return change events.
+	 *            which to return change events. This address must not refer to
+	 *            a repository.
 	 * 
-	 *            TODO if the given address is a model, are object and field
-	 *            events within this model returned as well?
+	 *            If the given address refers to a model, all events for
+	 *            contained objects and fields are returned as well. If the
+	 *            address refers to an object, the events for all contained
+	 *            fields are returned as well.
+	 * 
+	 *            TODO provide a method to request only model / object events,
+	 *            excluding events for child entities?
 	 * 
 	 * @param beginRevision the beginning revision number of the interval from
 	 *            which all {@link XEvent XEvents} are to be returned - can be

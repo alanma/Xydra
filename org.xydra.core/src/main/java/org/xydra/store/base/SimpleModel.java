@@ -1,10 +1,12 @@
 package org.xydra.store.base;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.Map;
 
 import org.xydra.core.XX;
+import org.xydra.core.change.XCommand;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XWritableModel;
@@ -18,15 +20,22 @@ import org.xydra.core.model.XWritableModel;
 public class SimpleModel implements XWritableModel, Serializable {
 	
 	private static final long serialVersionUID = 5593443685935758227L;
-	protected XAddress address;
-	protected long revisionNumber;
-	protected Set<XID> objectIds;
+	private final XAddress address;
+	private long revisionNumber;
+	private final Map<XID,SimpleObject> objects;
 	
-	public SimpleModel(XAddress address, long revisionNumber, Set<XID> objectIds) {
+	public SimpleModel(XAddress address) {
+		super();
+		this.address = address;
+		this.revisionNumber = XCommand.NEW;
+		this.objects = new HashMap<XID,SimpleObject>();
+	}
+	
+	public SimpleModel(XAddress address, long revisionNumber, Map<XID,SimpleObject> objects) {
 		super();
 		this.address = address;
 		this.revisionNumber = revisionNumber;
-		this.objectIds = objectIds;
+		this.objects = objects;
 	}
 	
 	@Override
@@ -36,7 +45,7 @@ public class SimpleModel implements XWritableModel, Serializable {
 	
 	@Override
 	public XID getID() {
-		return this.address.getField();
+		return this.address.getModel();
 	}
 	
 	@Override
@@ -45,39 +54,40 @@ public class SimpleModel implements XWritableModel, Serializable {
 	}
 	
 	@Override
-	public SimpleObject createObject(XID ObjectId) {
-		this.objectIds.add(ObjectId);
-		return getObject(ObjectId);
-	}
-	
-	@Override
-	public boolean removeObject(XID ObjectId) {
-		return this.objectIds.remove(ObjectId);
-	}
-	
-	@Override
-	public SimpleObject getObject(XID ObjectId) {
-		if(hasObject(ObjectId)) {
-			return new SimpleObject(XX.resolveObject(this.getAddress(), ObjectId),
-			        SimpleConstants.REVISION_NUMBER_UNDEFINED, null);
-		} else {
-			return null;
+	public SimpleObject createObject(XID objectId) {
+		SimpleObject object = this.objects.get(objectId);
+		if(object != null) {
+			return object;
 		}
+		SimpleObject newObject = new SimpleObject(XX.resolveObject(this.address, objectId));
+		this.objects.put(objectId, newObject);
+		return newObject;
 	}
 	
 	@Override
-	public boolean hasObject(XID ObjectId) {
-		return this.objectIds.contains(ObjectId);
+	public boolean removeObject(XID objectId) {
+		SimpleObject oldObject = this.objects.remove(objectId);
+		return oldObject != null;
+	}
+	
+	@Override
+	public SimpleObject getObject(XID objectId) {
+		return this.objects.get(objectId);
+	}
+	
+	@Override
+	public boolean hasObject(XID objectId) {
+		return this.objects.containsKey(objectId);
 	}
 	
 	@Override
 	public boolean isEmpty() {
-		return this.objectIds.isEmpty();
+		return this.objects.isEmpty();
 	}
 	
 	@Override
 	public Iterator<XID> iterator() {
-		return this.objectIds.iterator();
+		return this.objects.keySet().iterator();
 	}
 	
 }

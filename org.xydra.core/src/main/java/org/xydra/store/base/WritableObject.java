@@ -33,20 +33,8 @@ public class WritableObject extends BaseObject implements XWritableObject, Seria
 		XCommand command = X.getCommandFactory().createAddFieldCommand(
 		        this.address.getRepository(), this.address.getModel(), this.address.getObject(),
 		        fieldId, true);
-		long result = WritableUtils.executeCommand(this.credentials, this.store, command);
-		if(result >= 0) {
-			load();
-			return this.getField(fieldId);
-		} else {
-			// something went wrong
-			if(result == XCommand.FAILED) {
-				throw new RuntimeException("Command failed");
-			} else if(result == XCommand.NOCHANGE) {
-				return this.getField(fieldId);
-			} else {
-				throw new AssertionError("Cannot happen");
-			}
-		}
+		executeCommand(command);
+		return this.getField(fieldId);
 	}
 	
 	@Override
@@ -54,6 +42,10 @@ public class WritableObject extends BaseObject implements XWritableObject, Seria
 		XCommand command = X.getCommandFactory().createRemoveFieldCommand(
 		        this.address.getRepository(), this.address.getModel(), this.address.getObject(),
 		        fieldId, this.getField(fieldId).getRevisionNumber(), true);
+		return executeCommand(command);
+	}
+	
+	private boolean executeCommand(XCommand command) throws AssertionError {
 		long result = WritableUtils.executeCommand(this.credentials, this.store, command);
 		if(result >= 0) {
 			load();
@@ -72,6 +64,7 @@ public class WritableObject extends BaseObject implements XWritableObject, Seria
 	
 	@Override
 	public XWritableField getField(XID fieldId) {
+		// FIXME this return different instances for each call
 		XBaseField baseField = super.getField(fieldId);
 		WritableField writableField = new WritableField(this.credentials, this.store, baseField
 		        .getAddress());

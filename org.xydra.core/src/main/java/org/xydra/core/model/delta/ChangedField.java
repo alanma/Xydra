@@ -3,6 +3,7 @@ package org.xydra.core.model.delta;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XWritableField;
 import org.xydra.core.value.XValue;
 import org.xydra.index.XI;
 
@@ -22,7 +23,7 @@ import org.xydra.index.XI;
  * @author dscharrer
  * 
  */
-public class ChangedField implements DeltaField {
+public class ChangedField implements XWritableField {
 	
 	private XValue value;
 	private final XBaseField base;
@@ -46,10 +47,12 @@ public class ChangedField implements DeltaField {
 		this.base = base;
 	}
 	
-	public void setValue(XValue value) {
+	public boolean setValue(XValue value) {
 		// reset changed flag if the value is reset to the base field's value
+		boolean changes = !XI.equals(getValue(), value);
 		this.changed = !XI.equals(value, this.base.getValue());
 		this.value = value;
+		return changes;
 	}
 	
 	public XID getID() {
@@ -93,10 +96,6 @@ public class ChangedField implements DeltaField {
 	
 	public boolean isEmpty() {
 		return this.value == null;
-	}
-	
-	public void clear() {
-		setValue(null);
 	}
 	
 }

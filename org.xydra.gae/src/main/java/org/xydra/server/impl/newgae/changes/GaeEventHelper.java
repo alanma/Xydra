@@ -18,8 +18,6 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.delta.ChangedField;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.ChangedObject;
-import org.xydra.core.model.delta.NewField;
-import org.xydra.core.model.delta.NewObject;
 import org.xydra.core.value.XValue;
 
 
@@ -90,7 +88,7 @@ public abstract class GaeEventHelper {
 			        inTrans, false);
 		}
 		
-		for(NewObject object : changedModel.getNewObjects()) {
+		for(XBaseObject object : changedModel.getNewObjects()) {
 			events.add(MemoryModelEvent.createAddEvent(actorId, changedModel.getAddress(), object
 			        .getID(), rev, inTrans));
 			for(XID fieldId : object) {
@@ -106,7 +104,7 @@ public abstract class GaeEventHelper {
 				        .getOldField(fieldId), inTrans, false);
 			}
 			
-			for(NewField field : object.getNewFields()) {
+			for(XBaseField field : object.getNewFields()) {
 				GaeEventHelper
 				        .createEventsForNewField(events, rev, actorId, object, field, inTrans);
 			}

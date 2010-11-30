@@ -30,7 +30,10 @@ public interface XCommand {
 	static final long SAFE = -2;
 	
 	/**
-	 * revision of new fields during a transaction.
+	 * revision of new models, objects and fields, before they are assigned a
+	 * proper revision number (for example during a transaction).
+	 * 
+	 * TODO use a different constant?
 	 */
 	static final long NEW = 0;
 	

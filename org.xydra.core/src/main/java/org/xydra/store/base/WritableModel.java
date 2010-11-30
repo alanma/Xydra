@@ -30,30 +30,14 @@ public class WritableModel extends BaseModel implements XWritableModel, Serializ
 	}
 	
 	@Override
-	public XWritableObject createObject(XID objectID) {
+	public XWritableObject createObject(XID objectId) {
 		XCommand command = X.getCommandFactory().createAddObjectCommand(
-		        this.address.getRepository(), this.address.getModel(), objectID, true);
-		long result = WritableUtils.executeCommand(this.credentials, this.store, command);
-		if(result >= 0) {
-			load();
-			return this.getObject(objectID);
-		} else {
-			// something went wrong
-			if(result == XCommand.FAILED) {
-				throw new RuntimeException("Command failed");
-			} else if(result == XCommand.NOCHANGE) {
-				return this.getObject(objectID);
-			} else {
-				throw new AssertionError("Cannot happen");
-			}
-		}
+		        this.address.getRepository(), this.address.getModel(), objectId, true);
+		executeCommand(command);
+		return this.getObject(objectId);
 	}
 	
-	@Override
-	public boolean removeObject(XID objectId) {
-		XCommand command = X.getCommandFactory().createRemoveObjectCommand(
-		        this.address.getRepository(), this.address.getModel(), objectId,
-		        this.getObject(objectId).getRevisionNumber(), true);
+	private boolean executeCommand(XCommand command) {
 		long result = WritableUtils.executeCommand(this.credentials, this.store, command);
 		if(result >= 0) {
 			load();
@@ -68,6 +52,14 @@ public class WritableModel extends BaseModel implements XWritableModel, Serializ
 				throw new AssertionError("Cannot happen");
 			}
 		}
+	}
+	
+	@Override
+	public boolean removeObject(XID objectId) {
+		XCommand command = X.getCommandFactory().createRemoveObjectCommand(
+		        this.address.getRepository(), this.address.getModel(), objectId,
+		        this.getObject(objectId).getRevisionNumber(), true);
+		return executeCommand(command);
 	}
 	
 	@Override

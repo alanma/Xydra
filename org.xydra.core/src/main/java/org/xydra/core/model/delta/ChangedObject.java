@@ -13,8 +13,11 @@ import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XWritableField;
+import org.xydra.core.model.XWritableObject;
 import org.xydra.index.iterator.AbstractFilteringIterator;
 import org.xydra.index.iterator.BagUnionIterator;
+import org.xydra.store.base.SimpleField;
 
 
 /**
@@ -32,7 +35,7 @@ import org.xydra.index.iterator.BagUnionIterator;
  * @author dscharrer
  * 
  */
-public class ChangedObject implements DeltaObject {
+public class ChangedObject implements XWritableObject {
 	
 	// Fields that are in base but have been removed.
 	// Contains no XIDs that are in added or changed.
@@ -40,7 +43,7 @@ public class ChangedObject implements DeltaObject {
 	
 	// Fields that are not in base and have been added.
 	// Contains no XIDs that are in removed or changed.
-	private final Map<XID,NewField> added = new HashMap<XID,NewField>();
+	private final Map<XID,SimpleField> added = new HashMap<XID,SimpleField>();
 	
 	// Fields that are in base and have not been removed.
 	// While they were changed once, those changes might have been reverted.
@@ -89,28 +92,41 @@ public class ChangedObject implements DeltaObject {
 		return true;
 	}
 	
-	public void createField(XID fieldId) {
+	public XWritableField createField(XID fieldId) {
 		
-		if(!hasField(fieldId)) {
-			XBaseField field = this.base.getField(fieldId);
-			if(field != null) {
-				// If the field previously existed it must have been removed
-				// previously and we can merge the remove and add changes.
-				assert this.removed.contains(fieldId);
-				this.removed.remove(fieldId);
-				if(!field.isEmpty()) {
-					ChangedField cf = new ChangedField(field);
-					cf.clear();
-					this.changed.put(fieldId, cf);
-				}
-			} else {
-				// Otherwise, the field is completely new.
-				XAddress fieldAddr = XX.resolveField(getAddress(), fieldId);
-				this.added.put(fieldId, new NewField(fieldAddr));
-			}
+		XWritableField oldField = getField(fieldId);
+		if(oldField != null) {
+			return oldField;
 		}
 		
-		assert checkSetInvariants();
+		XBaseField field = this.base.getField(fieldId);
+		if(field != null) {
+			
+			// If the field previously existed it must have been removed
+			// previously and we can merge the remove and add changes.
+			assert this.removed.contains(fieldId);
+			assert !this.changed.containsKey(fieldId);
+			this.removed.remove(fieldId);
+			ChangedField newField = new ChangedField(field);
+			newField.setValue(null);
+			this.changed.put(fieldId, newField);
+			
+			assert checkSetInvariants();
+			
+			return newField;
+			
+		} else {
+			
+			// Otherwise, the field is completely new.
+			XAddress fieldAddr = XX.resolveField(getAddress(), fieldId);
+			SimpleField newField = new SimpleField(fieldAddr);
+			this.added.put(fieldId, newField);
+			
+			assert checkSetInvariants();
+			
+			return newField;
+		}
+		
 	}
 	
 	/**
@@ -126,7 +142,7 @@ public class ChangedObject implements DeltaObject {
 	 *         ChangedObject and were not contained in the original
 	 *         {@link XBaseObject}
 	 */
-	public Iterable<NewField> getNewFields() {
+	public Iterable<SimpleField> getNewFields() {
 		return this.added.values();
 	}
 	
@@ -157,10 +173,12 @@ public class ChangedObject implements DeltaObject {
 	public int countCommandsNeeded(int max) {
 		int n = this.removed.size() + this.added.size();
 		if(n < max) {
-			for(NewField field : this.added.values()) {
-				n += field.countChanges() - 1;
-				if(n >= max) {
-					return n;
+			for(XBaseField field : this.added.values()) {
+				if(!field.isEmpty()) {
+					n++;
+					if(n >= max) {
+						return n;
+					}
 				}
 			}
 			for(ChangedField field : this.changed.values()) {
@@ -202,10 +220,12 @@ public class ChangedObject implements DeltaObject {
 					}
 				}
 			}
-			for(NewField field : this.added.values()) {
-				n += field.countChanges() - 1;
-				if(n >= max) {
-					return n;
+			for(XBaseField field : this.added.values()) {
+				if(!field.isEmpty()) {
+					n++;
+					if(n >= max) {
+						return n;
+					}
 				}
 			}
 			for(ChangedField field : this.changed.values()) {
@@ -218,9 +238,9 @@ public class ChangedObject implements DeltaObject {
 		return n;
 	}
 	
-	public DeltaField getField(XID fieldId) {
+	public XWritableField getField(XID fieldId) {
 		
-		NewField newField = this.added.get(fieldId);
+		SimpleField newField = this.added.get(fieldId);
 		if(newField != null) {
 			return newField;
 		}
@@ -247,7 +267,7 @@ public class ChangedObject implements DeltaObject {
 		return changedField;
 	}
 	
-	public void removeField(XID fieldId) {
+	public boolean removeField(XID fieldId) {
 		
 		if(this.added.containsKey(fieldId)) {
 			
@@ -259,6 +279,8 @@ public class ChangedObject implements DeltaObject {
 			
 			assert checkSetInvariants();
 			
+			return true;
+			
 		} else if(!this.removed.contains(fieldId) && this.base.hasField(fieldId)) {
 			
 			// Exists in base and not removed yet.
@@ -269,8 +291,11 @@ public class ChangedObject implements DeltaObject {
 			
 			assert checkSetInvariants();
 			
+			return true;
+			
 		}
 		
+		return false;
 	}
 	
 	/**
@@ -340,6 +365,9 @@ public class ChangedObject implements DeltaObject {
 		return true;
 	}
 	
+	/**
+	 * Remove all fields.
+	 */
 	public void clear() {
 		
 		this.added.clear();

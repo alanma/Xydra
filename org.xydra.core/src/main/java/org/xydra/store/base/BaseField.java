@@ -19,6 +19,11 @@ import org.xydra.store.XydraStore;
  * Internally, the {@link XBaseField} retrieved as a snapshot is used as a
  * delegatee.
  * 
+ * TODO what is the point of wrapping a snapshot like this instead of just using
+ * the snapshot directly and storing the load function somewhere else (in a
+ * SynchronousStore wrapper / helper class? Same applies for {@link BaseObject}
+ * and {@link BaseModel}
+ * 
  * @author voelkel
  */
 public class BaseField implements XBaseField, Serializable {

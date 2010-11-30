@@ -34,6 +34,7 @@ import org.xydra.core.model.IHasXAddress;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XBaseModel;
+import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XExecutesCommands;
 import org.xydra.core.model.XField;
@@ -45,8 +46,6 @@ import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.core.model.delta.ChangedField;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.ChangedObject;
-import org.xydra.core.model.delta.NewField;
-import org.xydra.core.model.delta.NewObject;
 
 
 /**
@@ -140,7 +139,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 				removeObject(objectId);
 			}
 			
-			for(NewObject object : model.getNewObjects()) {
+			for(XBaseObject object : model.getNewObjects()) {
 				MemoryObject newObject = createObject(object.getID());
 				for(XID fieldId : object) {
 					XBaseField field = object.getField(fieldId);
@@ -158,7 +157,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 					oldObject.removeField(fieldId);
 				}
 				
-				for(NewField field : object.getNewFields()) {
+				for(XBaseField field : object.getNewFields()) {
 					XField newField = oldObject.createField(field.getID());
 					if(!field.isEmpty()) {
 						newField.setValue(field.getValue());
@@ -187,10 +186,11 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 				 * transaction(event)s should only contain events from the same
 				 * actor.
 				 */
-				this.eventQueue.createTransactionEvent(getSessionActor(), getModel(), getObject(), since);
+				this.eventQueue.createTransactionEvent(getSessionActor(), getModel(), getObject(),
+				        since);
 				
 				// new objects
-				for(NewObject object : model.getNewObjects()) {
+				for(XBaseObject object : model.getNewObjects()) {
 					MemoryObject newObject = getObject(object.getID());
 					assert newObject != null : "should have been created above";
 					for(XID fieldId : object) {
@@ -211,7 +211,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 					boolean changed = object.getRemovedFields().iterator().hasNext();
 					
 					// new fields in old objects
-					for(NewField field : object.getNewFields()) {
+					for(XBaseField field : object.getNewFields()) {
 						MemoryField newField = oldObject.getField(field.getID());
 						assert newField != null : "should have been created above";
 						newField.setRevisionNumber(newRevision);

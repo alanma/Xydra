@@ -11,10 +11,10 @@ import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
+import org.xydra.core.model.XWritableField;
+import org.xydra.core.model.XWritableModel;
+import org.xydra.core.model.XWritableObject;
 import org.xydra.core.model.delta.ChangedModel;
-import org.xydra.core.model.delta.DeltaField;
-import org.xydra.core.model.delta.DeltaModel;
-import org.xydra.core.model.delta.DeltaObject;
 import org.xydra.index.XI;
 import org.xydra.index.iterator.SingleValueIterator;
 
@@ -539,7 +539,7 @@ public class XChanges {
 	// TODO wouldn't it be better to return false instead of throwing an
 	// exception when the undo operation couldn't be executed?
 	// Exceptions are much nicer for debugging ~Daniel
-	public static void undoChanges(DeltaModel model, XEvent event) {
+	public static void undoChanges(XWritableModel model, XEvent event) {
 		if(event instanceof XTransactionEvent) {
 			undoChanges(model, (XTransactionEvent)event);
 		} else if(event instanceof XAtomicEvent) {
@@ -562,7 +562,7 @@ public class XChanges {
 	 * @throws IllegalArgumentException if the given {@link XModel} doesn't
 	 *             contain the target of any of the events
 	 */
-	public static void undoChanges(DeltaModel model, XTransactionEvent event) {
+	public static void undoChanges(XWritableModel model, XTransactionEvent event) {
 		for(int i = event.size(); i >= 0; i--) {
 			undoChanges(model, event.getEvent(i));
 		}
@@ -582,7 +582,7 @@ public class XChanges {
 	 *             contain the target of the event or if the events is a
 	 *             {@link XRepositoryEvent}
 	 */
-	public static void undoChanges(DeltaModel model, XAtomicEvent event) {
+	public static void undoChanges(XWritableModel model, XAtomicEvent event) {
 		if(event instanceof XModelEvent) {
 			undoChanges(model, (XModelEvent)event);
 			return;
@@ -611,7 +611,7 @@ public class XChanges {
 	 * @throws IllegalArgumentException if the given {@link XModel} doesn't
 	 *             contain the target of the event
 	 */
-	public static void undoChanges(DeltaModel model, XModelEvent event) {
+	public static void undoChanges(XWritableModel model, XModelEvent event) {
 		
 		if(!XI.equals(model.getAddress(), event.getTarget())) {
 			throw new IllegalArgumentException();
@@ -654,14 +654,14 @@ public class XChanges {
 	 * @throws IllegalArgumentException if the given {@link XModel} doesn't
 	 *             contain the target of the event
 	 */
-	public static void undoChanges(DeltaModel model, XObjectEvent event) {
+	public static void undoChanges(XWritableModel model, XObjectEvent event) {
 		
 		if(!model.getAddress().contains(event.getTarget())) {
 			throw new IllegalArgumentException();
 		}
 		
 		XID objectId = event.getObjectID();
-		DeltaObject object = model.getObject(objectId);
+		XWritableObject object = model.getObject(objectId);
 		if(object == null) {
 			throw new IllegalStateException();
 		}
@@ -703,20 +703,20 @@ public class XChanges {
 	 * @throws IllegalArgumentException if the given {@link XModel} doesn't
 	 *             contain the target of the event
 	 */
-	public static void undoChanges(DeltaModel model, XFieldEvent event) {
+	public static void undoChanges(XWritableModel model, XFieldEvent event) {
 		
 		if(!model.getAddress().contains(event.getTarget())) {
 			throw new IllegalArgumentException();
 		}
 		
 		XID objectId = event.getObjectID();
-		DeltaObject object = model.getObject(objectId);
+		XWritableObject object = model.getObject(objectId);
 		if(object == null) {
 			throw new IllegalStateException();
 		}
 		
 		XID fieldId = event.getFieldID();
-		DeltaField field = object.getField(fieldId);
+		XWritableField field = object.getField(fieldId);
 		if(field == null) {
 			throw new IllegalStateException();
 		}

@@ -2,10 +2,12 @@ package org.xydra.store.base;
 
 import java.io.Serializable;
 
+import org.xydra.core.change.XCommand;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XWritableField;
 import org.xydra.core.value.XValue;
+import org.xydra.index.XI;
 
 
 /**
@@ -15,11 +17,8 @@ import org.xydra.core.value.XValue;
  */
 public class SimpleField implements XWritableField, Serializable {
 	
-	/**
-     * 
-     */
 	private static final long serialVersionUID = -4704907115751969328L;
-	protected XAddress address;
+	private final XAddress address;
 	private long revisionNumber;
 	private XValue value;
 	
@@ -29,10 +28,15 @@ public class SimpleField implements XWritableField, Serializable {
 	 * @param value can be null
 	 */
 	public SimpleField(XAddress address, long revisionNumber, XValue value) {
-		super();
 		this.address = address;
 		this.revisionNumber = revisionNumber;
 		this.value = value;
+	}
+	
+	public SimpleField(XAddress address) {
+		this.address = address;
+		this.revisionNumber = XCommand.NEW;
+		this.value = null;
 	}
 	
 	@Override
@@ -62,14 +66,16 @@ public class SimpleField implements XWritableField, Serializable {
 	
 	@Override
 	public boolean setValue(XValue value) {
-		if(this.value == null) {
-			this.value = value;
-			return value == null;
-		} else {
-			boolean change = this.value.equals(value);
-			this.value = value;
-			return change;
-		}
+		boolean changed = XI.equals(this.value, value);
+		this.value = value;
+		return changed;
+	}
+	
+	/**
+	 * @param rev the new revision number
+	 */
+	public void setRevisionNumber(long rev) {
+		this.revisionNumber = rev;
 	}
 	
 }

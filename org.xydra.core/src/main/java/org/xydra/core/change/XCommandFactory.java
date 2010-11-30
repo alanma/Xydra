@@ -1,5 +1,6 @@
 package org.xydra.core.change;
 
+import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
@@ -11,10 +12,12 @@ import org.xydra.core.value.XValue;
 /**
  * A factory for creating {@link XCommand}s of different kinds.
  * 
+ * TODO Why don't the methods accept an {@link XAddress} for the target instead
+ * of multiple {@link XCommand}s? ~Daniel
+ * 
  * @author Kaidel
  * 
  */
-
 public interface XCommandFactory {
 	
 	/**

@@ -34,7 +34,7 @@ public class MemoryNoAccessRightsNoBatchNoAsyncStore implements
 	public MemoryNoAccessRightsNoBatchNoAsyncStore(XID repositoryId) {
 		Set<XID> modelIds = new HashSet<XID>();
 		this.simpleRepository = new SimpleRepository(X.getIDProvider().fromComponents(repositoryId,
-		        null, null, null), 0, modelIds);
+		        null, null, null), modelIds);
 	}
 	
 	@Override

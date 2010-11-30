@@ -21,8 +21,6 @@ import org.xydra.core.model.XRepository;
 import org.xydra.core.model.delta.ChangedField;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.ChangedObject;
-import org.xydra.core.model.delta.NewField;
-import org.xydra.core.model.delta.NewObject;
 import org.xydra.core.value.XValue;
 
 
@@ -727,7 +725,7 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 			removeObject(object);
 		}
 		
-		for(NewObject object : model.getNewObjects()) {
+		for(XBaseObject object : model.getNewObjects()) {
 			addObject(model.getAddress(), object);
 		}
 		
@@ -749,7 +747,7 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 			removeField(field);
 		}
 		
-		for(NewField field : object.getNewFields()) {
+		for(XBaseField field : object.getNewFields()) {
 			addField(object.getAddress(), field);
 		}
 		

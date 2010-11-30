@@ -18,14 +18,12 @@ import org.xydra.core.model.XWritableRepository;
 public class SimpleRepository implements XWritableRepository, Serializable {
 	
 	private static final long serialVersionUID = 5593443685935758227L;
-	protected XAddress address;
-	protected long revisionNumber;
-	protected Set<XID> modelIds;
+	private final XAddress address;
+	private final Set<XID> modelIds;
 	
-	public SimpleRepository(XAddress address, long revisionNumber, Set<XID> modelIds) {
+	public SimpleRepository(XAddress address, Set<XID> modelIds) {
 		super();
 		this.address = address;
-		this.revisionNumber = revisionNumber;
 		this.modelIds = modelIds;
 	}
 	
@@ -40,7 +38,7 @@ public class SimpleRepository implements XWritableRepository, Serializable {
 	
 	@Override
 	public XID getID() {
-		return this.address.getField();
+		return this.address.getRepository();
 	}
 	
 	@Override
@@ -56,6 +54,7 @@ public class SimpleRepository implements XWritableRepository, Serializable {
 	
 	@Override
 	public SimpleModel getModel(XID modelId) {
+		// FIXME this returns different instances for each call
 		if(hasModel(modelId)) {
 			return new SimpleModel(XX.resolveModel(this.getAddress(), modelId),
 			        SimpleConstants.REVISION_NUMBER_UNDEFINED, null);
