@@ -19,8 +19,8 @@ import org.xydra.store.access.XGroupDatabase;
 
 /**
  * An in-memory implementation of {@link XydraStore} that uses internally two
- * {@link AllowAllMemoryStore} instances. One for storing the actual repository
- * data and one for all data related to access rights.
+ * {@link AllowAllStore} instances. One for storing the actual repository data
+ * and one for all data related to access rights.
  * 
  * A {@link GroupModelWrapper} is used to use repository as a
  * {@link XGroupDatabase}.
@@ -29,8 +29,8 @@ import org.xydra.store.access.XGroupDatabase;
  */
 public class MemoryStore implements XydraStore {
 	
-	private AllowAllMemoryStore data;
-	private AllowAllMemoryStore rights;
+	private AllowAllStore data;
+	private AllowAllStore rights;
 	private GroupModelWrapper groupModelWrapper;
 	
 	/**
@@ -38,8 +38,11 @@ public class MemoryStore implements XydraStore {
 	 * @param rights
 	 */
 	public MemoryStore() {
-		this.data = new AllowAllMemoryStore(XX.toId("data"));
-		this.rights = new AllowAllMemoryStore(XX.toId("rights"));
+		// TODO why not store both data and rights in the same store instance,
+		// but with different repository IDs?
+		this.data = new AllowAllStore(new MemoryNoAccessRightsNoBatchNoAsyncStore(XX.toId("data")));
+		this.rights = new AllowAllStore(new MemoryNoAccessRightsNoBatchNoAsyncStore(XX
+		        .toId("rights")));
 		this.groupModelWrapper = new GroupModelWrapper(this.rights, XX.toId("rights"), XX
 		        .toId("actors"));
 		
@@ -102,6 +105,10 @@ public class MemoryStore implements XydraStore {
 			callback.onFailure(new AutorisationException("Unauthorised login/passwordHash "
 			        + actorId + "/" + passwordHash));
 		} else {
+			// FIXME check access rights
+			// FIXME need to check the repoId on modelAddresses and load from
+			// this.rights instead if requested ARM data
+			// (both also apply to other methods)
 			this.data.getModelSnapshots(actorId, passwordHash, modelAddresses, callback);
 		}
 	}

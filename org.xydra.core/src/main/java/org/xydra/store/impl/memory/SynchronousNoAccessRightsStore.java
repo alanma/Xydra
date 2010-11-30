@@ -19,12 +19,12 @@ import org.xydra.store.Callback;
  * 
  * @author voelkel
  */
-public class MemoryNoAccessRightsStore implements XydraNoAccessRightsStore {
+public class SynchronousNoAccessRightsStore implements XydraNoAccessRightsStore {
 	
-	protected MemoryNoAccessRightsNoBatchNoAsyncStore noBatchStore;
+	protected XydraNoAccessRightsNoBatchNoAsyncStore noBatchStore;
 	
-	public MemoryNoAccessRightsStore(XID repositoryId) {
-		this.noBatchStore = new MemoryNoAccessRightsNoBatchNoAsyncStore(repositoryId);
+	public SynchronousNoAccessRightsStore(XydraNoAccessRightsNoBatchNoAsyncStore base) {
+		this.noBatchStore = base;
 	}
 	
 	@Override

@@ -24,12 +24,16 @@ import org.xydra.store.XydraStore;
  * @author voelkel
  * 
  */
-public class AllowAllMemoryStore implements XydraStore {
+public class AllowAllStore implements XydraStore {
 	
-	protected MemoryNoAccessRightsStore storeWithoutAccessRights;
+	protected XydraNoAccessRightsStore storeWithoutAccessRights;
 	
-	public AllowAllMemoryStore(XID repositoryId) {
-		this.storeWithoutAccessRights = new MemoryNoAccessRightsStore(repositoryId);
+	public AllowAllStore(XydraNoAccessRightsStore base) {
+		this.storeWithoutAccessRights = base;
+	}
+	
+	public AllowAllStore(XydraNoAccessRightsNoBatchNoAsyncStore base) {
+		this.storeWithoutAccessRights = new SynchronousNoAccessRightsStore(base);
 	}
 	
 	@Override
