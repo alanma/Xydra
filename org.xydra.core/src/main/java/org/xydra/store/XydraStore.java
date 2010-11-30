@@ -63,6 +63,9 @@ import com.sun.org.apache.xpath.internal.objects.XObject;
  * 
  * For anonymous users over HTTP, the IP-Address could be used as an actorId.
  * 
+ * IMPROVE is it a good idea to abort the whole batch operation, if there is an
+ * AccessException or InternalStoreException for a single operation? ~Daniel
+ * 
  * @author voelkel
  * @author dscharrer
  */
@@ -272,19 +275,29 @@ public interface XydraStore {
 	 *            If the given address refers to a model, all events for
 	 *            contained objects and fields are returned as well. If the
 	 *            address refers to an object, the events for all contained
-	 *            fields are returned as well.
+	 *            fields are returned as well. Events for creating and removing
+	 *            the entity specified by the XAddress are also included.
 	 * 
 	 *            TODO provide a method to request only model / object events,
 	 *            excluding events for child entities?
 	 * 
-	 * @param beginRevision the beginning revision number of the interval from
-	 *            which all {@link XEvent XEvents} are to be returned - can be
-	 *            less than {@link #getFirstRevisionNumber()} to get all
-	 *            {@link XEvent XEvents} up to endRevision
-	 * @param endRevision the end revision number of the interval from which all
-	 *            {@link XEvent XEvents} are to be returned - can be greater
-	 *            than {@link #getCurrentRevisionNumber()} to get all
-	 *            {@link XEvent XEvents} since beginRevision
+	 *            FIXME Why can we only specify a single (start,end) revision
+	 *            pair, but multiple addresses? This does not make any sense as
+	 *            a revisions are model-specific. ~Daniel
+	 * 
+	 *            TODO How to filter transaction events if the address is not a
+	 *            model? Include the transaction if any events match the filter?
+	 *            Only include the transaction if all events match the filter?
+	 *            Or create a filtered transaction? ~Daniel
+	 * 
+	 * @param beginRevision the beginning revision number (inclusive) of the
+	 *            interval from which all {@link XEvent XEvents} are to be
+	 *            returned - can be zero to get all {@link XEvent XEvents} up to
+	 *            endRevision.
+	 * @param endRevision the end revision number (inclusive) of the interval
+	 *            from which all {@link XEvent XEvents} are to be returned - can
+	 *            be greater than {@link #getCurrentRevisionNumber()} to get all
+	 *            {@link XEvent XEvents} since beginRevision.
 	 * @param callback Asynchronous callback to signal success or failure. On
 	 *            success, this callback returns an array which has one entry
 	 *            for each requested XAddress. Each entry is itself an array of
