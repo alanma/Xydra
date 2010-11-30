@@ -22,12 +22,15 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.delta.ChangedModel;
+import org.xydra.core.model.delta.DeltaUtils;
 import org.xydra.core.model.impl.memory.AbstractChangeLog;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlEvent;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
 import org.xydra.index.XI;
+import org.xydra.index.query.Pair;
 import org.xydra.server.IXydraServer;
 import org.xydra.server.impl.newgae.GaeUtils;
 import org.xydra.store.XydraStore;
@@ -556,16 +559,17 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 		
 		XBaseModel currentModel = InternalGaeModel.get(this, change.rev - 1, change.locks);
 		
-		List<XAtomicEvent> events = GaeEventHelper.checkCommandAndCreateEvents(currentModel,
-		        command, actorId, change.rev);
+		Pair<ChangedModel,DeltaUtils.ModelChange> c = DeltaUtils.executeCommand(currentModel,
+		        command);
+		if(c == null) {
+			giveUpIfTimeoutCritical(change.startTime);
+			cleanupChangeEntity(change.entity, STATUS_FAILED_PRECONDITIONS);
+			return null;
+		}
+		
+		List<XAtomicEvent> events = DeltaUtils.createEvents(this.modelAddr, c, actorId, change.rev);
 		
 		try {
-			
-			if(events == null) {
-				giveUpIfTimeoutCritical(change.startTime);
-				cleanupChangeEntity(change.entity, STATUS_FAILED_PRECONDITIONS);
-				return null;
-			}
 			
 			if(events.isEmpty()) {
 				giveUpIfTimeoutCritical(change.startTime);

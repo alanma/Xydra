@@ -1,4 +1,4 @@
-package org.xydra.server.impl.newgae.changes;
+package org.xydra.core.model.delta;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,10 +15,8 @@ import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
-import org.xydra.core.model.delta.ChangedField;
-import org.xydra.core.model.delta.ChangedModel;
-import org.xydra.core.model.delta.ChangedObject;
 import org.xydra.core.value.XValue;
+import org.xydra.index.query.Pair;
 
 
 /**
@@ -30,83 +28,39 @@ import org.xydra.core.value.XValue;
  * @author dscharrer
  * 
  */
-public abstract class GaeEventHelper {
+public abstract class DeltaUtils {
 	
-	public static List<XAtomicEvent> checkRepositoryCommandAndCreateEvents(XBaseModel currentModel,
-	        XRepositoryCommand rc, XID actorId, long rev) throws AssertionError {
+	public static void createEventsForChangedModel(List<XAtomicEvent> events, XID actorId,
+	        ChangedModel changedModel, boolean inTrans, boolean implied) {
 		
-		List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
-		
-		switch(rc.getChangeType()) {
-		case ADD:
-			if(currentModel == null) {
-				events.add(MemoryRepositoryEvent.createAddEvent(actorId, rc.getTarget(), rc
-				        .getModelID(), rev - 1, false));
-			} else if(!rc.isForced()) {
-				return null;
-			}
-			break;
-		
-		case REMOVE:
-			if(currentModel == null || currentModel.getRevisionNumber() != rc.getRevisionNumber()) {
-				if(!rc.isForced()) {
-					return null;
-				}
-			}
-			if(currentModel != null) {
-				assert rev - 1 == currentModel.getRevisionNumber();
-				boolean inTrans = false;
-				
-				for(XID objectId : currentModel) {
-					inTrans = true;
-					GaeEventHelper.createEventsForRemovedObject(events, rev - 1, actorId,
-					        currentModel.getObject(objectId), inTrans, true);
-				}
-				events.add(MemoryRepositoryEvent.createRemoveEvent(actorId, rc.getTarget(), rc
-				        .getModelID(), rev - 1, inTrans));
-			}
-			break;
-		
-		default:
-			throw new AssertionError("XRepositoryCommand with unexpected type: " + rc);
-		}
-		
-		return events;
-	}
-	
-	public static List<XAtomicEvent> createEventsForChangedModel(XID actorId,
-	        ChangedModel changedModel) {
-		
-		List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
-		
-		boolean inTrans = changedModel.countEventsNeeded(2) > 1;
 		long rev = changedModel.getRevisionNumber();
 		
 		for(XID objectId : changedModel.getRemovedObjects()) {
 			XBaseObject removedObject = changedModel.getOldObject(objectId);
-			GaeEventHelper.createEventsForRemovedObject(events, rev, actorId, removedObject,
-			        inTrans, false);
+			DeltaUtils.createEventsForRemovedObject(events, rev, actorId, removedObject, inTrans,
+			        implied);
 		}
 		
 		for(XBaseObject object : changedModel.getNewObjects()) {
 			events.add(MemoryModelEvent.createAddEvent(actorId, changedModel.getAddress(), object
 			        .getID(), rev, inTrans));
 			for(XID fieldId : object) {
-				GaeEventHelper.createEventsForNewField(events, rev, actorId, object, object
+				DeltaUtils.createEventsForNewField(events, rev, actorId, object, object
 				        .getField(fieldId), inTrans);
 			}
 		}
 		
 		for(ChangedObject object : changedModel.getChangedObjects()) {
 			
+			assert !implied;
+			
 			for(XID fieldId : object.getRemovedFields()) {
-				GaeEventHelper.createEventsForRemovedField(events, rev, actorId, object, object
+				DeltaUtils.createEventsForRemovedField(events, rev, actorId, object, object
 				        .getOldField(fieldId), inTrans, false);
 			}
 			
 			for(XBaseField field : object.getNewFields()) {
-				GaeEventHelper
-				        .createEventsForNewField(events, rev, actorId, object, field, inTrans);
+				DeltaUtils.createEventsForNewField(events, rev, actorId, object, field, inTrans);
 			}
 			
 			for(ChangedField field : object.getChangedFields()) {
@@ -133,7 +87,6 @@ public abstract class GaeEventHelper {
 			
 		}
 		
-		return events;
 	}
 	
 	public static void createEventsForNewField(List<XAtomicEvent> events, long rev, XID actorId,
@@ -150,7 +103,7 @@ public abstract class GaeEventHelper {
 	public static void createEventsForRemovedObject(List<XAtomicEvent> events, long modelRev,
 	        XID actorId, XBaseObject object, boolean inTrans, boolean implied) {
 		for(XID fieldId : object) {
-			GaeEventHelper.createEventsForRemovedField(events, modelRev, actorId, object, object
+			DeltaUtils.createEventsForRemovedField(events, modelRev, actorId, object, object
 			        .getField(fieldId), inTrans, true);
 		}
 		events.add(MemoryModelEvent.createRemoveEvent(actorId, object.getAddress().getParent(),
@@ -169,32 +122,105 @@ public abstract class GaeEventHelper {
 		        modelRev, objectRev, fieldRev, inTrans, implied));
 	}
 	
-	public static List<XAtomicEvent> checkCommandAndCreateEvents(XBaseModel currentModel,
-	        XCommand command, XID actorId, long rev) {
+	/**
+	 * @return the appropriate events for the change (as returned by
+	 *         {@link #executeCommand(XBaseModel, XCommand)}
+	 */
+	public static List<XAtomicEvent> createEvents(XAddress modelAddr,
+	        Pair<ChangedModel,ModelChange> change, XID actorId, long rev) {
+		
+		assert change != null;
+		
+		ChangedModel model = change.getFirst();
+		ModelChange mc = change.getSecond();
+		
+		assert model == null || rev - 1 == model.getRevisionNumber();
+		
+		int nChanges = (mc == ModelChange.NOCHANGE ? 0 : 1);
+		if(model != null) {
+			nChanges += model.countEventsNeeded(2 - nChanges);
+		}
+		boolean inTrans = nChanges > 1;
+		
+		List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
+		
+		if(mc == ModelChange.CREATED) {
+			events.add(MemoryRepositoryEvent.createAddEvent(actorId, modelAddr.getParent(),
+			        modelAddr.getModel(), rev - 1, false));
+		}
+		
+		if(model != null) {
+			createEventsForChangedModel(events, actorId, model, inTrans, mc == ModelChange.REMOVED);
+		}
+		
+		if(mc == ModelChange.REMOVED) {
+			events.add(MemoryRepositoryEvent.createRemoveEvent(actorId, modelAddr.getParent(),
+			        modelAddr.getModel(), rev - 1, inTrans));
+		}
+		
+		return events;
+	}
+	
+	public enum ModelChange {
+		REMOVED, CREATED, NOCHANGE
+	}
+	
+	/**
+	 * Execute the current command on the model.
+	 * 
+	 * @param model The model to modify. Null if the model currently doesn't
+	 *            exist. This instance is modified.
+	 * @return The changed model after executing the command (may be null if
+	 *         there are no other changes except creating/removing the model)
+	 *         (Pair#getFirst()) and if the model was added or removed by the
+	 *         command (Pair#getSecond()). Returns null if the command failed.
+	 */
+	public static Pair<ChangedModel,ModelChange> executeCommand(XBaseModel model, XCommand command) {
 		
 		if(command instanceof XRepositoryCommand) {
+			
 			XRepositoryCommand rc = (XRepositoryCommand)command;
 			
-			return checkRepositoryCommandAndCreateEvents(currentModel, rc, actorId, rev);
+			switch(rc.getChangeType()) {
+			case ADD:
+				if(model == null) {
+					return new Pair<ChangedModel,ModelChange>(null, ModelChange.CREATED);
+				} else if(rc.isForced()) {
+					return new Pair<ChangedModel,ModelChange>(null, ModelChange.NOCHANGE);
+				} else {
+					return null;
+				}
+				
+			case REMOVE:
+				if((model == null || model.getRevisionNumber() != rc.getRevisionNumber())
+				        && !rc.isForced()) {
+					return null;
+				} else if(model != null) {
+					ChangedModel changedModel = new ChangedModel(model);
+					changedModel.clear();
+					return new Pair<ChangedModel,ModelChange>(changedModel, ModelChange.REMOVED);
+				} else {
+					return new Pair<ChangedModel,ModelChange>(null, ModelChange.NOCHANGE);
+				}
+				
+			default:
+				throw new AssertionError("XRepositoryCommand with unexpected type: " + rc);
+			}
 			
 		} else {
 			
-			if(currentModel == null) {
+			if(model == null) {
 				return null;
 			}
 			
-			assert rev - 1 == currentModel.getRevisionNumber();
-			
-			ChangedModel changedModel = new ChangedModel(currentModel);
+			ChangedModel changedModel = new ChangedModel(model);
 			
 			// apply changes to the delta-model
 			if(!changedModel.executeCommand(command)) {
 				return null;
 			}
 			
-			// create events
-			
-			return createEventsForChangedModel(actorId, changedModel);
+			return new Pair<ChangedModel,ModelChange>(changedModel, ModelChange.NOCHANGE);
 			
 		}
 		
