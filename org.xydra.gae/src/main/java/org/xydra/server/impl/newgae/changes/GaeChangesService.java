@@ -569,6 +569,8 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 		
 		List<XAtomicEvent> events = DeltaUtils.createEvents(this.modelAddr, c, actorId, change.rev);
 		
+		assert events != null;
+		
 		try {
 			
 			if(events.isEmpty()) {
