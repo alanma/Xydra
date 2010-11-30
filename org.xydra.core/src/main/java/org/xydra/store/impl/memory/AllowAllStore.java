@@ -51,7 +51,7 @@ public class AllowAllStore implements XydraStore {
 	public void executeCommandsAndGetEvents(XID actorId, String passwordHash, XCommand[] commands,
 	        XAddress[] addressesToGetEventsFor, long beginRevision, long endRevision,
 	        Callback<Pair<long[],XEvent[][]>> callback) {
-		this.storeWithoutAccessRights.executeCommandsAndGetEvents(commands,
+		this.storeWithoutAccessRights.executeCommandsAndGetEvents(actorId, commands,
 		        addressesToGetEventsFor, beginRevision, endRevision, callback);
 	}
 	

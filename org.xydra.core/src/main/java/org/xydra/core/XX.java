@@ -1,6 +1,5 @@
 package org.xydra.core;
 
-
 import org.xydra.core.model.MissingPieceException;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XField;
@@ -37,7 +36,7 @@ public class XX {
 	 * @return The {@link XField} with newly set {@link XValue}
 	 */
 	// 2010-10-27: used only in tests
-	public static XField setValue(XID actorID, XObject object, XID fieldID, XValue value) {
+	public static XField setValue(XObject object, XID fieldID, XValue value) {
 		XField field = object.createField(fieldID);
 		field.setValue(value);
 		return field;
@@ -56,9 +55,9 @@ public class XX {
 	 * @return The {@link XField} with newly set {@link XValue}
 	 */
 	// 2010-10-27: used only in this class
-	public static XField setValue(XID actorID, XModel model, XID objectID, XID fieldID, XValue value) {
+	public static XField setValue(XModel model, XID objectID, XID fieldID, XValue value) {
 		XObject object = safeGetObject(model, objectID);
-		return setValue(actorID, object, fieldID, value);
+		return setValue(object, fieldID, value);
 	}
 	
 	/**
@@ -76,10 +75,10 @@ public class XX {
 	 * @return The {@link XField} with newly set {@link XValue}
 	 */
 	// 2010-10-27: not used anywhere
-	public static XField setValue(XID actorID, XRepository repository, XID modelID, XID objectID,
-	        XID fieldID, XValue value) {
+	public static XField setValue(XRepository repository, XID modelID, XID objectID, XID fieldID,
+	        XValue value) {
 		XModel model = safeGetModel(repository, modelID);
-		return setValue(actorID, model, objectID, fieldID, value);
+		return setValue(model, objectID, fieldID, value);
 	}
 	
 	/**

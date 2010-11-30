@@ -48,7 +48,6 @@ import org.xydra.core.xml.impl.XmlOutStringBuffer;
  */
 public abstract class AbstractTestAPI {
 	
-	public static final XID ACTOR_ID = XX.toId("urn-test-actorID");
 	private XID actorId = XX.toId("AbstractTestAPI");
 	
 	@Test
@@ -237,7 +236,7 @@ public abstract class AbstractTestAPI {
 		XValue value1 = XV.toValue("Test value");
 		
 		// Add value to an existing field
-		XField field2 = XX.setValue(ACTOR_ID, object, field1.getID(), value1);
+		XField field2 = XX.setValue(object, field1.getID(), value1);
 		
 		// check if the method works correctly
 		assertEquals("the value of field should be set", field1, field2);
@@ -246,19 +245,19 @@ public abstract class AbstractTestAPI {
 		
 		// Change value of the existing field
 		XValue value2 = XV.toValue("Another test value");
-		field2 = XX.setValue(ACTOR_ID, object, field1.getID(), value2);
+		field2 = XX.setValue(object, field1.getID(), value2);
 		assertEquals(field1, field2);
 		assertTrue(field1 == field2);
 		
 		// Remove value of the existing field
-		field2 = XX.setValue(ACTOR_ID, object, field1.getID(), null);
+		field2 = XX.setValue(object, field1.getID(), null);
 		assertEquals(field1, field2);
 		assertTrue(field1 == field2);
 		assertNull(field1.getValue());
 		
 		// Add value to a not existing field (should create a fitting field)
 		XID newID = XX.createUniqueID();
-		field2 = XX.setValue(ACTOR_ID, object, newID, value1);
+		field2 = XX.setValue(object, newID, value1);
 		assertTrue(object.hasField(newID)); // did it create a new field?
 		assertEquals(object.getField(newID), field2);
 		assertTrue(object.getField(newID) == field2);
@@ -267,7 +266,7 @@ public abstract class AbstractTestAPI {
 		// Remove a value from a not existing field (should create a new field
 		// which value isn't set)
 		newID = XX.createUniqueID();
-		field2 = XX.setValue(ACTOR_ID, object, newID, null);
+		field2 = XX.setValue(object, newID, null);
 		assertTrue(object.hasField(newID));
 		assertEquals(object.getField(newID), field2);
 		assertTrue(object.getField(newID) == field2);
@@ -296,7 +295,7 @@ public abstract class AbstractTestAPI {
 		// copy it!
 		XModel copyModel = new MemoryModel(this.actorId, model.getID());
 		
-		XCopyUtils.copy(ACTOR_ID, model, copyModel);
+		XCopyUtils.copyData(model, copyModel);
 		
 		// do both models have the same content? (revision numbers may differ)
 		assertTrue(XCompareUtils.equalTree(model, copyModel));
@@ -320,7 +319,7 @@ public abstract class AbstractTestAPI {
 		// copy it!
 		XObject copyObject = new MemoryObject(this.actorId, object.getID());
 		
-		XCopyUtils.copy(ACTOR_ID, object, copyObject);
+		XCopyUtils.copyData(object, copyObject);
 		
 		// do both objects have the same content? (revision numbers may differ)
 		assertTrue(XCompareUtils.equalTree(object, copyObject));
@@ -553,14 +552,14 @@ public abstract class AbstractTestAPI {
 		field1 = object.createField(fieldID);
 		
 		// set the value of an existing field
-		AbstractTestAPI.safeSetStringValue(ACTOR_ID, object, fieldID, "Test");
+		AbstractTestAPI.safeSetStringValue(object, fieldID, "Test");
 		assertTrue(field1.getValue() instanceof XStringValue);
 		assertEquals("Test", ((XStringValue)field1.getValue()).contents());
 		
 		// set the value of a not existing field
 		newID = XX.createUniqueID();
 		assertFalse(object.hasField(newID));
-		AbstractTestAPI.safeSetStringValue(ACTOR_ID, object, newID, "Test");
+		AbstractTestAPI.safeSetStringValue(object, newID, "Test");
 		assertTrue(object.hasField(newID));
 		assertTrue(object.getField(newID).getValue() instanceof XStringValue);
 		assertEquals("Test", ((XStringValue)object.getField(newID).getValue()).contents());
@@ -1089,10 +1088,9 @@ public abstract class AbstractTestAPI {
 	 * @param stringValue The new String, which will be set as the value of the
 	 *            specified {@link XField}.
 	 */
-	public static void safeSetStringValue(XID actorID, XObject object, XID fieldID,
-	        String stringValue) {
+	public static void safeSetStringValue(XObject object, XID fieldID, String stringValue) {
 		if(object != null) {
-			XX.setValue(actorID, object, fieldID, XV.toValue(stringValue));
+			XX.setValue(object, fieldID, XV.toValue(stringValue));
 		}
 	}
 	

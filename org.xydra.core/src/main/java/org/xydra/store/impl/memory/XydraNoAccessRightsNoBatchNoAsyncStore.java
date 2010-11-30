@@ -21,23 +21,23 @@ import org.xydra.store.XydraStore;
 public interface XydraNoAccessRightsNoBatchNoAsyncStore {
 	
 	/**
-	 * Execute a non-implied command.
+	 * Execute a command.
 	 * 
 	 * @param actorId
 	 * @param xCommand
 	 * @return
 	 */
-	long executeCommand(XID actorId, XCommand xCommand);
+	long executeCommand(XID actorId, XCommand command);
 	
-	XEvent[] getEvents(XAddress xAddress, long beginRevision, long endRevision);
+	XEvent[] getEvents(XAddress address, long beginRevision, long endRevision);
 	
 	Set<XID> getModelIds();
 	
-	long getModelRevision(XAddress xAddress);
+	long getModelRevision(XAddress address);
 	
-	XBaseModel getModelSnapshot(XAddress xAddress);
+	XBaseModel getModelSnapshot(XAddress address);
 	
-	XBaseObject getObjectSnapshot(XAddress xAddress);
+	XBaseObject getObjectSnapshot(XAddress address);
 	
 	XID getRepositoryId();
 	

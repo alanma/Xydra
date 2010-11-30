@@ -22,8 +22,9 @@ public interface XydraNoAccessRightsStore {
 	
 	void executeCommands(XID actorId, XCommand[] commands, Callback<long[]> callback);
 	
-	void executeCommandsAndGetEvents(XCommand[] commands, XAddress[] addressesToGetEventsFor,
-	        long beginRevision, long endRevision, Callback<Pair<long[],XEvent[][]>> callback);
+	void executeCommandsAndGetEvents(XID actorId, XCommand[] commands,
+	        XAddress[] addressesToGetEventsFor, long beginRevision, long endRevision,
+	        Callback<Pair<long[],XEvent[][]>> callback);
 	
 	void getEvents(XAddress[] addresses, long beginRevision, long endRevision,
 	        Callback<XEvent[][]> callback);

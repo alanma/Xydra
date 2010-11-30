@@ -17,6 +17,8 @@ import org.xydra.store.Callback;
  * batch calls to an instance of {@link XydraNoAccessRightsNoBatchNoAsyncStore}
  * which treats them as single-op blocking call.
  * 
+ * TODO catch excpetions and pass them to the callback
+ * 
  * @author voelkel
  */
 public class SynchronousNoAccessRightsStore implements XydraNoAccessRightsStore {
@@ -27,31 +29,40 @@ public class SynchronousNoAccessRightsStore implements XydraNoAccessRightsStore 
 		this.noBatchStore = base;
 	}
 	
-	@Override
-	public void executeCommands(XID actorId, XCommand[] commands, Callback<long[]> callback) {
+	private long[] executeCommands(XID actorId, XCommand[] commands) {
 		long[] results = new long[commands.length];
 		for(int i = 0; i < commands.length; i++) {
 			results[i] = this.noBatchStore.executeCommand(actorId, commands[i]);
 		}
-		callback.onSuccess(results);
+		return results;
 	}
 	
 	@Override
-	public void executeCommandsAndGetEvents(XCommand[] commands,
+	public void executeCommands(XID actorId, XCommand[] commands, Callback<long[]> callback) {
+		callback.onSuccess(executeCommands(actorId, commands));
+	}
+	
+	@Override
+	public void executeCommandsAndGetEvents(XID actorId, XCommand[] commands,
 	        XAddress[] addressesToGetEventsFor, long beginRevision, long endRevision,
 	        Callback<Pair<long[],XEvent[][]>> callback) {
-		// TODO Auto-generated method stub
-		
+		long[] commandResults = executeCommands(actorId, commands);
+		XEvent[][] eventResults = getEvents(addressesToGetEventsFor, beginRevision, endRevision);
+		callback.onSuccess(new Pair<long[],XEvent[][]>(commandResults, eventResults));
+	}
+	
+	private XEvent[][] getEvents(XAddress[] addresses, long beginRevision, long endRevision) {
+		XEvent[][] results = new XEvent[addresses.length][];
+		for(int i = 0; i < addresses.length; i++) {
+			results[i] = this.noBatchStore.getEvents(addresses[i], beginRevision, endRevision);
+		}
+		return results;
 	}
 	
 	@Override
 	public void getEvents(XAddress[] addresses, long beginRevision, long endRevision,
 	        Callback<XEvent[][]> callback) {
-		XEvent[][] results = new XEvent[addresses.length][];
-		for(int i = 0; i < addresses.length; i++) {
-			results[i] = this.noBatchStore.getEvents(addresses[i], beginRevision, endRevision);
-		}
-		callback.onSuccess(results);
+		callback.onSuccess(getEvents(addresses, beginRevision, endRevision));
 	}
 	
 	@Override

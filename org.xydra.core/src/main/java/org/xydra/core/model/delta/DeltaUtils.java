@@ -15,8 +15,12 @@ import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.impl.memory.SynchronizesChangesImpl;
 import org.xydra.core.value.XValue;
 import org.xydra.index.query.Pair;
+import org.xydra.store.base.SimpleField;
+import org.xydra.store.base.SimpleModel;
+import org.xydra.store.base.SimpleObject;
 
 
 /**
@@ -224,6 +228,93 @@ public abstract class DeltaUtils {
 			
 		}
 		
+	}
+	
+	public static SimpleModel applyChanges(XAddress modelAddr, SimpleModel modelToChange,
+	        Pair<ChangedModel,ModelChange> change, long rev) {
+		
+		SimpleModel model = modelToChange;
+		ChangedModel changedModel = change.getFirst();
+		ModelChange mc = change.getSecond();
+		
+		if(mc == ModelChange.REMOVED) {
+			return null;
+		} else if(mc == ModelChange.CREATED) {
+			assert model == null;
+			model = new SimpleModel(modelAddr);
+		}
+		
+		assert model != null;
+		
+		applyChanges(model, changedModel, rev);
+		
+		return model;
+	}
+	
+	/**
+	 * IMPROVE some of this could be shared with {@link SynchronizesChangesImpl}
+	 * , but revision numbers are handled differently.
+	 */
+	public static void applyChanges(SimpleModel model, ChangedModel changedModel, long rev) {
+		
+		for(XID objectId : changedModel.getRemovedObjects()) {
+			assert model.hasObject(objectId);
+			model.removeObject(objectId);
+		}
+		
+		for(XBaseObject object : changedModel.getNewObjects()) {
+			assert !model.hasObject(object.getID());
+			SimpleObject newObject = model.createObject(object.getID());
+			for(XID fieldId : object) {
+				applyChanges(newObject, object.getField(fieldId), rev);
+			}
+			newObject.setRevisionNumber(rev);
+		}
+		
+		for(ChangedObject changedObject : changedModel.getChangedObjects()) {
+			
+			boolean objectChanged = false;
+			
+			SimpleObject object = model.getObject(changedObject.getID());
+			assert object != null;
+			
+			for(XID fieldId : changedObject.getRemovedFields()) {
+				assert object.hasField(fieldId);
+				object.removeField(fieldId);
+				objectChanged = true;
+			}
+			
+			for(XBaseField field : changedObject.getNewFields()) {
+				applyChanges(object, field, rev);
+				objectChanged = true;
+			}
+			
+			for(ChangedField changedField : changedObject.getChangedFields()) {
+				if(changedField.isChanged()) {
+					SimpleField field = object.getField(changedField.getID());
+					assert field != null;
+					boolean valueChanged = field.setValue(changedField.getValue());
+					assert valueChanged;
+					field.setRevisionNumber(rev);
+					objectChanged = true;
+				}
+			}
+			
+			if(objectChanged) {
+				object.setRevisionNumber(rev);
+			}
+			
+		}
+		
+		model.setRevisionNumber(rev);
+		
+	}
+	
+	public static void applyChanges(SimpleObject object, XBaseField field, long rev) {
+		assert !object.hasField(field.getID());
+		SimpleField newField = object.createField(field.getID());
+		newField.setValue(field.getValue());
+		newField.setRevisionNumber(rev);
 	}
 	
 }

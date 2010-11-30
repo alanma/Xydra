@@ -90,4 +90,11 @@ public class SimpleModel implements XWritableModel, Serializable {
 		return this.objects.keySet().iterator();
 	}
 	
+	/**
+	 * @param rev the new revision number
+	 */
+	public void setRevisionNumber(long rev) {
+		this.revisionNumber = rev;
+	}
+	
 }
