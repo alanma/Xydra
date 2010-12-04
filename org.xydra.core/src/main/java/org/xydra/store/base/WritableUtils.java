@@ -1,6 +1,7 @@
 package org.xydra.store.base;
 
 import org.xydra.core.change.XCommand;
+import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.StoreException;
 import org.xydra.store.XydraStore;
@@ -27,7 +28,7 @@ public class WritableUtils {
 	public static synchronized long executeCommand(Credentials credentials, XydraStore store,
 	        XCommand command) {
 		store.executeCommands(credentials.actorId, credentials.passwordHash,
-		        new XCommand[] { command }, new Callback<long[]>() {
+		        new XCommand[] { command }, new Callback<BatchedResult<Long>[]>() {
 			        
 			        @Override
 			        public void onFailure(Throwable exception) {
@@ -35,9 +36,13 @@ public class WritableUtils {
 			        }
 			        
 			        @Override
-			        public void onSuccess(long[] object) {
+			        public void onSuccess(BatchedResult<Long>[] object) {
 				        assert object.length == 1;
-				        WritableUtils.result = object[0];
+				        /*
+						 * TODO better error handling if getResult is null
+						 * because getException has an AccessException
+						 */
+				        WritableUtils.result = object[0].getResult();
 			        }
 		        });
 		return result;

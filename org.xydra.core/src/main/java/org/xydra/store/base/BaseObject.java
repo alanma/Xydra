@@ -7,6 +7,7 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
+import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.StoreException;
 import org.xydra.store.XydraStore;
@@ -46,7 +47,7 @@ public class BaseObject implements XBaseObject, Serializable {
 	
 	protected void load() {
 		this.store.getObjectSnapshots(this.credentials.actorId, this.credentials.passwordHash,
-		        new XAddress[] { this.address }, new Callback<XBaseObject[]>() {
+		        new XAddress[] { this.address }, new Callback<BatchedResult<XBaseObject>[]>() {
 			        
 			        @Override
 			        public void onFailure(Throwable error) {
@@ -54,9 +55,13 @@ public class BaseObject implements XBaseObject, Serializable {
 			        }
 			        
 			        @Override
-			        public void onSuccess(XBaseObject[] object) {
+			        public void onSuccess(BatchedResult<XBaseObject>[] object) {
 				        assert object.length == 1;
-				        BaseObject.this.baseObject = object[0];
+				        /*
+						 * TODO better error handling if getResult is null
+						 * because getException has an AccessException
+						 */
+				        BaseObject.this.baseObject = object[0].getResult();
 			        }
 		        });
 	}

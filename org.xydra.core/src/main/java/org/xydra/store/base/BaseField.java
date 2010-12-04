@@ -7,6 +7,7 @@ import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
 import org.xydra.core.value.XValue;
+import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.StoreException;
 import org.xydra.store.XydraStore;
@@ -82,7 +83,8 @@ public class BaseField implements XBaseField, Serializable {
 	
 	protected void load() {
 		this.store.getObjectSnapshots(this.credentials.actorId, this.credentials.passwordHash,
-		        new XAddress[] { this.address.getParent() }, new Callback<XBaseObject[]>() {
+		        new XAddress[] { this.address.getParent() },
+		        new Callback<BatchedResult<XBaseObject>[]>() {
 			        
 			        @Override
 			        public void onFailure(Throwable error) {
@@ -90,9 +92,13 @@ public class BaseField implements XBaseField, Serializable {
 			        }
 			        
 			        @Override
-			        public void onSuccess(XBaseObject[] object) {
+			        public void onSuccess(BatchedResult<XBaseObject>[] object) {
 				        assert object.length == 1;
-				        BaseField.this.baseField = object[0].getField(getID());
+				        /*
+						 * TODO better error handling if getResult is null
+						 * because getException has an AccessException
+						 */
+				        BaseField.this.baseField = object[0].getResult().getField(getID());
 			        }
 		        });
 	}

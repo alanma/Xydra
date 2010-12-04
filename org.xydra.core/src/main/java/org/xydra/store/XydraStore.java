@@ -13,16 +13,16 @@ import org.xydra.core.change.XTransactionEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
-import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
+import org.xydra.core.model.XRepository;
 import org.xydra.index.query.Pair;
 
 import com.sun.org.apache.xpath.internal.objects.XObject;
 
 
 /**
- * A small yet complete API for a persistence layer that offers the follwing
+ * A small yet complete API for a persistence layer that offers the following
  * features:
  * <ol>
  * <li>Persistence</li>
@@ -31,14 +31,14 @@ import com.sun.org.apache.xpath.internal.objects.XObject;
  * <li>Versioning</li>
  * <li>Transactions and Command-pattern</li>
  * <li>Retrieval of events</li>
- * <li>Partial loading (models or objects)</li>
+ * <li>Partial loading (supports loading single models or objects)</li>
  * </ol>
  * 
  * <h3>Usage guidelines</h3> For secure usage this API should be used over HTTPS
  * or within the same VM.
  * 
- * Exceptions: Each method may throw in the callback one of the following
- * exceptions:
+ * <h3>Exceptions</h3> Each method may throw in the callback one of the
+ * following exceptions:
  * <ul>
  * <li>{@link AutorisationException} if actorId and passwordHash don't match</li>
  * <li>{@link AccessException} if the actorId has not the rights to do the
@@ -56,15 +56,8 @@ import com.sun.org.apache.xpath.internal.objects.XObject;
  * <li></li>
  * </ul>
  * 
- * <h3>Implementation guidelines</h3>
- * 
- * TODO Prevent brute-force attacks by throwing an exception when too many
- * operations per time use the wrong actorId/passwordHash combination.
- * 
- * For anonymous users over HTTP, the IP-Address could be used as an actorId.
- * 
- * IMPROVE is it a good idea to abort the whole batch operation, if there is an
- * AccessException or InternalStoreException for a single operation? ~Daniel
+ * <h3>Implementation guidelines</h3> For anonymous users over HTTP, the
+ * IP-Address could be used as an actorId.
  * 
  * @author voelkel
  * @author dscharrer
@@ -78,6 +71,16 @@ public interface XydraStore {
 	/**
 	 * Redundant method to allow a quick (network-efficient) check if an actorId
 	 * and passwordHash are valid for authentication.
+	 * 
+	 * Possible exceptions:
+	 * <ul>
+	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
+	 * operations per time use the wrong actorId/passwordHash combination.</li>
+	 * <li>{@link ConnectionException}</li>
+	 * <li>{@link TimeoutException}</li>
+	 * <li>{@link RequestException}</li>
+	 * <li>{@link InternalStoreException}</li>
+	 * </ul>
 	 * 
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
@@ -95,6 +98,21 @@ public interface XydraStore {
 	/**
 	 * Returns a read-only snapshots of {@link XModel} state at the point in
 	 * time when this request was processed.
+	 * 
+	 * Possible exceptions in the callback:
+	 * <ul>
+	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
+	 * operations per time use the wrong actorId/passwordHash combination.</li>
+	 * <li>{@link AutorisationException}</li>
+	 * <li>{@link ConnectionException}</li>
+	 * <li>{@link TimeoutException}</li>
+	 * <li>{@link RequestException}</li>
+	 * <li>{@link InternalStoreException}</li>
+	 * </ul>
+	 * Possible exceptions in the {@link BatchedResult}:
+	 * <ul>
+	 * <li>{@link AccessException}</li>
+	 * </ul>
 	 * 
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
@@ -116,9 +134,24 @@ public interface XydraStore {
 	 *             lazy-loading stub only.
 	 */
 	void getModelSnapshots(XID actorId, String passwordHash, XAddress[] modelAddresses,
-	        Callback<XBaseModel[]> callback) throws IllegalArgumentException;
+	        Callback<BatchedResult<XBaseModel>[]> callback) throws IllegalArgumentException;
 	
 	/**
+	 * Possible exceptions:
+	 * <ul>
+	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
+	 * operations per time use the wrong actorId/passwordHash combination.</li>
+	 * <li>{@link AutorisationException}</li>
+	 * <li>{@link ConnectionException}</li>
+	 * <li>{@link TimeoutException}</li>
+	 * <li>{@link RequestException}</li>
+	 * <li>{@link InternalStoreException}</li>
+	 * </ul>
+	 * Possible exceptions in the {@link BatchedResult}:
+	 * <ul>
+	 * <li>{@link AccessException}</li>
+	 * </ul>
+	 * 
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
 	 *            with "Xydra" to avoid transmitting the same string over the
@@ -136,11 +169,26 @@ public interface XydraStore {
 	 * @throws IllegalArgumentException
 	 */
 	void getModelRevisions(XID actorId, String passwordHash, XAddress[] modelAddresses,
-	        Callback<long[]> callback) throws IllegalArgumentException;
+	        Callback<BatchedResult<Long>[]> callback) throws IllegalArgumentException;
 	
 	/**
 	 * Returns read-only snapshots of {@link XObject} state at the point in time
 	 * when this request was processed.
+	 * 
+	 * Possible exceptions:
+	 * <ul>
+	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
+	 * operations per time use the wrong actorId/passwordHash combination.</li>
+	 * <li>{@link AutorisationException}</li>
+	 * <li>{@link ConnectionException}</li>
+	 * <li>{@link TimeoutException}</li>
+	 * <li>{@link RequestException}</li>
+	 * <li>{@link InternalStoreException}</li>
+	 * </ul>
+	 * Possible exceptions in the {@link BatchedResult}:
+	 * <ul>
+	 * <li>{@link AccessException}</li>
+	 * </ul>
 	 * 
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
@@ -162,26 +210,49 @@ public interface XydraStore {
 	 *             lazy-loading stub only.
 	 */
 	void getObjectSnapshots(XID actorId, String passwordHash, XAddress[] objectAddresses,
-	        Callback<XBaseObject[]> callback);
+	        Callback<BatchedResult<XBaseObject>[]> callback);
 	
 	/**
+	 * Possible exceptions:
+	 * <ul>
+	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
+	 * operations per time use the wrong actorId/passwordHash combination.</li>
+	 * <li>{@link AutorisationException}</li>
+	 * <li>{@link AccessException}</li>
+	 * <li>{@link ConnectionException}</li>
+	 * <li>{@link TimeoutException}</li>
+	 * <li>{@link RequestException}</li>
+	 * <li>{@link InternalStoreException}</li>
+	 * </ul>
+	 * 
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
 	 *            with "Xydra" to avoid transmitting the same string over the
 	 *            network if the user uses the same password for multiple
 	 *            services.
-	 * @param repositoryId The id of the repository for which to return the list
-	 *            of all modelIds stored in it. TODO This parameter should be
-	 *            removed since one XydraStore represents exactly one
-	 *            repository.
 	 * @param callback Asynchronous callback to signal success or failure. On
 	 *            success a Set of all {@link XID} of all {@link XModel} for
 	 *            which the given actorId has read-access in the repository is
 	 *            returned.
 	 */
-	void getModelIds(XID actorId, String passwordHash, XID repositoryId, Callback<Set<XID>> callback);
+	void getModelIds(XID actorId, String passwordHash, Callback<Set<XID>> callback);
 	
 	/**
+	 * One {@link XydraStore} instance refers to exactly one Xydra
+	 * {@link XRepository}.
+	 * 
+	 * Possible exceptions:
+	 * <ul>
+	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
+	 * operations per time use the wrong actorId/passwordHash combination.</li>
+	 * <li>{@link AutorisationException}</li>
+	 * <li>{@link AccessException}</li>
+	 * <li>{@link ConnectionException}</li>
+	 * <li>{@link TimeoutException}</li>
+	 * <li>{@link RequestException}</li>
+	 * <li>{@link InternalStoreException}</li>
+	 * </ul>
+	 * 
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
 	 *            with "Xydra" to avoid transmitting the same string over the
@@ -189,10 +260,6 @@ public interface XydraStore {
 	 *            services.
 	 * @param callback Asynchronous callback to signal success or failure. On
 	 *            success, the repositoryId of this store is returned.
-	 * 
-	 *            TODO Why only restrict this to a single repository ID? max:
-	 *            One XydraStore should represent exactly one repository which
-	 *            in turn can have only one id.
 	 */
 	void getRepositoryId(XID actorId, String passwordHash, Callback<XID> callback);
 	
@@ -201,6 +268,21 @@ public interface XydraStore {
 	/**
 	 * Check permissions, command pre-conditions, execute the command and log
 	 * the resulting events.
+	 * 
+	 * Possible exceptions:
+	 * <ul>
+	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
+	 * operations per time use the wrong actorId/passwordHash combination.</li>
+	 * <li>{@link AutorisationException}</li>
+	 * <li>{@link ConnectionException}</li>
+	 * <li>{@link TimeoutException}</li>
+	 * <li>{@link RequestException}</li>
+	 * <li>{@link InternalStoreException}</li>
+	 * </ul>
+	 * Possible exceptions in the {@link BatchedResult}:
+	 * <ul>
+	 * <li>{@link AccessException}</li>
+	 * </ul>
 	 * 
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
@@ -253,7 +335,7 @@ public interface XydraStore {
 	 *            might be called before this one.
 	 */
 	void executeCommands(XID actorId, String passwordHash, XCommand[] commands,
-	        Callback<long[]> callback);
+	        Callback<BatchedResult<Long>[]> callback);
 	
 	/* events */
 
@@ -261,43 +343,27 @@ public interface XydraStore {
 	 * Returns an iterator over all {@link XEvent XEvents} that occurred after
 	 * (and including) beginRevision and before (but not including) endRevision.
 	 * 
+	 * Possible exceptions:
+	 * <ul>
+	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
+	 * operations per time use the wrong actorId/passwordHash combination.</li>
+	 * <li>{@link AutorisationException}</li>
+	 * <li>{@link ConnectionException}</li>
+	 * <li>{@link TimeoutException}</li>
+	 * <li>{@link RequestException}</li>
+	 * <li>{@link InternalStoreException}</li>
+	 * </ul>
+	 * Possible exceptions in the {@link BatchedResult}:
+	 * <ul>
+	 * <li>{@link AccessException}</li>
+	 * </ul>
+	 * 
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
 	 *            with "Xydra" to avoid transmitting the same string over the
 	 *            network if the user uses the same password for multiple
 	 *            services.
-	 * @param addresses of {@link XModel} (repositoryId/modelId/-/-),
-	 *            {@link XObject} (repositoryId/modelId/objectId/-), or
-	 *            {@link XField} (repositoryId/modelId/objectId/fieldId) for
-	 *            which to return change events. This address must not refer to
-	 *            a repository.
-	 * 
-	 *            If the given address refers to a model, all events for
-	 *            contained objects and fields are returned as well. If the
-	 *            address refers to an object, the events for all contained
-	 *            fields are returned as well. Events for creating and removing
-	 *            the entity specified by the XAddress are also included.
-	 * 
-	 *            TODO provide a method to request only model / object events,
-	 *            excluding events for child entities?
-	 * 
-	 *            FIXME Why can we only specify a single (start,end) revision
-	 *            pair, but multiple addresses? This does not make any sense as
-	 *            a revisions are model-specific. ~Daniel
-	 * 
-	 *            TODO How to filter transaction events if the address is not a
-	 *            model? Include the transaction if any events match the filter?
-	 *            Only include the transaction if all events match the filter?
-	 *            Or create a filtered transaction? ~Daniel
-	 * 
-	 * @param beginRevision the beginning revision number (inclusive) of the
-	 *            interval from which all {@link XEvent XEvents} are to be
-	 *            returned - can be zero to get all {@link XEvent XEvents} up to
-	 *            endRevision.
-	 * @param endRevision the end revision number (inclusive) of the interval
-	 *            from which all {@link XEvent XEvents} are to be returned - can
-	 *            be greater than {@link #getCurrentRevisionNumber()} to get all
-	 *            {@link XEvent XEvents} since beginRevision.
+	 * @param getEventsRequest see {@link GetEventsRequest}.
 	 * @param callback Asynchronous callback to signal success or failure. On
 	 *            success, this callback returns an array which has one entry
 	 *            for each requested XAddress. Each entry is itself an array of
@@ -309,15 +375,30 @@ public interface XydraStore {
 	 * @throws IllegalArgumentException if beginRevision is greater than
 	 *             endRevision
 	 */
-	void getEvents(XID actorId, String passwordHash, XAddress[] addresses, long beginRevision,
-	        long endRevision, Callback<XEvent[][]> callback);
+	void getEvents(XID actorId, String passwordHash, GetEventsRequest[] getEventsRequest,
+	        Callback<BatchedResult<XEvent[]>[]> callback);
 	
 	// ------------------ documented until here
 	
 	/**
 	 * Redundant, network-optimised method to combine in one method call the
 	 * effects of {@link #executeCommands(XID, String, XCommand[], Callback)}
-	 * and {@link #getEvents(XID, String, XAddress[], long, long, Callback)}.
+	 * and {@link #getEvents(XID, String, GetEventsRequest[], Callback)}.
+	 * 
+	 * Possible exceptions:
+	 * <ul>
+	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
+	 * operations per time use the wrong actorId/passwordHash combination.</li>
+	 * <li>{@link AutorisationException}</li>
+	 * <li>{@link ConnectionException}</li>
+	 * <li>{@link TimeoutException}</li>
+	 * <li>{@link RequestException}</li>
+	 * <li>{@link InternalStoreException}</li>
+	 * </ul>
+	 * Possible exceptions in the {@link BatchedResult}:
+	 * <ul>
+	 * <li>{@link AccessException}</li>
+	 * </ul>
 	 * 
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
@@ -326,23 +407,19 @@ public interface XydraStore {
 	 *            services.
 	 * @param commands See
 	 *            {@link #executeCommands(XID, String, XCommand[], Callback)}
-	 * @param addressesToGetEventsFor See
-	 *            {@link #getEvents(XID, String, XAddress[], long, long, Callback)}
-	 * @param beginRevision See
-	 *            {@link #getEvents(XID, String, XAddress[], long, long, Callback)}
-	 * @param endRevision See
-	 *            {@link #getEvents(XID, String, XAddress[], long, long, Callback)}
+	 * @param getEventRequests See
+	 *            {@link #getEvents(XID, String, GetEventsRequest[], Callback)}
 	 * @param callback Asynchronous callback to signal success or failure. On
 	 *            success, this method returns a {@link Pair} where the first
 	 *            component is the the same as the result of
 	 *            {@link #executeCommands(XID, String, XCommand[], Callback)}
 	 *            and the second is the same as the result of
-	 *            {@link #getEvents(XID, String, XAddress[], long, long, Callback)}
+	 *            {@link #getEvents(XID, String, GetEventsRequest[], Callback)}
 	 *            .
 	 */
 	void executeCommandsAndGetEvents(XID actorId, String passwordHash, XCommand[] commands,
-	        XAddress[] addressesToGetEventsFor, long beginRevision, long endRevision,
-	        Callback<Pair<long[],XEvent[][]>> callback);
+	        GetEventsRequest[] getEventRequests,
+	        Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback);
 	
 	/* rights by convention */
 

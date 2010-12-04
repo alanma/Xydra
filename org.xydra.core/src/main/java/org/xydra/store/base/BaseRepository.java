@@ -63,19 +63,18 @@ public class BaseRepository implements XBaseRepository, Serializable {
 	}
 	
 	private void initModelIds() {
-		this.store.getModelIds(this.credentials.actorId, this.credentials.passwordHash, getID(),
-		        new Callback<Set<XID>>() {
-			        
-			        @Override
-			        public void onFailure(Throwable exception) {
-				        throw new StoreException("re-throw", exception);
-			        }
-			        
-			        @Override
-			        public void onSuccess(Set<XID> modelIds) {
-				        BaseRepository.this.modelIds = modelIds;
-			        }
-		        });
+		this.store.getModelIds(this.credentials.actorId, this.credentials.passwordHash, new Callback<Set<XID>>() {
+            
+            @Override
+            public void onFailure(Throwable exception) {
+                throw new StoreException("re-throw", exception);
+            }
+            
+            @Override
+            public void onSuccess(Set<XID> modelIds) {
+                BaseRepository.this.modelIds = modelIds;
+            }
+        });
 		
 	}
 	

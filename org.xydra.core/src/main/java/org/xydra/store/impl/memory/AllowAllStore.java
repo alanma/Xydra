@@ -9,7 +9,9 @@ import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
 import org.xydra.index.query.Pair;
+import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
+import org.xydra.store.GetEventsRequest;
 import org.xydra.store.XydraStore;
 
 
@@ -43,45 +45,43 @@ public class AllowAllStore implements XydraStore {
 	
 	@Override
 	public void executeCommands(XID actorId, String passwordHash, XCommand[] commands,
-	        Callback<long[]> callback) {
+	        Callback<BatchedResult<Long>[]> callback) {
 		this.storeWithoutAccessRights.executeCommands(actorId, commands, callback);
 	}
 	
 	@Override
 	public void executeCommandsAndGetEvents(XID actorId, String passwordHash, XCommand[] commands,
-	        XAddress[] addressesToGetEventsFor, long beginRevision, long endRevision,
-	        Callback<Pair<long[],XEvent[][]>> callback) {
+	        GetEventsRequest[] getEventRequests, Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback) {
 		this.storeWithoutAccessRights.executeCommandsAndGetEvents(actorId, commands,
-		        addressesToGetEventsFor, beginRevision, endRevision, callback);
+		        getEventRequests, callback);
 	}
 	
 	@Override
-	public void getEvents(XID actorId, String passwordHash, XAddress[] addresses,
-	        long beginRevision, long endRevision, Callback<XEvent[][]> callback) {
-		this.storeWithoutAccessRights.getEvents(addresses, beginRevision, endRevision, callback);
+	public void getEvents(XID actorId, String passwordHash, GetEventsRequest[] getEventsRequest,
+	        Callback<BatchedResult<XEvent[]>[]> callback) {
+		this.storeWithoutAccessRights.getEvents(getEventsRequest, callback);
 	}
 	
 	@Override
-	public void getModelIds(XID actorId, String passwordHash, XID repositoryId,
-	        Callback<Set<XID>> callback) {
-		this.storeWithoutAccessRights.getModelIds(repositoryId, callback);
+	public void getModelIds(XID actorId, String passwordHash, Callback<Set<XID>> callback) {
+		this.storeWithoutAccessRights.getModelIds(callback);
 	}
 	
 	@Override
 	public void getModelRevisions(XID actorId, String passwordHash, XAddress[] modelAddresses,
-	        Callback<long[]> callback) throws IllegalArgumentException {
+	        Callback<BatchedResult<Long>[]> callback) throws IllegalArgumentException {
 		this.storeWithoutAccessRights.getModelRevisions(modelAddresses, callback);
 	}
 	
 	@Override
 	public void getModelSnapshots(XID actorId, String passwordHash, XAddress[] modelAddresses,
-	        Callback<XBaseModel[]> callback) throws IllegalArgumentException {
+	        Callback<BatchedResult<XBaseModel>[]> callback) throws IllegalArgumentException {
 		this.storeWithoutAccessRights.getModelSnapshots(modelAddresses, callback);
 	}
 	
 	@Override
 	public void getObjectSnapshots(XID actorId, String passwordHash, XAddress[] objectAddresses,
-	        Callback<XBaseObject[]> callback) {
+	        Callback<BatchedResult<XBaseObject>[]> callback) {
 		this.storeWithoutAccessRights.getObjectSnapshots(objectAddresses, callback);
 	}
 	

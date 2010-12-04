@@ -11,7 +11,9 @@ import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
 import org.xydra.index.query.Pair;
 import org.xydra.store.AutorisationException;
+import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
+import org.xydra.store.GetEventsRequest;
 import org.xydra.store.XydraStore;
 import org.xydra.store.access.GroupModelWrapper;
 import org.xydra.store.access.XGroupDatabase;
@@ -53,7 +55,7 @@ public class MemoryStore implements XydraStore {
 	}
 	
 	public void executeCommands(XID actorId, String passwordHash, XCommand[] commands,
-	        Callback<long[]> callback) {
+	        Callback<BatchedResult<Long>[]> callback) {
 		if(!this.groupModelWrapper.isValidLogin(actorId, passwordHash)) {
 			callback.onFailure(new AutorisationException("Unauthorised login/passwordHash "
 			        + actorId + "/" + passwordHash));
@@ -63,34 +65,32 @@ public class MemoryStore implements XydraStore {
 	}
 	
 	public void executeCommandsAndGetEvents(XID actorId, String passwordHash, XCommand[] commands,
-	        XAddress[] addressesToGetEventsFor, long beginRevision, long endRevision,
-	        Callback<Pair<long[],XEvent[][]>> callback) {
+	        GetEventsRequest[] getEventRequests, Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback) {
 		if(!this.groupModelWrapper.isValidLogin(actorId, passwordHash)) {
 			callback.onFailure(new AutorisationException("Unauthorised login/passwordHash "
 			        + actorId + "/" + passwordHash));
 		} else {
 			this.data.executeCommandsAndGetEvents(actorId, passwordHash, commands,
-			        addressesToGetEventsFor, beginRevision, endRevision, callback);
+			        getEventRequests, callback);
 		}
 	}
 	
-	public void getEvents(XID actorId, String passwordHash, XAddress[] addresses,
-	        long beginRevision, long endRevision, Callback<XEvent[][]> callback) {
-		this.data.getEvents(actorId, passwordHash, addresses, beginRevision, endRevision, callback);
+	public void getEvents(XID actorId, String passwordHash, GetEventsRequest[] getEventsRequest,
+	        Callback<BatchedResult<XEvent[]>[]> callback) {
+		this.data.getEvents(actorId, passwordHash, getEventsRequest, callback);
 	}
 	
-	public void getModelIds(XID actorId, String passwordHash, XID repositoryId,
-	        Callback<Set<XID>> callback) {
+	public void getModelIds(XID actorId, String passwordHash, Callback<Set<XID>> callback) {
 		if(!this.groupModelWrapper.isValidLogin(actorId, passwordHash)) {
 			callback.onFailure(new AutorisationException("Unauthorised login/passwordHash "
 			        + actorId + "/" + passwordHash));
 		} else {
-			this.data.getModelIds(actorId, passwordHash, repositoryId, callback);
+			this.data.getModelIds(actorId, passwordHash, callback);
 		}
 	}
 	
 	public void getModelRevisions(XID actorId, String passwordHash, XAddress[] modelAddresses,
-	        Callback<long[]> callback) throws IllegalArgumentException {
+	        Callback<BatchedResult<Long>[]> callback) throws IllegalArgumentException {
 		if(!this.groupModelWrapper.isValidLogin(actorId, passwordHash)) {
 			callback.onFailure(new AutorisationException("Unauthorised login/passwordHash "
 			        + actorId + "/" + passwordHash));
@@ -100,7 +100,7 @@ public class MemoryStore implements XydraStore {
 	}
 	
 	public void getModelSnapshots(XID actorId, String passwordHash, XAddress[] modelAddresses,
-	        Callback<XBaseModel[]> callback) throws IllegalArgumentException {
+	        Callback<BatchedResult<XBaseModel>[]> callback) throws IllegalArgumentException {
 		if(!this.groupModelWrapper.isValidLogin(actorId, passwordHash)) {
 			callback.onFailure(new AutorisationException("Unauthorised login/passwordHash "
 			        + actorId + "/" + passwordHash));
@@ -114,7 +114,7 @@ public class MemoryStore implements XydraStore {
 	}
 	
 	public void getObjectSnapshots(XID actorId, String passwordHash, XAddress[] objectAddresses,
-	        Callback<XBaseObject[]> callback) {
+	        Callback<BatchedResult<XBaseObject>[]> callback) {
 		if(!this.groupModelWrapper.isValidLogin(actorId, passwordHash)) {
 			callback.onFailure(new AutorisationException("Unauthorised login/passwordHash "
 			        + actorId + "/" + passwordHash));

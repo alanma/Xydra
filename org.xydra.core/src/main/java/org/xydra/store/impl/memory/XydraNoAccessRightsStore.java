@@ -9,7 +9,9 @@ import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
 import org.xydra.index.query.Pair;
+import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
+import org.xydra.store.GetEventsRequest;
 import org.xydra.store.XydraStore;
 
 
@@ -20,22 +22,20 @@ import org.xydra.store.XydraStore;
  */
 public interface XydraNoAccessRightsStore {
 	
-	void executeCommands(XID actorId, XCommand[] commands, Callback<long[]> callback);
+	void executeCommands(XID actorId, XCommand[] commands, Callback<BatchedResult<Long>[]> callback);
 	
 	void executeCommandsAndGetEvents(XID actorId, XCommand[] commands,
-	        XAddress[] addressesToGetEventsFor, long beginRevision, long endRevision,
-	        Callback<Pair<long[],XEvent[][]>> callback);
+	        GetEventsRequest[] getEventRequests, Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback);
 	
-	void getEvents(XAddress[] addresses, long beginRevision, long endRevision,
-	        Callback<XEvent[][]> callback);
+	void getEvents(GetEventsRequest[] getEventRequests, Callback<BatchedResult<XEvent[]>[]> callback);
 	
-	void getModelIds(XID repositoryId, Callback<Set<XID>> callback);
+	void getModelIds(Callback<Set<XID>> callback);
 	
-	void getModelRevisions(XAddress[] modelAddresses, Callback<long[]> callback);
+	void getModelRevisions(XAddress[] modelAddresses, Callback<BatchedResult<Long>[]> callback);
 	
-	void getModelSnapshots(XAddress[] modelAddresses, Callback<XBaseModel[]> callback);
+	void getModelSnapshots(XAddress[] modelAddresses, Callback<BatchedResult<XBaseModel>[]> callback);
 	
-	void getObjectSnapshots(XAddress[] objectAddresses, Callback<XBaseObject[]> callback);
+	void getObjectSnapshots(XAddress[] objectAddresses, Callback<BatchedResult<XBaseObject>[]> callback);
 	
 	void getRepositoryId(Callback<XID> callback);
 	
