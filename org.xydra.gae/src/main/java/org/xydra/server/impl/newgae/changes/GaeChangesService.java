@@ -33,6 +33,7 @@ import org.xydra.index.XI;
 import org.xydra.index.query.Pair;
 import org.xydra.server.IXydraServer;
 import org.xydra.server.impl.newgae.GaeUtils;
+import org.xydra.store.GetEventsRequest;
 import org.xydra.store.XydraStore;
 
 import com.google.appengine.api.datastore.Entity;
@@ -1134,8 +1135,7 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	/**
 	 * Get the event at the specified revision number.
 	 * 
-	 * @see XydraStore#getEvents(XID, String, XAddress[], long, long,
-	 *      org.xydra.store.Callback)
+	 * @see XydraStore#getEvents(XID, String, GetEventsRequest[], org.xydra.store.Callback)
 	 */
 	public XEvent getEventAt(long rev) {
 		
