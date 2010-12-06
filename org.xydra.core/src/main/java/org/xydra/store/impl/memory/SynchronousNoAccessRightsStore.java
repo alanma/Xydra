@@ -1,6 +1,5 @@
 package org.xydra.store.impl.memory;
 
-import java.util.ArrayList;
 import java.util.Set;
 
 import org.xydra.core.change.XCommand;
@@ -20,8 +19,6 @@ import org.xydra.store.GetEventsRequest;
  * batch calls to an instance of {@link XydraNoAccessRightsNoBatchNoAsyncStore}
  * which treats them as single-operation blocking call.
  * 
- * TODO catch exceptions and pass them to the callback
- * 
  * @author voelkel
  */
 public class SynchronousNoAccessRightsStore implements XydraNoAccessRightsStore {
@@ -32,13 +29,16 @@ public class SynchronousNoAccessRightsStore implements XydraNoAccessRightsStore 
 		this.noBatchStore = base;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private BatchedResult<Long>[] executeCommands(XID actorId, XCommand[] commands) {
-		ArrayList<Long[]> list = new ArrayList<Long[]>(commands.length);
-		BatchedResult<Long>[] results = (BatchedResult<Long>[])list.toArray();
+		@SuppressWarnings("unchecked")
+		BatchedResult<Long>[] results = new BatchedResult[commands.length];
 		for(int i = 0; i < commands.length; i++) {
-			results[i] = new BatchedResult<Long>(this.noBatchStore.executeCommand(actorId,
-			        commands[i]));
+			try {
+				results[i] = new BatchedResult<Long>(this.noBatchStore.executeCommand(actorId,
+				        commands[i]));
+			} catch(Exception e) {
+				results[i] = new BatchedResult<Long>(e);
+			}
 		}
 		return results;
 	}
@@ -59,10 +59,9 @@ public class SynchronousNoAccessRightsStore implements XydraNoAccessRightsStore 
 		        commandResults, eventResults));
 	}
 	
-	@SuppressWarnings("unchecked")
 	private BatchedResult<XEvent[]>[] getEvents(GetEventsRequest[] getEventsRequests) {
-		ArrayList<XEvent[]> list = new ArrayList<XEvent[]>();
-		BatchedResult<XEvent[]>[] results = (BatchedResult<XEvent[]>[])list.toArray();
+		@SuppressWarnings("unchecked")
+		BatchedResult<XEvent[]>[] results = new BatchedResult[getEventsRequests.length];
 		for(int i = 0; i < getEventsRequests.length; i++) {
 			try {
 				XEvent[] result = this.noBatchStore.getEvents(getEventsRequests[i].address,
@@ -83,15 +82,18 @@ public class SynchronousNoAccessRightsStore implements XydraNoAccessRightsStore 
 	
 	@Override
 	public void getModelIds(Callback<Set<XID>> callback) {
-		callback.onSuccess(this.noBatchStore.getModelIds());
+		try {
+			callback.onSuccess(this.noBatchStore.getModelIds());
+		} catch(Exception e) {
+			callback.onFailure(e);
+		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public void getModelRevisions(XAddress[] modelAddresses,
 	        Callback<BatchedResult<Long>[]> callback) {
-		ArrayList<Long[]> list = new ArrayList<Long[]>(modelAddresses.length);
-		BatchedResult<Long>[] results = (BatchedResult<Long>[])list.toArray();
+		@SuppressWarnings("unchecked")
+		BatchedResult<Long>[] results = new BatchedResult[modelAddresses.length];
 		for(int i = 0; i < modelAddresses.length; i++) {
 			try {
 				long result = this.noBatchStore.getModelRevision(modelAddresses[i]);
@@ -103,12 +105,11 @@ public class SynchronousNoAccessRightsStore implements XydraNoAccessRightsStore 
 		callback.onSuccess(results);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public void getModelSnapshots(XAddress[] modelAddresses,
 	        Callback<BatchedResult<XBaseModel>[]> callback) {
-		ArrayList<XBaseModel[]> list = new ArrayList<XBaseModel[]>(modelAddresses.length);
-		BatchedResult<XBaseModel>[] results = (BatchedResult<XBaseModel>[])list.toArray();
+		@SuppressWarnings("unchecked")
+		BatchedResult<XBaseModel>[] results = new BatchedResult[modelAddresses.length];
 		
 		for(int i = 0; i < modelAddresses.length; i++) {
 			try {
@@ -121,12 +122,11 @@ public class SynchronousNoAccessRightsStore implements XydraNoAccessRightsStore 
 		callback.onSuccess(results);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public void getObjectSnapshots(XAddress[] objectAddresses,
 	        Callback<BatchedResult<XBaseObject>[]> callback) {
-		ArrayList<XBaseObject[]> list = new ArrayList<XBaseObject[]>(objectAddresses.length);
-		BatchedResult<XBaseObject>[] results = (BatchedResult<XBaseObject>[])list.toArray();
+		@SuppressWarnings("unchecked")
+		BatchedResult<XBaseObject>[] results = new BatchedResult[objectAddresses.length];
 		for(int i = 0; i < objectAddresses.length; i++) {
 			try {
 				XBaseObject result = this.noBatchStore.getObjectSnapshot(objectAddresses[i]);

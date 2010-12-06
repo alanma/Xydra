@@ -5,8 +5,7 @@ import org.xydra.core.change.XTransaction;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
-
-import com.sun.org.apache.xpath.internal.objects.XObject;
+import org.xydra.core.model.XObject;
 
 
 /**
@@ -56,6 +55,7 @@ public class GetEventsRequest {
 		this.endRevision = endRevision;
 	}
 	
+	// TODO should these be final so that the request object is immutable?
 	public XAddress address;
 	public long beginRevision;
 	public long endRevision;
