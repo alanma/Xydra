@@ -82,6 +82,8 @@ public interface XydraStore {
 	 * <li>{@link InternalStoreException}</li>
 	 * </ul>
 	 * 
+	 * TODO Please comment in which cases the exceptions are thrown ~Bjoern
+	 * 
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
 	 *            with "Xydra" to avoid transmitting the same string over the
@@ -113,6 +115,8 @@ public interface XydraStore {
 	 * <ul>
 	 * <li>{@link AccessException}</li>
 	 * </ul>
+	 * 
+	 * TODO Please comment in which cases the exceptions are thrown ~Bjoern
 	 * 
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
@@ -152,6 +156,8 @@ public interface XydraStore {
 	 * <li>{@link AccessException}</li>
 	 * </ul>
 	 * 
+	 * TODO Please comment in which cases the exceptions are thrown ~Bjoern
+	 * 
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
 	 *            with "Xydra" to avoid transmitting the same string over the
@@ -189,6 +195,8 @@ public interface XydraStore {
 	 * <ul>
 	 * <li>{@link AccessException}</li>
 	 * </ul>
+	 * 
+	 * TODO Please comment in which cases the exceptions are thrown ~Bjoern
 	 * 
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
@@ -253,6 +261,8 @@ public interface XydraStore {
 	 * <li>{@link InternalStoreException}</li>
 	 * </ul>
 	 * 
+	 * TODO Please comment in which cases the exceptions are thrown ~Bjoern
+	 * 
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
 	 *            with "Xydra" to avoid transmitting the same string over the
@@ -283,6 +293,8 @@ public interface XydraStore {
 	 * <ul>
 	 * <li>{@link AccessException}</li>
 	 * </ul>
+	 * 
+	 * TODO Please comment in which cases the exceptions are thrown ~Bjoern
 	 * 
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
@@ -358,6 +370,8 @@ public interface XydraStore {
 	 * <li>{@link AccessException}</li>
 	 * </ul>
 	 * 
+	 * TODO Please comment in which cases the exceptions are thrown ~Bjoern
+	 * 
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
 	 *            with "Xydra" to avoid transmitting the same string over the
@@ -399,6 +413,8 @@ public interface XydraStore {
 	 * <ul>
 	 * <li>{@link AccessException}</li>
 	 * </ul>
+	 * 
+	 * TODO Please comment in which cases the exceptions are thrown ~Bjoern
 	 * 
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
