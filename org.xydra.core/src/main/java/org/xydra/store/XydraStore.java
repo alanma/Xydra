@@ -117,6 +117,8 @@ public interface XydraStore {
 	 * </ul>
 	 * 
 	 * TODO Please comment in which cases the exceptions are thrown ~Bjoern
+	 * 		(and if they are returned collectively for the whole callback or only selectively for single entries
+	 * 		in the returned BatchedResults array)
 	 * 
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
@@ -134,7 +136,9 @@ public interface XydraStore {
 	 *            it.
 	 * @throws IllegalArgumentException if the arguments are invalid
 	 * 
-	 *             Implementation note: Implementation may chose to supply a
+	 * TODO please comment in which case the arguments are considered "invalid" ~Bjoern
+	 * 
+	 *             Implementation note: Implementation may choose to supply a
 	 *             lazy-loading stub only.
 	 */
 	void getModelSnapshots(XID actorId, String passwordHash, XAddress[] modelAddresses,
