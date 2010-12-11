@@ -174,7 +174,16 @@ public class XSynchronizer {
 					if(commandRev != XCommand.FAILED) {
 						// command successfully synchronized
 						if(commandRev >= 0) {
-							log.info("sync: command applied remotely");
+							if(!gotEvents) {
+								log.warn("sync: command applied remotely with revision "
+								        + commandRev + ", but no new events - server error?");
+								// lost sync -> bad!!!
+								// FIXME this can lead to infinite send-command
+								// loops
+							} else {
+								log.info("sync: command applied remotely with revision "
+								        + commandRev);
+							}
 						} else {
 							if(!gotEvents) {
 								log.warn("sync: command didn't change anything remotely, "
@@ -183,7 +192,8 @@ public class XSynchronizer {
 								// FIXME this can lead to infinite send-command
 								// loops
 							} else {
-								log.info("sync: command failed remotely, got new events");
+								log.info("sync: command didn't change anything remotely, "
+								        + "got new events");
 							}
 							
 						}

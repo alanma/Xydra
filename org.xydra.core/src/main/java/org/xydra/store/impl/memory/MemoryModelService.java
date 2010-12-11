@@ -74,12 +74,14 @@ public class MemoryModelService {
 		// Actually apply the changes.
 		this.model = DeltaUtils.applyChanges(this.modelAddr, this.model, change, newRev);
 		
+		assert getRevisionNumber() == newRev;
+		
 		return newRev;
 	}
 	
 	synchronized public XEvent[] getEvents(XAddress address, long beginRevision, long endRevision) {
 		
-		long rev = getRevisionNumber();
+		long rev = this.events.size();
 		long start = beginRevision < 0 ? 0 : beginRevision;
 		long end = endRevision > rev ? rev : endRevision;
 		
