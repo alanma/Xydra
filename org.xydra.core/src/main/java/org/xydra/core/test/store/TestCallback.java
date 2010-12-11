@@ -1,9 +1,12 @@
 package org.xydra.core.test.store;
 
 import org.xydra.store.Callback;
+import org.xydra.store.XydraStore;
+
 
 /**
  * A simple {@link Callback} implementation for tests of {@link XydraStore}
+ * 
  * @author Kaidel
  */
 
@@ -18,7 +21,7 @@ public class TestCallback<T> implements Callback<T> {
 	public static int TIMEOUT = 1;
 	public static int SUCCESS = 2;
 	public static int FAILURE = 3;
-
+	
 	@Override
 	public void onSuccess(T object) {
 		this.success = true;
@@ -26,7 +29,7 @@ public class TestCallback<T> implements Callback<T> {
 		
 		this.effect = object;
 	}
-
+	
 	@Override
 	public void onFailure(Throwable exception) {
 		this.failure = true;
@@ -44,30 +47,28 @@ public class TestCallback<T> implements Callback<T> {
 	}
 	
 	public int waitOnCallback(long timeout) {
-		if(!success && !failure) {
+		if(!this.success && !this.failure) {
 			try {
 				Thread.sleep(timeout);
-			}
-			catch(InterruptedException ie) {
+			} catch(InterruptedException ie) {
 				ie.printStackTrace();
 				return UNKNOWN_ERROR;
 			}
 		}
 		
-		if(!success && !failure) {
+		if(!this.success && !this.failure) {
 			return TIMEOUT;
 		}
 		
-		if(success) {
+		if(this.success) {
 			return SUCCESS;
 		}
 		
-		if(failure) {
+		if(this.failure) {
 			return FAILURE;
 		}
 		
-		
 		return UNKNOWN_ERROR;
 	}
-
+	
 }
