@@ -5,6 +5,7 @@ import java.io.Serializable;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XType;
 import org.xydra.core.model.XWritableField;
 import org.xydra.core.value.XValue;
 import org.xydra.index.XI;
@@ -28,6 +29,7 @@ public class SimpleField implements XWritableField, Serializable {
 	 * @param value can be null
 	 */
 	public SimpleField(XAddress address, long revisionNumber, XValue value) {
+		assert address.getAddressedType() == XType.XFIELD;
 		this.address = address;
 		this.revisionNumber = revisionNumber;
 		this.value = value;
@@ -66,7 +68,7 @@ public class SimpleField implements XWritableField, Serializable {
 	
 	@Override
 	public boolean setValue(XValue value) {
-		boolean changed = XI.equals(this.value, value);
+		boolean changed = !XI.equals(this.value, value);
 		this.value = value;
 		return changed;
 	}

@@ -7,6 +7,7 @@ import java.util.Set;
 import org.xydra.core.XX;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XType;
 import org.xydra.core.model.XWritableRepository;
 
 
@@ -22,7 +23,7 @@ public class SimpleRepository implements XWritableRepository, Serializable {
 	private final Set<XID> modelIds;
 	
 	public SimpleRepository(XAddress address, Set<XID> modelIds) {
-		super();
+		assert address.getAddressedType() == XType.XREPOSITORY;
 		this.address = address;
 		this.modelIds = modelIds;
 	}

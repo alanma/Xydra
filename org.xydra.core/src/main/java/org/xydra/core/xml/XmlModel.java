@@ -121,6 +121,7 @@ public class XmlModel {
 	
 	/**
 	 * Get the {@link XRepository} represented by the given XML element.
+	 * 
 	 * @param actorId TODO
 	 * @param xml a partial XML document starting with &lt;xrepository&gt; and
 	 *            ending with the same &lt;/xrepository&gt;
@@ -181,6 +182,7 @@ public class XmlModel {
 		} else {
 			modelState.getChangeLogState().setFirstRevisionNumber(revision + 1);
 		}
+		assert modelState.getChangeLogState().getCurrentRevisionNumber() == revision;
 		
 		modelState.save(null);
 		
@@ -231,6 +233,7 @@ public class XmlModel {
 	
 	/**
 	 * Get the {@link XModel} represented by the given XML element.
+	 * 
 	 * @param actorId TODO
 	 * @param xml a partial XML document starting with &lt;xmodel&gt; and ending
 	 *            with the same &lt;/xmodel&gt;
@@ -308,6 +311,7 @@ public class XmlModel {
 	
 	/**
 	 * Get the {@link XObject} represented by the given XML element.
+	 * 
 	 * @param actorId TODO
 	 * @param xml a partial XML document starting with &lt;xobject&gt; and
 	 *            ending with the same &lt;/xobject&gt;
@@ -363,6 +367,7 @@ public class XmlModel {
 	
 	/**
 	 * Get the {@link XField} represented by the given XML element.
+	 * 
 	 * @param actorId TODO
 	 * @param xml a partial XML document starting with &lt;xfield&gt; and ending
 	 *            with the same &lt;/xfield&gt;
@@ -446,6 +451,10 @@ public class XmlModel {
 	public static void toXml(XBaseModel xmodel, XmlOut xo, boolean saveRevision,
 	        boolean ignoreInaccessible, boolean saveChangeLog) {
 		
+		if(!saveRevision && saveChangeLog) {
+			throw new IllegalArgumentException("cannot save change log without saving revisions");
+		}
+		
 		// get revision before outputting anything to prevent incomplete XML
 		// elements on errors
 		long rev = xmodel.getRevisionNumber();
@@ -470,6 +479,7 @@ public class XmlModel {
 			XChangeLog log = ((XLoggedModel)xmodel).getChangeLog();
 			if(log != null) {
 				toXml(log, xo);
+				assert log.getCurrentRevisionNumber() == xmodel.getRevisionNumber();
 			}
 		}
 		
@@ -510,6 +520,10 @@ public class XmlModel {
 	public static void toXml(XBaseObject xobject, XmlOut xo, boolean saveRevision,
 	        boolean ignoreInaccessible, boolean saveChangeLog) {
 		
+		if(!saveRevision && saveChangeLog) {
+			throw new IllegalArgumentException("cannot save change log without saving revisions");
+		}
+		
 		// get revision before outputting anything to prevent incomplete XML
 		// elements on errors
 		long rev = xobject.getRevisionNumber();
@@ -534,6 +548,7 @@ public class XmlModel {
 			XChangeLog log = ((XLoggedObject)xobject).getChangeLog();
 			if(log != null && log.getBaseAddress().equals(xobject.getAddress())) {
 				toXml(log, xo);
+				assert log.getCurrentRevisionNumber() == xobject.getRevisionNumber();
 			}
 		}
 		

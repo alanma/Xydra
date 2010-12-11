@@ -55,7 +55,7 @@ public class XmlModelTest {
 		
 		// test serializing without revisions
 		out = new XmlOutStringBuffer();
-		XmlModel.toXml(repo, out, false, true, true);
+		XmlModel.toXml(repo, out, false, true, false);
 		assertEquals("", out.getOpentags());
 		xml = out.getXml();
 		log.debug(xml);
@@ -84,7 +84,7 @@ public class XmlModelTest {
 		
 		// test serializing without revisions
 		out = new XmlOutStringBuffer();
-		XmlModel.toXml(model, out, false, true, true);
+		XmlModel.toXml(model, out, false, true, false);
 		assertEquals("", out.getOpentags());
 		xml = out.getXml();
 		log.debug(xml);
@@ -113,7 +113,7 @@ public class XmlModelTest {
 		
 		// test serializing without revisions
 		out = new XmlOutStringBuffer();
-		XmlModel.toXml(object, out, false, true, true);
+		XmlModel.toXml(object, out, false, true, false);
 		assertEquals("", out.getOpentags());
 		xml = out.getXml();
 		log.debug(xml);

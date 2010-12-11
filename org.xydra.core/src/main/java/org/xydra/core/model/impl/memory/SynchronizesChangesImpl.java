@@ -41,11 +41,11 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
-import org.xydra.core.model.XSynchronizationCallback;
 import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.core.model.delta.ChangedField;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.ChangedObject;
+import org.xydra.core.model.sync.LocalChange;
 
 
 /**
@@ -382,12 +382,8 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 		saveIfModel();
 	}
 	
-	public long[] synchronize(List<XEvent> remoteChanges, long lastRevision, XID actor,
-	        List<XCommand> localChanges, List<? extends XSynchronizationCallback> callbacks) {
-		
-		if(callbacks != null && localChanges.size() != callbacks.size()) {
-			throw new IllegalArgumentException("number of callbacks must equal number of commands");
-		}
+	public long[] synchronize(XEvent[] remoteChanges, long lastRevision,
+	        List<LocalChange> localChanges) {
 		
 		checkSync();
 		
@@ -425,9 +421,11 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 			}
 			
 			// Re-apply the local changes.
-			long nRemote = remoteChanges.size();
+			long nRemote = remoteChanges.length;
 			for(int i = 0; i < localChanges.size(); i++) {
-				XCommand command = localChanges.get(i);
+				// FIXME use the actorId from the local change
+				LocalChange lc = localChanges.get(i);
+				XCommand command = lc.command;
 				
 				// Adapt the command if needed.
 				if(command instanceof XModelCommand) {
@@ -437,7 +435,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 						command = MemoryModelCommand.createRemoveCommand(mc.getTarget(), mc
 						        .getRevisionNumber()
 						        + nRemote, mc.getObjectID());
-						localChanges.set(i, command);
+						lc.command = command;
 					}
 				} else if(command instanceof XObjectCommand) {
 					XObjectCommand oc = (XObjectCommand)command;
@@ -446,7 +444,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 						command = MemoryObjectCommand.createRemoveCommand(oc.getTarget(), oc
 						        .getRevisionNumber()
 						        + nRemote, oc.getFieldID());
-						localChanges.set(i, command);
+						lc.command = command;
 					}
 				} else if(command instanceof XFieldCommand) {
 					XFieldCommand fc = (XFieldCommand)command;
@@ -470,7 +468,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 						default:
 							assert false : "Invalid command: " + fc;
 						}
-						localChanges.set(i, command);
+						lc.command = command;
 					}
 				}
 				
@@ -480,8 +478,10 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 				 */
 				results[i] = executeCommand(command);
 				
-				if(callbacks != null && results[i] == XCommand.FAILED) {
-					callbacks.get(i).failed();
+				if(lc.callback != null && results[i] == XCommand.FAILED) {
+					// TODO should this be done here? what happens if the
+					// callback makes other changes to this model?
+					lc.callback.failed();
 				}
 				
 			}

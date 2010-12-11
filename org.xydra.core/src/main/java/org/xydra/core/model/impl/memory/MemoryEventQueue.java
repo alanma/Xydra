@@ -376,6 +376,8 @@ public class MemoryEventQueue implements Serializable {
 	 */
 	public void cleanEvents(int since) {
 		
+		// TODO the actorId is when merging events, is this OK?
+		
 		assert this.eventQueue instanceof RandomAccess;
 		
 		if(since + 1 >= this.eventQueue.size()) {
@@ -592,7 +594,9 @@ public class MemoryEventQueue implements Serializable {
 	}
 	
 	public void truncateLog(long revision) {
-		this.changeLog.truncateToRevision(revision, this.stateTransaction);
+		boolean truncated = this.changeLog.truncateToRevision(revision, this.stateTransaction);
+		assert truncated;
+		assert this.changeLog.getCurrentRevisionNumber() == revision;
 	}
 	
 	public void saveLog() {

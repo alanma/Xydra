@@ -35,6 +35,7 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryRepository;
+import org.xydra.core.model.sync.LocalChange;
 import org.xydra.core.test.ChangeRecorder;
 import org.xydra.core.test.DemoModelUtil;
 import org.xydra.core.test.HasChanged;
@@ -163,15 +164,16 @@ abstract public class AbstractSynchronizeTest {
 		XModelCommand removeJohnForced = MemoryModelCommand.createRemoveCommand(this.localModel
 		        .getAddress(), XCommand.FORCED, john.getID());
 		
-		List<XCommand> localChanges = new ArrayList<XCommand>();
-		localChanges.add(createObject); // 0
-		localChanges.add(createField); // 1
-		localChanges.add(setValue1); // 2
-		localChanges.add(setValue2); // 3
-		localChanges.add(removeField); // 4
-		localChanges.add(removePeter); // 5
-		localChanges.add(removeJohnSafe); // 6
-		localChanges.add(removeJohnForced); // 7
+		// IMPROVE test callbacks
+		List<LocalChange> localChanges = new ArrayList<LocalChange>();
+		localChanges.add(new LocalChange(ACTOR_ID, createObject, null)); // 0
+		localChanges.add(new LocalChange(ACTOR_ID, createField, null)); // 1
+		localChanges.add(new LocalChange(ACTOR_ID, setValue1, null)); // 2
+		localChanges.add(new LocalChange(ACTOR_ID, setValue2, null)); // 3
+		localChanges.add(new LocalChange(ACTOR_ID, removeField, null)); // 4
+		localChanges.add(new LocalChange(ACTOR_ID, removePeter, null)); // 5
+		localChanges.add(new LocalChange(ACTOR_ID, removeJohnSafe, null)); // 6
+		localChanges.add(new LocalChange(ACTOR_ID, removeJohnForced, null)); // 7
 		
 		// create a model identical to localModel to check events sent on sync
 		XRepository checkRepo = new MemoryRepository(this.actorId, this.localRepo.getID());
@@ -179,12 +181,13 @@ abstract public class AbstractSynchronizeTest {
 		XModel checkModel = checkRepo.getModel(DemoModelUtil.PHONEBOOK_ID);
 		
 		// apply the commands locally
-		for(XCommand command : localChanges) {
+		for(LocalChange change : localChanges) {
 			long result = 0;
-			result = checkModel.executeCommand(command);
-			assertTrue("command: " + fix(command), result >= 0 || result == XCommand.NOCHANGE);
-			result = this.localModel.executeCommand(command);
-			assertTrue("command: " + command, result >= 0 || result == XCommand.NOCHANGE);
+			result = checkModel.executeCommand(change.command);
+			assertTrue("command: " + fix(change.command), result >= 0
+			        || result == XCommand.NOCHANGE);
+			result = this.localModel.executeCommand(change.command);
+			assertTrue("command: " + change.command, result >= 0 || result == XCommand.NOCHANGE);
 		}
 		
 		// setup listeners
@@ -195,8 +198,8 @@ abstract public class AbstractSynchronizeTest {
 		newObject.addListenerForObjectEvents(hc);
 		
 		// synchronize the remoteChanges into localModel
-		long[] results = this.localModel.synchronize(remoteChanges, lastRevision, ACTOR_ID,
-		        localChanges, null);
+		XEvent[] remoteEvents = remoteChanges.toArray(new XEvent[remoteChanges.size()]);
+		long[] results = this.localModel.synchronize(remoteEvents, lastRevision, localChanges);
 		
 		// check results
 		assertEquals(localChanges.size(), results.length);
@@ -210,27 +213,27 @@ abstract public class AbstractSynchronizeTest {
 		assertEquals(XCommand.NOCHANGE, results[7]); // removeJohnForced
 		
 		// check that commands have been properly modified
-		assertEquals(createObject, localChanges.get(0));
-		assertEquals(createField, localChanges.get(1));
+		assertEquals(createObject, localChanges.get(0).command);
+		assertEquals(createField, localChanges.get(1).command);
 		assertEquals(setValue1.getRevisionNumber() + remoteChanges.size(),
-		        ((XFieldCommand)localChanges.get(2)).getRevisionNumber());
-		assertEquals(setValue2, localChanges.get(3));
+		        ((XFieldCommand)localChanges.get(2).command).getRevisionNumber());
+		assertEquals(setValue2, localChanges.get(3).command);
 		assertEquals(removeField.getRevisionNumber() + remoteChanges.size(),
-		        ((XObjectCommand)localChanges.get(4)).getRevisionNumber());
-		assertEquals(removePeter, localChanges.get(5));
-		assertEquals(removeJohnSafe, localChanges.get(6));
-		assertEquals(removeJohnForced, localChanges.get(7));
+		        ((XObjectCommand)localChanges.get(4).command).getRevisionNumber());
+		assertEquals(removePeter, localChanges.get(5).command);
+		assertEquals(removeJohnSafe, localChanges.get(6).command);
+		assertEquals(removeJohnForced, localChanges.get(7).command);
 		
 		// apply the commands remotely
-		assertTrue(this.remoteModel.executeCommand(fix(localChanges.get(0))) >= 0);
-		assertTrue(this.remoteModel.executeCommand(fix(localChanges.get(1))) >= 0);
-		assertTrue(this.remoteModel.executeCommand(fix(localChanges.get(2))) >= 0);
-		assertTrue(this.remoteModel.executeCommand(fix(localChanges.get(3))) >= 0);
-		assertTrue(this.remoteModel.executeCommand(fix(localChanges.get(4))) >= 0);
-		assertEquals(XCommand.FAILED, this.remoteModel.executeCommand(fix(localChanges
-		        .get(5))));
-		assertEquals(XCommand.FAILED, this.remoteModel.executeCommand(fix(localChanges
-		        .get(6))));
+		assertTrue(this.remoteModel.executeCommand(fix(localChanges.get(0).command)) >= 0);
+		assertTrue(this.remoteModel.executeCommand(fix(localChanges.get(1).command)) >= 0);
+		assertTrue(this.remoteModel.executeCommand(fix(localChanges.get(2).command)) >= 0);
+		assertTrue(this.remoteModel.executeCommand(fix(localChanges.get(3).command)) >= 0);
+		assertTrue(this.remoteModel.executeCommand(fix(localChanges.get(4).command)) >= 0);
+		assertEquals(XCommand.FAILED, this.remoteModel
+		        .executeCommand(fix(localChanges.get(5).command)));
+		assertEquals(XCommand.FAILED, this.remoteModel
+		        .executeCommand(fix(localChanges.get(6).command)));
 		// removeJohnForced not sent as it was NOCHANGE already
 		
 		assertTrue(XCompareUtils.equalState(this.remoteModel, this.localModel));

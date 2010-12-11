@@ -98,13 +98,6 @@ public interface XModel extends XLoggedModel, XWritableModel, Serializable, XSyn
 	long executeModelCommand(XModelCommand command);
 	
 	/**
-	 * @return the actor that is represented by this interface. This is the
-	 *         actor that is recorded for change operations. Operations will
-	 *         only succeed if this actor has access.
-	 */
-	XID getSessionActor();
-	
-	/**
 	 * Set a new actor to be used when building commands for changes to this
 	 * model and its children.
 	 * 

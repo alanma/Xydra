@@ -1,0 +1,176 @@
+package org.xydra.core.model.sync;
+
+import junit.framework.TestCase;
+
+import org.junit.Test;
+import org.xydra.core.XX;
+import org.xydra.core.change.XAtomicCommand;
+import org.xydra.core.change.XCommand;
+import org.xydra.core.change.XRepositoryCommand;
+import org.xydra.core.change.XTransaction;
+import org.xydra.core.change.XTransactionBuilder;
+import org.xydra.core.change.impl.memory.MemoryModelCommand;
+import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
+import org.xydra.core.model.XAddress;
+import org.xydra.core.model.XBaseModel;
+import org.xydra.core.model.XID;
+import org.xydra.core.model.XModel;
+import org.xydra.core.model.delta.ChangedModel;
+import org.xydra.core.model.impl.memory.MemoryModel;
+import org.xydra.core.model.state.XChangeLogState;
+import org.xydra.core.model.state.XModelState;
+import org.xydra.core.model.state.impl.memory.MemoryChangeLogState;
+import org.xydra.core.model.state.impl.memory.TemporaryModelState;
+import org.xydra.core.model.state.impl.memory.XStateUtils;
+import org.xydra.core.test.DemoModelUtil;
+import org.xydra.store.XydraStore;
+import org.xydra.store.impl.memory.AllowAllStore;
+import org.xydra.store.impl.memory.MemoryNoAccessRightsNoBatchNoAsyncStore;
+import org.xydra.store.impl.memory.XydraNoAccessRightsNoBatchNoAsyncStore;
+
+
+/**
+ * Test for {@link XSynchronizer}.
+ * 
+ * @author dscharrer
+ * 
+ *         TODO remove this once the store-based implementation in core works
+ */
+public class SynchronizerTest extends TestCase {
+	
+	protected static final XID ACTOR_TESTER = XX.toId("tester");
+	
+	private final XydraNoAccessRightsNoBatchNoAsyncStore bs;
+	private final XydraStore store;
+	
+	public SynchronizerTest() {
+		
+		this.bs = new MemoryNoAccessRightsNoBatchNoAsyncStore(XX.toId("remote"));
+		
+		this.store = new AllowAllStore(this.bs);
+		
+		XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(XX.toAddress(
+		        this.bs.getRepositoryId(), null, null, null), XCommand.SAFE,
+		        DemoModelUtil.PHONEBOOK_ID);
+		assertTrue(this.bs.executeCommand(ACTOR_TESTER, createCommand) >= 0);
+		XAddress modelAddr = createCommand.getChangedEntity();
+		XTransactionBuilder tb = new XTransactionBuilder(modelAddr);
+		DemoModelUtil.setupPhonebook(modelAddr, tb);
+		XTransaction trans = tb.build();
+		// Apply events individually so there is something in the change log to
+		// test
+		for(XAtomicCommand ac : trans) {
+			assertTrue(this.bs.executeCommand(ACTOR_TESTER, ac) >= 0);
+		}
+		
+	}
+	
+	static class TestCallback implements XCommandCallback {
+		
+		boolean applied = false;
+		
+		public void failed() {
+			fail("a command failed to apply remotely");
+		}
+		
+		public void failedPost() {
+			fail("should never be reached as we die in failed() already");
+		}
+		
+		synchronized public void applied(long revision) {
+			
+			assertFalse("double apply detected", this.applied);
+			
+			this.applied = true;
+			notify();
+		}
+	}
+	
+	@Test
+	public void testSynchronizer() {
+		
+		XBaseModel modelSnapshot = this.bs.getModelSnapshot(XX.toAddress(this.bs.getRepositoryId(),
+		        DemoModelUtil.PHONEBOOK_ID, null, null));
+		assertNotNull(modelSnapshot);
+		// TODO there should be a better way to get a proper XModel from an
+		// XBaseModel
+		XChangeLogState changeLogState = new MemoryChangeLogState(modelSnapshot.getAddress());
+		changeLogState.setFirstRevisionNumber(modelSnapshot.getRevisionNumber() + 1);
+		XModelState modelState = new TemporaryModelState(modelSnapshot.getAddress(), changeLogState);
+		// FIXME concurrency: model may be changed during copy
+		XStateUtils.copy(modelSnapshot, modelState);
+		
+		XModel model = new MemoryModel(ACTOR_TESTER, modelState);
+		
+		XSynchronizer sync = new XSynchronizer(model, this.store);
+		
+		// don't write model directly or changes will not be
+		// synchronized, so only pass the XModel as read-only XBaseModel
+		testCommands(sync, model);
+		
+	}
+	
+	private void testCommands(XSynchronizer sync, XBaseModel model) {
+		
+		final TestCallback c1 = new TestCallback();
+		final TestCallback c2 = new TestCallback();
+		
+		// Create a command manually.
+		XCommand command = MemoryModelCommand.createAddCommand(model.getAddress(), false, XX
+		        .toId("Frank"));
+		
+		// Apply the command locally.
+		sync.executeCommand(command, c1);
+		
+		// Now synchronize with the server.
+		sync.synchronize();
+		
+		// command may not be applied remotely yet!
+		
+		// Manually synchronizing is tedious, so send all commands
+		// immediately from now on.
+		sync.setAutomaticSynchronize(true);
+		
+		// We don't have to create all commands manually but can use a
+		// ChangedModel.
+		// TODO this is problematic with multithreading!
+		ChangedModel writeable = new ChangedModel(model);
+		
+		// Make modifications to the changed model.
+		writeable.getObject(DemoModelUtil.JOHN_ID).createField(XX.toId("newField"));
+		writeable.removeObject(DemoModelUtil.PETER_ID);
+		
+		// Create the command(s) describing the changes made to the
+		// ChangedModel.
+		XTransactionBuilder tb = new XTransactionBuilder(model.getAddress());
+		tb.applyChanges(writeable);
+		XCommand autoCommand = tb.buildCommand();
+		
+		// Now apply the command locally. It should be automatically
+		// sent to the server.
+		sync.executeCommand(autoCommand, c2);
+		
+		// both commands may still not be applied remotely
+		
+		waitForSuccess(c1);
+		waitForSuccess(c2);
+		
+	}
+	
+	private void waitForSuccess(final TestCallback c1) {
+		
+		long time = System.currentTimeMillis();
+		synchronized(c1) {
+			while(!c1.applied) {
+				assertFalse("timeout waiting for command to apply", System.currentTimeMillis()
+				        - time > 1000);
+				try {
+					c1.wait(1100);
+				} catch(InterruptedException e) {
+					// ignore
+				}
+			}
+		}
+	}
+	
+}

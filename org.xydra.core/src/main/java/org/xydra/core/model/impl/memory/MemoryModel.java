@@ -102,6 +102,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		
 		this.modelChangeListenerCollection = new HashSet<XModelEventListener>();
 		
+		assert this.eventQueue.getChangeLog() == null
+		        || this.eventQueue.getChangeLog().getCurrentRevisionNumber() == getRevisionNumber();
 	}
 	
 	/**

@@ -85,7 +85,7 @@ public class MemoryChangeLogState implements XChangeLogState {
 			return false;
 		}
 		
-		if(revisionNumber < this.revisionNumber) {
+		if(revisionNumber < this.revisionNumber - 1) {
 			return false;
 		}
 		

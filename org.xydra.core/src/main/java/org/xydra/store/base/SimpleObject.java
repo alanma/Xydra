@@ -5,9 +5,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XType;
 import org.xydra.core.model.XWritableObject;
 
 
@@ -25,7 +27,7 @@ public class SimpleObject implements XWritableObject, Serializable {
 	private final Map<XID,SimpleField> fields;
 	
 	public SimpleObject(XAddress address) {
-		super();
+		assert address.getAddressedType() == XType.XOBJECT;
 		this.address = address;
 		this.revisionNumber = XCommand.NEW;
 		this.fields = new HashMap<XID,SimpleField>();
@@ -52,7 +54,7 @@ public class SimpleObject implements XWritableObject, Serializable {
 		if(field != null) {
 			return field;
 		}
-		SimpleField newField = new SimpleField(getAddress());
+		SimpleField newField = new SimpleField(XX.resolveField(this.address, fieldId));
 		this.fields.put(fieldId, newField);
 		return newField;
 	}

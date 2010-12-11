@@ -96,13 +96,6 @@ public interface XObject extends XLoggedObject, XWritableObject, XSynchronizesCh
 	long executeObjectCommand(XObjectCommand command);
 	
 	/**
-	 * @return the actor that is represented by this interface. This is the
-	 *         actor that is recorded for change operations. Operations will
-	 *         only succeed if this actor has access.
-	 */
-	XID getSessionActor();
-	
-	/**
 	 * Set a new actor to be used when building commands for changes to this
 	 * object and its children. If the object has a parent model, the session
 	 * actor of the parent model is also set to the given actor.

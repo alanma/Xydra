@@ -2,9 +2,9 @@ package org.xydra.core.model;
 
 import java.util.List;
 
-import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XTransaction;
+import org.xydra.core.model.sync.LocalChange;
 
 
 /**
@@ -53,13 +53,19 @@ public interface XSynchronizesChanges extends XExecutesCommands, XExecutesTransa
 	 * @return the results for the localChanges
 	 * @throws IllegalStateException if this entity has already been removed
 	 */
-	long[] synchronize(List<XEvent> remoteChanges, long lastRevision, XID actor,
-	        List<XCommand> localChanges, List<? extends XSynchronizationCallback> callbacks);
+	long[] synchronize(XEvent[] remoteChanges, long lastRevision, List<LocalChange> localChanges);
 	
 	/**
 	 * @return the {@link XChangeLog} which is logging the {@link XEvent
 	 *         XEvents} which happen on this XSynchronizeChanges
 	 */
 	XChangeLog getChangeLog();
+	
+	/**
+	 * @return the actor that is represented by this interface. This is the
+	 *         actor that is recorded for change operations. Operations will
+	 *         only succeed if this actor has access.
+	 */
+	XID getSessionActor();
 	
 }

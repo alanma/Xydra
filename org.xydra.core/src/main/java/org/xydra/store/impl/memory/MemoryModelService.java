@@ -112,6 +112,7 @@ public class MemoryModelService {
 	synchronized public XBaseObject getObjectSnapshot(XID objectId) {
 		
 		if(this.model == null) {
+			// TODO is this the correct behaviour?
 			return null;
 		}
 		

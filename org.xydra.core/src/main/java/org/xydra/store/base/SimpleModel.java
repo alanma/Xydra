@@ -9,6 +9,7 @@ import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XType;
 import org.xydra.core.model.XWritableModel;
 
 
@@ -25,7 +26,7 @@ public class SimpleModel implements XWritableModel, Serializable {
 	private final Map<XID,SimpleObject> objects;
 	
 	public SimpleModel(XAddress address) {
-		super();
+		assert address.getAddressedType() == XType.XMODEL;
 		this.address = address;
 		this.revisionNumber = XCommand.NEW;
 		this.objects = new HashMap<XID,SimpleObject>();

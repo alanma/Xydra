@@ -244,9 +244,10 @@ public abstract class DeltaUtils {
 			model = new SimpleModel(modelAddr);
 		}
 		
-		assert model != null;
-		
-		applyChanges(model, changedModel, rev);
+		if(changedModel != null) {
+			assert model != null;
+			applyChanges(model, changedModel, rev);
+		}
 		
 		return model;
 	}
