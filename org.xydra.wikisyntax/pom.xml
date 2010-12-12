@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>org.xydra</groupId>
+	<artifactId>wikisyntax</artifactId>
+	<version>0.1.2-SNAPSHOT</version>
+	<packaging>jar</packaging>
+	<name>Xydra Wikisyntax</name>
+
+	<parent>
+		<groupId>org.xydra</groupId>
+		<artifactId>maven-root</artifactId>
+		<version>2010.10.16</version>
+	</parent>
+	
+	
+	<repositories>
+		<repository>
+			<id>xydra-repo</id>
+			<url>https://xydra.googlecode.com/svn/repository</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</releases>
+		</repository>
+		<repository>
+			<id>xydra-snap</id>
+			<url>https://xydra.googlecode.com/svn/snapshots</url>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</snapshots>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+		</repository>
+		
+	</repositories>
+
+	<dependencies>
+
+		<!--  XIndex -->
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>index</artifactId>
+			<version>0.1.2-SNAPSHOT</version>
+		</dependency>
+
+		<!-- This dependency is required whenever you use XydraLog -->
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>log</artifactId>
+			<version>0.1.2-SNAPSHOT</version>
+		</dependency>
+		
+		<!--  This is only required for logging in GWT -->
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>log</artifactId>
+			<version>0.1.2-SNAPSHOT</version>
+			<classifier>sources</classifier>
+		</dependency>
+
+		<!-- testing dependencies -->
+		<dependency>
+			<scope>test</scope>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.3.1</version>
+		</dependency>
+
+	</dependencies>
+
+
+
+
+		<distributionManagement>
+		<!--
+			Add this to settings.xml <server> <id>xydra-repo</id>
+			<username>xamde</username> <password>********</password> </server>
+			<server> <id>xydra-snap</id> <username>xamde</username>
+			<password>********</password> </server> <server> <id>xydra-site</id>
+			<username>xamde</username> <password>********</password> </server>
+		-->
+		<repository>
+			<id>xydra-repo</id>
+			<url>svn:https://xydra.googlecode.com/svn/repository</url>
+		</repository>
+		<snapshotRepository>
+			<id>xydra-snap</id>
+			<url>svn:https://xydra.googlecode.com/svn/snapshots</url>
+		</snapshotRepository>
+		<site>
+			<id>xydra-site</id>
+			<url>scp://${xydra.site}/${artifactId}</url>
+		</site>
+	</distributionManagement>
+
+
+	<scm>
+		<connection>svn:https://xydra.googlecode.com/svn/trunk/org.xydra.wikisyntax</connection>
+		<developerConnection>svn:https://xydra.googlecode.com/svn/trunk/org.xydra.wikisyntax</developerConnection>
+	</scm>
+
+</project>
