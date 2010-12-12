@@ -125,7 +125,7 @@ public class XSynchronizer {
 			
 			log.info("sync: sending command " + change.command + ", rev is " + this.syncRevison);
 			
-			this.service.executeCommand(this.addr, change.command, this.syncRevison,
+			this.service.executeCommand(this.addr, change.command, this.syncRevison + 1,
 			        new Callback<CommandResult>() {
 				        public void onFailure(Throwable error) {
 					        if(error instanceof ServiceException) {
@@ -174,7 +174,7 @@ public class XSynchronizer {
 			
 			log.info("sync: getting events, rev is " + this.syncRevison);
 			
-			this.service.getEvents(this.addr, this.syncRevison, XChangesService.NONE,
+			this.service.getEvents(this.addr, this.syncRevison + 1, XChangesService.NONE,
 			        new Callback<List<XEvent>>() {
 				        
 				        public void onFailure(Throwable error) {

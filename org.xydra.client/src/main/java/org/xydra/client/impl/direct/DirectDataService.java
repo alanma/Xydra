@@ -164,7 +164,7 @@ public class DirectDataService implements XDataService {
 			}
 			
 			XChangeLogState changeLogState = new MemoryChangeLogState(modelAddr);
-			changeLogState.setFirstRevisionNumber(model.getRevisionNumber());
+			changeLogState.setFirstRevisionNumber(model.getRevisionNumber() + 1);
 			XModelState modelState = new TemporaryModelState(modelAddr, changeLogState);
 			// FIXME concurrency: model may be changed during copy
 			XStateUtils.copy(model, modelState);
