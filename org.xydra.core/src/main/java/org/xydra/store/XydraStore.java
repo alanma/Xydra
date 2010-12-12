@@ -18,6 +18,9 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.index.query.Pair;
 
+/**
+ * FIXME Is this the correct import?! I think that "our" XObject" is meant here, or isn't it? ~Bjoern
+ */
 import com.sun.org.apache.xpath.internal.objects.XObject;
 
 
@@ -56,7 +59,7 @@ import com.sun.org.apache.xpath.internal.objects.XObject;
  * <ul>
  * <li>{@link QuotaException} to prevent brute-force attacks when too many
  * operations per time use the wrong actorId/passwordHash combination.</li>
- * <li>{@link AutorisationException} if actorId and passwordHash don't match</li>
+ * <li>{@link AuthorisationException} if actorId and passwordHash don't match</li>
  * <li>{@link AccessException} if the actorId has not the rights to do the
  * operation</li>
  * <li>{@link TimeoutException} if the implementation did not respond during a
@@ -123,7 +126,7 @@ public interface XydraStore {
 	 * <ul>
 	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
 	 * operations per time use the wrong actorId/passwordHash combination.</li>
-	 * <li>{@link AutorisationException}</li>
+	 * <li>{@link AuthorisationException}</li>
 	 * <li>{@link ConnectionException}</li>
 	 * <li>{@link TimeoutException}</li>
 	 * <li>{@link InternalStoreException}</li>
@@ -168,7 +171,7 @@ public interface XydraStore {
 	 * <ul>
 	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
 	 * operations per time use the wrong actorId/passwordHash combination.</li>
-	 * <li>{@link AutorisationException}</li>
+	 * <li>{@link AuthorisationException}</li>
 	 * <li>{@link ConnectionException}</li>
 	 * <li>{@link TimeoutException}</li>
 	 * <li>{@link InternalStoreException}</li>
@@ -212,7 +215,7 @@ public interface XydraStore {
 	 * <ul>
 	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
 	 * operations per time use the wrong actorId/passwordHash combination.</li>
-	 * <li>{@link AutorisationException}</li>
+	 * <li>{@link AuthorisationException}</li>
 	 * <li>{@link ConnectionException}</li>
 	 * <li>{@link TimeoutException}</li>
 	 * <li>{@link InternalStoreException}</li>
@@ -256,7 +259,7 @@ public interface XydraStore {
 	 * <ul>
 	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
 	 * operations per time use the wrong actorId/passwordHash combination.</li>
-	 * <li>{@link AutorisationException}</li>
+	 * <li>{@link AuthorisationException}</li>
 	 * <li>{@link ConnectionException}</li>
 	 * <li>{@link TimeoutException}</li>
 	 * <li>{@link InternalStoreException}</li>
@@ -290,7 +293,7 @@ public interface XydraStore {
 	 * <ul>
 	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
 	 * operations per time use the wrong actorId/passwordHash combination.</li>
-	 * <li>{@link AutorisationException}</li>
+	 * <li>{@link AuthorisationException}</li>
 	 * <li>{@link ConnectionException}</li>
 	 * <li>{@link TimeoutException}</li>
 	 * <li>{@link InternalStoreException}</li>
@@ -320,7 +323,7 @@ public interface XydraStore {
 	 * <ul>
 	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
 	 * operations per time use the wrong actorId/passwordHash combination.</li>
-	 * <li>{@link AutorisationException}</li>
+	 * <li>{@link AuthorisationException}</li>
 	 * <li>{@link ConnectionException}</li>
 	 * <li>{@link TimeoutException}</li>
 	 * <li>{@link InternalStoreException}</li>
@@ -401,7 +404,7 @@ public interface XydraStore {
 	 * <ul>
 	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
 	 * operations per time use the wrong actorId/passwordHash combination.</li>
-	 * <li>{@link AutorisationException}</li>
+	 * <li>{@link AuthorisationException}</li>
 	 * <li>{@link ConnectionException}</li>
 	 * <li>{@link TimeoutException}</li>
 	 * <li>{@link InternalStoreException}</li>
