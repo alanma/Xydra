@@ -8,7 +8,6 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xydra.core.XX;
 import org.xydra.core.change.XCommandFactory;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
@@ -39,7 +38,6 @@ import org.xydra.store.XydraStore;
 public abstract class AbstractStoreTest {
 	
 	private XydraStore store;
-	private XCommandFactory factory;
 	private XID correctUser, incorrectUser;
 	private String correctUserPass, incorrectUserPass;
 	private long timeout;
@@ -51,8 +49,9 @@ public abstract class AbstractStoreTest {
 	abstract protected XydraStore getStore();
 	
 	/**
-	 * @return an implementation of {@link XCommandFactory} that can be used with the implementation
-	 * of {@link XydraStore} that is to be tested
+	 * @return an implementation of {@link XCommandFactory} that can be used
+	 *         with the implementation of {@link XydraStore} that is to be
+	 *         tested
 	 */
 	abstract protected XCommandFactory getCommandFactory();
 	
@@ -80,14 +79,12 @@ public abstract class AbstractStoreTest {
 	abstract protected void getQuotaForBruteForce(long quota);
 	
 	/**
-	 * Returns an array of {@link XAddress XAddresses} of {@link XModel
-	 * XModels} the actor with the given {@link XID} has at least read access
-	 * to.
+	 * Returns an array of {@link XAddress XAddresses} of {@link XModel XModels}
+	 * the actor with the given {@link XID} has at least read access to.
 	 * 
 	 * @param accountID
-	 * @return an array of {@link XAddress XAddresses} of {@link XModel
-	 *         XModels} the actor with the given {@link XID} has at least read
-	 *         access to.
+	 * @return an array of {@link XAddress XAddresses} of {@link XModel XModels}
+	 *         the actor with the given {@link XID} has at least read access to.
 	 */
 	abstract protected XAddress[] getModelAddresses(XID accountID);
 	
@@ -123,8 +120,8 @@ public abstract class AbstractStoreTest {
 	 * access to (not even read access!)
 	 * 
 	 * @param accountID
-	 * @return Returns the {@link XAddress} of an {@link XObject} the given actor
-	 *         has no access to (not even read access!)
+	 * @return Returns the {@link XAddress} of an {@link XObject} the given
+	 *         actor has no access to (not even read access!)
 	 */
 	abstract protected XAddress getObjectAddressWithoutAccess(XID accountID);
 	
@@ -136,7 +133,6 @@ public abstract class AbstractStoreTest {
 	@Before
 	public void setUp() {
 		this.store = this.getStore();
-		this.factory = this.getCommandFactory();
 		
 		getCorrectUser(this.correctUser, this.correctUserPass);
 		getIncorrectUser(this.incorrectUser, this.incorrectUserPass);
@@ -281,11 +277,14 @@ public abstract class AbstractStoreTest {
 		
 		// check order of returned snapshots
 		for(int i = 0; i < modelAddresses.length; i++) {
-			if(i == modelAddresses.length) { // XAddress of a not existing XModel
+			if(i == modelAddresses.length) { // XAddress of a not existing
+											 // XModel
 				assertNull(result[i].getResult());
 				assertNotNull(result[i].getException());
 				assertTrue(result[i].getException() instanceof RequestException);
-			} else if(i == modelAddresses.length + 1) { //XAddress of an XModel the account has no access to
+			} else if(i == modelAddresses.length + 1) { // XAddress of an XModel
+														// the account has no
+														// access to
 				assertNull(result[i].getResult());
 				assertNotNull(result[i].getException());
 				assertTrue(result[i].getException() instanceof AccessException);
@@ -302,7 +301,7 @@ public abstract class AbstractStoreTest {
 		for(long l = 0; l < this.bfQuota + 5; l++) {
 			callback = new TestCallback<BatchedResult<XBaseModel>[]>();
 			tempArray = new XAddress[] { doesntExist }; // use small array to
-														// speed up the test
+			// speed up the test
 			
 			this.store.getModelSnapshots(this.incorrectUser, this.incorrectUserPass, tempArray,
 			        callback);
@@ -318,7 +317,7 @@ public abstract class AbstractStoreTest {
 		// TODO How to test for other exception types like ConnectionException,
 		// TimeoutException etc.?
 		
-		//TODO Test what happens if the XAddress refers to an XObject etc.
+		// TODO Test what happens if the XAddress refers to an XObject etc.
 	}
 	
 	/**
@@ -443,12 +442,14 @@ public abstract class AbstractStoreTest {
 		
 		// check order of returned snapshots
 		for(int i = 0; i < modelAddresses.length; i++) {
-			if(i == modelAddresses.length) { //XAddress of not existing XModel
+			if(i == modelAddresses.length) { // XAddress of not existing XModel
 				assertNull(snapshotResult[i].getResult());
 				assertEquals(revisionResult[i].getResult(), (Long)XydraStore.MODEL_DOES_NOT_EXIST);
 				assertNotNull(revisionResult[i].getException());
 				assertTrue(revisionResult[i].getException() instanceof RequestException);
-			} else if(i == modelAddresses.length + 1) { //XAddress of XModel the account has no access to
+			} else if(i == modelAddresses.length + 1) { // XAddress of XModel
+														// the account has no
+														// access to
 				assertNull(snapshotResult[i].getResult());
 				assertEquals(revisionResult[i].getResult(), (Long)XydraStore.MODEL_DOES_NOT_EXIST);
 				assertNotNull(revisionResult[i].getException());
@@ -469,7 +470,7 @@ public abstract class AbstractStoreTest {
 		for(long l = 0; l < this.bfQuota + 5; l++) {
 			revisionCallback = new TestCallback<BatchedResult<Long>[]>();
 			tempArray = new XAddress[] { doesntExist }; // use small array to
-														// speed up the test
+			// speed up the test
 			
 			this.store.getModelRevisions(this.incorrectUser, this.incorrectUserPass, tempArray,
 			        revisionCallback);
@@ -488,7 +489,7 @@ public abstract class AbstractStoreTest {
 	
 	/**
 	 * Test for the getObjectSnapshot-Method
-	 */	
+	 */
 	@Test
 	public void testGetObjectSnapshots() {
 		XAddress[] objectAddresses = this.getObjectAddresses(this.correctUser);
@@ -529,7 +530,8 @@ public abstract class AbstractStoreTest {
 			assertEquals(objectAddresses[i], result[i].getResult().getAddress());
 		}
 		
-		// Test if it behaves correctly for addresses of XObjects the user has no
+		// Test if it behaves correctly for addresses of XObjects the user has
+		// no
 		// access to
 		callback = new TestCallback<BatchedResult<XBaseObject>[]>();
 		XAddress[] tempArray = new XAddress[] { noAccess };
@@ -579,11 +581,14 @@ public abstract class AbstractStoreTest {
 		
 		// check order of returned snapshots
 		for(int i = 0; i < objectAddresses.length; i++) {
-			if(i == objectAddresses.length) { // XAddress of a not existing XModel
+			if(i == objectAddresses.length) { // XAddress of a not existing
+											  // XModel
 				assertNull(result[i].getResult());
 				assertNotNull(result[i].getException());
 				assertTrue(result[i].getException() instanceof RequestException);
-			} else if(i == objectAddresses.length + 1) { //XAddress of an XModel the account has no access to
+			} else if(i == objectAddresses.length + 1) { // XAddress of an
+														 // XModel the account
+														 // has no access to
 				assertNull(result[i].getResult());
 				assertNotNull(result[i].getException());
 				assertTrue(result[i].getException() instanceof AccessException);
@@ -600,7 +605,7 @@ public abstract class AbstractStoreTest {
 		for(long l = 0; l < this.bfQuota + 5; l++) {
 			callback = new TestCallback<BatchedResult<XBaseObject>[]>();
 			tempArray = new XAddress[] { doesntExist }; // use small array to
-														// speed up the test
+			// speed up the test
 			
 			this.store.getObjectSnapshots(this.incorrectUser, this.incorrectUserPass, tempArray,
 			        callback);
@@ -618,13 +623,12 @@ public abstract class AbstractStoreTest {
 	}
 	
 	/*
-	 * TODO From here on this tests assumes that every user has access on the general store and can
-	 * actually create XModels directly on the store. Update the first tests to also use this (instead
-	 * of using an abstract method, that is now unneccesary)
+	 * TODO From here on this tests assumes that every user has access on the
+	 * general store and can actually create XModels directly on the store.
+	 * Update the first tests to also use this (instead of using an abstract
+	 * method, that is now unneccesary)
 	 */
-	
-	
-	
+
 	/**
 	 * Method for checking whether a callback succeeded or not. Waits until the
 	 * operation/method the callback was passed to is finished or aborted by an
