@@ -408,6 +408,8 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 					this.eventQueue.logNullEvent();
 					continue;
 				}
+				assert !(this instanceof XModel)
+				        || getModel().getRevisionNumber() == remoteChange.getOldModelRevision();
 				/*
 				 * FIXME the remove changes should be applied as the actor
 				 * specified in the event
