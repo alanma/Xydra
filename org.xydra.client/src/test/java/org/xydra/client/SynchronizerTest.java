@@ -5,7 +5,6 @@ import junit.framework.TestCase;
 import org.junit.Test;
 import org.xydra.client.impl.direct.DirectChangesService;
 import org.xydra.client.impl.direct.DirectDataService;
-import org.xydra.client.sync.XCommandCallback;
 import org.xydra.client.sync.XSynchronizer;
 import org.xydra.core.X;
 import org.xydra.core.XX;
@@ -23,12 +22,17 @@ import org.xydra.core.model.XRepository;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.session.XProtectedRepository;
 import org.xydra.core.model.session.impl.arm.ArmProtectedRepository;
+import org.xydra.core.model.sync.XCommandCallback;
 import org.xydra.core.test.DemoModelUtil;
+import org.xydra.store.XydraStore;
 import org.xydra.store.access.XA;
 
 
 /**
  * Test for {@link XSynchronizer}.
+ * 
+ * TODO remove this once the store-based implementation in core works and there
+ * is a {@link XydraStore} network implementation
  * 
  * @author dscharrer
  * 

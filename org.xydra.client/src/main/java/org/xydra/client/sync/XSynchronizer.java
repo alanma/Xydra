@@ -7,17 +7,18 @@ import org.xydra.client.Callback;
 import org.xydra.client.ServiceException;
 import org.xydra.client.XChangesService;
 import org.xydra.client.XChangesService.CommandResult;
-import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XSynchronizesChanges;
+import org.xydra.core.model.sync.LocalChange;
+import org.xydra.core.model.sync.XCommandCallback;
 import org.xydra.index.XI;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.XydraStore;
 
 
 /**
@@ -26,7 +27,8 @@ import org.xydra.log.LoggerFactory;
  * {@link XSynchronizer}, it should no longer be used directly, so that all
  * events can be synchronized.
  * 
- * TODO handle timeouts (retry), other server/HTTP errors
+ * TODO remove this once the store-based implementation in core works and there
+ * is a {@link XydraStore} network implementation
  * 
  * @author dscharrer
  * 
@@ -35,13 +37,10 @@ public class XSynchronizer {
 	
 	static private final Logger log = LoggerFactory.getLogger(XSynchronizer.class);
 	
-	private static final XID LOCAL_ACTOR = XX.toId("local");
-	
 	private long syncRevison;
 	private final XSynchronizesChanges entity;
 	private final XChangesService service;
-	private final List<XCommand> commands;
-	private final List<XCommandCallback> callbacks;
+	private final List<LocalChange> changes = new ArrayList<LocalChange>();
 	private final XAddress addr;
 	
 	boolean requestRunning = false;
@@ -64,8 +63,6 @@ public class XSynchronizer {
 		this.addr = addr;
 		this.entity = entity;
 		this.service = service;
-		this.commands = new ArrayList<XCommand>();
-		this.callbacks = new ArrayList<XCommandCallback>();
 		this.syncRevison = getLocalRevisionNumber();
 		assert addr.getField() == null;
 		assert addr.getModel() != null;
@@ -90,7 +87,6 @@ public class XSynchronizer {
 	 *            is permanently applied.
 	 */
 	public void executeCommand(XCommand command, XCommandCallback callback) {
-		assert this.callbacks.size() == this.commands.size();
 		log.info("sync: got command: " + command);
 		long result = this.entity.executeCommand(command);
 		if(result == XCommand.FAILED) {
@@ -105,13 +101,11 @@ public class XSynchronizer {
 				callback.applied(result);
 			}
 		} else {
-			this.commands.add(command);
-			this.callbacks.add(callback);
+			this.changes.add(new LocalChange(this.entity.getSessionActor(), command, callback));
 			if(this.autoSync) {
 				startRequest();
 			}
 		}
-		assert this.callbacks.size() == this.commands.size();
 	}
 	
 	public long getLocalRevisionNumber() {
@@ -125,16 +119,13 @@ public class XSynchronizer {
 		}
 		this.requestRunning = true;
 		
-		assert this.callbacks.size() == this.commands.size();
-		
-		if(!this.commands.isEmpty()) {
+		if(!this.changes.isEmpty()) {
 			
-			XCommand command = this.commands.get(0);
-			final XCommandCallback callback = this.callbacks.get(0);
+			final LocalChange change = this.changes.get(0);
 			
-			log.info("sync: sending command " + command + ", rev is " + this.syncRevison);
+			log.info("sync: sending command " + change.command + ", rev is " + this.syncRevison);
 			
-			this.service.executeCommand(this.addr, command, this.syncRevison,
+			this.service.executeCommand(this.addr, change.command, this.syncRevison,
 			        new Callback<CommandResult>() {
 				        public void onFailure(Throwable error) {
 					        if(error instanceof ServiceException) {
@@ -160,11 +151,10 @@ public class XSynchronizer {
 							        }
 							        
 						        }
-						        if(callback != null) {
-							        callback.applied(res.getResult());
+						        if(change.callback != null) {
+							        change.callback.applied(res.getResult());
 						        }
-						        XSynchronizer.this.commands.remove(0);
-						        XSynchronizer.this.callbacks.remove(0);
+						        XSynchronizer.this.changes.remove(0);
 					        } else {
 						        if(res.getEvents().size() == 0) {
 							        log.warn("sync: command failed but no new events, sync lost?");
@@ -214,12 +204,12 @@ public class XSynchronizer {
 			return;
 		}
 		
-		log.info("sync: merging " + remoteChanges.size() + " remote and " + this.commands.size()
+		log.info("sync: merging " + remoteChanges.size() + " remote and " + this.changes.size()
 		        + " local changes, local rev is " + getLocalRevisionNumber() + " (synced to "
 		        + this.syncRevison + ")");
 		
-		long[] results = this.entity.synchronize(remoteChanges, this.syncRevison, LOCAL_ACTOR,
-		        this.commands, null);
+		XEvent[] events = remoteChanges.toArray(new XEvent[remoteChanges.size()]);
+		long[] results = this.entity.synchronize(events, this.syncRevison, this.changes);
 		
 		this.syncRevison += remoteChanges.size();
 		
@@ -227,34 +217,32 @@ public class XSynchronizer {
 		        + " (synced to " + this.syncRevison + ")");
 		
 		for(int i = 0; i < results.length; i++) {
-			XCommandCallback callback = this.callbacks.get(i);
+			LocalChange change = this.changes.get(i);
 			if(results[i] == XCommand.FAILED) {
-				log.info("sync: client command conflicted: " + this.commands.get(i));
-				if(callback != null) {
-					callback.failedPost();
+				log.info("sync: client command conflicted: " + change.command);
+				if(change.callback != null) {
+					change.callback.failedPost();
 				}
 			} else if(results[i] == XCommand.NOCHANGE) {
-				log.info("sync: client command redundant: " + this.commands.get(i));
-				if(callback != null) {
-					callback.applied(results[i]);
+				log.info("sync: client command redundant: " + change.command);
+				if(change.callback != null) {
+					change.callback.applied(results[i]);
 				}
 			}
 		}
 		
 		for(int i = results.length - 1; i >= 0; i--) {
 			if(results[i] < 0) {
-				this.callbacks.remove(i);
-				this.commands.remove(i);
+				this.changes.remove(i);
 			}
 		}
 		
 	}
 	
 	protected void requestEnded(boolean immediateRequest) {
-		assert this.callbacks.size() == this.commands.size();
 		this.requestRunning = false;
 		// TODO should this only be done when autoSync == true?
-		if(immediateRequest && !this.commands.isEmpty()) {
+		if(immediateRequest && !this.changes.isEmpty()) {
 			startRequest();
 		}
 	}
@@ -276,7 +264,7 @@ public class XSynchronizer {
 	 */
 	public void setAutomaticSynchronize(boolean autoSync) {
 		this.autoSync = autoSync;
-		if(autoSync && !this.commands.isEmpty()) {
+		if(autoSync && !this.changes.isEmpty()) {
 			startRequest();
 		}
 	}
