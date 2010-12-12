@@ -52,7 +52,7 @@ public class XSynchronizer {
 	 * lost. To persist changes supply the to the
 	 * {@link #executeCommand(XCommand, Callback)} Method.
 	 * 
-	 * @param addr The address of the entity on the server. This is needed for
+	 * @param addr The address of the entity on the store. This is needed for
 	 *            synchronizing single XObjects as the local copy of the entity
 	 *            will not have a parent model and thus no model XID in it's
 	 *            address.
@@ -174,9 +174,17 @@ public class XSynchronizer {
 					if(commandRev != XCommand.FAILED) {
 						// command successfully synchronized
 						if(commandRev >= 0) {
+							
+							if(commandRev <= XSynchronizer.this.lastSyncedRevison) {
+								log.error("sync: store returned a command revision " + commandRev
+								        + " that isn't greater than our already synced revison "
+								        + XSynchronizer.this.lastSyncedRevison + " - store error?");
+								// lost sync -> bad!!!
+							}
+							
 							if(!gotEvents) {
 								log.warn("sync: command applied remotely with revision "
-								        + commandRev + ", but no new events - server error?");
+								        + commandRev + ", but no new events - store error?");
 								// lost sync -> bad!!!
 								// FIXME this can lead to infinite send-command
 								// loops
@@ -336,7 +344,7 @@ public class XSynchronizer {
 	}
 	
 	/**
-	 * Query the server for new remote changes. Local changes will be sent
+	 * Query the store for new remote changes. Local changes will be sent
 	 * immediately.
 	 */
 	public void synchronize() {
@@ -345,10 +353,10 @@ public class XSynchronizer {
 	
 	/**
 	 * @param autoSync true if commands should be automatically sent to the
-	 *            server as they are added. The default is false (off). Even
-	 *            with auto sync on, no requests are made unless there are
-	 *            commands in the queue. Thus synchronize() still needs to be
-	 *            called from time to time to get updates from the server.
+	 *            store as they are added. The default is false (off). Even with
+	 *            auto sync on, no requests are made unless there are commands
+	 *            in the queue. Thus synchronize() still needs to be called from
+	 *            time to time to get updates from the store.
 	 */
 	public void setAutomaticSynchronize(boolean autoSync) {
 		this.autoSync = autoSync;
