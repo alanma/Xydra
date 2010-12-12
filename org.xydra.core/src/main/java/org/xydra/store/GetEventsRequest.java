@@ -12,8 +12,10 @@ import org.xydra.core.model.XObject;
  * Helper class for batch operations to group an {@link XAddress}, a
  * beginRevision, and an endRevision.
  * 
- * @author voelkel
+ * This is a request to fetch all {@link XEvent XEvents} that occurred after
+ * (and including) beginRevision and before (but not including) endRevision.
  * 
+ * @author voelkel
  */
 public class GetEventsRequest {
 	
@@ -30,10 +32,6 @@ public class GetEventsRequest {
 	 *            fields are returned as well. Events for creating and removing
 	 *            the entity specified by the XAddress are also included.
 	 * 
-	 *            FIXME Why can we only specify a single (start,end) revision
-	 *            pair, but multiple addresses? This does not make any sense as
-	 *            a revisions are model-specific. ~Daniel
-	 * 
 	 *            For objects and fields, the resulting events include all
 	 *            {@link XTransaction transactions} that contain changes to the
 	 *            given object or field. It is the responsibility of the client
@@ -43,6 +41,7 @@ public class GetEventsRequest {
 	 *            interval from which all {@link XEvent XEvents} are to be
 	 *            returned - can be zero to get all {@link XEvent XEvents} up to
 	 *            endRevision.
+	 * 
 	 * @param endRevision the end revision number (inclusive) of the interval
 	 *            from which all {@link XEvent XEvents} are to be returned - can
 	 *            be greater than {@link #getCurrentRevisionNumber()} to get all
@@ -55,9 +54,8 @@ public class GetEventsRequest {
 		this.endRevision = endRevision;
 	}
 	
-	// TODO should these be final so that the request object is immutable?
-	public XAddress address;
-	public long beginRevision;
-	public long endRevision;
+	public final XAddress address;
+	public final long beginRevision;
+	public final long endRevision;
 	
 }
