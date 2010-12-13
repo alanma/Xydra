@@ -179,6 +179,55 @@ public abstract class AbstractStoreTest {
 		assertNotNull(callback.getException());
 		assertTrue(callback.getException() instanceof QuotaException);
 		
+		// check IllegalArgumentException
+		// first parameter equals null
+		callback = new TestCallback<Boolean>();
+		boolean exceptionThrown = false;
+		
+		try {
+			this.store.checkLogin(null, this.correctUserPass, callback);
+		}
+		catch(IllegalArgumentException iae) {
+			exceptionThrown = true;
+		}
+		assertTrue(exceptionThrown);
+		
+		// second parameter equals null
+		callback = new TestCallback<Boolean>();
+		exceptionThrown = false;
+		
+		try {
+			this.store.checkLogin(this.correctUser, null, callback);
+		}
+		catch(IllegalArgumentException iae) {
+			exceptionThrown = true;
+		}
+		assertTrue(exceptionThrown);
+		
+		// both parameters equal null
+		callback = new TestCallback<Boolean>();
+		exceptionThrown = false;
+		
+		try {
+			this.store.checkLogin(null, null, callback);
+		}
+		catch(IllegalArgumentException iae) {
+			exceptionThrown = true;
+		}
+		assertTrue(exceptionThrown);
+		
+		// callback is null - should not throw an IllegalArgumentException
+		exceptionThrown = false;
+		
+		try {
+			this.store.checkLogin(this.correctUser, this.correctUserPass, null);
+		}
+		catch(IllegalArgumentException iae) {
+			exceptionThrown = true;
+		}
+		assertFalse(exceptionThrown);
+		
+		
 		// TODO How to test for other exception types like ConnectionException,
 		// TimeoutException etc.?
 		
@@ -313,6 +362,67 @@ public abstract class AbstractStoreTest {
 		assertNull(callback.getEffect());
 		assertNotNull(callback.getException());
 		assertTrue(callback.getException() instanceof QuotaException);
+		
+		// Test IllegalArgumentException
+		callback = new TestCallback<BatchedResult<XBaseModel>[]>();
+		boolean exceptionThrown = false;
+		
+		// first parameter equals null
+		try{
+			this.store.getModelSnapshots(null, this.correctUserPass, modelAddresses, callback);
+		}
+		catch(IllegalArgumentException iae) {
+			exceptionThrown = true;
+		}
+		assertTrue(exceptionThrown);
+		
+		// second parameter equals null
+		callback = new TestCallback<BatchedResult<XBaseModel>[]>();
+		exceptionThrown = false;
+		
+		try{
+			this.store.getModelSnapshots(this.correctUser, null, modelAddresses, callback);
+		}
+		catch(IllegalArgumentException iae) {
+			exceptionThrown = true;
+		}
+		assertTrue(exceptionThrown);
+		
+		// third parameter equals null
+		callback = new TestCallback<BatchedResult<XBaseModel>[]>();
+		exceptionThrown = false;
+		
+		try{
+			this.store.getModelSnapshots(this.correctUser, this.correctUserPass, null, callback);
+		}
+		catch(IllegalArgumentException iae) {
+			exceptionThrown = true;
+		}
+		assertTrue(exceptionThrown);
+		
+		// all parameters equal null
+		callback = new TestCallback<BatchedResult<XBaseModel>[]>();
+		exceptionThrown = false;
+		
+		try{
+			this.store.getModelSnapshots(null, null, null, callback);
+		}
+		catch(IllegalArgumentException iae) {
+			exceptionThrown = true;
+		}
+		assertTrue(exceptionThrown);
+		
+		// callback equals null - should not throw an IllegalArgumentException
+		callback = new TestCallback<BatchedResult<XBaseModel>[]>();
+		exceptionThrown = false;
+		
+		try{
+			this.store.getModelSnapshots(this.correctUser, this.correctUserPass, modelAddresses, null);
+		}
+		catch(IllegalArgumentException iae) {
+			exceptionThrown = true;
+		}
+		assertFalse(exceptionThrown);
 		
 		// TODO How to test for other exception types like ConnectionException,
 		// TimeoutException etc.?
@@ -483,6 +593,67 @@ public abstract class AbstractStoreTest {
 		assertNotNull(revisionCallback.getException());
 		assertTrue(revisionCallback.getException() instanceof QuotaException);
 		
+		// Test IllegalArgumentException
+		revisionCallback = new TestCallback<BatchedResult<Long>[]>();
+		boolean exceptionThrown = false;
+		
+		// first parameter equals null
+		try{
+			this.store.getModelRevisions(null, this.correctUserPass, modelAddresses, revisionCallback);
+		}
+		catch(IllegalArgumentException iae) {
+			exceptionThrown = true;
+		}
+		assertTrue(exceptionThrown);
+		
+		// second parameter equals null
+		revisionCallback = new TestCallback<BatchedResult<Long>[]>();
+		exceptionThrown = false;
+		
+		try{
+			this.store.getModelRevisions(this.correctUser, null, modelAddresses, revisionCallback);
+		}
+		catch(IllegalArgumentException iae) {
+			exceptionThrown = true;
+		}
+		assertTrue(exceptionThrown);
+		
+		// third parameter equals null
+		revisionCallback = new TestCallback<BatchedResult<Long>[]>();
+		exceptionThrown = false;
+		
+		try{
+			this.store.getModelRevisions(this.correctUser, this.correctUserPass, null, revisionCallback);
+		}
+		catch(IllegalArgumentException iae) {
+			exceptionThrown = true;
+		}
+		assertTrue(exceptionThrown);
+		
+		// all parameters equal null
+		revisionCallback = new TestCallback<BatchedResult<Long>[]>();
+		exceptionThrown = false;
+		
+		try{
+			this.store.getModelRevisions(null, null, null, revisionCallback);
+		}
+		catch(IllegalArgumentException iae) {
+			exceptionThrown = true;
+		}
+		assertTrue(exceptionThrown);
+		
+		// callback equals null - should not throw an IllegalArgumentException
+		revisionCallback = new TestCallback<BatchedResult<Long>[]>();
+		exceptionThrown = false;
+		
+		try{
+			this.store.getModelRevisions(this.correctUser, this.correctUserPass, modelAddresses, null);
+		}
+		catch(IllegalArgumentException iae) {
+			exceptionThrown = true;
+		}
+		assertFalse(exceptionThrown);
+		
 		// TODO How to test for other exception types like ConnectionException,
 		// TimeoutException etc.?
 	}
@@ -617,6 +788,67 @@ public abstract class AbstractStoreTest {
 		assertNull(callback.getEffect());
 		assertNotNull(callback.getException());
 		assertTrue(callback.getException() instanceof QuotaException);
+		
+		// Test IllegalArgumentException
+		callback = new TestCallback<BatchedResult<XBaseObject>[]>();
+		boolean exceptionThrown = false;
+		
+		// first parameter equals null
+		try{
+			this.store.getObjectSnapshots(null, this.correctUserPass, objectAddresses, callback);
+		}
+		catch(IllegalArgumentException iae) {
+			exceptionThrown = true;
+		}
+		assertTrue(exceptionThrown);
+		
+		// second parameter equals null
+		callback = new TestCallback<BatchedResult<XBaseObject>[]>();
+		exceptionThrown = false;
+		
+		try{
+			this.store.getObjectSnapshots(this.correctUser, null, objectAddresses, callback);
+		}
+		catch(IllegalArgumentException iae) {
+			exceptionThrown = true;
+		}
+		assertTrue(exceptionThrown);
+		
+		// third parameter equals null
+		callback = new TestCallback<BatchedResult<XBaseObject>[]>();
+		exceptionThrown = false;
+		
+		try{
+			this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, null, callback);
+		}
+		catch(IllegalArgumentException iae) {
+			exceptionThrown = true;
+		}
+		assertTrue(exceptionThrown);
+		
+		// all parameters equal null
+		callback = new TestCallback<BatchedResult<XBaseObject>[]>();
+		exceptionThrown = false;
+		
+		try{
+			this.store.getObjectSnapshots(null, null, null, callback);
+		}
+		catch(IllegalArgumentException iae) {
+			exceptionThrown = true;
+		}
+		assertTrue(exceptionThrown);
+		
+		// callback equals null - should not throw an IllegalArgumentException
+		callback = new TestCallback<BatchedResult<XBaseObject>[]>();
+		exceptionThrown = false;
+		
+		try{
+			this.store.getModelSnapshots(this.correctUser, this.correctUserPass, objectAddresses, null);
+		}
+		catch(IllegalArgumentException iae) {
+			exceptionThrown = true;
+		}
+		
 		
 		// TODO How to test for other exception types like ConnectionException,
 		// TimeoutException etc.?
