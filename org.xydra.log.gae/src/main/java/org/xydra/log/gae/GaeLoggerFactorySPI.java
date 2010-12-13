@@ -18,14 +18,10 @@ public class GaeLoggerFactorySPI implements ILoggerFactorySPI {
 	
 	private static ILoggerFactorySPI factory;
 	
-	static {
-		init();
-	}
-	
 	/**
 	 * Create and register appropriate factory.
 	 */
-	public static void init() {
+	public GaeLoggerFactorySPI() {
 		if(inProduction()) {
 			factory = new JulLoggerFactory();
 		} else {
@@ -50,6 +46,10 @@ public class GaeLoggerFactorySPI implements ILoggerFactorySPI {
 		return SystemProperty.environment.get() != null
 		        && SystemProperty.environment.value().equals(
 		                SystemProperty.Environment.Value.Production);
+	}
+	
+	public static void init() {
+		new GaeLoggerFactorySPI();
 	}
 	
 }

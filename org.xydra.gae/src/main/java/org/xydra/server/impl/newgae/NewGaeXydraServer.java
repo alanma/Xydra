@@ -14,7 +14,6 @@ import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XID;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.log.gae.GaeLoggerFactorySPI;
 import org.xydra.server.IXydraServer;
 import org.xydra.server.impl.InfrastructureServiceFactory;
 import org.xydra.server.impl.newgae.changes.GaeChangesService;
@@ -38,12 +37,6 @@ public class NewGaeXydraServer implements IXydraServer {
 	
 	XGroupDatabaseWithListeners groups;
 	XAccessManagerWithListeners arm;
-	
-	static {
-		// FIXME this still too late and logging will already be
-		// initialized ~Daniel
-		GaeLoggerFactorySPI.init();
-	}
 	
 	public NewGaeXydraServer() {
 		

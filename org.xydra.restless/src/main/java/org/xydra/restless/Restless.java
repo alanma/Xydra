@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.xydra.log.ILoggerFactorySPI;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
@@ -41,6 +42,11 @@ import org.xydra.log.LoggerFactory;
  *   &lt;init-param&gt;
  *    &lt;param-name&gt;app&lt;/param-name&gt;
  *    &lt;param-value&gt;org.xydra.example.ExampleApp&lt;/param-value&gt;
+ *   &lt;/init-param&gt;
+ *   &lt;init-param&gt;
+ *    &lt;param-name&gt;loggerFactory&lt;/param-name&gt;
+ *    &lt;!-- Example if you run on AppEngine. Param can be left out to use default. --&gt;
+ *    &lt;param-value&gt;org.xydra.log.gae.GaeLoggerFactorySPI&lt;/param-value&gt;
  *   &lt;/init-param&gt;
  *  &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
  * &lt;/servlet&gt;
@@ -230,6 +236,7 @@ public class Restless extends HttpServlet {
 	private List<RestlessMethod> methods = new LinkedList<RestlessMethod>();
 	
 	private ServletContext servletContext;
+	private String loggerFactory;
 	
 	/**
 	 * Register a handler that will receive exceptions thrown by the executed
@@ -440,7 +447,51 @@ public class Restless extends HttpServlet {
 		} catch(ServletException e) {
 			throw new RuntimeException("Could not initialise super servlet", e);
 		}
-		log.info("Restless init...");
+		
+		/**
+		 * Configuration option in web.xml to select class for logging back-end,
+		 * which must be an implementation of ILoggerFactorySPI.
+		 */
+		this.loggerFactory = servletConfig.getInitParameter("loggerFactory");
+		if(this.loggerFactory != null) {
+			// try to instantiate
+			try {
+				Class<?> loggerFactoryClass = Class.forName(this.loggerFactory);
+				try {
+					Constructor<?> constructor = loggerFactoryClass.getConstructor();
+					try {
+						Object instance = constructor.newInstance();
+						try {
+							ILoggerFactorySPI spi = (ILoggerFactorySPI)instance;
+							LoggerFactory.setLoggerFactorySPI(spi);
+						} catch(ClassCastException e) {
+							throw new RuntimeException(
+							        "Given loggerFactory class is not an implementation of ILoggerFactorySPI",
+							        e);
+						}
+					} catch(IllegalArgumentException e) {
+						throw new RuntimeException("Could not instantiate loggerFactory class", e);
+					} catch(InstantiationException e) {
+						throw new RuntimeException("Could not instantiate loggerFactory class", e);
+					} catch(IllegalAccessException e) {
+						throw new RuntimeException("Could not instantiate loggerFactory class", e);
+					} catch(InvocationTargetException e) {
+						throw new RuntimeException("Could not instantiate loggerFactory class", e);
+					}
+				} catch(SecurityException e) {
+					throw new RuntimeException("Could not get constructor of loggerFactory class",
+					        e);
+				} catch(NoSuchMethodException e) {
+					throw new RuntimeException(
+					        "Found no parameterless constructor in loggerFactory class", e);
+				}
+				
+			} catch(ClassNotFoundException e) {
+				throw new RuntimeException("Could not load loggerFactory class", e);
+			}
+		}
+		
+		log.info("Restless init. Using loggerFactory '" + this.loggerFactory + "'...");
 		
 		/** provide servletContext object for other parts of the application */
 		this.servletContext = servletConfig.getServletContext();
@@ -508,10 +559,9 @@ public class Restless extends HttpServlet {
 							        + ".restless(Restless,String prefix)' failed", e);
 						}
 					} catch(NoSuchMethodException e) {
-						log
-						        .warn("Class '"
-						                + this.apps
-						                + "' has no restless( Restless restless, String prefix ) method. Relying on static initializer.");
+						log.warn("Class '"
+						        + this.apps
+						        + "' has no restless( Restless restless, String prefix ) method. Relying on static initializer.");
 						log.debug("Configured with " + clazz.getName());
 					}
 				} catch(IllegalArgumentException e) {
@@ -621,16 +671,15 @@ public class Restless extends HttpServlet {
 					res.sendError(403, "Forbidden. Admin parts must be accessed via /admin.");
 				}
 			} else {
-				res
-				        .sendError(
-				                404,
-				                "No handler matched your "
-				                        + req.getMethod()
-				                        + "-request path '"
-				                        + path
-				                        + "'. "
-				                        + (foundPath ? "Found at least a path mapping (wrong HTTP method or missing parameters)."
-				                                : "Found not even a path mapping."));
+				res.sendError(
+				        404,
+				        "No handler matched your "
+				                + req.getMethod()
+				                + "-request path '"
+				                + path
+				                + "'. "
+				                + (foundPath ? "Found at least a path mapping (wrong HTTP method or missing parameters)."
+				                        : "Found not even a path mapping."));
 			}
 			
 		} catch(IOException e) {

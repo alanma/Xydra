@@ -2,13 +2,17 @@
 <web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
-	
+
 	<servlet>
 		<servlet-name>XydraServer</servlet-name>
 		<servlet-class>org.xydra.restless.Restless</servlet-class>
 		<init-param>
 			<param-name>app</param-name>
 			<param-value>org.xydra.server.rest.XydraRestServer</param-value>
+		</init-param>
+		<init-param>
+			<param-name>loggerFactor</param-name>
+			<param-value>org.xydra.log.gae.GaeLoggerFactorySPI</param-value>
 		</init-param>
 		<init-param>
 			<param-name>org.xydra.server</param-name>
@@ -21,5 +25,5 @@
 		<servlet-name>XydraServer</servlet-name>
 		<url-pattern>/*</url-pattern>
 	</servlet-mapping>
-	
+
 </web-app>
