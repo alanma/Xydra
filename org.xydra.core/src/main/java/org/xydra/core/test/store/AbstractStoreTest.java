@@ -26,10 +26,10 @@ import org.xydra.store.XydraStore;
  * Abstract test class for classes implementing the {@link XydraStore}
  * interface.
  * 
- * This test assumes that this test alone operates on the {@link XydraStore}
- * that is being tested. Some methods may fail if someone/something else
- * operates on the same {@link XydraStore} at the same time, even though the
- * {@link XydraStore} is working correctly.
+ * This test assumes that this test alone (no other threads) operates on the
+ * {@link XydraStore} that is being tested. Some methods may fail if
+ * someone/something else operates on the same {@link XydraStore} at the same
+ * time, even though the {@link XydraStore} is working correctly.
  * 
  * @author Kaidel
  * 
@@ -56,27 +56,27 @@ public abstract class AbstractStoreTest {
 	abstract protected XCommandFactory getCommandFactory();
 	
 	/**
-	 * Stores a correct/existing accountname with its correct passwordhash in
-	 * the given XID/string
+	 * Set an existing actorId with its correct passwordHash in the given
+	 * XID/string
 	 */
-	abstract protected void getCorrectUser(XID account, String passwordhash);
+	abstract protected void setCorrectUser(XID actorId, String passwordHash);
 	
 	/**
-	 * Stores a correct/existing accountname with an incorrect passwordhash in
-	 * the given XID/string
+	 * Set an existing XID with an incorrect passwordHash in the given
+	 * XID/string
 	 */
-	abstract protected void getIncorrectUser(XID account, String passwordhash);
+	abstract protected void setIncorrectUser(XID actorId, String passwordHash);
 	
 	/**
 	 * @param timeout sets the amount of time tests shall wait on callbacks
 	 */
-	abstract protected void getCallbackTimeout(long timeout);
+	abstract protected void setCallbackTimeout(long timeout);
 	
 	/**
 	 * @param quota sets the amount of allowed incorrect login tries before a
 	 *            QuotaException is thrown
 	 */
-	abstract protected void getQuotaForBruteForce(long quota);
+	abstract protected void setQuotaForBruteForce(long quota);
 	
 	/**
 	 * Returns an array of {@link XAddress XAddresses} of {@link XModel XModels}
@@ -134,10 +134,10 @@ public abstract class AbstractStoreTest {
 	public void setUp() {
 		this.store = this.getStore();
 		
-		getCorrectUser(this.correctUser, this.correctUserPass);
-		getIncorrectUser(this.incorrectUser, this.incorrectUserPass);
-		getCallbackTimeout(this.timeout);
-		getQuotaForBruteForce(this.bfQuota);
+		setCorrectUser(this.correctUser, this.correctUserPass);
+		setIncorrectUser(this.incorrectUser, this.incorrectUserPass);
+		setCallbackTimeout(this.timeout);
+		setQuotaForBruteForce(this.bfQuota);
 	}
 	
 	/**
@@ -155,7 +155,7 @@ public abstract class AbstractStoreTest {
 		assertNull(callback.getException());
 		
 		// Testing a login that should fail because of a wrong
-		// accountname-passwordhash combination
+		// actorId-passwordHash combination
 		callback = new TestCallback<Boolean>();
 		
 		this.store.checkLogin(this.incorrectUser, this.incorrectUserPass, callback);
@@ -278,13 +278,13 @@ public abstract class AbstractStoreTest {
 		// check order of returned snapshots
 		for(int i = 0; i < modelAddresses.length; i++) {
 			if(i == modelAddresses.length) { // XAddress of a not existing
-											 // XModel
+				                             // XModel
 				assertNull(result[i].getResult());
 				assertNotNull(result[i].getException());
 				assertTrue(result[i].getException() instanceof RequestException);
 			} else if(i == modelAddresses.length + 1) { // XAddress of an XModel
-														// the account has no
-														// access to
+				                                        // the account has no
+				                                        // access to
 				assertNull(result[i].getResult());
 				assertNotNull(result[i].getException());
 				assertTrue(result[i].getException() instanceof AccessException);
@@ -376,8 +376,8 @@ public abstract class AbstractStoreTest {
 			// compare revision numbers
 			assertNotNull(revisionResult[i].getResult());
 			assertNull(revisionResult[i].getException());
-			assertEquals((Long)snapshotResult[i].getResult().getRevisionNumber(), revisionResult[i]
-			        .getResult());
+			assertEquals((Long)snapshotResult[i].getResult().getRevisionNumber(),
+			        revisionResult[i].getResult());
 		}
 		
 		// Test if it behaves correctly for addresses of XModels the user has no
@@ -448,8 +448,8 @@ public abstract class AbstractStoreTest {
 				assertNotNull(revisionResult[i].getException());
 				assertTrue(revisionResult[i].getException() instanceof RequestException);
 			} else if(i == modelAddresses.length + 1) { // XAddress of XModel
-														// the account has no
-														// access to
+				                                        // the account has no
+				                                        // access to
 				assertNull(snapshotResult[i].getResult());
 				assertEquals(revisionResult[i].getResult(), (Long)XydraStore.MODEL_DOES_NOT_EXIST);
 				assertNotNull(revisionResult[i].getException());
@@ -582,13 +582,13 @@ public abstract class AbstractStoreTest {
 		// check order of returned snapshots
 		for(int i = 0; i < objectAddresses.length; i++) {
 			if(i == objectAddresses.length) { // XAddress of a not existing
-											  // XModel
+				                              // XModel
 				assertNull(result[i].getResult());
 				assertNotNull(result[i].getException());
 				assertTrue(result[i].getException() instanceof RequestException);
 			} else if(i == objectAddresses.length + 1) { // XAddress of an
-														 // XModel the account
-														 // has no access to
+				                                         // XModel the account
+				                                         // has no access to
 				assertNull(result[i].getResult());
 				assertNotNull(result[i].getException());
 				assertTrue(result[i].getException() instanceof AccessException);
