@@ -136,11 +136,11 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 			// apply changes
 			
 			for(XID objectId : model.getRemovedObjects()) {
-				removeObject(objectId);
+				removeObjectInternal(objectId);
 			}
 			
 			for(XBaseObject object : model.getNewObjects()) {
-				MemoryObject newObject = createObject(object.getID());
+				MemoryObject newObject = createObjectInternal(object.getID());
 				for(XID fieldId : object) {
 					XBaseField field = object.getField(fieldId);
 					MemoryField newField = newObject.createFieldInternal(fieldId);
@@ -544,35 +544,24 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 	protected abstract MemoryObject getObject(XID objectId);
 	
 	/**
-	 * Creates a new {@link MemoryObject} with the given {@link XID}.
+	 * Create a new object, increase revision (if not in a transaction) and
+	 * enqueue the corresponding event.
 	 * 
-	 * This method should never be called on entities that are {@link XObject
-	 * XObjects}.
-	 * 
-	 * @param objectId The {@link XID} for the {@link MemoryObject} which is to
-	 *            be created
-	 * 
-	 * @return the newly created {@link MemoryObject} or the already existing
-	 *         {@link MemoryObject}, if the given {@link XID} was already taken.
-	 * @throws AssertionError if the entity on which this method is called is an
-	 *             {@link XObject}
+	 * The caller is responsible for handling synchronization, for checking that
+	 * this model has not been removed and for checking that the object doesn't
+	 * already exist.
 	 */
-	protected abstract MemoryObject createObject(XID objectId);
+	protected abstract MemoryObject createObjectInternal(XID objectId);
 	
 	/**
-	 * Removes the {@link MemoryObject} with the given {@link XID}.
+	 * Remove an existing object, increase revision (if not in a transaction)
+	 * and enqueue the corresponding event(s).
 	 * 
-	 * This method should never be called on entities that are {@link XObject
-	 * XObjects}.
-	 * 
-	 * @param objectId The {@link XID} of the {@link MemoryObject} which is to
-	 *            be removed
-	 * 
-	 * @return true, if removal is successful.
-	 * @throws AssertionError if the entity on which this method is called is an
-	 *             {@link XObject}
+	 * The caller is responsible for handling synchronization, for checking that
+	 * this model has not been removed and for checking that the object actually
+	 * exists.
 	 */
-	protected abstract boolean removeObject(XID objectId);
+	protected abstract void removeObjectInternal(XID objectId);
 	
 	/**
 	 * @return Return the proxy for reading the current state.

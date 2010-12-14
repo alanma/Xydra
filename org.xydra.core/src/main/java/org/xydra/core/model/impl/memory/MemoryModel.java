@@ -16,6 +16,7 @@ import org.xydra.core.change.XModelEvent;
 import org.xydra.core.change.XModelEventListener;
 import org.xydra.core.change.XObjectEvent;
 import org.xydra.core.change.XTransaction;
+import org.xydra.core.change.impl.memory.MemoryModelCommand;
 import org.xydra.core.change.impl.memory.MemoryModelEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
@@ -117,62 +118,6 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		}
 	}
 	
-	@Override
-	public MemoryObject createObject(XID objectID) {
-		assert getRevisionNumber() >= 0;
-		synchronized(this.eventQueue) {
-			checkRemoved();
-			
-			if(hasObject(objectID)) {
-				return getObject(objectID);
-			}
-			
-			MemoryObject object = null;
-			
-			boolean inTrans = this.eventQueue.transactionInProgess;
-			Orphans orphans = getOrphans();
-			if(orphans != null) {
-				object = orphans.objects.remove(objectID);
-			} else if(!inTrans) {
-				beginStateTransaction();
-			}
-			
-			if(object == null) {
-				XObjectState objectState = this.state.createObjectState(objectID);
-				assert getAddress().contains(objectState.getAddress());
-				object = new MemoryObject(this.actorId, this, this.eventQueue, objectState);
-			}
-			
-			this.state.addObjectState(object.getState());
-			this.loadedObjects.put(object.getID(), object);
-			
-			XModelEvent event = MemoryModelEvent.createAddEvent(this.actorId, getAddress(),
-			        objectID, getRevisionNumber(), inTrans);
-			
-			this.eventQueue.enqueueModelEvent(this, event);
-			
-			// event propagation and revision number increasing happens after
-			// all events were successful
-			if(!inTrans) {
-				
-				// increment revision number
-				// only increment if this event is no subevent of a transaction
-				// (needs to be handled differently)
-				object.incrementRevisionAndSave();
-				
-				if(orphans == null) {
-					endStateTransaction();
-				}
-				
-				// propagate events
-				this.eventQueue.sendEvents();
-				
-			}
-			
-			return object;
-		}
-	}
-	
 	/**
 	 * @return the {@link XID} of the father-{@link XRepository} of this
 	 *         MemoryModel or null, if this object has no father.
@@ -214,63 +159,126 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		}
 	}
 	
-	@Override
-	public boolean removeObject(XID objectID) {
+	public MemoryObject createObject(XID objectId) {
+		
+		XModelCommand command = MemoryModelCommand.createAddCommand(getAddress(), true, objectId);
+		
+		// synchronize so that return is never null if command succeeded
 		synchronized(this.eventQueue) {
-			checkRemoved();
-			
-			if(!hasObject(objectID)) {
-				return false;
-			}
-			
-			MemoryObject object = getObject(objectID);
-			
-			assert object != null;
-			
-			boolean inTrans = this.eventQueue.transactionInProgess;
-			boolean makeTrans = !object.isEmpty();
-			int since = this.eventQueue.getNextPosition();
-			enqueueObjectRemoveEvents(this.actorId, object, makeTrans || inTrans, false);
-			
-			Orphans orphans = getOrphans();
-			if(!inTrans && orphans == null) {
-				beginStateTransaction();
-			}
-			
-			// remove the object
-			this.loadedObjects.remove(object.getID());
-			this.state.removeObjectState(object.getID());
-			if(orphans != null) {
-				object.removeInternal(orphans);
-				orphans.objects.put(object.getID(), object);
-			} else {
-				object.delete();
-			}
-			
-			// event propagation and revision number increasing for transactions
-			// happens after all events of a transaction were successful
-			if(!inTrans) {
-				
-				if(makeTrans) {
-					this.eventQueue.createTransactionEvent(this.actorId, this, null, since);
-				}
-				
-				// increment revision number
-				// only increment if this event is no subevent of a
-				// transaction (needs to be handled differently)
-				incrementRevisionAndSave();
-				
-				if(orphans == null) {
-					endStateTransaction();
-				}
-				
-				// propagate events
-				this.eventQueue.sendEvents();
-				
-			}
-			
-			return true;
+			long result = executeModelCommand(command);
+			MemoryObject object = getObject(objectId);
+			assert result == XCommand.FAILED || object != null;
+			return object;
 		}
+	}
+	
+	public boolean removeObject(XID objectId) {
+		
+		// no synchronization necessary here (except that in
+		// executeModelCommand())
+		
+		XModelCommand command = MemoryModelCommand.createRemoveCommand(getAddress(),
+		        XCommand.FORCED, objectId);
+		
+		long result = executeModelCommand(command);
+		assert result >= 0 || result == XCommand.NOCHANGE;
+		return result != XCommand.NOCHANGE;
+	}
+	
+	@Override
+	protected MemoryObject createObjectInternal(XID objectId) {
+		assert getRevisionNumber() >= 0;
+		
+		assert !hasObject(objectId);
+		
+		boolean inTrans = this.eventQueue.transactionInProgess;
+		Orphans orphans = getOrphans();
+		
+		if(!inTrans && orphans == null) {
+			beginStateTransaction();
+		}
+		
+		MemoryObject object = null;
+		if(orphans != null) {
+			object = orphans.objects.remove(objectId);
+		}
+		if(object == null) {
+			XObjectState objectState = this.state.createObjectState(objectId);
+			assert getAddress().contains(objectState.getAddress());
+			object = new MemoryObject(this.actorId, this, this.eventQueue, objectState);
+		}
+		
+		this.state.addObjectState(object.getState());
+		this.loadedObjects.put(object.getID(), object);
+		
+		XModelEvent event = MemoryModelEvent.createAddEvent(this.actorId, getAddress(), objectId,
+		        getRevisionNumber(), inTrans);
+		
+		this.eventQueue.enqueueModelEvent(this, event);
+		
+		// event propagation and revision number increasing happens after
+		// all events were successful
+		if(!inTrans) {
+			
+			object.incrementRevisionAndSave();
+			
+			if(orphans == null) {
+				endStateTransaction();
+			}
+			
+			// propagate events
+			this.eventQueue.sendEvents();
+			
+		}
+		
+		return object;
+	}
+	
+	@Override
+	protected void removeObjectInternal(XID objectId) {
+		
+		MemoryObject object = getObject(objectId);
+		assert object != null;
+		
+		boolean inTrans = this.eventQueue.transactionInProgess;
+		boolean makeTrans = !object.isEmpty();
+		int since = this.eventQueue.getNextPosition();
+		enqueueObjectRemoveEvents(this.actorId, object, makeTrans || inTrans, false);
+		
+		Orphans orphans = getOrphans();
+		if(!inTrans && orphans == null) {
+			beginStateTransaction();
+		}
+		
+		// remove the object
+		this.loadedObjects.remove(object.getID());
+		this.state.removeObjectState(object.getID());
+		if(orphans != null) {
+			object.removeInternal(orphans);
+			orphans.objects.put(object.getID(), object);
+		} else {
+			object.delete();
+		}
+		
+		// event propagation and revision number increasing for transactions
+		// happens after all events of a transaction were successful
+		if(!inTrans) {
+			
+			if(makeTrans) {
+				this.eventQueue.createTransactionEvent(this.actorId, this, null, since);
+			}
+			
+			incrementRevisionAndSave();
+			
+			if(orphans == null) {
+				endStateTransaction();
+			}
+			
+			// propagate events
+			this.eventQueue.sendEvents();
+			
+		}
+		
 	}
 	
 	public long executeModelCommand(XModelCommand command) {
@@ -280,6 +288,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 			if(!getAddress().equals(command.getTarget())) {
 				return XCommand.FAILED;
 			}
+			
+			long oldRev = getRevisionNumber();
 			
 			if(command.getChangeType() == ChangeType.ADD) {
 				if(hasObject(command.getObjectID())) {
@@ -295,14 +305,9 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 					return XCommand.FAILED;
 				}
 				
-				long oldRev = getRevisionNumber();
+				createObjectInternal(command.getObjectID());
 				
-				createObject(command.getObjectID());
-				
-				return oldRev + 1;
-			}
-			
-			if(command.getChangeType() == ChangeType.REMOVE) {
+			} else if(command.getChangeType() == ChangeType.REMOVE) {
 				XObject oldObject = getObject(command.getObjectID());
 				
 				if(oldObject == null) {
@@ -323,14 +328,13 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 					return XCommand.FAILED;
 				}
 				
-				long oldRev = getRevisionNumber();
+				removeObjectInternal(command.getObjectID());
 				
-				removeObject(command.getObjectID());
-				
-				return oldRev + 1;
+			} else {
+				throw new IllegalArgumentException("Unknown model command type: " + command);
 			}
 			
-			return XCommand.FAILED;
+			return oldRev + 1;
 		}
 	}
 	

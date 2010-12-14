@@ -286,18 +286,16 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	}
 	
 	/**
-	 * Create a new field and enqueue the corresponding event.
+	 * Create a new field, increase revision (if not in a transaction) and
+	 * enqueue the corresponding event.
 	 * 
 	 * The caller is responsible for handling synchronization, for checking that
-	 * this object has not been removed, for checking that the field doesn't
-	 * already exist, for handling state transactions and for dispatching
-	 * events.
+	 * this object has not been removed and for checking that the field doesn't
+	 * already exist.
 	 */
 	protected MemoryField createFieldInternal(XID fieldId) {
 		
 		assert !hasField(fieldId);
-		
-		MemoryField field = null;
 		
 		Orphans orphans = getOrphans();
 		boolean inTrans = this.eventQueue.transactionInProgess;
@@ -305,11 +303,11 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 			beginStateTransaction();
 		}
 		
+		MemoryField field = null;
 		if(orphans != null) {
 			XAddress fieldAddr = XX.resolveField(getAddress(), fieldId);
 			field = orphans.fields.remove(fieldAddr);
 		}
-		
 		if(field == null) {
 			XFieldState fieldState = this.state.createFieldState(fieldId);
 			assert getAddress().contains(fieldState.getAddress());
@@ -343,11 +341,12 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	}
 	
 	/**
-	 * Remove an existing field and enqueue the corresponding event(s).
+	 * Remove an existing field, increase revision (if not in a transaction) and
+	 * enqueue the corresponding event(s).
 	 * 
 	 * The caller is responsible for handling synchronization, for checking that
-	 * this object has not been removed, for checking that the field actually
-	 * exists, for handling state transactions and for dispatching events.
+	 * this object has not been removed and for checking that the field actually
+	 * exists.
 	 */
 	protected void removeFieldInternal(XID fieldId) {
 		
@@ -621,7 +620,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	}
 	
 	@Override
-	protected MemoryObject createObject(XID objectId) {
+	protected MemoryObject createObjectInternal(XID objectId) {
 		throw new AssertionError("object transactions cannot create objects");
 	}
 	
@@ -638,7 +637,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	}
 	
 	@Override
-	protected boolean removeObject(XID objectId) {
+	protected void removeObjectInternal(XID objectId) {
 		throw new AssertionError("object transactions cannot remove objects");
 	}
 	
