@@ -491,9 +491,9 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 			// Clean unneeded events.
 			this.eventQueue.cleanEvents(pos);
 			
-			cleanupOrphans();
-			
 		} finally {
+			
+			cleanupOrphans();
 			
 			this.eventQueue.saveLog();
 			endStateTransaction();
