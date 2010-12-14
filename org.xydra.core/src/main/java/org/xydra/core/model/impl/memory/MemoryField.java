@@ -20,6 +20,7 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
+import org.xydra.core.model.XSynchronizationCallback;
 import org.xydra.core.model.state.XFieldState;
 import org.xydra.core.model.state.impl.memory.TemporaryFieldState;
 import org.xydra.core.value.XValue;
@@ -59,8 +60,6 @@ public class MemoryField implements XField, Serializable {
 	
 	private Set<XFieldEventListener> fieldChangeListenerCollection;
 	
-	private XID actorId;
-	
 	/**
 	 * Creates a new MemoryField without a father-{@link XObject}.
 	 * 
@@ -82,7 +81,7 @@ public class MemoryField implements XField, Serializable {
 	 * @param fieldState The initial {@link XFieldState} of this MemoryField.
 	 */
 	public MemoryField(XID actorId, XFieldState fieldState) {
-		this(actorId, null, new MemoryEventQueue(null), fieldState);
+		this(null, new MemoryEventQueue(actorId, null, null), fieldState);
 	}
 	
 	/**
@@ -95,13 +94,10 @@ public class MemoryField implements XField, Serializable {
 	 *            never null.
 	 * @param fieldState The initial {@link XFieldState} of this MemoryField.
 	 */
-	protected MemoryField(XID actorId, MemoryObject parent, MemoryEventQueue eventQueue,
-	        XFieldState fieldState) {
+	protected MemoryField(MemoryObject parent, MemoryEventQueue eventQueue, XFieldState fieldState) {
 		assert eventQueue != null;
 		
 		this.eventQueue = eventQueue;
-		assert actorId != null;
-		this.actorId = actorId;
 		
 		if(fieldState == null) {
 			throw new IllegalArgumentException("objectState may not be null");
@@ -265,20 +261,21 @@ public class MemoryField implements XField, Serializable {
 		long modelRev = getModelRevisionNumber();
 		long objectRev = getObjectRevisionNumber();
 		long fieldRev = getRevisionNumber();
+		XID actorId = this.eventQueue.getActor();
 		XFieldEvent event = null;
 		if((oldValue == null)) {
 			assert newValue != null;
-			event = MemoryFieldEvent.createAddEvent(this.actorId, getAddress(), newValue, modelRev,
+			event = MemoryFieldEvent.createAddEvent(actorId, getAddress(), newValue, modelRev,
 			        objectRev, fieldRev, inTrans);
 		} else {
 			if(newValue == null) {
 				// implies remove
-				event = MemoryFieldEvent.createRemoveEvent(this.actorId, getAddress(), oldValue,
+				event = MemoryFieldEvent.createRemoveEvent(actorId, getAddress(), oldValue,
 				        modelRev, objectRev, fieldRev, inTrans, false);
 			} else {
 				assert !newValue.equals(oldValue);
 				// implies change
-				event = MemoryFieldEvent.createChangeEvent(this.actorId, getAddress(), oldValue,
+				event = MemoryFieldEvent.createChangeEvent(actorId, getAddress(), oldValue,
 				        newValue, modelRev, objectRev, fieldRev, inTrans);
 			}
 		}
@@ -305,13 +302,19 @@ public class MemoryField implements XField, Serializable {
 		
 	}
 	
+	public long executeFieldCommand(XFieldCommand command) {
+		return executeFieldCommand(command, null);
+	}
+	
 	/**
 	 * @throws IllegalStateException if this method is called after this
 	 *             MemoryField was already removed
 	 */
-	public long executeFieldCommand(XFieldCommand command) {
+	protected long executeFieldCommand(XFieldCommand command, XSynchronizationCallback callback) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
+			
+			assert !this.eventQueue.transactionInProgess;
 			
 			// check whether the given event actually refers to this field
 			if(!getAddress().equals(command.getTarget())) {
@@ -374,6 +377,8 @@ public class MemoryField implements XField, Serializable {
 			if(XI.equals(getValue(), command.getValue())) {
 				return XCommand.NOCHANGE;
 			}
+			
+			this.eventQueue.newLocalChange(command, callback);
 			
 			setValueInternal(command.getValue());
 			
@@ -575,22 +580,15 @@ public class MemoryField implements XField, Serializable {
 	
 	@Override
 	public XID getSessionActor() {
-		return this.actorId;
+		return this.eventQueue.getActor();
 	}
 	
 	@Override
-	public void setSessionActor(XID actor) {
-		this.actorId = actor;
-		if(this.getObject() == null) {
-			setSessionActorLocal(actor);
-		} else {
-			this.getObject().setSessionActor(actor);
+	public void setSessionActor(XID actorId) {
+		if(this.father != null) {
+			throw new IllegalStateException("cannot set actor on field with a parent");
 		}
-	}
-	
-	protected void setSessionActorLocal(XID actorId) {
-		assert actorId != null;
-		this.actorId = actorId;
+		this.eventQueue.setSessionActor(actorId, null);
 	}
 	
 }

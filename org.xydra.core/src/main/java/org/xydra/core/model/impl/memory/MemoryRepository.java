@@ -58,7 +58,8 @@ public class MemoryRepository implements XRepository, Serializable {
 	private Set<XFieldEventListener> fieldChangeListenerCollection;
 	private Set<XTransactionEventListener> transactionListenerCollection;
 	
-	private XID actorId;
+	private XID sessionActor;
+	private String sessionPasswordHash;
 	
 	/**
 	 * Creates a new MemoryRepository.
@@ -66,8 +67,9 @@ public class MemoryRepository implements XRepository, Serializable {
 	 * @param actorId TODO
 	 * @param repositoryId The {@link XID} for this MemoryRepository.
 	 */
-	public MemoryRepository(XID actorId, XID repositoryId) {
-		this(actorId, new TemporaryRepositoryState(XX.toAddress(repositoryId, null, null, null)));
+	public MemoryRepository(XID actorId, String passwordHash, XID repositoryId) {
+		this(actorId, passwordHash, new TemporaryRepositoryState(XX.toAddress(repositoryId, null,
+		        null, null)));
 	}
 	
 	/**
@@ -77,11 +79,12 @@ public class MemoryRepository implements XRepository, Serializable {
 	 * @param repositoryState The initial {@link XRepositoryState} of this
 	 *            MemoryRepository.
 	 */
-	public MemoryRepository(XID actorId, XRepositoryState repositoryState) {
+	public MemoryRepository(XID actorId, String passwordHash, XRepositoryState repositoryState) {
 		assert repositoryState != null;
 		
 		assert actorId != null;
-		this.actorId = actorId;
+		this.sessionActor = actorId;
+		this.sessionPasswordHash = passwordHash;
 		this.state = repositoryState;
 		
 		this.repoChangeListenerCollection = new HashSet<XRepositoryEventListener>();
@@ -95,7 +98,7 @@ public class MemoryRepository implements XRepository, Serializable {
 	public synchronized MemoryModel createModel(XID modelID) {
 		MemoryModel model = getModel(modelID);
 		if(model == null) {
-			XRepositoryEvent event = MemoryRepositoryEvent.createAddEvent(this.actorId,
+			XRepositoryEvent event = MemoryRepositoryEvent.createAddEvent(this.sessionActor,
 			        getAddress(), modelID);
 			
 			XModelState modelState = this.state.createModelState(modelID);
@@ -109,7 +112,7 @@ public class MemoryRepository implements XRepository, Serializable {
 			
 			modelState.save(trans);
 			
-			model = new MemoryModel(this.actorId, this, modelState);
+			model = new MemoryModel(this.sessionActor, this.sessionPasswordHash, this, modelState);
 			assert model.getRevisionNumber() == 0;
 			
 			this.state.addModelState(modelState);
@@ -160,7 +163,7 @@ public class MemoryRepository implements XRepository, Serializable {
 		}
 		
 		XModelState modelState = this.state.getModelState(modelID);
-		model = new MemoryModel(this.actorId, this, modelState);
+		model = new MemoryModel(this.sessionActor, this.sessionPasswordHash, this, modelState);
 		this.loadedModels.put(modelID, model);
 		
 		return model;
@@ -198,7 +201,7 @@ public class MemoryRepository implements XRepository, Serializable {
 			int since = model.eventQueue.getNextPosition();
 			boolean inTrans = enqueueModelRemoveEvents(model);
 			if(inTrans) {
-				model.eventQueue.createTransactionEvent(this.actorId, model, null, since);
+				model.eventQueue.createTransactionEvent(this.sessionActor, model, null, since);
 			}
 			
 			model.delete();
@@ -222,11 +225,11 @@ public class MemoryRepository implements XRepository, Serializable {
 		boolean inTrans = false;
 		for(XID objectId : model) {
 			MemoryObject object = model.getObject(objectId);
-			model.enqueueObjectRemoveEvents(this.actorId, object, true, true);
+			model.enqueueObjectRemoveEvents(this.sessionActor, object, true, true);
 			inTrans = true;
 		}
 		
-		XRepositoryEvent event = MemoryRepositoryEvent.createRemoveEvent(this.actorId,
+		XRepositoryEvent event = MemoryRepositoryEvent.createRemoveEvent(this.sessionActor,
 		        getAddress(), model.getID(), model.getOldRevisionNumber(), inTrans);
 		model.eventQueue.enqueueRepositoryEvent(this, event);
 		
@@ -542,15 +545,16 @@ public class MemoryRepository implements XRepository, Serializable {
 	
 	@Override
 	public XID getSessionActor() {
-		return this.actorId;
+		return this.sessionActor;
 	}
 	
 	@Override
-	public void setSessionActor(XID actorId) {
+	public void setSessionActor(XID actorId, String passwordHash) {
 		assert actorId != null;
-		this.actorId = actorId;
+		this.sessionActor = actorId;
+		this.sessionPasswordHash = passwordHash;
 		for(XModel model : this.loadedModels.values()) {
-			model.setSessionActor(actorId);
+			model.setSessionActor(actorId, passwordHash);
 		}
 	}
 	

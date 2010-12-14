@@ -6,7 +6,6 @@ import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.change.XModelCommand;
 import org.xydra.core.change.XModelEventListener;
 import org.xydra.core.change.XObjectEventListener;
-import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.XTransactionEventListener;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XID;
@@ -110,15 +109,6 @@ public class ArmProtectedModel extends ArmProtectedBaseModel implements XProtect
 	
 	public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
 		return this.model.removeListenerForTransactionEvents(changeListener);
-	}
-	
-	public long executeTransaction(XTransaction transaction) {
-		
-		if(!this.arm.canExecute(this.actor, transaction)) {
-			throw new AccessException(this.actor + " cannot execute " + transaction);
-		}
-		
-		return this.model.executeTransaction(transaction);
 	}
 	
 	public long executeCommand(XCommand command) {

@@ -2,6 +2,7 @@ package org.xydra.core.model.impl.memory;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.xydra.annotations.ReadOperation;
@@ -25,6 +26,7 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
+import org.xydra.core.model.XSynchronizationCallback;
 import org.xydra.core.model.delta.WrapperModel;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XFieldState;
@@ -53,16 +55,14 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	/** Has this MemoryObject been removed? */
 	boolean removed = false;
 	
-	private XID actorId;
-	
 	/**
 	 * Creates a new MemoryObject without a father-{@link XModel}.
 	 * 
 	 * @param actorId TODO
 	 * @param objectId The {@link XID} for this MemoryObject
 	 */
-	public MemoryObject(XID actorId, XID objectId) {
-		this(actorId, createObjectState(objectId));
+	public MemoryObject(XID actorId, String passwordHash, XID objectId) {
+		this(actorId, passwordHash, createObjectState(objectId));
 	}
 	
 	private static XObjectState createObjectState(XID objectId) {
@@ -79,14 +79,15 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	 * @param actorId TODO
 	 * @param objectState The {@link XObjectState} for this MemoryObject
 	 */
-	public MemoryObject(XID actorId, XObjectState objectState) {
-		this(actorId, null, createEventQueue(objectState), objectState);
+	public MemoryObject(XID actorId, String passwordHash, XObjectState objectState) {
+		this(null, createEventQueue(actorId, passwordHash, objectState), objectState);
 	}
 	
-	private static MemoryEventQueue createEventQueue(XObjectState objectState) {
+	private static MemoryEventQueue createEventQueue(XID actorId, String passwordHash,
+	        XObjectState objectState) {
 		XChangeLogState logState = objectState.getChangeLogState();
 		MemoryChangeLog log = logState == null ? null : new MemoryChangeLog(logState);
-		return new MemoryEventQueue(log);
+		return new MemoryEventQueue(actorId, passwordHash, log);
 	}
 	
 	/**
@@ -99,13 +100,9 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	 *            MemoryObject.
 	 * @param objectState The initial {@link XObjectState} of this MemoryObject.
 	 */
-	protected MemoryObject(XID actorId, MemoryModel parent, MemoryEventQueue eventQueue,
-	        XObjectState objectState) {
+	protected MemoryObject(MemoryModel parent, MemoryEventQueue eventQueue, XObjectState objectState) {
 		super(eventQueue);
 		assert eventQueue != null;
-		
-		assert actorId != null;
-		this.actorId = actorId;
 		
 		if(objectState == null) {
 			throw new IllegalArgumentException("objectState may not be null");
@@ -252,7 +249,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 			
 			XFieldState fieldState = this.state.getFieldState(fieldID);
 			assert fieldState != null;
-			field = new MemoryField(this.actorId, this, this.eventQueue, fieldState);
+			field = new MemoryField(this, this.eventQueue, fieldState);
 			this.loadedFields.put(fieldID, field);
 			
 			return field;
@@ -311,14 +308,15 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		if(field == null) {
 			XFieldState fieldState = this.state.createFieldState(fieldId);
 			assert getAddress().contains(fieldState.getAddress());
-			field = new MemoryField(this.actorId, this, this.eventQueue, fieldState);
+			field = new MemoryField(this, this.eventQueue, fieldState);
 		}
 		
 		this.state.addFieldState(field.getState());
 		this.loadedFields.put(field.getID(), field);
 		
-		XObjectEvent event = MemoryObjectEvent.createAddEvent(this.actorId, getAddress(), field
-		        .getID(), getModelRevisionNumber(), getRevisionNumber(), inTrans);
+		XObjectEvent event = MemoryObjectEvent
+		        .createAddEvent(this.eventQueue.getActor(), getAddress(), field.getID(),
+		                getModelRevisionNumber(), getRevisionNumber(), inTrans);
 		
 		this.eventQueue.enqueueObjectEvent(this, event);
 		
@@ -363,7 +361,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		
 		boolean makeTrans = !field.isEmpty();
 		int since = this.eventQueue.getNextPosition();
-		enqueueFieldRemoveEvents(this.actorId, field, makeTrans || inTrans, false);
+		enqueueFieldRemoveEvents(this.eventQueue.getActor(), field, makeTrans || inTrans, false);
 		
 		// actually remove the field
 		this.state.removeFieldState(field.getID());
@@ -381,7 +379,8 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		if(!inTrans) {
 			
 			if(makeTrans) {
-				this.eventQueue.createTransactionEvent(this.actorId, this.father, this, since);
+				this.eventQueue.createTransactionEvent(this.eventQueue.getActor(), this.father,
+				        this, since);
 			}
 			
 			incrementRevisionAndSave();
@@ -398,8 +397,14 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	}
 	
 	public long executeObjectCommand(XObjectCommand command) {
+		return executeObjectCommand(command, null);
+	}
+	
+	protected long executeObjectCommand(XObjectCommand command, XSynchronizationCallback callback) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
+			
+			assert !this.eventQueue.transactionInProgess;
 			
 			if(!getAddress().equals(command.getTarget())) {
 				return XCommand.FAILED;
@@ -420,6 +425,8 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 					}
 					return XCommand.FAILED;
 				}
+				
+				this.eventQueue.newLocalChange(command, callback);
 				
 				createFieldInternal(command.getFieldID());
 				
@@ -443,6 +450,8 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 				        && oldField.getRevisionNumber() != command.getRevisionNumber()) {
 					return XCommand.FAILED;
 				}
+				
+				this.eventQueue.newLocalChange(command, callback);
 				
 				removeFieldInternal(command.getFieldID());
 				
@@ -595,28 +604,23 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	}
 	
 	public long executeCommand(XCommand command) {
-		synchronized(this.eventQueue) {
-			checkRemoved();
-			if(command instanceof XTransaction) {
-				return executeTransaction((XTransaction)command);
-			}
-			if(command instanceof XObjectCommand) {
-				return executeObjectCommand((XObjectCommand)command);
-			}
-			if(command instanceof XFieldCommand) {
-				XField field = getField(command.getTarget().getField());
-				if(field != null) {
-					/*
-					 * TODO using the actor set on the field instead of the one
-					 * set on the object (on which the user called the
-					 * #executeCommand() method) - this is counter-intuitive for
-					 * an API user
-					 */
-					return field.executeFieldCommand((XFieldCommand)command);
-				}
-			}
-			return XCommand.FAILED;
+		return executeCommand(command, null);
+	}
+	
+	public long executeCommand(XCommand command, XSynchronizationCallback callback) {
+		if(command instanceof XTransaction) {
+			return executeTransaction((XTransaction)command, callback);
 		}
+		if(command instanceof XObjectCommand) {
+			return executeObjectCommand((XObjectCommand)command, callback);
+		}
+		if(command instanceof XFieldCommand) {
+			MemoryField field = getField(command.getTarget().getField());
+			if(field != null) {
+				return field.executeFieldCommand((XFieldCommand)command, callback);
+			}
+		}
+		throw new IllegalArgumentException("Unknown command type: " + command);
 	}
 	
 	@Override
@@ -703,25 +707,17 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	
 	@Override
 	public XID getSessionActor() {
-		return this.actorId;
+		return this.eventQueue.getActor();
 	}
 	
 	@Override
-	public void setSessionActor(XID actorId) {
-		assert actorId != null;
-		if(this.getModel() == null) {
-			setSessionActorLocalAndInChildren(actorId);
-		} else {
-			this.getModel().setSessionActor(actorId);
-		}
+	public void setSessionActor(XID actorId, String passwordHash) {
+		this.eventQueue.setSessionActor(actorId, passwordHash);
 	}
 	
-	protected void setSessionActorLocalAndInChildren(XID actorId) {
-		assert actorId != null;
-		this.actorId = actorId;
-		for(MemoryField field : this.loadedFields.values()) {
-			field.setSessionActorLocal(actorId);
-		}
+	@Override
+	public List<LocalChange> getLocalChanges() {
+		return this.eventQueue.getLocalChanges();
 	}
 	
 }

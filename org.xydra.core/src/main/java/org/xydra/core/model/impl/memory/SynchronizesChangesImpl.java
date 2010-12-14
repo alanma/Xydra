@@ -41,11 +41,11 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
+import org.xydra.core.model.XSynchronizationCallback;
 import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.core.model.delta.ChangedField;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.ChangedObject;
-import org.xydra.core.model.sync.LocalChange;
 
 
 /**
@@ -83,7 +83,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 		this.transactionListenerCollection = new HashSet<XTransactionEventListener>();
 	}
 	
-	public long executeTransaction(XTransaction transaction) {
+	protected long executeTransaction(XTransaction transaction, XSynchronizationCallback callback) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -114,6 +114,8 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 				// nothing to change
 				return XCommand.NOCHANGE;
 			}
+			
+			this.eventQueue.newLocalChange(transaction, callback);
 			
 			long oldRev = getOldRevisionNumber();
 			
@@ -382,8 +384,9 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 		saveIfModel();
 	}
 	
-	public long[] synchronize(XEvent[] remoteChanges, long lastRevision,
-	        List<LocalChange> localChanges) {
+	public long[] synchronize(XEvent[] remoteChanges, long lastRevision) {
+		
+		List<LocalChange> localChanges = this.eventQueue.getLocalChanges();
 		
 		checkSync();
 		
@@ -480,11 +483,9 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 				 */
 				results[i] = executeCommand(command);
 				
-				if(lc.callback != null && results[i] == XCommand.FAILED) {
-					// TODO should this be done here? what happens if the
-					// callback makes other changes to this model?
-					lc.callback.failed();
-				}
+				// TODO maybe allow the callback to "fix" the change here to
+				// prevent an avalanche of failed commands (wrong revisions) and
+				// to prevent sending events that will be undone again anyway.
 				
 			}
 			

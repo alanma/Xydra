@@ -141,6 +141,7 @@ public class XFile {
 	
 	/**
 	 * Loads the given XRepository.
+	 * 
 	 * @param actorId TODO
 	 * @param filename The filename of the repository to be loaded.
 	 * 
@@ -148,8 +149,9 @@ public class XFile {
 	 *         doesn't hold a correct XRepository
 	 * @throws IOException
 	 */
-	public static XRepository loadRepository(XID actorId, String filename) throws IOException {
-		return loadRepository(actorId, null, filename);
+	public static XRepository loadRepository(XID actorId, String passwordHash, String filename)
+	        throws IOException {
+		return loadRepository(actorId, passwordHash, null, filename);
 	}
 	
 	private static String readAll(InputStream stream) throws IOException {
@@ -173,9 +175,9 @@ public class XFile {
 	 *         doesn't hold a correct XRepository
 	 * @throws IOException
 	 */
-	public static XRepository loadRepository(XID actorId, String path, String name)
-	        throws IOException {
-		return loadRepository(actorId, getFileForRepository(path, name));
+	public static XRepository loadRepository(XID actorId, String passwordHash, String path,
+	        String name) throws IOException {
+		return loadRepository(actorId, passwordHash, getFileForRepository(path, name));
 	}
 	
 	/**
@@ -188,14 +190,15 @@ public class XFile {
 	 *         hold a correct XRepository
 	 * @throws IOException
 	 */
-	public static XRepository loadRepository(XID actorId, File file) throws IOException {
+	public static XRepository loadRepository(XID actorId, String passwordHash, File file)
+	        throws IOException {
 		
 		FileInputStream fin = new FileInputStream(file);
 		
 		String data = readAll(fin);
 		MiniElement element = new MiniXMLParserImpl().parseXml(data);
 		
-		return XmlModel.toRepository(actorId, element);
+		return XmlModel.toRepository(actorId, passwordHash, element);
 	}
 	
 	/**
@@ -208,8 +211,9 @@ public class XFile {
 	 *         hold a correct XModel
 	 * @throws IOException
 	 */
-	public static XModel loadModel(XID actorId, String filename) throws IOException {
-		return loadModel(actorId, null, filename);
+	public static XModel loadModel(XID actorId, String passwordHash, String filename)
+	        throws IOException {
+		return loadModel(actorId, passwordHash, null, filename);
 	}
 	
 	/**
@@ -223,8 +227,9 @@ public class XFile {
 	 *         hold a correct XModel
 	 * @throws IOException
 	 */
-	public static XModel loadModel(XID actorId, String path, String name) throws IOException {
-		return loadModel(actorId, getFileForModel(path, name));
+	public static XModel loadModel(XID actorId, String passwordHash, String path, String name)
+	        throws IOException {
+		return loadModel(actorId, passwordHash, getFileForModel(path, name));
 	}
 	
 	/**
@@ -237,14 +242,14 @@ public class XFile {
 	 *         hold a correct XModel
 	 * @throws IOException
 	 */
-	public static XModel loadModel(XID actorId, File file) throws IOException {
+	public static XModel loadModel(XID actorId, String passwordHash, File file) throws IOException {
 		
 		FileInputStream fin = new FileInputStream(file);
 		
 		String data = readAll(fin);
 		MiniElement element = new MiniXMLParserImpl().parseXml(data);
 		
-		return XmlModel.toModel(actorId, element);
+		return XmlModel.toModel(actorId, passwordHash, element);
 	}
 	
 }

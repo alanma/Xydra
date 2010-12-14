@@ -3,6 +3,7 @@ package org.xydra.core.model.impl.memory;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,6 +25,7 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
+import org.xydra.core.model.XSynchronizationCallback;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
@@ -53,16 +55,14 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	
 	private Set<XModelEventListener> modelChangeListenerCollection;
 	
-	private XID actorId;
-	
 	/**
 	 * Creates a new MemoryModel without father-{@link XRepository}.
 	 * 
 	 * @param actorId TODO
 	 * @param modelId The {@link XID} for this MemoryModel.
 	 */
-	public MemoryModel(XID actorId, XID modelId) {
-		this(actorId, null, createModelState(modelId));
+	public MemoryModel(XID actorId, String passwordHash, XID modelId) {
+		this(actorId, passwordHash, null, createModelState(modelId));
 	}
 	
 	private static XModelState createModelState(XID modelId) {
@@ -79,8 +79,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	 * @param actorId TODO
 	 * @param modelState The initial {@link XModelState} of this MemoryModel.
 	 */
-	public MemoryModel(XID actorId, XModelState modelState) {
-		this(actorId, null, modelState);
+	public MemoryModel(XID actorId, String passwordHash, XModelState modelState) {
+		this(actorId, passwordHash, null, modelState);
 	}
 	
 	/**
@@ -91,12 +91,11 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	 * @param father The father-{@link MemoryRepository} for this MemoryModel
 	 * @param modelState The initial {@link XModelState} of this MemoryModel.
 	 */
-	protected MemoryModel(XID actorId, MemoryRepository father, XModelState modelState) {
-		super(new MemoryEventQueue(modelState.getChangeLogState() == null ? null
-		        : new MemoryChangeLog(modelState.getChangeLogState())));
-		
-		assert actorId != null;
-		this.actorId = actorId;
+	protected MemoryModel(XID actorId, String passwordHash, MemoryRepository father,
+	        XModelState modelState) {
+		super(new MemoryEventQueue(actorId, passwordHash,
+		        modelState.getChangeLogState() == null ? null : new MemoryChangeLog(modelState
+		                .getChangeLogState())));
 		
 		this.state = modelState;
 		this.father = father;
@@ -145,7 +144,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 			        + "' has a child with objectID '" + objectID + "' but the objectState '"
 			        + XX.resolveObject(getAddress(), objectID)
 			        + "' is not in the XStateStore. Most likely it has not been save()d.";
-			object = new MemoryObject(this.actorId, this, this.eventQueue, objectState);
+			object = new MemoryObject(this, this.eventQueue, objectState);
 			this.loadedObjects.put(objectID, object);
 			
 			return object;
@@ -205,14 +204,14 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		if(object == null) {
 			XObjectState objectState = this.state.createObjectState(objectId);
 			assert getAddress().contains(objectState.getAddress());
-			object = new MemoryObject(this.actorId, this, this.eventQueue, objectState);
+			object = new MemoryObject(this, this.eventQueue, objectState);
 		}
 		
 		this.state.addObjectState(object.getState());
 		this.loadedObjects.put(object.getID(), object);
 		
-		XModelEvent event = MemoryModelEvent.createAddEvent(this.actorId, getAddress(), objectId,
-		        getRevisionNumber(), inTrans);
+		XModelEvent event = MemoryModelEvent.createAddEvent(this.eventQueue.getActor(),
+		        getAddress(), objectId, getRevisionNumber(), inTrans);
 		
 		this.eventQueue.enqueueModelEvent(this, event);
 		
@@ -243,7 +242,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		boolean inTrans = this.eventQueue.transactionInProgess;
 		boolean makeTrans = !object.isEmpty();
 		int since = this.eventQueue.getNextPosition();
-		enqueueObjectRemoveEvents(this.actorId, object, makeTrans || inTrans, false);
+		enqueueObjectRemoveEvents(this.eventQueue.getActor(), object, makeTrans || inTrans, false);
 		
 		Orphans orphans = getOrphans();
 		if(!inTrans && orphans == null) {
@@ -265,7 +264,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		if(!inTrans) {
 			
 			if(makeTrans) {
-				this.eventQueue.createTransactionEvent(this.actorId, this, null, since);
+				this.eventQueue.createTransactionEvent(this.eventQueue.getActor(), this, null,
+				        since);
 			}
 			
 			incrementRevisionAndSave();
@@ -282,8 +282,14 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	}
 	
 	public long executeModelCommand(XModelCommand command) {
+		return executeModelCommand(command, null);
+	}
+	
+	protected long executeModelCommand(XModelCommand command, XSynchronizationCallback callback) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
+			
+			assert !this.eventQueue.transactionInProgess;
 			
 			if(!getAddress().equals(command.getTarget())) {
 				return XCommand.FAILED;
@@ -304,6 +310,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 					}
 					return XCommand.FAILED;
 				}
+				
+				this.eventQueue.newLocalChange(command, callback);
 				
 				createObjectInternal(command.getObjectID());
 				
@@ -327,6 +335,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 				        && oldObject.getRevisionNumber() != command.getRevisionNumber()) {
 					return XCommand.FAILED;
 				}
+				
+				this.eventQueue.newLocalChange(command, callback);
 				
 				removeObjectInternal(command.getObjectID());
 				
@@ -438,7 +448,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	}
 	
 	@Override
-	public long executeTransaction(XTransaction transaction) {
+	protected long executeTransaction(XTransaction transaction, XSynchronizationCallback callback) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -459,11 +469,11 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 					 * #executeTransaction() method) - this is counter-intuitive
 					 * for an API user
 					 */
-					return object.executeTransaction(transaction);
+					return object.executeTransaction(transaction, callback);
 				}
 			}
 			
-			return super.executeTransaction(transaction);
+			return super.executeTransaction(transaction, callback);
 			
 		}
 	}
@@ -560,26 +570,22 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	}
 	
 	public long executeCommand(XCommand command) {
-		synchronized(this.eventQueue) {
-			checkRemoved();
-			
-			if(command instanceof XTransaction) {
-				return executeTransaction((XTransaction)command);
-			}
-			if(command instanceof XModelCommand) {
-				return executeModelCommand((XModelCommand)command);
-			}
-			MemoryObject object = getObject(command.getTarget().getObject());
-			if(object == null) {
-				return XCommand.FAILED;
-			}
-			/*
-			 * TODO using the actor set on the object instead of the one set on
-			 * the model (on which the user called the #executeCommand() method)
-			 * - this is counter-intuitive for an API user
-			 */
-			return object.executeCommand(command);
+		return executeCommand(command, null);
+	}
+	
+	public long executeCommand(XCommand command, XSynchronizationCallback callback) {
+		
+		if(command instanceof XTransaction) {
+			return executeTransaction((XTransaction)command, callback);
 		}
+		if(command instanceof XModelCommand) {
+			return executeModelCommand((XModelCommand)command, callback);
+		}
+		MemoryObject object = getObject(command.getTarget().getObject());
+		if(object == null) {
+			return XCommand.FAILED;
+		}
+		return object.executeCommand(command, callback);
 	}
 	
 	@Override
@@ -637,16 +643,17 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	
 	@Override
 	public XID getSessionActor() {
-		return this.actorId;
+		return this.eventQueue.getActor();
 	}
 	
 	@Override
-	public void setSessionActor(XID actorId) {
-		assert actorId != null;
-		this.actorId = actorId;
-		for(MemoryObject object : this.loadedObjects.values()) {
-			object.setSessionActorLocalAndInChildren(actorId);
-		}
+	public void setSessionActor(XID actorId, String passwordHash) {
+		this.eventQueue.setSessionActor(actorId, passwordHash);
+	}
+	
+	@Override
+	public List<LocalChange> getLocalChanges() {
+		return this.eventQueue.getLocalChanges();
 	}
 	
 }

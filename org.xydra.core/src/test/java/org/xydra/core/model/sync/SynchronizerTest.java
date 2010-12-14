@@ -3,6 +3,7 @@ package org.xydra.core.model.sync;
 import junit.framework.TestCase;
 
 import org.junit.Test;
+import org.xydra.core.XCopyUtils;
 import org.xydra.core.XX;
 import org.xydra.core.change.XAtomicCommand;
 import org.xydra.core.change.XCommand;
@@ -15,13 +16,8 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
+import org.xydra.core.model.XSynchronizationCallback;
 import org.xydra.core.model.delta.ChangedModel;
-import org.xydra.core.model.impl.memory.MemoryModel;
-import org.xydra.core.model.state.XChangeLogState;
-import org.xydra.core.model.state.XModelState;
-import org.xydra.core.model.state.impl.memory.MemoryChangeLogState;
-import org.xydra.core.model.state.impl.memory.TemporaryModelState;
-import org.xydra.core.model.state.impl.memory.XStateUtils;
 import org.xydra.core.test.DemoModelUtil;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.memory.AllowAllStore;
@@ -39,6 +35,7 @@ import org.xydra.store.impl.memory.XydraNoAccessRightsNoBatchNoAsyncStore;
 public class SynchronizerTest extends TestCase {
 	
 	protected static final XID ACTOR_TESTER = XX.toId("tester");
+	protected static final String PSW_TESTER = null; // TODO where to get this?
 	
 	private final XydraNoAccessRightsNoBatchNoAsyncStore bs;
 	private final XydraStore store;
@@ -65,21 +62,24 @@ public class SynchronizerTest extends TestCase {
 		
 	}
 	
-	static class TestCallback implements XCommandCallback {
+	static class TestCallback implements XSynchronizationCallback {
 		
 		boolean applied = false;
+		boolean failed = false;
 		
-		public void failed() {
-			fail("a command failed to apply remotely");
-		}
-		
-		public void failedPost() {
-			fail("should never be reached as we die in failed() already");
+		synchronized public void failed() {
+			
+			assertFalse("double fail detected", this.failed);
+			assertFalse("fail after apply detected", this.applied);
+			
+			this.failed = true;
+			notify();
 		}
 		
 		synchronized public void applied(long revision) {
 			
 			assertFalse("double apply detected", this.applied);
+			assertFalse("apply after fail detected", this.failed);
 			
 			this.applied = true;
 			notify();
@@ -94,13 +94,7 @@ public class SynchronizerTest extends TestCase {
 		assertNotNull(modelSnapshot);
 		// TODO there should be a better way to get a proper XModel from an
 		// XBaseModel
-		XChangeLogState changeLogState = new MemoryChangeLogState(modelSnapshot.getAddress());
-		changeLogState.setFirstRevisionNumber(modelSnapshot.getRevisionNumber() + 1);
-		XModelState modelState = new TemporaryModelState(modelSnapshot.getAddress(), changeLogState);
-		// FIXME concurrency: model may be changed during copy
-		XStateUtils.copy(modelSnapshot, modelState);
-		
-		XModel model = new MemoryModel(ACTOR_TESTER, modelState);
+		XModel model = XCopyUtils.copyModel(ACTOR_TESTER, PSW_TESTER, modelSnapshot);
 		
 		XSynchronizer sync = new XSynchronizer(model, this.store);
 		
@@ -110,7 +104,7 @@ public class SynchronizerTest extends TestCase {
 		
 	}
 	
-	private void testCommands(XSynchronizer sync, XBaseModel model) {
+	private void testCommands(XSynchronizer sync, XModel model) {
 		
 		final TestCallback c1 = new TestCallback();
 		final TestCallback c2 = new TestCallback();
@@ -120,16 +114,12 @@ public class SynchronizerTest extends TestCase {
 		        .toId("Frank"));
 		
 		// Apply the command locally.
-		sync.executeCommand(command, c1);
+		model.executeCommand(command, c1);
 		
 		// Now synchronize with the server.
 		sync.synchronize();
 		
 		// command may not be applied remotely yet!
-		
-		// Manually synchronizing is tedious, so send all commands
-		// immediately from now on.
-		sync.setAutomaticSynchronize(true);
 		
 		// We don't have to create all commands manually but can use a
 		// ChangedModel.
@@ -148,7 +138,9 @@ public class SynchronizerTest extends TestCase {
 		
 		// Now apply the command locally. It should be automatically
 		// sent to the server.
-		sync.executeCommand(autoCommand, c2);
+		model.executeCommand(autoCommand, c2);
+		
+		sync.synchronize();
 		
 		// both commands may still not be applied remotely
 		
@@ -162,6 +154,11 @@ public class SynchronizerTest extends TestCase {
 		long time = System.currentTimeMillis();
 		synchronized(c1) {
 			while(!c1.applied) {
+				
+				if(c1.failed) {
+					fail("a command failed to apply remotely");
+				}
+				
 				assertFalse("timeout waiting for command to apply", System.currentTimeMillis()
 				        - time > 1000);
 				try {

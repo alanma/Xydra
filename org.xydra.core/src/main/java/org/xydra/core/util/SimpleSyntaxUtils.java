@@ -72,6 +72,7 @@ import org.xydra.core.value.XValue;
 public class SimpleSyntaxUtils {
 	
 	private static final XID ACTOR_THIS = XX.toId("SimpleSyntaxUtils");
+	private static final String PSW_THIS = null;
 	
 	/**
 	 * @param simpleSyntax a String in a restricted syntax, inspired from Java
@@ -84,7 +85,7 @@ public class SimpleSyntaxUtils {
 		PseudoBufferedReader br = new PseudoBufferedReader(simpleSyntax);
 		String line;
 		
-		XModel model = new MemoryModel(ACTOR_THIS, modelID);
+		XModel model = new MemoryModel(ACTOR_THIS, PSW_THIS, modelID);
 		int lineNo = 1;
 		line = br.readLine();
 		while(line != null) {

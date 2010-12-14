@@ -104,6 +104,6 @@ public interface XRepository extends XBaseRepository, XWritableRepository, XSend
 	 * 
 	 * @param actor for this repository and its children, if any.
 	 */
-	void setSessionActor(XID actor);
+	void setSessionActor(XID actorId, String passwordHash);
 	
 }

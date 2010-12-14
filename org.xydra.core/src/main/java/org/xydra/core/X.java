@@ -88,6 +88,7 @@ public class X {
 	 * Creates an {@link XRepository} implementation that lives in-memory. The
 	 * underlying {@link XSPI} layer determines where persistence ultimately
 	 * happens.
+	 * 
 	 * @param actorId TODO
 	 * 
 	 * @return the new repository with ID = {@link X}#DEFAULT_REPOSITORY_ID.
@@ -96,7 +97,8 @@ public class X {
 		XID repoId = getIDProvider().fromString(DEFAULT_REPOSITORY_ID);
 		XAddress repoAddr = getIDProvider().fromComponents(repoId, null, null, null);
 		XRepositoryState repoState = XSPI.getStateStore().createRepositoryState(repoAddr);
-		return new MemoryRepository(actorId, repoState);
+		// TODO where to get the passwordHash?
+		return new MemoryRepository(actorId, null, repoState);
 	}
 	
 	// TODO Maybe we should add a method for creating Repositories with

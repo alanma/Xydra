@@ -130,8 +130,8 @@ public class XmlModel {
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XRepository element.
 	 */
-	public static XRepository toRepository(XID actorId, MiniElement xml) {
-		return new MemoryRepository(actorId, toRepositoryState(xml, null));
+	public static XRepository toRepository(XID actorId, String passwordHash, MiniElement xml) {
+		return new MemoryRepository(actorId, passwordHash, toRepositoryState(xml, null));
 	}
 	
 	/**
@@ -242,8 +242,8 @@ public class XmlModel {
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XModel element.
 	 */
-	public static XModel toModel(XID actorId, MiniElement xml) {
-		return new MemoryModel(actorId, toModelState(xml, null, null));
+	public static XModel toModel(XID actorId, String passwordHash, MiniElement xml) {
+		return new MemoryModel(actorId, passwordHash, toModelState(xml, null, null));
 	}
 	
 	/**
@@ -320,8 +320,8 @@ public class XmlModel {
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XObject element.
 	 */
-	public static XObject toObject(XID actorId, MiniElement xml) {
-		return new MemoryObject(actorId, toObjectState(xml, null, null));
+	public static XObject toObject(XID actorId, String passwordHash, MiniElement xml) {
+		return new MemoryObject(actorId, passwordHash, toObjectState(xml, null, null));
 	}
 	
 	/**

@@ -121,7 +121,7 @@ public class StrictStateTest {
 		
 		tb.addObject(model.getAddress(), XCommand.SAFE, XX.createUniqueID());
 		
-		model.executeTransaction(tb.build());
+		model.executeCommand(tb.build());
 		
 	}
 	

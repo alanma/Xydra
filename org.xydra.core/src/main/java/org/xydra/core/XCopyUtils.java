@@ -5,10 +5,17 @@ import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XBaseRepository;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XModel;
 import org.xydra.core.model.XWritableField;
 import org.xydra.core.model.XWritableModel;
 import org.xydra.core.model.XWritableObject;
 import org.xydra.core.model.XWritableRepository;
+import org.xydra.core.model.impl.memory.MemoryModel;
+import org.xydra.core.model.state.XChangeLogState;
+import org.xydra.core.model.state.XModelState;
+import org.xydra.core.model.state.impl.memory.MemoryChangeLogState;
+import org.xydra.core.model.state.impl.memory.TemporaryModelState;
+import org.xydra.core.model.state.impl.memory.XStateUtils;
 import org.xydra.store.base.SimpleField;
 import org.xydra.store.base.SimpleModel;
 import org.xydra.store.base.SimpleObject;
@@ -141,6 +148,15 @@ public class XCopyUtils {
 		SimpleObject targetObject = new SimpleObject(sourceObject.getAddress());
 		copyDataAndRevisions(sourceObject, targetObject);
 		return targetObject;
+	}
+	
+	public static XModel copyModel(XID actor, String password, XBaseModel modelSnapshot) {
+		XChangeLogState changeLogState = new MemoryChangeLogState(modelSnapshot.getAddress());
+		changeLogState.setFirstRevisionNumber(modelSnapshot.getRevisionNumber() + 1);
+		XModelState modelState = new TemporaryModelState(modelSnapshot.getAddress(), changeLogState);
+		XStateUtils.copy(modelSnapshot, modelState);
+		XModel model = new MemoryModel(actor, password, modelState);
+		return model;
 	}
 	
 }

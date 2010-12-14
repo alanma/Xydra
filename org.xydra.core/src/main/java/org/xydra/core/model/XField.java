@@ -72,9 +72,7 @@ public interface XField extends XLoggedField, XWritableField, Serializable {
 	
 	/**
 	 * Set a new actor to be used when building commands for changes to this
-	 * field. This method also sets the session actor for the parent
-	 * {@link XObject} and recursively to its parent {@link XModel}, if there is
-	 * one.
+	 * field. This method cannot be used if this field has a parent.
 	 * 
 	 * @param actor for this field.
 	 */

@@ -10,7 +10,6 @@ import org.xydra.core.change.XModelCommand;
 import org.xydra.core.change.XModelEvent;
 import org.xydra.core.change.XModelEventListener;
 import org.xydra.core.change.XObjectEventListener;
-import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.XTransactionEventListener;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
@@ -44,9 +43,9 @@ public interface XProtectedModel extends XLoggedModel, XProtectedSynchronizesCha
 	 * @param id The {@link XID} of the {@link XObject} which is to be returned
 	 * @return The {@link XObject} with the given {@link XID} or null, if no
 	 *         corresponding {@link XObject} exists
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (read access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (read access) to execute this
+	 *             method
 	 */
 	@ReadOperation
 	XProtectedObject getObject(XID objectId);
@@ -61,9 +60,9 @@ public interface XProtectedModel extends XLoggedModel, XProtectedSynchronizesCha
 	 *         {@link XObject} if the given {@link XID} was already taken as an
 	 *         {@link XProtectedObject} linked with the actor of this
 	 *         XProtectedModel
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (write access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (write access) to execute this
+	 *             method
 	 */
 	@ModificationOperation
 	XProtectedObject createObject(XID id);
@@ -76,9 +75,9 @@ public interface XProtectedModel extends XLoggedModel, XProtectedSynchronizesCha
 	 *            removed
 	 * @return true, if an {@link XObject} with the given {@link XID} did exist
 	 *         in this XProtectedModel and could be removed
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (writes access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (writes access) to execute this
+	 *             method
 	 */
 	@ModificationOperation
 	boolean removeObject(XID objectID);
@@ -104,83 +103,68 @@ public interface XProtectedModel extends XLoggedModel, XProtectedSynchronizesCha
 	 *         {@link XModelCommand} didn't change anything or if executing the
 	 *         {@link XModelCommand} succeeded the revision number of the
 	 *         {@link XModelEvent} caused by the {@link XModelCommand}.
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (write access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (write access) to execute this
+	 *             method
 	 */
 	@ModificationOperation
 	long executeModelCommand(XModelCommand command);
 	
 	/**
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (read access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (read access) to execute this
+	 *             method
 	 */
 	long getRevisionNumber();
 	
 	/**
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (read access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (read access) to execute this
+	 *             method
 	 */
 	boolean hasObject(XID objectID);
 	
 	/**
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (read access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (read access) to execute this
+	 *             method
 	 */
 	boolean isEmpty();
 	
 	/**
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (read access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (read access) to execute this
+	 *             method
 	 */
 	Iterator<XID> iterator();
 	
 	/**
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (read access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (read access) to execute this
+	 *             method
 	 */
 	boolean addListenerForModelEvents(XModelEventListener changeListener);
 	
 	/**
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (read access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (read access) to execute this
+	 *             method
 	 */
 	boolean addListenerForObjectEvents(XObjectEventListener changeListener);
 	
 	/**
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (read access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (read access) to execute this
+	 *             method
 	 */
 	boolean addListenerForFieldEvents(XFieldEventListener changeListener);
 	
 	/**
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (read access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (read access) to execute this
+	 *             method
 	 */
 	boolean addListenerForTransactionEvents(XTransactionEventListener changeListener);
-	
-	/**
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (read or write access,
-	 *             depending on the {@link XCommand XCommands} in the
-	 *             {@link XTransaction}) to execute this method
-	 */
-	long executeTransaction(XTransaction transaction);
-	
-	/**
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (read or write access,
-	 *             depending on the {@link XCommand}) to execute this method
-	 */
-	long executeCommand(XCommand command);
 	
 	/**
 	 * @return the actor that is represented by this interface. This is the

@@ -51,7 +51,7 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 			public void onSuccess(MiniElement xml) {
 				XModel model;
 				try {
-					model = XmlModel.toModel(actorId, xml);
+					model = XmlModel.toModel(actorId, null, xml);
 				} catch(Exception e) {
 					callback.onFailure(e);
 					return;
@@ -75,7 +75,7 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 			public void onSuccess(MiniElement xml) {
 				XObject object;
 				try {
-					object = XmlModel.toObject(actorId, xml);
+					object = XmlModel.toObject(actorId, null, xml);
 				} catch(Exception e) {
 					callback.onFailure(e);
 					return;

@@ -5,14 +5,13 @@ import java.util.Map;
 
 import org.xydra.client.gwt.editor.value.XIDEditor;
 import org.xydra.client.gwt.editor.value.XValueEditor.EditListener;
-import org.xydra.client.sync.XSynchronizer;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XModelEvent;
 import org.xydra.core.change.XModelEventListener;
 import org.xydra.core.change.impl.memory.MemoryModelCommand;
 import org.xydra.core.model.XID;
-import org.xydra.core.model.XLoggedModel;
-import org.xydra.core.model.XLoggedObject;
+import org.xydra.core.model.XModel;
+import org.xydra.core.model.XObject;
 import org.xydra.core.value.XValue;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -31,18 +30,16 @@ public class XModelEditor extends Composite implements XModelEventListener {
 	
 	private static final Logger log = LoggerFactory.getLogger(XModelEditor.class);
 	
-	private final XSynchronizer manager;
-	private final XLoggedModel model;
+	private final XModel model;
 	private final VerticalPanel outer = new VerticalPanel();
 	private final HorizontalPanel inner = new HorizontalPanel();
 	private final Button add = new Button("Add Object");
 	
 	private final Map<XID,XObjectEditor> objects = new HashMap<XID,XObjectEditor>();
 	
-	public XModelEditor(XLoggedModel model, XSynchronizer manager) {
+	public XModelEditor(XModel model) {
 		super();
 		
-		this.manager = manager;
 		this.model = model;
 		this.model.addListenerForModelEvents(this);
 		
@@ -103,12 +100,12 @@ public class XModelEditor extends Composite implements XModelEventListener {
 	}
 	
 	private void newObject(XID objectId) {
-		XLoggedObject object = this.model.getObject(objectId);
+		XObject object = this.model.getObject(objectId);
 		if(object == null) {
 			log.warn("editor: asked to add object " + objectId + ", which doesn't exist (anymore)");
 			return;
 		}
-		XObjectEditor editor = new XObjectEditor(object, this.manager);
+		XObjectEditor editor = new XObjectEditor(this.model, object);
 		this.objects.put(objectId, editor);
 		// TODO sort
 		this.outer.add(editor);
@@ -133,7 +130,7 @@ public class XModelEditor extends Composite implements XModelEventListener {
 	}
 	
 	private void add(XID id) {
-		this.manager.executeCommand(MemoryModelCommand.createAddCommand(this.model.getAddress(),
+		this.model.executeCommand(MemoryModelCommand.createAddCommand(this.model.getAddress(),
 		        true, id), null);
 	}
 	

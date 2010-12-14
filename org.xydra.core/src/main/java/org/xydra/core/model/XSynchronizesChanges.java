@@ -2,9 +2,11 @@ package org.xydra.core.model;
 
 import java.util.List;
 
+import org.xydra.annotations.ModificationOperation;
+import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XTransaction;
-import org.xydra.core.model.sync.LocalChange;
+import org.xydra.core.model.impl.memory.LocalChange;
 
 
 /**
@@ -15,8 +17,7 @@ import org.xydra.core.model.sync.LocalChange;
  * @author dscharrer
  * 
  */
-public interface XSynchronizesChanges extends XExecutesCommands, XExecutesTransactions,
-        IHasXAddress {
+public interface XSynchronizesChanges extends XExecutesCommands, IHasXAddress {
 	
 	/**
 	 * Roll back the state (including revisions) to a specific revision. This
@@ -53,7 +54,7 @@ public interface XSynchronizesChanges extends XExecutesCommands, XExecutesTransa
 	 * @return the results for the localChanges
 	 * @throws IllegalStateException if this entity has already been removed
 	 */
-	long[] synchronize(XEvent[] remoteChanges, long lastRevision, List<LocalChange> localChanges);
+	long[] synchronize(XEvent[] remoteChanges, long lastRevision);
 	
 	/**
 	 * @return the {@link XChangeLog} which is logging the {@link XEvent
@@ -67,5 +68,32 @@ public interface XSynchronizesChanges extends XExecutesCommands, XExecutesTransa
 	 *         only succeed if this actor has access.
 	 */
 	XID getSessionActor();
+	
+	/**
+	 * Set a new actor to be used when building commands for changes to this
+	 * entity and its children.
+	 * 
+	 * @param actorId for this entity and its children, if any.
+	 * @param passwordHash the password for the given actor.
+	 */
+	void setSessionActor(XID actorId, String passwordHash);
+	
+	List<LocalChange> getLocalChanges();
+	
+	/**
+	 * Execute the given {@link XCommand} if possible.
+	 * 
+	 * Not all implementations will be able to execute all commands.
+	 * 
+	 * @param command The {@link XCommand} which is to be executed
+	 * 
+	 * @return {@link XCommand#FAILED} if the command failed,
+	 *         {@link XCommand#NOCHANGE} if the command didn't change anything
+	 *         or the revision number of the {@link XEvent} caused by the
+	 *         command.
+	 * @throws IllegalStateException if this entity has already been removed
+	 */
+	@ModificationOperation
+	long executeCommand(XCommand command, XSynchronizationCallback callback);
 	
 }

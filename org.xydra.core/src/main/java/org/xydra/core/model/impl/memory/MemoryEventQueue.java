@@ -9,6 +9,7 @@ import java.util.RandomAccess;
 
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XAtomicEvent;
+import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.change.XModelEvent;
@@ -20,6 +21,7 @@ import org.xydra.core.change.impl.memory.MemoryTransactionEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XSynchronizationCallback;
 import org.xydra.core.model.impl.memory.SynchronizesChangesImpl.Orphans;
 import org.xydra.core.model.state.XStateTransaction;
 import org.xydra.index.XI;
@@ -35,9 +37,13 @@ public class MemoryEventQueue implements Serializable {
 	
 	private static final long serialVersionUID = -4839276542320739074L;
 	
-	private final List<EventQueueEntry> eventQueue;
+	private final List<EventQueueEntry> eventQueue = new ArrayList<EventQueueEntry>();
 	private boolean sending;
 	private final MemoryChangeLog changeLog;
+	
+	private final List<LocalChange> localChanges = new ArrayList<LocalChange>();
+	private XID sessionActor;
+	private String sessionPasswordHash;
 	
 	/**
 	 * Should events be logged right now?
@@ -65,9 +71,10 @@ public class MemoryEventQueue implements Serializable {
 	 * @param log The {@link XChangeLog} this MemoryEventQueue will use for
 	 *            logging (may be null)
 	 */
-	public MemoryEventQueue(MemoryChangeLog log) {
-		// array list to allow indexed access for creating transaction events
-		this.eventQueue = new ArrayList<EventQueueEntry>();
+	public MemoryEventQueue(XID actorId, String passwordHash, MemoryChangeLog log) {
+		assert actorId != null;
+		this.sessionActor = actorId;
+		this.sessionPasswordHash = passwordHash;
 		this.changeLog = log;
 		this.logging = this.changeLog != null;
 	}
@@ -90,7 +97,7 @@ public class MemoryEventQueue implements Serializable {
 	 * Propagates the {@link XEvent XEvents} in the enqueued
 	 * {@link EventQueueEntry EventQueueEntries}.
 	 */
-	public void sendEvents() {
+	protected void sendEvents() {
 		
 		if(this.sending)
 			return;
@@ -191,7 +198,7 @@ public class MemoryEventQueue implements Serializable {
 	 * @param model The {@link MemoryModel} in which this event occurred.
 	 * @param event The {@link XModelEvent}.
 	 */
-	public void enqueueRepositoryEvent(MemoryRepository repo, XRepositoryEvent event) {
+	protected void enqueueRepositoryEvent(MemoryRepository repo, XRepositoryEvent event) {
 		assert repo != null && event != null : "Neither repo nor event may be null!";
 		
 		enqueueEvent(new EventQueueEntry(repo, null, null, null, event));
@@ -206,7 +213,7 @@ public class MemoryEventQueue implements Serializable {
 	 * @param model The {@link MemoryModel} in which this event occurred.
 	 * @param event The {@link XModelEvent}.
 	 */
-	public void enqueueModelEvent(MemoryModel model, XModelEvent event) {
+	protected void enqueueModelEvent(MemoryModel model, XModelEvent event) {
 		assert model != null && event != null : "Neither model nor event may be null!";
 		
 		enqueueEvent(new EventQueueEntry(model.getFather(), model, null, null, event));
@@ -221,7 +228,7 @@ public class MemoryEventQueue implements Serializable {
 	 * @param object The {@link MemoryObject} in which this event occurred.
 	 * @param event The {@link XObjectEvent}.
 	 */
-	public void enqueueObjectEvent(MemoryObject object, XObjectEvent event) {
+	protected void enqueueObjectEvent(MemoryObject object, XObjectEvent event) {
 		assert object != null && event != null : "Neither object nor event may be null!";
 		
 		MemoryModel model = object.getModel();
@@ -239,7 +246,7 @@ public class MemoryEventQueue implements Serializable {
 	 * @param field The {@link MemoryField} in which this event occurred.
 	 * @param event The {@link XFieldEvent}.
 	 */
-	public void enqueueFieldEvent(MemoryField field, XFieldEvent event) {
+	protected void enqueueFieldEvent(MemoryField field, XFieldEvent event) {
 		assert field != null && event != null : "Neither field nor event may be null!";
 		
 		MemoryObject object = field.getObject();
@@ -266,7 +273,8 @@ public class MemoryEventQueue implements Serializable {
 	 *        getNextPosition())
 	 */
 	@SuppressWarnings("null")
-	public void createTransactionEvent(XID actor, MemoryModel model, MemoryObject object, int since) {
+	protected void createTransactionEvent(XID actor, MemoryModel model, MemoryObject object,
+	        int since) {
 		
 		assert this.eventQueue instanceof RandomAccess;
 		
@@ -306,14 +314,14 @@ public class MemoryEventQueue implements Serializable {
 	 * 
 	 * @return the position to use for the 'since' parameter, as described above
 	 */
-	int getNextPosition() {
+	protected int getNextPosition() {
 		return this.eventQueue.size();
 	}
 	
 	/**
 	 * A container for a given {@link XEvent} and the affected entities
 	 */
-	private static class EventQueueEntry {
+	protected static class EventQueueEntry {
 		
 		MemoryRepository repo;
 		MemoryModel model;
@@ -340,7 +348,7 @@ public class MemoryEventQueue implements Serializable {
 	 * @throws IllegalArgumentException if logging is set to true, but the
 	 *             {@link XChangeLog} if this MemoryEventQueue is not set
 	 */
-	public boolean setLogging(boolean logging) {
+	protected boolean setLogging(boolean logging) {
 		
 		if(logging && this.changeLog == null) {
 			throw new IllegalArgumentException(
@@ -374,7 +382,7 @@ public class MemoryEventQueue implements Serializable {
 	 *        with this index in the current MemoryEventQueue (value can be
 	 *        retrieved from getNextPosition())
 	 */
-	public void cleanEvents(int since) {
+	protected void cleanEvents(int since) {
 		
 		// TODO the actorId is when merging events, is this OK?
 		
@@ -520,7 +528,7 @@ public class MemoryEventQueue implements Serializable {
 	 * @return The merged {@link XFieldEvent} (which may be 'last') or null if
 	 *         the given {@link XFieldEvent XFieldEvents} cancel each other out.
 	 */
-	XFieldEvent mergeFieldEvents(XFieldEvent first, XFieldEvent last) {
+	private XFieldEvent mergeFieldEvents(XFieldEvent first, XFieldEvent last) {
 		
 		assert first.getTarget().equals(last.getTarget());
 		
@@ -573,7 +581,7 @@ public class MemoryEventQueue implements Serializable {
 	/**
 	 * @return the {@link MemoryChangeLog} being used for logging.
 	 */
-	public XChangeLog getChangeLog() {
+	protected XChangeLog getChangeLog() {
 		return this.changeLog;
 	}
 	
@@ -583,13 +591,13 @@ public class MemoryEventQueue implements Serializable {
 	 * @param logging True, to suspend logging, false for resuming.
 	 * @return True, if logging was suspended before this method was called.
 	 */
-	public boolean setBlockSending(boolean block) {
+	protected boolean setBlockSending(boolean block) {
 		boolean oldBlock = this.sending;
 		this.sending = block;
 		return oldBlock;
 	}
 	
-	public void logNullEvent() {
+	protected void logNullEvent() {
 		this.changeLog.appendEvent(null, this.stateTransaction);
 	}
 	
@@ -599,12 +607,33 @@ public class MemoryEventQueue implements Serializable {
 		assert this.changeLog.getCurrentRevisionNumber() == revision;
 	}
 	
-	public void saveLog() {
+	protected void saveLog() {
 		this.changeLog.save(this.stateTransaction);
 	}
 	
-	public void deleteLog() {
+	protected void deleteLog() {
 		this.changeLog.delete(this.stateTransaction);
+	}
+	
+	protected XID getActor() {
+		return this.sessionActor;
+	}
+	
+	protected void setSessionActor(XID actorId, String passwordHash) {
+		assert actorId != null;
+		this.sessionActor = actorId;
+		this.sessionPasswordHash = passwordHash;
+	}
+	
+	protected void newLocalChange(XCommand command, XSynchronizationCallback callback) {
+		if(this.orphans == null) {
+			this.localChanges.add(new LocalChange(this.sessionActor, this.sessionPasswordHash,
+			        command, callback));
+		}
+	}
+	
+	protected List<LocalChange> getLocalChanges() {
+		return this.localChanges;
 	}
 	
 }

@@ -5,15 +5,15 @@ import java.util.Map;
 
 import org.xydra.client.gwt.editor.value.XIDEditor;
 import org.xydra.client.gwt.editor.value.XValueEditor.EditListener;
-import org.xydra.client.sync.XSynchronizer;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XObjectEvent;
 import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.change.impl.memory.MemoryModelCommand;
 import org.xydra.core.change.impl.memory.MemoryObjectCommand;
+import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
-import org.xydra.core.model.XLoggedField;
-import org.xydra.core.model.XLoggedObject;
+import org.xydra.core.model.XModel;
+import org.xydra.core.model.XObject;
 import org.xydra.core.value.XValue;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -31,16 +31,16 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 	
 	private static final Logger log = LoggerFactory.getLogger(XObjectEditor.class);
 	
-	private final XSynchronizer manager;
-	private final XLoggedObject object;
+	private final XModel model;
+	private final XObject object;
 	private final HorizontalPanel inner = new HorizontalPanel();
 	private final Button add = new Button("Add Field");
 	private final Map<XID,XFieldEditor> fields = new HashMap<XID,XFieldEditor>();
 	
-	public XObjectEditor(XLoggedObject object, XSynchronizer manager) {
+	public XObjectEditor(XModel model, XObject object) {
 		super();
 		
-		this.manager = manager;
+		this.model = model;
 		this.object = object;
 		this.object.addListenerForObjectEvents(this);
 		
@@ -109,12 +109,12 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 	}
 	
 	private void newField(XID fieldId) {
-		XLoggedField field = this.object.getField(fieldId);
+		XField field = this.object.getField(fieldId);
 		if(field == null) {
 			log.info("editor: asked to add field " + fieldId + ", which doesn't exist (anymore)");
 			return;
 		}
-		XFieldEditor editor = new XFieldEditor(field, this.manager);
+		XFieldEditor editor = new XFieldEditor(this.object, field);
 		this.fields.put(fieldId, editor);
 		// TODO sort
 		add(editor);
@@ -139,12 +139,12 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 	}
 	
 	private void add(XID id) {
-		this.manager.executeCommand(MemoryObjectCommand.createAddCommand(this.object.getAddress(),
+		this.object.executeCommand(MemoryObjectCommand.createAddCommand(this.object.getAddress(),
 		        true, id), null);
 	}
 	
 	protected void delete() {
-		this.manager.executeCommand(MemoryModelCommand.createRemoveCommand(this.object.getAddress()
+		this.model.executeCommand(MemoryModelCommand.createRemoveCommand(this.object.getAddress()
 		        .getParent(), this.object.getRevisionNumber(), this.object.getID()), null);
 	}
 	

@@ -31,6 +31,7 @@ import org.xydra.core.value.impl.memory.MemoryStringValue;
 public abstract class AbstractChangeTest {
 	
 	private XID actorId = XX.toId("AbstractChangeTest");
+	private String password = null; // TODO where to get this?
 	
 	@Test
 	public void testRepositoryChangeListening() {
@@ -79,7 +80,7 @@ public abstract class AbstractChangeTest {
 	@Test
 	public void testModelChangeListenening() {
 		
-		XModel model = new MemoryModel(this.actorId, XX.createUniqueID());
+		XModel model = new MemoryModel(this.actorId, this.password, XX.createUniqueID());
 		DummyModelChangeListener modelListener = new DummyModelChangeListener();
 		model.addListenerForModelEvents(modelListener);
 		
@@ -146,7 +147,7 @@ public abstract class AbstractChangeTest {
 	@Test
 	public void testObjectChangeListening() {
 		
-		MemoryObject object1 = new MemoryObject(this.actorId, XX.createUniqueID());
+		MemoryObject object1 = new MemoryObject(this.actorId, this.password, XX.createUniqueID());
 		DummyObjectChangeListener listener1 = new DummyObjectChangeListener();
 		object1.addListenerForObjectEvents(listener1);
 		

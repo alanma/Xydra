@@ -105,7 +105,7 @@ abstract public class AbstractTransactionTest {
 		List<XEvent> received = ChangeRecorder.record(this.model);
 		List<XEvent> trans = ChangeRecorder.recordTransactions(this.model);
 		
-		long result = this.model.executeTransaction(tb.build());
+		long result = this.model.executeCommand(tb.build());
 		
 		assertEquals(modelRev + 1, result);
 		
@@ -200,7 +200,7 @@ abstract public class AbstractTransactionTest {
 		// correctly when the first event is executed
 		HasChanged hc = HasChanged.listen(this.model);
 		
-		long result = this.model.executeTransaction(tb.build());
+		long result = this.model.executeCommand(tb.build());
 		
 		assertEquals(XCommand.NOCHANGE, result);
 		
@@ -243,7 +243,7 @@ abstract public class AbstractTransactionTest {
 		// correctly when the first event is executed
 		HasChanged hc = HasChanged.listen(this.model);
 		
-		long result = this.model.executeTransaction(tb.build());
+		long result = this.model.executeCommand(tb.build());
 		
 		assertEquals(XCommand.NOCHANGE, result);
 		
@@ -282,7 +282,7 @@ abstract public class AbstractTransactionTest {
 		List<XEvent> received = ChangeRecorder.record(this.model);
 		List<XEvent> trans = ChangeRecorder.recordTransactions(this.model);
 		
-		long result = this.model.executeTransaction(tb.build());
+		long result = this.model.executeCommand(tb.build());
 		
 		assertEquals(modelRev + 1, result);
 		
@@ -343,7 +343,7 @@ abstract public class AbstractTransactionTest {
 		
 		HasChanged hc = HasChanged.listen(this.model);
 		
-		long result = this.model.executeTransaction(tb.build());
+		long result = this.model.executeCommand(tb.build());
 		
 		assertEquals(XCommand.FAILED, result);
 		
@@ -400,7 +400,7 @@ abstract public class AbstractTransactionTest {
 		List<XEvent> trans = ChangeRecorder.recordTransactions(this.model);
 		List<XEvent> transFromObject = ChangeRecorder.recordTransactions(this.john);
 		
-		long result = this.john.executeTransaction(tb.build());
+		long result = this.john.executeCommand(tb.build());
 		
 		assertEquals(modelRev + 1, result);
 		
@@ -477,7 +477,7 @@ abstract public class AbstractTransactionTest {
 		// correctly when the first event is executed
 		HasChanged hc = HasChanged.listen(this.model);
 		
-		long result = this.john.executeTransaction(tb.build());
+		long result = this.john.executeCommand(tb.build());
 		
 		assertEquals(XCommand.NOCHANGE, result);
 		
@@ -515,7 +515,7 @@ abstract public class AbstractTransactionTest {
 		List<XEvent> trans = ChangeRecorder.recordTransactions(this.model);
 		List<XEvent> transFromObject = ChangeRecorder.recordTransactions(this.john);
 		
-		long result = this.john.executeTransaction(tb.build());
+		long result = this.john.executeCommand(tb.build());
 		
 		assertEquals(modelRev + 1, result);
 		
@@ -578,7 +578,7 @@ abstract public class AbstractTransactionTest {
 		HasChanged phoneListener = new HasChanged();
 		johnPhone.addListenerForFieldEvents(phoneListener);
 		
-		long result = this.john.executeTransaction(tb.build());
+		long result = this.john.executeCommand(tb.build());
 		
 		assertEquals(XCommand.FAILED, result);
 		
@@ -642,7 +642,7 @@ abstract public class AbstractTransactionTest {
 		
 		HasChanged hc = HasChanged.listen(this.model);
 		
-		long result = this.model.executeTransaction(tb.build());
+		long result = this.model.executeCommand(tb.build());
 		
 		assertEquals(XCommand.FAILED, result);
 		

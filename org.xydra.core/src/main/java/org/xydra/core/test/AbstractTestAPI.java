@@ -49,12 +49,13 @@ import org.xydra.core.xml.impl.XmlOutStringBuffer;
 public abstract class AbstractTestAPI {
 	
 	private XID actorId = XX.toId("AbstractTestAPI");
+	private String password = null; // TODO where to get this?
 	
 	@Test
 	public void testRepository() {
 		
 		// create a repository
-		XRepository repo = new MemoryRepository(this.actorId, XX.createUniqueID());
+		XRepository repo = new MemoryRepository(this.actorId, this.password, XX.createUniqueID());
 		
 		// add a model to the repository
 		XID modelID = XX.createUniqueID(); // create an ID for
@@ -97,7 +98,7 @@ public abstract class AbstractTestAPI {
 		
 		// - do the same with a model that was created by a repository -
 		
-		XRepository repo = new MemoryRepository(this.actorId, XX.createUniqueID());
+		XRepository repo = new MemoryRepository(this.actorId, this.password, XX.createUniqueID());
 		XID modelID = XX.createUniqueID();
 		model = repo.createModel(modelID);
 		
@@ -122,7 +123,7 @@ public abstract class AbstractTestAPI {
 	@Test
 	public void testObject() {
 		// create an object
-		XObject object = new MemoryObject(this.actorId, XX.createUniqueID());
+		XObject object = new MemoryObject(this.actorId, this.password, XX.createUniqueID());
 		
 		// add a field to the object
 		XID fieldID = XX.createUniqueID(); // create an ID for
@@ -293,7 +294,7 @@ public abstract class AbstractTestAPI {
 		model.createObject(XX.createUniqueID());
 		
 		// copy it!
-		XModel copyModel = new MemoryModel(this.actorId, model.getID());
+		XModel copyModel = new MemoryModel(this.actorId, this.password, model.getID());
 		
 		XCopyUtils.copyData(model, copyModel);
 		
@@ -317,7 +318,7 @@ public abstract class AbstractTestAPI {
 		object.createField(XX.createUniqueID());
 		
 		// copy it!
-		XObject copyObject = new MemoryObject(this.actorId, object.getID());
+		XObject copyObject = new MemoryObject(this.actorId, this.password, object.getID());
 		
 		XCopyUtils.copyData(object, copyObject);
 		
@@ -547,7 +548,7 @@ public abstract class AbstractTestAPI {
 		
 		// - - Method: void safeSetStringValue(XID actorID, XObject object, XID
 		// fieldID, String stringValue) - -
-		object = new MemoryObject(this.actorId, XX.createUniqueID());
+		object = new MemoryObject(this.actorId, this.password, XX.createUniqueID());
 		fieldID = XX.createUniqueID();
 		field1 = object.createField(fieldID);
 		
@@ -1035,7 +1036,7 @@ public abstract class AbstractTestAPI {
 		
 		// try to load it
 		MiniElement e = new MiniXMLParserImpl().parseXml(out.getXml());
-		XRepository loadedRepo = XmlModel.toRepository(this.actorId, e);
+		XRepository loadedRepo = XmlModel.toRepository(this.actorId, this.password, e);
 		// if loadedRepo == null, saving wasn't successful
 		assertNotNull(loadedRepo);
 		// assert that the saving process really saved our repo
@@ -1047,7 +1048,7 @@ public abstract class AbstractTestAPI {
 	
 	@Test
 	public void testSaveAndLoadModel() {
-		XModel model = new MemoryModel(this.actorId, XX.createUniqueID());
+		XModel model = new MemoryModel(this.actorId, this.password, XX.createUniqueID());
 		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID()).setValue(
 		        XV.toValue(true));
 		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID()).setValue(
@@ -1068,7 +1069,7 @@ public abstract class AbstractTestAPI {
 		
 		// try to load it
 		MiniElement e = new MiniXMLParserImpl().parseXml(out.getXml());
-		XModel loadedModel = XmlModel.toModel(this.actorId, e);
+		XModel loadedModel = XmlModel.toModel(this.actorId, this.password, e);
 		assertTrue(loadedModel != null);
 		assertEquals(loadedModel, model);
 		assertTrue(XCompareUtils.equalState(loadedModel, model));

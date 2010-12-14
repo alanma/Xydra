@@ -379,7 +379,7 @@ public class XModelBasics {
 		// transaction.execute(model)
 		
 		// executing the transaction on the model
-		model.executeTransaction(transaction);
+		model.executeCommand(transaction);
 		
 		// checking whether the transaction was actually executed or not
 		XObject object = model.getObject(objectID);
@@ -506,10 +506,12 @@ public class XModelBasics {
 	 * XModel allows to specify access rights on the user level and it allows to
 	 * group users and grant access rights to a whole group.
 	 * 
-	 * There are 2 main interfaces for this purpose: {@link XAccessManagerWithListeners} and
+	 * There are 2 main interfaces for this purpose:
+	 * {@link XAccessManagerWithListeners} and
 	 * {@link XGroupDatabaseWithListeners}.
 	 * 
-	 * The {@link XAccessManagerWithListeners} actually manages the access rights.
+	 * The {@link XAccessManagerWithListeners} actually manages the access
+	 * rights.
 	 * 
 	 * The XGroupDatabase allows to group users, which enables the
 	 * XAccessManager to grant access rights to whole user groups. Every

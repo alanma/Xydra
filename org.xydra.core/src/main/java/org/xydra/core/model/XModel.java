@@ -93,16 +93,11 @@ public interface XModel extends XLoggedModel, XWritableModel, Serializable, XSyn
 	 *         {@link XModelCommand} succeeded the revision number of the
 	 *         {@link XModelEvent} caused by the {@link XModelCommand}.
 	 * @throws IllegalStateException if this model has already been removed
+	 * 
+	 *             TODO mark as @deprecated in favor of executeCommand()? same
+	 *             for object, field, repo
 	 */
 	@ModificationOperation
 	long executeModelCommand(XModelCommand command);
-	
-	/**
-	 * Set a new actor to be used when building commands for changes to this
-	 * model and its children.
-	 * 
-	 * @param actor for this model and its children, if any.
-	 */
-	void setSessionActor(XID actor);
 	
 }

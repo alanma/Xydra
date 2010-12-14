@@ -18,14 +18,14 @@ import org.xydra.client.gwt.editor.value.XStringListEditor;
 import org.xydra.client.gwt.editor.value.XStringSetEditor;
 import org.xydra.client.gwt.editor.value.XValueEditor;
 import org.xydra.client.gwt.editor.value.XValueUtils;
-import org.xydra.client.sync.XSynchronizer;
-import org.xydra.core.change.XCommand;
+import org.xydra.core.change.XFieldCommand;
 import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.change.impl.memory.MemoryFieldCommand;
 import org.xydra.core.change.impl.memory.MemoryObjectCommand;
+import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
-import org.xydra.core.model.XLoggedField;
+import org.xydra.core.model.XObject;
 import org.xydra.core.value.XBooleanListValue;
 import org.xydra.core.value.XBooleanValue;
 import org.xydra.core.value.XByteListValue;
@@ -80,8 +80,8 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 	private static final int IDX_SET_XID = 14;
 	private static final int IDX_LIST_BYTE = 15;
 	
-	private final XSynchronizer manager;
-	private final XLoggedField field;
+	private final XObject object;
+	private final XField field;
 	private final Label revision = new Label();
 	private final HorizontalPanel inner = new HorizontalPanel();
 	private final Button delete = new Button("Remove Field");
@@ -95,11 +95,11 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 	private Button cancel;
 	private XValueEditor editor;
 	
-	public XFieldEditor(XLoggedField field, XSynchronizer manager) {
+	public XFieldEditor(XObject object, XField field) {
 		
-		this.manager = manager;
 		this.field = field;
 		this.field.addListenerForFieldEvents(this);
+		this.object = object;
 		
 		add(this.inner);
 		
@@ -128,8 +128,8 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 	}
 	
 	protected void delete() {
-		this.manager.executeCommand(MemoryObjectCommand.createRemoveCommand(this.field.getAddress()
-		        .getParent(), this.field.getRevisionNumber(), this.field.getID()), null);
+		this.object.executeCommand(MemoryObjectCommand.createRemoveCommand(this.field.getAddress()
+		        .getParent(), this.field.getRevisionNumber(), this.field.getID()));
 	}
 	
 	protected void changeValue(XValue value) {
@@ -359,7 +359,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 			return;
 		}
 		
-		XCommand command;
+		XFieldCommand command;
 		if(this.field.isEmpty()) {
 			command = MemoryFieldCommand.createAddCommand(this.field.getAddress(), this.field
 			        .getRevisionNumber(), newValue);
@@ -372,7 +372,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 				        this.field.getRevisionNumber(), newValue);
 			}
 		}
-		this.manager.executeCommand(command, null);
+		this.field.executeFieldCommand(command);
 	}
 	
 	protected void typeChanged() {

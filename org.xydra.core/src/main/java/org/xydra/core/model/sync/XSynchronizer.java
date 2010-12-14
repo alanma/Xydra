@@ -1,6 +1,5 @@
 package org.xydra.core.model.sync;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.xydra.core.change.XCommand;
@@ -9,6 +8,7 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XSynchronizesChanges;
+import org.xydra.core.model.impl.memory.LocalChange;
 import org.xydra.index.XI;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
@@ -44,8 +44,6 @@ public class XSynchronizer {
 	
 	boolean requestRunning = false;
 	
-	private boolean autoSync = false;
-	
 	/**
 	 * Start synchronizing the given model (which has no local changes) via the
 	 * given service. Any further changes applied directly to the model will be
@@ -64,7 +62,7 @@ public class XSynchronizer {
 		this.addr = addr;
 		this.entity = entity;
 		this.store = store;
-		this.changes = new ArrayList<LocalChange>();
+		this.changes = entity.getLocalChanges(); // FIXME this is a hack
 		this.lastSyncedRevison = getLocalRevisionNumber();
 		assert addr.getField() == null;
 		assert addr.getModel() != null;
@@ -79,41 +77,6 @@ public class XSynchronizer {
 	 */
 	public XSynchronizer(XModel entity, XydraStore store) {
 		this(entity.getAddress(), entity, store);
-	}
-	
-	/**
-	 * Execute a command. The command will be immediately applied locally.
-	 * 
-	 * @param command The command to apply.
-	 * @param callback A callback that will be notified if the command fails or
-	 *            is permanently applied.
-	 */
-	public void executeCommand(XCommand command, XCommandCallback callback) {
-		log.info("sync: got command: " + command);
-		
-		// Try to execute the command locally.
-		// FIXME set actorId
-		long result = this.entity.executeCommand(command);
-		if(result == XCommand.FAILED) {
-			// The command failed, so we don't need to track it further.
-			log.warn("sync: command failed immediately");
-			if(callback != null) {
-				callback.failed();
-				callback.failedPost();
-			}
-		} else if(result == XCommand.NOCHANGE) {
-			// The command didn't change anything so we don't need to track it.
-			log.warn("sync: command already redundant");
-			if(callback != null) {
-				callback.applied(result);
-			}
-		} else {
-			// FIXME session actor may be changed by listeners on the model.
-			this.changes.add(new LocalChange(this.entity.getSessionActor(), command, callback));
-			if(this.autoSync) {
-				startRequest();
-			}
-		}
 	}
 	
 	public long getLocalRevisionNumber() {
@@ -302,8 +265,7 @@ public class XSynchronizer {
 		        + " local changes, local rev is " + getLocalRevisionNumber() + " (synced to "
 		        + this.lastSyncedRevison + ")");
 		
-		long[] results = this.entity.synchronize(remoteChanges, this.lastSyncedRevison,
-		        this.changes);
+		long[] results = this.entity.synchronize(remoteChanges, this.lastSyncedRevison);
 		assert results.length == this.changes.size();
 		
 		this.lastSyncedRevison += remoteChanges.length;
@@ -316,7 +278,7 @@ public class XSynchronizer {
 			if(results[i] == XCommand.FAILED) {
 				log.info("sync: client command conflicted: " + change.command);
 				if(change.callback != null) {
-					change.callback.failedPost();
+					change.callback.failed();
 				}
 			} else if(results[i] == XCommand.NOCHANGE) {
 				log.info("sync: client command redundant: " + change.command);
@@ -349,20 +311,6 @@ public class XSynchronizer {
 	 */
 	public void synchronize() {
 		startRequest();
-	}
-	
-	/**
-	 * @param autoSync true if commands should be automatically sent to the
-	 *            store as they are added. The default is false (off). Even with
-	 *            auto sync on, no requests are made unless there are commands
-	 *            in the queue. Thus synchronize() still needs to be called from
-	 *            time to time to get updates from the store.
-	 */
-	public void setAutomaticSynchronize(boolean autoSync) {
-		this.autoSync = autoSync;
-		if(autoSync && !this.changes.isEmpty()) {
-			startRequest();
-		}
 	}
 	
 }

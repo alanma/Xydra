@@ -61,7 +61,7 @@ public class XModelResource {
 			MiniXMLParser parser = new MiniXMLParserImpl();
 			MiniElement objectElement = parser.parseXml(objectXml);
 			
-			newObject = XmlModel.toObject(actorId, objectElement);
+			newObject = XmlModel.toObject(actorId, null, objectElement);
 			
 		} catch(IllegalArgumentException iae) {
 			throw new RestlessException(RestlessException.Bad_request,

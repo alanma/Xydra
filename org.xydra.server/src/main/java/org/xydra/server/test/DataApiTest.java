@@ -84,7 +84,7 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		
 		XObject retrievedObject;
 		try {
-			retrievedObject = XmlModel.toObject(JANE_ID, objectElement);
+			retrievedObject = XmlModel.toObject(JANE_ID, null, objectElement);
 		} catch(IllegalArgumentException iae) {
 			fail(iae.getMessage());
 			throw new RuntimeException();

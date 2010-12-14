@@ -9,7 +9,6 @@ import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.change.XObjectCommand;
 import org.xydra.core.change.XObjectEvent;
 import org.xydra.core.change.XObjectEventListener;
-import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.XTransactionEventListener;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
@@ -45,9 +44,9 @@ public interface XProtectedObject extends XLoggedObject, XProtectedSynchronizesC
 	 *         {@link XProtectedField} linked with the actor of this
 	 *         XProtectedObject or null, if no corresponding {@link XField}
 	 *         exists
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (read access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (read access) to execute this
+	 *             method
 	 */
 	@ReadOperation
 	XProtectedField getField(XID fieldId);
@@ -64,9 +63,9 @@ public interface XProtectedObject extends XLoggedObject, XProtectedSynchronizesC
 	 *         {@link XField} with this {@link XID} (both as an
 	 *         {@link XProtectedField} linked with the actor of this
 	 *         XProtectedObject)
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (write access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (write access) to execute this
+	 *             method
 	 */
 	@ModificationOperation
 	XProtectedField createField(XID fieldID);
@@ -79,9 +78,9 @@ public interface XProtectedObject extends XLoggedObject, XProtectedSynchronizesC
 	 *            removed
 	 * @return true, if the specified {@link XField} did exist and could be
 	 *         removed
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (write access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (write access) to execute this
+	 *             method
 	 */
 	@ModificationOperation
 	boolean removeField(XID fieldID);
@@ -107,76 +106,61 @@ public interface XProtectedObject extends XLoggedObject, XProtectedSynchronizesC
 	 *         {@link XObjectCommand} didn't change anything or if executing the
 	 *         {@link XObjectCommand} succeeded the revision number of the
 	 *         {@link XObjectEvent} caused by the {@link XObjectCommand}.
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (write access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (write access) to execute this
+	 *             method
 	 */
 	@ModificationOperation
 	long executeObjectCommand(XObjectCommand command);
 	
 	/**
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (read access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (read access) to execute this
+	 *             method
 	 */
 	long getRevisionNumber();
 	
 	/**
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (read access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (read access) to execute this
+	 *             method
 	 */
 	boolean hasField(XID objectID);
 	
 	/**
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (read access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (read access) to execute this
+	 *             method
 	 */
 	boolean isEmpty();
 	
 	/**
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (read access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (read access) to execute this
+	 *             method
 	 */
 	Iterator<XID> iterator();
 	
 	/**
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (read access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (read access) to execute this
+	 *             method
 	 */
 	boolean addListenerForObjectEvents(XObjectEventListener changeListener);
 	
 	/**
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (read access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (read access) to execute this
+	 *             method
 	 */
 	boolean addListenerForFieldEvents(XFieldEventListener changeListener);
 	
 	/**
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (read access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (read access) to execute this
+	 *             method
 	 */
 	boolean addListenerForTransactionEvents(XTransactionEventListener changeListener);
-	
-	/**
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (read or write access,
-	 *             depending on the {@link XCommand XCommands} in the
-	 *             {@link XTransaction}) to execute this method
-	 */
-	long executeTransaction(XTransaction transaction);
-	
-	/**
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (read or write access,
-	 *             depending on the {@link XCommand}) to execute this method
-	 */
-	long executeCommand(XCommand command);
 	
 	/**
 	 * @return the actor that is represented by this interface. This is the

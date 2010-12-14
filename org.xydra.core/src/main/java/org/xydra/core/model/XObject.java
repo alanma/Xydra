@@ -95,13 +95,4 @@ public interface XObject extends XLoggedObject, XWritableObject, XSynchronizesCh
 	@ModificationOperation
 	long executeObjectCommand(XObjectCommand command);
 	
-	/**
-	 * Set a new actor to be used when building commands for changes to this
-	 * object and its children. If the object has a parent model, the session
-	 * actor of the parent model is also set to the given actor.
-	 * 
-	 * @param actor for this object and its children, if any.
-	 */
-	void setSessionActor(XID actor);
-	
 }

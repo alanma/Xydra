@@ -14,8 +14,7 @@ import org.xydra.core.model.XID;
  * @author dscharrer
  * 
  */
-public interface XProtectedSynchronizesChanges extends IHasXAddress, XProtectedExecutesCommands,
-        XProtectedExecutesTransactions {
+public interface XProtectedSynchronizesChanges extends IHasXAddress, XProtectedExecutesCommands {
 	
 	/**
 	 * @return the {@link XChangeLog} which is logging the {@link XEvent

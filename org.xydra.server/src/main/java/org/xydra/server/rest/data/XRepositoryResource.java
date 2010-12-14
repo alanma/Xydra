@@ -39,7 +39,7 @@ public class XRepositoryResource {
 			MiniXMLParser parser = new MiniXMLParserImpl();
 			MiniElement modelElement = parser.parseXml(modelXml);
 			
-			newModel = XmlModel.toModel(actorId, modelElement);
+			newModel = XmlModel.toModel(actorId, null, modelElement);
 			
 		} catch(IllegalArgumentException iae) {
 			throw new RestlessException(RestlessException.Bad_request,

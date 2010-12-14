@@ -15,14 +15,13 @@ import org.xydra.core.access.impl.memory.MemoryGroupDatabase;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.change.impl.memory.MemoryModelCommand;
-import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
+import org.xydra.core.model.XSynchronizationCallback;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.session.XProtectedRepository;
 import org.xydra.core.model.session.impl.arm.ArmProtectedRepository;
-import org.xydra.core.model.sync.XCommandCallback;
 import org.xydra.core.test.DemoModelUtil;
 import org.xydra.store.XydraStore;
 import org.xydra.store.access.XA;
@@ -59,7 +58,7 @@ public class SynchronizerTest extends TestCase {
 		
 	}
 	
-	static class TestCallback implements XCommandCallback {
+	static class TestCallback implements XSynchronizationCallback {
 		
 		boolean applied = false;
 		
@@ -98,23 +97,19 @@ public class SynchronizerTest extends TestCase {
 				
 			}
 			
-			private void testCommands(XSynchronizer sync, XBaseModel model) {
+			private void testCommands(XSynchronizer sync, XModel model) {
 				
 				// Create a command manually.
 				XCommand command = MemoryModelCommand.createAddCommand(model.getAddress(), false,
 				        XX.toId("Frank"));
 				
 				// Apply the command locally.
-				sync.executeCommand(command, c1);
+				model.executeCommand(command, c1);
 				
 				// Now synchronize with the server.
 				sync.synchronize();
 				
 				// command may not be applied remotely yet!
-				
-				// Manually synchronizing is tedious, so send all commands
-				// immediately from now on.
-				sync.setAutomaticSynchronize(true);
 				
 				// We don't have to create all commands manually but can use a
 				// ChangedModel.
@@ -133,7 +128,9 @@ public class SynchronizerTest extends TestCase {
 				
 				// Now apply the command locally. It should be automatically
 				// sent to the server.
-				sync.executeCommand(autoCommand, c2);
+				model.executeCommand(autoCommand, c2);
+				
+				sync.synchronize();
 				
 				// both commands may still not be applied remotely
 				

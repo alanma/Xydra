@@ -93,7 +93,7 @@ public class CalendarManager {
 	private static XID managerID = XX.toId("calendarManager");
 	
 	public CalendarManager() {
-		this.accountModel = new MemoryModel(managerID, XX.createUniqueID());
+		this.accountModel = new MemoryModel(managerID, null, XX.createUniqueID());
 		
 		this.calendarRepo = X.createMemoryRepository(managerID);
 		this.calendarRepoID = this.calendarRepo.getID();
@@ -247,7 +247,7 @@ public class CalendarManager {
 		transBuilder.addCommand(setEnd);
 		
 		// execute the transaction
-		long result = userCalendar.executeTransaction(transBuilder.build());
+		long result = userCalendar.executeCommand(transBuilder.build());
 		
 		return result != XCommand.FAILED;
 	}

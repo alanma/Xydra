@@ -214,7 +214,7 @@ public class WebadminApp {
 			XModel model;
 			try {
 				MiniElement e = new MiniXMLParserImpl().parseXml(b.toString());
-				model = XmlModel.toModel(XX.toId("WebadminApp"), e);
+				model = XmlModel.toModel(XX.toId("WebadminApp"), null, e);
 			} catch(Exception e) {
 				throw new RuntimeException("error parsing model file \"" + name + "\"", e);
 			}

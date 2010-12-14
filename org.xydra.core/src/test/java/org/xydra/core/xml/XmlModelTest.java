@@ -50,7 +50,7 @@ public class XmlModelTest {
 		String xml = out.getXml();
 		log.debug(xml);
 		MiniElement e = new MiniXMLParserImpl().parseXml(xml);
-		XRepository repoAgain = XmlModel.toRepository(this.actorId, e);
+		XRepository repoAgain = XmlModel.toRepository(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalState(repo, repoAgain));
 		
 		// test serializing without revisions
@@ -60,7 +60,7 @@ public class XmlModelTest {
 		xml = out.getXml();
 		log.debug(xml);
 		e = new MiniXMLParserImpl().parseXml(xml);
-		repoAgain = XmlModel.toRepository(this.actorId, e);
+		repoAgain = XmlModel.toRepository(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalTree(repo, repoAgain));
 		checkNoRevisions(repoAgain);
 		
@@ -75,7 +75,7 @@ public class XmlModelTest {
 		String xml = out.getXml();
 		log.debug(xml);
 		MiniElement e = new MiniXMLParserImpl().parseXml(xml);
-		XModel modelAgain = XmlModel.toModel(this.actorId, e);
+		XModel modelAgain = XmlModel.toModel(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalState(model, modelAgain));
 		
 		// check that there is a change log
@@ -89,7 +89,7 @@ public class XmlModelTest {
 		xml = out.getXml();
 		log.debug(xml);
 		e = new MiniXMLParserImpl().parseXml(xml);
-		modelAgain = XmlModel.toModel(this.actorId, e);
+		modelAgain = XmlModel.toModel(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalTree(model, modelAgain));
 		checkNoRevisions(modelAgain);
 		
@@ -104,7 +104,7 @@ public class XmlModelTest {
 		String xml = out.getXml();
 		log.debug(xml);
 		MiniElement e = new MiniXMLParserImpl().parseXml(xml);
-		XObject objectAgain = XmlModel.toObject(this.actorId, e);
+		XObject objectAgain = XmlModel.toObject(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalState(object, objectAgain));
 		
 		// check that there is a change log
@@ -118,7 +118,7 @@ public class XmlModelTest {
 		xml = out.getXml();
 		log.debug(xml);
 		e = new MiniXMLParserImpl().parseXml(xml);
-		objectAgain = XmlModel.toObject(this.actorId, e);
+		objectAgain = XmlModel.toObject(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalTree(object, objectAgain));
 		checkNoRevisions(objectAgain);
 		
@@ -175,36 +175,36 @@ public class XmlModelTest {
 	
 	@Test
 	public void testEmptyRepository() {
-		testRepository(new MemoryRepository(this.actorId, XX.toId("repo")));
+		testRepository(new MemoryRepository(this.actorId, null, XX.toId("repo")));
 	}
 	
 	@Test
 	public void testFullRepository() {
-		XRepository repo = new MemoryRepository(this.actorId, XX.toId("repo"));
+		XRepository repo = new MemoryRepository(this.actorId, null, XX.toId("repo"));
 		DemoModelUtil.addPhonebookModel(repo);
 		testRepository(repo);
 	}
 	
 	@Test
 	public void testEmptyModel() {
-		testModel(new MemoryModel(this.actorId, DemoModelUtil.PHONEBOOK_ID));
+		testModel(new MemoryModel(this.actorId, null, DemoModelUtil.PHONEBOOK_ID));
 	}
 	
 	@Test
 	public void testFullModel() {
-		XModel model = new MemoryModel(this.actorId, DemoModelUtil.PHONEBOOK_ID);
+		XModel model = new MemoryModel(this.actorId, null, DemoModelUtil.PHONEBOOK_ID);
 		DemoModelUtil.setupPhonebook(model);
 		testModel(model);
 	}
 	
 	@Test
 	public void testEmptyObject() {
-		testObject(new MemoryObject(this.actorId, DemoModelUtil.JOHN_ID));
+		testObject(new MemoryObject(this.actorId, null, DemoModelUtil.JOHN_ID));
 	}
 	
 	@Test
 	public void testFullObject() {
-		XObject object = new MemoryObject(this.actorId, DemoModelUtil.JOHN_ID);
+		XObject object = new MemoryObject(this.actorId, null, DemoModelUtil.JOHN_ID);
 		DemoModelUtil.setupJohn(object);
 		testObject(object);
 	}

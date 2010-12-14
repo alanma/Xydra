@@ -193,7 +193,7 @@ public class XydraEditor implements EntryPoint {
 		
 		startSynchronizer(model);
 		
-		this.panel.add(new XModelEditor(model, this.manager));
+		this.panel.add(new XModelEditor(model));
 	}
 	
 	protected void loadedObject(XObject object) {
@@ -202,12 +202,11 @@ public class XydraEditor implements EntryPoint {
 		
 		startSynchronizer(object);
 		
-		this.panel.add(new XObjectEditor(object, this.manager));
+		this.panel.add(new XObjectEditor(null, object));
 	}
 	
 	private void startSynchronizer(XSynchronizesChanges entity) {
 		this.manager = new XSynchronizer(this.addr, entity, XydraEditor.this.changes);
-		this.manager.setAutomaticSynchronize(true);
 		this.timer.scheduleRepeating(5000);
 	}
 	
