@@ -15,6 +15,7 @@ import org.xydra.core.change.XObjectCommand;
 import org.xydra.core.change.XObjectEvent;
 import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.impl.memory.MemoryFieldEvent;
+import org.xydra.core.change.impl.memory.MemoryObjectCommand;
 import org.xydra.core.change.impl.memory.MemoryObjectEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
@@ -212,65 +213,6 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		this.loadedFields.clear();
 	}
 	
-	public boolean removeField(XID fieldID) {
-		synchronized(this.eventQueue) {
-			checkRemoved();
-			
-			if(!hasField(fieldID)) {
-				return false;
-			}
-			
-			MemoryField field = getField(fieldID);
-			assert field != null : "we checked above";
-			
-			boolean inTrans = this.eventQueue.transactionInProgess;
-			boolean makeTrans = !field.isEmpty();
-			int since = this.eventQueue.getNextPosition();
-			enqueueFieldRemoveEvents(this.actorId, field, makeTrans || inTrans, false);
-			
-			Orphans orphans = getOrphans();
-			if(!inTrans && orphans == null) {
-				beginStateTransaction();
-			}
-			
-			// actually remove the field
-			this.state.removeFieldState(field.getID());
-			this.loadedFields.remove(field.getID());
-			if(orphans != null) {
-				field.getState().setValue(null);
-				orphans.fields.put(field.getAddress(), field);
-			} else {
-				field.delete();
-			}
-			
-			// event propagation must be handled differently if a
-			// transaction is in progress
-			// event propagation and revision number increasing happens
-			// after all events were successful
-			if(!inTrans) {
-				
-				if(makeTrans) {
-					this.eventQueue.createTransactionEvent(this.actorId, this.father, this, since);
-				}
-				
-				// increment revision number
-				// only increment if this event is no sub-event of a
-				// transaction (needs to be handled differently)
-				incrementRevisionAndSave();
-				
-				if(orphans == null) {
-					endStateTransaction();
-				}
-				
-				// propagate events
-				this.eventQueue.sendEvents();
-				
-			}
-			
-			return true;
-		}
-	}
-	
 	/**
 	 * Saves the current state information of this MemoryObject with the
 	 * currently used persistence layer
@@ -317,59 +259,143 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		}
 	}
 	
-	public MemoryField createField(XID fieldID) {
+	public MemoryField createField(XID fieldId) {
+		
+		XObjectCommand command = MemoryObjectCommand.createAddCommand(getAddress(), true, fieldId);
+		
+		// synchronize so that return is never null if command succeeded
 		synchronized(this.eventQueue) {
-			checkRemoved();
-			
-			if(hasField(fieldID)) {
-				return getField(fieldID);
-			}
-			
-			MemoryField field = null;
-			
-			boolean inTrans = this.eventQueue.transactionInProgess;
-			Orphans orphans = getOrphans();
-			if(orphans != null) {
-				XAddress fieldAddr = XX.resolveField(getAddress(), fieldID);
-				field = orphans.fields.remove(fieldAddr);
-			} else if(!inTrans) {
-				beginStateTransaction();
-			}
-			
-			if(field == null) {
-				XFieldState fieldState = this.state.createFieldState(fieldID);
-				assert getAddress().contains(fieldState.getAddress());
-				field = new MemoryField(this.actorId, this, this.eventQueue, fieldState);
-			}
-			
-			this.state.addFieldState(field.getState());
-			this.loadedFields.put(field.getID(), field);
-			
-			XObjectEvent event = MemoryObjectEvent.createAddEvent(this.actorId, getAddress(), field
-			        .getID(), getModelRevisionNumber(), getRevisionNumber(), inTrans);
-			
-			this.eventQueue.enqueueObjectEvent(this, event);
-			
-			// event propagation and revision number increasing happens
-			// after all events were successful
-			if(!inTrans) {
-				
-				// increment revision number
-				// only increment if this event is no subevent of a transaction
-				// (needs to be handled differently)
-				field.incrementRevisionAndSave();
-				
-				if(orphans == null) {
-					endStateTransaction();
-				}
-				
-				// propagate events
-				this.eventQueue.sendEvents();
-				
-			}
-			
+			long result = executeObjectCommand(command);
+			MemoryField field = getField(fieldId);
+			assert result == XCommand.FAILED || field != null;
 			return field;
 		}
+	}
+	
+	public boolean removeField(XID fieldId) {
+		
+		// no synchronization necessary here (except that in
+		// executeObjectCommand())
+		
+		XObjectCommand command = MemoryObjectCommand.createRemoveCommand(getAddress(),
+		        XCommand.FORCED, fieldId);
+		
+		long result = executeObjectCommand(command);
+		assert result >= 0 || result == XCommand.NOCHANGE;
+		return result != XCommand.NOCHANGE;
+	}
+	
+	/**
+	 * Create a new field and enqueue the corresponding event.
+	 * 
+	 * The caller is responsible for handling synchronization, for checking that
+	 * this object has not been removed, for checking that the field doesn't
+	 * already exist, for handling state transactions and for dispatching
+	 * events.
+	 */
+	protected MemoryField createFieldInternal(XID fieldId) {
+		
+		assert !hasField(fieldId);
+		
+		MemoryField field = null;
+		
+		Orphans orphans = getOrphans();
+		boolean inTrans = this.eventQueue.transactionInProgess;
+		if(!inTrans && orphans == null) {
+			beginStateTransaction();
+		}
+		
+		if(orphans != null) {
+			XAddress fieldAddr = XX.resolveField(getAddress(), fieldId);
+			field = orphans.fields.remove(fieldAddr);
+		}
+		
+		if(field == null) {
+			XFieldState fieldState = this.state.createFieldState(fieldId);
+			assert getAddress().contains(fieldState.getAddress());
+			field = new MemoryField(this.actorId, this, this.eventQueue, fieldState);
+		}
+		
+		this.state.addFieldState(field.getState());
+		this.loadedFields.put(field.getID(), field);
+		
+		XObjectEvent event = MemoryObjectEvent.createAddEvent(this.actorId, getAddress(), field
+		        .getID(), getModelRevisionNumber(), getRevisionNumber(), inTrans);
+		
+		this.eventQueue.enqueueObjectEvent(this, event);
+		
+		// event propagation and revision number increasing happens after
+		// all events were successful
+		if(!inTrans) {
+			
+			field.incrementRevisionAndSave();
+			
+			if(orphans == null) {
+				endStateTransaction();
+			}
+			
+			// propagate events
+			this.eventQueue.sendEvents();
+			
+		}
+		
+		return field;
+	}
+	
+	/**
+	 * Remove an existing field and enqueue the corresponding event(s).
+	 * 
+	 * The caller is responsible for handling synchronization, for checking that
+	 * this object has not been removed, for checking that the field actually
+	 * exists, for handling state transactions and for dispatching events.
+	 */
+	protected void removeFieldInternal(XID fieldId) {
+		
+		assert hasField(fieldId);
+		
+		MemoryField field = getField(fieldId);
+		assert field != null : "checked by caller";
+		
+		boolean inTrans = this.eventQueue.transactionInProgess;
+		Orphans orphans = getOrphans();
+		if(!inTrans && orphans == null) {
+			beginStateTransaction();
+		}
+		
+		boolean makeTrans = !field.isEmpty();
+		int since = this.eventQueue.getNextPosition();
+		enqueueFieldRemoveEvents(this.actorId, field, makeTrans || inTrans, false);
+		
+		// actually remove the field
+		this.state.removeFieldState(field.getID());
+		this.loadedFields.remove(field.getID());
+		if(orphans != null) {
+			assert !orphans.fields.containsKey(field.getAddress());
+			field.getState().setValue(null);
+			orphans.fields.put(field.getAddress(), field);
+		} else {
+			field.delete();
+		}
+		
+		// event propagation and revision number increasing happens after
+		// all events were successful
+		if(!inTrans) {
+			
+			if(makeTrans) {
+				this.eventQueue.createTransactionEvent(this.actorId, this.father, this, since);
+			}
+			
+			incrementRevisionAndSave();
+			
+			if(orphans == null) {
+				endStateTransaction();
+			}
+			
+			// propagate events
+			this.eventQueue.sendEvents();
+			
+		}
+		
 	}
 	
 	public long executeObjectCommand(XObjectCommand command) {
@@ -379,6 +405,8 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 			if(!getAddress().equals(command.getTarget())) {
 				return XCommand.FAILED;
 			}
+			
+			long oldRev = getOldRevisionNumber();
 			
 			if(command.getChangeType() == ChangeType.ADD) {
 				if(hasField(command.getFieldID())) {
@@ -394,14 +422,9 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 					return XCommand.FAILED;
 				}
 				
-				long oldRev = getOldRevisionNumber();
+				createFieldInternal(command.getFieldID());
 				
-				createField(command.getFieldID());
-				
-				return oldRev + 1;
-			}
-			
-			if(command.getChangeType() == ChangeType.REMOVE) {
+			} else if(command.getChangeType() == ChangeType.REMOVE) {
 				XField oldField = getField(command.getFieldID());
 				
 				if(oldField == null) {
@@ -422,14 +445,13 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 					return XCommand.FAILED;
 				}
 				
-				long oldRev = getOldRevisionNumber();
+				removeFieldInternal(command.getFieldID());
 				
-				removeField(command.getFieldID());
-				
-				return oldRev + 1;
+			} else {
+				throw new IllegalArgumentException("Unknown object command type: " + command);
 			}
 			
-			return XCommand.FAILED;
+			return oldRev + 1;
 		}
 	}
 	

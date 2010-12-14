@@ -39,7 +39,7 @@ public class MemoryChangeLog extends AbstractChangeLog implements XChangeLog {
 		        || (event.getOldModelRevision() == getCurrentRevisionNumber()) : "cannot append event with old rev "
 		        + event.getOldModelRevision()
 		        + " to model change log at event "
-		        + getCurrentRevisionNumber();
+		        + getCurrentRevisionNumber() + ": " + event;
 		
 		assert event == null || !event.inTransaction();
 		// "else": event is part of a transaction and will therefore only be

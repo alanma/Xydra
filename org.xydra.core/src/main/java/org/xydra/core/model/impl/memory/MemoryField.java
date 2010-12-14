@@ -222,27 +222,42 @@ public class MemoryField implements XField, Serializable {
 	 */
 	@ModificationOperation
 	public boolean setValue(XValue newValue) {
+		
+		// no synchronization necessary here (except that in
+		// executeFieldCommand())
+		
 		XFieldCommand command;
 		if(newValue == null) {
 			command = MemoryFieldCommand.createRemoveCommand(getAddress(), XCommand.FORCED);
 		} else {
 			command = MemoryFieldCommand.createAddCommand(getAddress(), XCommand.FORCED, newValue);
 		}
+		
 		long result = executeFieldCommand(command);
 		assert result >= 0 || result == XCommand.NOCHANGE;
 		return result != XCommand.NOCHANGE;
 	}
 	
 	/**
-	 * Set the new value and enqueue the corresponding event. The caller is
-	 * responsible for checking that the value actually changed, for handling
-	 * state transactions and for dispatching events.
+	 * Set the new value, increase revision (if not in a transaction) and
+	 * enqueue the corresponding event.
+	 * 
+	 * The caller is responsible for handling synchronization, for checking that
+	 * this field has not been removed, for checking that the newValue is
+	 * actually different from the current value.
 	 */
 	protected void setValueInternal(XValue newValue) {
 		
 		XValue oldValue = getValue();
 		
+		assert !XI.equals(oldValue, newValue);
+		
 		boolean inTrans = this.eventQueue.transactionInProgess;
+		
+		boolean hasOrphans = (this.eventQueue.orphans != null);
+		if(!inTrans && !hasOrphans) {
+			beginStateTransaction();
+		}
 		
 		this.state.setValue(newValue);
 		
@@ -271,6 +286,22 @@ public class MemoryField implements XField, Serializable {
 		assert event != null;
 		
 		this.eventQueue.enqueueFieldEvent(this, event);
+		
+		// event propagation and revision number increasing happens after
+		// all events were successful
+		if(!inTrans) {
+			
+			// increment revision number
+			incrementRevisionAndSave();
+			
+			if(!hasOrphans) {
+				endStateTransaction();
+			}
+			
+			// dispatch events
+			this.eventQueue.sendEvents();
+			
+		}
 		
 	}
 	
@@ -337,31 +368,14 @@ public class MemoryField implements XField, Serializable {
 				}
 				
 			} else {
-				return XCommand.FAILED;
+				throw new IllegalArgumentException("Unknown field command type: " + command);
 			}
 			
 			if(XI.equals(getValue(), command.getValue())) {
 				return XCommand.NOCHANGE;
 			}
 			
-			assert !this.eventQueue.transactionInProgess;
-			
-			boolean hasOrphans = (this.eventQueue.orphans != null);
-			if(!hasOrphans) {
-				beginStateTransaction();
-			}
-			
 			setValueInternal(command.getValue());
-			
-			// increment revision number
-			incrementRevisionAndSave();
-			
-			if(!hasOrphans) {
-				endStateTransaction();
-			}
-			
-			// dispatch events
-			this.eventQueue.sendEvents();
 			
 			return oldRev + 1;
 		}
