@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -68,17 +69,6 @@ public abstract class AbstractStoreTest {
 	abstract protected void setIncorrectUser(XID actorId, String passwordHash);
 	
 	/**
-	 * @param timeout sets the amount of time tests shall wait on callbacks
-	 */
-	abstract protected void setCallbackTimeout(long timeout);
-	
-	/**
-	 * @param quota sets the amount of allowed incorrect login tries before a
-	 *            QuotaException is thrown
-	 */
-	abstract protected void setQuotaForBruteForce(long quota);
-	
-	/**
 	 * Returns an array of {@link XAddress XAddresses} of {@link XModel XModels}
 	 * the actor with the given {@link XID} has at least read access to.
 	 * 
@@ -87,16 +77,6 @@ public abstract class AbstractStoreTest {
 	 *         the actor with the given {@link XID} has at least read access to.
 	 */
 	abstract protected XAddress[] getModelAddresses(XID accountID);
-	
-	/**
-	 * Returns the {@link XAddress} of an {@link XModel} the given actor has no
-	 * access to (not even read access!)
-	 * 
-	 * @param accountID
-	 * @return Returns the {@link XAddress} of an {@link XModel} the given actor
-	 *         has no access to (not even read access!)
-	 */
-	abstract protected XAddress getModelAddressWithoutAccess(XID accountID);
 	
 	/**
 	 * @return the {@link XAddress} of a not existing {@link XModel}
@@ -116,16 +96,6 @@ public abstract class AbstractStoreTest {
 	abstract protected XAddress[] getObjectAddresses(XID accountID);
 	
 	/**
-	 * Returns the {@link XAddress} of an {@link XObject} the given actor has no
-	 * access to (not even read access!)
-	 * 
-	 * @param accountID
-	 * @return Returns the {@link XAddress} of an {@link XObject} the given
-	 *         actor has no access to (not even read access!)
-	 */
-	abstract protected XAddress getObjectAddressWithoutAccess(XID accountID);
-	
-	/**
 	 * @return the {@link XAddress} of a not existing {@link XObject}
 	 */
 	abstract protected XAddress getNotExistingObjectAddress();
@@ -136,8 +106,8 @@ public abstract class AbstractStoreTest {
 		
 		setCorrectUser(this.correctUser, this.correctUserPass);
 		setIncorrectUser(this.incorrectUser, this.incorrectUserPass);
-		setCallbackTimeout(this.timeout);
-		setQuotaForBruteForce(this.bfQuota);
+		this.timeout = getCallbackTimeout();
+		this.bfQuota = getQuotaForBruteForce();
 	}
 	
 	/**
@@ -182,51 +152,46 @@ public abstract class AbstractStoreTest {
 		// check IllegalArgumentException
 		// first parameter equals null
 		callback = new TestCallback<Boolean>();
-		boolean exceptionThrown = false;
 		
 		try {
 			this.store.checkLogin(null, this.correctUserPass, callback);
+			//if we reach this, the method didn't work as expected
+			fail();
 		}
 		catch(IllegalArgumentException iae) {
-			exceptionThrown = true;
 		}
-		assertTrue(exceptionThrown);
 		
 		// second parameter equals null
 		callback = new TestCallback<Boolean>();
-		exceptionThrown = false;
 		
 		try {
 			this.store.checkLogin(this.correctUser, null, callback);
+			//if we reach this, the method didn't work as expected
+			fail();
 		}
 		catch(IllegalArgumentException iae) {
-			exceptionThrown = true;
 		}
-		assertTrue(exceptionThrown);
 		
 		// both parameters equal null
 		callback = new TestCallback<Boolean>();
-		exceptionThrown = false;
 		
 		try {
 			this.store.checkLogin(null, null, callback);
+			//if we reach this, the method didn't work as expected
+			fail();
 		}
 		catch(IllegalArgumentException iae) {
-			exceptionThrown = true;
 		}
-		assertTrue(exceptionThrown);
 		
 		// callback is null - should not throw an IllegalArgumentException
-		exceptionThrown = false;
 		
 		try {
 			this.store.checkLogin(this.correctUser, this.correctUserPass, null);
 		}
 		catch(IllegalArgumentException iae) {
-			exceptionThrown = true;
-		}
-		assertFalse(exceptionThrown);
-		
+			//if we reach this, the method didn't work as expected
+			fail();
+		}	
 		
 		// TODO How to test for other exception types like ConnectionException,
 		// TimeoutException etc.?
@@ -239,7 +204,6 @@ public abstract class AbstractStoreTest {
 	@Test
 	public void testGetModelSnapshots() {
 		XAddress[] modelAddresses = this.getModelAddresses(this.correctUser);
-		XAddress noAccess = this.getModelAddressWithoutAccess(this.correctUser);
 		XAddress doesntExist = this.getNotExistingModelAddress();
 		TestCallback<BatchedResult<XBaseModel>[]> callback;
 		
@@ -276,26 +240,10 @@ public abstract class AbstractStoreTest {
 			assertEquals(modelAddresses[i], result[i].getResult().getAddress());
 		}
 		
-		// Test if it behaves correctly for addresses of XModels the user has no
-		// access to
-		callback = new TestCallback<BatchedResult<XBaseModel>[]>();
-		XAddress[] tempArray = new XAddress[] { noAccess };
-		
-		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, tempArray, callback);
-		
-		assertTrue(this.waitOnCallback(callback));
-		assertNotNull(callback.getEffect());
-		assertNull(callback.getException());
-		
-		result = callback.getEffect();
-		assertNull(result[0].getResult());
-		assertNotNull(result[0].getException());
-		assertTrue(result[0].getException() instanceof AccessException);
-		
 		// Test if it behaves correctly for addresses of XModels that don't
 		// exist
 		callback = new TestCallback<BatchedResult<XBaseModel>[]>();
-		tempArray = new XAddress[] { doesntExist };
+		XAddress[] tempArray = new XAddress[] { doesntExist };
 		
 		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, tempArray, callback);
 		
@@ -310,10 +258,9 @@ public abstract class AbstractStoreTest {
 		
 		// Test if it behaves correctly for mixes of the cases above
 		callback = new TestCallback<BatchedResult<XBaseModel>[]>();
-		tempArray = new XAddress[modelAddresses.length + 2];
+		tempArray = new XAddress[modelAddresses.length + 1];
 		System.arraycopy(modelAddresses, 0, tempArray, 0, modelAddresses.length);
 		tempArray[modelAddresses.length] = doesntExist;
-		tempArray[modelAddresses.length + 1] = noAccess;
 		
 		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, tempArray, callback);
 		
@@ -326,17 +273,11 @@ public abstract class AbstractStoreTest {
 		
 		// check order of returned snapshots
 		for(int i = 0; i < modelAddresses.length; i++) {
-			if(i == modelAddresses.length) { // XAddress of a not existing
-				                             // XModel
+			if(i == modelAddresses.length) { 
+				//This index contains an XAddress of a not existing XModel
 				assertNull(result[i].getResult());
 				assertNotNull(result[i].getException());
 				assertTrue(result[i].getException() instanceof RequestException);
-			} else if(i == modelAddresses.length + 1) { // XAddress of an XModel
-				                                        // the account has no
-				                                        // access to
-				assertNull(result[i].getResult());
-				assertNotNull(result[i].getException());
-				assertTrue(result[i].getException() instanceof AccessException);
 			} else {
 				assertNotNull(result[i].getResult());
 				assertNull(result[i].getException());
@@ -365,64 +306,59 @@ public abstract class AbstractStoreTest {
 		
 		// Test IllegalArgumentException
 		callback = new TestCallback<BatchedResult<XBaseModel>[]>();
-		boolean exceptionThrown = false;
 		
 		// first parameter equals null
 		try{
 			this.store.getModelSnapshots(null, this.correctUserPass, modelAddresses, callback);
+			//if we reach this, the method didn't work as expected
+			fail();
 		}
 		catch(IllegalArgumentException iae) {
-			exceptionThrown = true;
 		}
-		assertTrue(exceptionThrown);
 		
 		// second parameter equals null
 		callback = new TestCallback<BatchedResult<XBaseModel>[]>();
-		exceptionThrown = false;
 		
 		try{
 			this.store.getModelSnapshots(this.correctUser, null, modelAddresses, callback);
+			//if we reach this, the method didn't work as expected
+			fail();
 		}
 		catch(IllegalArgumentException iae) {
-			exceptionThrown = true;
 		}
-		assertTrue(exceptionThrown);
 		
 		// third parameter equals null
 		callback = new TestCallback<BatchedResult<XBaseModel>[]>();
-		exceptionThrown = false;
 		
 		try{
 			this.store.getModelSnapshots(this.correctUser, this.correctUserPass, null, callback);
+			//if we reach this, the method didn't work as expected
+			fail();
 		}
 		catch(IllegalArgumentException iae) {
-			exceptionThrown = true;
 		}
-		assertTrue(exceptionThrown);
 		
 		// all parameters equal null
 		callback = new TestCallback<BatchedResult<XBaseModel>[]>();
-		exceptionThrown = false;
 		
 		try{
 			this.store.getModelSnapshots(null, null, null, callback);
+			//if we reach this, the method didn't work as expected
+			fail();
 		}
 		catch(IllegalArgumentException iae) {
-			exceptionThrown = true;
 		}
-		assertTrue(exceptionThrown);
 		
 		// callback equals null - should not throw an IllegalArgumentException
 		callback = new TestCallback<BatchedResult<XBaseModel>[]>();
-		exceptionThrown = false;
 		
 		try{
 			this.store.getModelSnapshots(this.correctUser, this.correctUserPass, modelAddresses, null);
 		}
 		catch(IllegalArgumentException iae) {
-			exceptionThrown = true;
+			//if we reach this, the method didn't work as expected
+			fail();
 		}
-		assertFalse(exceptionThrown);
 		
 		// TODO How to test for other exception types like ConnectionException,
 		// TimeoutException etc.?
@@ -436,7 +372,6 @@ public abstract class AbstractStoreTest {
 	@Test
 	public void testGetModelRevisions() {
 		XAddress[] modelAddresses = this.getModelAddresses(this.correctUser);
-		XAddress noAccess = this.getModelAddressWithoutAccess(this.correctUser);
 		XAddress doesntExist = this.getNotExistingModelAddress();
 		TestCallback<BatchedResult<XBaseModel>[]> snapshotCallback;
 		TestCallback<BatchedResult<Long>[]> revisionCallback;
@@ -490,26 +425,10 @@ public abstract class AbstractStoreTest {
 			        revisionResult[i].getResult());
 		}
 		
-		// Test if it behaves correctly for addresses of XModels the user has no
-		// access to
-		revisionCallback = new TestCallback<BatchedResult<Long>[]>();
-		XAddress[] tempArray = new XAddress[] { noAccess };
-		
-		this.store.getModelRevisions(this.correctUser, this.correctUserPass, tempArray,
-		        revisionCallback);
-		assertTrue(this.waitOnCallback(revisionCallback));
-		assertNotNull(revisionCallback.getEffect());
-		assertNull(revisionCallback.getException());
-		
-		revisionResult = revisionCallback.getEffect();
-		assertEquals(revisionResult[0].getResult(), (Long)XydraStore.MODEL_DOES_NOT_EXIST);
-		assertNotNull(revisionResult[0].getException());
-		assertTrue(revisionResult[0].getException() instanceof AccessException);
-		
 		// Test if it behaves correctly for addresses of XModels that don't
 		// exist
 		revisionCallback = new TestCallback<BatchedResult<Long>[]>();
-		tempArray = new XAddress[] { doesntExist };
+		XAddress[] tempArray = new XAddress[] { doesntExist };
 		
 		this.store.getModelRevisions(this.correctUser, this.correctUserPass, tempArray,
 		        revisionCallback);
@@ -527,10 +446,9 @@ public abstract class AbstractStoreTest {
 		snapshotCallback = new TestCallback<BatchedResult<XBaseModel>[]>();
 		revisionCallback = new TestCallback<BatchedResult<Long>[]>();
 		
-		tempArray = new XAddress[modelAddresses.length + 2];
+		tempArray = new XAddress[modelAddresses.length + 1];
 		System.arraycopy(modelAddresses, 0, tempArray, 0, modelAddresses.length);
 		tempArray[modelAddresses.length] = doesntExist;
-		tempArray[modelAddresses.length + 1] = noAccess;
 		
 		this.store.getModelRevisions(this.correctUser, this.correctUserPass, tempArray,
 		        revisionCallback);
@@ -552,18 +470,12 @@ public abstract class AbstractStoreTest {
 		
 		// check order of returned snapshots
 		for(int i = 0; i < modelAddresses.length; i++) {
-			if(i == modelAddresses.length) { // XAddress of not existing XModel
+			if(i == modelAddresses.length) {
+				// this index contains an XAddress of a not existing XModel
 				assertNull(snapshotResult[i].getResult());
 				assertEquals(revisionResult[i].getResult(), (Long)XydraStore.MODEL_DOES_NOT_EXIST);
 				assertNotNull(revisionResult[i].getException());
 				assertTrue(revisionResult[i].getException() instanceof RequestException);
-			} else if(i == modelAddresses.length + 1) { // XAddress of XModel
-				                                        // the account has no
-				                                        // access to
-				assertNull(snapshotResult[i].getResult());
-				assertEquals(revisionResult[i].getResult(), (Long)XydraStore.MODEL_DOES_NOT_EXIST);
-				assertNotNull(revisionResult[i].getException());
-				assertTrue(revisionResult[i].getException() instanceof AccessException);
 			} else {
 				assertEquals(modelAddresses[i], snapshotResult[i].getResult());
 				
@@ -595,64 +507,59 @@ public abstract class AbstractStoreTest {
 		
 		// Test IllegalArgumentException
 		revisionCallback = new TestCallback<BatchedResult<Long>[]>();
-		boolean exceptionThrown = false;
 		
 		// first parameter equals null
 		try{
 			this.store.getModelRevisions(null, this.correctUserPass, modelAddresses, revisionCallback);
+			//if we reach this, the method didn't work as expected
+			fail();
 		}
 		catch(IllegalArgumentException iae) {
-			exceptionThrown = true;
 		}
-		assertTrue(exceptionThrown);
 		
 		// second parameter equals null
 		revisionCallback = new TestCallback<BatchedResult<Long>[]>();
-		exceptionThrown = false;
 		
 		try{
 			this.store.getModelRevisions(this.correctUser, null, modelAddresses, revisionCallback);
+			//if we reach this, the method didn't work as expected
+			fail();
 		}
 		catch(IllegalArgumentException iae) {
-			exceptionThrown = true;
 		}
-		assertTrue(exceptionThrown);
 		
 		// third parameter equals null
 		revisionCallback = new TestCallback<BatchedResult<Long>[]>();
-		exceptionThrown = false;
 		
 		try{
 			this.store.getModelRevisions(this.correctUser, this.correctUserPass, null, revisionCallback);
+			//if we reach this, the method didn't work as expected
+			fail();
 		}
 		catch(IllegalArgumentException iae) {
-			exceptionThrown = true;
 		}
-		assertTrue(exceptionThrown);
 		
 		// all parameters equal null
 		revisionCallback = new TestCallback<BatchedResult<Long>[]>();
-		exceptionThrown = false;
 		
 		try{
 			this.store.getModelRevisions(null, null, null, revisionCallback);
+			//if we reach this, the method didn't work as expected
+			fail();
 		}
 		catch(IllegalArgumentException iae) {
-			exceptionThrown = true;
 		}
-		assertTrue(exceptionThrown);
 		
 		// callback equals null - should not throw an IllegalArgumentException
 		revisionCallback = new TestCallback<BatchedResult<Long>[]>();
-		exceptionThrown = false;
 		
 		try{
 			this.store.getModelRevisions(this.correctUser, this.correctUserPass, modelAddresses, null);
 		}
 		catch(IllegalArgumentException iae) {
-			exceptionThrown = true;
+			//if we reach this, the method didn't work as expected
+			fail();
 		}
-		assertFalse(exceptionThrown);
 		
 		// TODO How to test for other exception types like ConnectionException,
 		// TimeoutException etc.?
@@ -664,7 +571,6 @@ public abstract class AbstractStoreTest {
 	@Test
 	public void testGetObjectSnapshots() {
 		XAddress[] objectAddresses = this.getObjectAddresses(this.correctUser);
-		XAddress noAccess = this.getObjectAddressWithoutAccess(this.correctUser);
 		XAddress doesntExist = this.getNotExistingObjectAddress();
 		TestCallback<BatchedResult<XBaseObject>[]> callback;
 		
@@ -701,27 +607,10 @@ public abstract class AbstractStoreTest {
 			assertEquals(objectAddresses[i], result[i].getResult().getAddress());
 		}
 		
-		// Test if it behaves correctly for addresses of XObjects the user has
-		// no
-		// access to
-		callback = new TestCallback<BatchedResult<XBaseObject>[]>();
-		XAddress[] tempArray = new XAddress[] { noAccess };
-		
-		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, tempArray, callback);
-		
-		assertTrue(this.waitOnCallback(callback));
-		assertNotNull(callback.getEffect());
-		assertNull(callback.getException());
-		
-		result = callback.getEffect();
-		assertNull(result[0].getResult());
-		assertNotNull(result[0].getException());
-		assertTrue(result[0].getException() instanceof AccessException);
-		
 		// Test if it behaves correctly for addresses of XObjects that don't
 		// exist
 		callback = new TestCallback<BatchedResult<XBaseObject>[]>();
-		tempArray = new XAddress[] { doesntExist };
+		XAddress[] tempArray = new XAddress[] { doesntExist };
 		
 		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, tempArray, callback);
 		
@@ -736,10 +625,9 @@ public abstract class AbstractStoreTest {
 		
 		// Test if it behaves correctly for mixes of the cases above
 		callback = new TestCallback<BatchedResult<XBaseObject>[]>();
-		tempArray = new XAddress[objectAddresses.length + 2];
+		tempArray = new XAddress[objectAddresses.length + 1];
 		System.arraycopy(objectAddresses, 0, tempArray, 0, objectAddresses.length);
 		tempArray[objectAddresses.length] = doesntExist;
-		tempArray[objectAddresses.length + 1] = noAccess;
 		
 		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, tempArray, callback);
 		
@@ -752,17 +640,11 @@ public abstract class AbstractStoreTest {
 		
 		// check order of returned snapshots
 		for(int i = 0; i < objectAddresses.length; i++) {
-			if(i == objectAddresses.length) { // XAddress of a not existing
-				                              // XModel
+			if(i == objectAddresses.length) { 
+				// this index contains an XAddress of a not existing XObject
 				assertNull(result[i].getResult());
 				assertNotNull(result[i].getException());
 				assertTrue(result[i].getException() instanceof RequestException);
-			} else if(i == objectAddresses.length + 1) { // XAddress of an
-				                                         // XModel the account
-				                                         // has no access to
-				assertNull(result[i].getResult());
-				assertNotNull(result[i].getException());
-				assertTrue(result[i].getException() instanceof AccessException);
 			} else {
 				assertNotNull(result[i].getResult());
 				assertNull(result[i].getException());
@@ -881,4 +763,21 @@ public abstract class AbstractStoreTest {
 		
 		return value == TestCallback.SUCCESS;
 	}
+	
+	/**
+	 * Return value sets the amount of time tests shall wait on callbacks.
+	 * Implementations of this abstract test may override this to use a custom value.
+	 */	
+	protected long getCallbackTimeout() {
+	    return 1000;
+	}
+	
+	/**
+	 * Return value sets the amount of allowed incorrect login tries before a
+	 * QuotaException is thrown.
+	 * 
+	 * Implementations of this abstract test need to override this to return the specific quota
+	 * of the XydraStore implementation which is to be tested.
+	 */
+	abstract protected long getQuotaForBruteForce();
 }
