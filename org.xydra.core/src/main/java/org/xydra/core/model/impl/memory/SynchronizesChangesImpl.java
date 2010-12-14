@@ -143,9 +143,9 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 				MemoryObject newObject = createObject(object.getID());
 				for(XID fieldId : object) {
 					XBaseField field = object.getField(fieldId);
-					XField newField = newObject.createField(fieldId);
+					MemoryField newField = newObject.createField(fieldId);
 					if(!field.isEmpty()) {
-						newField.setValue(field.getValue());
+						newField.setValueInternal(field.getValue());
 					}
 				}
 			}
@@ -158,16 +158,16 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 				}
 				
 				for(XBaseField field : object.getNewFields()) {
-					XField newField = oldObject.createField(field.getID());
+					MemoryField newField = oldObject.createField(field.getID());
 					if(!field.isEmpty()) {
-						newField.setValue(field.getValue());
+						newField.setValueInternal(field.getValue());
 					}
 				}
 				
 				for(ChangedField field : object.getChangedFields()) {
 					if(field.isChanged()) {
-						XField oldField = oldObject.getField(field.getID());
-						oldField.setValue(field.getValue());
+						MemoryField oldField = oldObject.getField(field.getID());
+						oldField.setValueInternal(field.getValue());
 					}
 				}
 				

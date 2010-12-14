@@ -13,6 +13,7 @@ import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XFieldCommand;
 import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.change.XFieldEventListener;
+import org.xydra.core.change.impl.memory.MemoryFieldCommand;
 import org.xydra.core.change.impl.memory.MemoryFieldEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XField;
@@ -221,72 +222,56 @@ public class MemoryField implements XField, Serializable {
 	 */
 	@ModificationOperation
 	public boolean setValue(XValue newValue) {
-		
-		synchronized(this.eventQueue) {
-			checkRemoved();
-			
-			XFieldEvent event = null;
-			
-			XValue oldValue = getValue();
-			
-			if(XI.equals(oldValue, newValue)) {
-				// implies no change
-				return false;
-			}
-			
-			boolean inTrans = this.eventQueue.transactionInProgess;
-			boolean hasOrphans = (this.eventQueue.orphans != null);
-			if(!inTrans && !hasOrphans) {
-				beginStateTransaction();
-			}
-			
-			this.state.setValue(newValue);
-			
-			// check for field event type
-			long modelRev = getModelRevisionNumber();
-			long objectRev = getObjectRevisionNumber();
-			long fieldRev = getRevisionNumber();
-			if((oldValue == null)) {
-				assert newValue != null;
-				event = MemoryFieldEvent.createAddEvent(this.actorId, getAddress(), newValue,
-				        modelRev, objectRev, fieldRev, inTrans);
-			} else {
-				if(newValue == null) {
-					// implies remove
-					event = MemoryFieldEvent.createRemoveEvent(this.actorId, getAddress(),
-					        oldValue, modelRev, objectRev, fieldRev, inTrans, false);
-				} else {
-					assert !newValue.equals(oldValue);
-					// implies change
-					event = MemoryFieldEvent.createChangeEvent(this.actorId, getAddress(),
-					        oldValue, newValue, modelRev, objectRev, fieldRev, inTrans);
-				}
-			}
-			
-			assert event != null;
-			
-			this.eventQueue.enqueueFieldEvent(this, event);
-			
-			// event propagation and revision number increasing happens
-			// after all events were successful for transactions
-			if(!inTrans) {
-				
-				// increment revision number
-				// only increment if this event is no subevent of a transaction
-				// (needs to be handled differently)
-				incrementRevisionAndSave();
-				
-				if(!hasOrphans) {
-					endStateTransaction();
-				}
-				
-				// dispatch events
-				this.eventQueue.sendEvents();
-				
-			}
-			
-			return true;
+		XFieldCommand command;
+		if(newValue == null) {
+			command = MemoryFieldCommand.createRemoveCommand(getAddress(), XCommand.FORCED);
+		} else {
+			command = MemoryFieldCommand.createAddCommand(getAddress(), XCommand.FORCED, newValue);
 		}
+		long result = executeFieldCommand(command);
+		assert result >= 0 || result == XCommand.NOCHANGE;
+		return result != XCommand.NOCHANGE;
+	}
+	
+	/**
+	 * Set the new value and enqueue the corresponding event. The caller is
+	 * responsible for checking that the value actually changed, for handling
+	 * state transactions and for dispatching events.
+	 */
+	protected void setValueInternal(XValue newValue) {
+		
+		XValue oldValue = getValue();
+		
+		boolean inTrans = this.eventQueue.transactionInProgess;
+		
+		this.state.setValue(newValue);
+		
+		// check for field event type
+		long modelRev = getModelRevisionNumber();
+		long objectRev = getObjectRevisionNumber();
+		long fieldRev = getRevisionNumber();
+		XFieldEvent event = null;
+		if((oldValue == null)) {
+			assert newValue != null;
+			event = MemoryFieldEvent.createAddEvent(this.actorId, getAddress(), newValue, modelRev,
+			        objectRev, fieldRev, inTrans);
+		} else {
+			if(newValue == null) {
+				// implies remove
+				event = MemoryFieldEvent.createRemoveEvent(this.actorId, getAddress(), oldValue,
+				        modelRev, objectRev, fieldRev, inTrans, false);
+			} else {
+				assert !newValue.equals(oldValue);
+				// implies change
+				event = MemoryFieldEvent.createChangeEvent(this.actorId, getAddress(), oldValue,
+				        newValue, modelRev, objectRev, fieldRev, inTrans);
+			}
+		}
+		
+		assert event != null;
+		
+		this.eventQueue.enqueueFieldEvent(this, event);
+		
 	}
 	
 	/**
@@ -309,7 +294,7 @@ public class MemoryField implements XField, Serializable {
 			long oldRev = getOldRevisionNumber();
 			
 			if(command.getChangeType() == ChangeType.ADD) {
-				if(this.getValue() != null) {
+				if(getValue() != null) {
 					/*
 					 * the forced event only cares about the postcondition -
 					 * that there is the given value set, not about that there
@@ -321,37 +306,24 @@ public class MemoryField implements XField, Serializable {
 					}
 				}
 				
-				if(setValue(command.getValue())) {
-					return oldRev + 1;
-				} else {
-					return XCommand.NOCHANGE;
-				}
-				
-			}
-			
-			if(command.getChangeType() == ChangeType.REMOVE) {
-				if(this.getValue() == null) {
-					if(command.isForced()) {
-						/*
-						 * the forced event only cares about the postcondition -
-						 * that there is no value set, not about that there was
-						 * a value before
-						 */
-						return XCommand.NOCHANGE;
-					} else {
+			} else if(command.getChangeType() == ChangeType.REMOVE) {
+				if(getValue() == null) {
+					/*
+					 * the forced event only cares about the postcondition -
+					 * that there is no value set, not about that there was a
+					 * value before
+					 */
+					if(!command.isForced()) {
 						// value is not set and can not be removed or the given
 						// value is not current anymore
 						return XCommand.FAILED;
 					}
 				}
 				
-				setValue(null);
+				assert command.getValue() == null;
 				
-				return oldRev + 1;
-			}
-			
-			if(command.getChangeType() == ChangeType.CHANGE) {
-				if(this.getValue() == null) {
+			} else if(command.getChangeType() == ChangeType.CHANGE) {
+				if(getValue() == null) {
 					/*
 					 * the forced event only cares about the postcondition -
 					 * that there is the given value set, not about that there
@@ -364,14 +336,34 @@ public class MemoryField implements XField, Serializable {
 					}
 				}
 				
-				if(setValue(command.getValue())) {
-					return oldRev + 1;
-				} else {
-					return XCommand.NOCHANGE;
-				}
+			} else {
+				return XCommand.FAILED;
 			}
 			
-			return XCommand.FAILED;
+			if(XI.equals(getValue(), command.getValue())) {
+				return XCommand.NOCHANGE;
+			}
+			
+			assert !this.eventQueue.transactionInProgess;
+			
+			boolean hasOrphans = (this.eventQueue.orphans != null);
+			if(!hasOrphans) {
+				beginStateTransaction();
+			}
+			
+			setValueInternal(command.getValue());
+			
+			// increment revision number
+			incrementRevisionAndSave();
+			
+			if(!hasOrphans) {
+				endStateTransaction();
+			}
+			
+			// dispatch events
+			this.eventQueue.sendEvents();
+			
+			return oldRev + 1;
 		}
 	}
 	
