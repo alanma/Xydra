@@ -15,7 +15,6 @@ import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
-import org.xydra.store.AccessException;
 import org.xydra.store.AuthorisationException;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.QuotaException;
@@ -155,10 +154,9 @@ public abstract class AbstractStoreTest {
 		
 		try {
 			this.store.checkLogin(null, this.correctUserPass, callback);
-			//if we reach this, the method didn't work as expected
+			// if we reach this, the method didn't work as expected
 			fail();
-		}
-		catch(IllegalArgumentException iae) {
+		} catch(IllegalArgumentException iae) {
 		}
 		
 		// second parameter equals null
@@ -166,10 +164,9 @@ public abstract class AbstractStoreTest {
 		
 		try {
 			this.store.checkLogin(this.correctUser, null, callback);
-			//if we reach this, the method didn't work as expected
+			// if we reach this, the method didn't work as expected
 			fail();
-		}
-		catch(IllegalArgumentException iae) {
+		} catch(IllegalArgumentException iae) {
 		}
 		
 		// both parameters equal null
@@ -177,21 +174,19 @@ public abstract class AbstractStoreTest {
 		
 		try {
 			this.store.checkLogin(null, null, callback);
-			//if we reach this, the method didn't work as expected
+			// if we reach this, the method didn't work as expected
 			fail();
-		}
-		catch(IllegalArgumentException iae) {
+		} catch(IllegalArgumentException iae) {
 		}
 		
 		// callback is null - should not throw an IllegalArgumentException
 		
 		try {
 			this.store.checkLogin(this.correctUser, this.correctUserPass, null);
-		}
-		catch(IllegalArgumentException iae) {
-			//if we reach this, the method didn't work as expected
+		} catch(IllegalArgumentException iae) {
+			// if we reach this, the method didn't work as expected
 			fail();
-		}	
+		}
 		
 		// TODO How to test for other exception types like ConnectionException,
 		// TimeoutException etc.?
@@ -273,8 +268,8 @@ public abstract class AbstractStoreTest {
 		
 		// check order of returned snapshots
 		for(int i = 0; i < modelAddresses.length; i++) {
-			if(i == modelAddresses.length) { 
-				//This index contains an XAddress of a not existing XModel
+			if(i == modelAddresses.length) {
+				// This index contains an XAddress of a not existing XModel
 				assertNull(result[i].getResult());
 				assertNotNull(result[i].getException());
 				assertTrue(result[i].getException() instanceof RequestException);
@@ -308,55 +303,51 @@ public abstract class AbstractStoreTest {
 		callback = new TestCallback<BatchedResult<XBaseModel>[]>();
 		
 		// first parameter equals null
-		try{
+		try {
 			this.store.getModelSnapshots(null, this.correctUserPass, modelAddresses, callback);
-			//if we reach this, the method didn't work as expected
+			// if we reach this, the method didn't work as expected
 			fail();
-		}
-		catch(IllegalArgumentException iae) {
+		} catch(IllegalArgumentException iae) {
 		}
 		
 		// second parameter equals null
 		callback = new TestCallback<BatchedResult<XBaseModel>[]>();
 		
-		try{
+		try {
 			this.store.getModelSnapshots(this.correctUser, null, modelAddresses, callback);
-			//if we reach this, the method didn't work as expected
+			// if we reach this, the method didn't work as expected
 			fail();
-		}
-		catch(IllegalArgumentException iae) {
+		} catch(IllegalArgumentException iae) {
 		}
 		
 		// third parameter equals null
 		callback = new TestCallback<BatchedResult<XBaseModel>[]>();
 		
-		try{
+		try {
 			this.store.getModelSnapshots(this.correctUser, this.correctUserPass, null, callback);
-			//if we reach this, the method didn't work as expected
+			// if we reach this, the method didn't work as expected
 			fail();
-		}
-		catch(IllegalArgumentException iae) {
+		} catch(IllegalArgumentException iae) {
 		}
 		
 		// all parameters equal null
 		callback = new TestCallback<BatchedResult<XBaseModel>[]>();
 		
-		try{
+		try {
 			this.store.getModelSnapshots(null, null, null, callback);
-			//if we reach this, the method didn't work as expected
+			// if we reach this, the method didn't work as expected
 			fail();
-		}
-		catch(IllegalArgumentException iae) {
+		} catch(IllegalArgumentException iae) {
 		}
 		
 		// callback equals null - should not throw an IllegalArgumentException
 		callback = new TestCallback<BatchedResult<XBaseModel>[]>();
 		
-		try{
-			this.store.getModelSnapshots(this.correctUser, this.correctUserPass, modelAddresses, null);
-		}
-		catch(IllegalArgumentException iae) {
-			//if we reach this, the method didn't work as expected
+		try {
+			this.store.getModelSnapshots(this.correctUser, this.correctUserPass, modelAddresses,
+			        null);
+		} catch(IllegalArgumentException iae) {
+			// if we reach this, the method didn't work as expected
 			fail();
 		}
 		
@@ -421,8 +412,8 @@ public abstract class AbstractStoreTest {
 			// compare revision numbers
 			assertNotNull(revisionResult[i].getResult());
 			assertNull(revisionResult[i].getException());
-			assertEquals((Long)snapshotResult[i].getResult().getRevisionNumber(),
-			        revisionResult[i].getResult());
+			assertEquals((Long)snapshotResult[i].getResult().getRevisionNumber(), revisionResult[i]
+			        .getResult());
 		}
 		
 		// Test if it behaves correctly for addresses of XModels that don't
@@ -509,55 +500,53 @@ public abstract class AbstractStoreTest {
 		revisionCallback = new TestCallback<BatchedResult<Long>[]>();
 		
 		// first parameter equals null
-		try{
-			this.store.getModelRevisions(null, this.correctUserPass, modelAddresses, revisionCallback);
-			//if we reach this, the method didn't work as expected
+		try {
+			this.store.getModelRevisions(null, this.correctUserPass, modelAddresses,
+			        revisionCallback);
+			// if we reach this, the method didn't work as expected
 			fail();
-		}
-		catch(IllegalArgumentException iae) {
+		} catch(IllegalArgumentException iae) {
 		}
 		
 		// second parameter equals null
 		revisionCallback = new TestCallback<BatchedResult<Long>[]>();
 		
-		try{
+		try {
 			this.store.getModelRevisions(this.correctUser, null, modelAddresses, revisionCallback);
-			//if we reach this, the method didn't work as expected
+			// if we reach this, the method didn't work as expected
 			fail();
-		}
-		catch(IllegalArgumentException iae) {
+		} catch(IllegalArgumentException iae) {
 		}
 		
 		// third parameter equals null
 		revisionCallback = new TestCallback<BatchedResult<Long>[]>();
 		
-		try{
-			this.store.getModelRevisions(this.correctUser, this.correctUserPass, null, revisionCallback);
-			//if we reach this, the method didn't work as expected
+		try {
+			this.store.getModelRevisions(this.correctUser, this.correctUserPass, null,
+			        revisionCallback);
+			// if we reach this, the method didn't work as expected
 			fail();
-		}
-		catch(IllegalArgumentException iae) {
+		} catch(IllegalArgumentException iae) {
 		}
 		
 		// all parameters equal null
 		revisionCallback = new TestCallback<BatchedResult<Long>[]>();
 		
-		try{
+		try {
 			this.store.getModelRevisions(null, null, null, revisionCallback);
-			//if we reach this, the method didn't work as expected
+			// if we reach this, the method didn't work as expected
 			fail();
-		}
-		catch(IllegalArgumentException iae) {
+		} catch(IllegalArgumentException iae) {
 		}
 		
 		// callback equals null - should not throw an IllegalArgumentException
 		revisionCallback = new TestCallback<BatchedResult<Long>[]>();
 		
-		try{
-			this.store.getModelRevisions(this.correctUser, this.correctUserPass, modelAddresses, null);
-		}
-		catch(IllegalArgumentException iae) {
-			//if we reach this, the method didn't work as expected
+		try {
+			this.store.getModelRevisions(this.correctUser, this.correctUserPass, modelAddresses,
+			        null);
+		} catch(IllegalArgumentException iae) {
+			// if we reach this, the method didn't work as expected
 			fail();
 		}
 		
@@ -640,7 +629,7 @@ public abstract class AbstractStoreTest {
 		
 		// check order of returned snapshots
 		for(int i = 0; i < objectAddresses.length; i++) {
-			if(i == objectAddresses.length) { 
+			if(i == objectAddresses.length) {
 				// this index contains an XAddress of a not existing XObject
 				assertNull(result[i].getResult());
 				assertNotNull(result[i].getException());
@@ -676,10 +665,9 @@ public abstract class AbstractStoreTest {
 		boolean exceptionThrown = false;
 		
 		// first parameter equals null
-		try{
+		try {
 			this.store.getObjectSnapshots(null, this.correctUserPass, objectAddresses, callback);
-		}
-		catch(IllegalArgumentException iae) {
+		} catch(IllegalArgumentException iae) {
 			exceptionThrown = true;
 		}
 		assertTrue(exceptionThrown);
@@ -688,10 +676,9 @@ public abstract class AbstractStoreTest {
 		callback = new TestCallback<BatchedResult<XBaseObject>[]>();
 		exceptionThrown = false;
 		
-		try{
+		try {
 			this.store.getObjectSnapshots(this.correctUser, null, objectAddresses, callback);
-		}
-		catch(IllegalArgumentException iae) {
+		} catch(IllegalArgumentException iae) {
 			exceptionThrown = true;
 		}
 		assertTrue(exceptionThrown);
@@ -700,10 +687,9 @@ public abstract class AbstractStoreTest {
 		callback = new TestCallback<BatchedResult<XBaseObject>[]>();
 		exceptionThrown = false;
 		
-		try{
+		try {
 			this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, null, callback);
-		}
-		catch(IllegalArgumentException iae) {
+		} catch(IllegalArgumentException iae) {
 			exceptionThrown = true;
 		}
 		assertTrue(exceptionThrown);
@@ -712,10 +698,9 @@ public abstract class AbstractStoreTest {
 		callback = new TestCallback<BatchedResult<XBaseObject>[]>();
 		exceptionThrown = false;
 		
-		try{
+		try {
 			this.store.getObjectSnapshots(null, null, null, callback);
-		}
-		catch(IllegalArgumentException iae) {
+		} catch(IllegalArgumentException iae) {
 			exceptionThrown = true;
 		}
 		assertTrue(exceptionThrown);
@@ -724,13 +709,12 @@ public abstract class AbstractStoreTest {
 		callback = new TestCallback<BatchedResult<XBaseObject>[]>();
 		exceptionThrown = false;
 		
-		try{
-			this.store.getModelSnapshots(this.correctUser, this.correctUserPass, objectAddresses, null);
-		}
-		catch(IllegalArgumentException iae) {
+		try {
+			this.store.getModelSnapshots(this.correctUser, this.correctUserPass, objectAddresses,
+			        null);
+		} catch(IllegalArgumentException iae) {
 			exceptionThrown = true;
 		}
-		
 		
 		// TODO How to test for other exception types like ConnectionException,
 		// TimeoutException etc.?
@@ -766,18 +750,19 @@ public abstract class AbstractStoreTest {
 	
 	/**
 	 * Return value sets the amount of time tests shall wait on callbacks.
-	 * Implementations of this abstract test may override this to use a custom value.
-	 */	
+	 * Implementations of this abstract test may override this to use a custom
+	 * value.
+	 */
 	protected long getCallbackTimeout() {
-	    return 1000;
+		return 1000;
 	}
 	
 	/**
 	 * Return value sets the amount of allowed incorrect login tries before a
 	 * QuotaException is thrown.
 	 * 
-	 * Implementations of this abstract test need to override this to return the specific quota
-	 * of the XydraStore implementation which is to be tested.
+	 * Implementations of this abstract test need to override this to return the
+	 * specific quota of the XydraStore implementation which is to be tested.
 	 */
 	abstract protected long getQuotaForBruteForce();
 }

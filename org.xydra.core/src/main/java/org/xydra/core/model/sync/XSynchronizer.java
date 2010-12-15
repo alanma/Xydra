@@ -27,7 +27,7 @@ import org.xydra.store.XydraStore;
  * 
  * TODO handle timeouts (retry), other store/HTTP errors
  * 
- * TODO move this into XModel/XObject?
+ * TODO move this into S
  * 
  * @author dscharrer
  * 
@@ -202,8 +202,7 @@ public class XSynchronizer {
 				
 			};
 			
-			// FIXME where to get the passwordHash?
-			this.store.executeCommandsAndGetEvents(change.actor, "",
+			this.store.executeCommandsAndGetEvents(change.actor, change.passwordHash,
 			        new XCommand[] { change.command },
 			        new GetEventsRequest[] { new GetEventsRequest(this.addr,
 			                this.lastSyncedRevison + 1, Long.MAX_VALUE) }, callback);
@@ -245,10 +244,10 @@ public class XSynchronizer {
 				
 			};
 			
-			// FIXME what actor to use here
 			// FIXME where to get the passwordHash?
-			this.store.getEvents(null, "", new GetEventsRequest[] { new GetEventsRequest(this.addr,
-			        this.lastSyncedRevison + 1, Long.MAX_VALUE) }, callback);
+			this.store.getEvents(this.entity.getSessionActor(), "",
+			        new GetEventsRequest[] { new GetEventsRequest(this.addr,
+			                this.lastSyncedRevison + 1, Long.MAX_VALUE) }, callback);
 			
 		}
 		
