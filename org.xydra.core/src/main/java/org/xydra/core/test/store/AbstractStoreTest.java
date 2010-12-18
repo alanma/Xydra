@@ -9,12 +9,13 @@ import static org.junit.Assert.fail;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.xydra.core.XX;
+import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XCommandFactory;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
-import org.xydra.core.model.XModel;
 import org.xydra.store.AuthorisationException;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.QuotaException;
@@ -26,6 +27,7 @@ import org.xydra.store.XydraStore;
  * Abstract test class for classes implementing the {@link XydraStore}
  * interface.
  * 
+ * 
  * This test assumes that this test alone (no other threads) operates on the
  * {@link XydraStore} that is being tested. Some methods may fail if
  * someone/something else operates on the same {@link XydraStore} at the same
@@ -35,10 +37,24 @@ import org.xydra.store.XydraStore;
  * 
  */
 
+/*
+ * TODO Test changeState in a seperate class! JUnit does not guarantee a
+ * specific execution order of the test methods, so changes made to the
+ * XydraStore might mess up the read-methods that suppose that the XydraStore is
+ * in the state which is created by the setUp method
+ */
+
 public abstract class AbstractStoreTest {
 	
 	private XydraStore store;
+	private XCommandFactory factory;
+	
 	private XID correctUser, incorrectUser;
+	private XAddress[] modelAddresses;
+	private XAddress notExistingModel;
+	private XAddress[] objectAddresses;
+	private XAddress notExistingObject;
+	
 	private String correctUserPass, incorrectUserPass;
 	private long timeout;
 	private long bfQuota;
@@ -49,9 +65,9 @@ public abstract class AbstractStoreTest {
 	abstract protected XydraStore getStore();
 	
 	/**
-	 * @return an implementation of {@link XCommandFactory} that can be used
-	 *         with the implementation of {@link XydraStore} that is to be
-	 *         tested
+	 * @return an implementation of {@link XCommandFactory} which works with the
+	 *         implementation of {@link XydraStore} return by {
+	 *         {@link #getStore()};
 	 */
 	abstract protected XCommandFactory getCommandFactory();
 	
@@ -67,50 +83,127 @@ public abstract class AbstractStoreTest {
 	 */
 	abstract protected void setIncorrectUser(XID actorId, String passwordHash);
 	
-	/**
-	 * Returns an array of {@link XAddress XAddresses} of {@link XModel XModels}
-	 * the actor with the given {@link XID} has at least read access to.
+	/*
+	 * TODO Maybe turn this into an @BeforeClass Method? (Problem: needs to be
+	 * static!)
 	 * 
-	 * @param accountID
-	 * @return an array of {@link XAddress XAddresses} of {@link XModel XModels}
-	 *         the actor with the given {@link XID} has at least read access to.
+	 * FIXME There might be problems if this is executed before every new test
+	 * method execution, since the XydraStore was already manipulated before...
+	 * or is this covered by the isForced-Parameter? Look into this!
 	 */
-	abstract protected XAddress[] getModelAddresses(XID accountID);
-	
-	/**
-	 * @return the {@link XAddress} of a not existing {@link XModel}
-	 */
-	abstract protected XAddress getNotExistingModelAddress();
-	
-	/**
-	 * Returns an array of {@link XAddress XAddresses} of {@link XObject
-	 * XObjects} the actor with the given {@link XID} has at least read access
-	 * to.
-	 * 
-	 * @param accountID
-	 * @return an array of {@link XAddress XAddresses} of {@link XObject
-	 *         XObjects} the actor with the given {@link XID} has at least read
-	 *         access to.
-	 */
-	abstract protected XAddress[] getObjectAddresses(XID accountID);
-	
-	/**
-	 * @return the {@link XAddress} of a not existing {@link XObject}
-	 */
-	abstract protected XAddress getNotExistingObjectAddress();
-	
 	@Before
 	public void setUp() {
 		this.store = this.getStore();
+		this.factory = this.getCommandFactory();
+		
+		if(this.store == null) {
+			throw new RuntimeException(
+			        "XydraStore could not be initalized in the setUpClass method!");
+		}
+		if(this.factory == null) {
+			throw new RuntimeException(
+			        "XCommandFactory could not be initalized in the setUpClass method!");
+		}
 		
 		setCorrectUser(this.correctUser, this.correctUserPass);
 		setIncorrectUser(this.incorrectUser, this.incorrectUserPass);
+		
 		this.timeout = getCallbackTimeout();
 		this.bfQuota = getQuotaForBruteForce();
 		
 		if(this.bfQuota <= 0) {
 			throw new IllegalArgumentException("Quota for Login attempts must be greater than 0!");
 		}
+		
+		// creating some models
+		XID modelID1 = XX.toId("TestModel1");
+		XID modelID2 = XX.toId("TestModel2");
+		XID modelID3 = XX.toId("TestModel3");
+		
+		XID objectID1 = XX.toId("TestObject1");
+		XID objectID2 = XX.toId("TestObject2");
+		XID objectID3 = XX.toId("TestObject3");
+		
+		// get the repository ID of the store
+		TestCallback<XID> callback = new TestCallback<XID>();
+		this.store.getRepositoryId(this.correctUser, this.correctUserPass, callback);
+		waitOnCallback(callback);
+		
+		if(callback.getEffect() == null) {
+			throw new RuntimeException(
+			        "getRepositoryID seems to now work correctly, rendering this test useless!");
+		}
+		XID repoID = callback.getEffect();
+		
+		XCommand modelCommand1 = this.factory.createAddModelCommand(repoID, modelID1, true);
+		XCommand modelCommand2 = this.factory.createAddModelCommand(repoID, modelID2, true);
+		XCommand modelCommand3 = this.factory.createAddModelCommand(repoID, modelID3, true);
+		
+		XCommand objectCommand1 = this.factory.createAddObjectCommand(repoID, modelID1, objectID1,
+		        true);
+		XCommand objectCommand2 = this.factory.createAddObjectCommand(repoID, modelID1, objectID2,
+		        true);
+		XCommand objectCommand3 = this.factory.createAddObjectCommand(repoID, modelID1, objectID3,
+		        true);
+		
+		XCommand[] commands = { modelCommand1, modelCommand2, modelCommand3, objectCommand1,
+		        objectCommand2, objectCommand3 };
+		TestCallback<BatchedResult<Long>[]> commandCallback = new TestCallback<BatchedResult<Long>[]>();
+		
+		this.store.executeCommands(this.correctUser, this.correctUserPass, commands,
+		        commandCallback);
+		waitOnCallback(commandCallback);
+		
+		BatchedResult<Long>[] result = commandCallback.getEffect();
+		if(commandCallback.getException() != null) {
+			throw new RuntimeException(
+			        "ExecuteCommands did not work properly in setUp (threw an Exception), here's its message text: "
+			                + commandCallback.getException().getMessage() + '\n'
+			                + " and here is its StackTrace: " + '\n'
+			                + commandCallback.getException().getStackTrace());
+		}
+		
+		if(result.length <= 0) {
+			throw new RuntimeException(
+			        "ExecuteCommands did not work properly in setUp (returned no results) - tests can not be run!");
+		}
+		
+		for(int i = 0; i < result.length; i++) {
+			if(result[i].getResult() == XCommand.FAILED) {
+				throw new RuntimeException(
+				        "ExecuteCommands did not work properly in setUp: command at index " + i
+				                + "failed!");
+			}
+			// TODO is this check necessary?
+			if(result[i].getResult() == XCommand.NOCHANGE) {
+				throw new RuntimeException(
+				        "ExecuteCommands did not work properly in setUp: command at index " + i
+				                + "did not change anything!");
+			}
+			
+			if(result[i].getException() != null) {
+				throw new RuntimeException(
+				        "ExecuteCommands did not work properly in setUp (executing command at index "
+				                + i + " threw an Exception), here's its message text: "
+				                + commandCallback.getException().getMessage() + '\n'
+				                + " and here is its StackTrace: " + '\n'
+				                + commandCallback.getException().getStackTrace());
+			}
+		}
+		
+		XAddress modelAddress1 = XX.toAddress(repoID, modelID1, null, null);
+		XAddress modelAddress2 = XX.toAddress(repoID, modelID2, null, null);
+		XAddress modelAddress3 = XX.toAddress(repoID, modelID3, null, null);
+		
+		this.modelAddresses = new XAddress[] { modelAddress1, modelAddress2, modelAddress3 };
+		this.notExistingModel = XX.toAddress(repoID, XX.toId("TestModelDoesntExist"), null, null);
+		
+		XAddress objectAddress1 = XX.toAddress(repoID, modelID1, objectID1, null);
+		XAddress objectAddress2 = XX.toAddress(repoID, modelID1, objectID2, null);
+		XAddress objectAddress3 = XX.toAddress(repoID, modelID1, objectID3, null);
+		this.objectAddresses = new XAddress[] { objectAddress1, objectAddress2, objectAddress3 };
+		this.notExistingObject = XX.toAddress(repoID, modelID1, XX.toId("TestObjectDoesntExist"),
+		        null);
 	}
 	
 	/**
@@ -222,13 +315,12 @@ public abstract class AbstractStoreTest {
 	// combinations
 	@Test
 	public void testGetModelSnapshotsBadAccount() {
-		XAddress[] modelAddresses = this.getModelAddresses(this.correctUser);
 		TestCallback<BatchedResult<XBaseModel>[]> callback;
 		
 		callback = new TestCallback<BatchedResult<XBaseModel>[]>();
 		
-		this.store.getModelSnapshots(this.incorrectUser, this.incorrectUserPass, modelAddresses,
-		        callback);
+		this.store.getModelSnapshots(this.incorrectUser, this.incorrectUserPass,
+		        this.modelAddresses, callback);
 		
 		assertFalse(this.waitOnCallback(callback));
 		assertNull(callback.getEffect());
@@ -240,10 +332,9 @@ public abstract class AbstractStoreTest {
 	// access to
 	@Test
 	public void testGetModelSnapshots() {
-		XAddress[] modelAddresses = this.getModelAddresses(this.correctUser);
 		TestCallback<BatchedResult<XBaseModel>[]> callback = new TestCallback<BatchedResult<XBaseModel>[]>();
 		
-		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, modelAddresses,
+		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, this.modelAddresses,
 		        callback);
 		
 		assertTrue(this.waitOnCallback(callback));
@@ -251,13 +342,13 @@ public abstract class AbstractStoreTest {
 		assertNull(callback.getException());
 		
 		BatchedResult<XBaseModel>[] result = callback.getEffect();
-		assertEquals(result.length, modelAddresses.length);
+		assertEquals(result.length, this.modelAddresses.length);
 		
 		// check order of returned snapshots
-		for(int i = 0; i < modelAddresses.length; i++) {
+		for(int i = 0; i < this.modelAddresses.length; i++) {
 			assertNotNull(result[i].getResult());
 			assertNull(result[i].getException());
-			assertEquals(modelAddresses[i], result[i].getResult().getAddress());
+			assertEquals(this.modelAddresses[i], result[i].getResult().getAddress());
 		}
 	}
 	
@@ -266,7 +357,7 @@ public abstract class AbstractStoreTest {
 	@Test
 	public void testGetModelSnapshotsNotExistingModel() {
 		TestCallback<BatchedResult<XBaseModel>[]> callback = new TestCallback<BatchedResult<XBaseModel>[]>();
-		XAddress[] tempArray = new XAddress[] { this.getNotExistingModelAddress() };
+		XAddress[] tempArray = new XAddress[] { this.notExistingModel };
 		
 		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, tempArray, callback);
 		
@@ -284,10 +375,9 @@ public abstract class AbstractStoreTest {
 	@Test
 	public void testGetModelSnapshotsMixedAddressTypes() {
 		TestCallback<BatchedResult<XBaseModel>[]> callback = new TestCallback<BatchedResult<XBaseModel>[]>();
-		XAddress[] modelAddresses = this.getModelAddresses(this.correctUser);
-		XAddress[] tempArray = new XAddress[modelAddresses.length + 1];
-		System.arraycopy(modelAddresses, 0, tempArray, 0, modelAddresses.length);
-		tempArray[modelAddresses.length] = this.getNotExistingModelAddress();
+		XAddress[] tempArray = new XAddress[this.modelAddresses.length + 1];
+		System.arraycopy(this.modelAddresses, 0, tempArray, 0, this.modelAddresses.length);
+		tempArray[this.modelAddresses.length] = this.notExistingModel;
 		
 		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, tempArray, callback);
 		
@@ -299,8 +389,8 @@ public abstract class AbstractStoreTest {
 		assertEquals(result.length, tempArray.length);
 		
 		// check order of returned snapshots
-		for(int i = 0; i < modelAddresses.length; i++) {
-			if(i == modelAddresses.length) {
+		for(int i = 0; i < this.modelAddresses.length; i++) {
+			if(i == this.modelAddresses.length) {
 				// This index contains an XAddress of a not existing XModel
 				assertNull(result[i].getResult());
 				assertNotNull(result[i].getException());
@@ -308,7 +398,7 @@ public abstract class AbstractStoreTest {
 			} else {
 				assertNotNull(result[i].getResult());
 				assertNull(result[i].getException());
-				assertEquals(modelAddresses[i], result[i].getResult().getAddress());
+				assertEquals(this.modelAddresses[i], result[i].getResult().getAddress());
 			}
 		}
 		// TODO Maybe test more complex mixes?
@@ -318,7 +408,7 @@ public abstract class AbstractStoreTest {
 	@Test
 	public void testGetModelSnapshotsQuotaExcpetion() {
 		TestCallback<BatchedResult<XBaseModel>[]> callback = null;
-		XAddress[] tempArray = new XAddress[] { this.getNotExistingModelAddress() };
+		XAddress[] tempArray = new XAddress[] { this.notExistingModel };
 		
 		assert this.bfQuota > 0;
 		for(long l = 0; l < this.bfQuota + 5; l++) {
@@ -341,11 +431,10 @@ public abstract class AbstractStoreTest {
 	@Test
 	public void testGetModelSnapshotsPassingNull() {
 		TestCallback<BatchedResult<XBaseModel>[]> callback = new TestCallback<BatchedResult<XBaseModel>[]>();
-		XAddress[] modelAddresses = this.getModelAddresses(this.correctUser);
 		
 		// first parameter equals null
 		try {
-			this.store.getModelSnapshots(null, this.correctUserPass, modelAddresses, callback);
+			this.store.getModelSnapshots(null, this.correctUserPass, this.modelAddresses, callback);
 			// if we reach this, the method didn't work as expected
 			fail();
 		} catch(IllegalArgumentException iae) {
@@ -355,7 +444,7 @@ public abstract class AbstractStoreTest {
 		callback = new TestCallback<BatchedResult<XBaseModel>[]>();
 		
 		try {
-			this.store.getModelSnapshots(this.correctUser, null, modelAddresses, callback);
+			this.store.getModelSnapshots(this.correctUser, null, this.modelAddresses, callback);
 			// if we reach this, the method didn't work as expected
 			fail();
 		} catch(IllegalArgumentException iae) {
@@ -385,8 +474,8 @@ public abstract class AbstractStoreTest {
 		callback = new TestCallback<BatchedResult<XBaseModel>[]>();
 		
 		try {
-			this.store.getModelSnapshots(this.correctUser, this.correctUserPass, modelAddresses,
-			        null);
+			this.store.getModelSnapshots(this.correctUser, this.correctUserPass,
+			        this.modelAddresses, null);
 		} catch(IllegalArgumentException iae) {
 			// if we reach this, the method didn't work as expected
 			fail();
@@ -406,13 +495,12 @@ public abstract class AbstractStoreTest {
 	// combinations
 	@Test
 	public void testGetModelRevisionsBadAccount() {
-		XAddress[] modelAddresses = this.getModelAddresses(this.correctUser);
 		TestCallback<BatchedResult<Long>[]> revisionCallback;
 		
 		revisionCallback = new TestCallback<BatchedResult<Long>[]>();
 		
-		this.store.getModelRevisions(this.incorrectUser, this.incorrectUserPass, modelAddresses,
-		        revisionCallback);
+		this.store.getModelRevisions(this.incorrectUser, this.incorrectUserPass,
+		        this.modelAddresses, revisionCallback);
 		assertFalse(this.waitOnCallback(revisionCallback));
 		assertNull(revisionCallback.getEffect());
 		assertNotNull(revisionCallback.getException());
@@ -425,32 +513,31 @@ public abstract class AbstractStoreTest {
 	public void testGetModelRevisions() {
 		TestCallback<BatchedResult<XBaseModel>[]> snapshotCallback = new TestCallback<BatchedResult<XBaseModel>[]>();
 		TestCallback<BatchedResult<Long>[]> revisionCallback = new TestCallback<BatchedResult<Long>[]>();
-		XAddress[] modelAddresses = this.getModelAddresses(this.correctUser);
 		
 		// Get revisions
-		this.store.getModelRevisions(this.correctUser, this.correctUserPass, modelAddresses,
+		this.store.getModelRevisions(this.correctUser, this.correctUserPass, this.modelAddresses,
 		        revisionCallback);
 		assertTrue(this.waitOnCallback(revisionCallback));
 		assertNotNull(revisionCallback.getEffect());
 		assertNull(revisionCallback.getException());
 		
 		// Get Model Snapshots to compare revision numbers
-		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, modelAddresses,
+		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, this.modelAddresses,
 		        snapshotCallback);
 		assertTrue(this.waitOnCallback(snapshotCallback));
 		assertNotNull(snapshotCallback.getEffect());
 		assertNull(snapshotCallback.getException());
 		
 		BatchedResult<XBaseModel>[] snapshotResult = snapshotCallback.getEffect();
-		assertEquals(snapshotResult.length, modelAddresses.length);
+		assertEquals(snapshotResult.length, this.modelAddresses.length);
 		
 		BatchedResult<Long>[] revisionResult = revisionCallback.getEffect();
-		assertEquals(revisionResult.length, modelAddresses.length);
+		assertEquals(revisionResult.length, this.modelAddresses.length);
 		
 		// check order of returned snapshots
-		for(int i = 0; i < modelAddresses.length; i++) {
+		for(int i = 0; i < this.modelAddresses.length; i++) {
 			// test addresses
-			assertEquals(modelAddresses[i], snapshotResult[i].getResult().getAddress());
+			assertEquals(this.modelAddresses[i], snapshotResult[i].getResult().getAddress());
 			
 			// compare revision numbers
 			assertNotNull(revisionResult[i].getResult());
@@ -465,7 +552,7 @@ public abstract class AbstractStoreTest {
 	@Test
 	public void testGetModelRevisionsNotExistingModel() {
 		TestCallback<BatchedResult<Long>[]> revisionCallback = new TestCallback<BatchedResult<Long>[]>();
-		XAddress[] tempArray = new XAddress[] { this.getNotExistingModelAddress() };
+		XAddress[] tempArray = new XAddress[] { this.notExistingModel };
 		
 		this.store.getModelRevisions(this.correctUser, this.correctUserPass, tempArray,
 		        revisionCallback);
@@ -486,10 +573,9 @@ public abstract class AbstractStoreTest {
 		TestCallback<BatchedResult<XBaseModel>[]> snapshotCallback = new TestCallback<BatchedResult<XBaseModel>[]>();
 		TestCallback<BatchedResult<Long>[]> revisionCallback = new TestCallback<BatchedResult<Long>[]>();
 		
-		XAddress[] modelAddresses = this.getModelAddresses(this.correctUser);
-		XAddress[] tempArray = new XAddress[modelAddresses.length + 1];
-		System.arraycopy(modelAddresses, 0, tempArray, 0, modelAddresses.length);
-		tempArray[modelAddresses.length] = this.getNotExistingModelAddress();
+		XAddress[] tempArray = new XAddress[this.modelAddresses.length + 1];
+		System.arraycopy(this.modelAddresses, 0, tempArray, 0, this.modelAddresses.length);
+		tempArray[this.modelAddresses.length] = this.notExistingModel;
 		
 		this.store.getModelRevisions(this.correctUser, this.correctUserPass, tempArray,
 		        revisionCallback);
@@ -510,15 +596,15 @@ public abstract class AbstractStoreTest {
 		assertEquals(revisionResult.length, tempArray.length);
 		
 		// check order of returned snapshots
-		for(int i = 0; i < modelAddresses.length; i++) {
-			if(i == modelAddresses.length) {
+		for(int i = 0; i < this.modelAddresses.length; i++) {
+			if(i == this.modelAddresses.length) {
 				// this index contains an XAddress of a not existing XModel
 				assertNull(snapshotResult[i].getResult());
 				assertEquals(revisionResult[i].getResult(), (Long)XydraStore.MODEL_DOES_NOT_EXIST);
 				assertNotNull(revisionResult[i].getException());
 				assertTrue(revisionResult[i].getException() instanceof RequestException);
 			} else {
-				assertEquals(modelAddresses[i], snapshotResult[i].getResult());
+				assertEquals(this.modelAddresses[i], snapshotResult[i].getResult());
 				
 				assertNotNull(revisionResult[i].getResult());
 				assertNull(revisionResult[i].getException());
@@ -533,9 +619,9 @@ public abstract class AbstractStoreTest {
 	// Testing the quota exception
 	public void testGetModelRevisionsQuotaException() {
 		TestCallback<BatchedResult<Long>[]> callback = null;
-		XAddress[] tempArray = { this.getNotExistingObjectAddress() };
+		XAddress[] tempArray = { this.notExistingModel };
 		
-		assert bfQuota > 0;
+		assert this.bfQuota > 0;
 		for(long l = 0; l < this.bfQuota + 5; l++) {
 			callback = new TestCallback<BatchedResult<Long>[]>();
 			
@@ -555,11 +641,10 @@ public abstract class AbstractStoreTest {
 	// Test IllegalArgumentException
 	public void testGetModelRevisionPassingNull() {
 		TestCallback<BatchedResult<Long>[]> revisionCallback = new TestCallback<BatchedResult<Long>[]>();
-		XAddress[] modelAddresses = this.getModelAddresses(this.correctUser);
 		
 		// first parameter equals null
 		try {
-			this.store.getModelRevisions(null, this.correctUserPass, modelAddresses,
+			this.store.getModelRevisions(null, this.correctUserPass, this.modelAddresses,
 			        revisionCallback);
 			// if we reach this, the method didn't work as expected
 			fail();
@@ -570,7 +655,8 @@ public abstract class AbstractStoreTest {
 		revisionCallback = new TestCallback<BatchedResult<Long>[]>();
 		
 		try {
-			this.store.getModelRevisions(this.correctUser, null, modelAddresses, revisionCallback);
+			this.store.getModelRevisions(this.correctUser, null, this.modelAddresses,
+			        revisionCallback);
 			// if we reach this, the method didn't work as expected
 			fail();
 		} catch(IllegalArgumentException iae) {
@@ -601,8 +687,8 @@ public abstract class AbstractStoreTest {
 		revisionCallback = new TestCallback<BatchedResult<Long>[]>();
 		
 		try {
-			this.store.getModelRevisions(this.correctUser, this.correctUserPass, modelAddresses,
-			        null);
+			this.store.getModelRevisions(this.correctUser, this.correctUserPass,
+			        this.modelAddresses, null);
 		} catch(IllegalArgumentException iae) {
 			// if we reach this, the method didn't work as expected
 			fail();
@@ -617,15 +703,14 @@ public abstract class AbstractStoreTest {
 	// combinations
 	@Test
 	public void testGetObjectSnapshotsBadAccount() {
-		XAddress[] objectAddresses = this.getObjectAddresses(this.correctUser);
 		TestCallback<BatchedResult<XBaseObject>[]> callback;
 		
 		// Test if it behaves correctly for wrong account + password
 		// combinations
 		callback = new TestCallback<BatchedResult<XBaseObject>[]>();
 		
-		this.store.getObjectSnapshots(this.incorrectUser, this.incorrectUserPass, objectAddresses,
-		        callback);
+		this.store.getObjectSnapshots(this.incorrectUser, this.incorrectUserPass,
+		        this.objectAddresses, callback);
 		
 		assertFalse(this.waitOnCallback(callback));
 		assertNull(callback.getEffect());
@@ -637,10 +722,9 @@ public abstract class AbstractStoreTest {
 	// access to
 	@Test
 	public void testGetObjectSnapshots() {
-		XAddress[] objectAddresses = this.getObjectAddresses(this.correctUser);
 		TestCallback<BatchedResult<XBaseObject>[]> callback = new TestCallback<BatchedResult<XBaseObject>[]>();
 		
-		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, objectAddresses,
+		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, this.objectAddresses,
 		        callback);
 		
 		assertTrue(this.waitOnCallback(callback));
@@ -648,13 +732,13 @@ public abstract class AbstractStoreTest {
 		assertNull(callback.getException());
 		
 		BatchedResult<XBaseObject>[] result = callback.getEffect();
-		assertEquals(result.length, objectAddresses.length);
+		assertEquals(result.length, this.objectAddresses.length);
 		
 		// check order of returned snapshots
-		for(int i = 0; i < objectAddresses.length; i++) {
+		for(int i = 0; i < this.objectAddresses.length; i++) {
 			assertNotNull(result[i].getResult());
 			assertNull(result[i].getException());
-			assertEquals(objectAddresses[i], result[i].getResult().getAddress());
+			assertEquals(this.objectAddresses[i], result[i].getResult().getAddress());
 		}
 	}
 	
@@ -663,7 +747,7 @@ public abstract class AbstractStoreTest {
 	@Test
 	public void testGetObjectSnapshotsNotExistingObject() {
 		TestCallback<BatchedResult<XBaseObject>[]> callback = new TestCallback<BatchedResult<XBaseObject>[]>();
-		XAddress[] tempArray = new XAddress[] { this.getNotExistingObjectAddress() };
+		XAddress[] tempArray = new XAddress[] { this.notExistingObject };
 		
 		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, tempArray, callback);
 		
@@ -680,11 +764,10 @@ public abstract class AbstractStoreTest {
 	// Test if it behaves correctly for mixes of the cases above
 	@Test
 	public void testGetObjectSnapshotsMixedAddresses() {
-		XAddress[] objectAddresses = this.getObjectAddresses(this.correctUser);
 		TestCallback<BatchedResult<XBaseObject>[]> callback = new TestCallback<BatchedResult<XBaseObject>[]>();
-		XAddress[] tempArray = new XAddress[objectAddresses.length + 1];
-		System.arraycopy(objectAddresses, 0, tempArray, 0, objectAddresses.length);
-		tempArray[objectAddresses.length] = this.getNotExistingObjectAddress();
+		XAddress[] tempArray = new XAddress[this.objectAddresses.length + 1];
+		System.arraycopy(this.objectAddresses, 0, tempArray, 0, this.objectAddresses.length);
+		tempArray[this.objectAddresses.length] = this.notExistingObject;
 		
 		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, tempArray, callback);
 		
@@ -696,8 +779,8 @@ public abstract class AbstractStoreTest {
 		assertEquals(result.length, tempArray.length);
 		
 		// check order of returned snapshots
-		for(int i = 0; i < objectAddresses.length; i++) {
-			if(i == objectAddresses.length) {
+		for(int i = 0; i < this.objectAddresses.length; i++) {
+			if(i == this.objectAddresses.length) {
 				// this index contains an XAddress of a not existing XObject
 				assertNull(result[i].getResult());
 				assertNotNull(result[i].getException());
@@ -705,7 +788,7 @@ public abstract class AbstractStoreTest {
 			} else {
 				assertNotNull(result[i].getResult());
 				assertNull(result[i].getException());
-				assertEquals(objectAddresses[i], result[i].getResult().getAddress());
+				assertEquals(this.objectAddresses[i], result[i].getResult().getAddress());
 			}
 		}
 		
@@ -716,7 +799,7 @@ public abstract class AbstractStoreTest {
 	@Test
 	public void testGetObjectSnapshotsQuotaException() {
 		TestCallback<BatchedResult<XBaseObject>[]> callback = null;
-		XAddress[] tempArray = new XAddress[] { this.getNotExistingObjectAddress() };
+		XAddress[] tempArray = new XAddress[] { this.notExistingObject };
 		
 		assert this.bfQuota > 0;
 		for(long l = 0; l < this.bfQuota + 5; l++) {
@@ -739,11 +822,11 @@ public abstract class AbstractStoreTest {
 	@Test
 	public void testGetObjectSnapshotsPassingNull() {
 		TestCallback<BatchedResult<XBaseObject>[]> callback = new TestCallback<BatchedResult<XBaseObject>[]>();
-		XAddress[] objectAddresses = this.getObjectAddresses(this.correctUser);
 		
 		// first parameter equals null
 		try {
-			this.store.getObjectSnapshots(null, this.correctUserPass, objectAddresses, callback);
+			this.store.getObjectSnapshots(null, this.correctUserPass, this.objectAddresses,
+			        callback);
 			// there's something wrong if we reached this
 			fail();
 		} catch(IllegalArgumentException iae) {
@@ -753,7 +836,7 @@ public abstract class AbstractStoreTest {
 		callback = new TestCallback<BatchedResult<XBaseObject>[]>();
 		
 		try {
-			this.store.getObjectSnapshots(this.correctUser, null, objectAddresses, callback);
+			this.store.getObjectSnapshots(this.correctUser, null, this.objectAddresses, callback);
 			// there's something wrong if we reached this
 			fail();
 		} catch(IllegalArgumentException iae) {
@@ -783,8 +866,8 @@ public abstract class AbstractStoreTest {
 		callback = new TestCallback<BatchedResult<XBaseObject>[]>();
 		
 		try {
-			this.store.getModelSnapshots(this.correctUser, this.correctUserPass, objectAddresses,
-			        null);
+			this.store.getModelSnapshots(this.correctUser, this.correctUserPass,
+			        this.objectAddresses, null);
 		} catch(IllegalArgumentException iae) {
 			// there's something wrong if we reached this
 			fail();
