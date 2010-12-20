@@ -7,6 +7,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.Set;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.xydra.core.XX;
@@ -58,6 +60,7 @@ public abstract class AbstractStoreTest {
 	private String correctUserPass, incorrectUserPass;
 	private long timeout;
 	private long bfQuota;
+	private boolean setUpDone = false;
 	
 	/**
 	 * @return an implementation of {@link XydraStore}
@@ -74,6 +77,12 @@ public abstract class AbstractStoreTest {
 	/**
 	 * Set an existing actorId with its correct passwordHash in the given
 	 * XID/string
+	 * 
+	 * Please note: This methods needs to return the XID of a user who has
+	 * access to read everything on the {@link XydraStore} returned by
+	 * {@link #getStore()} and at least write-access to the returned store
+	 * itself. Otherwise this test will fail (although the implementation which
+	 * is to be tested might work correctly).
 	 */
 	abstract protected void setCorrectUser(XID actorId, String passwordHash);
 	
@@ -83,16 +92,25 @@ public abstract class AbstractStoreTest {
 	 */
 	abstract protected void setIncorrectUser(XID actorId, String passwordHash);
 	
-	/*
-	 * TODO Maybe turn this into an @BeforeClass Method? (Problem: needs to be
-	 * static!)
-	 * 
-	 * FIXME There might be problems if this is executed before every new test
-	 * method execution, since the XydraStore was already manipulated before...
-	 * or is this covered by the isForced-Parameter? Look into this!
-	 */
 	@Before
 	public void setUp() {
+		
+		if(this.setUpDone) {
+			return;
+			
+			/*
+			 * This code segment guarantees that the following set-up code will
+			 * only be run once. This basically works like an @BeforeClass
+			 * method and it not really the most beautiful solution, but
+			 * unfortunately we cannot actually use a @BeforeClass method here,
+			 * because this is an abstract test and we need to call abstract
+			 * methods... but abstract methods cannot be static. There might be
+			 * some other kind of workout around this problem, but all I could
+			 * think of was/could find on the Internet were even uglier...
+			 * ~Bjoern
+			 */
+		}
+		
 		this.store = this.getStore();
 		this.factory = this.getCommandFactory();
 		
@@ -204,6 +222,8 @@ public abstract class AbstractStoreTest {
 		this.objectAddresses = new XAddress[] { objectAddress1, objectAddress2, objectAddress3 };
 		this.notExistingObject = XX.toAddress(repoID, modelID1, XX.toId("TestObjectDoesntExist"),
 		        null);
+		
+		this.setUpDone = true;
 	}
 	
 	/**
@@ -866,7 +886,7 @@ public abstract class AbstractStoreTest {
 		callback = new TestCallback<BatchedResult<XBaseObject>[]>();
 		
 		try {
-			this.store.getModelSnapshots(this.correctUser, this.correctUserPass,
+			this.store.getObjectSnapshots(this.correctUser, this.correctUserPass,
 			        this.objectAddresses, null);
 		} catch(IllegalArgumentException iae) {
 			// there's something wrong if we reached this
@@ -874,13 +894,129 @@ public abstract class AbstractStoreTest {
 		}
 	}
 	
-	/*
-	 * TODO From here on this tests assumes that every user has access on the
-	 * general store and can actually create XModels directly on the store.
-	 * Update the first tests to also use this (instead of using an abstract
-	 * method, that is now unneccesary)
+	/**
+	 * Tests for getModelIDs
 	 */
-
+	
+	// Test if it behaves correctly for wrong account + password
+	// combinations
+	@Test
+	public void testGetModelIdsBadAccount() {
+		TestCallback<Set<XID>> callback;
+		
+		// Test if it behaves correctly for wrong account + password
+		// combinations
+		callback = new TestCallback<Set<XID>>();
+		
+		this.store.getModelIds(this.incorrectUser, this.incorrectUserPass, callback);
+		
+		assertFalse(this.waitOnCallback(callback));
+		assertNull(callback.getEffect());
+		assertNotNull(callback.getException());
+		assertTrue(callback.getException() instanceof AuthorisationException);
+	}
+	
+	/*
+	 * Test if it behaves correctly for a correct account + password combination
+	 * 
+	 * 
+	 * Please note: This is only a rudimentary test of the functionality of
+	 * {@link XydraStore#getModelIds()}. Since this method is heavily connected
+	 * with account access rights and this test assumes no specific access right
+	 * management implementation, every implementation of this test should
+	 * provide further tests for this method that actually consider the access
+	 * right management used by the {@link XydraStore} implementation they are
+	 * testing.
+	 */
+	@Test
+	public void testGetModelIds() {
+		TestCallback<Set<XID>> callback = new TestCallback<Set<XID>>();
+		
+		this.store.getModelIds(this.correctUser, this.correctUserPass, callback);
+		
+		assertTrue(this.waitOnCallback(callback));
+		assertNotNull(callback.getEffect());
+		assertNull(callback.getException());
+		
+		Set<XID> result = callback.getEffect();
+		
+		/*
+		 * check if it contains the XIDs of the XModels created by this test
+		 * (the result should contain each of these XIDs, since the user with
+		 * the account XID this.correctUser has access to everything in the
+		 * store)
+		 */
+		for(int i = 0; i < this.modelAddresses.length; i++) {
+			assertTrue(result.contains(this.modelAddresses[i].getModel()));
+		}
+		
+	}
+	
+	// Testing the quota exception
+	@Test
+	public void testGetModelIdsQuotaException() {
+		TestCallback<Set<XID>> callback = null;
+		
+		assert this.bfQuota > 0;
+		for(long l = 0; l < this.bfQuota + 5; l++) {
+			callback = new TestCallback<Set<XID>>();
+			
+			this.store.getModelIds(this.incorrectUser, this.incorrectUserPass, callback);
+		}
+		assert callback != null;
+		
+		// should now return a QuotaException, since we exceeded the quota for
+		// failed login attempts by at least 5
+		assertFalse(this.waitOnCallback(callback));
+		assertNull(callback.getEffect());
+		assertNotNull(callback.getException());
+		assertTrue(callback.getException() instanceof QuotaException);
+	}
+	
+	// Test IllegalArgumentException
+	@Test
+	public void testGetModelIdsPassingNull() {
+		TestCallback<Set<XID>> callback = new TestCallback<Set<XID>>();
+		
+		// first parameter equals null
+		try {
+			this.store.getModelIds(null, this.correctUserPass, callback);
+			// there's something wrong if we reached this
+			fail();
+		} catch(IllegalArgumentException iae) {
+		}
+		
+		// second parameter equals null
+		callback = new TestCallback<Set<XID>>();
+		
+		try {
+			this.store.getModelIds(this.correctUser, null, callback);
+			// there's something wrong if we reached this
+			fail();
+		} catch(IllegalArgumentException iae) {
+		}
+		
+		// all parameters equal null
+		callback = new TestCallback<Set<XID>>();
+		
+		try {
+			this.store.getModelIds(null, null, callback);
+			// there's something wrong if we reached this
+			fail();
+		} catch(IllegalArgumentException iae) {
+		}
+		
+		// callback equals null - should not throw an IllegalArgumentException
+		callback = new TestCallback<Set<XID>>();
+		
+		try {
+			this.store.getModelIds(this.correctUser, this.correctUserPass, null);
+		} catch(IllegalArgumentException iae) {
+			// there's something wrong if we reached this
+			fail();
+		}
+	}
+	
 	/**
 	 * Method for checking whether a callback succeeded or not. Waits until the
 	 * operation/method the callback was passed to is finished or aborted by an
@@ -919,4 +1055,6 @@ public abstract class AbstractStoreTest {
 	 * specific quota of the XydraStore implementation which is to be tested.
 	 */
 	abstract protected long getQuotaForBruteForce();
+	
+	// TODO How to test getRepositoryID? Does it even need to be tested at all?
 }
