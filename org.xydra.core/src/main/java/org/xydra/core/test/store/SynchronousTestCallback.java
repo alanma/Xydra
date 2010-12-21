@@ -10,7 +10,7 @@ import org.xydra.store.XydraStore;
  * @author Kaidel
  */
 
-public class TestCallback<T> implements Callback<T> {
+public class SynchronousTestCallback<T> implements Callback<T> {
 	private T effect;
 	private Throwable exception;
 	
@@ -23,7 +23,7 @@ public class TestCallback<T> implements Callback<T> {
 	public static int FAILURE = 3;
 	
 	@Override
-	public void onSuccess(T object) {
+	public synchronized void onSuccess(T object) {
 		this.success = true;
 		notifyAll();
 		
@@ -31,7 +31,7 @@ public class TestCallback<T> implements Callback<T> {
 	}
 	
 	@Override
-	public void onFailure(Throwable exception) {
+	public synchronized void onFailure(Throwable exception) {
 		this.failure = true;
 		notifyAll();
 		
