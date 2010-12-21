@@ -60,7 +60,7 @@ public abstract class AbstractStoreTest {
 	private String correctUserPass, incorrectUserPass;
 	private long timeout;
 	private long bfQuota;
-	private boolean setUpDone = false;
+	private boolean setUpDone = false, incorrectActorExists = true;
 	
 	/**
 	 * @return an implementation of {@link XydraStore}
@@ -75,8 +75,7 @@ public abstract class AbstractStoreTest {
 	abstract protected XCommandFactory getCommandFactory();
 	
 	/**
-	 * Set an existing actorId with its correct passwordHash in the given
-	 * XID/string
+	 * Get an existing actorId
 	 * 
 	 * Please note: This methods needs to return the XID of a user who has
 	 * access to read everything on the {@link XydraStore} returned by
@@ -84,13 +83,23 @@ public abstract class AbstractStoreTest {
 	 * itself. Otherwise this test will fail (although the implementation which
 	 * is to be tested might work correctly).
 	 */
-	abstract protected void setCorrectUser(XID actorId, String passwordHash);
+	abstract protected XID getCorrectUser();
+	
+	// TODO Document!
+	
+	abstract protected String getCorrectUserPasswordHash();
 	
 	/**
-	 * Set an existing XID with an incorrect passwordHash in the given
-	 * XID/string
+	 * Gets the XID of an actor who has no access to the XydraStore at all
+	 * 
+	 * @returns null, if no incorrect user combination could be provided (for
+	 *          example if your XydraStore implementation doesn't care about
+	 *          access rights at all)
+	 * 
 	 */
-	abstract protected void setIncorrectUser(XID actorId, String passwordHash);
+	abstract protected XID getIncorrectUser();
+	
+	abstract protected String getIncorrectUserPasswordHash();
 	
 	@Before
 	public void setUp() {
@@ -123,8 +132,13 @@ public abstract class AbstractStoreTest {
 			        "XCommandFactory could not be initalized in the setUpClass method!");
 		}
 		
-		setCorrectUser(this.correctUser, this.correctUserPass);
-		setIncorrectUser(this.incorrectUser, this.incorrectUserPass);
+		// TODO somehow test whether these user variable were really set
+		this.correctUser = this.getCorrectUser();
+		this.correctUserPass = this.getCorrectUserPasswordHash();
+		
+		this.incorrectUser = this.getIncorrectUser();
+		this.incorrectUserPass = this.getIncorrectUserPasswordHash();
+		this.incorrectActorExists = (this.incorrectUser != null);
 		
 		this.timeout = getCallbackTimeout();
 		this.bfQuota = getQuotaForBruteForce();
@@ -143,7 +157,7 @@ public abstract class AbstractStoreTest {
 		XID objectID3 = XX.toId("TestObject3");
 		
 		// get the repository ID of the store
-		TestCallback<XID> callback = new TestCallback<XID>();
+		SynchronousTestCallback<XID> callback = new SynchronousTestCallback<XID>();
 		this.store.getRepositoryId(this.correctUser, this.correctUserPass, callback);
 		waitOnCallback(callback);
 		
@@ -166,7 +180,7 @@ public abstract class AbstractStoreTest {
 		
 		XCommand[] commands = { modelCommand1, modelCommand2, modelCommand3, objectCommand1,
 		        objectCommand2, objectCommand3 };
-		TestCallback<BatchedResult<Long>[]> commandCallback = new TestCallback<BatchedResult<Long>[]>();
+		SynchronousTestCallback<BatchedResult<Long>[]> commandCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		
 		this.store.executeCommands(this.correctUser, this.correctUserPass, commands,
 		        commandCallback);
@@ -234,7 +248,7 @@ public abstract class AbstractStoreTest {
 	// Testing a login that should succeed
 	@Test
 	public void testCheckLoginSuccess() {
-		TestCallback<Boolean> callback = new TestCallback<Boolean>();
+		SynchronousTestCallback<Boolean> callback = new SynchronousTestCallback<Boolean>();
 		
 		this.store.checkLogin(this.correctUser, this.correctUserPass, callback);
 		
@@ -250,7 +264,11 @@ public abstract class AbstractStoreTest {
 	 */
 	@Test
 	public void testCheckLoginFailure() {
-		TestCallback<Boolean> callback = new TestCallback<Boolean>();
+		if(!this.incorrectActorExists) {
+			return;
+		}
+		
+		SynchronousTestCallback<Boolean> callback = new SynchronousTestCallback<Boolean>();
 		
 		this.store.checkLogin(this.incorrectUser, this.incorrectUserPass, callback);
 		
@@ -263,23 +281,29 @@ public abstract class AbstractStoreTest {
 	// Test for checking if the QuoateException works for checkLogin
 	@Test
 	public void testCheckLoginQuotaException() {
-		TestCallback<Boolean> callback = null;
+		if(!this.incorrectActorExists) {
+			return;
+		}
+		
+		SynchronousTestCallback<Boolean> callback = null;
 		
 		assert this.bfQuota > 0;
 		// Testing the quota exception
 		for(long l = 0; l < this.bfQuota + 5; l++) {
-			callback = new TestCallback<Boolean>();
+			callback = new SynchronousTestCallback<Boolean>();
 			
 			this.store.checkLogin(this.incorrectUser, this.incorrectUserPass, callback);
 		}
 		
 		assert callback != null;
-		// should now return a QuotaException, since we exceeded the quota for
+		// should now return a QuotaException, since we exceeded the quota
+		// for
 		// failed login attempts by at least 5
 		assertFalse(this.waitOnCallback(callback));
 		assertEquals(callback.getEffect(), false);
 		assertNotNull(callback.getException());
 		assertTrue(callback.getException() instanceof QuotaException);
+		
 	}
 	
 	// Test if checkLogin actually throws IllegalArgumentExceptions if null is
@@ -288,7 +312,7 @@ public abstract class AbstractStoreTest {
 	public void testCheckLoginPassingNull() {
 		// check IllegalArgumentException
 		// first parameter equals null
-		TestCallback<Boolean> callback = new TestCallback<Boolean>();
+		SynchronousTestCallback<Boolean> callback = new SynchronousTestCallback<Boolean>();
 		
 		try {
 			this.store.checkLogin(null, this.correctUserPass, callback);
@@ -298,7 +322,7 @@ public abstract class AbstractStoreTest {
 		}
 		
 		// second parameter equals null
-		callback = new TestCallback<Boolean>();
+		callback = new SynchronousTestCallback<Boolean>();
 		
 		try {
 			this.store.checkLogin(this.correctUser, null, callback);
@@ -308,7 +332,7 @@ public abstract class AbstractStoreTest {
 		}
 		
 		// both parameters equal null
-		callback = new TestCallback<Boolean>();
+		callback = new SynchronousTestCallback<Boolean>();
 		
 		try {
 			this.store.checkLogin(null, null, callback);
@@ -335,9 +359,13 @@ public abstract class AbstractStoreTest {
 	// combinations
 	@Test
 	public void testGetModelSnapshotsBadAccount() {
-		TestCallback<BatchedResult<XBaseModel>[]> callback;
+		if(!this.incorrectActorExists) {
+			return;
+		}
 		
-		callback = new TestCallback<BatchedResult<XBaseModel>[]>();
+		SynchronousTestCallback<BatchedResult<XBaseModel>[]> callback;
+		
+		callback = new SynchronousTestCallback<BatchedResult<XBaseModel>[]>();
 		
 		this.store.getModelSnapshots(this.incorrectUser, this.incorrectUserPass,
 		        this.modelAddresses, callback);
@@ -352,7 +380,7 @@ public abstract class AbstractStoreTest {
 	// access to
 	@Test
 	public void testGetModelSnapshots() {
-		TestCallback<BatchedResult<XBaseModel>[]> callback = new TestCallback<BatchedResult<XBaseModel>[]>();
+		SynchronousTestCallback<BatchedResult<XBaseModel>[]> callback = new SynchronousTestCallback<BatchedResult<XBaseModel>[]>();
 		
 		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, this.modelAddresses,
 		        callback);
@@ -376,7 +404,7 @@ public abstract class AbstractStoreTest {
 	// exist
 	@Test
 	public void testGetModelSnapshotsNotExistingModel() {
-		TestCallback<BatchedResult<XBaseModel>[]> callback = new TestCallback<BatchedResult<XBaseModel>[]>();
+		SynchronousTestCallback<BatchedResult<XBaseModel>[]> callback = new SynchronousTestCallback<BatchedResult<XBaseModel>[]>();
 		XAddress[] tempArray = new XAddress[] { this.notExistingModel };
 		
 		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, tempArray, callback);
@@ -394,7 +422,7 @@ public abstract class AbstractStoreTest {
 	// Test if it behaves correctly for mixes of the cases above
 	@Test
 	public void testGetModelSnapshotsMixedAddressTypes() {
-		TestCallback<BatchedResult<XBaseModel>[]> callback = new TestCallback<BatchedResult<XBaseModel>[]>();
+		SynchronousTestCallback<BatchedResult<XBaseModel>[]> callback = new SynchronousTestCallback<BatchedResult<XBaseModel>[]>();
 		XAddress[] tempArray = new XAddress[this.modelAddresses.length + 1];
 		System.arraycopy(this.modelAddresses, 0, tempArray, 0, this.modelAddresses.length);
 		tempArray[this.modelAddresses.length] = this.notExistingModel;
@@ -427,19 +455,24 @@ public abstract class AbstractStoreTest {
 	// Testing the quota exception
 	@Test
 	public void testGetModelSnapshotsQuotaExcpetion() {
-		TestCallback<BatchedResult<XBaseModel>[]> callback = null;
+		if(!this.incorrectActorExists) {
+			return;
+		}
+		
+		SynchronousTestCallback<BatchedResult<XBaseModel>[]> callback = null;
 		XAddress[] tempArray = new XAddress[] { this.notExistingModel };
 		
 		assert this.bfQuota > 0;
 		for(long l = 0; l < this.bfQuota + 5; l++) {
-			callback = new TestCallback<BatchedResult<XBaseModel>[]>();
+			callback = new SynchronousTestCallback<BatchedResult<XBaseModel>[]>();
 			
 			this.store.getModelSnapshots(this.incorrectUser, this.incorrectUserPass, tempArray,
 			        callback);
 		}
 		
 		assert (callback != null);
-		// should now return a QuotaException, since we exceeded the quota for
+		// should now return a QuotaException, since we exceeded the quota
+		// for
 		// failed login attempts by at least 5
 		assertFalse(this.waitOnCallback(callback));
 		assertNull(callback.getEffect());
@@ -450,7 +483,7 @@ public abstract class AbstractStoreTest {
 	// Test if IllegalArgumentException are thrown when null values are passed
 	@Test
 	public void testGetModelSnapshotsPassingNull() {
-		TestCallback<BatchedResult<XBaseModel>[]> callback = new TestCallback<BatchedResult<XBaseModel>[]>();
+		SynchronousTestCallback<BatchedResult<XBaseModel>[]> callback = new SynchronousTestCallback<BatchedResult<XBaseModel>[]>();
 		
 		// first parameter equals null
 		try {
@@ -461,7 +494,7 @@ public abstract class AbstractStoreTest {
 		}
 		
 		// second parameter equals null
-		callback = new TestCallback<BatchedResult<XBaseModel>[]>();
+		callback = new SynchronousTestCallback<BatchedResult<XBaseModel>[]>();
 		
 		try {
 			this.store.getModelSnapshots(this.correctUser, null, this.modelAddresses, callback);
@@ -471,7 +504,7 @@ public abstract class AbstractStoreTest {
 		}
 		
 		// third parameter equals null
-		callback = new TestCallback<BatchedResult<XBaseModel>[]>();
+		callback = new SynchronousTestCallback<BatchedResult<XBaseModel>[]>();
 		
 		try {
 			this.store.getModelSnapshots(this.correctUser, this.correctUserPass, null, callback);
@@ -481,7 +514,7 @@ public abstract class AbstractStoreTest {
 		}
 		
 		// all parameters equal null
-		callback = new TestCallback<BatchedResult<XBaseModel>[]>();
+		callback = new SynchronousTestCallback<BatchedResult<XBaseModel>[]>();
 		
 		try {
 			this.store.getModelSnapshots(null, null, null, callback);
@@ -491,7 +524,7 @@ public abstract class AbstractStoreTest {
 		}
 		
 		// callback equals null - should not throw an IllegalArgumentException
-		callback = new TestCallback<BatchedResult<XBaseModel>[]>();
+		callback = new SynchronousTestCallback<BatchedResult<XBaseModel>[]>();
 		
 		try {
 			this.store.getModelSnapshots(this.correctUser, this.correctUserPass,
@@ -515,9 +548,13 @@ public abstract class AbstractStoreTest {
 	// combinations
 	@Test
 	public void testGetModelRevisionsBadAccount() {
-		TestCallback<BatchedResult<Long>[]> revisionCallback;
+		if(!this.incorrectActorExists) {
+			return;
+		}
 		
-		revisionCallback = new TestCallback<BatchedResult<Long>[]>();
+		SynchronousTestCallback<BatchedResult<Long>[]> revisionCallback;
+		
+		revisionCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		
 		this.store.getModelRevisions(this.incorrectUser, this.incorrectUserPass,
 		        this.modelAddresses, revisionCallback);
@@ -531,8 +568,8 @@ public abstract class AbstractStoreTest {
 	// access to
 	@Test
 	public void testGetModelRevisions() {
-		TestCallback<BatchedResult<XBaseModel>[]> snapshotCallback = new TestCallback<BatchedResult<XBaseModel>[]>();
-		TestCallback<BatchedResult<Long>[]> revisionCallback = new TestCallback<BatchedResult<Long>[]>();
+		SynchronousTestCallback<BatchedResult<XBaseModel>[]> snapshotCallback = new SynchronousTestCallback<BatchedResult<XBaseModel>[]>();
+		SynchronousTestCallback<BatchedResult<Long>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		
 		// Get revisions
 		this.store.getModelRevisions(this.correctUser, this.correctUserPass, this.modelAddresses,
@@ -571,7 +608,7 @@ public abstract class AbstractStoreTest {
 	// exist
 	@Test
 	public void testGetModelRevisionsNotExistingModel() {
-		TestCallback<BatchedResult<Long>[]> revisionCallback = new TestCallback<BatchedResult<Long>[]>();
+		SynchronousTestCallback<BatchedResult<Long>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		XAddress[] tempArray = new XAddress[] { this.notExistingModel };
 		
 		this.store.getModelRevisions(this.correctUser, this.correctUserPass, tempArray,
@@ -590,8 +627,8 @@ public abstract class AbstractStoreTest {
 	// Test if it behaves correctly for mixes of the cases above
 	@Test
 	public void testGetModelRevisionsMixedAddresses() {
-		TestCallback<BatchedResult<XBaseModel>[]> snapshotCallback = new TestCallback<BatchedResult<XBaseModel>[]>();
-		TestCallback<BatchedResult<Long>[]> revisionCallback = new TestCallback<BatchedResult<Long>[]>();
+		SynchronousTestCallback<BatchedResult<XBaseModel>[]> snapshotCallback = new SynchronousTestCallback<BatchedResult<XBaseModel>[]>();
+		SynchronousTestCallback<BatchedResult<Long>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		
 		XAddress[] tempArray = new XAddress[this.modelAddresses.length + 1];
 		System.arraycopy(this.modelAddresses, 0, tempArray, 0, this.modelAddresses.length);
@@ -638,19 +675,24 @@ public abstract class AbstractStoreTest {
 	
 	// Testing the quota exception
 	public void testGetModelRevisionsQuotaException() {
-		TestCallback<BatchedResult<Long>[]> callback = null;
+		if(!this.incorrectActorExists) {
+			return;
+		}
+		
+		SynchronousTestCallback<BatchedResult<Long>[]> callback = null;
 		XAddress[] tempArray = { this.notExistingModel };
 		
 		assert this.bfQuota > 0;
 		for(long l = 0; l < this.bfQuota + 5; l++) {
-			callback = new TestCallback<BatchedResult<Long>[]>();
+			callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 			
 			this.store.getModelRevisions(this.incorrectUser, this.incorrectUserPass, tempArray,
 			        callback);
 		}
 		assert callback != null;
 		
-		// should now return a QuotaException, since we exceeded the quota for
+		// should now return a QuotaException, since we exceeded the quota
+		// for
 		// failed login attempts by at least 5
 		assertFalse(this.waitOnCallback(callback));
 		assertNull(callback.getEffect());
@@ -660,7 +702,7 @@ public abstract class AbstractStoreTest {
 	
 	// Test IllegalArgumentException
 	public void testGetModelRevisionPassingNull() {
-		TestCallback<BatchedResult<Long>[]> revisionCallback = new TestCallback<BatchedResult<Long>[]>();
+		SynchronousTestCallback<BatchedResult<Long>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		
 		// first parameter equals null
 		try {
@@ -672,7 +714,7 @@ public abstract class AbstractStoreTest {
 		}
 		
 		// second parameter equals null
-		revisionCallback = new TestCallback<BatchedResult<Long>[]>();
+		revisionCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		
 		try {
 			this.store.getModelRevisions(this.correctUser, null, this.modelAddresses,
@@ -683,7 +725,7 @@ public abstract class AbstractStoreTest {
 		}
 		
 		// third parameter equals null
-		revisionCallback = new TestCallback<BatchedResult<Long>[]>();
+		revisionCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		
 		try {
 			this.store.getModelRevisions(this.correctUser, this.correctUserPass, null,
@@ -694,7 +736,7 @@ public abstract class AbstractStoreTest {
 		}
 		
 		// all parameters equal null
-		revisionCallback = new TestCallback<BatchedResult<Long>[]>();
+		revisionCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		
 		try {
 			this.store.getModelRevisions(null, null, null, revisionCallback);
@@ -704,7 +746,7 @@ public abstract class AbstractStoreTest {
 		}
 		
 		// callback equals null - should not throw an IllegalArgumentException
-		revisionCallback = new TestCallback<BatchedResult<Long>[]>();
+		revisionCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		
 		try {
 			this.store.getModelRevisions(this.correctUser, this.correctUserPass,
@@ -723,11 +765,15 @@ public abstract class AbstractStoreTest {
 	// combinations
 	@Test
 	public void testGetObjectSnapshotsBadAccount() {
-		TestCallback<BatchedResult<XBaseObject>[]> callback;
+		if(!this.incorrectActorExists) {
+			return;
+		}
+		
+		SynchronousTestCallback<BatchedResult<XBaseObject>[]> callback;
 		
 		// Test if it behaves correctly for wrong account + password
 		// combinations
-		callback = new TestCallback<BatchedResult<XBaseObject>[]>();
+		callback = new SynchronousTestCallback<BatchedResult<XBaseObject>[]>();
 		
 		this.store.getObjectSnapshots(this.incorrectUser, this.incorrectUserPass,
 		        this.objectAddresses, callback);
@@ -742,7 +788,7 @@ public abstract class AbstractStoreTest {
 	// access to
 	@Test
 	public void testGetObjectSnapshots() {
-		TestCallback<BatchedResult<XBaseObject>[]> callback = new TestCallback<BatchedResult<XBaseObject>[]>();
+		SynchronousTestCallback<BatchedResult<XBaseObject>[]> callback = new SynchronousTestCallback<BatchedResult<XBaseObject>[]>();
 		
 		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, this.objectAddresses,
 		        callback);
@@ -766,7 +812,7 @@ public abstract class AbstractStoreTest {
 	// exist
 	@Test
 	public void testGetObjectSnapshotsNotExistingObject() {
-		TestCallback<BatchedResult<XBaseObject>[]> callback = new TestCallback<BatchedResult<XBaseObject>[]>();
+		SynchronousTestCallback<BatchedResult<XBaseObject>[]> callback = new SynchronousTestCallback<BatchedResult<XBaseObject>[]>();
 		XAddress[] tempArray = new XAddress[] { this.notExistingObject };
 		
 		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, tempArray, callback);
@@ -784,7 +830,7 @@ public abstract class AbstractStoreTest {
 	// Test if it behaves correctly for mixes of the cases above
 	@Test
 	public void testGetObjectSnapshotsMixedAddresses() {
-		TestCallback<BatchedResult<XBaseObject>[]> callback = new TestCallback<BatchedResult<XBaseObject>[]>();
+		SynchronousTestCallback<BatchedResult<XBaseObject>[]> callback = new SynchronousTestCallback<BatchedResult<XBaseObject>[]>();
 		XAddress[] tempArray = new XAddress[this.objectAddresses.length + 1];
 		System.arraycopy(this.objectAddresses, 0, tempArray, 0, this.objectAddresses.length);
 		tempArray[this.objectAddresses.length] = this.notExistingObject;
@@ -818,19 +864,24 @@ public abstract class AbstractStoreTest {
 	// Testing the quota exception
 	@Test
 	public void testGetObjectSnapshotsQuotaException() {
-		TestCallback<BatchedResult<XBaseObject>[]> callback = null;
+		if(!this.incorrectActorExists) {
+			return;
+		}
+		
+		SynchronousTestCallback<BatchedResult<XBaseObject>[]> callback = null;
 		XAddress[] tempArray = new XAddress[] { this.notExistingObject };
 		
 		assert this.bfQuota > 0;
 		for(long l = 0; l < this.bfQuota + 5; l++) {
-			callback = new TestCallback<BatchedResult<XBaseObject>[]>();
+			callback = new SynchronousTestCallback<BatchedResult<XBaseObject>[]>();
 			
 			this.store.getObjectSnapshots(this.incorrectUser, this.incorrectUserPass, tempArray,
 			        callback);
 		}
 		assert callback != null;
 		
-		// should now return a QuotaException, since we exceeded the quota for
+		// should now return a QuotaException, since we exceeded the quota
+		// for
 		// failed login attempts by at least 5
 		assertFalse(this.waitOnCallback(callback));
 		assertNull(callback.getEffect());
@@ -841,7 +892,7 @@ public abstract class AbstractStoreTest {
 	// Test IllegalArgumentException
 	@Test
 	public void testGetObjectSnapshotsPassingNull() {
-		TestCallback<BatchedResult<XBaseObject>[]> callback = new TestCallback<BatchedResult<XBaseObject>[]>();
+		SynchronousTestCallback<BatchedResult<XBaseObject>[]> callback = new SynchronousTestCallback<BatchedResult<XBaseObject>[]>();
 		
 		// first parameter equals null
 		try {
@@ -853,7 +904,7 @@ public abstract class AbstractStoreTest {
 		}
 		
 		// second parameter equals null
-		callback = new TestCallback<BatchedResult<XBaseObject>[]>();
+		callback = new SynchronousTestCallback<BatchedResult<XBaseObject>[]>();
 		
 		try {
 			this.store.getObjectSnapshots(this.correctUser, null, this.objectAddresses, callback);
@@ -863,7 +914,7 @@ public abstract class AbstractStoreTest {
 		}
 		
 		// third parameter equals null
-		callback = new TestCallback<BatchedResult<XBaseObject>[]>();
+		callback = new SynchronousTestCallback<BatchedResult<XBaseObject>[]>();
 		
 		try {
 			this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, null, callback);
@@ -873,7 +924,7 @@ public abstract class AbstractStoreTest {
 		}
 		
 		// all parameters equal null
-		callback = new TestCallback<BatchedResult<XBaseObject>[]>();
+		callback = new SynchronousTestCallback<BatchedResult<XBaseObject>[]>();
 		
 		try {
 			this.store.getObjectSnapshots(null, null, null, callback);
@@ -883,7 +934,7 @@ public abstract class AbstractStoreTest {
 		}
 		
 		// callback equals null - should not throw an IllegalArgumentException
-		callback = new TestCallback<BatchedResult<XBaseObject>[]>();
+		callback = new SynchronousTestCallback<BatchedResult<XBaseObject>[]>();
 		
 		try {
 			this.store.getObjectSnapshots(this.correctUser, this.correctUserPass,
@@ -902,11 +953,15 @@ public abstract class AbstractStoreTest {
 	// combinations
 	@Test
 	public void testGetModelIdsBadAccount() {
-		TestCallback<Set<XID>> callback;
+		if(!this.incorrectActorExists) {
+			return;
+		}
+		
+		SynchronousTestCallback<Set<XID>> callback;
 		
 		// Test if it behaves correctly for wrong account + password
 		// combinations
-		callback = new TestCallback<Set<XID>>();
+		callback = new SynchronousTestCallback<Set<XID>>();
 		
 		this.store.getModelIds(this.incorrectUser, this.incorrectUserPass, callback);
 		
@@ -930,7 +985,7 @@ public abstract class AbstractStoreTest {
 	 */
 	@Test
 	public void testGetModelIds() {
-		TestCallback<Set<XID>> callback = new TestCallback<Set<XID>>();
+		SynchronousTestCallback<Set<XID>> callback = new SynchronousTestCallback<Set<XID>>();
 		
 		this.store.getModelIds(this.correctUser, this.correctUserPass, callback);
 		
@@ -955,11 +1010,15 @@ public abstract class AbstractStoreTest {
 	// Testing the quota exception
 	@Test
 	public void testGetModelIdsQuotaException() {
-		TestCallback<Set<XID>> callback = null;
+		if(!this.incorrectActorExists) {
+			return;
+		}
+		
+		SynchronousTestCallback<Set<XID>> callback = null;
 		
 		assert this.bfQuota > 0;
 		for(long l = 0; l < this.bfQuota + 5; l++) {
-			callback = new TestCallback<Set<XID>>();
+			callback = new SynchronousTestCallback<Set<XID>>();
 			
 			this.store.getModelIds(this.incorrectUser, this.incorrectUserPass, callback);
 		}
@@ -976,7 +1035,7 @@ public abstract class AbstractStoreTest {
 	// Test IllegalArgumentException
 	@Test
 	public void testGetModelIdsPassingNull() {
-		TestCallback<Set<XID>> callback = new TestCallback<Set<XID>>();
+		SynchronousTestCallback<Set<XID>> callback = new SynchronousTestCallback<Set<XID>>();
 		
 		// first parameter equals null
 		try {
@@ -987,7 +1046,7 @@ public abstract class AbstractStoreTest {
 		}
 		
 		// second parameter equals null
-		callback = new TestCallback<Set<XID>>();
+		callback = new SynchronousTestCallback<Set<XID>>();
 		
 		try {
 			this.store.getModelIds(this.correctUser, null, callback);
@@ -997,7 +1056,7 @@ public abstract class AbstractStoreTest {
 		}
 		
 		// all parameters equal null
-		callback = new TestCallback<Set<XID>>();
+		callback = new SynchronousTestCallback<Set<XID>>();
 		
 		try {
 			this.store.getModelIds(null, null, callback);
@@ -1007,10 +1066,87 @@ public abstract class AbstractStoreTest {
 		}
 		
 		// callback equals null - should not throw an IllegalArgumentException
-		callback = new TestCallback<Set<XID>>();
+		callback = new SynchronousTestCallback<Set<XID>>();
 		
 		try {
 			this.store.getModelIds(this.correctUser, this.correctUserPass, null);
+		} catch(IllegalArgumentException iae) {
+			// there's something wrong if we reached this
+			fail();
+		}
+	}
+	
+	/**
+	 * Tests for getRepositoryId
+	 */
+	
+	// TODO How to test getRepositoryIDs functionality? Does it even need to be
+	// tested at all?
+	
+	// Testing the quota exception
+	@Test
+	public void testGetRepositoryIdQuotaException() {
+		if(!this.incorrectActorExists) {
+			return;
+		}
+		
+		SynchronousTestCallback<XID> callback = null;
+		
+		assert this.bfQuota > 0;
+		for(long l = 0; l < this.bfQuota + 5; l++) {
+			callback = new SynchronousTestCallback<XID>();
+			
+			this.store.getRepositoryId(this.incorrectUser, this.incorrectUserPass, callback);
+		}
+		assert callback != null;
+		
+		// should now return a QuotaException, since we exceeded the quota
+		// for
+		// failed login attempts by at least 5
+		assertFalse(this.waitOnCallback(callback));
+		assertNull(callback.getEffect());
+		assertNotNull(callback.getException());
+		assertTrue(callback.getException() instanceof QuotaException);
+	}
+	
+	// Test IllegalArgumentException
+	@Test
+	public void testGetRepositoryIdPassingNull() {
+		SynchronousTestCallback<XID> callback = new SynchronousTestCallback<XID>();
+		
+		// first parameter equals null
+		try {
+			this.store.getRepositoryId(null, this.correctUserPass, callback);
+			// there's something wrong if we reached this
+			fail();
+		} catch(IllegalArgumentException iae) {
+		}
+		
+		// second parameter equals null
+		callback = new SynchronousTestCallback<XID>();
+		
+		try {
+			this.store.getRepositoryId(this.correctUser, null, callback);
+			// there's something wrong if we reached this
+			fail();
+		} catch(IllegalArgumentException iae) {
+		}
+		
+		// all parameters equal null
+		callback = new SynchronousTestCallback<XID>();
+		
+		try {
+			this.store.getRepositoryId(null, null, callback);
+			// there's something wrong if we reached this
+			fail();
+		} catch(IllegalArgumentException iae) {
+		}
+		
+		// callback equals null - should not throw an IllegalArgumentException
+		callback = new SynchronousTestCallback<XID>();
+		
+		try {
+			this.store.getRepositoryId(this.correctUser, this.correctUserPass, null);
 		} catch(IllegalArgumentException iae) {
 			// there's something wrong if we reached this
 			fail();
@@ -1026,16 +1162,16 @@ public abstract class AbstractStoreTest {
 	 * @return True, if the method which the callback was passed to succeeded,
 	 *         false if it failed or some kind of error occurred
 	 */
-	private boolean waitOnCallback(TestCallback<?> callback) {
+	private boolean waitOnCallback(SynchronousTestCallback<?> callback) {
 		int value = callback.waitOnCallback(this.timeout);
-		if(value == TestCallback.UNKNOWN_ERROR) {
+		if(value == SynchronousTestCallback.UNKNOWN_ERROR) {
 			return false;
 		}
-		if(value == TestCallback.TIMEOUT) {
+		if(value == SynchronousTestCallback.TIMEOUT) {
 			return false;
 		}
 		
-		return value == TestCallback.SUCCESS;
+		return value == SynchronousTestCallback.SUCCESS;
 	}
 	
 	/**
@@ -1055,6 +1191,4 @@ public abstract class AbstractStoreTest {
 	 * specific quota of the XydraStore implementation which is to be tested.
 	 */
 	abstract protected long getQuotaForBruteForce();
-	
-	// TODO How to test getRepositoryID? Does it even need to be tested at all?
 }
