@@ -415,8 +415,14 @@ public abstract class AbstractStoreTest {
 		
 		BatchedResult<XBaseModel>[] result = callback.getEffect();
 		assertNull(result[0].getResult());
-		assertNotNull(result[0].getException());
-		assertTrue(result[0].getException() instanceof RequestException);
+		/*
+		 * TODO This is not correct - RequestExceptions are only for malformed
+		 * requests (in this case passing an XAdrress with getType() !=
+		 * XType.XMODEL). Requesting snapshots of non-existent models should not
+		 * cause any exception. ~Daniel
+		 */
+		// assertNotNull(result[0].getException());
+		// assertTrue(result[0].getException() instanceof RequestException);
 	}
 	
 	// Test if it behaves correctly for mixes of the cases above
@@ -620,8 +626,10 @@ public abstract class AbstractStoreTest {
 		
 		BatchedResult<Long>[] revisionResult = revisionCallback.getEffect();
 		assertEquals(revisionResult[0].getResult(), (Long)XydraStore.MODEL_DOES_NOT_EXIST);
-		assertNotNull(revisionResult[0].getException());
-		assertTrue(revisionResult[0].getException() instanceof RequestException);
+		// TODO see comment in testGetModelSnapshotsNotExistingModel ~Daniel
+		// assertNotNull(revisionResult[0].getException());
+		// assertTrue(revisionResult[0].getException() instanceof
+		// RequestException);
 	}
 	
 	// Test if it behaves correctly for mixes of the cases above
@@ -658,10 +666,13 @@ public abstract class AbstractStoreTest {
 				// this index contains an XAddress of a not existing XModel
 				assertNull(snapshotResult[i].getResult());
 				assertEquals(revisionResult[i].getResult(), (Long)XydraStore.MODEL_DOES_NOT_EXIST);
-				assertNotNull(revisionResult[i].getException());
-				assertTrue(revisionResult[i].getException() instanceof RequestException);
+				// TODO see comment in testGetModelSnapshotsNotExistingModel
+				// ~Daniel
+				// assertNotNull(revisionResult[i].getException());
+				// assertTrue(revisionResult[i].getException() instanceof
+				// RequestException);
 			} else {
-				assertEquals(this.modelAddresses[i], snapshotResult[i].getResult());
+				assertEquals(this.modelAddresses[i], snapshotResult[i].getResult().getAddress());
 				
 				assertNotNull(revisionResult[i].getResult());
 				assertNull(revisionResult[i].getException());
@@ -823,8 +834,9 @@ public abstract class AbstractStoreTest {
 		
 		BatchedResult<XBaseObject>[] result = callback.getEffect();
 		assertNull(result[0].getResult());
-		assertNotNull(result[0].getException());
-		assertTrue(result[0].getException() instanceof RequestException);
+		// TODO see comment in testGetModelSnapshotsNotExistingModel ~Daniel
+		// assertNotNull(result[0].getException());
+		// assertTrue(result[0].getException() instanceof RequestException);
 	}
 	
 	// Test if it behaves correctly for mixes of the cases above

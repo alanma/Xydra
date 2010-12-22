@@ -46,7 +46,10 @@ public class SynchronousNoAccessRightsStore implements XydraNoAccessRightsStore 
 	@Override
 	public void executeCommands(XID actorId, XCommand[] commands,
 	        Callback<BatchedResult<Long>[]> callback) {
-		callback.onSuccess(executeCommands(actorId, commands));
+		BatchedResult<Long>[] result = executeCommands(actorId, commands);
+		if(callback != null) {
+			callback.onSuccess(result);
+		}
 	}
 	
 	@Override
@@ -55,8 +58,10 @@ public class SynchronousNoAccessRightsStore implements XydraNoAccessRightsStore 
 	        Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback) {
 		BatchedResult<Long>[] commandResults = executeCommands(actorId, commands);
 		BatchedResult<XEvent[]>[] eventResults = getEvents(getEventRequests);
-		callback.onSuccess(new Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>(
-		        commandResults, eventResults));
+		if(callback != null) {
+			callback.onSuccess(new Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>(
+			        commandResults, eventResults));
+		}
 	}
 	
 	private BatchedResult<XEvent[]>[] getEvents(GetEventsRequest[] getEventsRequests) {
@@ -77,15 +82,24 @@ public class SynchronousNoAccessRightsStore implements XydraNoAccessRightsStore 
 	@Override
 	public void getEvents(GetEventsRequest[] getEventRequests,
 	        Callback<BatchedResult<XEvent[]>[]> callback) {
-		callback.onSuccess(getEvents(getEventRequests));
+		if(callback != null) {
+			callback.onSuccess(getEvents(getEventRequests));
+		}
 	}
 	
 	@Override
 	public void getModelIds(Callback<Set<XID>> callback) {
+		Set<XID> ids;
 		try {
-			callback.onSuccess(this.noBatchStore.getModelIds());
+			ids = this.noBatchStore.getModelIds();
 		} catch(Exception e) {
-			callback.onFailure(e);
+			if(callback != null) {
+				callback.onFailure(e);
+			}
+			return;
+		}
+		if(callback != null) {
+			callback.onSuccess(ids);
 		}
 	}
 	
@@ -102,7 +116,9 @@ public class SynchronousNoAccessRightsStore implements XydraNoAccessRightsStore 
 				results[i] = new BatchedResult<Long>(e);
 			}
 		}
-		callback.onSuccess(results);
+		if(callback != null) {
+			callback.onSuccess(results);
+		}
 	}
 	
 	@Override
@@ -119,7 +135,9 @@ public class SynchronousNoAccessRightsStore implements XydraNoAccessRightsStore 
 				results[i] = new BatchedResult<XBaseModel>(e);
 			}
 		}
-		callback.onSuccess(results);
+		if(callback != null) {
+			callback.onSuccess(results);
+		}
 	}
 	
 	@Override
@@ -135,12 +153,17 @@ public class SynchronousNoAccessRightsStore implements XydraNoAccessRightsStore 
 				results[i] = new BatchedResult<XBaseObject>(e);
 			}
 		}
-		callback.onSuccess(results);
+		if(callback != null) {
+			callback.onSuccess(results);
+		}
 	}
 	
 	@Override
 	public void getRepositoryId(Callback<XID> callback) {
-		callback.onSuccess(this.noBatchStore.getRepositoryId());
+		XID repoId = this.noBatchStore.getRepositoryId();
+		if(callback != null) {
+			callback.onSuccess(repoId);
+		}
 	}
 	
 }
