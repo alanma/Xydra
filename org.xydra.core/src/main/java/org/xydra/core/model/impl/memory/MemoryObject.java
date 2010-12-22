@@ -82,11 +82,11 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		this(null, createEventQueue(actorId, passwordHash, objectState), objectState);
 	}
 	
-	private static MemoryEventQueue createEventQueue(XID actorId, String passwordHash,
+	private static MemoryEventManager createEventQueue(XID actorId, String passwordHash,
 	        XObjectState objectState) {
 		XChangeLogState logState = objectState.getChangeLogState();
 		MemoryChangeLog log = logState == null ? null : new MemoryChangeLog(logState);
-		return new MemoryEventQueue(actorId, passwordHash, log, objectState.getRevisionNumber());
+		return new MemoryEventManager(actorId, passwordHash, log, objectState.getRevisionNumber());
 	}
 	
 	/**
@@ -95,11 +95,11 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	 * 
 	 * @param actorId TODO
 	 * @param parent The father-{@link MemoryModel} of this MemoryObject.
-	 * @param eventQueue The {@link MemoryEventQueue} which will be used by this
+	 * @param eventQueue The {@link MemoryEventManager} which will be used by this
 	 *            MemoryObject.
 	 * @param objectState The initial {@link XObjectState} of this MemoryObject.
 	 */
-	protected MemoryObject(MemoryModel parent, MemoryEventQueue eventQueue, XObjectState objectState) {
+	protected MemoryObject(MemoryModel parent, MemoryEventManager eventQueue, XObjectState objectState) {
 		super(eventQueue);
 		assert eventQueue != null;
 		

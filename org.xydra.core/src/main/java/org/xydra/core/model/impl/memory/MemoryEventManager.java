@@ -33,7 +33,7 @@ import org.xydra.index.XI;
  * dispatched after all current change operations are completed.
  * 
  */
-public class MemoryEventQueue implements Serializable {
+public class MemoryEventManager implements Serializable {
 	
 	private static final long serialVersionUID = -4839276542320739074L;
 	
@@ -72,7 +72,7 @@ public class MemoryEventQueue implements Serializable {
 	 * @param log The {@link XChangeLog} this MemoryEventQueue will use for
 	 *            logging (may be null)
 	 */
-	public MemoryEventQueue(XID actorId, String passwordHash, MemoryChangeLog log, long syncRev) {
+	public MemoryEventManager(XID actorId, String passwordHash, MemoryChangeLog log, long syncRev) {
 		assert actorId != null;
 		this.sessionActor = actorId;
 		this.sessionPasswordHash = passwordHash;

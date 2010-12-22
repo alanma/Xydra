@@ -50,13 +50,13 @@ public class MemoryField implements XField, Serializable {
 	boolean removed = false;
 	
 	/**
-	 * The {@link MemoryEventQueue} used by this MemoryField. Will also be used
+	 * The {@link MemoryEventManager} used by this MemoryField. Will also be used
 	 * as the lock for synchronizing change operations.
 	 * 
 	 * If this MemoryField is created by an {@link MemoryObject}, the event
 	 * queue used by the {@link MemoryObject} will be used.
 	 */
-	private final MemoryEventQueue eventQueue;
+	private final MemoryEventManager eventQueue;
 	
 	private Set<XFieldEventListener> fieldChangeListenerCollection;
 	
@@ -81,7 +81,7 @@ public class MemoryField implements XField, Serializable {
 	 * @param fieldState The initial {@link XFieldState} of this MemoryField.
 	 */
 	public MemoryField(XID actorId, XFieldState fieldState) {
-		this(null, new MemoryEventQueue(actorId, null, null, -1), fieldState);
+		this(null, new MemoryEventManager(actorId, null, null, -1), fieldState);
 	}
 	
 	/**
@@ -90,11 +90,11 @@ public class MemoryField implements XField, Serializable {
 	 * @param actorId TODO
 	 * @param parent The father-{@link XObject} of this MemoryField (may be
 	 *            null)
-	 * @param eventQueue the {@link MemoryEventQueue} this MemoryField will use;
+	 * @param eventQueue the {@link MemoryEventManager} this MemoryField will use;
 	 *            never null.
 	 * @param fieldState The initial {@link XFieldState} of this MemoryField.
 	 */
-	protected MemoryField(MemoryObject parent, MemoryEventQueue eventQueue, XFieldState fieldState) {
+	protected MemoryField(MemoryObject parent, MemoryEventManager eventQueue, XFieldState fieldState) {
 		assert eventQueue != null;
 		
 		this.eventQueue = eventQueue;

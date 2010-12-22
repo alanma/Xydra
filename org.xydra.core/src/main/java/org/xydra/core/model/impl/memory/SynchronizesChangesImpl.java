@@ -70,13 +70,13 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 		
 	}
 	
-	protected final MemoryEventQueue eventQueue;
+	protected final MemoryEventManager eventQueue;
 	
 	private Set<XObjectEventListener> objectChangeListenerCollection;
 	private Set<XFieldEventListener> fieldChangeListenerCollection;
 	private Set<XTransactionEventListener> transactionListenerCollection;
 	
-	public SynchronizesChangesImpl(MemoryEventQueue queue) {
+	public SynchronizesChangesImpl(MemoryEventManager queue) {
 		this.eventQueue = queue;
 		this.objectChangeListenerCollection = new HashSet<XObjectEventListener>();
 		this.fieldChangeListenerCollection = new HashSet<XFieldEventListener>();

@@ -92,7 +92,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	 */
 	protected MemoryModel(XID actorId, String passwordHash, MemoryRepository father,
 	        XModelState modelState) {
-		super(new MemoryEventQueue(actorId, passwordHash,
+		super(new MemoryEventManager(actorId, passwordHash,
 		        modelState.getChangeLogState() == null ? null : new MemoryChangeLog(
 		                modelState.getChangeLogState()), modelState.getRevisionNumber()));
 		
@@ -522,7 +522,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	 * XObjectEvents} of the REMOVE-type will and lastly the {@link XModelEvent}
 	 * representing the actual removal of the {@link MemoryObject} will be
 	 * created to accurately represent the removal. The created {@link XEvent
-	 * XEvents} will then be enqueued into the {@link MemoryEventQueue} used by
+	 * XEvents} will then be enqueued into the {@link MemoryEventManager} used by
 	 * this MemoryModel and then be propagated to the interested listeners.
 	 * 
 	 * @param actor The {@link XID} of the actor
