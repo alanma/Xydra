@@ -3,7 +3,6 @@ package org.xydra.core.model.impl.memory;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -94,8 +93,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	protected MemoryModel(XID actorId, String passwordHash, MemoryRepository father,
 	        XModelState modelState) {
 		super(new MemoryEventQueue(actorId, passwordHash,
-		        modelState.getChangeLogState() == null ? null : new MemoryChangeLog(modelState
-		                .getChangeLogState())));
+		        modelState.getChangeLogState() == null ? null : new MemoryChangeLog(
+		                modelState.getChangeLogState())));
 		
 		this.state = modelState;
 		this.father = father;
@@ -639,21 +638,6 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	@Override
 	public String toString() {
 		return this.state.toString();
-	}
-	
-	@Override
-	public XID getSessionActor() {
-		return this.eventQueue.getActor();
-	}
-	
-	@Override
-	public void setSessionActor(XID actorId, String passwordHash) {
-		this.eventQueue.setSessionActor(actorId, passwordHash);
-	}
-	
-	@Override
-	public List<LocalChange> getLocalChanges() {
-		return this.eventQueue.getLocalChanges();
 	}
 	
 }

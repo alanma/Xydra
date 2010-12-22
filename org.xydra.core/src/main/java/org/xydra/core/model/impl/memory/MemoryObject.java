@@ -2,7 +2,6 @@ package org.xydra.core.model.impl.memory;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.xydra.annotations.ReadOperation;
@@ -572,9 +571,9 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		
 		if(field.getValue() != null) {
 			assert inTrans;
-			XFieldEvent event = MemoryFieldEvent.createRemoveEvent(actor, field.getAddress(), field
-			        .getValue(), modelRev, getRevisionNumber(), field.getRevisionNumber(), inTrans,
-			        true);
+			XFieldEvent event = MemoryFieldEvent.createRemoveEvent(actor, field.getAddress(),
+			        field.getValue(), modelRev, getRevisionNumber(), field.getRevisionNumber(),
+			        inTrans, true);
 			this.eventQueue.enqueueFieldEvent(field, event);
 		}
 		
@@ -703,21 +702,6 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 			this.state.endTransaction(this.eventQueue.stateTransaction);
 			this.eventQueue.stateTransaction = null;
 		}
-	}
-	
-	@Override
-	public XID getSessionActor() {
-		return this.eventQueue.getActor();
-	}
-	
-	@Override
-	public void setSessionActor(XID actorId, String passwordHash) {
-		this.eventQueue.setSessionActor(actorId, passwordHash);
-	}
-	
-	@Override
-	public List<LocalChange> getLocalChanges() {
-		return this.eventQueue.getLocalChanges();
 	}
 	
 }

@@ -437,18 +437,16 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 					XModelCommand mc = (XModelCommand)command;
 					if(mc.getChangeType() == ChangeType.REMOVE
 					        && mc.getRevisionNumber() > lastRevision) {
-						command = MemoryModelCommand.createRemoveCommand(mc.getTarget(), mc
-						        .getRevisionNumber()
-						        + nRemote, mc.getObjectID());
+						command = MemoryModelCommand.createRemoveCommand(mc.getTarget(),
+						        mc.getRevisionNumber() + nRemote, mc.getObjectID());
 						lc.command = command;
 					}
 				} else if(command instanceof XObjectCommand) {
 					XObjectCommand oc = (XObjectCommand)command;
 					if(oc.getChangeType() == ChangeType.REMOVE
 					        && oc.getRevisionNumber() > lastRevision) {
-						command = MemoryObjectCommand.createRemoveCommand(oc.getTarget(), oc
-						        .getRevisionNumber()
-						        + nRemote, oc.getFieldID());
+						command = MemoryObjectCommand.createRemoveCommand(oc.getTarget(),
+						        oc.getRevisionNumber() + nRemote, oc.getFieldID());
 						lc.command = command;
 					}
 				} else if(command instanceof XFieldCommand) {
@@ -456,19 +454,16 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 					if(fc.getRevisionNumber() > lastRevision) {
 						switch(command.getChangeType()) {
 						case ADD:
-							command = MemoryFieldCommand.createAddCommand(fc.getTarget(), fc
-							        .getRevisionNumber()
-							        + nRemote, fc.getValue());
+							command = MemoryFieldCommand.createAddCommand(fc.getTarget(),
+							        fc.getRevisionNumber() + nRemote, fc.getValue());
 							break;
 						case REMOVE:
-							command = MemoryFieldCommand.createRemoveCommand(fc.getTarget(), fc
-							        .getRevisionNumber()
-							        + nRemote);
+							command = MemoryFieldCommand.createRemoveCommand(fc.getTarget(),
+							        fc.getRevisionNumber() + nRemote);
 							break;
 						case CHANGE:
-							command = MemoryFieldCommand.createChangeCommand(fc.getTarget(), fc
-							        .getRevisionNumber()
-							        + nRemote, fc.getValue());
+							command = MemoryFieldCommand.createChangeCommand(fc.getTarget(),
+							        fc.getRevisionNumber() + nRemote, fc.getValue());
 							break;
 						default:
 							assert false : "Invalid command: " + fc;
@@ -519,11 +514,6 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 			field.delete();
 		}
 	}
-	
-	/**
-	 * @see XModel#getSessionActor()
-	 */
-	abstract public XID getSessionActor();
 	
 	/**
 	 * Increment this entity's revision number.
@@ -694,6 +684,21 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 		synchronized(this.eventQueue) {
 			return this.transactionListenerCollection.remove(changeListener);
 		}
+	}
+	
+	@Override
+	public XID getSessionActor() {
+		return this.eventQueue.getActor();
+	}
+	
+	@Override
+	public void setSessionActor(XID actorId, String passwordHash) {
+		this.eventQueue.setSessionActor(actorId, passwordHash);
+	}
+	
+	@Override
+	public List<LocalChange> getLocalChanges() {
+		return this.eventQueue.getLocalChanges();
 	}
 	
 }
