@@ -63,19 +63,20 @@ public abstract class AbstractStoreTest {
 	private boolean setUpDone = false, incorrectActorExists = true;
 	
 	/**
-	 * @return an implementation of {@link XydraStore}
+	 * @return an implementation of {@link XydraStore} which is to be tested
 	 */
 	abstract protected XydraStore getStore();
 	
 	/**
 	 * @return an implementation of {@link XCommandFactory} which works with the
-	 *         implementation of {@link XydraStore} return by {
+	 *         implementation of {@link XydraStore} returned by {
 	 *         {@link #getStore()};
 	 */
 	abstract protected XCommandFactory getCommandFactory();
 	
 	/**
-	 * Get an existing actorId
+	 * Returns the {@link XID} of an account, which is registered on the
+	 * {@link XydraStore} returned by {@link #getStore()}.
 	 * 
 	 * Please note: This methods needs to return the XID of a user who has
 	 * access to read everything on the {@link XydraStore} returned by
@@ -85,20 +86,62 @@ public abstract class AbstractStoreTest {
 	 */
 	abstract protected XID getCorrectUser();
 	
-	// TODO Document!
+	/**
+	 * Returns the correct password hash of the account which {@link XID} is
+	 * returned by {{@link #getCorrectUser()}.
+	 * 
+	 * Please note: This method needs to return the correct password hash,
+	 * otherwise all tests will fail, even though the implementation might work
+	 * correctly.
+	 * 
+	 * @return
+	 */
 	
 	abstract protected String getCorrectUserPasswordHash();
 	
 	/**
-	 * Gets the XID of an actor who has no access to the XydraStore at all
+	 * Returns the {@link XID} of any account which is registered on the
+	 * {@link XydraStore} returned by {@link #getStore()}. This method works
+	 * together with {@link #getIncorrectUserPasswordHash()}. These two methods
+	 * need to return a account-passwordhash combination which is incorrect,
+	 * i.e. the password hash is not correct for this account.
 	 * 
-	 * @returns null, if no incorrect user combination could be provided (for
-	 *          example if your XydraStore implementation doesn't care about
-	 *          access rights at all)
+	 * Return null, if the implementation of {@link XydraStore} which is
+	 * returned by {@link #getStore()} cannot provide such a combination (for
+	 * example if the implementation does not implement any access right
+	 * management)
+	 * 
+	 * Please note: If you return an {@link XID}, you need to make sure that the
+	 * String returned by {@link #getIncorrectUserPasswordHash()} is not the
+	 * correct password hash for this user. Otherwise some test will fail, even
+	 * though the implementation might work correctly.
+	 * 
+	 * @returns the {@link XID} of a registered account or null, if no incorrect
+	 *          user combination could be provided (for example if your
+	 *          XydraStore implementation doesn't care about access rights at
+	 *          all)
 	 * 
 	 */
 	abstract protected XID getIncorrectUser();
 	
+	/**
+	 * Returns a password hash which is not the correct password hash for the
+	 * account which {@link XID} is returned by {@link #getIncorrectUser()}.
+	 * 
+	 * Should return null, if the implementation of {@link XydraStore} which is
+	 * returned by {@link #getStore()} cannot provide such a password hash (for
+	 * example if the implementation does not implement any access right
+	 * management)
+	 * 
+	 * Please note: If you return a password hash}, you need to make sure that
+	 * it is not the correct password hash for the account which {@link XID} is
+	 * returned by {@link #getIncorrectUser()}. Otherwise some test will fail,
+	 * even though the implementation might work correctly.
+	 * 
+	 * @return an incorrect password hash for the account which {@link XID} is
+	 *         returned by {@link #getIncorrectUser()} or null if it's not
+	 *         possible to provide such a hash
+	 */
 	abstract protected String getIncorrectUserPasswordHash();
 	
 	@Before
@@ -132,15 +175,23 @@ public abstract class AbstractStoreTest {
 			        "XCommandFactory could not be initalized in the setUpClass method!");
 		}
 		
-		// TODO somehow test whether these user variable were really set
 		this.correctUser = this.getCorrectUser();
 		this.correctUserPass = this.getCorrectUserPasswordHash();
+		
+		if(this.correctUser == null || this.correctUserPass == null) {
+			throw new IllegalArgumentException("correctUser or correctUserPass were null");
+		}
 		
 		this.incorrectUser = this.getIncorrectUser();
 		this.incorrectUserPass = this.getIncorrectUserPasswordHash();
 		this.incorrectActorExists = (this.incorrectUser != null);
 		
 		this.timeout = getCallbackTimeout();
+		
+		if(this.timeout <= 0) {
+			throw new IllegalArgumentException("Timeout for callbacks must be greater than 0!");
+		}
+		
 		this.bfQuota = getQuotaForBruteForce();
 		
 		if(this.bfQuota <= 0) {
@@ -265,6 +316,8 @@ public abstract class AbstractStoreTest {
 	@Test
 	public void testCheckLoginFailure() {
 		if(!this.incorrectActorExists) {
+			// This test only makes sense if an incorrect actorID - passwordhash
+			// combination can be provided
 			return;
 		}
 		
@@ -282,6 +335,8 @@ public abstract class AbstractStoreTest {
 	@Test
 	public void testCheckLoginQuotaException() {
 		if(!this.incorrectActorExists) {
+			// This test only makes sense if an incorrect actorID - passwordhash
+			// combination can be provided
 			return;
 		}
 		
@@ -297,8 +352,7 @@ public abstract class AbstractStoreTest {
 		
 		assert callback != null;
 		// should now return a QuotaException, since we exceeded the quota
-		// for
-		// failed login attempts by at least 5
+		// for failed login attempts by at least 5
 		assertFalse(this.waitOnCallback(callback));
 		assertEquals(callback.getEffect(), false);
 		assertNotNull(callback.getException());
@@ -415,14 +469,7 @@ public abstract class AbstractStoreTest {
 		
 		BatchedResult<XBaseModel>[] result = callback.getEffect();
 		assertNull(result[0].getResult());
-		/*
-		 * TODO This is not correct - RequestExceptions are only for malformed
-		 * requests (in this case passing an XAdrress with getType() !=
-		 * XType.XMODEL). Requesting snapshots of non-existent models should not
-		 * cause any exception. ~Daniel
-		 */
-		// assertNotNull(result[0].getException());
-		// assertTrue(result[0].getException() instanceof RequestException);
+		assertNull(result[0].getException());
 	}
 	
 	// Test if it behaves correctly for mixes of the cases above
@@ -462,6 +509,8 @@ public abstract class AbstractStoreTest {
 	@Test
 	public void testGetModelSnapshotsQuotaExcpetion() {
 		if(!this.incorrectActorExists) {
+			// This test only makes sense if an incorrect actorID - passwordhash
+			// combination can be provided
 			return;
 		}
 		
@@ -478,8 +527,7 @@ public abstract class AbstractStoreTest {
 		
 		assert (callback != null);
 		// should now return a QuotaException, since we exceeded the quota
-		// for
-		// failed login attempts by at least 5
+		// for failed login attempts by at least 5
 		assertFalse(this.waitOnCallback(callback));
 		assertNull(callback.getEffect());
 		assertNotNull(callback.getException());
@@ -540,9 +588,6 @@ public abstract class AbstractStoreTest {
 			fail();
 		}
 		
-		// TODO How to test for other exception types like ConnectionException,
-		// TimeoutException etc.?
-		
 		// TODO Test what happens if the XAddress refers to an XObject etc.
 	}
 	
@@ -555,6 +600,8 @@ public abstract class AbstractStoreTest {
 	@Test
 	public void testGetModelRevisionsBadAccount() {
 		if(!this.incorrectActorExists) {
+			// This test only makes sense if an incorrect actorID - passwordhash
+			// combination can be provided
 			return;
 		}
 		
@@ -614,22 +661,19 @@ public abstract class AbstractStoreTest {
 	// exist
 	@Test
 	public void testGetModelRevisionsNotExistingModel() {
-		SynchronousTestCallback<BatchedResult<Long>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		SynchronousTestCallback<BatchedResult<Long>[]> callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		XAddress[] tempArray = new XAddress[] { this.notExistingModel };
 		
-		this.store.getModelRevisions(this.correctUser, this.correctUserPass, tempArray,
-		        revisionCallback);
+		this.store.getModelRevisions(this.correctUser, this.correctUserPass, tempArray, callback);
 		
-		assertTrue(this.waitOnCallback(revisionCallback));
-		assertNotNull(revisionCallback.getEffect());
-		assertNull(revisionCallback.getException());
+		assertTrue(this.waitOnCallback(callback));
+		assertNotNull(callback.getEffect());
+		assertNull(callback.getException());
 		
-		BatchedResult<Long>[] revisionResult = revisionCallback.getEffect();
-		assertEquals(revisionResult[0].getResult(), (Long)XydraStore.MODEL_DOES_NOT_EXIST);
-		// TODO see comment in testGetModelSnapshotsNotExistingModel ~Daniel
-		// assertNotNull(revisionResult[0].getException());
-		// assertTrue(revisionResult[0].getException() instanceof
-		// RequestException);
+		BatchedResult<Long>[] result = callback.getEffect();
+		assertNotNull(result[0].getResult());
+		assertNull(result[0].getException());
+		assertEquals(result[0].getResult(), (Long)XydraStore.MODEL_DOES_NOT_EXIST);
 	}
 	
 	// Test if it behaves correctly for mixes of the cases above
@@ -666,11 +710,7 @@ public abstract class AbstractStoreTest {
 				// this index contains an XAddress of a not existing XModel
 				assertNull(snapshotResult[i].getResult());
 				assertEquals(revisionResult[i].getResult(), (Long)XydraStore.MODEL_DOES_NOT_EXIST);
-				// TODO see comment in testGetModelSnapshotsNotExistingModel
-				// ~Daniel
-				// assertNotNull(revisionResult[i].getException());
-				// assertTrue(revisionResult[i].getException() instanceof
-				// RequestException);
+				assertNull(revisionResult[i].getException());
 			} else {
 				assertEquals(this.modelAddresses[i], snapshotResult[i].getResult().getAddress());
 				
@@ -687,6 +727,8 @@ public abstract class AbstractStoreTest {
 	// Testing the quota exception
 	public void testGetModelRevisionsQuotaException() {
 		if(!this.incorrectActorExists) {
+			// This test only makes sense if an incorrect actorID - passwordhash
+			// combination can be provided
 			return;
 		}
 		
@@ -703,8 +745,7 @@ public abstract class AbstractStoreTest {
 		assert callback != null;
 		
 		// should now return a QuotaException, since we exceeded the quota
-		// for
-		// failed login attempts by at least 5
+		// for failed login attempts by at least 5
 		assertFalse(this.waitOnCallback(callback));
 		assertNull(callback.getEffect());
 		assertNotNull(callback.getException());
@@ -777,6 +818,8 @@ public abstract class AbstractStoreTest {
 	@Test
 	public void testGetObjectSnapshotsBadAccount() {
 		if(!this.incorrectActorExists) {
+			// This test only makes sense if an incorrect actorID - passwordhash
+			// combination can be provided
 			return;
 		}
 		
@@ -834,9 +877,7 @@ public abstract class AbstractStoreTest {
 		
 		BatchedResult<XBaseObject>[] result = callback.getEffect();
 		assertNull(result[0].getResult());
-		// TODO see comment in testGetModelSnapshotsNotExistingModel ~Daniel
-		// assertNotNull(result[0].getException());
-		// assertTrue(result[0].getException() instanceof RequestException);
+		assertNull(result[0].getException());
 	}
 	
 	// Test if it behaves correctly for mixes of the cases above
@@ -877,6 +918,8 @@ public abstract class AbstractStoreTest {
 	@Test
 	public void testGetObjectSnapshotsQuotaException() {
 		if(!this.incorrectActorExists) {
+			// This test only makes sense if an incorrect actorID - passwordhash
+			// combination can be provided
 			return;
 		}
 		
@@ -893,8 +936,7 @@ public abstract class AbstractStoreTest {
 		assert callback != null;
 		
 		// should now return a QuotaException, since we exceeded the quota
-		// for
-		// failed login attempts by at least 5
+		// for failed login attempts by at least 5
 		assertFalse(this.waitOnCallback(callback));
 		assertNull(callback.getEffect());
 		assertNotNull(callback.getException());
@@ -966,6 +1008,8 @@ public abstract class AbstractStoreTest {
 	@Test
 	public void testGetModelIdsBadAccount() {
 		if(!this.incorrectActorExists) {
+			// This test only makes sense if an incorrect actorID - passwordhash
+			// combination can be provided
 			return;
 		}
 		
@@ -990,10 +1034,10 @@ public abstract class AbstractStoreTest {
 	 * Please note: This is only a rudimentary test of the functionality of
 	 * {@link XydraStore#getModelIds()}. Since this method is heavily connected
 	 * with account access rights and this test assumes no specific access right
-	 * management implementation, every implementation of this test should
-	 * provide further tests for this method that actually consider the access
-	 * right management used by the {@link XydraStore} implementation they are
-	 * testing.
+	 * management implementation, every implementation of {@link
+	 * AbstractStoreTest} should provide further tests for this method that
+	 * actually consider the access right management used by the {@link
+	 * XydraStore} implementation they are testing.
 	 */
 	@Test
 	public void testGetModelIds() {
@@ -1023,6 +1067,8 @@ public abstract class AbstractStoreTest {
 	@Test
 	public void testGetModelIdsQuotaException() {
 		if(!this.incorrectActorExists) {
+			// This test only makes sense if an incorrect actorID - passwordhash
+			// combination can be provided
 			return;
 		}
 		
@@ -1092,13 +1138,39 @@ public abstract class AbstractStoreTest {
 	 * Tests for getRepositoryId
 	 */
 	
-	// TODO How to test getRepositoryIDs functionality? Does it even need to be
-	// tested at all?
+	/*
+	 * Please note: getRepositoryIds functionality cannot be tested in an
+	 * abstracted way, since {@link XydraStore} does not force any way of how
+	 * its repository {@link XID} is to be set. You'll need to write your own,
+	 * implementation-specific, tests.
+	 */
+
+	// Test if it behaves correctly for wrong account + password
+	// combinations
+	@Test
+	public void testGetRepositoryIdBadAccount() {
+		if(!this.incorrectActorExists) {
+			// This test only makes sense if an incorrect actorID - passwordhash
+			// combination can be provided
+			return;
+		}
+		
+		SynchronousTestCallback<XID> callback = new SynchronousTestCallback<XID>();
+		
+		this.store.getRepositoryId(this.incorrectUser, this.incorrectUserPass, callback);
+		
+		assertFalse(this.waitOnCallback(callback));
+		assertNull(callback.getEffect());
+		assertNotNull(callback.getException());
+		assertTrue(callback.getException() instanceof AuthorisationException);
+	}
 	
 	// Testing the quota exception
 	@Test
 	public void testGetRepositoryIdQuotaException() {
 		if(!this.incorrectActorExists) {
+			// This test only makes sense if an incorrect actorID - passwordhash
+			// combination can be provided
 			return;
 		}
 		
@@ -1174,7 +1246,7 @@ public abstract class AbstractStoreTest {
 	 * @return True, if the method which the callback was passed to succeeded,
 	 *         false if it failed or some kind of error occurred
 	 */
-	private boolean waitOnCallback(SynchronousTestCallback<?> callback) {
+	protected boolean waitOnCallback(SynchronousTestCallback<?> callback) {
 		int value = callback.waitOnCallback(this.timeout);
 		if(value == SynchronousTestCallback.UNKNOWN_ERROR) {
 			return false;
