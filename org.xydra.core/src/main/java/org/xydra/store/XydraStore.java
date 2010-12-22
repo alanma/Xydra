@@ -15,10 +15,9 @@ import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
+import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.index.query.Pair;
-
-import com.sun.org.apache.xpath.internal.objects.XObject;
 
 
 /**
