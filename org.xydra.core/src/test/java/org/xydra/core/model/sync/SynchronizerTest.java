@@ -35,7 +35,8 @@ import org.xydra.store.impl.memory.XydraNoAccessRightsNoBatchNoAsyncStore;
 public class SynchronizerTest extends TestCase {
 	
 	protected static final XID ACTOR_TESTER = XX.toId("tester");
-	protected static final String PSW_TESTER = null; // TODO where to get this?
+	protected static final String PSW_TESTER = "password"; // TODO where to get
+														   // this?
 	
 	private final XydraNoAccessRightsNoBatchNoAsyncStore bs;
 	private final XydraStore store;
@@ -46,8 +47,8 @@ public class SynchronizerTest extends TestCase {
 		
 		this.store = new AllowAllStore(this.bs);
 		
-		XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(XX.toAddress(
-		        this.bs.getRepositoryId(), null, null, null), XCommand.SAFE,
+		XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(
+		        XX.toAddress(this.bs.getRepositoryId(), null, null, null), XCommand.SAFE,
 		        DemoModelUtil.PHONEBOOK_ID);
 		assertTrue(this.bs.executeCommand(ACTOR_TESTER, createCommand) >= 0);
 		XAddress modelAddr = createCommand.getChangedEntity();
@@ -110,8 +111,8 @@ public class SynchronizerTest extends TestCase {
 		final TestCallback c2 = new TestCallback();
 		
 		// Create a command manually.
-		XCommand command = MemoryModelCommand.createAddCommand(model.getAddress(), false, XX
-		        .toId("Frank"));
+		XCommand command = MemoryModelCommand.createAddCommand(model.getAddress(), false,
+		        XX.toId("Frank"));
 		
 		// Apply the command locally.
 		model.executeCommand(command, c1);

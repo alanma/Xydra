@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.xydra.core.change.ChangeType;
-import org.xydra.core.change.XAtomicCommand;
 import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XChanges;
 import org.xydra.core.change.XCommand;
@@ -46,6 +45,7 @@ import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.core.model.delta.ChangedField;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.ChangedObject;
+import org.xydra.index.XI;
 
 
 /**
@@ -279,7 +279,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 		checkSync();
 		
 		if(revision < 0) {
-			throw new RuntimeException("invalid revision number: " + revision);
+			throw new IllegalArgumentException("invalid revision number: " + revision);
 		}
 		
 		XChangeLog log = getChangeLog();
@@ -305,6 +305,9 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 			// rollback each event individually
 			for(long i = currentRev; i > revision; i--) {
 				XEvent event = log.getEventAt(i);
+				if(event == null) {
+					continue;
+				}
 				if(event instanceof XAtomicEvent) {
 					rollbackEvent((XAtomicEvent)event);
 				} else {
@@ -355,31 +358,80 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 	 *            rolled back
 	 */
 	private void rollbackEvent(XAtomicEvent event) {
-		XAtomicCommand command = XChanges.createForcedUndoCommand(event);
-		long result = executeCommand(command);
-		assert result > 0 : "rollback command " + command + " for event " + event + " failed";
-		XAddress target = event.getTarget();
 		
-		// fix revision numbers
-		setRevisionNumberIfModel(event.getOldModelRevision());
-		if(target.getObject() != null) {
-			MemoryObject object = getObject(target.getObject());
-			object.setRevisionNumber(event.getOldObjectRevision());
-			object.save();
-			if(target.getField() != null) {
-				MemoryField field = object.getField(target.getField());
-				field.setRevisionNumber(event.getOldFieldRevision());
-				field.save();
-			} else if(event.getChangeType() == ChangeType.REMOVE) {
-				MemoryField field = object.getField(((XObjectEvent)event).getFieldID());
+		assert getModel() == null
+		        || event.getRevisionNumber() == getModel().getRevisionNumber()
+		        || (event.inTransaction() && event.getOldModelRevision() == getModel()
+		                .getRevisionNumber());
+		
+		// TODO support rolling back repository events.
+		if(event instanceof XModelEvent) {
+			assert getModel() == this;
+			assert event.getTarget().equals(getAddress());
+			XID objectId = ((XModelEvent)event).getObjectID();
+			if(event.getChangeType() == ChangeType.REMOVE) {
+				assert !getModel().hasObject(objectId);
+				MemoryObject object = createObjectInternal(objectId);
+				assert event.getOldObjectRevision() >= 0;
+				object.setRevisionNumber(event.getOldObjectRevision());
+				object.save();
+			} else {
+				assert event.getChangeType() == ChangeType.ADD;
+				assert getModel().hasObject(objectId);
+				assert event.getRevisionNumber() == getModel().getObject(objectId)
+				        .getRevisionNumber()
+				        || (event.inTransaction() && getModel().getObject(objectId)
+				                .getRevisionNumber() == XCommand.NEW);
+				removeObjectInternal(objectId);
+			}
+			
+		} else {
+			assert event instanceof XObjectEvent || event instanceof XFieldEvent;
+			MemoryObject object = getObject(event.getTarget().getObject());
+			assert object != null;
+			assert event.getRevisionNumber() == object.getRevisionNumber()
+			        || (event.inTransaction() && event.getOldObjectRevision() == object
+			                .getRevisionNumber());
+			
+			if(event instanceof XObjectEvent) {
+				assert event.getTarget().equals(object.getAddress());
+				XID fieldId = ((XObjectEvent)event).getFieldID();
+				if(event.getChangeType() == ChangeType.REMOVE) {
+					assert !object.hasField(fieldId);
+					MemoryField field = object.createFieldInternal(fieldId);
+					assert event.getOldFieldRevision() >= 0;
+					field.setRevisionNumber(event.getOldFieldRevision());
+					field.save();
+				} else {
+					assert event.getChangeType() == ChangeType.ADD;
+					assert object.hasField(fieldId);
+					assert event.getRevisionNumber() == object.getField(fieldId)
+					        .getRevisionNumber()
+					        || (event.inTransaction() && object.getField(fieldId)
+					                .getRevisionNumber() == XCommand.NEW);
+					object.removeFieldInternal(fieldId);
+				}
+				
+			} else {
+				assert event instanceof XFieldEvent;
+				MemoryField field = object.getField(((XFieldEvent)event).getFieldID());
+				assert field != null;
+				assert event.getRevisionNumber() == field.getRevisionNumber()
+				        || (event.inTransaction() && event.getOldFieldRevision() == field
+				                .getRevisionNumber());
+				assert XI.equals(field.getValue(), ((XFieldEvent)event).getNewValue());
+				field.setValueInternal(((XFieldEvent)event).getOldValue());
+				assert event.getOldFieldRevision() >= 0;
 				field.setRevisionNumber(event.getOldFieldRevision());
 				field.save();
 			}
-		} else if(event.getChangeType() == ChangeType.REMOVE) {
-			MemoryObject field = getObject(((XModelEvent)event).getObjectID());
-			field.setRevisionNumber(event.getOldObjectRevision());
-			field.save();
+			
+			assert event.getOldObjectRevision() >= 0;
+			object.setRevisionNumber(event.getOldObjectRevision());
+			object.save();
 		}
+		
+		assert event.getOldModelRevision() >= 0;
 		setRevisionNumberIfModel(event.getOldModelRevision());
 		saveIfModel();
 	}
