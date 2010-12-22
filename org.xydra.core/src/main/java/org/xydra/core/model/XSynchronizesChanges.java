@@ -54,7 +54,7 @@ public interface XSynchronizesChanges extends XExecutesCommands, IHasXAddress {
 	 * @return the results for the localChanges
 	 * @throws IllegalStateException if this entity has already been removed
 	 */
-	long[] synchronize(XEvent[] remoteChanges, long lastRevision);
+	long[] synchronize(XEvent[] remoteChanges);
 	
 	/**
 	 * @return the {@link XChangeLog} which is logging the {@link XEvent
@@ -78,6 +78,7 @@ public interface XSynchronizesChanges extends XExecutesCommands, IHasXAddress {
 	 */
 	void setSessionActor(XID actorId, String passwordHash);
 	
+	// TODO document
 	List<LocalChange> getLocalChanges();
 	
 	/**
@@ -95,5 +96,8 @@ public interface XSynchronizesChanges extends XExecutesCommands, IHasXAddress {
 	 */
 	@ModificationOperation
 	long executeCommand(XCommand command, XSynchronizationCallback callback);
+	
+	// TODO document
+	long getSynchronizedRevision();
 	
 }

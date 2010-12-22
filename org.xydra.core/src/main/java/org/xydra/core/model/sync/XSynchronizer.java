@@ -36,7 +36,6 @@ public class XSynchronizer {
 	
 	static private final Logger log = LoggerFactory.getLogger(XSynchronizer.class);
 	
-	private long lastSyncedRevison;
 	private final XSynchronizesChanges entity;
 	private final XydraStore store;
 	private final List<LocalChange> changes;
@@ -63,7 +62,6 @@ public class XSynchronizer {
 		this.entity = entity;
 		this.store = store;
 		this.changes = entity.getLocalChanges(); // FIXME this is a hack
-		this.lastSyncedRevison = getLocalRevisionNumber();
 		assert addr.getField() == null;
 		assert addr.getModel() != null;
 		assert XI.equals(addr.getObject(), entity.getAddress().getObject());
@@ -92,6 +90,8 @@ public class XSynchronizer {
 		}
 		this.requestRunning = true;
 		
+		final long syncRev = this.entity.getSynchronizedRevision();
+		
 		if(!this.changes.isEmpty()) {
 			
 			// There are commands to send.
@@ -99,8 +99,7 @@ public class XSynchronizer {
 			// IMPROVE synchronize more than one change at a time
 			final LocalChange change = this.changes.get(0);
 			
-			log.info("sync: sending command " + change.command + ", rev is "
-			        + this.lastSyncedRevison);
+			log.info("sync: sending command " + change.command + ", rev is " + syncRev);
 			
 			Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback = new Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>>() {
 				
@@ -138,10 +137,10 @@ public class XSynchronizer {
 						// command successfully synchronized
 						if(commandRev >= 0) {
 							
-							if(commandRev <= XSynchronizer.this.lastSyncedRevison) {
+							if(commandRev <= syncRev) {
 								log.error("sync: store returned a command revision " + commandRev
 								        + " that isn't greater than our already synced revison "
-								        + XSynchronizer.this.lastSyncedRevison + " - store error?");
+								        + syncRev + " - store error?");
 								// lost sync -> bad!!!
 							}
 							
@@ -187,8 +186,8 @@ public class XSynchronizer {
 					
 					if(eventsRes.getException() != null) {
 						assert events == null;
-						log.info("sync: error getting events while sending command", eventsRes
-						        .getException());
+						log.info("sync: error getting events while sending command",
+						        eventsRes.getException());
 						// TODO handle error;
 						requestEnded(false);
 						return;
@@ -204,14 +203,14 @@ public class XSynchronizer {
 			
 			this.store.executeCommandsAndGetEvents(change.actor, change.passwordHash,
 			        new XCommand[] { change.command },
-			        new GetEventsRequest[] { new GetEventsRequest(this.addr,
-			                this.lastSyncedRevison + 1, Long.MAX_VALUE) }, callback);
+			        new GetEventsRequest[] { new GetEventsRequest(this.addr, syncRev + 1,
+			                Long.MAX_VALUE) }, callback);
 			
 		} else {
 			
 			// There are no commands to send, so just get new events.
 			
-			log.info("sync: getting events, rev is " + this.lastSyncedRevison);
+			log.info("sync: getting events, rev is " + syncRev);
 			
 			Callback<BatchedResult<XEvent[]>[]> callback = new Callback<BatchedResult<XEvent[]>[]>() {
 				
@@ -246,8 +245,8 @@ public class XSynchronizer {
 			
 			// FIXME where to get the passwordHash?
 			this.store.getEvents(this.entity.getSessionActor(), "",
-			        new GetEventsRequest[] { new GetEventsRequest(this.addr,
-			                this.lastSyncedRevison + 1, Long.MAX_VALUE) }, callback);
+			        new GetEventsRequest[] { new GetEventsRequest(this.addr, syncRev + 1,
+			                Long.MAX_VALUE) }, callback);
 			
 		}
 		
@@ -260,17 +259,19 @@ public class XSynchronizer {
 			return;
 		}
 		
+		long lastRev = this.entity.getSynchronizedRevision();
+		
 		log.info("sync: merging " + remoteChanges.length + " remote and " + this.changes.size()
 		        + " local changes, local rev is " + getLocalRevisionNumber() + " (synced to "
-		        + this.lastSyncedRevison + ")");
+		        + lastRev + ")");
 		
-		long[] results = this.entity.synchronize(remoteChanges, this.lastSyncedRevison);
+		long[] results = this.entity.synchronize(remoteChanges);
 		assert results.length == this.changes.size();
 		
-		this.lastSyncedRevison += remoteChanges.length;
+		assert this.entity.getSynchronizedRevision() == lastRev + remoteChanges.length;
 		
 		log.info("sync: merged changes, new local rev is " + getLocalRevisionNumber()
-		        + " (synced to " + this.lastSyncedRevison + ")");
+		        + " (synced to " + this.entity.getSynchronizedRevision() + ")");
 		
 		for(int i = 0; i < results.length; i++) {
 			LocalChange change = this.changes.get(i);

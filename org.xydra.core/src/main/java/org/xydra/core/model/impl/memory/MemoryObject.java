@@ -86,7 +86,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	        XObjectState objectState) {
 		XChangeLogState logState = objectState.getChangeLogState();
 		MemoryChangeLog log = logState == null ? null : new MemoryChangeLog(logState);
-		return new MemoryEventQueue(actorId, passwordHash, log);
+		return new MemoryEventQueue(actorId, passwordHash, log, objectState.getRevisionNumber());
 	}
 	
 	/**

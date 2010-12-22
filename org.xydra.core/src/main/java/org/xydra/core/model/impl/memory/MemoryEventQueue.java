@@ -41,6 +41,7 @@ public class MemoryEventQueue implements Serializable {
 	private boolean sending;
 	private final MemoryChangeLog changeLog;
 	
+	private long syncRevision;
 	private final List<LocalChange> localChanges = new ArrayList<LocalChange>();
 	private XID sessionActor;
 	private String sessionPasswordHash;
@@ -71,12 +72,13 @@ public class MemoryEventQueue implements Serializable {
 	 * @param log The {@link XChangeLog} this MemoryEventQueue will use for
 	 *            logging (may be null)
 	 */
-	public MemoryEventQueue(XID actorId, String passwordHash, MemoryChangeLog log) {
+	public MemoryEventQueue(XID actorId, String passwordHash, MemoryChangeLog log, long syncRev) {
 		assert actorId != null;
 		this.sessionActor = actorId;
 		this.sessionPasswordHash = passwordHash;
 		this.changeLog = log;
 		this.logging = this.changeLog != null;
+		this.syncRevision = syncRev;
 	}
 	
 	/**
@@ -546,31 +548,31 @@ public class MemoryEventQueue implements Serializable {
 			}
 			assert first.getChangeType() == ChangeType.REMOVE;
 			// non matching REMOVE -> ADD => merge to CHANGE
-			return MemoryFieldEvent.createChangeEvent(last.getActor(), last.getTarget(), first
-			        .getOldValue(), last.getNewValue(), last.getOldModelRevision(), last
-			        .getOldObjectRevision(), last.getOldFieldRevision(), false);
+			return MemoryFieldEvent.createChangeEvent(last.getActor(), last.getTarget(),
+			        first.getOldValue(), last.getNewValue(), last.getOldModelRevision(),
+			        last.getOldObjectRevision(), last.getOldFieldRevision(), false);
 		case REMOVE:
 			if(first.getChangeType() == ChangeType.REMOVE) {
 				return last;
 			}
 			assert first.getChangeType() == ChangeType.CHANGE;
 			// (non matching) CHANGE->REMOVE => merge to REMOVE
-			return MemoryFieldEvent.createRemoveEvent(last.getActor(), last.getTarget(), first
-			        .getOldValue(), last.getOldModelRevision(), last.getOldObjectRevision(), last
-			        .getOldFieldRevision(), false, false);
+			return MemoryFieldEvent.createRemoveEvent(last.getActor(), last.getTarget(),
+			        first.getOldValue(), last.getOldModelRevision(), last.getOldObjectRevision(),
+			        last.getOldFieldRevision(), false, false);
 		case CHANGE:
 			assert first.getChangeType() != ChangeType.REMOVE;
 			if(first.getChangeType() == ChangeType.CHANGE) {
 				// non-matching CHANGE->CHANGE => merge to CHANGE
-				return MemoryFieldEvent.createChangeEvent(last.getActor(), last.getTarget(), first
-				        .getOldValue(), last.getNewValue(), last.getOldModelRevision(), last
-				        .getOldObjectRevision(), last.getOldFieldRevision(), false);
+				return MemoryFieldEvent.createChangeEvent(last.getActor(), last.getTarget(),
+				        first.getOldValue(), last.getNewValue(), last.getOldModelRevision(),
+				        last.getOldObjectRevision(), last.getOldFieldRevision(), false);
 			} else {
 				assert first.getChangeType() == ChangeType.ADD;
 				// non-matching ADD->CHANGE => merge to ADD
-				return MemoryFieldEvent.createAddEvent(last.getActor(), last.getTarget(), last
-				        .getNewValue(), last.getOldModelRevision(), last.getOldObjectRevision(),
-				        last.getOldFieldRevision(), false);
+				return MemoryFieldEvent.createAddEvent(last.getActor(), last.getTarget(),
+				        last.getNewValue(), last.getOldModelRevision(),
+				        last.getOldObjectRevision(), last.getOldFieldRevision(), false);
 			}
 		default:
 			throw new AssertionError("invalid event: " + last);
@@ -634,6 +636,14 @@ public class MemoryEventQueue implements Serializable {
 	
 	protected List<LocalChange> getLocalChanges() {
 		return this.localChanges;
+	}
+	
+	protected void setSyncRevision(long syncRevision) {
+		this.syncRevision = syncRevision;
+	}
+	
+	protected long getSyncRevision() {
+		return this.syncRevision;
 	}
 	
 }

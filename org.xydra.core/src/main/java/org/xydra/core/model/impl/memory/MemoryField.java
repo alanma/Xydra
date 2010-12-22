@@ -81,7 +81,7 @@ public class MemoryField implements XField, Serializable {
 	 * @param fieldState The initial {@link XFieldState} of this MemoryField.
 	 */
 	public MemoryField(XID actorId, XFieldState fieldState) {
-		this(null, new MemoryEventQueue(actorId, null, null), fieldState);
+		this(null, new MemoryEventQueue(actorId, null, null, -1), fieldState);
 	}
 	
 	/**

@@ -35,7 +35,7 @@ public class XSynchronizer {
 	
 	static private final Logger log = LoggerFactory.getLogger(XSynchronizer.class);
 	
-	private long syncRevison;
+	private long syncRevison; // FIXME revision now tracked in entity.
 	private final XSynchronizesChanges entity;
 	private final XChangesService service;
 	private final List<LocalChange> changes;
@@ -177,7 +177,7 @@ public class XSynchronizer {
 		        + this.syncRevison + ")");
 		
 		XEvent[] events = remoteChanges.toArray(new XEvent[remoteChanges.size()]);
-		long[] results = this.entity.synchronize(events, this.syncRevison);
+		long[] results = this.entity.synchronize(events);
 		
 		this.syncRevison += remoteChanges.size();
 		

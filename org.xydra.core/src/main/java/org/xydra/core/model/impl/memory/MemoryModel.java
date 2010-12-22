@@ -94,7 +94,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	        XModelState modelState) {
 		super(new MemoryEventQueue(actorId, passwordHash,
 		        modelState.getChangeLogState() == null ? null : new MemoryChangeLog(
-		                modelState.getChangeLogState())));
+		                modelState.getChangeLogState()), modelState.getRevisionNumber()));
 		
 		this.state = modelState;
 		this.father = father;

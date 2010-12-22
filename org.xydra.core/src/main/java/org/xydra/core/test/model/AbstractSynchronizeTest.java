@@ -60,8 +60,8 @@ abstract public class AbstractSynchronizeTest {
 	public void setUp() {
 		
 		// create two identical phonebook models
-		XRepository remoteRepo = new MemoryRepository(this.actorId, this.password, XX
-		        .toId("remoteRepo"));
+		XRepository remoteRepo = new MemoryRepository(this.actorId, this.password,
+		        XX.toId("remoteRepo"));
 		DemoModelUtil.addPhonebookModel(remoteRepo);
 		this.remoteModel = remoteRepo.getModel(DemoModelUtil.PHONEBOOK_ID);
 		
@@ -137,8 +137,8 @@ abstract public class AbstractSynchronizeTest {
 		XAddress newFieldAddr = XX.resolveField(newObjectAddr, newFieldId);
 		XValue newValue1 = XV.toValue("chocolate chip");
 		XValue newValue2 = XV.toValue("almond");
-		XModelCommand createObject = MemoryModelCommand.createAddCommand(this.localModel
-		        .getAddress(), false, newObjectId);
+		XModelCommand createObject = MemoryModelCommand.createAddCommand(
+		        this.localModel.getAddress(), false, newObjectId);
 		XObjectCommand createField = MemoryObjectCommand.createAddCommand(newObjectAddr, false,
 		        newFieldId);
 		XFieldCommand setValue1 = MemoryFieldCommand.createAddCommand(newFieldAddr,
@@ -153,10 +153,10 @@ abstract public class AbstractSynchronizeTest {
 		        .getRevisionNumber(), DemoModelUtil.PETER_ID);
 		
 		XObject john = this.localModel.getObject(DemoModelUtil.JOHN_ID);
-		XModelCommand removeJohnSafe = MemoryModelCommand.createRemoveCommand(this.localModel
-		        .getAddress(), john.getRevisionNumber(), john.getID());
-		XModelCommand removeJohnForced = MemoryModelCommand.createRemoveCommand(this.localModel
-		        .getAddress(), XCommand.FORCED, john.getID());
+		XModelCommand removeJohnSafe = MemoryModelCommand.createRemoveCommand(
+		        this.localModel.getAddress(), john.getRevisionNumber(), john.getID());
+		XModelCommand removeJohnForced = MemoryModelCommand.createRemoveCommand(
+		        this.localModel.getAddress(), XCommand.FORCED, john.getID());
 		
 		// IMPROVE test callbacks
 		List<XCommand> localChanges = new ArrayList<XCommand>();
@@ -192,7 +192,8 @@ abstract public class AbstractSynchronizeTest {
 		// synchronize the remoteChanges into localModel
 		XEvent[] remoteEvents = remoteChanges.toArray(new XEvent[remoteChanges.size()]);
 		
-		long[] results = this.localModel.synchronize(remoteEvents, lastRevision);
+		assert lastRevision == this.localModel.getSynchronizedRevision();
+		long[] results = this.localModel.synchronize(remoteEvents);
 		
 		// FIXME this is a hack;
 		List<LocalChange> lc = this.localModel.getLocalChanges();
@@ -211,11 +212,11 @@ abstract public class AbstractSynchronizeTest {
 		// check that commands have been properly modified
 		assertEquals(createObject, lc.get(0).command);
 		assertEquals(createField, lc.get(1).command);
-		assertEquals(setValue1.getRevisionNumber() + remoteChanges.size(), ((XFieldCommand)lc
-		        .get(2).command).getRevisionNumber());
+		assertEquals(setValue1.getRevisionNumber() + remoteChanges.size(),
+		        ((XFieldCommand)lc.get(2).command).getRevisionNumber());
 		assertEquals(setValue2, lc.get(3).command);
-		assertEquals(removeField.getRevisionNumber() + remoteChanges.size(), ((XObjectCommand)lc
-		        .get(4).command).getRevisionNumber());
+		assertEquals(removeField.getRevisionNumber() + remoteChanges.size(),
+		        ((XObjectCommand)lc.get(4).command).getRevisionNumber());
 		assertEquals(removePeter, lc.get(5).command);
 		assertEquals(removeJohnSafe, lc.get(6).command);
 		
