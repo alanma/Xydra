@@ -49,8 +49,8 @@ public abstract class AbstractAllowAllStoreTest extends AbstractStoreTest {
 	}
 	
 	/**
-	 * Incorrect users do not exist, so we'll need to return false and do
-	 * nothing else
+	 * Incorrect users do not exist, so we'll need to return null and do nothing
+	 * else
 	 */
 	@Override
 	protected XID getIncorrectUser() {
