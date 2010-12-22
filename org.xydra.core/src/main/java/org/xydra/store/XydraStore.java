@@ -18,9 +18,6 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.index.query.Pair;
 
-/**
- * FIXME Is this the correct import?! I think that "our" XObject" is meant here, or isn't it? ~Bjoern
- */
 import com.sun.org.apache.xpath.internal.objects.XObject;
 
 
@@ -77,6 +74,15 @@ import com.sun.org.apache.xpath.internal.objects.XObject;
  * 
  * <h3>Implementation guidelines</h3> For anonymous users over HTTP, the
  * IP-Address could be used as an actorId.
+ * 
+ * TODO What is the point of allowing the callback to be null for methods that
+ * only return something and don't have side effects? ~Daniel (
+ * {@link XydraStore#getRepositoryId(XID, String, Callback)},
+ * {@link #getEvents(XID, String, GetEventsRequest[], Callback)},
+ * {@link #getModelIds(XID, String, Callback)},
+ * {@link #getModelRevisions(XID, String, XAddress[], Callback)}
+ * {@link #getModelSnapshots(XID, String, XAddress[], Callback)}
+ * {@link #getObjectSnapshots(XID, String, XAddress[], Callback)})
  * 
  * @author voelkel
  * @author dscharrer
