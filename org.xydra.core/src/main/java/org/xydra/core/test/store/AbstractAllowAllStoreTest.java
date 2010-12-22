@@ -30,6 +30,7 @@ public abstract class AbstractAllowAllStoreTest extends AbstractStoreTest {
 	 * QuotaException cannot be tested here (no access rights mean no
 	 * QuotaException), so we can return what we want...
 	 */
+	@Override
 	protected long getQuotaForBruteForce() {
 		return 1;
 	}
@@ -37,10 +38,12 @@ public abstract class AbstractAllowAllStoreTest extends AbstractStoreTest {
 	/**
 	 * Every user can do everything, so it doesn't matter what we return here
 	 */
+	@Override
 	protected XID getCorrectUser() {
 		return XX.createUniqueID();
 	}
 	
+	@Override
 	protected String getCorrectUserPasswordHash() {
 		return "Test";
 	}
@@ -49,10 +52,12 @@ public abstract class AbstractAllowAllStoreTest extends AbstractStoreTest {
 	 * Incorrect users do not exist, so we'll need to return false and do
 	 * nothing else
 	 */
+	@Override
 	protected XID getIncorrectUser() {
 		return null;
 	}
 	
+	@Override
 	protected String getIncorrectUserPasswordHash() {
 		return null;
 	}
