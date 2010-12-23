@@ -48,19 +48,19 @@ import org.xydra.store.XydraStore;
 
 public abstract class AbstractStoreTest {
 	
-	private XydraStore store;
-	private XCommandFactory factory;
+	protected XydraStore store;
+	protected XCommandFactory factory;
 	
 	private XID correctUser, incorrectUser;
-	private XAddress[] modelAddresses;
-	private XAddress notExistingModel;
-	private XAddress[] objectAddresses;
-	private XAddress notExistingObject;
+	protected XAddress[] modelAddresses;
+	protected XAddress notExistingModel;
+	protected XAddress[] objectAddresses;
+	protected XAddress notExistingObject;
 	
-	private String correctUserPass, incorrectUserPass;
-	private long timeout;
-	private long bfQuota;
-	private boolean setUpDone = false, incorrectActorExists = true;
+	protected String correctUserPass, incorrectUserPass;
+	protected long timeout;
+	protected long bfQuota;
+	protected boolean setUpDone = false, incorrectActorExists = true;
 	
 	/**
 	 * @return an implementation of {@link XydraStore} which is to be tested
