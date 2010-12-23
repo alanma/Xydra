@@ -72,6 +72,10 @@ public class BaseModel implements XBaseModel, Serializable {
 	}
 	
 	public XBaseObject getObject(XID objectId) {
+		if(this.baseModel == null) {
+			return null;
+		}
+		
 		return this.baseModel.getObject(objectId);
 	}
 	
