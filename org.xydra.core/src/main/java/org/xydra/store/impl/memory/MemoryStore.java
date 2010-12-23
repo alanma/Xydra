@@ -43,11 +43,22 @@ public class MemoryStore implements XydraStore {
 		// TODO why not store both data and rights in the same store instance,
 		// but with different repository IDs?
 		this.data = new AllowAllStore(new MemoryNoAccessRightsNoBatchNoAsyncStore(XX.toId("data")));
-		this.rights = new AllowAllStore(new MemoryNoAccessRightsNoBatchNoAsyncStore(XX
-		        .toId("rights")));
-		this.groupModelWrapper = new GroupModelWrapper(this.rights, XX.toId("rights"), XX
-		        .toId("actors"));
+		this.rights = new AllowAllStore(new MemoryNoAccessRightsNoBatchNoAsyncStore(
+		        XX.toId("rights")));
+		this.groupModelWrapper = new GroupModelWrapper(this.rights, XX.toId("rights"),
+		        XX.toId("actors"));
 		
+	}
+	
+	/**
+	 * This is just a temporary method to somehow make it possible to test
+	 * MemoryStore until I know how I'm supposed to work with the access rights
+	 * here. Do NOT use this anywhere else!
+	 * 
+	 * ~Bjoern
+	 */
+	public GroupModelWrapper getGroupModelWrapper() {
+		return this.groupModelWrapper;
 	}
 	
 	public void checkLogin(XID actorId, String passwordHash, Callback<Boolean> callback) {
@@ -65,7 +76,8 @@ public class MemoryStore implements XydraStore {
 	}
 	
 	public void executeCommandsAndGetEvents(XID actorId, String passwordHash, XCommand[] commands,
-	        GetEventsRequest[] getEventRequests, Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback) {
+	        GetEventsRequest[] getEventRequests,
+	        Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback) {
 		if(!this.groupModelWrapper.isValidLogin(actorId, passwordHash)) {
 			callback.onFailure(new AuthorisationException("Unauthorised login/passwordHash "
 			        + actorId + "/" + passwordHash));
