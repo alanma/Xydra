@@ -65,8 +65,13 @@ public class WritableModel extends BaseModel implements XWritableModel, Serializ
 	@Override
 	public XWritableObject getObject(XID objectId) {
 		XBaseObject baseObject = super.getObject(objectId);
-		WritableObject writableObject = new WritableObject(this.credentials, this.store, baseObject
-		        .getAddress());
+		
+		if(baseObject == null) {
+			return null;
+		}
+		
+		WritableObject writableObject = new WritableObject(this.credentials, this.store,
+		        baseObject.getAddress());
 		for(XID fieldId : baseObject) {
 			XWritableField writabelField = writableObject.createField(fieldId);
 			writabelField.setValue(baseObject.getField(fieldId).getValue());
