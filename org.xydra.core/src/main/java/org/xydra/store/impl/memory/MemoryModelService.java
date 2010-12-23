@@ -28,6 +28,12 @@ import org.xydra.store.base.SimpleModel;
 public class MemoryModelService {
 	
 	XAddress modelAddr;
+	
+	/*
+	 * FIXME model is never initialized in this class, which means that all
+	 * methods like executeCommand always fail from what I can see at the
+	 * moment. ~bjoern
+	 */
 	SimpleModel model = null;
 	private List<XEvent> events = new ArrayList<XEvent>();
 	
