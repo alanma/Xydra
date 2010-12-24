@@ -1,4 +1,4 @@
-package org.xydra.core.test.store;
+package org.xydra.store.test;
 
 import org.xydra.store.Callback;
 import org.xydra.store.XydraStore;

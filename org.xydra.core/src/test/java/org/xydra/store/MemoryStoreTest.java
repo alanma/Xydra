@@ -1,4 +1,4 @@
-package org.xydra.core.test.store;
+package org.xydra.store;
 
 import org.junit.Before;
 import org.xydra.core.X;
@@ -8,6 +8,7 @@ import org.xydra.core.model.XID;
 import org.xydra.store.XydraStore;
 import org.xydra.store.access.GroupModelWrapper;
 import org.xydra.store.impl.memory.MemoryStore;
+import org.xydra.store.test.AbstractStoreTest;
 
 
 public class MemoryStoreTest extends AbstractStoreTest {

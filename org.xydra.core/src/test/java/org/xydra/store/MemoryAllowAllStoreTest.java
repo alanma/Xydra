@@ -1,4 +1,4 @@
-package org.xydra.core.test.store;
+package org.xydra.store;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -13,6 +13,8 @@ import org.xydra.core.model.XID;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.memory.MemoryNoAccessRightsNoBatchNoAsyncStore;
 import org.xydra.store.impl.memory.SynchronousNoAccessRightsStore;
+import org.xydra.store.test.AbstractAllowAllStoreTest;
+import org.xydra.store.test.SynchronousTestCallback;
 
 
 public class MemoryAllowAllStoreTest extends AbstractAllowAllStoreTest {

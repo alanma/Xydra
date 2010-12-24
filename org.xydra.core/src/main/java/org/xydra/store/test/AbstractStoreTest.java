@@ -1,4 +1,4 @@
-package org.xydra.core.test.store;
+package org.xydra.store.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

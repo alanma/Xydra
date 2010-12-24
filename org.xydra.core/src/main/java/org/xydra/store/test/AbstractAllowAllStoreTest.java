@@ -1,4 +1,4 @@
-package org.xydra.core.test.store;
+package org.xydra.store.test;
 
 import org.xydra.core.XX;
 import org.xydra.core.model.XID;
