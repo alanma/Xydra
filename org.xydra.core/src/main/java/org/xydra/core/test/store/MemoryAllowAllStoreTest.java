@@ -16,7 +16,6 @@ import org.xydra.store.impl.memory.SynchronousNoAccessRightsStore;
 
 
 public class MemoryAllowAllStoreTest extends AbstractAllowAllStoreTest {
-	private XydraStore store;
 	private XID repositoryID = XX.createUniqueID();
 	
 	@Override
