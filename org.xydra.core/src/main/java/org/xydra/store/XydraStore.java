@@ -74,15 +74,6 @@ import org.xydra.index.query.Pair;
  * <h3>Implementation guidelines</h3> For anonymous users over HTTP, the
  * IP-Address could be used as an actorId.
  * 
- * TODO What is the point of allowing the callback to be null for methods that
- * only return something and don't have side effects? ~Daniel (
- * {@link XydraStore#getRepositoryId(XID, String, Callback)},
- * {@link #getEvents(XID, String, GetEventsRequest[], Callback)},
- * {@link #getModelIds(XID, String, Callback)},
- * {@link #getModelRevisions(XID, String, XAddress[], Callback)}
- * {@link #getModelSnapshots(XID, String, XAddress[], Callback)}
- * {@link #getObjectSnapshots(XID, String, XAddress[], Callback)})
- * 
  * @author voelkel
  * @author dscharrer
  */
@@ -158,9 +149,8 @@ public interface XydraStore {
 	 *            success, an array of {@link BatchedResult} is returned, in the
 	 *            same order of the modelAddresses given in the request. A null
 	 *            value in the array signals that the requested model does not
-	 *            exist in the store.
+	 *            exist in the store. May not be null.
 	 * @throws IllegalArgumentException if one of the given parameters is null.
-	 *             Only the callback may be null.
 	 * 
 	 *             Implementation note: Implementation may choose to supply a
 	 *             lazy-loading stub only.
@@ -202,9 +192,8 @@ public interface XydraStore {
 	 *            the request array (modelAddresses) the revision number of the
 	 *            addressed model as a long. Non-existing models (and those for
 	 *            which the actorId has no read-access) are signalled as
-	 *            {@link #MODEL_DOES_NOT_EXIST}.
+	 *            {@link #MODEL_DOES_NOT_EXIST}. May not be null.
 	 * @throws IllegalArgumentException if one of the given parameters is null.
-	 *             Only the callback may be null.
 	 */
 	void getModelRevisions(XID actorId, String passwordHash, XAddress[] modelAddresses,
 	        Callback<BatchedResult<Long>[]> callback) throws IllegalArgumentException;
@@ -246,9 +235,8 @@ public interface XydraStore {
 	 *            same order of the objectAddresses given in the request. A null
 	 *            value in the array signals that the requested object does not
 	 *            exist in the store - or that the actorId has no read-access on
-	 *            it.
+	 *            it. May not be null.
 	 * @throws IllegalArgumentException if one of the given parameters is null.
-	 *             Only the callback may be null.
 	 * 
 	 *             Implementation note: Implementation may chose to supply a
 	 *             lazy-loading stub only.
@@ -280,7 +268,7 @@ public interface XydraStore {
 	 *            for which the given actorId has read-access in the repository
 	 *            is returned.
 	 * @throws IllegalArgumentException if one of the given parameters is null.
-	 *             Only the callback may be null.
+	 *             May not be null.
 	 */
 	void getModelIds(XID actorId, String passwordHash, Callback<Set<XID>> callback)
 	        throws IllegalArgumentException;
@@ -310,9 +298,9 @@ public interface XydraStore {
 	 *            network if the user uses the same password for multiple
 	 *            services.
 	 * @param callback Asynchronous callback to signal success or failure. On
-	 *            success, the repositoryId of this store is returned.
-	 * @throws IllegalArgumentException if one of the given parameters is null.
-	 *             Only the callback may be null.
+	 *            success, the repositoryId of this store is returned. May not
+	 *            be null.
+	 * @throws IllegalArgumentException if any of the given parameters is null.
 	 */
 	void getRepositoryId(XID actorId, String passwordHash, Callback<XID> callback)
 	        throws IllegalArgumentException;
@@ -432,9 +420,8 @@ public interface XydraStore {
 	 * @param callback Asynchronous callback to signal success or failure. On
 	 *            success, this callback returns an array which has one entry
 	 *            for each requested XAddress. Each entry is itself an array of
-	 *            XEvents, in the order in which they happened.
-	 * @throws IllegalArgumentException if one of the given parameters is null.
-	 *             Only the callback may be null.
+	 *            XEvents, in the order in which they happened. May not be null.
+	 * @throws IllegalArgumentException if any of the given parameters is null.
 	 */
 	void getEvents(XID actorId, String passwordHash, GetEventsRequest[] getEventsRequest,
 	        Callback<BatchedResult<XEvent[]>[]> callback) throws IllegalArgumentException;
