@@ -14,6 +14,7 @@ import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XType;
 import org.xydra.core.model.XWritableRepository;
+import org.xydra.store.RequestException;
 
 
 /**
@@ -80,6 +81,10 @@ public class MemoryNoAccessRightsNoBatchNoAsyncStore implements
 	
 	@Override
 	public long getModelRevision(XAddress address) {
+		if(address.getAddressedType() != XType.XMODEL) {
+			throw new RequestException("must use a model address to get a model revison, was "
+			        + address);
+		}
 		checkRepoId(address);
 		return getModelService(address.getModel()).getRevisionNumber();
 	}
@@ -87,8 +92,8 @@ public class MemoryNoAccessRightsNoBatchNoAsyncStore implements
 	@Override
 	public XBaseModel getModelSnapshot(XAddress address) {
 		if(address.getAddressedType() != XType.XMODEL) {
-			throw new IllegalArgumentException(
-			        "must use a model address to get a model snapshot, was " + address);
+			throw new RequestException("must use a model address to get a model snapshot, was "
+			        + address);
 		}
 		checkRepoId(address);
 		return getModelService(address.getModel()).getModelSnapshot();
@@ -97,8 +102,8 @@ public class MemoryNoAccessRightsNoBatchNoAsyncStore implements
 	@Override
 	public XBaseObject getObjectSnapshot(XAddress address) {
 		if(address.getAddressedType() != XType.XOBJECT) {
-			throw new IllegalArgumentException(
-			        "must use an object address to get an object snapshot, was " + address);
+			throw new RequestException("must use an object address to get an object snapshot, was "
+			        + address);
 		}
 		checkRepoId(address);
 		return getModelService(address.getModel()).getObjectSnapshot(address.getObject());

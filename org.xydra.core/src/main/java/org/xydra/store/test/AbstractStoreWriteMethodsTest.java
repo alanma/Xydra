@@ -11,7 +11,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	protected XydraStore store;
 	protected XCommandFactory factory;
 	
-	private XID correctUser, incorrectUser, repoID;
+	protected XID correctUser, incorrectUser, repoID;
 	
 	protected String correctUserPass, incorrectUserPass;
 	protected long timeout;
