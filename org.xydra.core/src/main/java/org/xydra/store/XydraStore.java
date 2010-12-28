@@ -193,6 +193,10 @@ public interface XydraStore {
 	 *            addressed model as a long. Non-existing models (and those for
 	 *            which the actorId has no read-access) are signalled as
 	 *            {@link #MODEL_DOES_NOT_EXIST}. May not be null.
+	 * 
+	 *            TODO what is returned here if the passed address does not
+	 *            refer to an XModel ({@link #MODEL_DOES_NOT_EXIST} doesn't
+	 *            really fit here, I think) ~Bjoern
 	 * @throws IllegalArgumentException if one of the given parameters is null.
 	 */
 	void getModelRevisions(XID actorId, String passwordHash, XAddress[] modelAddresses,
