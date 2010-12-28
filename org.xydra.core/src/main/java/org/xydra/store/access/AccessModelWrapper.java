@@ -149,6 +149,8 @@ public class AccessModelWrapper implements XAccessDatabase {
 	private XWritableModel dataModel, indexModel;
 	
 	public AccessModelWrapper(XydraStore store, XID repositoryId, XID modelId) {
+		// FIXME these models are never created in the store, so any changes to
+		// them will fail
 		this.dataModel = new WritableModel(this.credentials, store, X.getIDProvider()
 		        .fromComponents(repositoryId, modelId, null, null));
 		this.indexModel = new WritableModel(this.credentials, store, X.getIDProvider()

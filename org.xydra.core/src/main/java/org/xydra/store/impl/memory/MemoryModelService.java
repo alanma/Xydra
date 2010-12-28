@@ -29,12 +29,11 @@ public class MemoryModelService {
 	
 	XAddress modelAddr;
 	
-	/*
-	 * FIXME model is never initialized in this class, which means that all
-	 * methods like executeCommand always fail from what I can see at the
-	 * moment. ~bjoern
+	/**
+	 * The current state of the model, or null if the model doesn't currently
+	 * exist.
 	 */
-	SimpleModel model = null;
+	private SimpleModel model = null;
 	private List<XEvent> events = new ArrayList<XEvent>();
 	
 	public MemoryModelService(XAddress modelAddr) {
@@ -81,6 +80,7 @@ public class MemoryModelService {
 		this.model = DeltaUtils.applyChanges(this.modelAddr, this.model, change, newRev);
 		
 		assert getRevisionNumber() == newRev;
+		assert this.model == null || this.model.getRevisionNumber() == newRev;
 		
 		return newRev;
 	}

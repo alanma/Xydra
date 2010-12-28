@@ -132,6 +132,8 @@ public class GroupModelWrapper implements XGroupDatabase, XPasswordDatabase {
 	private XWritableModel dataModel, indexModel;
 	
 	public GroupModelWrapper(XydraStore store, XID repositoryId, XID modelId) {
+		// FIXME these models are never created in the store, so any changes to
+		// them will fail
 		this.dataModel = new WritableModel(this.credentials, store, X.getIDProvider()
 		        .fromComponents(repositoryId, modelId, null, null));
 		this.indexModel = new WritableModel(this.credentials, store, X.getIDProvider()
