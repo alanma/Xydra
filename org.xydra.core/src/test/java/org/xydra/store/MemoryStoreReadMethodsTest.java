@@ -8,10 +8,10 @@ import org.xydra.core.model.XID;
 import org.xydra.store.XydraStore;
 import org.xydra.store.access.GroupModelWrapper;
 import org.xydra.store.impl.memory.MemoryStore;
-import org.xydra.store.test.AbstractStoreTest;
+import org.xydra.store.test.AbstractStoreReadMethodsTest;
 
 
-public class MemoryStoreTest extends AbstractStoreTest {
+public class MemoryStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 	protected GroupModelWrapper gmw = null;
 	
 	@Override

@@ -15,7 +15,7 @@ import org.xydra.store.impl.memory.XydraNoAccessRightsStore;
  * 
  */
 
-public abstract class AbstractAllowAllStoreTest extends AbstractStoreTest {
+public abstract class AbstractAllowAllStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 	
 	/**
 	 * Returns a new instance of AllowAllStore initialized with the given

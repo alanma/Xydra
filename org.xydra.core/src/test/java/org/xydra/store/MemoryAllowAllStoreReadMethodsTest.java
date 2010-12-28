@@ -13,11 +13,11 @@ import org.xydra.core.model.XID;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.memory.MemoryNoAccessRightsNoBatchNoAsyncStore;
 import org.xydra.store.impl.memory.SynchronousNoAccessRightsStore;
-import org.xydra.store.test.AbstractAllowAllStoreTest;
+import org.xydra.store.test.AbstractAllowAllStoreReadMethodsTest;
 import org.xydra.store.test.SynchronousTestCallback;
 
 
-public class MemoryAllowAllStoreTest extends AbstractAllowAllStoreTest {
+public class MemoryAllowAllStoreReadMethodsTest extends AbstractAllowAllStoreReadMethodsTest {
 	private XID repositoryID = XX.createUniqueID();
 	
 	@Override
