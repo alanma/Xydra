@@ -33,6 +33,7 @@ public class WritableRepository extends BaseRepository implements XWritableRepos
 		XCommand command = X.getCommandFactory().createAddModelCommand(this.getID(), modelId, true);
 		long result = WritableUtils.executeCommand(this.credentials, this.store, command);
 		if(result >= 0) {
+			this.modelIds = null;
 			return this.getModel(modelId);
 		} else {
 			// something went wrong
@@ -52,6 +53,7 @@ public class WritableRepository extends BaseRepository implements XWritableRepos
 		        this.getModel(modelId).getRevisionNumber(), true);
 		long result = WritableUtils.executeCommand(this.credentials, this.store, command);
 		if(result >= 0) {
+			this.modelIds = null;
 			return true;
 		} else {
 			// something went wrong
@@ -68,6 +70,9 @@ public class WritableRepository extends BaseRepository implements XWritableRepos
 	@Override
 	public XWritableModel getModel(XID modelId) {
 		XBaseModel baseModel = super.getModel(modelId);
+		if(baseModel == null) {
+			return null;
+		}
 		WritableModel writableModel = new WritableModel(this.credentials, this.store, baseModel
 		        .getAddress());
 		for(XID objectId : baseModel) {

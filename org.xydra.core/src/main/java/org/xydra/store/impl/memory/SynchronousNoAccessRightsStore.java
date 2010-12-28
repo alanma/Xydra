@@ -82,30 +82,36 @@ public class SynchronousNoAccessRightsStore implements XydraNoAccessRightsStore 
 	@Override
 	public void getEvents(GetEventsRequest[] getEventRequests,
 	        Callback<BatchedResult<XEvent[]>[]> callback) {
-		if(callback != null) {
-			callback.onSuccess(getEvents(getEventRequests));
+		if(callback == null) {
+			throw new IllegalArgumentException(
+			        "callback for side-effect free methods must not be null");
 		}
+		callback.onSuccess(getEvents(getEventRequests));
 	}
 	
 	@Override
 	public void getModelIds(Callback<Set<XID>> callback) {
+		if(callback == null) {
+			throw new IllegalArgumentException(
+			        "callback for side-effect free methods must not be null");
+		}
 		Set<XID> ids;
 		try {
 			ids = this.noBatchStore.getModelIds();
 		} catch(Exception e) {
-			if(callback != null) {
-				callback.onFailure(e);
-			}
+			callback.onFailure(e);
 			return;
 		}
-		if(callback != null) {
-			callback.onSuccess(ids);
-		}
+		callback.onSuccess(ids);
 	}
 	
 	@Override
 	public void getModelRevisions(XAddress[] modelAddresses,
 	        Callback<BatchedResult<Long>[]> callback) {
+		if(callback == null) {
+			throw new IllegalArgumentException(
+			        "callback for side-effect free methods must not be null");
+		}
 		@SuppressWarnings("unchecked")
 		BatchedResult<Long>[] results = new BatchedResult[modelAddresses.length];
 		for(int i = 0; i < modelAddresses.length; i++) {
@@ -116,14 +122,16 @@ public class SynchronousNoAccessRightsStore implements XydraNoAccessRightsStore 
 				results[i] = new BatchedResult<Long>(e);
 			}
 		}
-		if(callback != null) {
-			callback.onSuccess(results);
-		}
+		callback.onSuccess(results);
 	}
 	
 	@Override
 	public void getModelSnapshots(XAddress[] modelAddresses,
 	        Callback<BatchedResult<XBaseModel>[]> callback) {
+		if(callback == null) {
+			throw new IllegalArgumentException(
+			        "callback for side-effect free methods must not be null");
+		}
 		@SuppressWarnings("unchecked")
 		BatchedResult<XBaseModel>[] results = new BatchedResult[modelAddresses.length];
 		
@@ -135,14 +143,16 @@ public class SynchronousNoAccessRightsStore implements XydraNoAccessRightsStore 
 				results[i] = new BatchedResult<XBaseModel>(e);
 			}
 		}
-		if(callback != null) {
-			callback.onSuccess(results);
-		}
+		callback.onSuccess(results);
 	}
 	
 	@Override
 	public void getObjectSnapshots(XAddress[] objectAddresses,
 	        Callback<BatchedResult<XBaseObject>[]> callback) {
+		if(callback == null) {
+			throw new IllegalArgumentException(
+			        "callback for side-effect free methods must not be null");
+		}
 		@SuppressWarnings("unchecked")
 		BatchedResult<XBaseObject>[] results = new BatchedResult[objectAddresses.length];
 		for(int i = 0; i < objectAddresses.length; i++) {
@@ -153,17 +163,17 @@ public class SynchronousNoAccessRightsStore implements XydraNoAccessRightsStore 
 				results[i] = new BatchedResult<XBaseObject>(e);
 			}
 		}
-		if(callback != null) {
-			callback.onSuccess(results);
-		}
+		callback.onSuccess(results);
 	}
 	
 	@Override
 	public void getRepositoryId(Callback<XID> callback) {
-		XID repoId = this.noBatchStore.getRepositoryId();
-		if(callback != null) {
-			callback.onSuccess(repoId);
+		if(callback == null) {
+			throw new IllegalArgumentException(
+			        "callback for side-effect free methods must not be null");
 		}
+		XID repoId = this.noBatchStore.getRepositoryId();
+		callback.onSuccess(repoId);
 	}
 	
 }

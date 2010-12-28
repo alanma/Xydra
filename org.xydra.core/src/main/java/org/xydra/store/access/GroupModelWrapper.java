@@ -10,11 +10,13 @@ import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.core.X;
 import org.xydra.core.XX;
+import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.XWritableField;
 import org.xydra.core.model.XWritableModel;
 import org.xydra.core.model.XWritableObject;
+import org.xydra.core.model.XWritableRepository;
 import org.xydra.core.value.XIDSetValue;
 import org.xydra.core.value.XStringValue;
 import org.xydra.core.value.XValue;
@@ -22,7 +24,7 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.XydraStore;
 import org.xydra.store.base.Credentials;
-import org.xydra.store.base.WritableModel;
+import org.xydra.store.base.WritableRepository;
 
 
 /**
@@ -132,12 +134,11 @@ public class GroupModelWrapper implements XGroupDatabase, XPasswordDatabase {
 	private XWritableModel dataModel, indexModel;
 	
 	public GroupModelWrapper(XydraStore store, XID repositoryId, XID modelId) {
-		// FIXME these models are never created in the store, so any changes to
-		// them will fail
-		this.dataModel = new WritableModel(this.credentials, store, X.getIDProvider()
-		        .fromComponents(repositoryId, modelId, null, null));
-		this.indexModel = new WritableModel(this.credentials, store, X.getIDProvider()
-		        .fromComponents(repositoryId, XX.toId(modelId + "-index-by-actor"), null, null));
+		XAddress repoAddr = XX.toAddress(repositoryId, null, null, null);
+		XWritableRepository repo = new WritableRepository(this.credentials, store, repoAddr);
+		this.dataModel = repo.createModel(modelId);
+		this.indexModel = repo.createModel(XX.toId(modelId + "-index-by-actor"));
+		// FIXME a malicious user might be able to overwrite this index
 	}
 	
 	/**
@@ -232,6 +233,9 @@ public class GroupModelWrapper implements XGroupDatabase, XPasswordDatabase {
 	
 	@Override
 	public boolean isValidLogin(XID actorId, String passwordHash) {
+		if(actorId == null || passwordHash == null) {
+			throw new IllegalArgumentException("actorId and passwordHash must not be null");
+		}
 		XWritableObject actor = this.dataModel.getObject(actorId);
 		if(actor == null) {
 			return false;

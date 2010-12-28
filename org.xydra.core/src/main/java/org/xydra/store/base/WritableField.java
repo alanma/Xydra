@@ -28,9 +28,16 @@ public class WritableField extends BaseField implements XWritableField, Serializ
 	@Override
 	public boolean setValue(XValue value) {
 		// send change command
-		XCommand command = X.getCommandFactory().createAddValueCommand(
-		        this.address.getRepository(), this.address.getModel(), this.address.getObject(),
-		        this.address.getField(), this.getRevisionNumber(), value, true);
+		XCommand command;
+		if(value != null) {
+			command = X.getCommandFactory().createAddValueCommand(this.address.getRepository(),
+			        this.address.getModel(), this.address.getObject(), this.address.getField(),
+			        this.getRevisionNumber(), value, true);
+		} else {
+			command = X.getCommandFactory().createRemoveValueCommand(this.address.getRepository(),
+			        this.address.getModel(), this.address.getObject(), this.address.getField(),
+			        this.getRevisionNumber(), true);
+		}
 		long result = WritableUtils.executeCommand(this.credentials, this.store, command);
 		if(result >= 0) {
 			this.baseField = new SimpleField(this.address, result, value);

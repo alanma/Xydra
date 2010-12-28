@@ -9,6 +9,7 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseRepository;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XType;
 import org.xydra.store.Callback;
 import org.xydra.store.StoreException;
 import org.xydra.store.XydraStore;
@@ -25,7 +26,7 @@ public class BaseRepository implements XBaseRepository, Serializable {
 	private static final long serialVersionUID = -5943088597508682530L;
 	protected XAddress address;
 	protected Credentials credentials;
-	protected Set<XID> modelIds;
+	protected Set<XID> modelIds = null;
 	protected XBaseRepository baseRepository;
 	protected XydraStore store;
 	
@@ -39,7 +40,7 @@ public class BaseRepository implements XBaseRepository, Serializable {
 		this.store = store;
 		this.address = address;
 		this.credentials = credentials;
-		initModelIds();
+		assert address.getAddressedType() == XType.XREPOSITORY;
 	}
 	
 	@Override
@@ -49,42 +50,54 @@ public class BaseRepository implements XBaseRepository, Serializable {
 	
 	@Override
 	public XID getID() {
-		return this.address.getField();
+		return this.address.getRepository();
 	}
 	
 	@Override
 	public XBaseModel getModel(XID id) {
-		return new BaseModel(this.credentials, this.store, XX.resolveModel(getAddress(), id));
+		BaseModel model = new BaseModel(this.credentials, this.store, XX
+		        .resolveModel(getAddress(), id));
+		if(model.baseModel == null) {
+			return null;
+		}
+		return model;
 	}
 	
 	@Override
 	public boolean hasModel(XID id) {
+		initModelIds();
 		return this.modelIds.contains(id);
 	}
 	
 	private void initModelIds() {
-		this.store.getModelIds(this.credentials.actorId, this.credentials.passwordHash, new Callback<Set<XID>>() {
-            
-            @Override
-            public void onFailure(Throwable exception) {
-                throw new StoreException("re-throw", exception);
-            }
-            
-            @Override
-            public void onSuccess(Set<XID> modelIds) {
-                BaseRepository.this.modelIds = modelIds;
-            }
-        });
-		
+		if(this.modelIds != null) {
+			return;
+		}
+		this.store.getModelIds(this.credentials.actorId, this.credentials.passwordHash,
+		        new Callback<Set<XID>>() {
+			        
+			        @Override
+			        public void onFailure(Throwable exception) {
+				        throw new StoreException("re-throw", exception);
+			        }
+			        
+			        @Override
+			        public void onSuccess(Set<XID> modelIds) {
+				        BaseRepository.this.modelIds = modelIds;
+			        }
+		        });
+		// FIXME callback may not have been called yet
 	}
 	
 	@Override
 	public boolean isEmpty() {
+		initModelIds();
 		return this.modelIds.isEmpty();
 	}
 	
 	@Override
 	public Iterator<XID> iterator() {
+		initModelIds();
 		return this.modelIds.iterator();
 	}
 	

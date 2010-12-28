@@ -43,10 +43,10 @@ public class MemoryStore implements XydraStore {
 		// TODO why not store both data and rights in the same store instance,
 		// but with different repository IDs?
 		this.data = new AllowAllStore(new MemoryNoAccessRightsNoBatchNoAsyncStore(XX.toId("data")));
-		this.rights = new AllowAllStore(new MemoryNoAccessRightsNoBatchNoAsyncStore(
-		        XX.toId("rights")));
-		this.groupModelWrapper = new GroupModelWrapper(this.rights, XX.toId("rights"),
-		        XX.toId("actors"));
+		this.rights = new AllowAllStore(new MemoryNoAccessRightsNoBatchNoAsyncStore(XX
+		        .toId("rights")));
+		this.groupModelWrapper = new GroupModelWrapper(this.rights, XX.toId("rights"), XX
+		        .toId("actors"));
 		
 	}
 	
@@ -62,14 +62,27 @@ public class MemoryStore implements XydraStore {
 	}
 	
 	public void checkLogin(XID actorId, String passwordHash, Callback<Boolean> callback) {
+		checkCallback(callback);
+		if(actorId == null || passwordHash == null) {
+			throw new IllegalArgumentException("actorId and passwordHash must not be null");
+		}
 		callback.onSuccess(this.groupModelWrapper.isValidLogin(actorId, passwordHash));
 	}
+
+	private void checkCallback(Callback<Boolean> callback) {
+	    if(callback == null) {
+			throw new IllegalArgumentException(
+			        "callback for side-effect free methods must not be null");
+		}
+    }
 	
 	public void executeCommands(XID actorId, String passwordHash, XCommand[] commands,
 	        Callback<BatchedResult<Long>[]> callback) {
 		if(!this.groupModelWrapper.isValidLogin(actorId, passwordHash)) {
-			callback.onFailure(new AuthorisationException("Unauthorised login/passwordHash "
-			        + actorId + "/" + passwordHash));
+			if(callback != null) {
+				callback.onFailure(new AuthorisationException("Unauthorised login/passwordHash "
+				        + actorId + "/" + passwordHash));
+			}
 		} else {
 			this.data.executeCommands(actorId, passwordHash, commands, callback);
 		}
@@ -79,8 +92,10 @@ public class MemoryStore implements XydraStore {
 	        GetEventsRequest[] getEventRequests,
 	        Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback) {
 		if(!this.groupModelWrapper.isValidLogin(actorId, passwordHash)) {
-			callback.onFailure(new AuthorisationException("Unauthorised login/passwordHash "
-			        + actorId + "/" + passwordHash));
+			if(callback != null) {
+				callback.onFailure(new AuthorisationException("Unauthorised login/passwordHash "
+				        + actorId + "/" + passwordHash));
+			}
 		} else {
 			this.data.executeCommandsAndGetEvents(actorId, passwordHash, commands,
 			        getEventRequests, callback);
@@ -89,10 +104,18 @@ public class MemoryStore implements XydraStore {
 	
 	public void getEvents(XID actorId, String passwordHash, GetEventsRequest[] getEventsRequest,
 	        Callback<BatchedResult<XEvent[]>[]> callback) {
+		if(callback == null) {
+			throw new IllegalArgumentException(
+			        "callback for side-effect free methods must not be null");
+		}
 		this.data.getEvents(actorId, passwordHash, getEventsRequest, callback);
 	}
 	
 	public void getModelIds(XID actorId, String passwordHash, Callback<Set<XID>> callback) {
+		if(callback == null) {
+			throw new IllegalArgumentException(
+			        "callback for side-effect free methods must not be null");
+		}
 		if(!this.groupModelWrapper.isValidLogin(actorId, passwordHash)) {
 			callback.onFailure(new AuthorisationException("Unauthorised login/passwordHash "
 			        + actorId + "/" + passwordHash));
@@ -103,6 +126,10 @@ public class MemoryStore implements XydraStore {
 	
 	public void getModelRevisions(XID actorId, String passwordHash, XAddress[] modelAddresses,
 	        Callback<BatchedResult<Long>[]> callback) throws IllegalArgumentException {
+		if(callback == null) {
+			throw new IllegalArgumentException(
+			        "callback for side-effect free methods must not be null");
+		}
 		if(!this.groupModelWrapper.isValidLogin(actorId, passwordHash)) {
 			callback.onFailure(new AuthorisationException("Unauthorised login/passwordHash "
 			        + actorId + "/" + passwordHash));
@@ -113,6 +140,10 @@ public class MemoryStore implements XydraStore {
 	
 	public void getModelSnapshots(XID actorId, String passwordHash, XAddress[] modelAddresses,
 	        Callback<BatchedResult<XBaseModel>[]> callback) throws IllegalArgumentException {
+		if(callback == null) {
+			throw new IllegalArgumentException(
+			        "callback for side-effect free methods must not be null");
+		}
 		if(!this.groupModelWrapper.isValidLogin(actorId, passwordHash)) {
 			callback.onFailure(new AuthorisationException("Unauthorised login/passwordHash "
 			        + actorId + "/" + passwordHash));
@@ -127,6 +158,10 @@ public class MemoryStore implements XydraStore {
 	
 	public void getObjectSnapshots(XID actorId, String passwordHash, XAddress[] objectAddresses,
 	        Callback<BatchedResult<XBaseObject>[]> callback) {
+		if(callback == null) {
+			throw new IllegalArgumentException(
+			        "callback for side-effect free methods must not be null");
+		}
 		if(!this.groupModelWrapper.isValidLogin(actorId, passwordHash)) {
 			callback.onFailure(new AuthorisationException("Unauthorised login/passwordHash "
 			        + actorId + "/" + passwordHash));
@@ -136,6 +171,10 @@ public class MemoryStore implements XydraStore {
 	}
 	
 	public void getRepositoryId(XID actorId, String passwordHash, Callback<XID> callback) {
+		if(callback == null) {
+			throw new IllegalArgumentException(
+			        "callback for side-effect free methods must not be null");
+		}
 		if(!this.groupModelWrapper.isValidLogin(actorId, passwordHash)) {
 			callback.onFailure(new AuthorisationException("Unauthorised login/passwordHash "
 			        + actorId + "/" + passwordHash));

@@ -45,6 +45,7 @@ public class WritableUtils {
 				        WritableUtils.result = object[0].getResult();
 			        }
 		        });
+		// FIXME callback may not have been called yet
 		return result;
 	}
 	

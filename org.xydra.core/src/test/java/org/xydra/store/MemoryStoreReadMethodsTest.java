@@ -5,7 +5,6 @@ import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommandFactory;
 import org.xydra.core.model.XID;
-import org.xydra.store.XydraStore;
 import org.xydra.store.access.GroupModelWrapper;
 import org.xydra.store.impl.memory.MemoryStore;
 import org.xydra.store.test.AbstractStoreReadMethodsTest;
@@ -75,7 +74,7 @@ public class MemoryStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 	@Override
 	protected long getQuotaForBruteForce() {
 		// TODO Auto-generated method stub
-		return 0;
+		return 1;
 	}
 	
 	@Override

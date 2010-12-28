@@ -64,6 +64,9 @@ public class WritableObject extends BaseObject implements XWritableObject, Seria
 	public XWritableField getField(XID fieldId) {
 		// FIXME this return different instances for each call
 		XBaseField baseField = super.getField(fieldId);
+		if(baseField == null) {
+			return null;
+		}
 		WritableField writableField = new WritableField(this.credentials, this.store, baseField
 		        .getAddress());
 		writableField.setValue(baseField.getValue());
