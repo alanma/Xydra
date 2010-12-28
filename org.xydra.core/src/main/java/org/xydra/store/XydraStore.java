@@ -87,7 +87,7 @@ public interface XydraStore {
 	 * Redundant method to allow a quick (network-efficient) check if an actorId
 	 * and passwordHash are valid for authentication.
 	 * 
-	 * Possible exceptions (see class comment in {@link XydraStore} and comments
+	 * Possible exceptions to be received via callback.onError (see class comment in {@link XydraStore} and comments
 	 * in each exception):
 	 * <ul>
 	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
@@ -104,9 +104,8 @@ public interface XydraStore {
 	 *            services.
 	 * @param callback Asynchronous callback to signal success or failure.
 	 *            <code>true</code> is returned if the actorId and the supplied
-	 *            passwordHash match.
+	 *            passwordHash match. Must not be null.
 	 * @throws IllegalArgumentException if one of the given parameters is null.
-	 *             Only the callback may be null.
 	 */
 	void checkLogin(XID actorId, String passwordHash, Callback<Boolean> callback)
 	        throws IllegalArgumentException;
@@ -117,7 +116,7 @@ public interface XydraStore {
 	 * Retrieve read-only snapshots of {@link XModel} states at the point in
 	 * time when this request is processed.
 	 * 
-	 * Possible exceptions to received via callback.onError (see class comment
+	 * Possible exceptions to be received via callback.onError (see class comment
 	 * in {@link XydraStore} and comments in each exception):
 	 * <ul>
 	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
@@ -149,7 +148,7 @@ public interface XydraStore {
 	 *            success, an array of {@link BatchedResult} is returned, in the
 	 *            same order of the modelAddresses given in the request. A null
 	 *            value in the array signals that the requested model does not
-	 *            exist in the store. May not be null.
+	 *            exist in the store. Must not be null.
 	 * @throws IllegalArgumentException if one of the given parameters is null.
 	 * 
 	 *             Implementation note: Implementation may choose to supply a
@@ -161,7 +160,7 @@ public interface XydraStore {
 	/**
 	 * Read current state.
 	 * 
-	 * Possible exceptions (see class comment in {@link XydraStore} and comments
+	 * Possible exceptions to be received via callback.onError (see class comment in {@link XydraStore} and comments
 	 * in each exception):
 	 * <ul>
 	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
@@ -191,12 +190,8 @@ public interface XydraStore {
 	 *            success, the returned array contains in the same order as in
 	 *            the request array (modelAddresses) the revision number of the
 	 *            addressed model as a long. Non-existing models (and those for
-	 *            which the actorId has no read-access) are signalled as
-	 *            {@link #MODEL_DOES_NOT_EXIST}. May not be null.
-	 * 
-	 *            TODO what is returned here if the passed address does not
-	 *            refer to an XModel ({@link #MODEL_DOES_NOT_EXIST} doesn't
-	 *            really fit here, I think) ~Bjoern
+	 *            which the actorId has no read-access) are signaled as
+	 *            {@link #MODEL_DOES_NOT_EXIST}. Must not be null.
 	 * @throws IllegalArgumentException if one of the given parameters is null.
 	 */
 	void getModelRevisions(XID actorId, String passwordHash, XAddress[] modelAddresses,
@@ -208,7 +203,7 @@ public interface XydraStore {
 	 * Returns read-only snapshots of {@link XObject} state at the point in time
 	 * when this request was processed.
 	 * 
-	 * Possible exceptions (see class comment in {@link XydraStore} and comments
+	 * Possible exceptions to be received via callback.onError (see class comment in {@link XydraStore} and comments
 	 * in each exception):
 	 * <ul>
 	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
@@ -239,7 +234,7 @@ public interface XydraStore {
 	 *            same order of the objectAddresses given in the request. A null
 	 *            value in the array signals that the requested object does not
 	 *            exist in the store - or that the actorId has no read-access on
-	 *            it. May not be null.
+	 *            it. Must not be null.
 	 * @throws IllegalArgumentException if one of the given parameters is null.
 	 * 
 	 *             Implementation note: Implementation may chose to supply a
@@ -251,7 +246,7 @@ public interface XydraStore {
 	/**
 	 * Read current state.
 	 * 
-	 * Possible exceptions (see class comment in {@link XydraStore} and comments
+	 * Possible exceptions to be received via callback.onError (see class comment in {@link XydraStore} and comments
 	 * in each exception):
 	 * <ul>
 	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
@@ -272,7 +267,7 @@ public interface XydraStore {
 	 *            for which the given actorId has read-access in the repository
 	 *            is returned.
 	 * @throws IllegalArgumentException if one of the given parameters is null.
-	 *             May not be null.
+	 *             Must not be null.
 	 */
 	void getModelIds(XID actorId, String passwordHash, Callback<Set<XID>> callback)
 	        throws IllegalArgumentException;
@@ -285,7 +280,7 @@ public interface XydraStore {
 	 * 
 	 * Every authenticated actorId may read the repository ID.
 	 * 
-	 * Possible exceptions (see class comment in {@link XydraStore} and comments
+	 * Possible exceptions to be received via callback.onError (see class comment in {@link XydraStore} and comments
 	 * in each exception):
 	 * <ul>
 	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
@@ -302,7 +297,7 @@ public interface XydraStore {
 	 *            network if the user uses the same password for multiple
 	 *            services.
 	 * @param callback Asynchronous callback to signal success or failure. On
-	 *            success, the repositoryId of this store is returned. May not
+	 *            success, the repositoryId of this store is returned. Must not
 	 *            be null.
 	 * @throws IllegalArgumentException if any of the given parameters is null.
 	 */
@@ -315,7 +310,7 @@ public interface XydraStore {
 	 * Check permissions, command pre-conditions, execute the command and log
 	 * the resulting events.
 	 * 
-	 * Possible exceptions (see class comment in {@link XydraStore} and comments
+	 * Possible exceptions to be received via callback.onError (see class comment in {@link XydraStore} and comments
 	 * in each exception):
 	 * <ul>
 	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
@@ -396,7 +391,7 @@ public interface XydraStore {
 	 * Fetch all events that happened for a given address in a given range of
 	 * revisions. Batch operation for multiple such requests.
 	 * 
-	 * Possible exceptions (see class comment in {@link XydraStore} and comments
+	 * Possible exceptions to be received via callback.onError (see class comment in {@link XydraStore} and comments
 	 * in each exception):
 	 * <ul>
 	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
@@ -424,7 +419,8 @@ public interface XydraStore {
 	 * @param callback Asynchronous callback to signal success or failure. On
 	 *            success, this callback returns an array which has one entry
 	 *            for each requested XAddress. Each entry is itself an array of
-	 *            XEvents, in the order in which they happened. May not be null.
+	 *            XEvents, in the order in which they happened. Must not be
+	 *            null.
 	 * @throws IllegalArgumentException if any of the given parameters is null.
 	 */
 	void getEvents(XID actorId, String passwordHash, GetEventsRequest[] getEventsRequest,
@@ -460,6 +456,10 @@ public interface XydraStore {
 	 *            and the second is the same as the result of
 	 *            {@link #getEvents(XID, String, GetEventsRequest[], Callback)}
 	 *            (also including the same exceptions) .
+	 * 
+	 *            TODO forbid null callbacks? With a null callback this method
+	 *            provides no advantage over
+	 *            {@link #executeCommands(XID, String, XCommand[], Callback)}
 	 */
 	void executeCommandsAndGetEvents(XID actorId, String passwordHash, XCommand[] commands,
 	        GetEventsRequest[] getEventRequests,
