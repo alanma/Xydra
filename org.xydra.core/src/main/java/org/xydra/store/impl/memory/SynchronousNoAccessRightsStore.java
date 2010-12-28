@@ -46,6 +46,9 @@ public class SynchronousNoAccessRightsStore implements XydraNoAccessRightsStore 
 	@Override
 	public void executeCommands(XID actorId, XCommand[] commands,
 	        Callback<BatchedResult<Long>[]> callback) {
+		if(commands == null) {
+			throw new IllegalArgumentException("commands must not be null");
+		}
 		BatchedResult<Long>[] result = executeCommands(actorId, commands);
 		if(callback != null) {
 			callback.onSuccess(result);
@@ -54,10 +57,16 @@ public class SynchronousNoAccessRightsStore implements XydraNoAccessRightsStore 
 	
 	@Override
 	public void executeCommandsAndGetEvents(XID actorId, XCommand[] commands,
-	        GetEventsRequest[] getEventRequests,
+	        GetEventsRequest[] getEventsRequests,
 	        Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback) {
+		if(commands == null) {
+			throw new IllegalArgumentException("commands must not be null");
+		}
+		if(getEventsRequests == null) {
+			throw new IllegalArgumentException("getEventsRequests must not be null");
+		}
 		BatchedResult<Long>[] commandResults = executeCommands(actorId, commands);
-		BatchedResult<XEvent[]>[] eventResults = getEvents(getEventRequests);
+		BatchedResult<XEvent[]>[] eventResults = getEvents(getEventsRequests);
 		if(callback != null) {
 			callback.onSuccess(new Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>(
 			        commandResults, eventResults));
@@ -80,13 +89,16 @@ public class SynchronousNoAccessRightsStore implements XydraNoAccessRightsStore 
 	}
 	
 	@Override
-	public void getEvents(GetEventsRequest[] getEventRequests,
+	public void getEvents(GetEventsRequest[] getEventsRequests,
 	        Callback<BatchedResult<XEvent[]>[]> callback) {
 		if(callback == null) {
 			throw new IllegalArgumentException(
 			        "callback for side-effect free methods must not be null");
 		}
-		callback.onSuccess(getEvents(getEventRequests));
+		if(getEventsRequests == null) {
+			throw new IllegalArgumentException("getEventsRequests must not be null");
+		}
+		callback.onSuccess(getEvents(getEventsRequests));
 	}
 	
 	@Override
@@ -112,6 +124,9 @@ public class SynchronousNoAccessRightsStore implements XydraNoAccessRightsStore 
 			throw new IllegalArgumentException(
 			        "callback for side-effect free methods must not be null");
 		}
+		if(modelAddresses == null) {
+			throw new IllegalArgumentException("modelAddresses must not be null");
+		}
 		@SuppressWarnings("unchecked")
 		BatchedResult<Long>[] results = new BatchedResult[modelAddresses.length];
 		for(int i = 0; i < modelAddresses.length; i++) {
@@ -131,6 +146,9 @@ public class SynchronousNoAccessRightsStore implements XydraNoAccessRightsStore 
 		if(callback == null) {
 			throw new IllegalArgumentException(
 			        "callback for side-effect free methods must not be null");
+		}
+		if(modelAddresses == null) {
+			throw new IllegalArgumentException("modelAddresses must not be null");
 		}
 		@SuppressWarnings("unchecked")
 		BatchedResult<XBaseModel>[] results = new BatchedResult[modelAddresses.length];
@@ -152,6 +170,9 @@ public class SynchronousNoAccessRightsStore implements XydraNoAccessRightsStore 
 		if(callback == null) {
 			throw new IllegalArgumentException(
 			        "callback for side-effect free methods must not be null");
+		}
+		if(objectAddresses == null) {
+			throw new IllegalArgumentException("objectAddresses must not be null");
 		}
 		@SuppressWarnings("unchecked")
 		BatchedResult<XBaseObject>[] results = new BatchedResult[objectAddresses.length];

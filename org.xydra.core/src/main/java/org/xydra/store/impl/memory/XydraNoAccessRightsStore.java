@@ -25,9 +25,11 @@ public interface XydraNoAccessRightsStore {
 	void executeCommands(XID actorId, XCommand[] commands, Callback<BatchedResult<Long>[]> callback);
 	
 	void executeCommandsAndGetEvents(XID actorId, XCommand[] commands,
-	        GetEventsRequest[] getEventRequests, Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback);
+	        GetEventsRequest[] getEventsRequests,
+	        Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback);
 	
-	void getEvents(GetEventsRequest[] getEventRequests, Callback<BatchedResult<XEvent[]>[]> callback);
+	void getEvents(GetEventsRequest[] getEventsRequests,
+	        Callback<BatchedResult<XEvent[]>[]> callback);
 	
 	void getModelIds(Callback<Set<XID>> callback);
 	
@@ -35,7 +37,8 @@ public interface XydraNoAccessRightsStore {
 	
 	void getModelSnapshots(XAddress[] modelAddresses, Callback<BatchedResult<XBaseModel>[]> callback);
 	
-	void getObjectSnapshots(XAddress[] objectAddresses, Callback<BatchedResult<XBaseObject>[]> callback);
+	void getObjectSnapshots(XAddress[] objectAddresses,
+	        Callback<BatchedResult<XBaseObject>[]> callback);
 	
 	void getRepositoryId(Callback<XID> callback);
 	
