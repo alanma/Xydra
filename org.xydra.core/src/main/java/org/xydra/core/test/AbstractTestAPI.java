@@ -51,6 +51,10 @@ public abstract class AbstractTestAPI {
 	private XID actorId = XX.toId("AbstractTestAPI");
 	private String password = null; // TODO where to get this?
 	
+	{
+		TestLogger.init();
+	}
+	
 	@Test
 	public void testRepository() {
 		

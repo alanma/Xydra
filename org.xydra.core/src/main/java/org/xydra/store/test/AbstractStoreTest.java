@@ -2,6 +2,7 @@ package org.xydra.store.test;
 
 import org.xydra.core.change.XCommandFactory;
 import org.xydra.core.model.XID;
+import org.xydra.core.test.TestLogger;
 import org.xydra.store.XydraStore;
 
 
@@ -14,6 +15,11 @@ import org.xydra.store.XydraStore;
  */
 
 public abstract class AbstractStoreTest {
+	
+	{
+		TestLogger.init();
+	}
+	
 	/**
 	 * @return an implementation of {@link XydraStore} which is to be tested
 	 */
@@ -133,4 +139,5 @@ public abstract class AbstractStoreTest {
 		
 		return value == SynchronousTestCallback.SUCCESS;
 	}
+	
 }

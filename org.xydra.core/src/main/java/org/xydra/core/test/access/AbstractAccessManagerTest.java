@@ -13,6 +13,7 @@ import org.xydra.core.access.impl.memory.MemoryAccessManager;
 import org.xydra.core.access.impl.memory.MemoryGroupDatabase;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
+import org.xydra.core.test.TestLogger;
 import org.xydra.store.access.XA;
 import org.xydra.store.access.XAccessValue;
 
@@ -26,6 +27,10 @@ import org.xydra.store.access.XAccessValue;
 abstract public class AbstractAccessManagerTest {
 	
 	private XAccessManagerWithListeners arm;
+	
+	{
+		TestLogger.init();
+	}
 	
 	/** member of both groupZero and groupOne */
 	private XID actorAlpha;
@@ -42,7 +47,8 @@ abstract public class AbstractAccessManagerTest {
 	private XID access;
 	private XID access2;
 	
-	abstract protected XAccessManagerWithListeners getAccessManager(XGroupDatabaseWithListeners groups, XAddress rA0);
+	abstract protected XAccessManagerWithListeners getAccessManager(
+	        XGroupDatabaseWithListeners groups, XAddress rA0);
 	
 	@Before
 	public void setUp() {

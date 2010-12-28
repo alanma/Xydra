@@ -25,6 +25,7 @@ import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryField;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryObject;
+import org.xydra.core.test.TestLogger;
 import org.xydra.core.value.impl.memory.MemoryStringValue;
 
 
@@ -32,6 +33,10 @@ public abstract class AbstractChangeTest {
 	
 	private XID actorId = XX.toId("AbstractChangeTest");
 	private String password = null; // TODO where to get this?
+	
+	{
+		TestLogger.init();
+	}
 	
 	@Test
 	public void testRepositoryChangeListening() {

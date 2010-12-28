@@ -29,6 +29,7 @@ import org.xydra.core.model.XRepository;
 import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.core.test.ChangeRecorder;
 import org.xydra.core.test.HasChanged;
+import org.xydra.core.test.TestLogger;
 import org.xydra.core.value.XV;
 import org.xydra.core.value.XValue;
 import org.xydra.index.XI;
@@ -40,6 +41,10 @@ import org.xydra.index.XI;
  * @author dscharrer
  */
 abstract public class AbstractTransactionTest {
+	
+	{
+		TestLogger.init();
+	}
 	
 	private static final XValue JOHN_ALIAS = XV.toValue("Cookie Monster");
 	private static final XValue PETER_PHONE = XV.toValue("934-253-2");

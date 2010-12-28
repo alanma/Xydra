@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.xydra.core.XX;
 import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.model.XID;
+import org.xydra.core.test.TestLogger;
 import org.xydra.store.access.XA;
 
 
@@ -20,6 +21,10 @@ import org.xydra.store.access.XA;
 public abstract class AbstractGroupDatabaseTest {
 	
 	private XGroupDatabaseWithListeners groups;
+	
+	{
+		TestLogger.init();
+	}
 	
 	XID actorAlpha;
 	XID actorBeta;

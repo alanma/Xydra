@@ -21,6 +21,7 @@ import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
 import org.xydra.core.model.state.XRepositoryState;
 import org.xydra.core.model.state.XSPI;
+import org.xydra.core.test.TestLogger;
 import org.xydra.core.value.XV;
 
 
@@ -35,6 +36,10 @@ import org.xydra.core.value.XV;
  * @author voelkel
  */
 public abstract class AbstractStateTest {
+	
+	{
+		TestLogger.init();
+	}
 	
 	protected boolean canPersist() {
 		return true;
