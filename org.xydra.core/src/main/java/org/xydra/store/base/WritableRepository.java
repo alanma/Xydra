@@ -7,7 +7,6 @@ import org.xydra.core.change.XCommand;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
-import org.xydra.core.model.XBaseRepository;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XWritableField;
 import org.xydra.core.model.XWritableModel;
@@ -22,8 +21,6 @@ import org.xydra.store.XydraStore;
  * @author voelkel
  */
 public class WritableRepository extends BaseRepository implements XWritableRepository, Serializable {
-	
-	protected XBaseRepository writableRepository;
 	
 	private static final long serialVersionUID = -6112519567015753881L;
 	

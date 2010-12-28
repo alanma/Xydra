@@ -21,8 +21,6 @@ import org.xydra.store.XydraStore;
  */
 public class WritableModel extends BaseModel implements XWritableModel, Serializable {
 	
-	protected XBaseModel writableModel;
-	
 	private static final long serialVersionUID = -6112519567015753881L;
 	
 	public WritableModel(Credentials credentials, XydraStore store, XAddress address) {
@@ -70,8 +68,8 @@ public class WritableModel extends BaseModel implements XWritableModel, Serializ
 			return null;
 		}
 		
-		WritableObject writableObject = new WritableObject(this.credentials, this.store,
-		        baseObject.getAddress());
+		WritableObject writableObject = new WritableObject(this.credentials, this.store, baseObject
+		        .getAddress());
 		for(XID fieldId : baseObject) {
 			XWritableField writabelField = writableObject.createField(fieldId);
 			writabelField.setValue(baseObject.getField(fieldId).getValue());

@@ -20,8 +20,6 @@ import org.xydra.store.XydraStore;
  */
 public class WritableObject extends BaseObject implements XWritableObject, Serializable {
 	
-	protected XBaseObject writableObject;
-	
 	private static final long serialVersionUID = -6112519567015753881L;
 	
 	public WritableObject(Credentials credentials, XydraStore store, XAddress address) {
