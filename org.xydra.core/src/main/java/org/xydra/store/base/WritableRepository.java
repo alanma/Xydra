@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import org.xydra.core.X;
 import org.xydra.core.change.XCommand;
-import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
@@ -24,8 +23,12 @@ public class WritableRepository extends BaseRepository implements XWritableRepos
 	
 	private static final long serialVersionUID = -6112519567015753881L;
 	
-	public WritableRepository(Credentials credentials, XydraStore store, XAddress address) {
-		super(credentials, store, address);
+	/**
+	 * @param credentials
+	 * @param store
+	 */
+	public WritableRepository(Credentials credentials, XydraStore store) {
+		super(credentials, store);
 	}
 	
 	@Override
@@ -73,8 +76,8 @@ public class WritableRepository extends BaseRepository implements XWritableRepos
 		if(baseModel == null) {
 			return null;
 		}
-		WritableModel writableModel = new WritableModel(this.credentials, this.store, baseModel
-		        .getAddress());
+		WritableModel writableModel = new WritableModel(this.credentials, this.store,
+		        baseModel.getAddress());
 		for(XID objectId : baseModel) {
 			XBaseObject baseObject = baseModel.getObject(objectId);
 			XWritableObject writableObject = writableModel.getObject(objectId);

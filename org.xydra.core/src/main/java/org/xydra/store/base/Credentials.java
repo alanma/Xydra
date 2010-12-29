@@ -10,12 +10,28 @@ import org.xydra.core.model.XID;
  */
 public class Credentials {
 	
-	XID actorId;
-	String passwordHash;
+	private XID actorId;
+	private String passwordHash;
 	
 	public Credentials(XID actorId, String passwordHash) {
 		super();
+		this.setActorId(actorId);
+		this.setPasswordHash(passwordHash);
+	}
+	
+	public void setActorId(XID actorId) {
 		this.actorId = actorId;
+	}
+	
+	public XID getActorId() {
+		return this.actorId;
+	}
+	
+	public void setPasswordHash(String passwordHash) {
 		this.passwordHash = passwordHash;
+	}
+	
+	public String getPasswordHash() {
+		return this.passwordHash;
 	}
 }

@@ -46,7 +46,7 @@ public class BaseObject implements XBaseObject, Serializable {
 	}
 	
 	protected void load() {
-		this.store.getObjectSnapshots(this.credentials.actorId, this.credentials.passwordHash,
+		this.store.getObjectSnapshots(this.credentials.getActorId(), this.credentials.getPasswordHash(),
 		        new XAddress[] { this.address }, new Callback<BatchedResult<XBaseObject>[]>() {
 			        
 			        @Override

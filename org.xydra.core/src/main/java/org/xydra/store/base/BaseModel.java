@@ -46,7 +46,7 @@ public class BaseModel implements XBaseModel, Serializable {
 	}
 	
 	protected void load() {
-		this.store.getModelSnapshots(this.credentials.actorId, this.credentials.passwordHash,
+		this.store.getModelSnapshots(this.credentials.getActorId(), this.credentials.getPasswordHash(),
 		        new XAddress[] { this.address }, new Callback<BatchedResult<XBaseModel>[]>() {
 			        
 			        @Override

@@ -10,7 +10,6 @@ import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.core.X;
 import org.xydra.core.XX;
-import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.XWritableField;
@@ -136,9 +135,13 @@ public class GroupModelWrapper implements XGroupDatabase, XPasswordDatabase {
 	
 	private XWritableModel dataModel, indexModel;
 	
-	public GroupModelWrapper(XydraStore store, XID repositoryId, XID modelId) {
-		XAddress repoAddr = XX.toAddress(repositoryId, null, null, null);
-		XWritableRepository repo = new WritableRepository(this.credentials, store, repoAddr);
+	/**
+	 * @param store
+	 * @param repositoryId
+	 * @param modelId
+	 */
+	public GroupModelWrapper(XydraStore store, XID modelId) {
+		XWritableRepository repo = new WritableRepository(this.credentials, store);
 		this.dataModel = repo.createModel(modelId);
 		this.indexModel = repo.createModel(XX.toId(modelId + "-index-by-actor"));
 		// FIXME a malicious user might be able to overwrite this index

@@ -82,7 +82,7 @@ public class BaseField implements XBaseField, Serializable {
 	}
 	
 	protected void load() {
-		this.store.getObjectSnapshots(this.credentials.actorId, this.credentials.passwordHash,
+		this.store.getObjectSnapshots(this.credentials.getActorId(), this.credentials.getPasswordHash(),
 		        new XAddress[] { this.address.getParent() },
 		        new Callback<BatchedResult<XBaseObject>[]>() {
 			        

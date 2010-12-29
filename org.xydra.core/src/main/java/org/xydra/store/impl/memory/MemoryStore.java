@@ -43,10 +43,9 @@ public class MemoryStore implements XydraStore {
 		// TODO why not store both data and rights in the same store instance,
 		// but with different repository IDs?
 		this.data = new AllowAllStore(new MemoryNoAccessRightsNoBatchNoAsyncStore(XX.toId("data")));
-		this.rights = new AllowAllStore(new MemoryNoAccessRightsNoBatchNoAsyncStore(XX
-		        .toId("rights")));
-		this.groupModelWrapper = new GroupModelWrapper(this.rights, XX.toId("rights"), XX
-		        .toId("actors"));
+		this.rights = new AllowAllStore(new MemoryNoAccessRightsNoBatchNoAsyncStore(
+		        XX.toId("rights")));
+		this.groupModelWrapper = new GroupModelWrapper(this.rights, XX.toId("actors"));
 		
 	}
 	
@@ -68,13 +67,13 @@ public class MemoryStore implements XydraStore {
 		}
 		callback.onSuccess(this.groupModelWrapper.isValidLogin(actorId, passwordHash));
 	}
-
+	
 	private void checkCallback(Callback<Boolean> callback) {
-	    if(callback == null) {
+		if(callback == null) {
 			throw new IllegalArgumentException(
 			        "callback for side-effect free methods must not be null");
 		}
-    }
+	}
 	
 	public void executeCommands(XID actorId, String passwordHash, XCommand[] commands,
 	        Callback<BatchedResult<Long>[]> callback) {

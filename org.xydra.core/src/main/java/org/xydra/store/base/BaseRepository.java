@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
@@ -34,13 +35,41 @@ public class BaseRepository implements XBaseRepository, Serializable {
 	 * @param credentials
 	 * @param store must be in the same VM and may not be accessed over a
 	 *            network.
-	 * @param address
 	 */
-	public BaseRepository(Credentials credentials, XydraStore store, XAddress address) {
-		this.store = store;
-		this.address = address;
+	public BaseRepository(Credentials credentials, XydraStore store) {
 		this.credentials = credentials;
-		assert address.getAddressedType() == XType.XREPOSITORY;
+		this.store = store;
+		this.address = X.getIDProvider().fromComponents(getRepositoryId(store), null, null, null);
+		assert this.address.getAddressedType() == XType.XREPOSITORY;
+	}
+	
+	private XID repositoryId;
+	
+	private synchronized XID getRepositoryId(XydraStore store) {
+		assert store != null;
+		this.repositoryId = null;
+		store.getRepositoryId(this.credentials.getActorId(), this.credentials.getPasswordHash(),
+		        new Callback<XID>() {
+			        
+			        @Override
+			        public void onSuccess(XID object) {
+				        BaseRepository.this.repositoryId = object;
+			        }
+			        
+			        @Override
+			        public void onFailure(Throwable exception) {
+				        throw new RuntimeException(exception);
+			        }
+		        });
+		long c = 1;
+		while(this.repositoryId == null && c < 1000) {
+			try {
+				Thread.sleep(c);
+			} catch(InterruptedException e) {
+			}
+			c *= 2;
+		}
+		return this.repositoryId;
 	}
 	
 	@Override
@@ -55,8 +84,8 @@ public class BaseRepository implements XBaseRepository, Serializable {
 	
 	@Override
 	public XBaseModel getModel(XID id) {
-		BaseModel model = new BaseModel(this.credentials, this.store, XX
-		        .resolveModel(getAddress(), id));
+		BaseModel model = new BaseModel(this.credentials, this.store, XX.resolveModel(getAddress(),
+		        id));
 		if(model.baseModel == null) {
 			return null;
 		}
@@ -73,7 +102,7 @@ public class BaseRepository implements XBaseRepository, Serializable {
 		if(this.modelIds != null) {
 			return;
 		}
-		this.store.getModelIds(this.credentials.actorId, this.credentials.passwordHash,
+		this.store.getModelIds(this.credentials.getActorId(), this.credentials.getPasswordHash(),
 		        new Callback<Set<XID>>() {
 			        
 			        @Override

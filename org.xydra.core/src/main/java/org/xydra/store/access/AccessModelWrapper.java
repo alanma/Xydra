@@ -56,6 +56,10 @@ public class AccessModelWrapper implements XAccessDatabase {
 	
 	private static final String SEPARATOR = "_.";
 	
+	// FIXME get credentials from config settings
+	private static final Credentials credentials = new Credentials(XX.toId("__accessManager"),
+	        "TODO");
+	
 	/**
 	 * @param address
 	 * @return
@@ -143,15 +147,11 @@ public class AccessModelWrapper implements XAccessDatabase {
 		return field.getValue() != null;
 	}
 	
-	// FIXME get credentials from config settings
-	private Credentials credentials = new Credentials(XX.toId("__accessManager"), "TODO");
-	
 	@SuppressWarnings("unused")
 	private XWritableModel dataModel, indexModel;
 	
-	public AccessModelWrapper(XydraStore store, XID repositoryId, XID modelId) {
-		XAddress repoAddr = XX.toAddress(repositoryId, null, null, null);
-		XWritableRepository repo = new WritableRepository(this.credentials, store, repoAddr);
+	public AccessModelWrapper(XydraStore store, XID modelId) {
+		XWritableRepository repo = new WritableRepository(credentials, store);
 		this.dataModel = repo.createModel(modelId);
 		this.indexModel = repo.createModel(XX.toId(modelId + "-index-by-resource"));
 		// FIXME a malicious user might be able to overwrite this index
