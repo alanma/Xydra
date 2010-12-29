@@ -548,31 +548,31 @@ public class MemoryEventManager implements Serializable {
 			}
 			assert first.getChangeType() == ChangeType.REMOVE;
 			// non matching REMOVE -> ADD => merge to CHANGE
-			return MemoryFieldEvent.createChangeEvent(last.getActor(), last.getTarget(),
-			        first.getOldValue(), last.getNewValue(), last.getOldModelRevision(),
-			        last.getOldObjectRevision(), last.getOldFieldRevision(), false);
+			return MemoryFieldEvent.createChangeEvent(last.getActor(), last.getTarget(), first
+			        .getOldValue(), last.getNewValue(), last.getOldModelRevision(), last
+			        .getOldObjectRevision(), last.getOldFieldRevision(), false);
 		case REMOVE:
 			if(first.getChangeType() == ChangeType.REMOVE) {
 				return last;
 			}
 			assert first.getChangeType() == ChangeType.CHANGE;
 			// (non matching) CHANGE->REMOVE => merge to REMOVE
-			return MemoryFieldEvent.createRemoveEvent(last.getActor(), last.getTarget(),
-			        first.getOldValue(), last.getOldModelRevision(), last.getOldObjectRevision(),
-			        last.getOldFieldRevision(), false, false);
+			return MemoryFieldEvent.createRemoveEvent(last.getActor(), last.getTarget(), first
+			        .getOldValue(), last.getOldModelRevision(), last.getOldObjectRevision(), last
+			        .getOldFieldRevision(), false, false);
 		case CHANGE:
 			assert first.getChangeType() != ChangeType.REMOVE;
 			if(first.getChangeType() == ChangeType.CHANGE) {
 				// non-matching CHANGE->CHANGE => merge to CHANGE
-				return MemoryFieldEvent.createChangeEvent(last.getActor(), last.getTarget(),
-				        first.getOldValue(), last.getNewValue(), last.getOldModelRevision(),
-				        last.getOldObjectRevision(), last.getOldFieldRevision(), false);
+				return MemoryFieldEvent.createChangeEvent(last.getActor(), last.getTarget(), first
+				        .getOldValue(), last.getNewValue(), last.getOldModelRevision(), last
+				        .getOldObjectRevision(), last.getOldFieldRevision(), false);
 			} else {
 				assert first.getChangeType() == ChangeType.ADD;
 				// non-matching ADD->CHANGE => merge to ADD
-				return MemoryFieldEvent.createAddEvent(last.getActor(), last.getTarget(),
-				        last.getNewValue(), last.getOldModelRevision(),
-				        last.getOldObjectRevision(), last.getOldFieldRevision(), false);
+				return MemoryFieldEvent.createAddEvent(last.getActor(), last.getTarget(), last
+				        .getNewValue(), last.getOldModelRevision(), last.getOldObjectRevision(),
+				        last.getOldFieldRevision(), false);
 			}
 		default:
 			throw new AssertionError("invalid event: " + last);
@@ -619,6 +619,10 @@ public class MemoryEventManager implements Serializable {
 	
 	protected XID getActor() {
 		return this.sessionActor;
+	}
+	
+	protected String getPasswordHash() {
+		return this.sessionPasswordHash;
 	}
 	
 	protected void setSessionActor(XID actorId, String passwordHash) {

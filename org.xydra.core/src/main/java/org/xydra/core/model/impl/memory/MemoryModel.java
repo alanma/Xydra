@@ -93,8 +93,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	protected MemoryModel(XID actorId, String passwordHash, MemoryRepository father,
 	        XModelState modelState) {
 		super(new MemoryEventManager(actorId, passwordHash,
-		        modelState.getChangeLogState() == null ? null : new MemoryChangeLog(
-		                modelState.getChangeLogState()), modelState.getRevisionNumber()));
+		        modelState.getChangeLogState() == null ? null : new MemoryChangeLog(modelState
+		                .getChangeLogState()), modelState.getRevisionNumber()));
 		
 		this.state = modelState;
 		this.father = father;
@@ -522,8 +522,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	 * XObjectEvents} of the REMOVE-type will and lastly the {@link XModelEvent}
 	 * representing the actual removal of the {@link MemoryObject} will be
 	 * created to accurately represent the removal. The created {@link XEvent
-	 * XEvents} will then be enqueued into the {@link MemoryEventManager} used by
-	 * this MemoryModel and then be propagated to the interested listeners.
+	 * XEvents} will then be enqueued into the {@link MemoryEventManager} used
+	 * by this MemoryModel and then be propagated to the interested listeners.
 	 * 
 	 * @param actor The {@link XID} of the actor
 	 * @param object The {@link MemoryObject} which is to be removed (must not
@@ -576,8 +576,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		
 		if(command instanceof XTransaction) {
 			return executeTransaction((XTransaction)command, callback);
-		}
-		if(command instanceof XModelCommand) {
+		} else if(command instanceof XModelCommand) {
 			return executeModelCommand((XModelCommand)command, callback);
 		}
 		MemoryObject object = getObject(command.getTarget().getObject());

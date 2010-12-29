@@ -3,6 +3,7 @@ package org.xydra.core.model;
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.core.change.XCommand;
+import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XRepositoryCommand;
 import org.xydra.core.change.XRepositoryEvent;
 import org.xydra.core.change.XSendsFieldEvents;
@@ -104,5 +105,20 @@ public interface XRepository extends XWritableRepository, XSendsRepositoryEvents
 	 * @param actor for this repository and its children, if any.
 	 */
 	void setSessionActor(XID actorId, String passwordHash);
+	
+	/**
+	 * Execute the given {@link XCommand} if possible.
+	 * 
+	 * Not all implementations will be able to execute all commands.
+	 * 
+	 * @param command The {@link XCommand} which is to be executed
+	 * 
+	 * @return {@link XCommand#FAILED} if the command failed,
+	 *         {@link XCommand#NOCHANGE} if the command didn't change anything
+	 *         or the revision number of the {@link XEvent} caused by the
+	 *         command.
+	 */
+	@ModificationOperation
+	long executeCommand(XCommand command, XSynchronizationCallback callback);
 	
 }

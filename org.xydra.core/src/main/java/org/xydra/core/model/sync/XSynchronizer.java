@@ -9,6 +9,7 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.core.model.impl.memory.LocalChange;
+import org.xydra.core.model.impl.memory.SynchronizesChangesImpl;
 import org.xydra.index.XI;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
@@ -27,7 +28,7 @@ import org.xydra.store.XydraStore;
  * 
  * TODO handle timeouts (retry), other store/HTTP errors
  * 
- * TODO move this into S
+ * TODO move this into {@link SynchronizesChangesImpl}
  * 
  * @author dscharrer
  * 
@@ -170,6 +171,8 @@ public class XSynchronizer {
 						if(change.callback != null) {
 							change.callback.applied(commandRev);
 						}
+						// TODO don't remove the local command until we actually
+						// have the event
 						XSynchronizer.this.changes.remove(0);
 					} else {
 						if(!gotEvents) {
@@ -186,8 +189,8 @@ public class XSynchronizer {
 					
 					if(eventsRes.getException() != null) {
 						assert events == null;
-						log.info("sync: error getting events while sending command",
-						        eventsRes.getException());
+						log.info("sync: error getting events while sending command", eventsRes
+						        .getException());
 						// TODO handle error;
 						requestEnded(false);
 						return;

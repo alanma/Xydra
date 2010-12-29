@@ -28,6 +28,7 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
+import org.xydra.core.model.XSynchronizationCallback;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XRepositoryState;
@@ -121,45 +122,6 @@ public class MemoryRepository implements XRepository, Serializable {
 		return result != XCommand.NOCHANGE;
 	}
 	
-	public synchronized MemoryModel createModelInternal(XID modelId) {
-		MemoryModel model = getModel(modelId);
-		if(model == null) {
-			XRepositoryEvent event = MemoryRepositoryEvent.createAddEvent(this.sessionActor,
-			        getAddress(), modelId);
-			
-			XModelState modelState = this.state.createModelState(modelId);
-			
-			XChangeLogState ls = modelState.getChangeLogState();
-			
-			XStateTransaction trans = beginStateTransaction();
-			
-			ls.appendEvent(event, trans);
-			ls.save(trans);
-			
-			modelState.save(trans);
-			
-			model = new MemoryModel(this.sessionActor, this.sessionPasswordHash, this, modelState);
-			assert model.getRevisionNumber() == 0;
-			
-			this.state.addModelState(modelState);
-			save(trans);
-			
-			endStateTransaction(trans);
-			
-			// in memory
-			this.loadedModels.put(model.getID(), model);
-			
-			boolean oldLogging = model.eventQueue.setLogging(false);
-			model.eventQueue.enqueueRepositoryEvent(this, event);
-			model.eventQueue.setLogging(oldLogging);
-			
-			model.eventQueue.sendEvents();
-			
-		}
-		
-		return model;
-	}
-	
 	/**
 	 * Saves the current state information of this MemoryRepository with the
 	 * currently used persistence layer
@@ -200,7 +162,47 @@ public class MemoryRepository implements XRepository, Serializable {
 		return this.state.iterator();
 	}
 	
-	private long removeModelInternal(MemoryModel model) {
+	public void createModelInternal(XID modelId, XCommand command, XSynchronizationCallback callback) {
+		
+		XRepositoryEvent event = MemoryRepositoryEvent.createAddEvent(this.sessionActor,
+		        getAddress(), modelId);
+		
+		XModelState modelState = this.state.createModelState(modelId);
+		
+		XChangeLogState ls = modelState.getChangeLogState();
+		
+		XStateTransaction trans = beginStateTransaction();
+		
+		ls.appendEvent(event, trans);
+		ls.save(trans);
+		
+		modelState.save(trans);
+		
+		MemoryModel model = new MemoryModel(this.sessionActor, this.sessionPasswordHash, this,
+		        modelState);
+		assert model.getRevisionNumber() == 0;
+		
+		this.state.addModelState(modelState);
+		save(trans);
+		
+		endStateTransaction(trans);
+		
+		// in memory
+		this.loadedModels.put(model.getID(), model);
+		
+		boolean oldLogging = model.eventQueue.setLogging(false);
+		model.eventQueue.enqueueRepositoryEvent(this, event);
+		model.eventQueue.setLogging(oldLogging);
+		
+		assert model.eventQueue.getLocalChanges().isEmpty();
+		model.eventQueue.newLocalChange(command, callback);
+		
+		model.eventQueue.sendEvents();
+		
+	}
+	
+	private long removeModelInternal(MemoryModel model, XCommand command,
+	        XSynchronizationCallback callback) {
 		synchronized(model.eventQueue) {
 			
 			XID modelId = model.getID();
@@ -226,6 +228,8 @@ public class MemoryRepository implements XRepository, Serializable {
 			endStateTransaction(trans);
 			model.eventQueue.stateTransaction = null;
 			
+			model.eventQueue.newLocalChange(command, callback);
+			
 			model.eventQueue.sendEvents();
 			model.eventQueue.setBlockSending(true);
 			
@@ -249,7 +253,12 @@ public class MemoryRepository implements XRepository, Serializable {
 		return inTrans;
 	}
 	
-	public synchronized long executeRepositoryCommand(XRepositoryCommand command) {
+	public long executeRepositoryCommand(XRepositoryCommand command) {
+		return executeRepositoryCommand(command, null);
+	}
+	
+	private synchronized long executeRepositoryCommand(XRepositoryCommand command,
+	        XSynchronizationCallback callback) {
 		
 		if(!command.getRepositoryID().equals(getID())) {
 			// given given repository-id are not consistent
@@ -270,7 +279,7 @@ public class MemoryRepository implements XRepository, Serializable {
 				return XCommand.FAILED;
 			}
 			
-			createModelInternal(command.getModelID());
+			createModelInternal(command.getModelID(), command, callback);
 			
 			// Models are always created at the revision number 0.
 			return 0;
@@ -294,7 +303,7 @@ public class MemoryRepository implements XRepository, Serializable {
 				return XCommand.FAILED;
 			}
 			
-			return removeModelInternal(oldModel);
+			return removeModelInternal(oldModel, command, callback);
 		}
 		
 		return XCommand.FAILED;
@@ -397,112 +406,42 @@ public class MemoryRepository implements XRepository, Serializable {
 		}
 	}
 	
-	/**
-	 * Adds the given {@link XRepositoryEventListener} to this MemoryRepository,
-	 * if possible.
-	 * 
-	 * @param changeListener The {@link XRepositoryEventListener} which is to be
-	 *            added
-	 * @return false, if the given {@link XRepositoryEventListener} was already
-	 *         registered on this MemoryRepository, true otherwise
-	 */
 	public synchronized boolean addListenerForRepositoryEvents(
 	        XRepositoryEventListener changeListener) {
 		return this.repoChangeListenerCollection.add(changeListener);
 	}
 	
-	/**
-	 * Removes the given {@link XRepositoryEventListener} from this
-	 * MemoryRepository.
-	 * 
-	 * @param changeListener The {@link XRepositoryEventListener} which is to be
-	 *            removed
-	 * @return true, if the given {@link XRepositoryEventListener} was
-	 *         registered on this MemoryRepository, false otherwise
-	 */
 	public synchronized boolean removeListenerForRepositoryEvents(
 	        XRepositoryEventListener changeListener) {
 		return this.repoChangeListenerCollection.remove(changeListener);
 		
 	}
 	
-	/**
-	 * Adds the given {@link XModelEventListener} to this MemoryRepository, if
-	 * possible.
-	 * 
-	 * @param changeListener The {@link XModelEventListener} which is to be
-	 *            added
-	 * @return false, if the given {@link XModelEventListener} was already
-	 *         registered on this MemoryRepository, true otherwise
-	 */
 	public synchronized boolean addListenerForModelEvents(XModelEventListener changeListener) {
 		return this.modelChangeListenerCollection.add(changeListener);
 		
 	}
 	
-	/**
-	 * Removes the given {@link XModelEventListener} from this MemoryRepository.
-	 * 
-	 * @param changeListener The {@link XModelEventListener} which is to be
-	 *            removed
-	 * @return true, if the given {@link XModelEventListener} was registered on
-	 *         this MemoryRepository, false otherwise
-	 */
 	public synchronized boolean removeListenerForModelEvents(XModelEventListener changeListener) {
 		return this.modelChangeListenerCollection.remove(changeListener);
 		
 	}
 	
-	/**
-	 * Adds the given {@link XObjectEventListener} to this MemoryRepository, if
-	 * possible.
-	 * 
-	 * @param changeListener The {@link XObjectEventListener} which is to be
-	 *            added
-	 * @return false, if the given {@link XObjectEventListener} was already
-	 *         registered on this MemoryRepository, true otherwise
-	 */
 	public synchronized boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
 		return this.objectChangeListenerCollection.add(changeListener);
 		
 	}
 	
-	/**
-	 * Removes the given {@link XObjectEventListener} from this
-	 * MemoryRepository.
-	 * 
-	 * @param changeListener The {@link XObjectEventListener} which is to be
-	 *            removed
-	 * @return true, if the given {@link XObjectEventListener} was registered on
-	 *         this MemoryRepository, false otherwise
-	 */
 	public synchronized boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
 		return this.objectChangeListenerCollection.remove(changeListener);
 		
 	}
 	
-	/**
-	 * Adds the given {@link XFieldEventListener} to this MemoryRepository, if
-	 * possible.
-	 * 
-	 * @param changeListener The {@link XFieldEventListener} which is to be
-	 *            added
-	 * @return false, if the given {@link XFieldEventListener} was already
-	 *         registered on this MemoryRepository, true otherwise
-	 */
 	public synchronized boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
 		return this.fieldChangeListenerCollection.add(changeListener);
 		
 	}
 	
-	/**
-	 * Removes the given {@link XFieldEventListener} from this MemoryRepository.
-	 * 
-	 * @param changeListener The {@link XFieldEventListener} which is to be
-	 *            removed
-	 * @return true, if the given {@link XFieldEventListener} was registered on
-	 *         this MemoryRepository, false otherwise
-	 */
 	public synchronized boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
 		return this.fieldChangeListenerCollection.remove(changeListener);
 		
@@ -512,48 +451,43 @@ public class MemoryRepository implements XRepository, Serializable {
 		return this.state.getAddress();
 	}
 	
-	/**
-	 * Adds the given {@link XTransactionEventListener} to this
-	 * MemoryRepository, if possible.
-	 * 
-	 * @param changeListener The {@link XTransactionEventListener} which is to
-	 *            be added
-	 * @return false, if the given {@link XTransactionEventListener} was already
-	 *         registered on this MemoryRepository, true otherwise
-	 */
 	public synchronized boolean addListenerForTransactionEvents(
 	        XTransactionEventListener changeListener) {
 		return this.transactionListenerCollection.add(changeListener);
 	}
 	
-	/**
-	 * Removes the given {@link XTransactionEventListener} from this
-	 * MemoryRepository.
-	 * 
-	 * @param changeListener The {@link XTransactionEventListener} which is to
-	 *            be removed
-	 * @return true, if the given {@link XTransactionEventListener} was
-	 *         registered on this MemoryRepository, false otherwise
-	 */
 	public synchronized boolean removeListenerForTransactionEvents(
 	        XTransactionEventListener changeListener) {
 		return this.transactionListenerCollection.remove(changeListener);
 	}
 	
-	public synchronized long executeCommand(XCommand command) {
+	public long executeCommand(XCommand command) {
+		return executeCommand(command, null);
+	}
+	
+	public long executeCommand(XCommand command, XSynchronizationCallback callback) {
 		if(command instanceof XRepositoryCommand) {
-			return executeRepositoryCommand((XRepositoryCommand)command);
+			return executeRepositoryCommand((XRepositoryCommand)command, callback);
 		}
-		XModel model = getModel(command.getTarget().getModel());
+		MemoryModel model = getModel(command.getTarget().getModel());
 		if(model == null) {
 			return XCommand.FAILED;
 		}
-		/*
-		 * TODO using the actor set on the model instead of the one set on the
-		 * repository (on which the user called the #executeCommand() method) -
-		 * this is counter-intuitive for an API user
-		 */
-		return model.executeCommand(command);
+		synchronized(model.eventQueue) {
+			if(model.removed) {
+				return XCommand.FAILED;
+			}
+			XID modelActor = model.eventQueue.getActor();
+			String modelPsw = model.eventQueue.getPasswordHash();
+			model.eventQueue.setSessionActor(this.sessionActor, this.sessionPasswordHash);
+			
+			long res = model.executeCommand(command, callback);
+			// FIXME model commands executed by listeners will use the
+			// repository actor
+			
+			model.eventQueue.setSessionActor(modelActor, modelPsw);
+			return res;
+		}
 	}
 	
 	@Override
