@@ -279,7 +279,7 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * possible that someone will change the state of the given
 	 * model/object/etc. while the method is being executed, which may result in
 	 * incoherent transformations. We'll probably need a way to lock the
-	 * entities while these methods are being executed.
+	 * entities while these methods are being executed. Max: Yes.
 	 */
 	public void changeModel(XBaseModel oldModel, XBaseModel newModel)
 	        throws IllegalArgumentException {
@@ -367,8 +367,8 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 *             oldObject or its parent {@link XModel}.
 	 */
 	public void removeObject(XBaseObject oldObject) {
-		removeObject(oldObject.getAddress().getParent(), oldObject.getRevisionNumber(), oldObject
-		        .getID());
+		removeObject(oldObject.getAddress().getParent(), oldObject.getRevisionNumber(),
+		        oldObject.getID());
 	}
 	
 	/**
@@ -436,8 +436,8 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 *             oldField.
 	 */
 	public void removeField(XBaseField oldField) {
-		removeField(oldField.getAddress().getParent(), oldField.getRevisionNumber(), oldField
-		        .getID());
+		removeField(oldField.getAddress().getParent(), oldField.getRevisionNumber(),
+		        oldField.getID());
 	}
 	
 	/**
