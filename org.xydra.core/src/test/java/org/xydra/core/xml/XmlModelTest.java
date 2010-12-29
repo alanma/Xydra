@@ -22,6 +22,7 @@ import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryObject;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.core.test.DemoModelUtil;
+import org.xydra.core.test.TestLogger;
 import org.xydra.core.value.XV;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
@@ -38,7 +39,13 @@ import org.xydra.log.LoggerFactory;
  */
 public class XmlModelTest {
 	
-	private static final Logger log = LoggerFactory.getLogger(XmlModelTest.class);
+	private static final Logger log = getLogger();
+	
+	private static Logger getLogger() {
+		TestLogger.init();
+		return LoggerFactory.getLogger(XmlModelTest.class);
+	}
+	
 	private XID actorId = XX.toId("a-test-user");
 	
 	private void testRepository(XBaseRepository repo) {

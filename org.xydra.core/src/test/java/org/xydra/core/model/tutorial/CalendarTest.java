@@ -11,12 +11,9 @@ import org.xydra.core.test.TestLogger;
 
 public class CalendarTest {
 	
-	{
-		TestLogger.init();
-	}
-	
 	@BeforeClass
 	public static void init() {
+		TestLogger.init();
 		XSPI.setStateStore(new TemporaryStateStore());
 	}
 	

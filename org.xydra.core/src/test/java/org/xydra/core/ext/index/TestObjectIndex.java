@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xydra.core.X;
 import org.xydra.core.index.IObjectIndex;
@@ -17,6 +18,7 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
+import org.xydra.core.test.TestLogger;
 import org.xydra.core.value.XValue;
 
 
@@ -31,6 +33,11 @@ public class TestObjectIndex {
 	private XObject user2;
 	private XObject user3;
 	private IndexFactoryImpl indexFactory;
+	
+	@BeforeClass
+	public static void init() {
+		TestLogger.init();
+	}
 	
 	@Before
 	public void before() {

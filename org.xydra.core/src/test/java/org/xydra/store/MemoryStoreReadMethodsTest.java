@@ -1,5 +1,7 @@
 package org.xydra.store;
 
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Before;
 import org.xydra.core.X;
 import org.xydra.core.XX;
@@ -11,6 +13,7 @@ import org.xydra.store.test.AbstractStoreReadMethodsTest;
 
 
 public class MemoryStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
+	
 	protected GroupModelWrapper gmw = null;
 	
 	@Override
@@ -32,7 +35,7 @@ public class MemoryStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 	@Override
 	protected XID getCorrectUser() {
 		/*
-		 * FIXME this whole method propably needs to be changed, after Max tells
+		 * FIXME this whole method probably needs to be changed, after Max tells
 		 * me how to actually work with the access rights here. ~Bjoern
 		 */
 		if(this.gmw == null) {
@@ -42,14 +45,10 @@ public class MemoryStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 		XID actorId = XX.createUniqueID();
 		
 		if(!this.gmw.isValidLogin(actorId, this.getCorrectUserPasswordHash())) {
-			/*
-			 * FIXME addToGroup always fails!
-			 */
 			this.gmw.addToGroup(actorId, XX.toId("TestGroup"));
 			this.gmw.setPasswordHash(actorId, this.getCorrectUserPasswordHash());
 		}
-		System.out.println("LOL "
-		        + this.gmw.isValidLogin(actorId, this.getCorrectUserPasswordHash()));
+		assertTrue(this.gmw.isValidLogin(actorId, this.getCorrectUserPasswordHash()));
 		
 		return actorId;
 	}

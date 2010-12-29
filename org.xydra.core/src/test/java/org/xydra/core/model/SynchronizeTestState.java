@@ -4,6 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.xydra.core.model.state.XSPI;
+import org.xydra.core.test.TestLogger;
 import org.xydra.core.test.model.AbstractSynchronizeTest;
 import org.xydra.core.test.model.state.TestStateStore;
 
@@ -14,6 +15,7 @@ public class SynchronizeTestState extends AbstractSynchronizeTest {
 	
 	@BeforeClass
 	public static void init() {
+		TestLogger.init();
 		store = new TestStateStore();
 		XSPI.setStateStore(store);
 	}

@@ -193,16 +193,16 @@ public class GroupModelWrapper implements XGroupDatabase, XPasswordDatabase {
 	}
 	
 	public void dump() {
-		System.out.println("All groups:");
+		log.info("All groups:");
 		for(XID groupId : getGroups()) {
 			dumpGroupId(groupId);
 		}
 	}
 	
 	public void dumpGroupId(XID groupId) {
-		System.out.println("=== " + groupId);
-		System.out.println("*     All groups: " + getGroupsOf(groupId));
-		System.out.println("*    All members: " + getMembersOf(groupId));
+		log.info("=== " + groupId);
+		log.info("*     All groups: " + getGroupsOf(groupId));
+		log.info("*    All members: " + getMembersOf(groupId));
 	}
 	
 	@Override

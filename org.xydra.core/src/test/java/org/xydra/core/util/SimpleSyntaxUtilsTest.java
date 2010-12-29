@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.xydra.core.XX;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
+import org.xydra.core.test.TestLogger;
 import org.xydra.core.xml.XmlModel;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
 import org.xydra.log.Logger;
@@ -15,7 +16,12 @@ import org.xydra.log.LoggerFactory;
 
 public class SimpleSyntaxUtilsTest {
 	
-	private static final Logger log = LoggerFactory.getLogger(SimpleSyntaxUtilsTest.class);
+	private static final Logger log = getLogger();
+	
+	private static Logger getLogger() {
+		TestLogger.init();
+		return LoggerFactory.getLogger(SimpleSyntaxUtilsTest.class);
+	}
 	
 	static final XID PHONEBOOK = XX.toId("phonebook");
 	

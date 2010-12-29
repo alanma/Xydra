@@ -12,6 +12,7 @@ import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.state.XSPI;
+import org.xydra.core.test.TestLogger;
 import org.xydra.core.test.model.state.TestStateStore;
 import org.xydra.core.value.XV;
 
@@ -33,6 +34,7 @@ public class StrictStateTest {
 	
 	@BeforeClass
 	public static void init() {
+		TestLogger.init();
 		store = new TestStateStore();
 		XSPI.setStateStore(store);
 		actorId = XX.toId("StrictStateTest");

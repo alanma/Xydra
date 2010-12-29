@@ -4,16 +4,26 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XRepository;
+import org.xydra.core.model.state.XSPI;
+import org.xydra.core.model.state.impl.memory.TemporaryStateStore;
+import org.xydra.core.test.TestLogger;
 
 
 public class GroupDatabaseTest {
 	
 	private GroupModelWrapper wrapper;
+	
+	@BeforeClass
+	public static void init() {
+		TestLogger.init();
+		XSPI.setStateStore(new TemporaryStateStore());
+	}
 	
 	@Before
 	public void before() {
