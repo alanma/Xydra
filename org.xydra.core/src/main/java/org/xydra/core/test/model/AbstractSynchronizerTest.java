@@ -24,7 +24,7 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
-import org.xydra.core.model.XSynchronizationCallback;
+import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XType;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.impl.memory.SynchronizesChangesImpl;
@@ -92,7 +92,7 @@ abstract public class AbstractSynchronizerTest {
 		        modelId));
 	}
 	
-	static class TestCallback implements XSynchronizationCallback {
+	static class TestCallback implements XLocalChangeCallback {
 		
 		boolean applied = false;
 		boolean failed = false;

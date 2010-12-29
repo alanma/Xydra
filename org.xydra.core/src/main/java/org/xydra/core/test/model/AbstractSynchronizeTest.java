@@ -31,10 +31,10 @@ import org.xydra.core.change.impl.memory.MemoryObjectCommand;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XLocalChange;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.model.impl.memory.LocalChange;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.core.model.impl.memory.SynchronizesChangesImpl;
@@ -206,42 +206,39 @@ abstract public class AbstractSynchronizeTest {
 		XEvent[] remoteEvents = remoteChanges.toArray(new XEvent[remoteChanges.size()]);
 		
 		assert lastRevision == this.localModel.getSynchronizedRevision();
-		long[] results = this.localModel.synchronize(remoteEvents);
+		this.localModel.synchronize(remoteEvents);
 		
 		// FIXME this is a hack;
-		List<LocalChange> lc = this.localModel.getLocalChanges();
+		XLocalChange[] lc = this.localModel.getLocalChanges();
 		
 		// check results
-		assertEquals(7, lc.size());
-		assertEquals(lc.size(), results.length);
-		assertTrue(results[0] >= 0); // createObject
-		assertTrue(results[1] >= 0); // createField
-		assertTrue(results[2] >= 0); // setValue1
-		assertTrue(results[3] >= 0); // setValue2
-		assertTrue(results[4] >= 0); // removeField
-		assertEquals(XCommand.FAILED, results[5]); // removePeter
-		assertEquals(XCommand.FAILED, results[6]); // removeJohnSafe
+		assertEquals(5, lc.length);
+		
+		// TODO test callbacks
+		// assertEquals(lc.length, results.length);
+		// assertTrue(results[0] >= 0); // createObject
+		// assertTrue(results[1] >= 0); // createField
+		// assertTrue(results[2] >= 0); // setValue1
+		// assertTrue(results[3] >= 0); // setValue2
+		// assertTrue(results[4] >= 0); // removeField
+		// assertEquals(XCommand.FAILED, results[5]); // removePeter
+		// assertEquals(XCommand.FAILED, results[6]); // removeJohnSafe
 		
 		// check that commands have been properly modified
-		assertEquals(createObject, lc.get(0).command);
-		assertEquals(createField, lc.get(1).command);
-		assertEquals(setValue1.getRevisionNumber() + remoteChanges.size(), ((XFieldCommand)lc
-		        .get(2).command).getRevisionNumber());
-		assertEquals(setValue2, lc.get(3).command);
-		assertEquals(removeField.getRevisionNumber() + remoteChanges.size(), ((XObjectCommand)lc
-		        .get(4).command).getRevisionNumber());
-		assertEquals(removePeter, lc.get(5).command);
-		assertEquals(removeJohnSafe, lc.get(6).command);
+		assertEquals(createObject, lc[0].getCommand());
+		assertEquals(createField, lc[1].getCommand());
+		assertEquals(setValue1.getRevisionNumber() + remoteChanges.size(), ((XFieldCommand)lc[2]
+		        .getCommand()).getRevisionNumber());
+		assertEquals(setValue2, lc[3].getCommand());
+		assertEquals(removeField.getRevisionNumber() + remoteChanges.size(), ((XObjectCommand)lc[4]
+		        .getCommand()).getRevisionNumber());
 		
 		// apply the commands remotely
-		assertTrue(this.remoteModel.executeCommand(fix(lc.get(0).command)) >= 0);
-		assertTrue(this.remoteModel.executeCommand(fix(lc.get(1).command)) >= 0);
-		assertTrue(this.remoteModel.executeCommand(fix(lc.get(2).command)) >= 0);
-		assertTrue(this.remoteModel.executeCommand(fix(lc.get(3).command)) >= 0);
-		assertTrue(this.remoteModel.executeCommand(fix(lc.get(4).command)) >= 0);
-		assertEquals(XCommand.FAILED, this.remoteModel.executeCommand(fix(lc.get(5).command)));
-		assertEquals(XCommand.FAILED, this.remoteModel.executeCommand(fix(lc.get(6).command)));
-		// removeJohnForced not sent as it was NOCHANGE already
+		assertTrue(this.remoteModel.executeCommand(fix(lc[0].getCommand())) >= 0);
+		assertTrue(this.remoteModel.executeCommand(fix(lc[1].getCommand())) >= 0);
+		assertTrue(this.remoteModel.executeCommand(fix(lc[2].getCommand())) >= 0);
+		assertTrue(this.remoteModel.executeCommand(fix(lc[3].getCommand())) >= 0);
+		assertTrue(this.remoteModel.executeCommand(fix(lc[4].getCommand())) >= 0);
 		
 		assertTrue(XCompareUtils.equalState(this.remoteModel, this.localModel));
 		

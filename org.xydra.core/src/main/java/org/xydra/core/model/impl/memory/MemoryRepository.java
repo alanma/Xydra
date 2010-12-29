@@ -28,7 +28,7 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.model.XSynchronizationCallback;
+import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XRepositoryState;
@@ -162,7 +162,7 @@ public class MemoryRepository implements XRepository, Serializable {
 		return this.state.iterator();
 	}
 	
-	public void createModelInternal(XID modelId, XCommand command, XSynchronizationCallback callback) {
+	public void createModelInternal(XID modelId, XCommand command, XLocalChangeCallback callback) {
 		
 		XRepositoryEvent event = MemoryRepositoryEvent.createAddEvent(this.sessionActor,
 		        getAddress(), modelId);
@@ -202,7 +202,7 @@ public class MemoryRepository implements XRepository, Serializable {
 	}
 	
 	private long removeModelInternal(MemoryModel model, XCommand command,
-	        XSynchronizationCallback callback) {
+	        XLocalChangeCallback callback) {
 		synchronized(model.eventQueue) {
 			
 			XID modelId = model.getID();
@@ -247,7 +247,7 @@ public class MemoryRepository implements XRepository, Serializable {
 		}
 		
 		XRepositoryEvent event = MemoryRepositoryEvent.createRemoveEvent(this.sessionActor,
-		        getAddress(), model.getID(), model.getOldRevisionNumber(), inTrans);
+		        getAddress(), model.getID(), model.getCurrentRevisionNumber(), inTrans);
 		model.eventQueue.enqueueRepositoryEvent(this, event);
 		
 		return inTrans;
@@ -258,7 +258,7 @@ public class MemoryRepository implements XRepository, Serializable {
 	}
 	
 	private synchronized long executeRepositoryCommand(XRepositoryCommand command,
-	        XSynchronizationCallback callback) {
+	        XLocalChangeCallback callback) {
 		
 		if(!command.getRepositoryID().equals(getID())) {
 			// given given repository-id are not consistent
@@ -465,7 +465,7 @@ public class MemoryRepository implements XRepository, Serializable {
 		return executeCommand(command, null);
 	}
 	
-	public long executeCommand(XCommand command, XSynchronizationCallback callback) {
+	public long executeCommand(XCommand command, XLocalChangeCallback callback) {
 		if(command instanceof XRepositoryCommand) {
 			return executeRepositoryCommand((XRepositoryCommand)command, callback);
 		}

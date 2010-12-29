@@ -119,6 +119,6 @@ public interface XRepository extends XWritableRepository, XSendsRepositoryEvents
 	 *         command.
 	 */
 	@ModificationOperation
-	long executeCommand(XCommand command, XSynchronizationCallback callback);
+	long executeCommand(XCommand command, XLocalChangeCallback callback);
 	
 }

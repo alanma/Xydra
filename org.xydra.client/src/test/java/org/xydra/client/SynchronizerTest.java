@@ -18,7 +18,7 @@ import org.xydra.core.change.impl.memory.MemoryModelCommand;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.model.XSynchronizationCallback;
+import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.session.XProtectedRepository;
 import org.xydra.core.model.session.impl.arm.ArmProtectedRepository;
@@ -58,7 +58,7 @@ public class SynchronizerTest extends TestCase {
 		
 	}
 	
-	static class TestCallback implements XSynchronizationCallback {
+	static class TestCallback implements XLocalChangeCallback {
 		
 		boolean applied = false;
 		

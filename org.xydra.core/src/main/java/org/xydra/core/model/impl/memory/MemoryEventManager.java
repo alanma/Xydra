@@ -21,7 +21,7 @@ import org.xydra.core.change.impl.memory.MemoryTransactionEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XID;
-import org.xydra.core.model.XSynchronizationCallback;
+import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.impl.memory.SynchronizesChangesImpl.Orphans;
 import org.xydra.core.model.state.XStateTransaction;
 import org.xydra.index.XI;
@@ -42,7 +42,7 @@ public class MemoryEventManager implements Serializable {
 	private final MemoryChangeLog changeLog;
 	
 	private long syncRevision;
-	private final List<LocalChange> localChanges = new ArrayList<LocalChange>();
+	private final List<MemoryLocalChange> localChanges = new ArrayList<MemoryLocalChange>();
 	private XID sessionActor;
 	private String sessionPasswordHash;
 	
@@ -631,14 +631,14 @@ public class MemoryEventManager implements Serializable {
 		this.sessionPasswordHash = passwordHash;
 	}
 	
-	protected void newLocalChange(XCommand command, XSynchronizationCallback callback) {
+	protected void newLocalChange(XCommand command, XLocalChangeCallback callback) {
 		if(this.orphans == null) {
-			this.localChanges.add(new LocalChange(this.sessionActor, this.sessionPasswordHash,
+			this.localChanges.add(new MemoryLocalChange(this.sessionActor, this.sessionPasswordHash,
 			        command, callback));
 		}
 	}
 	
-	protected List<LocalChange> getLocalChanges() {
+	protected List<MemoryLocalChange> getLocalChanges() {
 		return this.localChanges;
 	}
 	

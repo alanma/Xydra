@@ -9,10 +9,10 @@ import org.xydra.client.XChangesService.CommandResult;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
+import org.xydra.core.model.XLocalChange;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XSynchronizesChanges;
-import org.xydra.core.model.impl.memory.LocalChange;
 import org.xydra.index.XI;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -38,7 +38,6 @@ public class XSynchronizer {
 	private long syncRevison; // FIXME revision now tracked in entity.
 	private final XSynchronizesChanges entity;
 	private final XChangesService service;
-	private final List<LocalChange> changes;
 	private final XAddress addr;
 	
 	boolean requestRunning = false;
@@ -60,7 +59,6 @@ public class XSynchronizer {
 		this.entity = entity;
 		this.service = service;
 		this.syncRevison = getLocalRevisionNumber();
-		this.changes = entity.getLocalChanges(); // FIXME hack
 		assert addr.getField() == null;
 		assert addr.getModel() != null;
 		assert XI.equals(addr.getObject(), entity.getAddress().getObject());
@@ -87,13 +85,24 @@ public class XSynchronizer {
 		}
 		this.requestRunning = true;
 		
-		if(!this.changes.isEmpty()) {
+		XLocalChange[] changes = this.entity.getLocalChanges();
+		
+		XLocalChange newChange = null;
+		for(int i = 0; i < changes.length; i++) {
+			if(!changes[i].isApplied()) {
+				newChange = changes[i];
+				break;
+			}
+		}
+		
+		if(newChange != null) {
 			
-			final LocalChange change = this.changes.get(0);
+			final XLocalChange change = newChange;
 			
-			log.info("sync: sending command " + change.command + ", rev is " + this.syncRevison);
+			log.info("sync: sending command " + change.getCommand() + ", rev is "
+			        + this.syncRevison);
 			
-			this.service.executeCommand(this.addr, change.command, this.syncRevison + 1,
+			this.service.executeCommand(this.addr, change.getCommand(), this.syncRevison + 1,
 			        new Callback<CommandResult>() {
 				        public void onFailure(Throwable error) {
 					        if(error instanceof ServiceException) {
@@ -119,10 +128,7 @@ public class XSynchronizer {
 							        }
 							        
 						        }
-						        if(change.callback != null) {
-							        change.callback.applied(res.getResult());
-						        }
-						        XSynchronizer.this.changes.remove(0);
+						        change.setRemoteResult(res.getResult());
 					        } else {
 						        if(res.getEvents().size() == 0) {
 							        log.warn("sync: command failed but no new events, sync lost?");
@@ -172,45 +178,15 @@ public class XSynchronizer {
 			return;
 		}
 		
-		log.info("sync: merging " + remoteChanges.size() + " remote and " + this.changes.size()
-		        + " local changes, local rev is " + getLocalRevisionNumber() + " (synced to "
-		        + this.syncRevison + ")");
-		
 		XEvent[] events = remoteChanges.toArray(new XEvent[remoteChanges.size()]);
-		long[] results = this.entity.synchronize(events);
-		
-		this.syncRevison += remoteChanges.size();
-		
-		log.info("sync: merged changes, new local rev is " + getLocalRevisionNumber()
-		        + " (synced to " + this.syncRevison + ")");
-		
-		for(int i = 0; i < results.length; i++) {
-			LocalChange change = this.changes.get(i);
-			if(results[i] == XCommand.FAILED) {
-				log.info("sync: client command conflicted: " + change.command);
-				if(change.callback != null) {
-					change.callback.failed();
-				}
-			} else if(results[i] == XCommand.NOCHANGE) {
-				log.info("sync: client command redundant: " + change.command);
-				if(change.callback != null) {
-					change.callback.applied(results[i]);
-				}
-			}
-		}
-		
-		for(int i = results.length - 1; i >= 0; i--) {
-			if(results[i] < 0) {
-				this.changes.remove(i);
-			}
-		}
+		this.entity.synchronize(events);
 		
 	}
 	
 	protected void requestEnded(boolean immediateRequest) {
 		this.requestRunning = false;
 		// TODO should this only be done when autoSync == true?
-		if(immediateRequest && !this.changes.isEmpty()) {
+		if(immediateRequest && this.entity.countUnappliedLocalChanges() > 0) {
 			startRequest();
 		}
 	}

@@ -12,12 +12,9 @@ import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XChanges;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
-import org.xydra.core.change.XFieldCommand;
 import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.change.XFieldEventListener;
-import org.xydra.core.change.XModelCommand;
 import org.xydra.core.change.XModelEvent;
-import org.xydra.core.change.XObjectCommand;
 import org.xydra.core.change.XObjectEvent;
 import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.change.XSendsFieldEvents;
@@ -26,9 +23,6 @@ import org.xydra.core.change.XSendsTransactionEvents;
 import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.XTransactionEvent;
 import org.xydra.core.change.XTransactionEventListener;
-import org.xydra.core.change.impl.memory.MemoryFieldCommand;
-import org.xydra.core.change.impl.memory.MemoryModelCommand;
-import org.xydra.core.change.impl.memory.MemoryObjectCommand;
 import org.xydra.core.model.IHasXAddress;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseField;
@@ -38,14 +32,17 @@ import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XExecutesCommands;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XLocalChange;
+import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
-import org.xydra.core.model.XSynchronizationCallback;
 import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.core.model.delta.ChangedField;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.ChangedObject;
 import org.xydra.index.XI;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
 
 /**
@@ -58,6 +55,8 @@ import org.xydra.index.XI;
 public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchronizesChanges,
         XExecutesCommands, XSendsObjectEvents, XSendsFieldEvents, XSendsTransactionEvents,
         Serializable {
+	
+	private static final Logger log = LoggerFactory.getLogger(SynchronizesChangesImpl.class);
 	
 	private static final long serialVersionUID = -5649382238597273583L;
 	
@@ -83,7 +82,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 		this.transactionListenerCollection = new HashSet<XTransactionEventListener>();
 	}
 	
-	protected long executeTransaction(XTransaction transaction, XSynchronizationCallback callback) {
+	protected long executeTransaction(XTransaction transaction, XLocalChangeCallback callback) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -117,7 +116,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 			
 			this.eventQueue.newLocalChange(transaction, callback);
 			
-			long oldRev = getOldRevisionNumber();
+			long oldRev = getCurrentRevisionNumber();
 			
 			// only execute as transaction if there actually are multiple
 			// changes
@@ -252,7 +251,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 				this.eventQueue.sendEvents();
 				
 			} else {
-				assert getOldRevisionNumber() == oldRev + 1 : "there should have been exactly one change";
+				assert getCurrentRevisionNumber() == oldRev + 1 : "there should have been exactly one change";
 			}
 			
 			return oldRev + 1;
@@ -436,13 +435,17 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 		saveIfModel();
 	}
 	
-	public long[] synchronize(XEvent[] remoteChanges) {
+	public void synchronize(XEvent[] remoteChanges) {
 		
-		List<LocalChange> localChanges = this.eventQueue.getLocalChanges();
+		List<MemoryLocalChange> localChanges = this.eventQueue.getLocalChanges();
+		
+		log.info("sync: merging " + remoteChanges.length + " remote and " + localChanges.size()
+		        + " local changes, local rev is " + getCurrentRevisionNumber() + " (synced to "
+		        + getSynchronizedRevision() + ")");
 		
 		checkSync();
 		
-		long[] results = new long[localChanges.size()];
+		long[] results = null;
 		
 		boolean oldBlock = this.eventQueue.setBlockSending(true);
 		
@@ -474,8 +477,8 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 				XCommand replayCommand = XChanges.createReplayCommand(remoteChange);
 				long result = executeCommand(replayCommand);
 				if(result < 0) {
-					// FIXME local commands should still be re-applied to main
-					// consistency
+					// FIXME local commands should still be re-applied to
+					// maintain consistency
 					throw new IllegalStateException("could not apply remote change: "
 					        + remoteChange);
 				}
@@ -485,56 +488,31 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 				this.eventQueue.setSyncRevision(remoteChange.getRevisionNumber());
 			}
 			
+			// Remove local changes that have been applied remotely.
+			long remoteRev = getCurrentRevisionNumber();
+			for(int i = localChanges.size() - 1; i >= 0; i--) {
+				MemoryLocalChange lc = localChanges.get(i);
+				if(lc.isApplied() && lc.getRemoteResult() >= 0 && lc.getRemoteResult() <= remoteRev) {
+					localChanges.remove(i);
+				}
+			}
+			
+			results = new long[localChanges.size()];
+			
 			// Re-apply the local changes.
 			long nRemote = remoteChanges.length;
 			for(int i = 0; i < localChanges.size(); i++) {
-				// FIXME use the actorId from the local change
-				LocalChange lc = localChanges.get(i);
-				XCommand command = lc.command;
 				
-				// Adapt the command if needed.
-				if(command instanceof XModelCommand) {
-					XModelCommand mc = (XModelCommand)command;
-					if(mc.getChangeType() == ChangeType.REMOVE && mc.getRevisionNumber() > syncRev) {
-						command = MemoryModelCommand.createRemoveCommand(mc.getTarget(),
-						        mc.getRevisionNumber() + nRemote, mc.getObjectID());
-						lc.command = command;
-					}
-				} else if(command instanceof XObjectCommand) {
-					XObjectCommand oc = (XObjectCommand)command;
-					if(oc.getChangeType() == ChangeType.REMOVE && oc.getRevisionNumber() > syncRev) {
-						command = MemoryObjectCommand.createRemoveCommand(oc.getTarget(),
-						        oc.getRevisionNumber() + nRemote, oc.getFieldID());
-						lc.command = command;
-					}
-				} else if(command instanceof XFieldCommand) {
-					XFieldCommand fc = (XFieldCommand)command;
-					if(fc.getRevisionNumber() > syncRev) {
-						switch(command.getChangeType()) {
-						case ADD:
-							command = MemoryFieldCommand.createAddCommand(fc.getTarget(),
-							        fc.getRevisionNumber() + nRemote, fc.getValue());
-							break;
-						case REMOVE:
-							command = MemoryFieldCommand.createRemoveCommand(fc.getTarget(),
-							        fc.getRevisionNumber() + nRemote);
-							break;
-						case CHANGE:
-							command = MemoryFieldCommand.createChangeCommand(fc.getTarget(),
-							        fc.getRevisionNumber() + nRemote, fc.getValue());
-							break;
-						default:
-							assert false : "Invalid command: " + fc;
-						}
-						lc.command = command;
-					}
-				}
+				// FIXME use the actorId from the local change
+				MemoryLocalChange lc = localChanges.get(i);
+				
+				lc.updateCommand(syncRev, nRemote);
 				
 				/*
 				 * Applying all local commands as the current actor, ignoring
 				 * what actor was used when they were originally executed.
 				 */
-				results[i] = executeCommand(command);
+				results[i] = executeCommand(lc.getCommand());
 				
 				// TODO maybe allow the callback to "fix" the change here to
 				// prevent an avalanche of failed commands (wrong revisions) and
@@ -547,6 +525,8 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 			// Clean unneeded events.
 			this.eventQueue.cleanEvents(pos);
 			
+			assert getSynchronizedRevision() == syncRev + remoteChanges.length;
+			
 		} finally {
 			
 			cleanupOrphans();
@@ -555,11 +535,40 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 			endStateTransaction();
 			
 			this.eventQueue.setBlockSending(oldBlock);
+			
+			if(results != null) {
+				
+				for(int i = 0; i < results.length; i++) {
+					MemoryLocalChange change = localChanges.get(i);
+					if(results[i] == XCommand.FAILED) {
+						log.info("sync: client command conflicted: " + change.getCommand());
+						if(change.getCallback() != null) {
+							change.getCallback().failed();
+						}
+					} else if(results[i] == XCommand.NOCHANGE) {
+						log.info("sync: client command redundant: " + change.getCommand());
+						if(change.getCallback() != null) {
+							change.getCallback().applied(results[i]);
+						}
+					}
+				}
+				
+				// IMPROVE this is O(nLocalChanges^2) worst case
+				for(int i = results.length - 1; i >= 0; i--) {
+					if(results[i] < 0) {
+						localChanges.remove(i);
+					}
+				}
+				
+			}
+			
 			this.eventQueue.sendEvents();
 			
 		}
 		
-		return results;
+		log.info("sync: merged changes, new local rev is " + getCurrentRevisionNumber()
+		        + " (synced to " + getSynchronizedRevision() + ")");
+		
 	}
 	
 	private void cleanupOrphans() {
@@ -623,7 +632,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 	 * @return the revision number to return when executing {@link XCommand
 	 *         XCommands}.
 	 */
-	protected abstract long getOldRevisionNumber();
+	protected abstract long getCurrentRevisionNumber();
 	
 	/**
 	 * @return the {@link MemoryModel} to use for sending
@@ -757,8 +766,20 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 	}
 	
 	@Override
-	public List<LocalChange> getLocalChanges() {
-		return this.eventQueue.getLocalChanges();
+	public XLocalChange[] getLocalChanges() {
+		List<MemoryLocalChange> mlc = this.eventQueue.getLocalChanges();
+		return mlc.toArray(new XLocalChange[mlc.size()]);
+	}
+	
+	@Override
+	public int countUnappliedLocalChanges() {
+		int count = 0;
+		for(XLocalChange lc : this.eventQueue.getLocalChanges()) {
+			if(!lc.isApplied()) {
+				count++;
+			}
+		}
+		return count;
 	}
 	
 	@Override

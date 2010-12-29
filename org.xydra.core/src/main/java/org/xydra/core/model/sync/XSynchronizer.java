@@ -1,14 +1,12 @@
 package org.xydra.core.model.sync;
 
-import java.util.List;
-
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
+import org.xydra.core.model.XLocalChange;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XSynchronizesChanges;
-import org.xydra.core.model.impl.memory.LocalChange;
 import org.xydra.core.model.impl.memory.SynchronizesChangesImpl;
 import org.xydra.index.XI;
 import org.xydra.index.query.Pair;
@@ -39,7 +37,6 @@ public class XSynchronizer {
 	
 	private final XSynchronizesChanges entity;
 	private final XydraStore store;
-	private final List<LocalChange> changes;
 	private final XAddress addr;
 	
 	boolean requestRunning = false;
@@ -62,7 +59,6 @@ public class XSynchronizer {
 		this.addr = addr;
 		this.entity = entity;
 		this.store = store;
-		this.changes = entity.getLocalChanges(); // FIXME this is a hack
 		assert addr.getField() == null;
 		assert addr.getModel() != null;
 		assert XI.equals(addr.getObject(), entity.getAddress().getObject());
@@ -93,14 +89,24 @@ public class XSynchronizer {
 		
 		final long syncRev = this.entity.getSynchronizedRevision();
 		
-		if(!this.changes.isEmpty()) {
+		XLocalChange[] changes = this.entity.getLocalChanges();
+		
+		XLocalChange newChange = null;
+		for(int i = 0; i < changes.length; i++) {
+			if(!changes[i].isApplied()) {
+				newChange = changes[i];
+				break;
+			}
+		}
+		
+		if(newChange != null) {
 			
 			// There are commands to send.
 			
 			// IMPROVE synchronize more than one change at a time
-			final LocalChange change = this.changes.get(0);
+			final XLocalChange change = newChange;
 			
-			log.info("sync: sending command " + change.command + ", rev is " + syncRev);
+			log.info("sync: sending command " + change.getCommand() + ", rev is " + syncRev);
 			
 			Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback = new Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>>() {
 				
@@ -168,12 +174,7 @@ public class XSynchronizer {
 							}
 							
 						}
-						if(change.callback != null) {
-							change.callback.applied(commandRev);
-						}
-						// TODO don't remove the local command until we actually
-						// have the event
-						XSynchronizer.this.changes.remove(0);
+						change.setRemoteResult(commandRev);
 					} else {
 						if(!gotEvents) {
 							log.warn("sync: command failed but no new events, sync lost?");
@@ -204,8 +205,8 @@ public class XSynchronizer {
 				
 			};
 			
-			this.store.executeCommandsAndGetEvents(change.actor, change.passwordHash,
-			        new XCommand[] { change.command },
+			this.store.executeCommandsAndGetEvents(change.getActor(), change.getPasswordHash(),
+			        new XCommand[] { change.getCommand() },
 			        new GetEventsRequest[] { new GetEventsRequest(this.addr, syncRev + 1,
 			                Long.MAX_VALUE) }, callback);
 			
@@ -262,48 +263,14 @@ public class XSynchronizer {
 			return;
 		}
 		
-		long lastRev = this.entity.getSynchronizedRevision();
-		
-		log.info("sync: merging " + remoteChanges.length + " remote and " + this.changes.size()
-		        + " local changes, local rev is " + getLocalRevisionNumber() + " (synced to "
-		        + lastRev + ")");
-		
-		long[] results = this.entity.synchronize(remoteChanges);
-		assert results.length == this.changes.size();
-		
-		assert this.entity.getSynchronizedRevision() == lastRev + remoteChanges.length;
-		
-		log.info("sync: merged changes, new local rev is " + getLocalRevisionNumber()
-		        + " (synced to " + this.entity.getSynchronizedRevision() + ")");
-		
-		for(int i = 0; i < results.length; i++) {
-			LocalChange change = this.changes.get(i);
-			if(results[i] == XCommand.FAILED) {
-				log.info("sync: client command conflicted: " + change.command);
-				if(change.callback != null) {
-					change.callback.failed();
-				}
-			} else if(results[i] == XCommand.NOCHANGE) {
-				log.info("sync: client command redundant: " + change.command);
-				if(change.callback != null) {
-					change.callback.applied(results[i]);
-				}
-			}
-		}
-		
-		// IMPROVE this is O(nLocalChanges^2) worst case
-		for(int i = results.length - 1; i >= 0; i--) {
-			if(results[i] < 0) {
-				this.changes.remove(i);
-			}
-		}
+		this.entity.synchronize(remoteChanges);
 		
 	}
 	
 	protected void requestEnded(boolean noConnectionErrors) {
 		this.requestRunning = false;
 		// TODO should this only be done when autoSync == true?
-		if(noConnectionErrors && !this.changes.isEmpty()) {
+		if(noConnectionErrors && this.entity.countUnappliedLocalChanges() > 0) {
 			startRequest();
 		}
 	}

@@ -10,7 +10,7 @@ import org.xydra.core.change.XCommand;
  * @author dscharrer
  * 
  */
-public interface XSynchronizationCallback {
+public interface XLocalChangeCallback {
 	
 	/**
 	 * Called when there have been remote changes that prevent this command from

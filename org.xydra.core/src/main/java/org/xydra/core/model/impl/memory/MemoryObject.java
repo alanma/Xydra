@@ -25,7 +25,7 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.model.XSynchronizationCallback;
+import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.delta.WrapperModel;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XFieldState;
@@ -399,7 +399,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		return executeObjectCommand(command, null);
 	}
 	
-	protected long executeObjectCommand(XObjectCommand command, XSynchronizationCallback callback) {
+	protected long executeObjectCommand(XObjectCommand command, XLocalChangeCallback callback) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -409,7 +409,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 				return XCommand.FAILED;
 			}
 			
-			long oldRev = getOldRevisionNumber();
+			long oldRev = getCurrentRevisionNumber();
 			
 			if(command.getChangeType() == ChangeType.ADD) {
 				if(hasField(command.getFieldID())) {
@@ -540,7 +540,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	}
 	
 	@Override
-	protected long getOldRevisionNumber() {
+	protected long getCurrentRevisionNumber() {
 		if(this.father != null)
 			return this.father.getRevisionNumber();
 		else
@@ -606,7 +606,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		return executeCommand(command, null);
 	}
 	
-	public long executeCommand(XCommand command, XSynchronizationCallback callback) {
+	public long executeCommand(XCommand command, XLocalChangeCallback callback) {
 		if(command instanceof XTransaction) {
 			return executeTransaction((XTransaction)command, callback);
 		}

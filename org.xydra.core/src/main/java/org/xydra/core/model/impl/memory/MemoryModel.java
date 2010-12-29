@@ -24,7 +24,7 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.model.XSynchronizationCallback;
+import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
@@ -284,7 +284,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		return executeModelCommand(command, null);
 	}
 	
-	protected long executeModelCommand(XModelCommand command, XSynchronizationCallback callback) {
+	protected long executeModelCommand(XModelCommand command, XLocalChangeCallback callback) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -447,7 +447,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	}
 	
 	@Override
-	protected long executeTransaction(XTransaction transaction, XSynchronizationCallback callback) {
+	protected long executeTransaction(XTransaction transaction, XLocalChangeCallback callback) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -572,7 +572,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		return executeCommand(command, null);
 	}
 	
-	public long executeCommand(XCommand command, XSynchronizationCallback callback) {
+	public long executeCommand(XCommand command, XLocalChangeCallback callback) {
 		
 		if(command instanceof XTransaction) {
 			return executeTransaction((XTransaction)command, callback);
@@ -587,7 +587,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	}
 	
 	@Override
-	protected long getOldRevisionNumber() {
+	protected long getCurrentRevisionNumber() {
 		return getRevisionNumber();
 	}
 	

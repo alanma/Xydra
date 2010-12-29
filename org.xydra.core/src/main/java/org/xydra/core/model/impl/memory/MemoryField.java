@@ -20,7 +20,7 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.model.XSynchronizationCallback;
+import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.state.XFieldState;
 import org.xydra.core.model.state.impl.memory.TemporaryFieldState;
 import org.xydra.core.value.XValue;
@@ -310,7 +310,7 @@ public class MemoryField implements XField, Serializable {
 	 * @throws IllegalStateException if this method is called after this
 	 *             MemoryField was already removed
 	 */
-	protected long executeFieldCommand(XFieldCommand command, XSynchronizationCallback callback) {
+	protected long executeFieldCommand(XFieldCommand command, XLocalChangeCallback callback) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -388,7 +388,7 @@ public class MemoryField implements XField, Serializable {
 	
 	private long getOldRevisionNumber() {
 		if(this.father != null)
-			return this.father.getOldRevisionNumber();
+			return this.father.getCurrentRevisionNumber();
 		return getRevisionNumber();
 	}
 	
