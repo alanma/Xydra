@@ -23,9 +23,8 @@ import org.xydra.core.model.state.XRepositoryState;
  * @author voelkel
  * 
  */
-public interface XRepository extends XBaseRepository, XWritableRepository, XSendsRepositoryEvents,
-        XSendsModelEvent, XSendsObjectEvents, XSendsFieldEvents, XSendsTransactionEvents,
-        XExecutesCommands {
+public interface XRepository extends XWritableRepository, XSendsRepositoryEvents, XSendsModelEvent,
+        XSendsObjectEvents, XSendsFieldEvents, XSendsTransactionEvents, XExecutesCommands {
 	
 	/**
 	 * Returns the {@link XModel} contained in this repository with the given

@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
@@ -23,6 +22,7 @@ import org.xydra.core.change.XRepositoryEvent;
 import org.xydra.core.change.XRepositoryEventListener;
 import org.xydra.core.change.XTransactionEvent;
 import org.xydra.core.change.XTransactionEventListener;
+import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.core.change.impl.memory.MemoryRepositoryEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
@@ -94,14 +94,40 @@ public class MemoryRepository implements XRepository, Serializable {
 		this.transactionListenerCollection = new HashSet<XTransactionEventListener>();
 	}
 	
-	@ModificationOperation
-	public synchronized MemoryModel createModel(XID modelID) {
-		MemoryModel model = getModel(modelID);
+	public MemoryModel createModel(XID modelId) {
+		
+		XRepositoryCommand command = MemoryRepositoryCommand.createAddCommand(getAddress(), true,
+		        modelId);
+		
+		// synchronize so that return is never null if command succeeded
+		synchronized(this) {
+			long result = executeRepositoryCommand(command);
+			MemoryModel model = getModel(modelId);
+			assert result == XCommand.FAILED || model != null;
+			return model;
+		}
+	}
+	
+	public boolean removeModel(XID modelId) {
+		
+		// no synchronization necessary here (except that in
+		// executeRepositoryCommand())
+		
+		XRepositoryCommand command = MemoryRepositoryCommand.createRemoveCommand(getAddress(),
+		        XCommand.FORCED, modelId);
+		
+		long result = executeRepositoryCommand(command);
+		assert result >= 0 || result == XCommand.NOCHANGE;
+		return result != XCommand.NOCHANGE;
+	}
+	
+	public synchronized MemoryModel createModelInternal(XID modelId) {
+		MemoryModel model = getModel(modelId);
 		if(model == null) {
 			XRepositoryEvent event = MemoryRepositoryEvent.createAddEvent(this.sessionActor,
-			        getAddress(), modelID);
+			        getAddress(), modelId);
 			
-			XModelState modelState = this.state.createModelState(modelID);
+			XModelState modelState = this.state.createModelState(modelId);
 			
 			XChangeLogState ls = modelState.getChangeLogState();
 			
@@ -174,19 +200,6 @@ public class MemoryRepository implements XRepository, Serializable {
 		return this.state.iterator();
 	}
 	
-	@ModificationOperation
-	public synchronized boolean removeModel(XID modelID) {
-		
-		MemoryModel model = getModel(modelID);
-		if(model == null) {
-			return false;
-		}
-		
-		removeModelInternal(model);
-		
-		return true;
-	}
-	
 	private long removeModelInternal(MemoryModel model) {
 		synchronized(model.eventQueue) {
 			
@@ -257,7 +270,7 @@ public class MemoryRepository implements XRepository, Serializable {
 				return XCommand.FAILED;
 			}
 			
-			createModel(command.getModelID());
+			createModelInternal(command.getModelID());
 			
 			// Models are always created at the revision number 0.
 			return 0;
