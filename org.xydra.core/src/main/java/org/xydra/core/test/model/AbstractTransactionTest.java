@@ -27,6 +27,8 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.XSynchronizesChanges;
+import org.xydra.core.model.impl.memory.MemoryModel;
+import org.xydra.core.model.impl.memory.MemoryObject;
 import org.xydra.core.test.ChangeRecorder;
 import org.xydra.core.test.HasChanged;
 import org.xydra.core.test.TestLogger;
@@ -36,7 +38,8 @@ import org.xydra.index.XI;
 
 
 /**
- * Tests for implementations of {@link XSynchronizesChanges}.
+ * Tests for implementations of {@link XSynchronizesChanges} (
+ * {@link MemoryModel} and {@link MemoryObject})
  * 
  * @author dscharrer
  */

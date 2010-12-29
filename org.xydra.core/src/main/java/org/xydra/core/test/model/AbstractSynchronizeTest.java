@@ -35,7 +35,9 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.LocalChange;
+import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryRepository;
+import org.xydra.core.model.impl.memory.SynchronizesChangesImpl;
 import org.xydra.core.test.ChangeRecorder;
 import org.xydra.core.test.DemoModelUtil;
 import org.xydra.core.test.HasChanged;
@@ -49,6 +51,12 @@ import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
 
 
+/**
+ * Test for {@link SynchronizesChangesImpl} ({@link MemoryModel})
+ * 
+ * @author dscharrer
+ * 
+ */
 abstract public class AbstractSynchronizeTest {
 	
 	{

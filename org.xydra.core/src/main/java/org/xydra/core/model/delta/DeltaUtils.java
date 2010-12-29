@@ -242,6 +242,7 @@ public abstract class DeltaUtils {
 		} else if(mc == ModelChange.CREATED) {
 			assert model == null;
 			model = new SimpleModel(modelAddr);
+			model.setRevisionNumber(rev);
 		}
 		
 		if(changedModel != null) {
