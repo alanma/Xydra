@@ -35,6 +35,7 @@ import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.state.XSPI;
 import org.xydra.core.model.state.impl.memory.TemporaryStateStore;
+import org.xydra.core.test.TestLogger;
 import org.xydra.core.value.XV;
 import org.xydra.core.value.XValue;
 import org.xydra.log.Logger;
@@ -80,7 +81,12 @@ import org.xydra.store.access.XA;
  */
 public class XModelBasics {
 	
-	private static final Logger log = LoggerFactory.getLogger(XModelBasics.class);
+	private static final Logger log = getLogger();
+	
+	private static Logger getLogger() {
+		TestLogger.init();
+		return LoggerFactory.getLogger(XModelBasics.class);
+	}
 	
 	@BeforeClass
 	public static void init() {
