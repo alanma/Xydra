@@ -30,6 +30,9 @@ import org.xydra.store.base.WritableRepository;
 /**
  * Wraps a XydraStore model to model groups and their members.
  * 
+ * 
+ * <h3>Implementation Note</h3>
+ * 
  * Data modelling:
  * 
  * <pre>
