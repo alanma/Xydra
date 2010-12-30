@@ -24,7 +24,6 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
-import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
@@ -99,55 +98,14 @@ abstract public class AbstractSynchronizerTest {
 		        modelId));
 	}
 	
-	static class TestCallback implements XLocalChangeCallback {
-		
-		boolean applied = false;
-		boolean failed = false;
-		
-		synchronized public void failed() {
-			
-			assertFalse("double fail detected", this.failed);
-			assertFalse("fail after apply detected", this.applied);
-			
-			this.failed = true;
-			notifyAll();
-		}
-		
-		synchronized public void applied(long revision) {
-			
-			assertFalse("double apply detected", this.applied);
-			assertFalse("apply after fail detected", this.failed);
-			
-			this.applied = true;
-			notifyAll();
-		}
-		
-		synchronized public void waitForSuccess() {
-			
-			long time = System.currentTimeMillis();
-			while(!this.applied) {
-				
-				if(this.failed) {
-					fail("a command failed to apply remotely");
-				}
-				
-				assertFalse("timeout waiting for command to apply", System.currentTimeMillis()
-				        - time > 1000);
-				try {
-					wait(1100);
-				} catch(InterruptedException e) {
-					// ignore
-				}
-			}
-		}
-		
-	}
-	
 	@Test
 	public void testSendLocalChanges() {
 		
-		final TestCallback c1 = new TestCallback();
-		final TestCallback c2 = new TestCallback();
+		TestLocalChangeCallback c1 = new TestLocalChangeCallback();
+		TestLocalChangeCallback c2 = new TestLocalChangeCallback();
+		
+		TestSynchronizationCallback sc1 = new TestSynchronizationCallback();
+		TestSynchronizationCallback sc2 = new TestSynchronizationCallback();
 		
 		// Create a command manually.
 		XCommand command = MemoryModelCommand.createAddCommand(this.model.getAddress(), false, XX
@@ -157,7 +115,7 @@ abstract public class AbstractSynchronizerTest {
 		this.model.executeCommand(command, c1);
 		
 		// Now synchronize with the server.
-		this.sync.synchronize();
+		this.sync.synchronize(sc1);
 		
 		// command may not be applied remotely yet!
 		
@@ -178,15 +136,20 @@ abstract public class AbstractSynchronizerTest {
 		// Now apply the command locally. It should be automatically
 		// sent to the server.
 		this.model.executeCommand(autoCommand, c2);
+		long finalRev = this.model.getRevisionNumber();
 		
-		this.sync.synchronize();
+		this.sync.synchronize(sc2);
 		
 		// both commands may still not be applied remotely
 		
-		c1.waitForSuccess();
-		c2.waitForSuccess();
+		assertTrue(c1.waitForResult() >= 0);
+		assertTrue(c2.waitForResult() >= 0);
 		assertTrue(XCompareUtils.equalState(this.model,
 		        loadModelSnapshot(DemoModelUtil.PHONEBOOK_ID)));
+		checkSyncCallback(sc1);
+		checkSyncCallback(sc2);
+		assertEquals(finalRev, this.model.getRevisionNumber());
+		assertEquals(finalRev, this.model.getSynchronizedRevision());
 		
 	}
 	
@@ -214,21 +177,33 @@ abstract public class AbstractSynchronizerTest {
 			XObject object = model.createObject(XX.toId("bob"));
 			XField field = object.createField(XX.toId("cookies"));
 			field.setValue(XV.toValue("yummy"));
-			sync.synchronize();
-			// FIXME assuming synchronous operation
+			long modelRev = model.getRevisionNumber();
+			
+			TestSynchronizationCallback sc1 = new TestSynchronizationCallback();
+			sync.synchronize(sc1);
+			checkSyncCallback(sc1);
 			
 			XBaseModel remoteModel = loadModelSnapshot(NEWMODEL_ID);
 			assertNotNull(remoteModel);
 			assertTrue(XCompareUtils.equalState(model, remoteModel));
+			assertEquals(modelRev, model.getRevisionNumber());
+			assertEquals(modelRev, model.getSynchronizedRevision());
 			
 			// check that the local model still works
 			model.createObject(XX.toId("jane"));
 			
 			repo.removeModel(NEWMODEL_ID);
-			sync.synchronize();
+			modelRev = model.getRevisionNumber();
+			
+			TestSynchronizationCallback sc2 = new TestSynchronizationCallback();
+			sync.synchronize(sc2);
+			checkSyncCallback(sc2);
 			
 			assertNull(loadModelSnapshot(NEWMODEL_ID));
 			assertFalse(repo.hasModel(NEWMODEL_ID));
+			assertEquals(modelRev, model.getRevisionNumber());
+			assertEquals(modelRev, model.getSynchronizedRevision());
+			
 			// check that local model is removed
 			try {
 				model.createObject(XX.toId("jane"));
@@ -239,12 +214,17 @@ abstract public class AbstractSynchronizerTest {
 			
 			model = repo.createModel(NEWMODEL_ID);
 			model.createObject(XX.toId("john"));
+			modelRev = model.getRevisionNumber();
+			
+			TestSynchronizationCallback sc3 = new TestSynchronizationCallback();
 			sync = new XSynchronizer(model, store);
-			sync.synchronize();
+			sync.synchronize(sc3);
+			checkSyncCallback(sc3);
 			
 			remoteModel = loadModelSnapshot(NEWMODEL_ID);
 			assertNotNull(remoteModel);
 			assertTrue(XCompareUtils.equalState(model, remoteModel));
+			assertEquals(model.getRevisionNumber(), model.getSynchronizedRevision());
 			
 			// check that the local model still works
 			model.createObject(XX.toId("jane"));
@@ -310,6 +290,19 @@ abstract public class AbstractSynchronizerTest {
 		assertNotNull(result);
 		assertNull(result.getException());
 		return result.getResult();
+	}
+	
+	void checkSyncCallback(TestSynchronizationCallback sc) {
+		if(sc.getRequestError() != null) {
+			throw new RuntimeException(sc.getRequestError());
+		}
+		if(sc.getCommandError() != null) {
+			throw new RuntimeException(sc.getCommandError());
+		}
+		if(sc.getEventsError() != null) {
+			throw new RuntimeException(sc.getEventsError());
+		}
+		assertTrue(sc.isSuccess());
 	}
 	
 }

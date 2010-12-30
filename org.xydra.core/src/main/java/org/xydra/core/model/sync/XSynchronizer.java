@@ -4,7 +4,6 @@ import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XLocalChange;
 import org.xydra.core.model.XModel;
-import org.xydra.core.model.XObject;
 import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
@@ -17,11 +16,7 @@ import org.xydra.store.XydraStore;
 
 /**
  * A class that can synchronize local and remote changes made to an
- * {@link XModel}. If an {@link XModel} or {@link XObject} is wrapped in the
- * {@link XSynchronizer}, it should no longer be used directly, so that all
- * events can be synchronized.
- * 
- * TODO handle timeouts (retry), other store/HTTP errors
+ * {@link XModel}.
  * 
  * @author dscharrer
  * 
@@ -36,17 +31,9 @@ public class XSynchronizer {
 	boolean requestRunning = false;
 	
 	/**
-	 * Start synchronizing the given model (which has no local changes) via the
-	 * given service. Any further changes applied directly to the model will be
-	 * lost. To persist changes supply the to the
-	 * {@link #executeCommand(XCommand, Callback)} Method.
-	 * 
-	 * @param addr The address of the entity on the store. This is needed for
-	 *            synchronizing single XObjects as the local copy of the entity
-	 *            will not have a parent model and thus no model XID in it's
-	 *            address.
-	 * 
-	 * @param entity A fully synchronized entity.
+	 * Wrap the given entity to be synchronized with the given store. Each
+	 * entity should only be wrapped once or commands may be sent multiple
+	 * times.
 	 */
 	public XSynchronizer(XSynchronizesChanges entity, XydraStore store) {
 		log.info("sync: init with entity " + entity.getAddress() + " | " + entity.getAddress());
@@ -58,7 +45,7 @@ public class XSynchronizer {
 	 * Query the store for new remote changes. Local changes will be sent
 	 * immediately.
 	 */
-	public void synchronize() {
+	public void synchronize(final XSynchronizationCallback sc) {
 		
 		if(this.requestRunning) {
 			// There are already requests running, start this request when they
@@ -102,8 +89,10 @@ public class XSynchronizer {
 				@Override
 				public void onFailure(Throwable exception) {
 					log.error("sync: request error sending command", exception);
-					// TODO handle error;
-					requestEnded(false);
+					if(sc != null) {
+						sc.onRequestError(exception);
+					}
+					requestEnded(false, sc);
 				}
 				
 				@Override
@@ -122,8 +111,10 @@ public class XSynchronizer {
 					if(commandRes.getException() != null) {
 						assert commandRes.getResult() == null;
 						log.error("sync: error sending command", commandRes.getException());
-						// TODO handle error;
 						success = false;
+						if(sc != null) {
+							sc.onCommandErrror(commandRes.getException());
+						}
 						
 					} else {
 						
@@ -182,15 +173,17 @@ public class XSynchronizer {
 						assert events == null;
 						log.error("sync: error getting events while sending command", eventsRes
 						        .getException());
-						// TODO handle error;
-						requestEnded(false);
+						if(sc != null) {
+							sc.onEventsError(eventsRes.getException());
+						}
+						requestEnded(false, sc);
 						return;
 					}
 					
 					assert events != null;
 					
 					applyEvents(events);
-					requestEnded(success);
+					requestEnded(success, sc);
 				}
 				
 			};
@@ -211,8 +204,10 @@ public class XSynchronizer {
 				@Override
 				public void onFailure(Throwable exception) {
 					log.error("sync: request error getting events", exception);
-					// TODO handle error;
-					requestEnded(false);
+					if(sc != null) {
+						sc.onRequestError(exception);
+					}
+					requestEnded(false, sc);
 				}
 				
 				@Override
@@ -224,15 +219,17 @@ public class XSynchronizer {
 					if(eventsRes.getException() != null) {
 						assert eventsRes.getResult() == null;
 						log.error("sync: error getting events", eventsRes.getException());
-						// TODO handle error;
-						requestEnded(false);
+						if(sc != null) {
+							sc.onEventsError(eventsRes.getException());
+						}
+						requestEnded(false, sc);
 						return;
 					}
 					
 					assert eventsRes.getResult() != null;
 					
 					applyEvents(eventsRes.getResult());
-					requestEnded(true);
+					requestEnded(true, sc);
 				}
 				
 			};
@@ -262,14 +259,18 @@ public class XSynchronizer {
 		
 	}
 	
-	private void requestEnded(boolean noConnectionErrors) {
+	private void requestEnded(boolean noConnectionErrors, XSynchronizationCallback sc) {
 		
 		this.requestRunning = false;
 		
-		// Send the remaining local changes.
-		if(noConnectionErrors && this.entity.countUnappliedLocalChanges() > 0) {
-			// TODO this can create deep call stacks
-			synchronize();
+		if(noConnectionErrors) {
+			if(this.entity.countUnappliedLocalChanges() > 0) {
+				// Send the remaining local changes.
+				// FIXME this can create deep call stacks
+				synchronize(sc);
+			} else if(sc != null) {
+				sc.onSuccess();
+			}
 		}
 	}
 	
