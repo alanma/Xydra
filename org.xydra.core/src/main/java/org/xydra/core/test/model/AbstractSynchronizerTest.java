@@ -22,15 +22,20 @@ import org.xydra.core.change.impl.memory.MemoryModelCommand;
 import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
+import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
-import org.xydra.core.model.XModel;
 import org.xydra.core.model.XLocalChangeCallback;
+import org.xydra.core.model.XModel;
+import org.xydra.core.model.XObject;
+import org.xydra.core.model.XRepository;
 import org.xydra.core.model.XType;
 import org.xydra.core.model.delta.ChangedModel;
+import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.core.model.impl.memory.SynchronizesChangesImpl;
 import org.xydra.core.model.sync.XSynchronizer;
 import org.xydra.core.test.DemoModelUtil;
 import org.xydra.core.test.TestLogger;
+import org.xydra.core.value.XV;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.XydraStore;
 import org.xydra.store.test.SynchronousTestCallback;
@@ -55,6 +60,8 @@ abstract public class AbstractSynchronizerTest {
 	
 	private XModel model;
 	private XSynchronizer sync;
+	
+	private static final XID NEWMODEL_ID = XX.toId("newmodel");
 	
 	@Before
 	public void setUp() {
@@ -194,22 +201,67 @@ abstract public class AbstractSynchronizerTest {
 	}
 	
 	@Test
-	public void testCreateModel() {
-		// TODO implement
-	}
-	
-	@Test
-	public void testRecreateModel() {
-		// TODO implement
-	}
-	
-	@Test
-	public void testRemoveModel() {
-		// TODO implement
+	public void testCreateRemoveModel() {
+		
+		try {
+			
+			assertNull(loadModelSnapshot(NEWMODEL_ID));
+			
+			XRepository repo = new MemoryRepository(actorId, passwordHash, repoAddr.getRepository());
+			
+			XModel model = repo.createModel(NEWMODEL_ID);
+			XSynchronizer sync = new XSynchronizer(model, store);
+			XObject object = model.createObject(XX.toId("bob"));
+			XField field = object.createField(XX.toId("cookies"));
+			field.setValue(XV.toValue("yummy"));
+			sync.synchronize();
+			// FIXME assuming synchronous operation
+			
+			XBaseModel remoteModel = loadModelSnapshot(NEWMODEL_ID);
+			assertNotNull(remoteModel);
+			assertTrue(XCompareUtils.equalState(model, remoteModel));
+			
+			// check that the local model still works
+			model.createObject(XX.toId("jane"));
+			
+			repo.removeModel(NEWMODEL_ID);
+			sync.synchronize();
+			
+			assertNull(loadModelSnapshot(NEWMODEL_ID));
+			assertFalse(repo.hasModel(NEWMODEL_ID));
+			// check that local model is removed
+			try {
+				model.createObject(XX.toId("jane"));
+				fail();
+			} catch(IllegalStateException ise) {
+				// worked
+			}
+			
+			model = repo.createModel(NEWMODEL_ID);
+			model.createObject(XX.toId("john"));
+			sync = new XSynchronizer(model, store);
+			sync.synchronize();
+			
+			remoteModel = loadModelSnapshot(NEWMODEL_ID);
+			assertNotNull(remoteModel);
+			assertTrue(XCompareUtils.equalState(model, remoteModel));
+			
+			// check that the local model still works
+			model.createObject(XX.toId("jane"));
+			
+		} finally {
+			removeModel(NEWMODEL_ID);
+		}
+		
 	}
 	
 	@Test
 	public void testLoadRemoteChangesRemovedModel() {
+		// TODO implement
+	}
+	
+	@Test
+	public void testLoadRemoteChangesMissingRevisions() {
 		// TODO implement
 	}
 	

@@ -15,16 +15,18 @@ import org.xydra.core.change.XModelCommand;
 import org.xydra.core.change.XModelEvent;
 import org.xydra.core.change.XModelEventListener;
 import org.xydra.core.change.XObjectEvent;
+import org.xydra.core.change.XRepositoryEvent;
 import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.impl.memory.MemoryModelCommand;
 import org.xydra.core.change.impl.memory.MemoryModelEvent;
+import org.xydra.core.change.impl.memory.MemoryRepositoryEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
@@ -48,9 +50,6 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	
 	/** The father-repository of this MemoryModel */
 	private final MemoryRepository father;
-	
-	/** Has this MemoryModel been removed? */
-	boolean removed = false;
 	
 	private Set<XModelEventListener> modelChangeListenerCollection;
 	
@@ -349,7 +348,6 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	
 	public XID getID() {
 		synchronized(this.eventQueue) {
-			checkRemoved();
 			return this.state.getID();
 		}
 	}
@@ -441,7 +439,6 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	
 	public long getRevisionNumber() {
 		synchronized(this.eventQueue) {
-			checkRemoved();
 			return this.state.getRevisionNumber();
 		}
 	}
@@ -485,10 +482,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	}
 	
 	public XAddress getAddress() {
-		synchronized(this.eventQueue) {
-			checkRemoved();
-			return this.state.getAddress();
-		}
+		return this.state.getAddress();
 	}
 	
 	/**
@@ -563,8 +557,13 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 			MemoryObject object = getObject(objectId);
 			object.delete();
 		}
+		for(XID objectId : this.loadedObjects.keySet()) {
+			this.state.removeObjectState(objectId);
+		}
+		this.state.setRevisionNumber(this.state.getRevisionNumber() + 1);
 		this.state.delete(this.eventQueue.stateTransaction);
 		this.eventQueue.deleteLog();
+		this.loadedObjects.clear();
 		this.removed = true;
 	}
 	
@@ -588,7 +587,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	
 	@Override
 	protected long getCurrentRevisionNumber() {
-		return getRevisionNumber();
+		return this.state.getRevisionNumber();
 	}
 	
 	@Override
@@ -637,6 +636,22 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	@Override
 	public String toString() {
 		return this.state.toString();
+	}
+	
+	protected boolean enqueueModelRemoveEvents(XID actorId) {
+		
+		boolean inTrans = false;
+		for(XID objectId : this) {
+			MemoryObject object = getObject(objectId);
+			enqueueObjectRemoveEvents(actorId, object, true, true);
+			inTrans = true;
+		}
+		
+		XRepositoryEvent event = MemoryRepositoryEvent.createRemoveEvent(actorId, getFather()
+		        .getAddress(), getID(), getCurrentRevisionNumber(), inTrans);
+		this.eventQueue.enqueueRepositoryEvent(getFather(), event);
+		
+		return inTrans;
 	}
 	
 }

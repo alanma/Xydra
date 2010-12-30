@@ -5,9 +5,11 @@ import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XFieldCommand;
 import org.xydra.core.change.XModelCommand;
 import org.xydra.core.change.XObjectCommand;
+import org.xydra.core.change.XRepositoryCommand;
 import org.xydra.core.change.impl.memory.MemoryFieldCommand;
 import org.xydra.core.change.impl.memory.MemoryModelCommand;
 import org.xydra.core.change.impl.memory.MemoryObjectCommand;
+import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XLocalChange;
 import org.xydra.core.model.XLocalChangeCallback;
@@ -51,7 +53,7 @@ public class MemoryLocalChange implements XLocalChange {
 	}
 	
 	@Override
-	public long getRemoteResult() {
+	public long getRemoteRevision() {
 		return this.result;
 	}
 	
@@ -71,28 +73,39 @@ public class MemoryLocalChange implements XLocalChange {
 		}
 		this.applied = true;
 		this.result = revision;
-		this.callback.applied(revision);
+		if(this.callback != null) {
+			this.callback.applied(revision);
+		}
 	}
 	
-	protected void updateCommand(long syncRev, long nRemote) {
+	protected void updateCommand(long oldSyncRev, long newSyncRev) {
 		// Adapt the command if needed.
-		if(this.command instanceof XModelCommand) {
+		assert newSyncRev >= oldSyncRev;
+		long nRemote = newSyncRev - oldSyncRev;
+		if(this.command instanceof XRepositoryCommand) {
+			XRepositoryCommand rc = (XRepositoryCommand)this.command;
+			if(rc.getChangeType() == ChangeType.REMOVE && rc.getRevisionNumber() > oldSyncRev) {
+				this.command = MemoryRepositoryCommand.createRemoveCommand(rc.getTarget(), rc
+				        .getRevisionNumber()
+				        + nRemote, rc.getModelID());
+			}
+		} else if(this.command instanceof XModelCommand) {
 			XModelCommand mc = (XModelCommand)this.command;
-			if(mc.getChangeType() == ChangeType.REMOVE && mc.getRevisionNumber() > syncRev) {
+			if(mc.getChangeType() == ChangeType.REMOVE && mc.getRevisionNumber() > oldSyncRev) {
 				this.command = MemoryModelCommand.createRemoveCommand(mc.getTarget(), mc
 				        .getRevisionNumber()
 				        + nRemote, mc.getObjectID());
 			}
 		} else if(this.command instanceof XObjectCommand) {
 			XObjectCommand oc = (XObjectCommand)this.command;
-			if(oc.getChangeType() == ChangeType.REMOVE && oc.getRevisionNumber() > syncRev) {
+			if(oc.getChangeType() == ChangeType.REMOVE && oc.getRevisionNumber() > oldSyncRev) {
 				this.command = MemoryObjectCommand.createRemoveCommand(oc.getTarget(), oc
 				        .getRevisionNumber()
 				        + nRemote, oc.getFieldID());
 			}
 		} else if(this.command instanceof XFieldCommand) {
 			XFieldCommand fc = (XFieldCommand)this.command;
-			if(fc.getRevisionNumber() > syncRev) {
+			if(fc.getRevisionNumber() > oldSyncRev) {
 				switch(this.command.getChangeType()) {
 				case ADD:
 					this.command = MemoryFieldCommand.createAddCommand(fc.getTarget(), fc

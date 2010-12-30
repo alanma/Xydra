@@ -19,7 +19,7 @@ public interface XLocalChange {
 	
 	boolean isApplied();
 	
-	long getRemoteResult();
+	long getRemoteRevision();
 	
 	void setRemoteResult(long result);
 	

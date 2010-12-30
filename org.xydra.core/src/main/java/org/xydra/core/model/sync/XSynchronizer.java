@@ -54,7 +54,11 @@ public class XSynchronizer {
 		this.store = store;
 	}
 	
-	private synchronized void startRequest() {
+	/**
+	 * Query the store for new remote changes. Local changes will be sent
+	 * immediately.
+	 */
+	public void synchronize() {
 		
 		if(this.requestRunning) {
 			// There are already requests running, start this request when they
@@ -249,7 +253,12 @@ public class XSynchronizer {
 			return;
 		}
 		
-		this.entity.synchronize(remoteChanges);
+		boolean success = this.entity.synchronize(remoteChanges);
+		
+		if(!success) {
+			log.error("sync: error applying remote events");
+		}
+		assert success;
 		
 	}
 	
@@ -259,16 +268,9 @@ public class XSynchronizer {
 		
 		// Send the remaining local changes.
 		if(noConnectionErrors && this.entity.countUnappliedLocalChanges() > 0) {
-			startRequest();
+			// TODO this can create deep call stacks
+			synchronize();
 		}
-	}
-	
-	/**
-	 * Query the store for new remote changes. Local changes will be sent
-	 * immediately.
-	 */
-	public void synchronize() {
-		startRequest();
 	}
 	
 }

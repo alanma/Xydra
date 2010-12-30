@@ -22,10 +22,10 @@ import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.delta.WrapperModel;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XFieldState;
@@ -50,9 +50,6 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	
 	/** The father-model of this MemoryObject */
 	private final MemoryModel father;
-	
-	/** Has this MemoryObject been removed? */
-	boolean removed = false;
 	
 	/**
 	 * Creates a new MemoryObject without a father-{@link XModel}.
@@ -95,11 +92,12 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	 * 
 	 * @param actorId TODO
 	 * @param parent The father-{@link MemoryModel} of this MemoryObject.
-	 * @param eventQueue The {@link MemoryEventManager} which will be used by this
-	 *            MemoryObject.
+	 * @param eventQueue The {@link MemoryEventManager} which will be used by
+	 *            this MemoryObject.
 	 * @param objectState The initial {@link XObjectState} of this MemoryObject.
 	 */
-	protected MemoryObject(MemoryModel parent, MemoryEventManager eventQueue, XObjectState objectState) {
+	protected MemoryObject(MemoryModel parent, MemoryEventManager eventQueue,
+	        XObjectState objectState) {
 		super(eventQueue);
 		assert eventQueue != null;
 		
@@ -185,7 +183,6 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	
 	public XID getID() {
 		synchronized(this.eventQueue) {
-			checkRemoved();
 			return this.state.getID();
 		}
 	}
@@ -508,7 +505,6 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	
 	public long getRevisionNumber() {
 		synchronized(this.eventQueue) {
-			checkRemoved();
 			return this.state.getRevisionNumber();
 		}
 	}
@@ -522,7 +518,6 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	
 	public XAddress getAddress() {
 		synchronized(this.eventQueue) {
-			checkRemoved();
 			return this.state.getAddress();
 		}
 	}
@@ -571,9 +566,9 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		
 		if(field.getValue() != null) {
 			assert inTrans;
-			XFieldEvent event = MemoryFieldEvent.createRemoveEvent(actor, field.getAddress(),
-			        field.getValue(), modelRev, getRevisionNumber(), field.getRevisionNumber(),
-			        inTrans, true);
+			XFieldEvent event = MemoryFieldEvent.createRemoveEvent(actor, field.getAddress(), field
+			        .getValue(), modelRev, getRevisionNumber(), field.getRevisionNumber(), inTrans,
+			        true);
 			this.eventQueue.enqueueFieldEvent(field, event);
 		}
 		
@@ -595,7 +590,11 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 			MemoryField field = getField(fieldId);
 			field.delete();
 		}
+		for(XID fieldId : this.loadedFields.keySet()) {
+			this.state.removeFieldState(fieldId);
+		}
 		this.state.delete(this.eventQueue.stateTransaction);
+		this.loadedFields.clear();
 		if(this.father == null) {
 			this.eventQueue.deleteLog();
 		}

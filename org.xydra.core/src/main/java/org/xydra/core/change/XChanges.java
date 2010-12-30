@@ -1,6 +1,8 @@
 package org.xydra.core.change;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.xydra.core.change.impl.memory.MemoryFieldCommand;
 import org.xydra.core.change.impl.memory.MemoryModelCommand;
@@ -778,15 +780,23 @@ public class XChanges {
 	 * @return an {@link XTransaction} which execution would've created the
 	 *         given {@link XTransactionEvent}
 	 */
-	static public XTransaction createReplayCommand(XTransactionEvent event) {
+	static public XCommand createReplayCommand(XTransactionEvent trans) {
 		
-		XAtomicCommand[] result = new XAtomicCommand[event.size()];
+		List<XAtomicCommand> result = new ArrayList<XAtomicCommand>();
 		
-		for(int i = 0; i < event.size(); i++) {
-			result[i] = createReplayCommand(event.getEvent(i));
+		for(XAtomicEvent event : trans) {
+			if(!event.isImplied()) {
+				result.add(createReplayCommand(event));
+			}
 		}
 		
-		return MemoryTransaction.createTransaction(event.getTarget(), result);
+		assert result.size() > 0;
+		
+		if(result.size() == 1) {
+			return result.get(0);
+		}
+		
+		return MemoryTransaction.createTransaction(trans.getTarget(), result);
 	}
 	
 	/**
@@ -899,7 +909,7 @@ public class XChanges {
 			        + event.getChangeType();
 			
 			return MemoryRepositoryCommand.createRemoveCommand(event.getTarget(), event
-			        .getOldModelRevision(), event.getRepositoryID());
+			        .getOldModelRevision(), event.getModelID());
 			
 		}
 		

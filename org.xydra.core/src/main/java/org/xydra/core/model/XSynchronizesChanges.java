@@ -36,7 +36,7 @@ public interface XSynchronizesChanges extends XExecutesCommands, IHasXAddress {
 	 *            Synchronization, including local changes that have been saved
 	 *            remotely.
 	 */
-	void synchronize(XEvent[] remoteChanges);
+	boolean synchronize(XEvent[] remoteChanges);
 	
 	/**
 	 * @return the {@link XChangeLog} which is logging the {@link XEvent

@@ -206,7 +206,8 @@ abstract public class AbstractSynchronizeTest {
 		XEvent[] remoteEvents = remoteChanges.toArray(new XEvent[remoteChanges.size()]);
 		
 		assert lastRevision == this.localModel.getSynchronizedRevision();
-		this.localModel.synchronize(remoteEvents);
+		boolean success = this.localModel.synchronize(remoteEvents);
+		assertTrue(success);
 		
 		// FIXME this is a hack;
 		XLocalChange[] lc = this.localModel.getLocalChanges();

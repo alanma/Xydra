@@ -25,6 +25,7 @@ public class BatchedResult<K> extends Pair<K,Throwable> {
 	
 	public BatchedResult(Throwable t) {
 		super(null, t);
+		assert t != null;
 	}
 	
 	/**

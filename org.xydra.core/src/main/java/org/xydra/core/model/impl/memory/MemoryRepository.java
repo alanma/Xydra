@@ -26,9 +26,9 @@ import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.core.change.impl.memory.MemoryRepositoryEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XRepositoryState;
@@ -197,6 +197,8 @@ public class MemoryRepository implements XRepository, Serializable {
 		assert model.eventQueue.getLocalChanges().isEmpty();
 		model.eventQueue.newLocalChange(command, callback);
 		
+		model.eventQueue.setSyncRevision(-1);
+		
 		model.eventQueue.sendEvents();
 		
 	}
@@ -214,7 +216,7 @@ public class MemoryRepository implements XRepository, Serializable {
 			model.eventQueue.stateTransaction = trans;
 			
 			int since = model.eventQueue.getNextPosition();
-			boolean inTrans = enqueueModelRemoveEvents(model);
+			boolean inTrans = model.enqueueModelRemoveEvents(this.sessionActor);
 			if(inTrans) {
 				model.eventQueue.createTransactionEvent(this.sessionActor, model, null, since);
 			}
@@ -235,22 +237,6 @@ public class MemoryRepository implements XRepository, Serializable {
 			
 			return rev;
 		}
-	}
-	
-	protected boolean enqueueModelRemoveEvents(MemoryModel model) {
-		
-		boolean inTrans = false;
-		for(XID objectId : model) {
-			MemoryObject object = model.getObject(objectId);
-			model.enqueueObjectRemoveEvents(this.sessionActor, object, true, true);
-			inTrans = true;
-		}
-		
-		XRepositoryEvent event = MemoryRepositoryEvent.createRemoveEvent(this.sessionActor,
-		        getAddress(), model.getID(), model.getCurrentRevisionNumber(), inTrans);
-		model.eventQueue.enqueueRepositoryEvent(this, event);
-		
-		return inTrans;
 	}
 	
 	public long executeRepositoryCommand(XRepositoryCommand command) {
@@ -344,8 +330,10 @@ public class MemoryRepository implements XRepository, Serializable {
 	 *            registered listeners.
 	 */
 	protected void fireRepositoryEvent(XRepositoryEvent event) {
-		for(XRepositoryEventListener listener : this.repoChangeListenerCollection) {
-			listener.onChangeEvent(event);
+		synchronized(this.repoChangeListenerCollection) {
+			for(XRepositoryEventListener listener : this.repoChangeListenerCollection) {
+				listener.onChangeEvent(event);
+			}
 		}
 	}
 	
@@ -358,9 +346,12 @@ public class MemoryRepository implements XRepository, Serializable {
 	 *            registered listeners.
 	 */
 	protected void fireModelEvent(XModelEvent event) {
-		for(XModelEventListener listener : this.modelChangeListenerCollection) {
-			listener.onChangeEvent(event);
+		synchronized(this.modelChangeListenerCollection) {
+			for(XModelEventListener listener : this.modelChangeListenerCollection) {
+				listener.onChangeEvent(event);
+			}
 		}
+		
 	}
 	
 	/**
@@ -372,8 +363,10 @@ public class MemoryRepository implements XRepository, Serializable {
 	 *            registered listeners.
 	 */
 	protected void fireObjectEvent(XObjectEvent event) {
-		for(XObjectEventListener listener : this.objectChangeListenerCollection) {
-			listener.onChangeEvent(event);
+		synchronized(this.objectChangeListenerCollection) {
+			for(XObjectEventListener listener : this.objectChangeListenerCollection) {
+				listener.onChangeEvent(event);
+			}
 		}
 	}
 	
@@ -386,8 +379,10 @@ public class MemoryRepository implements XRepository, Serializable {
 	 *            registered listeners.
 	 */
 	protected void fireFieldEvent(XFieldEvent event) {
-		for(XFieldEventListener listener : this.fieldChangeListenerCollection) {
-			listener.onChangeEvent(event);
+		synchronized(this.fieldChangeListenerCollection) {
+			for(XFieldEventListener listener : this.fieldChangeListenerCollection) {
+				listener.onChangeEvent(event);
+			}
 		}
 	}
 	
@@ -401,64 +396,75 @@ public class MemoryRepository implements XRepository, Serializable {
 	 *            registered listeners.
 	 */
 	protected void fireTransactionEvent(XTransactionEvent event) {
-		for(XTransactionEventListener listener : this.transactionListenerCollection) {
-			listener.onChangeEvent(event);
+		synchronized(this.transactionListenerCollection) {
+			for(XTransactionEventListener listener : this.transactionListenerCollection) {
+				listener.onChangeEvent(event);
+			}
 		}
 	}
 	
-	public synchronized boolean addListenerForRepositoryEvents(
-	        XRepositoryEventListener changeListener) {
-		return this.repoChangeListenerCollection.add(changeListener);
+	public boolean addListenerForRepositoryEvents(XRepositoryEventListener changeListener) {
+		synchronized(this.repoChangeListenerCollection) {
+			return this.repoChangeListenerCollection.add(changeListener);
+		}
 	}
 	
-	public synchronized boolean removeListenerForRepositoryEvents(
-	        XRepositoryEventListener changeListener) {
-		return this.repoChangeListenerCollection.remove(changeListener);
-		
+	public boolean removeListenerForRepositoryEvents(XRepositoryEventListener changeListener) {
+		synchronized(this.repoChangeListenerCollection) {
+			return this.repoChangeListenerCollection.remove(changeListener);
+		}
 	}
 	
-	public synchronized boolean addListenerForModelEvents(XModelEventListener changeListener) {
-		return this.modelChangeListenerCollection.add(changeListener);
-		
+	public boolean addListenerForModelEvents(XModelEventListener changeListener) {
+		synchronized(this.modelChangeListenerCollection) {
+			return this.modelChangeListenerCollection.add(changeListener);
+		}
 	}
 	
-	public synchronized boolean removeListenerForModelEvents(XModelEventListener changeListener) {
-		return this.modelChangeListenerCollection.remove(changeListener);
-		
+	public boolean removeListenerForModelEvents(XModelEventListener changeListener) {
+		synchronized(this.modelChangeListenerCollection) {
+			return this.modelChangeListenerCollection.remove(changeListener);
+		}
 	}
 	
-	public synchronized boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
-		return this.objectChangeListenerCollection.add(changeListener);
-		
+	public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
+		synchronized(this.objectChangeListenerCollection) {
+			return this.objectChangeListenerCollection.add(changeListener);
+		}
 	}
 	
-	public synchronized boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
-		return this.objectChangeListenerCollection.remove(changeListener);
-		
+	public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
+		synchronized(this.objectChangeListenerCollection) {
+			return this.objectChangeListenerCollection.remove(changeListener);
+		}
 	}
 	
-	public synchronized boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
-		return this.fieldChangeListenerCollection.add(changeListener);
-		
+	public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
+		synchronized(this.fieldChangeListenerCollection) {
+			return this.fieldChangeListenerCollection.add(changeListener);
+		}
 	}
 	
-	public synchronized boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
-		return this.fieldChangeListenerCollection.remove(changeListener);
-		
+	public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
+		synchronized(this.fieldChangeListenerCollection) {
+			return this.fieldChangeListenerCollection.remove(changeListener);
+		}
 	}
 	
-	public synchronized XAddress getAddress() {
+	public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
+		synchronized(this.transactionListenerCollection) {
+			return this.transactionListenerCollection.add(changeListener);
+		}
+	}
+	
+	public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
+		synchronized(this.transactionListenerCollection) {
+			return this.transactionListenerCollection.remove(changeListener);
+		}
+	}
+	
+	public XAddress getAddress() {
 		return this.state.getAddress();
-	}
-	
-	public synchronized boolean addListenerForTransactionEvents(
-	        XTransactionEventListener changeListener) {
-		return this.transactionListenerCollection.add(changeListener);
-	}
-	
-	public synchronized boolean removeListenerForTransactionEvents(
-	        XTransactionEventListener changeListener) {
-		return this.transactionListenerCollection.remove(changeListener);
 	}
 	
 	public long executeCommand(XCommand command) {

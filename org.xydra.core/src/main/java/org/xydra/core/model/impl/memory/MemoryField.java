@@ -18,9 +18,9 @@ import org.xydra.core.change.impl.memory.MemoryFieldEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.state.XFieldState;
 import org.xydra.core.model.state.impl.memory.TemporaryFieldState;
 import org.xydra.core.value.XValue;
@@ -50,8 +50,8 @@ public class MemoryField implements XField, Serializable {
 	boolean removed = false;
 	
 	/**
-	 * The {@link MemoryEventManager} used by this MemoryField. Will also be used
-	 * as the lock for synchronizing change operations.
+	 * The {@link MemoryEventManager} used by this MemoryField. Will also be
+	 * used as the lock for synchronizing change operations.
 	 * 
 	 * If this MemoryField is created by an {@link MemoryObject}, the event
 	 * queue used by the {@link MemoryObject} will be used.
@@ -90,8 +90,8 @@ public class MemoryField implements XField, Serializable {
 	 * @param actorId TODO
 	 * @param parent The father-{@link XObject} of this MemoryField (may be
 	 *            null)
-	 * @param eventQueue the {@link MemoryEventManager} this MemoryField will use;
-	 *            never null.
+	 * @param eventQueue the {@link MemoryEventManager} this MemoryField will
+	 *            use; never null.
 	 * @param fieldState The initial {@link XFieldState} of this MemoryField.
 	 */
 	protected MemoryField(MemoryObject parent, MemoryEventManager eventQueue, XFieldState fieldState) {
@@ -207,7 +207,6 @@ public class MemoryField implements XField, Serializable {
 	@ReadOperation
 	public XID getID() {
 		synchronized(this.eventQueue) {
-			checkRemoved();
 			return this.state.getID();
 		}
 	}
@@ -443,7 +442,6 @@ public class MemoryField implements XField, Serializable {
 	@ReadOperation
 	public long getRevisionNumber() {
 		synchronized(this.eventQueue) {
-			checkRemoved();
 			return this.state.getRevisionNumber();
 		}
 	}
@@ -471,7 +469,6 @@ public class MemoryField implements XField, Serializable {
 	
 	public XAddress getAddress() {
 		synchronized(this.eventQueue) {
-			checkRemoved();
 			return this.state.getAddress();
 		}
 	}
@@ -533,6 +530,7 @@ public class MemoryField implements XField, Serializable {
 	 * @param transaction
 	 */
 	protected void delete() {
+		this.state.setValue(null);
 		this.state.delete(this.eventQueue.stateTransaction);
 		this.removed = true;
 	}
