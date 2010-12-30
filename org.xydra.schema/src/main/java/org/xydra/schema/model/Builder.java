@@ -13,7 +13,7 @@ public class Builder {
 	
 	public static XModel toXModel(SModel smodel) {
 		XID id = X.getIDProvider().fromString(smodel.name.name);
-		XModel xmodel = new MemoryModel(ACTOR, id);
+		XModel xmodel = new MemoryModel(ACTOR, "", id);
 		for(SObject sobject : smodel.objects) {
 			XID objId = X.getIDProvider().fromString(sobject.name.name);
 			XObject xo = xmodel.createObject(objId);
