@@ -403,6 +403,9 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 			assert !this.eventQueue.transactionInProgess;
 			
 			if(!getAddress().equals(command.getTarget())) {
+				if(callback != null) {
+					callback.onFailure();
+				}
 				return XCommand.FAILED;
 			}
 			
@@ -417,7 +420,13 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 						 * that there is a field with the given ID, not about
 						 * that there was no such field before
 						 */
+						if(callback != null) {
+							callback.onSuccess(XCommand.NOCHANGE);
+						}
 						return XCommand.NOCHANGE;
+					}
+					if(callback != null) {
+						callback.onFailure();
 					}
 					return XCommand.FAILED;
 				}
@@ -437,13 +446,22 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 						 * that there is no field with the given ID, not about
 						 * that there was such a field before
 						 */
+						if(callback != null) {
+							callback.onSuccess(XCommand.NOCHANGE);
+						}
 						return XCommand.NOCHANGE;
+					}
+					if(callback != null) {
+						callback.onFailure();
 					}
 					return XCommand.FAILED;
 				}
 				
 				if(!command.isForced()
 				        && oldField.getRevisionNumber() != command.getRevisionNumber()) {
+					if(callback != null) {
+						callback.onFailure();
+					}
 					return XCommand.FAILED;
 				}
 				

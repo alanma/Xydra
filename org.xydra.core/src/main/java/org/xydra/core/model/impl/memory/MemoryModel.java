@@ -290,6 +290,9 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 			assert !this.eventQueue.transactionInProgess;
 			
 			if(!getAddress().equals(command.getTarget())) {
+				if(callback != null) {
+					callback.onFailure();
+				}
 				return XCommand.FAILED;
 			}
 			
@@ -304,7 +307,13 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 						 * that there is an object with the given ID, not about
 						 * that there was no such object before
 						 */
+						if(callback != null) {
+							callback.onSuccess(XCommand.NOCHANGE);
+						}
 						return XCommand.NOCHANGE;
+					}
+					if(callback != null) {
+						callback.onFailure();
 					}
 					return XCommand.FAILED;
 				}
@@ -324,7 +333,13 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 						 * that there is no object with the given ID, not about
 						 * that there was such an object before
 						 */
+						if(callback != null) {
+							callback.onSuccess(XCommand.NOCHANGE);
+						}
 						return XCommand.NOCHANGE;
+					}
+					if(callback != null) {
+						callback.onFailure();
 					}
 					return XCommand.FAILED;
 				}
@@ -456,6 +471,9 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 				
 				if(object == null) {
 					// object does not exist -> transaction fails
+					if(callback != null) {
+						callback.onFailure();
+					}
 					return XCommand.FAILED;
 				} else {
 					// let the object handle the transaction execution

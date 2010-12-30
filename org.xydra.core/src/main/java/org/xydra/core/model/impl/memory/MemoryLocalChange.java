@@ -74,7 +74,7 @@ public class MemoryLocalChange implements XLocalChange {
 		this.applied = true;
 		this.result = revision;
 		if(this.callback != null) {
-			this.callback.applied(revision);
+			this.callback.onSuccess(revision);
 		}
 	}
 	

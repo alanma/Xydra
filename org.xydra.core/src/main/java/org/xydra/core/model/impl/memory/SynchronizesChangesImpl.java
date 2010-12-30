@@ -97,6 +97,9 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 			
 			// make sure that the transaction actually refers to this model
 			if(!transaction.getTarget().equals(getAddress())) {
+				if(callback != null) {
+					callback.onFailure();
+				}
 				return XCommand.FAILED;
 			}
 			
@@ -109,6 +112,9 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 			 * checking the commands against that.
 			 */
 			if(!model.executeCommand(transaction)) {
+				if(callback != null) {
+					callback.onFailure();
+				}
 				return XCommand.FAILED;
 			}
 			
@@ -118,6 +124,9 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 			
 			if(nChanges == 0) {
 				// nothing to change
+				if(callback != null) {
+					callback.onSuccess(XCommand.NOCHANGE);
+				}
 				return XCommand.NOCHANGE;
 			}
 			
@@ -645,12 +654,12 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 					if(results[i] == XCommand.FAILED) {
 						log.info("sync: client command conflicted: " + change.getCommand());
 						if(change.getCallback() != null) {
-							change.getCallback().failed();
+							change.getCallback().onFailure();
 						}
 					} else if(results[i] == XCommand.NOCHANGE) {
 						log.info("sync: client command redundant: " + change.getCommand());
 						if(change.getCallback() != null) {
-							change.getCallback().applied(results[i]);
+							change.getCallback().onSuccess(results[i]);
 						}
 					}
 				}

@@ -248,6 +248,9 @@ public class MemoryRepository implements XRepository, Serializable {
 		
 		if(!command.getRepositoryID().equals(getID())) {
 			// given given repository-id are not consistent
+			if(callback != null) {
+				callback.onFailure();
+			}
 			return XCommand.FAILED;
 		}
 		
@@ -260,7 +263,13 @@ public class MemoryRepository implements XRepository, Serializable {
 					 * that there is a model with the given ID, not about that
 					 * there was no such model before
 					 */
+					if(callback != null) {
+						callback.onSuccess(XCommand.NOCHANGE);
+					}
 					return XCommand.NOCHANGE;
+				}
+				if(callback != null) {
+					callback.onFailure();
 				}
 				return XCommand.FAILED;
 			}
@@ -269,9 +278,8 @@ public class MemoryRepository implements XRepository, Serializable {
 			
 			// Models are always created at the revision number 0.
 			return 0;
-		}
-		
-		if(command.getChangeType() == ChangeType.REMOVE) {
+			
+		} else if(command.getChangeType() == ChangeType.REMOVE) {
 			MemoryModel oldModel = getModel(command.getModelID());
 			if(oldModel == null) {
 				// ID not taken
@@ -281,7 +289,13 @@ public class MemoryRepository implements XRepository, Serializable {
 					 * that there is no model with the given ID, not about that
 					 * there was such a model before
 					 */
+					if(callback != null) {
+						callback.onSuccess(XCommand.NOCHANGE);
+					}
 					return XCommand.NOCHANGE;
+				}
+				if(callback != null) {
+					callback.onFailure();
 				}
 				return XCommand.FAILED;
 			}
@@ -290,9 +304,10 @@ public class MemoryRepository implements XRepository, Serializable {
 			}
 			
 			return removeModelInternal(oldModel, command, callback);
+			
+		} else {
+			throw new IllegalArgumentException("unknown command type: " + command);
 		}
-		
-		return XCommand.FAILED;
 	}
 	
 	public synchronized XID getID() {

@@ -171,7 +171,6 @@ abstract public class AbstractSynchronizeTest {
 		XModelCommand removeJohnForced = MemoryModelCommand.createRemoveCommand(this.localModel
 		        .getAddress(), XCommand.FORCED, john.getID());
 		
-		// IMPROVE test callbacks
 		List<XCommand> localChanges = new ArrayList<XCommand>();
 		localChanges.add(createObject); // 0
 		localChanges.add(createField); // 1
@@ -182,18 +181,24 @@ abstract public class AbstractSynchronizeTest {
 		localChanges.add(removeJohnSafe); // 6
 		localChanges.add(removeJohnForced); // 7
 		
+		TestLocalChangeCallback[] lcc = new TestLocalChangeCallback[localChanges.size()];
+		
 		// create a model identical to localModel to check events sent on sync
 		XModel checkModel = XCopyUtils.copyModel(this.actorId, this.password, this.localModel);
 		
 		// apply the commands locally
+		int i = 0;
 		for(XCommand command : localChanges) {
 			long result = 0;
 			result = checkModel.executeCommand(command);
 			assertTrue("command: " + fix(command), result >= 0 || result == XCommand.NOCHANGE);
-			// TODO test callbacks
-			result = this.localModel.executeCommand(command);
+			lcc[i] = new TestLocalChangeCallback();
+			result = this.localModel.executeCommand(command, lcc[i]);
 			assertTrue("command: " + command, result >= 0 || result == XCommand.NOCHANGE);
+			i++;
 		}
+		
+		assertEquals(XCommand.NOCHANGE, lcc[7].waitForResult()); // removeJohnForced
 		
 		// setup listeners
 		List<XEvent> events = ChangeRecorder.record(this.localModel);
@@ -209,21 +214,18 @@ abstract public class AbstractSynchronizeTest {
 		boolean success = this.localModel.synchronize(remoteEvents);
 		assertTrue(success);
 		
-		// FIXME this is a hack;
 		XLocalChange[] lc = this.localModel.getLocalChanges();
 		
 		// check results
 		assertEquals(5, lc.length);
 		
-		// TODO test callbacks
-		// assertEquals(lc.length, results.length);
-		// assertTrue(results[0] >= 0); // createObject
-		// assertTrue(results[1] >= 0); // createField
-		// assertTrue(results[2] >= 0); // setValue1
-		// assertTrue(results[3] >= 0); // setValue2
-		// assertTrue(results[4] >= 0); // removeField
-		// assertEquals(XCommand.FAILED, results[5]); // removePeter
-		// assertEquals(XCommand.FAILED, results[6]); // removeJohnSafe
+		assertFalse(lcc[0].hasBeenCalled()); // createObject
+		assertFalse(lcc[1].hasBeenCalled()); // createField
+		assertFalse(lcc[2].hasBeenCalled()); // setValue1
+		assertFalse(lcc[3].hasBeenCalled()); // setValue2
+		assertFalse(lcc[4].hasBeenCalled()); // removeField
+		assertEquals(XCommand.FAILED, lcc[5].waitForResult()); // removePeter
+		assertEquals(XCommand.FAILED, lcc[6].waitForResult()); // removeJohnSafe
 		
 		// check that commands have been properly modified
 		assertEquals(createObject, lc[0].getCommand());

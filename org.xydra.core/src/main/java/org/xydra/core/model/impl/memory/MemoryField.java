@@ -317,10 +317,16 @@ public class MemoryField implements XField, Serializable {
 			
 			// check whether the given event actually refers to this field
 			if(!getAddress().equals(command.getTarget())) {
+				if(callback != null) {
+					callback.onFailure();
+				}
 				return XCommand.FAILED;
 			}
 			
 			if(!command.isForced() && this.getRevisionNumber() != command.getRevisionNumber()) {
+				if(callback != null) {
+					callback.onFailure();
+				}
 				return XCommand.FAILED;
 			}
 			
@@ -335,6 +341,9 @@ public class MemoryField implements XField, Serializable {
 					 */
 					if(!command.isForced()) {
 						// value already set
+						if(callback != null) {
+							callback.onFailure();
+						}
 						return XCommand.FAILED;
 					}
 				}
@@ -349,6 +358,9 @@ public class MemoryField implements XField, Serializable {
 					if(!command.isForced()) {
 						// value is not set and can not be removed or the given
 						// value is not current anymore
+						if(callback != null) {
+							callback.onFailure();
+						}
 						return XCommand.FAILED;
 					}
 				}
@@ -365,6 +377,9 @@ public class MemoryField implements XField, Serializable {
 					if(!command.isForced()) {
 						// given old value does not concur with the current
 						// value
+						if(callback != null) {
+							callback.onFailure();
+						}
 						return XCommand.FAILED;
 					}
 				}
@@ -374,6 +389,9 @@ public class MemoryField implements XField, Serializable {
 			}
 			
 			if(XI.equals(getValue(), command.getValue())) {
+				if(callback != null) {
+					callback.onSuccess(XCommand.NOCHANGE);
+				}
 				return XCommand.NOCHANGE;
 			}
 			

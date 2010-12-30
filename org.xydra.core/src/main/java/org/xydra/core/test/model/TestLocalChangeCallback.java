@@ -19,7 +19,7 @@ class TestLocalChangeCallback implements XLocalChangeCallback {
 	private boolean committed = false;
 	private long result;
 	
-	synchronized public void failed() {
+	synchronized public void onFailure() {
 		
 		assert !this.committed : "double fail/apply detected";
 		
@@ -28,7 +28,7 @@ class TestLocalChangeCallback implements XLocalChangeCallback {
 		notifyAll();
 	}
 	
-	synchronized public void applied(long revision) {
+	synchronized public void onSuccess(long revision) {
 		
 		assert !this.committed : "double fail/apply detected";
 		
@@ -54,6 +54,10 @@ class TestLocalChangeCallback implements XLocalChangeCallback {
 		}
 		
 		return this.result;
+	}
+	
+	synchronized public boolean hasBeenCalled() {
+		return this.committed;
 	}
 	
 }

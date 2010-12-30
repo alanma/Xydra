@@ -62,7 +62,7 @@ public class SynchronizerTest extends TestCase {
 		
 		boolean applied = false;
 		
-		public void failed() {
+		public void onFailure() {
 			fail("a command failed to apply remotely");
 		}
 		
@@ -70,7 +70,7 @@ public class SynchronizerTest extends TestCase {
 			fail("should never be reached as we die in failed() already");
 		}
 		
-		synchronized public void applied(long revision) {
+		synchronized public void onSuccess(long revision) {
 			
 			assertFalse("double apply detected", this.applied);
 			

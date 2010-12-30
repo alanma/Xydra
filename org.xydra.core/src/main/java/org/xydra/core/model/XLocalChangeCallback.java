@@ -16,7 +16,7 @@ public interface XLocalChangeCallback {
 	 * Called when there have been remote changes that prevent this command from
 	 * applying.
 	 */
-	void failed();
+	void onFailure();
 	
 	/**
 	 * Called when the command has successfully been synchronized and is applied
@@ -26,6 +26,6 @@ public interface XLocalChangeCallback {
 	 *            applied remotely. This may be {@link XCommand#NOCHANGE} but
 	 *            not {@link XCommand#FAILED}.
 	 */
-	void applied(long revision);
+	void onSuccess(long revision);
 	
 }
