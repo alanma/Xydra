@@ -2,8 +2,6 @@ package org.xydra.doc;
 
 import java.io.Serializable;
 
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XModelCommand;
 import org.xydra.core.change.XSendsFieldEvents;
 import org.xydra.core.change.XSendsModelEvent;
 import org.xydra.core.change.XSendsObjectEvents;
@@ -13,7 +11,6 @@ import org.xydra.core.model.IHasXID;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XExecutesCommands;
-import org.xydra.core.model.XExecutesTransactions;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XLoggedModel;
 import org.xydra.core.model.XModel;
@@ -94,9 +91,6 @@ import org.xydra.core.model.XSynchronizesChanges;
  * TODO Why does {@link XSynchronizesChanges} does not extend
  * {@link XLoggedModel} or why is there no common super-interface for the
  * getChangeLog operation?
- * 
- * TODO What is the difference between specific commands such as
- * {@link XModelCommand} and the more generic {@link XCommand} ?
  * 
  * <h3>Orthogonal features</h3>
  * <ul>
