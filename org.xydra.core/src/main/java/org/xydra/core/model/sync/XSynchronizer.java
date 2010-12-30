@@ -44,6 +44,9 @@ public class XSynchronizer {
 	/**
 	 * Query the store for new remote changes. Local changes will be sent
 	 * immediately.
+	 * 
+	 * @param sc A callback that is notified if synchronizing was successful or
+	 *            not.
 	 */
 	public void synchronize(final XSynchronizationCallback sc) {
 		

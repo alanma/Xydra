@@ -16,4 +16,7 @@ public interface XSynchronizationCallback {
 	
 	void onSuccess();
 	
+	// TODO add methods to be called if we detect that synchronization has been
+	// lost
+	
 }
