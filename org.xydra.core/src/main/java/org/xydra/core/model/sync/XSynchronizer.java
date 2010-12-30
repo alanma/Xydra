@@ -46,7 +46,7 @@ public class XSynchronizer {
 	 * immediately.
 	 * 
 	 * @param sc A callback that is notified if synchronizing was successful or
-	 *            not.
+	 *            not. This may be null if no notification is desired.
 	 */
 	public void synchronize(final XSynchronizationCallback sc) {
 		

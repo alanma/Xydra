@@ -168,6 +168,8 @@ abstract public class AbstractSynchronizerTest {
 		
 		try {
 			
+			// TODO test listeners
+			
 			assertNull(loadModelSnapshot(NEWMODEL_ID));
 			
 			XRepository repo = new MemoryRepository(actorId, passwordHash, repoAddr.getRepository());
