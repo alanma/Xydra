@@ -61,16 +61,17 @@ public class MemoryLocalChange implements XLocalChange {
 	}
 	
 	@Override
-	public void setRemoteResult(long result) {
+	public void setRemoteResult(long revision) {
 		if(this.applied) {
 			throw new IllegalStateException("cannot overwrite remote result " + this.result
-			        + " with " + result);
+			        + " with " + revision);
+		}
+		if(revision < 0) {
+			throw new IllegalArgumentException("invalid revision: " + revision);
 		}
 		this.applied = true;
-		this.result = result;
-		if(result >= 0) {
-			this.callback.applied(result);
-		}
+		this.result = revision;
+		this.callback.applied(revision);
 	}
 	
 	protected void updateCommand(long syncRev, long nRemote) {

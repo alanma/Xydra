@@ -87,8 +87,8 @@ public interface XydraStore {
 	 * Redundant method to allow a quick (network-efficient) check if an actorId
 	 * and passwordHash are valid for authentication.
 	 * 
-	 * Possible exceptions to be received via callback.onError (see class comment in {@link XydraStore} and comments
-	 * in each exception):
+	 * Possible exceptions to be received via callback.onError (see class
+	 * comment in {@link XydraStore} and comments in each exception):
 	 * <ul>
 	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
 	 * operations per time use the wrong actorId/passwordHash combination.</li>
@@ -116,8 +116,8 @@ public interface XydraStore {
 	 * Retrieve read-only snapshots of {@link XModel} states at the point in
 	 * time when this request is processed.
 	 * 
-	 * Possible exceptions to be received via callback.onError (see class comment
-	 * in {@link XydraStore} and comments in each exception):
+	 * Possible exceptions to be received via callback.onError (see class
+	 * comment in {@link XydraStore} and comments in each exception):
 	 * <ul>
 	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
 	 * operations per time use the wrong actorId/passwordHash combination.</li>
@@ -160,8 +160,8 @@ public interface XydraStore {
 	/**
 	 * Read current state.
 	 * 
-	 * Possible exceptions to be received via callback.onError (see class comment in {@link XydraStore} and comments
-	 * in each exception):
+	 * Possible exceptions to be received via callback.onError (see class
+	 * comment in {@link XydraStore} and comments in each exception):
 	 * <ul>
 	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
 	 * operations per time use the wrong actorId/passwordHash combination.</li>
@@ -203,8 +203,8 @@ public interface XydraStore {
 	 * Returns read-only snapshots of {@link XObject} state at the point in time
 	 * when this request was processed.
 	 * 
-	 * Possible exceptions to be received via callback.onError (see class comment in {@link XydraStore} and comments
-	 * in each exception):
+	 * Possible exceptions to be received via callback.onError (see class
+	 * comment in {@link XydraStore} and comments in each exception):
 	 * <ul>
 	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
 	 * operations per time use the wrong actorId/passwordHash combination.</li>
@@ -246,8 +246,8 @@ public interface XydraStore {
 	/**
 	 * Read current state.
 	 * 
-	 * Possible exceptions to be received via callback.onError (see class comment in {@link XydraStore} and comments
-	 * in each exception):
+	 * Possible exceptions to be received via callback.onError (see class
+	 * comment in {@link XydraStore} and comments in each exception):
 	 * <ul>
 	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
 	 * operations per time use the wrong actorId/passwordHash combination.</li>
@@ -280,8 +280,8 @@ public interface XydraStore {
 	 * 
 	 * Every authenticated actorId may read the repository ID.
 	 * 
-	 * Possible exceptions to be received via callback.onError (see class comment in {@link XydraStore} and comments
-	 * in each exception):
+	 * Possible exceptions to be received via callback.onError (see class
+	 * comment in {@link XydraStore} and comments in each exception):
 	 * <ul>
 	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
 	 * operations per time use the wrong actorId/passwordHash combination.</li>
@@ -310,8 +310,8 @@ public interface XydraStore {
 	 * Check permissions, command pre-conditions, execute the command and log
 	 * the resulting events.
 	 * 
-	 * Possible exceptions to be received via callback.onError (see class comment in {@link XydraStore} and comments
-	 * in each exception):
+	 * Possible exceptions to be received via callback.onError (see class
+	 * comment in {@link XydraStore} and comments in each exception):
 	 * <ul>
 	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
 	 * operations per time use the wrong actorId/passwordHash combination.</li>
@@ -391,8 +391,8 @@ public interface XydraStore {
 	 * Fetch all events that happened for a given address in a given range of
 	 * revisions. Batch operation for multiple such requests.
 	 * 
-	 * Possible exceptions to be received via callback.onError (see class comment in {@link XydraStore} and comments
-	 * in each exception):
+	 * Possible exceptions to be received via callback.onError (see class
+	 * comment in {@link XydraStore} and comments in each exception):
 	 * <ul>
 	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
 	 * operations per time use the wrong actorId/passwordHash combination.</li>
@@ -408,6 +408,8 @@ public interface XydraStore {
 	 * <li>{@link RequestException} (a) if beginRevision is greater than
 	 * endRevision; (b) if beginRevision or endRevision are negative</li>
 	 * </ul>
+	 * 
+	 * TODO what happens if the entity (or containing model) doesn't exits?
 	 * 
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed

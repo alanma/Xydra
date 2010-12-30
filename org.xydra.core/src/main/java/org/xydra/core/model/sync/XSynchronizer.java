@@ -2,13 +2,10 @@ package org.xydra.core.model.sync;
 
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
-import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XLocalChange;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XSynchronizesChanges;
-import org.xydra.core.model.impl.memory.SynchronizesChangesImpl;
-import org.xydra.index.XI;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -26,8 +23,6 @@ import org.xydra.store.XydraStore;
  * 
  * TODO handle timeouts (retry), other store/HTTP errors
  * 
- * TODO move this into {@link SynchronizesChangesImpl}
- * 
  * @author dscharrer
  * 
  */
@@ -37,7 +32,6 @@ public class XSynchronizer {
 	
 	private final XSynchronizesChanges entity;
 	private final XydraStore store;
-	private final XAddress addr;
 	
 	boolean requestRunning = false;
 	
@@ -54,31 +48,13 @@ public class XSynchronizer {
 	 * 
 	 * @param entity A fully synchronized entity.
 	 */
-	public XSynchronizer(XAddress addr, XSynchronizesChanges entity, XydraStore store) {
-		log.info("sync: init with entity " + addr + " | " + entity.getAddress());
-		this.addr = addr;
+	public XSynchronizer(XSynchronizesChanges entity, XydraStore store) {
+		log.info("sync: init with entity " + entity.getAddress() + " | " + entity.getAddress());
 		this.entity = entity;
 		this.store = store;
-		assert addr.getField() == null;
-		assert addr.getModel() != null;
-		assert XI.equals(addr.getObject(), entity.getAddress().getObject());
 	}
 	
-	/**
-	 * Start synchronizing the given model (which has no local changes) via the
-	 * given service. Any further changes applied directly to the model will be
-	 * lost. To persist changes supply the to the
-	 * {@link #executeCommand(XCommand, Callback)} Method.
-	 */
-	public XSynchronizer(XModel entity, XydraStore store) {
-		this(entity.getAddress(), entity, store);
-	}
-	
-	public long getLocalRevisionNumber() {
-		return this.entity.getChangeLog().getCurrentRevisionNumber();
-	}
-	
-	private void startRequest() {
+	private synchronized void startRequest() {
 		
 		if(this.requestRunning) {
 			// There are already requests running, start this request when they
@@ -91,6 +67,8 @@ public class XSynchronizer {
 		
 		XLocalChange[] changes = this.entity.getLocalChanges();
 		
+		// Find the first local command that has not been sent to the server
+		// yet.
 		XLocalChange newChange = null;
 		for(int i = 0; i < changes.length; i++) {
 			if(!changes[i].isApplied()) {
@@ -103,7 +81,14 @@ public class XSynchronizer {
 			
 			// There are commands to send.
 			
-			// IMPROVE synchronize more than one change at a time
+			/*
+			 * IMPROVE synchronize more than one change at a time
+			 * 
+			 * To do this, the server needs to be able to differentiate between
+			 * revisions in the command that refer to local changes and those
+			 * that refer to remote changes.
+			 */
+
 			final XLocalChange change = newChange;
 			
 			log.info("sync: sending command " + change.getCommand() + ", rev is " + syncRev);
@@ -112,7 +97,7 @@ public class XSynchronizer {
 				
 				@Override
 				public void onFailure(Throwable exception) {
-					log.info("sync: request error sending command", exception);
+					log.error("sync: request error sending command", exception);
 					// TODO handle error;
 					requestEnded(false);
 				}
@@ -126,21 +111,21 @@ public class XSynchronizer {
 					BatchedResult<Long> commandRes = res.getFirst()[0];
 					BatchedResult<XEvent[]> eventsRes = res.getSecond()[0];
 					
-					if(commandRes.getException() != null) {
-						assert commandRes.getResult() == null;
-						log.info("sync: error sending command", commandRes.getException());
-						// TODO handle error;
-						requestEnded(false);
-						return;
-					}
-					
-					assert commandRes.getResult() != null;
-					long commandRev = commandRes.getResult();
-					
 					XEvent[] events = eventsRes.getResult();
 					boolean gotEvents = (events != null && events.length != 0);
 					
-					if(commandRev != XCommand.FAILED) {
+					boolean success = true;
+					if(commandRes.getException() != null) {
+						assert commandRes.getResult() == null;
+						log.error("sync: error sending command", commandRes.getException());
+						// TODO handle error;
+						success = false;
+						
+					} else {
+						
+						assert commandRes.getResult() != null;
+						long commandRev = commandRes.getResult();
+						
 						// command successfully synchronized
 						if(commandRev >= 0) {
 							
@@ -155,42 +140,43 @@ public class XSynchronizer {
 								log.warn("sync: command applied remotely with revision "
 								        + commandRev + ", but no new events - store error?");
 								// lost sync -> bad!!!
-								// FIXME this can lead to infinite send-command
-								// loops
 							} else {
 								log.info("sync: command applied remotely with revision "
 								        + commandRev);
 							}
-						} else {
+							
+							change.setRemoteResult(commandRev);
+							
+						} else if(commandRev == XCommand.NOCHANGE) {
 							if(!gotEvents) {
 								log.warn("sync: command didn't change anything remotely, "
 								        + "but no new events, sync lost?");
 								// lost sync -> bad!!!
-								// FIXME this can lead to infinite send-command
-								// loops
 							} else {
 								log.info("sync: command didn't change anything remotely, "
 								        + "got new events");
+								// command should be marked as redundant when
+								// merging remote events
 							}
 							
-						}
-						change.setRemoteResult(commandRev);
-					} else {
-						if(!gotEvents) {
-							log.warn("sync: command failed but no new events, sync lost?");
-							// lost sync -> bad!!!
-							// FIXME this can lead to infinite send-command
-							// loops
 						} else {
-							log.info("sync: command failed remotely, got new events");
-							// local command should fail to re-apply in
-							// applyEvents
+							assert commandRev == XCommand.FAILED;
+							if(!gotEvents) {
+								log.warn("sync: command failed but no new events, sync lost?");
+								// lost sync -> bad!!!
+							} else {
+								log.info("sync: command failed remotely, got new events");
+								// command should be marked as failed when
+								// merging
+								// remote events
+							}
 						}
+						
 					}
 					
 					if(eventsRes.getException() != null) {
 						assert events == null;
-						log.info("sync: error getting events while sending command", eventsRes
+						log.error("sync: error getting events while sending command", eventsRes
 						        .getException());
 						// TODO handle error;
 						requestEnded(false);
@@ -200,15 +186,15 @@ public class XSynchronizer {
 					assert events != null;
 					
 					applyEvents(events);
-					requestEnded(true);
+					requestEnded(success);
 				}
 				
 			};
 			
 			this.store.executeCommandsAndGetEvents(change.getActor(), change.getPasswordHash(),
 			        new XCommand[] { change.getCommand() },
-			        new GetEventsRequest[] { new GetEventsRequest(this.addr, syncRev + 1,
-			                Long.MAX_VALUE) }, callback);
+			        new GetEventsRequest[] { new GetEventsRequest(this.entity.getAddress(),
+			                syncRev + 1, Long.MAX_VALUE) }, callback);
 			
 		} else {
 			
@@ -220,7 +206,7 @@ public class XSynchronizer {
 				
 				@Override
 				public void onFailure(Throwable exception) {
-					log.info("sync: request error getting events", exception);
+					log.error("sync: request error getting events", exception);
 					// TODO handle error;
 					requestEnded(false);
 				}
@@ -233,7 +219,7 @@ public class XSynchronizer {
 					
 					if(eventsRes.getException() != null) {
 						assert eventsRes.getResult() == null;
-						log.info("sync: error getting events", eventsRes.getException());
+						log.error("sync: error getting events", eventsRes.getException());
 						// TODO handle error;
 						requestEnded(false);
 						return;
@@ -249,14 +235,14 @@ public class XSynchronizer {
 			
 			// FIXME where to get the passwordHash?
 			this.store.getEvents(this.entity.getSessionActor(), "",
-			        new GetEventsRequest[] { new GetEventsRequest(this.addr, syncRev + 1,
-			                Long.MAX_VALUE) }, callback);
+			        new GetEventsRequest[] { new GetEventsRequest(this.entity.getAddress(),
+			                syncRev + 1, Long.MAX_VALUE) }, callback);
 			
 		}
 		
 	}
 	
-	protected void applyEvents(XEvent[] remoteChanges) {
+	private void applyEvents(XEvent[] remoteChanges) {
 		
 		if(remoteChanges.length == 0) {
 			// no changes to merge
@@ -267,9 +253,11 @@ public class XSynchronizer {
 		
 	}
 	
-	protected void requestEnded(boolean noConnectionErrors) {
+	private void requestEnded(boolean noConnectionErrors) {
+		
 		this.requestRunning = false;
-		// TODO should this only be done when autoSync == true?
+		
+		// Send the remaining local changes.
 		if(noConnectionErrors && this.entity.countUnappliedLocalChanges() > 0) {
 			startRequest();
 		}
