@@ -456,7 +456,7 @@ abstract public class AbstractSynchronizerTest {
 	}
 	
 	@Test
-	public void testLoadRemoteChangesRemovedTheCreatedModel() {
+	public void testLoadRemoteChangesRemovedThenCreatedModel() {
 		
 		try {
 			
@@ -533,12 +533,14 @@ abstract public class AbstractSynchronizerTest {
 			assertTrue(repo.hasModel(NEWMODEL_ID));
 			assertTrue(hc2.eventsReceived);
 			assertTrue(hc3.eventsReceived);
+			// test that the model is not removed
 			model.createObject(XX.toId("jane"));
 			
 			// test synchronizing the model without repository
 			hc4.eventsReceived = false;
 			synchronize(sync2);
 			assertTrue(hc4.eventsReceived);
+			// test that the model is not removed
 			modelCopy.createObject(XX.toId("jane"));
 			
 		} finally {
@@ -549,6 +551,63 @@ abstract public class AbstractSynchronizerTest {
 	
 	@Test
 	public void testLoadRemoteChangesRemovedCreatedModel() {
+		
+		try {
+			
+			assertNull(loadModelSnapshot(NEWMODEL_ID));
+			
+			// create a model
+			XRepository repo = new MemoryRepository(actorId, passwordHash, this.repoAddr
+			        .getRepository());
+			XModel model = repo.createModel(NEWMODEL_ID);
+			XSynchronizer sync = new XSynchronizer(model, store);
+			synchronize(sync);
+			XModel modelCopy = loadModel(NEWMODEL_ID);
+			assertTrue(XCompareUtils.equalState(model, modelCopy));
+			long modelRev = model.getRevisionNumber();
+			HasChanged hc2 = HasChanged.listen(model);
+			HasChanged hc3 = HasChanged.listen(modelCopy);
+			
+			removeModel(NEWMODEL_ID);
+			assertNull(loadModelSnapshot(NEWMODEL_ID));
+			
+			// now re-create the model, with some content
+			XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(
+			        this.repoAddr, XCommand.SAFE, NEWMODEL_ID);
+			executeCommand(createCommand);
+			XBaseModel remoteModel = loadModelSnapshot(NEWMODEL_ID);
+			assertNotNull(remoteModel);
+			
+			// test synchronizing the model with repository
+			HasChanged hc1 = new HasChanged();
+			repo.addListenerForModelEvents(hc1);
+			synchronize(sync);
+			assertTrue(repo.hasModel(NEWMODEL_ID));
+			assertEquals(modelRev + 2, model.getRevisionNumber());
+			assertEquals(modelRev + 2, model.getSynchronizedRevision());
+			assertFalse(hc1.eventsReceived);
+			assertFalse(hc2.eventsReceived);
+			assertTrue(XCompareUtils.equalState(model, remoteModel));
+			// test that the model is not removed
+			model.createObject(XX.toId("jane"));
+			
+			// test synchronizing the model without repository
+			XSynchronizer sync2 = new XSynchronizer(modelCopy, store);
+			synchronize(sync2);
+			assertEquals(modelRev + 2, modelCopy.getRevisionNumber());
+			assertEquals(modelRev + 2, modelCopy.getSynchronizedRevision());
+			assertFalse(hc3.eventsReceived);
+			assertTrue(XCompareUtils.equalState(modelCopy, remoteModel));
+			// test that the model is not removed
+			modelCopy.createObject(XX.toId("jane"));
+			
+		} finally {
+			removeModel(NEWMODEL_ID);
+		}
+	}
+	
+	@Test
+	public void testSyncModelCreatedWithoutRepository() {
 		// TODO implement
 	}
 	
