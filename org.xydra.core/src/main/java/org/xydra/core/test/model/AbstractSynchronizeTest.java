@@ -247,9 +247,39 @@ abstract public class AbstractSynchronizeTest {
 		
 		// check that there are enough but no redundant events sent
 		for(XEvent event : events) {
-			
 			assertFalse(johnAddr.equalsOrContains(event.getChangedEntity()));
 			assertFalse(newObjectAddr.equalsOrContains(event.getChangedEntity()));
+		}
+		replaySyncEvents(checkModel, events);
+		assertTrue(XCompareUtils.equalTree(this.localModel, checkModel));
+		
+		// check the change log
+		Iterator<XEvent> remoteHistory = this.remoteModel.getChangeLog().getEventsSince(
+		        lastRevision + 1);
+		Iterator<XEvent> localHistory = this.localModel.getChangeLog().getEventsSince(
+		        lastRevision + 1);
+		
+		assertEquals(this.remoteModel.getChangeLog().getCurrentRevisionNumber(), this.localModel
+		        .getChangeLog().getCurrentRevisionNumber());
+		
+		while(remoteHistory.hasNext()) {
+			assertTrue(localHistory.hasNext());
+			XEvent remote = fix(remoteHistory.next());
+			XEvent local = localHistory.next();
+			assertEquals(remote, local);
+		}
+		assertFalse(localHistory.hasNext());
+		
+		// check that listeners are still there
+		assertFalse(hc.eventsReceived);
+		this.localModel.getObject(newObjectId).createField(newFieldId);
+		assertTrue(hc.eventsReceived);
+		
+	}
+	
+	protected static void replaySyncEvents(XModel checkModel, List<XEvent> events) {
+		
+		for(XEvent event : events) {
 			
 			if(event instanceof XModelEvent) {
 				XModelEvent me = (XModelEvent)event;
@@ -284,30 +314,6 @@ abstract public class AbstractSynchronizeTest {
 			}
 			
 		}
-		assertTrue(XCompareUtils.equalTree(this.localModel, checkModel));
-		
-		// check the change log
-		Iterator<XEvent> remoteHistory = this.remoteModel.getChangeLog().getEventsSince(
-		        lastRevision + 1);
-		Iterator<XEvent> localHistory = this.localModel.getChangeLog().getEventsSince(
-		        lastRevision + 1);
-		
-		assertEquals(this.remoteModel.getChangeLog().getCurrentRevisionNumber(), this.localModel
-		        .getChangeLog().getCurrentRevisionNumber());
-		
-		while(remoteHistory.hasNext()) {
-			assertTrue(localHistory.hasNext());
-			XEvent remote = fix(remoteHistory.next());
-			XEvent local = localHistory.next();
-			assertEquals(remote, local);
-		}
-		assertFalse(localHistory.hasNext());
-		
-		// check that listeners are still there
-		assertFalse(hc.eventsReceived);
-		this.localModel.getObject(newObjectId).createField(newFieldId);
-		assertTrue(hc.eventsReceived);
-		
 	}
 	
 	private XEvent fix(XEvent event) {
