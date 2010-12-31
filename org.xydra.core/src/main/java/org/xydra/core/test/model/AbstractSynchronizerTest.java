@@ -33,6 +33,7 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.delta.ChangedModel;
+import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.core.model.impl.memory.SynchronizesChangesImpl;
 import org.xydra.core.model.state.XSPI;
@@ -97,18 +98,7 @@ abstract public class AbstractSynchronizerTest {
 		assertNotNull(repoId);
 		this.repoAddr = XX.toAddress(repoId, null, null, null);
 		
-		XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(this.repoAddr,
-		        XCommand.SAFE, DemoModelUtil.PHONEBOOK_ID);
-		executeCommand(createCommand);
-		XAddress modelAddr = createCommand.getChangedEntity();
-		XTransactionBuilder tb = new XTransactionBuilder(modelAddr);
-		DemoModelUtil.setupPhonebook(modelAddr, tb);
-		XTransaction trans = tb.build();
-		// Apply events individually so there is something in the change log to
-		// test
-		for(XAtomicCommand ac : trans) {
-			executeCommand(ac);
-		}
+		createPhonebook(DemoModelUtil.PHONEBOOK_ID);
 		
 		this.model = loadModel(DemoModelUtil.PHONEBOOK_ID);
 		this.sync = new XSynchronizer(this.model, store);
@@ -510,18 +500,7 @@ abstract public class AbstractSynchronizerTest {
 			}
 			
 			// now re-create the model, with some content
-			XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(
-			        this.repoAddr, XCommand.SAFE, NEWMODEL_ID);
-			executeCommand(createCommand);
-			XAddress modelAddr = createCommand.getChangedEntity();
-			XTransactionBuilder tb = new XTransactionBuilder(modelAddr);
-			DemoModelUtil.setupPhonebook(modelAddr, tb);
-			XTransaction trans = tb.build();
-			// Apply events individually so there is something in the change log
-			// to test
-			for(XAtomicCommand ac : trans) {
-				executeCommand(ac);
-			}
+			createPhonebook(NEWMODEL_ID);
 			XBaseModel remoteModel = loadModelSnapshot(NEWMODEL_ID);
 			assertNotNull(remoteModel);
 			
@@ -604,11 +583,53 @@ abstract public class AbstractSynchronizerTest {
 		} finally {
 			removeModel(NEWMODEL_ID);
 		}
+		
 	}
 	
 	@Test
 	public void testSyncModelCreatedWithoutRepository() {
-		// TODO implement
+		
+		try {
+			
+			assertNull(loadModelSnapshot(NEWMODEL_ID));
+			
+			// create a local model
+			XAddress modelAddr = XX.resolveModel(this.repoAddr, NEWMODEL_ID);
+			// must be created with a repository ID to be synchronized
+			XModel model = new MemoryModel(actorId, passwordHash, modelAddr);
+			DemoModelUtil.setupPhonebook(model);
+			
+			XBaseModel snapshot = XCopyUtils.createSnapshot(model);
+			
+			synchronize(new XSynchronizer(model, store));
+			
+			assertTrue(XCompareUtils.equalTree(snapshot, model));
+			XBaseModel remoteModel = loadModelSnapshot(NEWMODEL_ID);
+			assertNotNull(remoteModel);
+			assertTrue(XCompareUtils.equalState(model, remoteModel));
+			
+		} finally {
+			removeModel(NEWMODEL_ID);
+		}
+		
+	}
+	
+	/**
+	 * Create a phonebook model with the given XID in the store.
+	 */
+	private void createPhonebook(XID modelId) {
+		XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(this.repoAddr,
+		        XCommand.SAFE, modelId);
+		executeCommand(createCommand);
+		XAddress modelAddr = createCommand.getChangedEntity();
+		XTransactionBuilder tb = new XTransactionBuilder(modelAddr);
+		DemoModelUtil.setupPhonebook(modelAddr, tb);
+		XTransaction trans = tb.build();
+		// Apply events individually so there is something in the change log
+		// to test
+		for(XAtomicCommand ac : trans) {
+			executeCommand(ac);
+		}
 	}
 	
 	private XModel loadModel(XID modelId) {

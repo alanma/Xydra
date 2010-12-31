@@ -19,6 +19,7 @@ import org.xydra.core.change.XRepositoryEvent;
 import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.impl.memory.MemoryModelCommand;
 import org.xydra.core.change.impl.memory.MemoryModelEvent;
+import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.core.change.impl.memory.MemoryRepositoryEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
@@ -27,6 +28,7 @@ import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
+import org.xydra.core.model.XType;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
@@ -60,14 +62,28 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	 * @param modelId The {@link XID} for this MemoryModel.
 	 */
 	public MemoryModel(XID actorId, String passwordHash, XID modelId) {
-		this(actorId, passwordHash, null, createModelState(modelId));
+		this(actorId, passwordHash, null, createModelState(XX.toAddress(null, modelId, null, null)));
 	}
 	
-	private static XModelState createModelState(XID modelId) {
-		XAddress modelAddr = XX.toAddress(null, modelId, null, null);
+	/**
+	 * Creates a new MemoryModel without father-{@link XRepository} but with a
+	 * parent repository XID so it can be synchronized.
+	 * 
+	 * @param actorId TODO
+	 * @param modelAddr The {@link XAddress} for this MemoryModel.
+	 */
+	public MemoryModel(XID actorId, String passwordHash, XAddress modelAddr) {
+		this(actorId, passwordHash, null, createModelState(modelAddr));
+		if(modelAddr.getAddressedType() != XType.XMODEL) {
+			throw new IllegalArgumentException("modelAddr must be a model Adress, was: "
+			        + modelAddr);
+		}
+	}
+	
+	private static XModelState createModelState(XAddress modelAddr) {
 		XChangeLogState changeLogState = new MemoryChangeLogState(modelAddr);
-		// Bump the log revision since we're missing this object's create event.
-		changeLogState.setFirstRevisionNumber(1);
+		// Bump the log revision if we're missing this object's create event.
+		changeLogState.setFirstRevisionNumber(modelAddr.getRepository() == null ? 1 : 0);
 		return new TemporaryModelState(modelAddr, changeLogState);
 	}
 	
@@ -100,8 +116,22 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		
 		this.modelChangeListenerCollection = new HashSet<XModelEventListener>();
 		
+		if(father == null && getAddress().getRepository() != null
+		        && this.eventQueue.getChangeLog() != null
+		        && this.eventQueue.getChangeLog().getCurrentRevisionNumber() == -1) {
+			XAddress repoAddr = getAddress().getParent();
+			XCommand createCommand = MemoryRepositoryCommand.createAddCommand(repoAddr, true,
+			        getID());
+			this.eventQueue.newLocalChange(createCommand, null);
+			XRepositoryEvent createEvent = MemoryRepositoryEvent.createAddEvent(actorId, repoAddr,
+			        getID());
+			this.eventQueue.enqueueRepositoryEvent(null, createEvent);
+			this.eventQueue.sendEvents();
+		}
+		
 		assert this.eventQueue.getChangeLog() == null
 		        || this.eventQueue.getChangeLog().getCurrentRevisionNumber() == getRevisionNumber();
+		
 	}
 	
 	/**

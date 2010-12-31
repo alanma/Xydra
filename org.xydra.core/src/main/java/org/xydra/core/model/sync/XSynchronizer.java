@@ -37,6 +37,11 @@ public class XSynchronizer {
 	 */
 	public XSynchronizer(XSynchronizesChanges entity, XydraStore store) {
 		log.info("sync: init with entity " + entity.getAddress() + " | " + entity.getAddress());
+		if(entity.getAddress().getRepository() == null || entity.getAddress().getModel() == null) {
+			throw new IllegalArgumentException(
+			        "cannot synchronized entities without a repository and model ID, was: "
+			                + entity.getAddress());
+		}
 		this.entity = entity;
 		this.store = store;
 	}
