@@ -88,12 +88,12 @@ abstract public class AbstractSynchronizerTest {
 		// check login
 		SynchronousTestCallback<Boolean> loginCallback = new SynchronousTestCallback<Boolean>();
 		store.checkLogin(actorId, passwordHash, loginCallback);
-		assertTrue(waitSimpleCallbackSuccess(loginCallback));
+		assertTrue(waitForSuccess(loginCallback));
 		
 		// get repository address
 		SynchronousTestCallback<XID> repoIdCallback = new SynchronousTestCallback<XID>();
 		store.getRepositoryId(actorId, passwordHash, repoIdCallback);
-		XID repoId = waitSimpleCallbackSuccess(repoIdCallback);
+		XID repoId = waitForSuccess(repoIdCallback);
 		assertNotNull(repoId);
 		this.repoAddr = XX.toAddress(repoId, null, null, null);
 		
@@ -117,11 +117,6 @@ abstract public class AbstractSynchronizerTest {
 	@After
 	public void tearDown() {
 		removeModel(DemoModelUtil.PHONEBOOK_ID);
-	}
-	
-	private void removeModel(XID modelId) {
-		executeCommand(MemoryRepositoryCommand.createRemoveCommand(this.repoAddr, XCommand.FORCED,
-		        modelId));
 	}
 	
 	@Test
@@ -226,9 +221,7 @@ abstract public class AbstractSynchronizerTest {
 		XBaseModel testModel = loadModelSnapshot(DemoModelUtil.PHONEBOOK_ID);
 		
 		// synchronize
-		TestSynchronizationCallback sc = new TestSynchronizationCallback();
-		this.sync.synchronize(sc);
-		checkSyncCallback(sc);
+		synchronize(this.sync);
 		
 		// check the local model
 		assertTrue(this.model.hasObject(bobId));
@@ -346,9 +339,7 @@ abstract public class AbstractSynchronizerTest {
 		assertTrue(XCompareUtils.equalState(midCopy, this.model));
 		
 		// synchronize
-		TestSynchronizationCallback sc = new TestSynchronizationCallback();
-		this.sync.synchronize(sc);
-		checkSyncCallback(sc);
+		synchronize(this.sync);
 		
 		// check local model
 		XObject jane = this.model.getObject(janeId);
@@ -406,9 +397,7 @@ abstract public class AbstractSynchronizerTest {
 			HasChanged hc1 = HasChanged.listen(model);
 			XBaseModel testModel = XCopyUtils.createSnapshot(model);
 			
-			TestSynchronizationCallback sc1 = new TestSynchronizationCallback();
-			sync.synchronize(sc1);
-			checkSyncCallback(sc1);
+			synchronize(sync);
 			
 			XBaseModel remoteModel = loadModelSnapshot(NEWMODEL_ID);
 			assertNotNull(remoteModel);
@@ -425,9 +414,7 @@ abstract public class AbstractSynchronizerTest {
 			modelRev = model.getRevisionNumber();
 			hc1.eventsReceived = false;
 			
-			TestSynchronizationCallback sc2 = new TestSynchronizationCallback();
-			sync.synchronize(sc2);
-			checkSyncCallback(sc2);
+			synchronize(sync);
 			
 			assertNull(loadModelSnapshot(NEWMODEL_ID));
 			assertFalse(repo.hasModel(NEWMODEL_ID));
@@ -449,10 +436,8 @@ abstract public class AbstractSynchronizerTest {
 			HasChanged hc2 = HasChanged.listen(model);
 			testModel = XCopyUtils.createSnapshot(model);
 			
-			TestSynchronizationCallback sc3 = new TestSynchronizationCallback();
 			sync = new XSynchronizer(model, store);
-			sync.synchronize(sc3);
-			checkSyncCallback(sc3);
+			synchronize(sync);
 			
 			remoteModel = loadModelSnapshot(NEWMODEL_ID);
 			assertNotNull(remoteModel);
@@ -471,17 +456,99 @@ abstract public class AbstractSynchronizerTest {
 	}
 	
 	@Test
-	public void testLoadRemoteChangesRemovedModel() {
-		// TODO implement
+	public void testLoadRemoteChangesRemovedTheCreatedModel() {
+		
+		try {
+			
+			assertNull(loadModelSnapshot(NEWMODEL_ID));
+			
+			// create a model
+			XRepository repo = new MemoryRepository(actorId, passwordHash, this.repoAddr
+			        .getRepository());
+			XModel model = repo.createModel(NEWMODEL_ID);
+			XObject object = model.createObject(XX.toId("bob"));
+			XField field = object.createField(XX.toId("cookies"));
+			field.setValue(XV.toValue("yummy"));
+			XSynchronizer sync = new XSynchronizer(model, store);
+			synchronize(sync);
+			XModel modelCopy = loadModel(NEWMODEL_ID);
+			assertTrue(XCompareUtils.equalState(model, modelCopy));
+			long modelRev = model.getRevisionNumber();
+			HasChanged hc3 = HasChanged.listen(model);
+			HasChanged hc4 = HasChanged.listen(modelCopy);
+			
+			removeModel(NEWMODEL_ID);
+			assertNull(loadModelSnapshot(NEWMODEL_ID));
+			
+			// test synchronizing the model with repository
+			HasChanged hc1 = new HasChanged();
+			repo.addListenerForModelEvents(hc1);
+			synchronize(sync);
+			assertFalse(repo.hasModel(NEWMODEL_ID));
+			assertEquals(modelRev + 1, model.getRevisionNumber());
+			assertEquals(modelRev + 1, model.getSynchronizedRevision());
+			assertTrue(hc1.eventsReceived);
+			assertTrue(hc3.eventsReceived);
+			try {
+				model.createObject(XX.toId("jane"));
+				fail();
+			} catch(IllegalStateException ise) {
+				// worked
+			}
+			
+			// test synchronizing the model without repository
+			XSynchronizer sync2 = new XSynchronizer(modelCopy, store);
+			synchronize(sync2);
+			assertEquals(modelRev + 1, modelCopy.getRevisionNumber());
+			assertEquals(modelRev + 1, modelCopy.getSynchronizedRevision());
+			assertTrue(hc4.eventsReceived);
+			try {
+				modelCopy.createObject(XX.toId("jane"));
+				fail();
+			} catch(IllegalStateException ise) {
+				// worked
+			}
+			
+			// now re-create the model, with some content
+			XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(
+			        this.repoAddr, XCommand.SAFE, NEWMODEL_ID);
+			executeCommand(createCommand);
+			XAddress modelAddr = createCommand.getChangedEntity();
+			XTransactionBuilder tb = new XTransactionBuilder(modelAddr);
+			DemoModelUtil.setupPhonebook(modelAddr, tb);
+			XTransaction trans = tb.build();
+			// Apply events individually so there is something in the change log
+			// to test
+			for(XAtomicCommand ac : trans) {
+				executeCommand(ac);
+			}
+			XBaseModel remoteModel = loadModelSnapshot(NEWMODEL_ID);
+			assertNotNull(remoteModel);
+			
+			// test synchronizing the model with repository
+			HasChanged hc2 = new HasChanged();
+			repo.addListenerForModelEvents(hc2);
+			hc3.eventsReceived = false;
+			synchronize(sync);
+			assertTrue(repo.hasModel(NEWMODEL_ID));
+			assertTrue(hc2.eventsReceived);
+			assertTrue(hc3.eventsReceived);
+			model.createObject(XX.toId("jane"));
+			
+			// test synchronizing the model without repository
+			hc4.eventsReceived = false;
+			synchronize(sync2);
+			assertTrue(hc4.eventsReceived);
+			modelCopy.createObject(XX.toId("jane"));
+			
+		} finally {
+			removeModel(NEWMODEL_ID);
+		}
+		
 	}
 	
 	@Test
-	public void testLoadRemoteChangesRemovedCreateModel() {
-		// TODO implement
-	}
-	
-	@Test
-	public void testLoadRemoteChangesMissingRevisions() {
+	public void testLoadRemoteChangesRemovedCreatedModel() {
 		// TODO implement
 	}
 	
@@ -504,21 +571,37 @@ abstract public class AbstractSynchronizerTest {
 		
 		store.getModelSnapshots(actorId, passwordHash, new XAddress[] { modelAddr }, tc);
 		
-		return waitCallbackSuccess(tc);
+		return waitForSuccessBatched(tc);
 	}
 	
+	private void removeModel(XID modelId) {
+		executeCommand(MemoryRepositoryCommand.createRemoveCommand(this.repoAddr, XCommand.FORCED,
+		        modelId));
+	}
+	
+	/**
+	 * Execute the given command on the store and check that there were no
+	 * errors.
+	 */
 	private void executeCommand(XCommand command) {
 		SynchronousTestCallback<BatchedResult<Long>[]> tc;
 		tc = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		
 		store.executeCommands(actorId, passwordHash, new XCommand[] { command }, tc);
 		
-		long res = waitCallbackSuccess(tc);
+		long res = waitForSuccessBatched(tc);
 		
-		assertTrue(res >= 0);
+		assertTrue(res != XCommand.FAILED);
 	}
 	
-	private <T> T waitSimpleCallbackSuccess(SynchronousTestCallback<T> tc) {
+	/**
+	 * Wait for the given callback and check that there were no errors.
+	 * 
+	 * TODO this could also be of use to other store tests
+	 * 
+	 * @return the result passed to the callback.
+	 */
+	private <T> T waitForSuccess(SynchronousTestCallback<T> tc) {
 		
 		assertEquals(SynchronousTestCallback.SUCCESS, tc.waitOnCallback(0));
 		
@@ -526,9 +609,17 @@ abstract public class AbstractSynchronizerTest {
 		return tc.getEffect();
 	}
 	
-	private <T> T waitCallbackSuccess(SynchronousTestCallback<BatchedResult<T>[]> tc) {
+	/**
+	 * Wait for the given callback and check that there were no errors and
+	 * exactly one batched result.
+	 * 
+	 * TODO this could also be of use to other store tests
+	 * 
+	 * @return the result passed to the callback.
+	 */
+	private <T> T waitForSuccessBatched(SynchronousTestCallback<BatchedResult<T>[]> tc) {
 		
-		BatchedResult<T>[] results = waitSimpleCallbackSuccess(tc);
+		BatchedResult<T>[] results = waitForSuccess(tc);
 		assertNotNull(results);
 		assertEquals(1, results.length);
 		BatchedResult<T> result = results[0];
@@ -537,7 +628,10 @@ abstract public class AbstractSynchronizerTest {
 		return result.getResult();
 	}
 	
-	void checkSyncCallback(TestSynchronizationCallback sc) {
+	/**
+	 * Wait for the given callback and check that there were no errors.
+	 */
+	private void checkSyncCallback(TestSynchronizationCallback sc) {
 		if(sc.getRequestError() != null) {
 			throw new RuntimeException(sc.getRequestError());
 		}
@@ -548,6 +642,15 @@ abstract public class AbstractSynchronizerTest {
 			throw new RuntimeException(sc.getEventsError());
 		}
 		assertTrue(sc.isSuccess());
+	}
+	
+	/**
+	 * Synchronize and check that there were no errors.
+	 */
+	private void synchronize(XSynchronizer sync) {
+		TestSynchronizationCallback sc = new TestSynchronizationCallback();
+		sync.synchronize(sc);
+		checkSyncCallback(sc);
 	}
 	
 }

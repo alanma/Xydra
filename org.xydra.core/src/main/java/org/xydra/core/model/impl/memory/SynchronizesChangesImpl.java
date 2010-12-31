@@ -297,69 +297,74 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 			throw new IllegalArgumentException("invalid revision number: " + revision);
 		}
 		
-		XChangeLog log = getChangeLog();
-		long currentRev = log.getCurrentRevisionNumber();
-		if(revision == currentRev) {
-			return;
-		}
-		
-		boolean oldBlock = this.eventQueue.setBlockSending(true);
-		int pos = this.eventQueue.getNextPosition();
-		
-		// stop the change log to prevent the rollback events from being logged
-		boolean oldLogging = this.eventQueue.setLogging(false);
-		
-		boolean hasOrphans = (this.eventQueue.orphans != null);
-		if(!hasOrphans) {
-			this.eventQueue.orphans = new Orphans();
-			beginStateTransaction();
-		}
-		
-		try {
+		synchronized(this.eventQueue) {
 			
-			// rollback each event individually
-			for(long i = currentRev; i > revision; i--) {
-				XEvent event = log.getEventAt(i);
-				if(event == null) {
-					continue;
-				}
-				if(event instanceof XAtomicEvent) {
-					rollbackEvent((XAtomicEvent)event);
-				} else {
-					assert event instanceof XTransactionEvent;
-					XTransactionEvent trans = (XTransactionEvent)event;
-					for(int j = trans.size() - 1; j >= 0; j--) {
-						XAtomicEvent atomicEvent = trans.getEvent(j);
-						rollbackEvent(atomicEvent);
+			XChangeLog log = getChangeLog();
+			long currentRev = log.getCurrentRevisionNumber();
+			if(revision == currentRev) {
+				return;
+			}
+			
+			boolean oldBlock = this.eventQueue.setBlockSending(true);
+			int pos = this.eventQueue.getNextPosition();
+			
+			// stop the change log to prevent the rollback events from being
+			// logged
+			boolean oldLogging = this.eventQueue.setLogging(false);
+			
+			boolean hasOrphans = (this.eventQueue.orphans != null);
+			if(!hasOrphans) {
+				this.eventQueue.orphans = new Orphans();
+				beginStateTransaction();
+			}
+			
+			try {
+				
+				// rollback each event individually
+				for(long i = currentRev; i > revision; i--) {
+					XEvent event = log.getEventAt(i);
+					if(event == null) {
+						continue;
 					}
+					if(event instanceof XAtomicEvent) {
+						rollbackEvent((XAtomicEvent)event);
+					} else {
+						assert event instanceof XTransactionEvent;
+						XTransactionEvent trans = (XTransactionEvent)event;
+						for(int j = trans.size() - 1; j >= 0; j--) {
+							XAtomicEvent atomicEvent = trans.getEvent(j);
+							rollbackEvent(atomicEvent);
+						}
+					}
+					
+				}
+				
+				// reset the change log
+				this.eventQueue.truncateLog(revision);
+				
+				if(!hasOrphans) {
+					// Clean unneeded events.
+					this.eventQueue.cleanEvents(pos);
+					
+					cleanupOrphans();
+					
+					this.eventQueue.saveLog();
+				}
+				
+			} finally {
+				
+				if(!hasOrphans) {
+					endStateTransaction();
+					
+					this.eventQueue.setBlockSending(oldBlock);
+					this.eventQueue.sendEvents();
 				}
 				
 			}
 			
-			// reset the change log
-			this.eventQueue.truncateLog(revision);
-			
-			if(!hasOrphans) {
-				// Clean unneeded events.
-				this.eventQueue.cleanEvents(pos);
-				
-				cleanupOrphans();
-				
-				this.eventQueue.saveLog();
-			}
-			
-		} finally {
-			
-			if(!hasOrphans) {
-				endStateTransaction();
-				
-				this.eventQueue.setBlockSending(oldBlock);
-				this.eventQueue.sendEvents();
-			}
+			this.eventQueue.setLogging(oldLogging);
 			
 		}
-		
-		this.eventQueue.setLogging(oldLogging);
 		
 	}
 	
@@ -566,21 +571,24 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 	
 	public boolean synchronize(XEvent[] remoteChanges) {
 		
-		List<MemoryLocalChange> localChanges = this.eventQueue.getLocalChanges();
-		
-		log.info("sync: merging " + remoteChanges.length + " remote and " + localChanges.size()
-		        + " local changes, local rev is " + getCurrentRevisionNumber() + " (synced to "
-		        + getSynchronizedRevision() + ")");
-		
-		checkSync();
-		
-		long[] results = null;
-		
-		boolean oldBlock = this.eventQueue.setBlockSending(true);
-		
 		boolean success = true;
+		boolean removedChanged;
 		
-		try {
+		synchronized(this.eventQueue) {
+			
+			boolean oldRemoved = this.removed;
+			
+			List<MemoryLocalChange> localChanges = this.eventQueue.getLocalChanges();
+			
+			log.info("sync: merging " + remoteChanges.length + " remote and " + localChanges.size()
+			        + " local changes, local rev is " + getCurrentRevisionNumber() + " (synced to "
+			        + getSynchronizedRevision() + ")");
+			
+			checkSync();
+			
+			long[] results = null;
+			
+			boolean oldBlock = this.eventQueue.setBlockSending(true);
 			
 			assert this.eventQueue.orphans == null;
 			beginStateTransaction();
@@ -638,8 +646,6 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 			// Clean unneeded events.
 			this.eventQueue.cleanEvents(pos);
 			
-		} finally {
-			
 			cleanupOrphans();
 			
 			this.eventQueue.saveLog();
@@ -647,40 +653,48 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchron
 			
 			this.eventQueue.setBlockSending(oldBlock);
 			
-			if(results != null) {
-				
-				for(int i = 0; i < results.length; i++) {
-					MemoryLocalChange change = localChanges.get(i);
-					if(results[i] == XCommand.FAILED) {
-						log.info("sync: client command conflicted: " + change.getCommand());
-						if(change.getCallback() != null) {
-							change.getCallback().onFailure();
-						}
-					} else if(results[i] == XCommand.NOCHANGE) {
-						log.info("sync: client command redundant: " + change.getCommand());
-						if(change.getCallback() != null) {
-							change.getCallback().onSuccess(results[i]);
-						}
+			// invoke callbacks for failed / nochange commands
+			for(int i = 0; i < results.length; i++) {
+				MemoryLocalChange change = localChanges.get(i);
+				if(results[i] == XCommand.FAILED) {
+					log.info("sync: client command conflicted: " + change.getCommand());
+					if(change.getCallback() != null) {
+						change.getCallback().onFailure();
+					}
+				} else if(results[i] == XCommand.NOCHANGE) {
+					log.info("sync: client command redundant: " + change.getCommand());
+					if(change.getCallback() != null) {
+						change.getCallback().onSuccess(results[i]);
 					}
 				}
-				
-				// IMPROVE this is O(nLocalChanges^2) worst case
-				for(int i = results.length - 1; i >= 0; i--) {
-					if(results[i] < 0) {
-						localChanges.remove(i);
-					}
-				}
-				
 			}
 			
-			this.eventQueue.sendEvents();
+			// remove faild / nochange commands
+			// IMPROVE this is O(nLocalChanges^2) worst case
+			for(int i = results.length - 1; i >= 0; i--) {
+				if(results[i] < 0) {
+					localChanges.remove(i);
+				}
+			}
 			
+			MemoryModel model = getModel();
+			removedChanged = (oldRemoved != this.removed && model != null && model.getFather() != null);
+			if(!removedChanged) {
+				this.eventQueue.sendEvents();
+			}
+			
+			log.info("sync: merged changes, new local rev is " + getCurrentRevisionNumber()
+			        + " (synced to " + getSynchronizedRevision() + ")");
 		}
 		
-		log.info("sync: merged changes, new local rev is " + getCurrentRevisionNumber()
-		        + " (synced to " + getSynchronizedRevision() + ")");
+		// This needs to be outside of the synchronized block to prevent
+		// deadlocks between repository and model locking.
+		if(removedChanged) {
+			getModel().getFather().updateRemoved(getModel());
+		}
 		
 		return success;
+		
 	}
 	
 	private void cleanupOrphans() {

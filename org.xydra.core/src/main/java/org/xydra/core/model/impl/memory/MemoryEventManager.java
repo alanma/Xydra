@@ -117,11 +117,12 @@ public class MemoryEventManager implements Serializable {
 			        || entry.event instanceof XTransactionEvent;
 			
 			if(entry.event instanceof XRepositoryEvent) {
-				assert entry.repo != null;
 				
 				// fire repo event
 				
-				entry.repo.fireRepositoryEvent((XRepositoryEvent)entry.event);
+				if(entry.repo != null) {
+					entry.repo.fireRepositoryEvent((XRepositoryEvent)entry.event);
+				}
 				
 			} else if(entry.event instanceof XModelEvent) {
 				assert entry.model != null;
@@ -201,7 +202,7 @@ public class MemoryEventManager implements Serializable {
 	 * @param event The {@link XModelEvent}.
 	 */
 	protected void enqueueRepositoryEvent(MemoryRepository repo, XRepositoryEvent event) {
-		assert repo != null && event != null : "Neither repo nor event may be null!";
+		assert event != null : "Event must not be null!";
 		
 		enqueueEvent(new EventQueueEntry(repo, null, null, null, event));
 	}

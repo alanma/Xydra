@@ -659,17 +659,23 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	protected boolean enqueueModelRemoveEvents(XID actorId) {
 		
 		boolean inTrans = false;
+		
 		for(XID objectId : this) {
 			MemoryObject object = getObject(objectId);
 			enqueueObjectRemoveEvents(actorId, object, true, true);
 			inTrans = true;
 		}
 		
-		XRepositoryEvent event = MemoryRepositoryEvent.createRemoveEvent(actorId, getFather()
-		        .getAddress(), getID(), getCurrentRevisionNumber(), inTrans);
+		XAddress repoAdrr = hasFather() ? getFather().getAddress() : getAddress().getParent();
+		XRepositoryEvent event = MemoryRepositoryEvent.createRemoveEvent(actorId, repoAdrr,
+		        getID(), getCurrentRevisionNumber(), inTrans);
 		this.eventQueue.enqueueRepositoryEvent(getFather(), event);
 		
 		return inTrans;
+	}
+	
+	protected XModelState getState() {
+		return this.state;
 	}
 	
 }

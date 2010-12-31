@@ -526,4 +526,26 @@ public class MemoryRepository implements XRepository, Serializable {
 		}
 	}
 	
+	protected synchronized void updateRemoved(MemoryModel model) {
+		assert model != null;
+		synchronized(model.eventQueue) {
+			XID modelId = model.getID();
+			boolean hasModel = hasModel(modelId);
+			if(model.removed && hasModel) {
+				XStateTransaction trans = beginStateTransaction();
+				this.state.removeModelState(modelId);
+				this.loadedModels.remove(modelId);
+				save(trans);
+				endStateTransaction(trans);
+			} else if(!model.removed && !hasModel) {
+				XStateTransaction trans = beginStateTransaction();
+				this.state.addModelState(model.getState());
+				save(trans);
+				endStateTransaction(trans);
+				this.loadedModels.put(model.getID(), model);
+			}
+			model.eventQueue.sendEvents();
+		}
+	}
+	
 }
