@@ -22,9 +22,11 @@ import org.xydra.core.change.XRepositoryCommand;
 import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.change.impl.memory.MemoryModelCommand;
+import org.xydra.core.change.impl.memory.MemoryObjectCommand;
 import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
+import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
@@ -132,11 +134,14 @@ abstract public class AbstractSynchronizerTest {
 		TestSynchronizationCallback sc2 = new TestSynchronizationCallback();
 		
 		// Create a command manually.
-		XCommand command = MemoryModelCommand.createAddCommand(this.model.getAddress(), false, XX
-		        .toId("Frank"));
+		final XID frankId = XX.toId("Frank");
+		XCommand command = MemoryModelCommand.createAddCommand(this.model.getAddress(), false,
+		        frankId);
 		
 		// Apply the command locally.
-		this.model.executeCommand(command, c1);
+		assertTrue(this.model.executeCommand(command, c1) >= 0);
+		
+		assertTrue(this.model.hasObject(frankId));
 		
 		// Now synchronize with the server.
 		this.sync.synchronize(sc1);
@@ -148,8 +153,9 @@ abstract public class AbstractSynchronizerTest {
 		ChangedModel changedModel = new ChangedModel(this.model);
 		
 		// Make modifications to the changed model.
-		changedModel.getObject(DemoModelUtil.JOHN_ID).createField(XX.toId("newField"));
-		changedModel.removeObject(DemoModelUtil.PETER_ID);
+		final XID newfieldId = XX.toId("newField");
+		changedModel.getObject(DemoModelUtil.JOHN_ID).createField(newfieldId);
+		assertTrue(changedModel.removeObject(DemoModelUtil.PETER_ID));
 		
 		// Create the command(s) describing the changes made to the
 		// ChangedModel.
@@ -157,10 +163,19 @@ abstract public class AbstractSynchronizerTest {
 		tb.applyChanges(changedModel);
 		XCommand autoCommand = tb.buildCommand();
 		
+		// We can also modify the model directly.
+		final XID janeId = XX.toId("jane");
+		this.model.createObject(janeId);
+		
 		// Now apply the command locally. It should be automatically
 		// sent to the server.
 		this.model.executeCommand(autoCommand, c2);
 		long finalRev = this.model.getRevisionNumber();
+		
+		assertTrue(this.model.hasObject(frankId));
+		assertTrue(this.model.getObject(DemoModelUtil.JOHN_ID).hasField(newfieldId));
+		assertFalse(this.model.hasObject(DemoModelUtil.PETER_ID));
+		assertTrue(this.model.hasObject(janeId));
 		
 		this.sync.synchronize(sc2);
 		
@@ -168,10 +183,16 @@ abstract public class AbstractSynchronizerTest {
 		
 		assertTrue(c1.waitForResult() >= 0);
 		assertTrue(c2.waitForResult() >= 0);
-		assertTrue(XCompareUtils.equalState(this.model,
-		        loadModelSnapshot(DemoModelUtil.PHONEBOOK_ID)));
 		checkSyncCallback(sc1);
 		checkSyncCallback(sc2);
+		
+		// check model state
+		assertTrue(this.model.hasObject(frankId));
+		assertTrue(this.model.getObject(DemoModelUtil.JOHN_ID).hasField(newfieldId));
+		assertFalse(this.model.hasObject(DemoModelUtil.PETER_ID));
+		assertTrue(this.model.hasObject(janeId));
+		assertTrue(XCompareUtils.equalState(this.model,
+		        loadModelSnapshot(DemoModelUtil.PHONEBOOK_ID)));
 		assertEquals(finalRev, this.model.getRevisionNumber());
 		assertEquals(finalRev, this.model.getSynchronizedRevision());
 		
@@ -181,6 +202,8 @@ abstract public class AbstractSynchronizerTest {
 	public void testLoadRemoteChanges() {
 		
 		XModel modelCopy = XCopyUtils.copyModel(actorId, passwordHash, this.model);
+		List<XEvent> events = ChangeRecorder.record(this.model);
+		assertTrue(XCompareUtils.equalState(modelCopy, this.model));
 		
 		// make some remote changes
 		final XID bobId = XX.toId("Bob");
@@ -201,8 +224,6 @@ abstract public class AbstractSynchronizerTest {
 		executeCommand(tb.buildCommand());
 		
 		XBaseModel testModel = loadModelSnapshot(DemoModelUtil.PHONEBOOK_ID);
-		assertTrue(XCompareUtils.equalState(modelCopy, this.model));
-		List<XEvent> events = ChangeRecorder.record(this.model);
 		
 		// synchronize
 		TestSynchronizationCallback sc = new TestSynchronizationCallback();
@@ -232,7 +253,138 @@ abstract public class AbstractSynchronizerTest {
 	
 	@Test
 	public void testMergeChanges() {
-		// TODO implement
+		
+		XModel startCopy = XCopyUtils.copyModel(actorId, passwordHash, this.model);
+		List<XEvent> startEvents = ChangeRecorder.record(this.model);
+		assertTrue(XCompareUtils.equalState(startCopy, this.model));
+		
+		XModel startCopy2 = XCopyUtils.copyModel(actorId, passwordHash, this.model);
+		assertTrue(XCompareUtils.equalState(startCopy2, this.model));
+		
+		// make some remote changes
+		final XID cakesId = XX.toId("cakes");
+		XCommand command = MemoryObjectCommand.createAddCommand(this.model.getObject(
+		        DemoModelUtil.JOHN_ID).getAddress(), false, cakesId);
+		executeCommand(command);
+		
+		// make more remote changes
+		final XID janeId = XX.toId("Jane");
+		final XID cookiesId = XX.toId("cookies");
+		final XValue cookiesValue = XV.toValue("gone");
+		final XAddress janeAddr = XX.resolveObject(this.model.getAddress(), janeId);
+		final XAddress cookiesAddr = XX.resolveField(janeAddr, cookiesId);
+		XTransactionBuilder tb = new XTransactionBuilder(this.model.getAddress());
+		tb.addObject(this.model.getAddress(), XCommand.SAFE, janeId);
+		tb.addField(janeAddr, XCommand.SAFE, cookiesId);
+		tb.addValue(cookiesAddr, XCommand.NEW, cookiesValue);
+		executeCommand(tb.buildCommand());
+		
+		// and some more remote changes
+		XCommand command2 = MemoryObjectCommand.createAddCommand(this.model.getObject(
+		        DemoModelUtil.PETER_ID).getAddress(), false, cakesId);
+		executeCommand(command2);
+		
+		// and even more remote changes
+		final XID bobId = XX.toId("Bob");
+		XCommand command4 = MemoryModelCommand.createAddCommand(this.model.getAddress(), false,
+		        bobId);
+		executeCommand(command4);
+		
+		// also make some local changes
+		// should be reverted on sync because of conflicting remote changes
+		TestLocalChangeCallback tlc1 = new TestLocalChangeCallback();
+		XTransactionBuilder tb2 = new XTransactionBuilder(this.model.getAddress());
+		tb2.addObject(this.model.getAddress(), XCommand.SAFE, janeId);
+		tb2.addField(janeAddr, XCommand.SAFE, cakesId);
+		assertTrue(this.model.executeCommand(tb2.buildCommand(), tlc1) >= 0);
+		// should survive the sync
+		final XID newfieldId = XX.toId("newField");
+		this.model.getObject(DemoModelUtil.JOHN_ID).createField(newfieldId);
+		// should be reverted on sync
+		TestLocalChangeCallback tlc2 = new TestLocalChangeCallback();
+		XCommand command3 = MemoryModelCommand.createRemoveCommand(this.model.getAddress(),
+		        this.model.getObject(DemoModelUtil.PETER_ID).getRevisionNumber(),
+		        DemoModelUtil.PETER_ID);
+		assertTrue(this.model.executeCommand(command3, tlc2) >= 0);
+		// should sync to XCommand#NOCHANGE
+		TestLocalChangeCallback tlc3 = new TestLocalChangeCallback();
+		XCommand command5 = MemoryModelCommand.createAddCommand(this.model.getAddress(), false,
+		        bobId);
+		assertTrue(this.model.executeCommand(command5, tlc3) >= 0);
+		
+		// check the local model
+		XObject localJane = this.model.getObject(janeId);
+		assertNotNull(localJane);
+		assertTrue(localJane.hasField(cakesId));
+		assertFalse(localJane.hasField(cookiesId));
+		assertEquals(localJane.getRevisionNumber(), localJane.getField(cakesId).getRevisionNumber());
+		assertFalse(this.model.hasObject(DemoModelUtil.PETER_ID));
+		assertTrue(this.model.getObject(DemoModelUtil.JOHN_ID).hasField(newfieldId));
+		assertFalse(this.model.getObject(DemoModelUtil.JOHN_ID).hasField(cakesId));
+		assertTrue(this.model.hasObject(bobId));
+		
+		// check the remote model
+		XBaseModel testModel = loadModelSnapshot(DemoModelUtil.PHONEBOOK_ID);
+		assertTrue(testModel.getObject(DemoModelUtil.JOHN_ID).hasField(cakesId));
+		assertFalse(testModel.getObject(DemoModelUtil.JOHN_ID).hasField(newfieldId));
+		XBaseObject remoteJane = testModel.getObject(janeId);
+		assertNotNull(remoteJane);
+		assertTrue(remoteJane.hasField(cookiesId));
+		assertFalse(remoteJane.hasField(cakesId));
+		assertEquals(remoteJane.getRevisionNumber(), remoteJane.getField(cookiesId)
+		        .getRevisionNumber());
+		assertTrue(testModel.hasObject(DemoModelUtil.PETER_ID));
+		assertTrue(testModel.getObject(DemoModelUtil.PETER_ID).hasField(cakesId));
+		assertTrue(testModel.hasObject(bobId));
+		
+		// check events sent so far
+		AbstractSynchronizeTest.replaySyncEvents(startCopy2, startEvents);
+		assertTrue(XCompareUtils.equalTree(startCopy2, this.model));
+		
+		XModel midCopy = XCopyUtils.copyModel(actorId, passwordHash, this.model);
+		List<XEvent> midEvents = ChangeRecorder.record(this.model);
+		assertTrue(XCompareUtils.equalState(midCopy, this.model));
+		
+		// synchronize
+		TestSynchronizationCallback sc = new TestSynchronizationCallback();
+		this.sync.synchronize(sc);
+		checkSyncCallback(sc);
+		
+		// check local model
+		XObject jane = this.model.getObject(janeId);
+		assertNotNull(jane);
+		assertTrue(jane.hasField(cookiesId));
+		assertFalse(jane.hasField(cakesId));
+		assertEquals(jane.getRevisionNumber(), jane.getField(cookiesId).getRevisionNumber());
+		assertTrue(this.model.hasObject(DemoModelUtil.PETER_ID));
+		assertTrue(this.model.getObject(DemoModelUtil.PETER_ID).hasField(cakesId));
+		assertEquals(testModel.getObject(janeId).getRevisionNumber(), this.model.getObject(janeId)
+		        .getRevisionNumber());
+		assertTrue(testModel.getObject(DemoModelUtil.JOHN_ID).getRevisionNumber() < this.model
+		        .getObject(DemoModelUtil.JOHN_ID).getRevisionNumber());
+		assertEquals(testModel.getObject(DemoModelUtil.PETER_ID).getRevisionNumber(), this.model
+		        .getObject(DemoModelUtil.PETER_ID).getRevisionNumber());
+		assertEquals(testModel.getObject(DemoModelUtil.PETER_ID).getField(cakesId)
+		        .getRevisionNumber(), this.model.getObject(DemoModelUtil.PETER_ID)
+		        .getField(cakesId).getRevisionNumber());
+		assertTrue(this.model.hasObject(bobId));
+		assertEquals(testModel.getObject(bobId).getRevisionNumber(), this.model.getObject(bobId)
+		        .getRevisionNumber());
+		
+		// check the remote model
+		XBaseModel remoteModel = loadModelSnapshot(DemoModelUtil.PHONEBOOK_ID);
+		assertTrue(XCompareUtils.equalState(this.model, remoteModel));
+		
+		// check that the correct events were sent
+		AbstractSynchronizeTest.replaySyncEvents(startCopy, startEvents);
+		assertTrue(XCompareUtils.equalTree(startCopy, this.model));
+		
+		AbstractSynchronizeTest.replaySyncEvents(midCopy, midEvents);
+		assertTrue(XCompareUtils.equalTree(midCopy, this.model));
+		
+		assertEquals(XCommand.FAILED, tlc1.waitForResult());
+		assertEquals(XCommand.FAILED, tlc2.waitForResult());
+		
 	}
 	
 	@Test
@@ -363,7 +515,7 @@ abstract public class AbstractSynchronizerTest {
 		
 		long res = waitCallbackSuccess(tc);
 		
-		assertTrue(res != XCommand.FAILED);
+		assertTrue(res >= 0);
 	}
 	
 	private <T> T waitSimpleCallbackSuccess(SynchronousTestCallback<T> tc) {
