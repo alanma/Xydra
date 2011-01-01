@@ -6,6 +6,7 @@ import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.change.XObjectCommand;
 import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.change.XTransactionEventListener;
+import org.xydra.core.model.IHasChangeLog;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
@@ -22,7 +23,8 @@ import org.xydra.store.AccessException;
  * @author dscharrer
  * 
  */
-public class ArmProtectedObject extends ArmProtectedBaseObject implements XProtectedObject {
+public class ArmProtectedObject extends ArmProtectedBaseObject implements XProtectedObject,
+        IHasChangeLog {
 	
 	private final XObject object;
 	

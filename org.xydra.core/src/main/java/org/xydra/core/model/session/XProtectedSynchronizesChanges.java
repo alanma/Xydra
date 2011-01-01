@@ -2,6 +2,7 @@ package org.xydra.core.model.session;
 
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XTransaction;
+import org.xydra.core.model.IHasChangeLog;
 import org.xydra.core.model.IHasXAddress;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XID;
@@ -14,7 +15,8 @@ import org.xydra.core.model.XID;
  * @author dscharrer
  * 
  */
-public interface XProtectedSynchronizesChanges extends IHasXAddress, XProtectedExecutesCommands {
+public interface XProtectedSynchronizesChanges extends IHasXAddress, IHasChangeLog,
+        XProtectedExecutesCommands {
 	
 	/**
 	 * @return the {@link XChangeLog} which is logging the {@link XEvent

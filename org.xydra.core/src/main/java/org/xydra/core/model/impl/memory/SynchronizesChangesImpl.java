@@ -26,6 +26,7 @@ import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.XTransactionEvent;
 import org.xydra.core.change.XTransactionEventListener;
 import org.xydra.core.change.impl.memory.MemoryRepositoryEvent;
+import org.xydra.core.model.IHasChangeLog;
 import org.xydra.core.model.IHasXAddress;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseField;
@@ -56,9 +57,9 @@ import org.xydra.log.LoggerFactory;
  * 
  * @author dscharrer
  */
-public abstract class SynchronizesChangesImpl implements IHasXAddress, XSynchronizesChanges,
-        XExecutesCommands, XSendsObjectEvents, XSendsFieldEvents, XSendsTransactionEvents,
-        Serializable {
+public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChangeLog,
+        XSynchronizesChanges, XExecutesCommands, XSendsObjectEvents, XSendsFieldEvents,
+        XSendsTransactionEvents, Serializable {
 	
 	/** Has this entity been removed? */
 	protected boolean removed = false;

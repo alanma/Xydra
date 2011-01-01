@@ -16,7 +16,7 @@ import org.xydra.core.change.XSendsTransactionEvents;
  * 
  */
 public interface XLoggedModel extends XBaseModel, XSendsModelEvent, XSendsObjectEvents,
-        XSendsFieldEvents, XSendsTransactionEvents {
+        XSendsFieldEvents, XSendsTransactionEvents, IHasChangeLog {
 	
 	/**
 	 * Returns the {@link XLoggedObject} contained in this model with the given
@@ -29,11 +29,5 @@ public interface XLoggedModel extends XBaseModel, XSendsModelEvent, XSendsObject
 	 */
 	@ReadOperation
 	XLoggedObject getObject(XID objectId);
-	
-	/**
-	 * @return the {@link XChangeLog} which is logging the {@link XEvent
-	 *         XEvents} which happen on this model.
-	 */
-	XChangeLog getChangeLog();
 	
 }

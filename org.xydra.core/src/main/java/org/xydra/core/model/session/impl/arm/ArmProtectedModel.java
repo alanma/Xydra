@@ -7,6 +7,7 @@ import org.xydra.core.change.XModelCommand;
 import org.xydra.core.change.XModelEventListener;
 import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.change.XTransactionEventListener;
+import org.xydra.core.model.IHasChangeLog;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
@@ -23,7 +24,8 @@ import org.xydra.store.AccessException;
  * @author dscharrer
  * 
  */
-public class ArmProtectedModel extends ArmProtectedBaseModel implements XProtectedModel {
+public class ArmProtectedModel extends ArmProtectedBaseModel implements XProtectedModel,
+        IHasChangeLog {
 	
 	private final XModel model;
 	

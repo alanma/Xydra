@@ -1,5 +1,6 @@
 package org.xydra.core.model;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import org.xydra.annotations.ReadOperation;
@@ -7,6 +8,8 @@ import org.xydra.annotations.ReadOperation;
 
 /**
  * A basic model that at least supports read operations.
+ * 
+ * Some implementations are also {@link Serializable}.
  * 
  * @author dscharrer
  * 

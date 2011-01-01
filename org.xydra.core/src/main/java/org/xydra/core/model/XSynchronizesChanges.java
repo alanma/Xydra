@@ -14,7 +14,7 @@ import org.xydra.core.change.XTransaction;
  * @author dscharrer
  * 
  */
-public interface XSynchronizesChanges extends XExecutesCommands, IHasXAddress {
+public interface XSynchronizesChanges extends IHasChangeLog, XExecutesCommands, IHasXAddress {
 	
 	/**
 	 * Roll back the state (including revisions) to a specific revision. This
