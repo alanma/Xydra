@@ -213,6 +213,16 @@
 				</configuration>
 			</plugin>
 
+			<!-- Google App Engine (GAE) plugin -->
+			<plugin>
+				<groupId>net.kindleit</groupId>
+				<artifactId>maven-gae-plugin</artifactId>
+				<version>0.7.3</version>
+				<configuration>
+					<sdkDir>${gae.home}</sdkDir>
+				</configuration>
+			</plugin>
+
 		</plugins>
 	</build>
 
