@@ -86,12 +86,6 @@ import org.xydra.core.model.XSynchronizesChanges;
  * </li>
  * </ul>
  * 
- * TODO Why is a {@link XBaseModel} not {@link Serializable} ?
- * 
- * TODO Why does {@link XSynchronizesChanges} does not extend
- * {@link XLoggedModel} or why is there no common super-interface for the
- * getChangeLog operation?
- * 
  * <h3>Orthogonal features</h3>
  * <ul>
  * <li>serialisable</li>
