@@ -6,6 +6,7 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 
 
+// TODO What is the point of this class? ~Daniel
 public class SimpleEvent implements XEvent {
 	
 	public XID getActor() {
