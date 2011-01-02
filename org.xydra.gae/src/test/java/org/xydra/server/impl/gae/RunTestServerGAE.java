@@ -1,7 +1,7 @@
 package org.xydra.server.impl.gae;
 
-import org.xydra.server.impl.newgae.GaeTestfixer;
 import org.xydra.server.test.TestServer;
+import org.xydra.store.impl.gae.GaeTestfixer;
 
 
 public class RunTestServerGAE {

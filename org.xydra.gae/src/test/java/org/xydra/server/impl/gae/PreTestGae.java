@@ -4,8 +4,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.xydra.server.impl.gae.GaeXydraServer;
-import org.xydra.server.impl.newgae.GaeTestfixer;
 import org.xydra.server.test.PreTest;
+import org.xydra.store.impl.gae.GaeTestfixer;
 
 
 public class PreTestGae extends PreTest {

@@ -1,4 +1,4 @@
-package org.xydra.server.impl.newgae.changes;
+package org.xydra.store.impl.gae.changes;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,9 +32,9 @@ import org.xydra.core.xml.impl.XmlOutStringBuffer;
 import org.xydra.index.XI;
 import org.xydra.index.query.Pair;
 import org.xydra.server.IXydraServer;
-import org.xydra.server.impl.newgae.GaeUtils;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.XydraStore;
+import org.xydra.store.impl.gae.GaeUtils;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;

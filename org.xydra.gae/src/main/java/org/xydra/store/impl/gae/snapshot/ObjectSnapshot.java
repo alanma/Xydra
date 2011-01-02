@@ -1,4 +1,4 @@
-package org.xydra.server.impl.newgae.snapshot;
+package org.xydra.store.impl.gae.snapshot;
 
 import java.io.Serializable;
 import java.util.HashMap;

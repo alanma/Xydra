@@ -31,20 +31,29 @@ import org.xydra.store.access.XGroupDatabase;
  */
 public class MemoryStore implements XydraStore {
 	
-	private AllowAllStore data;
-	private AllowAllStore rights;
-	private GroupModelWrapper groupModelWrapper;
+	private final AllowAllStore data;
+	private final AllowAllStore rights;
+	private final GroupModelWrapper groupModelWrapper;
 	
 	/**
 	 * @param data
 	 * @param rights
 	 */
 	public MemoryStore() {
+		this(new AllowAllStore(new MemoryNoAccessRightsNoBatchNoAsyncStore(XX.toId("data"))),
+		        new AllowAllStore(new MemoryNoAccessRightsNoBatchNoAsyncStore(XX.toId("rights"))));
+	}
+	
+	/**
+	 * @param data
+	 * @param rights
+	 */
+	public MemoryStore(AllowAllStore data, AllowAllStore rights) {
 		// TODO why not store both data and rights in the same store instance,
 		// but with different repository IDs?
 		this.data = new AllowAllStore(new MemoryNoAccessRightsNoBatchNoAsyncStore(XX.toId("data")));
-		this.rights = new AllowAllStore(new MemoryNoAccessRightsNoBatchNoAsyncStore(
-		        XX.toId("rights")));
+		this.rights = new AllowAllStore(new MemoryNoAccessRightsNoBatchNoAsyncStore(XX
+		        .toId("rights")));
 		this.groupModelWrapper = new GroupModelWrapper(this.rights, XX.toId("actors"));
 		
 	}

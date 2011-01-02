@@ -336,9 +336,4 @@ abstract public class AbstractSynchronizeTest {
 		
 	}
 	
-	@Test
-	public void testSynchronizeMissingRevisions() {
-		// TODO implement
-	}
-	
 }

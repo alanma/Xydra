@@ -1,13 +1,18 @@
-package org.xydra.server.impl.newgae.changes;
+package org.xydra.store.impl.gae.changes;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XField;
+import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XType;
-import org.xydra.server.impl.newgae.GaeUtils;
+import org.xydra.store.impl.gae.GaeUtils;
 
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.sun.org.apache.xpath.internal.objects.XObject;
 
 
@@ -41,6 +46,31 @@ public class InternalGaeXEntity {
 		        || modelOrObjectOrFieldAddr.getAddressedType() == XType.XOBJECT
 		        || modelOrObjectOrFieldAddr.getAddressedType() == XType.XFIELD;
 		GaeUtils.deleteEntity(KeyStructure.createEntityKey(modelOrObjectOrFieldAddr));
+	}
+	
+	public static Set<XID> findChildren(XAddress address) {
+		Set<XID> childIds = new HashSet<XID>();
+		Query q = new Query(address.getAddressedType().getChildType().toString()).addFilter(
+		        PROP_PARENT, FilterOperator.EQUAL, address.toURI()).setKeysOnly();
+		for(Entity e : GaeUtils.prepareQuery(q).asIterable()) {
+			XAddress childAddr = KeyStructure.toAddress(e.getKey());
+			assert address.equals(childAddr.getParent());
+			childIds.add(getEntityId(childAddr));
+		}
+		return childIds;
+	}
+	
+	private static XID getEntityId(XAddress address) {
+		if(address.getField() != null) {
+			return address.getField();
+		}
+		if(address.getObject() != null) {
+			return address.getObject();
+		}
+		if(address.getModel() != null) {
+			return address.getModel();
+		}
+		return address.getRepository();
 	}
 	
 }

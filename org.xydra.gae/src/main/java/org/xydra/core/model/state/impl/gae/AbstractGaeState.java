@@ -5,7 +5,7 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.state.XStateTransaction;
 import org.xydra.core.model.state.impl.memory.AbstractState;
 import org.xydra.server.impl.gae.OldGaeUtils;
-import org.xydra.server.impl.newgae.GaeUtils;
+import org.xydra.store.impl.gae.GaeUtils;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;

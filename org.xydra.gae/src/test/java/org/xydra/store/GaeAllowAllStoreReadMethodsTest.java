@@ -10,20 +10,21 @@ import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommandFactory;
 import org.xydra.core.model.XID;
-import org.xydra.store.impl.memory.MemoryNoAccessRightsNoBatchNoAsyncStore;
+import org.xydra.store.impl.gae.GaeXydraStore;
 import org.xydra.store.impl.memory.SynchronousNoAccessRightsStore;
 import org.xydra.store.test.AbstractAllowAllStoreReadMethodsTest;
 import org.xydra.store.test.SynchronousTestCallback;
 
 
-public class MemoryAllowAllStoreReadMethodsTest extends AbstractAllowAllStoreReadMethodsTest {
+public class GaeAllowAllStoreReadMethodsTest extends AbstractAllowAllStoreReadMethodsTest {
+	
 	private XID repositoryID = XX.createUniqueID();
 	
 	@Override
 	protected XydraStore getStore() {
 		if(this.store == null) {
-			this.store = getNewStore(new SynchronousNoAccessRightsStore(
-			        new MemoryNoAccessRightsNoBatchNoAsyncStore(this.repositoryID)));
+			this.store = getNewStore(new SynchronousNoAccessRightsStore(new GaeXydraStore(
+			        this.repositoryID)));
 		}
 		
 		return this.store;
@@ -39,9 +40,6 @@ public class MemoryAllowAllStoreReadMethodsTest extends AbstractAllowAllStoreRea
 	 */
 	@Test
 	public void testGetRepositoryID() {
-		// TODO move this to an abstrac test so it can be used for other
-		// implementations
-		
 		XID correctUser = this.getCorrectUser();
 		String correctUserPass = this.getCorrectUserPasswordHash();
 		

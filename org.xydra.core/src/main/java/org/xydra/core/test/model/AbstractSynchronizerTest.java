@@ -781,4 +781,5 @@ abstract public class AbstractSynchronizerTest {
 		assertFalse(localEvents.hasNext());
 		
 	}
+	
 }

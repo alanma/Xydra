@@ -12,8 +12,8 @@ import org.xydra.core.access.XGroupListener;
 import org.xydra.core.access.impl.memory.MemoryGroupDatabase;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.model.XID;
-import org.xydra.server.impl.newgae.GaeTestfixer;
-import org.xydra.server.impl.newgae.GaeUtils;
+import org.xydra.store.impl.gae.GaeTestfixer;
+import org.xydra.store.impl.gae.GaeUtils;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.xydra.server.impl.newgae.changes;
+package org.xydra.store.impl.gae.changes;
 
 import java.util.Set;
 
@@ -13,7 +13,7 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XType;
 import org.xydra.core.value.XValue;
-import org.xydra.server.impl.newgae.GaeUtils;
+import org.xydra.store.impl.gae.GaeUtils;
 
 import com.google.appengine.api.datastore.Entity;
 

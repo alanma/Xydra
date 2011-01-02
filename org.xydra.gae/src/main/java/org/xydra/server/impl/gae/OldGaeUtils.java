@@ -2,7 +2,7 @@ package org.xydra.server.impl.gae;
 
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
-import org.xydra.server.impl.newgae.GaeTestfixer;
+import org.xydra.store.impl.gae.GaeTestfixer;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;

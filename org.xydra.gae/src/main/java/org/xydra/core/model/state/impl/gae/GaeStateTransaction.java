@@ -4,7 +4,7 @@
 package org.xydra.core.model.state.impl.gae;
 
 import org.xydra.core.model.state.XStateTransaction;
-import org.xydra.server.impl.newgae.GaeUtils;
+import org.xydra.store.impl.gae.GaeUtils;
 
 import com.google.appengine.api.datastore.Transaction;
 

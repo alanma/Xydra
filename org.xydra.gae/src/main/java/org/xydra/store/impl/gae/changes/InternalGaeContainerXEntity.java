@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.xydra.server.impl.newgae.changes;
+package org.xydra.store.impl.gae.changes;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,11 +14,9 @@ import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XType;
-import org.xydra.server.impl.newgae.GaeUtils;
+import org.xydra.store.impl.gae.GaeUtils;
 
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.FilterOperator;
 
 
 /**
@@ -103,18 +101,10 @@ abstract class InternalGaeContainerXEntity<C> extends InternalGaeXEntity {
 			
 			assert GaeChangesService.canWrite(this.addr, this.locks);
 			
-			this.cachedIds = new HashSet<XID>();
-			Query q = new Query(this.addr.getAddressedType().getChildType().toString()).addFilter(
-			        PROP_PARENT, FilterOperator.EQUAL, this.addr.toURI()).setKeysOnly();
-			for(Entity e : GaeUtils.prepareQuery(q).asIterable()) {
-				XAddress childAddr = KeyStructure.toAddress(e.getKey());
-				this.cachedIds.add(getChildId(childAddr));
-			}
+			this.cachedIds = findChildren(this.addr);
 		}
 		return this.cachedIds.iterator();
 	}
-	
-	abstract protected XID getChildId(XAddress childAddr);
 	
 	protected Set<XAddress> getLocks() {
 		return this.locks;

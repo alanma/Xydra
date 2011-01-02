@@ -1,4 +1,4 @@
-package org.xydra.server.impl.newgae;
+package org.xydra.store.impl.gae;
 
 import java.util.ConcurrentModificationException;
 

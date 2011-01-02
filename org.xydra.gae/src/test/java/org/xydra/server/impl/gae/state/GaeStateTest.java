@@ -7,7 +7,7 @@ import org.junit.Test;
 import org.xydra.core.model.state.XSPI;
 import org.xydra.core.model.state.impl.gae.GaeStateStore;
 import org.xydra.core.test.model.state.AbstractStateTest;
-import org.xydra.server.impl.newgae.GaeTestfixer;
+import org.xydra.store.impl.gae.GaeTestfixer;
 
 
 public class GaeStateTest extends AbstractStateTest {

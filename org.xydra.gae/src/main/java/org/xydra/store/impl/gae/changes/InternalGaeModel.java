@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.xydra.server.impl.newgae.changes;
+package org.xydra.store.impl.gae.changes;
 
 import java.util.Set;
 
@@ -13,7 +13,7 @@ import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XType;
-import org.xydra.server.impl.newgae.GaeUtils;
+import org.xydra.store.impl.gae.GaeUtils;
 
 import com.google.appengine.api.datastore.Entity;
 
@@ -56,12 +56,6 @@ public class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObj
 		return XX.resolveObject(addr, childId);
 	}
 	
-	@Override
-	protected XID getChildId(XAddress childAddr) {
-		assert childAddr.getAddressedType() == XType.XOBJECT;
-		return childAddr.getObject();
-	}
-	
 	/**
 	 * Get a read-only interface to an {@link XModel} in the GAE datastore.
 	 * 
@@ -79,8 +73,8 @@ public class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObj
 	        Set<XAddress> locks) {
 		
 		assert GaeChangesService.canRead(changesService.getBaseAddress(), locks);
-		Entity e = GaeUtils.getEntity(KeyStructure.createEntityKey(changesService
-		        .getBaseAddress()));
+		Entity e = GaeUtils
+		        .getEntity(KeyStructure.createEntityKey(changesService.getBaseAddress()));
 		if(e == null) {
 			return null;
 		}

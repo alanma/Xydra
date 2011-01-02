@@ -1,4 +1,4 @@
-package org.xydra.server.impl.newgae.changes;
+package org.xydra.store.impl.gae.changes;
 
 import org.xydra.store.InternalStoreException;
 

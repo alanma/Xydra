@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.xydra.server.impl.newgae.changes;
+package org.xydra.store.impl.gae.changes;
 
 import java.util.HashSet;
 import java.util.Iterator;

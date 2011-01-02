@@ -4,5 +4,5 @@
  * 
  * See {@link GaeChangesService}.
  */
-package org.xydra.server.impl.newgae.changes;
+package org.xydra.store.impl.gae.changes;
 

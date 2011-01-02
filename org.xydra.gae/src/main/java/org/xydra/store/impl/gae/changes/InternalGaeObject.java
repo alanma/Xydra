@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.xydra.server.impl.newgae.changes;
+package org.xydra.store.impl.gae.changes;
 
 import java.util.ConcurrentModificationException;
 import java.util.Set;
@@ -15,7 +15,7 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.XType;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.server.impl.newgae.GaeUtils;
+import org.xydra.store.impl.gae.GaeUtils;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -124,12 +124,6 @@ public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeFi
 	@Override
 	protected XAddress resolveChild(XAddress addr, XID childId) {
 		return XX.resolveField(addr, childId);
-	}
-	
-	@Override
-	protected XID getChildId(XAddress childAddr) {
-		assert childAddr.getAddressedType() == XType.XFIELD;
-		return childAddr.getField();
 	}
 	
 	/**
