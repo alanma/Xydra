@@ -7,6 +7,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import org.junit.After;
@@ -27,6 +29,7 @@ import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
+import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
@@ -45,6 +48,7 @@ import org.xydra.core.test.TestLogger;
 import org.xydra.core.value.XV;
 import org.xydra.core.value.XValue;
 import org.xydra.store.BatchedResult;
+import org.xydra.store.GetEventsRequest;
 import org.xydra.store.XydraStore;
 import org.xydra.store.test.SynchronousTestCallback;
 
@@ -181,6 +185,8 @@ abstract public class AbstractSynchronizerTest {
 		assertEquals(finalRev, this.model.getRevisionNumber());
 		assertEquals(finalRev, this.model.getSynchronizedRevision());
 		
+		checkEvents(this.model);
+		
 	}
 	
 	@Test
@@ -231,6 +237,8 @@ abstract public class AbstractSynchronizerTest {
 		// check that the correct events were sent
 		AbstractSynchronizeTest.replaySyncEvents(modelCopy, events);
 		assertTrue(XCompareUtils.equalTree(modelCopy, this.model));
+		
+		checkEvents(this.model);
 		
 	}
 	
@@ -366,6 +374,8 @@ abstract public class AbstractSynchronizerTest {
 		assertEquals(XCommand.FAILED, tlc1.waitForResult());
 		assertEquals(XCommand.FAILED, tlc2.waitForResult());
 		
+		checkEvents(this.model);
+		
 	}
 	
 	@Test
@@ -397,6 +407,8 @@ abstract public class AbstractSynchronizerTest {
 			assertEquals(modelRev, model.getSynchronizedRevision());
 			assertFalse(hc1.eventsReceived);
 			
+			checkEvents(model);
+			
 			// check that the local model still works
 			model.createObject(XX.toId("jane"));
 			
@@ -411,6 +423,8 @@ abstract public class AbstractSynchronizerTest {
 			assertEquals(modelRev, model.getRevisionNumber());
 			assertEquals(modelRev, model.getSynchronizedRevision());
 			assertFalse(hc1.eventsReceived);
+			
+			checkEvents(model);
 			
 			// check that local model is removed
 			try {
@@ -435,6 +449,8 @@ abstract public class AbstractSynchronizerTest {
 			assertTrue(XCompareUtils.equalTree(model, testModel));
 			assertEquals(model.getRevisionNumber(), model.getSynchronizedRevision());
 			assertFalse(hc2.eventsReceived);
+			
+			checkEvents(model);
 			
 			// check that the local model still works
 			model.createObject(XX.toId("jane"));
@@ -466,6 +482,7 @@ abstract public class AbstractSynchronizerTest {
 			long modelRev = model.getRevisionNumber();
 			HasChanged hc3 = HasChanged.listen(model);
 			HasChanged hc4 = HasChanged.listen(modelCopy);
+			checkEvents(model);
 			
 			removeModel(NEWMODEL_ID);
 			assertNull(loadModelSnapshot(NEWMODEL_ID));
@@ -479,6 +496,7 @@ abstract public class AbstractSynchronizerTest {
 			assertEquals(modelRev + 1, model.getSynchronizedRevision());
 			assertTrue(hc1.eventsReceived);
 			assertTrue(hc3.eventsReceived);
+			checkEvents(model);
 			try {
 				model.createObject(XX.toId("jane"));
 				fail();
@@ -492,6 +510,7 @@ abstract public class AbstractSynchronizerTest {
 			assertEquals(modelRev + 1, modelCopy.getRevisionNumber());
 			assertEquals(modelRev + 1, modelCopy.getSynchronizedRevision());
 			assertTrue(hc4.eventsReceived);
+			checkEvents(modelCopy);
 			try {
 				modelCopy.createObject(XX.toId("jane"));
 				fail();
@@ -512,6 +531,7 @@ abstract public class AbstractSynchronizerTest {
 			assertTrue(repo.hasModel(NEWMODEL_ID));
 			assertTrue(hc2.eventsReceived);
 			assertTrue(hc3.eventsReceived);
+			checkEvents(model);
 			// test that the model is not removed
 			model.createObject(XX.toId("jane"));
 			
@@ -519,6 +539,7 @@ abstract public class AbstractSynchronizerTest {
 			hc4.eventsReceived = false;
 			synchronize(sync2);
 			assertTrue(hc4.eventsReceived);
+			checkEvents(modelCopy);
 			// test that the model is not removed
 			modelCopy.createObject(XX.toId("jane"));
 			
@@ -546,6 +567,7 @@ abstract public class AbstractSynchronizerTest {
 			long modelRev = model.getRevisionNumber();
 			HasChanged hc2 = HasChanged.listen(model);
 			HasChanged hc3 = HasChanged.listen(modelCopy);
+			checkEvents(model);
 			
 			removeModel(NEWMODEL_ID);
 			assertNull(loadModelSnapshot(NEWMODEL_ID));
@@ -567,6 +589,7 @@ abstract public class AbstractSynchronizerTest {
 			assertFalse(hc1.eventsReceived);
 			assertFalse(hc2.eventsReceived);
 			assertTrue(XCompareUtils.equalState(model, remoteModel));
+			checkEvents(model);
 			// test that the model is not removed
 			model.createObject(XX.toId("jane"));
 			
@@ -577,6 +600,7 @@ abstract public class AbstractSynchronizerTest {
 			assertEquals(modelRev + 2, modelCopy.getSynchronizedRevision());
 			assertFalse(hc3.eventsReceived);
 			assertTrue(XCompareUtils.equalState(modelCopy, remoteModel));
+			checkEvents(modelCopy);
 			// test that the model is not removed
 			modelCopy.createObject(XX.toId("jane"));
 			
@@ -607,6 +631,7 @@ abstract public class AbstractSynchronizerTest {
 			XBaseModel remoteModel = loadModelSnapshot(NEWMODEL_ID);
 			assertNotNull(remoteModel);
 			assertTrue(XCompareUtils.equalState(model, remoteModel));
+			checkEvents(model);
 			
 		} finally {
 			removeModel(NEWMODEL_ID);
@@ -733,4 +758,27 @@ abstract public class AbstractSynchronizerTest {
 		checkSyncCallback(sc);
 	}
 	
+	private void checkEvents(XModel model) {
+		
+		XChangeLog cl = model.getChangeLog();
+		
+		long startRev = cl.getFirstRevisionNumber();
+		Iterator<XEvent> localEvents = cl.getEventsBetween(startRev, Long.MAX_VALUE);
+		
+		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback;
+		callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
+		store.getEvents(actorId, passwordHash, new GetEventsRequest[] { new GetEventsRequest(model
+		        .getAddress(), startRev, Long.MAX_VALUE) }, callback);
+		XEvent[] result = waitForSuccessBatched(callback);
+		Iterator<XEvent> remoteEvents = Arrays.asList(result).iterator();
+		
+		while(remoteEvents.hasNext()) {
+			assertTrue(localEvents.hasNext());
+			XEvent remote = remoteEvents.next();
+			XEvent local = localEvents.next();
+			assertEquals(remote, local);
+		}
+		assertFalse(localEvents.hasNext());
+		
+	}
 }

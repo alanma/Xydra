@@ -23,6 +23,7 @@ import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.core.change.impl.memory.MemoryRepositoryEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
+import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
@@ -219,7 +220,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		assert !hasObject(objectId);
 		
 		boolean inTrans = this.eventQueue.transactionInProgess;
-		Orphans orphans = getOrphans();
+		Orphans orphans = this.eventQueue.orphans;
 		
 		if(!inTrans && orphans == null) {
 			beginStateTransaction();
@@ -234,6 +235,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 			assert getAddress().contains(objectState.getAddress());
 			object = new MemoryObject(this, this.eventQueue, objectState);
 		}
+		assert object.getModel() == this;
 		
 		this.state.addObjectState(object.getState());
 		this.loadedObjects.put(object.getID(), object);
@@ -272,7 +274,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		int since = this.eventQueue.getNextPosition();
 		enqueueObjectRemoveEvents(this.eventQueue.getActor(), object, makeTrans || inTrans, false);
 		
-		Orphans orphans = getOrphans();
+		Orphans orphans = this.eventQueue.orphans;
 		if(!inTrans && orphans == null) {
 			beginStateTransaction();
 		}
@@ -281,8 +283,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		this.loadedObjects.remove(object.getID());
 		this.state.removeObjectState(object.getID());
 		if(orphans != null) {
-			object.removeInternal(orphans);
-			orphans.objects.put(object.getID(), object);
+			object.removeInternal();
 		} else {
 			object.delete();
 		}
@@ -612,6 +613,25 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		this.state.delete(this.eventQueue.stateTransaction);
 		this.eventQueue.deleteLog();
 		this.loadedObjects.clear();
+		this.removed = true;
+	}
+	
+	/**
+	 * Removes all {@link XField XFields} of this MemoryObject from the
+	 * persistence layer and the MemoryObject itself.
+	 */
+	protected void removeInternal() {
+		// all fields are already loaded for creating events
+		
+		for(MemoryObject object : this.loadedObjects.values()) {
+			object.removeInternal();
+			this.state.removeObjectState(object.getID());
+		}
+		
+		this.state.setRevisionNumber(this.state.getRevisionNumber() + 1);
+		
+		this.loadedObjects.clear();
+		
 		this.removed = true;
 	}
 	

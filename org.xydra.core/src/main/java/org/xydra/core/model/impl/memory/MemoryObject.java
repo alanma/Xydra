@@ -188,25 +188,6 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	}
 	
 	/**
-	 * Removes all {@link XField XFields} of this MemoryObject from the
-	 * persistence layer and the MemoryObject itself.
-	 * 
-	 * @param orphans The collection to which the removed {@link XField XFields}
-	 *            are to be added to for server-client synchronization purposes
-	 */
-	protected void removeInternal(Orphans orphans) {
-		// all fields are already loaded for creating events
-		
-		for(MemoryField field : this.loadedFields.values()) {
-			field.getState().setValue(null);
-			orphans.fields.put(field.getAddress(), field);
-			this.state.removeFieldState(field.getID());
-		}
-		
-		this.loadedFields.clear();
-	}
-	
-	/**
 	 * Saves the current state information of this MemoryObject with the
 	 * currently used persistence layer
 	 */
@@ -290,7 +271,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		
 		assert !hasField(fieldId);
 		
-		Orphans orphans = getOrphans();
+		Orphans orphans = this.eventQueue.orphans;
 		boolean inTrans = this.eventQueue.transactionInProgess;
 		if(!inTrans && orphans == null) {
 			beginStateTransaction();
@@ -306,6 +287,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 			assert getAddress().contains(fieldState.getAddress());
 			field = new MemoryField(this, this.eventQueue, fieldState);
 		}
+		assert field.getObject() == this;
 		
 		this.state.addFieldState(field.getState());
 		this.loadedFields.put(field.getID(), field);
@@ -350,7 +332,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		assert field != null : "checked by caller";
 		
 		boolean inTrans = this.eventQueue.transactionInProgess;
-		Orphans orphans = getOrphans();
+		Orphans orphans = this.eventQueue.orphans;
 		if(!inTrans && orphans == null) {
 			beginStateTransaction();
 		}
@@ -611,12 +593,32 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		for(XID fieldId : this.loadedFields.keySet()) {
 			this.state.removeFieldState(fieldId);
 		}
-		this.state.delete(this.eventQueue.stateTransaction);
 		this.loadedFields.clear();
+		this.state.delete(this.eventQueue.stateTransaction);
 		if(this.father == null) {
 			this.eventQueue.deleteLog();
 		}
 		this.removed = true;
+	}
+	
+	/**
+	 * Removes all {@link XField XFields} of this MemoryObject from the
+	 * persistence layer and the MemoryObject itself.
+	 */
+	protected void removeInternal() {
+		// all fields are already loaded for creating events
+		
+		for(MemoryField field : this.loadedFields.values()) {
+			field.getState().setValue(null);
+			assert !this.eventQueue.orphans.fields.containsKey(field.getAddress());
+			this.eventQueue.orphans.fields.put(field.getAddress(), field);
+			this.state.removeFieldState(field.getID());
+		}
+		
+		this.loadedFields.clear();
+		
+		assert !this.eventQueue.orphans.objects.containsKey(getID());
+		this.eventQueue.orphans.objects.put(getID(), this);
 	}
 	
 	public long executeCommand(XCommand command) {

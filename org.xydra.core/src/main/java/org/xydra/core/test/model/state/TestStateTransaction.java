@@ -36,28 +36,28 @@ public class TestStateTransaction implements Serializable, XStateTransaction {
 		assert !this.committed : "double commit detected";
 		
 		for(TestState s : this.saved) {
-			assert s.saved : "unsaved changes to entity in transaction";
+			assert s.saved : "unsaved changes to entity in transaction" + s;
 			assert s.currentTrans == this;
 			s.currentTrans = null;
 			this.store.save(s);
 		}
 		
 		for(TestState s : this.deleted) {
-			assert s.saved : "unsaved changes to entity in transaction";
+			assert s.saved : "unsaved changes to entity in transaction" + s;
 			assert s.currentTrans == this;
 			s.currentTrans = null;
 			this.store.delete(s);
 		}
 		
 		for(TestChangeLogState s : this.savedLogs) {
-			assert s.saved : "unsaved changes to entity in transaction";
+			assert s.saved : "unsaved changes to entity in transaction" + s;
 			assert s.currentTrans == this;
 			s.currentTrans = null;
 			this.store.save(s);
 		}
 		
 		for(TestChangeLogState s : this.deletedLogs) {
-			assert s.saved : "unsaved changes to entity in transaction";
+			assert s.saved : "unsaved changes to entity in transaction" + s;
 			assert s.currentTrans == this;
 			s.currentTrans = null;
 			this.store.delete(s);

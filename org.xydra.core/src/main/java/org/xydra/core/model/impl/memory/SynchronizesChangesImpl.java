@@ -34,7 +34,6 @@ import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XExecutesCommands;
-import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XLocalChange;
 import org.xydra.core.model.XLocalChangeCallback;
@@ -281,15 +280,6 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 		return this.eventQueue.getChangeLog();
 	}
 	
-	/**
-	 * Returns a collection containing the {@link XField XFields} and
-	 * {@link XObject XObjects} that are (temporarily) removed while
-	 * synchronizing.
-	 */
-	protected Orphans getOrphans() {
-		return this.eventQueue.orphans;
-	}
-	
 	public void rollback(long revision) {
 		
 		checkSync();
@@ -398,7 +388,6 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 				assert getModel().isEmpty();
 				this.removed = true;
 			}
-			// TODO reflect this change in the repository if any
 			
 		} else if(event instanceof XModelEvent) {
 			// TODO allow applying XModelEvents on a model-less object
@@ -473,6 +462,13 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 	
 	private boolean replayEvent(XEvent event) {
 		
+		long oldModelRev = getModel() == null ? -1 : getModel().getRevisionNumber();
+		assert oldModelRev <= event.getOldModelRevision();
+		setRevisionNumberIfModel(event.getOldModelRevision());
+		// TODO adjust object and field revisions? this is needed for
+		// synchronizing parent-less
+		// objects and/or if there are missing events (access rights?)
+		
 		/*
 		 * FIXME the remote changes should be applied as the actor specified in
 		 * the event
@@ -480,16 +476,26 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 		XCommand replayCommand = XChanges.createReplayCommand(event);
 		long result = replayCommand(replayCommand);
 		if(result < 0) {
+			setRevisionNumberIfModel(oldModelRev);
+			saveIfModel();
 			return false;
 		}
+		assert event.equals(getChangeLog().getEventAt(result));
 		assert getModel() == null ? getObject().getRevisionNumber() == event.getRevisionNumber()
 		        : getModel().getRevisionNumber() == event.getRevisionNumber();
 		assert getCurrentRevisionNumber() == event.getRevisionNumber();
+		
+		assert event.getChangedEntity().getObject() == null
+		        || getObject(event.getChangedEntity().getObject()) == null
+		        || getObject(event.getChangedEntity().getObject()).getRevisionNumber() == event
+		                .getRevisionNumber();
 		
 		return true;
 	}
 	
 	private long replayCommand(XCommand command) {
+		
+		assert !this.eventQueue.transactionInProgess;
 		
 		if(command instanceof XRepositoryCommand) {
 			if(getAddress().getAddressedType() != XType.XMODEL) {
@@ -555,7 +561,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 					        since);
 				}
 				
-				getModel().delete();
+				getModel().removeInternal();
 				
 			} else {
 				throw new AssertionError("unknown command type: " + rc);
@@ -576,6 +582,8 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 		boolean removedChanged;
 		
 		synchronized(this.eventQueue) {
+			
+			assert !this.eventQueue.transactionInProgess;
 			
 			boolean oldRemoved = this.removed;
 			
@@ -670,7 +678,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 				}
 			}
 			
-			// remove faild / nochange commands
+			// remove failed / nochange commands
 			// IMPROVE this is O(nLocalChanges^2) worst case
 			for(int i = results.length - 1; i >= 0; i--) {
 				if(results[i] < 0) {

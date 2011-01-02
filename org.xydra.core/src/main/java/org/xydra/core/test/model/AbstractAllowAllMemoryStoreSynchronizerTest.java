@@ -22,7 +22,7 @@ abstract public class AbstractAllowAllMemoryStoreSynchronizerTest extends
 	
 	@BeforeClass
 	public static void init() {
-		simpleStore = new MemoryNoAccessRightsNoBatchNoAsyncStore(XX.toId("remote"));
+		simpleStore = new MemoryNoAccessRightsNoBatchNoAsyncStore(XX.toId("repo"));
 		AbstractAllowAllStoreSynchronizerTest.init();
 	}
 	
