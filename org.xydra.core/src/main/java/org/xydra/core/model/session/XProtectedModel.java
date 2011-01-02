@@ -11,11 +11,14 @@ import org.xydra.core.change.XModelEvent;
 import org.xydra.core.change.XModelEventListener;
 import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.change.XTransactionEventListener;
+import org.xydra.core.model.IHasChangeLog;
+import org.xydra.core.model.XExecutesCommands;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XLoggedModel;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
+import org.xydra.core.model.XWritableModel;
 import org.xydra.store.AccessException;
 
 
@@ -33,7 +36,8 @@ import org.xydra.store.AccessException;
  * @author dscharrer
  * 
  */
-public interface XProtectedModel extends XLoggedModel, XProtectedSynchronizesChanges {
+public interface XProtectedModel extends XLoggedModel, XWritableModel, IHasChangeLog,
+        XExecutesCommands {
 	
 	/**
 	 * Returns the {@link XObject} contained in this model with the given

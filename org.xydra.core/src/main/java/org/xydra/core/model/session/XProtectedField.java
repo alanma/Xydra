@@ -8,6 +8,7 @@ import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XLoggedField;
+import org.xydra.core.model.XWritableField;
 import org.xydra.core.value.XValue;
 import org.xydra.store.AccessException;
 
@@ -26,7 +27,7 @@ import org.xydra.store.AccessException;
  * @author dscharrer
  * 
  */
-public interface XProtectedField extends XLoggedField {
+public interface XProtectedField extends XLoggedField, XWritableField {
 	
 	/**
 	 * Sets the {@link XValue} of this field to the given value.
@@ -35,9 +36,9 @@ public interface XProtectedField extends XLoggedField {
 	 * remove the current {@link XValue})
 	 * 
 	 * @param value The new {@link XValue}
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (write access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (write access) to execute this
+	 *             method
 	 * 
 	 */
 	@ModificationOperation
@@ -58,38 +59,38 @@ public interface XProtectedField extends XLoggedField {
 	 *         {@link XCommand#NOCHANGE} if the {@link XCommand} didn't change
 	 *         anything or the revision number of the {@link XEvent} caused by
 	 *         the {@link XCommand}.
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (write access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (write access) to execute this
+	 *             method
 	 */
 	@ModificationOperation
 	long executeFieldCommand(XFieldCommand command);
 	
 	/**
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (read access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (read access) to execute this
+	 *             method
 	 */
 	long getRevisionNumber();
 	
 	/**
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (read access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (read access) to execute this
+	 *             method
 	 */
 	XValue getValue();
 	
 	/**
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (read access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (read access) to execute this
+	 *             method
 	 */
 	boolean isEmpty();
 	
 	/**
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (read access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (read access) to execute this
+	 *             method
 	 */
 	boolean addListenerForFieldEvents(XFieldEventListener changeListener);
 	

@@ -12,6 +12,7 @@ import org.xydra.core.change.XSendsRepositoryEvents;
 import org.xydra.core.change.XSendsTransactionEvents;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseRepository;
+import org.xydra.core.model.XExecutesCommands;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
@@ -34,7 +35,7 @@ import org.xydra.store.AccessException;
  */
 public interface XProtectedRepository extends XBaseRepository, XSendsRepositoryEvents,
         XSendsModelEvent, XSendsObjectEvents, XSendsFieldEvents, XSendsTransactionEvents,
-        XProtectedExecutesCommands {
+        XExecutesCommands {
 	
 	/**
 	 * Returns the {@link XModel} contained in this repository with the given
@@ -46,9 +47,9 @@ public interface XProtectedRepository extends XBaseRepository, XSendsRepositoryE
 	 *         {@link XProtectedModel} linked with the actor of this
 	 *         XProtectedRepository or null if no such {@link XBaseModel} exists
 	 *         in this repository
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (read access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (read access) to execute this
+	 *             method
 	 */
 	@ReadOperation
 	XProtectedModel getModel(XID id);
@@ -63,9 +64,9 @@ public interface XProtectedRepository extends XBaseRepository, XSendsRepositoryE
 	 *         {@link XModel} if the given {@link XID} was already taken (both
 	 *         as an {@link XProtected} linked with the actor of this
 	 *         XProtectedObject)
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (write access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (write access) to execute this
+	 *             method
 	 */
 	@ModificationOperation
 	XProtectedModel createModel(XID id);
@@ -102,9 +103,9 @@ public interface XProtectedRepository extends XBaseRepository, XSendsRepositoryE
 	 *         or if executing the {@link XRepositoryCommand} succeeded the
 	 *         revision number of the {@link XRepositoryEvent} caused by the
 	 *         {@link XRepositoryCommand}.
-	 * @throws AccessException if the actor linked with this field does not
-	 *             have the necessary access rights (write access) to execute
-	 *             this method
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (write access) to execute this
+	 *             method
 	 */
 	@ModificationOperation
 	long executeRepositoryCommand(XRepositoryCommand command);
