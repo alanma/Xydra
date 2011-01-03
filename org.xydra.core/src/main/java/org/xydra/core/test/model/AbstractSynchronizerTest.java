@@ -729,7 +729,7 @@ abstract public class AbstractSynchronizerTest {
 		assertEquals(1, results.length);
 		BatchedResult<T> result = results[0];
 		assertNotNull(result);
-		assertNull(result.getException());
+		assertNull(result.toString(), result.getException());
 		return result.getResult();
 	}
 	

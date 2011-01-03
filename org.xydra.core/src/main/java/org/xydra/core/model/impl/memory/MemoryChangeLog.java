@@ -34,18 +34,15 @@ public class MemoryChangeLog extends AbstractChangeLog implements XChangeLog {
 	 * @param event the {@link XEvent} which is to be appended
 	 */
 	protected void appendEvent(XEvent event, XStateTransaction transaction) {
-		assert this.state.getBaseAddress().getObject() != null || event != null : "cannot add null events to model change log";
 		// TODO
-		if(!(event == null || this.state.getBaseAddress().getObject() != null || (event
-		        .getOldModelRevision() == getCurrentRevisionNumber()))) {
-			assert false : "cannot append event with old rev " + event.getOldModelRevision()
-			        + " to model change log at event " + getCurrentRevisionNumber() + ": " + event;
-		}
+		assert event == null || (event.getRevisionNumber() == getCurrentRevisionNumber() + 1) : "cannot append event with rev "
+		        + event.getRevisionNumber()
+		        + " to model change log at event "
+		        + getCurrentRevisionNumber() + ": " + event;
 		
 		assert event == null || !event.inTransaction();
 		// "else": event is part of a transaction and will therefore only be
-		// recorded as part of the transaction (by using a
-		// ChangeLogTransactionListener)
+		// recorded as part of the transaction
 		
 		this.state.appendEvent(event, transaction);
 	}

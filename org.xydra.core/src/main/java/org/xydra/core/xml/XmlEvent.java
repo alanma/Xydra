@@ -449,7 +449,8 @@ public class XmlEvent {
 		XID modelId = address.getModel();
 		
 		if(type == ChangeType.ADD) {
-			return MemoryRepositoryEvent.createAddEvent(actor, target, modelId);
+			return MemoryRepositoryEvent.createAddEvent(actor, target, modelId, modelRev,
+			        inTransaction);
 		} else if(type == ChangeType.REMOVE) {
 			return MemoryRepositoryEvent.createRemoveEvent(actor, target, modelId, modelRev,
 			        inTransaction);

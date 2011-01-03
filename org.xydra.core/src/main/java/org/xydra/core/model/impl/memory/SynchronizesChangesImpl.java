@@ -462,6 +462,10 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 	
 	private boolean replayEvent(XEvent event) {
 		
+		while(getChangeLog().getCurrentRevisionNumber() < event.getOldModelRevision()) {
+			this.eventQueue.logNullEvent();
+		}
+		
 		long oldModelRev = getModel() == null ? -1 : getModel().getRevisionNumber();
 		assert oldModelRev <= event.getOldModelRevision();
 		setRevisionNumberIfModel(event.getOldModelRevision());
