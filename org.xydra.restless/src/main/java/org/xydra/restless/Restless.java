@@ -82,7 +82,7 @@ public class Restless extends HttpServlet {
 	public static final String XHTML_NS = "xmlns=\"http://www.w3.org/1999/xhtml\"";
 	public static final String XML_DECLARATION = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	
-	private static Logger log = LoggerFactory.getLogger(Restless.class);
+	private static Logger log;
 	
 	private static final long serialVersionUID = -1906300614203565189L;
 	
@@ -491,6 +491,7 @@ public class Restless extends HttpServlet {
 			}
 		}
 		
+		log = LoggerFactory.getLogger(Restless.class);
 		log.info("Restless init. Using loggerFactory '" + this.loggerFactory + "'...");
 		
 		/** provide servletContext object for other parts of the application */
@@ -559,9 +560,10 @@ public class Restless extends HttpServlet {
 							        + ".restless(Restless,String prefix)' failed", e);
 						}
 					} catch(NoSuchMethodException e) {
-						log.warn("Class '"
-						        + this.apps
-						        + "' has no restless( Restless restless, String prefix ) method. Relying on static initializer.");
+						log
+						        .warn("Class '"
+						                + this.apps
+						                + "' has no restless( Restless restless, String prefix ) method. Relying on static initializer.");
 						log.debug("Configured with " + clazz.getName());
 					}
 				} catch(IllegalArgumentException e) {
@@ -671,15 +673,16 @@ public class Restless extends HttpServlet {
 					res.sendError(403, "Forbidden. Admin parts must be accessed via /admin.");
 				}
 			} else {
-				res.sendError(
-				        404,
-				        "No handler matched your "
-				                + req.getMethod()
-				                + "-request path '"
-				                + path
-				                + "'. "
-				                + (foundPath ? "Found at least a path mapping (wrong HTTP method or missing parameters)."
-				                        : "Found not even a path mapping."));
+				res
+				        .sendError(
+				                404,
+				                "No handler matched your "
+				                        + req.getMethod()
+				                        + "-request path '"
+				                        + path
+				                        + "'. "
+				                        + (foundPath ? "Found at least a path mapping (wrong HTTP method or missing parameters)."
+				                                : "Found not even a path mapping."));
 			}
 			
 		} catch(IOException e) {
