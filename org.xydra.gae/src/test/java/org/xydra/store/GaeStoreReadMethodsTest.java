@@ -8,6 +8,7 @@ import org.xydra.core.XX;
 import org.xydra.core.change.XCommandFactory;
 import org.xydra.core.model.XID;
 import org.xydra.store.access.GroupModelWrapper;
+import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.impl.gae.GaeXydraStore;
 import org.xydra.store.impl.memory.MemoryStore;
 import org.xydra.store.test.AbstractStoreReadMethodsTest;
@@ -20,6 +21,7 @@ public class GaeStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 	@Override
 	protected XydraStore getStore() {
 		if(this.store != null) {
+			GaeTestfixer.enable();
 			return this.store;
 		}
 		
