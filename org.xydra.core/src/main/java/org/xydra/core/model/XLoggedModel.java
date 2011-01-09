@@ -12,10 +12,14 @@ import org.xydra.core.change.XSendsTransactionEvents;
  * A logged model that at least supports read operations and sends
  * {@link XEvent XEvents} if something is changed.
  * 
- * @author dscharrer
+ * <h4>Design note</h4> Support for read operations would be enough, but this
+ * leads to a problem with polymorphic methods in Java. Given interface B1 with
+ * method B2 foo() and interface C1 with method C2 foo() can not be implemented
+ * in Java with class A1 and method A2 foo() where A2 implements B2 and C2.
  * 
+ * @author dscharrer
  */
-public interface XLoggedModel extends XBaseModel, XSendsModelEvent, XSendsObjectEvents,
+public interface XLoggedModel extends XWritableModel, XSendsModelEvent, XSendsObjectEvents,
         XSendsFieldEvents, XSendsTransactionEvents, IHasChangeLog {
 	
 	/**
