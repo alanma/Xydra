@@ -36,6 +36,12 @@ public class GaeXydraServer implements IXydraServer {
 	private XAccessManagerWithListeners accessManager;
 	
 	public GaeXydraServer() {
+		/* switch on test fix mode if run from local POM */
+		String gaetestfix = System.getProperty("gaetestfix");
+		if(gaetestfix != null && gaetestfix.equalsIgnoreCase("true")) {
+			GaeTestfixer.enable();
+		}
+		
 		// To enable local JUnit testing with multiple threads
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		
