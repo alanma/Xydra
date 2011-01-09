@@ -15,8 +15,6 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.index.XI;
 
-import com.sun.org.apache.xpath.internal.objects.XObject;
-
 
 /**
  * Implementation of the {@XTransaction} interface.
