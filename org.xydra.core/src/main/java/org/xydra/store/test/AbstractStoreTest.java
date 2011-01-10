@@ -2,6 +2,7 @@ package org.xydra.store.test;
 
 import org.xydra.core.change.XCommandFactory;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XRepository;
 import org.xydra.core.test.TestLogger;
 import org.xydra.store.XydraStore;
 
@@ -9,6 +10,10 @@ import org.xydra.store.XydraStore;
 /**
  * An abstract test capsuling the methods that are the same for read- and
  * write-tests
+ * 
+ * All methods need to be implemented as described in their comments. Not
+ * adhering to this guidelines might result in failing tests, even though the
+ * code which is to be tested might be correct.
  * 
  * @author Kaidel
  * 
@@ -116,8 +121,19 @@ public abstract class AbstractStoreTest {
 	 * 
 	 * Implementations of this abstract test need to override this to return the
 	 * specific quota of the XydraStore implementation which is to be tested.
+	 * Return a value less than zero if your implementation does not support
+	 * QuotaExceptions.
 	 */
 	abstract protected long getQuotaForBruteForce();
+	
+	/**
+	 * Returns the {@link XID} of the {@link XRepository} used by the
+	 * {@link XydraStore} returned by {@link #getStore()}.
+	 * 
+	 * @return the {@link XID} of the {@link XRepository} used by the
+	 *         {@link XydraStore} returned by {@link #getStore()}
+	 */
+	abstract protected XID getRepositoryId();
 	
 	/**
 	 * Method for checking whether a callback succeeded or not. Waits until the
