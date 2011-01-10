@@ -105,10 +105,6 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		
 		this.bfQuota = getQuotaForBruteForce();
 		
-		if(this.bfQuota <= 0) {
-			throw new IllegalArgumentException("Quota for Login attempts must be greater than 0!");
-		}
-		
 		// creating some models
 		XID modelID1 = XX.toId("TestModel1");
 		XID modelID2 = XX.toId("TestModel2");
@@ -236,18 +232,18 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		
 		this.store.checkLogin(this.incorrectUser, this.incorrectUserPass, callback);
 		
-		assertFalse(this.waitOnCallback(callback));
+		assertTrue(this.waitOnCallback(callback));
 		assertEquals(callback.getEffect(), false);
-		assertNotNull(callback.getException());
-		assertTrue(callback.getException() instanceof AuthorisationException);
+		assertNull(callback.getException());
 	}
 	
 	// Test for checking if the QuoateException works for checkLogin
 	@Test
 	public void testCheckLoginQuotaException() {
-		if(!this.incorrectActorExists) {
+		if(!this.incorrectActorExists || this.bfQuota < 0) {
 			// This test only makes sense if an incorrect actorID - passwordhash
-			// combination can be provided
+			// combination can be provided and QuotaExceptions are thrown by the
+			// implementation which is to be tested
 			return;
 		}
 		
@@ -448,9 +444,10 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	// Testing the quota exception
 	@Test
 	public void testGetModelSnapshotsQuotaExcpetion() {
-		if(!this.incorrectActorExists) {
+		if(!this.incorrectActorExists || this.bfQuota < 0) {
 			// This test only makes sense if an incorrect actorID - passwordhash
-			// combination can be provided
+			// combination can be provided and QuotaExceptions are thrown by the
+			// implementation which is to be tested
 			return;
 		}
 		
@@ -691,9 +688,10 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	
 	// Testing the quota exception
 	public void testGetModelRevisionsQuotaException() {
-		if(!this.incorrectActorExists) {
+		if(!this.incorrectActorExists || this.bfQuota < 0) {
 			// This test only makes sense if an incorrect actorID - passwordhash
-			// combination can be provided
+			// combination can be provided and QuotaExceptions are thrown by the
+			// implementation which is to be tested
 			return;
 		}
 		
@@ -908,9 +906,10 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	// Testing the quota exception
 	@Test
 	public void testGetObjectSnapshotsQuotaException() {
-		if(!this.incorrectActorExists) {
+		if(!this.incorrectActorExists || this.bfQuota < 0) {
 			// This test only makes sense if an incorrect actorID - passwordhash
-			// combination can be provided
+			// combination can be provided and QuotaExceptions are thrown by the
+			// implementation which is to be tested
 			return;
 		}
 		
@@ -1063,9 +1062,10 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	// Testing the quota exception
 	@Test
 	public void testGetModelIdsQuotaException() {
-		if(!this.incorrectActorExists) {
+		if(!this.incorrectActorExists || this.bfQuota < 0) {
 			// This test only makes sense if an incorrect actorID - passwordhash
-			// combination can be provided
+			// combination can be provided and QuotaExceptions are thrown by the
+			// implementation which is to be tested
 			return;
 		}
 		
@@ -1142,12 +1142,23 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	 */
 	
 	/*
-	 * Please note: getRepositoryIds functionality cannot be tested in an
-	 * abstracted way, since {@link XydraStore} does not force any way of how
-	 * its repository {@link XID} is to be set. You'll need to write your own,
-	 * implementation-specific, tests.
+	 * Test if it behaves correctly for a correct account + password combination
 	 */
-
+	@Test
+	public void testGetRepositoryId() {
+		XID correctUser = this.getCorrectUser();
+		String correctUserPass = this.getCorrectUserPasswordHash();
+		
+		SynchronousTestCallback<XID> callback = new SynchronousTestCallback<XID>();
+		
+		this.store.getRepositoryId(correctUser, correctUserPass, callback);
+		
+		assertTrue(waitOnCallback(callback));
+		assertNotNull(callback.getEffect());
+		assertEquals(callback.getEffect(), this.getRepositoryId());
+		assertNull(callback.getException());
+	}
+	
 	// Test if it behaves correctly for wrong account + password
 	// combinations
 	@Test
@@ -1171,9 +1182,10 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	// Testing the quota exception
 	@Test
 	public void testGetRepositoryIdQuotaException() {
-		if(!this.incorrectActorExists) {
+		if(!this.incorrectActorExists || this.bfQuota < 0) {
 			// This test only makes sense if an incorrect actorID - passwordhash
-			// combination can be provided
+			// combination can be provided and QuotaExceptions are thrown by the
+			// implementation which is to be tested
 			return;
 		}
 		
