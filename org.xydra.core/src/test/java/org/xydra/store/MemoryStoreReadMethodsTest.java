@@ -2,12 +2,13 @@ package org.xydra.store;
 
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Before;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommandFactory;
 import org.xydra.core.model.XID;
 import org.xydra.store.access.GroupModelWrapper;
+import org.xydra.store.access.XPasswordDatabase;
+import org.xydra.store.base.HashUtils;
 import org.xydra.store.impl.memory.MemoryStore;
 import org.xydra.store.test.AbstractStoreReadMethodsTest;
 
@@ -15,6 +16,7 @@ import org.xydra.store.test.AbstractStoreReadMethodsTest;
 public class MemoryStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 	
 	protected GroupModelWrapper gmw = null;
+	protected String correctPass = "Test";
 	
 	@Override
 	protected XydraStore getStore() {
@@ -41,12 +43,12 @@ public class MemoryStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 		if(this.gmw == null) {
 			this.gmw = ((MemoryStore)this.getStore()).getGroupModelWrapper();
 		}
+		XPasswordDatabase pwdbase = this.gmw;
 		
 		XID actorId = XX.createUniqueID();
 		
 		if(!this.gmw.isValidLogin(actorId, this.getCorrectUserPasswordHash())) {
-			this.gmw.addToGroup(actorId, XX.toId("TestGroup"));
-			this.gmw.setPasswordHash(actorId, this.getCorrectUserPasswordHash());
+			pwdbase.setPasswordHash(actorId, HashUtils.getXydraPasswordHash(this.correctPass));
 		}
 		assertTrue(this.gmw.isValidLogin(actorId, this.getCorrectUserPasswordHash()));
 		
@@ -55,36 +57,50 @@ public class MemoryStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 	
 	@Override
 	protected String getCorrectUserPasswordHash() {
-		return "Test";
+		return HashUtils.getXydraPasswordHash(this.correctPass);
 	}
 	
 	@Override
 	protected XID getIncorrectUser() {
-		// TODO Auto-generated method stub
-		return null;
+		/*
+		 * FIXME this whole method probably needs to be changed, after Max tells
+		 * me how to actually work with the access rights here. ~Bjoern
+		 */
+		if(this.gmw == null) {
+			this.gmw = ((MemoryStore)this.getStore()).getGroupModelWrapper();
+		}
+		XPasswordDatabase pwdbase = this.gmw;
+		
+		XID actorId = XX.createUniqueID();
+		
+		if(!this.gmw.isValidLogin(actorId, this.getCorrectUserPasswordHash())) {
+			pwdbase.setPasswordHash(actorId, HashUtils.getXydraPasswordHash("correct"));
+		}
+		assertTrue(this.gmw.isValidLogin(actorId, HashUtils.getXydraPasswordHash("correct")));
+		
+		return actorId;
 	}
 	
 	@Override
 	protected String getIncorrectUserPasswordHash() {
-		// TODO Auto-generated method stub
-		return null;
+		return HashUtils.getXydraPasswordHash("incorrect");
 	}
 	
 	@Override
 	protected long getQuotaForBruteForce() {
-		// TODO Auto-generated method stub
-		return 1;
+		/*
+		 * FIXME {@link MemoryStore} does not support QuotaExceptions at the
+		 * moment ~Bjoern
+		 */
+
+		return -1;
 	}
 	
 	@Override
-	@Before
-	public void setUp() {
-		if(this.setUpDone) {
-			return;
-		}
-		
-		super.setUp();
-		
+	protected XID getRepositoryId() {
+		return XX.toId("data");
+		// repositoryId as set in the standard constructor of {@link
+		// MemoryStore}
 	}
 	
 }
