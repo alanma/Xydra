@@ -29,6 +29,12 @@ import org.xydra.store.access.XGroupDatabase;
  * 
  * @author voelkel
  */
+
+/*
+ * FIXME MemoryStore currently does not throw QuotaExceptions as described by
+ * the XydraStore interface. ~Bjoern
+ */
+
 public class MemoryStore implements XydraStore {
 	
 	private final AllowAllStore data;
@@ -52,8 +58,8 @@ public class MemoryStore implements XydraStore {
 		// TODO why not store both data and rights in the same store instance,
 		// but with different repository IDs?
 		this.data = new AllowAllStore(new MemoryNoAccessRightsNoBatchNoAsyncStore(XX.toId("data")));
-		this.rights = new AllowAllStore(new MemoryNoAccessRightsNoBatchNoAsyncStore(XX
-		        .toId("rights")));
+		this.rights = new AllowAllStore(new MemoryNoAccessRightsNoBatchNoAsyncStore(
+		        XX.toId("rights")));
 		this.groupModelWrapper = new GroupModelWrapper(this.rights, XX.toId("actors"));
 		
 	}
