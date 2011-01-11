@@ -63,10 +63,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	
 	@Before
 	public void setUp() {
-		
-		if(this.setUpDone) {
-			return;
-			
+		if(!this.setUpDone) {
 			/*
 			 * This code segment guarantees that the following set-up code will
 			 * only be run once. This basically works like an @BeforeClass
@@ -78,6 +75,14 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			 * think of was/could find on the Internet were even uglier...
 			 * ~Bjoern
 			 */
+
+			/*
+			 * FIXME Does only running this once cause problems with methods
+			 * that look for QuotaExceptions and such? Would it be better to
+			 * reinitialize the store after every method?
+			 */
+
+			return;
 		}
 		
 		this.store = this.getStore();
@@ -114,16 +119,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		XID objectID2 = XX.toId("TestObject2");
 		XID objectID3 = XX.toId("TestObject3");
 		
-		// get the repository ID of the store
-		SynchronousTestCallback<XID> callback = new SynchronousTestCallback<XID>();
-		this.store.getRepositoryId(this.correctUser, this.correctUserPass, callback);
-		waitOnCallback(callback);
-		
-		if(callback.getEffect() == null) {
-			throw new RuntimeException(
-			        "getRepositoryID seems to not work correctly, rendering this test useless!");
-		}
-		XID repoID = callback.getEffect();
+		XID repoID = getRepositoryId();
 		
 		XCommand modelCommand1 = this.factory.createAddModelCommand(repoID, modelID1, true);
 		XCommand modelCommand2 = this.factory.createAddModelCommand(repoID, modelID2, true);
@@ -195,6 +191,20 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		this.notExistingObject = XX.toAddress(repoID, modelID1, XX.toId("TestObjectDoesntExist"),
 		        null);
 		
+		if(!this.setUpDone) {
+			/*
+			 * This code segment guarantees that the following set-up code will
+			 * only be run once. This basically works like an @BeforeClass
+			 * method and it not really the most beautiful solution, but
+			 * unfortunately we cannot actually use a @BeforeClass method here,
+			 * because this is an abstract test and we need to call abstract
+			 * methods... but abstract methods cannot be static. There might be
+			 * some other kind of workout around this problem, but all I could
+			 * think of was/could find on the Internet were even uglier...
+			 * ~Bjoern
+			 */
+		}
+		
 		this.setUpDone = true;
 	}
 	
@@ -261,7 +271,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		// should now return a QuotaException, since we exceeded the quota
 		// for failed login attempts by at least 5
 		assertFalse(this.waitOnCallback(callback));
-		assertEquals(callback.getEffect(), false);
+		assertNull(callback.getEffect());
 		assertNotNull(callback.getException());
 		assertTrue(callback.getException() instanceof QuotaException);
 		
@@ -687,6 +697,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	}
 	
 	// Testing the quota exception
+	@Test
 	public void testGetModelRevisionsQuotaException() {
 		if(!this.incorrectActorExists || this.bfQuota < 0) {
 			// This test only makes sense if an incorrect actorID - passwordhash
@@ -716,6 +727,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	}
 	
 	// Test IllegalArgumentException
+	@Test
 	public void testGetModelRevisionPassingNull() {
 		SynchronousTestCallback<BatchedResult<Long>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		
