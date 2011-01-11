@@ -141,10 +141,10 @@ public class GroupModelWrapper implements XGroupDatabase, XPasswordDatabase {
 	 * @param modelId
 	 */
 	public GroupModelWrapper(XydraStore store, XID modelId) {
-		XWritableRepository repo = new WritableRepository(this.credentials, store);
-		this.dataModel = repo.createModel(modelId);
-		this.indexModel = repo.createModel(XX.toId(modelId + "-index-by-actor"));
+		XWritableRepository repository = new WritableRepository(this.credentials, store);
+		this.dataModel = repository.createModel(modelId);
 		// FIXME a malicious user might be able to overwrite this index
+		this.indexModel = repository.createModel(XX.toId(modelId + "-index-by-actor"));
 	}
 	
 	/**

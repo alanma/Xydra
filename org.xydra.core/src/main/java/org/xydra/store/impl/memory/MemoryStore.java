@@ -14,9 +14,11 @@ import org.xydra.store.AuthorisationException;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.GetEventsRequest;
+import org.xydra.store.QuotaException;
 import org.xydra.store.XydraStore;
 import org.xydra.store.access.GroupModelWrapper;
 import org.xydra.store.access.XGroupDatabase;
+import org.xydra.store.access.XPasswordDatabase;
 
 
 /**
@@ -29,17 +31,21 @@ import org.xydra.store.access.XGroupDatabase;
  * 
  * @author voelkel
  */
-
-/*
- * FIXME MemoryStore currently does not throw QuotaExceptions as described by
- * the XydraStore interface. ~Bjoern
+/**
+ * @author xamde
+ * 
  */
-
 public class MemoryStore implements XydraStore {
+	
+	/**
+	 * Maximal number of failed login attempts for this store.
+	 */
+	public static final int MAX_FAILED_LOGIN_ATTEMPTS = 10;
 	
 	private final AllowAllStore data;
 	private final AllowAllStore rights;
 	private final GroupModelWrapper groupModelWrapper;
+	private int failedLoginAttempts;
 	
 	/**
 	 * @param data
@@ -55,13 +61,17 @@ public class MemoryStore implements XydraStore {
 	 * @param rights
 	 */
 	public MemoryStore(AllowAllStore data, AllowAllStore rights) {
-		// TODO why not store both data and rights in the same store instance,
-		// but with different repository IDs?
+		/*
+		 * TODO Daniel: why not store both data and rights in the same store
+		 * instance, but with different repository IDs? max: That would make the
+		 * concept of a repository as the largest possible unit of data
+		 * obsolete. "One repo = all data" makes maintenance (backups) easier.
+		 */
 		this.data = new AllowAllStore(new MemoryNoAccessRightsNoBatchNoAsyncStore(XX.toId("data")));
 		this.rights = new AllowAllStore(new MemoryNoAccessRightsNoBatchNoAsyncStore(
 		        XX.toId("rights")));
 		this.groupModelWrapper = new GroupModelWrapper(this.rights, XX.toId("actors"));
-		
+		this.failedLoginAttempts = 0;
 	}
 	
 	/**
@@ -75,12 +85,45 @@ public class MemoryStore implements XydraStore {
 		return this.groupModelWrapper;
 	}
 	
+	/**
+	 * @return the {@link XGroupDatabase} used by this {@link XydraStore}.
+	 * 
+	 *         Note: A reference to a {@link XydraStore} gives a developer full
+	 *         access to all data, including users, groups, and passwords. Real
+	 *         security is only effective by using Xydra over REST.
+	 */
+	public XGroupDatabase getGroupDatabase() {
+		return this.groupModelWrapper;
+	}
+	
+	/**
+	 * @return the {@link XPasswordDatabase} used by this {@link XydraStore}.
+	 *         Note: A reference to a {@link XydraStore} gives a developer full
+	 *         access to all data, including users, groups, and passwords. Real
+	 *         security is only effective by using Xydra over REST.
+	 */
+	public XPasswordDatabase getPasswordDatabase() {
+		return this.groupModelWrapper;
+	}
+	
 	public void checkLogin(XID actorId, String passwordHash, Callback<Boolean> callback) {
 		checkCallback(callback);
 		if(actorId == null || passwordHash == null) {
 			throw new IllegalArgumentException("actorId and passwordHash must not be null");
 		}
-		callback.onSuccess(this.groupModelWrapper.isValidLogin(actorId, passwordHash));
+		try {
+			boolean authenticated = this.groupModelWrapper.isValidLogin(actorId, passwordHash);
+			if(!authenticated) {
+				this.failedLoginAttempts++;
+				if(this.failedLoginAttempts >= MAX_FAILED_LOGIN_ATTEMPTS) {
+					callback.onFailure(new QuotaException(MAX_FAILED_LOGIN_ATTEMPTS
+					        + " failed login attempts."));
+				}
+			}
+			callback.onSuccess(authenticated);
+		} catch(Exception e) {
+			callback.onFailure(e);
+		}
 	}
 	
 	private void checkCallback(Callback<Boolean> callback) {
