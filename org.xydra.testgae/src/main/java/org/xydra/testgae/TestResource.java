@@ -8,7 +8,9 @@ import java.io.Writer;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.xydra.core.X;
 import org.xydra.core.XX;
+import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.core.model.XID;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -79,7 +81,15 @@ public class TestResource {
 	private void test2(Writer w) throws IOException {
 		XID repoId = XX.toId("repo1");
 		GaeXydraStore store = new GaeXydraStore(repoId);
-		w.write("repoId=" + store.getRepositoryId() + "\n");
+		w.write("RepoId = " + store.getRepositoryId() + "\n");
+		w.flush();
+		XID actorId = XX.toId("testActor");
+		XID modelId = XX.toId("model1");
+		store.executeCommand(
+		        actorId,
+		        MemoryRepositoryCommand.createAddCommand(
+		                X.getIDProvider().fromComponents(repoId, null, null, null), true, modelId));
+		w.write("Created model1.\n");
 		w.flush();
 	}
 	
