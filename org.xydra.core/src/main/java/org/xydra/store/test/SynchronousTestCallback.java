@@ -11,11 +11,11 @@ import org.xydra.store.XydraStore;
  */
 
 public class SynchronousTestCallback<T> implements Callback<T> {
-	private T effect;
-	private Throwable exception;
+	protected T effect;
+	protected Throwable exception;
 	
-	private boolean success = false;
-	private boolean failure = false;
+	protected boolean success = false;
+	protected boolean failure = false;
 	
 	public static int UNKNOWN_ERROR = 0;
 	public static int TIMEOUT = 1;
@@ -25,17 +25,16 @@ public class SynchronousTestCallback<T> implements Callback<T> {
 	@Override
 	public synchronized void onSuccess(T object) {
 		this.success = true;
-		notifyAll();
-		
 		this.effect = object;
+		
+		notifyAll();
 	}
 	
 	@Override
 	public synchronized void onFailure(Throwable exception) {
 		this.failure = true;
-		notifyAll();
-		
 		this.exception = exception;
+		notifyAll();
 	}
 	
 	public T getEffect() {
