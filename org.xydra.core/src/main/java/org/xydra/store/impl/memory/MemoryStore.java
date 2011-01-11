@@ -47,6 +47,14 @@ public class MemoryStore implements XydraStore {
 	private final GroupModelWrapper groupModelWrapper;
 	private int failedLoginAttempts;
 	
+	/*
+	 * TODO Implementation of "failed-login-attack"-prevention is a bit strange
+	 * in my opinion. Exceeding MAX_FAILED_LOGIN_ATTEMPTS results in a complete
+	 * shut-down of this store, and does not only hinder one specific account
+	 * from trying to log-in as I would expect something like this to work.
+	 * Maybe we should discuss & improve this? ~Bjoern
+	 */
+
 	/**
 	 * @param data
 	 * @param rights
@@ -113,12 +121,17 @@ public class MemoryStore implements XydraStore {
 		}
 		try {
 			boolean authenticated = this.groupModelWrapper.isValidLogin(actorId, passwordHash);
+			
 			if(!authenticated) {
 				this.failedLoginAttempts++;
 				if(this.failedLoginAttempts >= MAX_FAILED_LOGIN_ATTEMPTS) {
 					callback.onFailure(new QuotaException(MAX_FAILED_LOGIN_ATTEMPTS
 					        + " failed login attempts."));
+					
+					// do not call onSuccess after this occurred
+					return;
 				}
+				
 			}
 			callback.onSuccess(authenticated);
 		} catch(Exception e) {
@@ -174,8 +187,16 @@ public class MemoryStore implements XydraStore {
 			        "callback for side-effect free methods must not be null");
 		}
 		if(!this.groupModelWrapper.isValidLogin(actorId, passwordHash)) {
-			callback.onFailure(new AuthorisationException("Unauthorised login/passwordHash "
-			        + actorId + "/" + passwordHash));
+			this.failedLoginAttempts++;
+			
+			if(this.failedLoginAttempts > MAX_FAILED_LOGIN_ATTEMPTS) {
+				callback.onFailure(new QuotaException(MAX_FAILED_LOGIN_ATTEMPTS
+				        + " failed login attempts."));
+			} else {
+				
+				callback.onFailure(new AuthorisationException("Unauthorised login/passwordHash "
+				        + actorId + "/" + passwordHash));
+			}
 		} else {
 			this.data.getModelIds(actorId, passwordHash, callback);
 		}
@@ -188,8 +209,15 @@ public class MemoryStore implements XydraStore {
 			        "callback for side-effect free methods must not be null");
 		}
 		if(!this.groupModelWrapper.isValidLogin(actorId, passwordHash)) {
-			callback.onFailure(new AuthorisationException("Unauthorised login/passwordHash "
-			        + actorId + "/" + passwordHash));
+			this.failedLoginAttempts++;
+			
+			if(this.failedLoginAttempts > MAX_FAILED_LOGIN_ATTEMPTS) {
+				callback.onFailure(new QuotaException(MAX_FAILED_LOGIN_ATTEMPTS
+				        + " failed login attempts."));
+			} else {
+				callback.onFailure(new AuthorisationException("Unauthorised login/passwordHash "
+				        + actorId + "/" + passwordHash));
+			}
 		} else {
 			this.data.getModelRevisions(actorId, passwordHash, modelAddresses, callback);
 		}
@@ -202,8 +230,15 @@ public class MemoryStore implements XydraStore {
 			        "callback for side-effect free methods must not be null");
 		}
 		if(!this.groupModelWrapper.isValidLogin(actorId, passwordHash)) {
-			callback.onFailure(new AuthorisationException("Unauthorised login/passwordHash "
-			        + actorId + "/" + passwordHash));
+			this.failedLoginAttempts++;
+			
+			if(this.failedLoginAttempts > MAX_FAILED_LOGIN_ATTEMPTS) {
+				callback.onFailure(new QuotaException(MAX_FAILED_LOGIN_ATTEMPTS
+				        + " failed login attempts."));
+			} else {
+				callback.onFailure(new AuthorisationException("Unauthorised login/passwordHash "
+				        + actorId + "/" + passwordHash));
+			}
 		} else {
 			// FIXME check access rights
 			// FIXME need to check the repoId on modelAddresses and load from
@@ -220,8 +255,15 @@ public class MemoryStore implements XydraStore {
 			        "callback for side-effect free methods must not be null");
 		}
 		if(!this.groupModelWrapper.isValidLogin(actorId, passwordHash)) {
-			callback.onFailure(new AuthorisationException("Unauthorised login/passwordHash "
-			        + actorId + "/" + passwordHash));
+			this.failedLoginAttempts++;
+			
+			if(this.failedLoginAttempts > MAX_FAILED_LOGIN_ATTEMPTS) {
+				callback.onFailure(new QuotaException(MAX_FAILED_LOGIN_ATTEMPTS
+				        + " failed login attempts."));
+			} else {
+				callback.onFailure(new AuthorisationException("Unauthorised login/passwordHash "
+				        + actorId + "/" + passwordHash));
+			}
 		} else {
 			this.data.getObjectSnapshots(actorId, passwordHash, objectAddresses, callback);
 		}
@@ -233,8 +275,15 @@ public class MemoryStore implements XydraStore {
 			        "callback for side-effect free methods must not be null");
 		}
 		if(!this.groupModelWrapper.isValidLogin(actorId, passwordHash)) {
-			callback.onFailure(new AuthorisationException("Unauthorised login/passwordHash "
-			        + actorId + "/" + passwordHash));
+			this.failedLoginAttempts++;
+			
+			if(this.failedLoginAttempts > MAX_FAILED_LOGIN_ATTEMPTS) {
+				callback.onFailure(new QuotaException(MAX_FAILED_LOGIN_ATTEMPTS
+				        + " failed login attempts."));
+			} else {
+				callback.onFailure(new AuthorisationException("Unauthorised login/passwordHash "
+				        + actorId + "/" + passwordHash));
+			}
 		} else {
 			this.data.getRepositoryId(actorId, passwordHash, callback);
 		}
