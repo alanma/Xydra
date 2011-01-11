@@ -21,7 +21,7 @@ public class TestGaeApp {
 		});
 		
 		EchoResource.restless(r);
-		
+		TestResource.restless(r);
 	}
 	
 }
