@@ -88,12 +88,7 @@ public class MemoryStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 	
 	@Override
 	protected long getQuotaForBruteForce() {
-		/*
-		 * FIXME {@link MemoryStore} does not support QuotaExceptions at the
-		 * moment ~Bjoern
-		 */
-
-		return -1;
+		return MemoryStore.MAX_FAILED_LOGIN_ATTEMPTS;
 	}
 	
 	@Override
