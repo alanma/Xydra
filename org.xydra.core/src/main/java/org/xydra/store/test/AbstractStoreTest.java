@@ -147,10 +147,14 @@ public abstract class AbstractStoreTest {
 	protected boolean waitOnCallback(SynchronousTestCallback<?> callback) {
 		int value = callback.waitOnCallback(this.getCallbackTimeout());
 		if(value == SynchronousTestCallback.UNKNOWN_ERROR) {
-			return false;
+			throw new RuntimeException("Unknown Error occurred");
 		}
 		if(value == SynchronousTestCallback.TIMEOUT) {
-			return false;
+			throw new RuntimeException("Timeout occurred");
+		}
+		if(callback.failure == callback.success) {
+			throw new RuntimeException(
+			        "Either both onSuccess and onFailure or neither of these two methods were called");
 		}
 		
 		return value == SynchronousTestCallback.SUCCESS;
