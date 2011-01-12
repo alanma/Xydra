@@ -1,10 +1,39 @@
 package org.xydra.store.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Before;
+import org.junit.Test;
+import org.xydra.core.X;
+import org.xydra.core.XX;
+import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XCommandFactory;
+import org.xydra.core.model.XAddress;
+import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XID;
+import org.xydra.store.AuthorisationException;
+import org.xydra.store.BatchedResult;
 import org.xydra.store.XydraStore;
 
+
+/**
+ * Abstract test for the write methods of {@link XydraStore}.
+ * 
+ * @author Björn
+ */
+
+/*
+ * TODO Comments in {@link XydraStore} state, that the changes made by methods
+ * like executeCommand might not be avaiable directly after the execution of the
+ * commands. if this is the case, how exactly can I effectively test if the
+ * changes are made? Idea: Introduce a parameter "average waiting time", which
+ * describe how long it takes on averages after the changes are avaiable on the
+ * store
+ */
 
 public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	
@@ -73,17 +102,106 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		}
 		
 		// get the repository ID of the store
-		SynchronousTestCallback<XID> callback = new SynchronousTestCallback<XID>();
-		this.store.getRepositoryId(this.correctUser, this.correctUserPass, callback);
-		waitOnCallback(callback);
-		
-		if(callback.getEffect() == null) {
-			throw new RuntimeException(
-			        "getRepositoryID seems to not work correctly, rendering this test useless!");
-		}
-		this.repoID = callback.getEffect();
+		this.repoID = getRepositoryId();
 		
 		this.setUpDone = true;
 	}
 	
+	/*
+	 * Tests for executeCommand
+	 */
+
+	// Test if it behaves correctly for wrong account + password
+	// combinations
+	@Test
+	public void testExecuteCommandsBadAccount() {
+		if(!this.incorrectActorExists) {
+			return;
+		}
+		
+		SynchronousTestCallback<BatchedResult<Long>[]> callback;
+		
+		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		
+		XCommand[] commands = new XCommand[] { X.getCommandFactory().createAddModelCommand(
+		        this.repoID, XX.createUniqueID(), true) };
+		
+		this.store.executeCommands(this.incorrectUser, this.incorrectUserPass, commands, callback);
+		
+		assertFalse(this.waitOnCallback(callback));
+		assertNull(callback.getEffect());
+		assertNotNull(callback.getException());
+		assertTrue(callback.getException() instanceof AuthorisationException);
+	}
+	
+	// Test if model Commands work
+	@Test
+	public void testExecuteCommandsModelCommands() {
+		// create a model
+		SynchronousTestCallback<BatchedResult<Long>[]> callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		XID modelID = XX.createUniqueID();
+		
+		// first, let's make sure that the model we want to create doesn't exist
+		// check if the model was created
+		SynchronousTestCallback<BatchedResult<XBaseModel>[]> callback2 = new SynchronousTestCallback<BatchedResult<XBaseModel>[]>();
+		XAddress[] modelAddress = new XAddress[] { XX.toAddress(this.repoID, modelID, null, null) };
+		
+		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, modelAddress,
+		        callback2);
+		assertTrue(this.waitOnCallback(callback2));
+		
+		BatchedResult<XBaseModel>[] result2 = callback2.getEffect();
+		assertNotNull(result2);
+		assertNull(result2[0].getResult());
+		
+		// create the model
+		XCommand[] commands = new XCommand[] { X.getCommandFactory().createAddModelCommand(
+		        this.repoID, modelID, true) };
+		
+		this.store.executeCommands(this.correctUser, this.correctUserPass, commands, callback);
+		
+		assertTrue(this.waitOnCallback(callback));
+		assertNotNull(callback.getEffect());
+		assertTrue(callback.getEffect().length == 1);
+		assertTrue((callback.getEffect())[0].getResult() > 0);
+		assertNull(callback.getException());
+		
+		// check if the model was created
+		callback2 = new SynchronousTestCallback<BatchedResult<XBaseModel>[]>();
+		modelAddress = new XAddress[] { XX.toAddress(this.repoID, modelID, null, null) };
+		
+		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, modelAddress,
+		        callback2);
+		assertTrue(this.waitOnCallback(callback2));
+		
+		result2 = callback2.getEffect();
+		assertNotNull(result2);
+		assertEquals(result2[0].getResult().getID(), modelID);
+		
+		// remove the model again
+		commands = new XCommand[] { X.getCommandFactory().createRemoveModelCommand(this.repoID,
+		        modelID, (callback.getEffect())[0].getResult(), true) };
+		
+		this.store.executeCommands(this.correctUser, this.correctUserPass, commands, callback);
+		
+		assertTrue(this.waitOnCallback(callback));
+		assertNotNull(callback.getEffect());
+		assertTrue(callback.getEffect().length == 1);
+		assertTrue((callback.getEffect())[0].getResult() > 0);
+		assertNull(callback.getException());
+		
+		// check if the model was removed
+		callback2 = new SynchronousTestCallback<BatchedResult<XBaseModel>[]>();
+		modelAddress = new XAddress[] { XX.toAddress(this.repoID, modelID, null, null) };
+		
+		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, modelAddress,
+		        callback2);
+		assertTrue(this.waitOnCallback(callback2));
+		
+		result2 = callback2.getEffect();
+		assertNotNull(result2);
+		assertNull(result2[0].getResult());
+		
+		// TODO Maybe split all these cases into smaller tests
+	}
 }
