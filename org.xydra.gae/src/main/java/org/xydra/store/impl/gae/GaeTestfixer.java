@@ -1,5 +1,8 @@
 package org.xydra.store.impl.gae;
 
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
+
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
@@ -24,11 +27,14 @@ import com.google.appengine.api.utils.SystemProperty;
  */
 public class GaeTestfixer {
 	
+	private static final Logger log = LoggerFactory.getLogger(GaeTestfixer.class);
+	
 	private static boolean enabled = false;
 	/** checking for production env only once makes this run faster */
 	private static boolean checkedProduction = false;
 	
 	public static void enable() {
+		log.debug("Enabling test fixer.");
 		enabled = true;
 		checkedProduction = false;
 	}
@@ -58,6 +64,7 @@ public class GaeTestfixer {
 		if(!checkedProduction) {
 			checkedProduction = true;
 			if(inProduction()) {
+				log.info("We are in production: Auto-disabled test fixer.");
 				enabled = false;
 				return;
 			}
@@ -67,6 +74,7 @@ public class GaeTestfixer {
 				Class.forName("com.google.appengine.tools.development.testing.LocalServiceTestHelper");
 			} catch(ClassNotFoundException e) {
 				/* ah, we are in production */
+				log.info("We are in fact in production (or a jar is missing): Auto-disabled test fixer.");
 				enabled = false;
 				return;
 			}
