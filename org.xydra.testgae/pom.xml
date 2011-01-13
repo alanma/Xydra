@@ -124,9 +124,9 @@
 		</dependency>
 
 		<dependency>
-			<scope>runtime,compile</scope>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
+			<scope>compile</scope>
 		</dependency>
 
 		<!-- Depend on tests in core as explained in -->

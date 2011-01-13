@@ -20,6 +20,8 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.log.gae.GaeLoggerFactorySPI;
 import org.xydra.restless.Restless;
 import org.xydra.store.Callback;
+import org.xydra.store.GaeAllowAllStoreReadMethodsTest;
+import org.xydra.store.GaeStoreReadMethodsTest;
 import org.xydra.store.MemoryAllowAllStoreReadMethodsTest;
 import org.xydra.store.XydraStore;
 import org.xydra.store.access.GroupModelWrapper;
@@ -66,7 +68,14 @@ public class TestResource {
 	}
 	
 	private void test3(Writer w) throws IOException {
-		Result result = JUnitCore.runClasses(MemoryAllowAllStoreReadMethodsTest.class);
+		runJunitTest(MemoryAllowAllStoreReadMethodsTest.class, w);
+		runJunitTest(GaeAllowAllStoreReadMethodsTest.class, w);
+		runJunitTest(GaeStoreReadMethodsTest.class, w);
+	}
+	
+	private void runJunitTest(Class<?> clazz, Writer w) throws IOException {
+		w.write("Running " + clazz.getName() + "...\n");
+		Result result = JUnitCore.runClasses(clazz);
 		w.write(result.getIgnoreCount() + " ignored, " + result.getRunCount() + " run, "
 		        + result.getFailureCount() + " failed. Time: " + result.getRunTime() + " ms\n");
 		for(Failure f : result.getFailures()) {
@@ -76,6 +85,7 @@ public class TestResource {
 			w.write(f.getDescription() + "\n");
 			w.write(f.getException() + "\n");
 		}
+		w.write("Done running " + clazz.getName() + ".\n");
 	}
 	
 	XID test1_repoId = null;
