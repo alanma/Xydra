@@ -123,6 +123,28 @@
 			<version>0.1.2-SNAPSHOT</version>
 		</dependency>
 
+		<dependency>
+			<scope>runtime,compile</scope>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+
+		<!-- Depend on tests in core as explained in -->
+		<!-- http://maven.apache.org/guides/mini/guide-attached-tests.html -->
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>core</artifactId>
+			<version>0.1.2-SNAPSHOT</version>
+			<type>test-jar</type>
+		</dependency>
+
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>gae</artifactId>
+			<version>0.1.2-SNAPSHOT</version>
+			<type>test-jar</type>
+		</dependency>
+
 		<!-- logging -->
 		<dependency>
 			<groupId>org.xydra</groupId>
@@ -130,14 +152,9 @@
 			<version>0.1.2-SNAPSHOT</version>
 		</dependency>
 
-		<!-- testing dependencies -->
-		<dependency>
-			<scope>test</scope>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-		</dependency>
 
-<!--  Google App Engine -->
+
+		<!-- Google App Engine -->
 		<dependency>
 			<groupId>com.google.appengine</groupId>
 			<artifactId>appengine-api-1.0-sdk</artifactId>
@@ -150,10 +167,8 @@
 			<scope>runtime,compile</scope>
 		</dependency>
 
-		<!--
-			J2EE Servlet API. We need it to compile IndexServlet class. You can
-			probably remove it, if you don't explicitly use Servlets
-		-->
+		<!-- J2EE Servlet API. We need it to compile IndexServlet class. You can 
+			probably remove it, if you don't explicitly use Servlets -->
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>
 			<artifactId>geronimo-servlet_2.5_spec</artifactId>
@@ -161,10 +176,7 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!--
-			GAE libraries for local testing as described here:
-			http://code.google.com/appengine/docs/java/howto/unittesting.html
-		-->
+		<!-- GAE libraries for local testing as described here: http://code.google.com/appengine/docs/java/howto/unittesting.html -->
 
 		<dependency>
 			<groupId>com.google.appengine</groupId>
@@ -172,7 +184,7 @@
 			<version>${gae.version}</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.google.appengine</groupId>
 			<artifactId>appengine-testing</artifactId>

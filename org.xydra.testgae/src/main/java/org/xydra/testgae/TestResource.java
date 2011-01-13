@@ -8,6 +8,9 @@ import java.io.Writer;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
+import org.junit.runner.notification.Failure;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
@@ -17,6 +20,7 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.log.gae.GaeLoggerFactorySPI;
 import org.xydra.restless.Restless;
 import org.xydra.store.Callback;
+import org.xydra.store.MemoryAllowAllStoreReadMethodsTest;
 import org.xydra.store.XydraStore;
 import org.xydra.store.access.GroupModelWrapper;
 import org.xydra.store.base.HashUtils;
@@ -34,6 +38,7 @@ public class TestResource {
 	public static void restless(Restless r) {
 		r.addGet("/test1", TestResource.class, "test1");
 		r.addGet("/test2", TestResource.class, "test2");
+		r.addGet("/test3", TestResource.class, "test3");
 	}
 	
 	public void test1(HttpServletRequest req, HttpServletResponse res) throws IOException {
@@ -50,6 +55,27 @@ public class TestResource {
 		res.getWriter().println("Test2 start.");
 		test2(res.getWriter());
 		res.getWriter().println("Test2 stop. Some operations might still be pending.");
+	}
+	
+	public void test3(HttpServletRequest req, HttpServletResponse res) throws IOException {
+		res.setContentType("text/plain");
+		res.setStatus(200);
+		res.getWriter().println("Test3 start.");
+		test3(res.getWriter());
+		res.getWriter().println("Test3 stop. Some operations might still be pending.");
+	}
+	
+	private void test3(Writer w) throws IOException {
+		Result result = JUnitCore.runClasses(MemoryAllowAllStoreReadMethodsTest.class);
+		w.write(result.getIgnoreCount() + " ignored, " + result.getRunCount() + " run, "
+		        + result.getFailureCount() + " failed. Time: " + result.getRunTime() + " ms\n");
+		for(Failure f : result.getFailures()) {
+			w.write("=== " + f.getTestHeader() + "\n");
+			w.write(f.getMessage() + "\n");
+			w.write(f.getTrace() + "\n");
+			w.write(f.getDescription() + "\n");
+			w.write(f.getException() + "\n");
+		}
 	}
 	
 	XID test1_repoId = null;
@@ -103,7 +129,7 @@ public class TestResource {
 	public static void main(String[] args) throws UnsupportedEncodingException, IOException {
 		TestResource tr = new TestResource();
 		Writer w = new OutputStreamWriter(System.out, "utf-8");
-		tr.test2(w);
+		tr.test3(w);
 		w.flush();
 		w.close();
 	}
