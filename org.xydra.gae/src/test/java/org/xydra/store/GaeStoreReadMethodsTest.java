@@ -92,8 +92,7 @@ public class GaeStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 	
 	@Override
 	protected XID getRepositoryId() {
-		// FIXME !!!
-		return null;
+		return GaeXydraStore.getDefaultRepositoryId();
 	}
 	
 }

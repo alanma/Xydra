@@ -142,8 +142,17 @@ public class GaeXydraStore implements XydraNoAccessRightsNoBatchNoAsyncStore {
 	}
 	
 	static public XydraStore get() {
-		return new MemoryStore(new AllowAllStore(new GaeXydraStore(XX.toId("data"))),
+		return new MemoryStore(new AllowAllStore(new GaeXydraStore(getDefaultRepositoryId())),
 		        new AllowAllStore(new GaeXydraStore(XX.toId("rights"))));
+	}
+	
+	/**
+	 * This method is used in tests.
+	 * 
+	 * @return the default repository id used by {@link #get()}
+	 */
+	static public XID getDefaultRepositoryId() {
+		return XX.toId("data");
 	}
 	
 }

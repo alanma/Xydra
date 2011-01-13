@@ -57,8 +57,7 @@ public class GaeAllowAllStoreReadMethodsTest extends AbstractAllowAllStoreReadMe
 	
 	@Override
 	protected XID getRepositoryId() {
-		// FIXME !!!
-		return null;
+		return this.repositoryID;
 	}
 	
 }
