@@ -6,6 +6,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.utils.SystemProperty;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.apphosting.api.ApiProxy;
@@ -33,14 +34,25 @@ public class GaeTestfixer {
 	private static Environment env;
 	private static Delegate<?> delegate;
 	private static boolean enabled = false;
+	/** checking for production env only once makes this run faster */
+	private static boolean checkedProduction = false;
 	
 	public static void enable() {
 		enabled = true;
 	}
 	
 	/**
-	 * Fix testing in development mode which spawns multiple threads, which may
-	 * not happen on AppEngien in production mode.
+	 * @return true if app is running on a real remote GAE server
+	 */
+	public static boolean inProduction() {
+		return SystemProperty.environment.get() != null
+		        && SystemProperty.environment.value().equals(
+		                SystemProperty.Environment.Value.Production);
+	}
+	
+	/**
+	 * Fix testing in development mode which spawns multiple threads, which
+	 * canot not happen on AppEngine in production mode.
 	 * 
 	 * This method just returns, doing nothing if {@link GaeTestfixer#enable()}
 	 * is not called from main code.
@@ -48,6 +60,15 @@ public class GaeTestfixer {
 	public static void initialiseHelperAndAttachToCurrentThread() {
 		if(!enabled) {
 			return;
+		}
+		
+		/* if enabled and in production: self-disable */
+		if(!checkedProduction) {
+			checkedProduction = true;
+			if(inProduction()) {
+				enabled = false;
+				return;
+			}
 		}
 		
 		if(helper_ == null) {
