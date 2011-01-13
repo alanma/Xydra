@@ -30,6 +30,7 @@ public class GaeTestfixer {
 	
 	public static void enable() {
 		enabled = true;
+		checkedProduction = false;
 	}
 	
 	/**
