@@ -23,6 +23,7 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.XydraStore;
 import org.xydra.store.base.Credentials;
+import org.xydra.store.base.HashUtils;
 import org.xydra.store.base.WritableRepository;
 
 
@@ -38,6 +39,12 @@ import org.xydra.store.base.WritableRepository;
  * objectId | fieldId     | value
  * ---------+-------------+----------------------------
  * groupId  | "hasMember" | {@link XIDSetValue} actors
+ * </pre>
+ * 
+ * <pre>
+ * objectId | fieldId           | value
+ * ---------+-------------------+----------------------------
+ * actorId  | "hasPasswordHash" | the password hash (see {@link HashUtils})
  * </pre>
  * 
  * Indexes:

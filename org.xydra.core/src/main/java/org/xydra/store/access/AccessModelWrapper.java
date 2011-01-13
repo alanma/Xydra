@@ -34,7 +34,7 @@ import org.xydra.store.base.WritableRepository;
  * <pre>
  * objectId | fieldId                        | value
  * ---------+--------------------------------+----------
- * actorId  | "enc(address)+"_"+enc(rightId) | boolean
+ * actorId  | "enc(address)+"_."+enc(rightId) | boolean
  * </pre>
  * 
  * Rights can be READ, WRITE, ADMIN.
