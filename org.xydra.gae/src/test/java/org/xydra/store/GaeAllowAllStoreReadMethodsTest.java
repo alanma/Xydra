@@ -55,4 +55,10 @@ public class GaeAllowAllStoreReadMethodsTest extends AbstractAllowAllStoreReadMe
 		assertNull(callback.getException());
 	}
 	
+	@Override
+	protected XID getRepositoryId() {
+		// FIXME !!!
+		return null;
+	}
+	
 }
