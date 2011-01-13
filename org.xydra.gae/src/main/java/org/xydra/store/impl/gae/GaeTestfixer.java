@@ -1,17 +1,11 @@
 package org.xydra.store.impl.gae;
 
 import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.utils.SystemProperty;
-import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
-import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import com.google.apphosting.api.ApiProxy;
-import com.google.apphosting.api.ApiProxy.Delegate;
-import com.google.apphosting.api.ApiProxy.Environment;
 
 
 /**
@@ -26,13 +20,10 @@ import com.google.apphosting.api.ApiProxy.Environment;
  * 
  * http://code.google.com/p/googleappengine/issues/detail?id=2201
  * 
- * @author voelkel
+ * @author xamde
  */
 public class GaeTestfixer {
 	
-	private static LocalServiceTestHelper helper_;
-	private static Environment env;
-	private static Delegate<?> delegate;
 	private static boolean enabled = false;
 	/** checking for production env only once makes this run faster */
 	private static boolean checkedProduction = false;
@@ -52,7 +43,7 @@ public class GaeTestfixer {
 	
 	/**
 	 * Fix testing in development mode which spawns multiple threads, which
-	 * canot not happen on AppEngine in production mode.
+	 * cannot not happen on AppEngine in production mode.
 	 * 
 	 * This method just returns, doing nothing if {@link GaeTestfixer#enable()}
 	 * is not called from main code.
@@ -71,44 +62,7 @@ public class GaeTestfixer {
 			}
 		}
 		
-		if(helper_ == null) {
-			// create new environment
-			helper_ = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
-			setUp();
-			
-			// remember it
-			env = ApiProxy.getCurrentEnvironment();
-			delegate = ApiProxy.getDelegate();
-			
-			// add marker Entity to GAE dataStore
-			Key key = KeyFactory.createKey("test", "marker");
-			Entity marker = new Entity(key);
-			DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-			datastore.put(marker);
-			assert containsMarker(datastore);
-		} else if(ApiProxy.getCurrentEnvironment() == null) {
-			
-			// make sure to setup, if necessary
-			if(!setup) {
-				setUp();
-			}
-			
-			// if(SystemProperty.Environment.environment.get() == null) {
-			// throw new IllegalStateException(
-			// "You seem to run locally, but have not enabled the testfixer.");
-			// }
-			
-			// // we must be on Dev-Server
-			// if(SystemProperty.Environment.environment.value() !=
-			// SystemProperty.Environment.Value.Development) {
-			// throw new AssertionError(
-			// "We are on production server, but current environment is null.");
-			// }
-			
-			// a second thread needs the test stubs - attach to thread
-			ApiProxy.setEnvironmentForCurrentThread(env);
-			ApiProxy.setDelegate(delegate);
-		}
+		GaeTestFixer_LocalPart.initialiseHelperAndAttachToCurrentThread();
 	}
 	
 	/**
@@ -127,17 +81,20 @@ public class GaeTestfixer {
 		}
 	}
 	
-	private static boolean setup = false;
-	
-	public static synchronized void setUp() {
-		helper_.setUp();
-		setup = true;
+	/**
+	 * Add marker Entity to GAE dataStore
+	 * 
+	 * @param datastore
+	 */
+	public static void setMarkerEntity(DatastoreService datastore) {
+		Key key = KeyFactory.createKey("test", "marker");
+		Entity marker = new Entity(key);
+		datastore.put(marker);
+		assert GaeTestfixer.containsMarker(datastore);
 	}
 	
 	public static synchronized void tearDown() {
-		assert setup;
-		helper_.tearDown();
-		setup = false;
+		GaeTestFixer_LocalPart.tearDown();
 	}
 	
 }
