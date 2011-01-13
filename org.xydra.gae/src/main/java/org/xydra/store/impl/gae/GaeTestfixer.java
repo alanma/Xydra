@@ -61,8 +61,16 @@ public class GaeTestfixer {
 				enabled = false;
 				return;
 			}
+			
+			/* second check: can we load this class: 'LocalServiceTestHelper' ? */
+			try {
+				Class.forName("com.google.appengine.tools.development.testing.LocalServiceTestHelper");
+			} catch(ClassNotFoundException e) {
+				/* ah, we are in production */
+				enabled = false;
+				return;
+			}
 		}
-		
 		GaeTestFixer_LocalPart.initialiseHelperAndAttachToCurrentThread();
 	}
 	
