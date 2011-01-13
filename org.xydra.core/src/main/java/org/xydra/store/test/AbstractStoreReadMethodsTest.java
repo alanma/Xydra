@@ -63,7 +63,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	
 	@Before
 	public void setUp() {
-		if(!this.setUpDone) {
+		if(this.setUpDone) {
 			/*
 			 * This code segment guarantees that the following set-up code will
 			 * only be run once. This basically works like an @BeforeClass
@@ -217,7 +217,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	@Test
 	public void testCheckLoginSuccess() {
 		SynchronousTestCallback<Boolean> callback = new SynchronousTestCallback<Boolean>();
-		
+		assert this.store != null;
 		this.store.checkLogin(this.correctUser, this.correctUserPass, callback);
 		
 		assertTrue(this.waitOnCallback(callback));
