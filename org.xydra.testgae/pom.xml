@@ -164,7 +164,6 @@
 			<groupId>com.google.appengine</groupId>
 			<artifactId>appengine-api-labs</artifactId>
 			<version>${gae.version}</version>
-			<scope>runtime,compile</scope>
 		</dependency>
 
 		<!-- J2EE Servlet API. We need it to compile IndexServlet class. You can 
@@ -189,7 +188,7 @@
 			<groupId>com.google.appengine</groupId>
 			<artifactId>appengine-testing</artifactId>
 			<version>${gae.version}</version>
-			<scope>compile</scope><!-- Don't ask -->
+			<scope>test</scope><!-- Don't ask -->
 		</dependency>
 
 

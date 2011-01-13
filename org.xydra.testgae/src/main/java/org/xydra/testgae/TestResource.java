@@ -26,6 +26,7 @@ import org.xydra.store.MemoryAllowAllStoreReadMethodsTest;
 import org.xydra.store.XydraStore;
 import org.xydra.store.access.GroupModelWrapper;
 import org.xydra.store.base.HashUtils;
+import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.impl.gae.GaeXydraStore;
 
 
@@ -41,6 +42,7 @@ public class TestResource {
 		r.addGet("/test1", TestResource.class, "test1");
 		r.addGet("/test2", TestResource.class, "test2");
 		r.addGet("/test3", TestResource.class, "test3");
+		r.addGet("/info", TestResource.class, "info");
 	}
 	
 	public void test1(HttpServletRequest req, HttpServletResponse res) throws IOException {
@@ -65,6 +67,10 @@ public class TestResource {
 		res.getWriter().println("Test3 start.");
 		test3(res.getWriter());
 		res.getWriter().println("Test3 stop. Some operations might still be pending.");
+	}
+	
+	public String info() {
+		return "GAE is in production? " + GaeTestfixer.inProduction();
 	}
 	
 	private void test3(Writer w) throws IOException {
