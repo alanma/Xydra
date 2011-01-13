@@ -409,8 +409,6 @@ public interface XydraStore {
 	 * endRevision; (b) if beginRevision or endRevision are negative</li>
 	 * </ul>
 	 * 
-	 * TODO what happens if the entity (or containing model) doesn't exits?
-	 * 
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
 	 *            with "Xydra" to avoid transmitting the same string over the
@@ -420,9 +418,16 @@ public interface XydraStore {
 	 *            {@link GetEventsRequest}.
 	 * @param callback Asynchronous callback to signal success or failure. On
 	 *            success, this callback returns an array which has one entry
-	 *            for each requested XAddress. Each entry is itself an array of
-	 *            XEvents, in the order in which they happened. Must not be
-	 *            null.
+	 *            for each requested XAddress.
+	 * 
+	 *            Each entry is itself an array of XEvents, in the order in
+	 *            which they happened.
+	 * 
+	 *            The resulting XEvent[][] array itself is never null. However,
+	 *            individual entries in the array can be null to indicate that
+	 *            the requested entity does not exist or the user is not allowed
+	 *            to read it.
+	 * 
 	 * @throws IllegalArgumentException if any of the given parameters is null.
 	 */
 	void getEvents(XID actorId, String passwordHash, GetEventsRequest[] getEventsRequest,
@@ -459,8 +464,8 @@ public interface XydraStore {
 	 *            {@link #getEvents(XID, String, GetEventsRequest[], Callback)}
 	 *            (also including the same exceptions) .
 	 * 
-	 *            TODO forbid null callbacks? With a null callback this method
-	 *            provides no advantage over
+	 *            This callback may not be null, because with a null callback
+	 *            this method provides no advantage over
 	 *            {@link #executeCommands(XID, String, XCommand[], Callback)}
 	 */
 	void executeCommandsAndGetEvents(XID actorId, String passwordHash, XCommand[] commands,
