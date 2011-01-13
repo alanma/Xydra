@@ -46,7 +46,7 @@
 				<enabled>false</enabled>
 			</releases>
 		</repository>
-		<!--  For API VIZ -->
+		<!-- For API VIZ -->
 		<repository>
 			<id>jboss.releases</id>
 			<name>JBoss releases</name>
@@ -63,7 +63,7 @@
 
 	<dependencies>
 
-		<!--  XIndex -->
+		<!-- XIndex -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>index</artifactId>
@@ -76,7 +76,7 @@
 			<classifier>sources</classifier>
 		</dependency>
 
-		<!--  Xlog -->
+		<!-- Xlog -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
@@ -89,7 +89,7 @@
 			<classifier>sources</classifier>
 		</dependency>
 
-		<!--  for testing the GWT compatibility -->
+		<!-- for testing the GWT compatibility -->
 		<dependency>
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-servlet</artifactId>
@@ -115,7 +115,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<!--  for abstract tests in main  -->
+			<!-- for abstract tests in main -->
 			<scope>compile</scope>
 			<!-- version info taken from parent -->
 		</dependency>
@@ -143,30 +143,42 @@
 				</executions>
 			</plugin>
 
-          <plugin>
-            <inherited>true</inherited>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>attach-sources</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
+			<plugin>
+				<inherited>true</inherited>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Deploy tests as a separate jar as explained at -->
+			<!-- http://maven.apache.org/guides/mini/guide-attached-tests.html -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.2</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
 	<distributionManagement>
-		<!--
-			Add this to settings.xml <server> <id>xydra-repo</id>
-			<username>xamde</username> <password>********</password> </server>
-			<server> <id>xydra-snap</id> <username>xamde</username>
-			<password>********</password> </server> <server> <id>xydra-site</id>
-			<username>xamde</username> <password>********</password> </server>
-		-->
+		<!-- Add this to settings.xml <server> <id>xydra-repo</id> <username>xamde</username> 
+			<password>********</password> </server> <server> <id>xydra-snap</id> <username>xamde</username> 
+			<password>********</password> </server> <server> <id>xydra-site</id> <username>xamde</username> 
+			<password>********</password> </server> -->
 		<repository>
 			<id>xydra-repo</id>
 			<url>svn:https://xydra.googlecode.com/svn/repository</url>
