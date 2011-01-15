@@ -21,7 +21,7 @@ import org.xydra.store.test.AbstractStoreReadMethodsTest;
  * @author xamde
  * 
  */
-public class MemoryStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
+public class DelegatingSecureStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 	
 	protected XPasswordDatabase passwordDb = null;
 	protected String correctPass = "Test";
@@ -102,4 +102,9 @@ public class MemoryStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 		// MemoryStore}
 	}
 	
+	/*
+	 * TODO Tests for QuoataException are painfully slow - can we do something
+	 * about that? (Propably not, since it's a "problem" of the implementation)
+	 */
+
 }

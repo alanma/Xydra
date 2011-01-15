@@ -9,7 +9,7 @@ import org.xydra.store.impl.memory.MemoryBlockingPersistence;
 import org.xydra.store.test.AbstractAllowAllStoreReadMethodsTest;
 
 
-public class MemoryAllowAllStoreReadMethodsTest extends AbstractAllowAllStoreReadMethodsTest {
+public class DelegatingAllowAllStoreReadMethodsTest extends AbstractAllowAllStoreReadMethodsTest {
 	private XID repositoryID = XX.createUniqueID();
 	
 	@Override
