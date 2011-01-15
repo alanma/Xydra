@@ -189,7 +189,7 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 		XmlOutStringBuffer xo = new XmlOutStringBuffer();
 		XmlModel.toXml(object, xo, false, false, false);
 		
-		send(modelId.toURI(), xo.getXml(), callback);
+		send(modelId.toString(), xo.getXml(), callback);
 		
 	}
 	
@@ -198,7 +198,7 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 		XmlOutStringBuffer xo = new XmlOutStringBuffer();
 		XmlModel.toXml(field, xo, false);
 		
-		send(modelId.toURI() + "/" + objectId.toURI(), xo.getXml(), callback);
+		send(modelId.toString() + "/" + objectId.toString(), xo.getXml(), callback);
 		
 	}
 	
@@ -221,15 +221,15 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 	}
 	
 	public void deleteModel(XID modelId, Callback<Void> callback) {
-		delete(modelId.toURI(), callback);
+		delete(modelId.toString(), callback);
 	}
 	
 	public void deleteObject(XID modelId, XID objectId, Callback<Void> callback) {
-		delete(modelId.toURI() + "/" + objectId.toURI(), callback);
+		delete(modelId.toString() + "/" + objectId.toString(), callback);
 	}
 	
 	public void deleteField(XID modelId, XID objectId, XID fieldId, Callback<Void> callback) {
-		delete(modelId.toURI() + "/" + objectId.toURI() + "/" + fieldId.toURI(), callback);
+		delete(modelId.toString() + "/" + objectId.toString() + "/" + fieldId.toString(), callback);
 	}
 	
 }
