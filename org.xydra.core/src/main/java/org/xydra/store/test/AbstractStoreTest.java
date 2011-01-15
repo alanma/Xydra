@@ -122,7 +122,7 @@ public abstract class AbstractStoreTest {
 	 * Implementations of this abstract test need to override this to return the
 	 * specific quota of the XydraStore implementation which is to be tested.
 	 * Return a value less than zero if your implementation does not support
-	 * QuotaExceptions.
+	 * QuotaExceptions or such a value cannot be provided.
 	 */
 	abstract protected long getQuotaForBruteForce();
 	
