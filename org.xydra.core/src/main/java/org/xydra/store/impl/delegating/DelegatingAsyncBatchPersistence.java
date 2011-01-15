@@ -23,10 +23,10 @@ import org.xydra.store.GetEventsRequest;
  */
 public class DelegatingAsyncBatchPersistence implements XydraAsyncBatchPersistence {
 	
-	protected XydraBlockingPersistence noBatchStore;
+	protected XydraBlockingPersistence blockingPersistence;
 	
 	public DelegatingAsyncBatchPersistence(XydraBlockingPersistence base) {
-		this.noBatchStore = base;
+		this.blockingPersistence = base;
 	}
 	
 	private BatchedResult<Long>[] executeCommands(XID actorId, XCommand[] commands) {
@@ -34,7 +34,7 @@ public class DelegatingAsyncBatchPersistence implements XydraAsyncBatchPersisten
 		BatchedResult<Long>[] results = new BatchedResult[commands.length];
 		for(int i = 0; i < commands.length; i++) {
 			try {
-				results[i] = new BatchedResult<Long>(this.noBatchStore.executeCommand(actorId,
+				results[i] = new BatchedResult<Long>(this.blockingPersistence.executeCommand(actorId,
 				        commands[i]));
 			} catch(Exception e) {
 				results[i] = new BatchedResult<Long>(e);
@@ -78,7 +78,7 @@ public class DelegatingAsyncBatchPersistence implements XydraAsyncBatchPersisten
 		BatchedResult<XEvent[]>[] results = new BatchedResult[getEventsRequests.length];
 		for(int i = 0; i < getEventsRequests.length; i++) {
 			try {
-				XEvent[] result = this.noBatchStore.getEvents(getEventsRequests[i].address,
+				XEvent[] result = this.blockingPersistence.getEvents(getEventsRequests[i].address,
 				        getEventsRequests[i].beginRevision, getEventsRequests[i].endRevision);
 				results[i] = new BatchedResult<XEvent[]>(result);
 			} catch(Exception e) {
@@ -109,7 +109,7 @@ public class DelegatingAsyncBatchPersistence implements XydraAsyncBatchPersisten
 		}
 		Set<XID> ids;
 		try {
-			ids = this.noBatchStore.getModelIds();
+			ids = this.blockingPersistence.getModelIds();
 		} catch(Exception e) {
 			callback.onFailure(e);
 			return;
@@ -131,7 +131,7 @@ public class DelegatingAsyncBatchPersistence implements XydraAsyncBatchPersisten
 		BatchedResult<Long>[] results = new BatchedResult[modelAddresses.length];
 		for(int i = 0; i < modelAddresses.length; i++) {
 			try {
-				long result = this.noBatchStore.getModelRevision(modelAddresses[i]);
+				long result = this.blockingPersistence.getModelRevision(modelAddresses[i]);
 				results[i] = new BatchedResult<Long>(result);
 			} catch(Exception e) {
 				results[i] = new BatchedResult<Long>(e);
@@ -155,7 +155,7 @@ public class DelegatingAsyncBatchPersistence implements XydraAsyncBatchPersisten
 		
 		for(int i = 0; i < modelAddresses.length; i++) {
 			try {
-				XBaseModel result = this.noBatchStore.getModelSnapshot(modelAddresses[i]);
+				XBaseModel result = this.blockingPersistence.getModelSnapshot(modelAddresses[i]);
 				results[i] = new BatchedResult<XBaseModel>(result);
 			} catch(Exception e) {
 				results[i] = new BatchedResult<XBaseModel>(e);
@@ -178,7 +178,7 @@ public class DelegatingAsyncBatchPersistence implements XydraAsyncBatchPersisten
 		BatchedResult<XBaseObject>[] results = new BatchedResult[objectAddresses.length];
 		for(int i = 0; i < objectAddresses.length; i++) {
 			try {
-				XBaseObject result = this.noBatchStore.getObjectSnapshot(objectAddresses[i]);
+				XBaseObject result = this.blockingPersistence.getObjectSnapshot(objectAddresses[i]);
 				results[i] = new BatchedResult<XBaseObject>(result);
 			} catch(Exception e) {
 				results[i] = new BatchedResult<XBaseObject>(e);
@@ -193,13 +193,13 @@ public class DelegatingAsyncBatchPersistence implements XydraAsyncBatchPersisten
 			throw new IllegalArgumentException(
 			        "callback for side-effect free methods must not be null");
 		}
-		XID repoId = this.noBatchStore.getRepositoryId();
+		XID repoId = this.blockingPersistence.getRepositoryId();
 		callback.onSuccess(repoId);
 	}
 	
 	@Override
 	public void clear() {
-		this.noBatchStore.clear();
+		this.blockingPersistence.clear();
 	}
 	
 }

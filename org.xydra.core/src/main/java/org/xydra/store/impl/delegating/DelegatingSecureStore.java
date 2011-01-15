@@ -108,7 +108,7 @@ public class DelegatingSecureStore implements XydraStore, XydraStoreAdmin {
 					} catch(InterruptedException e) {
 						log.warn("could not sleep while throttling potential hacker", e);
 					}
-					// TODO inform admin better
+					// TODO IMPROVE inform admin better
 					log.warn("SECURITY: Potential hacking attempt on account '" + actorId + "'");
 					callback.onFailure(new QuotaException(MAX_FAILED_LOGIN_ATTEMPTS
 					        + " failed login attempts."));
