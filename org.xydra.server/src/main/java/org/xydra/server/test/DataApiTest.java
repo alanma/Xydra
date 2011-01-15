@@ -76,8 +76,8 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 	@Test
 	public void testGetObject() throws IOException {
 		
-		URL objectUrl = dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toURI() + "/").resolve(
-		        DemoModelUtil.JOHN_ID.toURI()).toURL();
+		URL objectUrl = dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toString() + "/").resolve(
+		        DemoModelUtil.JOHN_ID.toString()).toURL();
 		
 		MiniElement objectElement = loadXml(objectUrl);
 		assertNotNull(objectElement);
@@ -100,8 +100,8 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 	@Test
 	public void testGetField() throws IOException {
 		
-		URL fieldUrl = dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toURI() + "/").resolve(
-		        DemoModelUtil.JOHN_ID.toURI() + "/").resolve(DemoModelUtil.PHONE_ID.toURI())
+		URL fieldUrl = dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toString() + "/").resolve(
+		        DemoModelUtil.JOHN_ID.toString() + "/").resolve(DemoModelUtil.PHONE_ID.toString())
 		        .toURL();
 		
 		MiniElement fieldElement = loadXml(fieldUrl);
@@ -141,7 +141,7 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 	@Test
 	public void testGetBadObjectId() throws IOException {
 		
-		URL url = dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toURI() + "/").resolve(
+		URL url = dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toString() + "/").resolve(
 		        AbstractRestApiTest.BAD_ID).toURL();
 		
 		HttpURLConnection c = (HttpURLConnection)url.openConnection();
@@ -154,8 +154,8 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 	@Test
 	public void testGetBadFieldId() throws IOException {
 		
-		URL url = dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toURI() + "/").resolve(
-		        DemoModelUtil.JOHN_ID.toURI() + "/").resolve(AbstractRestApiTest.BAD_ID).toURL();
+		URL url = dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toString() + "/").resolve(
+		        DemoModelUtil.JOHN_ID.toString() + "/").resolve(AbstractRestApiTest.BAD_ID).toURL();
 		
 		HttpURLConnection c = (HttpURLConnection)url.openConnection();
 		setLoginDetails(c);
@@ -167,8 +167,8 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 	@Test
 	public void testGetMoreComponentsUrl() throws IOException {
 		
-		URL url = dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toURI() + "/").resolve(
-		        DemoModelUtil.JOHN_ID.toURI() + "/").resolve(DemoModelUtil.PHONE_ID + "/").resolve(
+		URL url = dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toString() + "/").resolve(
+		        DemoModelUtil.JOHN_ID.toString() + "/").resolve(DemoModelUtil.PHONE_ID + "/").resolve(
 		        AbstractRestApiTest.BAD_ID).toURL();
 		
 		HttpURLConnection c = (HttpURLConnection)url.openConnection();
@@ -193,7 +193,7 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 	@Test
 	public void testGetMissingObject() throws IOException {
 		
-		URL url = dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toURI() + "/").resolve(
+		URL url = dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toString() + "/").resolve(
 		        AbstractRestApiTest.MISSING_ID).toURL();
 		
 		HttpURLConnection c = (HttpURLConnection)url.openConnection();
@@ -206,8 +206,8 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 	@Test
 	public void testGetMissingField() throws IOException {
 		
-		URL url = dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toURI() + "/").resolve(
-		        DemoModelUtil.JOHN_ID.toURI() + "/").resolve(AbstractRestApiTest.MISSING_ID)
+		URL url = dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toString() + "/").resolve(
+		        DemoModelUtil.JOHN_ID.toString() + "/").resolve(AbstractRestApiTest.MISSING_ID)
 		        .toURL();
 		
 		HttpURLConnection c = (HttpURLConnection)url.openConnection();
@@ -299,7 +299,7 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		
 		XmlOutStringBuffer out = new XmlOutStringBuffer();
 		XmlModel.toXml(john, out, false, false, false);
-		postDataAndExpectHttpCreatedResponse(dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toURI())
+		postDataAndExpectHttpCreatedResponse(dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toString())
 		        .toURL(), out.getXml());
 		
 		XModel updatedModel = getRemoteModel(DemoModelUtil.PHONEBOOK_ID);
@@ -337,7 +337,7 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		XmlOutStringBuffer out = new XmlOutStringBuffer();
 		XmlModel.toXml(phone, out, false);
 		postDataAndExpectHttpCreatedResponse(dataapi.resolve(
-		        DemoModelUtil.PHONEBOOK_ID.toURI() + "/").resolve(DemoModelUtil.JOHN_ID.toURI())
+		        DemoModelUtil.PHONEBOOK_ID.toString() + "/").resolve(DemoModelUtil.JOHN_ID.toString())
 		        .toURL(), out.getXml());
 		
 		XModel updatedModel = getRemoteModel(DemoModelUtil.PHONEBOOK_ID);
@@ -360,7 +360,7 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 	@Test
 	public void testDeleteModel() throws IOException {
 		
-		URL url = dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toURI()).toURL();
+		URL url = dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toString()).toURL();
 		
 		deleteResource(url);
 		
@@ -377,8 +377,8 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		XModel oldModel = getRemoteModel(DemoModelUtil.PHONEBOOK_ID);
 		assertNotNull(oldModel);
 		
-		URL url = dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toURI() + "/").resolve(
-		        DemoModelUtil.JOHN_ID.toURI()).toURL();
+		URL url = dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toString() + "/").resolve(
+		        DemoModelUtil.JOHN_ID.toString()).toURL();
 		
 		deleteResource(url);
 		
@@ -404,8 +404,8 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		XModel oldModel = getRemoteModel(DemoModelUtil.PHONEBOOK_ID);
 		assertNotNull(oldModel);
 		
-		URL url = dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toURI() + "/").resolve(
-		        DemoModelUtil.JOHN_ID.toURI() + "/").resolve(DemoModelUtil.ALIASES_ID.toURI())
+		URL url = dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toString() + "/").resolve(
+		        DemoModelUtil.JOHN_ID.toString() + "/").resolve(DemoModelUtil.ALIASES_ID.toString())
 		        .toURL();
 		
 		deleteResource(url);

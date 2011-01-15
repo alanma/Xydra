@@ -212,7 +212,7 @@ public abstract class AbstractRestApiTest {
 	
 	protected XModel getRemoteModel(XID modelId) throws IOException {
 		
-		URL modelUrl = dataapi.resolve(modelId.toURI()).toURL();
+		URL modelUrl = dataapi.resolve(modelId.toString()).toURL();
 		
 		MiniElement modelElement = loadXml(modelUrl);
 		if(modelElement == null) {

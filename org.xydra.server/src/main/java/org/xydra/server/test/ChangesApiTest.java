@@ -320,8 +320,8 @@ public abstract class ChangesApiTest extends AbstractRestApiTest {
 	@Test
 	public void testGetMoreComponentsUrl() throws IOException {
 		
-		URL url = changesapi.resolve(DemoModelUtil.PHONEBOOK_ID.toURI() + "/").resolve(
-		        DemoModelUtil.JOHN_ID.toURI() + "/").resolve(DemoModelUtil.ALIASES_ID.toURI())
+		URL url = changesapi.resolve(DemoModelUtil.PHONEBOOK_ID.toString() + "/").resolve(
+		        DemoModelUtil.JOHN_ID.toString() + "/").resolve(DemoModelUtil.ALIASES_ID.toString())
 		        .toURL();
 		
 		HttpURLConnection c = (HttpURLConnection)url.openConnection();
@@ -346,7 +346,7 @@ public abstract class ChangesApiTest extends AbstractRestApiTest {
 	@Test
 	public void testGetChangesMissingObject() throws IOException {
 		
-		URL url = changesapi.resolve(DemoModelUtil.PHONEBOOK_ID.toURI() + "/").resolve(MISSING_ID)
+		URL url = changesapi.resolve(DemoModelUtil.PHONEBOOK_ID.toString() + "/").resolve(MISSING_ID)
 		        .toURL();
 		
 		HttpURLConnection c = (HttpURLConnection)url.openConnection();
@@ -416,7 +416,7 @@ public abstract class ChangesApiTest extends AbstractRestApiTest {
 		testSendCommand(command);
 		
 		// cleanup
-		deleteResource(dataapi.resolve(NEW_ID.toURI()).toURL());
+		deleteResource(dataapi.resolve(NEW_ID.toString()).toURL());
 		
 	}
 	
