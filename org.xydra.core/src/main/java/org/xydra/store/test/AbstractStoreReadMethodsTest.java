@@ -247,7 +247,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		assertNull(callback.getException());
 	}
 	
-	// Test for checking if the QuoateException works for checkLogin
+	// Test for checking if the QuoateException works for checkLogin - sloooow
 	@Test
 	public void testCheckLoginQuotaException() {
 		if(!this.incorrectActorExists || this.bfQuota < 0) {
@@ -261,7 +261,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		
 		assert this.bfQuota > 0;
 		// Testing the quota exception
-		for(long l = 0; l < this.bfQuota + 5; l++) {
+		for(long l = 0; l < this.bfQuota + 1; l++) {
 			callback = new SynchronousTestCallback<Boolean>();
 			
 			this.store.checkLogin(this.incorrectUser, this.incorrectUserPass, callback);
@@ -269,7 +269,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		
 		assert callback != null;
 		// should now return a QuotaException, since we exceeded the quota
-		// for failed login attempts by at least 5
+		// for failed login attempts by at least one
 		assertFalse(this.waitOnCallback(callback));
 		assertNull(callback.getEffect());
 		assertNotNull(callback.getException());
@@ -451,7 +451,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		// TODO Maybe test more complex mixes? (use objectadresses too?)
 	}
 	
-	// Testing the quota exception
+	// Testing the quota exception - sloooow
 	@Test
 	public void testGetModelSnapshotsQuotaExcpetion() {
 		if(!this.incorrectActorExists || this.bfQuota < 0) {
@@ -465,7 +465,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		XAddress[] tempArray = new XAddress[] { this.notExistingModel };
 		
 		assert this.bfQuota > 0;
-		for(long l = 0; l < this.bfQuota + 5; l++) {
+		for(long l = 0; l < this.bfQuota + 1; l++) {
 			callback = new SynchronousTestCallback<BatchedResult<XBaseModel>[]>();
 			
 			this.store.getModelSnapshots(this.incorrectUser, this.incorrectUserPass, tempArray,
@@ -474,7 +474,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		
 		assert (callback != null);
 		// should now return a QuotaException, since we exceeded the quota
-		// for failed login attempts by at least 5
+		// for failed login attempts by at least one
 		assertFalse(this.waitOnCallback(callback));
 		assertNull(callback.getEffect());
 		assertNotNull(callback.getException());
@@ -710,7 +710,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		XAddress[] tempArray = { this.notExistingModel };
 		
 		assert this.bfQuota > 0;
-		for(long l = 0; l < this.bfQuota + 5; l++) {
+		for(long l = 0; l < this.bfQuota + 1; l++) {
 			callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 			
 			this.store.getModelRevisions(this.incorrectUser, this.incorrectUserPass, tempArray,
@@ -719,7 +719,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		assert callback != null;
 		
 		// should now return a QuotaException, since we exceeded the quota
-		// for failed login attempts by at least 5
+		// for failed login attempts by at least one
 		assertFalse(this.waitOnCallback(callback));
 		assertNull(callback.getEffect());
 		assertNotNull(callback.getException());
@@ -915,7 +915,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		// TODO Maybe test more complex mixes?
 	}
 	
-	// Testing the quota exception
+	// Testing the quota exception - sloooow
 	@Test
 	public void testGetObjectSnapshotsQuotaException() {
 		if(!this.incorrectActorExists || this.bfQuota < 0) {
@@ -1071,7 +1071,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		
 	}
 	
-	// Testing the quota exception
+	// Testing the quota exception - sloooow
 	@Test
 	public void testGetModelIdsQuotaException() {
 		if(!this.incorrectActorExists || this.bfQuota < 0) {
@@ -1084,7 +1084,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		SynchronousTestCallback<Set<XID>> callback = null;
 		
 		assert this.bfQuota > 0;
-		for(long l = 0; l < this.bfQuota + 5; l++) {
+		for(long l = 0; l < this.bfQuota + 1; l++) {
 			callback = new SynchronousTestCallback<Set<XID>>();
 			
 			this.store.getModelIds(this.incorrectUser, this.incorrectUserPass, callback);
@@ -1092,7 +1092,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		assert callback != null;
 		
 		// should now return a QuotaException, since we exceeded the quota for
-		// failed login attempts by at least 5
+		// failed login attempts by at least one
 		assertFalse(this.waitOnCallback(callback));
 		assertNull(callback.getEffect());
 		assertNotNull(callback.getException());

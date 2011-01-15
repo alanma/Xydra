@@ -60,7 +60,7 @@ public class WritableUtils {
 		}
 		
 		@Override
-		public void onSuccess(BatchedResult<Long>[] object) {
+		public synchronized void onSuccess(BatchedResult<Long>[] object) {
 			assert object.length == 1;
 			/*
 			 * TODO better error handling if getResult is null because

@@ -12,6 +12,15 @@ import org.xydra.store.impl.delegating.DelegatingSecureStore;
 import org.xydra.store.test.AbstractStoreReadMethodsTest;
 
 
+/**
+ * TODO testing for quote exceptions is very slow, because the implementation
+ * lets the caller waiting for a long time to throttle the hacking attempt - all
+ * tests testing the quota stuff should go into another class so that this class
+ * can also be used for performance tests.
+ * 
+ * @author xamde
+ * 
+ */
 public class MemoryStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 	
 	protected XPasswordDatabase passwordDb = null;

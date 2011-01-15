@@ -71,7 +71,7 @@ public class DelegatingSecureStore implements XydraStore, XydraStoreAdmin {
 		this.allowAllStore = allowAllStore;
 		Credentials credentials = new Credentials(DelegatingAllowAllStore.INTERNAL_XYDRA_ADMIN_ID,
 		        "ignored");
-		this.groupModelWrapper = new GroupModelWrapper(credentials, this);
+		this.groupModelWrapper = new GroupModelWrapper(credentials, allowAllStore);
 		initialiseAccessRights();
 	}
 	
@@ -83,6 +83,7 @@ public class DelegatingSecureStore implements XydraStore, XydraStoreAdmin {
 	}
 	
 	public void checkLogin(XID actorId, String passwordHash, Callback<Boolean> callback) {
+		assertNonNullActorAndPassword(actorId, passwordHash);
 		assertNonNullCallback(callback);
 		if(actorId == null || passwordHash == null) {
 			throw new IllegalArgumentException("actorId and passwordHash must not be null");
@@ -129,6 +130,7 @@ public class DelegatingSecureStore implements XydraStore, XydraStoreAdmin {
 	
 	public void executeCommands(XID actorId, String passwordHash, XCommand[] commands,
 	        Callback<BatchedResult<Long>[]> callback) {
+		assertNonNullActorAndPassword(actorId, passwordHash);
 		if(validLogin(actorId, passwordHash, callback)) {
 			// TODO check access rights, not only login
 			this.allowAllStore.executeCommands(actorId, passwordHash, commands, callback);
@@ -138,6 +140,7 @@ public class DelegatingSecureStore implements XydraStore, XydraStoreAdmin {
 	public void executeCommandsAndGetEvents(XID actorId, String passwordHash, XCommand[] commands,
 	        GetEventsRequest[] getEventRequests,
 	        Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback) {
+		assertNonNullActorAndPassword(actorId, passwordHash);
 		if(validLogin(actorId, passwordHash, callback)) {
 			// TODO check access rights, not only login
 			this.allowAllStore.executeCommandsAndGetEvents(actorId, passwordHash, commands,
@@ -147,6 +150,7 @@ public class DelegatingSecureStore implements XydraStore, XydraStoreAdmin {
 	
 	public void getEvents(XID actorId, String passwordHash, GetEventsRequest[] getEventsRequest,
 	        Callback<BatchedResult<XEvent[]>[]> callback) {
+		assertNonNullActorAndPassword(actorId, passwordHash);
 		assertNonNullCallback(callback);
 		if(validLogin(actorId, passwordHash, callback)) {
 			// TODO check access rights, not only login
@@ -168,6 +172,7 @@ public class DelegatingSecureStore implements XydraStore, XydraStoreAdmin {
 	}
 	
 	public void getModelIds(XID actorId, String passwordHash, Callback<Set<XID>> callback) {
+		assertNonNullActorAndPassword(actorId, passwordHash);
 		assertNonNullCallback(callback);
 		if(validLogin(actorId, passwordHash, callback)) {
 			// TODO check access rights, not only login
@@ -177,6 +182,7 @@ public class DelegatingSecureStore implements XydraStore, XydraStoreAdmin {
 	
 	public void getModelRevisions(XID actorId, String passwordHash, XAddress[] modelAddresses,
 	        Callback<BatchedResult<Long>[]> callback) throws IllegalArgumentException {
+		assertNonNullActorAndPassword(actorId, passwordHash);
 		assertNonNullCallback(callback);
 		if(validLogin(actorId, passwordHash, callback)) {
 			this.allowAllStore.getModelRevisions(actorId, passwordHash, modelAddresses, callback);
@@ -185,6 +191,7 @@ public class DelegatingSecureStore implements XydraStore, XydraStoreAdmin {
 	
 	public void getModelSnapshots(XID actorId, String passwordHash, XAddress[] modelAddresses,
 	        Callback<BatchedResult<XBaseModel>[]> callback) throws IllegalArgumentException {
+		assertNonNullActorAndPassword(actorId, passwordHash);
 		assertNonNullCallback(callback);
 		if(validLogin(actorId, passwordHash, callback)) {
 			// TODO check access rights, not only login
@@ -192,8 +199,18 @@ public class DelegatingSecureStore implements XydraStore, XydraStoreAdmin {
 		}
 	}
 	
+	private void assertNonNullActorAndPassword(XID actorId, String passwordHash) {
+		if(actorId == null) {
+			throw new IllegalArgumentException("actorId may not be null");
+		}
+		if(passwordHash == null) {
+			throw new IllegalArgumentException("passwordHash may not be null");
+		}
+	}
+	
 	public void getObjectSnapshots(XID actorId, String passwordHash, XAddress[] objectAddresses,
 	        Callback<BatchedResult<XBaseObject>[]> callback) {
+		assertNonNullActorAndPassword(actorId, passwordHash);
 		assertNonNullCallback(callback);
 		if(validLogin(actorId, passwordHash, callback)) {
 			// TODO check access rights, not only login
@@ -214,6 +231,7 @@ public class DelegatingSecureStore implements XydraStore, XydraStoreAdmin {
 	}
 	
 	public void getRepositoryId(XID actorId, String passwordHash, Callback<XID> callback) {
+		assertNonNullActorAndPassword(actorId, passwordHash);
 		assertNonNullCallback(callback);
 		if(validLogin(actorId, passwordHash, callback)) {
 			// TODO check access rights, not only login
