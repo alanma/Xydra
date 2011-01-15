@@ -93,7 +93,7 @@ public class MetaModel {
 	 */
 	public MetaModel(XRepository repository, XModel baseModel) {
 		this.baseModel = baseModel;
-		XID metaModelID = X.getIDProvider().fromString(baseModel.getID().toURI() + "-meta");
+		XID metaModelID = X.getIDProvider().fromString(baseModel.getID().toString() + "-meta");
 		this.metaModel = repository.createModel(metaModelID);
 		// add built-ins
 		setNamespaceExpansion("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
@@ -160,7 +160,7 @@ public class MetaModel {
 	 * model
 	 */
 	public XObject getOrCreateAnnotationForModel(boolean create) {
-		String modelID = this.baseModel.getID().toURI();
+		String modelID = this.baseModel.getID().toString();
 		String metaID = escapeDots(modelID);
 		XID xid = X.getIDProvider().fromString(metaID);
 		if(create) {
@@ -176,8 +176,8 @@ public class MetaModel {
 	 * 'john' in the 'phonebook' model
 	 */
 	public XObject getOrCreateAnnotationForObject(XID objectIdInBaseModel, boolean create) {
-		String modelID = this.baseModel.getID().toURI();
-		String objectID = objectIdInBaseModel.toURI();
+		String modelID = this.baseModel.getID().toString();
+		String objectID = objectIdInBaseModel.toString();
 		String metaID = escapeDots(modelID) + "." + escapeDots(objectID);
 		XID xid = X.getIDProvider().fromString(metaID);
 		if(create) {
@@ -200,9 +200,9 @@ public class MetaModel {
 	 */
 	public XObject getOrCreateAnnotationForField(XID objectIdInBaseModel, XID fieldIdInBaseModel,
 	        boolean create) {
-		String modelID = this.baseModel.getID().toURI();
-		String objectID = objectIdInBaseModel.toURI();
-		String fieldId = fieldIdInBaseModel.toURI();
+		String modelID = this.baseModel.getID().toString();
+		String objectID = objectIdInBaseModel.toString();
+		String fieldId = fieldIdInBaseModel.toString();
 		String metaID = escapeDots(modelID) + "." + escapeDots(objectID) + "."
 		        + escapeDots(fieldId);
 		XID xid = X.getIDProvider().fromString(metaID);

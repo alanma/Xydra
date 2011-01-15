@@ -13,7 +13,7 @@ public class SID extends SValue {
 	}
 	
 	public void toSyntax(StringBuffer buf) {
-		buf.append(this.value.toURI());
+		buf.append(this.value.toString());
 	}
 	
 }
