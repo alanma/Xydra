@@ -381,7 +381,7 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 				long startTime = now();
 				newChange.setUnindexedProperty(PROP_LAST_ACTIVITY, startTime);
 				if(actorId != null) {
-					newChange.setUnindexedProperty(PROP_ACTOR, actorId.toURI());
+					newChange.setUnindexedProperty(PROP_ACTOR, actorId.toString());
 				}
 				
 				GaeUtils.putEntity(newChange, trans);
@@ -1135,7 +1135,8 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	/**
 	 * Get the event at the specified revision number.
 	 * 
-	 * @see XydraStore#getEvents(XID, String, GetEventsRequest[], org.xydra.store.Callback)
+	 * @see XydraStore#getEvents(XID, String, GetEventsRequest[],
+	 *      org.xydra.store.Callback)
 	 */
 	public XEvent getEventAt(long rev) {
 		

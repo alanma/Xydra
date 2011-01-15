@@ -13,36 +13,36 @@ import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XType;
-import org.xydra.core.model.XWritableRepository;
 import org.xydra.store.RequestException;
+import org.xydra.store.impl.delegating.XydraBlockingPersistence;
 
 
 /**
- * Mapping all calls to an underlying {@link XWritableRepository}.
+ * Stores state in memory. Each model is managed as a
+ * {@link MemoryModelPersistence}.
  * 
  * @author voelkel
  * @author dscharrer
  */
-public class MemoryNoAccessRightsNoBatchNoAsyncStore implements
-        XydraNoAccessRightsNoBatchNoAsyncStore {
+public class MemoryBlockingPersistence implements XydraBlockingPersistence {
 	
 	private XID repoId;
 	
-	private Map<XID,MemoryModelService> models = new HashMap<XID,MemoryModelService>();
+	private Map<XID,MemoryModelPersistence> models = new HashMap<XID,MemoryModelPersistence>();
 	
-	public MemoryNoAccessRightsNoBatchNoAsyncStore(XID repositoryId) {
+	public MemoryBlockingPersistence(XID repositoryId) {
 		this.repoId = repositoryId;
 	}
 	
-	private MemoryModelService getModelService(XID modelId) {
+	private MemoryModelPersistence getModelService(XID modelId) {
 		if(modelId == null) {
 			throw new IllegalArgumentException("modelId must not be null");
 		}
 		synchronized(this.models) {
-			MemoryModelService ms = this.models.get(modelId);
+			MemoryModelPersistence ms = this.models.get(modelId);
 			if(ms == null) {
 				XAddress modelAddr = XX.toAddress(this.repoId, modelId, null, null);
-				ms = new MemoryModelService(modelAddr);
+				ms = new MemoryModelPersistence(modelAddr);
 				this.models.put(modelId, ms);
 			}
 			return ms;
@@ -112,6 +112,11 @@ public class MemoryNoAccessRightsNoBatchNoAsyncStore implements
 	@Override
 	public XID getRepositoryId() {
 		return this.repoId;
+	}
+	
+	@Override
+	public void clear() {
+		this.models.clear();
 	}
 	
 }

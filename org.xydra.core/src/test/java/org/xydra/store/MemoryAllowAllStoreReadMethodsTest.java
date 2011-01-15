@@ -4,8 +4,8 @@ import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommandFactory;
 import org.xydra.core.model.XID;
-import org.xydra.store.impl.memory.MemoryNoAccessRightsNoBatchNoAsyncStore;
-import org.xydra.store.impl.memory.SynchronousNoAccessRightsStore;
+import org.xydra.store.impl.delegating.DelegatingAsyncBatchPersistence;
+import org.xydra.store.impl.memory.MemoryBlockingPersistence;
 import org.xydra.store.test.AbstractAllowAllStoreReadMethodsTest;
 
 
@@ -15,8 +15,8 @@ public class MemoryAllowAllStoreReadMethodsTest extends AbstractAllowAllStoreRea
 	@Override
 	protected XydraStore getStore() {
 		if(this.store == null) {
-			this.store = getNewStore(new SynchronousNoAccessRightsStore(
-			        new MemoryNoAccessRightsNoBatchNoAsyncStore(this.repositoryID)));
+			this.store = getNewStore(new DelegatingAsyncBatchPersistence(
+			        new MemoryBlockingPersistence(this.repositoryID)));
 		}
 		
 		return this.store;

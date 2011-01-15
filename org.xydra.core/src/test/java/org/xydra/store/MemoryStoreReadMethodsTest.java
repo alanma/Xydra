@@ -9,7 +9,7 @@ import org.xydra.core.model.XID;
 import org.xydra.store.access.GroupModelWrapper;
 import org.xydra.store.access.XPasswordDatabase;
 import org.xydra.store.base.HashUtils;
-import org.xydra.store.impl.memory.MemoryStore;
+import org.xydra.store.impl.delegating.DelegatingSecureStore;
 import org.xydra.store.test.AbstractStoreReadMethodsTest;
 
 
@@ -24,7 +24,7 @@ public class MemoryStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 			return this.store;
 		}
 		
-		this.store = new MemoryStore();
+		this.store = new DelegatingSecureStore();
 		
 		return this.store;
 	}
@@ -41,7 +41,7 @@ public class MemoryStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 		 * me how to actually work with the access rights here. ~Bjoern
 		 */
 		if(this.gmw == null) {
-			this.gmw = ((MemoryStore)this.getStore()).getGroupModelWrapper();
+			this.gmw = ((DelegatingSecureStore)this.getStore()).getGroupModelWrapper();
 		}
 		XPasswordDatabase pwdbase = this.gmw;
 		
@@ -67,7 +67,7 @@ public class MemoryStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 		 * me how to actually work with the access rights here. ~Bjoern
 		 */
 		if(this.gmw == null) {
-			this.gmw = ((MemoryStore)this.getStore()).getGroupModelWrapper();
+			this.gmw = ((DelegatingSecureStore)this.getStore()).getGroupModelWrapper();
 		}
 		XPasswordDatabase pwdbase = this.gmw;
 		
@@ -88,7 +88,7 @@ public class MemoryStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 	
 	@Override
 	protected long getQuotaForBruteForce() {
-		return MemoryStore.MAX_FAILED_LOGIN_ATTEMPTS;
+		return DelegatingSecureStore.MAX_FAILED_LOGIN_ATTEMPTS;
 	}
 	
 	@Override

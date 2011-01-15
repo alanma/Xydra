@@ -2,13 +2,13 @@ package org.xydra.store.test;
 
 import org.xydra.core.XX;
 import org.xydra.core.model.XID;
-import org.xydra.store.impl.memory.AllowAllStore;
-import org.xydra.store.impl.memory.XydraNoAccessRightsStore;
+import org.xydra.store.impl.delegating.DelegatingAllowAllStore;
+import org.xydra.store.impl.delegating.XydraAsyncBatchPersistence;
 
 
 /**
  * This is an abstract class capsuling behaviour that is the same for all
- * instantiations of {@link AllowAllStore}.
+ * instantiations of {@link DelegatingAllowAllStore}.
  * 
  * 
  * @author Kaidel
@@ -19,11 +19,11 @@ public abstract class AbstractAllowAllStoreReadMethodsTest extends AbstractStore
 	
 	/**
 	 * Returns a new instance of AllowAllStore initialized with the given
-	 * {@link XydraNoAccessRightsStore}. This makes it possible to reuse this
+	 * {@link XydraAsyncBatchPersistence}. This makes it possible to reuse this
 	 * test with different instantiations.
 	 */
-	public AllowAllStore getNewStore(XydraNoAccessRightsStore base) {
-		return new AllowAllStore(base);
+	public DelegatingAllowAllStore getNewStore(XydraAsyncBatchPersistence base) {
+		return new DelegatingAllowAllStore(base);
 	}
 	
 	/**

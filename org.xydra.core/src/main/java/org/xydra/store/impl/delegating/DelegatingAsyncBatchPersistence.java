@@ -1,4 +1,4 @@
-package org.xydra.store.impl.memory;
+package org.xydra.store.impl.delegating;
 
 import java.util.Set;
 
@@ -15,17 +15,17 @@ import org.xydra.store.GetEventsRequest;
 
 
 /**
- * An implementation of {@link XydraNoAccessRightsStore} that maps all async
- * batch calls to an instance of {@link XydraNoAccessRightsNoBatchNoAsyncStore}
- * which treats them as single-operation blocking call.
+ * An implementation of {@link XydraAsyncBatchPersistence} that maps all
+ * asynchronous batch calls to an instance of {@link XydraBlockingPersistence} which
+ * treats them as single-operation blocking call.
  * 
  * @author voelkel
  */
-public class SynchronousNoAccessRightsStore implements XydraNoAccessRightsStore {
+public class DelegatingAsyncBatchPersistence implements XydraAsyncBatchPersistence {
 	
-	protected XydraNoAccessRightsNoBatchNoAsyncStore noBatchStore;
+	protected XydraBlockingPersistence noBatchStore;
 	
-	public SynchronousNoAccessRightsStore(XydraNoAccessRightsNoBatchNoAsyncStore base) {
+	public DelegatingAsyncBatchPersistence(XydraBlockingPersistence base) {
 		this.noBatchStore = base;
 	}
 	
@@ -195,6 +195,11 @@ public class SynchronousNoAccessRightsStore implements XydraNoAccessRightsStore 
 		}
 		XID repoId = this.noBatchStore.getRepositoryId();
 		callback.onSuccess(repoId);
+	}
+	
+	@Override
+	public void clear() {
+		this.noBatchStore.clear();
 	}
 	
 }

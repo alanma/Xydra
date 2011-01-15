@@ -6,7 +6,7 @@
  * {@link org.xydra.core.model.XBaseField} which can be used synchronously on
  * the server-side.
  * 
- * They faclitate the implementation of the access rights manager.
+ * They facilitate the implementation of the access rights manager.
  */
 package org.xydra.store.base;
 

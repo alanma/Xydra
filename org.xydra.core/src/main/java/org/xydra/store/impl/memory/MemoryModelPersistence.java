@@ -19,13 +19,13 @@ import org.xydra.store.base.SimpleModel;
 
 
 /**
- * A helper class used by {@link MemoryNoAccessRightsNoBatchNoAsyncStore} to
+ * A helper class used by {@link MemoryBlockingPersistence} to
  * manage individual models.
  * 
  * @author dscharrer
  * 
  */
-public class MemoryModelService {
+public class MemoryModelPersistence {
 	
 	XAddress modelAddr;
 	
@@ -36,7 +36,7 @@ public class MemoryModelService {
 	private SimpleModel model = null;
 	private List<XEvent> events = new ArrayList<XEvent>();
 	
-	public MemoryModelService(XAddress modelAddr) {
+	public MemoryModelPersistence(XAddress modelAddr) {
 		this.modelAddr = modelAddr;
 	}
 	

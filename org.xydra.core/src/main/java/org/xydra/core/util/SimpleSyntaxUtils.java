@@ -183,14 +183,14 @@ public class SimpleSyntaxUtils {
 		}
 		Collections.sort(sortedObjectIDS, new Comparator<XID>() {
 			public int compare(XID o1, XID o2) {
-				return o1.toURI().compareTo(o2.toURI());
+				return o1.toString().compareTo(o2.toString());
 			}
 		});
 		
 		for(XID objectID : sortedObjectIDS) {
 			XObject object = model.getObject(objectID);
 			if(object.isEmpty()) {
-				buf.append(objectID.toURI()).append("\n");
+				buf.append(objectID.toString()).append("\n");
 			} else {
 				
 				// sort
@@ -200,12 +200,12 @@ public class SimpleSyntaxUtils {
 				}
 				Collections.sort(sortedFieldIDS, new Comparator<XID>() {
 					public int compare(XID o1, XID o2) {
-						return o1.toURI().compareTo(o2.toURI());
+						return o1.toString().compareTo(o2.toString());
 					}
 				});
 				
 				for(XID fieldID : sortedFieldIDS) {
-					buf.append(objectID.toURI()).append(".").append(fieldID.toURI()).append("=");
+					buf.append(objectID.toString()).append(".").append(fieldID.toString()).append("=");
 					XField field = object.getField(fieldID);
 					if(!field.isEmpty()) {
 						XValue value = field.getValue();

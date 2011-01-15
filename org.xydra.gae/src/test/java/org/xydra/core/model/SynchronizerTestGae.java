@@ -6,9 +6,9 @@ import org.xydra.core.model.state.XSPI;
 import org.xydra.core.model.state.impl.memory.TemporaryStateStore;
 import org.xydra.core.test.TestLogger;
 import org.xydra.core.test.model.AbstractSynchronizerTest;
+import org.xydra.store.impl.delegating.DelegatingAllowAllStore;
 import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.impl.gae.GaeXydraStore;
-import org.xydra.store.impl.memory.AllowAllStore;
 
 
 public class SynchronizerTestGae extends AbstractSynchronizerTest {
@@ -20,7 +20,7 @@ public class SynchronizerTestGae extends AbstractSynchronizerTest {
 		XSPI.setStateStore(new TemporaryStateStore());
 		actorId = XX.toId("tester");
 		passwordHash = "top secret";
-		store = new AllowAllStore(new GaeXydraStore(XX.toId("repo")));
+		store = new DelegatingAllowAllStore(new GaeXydraStore(XX.toId("repo")));
 	}
 	
 }

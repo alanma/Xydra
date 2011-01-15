@@ -10,7 +10,6 @@
  * implemented individually, without requiring other packages.
  * 
  * @author voelkel
- * 
  */
 package org.xydra.core;
 

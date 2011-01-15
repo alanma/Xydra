@@ -144,6 +144,10 @@ public interface XydraStore {
 	 * @param modelAddresses an array of {@link XAddress} for which models to
 	 *            get snapshots. Each {@link XAddress} must address an
 	 *            {@link XModel} (repositoryId/modelId/-/-).
+	 * 
+	 *            TODO How can a client request a specific version of a
+	 *            snapshot?
+	 * 
 	 * @param callback Asynchronous callback to signal success or failure. On
 	 *            success, an array of {@link BatchedResult} is returned, in the
 	 *            same order of the modelAddresses given in the request. A null
@@ -345,7 +349,7 @@ public interface XydraStore {
 	 *            non-negative number indicates the resulting revision number of
 	 *            the changed entity.
 	 * 
-	 *            For successful commands that changed something, the the return
+	 *            For successful commands that changed something, the return
 	 *            value is always a revision number that can be used to retrieve
 	 *            the corresponding event using {@link #getEvents()}
 	 * 
@@ -472,6 +476,14 @@ public interface XydraStore {
 	        GetEventsRequest[] getEventRequests,
 	        Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback)
 	        throws IllegalArgumentException;
+	
+	/**
+	 * @return a {@link XydraStoreAdmin} interface that contains local
+	 *         administration functions that are not exposed via REST.
+	 *         Client-side implementations that do not allow any of these
+	 *         administrative methods may return null.
+	 */
+	XydraStoreAdmin getXydraStoreAdmin();
 	
 	/* rights by convention, TODO document */
 

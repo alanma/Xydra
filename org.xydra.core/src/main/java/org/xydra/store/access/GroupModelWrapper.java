@@ -1,6 +1,5 @@
 package org.xydra.store.access;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -19,9 +18,14 @@ import org.xydra.core.model.XWritableRepository;
 import org.xydra.core.value.XIDSetValue;
 import org.xydra.core.value.XStringValue;
 import org.xydra.core.value.XValue;
+import org.xydra.index.impl.FastEntrySetFactory;
+import org.xydra.index.impl.MapSetIndex;
+import org.xydra.index.query.EqualsConstraint;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.NamingUtils;
 import org.xydra.store.XydraStore;
+import org.xydra.store.XydraStoreAdmin;
 import org.xydra.store.base.Credentials;
 import org.xydra.store.base.HashUtils;
 import org.xydra.store.base.WritableRepository;
@@ -33,7 +37,7 @@ import org.xydra.store.base.WritableRepository;
  * 
  * <h3>Implementation Note</h3>
  * 
- * Data modelling:
+ * <h4>Data modelling</h4> Group membership (group->actors)
  * 
  * <pre>
  * objectId | fieldId     | value
@@ -41,13 +45,17 @@ import org.xydra.store.base.WritableRepository;
  * groupId  | "hasMember" | {@link XIDSetValue} actors
  * </pre>
  * 
+ * Passwords
+ * 
  * <pre>
  * objectId | fieldId           | value
  * ---------+-------------------+----------------------------
  * actorId  | "hasPasswordHash" | the password hash (see {@link HashUtils})
  * </pre>
  * 
- * Indexes:
+ * 
+ * <h3>FUTURE IMPL -- currently index is in memory only</h3> <h4>Indexes for
+ * faster access</h4> Group membership (actor->groups)
  * 
  * <pre>
  * objectId | fieldId     | value
@@ -70,88 +78,28 @@ public class GroupModelWrapper implements XGroupDatabase, XPasswordDatabase {
 	
 	private static final long serialVersionUID = 3858107275113200924L;
 	
-	private static void addToXIDSetValueInObject(XWritableModel model, XID objectId, XID fieldId,
-	        XID addedValue) {
-		log.trace(objectId + " " + fieldId + " " + addedValue + " .");
-		
-		XWritableObject object = model.getObject(objectId);
-		if(object == null) {
-			object = model.createObject(objectId);
-		}
-		XWritableField field = object.getField(fieldId);
-		if(field == null) {
-			field = object.createField(fieldId);
-		}
-		XValue currentValue = field.getValue();
-		if(currentValue == null) {
-			currentValue = X.getValueFactory().createIDSetValue(new XID[] { addedValue });
-		} else {
-			currentValue = ((XIDSetValue)currentValue).add(addedValue);
-		}
-		field.setValue(currentValue);
-	}
+	private XWritableModel dataModel;
 	
-	private static void removeFromXIDSetValueInObject(XWritableModel model, XID objectId,
-	        XID fieldId, XID removedValue) {
-		XWritableObject object = model.getObject(objectId);
-		if(object == null) {
-			return;
-		}
-		XWritableField field = object.getField(fieldId);
-		if(field == null) {
-			return;
-		}
-		XValue currentValue = field.getValue();
-		if(currentValue == null) {
-			return;
-		} else {
-			currentValue = ((XIDSetValue)currentValue).remove(removedValue);
-		}
-		field.setValue(currentValue);
-	}
-	
-	private static Set<XID> getXIDSetValue(XWritableModel model, XID objectId, XID fieldId) {
-		XWritableObject object = model.getObject(objectId);
-		if(object == null) {
-			return Collections.emptySet();
-		}
-		XWritableField field = object.getField(fieldId);
-		if(field == null) {
-			return Collections.emptySet();
-		}
-		XValue value = field.getValue();
-		return ((XIDSetValue)value).toSet();
-	}
-	
-	private static boolean valueContainsId(XWritableModel model, XID objectId, XID fieldId,
-	        XID valueId) {
-		XWritableObject object = model.getObject(objectId);
-		if(object == null) {
-			throw new IllegalArgumentException("Object " + objectId + " not found");
-		}
-		XWritableField field = object.getField(fieldId);
-		if(field == null) {
-			return false;
-		}
-		XValue value = field.getValue();
-		return ((XIDSetValue)value).contains(valueId);
-	}
-	
-	// FIXME get credentials from config settings
-	private Credentials credentials = new Credentials(XX.toId("__accessManager"), "TODO");
-	
-	private XWritableModel dataModel, indexModel;
+	private MapSetIndex<XID,XID> actor2groups = null;
 	
 	/**
+	 * @param credentials to authenticate and authorise to store
 	 * @param store
-	 * @param repositoryId
-	 * @param modelId
 	 */
-	public GroupModelWrapper(XydraStore store, XID modelId) {
-		XWritableRepository repository = new WritableRepository(this.credentials, store);
-		this.dataModel = repository.createModel(modelId);
-		// FIXME a malicious user might be able to overwrite this index
-		this.indexModel = repository.createModel(XX.toId(modelId + "-index-by-actor"));
+	public GroupModelWrapper(XydraStore store) {
+		Credentials credentials;
+		XydraStoreAdmin admin = store.getXydraStoreAdmin();
+		if(admin != null) {
+			// use XydraAdmin account
+			credentials = new Credentials(XydraStoreAdmin.XYDRA_ADMIN_ID,
+			        admin.getXydraAdminPasswordHash());
+		} else {
+			// use a bogus account and hope the store has an allow-all policy
+			credentials = new Credentials(XX.toId("GroupModelWrapper"),
+			        HashUtils.getXydraPasswordHash("secret"));
+		}
+		XWritableRepository repository = new WritableRepository(credentials, store);
+		this.dataModel = repository.createModel(NamingUtils.ID_ACCOUNT_MODEL);
 	}
 	
 	/**
@@ -162,24 +110,38 @@ public class GroupModelWrapper implements XGroupDatabase, XPasswordDatabase {
 	 */
 	protected GroupModelWrapper(XRepository repository, XID modelId) {
 		this.dataModel = repository.createModel(modelId);
-		this.indexModel = repository.createModel(XX.toId(modelId + "-index-by-actor"));
 	}
 	
 	@Override
 	public void addToGroup(XID actorId, XID groupId) {
-		addToXIDSetValueInObject(this.dataModel, groupId, hasMember, actorId);
-		addToXIDSetValueInObject(this.indexModel, actorId, isMemberOf, groupId);
+		XidSetValueUtils.addToXIDSetValueInObject(this.dataModel, groupId, hasMember, actorId);
+		
+		ensureIndexIsInitialised();
+		this.actor2groups.index(actorId, groupId);
+	}
+	
+	private void ensureIndexIsInitialised() {
+		if(this.actor2groups == null) {
+			this.actor2groups = new MapSetIndex<XID,XID>(new FastEntrySetFactory<XID>());
+		}
 	}
 	
 	@Override
 	public Set<XID> getGroupsOf(XID actor) {
-		return getXIDSetValue(this.indexModel, actor, isMemberOf);
+		ensureIndexIsInitialised();
+		Iterator<XID> it = this.actor2groups.constraintIterator(new EqualsConstraint<XID>(actor));
+		Set<XID> result = new HashSet<XID>();
+		while(it.hasNext()) {
+			XID xid = it.next();
+			result.add(xid);
+		}
+		return result;
 	}
 	
 	/* transitive */
 	@Override
 	public Set<XID> getMembersOf(XID group) {
-		return getXIDSetValue(this.dataModel, group, hasMember);
+		return XidSetValueUtils.getXIDSetValue(this.dataModel, group, hasMember);
 	}
 	
 	/* direct */
@@ -196,13 +158,16 @@ public class GroupModelWrapper implements XGroupDatabase, XPasswordDatabase {
 	
 	@Override
 	public boolean hasGroup(XID actor, XID group) {
-		return valueContainsId(this.indexModel, actor, isMemberOf, group);
+		ensureIndexIsInitialised();
+		return this.actor2groups.contains(new EqualsConstraint<XID>(actor),
+		        new EqualsConstraint<XID>(group));
 	}
 	
 	@Override
 	public void removeFromGroup(XID actorId, XID groupId) {
-		removeFromXIDSetValueInObject(this.dataModel, groupId, hasMember, actorId);
-		removeFromXIDSetValueInObject(this.indexModel, actorId, isMemberOf, groupId);
+		XidSetValueUtils.removeFromXIDSetValueInObject(this.dataModel, groupId, hasMember, actorId);
+		ensureIndexIsInitialised();
+		this.actor2groups.deIndex(actorId, groupId);
 	}
 	
 	public void dump() {

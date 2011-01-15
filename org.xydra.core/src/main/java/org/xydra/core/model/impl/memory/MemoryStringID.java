@@ -24,7 +24,8 @@ public class MemoryStringID implements XID {
 		this.string = uriString;
 	}
 	
-	public String toURI() {
+	@Override
+	public String toString() {
 		return this.string;
 	}
 	
@@ -38,19 +39,14 @@ public class MemoryStringID implements XID {
 		if(other instanceof MemoryStringID) {
 			return ((MemoryStringID)other).string.equals(this.string);
 		} else if(other instanceof XID) {
-			return ((XID)other).toURI().equals(this.string);
+			return ((XID)other).toString().equals(this.string);
 		} else {
 			return false;
 		}
 	}
 	
-	@Override
-	public String toString() {
-		return toURI();
-	}
-	
 	public int compareTo(XID o) {
-		return this.toURI().compareTo(o.toURI());
+		return this.toString().compareTo(o.toString());
 	}
 	
 }

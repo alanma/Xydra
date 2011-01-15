@@ -1,4 +1,4 @@
-package org.xydra.store.impl.memory;
+package org.xydra.store.impl.delegating;
 
 import java.util.Set;
 
@@ -13,29 +13,28 @@ import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.XydraStore;
+import org.xydra.store.XydraStoreAdmin;
 
 
 /**
  * A simple in-memory implementation of {@link XydraStore} that allows
  * everything and simply ignores all actorId and passwordHash parameters.
  * 
- * Delegates all calls to a simpler {@link XydraNoAccessRightsStore}.
- * 
- * TODO should share code with gae impl
+ * Delegates all calls to a simpler {@link XydraAsyncBatchPersistence}.
  * 
  * @author voelkel
- * 
  */
-public class AllowAllStore implements XydraStore {
+public class DelegatingAllowAllStore implements XydraStore, XydraStoreAdmin {
 	
-	protected XydraNoAccessRightsStore storeWithoutAccessRights;
+	protected XydraAsyncBatchPersistence storeWithoutAccessRights;
+	private String xydraAdminPasswordHash;
 	
-	public AllowAllStore(XydraNoAccessRightsStore base) {
+	public DelegatingAllowAllStore(XydraAsyncBatchPersistence base) {
 		this.storeWithoutAccessRights = base;
 	}
 	
-	public AllowAllStore(XydraNoAccessRightsNoBatchNoAsyncStore base) {
-		this.storeWithoutAccessRights = new SynchronousNoAccessRightsStore(base);
+	public DelegatingAllowAllStore(XydraBlockingPersistence base) {
+		this.storeWithoutAccessRights = new DelegatingAsyncBatchPersistence(base);
 	}
 	
 	@Override
@@ -121,5 +120,34 @@ public class AllowAllStore implements XydraStore {
 			throw new IllegalArgumentException("actorID and/or passwordHash were null");
 		}
 		this.storeWithoutAccessRights.getRepositoryId(callback);
+	}
+	
+	@Override
+	public XydraStoreAdmin getXydraStoreAdmin() {
+		return this;
+	}
+	
+	@Override
+	public XydraStore getXydraStore() {
+		return this;
+	}
+	
+	@Override
+	public void clear() {
+		this.storeWithoutAccessRights.clear();
+	}
+	
+	@Override
+	public void setXydraAdminPasswordHash(String xydraAdminPasswordHash) {
+		/**
+		 * this store ignores the XydraAdmin as ANY user may do EVERYTHING
+		 * already. We store it only to fulfill the XydraStoreAdmin interface
+		 */
+		this.xydraAdminPasswordHash = xydraAdminPasswordHash;
+	}
+	
+	@Override
+	public String getXydraAdminPasswordHash() {
+		return this.xydraAdminPasswordHash;
 	}
 }

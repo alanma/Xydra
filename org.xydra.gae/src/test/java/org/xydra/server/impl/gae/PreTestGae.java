@@ -3,7 +3,6 @@ package org.xydra.server.impl.gae;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.xydra.server.impl.gae.GaeXydraServer;
 import org.xydra.server.test.PreTest;
 import org.xydra.store.impl.gae.GaeTestfixer;
 

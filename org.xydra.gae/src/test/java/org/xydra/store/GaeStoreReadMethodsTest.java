@@ -8,9 +8,9 @@ import org.xydra.core.XX;
 import org.xydra.core.change.XCommandFactory;
 import org.xydra.core.model.XID;
 import org.xydra.store.access.GroupModelWrapper;
+import org.xydra.store.impl.delegating.DelegatingSecureStore;
 import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.impl.gae.GaeXydraStore;
-import org.xydra.store.impl.memory.MemoryStore;
 import org.xydra.store.test.AbstractStoreReadMethodsTest;
 
 
@@ -42,7 +42,7 @@ public class GaeStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 		 * me how to actually work with the access rights here. ~Bjoern
 		 */
 		if(this.gmw == null) {
-			this.gmw = ((MemoryStore)this.getStore()).getGroupModelWrapper();
+			this.gmw = ((DelegatingSecureStore)this.getStore()).getGroupModelWrapper();
 		}
 		
 		XID actorId = XX.createUniqueID();

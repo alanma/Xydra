@@ -21,6 +21,7 @@ import org.xydra.core.value.XValue;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.NamingUtils;
 import org.xydra.store.XydraStore;
 import org.xydra.store.base.Credentials;
 import org.xydra.store.base.WritableRepository;
@@ -52,61 +53,9 @@ public class AccessModelWrapper implements XAccessDatabase {
 	
 	private static final long serialVersionUID = 3858107275113200924L;
 	
-	private static final String NULL_ENCODED = "_N";
-	
-	private static final String SEPARATOR = "_.";
-	
 	// FIXME get credentials from config settings
 	private static final Credentials credentials = new Credentials(XX.toId("__accessManager"),
 	        "TODO");
-	
-	/**
-	 * @param address
-	 * @return
-	 */
-	public static String encode(XAddress address) {
-		if(address == null) {
-			return "_N";
-		} else {
-			return encode(address.getRepository()) + SEPARATOR + encode(address.getModel())
-			        + SEPARATOR + encode(address.getObject()) + SEPARATOR
-			        + encode(address.getField());
-		}
-	}
-	
-	public static String encode(XID xid) {
-		if(xid == null) {
-			return NULL_ENCODED;
-		} else {
-			String enc = xid.toURI();
-			enc.replace("_", "__");
-			// now we can safely use "_." as a separator
-			return enc;
-		}
-	}
-	
-	public static XID decodeXid(String encodedXid) {
-		if(encodedXid.equals(NULL_ENCODED)) {
-			return null;
-		} else {
-			String dec = encodedXid.replace("__", "_");
-			return XX.toId(dec);
-		}
-	}
-	
-	public static XAddress decodeXAddress(String encodedXAddress) {
-		if(encodedXAddress.equals(NULL_ENCODED)) {
-			return null;
-		} else {
-			String[] encParts = encodedXAddress.split("_\\.");
-			if(encParts.length != 4) {
-				throw new IllegalArgumentException("Encoded address consits not of four parts: "
-				        + encodedXAddress);
-			}
-			return X.getIDProvider().fromComponents(decodeXid(encParts[0]), decodeXid(encParts[1]),
-			        decodeXid(encParts[2]), decodeXid(encParts[3]));
-		}
-	}
 	
 	private static void setValueInObject(XWritableModel model, XID objectId, XID fieldId,
 	        boolean value) {
@@ -258,20 +207,22 @@ public class AccessModelWrapper implements XAccessDatabase {
 	}
 	
 	private static final XID toFieldId(XAddress resource, XID access) {
-		return XX.toId(encode(resource) + SEPARATOR + encode(access));
+		return XX.toId(NamingUtils.encode(resource) + NamingUtils.ENCODING_SEPARATOR
+		        + NamingUtils.encode(access));
 	}
 	
 	/**
 	 * @return XAddress resource, XID access
 	 */
 	private static final Object[] fromFieldId(XID fieldId) {
-		String[] parts = fieldId.toURI().split("_\\.");
-		return new Object[] { decodeXAddress(parts[0]), decodeXid(parts[1]) };
+		String[] parts = fieldId.toString().split("_\\.");
+		return new Object[] { NamingUtils.decodeXAddress(parts[0]), NamingUtils.decodeXid(parts[1]) };
 	}
 	
 	@Override
 	public void setAccess(XID actor, XAddress resource, XID access, boolean allowed) {
-		XID fieldId = XX.toId(encode(resource) + SEPARATOR + encode(access));
+		XID fieldId = XX.toId(NamingUtils.encode(resource) + NamingUtils.ENCODING_SEPARATOR
+		        + NamingUtils.encode(access));
 		setValueInObject(this.dataModel, actor, fieldId, allowed);
 	}
 	

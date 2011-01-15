@@ -1,4 +1,4 @@
-package org.xydra.store.impl.memory;
+package org.xydra.store.impl.delegating;
 
 import java.util.Set;
 
@@ -9,6 +9,7 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.impl.memory.UUID;
 import org.xydra.index.query.Pair;
 import org.xydra.store.AuthorisationException;
 import org.xydra.store.BatchedResult;
@@ -16,70 +17,55 @@ import org.xydra.store.Callback;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.QuotaException;
 import org.xydra.store.XydraStore;
+import org.xydra.store.XydraStoreAdmin;
 import org.xydra.store.access.GroupModelWrapper;
 import org.xydra.store.access.XGroupDatabase;
 import org.xydra.store.access.XPasswordDatabase;
+import org.xydra.store.base.HashUtils;
+import org.xydra.store.impl.memory.MemoryBlockingPersistence;
 
 
 /**
  * An in-memory implementation of {@link XydraStore} that uses internally two
- * {@link AllowAllStore} instances. One for storing the actual repository data
- * and one for all data related to access rights.
+ * {@link DelegatingAllowAllStore} instances. One for storing the actual
+ * repository data and one for all data related to access rights.
  * 
  * A {@link GroupModelWrapper} is used to use repository as a
  * {@link XGroupDatabase}.
  * 
- * @author voelkel
- */
-/**
  * @author xamde
  * 
+ *         TODO Implementation of "failed-login-attack"-prevention currently
+ *         treats all actors together. Once any actor is authenticated, another
+ *         15 malicious attempts can be performed by any actors. failed login
+ *         attempts need to be registered for each actorId separately. We should
+ *         improve this.
  */
-public class MemoryStore implements XydraStore {
+public class DelegatingSecureStore implements XydraStore, XydraStoreAdmin {
 	
 	/**
 	 * Maximal number of failed login attempts for this store.
 	 */
 	public static final int MAX_FAILED_LOGIN_ATTEMPTS = 10;
 	
-	private final AllowAllStore data;
-	private final AllowAllStore rights;
+	private final DelegatingAllowAllStore data;
 	private final GroupModelWrapper groupModelWrapper;
 	private int failedLoginAttempts;
+	private String xydraAdminAccountPasswordHash;
 	
-	/*
-	 * TODO Implementation of "failed-login-attack"-prevention is a bit strange
-	 * in my opinion. Exceeding MAX_FAILED_LOGIN_ATTEMPTS results in a complete
-	 * shut-down of this store, and does not only hinder one specific account
-	 * from trying to log-in as I would expect something like this to work.
-	 * Maybe we should discuss & improve this? ~Bjoern
-	 */
-
-	/**
-	 * @param data
-	 * @param rights
-	 */
-	public MemoryStore() {
-		this(new AllowAllStore(new MemoryNoAccessRightsNoBatchNoAsyncStore(XX.toId("data"))),
-		        new AllowAllStore(new MemoryNoAccessRightsNoBatchNoAsyncStore(XX.toId("rights"))));
+	public DelegatingSecureStore() {
+		this(new DelegatingAllowAllStore(new MemoryBlockingPersistence(XX.toId("data"))));
 	}
 	
 	/**
-	 * @param data
-	 * @param rights
+	 * @param data is used internally to store used data and access rights and
+	 *            accounts.
 	 */
-	public MemoryStore(AllowAllStore data, AllowAllStore rights) {
-		/*
-		 * TODO Daniel: why not store both data and rights in the same store
-		 * instance, but with different repository IDs? max: That would make the
-		 * concept of a repository as the largest possible unit of data
-		 * obsolete. "One repo = all data" makes maintenance (backups) easier.
-		 */
-		this.data = new AllowAllStore(new MemoryNoAccessRightsNoBatchNoAsyncStore(XX.toId("data")));
-		this.rights = new AllowAllStore(new MemoryNoAccessRightsNoBatchNoAsyncStore(
-		        XX.toId("rights")));
-		this.groupModelWrapper = new GroupModelWrapper(this.rights, XX.toId("actors"));
+	public DelegatingSecureStore(DelegatingAllowAllStore data) {
+		this.data = data;
 		this.failedLoginAttempts = 0;
+		this.groupModelWrapper = new GroupModelWrapper(this);
+		initialiseAccessRights();
 	}
 	
 	/**
@@ -122,7 +108,9 @@ public class MemoryStore implements XydraStore {
 		try {
 			boolean authenticated = this.groupModelWrapper.isValidLogin(actorId, passwordHash);
 			
-			if(!authenticated) {
+			if(authenticated) {
+				this.failedLoginAttempts = 0;
+			} else {
 				this.failedLoginAttempts++;
 				if(this.failedLoginAttempts >= MAX_FAILED_LOGIN_ATTEMPTS) {
 					callback.onFailure(new QuotaException(MAX_FAILED_LOGIN_ATTEMPTS
@@ -131,7 +119,6 @@ public class MemoryStore implements XydraStore {
 					// do not call onSuccess after this occurred
 					return;
 				}
-				
 			}
 			callback.onSuccess(authenticated);
 		} catch(Exception e) {
@@ -198,6 +185,7 @@ public class MemoryStore implements XydraStore {
 				        + actorId + "/" + passwordHash));
 			}
 		} else {
+			this.failedLoginAttempts = 0;
 			this.data.getModelIds(actorId, passwordHash, callback);
 		}
 	}
@@ -219,6 +207,7 @@ public class MemoryStore implements XydraStore {
 				        + actorId + "/" + passwordHash));
 			}
 		} else {
+			this.failedLoginAttempts = 0;
 			this.data.getModelRevisions(actorId, passwordHash, modelAddresses, callback);
 		}
 	}
@@ -240,6 +229,7 @@ public class MemoryStore implements XydraStore {
 				        + actorId + "/" + passwordHash));
 			}
 		} else {
+			this.failedLoginAttempts = 0;
 			// FIXME check access rights
 			// FIXME need to check the repoId on modelAddresses and load from
 			// this.rights instead if requested ARM data
@@ -265,6 +255,7 @@ public class MemoryStore implements XydraStore {
 				        + actorId + "/" + passwordHash));
 			}
 		} else {
+			this.failedLoginAttempts = 0;
 			this.data.getObjectSnapshots(actorId, passwordHash, objectAddresses, callback);
 		}
 	}
@@ -274,6 +265,7 @@ public class MemoryStore implements XydraStore {
 			throw new IllegalArgumentException(
 			        "callback for side-effect free methods must not be null");
 		}
+		assert this.groupModelWrapper != null;
 		if(!this.groupModelWrapper.isValidLogin(actorId, passwordHash)) {
 			this.failedLoginAttempts++;
 			
@@ -285,8 +277,48 @@ public class MemoryStore implements XydraStore {
 				        + actorId + "/" + passwordHash));
 			}
 		} else {
+			this.failedLoginAttempts = 0;
 			this.data.getRepositoryId(actorId, passwordHash, callback);
 		}
+	}
+	
+	@Override
+	public XydraStoreAdmin getXydraStoreAdmin() {
+		return this;
+	}
+	
+	@Override
+	public XydraStore getXydraStore() {
+		return this;
+	}
+	
+	@Override
+	public void clear() {
+		this.data.clear();
+		initialiseAccessRights();
+	}
+	
+	/**
+	 * Set up a XydraAdmin account, to ensure this account is always defined.
+	 */
+	private void initialiseAccessRights() {
+		// initialise XydraAdmin pass with a long, random string
+		String password = UUID.uuid(100);
+		String passwordHash = HashUtils.getXydraPasswordHash(password);
+		setXydraAdminPasswordHash(passwordHash);
+	}
+	
+	@Override
+	public void setXydraAdminPasswordHash(String passwordHash) {
+		// set in object instance
+		this.xydraAdminAccountPasswordHash = passwordHash;
+		// persists admin account in store
+		this.groupModelWrapper.setPasswordHash(XYDRA_ADMIN_ID, passwordHash);
+	}
+	
+	@Override
+	public String getXydraAdminPasswordHash() {
+		return this.xydraAdminAccountPasswordHash;
 	}
 	
 }

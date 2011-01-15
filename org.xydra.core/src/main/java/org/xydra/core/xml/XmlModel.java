@@ -400,7 +400,7 @@ public class XmlModel {
 	        boolean ignoreInaccessible, boolean saveChangeLog) {
 		
 		xo.open(XREPOSITORY_ELEMENT);
-		xo.attribute(XmlUtils.XID_ATTRIBUTE, xrepository.getID().toURI());
+		xo.attribute(XmlUtils.XID_ATTRIBUTE, xrepository.getID().toString());
 		
 		for(XID modelOd : xrepository) {
 			try {
@@ -460,7 +460,7 @@ public class XmlModel {
 		long rev = xmodel.getRevisionNumber();
 		
 		xo.open(XMODEL_ELEMENT);
-		xo.attribute(XmlUtils.XID_ATTRIBUTE, xmodel.getID().toURI());
+		xo.attribute(XmlUtils.XID_ATTRIBUTE, xmodel.getID().toString());
 		if(saveRevision) {
 			xo.attribute(REVISION_ATTRIBUTE, Long.toString(rev));
 		}
@@ -529,7 +529,7 @@ public class XmlModel {
 		long rev = xobject.getRevisionNumber();
 		
 		xo.open(XOBJECT_ELEMENT);
-		xo.attribute(XmlUtils.XID_ATTRIBUTE, xobject.getID().toURI());
+		xo.attribute(XmlUtils.XID_ATTRIBUTE, xobject.getID().toString());
 		if(saveRevision) {
 			xo.attribute(REVISION_ATTRIBUTE, Long.toString(rev));
 		}
@@ -591,7 +591,7 @@ public class XmlModel {
 		long rev = xfield.getRevisionNumber();
 		
 		xo.open(XFIELD_ELEMENT);
-		xo.attribute(XmlUtils.XID_ATTRIBUTE, xfield.getID().toURI());
+		xo.attribute(XmlUtils.XID_ATTRIBUTE, xfield.getID().toString());
 		if(saveRevision) {
 			xo.attribute(REVISION_ATTRIBUTE, Long.toString(rev));
 		}

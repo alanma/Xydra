@@ -91,7 +91,7 @@ public class TestObjectIndex {
 	public void testValueToXID() {
 		for(XValue value : allSingleValueTypes()) {
 			XID id = ObjectIndex.valueToXID(value);
-			id.toURI();
+			id.toString();
 		}
 	}
 	

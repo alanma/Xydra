@@ -23,25 +23,27 @@ public class MemoryStringIDProvider implements XIDProvider {
 	        + "\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D"
 	        + "\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF" + "\\uFDF0-\\uFFFD";
 	// the XML spec also allows 5-digit unicode characters
-	// (\u10000-\uEFFFF) but Java can't handle them as char ist 16-bit only.
+	// (\u10000-\uEFFFF) but Java can't handle them as char datatype is 16-bit
+	// only.
 	private static final String nameChar = nameStartChar
 	        + "\\-\\.0-9\\xB7\\u0300-\u036F\\u203F-\\u2040";
 	private static final String nameRegex = "[" + nameStartChar + "][" + nameChar + "]*";
 	
-	// IMPROVE precompiling the regex in a java.util.regex.Pattern is faster,
-	// but GWT doesn't support that class
-	
+	/*
+	 * IMPROVE precompiling the regex in a java.util.regex.Pattern is faster,
+	 * but GWT doesn't support that class
+	 */
+
 	public XID createUniqueID() {
+		/* leading 'a' ensures legal XML name */
 		return new MemoryStringID("a" + UUID.uuid());
 	}
 	
 	public XID fromString(String uriString) {
-		
 		if(!uriString.matches(nameRegex)) {
 			throw new IllegalArgumentException("'" + uriString
 			        + "' is not a valid XML name or contains ':', cannot create XID");
 		}
-		
 		return new MemoryStringID(uriString);
 	}
 	

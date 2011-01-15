@@ -17,8 +17,8 @@ import org.xydra.store.XydraStore;
 
 
 /**
- * At creation time the {@link XydraStore} is consulted once to fetch a fresh
- * snapshot.
+ * An {@link XBaseRepository} which pulls state <em>once</em> lazily via a
+ * snapshot from a local {@link XydraStore}.
  * 
  * @author voelkel
  */
@@ -32,7 +32,8 @@ public class BaseRepository implements XBaseRepository, Serializable {
 	protected XydraStore store;
 	
 	/**
-	 * @param credentials
+	 * @param credentials active credentials which are used to authenticate and
+	 *            authorise to the XydraStore.
 	 * @param store must be in the same VM and may not be accessed over a
 	 *            network.
 	 */
@@ -64,6 +65,7 @@ public class BaseRepository implements XBaseRepository, Serializable {
 		long c = 1;
 		while(this.repositoryId == null && c < 1000) {
 			try {
+				// TODO implement smarter with wait()?
 				Thread.sleep(c);
 			} catch(InterruptedException e) {
 			}

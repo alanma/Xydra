@@ -12,7 +12,7 @@ import org.xydra.core.test.TestLogger;
 import org.xydra.store.access.XGroupDatabase;
 import org.xydra.store.access.XPasswordDatabase;
 import org.xydra.store.base.HashUtils;
-import org.xydra.store.impl.memory.MemoryStore;
+import org.xydra.store.impl.delegating.DelegatingSecureStore;
 
 
 /**
@@ -22,7 +22,7 @@ import org.xydra.store.impl.memory.MemoryStore;
  */
 public class AccessControlTest {
 	
-	private MemoryStore store;
+	private DelegatingSecureStore store;
 	
 	@BeforeClass
 	public static void init() {
@@ -31,7 +31,7 @@ public class AccessControlTest {
 	
 	@Before
 	public void before() {
-		this.store = new MemoryStore();
+		this.store = new DelegatingSecureStore();
 	}
 	
 	static final XID user1 = XX.toId("user1");

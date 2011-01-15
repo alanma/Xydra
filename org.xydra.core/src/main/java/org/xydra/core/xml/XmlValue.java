@@ -993,7 +993,7 @@ public class XmlValue {
 		xo.open(XID_ELEMENT);
 		
 		if(xvalue != null) {
-			xo.content(xvalue.toURI());
+			xo.content(xvalue.toString());
 		} else {
 			xo.attribute(NULL_ATTRIBUTE, NULL_VALUE);
 		}

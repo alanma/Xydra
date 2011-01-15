@@ -20,10 +20,11 @@ public interface XID extends XValue, Serializable, Comparable<XID> {
 	// TODO conversion to URI, byte[] and String
 	
 	/**
-	 * To convert this XID to a byte[] representation use the ByteUtils.
+	 * To convert this XID to a byte[] representation use the ByteUtils (TBD).
 	 * 
-	 * @return a valid URI TODO explain exact notion of valid
+	 * @return a compact String which can be turned into an XID again via
+	 *         {@link XIDProvider#fromString(String)}
 	 */
-	String toURI();
+	String toString();
 	
 }

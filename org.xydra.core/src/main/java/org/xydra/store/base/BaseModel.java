@@ -14,8 +14,8 @@ import org.xydra.store.XydraStore;
 
 
 /**
- * At creation time the {@link XydraStore} is consulted once to fetch a fresh
- * snapshot.
+ * An {@link XBaseModel} which pulls state <em>once</em> lazily via a snapshot
+ * from a local {@link XydraStore}.
  * 
  * @author voelkel
  */
@@ -46,8 +46,9 @@ public class BaseModel implements XBaseModel, Serializable {
 	}
 	
 	protected void load() {
-		this.store.getModelSnapshots(this.credentials.getActorId(), this.credentials.getPasswordHash(),
-		        new XAddress[] { this.address }, new Callback<BatchedResult<XBaseModel>[]>() {
+		this.store.getModelSnapshots(this.credentials.getActorId(),
+		        this.credentials.getPasswordHash(), new XAddress[] { this.address },
+		        new Callback<BatchedResult<XBaseModel>[]>() {
 			        
 			        @Override
 			        public void onFailure(Throwable error) {

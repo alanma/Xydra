@@ -15,12 +15,12 @@ import org.xydra.core.model.XType;
 import org.xydra.server.impl.InfrastructureServiceFactory;
 import org.xydra.store.RequestException;
 import org.xydra.store.XydraStore;
+import org.xydra.store.impl.delegating.DelegatingAllowAllStore;
+import org.xydra.store.impl.delegating.DelegatingSecureStore;
+import org.xydra.store.impl.delegating.XydraBlockingPersistence;
 import org.xydra.store.impl.gae.changes.GaeChangesService;
 import org.xydra.store.impl.gae.changes.InternalGaeXEntity;
 import org.xydra.store.impl.gae.snapshot.GaeSnapshotService;
-import org.xydra.store.impl.memory.AllowAllStore;
-import org.xydra.store.impl.memory.MemoryStore;
-import org.xydra.store.impl.memory.XydraNoAccessRightsNoBatchNoAsyncStore;
 
 
 /**
@@ -29,7 +29,7 @@ import org.xydra.store.impl.memory.XydraNoAccessRightsNoBatchNoAsyncStore;
  * 
  * @author dscharrer
  */
-public class GaeXydraStore implements XydraNoAccessRightsNoBatchNoAsyncStore {
+public class GaeXydraStore implements XydraBlockingPersistence {
 	
 	private final XAddress repoAddr;
 	
@@ -142,8 +142,7 @@ public class GaeXydraStore implements XydraNoAccessRightsNoBatchNoAsyncStore {
 	}
 	
 	static public XydraStore get() {
-		return new MemoryStore(new AllowAllStore(new GaeXydraStore(getDefaultRepositoryId())),
-		        new AllowAllStore(new GaeXydraStore(XX.toId("rights"))));
+		return new DelegatingSecureStore(new DelegatingAllowAllStore(new GaeXydraStore(getDefaultRepositoryId())));
 	}
 	
 	/**
@@ -153,6 +152,11 @@ public class GaeXydraStore implements XydraNoAccessRightsNoBatchNoAsyncStore {
 	 */
 	static public XID getDefaultRepositoryId() {
 		return XX.toId("data");
+	}
+	
+	@Override
+	public void clear() {
+		// FIXME implement: delete ALL local data
 	}
 	
 }

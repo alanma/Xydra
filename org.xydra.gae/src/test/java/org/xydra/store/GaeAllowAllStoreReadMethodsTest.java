@@ -10,9 +10,9 @@ import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommandFactory;
 import org.xydra.core.model.XID;
+import org.xydra.store.impl.delegating.DelegatingAsyncBatchPersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.impl.gae.GaeXydraStore;
-import org.xydra.store.impl.memory.SynchronousNoAccessRightsStore;
 import org.xydra.store.test.AbstractAllowAllStoreReadMethodsTest;
 import org.xydra.store.test.SynchronousTestCallback;
 
@@ -25,7 +25,7 @@ public class GaeAllowAllStoreReadMethodsTest extends AbstractAllowAllStoreReadMe
 	protected XydraStore getStore() {
 		if(this.store == null) {
 			GaeTestfixer.enable();
-			this.store = getNewStore(new SynchronousNoAccessRightsStore(new GaeXydraStore(
+			this.store = getNewStore(new DelegatingAsyncBatchPersistence(new GaeXydraStore(
 			        this.repositoryID)));
 		}
 		
