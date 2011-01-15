@@ -16,6 +16,7 @@ import org.xydra.core.model.XWritableModel;
 import org.xydra.core.model.XWritableObject;
 import org.xydra.core.model.XWritableRepository;
 import org.xydra.core.value.XIDSetValue;
+import org.xydra.core.value.XIntegerValue;
 import org.xydra.core.value.XStringValue;
 import org.xydra.core.value.XValue;
 import org.xydra.index.impl.FastEntrySetFactory;
@@ -25,7 +26,6 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.NamingUtils;
 import org.xydra.store.XydraStore;
-import org.xydra.store.XydraStoreAdmin;
 import org.xydra.store.base.Credentials;
 import org.xydra.store.base.HashUtils;
 import org.xydra.store.base.WritableRepository;
@@ -37,7 +37,18 @@ import org.xydra.store.base.WritableRepository;
  * 
  * <h3>Implementation Note</h3>
  * 
- * <h4>Data modelling</h4> Group membership (group->actors)
+ * <h4>Data modelling</h4>
+ * 
+ * Accounts (Passwords, failed login attempts)
+ * 
+ * <pre>
+ * objectId | fieldId                  | value
+ * ---------+--------------------------+----------------------------
+ * actorId  | "hasPasswordHash"        | the password hash (see {@link HashUtils})
+ * actorId  | "hasFailedLoginAttempts" | if present: number of failed login attempts
+ * </pre>
+ * 
+ * Group membership (group->actors)
  * 
  * <pre>
  * objectId | fieldId     | value
@@ -45,21 +56,13 @@ import org.xydra.store.base.WritableRepository;
  * groupId  | "hasMember" | {@link XIDSetValue} actors
  * </pre>
  * 
- * Passwords
- * 
- * <pre>
- * objectId | fieldId           | value
- * ---------+-------------------+----------------------------
- * actorId  | "hasPasswordHash" | the password hash (see {@link HashUtils})
- * </pre>
- * 
  * 
  * <h3>FUTURE IMPL -- currently index is in memory only</h3> <h4>Indexes for
  * faster access</h4> Group membership (actor->groups)
  * 
  * <pre>
- * objectId | fieldId     | value
- * ---------+-------------+----------------------------
+ * objectId | fieldId      | value
+ * ---------+--------------+----------------------------
  * actorId  | "isMemberOf" | {@link XIDSetValue} groupIds
  * </pre>
  * 
@@ -75,6 +78,7 @@ public class GroupModelWrapper implements XGroupDatabase, XPasswordDatabase {
 	public static final XID hasMember = XX.toId("hasMember");
 	public static final XID isMemberOf = XX.toId("isMemberOf");
 	public static final XID hasPasswordHash = XX.toId("hasPasswordHash");
+	public static final XID hasFailedLoginAttempts = XX.toId("hasFailedLoginAttempts");
 	
 	private static final long serialVersionUID = 3858107275113200924L;
 	
@@ -86,18 +90,7 @@ public class GroupModelWrapper implements XGroupDatabase, XPasswordDatabase {
 	 * @param credentials to authenticate and authorise to store
 	 * @param store
 	 */
-	public GroupModelWrapper(XydraStore store) {
-		Credentials credentials;
-		XydraStoreAdmin admin = store.getXydraStoreAdmin();
-		if(admin != null) {
-			// use XydraAdmin account
-			credentials = new Credentials(XydraStoreAdmin.XYDRA_ADMIN_ID,
-			        admin.getXydraAdminPasswordHash());
-		} else {
-			// use a bogus account and hope the store has an allow-all policy
-			credentials = new Credentials(XX.toId("GroupModelWrapper"),
-			        HashUtils.getXydraPasswordHash("secret"));
-		}
+	public GroupModelWrapper(Credentials credentials, XydraStore store) {
 		XWritableRepository repository = new WritableRepository(credentials, store);
 		this.dataModel = repository.createModel(NamingUtils.ID_ACCOUNT_MODEL);
 	}
@@ -210,23 +203,86 @@ public class GroupModelWrapper implements XGroupDatabase, XPasswordDatabase {
 	}
 	
 	@Override
+	public int incrementFailedLoginAttempts(XID actorId) {
+		XWritableObject actor = this.dataModel.getObject(actorId);
+		if(actor == null) {
+			actor = this.dataModel.createObject(actorId);
+		}
+		XWritableField field = actor.getField(hasFailedLoginAttempts);
+		if(field == null) {
+			field = actor.createField(hasFailedLoginAttempts);
+			field.setValue(X.getValueFactory().createIntegerValue(1));
+			return 1;
+		} else {
+			// increment
+			int failedAttempts = ((XIntegerValue)field.getValue()).contents();
+			failedAttempts++;
+			field.setValue(X.getValueFactory().createIntegerValue(failedAttempts));
+			return failedAttempts;
+		}
+	}
+	
+	@Override
+	public void resetFailedLoginAttempts(XID actorId) {
+		XWritableObject actor = this.dataModel.getObject(actorId);
+		if(actor == null) {
+			return;
+		}
+		XWritableField field = actor.getField(hasFailedLoginAttempts);
+		if(field == null) {
+			return;
+		} else {
+			actor.removeField(hasFailedLoginAttempts);
+		}
+	}
+	
+	@Override
+	public int getFailedLoginAttempts(XID actorId) {
+		if(actorId == null) {
+			throw new IllegalArgumentException("actorId must not be null");
+		}
+		XWritableObject actor = this.dataModel.getObject(actorId);
+		if(actor == null) {
+			return 0;
+		}
+		XWritableField field = actor.getField(hasPasswordHash);
+		if(field == null) {
+			return 0;
+		}
+		XValue value = field.getValue();
+		if(value == null) {
+			return 0;
+		}
+		return ((XIntegerValue)value).contents();
+	}
+	
+	@Override
 	public boolean isValidLogin(XID actorId, String passwordHash) {
 		if(actorId == null || passwordHash == null) {
 			throw new IllegalArgumentException("actorId and passwordHash must not be null");
 		}
+		
+		String storedPasswordHash = getPasswordHash(actorId);
+		return passwordHash.equals(storedPasswordHash);
+	}
+	
+	@Override
+	public String getPasswordHash(XID actorId) {
+		if(actorId == null) {
+			throw new IllegalArgumentException("actorId must not be null");
+		}
 		XWritableObject actor = this.dataModel.getObject(actorId);
 		if(actor == null) {
-			return false;
+			return null;
 		}
 		XWritableField field = actor.getField(hasPasswordHash);
 		if(field == null) {
-			return false;
+			return null;
 		}
 		XValue value = field.getValue();
 		if(value == null) {
-			return false;
+			return null;
 		}
-		return ((XStringValue)value).contents().equals(passwordHash);
+		return ((XStringValue)value).contents();
 	}
-	
 }

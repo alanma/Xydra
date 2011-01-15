@@ -6,6 +6,7 @@ import org.xydra.core.X;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
+import org.xydra.core.model.XBaseRepository;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XWritableField;
 import org.xydra.core.model.XWritableModel;
@@ -15,7 +16,10 @@ import org.xydra.store.XydraStore;
 
 
 /**
- * Uses an internal {@link XBaseModel} snapshot.
+ * Extends a {@link XBaseRepository} with write operations. Write operations are
+ * immediately translated to commands against the underlying {@link XydraStore}
+ * and executed. Then the implementation blocks until the store asynchronously
+ * responds.
  * 
  * @author voelkel
  */

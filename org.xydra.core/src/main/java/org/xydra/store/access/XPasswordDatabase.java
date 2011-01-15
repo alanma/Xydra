@@ -17,6 +17,12 @@ public interface XPasswordDatabase {
 	
 	/**
 	 * @param actorId
+	 * @return the stored password hash or null if there is none
+	 */
+	String getPasswordHash(XID actorId);
+	
+	/**
+	 * @param actorId
 	 */
 	void removePasswordHash(XID actorId);
 	
@@ -26,5 +32,26 @@ public interface XPasswordDatabase {
 	 * @return
 	 */
 	boolean isValidLogin(XID actorId, String passwordHash);
+	
+	/**
+	 * Set number of failed login attempts back to zero.
+	 * 
+	 * @param actorId
+	 */
+	void resetFailedLoginAttempts(XID actorId);
+	
+	/**
+	 * Increment number of failed login attempts.
+	 * 
+	 * @param actorId
+	 * @return TODO
+	 */
+	int incrementFailedLoginAttempts(XID actorId);
+	
+	/**
+	 * @param actorId
+	 * @return number of failed loging attempts.
+	 */
+	int getFailedLoginAttempts(XID actorId);
 	
 }

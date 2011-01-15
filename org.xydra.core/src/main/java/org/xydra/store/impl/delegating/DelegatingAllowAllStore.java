@@ -2,6 +2,7 @@ package org.xydra.store.impl.delegating;
 
 import java.util.Set;
 
+import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
@@ -22,19 +23,28 @@ import org.xydra.store.XydraStoreAdmin;
  * 
  * Delegates all calls to a simpler {@link XydraAsyncBatchPersistence}.
  * 
+ * <h3>Security Warning</h3>
+ * 
+ * This store has a built-in internal XydraAdmin account with the name
+ * 'internal--XydraAdmin'. Password is ignored, use 'ignored' in places where
+ * you need one. Secure implementations using this
+ * {@link DelegatingAllowAllStore} MUST deny any operation (read or write)
+ * executed with this account.
+ * 
  * @author voelkel
  */
 public class DelegatingAllowAllStore implements XydraStore, XydraStoreAdmin {
 	
-	protected XydraAsyncBatchPersistence storeWithoutAccessRights;
-	private String xydraAdminPasswordHash;
+	public static final XID INTERNAL_XYDRA_ADMIN_ID = XX.toId("internal--" + XYDRA_ADMIN_ID);
 	
-	public DelegatingAllowAllStore(XydraAsyncBatchPersistence base) {
-		this.storeWithoutAccessRights = base;
+	protected XydraAsyncBatchPersistence storeWithoutAccessRights;
+	
+	public DelegatingAllowAllStore(XydraAsyncBatchPersistence asyncBatchPersistence) {
+		this.storeWithoutAccessRights = asyncBatchPersistence;
 	}
 	
-	public DelegatingAllowAllStore(XydraBlockingPersistence base) {
-		this.storeWithoutAccessRights = new DelegatingAsyncBatchPersistence(base);
+	public DelegatingAllowAllStore(XydraBlockingPersistence blockingPersistence) {
+		this(new DelegatingAsyncBatchPersistence(blockingPersistence));
 	}
 	
 	@Override
@@ -139,15 +149,11 @@ public class DelegatingAllowAllStore implements XydraStore, XydraStoreAdmin {
 	
 	@Override
 	public void setXydraAdminPasswordHash(String xydraAdminPasswordHash) {
-		/**
-		 * this store ignores the XydraAdmin as ANY user may do EVERYTHING
-		 * already. We store it only to fulfill the XydraStoreAdmin interface
-		 */
-		this.xydraAdminPasswordHash = xydraAdminPasswordHash;
+		throw new UnsupportedOperationException("This store has no access control.");
 	}
 	
 	@Override
 	public String getXydraAdminPasswordHash() {
-		return this.xydraAdminPasswordHash;
+		throw new UnsupportedOperationException("This store has no access control.");
 	}
 }
