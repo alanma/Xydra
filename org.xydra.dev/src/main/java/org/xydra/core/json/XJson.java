@@ -47,7 +47,7 @@ public class XJson {
 	private static void asJsonString(XBaseField xfield, JSONWriter jsonWriter) {
 		try {
 			jsonWriter.objectStart();
-			jsonWriter.key(xfield.getID().toURI());
+			jsonWriter.key(xfield.getID().toString());
 			asJsonString(xfield.getValue(), jsonWriter);
 			jsonWriter.objectEnd();
 		} catch(JSONException e) {
@@ -65,7 +65,7 @@ public class XJson {
 	private static void asJsonString(XBaseModel xmodel, JSONWriter jsonWriter) {
 		try {
 			jsonWriter.objectStart();
-			jsonWriter.key(xmodel.getID().toURI());
+			jsonWriter.key(xmodel.getID().toString());
 			jsonWriter.arrayStart();
 			for(XID objectID : xmodel) {
 				XBaseObject xo = xmodel.getObject(objectID);
@@ -88,7 +88,7 @@ public class XJson {
 	private static void asJsonString(XBaseObject xobject, JSONWriter jsonWriter) {
 		try {
 			jsonWriter.objectStart();
-			jsonWriter.key(xobject.getID().toURI());
+			jsonWriter.key(xobject.getID().toString());
 			jsonWriter.arrayStart();
 			for(XID fieldID : xobject) {
 				XBaseField xf = xobject.getField(fieldID);
@@ -119,7 +119,7 @@ public class XJson {
 			} else if(xvalue instanceof XDoubleValue) {
 				jsonWriter.value(((XDoubleValue)xvalue).contents());
 			} else if(xvalue instanceof XID) {
-				jsonWriter.value(((XID)xvalue).toURI());
+				jsonWriter.value(((XID)xvalue).toString());
 			} else if(xvalue instanceof XIntegerValue) {
 				jsonWriter.value(((XIntegerValue)xvalue).contents());
 			} else if(xvalue instanceof XLongValue) {
@@ -151,7 +151,7 @@ public class XJson {
 				}
 			} else if(xlistvalue instanceof XIDListValue) {
 				for(XID xid : ((XIDListValue)xlistvalue)) {
-					jsonWriter.value(xid.toURI());
+					jsonWriter.value(xid.toString());
 				}
 			} else if(xlistvalue instanceof XIntegerListValue) {
 				for(Integer i : ((XIntegerListValue)xlistvalue)) {
