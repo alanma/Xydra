@@ -101,7 +101,7 @@ public class DelegatingSecureStore implements XydraStore, XydraStoreAdmin {
 			} else {
 				int failedLoginAttempts = this.groupModelWrapper
 				        .incrementFailedLoginAttempts(actorId);
-				if(failedLoginAttempts >= MAX_FAILED_LOGIN_ATTEMPTS) {
+				if(failedLoginAttempts > MAX_FAILED_LOGIN_ATTEMPTS) {
 					/* let user wait 10 seconds and inform administrator */
 					try {
 						Thread.sleep(10 * 1000);
@@ -290,7 +290,7 @@ public class DelegatingSecureStore implements XydraStore, XydraStoreAdmin {
 			return true;
 		} else {
 			int failedLoginAttempts = this.groupModelWrapper.incrementFailedLoginAttempts(actorId);
-			if(failedLoginAttempts >= MAX_FAILED_LOGIN_ATTEMPTS) {
+			if(failedLoginAttempts > MAX_FAILED_LOGIN_ATTEMPTS) {
 				/* let user wait 10 seconds and inform administrator */
 				try {
 					Thread.sleep(10 * 1000);
