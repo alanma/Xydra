@@ -6,7 +6,6 @@ import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommandFactory;
 import org.xydra.core.model.XID;
-import org.xydra.store.access.GroupModelWrapper;
 import org.xydra.store.access.XPasswordDatabase;
 import org.xydra.store.base.HashUtils;
 import org.xydra.store.impl.delegating.DelegatingSecureStore;
@@ -15,7 +14,7 @@ import org.xydra.store.test.AbstractStoreReadMethodsTest;
 
 public class MemoryStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 	
-	protected GroupModelWrapper gmw = null;
+	protected XPasswordDatabase passwordDb = null;
 	protected String correctPass = "Test";
 	
 	@Override
@@ -36,21 +35,17 @@ public class MemoryStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 	
 	@Override
 	protected XID getCorrectUser() {
-		/*
-		 * FIXME this whole method probably needs to be changed, after Max tells
-		 * me how to actually work with the access rights here. ~Bjoern
-		 */
-		if(this.gmw == null) {
-			this.gmw = ((DelegatingSecureStore)this.getStore()).getGroupModelWrapper();
+		if(this.passwordDb == null) {
+			this.passwordDb = ((DelegatingSecureStore)this.getStore()).getPasswordDatabase();
 		}
-		XPasswordDatabase pwdbase = this.gmw;
+		XPasswordDatabase pwdbase = this.passwordDb;
 		
 		XID actorId = XX.createUniqueID();
 		
-		if(!this.gmw.isValidLogin(actorId, this.getCorrectUserPasswordHash())) {
+		if(!this.passwordDb.isValidLogin(actorId, this.getCorrectUserPasswordHash())) {
 			pwdbase.setPasswordHash(actorId, HashUtils.getXydraPasswordHash(this.correctPass));
 		}
-		assertTrue(this.gmw.isValidLogin(actorId, this.getCorrectUserPasswordHash()));
+		assertTrue(this.passwordDb.isValidLogin(actorId, this.getCorrectUserPasswordHash()));
 		
 		return actorId;
 	}
@@ -66,17 +61,17 @@ public class MemoryStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 		 * FIXME this whole method probably needs to be changed, after Max tells
 		 * me how to actually work with the access rights here. ~Bjoern
 		 */
-		if(this.gmw == null) {
-			this.gmw = ((DelegatingSecureStore)this.getStore()).getGroupModelWrapper();
+		if(this.passwordDb == null) {
+			this.passwordDb = ((DelegatingSecureStore)this.getStore()).getPasswordDatabase();
 		}
-		XPasswordDatabase pwdbase = this.gmw;
+		XPasswordDatabase pwdbase = this.passwordDb;
 		
 		XID actorId = XX.createUniqueID();
 		
-		if(!this.gmw.isValidLogin(actorId, this.getCorrectUserPasswordHash())) {
+		if(!this.passwordDb.isValidLogin(actorId, this.getCorrectUserPasswordHash())) {
 			pwdbase.setPasswordHash(actorId, HashUtils.getXydraPasswordHash("correct"));
 		}
-		assertTrue(this.gmw.isValidLogin(actorId, HashUtils.getXydraPasswordHash("correct")));
+		assertTrue(this.passwordDb.isValidLogin(actorId, HashUtils.getXydraPasswordHash("correct")));
 		
 		return actorId;
 	}

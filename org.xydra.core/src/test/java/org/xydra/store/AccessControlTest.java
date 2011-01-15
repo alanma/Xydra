@@ -42,7 +42,7 @@ public class AccessControlTest {
 	@Test
 	public void testAddAndRemoveOneActor() {
 		// register users
-		XPasswordDatabase passwordDb = this.store.getGroupModelWrapper();
+		XPasswordDatabase passwordDb = this.store.getPasswordDatabase();
 		passwordDb.setPasswordHash(user1, HashUtils.getXydraPasswordHash("secret1"));
 		passwordDb.setPasswordHash(user2, HashUtils.getXydraPasswordHash("secret2"));
 		
@@ -50,7 +50,7 @@ public class AccessControlTest {
 		assertFalse(passwordDb.isValidLogin(user1, "secret1"));
 		assertTrue(passwordDb.isValidLogin(user1, HashUtils.getXydraPasswordHash("secret1")));
 		
-		XGroupDatabase groupDb = this.store.getGroupModelWrapper();
+		XGroupDatabase groupDb = this.store.getGroupDatabase();
 		groupDb.addToGroup(user1, groupA);
 		assertTrue(groupDb.getMembersOf(groupA).contains(user1));
 	}

@@ -167,17 +167,6 @@ public class DelegatingSecureStore implements XydraStore, XydraStoreAdmin {
 		return this.groupModelWrapper;
 	}
 	
-	/**
-	 * This is just a temporary method to somehow make it possible to test
-	 * MemoryStore until I know how I'm supposed to work with the access rights
-	 * here. Do NOT use this anywhere else!
-	 * 
-	 * ~Bjoern
-	 */
-	public GroupModelWrapper getGroupModelWrapper() {
-		return this.groupModelWrapper;
-	}
-	
 	public void getModelIds(XID actorId, String passwordHash, Callback<Set<XID>> callback) {
 		assertNonNullCallback(callback);
 		if(validLogin(actorId, passwordHash, callback)) {

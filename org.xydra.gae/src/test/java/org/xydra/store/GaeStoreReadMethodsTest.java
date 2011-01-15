@@ -7,7 +7,8 @@ import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommandFactory;
 import org.xydra.core.model.XID;
-import org.xydra.store.access.GroupModelWrapper;
+import org.xydra.store.access.XGroupDatabase;
+import org.xydra.store.access.XPasswordDatabase;
 import org.xydra.store.impl.delegating.DelegatingSecureStore;
 import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.impl.gae.GaeXydraStore;
@@ -16,7 +17,8 @@ import org.xydra.store.test.AbstractStoreReadMethodsTest;
 
 public class GaeStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 	
-	protected GroupModelWrapper gmw = null;
+	protected XPasswordDatabase passwordDb = null;
+	protected XGroupDatabase groupDb = null;
 	
 	@Override
 	protected XydraStore getStore() {
@@ -37,21 +39,20 @@ public class GaeStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 	
 	@Override
 	protected XID getCorrectUser() {
-		/*
-		 * FIXME this whole method probably needs to be changed, after Max tells
-		 * me how to actually work with the access rights here. ~Bjoern
-		 */
-		if(this.gmw == null) {
-			this.gmw = ((DelegatingSecureStore)this.getStore()).getGroupModelWrapper();
+		if(this.passwordDb == null) {
+			this.passwordDb = ((DelegatingSecureStore)this.getStore()).getPasswordDatabase();
+		}
+		if(this.groupDb == null) {
+			this.groupDb = ((DelegatingSecureStore)this.getStore()).getGroupDatabase();
 		}
 		
 		XID actorId = XX.createUniqueID();
 		
-		if(!this.gmw.isValidLogin(actorId, this.getCorrectUserPasswordHash())) {
-			this.gmw.addToGroup(actorId, XX.toId("TestGroup"));
-			this.gmw.setPasswordHash(actorId, this.getCorrectUserPasswordHash());
+		if(!this.passwordDb.isValidLogin(actorId, this.getCorrectUserPasswordHash())) {
+			this.groupDb.addToGroup(actorId, XX.toId("TestGroup"));
+			this.passwordDb.setPasswordHash(actorId, this.getCorrectUserPasswordHash());
 		}
-		assertTrue(this.gmw.isValidLogin(actorId, this.getCorrectUserPasswordHash()));
+		assertTrue(this.passwordDb.isValidLogin(actorId, this.getCorrectUserPasswordHash()));
 		
 		return actorId;
 	}
