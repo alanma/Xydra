@@ -59,32 +59,10 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	
 	protected String correctUserPass, incorrectUserPass;
 	protected long bfQuota;
-	protected boolean setUpDone = false, incorrectActorExists = true;
+	protected boolean incorrectActorExists = true;
 	
 	@Before
 	public void setUp() {
-		if(this.setUpDone) {
-			/*
-			 * This code segment guarantees that the following set-up code will
-			 * only be run once. This basically works like an @BeforeClass
-			 * method and it not really the most beautiful solution, but
-			 * unfortunately we cannot actually use a @BeforeClass method here,
-			 * because this is an abstract test and we need to call abstract
-			 * methods... but abstract methods cannot be static. There might be
-			 * some other kind of workout around this problem, but all I could
-			 * think of was/could find on the Internet were even uglier...
-			 * ~Bjoern
-			 */
-
-			/*
-			 * FIXME Does only running this once cause problems with methods
-			 * that look for QuotaExceptions and such? Would it be better to
-			 * reinitialize the store after every method?
-			 */
-
-			return;
-		}
-		
 		this.store = this.getStore();
 		this.factory = this.getCommandFactory();
 		
@@ -190,22 +168,6 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		this.objectAddresses = new XAddress[] { objectAddress1, objectAddress2, objectAddress3 };
 		this.notExistingObject = XX.toAddress(repoID, modelID1, XX.toId("TestObjectDoesntExist"),
 		        null);
-		
-		if(!this.setUpDone) {
-			/*
-			 * This code segment guarantees that the following set-up code will
-			 * only be run once. This basically works like an @BeforeClass
-			 * method and it not really the most beautiful solution, but
-			 * unfortunately we cannot actually use a @BeforeClass method here,
-			 * because this is an abstract test and we need to call abstract
-			 * methods... but abstract methods cannot be static. There might be
-			 * some other kind of workout around this problem, but all I could
-			 * think of was/could find on the Internet were even uglier...
-			 * ~Bjoern
-			 */
-		}
-		
-		this.setUpDone = true;
 	}
 	
 	/**
@@ -247,7 +209,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		assertNull(callback.getException());
 	}
 	
-	// Test for checking if the QuoateException works for checkLogin - sloooow
+	// Test for checking if the QuoateException works for checkLogin
 	@Test
 	public void testCheckLoginQuotaException() {
 		if(!this.incorrectActorExists || this.bfQuota < 0) {
@@ -265,15 +227,27 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			callback = new SynchronousTestCallback<Boolean>();
 			
 			this.store.checkLogin(this.incorrectUser, this.incorrectUserPass, callback);
+			
+			boolean wait = waitOnCallback(callback);
+			
+			if(l < this.bfQuota) {
+				// QuotaException shouldn't be thrown yet.
+				assertTrue(wait);
+				assertNotNull(callback.getEffect());
+				assertNull(callback.getException());
+				assertFalse(callback.getException() instanceof QuotaException);
+			} else {
+				// should now return a QuotaException, since we exceeded the
+				// quota
+				assertFalse(wait);
+				assertNull(callback.getEffect());
+				assertNotNull(callback.getException());
+				assertTrue(callback.getException() instanceof QuotaException);
+			}
 		}
 		
-		assert callback != null;
-		// should now return a QuotaException, since we exceeded the quota
-		// for failed login attempts by at least one
-		assertFalse(this.waitOnCallback(callback));
-		assertNull(callback.getEffect());
-		assertNotNull(callback.getException());
-		assertTrue(callback.getException() instanceof QuotaException);
+		// TODO also check if QuotaException keeps being thrown after the quota
+		// was exceeded by one
 		
 	}
 	
@@ -451,7 +425,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		// TODO Maybe test more complex mixes? (use objectadresses too?)
 	}
 	
-	// Testing the quota exception - sloooow
+	// Testing the quota exception
 	@Test
 	public void testGetModelSnapshotsQuotaExcpetion() {
 		if(!this.incorrectActorExists || this.bfQuota < 0) {
@@ -470,15 +444,23 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			
 			this.store.getModelSnapshots(this.incorrectUser, this.incorrectUserPass, tempArray,
 			        callback);
+			
+			assertFalse(waitOnCallback(callback));
+			assertNull(callback.getEffect());
+			assertNotNull(callback.getException());
+			
+			if(l < this.bfQuota) {
+				// QuotaException shouldn't be thrown yet.
+				assertFalse(callback.getException() instanceof QuotaException);
+			} else {
+				// should now return a QuotaException, since we exceeded the
+				// quota
+				assertTrue(callback.getException() instanceof QuotaException);
+			}
 		}
 		
-		assert (callback != null);
-		// should now return a QuotaException, since we exceeded the quota
-		// for failed login attempts by at least one
-		assertFalse(this.waitOnCallback(callback));
-		assertNull(callback.getEffect());
-		assertNotNull(callback.getException());
-		assertTrue(callback.getException() instanceof QuotaException);
+		// TODO also check if QuotaException keeps being thrown after the quota
+		// was exceeded by one
 	}
 	
 	// Test if IllegalArgumentException are thrown when null values are passed
@@ -715,15 +697,23 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			
 			this.store.getModelRevisions(this.incorrectUser, this.incorrectUserPass, tempArray,
 			        callback);
+			
+			assertFalse(waitOnCallback(callback));
+			assertNull(callback.getEffect());
+			assertNotNull(callback.getException());
+			
+			if(l < this.bfQuota) {
+				// QuotaException shouldn't be thrown yet.
+				assertFalse(callback.getException() instanceof QuotaException);
+			} else {
+				// should now return a QuotaException, since we exceeded the
+				// quota
+				assertTrue(callback.getException() instanceof QuotaException);
+			}
 		}
-		assert callback != null;
 		
-		// should now return a QuotaException, since we exceeded the quota
-		// for failed login attempts by at least one
-		assertFalse(this.waitOnCallback(callback));
-		assertNull(callback.getEffect());
-		assertNotNull(callback.getException());
-		assertTrue(callback.getException() instanceof QuotaException);
+		// TODO also check if QuotaException keeps being thrown after the quota
+		// was exceeded by one
 	}
 	
 	// Test IllegalArgumentException
@@ -915,7 +905,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		// TODO Maybe test more complex mixes?
 	}
 	
-	// Testing the quota exception - sloooow
+	// Testing the quota exception
 	@Test
 	public void testGetObjectSnapshotsQuotaException() {
 		if(!this.incorrectActorExists || this.bfQuota < 0) {
@@ -929,20 +919,29 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		XAddress[] tempArray = new XAddress[] { this.notExistingObject };
 		
 		assert this.bfQuota > 0;
-		for(long l = 0; l < this.bfQuota + 5; l++) {
+		for(long l = 0; l < this.bfQuota + 1; l++) {
 			callback = new SynchronousTestCallback<BatchedResult<XBaseObject>[]>();
 			
 			this.store.getObjectSnapshots(this.incorrectUser, this.incorrectUserPass, tempArray,
 			        callback);
+			
+			assertFalse(waitOnCallback(callback));
+			assertNull(callback.getEffect());
+			assertNotNull(callback.getException());
+			
+			if(l < this.bfQuota) {
+				// QuotaException shouldn't be thrown yet.
+				assertFalse(callback.getException() instanceof QuotaException);
+			} else {
+				// should now return a QuotaException, since we exceeded the
+				// quota
+				assertTrue(callback.getException() instanceof QuotaException);
+			}
 		}
-		assert callback != null;
 		
-		// should now return a QuotaException, since we exceeded the quota
-		// for failed login attempts by at least 5
-		assertFalse(this.waitOnCallback(callback));
-		assertNull(callback.getEffect());
-		assertNotNull(callback.getException());
-		assertTrue(callback.getException() instanceof QuotaException);
+		// TODO also check if QuotaException keeps being thrown after the quota
+		// was exceeded by one
+		
 	}
 	
 	// Test IllegalArgumentException
@@ -1071,7 +1070,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		
 	}
 	
-	// Testing the quota exception - sloooow
+	// Testing the quota exception
 	@Test
 	public void testGetModelIdsQuotaException() {
 		if(!this.incorrectActorExists || this.bfQuota < 0) {
@@ -1088,15 +1087,23 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			callback = new SynchronousTestCallback<Set<XID>>();
 			
 			this.store.getModelIds(this.incorrectUser, this.incorrectUserPass, callback);
+			
+			assertFalse(waitOnCallback(callback));
+			assertNull(callback.getEffect());
+			assertNotNull(callback.getException());
+			
+			if(l < this.bfQuota) {
+				// QuotaException shouldn't be thrown yet.
+				assertFalse(callback.getException() instanceof QuotaException);
+			} else {
+				// should now return a QuotaException, since we exceeded the
+				// quota
+				assertTrue(callback.getException() instanceof QuotaException);
+			}
 		}
-		assert callback != null;
 		
-		// should now return a QuotaException, since we exceeded the quota for
-		// failed login attempts by at least one
-		assertFalse(this.waitOnCallback(callback));
-		assertNull(callback.getEffect());
-		assertNotNull(callback.getException());
-		assertTrue(callback.getException() instanceof QuotaException);
+		// TODO also check if QuotaException keeps being thrown after the quota
+		// was exceeded by one
 	}
 	
 	// Test IllegalArgumentException
@@ -1204,20 +1211,27 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		SynchronousTestCallback<XID> callback = null;
 		
 		assert this.bfQuota > 0;
-		for(long l = 0; l < this.bfQuota + 5; l++) {
+		for(long l = 0; l < this.bfQuota + 1; l++) {
 			callback = new SynchronousTestCallback<XID>();
 			
 			this.store.getRepositoryId(this.incorrectUser, this.incorrectUserPass, callback);
+			
+			assertFalse(waitOnCallback(callback));
+			assertNull(callback.getEffect());
+			assertNotNull(callback.getException());
+			
+			if(l < this.bfQuota) {
+				// QuotaException shouldn't be thrown yet.
+				assertFalse(callback.getException() instanceof QuotaException);
+			} else {
+				// should now return a QuotaException, since we exceeded the
+				// quota
+				assertTrue(callback.getException() instanceof QuotaException);
+			}
 		}
-		assert callback != null;
 		
-		// should now return a QuotaException, since we exceeded the quota
-		// for
-		// failed login attempts by at least 5
-		assertFalse(this.waitOnCallback(callback));
-		assertNull(callback.getEffect());
-		assertNotNull(callback.getException());
-		assertTrue(callback.getException() instanceof QuotaException);
+		// TODO also check if QuotaException keeps being thrown after the quota
+		// was exceeded by one
 	}
 	
 	// Test IllegalArgumentException
