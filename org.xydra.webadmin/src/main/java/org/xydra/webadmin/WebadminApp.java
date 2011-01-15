@@ -122,7 +122,7 @@ public class WebadminApp {
 		// Add the models to the zip archive.
 		for(XID modelId : server) {
 			
-			String filename = URLEncoder.encode(modelId.toURI(), "UTF-8") + XFile.MODEL_SUFFIX;
+			String filename = URLEncoder.encode(modelId.toString(), "UTF-8") + XFile.MODEL_SUFFIX;
 			
 			// Start a new entry in the zip archive.
 			ZipEntry ze = new ZipEntry(filename);
