@@ -67,12 +67,11 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		this.factory = this.getCommandFactory();
 		
 		if(this.store == null) {
-			throw new RuntimeException(
-			        "XydraStore could not be initalized in the setUpClass method!");
+			throw new RuntimeException("XydraStore could not be initalized in the setUp method!");
 		}
 		if(this.factory == null) {
 			throw new RuntimeException(
-			        "XCommandFactory could not be initalized in the setUpClass method!");
+			        "XCommandFactory could not be initalized in the setUp method!");
 		}
 		
 		this.correctUser = this.getCorrectUser();
