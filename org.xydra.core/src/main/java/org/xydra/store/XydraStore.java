@@ -26,22 +26,27 @@ import org.xydra.index.query.Pair;
  * <ol>
  * <li>Persistence</li>
  * <li>Asynchronous design to be used over a network</li>
- * <li>Access Rights</li>
+ * <li>Batch operations to be more efficient over a network</li>
+ * <li>Access Rights (authentication and authorisation)</li>
  * <li>Versioning</li>
  * <li>Transactions and Command-pattern</li>
- * <li>Retrieval of events</li>
+ * <li>Retrieval of all occurred events</li>
  * <li>Partial loading (supports loading single models or objects)</li>
  * </ol>
  * 
- * <h3>Usage guidelines</h3> For secure usage this API should be used over HTTPS
- * or within the same VM.
+ * <h3>Usage guidelines</h3>
  * 
- * <h3>Confidentiality</h3> In general, a given actorId is first authenticated,
- * which is throttled to a certain number of login attempts per time interval.
- * If that threshold is exceeded, a {@link QuotaException} is thrown.
+ * For secure usage this API should be used over HTTPS.
  * 
- * Once the actorId is authenticated, Xydra checks if it has the necessary
- * rights to perform an operation (read or write). If not, an
+ * <h3>Confidentiality</h3>
+ * 
+ * In general, a given actorId is first authenticated, which is throttled to a
+ * certain number of login attempts per time interval. If that threshold is
+ * exceeded, a {@link QuotaException} is thrown. TODO Clarify behaviour (when
+ * delayed how much, when blocked, how to unblock, ...)
+ * 
+ * Once the actorId is authenticated, Xydra checks if the actor has the
+ * necessary rights to perform an operation (read or write). If not, an
  * {@link AccessException} is returned, in most methods within a
  * {@link BatchedResult}. This implies an actorId that is known in the Xydra
  * store implementation can find out what models and objects a repository
@@ -132,8 +137,6 @@ public interface XydraStore {
 	 * <ul>
 	 * <li>{@link RequestException} for addresses that do not address an
 	 * {@link XModel}.</li>
-	 * <li>{@link AccessException} for a modelAddress the given actorId may not
-	 * read</li>
 	 * </ul>
 	 * 
 	 * @param actorId The actor who is performing this operation.
@@ -152,7 +155,8 @@ public interface XydraStore {
 	 *            success, an array of {@link BatchedResult} is returned, in the
 	 *            same order of the modelAddresses given in the request. A null
 	 *            value in the array signals that the requested model does not
-	 *            exist in the store. Must not be null.
+	 *            exist in the store or the actorId may not read it. Must not be
+	 *            null.
 	 * @throws IllegalArgumentException if one of the given parameters is null.
 	 * 
 	 *             Implementation note: Implementation may choose to supply a
@@ -178,8 +182,6 @@ public interface XydraStore {
 	 * <ul>
 	 * <li>{@link RequestException} for addresses that do not address an
 	 * {@link XModel}.</li>
-	 * <li>{@link AccessException} for a modelAddress the given actorId may not
-	 * read</li>
 	 * </ul>
 	 * 
 	 * @param actorId The actor who is performing this operation.
@@ -221,8 +223,6 @@ public interface XydraStore {
 	 * <ul>
 	 * <li>{@link RequestException} for addresses that do not address an
 	 * {@link XObject}.</li>
-	 * <li>{@link AccessException} for a objectAddress the given actorId may not
-	 * read</li>
 	 * </ul>
 	 * 
 	 * @param actorId The actor who is performing this operation.
@@ -269,9 +269,8 @@ public interface XydraStore {
 	 * @param callback Asynchronous callback to signal success or failure. On
 	 *            success a Set of all {@link XID} of all {@link XModel XModels}
 	 *            for which the given actorId has read-access in the repository
-	 *            is returned.
+	 *            is returned. Must not be null.
 	 * @throws IllegalArgumentException if one of the given parameters is null.
-	 *             Must not be null.
 	 */
 	void getModelIds(XID actorId, String passwordHash, Callback<Set<XID>> callback)
 	        throws IllegalArgumentException;
@@ -407,8 +406,6 @@ public interface XydraStore {
 	 * </ul>
 	 * Possible exceptions in each {@link BatchedResult}:
 	 * <ul>
-	 * <li>{@link AccessException} if the given actorId may not read the entity
-	 * with the {@link XAddress} in the {@link GetEventsRequest}.</li>
 	 * <li>{@link RequestException} (a) if beginRevision is greater than
 	 * endRevision; (b) if beginRevision or endRevision are negative</li>
 	 * </ul>
