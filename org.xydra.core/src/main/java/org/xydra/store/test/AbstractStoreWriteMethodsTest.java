@@ -45,37 +45,20 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	protected String correctUserPass, incorrectUserPass;
 	protected long timeout;
 	protected long bfQuota;
-	protected boolean setUpDone = false, incorrectActorExists = true;
+	protected boolean incorrectActorExists = true;
 	
 	@Before
 	public void setUp() {
-		
-		if(this.setUpDone) {
-			return;
-			
-			/*
-			 * This code segment guarantees that the following set-up code will
-			 * only be run once. This basically works like an @BeforeClass
-			 * method and it not really the most beautiful solution, but
-			 * unfortunately we cannot actually use a @BeforeClass method here,
-			 * because this is an abstract test and we need to call abstract
-			 * methods... but abstract methods cannot be static. There might be
-			 * some other kind of workout around this problem, but all I could
-			 * think of was/could find on the Internet were even uglier...
-			 * ~Bjoern
-			 */
-		}
 		
 		this.store = this.getStore();
 		this.factory = this.getCommandFactory();
 		
 		if(this.store == null) {
-			throw new RuntimeException(
-			        "XydraStore could not be initalized in the setUpClass method!");
+			throw new RuntimeException("XydraStore could not be initalized in the setUp method!");
 		}
 		if(this.factory == null) {
 			throw new RuntimeException(
-			        "XCommandFactory could not be initalized in the setUpClass method!");
+			        "XCommandFactory could not be initalized in the setUp method!");
 		}
 		
 		this.correctUser = this.getCorrectUser();
@@ -97,14 +80,8 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		this.bfQuota = getQuotaForBruteForce();
 		
-		if(this.bfQuota <= 0) {
-			throw new IllegalArgumentException("Quota for Login attempts must be greater than 0!");
-		}
-		
 		// get the repository ID of the store
 		this.repoID = getRepositoryId();
-		
-		this.setUpDone = true;
 	}
 	
 	/*
@@ -134,14 +111,31 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertTrue(callback.getException() instanceof AuthorisationException);
 	}
 	
-	// Test if model Commands work
+	/*
+	 * Tests for executeCommand
+	 */
+
+	/*
+	 * Tests for modelCommands
+	 */
 	@Test
-	public void testExecuteCommandsModelCommands() {
+	public void testExecuteCommandsCorrectModelCommands() {
 		// create a model
 		SynchronousTestCallback<BatchedResult<Long>[]> callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		XID modelID = XX.createUniqueID();
 		
-		// first, let's make sure that the model we want to create doesn't exist
+		XCommand[] commands = new XCommand[] { X.getCommandFactory().createAddModelCommand(
+		        this.repoID, modelID, true) };
+		
+		this.store.executeCommands(this.correctUser, this.correctUserPass, commands, callback);
+		
+		assertTrue(this.waitOnCallback(callback));
+		assertNotNull(callback.getEffect());
+		assertTrue(callback.getEffect().length == 1);
+		assertNull(callback.getException());
+		assertTrue((callback.getEffect())[0].getResult() > 0);
+		assertNull((callback.getEffect())[0].getException());
+		
 		// check if the model was created
 		SynchronousTestCallback<BatchedResult<XBaseModel>[]> callback2 = new SynchronousTestCallback<BatchedResult<XBaseModel>[]>();
 		XAddress[] modelAddress = new XAddress[] { XX.toAddress(this.repoID, modelID, null, null) };
@@ -151,30 +145,6 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertTrue(this.waitOnCallback(callback2));
 		
 		BatchedResult<XBaseModel>[] result2 = callback2.getEffect();
-		assertNotNull(result2);
-		assertNull(result2[0].getResult());
-		
-		// create the model
-		XCommand[] commands = new XCommand[] { X.getCommandFactory().createAddModelCommand(
-		        this.repoID, modelID, true) };
-		
-		this.store.executeCommands(this.correctUser, this.correctUserPass, commands, callback);
-		
-		assertTrue(this.waitOnCallback(callback));
-		assertNotNull(callback.getEffect());
-		assertTrue(callback.getEffect().length == 1);
-		assertTrue((callback.getEffect())[0].getResult() > 0);
-		assertNull(callback.getException());
-		
-		// check if the model was created
-		callback2 = new SynchronousTestCallback<BatchedResult<XBaseModel>[]>();
-		modelAddress = new XAddress[] { XX.toAddress(this.repoID, modelID, null, null) };
-		
-		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, modelAddress,
-		        callback2);
-		assertTrue(this.waitOnCallback(callback2));
-		
-		result2 = callback2.getEffect();
 		assertNotNull(result2);
 		assertEquals(result2[0].getResult().getID(), modelID);
 		
@@ -187,8 +157,8 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertTrue(this.waitOnCallback(callback));
 		assertNotNull(callback.getEffect());
 		assertTrue(callback.getEffect().length == 1);
-		assertTrue((callback.getEffect())[0].getResult() > 0);
 		assertNull(callback.getException());
+		assertTrue((callback.getEffect())[0].getResult() > 0);
 		
 		// check if the model was removed
 		callback2 = new SynchronousTestCallback<BatchedResult<XBaseModel>[]>();
@@ -201,7 +171,107 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		result2 = callback2.getEffect();
 		assertNotNull(result2);
 		assertNull(result2[0].getResult());
-		
-		// TODO Maybe split all these cases into smaller tests
+		assertNull(result2[0].getException());
 	}
+	
+	@Test
+	public void testExecuteCommandsIncorrectModelCommands() {
+		// try to remove non-existing model
+		XID modelID = XX.createUniqueID();
+		SynchronousTestCallback<BatchedResult<Long>[]> callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		
+		XCommand[] commands = new XCommand[] { X.getCommandFactory().createRemoveModelCommand(
+		        this.repoID, modelID, (callback.getEffect())[0].getResult(), true) };
+		
+		this.store.executeCommands(this.correctUser, this.correctUserPass, commands, callback);
+		
+		assertTrue(this.waitOnCallback(callback));
+		assertNotNull(callback.getEffect());
+		assertTrue(callback.getEffect().length == 1);
+		assertNull(callback.getException());
+		assertTrue((callback.getEffect())[0].getResult() == XCommand.FAILED);
+		assertNull((callback.getEffect())[0].getException());
+	}
+	
+	@Test
+	public void testExecuteCommandsMixedCorrectModelCommands() {
+		// create a model
+		SynchronousTestCallback<BatchedResult<Long>[]> callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		
+		int modelCount = 5;
+		XID[] modelIDs = new XID[modelCount];
+		XCommand[] commands = new XCommand[modelCount];
+		for(int i = 0; i < modelIDs.length; i++) {
+			commands[i] = X.getCommandFactory().createAddModelCommand(this.repoID, modelIDs[i],
+			        true);
+		}
+		
+		this.store.executeCommands(this.correctUser, this.correctUserPass, commands, callback);
+		
+		assertTrue(this.waitOnCallback(callback));
+		assertNotNull(callback.getEffect());
+		assertTrue(callback.getEffect().length == modelCount);
+		assertNull(callback.getException());
+		
+		for(int i = 0; i < modelCount; i++) {
+			assertTrue((callback.getEffect())[i].getResult() > 0);
+			assertNull((callback.getEffect())[i].getException());
+		}
+		
+		// check if the models were created
+		SynchronousTestCallback<BatchedResult<XBaseModel>[]> callback2 = new SynchronousTestCallback<BatchedResult<XBaseModel>[]>();
+		
+		XAddress[] modelAddresses = new XAddress[modelCount];
+		for(int i = 0; i < modelCount; i++) {
+			modelAddresses[i] = XX.toAddress(this.repoID, modelIDs[i], null, null);
+		}
+		
+		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, modelAddresses,
+		        callback2);
+		assertTrue(this.waitOnCallback(callback2));
+		assertNull(callback2.getException());
+		
+		BatchedResult<XBaseModel>[] result2 = callback2.getEffect();
+		assertNotNull(result2);
+		for(int i = 0; i < modelCount; i++) {
+			assertEquals(result2[i].getResult().getID(), modelAddresses[i].getModel());
+			assertNull(result2[i].getException());
+		}
+		
+		// remove the models again
+		commands = new XCommand[modelCount];
+		for(int i = 0; i < modelCount; i++) {
+			commands[i] = X.getCommandFactory().createRemoveModelCommand(this.repoID,
+			        modelIDs[modelCount], (callback.getEffect())[0].getResult(), true);
+		}
+		
+		this.store.executeCommands(this.correctUser, this.correctUserPass, commands, callback);
+		
+		assertTrue(this.waitOnCallback(callback));
+		assertNotNull(callback.getEffect());
+		assertTrue(callback.getEffect().length == modelCount);
+		assertNull(callback.getException());
+		
+		for(int i = 0; i < modelCount; i++) {
+			assertTrue((callback.getEffect())[i].getResult() > 0);
+			assertNull((callback.getEffect())[i].getException());
+		}
+		
+		// check if the models were removed
+		callback2 = new SynchronousTestCallback<BatchedResult<XBaseModel>[]>();
+		
+		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, modelAddresses,
+		        callback2);
+		assertTrue(this.waitOnCallback(callback2));
+		assertNull(callback2.getException());
+		
+		result2 = callback2.getEffect();
+		assertNotNull(result2);
+		for(int i = 0; i < modelCount; i++) {
+			assertNull(result2[i].getResult());
+			assertNull(result2[i].getException());
+		}
+		
+	}
+	// TODO Test "noChange"-cases
 }
