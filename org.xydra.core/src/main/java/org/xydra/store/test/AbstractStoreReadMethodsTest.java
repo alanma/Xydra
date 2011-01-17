@@ -135,13 +135,14 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			if(result[i].getResult() == XCommand.FAILED) {
 				throw new RuntimeException(
 				        "ExecuteCommands did not work properly in setUp: command at index " + i
-				                + "failed!");
+				                + " failed!");
 			}
 			// TODO is this check necessary?
+			// TODO this fails with the GaeStore which cannot be reset
 			if(result[i].getResult() == XCommand.NOCHANGE) {
 				throw new RuntimeException(
 				        "ExecuteCommands did not work properly in setUp: command at index " + i
-				                + "did not change anything!");
+				                + " did not change anything!");
 			}
 			
 			if(result[i].getException() != null) {
@@ -584,8 +585,8 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			// compare revision numbers
 			assertNotNull(revisionResult[i].getResult());
 			assertNull(revisionResult[i].getException());
-			assertEquals((Long)snapshotResult[i].getResult().getRevisionNumber(),
-			        revisionResult[i].getResult());
+			assertEquals((Long)snapshotResult[i].getResult().getRevisionNumber(), revisionResult[i]
+			        .getResult());
 		}
 	}
 	

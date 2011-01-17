@@ -29,6 +29,8 @@ public class WritableUtils {
 	 * @param command
 	 * @return
 	 */
+	// TODO why is this synchronized for all users of WritableUtils and not just
+	// for one command? ~Daniel
 	public static synchronized long executeCommand(Credentials credentials, XydraStore store,
 	        XCommand command) {
 		WaitingCallback callback = new WaitingCallback();
@@ -62,6 +64,7 @@ public class WritableUtils {
 		@Override
 		public synchronized void onSuccess(BatchedResult<Long>[] object) {
 			assert object.length == 1;
+			assert object[0] != null;
 			/*
 			 * TODO better error handling if getResult is null because
 			 * getException has an AccessException
