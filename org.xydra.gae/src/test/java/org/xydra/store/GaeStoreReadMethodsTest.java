@@ -22,12 +22,11 @@ public class GaeStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 	
 	@Override
 	protected XydraStore getStore() {
-		if(this.store != null) {
-			GaeTestfixer.enable();
-			return this.store;
-		}
+		GaeTestfixer.enable();
 		
-		this.store = GaeXydraStore.get();
+		if(this.store == null) {
+			this.store = GaeXydraStore.get();
+		}
 		
 		return this.store;
 	}
