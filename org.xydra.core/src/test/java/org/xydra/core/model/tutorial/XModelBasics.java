@@ -8,7 +8,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xydra.core.X;
 import org.xydra.core.XX;
-import org.xydra.core.access.XAccessManagerWithListeners;
+import org.xydra.core.access.XAccessManager;
 import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.access.impl.memory.MemoryAccessManager;
 import org.xydra.core.access.impl.memory.MemoryGroupDatabase;
@@ -513,10 +513,10 @@ public class XModelBasics {
 	 * group users and grant access rights to a whole group.
 	 * 
 	 * There are 2 main interfaces for this purpose:
-	 * {@link XAccessManagerWithListeners} and
+	 * {@link XAccessManager} and
 	 * {@link XGroupDatabaseWithListeners}.
 	 * 
-	 * The {@link XAccessManagerWithListeners} actually manages the access
+	 * The {@link XAccessManager} actually manages the access
 	 * rights.
 	 * 
 	 * The XGroupDatabase allows to group users, which enables the
@@ -541,7 +541,7 @@ public class XModelBasics {
 		
 		// creating an XAccessManager and an XGroupDatabase
 		XGroupDatabaseWithListeners groups = new MemoryGroupDatabase();
-		XAccessManagerWithListeners arm = new MemoryAccessManager(groups);
+		XAccessManager arm = new MemoryAccessManager(groups);
 		
 		// granting write access to the user with the XID user1ID on model
 		

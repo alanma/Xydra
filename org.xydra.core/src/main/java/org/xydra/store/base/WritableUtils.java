@@ -30,7 +30,7 @@ public class WritableUtils {
 	 * @return
 	 */
 	// TODO why is this synchronized for all users of WritableUtils and not just
-	// for one command? ~Daniel
+	// for one command? ~Daniel. Max: because i dont know how
 	public static synchronized long executeCommand(Credentials credentials, XydraStore store,
 	        XCommand command) {
 		WaitingCallback callback = new WaitingCallback();

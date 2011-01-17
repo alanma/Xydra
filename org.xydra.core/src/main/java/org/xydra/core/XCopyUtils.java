@@ -126,6 +126,7 @@ public class XCopyUtils {
 	 * Copy all state information from sourceModel.
 	 * 
 	 * @param sourceModel The {@link XBaseModel} which is to be copied
+	 * @return the snapshot or null
 	 */
 	public static SimpleModel createSnapshot(XBaseModel sourceModel) {
 		if(sourceModel == null) {

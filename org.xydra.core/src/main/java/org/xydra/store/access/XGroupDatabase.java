@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Set;
 
 import org.xydra.core.model.XID;
+import org.xydra.store.MAXTodo;
 
 
 /**
@@ -21,9 +22,12 @@ import org.xydra.core.model.XID;
  * @author dscharrer
  * @author voelkel
  */
+@MAXTodo
 public interface XGroupDatabase extends Serializable {
 	
 	/**
+	 * Write operation.
+	 * 
 	 * Add an actor to a group.
 	 * 
 	 * The actor will become a direct member of this group.
@@ -35,6 +39,8 @@ public interface XGroupDatabase extends Serializable {
 	void addToGroup(XID actorId, XID groupId);
 	
 	/**
+	 * Write operation.
+	 * 
 	 * Remove an actor from a group.
 	 * 
 	 * @param actorId The {@link XID} of the actor for which to revoke group

@@ -1,6 +1,7 @@
 package org.xydra.core.access;
 
 import java.io.Serializable;
+import java.util.Set;
 
 import org.xydra.core.change.XCommand;
 import org.xydra.core.model.XAddress;
@@ -9,6 +10,8 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
+import org.xydra.index.query.Pair;
+import org.xydra.store.MAXTodo;
 import org.xydra.store.access.XA;
 import org.xydra.store.access.XAccessDatabase;
 import org.xydra.store.access.XAccessValue;
@@ -22,7 +25,36 @@ import org.xydra.store.access.XAccessValue;
  * 
  * @author dscharrer
  */
-public interface XAccessManagerWithListeners extends XAccessDatabase, Serializable {
+@MAXTodo
+public interface XAccessManager extends XAccessDatabase, Serializable {
+	
+	/**
+	 * Get all types of access an actor has to a resource.
+	 * 
+	 * @param actor The {@link XID} of the actor of whom the access rights are
+	 *            to be returned.
+	 * @param resource The {@link XAddress} of the resource of which the access
+	 *            rights of the given actor are to be returned.
+	 * @return Returns two sets of permissions. Permissions in the first set are
+	 *         explicitly allowed while permissions in the second set are
+	 *         explicitly denied.
+	 */
+	Pair<Set<XID>,Set<XID>> getPermissions(XID actor, XAddress resource);
+	
+	/**
+	 * Get all actors that have access to a resource.
+	 * 
+	 * @param resource The resource being accessed.
+	 * @param access The type of access being requested.
+	 * @return Returns two sets of actors. An actor is allowed access exactly if
+	 *         he or a group he is in is in the first set AND he isn't in the
+	 *         second set. Groups in the second set do NOT mean that their
+	 *         members don't have access and should be ignored.
+	 * 
+	 *         FIXME The documentation of the return value is too unclear to be
+	 *         implemented.
+	 */
+	Pair<Set<XID>,Set<XID>> getActorsWithPermission(XAddress resource, XID access);
 	
 	/**
 	 * Add a listener for access events.

@@ -31,7 +31,7 @@ public interface XCommandFactory {
 	 *            otherwise
 	 * @return an {@link XRepositoryCommand} with the specified settings
 	 */
-	public XRepositoryCommand createAddModelCommand(XID repositoryID, XID modelID, boolean isForced);
+	public XRepositoryCommand createAddModelCommand(XID repositoryID, XID modelId, boolean isForced);
 	
 	/**
 	 * Creates an {@link XRepositoryCommand} that will remove the specified
@@ -47,7 +47,7 @@ public interface XCommandFactory {
 	 *            otherwise
 	 * @return an {@link XRepositoryCommand} with the specified settings
 	 */
-	public XRepositoryCommand createRemoveModelCommand(XID repositoryID, XID modelID,
+	public XRepositoryCommand createRemoveModelCommand(XID repositoryId, XID modelId,
 	        long modelRevision, boolean isForced);
 	
 	/**
@@ -63,7 +63,7 @@ public interface XCommandFactory {
 	 *            otherwise
 	 * @return an {@link XModelCommand} with the specified settings
 	 */
-	public XModelCommand createAddObjectCommand(XID repositoryID, XID modelID, XID objectID,
+	public XModelCommand createAddObjectCommand(XID repositoryId, XID modelId, XID objectId,
 	        boolean isForced);
 	
 	/**
@@ -83,7 +83,7 @@ public interface XCommandFactory {
 	 *            otherwise
 	 * @return an {@link XModelCommand} with the specified settings
 	 */
-	public XModelCommand createRemoveObjectCommand(XID repositoryID, XID modelID, XID objectID,
+	public XModelCommand createRemoveObjectCommand(XID repositoryId, XID modelId, XID objectId,
 	        long objectRevision, boolean isForced);
 	
 	/**
@@ -101,7 +101,7 @@ public interface XCommandFactory {
 	 *            otherwise
 	 * @return an {@link XObjectCommand} with the specified settings
 	 */
-	public XObjectCommand createAddFieldCommand(XID repositoryID, XID modelID, XID objectID,
+	public XObjectCommand createAddFieldCommand(XID repositoryId, XID modelId, XID objectId,
 	        XID fieldID, boolean isForced);
 	
 	/**

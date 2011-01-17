@@ -2,7 +2,7 @@ package org.xydra.core.model.session.impl.arm;
 
 import java.util.Iterator;
 
-import org.xydra.core.access.XAccessManagerWithListeners;
+import org.xydra.core.access.XAccessManager;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.change.XModelEventListener;
@@ -21,7 +21,7 @@ import org.xydra.store.AccessException;
 
 /**
  * An abstract {@link XProtectedRepository} that wraps an {@link XRepository}
- * for a specific actor and checks all access against an {@link XAccessManagerWithListeners}.
+ * for a specific actor and checks all access against an {@link XAccessManager}.
  * 
  * @author dscharrer
  * 
@@ -29,10 +29,10 @@ import org.xydra.store.AccessException;
 abstract public class AbstractArmProtectedRepository implements XProtectedRepository {
 	
 	private final XRepository repo;
-	private final XAccessManagerWithListeners arm;
+	private final XAccessManager arm;
 	private final XID actor;
 	
-	public AbstractArmProtectedRepository(XRepository repo, XAccessManagerWithListeners arm, XID actor) {
+	public AbstractArmProtectedRepository(XRepository repo, XAccessManager arm, XID actor) {
 		this.repo = repo;
 		this.arm = arm;
 		this.actor = actor;
@@ -41,11 +41,11 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 		assert arm != null;
 	}
 	
-	protected XAccessManagerWithListeners getArm() {
+	protected XAccessManager getArm() {
 		return this.arm;
 	}
 	
-	abstract protected XAccessManagerWithListeners getArmForModel(XID modelId);
+	abstract protected XAccessManager getArmForModel(XID modelId);
 	
 	private void checkReadAccess() throws AccessException {
 		if(!this.arm.canRead(this.actor, getAddress())) {
@@ -77,7 +77,7 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 	
 	public XProtectedModel getModel(XID modelId) {
 		
-		XAccessManagerWithListeners modelArm = getArmForModel(modelId);
+		XAccessManager modelArm = getArmForModel(modelId);
 		
 		if(!modelArm.canKnowAboutModel(this.actor, getAddress(), modelId)) {
 			throw new AccessException(this.actor + " cannot read modelId " + modelId + " in "

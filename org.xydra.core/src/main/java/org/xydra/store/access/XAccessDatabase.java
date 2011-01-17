@@ -5,14 +5,17 @@ import java.util.Set;
 
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
-import org.xydra.index.query.Pair;
+import org.xydra.store.MAXTodo;
 
 
 /**
  * A database that stores inheritable access rights.
  * 
+ * By design, implementations of this interface need a {@link XGroupDatabase}.
+ * 
  * @author dscharrer
  */
+@MAXTodo
 public interface XAccessDatabase extends Serializable {
 	
 	/**
@@ -88,34 +91,6 @@ public interface XAccessDatabase extends Serializable {
 	 */
 	XAccessValue getAccessDefinition(XID actor, XAddress resource, XID access)
 	        throws IllegalArgumentException;
-	
-	/**
-	 * Get all types of access an actor has to a resource.
-	 * 
-	 * @param actor The {@link XID} of the actor of whom the access rights are
-	 *            to be returned.
-	 * @param resource The {@link XAddress} of the resource of which the access
-	 *            rights of the given actor are to be returned.
-	 * @return Returns two sets of permissions. Permissions in the first set are
-	 *         explicitly allowed while permissions in the second set are
-	 *         explicitly denied.
-	 */
-	Pair<Set<XID>,Set<XID>> getPermissions(XID actor, XAddress resource);
-	
-	/**
-	 * Get all actors that have access to a resource.
-	 * 
-	 * @param resource The resource being accessed.
-	 * @param access The type of access being requested.
-	 * @return Returns two sets of actors. An actor is allowed access exactly if
-	 *         he or a group he is in is in the first set AND he isn't in the
-	 *         second set. Groups in the second set do NOT mean that their
-	 *         members don't have access and should be ignored.
-	 * 
-	 *         FIXME The documentation of the return value is too unclear to be
-	 *         implemented.
-	 */
-	Pair<Set<XID>,Set<XID>> getActorsWithPermission(XAddress resource, XID access);
 	
 	/**
 	 * @return an {@link Set} with all access definitions in this manager. Never

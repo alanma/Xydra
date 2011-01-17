@@ -6,9 +6,10 @@ import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommandFactory;
 import org.xydra.core.model.XID;
-import org.xydra.store.access.XPasswordDatabase;
+import org.xydra.store.access.XAccountDatabase;
 import org.xydra.store.base.HashUtils;
-import org.xydra.store.impl.delegating.DelegatingSecureStore;
+import org.xydra.store.impl.delegate.AuthorisationArm;
+import org.xydra.store.impl.memory.SecureMemoryStore;
 import org.xydra.store.test.AbstractStoreReadMethodsTest;
 
 
@@ -23,17 +24,14 @@ import org.xydra.store.test.AbstractStoreReadMethodsTest;
  */
 public class DelegatingSecureStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 	
-	protected XPasswordDatabase passwordDb = null;
+	protected XAccountDatabase accountDb = null;
 	protected String correctPass = "Test";
 	
 	@Override
 	protected XydraStore getStore() {
-		if(this.store != null) {
-			return this.store;
+		if(this.store == null) {
+			this.store = new SecureMemoryStore();
 		}
-		
-		this.store = new DelegatingSecureStore();
-		
 		return this.store;
 	}
 	
@@ -44,17 +42,19 @@ public class DelegatingSecureStoreReadMethodsTest extends AbstractStoreReadMetho
 	
 	@Override
 	protected XID getCorrectUser() {
-		if(this.passwordDb == null) {
-			this.passwordDb = ((DelegatingSecureStore)this.getStore()).getPasswordDatabase();
+		if(this.accountDb == null) {
+			// open as XydraAdmin
+			this.accountDb = StoreUtils.getAccountDatabase(XydraStoreAdmin.XYDRA_ADMIN_ID, this
+			        .getStore().getXydraStoreAdmin().getXydraAdminPasswordHash(), this.getStore());
 		}
-		XPasswordDatabase pwdbase = this.passwordDb;
 		
 		XID actorId = XX.createUniqueID();
 		
-		if(!this.passwordDb.isValidLogin(actorId, this.getCorrectUserPasswordHash())) {
-			pwdbase.setPasswordHash(actorId, HashUtils.getXydraPasswordHash(this.correctPass));
+		if(!this.accountDb.isValidLogin(actorId, this.getCorrectUserPasswordHash())) {
+			this.accountDb.setPasswordHash(actorId,
+			        HashUtils.getXydraPasswordHash(this.correctPass));
 		}
-		assertTrue(this.passwordDb.isValidLogin(actorId, this.getCorrectUserPasswordHash()));
+		assertTrue(this.accountDb.isValidLogin(actorId, this.getCorrectUserPasswordHash()));
 		
 		return actorId;
 	}
@@ -67,22 +67,10 @@ public class DelegatingSecureStoreReadMethodsTest extends AbstractStoreReadMetho
 	@Override
 	protected XID getIncorrectUser() {
 		/*
-		 * FIXME this whole method probably needs to be changed, after Max tells
-		 * me how to actually work with the access rights here. ~Bjoern
+		 * By definition of createUniqueID this ID is unknown an is therefore
+		 * not registered in the accountDb
 		 */
-		if(this.passwordDb == null) {
-			this.passwordDb = ((DelegatingSecureStore)this.getStore()).getPasswordDatabase();
-		}
-		XPasswordDatabase pwdbase = this.passwordDb;
-		
-		XID actorId = XX.createUniqueID();
-		
-		if(!this.passwordDb.isValidLogin(actorId, this.getCorrectUserPasswordHash())) {
-			pwdbase.setPasswordHash(actorId, HashUtils.getXydraPasswordHash("correct"));
-		}
-		assertTrue(this.passwordDb.isValidLogin(actorId, HashUtils.getXydraPasswordHash("correct")));
-		
-		return actorId;
+		return XX.createUniqueID();
 	}
 	
 	@Override
@@ -92,7 +80,7 @@ public class DelegatingSecureStoreReadMethodsTest extends AbstractStoreReadMetho
 	
 	@Override
 	protected long getQuotaForBruteForce() {
-		return DelegatingSecureStore.MAX_FAILED_LOGIN_ATTEMPTS;
+		return AuthorisationArm.MAX_FAILED_LOGIN_ATTEMPTS;
 	}
 	
 	@Override

@@ -16,19 +16,26 @@ import org.xydra.core.model.XWritableModel;
 /**
  * A simple data container for {@link XWritableModel}.
  * 
+ * Minimal memory footprint, can be used as data transfer object.
+ * 
  * @author voelkel
  */
 public class SimpleModel implements XWritableModel, Serializable {
 	
 	private static final long serialVersionUID = 5593443685935758227L;
+	
 	private final XAddress address;
 	private long revisionNumber;
 	private final Map<XID,SimpleObject> objects;
 	
 	public SimpleModel(XAddress address) {
+		this(address, XCommand.NEW);
+	}
+	
+	public SimpleModel(XAddress address, long revisionNumber) {
 		assert address.getAddressedType() == XType.XMODEL;
 		this.address = address;
-		this.revisionNumber = XCommand.NEW;
+		this.revisionNumber = revisionNumber;
 		this.objects = new HashMap<XID,SimpleObject>();
 	}
 	
@@ -96,6 +103,10 @@ public class SimpleModel implements XWritableModel, Serializable {
 	 */
 	public void setRevisionNumber(long rev) {
 		this.revisionNumber = rev;
+	}
+	
+	public void addObject(SimpleObject object) {
+		this.objects.put(object.getID(), object);
 	}
 	
 }

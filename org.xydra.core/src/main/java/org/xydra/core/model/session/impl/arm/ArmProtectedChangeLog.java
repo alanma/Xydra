@@ -3,7 +3,7 @@ package org.xydra.core.model.session.impl.arm;
 import java.util.Iterator;
 
 import org.xydra.core.XX;
-import org.xydra.core.access.XAccessManagerWithListeners;
+import org.xydra.core.access.XAccessManager;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XModelEvent;
 import org.xydra.core.change.XObjectEvent;
@@ -17,7 +17,7 @@ import org.xydra.store.AccessException;
 
 /**
  * An {@link XChangeLog} wrapper for a specific actor that checks all access
- * against an {@link XAccessManagerWithListeners}.
+ * against an {@link XAccessManager}.
  * 
  * @author dscharrer
  * 
@@ -27,10 +27,10 @@ public class ArmProtectedChangeLog implements XChangeLog {
 	private static final long serialVersionUID = -1236561973087579785L;
 	
 	private final XChangeLog log;
-	private final XAccessManagerWithListeners arm;
+	private final XAccessManager arm;
 	private final XID actor;
 	
-	public ArmProtectedChangeLog(XChangeLog log, XAccessManagerWithListeners arm, XID actor) {
+	public ArmProtectedChangeLog(XChangeLog log, XAccessManager arm, XID actor) {
 		this.log = log;
 		this.arm = arm;
 		this.actor = actor;

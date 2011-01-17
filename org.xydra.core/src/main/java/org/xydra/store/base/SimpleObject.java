@@ -16,6 +16,8 @@ import org.xydra.core.model.XWritableObject;
 /**
  * A simple data container for {@link XWritableObject}.
  * 
+ * Minimal memory footprint, can be used as data transfer object.
+ * 
  * @author voelkel
  */
 public class SimpleObject implements XWritableObject, Serializable {
@@ -26,10 +28,18 @@ public class SimpleObject implements XWritableObject, Serializable {
 	private long revisionNumber;
 	private final Map<XID,SimpleField> fields;
 	
+	public void addField(SimpleField field) {
+		this.fields.put(field.getID(), field);
+	}
+	
 	public SimpleObject(XAddress address) {
+		this(address, XCommand.NEW);
+	}
+	
+	public SimpleObject(XAddress address, long revisionNumber) {
 		assert address.getAddressedType() == XType.XOBJECT;
 		this.address = address;
-		this.revisionNumber = XCommand.NEW;
+		this.revisionNumber = revisionNumber;
 		this.fields = new HashMap<XID,SimpleField>();
 	}
 	

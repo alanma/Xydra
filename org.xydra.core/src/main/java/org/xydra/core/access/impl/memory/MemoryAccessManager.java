@@ -9,8 +9,7 @@ import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.core.access.XAccessEvent;
 import org.xydra.core.access.XAccessListener;
-import org.xydra.core.access.XAccessManagerWithListeners;
-import org.xydra.core.access.XGroupDatabaseWithListeners;
+import org.xydra.core.access.XAccessManager;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
@@ -25,10 +24,11 @@ import org.xydra.index.query.Wildcard;
 import org.xydra.store.access.XA;
 import org.xydra.store.access.XAccessDefinition;
 import org.xydra.store.access.XAccessValue;
+import org.xydra.store.access.XGroupDatabase;
 
 
 /**
- * Implementation of {@link XAccessManagerWithListeners}.
+ * Implementation of {@link XAccessManager}.
  * 
  * IMPROVE using standard java monitor for now, reader-writer lock may be more
  * appropriate
@@ -42,12 +42,12 @@ public class MemoryAccessManager extends AbstractAccessManager {
 	
 	private static final long serialVersionUID = -1731169839295825690L;
 	
-	private final XGroupDatabaseWithListeners groups;
+	private final XGroupDatabase groups;
 	// map of access -> resource -> actor
 	private final IMapMapMapIndex<XID,XAddress,XID,Boolean> rights;
 	private final Set<XAccessListener> listeners;
 	
-	public MemoryAccessManager(XGroupDatabaseWithListeners groups) {
+	public MemoryAccessManager(XGroupDatabase groups) {
 		this.groups = groups;
 		this.rights = new FastTripleMap<XID,XAddress,XID,Boolean>();
 		this.listeners = new HashSet<XAccessListener>();
@@ -364,8 +364,8 @@ public class MemoryAccessManager extends AbstractAccessManager {
 			
 			@Override
 			public XAccessDefinition transform(KeyKeyKeyEntryTuple<XID,XAddress,XID,Boolean> in) {
-				return new MemoryAccessDefinition(in.getKey1(), in.getKey2(), in.getKey3(), in
-				        .getEntry());
+				return new MemoryAccessDefinition(in.getKey1(), in.getKey2(), in.getKey3(),
+				        in.getEntry());
 			}
 			
 		};

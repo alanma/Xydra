@@ -7,6 +7,8 @@ import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.StoreException;
@@ -21,7 +23,10 @@ import org.xydra.store.XydraStore;
  */
 public class BaseModel implements XBaseModel, Serializable {
 	
+	private static final Logger log = LoggerFactory.getLogger(BaseModel.class);
+	
 	private static final long serialVersionUID = 2086217765670621565L;
+	
 	protected XAddress address;
 	protected Credentials credentials;
 	protected XBaseModel baseModel;
@@ -45,26 +50,41 @@ public class BaseModel implements XBaseModel, Serializable {
 		return this.address;
 	}
 	
-	protected void load() {
+	protected synchronized void load() {
+		LoadingCallback callback = new LoadingCallback();
 		this.store.getModelSnapshots(this.credentials.getActorId(),
-		        this.credentials.getPasswordHash(), new XAddress[] { this.address },
-		        new Callback<BatchedResult<XBaseModel>[]>() {
-			        
-			        @Override
-			        public void onFailure(Throwable error) {
-				        throw new StoreException("", error);
-			        }
-			        
-			        @Override
-			        public void onSuccess(BatchedResult<XBaseModel>[] model) {
-				        assert model.length == 1;
-				        /*
-						 * TODO better error handling if getResult is null
-						 * because getException has an AccessException
-						 */
-				        BaseModel.this.baseModel = model[0].getResult();
-			        }
-		        });
+		        this.credentials.getPasswordHash(), new XAddress[] { this.address }, callback);
+		while(!callback.done) {
+			try {
+				callback.wait();
+			} catch(InterruptedException e) {
+				log.debug("Could not wait", e);
+			}
+		}
+	}
+	
+	private final class LoadingCallback implements Callback<BatchedResult<XBaseModel>[]> {
+		public boolean done = false;
+		
+		@Override
+		public synchronized void onFailure(Throwable error) {
+			this.done = true;
+			// TODO is the notify necessary?
+			notify();
+			throw new StoreException("", error);
+		}
+		
+		@Override
+		public synchronized void onSuccess(BatchedResult<XBaseModel>[] model) {
+			assert model.length == 1;
+			this.done = true;
+			/*
+			 * TODO better error handling if getResult is null because
+			 * getException has an AccessException
+			 */
+			BaseModel.this.baseModel = model[0].getResult();
+			notify();
+		}
 	}
 	
 	@Override

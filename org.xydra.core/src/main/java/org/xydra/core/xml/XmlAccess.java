@@ -9,7 +9,7 @@ import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.core.XX;
-import org.xydra.core.access.XAccessManagerWithListeners;
+import org.xydra.core.access.XAccessManager;
 import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.access.impl.memory.MemoryAccessDefinition;
 import org.xydra.core.access.impl.memory.MemoryAccessManager;
@@ -98,12 +98,12 @@ public class XmlAccess {
 	 *             valid access manager.
 	 * 
 	 */
-	public static XAccessManagerWithListeners toAccessManager(MiniElement xml,
+	public static XAccessManager toAccessManager(MiniElement xml,
 	        XGroupDatabaseWithListeners groups) throws IllegalArgumentException {
 		
 		XmlUtils.checkElementName(xml, XACCESSDEFS_ELEMENT);
 		
-		XAccessManagerWithListeners arm = new MemoryAccessManager(groups);
+		XAccessManager arm = new MemoryAccessManager(groups);
 		
 		Iterator<MiniElement> it = xml.getElements();
 		while(it.hasNext()) {
@@ -152,12 +152,12 @@ public class XmlAccess {
 	}
 	
 	/**
-	 * Encode the given {@link XAccessManagerWithListeners}'s
+	 * Encode the given {@link XAccessManager}'s
 	 * {@link XAccessDefinition XAccessDefinitions} as an XML element.
 	 * 
 	 * @param out The XML encoder to write to.
 	 */
-	public static void toXml(XAccessManagerWithListeners arm, XmlOut out)
+	public static void toXml(XAccessManager arm, XmlOut out)
 	        throws IllegalArgumentException {
 		
 		toXml(arm.getDefinitions(), out);

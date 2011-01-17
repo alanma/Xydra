@@ -7,7 +7,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import org.xydra.core.XX;
-import org.xydra.core.access.XAccessManagerWithListeners;
+import org.xydra.core.access.XAccessManager;
 import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.access.impl.memory.MemoryAccessManager;
 import org.xydra.core.access.impl.memory.MemoryGroupDatabase;
@@ -18,14 +18,14 @@ import org.xydra.store.access.XAccessValue;
 
 
 /**
- * Test for implementations of {@link XAccessManagerWithListeners}.
+ * Test for implementations of {@link XAccessManager}.
  * 
  * @author dscharrer
  * 
  */
 abstract public class AbstractAccessManagerTest {
 	
-	private XAccessManagerWithListeners arm;
+	private XAccessManager arm;
 	
 	/** member of both groupZero and groupOne */
 	private XID actorAlpha;
@@ -42,7 +42,7 @@ abstract public class AbstractAccessManagerTest {
 	private XID access;
 	private XID access2;
 	
-	abstract protected XAccessManagerWithListeners getAccessManager(
+	abstract protected XAccessManager getAccessManager(
 	        XGroupDatabaseWithListeners groups, XAddress rA0);
 	
 	@Before

@@ -14,11 +14,14 @@ import org.xydra.core.model.XWritableRepository;
 /**
  * A simple data container for {@link XWritableRepository}.
  * 
+ * Minimal memory footprint, can be used as data transfer object.
+ * 
  * @author voelkel
  */
 public class SimpleRepository implements XWritableRepository, Serializable {
 	
 	private static final long serialVersionUID = 5593443685935758227L;
+	
 	private final XAddress address;
 	private final Set<XID> modelIds;
 	

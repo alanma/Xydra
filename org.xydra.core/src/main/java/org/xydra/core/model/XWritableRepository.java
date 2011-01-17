@@ -23,22 +23,22 @@ public interface XWritableRepository extends XBaseRepository {
 	 *         {@link XWritableModel} if the given {@link XID} was already taken
 	 */
 	@ModificationOperation
-	XWritableModel createModel(XID id);
+	XWritableModel createModel(XID modelId);
 	
 	/**
 	 * Removes the specified {@link XWritableModel} from this
 	 * XWritableRepository.
 	 * 
-	 * @param baseRepository The {@link XID} of the {@link XWritableModel} which is
-	 *            to be removed
+	 * @param baseRepository The {@link XID} of the {@link XWritableModel} which
+	 *            is to be removed
 	 * 
 	 * @return true, if the specified {@link XWritableModel} could be removed,
 	 *         false otherwise
 	 */
 	@ModificationOperation
-	boolean removeModel(XID modelID);
+	boolean removeModel(XID modelId);
 	
 	@ReadOperation
-	XWritableModel getModel(XID id);
+	XWritableModel getModel(XID modelId);
 	
 }

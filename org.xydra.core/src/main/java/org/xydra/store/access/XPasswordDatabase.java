@@ -1,15 +1,19 @@
 package org.xydra.store.access;
 
 import org.xydra.core.model.XID;
+import org.xydra.store.MAXTodo;
 
 
 /**
  * @author voelkel
  * 
  */
+@MAXTodo
 public interface XPasswordDatabase {
 	
 	/**
+	 * Write operation.
+	 * 
 	 * @param actorId
 	 * @param passwordHash
 	 */
@@ -22,6 +26,8 @@ public interface XPasswordDatabase {
 	String getPasswordHash(XID actorId);
 	
 	/**
+	 * Write operation.
+	 * 
 	 * @param actorId
 	 */
 	void removePasswordHash(XID actorId);
@@ -34,6 +40,8 @@ public interface XPasswordDatabase {
 	boolean isValidLogin(XID actorId, String passwordHash);
 	
 	/**
+	 * Write operation.
+	 * 
 	 * Set number of failed login attempts back to zero.
 	 * 
 	 * @param actorId
@@ -41,6 +49,8 @@ public interface XPasswordDatabase {
 	void resetFailedLoginAttempts(XID actorId);
 	
 	/**
+	 * Write operation.
+	 * 
 	 * Increment number of failed login attempts.
 	 * 
 	 * @param actorId

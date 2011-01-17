@@ -1,5 +1,6 @@
-package org.xydra.store.impl.delegating;
+package org.xydra.store.impl.delegate;
 
+import java.util.List;
 import java.util.Set;
 
 import org.xydra.core.change.XAtomicEvent;
@@ -11,29 +12,32 @@ import org.xydra.core.change.XRepositoryCommand;
 import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.XTransactionEvent;
 import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
+import org.xydra.core.model.XWritableModel;
+import org.xydra.core.model.XWritableObject;
 import org.xydra.store.GetEventsRequest;
+import org.xydra.store.MAXDone;
 import org.xydra.store.XydraStore;
 
 
 /**
- * A persistence layer interface for {@link XydraStore} implementations.
+ * A persistence SPI for {@link XydraStore} implementations.
  * 
  * Differences to {@link XydraStore} interface:
  * <ol>
- * <li>Synchronous (blocking)</li>
- * <li>No access control</li>
  * <li>No batch operations</li>
+ * <li>Synchronous (blocking)</li>
+ * <li>No authorisation</li>
+ * <li>No access control</li>
  * </ol>
  * 
  * @author voelkel
  */
-public interface XydraBlockingPersistence {
+@MAXDone
+public interface XydraPersistence {
 	
 	/**
 	 * Execute a command.
@@ -100,11 +104,11 @@ public interface XydraBlockingPersistence {
 	 * @return all events that occurred in the entity addressed with 'address'
 	 *         between beginRevision and endRevision.
 	 */
-	XEvent[] getEvents(XAddress address, long beginRevision, long endRevision);
+	List<XEvent> getEvents(XAddress address, long beginRevision, long endRevision);
 	
 	/**
 	 * @return a {@link Set} containing all XIDs of {@link XModel XModels} in
-	 *         this {@link XydraBlockingPersistence}.
+	 *         this {@link XydraPersistence}.
 	 */
 	Set<XID> getModelIds();
 	
@@ -116,20 +120,21 @@ public interface XydraBlockingPersistence {
 	
 	/**
 	 * @param address of an {@link XModel}
-	 * @return the current snapshot of the addressee {@link XModel}.
+	 * @return the current snapshot of the addressed {@link XModel} or null if
+	 *         none found.
 	 */
-	XBaseModel getModelSnapshot(XAddress address);
+	XWritableModel getModelSnapshot(XAddress address);
 	
 	/**
 	 * @param address of an {@link XObject}
 	 * @return the current snapshot of the {@link XObject} addressed with
 	 *         'address'.
 	 */
-	XBaseObject getObjectSnapshot(XAddress address);
+	XWritableObject getObjectSnapshot(XAddress address);
 	
 	/**
-	 * @return the XID of this {@link XydraBlockingPersistence}. This helps a client to
-	 *         differentiate among several {@link XydraBlockingPersistence}
+	 * @return the XID of this {@link XydraPersistence}. This helps a client to
+	 *         differentiate among several {@link XydraPersistence}
 	 *         implementations, e.g. when synchronising between several ov them.
 	 */
 	XID getRepositoryId();

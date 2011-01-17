@@ -12,16 +12,19 @@ import org.xydra.index.XI;
 
 
 /**
- * A simple data container for {@link XWritableField}
+ * A simple data container for {@link XWritableField}.
+ * 
+ * Minimal memory footprint, can be used as data transfer object.
  * 
  * @author voelkel
  */
 public class SimpleField implements XWritableField, Serializable {
 	
 	private static final long serialVersionUID = -4704907115751969328L;
+	
 	private final XAddress address;
-	private long revisionNumber;
 	private XValue value;
+	private long revisionNumber;
 	
 	/**
 	 * @param address
@@ -35,10 +38,14 @@ public class SimpleField implements XWritableField, Serializable {
 		this.value = value;
 	}
 	
-	public SimpleField(XAddress address) {
+	public SimpleField(XAddress address, long rev) {
 		this.address = address;
-		this.revisionNumber = XCommand.NEW;
+		this.revisionNumber = rev;
 		this.value = null;
+	}
+	
+	public SimpleField(XAddress address) {
+		this(address, XCommand.NEW);
 	}
 	
 	@Override

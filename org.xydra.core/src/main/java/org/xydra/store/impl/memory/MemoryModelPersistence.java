@@ -9,22 +9,22 @@ import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.impl.memory.MemoryTransactionEvent;
 import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.DeltaUtils;
 import org.xydra.index.query.Pair;
+import org.xydra.store.MAXDone;
 import org.xydra.store.base.SimpleModel;
+import org.xydra.store.base.SimpleObject;
 
 
 /**
- * A helper class used by {@link MemoryBlockingPersistence} to
- * manage individual models.
+ * A helper class used by {@link MemoryPersistence} to manage individual models.
  * 
  * @author dscharrer
  * 
  */
+@MAXDone
 public class MemoryModelPersistence {
 	
 	XAddress modelAddr;
@@ -85,14 +85,15 @@ public class MemoryModelPersistence {
 		return newRev;
 	}
 	
-	synchronized public XEvent[] getEvents(XAddress address, long beginRevision, long endRevision) {
+	synchronized public List<XEvent> getEvents(XAddress address, long beginRevision,
+	        long endRevision) {
 		
 		long rev = this.events.size();
 		long start = beginRevision < 0 ? 0 : beginRevision;
 		long end = endRevision > rev ? rev : endRevision;
 		
 		if(start == 0 && end == rev) {
-			return this.events.toArray(new XEvent[this.events.size()]);
+			return this.events;
 		}
 		
 		List<XEvent> result = new ArrayList<XEvent>();
@@ -106,18 +107,21 @@ public class MemoryModelPersistence {
 			}
 		}
 		
-		return result.toArray(new XEvent[result.size()]);
+		return result;
 	}
 	
 	synchronized public long getRevisionNumber() {
 		return this.events.size() - 1;
 	}
 	
-	synchronized public XBaseModel getModelSnapshot() {
+	/**
+	 * @return the snapshot or null if not found
+	 */
+	synchronized public SimpleModel getModelSnapshot() {
 		return XCopyUtils.createSnapshot(this.model);
 	}
 	
-	synchronized public XBaseObject getObjectSnapshot(XID objectId) {
+	synchronized public SimpleObject getObjectSnapshot(XID objectId) {
 		
 		if(this.model == null) {
 			// TODO is this the correct behaviour?
@@ -125,6 +129,10 @@ public class MemoryModelPersistence {
 		}
 		
 		return XCopyUtils.createSnapshot(this.model.getObject(objectId));
+	}
+	
+	public boolean exists() {
+		return this.model != null;
 	}
 	
 }

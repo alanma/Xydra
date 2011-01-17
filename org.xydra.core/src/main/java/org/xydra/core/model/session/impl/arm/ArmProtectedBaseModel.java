@@ -2,7 +2,7 @@ package org.xydra.core.model.session.impl.arm;
 
 import java.util.Iterator;
 
-import org.xydra.core.access.XAccessManagerWithListeners;
+import org.xydra.core.access.XAccessManager;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XBaseObject;
@@ -12,7 +12,7 @@ import org.xydra.store.AccessException;
 
 /**
  * An {@link XBaseModel} that wraps an {@link XBaseModel} for a specific actor
- * and checks all access against an {@link XAccessManagerWithListeners}.
+ * and checks all access against an {@link XAccessManager}.
  * 
  * @author dscharrer
  * 
@@ -20,10 +20,10 @@ import org.xydra.store.AccessException;
 public class ArmProtectedBaseModel implements XBaseModel {
 	
 	private final XBaseModel model;
-	protected final XAccessManagerWithListeners arm;
+	protected final XAccessManager arm;
 	protected final XID actor;
 	
-	public ArmProtectedBaseModel(XBaseModel model, XAccessManagerWithListeners arm, XID actor) {
+	public ArmProtectedBaseModel(XBaseModel model, XAccessManager arm, XID actor) {
 		this.model = model;
 		this.arm = arm;
 		this.actor = actor;

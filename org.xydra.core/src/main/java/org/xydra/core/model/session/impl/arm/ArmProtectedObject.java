@@ -1,6 +1,6 @@
 package org.xydra.core.model.session.impl.arm;
 
-import org.xydra.core.access.XAccessManagerWithListeners;
+import org.xydra.core.access.XAccessManager;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.change.XObjectCommand;
@@ -18,7 +18,7 @@ import org.xydra.store.AccessException;
 
 /**
  * An {@link XProtectedObject} that wraps an {@link XObject} for a specific
- * actor and checks all access against an {@link XAccessManagerWithListeners}.
+ * actor and checks all access against an {@link XAccessManager}.
  * 
  * @author dscharrer
  * 
@@ -28,7 +28,7 @@ public class ArmProtectedObject extends ArmProtectedBaseObject implements XProte
 	
 	private final XObject object;
 	
-	public ArmProtectedObject(XObject object, XAccessManagerWithListeners arm, XID actor) {
+	public ArmProtectedObject(XObject object, XAccessManager arm, XID actor) {
 		super(object, arm, actor);
 		this.object = object;
 	}

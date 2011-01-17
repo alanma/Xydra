@@ -2,8 +2,8 @@ package org.xydra.store.test;
 
 import org.xydra.core.XX;
 import org.xydra.core.model.XID;
-import org.xydra.store.impl.delegating.DelegatingAllowAllStore;
-import org.xydra.store.impl.delegating.XydraAsyncBatchPersistence;
+import org.xydra.store.impl.delegate.DelegatingAllowAllStore;
+import org.xydra.store.impl.delegate.XydraPersistence;
 
 
 /**
@@ -22,8 +22,8 @@ public abstract class AbstractAllowAllStoreReadMethodsTest extends AbstractStore
 	 * {@link XydraAsyncBatchPersistence}. This makes it possible to reuse this
 	 * test with different instantiations.
 	 */
-	public DelegatingAllowAllStore getNewStore(XydraAsyncBatchPersistence base) {
-		return new DelegatingAllowAllStore(base);
+	public DelegatingAllowAllStore getNewStore(XydraPersistence xydraPersistence) {
+		return new DelegatingAllowAllStore(xydraPersistence);
 	}
 	
 	/**

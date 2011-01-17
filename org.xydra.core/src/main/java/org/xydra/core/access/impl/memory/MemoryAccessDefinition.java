@@ -2,9 +2,16 @@ package org.xydra.core.access.impl.memory;
 
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
+import org.xydra.store.MAXTodo;
 import org.xydra.store.access.XAccessDefinition;
 
 
+/**
+ * An in-memory implementation of {@link XAccessDefinition}.
+ * 
+ * @author xamde
+ */
+@MAXTodo
 public class MemoryAccessDefinition implements XAccessDefinition {
 	
 	private final XID access;

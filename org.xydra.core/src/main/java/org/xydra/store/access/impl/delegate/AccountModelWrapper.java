@@ -1,4 +1,4 @@
-package org.xydra.store.access;
+package org.xydra.store.access.impl.delegate;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -10,11 +10,9 @@ import org.xydra.annotations.RunsInJava;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.model.XID;
-import org.xydra.core.model.XRepository;
 import org.xydra.core.model.XWritableField;
 import org.xydra.core.model.XWritableModel;
 import org.xydra.core.model.XWritableObject;
-import org.xydra.core.model.XWritableRepository;
 import org.xydra.core.value.XIDSetValue;
 import org.xydra.core.value.XIntegerValue;
 import org.xydra.core.value.XStringValue;
@@ -24,18 +22,17 @@ import org.xydra.index.impl.MapSetIndex;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.store.NamingUtils;
+import org.xydra.store.MAXTodo;
 import org.xydra.store.XydraStore;
-import org.xydra.store.base.Credentials;
+import org.xydra.store.access.XAccountDatabase;
+import org.xydra.store.access.XidSetValueUtils;
 import org.xydra.store.base.HashUtils;
-import org.xydra.store.base.WritableRepository;
+import org.xydra.store.impl.delegate.XydraPersistence;
 
 
 /**
- * Wraps a XydraStore model to model groups and their members.
- * 
- * 
- * <h3>Implementation Note</h3>
+ * Wraps a {@link XydraStore} model to store accounts with passwords and groups
+ * and their members. This is usually one special model per store.
  * 
  * <h4>Data modelling</h4>
  * 
@@ -66,14 +63,20 @@ import org.xydra.store.base.WritableRepository;
  * actorId  | "isMemberOf" | {@link XIDSetValue} groupIds
  * </pre>
  * 
+ * 
+ * FIXME This impl does not write changes back to a {@link XydraPersistence}
+ * because {@link XWritableModel} is just an im-memory snapshot (at least the
+ * ones we have).
+ * 
  * @author voelkel
  */
 @RunsInAppEngine
 @RunsInGWT
 @RunsInJava
-public class GroupModelWrapper implements XGroupDatabase, XPasswordDatabase {
+@MAXTodo
+public class AccountModelWrapper implements XAccountDatabase {
 	
-	private static final Logger log = LoggerFactory.getLogger(GroupModelWrapper.class);
+	private static final Logger log = LoggerFactory.getLogger(AccountModelWrapper.class);
 	
 	public static final XID hasMember = XX.toId("hasMember");
 	public static final XID isMemberOf = XX.toId("isMemberOf");
@@ -82,32 +85,42 @@ public class GroupModelWrapper implements XGroupDatabase, XPasswordDatabase {
 	
 	private static final long serialVersionUID = 3858107275113200924L;
 	
-	private XWritableModel dataModel;
+	private XWritableModel wrappedAccountModel;
 	
 	private MapSetIndex<XID,XID> actor2groups = null;
 	
-	/**
-	 * @param credentials to authenticate and authorise to store
-	 * @param store
-	 */
-	public GroupModelWrapper(Credentials credentials, XydraStore store) {
-		XWritableRepository repository = new WritableRepository(credentials, store);
-		this.dataModel = repository.createModel(NamingUtils.ID_ACCOUNT_MODEL);
-	}
+	// /**
+	// * @param credentials to authenticate and authorise to store
+	// * @param store
+	// */
+	// public AccountModelWrapper(Credentials credentials, XydraStore store) {
+	// XWritableRepository repository = new WritableRepository(credentials,
+	// store);
+	// this.wrappedAccountModel =
+	// repository.createModel(NamingUtils.ID_ACCOUNT_MODEL);
+	// }
+	//
+	// /**
+	// * To test
+	// *
+	// * @param repository
+	// * @param modelId
+	// */
+	// public AccountModelWrapper(XRepository repository, XID modelId) {
+	// this.wrappedAccountModel = repository.createModel(modelId);
+	// }
 	
-	/**
-	 * To test
-	 * 
-	 * @param repository
-	 * @param modelId
-	 */
-	protected GroupModelWrapper(XRepository repository, XID modelId) {
-		this.dataModel = repository.createModel(modelId);
+	public AccountModelWrapper(XWritableModel accountModel) {
+		if(accountModel == null) {
+			throw new IllegalArgumentException("accountModel may not be null");
+		}
+		this.wrappedAccountModel = accountModel;
 	}
 	
 	@Override
 	public void addToGroup(XID actorId, XID groupId) {
-		XidSetValueUtils.addToXIDSetValueInObject(this.dataModel, groupId, hasMember, actorId);
+		XidSetValueUtils.addToXIDSetValueInObject(this.wrappedAccountModel, groupId, hasMember,
+		        actorId);
 		
 		ensureIndexIsInitialised();
 		this.actor2groups.index(actorId, groupId);
@@ -134,13 +147,13 @@ public class GroupModelWrapper implements XGroupDatabase, XPasswordDatabase {
 	/* transitive */
 	@Override
 	public Set<XID> getMembersOf(XID group) {
-		return XidSetValueUtils.getXIDSetValue(this.dataModel, group, hasMember);
+		return XidSetValueUtils.getXIDSetValue(this.wrappedAccountModel, group, hasMember);
 	}
 	
 	/* direct */
 	@Override
 	public Set<XID> getGroups() {
-		Iterator<XID> it = this.dataModel.iterator();
+		Iterator<XID> it = this.wrappedAccountModel.iterator();
 		Set<XID> set = new HashSet<XID>();
 		while(it.hasNext()) {
 			XID xid = it.next();
@@ -158,7 +171,8 @@ public class GroupModelWrapper implements XGroupDatabase, XPasswordDatabase {
 	
 	@Override
 	public void removeFromGroup(XID actorId, XID groupId) {
-		XidSetValueUtils.removeFromXIDSetValueInObject(this.dataModel, groupId, hasMember, actorId);
+		XidSetValueUtils.removeFromXIDSetValueInObject(this.wrappedAccountModel, groupId,
+		        hasMember, actorId);
 		ensureIndexIsInitialised();
 		this.actor2groups.deIndex(actorId, groupId);
 	}
@@ -178,7 +192,7 @@ public class GroupModelWrapper implements XGroupDatabase, XPasswordDatabase {
 	
 	@Override
 	public void removePasswordHash(XID actorId) {
-		XWritableObject actor = this.dataModel.getObject(actorId);
+		XWritableObject actor = this.wrappedAccountModel.getObject(actorId);
 		if(actor == null) {
 			return;
 		}
@@ -191,9 +205,10 @@ public class GroupModelWrapper implements XGroupDatabase, XPasswordDatabase {
 	
 	@Override
 	public void setPasswordHash(XID actorId, String passwordHash) {
-		XWritableObject actor = this.dataModel.getObject(actorId);
+		assert this.wrappedAccountModel != null;
+		XWritableObject actor = this.wrappedAccountModel.getObject(actorId);
 		if(actor == null) {
-			actor = this.dataModel.createObject(actorId);
+			actor = this.wrappedAccountModel.createObject(actorId);
 		}
 		XWritableField field = actor.getField(hasPasswordHash);
 		if(field == null) {
@@ -204,9 +219,9 @@ public class GroupModelWrapper implements XGroupDatabase, XPasswordDatabase {
 	
 	@Override
 	public int incrementFailedLoginAttempts(XID actorId) {
-		XWritableObject actor = this.dataModel.getObject(actorId);
+		XWritableObject actor = this.wrappedAccountModel.getObject(actorId);
 		if(actor == null) {
-			actor = this.dataModel.createObject(actorId);
+			actor = this.wrappedAccountModel.createObject(actorId);
 		}
 		XWritableField field = actor.getField(hasFailedLoginAttempts);
 		if(field == null) {
@@ -224,7 +239,7 @@ public class GroupModelWrapper implements XGroupDatabase, XPasswordDatabase {
 	
 	@Override
 	public void resetFailedLoginAttempts(XID actorId) {
-		XWritableObject actor = this.dataModel.getObject(actorId);
+		XWritableObject actor = this.wrappedAccountModel.getObject(actorId);
 		if(actor == null) {
 			return;
 		}
@@ -241,11 +256,11 @@ public class GroupModelWrapper implements XGroupDatabase, XPasswordDatabase {
 		if(actorId == null) {
 			throw new IllegalArgumentException("actorId must not be null");
 		}
-		XWritableObject actor = this.dataModel.getObject(actorId);
+		XWritableObject actor = this.wrappedAccountModel.getObject(actorId);
 		if(actor == null) {
 			return 0;
 		}
-		XWritableField field = actor.getField(hasPasswordHash);
+		XWritableField field = actor.getField(hasFailedLoginAttempts);
 		if(field == null) {
 			return 0;
 		}
@@ -253,6 +268,7 @@ public class GroupModelWrapper implements XGroupDatabase, XPasswordDatabase {
 		if(value == null) {
 			return 0;
 		}
+		assert value instanceof XIntegerValue : "type is " + value.getClass();
 		return ((XIntegerValue)value).contents();
 	}
 	
@@ -271,7 +287,7 @@ public class GroupModelWrapper implements XGroupDatabase, XPasswordDatabase {
 		if(actorId == null) {
 			throw new IllegalArgumentException("actorId must not be null");
 		}
-		XWritableObject actor = this.dataModel.getObject(actorId);
+		XWritableObject actor = this.wrappedAccountModel.getObject(actorId);
 		if(actor == null) {
 			return null;
 		}

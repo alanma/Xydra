@@ -1,6 +1,6 @@
 package org.xydra.core.model.session.impl.arm;
 
-import org.xydra.core.access.XAccessManagerWithListeners;
+import org.xydra.core.access.XAccessManager;
 import org.xydra.core.change.XFieldCommand;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.model.XField;
@@ -12,7 +12,7 @@ import org.xydra.store.AccessException;
 
 /**
  * An {@link XProtectedField} that wraps an {@link XField} for a specific actor
- * and checks all access against an {@link XAccessManagerWithListeners}.
+ * and checks all access against an {@link XAccessManager}.
  * 
  * @author dscharrer
  * 
@@ -21,7 +21,7 @@ public class ArmProtectedField extends ArmProtectedBaseField implements XProtect
 	
 	private final XField field;
 	
-	public ArmProtectedField(XField field, XAccessManagerWithListeners arm, XID actor) {
+	public ArmProtectedField(XField field, XAccessManager arm, XID actor) {
 		super(field, arm, actor);
 		this.field = field;
 	}

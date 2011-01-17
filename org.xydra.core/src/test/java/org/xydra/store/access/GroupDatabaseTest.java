@@ -10,14 +10,19 @@ import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XRepository;
+import org.xydra.core.model.XWritableModel;
 import org.xydra.core.model.state.XSPI;
 import org.xydra.core.model.state.impl.memory.TemporaryStateStore;
 import org.xydra.core.test.TestLogger;
+import org.xydra.store.MAXTodo;
+import org.xydra.store.NamingUtils;
+import org.xydra.store.access.impl.delegate.AccountModelWrapper;
 
 
+@MAXTodo
 public class GroupDatabaseTest {
 	
-	private GroupModelWrapper wrapper;
+	private AccountModelWrapper wrapper;
 	
 	@BeforeClass
 	public static void init() {
@@ -29,7 +34,8 @@ public class GroupDatabaseTest {
 	public void before() {
 		XID actorId = XX.toId("Test");
 		XRepository repo = X.createMemoryRepository(actorId);
-		this.wrapper = new GroupModelWrapper(repo, XX.toId("ARM"));
+		XWritableModel accountModel = repo.createModel(NamingUtils.ID_ACCOUNT_MODEL);
+		this.wrapper = new AccountModelWrapper(accountModel);
 	}
 	
 	static final XID actor1 = XX.toId("actor1");

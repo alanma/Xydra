@@ -6,11 +6,12 @@ import org.xydra.store.base.HashUtils;
 
 
 /**
- * Administrative functions to manage a local {@link XydraStore}. The methods in
- * this interface should not be exposed over REST or other network interfaces
- * for security reasons.
+ * Administrative functions to manage a specific XydraStore instance (or an
+ * implementation delegate of it). The methods in this interface should not be
+ * exposed over REST or other network interfaces for security reasons.
  * 
  * @author xamde
+ * 
  */
 public interface XydraStoreAdmin {
 	
@@ -21,12 +22,6 @@ public interface XydraStoreAdmin {
 	 * update, delete all Xydra entities (model, object, field, value).
 	 */
 	public static final XID XYDRA_ADMIN_ID = XX.toId("internal--XydraAdmin");
-	
-	/**
-	 * @return the {@link XydraStore} for which this is the administrative
-	 *         interface.
-	 */
-	XydraStore getXydraStore();
 	
 	/**
 	 * Delete <em>all</em> data in the store. Intended to be used in unit tests.

@@ -5,6 +5,7 @@ import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.core.XX;
 import org.xydra.core.model.XID;
+import org.xydra.store.MAXTodo;
 
 
 /**
@@ -15,6 +16,7 @@ import org.xydra.core.model.XID;
 @RunsInAppEngine
 @RunsInGWT
 @RunsInJava
+@MAXTodo
 public class XA {
 	
 	/**

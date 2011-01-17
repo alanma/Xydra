@@ -2,6 +2,7 @@ package org.xydra.store.impl.memory;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -9,12 +10,13 @@ import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XType;
+import org.xydra.store.MAXDone;
 import org.xydra.store.RequestException;
-import org.xydra.store.impl.delegating.XydraBlockingPersistence;
+import org.xydra.store.base.SimpleModel;
+import org.xydra.store.base.SimpleObject;
+import org.xydra.store.impl.delegate.XydraPersistence;
 
 
 /**
@@ -24,49 +26,50 @@ import org.xydra.store.impl.delegating.XydraBlockingPersistence;
  * @author voelkel
  * @author dscharrer
  */
-public class MemoryBlockingPersistence implements XydraBlockingPersistence {
+@MAXDone
+public class MemoryPersistence implements XydraPersistence {
 	
 	private XID repoId;
 	
 	private Map<XID,MemoryModelPersistence> models = new HashMap<XID,MemoryModelPersistence>();
 	
-	public MemoryBlockingPersistence(XID repositoryId) {
+	public MemoryPersistence(XID repositoryId) {
 		this.repoId = repositoryId;
 	}
 	
-	private MemoryModelPersistence getModelService(XID modelId) {
+	private MemoryModelPersistence getModelPersistence(XID modelId) {
 		if(modelId == null) {
 			throw new IllegalArgumentException("modelId must not be null");
 		}
 		synchronized(this.models) {
-			MemoryModelPersistence ms = this.models.get(modelId);
-			if(ms == null) {
+			MemoryModelPersistence modelPersistence = this.models.get(modelId);
+			if(modelPersistence == null) {
 				XAddress modelAddr = XX.toAddress(this.repoId, modelId, null, null);
-				ms = new MemoryModelPersistence(modelAddr);
-				this.models.put(modelId, ms);
+				modelPersistence = new MemoryModelPersistence(modelAddr);
+				this.models.put(modelId, modelPersistence);
 			}
-			return ms;
-		}
-	}
-	
-	private void checkRepoId(XAddress address) {
-		if(!this.repoId.equals(address.getRepository())) {
-			throw new IllegalArgumentException("wrong repository ID: was " + address
-			        + " but expected " + this.repoId);
+			return modelPersistence;
 		}
 	}
 	
 	@Override
 	public long executeCommand(XID actorId, XCommand command) {
 		XAddress address = command.getChangedEntity();
-		checkRepoId(address);
-		return getModelService(address.getModel()).executeCommand(actorId, command);
+		// caller asserts repoId matches address
+		MemoryModelPersistence modelPersistence = getModelPersistence(address.getModel());
+		long result = modelPersistence.executeCommand(actorId, command);
+		// update internal cache map
+		if(!modelPersistence.exists()) {
+			this.models.remove(address.getModel());
+		}
+		return result;
 	}
 	
 	@Override
-	public XEvent[] getEvents(XAddress address, long beginRevision, long endRevision) {
-		checkRepoId(address);
-		return getModelService(address.getModel()).getEvents(address, beginRevision, endRevision);
+	public List<XEvent> getEvents(XAddress address, long beginRevision, long endRevision) {
+		// caller asserts repoId matches address
+		return getModelPersistence(address.getModel()).getEvents(address, beginRevision,
+		        endRevision);
 	}
 	
 	@Override
@@ -75,7 +78,9 @@ public class MemoryBlockingPersistence implements XydraBlockingPersistence {
 		synchronized(this.models) {
 			modelIds.addAll(this.models.keySet());
 		}
-		// TODO filter to exclude models that don't actually exist right now?
+		// TODO filter to exclude models that don't actually exist right
+		// now? Max: Is this fixed now by removing the removed models
+		// (via executeCommand) also from out map?
 		return modelIds;
 	}
 	
@@ -85,28 +90,28 @@ public class MemoryBlockingPersistence implements XydraBlockingPersistence {
 			throw new RequestException("must use a model address to get a model revison, was "
 			        + address);
 		}
-		checkRepoId(address);
-		return getModelService(address.getModel()).getRevisionNumber();
+		// caller asserts repoId matches address
+		return getModelPersistence(address.getModel()).getRevisionNumber();
 	}
 	
 	@Override
-	public XBaseModel getModelSnapshot(XAddress address) {
+	public SimpleModel getModelSnapshot(XAddress address) {
 		if(address.getAddressedType() != XType.XMODEL) {
 			throw new RequestException("must use a model address to get a model snapshot, was "
 			        + address);
 		}
-		checkRepoId(address);
-		return getModelService(address.getModel()).getModelSnapshot();
+		// caller asserts repoId matches address
+		return getModelPersistence(address.getModel()).getModelSnapshot();
 	}
 	
 	@Override
-	public XBaseObject getObjectSnapshot(XAddress address) {
+	public SimpleObject getObjectSnapshot(XAddress address) {
 		if(address.getAddressedType() != XType.XOBJECT) {
 			throw new RequestException("must use an object address to get an object snapshot, was "
 			        + address);
 		}
-		checkRepoId(address);
-		return getModelService(address.getModel()).getObjectSnapshot(address.getObject());
+		// caller asserts repoId matches address
+		return getModelPersistence(address.getModel()).getObjectSnapshot(address.getObject());
 	}
 	
 	@Override

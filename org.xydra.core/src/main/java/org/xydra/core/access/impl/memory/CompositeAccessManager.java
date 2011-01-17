@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.xydra.core.access.XAccessListener;
-import org.xydra.core.access.XAccessManagerWithListeners;
+import org.xydra.core.access.XAccessManager;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
 import org.xydra.index.query.Pair;
@@ -25,12 +25,12 @@ public class CompositeAccessManager extends AbstractAccessManager {
 	
 	private static final long serialVersionUID = 2576314343471791859L;
 	
-	private final XAccessManagerWithListeners outer;
-	private final XAccessManagerWithListeners inner;
+	private final XAccessManager outer;
+	private final XAccessManager inner;
 	private final XAddress mountPoint;
 	
-	public CompositeAccessManager(XAddress mountPoint, XAccessManagerWithListeners outer,
-	        XAccessManagerWithListeners inner) {
+	public CompositeAccessManager(XAddress mountPoint, XAccessManager outer,
+	        XAccessManager inner) {
 		this.mountPoint = mountPoint;
 		this.outer = outer;
 		this.inner = inner;

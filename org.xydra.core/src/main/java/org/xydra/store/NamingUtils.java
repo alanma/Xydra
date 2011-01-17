@@ -141,13 +141,13 @@ public class NamingUtils {
 	
 	/**
 	 * Default ID for the default model for accounts, created by store
-	 * implementation.
+	 * implementation: {@value}
 	 */
 	public static final XID ID_ACCOUNT_MODEL = XX.toId(PREFIX_INTERNAL + NAMESPACE_SEPARATOR
 	        + "accounts");
 	
-	public static XID getRightsModelId(XID modelID) {
-		return XX.toId(PREFIX_RIGHTS_ID + modelID.toString());
+	public static XID getRightsModelId(XID modelId) {
+		return XX.toId(PREFIX_RIGHTS_ID + modelId.toString());
 	}
 	
 	/***
@@ -158,16 +158,16 @@ public class NamingUtils {
 	 * Read-rights for an index model are inherited from the corresponding base
 	 * model.
 	 * 
-	 * @param modelID
+	 * @param modelId
 	 * @param indexName may not be null and not be the empty string.
 	 * @return an XID in the internal name-space following the name-space
 	 *         conventions for <em>index models</em>.
 	 */
-	public static XID getIndexModelId(XID modelID, String indexName) {
+	public static XID getIndexModelId(XID modelId, String indexName) {
 		if(indexName == null || indexName.length() == 0) {
 			throw new IllegalArgumentException("Indexname may not be null and not the empty string");
 		}
-		return XX.toId(PREFIX_INDEX_ID + encode(modelID) + ENCODING_SEPARATOR
+		return XX.toId(PREFIX_INDEX_ID + encode(modelId) + ENCODING_SEPARATOR
 		        + encodeXid(indexName));
 	}
 	
