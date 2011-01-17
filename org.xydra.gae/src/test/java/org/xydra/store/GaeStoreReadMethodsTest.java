@@ -7,25 +7,22 @@ import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommandFactory;
 import org.xydra.core.model.XID;
-import org.xydra.store.access.XGroupDatabase;
-import org.xydra.store.access.XPasswordDatabase;
-import org.xydra.store.impl.delegating.DelegatingSecureStore;
+import org.xydra.store.access.XAccountDatabase;
+import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
-import org.xydra.store.impl.gae.GaeXydraStore;
 import org.xydra.store.test.AbstractStoreReadMethodsTest;
 
 
 public class GaeStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 	
-	protected XPasswordDatabase passwordDb = null;
-	protected XGroupDatabase groupDb = null;
+	protected XAccountDatabase accountDb = null;
 	
 	@Override
 	protected XydraStore getStore() {
 		GaeTestfixer.enable();
 		
 		if(this.store == null) {
-			this.store = GaeXydraStore.get();
+			this.store = GaePersistence.get();
 		}
 		
 		return this.store;
@@ -38,20 +35,19 @@ public class GaeStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 	
 	@Override
 	protected XID getCorrectUser() {
-		if(this.passwordDb == null) {
-			this.passwordDb = ((DelegatingSecureStore)this.getStore()).getPasswordDatabase();
-		}
-		if(this.groupDb == null) {
-			this.groupDb = ((DelegatingSecureStore)this.getStore()).getGroupDatabase();
+		if(this.accountDb == null) {
+			// open as XydraAdmin
+			this.accountDb = StoreUtils.getAccountDatabase(XydraStoreAdmin.XYDRA_ADMIN_ID, this
+			        .getStore().getXydraStoreAdmin().getXydraAdminPasswordHash(), getStore());
 		}
 		
 		XID actorId = XX.createUniqueID();
 		
-		if(!this.passwordDb.isValidLogin(actorId, this.getCorrectUserPasswordHash())) {
-			this.groupDb.addToGroup(actorId, XX.toId("TestGroup"));
-			this.passwordDb.setPasswordHash(actorId, this.getCorrectUserPasswordHash());
+		if(!this.accountDb.isValidLogin(actorId, this.getCorrectUserPasswordHash())) {
+			this.accountDb.addToGroup(actorId, XX.toId("TestGroup"));
+			this.accountDb.setPasswordHash(actorId, this.getCorrectUserPasswordHash());
 		}
-		assertTrue(this.passwordDb.isValidLogin(actorId, this.getCorrectUserPasswordHash()));
+		assertTrue(this.accountDb.isValidLogin(actorId, this.getCorrectUserPasswordHash()));
 		
 		return actorId;
 	}
@@ -83,11 +79,12 @@ public class GaeStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 	@Before
 	public void setUp() {
 		super.setUp();
+		
 	}
 	
 	@Override
 	protected XID getRepositoryId() {
-		return GaeXydraStore.getDefaultRepositoryId();
+		return GaePersistence.getDefaultRepositoryId();
 	}
 	
 }

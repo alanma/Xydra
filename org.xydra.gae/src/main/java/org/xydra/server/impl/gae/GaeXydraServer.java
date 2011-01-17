@@ -4,7 +4,7 @@ import java.util.Iterator;
 
 import org.xydra.core.X;
 import org.xydra.core.XX;
-import org.xydra.core.access.XAccessManagerWithListeners;
+import org.xydra.core.access.XAccessManager;
 import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.access.impl.gae.GaeAccess;
 import org.xydra.core.access.impl.gae.GaeGroups;
@@ -33,7 +33,7 @@ public class GaeXydraServer implements IXydraServer {
 	
 	private XGroupDatabaseWithListeners groups;
 	private XRepository repo;
-	private XAccessManagerWithListeners accessManager;
+	private XAccessManager accessManager;
 	
 	public GaeXydraServer() {
 		/* switch on test fix mode if run from local POM */
@@ -56,12 +56,12 @@ public class GaeXydraServer implements IXydraServer {
 		
 	}
 	
-	public XAccessManagerWithListeners getAccessManagerForModel(XAddress modelAddr,
+	public XAccessManager getAccessManagerForModel(XAddress modelAddr,
 	        XGroupDatabaseWithListeners groups) {
 		return GaeAccess.loadAccessManager(modelAddr, groups);
 	}
 	
-	public XAccessManagerWithListeners getAccessManager() {
+	public XAccessManager getAccessManager() {
 		return this.accessManager;
 	}
 	

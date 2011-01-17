@@ -4,7 +4,7 @@ import java.util.Set;
 
 import org.xydra.core.access.XAccessEvent;
 import org.xydra.core.access.XAccessListener;
-import org.xydra.core.access.XAccessManagerWithListeners;
+import org.xydra.core.access.XAccessManager;
 import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.access.impl.memory.MemoryAccessManager;
 import org.xydra.core.model.XAddress;
@@ -22,7 +22,7 @@ import com.google.appengine.api.datastore.KeyFactory;
 
 
 /**
- * Utility that can persist and load an {@link XAccessManagerWithListeners} in
+ * Utility that can persist and load an {@link XAccessManager} in
  * the GAE datastore.
  * 
  * The XAccessManager is represented by a single entity that contains an
@@ -44,9 +44,9 @@ public class GaeAccess {
 	
 	/**
 	 * Load the whole access manager from the GAE datastore into memory. Changes
-	 * to the returned {@link XAccessManagerWithListeners} are persisted.
+	 * to the returned {@link XAccessManager} are persisted.
 	 */
-	public static XAccessManagerWithListeners loadAccessManager(XAddress addr,
+	public static XAccessManager loadAccessManager(XAddress addr,
 	        XGroupDatabaseWithListeners groups) {
 		
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
@@ -54,7 +54,7 @@ public class GaeAccess {
 		// Load entity containing the access definitions for ARM.
 		Key armKey = getAccessManagerKey(addr);
 		Entity e = GaeUtils.getEntity(armKey);
-		XAccessManagerWithListeners arm;
+		XAccessManager arm;
 		
 		if(e == null) {
 			// There was no ARM for the given access in the state store, so
@@ -105,9 +105,9 @@ public class GaeAccess {
 	private static class Persister implements XAccessListener {
 		
 		private final XAddress addr;
-		private final XAccessManagerWithListeners arm;
+		private final XAccessManager arm;
 		
-		public Persister(XAddress addr, XAccessManagerWithListeners arm) {
+		public Persister(XAddress addr, XAccessManager arm) {
 			this.addr = addr;
 			this.arm = arm;
 		}

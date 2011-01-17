@@ -16,6 +16,7 @@ import org.xydra.core.value.XValue;
  * @author dscharrer
  * 
  */
+@Deprecated
 public class FieldSnapshot implements XBaseField, Serializable {
 	
 	private static final long serialVersionUID = -6014779550527350829L;

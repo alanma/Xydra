@@ -2,6 +2,7 @@ package org.xydra.store.impl.gae;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.xydra.core.XX;
@@ -9,31 +10,31 @@ import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XType;
+import org.xydra.core.model.XWritableModel;
+import org.xydra.core.model.XWritableObject;
 import org.xydra.server.impl.InfrastructureServiceFactory;
 import org.xydra.store.RequestException;
 import org.xydra.store.XydraStore;
-import org.xydra.store.impl.delegating.DelegatingAllowAllStore;
-import org.xydra.store.impl.delegating.DelegatingSecureStore;
-import org.xydra.store.impl.delegating.XydraBlockingPersistence;
+import org.xydra.store.impl.delegate.DelegatingSecureStore;
+import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.changes.GaeChangesService;
 import org.xydra.store.impl.gae.changes.InternalGaeXEntity;
 import org.xydra.store.impl.gae.snapshot.GaeSnapshotService;
 
 
 /**
- * An {@link XydraStore} implementation that persists changes in the Google
- * Appengine datastore.
+ * An {@link XydraPersistence} implementation that persists changes in the
+ * Google AppEngine datastore.
  * 
  * @author dscharrer
  */
-public class GaeXydraStore implements XydraBlockingPersistence {
+public class GaePersistence implements XydraPersistence {
 	
 	private final XAddress repoAddr;
 	
-	public GaeXydraStore(XID repoId) {
+	public GaePersistence(XID repoId) {
 		
 		// To enable local JUnit testing with multiple threads
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
@@ -82,7 +83,7 @@ public class GaeXydraStore implements XydraBlockingPersistence {
 	}
 	
 	@Override
-	public XEvent[] getEvents(XAddress address, long beginRevision, long endRevision) {
+	public List<XEvent> getEvents(XAddress address, long beginRevision, long endRevision) {
 		checkAddres(address);
 		if(address.getModel() == null) {
 			throw new RequestException("address must specify a model, was " + address);
@@ -93,7 +94,7 @@ public class GaeXydraStore implements XydraBlockingPersistence {
 		while(it.hasNext()) {
 			events.add(it.next());
 		}
-		return events.toArray(new XEvent[events.size()]);
+		return events;
 	}
 	
 	@Override
@@ -111,7 +112,7 @@ public class GaeXydraStore implements XydraBlockingPersistence {
 	}
 	
 	@Override
-	public XBaseModel getModelSnapshot(XAddress address) {
+	public XWritableModel getModelSnapshot(XAddress address) {
 		checkAddres(address);
 		if(address.getAddressedType() != XType.XMODEL) {
 			throw new RequestException("address must refer to a model, was " + address);
@@ -120,7 +121,7 @@ public class GaeXydraStore implements XydraBlockingPersistence {
 	}
 	
 	@Override
-	public XBaseObject getObjectSnapshot(XAddress address) {
+	public XWritableObject getObjectSnapshot(XAddress address) {
 		checkAddres(address);
 		if(address.getAddressedType() != XType.XOBJECT) {
 			throw new RequestException("address must refer to an object, was " + address);
@@ -142,7 +143,7 @@ public class GaeXydraStore implements XydraBlockingPersistence {
 	}
 	
 	static public XydraStore get() {
-		return new DelegatingSecureStore(new DelegatingAllowAllStore(new GaeXydraStore(getDefaultRepositoryId())));
+		return new DelegatingSecureStore(new GaePersistence(getDefaultRepositoryId()));
 	}
 	
 	/**

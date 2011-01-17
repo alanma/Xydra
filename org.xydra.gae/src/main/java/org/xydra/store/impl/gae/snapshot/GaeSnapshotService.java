@@ -12,11 +12,15 @@ import org.xydra.core.change.XRepositoryEvent;
 import org.xydra.core.change.XTransactionEvent;
 import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XChangeLog;
+import org.xydra.core.model.XWritableModel;
+import org.xydra.store.base.SimpleField;
+import org.xydra.store.base.SimpleModel;
+import org.xydra.store.base.SimpleObject;
 
 
 /**
- * Computes *Snapshots ( {@link FieldSnapshot}, {@link ObjectSnapshot},
- * {@link ModelSnapshot}) from a given {@link XChangeLog}.
+ * Computes *Snapshots ( {@link SimpleField}, {@link SimpleObject},
+ * {@link SimpleModel}) from a given {@link XChangeLog}.
  * 
  * @author dscharrer
  * 
@@ -36,11 +40,11 @@ public class GaeSnapshotService {
 	 * @return an {@link XBaseModel} by applying all events in the
 	 *         {@link XChangeLog}
 	 */
-	public XBaseModel getSnapshot() {
+	public XWritableModel getSnapshot() {
 		
 		// IMPROVE save & cache snapshots
 		
-		ModelSnapshot model = null;
+		SimpleModel model = null;
 		
 		Iterator<XEvent> events = this.log.getEventsSince(0);
 		
@@ -63,7 +67,7 @@ public class GaeSnapshotService {
 		
 	}
 	
-	private ModelSnapshot applyEvent(ModelSnapshot model, XAtomicEvent event) {
+	private SimpleModel applyEvent(SimpleModel model, XAtomicEvent event) {
 		
 		long rev = event.getRevisionNumber();
 		
@@ -71,7 +75,7 @@ public class GaeSnapshotService {
 		if(event instanceof XRepositoryEvent) {
 			if(event.getChangeType() == ChangeType.ADD) {
 				assert model == null;
-				return new ModelSnapshot(event.getChangedEntity(), rev);
+				return new SimpleModel(event.getChangedEntity(), rev);
 			} else {
 				assert event.getChangeType() == ChangeType.REMOVE;
 				assert model != null;
@@ -81,59 +85,59 @@ public class GaeSnapshotService {
 		
 		// model, object and field events
 		assert model != null;
-		model.rev = rev;
+		model.setRevisionNumber(rev);
 		
 		if(event instanceof XModelEvent) {
 			XModelEvent me = (XModelEvent)event;
 			if(me.getChangeType() == ChangeType.ADD) {
 				assert !model.hasObject(me.getObjectID());
-				ObjectSnapshot object = new ObjectSnapshot(me.getChangedEntity(), rev);
-				model.objects.put(me.getObjectID(), object);
+				SimpleObject object = new SimpleObject(me.getChangedEntity(), rev);
+				model.addObject(object);
 			} else {
 				assert me.getChangeType() == ChangeType.REMOVE;
 				assert model.hasObject(me.getObjectID());
-				model.objects.remove(me.getObjectID());
+				model.removeObject(me.getObjectID());
 			}
 			return model;
 		}
 		
 		// object and field events
-		ObjectSnapshot object = model.getObject(event.getTarget().getObject());
+		SimpleObject object = model.getObject(event.getTarget().getObject());
 		assert object != null;
-		object.rev = rev;
+		object.setRevisionNumber(rev);
 		
 		if(event instanceof XObjectEvent) {
 			XObjectEvent oe = (XObjectEvent)event;
 			if(oe.getChangeType() == ChangeType.ADD) {
 				assert !object.hasField(oe.getFieldID());
-				FieldSnapshot field = new FieldSnapshot(oe.getChangedEntity(), rev);
-				object.fields.put(oe.getFieldID(), field);
+				SimpleField field = new SimpleField(oe.getChangedEntity(), rev);
+				object.addField(field);
 			} else {
 				assert oe.getChangeType() == ChangeType.REMOVE;
 				assert object.hasField(oe.getFieldID());
-				object.fields.remove(oe.getFieldID());
+				object.removeField(oe.getFieldID());
 			}
 			return model;
 		}
 		
 		// field events
-		FieldSnapshot field = object.getField(event.getTarget().getField());
+		SimpleField field = object.getField(event.getTarget().getField());
 		assert field != null;
-		field.rev = rev;
+		field.setRevisionNumber(rev);
 		
 		assert event instanceof XFieldEvent;
 		XFieldEvent fe = (XFieldEvent)event;
 		
 		if(fe.getChangeType() == ChangeType.ADD) {
 			assert field.isEmpty();
-			field.value = fe.getNewValue();
+			field.setValue(fe.getNewValue());
 		} else if(fe.getChangeType() == ChangeType.CHANGE) {
 			assert !field.isEmpty();
-			field.value = fe.getNewValue();
+			field.setValue(fe.getNewValue());
 		} else {
 			assert fe.getChangeType() == ChangeType.REMOVE;
 			assert !field.isEmpty();
-			field.value = null;
+			field.setValue(null);
 		}
 		
 		return model;

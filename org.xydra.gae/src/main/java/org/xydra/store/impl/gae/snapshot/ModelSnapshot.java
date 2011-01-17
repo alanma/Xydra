@@ -18,18 +18,20 @@ import org.xydra.core.model.XType;
  * @author dscharrer
  * 
  */
+@Deprecated
+@SuppressWarnings("deprecation")
 public class ModelSnapshot implements XBaseModel, Serializable {
 	
 	private static final long serialVersionUID = 2234329418396820686L;
 	
-	private final XAddress addr;
-	protected long rev;
+	private final XAddress address;
+	protected long revisionNumber;
 	protected Map<XID,ObjectSnapshot> objects = new HashMap<XID,ObjectSnapshot>();
 	
 	protected ModelSnapshot(XAddress addr, long rev) {
 		assert addr.getAddressedType() == XType.XMODEL;
-		this.addr = addr;
-		this.rev = rev;
+		this.address = addr;
+		this.revisionNumber = rev;
 	}
 	
 	@Override
@@ -39,7 +41,7 @@ public class ModelSnapshot implements XBaseModel, Serializable {
 	
 	@Override
 	public long getRevisionNumber() {
-		return this.rev;
+		return this.revisionNumber;
 	}
 	
 	@Override
@@ -59,12 +61,12 @@ public class ModelSnapshot implements XBaseModel, Serializable {
 	
 	@Override
 	public XAddress getAddress() {
-		return this.addr;
+		return this.address;
 	}
 	
 	@Override
 	public XID getID() {
-		return this.addr.getModel();
+		return this.address.getModel();
 	}
 	
 }

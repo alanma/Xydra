@@ -18,6 +18,8 @@ import org.xydra.core.model.XType;
  * @author dscharrer
  * 
  */
+@Deprecated
+@SuppressWarnings("deprecation")
 public class ObjectSnapshot implements XBaseObject, Serializable {
 	
 	private static final long serialVersionUID = 3435719513297598376L;
