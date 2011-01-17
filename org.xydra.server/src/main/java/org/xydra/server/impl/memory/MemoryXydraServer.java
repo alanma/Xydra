@@ -4,7 +4,7 @@ import java.util.Iterator;
 
 import org.xydra.core.X;
 import org.xydra.core.XX;
-import org.xydra.core.access.XAccessManagerWithListeners;
+import org.xydra.core.access.XAccessManager;
 import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.access.impl.memory.MemoryAccessManager;
 import org.xydra.core.access.impl.memory.MemoryGroupDatabase;
@@ -35,7 +35,7 @@ public class MemoryXydraServer implements IXydraServer {
 	
 	private XGroupDatabaseWithListeners groups;
 	
-	private XAccessManagerWithListeners accessManager;
+	private XAccessManager accessManager;
 	
 	/**
 	 * Parameter-less constructor. Called form {@link XydraRestServer}.
@@ -55,7 +55,7 @@ public class MemoryXydraServer implements IXydraServer {
 		this.accessManager = new MemoryAccessManager(this.groups);
 	}
 	
-	public XAccessManagerWithListeners getAccessManager() {
+	public XAccessManager getAccessManager() {
 		return this.accessManager;
 	}
 	

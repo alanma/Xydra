@@ -19,7 +19,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.xydra.core.XX;
-import org.xydra.core.access.XAccessManagerWithListeners;
+import org.xydra.core.access.XAccessManager;
 import org.xydra.core.change.XAtomicCommand;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XRepositoryCommand;
@@ -85,7 +85,7 @@ public abstract class AbstractRestApiTest {
 		xydraServer = server.getBackend();
 		
 		XAddress repoAddr = xydraServer.getRepositoryAddress();
-		XAccessManagerWithListeners arm = xydraServer.getAccessManager();
+		XAccessManager arm = xydraServer.getAccessManager();
 		arm.setAccess(ACTOR_TESTER, repoAddr, XA.ACCESS_READ, true);
 		arm.setAccess(ACTOR_TESTER, repoAddr, XA.ACCESS_WRITE, true);
 		
@@ -150,7 +150,7 @@ public abstract class AbstractRestApiTest {
 		
 		// cleanup access rights
 		XAddress repoAddr = xydraServer.getRepositoryAddress();
-		XAccessManagerWithListeners arm = xydraServer.getAccessManager();
+		XAccessManager arm = xydraServer.getAccessManager();
 		arm.resetAccess(ACTOR_TESTER, repoAddr, XA.ACCESS_READ);
 		arm.resetAccess(ACTOR_TESTER, repoAddr, XA.ACCESS_WRITE);
 		
