@@ -83,12 +83,7 @@ public class GaeStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 	@Override
 	@Before
 	public void setUp() {
-		if(this.setUpDone) {
-			return;
-		}
-		
 		super.setUp();
-		
 	}
 	
 	@Override
