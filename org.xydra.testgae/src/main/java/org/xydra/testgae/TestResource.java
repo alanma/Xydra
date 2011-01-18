@@ -20,14 +20,14 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.log.gae.GaeLoggerFactorySPI;
 import org.xydra.restless.Restless;
 import org.xydra.store.Callback;
+import org.xydra.store.DelegatingAllowAllStoreReadMethodsTest;
 import org.xydra.store.GaeAllowAllStoreReadMethodsTest;
 import org.xydra.store.GaeStoreReadMethodsTest;
-import org.xydra.store.MemoryAllowAllStoreReadMethodsTest;
 import org.xydra.store.XydraStore;
-import org.xydra.store.access.GroupModelWrapper;
 import org.xydra.store.base.HashUtils;
+import org.xydra.store.impl.delegate.XydraPersistence;
+import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
-import org.xydra.store.impl.gae.GaeXydraStore;
 
 
 public class TestResource {
@@ -74,7 +74,7 @@ public class TestResource {
 	}
 	
 	private void test3(Writer w) throws IOException {
-		runJunitTest(MemoryAllowAllStoreReadMethodsTest.class, w);
+		runJunitTest(DelegatingAllowAllStoreReadMethodsTest.class, w);
 		runJunitTest(GaeAllowAllStoreReadMethodsTest.class, w);
 		runJunitTest(GaeStoreReadMethodsTest.class, w);
 	}
@@ -98,12 +98,13 @@ public class TestResource {
 	
 	private void test1() {
 		log.info("Setting up store");
-		XydraStore store = GaeXydraStore.get();
+		XydraStore store = GaePersistence.get();
 		XID actorId = XX.toId("test1");
 		String passwordHash = HashUtils.getMD5("secret");
 		
-		XID modelId = XX.toId("model1");
-		GroupModelWrapper gmw = new GroupModelWrapper(store, modelId);
+		// TODO GroupModelWrapper doesn't exist anymore
+		// XID modelId = XX.toId("model1");
+		// GroupModelWrapper gmw = new GroupModelWrapper(store, modelId);
 		
 		log.info("Asking for repo id...");
 		store.getRepositoryId(actorId, passwordHash, new Callback<XID>() {
@@ -122,15 +123,13 @@ public class TestResource {
 	
 	private void test2(Writer w) throws IOException {
 		XID repoId = XX.toId("repo1");
-		GaeXydraStore store = new GaeXydraStore(repoId);
-		w.write("RepoId = " + store.getRepositoryId() + "\n");
+		XydraPersistence persistence = new GaePersistence(repoId);
+		w.write("RepoId = " + persistence.getRepositoryId() + "\n");
 		w.flush();
 		XID actorId = XX.toId("testActor");
 		XID modelId = XX.toId("model1");
-		store.executeCommand(
-		        actorId,
-		        MemoryRepositoryCommand.createAddCommand(
-		                X.getIDProvider().fromComponents(repoId, null, null, null), true, modelId));
+		persistence.executeCommand(actorId, MemoryRepositoryCommand.createAddCommand(X
+		        .getIDProvider().fromComponents(repoId, null, null, null), true, modelId));
 		w.write("Created model1.\n");
 		w.flush();
 	}
