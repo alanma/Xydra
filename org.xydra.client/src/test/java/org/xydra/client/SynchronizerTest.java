@@ -8,7 +8,7 @@ import org.xydra.client.impl.direct.DirectDataService;
 import org.xydra.client.sync.XSynchronizer;
 import org.xydra.core.X;
 import org.xydra.core.XX;
-import org.xydra.core.access.XAccessManagerWithListeners;
+import org.xydra.core.access.XAccessManager;
 import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.access.impl.memory.MemoryAccessManager;
 import org.xydra.core.access.impl.memory.MemoryGroupDatabase;
@@ -16,9 +16,9 @@ import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.change.impl.memory.MemoryModelCommand;
 import org.xydra.core.model.XID;
+import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.session.XProtectedRepository;
 import org.xydra.core.model.session.impl.arm.ArmProtectedRepository;
@@ -49,7 +49,7 @@ public class SynchronizerTest extends TestCase {
 		DemoModelUtil.addPhonebookModel(repo);
 		XGroupDatabaseWithListeners groups = new MemoryGroupDatabase();
 		
-		XAccessManagerWithListeners arm = new MemoryAccessManager(groups);
+		XAccessManager arm = new MemoryAccessManager(groups);
 		arm.setAccess(actorId, repo.getAddress(), XA.ACCESS_READ, true);
 		arm.setAccess(actorId, repo.getAddress(), XA.ACCESS_WRITE, true);
 		XProtectedRepository pr = new ArmProtectedRepository(repo, arm, actorId);

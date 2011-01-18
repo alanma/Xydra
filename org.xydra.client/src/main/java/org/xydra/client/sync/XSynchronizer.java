@@ -175,6 +175,7 @@ public class XSynchronizer {
 		
 		if(remoteChanges.size() == 0) {
 			// no changes to merge
+			log.info("sync: no remote changes to merge");
 			return;
 		}
 		
