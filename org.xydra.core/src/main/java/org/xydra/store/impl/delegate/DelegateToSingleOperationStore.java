@@ -175,6 +175,8 @@ public class DelegateToSingleOperationStore implements XydraStore {
 			assert waitingForCommands == false;
 			boolean waitingForEvents = true;
 			while(waitingForEvents) {
+				// hopefully remains false
+				waitingForEvents = false;
 				int j = 0;
 				while(j < getEventCallbacks.length && !waitingForEvents) {
 					if(!getEventCallbacks[j].done) {
