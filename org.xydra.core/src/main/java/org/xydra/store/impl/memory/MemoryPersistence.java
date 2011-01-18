@@ -59,8 +59,20 @@ public class MemoryPersistence implements XydraPersistence {
 		MemoryModelPersistence modelPersistence = getModelPersistence(address.getModel());
 		long result = modelPersistence.executeCommand(actorId, command);
 		// update internal cache map
+		/*
+		 * TODO this breaks synchronization and is different from the GAE
+		 * behavior, where removing a model does NOT destroy the event log
+		 * 
+		 * removing the MemoryModelPersistence here will cause the model
+		 * revision to be reset to zero if the model is re-created and cause old
+		 * revisions to be reused for different events, which might confuse
+		 * users of the API - especially if they never noticed that the model
+		 * was gone
+		 */
 		if(!modelPersistence.exists()) {
-			this.models.remove(address.getModel());
+			synchronized(this.models) {
+				this.models.remove(address.getModel());
+			}
 		}
 		return result;
 	}
@@ -80,7 +92,8 @@ public class MemoryPersistence implements XydraPersistence {
 		}
 		// TODO filter to exclude models that don't actually exist right
 		// now? Max: Is this fixed now by removing the removed models
-		// (via executeCommand) also from out map?
+		// (via executeCommand) also from out map? Yes, but doing so introduces
+		// other problems. ~Daniel
 		return modelIds;
 	}
 	
@@ -121,7 +134,9 @@ public class MemoryPersistence implements XydraPersistence {
 	
 	@Override
 	public void clear() {
-		this.models.clear();
+		synchronized(this.models) {
+			this.models.clear();
+		}
 	}
 	
 }
