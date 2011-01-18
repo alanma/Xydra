@@ -24,6 +24,10 @@ import org.xydra.store.XydraStoreAdmin;
 /**
  * Delegate asynchronous batch methods to asynchronous single-operation methods.
  * 
+ * This expects that wrapped {@link XydraSingleOperationStore} to be able to
+ * complete the requests and call any callbacks before we return, which might
+ * not be the case for event-loop dependent implementations.
+ * 
  * @author xamde
  */
 @MAXDone
