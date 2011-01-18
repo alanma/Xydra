@@ -303,6 +303,8 @@ public class AccountModelWrapperOnPersistence implements XAccountDatabase {
 		long removeRevNr = this.persistence.getModelRevision(X.getIDProvider().fromComponents(
 		        this.persistence.getRepositoryId(), NamingUtils.ID_ACCOUNT_MODEL, null, null));
 		if(removeRevNr > this.currentModelRev) {
+			// TODO IMPROVE PERFORMANCE re-sync from events, that should be much
+			// faster
 			initialiseFromRemoteSnapshot();
 		}
 	}

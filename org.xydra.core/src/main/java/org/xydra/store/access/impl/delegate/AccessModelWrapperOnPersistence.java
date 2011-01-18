@@ -37,6 +37,9 @@ import org.xydra.store.impl.delegate.XydraPersistence;
  * See {@link Documentation_AccessModel} for the mapping from internal data
  * structures to Xydra layout (repo/model/object/field).
  * 
+ * TODO refresh from persistence if revNr is no longer fresh -- see
+ * {@link AccountModelWrapperOnPersistence}
+ * 
  * @author voelkel
  */
 @RunsInAppEngine
