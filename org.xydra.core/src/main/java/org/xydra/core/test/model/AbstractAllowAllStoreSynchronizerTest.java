@@ -7,7 +7,7 @@ import org.xydra.core.XX;
 import org.xydra.core.model.impl.memory.SynchronizesChangesImpl;
 import org.xydra.core.model.state.XSPI;
 import org.xydra.core.model.sync.XSynchronizer;
-import org.xydra.store.impl.delegate.DelegatingSecureStore;
+import org.xydra.store.impl.delegate.DelegatingAllowAllStore;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -30,7 +30,7 @@ abstract public class AbstractAllowAllStoreSynchronizerTest extends AbstractSync
 		assertNotNull(simpleStore);
 		actorId = XX.toId("tester");
 		passwordHash = "top secret";
-		store = new DelegatingSecureStore(simpleStore);
+		store = new DelegatingAllowAllStore(simpleStore);
 	}
 	
 }
