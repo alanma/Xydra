@@ -28,6 +28,11 @@ import org.xydra.store.XydraStoreAdmin;
  * complete the requests and call any callbacks before we return, which might
  * not be the case for event-loop dependent implementations.
  * 
+ * TODO wouldn't it be better to either delegate to a {@link XydraBlockingStore}
+ * (a {@link XydraBlockingStore}->{@link XydraSingleOperationStore} wrapper can
+ * then be used) -OR- to not wait for callbacks before returning and handle the
+ * batched callback in the last called {@link SingleOpCallback}?
+ * 
  * @author xamde
  */
 @MAXDone
