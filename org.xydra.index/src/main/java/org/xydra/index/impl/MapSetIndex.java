@@ -4,18 +4,18 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.xydra.index.Factory;
 import org.xydra.index.IEntrySet;
-import org.xydra.index.IMapSetIndex;
 import org.xydra.index.IEntrySet.IEntrySetDiff;
+import org.xydra.index.IMapSetIndex;
 import org.xydra.index.iterator.AbstractCascadedIterator;
 import org.xydra.index.iterator.NoneIterator;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.GenericKeyEntryTupleConstraintFilteringIterator;
 import org.xydra.index.query.KeyEntryTuple;
-
 
 
 public class MapSetIndex<K, E> implements IMapSetIndex<K,E> {
@@ -299,6 +299,14 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K,E> {
 	
 	public Iterator<K> keyIterator() {
 		return this.map.keySet().iterator();
+	}
+	
+	public IEntrySet<E> lookup(K key) {
+		return this.map.get(key);
+	}
+	
+	public Set<K> keySet() {
+		return this.map.keySet();
 	}
 	
 }
