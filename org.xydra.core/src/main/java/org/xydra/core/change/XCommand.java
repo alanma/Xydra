@@ -12,9 +12,7 @@ import org.xydra.core.model.XModel;
  * 
  * See the more specific types (for example {@link XModelEvent} for further
  * explanations)
- * 
  */
-
 public interface XCommand {
 	
 	/**

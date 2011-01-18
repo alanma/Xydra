@@ -1,4 +1,6 @@
 /**
+ * FIXME try to phase out the whole State-stuff
+ * 
  * This package contains simple state-entities. This layer serves as the minimal
  * service provider interface (SPI) for implementing different persistence
  * strategies.

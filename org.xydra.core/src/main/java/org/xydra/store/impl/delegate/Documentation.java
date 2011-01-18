@@ -42,8 +42,8 @@ package org.xydra.store.impl.delegate;
  * <td>Yes</td>
  * <td> {@link org.xydra.store.impl.delegate.XydraBlockingStore
  * XydraBlockingStore}</td>
- * <td> {@link org.xydra.store.impl.delegate.DelegateToBlockingStore
- * DelegateToBlockingStore}</td>
+ * <td> {@link org.xydra.store.impl.delegate.DelegateToPersistenceAndArm
+ * DelegateToPersistenceAndArm}</td>
  * </tr>
  * 
  * <tr>
@@ -51,10 +51,8 @@ package org.xydra.store.impl.delegate;
  * <td>Blocking (synchronous)</td>
  * <td>No</td>
  * <td>No</td>
- * <td> {@link org.xydra.store.impl.delegate.XydraPersistence
- * XydraBlockingPersistence}</td>
- * <td> {@link org.xydra.store.impl.delegate.DelegateToBlockingStore
- * DelegateToBlockingStore}</td>
+ * <td> {@link org.xydra.store.impl.delegate.XydraPersistence XydraPersistence}</td>
+ * <td>in-memory and on GAE</td>
  * </tr>
  * 
  * </table>

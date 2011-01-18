@@ -1,6 +1,5 @@
 package org.xydra.store.access;
 
-import java.io.Serializable;
 import java.util.Set;
 
 import org.xydra.core.model.XAddress;
@@ -11,12 +10,14 @@ import org.xydra.store.MAXTodo;
 /**
  * A database that stores inheritable access rights.
  * 
- * By design, implementations of this interface need a {@link XGroupDatabase}.
+ * By design, implementations of this interface need a {@link XGroupDatabase}
+ * (otherwise they can not correctly compute if a given actor has a certain
+ * right).
  * 
  * @author dscharrer
  */
 @MAXTodo
-public interface XAccessDatabase extends Serializable {
+public interface XAccessDatabase {
 	
 	/**
 	 * Define access rights to a given resource and its descendants for an

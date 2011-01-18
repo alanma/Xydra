@@ -15,12 +15,12 @@ import org.xydra.index.iterator.SingleValueIterator;
  * @author dscharrer
  * 
  */
-public class WrapperObject implements XBaseObject {
+public class BaseObjectWithOneField implements XBaseObject {
 	
 	private final XBaseField field;
 	private final XAddress address;
 	
-	public WrapperObject(XAddress addr, XBaseField field) {
+	public BaseObjectWithOneField(XAddress addr, XBaseField field) {
 		this.address = addr;
 		this.field = field;
 	}

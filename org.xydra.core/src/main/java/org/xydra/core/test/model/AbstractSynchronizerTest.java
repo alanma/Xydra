@@ -106,6 +106,8 @@ abstract public class AbstractSynchronizerTest {
 		
 		this.model = loadModel(DemoModelUtil.PHONEBOOK_ID);
 		this.sync = new XSynchronizer(this.model, store);
+		
+		assert this.repoAddr != null;
 	}
 	
 	@After
@@ -254,8 +256,8 @@ abstract public class AbstractSynchronizerTest {
 		
 		// make some remote changes
 		final XID cakesId = XX.toId("cakes");
-		XCommand command = MemoryObjectCommand.createAddCommand(this.model.getObject(
-		        DemoModelUtil.JOHN_ID).getAddress(), false, cakesId);
+		XCommand command = MemoryObjectCommand.createAddCommand(
+		        this.model.getObject(DemoModelUtil.JOHN_ID).getAddress(), false, cakesId);
 		executeCommand(command);
 		
 		// make more remote changes
@@ -271,8 +273,8 @@ abstract public class AbstractSynchronizerTest {
 		executeCommand(tb.buildCommand());
 		
 		// and some more remote changes
-		XCommand command2 = MemoryObjectCommand.createAddCommand(this.model.getObject(
-		        DemoModelUtil.PETER_ID).getAddress(), false, cakesId);
+		XCommand command2 = MemoryObjectCommand.createAddCommand(
+		        this.model.getObject(DemoModelUtil.PETER_ID).getAddress(), false, cakesId);
 		executeCommand(command2);
 		
 		// and even more remote changes
@@ -385,8 +387,8 @@ abstract public class AbstractSynchronizerTest {
 			
 			assertNull(loadModelSnapshot(NEWMODEL_ID));
 			
-			XRepository repo = new MemoryRepository(actorId, passwordHash, this.repoAddr
-			        .getRepository());
+			XRepository repo = new MemoryRepository(actorId, passwordHash,
+			        this.repoAddr.getRepository());
 			
 			XModel model = repo.createModel(NEWMODEL_ID);
 			XSynchronizer sync = new XSynchronizer(model, store);
@@ -469,8 +471,8 @@ abstract public class AbstractSynchronizerTest {
 			assertNull(loadModelSnapshot(NEWMODEL_ID));
 			
 			// create a model
-			XRepository repo = new MemoryRepository(actorId, passwordHash, this.repoAddr
-			        .getRepository());
+			XRepository repo = new MemoryRepository(actorId, passwordHash,
+			        this.repoAddr.getRepository());
 			XModel model = repo.createModel(NEWMODEL_ID);
 			XObject object = model.createObject(XX.toId("bob"));
 			XField field = object.createField(XX.toId("cookies"));
@@ -557,8 +559,8 @@ abstract public class AbstractSynchronizerTest {
 			assertNull(loadModelSnapshot(NEWMODEL_ID));
 			
 			// create a model
-			XRepository repo = new MemoryRepository(actorId, passwordHash, this.repoAddr
-			        .getRepository());
+			XRepository repo = new MemoryRepository(actorId, passwordHash,
+			        this.repoAddr.getRepository());
 			XModel model = repo.createModel(NEWMODEL_ID);
 			XSynchronizer sync = new XSynchronizer(model, store);
 			synchronize(sync);
@@ -680,6 +682,7 @@ abstract public class AbstractSynchronizerTest {
 	}
 	
 	private void removeModel(XID modelId) {
+		assert this.repoAddr != null;
 		executeCommand(MemoryRepositoryCommand.createRemoveCommand(this.repoAddr, XCommand.FORCED,
 		        modelId));
 	}
@@ -767,8 +770,9 @@ abstract public class AbstractSynchronizerTest {
 		
 		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback;
 		callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
-		store.getEvents(actorId, passwordHash, new GetEventsRequest[] { new GetEventsRequest(model
-		        .getAddress(), startRev, Long.MAX_VALUE) }, callback);
+		store.getEvents(actorId, passwordHash,
+		        new GetEventsRequest[] { new GetEventsRequest(model.getAddress(), startRev,
+		                Long.MAX_VALUE) }, callback);
 		XEvent[] result = waitForSuccessBatched(callback);
 		Iterator<XEvent> remoteEvents = Arrays.asList(result).iterator();
 		

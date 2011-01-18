@@ -5,15 +5,15 @@ import java.util.Map;
 
 import org.xydra.core.X;
 import org.xydra.core.XX;
+import org.xydra.core.access.impl.memory.AccountModelWrapper;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
-import org.xydra.core.model.XWritableModel;
 import org.xydra.core.model.impl.memory.UUID;
 import org.xydra.store.NamingUtils;
 import org.xydra.store.XydraStoreAdmin;
 import org.xydra.store.access.XAccountDatabase;
 import org.xydra.store.access.XGroupDatabase;
-import org.xydra.store.access.impl.delegate.AccountModelWrapper;
+import org.xydra.store.access.impl.delegate.AccountModelWrapperOnPersistence;
 import org.xydra.store.base.HashUtils;
 
 
@@ -72,8 +72,8 @@ public class AuthorisationArm implements XAuthorisationArm {
 			assert result2 >= 0;
 			
 			// initialise account model wrapper
-			XWritableModel accountModel = this.persistence.getModelSnapshot(accountModelAddress);
-			AccountModelWrapper groupModelWrapper = new AccountModelWrapper(accountModel);
+			AccountModelWrapperOnPersistence groupModelWrapper = new AccountModelWrapperOnPersistence(
+			        this.persistence, INTERNAL_XYDRA_ADMIN_ID);
 			this.accountDb = groupModelWrapper;
 			
 			// create initial rights
@@ -102,8 +102,6 @@ public class AuthorisationArm implements XAuthorisationArm {
 	
 	@Override
 	public XModelArm getModelArm(XID modelId) {
-		assert this.persistence.getModelIds().contains(modelId) : "persistence stores a model with id "
-		        + modelId;
 		XID rightsModelId = NamingUtils.getRightsModelId(modelId);
 		XModelArm modelArm = this.modelArms.get(rightsModelId);
 		if(modelArm == null) {

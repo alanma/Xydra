@@ -8,6 +8,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xydra.core.X;
 import org.xydra.core.XX;
+import org.xydra.core.access.impl.memory.AccountModelWrapper;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.XWritableModel;
@@ -16,7 +17,6 @@ import org.xydra.core.model.state.impl.memory.TemporaryStateStore;
 import org.xydra.core.test.TestLogger;
 import org.xydra.store.MAXTodo;
 import org.xydra.store.NamingUtils;
-import org.xydra.store.access.impl.delegate.AccountModelWrapper;
 
 
 @MAXTodo

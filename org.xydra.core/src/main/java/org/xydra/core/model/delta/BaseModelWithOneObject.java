@@ -15,12 +15,12 @@ import org.xydra.index.iterator.SingleValueIterator;
  * @author dscharrer
  * 
  */
-public class WrapperModel implements XBaseModel {
+public class BaseModelWithOneObject implements XBaseModel {
 	
 	private final XBaseObject object;
 	private final XAddress address;
 	
-	public WrapperModel(XBaseObject object) {
+	public BaseModelWithOneObject(XBaseObject object) {
 		this.address = object.getAddress().getParent();
 		this.object = object;
 	}

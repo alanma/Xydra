@@ -31,6 +31,8 @@ import org.xydra.store.RequestException;
 import org.xydra.store.TimeoutException;
 import org.xydra.store.XydraStore;
 import org.xydra.store.XydraStoreAdmin;
+import org.xydra.store.access.XAccountDatabase;
+import org.xydra.store.access.impl.delegate.AccountModelWrapperOnPersistence;
 import org.xydra.store.impl.memory.AllowAllAuthorisationArm;
 
 
@@ -56,6 +58,7 @@ public class DelegateToPersistenceAndArm implements XydraBlockingStore, XydraSto
 	private XydraPersistence persistence;
 	private XAuthorisationArm arm;
 	private transient XID repoId;
+	private transient AccountModelWrapperOnPersistence accountDb;
 	
 	/**
 	 * @param persistence used to persists data (who would have guessed that :-)
@@ -401,6 +404,16 @@ public class DelegateToPersistenceAndArm implements XydraBlockingStore, XydraSto
 	@Override
 	public XydraStoreAdmin getXydraStoreAdmin() {
 		return this;
+	}
+	
+	@Override
+	public XAccountDatabase getAccountDatabase() {
+		// FIXME !!!
+		// if(this.accountDb == null) {
+		this.accountDb = new AccountModelWrapperOnPersistence(this.persistence,
+		        AuthorisationArm.INTERNAL_XYDRA_ADMIN_ID);
+		// }
+		return this.accountDb;
 	}
 	
 }

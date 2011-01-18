@@ -43,9 +43,7 @@ public class DelegatingSecureStoreReadMethodsTest extends AbstractStoreReadMetho
 	@Override
 	protected XID getCorrectUser() {
 		if(this.accountDb == null) {
-			// open as XydraAdmin
-			this.accountDb = StoreUtils.getAccountDatabase(XydraStoreAdmin.XYDRA_ADMIN_ID, this
-			        .getStore().getXydraStoreAdmin().getXydraAdminPasswordHash(), this.getStore());
+			this.accountDb = this.store.getXydraStoreAdmin().getAccountDatabase();
 		}
 		
 		XID actorId = XX.createUniqueID();

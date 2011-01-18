@@ -1,10 +1,10 @@
 package org.xydra.store;
 
+import org.xydra.core.access.impl.memory.AccountModelWrapper;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XWritableModel;
 import org.xydra.core.model.XWritableRepository;
 import org.xydra.store.access.XAccountDatabase;
-import org.xydra.store.access.impl.delegate.AccountModelWrapper;
 import org.xydra.store.base.Credentials;
 import org.xydra.store.base.WritableRepository;
 
@@ -18,7 +18,10 @@ public class StoreUtils {
 	 * @return an {@link XAccountDatabase} backed by a model in a store. Each
 	 *         change operation is immediately executed against changes in the
 	 *         account management model in the store.
+	 * 
+	 * @deprecated not really deprecated, but not working..
 	 */
+	@Deprecated
 	public static XAccountDatabase getAccountDatabase(XID actorId, String passwordHash,
 	        XydraStore store) {
 		if(actorId == null) {

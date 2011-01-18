@@ -17,6 +17,7 @@ import org.xydra.store.base.Credentials;
 import org.xydra.store.base.HashUtils;
 import org.xydra.store.base.WritableRepository;
 import org.xydra.store.impl.memory.SecureMemoryStore;
+import org.xydra.store.test.SynchronousTestCallback;
 
 
 /**
@@ -64,14 +65,8 @@ public class AccessControlTest {
 	}
 	
 	@Test
-	public void testAddAndRemoveOneActor() {
-		// get admin account
-		XID actorId = XydraStoreAdmin.XYDRA_ADMIN_ID;
-		String passwordHash = this.store.getXydraStoreAdmin().getXydraAdminPasswordHash();
-		assertNotNull(passwordHash);
-		// open accountDb via admin account
-		XAccountDatabase accountDb = StoreUtils.getAccountDatabase(actorId, passwordHash,
-		        this.store);
+	public void testAddActors() throws Throwable {
+		XAccountDatabase accountDb = this.store.getXydraStoreAdmin().getAccountDatabase();
 		// register other users
 		accountDb.setPasswordHash(user1, HashUtils.getXydraPasswordHash("secret1"));
 		accountDb.setPasswordHash(user2, HashUtils.getXydraPasswordHash("secret2"));
@@ -82,5 +77,18 @@ public class AccessControlTest {
 		
 		accountDb.addToGroup(user1, groupA);
 		assertTrue(accountDb.getMembersOf(groupA).contains(user1));
+		
+		// open account db again and test again
+		accountDb = this.store.getXydraStoreAdmin().getAccountDatabase();
+		assertTrue(accountDb.isValidLogin(user1, HashUtils.getXydraPasswordHash("secret1")));
+		assertNotNull(accountDb.getPasswordHash(user1));
+		assertTrue(accountDb.getMembersOf(groupA).contains(user1));
+		
+		SynchronousTestCallback<Boolean> callback = new SynchronousTestCallback<Boolean>();
+		this.store.checkLogin(user1, HashUtils.getXydraPasswordHash("secret1"), callback);
+		callback.waitOnCallback(100);
+		if(!callback.getEffect()) {
+			throw new RuntimeException("Could not login user1", callback.getException());
+		}
 	}
 }

@@ -29,42 +29,19 @@ import org.xydra.store.access.XAccessValue;
 public interface XAccessManager extends XAccessDatabase, Serializable {
 	
 	/**
-	 * Get all types of access an actor has to a resource.
-	 * 
-	 * @param actor The {@link XID} of the actor of whom the access rights are
-	 *            to be returned.
-	 * @param resource The {@link XAddress} of the resource of which the access
-	 *            rights of the given actor are to be returned.
-	 * @return Returns two sets of permissions. Permissions in the first set are
-	 *         explicitly allowed while permissions in the second set are
-	 *         explicitly denied.
-	 */
-	Pair<Set<XID>,Set<XID>> getPermissions(XID actor, XAddress resource);
-	
-	/**
-	 * Get all actors that have access to a resource.
-	 * 
-	 * @param resource The resource being accessed.
-	 * @param access The type of access being requested.
-	 * @return Returns two sets of actors. An actor is allowed access exactly if
-	 *         he or a group he is in is in the first set AND he isn't in the
-	 *         second set. Groups in the second set do NOT mean that their
-	 *         members don't have access and should be ignored.
-	 * 
-	 *         FIXME The documentation of the return value is too unclear to be
-	 *         implemented.
-	 */
-	Pair<Set<XID>,Set<XID>> getActorsWithPermission(XAddress resource, XID access);
-	
-	/**
 	 * Add a listener for access events.
 	 */
 	void addListener(XAccessListener listener);
 	
 	/**
-	 * Remove a listener for access events.
+	 * Checks whether the specified actor is allowed to execute the given
+	 * {@link XCommand}
+	 * 
+	 * @param actor The {@link XID} of the actor
+	 * @param command The {@link XCommand} which is to be checked
+	 * @return return if the actor is allowed to execute the {@link XCommand}
 	 */
-	void removeListener(XAccessListener listener);
+	boolean canExecute(XID actor, XCommand command);
 	
 	// TODO Why not have a generic canKnowAboutEntity(XID actor, XAddress
 	// entity) method instead?
@@ -76,15 +53,34 @@ public interface XAccessManager extends XAccessDatabase, Serializable {
 	
 	/**
 	 * @return true if the actor is allowed to know about the existence of the
+	 *         specified {@link XModel}
+	 */
+	public boolean canKnowAboutModel(XID actor, XAddress repoAddr, XID modelId);
+	
+	/**
+	 * @return true if the actor is allowed to know about the existence of the
 	 *         specified {@link XObject}
 	 */
 	public boolean canKnowAboutObject(XID actor, XAddress modelAddr, XID objectId);
 	
 	/**
-	 * @return true if the actor is allowed to know about the existence of the
-	 *         specified {@link XModel}
+	 * @return true if the actor is allowed to read from the specified resource
 	 */
-	public boolean canKnowAboutModel(XID actor, XAddress repoAddr, XID modelId);
+	boolean canRead(XID actor, XAddress resource);
+	
+	/**
+	 * Checks whether the specified actor is allowed to remove the specified
+	 * {@link XField} from the specified {@link XObject}.
+	 * 
+	 * @param actor The {@link XID} of the actor
+	 * @param modelAddr The {@link XAddress} of the {@link XObject} for which
+	 *            the allowance of the remove-operation is to be checked.
+	 * @param objectID The {@link XID} of the {@link XField} the actor would
+	 *            like to remove
+	 * @return true if the actor is allowed to remove the {@link XField} with
+	 *         the given {@link XID} from the given {@link XObject}
+	 */
+	boolean canRemoveField(XID actor, XAddress objectAddr, XID fieldId);
 	
 	/**
 	 * Checks whether the specified actor is allowed to remove the specified
@@ -115,38 +111,37 @@ public interface XAccessManager extends XAccessDatabase, Serializable {
 	boolean canRemoveObject(XID actor, XAddress modelAddr, XID objectId);
 	
 	/**
-	 * Checks whether the specified actor is allowed to remove the specified
-	 * {@link XField} from the specified {@link XObject}.
-	 * 
-	 * @param actor The {@link XID} of the actor
-	 * @param modelAddr The {@link XAddress} of the {@link XObject} for which
-	 *            the allowance of the remove-operation is to be checked.
-	 * @param objectID The {@link XID} of the {@link XField} the actor would
-	 *            like to remove
-	 * @return true if the actor is allowed to remove the {@link XField} with
-	 *         the given {@link XID} from the given {@link XObject}
-	 */
-	boolean canRemoveField(XID actor, XAddress objectAddr, XID fieldId);
-	
-	/**
-	 * @return true if the actor is allowed to read from the specified resource
-	 */
-	boolean canRead(XID actor, XAddress resource);
-	
-	/**
 	 * @return true if the actor is allowed to write to the specified resource
 	 */
 	boolean canWrite(XID actor, XAddress resource);
 	
 	/**
-	 * Checks whether the specified actor is allowed to execute the given
-	 * {@link XCommand}
+	 * Get all actors that have access to a resource.
 	 * 
-	 * @param actor The {@link XID} of the actor
-	 * @param command The {@link XCommand} which is to be checked
-	 * @return return if the actor is allowed to execute the {@link XCommand}
+	 * @param resource The resource being accessed.
+	 * @param access The type of access being requested.
+	 * @return Returns two sets of actors. An actor is allowed access exactly if
+	 *         he or a group he is in is in the first set AND he isn't in the
+	 *         second set. Groups in the second set do NOT mean that their
+	 *         members don't have access and should be ignored.
+	 * 
+	 *         FIXME The documentation of the return value is too unclear to be
+	 *         implemented.
 	 */
-	boolean canExecute(XID actor, XCommand command);
+	Pair<Set<XID>,Set<XID>> getActorsWithPermission(XAddress resource, XID access);
+	
+	/**
+	 * Get all types of access an actor has to a resource.
+	 * 
+	 * @param actor The {@link XID} of the actor of whom the access rights are
+	 *            to be returned.
+	 * @param resource The {@link XAddress} of the resource of which the access
+	 *            rights of the given actor are to be returned.
+	 * @return Returns two sets of permissions. Permissions in the first set are
+	 *         explicitly allowed while permissions in the second set are
+	 *         explicitly denied.
+	 */
+	Pair<Set<XID>,Set<XID>> getPermissions(XID actor, XAddress resource);
 	
 	/**
 	 * Check if an actor has access rights to a specific resource according to
@@ -180,6 +175,27 @@ public interface XAccessManager extends XAccessDatabase, Serializable {
 	XAccessValue hasAccess(XID actor, XAddress resource, XID access);
 	
 	/**
+	 * Check if an actor has access rights to any resource in a subtree.
+	 * 
+	 * This is semantically equivalent to checking hasAccess() on every entity
+	 * in the subtree (including the rootResource) but should be much more
+	 * efficient, at least for sparse access managers.
+	 * 
+	 * @param actor The {@link XID} of the actor trying to get access.
+	 * @param rootResource The {@link XAddress} of the root resource of the
+	 *            subtree on which the access rights of the given actor are to
+	 *            be checked.
+	 * @param access The {@link XID} of the type of access being requested.
+	 *            (read, write, ...)
+	 * 
+	 * @return true if the actor has access to the model, null if the access is
+	 *         undefined for at least one resource and not defined to true for
+	 *         any resource
+	 * 
+	 */
+	XAccessValue hasAccessToSubresource(XID actor, XAddress rootResource, XID access);
+	
+	/**
 	 * Check if an actor has access rights to a whole resource subtree.
 	 * 
 	 * This is semantically equivalent to checking hasAccess() on every entity
@@ -201,24 +217,8 @@ public interface XAccessManager extends XAccessDatabase, Serializable {
 	XAccessValue hasAccessToSubtree(XID actor, XAddress rootResource, XID access);
 	
 	/**
-	 * Check if an actor has access rights to any resource in a subtree.
-	 * 
-	 * This is semantically equivalent to checking hasAccess() on every entity
-	 * in the subtree (including the rootResource) but should be much more
-	 * efficient, at least for sparse access managers.
-	 * 
-	 * @param actor The {@link XID} of the actor trying to get access.
-	 * @param rootResource The {@link XAddress} of the root resource of the
-	 *            subtree on which the access rights of the given actor are to
-	 *            be checked.
-	 * @param access The {@link XID} of the type of access being requested.
-	 *            (read, write, ...)
-	 * 
-	 * @return true if the actor has access to the model, null if the access is
-	 *         undefined for at least one resource and not defined to true for
-	 *         any resource
-	 * 
+	 * Remove a listener for access events.
 	 */
-	XAccessValue hasAccessToSubresource(XID actor, XAddress rootResource, XID access);
+	void removeListener(XAccessListener listener);
 	
 }

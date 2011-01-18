@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.xydra.core.X;
+import org.xydra.core.change.XCommand;
 import org.xydra.core.model.XID;
 import org.xydra.core.model.XWritableField;
 import org.xydra.core.model.XWritableModel;
@@ -12,6 +13,8 @@ import org.xydra.core.value.XIDSetValue;
 import org.xydra.core.value.XValue;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.NamingUtils;
+import org.xydra.store.impl.delegate.XydraPersistence;
 
 
 /**
@@ -54,6 +57,127 @@ public class XidSetValueUtils {
 			currentValue = ((XIDSetValue)currentValue).add(addedValue);
 		}
 		field.setValue(currentValue);
+	}
+	
+	/**
+	 * Helper method. Post condition: model.object.field is an
+	 * {@link XIDSetValue} which contains addedValue.
+	 * 
+	 * @param persistence
+	 * @param previousRevNr
+	 * @param executingActorId
+	 * @param objectId
+	 * @param fieldId
+	 * @param value
+	 * @return the resulting revNr
+	 */
+	public static long setValueInObject(XydraPersistence persistence, long previousRevNr,
+	        XID executingActorId, XID objectId, XID fieldId, XValue value) {
+		long revNr = previousRevNr;
+		// try: repo.model.object.field = value
+		long result = tryToSetValueInField(persistence, revNr, executingActorId, objectId, fieldId,
+		        value);
+		if(result == XCommand.FAILED) {
+			log.info("failed to set value; creating field...");
+			// try: repo.model.object.NEW field
+			result = tryToCreateField(persistence, executingActorId, objectId, fieldId);
+			if(result == XCommand.FAILED) {
+				log.info("failed to create field; creating object...");
+				// try: repo.model.NEW object
+				result = tryToCreateObject(persistence, executingActorId, objectId);
+				if(result == XCommand.FAILED) {
+					log.info("failed to create object; creating model...");
+					// try: repo.NEW model
+					result = tryToCreateModel(persistence, executingActorId);
+					assert result != XCommand.FAILED : "failed to create model";
+					if(result >= 0) {
+						revNr = result;
+					} // repo.model.NEW object
+					result = tryToCreateObject(persistence, executingActorId, objectId);
+					assert result != XCommand.FAILED : "failed to create object in new model";
+					if(result >= 0) {
+						revNr = result;
+					} // repo.model.object.NEW field
+					result = tryToCreateField(persistence, executingActorId, objectId, fieldId);
+					assert result != XCommand.FAILED : "failed to create field in new object";
+					if(result >= 0) {
+						revNr = result;
+					} // repo.model.object.field = value
+					result = tryToSetValueInField(persistence, revNr, executingActorId, objectId,
+					        fieldId, value);
+					assert result != XCommand.FAILED : "failed to set value in new field";
+					if(result >= 0) {
+						revNr = result;
+					}
+				} else if(result >= 0) {
+					revNr = result;
+				}
+				log.info("created object with " + result);
+				// repo.model.object.NEW field
+				result = tryToCreateField(persistence, executingActorId, objectId, fieldId);
+				assert result != XCommand.FAILED : "failed to create field in new object";
+				if(result >= 0) {
+					revNr = result;
+				}
+				log.info("created field with " + result);
+				// repo.model.object.field = value
+				result = tryToSetValueInField(persistence, revNr, executingActorId, objectId,
+				        fieldId, value);
+				assert result != XCommand.FAILED : "failed to set value in new field";
+				if(result >= 0) {
+					revNr = result;
+				}
+				log.info("set value with " + result);
+			} else if(result >= 0) {
+				revNr = result;
+			}
+		} else if(result >= 0) {
+			revNr = result;
+		}
+		assert result != XCommand.FAILED : objectId + "/" + fieldId + " = " + value
+		        + " -> result = " + result;
+		return result;
+	}
+	
+	private static long tryToCreateModel(XydraPersistence persistence, XID executingActorId) {
+		return persistence.executeCommand(
+		        executingActorId,
+		        X.getCommandFactory().createAddModelCommand(persistence.getRepositoryId(),
+		                NamingUtils.ID_ACCOUNT_MODEL, false));
+	}
+	
+	private static long tryToCreateField(XydraPersistence persistence, XID executingActorId,
+	        XID objectId, XID fieldId) {
+		return persistence.executeCommand(
+		        executingActorId,
+		        X.getCommandFactory().createAddFieldCommand(persistence.getRepositoryId(),
+		                NamingUtils.ID_ACCOUNT_MODEL, objectId, fieldId, false));
+	}
+	
+	private static long tryToCreateObject(XydraPersistence persistence, XID executingActorId,
+	        XID objectId) {
+		return persistence.executeCommand(
+		        executingActorId,
+		        X.getCommandFactory().createAddObjectCommand(persistence.getRepositoryId(),
+		                NamingUtils.ID_ACCOUNT_MODEL, objectId, false));
+	}
+	
+	/**
+	 * @param persistence
+	 * @param previousRevNr
+	 * @param executingActorId
+	 * @param objectId
+	 * @param fieldId
+	 * @param value
+	 * @return try: repo.model.object.field = value
+	 */
+	private static long tryToSetValueInField(XydraPersistence persistence, long previousRevNr,
+	        XID executingActorId, XID objectId, XID fieldId, XValue value) {
+		return persistence.executeCommand(
+		        executingActorId,
+		        X.getCommandFactory().createAddValueCommand(persistence.getRepositoryId(),
+		                NamingUtils.ID_ACCOUNT_MODEL, objectId, fieldId, previousRevNr, value,
+		                false));
 	}
 	
 	/**

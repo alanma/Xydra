@@ -1,8 +1,9 @@
 package org.xydra.store.access;
 
-import java.io.Serializable;
 import java.util.Set;
 
+import org.xydra.annotations.ModificationOperation;
+import org.xydra.annotations.ReadOperation;
 import org.xydra.core.model.XID;
 import org.xydra.store.MAXTodo;
 
@@ -23,11 +24,9 @@ import org.xydra.store.MAXTodo;
  * @author voelkel
  */
 @MAXTodo
-public interface XGroupDatabase extends Serializable {
+public interface XGroupDatabase {
 	
 	/**
-	 * Write operation.
-	 * 
 	 * Add an actor to a group.
 	 * 
 	 * The actor will become a direct member of this group.
@@ -36,11 +35,10 @@ public interface XGroupDatabase extends Serializable {
 	 * @param groupId The {@link XID} of the group the specified actor will be
 	 *            added to
 	 */
+	@ModificationOperation
 	void addToGroup(XID actorId, XID groupId);
 	
 	/**
-	 * Write operation.
-	 * 
 	 * Remove an actor from a group.
 	 * 
 	 * @param actorId The {@link XID} of the actor for which to revoke group
@@ -48,6 +46,7 @@ public interface XGroupDatabase extends Serializable {
 	 * @param groupId The {@link XID} of the group the specified actor will be
 	 *            removed from
 	 */
+	@ModificationOperation
 	void removeFromGroup(XID actorId, XID groupId);
 	
 	/**
@@ -59,6 +58,7 @@ public interface XGroupDatabase extends Serializable {
 	 *            status of the specified actor is to be checked
 	 * @return true, if the specified actor is a member of the specified group
 	 */
+	@ReadOperation
 	boolean hasGroup(XID actorId, XID groupId);
 	
 	/**
@@ -69,6 +69,7 @@ public interface XGroupDatabase extends Serializable {
 	 * @return a set with all {@link XID XIDs} of the groups the specified actor
 	 *         is a member of. Never null.
 	 */
+	@ReadOperation
 	Set<XID> getGroupsOf(XID actorOrGroupId);
 	
 	/**
@@ -79,6 +80,7 @@ public interface XGroupDatabase extends Serializable {
 	 * @return a set containing all {@link XID XIDs} of the members of the
 	 *         specified group. Never null.
 	 */
+	@ReadOperation
 	Set<XID> getMembersOf(XID groupId);
 	
 	/**
@@ -86,6 +88,7 @@ public interface XGroupDatabase extends Serializable {
 	 *         groups. Groups are defined as long as they have at least one
 	 *         member. Never null.
 	 */
+	@ReadOperation
 	Set<XID> getGroups();
 	
 }

@@ -123,7 +123,8 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			        "ExecuteCommands did not work properly in setUp (threw an Exception), here's its message text: "
 			                + commandCallback.getException().getMessage() + '\n'
 			                + " and here is its StackTrace: " + '\n'
-			                + commandCallback.getException().getStackTrace());
+			                + commandCallback.getException().getStackTrace(),
+			        commandCallback.getException());
 		}
 		
 		if(result.length <= 0) {
@@ -585,8 +586,8 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			// compare revision numbers
 			assertNotNull(revisionResult[i].getResult());
 			assertNull(revisionResult[i].getException());
-			assertEquals((Long)snapshotResult[i].getResult().getRevisionNumber(), revisionResult[i]
-			        .getResult());
+			assertEquals((Long)snapshotResult[i].getResult().getRevisionNumber(),
+			        revisionResult[i].getResult());
 		}
 	}
 	

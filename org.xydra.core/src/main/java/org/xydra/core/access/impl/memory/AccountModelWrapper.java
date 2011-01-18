@@ -1,4 +1,4 @@
-package org.xydra.store.access.impl.delegate;
+package org.xydra.core.access.impl.memory;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -13,7 +13,6 @@ import org.xydra.core.model.XID;
 import org.xydra.core.model.XWritableField;
 import org.xydra.core.model.XWritableModel;
 import org.xydra.core.model.XWritableObject;
-import org.xydra.core.value.XIDSetValue;
 import org.xydra.core.value.XIntegerValue;
 import org.xydra.core.value.XStringValue;
 import org.xydra.core.value.XValue;
@@ -26,7 +25,7 @@ import org.xydra.store.MAXTodo;
 import org.xydra.store.XydraStore;
 import org.xydra.store.access.XAccountDatabase;
 import org.xydra.store.access.XidSetValueUtils;
-import org.xydra.store.base.HashUtils;
+import org.xydra.store.access.impl.delegate.Documentation_AccountModel;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -34,34 +33,8 @@ import org.xydra.store.impl.delegate.XydraPersistence;
  * Wraps a {@link XydraStore} model to store accounts with passwords and groups
  * and their members. This is usually one special model per store.
  * 
- * <h4>Data modelling</h4>
- * 
- * Accounts (Passwords, failed login attempts)
- * 
- * <pre>
- * objectId | fieldId                  | value
- * ---------+--------------------------+----------------------------
- * actorId  | "hasPasswordHash"        | the password hash (see {@link HashUtils})
- * actorId  | "hasFailedLoginAttempts" | if present: number of failed login attempts
- * </pre>
- * 
- * Group membership (group->actors)
- * 
- * <pre>
- * objectId | fieldId     | value
- * ---------+-------------+----------------------------
- * groupId  | "hasMember" | {@link XIDSetValue} actors
- * </pre>
- * 
- * 
- * <h3>FUTURE IMPL -- currently index is in memory only</h3> <h4>Indexes for
- * faster access</h4> Group membership (actor->groups)
- * 
- * <pre>
- * objectId | fieldId      | value
- * ---------+--------------+----------------------------
- * actorId  | "isMemberOf" | {@link XIDSetValue} groupIds
- * </pre>
+ * See {@link Documentation_AccountModel} for the mapping from internal data
+ * structures to Xydras repo/model/object/field layout.
  * 
  * 
  * FIXME This impl does not write changes back to a {@link XydraPersistence}

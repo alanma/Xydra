@@ -2,19 +2,17 @@ package org.xydra.core.access.impl.memory;
 
 import java.util.Set;
 
-import org.xydra.core.X;
 import org.xydra.core.access.XAccessListener;
 import org.xydra.core.access.XAccessManager;
 import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XID;
-import org.xydra.core.model.XWritableModel;
 import org.xydra.index.query.Pair;
 import org.xydra.store.NamingUtils;
 import org.xydra.store.access.XAccessDatabase;
 import org.xydra.store.access.XAccessDefinition;
 import org.xydra.store.access.XAccessValue;
 import org.xydra.store.access.impl.delegate.AccessModelWrapperOnPersistence;
-import org.xydra.store.access.impl.delegate.AccountModelWrapper;
+import org.xydra.store.access.impl.delegate.AccountModelWrapperOnPersistence;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -22,8 +20,6 @@ import org.xydra.store.impl.delegate.XydraPersistence;
  * Uses a {@link XydraPersistence} (via {@link AccessModelWrapperOnPersistence})
  * to persists access rights and a fast in-memory {@link MemoryAccessManager} to
  * reason on access definitions.
- * 
- * FIXME when do we synchronize with the real state from the data store?
  * 
  * FIXME synchronize across threads via GAE MemCache (if we are on GAE)
  * 
@@ -44,11 +40,8 @@ public class DelegatingAccessManager extends AbstractAccessManager implements XA
 	 * @param modelId base modelId
 	 */
 	public DelegatingAccessManager(XydraPersistence persistence, XID internalActorId, XID modelId) {
-		// FIXME replace with write-back-AccountModelWrapper
-		XAddress modelAddress = X.getIDProvider().fromComponents(persistence.getRepositoryId(),
-		        NamingUtils.ID_ACCOUNT_MODEL, null, null);
-		XWritableModel accountModel = persistence.getModelSnapshot(modelAddress);
-		AccountModelWrapper accounts = new AccountModelWrapper(accountModel);
+		AccountModelWrapperOnPersistence accounts = new AccountModelWrapperOnPersistence(
+		        persistence, internalActorId);
 		this.memoryAccessManager = new MemoryAccessManager(accounts);
 		
 		XID rightsModelId = NamingUtils.getRightsModelId(modelId);

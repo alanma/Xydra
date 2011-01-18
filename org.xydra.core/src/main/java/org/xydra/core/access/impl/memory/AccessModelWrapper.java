@@ -1,5 +1,6 @@
 package org.xydra.core.access.impl.memory;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,6 +26,7 @@ import org.xydra.store.access.XAccessDefinition;
 import org.xydra.store.access.XAccessValue;
 import org.xydra.store.access.impl.delegate.AccessModelWrapperOnPersistence;
 import org.xydra.store.access.impl.delegate.BooleanValueUtils;
+import org.xydra.store.access.impl.delegate.Documentation_AccessModel;
 import org.xydra.store.base.Credentials;
 import org.xydra.store.base.WritableRepository;
 
@@ -33,17 +35,8 @@ import org.xydra.store.base.WritableRepository;
  * Wraps a {@link XydraStore} model to store access right definitions. For
  * better performance use a {@link AccessModelWrapperOnPersistence} if you can.
  * 
- * Data modelling:
- * 
- * <pre>
- * objectId | fieldId                        | value
- * ---------+--------------------------------+----------
- * actorId  | "enc(address)+"_."+enc(rightId) | boolean
- * </pre>
- * 
- * Rights can be READ, WRITE, ADMIN.
- * 
- * Non-existing field: right not defined.
+ * See {@link Documentation_AccessModel} for the mapping from internal data
+ * structures to Xydra layout (repo/model/object/field).
  * 
  * @author voelkel
  */
@@ -51,7 +44,7 @@ import org.xydra.store.base.WritableRepository;
 @RunsInGWT
 @RunsInJava
 @MAXTodo
-public class AccessModelWrapper implements XAccessDatabase {
+public class AccessModelWrapper implements XAccessDatabase, Serializable {
 	
 	private static final long serialVersionUID = -7345262691858094628L;
 	

@@ -5,7 +5,7 @@ import org.xydra.annotations.ReadOperation;
 
 
 /**
- * An XObject allowing simple changes.
+ * An {@link XBaseModel} which allows also simple changes.
  * 
  * @author voelkel
  */

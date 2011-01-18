@@ -34,19 +34,8 @@ import org.xydra.store.impl.delegate.XydraPersistence;
  * 
  * Is be {@link Serializable} so that it can be stored in GAE MemCache.
  * 
- * Data modelling:
- * 
- * <pre>
- * objectId | fieldId                        | value
- * ---------+--------------------------------+----------
- * actorId  | "enc(address)+"_."+enc(rightId) | boolean
- * </pre>
- * 
- * CAUTION: There may ONLY be actorIds be used as objectIds in this model.
- * 
- * Rights can be READ, WRITE, ADMIN.
- * 
- * Non-existing field: right not defined.
+ * See {@link Documentation_AccessModel} for the mapping from internal data
+ * structures to Xydra layout (repo/model/object/field).
  * 
  * @author voelkel
  */
@@ -106,6 +95,7 @@ public class AccessModelWrapperOnPersistence implements XAccessDatabase, Seriali
 			this.modelSnapshot = this.persistence.getModelSnapshot(getModelAddress());
 		}
 		if(this.modelSnapshot == null) {
+			// FIXME don't complain - create it
 			throw new IllegalStateException("No model found with address '" + getModelAddress()
 			        + "'");
 		}
