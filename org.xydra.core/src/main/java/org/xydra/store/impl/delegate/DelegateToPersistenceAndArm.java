@@ -169,8 +169,8 @@ public class DelegateToPersistenceAndArm implements XydraBlockingStore, XydraSto
 		case XFIELD:
 			return modelArm.hasModelReadAccess(actorId)
 			        && modelArm.hasObjectReadAccess(actorId, address.getObject())
-			        && modelArm.hasFieldWriteAccess(actorId, address.getObject(),
-			                address.getField());
+			        && modelArm.hasFieldWriteAccess(actorId, address.getObject(), address
+			                .getField());
 		}
 		throw new AssertionError("Switch-case returned already");
 	}
@@ -183,6 +183,10 @@ public class DelegateToPersistenceAndArm implements XydraBlockingStore, XydraSto
 		long beginRevision = getEventsRequest.beginRevision;
 		long endRevision = getEventsRequest.endRevision;
 		checkRepoId(address);
+		if(endRevision < beginRevision) {
+			throw new IllegalArgumentException("invalid revision range for getEvents: ["
+			        + beginRevision + "," + endRevision + "]");
+		}
 		XModelArm modelArm = this.arm.getModelArm(address.getModel());
 		if(passwordHash != null && !modelArm.hasModelReadAccess(actorId)) {
 			return new XEvent[0];
@@ -193,17 +197,24 @@ public class DelegateToPersistenceAndArm implements XydraBlockingStore, XydraSto
 		if(passwordHash != null) {
 			Iterator<XEvent> it = events.iterator();
 			while(it.hasNext()) {
+				// TODO handle XTransactionEvents
 				XEvent event = it.next();
 				switch(event.getChangedEntity().getAddressedType()) {
 				case XREPOSITORY: {
-					// TODO is the model creation event part of the models'
-					// event
-					// log?
+					/*
+					 * TODO is the model creation event part of the models'
+					 * event log? -- Yes. On GAE this is needed for
+					 * synchronization purposes (so are model remove events).
+					 * Everywhere else this is useful to log who created/removed
+					 * the model. ~Daniel
+					 */
 					throw new AssertionError(
 					        "This class should only return model events, not repository events");
 				}
 				case XMODEL: {
 					// no need to filter it out
+					// TODO while (with write access to the repo) the existence
+					// of models
 				}
 					break;
 				case XOBJECT: {
@@ -211,6 +222,8 @@ public class DelegateToPersistenceAndArm implements XydraBlockingStore, XydraSto
 					if(!modelArm.hasObjectReadAccess(actorId, objectId)) {
 						// filter event out
 						it.remove();
+						// IMPROVE remove in the middle of array lists is
+						// inefficient
 					}
 				}
 					break;

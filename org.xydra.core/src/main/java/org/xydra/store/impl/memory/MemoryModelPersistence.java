@@ -88,20 +88,35 @@ public class MemoryModelPersistence {
 	synchronized public List<XEvent> getEvents(XAddress address, long beginRevision,
 	        long endRevision) {
 		
-		long rev = this.events.size();
+		long currentRev = getRevisionNumber();
 		long start = beginRevision < 0 ? 0 : beginRevision;
-		long end = endRevision > rev ? rev : endRevision;
+		long end = endRevision > currentRev ? currentRev : endRevision;
 		
-		if(start == 0 && end == rev) {
-			return this.events;
+		if(start > end) {
+			// happens if start >= currentRev, which is allowed
+			return new ArrayList<XEvent>();
+		}
+		
+		if(start == 0 && end == endRevision) {
+			// we still need to copy the list because the caller might expect to
+			// have a instance it can modify when doing filtering.
+			List<XEvent> result = new ArrayList<XEvent>();
+			result.addAll(this.events);
+			return result;
 		}
 		
 		List<XEvent> result = new ArrayList<XEvent>();
 		
 		// filter a sub-list
-		// TODO IMROVE can handle max. Integer.MAX events
-		for(XEvent xe : this.events.subList((int)start, (int)end)) {
+		// TODO IMROVE can handle max. Integer.MAX events. -- So what? 2^31 is a
+		// lot of events and the standard java containers cannot contain more
+		// anyway, at least the array-based ArrayList. ~Daniel
+		
+		for(XEvent xe : this.events.subList((int)start, (int)end + 1)) {
 			// TODO how to filter transaction events? ~Daniel
+			// TODO should this filtering be done in the calling
+			// DelegateToPersistenceAndArm since it needs to filter for access
+			// rights anyway?
 			if(address.equalsOrContains(xe.getChangedEntity())) {
 				result.add(xe);
 			}

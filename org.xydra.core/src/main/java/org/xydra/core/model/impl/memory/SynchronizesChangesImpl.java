@@ -616,6 +616,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 			
 			// Apply the remote changes.
 			for(XEvent remoteChange : remoteChanges) {
+				log.info("sync: merging remote event " + remoteChange);
 				if(remoteChange == null) {
 					this.eventQueue.logNullEvent();
 					continue;
