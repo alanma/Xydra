@@ -1,27 +1,27 @@
 package org.xydra.core.model.session.impl.arm;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableField;
+import org.xydra.base.XID;
+import org.xydra.base.value.XValue;
 import org.xydra.core.access.XAccessManager;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseField;
-import org.xydra.core.model.XID;
-import org.xydra.core.value.XValue;
 import org.xydra.store.AccessException;
 
 
 /**
- * An {@link XBaseField} that wraps an {@link XBaseField} for a specific actor
+ * An {@link XReadableField} that wraps an {@link XReadableField} for a specific actor
  * and checks all access against an {@link XAccessManager}.
  * 
  * @author dscharrer
  * 
  */
-public class ArmProtectedBaseField implements XBaseField {
+public class ArmProtectedBaseField implements XReadableField {
 	
-	private final XBaseField field;
+	private final XReadableField field;
 	protected final XAccessManager arm;
 	protected final XID actor;
 	
-	public ArmProtectedBaseField(XBaseField field, XAccessManager arm, XID actor) {
+	public ArmProtectedBaseField(XReadableField field, XAccessManager arm, XID actor) {
 		this.field = field;
 		this.arm = arm;
 		this.actor = actor;

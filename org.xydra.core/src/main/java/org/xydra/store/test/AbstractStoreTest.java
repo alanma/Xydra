@@ -1,7 +1,7 @@
 package org.xydra.store.test;
 
+import org.xydra.base.XID;
 import org.xydra.core.change.XCommandFactory;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.test.TestLogger;
 import org.xydra.store.XydraStore;

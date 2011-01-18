@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
 import org.xydra.core.XX;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;

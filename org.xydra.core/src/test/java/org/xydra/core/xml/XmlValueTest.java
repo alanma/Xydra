@@ -3,11 +3,11 @@ package org.xydra.core.xml;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
+import org.xydra.base.value.XValue;
 import org.xydra.core.XX;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
 import org.xydra.core.value.XV;
-import org.xydra.core.value.XValue;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
 

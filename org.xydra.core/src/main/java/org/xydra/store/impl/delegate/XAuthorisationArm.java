@@ -1,6 +1,6 @@
 package org.xydra.store.impl.delegate;
 
-import org.xydra.core.model.XID;
+import org.xydra.base.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.store.MAXDone;
 import org.xydra.store.XydraStoreAdmin;

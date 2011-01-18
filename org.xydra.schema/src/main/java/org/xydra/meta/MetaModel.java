@@ -1,12 +1,12 @@
 package org.xydra.meta;
 
+import org.xydra.base.XID;
+import org.xydra.base.value.XStringValue;
 import org.xydra.core.X;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.value.XStringValue;
 
 
 /**

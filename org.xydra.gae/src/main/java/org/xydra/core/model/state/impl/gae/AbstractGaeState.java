@@ -1,7 +1,7 @@
 package org.xydra.core.model.state.impl.gae;
 
-import org.xydra.core.model.IHasXID;
-import org.xydra.core.model.XAddress;
+import org.xydra.base.IHasXID;
+import org.xydra.base.XAddress;
 import org.xydra.core.model.state.XStateTransaction;
 import org.xydra.core.model.state.impl.memory.AbstractState;
 import org.xydra.server.impl.gae.OldGaeUtils;

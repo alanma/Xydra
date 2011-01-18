@@ -5,16 +5,17 @@ import java.util.Iterator;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableField;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XReadableObject;
+import org.xydra.base.XReadableRepository;
+import org.xydra.base.XID;
+import org.xydra.base.value.XValue;
 import org.xydra.core.XX;
 import org.xydra.core.change.XEvent;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseField;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XBaseObject;
-import org.xydra.core.model.XBaseRepository;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XLoggedModel;
 import org.xydra.core.model.XLoggedObject;
 import org.xydra.core.model.XModel;
@@ -36,7 +37,6 @@ import org.xydra.core.model.state.impl.memory.TemporaryFieldState;
 import org.xydra.core.model.state.impl.memory.TemporaryModelState;
 import org.xydra.core.model.state.impl.memory.TemporaryObjectState;
 import org.xydra.core.model.state.impl.memory.TemporaryRepositoryState;
-import org.xydra.core.value.XValue;
 import org.xydra.store.AccessException;
 
 
@@ -381,9 +381,9 @@ public class XmlModel {
 	}
 	
 	/**
-	 * Encode the given {@link XBaseRepository} as an XML element.
+	 * Encode the given {@link XReadableRepository} as an XML element.
 	 * 
-	 * @param xmodel an {@link XBaseRepository}
+	 * @param xmodel an {@link XReadableRepository}
 	 * @param out the {@link XmlOut} that a partial XML document starting with
 	 *            &lt;xrepository&gt; and ending with the same
 	 *            &lt;/xrepository&gt; is written to. White space is permitted
@@ -396,7 +396,7 @@ public class XmlModel {
 	 * @throws IllegalArgumentException if the model contains an unsupported
 	 *             XValue type. See {@link XmlValueWriter} for details.
 	 */
-	public static void toXml(XBaseRepository xrepository, XmlOut xo, boolean saveRevision,
+	public static void toXml(XReadableRepository xrepository, XmlOut xo, boolean saveRevision,
 	        boolean ignoreInaccessible, boolean saveChangeLog) {
 		
 		xo.open(XREPOSITORY_ELEMENT);
@@ -418,10 +418,10 @@ public class XmlModel {
 	}
 	
 	/**
-	 * Encode the given {@link XBaseRepository} as an XML element, including
+	 * Encode the given {@link XReadableRepository} as an XML element, including
 	 * revision numbers and ignoring inaccessible entities.
 	 * 
-	 * @param xmodel an {@link XBaseRepository}
+	 * @param xmodel an {@link XReadableRepository}
 	 * @param out the {@link XmlOut} that a partial XML document starting with
 	 *            &lt;xrepository&gt; and ending with the same
 	 *            &lt;/xrepository&gt; is written to. White space is permitted
@@ -429,14 +429,14 @@ public class XmlModel {
 	 * @throws IllegalArgumentException if the model contains an unsupported
 	 *             XValue type. See {@link XmlValueWriter} for details.
 	 */
-	public static void toXml(XBaseRepository xrepository, XmlOut xo) {
+	public static void toXml(XReadableRepository xrepository, XmlOut xo) {
 		toXml(xrepository, xo, true, true, true);
 	}
 	
 	/**
-	 * Encode the given {@link XBaseModel} as an XML element.
+	 * Encode the given {@link XReadableModel} as an XML element.
 	 * 
-	 * @param xmodel an {@link XBaseModel}
+	 * @param xmodel an {@link XReadableModel}
 	 * @param out the {@link XmlOut} that a partial XML document starting with
 	 *            &lt;xmodel&gt; and ending with the same &lt;/xmodel&gt; is
 	 *            written to. White space is permitted but not required.
@@ -448,7 +448,7 @@ public class XmlModel {
 	 * @throws IllegalArgumentException if the model contains an unsupported
 	 *             XValue type. See {@link XmlValueWriter} for details.
 	 */
-	public static void toXml(XBaseModel xmodel, XmlOut xo, boolean saveRevision,
+	public static void toXml(XReadableModel xmodel, XmlOut xo, boolean saveRevision,
 	        boolean ignoreInaccessible, boolean saveChangeLog) {
 		
 		if(!saveRevision && saveChangeLog) {
@@ -488,22 +488,22 @@ public class XmlModel {
 	}
 	
 	/**
-	 * Encode the given {@link XBaseModel} as an XML element, including revision
+	 * Encode the given {@link XReadableModel} as an XML element, including revision
 	 * numbers and ignoring inaccessible entities.
 	 * 
-	 * @param xmodel an {@link XBaseModel}
+	 * @param xmodel an {@link XReadableModel}
 	 * @param out the {@link XmlOut} that a partial XML document starting with
 	 *            &lt;xmodel&gt; and ending with the same &lt;/xmodel&gt; is
 	 *            written to. White space is permitted but not required.
 	 * @throws IllegalArgumentException if the model contains an unsupported
 	 *             XValue type. See {@link XmlValueWriter} for details.
 	 */
-	public static void toXml(XBaseModel xmodel, XmlOut xo) {
+	public static void toXml(XReadableModel xmodel, XmlOut xo) {
 		toXml(xmodel, xo, true, true, true);
 	}
 	
 	/**
-	 * Encode the given {@link XBaseObject} as an XML element.
+	 * Encode the given {@link XReadableObject} as an XML element.
 	 * 
 	 * @param xobject an {@link XObject}
 	 * @param out the {@link XmlOut} that a partial XML document starting with
@@ -517,7 +517,7 @@ public class XmlModel {
 	 * @throws IllegalArgumentException if the object contains an unsupported
 	 *             XValue type. See {@link XmlValueWriter} for details.
 	 */
-	public static void toXml(XBaseObject xobject, XmlOut xo, boolean saveRevision,
+	public static void toXml(XReadableObject xobject, XmlOut xo, boolean saveRevision,
 	        boolean ignoreInaccessible, boolean saveChangeLog) {
 		
 		if(!saveRevision && saveChangeLog) {
@@ -557,24 +557,24 @@ public class XmlModel {
 	}
 	
 	/**
-	 * Encode the given {@link XBaseObject} as an XML element, including
+	 * Encode the given {@link XReadableObject} as an XML element, including
 	 * revision numbers and ignoring inaccessible entities.
 	 * 
-	 * @param xobject an {@link XBaseObject}
+	 * @param xobject an {@link XReadableObject}
 	 * @param out the {@link XmlOut} that a partial XML document starting with
 	 *            &lt;xobject&gt; and ending with the same &lt;/xobject&gt; is
 	 *            written to. White space is permitted but not required.
 	 * @throws IllegalArgumentException if the object contains an unsupported
 	 *             XValue type. See {@link XmlValueWriter} for details.
 	 */
-	public static void toXml(XBaseObject xobject, XmlOut xo) {
+	public static void toXml(XReadableObject xobject, XmlOut xo) {
 		toXml(xobject, xo, true, true, true);
 	}
 	
 	/**
-	 * Encode the given {@link XBaseField} as an XML element.
+	 * Encode the given {@link XReadableField} as an XML element.
 	 * 
-	 * @param xfield an {@link XBaseField}
+	 * @param xfield an {@link XReadableField}
 	 * @param out the {@link XmlOut} that a partial XML document starting with
 	 *            &lt;xfield&gt; and ending with the same &lt;/xfield&gt; is
 	 *            written to. White space is permitted but not required.
@@ -583,7 +583,7 @@ public class XmlModel {
 	 * @throws IllegalArgumentException if the field contains an unsupported
 	 *             XValue type. See {@link XmlValueWriter} for details.
 	 */
-	public static void toXml(XBaseField xfield, XmlOut xo, boolean saveRevision) {
+	public static void toXml(XReadableField xfield, XmlOut xo, boolean saveRevision) {
 		
 		// get values before outputting anything to prevent incomplete XML
 		// elements on errors
@@ -605,17 +605,17 @@ public class XmlModel {
 	}
 	
 	/**
-	 * Encode the given {@link XBaseField} as an XML element, including revision
+	 * Encode the given {@link XReadableField} as an XML element, including revision
 	 * numbers.
 	 * 
-	 * @param xfield an {@link XBaseField}
+	 * @param xfield an {@link XReadableField}
 	 * @param out the {@link XmlOut} that a partial XML document starting with
 	 *            &lt;xfield&gt; and ending with the same &lt;/xfield&gt; is
 	 *            written to. White space is permitted but not required.
 	 * @throws IllegalArgumentException if the field contains an unsupported
 	 *             XValue type. See {@link XmlValueWriter} for details.
 	 */
-	public static void toXml(XBaseField xfield, XmlOut xo) {
+	public static void toXml(XReadableField xfield, XmlOut xo) {
 		toXml(xfield, xo, true);
 	}
 	

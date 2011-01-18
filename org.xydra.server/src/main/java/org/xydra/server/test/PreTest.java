@@ -5,11 +5,11 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.Test;
+import org.xydra.base.XAddress;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XRepositoryCommand;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
-import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.test.DemoModelUtil;
 import org.xydra.server.IXydraServer;

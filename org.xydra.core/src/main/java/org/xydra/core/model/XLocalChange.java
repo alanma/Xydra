@@ -1,5 +1,6 @@
 package org.xydra.core.model;
 
+import org.xydra.base.XID;
 import org.xydra.core.change.XCommand;
 
 

@@ -1,12 +1,12 @@
 package org.xydra.store;
 
+import org.xydra.base.XID;
+import org.xydra.base.XHalfWritableModel;
+import org.xydra.base.XHalfWritableRepository;
 import org.xydra.core.access.impl.memory.AccountModelWrapper;
-import org.xydra.core.model.XID;
-import org.xydra.core.model.XWritableModel;
-import org.xydra.core.model.XWritableRepository;
 import org.xydra.store.access.XAccountDatabase;
 import org.xydra.store.base.Credentials;
-import org.xydra.store.base.WritableRepository;
+import org.xydra.store.base.HalfWritableRepositoryOnStore;
 
 
 public class StoreUtils {
@@ -31,8 +31,8 @@ public class StoreUtils {
 			throw new IllegalArgumentException("passwordHash is null");
 		}
 		Credentials credentials = new Credentials(actorId, passwordHash);
-		XWritableRepository repository = new WritableRepository(credentials, store);
-		XWritableModel accountModel = repository.getModel(NamingUtils.ID_ACCOUNT_MODEL);
+		XHalfWritableRepository repository = new HalfWritableRepositoryOnStore(credentials, store);
+		XHalfWritableModel accountModel = repository.getModel(NamingUtils.ID_ACCOUNT_MODEL);
 		if(accountModel == null) {
 			throw new IllegalStateException("Store is missing the account model '"
 			        + NamingUtils.ID_ACCOUNT_MODEL + "'");

@@ -9,17 +9,17 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xydra.base.XID;
+import org.xydra.base.value.XValue;
 import org.xydra.core.X;
 import org.xydra.core.index.IObjectIndex;
 import org.xydra.core.index.IUniqueObjectIndex;
 import org.xydra.core.index.impl.memory.IndexFactoryImpl;
 import org.xydra.core.index.impl.memory.ObjectIndex;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.test.TestLogger;
-import org.xydra.core.value.XValue;
 
 
 public class TestObjectIndex {

@@ -2,10 +2,10 @@ package org.xydra.core.model.state.impl.gae;
 
 import java.util.Iterator;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.core.XX;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
-import org.xydra.core.model.XType;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XFieldState;
 import org.xydra.core.model.state.XObjectState;

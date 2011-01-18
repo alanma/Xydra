@@ -3,10 +3,10 @@ package org.xydra.core.index;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
-import org.xydra.core.model.XID;
+import org.xydra.base.XID;
+import org.xydra.base.value.XValue;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
-import org.xydra.core.value.XValue;
 
 
 /**

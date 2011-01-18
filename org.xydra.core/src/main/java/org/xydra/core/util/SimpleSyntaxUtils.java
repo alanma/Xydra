@@ -8,16 +8,16 @@ import java.util.List;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
+import org.xydra.base.XID;
+import org.xydra.base.value.XIDListValue;
+import org.xydra.base.value.XValue;
 import org.xydra.core.URIFormatException;
 import org.xydra.core.XX;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.impl.memory.MemoryModel;
-import org.xydra.core.value.XIDListValue;
 import org.xydra.core.value.XV;
-import org.xydra.core.value.XValue;
 
 
 /**

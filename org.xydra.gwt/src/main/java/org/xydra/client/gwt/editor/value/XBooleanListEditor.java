@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.xydra.core.value.XBooleanListValue;
-import org.xydra.core.value.XBooleanValue;
+import org.xydra.base.value.XBooleanListValue;
+import org.xydra.base.value.XBooleanValue;
 import org.xydra.core.value.XV;
 
 

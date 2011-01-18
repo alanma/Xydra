@@ -7,6 +7,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XID;
 import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XAtomicCommand;
@@ -18,10 +21,7 @@ import org.xydra.core.change.XModelEvent;
 import org.xydra.core.change.XObjectEvent;
 import org.xydra.core.change.XRepositoryEvent;
 import org.xydra.core.change.XTransaction;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XChangeLog;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.DeltaUtils;
 import org.xydra.core.model.impl.memory.AbstractChangeLog;
@@ -558,7 +558,7 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	private List<XAtomicEvent> checkPreconditionsAndSaveEvents(ChangeInProgress change,
 	        XCommand command, XID actorId) {
 		
-		XBaseModel currentModel = InternalGaeModel.get(this, change.rev - 1, change.locks);
+		XReadableModel currentModel = InternalGaeModel.get(this, change.rev - 1, change.locks);
 		
 		Pair<ChangedModel,DeltaUtils.ModelChange> c = DeltaUtils.executeCommand(currentModel,
 		        command);

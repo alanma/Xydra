@@ -2,6 +2,10 @@ package org.xydra.store.impl.delegate;
 
 import java.util.Set;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XReadableObject;
+import org.xydra.base.XID;
 import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
@@ -10,10 +14,6 @@ import org.xydra.core.change.XObjectCommand;
 import org.xydra.core.change.XRepositoryCommand;
 import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.XTransactionEvent;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XBaseObject;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
@@ -182,7 +182,7 @@ public interface XydraSingleOperationStore {
 	 *             lazy-loading stub only.
 	 */
 	void getModelSnapshot(XID actorId, String passwordHash, XAddress modelAddress,
-	        Callback<XBaseModel> callback) throws IllegalArgumentException;
+	        Callback<XReadableModel> callback) throws IllegalArgumentException;
 	
 	/**
 	 * Read current state.
@@ -258,7 +258,7 @@ public interface XydraSingleOperationStore {
 	 *            get snapshots. Each {@link XAddress} must address an
 	 *            {@link XObject} (repositoryId/modelId/objectId/-).
 	 * @param callback Asynchronous callback to signal success or failure. On
-	 *            success, an {@link XBaseObject} is returned. A null value
+	 *            success, an {@link XReadableObject} is returned. A null value
 	 *            signals that the requested object does not exist in the store
 	 *            - or that the actorId has no read-access on it. Must not be
 	 *            null.
@@ -268,7 +268,7 @@ public interface XydraSingleOperationStore {
 	 *             lazy-loading stub only.
 	 */
 	void getObjectSnapshot(XID actorId, String passwordHash, XAddress objectAddress,
-	        Callback<XBaseObject> callback) throws IllegalArgumentException;
+	        Callback<XReadableObject> callback) throws IllegalArgumentException;
 	
 	/**
 	 * Read current state.

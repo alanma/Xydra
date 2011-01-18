@@ -3,6 +3,7 @@ package org.xydra.core.model;
 import java.io.Serializable;
 import java.util.Iterator;
 
+import org.xydra.base.XAddress;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;

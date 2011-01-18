@@ -2,13 +2,13 @@ package org.xydra.client.sync;
 
 import java.util.List;
 
+import org.xydra.base.XAddress;
 import org.xydra.client.Callback;
 import org.xydra.client.ServiceException;
 import org.xydra.client.XChangesService;
 import org.xydra.client.XChangesService.CommandResult;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
-import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XLocalChange;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;

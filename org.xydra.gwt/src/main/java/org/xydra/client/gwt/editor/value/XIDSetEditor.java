@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.xydra.core.model.XID;
-import org.xydra.core.value.XIDSetValue;
+import org.xydra.base.XID;
+import org.xydra.base.value.XIDSetValue;
 import org.xydra.core.value.XV;
 
 

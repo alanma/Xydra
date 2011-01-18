@@ -6,10 +6,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.xydra.base.XID;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommandFactory;
-import org.xydra.core.model.XID;
 import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.test.AbstractAllowAllStoreReadMethodsTest;

@@ -7,15 +7,15 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xydra.base.XID;
+import org.xydra.base.XHalfWritableModel;
+import org.xydra.base.XHalfWritableRepository;
 import org.xydra.core.XX;
-import org.xydra.core.model.XID;
-import org.xydra.core.model.XWritableModel;
-import org.xydra.core.model.XWritableRepository;
 import org.xydra.core.test.TestLogger;
 import org.xydra.store.access.XAccountDatabase;
 import org.xydra.store.base.Credentials;
 import org.xydra.store.base.HashUtils;
-import org.xydra.store.base.WritableRepository;
+import org.xydra.store.base.HalfWritableRepositoryOnStore;
 import org.xydra.store.impl.memory.SecureMemoryStore;
 import org.xydra.store.test.SynchronousTestCallback;
 
@@ -58,8 +58,8 @@ public class AccessControlTest {
 	public void testStoreHasAccountModel() {
 		Credentials credentials = new Credentials(XydraStoreAdmin.XYDRA_ADMIN_ID, this.store
 		        .getXydraStoreAdmin().getXydraAdminPasswordHash());
-		XWritableRepository repo = new WritableRepository(credentials, this.store);
-		XWritableModel accountModel = repo.getModel(NamingUtils.ID_ACCOUNT_MODEL);
+		XHalfWritableRepository repo = new HalfWritableRepositoryOnStore(credentials, this.store);
+		XHalfWritableModel accountModel = repo.getModel(NamingUtils.ID_ACCOUNT_MODEL);
 		assertNotNull("Store is missing the account model '" + NamingUtils.ID_ACCOUNT_MODEL + "'",
 		        accountModel);
 	}

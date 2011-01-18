@@ -2,12 +2,12 @@ package org.xydra.core.access.impl.gae;
 
 import java.util.Set;
 
+import org.xydra.base.XAddress;
 import org.xydra.core.access.XAccessEvent;
 import org.xydra.core.access.XAccessListener;
 import org.xydra.core.access.XAccessManager;
 import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.access.impl.memory.MemoryAccessManager;
-import org.xydra.core.model.XAddress;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlAccess;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;

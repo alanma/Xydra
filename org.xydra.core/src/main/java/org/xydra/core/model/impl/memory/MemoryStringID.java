@@ -2,7 +2,7 @@ package org.xydra.core.model.impl.memory;
 
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
-import org.xydra.core.model.XID;
+import org.xydra.base.XID;
 
 
 /**

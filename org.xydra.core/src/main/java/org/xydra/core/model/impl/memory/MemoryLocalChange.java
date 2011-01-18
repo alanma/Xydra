@@ -1,5 +1,6 @@
 package org.xydra.core.model.impl.memory;
 
+import org.xydra.base.XID;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XFieldCommand;
@@ -10,7 +11,6 @@ import org.xydra.core.change.impl.memory.MemoryFieldCommand;
 import org.xydra.core.change.impl.memory.MemoryModelCommand;
 import org.xydra.core.change.impl.memory.MemoryObjectCommand;
 import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XLocalChange;
 import org.xydra.core.model.XLocalChangeCallback;
 

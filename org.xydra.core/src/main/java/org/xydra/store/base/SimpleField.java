@@ -2,23 +2,24 @@ package org.xydra.store.base;
 
 import java.io.Serializable;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
+import org.xydra.base.XWritableField;
+import org.xydra.base.XType;
+import org.xydra.base.XHalfWritableField;
+import org.xydra.base.value.XValue;
 import org.xydra.core.change.XCommand;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
-import org.xydra.core.model.XType;
-import org.xydra.core.model.XWritableField;
-import org.xydra.core.value.XValue;
 import org.xydra.index.XI;
 
 
 /**
- * A simple data container for {@link XWritableField}.
+ * A simple data container for {@link XHalfWritableField}.
  * 
  * Minimal memory footprint, can be used as data transfer object.
  * 
  * @author voelkel
  */
-public class SimpleField implements XWritableField, Serializable {
+public class SimpleField implements Serializable, XWritableField {
 	
 	private static final long serialVersionUID = -4704907115751969328L;
 	
@@ -80,9 +81,6 @@ public class SimpleField implements XWritableField, Serializable {
 		return changed;
 	}
 	
-	/**
-	 * @param rev the new revision number
-	 */
 	public void setRevisionNumber(long rev) {
 		this.revisionNumber = rev;
 	}

@@ -2,12 +2,12 @@ package org.xydra.store.impl.delegate;
 
 import java.util.Set;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XReadableObject;
+import org.xydra.base.XID;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XBaseObject;
-import org.xydra.core.model.XID;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.Callback;
@@ -56,11 +56,11 @@ public class DelegateToBlockingStore implements XydraSingleOperationStore {
 	
 	@Override
 	public void getModelSnapshot(XID actorId, String passwordHash, XAddress modelAddress,
-	        Callback<XBaseModel> callback) throws IllegalArgumentException {
+	        Callback<XReadableModel> callback) throws IllegalArgumentException {
 		assert actorId != null;
 		assert callback != null;
 		try {
-			XBaseModel result = this.blockingStore.getModelSnapshot(actorId, passwordHash,
+			XReadableModel result = this.blockingStore.getModelSnapshot(actorId, passwordHash,
 			        modelAddress);
 			callback.onSuccess(result);
 		} catch(StoreException e) {
@@ -85,11 +85,11 @@ public class DelegateToBlockingStore implements XydraSingleOperationStore {
 	
 	@Override
 	public void getObjectSnapshot(XID actorId, String passwordHash, XAddress objectAddress,
-	        Callback<XBaseObject> callback) throws IllegalArgumentException {
+	        Callback<XReadableObject> callback) throws IllegalArgumentException {
 		assert actorId != null;
 		assert callback != null;
 		try {
-			XBaseObject result = this.blockingStore.getObjectSnapshot(actorId, passwordHash,
+			XReadableObject result = this.blockingStore.getObjectSnapshot(actorId, passwordHash,
 			        objectAddress);
 			callback.onSuccess(result);
 		} catch(StoreException e) {

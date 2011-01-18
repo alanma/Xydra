@@ -3,14 +3,14 @@ package org.xydra.store.access;
 import java.util.Collections;
 import java.util.Set;
 
+import org.xydra.base.XID;
+import org.xydra.base.XHalfWritableField;
+import org.xydra.base.XHalfWritableModel;
+import org.xydra.base.XHalfWritableObject;
+import org.xydra.base.value.XIDSetValue;
+import org.xydra.base.value.XValue;
 import org.xydra.core.X;
 import org.xydra.core.change.XCommand;
-import org.xydra.core.model.XID;
-import org.xydra.core.model.XWritableField;
-import org.xydra.core.model.XWritableModel;
-import org.xydra.core.model.XWritableObject;
-import org.xydra.core.value.XIDSetValue;
-import org.xydra.core.value.XValue;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.NamingUtils;
@@ -38,15 +38,15 @@ public class XidSetValueUtils {
 	 * @param fieldId
 	 * @param addedValue
 	 */
-	public static void addToXIDSetValueInObject(XWritableModel model, XID objectId, XID fieldId,
+	public static void addToXIDSetValueInObject(XHalfWritableModel model, XID objectId, XID fieldId,
 	        XID addedValue) {
 		log.trace(objectId + " " + fieldId + " " + addedValue + " .");
 		
-		XWritableObject object = model.getObject(objectId);
+		XHalfWritableObject object = model.getObject(objectId);
 		if(object == null) {
 			object = model.createObject(objectId);
 		}
-		XWritableField field = object.getField(fieldId);
+		XHalfWritableField field = object.getField(fieldId);
 		if(field == null) {
 			field = object.createField(fieldId);
 		}
@@ -189,13 +189,13 @@ public class XidSetValueUtils {
 	 * @param fieldId
 	 * @param removedValue
 	 */
-	public static void removeFromXIDSetValueInObject(XWritableModel model, XID objectId,
+	public static void removeFromXIDSetValueInObject(XHalfWritableModel model, XID objectId,
 	        XID fieldId, XID removedValue) {
-		XWritableObject object = model.getObject(objectId);
+		XHalfWritableObject object = model.getObject(objectId);
 		if(object == null) {
 			return;
 		}
-		XWritableField field = object.getField(fieldId);
+		XHalfWritableField field = object.getField(fieldId);
 		if(field == null) {
 			return;
 		}
@@ -214,12 +214,12 @@ public class XidSetValueUtils {
 	 * @param fieldId
 	 * @return model.object.field as a Set<XID>, never null (returns emtpy set)
 	 */
-	public static Set<XID> getXIDSetValue(XWritableModel model, XID objectId, XID fieldId) {
-		XWritableObject object = model.getObject(objectId);
+	public static Set<XID> getXIDSetValue(XHalfWritableModel model, XID objectId, XID fieldId) {
+		XHalfWritableObject object = model.getObject(objectId);
 		if(object == null) {
 			return Collections.emptySet();
 		}
-		XWritableField field = object.getField(fieldId);
+		XHalfWritableField field = object.getField(fieldId);
 		if(field == null) {
 			return Collections.emptySet();
 		}
@@ -234,13 +234,13 @@ public class XidSetValueUtils {
 	 * @param valueId
 	 * @return true if model.object.field exists and contains the valueId
 	 */
-	public static boolean valueContainsId(XWritableModel model, XID objectId, XID fieldId,
+	public static boolean valueContainsId(XHalfWritableModel model, XID objectId, XID fieldId,
 	        XID valueId) {
-		XWritableObject object = model.getObject(objectId);
+		XHalfWritableObject object = model.getObject(objectId);
 		if(object == null) {
 			throw new IllegalArgumentException("Object " + objectId + " not found");
 		}
-		XWritableField field = object.getField(fieldId);
+		XHalfWritableField field = object.getField(fieldId);
 		if(field == null) {
 			return false;
 		}

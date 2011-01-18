@@ -4,10 +4,10 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.xydra.annotations.RunsInJava;
+import org.xydra.base.XID;
 import org.xydra.core.X;
 import org.xydra.core.XCompareUtils;
 import org.xydra.core.XX;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.test.DemoModelUtil;

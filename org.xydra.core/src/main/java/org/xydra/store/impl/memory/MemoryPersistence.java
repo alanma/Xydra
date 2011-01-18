@@ -6,16 +6,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
+import org.xydra.base.XWritableModel;
+import org.xydra.base.XWritableObject;
+import org.xydra.base.XType;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
-import org.xydra.core.model.XType;
 import org.xydra.store.MAXDone;
 import org.xydra.store.RequestException;
-import org.xydra.store.base.SimpleModel;
-import org.xydra.store.base.SimpleObject;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -108,7 +108,7 @@ public class MemoryPersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public SimpleModel getModelSnapshot(XAddress address) {
+	public XWritableModel getModelSnapshot(XAddress address) {
 		if(address.getAddressedType() != XType.XMODEL) {
 			throw new RequestException("must use a model address to get a model snapshot, was "
 			        + address);
@@ -118,7 +118,7 @@ public class MemoryPersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public SimpleObject getObjectSnapshot(XAddress address) {
+	public XWritableObject getObjectSnapshot(XAddress address) {
 		if(address.getAddressedType() != XType.XOBJECT) {
 			throw new RequestException("must use an object address to get an object snapshot, was "
 			        + address);

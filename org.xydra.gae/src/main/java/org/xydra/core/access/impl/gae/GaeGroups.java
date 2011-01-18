@@ -5,13 +5,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.xydra.base.XID;
 import org.xydra.core.XX;
 import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.access.XGroupEvent;
 import org.xydra.core.access.XGroupListener;
 import org.xydra.core.access.impl.memory.MemoryGroupDatabase;
 import org.xydra.core.change.ChangeType;
-import org.xydra.core.model.XID;
 import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.impl.gae.GaeUtils;
 

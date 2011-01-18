@@ -6,18 +6,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XReadableObject;
+import org.xydra.base.XID;
+import org.xydra.base.XType;
+import org.xydra.base.XHalfWritableModel;
+import org.xydra.base.XHalfWritableObject;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XAtomicCommand;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XTransaction;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XBaseObject;
-import org.xydra.core.model.XID;
-import org.xydra.core.model.XType;
-import org.xydra.core.model.XWritableModel;
-import org.xydra.core.model.XWritableObject;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.AccessException;
@@ -170,7 +170,7 @@ public class DelegateToPersistenceAndArm implements XydraBlockingStore, XydraSto
 			return modelArm.hasModelReadAccess(actorId)
 			        && modelArm.hasObjectReadAccess(actorId, address.getObject())
 			        && modelArm.hasFieldWriteAccess(actorId, address.getObject(), address
-			                .getField());
+			        		.getField());
 		}
 		throw new AssertionError("Switch-case returned already");
 	}
@@ -313,7 +313,7 @@ public class DelegateToPersistenceAndArm implements XydraBlockingStore, XydraSto
 	}
 	
 	@Override
-	public XBaseModel getModelSnapshot(XID actorId, String passwordHash, XAddress address) {
+	public XReadableModel getModelSnapshot(XID actorId, String passwordHash, XAddress address) {
 		assert actorId != null;
 		authorise(actorId, passwordHash);
 		if(address.getAddressedType() != XType.XMODEL) {
@@ -323,7 +323,7 @@ public class DelegateToPersistenceAndArm implements XydraBlockingStore, XydraSto
 		checkRepoId(address);
 		XModelArm modelArm = this.arm.getModelArm(address.getModel());
 		if(passwordHash == null || modelArm.hasModelReadAccess(actorId)) {
-			XWritableModel modelSnapshot = this.persistence.getModelSnapshot(address);
+			XHalfWritableModel modelSnapshot = this.persistence.getModelSnapshot(address);
 			// filter out objects & fields which the actor may not see
 			if(passwordHash != null) {
 				List<XID> objectIdsToBeRemoved = new LinkedList<XID>();
@@ -333,7 +333,7 @@ public class DelegateToPersistenceAndArm implements XydraBlockingStore, XydraSto
 					} else {
 						// remove fields the actorId may not see
 						List<XID> fieldIdsToBeRemoved = new LinkedList<XID>();
-						XWritableObject object = modelSnapshot.getObject(objectId);
+						XHalfWritableObject object = modelSnapshot.getObject(objectId);
 						for(XID fieldId : object) {
 							if(!modelArm.hasFieldReadAccess(actorId, objectId, fieldId)) {
 								fieldIdsToBeRemoved.add(fieldId);
@@ -357,7 +357,7 @@ public class DelegateToPersistenceAndArm implements XydraBlockingStore, XydraSto
 	}
 	
 	@Override
-	public XBaseObject getObjectSnapshot(XID actorId, String passwordHash, XAddress address) {
+	public XReadableObject getObjectSnapshot(XID actorId, String passwordHash, XAddress address) {
 		assert actorId != null;
 		authorise(actorId, passwordHash);
 		if(address.getAddressedType() != XType.XOBJECT) {
@@ -368,7 +368,7 @@ public class DelegateToPersistenceAndArm implements XydraBlockingStore, XydraSto
 		XModelArm modelArm = this.arm.getModelArm(address.getModel());
 		XID objectId = address.getObject();
 		if(passwordHash == null || modelArm.hasObjectReadAccess(actorId, objectId)) {
-			XWritableObject objectSnapshot = this.persistence.getObjectSnapshot(address);
+			XHalfWritableObject objectSnapshot = this.persistence.getObjectSnapshot(address);
 			if(passwordHash != null) {
 				/* remove fields the actorId may not read */
 				List<XID> toBeRemoved = new LinkedList<XID>();

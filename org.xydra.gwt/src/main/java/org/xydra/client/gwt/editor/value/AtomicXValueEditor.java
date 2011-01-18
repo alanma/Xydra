@@ -1,6 +1,6 @@
 package org.xydra.client.gwt.editor.value;
 
-import org.xydra.core.value.XValue;
+import org.xydra.base.value.XValue;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;

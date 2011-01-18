@@ -3,6 +3,10 @@ package org.xydra.store.impl.delegate;
 import java.util.List;
 import java.util.Set;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
+import org.xydra.base.XHalfWritableModel;
+import org.xydra.base.XHalfWritableObject;
 import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
@@ -11,13 +15,9 @@ import org.xydra.core.change.XObjectCommand;
 import org.xydra.core.change.XRepositoryCommand;
 import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.XTransactionEvent;
-import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
-import org.xydra.core.model.XWritableModel;
-import org.xydra.core.model.XWritableObject;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.MAXDone;
 import org.xydra.store.XydraStore;
@@ -123,14 +123,14 @@ public interface XydraPersistence {
 	 * @return the current snapshot of the addressed {@link XModel} or null if
 	 *         none found.
 	 */
-	XWritableModel getModelSnapshot(XAddress address);
+	XHalfWritableModel getModelSnapshot(XAddress address);
 	
 	/**
 	 * @param address of an {@link XObject}
 	 * @return the current snapshot of the {@link XObject} addressed with
 	 *         'address'.
 	 */
-	XWritableObject getObjectSnapshot(XAddress address);
+	XHalfWritableObject getObjectSnapshot(XAddress address);
 	
 	/**
 	 * @return the XID of this {@link XydraPersistence}. This helps a client to

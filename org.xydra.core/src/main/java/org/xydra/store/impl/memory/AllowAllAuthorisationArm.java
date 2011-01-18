@@ -1,7 +1,7 @@
 package org.xydra.store.impl.memory;
 
+import org.xydra.base.XID;
 import org.xydra.core.XX;
-import org.xydra.core.model.XID;
 import org.xydra.store.MAXDone;
 import org.xydra.store.impl.delegate.XAuthorisationArm;
 import org.xydra.store.impl.delegate.XModelArm;

@@ -1,15 +1,15 @@
 package org.xydra.doc;
 
+import org.xydra.base.XID;
+import org.xydra.base.value.XIntegerValue;
+import org.xydra.base.value.XStringValue;
+import org.xydra.base.value.XValueFactory;
 import org.xydra.core.X;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XIDProvider;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.value.XIntegerValue;
-import org.xydra.core.value.XStringValue;
-import org.xydra.core.value.XValueFactory;
 
 
 public class X5MinuteTutorial {

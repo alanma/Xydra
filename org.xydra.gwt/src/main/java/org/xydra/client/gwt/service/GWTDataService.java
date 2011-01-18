@@ -1,13 +1,13 @@
 package org.xydra.client.gwt.service;
 
+import org.xydra.base.XReadableField;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XReadableObject;
+import org.xydra.base.XID;
 import org.xydra.client.Callback;
 import org.xydra.client.XDataService;
 import org.xydra.core.XX;
-import org.xydra.core.model.XBaseField;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.xml.MiniElement;
@@ -175,7 +175,7 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 		
 	}
 	
-	public void setModel(XBaseModel model, Callback<Boolean> callback) {
+	public void setModel(XReadableModel model, Callback<Boolean> callback) {
 		
 		XmlOutStringBuffer xo = new XmlOutStringBuffer();
 		XmlModel.toXml(model, xo, false, false, false);
@@ -184,7 +184,7 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 		
 	}
 	
-	public void setObject(XID modelId, XBaseObject object, Callback<Boolean> callback) {
+	public void setObject(XID modelId, XReadableObject object, Callback<Boolean> callback) {
 		
 		XmlOutStringBuffer xo = new XmlOutStringBuffer();
 		XmlModel.toXml(object, xo, false, false, false);
@@ -193,7 +193,7 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 		
 	}
 	
-	public void setField(XID modelId, XID objectId, XBaseField field, Callback<Boolean> callback) {
+	public void setField(XID modelId, XID objectId, XReadableField field, Callback<Boolean> callback) {
 		
 		XmlOutStringBuffer xo = new XmlOutStringBuffer();
 		XmlModel.toXml(field, xo, false);

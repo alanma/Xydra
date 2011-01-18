@@ -3,16 +3,16 @@ package org.xydra.client.gwt.editor;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.xydra.base.XID;
+import org.xydra.base.value.XValue;
 import org.xydra.client.gwt.editor.value.XIDEditor;
 import org.xydra.client.gwt.editor.value.XValueEditor.EditListener;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XModelEvent;
 import org.xydra.core.change.XModelEventListener;
 import org.xydra.core.change.impl.memory.MemoryModelCommand;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
-import org.xydra.core.value.XValue;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 

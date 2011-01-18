@@ -2,6 +2,8 @@ package org.xydra.core.model;
 
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
+import org.xydra.base.XID;
+import org.xydra.base.XHalfWritableRepository;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XRepositoryCommand;
@@ -24,7 +26,7 @@ import org.xydra.core.model.state.XRepositoryState;
  * @author voelkel
  * 
  */
-public interface XRepository extends XWritableRepository, XSendsRepositoryEvents, XSendsModelEvent,
+public interface XRepository extends XHalfWritableRepository, XSendsRepositoryEvents, XSendsModelEvent,
         XSendsObjectEvents, XSendsFieldEvents, XSendsTransactionEvents, XExecutesCommands {
 	
 	/**

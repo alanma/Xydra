@@ -2,6 +2,9 @@ package org.xydra.server.impl.gae;
 
 import java.util.Iterator;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XID;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.access.XAccessManager;
@@ -9,10 +12,7 @@ import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.access.impl.gae.GaeAccess;
 import org.xydra.core.access.impl.gae.GaeGroups;
 import org.xydra.core.change.XCommand;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XChangeLog;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.state.XSPI;
@@ -83,7 +83,7 @@ public class GaeXydraServer implements IXydraServer {
 		return model.getChangeLog();
 	}
 	
-	public XBaseModel getModelSnapshot(XID modelId) {
+	public XReadableModel getModelSnapshot(XID modelId) {
 		return this.repo.getModel(modelId);
 	}
 	

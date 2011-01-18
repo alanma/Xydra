@@ -6,6 +6,14 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableField;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XReadableObject;
+import org.xydra.base.XID;
+import org.xydra.base.XHalfWritableField;
+import org.xydra.base.XHalfWritableModel;
+import org.xydra.base.XHalfWritableObject;
 import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XAtomicCommand;
@@ -14,35 +22,27 @@ import org.xydra.core.change.XFieldCommand;
 import org.xydra.core.change.XModelCommand;
 import org.xydra.core.change.XObjectCommand;
 import org.xydra.core.change.XTransaction;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseField;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XBaseObject;
-import org.xydra.core.model.XID;
-import org.xydra.core.model.XWritableField;
-import org.xydra.core.model.XWritableModel;
-import org.xydra.core.model.XWritableObject;
 import org.xydra.index.iterator.AbstractFilteringIterator;
 import org.xydra.index.iterator.BagUnionIterator;
 import org.xydra.store.base.SimpleObject;
 
 
 /**
- * An {@link XBaseField}/{@link DeltaField} that represents changes to an
- * {@link XBaseField}.
+ * An {@link XReadableField}/{@link DeltaField} that represents changes to an
+ * {@link XReadableField}.
  * 
- * An {@link XBaseField} is passed as an argument of the constructor. This
- * ChangedField will than basically represent the given {@link XBaseField} and
- * allow changes on its set of {@link XBaseObject XBaseObjects}. The changes do
- * not happen directly on the passed {@link XBaseField} but rather on a sort of
- * copy that emulates the passed {@link XBaseModel}. A ChangedModel provides
+ * An {@link XReadableField} is passed as an argument of the constructor. This
+ * ChangedField will than basically represent the given {@link XReadableField} and
+ * allow changes on its set of {@link XReadableObject XBaseObjects}. The changes do
+ * not happen directly on the passed {@link XReadableField} but rather on a sort of
+ * copy that emulates the passed {@link XReadableModel}. A ChangedModel provides
  * methods to compare the current state to the state the passed
- * {@link XBaseModel} was in at creation time.
+ * {@link XReadableModel} was in at creation time.
  * 
  * @author dscharrer
  * 
  */
-public class ChangedModel implements XWritableModel {
+public class ChangedModel implements XHalfWritableModel {
 	
 	// Fields that are in base but have been removed.
 	// Contains no XIDs that are in added or changed.
@@ -57,23 +57,23 @@ public class ChangedModel implements XWritableModel {
 	// Contains no XIDs that are in added or removed.
 	private final Map<XID,ChangedObject> changed = new HashMap<XID,ChangedObject>();
 	
-	private final XBaseModel base;
+	private final XReadableModel base;
 	
 	/**
-	 * Wrap an {@link XBaseModel} to record a set of changes made. Multiple
+	 * Wrap an {@link XReadableModel} to record a set of changes made. Multiple
 	 * changes will be combined as much as possible such that a minimal set of
 	 * changes remains.
 	 * 
 	 * Note that this is a very lightweight wrapper intended for a short
-	 * lifetime. As a consequence, the wrapped {@link XBaseModel} is not copied
+	 * lifetime. As a consequence, the wrapped {@link XReadableModel} is not copied
 	 * and changes to it or any contained objects and fields (as opposed to this
 	 * {@link ChangedModel}) may result in undefined behavior of the
 	 * {@link ChangedModel}.
 	 * 
-	 * @param base The {@link XBaseModel} this ChangedModel will encapsulate and
+	 * @param base The {@link XReadableModel} this ChangedModel will encapsulate and
 	 *            represent
 	 */
-	public ChangedModel(XBaseModel base) {
+	public ChangedModel(XReadableModel base) {
 		this.base = base;
 	}
 	
@@ -99,14 +99,14 @@ public class ChangedModel implements XWritableModel {
 		return true;
 	}
 	
-	public XWritableObject createObject(XID objectId) {
+	public XHalfWritableObject createObject(XID objectId) {
 		
-		XWritableObject oldObject = getObject(objectId);
+		XHalfWritableObject oldObject = getObject(objectId);
 		if(oldObject != null) {
 			return oldObject;
 		}
 		
-		XBaseObject object = this.base.getObject(objectId);
+		XReadableObject object = this.base.getObject(objectId);
 		if(object != null) {
 			
 			// If the field previously existed it must have been removed
@@ -147,7 +147,7 @@ public class ChangedModel implements XWritableModel {
 	/**
 	 * @return the {@link NewObject NewObjects} that have been added to this
 	 *         ChangedModel and were not contained in the original
-	 *         {@link XBaseModel}
+	 *         {@link XReadableModel}
 	 */
 	public Iterable<SimpleObject> getNewObjects() {
 		return this.added.values();
@@ -155,7 +155,7 @@ public class ChangedModel implements XWritableModel {
 	
 	/**
 	 * @return an iterable of the objects that already existed in the original
-	 *         {@link XBaseModel} but have been changed. Note: their current
+	 *         {@link XReadableModel} but have been changed. Note: their current
 	 *         state might be the same as the original one
 	 */
 	public Iterable<ChangedObject> getChangedObjects() {
@@ -166,7 +166,7 @@ public class ChangedModel implements XWritableModel {
 	 * Get the number of {@link XCommand XCommands} needed to create this
 	 * object.
 	 */
-	private static int countChanges(XBaseObject object, int max) {
+	private static int countChanges(XReadableObject object, int max) {
 		int n = 1; // one to create the object
 		if(n < max) {
 			for(XID fieldId : object) {
@@ -181,7 +181,7 @@ public class ChangedModel implements XWritableModel {
 	
 	/**
 	 * Count the minimal number of {@link XCommand XCommands} that would be
-	 * needed to transform the original {@link XBaseModel} to the current state
+	 * needed to transform the original {@link XReadableModel} to the current state
 	 * which is represented by this ChangedModel.
 	 * 
 	 * This is different to {@link #countEventsNeeded} in that a removed object
@@ -198,7 +198,7 @@ public class ChangedModel implements XWritableModel {
 	public int countCommandsNeeded(int max) {
 		int n = this.removed.size() + this.added.size();
 		if(n < max) {
-			for(XBaseObject object : this.added.values()) {
+			for(XReadableObject object : this.added.values()) {
 				n += countChanges(object, max - n + 1) - 1;
 				if(n >= max) {
 					return n;
@@ -216,7 +216,7 @@ public class ChangedModel implements XWritableModel {
 	
 	/**
 	 * Count the number of {@link XEvents XEvents} that would be needed to log
-	 * the transformation of the original {@link XBaseModel} to the current
+	 * the transformation of the original {@link XReadableModel} to the current
 	 * state which is represented by this ChangedModel.
 	 * 
 	 * This is different to {@link #countCommandsNeeded} in that a removed
@@ -235,13 +235,13 @@ public class ChangedModel implements XWritableModel {
 		if(n < max) {
 			for(XID objectId : this.removed) {
 				// removing object itself already counted
-				XBaseObject oldObject = getOldObject(objectId);
+				XReadableObject oldObject = getOldObject(objectId);
 				for(XID fieldId : this.removed) {
 					n++; // removing the field
 					if(n >= max) {
 						return n;
 					}
-					XBaseField oldField = oldObject.getField(fieldId);
+					XReadableField oldField = oldObject.getField(fieldId);
 					if(!oldField.isEmpty()) {
 						n++; // removing the value
 						if(n >= max) {
@@ -250,7 +250,7 @@ public class ChangedModel implements XWritableModel {
 					}
 				}
 			}
-			for(XBaseObject object : this.added.values()) {
+			for(XReadableObject object : this.added.values()) {
 				n += countChanges(object, max - n + 1) - 1;
 				if(n >= max) {
 					break;
@@ -268,9 +268,9 @@ public class ChangedModel implements XWritableModel {
 		return n;
 	}
 	
-	public XWritableObject getObject(XID objectId) {
+	public XHalfWritableObject getObject(XID objectId) {
 		
-		XWritableObject newObject = this.added.get(objectId);
+		XHalfWritableObject newObject = this.added.get(objectId);
 		if(newObject != null) {
 			return newObject;
 		}
@@ -284,7 +284,7 @@ public class ChangedModel implements XWritableModel {
 			return null;
 		}
 		
-		XBaseObject object = this.base.getObject(objectId);
+		XReadableObject object = this.base.getObject(objectId);
 		if(object == null) {
 			return null;
 		}
@@ -328,11 +328,11 @@ public class ChangedModel implements XWritableModel {
 	}
 	
 	/**
-	 * Return the revision number of the wrapped {@link XBaseModel}. The
+	 * Return the revision number of the wrapped {@link XReadableModel}. The
 	 * revision number does not increase with changes to this
 	 * {@link ChangedModel}.
 	 * 
-	 * @return the revision number of the original {@link XBaseModel}
+	 * @return the revision number of the original {@link XReadableModel}
 	 */
 	public long getRevisionNumber() {
 		return this.base.getRevisionNumber();
@@ -364,10 +364,10 @@ public class ChangedModel implements XWritableModel {
 	}
 	
 	/**
-	 * @return the {@link XBaseObject} with the given {@link XID} as it exists
-	 *         in the original {@link XBaseModel}.
+	 * @return the {@link XReadableObject} with the given {@link XID} as it exists
+	 *         in the original {@link XReadableModel}.
 	 */
-	public XBaseObject getOldObject(XID objectId) {
+	public XReadableObject getOldObject(XID objectId) {
 		return this.base.getObject(objectId);
 	}
 	
@@ -420,7 +420,7 @@ public class ChangedModel implements XWritableModel {
 			return true;
 			
 		case REMOVE:
-			XBaseObject object = getObject(objectId);
+			XReadableObject object = getObject(objectId);
 			
 			if(object == null) {
 				// command is invalid or doesn't change anything
@@ -452,7 +452,7 @@ public class ChangedModel implements XWritableModel {
 	 */
 	public boolean executeCommand(XObjectCommand command) {
 		
-		XWritableObject object = getObject(command.getObjectID());
+		XHalfWritableObject object = getObject(command.getObjectID());
 		if(object == null) {
 			// command is invalid
 			return false;
@@ -472,7 +472,7 @@ public class ChangedModel implements XWritableModel {
 			return true;
 			
 		case REMOVE:
-			XBaseField field = object.getField(fieldId);
+			XReadableField field = object.getField(fieldId);
 			
 			if(field == null) {
 				// command is invalid or doesn't change anything
@@ -504,13 +504,13 @@ public class ChangedModel implements XWritableModel {
 	 */
 	public boolean executeCommand(XFieldCommand command) {
 		
-		XWritableObject object = getObject(command.getObjectID());
+		XHalfWritableObject object = getObject(command.getObjectID());
 		if(object == null) {
 			// command is invalid
 			return false;
 		}
 		
-		XWritableField field = object.getField(command.getFieldID());
+		XHalfWritableField field = object.getField(command.getFieldID());
 		if(field == null) {
 			// command is invalid
 			return false;

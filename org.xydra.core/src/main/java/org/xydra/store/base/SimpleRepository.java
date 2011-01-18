@@ -4,15 +4,16 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
+import org.xydra.base.XWritableRepository;
+import org.xydra.base.XType;
+import org.xydra.base.XHalfWritableRepository;
 import org.xydra.core.XX;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
-import org.xydra.core.model.XType;
-import org.xydra.core.model.XWritableRepository;
 
 
 /**
- * A simple data container for {@link XWritableRepository}.
+ * A simple data container for {@link XHalfWritableRepository}.
  * 
  * Minimal memory footprint, can be used as data transfer object.
  * 

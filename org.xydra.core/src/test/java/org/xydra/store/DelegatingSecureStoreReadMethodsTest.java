@@ -2,10 +2,10 @@ package org.xydra.store;
 
 import static org.junit.Assert.assertTrue;
 
+import org.xydra.base.XID;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommandFactory;
-import org.xydra.core.model.XID;
 import org.xydra.store.access.XAccountDatabase;
 import org.xydra.store.base.HashUtils;
 import org.xydra.store.impl.delegate.AuthorisationArm;

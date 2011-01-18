@@ -1,6 +1,6 @@
 package org.xydra.schema.model;
 
-import org.xydra.core.model.XID;
+import org.xydra.base.XID;
 
 
 public class SID extends SValue {

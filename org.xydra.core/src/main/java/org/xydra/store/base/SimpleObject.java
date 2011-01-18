@@ -5,22 +5,24 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
+import org.xydra.base.XWritableField;
+import org.xydra.base.XWritableObject;
+import org.xydra.base.XType;
+import org.xydra.base.XHalfWritableObject;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
-import org.xydra.core.model.XType;
-import org.xydra.core.model.XWritableObject;
 
 
 /**
- * A simple data container for {@link XWritableObject}.
+ * A simple data container for {@link XHalfWritableObject}.
  * 
  * Minimal memory footprint, can be used as data transfer object.
  * 
  * @author voelkel
  */
-public class SimpleObject implements XWritableObject, Serializable {
+public class SimpleObject implements Serializable, XWritableObject {
 	
 	private static final long serialVersionUID = 5593443685935758227L;
 	
@@ -28,6 +30,7 @@ public class SimpleObject implements XWritableObject, Serializable {
 	private long revisionNumber;
 	private final Map<XID,SimpleField> fields;
 	
+	@Override
 	public void addField(SimpleField field) {
 		this.fields.put(field.getID(), field);
 	}
@@ -71,12 +74,12 @@ public class SimpleObject implements XWritableObject, Serializable {
 	
 	@Override
 	public boolean removeField(XID fieldId) {
-		SimpleField oldField = this.fields.remove(fieldId);
+		XWritableField oldField = this.fields.remove(fieldId);
 		return oldField != null;
 	}
 	
 	@Override
-	public SimpleField getField(XID fieldId) {
+	public XWritableField getField(XID fieldId) {
 		return this.fields.get(fieldId);
 	}
 	
@@ -95,9 +98,7 @@ public class SimpleObject implements XWritableObject, Serializable {
 		return this.fields.keySet().iterator();
 	}
 	
-	/**
-	 * @param rev the new revision number
-	 */
+	@Override
 	public void setRevisionNumber(long rev) {
 		this.revisionNumber = rev;
 	}

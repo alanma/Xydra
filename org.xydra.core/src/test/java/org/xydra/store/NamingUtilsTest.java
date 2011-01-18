@@ -3,8 +3,8 @@ package org.xydra.store;
 import static junit.framework.Assert.assertEquals;
 
 import org.junit.Test;
+import org.xydra.base.XID;
 import org.xydra.core.XX;
-import org.xydra.core.model.XID;
 
 
 public class NamingUtilsTest {

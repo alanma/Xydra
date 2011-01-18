@@ -2,6 +2,10 @@ package org.xydra.store.impl.gae.snapshot;
 
 import java.util.Iterator;
 
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XWritableField;
+import org.xydra.base.XWritableObject;
+import org.xydra.base.XHalfWritableModel;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XEvent;
@@ -10,9 +14,7 @@ import org.xydra.core.change.XModelEvent;
 import org.xydra.core.change.XObjectEvent;
 import org.xydra.core.change.XRepositoryEvent;
 import org.xydra.core.change.XTransactionEvent;
-import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XChangeLog;
-import org.xydra.core.model.XWritableModel;
 import org.xydra.store.base.SimpleField;
 import org.xydra.store.base.SimpleModel;
 import org.xydra.store.base.SimpleObject;
@@ -37,10 +39,10 @@ public class GaeSnapshotService {
 	}
 	
 	/**
-	 * @return an {@link XBaseModel} by applying all events in the
+	 * @return an {@link XReadableModel} by applying all events in the
 	 *         {@link XChangeLog}
 	 */
-	public XWritableModel getSnapshot() {
+	public XHalfWritableModel getSnapshot() {
 		
 		// IMPROVE save & cache snapshots
 		
@@ -102,7 +104,7 @@ public class GaeSnapshotService {
 		}
 		
 		// object and field events
-		SimpleObject object = model.getObject(event.getTarget().getObject());
+		XWritableObject object = model.getObject(event.getTarget().getObject());
 		assert object != null;
 		object.setRevisionNumber(rev);
 		
@@ -121,7 +123,7 @@ public class GaeSnapshotService {
 		}
 		
 		// field events
-		SimpleField field = object.getField(event.getTarget().getField());
+		XWritableField field = object.getField(event.getTarget().getField());
 		assert field != null;
 		field.setRevisionNumber(rev);
 		

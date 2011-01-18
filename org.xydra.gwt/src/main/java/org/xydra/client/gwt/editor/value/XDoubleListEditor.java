@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.xydra.core.value.XDoubleListValue;
-import org.xydra.core.value.XDoubleValue;
+import org.xydra.base.value.XDoubleListValue;
+import org.xydra.base.value.XDoubleValue;
 import org.xydra.core.value.XV;
 
 

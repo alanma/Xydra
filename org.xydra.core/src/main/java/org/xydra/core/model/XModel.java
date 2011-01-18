@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
+import org.xydra.base.XID;
+import org.xydra.base.XHalfWritableModel;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XModelCommand;
 import org.xydra.core.change.XModelEvent;
@@ -29,7 +31,7 @@ import org.xydra.core.model.state.XModelState;
  * @author Kaidel
  * 
  */
-public interface XModel extends XLoggedModel, XWritableModel, Serializable, XSynchronizesChanges {
+public interface XModel extends XLoggedModel, XHalfWritableModel, Serializable, XSynchronizesChanges {
 	
 	/**
 	 * Returns the {@link XObject} contained in this model with the given

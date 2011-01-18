@@ -1,6 +1,6 @@
 package org.xydra.client.gwt.editor.value;
 
-import org.xydra.core.value.XIntegerValue;
+import org.xydra.base.value.XIntegerValue;
 import org.xydra.core.value.XV;
 
 import com.google.gwt.event.dom.client.KeyCodes;

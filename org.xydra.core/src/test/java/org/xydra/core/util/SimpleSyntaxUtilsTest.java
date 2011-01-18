@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.xydra.base.XID;
 import org.xydra.core.XX;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.test.TestLogger;
 import org.xydra.core.xml.XmlModel;

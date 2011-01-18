@@ -3,6 +3,7 @@ package org.xydra.client;
 import junit.framework.TestCase;
 
 import org.junit.Test;
+import org.xydra.base.XID;
 import org.xydra.client.impl.direct.DirectChangesService;
 import org.xydra.client.impl.direct.DirectDataService;
 import org.xydra.client.sync.XSynchronizer;
@@ -15,7 +16,6 @@ import org.xydra.core.access.impl.memory.MemoryGroupDatabase;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.change.impl.memory.MemoryModelCommand;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;

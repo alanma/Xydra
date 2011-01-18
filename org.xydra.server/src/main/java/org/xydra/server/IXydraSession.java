@@ -1,10 +1,10 @@
 package org.xydra.server;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XID;
 import org.xydra.core.change.XCommand;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XChangeLog;
-import org.xydra.core.model.XID;
 
 
 /**
@@ -21,7 +21,7 @@ public interface IXydraSession {
 	 * @return a read-only interface to the snapshot for the model this time.
 	 *         Returns null if no such model exists.
 	 */
-	XBaseModel getModelSnapshot(XID modelId);
+	XReadableModel getModelSnapshot(XID modelId);
 	
 	/**
 	 * @return an interface to read the change log entries for the given model.

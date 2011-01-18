@@ -2,7 +2,7 @@ package org.xydra.store.access;
 
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
-import org.xydra.core.model.XID;
+import org.xydra.base.XID;
 import org.xydra.store.MAXTodo;
 
 

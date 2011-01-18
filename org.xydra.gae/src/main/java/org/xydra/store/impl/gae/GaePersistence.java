@@ -5,15 +5,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XID;
+import org.xydra.base.XType;
+import org.xydra.base.XHalfWritableModel;
+import org.xydra.base.XHalfWritableObject;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XID;
-import org.xydra.core.model.XType;
-import org.xydra.core.model.XWritableModel;
-import org.xydra.core.model.XWritableObject;
 import org.xydra.server.impl.InfrastructureServiceFactory;
 import org.xydra.store.RequestException;
 import org.xydra.store.XydraStore;
@@ -60,7 +60,7 @@ public class GaePersistence implements XydraPersistence {
 		return new GaeSnapshotService(getChangesService(modelId));
 	}
 	
-	public XBaseModel getModelSnapshot(XID modelId) {
+	public XReadableModel getModelSnapshot(XID modelId) {
 		
 		GaeSnapshotService s = getSnapshotService(modelId);
 		
@@ -112,7 +112,7 @@ public class GaePersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public XWritableModel getModelSnapshot(XAddress address) {
+	public XHalfWritableModel getModelSnapshot(XAddress address) {
 		checkAddres(address);
 		if(address.getAddressedType() != XType.XMODEL) {
 			throw new RequestException("address must refer to a model, was " + address);
@@ -121,7 +121,7 @@ public class GaePersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public XWritableObject getObjectSnapshot(XAddress address) {
+	public XHalfWritableObject getObjectSnapshot(XAddress address) {
 		checkAddres(address);
 		if(address.getAddressedType() != XType.XOBJECT) {
 			throw new RequestException("address must refer to an object, was " + address);

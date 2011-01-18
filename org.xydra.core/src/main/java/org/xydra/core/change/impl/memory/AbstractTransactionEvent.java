@@ -5,13 +5,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.change.XTransactionEvent;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.index.XI;
 

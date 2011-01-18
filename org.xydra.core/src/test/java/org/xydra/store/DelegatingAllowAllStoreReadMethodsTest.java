@@ -1,9 +1,9 @@
 package org.xydra.store;
 
+import org.xydra.base.XID;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommandFactory;
-import org.xydra.core.model.XID;
 import org.xydra.store.impl.memory.MemoryPersistence;
 import org.xydra.store.test.AbstractAllowAllStoreReadMethodsTest;
 

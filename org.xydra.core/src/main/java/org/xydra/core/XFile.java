@@ -8,8 +8,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
-import org.xydra.core.model.XBaseRepository;
-import org.xydra.core.model.XID;
+import org.xydra.base.XReadableRepository;
+import org.xydra.base.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.xml.MiniElement;
@@ -34,7 +34,7 @@ public class XFile {
 	public static final String EVENTS_SUFFIX = ".xevents" + XML_SUFFIX;
 	
 	/**
-	 * Saves the given {@link XBaseRepository} in the directory of the program
+	 * Saves the given {@link XReadableRepository} in the directory of the program
 	 * as filename{@value #REPOSITORY_SUFFIX}.
 	 * 
 	 * @param repository The repository which will be saved
@@ -42,7 +42,7 @@ public class XFile {
 	 *            saved
 	 * @throws IOException
 	 */
-	public static void saveRepository(XBaseRepository repository, String filename)
+	public static void saveRepository(XReadableRepository repository, String filename)
 	        throws IOException {
 		saveRepository(repository, null, filename);
 	}
@@ -55,7 +55,7 @@ public class XFile {
 	 * @param name The name of the file in which the repository will be saved
 	 * @throws IOException
 	 */
-	public static void saveRepository(XBaseRepository repository, String path, String name)
+	public static void saveRepository(XReadableRepository repository, String path, String name)
 	        throws IOException {
 		saveRepository(repository, getFileForRepository(path, name));
 	}
@@ -77,7 +77,7 @@ public class XFile {
 	 * @param file The file in which the repository will be saved
 	 * @throws IOException
 	 */
-	public static void saveRepository(XBaseRepository repository, File file) throws IOException {
+	public static void saveRepository(XReadableRepository repository, File file) throws IOException {
 		
 		FileOutputStream fos = new FileOutputStream(file);
 		

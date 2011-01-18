@@ -2,8 +2,8 @@ package org.xydra.core.model.state.impl.memory;
 
 import java.io.Serializable;
 
-import org.xydra.core.model.IHasXAddress;
-import org.xydra.core.model.XAddress;
+import org.xydra.base.IHasXAddress;
+import org.xydra.base.XAddress;
 import org.xydra.core.model.state.XStateTransaction;
 
 

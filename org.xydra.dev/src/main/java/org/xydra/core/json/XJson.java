@@ -3,29 +3,29 @@ package org.xydra.core.json;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.xydra.base.XReadableField;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XReadableObject;
+import org.xydra.base.XID;
+import org.xydra.base.value.XBooleanListValue;
+import org.xydra.base.value.XBooleanValue;
+import org.xydra.base.value.XDoubleListValue;
+import org.xydra.base.value.XDoubleValue;
+import org.xydra.base.value.XIDListValue;
+import org.xydra.base.value.XIntegerListValue;
+import org.xydra.base.value.XIntegerValue;
+import org.xydra.base.value.XListValue;
+import org.xydra.base.value.XLongListValue;
+import org.xydra.base.value.XLongValue;
+import org.xydra.base.value.XStringListValue;
+import org.xydra.base.value.XStringValue;
+import org.xydra.base.value.XValue;
 import org.xydra.core.X;
-import org.xydra.core.model.XBaseField;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.value.TypeSystem;
-import org.xydra.core.value.XBooleanListValue;
-import org.xydra.core.value.XBooleanValue;
-import org.xydra.core.value.XDoubleListValue;
-import org.xydra.core.value.XDoubleValue;
-import org.xydra.core.value.XIDListValue;
-import org.xydra.core.value.XIntegerListValue;
-import org.xydra.core.value.XIntegerValue;
-import org.xydra.core.value.XListValue;
-import org.xydra.core.value.XLongListValue;
-import org.xydra.core.value.XLongValue;
-import org.xydra.core.value.XStringListValue;
-import org.xydra.core.value.XStringValue;
-import org.xydra.core.value.XValue;
 import org.xydra.json.BroadcastSAJ;
 import org.xydra.json.DumpSAJ;
 import org.xydra.json.JSONException;
@@ -37,14 +37,14 @@ import org.xydra.minio.MiniStringWriter;
 
 public class XJson {
 	
-	public static String asJsonString(XBaseField xfield) {
+	public static String asJsonString(XReadableField xfield) {
 		MiniStringWriter mw = new MiniStringWriter();
 		JSONWriter jw = new JSONWriter(mw);
 		asJsonString(xfield, jw);
 		return mw.toString();
 	}
 	
-	private static void asJsonString(XBaseField xfield, JSONWriter jsonWriter) {
+	private static void asJsonString(XReadableField xfield, JSONWriter jsonWriter) {
 		try {
 			jsonWriter.objectStart();
 			jsonWriter.key(xfield.getID().toString());
@@ -55,20 +55,20 @@ public class XJson {
 		}
 	}
 	
-	public static String asJsonString(XBaseModel xmodel) {
+	public static String asJsonString(XReadableModel xmodel) {
 		MiniStringWriter mw = new MiniStringWriter();
 		JSONWriter jsonWriter = new JSONWriter(mw);
 		asJsonString(xmodel, jsonWriter);
 		return mw.toString();
 	}
 	
-	private static void asJsonString(XBaseModel xmodel, JSONWriter jsonWriter) {
+	private static void asJsonString(XReadableModel xmodel, JSONWriter jsonWriter) {
 		try {
 			jsonWriter.objectStart();
 			jsonWriter.key(xmodel.getID().toString());
 			jsonWriter.arrayStart();
 			for(XID objectID : xmodel) {
-				XBaseObject xo = xmodel.getObject(objectID);
+				XReadableObject xo = xmodel.getObject(objectID);
 				asJsonString(xo, jsonWriter);
 			}
 			jsonWriter.arrayEnd();
@@ -78,20 +78,20 @@ public class XJson {
 		}
 	}
 	
-	public static String asJsonString(XBaseObject xobject) {
+	public static String asJsonString(XReadableObject xobject) {
 		MiniStringWriter mw = new MiniStringWriter();
 		JSONWriter jw = new JSONWriter(mw);
 		asJsonString(xobject, jw);
 		return mw.toString();
 	}
 	
-	private static void asJsonString(XBaseObject xobject, JSONWriter jsonWriter) {
+	private static void asJsonString(XReadableObject xobject, JSONWriter jsonWriter) {
 		try {
 			jsonWriter.objectStart();
 			jsonWriter.key(xobject.getID().toString());
 			jsonWriter.arrayStart();
 			for(XID fieldID : xobject) {
-				XBaseField xf = xobject.getField(fieldID);
+				XReadableField xf = xobject.getField(fieldID);
 				asJsonString(xf, jsonWriter);
 			}
 			jsonWriter.arrayEnd();

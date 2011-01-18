@@ -1,6 +1,6 @@
 package org.xydra.store.impl.memory;
 
-import org.xydra.core.model.XID;
+import org.xydra.base.XID;
 import org.xydra.store.MAXDone;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.delegate.DelegatingStore;

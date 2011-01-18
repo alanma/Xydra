@@ -5,15 +5,15 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.xydra.base.XReadableField;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XReadableObject;
+import org.xydra.base.XReadableRepository;
+import org.xydra.base.XID;
 import org.xydra.core.XCompareUtils;
 import org.xydra.core.XX;
-import org.xydra.core.model.XBaseField;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XBaseObject;
-import org.xydra.core.model.XBaseRepository;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
@@ -31,8 +31,8 @@ import org.xydra.log.LoggerFactory;
 
 
 /**
- * Test serializing {@link XBaseRepository}, {@link XBaseModel},
- * {@link XBaseObject} and {@link XBaseField} types to/from XML.
+ * Test serializing {@link XReadableRepository}, {@link XReadableModel},
+ * {@link XReadableObject} and {@link XReadableField} types to/from XML.
  * 
  * @author dscharrer
  * 
@@ -48,7 +48,7 @@ public class XmlModelTest {
 	
 	private XID actorId = XX.toId("a-test-user");
 	
-	private void testRepository(XBaseRepository repo) {
+	private void testRepository(XReadableRepository repo) {
 		
 		// test serializing with revisions
 		XmlOutStringBuffer out = new XmlOutStringBuffer();
@@ -73,7 +73,7 @@ public class XmlModelTest {
 		
 	}
 	
-	private void testModel(XBaseModel model) {
+	private void testModel(XReadableModel model) {
 		
 		// test serializing with revisions
 		XmlOutStringBuffer out = new XmlOutStringBuffer();
@@ -102,7 +102,7 @@ public class XmlModelTest {
 		
 	}
 	
-	private void testObject(XBaseObject object) {
+	private void testObject(XReadableObject object) {
 		
 		// test serializing with revisions
 		XmlOutStringBuffer out = new XmlOutStringBuffer();
@@ -131,7 +131,7 @@ public class XmlModelTest {
 		
 	}
 	
-	private void testField(XBaseField field) {
+	private void testField(XReadableField field) {
 		
 		// test serializing with revisions
 		XmlOutStringBuffer out = new XmlOutStringBuffer();
@@ -156,27 +156,27 @@ public class XmlModelTest {
 		
 	}
 	
-	void checkNoRevisions(XBaseRepository repo) {
+	void checkNoRevisions(XReadableRepository repo) {
 		for(XID modelId : repo) {
 			checkNoRevisions(repo.getModel(modelId));
 		}
 	}
 	
-	void checkNoRevisions(XBaseModel model) {
+	void checkNoRevisions(XReadableModel model) {
 		assertEquals(XmlModel.NO_REVISION, model.getRevisionNumber());
 		for(XID objectId : model) {
 			checkNoRevisions(model.getObject(objectId));
 		}
 	}
 	
-	void checkNoRevisions(XBaseObject object) {
+	void checkNoRevisions(XReadableObject object) {
 		assertEquals(XmlModel.NO_REVISION, object.getRevisionNumber());
 		for(XID fieldId : object) {
 			checkNoRevisions(object.getField(fieldId));
 		}
 	}
 	
-	void checkNoRevisions(XBaseField field) {
+	void checkNoRevisions(XReadableField field) {
 		assertEquals(XmlModel.NO_REVISION, field.getRevisionNumber());
 	}
 	

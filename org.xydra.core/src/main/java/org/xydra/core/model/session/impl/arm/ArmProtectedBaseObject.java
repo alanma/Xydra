@@ -2,28 +2,28 @@ package org.xydra.core.model.session.impl.arm;
 
 import java.util.Iterator;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableField;
+import org.xydra.base.XReadableObject;
+import org.xydra.base.XID;
 import org.xydra.core.access.XAccessManager;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseField;
-import org.xydra.core.model.XBaseObject;
-import org.xydra.core.model.XID;
 import org.xydra.store.AccessException;
 
 
 /**
- * An {@link XBaseObject} that wraps an {@link XBaseObject} for a specific actor
+ * An {@link XReadableObject} that wraps an {@link XReadableObject} for a specific actor
  * and checks all access against an {@link XAccessManager}.
  * 
  * @author dscharrer
  * 
  */
-public class ArmProtectedBaseObject implements XBaseObject {
+public class ArmProtectedBaseObject implements XReadableObject {
 	
-	private final XBaseObject object;
+	private final XReadableObject object;
 	protected final XAccessManager arm;
 	protected final XID actor;
 	
-	public ArmProtectedBaseObject(XBaseObject object, XAccessManager arm, XID actor) {
+	public ArmProtectedBaseObject(XReadableObject object, XAccessManager arm, XID actor) {
 		this.object = object;
 		this.arm = arm;
 		this.actor = actor;
@@ -39,11 +39,11 @@ public class ArmProtectedBaseObject implements XBaseObject {
 		}
 	}
 	
-	public XBaseField getField(XID fieldId) {
+	public XReadableField getField(XID fieldId) {
 		
 		checkCanKnowAboutField(fieldId);
 		
-		XBaseField field = this.object.getField(fieldId);
+		XReadableField field = this.object.getField(fieldId);
 		
 		if(field == null) {
 			return null;

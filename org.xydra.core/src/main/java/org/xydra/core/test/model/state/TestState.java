@@ -5,10 +5,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
+import org.xydra.base.value.XValue;
 import org.xydra.core.model.state.XStateTransaction;
-import org.xydra.core.value.XValue;
 import org.xydra.index.XI;
 
 

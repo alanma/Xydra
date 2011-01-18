@@ -2,10 +2,10 @@ package org.xydra.client;
 
 import java.util.List;
 
+import org.xydra.base.XAddress;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XRepositoryCommand;
-import org.xydra.core.model.XAddress;
 import org.xydra.store.AccessException;
 
 

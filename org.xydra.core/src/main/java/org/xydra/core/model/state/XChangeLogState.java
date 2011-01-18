@@ -2,8 +2,8 @@ package org.xydra.core.model.state;
 
 import java.io.Serializable;
 
+import org.xydra.base.XAddress;
 import org.xydra.core.change.XEvent;
-import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XModel;
 

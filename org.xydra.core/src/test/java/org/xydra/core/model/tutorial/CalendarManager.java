@@ -1,5 +1,8 @@
 package org.xydra.core.model.tutorial;
 
+import org.xydra.base.XID;
+import org.xydra.base.value.XIntegerValue;
+import org.xydra.base.value.XStringValue;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.access.XAccessManager;
@@ -10,13 +13,10 @@ import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XCommandFactory;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryModel;
-import org.xydra.core.value.XIntegerValue;
-import org.xydra.core.value.XStringValue;
 import org.xydra.core.value.XV;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;

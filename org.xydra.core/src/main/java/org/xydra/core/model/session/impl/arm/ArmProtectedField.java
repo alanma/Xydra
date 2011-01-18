@@ -1,12 +1,12 @@
 package org.xydra.core.model.session.impl.arm;
 
+import org.xydra.base.XID;
+import org.xydra.base.value.XValue;
 import org.xydra.core.access.XAccessManager;
 import org.xydra.core.change.XFieldCommand;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.session.XProtectedField;
-import org.xydra.core.value.XValue;
 import org.xydra.store.AccessException;
 
 

@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.xydra.annotations.ReadOperation;
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
 import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XCommand;
@@ -24,8 +26,6 @@ import org.xydra.core.change.XTransactionEvent;
 import org.xydra.core.change.XTransactionEventListener;
 import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.core.change.impl.memory.MemoryRepositoryEvent;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;

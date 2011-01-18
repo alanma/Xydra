@@ -2,30 +2,30 @@ package org.xydra.core.model.delta;
 
 import java.util.Iterator;
 
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseField;
-import org.xydra.core.model.XBaseObject;
-import org.xydra.core.model.XID;
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableField;
+import org.xydra.base.XReadableObject;
+import org.xydra.base.XID;
 import org.xydra.index.iterator.SingleValueIterator;
 
 
 /**
- * A fake {@link XBaseObject} that holds exactly one {@link XBaseField}.
+ * A fake {@link XReadableObject} that holds exactly one {@link XReadableField}.
  * 
  * @author dscharrer
  * 
  */
-public class BaseObjectWithOneField implements XBaseObject {
+public class BaseObjectWithOneField implements XReadableObject {
 	
-	private final XBaseField field;
+	private final XReadableField field;
 	private final XAddress address;
 	
-	public BaseObjectWithOneField(XAddress addr, XBaseField field) {
+	public BaseObjectWithOneField(XAddress addr, XReadableField field) {
 		this.address = addr;
 		this.field = field;
 	}
 	
-	public XBaseField getField(XID fieldId) {
+	public XReadableField getField(XID fieldId) {
 		if(!this.field.getID().equals(fieldId)) {
 			return null;
 		}

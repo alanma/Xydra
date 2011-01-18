@@ -1,15 +1,15 @@
 package org.xydra.core.model.session;
 
 import org.xydra.annotations.ModificationOperation;
+import org.xydra.base.XID;
+import org.xydra.base.XHalfWritableField;
+import org.xydra.base.value.XValue;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XFieldCommand;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XLoggedField;
-import org.xydra.core.model.XWritableField;
-import org.xydra.core.value.XValue;
 import org.xydra.store.AccessException;
 
 
@@ -27,7 +27,7 @@ import org.xydra.store.AccessException;
  * @author dscharrer
  * 
  */
-public interface XProtectedField extends XLoggedField, XWritableField {
+public interface XProtectedField extends XLoggedField, XHalfWritableField {
 	
 	/**
 	 * Sets the {@link XValue} of this field to the given value.

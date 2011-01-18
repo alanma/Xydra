@@ -7,6 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.xydra.base.IHasXAddress;
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableField;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XReadableObject;
+import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XChanges;
@@ -27,20 +34,13 @@ import org.xydra.core.change.XTransactionEvent;
 import org.xydra.core.change.XTransactionEventListener;
 import org.xydra.core.change.impl.memory.MemoryRepositoryEvent;
 import org.xydra.core.model.IHasChangeLog;
-import org.xydra.core.model.IHasXAddress;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseField;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XExecutesCommands;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XLocalChange;
 import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XSynchronizesChanges;
-import org.xydra.core.model.XType;
 import org.xydra.core.model.delta.ChangedField;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.ChangedObject;
@@ -156,10 +156,10 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 				removeObjectInternal(objectId);
 			}
 			
-			for(XBaseObject object : model.getNewObjects()) {
+			for(XReadableObject object : model.getNewObjects()) {
 				MemoryObject newObject = createObjectInternal(object.getID());
 				for(XID fieldId : object) {
-					XBaseField field = object.getField(fieldId);
+					XReadableField field = object.getField(fieldId);
 					MemoryField newField = newObject.createFieldInternal(fieldId);
 					if(!field.isEmpty()) {
 						newField.setValueInternal(field.getValue());
@@ -174,7 +174,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 					oldObject.removeFieldInternal(fieldId);
 				}
 				
-				for(XBaseField field : object.getNewFields()) {
+				for(XReadableField field : object.getNewFields()) {
 					MemoryField newField = oldObject.createFieldInternal(field.getID());
 					if(!field.isEmpty()) {
 						newField.setValueInternal(field.getValue());
@@ -207,7 +207,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 				        since);
 				
 				// new objects
-				for(XBaseObject object : model.getNewObjects()) {
+				for(XReadableObject object : model.getNewObjects()) {
 					MemoryObject newObject = getObject(object.getID());
 					assert newObject != null : "should have been created above";
 					for(XID fieldId : object) {
@@ -228,7 +228,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 					boolean changed = object.getRemovedFields().iterator().hasNext();
 					
 					// new fields in old objects
-					for(XBaseField field : object.getNewFields()) {
+					for(XReadableField field : object.getNewFields()) {
 						MemoryField newField = oldObject.getField(field.getID());
 						assert newField != null : "should have been created above";
 						newField.setRevisionNumber(newRevision);
@@ -766,7 +766,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 	/**
 	 * @return Return the proxy for reading the current state.
 	 */
-	protected abstract XBaseModel getTransactionTarget();
+	protected abstract XReadableModel getTransactionTarget();
 	
 	/**
 	 * @return the revision number to return when executing {@link XCommand

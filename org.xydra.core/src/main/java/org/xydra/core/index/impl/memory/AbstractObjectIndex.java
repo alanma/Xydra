@@ -3,16 +3,16 @@ package org.xydra.core.index.impl.memory;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
+import org.xydra.base.XID;
+import org.xydra.base.value.XBooleanValue;
+import org.xydra.base.value.XCollectionValue;
+import org.xydra.base.value.XDoubleValue;
+import org.xydra.base.value.XIntegerValue;
+import org.xydra.base.value.XLongValue;
+import org.xydra.base.value.XStringValue;
+import org.xydra.base.value.XValue;
 import org.xydra.core.X;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XObject;
-import org.xydra.core.value.XBooleanValue;
-import org.xydra.core.value.XCollectionValue;
-import org.xydra.core.value.XDoubleValue;
-import org.xydra.core.value.XIntegerValue;
-import org.xydra.core.value.XLongValue;
-import org.xydra.core.value.XStringValue;
-import org.xydra.core.value.XValue;
 
 
 @RunsInAppEngine

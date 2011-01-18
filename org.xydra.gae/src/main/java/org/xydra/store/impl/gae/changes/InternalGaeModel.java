@@ -5,14 +5,14 @@ package org.xydra.store.impl.gae.changes;
 
 import java.util.Set;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XReadableObject;
+import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.core.XX;
 import org.xydra.core.change.XEvent;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XBaseObject;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
-import org.xydra.core.model.XType;
 import org.xydra.store.impl.gae.GaeUtils;
 
 import com.google.appengine.api.datastore.Entity;
@@ -26,7 +26,7 @@ import com.google.appengine.api.datastore.Entity;
  * 
  */
 public class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObject> implements
-        XBaseModel {
+        XReadableModel {
 	
 	private InternalGaeModel(GaeChangesService changesService, XAddress modelAddr, long modelRev,
 	        Set<XAddress> locks) {
@@ -38,7 +38,7 @@ public class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObj
 		return getAddress().getModel();
 	}
 	
-	public XBaseObject getObject(XID objectId) {
+	public XReadableObject getObject(XID objectId) {
 		return getChild(objectId);
 	}
 	

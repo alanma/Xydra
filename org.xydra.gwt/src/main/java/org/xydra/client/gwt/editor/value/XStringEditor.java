@@ -1,6 +1,6 @@
 package org.xydra.client.gwt.editor.value;
 
-import org.xydra.core.value.XStringValue;
+import org.xydra.base.value.XStringValue;
 import org.xydra.core.value.XV;
 
 import com.google.gwt.user.client.ui.TextBox;

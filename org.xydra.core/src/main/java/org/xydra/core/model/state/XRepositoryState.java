@@ -3,9 +3,9 @@ package org.xydra.core.model.state;
 import java.io.Serializable;
 import java.util.Iterator;
 
-import org.xydra.core.model.IHasXAddress;
-import org.xydra.core.model.IHasXID;
-import org.xydra.core.model.XID;
+import org.xydra.base.IHasXAddress;
+import org.xydra.base.IHasXID;
+import org.xydra.base.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 

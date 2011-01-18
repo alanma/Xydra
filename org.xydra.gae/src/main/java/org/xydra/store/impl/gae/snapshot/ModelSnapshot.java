@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XID;
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.core.model.XModel;
-import org.xydra.core.model.XType;
 
 
 /**
@@ -20,7 +20,7 @@ import org.xydra.core.model.XType;
  */
 @Deprecated
 @SuppressWarnings("deprecation")
-public class ModelSnapshot implements XBaseModel, Serializable {
+public class ModelSnapshot implements XReadableModel, Serializable {
 	
 	private static final long serialVersionUID = 2234329418396820686L;
 	

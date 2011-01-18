@@ -7,16 +7,16 @@ import java.util.Set;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
+import org.xydra.base.XHalfWritableField;
+import org.xydra.base.XHalfWritableModel;
+import org.xydra.base.XHalfWritableObject;
+import org.xydra.base.XHalfWritableRepository;
+import org.xydra.base.value.XBooleanValue;
+import org.xydra.base.value.XValue;
 import org.xydra.core.XX;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.model.XWritableField;
-import org.xydra.core.model.XWritableModel;
-import org.xydra.core.model.XWritableObject;
-import org.xydra.core.model.XWritableRepository;
-import org.xydra.core.value.XBooleanValue;
-import org.xydra.core.value.XValue;
 import org.xydra.index.query.Pair;
 import org.xydra.store.MAXTodo;
 import org.xydra.store.NamingUtils;
@@ -28,7 +28,7 @@ import org.xydra.store.access.impl.delegate.AccessModelWrapperOnPersistence;
 import org.xydra.store.access.impl.delegate.BooleanValueUtils;
 import org.xydra.store.access.impl.delegate.Documentation_AccessModel;
 import org.xydra.store.base.Credentials;
-import org.xydra.store.base.WritableRepository;
+import org.xydra.store.base.HalfWritableRepositoryOnStore;
 
 
 /**
@@ -48,10 +48,10 @@ public class AccessModelWrapper implements XAccessDatabase, Serializable {
 	
 	private static final long serialVersionUID = -7345262691858094628L;
 	
-	private XWritableModel wrappedModel;
+	private XHalfWritableModel wrappedModel;
 	
 	public AccessModelWrapper(XydraStore store, Credentials credentials, XID modelId) {
-		XWritableRepository repo = new WritableRepository(credentials, store);
+		XHalfWritableRepository repo = new HalfWritableRepositoryOnStore(credentials, store);
 		this.wrappedModel = repo.createModel(modelId);
 	}
 	
@@ -68,12 +68,12 @@ public class AccessModelWrapper implements XAccessDatabase, Serializable {
 	@Override
 	public XAccessValue getAccessDefinition(XID actor, XAddress resource, XID access)
 	        throws IllegalArgumentException {
-		XWritableObject object = this.wrappedModel.getObject(actor);
+		XHalfWritableObject object = this.wrappedModel.getObject(actor);
 		if(object == null) {
 			return XAccessValue.UNDEFINED;
 		}
 		XID fieldId = toFieldId(resource, access);
-		XWritableField field = object.getField(fieldId);
+		XHalfWritableField field = object.getField(fieldId);
 		if(field == null) {
 			return XAccessValue.UNDEFINED;
 		}
@@ -104,9 +104,9 @@ public class AccessModelWrapper implements XAccessDatabase, Serializable {
 	 */
 	public Set<XAccessDefinition> getDefinitionsFor(XID actorId) {
 		Set<XAccessDefinition> defs = new HashSet<XAccessDefinition>();
-		XWritableObject actorObject = this.wrappedModel.getObject(actorId);
+		XHalfWritableObject actorObject = this.wrappedModel.getObject(actorId);
 		for(XID fieldId : actorObject) {
-			XWritableField field = actorObject.getField(fieldId);
+			XHalfWritableField field = actorObject.getField(fieldId);
 			XValue value = field.getValue();
 			if(value != null) {
 				// parse fieldId

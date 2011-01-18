@@ -1,15 +1,15 @@
 package org.xydra.core;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
+import org.xydra.base.XType;
+import org.xydra.base.value.XValue;
 import org.xydra.core.model.MissingPieceException;
-import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XIDProvider;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.model.XType;
-import org.xydra.core.value.XValue;
 
 
 /**

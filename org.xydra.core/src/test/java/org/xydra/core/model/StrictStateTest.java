@@ -7,6 +7,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xydra.base.XID;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;

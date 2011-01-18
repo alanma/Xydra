@@ -1,24 +1,24 @@
 package org.xydra.client.gwt.editor.value;
 
-import org.xydra.core.model.XID;
-import org.xydra.core.value.XBooleanListValue;
-import org.xydra.core.value.XBooleanValue;
-import org.xydra.core.value.XByteListValue;
-import org.xydra.core.value.XCollectionValue;
-import org.xydra.core.value.XDoubleListValue;
-import org.xydra.core.value.XDoubleValue;
-import org.xydra.core.value.XIDListValue;
-import org.xydra.core.value.XIDSetValue;
-import org.xydra.core.value.XIntegerListValue;
-import org.xydra.core.value.XIntegerValue;
-import org.xydra.core.value.XListValue;
-import org.xydra.core.value.XLongListValue;
-import org.xydra.core.value.XLongValue;
-import org.xydra.core.value.XSetValue;
-import org.xydra.core.value.XStringListValue;
-import org.xydra.core.value.XStringSetValue;
-import org.xydra.core.value.XStringValue;
-import org.xydra.core.value.XValue;
+import org.xydra.base.XID;
+import org.xydra.base.value.XBooleanListValue;
+import org.xydra.base.value.XBooleanValue;
+import org.xydra.base.value.XByteListValue;
+import org.xydra.base.value.XCollectionValue;
+import org.xydra.base.value.XDoubleListValue;
+import org.xydra.base.value.XDoubleValue;
+import org.xydra.base.value.XIDListValue;
+import org.xydra.base.value.XIDSetValue;
+import org.xydra.base.value.XIntegerListValue;
+import org.xydra.base.value.XIntegerValue;
+import org.xydra.base.value.XListValue;
+import org.xydra.base.value.XLongListValue;
+import org.xydra.base.value.XLongValue;
+import org.xydra.base.value.XSetValue;
+import org.xydra.base.value.XStringListValue;
+import org.xydra.base.value.XStringSetValue;
+import org.xydra.base.value.XStringValue;
+import org.xydra.base.value.XValue;
 
 import com.google.gwt.user.client.ui.Composite;
 

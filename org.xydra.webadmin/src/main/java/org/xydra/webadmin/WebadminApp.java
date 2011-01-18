@@ -24,14 +24,14 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInJava;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XID;
 import org.xydra.core.XFile;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XRepositoryCommand;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlModel;
@@ -222,7 +222,7 @@ public class WebadminApp {
 			XID actor = null; // TODO
 			
 			boolean existed = false;
-			XBaseModel oldModel = server.getModelSnapshot(model.getID());
+			XReadableModel oldModel = server.getModelSnapshot(model.getID());
 			if(oldModel != null) {
 				existed = true;
 				overwritten++;

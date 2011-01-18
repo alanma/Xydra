@@ -1,5 +1,10 @@
 package org.xydra.client.impl.direct;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableField;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XReadableObject;
+import org.xydra.base.XID;
 import org.xydra.client.Callback;
 import org.xydra.client.NotFoundException;
 import org.xydra.client.XDataService;
@@ -8,12 +13,7 @@ import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.change.impl.memory.MemoryModelCommand;
 import org.xydra.core.change.impl.memory.MemoryObjectCommand;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseField;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
@@ -216,7 +216,7 @@ public class DirectDataService implements XDataService {
 	}
 	
 	@Override
-	public void setModel(XBaseModel model, Callback<Boolean> callback) {
+	public void setModel(XReadableModel model, Callback<Boolean> callback) {
 		
 		XProtectedModel oldModel = this.repo.createModel(model.getID());
 		
@@ -235,7 +235,7 @@ public class DirectDataService implements XDataService {
 	}
 	
 	@Override
-	public void setObject(XID modelId, XBaseObject object, Callback<Boolean> callback) {
+	public void setObject(XID modelId, XReadableObject object, Callback<Boolean> callback) {
 		
 		XAddress modelAddr = XX.resolveModel(this.repo.getAddress(), modelId);
 		XTransactionBuilder tb = new XTransactionBuilder(modelAddr);
@@ -257,7 +257,7 @@ public class DirectDataService implements XDataService {
 	}
 	
 	@Override
-	public void setField(XID modelId, XID objectId, XBaseField field, Callback<Boolean> callback) {
+	public void setField(XID modelId, XID objectId, XReadableField field, Callback<Boolean> callback) {
 		
 		XAddress objectAddr = XX.resolveObject(this.repo.getAddress(), modelId, objectId);
 		XTransactionBuilder tb = new XTransactionBuilder(objectAddr);

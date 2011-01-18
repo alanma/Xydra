@@ -1,7 +1,7 @@
 package org.xydra.store.test;
 
+import org.xydra.base.XID;
 import org.xydra.core.XX;
-import org.xydra.core.model.XID;
 import org.xydra.store.impl.delegate.DelegatingAllowAllStore;
 import org.xydra.store.impl.delegate.XydraPersistence;
 

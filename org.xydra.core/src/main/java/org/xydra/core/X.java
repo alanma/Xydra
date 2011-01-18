@@ -1,18 +1,18 @@
 package org.xydra.core;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
+import org.xydra.base.value.XValueFactory;
+import org.xydra.base.value.impl.memory.MemoryValueFactory;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XCommandFactory;
 import org.xydra.core.change.impl.memory.MemoryCommandFactory;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XIDProvider;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.core.model.impl.memory.MemoryStringIDProvider;
 import org.xydra.core.model.state.XRepositoryState;
 import org.xydra.core.model.state.XSPI;
-import org.xydra.core.value.XValueFactory;
-import org.xydra.core.value.impl.memory.MemoryValueFactory;
 
 
 /**

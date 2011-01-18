@@ -6,12 +6,12 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xydra.base.XID;
+import org.xydra.base.XHalfWritableModel;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.access.impl.memory.AccountModelWrapper;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.model.XWritableModel;
 import org.xydra.core.model.state.XSPI;
 import org.xydra.core.model.state.impl.memory.TemporaryStateStore;
 import org.xydra.core.test.TestLogger;
@@ -34,7 +34,7 @@ public class GroupDatabaseTest {
 	public void before() {
 		XID actorId = XX.toId("Test");
 		XRepository repo = X.createMemoryRepository(actorId);
-		XWritableModel accountModel = repo.createModel(NamingUtils.ID_ACCOUNT_MODEL);
+		XHalfWritableModel accountModel = repo.createModel(NamingUtils.ID_ACCOUNT_MODEL);
 		this.wrapper = new AccountModelWrapper(accountModel);
 	}
 	

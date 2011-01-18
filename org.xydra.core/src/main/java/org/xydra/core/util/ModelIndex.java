@@ -1,10 +1,10 @@
 package org.xydra.core.util;
 
+import org.xydra.base.XID;
+import org.xydra.base.value.XValue;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
-import org.xydra.core.value.XValue;
 import org.xydra.index.ITripleIndex;
 import org.xydra.index.impl.TripleIndex;
 import org.xydra.index.query.Constraint;

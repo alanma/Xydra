@@ -1,5 +1,7 @@
 package org.xydra.core.model;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
 import org.xydra.core.URIFormatException;
 
 

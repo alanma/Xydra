@@ -1,7 +1,7 @@
 package org.xydra.core.access;
 
+import org.xydra.base.XID;
 import org.xydra.core.change.ChangeType;
-import org.xydra.core.model.XID;
 
 
 /**

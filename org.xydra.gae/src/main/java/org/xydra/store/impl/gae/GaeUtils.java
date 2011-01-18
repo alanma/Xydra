@@ -2,7 +2,7 @@ package org.xydra.store.impl.gae;
 
 import java.util.ConcurrentModificationException;
 
-import org.xydra.core.model.XAddress;
+import org.xydra.base.XAddress;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;

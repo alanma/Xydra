@@ -4,6 +4,8 @@ import java.util.Iterator;
 
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
+import org.xydra.base.XID;
+import org.xydra.base.XHalfWritableModel;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.change.XModelCommand;
@@ -14,11 +16,9 @@ import org.xydra.core.change.XTransactionEventListener;
 import org.xydra.core.model.IHasChangeLog;
 import org.xydra.core.model.XExecutesCommands;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XLoggedModel;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
-import org.xydra.core.model.XWritableModel;
 import org.xydra.store.AccessException;
 
 
@@ -36,7 +36,7 @@ import org.xydra.store.AccessException;
  * @author dscharrer
  * 
  */
-public interface XProtectedModel extends XLoggedModel, XWritableModel, IHasChangeLog,
+public interface XProtectedModel extends XLoggedModel, XHalfWritableModel, IHasChangeLog,
         XExecutesCommands {
 	
 	/**

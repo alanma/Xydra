@@ -1,6 +1,6 @@
 package org.xydra.store.base;
 
-import org.xydra.core.model.XID;
+import org.xydra.base.XID;
 
 
 /**

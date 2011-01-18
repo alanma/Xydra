@@ -1,6 +1,6 @@
 package org.xydra.core.model.state;
 
-import org.xydra.core.model.XAddress;
+import org.xydra.base.XAddress;
 
 
 /**

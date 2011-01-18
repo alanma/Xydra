@@ -2,12 +2,12 @@ package org.xydra.store.impl.delegate;
 
 import java.util.Set;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XReadableObject;
+import org.xydra.base.XID;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XBaseObject;
-import org.xydra.core.model.XID;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -371,7 +371,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 	}
 	
 	public void getModelSnapshot(XID actorId, String passwordHash, XAddress modelAddress,
-	        Callback<XBaseModel> callback) throws IllegalArgumentException {
+	        Callback<XReadableModel> callback) throws IllegalArgumentException {
 		DelegationUtils.assertNonNullActorAndPassword(actorId, passwordHash);
 		DelegationUtils.assertNonNullCallback(callback);
 		this.singleOpStore.getModelSnapshot(actorId, passwordHash, modelAddress, callback);
@@ -379,13 +379,13 @@ public class DelegateToSingleOperationStore implements XydraStore {
 	
 	@Override
 	public synchronized void getModelSnapshots(XID actorId, String passwordHash,
-	        XAddress[] modelAddresses, Callback<BatchedResult<XBaseModel>[]> callback)
+	        XAddress[] modelAddresses, Callback<BatchedResult<XReadableModel>[]> callback)
 	        throws IllegalArgumentException {
 		DelegationUtils.assertNonNullActorAndPassword(actorId, passwordHash);
 		DelegationUtils.assertNonNullCallback(callback);
 		DelegationUtils.assertNonNull(modelAddresses);
 		@SuppressWarnings("unchecked")
-		SingleOpCallback<XBaseModel>[] singleOpCallback = new SingleOpCallback[modelAddresses.length];
+		SingleOpCallback<XReadableModel>[] singleOpCallback = new SingleOpCallback[modelAddresses.length];
 		try {
 			// authorise only once
 			if(!validLogin(actorId, passwordHash, callback)) {
@@ -394,7 +394,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 			
 			// call n individual asynchronous single operations
 			for(int i = 0; i < modelAddresses.length; i++) {
-				singleOpCallback[i] = new SingleOpCallback<XBaseModel>();
+				singleOpCallback[i] = new SingleOpCallback<XReadableModel>();
 				this.singleOpStore.getModelSnapshot(actorId, null, modelAddresses[i],
 				        singleOpCallback[i]);
 			}
@@ -420,14 +420,14 @@ public class DelegateToSingleOperationStore implements XydraStore {
 			assert waiting == false;
 			// compose individual results
 			@SuppressWarnings("unchecked")
-			BatchedResult<XBaseModel>[] batchedResult = new BatchedResult[modelAddresses.length];
+			BatchedResult<XReadableModel>[] batchedResult = new BatchedResult[modelAddresses.length];
 			for(int i = 0; i < modelAddresses.length; i++) {
 				if(singleOpCallback[i].exception == null) {
 					// success
-					batchedResult[i] = new BatchedResult<XBaseModel>(singleOpCallback[i].result);
+					batchedResult[i] = new BatchedResult<XReadableModel>(singleOpCallback[i].result);
 				} else {
 					// failure
-					batchedResult[i] = new BatchedResult<XBaseModel>(singleOpCallback[i].exception);
+					batchedResult[i] = new BatchedResult<XReadableModel>(singleOpCallback[i].exception);
 				}
 			}
 			callback.onSuccess(batchedResult);
@@ -438,7 +438,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 	}
 	
 	public void getObjectSnapshot(XID actorId, String passwordHash, XAddress objectAddress,
-	        Callback<XBaseObject> callback) throws IllegalArgumentException {
+	        Callback<XReadableObject> callback) throws IllegalArgumentException {
 		DelegationUtils.assertNonNullActorAndPassword(actorId, passwordHash);
 		DelegationUtils.assertNonNullCallback(callback);
 		this.singleOpStore.getObjectSnapshot(actorId, passwordHash, objectAddress, callback);
@@ -446,13 +446,13 @@ public class DelegateToSingleOperationStore implements XydraStore {
 	
 	@Override
 	public void getObjectSnapshots(XID actorId, String passwordHash, XAddress[] objectAddresses,
-	        Callback<BatchedResult<XBaseObject>[]> callback) throws IllegalArgumentException {
+	        Callback<BatchedResult<XReadableObject>[]> callback) throws IllegalArgumentException {
 		DelegationUtils.assertNonNullActorAndPassword(actorId, passwordHash);
 		DelegationUtils.assertNonNullCallback(callback);
 		DelegationUtils.assertNonNull(objectAddresses);
 		
 		@SuppressWarnings("unchecked")
-		SingleOpCallback<XBaseObject>[] singleOpCallback = new SingleOpCallback[objectAddresses.length];
+		SingleOpCallback<XReadableObject>[] singleOpCallback = new SingleOpCallback[objectAddresses.length];
 		try {
 			// authorise only once
 			if(!validLogin(actorId, passwordHash, callback)) {
@@ -460,7 +460,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 			}
 			// call n individual asynchronous single operations
 			for(int i = 0; i < objectAddresses.length; i++) {
-				singleOpCallback[i] = new SingleOpCallback<XBaseObject>();
+				singleOpCallback[i] = new SingleOpCallback<XReadableObject>();
 				this.singleOpStore.getObjectSnapshot(actorId, null, objectAddresses[i],
 				        singleOpCallback[i]);
 			}
@@ -486,14 +486,14 @@ public class DelegateToSingleOperationStore implements XydraStore {
 			assert waiting == false;
 			// compose individual results
 			@SuppressWarnings("unchecked")
-			BatchedResult<XBaseObject>[] batchedResult = new BatchedResult[objectAddresses.length];
+			BatchedResult<XReadableObject>[] batchedResult = new BatchedResult[objectAddresses.length];
 			for(int i = 0; i < objectAddresses.length; i++) {
 				if(singleOpCallback[i].exception == null) {
 					// success
-					batchedResult[i] = new BatchedResult<XBaseObject>(singleOpCallback[i].result);
+					batchedResult[i] = new BatchedResult<XReadableObject>(singleOpCallback[i].result);
 				} else {
 					// failure
-					batchedResult[i] = new BatchedResult<XBaseObject>(singleOpCallback[i].exception);
+					batchedResult[i] = new BatchedResult<XReadableObject>(singleOpCallback[i].exception);
 				}
 			}
 			callback.onSuccess(batchedResult);

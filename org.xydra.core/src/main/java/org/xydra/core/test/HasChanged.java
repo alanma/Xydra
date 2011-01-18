@@ -3,6 +3,7 @@
  */
 package org.xydra.core.test;
 
+import org.xydra.base.XID;
 import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.change.XModelEvent;
@@ -14,7 +15,6 @@ import org.xydra.core.change.XRepositoryEventListener;
 import org.xydra.core.change.XTransactionEvent;
 import org.xydra.core.change.XTransactionEventListener;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 

@@ -8,13 +8,13 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XID;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XCommandFactory;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XID;
 import org.xydra.store.AuthorisationException;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.XydraStore;
@@ -23,7 +23,7 @@ import org.xydra.store.XydraStore;
 /**
  * Abstract test for the write methods of {@link XydraStore}.
  * 
- * @author Björn
+ * @author Bjï¿½rn
  */
 
 /*
@@ -137,14 +137,14 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNull((callback.getEffect())[0].getException());
 		
 		// check if the model was created
-		SynchronousTestCallback<BatchedResult<XBaseModel>[]> callback2 = new SynchronousTestCallback<BatchedResult<XBaseModel>[]>();
+		SynchronousTestCallback<BatchedResult<XReadableModel>[]> callback2 = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
 		XAddress[] modelAddress = new XAddress[] { XX.toAddress(this.repoID, modelID, null, null) };
 		
 		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, modelAddress,
 		        callback2);
 		assertTrue(this.waitOnCallback(callback2));
 		
-		BatchedResult<XBaseModel>[] result2 = callback2.getEffect();
+		BatchedResult<XReadableModel>[] result2 = callback2.getEffect();
 		assertNotNull(result2);
 		assertEquals(result2[0].getResult().getID(), modelID);
 		
@@ -161,7 +161,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertTrue((callback.getEffect())[0].getResult() > 0);
 		
 		// check if the model was removed
-		callback2 = new SynchronousTestCallback<BatchedResult<XBaseModel>[]>();
+		callback2 = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
 		modelAddress = new XAddress[] { XX.toAddress(this.repoID, modelID, null, null) };
 		
 		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, modelAddress,
@@ -219,7 +219,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		}
 		
 		// check if the models were created
-		SynchronousTestCallback<BatchedResult<XBaseModel>[]> callback2 = new SynchronousTestCallback<BatchedResult<XBaseModel>[]>();
+		SynchronousTestCallback<BatchedResult<XReadableModel>[]> callback2 = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
 		
 		XAddress[] modelAddresses = new XAddress[modelCount];
 		for(int i = 0; i < modelCount; i++) {
@@ -231,7 +231,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertTrue(this.waitOnCallback(callback2));
 		assertNull(callback2.getException());
 		
-		BatchedResult<XBaseModel>[] result2 = callback2.getEffect();
+		BatchedResult<XReadableModel>[] result2 = callback2.getEffect();
 		assertNotNull(result2);
 		for(int i = 0; i < modelCount; i++) {
 			assertEquals(result2[i].getResult().getID(), modelAddresses[i].getModel());
@@ -258,7 +258,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		}
 		
 		// check if the models were removed
-		callback2 = new SynchronousTestCallback<BatchedResult<XBaseModel>[]>();
+		callback2 = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
 		
 		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, modelAddresses,
 		        callback2);

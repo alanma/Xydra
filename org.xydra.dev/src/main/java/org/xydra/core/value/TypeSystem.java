@@ -1,5 +1,11 @@
 package org.xydra.core.value;
 
+import org.xydra.base.value.XBooleanValue;
+import org.xydra.base.value.XDoubleValue;
+import org.xydra.base.value.XIntegerValue;
+import org.xydra.base.value.XLongValue;
+import org.xydra.base.value.XStringValue;
+
 /*
  * TODO what is this needed for? ~~daniel
  */

@@ -1,7 +1,7 @@
 package org.xydra.core.model.session.impl.arm;
 
+import org.xydra.base.XID;
 import org.xydra.core.access.XAccessManager;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.session.XProtectedRepository;
 

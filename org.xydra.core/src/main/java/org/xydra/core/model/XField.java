@@ -3,11 +3,13 @@ package org.xydra.core.model;
 import java.io.Serializable;
 
 import org.xydra.annotations.ModificationOperation;
+import org.xydra.base.XID;
+import org.xydra.base.XHalfWritableField;
+import org.xydra.base.value.XValue;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XFieldCommand;
 import org.xydra.core.model.state.XFieldState;
-import org.xydra.core.value.XValue;
 
 
 /**
@@ -27,7 +29,7 @@ import org.xydra.core.value.XValue;
  * @author kaidel
  * 
  */
-public interface XField extends XLoggedField, XWritableField, Serializable {
+public interface XField extends XLoggedField, XHalfWritableField, Serializable {
 	
 	/**
 	 * Sets the {@link XValue} of this field to the given value.

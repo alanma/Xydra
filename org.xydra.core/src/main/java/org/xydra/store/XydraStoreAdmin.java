@@ -1,7 +1,7 @@
 package org.xydra.store;
 
+import org.xydra.base.XID;
 import org.xydra.core.XX;
-import org.xydra.core.model.XID;
 import org.xydra.store.access.XAccountDatabase;
 import org.xydra.store.base.HashUtils;
 

@@ -3,19 +3,20 @@ package org.xydra.store.impl.memory;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
+import org.xydra.base.XWritableModel;
+import org.xydra.base.XWritableObject;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.impl.memory.MemoryTransactionEvent;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.DeltaUtils;
 import org.xydra.index.query.Pair;
 import org.xydra.store.MAXDone;
 import org.xydra.store.base.SimpleModel;
-import org.xydra.store.base.SimpleObject;
 
 
 /**
@@ -132,11 +133,11 @@ public class MemoryModelPersistence {
 	/**
 	 * @return the snapshot or null if not found
 	 */
-	synchronized public SimpleModel getModelSnapshot() {
+	synchronized public XWritableModel getModelSnapshot() {
 		return XCopyUtils.createSnapshot(this.model);
 	}
 	
-	synchronized public SimpleObject getObjectSnapshot(XID objectId) {
+	synchronized public XWritableObject getObjectSnapshot(XID objectId) {
 		
 		if(this.model == null) {
 			// TODO is this the correct behaviour?

@@ -1,10 +1,10 @@
 package org.xydra.core.model.state.impl.gae;
 
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
-import org.xydra.core.model.XType;
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
+import org.xydra.base.XType;
+import org.xydra.base.value.XValue;
 import org.xydra.core.model.state.XFieldState;
-import org.xydra.core.value.XValue;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.MiniXMLParser;
 import org.xydra.core.xml.XmlValue;

@@ -1,10 +1,10 @@
 package org.xydra.store.impl.delegate;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.access.impl.memory.DelegatingAccessManager;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
 import org.xydra.store.access.XAccessDatabase;
 
 

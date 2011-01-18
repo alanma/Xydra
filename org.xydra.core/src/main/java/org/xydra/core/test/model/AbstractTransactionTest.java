@@ -11,6 +11,9 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
+import org.xydra.base.value.XValue;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
@@ -20,9 +23,7 @@ import org.xydra.core.change.XTransactionEvent;
 import org.xydra.core.change.impl.memory.MemoryFieldEvent;
 import org.xydra.core.change.impl.memory.MemoryModelEvent;
 import org.xydra.core.change.impl.memory.MemoryObjectEvent;
-import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
@@ -33,7 +34,6 @@ import org.xydra.core.test.ChangeRecorder;
 import org.xydra.core.test.HasChanged;
 import org.xydra.core.test.TestLogger;
 import org.xydra.core.value.XV;
-import org.xydra.core.value.XValue;
 import org.xydra.index.XI;
 
 

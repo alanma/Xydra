@@ -1,6 +1,6 @@
 package org.xydra.core.model.state.impl.gae;
 
-import org.xydra.core.model.XAddress;
+import org.xydra.base.XAddress;
 import org.xydra.core.model.state.XFieldState;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;

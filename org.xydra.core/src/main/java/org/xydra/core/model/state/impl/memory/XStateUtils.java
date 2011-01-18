@@ -5,10 +5,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.xydra.core.model.XBaseField;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XBaseObject;
-import org.xydra.core.model.XID;
+import org.xydra.base.XReadableField;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XReadableObject;
+import org.xydra.base.XID;
 import org.xydra.core.model.state.XFieldState;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
@@ -61,7 +61,7 @@ public class XStateUtils {
 	 * Copies the source field's state to the target. Doesn't copy the change
 	 * log.
 	 */
-	public static void copy(XBaseModel source, XModelState target) {
+	public static void copy(XReadableModel source, XModelState target) {
 		target.setRevisionNumber(source.getRevisionNumber());
 		if(!target.isEmpty()) {
 			Set<XID> toRemove = new HashSet<XID>();
@@ -91,7 +91,7 @@ public class XStateUtils {
 	 * Copies the source field's state to the target. Doesn't copy the change
 	 * log.
 	 */
-	public static void copy(XBaseObject source, XObjectState target) {
+	public static void copy(XReadableObject source, XObjectState target) {
 		target.setRevisionNumber(source.getRevisionNumber());
 		if(!target.isEmpty()) {
 			Set<XID> toRemove = new HashSet<XID>();
@@ -120,7 +120,7 @@ public class XStateUtils {
 	/**
 	 * Copies the source field's state to the target.
 	 */
-	public static void copy(XBaseField source, XFieldState target) {
+	public static void copy(XReadableField source, XFieldState target) {
 		target.setRevisionNumber(source.getRevisionNumber());
 		target.setValue(source.getValue());
 		target.save(null);

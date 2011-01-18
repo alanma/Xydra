@@ -2,28 +2,28 @@ package org.xydra.core.model.session.impl.arm;
 
 import java.util.Iterator;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XReadableObject;
+import org.xydra.base.XID;
 import org.xydra.core.access.XAccessManager;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XBaseObject;
-import org.xydra.core.model.XID;
 import org.xydra.store.AccessException;
 
 
 /**
- * An {@link XBaseModel} that wraps an {@link XBaseModel} for a specific actor
+ * An {@link XReadableModel} that wraps an {@link XReadableModel} for a specific actor
  * and checks all access against an {@link XAccessManager}.
  * 
  * @author dscharrer
  * 
  */
-public class ArmProtectedBaseModel implements XBaseModel {
+public class ArmProtectedBaseModel implements XReadableModel {
 	
-	private final XBaseModel model;
+	private final XReadableModel model;
 	protected final XAccessManager arm;
 	protected final XID actor;
 	
-	public ArmProtectedBaseModel(XBaseModel model, XAccessManager arm, XID actor) {
+	public ArmProtectedBaseModel(XReadableModel model, XAccessManager arm, XID actor) {
 		this.model = model;
 		this.arm = arm;
 		this.actor = actor;
@@ -39,11 +39,11 @@ public class ArmProtectedBaseModel implements XBaseModel {
 		}
 	}
 	
-	public XBaseObject getObject(XID objectId) {
+	public XReadableObject getObject(XID objectId) {
 		
 		checkCanKnowAboutObject(objectId);
 		
-		XBaseObject object = this.model.getObject(objectId);
+		XReadableObject object = this.model.getObject(objectId);
 		
 		if(object == null) {
 			return null;

@@ -1,9 +1,9 @@
 package org.xydra.core.index.impl.memory;
 
+import org.xydra.base.XID;
 import org.xydra.core.index.IIndexFactory;
 import org.xydra.core.index.IObjectIndex;
 import org.xydra.core.index.IUniqueObjectIndex;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XObject;
 
 

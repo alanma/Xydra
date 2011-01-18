@@ -1,11 +1,11 @@
 package org.xydra.server.impl.memory;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XID;
 import org.xydra.core.access.XAccessManager;
 import org.xydra.core.change.XCommand;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XChangeLog;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.session.impl.arm.ArmProtectedBaseModel;
 import org.xydra.core.model.session.impl.arm.ArmProtectedChangeLog;
 import org.xydra.server.IXydraServer;
@@ -57,7 +57,7 @@ public class ArmXydraSession implements IXydraSession {
 		return new ArmProtectedChangeLog(log, arm, this.actor);
 	}
 	
-	public XBaseModel getModelSnapshot(XID modelId) {
+	public XReadableModel getModelSnapshot(XID modelId) {
 		
 		XAccessManager arm = this.server.getAccessManager();
 		
@@ -66,7 +66,7 @@ public class ArmXydraSession implements IXydraSession {
 			        + getRepositoryAddress());
 		}
 		
-		XBaseModel model = this.server.getModelSnapshot(modelId);
+		XReadableModel model = this.server.getModelSnapshot(modelId);
 		if(model == null) {
 			return null;
 		}

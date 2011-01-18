@@ -2,6 +2,9 @@ package org.xydra.core.model.session;
 
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XReadableRepository;
+import org.xydra.base.XID;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XRepositoryCommand;
 import org.xydra.core.change.XRepositoryEvent;
@@ -10,10 +13,7 @@ import org.xydra.core.change.XSendsModelEvent;
 import org.xydra.core.change.XSendsObjectEvents;
 import org.xydra.core.change.XSendsRepositoryEvents;
 import org.xydra.core.change.XSendsTransactionEvents;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XBaseRepository;
 import org.xydra.core.model.XExecutesCommands;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.store.AccessException;
@@ -33,7 +33,7 @@ import org.xydra.store.AccessException;
  * @author dscharrer
  * 
  */
-public interface XProtectedRepository extends XBaseRepository, XSendsRepositoryEvents,
+public interface XProtectedRepository extends XReadableRepository, XSendsRepositoryEvents,
         XSendsModelEvent, XSendsObjectEvents, XSendsFieldEvents, XSendsTransactionEvents,
         XExecutesCommands {
 	
@@ -45,7 +45,7 @@ public interface XProtectedRepository extends XBaseRepository, XSendsRepositoryE
 	 * @param id The {@link XID} of the {@link XModel} which is to be returned
 	 * @return the {@link XModel} with the given {@link XID} as an
 	 *         {@link XProtectedModel} linked with the actor of this
-	 *         XProtectedRepository or null if no such {@link XBaseModel} exists
+	 *         XProtectedRepository or null if no such {@link XReadableModel} exists
 	 *         in this repository
 	 * @throws AccessException if the actor linked with this field does not have
 	 *             the necessary access rights (read access) to execute this

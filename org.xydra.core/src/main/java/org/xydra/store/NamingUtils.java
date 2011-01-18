@@ -1,9 +1,9 @@
 package org.xydra.store;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
 import org.xydra.core.X;
 import org.xydra.core.XX;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
 
 
 /**

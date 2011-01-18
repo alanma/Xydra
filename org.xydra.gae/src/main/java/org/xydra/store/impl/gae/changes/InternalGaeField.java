@@ -5,14 +5,14 @@ package org.xydra.store.impl.gae.changes;
 
 import java.util.Set;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableField;
+import org.xydra.base.XID;
+import org.xydra.base.XType;
+import org.xydra.base.value.XValue;
 import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XFieldEvent;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseField;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XID;
-import org.xydra.core.model.XType;
-import org.xydra.core.value.XValue;
 import org.xydra.store.impl.gae.GaeUtils;
 
 import com.google.appengine.api.datastore.Entity;
@@ -25,7 +25,7 @@ import com.google.appengine.api.datastore.Entity;
  * @author dscharrer
  * 
  */
-class InternalGaeField extends InternalGaeXEntity implements XBaseField {
+class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 	
 	private static final String PROP_TRANSINDEX = "transindex";
 	// Value for PROP_TRANSINDEX if there hasn't been any XFieldEvent yet

@@ -2,8 +2,8 @@ package org.xydra.serverapi;
 
 import java.util.List;
 
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
 
 
 /**

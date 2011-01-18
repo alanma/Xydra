@@ -1,6 +1,6 @@
 package org.xydra.core.util;
 
-import org.xydra.core.value.XValue;
+import org.xydra.base.value.XValue;
 
 
 /*

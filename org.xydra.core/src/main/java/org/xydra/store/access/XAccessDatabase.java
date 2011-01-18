@@ -2,8 +2,8 @@ package org.xydra.store.access;
 
 import java.util.Set;
 
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
 import org.xydra.store.MAXTodo;
 
 

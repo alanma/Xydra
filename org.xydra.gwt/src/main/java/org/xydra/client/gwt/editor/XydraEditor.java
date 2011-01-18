@@ -1,5 +1,7 @@
 package org.xydra.client.gwt.editor;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
 import org.xydra.client.Callback;
 import org.xydra.client.ServiceException;
 import org.xydra.client.XChangesService;
@@ -9,8 +11,6 @@ import org.xydra.client.gwt.service.GWTDataService;
 import org.xydra.client.gwt.xml.impl.GWTMiniXMLParserImpl;
 import org.xydra.client.sync.XSynchronizer;
 import org.xydra.core.XX;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XSynchronizesChanges;

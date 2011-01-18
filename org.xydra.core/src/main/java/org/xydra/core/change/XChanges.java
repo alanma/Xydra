@@ -4,18 +4,18 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XID;
+import org.xydra.base.XHalfWritableField;
+import org.xydra.base.XHalfWritableModel;
+import org.xydra.base.XHalfWritableObject;
 import org.xydra.core.change.impl.memory.MemoryFieldCommand;
 import org.xydra.core.change.impl.memory.MemoryModelCommand;
 import org.xydra.core.change.impl.memory.MemoryObjectCommand;
 import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.core.change.impl.memory.MemoryTransaction;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.model.XWritableField;
-import org.xydra.core.model.XWritableModel;
-import org.xydra.core.model.XWritableObject;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.index.XI;
 import org.xydra.index.iterator.SingleValueIterator;
@@ -458,24 +458,24 @@ public class XChanges {
 	 * fail if there have been any conflicting changes since then that have not
 	 * been undone already.
 	 * 
-	 * The relevant parts of the given {@link XBaseModel} must be in the same
+	 * The relevant parts of the given {@link XReadableModel} must be in the same
 	 * state as they where directly after the event, only the revision numbers
 	 * may differ.
 	 * 
-	 * @param base The {@link XBaseModel} on which the given {@link XEvent}
+	 * @param base The {@link XReadableModel} on which the given {@link XEvent}
 	 *            happened
 	 * @param event The {@link XEvent} which inverse {@link XCommand} is to be
 	 *            calculated
 	 * @return the inverse of the given {@link XEvent}, successfully executing
 	 *         it will basically result in an undo operation
 	 * 
-	 * @throws IllegalStateException if the given {@link XBaseModel} is in a
+	 * @throws IllegalStateException if the given {@link XReadableModel} is in a
 	 *             different state
-	 * @throws IllegalArgumentException if the given {@link XBaseModel} doesn't
+	 * @throws IllegalArgumentException if the given {@link XReadableModel} doesn't
 	 *             contain the target of the given event or the event is an
 	 *             {@link XRepositoryEvent}
 	 */
-	public static XCommand createUndoCommand(XBaseModel base, XEvent event) {
+	public static XCommand createUndoCommand(XReadableModel base, XEvent event) {
 		return createUndoCommand(base, new SingleValueIterator<XEvent>(event));
 	}
 	
@@ -492,7 +492,7 @@ public class XChanges {
 	 * as they where directly after the event, only the revision numbers may
 	 * differ.
 	 * 
-	 * @param base The {@link XBaseModel} on which the given {@link XEvent}s
+	 * @param base The {@link XReadableModel} on which the given {@link XEvent}s
 	 *            happened.
 	 * @param events an iterator over the {@link XEvent}s which inverse
 	 *            {@link XCommand}s are to be calculated
@@ -505,7 +505,7 @@ public class XChanges {
 	 *             contain the target of any of the events or if any of the
 	 *             events is a {@link XRepositoryEvent}
 	 */
-	public static XCommand createUndoCommand(XBaseModel base, Iterator<XEvent> events) {
+	public static XCommand createUndoCommand(XReadableModel base, Iterator<XEvent> events) {
 		
 		ChangedModel model = new ChangedModel(base);
 		
@@ -541,7 +541,7 @@ public class XChanges {
 	// TODO wouldn't it be better to return false instead of throwing an
 	// exception when the undo operation couldn't be executed?
 	// Exceptions are much nicer for debugging ~Daniel
-	public static void undoChanges(XWritableModel model, XEvent event) {
+	public static void undoChanges(XHalfWritableModel model, XEvent event) {
 		if(event instanceof XTransactionEvent) {
 			undoChanges(model, (XTransactionEvent)event);
 		} else if(event instanceof XAtomicEvent) {
@@ -564,7 +564,7 @@ public class XChanges {
 	 * @throws IllegalArgumentException if the given {@link XModel} doesn't
 	 *             contain the target of any of the events
 	 */
-	public static void undoChanges(XWritableModel model, XTransactionEvent event) {
+	public static void undoChanges(XHalfWritableModel model, XTransactionEvent event) {
 		for(int i = event.size(); i >= 0; i--) {
 			undoChanges(model, event.getEvent(i));
 		}
@@ -584,7 +584,7 @@ public class XChanges {
 	 *             contain the target of the event or if the events is a
 	 *             {@link XRepositoryEvent}
 	 */
-	public static void undoChanges(XWritableModel model, XAtomicEvent event) {
+	public static void undoChanges(XHalfWritableModel model, XAtomicEvent event) {
 		if(event instanceof XModelEvent) {
 			undoChanges(model, (XModelEvent)event);
 			return;
@@ -613,7 +613,7 @@ public class XChanges {
 	 * @throws IllegalArgumentException if the given {@link XModel} doesn't
 	 *             contain the target of the event
 	 */
-	public static void undoChanges(XWritableModel model, XModelEvent event) {
+	public static void undoChanges(XHalfWritableModel model, XModelEvent event) {
 		
 		if(!XI.equals(model.getAddress(), event.getTarget())) {
 			throw new IllegalArgumentException();
@@ -656,14 +656,14 @@ public class XChanges {
 	 * @throws IllegalArgumentException if the given {@link XModel} doesn't
 	 *             contain the target of the event
 	 */
-	public static void undoChanges(XWritableModel model, XObjectEvent event) {
+	public static void undoChanges(XHalfWritableModel model, XObjectEvent event) {
 		
 		if(!model.getAddress().contains(event.getTarget())) {
 			throw new IllegalArgumentException();
 		}
 		
 		XID objectId = event.getObjectID();
-		XWritableObject object = model.getObject(objectId);
+		XHalfWritableObject object = model.getObject(objectId);
 		if(object == null) {
 			throw new IllegalStateException();
 		}
@@ -705,20 +705,20 @@ public class XChanges {
 	 * @throws IllegalArgumentException if the given {@link XModel} doesn't
 	 *             contain the target of the event
 	 */
-	public static void undoChanges(XWritableModel model, XFieldEvent event) {
+	public static void undoChanges(XHalfWritableModel model, XFieldEvent event) {
 		
 		if(!model.getAddress().contains(event.getTarget())) {
 			throw new IllegalArgumentException();
 		}
 		
 		XID objectId = event.getObjectID();
-		XWritableObject object = model.getObject(objectId);
+		XHalfWritableObject object = model.getObject(objectId);
 		if(object == null) {
 			throw new IllegalStateException();
 		}
 		
 		XID fieldId = event.getFieldID();
-		XWritableField field = object.getField(fieldId);
+		XHalfWritableField field = object.getField(fieldId);
 		if(field == null) {
 			throw new IllegalStateException();
 		}

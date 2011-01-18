@@ -7,15 +7,15 @@ import java.util.Set;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
+import org.xydra.base.XID;
+import org.xydra.base.XHalfWritableField;
+import org.xydra.base.XHalfWritableModel;
+import org.xydra.base.XHalfWritableObject;
+import org.xydra.base.value.XIntegerValue;
+import org.xydra.base.value.XStringValue;
+import org.xydra.base.value.XValue;
 import org.xydra.core.X;
 import org.xydra.core.XX;
-import org.xydra.core.model.XID;
-import org.xydra.core.model.XWritableField;
-import org.xydra.core.model.XWritableModel;
-import org.xydra.core.model.XWritableObject;
-import org.xydra.core.value.XIntegerValue;
-import org.xydra.core.value.XStringValue;
-import org.xydra.core.value.XValue;
 import org.xydra.index.impl.FastEntrySetFactory;
 import org.xydra.index.impl.MapSetIndex;
 import org.xydra.index.query.EqualsConstraint;
@@ -38,7 +38,7 @@ import org.xydra.store.impl.delegate.XydraPersistence;
  * 
  * 
  * FIXME This impl does not write changes back to a {@link XydraPersistence}
- * because {@link XWritableModel} is just an im-memory snapshot (at least the
+ * because {@link XHalfWritableModel} is just an im-memory snapshot (at least the
  * ones we have).
  * 
  * @author voelkel
@@ -58,7 +58,7 @@ public class AccountModelWrapper implements XAccountDatabase {
 	
 	private static final long serialVersionUID = 3858107275113200924L;
 	
-	private XWritableModel wrappedAccountModel;
+	private XHalfWritableModel wrappedAccountModel;
 	
 	private MapSetIndex<XID,XID> actor2groups = null;
 	
@@ -83,7 +83,7 @@ public class AccountModelWrapper implements XAccountDatabase {
 	// this.wrappedAccountModel = repository.createModel(modelId);
 	// }
 	
-	public AccountModelWrapper(XWritableModel accountModel) {
+	public AccountModelWrapper(XHalfWritableModel accountModel) {
 		if(accountModel == null) {
 			throw new IllegalArgumentException("accountModel may not be null");
 		}
@@ -165,11 +165,11 @@ public class AccountModelWrapper implements XAccountDatabase {
 	
 	@Override
 	public void removePasswordHash(XID actorId) {
-		XWritableObject actor = this.wrappedAccountModel.getObject(actorId);
+		XHalfWritableObject actor = this.wrappedAccountModel.getObject(actorId);
 		if(actor == null) {
 			return;
 		}
-		XWritableField field = actor.getField(hasPasswordHash);
+		XHalfWritableField field = actor.getField(hasPasswordHash);
 		if(field == null) {
 			return;
 		}
@@ -179,11 +179,11 @@ public class AccountModelWrapper implements XAccountDatabase {
 	@Override
 	public void setPasswordHash(XID actorId, String passwordHash) {
 		assert this.wrappedAccountModel != null;
-		XWritableObject actor = this.wrappedAccountModel.getObject(actorId);
+		XHalfWritableObject actor = this.wrappedAccountModel.getObject(actorId);
 		if(actor == null) {
 			actor = this.wrappedAccountModel.createObject(actorId);
 		}
-		XWritableField field = actor.getField(hasPasswordHash);
+		XHalfWritableField field = actor.getField(hasPasswordHash);
 		if(field == null) {
 			field = actor.createField(hasPasswordHash);
 		}
@@ -192,11 +192,11 @@ public class AccountModelWrapper implements XAccountDatabase {
 	
 	@Override
 	public int incrementFailedLoginAttempts(XID actorId) {
-		XWritableObject actor = this.wrappedAccountModel.getObject(actorId);
+		XHalfWritableObject actor = this.wrappedAccountModel.getObject(actorId);
 		if(actor == null) {
 			actor = this.wrappedAccountModel.createObject(actorId);
 		}
-		XWritableField field = actor.getField(hasFailedLoginAttempts);
+		XHalfWritableField field = actor.getField(hasFailedLoginAttempts);
 		if(field == null) {
 			field = actor.createField(hasFailedLoginAttempts);
 			field.setValue(X.getValueFactory().createIntegerValue(1));
@@ -212,11 +212,11 @@ public class AccountModelWrapper implements XAccountDatabase {
 	
 	@Override
 	public void resetFailedLoginAttempts(XID actorId) {
-		XWritableObject actor = this.wrappedAccountModel.getObject(actorId);
+		XHalfWritableObject actor = this.wrappedAccountModel.getObject(actorId);
 		if(actor == null) {
 			return;
 		}
-		XWritableField field = actor.getField(hasFailedLoginAttempts);
+		XHalfWritableField field = actor.getField(hasFailedLoginAttempts);
 		if(field == null) {
 			return;
 		} else {
@@ -229,11 +229,11 @@ public class AccountModelWrapper implements XAccountDatabase {
 		if(actorId == null) {
 			throw new IllegalArgumentException("actorId must not be null");
 		}
-		XWritableObject actor = this.wrappedAccountModel.getObject(actorId);
+		XHalfWritableObject actor = this.wrappedAccountModel.getObject(actorId);
 		if(actor == null) {
 			return 0;
 		}
-		XWritableField field = actor.getField(hasFailedLoginAttempts);
+		XHalfWritableField field = actor.getField(hasFailedLoginAttempts);
 		if(field == null) {
 			return 0;
 		}
@@ -260,11 +260,11 @@ public class AccountModelWrapper implements XAccountDatabase {
 		if(actorId == null) {
 			throw new IllegalArgumentException("actorId must not be null");
 		}
-		XWritableObject actor = this.wrappedAccountModel.getObject(actorId);
+		XHalfWritableObject actor = this.wrappedAccountModel.getObject(actorId);
 		if(actor == null) {
 			return null;
 		}
-		XWritableField field = actor.getField(hasPasswordHash);
+		XHalfWritableField field = actor.getField(hasPasswordHash);
 		if(field == null) {
 			return null;
 		}

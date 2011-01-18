@@ -1,8 +1,8 @@
 package org.xydra.store.impl.gae.changes;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XType;
 import org.xydra.core.XX;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XType;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;

@@ -1,6 +1,8 @@
 package org.xydra.core.model;
 
 import org.xydra.annotations.ModificationOperation;
+import org.xydra.base.IHasXAddress;
+import org.xydra.base.XID;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XTransaction;

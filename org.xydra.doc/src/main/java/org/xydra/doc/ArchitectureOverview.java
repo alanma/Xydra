@@ -2,16 +2,16 @@ package org.xydra.doc;
 
 import java.io.Serializable;
 
+import org.xydra.base.IHasXAddress;
+import org.xydra.base.IHasXID;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XID;
 import org.xydra.core.change.XSendsFieldEvents;
 import org.xydra.core.change.XSendsModelEvent;
 import org.xydra.core.change.XSendsObjectEvents;
 import org.xydra.core.change.XSendsTransactionEvents;
-import org.xydra.core.model.IHasXAddress;
-import org.xydra.core.model.IHasXID;
-import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XExecutesCommands;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XLoggedModel;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XSynchronizesChanges;
@@ -47,7 +47,7 @@ import org.xydra.core.model.XSynchronizesChanges;
  * </ul>
  * <b>extends</b>
  * <ul>
- * <li>{@link XBaseModel} <br />
+ * <li>{@link XReadableModel} <br />
  * <i>provides state read operations</i> <br />
  * <b>extends</b>
  * <ul>

@@ -2,6 +2,8 @@ package org.xydra.core.model.session.impl.arm;
 
 import java.util.Iterator;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
 import org.xydra.core.access.XAccessManager;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XFieldEventListener;
@@ -10,8 +12,6 @@ import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.change.XRepositoryCommand;
 import org.xydra.core.change.XRepositoryEventListener;
 import org.xydra.core.change.XTransactionEventListener;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.session.XProtectedModel;

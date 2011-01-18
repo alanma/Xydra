@@ -5,12 +5,12 @@ import java.util.Iterator;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
-import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XChangeLog;
-import org.xydra.core.model.XID;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.MiniXMLParser;
 import org.xydra.core.xml.XmlCommand;

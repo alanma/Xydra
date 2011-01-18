@@ -7,6 +7,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.xydra.annotations.ReadOperation;
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XCommand;
@@ -21,15 +25,11 @@ import org.xydra.core.change.impl.memory.MemoryModelCommand;
 import org.xydra.core.change.impl.memory.MemoryModelEvent;
 import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.core.change.impl.memory.MemoryRepositoryEvent;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.model.XType;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
@@ -670,7 +670,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	}
 	
 	@Override
-	protected XBaseModel getTransactionTarget() {
+	protected XReadableModel getTransactionTarget() {
 		return this;
 	}
 	

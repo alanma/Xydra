@@ -8,17 +8,17 @@ import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableField;
+import org.xydra.base.XReadableObject;
+import org.xydra.base.XID;
+import org.xydra.base.XHalfWritableModel;
+import org.xydra.base.value.XIDSetValue;
+import org.xydra.base.value.XIntegerValue;
+import org.xydra.base.value.XStringValue;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseField;
-import org.xydra.core.model.XBaseObject;
-import org.xydra.core.model.XID;
-import org.xydra.core.model.XWritableModel;
-import org.xydra.core.value.XIDSetValue;
-import org.xydra.core.value.XIntegerValue;
-import org.xydra.core.value.XStringValue;
 import org.xydra.index.IEntrySet;
 import org.xydra.index.impl.FastEntrySetFactory;
 import org.xydra.index.impl.MapIndex;
@@ -79,7 +79,7 @@ public class AccountModelWrapperOnPersistence implements XAccountDatabase {
 	private void initialiseFromRemoteSnapshot() {
 		XAddress accountModelAddress = X.getIDProvider().fromComponents(
 		        this.persistence.getRepositoryId(), NamingUtils.ID_ACCOUNT_MODEL, null, null);
-		XWritableModel accountModelSnapshot = this.persistence
+		XHalfWritableModel accountModelSnapshot = this.persistence
 		        .getModelSnapshot(accountModelAddress);
 		// initialize internal data structures
 		this.currentModelRev = accountModelSnapshot.getRevisionNumber();
@@ -87,25 +87,25 @@ public class AccountModelWrapperOnPersistence implements XAccountDatabase {
 		this.actor_hasPasswordHash__string = new MapIndex<XID,String>();
 		this.actor_hasFailedLoginAttempts__int = new MapIndex<XID,Integer>();
 		for(XID objectId : accountModelSnapshot) {
-			XBaseObject object = accountModelSnapshot.getObject(objectId);
+			XReadableObject object = accountModelSnapshot.getObject(objectId);
 			for(XID fieldId : object) {
 				// actorId | "hasPasswordHash" | the password hash (see {@link
 				// HashUtils})
 				if(fieldId.equals(hasPasswordHash)) {
-					XBaseField field = object.getField(fieldId);
+					XReadableField field = object.getField(fieldId);
 					this.actor_hasPasswordHash__string.index(objectId,
 					        ((XStringValue)field.getValue()).contents());
 				} else
 				// actorId | "hasFailedLoginAttempts" | if present: number of
 				// failed login attempts
 				if(fieldId.equals(hasFailedLoginAttempts)) {
-					XBaseField field = object.getField(fieldId);
+					XReadableField field = object.getField(fieldId);
 					this.actor_hasFailedLoginAttempts__int.index(objectId,
 					        ((XIntegerValue)field.getValue()).contents());
 				} else
 				// groupId | "hasMember" | {@link XIDSetValue} actors
 				if(fieldId.equals(hasMember)) {
-					XBaseField field = object.getField(fieldId);
+					XReadableField field = object.getField(fieldId);
 					XIDSetValue members = (XIDSetValue)field.getValue();
 					for(XID member : members) {
 						this.group_hasMember__actor.index(objectId, member);

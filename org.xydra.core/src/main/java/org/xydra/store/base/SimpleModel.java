@@ -5,28 +5,30 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
+import org.xydra.base.XWritableModel;
+import org.xydra.base.XWritableObject;
+import org.xydra.base.XType;
+import org.xydra.base.XHalfWritableModel;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
-import org.xydra.core.model.XType;
-import org.xydra.core.model.XWritableModel;
 
 
 /**
- * A simple data container for {@link XWritableModel}.
+ * A simple data container for {@link XHalfWritableModel}.
  * 
  * Minimal memory footprint, can be used as data transfer object.
  * 
  * @author voelkel
  */
-public class SimpleModel implements XWritableModel, Serializable {
+public class SimpleModel implements Serializable, XWritableModel {
 	
 	private static final long serialVersionUID = 5593443685935758227L;
 	
 	private final XAddress address;
 	private long revisionNumber;
-	private final Map<XID,SimpleObject> objects;
+	private final Map<XID,XWritableObject> objects;
 	
 	public SimpleModel(XAddress address) {
 		this(address, XCommand.NEW);
@@ -36,10 +38,10 @@ public class SimpleModel implements XWritableModel, Serializable {
 		assert address.getAddressedType() == XType.XMODEL;
 		this.address = address;
 		this.revisionNumber = revisionNumber;
-		this.objects = new HashMap<XID,SimpleObject>();
+		this.objects = new HashMap<XID,XWritableObject>();
 	}
 	
-	public SimpleModel(XAddress address, long revisionNumber, Map<XID,SimpleObject> objects) {
+	public SimpleModel(XAddress address, long revisionNumber, Map<XID,XWritableObject> objects) {
 		super();
 		this.address = address;
 		this.revisionNumber = revisionNumber;
@@ -62,24 +64,24 @@ public class SimpleModel implements XWritableModel, Serializable {
 	}
 	
 	@Override
-	public SimpleObject createObject(XID objectId) {
-		SimpleObject object = this.objects.get(objectId);
+	public XWritableObject createObject(XID objectId) {
+		XWritableObject object = this.objects.get(objectId);
 		if(object != null) {
 			return object;
 		}
-		SimpleObject newObject = new SimpleObject(XX.resolveObject(this.address, objectId));
+		XWritableObject newObject = new SimpleObject(XX.resolveObject(this.address, objectId));
 		this.objects.put(objectId, newObject);
 		return newObject;
 	}
 	
 	@Override
 	public boolean removeObject(XID objectId) {
-		SimpleObject oldObject = this.objects.remove(objectId);
+		XWritableObject oldObject = this.objects.remove(objectId);
 		return oldObject != null;
 	}
 	
 	@Override
-	public SimpleObject getObject(XID objectId) {
+	public XWritableObject getObject(XID objectId) {
 		return this.objects.get(objectId);
 	}
 	
@@ -98,14 +100,13 @@ public class SimpleModel implements XWritableModel, Serializable {
 		return this.objects.keySet().iterator();
 	}
 	
-	/**
-	 * @param rev the new revision number
-	 */
+	@Override
 	public void setRevisionNumber(long rev) {
 		this.revisionNumber = rev;
 	}
 	
-	public void addObject(SimpleObject object) {
+	@Override
+	public void addObject(XWritableObject object) {
 		this.objects.put(object.getID(), object);
 	}
 	

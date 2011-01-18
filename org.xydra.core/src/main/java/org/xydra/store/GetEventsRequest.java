@@ -1,8 +1,8 @@
 package org.xydra.store;
 
+import org.xydra.base.XAddress;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XTransaction;
-import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;

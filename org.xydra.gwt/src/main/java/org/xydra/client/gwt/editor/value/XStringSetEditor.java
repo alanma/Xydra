@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.xydra.core.value.XStringSetValue;
-import org.xydra.core.value.XStringValue;
+import org.xydra.base.value.XStringSetValue;
+import org.xydra.base.value.XStringValue;
 import org.xydra.core.value.XV;
 
 

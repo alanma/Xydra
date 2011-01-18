@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.xydra.base.XAddress;
 import org.xydra.core.XX;
-import org.xydra.core.model.XAddress;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XFieldState;
 import org.xydra.core.model.state.XModelState;

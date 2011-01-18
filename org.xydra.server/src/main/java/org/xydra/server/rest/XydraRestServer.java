@@ -11,11 +11,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInJava;
+import org.xydra.base.XReadableField;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XReadableObject;
+import org.xydra.base.XID;
 import org.xydra.core.XX;
-import org.xydra.core.model.XBaseField;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XBaseObject;
-import org.xydra.core.model.XID;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
@@ -272,9 +272,9 @@ public class XydraRestServer {
 		return new ArmXydraSession(server, actor);
 	}
 	
-	public static XBaseModel getModel(IXydraSession session, String modelIdStr) {
+	public static XReadableModel getModel(IXydraSession session, String modelIdStr) {
 		XID modelId = getId(modelIdStr);
-		XBaseModel model = session.getModelSnapshot(modelId);
+		XReadableModel model = session.getModelSnapshot(modelId);
 		if(model == null) {
 			throw new RestlessException(RestlessException.Not_found, "no such model " + modelIdStr
 			        + " in " + session.getRepositoryAddress());
@@ -282,10 +282,10 @@ public class XydraRestServer {
 		return model;
 	}
 	
-	public static XBaseObject getObject(IXydraSession session, String modelIdStr, String objectIdStr) {
+	public static XReadableObject getObject(IXydraSession session, String modelIdStr, String objectIdStr) {
 		XID objectId = getId(objectIdStr);
-		XBaseModel model = getModel(session, modelIdStr);
-		XBaseObject object = model.getObject(objectId);
+		XReadableModel model = getModel(session, modelIdStr);
+		XReadableObject object = model.getObject(objectId);
 		if(object == null) {
 			throw new RestlessException(RestlessException.Not_found, "no such object "
 			        + objectIdStr + " in " + model.getAddress());
@@ -293,11 +293,11 @@ public class XydraRestServer {
 		return object;
 	}
 	
-	public static XBaseField getField(IXydraSession session, String modelIdStr, String objectIdStr,
+	public static XReadableField getField(IXydraSession session, String modelIdStr, String objectIdStr,
 	        String fieldIdStr) {
 		XID fieldId = getId(fieldIdStr);
-		XBaseObject object = getObject(session, modelIdStr, objectIdStr);
-		XBaseField field = object.getField(fieldId);
+		XReadableObject object = getObject(session, modelIdStr, objectIdStr);
+		XReadableField field = object.getField(fieldId);
 		if(field == null) {
 			throw new RestlessException(RestlessException.Not_found, "no field object "
 			        + fieldIdStr + " in " + object.getAddress());

@@ -2,10 +2,10 @@ package org.xydra.core.access.impl.memory;
 
 import java.util.Set;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
 import org.xydra.core.access.XAccessListener;
 import org.xydra.core.access.XAccessManager;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
 import org.xydra.index.query.Pair;
 import org.xydra.store.NamingUtils;
 import org.xydra.store.access.XAccessDatabase;

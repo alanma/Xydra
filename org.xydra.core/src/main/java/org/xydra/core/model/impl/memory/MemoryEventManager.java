@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.RandomAccess;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XCommand;
@@ -18,9 +20,7 @@ import org.xydra.core.change.XRepositoryEvent;
 import org.xydra.core.change.XTransactionEvent;
 import org.xydra.core.change.impl.memory.MemoryFieldEvent;
 import org.xydra.core.change.impl.memory.MemoryTransactionEvent;
-import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XChangeLog;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.impl.memory.SynchronizesChangesImpl.Orphans;
 import org.xydra.core.model.state.XStateTransaction;

@@ -8,12 +8,12 @@ import javax.servlet.ServletContext;
 
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.webapp.WebAppContext;
+import org.xydra.base.XAddress;
 import org.xydra.core.access.XAccessManager;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XRepositoryCommand;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
-import org.xydra.core.model.XAddress;
 import org.xydra.core.test.DemoModelUtil;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;

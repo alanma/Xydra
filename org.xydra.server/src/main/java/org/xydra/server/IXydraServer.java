@@ -2,13 +2,13 @@ package org.xydra.server;
 
 import java.util.Iterator;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XID;
 import org.xydra.core.access.XAccessManager;
 import org.xydra.core.access.XGroupDatabaseWithListeners;
 import org.xydra.core.change.XCommand;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XChangeLog;
-import org.xydra.core.model.XID;
 
 
 /**
@@ -29,7 +29,7 @@ public interface IXydraServer extends Iterable<XID> {
 	 *         TODO Models may not actually be loaded lazyly, better to leave
 	 *         this up to the implementation. ~Daniel
 	 */
-	XBaseModel getModelSnapshot(XID modelId);
+	XReadableModel getModelSnapshot(XID modelId);
 	
 	/**
 	 * @return an interface to read the change log entries for the given model.

@@ -1,7 +1,7 @@
 package org.xydra.core.test.model.state;
 
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
 import org.xydra.core.model.state.XFieldState;
 
 

@@ -3,15 +3,15 @@ package org.xydra.server.rest.data;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableField;
+import org.xydra.base.XReadableObject;
+import org.xydra.base.XID;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XModelCommand;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.change.impl.memory.MemoryModelCommand;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseField;
-import org.xydra.core.model.XBaseObject;
-import org.xydra.core.model.XID;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.MiniXMLParser;
 import org.xydra.core.xml.XmlModel;
@@ -44,7 +44,7 @@ public class XObjectResource {
 	public void get(Restless restless, HttpServletRequest req, HttpServletResponse res,
 	        String modelId, String objectId) {
 		IXydraSession session = XydraRestServer.getSession(restless, req);
-		XBaseObject object = XydraRestServer.getObject(session, modelId, objectId);
+		XReadableObject object = XydraRestServer.getObject(session, modelId, objectId);
 		
 		XmlOutStringBuffer xo = new XmlOutStringBuffer();
 		XmlModel.toXml(object, xo, true, true, false);
@@ -58,7 +58,7 @@ public class XObjectResource {
 		
 		String fieldXml = XydraRestServer.readPostData(req);
 		
-		XBaseField newField;
+		XReadableField newField;
 		try {
 			
 			MiniXMLParser parser = new MiniXMLParserImpl();

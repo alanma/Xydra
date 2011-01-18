@@ -14,6 +14,11 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XReadableObject;
+import org.xydra.base.XID;
+import org.xydra.base.value.XValue;
 import org.xydra.core.XCompareUtils;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.XX;
@@ -26,12 +31,8 @@ import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.change.impl.memory.MemoryModelCommand;
 import org.xydra.core.change.impl.memory.MemoryObjectCommand;
 import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XBaseObject;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
@@ -46,7 +47,6 @@ import org.xydra.core.test.DemoModelUtil;
 import org.xydra.core.test.HasChanged;
 import org.xydra.core.test.TestLogger;
 import org.xydra.core.value.XV;
-import org.xydra.core.value.XValue;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.XydraStore;
@@ -216,7 +216,7 @@ abstract public class AbstractSynchronizerTest {
 		tb.addValue(cookiesAddr, XCommand.NEW, cookiesValue);
 		executeCommand(tb.buildCommand());
 		
-		XBaseModel testModel = loadModelSnapshot(DemoModelUtil.PHONEBOOK_ID);
+		XReadableModel testModel = loadModelSnapshot(DemoModelUtil.PHONEBOOK_ID);
 		
 		// synchronize
 		synchronize(this.sync);
@@ -233,7 +233,7 @@ abstract public class AbstractSynchronizerTest {
 		assertTrue(XCompareUtils.equalState(testModel, this.model));
 		
 		// check the remote model
-		XBaseModel remoteModel = loadModelSnapshot(DemoModelUtil.PHONEBOOK_ID);
+		XReadableModel remoteModel = loadModelSnapshot(DemoModelUtil.PHONEBOOK_ID);
 		assertTrue(XCompareUtils.equalState(testModel, remoteModel));
 		
 		// check that the correct events were sent
@@ -317,10 +317,10 @@ abstract public class AbstractSynchronizerTest {
 		assertTrue(this.model.hasObject(bobId));
 		
 		// check the remote model
-		XBaseModel testModel = loadModelSnapshot(DemoModelUtil.PHONEBOOK_ID);
+		XReadableModel testModel = loadModelSnapshot(DemoModelUtil.PHONEBOOK_ID);
 		assertTrue(testModel.getObject(DemoModelUtil.JOHN_ID).hasField(cakesId));
 		assertFalse(testModel.getObject(DemoModelUtil.JOHN_ID).hasField(newfieldId));
-		XBaseObject remoteJane = testModel.getObject(janeId);
+		XReadableObject remoteJane = testModel.getObject(janeId);
 		assertNotNull(remoteJane);
 		assertTrue(remoteJane.hasField(cookiesId));
 		assertFalse(remoteJane.hasField(cakesId));
@@ -363,7 +363,7 @@ abstract public class AbstractSynchronizerTest {
 		        .getRevisionNumber());
 		
 		// check the remote model
-		XBaseModel remoteModel = loadModelSnapshot(DemoModelUtil.PHONEBOOK_ID);
+		XReadableModel remoteModel = loadModelSnapshot(DemoModelUtil.PHONEBOOK_ID);
 		assertTrue(XCompareUtils.equalState(this.model, remoteModel));
 		
 		// check that the correct events were sent
@@ -397,11 +397,11 @@ abstract public class AbstractSynchronizerTest {
 			field.setValue(XV.toValue("yummy"));
 			long modelRev = model.getRevisionNumber();
 			HasChanged hc1 = HasChanged.listen(model);
-			XBaseModel testModel = XCopyUtils.createSnapshot(model);
+			XReadableModel testModel = XCopyUtils.createSnapshot(model);
 			
 			synchronize(sync);
 			
-			XBaseModel remoteModel = loadModelSnapshot(NEWMODEL_ID);
+			XReadableModel remoteModel = loadModelSnapshot(NEWMODEL_ID);
 			assertNotNull(remoteModel);
 			assertTrue(XCompareUtils.equalState(model, remoteModel));
 			assertTrue(XCompareUtils.equalState(model, testModel));
@@ -522,7 +522,7 @@ abstract public class AbstractSynchronizerTest {
 			
 			// now re-create the model, with some content
 			createPhonebook(NEWMODEL_ID);
-			XBaseModel remoteModel = loadModelSnapshot(NEWMODEL_ID);
+			XReadableModel remoteModel = loadModelSnapshot(NEWMODEL_ID);
 			assertNotNull(remoteModel);
 			
 			// test synchronizing the model with repository
@@ -578,7 +578,7 @@ abstract public class AbstractSynchronizerTest {
 			XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(
 			        this.repoAddr, XCommand.SAFE, NEWMODEL_ID);
 			executeCommand(createCommand);
-			XBaseModel remoteModel = loadModelSnapshot(NEWMODEL_ID);
+			XReadableModel remoteModel = loadModelSnapshot(NEWMODEL_ID);
 			assertNotNull(remoteModel);
 			
 			// test synchronizing the model with repository
@@ -625,12 +625,12 @@ abstract public class AbstractSynchronizerTest {
 			XModel model = new MemoryModel(actorId, passwordHash, modelAddr);
 			DemoModelUtil.setupPhonebook(model);
 			
-			XBaseModel snapshot = XCopyUtils.createSnapshot(model);
+			XReadableModel snapshot = XCopyUtils.createSnapshot(model);
 			
 			synchronize(new XSynchronizer(model, store));
 			
 			assertTrue(XCompareUtils.equalTree(snapshot, model));
-			XBaseModel remoteModel = loadModelSnapshot(NEWMODEL_ID);
+			XReadableModel remoteModel = loadModelSnapshot(NEWMODEL_ID);
 			assertNotNull(remoteModel);
 			assertTrue(XCompareUtils.equalState(model, remoteModel));
 			checkEvents(model);
@@ -661,7 +661,7 @@ abstract public class AbstractSynchronizerTest {
 	
 	private XModel loadModel(XID modelId) {
 		
-		XBaseModel modelSnapshot = loadModelSnapshot(modelId);
+		XReadableModel modelSnapshot = loadModelSnapshot(modelId);
 		assertNotNull(modelSnapshot);
 		
 		// TODO there should be a better way to get a proper XModel from an
@@ -670,11 +670,11 @@ abstract public class AbstractSynchronizerTest {
 		return model;
 	}
 	
-	private XBaseModel loadModelSnapshot(XID modelId) {
+	private XReadableModel loadModelSnapshot(XID modelId) {
 		XAddress modelAddr = XX.resolveModel(this.repoAddr, modelId);
 		
-		SynchronousTestCallback<BatchedResult<XBaseModel>[]> tc;
-		tc = new SynchronousTestCallback<BatchedResult<XBaseModel>[]>();
+		SynchronousTestCallback<BatchedResult<XReadableModel>[]> tc;
+		tc = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
 		
 		store.getModelSnapshots(actorId, passwordHash, new XAddress[] { modelAddr }, tc);
 		

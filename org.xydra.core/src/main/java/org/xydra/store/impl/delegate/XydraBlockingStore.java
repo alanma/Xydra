@@ -2,6 +2,10 @@ package org.xydra.store.impl.delegate;
 
 import java.util.Set;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XReadableObject;
+import org.xydra.base.XID;
 import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
@@ -10,10 +14,6 @@ import org.xydra.core.change.XObjectCommand;
 import org.xydra.core.change.XRepositoryCommand;
 import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.XTransactionEvent;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XBaseObject;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
@@ -173,7 +173,7 @@ public interface XydraBlockingStore {
 	 *             Implementation note: Implementation may choose to supply a
 	 *             lazy-loading stub only.
 	 */
-	XBaseModel getModelSnapshot(XID actorId, String passwordHash, XAddress modelAddress)
+	XReadableModel getModelSnapshot(XID actorId, String passwordHash, XAddress modelAddress)
 	        throws IllegalArgumentException, QuotaException, AuthorisationException,
 	        TimeoutException, ConnectionException, RequestException, InternalStoreException;
 	
@@ -228,7 +228,7 @@ public interface XydraBlockingStore {
 	 * @param objectAddress an array of {@link XAddress} for which objects to
 	 *            get snapshots. Each {@link XAddress} must address an
 	 *            {@link XObject} (repositoryId/modelId/objectId/-).
-	 * @return a {@link XBaseObject}. A null value signals that the requested
+	 * @return a {@link XReadableObject}. A null value signals that the requested
 	 *         object does not exist in the store - or that the actorId has no
 	 *         read-access on it.
 	 * @throws IllegalArgumentException if one of the given parameters is null
@@ -253,7 +253,7 @@ public interface XydraBlockingStore {
 	 *             Implementation note: Implementation may chose to supply a
 	 *             lazy-loading stub only.
 	 */
-	XBaseObject getObjectSnapshot(XID actorId, String passwordHash, XAddress objectAddress)
+	XReadableObject getObjectSnapshot(XID actorId, String passwordHash, XAddress objectAddress)
 	        throws IllegalArgumentException, QuotaException, AuthorisationException,
 	        TimeoutException, ConnectionException, RequestException, InternalStoreException;
 	

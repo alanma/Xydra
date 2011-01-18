@@ -1,6 +1,6 @@
 package org.xydra.store.access.impl.delegate;
 
-import org.xydra.core.value.XIDSetValue;
+import org.xydra.base.value.XIDSetValue;
 import org.xydra.store.base.HashUtils;
 
 

@@ -6,6 +6,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.xydra.base.XID;
+import org.xydra.base.value.impl.memory.MemoryStringValue;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
@@ -18,7 +20,6 @@ import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.change.XRepositoryEvent;
 import org.xydra.core.change.XRepositoryEventListener;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
@@ -26,7 +27,6 @@ import org.xydra.core.model.impl.memory.MemoryField;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryObject;
 import org.xydra.core.test.TestLogger;
-import org.xydra.core.value.impl.memory.MemoryStringValue;
 
 
 public abstract class AbstractChangeTest {

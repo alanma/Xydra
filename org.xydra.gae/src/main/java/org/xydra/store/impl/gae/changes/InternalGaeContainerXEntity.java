@@ -9,11 +9,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.core.XX;
 import org.xydra.core.change.XEvent;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
-import org.xydra.core.model.XType;
 import org.xydra.store.impl.gae.GaeUtils;
 
 import com.google.appengine.api.datastore.Entity;

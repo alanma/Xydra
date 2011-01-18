@@ -2,9 +2,9 @@ package org.xydra.core.model.impl.memory;
 
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
 import org.xydra.core.URIFormatException;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XIDProvider;
 
 

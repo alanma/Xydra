@@ -2,6 +2,8 @@ package org.xydra.core.model;
 
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
+import org.xydra.base.XID;
+import org.xydra.base.XHalfWritableObject;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XObjectCommand;
 import org.xydra.core.change.XObjectEvent;
@@ -24,7 +26,7 @@ import org.xydra.core.model.state.XObjectState;
  * @author Kaidel
  * 
  */
-public interface XObject extends XLoggedObject, XWritableObject, XSynchronizesChanges {
+public interface XObject extends XLoggedObject, XHalfWritableObject, XSynchronizesChanges {
 	
 	/**
 	 * Returns the {@link XField} with the given {@link XID} contained in this

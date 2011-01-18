@@ -3,13 +3,13 @@ package org.xydra.server.rest.data;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XID;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XRepositoryCommand;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XID;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.MiniXMLParser;
 import org.xydra.core.xml.XmlModel;
@@ -33,7 +33,7 @@ public class XRepositoryResource {
 		
 		String modelXml = XydraRestServer.readPostData(req);
 		
-		XBaseModel newModel;
+		XReadableModel newModel;
 		try {
 			
 			MiniXMLParser parser = new MiniXMLParserImpl();
@@ -47,7 +47,7 @@ public class XRepositoryResource {
 		}
 		
 		boolean hadModel = true;
-		XBaseModel oldModel = session.getModelSnapshot(newModel.getID());
+		XReadableModel oldModel = session.getModelSnapshot(newModel.getID());
 		if(oldModel == null) {
 			XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(session
 			        .getRepositoryAddress(), false, newModel.getID());

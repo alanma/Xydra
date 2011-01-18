@@ -7,6 +7,9 @@ import java.util.List;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
+import org.xydra.base.value.XValue;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XEvent;
@@ -20,11 +23,8 @@ import org.xydra.core.change.impl.memory.MemoryModelEvent;
 import org.xydra.core.change.impl.memory.MemoryObjectEvent;
 import org.xydra.core.change.impl.memory.MemoryRepositoryEvent;
 import org.xydra.core.change.impl.memory.MemoryTransactionEvent;
-import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XChangeLog;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.state.XChangeLogState;
-import org.xydra.core.value.XValue;
 import org.xydra.index.XI;
 
 

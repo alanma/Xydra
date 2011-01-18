@@ -1,12 +1,12 @@
 package org.xydra.core;
 
-import org.xydra.core.model.XBaseField;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XBaseObject;
-import org.xydra.core.model.XBaseRepository;
-import org.xydra.core.model.XID;
+import org.xydra.base.XReadableField;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XReadableObject;
+import org.xydra.base.XReadableRepository;
+import org.xydra.base.XID;
+import org.xydra.base.value.XValue;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.value.XValue;
 import org.xydra.index.XI;
 
 /**
@@ -19,16 +19,16 @@ import org.xydra.index.XI;
 public class XCompareUtils {
 
 	/**
-	 * Check if two {@link XBaseRepository}s have the same {@link XID}, the same
-	 * revision and the same {@link XBaseModel}s as defined by
-	 * {@link XCompareUtils#equalState(XBaseModel, XBaseModel)}.
+	 * Check if two {@link XReadableRepository}s have the same {@link XID}, the same
+	 * revision and the same {@link XReadableModel}s as defined by
+	 * {@link XCompareUtils#equalState(XReadableModel, XReadableModel)}.
 	 * 
-	 * This is similar to {@link XCompareUtils#equalTree(XBaseRepository, XBaseRepository)}
+	 * This is similar to {@link XCompareUtils#equalTree(XReadableRepository, XReadableRepository)}
 	 * but also checks the revision number.
 	 * 
-	 * @return true if the two {@link XBaseRepository}s have the same state.
+	 * @return true if the two {@link XReadableRepository}s have the same state.
 	 */
-	public static boolean equalState(XBaseRepository repoA, XBaseRepository repoB) {
+	public static boolean equalState(XReadableRepository repoA, XReadableRepository repoB) {
 		
 		if(repoA == null && repoB == null) {
 			return true;
@@ -45,8 +45,8 @@ public class XCompareUtils {
 		
 		for(XID modelId : repoA) {
 			
-			XBaseModel modelA = repoA.getModel(modelId);
-			XBaseModel modelB = repoB.getModel(modelId);
+			XReadableModel modelA = repoA.getModel(modelId);
+			XReadableModel modelB = repoB.getModel(modelId);
 			
 			if(modelB == null) {
 				return false;
@@ -70,18 +70,18 @@ public class XCompareUtils {
 	}
 
 	/**
-	 * Check if two {@link XBaseModel}s have the same {@link XID}, the same
-	 * revision and the same {@link XBaseObject}s as defined by
-	 * {@link XCompareUtils#equalState(XBaseObject, XBaseObject)}.
+	 * Check if two {@link XReadableModel}s have the same {@link XID}, the same
+	 * revision and the same {@link XReadableObject}s as defined by
+	 * {@link XCompareUtils#equalState(XReadableObject, XReadableObject)}.
 	 * 
-	 * This is similar to {@link XCompareUtils#equalTree(XBaseModel, XBaseModel)} but also
+	 * This is similar to {@link XCompareUtils#equalTree(XReadableModel, XReadableModel)} but also
 	 * checks the revision number.
 	 * 
 	 * Parent-{@link XRepository}s, if they exist, are not compared.
 	 * 
-	 * @return true if the two {@link XBaseModel}s have the same state.
+	 * @return true if the two {@link XReadableModel}s have the same state.
 	 */
-	public static boolean equalState(XBaseModel modelA, XBaseModel modelB) {
+	public static boolean equalState(XReadableModel modelA, XReadableModel modelB) {
 		
 		if(modelA == null && modelB == null) {
 			return true;
@@ -102,8 +102,8 @@ public class XCompareUtils {
 		
 		for(XID objectId : modelA) {
 			
-			XBaseObject objectA = modelA.getObject(objectId);
-			XBaseObject objectB = modelB.getObject(objectId);
+			XReadableObject objectA = modelA.getObject(objectId);
+			XReadableObject objectB = modelB.getObject(objectId);
 			
 			if(objectB == null) {
 				return false;
@@ -127,18 +127,18 @@ public class XCompareUtils {
 	}
 
 	/**
-	 * Check if two {@link XBaseObject}s have the same {@link XID}, the same
-	 * revision and the same {@link XBaseField}s as defined by
-	 * {@link XCompareUtils#equalState(XBaseField, XBaseField)}.
+	 * Check if two {@link XReadableObject}s have the same {@link XID}, the same
+	 * revision and the same {@link XReadableField}s as defined by
+	 * {@link XCompareUtils#equalState(XReadableField, XReadableField)}.
 	 * 
-	 * This is similar to {@link XCompareUtils#equalTree(XBaseObject, XBaseObject)} but also
+	 * This is similar to {@link XCompareUtils#equalTree(XReadableObject, XReadableObject)} but also
 	 * checks the revision number.
 	 * 
-	 * Parent-{@link XBaseModel}s, if they exist, are not compared
+	 * Parent-{@link XReadableModel}s, if they exist, are not compared
 	 * 
-	 * @return true if the two {@link XBaseObject}s have the same state.
+	 * @return true if the two {@link XReadableObject}s have the same state.
 	 */
-	public static boolean equalState(XBaseObject objectA, XBaseObject objectB) {
+	public static boolean equalState(XReadableObject objectA, XReadableObject objectB) {
 		
 		if(objectA == null && objectB == null) {
 			return true;
@@ -159,8 +159,8 @@ public class XCompareUtils {
 		
 		for(XID fieldId : objectA) {
 			
-			XBaseField fieldA = objectA.getField(fieldId);
-			XBaseField fieldB = objectB.getField(fieldId);
+			XReadableField fieldA = objectA.getField(fieldId);
+			XReadableField fieldB = objectB.getField(fieldId);
 			
 			if(fieldB == null) {
 				return false;
@@ -184,18 +184,18 @@ public class XCompareUtils {
 	}
 
 	/**
-	 * Check if two {@link XBaseField}s have the same ID, the same revision and
+	 * Check if two {@link XReadableField}s have the same ID, the same revision and
 	 * the same {@link XValue}.
 	 * 
-	 * This is similar to {@link XCompareUtils#equalTree(XBaseField, XBaseField)} but also
+	 * This is similar to {@link XCompareUtils#equalTree(XReadableField, XReadableField)} but also
 	 * checks the revision number.
 	 * 
-	 * Parent-{@link XBaseObject}s, if they exist, are not compared
+	 * Parent-{@link XReadableObject}s, if they exist, are not compared
 	 * 
-	 * @return true if the two {@link XBaseField}s have the same state.
+	 * @return true if the two {@link XReadableField}s have the same state.
 	 */
 	// 2010-10-27: used here + in several different functionality tests
-	public static boolean equalState(XBaseField fieldA, XBaseField fieldB) {
+	public static boolean equalState(XReadableField fieldA, XReadableField fieldB) {
 		
 		if(fieldA == null && fieldB == null) {
 			return true;
@@ -222,18 +222,18 @@ public class XCompareUtils {
 	}
 
 	/**
-	 * Check if two {@link XBaseRepository}s have the same {@link XID} and the
-	 * same {@link XBaseModel}s as defined by
-	 * {@link XCompareUtils#equalTree(XBaseModel, XBaseModel)}.
+	 * Check if two {@link XReadableRepository}s have the same {@link XID} and the
+	 * same {@link XReadableModel}s as defined by
+	 * {@link XCompareUtils#equalTree(XReadableModel, XReadableModel)}.
 	 * 
 	 * This is similar to {@link equalState}
 	 * but ignores the revision number.
 	 * 
-	 * Parent-{@link XBaseModel}s, if they exist, are not compared.
+	 * Parent-{@link XReadableModel}s, if they exist, are not compared.
 	 * 
-	 * @return true if the two {@link XBaseRepository}s represent the same tree.
+	 * @return true if the two {@link XReadableRepository}s represent the same tree.
 	 */
-	public static boolean equalTree(XBaseRepository repoA, XBaseRepository repoB) {
+	public static boolean equalTree(XReadableRepository repoA, XReadableRepository repoB) {
 		
 		if(repoA == null && repoB == null) {
 			return true;
@@ -250,8 +250,8 @@ public class XCompareUtils {
 		
 		for(XID modelId : repoA) {
 			
-			XBaseModel modelA = repoA.getModel(modelId);
-			XBaseModel modelB = repoB.getModel(modelId);
+			XReadableModel modelA = repoA.getModel(modelId);
+			XReadableModel modelB = repoB.getModel(modelId);
 			
 			if(modelB == null) {
 				return false;
@@ -275,18 +275,18 @@ public class XCompareUtils {
 	}
 
 	/**
-	 * Check if two {@link XBaseModel}s have the same {@link XID} and the same
-	 * {@link XBaseObject}s as defined by
-	 * {@link XCompareUtils#equalTree(XBaseObject, XBaseObject)}.
+	 * Check if two {@link XReadableModel}s have the same {@link XID} and the same
+	 * {@link XReadableObject}s as defined by
+	 * {@link XCompareUtils#equalTree(XReadableObject, XReadableObject)}.
 	 * 
 	 * This is similar to {@link equalState} but
 	 * ignores the revision number.
 	 * 
-	 * Parent-{@link XBaseRepository}s, if they exist, are not compared.
+	 * Parent-{@link XReadableRepository}s, if they exist, are not compared.
 	 * 
-	 * @return true if the two {@link XBaseModel}s represent the same tree.
+	 * @return true if the two {@link XReadableModel}s represent the same tree.
 	 */
-	public static boolean equalTree(XBaseModel modelA, XBaseModel modelB) {
+	public static boolean equalTree(XReadableModel modelA, XReadableModel modelB) {
 		
 		if(modelA == null && modelB == null) {
 			return true;
@@ -303,8 +303,8 @@ public class XCompareUtils {
 		
 		for(XID objectId : modelA) {
 			
-			XBaseObject objectA = modelA.getObject(objectId);
-			XBaseObject objectB = modelB.getObject(objectId);
+			XReadableObject objectA = modelA.getObject(objectId);
+			XReadableObject objectB = modelB.getObject(objectId);
 			
 			if(objectB == null) {
 				return false;
@@ -328,18 +328,18 @@ public class XCompareUtils {
 	}
 
 	/**
-	 * Check if two {@link XBaseObject}s have the same {@link XID} and the same
-	 * {@link XBaseField}s as defined by
-	 * {@link XCompareUtils#equalTree(XBaseField, XBaseField)}.
+	 * Check if two {@link XReadableObject}s have the same {@link XID} and the same
+	 * {@link XReadableField}s as defined by
+	 * {@link XCompareUtils#equalTree(XReadableField, XReadableField)}.
 	 * 
 	 * This is similar to {@link equalState} but
 	 * ignores the revision number.
 	 * 
-	 * Parent-{@link XBaseModel}s, if they exist, are not compared.
+	 * Parent-{@link XReadableModel}s, if they exist, are not compared.
 	 * 
-	 * @return true if the two {@link XBaseObject}s represent the same subtree.
+	 * @return true if the two {@link XReadableObject}s represent the same subtree.
 	 */
-	public static boolean equalTree(XBaseObject objectA, XBaseObject objectB) {
+	public static boolean equalTree(XReadableObject objectA, XReadableObject objectB) {
 		
 		if(objectA == null && objectB == null) {
 			return true;
@@ -356,8 +356,8 @@ public class XCompareUtils {
 		
 		for(XID fieldId : objectA) {
 			
-			XBaseField fieldA = objectA.getField(fieldId);
-			XBaseField fieldB = objectB.getField(fieldId);
+			XReadableField fieldA = objectA.getField(fieldId);
+			XReadableField fieldB = objectB.getField(fieldId);
 			
 			if(fieldB == null) {
 				return false;
@@ -381,17 +381,17 @@ public class XCompareUtils {
 	}
 
 	/**
-	 * Check if two {@link XBaseField}s have the same {@link XID} and the same
+	 * Check if two {@link XReadableField}s have the same {@link XID} and the same
 	 * {@link XValue}.
 	 * 
 	 * This is similar to {@link equalState} but
 	 * ignores the revision number.
 	 * 
-	 * Parent-{@link XBaseObject}s, if they exist, are not compared.
+	 * Parent-{@link XReadableObject}s, if they exist, are not compared.
 	 * 
-	 * @return true if the two {@link XBaseField}s represent the same subtree.
+	 * @return true if the two {@link XReadableField}s represent the same subtree.
 	 */
-	public static boolean equalTree(XBaseField fieldA, XBaseField fieldB) {
+	public static boolean equalTree(XReadableField fieldA, XReadableField fieldB) {
 		
 		if(fieldA == null && fieldB == null) {
 			return true;

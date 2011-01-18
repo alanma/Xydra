@@ -1,10 +1,10 @@
 package org.xydra.client;
 
-import org.xydra.core.model.XBaseField;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XBaseObject;
+import org.xydra.base.XReadableField;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XReadableObject;
+import org.xydra.base.XID;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.store.AccessException;
@@ -89,7 +89,7 @@ public interface XDataService {
 	 *            if the action changed anything (true) or if the remote model's
 	 *            state was equal to the passed one.
 	 */
-	void setModel(XBaseModel model, Callback<Boolean> callback);
+	void setModel(XReadableModel model, Callback<Boolean> callback);
 	
 	/**
 	 * Set the remote state of the object with the given ID.
@@ -105,7 +105,7 @@ public interface XDataService {
 	 *            if the action changed anything (true) or if the remote
 	 *            object's state was equal to the passed one.
 	 */
-	void setObject(XID modelId, XBaseObject object, Callback<Boolean> callback);
+	void setObject(XID modelId, XReadableObject object, Callback<Boolean> callback);
 	
 	/**
 	 * Set the remote state of the field with the given ID.
@@ -124,7 +124,7 @@ public interface XDataService {
 	 *            if the action changed anything (true) or if the remote field's
 	 *            state was equal to the passed one.
 	 */
-	void setField(XID modelId, XID objectId, XBaseField field, Callback<Boolean> callback);
+	void setField(XID modelId, XID objectId, XReadableField field, Callback<Boolean> callback);
 	
 	/**
 	 * Remove the model with the given ID.

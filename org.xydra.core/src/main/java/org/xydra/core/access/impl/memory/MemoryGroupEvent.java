@@ -3,10 +3,10 @@ package org.xydra.core.access.impl.memory;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
+import org.xydra.base.XID;
 import org.xydra.core.access.XAccessEvent;
 import org.xydra.core.access.XGroupEvent;
 import org.xydra.core.change.ChangeType;
-import org.xydra.core.model.XID;
 
 
 /**

@@ -3,11 +3,11 @@ package org.xydra.store.impl.delegate;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.access.impl.memory.AccountModelWrapper;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.impl.memory.UUID;
 import org.xydra.store.NamingUtils;
 import org.xydra.store.XydraStoreAdmin;

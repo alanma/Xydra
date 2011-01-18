@@ -1,9 +1,9 @@
 package org.xydra.core.access;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XType;
 import org.xydra.core.access.impl.memory.CompositeAccessManager;
 import org.xydra.core.access.impl.memory.MemoryAccessManager;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XType;
 import org.xydra.core.test.access.AbstractAccessManagerTest;
 
 

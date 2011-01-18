@@ -1,6 +1,8 @@
 package org.xydra.core.model;
 
 import org.xydra.annotations.ReadOperation;
+import org.xydra.base.XID;
+import org.xydra.base.XHalfWritableObject;
 import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XSendsFieldEvents;
 import org.xydra.core.change.XSendsObjectEvents;
@@ -18,7 +20,7 @@ import org.xydra.core.change.XSendsTransactionEvents;
  * 
  * @author dscharrer
  */
-public interface XLoggedObject extends XWritableObject, XSendsObjectEvents, XSendsFieldEvents,
+public interface XLoggedObject extends XHalfWritableObject, XSendsObjectEvents, XSendsFieldEvents,
         XSendsTransactionEvents, IHasChangeLog {
 	
 	/**

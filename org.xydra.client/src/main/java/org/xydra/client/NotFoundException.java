@@ -1,7 +1,7 @@
 package org.xydra.client;
 
+import org.xydra.base.XAddress;
 import org.xydra.core.XX;
-import org.xydra.core.model.XAddress;
 import org.xydra.store.RequestException;
 
 

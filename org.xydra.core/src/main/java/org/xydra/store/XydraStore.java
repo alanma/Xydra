@@ -2,6 +2,10 @@ package org.xydra.store;
 
 import java.util.Set;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XReadableObject;
+import org.xydra.base.XID;
 import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XEvent;
@@ -10,10 +14,6 @@ import org.xydra.core.change.XObjectCommand;
 import org.xydra.core.change.XRepositoryCommand;
 import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.XTransactionEvent;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XBaseObject;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
@@ -163,7 +163,7 @@ public interface XydraStore {
 	 *             lazy-loading stub only.
 	 */
 	void getModelSnapshots(XID actorId, String passwordHash, XAddress[] modelAddresses,
-	        Callback<BatchedResult<XBaseModel>[]> callback) throws IllegalArgumentException;
+	        Callback<BatchedResult<XReadableModel>[]> callback) throws IllegalArgumentException;
 	
 	/**
 	 * Read current state.
@@ -234,7 +234,7 @@ public interface XydraStore {
 	 *            get snapshots. Each {@link XAddress} must address an
 	 *            {@link XObject} (repositoryId/modelId/objectId/-).
 	 * @param callback Asynchronous callback to signal success or failure. On
-	 *            success, an array of {@link XBaseObject} is returned, in the
+	 *            success, an array of {@link XReadableObject} is returned, in the
 	 *            same order of the objectAddresses given in the request. A null
 	 *            value in the array signals that the requested object does not
 	 *            exist in the store - or that the actorId has no read-access on
@@ -245,7 +245,7 @@ public interface XydraStore {
 	 *             lazy-loading stub only.
 	 */
 	void getObjectSnapshots(XID actorId, String passwordHash, XAddress[] objectAddresses,
-	        Callback<BatchedResult<XBaseObject>[]> callback) throws IllegalArgumentException;
+	        Callback<BatchedResult<XReadableObject>[]> callback) throws IllegalArgumentException;
 	
 	/**
 	 * Read current state.

@@ -7,16 +7,16 @@ import java.util.Set;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
+import org.xydra.base.XHalfWritableField;
+import org.xydra.base.XHalfWritableModel;
+import org.xydra.base.XHalfWritableObject;
+import org.xydra.base.value.XBooleanValue;
+import org.xydra.base.value.XValue;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.access.impl.memory.MemoryAccessDefinition;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XID;
-import org.xydra.core.model.XWritableField;
-import org.xydra.core.model.XWritableModel;
-import org.xydra.core.model.XWritableObject;
-import org.xydra.core.value.XBooleanValue;
-import org.xydra.core.value.XValue;
 import org.xydra.index.query.Pair;
 import org.xydra.store.MAXTodo;
 import org.xydra.store.NamingUtils;
@@ -55,7 +55,7 @@ public class AccessModelWrapperOnPersistence implements XAccessDatabase, Seriali
 	private XID modelId;
 	
 	private transient XAddress address;
-	private transient XWritableModel modelSnapshot;
+	private transient XHalfWritableModel modelSnapshot;
 	
 	/**
 	 * @param persistence
@@ -72,12 +72,12 @@ public class AccessModelWrapperOnPersistence implements XAccessDatabase, Seriali
 	@Override
 	public XAccessValue getAccessDefinition(XID actor, XAddress resource, XID access)
 	        throws IllegalArgumentException {
-		XWritableObject object = getModelSnapshot().getObject(actor);
+		XHalfWritableObject object = getModelSnapshot().getObject(actor);
 		if(object == null) {
 			return XAccessValue.UNDEFINED;
 		}
 		XID fieldId = toFieldId(resource, access);
-		XWritableField field = object.getField(fieldId);
+		XHalfWritableField field = object.getField(fieldId);
 		if(field == null) {
 			return XAccessValue.UNDEFINED;
 		}
@@ -93,7 +93,7 @@ public class AccessModelWrapperOnPersistence implements XAccessDatabase, Seriali
 		}
 	}
 	
-	private XWritableModel getModelSnapshot() {
+	private XHalfWritableModel getModelSnapshot() {
 		if(this.modelSnapshot == null) {
 			this.modelSnapshot = this.persistence.getModelSnapshot(getModelAddress());
 		}
@@ -129,9 +129,9 @@ public class AccessModelWrapperOnPersistence implements XAccessDatabase, Seriali
 	 */
 	public Set<XAccessDefinition> getDefinitionsFor(XID actorId) {
 		Set<XAccessDefinition> defs = new HashSet<XAccessDefinition>();
-		XWritableObject actorObject = getModelSnapshot().getObject(actorId);
+		XHalfWritableObject actorObject = getModelSnapshot().getObject(actorId);
 		for(XID fieldId : actorObject) {
-			XWritableField field = actorObject.getField(fieldId);
+			XHalfWritableField field = actorObject.getField(fieldId);
 			XValue value = field.getValue();
 			if(value != null) {
 				// parse fieldId

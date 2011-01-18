@@ -6,13 +6,13 @@ package org.xydra.store.impl.gae.changes;
 import java.util.ConcurrentModificationException;
 import java.util.Set;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableField;
+import org.xydra.base.XReadableObject;
+import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.core.XX;
 import org.xydra.core.change.XEvent;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseField;
-import org.xydra.core.model.XBaseObject;
-import org.xydra.core.model.XID;
-import org.xydra.core.model.XType;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.impl.gae.GaeUtils;
@@ -31,7 +31,7 @@ import com.sun.org.apache.xpath.internal.objects.XObject;
  * 
  */
 public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> implements
-        XBaseObject {
+        XReadableObject {
 	
 	private static final Logger log = LoggerFactory.getLogger(InternalGaeObject.class);
 	
@@ -89,7 +89,7 @@ public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeFi
 		if(this.objectRev == XEvent.RevisionNotAvailable) {
 			
 			for(XID fieldId : this) {
-				XBaseField field = getField(fieldId);
+				XReadableField field = getField(fieldId);
 				assert field != null;
 				long fieldRev = field.getRevisionNumber();
 				assert fieldRev >= 0;

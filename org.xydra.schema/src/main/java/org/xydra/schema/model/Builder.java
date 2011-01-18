@@ -1,7 +1,7 @@
 package org.xydra.schema.model;
 
+import org.xydra.base.XID;
 import org.xydra.core.X;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.impl.memory.MemoryModel;

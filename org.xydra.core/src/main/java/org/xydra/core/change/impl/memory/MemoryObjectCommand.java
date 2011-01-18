@@ -1,12 +1,12 @@
 package org.xydra.core.change.impl.memory;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
 import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XObjectCommand;
-import org.xydra.core.model.XAddress;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XID;
 
 
 /**

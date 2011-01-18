@@ -3,6 +3,14 @@ package org.xydra.core.model.delta;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableField;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XReadableObject;
+import org.xydra.base.XID;
+import org.xydra.base.XWritableField;
+import org.xydra.base.XWritableObject;
+import org.xydra.base.value.XValue;
 import org.xydra.core.change.XAtomicEvent;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XRepositoryCommand;
@@ -10,17 +18,9 @@ import org.xydra.core.change.impl.memory.MemoryFieldEvent;
 import org.xydra.core.change.impl.memory.MemoryModelEvent;
 import org.xydra.core.change.impl.memory.MemoryObjectEvent;
 import org.xydra.core.change.impl.memory.MemoryRepositoryEvent;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseField;
-import org.xydra.core.model.XBaseModel;
-import org.xydra.core.model.XBaseObject;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.impl.memory.SynchronizesChangesImpl;
-import org.xydra.core.value.XValue;
 import org.xydra.index.query.Pair;
-import org.xydra.store.base.SimpleField;
 import org.xydra.store.base.SimpleModel;
-import org.xydra.store.base.SimpleObject;
 
 
 /**
@@ -40,12 +40,12 @@ public abstract class DeltaUtils {
 		long rev = changedModel.getRevisionNumber();
 		
 		for(XID objectId : changedModel.getRemovedObjects()) {
-			XBaseObject removedObject = changedModel.getOldObject(objectId);
+			XReadableObject removedObject = changedModel.getOldObject(objectId);
 			DeltaUtils.createEventsForRemovedObject(events, rev, actorId, removedObject, inTrans,
 			        implied);
 		}
 		
-		for(XBaseObject object : changedModel.getNewObjects()) {
+		for(XReadableObject object : changedModel.getNewObjects()) {
 			events.add(MemoryModelEvent.createAddEvent(actorId, changedModel.getAddress(),
 			        object.getID(), rev, inTrans));
 			for(XID fieldId : object) {
@@ -63,7 +63,7 @@ public abstract class DeltaUtils {
 				        object.getOldField(fieldId), inTrans, false);
 			}
 			
-			for(XBaseField field : object.getNewFields()) {
+			for(XReadableField field : object.getNewFields()) {
 				DeltaUtils.createEventsForNewField(events, rev, actorId, object, field, inTrans);
 			}
 			
@@ -94,7 +94,7 @@ public abstract class DeltaUtils {
 	}
 	
 	public static void createEventsForNewField(List<XAtomicEvent> events, long rev, XID actorId,
-	        XBaseObject object, XBaseField field, boolean inTrans) {
+	        XReadableObject object, XReadableField field, boolean inTrans) {
 		long objectRev = object.getRevisionNumber();
 		events.add(MemoryObjectEvent.createAddEvent(actorId, object.getAddress(), field.getID(),
 		        rev, objectRev, inTrans));
@@ -105,7 +105,7 @@ public abstract class DeltaUtils {
 	}
 	
 	public static void createEventsForRemovedObject(List<XAtomicEvent> events, long modelRev,
-	        XID actorId, XBaseObject object, boolean inTrans, boolean implied) {
+	        XID actorId, XReadableObject object, boolean inTrans, boolean implied) {
 		for(XID fieldId : object) {
 			DeltaUtils.createEventsForRemovedField(events, modelRev, actorId, object,
 			        object.getField(fieldId), inTrans, true);
@@ -115,7 +115,7 @@ public abstract class DeltaUtils {
 	}
 	
 	public static void createEventsForRemovedField(List<XAtomicEvent> events, long modelRev,
-	        XID actorId, XBaseObject object, XBaseField field, boolean inTrans, boolean implied) {
+	        XID actorId, XReadableObject object, XReadableField field, boolean inTrans, boolean implied) {
 		long objectRev = object.getRevisionNumber();
 		long fieldRev = field.getRevisionNumber();
 		if(!field.isEmpty()) {
@@ -128,7 +128,7 @@ public abstract class DeltaUtils {
 	
 	/**
 	 * @return the appropriate events for the change (as returned by
-	 *         {@link #executeCommand(XBaseModel, XCommand)}
+	 *         {@link #executeCommand(XReadableModel, XCommand)}
 	 */
 	public static List<XAtomicEvent> createEvents(XAddress modelAddr,
 	        Pair<ChangedModel,ModelChange> change, XID actorId, long rev) {
@@ -179,7 +179,7 @@ public abstract class DeltaUtils {
 	 *         (Pair#getFirst()) and if the model was added or removed by the
 	 *         command (Pair#getSecond()). Returns null if the command failed.
 	 */
-	public static Pair<ChangedModel,ModelChange> executeCommand(XBaseModel model, XCommand command) {
+	public static Pair<ChangedModel,ModelChange> executeCommand(XReadableModel model, XCommand command) {
 		
 		if(command instanceof XRepositoryCommand) {
 			
@@ -272,9 +272,9 @@ public abstract class DeltaUtils {
 			model.removeObject(objectId);
 		}
 		
-		for(XBaseObject object : changedModel.getNewObjects()) {
+		for(XReadableObject object : changedModel.getNewObjects()) {
 			assert !model.hasObject(object.getID());
-			SimpleObject newObject = model.createObject(object.getID());
+			XWritableObject newObject = model.createObject(object.getID());
 			for(XID fieldId : object) {
 				applyChanges(newObject, object.getField(fieldId), rev);
 			}
@@ -285,7 +285,7 @@ public abstract class DeltaUtils {
 			
 			boolean objectChanged = false;
 			
-			SimpleObject object = model.getObject(changedObject.getID());
+			XWritableObject object = model.getObject(changedObject.getID());
 			assert object != null;
 			
 			for(XID fieldId : changedObject.getRemovedFields()) {
@@ -294,14 +294,14 @@ public abstract class DeltaUtils {
 				objectChanged = true;
 			}
 			
-			for(XBaseField field : changedObject.getNewFields()) {
+			for(XReadableField field : changedObject.getNewFields()) {
 				applyChanges(object, field, rev);
 				objectChanged = true;
 			}
 			
 			for(ChangedField changedField : changedObject.getChangedFields()) {
 				if(changedField.isChanged()) {
-					SimpleField field = object.getField(changedField.getID());
+					XWritableField field = object.getField(changedField.getID());
 					assert field != null;
 					boolean valueChanged = field.setValue(changedField.getValue());
 					assert valueChanged;
@@ -320,9 +320,9 @@ public abstract class DeltaUtils {
 		
 	}
 	
-	public static void applyChanges(SimpleObject object, XBaseField field, long rev) {
+	public static void applyChanges(XWritableObject object, XReadableField field, long rev) {
 		assert !object.hasField(field.getID());
-		SimpleField newField = object.createField(field.getID());
+		XWritableField newField = object.createField(field.getID());
 		newField.setValue(field.getValue());
 		newField.setRevisionNumber(rev);
 	}

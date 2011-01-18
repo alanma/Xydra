@@ -5,6 +5,9 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.xydra.annotations.ReadOperation;
+import org.xydra.base.XAddress;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XID;
 import org.xydra.core.XX;
 import org.xydra.core.change.ChangeType;
 import org.xydra.core.change.XCommand;
@@ -17,11 +20,8 @@ import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.impl.memory.MemoryFieldEvent;
 import org.xydra.core.change.impl.memory.MemoryObjectCommand;
 import org.xydra.core.change.impl.memory.MemoryObjectEvent;
-import org.xydra.core.model.XAddress;
-import org.xydra.core.model.XBaseModel;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XID;
 import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
@@ -674,7 +674,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	}
 	
 	@Override
-	protected XBaseModel getTransactionTarget() {
+	protected XReadableModel getTransactionTarget() {
 		if(this.father != null) {
 			return this.father;
 		}
