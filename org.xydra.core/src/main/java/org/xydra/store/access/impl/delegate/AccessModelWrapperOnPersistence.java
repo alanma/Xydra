@@ -102,7 +102,7 @@ public class AccessModelWrapperOnPersistence implements XAccessDatabase, Seriali
 		}
 		if(this.modelSnapshot == null) {
 			
-			// FIXME don't complain - create it
+			// don't complain - create it
 			throw new IllegalStateException("No model found with address '" + getModelAddress()
 			        + "'");
 		}

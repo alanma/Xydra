@@ -3,12 +3,12 @@ package org.xydra.store.base;
 import java.io.Serializable;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableModel;
-import org.xydra.base.XReadableObject;
-import org.xydra.base.XID;
 import org.xydra.base.XHalfWritableField;
 import org.xydra.base.XHalfWritableModel;
 import org.xydra.base.XHalfWritableObject;
+import org.xydra.base.XID;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XReadableObject;
 import org.xydra.core.X;
 import org.xydra.core.change.XCommand;
 import org.xydra.store.XydraStore;
@@ -19,7 +19,10 @@ import org.xydra.store.XydraStore;
  * 
  * @author voelkel
  */
-public class HalfWritableModelOnStore extends ReadableModelOnStore implements XHalfWritableModel, Serializable {
+@Deprecated
+@SuppressWarnings("deprecation")
+public class HalfWritableModelOnStore extends ReadableModelOnStore implements XHalfWritableModel,
+        Serializable {
 	
 	private static final long serialVersionUID = -6112519567015753881L;
 	
@@ -68,8 +71,8 @@ public class HalfWritableModelOnStore extends ReadableModelOnStore implements XH
 			return null;
 		}
 		
-		HalfWritableObjectOnStore writableObject = new HalfWritableObjectOnStore(this.credentials, this.store, baseObject
-		        .getAddress());
+		HalfWritableObjectOnStore writableObject = new HalfWritableObjectOnStore(this.credentials,
+		        this.store, baseObject.getAddress());
 		for(XID fieldId : baseObject) {
 			XHalfWritableField writabelField = writableObject.createField(fieldId);
 			writabelField.setValue(baseObject.getField(fieldId).getValue());

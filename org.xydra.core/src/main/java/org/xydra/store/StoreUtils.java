@@ -1,14 +1,15 @@
 package org.xydra.store;
 
-import org.xydra.base.XID;
 import org.xydra.base.XHalfWritableModel;
 import org.xydra.base.XHalfWritableRepository;
+import org.xydra.base.XID;
 import org.xydra.core.access.impl.memory.AccountModelWrapper;
 import org.xydra.store.access.XAccountDatabase;
 import org.xydra.store.base.Credentials;
 import org.xydra.store.base.HalfWritableRepositoryOnStore;
 
 
+@SuppressWarnings("deprecation")
 public class StoreUtils {
 	
 	/**

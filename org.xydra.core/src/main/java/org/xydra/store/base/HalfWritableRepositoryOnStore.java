@@ -2,28 +2,31 @@ package org.xydra.store.base;
 
 import java.io.Serializable;
 
-import org.xydra.base.XReadableModel;
-import org.xydra.base.XReadableObject;
-import org.xydra.base.XReadableRepository;
-import org.xydra.base.XID;
 import org.xydra.base.XHalfWritableField;
 import org.xydra.base.XHalfWritableModel;
 import org.xydra.base.XHalfWritableObject;
 import org.xydra.base.XHalfWritableRepository;
+import org.xydra.base.XID;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XReadableObject;
+import org.xydra.base.XReadableRepository;
 import org.xydra.core.X;
 import org.xydra.core.change.XCommand;
 import org.xydra.store.XydraStore;
 
 
 /**
- * Extends a {@link XReadableRepository} with write operations. Write operations are
- * immediately translated to commands against the underlying {@link XydraStore}
- * and executed. Then the implementation blocks until the store asynchronously
- * responds.
+ * Extends a {@link XReadableRepository} with write operations. Write operations
+ * are immediately translated to commands against the underlying
+ * {@link XydraStore} and executed. Then the implementation blocks until the
+ * store asynchronously responds.
  * 
  * @author voelkel
  */
-public class HalfWritableRepositoryOnStore extends ReadableRepositoryOnStore implements Serializable, XHalfWritableRepository {
+@Deprecated
+@SuppressWarnings("deprecation")
+public class HalfWritableRepositoryOnStore extends ReadableRepositoryOnStore implements
+        Serializable, XHalfWritableRepository {
 	
 	private static final long serialVersionUID = -6112519567015753881L;
 	
@@ -80,8 +83,8 @@ public class HalfWritableRepositoryOnStore extends ReadableRepositoryOnStore imp
 		if(baseModel == null) {
 			return null;
 		}
-		HalfWritableModelOnStore writableModel = new HalfWritableModelOnStore(this.credentials, this.store,
-		        baseModel.getAddress());
+		HalfWritableModelOnStore writableModel = new HalfWritableModelOnStore(this.credentials,
+		        this.store, baseModel.getAddress());
 		for(XID objectId : baseModel) {
 			XReadableObject baseObject = baseModel.getObject(objectId);
 			XHalfWritableObject writableObject = writableModel.getObject(objectId);

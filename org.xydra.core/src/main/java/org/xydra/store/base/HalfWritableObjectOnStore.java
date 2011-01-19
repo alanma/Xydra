@@ -3,11 +3,11 @@ package org.xydra.store.base;
 import java.io.Serializable;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableField;
-import org.xydra.base.XReadableObject;
-import org.xydra.base.XID;
 import org.xydra.base.XHalfWritableField;
 import org.xydra.base.XHalfWritableObject;
+import org.xydra.base.XID;
+import org.xydra.base.XReadableField;
+import org.xydra.base.XReadableObject;
 import org.xydra.core.X;
 import org.xydra.core.change.XCommand;
 import org.xydra.store.XydraStore;
@@ -18,7 +18,10 @@ import org.xydra.store.XydraStore;
  * 
  * @author voelkel
  */
-public class HalfWritableObjectOnStore extends ReadableObjectOnStore implements XHalfWritableObject, Serializable {
+@Deprecated
+@SuppressWarnings("deprecation")
+public class HalfWritableObjectOnStore extends ReadableObjectOnStore implements
+        XHalfWritableObject, Serializable {
 	
 	private static final long serialVersionUID = -6112519567015753881L;
 	
@@ -62,13 +65,13 @@ public class HalfWritableObjectOnStore extends ReadableObjectOnStore implements 
 	
 	@Override
 	public XHalfWritableField getField(XID fieldId) {
-		// FIXME this returns different instances for each call
+		// this returns different instances for each call
 		XReadableField baseField = super.getField(fieldId);
 		if(baseField == null) {
 			return null;
 		}
-		HalfWritableFieldOnStore writableField = new HalfWritableFieldOnStore(this.credentials, this.store,
-		        baseField.getAddress());
+		HalfWritableFieldOnStore writableField = new HalfWritableFieldOnStore(this.credentials,
+		        this.store, baseField.getAddress());
 		writableField.setValue(baseField.getValue());
 		return writableField;
 	}

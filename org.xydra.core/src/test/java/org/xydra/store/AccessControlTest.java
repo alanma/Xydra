@@ -7,15 +7,15 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xydra.base.XID;
 import org.xydra.base.XHalfWritableModel;
 import org.xydra.base.XHalfWritableRepository;
+import org.xydra.base.XID;
 import org.xydra.core.XX;
 import org.xydra.core.test.TestLogger;
 import org.xydra.store.access.XAccountDatabase;
 import org.xydra.store.base.Credentials;
-import org.xydra.store.base.HashUtils;
 import org.xydra.store.base.HalfWritableRepositoryOnStore;
+import org.xydra.store.base.HashUtils;
 import org.xydra.store.impl.memory.SecureMemoryStore;
 import org.xydra.store.test.SynchronousTestCallback;
 
@@ -26,6 +26,7 @@ import org.xydra.store.test.SynchronousTestCallback;
  * @author xamde
  */
 @MAXTodo
+@SuppressWarnings("deprecation")
 public class AccessControlTest {
 	
 	private XydraStore store;

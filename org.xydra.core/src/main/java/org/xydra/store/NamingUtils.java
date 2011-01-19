@@ -118,9 +118,6 @@ public class NamingUtils {
 	}
 	
 	/**
-	 * FIXME this is wrong if the original address contained '_.' the encoded
-	 * XID will have '__.' which decodes wrong.
-	 * 
 	 * @param encodedXAddress created via {@link #encode(XAddress)}
 	 * @return the decoded XAddress or null if the encodedXAddress represents
 	 *         null
