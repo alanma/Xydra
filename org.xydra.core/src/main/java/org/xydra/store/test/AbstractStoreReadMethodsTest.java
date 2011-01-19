@@ -12,9 +12,9 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.xydra.base.XAddress;
+import org.xydra.base.XID;
 import org.xydra.base.XReadableModel;
 import org.xydra.base.XReadableObject;
-import org.xydra.base.XID;
 import org.xydra.core.XX;
 import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XCommandFactory;
@@ -1066,7 +1066,8 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		 * store)
 		 */
 		for(int i = 0; i < this.modelAddresses.length; i++) {
-			assertTrue(result.contains(this.modelAddresses[i].getModel()));
+			assertTrue(result + " should contain " + this.modelAddresses[i].getModel(),
+			        result.contains(this.modelAddresses[i].getModel()));
 		}
 		
 	}
