@@ -1,14 +1,14 @@
 package org.xydra.doc;
 
-import org.xydra.base.XReadableField;
-import org.xydra.base.XReadableModel;
-import org.xydra.base.XReadableObject;
-import org.xydra.base.XReadableRepository;
-import org.xydra.base.XID;
 import org.xydra.base.XHalfWritableField;
 import org.xydra.base.XHalfWritableModel;
 import org.xydra.base.XHalfWritableObject;
 import org.xydra.base.XHalfWritableRepository;
+import org.xydra.base.XID;
+import org.xydra.base.XReadableField;
+import org.xydra.base.XReadableModel;
+import org.xydra.base.XReadableObject;
+import org.xydra.base.XReadableRepository;
 import org.xydra.base.value.XBooleanValue;
 import org.xydra.base.value.XIntegerValue;
 import org.xydra.base.value.XStringListValue;
@@ -22,6 +22,7 @@ import org.xydra.core.change.XEvent;
 import org.xydra.core.change.XTransaction;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
+import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.store.NamingUtils;
 import org.xydra.store.XydraStore;
@@ -36,8 +37,6 @@ import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.delegate.XydraSingleOperationStore;
 import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.store.impl.memory.MemoryPersistence;
-
-import com.sun.org.apache.xpath.internal.objects.XObject;
 
 
 /**
@@ -195,14 +194,15 @@ import com.sun.org.apache.xpath.internal.objects.XObject;
  * <h4>Bootstrapping</h4> The simplest possible data structure to implement
  * Xydra are <em>read-only</em> variants of {@link XRepository} / {@link XModel}
  * / {@link XObject} / {@link XField} / {@link XValue}. These are offered as
- * {@link XReadableRepository} / {@link XReadableModel} / {@link XReadableObject} /
- * {@link XReadableField}. Values themselves are already modelled as unchangeable
- * value objects. The read-only variants are implemented several times FIXME too
- * many times, it seems.
+ * {@link XReadableRepository} / {@link XReadableModel} /
+ * {@link XReadableObject} / {@link XReadableField}. Values themselves are
+ * already modelled as unchangeable value objects. The read-only variants are
+ * implemented several times FIXME too many times, it seems.
  * 
  * XBase{RMO} offers e.g. {@link XReadableModel#getID()},
- * {@link XReadableModel#iterator()} , {@link XReadableModel#getRevisionNumber()}.
- * {@link XReadableField} has {@link XReadableField#getValue()}.
+ * {@link XReadableModel#iterator()} ,
+ * {@link XReadableModel#getRevisionNumber()}. {@link XReadableField} has
+ * {@link XReadableField#getValue()}.
  * 
  * The next bootstrapping level are simple variants that support read and write,
  * without any semantic checks. The interfaces for them are
@@ -212,8 +212,8 @@ import com.sun.org.apache.xpath.internal.objects.XObject;
  * XWritable{RMOF} extends XBase{RMOF} and offers additionally e.g.
  * {@link XHalfWritableModel#createObject(XID)} and
  * {@link XHalfWritableModel#removeObject(XID)}. {@link XHalfWritableField} has
- * respectively {@link XHalfWritableField#setValue(XValue)}. Note that XWritable...
- * does not allow to set the revision number.
+ * respectively {@link XHalfWritableField#setValue(XValue)}. Note that
+ * XWritable... does not allow to set the revision number.
  * 
  * XWritable{RMOF} is implemented by Simple{RMOF} in its simplest version.
  * Simple{RMOF} offers in addition e.g.

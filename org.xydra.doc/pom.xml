@@ -109,6 +109,24 @@
 			<version>0.1.2-SNAPSHOT</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>client</artifactId>
+			<version>0.1.2-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>server</artifactId>
+			<version>0.1.2-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>gae</artifactId>
+			<version>0.1.2-SNAPSHOT</version>
+		</dependency>
+
 		<!-- logging -->
 		<dependency>
 			<groupId>org.xydra</groupId>

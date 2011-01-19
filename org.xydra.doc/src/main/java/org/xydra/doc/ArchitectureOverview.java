@@ -4,8 +4,8 @@ import java.io.Serializable;
 
 import org.xydra.base.IHasXAddress;
 import org.xydra.base.IHasXID;
-import org.xydra.base.XReadableModel;
 import org.xydra.base.XID;
+import org.xydra.base.XReadableModel;
 import org.xydra.core.change.XSendsFieldEvents;
 import org.xydra.core.change.XSendsModelEvent;
 import org.xydra.core.change.XSendsObjectEvents;
