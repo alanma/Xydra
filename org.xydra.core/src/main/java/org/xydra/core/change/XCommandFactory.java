@@ -82,6 +82,9 @@ public interface XCommandFactory {
 	 * @param isForced true, if this XCommand should be a forced command, false
 	 *            otherwise
 	 * @return an {@link XModelCommand} with the specified settings
+	 * 
+	 *         TODO max: Why can I indicate FORCED via a special objectRevision
+	 *         AND the boolean flag?
 	 */
 	public XModelCommand createRemoveObjectCommand(XID repositoryId, XID modelId, XID objectId,
 	        long objectRevision, boolean isForced);

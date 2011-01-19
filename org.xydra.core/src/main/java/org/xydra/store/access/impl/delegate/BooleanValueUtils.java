@@ -1,9 +1,9 @@
 package org.xydra.store.access.impl.delegate;
 
-import org.xydra.base.XID;
 import org.xydra.base.XHalfWritableField;
 import org.xydra.base.XHalfWritableModel;
 import org.xydra.base.XHalfWritableObject;
+import org.xydra.base.XID;
 import org.xydra.core.X;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -11,6 +11,7 @@ import org.xydra.store.InternalStoreException;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
+@Deprecated
 public class BooleanValueUtils {
 	
 	private static final Logger log = LoggerFactory.getLogger(BooleanValueUtils.class);

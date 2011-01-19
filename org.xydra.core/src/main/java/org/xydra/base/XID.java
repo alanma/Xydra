@@ -9,16 +9,12 @@ import org.xydra.core.model.XIDProvider;
 /**
  * A identification object that can be serialised.
  * 
- * TODO specify syntax rules
- * 
  * <em>Important:</em> Implementations of XID must implement <tt>equals()</tt>
  * and <tt>hashCode</tt> correctly.
  * 
  * @author voelkel
  */
 public interface XID extends XValue, Serializable, Comparable<XID> {
-	
-	// TODO conversion to URI, byte[] and String
 	
 	/**
 	 * To convert this XID to a byte[] representation use the ByteUtils (TBD).

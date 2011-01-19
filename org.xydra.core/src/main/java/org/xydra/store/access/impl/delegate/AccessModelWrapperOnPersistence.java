@@ -7,11 +7,12 @@ import java.util.Set;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
+import org.xydra.base.HalfWritableUtils;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
 import org.xydra.base.XHalfWritableField;
 import org.xydra.base.XHalfWritableModel;
 import org.xydra.base.XHalfWritableObject;
+import org.xydra.base.XID;
 import org.xydra.base.value.XBooleanValue;
 import org.xydra.base.value.XValue;
 import org.xydra.core.X;
@@ -46,6 +47,8 @@ import org.xydra.store.impl.delegate.XydraPersistence;
 @RunsInGWT
 @RunsInJava
 @MAXTodo
+@Deprecated
+@SuppressWarnings("deprecation")
 public class AccessModelWrapperOnPersistence implements XAccessDatabase, Serializable {
 	
 	private static final long serialVersionUID = 3858107275113200924L;
@@ -72,20 +75,14 @@ public class AccessModelWrapperOnPersistence implements XAccessDatabase, Seriali
 	@Override
 	public XAccessValue getAccessDefinition(XID actor, XAddress resource, XID access)
 	        throws IllegalArgumentException {
-		XHalfWritableObject object = getModelSnapshot().getObject(actor);
-		if(object == null) {
-			return XAccessValue.UNDEFINED;
-		}
-		XID fieldId = toFieldId(resource, access);
-		XHalfWritableField field = object.getField(fieldId);
-		if(field == null) {
-			return XAccessValue.UNDEFINED;
-		}
-		XValue value = field.getValue();
+		return valueToAccessValue(HalfWritableUtils.getValue(getModelSnapshot(), actor,
+		        toFieldId(resource, access)));
+	}
+	
+	private XAccessValue valueToAccessValue(XValue value) {
 		if(value == null) {
 			return XAccessValue.UNDEFINED;
 		}
-		
 		if(((XBooleanValue)value).contents()) {
 			return XAccessValue.ALLOWED;
 		} else {
@@ -93,11 +90,18 @@ public class AccessModelWrapperOnPersistence implements XAccessDatabase, Seriali
 		}
 	}
 	
+	private XValue booleanToValue(boolean access) {
+		return X.getValueFactory().createBooleanValue(access);
+	}
+	
 	private XHalfWritableModel getModelSnapshot() {
+		// TODO get a fresh snapshot if revNr in store changed
+		
 		if(this.modelSnapshot == null) {
 			this.modelSnapshot = this.persistence.getModelSnapshot(getModelAddress());
 		}
 		if(this.modelSnapshot == null) {
+			
 			// FIXME don't complain - create it
 			throw new IllegalStateException("No model found with address '" + getModelAddress()
 			        + "'");
@@ -160,7 +164,7 @@ public class AccessModelWrapperOnPersistence implements XAccessDatabase, Seriali
 		        actor, fieldId);
 		// write to local snapshot, if any
 		if(this.modelSnapshot != null) {
-			BooleanValueUtils.removeValueInObject(this.modelSnapshot, actor, fieldId);
+			HalfWritableUtils.removeValue(this.modelSnapshot, actor, toFieldId(resource, access));
 		}
 	}
 	
@@ -189,7 +193,8 @@ public class AccessModelWrapperOnPersistence implements XAccessDatabase, Seriali
 		        actor, fieldId, allowed);
 		// write to local snapshot, if any
 		if(this.modelSnapshot != null) {
-			BooleanValueUtils.setValueInObject(getModelSnapshot(), actor, fieldId, allowed);
+			HalfWritableUtils.setValue(this.modelSnapshot, actor, toFieldId(resource, access),
+			        booleanToValue(allowed));
 		}
 	}
 	

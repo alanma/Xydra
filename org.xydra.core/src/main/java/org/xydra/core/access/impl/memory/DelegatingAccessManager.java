@@ -3,6 +3,7 @@ package org.xydra.core.access.impl.memory;
 import java.util.Set;
 
 import org.xydra.base.XAddress;
+import org.xydra.base.XHalfWritableModel;
 import org.xydra.base.XID;
 import org.xydra.core.access.XAccessListener;
 import org.xydra.core.access.XAccessManager;
@@ -11,15 +12,16 @@ import org.xydra.store.NamingUtils;
 import org.xydra.store.access.XAccessDatabase;
 import org.xydra.store.access.XAccessDefinition;
 import org.xydra.store.access.XAccessValue;
-import org.xydra.store.access.impl.delegate.AccessModelWrapperOnPersistence;
+import org.xydra.store.access.impl.delegate.AccessDatabaseOnHalfWritableModel;
 import org.xydra.store.access.impl.delegate.AccountModelWrapperOnPersistence;
+import org.xydra.store.base.HalfWritableRepositoryOnPersistence;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
 /**
- * Uses a {@link XydraPersistence} (via {@link AccessModelWrapperOnPersistence})
- * to persists access rights and a fast in-memory {@link MemoryAccessManager} to
- * reason on access definitions.
+ * Uses a {@link XydraPersistence} (via
+ * {@link HalfWritableRepositoryOnPersistence}) to persists access rights and a
+ * fast in-memory {@link MemoryAccessManager} to reason on access definitions.
  * 
  * FIXME synchronize across threads via GAE MemCache (if we are on GAE)
  * 
@@ -34,6 +36,8 @@ public class DelegatingAccessManager extends AbstractAccessManager implements XA
 	
 	private MemoryAccessManager memoryAccessManager;
 	
+	private HalfWritableRepositoryOnPersistence halfWritableRepository;
+	
 	/**
 	 * @param persistence
 	 * @param internalActorId
@@ -44,10 +48,15 @@ public class DelegatingAccessManager extends AbstractAccessManager implements XA
 		        persistence, internalActorId);
 		this.memoryAccessManager = new MemoryAccessManager(accounts);
 		
+		this.halfWritableRepository = new HalfWritableRepositoryOnPersistence(persistence,
+		        internalActorId);
 		XID rightsModelId = NamingUtils.getRightsModelId(modelId);
-		this.accessPersistence = new AccessModelWrapperOnPersistence(persistence, internalActorId,
-		        rightsModelId);
-		// load
+		XHalfWritableModel rightsModel = this.halfWritableRepository.getModel(rightsModelId);
+		if(rightsModel == null) {
+			rightsModel = this.halfWritableRepository.createModel(rightsModelId);
+		}
+		this.accessPersistence = new AccessDatabaseOnHalfWritableModel(rightsModel);
+		// load into fast in-memory data structures TODO better lazy?
 		for(XAccessDefinition def : this.accessPersistence.getDefinitions()) {
 			this.memoryAccessManager.setAccess(def.getActor(), def.getResource(), def.getAccess(),
 			        def.isAllowed());

@@ -20,6 +20,11 @@ public class MemoryStringID implements XID {
 	
 	private final String string;
 	
+	/**
+	 * No syntax checks are performed.
+	 * 
+	 * @param uriString
+	 */
 	protected MemoryStringID(String uriString) {
 		this.string = uriString;
 	}

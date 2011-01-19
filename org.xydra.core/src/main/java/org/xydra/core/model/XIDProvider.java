@@ -22,8 +22,8 @@ public interface XIDProvider {
 	 * Creates an {@link XID} from a given string. The string must be a valid
 	 * XML name and may not contain any ':' characters.
 	 * 
-	 * @param uriString The String which will be used to create the {@link XID}.
-	 * @return a new unique {@link XID} object calculated from the given URI
+	 * @param name the String which will be used to create the {@link XID}.
+	 * @return a new unique {@link XID} object calculated from the given name
 	 * @throws IllegalArgumentException if the given name is not a valid
 	 *             {@link XID} string
 	 */

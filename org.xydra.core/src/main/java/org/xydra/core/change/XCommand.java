@@ -31,18 +31,19 @@ public interface XCommand {
 	 * revision of new models, objects and fields, before they are assigned a
 	 * proper revision number (for example during a transaction).
 	 * 
-	 * TODO use a different constant?
+	 * TODO use a different constant? Max: Better yes. 0 = not set/bug. 1...n =
+	 * proper revNr. < 0 = special state
 	 */
 	static final long NEW = 0;
 	
 	/**
-	 * returned when executing commands to indicate that the command failed
+	 * Returned when executing commands to indicate that the command failed.
 	 */
 	static final long FAILED = -1;
 	
 	/**
-	 * returned when executing commands to indicate that the command succeeded
-	 * but nothing actually changed
+	 * Returned when executing commands to indicate that the command succeeded
+	 * but nothing actually changed.
 	 */
 	static final long NOCHANGE = -2;
 	
