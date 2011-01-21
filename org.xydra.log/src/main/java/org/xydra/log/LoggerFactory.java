@@ -18,7 +18,7 @@ public class LoggerFactory {
 	/**
 	 * All log messages are also sent to a registered {@link ILogListener}
 	 * 
-	 * @param logger
+	 * @param logListener
 	 */
 	public static void setLogListener(ILogListener logListener) {
 		logListener_ = logListener;

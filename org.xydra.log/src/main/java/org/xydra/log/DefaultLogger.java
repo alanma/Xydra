@@ -2,6 +2,7 @@ package org.xydra.log;
 
 public class DefaultLogger extends Logger {
 	
+	public static final String ROOT_LOGGER_NAME = "ROOT";
 	private Level level = Level.Info;
 	private boolean lineNumbers = true;
 	private String name;
@@ -88,8 +89,8 @@ public class DefaultLogger extends Logger {
 				throw new RuntimeException("marker");
 			} catch(RuntimeException e) {
 				StackTraceElement stacktrace = e.getStackTrace()[2];
-				output(format(stacktrace.getClassName(), stacktrace.getMethodName(), stacktrace
-				        .getLineNumber(), level, msg));
+				output(format(stacktrace.getClassName(), stacktrace.getMethodName(),
+				        stacktrace.getLineNumber(), level, msg));
 			}
 		} else {
 			output(format(level, msg));
@@ -102,8 +103,8 @@ public class DefaultLogger extends Logger {
 				throw new RuntimeException("marker");
 			} catch(RuntimeException e) {
 				StackTraceElement stacktrace = e.getStackTrace()[2];
-				output(format(stacktrace.getClassName(), stacktrace.getMethodName(), stacktrace
-				        .getLineNumber(), level, msg, t));
+				output(format(stacktrace.getClassName(), stacktrace.getMethodName(),
+				        stacktrace.getLineNumber(), level, msg, t));
 			}
 		} else {
 			output(format(level, msg, t));
