@@ -7,7 +7,6 @@ import java.util.Random;
 import java.util.Set;
 
 import org.junit.Test;
-import org.xydra.index.ITransitivePairIndex;
 import org.xydra.index.ITransitivePairIndex.CycleException;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
@@ -15,13 +14,6 @@ import org.xydra.index.query.Pair;
 import org.xydra.index.query.Wildcard;
 
 
-
-/**
- * Test for implementations of {@link IGroupDatabase}.
- * 
- * @author dscharrer
- * 
- */
 abstract public class AbstractTransitivePairIndexTest extends AbstractPairIndexTest {
 	
 	protected ITransitivePairIndex<Integer> idx;

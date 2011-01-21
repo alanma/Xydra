@@ -3,9 +3,9 @@ package org.xydra.index.impl;
 import java.util.Iterator;
 
 import org.xydra.index.IMapMapSetIndex;
+import org.xydra.index.IMapMapSetIndex.IMapMapSetDiff;
 import org.xydra.index.IMapSetIndex;
 import org.xydra.index.ITripleIndex;
-import org.xydra.index.IMapMapSetIndex.IMapMapSetDiff;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.KeyKeyEntryTuple;
@@ -18,8 +18,9 @@ import org.xydra.index.query.Wildcard;
  * 
  * @author voelkel
  * 
- * @param <K>
- * @param <E>
+ * @param <K> key type 1
+ * @param <L> key type 2
+ * @param <M> key type 3
  */
 public class TripleIndex<K, L, M> implements ITripleIndex<K,L,M> {
 	
@@ -119,7 +120,8 @@ public class TripleIndex<K, L, M> implements ITripleIndex<K,L,M> {
 	 * @param c1
 	 * @param c2
 	 * @param c3
-	 * @return
+	 * @return an {@link Iterator} over all {@link KeyKeyEntryTuple} that match
+	 *         the given constraints
 	 */
 	public Iterator<KeyKeyEntryTuple<K,L,M>> getTriples(Constraint<K> c1, Constraint<L> c2,
 	        Constraint<M> c3) {

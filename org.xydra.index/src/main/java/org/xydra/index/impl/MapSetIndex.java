@@ -167,6 +167,10 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K,E> {
 		}
 	}
 	
+	public void deIndex(K key) {
+		this.map.remove(key);
+	}
+	
 	public void index(K key1, E entry) {
 		IEntrySet<E> index0 = this.map.get(key1);
 		if(index0 == null) {

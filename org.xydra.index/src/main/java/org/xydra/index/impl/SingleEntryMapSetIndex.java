@@ -11,14 +11,13 @@ import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.KeyEntryTuple;
 
 
-
 /**
  * An {@link IMapSetIndex} that can store exactly one key-entry mapping. Small.
  * 
  * @author voelkel
  * 
- * @param <K>
- * @param <V>
+ * @param <K> key type
+ * @param <E> entry type
  */
 public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K,E> implements IMapSetIndex<K,E> {
 	
@@ -81,6 +80,14 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K,E> implements 
 	}
 	
 	public void deIndex(K key1, E entry) {
+		this.clear();
+	}
+	
+	public void deIndex(K key1) {
+		/*
+		 * This implementation can at most store a single entry, so clear is
+		 * correct
+		 */
 		this.clear();
 	}
 	

@@ -6,7 +6,6 @@ import org.xydra.index.query.Constraint;
 import org.xydra.index.query.KeyEntryTuple;
 
 
-
 /**
  * @author voelkel
  * 
@@ -29,6 +28,13 @@ public interface IMapSetIndex<K, E> extends IIndex {
 	boolean containsKey(K key);
 	
 	void deIndex(K key1, E entry);
+	
+	/**
+	 * Deindex all current entries with (key1, ?).
+	 * 
+	 * @param key1
+	 */
+	void deIndex(K key1);
 	
 	void index(K key1, E entry);
 	

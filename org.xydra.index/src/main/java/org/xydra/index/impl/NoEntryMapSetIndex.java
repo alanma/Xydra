@@ -8,7 +8,6 @@ import org.xydra.index.query.Constraint;
 import org.xydra.index.query.KeyEntryTuple;
 
 
-
 /**
  * An empty, read-only {@link IMapSetIndex}.
  * 
@@ -20,8 +19,7 @@ public class NoEntryMapSetIndex<K, E> implements IMapSetIndex<K,E> {
 	
 	private static final long serialVersionUID = -4800590888115736374L;
 	
-	public org.xydra.index.IMapSetIndex.IMapSetDiff<K,E> computeDiff(
-	        IMapSetIndex<K,E> otherFuture) {
+	public org.xydra.index.IMapSetIndex.IMapSetDiff<K,E> computeDiff(IMapSetIndex<K,E> otherFuture) {
 		
 		// comparing this to other: all content has been added, nothing has been
 		// removed
@@ -59,6 +57,10 @@ public class NoEntryMapSetIndex<K, E> implements IMapSetIndex<K,E> {
 	}
 	
 	public void deIndex(K key1, E entry) {
+		throw new RuntimeException("this index is not meant to write");
+	}
+	
+	public void deIndex(K key1) {
 		throw new RuntimeException("this index is not meant to write");
 	}
 	

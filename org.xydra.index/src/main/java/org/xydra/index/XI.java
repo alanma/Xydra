@@ -1,6 +1,8 @@
 package org.xydra.index;
 
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 
 /**
@@ -35,6 +37,21 @@ public class XI {
 			}
 		}
 		return !b.hasNext();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T> Set<T> toJavaSet(IEntrySet<T> entrySet) {
+		if(entrySet instanceof Set) {
+			/* if created with FastEntrySetFactory, this works */
+			return (Set<T>)entrySet;
+		} // else: convert
+		Iterator<T> it = entrySet.iterator();
+		Set<T> result = new HashSet<T>();
+		while(it.hasNext()) {
+			T xid = it.next();
+			result.add(xid);
+		}
+		return result;
 	}
 	
 }

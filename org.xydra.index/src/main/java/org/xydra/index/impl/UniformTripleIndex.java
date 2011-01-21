@@ -8,7 +8,6 @@ import org.xydra.index.query.Constraint;
 import org.xydra.index.query.KeyKeyEntryTuple;
 
 
-
 public class UniformTripleIndex<K> extends TripleIndex<K,K,K> implements IUniformTripleIndex<K> {
 	
 	private static final long serialVersionUID = 7121877986612175167L;
@@ -18,7 +17,9 @@ public class UniformTripleIndex<K> extends TripleIndex<K,K,K> implements IUnifor
 	 * @param c2
 	 * @param c3
 	 * @param projectedConstraint (1,2, or 3)
-	 * @return
+	 * @return an {@link Iterator} that contains all triples matching the given
+	 *         constraints, projected to a single component (first, second, or
+	 *         third)
 	 */
 	
 	public Iterator<K> getMatchingAndProject(Constraint<K> c1, Constraint<K> c2, Constraint<K> c3,

@@ -17,13 +17,7 @@ import org.xydra.index.query.Pair;
 import org.xydra.index.query.Wildcard;
 
 
-/**
- * Test for implementations of {@link IGroupDatabase}.
- * 
- * @author dscharrer
- * 
- */
-abstract public class AbstractPairIndexTest extends TestCase {
+public abstract class AbstractPairIndexTest extends TestCase {
 	
 	protected IPairIndex<Integer,Integer> index;
 	
