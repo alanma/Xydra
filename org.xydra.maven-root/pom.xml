@@ -4,7 +4,7 @@
 
 	<groupId>org.xydra</groupId>
 	<artifactId>maven-root</artifactId>
-	<version>2010.10.16</version>
+	<version>2011.01.22</version>
 	<packaging>pom</packaging>
 
 	<name>Xydra Maven Root</name>
@@ -71,10 +71,12 @@
 				http://garbuz.com/sm/content.php/articles/maven2_deploying_sources/
 			-->
 			<plugin>
+				<inherited>true</inherited>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>attach-sources</id>
 						<goals>
 							<goal>jar</goal>
 						</goals>
@@ -134,6 +136,8 @@
 					</execution>
 				</executions>
 			</plugin>
+			
+			
 			
 			<!-- Deploy tests as a separate jar as explained at -->
 			<!-- http://maven.apache.org/guides/mini/guide-attached-tests.html -->
