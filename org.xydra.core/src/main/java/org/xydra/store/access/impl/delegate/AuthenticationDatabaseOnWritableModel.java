@@ -108,7 +108,7 @@ public class AuthenticationDatabaseOnWritableModel implements XAuthenticationDat
 		XStringValue passwordHashValue = X.getValueFactory().createStringValue(passwordHash);
 		boolean result = WritableUtils.setValue(this.authenticationModel, actorId, hasPasswordHash,
 		        passwordHashValue);
-		assert result;
+		assert result : "command to set passwordHash should execute with success";
 	}
 	
 }
