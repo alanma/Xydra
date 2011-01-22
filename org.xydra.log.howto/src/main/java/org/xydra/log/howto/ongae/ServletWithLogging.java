@@ -10,6 +10,13 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
 
+/**
+ * FIXME The current maven config (pom.xml) conflicts GAE with GWT settings,
+ * gae:deploy fails.
+ * 
+ * @author xamde
+ * 
+ */
 public class ServletWithLogging extends HttpServlet {
 	
 	private static final long serialVersionUID = -7941734636749249244L;
