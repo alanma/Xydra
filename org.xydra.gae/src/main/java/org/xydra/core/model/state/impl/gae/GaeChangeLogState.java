@@ -1,7 +1,7 @@
 package org.xydra.core.model.state.impl.gae;
 
 import org.xydra.base.XAddress;
-import org.xydra.core.change.XEvent;
+import org.xydra.base.change.XEvent;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XStateTransaction;
 import org.xydra.core.xml.MiniElement;

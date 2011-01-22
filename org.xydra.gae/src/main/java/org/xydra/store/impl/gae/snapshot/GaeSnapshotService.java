@@ -2,22 +2,22 @@ package org.xydra.store.impl.gae.snapshot;
 
 import java.util.Iterator;
 
-import org.xydra.base.XReadableModel;
-import org.xydra.base.XWritableField;
-import org.xydra.base.XWritableObject;
-import org.xydra.base.XHalfWritableModel;
-import org.xydra.core.change.ChangeType;
-import org.xydra.core.change.XAtomicEvent;
-import org.xydra.core.change.XEvent;
-import org.xydra.core.change.XFieldEvent;
-import org.xydra.core.change.XModelEvent;
-import org.xydra.core.change.XObjectEvent;
-import org.xydra.core.change.XRepositoryEvent;
-import org.xydra.core.change.XTransactionEvent;
+import org.xydra.base.change.ChangeType;
+import org.xydra.base.change.XAtomicEvent;
+import org.xydra.base.change.XEvent;
+import org.xydra.base.change.XFieldEvent;
+import org.xydra.base.change.XModelEvent;
+import org.xydra.base.change.XObjectEvent;
+import org.xydra.base.change.XRepositoryEvent;
+import org.xydra.base.change.XTransactionEvent;
+import org.xydra.base.rmof.XReadableModel;
+import org.xydra.base.rmof.XRevWritableField;
+import org.xydra.base.rmof.XRevWritableObject;
+import org.xydra.base.rmof.XWritableModel;
+import org.xydra.base.rmof.impl.memory.SimpleField;
+import org.xydra.base.rmof.impl.memory.SimpleModel;
+import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.model.XChangeLog;
-import org.xydra.store.base.SimpleField;
-import org.xydra.store.base.SimpleModel;
-import org.xydra.store.base.SimpleObject;
 
 
 /**
@@ -42,7 +42,7 @@ public class GaeSnapshotService {
 	 * @return an {@link XReadableModel} by applying all events in the
 	 *         {@link XChangeLog}
 	 */
-	public XHalfWritableModel getSnapshot() {
+	public XWritableModel getSnapshot() {
 		
 		// IMPROVE save & cache snapshots
 		
@@ -92,38 +92,38 @@ public class GaeSnapshotService {
 		if(event instanceof XModelEvent) {
 			XModelEvent me = (XModelEvent)event;
 			if(me.getChangeType() == ChangeType.ADD) {
-				assert !model.hasObject(me.getObjectID());
+				assert !model.hasObject(me.getObjectId());
 				SimpleObject object = new SimpleObject(me.getChangedEntity(), rev);
 				model.addObject(object);
 			} else {
 				assert me.getChangeType() == ChangeType.REMOVE;
-				assert model.hasObject(me.getObjectID());
-				model.removeObject(me.getObjectID());
+				assert model.hasObject(me.getObjectId());
+				model.removeObject(me.getObjectId());
 			}
 			return model;
 		}
 		
 		// object and field events
-		XWritableObject object = model.getObject(event.getTarget().getObject());
+		XRevWritableObject object = model.getObject(event.getTarget().getObject());
 		assert object != null;
 		object.setRevisionNumber(rev);
 		
 		if(event instanceof XObjectEvent) {
 			XObjectEvent oe = (XObjectEvent)event;
 			if(oe.getChangeType() == ChangeType.ADD) {
-				assert !object.hasField(oe.getFieldID());
+				assert !object.hasField(oe.getFieldId());
 				SimpleField field = new SimpleField(oe.getChangedEntity(), rev);
 				object.addField(field);
 			} else {
 				assert oe.getChangeType() == ChangeType.REMOVE;
-				assert object.hasField(oe.getFieldID());
-				object.removeField(oe.getFieldID());
+				assert object.hasField(oe.getFieldId());
+				object.removeField(oe.getFieldId());
 			}
 			return model;
 		}
 		
 		// field events
-		XWritableField field = object.getField(event.getTarget().getField());
+		XRevWritableField field = object.getField(event.getTarget().getField());
 		assert field != null;
 		field.setRevisionNumber(rev);
 		

@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.Set;
 
 import org.xydra.base.XID;
-import org.xydra.core.XX;
-import org.xydra.core.access.XGroupDatabaseWithListeners;
-import org.xydra.core.access.XGroupEvent;
-import org.xydra.core.access.XGroupListener;
-import org.xydra.core.access.impl.memory.MemoryGroupDatabase;
-import org.xydra.core.change.ChangeType;
+import org.xydra.base.XX;
+import org.xydra.base.change.ChangeType;
+import org.xydra.store.access.XGroupDatabaseWithListeners;
+import org.xydra.store.access.XGroupEvent;
+import org.xydra.store.access.XGroupListener;
+import org.xydra.store.access.impl.memory.MemoryGroupDatabase;
 import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.impl.gae.GaeUtils;
 

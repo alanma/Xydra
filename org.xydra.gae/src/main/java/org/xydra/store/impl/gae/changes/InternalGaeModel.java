@@ -6,12 +6,12 @@ package org.xydra.store.impl.gae.changes;
 import java.util.Set;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableModel;
-import org.xydra.base.XReadableObject;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
-import org.xydra.core.XX;
-import org.xydra.core.change.XEvent;
+import org.xydra.base.XX;
+import org.xydra.base.change.XEvent;
+import org.xydra.base.rmof.XReadableModel;
+import org.xydra.base.rmof.XReadableObject;
 import org.xydra.core.model.XModel;
 import org.xydra.store.impl.gae.GaeUtils;
 
@@ -60,7 +60,7 @@ public class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObj
 	 * Get a read-only interface to an {@link XModel} in the GAE datastore.
 	 * 
 	 * @param changesService The changes service that manages the model to load.
-	 * @param rev The model revision to to be returned by
+	 * @param modelRev The model revision to to be returned by
 	 *            {@link #getRevisionNumber()}.
 	 * @param locks The locks held by the current process. These are used to
 	 *            assert that we have enough locks when reading fields or

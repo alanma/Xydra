@@ -3,19 +3,28 @@ package org.xydra.store;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
+import org.xydra.base.X;
 import org.xydra.base.XID;
-import org.xydra.core.X;
-import org.xydra.core.XX;
-import org.xydra.core.change.XCommandFactory;
-import org.xydra.store.access.XAccountDatabase;
+import org.xydra.base.XX;
+import org.xydra.base.change.XCommandFactory;
+import org.xydra.store.access.HashUtils;
+import org.xydra.store.access.XAccessControlManager;
 import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
-import org.xydra.store.test.AbstractStoreReadMethodsTest;
 
 
 public class GaeStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 	
-	protected XAccountDatabase accountDb = null;
+	private static final XID DIRK = XX.toId("user-dirk");
+	private static final String DIRKS_PASS = "hello";
+	
+	@Before
+	public void before() {
+		XAccessControlManager acm = getStore().getXydraStoreAdmin().getAccessControlManager();
+		acm.getAuthenticationDatabase().setPasswordHash(DIRK,
+		        HashUtils.getXydraPasswordHash(DIRKS_PASS));
+		assertTrue(acm.isAuthenticated(getCorrectUser(), getCorrectUserPasswordHash()));
+	}
 	
 	@Override
 	protected XydraStore getStore() {
@@ -35,26 +44,12 @@ public class GaeStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 	
 	@Override
 	protected XID getCorrectUser() {
-		if(this.accountDb == null) {
-			// open as XydraAdmin
-			this.accountDb = StoreUtils.getAccountDatabase(XydraStoreAdmin.XYDRA_ADMIN_ID, this
-			        .getStore().getXydraStoreAdmin().getXydraAdminPasswordHash(), getStore());
-		}
-		
-		XID actorId = XX.createUniqueID();
-		
-		if(!this.accountDb.isValidLogin(actorId, this.getCorrectUserPasswordHash())) {
-			this.accountDb.addToGroup(actorId, XX.toId("TestGroup"));
-			this.accountDb.setPasswordHash(actorId, this.getCorrectUserPasswordHash());
-		}
-		assertTrue(this.accountDb.isValidLogin(actorId, this.getCorrectUserPasswordHash()));
-		
-		return actorId;
+		return DIRK;
 	}
 	
 	@Override
 	protected String getCorrectUserPasswordHash() {
-		return "Test";
+		return HashUtils.getXydraPasswordHash(DIRKS_PASS);
 	}
 	
 	@Override

@@ -2,16 +2,14 @@ package org.xydra.server.impl.gae;
 
 import java.util.Iterator;
 
+import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableModel;
 import org.xydra.base.XID;
-import org.xydra.core.X;
-import org.xydra.core.XX;
-import org.xydra.core.access.XAccessManager;
-import org.xydra.core.access.XGroupDatabaseWithListeners;
+import org.xydra.base.XX;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.rmof.XReadableModel;
 import org.xydra.core.access.impl.gae.GaeAccess;
 import org.xydra.core.access.impl.gae.GaeGroups;
-import org.xydra.core.change.XCommand;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
@@ -19,6 +17,8 @@ import org.xydra.core.model.state.XSPI;
 import org.xydra.core.model.state.impl.gae.GaeStateStore;
 import org.xydra.server.IXydraServer;
 import org.xydra.server.impl.InfrastructureServiceFactory;
+import org.xydra.store.access.XAuthorisationManager;
+import org.xydra.store.access.XGroupDatabaseWithListeners;
 import org.xydra.store.impl.gae.GaeInfrastructureProvider;
 import org.xydra.store.impl.gae.GaeTestfixer;
 
@@ -33,7 +33,7 @@ public class GaeXydraServer implements IXydraServer {
 	
 	private XGroupDatabaseWithListeners groups;
 	private XRepository repo;
-	private XAccessManager accessManager;
+	private XAuthorisationManager accessManager;
 	
 	public GaeXydraServer() {
 		/* switch on test fix mode if run from local POM */
@@ -56,12 +56,12 @@ public class GaeXydraServer implements IXydraServer {
 		
 	}
 	
-	public XAccessManager getAccessManagerForModel(XAddress modelAddr,
+	public XAuthorisationManager getAccessManagerForModel(XAddress modelAddr,
 	        XGroupDatabaseWithListeners groups) {
 		return GaeAccess.loadAccessManager(modelAddr, groups);
 	}
 	
-	public XAccessManager getAccessManager() {
+	public XAuthorisationManager getAccessManager() {
 		return this.accessManager;
 	}
 	

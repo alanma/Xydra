@@ -8,19 +8,19 @@ import java.util.List;
 import java.util.Set;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableModel;
 import org.xydra.base.XID;
-import org.xydra.core.XX;
-import org.xydra.core.change.ChangeType;
-import org.xydra.core.change.XAtomicCommand;
-import org.xydra.core.change.XAtomicEvent;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XEvent;
-import org.xydra.core.change.XFieldEvent;
-import org.xydra.core.change.XModelEvent;
-import org.xydra.core.change.XObjectEvent;
-import org.xydra.core.change.XRepositoryEvent;
-import org.xydra.core.change.XTransaction;
+import org.xydra.base.XX;
+import org.xydra.base.change.ChangeType;
+import org.xydra.base.change.XAtomicCommand;
+import org.xydra.base.change.XAtomicEvent;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XEvent;
+import org.xydra.base.change.XFieldEvent;
+import org.xydra.base.change.XModelEvent;
+import org.xydra.base.change.XObjectEvent;
+import org.xydra.base.change.XRepositoryEvent;
+import org.xydra.base.change.XTransaction;
+import org.xydra.base.rmof.XReadableModel;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.DeltaUtils;
@@ -695,7 +695,7 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 				assert event.getTarget().getObject() != null;
 				
 			} else if(event instanceof XModelEvent) {
-				XID objectId = ((XModelEvent)event).getObjectID();
+				XID objectId = ((XModelEvent)event).getObjectId();
 				if(event.getChangeType() == ChangeType.REMOVE) {
 					InternalGaeXEntity.remove(event.getChangedEntity(), change.locks);
 					// object removed, so revision is of no interest

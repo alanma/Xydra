@@ -6,17 +6,18 @@ import java.util.List;
 import java.util.Set;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableModel;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
-import org.xydra.base.XHalfWritableModel;
-import org.xydra.base.XHalfWritableObject;
-import org.xydra.core.XX;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XEvent;
+import org.xydra.base.XX;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XEvent;
+import org.xydra.base.rmof.XReadableModel;
+import org.xydra.base.rmof.XWritableModel;
+import org.xydra.base.rmof.XWritableObject;
 import org.xydra.server.impl.InfrastructureServiceFactory;
 import org.xydra.store.RequestException;
 import org.xydra.store.XydraStore;
+import org.xydra.store.XydraStoreAdmin;
 import org.xydra.store.impl.delegate.DelegatingSecureStore;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.changes.GaeChangesService;
@@ -112,7 +113,7 @@ public class GaePersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public XHalfWritableModel getModelSnapshot(XAddress address) {
+	public XWritableModel getModelSnapshot(XAddress address) {
 		checkAddres(address);
 		if(address.getAddressedType() != XType.XMODEL) {
 			throw new RequestException("address must refer to a model, was " + address);
@@ -121,7 +122,7 @@ public class GaePersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public XHalfWritableObject getObjectSnapshot(XAddress address) {
+	public XWritableObject getObjectSnapshot(XAddress address) {
 		checkAddres(address);
 		if(address.getAddressedType() != XType.XOBJECT) {
 			throw new RequestException("address must refer to an object, was " + address);
@@ -143,7 +144,8 @@ public class GaePersistence implements XydraPersistence {
 	}
 	
 	static public XydraStore get() {
-		return new DelegatingSecureStore(new GaePersistence(getDefaultRepositoryId()));
+		return new DelegatingSecureStore(new GaePersistence(getDefaultRepositoryId()),
+		        XydraStoreAdmin.XYDRA_ADMIN_ID);
 	}
 	
 	/**

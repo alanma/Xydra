@@ -7,7 +7,7 @@ import java.util.Set;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
-import org.xydra.core.XX;
+import org.xydra.base.XX;
 import org.xydra.core.model.state.XStateTransaction;
 import org.xydra.store.impl.gae.GaeUtils;
 

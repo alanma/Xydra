@@ -3,9 +3,9 @@ package org.xydra.store.impl.gae.snapshot;
 import java.io.Serializable;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableField;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
+import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XField;
 

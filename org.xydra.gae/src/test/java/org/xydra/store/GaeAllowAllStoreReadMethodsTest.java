@@ -6,14 +6,12 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.xydra.base.X;
 import org.xydra.base.XID;
-import org.xydra.core.X;
-import org.xydra.core.XX;
-import org.xydra.core.change.XCommandFactory;
+import org.xydra.base.XX;
+import org.xydra.base.change.XCommandFactory;
 import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
-import org.xydra.store.test.AbstractAllowAllStoreReadMethodsTest;
-import org.xydra.store.test.SynchronousTestCallback;
 
 
 public class GaeAllowAllStoreReadMethodsTest extends AbstractAllowAllStoreReadMethodsTest {
@@ -36,10 +34,10 @@ public class GaeAllowAllStoreReadMethodsTest extends AbstractAllowAllStoreReadMe
 	}
 	
 	/*
-	 * Tests for getRepositoryID
+	 * Tests for getRepositoryId
 	 */
 	@Test
-	public void testGetRepositoryID() {
+	public void testGetRepositoryId() {
 		XID correctUser = this.getCorrectUser();
 		String correctUserPass = this.getCorrectUserPasswordHash();
 		

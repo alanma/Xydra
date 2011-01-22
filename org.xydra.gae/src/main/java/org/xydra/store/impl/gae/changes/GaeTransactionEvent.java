@@ -7,12 +7,12 @@ import java.util.Iterator;
 
 import org.xydra.base.XID;
 import org.xydra.base.XType;
-import org.xydra.core.change.ChangeType;
-import org.xydra.core.change.XAtomicEvent;
-import org.xydra.core.change.XEvent;
-import org.xydra.core.change.XRepositoryEvent;
-import org.xydra.core.change.XTransactionEvent;
-import org.xydra.core.change.impl.memory.AbstractTransactionEvent;
+import org.xydra.base.change.ChangeType;
+import org.xydra.base.change.XAtomicEvent;
+import org.xydra.base.change.XEvent;
+import org.xydra.base.change.XRepositoryEvent;
+import org.xydra.base.change.XTransactionEvent;
+import org.xydra.base.change.impl.memory.AbstractTransactionEvent;
 import org.xydra.index.XI;
 
 

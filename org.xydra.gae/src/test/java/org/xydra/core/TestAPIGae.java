@@ -3,7 +3,6 @@ package org.xydra.core;
 import org.junit.BeforeClass;
 import org.xydra.core.model.state.XSPI;
 import org.xydra.core.model.state.impl.gae.GaeStateStore;
-import org.xydra.core.test.AbstractTestAPI;
 import org.xydra.store.impl.gae.GaeTestfixer;
 
 

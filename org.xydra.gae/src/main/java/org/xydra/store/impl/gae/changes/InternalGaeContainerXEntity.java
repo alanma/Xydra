@@ -12,8 +12,8 @@ import java.util.Set;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
-import org.xydra.core.XX;
-import org.xydra.core.change.XEvent;
+import org.xydra.base.XX;
+import org.xydra.base.change.XEvent;
 import org.xydra.store.impl.gae.GaeUtils;
 
 import com.google.appengine.api.datastore.Entity;

@@ -7,12 +7,12 @@ import java.util.ConcurrentModificationException;
 import java.util.Set;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableField;
-import org.xydra.base.XReadableObject;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
-import org.xydra.core.XX;
-import org.xydra.core.change.XEvent;
+import org.xydra.base.XX;
+import org.xydra.base.change.XEvent;
+import org.xydra.base.rmof.XReadableField;
+import org.xydra.base.rmof.XReadableObject;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.impl.gae.GaeUtils;

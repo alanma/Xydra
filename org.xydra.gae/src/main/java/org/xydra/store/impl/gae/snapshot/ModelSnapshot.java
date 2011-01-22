@@ -6,9 +6,9 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableModel;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
+import org.xydra.base.rmof.XReadableModel;
 import org.xydra.core.model.XModel;
 
 

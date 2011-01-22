@@ -115,7 +115,7 @@ public class GaeUtils {
 	 * Prepares the given GAE query.
 	 * 
 	 * @param query
-	 * @return
+	 * @return a GAE prepared query
 	 */
 	public static PreparedQuery prepareQuery(Query query) {
 		return prepareQuery(query, null);
@@ -125,7 +125,7 @@ public class GaeUtils {
 	 * Prepares the given GAE query.
 	 * 
 	 * @param query
-	 * @return
+	 * @return a GAE prepared query
 	 */
 	public static PreparedQuery prepareQuery(Query query, Transaction trans) {
 		makeSureDatestoreServiceIsInitialised();

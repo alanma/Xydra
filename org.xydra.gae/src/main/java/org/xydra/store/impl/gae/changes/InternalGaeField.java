@@ -6,12 +6,12 @@ package org.xydra.store.impl.gae.changes;
 import java.util.Set;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableField;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
+import org.xydra.base.change.XAtomicEvent;
+import org.xydra.base.change.XFieldEvent;
+import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.value.XValue;
-import org.xydra.core.change.XAtomicEvent;
-import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.model.XField;
 import org.xydra.store.impl.gae.GaeUtils;
 
