@@ -85,7 +85,7 @@ public class GaeMyAdminApp {
 			w.write("Kind '" + kind + "'. Counting ... ");
 			Query q = new Query(kind).setKeysOnly();
 			PreparedQuery pq = datastore.prepare(q);
-			int count = pq.countEntities();
+			int count = pq.countEntities(FetchOptions.Builder.withDefaults());
 			w.write(count + "\n");
 		}
 		
@@ -103,8 +103,7 @@ public class GaeMyAdminApp {
 				w.write("Deleted all '" + kind + "'.\n");
 			}
 		} else {
-			w
-			        .write("Ok, did not delete anything. If you are really sure, add '?sure=yes' to this url.");
+			w.write("Ok, did not delete anything. If you are really sure, add '?sure=yes' to this url.");
 		}
 		
 		w.flush();
@@ -128,7 +127,7 @@ public class GaeMyAdminApp {
 	 * TODO add pagination
 	 * 
 	 * @param kind
-	 * @return
+	 * @return an {@link Iterable} over all Entity of the given kind
 	 */
 	public Iterable<Entity> getEntitiesOfKind(String kind) {
 		return this.datastore.prepare(new Query(kind)).asIterable();
@@ -175,7 +174,7 @@ public class GaeMyAdminApp {
 			        "Memcache health:  /!\\ READ-ONLY MODE /!\\ Will return no hits\n");
 		}
 		
-		Collection<Transaction> txns = datastore.getActiveTransactions();
+		Collection<Transaction> txns = this.datastore.getActiveTransactions();
 		res.getWriter().write("Active transactions: " + txns.size() + "\n");
 		
 		FetchOptions defaultFetchOptions = FetchOptions.Builder.withDefaults();
@@ -334,14 +333,11 @@ public class GaeMyAdminApp {
 			Long totalBytes = (Long)statTotal.getProperty("bytes");
 			Long totalEntities = (Long)statTotal.getProperty("count");
 			res.getWriter()
-			        .write(
-			                "Datastore contains " + totalBytes + " bytes in " + totalEntities
-			                        + " entities");
+			        .write("Datastore contains " + totalBytes + " bytes in " + totalEntities
+			                + " entities");
 		} else {
-			res
-			        .getWriter()
-			        .write(
-			                "No entity named '__Stat_Total__' found. Works maybe only in production. Stats are computed only once a day.");
+			res.getWriter()
+			        .write("No entity named '__Stat_Total__' found. Works maybe only in production. Stats are computed only once a day.");
 		}
 		
 		long stop = System.currentTimeMillis();
