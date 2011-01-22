@@ -1,8 +1,8 @@
 package org.xydra.meta;
 
+import org.xydra.base.X;
 import org.xydra.base.XID;
 import org.xydra.base.value.XStringValue;
-import org.xydra.core.X;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
@@ -93,8 +93,8 @@ public class MetaModel {
 	 */
 	public MetaModel(XRepository repository, XModel baseModel) {
 		this.baseModel = baseModel;
-		XID metaModelID = X.getIDProvider().fromString(baseModel.getID().toString() + "-meta");
-		this.metaModel = repository.createModel(metaModelID);
+		XID metaModelId = X.getIDProvider().fromString(baseModel.getID().toString() + "-meta");
+		this.metaModel = repository.createModel(metaModelId);
 		// add built-ins
 		setNamespaceExpansion("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
 	}

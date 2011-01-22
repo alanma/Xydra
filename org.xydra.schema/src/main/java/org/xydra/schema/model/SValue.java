@@ -1,7 +1,7 @@
 package org.xydra.schema.model;
 
+import org.xydra.base.X;
 import org.xydra.base.XID;
-import org.xydra.core.X;
 
 
 public abstract class SValue implements ISyntax {

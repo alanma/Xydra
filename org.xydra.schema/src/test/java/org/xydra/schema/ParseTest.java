@@ -6,11 +6,11 @@ import java.io.IOException;
 import java.io.StringReader;
 
 import org.junit.Test;
-import org.xydra.core.X;
+import org.xydra.base.X;
+import org.xydra.base.XX;
+import org.xydra.core.DemoModelUtil;
 import org.xydra.core.XFile;
-import org.xydra.core.XX;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.test.DemoModelUtil;
 import org.xydra.schema.model.SObject;
 import org.xydra.schema.parser.ParseException;
 import org.xydra.schema.parser.XSchemaParser;
