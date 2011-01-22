@@ -13,8 +13,8 @@ import java.util.NoSuchElementException;
  */
 public class XListValueIterator<E> implements Iterator<E> {
 	
-	private final XListValue<E> list;
 	private int index = -1;
+	private final XListValue<E> list;
 	private int size;
 	
 	public XListValueIterator(XListValue<E> list) {

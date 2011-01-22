@@ -6,29 +6,26 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xydra.base.X;
 import org.xydra.base.XID;
+import org.xydra.base.XX;
+import org.xydra.base.change.ChangeType;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XCommandFactory;
+import org.xydra.base.change.XEvent;
+import org.xydra.base.change.XFieldCommand;
+import org.xydra.base.change.XFieldEvent;
+import org.xydra.base.change.XModelCommand;
+import org.xydra.base.change.XModelEvent;
+import org.xydra.base.change.XObjectCommand;
+import org.xydra.base.change.XObjectEvent;
+import org.xydra.base.change.XRepositoryCommand;
+import org.xydra.base.change.XRepositoryEvent;
+import org.xydra.base.change.XTransaction;
 import org.xydra.base.value.XValue;
-import org.xydra.core.X;
-import org.xydra.core.XX;
-import org.xydra.core.access.XAccessManager;
-import org.xydra.core.access.XGroupDatabaseWithListeners;
-import org.xydra.core.access.impl.memory.MemoryAccessManager;
-import org.xydra.core.access.impl.memory.MemoryGroupDatabase;
-import org.xydra.core.change.ChangeType;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XCommandFactory;
-import org.xydra.core.change.XEvent;
-import org.xydra.core.change.XFieldCommand;
-import org.xydra.core.change.XFieldEvent;
-import org.xydra.core.change.XModelCommand;
-import org.xydra.core.change.XModelEvent;
+import org.xydra.core.TestLogger;
 import org.xydra.core.change.XModelEventListener;
-import org.xydra.core.change.XObjectCommand;
-import org.xydra.core.change.XObjectEvent;
 import org.xydra.core.change.XObjectEventListener;
-import org.xydra.core.change.XRepositoryCommand;
-import org.xydra.core.change.XRepositoryEvent;
-import org.xydra.core.change.XTransaction;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
@@ -36,11 +33,14 @@ import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.state.XSPI;
 import org.xydra.core.model.state.impl.memory.TemporaryStateStore;
-import org.xydra.core.test.TestLogger;
 import org.xydra.core.value.XV;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.access.XA;
+import org.xydra.store.access.XAuthorisationManager;
+import org.xydra.store.access.XGroupDatabaseWithListeners;
+import org.xydra.store.access.impl.memory.MemoryAuthorisationManager;
+import org.xydra.store.access.impl.memory.MemoryGroupDatabase;
 
 
 /**
@@ -145,23 +145,23 @@ public class XModelBasics {
 		 */
 
 		// creating the XObject
-		XID objectID = XX.toId("ExampleObject");
-		model.createObject(objectID);
+		XID objectId = XX.toId("ExampleObject");
+		model.createObject(objectId);
 		
 		/*
 		 * We forgot to save the XObject into a variable! So how can we get a
 		 * hold of it? Simple, just use its XID!
 		 */
 
-		XObject object = model.getObject(objectID);
+		XObject object = model.getObject(objectId);
 		
 		/*
 		 * Now that we have an object we can add fields to it, which basically
 		 * works the same as creating an XObject.
 		 */
 
-		XID fieldID = XX.toId("ExampleField");
-		XField field = object.createField(fieldID);
+		XID fieldId = XX.toId("ExampleField");
+		XField field = object.createField(fieldId);
 		
 		/*
 		 * Setting the value of a field is just as simple, but first we have to
@@ -187,7 +187,92 @@ public class XModelBasics {
 		 */
 
 		// removing our field from our object
-		object.removeField(fieldID);
+		object.removeField(fieldId);
+	}
+	
+	/**
+	 * Since XModel was developed to be used in a client-server environment with
+	 * many different users operating on the same set of data, we also need some
+	 * kind of access right management.
+	 * 
+	 * XModel allows to specify access rights on the user level and it allows to
+	 * group users and grant access rights to a whole group.
+	 * 
+	 * There are 2 main interfaces for this purpose:
+	 * {@link XAuthorisationManager} and {@link XGroupDatabaseWithListeners}.
+	 * 
+	 * The {@link XAuthorisationManager} actually manages the access rights.
+	 * 
+	 * The XGroupDatabase allows to group users, which enables the
+	 * XAccessManager to grant access rights to whole user groups. Every
+	 * XAccessManager uses an XGroupDatabase.
+	 * 
+	 * At the moment an XModel itself does not use an XAccessManager and the
+	 * application has to make sure that the access rights that are defined in
+	 * the XAccessManager are actually enforced. Note: This may change in the
+	 * future.
+	 */
+	@Test
+	public void testUsingAccessRights() {
+		/* Here's a little example: */
+		XID actorID = XX.toId("ExampleActor");
+		XID user1ID = XX.toId("ExampleUser1");
+		XID user2ID = XX.toId("ExampleUser2");
+		XID user3ID = XX.toId("ExampleUser3");
+		
+		XRepository repo = X.createMemoryRepository(actorID);
+		XModel model = repo.createModel(XX.createUniqueID());
+		
+		// creating an XAccessManager and an XGroupDatabase
+		XGroupDatabaseWithListeners groups = new MemoryGroupDatabase();
+		XAuthorisationManager arm = new MemoryAuthorisationManager(groups);
+		
+		// granting write access to the user with the XID user1ID on model
+		
+		// FIXME use small local ID and Address interface
+		
+		// arm.setAccess(user1ID, XA.ACCESS_WRITE, true, XID...path);
+		
+		arm.getAuthorisationDatabase()
+		        .setAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE, true);
+		assertTrue(arm.hasAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE).isAllowed());
+		
+		// depriving user1ID from his read-access again
+		arm.getAuthorisationDatabase().resetAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE);
+		assertTrue(!arm.hasAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE).isDefined());
+		
+		/*
+		 * Note that the hasAccess method does not return false, but null now,
+		 * because we reset the access rights for user1ID which means that his
+		 * rights are not specified. It would return false if we had used
+		 * arm.setAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE, false);
+		 * and therefore explicitly stated that user1ID should not have write
+		 * access
+		 */
+
+		// grouping user1ID, user2ID and user3ID and granting read-access to the
+		// group
+		XID groupID = XX.toId("ExampleGroup");
+		groups.addToGroup(user1ID, groupID);
+		groups.addToGroup(user2ID, groupID);
+		groups.addToGroup(user3ID, groupID);
+		
+		arm.getAuthorisationDatabase()
+		        .setAccess(groupID, model.getAddress(), XA.ACCESS_WRITE, true);
+		assertTrue(arm.hasAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE).isAllowed());
+		assertTrue(arm.hasAccess(user2ID, model.getAddress(), XA.ACCESS_WRITE).isAllowed());
+		assertTrue(arm.hasAccess(user3ID, model.getAddress(), XA.ACCESS_WRITE).isAllowed());
+		
+		/*
+		 * Note that individual access right definitions take precedence before
+		 * the access rights defined on groups. For example if we specify that
+		 * user1ID is not allowed to read the model, the group definition will
+		 * be ignored.
+		 */
+
+		arm.getAuthorisationDatabase().setAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE,
+		        false);
+		assertTrue(arm.hasAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE).isDenied());
 	}
 	
 	/**
@@ -206,7 +291,7 @@ public class XModelBasics {
 		
 		// getting an XRepository
 		XRepository repository = X.createMemoryRepository(actorID);
-		XID repositoryID = repository.getID();
+		XID repositoryId = repository.getID();
 		
 		/*
 		 * We want to add a model to our repository. We could either achieve
@@ -234,14 +319,14 @@ public class XModelBasics {
 		 * Here's how we'd to the above using XCommands:
 		 */
 
-		XID modelID = XX.createUniqueID();
-		XRepositoryCommand repositoryCommand = commandFactory.createAddModelCommand(repositoryID,
-		        modelID, false);
+		XID modelId = XX.createUniqueID();
+		XRepositoryCommand repositoryCommand = commandFactory.createAddModelCommand(repositoryId,
+		        modelId, false);
 		
 		// execute the command, therefore adding an XModel
 		repository.executeCommand(repositoryCommand);
 		
-		XModel model = repository.getModel(modelID);
+		XModel model = repository.getModel(modelId);
 		assertNotNull(model);
 		
 		// FIXME max: consider using adapter pattern for transactions
@@ -251,9 +336,9 @@ public class XModelBasics {
 		XID object1ID = XX.createUniqueID();
 		XID object2ID = XX.createUniqueID();
 		
-		XModelCommand modelCommand1 = commandFactory.createAddObjectCommand(repositoryID, modelID,
+		XModelCommand modelCommand1 = commandFactory.createAddObjectCommand(repositoryId, modelId,
 		        object1ID, false);
-		XModelCommand modelCommand2 = commandFactory.createAddObjectCommand(repositoryID, modelID,
+		XModelCommand modelCommand2 = commandFactory.createAddObjectCommand(repositoryId, modelId,
 		        object2ID, false);
 		
 		model.executeCommand(modelCommand1);
@@ -287,8 +372,8 @@ public class XModelBasics {
 		 */
 
 		// lets remove object2
-		XModelCommand removeObject2Command = commandFactory.createRemoveObjectCommand(repositoryID,
-		        modelID, object2ID, object2.getRevisionNumber(), false);
+		XModelCommand removeObject2Command = commandFactory.createRemoveObjectCommand(repositoryId,
+		        modelId, object2ID, object2.getRevisionNumber(), false);
 		
 		model.executeCommand(removeObject2Command);
 		
@@ -296,105 +381,25 @@ public class XModelBasics {
 		assertEquals(model.getObject(object2ID), null);
 		
 		// lets add a field to object1
-		XID fieldID = XX.createUniqueID();
-		XObjectCommand objectCommand = commandFactory.createAddFieldCommand(repositoryID, modelID,
-		        object1ID, fieldID, false);
+		XID fieldId = XX.createUniqueID();
+		XObjectCommand objectCommand = commandFactory.createAddFieldCommand(repositoryId, modelId,
+		        object1ID, fieldId, false);
 		object1.executeCommand(objectCommand);
 		
 		// lets see if the field was actually added
-		XField field = object1.getField(fieldID);
+		XField field = object1.getField(fieldId);
 		
 		assertNotNull(field);
 		
 		// and, finally, lets set the value of the field
 		XValue doubleValue = XV.toValue(3.14159);
-		XFieldCommand fieldCommand = commandFactory.createAddValueCommand(repositoryID, modelID,
-		        object1ID, fieldID, field.getRevisionNumber(), doubleValue, false);
+		XFieldCommand fieldCommand = commandFactory.createAddValueCommand(repositoryId, modelId,
+		        object1ID, fieldId, field.getRevisionNumber(), doubleValue, false);
 		
 		field.executeFieldCommand(fieldCommand);
 		
 		// lets see if the value was set
 		assertEquals(doubleValue, field.getValue());
-	}
-	
-	/**
-	 * XCommands can be combined to a transaction and then be executed
-	 * atomically. For example we could do everything we did in
-	 * testUsingCommands() in one transactions. Transactions can be executed by
-	 * XModels and XObjects.
-	 * 
-	 * Here's how, first we'll create the repository and the XModel:
-	 */
-	@Test
-	public void testUsingTransactions() {
-		
-		// setting up an actor ID
-		XID actorID = XX.toId("TutorialActor");
-		
-		// getting an XRepository
-		XRepository repository = X.createMemoryRepository(actorID);
-		XID repositoryID = repository.getID();
-		
-		// creating the XModel
-		XCommandFactory commandFactory = X.getCommandFactory();
-		
-		XID modelID = XX.createUniqueID();
-		XRepositoryCommand repositoryCommand = commandFactory.createAddModelCommand(repositoryID,
-		        modelID, false);
-		
-		// execute the command, therefore adding an XModel
-		repository.executeCommand(repositoryCommand);
-		
-		XModel model = repository.getModel(modelID);
-		assertNotNull(model);
-		
-		// building the commands
-		XID objectID = XX.createUniqueID();
-		XID fieldID = XX.createUniqueID();
-		XValue doubleValue = XV.toValue(3.14159);
-		
-		XModelCommand addObjectCommandCommand = commandFactory.createAddObjectCommand(repositoryID,
-		        modelID, objectID, false);
-		XObjectCommand addFieldCommand = commandFactory.createAddFieldCommand(repositoryID,
-		        modelID, objectID, fieldID, false);
-		/*
-		 * we know that the XField which value we want to set has just been
-		 * added and since the transaction will be executed atomically we can be
-		 * sure that the revision number of the XField will be 0
-		 */
-		XFieldCommand addValueCommand = commandFactory.createAddValueCommand(repositoryID, modelID,
-		        objectID, fieldID, 0, doubleValue, false);
-		
-		/*
-		 * After we created the commands it's time to add them to a transaction.
-		 * For that purpose we'll use a XTransactionBuilder.
-		 * 
-		 * We have to specify on what we want to execute the transaction, since
-		 * we want to execute it on the model, we'll pass the XAddress of the
-		 * model.
-		 */
-
-		XTransactionBuilder transBuilder = new XTransactionBuilder(model.getAddress());
-		transBuilder.addCommand(addObjectCommandCommand);
-		transBuilder.addCommand(addFieldCommand);
-		transBuilder.addCommand(addValueCommand);
-		
-		// getting the transaction
-		XTransaction transaction = transBuilder.build();
-		// FIXME
-		// transaction.execute(model)
-		
-		// executing the transaction on the model
-		model.executeCommand(transaction);
-		
-		// checking whether the transaction was actually executed or not
-		XObject object = model.getObject(objectID);
-		assertNotNull(object);
-		
-		XField field = object.getField(fieldID);
-		assertNotNull(field);
-		
-		assertEquals(field.getValue(), doubleValue);
 	}
 	
 	/**
@@ -476,11 +481,11 @@ public class XModelBasics {
 			
 			public void onChangeEvent(XObjectEvent event) {
 				if(event.getChangeType() == ChangeType.ADD) {
-					log.info("An XField with ID " + event.getFieldID()
-					        + " was added to the XObject with ID " + event.getObjectID() + "!");
+					log.info("An XField with ID " + event.getFieldId()
+					        + " was added to the XObject with ID " + event.getObjectId() + "!");
 				} else if(event.getChangeType() == ChangeType.REMOVE) {
-					log.info("An XField with ID " + event.getFieldID()
-					        + " was removed from the XObject with ID " + event.getObjectID() + "!");
+					log.info("An XField with ID " + event.getFieldId()
+					        + " was removed from the XObject with ID " + event.getObjectId() + "!");
 				}
 			}
 			
@@ -505,87 +510,83 @@ public class XModelBasics {
 	}
 	
 	/**
-	 * Since XModel was developed to be used in a client-server environment with
-	 * many different users operating on the same set of data, we also need some
-	 * kind of access right management.
+	 * XCommands can be combined to a transaction and then be executed
+	 * atomically. For example we could do everything we did in
+	 * testUsingCommands() in one transactions. Transactions can be executed by
+	 * XModels and XObjects.
 	 * 
-	 * XModel allows to specify access rights on the user level and it allows to
-	 * group users and grant access rights to a whole group.
-	 * 
-	 * There are 2 main interfaces for this purpose:
-	 * {@link XAccessManager} and
-	 * {@link XGroupDatabaseWithListeners}.
-	 * 
-	 * The {@link XAccessManager} actually manages the access
-	 * rights.
-	 * 
-	 * The XGroupDatabase allows to group users, which enables the
-	 * XAccessManager to grant access rights to whole user groups. Every
-	 * XAccessManager uses an XGroupDatabase.
-	 * 
-	 * At the moment an XModel itself does not use an XAccessManager and the
-	 * application has to make sure that the access rights that are defined in
-	 * the XAccessManager are actually enforced. Note: This may change in the
-	 * future.
+	 * Here's how, first we'll create the repository and the XModel:
 	 */
 	@Test
-	public void testUsingAccessRights() {
-		/* Here's a little example: */
-		XID actorID = XX.toId("ExampleActor");
-		XID user1ID = XX.toId("ExampleUser1");
-		XID user2ID = XX.toId("ExampleUser2");
-		XID user3ID = XX.toId("ExampleUser3");
+	public void testUsingTransactions() {
 		
-		XRepository repo = X.createMemoryRepository(actorID);
-		XModel model = repo.createModel(XX.createUniqueID());
+		// setting up an actor ID
+		XID actorID = XX.toId("TutorialActor");
 		
-		// creating an XAccessManager and an XGroupDatabase
-		XGroupDatabaseWithListeners groups = new MemoryGroupDatabase();
-		XAccessManager arm = new MemoryAccessManager(groups);
+		// getting an XRepository
+		XRepository repository = X.createMemoryRepository(actorID);
+		XID repositoryId = repository.getID();
 		
-		// granting write access to the user with the XID user1ID on model
+		// creating the XModel
+		XCommandFactory commandFactory = X.getCommandFactory();
 		
-		// FIXME use small local ID and Address interface
+		XID modelId = XX.createUniqueID();
+		XRepositoryCommand repositoryCommand = commandFactory.createAddModelCommand(repositoryId,
+		        modelId, false);
 		
-		// arm.setAccess(user1ID, XA.ACCESS_WRITE, true, XID...path);
+		// execute the command, therefore adding an XModel
+		repository.executeCommand(repositoryCommand);
 		
-		arm.setAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE, true);
-		assertTrue(arm.hasAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE).isAllowed());
+		XModel model = repository.getModel(modelId);
+		assertNotNull(model);
 		
-		// depriving user1ID from his read-access again
-		arm.resetAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE);
-		assertTrue(!arm.hasAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE).isDefined());
+		// building the commands
+		XID objectId = XX.createUniqueID();
+		XID fieldId = XX.createUniqueID();
+		XValue doubleValue = XV.toValue(3.14159);
+		
+		XModelCommand addObjectCommandCommand = commandFactory.createAddObjectCommand(repositoryId,
+		        modelId, objectId, false);
+		XObjectCommand addFieldCommand = commandFactory.createAddFieldCommand(repositoryId,
+		        modelId, objectId, fieldId, false);
+		/*
+		 * we know that the XField which value we want to set has just been
+		 * added and since the transaction will be executed atomically we can be
+		 * sure that the revision number of the XField will be 0
+		 */
+		XFieldCommand addValueCommand = commandFactory.createAddValueCommand(repositoryId, modelId,
+		        objectId, fieldId, 0, doubleValue, false);
 		
 		/*
-		 * Note that the hasAccess method does not return false, but null now,
-		 * because we reset the access rights for user1ID which means that his
-		 * rights are not specified. It would return false if we had used
-		 * arm.setAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE, false);
-		 * and therefore explicitly stated that user1ID should not have write
-		 * access
+		 * After we created the commands it's time to add them to a transaction.
+		 * For that purpose we'll use a XTransactionBuilder.
+		 * 
+		 * We have to specify on what we want to execute the transaction, since
+		 * we want to execute it on the model, we'll pass the XAddress of the
+		 * model.
 		 */
 
-		// grouping user1ID, user2ID and user3ID and granting read-access to the
-		// group
-		XID groupID = XX.toId("ExampleGroup");
-		groups.addToGroup(user1ID, groupID);
-		groups.addToGroup(user2ID, groupID);
-		groups.addToGroup(user3ID, groupID);
+		XTransactionBuilder transBuilder = new XTransactionBuilder(model.getAddress());
+		transBuilder.addCommand(addObjectCommandCommand);
+		transBuilder.addCommand(addFieldCommand);
+		transBuilder.addCommand(addValueCommand);
 		
-		arm.setAccess(groupID, model.getAddress(), XA.ACCESS_WRITE, true);
-		assertTrue(arm.hasAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE).isAllowed());
-		assertTrue(arm.hasAccess(user2ID, model.getAddress(), XA.ACCESS_WRITE).isAllowed());
-		assertTrue(arm.hasAccess(user3ID, model.getAddress(), XA.ACCESS_WRITE).isAllowed());
+		// getting the transaction
+		XTransaction transaction = transBuilder.build();
+		// FIXME
+		// transaction.execute(model)
 		
-		/*
-		 * Note that individual access right definitions take precedence before
-		 * the access rights defined on groups. For example if we specify that
-		 * user1ID is not allowed to read the model, the group definition will
-		 * be ignored.
-		 */
-
-		arm.setAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE, false);
-		assertTrue(arm.hasAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE).isDenied());
+		// executing the transaction on the model
+		model.executeCommand(transaction);
+		
+		// checking whether the transaction was actually executed or not
+		XObject object = model.getObject(objectId);
+		assertNotNull(object);
+		
+		XField field = object.getField(fieldId);
+		assertNotNull(field);
+		
+		assertEquals(field.getValue(), doubleValue);
 	}
 	
 }

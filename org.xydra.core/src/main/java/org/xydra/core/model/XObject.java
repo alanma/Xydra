@@ -3,10 +3,10 @@ package org.xydra.core.model;
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.base.XID;
-import org.xydra.base.XHalfWritableObject;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XObjectCommand;
-import org.xydra.core.change.XObjectEvent;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XObjectCommand;
+import org.xydra.base.change.XObjectEvent;
+import org.xydra.base.rmof.XWritableObject;
 import org.xydra.core.model.state.XObjectState;
 
 
@@ -26,27 +26,14 @@ import org.xydra.core.model.state.XObjectState;
  * @author Kaidel
  * 
  */
-public interface XObject extends XLoggedObject, XHalfWritableObject, XSynchronizesChanges {
-	
-	/**
-	 * Returns the {@link XField} with the given {@link XID} contained in this
-	 * object.
-	 * 
-	 * @param fieldID The {@link XID} of the {@link XField} which is to be
-	 *            returned
-	 * @return The {@link XField} with the given {@link XID} or null, if no
-	 *         corresponding {@link XField} exists
-	 * @throws IllegalStateException if this object has already been removed
-	 */
-	@ReadOperation
-	XField getField(XID fieldId);
+public interface XObject extends XLoggedObject, XWritableObject, XSynchronizesChanges {
 	
 	/**
 	 * Creates a new {@link XField} and adds it to this {@link XObject} or
 	 * returns the already existing {@link XField} if the given {@link XID} was
 	 * already taken.
 	 * 
-	 * @param fieldID The {@link XID} for the {@link XField} which is to be
+	 * @param fieldId The {@link XID} for the {@link XField} which is to be
 	 *            created.
 	 * 
 	 * @return the newly created {@link XField} or the already existing
@@ -54,21 +41,7 @@ public interface XObject extends XLoggedObject, XHalfWritableObject, XSynchroniz
 	 * @throws IllegalStateException if this object has already been removed
 	 */
 	@ModificationOperation
-	XField createField(XID fieldID);
-	
-	/**
-	 * Removes the {@link XField} with the given {@link XID} from this XObject
-	 * 
-	 * @param fieldID The {@link XID} of the {@link XField} which is to be
-	 *            removed
-	 * 
-	 * @return true, if the specified {@link XField} did exist and could be
-	 *         removed
-	 * @throws IllegalStateException if this object has already been removed
-	 *             itself
-	 */
-	@ModificationOperation
-	boolean removeField(XID fieldID);
+	XField createField(XID fieldId);
 	
 	/**
 	 * Executes the given {@link XObjectCommand} if possible.
@@ -96,5 +69,32 @@ public interface XObject extends XLoggedObject, XHalfWritableObject, XSynchroniz
 	 */
 	@ModificationOperation
 	long executeObjectCommand(XObjectCommand command);
+	
+	/**
+	 * Returns the {@link XField} with the given {@link XID} contained in this
+	 * object.
+	 * 
+	 * @param fieldId The {@link XID} of the {@link XField} which is to be
+	 *            returned
+	 * @return The {@link XField} with the given {@link XID} or null, if no
+	 *         corresponding {@link XField} exists
+	 * @throws IllegalStateException if this object has already been removed
+	 */
+	@ReadOperation
+	XField getField(XID fieldId);
+	
+	/**
+	 * Removes the {@link XField} with the given {@link XID} from this XObject
+	 * 
+	 * @param fieldId The {@link XID} of the {@link XField} which is to be
+	 *            removed
+	 * 
+	 * @return true, if the specified {@link XField} did exist and could be
+	 *         removed
+	 * @throws IllegalStateException if this object has already been removed
+	 *             itself
+	 */
+	@ModificationOperation
+	boolean removeField(XID fieldId);
 	
 }

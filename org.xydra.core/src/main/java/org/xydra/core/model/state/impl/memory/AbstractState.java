@@ -24,10 +24,6 @@ public abstract class AbstractState implements IHasXAddress, Serializable {
 		this.address = address;
 	}
 	
-	public XAddress getAddress() {
-		return this.address;
-	}
-	
 	/*
 	 * See {@link XModelState#beginTransaction()}, etc.
 	 */
@@ -42,6 +38,10 @@ public abstract class AbstractState implements IHasXAddress, Serializable {
 	public void endTransaction(XStateTransaction transaction) {
 		// overwrite, if transactions are needed for the state backend
 		assert transaction == null;
+	}
+	
+	public XAddress getAddress() {
+		return this.address;
 	}
 	
 }

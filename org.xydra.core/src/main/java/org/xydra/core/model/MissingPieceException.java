@@ -1,6 +1,6 @@
 package org.xydra.core.model;
 
-import org.xydra.core.XX;
+import org.xydra.base.XX;
 
 
 /**

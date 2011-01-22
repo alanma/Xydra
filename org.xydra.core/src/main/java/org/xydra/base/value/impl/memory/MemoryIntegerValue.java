@@ -19,6 +19,10 @@ public class MemoryIntegerValue implements XIntegerValue {
 		this.content = content;
 	}
 	
+	public Number asNumber() {
+		return contents();
+	}
+	
 	public int contents() {
 		return this.content;
 	}
@@ -40,10 +44,6 @@ public class MemoryIntegerValue implements XIntegerValue {
 	@Override
 	public String toString() {
 		return Integer.toString(this.content);
-	}
-	
-	public Number asNumber() {
-		return contents();
 	}
 	
 }

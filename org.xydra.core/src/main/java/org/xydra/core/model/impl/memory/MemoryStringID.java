@@ -29,14 +29,8 @@ public class MemoryStringID implements XID {
 		this.string = uriString;
 	}
 	
-	@Override
-	public String toString() {
-		return this.string;
-	}
-	
-	@Override
-	public int hashCode() {
-		return this.string.hashCode();
+	public int compareTo(XID o) {
+		return this.toString().compareTo(o.toString());
 	}
 	
 	@Override
@@ -50,8 +44,14 @@ public class MemoryStringID implements XID {
 		}
 	}
 	
-	public int compareTo(XID o) {
-		return this.toString().compareTo(o.toString());
+	@Override
+	public int hashCode() {
+		return this.string.hashCode();
+	}
+	
+	@Override
+	public String toString() {
+		return this.string;
 	}
 	
 }

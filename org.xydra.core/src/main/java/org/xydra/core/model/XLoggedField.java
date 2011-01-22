@@ -1,6 +1,6 @@
 package org.xydra.core.model;
 
-import org.xydra.base.XHalfWritableField;
+import org.xydra.base.rmof.XWritableField;
 import org.xydra.core.change.XSendsFieldEvents;
 
 
@@ -15,6 +15,6 @@ import org.xydra.core.change.XSendsFieldEvents;
  * @author dscharrer
  * 
  */
-public interface XLoggedField extends XHalfWritableField, XSendsFieldEvents {
+public interface XLoggedField extends XWritableField, XSendsFieldEvents {
 	
 }

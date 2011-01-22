@@ -4,8 +4,8 @@ import java.util.Iterator;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
-import org.xydra.core.XX;
-import org.xydra.core.change.ChangeType;
+import org.xydra.base.XX;
+import org.xydra.base.change.ChangeType;
 import org.xydra.index.XI;
 
 
@@ -17,10 +17,10 @@ import org.xydra.index.XI;
  */
 class XmlUtils {
 	
-	protected static final String REPOSITORYID_ATTRIBUTE = "repositoryId";
+	protected static final String FIELDID_ATTRIBUTE = "fieldId";
 	protected static final String MODELID_ATTRIBUTE = "modelId";
 	protected static final String OBJECTID_ATTRIBUTE = "objectId";
-	protected static final String FIELDID_ATTRIBUTE = "fieldId";
+	protected static final String REPOSITORYID_ATTRIBUTE = "repositoryId";
 	protected static final String TYPE_ATTRIBUTE = "type";
 	protected static final String XID_ATTRIBUTE = "xid";
 	
@@ -39,6 +39,16 @@ class XmlUtils {
 		}
 	}
 	
+	protected static ChangeType getChangeType(MiniElement xml, String elementName) {
+		String typeString = getRequiredAttribbute(xml, TYPE_ATTRIBUTE, elementName);
+		ChangeType type = ChangeType.fromString(typeString);
+		if(type == null) {
+			throw new IllegalArgumentException("<" + elementName + ">@" + TYPE_ATTRIBUTE
+			        + " does not contain a valid type, but '" + typeString + "'");
+		}
+		return type;
+	}
+	
 	protected static XID getOptionalXidAttribute(MiniElement xml, String attributeName, XID def) {
 		String xidString = xml.getAttribute(attributeName);
 		if(xidString == null) {
@@ -47,13 +57,32 @@ class XmlUtils {
 		return XX.toId(xidString);
 	}
 	
+	protected static String getRequiredAttribbute(MiniElement xml, String attribute, String element) {
+		String value = xml.getAttribute(attribute);
+		if(value == null) {
+			throw new IllegalArgumentException("Missing attribute " + attribute + "@<" + element
+			        + ">");
+		}
+		return value;
+	}
+	
+	static XID getRequiredXidAttribute(MiniElement xml, String elementName) {
+		String xidString = xml.getAttribute(XID_ATTRIBUTE);
+		if(xidString == null) {
+			throw new IllegalArgumentException("<" + elementName + "> element is missing the "
+			        + XID_ATTRIBUTE + " attribute.");
+		}
+		XID xid = XX.toId(xidString);
+		return xid;
+	}
+	
 	@SuppressWarnings("null")
 	protected static XAddress getTarget(MiniElement xml, XAddress context) {
 		
 		boolean match = (context != null);
 		
-		XID repoId = getOptionalXidAttribute(xml, REPOSITORYID_ATTRIBUTE, match ? context
-		        .getRepository() : null);
+		XID repoId = getOptionalXidAttribute(xml, REPOSITORYID_ATTRIBUTE,
+		        match ? context.getRepository() : null);
 		match = match && XI.equals(repoId, context.getRepository());
 		XID modelId = getOptionalXidAttribute(xml, MODELID_ATTRIBUTE, match ? context.getModel()
 		        : null);
@@ -96,35 +125,6 @@ class XmlUtils {
 			out.attribute(FIELDID_ATTRIBUTE, fieldId.toString());
 		}
 		
-	}
-	
-	protected static ChangeType getChangeType(MiniElement xml, String elementName) {
-		String typeString = getRequiredAttribbute(xml, TYPE_ATTRIBUTE, elementName);
-		ChangeType type = ChangeType.fromString(typeString);
-		if(type == null) {
-			throw new IllegalArgumentException("<" + elementName + ">@" + TYPE_ATTRIBUTE
-			        + " does not contain a valid type, but '" + typeString + "'");
-		}
-		return type;
-	}
-	
-	protected static String getRequiredAttribbute(MiniElement xml, String attribute, String element) {
-		String value = xml.getAttribute(attribute);
-		if(value == null) {
-			throw new IllegalArgumentException("Missing attribute " + attribute + "@<" + element
-			        + ">");
-		}
-		return value;
-	}
-	
-	static XID getRequiredXidAttribute(MiniElement xml, String elementName) {
-		String xidString = xml.getAttribute(XID_ATTRIBUTE);
-		if(xidString == null) {
-			throw new IllegalArgumentException("<" + elementName + "> element is missing the "
-			        + XID_ATTRIBUTE + " attribute.");
-		}
-		XID xid = XX.toId(xidString);
-		return xid;
 	}
 	
 }

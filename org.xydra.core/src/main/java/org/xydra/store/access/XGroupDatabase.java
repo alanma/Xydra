@@ -5,7 +5,6 @@ import java.util.Set;
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.base.XID;
-import org.xydra.store.MAXTodo;
 
 
 /**
@@ -23,7 +22,7 @@ import org.xydra.store.MAXTodo;
  * @author dscharrer
  * @author voelkel
  */
-@MAXTodo
+
 public interface XGroupDatabase {
 	
 	/**
@@ -39,27 +38,12 @@ public interface XGroupDatabase {
 	void addToGroup(XID actorId, XID groupId);
 	
 	/**
-	 * Remove an actor from a group.
-	 * 
-	 * @param actorId The {@link XID} of the actor for which to revoke group
-	 *            membership.
-	 * @param groupId The {@link XID} of the group the specified actor will be
-	 *            removed from
-	 */
-	@ModificationOperation
-	void removeFromGroup(XID actorId, XID groupId);
-	
-	/**
-	 * Check if the specified actor is a member of the specific group.
-	 * 
-	 * @param actorId The {@link XID} of the actor whose membership status is to
-	 *            be checked
-	 * @param groupId The {@link XID} of the group for which the membership
-	 *            status of the specified actor is to be checked
-	 * @return true, if the specified actor is a member of the specified group
+	 * @return returns an set containing the {@link XID XIDs} of the defined
+	 *         groups. Groups are defined as long as they have at least one
+	 *         member. Never null.
 	 */
 	@ReadOperation
-	boolean hasGroup(XID actorId, XID groupId);
+	Set<XID> getGroups();
 	
 	/**
 	 * Get all groups an actor is part of.
@@ -84,11 +68,35 @@ public interface XGroupDatabase {
 	Set<XID> getMembersOf(XID groupId);
 	
 	/**
-	 * @return returns an set containing the {@link XID XIDs} of the defined
-	 *         groups. Groups are defined as long as they have at least one
-	 *         member. Never null.
+	 * Check if the specified actor is a member of the specific group.
+	 * 
+	 * @param actorId The {@link XID} of the actor whose membership status is to
+	 *            be checked
+	 * @param groupId The {@link XID} of the group for which the membership
+	 *            status of the specified actor is to be checked
+	 * @return true, if the specified actor is a member of the specified group
 	 */
 	@ReadOperation
-	Set<XID> getGroups();
+	boolean hasGroup(XID actorId, XID groupId);
+	
+	/**
+	 * Remove an actor from a group.
+	 * 
+	 * @param actorId The {@link XID} of the actor for which to revoke group
+	 *            membership.
+	 * @param groupId The {@link XID} of the group the specified actor will be
+	 *            removed from
+	 */
+	@ModificationOperation
+	void removeFromGroup(XID actorId, XID groupId);
+	
+	/**
+	 * Same as removing all actors from a group but can sometimes be implemented
+	 * faster.
+	 * 
+	 * @param groupId
+	 */
+	@ModificationOperation
+	void removeGroup(XID groupId);
 	
 }

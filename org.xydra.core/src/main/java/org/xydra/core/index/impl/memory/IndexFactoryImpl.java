@@ -9,11 +9,11 @@ import org.xydra.core.model.XObject;
 
 public class IndexFactoryImpl implements IIndexFactory {
 	
-	public IObjectIndex createObjectIndex(XID fieldID, XObject indexObject) {
-		return new ObjectIndex(fieldID, indexObject);
+	public IObjectIndex createObjectIndex(XID fieldId, XObject indexObject) {
+		return new ObjectIndex(fieldId, indexObject);
 	}
 	
-	public IUniqueObjectIndex createUniqueObjectIndex(XID fieldID, XObject indexObject) {
-		return new UniqueObjectIndex(fieldID, indexObject);
+	public IUniqueObjectIndex createUniqueObjectIndex(XID fieldId, XObject indexObject) {
+		return new UniqueObjectIndex(fieldId, indexObject);
 	}
 }

@@ -1,7 +1,7 @@
 package org.xydra.core.model.sync;
 
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XEvent;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XEvent;
 import org.xydra.core.model.XLocalChange;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XSynchronizesChanges;
@@ -26,9 +26,9 @@ public class XSynchronizer {
 	static private final Logger log = LoggerFactory.getLogger(XSynchronizer.class);
 	
 	private final XSynchronizesChanges entity;
-	private final XydraStore store;
-	
 	boolean requestRunning = false;
+	
+	private final XydraStore store;
 	
 	/**
 	 * Wrap the given entity to be synchronized with the given store. Each
@@ -44,6 +44,37 @@ public class XSynchronizer {
 		}
 		this.entity = entity;
 		this.store = store;
+	}
+	
+	private void applyEvents(XEvent[] remoteChanges) {
+		
+		if(remoteChanges.length == 0) {
+			// no changes to merge
+			return;
+		}
+		
+		boolean success = this.entity.synchronize(remoteChanges);
+		
+		if(!success) {
+			log.error("sync: error applying remote events");
+		}
+		assert success;
+		
+	}
+	
+	private void requestEnded(boolean noConnectionErrors, XSynchronizationCallback sc) {
+		
+		this.requestRunning = false;
+		
+		if(noConnectionErrors) {
+			if(this.entity.countUnappliedLocalChanges() > 0) {
+				// Send the remaining local changes.
+				// FIXME this can create deep call stacks
+				synchronize(sc);
+			} else if(sc != null) {
+				sc.onSuccess();
+			}
+		}
 	}
 	
 	/**
@@ -179,8 +210,8 @@ public class XSynchronizer {
 					
 					if(eventsRes.getException() != null) {
 						assert events == null;
-						log.error("sync: error getting events while sending command", eventsRes
-						        .getException());
+						log.error("sync: error getting events while sending command",
+						        eventsRes.getException());
 						if(sc != null) {
 							sc.onEventsError(eventsRes.getException());
 						}
@@ -249,37 +280,6 @@ public class XSynchronizer {
 			
 		}
 		
-	}
-	
-	private void applyEvents(XEvent[] remoteChanges) {
-		
-		if(remoteChanges.length == 0) {
-			// no changes to merge
-			return;
-		}
-		
-		boolean success = this.entity.synchronize(remoteChanges);
-		
-		if(!success) {
-			log.error("sync: error applying remote events");
-		}
-		assert success;
-		
-	}
-	
-	private void requestEnded(boolean noConnectionErrors, XSynchronizationCallback sc) {
-		
-		this.requestRunning = false;
-		
-		if(noConnectionErrors) {
-			if(this.entity.countUnappliedLocalChanges() > 0) {
-				// Send the remaining local changes.
-				// FIXME this can create deep call stacks
-				synchronize(sc);
-			} else if(sc != null) {
-				sc.onSuccess();
-			}
-		}
 	}
 	
 }

@@ -3,10 +3,9 @@ package org.xydra.core.model;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.xydra.core.TestLogger;
+import org.xydra.core.model.state.TestStateStore;
 import org.xydra.core.model.state.XSPI;
-import org.xydra.core.test.TestLogger;
-import org.xydra.core.test.model.AbstractChangeTest;
-import org.xydra.core.test.model.state.TestStateStore;
 
 
 public class ChangeTestState extends AbstractChangeTest {

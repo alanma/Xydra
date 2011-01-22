@@ -21,11 +21,13 @@ public interface XmlOut {
 	 */
 	public static final String XML_DECLARATION = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
 	
-	public void open(String elementName);
-	
 	public void attribute(String name, String value);
 	
-	public void content(String rawContent);
+	/**
+	 * Close the stream (for steam-based implementations) -- do not confuse with
+	 * {@link #close(String)}
+	 */
+	public void close();
 	
 	/**
 	 * Close the element with the given name -- do not confuse with
@@ -35,26 +37,22 @@ public interface XmlOut {
 	 */
 	public void close(String elementName);
 	
+	public void closeProcessingInstruction();
+	
 	public void comment(String string);
 	
-	/**
-	 * circumvent xml and just write as-is to writer
-	 * 
-	 * @
-	 */
-	public void write(String s);
-	
-	public void openProcessingInstruction(String processingInstruction);
-	
-	public void closeProcessingInstruction();
+	public void content(String rawContent);
 	
 	public void doctype(String doctype, String publicID, String url);
 	
 	public void flush();
 	
+	public void open(String elementName);
+	
+	public void openProcessingInstruction(String processingInstruction);
+	
 	/**
-	 * Close the stream (for steam-based implementations) -- do not confuse with
-	 * {@link #close(String)}
+	 * circumvent xml and just write as-is to writer
 	 */
-	public void close();
+	public void write(String s);
 }

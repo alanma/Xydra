@@ -27,62 +27,13 @@ public class MemoryLongListValue extends MemoryListValue<Long> implements XLongL
 		}
 	}
 	
-	public MemoryLongListValue(long[] content) {
-		this.list = new long[content.length];
-		System.arraycopy(content, 0, this.list, 0, content.length);
-	}
-	
 	private MemoryLongListValue(int length) {
 		this.list = new long[length];
 	}
 	
-	public long[] contents() {
-		long[] array = new long[this.list.length];
-		System.arraycopy(this.list, 0, array, 0, this.list.length);
-		return array;
-	}
-	
-	public Long[] toArray() {
-		Long[] array = new Long[this.list.length];
-		fillArray(array);
-		return array;
-	}
-	
-	@Override
-	public boolean equals(Object other) {
-		return other instanceof XLongListValue
-		        && XI.equalsIterator(this.iterator(), ((XLongListValue)other).iterator());
-	}
-	
-	@Override
-	public int hashCode() {
-		return Arrays.hashCode(this.list);
-	}
-	
-	@Override
-	public String toString() {
-		return Arrays.toString(this.list);
-	}
-	
-	public Long get(int index) {
-		return this.list[index];
-	}
-	
-	public int size() {
-		return this.list.length;
-	}
-	
-	public Number[] toNumberArray() {
-		Number[] array = new Number[this.list.length];
-		int i = 0;
-		for(Number e : this) {
-			array[i++] = e;
-		}
-		return array;
-	}
-	
-	public XLongListValue add(Long entry) {
-		return add(this.list.length, entry);
+	public MemoryLongListValue(long[] content) {
+		this.list = new long[content.length];
+		System.arraycopy(content, 0, this.list, 0, content.length);
 	}
 	
 	public XLongListValue add(int index, Long entry) {
@@ -97,12 +48,29 @@ public class MemoryLongListValue extends MemoryListValue<Long> implements XLongL
 		return v;
 	}
 	
-	public XLongListValue remove(Long entry) {
-		int index = indexOf(entry);
-		if(index < 0) {
-			return this;
-		}
-		return remove(index);
+	public XLongListValue add(Long entry) {
+		return add(this.list.length, entry);
+	}
+	
+	public long[] contents() {
+		long[] array = new long[this.list.length];
+		System.arraycopy(this.list, 0, array, 0, this.list.length);
+		return array;
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		return other instanceof XLongListValue
+		        && XI.equalsIterator(this.iterator(), ((XLongListValue)other).iterator());
+	}
+	
+	public Long get(int index) {
+		return this.list[index];
+	}
+	
+	@Override
+	public int hashCode() {
+		return Arrays.hashCode(this.list);
 	}
 	
 	public XLongListValue remove(int index) {
@@ -114,6 +82,38 @@ public class MemoryLongListValue extends MemoryListValue<Long> implements XLongL
 		System.arraycopy(this.list, 0, v.list, 0, index);
 		System.arraycopy(this.list, index + 1, v.list, index, size - index - 1);
 		return v;
+	}
+	
+	public XLongListValue remove(Long entry) {
+		int index = indexOf(entry);
+		if(index < 0) {
+			return this;
+		}
+		return remove(index);
+	}
+	
+	public int size() {
+		return this.list.length;
+	}
+	
+	public Long[] toArray() {
+		Long[] array = new Long[this.list.length];
+		fillArray(array);
+		return array;
+	}
+	
+	public Number[] toNumberArray() {
+		Number[] array = new Number[this.list.length];
+		int i = 0;
+		for(Number e : this) {
+			array[i++] = e;
+		}
+		return array;
+	}
+	
+	@Override
+	public String toString() {
+		return Arrays.toString(this.list);
 	}
 	
 }

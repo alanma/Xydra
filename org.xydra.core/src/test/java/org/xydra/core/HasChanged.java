@@ -1,0 +1,78 @@
+/**
+ * 
+ */
+package org.xydra.core;
+
+import org.xydra.base.XID;
+import org.xydra.base.change.XFieldEvent;
+import org.xydra.base.change.XModelEvent;
+import org.xydra.base.change.XObjectEvent;
+import org.xydra.base.change.XRepositoryEvent;
+import org.xydra.base.change.XTransactionEvent;
+import org.xydra.core.change.XFieldEventListener;
+import org.xydra.core.change.XModelEventListener;
+import org.xydra.core.change.XObjectEventListener;
+import org.xydra.core.change.XRepositoryEventListener;
+import org.xydra.core.change.XTransactionEventListener;
+import org.xydra.core.model.XField;
+import org.xydra.core.model.XModel;
+import org.xydra.core.model.XObject;
+
+
+/**
+ * A listener for events of type T that records in a boolean variable if any
+ * events have been received.
+ * 
+ * @param <T>
+ */
+public class HasChanged implements XRepositoryEventListener, XModelEventListener,
+        XObjectEventListener, XFieldEventListener, XTransactionEventListener {
+	
+	/**
+	 * Listen for any fired change events sent by any object or field in the
+	 * model or the model itself.
+	 */
+	static public HasChanged listen(XModel model) {
+		HasChanged hc = new HasChanged();
+		
+		model.addListenerForModelEvents(hc);
+		model.addListenerForObjectEvents(hc);
+		model.addListenerForFieldEvents(hc);
+		model.addListenerForTransactionEvents(hc);
+		for(XID objectId : model) {
+			XObject object = model.getObject(objectId);
+			object.addListenerForObjectEvents(hc);
+			object.addListenerForFieldEvents(hc);
+			object.addListenerForTransactionEvents(hc);
+			for(XID fieldId : object) {
+				XField field = object.getField(fieldId);
+				field.addListenerForFieldEvents(hc);
+			}
+		}
+		
+		return hc;
+	}
+	
+	public boolean eventsReceived = false;
+	
+	public void onChangeEvent(XFieldEvent event) {
+		this.eventsReceived = true;
+	}
+	
+	public void onChangeEvent(XModelEvent event) {
+		this.eventsReceived = true;
+	}
+	
+	public void onChangeEvent(XObjectEvent event) {
+		this.eventsReceived = true;
+	}
+	
+	public void onChangeEvent(XRepositoryEvent event) {
+		this.eventsReceived = true;
+	}
+	
+	public void onChangeEvent(XTransactionEvent event) {
+		this.eventsReceived = true;
+	}
+	
+}

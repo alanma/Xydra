@@ -22,11 +22,11 @@ public class MemoryAddressSortedSetValue extends MemoryAddressListValue implemen
 	
 	private static final long serialVersionUID = -83885798275571937L;
 	
-	public MemoryAddressSortedSetValue(XAddress[] contents) {
+	public MemoryAddressSortedSetValue(Collection<XAddress> contents) {
 		super(contents);
 	}
 	
-	public MemoryAddressSortedSetValue(Collection<XAddress> contents) {
+	public MemoryAddressSortedSetValue(XAddress[] contents) {
 		super(contents);
 	}
 	
@@ -36,8 +36,8 @@ public class MemoryAddressSortedSetValue extends MemoryAddressListValue implemen
 			// no need to add it
 			return this;
 		} else {
-			XAddress[] newList = MemoryAddressListValue.createArrayWithEntryInsertedAtPosition(this
-			        .contents(), this.contents().length, entry);
+			XAddress[] newList = MemoryAddressListValue.createArrayWithEntryInsertedAtPosition(
+			        this.contents(), this.contents().length, entry);
 			return new MemoryAddressSortedSetValue(newList);
 		}
 	}
@@ -50,8 +50,8 @@ public class MemoryAddressSortedSetValue extends MemoryAddressListValue implemen
 			// not possible to remove it
 			return this;
 		} else {
-			XAddress[] newList = MemoryAddressListValue.createArrayWithEntryRemovedAtPosition(this
-			        .contents(), index);
+			XAddress[] newList = MemoryAddressListValue.createArrayWithEntryRemovedAtPosition(
+			        this.contents(), index);
 			return new MemoryAddressSortedSetValue(newList);
 		}
 	}

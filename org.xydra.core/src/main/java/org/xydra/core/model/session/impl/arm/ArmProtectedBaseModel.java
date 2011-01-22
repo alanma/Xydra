@@ -3,27 +3,27 @@ package org.xydra.core.model.session.impl.arm;
 import java.util.Iterator;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableModel;
-import org.xydra.base.XReadableObject;
 import org.xydra.base.XID;
-import org.xydra.core.access.XAccessManager;
+import org.xydra.base.rmof.XReadableModel;
+import org.xydra.base.rmof.XReadableObject;
 import org.xydra.store.AccessException;
+import org.xydra.store.access.XAuthorisationManager;
 
 
 /**
- * An {@link XReadableModel} that wraps an {@link XReadableModel} for a specific actor
- * and checks all access against an {@link XAccessManager}.
+ * An {@link XReadableModel} that wraps an {@link XReadableModel} for a specific
+ * actor and checks all access against an {@link XAuthorisationManager}.
  * 
  * @author dscharrer
  * 
  */
 public class ArmProtectedBaseModel implements XReadableModel {
 	
-	private final XReadableModel model;
-	protected final XAccessManager arm;
 	protected final XID actor;
+	protected final XAuthorisationManager arm;
+	private final XReadableModel model;
 	
-	public ArmProtectedBaseModel(XReadableModel model, XAccessManager arm, XID actor) {
+	public ArmProtectedBaseModel(XReadableModel model, XAuthorisationManager arm, XID actor) {
 		this.model = model;
 		this.arm = arm;
 		this.actor = actor;
@@ -32,11 +32,30 @@ public class ArmProtectedBaseModel implements XReadableModel {
 		assert arm != null;
 	}
 	
+	protected void checkCanKnowAboutObject(XID objectId) {
+		if(!this.arm.canKnowAboutObject(this.actor, getAddress(), objectId)) {
+			throw new AccessException(this.actor + " cannot read object " + objectId + " in "
+			        + getAddress());
+		}
+	}
+	
 	protected void checkReadAccess() throws AccessException {
 		// IMPROVE cache this
 		if(!this.arm.canRead(this.actor, getAddress())) {
 			throw new AccessException(this.actor + " cannot read " + getAddress());
 		}
+	}
+	
+	public XID getActor() {
+		return this.actor;
+	}
+	
+	public XAddress getAddress() {
+		return this.model.getAddress();
+	}
+	
+	public XID getID() {
+		return this.model.getID();
 	}
 	
 	public XReadableObject getObject(XID objectId) {
@@ -50,13 +69,6 @@ public class ArmProtectedBaseModel implements XReadableModel {
 		}
 		
 		return new ArmProtectedBaseObject(object, this.arm, this.actor);
-	}
-	
-	protected void checkCanKnowAboutObject(XID objectId) {
-		if(!this.arm.canKnowAboutObject(this.actor, getAddress(), objectId)) {
-			throw new AccessException(this.actor + " cannot read object " + objectId + " in "
-			        + getAddress());
-		}
 	}
 	
 	public long getRevisionNumber() {
@@ -80,23 +92,11 @@ public class ArmProtectedBaseModel implements XReadableModel {
 		return this.model.isEmpty();
 	}
 	
-	public XAddress getAddress() {
-		return this.model.getAddress();
-	}
-	
-	public XID getID() {
-		return this.model.getID();
-	}
-	
 	public Iterator<XID> iterator() {
 		
 		checkReadAccess();
 		
 		return this.model.iterator();
-	}
-	
-	public XID getActor() {
-		return this.actor;
 	}
 	
 }

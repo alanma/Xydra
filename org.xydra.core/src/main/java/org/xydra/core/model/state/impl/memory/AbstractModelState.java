@@ -28,24 +28,22 @@ public abstract class AbstractModelState extends AbstractState implements XModel
 		}
 	}
 	
-	public long getRevisionNumber() {
-		return this.revisionNumber;
-	}
-	
-	public void setRevisionNumber(long revisionNumber) {
-		this.revisionNumber = revisionNumber;
-	}
-	
-	@Override
-	public String toString() {
-		return "xmodel" + getAddress() + " [" + getRevisionNumber() + "]" + " = "
-		        + XStateUtils.toString(iterator(), ",");
-	}
-	
-	/* Content of model is ignored for hashCode */
-	@Override
-	public int hashCode() {
-		return (int)(getAddress().hashCode() + getRevisionNumber());
+	/**
+	 * Checks whether the given {@link XObjectState} could be added as a child
+	 * of this AbstractModelState.
+	 * 
+	 * @param objectState The {@link XObjectState} which is to be checked
+	 * @throws IllegalArgumentException if the given {@link XObjectState} was
+	 *             null or cannot be added to this AbstractModelState
+	 */
+	protected void checkObjectState(XObjectState objectState) {
+		if(objectState == null) {
+			throw new IllegalArgumentException("objectState was null");
+		}
+		if(!getAddress().contains(objectState.getAddress())) {
+			throw new IllegalArgumentException("cannot add object state "
+			        + objectState.getAddress() + " to " + getAddress());
+		}
 	}
 	
 	@Override
@@ -66,22 +64,24 @@ public abstract class AbstractModelState extends AbstractState implements XModel
 		return getAddress().getModel();
 	}
 	
-	/**
-	 * Checks whether the given {@link XObjectState} could be added as a child
-	 * of this AbstractModelState.
-	 * 
-	 * @param objectState The {@link XObjectState} which is to be checked
-	 * @throws IllegalArgumentException if the given {@link XObjectState} was
-	 *             null or cannot be added to this AbstractModelState
-	 */
-	protected void checkObjectState(XObjectState objectState) {
-		if(objectState == null) {
-			throw new IllegalArgumentException("objectState was null");
-		}
-		if(!getAddress().contains(objectState.getAddress())) {
-			throw new IllegalArgumentException("cannot add object state "
-			        + objectState.getAddress() + " to " + getAddress());
-		}
+	public long getRevisionNumber() {
+		return this.revisionNumber;
+	}
+	
+	/* Content of model is ignored for hashCode */
+	@Override
+	public int hashCode() {
+		return (int)(getAddress().hashCode() + getRevisionNumber());
+	}
+	
+	public void setRevisionNumber(long revisionNumber) {
+		this.revisionNumber = revisionNumber;
+	}
+	
+	@Override
+	public String toString() {
+		return "xmodel" + getAddress() + " [" + getRevisionNumber() + "]" + " = "
+		        + XStateUtils.toString(iterator(), ",");
 	}
 	
 }

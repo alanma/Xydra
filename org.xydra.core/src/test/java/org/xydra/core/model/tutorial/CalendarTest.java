@@ -4,9 +4,9 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xydra.core.TestLogger;
 import org.xydra.core.model.state.XSPI;
 import org.xydra.core.model.state.impl.memory.TemporaryStateStore;
-import org.xydra.core.test.TestLogger;
 
 
 public class CalendarTest {

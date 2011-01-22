@@ -1,5 +1,8 @@
 package org.xydra.core.change;
 
+import org.xydra.base.change.XObjectEvent;
+
+
 /**
  * This interface indicates that it is possible register
  * {@link XObjectEventListener XObjectEventListeners} to listen for

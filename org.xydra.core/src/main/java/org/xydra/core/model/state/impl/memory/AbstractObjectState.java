@@ -29,24 +29,22 @@ public abstract class AbstractObjectState extends AbstractState implements XObje
 		}
 	}
 	
-	public long getRevisionNumber() {
-		return this.revisionNumber;
-	}
-	
-	public void setRevisionNumber(long revisionNumber) {
-		this.revisionNumber = revisionNumber;
-	}
-	
-	@Override
-	public String toString() {
-		return "xobject " + getAddress() + " [" + getRevisionNumber() + "]" + " = "
-		        + XStateUtils.toString(iterator(), ",");
-	}
-	
-	/* Content of object is ignored for hashCode */
-	@Override
-	public int hashCode() {
-		return (int)(getAddress().hashCode() + getRevisionNumber());
+	/**
+	 * Checks whether the given {@link XFieldState} could be added as a child of
+	 * this AbstractObjectState.
+	 * 
+	 * @param fieldState The {@link XFieldState} which is to be checked
+	 * @throws IllegalArgumentException if the given {@link XFieldState} was
+	 *             null or cannot be added to this AbstractObjectState
+	 */
+	protected void checkFieldState(XFieldState fieldState) {
+		if(fieldState == null) {
+			throw new IllegalArgumentException("fieldState was null");
+		}
+		if(!getAddress().contains(fieldState.getAddress())) {
+			throw new IllegalArgumentException("cannot add field state " + fieldState.getAddress()
+			        + " to " + getAddress());
+		}
 	}
 	
 	@Override
@@ -67,22 +65,24 @@ public abstract class AbstractObjectState extends AbstractState implements XObje
 		return getAddress().getObject();
 	}
 	
-	/**
-	 * Checks whether the given {@link XFieldState} could be added as a child of
-	 * this AbstractObjectState.
-	 * 
-	 * @param fieldState The {@link XFieldState} which is to be checked
-	 * @throws IllegalArgumentException if the given {@link XFieldState} was
-	 *             null or cannot be added to this AbstractObjectState
-	 */
-	protected void checkFieldState(XFieldState fieldState) {
-		if(fieldState == null) {
-			throw new IllegalArgumentException("fieldState was null");
-		}
-		if(!getAddress().contains(fieldState.getAddress())) {
-			throw new IllegalArgumentException("cannot add field state " + fieldState.getAddress()
-			        + " to " + getAddress());
-		}
+	public long getRevisionNumber() {
+		return this.revisionNumber;
+	}
+	
+	/* Content of object is ignored for hashCode */
+	@Override
+	public int hashCode() {
+		return (int)(getAddress().hashCode() + getRevisionNumber());
+	}
+	
+	public void setRevisionNumber(long revisionNumber) {
+		this.revisionNumber = revisionNumber;
+	}
+	
+	@Override
+	public String toString() {
+		return "xobject " + getAddress() + " [" + getRevisionNumber() + "]" + " = "
+		        + XStateUtils.toString(iterator(), ",");
 	}
 	
 }

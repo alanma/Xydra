@@ -31,6 +31,24 @@ import org.xydra.core.model.XRepository;
 public interface XRepositoryState extends IHasXID, Iterable<XID>, IHasXAddress, Serializable {
 	
 	/**
+	 * Links the given {@link XModelState} as a child of this XRepositoryState.
+	 * This means that the {@link XModel} represented by the given
+	 * {@link XModelState} is a child-{@link XModel} of the {@link XRepository}
+	 * represented by this XRepositoryState. Also sets this XRepositoryState as
+	 * the parent. Neither this fact nor the {@link XModelState} itself is
+	 * persisted by this operation.
+	 * 
+	 * Implementations should not persist this change until the corresponding
+	 * save unless they can guarantee that no other state calls will fail.
+	 * 
+	 * TODO: better to add a transaction parameter so that implementations can
+	 * persist whenever they want?
+	 * 
+	 * @param modelState The {@link XModelState} which is to be added as a child
+	 */
+	void addModelState(XModelState modelState);
+	
+	/**
 	 * Begin a simple transaction to prevent inconsistent states from being
 	 * persisted.
 	 * 
@@ -50,23 +68,16 @@ public interface XRepositoryState extends IHasXID, Iterable<XID>, IHasXAddress, 
 	XStateTransaction beginTransaction();
 	
 	/**
-	 * Persist changes associated with the given transaction.
+	 * Create a new {@link XModelState} in the same persistence layer as this
+	 * XRepositoryState and with an address contained within this repository.
+	 * This does not check if there is already such a state and does not add the
+	 * created state as a child. The {@link XRepository} implementation is
+	 * responsible for doing so.
 	 * 
-	 * @param transaction must have been returned by {@link #beginTransaction()}
-	 *            from this {@link XRepositoryState}
+	 * @param id The {@link XID} for the new {@link XModelState}
+	 * @return The newly created {@link XModelState}
 	 */
-	void endTransaction(XStateTransaction transaction);
-	
-	/**
-	 * Store this state information in the attached persistence layer, i.e. the
-	 * one determined by calling {@link XStateStore#c}.create...().
-	 * 
-	 * @param transaction If not null, persist the change at the end of the
-	 *            given transaction, otherwise persist it now. The transaction
-	 *            object must have been created by this {@link XRepositoryState}
-	 *            .
-	 */
-	void save(XStateTransaction transaction);
+	XModelState createModelState(XID id);
 	
 	/**
 	 * Delete this state information from the attached persistence layer, i.e.
@@ -80,22 +91,12 @@ public interface XRepositoryState extends IHasXID, Iterable<XID>, IHasXAddress, 
 	void delete(XStateTransaction transaction);
 	
 	/**
-	 * Links the given {@link XModelState} as a child of this XRepositoryState.
-	 * This means that the {@link XModel} represented by the given
-	 * {@link XModelState} is a child-{@link XModel} of the {@link XRepository}
-	 * represented by this XRepositoryState. Also sets this XRepositoryState as
-	 * the parent. Neither this fact nor the {@link XModelState} itself is
-	 * persisted by this operation.
+	 * Persist changes associated with the given transaction.
 	 * 
-	 * Implementations should not persist this change until the corresponding
-	 * save unless they can guarantee that no other state calls will fail.
-	 * 
-	 * TODO: better to add a transaction parameter so that implementations can
-	 * persist whenever they want?
-	 * 
-	 * @param modelState The {@link XModelState} which is to be added as a child
+	 * @param transaction must have been returned by {@link #beginTransaction()}
+	 *            from this {@link XRepositoryState}
 	 */
-	void addModelState(XModelState modelState);
+	void endTransaction(XStateTransaction transaction);
 	
 	/**
 	 * Get the specified {@link XModelState} contained in this XRepositoryState
@@ -113,18 +114,6 @@ public interface XRepositoryState extends IHasXID, Iterable<XID>, IHasXAddress, 
 	 *         null if no such {@link XModelState} exists
 	 */
 	XModelState getModelState(XID id);
-	
-	/**
-	 * Create a new {@link XModelState} in the same persistence layer as this
-	 * XRepositoryState and with an address contained within this repository.
-	 * This does not check if there is already such a state and does not add the
-	 * created state as a child. The {@link XRepository} implementation is
-	 * responsible for doing so.
-	 * 
-	 * @param id The {@link XID} for the new {@link XModelState}
-	 * @return The newly created {@link XModelState}
-	 */
-	XModelState createModelState(XID id);
 	
 	/**
 	 * Checks whether the {@link XRepository} represented by this XModelState
@@ -148,6 +137,15 @@ public interface XRepositoryState extends IHasXID, Iterable<XID>, IHasXAddress, 
 	boolean isEmpty();
 	
 	/**
+	 * Returns an {@link Iterator} over the {@link XID XIDs} of all children-
+	 * {@link XModelState XModelStates} of this XRepositoryState
+	 * 
+	 * @returns an {@link Iterator} over the {@link XID XIDs} of all children-
+	 *          {@link XModelState XModelStates} of this XRepositoryState
+	 */
+	Iterator<XID> iterator();
+	
+	/**
 	 * Removes the specified {@link XModelState} from this XRepositoryState.
 	 * This does not remove the actual {@link XModelState} from the state
 	 * backend, only the reference from this state. To cleanup the state use
@@ -162,12 +160,14 @@ public interface XRepositoryState extends IHasXID, Iterable<XID>, IHasXAddress, 
 	void removeModelState(XID modelStateId);
 	
 	/**
-	 * Returns an {@link Iterator} over the {@link XID XIDs} of all children-
-	 * {@link XModelState XModelStates} of this XRepositoryState
+	 * Store this state information in the attached persistence layer, i.e. the
+	 * one determined by calling {@link XStateStore#c}.create...().
 	 * 
-	 * @returns an {@link Iterator} over the {@link XID XIDs} of all children-
-	 *          {@link XModelState XModelStates} of this XRepositoryState
+	 * @param transaction If not null, persist the change at the end of the
+	 *            given transaction, otherwise persist it now. The transaction
+	 *            object must have been created by this {@link XRepositoryState}
+	 *            .
 	 */
-	Iterator<XID> iterator();
+	void save(XStateTransaction transaction);
 	
 }

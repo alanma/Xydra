@@ -1,7 +1,7 @@
 package org.xydra.base.value;
 
 /**
- * An {@link XValue] for storing a single Java Double value.
+ * An {@link XValue} for storing a single Java Double value.
  * 
  * @author Kaidel
  * 

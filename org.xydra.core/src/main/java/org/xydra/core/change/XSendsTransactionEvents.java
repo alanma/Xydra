@@ -1,5 +1,8 @@
 package org.xydra.core.change;
 
+import org.xydra.base.change.XTransactionEvent;
+
+
 /**
  * This interface indicates that it is possible to register
  * {@link XTransactionEventListener XTransactionEventListeners} to listen for

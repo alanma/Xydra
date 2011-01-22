@@ -3,6 +3,7 @@ package org.xydra.core.index.impl.memory;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
+import org.xydra.base.X;
 import org.xydra.base.XID;
 import org.xydra.base.value.XBooleanValue;
 import org.xydra.base.value.XCollectionValue;
@@ -11,8 +12,8 @@ import org.xydra.base.value.XIntegerValue;
 import org.xydra.base.value.XLongValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XValue;
-import org.xydra.core.X;
 import org.xydra.core.model.XObject;
+import org.xydra.store.NamingUtils;
 
 
 @RunsInAppEngine
@@ -22,25 +23,11 @@ public abstract class AbstractObjectIndex {
 	
 	private static final String CLASSNAME = "org.xydra.core.index.impl.memory.AbstractObjectIndex";
 	
-	protected XID fieldID;
-	protected XObject indexObject;
-	protected XID actor = X.getIDProvider().fromString(CLASSNAME);
-	
-	/**
-	 * @param fieldID
-	 * @param indexObjectID, common practice is to use one with ID
-	 *            {objectID}"-index-"{fieldID}
-	 */
-	public AbstractObjectIndex(XID fieldID, XObject indexObject) {
-		this.fieldID = fieldID;
-		this.indexObject = indexObject;
-	}
-	
 	/**
 	 * convert value to key
 	 * 
 	 * @param value
-	 * @return
+	 * @return an XID parsed from an encoded XValue
 	 */
 	public static XID valueToXID(XValue value) {
 		String key;
@@ -72,6 +59,20 @@ public abstract class AbstractObjectIndex {
 		}
 		XID xid = X.getIDProvider().fromString(key);
 		return xid;
+	}
+	protected XID actor = X.getIDProvider().fromString(CLASSNAME);
+	protected XID fieldId;
+	
+	protected XObject indexObject;
+	
+	/**
+	 * @param fieldId
+	 * @param indexObject see {@link NamingUtils#getIndexModelId(XID, String)}
+	 *            to obtain a suitable XID for your index object
+	 */
+	public AbstractObjectIndex(XID fieldId, XObject indexObject) {
+		this.fieldId = fieldId;
+		this.indexObject = indexObject;
 	}
 	
 }

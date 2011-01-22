@@ -2,14 +2,14 @@ package org.xydra.core.model.session;
 
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
-import org.xydra.base.XReadableModel;
-import org.xydra.base.XReadableRepository;
 import org.xydra.base.XID;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XRepositoryCommand;
-import org.xydra.core.change.XRepositoryEvent;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XRepositoryCommand;
+import org.xydra.base.change.XRepositoryEvent;
+import org.xydra.base.rmof.XReadableModel;
+import org.xydra.base.rmof.XReadableRepository;
 import org.xydra.core.change.XSendsFieldEvents;
-import org.xydra.core.change.XSendsModelEvent;
+import org.xydra.core.change.XSendsModelEvents;
 import org.xydra.core.change.XSendsObjectEvents;
 import org.xydra.core.change.XSendsRepositoryEvents;
 import org.xydra.core.change.XSendsTransactionEvents;
@@ -34,25 +34,8 @@ import org.xydra.store.AccessException;
  * 
  */
 public interface XProtectedRepository extends XReadableRepository, XSendsRepositoryEvents,
-        XSendsModelEvent, XSendsObjectEvents, XSendsFieldEvents, XSendsTransactionEvents,
+        XSendsModelEvents, XSendsObjectEvents, XSendsFieldEvents, XSendsTransactionEvents,
         XExecutesCommands {
-	
-	/**
-	 * Returns the {@link XModel} contained in this repository with the given
-	 * {@link XID} as an {@link XProtectedModel} linked with the actor of this
-	 * XProtectedRepository.
-	 * 
-	 * @param id The {@link XID} of the {@link XModel} which is to be returned
-	 * @return the {@link XModel} with the given {@link XID} as an
-	 *         {@link XProtectedModel} linked with the actor of this
-	 *         XProtectedRepository or null if no such {@link XReadableModel} exists
-	 *         in this repository
-	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (read access) to execute this
-	 *             method
-	 */
-	@ReadOperation
-	XProtectedModel getModel(XID id);
 	
 	/**
 	 * Creates a new {@link XModel} with the given {@link XID} and adds it to
@@ -62,7 +45,7 @@ public interface XProtectedRepository extends XReadableRepository, XSendsReposit
 	 * @param id The {@link XID} for the {@link XModel} which is to be created
 	 * @return the newly created {@link XModel} or the already existing
 	 *         {@link XModel} if the given {@link XID} was already taken (both
-	 *         as an {@link XProtected} linked with the actor of this
+	 *         as an XProtected... linked with the actor of this
 	 *         XProtectedObject)
 	 * @throws AccessException if the actor linked with this field does not have
 	 *             the necessary access rights (write access) to execute this
@@ -70,16 +53,6 @@ public interface XProtectedRepository extends XReadableRepository, XSendsReposit
 	 */
 	@ModificationOperation
 	XProtectedModel createModel(XID id);
-	
-	/**
-	 * Removes the specified {@link XModel} from this XProtectedRepository.
-	 * 
-	 * @param model The {@link XID} of the {@link XModel} which is to be removed
-	 * @return true, if the specified {@link XModel} could be removed, false
-	 *         otherwise
-	 */
-	@ModificationOperation
-	boolean removeModel(XID modelID);
 	
 	/**
 	 * Executes the given {@link XRepositoryCommand} if possible.
@@ -116,5 +89,32 @@ public interface XProtectedRepository extends XReadableRepository, XSendsReposit
 	 *         only succeed if this actor has access.
 	 */
 	XID getActor();
+	
+	/**
+	 * Returns the {@link XModel} contained in this repository with the given
+	 * {@link XID} as an {@link XProtectedModel} linked with the actor of this
+	 * XProtectedRepository.
+	 * 
+	 * @param id The {@link XID} of the {@link XModel} which is to be returned
+	 * @return the {@link XModel} with the given {@link XID} as an
+	 *         {@link XProtectedModel} linked with the actor of this
+	 *         XProtectedRepository or null if no such {@link XReadableModel}
+	 *         exists in this repository
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (read access) to execute this
+	 *             method
+	 */
+	@ReadOperation
+	XProtectedModel getModel(XID id);
+	
+	/**
+	 * Removes the specified {@link XModel} from this XProtectedRepository.
+	 * 
+	 * @param model The {@link XID} of the {@link XModel} which is to be removed
+	 * @return true, if the specified {@link XModel} could be removed, false
+	 *         otherwise
+	 */
+	@ModificationOperation
+	boolean removeModel(XID modelId);
 	
 }

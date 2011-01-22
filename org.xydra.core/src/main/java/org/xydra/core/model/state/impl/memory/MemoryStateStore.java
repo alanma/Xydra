@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.xydra.base.XAddress;
-import org.xydra.core.XX;
+import org.xydra.base.XX;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XFieldState;
 import org.xydra.core.model.state.XModelState;
@@ -26,8 +26,8 @@ public class MemoryStateStore implements XStateStore, Serializable {
 	private static final long serialVersionUID = 4486561293132414895L;
 	
 	private Map<XAddress,XFieldState> fields;
-	private Map<XAddress,XObjectState> objects;
 	private Map<XAddress,XModelState> models;
+	private Map<XAddress,XObjectState> objects;
 	private Map<XAddress,XRepositoryState> repositories;
 	
 	public MemoryStateStore() {
@@ -53,6 +53,22 @@ public class MemoryStateStore implements XStateStore, Serializable {
 	
 	public XRepositoryState createRepositoryState(XAddress repoAddr) {
 		return new StoredRepositoryState(repoAddr, this);
+	}
+	
+	protected void deleteFieldState(XAddress fieldAddress) {
+		this.fields.remove(fieldAddress);
+	}
+	
+	protected void deleteModelState(XAddress modelAddress) {
+		this.models.remove(modelAddress);
+	}
+	
+	protected void deleteObjectState(XAddress objectAddress) {
+		this.objects.remove(objectAddress);
+	}
+	
+	protected void deleteRepositoryState(XAddress repositoryAddress) {
+		this.repositories.remove(repositoryAddress);
 	}
 	
 	public XFieldState loadFieldState(XAddress fieldStateAddress) {
@@ -83,29 +99,6 @@ public class MemoryStateStore implements XStateStore, Serializable {
 		return this.repositories.get(repositoryStateAddress);
 	}
 	
-	protected void deleteFieldState(XAddress fieldAddress) {
-		this.fields.remove(fieldAddress);
-	}
-	
-	protected void deleteModelState(XAddress modelAddress) {
-		this.models.remove(modelAddress);
-	}
-	
-	protected void deleteObjectState(XAddress objectAddress) {
-		this.objects.remove(objectAddress);
-	}
-	
-	protected void deleteRepositoryState(XAddress repositoryAddress) {
-		this.repositories.remove(repositoryAddress);
-	}
-	
-	protected void save(StoredFieldState fieldState) {
-		if(fieldState == null) {
-			throw new IllegalArgumentException("fieldState may not be null");
-		}
-		this.fields.put(fieldState.getAddress(), fieldState);
-	}
-	
 	protected void save(AbstractModelState modelState) {
 		if(modelState == null) {
 			throw new IllegalArgumentException("modelState may not be null");
@@ -126,6 +119,13 @@ public class MemoryStateStore implements XStateStore, Serializable {
 		}
 		this.repositories.put(XX.toAddress(repositoryState.getID(), null, null, null),
 		        repositoryState);
+	}
+	
+	protected void save(StoredFieldState fieldState) {
+		if(fieldState == null) {
+			throw new IllegalArgumentException("fieldState may not be null");
+		}
+		this.fields.put(fieldState.getAddress(), fieldState);
 	}
 	
 }

@@ -4,7 +4,7 @@ import static junit.framework.Assert.assertEquals;
 
 import org.junit.Test;
 import org.xydra.base.XID;
-import org.xydra.core.XX;
+import org.xydra.base.XX;
 
 
 public class NamingUtilsTest {

@@ -1,5 +1,8 @@
 package org.xydra.core.change;
 
+import org.xydra.base.change.XRepositoryEvent;
+
+
 /**
  * A listener interested in {@link XRepositoryEvent XRepositoryEvents}. Can be
  * registered on classes implementing the {@link XSendsRepositoryEvents}

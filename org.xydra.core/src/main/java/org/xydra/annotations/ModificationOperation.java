@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
  * @author voelkel
  * 
  */
-@Target( { METHOD })
+@Target({ METHOD })
 @Retention(RetentionPolicy.SOURCE)
 public @interface ModificationOperation {
 	// annotation

@@ -31,33 +31,6 @@ public abstract class AbstractFieldState extends AbstractState implements XField
 		}
 	}
 	
-	public long getRevisionNumber() {
-		return this.revisionNumber;
-	}
-	
-	public XValue getValue() {
-		return this.value;
-	}
-	
-	public void setRevisionNumber(long revisionNumber) {
-		this.revisionNumber = revisionNumber;
-	}
-	
-	public void setValue(XValue value) {
-		this.value = value;
-	}
-	
-	@Override
-	public String toString() {
-		return "xfield " + getAddress() + " [" + getRevisionNumber() + "]" + " = " + getValue();
-	}
-	
-	@Override
-	public int hashCode() {
-		return (int)(getAddress().hashCode() + getRevisionNumber() + (getValue() == null ? 0
-		        : getValue().hashCode()));
-	}
-	
 	@Override
 	public boolean equals(Object other) {
 		if(!(other instanceof XFieldState)) {
@@ -90,6 +63,33 @@ public abstract class AbstractFieldState extends AbstractState implements XField
 	
 	public XID getID() {
 		return getAddress().getField();
+	}
+	
+	public long getRevisionNumber() {
+		return this.revisionNumber;
+	}
+	
+	public XValue getValue() {
+		return this.value;
+	}
+	
+	@Override
+	public int hashCode() {
+		return (int)(getAddress().hashCode() + getRevisionNumber() + (getValue() == null ? 0
+		        : getValue().hashCode()));
+	}
+	
+	public void setRevisionNumber(long revisionNumber) {
+		this.revisionNumber = revisionNumber;
+	}
+	
+	public void setValue(XValue value) {
+		this.value = value;
+	}
+	
+	@Override
+	public String toString() {
+		return "xfield " + getAddress() + " [" + getRevisionNumber() + "]" + " = " + getValue();
 	}
 	
 }

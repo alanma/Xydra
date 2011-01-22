@@ -12,15 +12,6 @@ import org.xydra.base.XID;
 public interface XIDSetValue extends XSetValue<XID> {
 	
 	/**
-	 * Returns the contents of this XIDSetValue as an array.
-	 * 
-	 * Note: Changes to the returned array will not affect the XIDSetValue.
-	 * 
-	 * @return an array containing the {@link XID} values of this XIDSetValue.
-	 */
-	public XID[] contents();
-	
-	/**
 	 * Creates a new {@link XIDSetValue} containing all entries from this value
 	 * as well as the specified entry. This value is not modified.
 	 * 
@@ -29,6 +20,15 @@ public interface XIDSetValue extends XSetValue<XID> {
 	 *         as well as the given entry
 	 */
 	XIDSetValue add(XID entry);
+	
+	/**
+	 * Returns the contents of this XIDSetValue as an array.
+	 * 
+	 * Note: Changes to the returned array will not affect the XIDSetValue.
+	 * 
+	 * @return an array containing the {@link XID} values of this XIDSetValue.
+	 */
+	public XID[] contents();
 	
 	/**
 	 * Creates a new {@link XIDSetValue} containing all entries from this value

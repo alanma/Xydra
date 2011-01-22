@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
-import org.xydra.core.XX;
+import org.xydra.base.XX;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XRepositoryState;
 import org.xydra.core.model.state.XStateTransaction;
@@ -36,6 +36,21 @@ public class StoredRepositoryState extends AbstractRepositoryState {
 		this.modelStateIDs.add(modelState.getID());
 	}
 	
+	public XModelState createModelState(XID id) {
+		XAddress modelAddr = XX.resolveModel(getAddress(), id);
+		return this.store.createModelState(modelAddr);
+	}
+	
+	public void delete(XStateTransaction transaction) {
+		assert transaction == null : "no transactions needed/supported";
+		this.store.deleteRepositoryState(this.getAddress());
+	}
+	
+	public XModelState getModelState(XID id) {
+		XAddress modelAddr = XX.resolveModel(getAddress(), id);
+		return this.store.loadModelState(modelAddr);
+	}
+	
 	/* can be answered by using solely local data */
 	public boolean hasModelState(XID modelStateID) {
 		boolean result = this.modelStateIDs.contains(modelStateID);
@@ -56,6 +71,11 @@ public class StoredRepositoryState extends AbstractRepositoryState {
 		this.modelStateIDs.remove(modelId);
 	}
 	
+	public void save(XStateTransaction transaction) {
+		assert transaction == null : "no transactions needed/supported";
+		this.store.save(this);
+	}
+	
 	protected void setChildrenIDs(Iterator<XID> childrenIDs) {
 		synchronized(this.modelStateIDs) {
 			this.modelStateIDs.clear();
@@ -64,25 +84,5 @@ public class StoredRepositoryState extends AbstractRepositoryState {
 				this.modelStateIDs.add(xid);
 			}
 		}
-	}
-	
-	public void save(XStateTransaction transaction) {
-		assert transaction == null : "no transactions needed/supported";
-		this.store.save(this);
-	}
-	
-	public void delete(XStateTransaction transaction) {
-		assert transaction == null : "no transactions needed/supported";
-		this.store.deleteRepositoryState(this.getAddress());
-	}
-	
-	public XModelState createModelState(XID id) {
-		XAddress modelAddr = XX.resolveModel(getAddress(), id);
-		return this.store.createModelState(modelAddr);
-	}
-	
-	public XModelState getModelState(XID id) {
-		XAddress modelAddr = XX.resolveModel(getAddress(), id);
-		return this.store.loadModelState(modelAddr);
 	}
 }

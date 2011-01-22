@@ -8,6 +8,7 @@ import org.xydra.base.IHasXID;
 import org.xydra.base.XID;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XModel;
+import org.xydra.core.model.XObject;
 
 
 /**
@@ -46,6 +47,36 @@ public interface XModelState extends IHasXID, Serializable, Iterable<XID>, IHasX
 	void addObjectState(XObjectState objectState);
 	
 	/**
+	 * Begin a simple transaction to prevent inconsistent states from being
+	 * persisted.
+	 * 
+	 * Only the state backend itself can abort state transactions. null may be
+	 * returned if the backend can guarantee that saving and deleting states is
+	 * always possible. Otherwise, changes performed with this transaction
+	 * object should not be persisted until the transaction object is passed to
+	 * {@link #endTransaction()}.
+	 * 
+	 * Each state may only be part of at most one transaction at any given time.
+	 * 
+	 * The returned transaction object may only be used for this
+	 * {@link XModelState} as well as {@link XObjectState}s and
+	 * {@link XFieldState}s contained with this model.
+	 */
+	XStateTransaction beginTransaction();
+	
+	/**
+	 * Creates a new {@link XObjectState} in the same persistence layer as this
+	 * XModelState and with an address contained within this model. This does
+	 * not check if there is already such a state and does not add the created
+	 * state as a child. The {@link XModel} implementation is responsible for
+	 * doing so.
+	 * 
+	 * @param id The {@link XID} for the new {@link XObjectState}
+	 * @return The newly created {@link XObjectState}
+	 */
+	XObjectState createObjectState(XID id);
+	
+	/**
 	 * Delete this state information from the attached persistence layer, i.e.
 	 * the one determined by calling {@link XStateFactory}.create...().
 	 * 
@@ -55,6 +86,39 @@ public interface XModelState extends IHasXID, Serializable, Iterable<XID>, IHasX
 	 *            the containing {@link XRepositoryState}.
 	 */
 	void delete(XStateTransaction transaction);
+	
+	/**
+	 * Persist changes associated with the given transaction.
+	 * 
+	 * @param transaction must have been returned by {@link #beginTransaction()}
+	 *            from this {@link XModelState}
+	 */
+	void endTransaction(XStateTransaction transaction);
+	
+	/**
+	 * Gets the {@link XChangeLogState} of the {@link XChangeLog} which is
+	 * logging the {@link XModel} represented by this XModelState.
+	 * 
+	 * @return the {@link XChangeLogState} of the {@link XChangeLog} which is
+	 *         logging the {@link XModel} represented by this XModelState.
+	 */
+	XChangeLogState getChangeLogState();
+	
+	/**
+	 * Gets the specified {@link XObjectState} contained in this XModelState
+	 * from the appropriate persistence layer.
+	 * 
+	 * This is only guaranteed to succeed if the {@link XObject} represented by
+	 * the requested {@link XObjectState} is not already deleted AND and was not
+	 * removed from the {@link XModel} represented by this XModelState. It is
+	 * however not guaranteed to fail if only the {@link XObject} was removed.
+	 * 
+	 * @param id The {@link XID} of the {@link XObject} which
+	 *            {@link XObjectState} is to be returned
+	 * @return The {@link XObjectState} corresponding to the given {@link XID}
+	 *         or null if no such {@link XObjectState} exists
+	 */
+	XObjectState getObjectState(XID id);
 	
 	/**
 	 * Gets the current revision number of the {@link XModel} which state is
@@ -87,32 +151,13 @@ public interface XModelState extends IHasXID, Serializable, Iterable<XID>, IHasX
 	boolean isEmpty();
 	
 	/**
-	 * Gets the specified {@link XObjectState} contained in this XModelState
-	 * from the appropriate persistence layer.
+	 * Returns an {@link Iterator} over the {@link XID XIDs} of all children-
+	 * {@link XObjectState XObjectStates} of this XModelState
 	 * 
-	 * This is only guaranteed to succeed if the {@link XObject} represented by
-	 * the requested {@link XObjectState} is not already deleted AND and was not
-	 * removed from the {@link XModel} represented by this XModelState. It is
-	 * however not guaranteed to fail if only the {@link XObject} was removed.
-	 * 
-	 * @param id The {@link XID} of the {@link XObject} which
-	 *            {@link XObjectState} is to be returned
-	 * @return The {@link XObjectState} corresponding to the given {@link XID}
-	 *         or null if no such {@link XObjectState} exists
+	 * @returns an {@link Iterator} over the {@link XID XIDs} of all children-
+	 *          {@link XObjectState XObjectStates} of this XModelState
 	 */
-	XObjectState getObjectState(XID id);
-	
-	/**
-	 * Creates a new {@link XObjectState} in the same persistence layer as this
-	 * XModelState and with an address contained within this model. This does
-	 * not check if there is already such a state and does not add the created
-	 * state as a child. The {@link XModel} implementation is responsible for
-	 * doing so.
-	 * 
-	 * @param id The {@link XID} for the new {@link XObjectState}
-	 * @return The newly created {@link XObjectState}
-	 */
-	XObjectState createObjectState(XID id);
+	Iterator<XID> iterator();
 	
 	/**
 	 * Removes the specified {@link XObjectState} from this XModelState. This
@@ -127,32 +172,6 @@ public interface XModelState extends IHasXID, Serializable, Iterable<XID>, IHasX
 	 *            to be removed
 	 */
 	void removeObjectState(XID objectStateId);
-	
-	/**
-	 * Begin a simple transaction to prevent inconsistent states from being
-	 * persisted.
-	 * 
-	 * Only the state backend itself can abort state transactions. null may be
-	 * returned if the backend can guarantee that saving and deleting states is
-	 * always possible. Otherwise, changes performed with this transaction
-	 * object should not be persisted until the transaction object is passed to
-	 * {@link #endTransaction()}.
-	 * 
-	 * Each state may only be part of at most one transaction at any given time.
-	 * 
-	 * The returned transaction object may only be used for this
-	 * {@link XModelState} as well as {@link XObjectState}s and
-	 * {@link XFieldState}s contained with this model.
-	 */
-	XStateTransaction beginTransaction();
-	
-	/**
-	 * Persist changes associated with the given transaction.
-	 * 
-	 * @param transaction must have been returned by {@link #beginTransaction()}
-	 *            from this {@link XModelState}
-	 */
-	void endTransaction(XStateTransaction transaction);
 	
 	/**
 	 * Store this state information in the attached persistence layer, i.e. the
@@ -174,23 +193,5 @@ public interface XModelState extends IHasXID, Serializable, Iterable<XID>, IHasX
 	 * @param revisionNumber the revision number
 	 */
 	void setRevisionNumber(long revisionNumber);
-	
-	/**
-	 * Gets the {@link XChangeLogState} of the {@link XChangeLog} which is
-	 * logging the {@link XModel} represented by this XModelState.
-	 * 
-	 * @return the {@link XChangeLogState} of the {@link XChangeLog} which is
-	 *         logging the {@link XModel} represented by this XModelState.
-	 */
-	XChangeLogState getChangeLogState();
-	
-	/**
-	 * Returns an {@link Iterator} over the {@link XID XIDs} of all children-
-	 * {@link XObjectState XObjectStates} of this XModelState
-	 * 
-	 * @returns an {@link Iterator} over the {@link XID XIDs} of all children-
-	 *          {@link XObjectState XObjectStates} of this XModelState
-	 */
-	Iterator<XID> iterator();
 	
 }

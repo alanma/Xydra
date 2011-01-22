@@ -3,11 +3,11 @@ package org.xydra.store.impl.delegate;
 import java.util.Set;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableModel;
-import org.xydra.base.XReadableObject;
 import org.xydra.base.XID;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XEvent;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XEvent;
+import org.xydra.base.rmof.XReadableModel;
+import org.xydra.base.rmof.XReadableObject;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -15,7 +15,7 @@ import org.xydra.store.AuthorisationException;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.GetEventsRequest;
-import org.xydra.store.MAXDone;
+
 import org.xydra.store.StoreException;
 import org.xydra.store.XydraStore;
 import org.xydra.store.XydraStoreAdmin;
@@ -35,7 +35,7 @@ import org.xydra.store.XydraStoreAdmin;
  * 
  * @author xamde
  */
-@MAXDone
+
 public class DelegateToSingleOperationStore implements XydraStore {
 	
 	private static class SingleOpCallback<T> implements Callback<T> {
@@ -427,7 +427,8 @@ public class DelegateToSingleOperationStore implements XydraStore {
 					batchedResult[i] = new BatchedResult<XReadableModel>(singleOpCallback[i].result);
 				} else {
 					// failure
-					batchedResult[i] = new BatchedResult<XReadableModel>(singleOpCallback[i].exception);
+					batchedResult[i] = new BatchedResult<XReadableModel>(
+					        singleOpCallback[i].exception);
 				}
 			}
 			callback.onSuccess(batchedResult);
@@ -490,10 +491,12 @@ public class DelegateToSingleOperationStore implements XydraStore {
 			for(int i = 0; i < objectAddresses.length; i++) {
 				if(singleOpCallback[i].exception == null) {
 					// success
-					batchedResult[i] = new BatchedResult<XReadableObject>(singleOpCallback[i].result);
+					batchedResult[i] = new BatchedResult<XReadableObject>(
+					        singleOpCallback[i].result);
 				} else {
 					// failure
-					batchedResult[i] = new BatchedResult<XReadableObject>(singleOpCallback[i].exception);
+					batchedResult[i] = new BatchedResult<XReadableObject>(
+					        singleOpCallback[i].exception);
 				}
 			}
 			callback.onSuccess(batchedResult);

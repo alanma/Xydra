@@ -1,6 +1,6 @@
 package org.xydra.core.model;
 
-import org.xydra.core.change.XEvent;
+import org.xydra.base.change.XEvent;
 
 
 public interface IHasChangeLog {

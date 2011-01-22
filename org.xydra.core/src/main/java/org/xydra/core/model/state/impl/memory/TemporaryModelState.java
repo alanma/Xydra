@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
-import org.xydra.core.XX;
+import org.xydra.base.XX;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
@@ -22,8 +22,8 @@ public class TemporaryModelState extends AbstractModelState {
 	
 	private static final long serialVersionUID = 5621101945176337135L;
 	
-	private final Map<XID,XObjectState> objectStates = new HashMap<XID,XObjectState>();
 	private final XChangeLogState changeLogState;
+	private final Map<XID,XObjectState> objectStates = new HashMap<XID,XObjectState>();
 	
 	public TemporaryModelState(XAddress modelAddr) {
 		super(modelAddr);
@@ -38,6 +38,20 @@ public class TemporaryModelState extends AbstractModelState {
 	public void addObjectState(XObjectState objectState) {
 		checkObjectState(objectState);
 		this.objectStates.put(objectState.getID(), objectState);
+	}
+	
+	public XObjectState createObjectState(XID id) {
+		XAddress objectAddr = XX.resolveObject(getAddress(), id);
+		return new TemporaryObjectState(objectAddr);
+	}
+	
+	public void delete(XStateTransaction transaction) {
+		assert transaction == null : "no transactions needed/supported";
+		// nothing to do here
+	}
+	
+	public XChangeLogState getChangeLogState() {
+		return this.changeLogState;
 	}
 	
 	public XObjectState getObjectState(XID objectStateID) {
@@ -60,23 +74,9 @@ public class TemporaryModelState extends AbstractModelState {
 		this.objectStates.remove(objectId);
 	}
 	
-	public void delete(XStateTransaction transaction) {
-		assert transaction == null : "no transactions needed/supported";
-		// nothing to do here
-	}
-	
 	public void save(XStateTransaction transaction) {
 		assert transaction == null : "no transactions needed/supported";
 		// nothing to save
-	}
-	
-	public XObjectState createObjectState(XID id) {
-		XAddress objectAddr = XX.resolveObject(getAddress(), id);
-		return new TemporaryObjectState(objectAddr);
-	}
-	
-	public XChangeLogState getChangeLogState() {
-		return this.changeLogState;
 	}
 	
 }

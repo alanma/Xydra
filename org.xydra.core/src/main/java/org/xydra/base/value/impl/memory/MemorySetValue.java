@@ -23,34 +23,39 @@ public abstract class MemorySetValue<E> implements XSetValue<E> {
 	
 	protected final Set<E> set = new HashSet<E>();
 	
-	public MemorySetValue(E[] contents) {
-		this(Arrays.asList(contents));
-	}
-	
 	public MemorySetValue(Collection<E> contents) {
 		this.set.addAll(contents);
 	}
 	
-	public Set<E> toSet() {
-		Set<E> copy = new HashSet<E>();
-		copy.addAll(this.set);
-		return copy;
+	public MemorySetValue(E[] contents) {
+		this(Arrays.asList(contents));
+	}
+	
+	public boolean checkEquals(XSetValue<E> other) {
+		if(other instanceof MemorySetValue<?>) {
+			return this.set.equals(((MemorySetValue<?>)other).set);
+		}
+		if(size() != other.size()) {
+			return false;
+		}
+		for(E e : other) {
+			if(!contains(e)) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	public boolean contains(E elem) {
 		return this.set.contains(elem);
 	}
 	
+	protected int getHashCode() {
+		return this.set.hashCode();
+	}
+	
 	public boolean isEmpty() {
 		return this.set.isEmpty();
-	}
-	
-	public int size() {
-		return this.set.size();
-	}
-	
-	protected E[] toArray(E[] a) {
-		return this.set.toArray(a);
 	}
 	
 	public Iterator<E> iterator() {
@@ -72,23 +77,18 @@ public abstract class MemorySetValue<E> implements XSetValue<E> {
 		};
 	}
 	
-	public boolean checkEquals(XSetValue<E> other) {
-		if(other instanceof MemorySetValue<?>) {
-			return this.set.equals(((MemorySetValue<?>)other).set);
-		}
-		if(size() != other.size()) {
-			return false;
-		}
-		for(E e : other) {
-			if(!contains(e)) {
-				return false;
-			}
-		}
-		return true;
+	public int size() {
+		return this.set.size();
 	}
 	
-	protected int getHashCode() {
-		return this.set.hashCode();
+	protected E[] toArray(E[] a) {
+		return this.set.toArray(a);
+	}
+	
+	public Set<E> toSet() {
+		Set<E> copy = new HashSet<E>();
+		copy.addAll(this.set);
+		return copy;
 	}
 	
 	@Override

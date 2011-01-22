@@ -3,13 +3,13 @@ package org.xydra.core.model;
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.base.XID;
-import org.xydra.base.XHalfWritableRepository;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XEvent;
-import org.xydra.core.change.XRepositoryCommand;
-import org.xydra.core.change.XRepositoryEvent;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XEvent;
+import org.xydra.base.change.XRepositoryCommand;
+import org.xydra.base.change.XRepositoryEvent;
+import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.core.change.XSendsFieldEvents;
-import org.xydra.core.change.XSendsModelEvent;
+import org.xydra.core.change.XSendsModelEvents;
 import org.xydra.core.change.XSendsObjectEvents;
 import org.xydra.core.change.XSendsRepositoryEvents;
 import org.xydra.core.change.XSendsTransactionEvents;
@@ -26,19 +26,9 @@ import org.xydra.core.model.state.XRepositoryState;
  * @author voelkel
  * 
  */
-public interface XRepository extends XHalfWritableRepository, XSendsRepositoryEvents, XSendsModelEvent,
-        XSendsObjectEvents, XSendsFieldEvents, XSendsTransactionEvents, XExecutesCommands {
-	
-	/**
-	 * Returns the {@link XModel} contained in this repository with the given
-	 * {@link XID}
-	 * 
-	 * @param id The {@link XID} of the {@link XModel} which is to be returned
-	 * @return the {@link XModel} with the given {@link XID} or null if no such
-	 *         {@link XModel} exists in this repository.
-	 */
-	@ReadOperation
-	XModel getModel(XID id);
+public interface XRepository extends XWritableRepository, XSendsRepositoryEvents,
+        XSendsModelEvents, XSendsObjectEvents, XSendsFieldEvents, XSendsTransactionEvents,
+        XExecutesCommands {
 	
 	/**
 	 * Creates a new {@link XModel} with the given {@link XID} and adds it to
@@ -54,16 +44,19 @@ public interface XRepository extends XHalfWritableRepository, XSendsRepositoryEv
 	XModel createModel(XID id);
 	
 	/**
-	 * Removes the specified {@link XModel} from this XRepository.
+	 * Execute the given {@link XCommand} if possible.
 	 * 
-	 * @param repository The {@link XID} of the {@link XModel} which is to be
-	 *            removed
+	 * Not all implementations will be able to execute all commands.
 	 * 
-	 * @return true, if the specified {@link XModel} could be removed, false
-	 *         otherwise
+	 * @param command The {@link XCommand} which is to be executed
+	 * 
+	 * @return {@link XCommand#FAILED} if the command failed,
+	 *         {@link XCommand#NOCHANGE} if the command didn't change anything
+	 *         or the revision number of the {@link XEvent} caused by the
+	 *         command.
 	 */
 	@ModificationOperation
-	boolean removeModel(XID modelID);
+	long executeCommand(XCommand command, XLocalChangeCallback callback);
 	
 	/**
 	 * Executes the given {@link XRepositoryCommand} if possible.
@@ -93,11 +86,34 @@ public interface XRepository extends XHalfWritableRepository, XSendsRepositoryEv
 	long executeRepositoryCommand(XRepositoryCommand command);
 	
 	/**
+	 * Returns the {@link XModel} contained in this repository with the given
+	 * {@link XID}
+	 * 
+	 * @param id The {@link XID} of the {@link XModel} which is to be returned
+	 * @return the {@link XModel} with the given {@link XID} or null if no such
+	 *         {@link XModel} exists in this repository.
+	 */
+	@ReadOperation
+	XModel getModel(XID id);
+	
+	/**
 	 * @return the actor that is represented by this interface. This is the
 	 *         actor that is recorded for change operations. Operations will
 	 *         only succeed if this actor has access.
 	 */
 	XID getSessionActor();
+	
+	/**
+	 * Removes the specified {@link XModel} from this XRepository.
+	 * 
+	 * @param repository The {@link XID} of the {@link XModel} which is to be
+	 *            removed
+	 * 
+	 * @return true, if the specified {@link XModel} could be removed, false
+	 *         otherwise
+	 */
+	@ModificationOperation
+	boolean removeModel(XID modelId);
 	
 	/**
 	 * Set a new actor to be used when building commands for changes to this
@@ -107,20 +123,5 @@ public interface XRepository extends XHalfWritableRepository, XSendsRepositoryEv
 	 * @param actor for this repository and its children, if any.
 	 */
 	void setSessionActor(XID actorId, String passwordHash);
-	
-	/**
-	 * Execute the given {@link XCommand} if possible.
-	 * 
-	 * Not all implementations will be able to execute all commands.
-	 * 
-	 * @param command The {@link XCommand} which is to be executed
-	 * 
-	 * @return {@link XCommand#FAILED} if the command failed,
-	 *         {@link XCommand#NOCHANGE} if the command didn't change anything
-	 *         or the revision number of the {@link XEvent} caused by the
-	 *         command.
-	 */
-	@ModificationOperation
-	long executeCommand(XCommand command, XLocalChangeCallback callback);
 	
 }

@@ -1,8 +1,8 @@
 package org.xydra.core.gwt;
 
+import org.xydra.base.X;
 import org.xydra.base.XID;
-import org.xydra.core.X;
-import org.xydra.core.XX;
+import org.xydra.base.XX;
 
 import com.google.gwt.core.client.EntryPoint;
 
@@ -18,8 +18,8 @@ public class DummyEntryPoint implements EntryPoint {
 	
 	public void onModuleLoad() {
 		XID actorId = XX.toId("gwt-moduleload");
-		X.createMemoryRepository(actorId).createModel(XX.createUniqueID()).createObject(
-		        XX.toId("hello world"));
+		X.createMemoryRepository(actorId).createModel(XX.createUniqueID())
+		        .createObject(XX.toId("hello world"));
 	}
 	
 }

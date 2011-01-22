@@ -1,16 +1,16 @@
 package org.xydra.core.model.impl.memory;
 
 import org.xydra.base.XID;
-import org.xydra.core.change.ChangeType;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XFieldCommand;
-import org.xydra.core.change.XModelCommand;
-import org.xydra.core.change.XObjectCommand;
-import org.xydra.core.change.XRepositoryCommand;
-import org.xydra.core.change.impl.memory.MemoryFieldCommand;
-import org.xydra.core.change.impl.memory.MemoryModelCommand;
-import org.xydra.core.change.impl.memory.MemoryObjectCommand;
-import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
+import org.xydra.base.change.ChangeType;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XFieldCommand;
+import org.xydra.base.change.XModelCommand;
+import org.xydra.base.change.XObjectCommand;
+import org.xydra.base.change.XRepositoryCommand;
+import org.xydra.base.change.impl.memory.MemoryFieldCommand;
+import org.xydra.base.change.impl.memory.MemoryModelCommand;
+import org.xydra.base.change.impl.memory.MemoryObjectCommand;
+import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.core.model.XLocalChange;
 import org.xydra.core.model.XLocalChangeCallback;
 
@@ -18,10 +18,10 @@ import org.xydra.core.model.XLocalChangeCallback;
 public class MemoryLocalChange implements XLocalChange {
 	
 	private final XID actor;
-	private final String passwordHash;
-	private XCommand command;
-	private final XLocalChangeCallback callback;
 	private boolean applied = false;
+	private final XLocalChangeCallback callback;
+	private XCommand command;
+	private final String passwordHash;
 	private long result;
 	
 	public MemoryLocalChange(XID actor, String passwordHash, XCommand command,
@@ -33,13 +33,12 @@ public class MemoryLocalChange implements XLocalChange {
 	}
 	
 	@Override
-	public String toString() {
-		return this.command.toString();
-	}
-	
-	@Override
 	public XID getActor() {
 		return this.actor;
+	}
+	
+	protected XLocalChangeCallback getCallback() {
+		return this.callback;
 	}
 	
 	@Override
@@ -78,6 +77,11 @@ public class MemoryLocalChange implements XLocalChange {
 		}
 	}
 	
+	@Override
+	public String toString() {
+		return this.command.toString();
+	}
+	
 	protected void updateCommand(long oldSyncRev, long newSyncRev) {
 		// Adapt the command if needed.
 		assert newSyncRev >= oldSyncRev;
@@ -85,52 +89,42 @@ public class MemoryLocalChange implements XLocalChange {
 		if(this.command instanceof XRepositoryCommand) {
 			XRepositoryCommand rc = (XRepositoryCommand)this.command;
 			if(rc.getChangeType() == ChangeType.REMOVE && rc.getRevisionNumber() > oldSyncRev) {
-				this.command = MemoryRepositoryCommand.createRemoveCommand(rc.getTarget(), rc
-				        .getRevisionNumber()
-				        + nRemote, rc.getModelID());
+				this.command = MemoryRepositoryCommand.createRemoveCommand(rc.getTarget(),
+				        rc.getRevisionNumber() + nRemote, rc.getModelId());
 			}
 		} else if(this.command instanceof XModelCommand) {
 			XModelCommand mc = (XModelCommand)this.command;
 			if(mc.getChangeType() == ChangeType.REMOVE && mc.getRevisionNumber() > oldSyncRev) {
-				this.command = MemoryModelCommand.createRemoveCommand(mc.getTarget(), mc
-				        .getRevisionNumber()
-				        + nRemote, mc.getObjectID());
+				this.command = MemoryModelCommand.createRemoveCommand(mc.getTarget(),
+				        mc.getRevisionNumber() + nRemote, mc.getObjectId());
 			}
 		} else if(this.command instanceof XObjectCommand) {
 			XObjectCommand oc = (XObjectCommand)this.command;
 			if(oc.getChangeType() == ChangeType.REMOVE && oc.getRevisionNumber() > oldSyncRev) {
-				this.command = MemoryObjectCommand.createRemoveCommand(oc.getTarget(), oc
-				        .getRevisionNumber()
-				        + nRemote, oc.getFieldID());
+				this.command = MemoryObjectCommand.createRemoveCommand(oc.getTarget(),
+				        oc.getRevisionNumber() + nRemote, oc.getFieldId());
 			}
 		} else if(this.command instanceof XFieldCommand) {
 			XFieldCommand fc = (XFieldCommand)this.command;
 			if(fc.getRevisionNumber() > oldSyncRev) {
 				switch(this.command.getChangeType()) {
 				case ADD:
-					this.command = MemoryFieldCommand.createAddCommand(fc.getTarget(), fc
-					        .getRevisionNumber()
-					        + nRemote, fc.getValue());
+					this.command = MemoryFieldCommand.createAddCommand(fc.getTarget(),
+					        fc.getRevisionNumber() + nRemote, fc.getValue());
 					break;
 				case REMOVE:
-					this.command = MemoryFieldCommand.createRemoveCommand(fc.getTarget(), fc
-					        .getRevisionNumber()
-					        + nRemote);
+					this.command = MemoryFieldCommand.createRemoveCommand(fc.getTarget(),
+					        fc.getRevisionNumber() + nRemote);
 					break;
 				case CHANGE:
-					this.command = MemoryFieldCommand.createChangeCommand(fc.getTarget(), fc
-					        .getRevisionNumber()
-					        + nRemote, fc.getValue());
+					this.command = MemoryFieldCommand.createChangeCommand(fc.getTarget(),
+					        fc.getRevisionNumber() + nRemote, fc.getValue());
 					break;
 				default:
 					assert false : "Invalid command: " + fc;
 				}
 			}
 		}
-	}
-	
-	protected XLocalChangeCallback getCallback() {
-		return this.callback;
 	}
 	
 }

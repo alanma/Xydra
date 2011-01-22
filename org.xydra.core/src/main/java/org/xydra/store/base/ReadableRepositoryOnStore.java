@@ -4,13 +4,13 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableModel;
-import org.xydra.base.XReadableRepository;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
-import org.xydra.core.X;
-import org.xydra.core.XX;
+import org.xydra.base.XX;
+import org.xydra.base.rmof.XReadableModel;
+import org.xydra.base.rmof.XReadableRepository;
 import org.xydra.store.Callback;
 import org.xydra.store.StoreException;
 import org.xydra.store.XydraStore;
@@ -26,9 +26,11 @@ public class ReadableRepositoryOnStore implements XReadableRepository, Serializa
 	
 	private static final long serialVersionUID = -5943088597508682530L;
 	protected XAddress address;
+	protected XReadableRepository baseRepository;
 	protected Credentials credentials;
 	protected Set<XID> modelIds = null;
-	protected XReadableRepository baseRepository;
+	private XID repositoryId;
+	
 	protected XydraStore store;
 	
 	/**
@@ -44,36 +46,6 @@ public class ReadableRepositoryOnStore implements XReadableRepository, Serializa
 		assert this.address.getAddressedType() == XType.XREPOSITORY;
 	}
 	
-	private XID repositoryId;
-	
-	private synchronized XID getRepositoryId(XydraStore store) {
-		assert store != null;
-		this.repositoryId = null;
-		store.getRepositoryId(this.credentials.getActorId(), this.credentials.getPasswordHash(),
-		        new Callback<XID>() {
-			        
-			        @Override
-			        public void onSuccess(XID object) {
-				        ReadableRepositoryOnStore.this.repositoryId = object;
-			        }
-			        
-			        @Override
-			        public void onFailure(Throwable exception) {
-				        throw new RuntimeException(exception);
-			        }
-		        });
-		long c = 1;
-		while(this.repositoryId == null && c < 1000) {
-			try {
-				// TODO implement smarter with wait()?
-				Thread.sleep(c);
-			} catch(InterruptedException e) {
-			}
-			c *= 2;
-		}
-		return this.repositoryId;
-	}
-	
 	@Override
 	public XAddress getAddress() {
 		return this.address;
@@ -86,12 +58,40 @@ public class ReadableRepositoryOnStore implements XReadableRepository, Serializa
 	
 	@Override
 	public XReadableModel getModel(XID id) {
-		ReadableModelOnStore model = new ReadableModelOnStore(this.credentials, this.store, XX.resolveModel(getAddress(),
-		        id));
+		ReadableModelOnStore model = new ReadableModelOnStore(this.credentials, this.store,
+		        XX.resolveModel(getAddress(), id));
 		if(model.baseModel == null) {
 			return null;
 		}
 		return model;
+	}
+	
+	private synchronized XID getRepositoryId(XydraStore store) {
+		assert store != null;
+		this.repositoryId = null;
+		store.getRepositoryId(this.credentials.getActorId(), this.credentials.getPasswordHash(),
+		        new Callback<XID>() {
+			        
+			        @Override
+			        public void onFailure(Throwable exception) {
+				        throw new RuntimeException(exception);
+			        }
+			        
+			        @Override
+			        public void onSuccess(XID object) {
+				        ReadableRepositoryOnStore.this.repositoryId = object;
+			        }
+		        });
+		long c = 1;
+		while(this.repositoryId == null && c < 1000) {
+			try {
+				// TODO implement smarter with wait()?
+				Thread.sleep(c);
+			} catch(InterruptedException e) {
+			}
+			c *= 2;
+		}
+		return this.repositoryId;
 	}
 	
 	@Override

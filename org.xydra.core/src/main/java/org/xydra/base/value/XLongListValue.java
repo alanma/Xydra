@@ -9,29 +9,6 @@ package org.xydra.base.value;
 public interface XLongListValue extends XNumberListValue<Long> {
 	
 	/**
-	 * Returns the Long values as an array in the order they were added to the
-	 * list.
-	 * 
-	 * Note: Changes to the returned array will not affect the XLongListValue.
-	 * 
-	 * @return an array containing the list of Long values in the order they
-	 *         were added to the list
-	 */
-	long[] contents();
-	
-	/**
-	 * Creates a new {@link XLongListValue} containing all entries from this
-	 * value as well as the specified entry. The order of the already existing
-	 * entries is preserved and the new entry is added to the end of the list.
-	 * This value is not modified.
-	 * 
-	 * @param entry The new entry.
-	 * @return a new {@link XLongListValue} containing all entries from this
-	 *         value as well as the specified entry.
-	 */
-	XLongListValue add(Long entry);
-	
-	/**
 	 * Creates a new {@link XLongListValue} containing all entries from this
 	 * value as well as the specified entry. The order of the already existing
 	 * entries is preserved and the new entry is added at the specified index
@@ -48,15 +25,26 @@ public interface XLongListValue extends XNumberListValue<Long> {
 	
 	/**
 	 * Creates a new {@link XLongListValue} containing all entries from this
-	 * value except the specified entry. Only the first occurrence of the entry
-	 * is removed, if this list contains it multiple times. This value is not
-	 * modified.
+	 * value as well as the specified entry. The order of the already existing
+	 * entries is preserved and the new entry is added to the end of the list.
+	 * This value is not modified.
 	 * 
-	 * @param entry The entry which is to be removed
+	 * @param entry The new entry.
 	 * @return a new {@link XLongListValue} containing all entries from this
-	 *         value except the given entry
+	 *         value as well as the specified entry.
 	 */
-	XLongListValue remove(Long entry);
+	XLongListValue add(Long entry);
+	
+	/**
+	 * Returns the Long values as an array in the order they were added to the
+	 * list.
+	 * 
+	 * Note: Changes to the returned array will not affect the XLongListValue.
+	 * 
+	 * @return an array containing the list of Long values in the order they
+	 *         were added to the list
+	 */
+	long[] contents();
 	
 	/**
 	 * Creates a new {@link XLongListValue} containing all entries from this
@@ -71,5 +59,17 @@ public interface XLongListValue extends XNumberListValue<Long> {
 	 *             equal to size()
 	 */
 	XLongListValue remove(int index);
+	
+	/**
+	 * Creates a new {@link XLongListValue} containing all entries from this
+	 * value except the specified entry. Only the first occurrence of the entry
+	 * is removed, if this list contains it multiple times. This value is not
+	 * modified.
+	 * 
+	 * @param entry The entry which is to be removed
+	 * @return a new {@link XLongListValue} containing all entries from this
+	 *         value except the given entry
+	 */
+	XLongListValue remove(Long entry);
 	
 }

@@ -2,11 +2,11 @@ package org.xydra.core.model.session;
 
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.base.XID;
-import org.xydra.base.XHalfWritableField;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XEvent;
+import org.xydra.base.change.XFieldCommand;
+import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.value.XValue;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XEvent;
-import org.xydra.core.change.XFieldCommand;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XLoggedField;
@@ -27,22 +27,14 @@ import org.xydra.store.AccessException;
  * @author dscharrer
  * 
  */
-public interface XProtectedField extends XLoggedField, XHalfWritableField {
+public interface XProtectedField extends XLoggedField, XWritableField {
 	
 	/**
-	 * Sets the {@link XValue} of this field to the given value.
-	 * 
-	 * Passing "null" as the 'value' arguments implies an remove operation (will
-	 * remove the current {@link XValue})
-	 * 
-	 * @param value The new {@link XValue}
 	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (write access) to execute this
+	 *             the necessary access rights (read access) to execute this
 	 *             method
-	 * 
 	 */
-	@ModificationOperation
-	boolean setValue(XValue value);
+	boolean addListenerForFieldEvents(XFieldEventListener changeListener);
 	
 	/**
 	 * Executes the given {@link XCommand} if possible.
@@ -67,6 +59,13 @@ public interface XProtectedField extends XLoggedField, XHalfWritableField {
 	long executeFieldCommand(XFieldCommand command);
 	
 	/**
+	 * @return the actor that is represented by this interface. This is the
+	 *         actor that is recorded for change operations. Operations will
+	 *         only succeed if this actor has access.
+	 */
+	XID getActor();
+	
+	/**
 	 * @throws AccessException if the actor linked with this field does not have
 	 *             the necessary access rights (read access) to execute this
 	 *             method
@@ -88,17 +87,18 @@ public interface XProtectedField extends XLoggedField, XHalfWritableField {
 	boolean isEmpty();
 	
 	/**
+	 * Sets the {@link XValue} of this field to the given value.
+	 * 
+	 * Passing "null" as the 'value' arguments implies an remove operation (will
+	 * remove the current {@link XValue})
+	 * 
+	 * @param value The new {@link XValue}
 	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (read access) to execute this
+	 *             the necessary access rights (write access) to execute this
 	 *             method
+	 * 
 	 */
-	boolean addListenerForFieldEvents(XFieldEventListener changeListener);
-	
-	/**
-	 * @return the actor that is represented by this interface. This is the
-	 *         actor that is recorded for change operations. Operations will
-	 *         only succeed if this actor has access.
-	 */
-	XID getActor();
+	@ModificationOperation
+	boolean setValue(XValue value);
 	
 }

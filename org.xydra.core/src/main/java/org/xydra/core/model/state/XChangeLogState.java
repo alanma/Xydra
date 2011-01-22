@@ -3,7 +3,7 @@ package org.xydra.core.model.state;
 import java.io.Serializable;
 
 import org.xydra.base.XAddress;
-import org.xydra.core.change.XEvent;
+import org.xydra.base.change.XEvent;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XModel;
 
@@ -18,6 +18,18 @@ import org.xydra.core.model.XModel;
 public interface XChangeLogState extends Serializable {
 	
 	/**
+	 * Appends the given {@link XEvent} to the log
+	 * 
+	 * @param event The {@link XEvent} which is to be logged
+	 * @param transaction If not null, persist the change at the end of the
+	 *            given transaction, otherwise persist it now. The transaction
+	 *            object must have been created by {@link XObjectState},
+	 *            {@link XModelState} or {@link XRepositoryState} containing the
+	 *            XChangeLog represented by this XChangeLogState
+	 */
+	void appendEvent(XEvent event, XStateTransaction transaction);
+	
+	/**
 	 * Delete this state information from the attached persistence layer, i.e.
 	 * the one determined by calling {@link XStateFactory}.create...().
 	 * 
@@ -30,22 +42,11 @@ public interface XChangeLogState extends Serializable {
 	void delete(XStateTransaction transaction);
 	
 	/**
-	 * Store the data of this object in the attached persistence layer, i.e. the
-	 * one determined by calling {@link XStateFactory}.create...().
-	 * 
-	 * @param transaction If not null, persist the change at the end of the
-	 *            given transaction, otherwise persist it now. The transaction
-	 *            object must have been created by {@link XObjectState},
-	 *            {@link XModelState} or {@link XRepositoryState} containing the
-	 *            XChangeLog represented by this XChangeLogState
+	 * @return the {@link XAddress} of the {@link XModelState} or
+	 *         {@link XObjectState} this changelog refers to. All contained
+	 *         events have been produced by this entity or a descendant.
 	 */
-	void save(XStateTransaction transaction);
-	
-	/**
-	 * @return the revision number the logged {@link XModel} had at the time
-	 *         when this change log began logging
-	 */
-	long getFirstRevisionNumber();
+	XAddress getBaseAddress();
 	
 	/**
 	 * @return the current revision number of the logged {@link XModel} as seen
@@ -68,16 +69,28 @@ public interface XChangeLogState extends Serializable {
 	XEvent getEvent(long revisionNumber);
 	
 	/**
-	 * Appends the given {@link XEvent} to the log
+	 * @return the revision number the logged {@link XModel} had at the time
+	 *         when this change log began logging
+	 */
+	long getFirstRevisionNumber();
+	
+	/**
+	 * Store the data of this object in the attached persistence layer, i.e. the
+	 * one determined by calling {@link XStateFactory}.create...().
 	 * 
-	 * @param event The {@link XEvent} which is to be logged
 	 * @param transaction If not null, persist the change at the end of the
 	 *            given transaction, otherwise persist it now. The transaction
 	 *            object must have been created by {@link XObjectState},
 	 *            {@link XModelState} or {@link XRepositoryState} containing the
 	 *            XChangeLog represented by this XChangeLogState
 	 */
-	void appendEvent(XEvent event, XStateTransaction transaction);
+	void save(XStateTransaction transaction);
+	
+	/**
+	 * Set the first revision number. This can only be done if the change log is
+	 * empty.
+	 */
+	void setFirstRevisionNumber(long rev);
 	
 	/**
 	 * Removes all {@link XEvent XEvents} from this XChangeLogState that
@@ -97,18 +110,5 @@ public interface XChangeLogState extends Serializable {
 	 */
 	
 	boolean truncateToRevision(long revisionNumber, XStateTransaction transaction);
-	
-	/**
-	 * @return the {@link XAddress} of the {@link XModelState} or
-	 *         {@link XObjectState} this changelog refers to. All contained
-	 *         events have been produced by this entity or a descendant.
-	 */
-	XAddress getBaseAddress();
-	
-	/**
-	 * Set the first revision number. This can only be done if the change log is
-	 * empty.
-	 */
-	void setFirstRevisionNumber(long rev);
 	
 }

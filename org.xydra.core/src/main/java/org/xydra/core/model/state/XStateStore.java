@@ -30,6 +30,20 @@ public interface XStateStore {
 	XFieldState createFieldState(XAddress fieldStateAddress);
 	
 	/**
+	 * Create a new {@link XModelState} in the persistence layer represented by
+	 * this XStateStore. The created {@link XModelState} is not persisted until
+	 * it is saved. Also, this doesn't check if there already exists an
+	 * {@link XModelState} with the given {@link XAddress}. Use
+	 * {@link #loadModelState(XAddress)} to load an existing {@link XModelState}
+	 * s.
+	 * 
+	 * @param modelStateID the {@link XAddress} for the new {@link XModelState}
+	 * @return a new, not yet persisted {@link XModelState}, linked to this
+	 *         {@link XStateStore}.
+	 */
+	XModelState createModelState(XAddress modelStateAddress);
+	
+	/**
 	 * Create a new {@link XObjectState} in the persistence layer represented by
 	 * this XStateStore. The created {@link XObjectState} is not persisted until
 	 * it is saved. Also, this doesn't check if there already exists an
@@ -43,20 +57,6 @@ public interface XStateStore {
 	 *         {@link XStateStore}.
 	 */
 	XObjectState createObjectState(XAddress objectStateAddress);
-	
-	/**
-	 * Create a new {@link XModelState} in the persistence layer represented by
-	 * this XStateStore. The created {@link XModelState} is not persisted until
-	 * it is saved. Also, this doesn't check if there already exists an
-	 * {@link XModelState} with the given {@link XAddress}. Use
-	 * {@link #loadModelState(XAddress)} to load an existing {@link XModelState}
-	 * s.
-	 * 
-	 * @param modelStateID the {@link XAddress} for the new {@link XModelState}
-	 * @return a new, not yet persisted {@link XModelState}, linked to this
-	 *         {@link XStateStore}.
-	 */
-	XModelState createModelState(XAddress modelStateAddress);
 	
 	/**
 	 * Create a new {@link XRepositoryState} in the persistence layer
@@ -87,19 +87,6 @@ public interface XStateStore {
 	XFieldState loadFieldState(XAddress fieldStateAddress);
 	
 	/**
-	 * Checks whether an already persisted {@link XObjectState} with the given
-	 * {@link XAddress} exists and returns it if this is the case.
-	 * 
-	 * @param fieldAddress The {@link XAddress} of the {@link XObjectState}
-	 *            which is to be returned (must not be null)
-	 * @return a previously persisted {@link XObjectState} or null, if no
-	 *         {@link ObjectState} with the given {@link XAddress} exists.
-	 * @throws IllegalArgumentException if the given {@link XAddress} equals
-	 *             null.
-	 */
-	XObjectState loadObjectState(XAddress objectStateAddress);
-	
-	/**
 	 * Checks whether an already persisted {@link XModelState} with the given
 	 * {@link XAddress} exists and returns it if this is the case.
 	 * 
@@ -111,6 +98,19 @@ public interface XStateStore {
 	 *             null.
 	 */
 	XModelState loadModelState(XAddress modelStateAddress);
+	
+	/**
+	 * Checks whether an already persisted {@link XObjectState} with the given
+	 * {@link XAddress} exists and returns it if this is the case.
+	 * 
+	 * @param fieldAddress The {@link XAddress} of the {@link XObjectState}
+	 *            which is to be returned (must not be null)
+	 * @return a previously persisted {@link XObjectState} or null, if no
+	 *         {@link ObjectState} with the given {@link XAddress} exists.
+	 * @throws IllegalArgumentException if the given {@link XAddress} equals
+	 *             null.
+	 */
+	XObjectState loadObjectState(XAddress objectStateAddress);
 	
 	/**
 	 * Checks whether an already persisted {@link XRepositoryState} with the

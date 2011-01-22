@@ -20,11 +20,11 @@ public class MemoryIDSortedSetValue extends MemoryIDListValue implements XIDSort
 	
 	private static final long serialVersionUID = -83885798275571937L;
 	
-	public MemoryIDSortedSetValue(XID[] contents) {
+	public MemoryIDSortedSetValue(Collection<XID> contents) {
 		super(contents);
 	}
 	
-	public MemoryIDSortedSetValue(Collection<XID> contents) {
+	public MemoryIDSortedSetValue(XID[] contents) {
 		super(contents);
 	}
 	
@@ -34,8 +34,8 @@ public class MemoryIDSortedSetValue extends MemoryIDListValue implements XIDSort
 			// no need to add it
 			return this;
 		} else {
-			XID[] newList = MemoryIDListValue.createArrayWithEntryInsertedAtPosition(this
-			        .contents(), this.contents().length, entry);
+			XID[] newList = MemoryIDListValue.createArrayWithEntryInsertedAtPosition(
+			        this.contents(), this.contents().length, entry);
 			return new MemoryIDSortedSetValue(newList);
 		}
 	}

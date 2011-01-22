@@ -1,6 +1,6 @@
 package org.xydra.store;
 
-import org.xydra.core.change.XCommand;
+import org.xydra.base.change.XCommand;
 import org.xydra.index.query.Pair;
 
 
@@ -29,20 +29,20 @@ public class BatchedResult<K> extends Pair<K,Throwable> {
 	}
 	
 	/**
-	 * @return the result of executing a {@link XCommand}. If null, the
-	 *         {@link #getException()} is non-null.
-	 */
-	public K getResult() {
-		return this.getFirst();
-	}
-	
-	/**
 	 * @return the exception caused by executing the {@link XCommand}. If null,
 	 *         there was no exception and {@link #getResult()} contains the
 	 *         result.
 	 */
 	public Throwable getException() {
 		return this.getSecond();
+	}
+	
+	/**
+	 * @return the result of executing a {@link XCommand}. If null, the
+	 *         {@link #getException()} is non-null.
+	 */
+	public K getResult() {
+		return this.getFirst();
 	}
 	
 }

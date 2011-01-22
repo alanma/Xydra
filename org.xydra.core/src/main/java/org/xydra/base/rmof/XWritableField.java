@@ -1,0 +1,28 @@
+package org.xydra.base.rmof;
+
+import org.xydra.annotations.ModificationOperation;
+import org.xydra.base.value.XValue;
+
+
+/**
+ * Allowing simple changes, but not to the revision number.
+ * 
+ * @author voelkel
+ */
+public interface XWritableField extends XReadableField {
+	
+	/**
+	 * Sets the {@link XValue} of this field to the given value.
+	 * 
+	 * Passing "null" as the 'value' arguments implies an remove operation (will
+	 * remove the current {@link XValue})
+	 * 
+	 * @param value The new {@link XValue}
+	 * 
+	 * @return true, if this operation actually changed the current
+	 *         {@link XValue} of this field, false otherwise
+	 */
+	@ModificationOperation
+	boolean setValue(XValue value);
+	
+}

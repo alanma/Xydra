@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
-import org.xydra.core.XX;
+import org.xydra.base.XX;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XRepositoryState;
 import org.xydra.core.model.state.XStateTransaction;
@@ -32,6 +32,20 @@ public class TemporaryRepositoryState extends AbstractRepositoryState {
 		this.modelStates.put(modelState.getID(), modelState);
 	}
 	
+	public XModelState createModelState(XID id) {
+		XAddress modelAddr = XX.resolveModel(getAddress(), id);
+		return new TemporaryModelState(modelAddr, new MemoryChangeLogState(modelAddr));
+	}
+	
+	public void delete(XStateTransaction transaction) {
+		assert transaction == null : "no transactions needed/supported";
+		// nothing to do here
+	}
+	
+	public XModelState getModelState(XID id) {
+		return this.modelStates.get(id);
+	}
+	
 	public boolean hasModelState(XID modelStateID) {
 		return this.modelStates.containsKey(modelStateID);
 	}
@@ -51,19 +65,5 @@ public class TemporaryRepositoryState extends AbstractRepositoryState {
 	public void save(XStateTransaction transaction) {
 		assert transaction == null : "no transactions needed/supported";
 		// nothing to save
-	}
-	
-	public void delete(XStateTransaction transaction) {
-		assert transaction == null : "no transactions needed/supported";
-		// nothing to do here
-	}
-	
-	public XModelState createModelState(XID id) {
-		XAddress modelAddr = XX.resolveModel(getAddress(), id);
-		return new TemporaryModelState(modelAddr, new MemoryChangeLogState(modelAddr));
-	}
-	
-	public XModelState getModelState(XID id) {
-		return this.modelStates.get(id);
 	}
 }

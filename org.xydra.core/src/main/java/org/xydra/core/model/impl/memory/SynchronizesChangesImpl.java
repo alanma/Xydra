@@ -9,30 +9,30 @@ import java.util.Set;
 
 import org.xydra.base.IHasXAddress;
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableField;
-import org.xydra.base.XReadableModel;
-import org.xydra.base.XReadableObject;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
-import org.xydra.core.change.ChangeType;
-import org.xydra.core.change.XAtomicEvent;
+import org.xydra.base.change.ChangeType;
+import org.xydra.base.change.XAtomicEvent;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XEvent;
+import org.xydra.base.change.XFieldEvent;
+import org.xydra.base.change.XModelEvent;
+import org.xydra.base.change.XObjectEvent;
+import org.xydra.base.change.XRepositoryCommand;
+import org.xydra.base.change.XRepositoryEvent;
+import org.xydra.base.change.XTransaction;
+import org.xydra.base.change.XTransactionEvent;
+import org.xydra.base.change.impl.memory.MemoryRepositoryEvent;
+import org.xydra.base.rmof.XReadableField;
+import org.xydra.base.rmof.XReadableModel;
+import org.xydra.base.rmof.XReadableObject;
 import org.xydra.core.change.XChanges;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XEvent;
-import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.change.XFieldEventListener;
-import org.xydra.core.change.XModelEvent;
-import org.xydra.core.change.XObjectEvent;
 import org.xydra.core.change.XObjectEventListener;
-import org.xydra.core.change.XRepositoryCommand;
-import org.xydra.core.change.XRepositoryEvent;
 import org.xydra.core.change.XSendsFieldEvents;
 import org.xydra.core.change.XSendsObjectEvents;
 import org.xydra.core.change.XSendsTransactionEvents;
-import org.xydra.core.change.XTransaction;
-import org.xydra.core.change.XTransactionEvent;
 import org.xydra.core.change.XTransactionEventListener;
-import org.xydra.core.change.impl.memory.MemoryRepositoryEvent;
 import org.xydra.core.model.IHasChangeLog;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XExecutesCommands;
@@ -60,26 +60,26 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
         XSynchronizesChanges, XExecutesCommands, XSendsObjectEvents, XSendsFieldEvents,
         XSendsTransactionEvents, Serializable {
 	
-	/** Has this entity been removed? */
-	protected boolean removed = false;
+	protected static class Orphans implements Serializable {
+		
+		private static final long serialVersionUID = -146971665894476381L;
+		
+		Map<XAddress,MemoryField> fields = new HashMap<XAddress,MemoryField>();
+		Map<XID,MemoryObject> objects = new HashMap<XID,MemoryObject>();
+		
+	}
 	
 	private static final Logger log = LoggerFactory.getLogger(SynchronizesChangesImpl.class);
 	
 	private static final long serialVersionUID = -5649382238597273583L;
 	
-	protected static class Orphans implements Serializable {
-		
-		private static final long serialVersionUID = -146971665894476381L;
-		
-		Map<XID,MemoryObject> objects = new HashMap<XID,MemoryObject>();
-		Map<XAddress,MemoryField> fields = new HashMap<XAddress,MemoryField>();
-		
-	}
-	
 	protected final MemoryEventManager eventQueue;
 	
-	private Set<XObjectEventListener> objectChangeListenerCollection;
 	private Set<XFieldEventListener> fieldChangeListenerCollection;
+	
+	private Set<XObjectEventListener> objectChangeListenerCollection;
+	/** Has this entity been removed? */
+	protected boolean removed = false;
 	private Set<XTransactionEventListener> transactionListenerCollection;
 	
 	public SynchronizesChangesImpl(MemoryEventManager queue) {
@@ -88,6 +88,78 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 		this.fieldChangeListenerCollection = new HashSet<XFieldEventListener>();
 		this.transactionListenerCollection = new HashSet<XTransactionEventListener>();
 	}
+	
+	public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
+		synchronized(this.eventQueue) {
+			return this.fieldChangeListenerCollection.add(changeListener);
+		}
+	}
+	
+	public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
+		synchronized(this.eventQueue) {
+			return this.objectChangeListenerCollection.add(changeListener);
+		}
+	}
+	
+	public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
+		synchronized(this.eventQueue) {
+			return this.transactionListenerCollection.add(changeListener);
+		}
+	}
+	
+	/**
+	 * Start a new state transaction.
+	 */
+	protected abstract void beginStateTransaction();
+	
+	/**
+	 * @throws IllegalStateException if this entity has already been removed
+	 */
+	protected abstract void checkRemoved() throws IllegalStateException;
+	
+	/**
+	 * Check if this entity may be synchronized.
+	 */
+	protected abstract void checkSync();
+	
+	private void cleanupOrphans() {
+		Orphans orphans = this.eventQueue.orphans;
+		this.eventQueue.orphans = null;
+		
+		for(MemoryObject object : orphans.objects.values()) {
+			object.delete();
+		}
+		
+		for(MemoryField field : orphans.fields.values()) {
+			field.delete();
+		}
+	}
+	
+	@Override
+	public int countUnappliedLocalChanges() {
+		int count = 0;
+		for(XLocalChange lc : this.eventQueue.getLocalChanges()) {
+			if(!lc.isApplied()) {
+				count++;
+			}
+		}
+		return count;
+	}
+	
+	/**
+	 * Create a new object, increase revision (if not in a transaction) and
+	 * enqueue the corresponding event.
+	 * 
+	 * The caller is responsible for handling synchronization, for checking that
+	 * this model has not been removed and for checking that the object doesn't
+	 * already exist.
+	 */
+	protected abstract MemoryObject createObjectInternal(XID objectId);
+	
+	/**
+	 * End the current state transaction.
+	 */
+	protected abstract void endStateTransaction();
 	
 	protected long executeTransaction(XTransaction transaction, XLocalChangeCallback callback) {
 		synchronized(this.eventQueue) {
@@ -276,8 +348,255 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 		
 	}
 	
+	/**
+	 * Notifies all listeners that have registered interest for notification on
+	 * {@link XFieldEvent XFieldEvents} happening on child-{@link MemoryField
+	 * MemoryFields} of this entity.
+	 * 
+	 * @param event The {@link XFieldEvent} which will be propagated to the
+	 *            registered listeners.
+	 */
+	protected void fireFieldEvent(XFieldEvent event) {
+		for(XFieldEventListener listener : this.fieldChangeListenerCollection) {
+			listener.onChangeEvent(event);
+		}
+	}
+	
+	/**
+	 * Notifies all listeners that have registered interest for notification on
+	 * {@link XObjectEvent XObjectEvents} happening on child-
+	 * {@link MemoryObject MemoryObjects} of this entity.
+	 * 
+	 * @param event The {@link XObjectEvent} which will be propagated to the
+	 *            registered listeners.
+	 */
+	protected void fireObjectEvent(XObjectEvent event) {
+		for(XObjectEventListener listener : this.objectChangeListenerCollection) {
+			listener.onChangeEvent(event);
+		}
+	}
+	
+	/**
+	 * Notifies all listeners that have registered interest for notification on
+	 * {@link XTransactionEvent XTransactionEvents} happening on this entity.
+	 * 
+	 * @param event The {@link XTransactonEvent} which will be propagated to the
+	 *            registered listeners.
+	 */
+	protected void fireTransactionEvent(XTransactionEvent event) {
+		for(XTransactionEventListener listener : this.transactionListenerCollection) {
+			listener.onChangeEvent(event);
+		}
+	}
+	
 	public XChangeLog getChangeLog() {
 		return this.eventQueue.getChangeLog();
+	}
+	
+	/**
+	 * @return the revision number to return when executing {@link XCommand
+	 *         XCommands}.
+	 */
+	protected abstract long getCurrentRevisionNumber();
+	
+	@Override
+	public XLocalChange[] getLocalChanges() {
+		List<MemoryLocalChange> mlc = this.eventQueue.getLocalChanges();
+		return mlc.toArray(new XLocalChange[mlc.size()]);
+	}
+	
+	/**
+	 * @return the {@link MemoryModel} to use for sending
+	 *         {@link XTransactionEvent XTransactionEvents}
+	 */
+	protected abstract MemoryModel getModel();
+	
+	/**
+	 * @return the {@link MemoryObject} to use for sending
+	 *         {@link XTransactionEvent XTransactionEvents}
+	 */
+	protected abstract MemoryObject getObject();
+	
+	/**
+	 * Get the {@link MemoryObject} with the given {@link XID}.
+	 * 
+	 * If the entity this method is called on already is an {@link MemoryObject}
+	 * the method returns this entity exactly when the given {@link XID} matches
+	 * its {@link XID} and null otherwise.
+	 * 
+	 * @param objectId The {@link XID} of the {@link MemoryObject} which is to
+	 *            be returned
+	 * 
+	 * @return true if there is an {@link XObject} with the given {@link XID}
+	 */
+	protected abstract MemoryObject getObject(XID objectId);
+	
+	@Override
+	public XID getSessionActor() {
+		return this.eventQueue.getActor();
+	}
+	
+	@Override
+	public long getSynchronizedRevision() {
+		return this.eventQueue.getSyncRevision();
+	}
+	
+	/**
+	 * @return Return the proxy for reading the current state.
+	 */
+	protected abstract XReadableModel getTransactionTarget();
+	
+	/**
+	 * Increment this entity's revision number.
+	 */
+	protected abstract void incrementRevisionAndSave();
+	
+	public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
+		synchronized(this.eventQueue) {
+			return this.fieldChangeListenerCollection.remove(changeListener);
+		}
+	}
+	
+	public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
+		synchronized(this.eventQueue) {
+			return this.objectChangeListenerCollection.remove(changeListener);
+		}
+	}
+	
+	public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
+		synchronized(this.eventQueue) {
+			return this.transactionListenerCollection.remove(changeListener);
+		}
+	}
+	
+	/**
+	 * Remove an existing object, increase revision (if not in a transaction)
+	 * and enqueue the corresponding event(s).
+	 * 
+	 * The caller is responsible for handling synchronization, for checking that
+	 * this model has not been removed and for checking that the object actually
+	 * exists.
+	 */
+	protected abstract void removeObjectInternal(XID objectId);
+	
+	private long replayCommand(XCommand command) {
+		
+		assert !this.eventQueue.transactionInProgess;
+		
+		if(command instanceof XRepositoryCommand) {
+			if(getAddress().getAddressedType() != XType.XMODEL) {
+				return XCommand.FAILED;
+			}
+			
+			XRepositoryCommand rc = (XRepositoryCommand)command;
+			
+			if(!rc.getRepositoryId().equals(getAddress().getRepository())) {
+				// given given repository-id are not consistent
+				return XCommand.FAILED;
+			}
+			
+			if(!rc.getModelId().equals(getModel().getID())) {
+				return XCommand.FAILED;
+			}
+			
+			if(command.getChangeType() == ChangeType.ADD) {
+				if(!this.removed) {
+					// ID already taken
+					if(rc.isForced()) {
+						/*
+						 * the forced event only cares about the postcondition -
+						 * that there is a model with the given ID, not about
+						 * that there was no such model before
+						 */
+						return XCommand.NOCHANGE;
+					}
+					return XCommand.FAILED;
+				}
+				
+				this.removed = false;
+				
+				XRepositoryEvent event = MemoryRepositoryEvent.createAddEvent(getSessionActor(),
+				        getAddress().getParent(), getModel().getID(), getCurrentRevisionNumber(),
+				        false);
+				this.eventQueue.enqueueRepositoryEvent(getModel().getFather(), event);
+				
+				incrementRevisionAndSave();
+			}
+
+			else if(command.getChangeType() == ChangeType.REMOVE) {
+				if(this.removed) {
+					// ID not taken
+					if(rc.isForced()) {
+						/*
+						 * the forced event only cares about the postcondition -
+						 * that there is no model with the given ID, not about
+						 * that there was such a model before
+						 */
+						return XCommand.NOCHANGE;
+					}
+					return XCommand.FAILED;
+				}
+				if(!rc.isForced() && getCurrentRevisionNumber() != rc.getRevisionNumber()) {
+					return XCommand.FAILED;
+				}
+				
+				int since = this.eventQueue.getNextPosition();
+				boolean inTrans = getModel().enqueueModelRemoveEvents(getSessionActor());
+				if(inTrans) {
+					this.eventQueue.createTransactionEvent(getSessionActor(), getModel(), null,
+					        since);
+				}
+				
+				getModel().removeInternal();
+				
+			} else {
+				throw new AssertionError("unknown command type: " + rc);
+			}
+			
+			assert getModel().getRevisionNumber() == getCurrentRevisionNumber();
+			return getCurrentRevisionNumber();
+		}
+		
+		// TODO allow replaying XModelCommands on a model-less object
+		
+		return executeCommand(command);
+	}
+	
+	private boolean replayEvent(XEvent event) {
+		
+		while(getChangeLog().getCurrentRevisionNumber() < event.getOldModelRevision()) {
+			this.eventQueue.logNullEvent();
+		}
+		
+		long oldModelRev = getModel() == null ? -1 : getModel().getRevisionNumber();
+		assert oldModelRev <= event.getOldModelRevision();
+		setRevisionNumberIfModel(event.getOldModelRevision());
+		// TODO adjust object and field revisions? this is needed for
+		// synchronizing parent-less
+		// objects and/or if there are missing events (access rights?)
+		
+		/*
+		 * FIXME the remote changes should be applied as the actor specified in
+		 * the event
+		 */
+		XCommand replayCommand = XChanges.createReplayCommand(event);
+		long result = replayCommand(replayCommand);
+		if(result < 0) {
+			setRevisionNumberIfModel(oldModelRev);
+			saveIfModel();
+			return false;
+		}
+		assert event.equals(getChangeLog().getEventAt(result));
+		assert getModel() == null ? getObject().getRevisionNumber() == event.getRevisionNumber()
+		        : getModel().getRevisionNumber() == event.getRevisionNumber();
+		assert getCurrentRevisionNumber() == event.getRevisionNumber();
+		
+		assert event.getChangedEntity().getObject() == null
+		        || getObject(event.getChangedEntity().getObject()) == null
+		        || getObject(event.getChangedEntity().getObject()).getRevisionNumber() == event
+		                .getRevisionNumber();
+		
+		return true;
 	}
 	
 	public void rollback(long revision) {
@@ -393,7 +712,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 			// TODO allow applying XModelEvents on a model-less object
 			assert getModel() == this;
 			assert event.getTarget().equals(getAddress());
-			XID objectId = ((XModelEvent)event).getObjectID();
+			XID objectId = ((XModelEvent)event).getObjectId();
 			if(event.getChangeType() == ChangeType.REMOVE) {
 				assert !getModel().hasObject(objectId);
 				MemoryObject object = createObjectInternal(objectId);
@@ -420,7 +739,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 			
 			if(event instanceof XObjectEvent) {
 				assert event.getTarget().equals(object.getAddress());
-				XID fieldId = ((XObjectEvent)event).getFieldID();
+				XID fieldId = ((XObjectEvent)event).getFieldId();
 				if(event.getChangeType() == ChangeType.REMOVE) {
 					assert !object.hasField(fieldId);
 					MemoryField field = object.createFieldInternal(fieldId);
@@ -439,7 +758,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 				
 			} else {
 				assert event instanceof XFieldEvent;
-				MemoryField field = object.getField(((XFieldEvent)event).getFieldID());
+				MemoryField field = object.getField(((XFieldEvent)event).getFieldId());
 				assert field != null;
 				assert event.getRevisionNumber() == field.getRevisionNumber()
 				        || (event.inTransaction() && event.getOldFieldRevision() == field
@@ -460,124 +779,19 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 		saveIfModel();
 	}
 	
-	private boolean replayEvent(XEvent event) {
-		
-		while(getChangeLog().getCurrentRevisionNumber() < event.getOldModelRevision()) {
-			this.eventQueue.logNullEvent();
-		}
-		
-		long oldModelRev = getModel() == null ? -1 : getModel().getRevisionNumber();
-		assert oldModelRev <= event.getOldModelRevision();
-		setRevisionNumberIfModel(event.getOldModelRevision());
-		// TODO adjust object and field revisions? this is needed for
-		// synchronizing parent-less
-		// objects and/or if there are missing events (access rights?)
-		
-		/*
-		 * FIXME the remote changes should be applied as the actor specified in
-		 * the event
-		 */
-		XCommand replayCommand = XChanges.createReplayCommand(event);
-		long result = replayCommand(replayCommand);
-		if(result < 0) {
-			setRevisionNumberIfModel(oldModelRev);
-			saveIfModel();
-			return false;
-		}
-		assert event.equals(getChangeLog().getEventAt(result));
-		assert getModel() == null ? getObject().getRevisionNumber() == event.getRevisionNumber()
-		        : getModel().getRevisionNumber() == event.getRevisionNumber();
-		assert getCurrentRevisionNumber() == event.getRevisionNumber();
-		
-		assert event.getChangedEntity().getObject() == null
-		        || getObject(event.getChangedEntity().getObject()) == null
-		        || getObject(event.getChangedEntity().getObject()).getRevisionNumber() == event
-		                .getRevisionNumber();
-		
-		return true;
-	}
+	/**
+	 * Save using the persistence layer, if this is a subtype of {@link XModel}.
+	 */
+	protected abstract void saveIfModel();
 	
-	private long replayCommand(XCommand command) {
-		
-		assert !this.eventQueue.transactionInProgess;
-		
-		if(command instanceof XRepositoryCommand) {
-			if(getAddress().getAddressedType() != XType.XMODEL) {
-				return XCommand.FAILED;
-			}
-			
-			XRepositoryCommand rc = (XRepositoryCommand)command;
-			
-			if(!rc.getRepositoryID().equals(getAddress().getRepository())) {
-				// given given repository-id are not consistent
-				return XCommand.FAILED;
-			}
-			
-			if(!rc.getModelID().equals(getModel().getID())) {
-				return XCommand.FAILED;
-			}
-			
-			if(command.getChangeType() == ChangeType.ADD) {
-				if(!this.removed) {
-					// ID already taken
-					if(rc.isForced()) {
-						/*
-						 * the forced event only cares about the postcondition -
-						 * that there is a model with the given ID, not about
-						 * that there was no such model before
-						 */
-						return XCommand.NOCHANGE;
-					}
-					return XCommand.FAILED;
-				}
-				
-				this.removed = false;
-				
-				XRepositoryEvent event = MemoryRepositoryEvent.createAddEvent(getSessionActor(),
-				        getAddress().getParent(), getModel().getID(), getCurrentRevisionNumber(),
-				        false);
-				this.eventQueue.enqueueRepositoryEvent(getModel().getFather(), event);
-				
-				incrementRevisionAndSave();
-			}
-
-			else if(command.getChangeType() == ChangeType.REMOVE) {
-				if(this.removed) {
-					// ID not taken
-					if(rc.isForced()) {
-						/*
-						 * the forced event only cares about the postcondition -
-						 * that there is no model with the given ID, not about
-						 * that there was such a model before
-						 */
-						return XCommand.NOCHANGE;
-					}
-					return XCommand.FAILED;
-				}
-				if(!rc.isForced() && getCurrentRevisionNumber() != rc.getRevisionNumber()) {
-					return XCommand.FAILED;
-				}
-				
-				int since = this.eventQueue.getNextPosition();
-				boolean inTrans = getModel().enqueueModelRemoveEvents(getSessionActor());
-				if(inTrans) {
-					this.eventQueue.createTransactionEvent(getSessionActor(), getModel(), null,
-					        since);
-				}
-				
-				getModel().removeInternal();
-				
-			} else {
-				throw new AssertionError("unknown command type: " + rc);
-			}
-			
-			assert getModel().getRevisionNumber() == getCurrentRevisionNumber();
-			return getCurrentRevisionNumber();
-		}
-		
-		// TODO allow replaying XModelCommands on a model-less object
-		
-		return executeCommand(command);
+	/**
+	 * Set the new revision number, if this is a subtype of {@link XModel}.
+	 */
+	protected abstract void setRevisionNumberIfModel(long modelRevisionNumber);
+	
+	@Override
+	public void setSessionActor(XID actorId, String passwordHash) {
+		this.eventQueue.setSessionActor(actorId, passwordHash);
 	}
 	
 	public boolean synchronize(XEvent[] remoteChanges) {
@@ -709,222 +923,6 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 		
 		return success;
 		
-	}
-	
-	private void cleanupOrphans() {
-		Orphans orphans = this.eventQueue.orphans;
-		this.eventQueue.orphans = null;
-		
-		for(MemoryObject object : orphans.objects.values()) {
-			object.delete();
-		}
-		
-		for(MemoryField field : orphans.fields.values()) {
-			field.delete();
-		}
-	}
-	
-	/**
-	 * Increment this entity's revision number.
-	 */
-	protected abstract void incrementRevisionAndSave();
-	
-	/**
-	 * Get the {@link MemoryObject} with the given {@link XID}.
-	 * 
-	 * If the entity this method is called on already is an {@link MemoryObject}
-	 * the method returns this entity exactly when the given {@link XID} matches
-	 * its {@link XID} and null otherwise.
-	 * 
-	 * @param objectId The {@link XID} of the {@link MemoryObject} which is to
-	 *            be returned
-	 * 
-	 * @return true if there is an {@link XObject} with the given {@link XID}
-	 */
-	protected abstract MemoryObject getObject(XID objectId);
-	
-	/**
-	 * Create a new object, increase revision (if not in a transaction) and
-	 * enqueue the corresponding event.
-	 * 
-	 * The caller is responsible for handling synchronization, for checking that
-	 * this model has not been removed and for checking that the object doesn't
-	 * already exist.
-	 */
-	protected abstract MemoryObject createObjectInternal(XID objectId);
-	
-	/**
-	 * Remove an existing object, increase revision (if not in a transaction)
-	 * and enqueue the corresponding event(s).
-	 * 
-	 * The caller is responsible for handling synchronization, for checking that
-	 * this model has not been removed and for checking that the object actually
-	 * exists.
-	 */
-	protected abstract void removeObjectInternal(XID objectId);
-	
-	/**
-	 * @return Return the proxy for reading the current state.
-	 */
-	protected abstract XReadableModel getTransactionTarget();
-	
-	/**
-	 * @return the revision number to return when executing {@link XCommand
-	 *         XCommands}.
-	 */
-	protected abstract long getCurrentRevisionNumber();
-	
-	/**
-	 * @return the {@link MemoryModel} to use for sending
-	 *         {@link XTransactionEvent XTransactionEvents}
-	 */
-	protected abstract MemoryModel getModel();
-	
-	/**
-	 * @return the {@link MemoryObject} to use for sending
-	 *         {@link XTransactionEvent XTransactionEvents}
-	 */
-	protected abstract MemoryObject getObject();
-	
-	/**
-	 * @throws IllegalStateException if this entity has already been removed
-	 */
-	protected abstract void checkRemoved() throws IllegalStateException;
-	
-	/**
-	 * Save using the persistence layer, if this is a subtype of {@link XModel}.
-	 */
-	protected abstract void saveIfModel();
-	
-	/**
-	 * Set the new revision number, if this is a subtype of {@link XModel}.
-	 */
-	protected abstract void setRevisionNumberIfModel(long modelRevisionNumber);
-	
-	/**
-	 * Check if this entity may be synchronized.
-	 */
-	protected abstract void checkSync();
-	
-	/**
-	 * Start a new state transaction.
-	 * 
-	 * @return true if a transaction was started and should be ended later.
-	 */
-	protected abstract void beginStateTransaction();
-	
-	/**
-	 * End the current state transaction.
-	 */
-	protected abstract void endStateTransaction();
-	
-	/**
-	 * Notifies all listeners that have registered interest for notification on
-	 * {@link XObjectEvent XObjectEvents} happening on child-
-	 * {@link MemoryObject MemoryObjects} of this entity.
-	 * 
-	 * @param event The {@link XObjectEvent} which will be propagated to the
-	 *            registered listeners.
-	 */
-	protected void fireObjectEvent(XObjectEvent event) {
-		for(XObjectEventListener listener : this.objectChangeListenerCollection) {
-			listener.onChangeEvent(event);
-		}
-	}
-	
-	/**
-	 * Notifies all listeners that have registered interest for notification on
-	 * {@link XFieldEvent XFieldEvents} happening on child-{@link MemoryField
-	 * MemoryFields} of this entity.
-	 * 
-	 * @param event The {@link XFieldEvent} which will be propagated to the
-	 *            registered listeners.
-	 */
-	protected void fireFieldEvent(XFieldEvent event) {
-		for(XFieldEventListener listener : this.fieldChangeListenerCollection) {
-			listener.onChangeEvent(event);
-		}
-	}
-	
-	/**
-	 * Notifies all listeners that have registered interest for notification on
-	 * {@link XTransactionEvent XTransactionEvents} happening on this entity.
-	 * 
-	 * @param event The {@link XTransactonEvent} which will be propagated to the
-	 *            registered listeners.
-	 */
-	protected void fireTransactionEvent(XTransactionEvent event) {
-		for(XTransactionEventListener listener : this.transactionListenerCollection) {
-			listener.onChangeEvent(event);
-		}
-	}
-	
-	public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
-		synchronized(this.eventQueue) {
-			return this.objectChangeListenerCollection.add(changeListener);
-		}
-	}
-	
-	public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
-		synchronized(this.eventQueue) {
-			return this.objectChangeListenerCollection.remove(changeListener);
-		}
-	}
-	
-	public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
-		synchronized(this.eventQueue) {
-			return this.fieldChangeListenerCollection.add(changeListener);
-		}
-	}
-	
-	public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
-		synchronized(this.eventQueue) {
-			return this.fieldChangeListenerCollection.remove(changeListener);
-		}
-	}
-	
-	public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
-		synchronized(this.eventQueue) {
-			return this.transactionListenerCollection.add(changeListener);
-		}
-	}
-	
-	public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
-		synchronized(this.eventQueue) {
-			return this.transactionListenerCollection.remove(changeListener);
-		}
-	}
-	
-	@Override
-	public XID getSessionActor() {
-		return this.eventQueue.getActor();
-	}
-	
-	@Override
-	public void setSessionActor(XID actorId, String passwordHash) {
-		this.eventQueue.setSessionActor(actorId, passwordHash);
-	}
-	
-	@Override
-	public XLocalChange[] getLocalChanges() {
-		List<MemoryLocalChange> mlc = this.eventQueue.getLocalChanges();
-		return mlc.toArray(new XLocalChange[mlc.size()]);
-	}
-	
-	@Override
-	public int countUnappliedLocalChanges() {
-		int count = 0;
-		for(XLocalChange lc : this.eventQueue.getLocalChanges()) {
-			if(!lc.isApplied()) {
-				count++;
-			}
-		}
-		return count;
-	}
-	
-	@Override
-	public long getSynchronizedRevision() {
-		return this.eventQueue.getSyncRevision();
 	}
 	
 }

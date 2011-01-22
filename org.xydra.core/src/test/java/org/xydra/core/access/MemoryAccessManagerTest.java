@@ -1,15 +1,17 @@
 package org.xydra.core.access;
 
 import org.xydra.base.XAddress;
-import org.xydra.core.access.impl.memory.MemoryAccessManager;
-import org.xydra.core.test.access.AbstractAccessManagerTest;
+import org.xydra.store.access.XAuthorisationManager;
+import org.xydra.store.access.XGroupDatabaseWithListeners;
+import org.xydra.store.access.impl.memory.MemoryAuthorisationManager;
 
 
 public class MemoryAccessManagerTest extends AbstractAccessManagerTest {
 	
 	@Override
-	protected XAccessManager getAccessManager(XGroupDatabaseWithListeners groups, XAddress rA0) {
-		return new MemoryAccessManager(groups);
+	protected XAuthorisationManager getAccessManager(XGroupDatabaseWithListeners groups,
+	        XAddress rA0) {
+		return new MemoryAuthorisationManager(groups);
 	}
 	
 }

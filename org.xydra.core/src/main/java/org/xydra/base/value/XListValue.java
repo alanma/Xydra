@@ -10,38 +10,6 @@ package org.xydra.base.value;
 public interface XListValue<E> extends XCollectionValue<E> {
 	
 	/**
-	 * Returns the index of the first occurrence of the given element in this
-	 * XListValue
-	 * 
-	 * @param elem The element which index of its first occurrence in this list
-	 *            is to be returned
-	 * @return The index of the first occurrence of the given element. Returns
-	 *         -1 if this XListValue doesn't contain the given element.
-	 */
-	int indexOf(E elem);
-	
-	/**
-	 * Returns the index of the last occurrence of the given element in this
-	 * XListValue
-	 * 
-	 * @param elem The element which index of its last occurrence in this list
-	 *            is to be returned
-	 * @return The index of the last occurrence of the given element. Returns -1
-	 *         if this XListValue doesn't contain the given element.
-	 */
-	int lastIndexOf(E elem);
-	
-	/**
-	 * Returns the element at the given index.
-	 * 
-	 * @param index The index of the element which is to be returned
-	 * @return the element at the given index.
-	 * @throws IndexOutOfBoundsException if the given index is less than zero or
-	 *             greater than or equal to size()
-	 */
-	E get(int index);
-	
-	/**
 	 * Creates a new {@link XListValue} containing all entries from this value
 	 * as well as the specified entry. The order of the already existing entries
 	 * is preserved and the new entry is added to the end of the list. This
@@ -67,6 +35,38 @@ public interface XListValue<E> extends XCollectionValue<E> {
 	 *             size()
 	 */
 	XListValue<E> add(int index, E entry);
+	
+	/**
+	 * Returns the element at the given index.
+	 * 
+	 * @param index The index of the element which is to be returned
+	 * @return the element at the given index.
+	 * @throws IndexOutOfBoundsException if the given index is less than zero or
+	 *             greater than or equal to size()
+	 */
+	E get(int index);
+	
+	/**
+	 * Returns the index of the first occurrence of the given element in this
+	 * XListValue
+	 * 
+	 * @param elem The element which index of its first occurrence in this list
+	 *            is to be returned
+	 * @return The index of the first occurrence of the given element. Returns
+	 *         -1 if this XListValue doesn't contain the given element.
+	 */
+	int indexOf(E elem);
+	
+	/**
+	 * Returns the index of the last occurrence of the given element in this
+	 * XListValue
+	 * 
+	 * @param elem The element which index of its last occurrence in this list
+	 *            is to be returned
+	 * @return The index of the last occurrence of the given element. Returns -1
+	 *         if this XListValue doesn't contain the given element.
+	 */
+	int lastIndexOf(E elem);
 	
 	/**
 	 * Creates a new {@link XListValue} containing all entries from this value

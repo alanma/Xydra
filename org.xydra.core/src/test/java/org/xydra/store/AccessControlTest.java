@@ -7,17 +7,14 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xydra.base.XHalfWritableModel;
-import org.xydra.base.XHalfWritableRepository;
 import org.xydra.base.XID;
-import org.xydra.core.XX;
-import org.xydra.core.test.TestLogger;
-import org.xydra.store.access.XAccountDatabase;
-import org.xydra.store.base.Credentials;
-import org.xydra.store.base.HalfWritableRepositoryOnStore;
-import org.xydra.store.base.HashUtils;
+import org.xydra.base.XX;
+import org.xydra.core.TestLogger;
+import org.xydra.store.access.HashUtils;
+import org.xydra.store.access.XAccessControlManager;
+import org.xydra.store.access.XAuthenticationDatabase;
+import org.xydra.store.access.XGroupDatabase;
 import org.xydra.store.impl.memory.SecureMemoryStore;
-import org.xydra.store.test.SynchronousTestCallback;
 
 
 /**
@@ -25,22 +22,25 @@ import org.xydra.store.test.SynchronousTestCallback;
  * 
  * @author xamde
  */
-@MAXTodo
-@SuppressWarnings("deprecation")
 public class AccessControlTest {
 	
-	private XydraStore store;
+	static final XID groupA = XX.toId("groupA");
+	
+	static final XID groupB = XX.toId("groupB");
+	
+	static final XID user1 = XX.toId("user1");
+	
+	static final XID user2 = XX.toId("user2");
 	
 	@BeforeClass
 	public static void init() {
 		TestLogger.init();
 	}
-	
+	private XydraStore store;
 	@Before
 	public void before() {
 		this.store = createStore();
 	}
-	
 	/**
 	 * Overwrite this method to test other implementations.
 	 * 
@@ -50,40 +50,29 @@ public class AccessControlTest {
 		return new SecureMemoryStore();
 	}
 	
-	static final XID user1 = XX.toId("user1");
-	static final XID user2 = XX.toId("user2");
-	static final XID groupA = XX.toId("groupA");
-	static final XID groupB = XX.toId("groupB");
-	
-	@Test
-	public void testStoreHasAccountModel() {
-		Credentials credentials = new Credentials(XydraStoreAdmin.XYDRA_ADMIN_ID, this.store
-		        .getXydraStoreAdmin().getXydraAdminPasswordHash());
-		XHalfWritableRepository repo = new HalfWritableRepositoryOnStore(credentials, this.store);
-		XHalfWritableModel accountModel = repo.getModel(NamingUtils.ID_ACCOUNT_MODEL);
-		assertNotNull("Store is missing the account model '" + NamingUtils.ID_ACCOUNT_MODEL + "'",
-		        accountModel);
-	}
-	
 	@Test
 	public void testAddActors() throws Throwable {
-		XAccountDatabase accountDb = this.store.getXydraStoreAdmin().getAccountDatabase();
+		XAccessControlManager acm = this.store.getXydraStoreAdmin().getAccessControlManager();
+		XAuthenticationDatabase authenticationDb = acm.getAuthenticationDatabase();
+		XGroupDatabase groupDb = acm.getAuthorisationManager().getGroupDatabase();
+		
 		// register other users
-		accountDb.setPasswordHash(user1, HashUtils.getXydraPasswordHash("secret1"));
-		accountDb.setPasswordHash(user2, HashUtils.getXydraPasswordHash("secret2"));
+		authenticationDb.setPasswordHash(user1, HashUtils.getXydraPasswordHash("secret1"));
+		authenticationDb.setPasswordHash(user2, HashUtils.getXydraPasswordHash("secret2"));
 		
-		assertFalse(accountDb.isValidLogin(user1, "foo"));
-		assertFalse(accountDb.isValidLogin(user1, "secret1"));
-		assertTrue(accountDb.isValidLogin(user1, HashUtils.getXydraPasswordHash("secret1")));
+		assertFalse(acm.isAuthenticated(user1, "foo"));
+		assertFalse(acm.isAuthenticated(user1, "secret1"));
+		assertTrue(acm.isAuthenticated(user1, HashUtils.getXydraPasswordHash("secret1")));
 		
-		accountDb.addToGroup(user1, groupA);
-		assertTrue(accountDb.getMembersOf(groupA).contains(user1));
+		groupDb.addToGroup(user1, groupA);
+		assertTrue(groupDb.getMembersOf(groupA).contains(user1));
 		
 		// open account db again and test again
-		accountDb = this.store.getXydraStoreAdmin().getAccountDatabase();
-		assertTrue(accountDb.isValidLogin(user1, HashUtils.getXydraPasswordHash("secret1")));
-		assertNotNull(accountDb.getPasswordHash(user1));
-		assertTrue(accountDb.getMembersOf(groupA).contains(user1));
+		authenticationDb = this.store.getXydraStoreAdmin().getAccessControlManager()
+		        .getAuthenticationDatabase();
+		assertTrue(acm.isAuthenticated(user1, HashUtils.getXydraPasswordHash("secret1")));
+		assertNotNull(authenticationDb.getPasswordHash(user1));
+		assertTrue(groupDb.getMembersOf(groupA).contains(user1));
 		
 		SynchronousTestCallback<Boolean> callback = new SynchronousTestCallback<Boolean>();
 		this.store.checkLogin(user1, HashUtils.getXydraPasswordHash("secret1"), callback);
@@ -91,5 +80,10 @@ public class AccessControlTest {
 		if(!callback.getEffect()) {
 			throw new RuntimeException("Could not login user1", callback.getException());
 		}
+	}
+	
+	@Test
+	public void testStoreHasAccountModel() {
+		// TODO test this on a store that is based on persistence
 	}
 }

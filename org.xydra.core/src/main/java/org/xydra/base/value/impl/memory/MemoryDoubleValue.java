@@ -19,6 +19,10 @@ public class MemoryDoubleValue implements XDoubleValue {
 		this.content = content;
 	}
 	
+	public Number asNumber() {
+		return contents();
+	}
+	
 	public double contents() {
 		return this.content;
 	}
@@ -40,10 +44,6 @@ public class MemoryDoubleValue implements XDoubleValue {
 	@Override
 	public String toString() {
 		return Double.toString(this.content);
-	}
-	
-	public Number asNumber() {
-		return contents();
 	}
 	
 }

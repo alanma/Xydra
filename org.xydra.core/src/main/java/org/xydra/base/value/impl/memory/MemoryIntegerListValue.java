@@ -27,62 +27,13 @@ public class MemoryIntegerListValue extends MemoryListValue<Integer> implements 
 		}
 	}
 	
-	public MemoryIntegerListValue(int[] content) {
-		this.list = new int[content.length];
-		System.arraycopy(content, 0, this.list, 0, content.length);
-	}
-	
 	private MemoryIntegerListValue(int length) {
 		this.list = new int[length];
 	}
 	
-	public int[] contents() {
-		int[] array = new int[this.list.length];
-		System.arraycopy(this.list, 0, array, 0, this.list.length);
-		return array;
-	}
-	
-	public Integer[] toArray() {
-		Integer[] array = new Integer[this.list.length];
-		fillArray(array);
-		return array;
-	}
-	
-	@Override
-	public boolean equals(Object other) {
-		return other instanceof XIntegerListValue
-		        && XI.equalsIterator(this.iterator(), ((XIntegerListValue)other).iterator());
-	}
-	
-	@Override
-	public int hashCode() {
-		return Arrays.hashCode(this.list);
-	}
-	
-	@Override
-	public String toString() {
-		return Arrays.toString(this.list);
-	}
-	
-	public Integer get(int index) {
-		return this.list[index];
-	}
-	
-	public int size() {
-		return this.list.length;
-	}
-	
-	public Number[] toNumberArray() {
-		Number[] array = new Number[this.list.length];
-		int i = 0;
-		for(Number e : this) {
-			array[i++] = e;
-		}
-		return array;
-	}
-	
-	public XIntegerListValue add(Integer entry) {
-		return add(this.list.length, entry);
+	public MemoryIntegerListValue(int[] content) {
+		this.list = new int[content.length];
+		System.arraycopy(content, 0, this.list, 0, content.length);
 	}
 	
 	public XIntegerListValue add(int index, Integer entry) {
@@ -97,12 +48,29 @@ public class MemoryIntegerListValue extends MemoryListValue<Integer> implements 
 		return v;
 	}
 	
-	public XIntegerListValue remove(Integer entry) {
-		int index = indexOf(entry);
-		if(index < 0) {
-			return this;
-		}
-		return remove(index);
+	public XIntegerListValue add(Integer entry) {
+		return add(this.list.length, entry);
+	}
+	
+	public int[] contents() {
+		int[] array = new int[this.list.length];
+		System.arraycopy(this.list, 0, array, 0, this.list.length);
+		return array;
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		return other instanceof XIntegerListValue
+		        && XI.equalsIterator(this.iterator(), ((XIntegerListValue)other).iterator());
+	}
+	
+	public Integer get(int index) {
+		return this.list[index];
+	}
+	
+	@Override
+	public int hashCode() {
+		return Arrays.hashCode(this.list);
 	}
 	
 	public XIntegerListValue remove(int index) {
@@ -114,6 +82,38 @@ public class MemoryIntegerListValue extends MemoryListValue<Integer> implements 
 		System.arraycopy(this.list, 0, v.list, 0, index);
 		System.arraycopy(this.list, index + 1, v.list, index, size - index - 1);
 		return v;
+	}
+	
+	public XIntegerListValue remove(Integer entry) {
+		int index = indexOf(entry);
+		if(index < 0) {
+			return this;
+		}
+		return remove(index);
+	}
+	
+	public int size() {
+		return this.list.length;
+	}
+	
+	public Integer[] toArray() {
+		Integer[] array = new Integer[this.list.length];
+		fillArray(array);
+		return array;
+	}
+	
+	public Number[] toNumberArray() {
+		Number[] array = new Number[this.list.length];
+		int i = 0;
+		for(Number e : this) {
+			array[i++] = e;
+		}
+		return array;
+	}
+	
+	@Override
+	public String toString() {
+		return Arrays.toString(this.list);
 	}
 	
 }

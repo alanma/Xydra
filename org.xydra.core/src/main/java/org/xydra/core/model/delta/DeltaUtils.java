@@ -4,23 +4,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableField;
-import org.xydra.base.XReadableModel;
-import org.xydra.base.XReadableObject;
 import org.xydra.base.XID;
-import org.xydra.base.XWritableField;
-import org.xydra.base.XWritableObject;
+import org.xydra.base.change.XAtomicEvent;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XRepositoryCommand;
+import org.xydra.base.change.impl.memory.MemoryFieldEvent;
+import org.xydra.base.change.impl.memory.MemoryModelEvent;
+import org.xydra.base.change.impl.memory.MemoryObjectEvent;
+import org.xydra.base.change.impl.memory.MemoryRepositoryEvent;
+import org.xydra.base.rmof.XReadableField;
+import org.xydra.base.rmof.XReadableModel;
+import org.xydra.base.rmof.XReadableObject;
+import org.xydra.base.rmof.XRevWritableField;
+import org.xydra.base.rmof.XRevWritableObject;
+import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.value.XValue;
-import org.xydra.core.change.XAtomicEvent;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XRepositoryCommand;
-import org.xydra.core.change.impl.memory.MemoryFieldEvent;
-import org.xydra.core.change.impl.memory.MemoryModelEvent;
-import org.xydra.core.change.impl.memory.MemoryObjectEvent;
-import org.xydra.core.change.impl.memory.MemoryRepositoryEvent;
 import org.xydra.core.model.impl.memory.SynchronizesChangesImpl;
 import org.xydra.index.query.Pair;
-import org.xydra.store.base.SimpleModel;
 
 
 /**
@@ -33,6 +33,146 @@ import org.xydra.store.base.SimpleModel;
  * 
  */
 public abstract class DeltaUtils {
+	
+	public enum ModelChange {
+		CREATED, NOCHANGE, REMOVED
+	}
+	
+	/**
+	 * IMPROVE some of this could be shared with {@link SynchronizesChangesImpl}
+	 * , but revision numbers are handled differently.
+	 */
+	public static void applyChanges(SimpleModel model, ChangedModel changedModel, long rev) {
+		
+		for(XID objectId : changedModel.getRemovedObjects()) {
+			assert model.hasObject(objectId);
+			model.removeObject(objectId);
+		}
+		
+		for(XReadableObject object : changedModel.getNewObjects()) {
+			assert !model.hasObject(object.getID());
+			XRevWritableObject newObject = model.createObject(object.getID());
+			for(XID fieldId : object) {
+				applyChanges(newObject, object.getField(fieldId), rev);
+			}
+			newObject.setRevisionNumber(rev);
+		}
+		
+		for(ChangedObject changedObject : changedModel.getChangedObjects()) {
+			
+			boolean objectChanged = false;
+			
+			XRevWritableObject object = model.getObject(changedObject.getID());
+			assert object != null;
+			
+			for(XID fieldId : changedObject.getRemovedFields()) {
+				assert object.hasField(fieldId);
+				object.removeField(fieldId);
+				objectChanged = true;
+			}
+			
+			for(XReadableField field : changedObject.getNewFields()) {
+				applyChanges(object, field, rev);
+				objectChanged = true;
+			}
+			
+			for(ChangedField changedField : changedObject.getChangedFields()) {
+				if(changedField.isChanged()) {
+					XRevWritableField field = object.getField(changedField.getID());
+					assert field != null;
+					boolean valueChanged = field.setValue(changedField.getValue());
+					assert valueChanged;
+					field.setRevisionNumber(rev);
+					objectChanged = true;
+				}
+			}
+			
+			if(objectChanged) {
+				object.setRevisionNumber(rev);
+			}
+			
+		}
+		
+		model.setRevisionNumber(rev);
+		
+	}
+	
+	/**
+	 * @param modelAddr
+	 * @param modelToChange
+	 * @param change
+	 * @param rev
+	 * @return a model with the changes applied or null if model has been
+	 *         removed by the changes.
+	 */
+	public static SimpleModel applyChanges(XAddress modelAddr, SimpleModel modelToChange,
+	        Pair<ChangedModel,ModelChange> change, long rev) {
+		
+		SimpleModel model = modelToChange;
+		ChangedModel changedModel = change.getFirst();
+		ModelChange mc = change.getSecond();
+		
+		if(mc == ModelChange.REMOVED) {
+			return null;
+		} else if(mc == ModelChange.CREATED) {
+			assert model == null;
+			model = new SimpleModel(modelAddr);
+			model.setRevisionNumber(rev);
+		}
+		
+		if(changedModel != null) {
+			assert model != null;
+			applyChanges(model, changedModel, rev);
+		}
+		
+		return model;
+	}
+	
+	public static void applyChanges(XRevWritableObject object, XReadableField field, long rev) {
+		assert !object.hasField(field.getID());
+		XRevWritableField newField = object.createField(field.getID());
+		newField.setValue(field.getValue());
+		newField.setRevisionNumber(rev);
+	}
+	
+	/**
+	 * @return the appropriate events for the change (as returned by
+	 *         {@link #executeCommand(XReadableModel, XCommand)}
+	 */
+	public static List<XAtomicEvent> createEvents(XAddress modelAddr,
+	        Pair<ChangedModel,ModelChange> change, XID actorId, long rev) {
+		
+		assert change != null;
+		
+		ChangedModel model = change.getFirst();
+		ModelChange mc = change.getSecond();
+		
+		assert model == null || rev - 1 == model.getRevisionNumber();
+		
+		int nChanges = (mc == ModelChange.NOCHANGE ? 0 : 1);
+		if(model != null) {
+			nChanges += model.countEventsNeeded(2 - nChanges);
+		}
+		boolean inTrans = nChanges > 1;
+		
+		List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
+		
+		if(mc == ModelChange.CREATED) {
+			events.add(MemoryRepositoryEvent.createAddEvent(actorId, modelAddr.getParent(),
+			        modelAddr.getModel(), rev - 1, false));
+		}
+		
+		if(model != null) {
+			createEventsForChangedModel(events, actorId, model, inTrans, mc == ModelChange.REMOVED);
+		}
+		
+		if(mc == ModelChange.REMOVED) {
+			events.add(MemoryRepositoryEvent.createRemoveEvent(actorId, modelAddr.getParent(),
+			        modelAddr.getModel(), rev - 1, inTrans));
+		}
+		
+		return events;
+	}
 	
 	public static void createEventsForChangedModel(List<XAtomicEvent> events, XID actorId,
 	        ChangedModel changedModel, boolean inTrans, boolean implied) {
@@ -104,18 +244,9 @@ public abstract class DeltaUtils {
 		}
 	}
 	
-	public static void createEventsForRemovedObject(List<XAtomicEvent> events, long modelRev,
-	        XID actorId, XReadableObject object, boolean inTrans, boolean implied) {
-		for(XID fieldId : object) {
-			DeltaUtils.createEventsForRemovedField(events, modelRev, actorId, object,
-			        object.getField(fieldId), inTrans, true);
-		}
-		events.add(MemoryModelEvent.createRemoveEvent(actorId, object.getAddress().getParent(),
-		        object.getID(), modelRev, object.getRevisionNumber(), inTrans, implied));
-	}
-	
 	public static void createEventsForRemovedField(List<XAtomicEvent> events, long modelRev,
-	        XID actorId, XReadableObject object, XReadableField field, boolean inTrans, boolean implied) {
+	        XID actorId, XReadableObject object, XReadableField field, boolean inTrans,
+	        boolean implied) {
 		long objectRev = object.getRevisionNumber();
 		long fieldRev = field.getRevisionNumber();
 		if(!field.isEmpty()) {
@@ -126,47 +257,14 @@ public abstract class DeltaUtils {
 		        modelRev, objectRev, fieldRev, inTrans, implied));
 	}
 	
-	/**
-	 * @return the appropriate events for the change (as returned by
-	 *         {@link #executeCommand(XReadableModel, XCommand)}
-	 */
-	public static List<XAtomicEvent> createEvents(XAddress modelAddr,
-	        Pair<ChangedModel,ModelChange> change, XID actorId, long rev) {
-		
-		assert change != null;
-		
-		ChangedModel model = change.getFirst();
-		ModelChange mc = change.getSecond();
-		
-		assert model == null || rev - 1 == model.getRevisionNumber();
-		
-		int nChanges = (mc == ModelChange.NOCHANGE ? 0 : 1);
-		if(model != null) {
-			nChanges += model.countEventsNeeded(2 - nChanges);
+	public static void createEventsForRemovedObject(List<XAtomicEvent> events, long modelRev,
+	        XID actorId, XReadableObject object, boolean inTrans, boolean implied) {
+		for(XID fieldId : object) {
+			DeltaUtils.createEventsForRemovedField(events, modelRev, actorId, object,
+			        object.getField(fieldId), inTrans, true);
 		}
-		boolean inTrans = nChanges > 1;
-		
-		List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
-		
-		if(mc == ModelChange.CREATED) {
-			events.add(MemoryRepositoryEvent.createAddEvent(actorId, modelAddr.getParent(),
-			        modelAddr.getModel(), rev - 1, false));
-		}
-		
-		if(model != null) {
-			createEventsForChangedModel(events, actorId, model, inTrans, mc == ModelChange.REMOVED);
-		}
-		
-		if(mc == ModelChange.REMOVED) {
-			events.add(MemoryRepositoryEvent.createRemoveEvent(actorId, modelAddr.getParent(),
-			        modelAddr.getModel(), rev - 1, inTrans));
-		}
-		
-		return events;
-	}
-	
-	public enum ModelChange {
-		REMOVED, CREATED, NOCHANGE
+		events.add(MemoryModelEvent.createRemoveEvent(actorId, object.getAddress().getParent(),
+		        object.getID(), modelRev, object.getRevisionNumber(), inTrans, implied));
 	}
 	
 	/**
@@ -179,7 +277,8 @@ public abstract class DeltaUtils {
 	 *         (Pair#getFirst()) and if the model was added or removed by the
 	 *         command (Pair#getSecond()). Returns null if the command failed.
 	 */
-	public static Pair<ChangedModel,ModelChange> executeCommand(XReadableModel model, XCommand command) {
+	public static Pair<ChangedModel,ModelChange> executeCommand(XReadableModel model,
+	        XCommand command) {
 		
 		if(command instanceof XRepositoryCommand) {
 			
@@ -228,103 +327,6 @@ public abstract class DeltaUtils {
 			
 		}
 		
-	}
-	
-	/**
-	 * @param modelAddr
-	 * @param modelToChange
-	 * @param change
-	 * @param rev
-	 * @return a model with the changes applied or null if model has been
-	 *         removed by the changes.
-	 */
-	public static SimpleModel applyChanges(XAddress modelAddr, SimpleModel modelToChange,
-	        Pair<ChangedModel,ModelChange> change, long rev) {
-		
-		SimpleModel model = modelToChange;
-		ChangedModel changedModel = change.getFirst();
-		ModelChange mc = change.getSecond();
-		
-		if(mc == ModelChange.REMOVED) {
-			return null;
-		} else if(mc == ModelChange.CREATED) {
-			assert model == null;
-			model = new SimpleModel(modelAddr);
-			model.setRevisionNumber(rev);
-		}
-		
-		if(changedModel != null) {
-			assert model != null;
-			applyChanges(model, changedModel, rev);
-		}
-		
-		return model;
-	}
-	
-	/**
-	 * IMPROVE some of this could be shared with {@link SynchronizesChangesImpl}
-	 * , but revision numbers are handled differently.
-	 */
-	public static void applyChanges(SimpleModel model, ChangedModel changedModel, long rev) {
-		
-		for(XID objectId : changedModel.getRemovedObjects()) {
-			assert model.hasObject(objectId);
-			model.removeObject(objectId);
-		}
-		
-		for(XReadableObject object : changedModel.getNewObjects()) {
-			assert !model.hasObject(object.getID());
-			XWritableObject newObject = model.createObject(object.getID());
-			for(XID fieldId : object) {
-				applyChanges(newObject, object.getField(fieldId), rev);
-			}
-			newObject.setRevisionNumber(rev);
-		}
-		
-		for(ChangedObject changedObject : changedModel.getChangedObjects()) {
-			
-			boolean objectChanged = false;
-			
-			XWritableObject object = model.getObject(changedObject.getID());
-			assert object != null;
-			
-			for(XID fieldId : changedObject.getRemovedFields()) {
-				assert object.hasField(fieldId);
-				object.removeField(fieldId);
-				objectChanged = true;
-			}
-			
-			for(XReadableField field : changedObject.getNewFields()) {
-				applyChanges(object, field, rev);
-				objectChanged = true;
-			}
-			
-			for(ChangedField changedField : changedObject.getChangedFields()) {
-				if(changedField.isChanged()) {
-					XWritableField field = object.getField(changedField.getID());
-					assert field != null;
-					boolean valueChanged = field.setValue(changedField.getValue());
-					assert valueChanged;
-					field.setRevisionNumber(rev);
-					objectChanged = true;
-				}
-			}
-			
-			if(objectChanged) {
-				object.setRevisionNumber(rev);
-			}
-			
-		}
-		
-		model.setRevisionNumber(rev);
-		
-	}
-	
-	public static void applyChanges(XWritableObject object, XReadableField field, long rev) {
-		assert !object.hasField(field.getID());
-		XWritableField newField = object.createField(field.getID());
-		newField.setValue(field.getValue());
-		newField.setRevisionNumber(rev);
 	}
 	
 }

@@ -2,9 +2,11 @@ package org.xydra.core.value;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.value.XAddressListValue;
@@ -28,13 +30,16 @@ import org.xydra.base.value.XStringSetValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XValue;
 import org.xydra.base.value.XValueFactory;
-import org.xydra.core.X;
 
 
 /**
  * Methods for creating and dealing with {@link XValue XValues}
  * 
  * @author dscharrer
+ * 
+ */
+/**
+ * @author xamde
  * 
  */
 public class XV {
@@ -54,18 +59,6 @@ public class XV {
 	
 	/**
 	 * Returns the content of the given {@link Collection} as an
-	 * {@link XIDListValue}
-	 * 
-	 * @param list The {@link Collection} which is to be converted into an
-	 *            {@link XIDListValue}
-	 * @return an {@link XIDListValue} with the content of the given list
-	 */
-	public static XIDListValue toIDListValue(Collection<XID> list) {
-		return vf.createIDListValue(list);
-	}
-	
-	/**
-	 * Returns the content of the given {@link Collection} as an
 	 * {@link XAddressListValue}
 	 * 
 	 * @param list The {@link Collection} which is to be converted into an
@@ -74,6 +67,68 @@ public class XV {
 	 */
 	public static XAddressListValue toAddressListValue(Collection<XAddress> list) {
 		return vf.createAddressListValue(list);
+	}
+	
+	/**
+	 * Returns the content of the given {@link Collection} as an
+	 * {@link XAddressSetValue}
+	 * 
+	 * @param list The {@link Collection} which is to be converted into an
+	 *            {@link XAddressSetValue}
+	 * @return an {@link XAddressSetValue} with the content of the given list
+	 */
+	public static XAddressSetValue toAddressSetValue(Collection<XAddress> list) {
+		return vf.createAddressSetValue(list);
+	}
+	
+	/**
+	 * Returns the content of the given {@link XAddress} array as an
+	 * {@link XAddressSetValue}
+	 * 
+	 * @param list The {@link XAddress} array which is to be converted into an
+	 *            {@link XAddressSetValue}
+	 * @return an {@link XAddressSetValue} with the content of the given list
+	 */
+	public static XAddressSetValue toAddressSetValue(XAddress[] list) {
+		return vf.createAddressSetValue(list);
+	}
+	
+	/**
+	 * Returns the content of the given {@link Collection} as an
+	 * {@link XAddressSortedSetValue}
+	 * 
+	 * @param list The {@link Collection} which is to be converted into an
+	 *            {@link XAddressSortedSetValue}
+	 * @return an {@link XAddressSortedSetValue} with the content of the given
+	 *         list, preserving sort oder.
+	 */
+	public static XAddressSortedSetValue toAddressSortedSetValue(Collection<XAddress> list) {
+		return vf.createAddressSortedSetValue(list);
+	}
+	
+	/**
+	 * Returns the content of the given {@link XAddress} array as an
+	 * {@link XAddressSortedSetValue}
+	 * 
+	 * @param list The {@link XAddress} array which is to be converted into an
+	 *            {@link XAddressSortedSetValue}
+	 * @return an {@link XAddressSortedSetValue} with the content of the given
+	 *         list, maintaining sort oder.
+	 */
+	public static XAddressSortedSetValue toAddressSortedSetValue(XAddress[] list) {
+		return vf.createAddressSortedSetValue(list);
+	}
+	
+	/**
+	 * Returns the content of the given {@link Collection} as an
+	 * {@link XBooleanListValue}
+	 * 
+	 * @param list The {@link Collection} which is to be converted into an
+	 *            {@link XBooleanListValue}
+	 * @return an {@link XBooleanListValue} with the content of the given list
+	 */
+	public static XBooleanListValue toBooleanListValue(Collection<Boolean> list) {
+		return vf.createBooleanListValue(list);
 	}
 	
 	/**
@@ -88,18 +143,6 @@ public class XV {
 		return vf.createByteListValue(list);
 	}
 	
-/**
-	 * Returns the content of the given {@link Collection} as an
-	 * {@link XBooleanListValue]
-	 * 
-	 * @param list The {@link Collection} which is to be converted into an
-	 *            {@link XBooleanListValue}
-	 * @return an {@link XBooleanListValue} with the content of the given list
-	 */
-	public static XBooleanListValue toBooleanListValue(Collection<Boolean> list) {
-		return vf.createBooleanListValue(list);
-	}
-	
 	/**
 	 * Returns the content of the given {@link Collection} as an
 	 * {@link XDoubleListValue}
@@ -110,6 +153,116 @@ public class XV {
 	 */
 	public static XDoubleListValue toDoubleListValue(Collection<Double> list) {
 		return vf.createDoubleListValue(list);
+	}
+	
+	/**
+	 * Returns the content of the given {@link Collection} as an
+	 * {@link XIDListValue}
+	 * 
+	 * @param list The {@link Collection} which is to be converted into an
+	 *            {@link XIDListValue}
+	 * @return an {@link XIDListValue} with the content of the given list
+	 */
+	public static XIDListValue toIDListValue(Collection<XID> list) {
+		return vf.createIDListValue(list);
+	}
+	
+	/**
+	 * @param value may be null or {@link XIDSetValue}
+	 * @return always a Set<XID>, never null
+	 * @throws IllegalArgumentException if value is not an {@link XIDSetValue}
+	 */
+	public static Set<XID> toIDSet(XValue value) {
+		if(value == null) {
+			return Collections.emptySet();
+		} else {
+			try {
+				XIDSetValue idSetValue = (XIDSetValue)value;
+				return idSetValue.toSet();
+			} catch(ClassCastException e) {
+				throw new IllegalArgumentException("Given value is not an XIDSetValue", e);
+			}
+		}
+	}
+	
+	/**
+	 * Returns the content of the given {@link Collection} as an
+	 * {@link XIDSetValue}
+	 * 
+	 * @param list The {@link Collection} which is to be converted into an
+	 *            {@link XIDSetValue}
+	 * @return an {@link XIDSetValue} with the content of the given list
+	 */
+	public static XIDSetValue toIDSetValue(Collection<XID> list) {
+		return vf.createIDSetValue(list);
+	}
+	
+	/**
+	 * Returns the content of the given {@link Collection} as an
+	 * {@link XIDSetValue}
+	 * 
+	 * @param list The {@link Collection} which is to be converted into an
+	 *            {@link XIDSetValue}
+	 * @return an {@link XIDSetValue} with the content of the given list
+	 */
+	public static XIDSetValue toIDSetValue(Set<XID> list) {
+		return vf.createIDSetValue(list);
+	}
+	
+	/**
+	 * Returns the content of the given {@link XID} array as an
+	 * {@link XIDSetValue}
+	 * 
+	 * @param list The {@link XID} array which is to be converted into an
+	 *            {@link XIDSetValue}
+	 * @return an {@link XIDSetValue} with the content of the given list
+	 */
+	public static XIDSetValue toIDSetValue(XID[] list) {
+		return vf.createIDSetValue(list);
+	}
+	
+	/**
+	 * Returns the content of the given {@link Collection} as an
+	 * {@link XIDSortedSetValue}
+	 * 
+	 * @param list The {@link Collection} which is to be converted into an
+	 *            {@link XIDSortedSetValue}
+	 * @return an {@link XIDSortedSetValue} with the content of the given list,
+	 *         preserving sort oder.
+	 */
+	public static XIDSortedSetValue toIDSortedSetValue(Collection<XID> list) {
+		return vf.createIDSortedSetValue(list);
+	}
+	
+	/**
+	 * Returns the content of the given {@link XID} array as an
+	 * {@link XIDSortedSetValue}
+	 * 
+	 * @param list The {@link XID} array which is to be converted into an
+	 *            {@link XIDSortedSetValue}
+	 * @return an {@link XIDSortedSetValue} with the content of the given list,
+	 *         maintaining sort oder.
+	 */
+	public static XIDSortedSetValue toIDSortedSetValue(XID[] list) {
+		return vf.createIDSortedSetValue(list);
+	}
+	
+	/**
+	 * @param value may be null or {@link XIntegerValue}
+	 * @return null as 0 and {@link XIntegerValue} as their contents().
+	 * @throws IllegalArgumentException if value is not an {@link XIntegerValue}
+	 */
+	public static int toInteger(XValue value) {
+		if(value == null) {
+			return 0;
+		} else {
+			try {
+				XIntegerValue integerValue = (XIntegerValue)value;
+				return integerValue.contents();
+			} catch(ClassCastException e) {
+				throw new IllegalArgumentException("Given value is not an XIntegerValue", e);
+			}
+		}
 	}
 	
 	/**
@@ -134,6 +287,24 @@ public class XV {
 	 */
 	public static XLongListValue toLongListValue(Collection<Long> list) {
 		return vf.createLongListValue(list);
+	}
+	
+	/**
+	 * @param value may be null or {@link XStringValue}
+	 * @return null as null and {@link XStringValue} as their contents().
+	 * @throws IllegalArgumentException if value is not an {@link XStringValue}
+	 */
+	public static String toString(XValue value) {
+		if(value == null) {
+			return null;
+		} else {
+			try {
+				XStringValue stringValue = (XStringValue)value;
+				return stringValue.contents();
+			} catch(ClassCastException e) {
+				throw new IllegalArgumentException("Given value is not an XStringValue", e);
+			}
+		}
 	}
 	
 	/**
@@ -162,56 +333,6 @@ public class XV {
 	
 	/**
 	 * Returns the content of the given {@link Collection} as an
-	 * {@link XIDSetValue}
-	 * 
-	 * @param list The {@link Collection} which is to be converted into an
-	 *            {@link XIDSetValue}
-	 * @return an {@link XIDSetValue} with the content of the given list
-	 */
-	public static XIDSetValue toIDSetValue(Collection<XID> list) {
-		return vf.createIDSetValue(list);
-	}
-	
-	/**
-	 * Returns the content of the given {@link Collection} as an
-	 * {@link XAddressSetValue}
-	 * 
-	 * @param list The {@link Collection} which is to be converted into an
-	 *            {@link XAddressSetValue}
-	 * @return an {@link XAddressSetValue} with the content of the given list
-	 */
-	public static XAddressSetValue toAddressSetValue(Collection<XAddress> list) {
-		return vf.createAddressSetValue(list);
-	}
-	
-	/**
-	 * Returns the content of the given {@link Collection} as an
-	 * {@link XIDSortedSetValue}
-	 * 
-	 * @param list The {@link Collection} which is to be converted into an
-	 *            {@link XIDSortedSetValue}
-	 * @return an {@link XIDSortedSetValue} with the content of the given list,
-	 *         preserving sort oder.
-	 */
-	public static XIDSortedSetValue toIDSortedSetValue(Collection<XID> list) {
-		return vf.createIDSortedSetValue(list);
-	}
-	
-	/**
-	 * Returns the content of the given {@link Collection} as an
-	 * {@link XAddressSortedSetValue}
-	 * 
-	 * @param list The {@link Collection} which is to be converted into an
-	 *            {@link XAddressSortedSetValue}
-	 * @return an {@link XAddressSortedSetValue} with the content of the given
-	 *         list, preserving sort oder.
-	 */
-	public static XAddressSortedSetValue toAddressSortedSetValue(Collection<XAddress> list) {
-		return vf.createAddressSortedSetValue(list);
-	}
-	
-	/**
-	 * Returns the content of the given {@link Collection} as an
 	 * {@link XStringSetValue}
 	 * 
 	 * @param list The {@link Collection} which is to be converted into an
@@ -223,39 +344,46 @@ public class XV {
 	}
 	
 	/**
-	 * Returns the content of the given {@link Collection} as an
-	 * {@link XIDSetValue}
+	 * Returns the content of the given {@link String} array as an
+	 * {@link XStringSetValue}
 	 * 
-	 * @param list The {@link Collection} which is to be converted into an
-	 *            {@link XIDSetValue}
-	 * @return an {@link XIDSetValue} with the content of the given list
+	 * @param list The {@link String} array which is to be converted into an
+	 *            {@link XStringSetValue}
+	 * @return an {@link XStringSetValue} with the content of the given list
 	 */
-	public static XIDSetValue toIDSetValue(Set<XID> list) {
-		return vf.createIDSetValue(list);
+	public static XStringSetValue toStringSetValue(String[] list) {
+		return vf.createStringSetValue(list);
 	}
 	
 	/**
-	 * Returns the content of the given {@link XID} array as an
-	 * {@link XIDListValue}
-	 * 
-	 * @param list The {@link XID} array which is to be converted into an
-	 *            {@link XIDListValue}
-	 * @return an {@link XIDListValue} with the content of the given list
+	 * @return the boolean wrapped in an {@link XBooleanValue}
 	 */
-	public static XIDListValue toValue(XID[] list) {
-		return vf.createIDListValue(list);
+	public static XBooleanValue toValue(boolean value) {
+		return vf.createBooleanValue(value);
 	}
 	
 	/**
-	 * Returns the content of the given {@link XAddress} array as an
-	 * {@link XAddressListValue}
+	 * Returns the content of the given boolean array as an
+	 * {@link XBooleanListValue}
 	 * 
-	 * @param list The {@link XAddress} array which is to be converted into an
-	 *            {@link XAddressListValue}
-	 * @return an {@link XAddressListValue} with the content of the given list
+	 * @param list The boolean array which is to be converted into an
+	 *            {@link XBooleanListValue}
+	 * @return an {@link XBooleanListValue} with the content of the given list
 	 */
-	public static XAddressListValue toValue(XAddress[] list) {
-		return vf.createAddressListValue(list);
+	public static XBooleanListValue toValue(boolean[] list) {
+		return vf.createBooleanListValue(list);
+	}
+	
+	/**
+	 * Returns the content of the given {@link Boolean} array as an
+	 * {@link XBooleanListValue}
+	 * 
+	 * @param list The {@link Boolean} array which is to be converted into an
+	 *            {@link XBooleanListValue}
+	 * @return an {@link XBooleanListValue} with the content of the given list
+	 */
+	public static XBooleanListValue toValue(Boolean[] list) {
+		return vf.createBooleanListValue(Arrays.asList(list));
 	}
 	
 	/**
@@ -281,28 +409,11 @@ public class XV {
 		return vf.createByteListValue(Arrays.asList(list));
 	}
 	
-/**
-	 * Returns the content of the given boolean array as an
-	 * {@link XBooleanListValue]
-	 * 
-	 * @param list The boolean array which is to be converted into an
-	 *            {@link XBooleanListValue}
-	 * @return an {@link XBooleanListValue} with the content of the given list
+	/**
+	 * @return the double wrapped in an {@link XDoubleValue}
 	 */
-	public static XBooleanListValue toValue(boolean[] list) {
-		return vf.createBooleanListValue(list);
-	}
-	
-/**
-	 * Returns the content of the given {@link Boolean} array as an
-	 * {@link XBooleanListValue]
-	 * 
-	 * @param list The {@link Boolean} array which is to be converted into an
-	 *            {@link XBooleanListValue}
-	 * @return an {@link XBooleanListValue} with the content of the given list
-	 */
-	public static XBooleanListValue toValue(Boolean[] list) {
-		return vf.createBooleanListValue(Arrays.asList(list));
+	public static XDoubleValue toValue(double value) {
+		return vf.createDoubleValue(value);
 	}
 	
 	/**
@@ -330,6 +441,13 @@ public class XV {
 	}
 	
 	/**
+	 * @return the int wrapped in an {@link XIntegerValue}
+	 */
+	public static XIntegerValue toValue(int value) {
+		return vf.createIntegerValue(value);
+	}
+	
+	/**
 	 * Returns the content of the given int array as an
 	 * {@link XIntegerListValue}
 	 * 
@@ -351,6 +469,13 @@ public class XV {
 	 */
 	public static XIntegerListValue toValue(Integer[] list) {
 		return vf.createIntegerListValue(Arrays.asList(list));
+	}
+	
+	/**
+	 * @return the long wrapped in an {@link XLongValue}
+	 */
+	public static XLongValue toValue(long value) {
+		return vf.createLongValue(value);
 	}
 	
 	/**
@@ -377,6 +502,13 @@ public class XV {
 	}
 	
 	/**
+	 * @return the {@link String} wrapped in an {@link XStringValue}
+	 */
+	public static XStringValue toValue(String value) {
+		return vf.createStringValue(value);
+	}
+	
+	/**
 	 * Returns the content of the given {@link String} array as an
 	 * {@link XStringListValue}
 	 * 
@@ -389,100 +521,26 @@ public class XV {
 	}
 	
 	/**
-	 * Returns the content of the given {@link String} array as an
-	 * {@link XStringSetValue}
+	 * Returns the content of the given {@link XAddress} array as an
+	 * {@link XAddressListValue}
 	 * 
-	 * @param list The {@link String} array which is to be converted into an
-	 *            {@link XStringSetValue}
-	 * @return an {@link XStringSetValue} with the content of the given list
+	 * @param list The {@link XAddress} array which is to be converted into an
+	 *            {@link XAddressListValue}
+	 * @return an {@link XAddressListValue} with the content of the given list
 	 */
-	public static XStringSetValue toStringSetValue(String[] list) {
-		return vf.createStringSetValue(list);
+	public static XAddressListValue toValue(XAddress[] list) {
+		return vf.createAddressListValue(list);
 	}
 	
 	/**
 	 * Returns the content of the given {@link XID} array as an
-	 * {@link XIDSetValue}
+	 * {@link XIDListValue}
 	 * 
 	 * @param list The {@link XID} array which is to be converted into an
-	 *            {@link XIDSetValue}
-	 * @return an {@link XIDSetValue} with the content of the given list
+	 *            {@link XIDListValue}
+	 * @return an {@link XIDListValue} with the content of the given list
 	 */
-	public static XIDSetValue toIDSetValue(XID[] list) {
-		return vf.createIDSetValue(list);
+	public static XIDListValue toValue(XID[] list) {
+		return vf.createIDListValue(list);
 	}
-	
-	/**
-	 * Returns the content of the given {@link XAddress} array as an
-	 * {@link XAddressSetValue}
-	 * 
-	 * @param list The {@link XAddress} array which is to be converted into an
-	 *            {@link XAddressSetValue}
-	 * @return an {@link XAddressSetValue} with the content of the given list
-	 */
-	public static XAddressSetValue toAddressSetValue(XAddress[] list) {
-		return vf.createAddressSetValue(list);
-	}
-	
-	/**
-	 * Returns the content of the given {@link XID} array as an
-	 * {@link XIDSortedSetValue}
-	 * 
-	 * @param list The {@link XID} array which is to be converted into an
-	 *            {@link XIDSortedSetValue}
-	 * @return an {@link XIDSortedSetValue} with the content of the given list,
-	 *         maintaining sort oder.
-	 */
-	public static XIDSortedSetValue toIDSortedSetValue(XID[] list) {
-		return vf.createIDSortedSetValue(list);
-	}
-	
-	/**
-	 * Returns the content of the given {@link XAddress} array as an
-	 * {@link XAddressSortedSetValue}
-	 * 
-	 * @param list The {@link XAddress} array which is to be converted into an
-	 *            {@link XAddressSortedSetValue}
-	 * @return an {@link XAddressSortedSetValue} with the content of the given
-	 *         list, maintaining sort oder.
-	 */
-	public static XAddressSortedSetValue toAddressSortedSetValue(XAddress[] list) {
-		return vf.createAddressSortedSetValue(list);
-	}
-	
-	/**
-	 * @return the boolean wrapped in an {@link XBooleanValue}
-	 */
-	public static XBooleanValue toValue(boolean value) {
-		return vf.createBooleanValue(value);
-	}
-	
-	/**
-	 * @return the double wrapped in an {@link XDoubleValue}
-	 */
-	public static XDoubleValue toValue(double value) {
-		return vf.createDoubleValue(value);
-	}
-	
-	/**
-	 * @return the int wrapped in an {@link XIntegerValue}
-	 */
-	public static XIntegerValue toValue(int value) {
-		return vf.createIntegerValue(value);
-	}
-	
-	/**
-	 * @return the long wrapped in an {@link XLongValue}
-	 */
-	public static XLongValue toValue(long value) {
-		return vf.createLongValue(value);
-	}
-	
-	/**
-	 * @return the {@link String} wrapped in an {@link XStringValue}
-	 */
-	public static XStringValue toValue(String value) {
-		return vf.createStringValue(value);
-	}
-	
 }

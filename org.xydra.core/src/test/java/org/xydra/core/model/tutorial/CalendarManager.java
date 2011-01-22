@@ -1,16 +1,12 @@
 package org.xydra.core.model.tutorial;
 
+import org.xydra.base.X;
 import org.xydra.base.XID;
+import org.xydra.base.XX;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XCommandFactory;
 import org.xydra.base.value.XIntegerValue;
 import org.xydra.base.value.XStringValue;
-import org.xydra.core.X;
-import org.xydra.core.XX;
-import org.xydra.core.access.XAccessManager;
-import org.xydra.core.access.XGroupDatabaseWithListeners;
-import org.xydra.core.access.impl.memory.MemoryAccessManager;
-import org.xydra.core.access.impl.memory.MemoryGroupDatabase;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XCommandFactory;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
@@ -21,6 +17,10 @@ import org.xydra.core.value.XV;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.access.XA;
+import org.xydra.store.access.XAuthorisationManager;
+import org.xydra.store.access.XGroupDatabaseWithListeners;
+import org.xydra.store.access.impl.memory.MemoryAuthorisationManager;
+import org.xydra.store.access.impl.memory.MemoryGroupDatabase;
 
 
 /**
@@ -37,7 +37,7 @@ import org.xydra.store.access.XA;
  */
 public class CalendarManager {
 	
-	private static final Logger log = LoggerFactory.getLogger(CalendarManager.class);
+	private static XID beginFieldId = XX.toId("begin");
 	
 	/*
 	 * Before we can begin we need to think about how we want to organize the
@@ -54,43 +54,63 @@ public class CalendarManager {
 	 * event-XObject has the same structure.
 	 */
 
-	private static XID nameFieldID = XX.toId("name");
-	private static XID placeFieldID = XX.toId("place");
-	private static XID dayFieldID = XX.toId("day");
-	private static XID monthFieldID = XX.toId("month");
-	private static XID yearFieldID = XX.toId("year");
-	private static XID beginFieldID = XX.toId("begin");
-	private static XID endFieldID = XX.toId("end");
-	private static XID descFieldID = XX.toId("description");
+	private static XID dayFieldId = XX.toId("day");
+	private static XID descFieldId = XX.toId("description");
+	private static XID endFieldId = XX.toId("end");
+	private static final Logger log = LoggerFactory.getLogger(CalendarManager.class);
+	/*
+	 * We'll need an ID for our program to distinguish between changes made by
+	 * the user and changes made by the program.
+	 */
+	private static XID managerID = XX.toId("calendarManager");
+	private static XID monthFieldId = XX.toId("month");
+	private static XID nameFieldId = XX.toId("name");
+	private static XID placeFieldId = XX.toId("place");
 	
 	/*
 	 * We'll also use a simple user account management. Were going to use a
 	 * special XModel for that, where every XObject represents a user and only
 	 * holds one XField for saving its password.
 	 */
-	private static XID pwdFieldID = XX.toId("pwd");
+	private static XID pwdFieldId = XX.toId("pwd");
 	
+	private static XID yearFieldId = XX.toId("year");
+	
+	public static void main(String[] args) {
+		CalendarManager cm = new CalendarManager();
+		cm.registerNewUser("john", "superman");
+		// FIXME it seems the event is not added properly
+		cm.addEvent("john", "superman", "Brush Teeth", "at home", 2010, 4, 14,
+		        "Brush teeth for 2 minutes", 2200, 2203);
+		String events = cm.getEvents("john", "superman", "john", 2000, 1, 1, 2020, 12, 31);
+		log.info(events);
+		
+		// alice registers
+		cm.registerNewUser("alice", "wonderwomen");
+		
+		// john shares with alice
+		cm.shareCalendarWith("john", "superman", "alice");
+		
+		// alice looks up johns events
+		String aliceEvents = cm.getEvents("alice", "wonderwomen", "john", 2000, 1, 1, 2020, 12, 31);
+		log.info(aliceEvents);
+	}
 	private XModel accountModel;
-	
-	/*
-	 * We'll use a repository to store all calendar-XModels. Every XModel will
-	 * have the same ID as the user that it belongs to.
-	 */
-	private XRepository calendarRepo;
-	private XID calendarRepoID;
 	
 	/*
 	 * Sometimes users may or may not want to share their calendar with other
 	 * users, so we'll need access right management too.
 	 */
-	private XAccessManager arm;
-	private XGroupDatabaseWithListeners groups;
-	
+	private XAuthorisationManager arm;
 	/*
-	 * We'll need an ID for our program to distinguish between changes made by
-	 * the user and changes made by the program.
+	 * We'll use a repository to store all calendar-XModels. Every XModel will
+	 * have the same ID as the user that it belongs to.
 	 */
-	private static XID managerID = XX.toId("calendarManager");
+	private XRepository calendarRepo;
+	
+	private XID calendarRepoID;
+	
+	private XGroupDatabaseWithListeners groups;
 	
 	public CalendarManager() {
 		this.accountModel = new MemoryModel(managerID, null, XX.createUniqueID());
@@ -99,46 +119,7 @@ public class CalendarManager {
 		this.calendarRepoID = this.calendarRepo.getID();
 		
 		this.groups = new MemoryGroupDatabase();
-		this.arm = new MemoryAccessManager(this.groups);
-	}
-	
-	/**
-	 * Registers a new user on this Calendar Manager and creates a calendar for
-	 * the user.
-	 * 
-	 * @param userName The username.
-	 * @param pwd The password that the user wants to use.
-	 * @return true, if registration was successful, false otherwise
-	 */
-	public boolean registerNewUser(String userName, String pwd) {
-		/*
-		 * check whether the user name is already taken or not by checking
-		 * whether there already exists an XObject in our accountModel with an
-		 * XID that equals the name of the user who wants to register.
-		 */
-		XID userID = XX.toId(userName);
-		
-		if(this.accountModel.getObject(userID) != null) {
-			return false;
-		}
-		
-		// create the entry for the user in the accountModel and save the
-		// password
-		XObject userObject = this.accountModel.createObject(userID);
-		XField pwdField = userObject.createField(pwdFieldID);
-		
-		XStringValue pwdValue = XV.toValue(pwd);
-		
-		pwdField.setValue(pwdValue);
-		
-		// create the calendar for the user
-		XModel usrCalendar = this.calendarRepo.createModel(userID);
-		
-		// set access rights for the user
-		this.arm.setAccess(userID, usrCalendar.getAddress(), XA.ACCESS_READ, true);
-		this.arm.setAccess(userID, usrCalendar.getAddress(), XA.ACCESS_WRITE, true);
-		
-		return true;
+		this.arm = new MemoryAuthorisationManager(this.groups);
 	}
 	
 	/**
@@ -187,44 +168,44 @@ public class CalendarManager {
 		        false);
 		
 		XCommand addName = cmdFactory.createAddFieldCommand(this.calendarRepoID, userID, eventID,
-		        nameFieldID, false);
+		        nameFieldId, false);
 		XCommand setName = cmdFactory.createAddValueCommand(this.calendarRepoID, userID, eventID,
-		        nameFieldID, 0, XV.toValue(name), false);
+		        nameFieldId, 0, XV.toValue(name), false);
 		
 		XCommand addPlace = cmdFactory.createAddFieldCommand(this.calendarRepoID, userID, eventID,
-		        placeFieldID, false);
+		        placeFieldId, false);
 		XCommand setPlace = cmdFactory.createAddValueCommand(this.calendarRepoID, userID, eventID,
-		        placeFieldID, 0, XV.toValue(place), false);
+		        placeFieldId, 0, XV.toValue(place), false);
 		
 		XCommand addYear = cmdFactory.createAddFieldCommand(this.calendarRepoID, userID, eventID,
-		        yearFieldID, false);
+		        yearFieldId, false);
 		XCommand setYear = cmdFactory.createAddValueCommand(this.calendarRepoID, userID, eventID,
-		        yearFieldID, 0, XV.toValue(year), false);
+		        yearFieldId, 0, XV.toValue(year), false);
 		
 		XCommand addMonth = cmdFactory.createAddFieldCommand(this.calendarRepoID, userID, eventID,
-		        monthFieldID, false);
+		        monthFieldId, false);
 		XCommand setMonth = cmdFactory.createAddValueCommand(this.calendarRepoID, userID, eventID,
-		        monthFieldID, 0, XV.toValue(month), false);
+		        monthFieldId, 0, XV.toValue(month), false);
 		
 		XCommand addDay = cmdFactory.createAddFieldCommand(this.calendarRepoID, userID, eventID,
-		        dayFieldID, false);
+		        dayFieldId, false);
 		XCommand setDay = cmdFactory.createAddValueCommand(this.calendarRepoID, userID, eventID,
-		        dayFieldID, 0, XV.toValue(day), false);
+		        dayFieldId, 0, XV.toValue(day), false);
 		
 		XCommand addDescription = cmdFactory.createAddFieldCommand(this.calendarRepoID, userID,
-		        eventID, descFieldID, false);
+		        eventID, descFieldId, false);
 		XCommand setDescription = cmdFactory.createAddValueCommand(this.calendarRepoID, userID,
-		        eventID, descFieldID, 0, XV.toValue(description), false);
+		        eventID, descFieldId, 0, XV.toValue(description), false);
 		
 		XCommand addBegin = cmdFactory.createAddFieldCommand(this.calendarRepoID, userID, eventID,
-		        beginFieldID, false);
+		        beginFieldId, false);
 		XCommand setBegin = cmdFactory.createAddValueCommand(this.calendarRepoID, userID, eventID,
-		        beginFieldID, 0, XV.toValue(begin), false);
+		        beginFieldId, 0, XV.toValue(begin), false);
 		
 		XCommand addEnd = cmdFactory.createAddFieldCommand(this.calendarRepoID, userID, eventID,
-		        endFieldID, false);
+		        endFieldId, false);
 		XCommand setEnd = cmdFactory.createAddValueCommand(this.calendarRepoID, userID, eventID,
-		        endFieldID, 0, XV.toValue(end), false);
+		        endFieldId, 0, XV.toValue(end), false);
 		
 		// put the commands into a transaction
 		XTransactionBuilder transBuilder = new XTransactionBuilder(userCalendar.getAddress());
@@ -250,6 +231,31 @@ public class CalendarManager {
 		long result = userCalendar.executeCommand(transBuilder.build());
 		
 		return result != XCommand.FAILED;
+	}
+	
+	/**
+	 * A method for checking if the given user name ist actualy taken and if it
+	 * is, to check if the given password is correct
+	 * 
+	 * @param userName The name of the user
+	 * @param pwd The password of the user
+	 * @return true, if the user exists and the given password is correct
+	 */
+	private boolean checkUserNameAndPassword(String userName, String pwd) {
+		XID userID = XX.toId(userName);
+		
+		// check if the user exists
+		XObject usrAccount = this.accountModel.getObject(userID);
+		if(usrAccount == null) {
+			return false;
+		}
+		
+		// check if the given password is right
+		if(!pwd.equals(usrAccount.getField(pwdFieldId).getValue().toString())) {
+			return false;
+		}
+		
+		return true;
 	}
 	
 	/**
@@ -305,24 +311,24 @@ public class CalendarManager {
 		for(XID eventID : userCalendar) {
 			XObject event = userCalendar.getObject(eventID);
 			
-			int eventYear = ((XIntegerValue)event.getField(yearFieldID).getValue()).contents();
-			int eventMonth = ((XIntegerValue)event.getField(yearFieldID).getValue()).contents();
-			int eventDay = ((XIntegerValue)event.getField(yearFieldID).getValue()).contents();
+			int eventYear = ((XIntegerValue)event.getField(yearFieldId).getValue()).contents();
+			int eventMonth = ((XIntegerValue)event.getField(yearFieldId).getValue()).contents();
+			int eventDay = ((XIntegerValue)event.getField(yearFieldId).getValue()).contents();
 			
 			if(eventYear >= beginYear && eventYear <= endYear) {
 				if(eventMonth >= beginMonth && eventMonth <= endMonth) {
 					if(eventDay >= beginDay && eventDay <= endDay) {
 						// the date of the event is within the given bounds!
-						String name = ((XStringValue)event.getField(nameFieldID).getValue())
+						String name = ((XStringValue)event.getField(nameFieldId).getValue())
 						        .contents();
-						String place = ((XStringValue)event.getField(placeFieldID).getValue())
+						String place = ((XStringValue)event.getField(placeFieldId).getValue())
 						        .contents();
-						String description = ((XStringValue)event.getField(descFieldID).getValue())
+						String description = ((XStringValue)event.getField(descFieldId).getValue())
 						        .contents();
 						
-						int begin = ((XIntegerValue)event.getField(beginFieldID).getValue())
+						int begin = ((XIntegerValue)event.getField(beginFieldId).getValue())
 						        .contents();
-						int end = ((XIntegerValue)event.getField(endFieldID).getValue()).contents();
+						int end = ((XIntegerValue)event.getField(endFieldId).getValue()).contents();
 						
 						result += "Event: " + name + '\n' + "At: " + place + ", from " + begin
 						        + " to " + end + '\n' + "Description: " + description + '\n' + '\n';
@@ -333,6 +339,47 @@ public class CalendarManager {
 		}
 		
 		return result;
+	}
+	
+	/**
+	 * Registers a new user on this Calendar Manager and creates a calendar for
+	 * the user.
+	 * 
+	 * @param userName The username.
+	 * @param pwd The password that the user wants to use.
+	 * @return true, if registration was successful, false otherwise
+	 */
+	public boolean registerNewUser(String userName, String pwd) {
+		/*
+		 * check whether the user name is already taken or not by checking
+		 * whether there already exists an XObject in our accountModel with an
+		 * XID that equals the name of the user who wants to register.
+		 */
+		XID userID = XX.toId(userName);
+		
+		if(this.accountModel.getObject(userID) != null) {
+			return false;
+		}
+		
+		// create the entry for the user in the accountModel and save the
+		// password
+		XObject userObject = this.accountModel.createObject(userID);
+		XField pwdField = userObject.createField(pwdFieldId);
+		
+		XStringValue pwdValue = XV.toValue(pwd);
+		
+		pwdField.setValue(pwdValue);
+		
+		// create the calendar for the user
+		XModel usrCalendar = this.calendarRepo.createModel(userID);
+		
+		// set access rights for the user
+		this.arm.getAuthorisationDatabase().setAccess(userID, usrCalendar.getAddress(),
+		        XA.ACCESS_READ, true);
+		this.arm.getAuthorisationDatabase().setAccess(userID, usrCalendar.getAddress(),
+		        XA.ACCESS_WRITE, true);
+		
+		return true;
 	}
 	
 	/**
@@ -361,7 +408,8 @@ public class CalendarManager {
 		// grant read access
 		XModel user1Calendar = this.calendarRepo.getModel(user1ID);
 		
-		this.arm.setAccess(user2ID, user1Calendar.getAddress(), XA.ACCESS_READ, true);
+		this.arm.getAuthorisationDatabase().setAccess(user2ID, user1Calendar.getAddress(),
+		        XA.ACCESS_READ, true);
 		
 		return true;
 	}
@@ -389,53 +437,9 @@ public class CalendarManager {
 		
 		XModel user1Calendar = this.calendarRepo.getModel(user1ID);
 		
-		this.arm.setAccess(user2ID, user1Calendar.getAddress(), XA.ACCESS_READ, false);
+		this.arm.getAuthorisationDatabase().setAccess(user2ID, user1Calendar.getAddress(),
+		        XA.ACCESS_READ, false);
 		
 		return true;
-	}
-	
-	/**
-	 * A method for checking if the given user name ist actualy taken and if it
-	 * is, to check if the given password is correct
-	 * 
-	 * @param userName The name of the user
-	 * @param pwd The password of the user
-	 * @return true, if the user exists and the given password is correct
-	 */
-	private boolean checkUserNameAndPassword(String userName, String pwd) {
-		XID userID = XX.toId(userName);
-		
-		// check if the user exists
-		XObject usrAccount = this.accountModel.getObject(userID);
-		if(usrAccount == null) {
-			return false;
-		}
-		
-		// check if the given password is right
-		if(!pwd.equals(usrAccount.getField(pwdFieldID).getValue().toString())) {
-			return false;
-		}
-		
-		return true;
-	}
-	
-	public static void main(String[] args) {
-		CalendarManager cm = new CalendarManager();
-		cm.registerNewUser("john", "superman");
-		// FIXME it seems the event is not added properly
-		cm.addEvent("john", "superman", "Brush Teeth", "at home", 2010, 4, 14,
-		        "Brush teeth for 2 minutes", 2200, 2203);
-		String events = cm.getEvents("john", "superman", "john", 2000, 1, 1, 2020, 12, 31);
-		log.info(events);
-		
-		// alice registers
-		cm.registerNewUser("alice", "wonderwomen");
-		
-		// john shares with alice
-		cm.shareCalendarWith("john", "superman", "alice");
-		
-		// alice looks up johns events
-		String aliceEvents = cm.getEvents("alice", "wonderwomen", "john", 2000, 1, 1, 2020, 12, 31);
-		log.info(aliceEvents);
 	}
 }

@@ -4,15 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.xydra.base.XAddress;
-import org.xydra.core.change.XEvent;
+import org.xydra.base.change.XEvent;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XStateTransaction;
 
 
 public class MemoryChangeLogState implements XChangeLogState {
 	
+	private static final long serialVersionUID = 4745987477215964499L;
+	
 	/** the ID of the model this change log refers to **/
 	private XAddress baseAddr;
+	
+	/** the event list **/
+	private List<XEvent> events = new ArrayList<XEvent>();
 	
 	/**
 	 * the revision number the model had while this changelog was created the
@@ -20,11 +25,6 @@ public class MemoryChangeLogState implements XChangeLogState {
 	 * revision number which equals this.revisionNumber + this.events.length
 	 **/
 	private long revisionNumber = 0L;
-	
-	/** the event list **/
-	private List<XEvent> events = new ArrayList<XEvent>();
-	
-	private static final long serialVersionUID = 4745987477215964499L;
 	
 	/**
 	 * Creates a new MemoryChangeLogState.
@@ -38,28 +38,6 @@ public class MemoryChangeLogState implements XChangeLogState {
 	 */
 	public MemoryChangeLogState(XAddress baseAddr) {
 		this.baseAddr = baseAddr;
-	}
-	
-	public void save(XStateTransaction transaction) {
-		// memory change log cannot be saved, ignore
-	}
-	
-	public void delete(XStateTransaction transaction) {
-		// automatically deleted by garbage collector
-	}
-	
-	public long getCurrentRevisionNumber() {
-		return this.revisionNumber + this.events.size() - 1;
-	}
-	
-	public XEvent getEvent(long revisionNumber) {
-		XEvent event = this.events.get((int)(revisionNumber - this.revisionNumber));
-		assert event == null || event.getRevisionNumber() == revisionNumber;
-		return event;
-	}
-	
-	public long getFirstRevisionNumber() {
-		return this.revisionNumber;
 	}
 	
 	public void appendEvent(XEvent event, XStateTransaction transaction) {
@@ -76,8 +54,44 @@ public class MemoryChangeLogState implements XChangeLogState {
 		}
 	}
 	
+	public void delete(XStateTransaction transaction) {
+		// automatically deleted by garbage collector
+	}
+	
 	public XAddress getBaseAddress() {
 		return this.baseAddr;
+	}
+	
+	public long getCurrentRevisionNumber() {
+		return this.revisionNumber + this.events.size() - 1;
+	}
+	
+	public XEvent getEvent(long revisionNumber) {
+		XEvent event = this.events.get((int)(revisionNumber - this.revisionNumber));
+		assert event == null || event.getRevisionNumber() == revisionNumber;
+		return event;
+	}
+	
+	public long getFirstRevisionNumber() {
+		return this.revisionNumber;
+	}
+	
+	public void save(XStateTransaction transaction) {
+		// memory change log cannot be saved, ignore
+	}
+	
+	public void setFirstRevisionNumber(long rev) {
+		if(!this.events.isEmpty()) {
+			throw new IllegalStateException(
+			        "cannot set start revision number of non-empty change log");
+		}
+		this.revisionNumber = rev;
+	}
+	
+	@Override
+	public String toString() {
+		return "change log for " + getBaseAddress() + ": baseRev=" + this.revisionNumber
+		        + " currentRev=" + getCurrentRevisionNumber() + " events=" + this.events.toString();
 	}
 	
 	public boolean truncateToRevision(long revisionNumber, XStateTransaction transaction) {
@@ -96,19 +110,5 @@ public class MemoryChangeLogState implements XChangeLogState {
 		assert revisionNumber == getCurrentRevisionNumber();
 		
 		return true;
-	}
-	
-	public void setFirstRevisionNumber(long rev) {
-		if(!this.events.isEmpty()) {
-			throw new IllegalStateException(
-			        "cannot set start revision number of non-empty change log");
-		}
-		this.revisionNumber = rev;
-	}
-	
-	@Override
-	public String toString() {
-		return "change log for " + getBaseAddress() + ": baseRev=" + this.revisionNumber
-		        + " currentRev=" + getCurrentRevisionNumber() + " events=" + this.events.toString();
 	}
 }

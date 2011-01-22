@@ -9,17 +9,6 @@ package org.xydra.base.value;
 public interface XByteListValue extends XListValue<Byte> {
 	
 	/**
-	 * Returns the Byte values as an array in the order they were added to the
-	 * list.
-	 * 
-	 * Note: Changes to the returned array will not affect the XByteListValue.
-	 * 
-	 * @return an array containing the list of Byte values in the order they
-	 *         were added to the list
-	 */
-	byte[] contents();
-	
-	/**
 	 * Creates a new {@link XByteListValue} containing all entries from this
 	 * value as well as the specified entry. The order of the already existing
 	 * entries is preserved and the new entry is added to the end of the list.
@@ -45,6 +34,17 @@ public interface XByteListValue extends XListValue<Byte> {
 	 *             size()
 	 */
 	XByteListValue add(int index, Byte entry);
+	
+	/**
+	 * Returns the Byte values as an array in the order they were added to the
+	 * list.
+	 * 
+	 * Note: Changes to the returned array will not affect the XByteListValue.
+	 * 
+	 * @return an array containing the list of Byte values in the order they
+	 *         were added to the list
+	 */
+	byte[] contents();
 	
 	/**
 	 * Creates a new {@link XByteListValue} containing all entries from this

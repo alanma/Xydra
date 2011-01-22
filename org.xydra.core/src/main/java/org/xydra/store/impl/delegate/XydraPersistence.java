@@ -5,21 +5,21 @@ import java.util.Set;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
-import org.xydra.base.XHalfWritableModel;
-import org.xydra.base.XHalfWritableObject;
-import org.xydra.core.change.XAtomicEvent;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XEvent;
-import org.xydra.core.change.XModelCommand;
-import org.xydra.core.change.XObjectCommand;
-import org.xydra.core.change.XRepositoryCommand;
-import org.xydra.core.change.XTransaction;
-import org.xydra.core.change.XTransactionEvent;
+import org.xydra.base.change.XAtomicEvent;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XEvent;
+import org.xydra.base.change.XModelCommand;
+import org.xydra.base.change.XObjectCommand;
+import org.xydra.base.change.XRepositoryCommand;
+import org.xydra.base.change.XTransaction;
+import org.xydra.base.change.XTransactionEvent;
+import org.xydra.base.rmof.XWritableModel;
+import org.xydra.base.rmof.XWritableObject;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.store.GetEventsRequest;
-import org.xydra.store.MAXDone;
+
 import org.xydra.store.XydraStore;
 
 
@@ -36,8 +36,15 @@ import org.xydra.store.XydraStore;
  * 
  * @author voelkel
  */
-@MAXDone
+
 public interface XydraPersistence {
+	
+	/**
+	 * Delete <em>all</em> data. This method should not be exposed over REST or
+	 * other network protocols. This method is intended to be used in unit
+	 * tests.
+	 */
+	void clear();
 	
 	/**
 	 * Execute a command.
@@ -47,7 +54,7 @@ public interface XydraPersistence {
 	 * 
 	 * For successful commands that changed something, the return value is
 	 * always a revision number that can be used to retrieve the corresponding
-	 * event using {@link #getEvents()}
+	 * event using {@link #getEvents(XAddress, long, long)}
 	 * 
 	 * Like any other {@link XCommand}, {@link XTransaction}s only "take up" a
 	 * single revision, which is the one passed to the callback. For
@@ -99,8 +106,8 @@ public interface XydraPersistence {
 	 *            endRevision.
 	 * @param endRevision the end revision number (inclusive) of the interval
 	 *            from which all {@link XEvent XEvents} are to be returned - can
-	 *            be greater than {@link #getCurrentRevisionNumber()} to get all
-	 *            {@link XEvent XEvents} since beginRevision.
+	 *            be greater than current revision number of the addressed
+	 *            entity to get all {@link XEvent XEvents} since beginRevision.
 	 * @return all events that occurred in the entity addressed with 'address'
 	 *         between beginRevision and endRevision.
 	 */
@@ -123,14 +130,14 @@ public interface XydraPersistence {
 	 * @return the current snapshot of the addressed {@link XModel} or null if
 	 *         none found.
 	 */
-	XHalfWritableModel getModelSnapshot(XAddress address);
+	XWritableModel getModelSnapshot(XAddress address);
 	
 	/**
 	 * @param address of an {@link XObject}
 	 * @return the current snapshot of the {@link XObject} addressed with
 	 *         'address'.
 	 */
-	XHalfWritableObject getObjectSnapshot(XAddress address);
+	XWritableObject getObjectSnapshot(XAddress address);
 	
 	/**
 	 * @return the XID of this {@link XydraPersistence}. This helps a client to
@@ -138,12 +145,5 @@ public interface XydraPersistence {
 	 *         implementations, e.g. when synchronising between several ov them.
 	 */
 	XID getRepositoryId();
-	
-	/**
-	 * Delete <em>all</em> data. This method should not be exposed over REST or
-	 * other network protocols. This method is intended to be used in unit
-	 * tests.
-	 */
-	void clear();
 	
 }

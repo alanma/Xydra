@@ -12,7 +12,7 @@ import org.xydra.core.model.XObject;
 
 
 /**
- * Index any number of objects by a given fieldID. The value of the field is
+ * Index any number of objects by a given fieldId. The value of the field is
  * converted to an internal XID key which is used as the field-ID in another
  * {@link XObject}.
  * 
@@ -23,15 +23,54 @@ import org.xydra.core.model.XObject;
 @RunsInJava
 public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObjectIndex {
 	
-	public UniqueObjectIndex(XID fieldID, XObject indexObject) {
-		super(fieldID, indexObject);
+	public UniqueObjectIndex(XID fieldId, XObject indexObject) {
+		super(fieldId, indexObject);
+	}
+	
+	public void clear() {
+		for(XID fieldId : this.indexObject) {
+			this.indexObject.removeField(fieldId);
+		}
+	}
+	
+	public boolean contains(XValue indexKey) {
+		XID key = valueToXID(indexKey);
+		XField indexField = this.indexObject.getField(key);
+		if(indexField == null) {
+			return false;
+		}
+		return true;
+	}
+	
+	public XID deindex(XObject xo) {
+		XField field = xo.getField(this.fieldId);
+		if(field == null) {
+			return null;
+		}
+		XValue keyValue = field.getValue();
+		return deindex(keyValue);
+	}
+	
+	public XID deindex(XValue key) {
+		XID xid = valueToXID(key);
+		XField indexField = this.indexObject.getField(xid);
+		if(indexField == null) {
+			// nothing to do to deindex
+			return null;
+		}
+		XID indexValue = (XID)indexField.getValue();
+		assert indexValue != null : "IndexField " + indexField.getID()
+		        + " has a null value. Key = " + key;
+		XID previous = indexValue;
+		this.indexObject.removeField(xid);
+		return previous;
 	}
 	
 	public XID index(XObject xo) {
 		if(xo == null) {
 			throw new IllegalArgumentException("Object may not be null");
 		}
-		XField field = xo.getField(this.fieldID);
+		XField field = xo.getField(this.fieldId);
 		XValue keyValue = field.getValue();
 		return index(keyValue, xo.getID());
 	}
@@ -56,28 +95,10 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 		return previous;
 	}
 	
-	public XID deindex(XObject xo) {
-		XField field = xo.getField(this.fieldID);
-		if(field == null) {
-			return null;
-		}
-		XValue keyValue = field.getValue();
-		return deindex(keyValue);
-	}
-	
-	public XID deindex(XValue key) {
-		XID xid = valueToXID(key);
-		XField indexField = this.indexObject.getField(xid);
-		if(indexField == null) {
-			// nothing to do to deindex
-			return null;
-		}
-		XID indexValue = (XID)indexField.getValue();
-		assert indexValue != null : "IndexField " + indexField.getID()
-		        + " has a null value. Key = " + key;
-		XID previous = indexValue;
-		this.indexObject.removeField(xid);
-		return previous;
+	public XObject lookup(XModel model, XValue indexKey) {
+		XID id = lookupID(indexKey);
+		XObject object = model.getObject(id);
+		return object;
 	}
 	
 	public XID lookupID(XValue indexKey) {
@@ -89,27 +110,6 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 		XID indexValue = (XID)indexField.getValue();
 		assert indexValue != null;
 		return indexValue;
-	}
-	
-	public XObject lookup(XModel model, XValue indexKey) {
-		XID id = lookupID(indexKey);
-		XObject object = model.getObject(id);
-		return object;
-	}
-	
-	public boolean contains(XValue indexKey) {
-		XID key = valueToXID(indexKey);
-		XField indexField = this.indexObject.getField(key);
-		if(indexField == null) {
-			return false;
-		}
-		return true;
-	}
-	
-	public void clear() {
-		for(XID fieldID : this.indexObject) {
-			this.indexObject.removeField(fieldID);
-		}
 	}
 	
 }

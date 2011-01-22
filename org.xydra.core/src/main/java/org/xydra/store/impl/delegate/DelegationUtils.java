@@ -6,6 +6,12 @@ import org.xydra.store.Callback;
 
 class DelegationUtils {
 	
+	public static void assertNonNull(Object o) {
+		if(o == null) {
+			throw new IllegalArgumentException("null parameter not permitted");
+		}
+	}
+	
 	/**
 	 * @param actorId
 	 * @param passwordHash
@@ -28,12 +34,6 @@ class DelegationUtils {
 		if(callback == null) {
 			throw new IllegalArgumentException(
 			        "callback for side-effect free methods must not be null");
-		}
-	}
-	
-	public static void assertNonNull(Object o) {
-		if(o == null) {
-			throw new IllegalArgumentException("null parameter not permitted");
 		}
 	}
 	

@@ -3,17 +3,17 @@ package org.xydra.store.impl.delegate;
 import java.util.Set;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableModel;
-import org.xydra.base.XReadableObject;
 import org.xydra.base.XID;
-import org.xydra.core.change.XAtomicEvent;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XEvent;
-import org.xydra.core.change.XModelCommand;
-import org.xydra.core.change.XObjectCommand;
-import org.xydra.core.change.XRepositoryCommand;
-import org.xydra.core.change.XTransaction;
-import org.xydra.core.change.XTransactionEvent;
+import org.xydra.base.change.XAtomicEvent;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XEvent;
+import org.xydra.base.change.XModelCommand;
+import org.xydra.base.change.XObjectCommand;
+import org.xydra.base.change.XRepositoryCommand;
+import org.xydra.base.change.XTransaction;
+import org.xydra.base.change.XTransactionEvent;
+import org.xydra.base.rmof.XReadableModel;
+import org.xydra.base.rmof.XReadableObject;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
@@ -24,7 +24,7 @@ import org.xydra.store.Callback;
 import org.xydra.store.ConnectionException;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.InternalStoreException;
-import org.xydra.store.MAXDone;
+
 import org.xydra.store.QuotaException;
 import org.xydra.store.RequestException;
 import org.xydra.store.TimeoutException;
@@ -101,7 +101,7 @@ import org.xydra.store.XydraStoreAdmin;
  * @author voelkel
  * @author dscharrer
  */
-@MAXDone
+
 public interface XydraSingleOperationStore {
 	
 	/**
@@ -133,6 +133,203 @@ public interface XydraSingleOperationStore {
 	 */
 	void checkLogin(XID actorId, String passwordHash, Callback<Boolean> callback)
 	        throws IllegalArgumentException;
+	
+	/**
+	 * Change state.
+	 * 
+	 * Check permissions, command pre-conditions, execute the command and log
+	 * the resulting events.
+	 * 
+	 * Possible exceptions to be received via callback.onError (see class
+	 * comment in {@link XydraSingleOperationStore} and comments in each
+	 * exception):
+	 * <ul>
+	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
+	 * operations per time use the wrong actorId/passwordHash combination.</li>
+	 * <li>{@link AuthorisationException}</li>
+	 * <li>{@link ConnectionException}</li>
+	 * <li>{@link TimeoutException}</li>
+	 * <li>{@link InternalStoreException}</li>
+	 * </ul>
+	 * Possible exceptions in the {@link BatchedResult}:
+	 * <ul>
+	 * <li>{@link AccessException} for a command that could not be executed
+	 * because the given actorId has not the necessary rights to do this (read
+	 * and write)</li>
+	 * <li>{@link RequestException} for a command that is in itself
+	 * inconsistent, i.e. a {@link XTransaction} that contains no commands.</li>
+	 * </ul>
+	 * 
+	 * @param actorId The actor who is performing this operation.
+	 * @param passwordHash The MD5 hash of the secret actor password prefixed
+	 *            with "Xydra" to avoid transmitting the same string over the
+	 *            network if the user uses the same password for multiple
+	 *            services. If null, all access is granted.
+	 * @param command A command to be executedIt might fail or succeed. If you
+	 *            want transaction semantics, you need to wrap commands in a
+	 *            {@link XTransaction}.
+	 * @param callback Asynchronous callback to signal success or failure. On
+	 *            success, return the result of executing the command. A
+	 *            non-negative number indicates the resulting revision number of
+	 *            the changed entity.
+	 * 
+	 *            For successful commands that changed something, the return
+	 *            value is always a revision number that can be used to retrieve
+	 *            the corresponding event using
+	 *            {@link #getEvents(XID, String, GetEventsRequest, Callback)}
+	 * 
+	 *            Like any other {@link XCommand}, {@link XTransaction}s only
+	 *            "take up" a single revision, which is the one passed to the
+	 *            callback. For {@link XTransaction}s as well as
+	 *            {@link XRepositoryCommand}s, {@link XModelCommand}s and
+	 *            {@link XObjectCommand}s of type remove, the event saved in the
+	 *            change log may be either a {@link XTransactionEvent} or an
+	 *            {@link XAtomicEvent}, depending on whether there are actually
+	 *            multiple changes.
+	 * 
+	 *            Negative numbers indicate a special result:
+	 *            {@link XCommand#FAILED} signals a failure,
+	 *            {@link XCommand#NOCHANGE} signals that the command did not
+	 *            change anything.
+	 * 
+	 *            Commands may still "take up" a revision number, even if they
+	 *            failed or didn't change anything, causing the next command to
+	 *            skip a revision number. This means that there can be revision
+	 *            numbers without any associated events. The revision of the
+	 *            model however is only updated if anything actually changed.
+	 * 
+	 *            Even after a the callback's {@link Callback#onSuccess(Object)}
+	 *            method has been called, the change may not actually be
+	 *            returned yet by
+	 *            {@link #getModelSnapshot(XID, String, XAddress, Callback)},
+	 *            {@link #getModelIds(XID, String, Callback)},
+	 *            {@link #getModelRevision(XID, String, XAddress, Callback)} and
+	 *            {@link #getObjectSnapshot(XID, String, XAddress, Callback)}
+	 *            yet. The change will however eventually be returned by those
+	 *            methods, and will stay persistent once it does. Also, no
+	 *            changes with greater revision numbers will become visible
+	 *            before this one, but their callbacks'
+	 *            {@link Callback#onSuccess(Object)} method might be called
+	 *            before this one.
+	 * @throws IllegalArgumentException if one of the given parameters is null.
+	 *             Only the callback may be null.
+	 */
+	void executeCommand(XID actorId, String passwordHash, XCommand command, Callback<Long> callback)
+	        throws IllegalArgumentException;
+	
+	/**
+	 * EVENTS.
+	 * 
+	 * Fetch all events that happened for a given address in a given range of
+	 * revisions. Batch operation for multiple such requests.
+	 * 
+	 * Possible exceptions to be received via callback.onError (see class
+	 * comment in {@link XydraSingleOperationStore} and comments in each
+	 * exception):
+	 * <ul>
+	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
+	 * operations per time use the wrong actorId/passwordHash combination.</li>
+	 * <li>{@link AuthorisationException}</li>
+	 * <li>{@link ConnectionException}</li>
+	 * <li>{@link TimeoutException}</li>
+	 * <li>{@link InternalStoreException}</li>
+	 * </ul>
+	 * Possible exceptions in each {@link BatchedResult}:
+	 * <ul>
+	 * <li>{@link AccessException} if the given actorId may not read the entity
+	 * with the {@link XAddress} in the {@link GetEventsRequest}.</li>
+	 * <li>{@link RequestException} (a) if beginRevision is greater than
+	 * endRevision; (b) if beginRevision or endRevision are negative</li>
+	 * </ul>
+	 * 
+	 * @param actorId The actor who is performing this operation.
+	 * @param passwordHash The MD5 hash of the secret actor password prefixed
+	 *            with "Xydra" to avoid transmitting the same string over the
+	 *            network if the user uses the same password for multiple
+	 *            services. If null, all access is granted.
+	 * @param getEventsRequest a request for events. See
+	 *            {@link GetEventsRequest}.
+	 * @param callback Asynchronous callback to signal success or failure. On
+	 *            success, this callback returns an array of XEvents, in the
+	 *            order in which they happened.
+	 * 
+	 *            The array can be null to indicate that the requested entity
+	 *            does not exist or the user is not allowed to read it.
+	 * 
+	 * @throws IllegalArgumentException if any of the given parameters is null.
+	 */
+	void getEvents(XID actorId, String passwordHash, GetEventsRequest getEventsRequest,
+	        Callback<XEvent[]> callback) throws IllegalArgumentException;
+	
+	/**
+	 * Read current state.
+	 * 
+	 * Possible exceptions to be received via callback.onError (see class
+	 * comment in {@link XydraSingleOperationStore} and comments in each
+	 * exception):
+	 * <ul>
+	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
+	 * operations per time use the wrong actorId/passwordHash combination.</li>
+	 * <li>{@link AuthorisationException}</li>
+	 * <li>{@link ConnectionException}</li>
+	 * <li>{@link TimeoutException}</li>
+	 * <li>{@link InternalStoreException}</li>
+	 * </ul>
+	 * 
+	 * @param actorId The actor who is performing this operation.
+	 * @param passwordHash The MD5 hash of the secret actor password prefixed
+	 *            with "Xydra" to avoid transmitting the same string over the
+	 *            network if the user uses the same password for multiple
+	 *            services. If null, all access is granted.
+	 * @param callback Asynchronous callback to signal success or failure. On
+	 *            success a Set of all {@link XID} of all {@link XModel XModels}
+	 *            for which the given actorId has read-access in the repository
+	 *            is returned.
+	 * @throws IllegalArgumentException if one of the given parameters is null.
+	 *             Must not be null.
+	 */
+	void getModelIds(XID actorId, String passwordHash, Callback<Set<XID>> callback)
+	        throws IllegalArgumentException;
+	
+	/**
+	 * Read current state.
+	 * 
+	 * Possible exceptions to be received via callback.onError (see class
+	 * comment in {@link XydraSingleOperationStore} and comments in each
+	 * exception):
+	 * <ul>
+	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
+	 * operations per time use the wrong actorId/passwordHash combination.</li>
+	 * <li>{@link AuthorisationException}</li>
+	 * <li>{@link ConnectionException}</li>
+	 * <li>{@link TimeoutException}</li>
+	 * <li>{@link InternalStoreException}</li>
+	 * </ul>
+	 * Possible exceptions in the {@link BatchedResult}:
+	 * <ul>
+	 * <li>{@link RequestException} for addresses that do not address an
+	 * {@link XModel}.</li>
+	 * <li>{@link AccessException} for a modelAddress the given actorId may not
+	 * read</li>
+	 * </ul>
+	 * 
+	 * @param actorId The actor who is performing this operation.
+	 * @param passwordHash The MD5 hash of the secret actor password prefixed
+	 *            with "Xydra" to avoid transmitting the same string over the
+	 *            network if the user uses the same password for multiple
+	 *            services. If null, all access is granted.
+	 * @param modelAddress an array of {@link XAddress} for which the latest
+	 *            model revision should be retrieved. Each {@link XAddress} must
+	 *            address an {@link XModel} (repositoryId/modelId/-/-).
+	 * @param callback Asynchronous callback to signal success or failure. On
+	 *            success, the revision number of the addressed model as a long.
+	 *            A non-existing model (and those for which the actorId has no
+	 *            read-access) is signaled as {@link XCommand#FAILED}. Must not
+	 *            be null.
+	 * @throws IllegalArgumentException if one of the given parameters is null.
+	 */
+	void getModelRevision(XID actorId, String passwordHash, XAddress modelAddress,
+	        Callback<Long> callback) throws IllegalArgumentException;
 	
 	/**
 	 * Read current state.
@@ -187,46 +384,6 @@ public interface XydraSingleOperationStore {
 	/**
 	 * Read current state.
 	 * 
-	 * Possible exceptions to be received via callback.onError (see class
-	 * comment in {@link XydraSingleOperationStore} and comments in each
-	 * exception):
-	 * <ul>
-	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
-	 * operations per time use the wrong actorId/passwordHash combination.</li>
-	 * <li>{@link AuthorisationException}</li>
-	 * <li>{@link ConnectionException}</li>
-	 * <li>{@link TimeoutException}</li>
-	 * <li>{@link InternalStoreException}</li>
-	 * </ul>
-	 * Possible exceptions in the {@link BatchedResult}:
-	 * <ul>
-	 * <li>{@link RequestException} for addresses that do not address an
-	 * {@link XModel}.</li>
-	 * <li>{@link AccessException} for a modelAddress the given actorId may not
-	 * read</li>
-	 * </ul>
-	 * 
-	 * @param actorId The actor who is performing this operation.
-	 * @param passwordHash The MD5 hash of the secret actor password prefixed
-	 *            with "Xydra" to avoid transmitting the same string over the
-	 *            network if the user uses the same password for multiple
-	 *            services. If null, all access is granted.
-	 * @param modelAddress an array of {@link XAddress} for which the latest
-	 *            model revision should be retrieved. Each {@link XAddress} must
-	 *            address an {@link XModel} (repositoryId/modelId/-/-).
-	 * @param callback Asynchronous callback to signal success or failure. On
-	 *            success, the revision number of the addressed model as a long.
-	 *            A non-existing model (and those for which the actorId has no
-	 *            read-access) is signaled as {@link #MODEL_DOES_NOT_EXIST}.
-	 *            Must not be null.
-	 * @throws IllegalArgumentException if one of the given parameters is null.
-	 */
-	void getModelRevision(XID actorId, String passwordHash, XAddress modelAddress,
-	        Callback<Long> callback) throws IllegalArgumentException;
-	
-	/**
-	 * Read current state.
-	 * 
 	 * Returns read-only snapshots of {@link XObject} state at the point in time
 	 * when this request was processed.
 	 * 
@@ -273,36 +430,6 @@ public interface XydraSingleOperationStore {
 	/**
 	 * Read current state.
 	 * 
-	 * Possible exceptions to be received via callback.onError (see class
-	 * comment in {@link XydraSingleOperationStore} and comments in each
-	 * exception):
-	 * <ul>
-	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
-	 * operations per time use the wrong actorId/passwordHash combination.</li>
-	 * <li>{@link AuthorisationException}</li>
-	 * <li>{@link ConnectionException}</li>
-	 * <li>{@link TimeoutException}</li>
-	 * <li>{@link InternalStoreException}</li>
-	 * </ul>
-	 * 
-	 * @param actorId The actor who is performing this operation.
-	 * @param passwordHash The MD5 hash of the secret actor password prefixed
-	 *            with "Xydra" to avoid transmitting the same string over the
-	 *            network if the user uses the same password for multiple
-	 *            services. If null, all access is granted.
-	 * @param callback Asynchronous callback to signal success or failure. On
-	 *            success a Set of all {@link XID} of all {@link XModel XModels}
-	 *            for which the given actorId has read-access in the repository
-	 *            is returned.
-	 * @throws IllegalArgumentException if one of the given parameters is null.
-	 *             Must not be null.
-	 */
-	void getModelIds(XID actorId, String passwordHash, Callback<Set<XID>> callback)
-	        throws IllegalArgumentException;
-	
-	/**
-	 * Read current state.
-	 * 
 	 * One {@link XydraSingleOperationStore} instance refers to exactly one
 	 * Xydra {@link XRepository}.
 	 * 
@@ -332,129 +459,6 @@ public interface XydraSingleOperationStore {
 	 */
 	void getRepositoryId(XID actorId, String passwordHash, Callback<XID> callback)
 	        throws IllegalArgumentException;
-	
-	/**
-	 * Change state.
-	 * 
-	 * Check permissions, command pre-conditions, execute the command and log
-	 * the resulting events.
-	 * 
-	 * Possible exceptions to be received via callback.onError (see class
-	 * comment in {@link XydraSingleOperationStore} and comments in each
-	 * exception):
-	 * <ul>
-	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
-	 * operations per time use the wrong actorId/passwordHash combination.</li>
-	 * <li>{@link AuthorisationException}</li>
-	 * <li>{@link ConnectionException}</li>
-	 * <li>{@link TimeoutException}</li>
-	 * <li>{@link InternalStoreException}</li>
-	 * </ul>
-	 * Possible exceptions in the {@link BatchedResult}:
-	 * <ul>
-	 * <li>{@link AccessException} for a command that could not be executed
-	 * because the given actorId has not the necessary rights to do this (read
-	 * and write)</li>
-	 * <li>{@link RequestException} for a command that is in itself
-	 * inconsistent, i.e. a {@link XTransaction} that contains no commands.</li>
-	 * </ul>
-	 * 
-	 * @param actorId The actor who is performing this operation.
-	 * @param passwordHash The MD5 hash of the secret actor password prefixed
-	 *            with "Xydra" to avoid transmitting the same string over the
-	 *            network if the user uses the same password for multiple
-	 *            services. If null, all access is granted.
-	 * @param command A command to be executedIt might fail or succeed. If you
-	 *            want transaction semantics, you need to wrap commands in a
-	 *            {@link XTransaction}.
-	 * @param callback Asynchronous callback to signal success or failure. On
-	 *            success, return the result of executing the command. A
-	 *            non-negative number indicates the resulting revision number of
-	 *            the changed entity.
-	 * 
-	 *            For successful commands that changed something, the return
-	 *            value is always a revision number that can be used to retrieve
-	 *            the corresponding event using {@link #getEvents()}
-	 * 
-	 *            Like any other {@link XCommand}, {@link XTransaction}s only
-	 *            "take up" a single revision, which is the one passed to the
-	 *            callback. For {@link XTransaction}s as well as
-	 *            {@link XRepositoryCommand}s, {@link XModelCommand}s and
-	 *            {@link XObjectCommand}s of type remove, the event saved in the
-	 *            change log may be either a {@link XTransactionEvent} or an
-	 *            {@link XAtomicEvent}, depending on whether there are actually
-	 *            multiple changes.
-	 * 
-	 *            Negative numbers indicate a special result:
-	 *            {@link XCommand#FAILED} signals a failure,
-	 *            {@link XCommand#NOCHANGE} signals that the command did not
-	 *            change anything.
-	 * 
-	 *            Commands may still "take up" a revision number, even if they
-	 *            failed or didn't change anything, causing the next command to
-	 *            skip a revision number. This means that there can be revision
-	 *            numbers without any associated events. The revision of the
-	 *            model however is only updated if anything actually changed.
-	 * 
-	 *            Even after a the callback's {@link Callback#onSuccess(Object)}
-	 *            method has been called, the change may not actually be
-	 *            returned yet by {@link #getModelSnapshots()},
-	 *            {@link #getModelIds()}, {@link #getModelRevisions()} and
-	 *            {@link #getObjectSnapshots()} yet. The change will however
-	 *            eventually be returned by those methods, and will stay
-	 *            persistent once it does. Also, no changes with greater
-	 *            revision numbers will become visible before this one, but
-	 *            their callbacks' {@link Callback#onSuccess(Object)} method
-	 *            might be called before this one.
-	 * @throws IllegalArgumentException if one of the given parameters is null.
-	 *             Only the callback may be null.
-	 */
-	void executeCommand(XID actorId, String passwordHash, XCommand command, Callback<Long> callback)
-	        throws IllegalArgumentException;
-	
-	/**
-	 * EVENTS.
-	 * 
-	 * Fetch all events that happened for a given address in a given range of
-	 * revisions. Batch operation for multiple such requests.
-	 * 
-	 * Possible exceptions to be received via callback.onError (see class
-	 * comment in {@link XydraSingleOperationStore} and comments in each
-	 * exception):
-	 * <ul>
-	 * <li>{@link QuotaException} to prevent brute-force attacks when too many
-	 * operations per time use the wrong actorId/passwordHash combination.</li>
-	 * <li>{@link AuthorisationException}</li>
-	 * <li>{@link ConnectionException}</li>
-	 * <li>{@link TimeoutException}</li>
-	 * <li>{@link InternalStoreException}</li>
-	 * </ul>
-	 * Possible exceptions in each {@link BatchedResult}:
-	 * <ul>
-	 * <li>{@link AccessException} if the given actorId may not read the entity
-	 * with the {@link XAddress} in the {@link GetEventsRequest}.</li>
-	 * <li>{@link RequestException} (a) if beginRevision is greater than
-	 * endRevision; (b) if beginRevision or endRevision are negative</li>
-	 * </ul>
-	 * 
-	 * @param actorId The actor who is performing this operation.
-	 * @param passwordHash The MD5 hash of the secret actor password prefixed
-	 *            with "Xydra" to avoid transmitting the same string over the
-	 *            network if the user uses the same password for multiple
-	 *            services. If null, all access is granted.
-	 * @param getEventsRequest a request for events. See
-	 *            {@link GetEventsRequest}.
-	 * @param callback Asynchronous callback to signal success or failure. On
-	 *            success, this callback returns an array of XEvents, in the
-	 *            order in which they happened.
-	 * 
-	 *            The array can be null to indicate that the requested entity
-	 *            does not exist or the user is not allowed to read it.
-	 * 
-	 * @throws IllegalArgumentException if any of the given parameters is null.
-	 */
-	void getEvents(XID actorId, String passwordHash, GetEventsRequest getEventsRequest,
-	        Callback<XEvent[]> callback) throws IllegalArgumentException;
 	
 	/**
 	 * @return a {@link XydraStoreAdmin} interface that contains local

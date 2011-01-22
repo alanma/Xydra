@@ -1,7 +1,6 @@
 package org.xydra.store.impl.delegate;
 
 import org.xydra.base.XID;
-import org.xydra.store.MAXTodo;
 
 
 /**
@@ -10,8 +9,12 @@ import org.xydra.store.MAXTodo;
  * 
  * @author xamde
  */
-@MAXTodo
+
 public interface XModelArm {
+	
+	boolean hasFieldReadAccess(XID actorId, XID objectId, XID fieldId);
+	
+	boolean hasFieldWriteAccess(XID actorId, XID objectId, XID fieldId);
 	
 	/**
 	 * @param actorId
@@ -25,8 +28,4 @@ public interface XModelArm {
 	boolean hasObjectReadAccess(XID actorId, XID objectId);
 	
 	boolean hasObjectWriteAccess(XID actorId, XID objectId);
-	
-	boolean hasFieldReadAccess(XID actorId, XID objectId, XID fieldId);
-	
-	boolean hasFieldWriteAccess(XID actorId, XID objectId, XID fieldId);
 }

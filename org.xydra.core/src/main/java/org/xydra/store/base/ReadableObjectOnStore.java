@@ -4,9 +4,9 @@ import java.io.Serializable;
 import java.util.Iterator;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableField;
-import org.xydra.base.XReadableObject;
 import org.xydra.base.XID;
+import org.xydra.base.rmof.XReadableField;
+import org.xydra.base.rmof.XReadableObject;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.StoreException;
@@ -23,8 +23,8 @@ public class ReadableObjectOnStore implements XReadableObject, Serializable {
 	
 	private static final long serialVersionUID = -4890586955104381922L;
 	protected XAddress address;
-	protected Credentials credentials;
 	protected XReadableObject baseObject;
+	protected Credentials credentials;
 	protected XydraStore store;
 	
 	/**
@@ -43,27 +43,6 @@ public class ReadableObjectOnStore implements XReadableObject, Serializable {
 	@Override
 	public XAddress getAddress() {
 		return this.address;
-	}
-	
-	protected void load() {
-		this.store.getObjectSnapshots(this.credentials.getActorId(), this.credentials.getPasswordHash(),
-		        new XAddress[] { this.address }, new Callback<BatchedResult<XReadableObject>[]>() {
-			        
-			        @Override
-			        public void onFailure(Throwable error) {
-				        throw new StoreException("", error);
-			        }
-			        
-			        @Override
-			        public void onSuccess(BatchedResult<XReadableObject>[] object) {
-				        assert object.length == 1;
-				        /*
-						 * TODO better error handling if getResult is null
-						 * because getException has an AccessException
-						 */
-				        ReadableObjectOnStore.this.baseObject = object[0].getResult();
-			        }
-		        });
 	}
 	
 	@Override
@@ -94,6 +73,28 @@ public class ReadableObjectOnStore implements XReadableObject, Serializable {
 	@Override
 	public Iterator<XID> iterator() {
 		return this.baseObject.iterator();
+	}
+	
+	protected void load() {
+		this.store.getObjectSnapshots(this.credentials.getActorId(),
+		        this.credentials.getPasswordHash(), new XAddress[] { this.address },
+		        new Callback<BatchedResult<XReadableObject>[]>() {
+			        
+			        @Override
+			        public void onFailure(Throwable error) {
+				        throw new StoreException("", error);
+			        }
+			        
+			        @Override
+			        public void onSuccess(BatchedResult<XReadableObject>[] object) {
+				        assert object.length == 1;
+				        /*
+						 * TODO better error handling if getResult is null
+						 * because getException has an AccessException
+						 */
+				        ReadableObjectOnStore.this.baseObject = object[0].getResult();
+			        }
+		        });
 	}
 	
 }

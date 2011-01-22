@@ -1,8 +1,8 @@
 package org.xydra.store;
 
 import org.xydra.base.XAddress;
-import org.xydra.core.change.XEvent;
-import org.xydra.core.change.XTransaction;
+import org.xydra.base.change.XEvent;
+import org.xydra.base.change.XTransaction;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
@@ -19,8 +19,12 @@ import org.xydra.core.model.XObject;
  */
 public class GetEventsRequest {
 	
+	public final XAddress address;
+	
+	public final long beginRevision;
+	public final long endRevision;
 	/**
-	 * @param addresses of {@link XModel} (repositoryId/modelId/-/-),
+	 * @param address of {@link XModel} (repositoryId/modelId/-/-),
 	 *            {@link XObject} (repositoryId/modelId/objectId/-), or
 	 *            {@link XField} (repositoryId/modelId/objectId/fieldId) for
 	 *            which to return change events. This address must not refer to
@@ -50,9 +54,9 @@ public class GetEventsRequest {
 	 * 
 	 * @param endRevision the end revision number (inclusive) of the interval
 	 *            from which all {@link XEvent XEvents} are to be returned - can
-	 *            be greater than {@link #getCurrentRevisionNumber()} to get all
-	 *            {@link XEvent XEvents} since beginRevision. Must be greater
-	 *            than beginRevision.
+	 *            be greater than current revision number of the addresed
+	 *            entitiy to get all {@link XEvent XEvents} since beginRevision.
+	 *            Must be greater than beginRevision.
 	 * 
 	 *            TODO is there a point in allowing endRevision < 0?
 	 */
@@ -62,9 +66,5 @@ public class GetEventsRequest {
 		this.beginRevision = beginRevision;
 		this.endRevision = endRevision;
 	}
-	
-	public final XAddress address;
-	public final long beginRevision;
-	public final long endRevision;
 	
 }

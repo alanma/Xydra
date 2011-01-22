@@ -5,11 +5,11 @@ import org.xydra.core.model.XLocalChangeCallback;
 
 public abstract class AbstractLocalChangeCallback implements XLocalChangeCallback {
 	
-	public void onSuccess(long revision) {
+	public void onFailure() {
 		// ignore
 	}
 	
-	public void onFailure() {
+	public void onSuccess(long revision) {
 		// ignore
 	}
 	

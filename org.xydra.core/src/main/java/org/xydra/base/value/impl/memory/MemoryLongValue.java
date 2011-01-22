@@ -19,6 +19,10 @@ public class MemoryLongValue implements XLongValue {
 		this.content = content;
 	}
 	
+	public Number asNumber() {
+		return contents();
+	}
+	
 	public long contents() {
 		return this.content;
 	}
@@ -40,10 +44,6 @@ public class MemoryLongValue implements XLongValue {
 	@Override
 	public String toString() {
 		return Long.toString(this.content);
-	}
-	
-	public Number asNumber() {
-		return contents();
 	}
 	
 }

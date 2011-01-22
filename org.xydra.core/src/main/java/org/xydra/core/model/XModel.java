@@ -5,10 +5,10 @@ import java.io.Serializable;
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.base.XID;
-import org.xydra.base.XHalfWritableModel;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XModelCommand;
-import org.xydra.core.change.XModelEvent;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XModelCommand;
+import org.xydra.base.change.XModelEvent;
+import org.xydra.base.rmof.XWritableModel;
 import org.xydra.core.model.state.XModelState;
 
 
@@ -31,19 +31,7 @@ import org.xydra.core.model.state.XModelState;
  * @author Kaidel
  * 
  */
-public interface XModel extends XLoggedModel, XHalfWritableModel, Serializable, XSynchronizesChanges {
-	
-	/**
-	 * Returns the {@link XObject} contained in this model with the given
-	 * {@link XID}
-	 * 
-	 * @param id The {@link XID} of the {@link XObject} which is to be returned
-	 * @return The {@link XObject} with the given {@link XID} or null, if no
-	 *         corresponding {@link XObject} exists
-	 * @throws IllegalStateException if this model has already been removed
-	 */
-	@ReadOperation
-	XObject getObject(XID objectId);
+public interface XModel extends XLoggedModel, XWritableModel, Serializable, XSynchronizesChanges {
 	
 	/**
 	 * Creates a new {@link XObject} with the given {@link XID} and adds it to
@@ -58,19 +46,6 @@ public interface XModel extends XLoggedModel, XHalfWritableModel, Serializable, 
 	 */
 	@ModificationOperation
 	XObject createObject(XID id);
-	
-	/**
-	 * Removes the {@link XObject} with the given {@link XID} from this XModel.
-	 * 
-	 * @param object The {@link XID} of the {@link XObject} which is to be
-	 *            removed
-	 * 
-	 * @return true, if an {@link XObject} with the given {@link XID} did exist
-	 *         in this XModel and could be removed
-	 * @throws IllegalStateException if this model has already been removed
-	 */
-	@ModificationOperation
-	boolean removeObject(XID objectID);
 	
 	/**
 	 * Executes the given {@link XModelCommand} if possible.
@@ -101,5 +76,30 @@ public interface XModel extends XLoggedModel, XHalfWritableModel, Serializable, 
 	 */
 	@ModificationOperation
 	long executeModelCommand(XModelCommand command);
+	
+	/**
+	 * Returns the {@link XObject} contained in this model with the given
+	 * {@link XID}
+	 * 
+	 * @param id The {@link XID} of the {@link XObject} which is to be returned
+	 * @return The {@link XObject} with the given {@link XID} or null, if no
+	 *         corresponding {@link XObject} exists
+	 * @throws IllegalStateException if this model has already been removed
+	 */
+	@ReadOperation
+	XObject getObject(XID objectId);
+	
+	/**
+	 * Removes the {@link XObject} with the given {@link XID} from this XModel.
+	 * 
+	 * @param object The {@link XID} of the {@link XObject} which is to be
+	 *            removed
+	 * 
+	 * @return true, if an {@link XObject} with the given {@link XID} did exist
+	 *         in this XModel and could be removed
+	 * @throws IllegalStateException if this model has already been removed
+	 */
+	@ModificationOperation
+	boolean removeObject(XID objectId);
 	
 }

@@ -33,6 +33,21 @@ import org.xydra.core.model.XObject;
 public interface XObjectState extends IHasXID, Iterable<XID>, IHasXAddress, Serializable {
 	
 	/**
+	 * Take the {@link XFieldState} and links it as a child of this
+	 * {@link XObjectState}. This means that the {@link XField} represented by
+	 * the given {@link XFieldState} is a child-{@link XField} of the
+	 * {@link XObject} represented by this XObjectState. Also sets this
+	 * {@link XFieldState} as the parent. Neither this fact nor the
+	 * {@link XFieldState} itself is persisted by this operation.
+	 * 
+	 * Implementations should not persist this change until the corresponding
+	 * save unless they can guarantee that no other state calls will fail.
+	 * 
+	 * @param fieldState The {@link XFieldState} which is to be added as a child
+	 */
+	void addFieldState(XFieldState fieldState);
+	
+	/**
 	 * Begin a simple transaction to prevent inconsistent states from being
 	 * persisted.
 	 * 
@@ -51,12 +66,16 @@ public interface XObjectState extends IHasXID, Iterable<XID>, IHasXAddress, Seri
 	XStateTransaction beginTransaction();
 	
 	/**
-	 * Persist changes associated with the given transaction.
+	 * Creates a new {@link XFieldState} in the same persistence layer as this
+	 * XObjectState and with an address contained within this object. This does
+	 * not check if there is already such a state and does not add the created
+	 * state as a child. The {@link XObject} implementation is responsible for
+	 * doing so.
 	 * 
-	 * @param transaction must have been returned by {@link #beginTransaction()}
-	 *            from this {@link XObjectState}
+	 * @param id The {@link XID} for the new {@link XFieldState}
+	 * @return The newly created {@link XFieldState}
 	 */
-	void endTransaction(XStateTransaction transaction);
+	XFieldState createFieldState(XID id);
 	
 	/**
 	 * Delete this state information from the attached persistence layer, i.e.
@@ -71,40 +90,37 @@ public interface XObjectState extends IHasXID, Iterable<XID>, IHasXAddress, Seri
 	void delete(XStateTransaction transaction);
 	
 	/**
-	 * Store this state information in the attached persistence layer, i.e. the
-	 * one determined by calling {@link XStateFactory}.create...().
+	 * Persist changes associated with the given transaction.
 	 * 
-	 * @param transaction If not null, persist the change at the end of the
-	 *            given transaction, otherwise persist it now. The transaction
-	 *            object must have been created by this {@link XObjectState} or
-	 *            the containing {@link XModelState} or {@link XRepositoryState}
-	 *            .
+	 * @param transaction must have been returned by {@link #beginTransaction()}
+	 *            from this {@link XObjectState}
 	 */
-	void save(XStateTransaction transaction);
+	void endTransaction(XStateTransaction transaction);
 	
 	/**
-	 * Returns an {@link Iterator} over the {@link XID}s of all children-
-	 * {@link XFieldState XFieldStates} of this XObjectState
+	 * Gets the {@link XChangeLogState} of the {@link XChangeLog} which is
+	 * logging the {@link XObject} represented by this XObjectState.
 	 * 
-	 * @returns an {@link Iterator} over the {@link XID}s of all children-
-	 *          {@link XFieldState XFieldStates} of this XObjectState
+	 * @return the {@link XChangeLogState} of the {@link XChangeLog} which is
+	 *         logging the {@link XObject} represented by this XObjectState.
 	 */
-	Iterator<XID> iterator();
+	XChangeLogState getChangeLogState();
 	
 	/**
-	 * Take the {@link XFieldState} and links it as a child of this
-	 * {@link XObjectState}. This means that the {@link XField} represented by
-	 * the given {@link XFieldState} is a child-{@link XField} of the
-	 * {@link XObject} represented by this XObjectState. Also sets this
-	 * {@link XFieldState} as the parent. Neither this fact nor the
-	 * {@link XFieldState} itself is persisted by this operation.
+	 * Gets the specified {@link XFieldState} contained in this XObjectState
+	 * from the appropriate persistence layer.
 	 * 
-	 * Implementations should not persist this change until the corresponding
-	 * save unless they can guarantee that no other state calls will fail.
+	 * This is only guaranteed to succeed if the {@link XField} represented by
+	 * the requested {@link XFieldState} is not already deleted AND and was not
+	 * removed from the {@link XObject} represented by this XObjectState. It is
+	 * however not guaranteed to fail if only the {@link XField} was removed.
 	 * 
-	 * @param fieldState The {@link XFieldState} which is to be added as a child
+	 * @param id The {@link XID} of the {@link XField} which {@link XFieldState}
+	 *            is to be returned
+	 * @return The {@link XFieldState} corresponding to the given {@link XID} or
+	 *         null if no such {@link XFieldState} exists
 	 */
-	void addFieldState(XFieldState fieldState);
+	XFieldState getFieldState(XID id);
 	
 	/**
 	 * Gets the current revision number of the {@link XObject} which state is
@@ -137,32 +153,13 @@ public interface XObjectState extends IHasXID, Iterable<XID>, IHasXAddress, Seri
 	boolean isEmpty();
 	
 	/**
-	 * Gets the specified {@link XFieldState} contained in this XObjectState
-	 * from the appropriate persistence layer.
+	 * Returns an {@link Iterator} over the {@link XID}s of all children-
+	 * {@link XFieldState XFieldStates} of this XObjectState
 	 * 
-	 * This is only guaranteed to succeed if the {@link XField} represented by
-	 * the requested {@link XFieldState} is not already deleted AND and was not
-	 * removed from the {@link XObject} represented by this XObjectState. It is
-	 * however not guaranteed to fail if only the {@link XField} was removed.
-	 * 
-	 * @param id The {@link XID} of the {@link XField} which {@link XFieldState}
-	 *            is to be returned
-	 * @return The {@link XFieldState} corresponding to the given {@link XID} or
-	 *         null if no such {@link XFieldState} exists
+	 * @returns an {@link Iterator} over the {@link XID}s of all children-
+	 *          {@link XFieldState XFieldStates} of this XObjectState
 	 */
-	XFieldState getFieldState(XID id);
-	
-	/**
-	 * Creates a new {@link XFieldState} in the same persistence layer as this
-	 * XObjectState and with an address contained within this object. This does
-	 * not check if there is already such a state and does not add the created
-	 * state as a child. The {@link XObject} implementation is responsible for
-	 * doing so.
-	 * 
-	 * @param id The {@link XID} for the new {@link XFieldState}
-	 * @return The newly created {@link XFieldState}
-	 */
-	XFieldState createFieldState(XID id);
+	Iterator<XID> iterator();
 	
 	/**
 	 * Removes the specified {@link XFieldState} from this XObjectState. This
@@ -179,6 +176,18 @@ public interface XObjectState extends IHasXID, Iterable<XID>, IHasXAddress, Seri
 	void removeFieldState(XID fieldStateId);
 	
 	/**
+	 * Store this state information in the attached persistence layer, i.e. the
+	 * one determined by calling {@link XStateFactory}.create...().
+	 * 
+	 * @param transaction If not null, persist the change at the end of the
+	 *            given transaction, otherwise persist it now. The transaction
+	 *            object must have been created by this {@link XObjectState} or
+	 *            the containing {@link XModelState} or {@link XRepositoryState}
+	 *            .
+	 */
+	void save(XStateTransaction transaction);
+	
+	/**
 	 * Sets the stored revision number
 	 * 
 	 * Implementations should not persist this change until the corresponding
@@ -187,14 +196,5 @@ public interface XObjectState extends IHasXID, Iterable<XID>, IHasXAddress, Seri
 	 * @param revisionNumber the revision number
 	 */
 	void setRevisionNumber(long revisionNumber);
-	
-	/**
-	 * Gets the {@link XChangeLogState} of the {@link XChangeLog} which is
-	 * logging the {@link XObject} represented by this XObjectState.
-	 * 
-	 * @return the {@link XChangeLogState} of the {@link XChangeLog} which is
-	 *         logging the {@link XObject} represented by this XObjectState.
-	 */
-	XChangeLogState getChangeLogState();
 	
 }

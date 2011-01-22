@@ -9,9 +9,10 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xydra.base.X;
 import org.xydra.base.XID;
 import org.xydra.base.value.XValue;
-import org.xydra.core.X;
+import org.xydra.core.TestLogger;
 import org.xydra.core.index.IObjectIndex;
 import org.xydra.core.index.IUniqueObjectIndex;
 import org.xydra.core.index.impl.memory.IndexFactoryImpl;
@@ -19,25 +20,64 @@ import org.xydra.core.index.impl.memory.ObjectIndex;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.test.TestLogger;
 
 
 public class TestObjectIndex {
 	
-	private XRepository repo;
-	private XID actor;
-	private XModel model;
-	private XObject indexObject;
-	private XID emailFieldId;
-	private XObject user1;
-	private XObject user2;
-	private XObject user3;
-	private IndexFactoryImpl indexFactory;
-	
+	/**
+	 * @return each kind of value at least once
+	 */
+	public static final List<XValue> allKindsOfValues() {
+		String a = "John Doe";
+		String b = "New York";
+		String c = "Sven Väth";
+		XID id1 = X.getIDProvider().fromString("test-id1");
+		XID id2 = X.getIDProvider().fromString("test-id2");
+		XID id3 = X.getIDProvider().createUniqueID();
+		LinkedList<XValue> list = new LinkedList<XValue>();
+		list.addAll(allSingleValueTypes());
+		list.add(X.getValueFactory().createBooleanListValue(new boolean[] { true, false, true }));
+		list.add(X.getValueFactory().createByteListValue(new byte[] { 42, 23, 15 }));
+		list.add(X.getValueFactory().createDoubleListValue(new double[] { 2.3, 4.2, 1.5 }));
+		list.add(X.getValueFactory().createIDListValue(new XID[] { id1, id2, id3 }));
+		list.add(X.getValueFactory().createIDSetValue(new XID[] { id1, id2, id3 }));
+		list.add(X.getValueFactory().createIntegerListValue(new int[] { 11, 12, 13 }));
+		list.add(X.getValueFactory().createLongListValue(new long[] { 1234567890, 12, 13 }));
+		list.add(X.getValueFactory().createStringListValue(new String[] { a, b, c }));
+		list.add(X.getValueFactory().createStringSetValue(new String[] { a, b, c }));
+		return list;
+	}
+	/**
+	 * @return each kind of value at least once
+	 */
+	public static final List<XValue> allSingleValueTypes() {
+		String a = "John Doe";
+		XID id1 = X.getIDProvider().fromString("test-id1");
+		LinkedList<XValue> list = new LinkedList<XValue>();
+		list.add(X.getValueFactory().createBooleanValue(true));
+		list.add(X.getValueFactory().createDoubleValue(3.1415));
+		list.add(id1);
+		list.add(X.getValueFactory().createIntegerValue(42));
+		list.add(X.getValueFactory().createLongValue(1234567));
+		list.add(X.getValueFactory().createStringValue(a));
+		return list;
+	}
 	@BeforeClass
 	public static void init() {
 		TestLogger.init();
 	}
+	private XID actor;
+	private XID emailFieldId;
+	private IndexFactoryImpl indexFactory;
+	private XObject indexObject;
+	private XModel model;
+	private XRepository repo;
+	
+	private XObject user1;
+	
+	private XObject user2;
+	
+	private XObject user3;
 	
 	@Before
 	public void before() {
@@ -66,8 +106,8 @@ public class TestObjectIndex {
 		oi.index(this.user1);
 		oi.index(this.user2);
 		oi.index(this.user3);
-		Set<XObject> user3_again_set = oi.lookup(this.model, X.getValueFactory().createStringValue(
-		        "some@one.com"));
+		Set<XObject> user3_again_set = oi.lookup(this.model,
+		        X.getValueFactory().createStringValue("some@one.com"));
 		assertEquals(1, user3_again_set.size());
 		XObject user3_again = user3_again_set.iterator().next();
 		assertEquals(this.user3.getID(), user3_again.getID());
@@ -81,8 +121,8 @@ public class TestObjectIndex {
 		oi.index(this.user1);
 		oi.index(this.user2);
 		oi.index(this.user3);
-		XObject user3_again = oi.lookup(this.model, X.getValueFactory().createStringValue(
-		        "some@one.com"));
+		XObject user3_again = oi.lookup(this.model,
+		        X.getValueFactory().createStringValue("some@one.com"));
 		assertEquals(this.user3.getID(), user3_again.getID());
 		assertEquals(this.user3, user3_again);
 	}
@@ -93,46 +133,6 @@ public class TestObjectIndex {
 			XID id = ObjectIndex.valueToXID(value);
 			id.toString();
 		}
-	}
-	
-	/**
-	 * @return each kind of value at least once
-	 */
-	public static final List<XValue> allKindsOfValues() {
-		String a = "John Doe";
-		String b = "New York";
-		String c = "Sven Väth";
-		XID id1 = X.getIDProvider().fromString("test-id1");
-		XID id2 = X.getIDProvider().fromString("test-id2");
-		XID id3 = X.getIDProvider().createUniqueID();
-		LinkedList<XValue> list = new LinkedList<XValue>();
-		list.addAll(allSingleValueTypes());
-		list.add(X.getValueFactory().createBooleanListValue(new boolean[] { true, false, true }));
-		list.add(X.getValueFactory().createByteListValue(new byte[] { 42, 23, 15 }));
-		list.add(X.getValueFactory().createDoubleListValue(new double[] { 2.3, 4.2, 1.5 }));
-		list.add(X.getValueFactory().createIDListValue(new XID[] { id1, id2, id3 }));
-		list.add(X.getValueFactory().createIDSetValue(new XID[] { id1, id2, id3 }));
-		list.add(X.getValueFactory().createIntegerListValue(new int[] { 11, 12, 13 }));
-		list.add(X.getValueFactory().createLongListValue(new long[] { 1234567890, 12, 13 }));
-		list.add(X.getValueFactory().createStringListValue(new String[] { a, b, c }));
-		list.add(X.getValueFactory().createStringSetValue(new String[] { a, b, c }));
-		return list;
-	}
-	
-	/**
-	 * @return each kind of value at least once
-	 */
-	public static final List<XValue> allSingleValueTypes() {
-		String a = "John Doe";
-		XID id1 = X.getIDProvider().fromString("test-id1");
-		LinkedList<XValue> list = new LinkedList<XValue>();
-		list.add(X.getValueFactory().createBooleanValue(true));
-		list.add(X.getValueFactory().createDoubleValue(3.1415));
-		list.add(id1);
-		list.add(X.getValueFactory().createIntegerValue(42));
-		list.add(X.getValueFactory().createLongValue(1234567));
-		list.add(X.getValueFactory().createStringValue(a));
-		return list;
 	}
 	
 }

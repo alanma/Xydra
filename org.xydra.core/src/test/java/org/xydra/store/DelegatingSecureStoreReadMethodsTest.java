@@ -2,15 +2,14 @@ package org.xydra.store;
 
 import static org.junit.Assert.assertTrue;
 
+import org.xydra.base.X;
 import org.xydra.base.XID;
-import org.xydra.core.X;
-import org.xydra.core.XX;
-import org.xydra.core.change.XCommandFactory;
-import org.xydra.store.access.XAccountDatabase;
-import org.xydra.store.base.HashUtils;
-import org.xydra.store.impl.delegate.AuthorisationArm;
+import org.xydra.base.XX;
+import org.xydra.base.change.XCommandFactory;
+import org.xydra.store.access.HashUtils;
+import org.xydra.store.access.XAccessControlManager;
+import org.xydra.store.access.XAuthenticationDatabase;
 import org.xydra.store.impl.memory.SecureMemoryStore;
-import org.xydra.store.test.AbstractStoreReadMethodsTest;
 
 
 /**
@@ -24,16 +23,9 @@ import org.xydra.store.test.AbstractStoreReadMethodsTest;
  */
 public class DelegatingSecureStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
 	
-	protected XAccountDatabase accountDb = null;
+	private XAccessControlManager acm;
+	protected XAuthenticationDatabase authenticationDb = null;
 	protected String correctPass = "Test";
-	
-	@Override
-	protected XydraStore getStore() {
-		if(this.store == null) {
-			this.store = new SecureMemoryStore();
-		}
-		return this.store;
-	}
 	
 	@Override
 	protected XCommandFactory getCommandFactory() {
@@ -42,17 +34,22 @@ public class DelegatingSecureStoreReadMethodsTest extends AbstractStoreReadMetho
 	
 	@Override
 	protected XID getCorrectUser() {
-		if(this.accountDb == null) {
-			this.accountDb = this.store.getXydraStoreAdmin().getAccountDatabase();
+		if(this.authenticationDb == null) {
+			this.authenticationDb = this.store.getXydraStoreAdmin().getAccessControlManager()
+			        .getAuthenticationDatabase();
+		}
+		if(this.acm == null) {
+			this.acm = this.store.getXydraStoreAdmin().getAccessControlManager();
 		}
 		
-		XID actorId = XX.createUniqueID();
+		// easier in the debugger
+		XID actorId = XX.toId("SecureDirk");
 		
-		if(!this.accountDb.isValidLogin(actorId, this.getCorrectUserPasswordHash())) {
-			this.accountDb.setPasswordHash(actorId,
+		if(!this.acm.isAuthenticated(actorId, this.getCorrectUserPasswordHash())) {
+			this.authenticationDb.setPasswordHash(actorId,
 			        HashUtils.getXydraPasswordHash(this.correctPass));
 		}
-		assertTrue(this.accountDb.isValidLogin(actorId, this.getCorrectUserPasswordHash()));
+		assertTrue(this.acm.isAuthenticated(actorId, this.getCorrectUserPasswordHash()));
 		
 		return actorId;
 	}
@@ -78,7 +75,7 @@ public class DelegatingSecureStoreReadMethodsTest extends AbstractStoreReadMetho
 	
 	@Override
 	protected long getQuotaForBruteForce() {
-		return AuthorisationArm.MAX_FAILED_LOGIN_ATTEMPTS;
+		return XydraStore.MAX_FAILED_LOGIN_ATTEMPTS;
 	}
 	
 	@Override
@@ -86,6 +83,14 @@ public class DelegatingSecureStoreReadMethodsTest extends AbstractStoreReadMetho
 		return XX.toId("data");
 		// repositoryId as set in the standard constructor of {@link
 		// MemoryStore}
+	}
+	
+	@Override
+	protected XydraStore getStore() {
+		if(this.store == null) {
+			this.store = new SecureMemoryStore();
+		}
+		return this.store;
 	}
 	
 	/*

@@ -4,8 +4,8 @@ import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XIDProvider;
 import org.xydra.core.URIFormatException;
-import org.xydra.core.model.XIDProvider;
 
 
 /**
@@ -37,14 +37,6 @@ public class MemoryStringIDProvider implements XIDProvider {
 	public XID createUniqueID() {
 		/* leading 'a' ensures legal XML name */
 		return new MemoryStringID("a" + UUID.uuid());
-	}
-	
-	public XID fromString(String uriString) {
-		if(!uriString.matches(nameRegex)) {
-			throw new IllegalArgumentException("'" + uriString
-			        + "' is not a valid XML name or contains ':', cannot create XID");
-		}
-		return new MemoryStringID(uriString);
 	}
 	
 	public XAddress fromAddress(String address) {
@@ -90,6 +82,14 @@ public class MemoryStringIDProvider implements XIDProvider {
 	
 	public XAddress fromComponents(XID repositoryId, XID modelId, XID objectId, XID fieldId) {
 		return new MemoryAddress(repositoryId, modelId, objectId, fieldId);
+	}
+	
+	public XID fromString(String uriString) {
+		if(!uriString.matches(nameRegex)) {
+			throw new IllegalArgumentException("'" + uriString
+			        + "' is not a valid XML name or contains ':', cannot create XID");
+		}
+		return new MemoryStringID(uriString);
 	}
 	
 }

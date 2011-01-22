@@ -8,23 +8,23 @@ import java.util.Set;
 
 import org.xydra.annotations.ReadOperation;
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableModel;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
-import org.xydra.core.XX;
-import org.xydra.core.change.ChangeType;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XEvent;
-import org.xydra.core.change.XModelCommand;
-import org.xydra.core.change.XModelEvent;
+import org.xydra.base.XX;
+import org.xydra.base.change.ChangeType;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XEvent;
+import org.xydra.base.change.XModelCommand;
+import org.xydra.base.change.XModelEvent;
+import org.xydra.base.change.XObjectEvent;
+import org.xydra.base.change.XRepositoryEvent;
+import org.xydra.base.change.XTransaction;
+import org.xydra.base.change.impl.memory.MemoryModelCommand;
+import org.xydra.base.change.impl.memory.MemoryModelEvent;
+import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
+import org.xydra.base.change.impl.memory.MemoryRepositoryEvent;
+import org.xydra.base.rmof.XReadableModel;
 import org.xydra.core.change.XModelEventListener;
-import org.xydra.core.change.XObjectEvent;
-import org.xydra.core.change.XRepositoryEvent;
-import org.xydra.core.change.XTransaction;
-import org.xydra.core.change.impl.memory.MemoryModelCommand;
-import org.xydra.core.change.impl.memory.MemoryModelEvent;
-import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
-import org.xydra.core.change.impl.memory.MemoryRepositoryEvent;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
@@ -48,55 +48,20 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	
 	private static final long serialVersionUID = -2969189978307340483L;
 	
-	private final XModelState state;
-	private final Map<XID,MemoryObject> loadedObjects = new HashMap<XID,MemoryObject>();
-	
-	/** The father-repository of this MemoryModel */
-	private final MemoryRepository father;
-	
-	private Set<XModelEventListener> modelChangeListenerCollection;
-	
-	/**
-	 * Creates a new MemoryModel without father-{@link XRepository}.
-	 * 
-	 * @param actorId TODO
-	 * @param modelId The {@link XID} for this MemoryModel.
-	 */
-	public MemoryModel(XID actorId, String passwordHash, XID modelId) {
-		this(actorId, passwordHash, null, createModelState(XX.toAddress(null, modelId, null, null)));
-	}
-	
-	/**
-	 * Creates a new MemoryModel without father-{@link XRepository} but with a
-	 * parent repository XID so it can be synchronized.
-	 * 
-	 * @param actorId TODO
-	 * @param modelAddr The {@link XAddress} for this MemoryModel.
-	 */
-	public MemoryModel(XID actorId, String passwordHash, XAddress modelAddr) {
-		this(actorId, passwordHash, null, createModelState(modelAddr));
-		if(modelAddr.getAddressedType() != XType.XMODEL) {
-			throw new IllegalArgumentException("modelAddr must be a model Adress, was: "
-			        + modelAddr);
-		}
-	}
-	
 	private static XModelState createModelState(XAddress modelAddr) {
 		XChangeLogState changeLogState = new MemoryChangeLogState(modelAddr);
 		// Bump the log revision if we're missing this object's create event.
 		changeLogState.setFirstRevisionNumber(modelAddr.getRepository() == null ? 1 : 0);
 		return new TemporaryModelState(modelAddr, changeLogState);
 	}
+	/** The father-repository of this MemoryModel */
+	private final MemoryRepository father;
 	
-	/**
-	 * Creates a new MemoryModel without father-{@link XRepository}.
-	 * 
-	 * @param actorId TODO
-	 * @param modelState The initial {@link XModelState} of this MemoryModel.
-	 */
-	public MemoryModel(XID actorId, String passwordHash, XModelState modelState) {
-		this(actorId, passwordHash, null, modelState);
-	}
+	private final Map<XID,MemoryObject> loadedObjects = new HashMap<XID,MemoryObject>();
+	
+	private Set<XModelEventListener> modelChangeListenerCollection;
+	
+	private final XModelState state;
 	
 	/**
 	 * Creates a new MemoryModel with the given {@link MemoryRepository} as its
@@ -109,8 +74,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	protected MemoryModel(XID actorId, String passwordHash, MemoryRepository father,
 	        XModelState modelState) {
 		super(new MemoryEventManager(actorId, passwordHash,
-		        modelState.getChangeLogState() == null ? null : new MemoryChangeLog(modelState
-		                .getChangeLogState()), modelState.getRevisionNumber()));
+		        modelState.getChangeLogState() == null ? null : new MemoryChangeLog(
+		                modelState.getChangeLogState()), modelState.getRevisionNumber()));
 		
 		this.state = modelState;
 		this.father = father;
@@ -136,6 +101,53 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	}
 	
 	/**
+	 * Creates a new MemoryModel without father-{@link XRepository} but with a
+	 * parent repository XID so it can be synchronized.
+	 * 
+	 * @param actorId TODO
+	 * @param modelAddr The {@link XAddress} for this MemoryModel.
+	 */
+	public MemoryModel(XID actorId, String passwordHash, XAddress modelAddr) {
+		this(actorId, passwordHash, null, createModelState(modelAddr));
+		if(modelAddr.getAddressedType() != XType.XMODEL) {
+			throw new IllegalArgumentException("modelAddr must be a model Adress, was: "
+			        + modelAddr);
+		}
+	}
+	
+	/**
+	 * Creates a new MemoryModel without father-{@link XRepository}.
+	 * 
+	 * @param actorId TODO
+	 * @param modelId The {@link XID} for this MemoryModel.
+	 */
+	public MemoryModel(XID actorId, String passwordHash, XID modelId) {
+		this(actorId, passwordHash, null, createModelState(XX.toAddress(null, modelId, null, null)));
+	}
+	
+	/**
+	 * Creates a new MemoryModel without father-{@link XRepository}.
+	 * 
+	 * @param actorId TODO
+	 * @param modelState The initial {@link XModelState} of this MemoryModel.
+	 */
+	public MemoryModel(XID actorId, String passwordHash, XModelState modelState) {
+		this(actorId, passwordHash, null, modelState);
+	}
+	
+	public boolean addListenerForModelEvents(XModelEventListener changeListener) {
+		synchronized(this.eventQueue) {
+			return this.modelChangeListenerCollection.add(changeListener);
+		}
+	}
+	
+	@Override
+	protected void beginStateTransaction() {
+		assert this.eventQueue.stateTransaction == null : "multiple state transactions detected";
+		this.eventQueue.stateTransaction = this.state.beginTransaction();
+	}
+	
+	/**
 	 * @throws IllegalStateException if this method is called after this
 	 *             MemoryModel was already removed
 	 */
@@ -146,45 +158,9 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		}
 	}
 	
-	/**
-	 * @return the {@link XID} of the father-{@link XRepository} of this
-	 *         MemoryModel or null, if this object has no father.
-	 */
-	protected XID getRepositoryId() {
-		return this.father == null ? null : this.father.getID();
-	}
-	
 	@Override
-	public MemoryObject getObject(XID objectID) {
-		synchronized(this.eventQueue) {
-			checkRemoved();
-			
-			MemoryObject object = this.loadedObjects.get(objectID);
-			if(object != null) {
-				return object;
-			}
-			
-			if(!this.state.hasObjectState(objectID)) {
-				return null;
-			}
-			
-			XObjectState objectState = this.state.getObjectState(objectID);
-			assert objectState != null : "The state '" + getAddress()
-			        + "' has a child with objectID '" + objectID + "' but the objectState '"
-			        + XX.resolveObject(getAddress(), objectID)
-			        + "' is not in the XStateStore. Most likely it has not been save()d.";
-			object = new MemoryObject(this, this.eventQueue, objectState);
-			this.loadedObjects.put(objectID, object);
-			
-			return object;
-		}
-	}
-	
-	public Iterator<XID> iterator() {
-		synchronized(this.eventQueue) {
-			checkRemoved();
-			return this.state.iterator();
-		}
+	protected void checkSync() {
+		// models can always sync
 	}
 	
 	public MemoryObject createObject(XID objectId) {
@@ -198,19 +174,6 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 			assert result == XCommand.FAILED || object != null;
 			return object;
 		}
-	}
-	
-	public boolean removeObject(XID objectId) {
-		
-		// no synchronization necessary here (except that in
-		// executeModelCommand())
-		
-		XModelCommand command = MemoryModelCommand.createRemoveCommand(getAddress(),
-		        XCommand.FORCED, objectId);
-		
-		long result = executeModelCommand(command);
-		assert result >= 0 || result == XCommand.NOCHANGE;
-		return result != XCommand.NOCHANGE;
 	}
 	
 	@Override
@@ -263,6 +226,438 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		return object;
 	}
 	
+	/**
+	 * Deletes the state information of this MemoryModel from the currently used
+	 * persistence layer
+	 */
+	protected void delete() {
+		for(XID objectId : this) {
+			MemoryObject object = getObject(objectId);
+			object.delete();
+		}
+		for(XID objectId : this.loadedObjects.keySet()) {
+			this.state.removeObjectState(objectId);
+		}
+		this.state.setRevisionNumber(this.state.getRevisionNumber() + 1);
+		this.state.delete(this.eventQueue.stateTransaction);
+		this.eventQueue.deleteLog();
+		this.loadedObjects.clear();
+		this.removed = true;
+	}
+	
+	@Override
+	protected void endStateTransaction() {
+		this.state.endTransaction(this.eventQueue.stateTransaction);
+		this.eventQueue.stateTransaction = null;
+	}
+	
+	protected boolean enqueueModelRemoveEvents(XID actorId) {
+		
+		boolean inTrans = false;
+		
+		for(XID objectId : this) {
+			MemoryObject object = getObject(objectId);
+			enqueueObjectRemoveEvents(actorId, object, true, true);
+			inTrans = true;
+		}
+		
+		XAddress repoAdrr = hasFather() ? getFather().getAddress() : getAddress().getParent();
+		XRepositoryEvent event = MemoryRepositoryEvent.createRemoveEvent(actorId, repoAdrr,
+		        getID(), getCurrentRevisionNumber(), inTrans);
+		this.eventQueue.enqueueRepositoryEvent(getFather(), event);
+		
+		return inTrans;
+	}
+	
+	/**
+	 * Creates all {@link XEvent XEvents} which will represent the removal of
+	 * the given {@link MemoryObject}. All necessary {@link XObjectEvent
+	 * XObjectEvents} of the REMOVE-type will and lastly the {@link XModelEvent}
+	 * representing the actual removal of the {@link MemoryObject} will be
+	 * created to accurately represent the removal. The created {@link XEvent
+	 * XEvents} will then be enqueued into the {@link MemoryEventManager} used
+	 * by this MemoryModel and then be propagated to the interested listeners.
+	 * 
+	 * @param actor The {@link XID} of the actor
+	 * @param object The {@link MemoryObject} which is to be removed (must not
+	 *            be null)
+	 * @param inTrans true, if the removal of this {@link MemoryObject} occurs
+	 *            during an {@link XTransaction}.
+	 * @param implied true if this model is also removed in the same transaction
+	 * @throws IllegalArgumentException if the given {@link MemoryOjbect} equals
+	 *             null
+	 */
+	protected void enqueueObjectRemoveEvents(XID actor, MemoryObject object, boolean inTrans,
+	        boolean implied) {
+		
+		if(object == null) {
+			throw new IllegalArgumentException("object must not be null");
+		}
+		
+		for(XID fieldId : object) {
+			assert inTrans;
+			MemoryField field = object.getField(fieldId);
+			object.enqueueFieldRemoveEvents(actor, field, inTrans, true);
+		}
+		
+		// add event to remove the object
+		XModelEvent event = MemoryModelEvent.createRemoveEvent(actor, getAddress(), object.getID(),
+		        getRevisionNumber(), object.getRevisionNumber(), inTrans, implied);
+		this.eventQueue.enqueueModelEvent(this, event);
+		
+	}
+	
+	@Override
+	@ReadOperation
+	public boolean equals(Object object) {
+		if(!(object instanceof MemoryModel)) {
+			return false;
+		}
+		
+		MemoryModel model = (MemoryModel)object;
+		
+		// compare revision number, repository ID & modelId
+		if(this.father != null) {
+			if(model.father == null) {
+				return false;
+			}
+			
+			return (getRevisionNumber() == model.getRevisionNumber())
+			        && (this.father.getID().equals(model.father.getID()))
+			        && (getID().equals(model.getID()));
+		} else {
+			if(model.father != null) {
+				return false;
+			}
+			
+			return (getRevisionNumber() == model.getRevisionNumber())
+			        && (getID().equals(model.getID()));
+		}
+	}
+	
+	public long executeCommand(XCommand command) {
+		return executeCommand(command, null);
+	}
+	
+	public long executeCommand(XCommand command, XLocalChangeCallback callback) {
+		
+		if(command instanceof XTransaction) {
+			return executeTransaction((XTransaction)command, callback);
+		} else if(command instanceof XModelCommand) {
+			return executeModelCommand((XModelCommand)command, callback);
+		}
+		MemoryObject object = getObject(command.getTarget().getObject());
+		if(object == null) {
+			return XCommand.FAILED;
+		}
+		return object.executeCommand(command, callback);
+	}
+	
+	public long executeModelCommand(XModelCommand command) {
+		return executeModelCommand(command, null);
+	}
+	
+	protected long executeModelCommand(XModelCommand command, XLocalChangeCallback callback) {
+		synchronized(this.eventQueue) {
+			checkRemoved();
+			
+			assert !this.eventQueue.transactionInProgess;
+			
+			if(!getAddress().equals(command.getTarget())) {
+				if(callback != null) {
+					callback.onFailure();
+				}
+				return XCommand.FAILED;
+			}
+			
+			long oldRev = getRevisionNumber();
+			
+			if(command.getChangeType() == ChangeType.ADD) {
+				if(hasObject(command.getObjectId())) {
+					// ID already taken
+					if(command.isForced()) {
+						/*
+						 * the forced event only cares about the postcondition -
+						 * that there is an object with the given ID, not about
+						 * that there was no such object before
+						 */
+						if(callback != null) {
+							callback.onSuccess(XCommand.NOCHANGE);
+						}
+						return XCommand.NOCHANGE;
+					}
+					if(callback != null) {
+						callback.onFailure();
+					}
+					return XCommand.FAILED;
+				}
+				
+				this.eventQueue.newLocalChange(command, callback);
+				
+				createObjectInternal(command.getObjectId());
+				
+			} else if(command.getChangeType() == ChangeType.REMOVE) {
+				XObject oldObject = getObject(command.getObjectId());
+				
+				if(oldObject == null) {
+					// ID not taken
+					if(command.isForced()) {
+						/*
+						 * the forced event only cares about the postcondition -
+						 * that there is no object with the given ID, not about
+						 * that there was such an object before
+						 */
+						if(callback != null) {
+							callback.onSuccess(XCommand.NOCHANGE);
+						}
+						return XCommand.NOCHANGE;
+					}
+					if(callback != null) {
+						callback.onFailure();
+					}
+					return XCommand.FAILED;
+				}
+				
+				if(!command.isForced()
+				        && oldObject.getRevisionNumber() != command.getRevisionNumber()) {
+					return XCommand.FAILED;
+				}
+				
+				this.eventQueue.newLocalChange(command, callback);
+				
+				removeObjectInternal(command.getObjectId());
+				
+			} else {
+				throw new IllegalArgumentException("Unknown model command type: " + command);
+			}
+			
+			return oldRev + 1;
+		}
+	}
+	
+	@Override
+	protected long executeTransaction(XTransaction transaction, XLocalChangeCallback callback) {
+		synchronized(this.eventQueue) {
+			checkRemoved();
+			
+			if(transaction.getTarget().getObject() != null) {
+				
+				// try to get the object the given transaction actually refers
+				// to
+				MemoryObject object = getObject(transaction.getTarget().getObject());
+				
+				if(object == null) {
+					// object does not exist -> transaction fails
+					if(callback != null) {
+						callback.onFailure();
+					}
+					return XCommand.FAILED;
+				} else {
+					// let the object handle the transaction execution
+					/*
+					 * TODO using the actor set on the object instead of the one
+					 * set on the model (on which the user called the
+					 * #executeTransaction() method) - this is counter-intuitive
+					 * for an API user
+					 */
+					return object.executeTransaction(transaction, callback);
+				}
+			}
+			
+			return super.executeTransaction(transaction, callback);
+			
+		}
+	}
+	
+	/**
+	 * Notifies all listeners that have registered interest for notification on
+	 * {@link XModelEvent XModelEvents} happening on this MemoryModel.
+	 * 
+	 * @param event The {@link XModelEvent} which will be propagated to the
+	 *            registered listeners.
+	 */
+	protected void fireModelEvent(XModelEvent event) {
+		for(XModelEventListener listener : this.modelChangeListenerCollection) {
+			listener.onChangeEvent(event);
+		}
+	}
+	
+	public XAddress getAddress() {
+		return this.state.getAddress();
+	}
+	
+	@Override
+	protected long getCurrentRevisionNumber() {
+		return this.state.getRevisionNumber();
+	}
+	
+	/**
+	 * Returns the father-{@link MemoryRepository} of this MemoryModel.
+	 * 
+	 * @return The father of this MemoryModel (may be null).
+	 */
+	@ReadOperation
+	protected MemoryRepository getFather() {
+		return this.father;
+	}
+	
+	public XID getID() {
+		synchronized(this.eventQueue) {
+			return this.state.getID();
+		}
+	}
+	
+	@Override
+	protected MemoryModel getModel() {
+		return this;
+	}
+	
+	@Override
+	protected MemoryObject getObject() {
+		// this is not an object
+		return null;
+	}
+	
+	@Override
+	public MemoryObject getObject(XID objectId) {
+		synchronized(this.eventQueue) {
+			checkRemoved();
+			
+			MemoryObject object = this.loadedObjects.get(objectId);
+			if(object != null) {
+				return object;
+			}
+			
+			if(!this.state.hasObjectState(objectId)) {
+				return null;
+			}
+			
+			XObjectState objectState = this.state.getObjectState(objectId);
+			assert objectState != null : "The state '" + getAddress()
+			        + "' has a child with objectId '" + objectId + "' but the objectState '"
+			        + XX.resolveObject(getAddress(), objectId)
+			        + "' is not in the XStateStore. Most likely it has not been save()d.";
+			object = new MemoryObject(this, this.eventQueue, objectState);
+			this.loadedObjects.put(objectId, object);
+			
+			return object;
+		}
+	}
+	
+	/**
+	 * @return the {@link XID} of the father-{@link XRepository} of this
+	 *         MemoryModel or null, if this object has no father.
+	 */
+	protected XID getRepositoryId() {
+		return this.father == null ? null : this.father.getID();
+	}
+	
+	public long getRevisionNumber() {
+		synchronized(this.eventQueue) {
+			return this.state.getRevisionNumber();
+		}
+	}
+	
+	protected XModelState getState() {
+		return this.state;
+	}
+	
+	@Override
+	protected XReadableModel getTransactionTarget() {
+		return this;
+	}
+	
+	/**
+	 * Checks whether this MemoryModel has a father-{@link XRepository} or not.
+	 * 
+	 * @return true, if this MemoryModel has a father-{@link XRepository}, false
+	 *         otherwise.
+	 */
+	@ReadOperation
+	protected boolean hasFather() {
+		return this.father != null;
+	}
+	
+	@Override
+	@ReadOperation
+	public int hashCode() {
+		int hashCode = getID().hashCode() + (int)getRevisionNumber();
+		
+		if(this.father != null) {
+			hashCode += this.father.getID().hashCode();
+		}
+		
+		return hashCode;
+	}
+	
+	public boolean hasObject(XID id) {
+		synchronized(this.eventQueue) {
+			checkRemoved();
+			return this.loadedObjects.containsKey(id) || this.state.hasObjectState(id);
+		}
+	}
+	
+	@Override
+	protected void incrementRevisionAndSave() {
+		assert !this.eventQueue.transactionInProgess;
+		long newRevision = getRevisionNumber() + 1;
+		this.state.setRevisionNumber(newRevision);
+		save();
+		this.eventQueue.saveLog();
+	}
+	
+	public boolean isEmpty() {
+		synchronized(this.eventQueue) {
+			checkRemoved();
+			return this.state.isEmpty();
+		}
+	}
+	
+	public Iterator<XID> iterator() {
+		synchronized(this.eventQueue) {
+			checkRemoved();
+			return this.state.iterator();
+		}
+	}
+	
+	/**
+	 * Removes all {@link XField XFields} of this MemoryObject from the
+	 * persistence layer and the MemoryObject itself.
+	 */
+	protected void removeInternal() {
+		// all fields are already loaded for creating events
+		
+		for(MemoryObject object : this.loadedObjects.values()) {
+			object.removeInternal();
+			this.state.removeObjectState(object.getID());
+		}
+		
+		this.state.setRevisionNumber(this.state.getRevisionNumber() + 1);
+		
+		this.loadedObjects.clear();
+		
+		this.removed = true;
+	}
+	
+	public boolean removeListenerForModelEvents(XModelEventListener changeListener) {
+		synchronized(this.eventQueue) {
+			return this.modelChangeListenerCollection.remove(changeListener);
+		}
+	}
+	
+	public boolean removeObject(XID objectId) {
+		
+		// no synchronization necessary here (except that in
+		// executeModelCommand())
+		
+		XModelCommand command = MemoryModelCommand.createRemoveCommand(getAddress(),
+		        XCommand.FORCED, objectId);
+		
+		long result = executeModelCommand(command);
+		assert result >= 0 || result == XCommand.NOCHANGE;
+		return result != XCommand.NOCHANGE;
+	}
+	
 	@Override
 	protected void removeObjectInternal(XID objectId) {
 		
@@ -310,368 +705,12 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		
 	}
 	
-	public long executeModelCommand(XModelCommand command) {
-		return executeModelCommand(command, null);
-	}
-	
-	protected long executeModelCommand(XModelCommand command, XLocalChangeCallback callback) {
-		synchronized(this.eventQueue) {
-			checkRemoved();
-			
-			assert !this.eventQueue.transactionInProgess;
-			
-			if(!getAddress().equals(command.getTarget())) {
-				if(callback != null) {
-					callback.onFailure();
-				}
-				return XCommand.FAILED;
-			}
-			
-			long oldRev = getRevisionNumber();
-			
-			if(command.getChangeType() == ChangeType.ADD) {
-				if(hasObject(command.getObjectID())) {
-					// ID already taken
-					if(command.isForced()) {
-						/*
-						 * the forced event only cares about the postcondition -
-						 * that there is an object with the given ID, not about
-						 * that there was no such object before
-						 */
-						if(callback != null) {
-							callback.onSuccess(XCommand.NOCHANGE);
-						}
-						return XCommand.NOCHANGE;
-					}
-					if(callback != null) {
-						callback.onFailure();
-					}
-					return XCommand.FAILED;
-				}
-				
-				this.eventQueue.newLocalChange(command, callback);
-				
-				createObjectInternal(command.getObjectID());
-				
-			} else if(command.getChangeType() == ChangeType.REMOVE) {
-				XObject oldObject = getObject(command.getObjectID());
-				
-				if(oldObject == null) {
-					// ID not taken
-					if(command.isForced()) {
-						/*
-						 * the forced event only cares about the postcondition -
-						 * that there is no object with the given ID, not about
-						 * that there was such an object before
-						 */
-						if(callback != null) {
-							callback.onSuccess(XCommand.NOCHANGE);
-						}
-						return XCommand.NOCHANGE;
-					}
-					if(callback != null) {
-						callback.onFailure();
-					}
-					return XCommand.FAILED;
-				}
-				
-				if(!command.isForced()
-				        && oldObject.getRevisionNumber() != command.getRevisionNumber()) {
-					return XCommand.FAILED;
-				}
-				
-				this.eventQueue.newLocalChange(command, callback);
-				
-				removeObjectInternal(command.getObjectID());
-				
-			} else {
-				throw new IllegalArgumentException("Unknown model command type: " + command);
-			}
-			
-			return oldRev + 1;
-		}
-	}
-	
-	public XID getID() {
-		synchronized(this.eventQueue) {
-			return this.state.getID();
-		}
-	}
-	
-	public boolean hasObject(XID id) {
-		synchronized(this.eventQueue) {
-			checkRemoved();
-			return this.loadedObjects.containsKey(id) || this.state.hasObjectState(id);
-		}
-	}
-	
-	@Override
-	protected void incrementRevisionAndSave() {
-		assert !this.eventQueue.transactionInProgess;
-		long newRevision = getRevisionNumber() + 1;
-		this.state.setRevisionNumber(newRevision);
-		save();
-		this.eventQueue.saveLog();
-	}
-	
 	/**
 	 * Saves the current state information of this MemoryModel with the
 	 * currently used persistence layer
 	 */
 	protected void save() {
 		this.state.save(this.eventQueue.stateTransaction);
-	}
-	
-	/**
-	 * Returns the father-{@link MemoryRepository} of this MemoryModel.
-	 * 
-	 * @return The father of this MemoryModel (may be null).
-	 */
-	@ReadOperation
-	protected MemoryRepository getFather() {
-		return this.father;
-	}
-	
-	/**
-	 * Checks whether this MemoryModel has a father-{@link XRepository} or not.
-	 * 
-	 * @return true, if this MemoryModel has a father-{@link XRepository}, false
-	 *         otherwise.
-	 */
-	@ReadOperation
-	protected boolean hasFather() {
-		return this.father != null;
-	}
-	
-	@Override
-	@ReadOperation
-	public boolean equals(Object object) {
-		if(!(object instanceof MemoryModel)) {
-			return false;
-		}
-		
-		MemoryModel model = (MemoryModel)object;
-		
-		// compare revision number, repository ID & modelID
-		if(this.father != null) {
-			if(model.father == null) {
-				return false;
-			}
-			
-			return (getRevisionNumber() == model.getRevisionNumber())
-			        && (this.father.getID().equals(model.father.getID()))
-			        && (getID().equals(model.getID()));
-		} else {
-			if(model.father != null) {
-				return false;
-			}
-			
-			return (getRevisionNumber() == model.getRevisionNumber())
-			        && (getID().equals(model.getID()));
-		}
-	}
-	
-	@Override
-	@ReadOperation
-	public int hashCode() {
-		int hashCode = getID().hashCode() + (int)getRevisionNumber();
-		
-		if(this.father != null) {
-			hashCode += this.father.getID().hashCode();
-		}
-		
-		return hashCode;
-	}
-	
-	public long getRevisionNumber() {
-		synchronized(this.eventQueue) {
-			return this.state.getRevisionNumber();
-		}
-	}
-	
-	@Override
-	protected long executeTransaction(XTransaction transaction, XLocalChangeCallback callback) {
-		synchronized(this.eventQueue) {
-			checkRemoved();
-			
-			if(transaction.getTarget().getObject() != null) {
-				
-				// try to get the object the given transaction actually refers
-				// to
-				MemoryObject object = getObject(transaction.getTarget().getObject());
-				
-				if(object == null) {
-					// object does not exist -> transaction fails
-					if(callback != null) {
-						callback.onFailure();
-					}
-					return XCommand.FAILED;
-				} else {
-					// let the object handle the transaction execution
-					/*
-					 * TODO using the actor set on the object instead of the one
-					 * set on the model (on which the user called the
-					 * #executeTransaction() method) - this is counter-intuitive
-					 * for an API user
-					 */
-					return object.executeTransaction(transaction, callback);
-				}
-			}
-			
-			return super.executeTransaction(transaction, callback);
-			
-		}
-	}
-	
-	public boolean isEmpty() {
-		synchronized(this.eventQueue) {
-			checkRemoved();
-			return this.state.isEmpty();
-		}
-	}
-	
-	public XAddress getAddress() {
-		return this.state.getAddress();
-	}
-	
-	/**
-	 * Notifies all listeners that have registered interest for notification on
-	 * {@link XModelEvent XModelEvents} happening on this MemoryModel.
-	 * 
-	 * @param event The {@link XModelEvent} which will be propagated to the
-	 *            registered listeners.
-	 */
-	protected void fireModelEvent(XModelEvent event) {
-		for(XModelEventListener listener : this.modelChangeListenerCollection) {
-			listener.onChangeEvent(event);
-		}
-	}
-	
-	public boolean addListenerForModelEvents(XModelEventListener changeListener) {
-		synchronized(this.eventQueue) {
-			return this.modelChangeListenerCollection.add(changeListener);
-		}
-	}
-	
-	public boolean removeListenerForModelEvents(XModelEventListener changeListener) {
-		synchronized(this.eventQueue) {
-			return this.modelChangeListenerCollection.remove(changeListener);
-		}
-	}
-	
-	/**
-	 * Creates all {@link XEvent XEvents} which will represent the removal of
-	 * the given {@link MemoryObject}. All necessary {@link XObjectEvent
-	 * XObjectEvents} of the REMOVE-type will and lastly the {@link XModelEvent}
-	 * representing the actual removal of the {@link MemoryObject} will be
-	 * created to accurately represent the removal. The created {@link XEvent
-	 * XEvents} will then be enqueued into the {@link MemoryEventManager} used
-	 * by this MemoryModel and then be propagated to the interested listeners.
-	 * 
-	 * @param actor The {@link XID} of the actor
-	 * @param object The {@link MemoryObject} which is to be removed (must not
-	 *            be null)
-	 * @param inTrans true, if the removal of this {@link MemoryObject} occurs
-	 *            during an {@link XTransaction}.
-	 * @param implied true if this model is also removed in the same transaction
-	 * @throws IllegalArgumentException if the given {@link MemoryOjbect} equals
-	 *             null
-	 */
-	protected void enqueueObjectRemoveEvents(XID actor, MemoryObject object, boolean inTrans,
-	        boolean implied) {
-		
-		if(object == null) {
-			throw new IllegalArgumentException("object must not be null");
-		}
-		
-		for(XID fieldID : object) {
-			assert inTrans;
-			MemoryField field = object.getField(fieldID);
-			object.enqueueFieldRemoveEvents(actor, field, inTrans, true);
-		}
-		
-		// add event to remove the object
-		XModelEvent event = MemoryModelEvent.createRemoveEvent(actor, getAddress(), object.getID(),
-		        getRevisionNumber(), object.getRevisionNumber(), inTrans, implied);
-		this.eventQueue.enqueueModelEvent(this, event);
-		
-	}
-	
-	/**
-	 * Deletes the state information of this MemoryModel from the currently used
-	 * persistence layer
-	 */
-	protected void delete() {
-		for(XID objectId : this) {
-			MemoryObject object = getObject(objectId);
-			object.delete();
-		}
-		for(XID objectId : this.loadedObjects.keySet()) {
-			this.state.removeObjectState(objectId);
-		}
-		this.state.setRevisionNumber(this.state.getRevisionNumber() + 1);
-		this.state.delete(this.eventQueue.stateTransaction);
-		this.eventQueue.deleteLog();
-		this.loadedObjects.clear();
-		this.removed = true;
-	}
-	
-	/**
-	 * Removes all {@link XField XFields} of this MemoryObject from the
-	 * persistence layer and the MemoryObject itself.
-	 */
-	protected void removeInternal() {
-		// all fields are already loaded for creating events
-		
-		for(MemoryObject object : this.loadedObjects.values()) {
-			object.removeInternal();
-			this.state.removeObjectState(object.getID());
-		}
-		
-		this.state.setRevisionNumber(this.state.getRevisionNumber() + 1);
-		
-		this.loadedObjects.clear();
-		
-		this.removed = true;
-	}
-	
-	public long executeCommand(XCommand command) {
-		return executeCommand(command, null);
-	}
-	
-	public long executeCommand(XCommand command, XLocalChangeCallback callback) {
-		
-		if(command instanceof XTransaction) {
-			return executeTransaction((XTransaction)command, callback);
-		} else if(command instanceof XModelCommand) {
-			return executeModelCommand((XModelCommand)command, callback);
-		}
-		MemoryObject object = getObject(command.getTarget().getObject());
-		if(object == null) {
-			return XCommand.FAILED;
-		}
-		return object.executeCommand(command, callback);
-	}
-	
-	@Override
-	protected long getCurrentRevisionNumber() {
-		return this.state.getRevisionNumber();
-	}
-	
-	@Override
-	protected MemoryModel getModel() {
-		return this;
-	}
-	
-	@Override
-	protected MemoryObject getObject() {
-		// this is not an object
-		return null;
-	}
-	
-	@Override
-	protected XReadableModel getTransactionTarget() {
-		return this;
 	}
 	
 	@Override
@@ -685,47 +724,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	}
 	
 	@Override
-	protected void checkSync() {
-		// models can always sync
-	}
-	
-	@Override
-	protected void beginStateTransaction() {
-		assert this.eventQueue.stateTransaction == null : "multiple state transactions detected";
-		this.eventQueue.stateTransaction = this.state.beginTransaction();
-	}
-	
-	@Override
-	protected void endStateTransaction() {
-		this.state.endTransaction(this.eventQueue.stateTransaction);
-		this.eventQueue.stateTransaction = null;
-	}
-	
-	@Override
 	public String toString() {
 		return this.state.toString();
-	}
-	
-	protected boolean enqueueModelRemoveEvents(XID actorId) {
-		
-		boolean inTrans = false;
-		
-		for(XID objectId : this) {
-			MemoryObject object = getObject(objectId);
-			enqueueObjectRemoveEvents(actorId, object, true, true);
-			inTrans = true;
-		}
-		
-		XAddress repoAdrr = hasFather() ? getFather().getAddress() : getAddress().getParent();
-		XRepositoryEvent event = MemoryRepositoryEvent.createRemoveEvent(actorId, repoAdrr,
-		        getID(), getCurrentRevisionNumber(), inTrans);
-		this.eventQueue.enqueueRepositoryEvent(getFather(), event);
-		
-		return inTrans;
-	}
-	
-	protected XModelState getState() {
-		return this.state;
 	}
 	
 }

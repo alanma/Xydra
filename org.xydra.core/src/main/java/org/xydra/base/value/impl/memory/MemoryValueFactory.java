@@ -35,72 +35,40 @@ import org.xydra.base.value.XValueFactory;
  */
 public class MemoryValueFactory implements XValueFactory {
 	
-	public XStringValue createStringValue(String string) {
-		return new MemoryStringValue(string);
+	public XAddressListValue createAddressListValue(Collection<XAddress> values) {
+		return new MemoryAddressListValue(values);
 	}
 	
-	public XBooleanValue createBooleanValue(boolean value) {
-		return new MemoryBooleanValue(value);
+	public XAddressListValue createAddressListValue(XAddress[] values) {
+		return new MemoryAddressListValue(values);
 	}
 	
-	public XDoubleValue createDoubleValue(double value) {
-		return new MemoryDoubleValue(value);
+	public XAddressSetValue createAddressSetValue(Collection<XAddress> values) {
+		return new MemoryAddressSetValue(values);
 	}
 	
-	public XIntegerValue createIntegerValue(int value) {
-		return new MemoryIntegerValue(value);
+	public XAddressSetValue createAddressSetValue(XAddress[] values) {
+		return new MemoryAddressSetValue(values);
 	}
 	
-	public XLongValue createLongValue(long value) {
-		return new MemoryLongValue(value);
+	public XAddressSortedSetValue createAddressSortedSetValue(Collection<XAddress> values) {
+		return new MemoryAddressSortedSetValue(values);
+	}
+	
+	public XAddressSortedSetValue createAddressSortedSetValue(XAddress[] values) {
+		return new MemoryAddressSortedSetValue(values);
 	}
 	
 	public XBooleanListValue createBooleanListValue(boolean[] values) {
 		return new MemoryBooleanListValue(values);
 	}
 	
-	public XDoubleListValue createDoubleListValue(double[] values) {
-		return new MemoryDoubleListValue(values);
-	}
-	
-	public XIntegerListValue createIntegerListValue(int[] values) {
-		return new MemoryIntegerListValue(values);
-	}
-	
-	public XLongListValue createLongListValue(long[] values) {
-		return new MemoryLongListValue(values);
-	}
-	
-	public XStringListValue createStringListValue(String[] strings) {
-		return new MemoryStringListValue(strings);
-	}
-	
-	public XStringListValue createStringListValue(Collection<String> strings) {
-		return new MemoryStringListValue(strings);
-	}
-	
-	public XIDListValue createIDListValue(XID[] xids) {
-		return new MemoryIDListValue(xids);
-	}
-	
-	public XIDListValue createIDListValue(Collection<XID> xids) {
-		return new MemoryIDListValue(xids);
-	}
-	
 	public XBooleanListValue createBooleanListValue(Collection<Boolean> values) {
 		return new MemoryBooleanListValue(values);
 	}
 	
-	public XDoubleListValue createDoubleListValue(Collection<Double> values) {
-		return new MemoryDoubleListValue(values);
-	}
-	
-	public XIntegerListValue createIntegerListValue(Collection<Integer> values) {
-		return new MemoryIntegerListValue(values);
-	}
-	
-	public XLongListValue createLongListValue(Collection<Long> values) {
-		return new MemoryLongListValue(values);
+	public XBooleanValue createBooleanValue(boolean value) {
+		return new MemoryBooleanValue(value);
 	}
 	
 	public XByteListValue createByteListValue(byte[] values) {
@@ -111,51 +79,83 @@ public class MemoryValueFactory implements XValueFactory {
 		return new MemoryByteListValue(values);
 	}
 	
-	public XStringSetValue createStringSetValue(String[] values) {
-		return new MemoryStringSetValue(values);
+	public XDoubleListValue createDoubleListValue(Collection<Double> values) {
+		return new MemoryDoubleListValue(values);
 	}
 	
-	public XStringSetValue createStringSetValue(Collection<String> values) {
-		return new MemoryStringSetValue(values);
+	public XDoubleListValue createDoubleListValue(double[] values) {
+		return new MemoryDoubleListValue(values);
 	}
 	
-	public XIDSetValue createIDSetValue(XID[] values) {
-		return new MemoryIDSetValue(values);
+	public XDoubleValue createDoubleValue(double value) {
+		return new MemoryDoubleValue(value);
+	}
+	
+	public XIDListValue createIDListValue(Collection<XID> xids) {
+		return new MemoryIDListValue(xids);
+	}
+	
+	public XIDListValue createIDListValue(XID[] xids) {
+		return new MemoryIDListValue(xids);
 	}
 	
 	public XIDSetValue createIDSetValue(Collection<XID> values) {
 		return new MemoryIDSetValue(values);
 	}
 	
-	public XIDSortedSetValue createIDSortedSetValue(XID[] values) {
-		return new MemoryIDSortedSetValue(values);
+	public XIDSetValue createIDSetValue(XID[] values) {
+		return new MemoryIDSetValue(values);
 	}
 	
 	public XIDSortedSetValue createIDSortedSetValue(Collection<XID> values) {
 		return new MemoryIDSortedSetValue(values);
 	}
 	
-	public XAddressSortedSetValue createAddressSortedSetValue(XAddress[] values) {
-		return new MemoryAddressSortedSetValue(values);
+	public XIDSortedSetValue createIDSortedSetValue(XID[] values) {
+		return new MemoryIDSortedSetValue(values);
 	}
 	
-	public XAddressSortedSetValue createAddressSortedSetValue(Collection<XAddress> values) {
-		return new MemoryAddressSortedSetValue(values);
+	public XIntegerListValue createIntegerListValue(Collection<Integer> values) {
+		return new MemoryIntegerListValue(values);
 	}
 	
-	public XAddressSetValue createAddressSetValue(XAddress[] values) {
-		return new MemoryAddressSetValue(values);
+	public XIntegerListValue createIntegerListValue(int[] values) {
+		return new MemoryIntegerListValue(values);
 	}
 	
-	public XAddressSetValue createAddressSetValue(Collection<XAddress> values) {
-		return new MemoryAddressSetValue(values);
+	public XIntegerValue createIntegerValue(int value) {
+		return new MemoryIntegerValue(value);
 	}
 	
-	public XAddressListValue createAddressListValue(XAddress[] values) {
-		return new MemoryAddressListValue(values);
+	public XLongListValue createLongListValue(Collection<Long> values) {
+		return new MemoryLongListValue(values);
 	}
 	
-	public XAddressListValue createAddressListValue(Collection<XAddress> values) {
-		return new MemoryAddressListValue(values);
+	public XLongListValue createLongListValue(long[] values) {
+		return new MemoryLongListValue(values);
+	}
+	
+	public XLongValue createLongValue(long value) {
+		return new MemoryLongValue(value);
+	}
+	
+	public XStringListValue createStringListValue(Collection<String> strings) {
+		return new MemoryStringListValue(strings);
+	}
+	
+	public XStringListValue createStringListValue(String[] strings) {
+		return new MemoryStringListValue(strings);
+	}
+	
+	public XStringSetValue createStringSetValue(Collection<String> values) {
+		return new MemoryStringSetValue(values);
+	}
+	
+	public XStringSetValue createStringSetValue(String[] values) {
+		return new MemoryStringSetValue(values);
+	}
+	
+	public XStringValue createStringValue(String string) {
+		return new MemoryStringValue(string);
 	}
 }

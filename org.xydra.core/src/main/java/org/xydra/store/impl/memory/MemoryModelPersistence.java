@@ -5,18 +5,17 @@ import java.util.List;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
-import org.xydra.base.XWritableModel;
-import org.xydra.base.XWritableObject;
+import org.xydra.base.change.XAtomicEvent;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XEvent;
+import org.xydra.base.change.impl.memory.MemoryTransactionEvent;
+import org.xydra.base.rmof.XRevWritableModel;
+import org.xydra.base.rmof.XRevWritableObject;
+import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.core.XCopyUtils;
-import org.xydra.core.change.XAtomicEvent;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XEvent;
-import org.xydra.core.change.impl.memory.MemoryTransactionEvent;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.DeltaUtils;
 import org.xydra.index.query.Pair;
-import org.xydra.store.MAXDone;
-import org.xydra.store.base.SimpleModel;
 
 
 /**
@@ -25,17 +24,17 @@ import org.xydra.store.base.SimpleModel;
  * @author dscharrer
  * 
  */
-@MAXDone
+
 public class MemoryModelPersistence {
 	
-	XAddress modelAddr;
+	private List<XEvent> events = new ArrayList<XEvent>();
 	
 	/**
 	 * The current state of the model, or null if the model doesn't currently
 	 * exist.
 	 */
 	private SimpleModel model = null;
-	private List<XEvent> events = new ArrayList<XEvent>();
+	XAddress modelAddr;
 	
 	public MemoryModelPersistence(XAddress modelAddr) {
 		this.modelAddr = modelAddr;
@@ -86,6 +85,10 @@ public class MemoryModelPersistence {
 		return newRev;
 	}
 	
+	public boolean exists() {
+		return this.model != null;
+	}
+	
 	synchronized public List<XEvent> getEvents(XAddress address, long beginRevision,
 	        long endRevision) {
 		
@@ -126,18 +129,14 @@ public class MemoryModelPersistence {
 		return result;
 	}
 	
-	synchronized public long getRevisionNumber() {
-		return this.events.size() - 1;
-	}
-	
 	/**
 	 * @return the snapshot or null if not found
 	 */
-	synchronized public XWritableModel getModelSnapshot() {
+	synchronized public XRevWritableModel getModelSnapshot() {
 		return XCopyUtils.createSnapshot(this.model);
 	}
 	
-	synchronized public XWritableObject getObjectSnapshot(XID objectId) {
+	synchronized public XRevWritableObject getObjectSnapshot(XID objectId) {
 		
 		if(this.model == null) {
 			// TODO is this the correct behaviour?
@@ -147,8 +146,8 @@ public class MemoryModelPersistence {
 		return XCopyUtils.createSnapshot(this.model.getObject(objectId));
 	}
 	
-	public boolean exists() {
-		return this.model != null;
+	synchronized public long getRevisionNumber() {
+		return this.events.size() - 1;
 	}
 	
 }

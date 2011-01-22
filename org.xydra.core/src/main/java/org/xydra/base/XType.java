@@ -1,6 +1,5 @@
 package org.xydra.base;
 
-
 /**
  * an enumeration used by {@link XAddress XAddresses} to tell what kind of Xydra
  * entity they refer to.
@@ -8,24 +7,7 @@ package org.xydra.base;
  */
 public enum XType {
 	
-	XREPOSITORY, XMODEL, XOBJECT, XFIELD;
-	
-	/**
-	 * @return the XType of entities containing entities of this XType or null
-	 *         for XREPOSITORY
-	 */
-	public XType getParentType() {
-		switch(this) {
-		case XMODEL:
-			return XREPOSITORY;
-		case XOBJECT:
-			return XMODEL;
-		case XFIELD:
-			return XOBJECT;
-		default:
-			return null;
-		}
-	}
+	XFIELD, XMODEL, XOBJECT, XREPOSITORY;
 	
 	/**
 	 * @return the XType of entities contained in entities of this XType or null
@@ -39,6 +21,23 @@ public enum XType {
 			return XOBJECT;
 		case XOBJECT:
 			return XFIELD;
+		default:
+			return null;
+		}
+	}
+	
+	/**
+	 * @return the XType of entities containing entities of this XType or null
+	 *         for XREPOSITORY
+	 */
+	public XType getParentType() {
+		switch(this) {
+		case XMODEL:
+			return XREPOSITORY;
+		case XOBJECT:
+			return XMODEL;
+		case XFIELD:
+			return XOBJECT;
 		default:
 			return null;
 		}

@@ -10,22 +10,22 @@ import java.util.Set;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
-import org.xydra.core.XX;
-import org.xydra.core.change.ChangeType;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XFieldEvent;
+import org.xydra.base.XX;
+import org.xydra.base.change.ChangeType;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XFieldEvent;
+import org.xydra.base.change.XModelEvent;
+import org.xydra.base.change.XObjectEvent;
+import org.xydra.base.change.XRepositoryCommand;
+import org.xydra.base.change.XRepositoryEvent;
+import org.xydra.base.change.XTransactionEvent;
+import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
+import org.xydra.base.change.impl.memory.MemoryRepositoryEvent;
 import org.xydra.core.change.XFieldEventListener;
-import org.xydra.core.change.XModelEvent;
 import org.xydra.core.change.XModelEventListener;
-import org.xydra.core.change.XObjectEvent;
 import org.xydra.core.change.XObjectEventListener;
-import org.xydra.core.change.XRepositoryCommand;
-import org.xydra.core.change.XRepositoryEvent;
 import org.xydra.core.change.XRepositoryEventListener;
-import org.xydra.core.change.XTransactionEvent;
 import org.xydra.core.change.XTransactionEventListener;
-import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
-import org.xydra.core.change.impl.memory.MemoryRepositoryEvent;
 import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
@@ -50,17 +50,17 @@ public class MemoryRepository implements XRepository, Serializable {
 	
 	private static final long serialVersionUID = 2412386047787717740L;
 	
-	private final XRepositoryState state;
+	private Set<XFieldEventListener> fieldChangeListenerCollection;
 	private final Map<XID,MemoryModel> loadedModels = new HashMap<XID,MemoryModel>();
 	
-	private Set<XRepositoryEventListener> repoChangeListenerCollection;
 	private Set<XModelEventListener> modelChangeListenerCollection;
 	private Set<XObjectEventListener> objectChangeListenerCollection;
-	private Set<XFieldEventListener> fieldChangeListenerCollection;
-	private Set<XTransactionEventListener> transactionListenerCollection;
-	
+	private Set<XRepositoryEventListener> repoChangeListenerCollection;
 	private XID sessionActor;
 	private String sessionPasswordHash;
+	
+	private final XRepositoryState state;
+	private Set<XTransactionEventListener> transactionListenerCollection;
 	
 	/**
 	 * Creates a new MemoryRepository.
@@ -95,6 +95,40 @@ public class MemoryRepository implements XRepository, Serializable {
 		this.transactionListenerCollection = new HashSet<XTransactionEventListener>();
 	}
 	
+	public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
+		synchronized(this.fieldChangeListenerCollection) {
+			return this.fieldChangeListenerCollection.add(changeListener);
+		}
+	}
+	
+	public boolean addListenerForModelEvents(XModelEventListener changeListener) {
+		synchronized(this.modelChangeListenerCollection) {
+			return this.modelChangeListenerCollection.add(changeListener);
+		}
+	}
+	
+	public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
+		synchronized(this.objectChangeListenerCollection) {
+			return this.objectChangeListenerCollection.add(changeListener);
+		}
+	}
+	
+	public boolean addListenerForRepositoryEvents(XRepositoryEventListener changeListener) {
+		synchronized(this.repoChangeListenerCollection) {
+			return this.repoChangeListenerCollection.add(changeListener);
+		}
+	}
+	
+	public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
+		synchronized(this.transactionListenerCollection) {
+			return this.transactionListenerCollection.add(changeListener);
+		}
+	}
+	
+	private XStateTransaction beginStateTransaction() {
+		return this.state.beginTransaction();
+	}
+	
 	public MemoryModel createModel(XID modelId) {
 		
 		XRepositoryCommand command = MemoryRepositoryCommand.createAddCommand(getAddress(), true,
@@ -107,59 +141,6 @@ public class MemoryRepository implements XRepository, Serializable {
 			assert result == XCommand.FAILED || model != null;
 			return model;
 		}
-	}
-	
-	public boolean removeModel(XID modelId) {
-		
-		// no synchronization necessary here (except that in
-		// executeRepositoryCommand())
-		
-		XRepositoryCommand command = MemoryRepositoryCommand.createRemoveCommand(getAddress(),
-		        XCommand.FORCED, modelId);
-		
-		long result = executeRepositoryCommand(command);
-		assert result >= 0 || result == XCommand.NOCHANGE;
-		return result != XCommand.NOCHANGE;
-	}
-	
-	/**
-	 * Saves the current state information of this MemoryRepository with the
-	 * currently used persistence layer
-	 */
-	private void save(XStateTransaction transaction) {
-		this.state.save(transaction);
-	}
-	
-	private XStateTransaction beginStateTransaction() {
-		return this.state.beginTransaction();
-	}
-	
-	private void endStateTransaction(XStateTransaction transaction) {
-		this.state.endTransaction(transaction);
-	}
-	
-	@ReadOperation
-	public synchronized MemoryModel getModel(XID modelID) {
-		
-		MemoryModel model = this.loadedModels.get(modelID);
-		if(model != null) {
-			return model;
-		}
-		
-		if(!this.state.hasModelState(modelID)) {
-			return null;
-		}
-		
-		XModelState modelState = this.state.getModelState(modelID);
-		model = new MemoryModel(this.sessionActor, this.sessionPasswordHash, this, modelState);
-		this.loadedModels.put(modelID, model);
-		
-		return model;
-	}
-	
-	@ReadOperation
-	public synchronized Iterator<XID> iterator() {
-		return this.state.iterator();
 	}
 	
 	public void createModelInternal(XID modelId, XCommand command, XLocalChangeCallback callback) {
@@ -203,39 +184,45 @@ public class MemoryRepository implements XRepository, Serializable {
 		
 	}
 	
-	private long removeModelInternal(MemoryModel model, XCommand command,
-	        XLocalChangeCallback callback) {
+	private void endStateTransaction(XStateTransaction transaction) {
+		this.state.endTransaction(transaction);
+	}
+	
+	@Override
+	public boolean equals(Object object) {
+		if(!(object instanceof XRepository)) {
+			return false;
+		}
+		
+		return getID().equals(((XRepository)object).getID());
+	}
+	
+	public long executeCommand(XCommand command) {
+		return executeCommand(command, null);
+	}
+	
+	public long executeCommand(XCommand command, XLocalChangeCallback callback) {
+		if(command instanceof XRepositoryCommand) {
+			return executeRepositoryCommand((XRepositoryCommand)command, callback);
+		}
+		MemoryModel model = getModel(command.getTarget().getModel());
+		if(model == null) {
+			return XCommand.FAILED;
+		}
 		synchronized(model.eventQueue) {
-			
-			XID modelId = model.getID();
-			
-			long rev = model.getRevisionNumber() + 1;
-			
-			XStateTransaction trans = beginStateTransaction();
-			assert model.eventQueue.stateTransaction == null;
-			model.eventQueue.stateTransaction = trans;
-			
-			int since = model.eventQueue.getNextPosition();
-			boolean inTrans = model.enqueueModelRemoveEvents(this.sessionActor);
-			if(inTrans) {
-				model.eventQueue.createTransactionEvent(this.sessionActor, model, null, since);
+			if(model.removed) {
+				return XCommand.FAILED;
 			}
+			XID modelActor = model.eventQueue.getActor();
+			String modelPsw = model.eventQueue.getPasswordHash();
+			model.eventQueue.setSessionActor(this.sessionActor, this.sessionPasswordHash);
 			
-			model.delete();
-			this.state.removeModelState(modelId);
-			this.loadedModels.remove(modelId);
+			long res = model.executeCommand(command, callback);
+			// FIXME model commands executed by listeners will use the
+			// repository actor
 			
-			save(trans);
-			
-			endStateTransaction(trans);
-			model.eventQueue.stateTransaction = null;
-			
-			model.eventQueue.newLocalChange(command, callback);
-			
-			model.eventQueue.sendEvents();
-			model.eventQueue.setBlockSending(true);
-			
-			return rev;
+			model.eventQueue.setSessionActor(modelActor, modelPsw);
+			return res;
 		}
 	}
 	
@@ -246,7 +233,7 @@ public class MemoryRepository implements XRepository, Serializable {
 	private synchronized long executeRepositoryCommand(XRepositoryCommand command,
 	        XLocalChangeCallback callback) {
 		
-		if(!command.getRepositoryID().equals(getID())) {
+		if(!command.getRepositoryId().equals(getID())) {
 			// given given repository-id are not consistent
 			if(callback != null) {
 				callback.onFailure();
@@ -255,7 +242,7 @@ public class MemoryRepository implements XRepository, Serializable {
 		}
 		
 		if(command.getChangeType() == ChangeType.ADD) {
-			if(hasModel(command.getModelID())) {
+			if(hasModel(command.getModelId())) {
 				// ID already taken
 				if(command.isForced()) {
 					/*
@@ -274,13 +261,13 @@ public class MemoryRepository implements XRepository, Serializable {
 				return XCommand.FAILED;
 			}
 			
-			createModelInternal(command.getModelID(), command, callback);
+			createModelInternal(command.getModelId(), command, callback);
 			
 			// Models are always created at the revision number 0.
 			return 0;
 			
 		} else if(command.getChangeType() == ChangeType.REMOVE) {
-			MemoryModel oldModel = getModel(command.getModelID());
+			MemoryModel oldModel = getModel(command.getModelId());
 			if(oldModel == null) {
 				// ID not taken
 				if(command.isForced()) {
@@ -310,43 +297,17 @@ public class MemoryRepository implements XRepository, Serializable {
 		}
 	}
 	
-	public synchronized XID getID() {
-		return this.state.getID();
-	}
-	
-	public synchronized boolean hasModel(XID id) {
-		return this.loadedModels.containsKey(id) || this.state.hasModelState(id);
-	}
-	
-	public synchronized boolean isEmpty() {
-		return this.state.isEmpty();
-	}
-	
-	@Override
-	public boolean equals(Object object) {
-		if(!(object instanceof XRepository)) {
-			return false;
-		}
-		
-		return getID().equals(((XRepository)object).getID());
-	}
-	
-	@Override
-	public int hashCode() {
-		return getID().hashCode();
-	}
-	
 	/**
 	 * Notifies all listeners that have registered interest for notification on
-	 * {@link XRepositoryEvent XRepositoryEvents} happening on this
-	 * MemoryRepository.
+	 * {@link XFieldEvent XFieldEvents} happening on child- {@link MemoryField
+	 * MemoryFields} of this MemoryRepository.
 	 * 
-	 * @param event The {@link XRepositoryEvent} which will be propagated to the
+	 * @param event The {@link XFieldEvent} which will be propagated to the
 	 *            registered listeners.
 	 */
-	protected void fireRepositoryEvent(XRepositoryEvent event) {
-		synchronized(this.repoChangeListenerCollection) {
-			for(XRepositoryEventListener listener : this.repoChangeListenerCollection) {
+	protected void fireFieldEvent(XFieldEvent event) {
+		synchronized(this.fieldChangeListenerCollection) {
+			for(XFieldEventListener listener : this.fieldChangeListenerCollection) {
 				listener.onChangeEvent(event);
 			}
 		}
@@ -387,15 +348,15 @@ public class MemoryRepository implements XRepository, Serializable {
 	
 	/**
 	 * Notifies all listeners that have registered interest for notification on
-	 * {@link XFieldEvent XFieldEvents} happening on child- {@link MemoryField
-	 * MemoryFields} of this MemoryRepository.
+	 * {@link XRepositoryEvent XRepositoryEvents} happening on this
+	 * MemoryRepository.
 	 * 
-	 * @param event The {@link XFieldEvent} which will be propagated to the
+	 * @param event The {@link XRepositoryEvent} which will be propagated to the
 	 *            registered listeners.
 	 */
-	protected void fireFieldEvent(XFieldEvent event) {
-		synchronized(this.fieldChangeListenerCollection) {
-			for(XFieldEventListener listener : this.fieldChangeListenerCollection) {
+	protected void fireRepositoryEvent(XRepositoryEvent event) {
+		synchronized(this.repoChangeListenerCollection) {
+			for(XRepositoryEventListener listener : this.repoChangeListenerCollection) {
 				listener.onChangeEvent(event);
 			}
 		}
@@ -418,21 +379,59 @@ public class MemoryRepository implements XRepository, Serializable {
 		}
 	}
 	
-	public boolean addListenerForRepositoryEvents(XRepositoryEventListener changeListener) {
-		synchronized(this.repoChangeListenerCollection) {
-			return this.repoChangeListenerCollection.add(changeListener);
-		}
+	public XAddress getAddress() {
+		return this.state.getAddress();
 	}
 	
-	public boolean removeListenerForRepositoryEvents(XRepositoryEventListener changeListener) {
-		synchronized(this.repoChangeListenerCollection) {
-			return this.repoChangeListenerCollection.remove(changeListener);
-		}
+	public synchronized XID getID() {
+		return this.state.getID();
 	}
 	
-	public boolean addListenerForModelEvents(XModelEventListener changeListener) {
-		synchronized(this.modelChangeListenerCollection) {
-			return this.modelChangeListenerCollection.add(changeListener);
+	@ReadOperation
+	public synchronized MemoryModel getModel(XID modelId) {
+		
+		MemoryModel model = this.loadedModels.get(modelId);
+		if(model != null) {
+			return model;
+		}
+		
+		if(!this.state.hasModelState(modelId)) {
+			return null;
+		}
+		
+		XModelState modelState = this.state.getModelState(modelId);
+		model = new MemoryModel(this.sessionActor, this.sessionPasswordHash, this, modelState);
+		this.loadedModels.put(modelId, model);
+		
+		return model;
+	}
+	
+	@Override
+	public XID getSessionActor() {
+		return this.sessionActor;
+	}
+	
+	@Override
+	public int hashCode() {
+		return getID().hashCode();
+	}
+	
+	public synchronized boolean hasModel(XID id) {
+		return this.loadedModels.containsKey(id) || this.state.hasModelState(id);
+	}
+	
+	public synchronized boolean isEmpty() {
+		return this.state.isEmpty();
+	}
+	
+	@ReadOperation
+	public synchronized Iterator<XID> iterator() {
+		return this.state.iterator();
+	}
+	
+	public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
+		synchronized(this.fieldChangeListenerCollection) {
+			return this.fieldChangeListenerCollection.remove(changeListener);
 		}
 	}
 	
@@ -442,33 +441,15 @@ public class MemoryRepository implements XRepository, Serializable {
 		}
 	}
 	
-	public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
-		synchronized(this.objectChangeListenerCollection) {
-			return this.objectChangeListenerCollection.add(changeListener);
-		}
-	}
-	
 	public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
 		synchronized(this.objectChangeListenerCollection) {
 			return this.objectChangeListenerCollection.remove(changeListener);
 		}
 	}
 	
-	public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
-		synchronized(this.fieldChangeListenerCollection) {
-			return this.fieldChangeListenerCollection.add(changeListener);
-		}
-	}
-	
-	public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
-		synchronized(this.fieldChangeListenerCollection) {
-			return this.fieldChangeListenerCollection.remove(changeListener);
-		}
-	}
-	
-	public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
-		synchronized(this.transactionListenerCollection) {
-			return this.transactionListenerCollection.add(changeListener);
+	public boolean removeListenerForRepositoryEvents(XRepositoryEventListener changeListener) {
+		synchronized(this.repoChangeListenerCollection) {
+			return this.repoChangeListenerCollection.remove(changeListener);
 		}
 	}
 	
@@ -478,42 +459,61 @@ public class MemoryRepository implements XRepository, Serializable {
 		}
 	}
 	
-	public XAddress getAddress() {
-		return this.state.getAddress();
+	public boolean removeModel(XID modelId) {
+		
+		// no synchronization necessary here (except that in
+		// executeRepositoryCommand())
+		
+		XRepositoryCommand command = MemoryRepositoryCommand.createRemoveCommand(getAddress(),
+		        XCommand.FORCED, modelId);
+		
+		long result = executeRepositoryCommand(command);
+		assert result >= 0 || result == XCommand.NOCHANGE;
+		return result != XCommand.NOCHANGE;
 	}
 	
-	public long executeCommand(XCommand command) {
-		return executeCommand(command, null);
-	}
-	
-	public long executeCommand(XCommand command, XLocalChangeCallback callback) {
-		if(command instanceof XRepositoryCommand) {
-			return executeRepositoryCommand((XRepositoryCommand)command, callback);
-		}
-		MemoryModel model = getModel(command.getTarget().getModel());
-		if(model == null) {
-			return XCommand.FAILED;
-		}
+	private long removeModelInternal(MemoryModel model, XCommand command,
+	        XLocalChangeCallback callback) {
 		synchronized(model.eventQueue) {
-			if(model.removed) {
-				return XCommand.FAILED;
+			
+			XID modelId = model.getID();
+			
+			long rev = model.getRevisionNumber() + 1;
+			
+			XStateTransaction trans = beginStateTransaction();
+			assert model.eventQueue.stateTransaction == null;
+			model.eventQueue.stateTransaction = trans;
+			
+			int since = model.eventQueue.getNextPosition();
+			boolean inTrans = model.enqueueModelRemoveEvents(this.sessionActor);
+			if(inTrans) {
+				model.eventQueue.createTransactionEvent(this.sessionActor, model, null, since);
 			}
-			XID modelActor = model.eventQueue.getActor();
-			String modelPsw = model.eventQueue.getPasswordHash();
-			model.eventQueue.setSessionActor(this.sessionActor, this.sessionPasswordHash);
 			
-			long res = model.executeCommand(command, callback);
-			// FIXME model commands executed by listeners will use the
-			// repository actor
+			model.delete();
+			this.state.removeModelState(modelId);
+			this.loadedModels.remove(modelId);
 			
-			model.eventQueue.setSessionActor(modelActor, modelPsw);
-			return res;
+			save(trans);
+			
+			endStateTransaction(trans);
+			model.eventQueue.stateTransaction = null;
+			
+			model.eventQueue.newLocalChange(command, callback);
+			
+			model.eventQueue.sendEvents();
+			model.eventQueue.setBlockSending(true);
+			
+			return rev;
 		}
 	}
 	
-	@Override
-	public XID getSessionActor() {
-		return this.sessionActor;
+	/**
+	 * Saves the current state information of this MemoryRepository with the
+	 * currently used persistence layer
+	 */
+	private void save(XStateTransaction transaction) {
+		this.state.save(transaction);
 	}
 	
 	@Override

@@ -9,17 +9,6 @@ package org.xydra.base.value;
 public interface XDoubleListValue extends XNumberListValue<Double> {
 	
 	/**
-	 * Returns the Double values as an array in the order they were added to the
-	 * list.
-	 * 
-	 * Note: Changes to the returned array will not affect the XDoubleListValue.
-	 * 
-	 * @return an array containing the list of Double values in the order they
-	 *         were added to the list
-	 */
-	double[] contents();
-	
-	/**
 	 * Creates a new {@link XDoubleListValue} containing all entries from this
 	 * value as well as the specified entry. The order of the already existing
 	 * entries is preserved and the new entry is added to the end of the list.
@@ -45,6 +34,17 @@ public interface XDoubleListValue extends XNumberListValue<Double> {
 	 *             size()
 	 */
 	XDoubleListValue add(int index, Double entry);
+	
+	/**
+	 * Returns the Double values as an array in the order they were added to the
+	 * list.
+	 * 
+	 * Note: Changes to the returned array will not affect the XDoubleListValue.
+	 * 
+	 * @return an array containing the list of Double values in the order they
+	 *         were added to the list
+	 */
+	double[] contents();
 	
 	/**
 	 * Creates a new {@link XDoubleListValue} containing all entries from this

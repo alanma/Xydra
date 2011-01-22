@@ -4,20 +4,20 @@ import java.util.Iterator;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
-import org.xydra.core.XX;
-import org.xydra.core.access.XAccessManager;
-import org.xydra.core.change.XEvent;
-import org.xydra.core.change.XModelEvent;
-import org.xydra.core.change.XObjectEvent;
-import org.xydra.core.change.XRepositoryEvent;
+import org.xydra.base.XX;
+import org.xydra.base.change.XEvent;
+import org.xydra.base.change.XModelEvent;
+import org.xydra.base.change.XObjectEvent;
+import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.index.iterator.AbstractTransformingIterator;
 import org.xydra.store.AccessException;
+import org.xydra.store.access.XAuthorisationManager;
 
 
 /**
  * An {@link XChangeLog} wrapper for a specific actor that checks all access
- * against an {@link XAccessManager}.
+ * against an {@link XAuthorisationManager}.
  * 
  * @author dscharrer
  * 
@@ -26,35 +26,14 @@ public class ArmProtectedChangeLog implements XChangeLog {
 	
 	private static final long serialVersionUID = -1236561973087579785L;
 	
-	private final XChangeLog log;
-	private final XAccessManager arm;
 	private final XID actor;
+	private final XAuthorisationManager arm;
+	private final XChangeLog log;
 	
-	public ArmProtectedChangeLog(XChangeLog log, XAccessManager arm, XID actor) {
+	public ArmProtectedChangeLog(XChangeLog log, XAuthorisationManager arm, XID actor) {
 		this.log = log;
 		this.arm = arm;
 		this.actor = actor;
-	}
-	
-	public Iterator<XEvent> getEventsSince(long revisionNumber) {
-		return getEventsBetween(revisionNumber, Long.MAX_VALUE);
-	}
-	
-	public Iterator<XEvent> getEventsUntil(long revisionNumber) {
-		return getEventsBetween(0, revisionNumber);
-	}
-	
-	private void checkReadAccess() throws AccessException {
-		if(!this.arm.canRead(this.actor, getBaseAddress())) {
-			throw new AccessException(this.actor + " cannot read " + getBaseAddress());
-		}
-	}
-	
-	public long getCurrentRevisionNumber() {
-		
-		checkReadAccess();
-		
-		return this.log.getCurrentRevisionNumber();
 	}
 	
 	private boolean canSee(XEvent event) {
@@ -64,26 +43,43 @@ public class ArmProtectedChangeLog implements XChangeLog {
 		}
 		
 		if(event instanceof XRepositoryEvent) {
-			XAddress modelAddr = XX.resolveModel(event.getTarget(), ((XRepositoryEvent)event)
-			        .getModelID());
+			XAddress modelAddr = XX.resolveModel(event.getTarget(),
+			        ((XRepositoryEvent)event).getModelId());
 			if(this.arm.canRead(this.actor, modelAddr)) {
 				return true;
 			}
 		} else if(event instanceof XModelEvent) {
-			XAddress objectAddr = XX.resolveObject(event.getTarget(), ((XModelEvent)event)
-			        .getObjectID());
+			XAddress objectAddr = XX.resolveObject(event.getTarget(),
+			        ((XModelEvent)event).getObjectId());
 			if(this.arm.canRead(this.actor, objectAddr)) {
 				return true;
 			}
 		} else if(event instanceof XObjectEvent) {
-			XAddress fieldAddr = XX.resolveField(event.getTarget(), ((XObjectEvent)event)
-			        .getFieldID());
+			XAddress fieldAddr = XX.resolveField(event.getTarget(),
+			        ((XObjectEvent)event).getFieldId());
 			if(this.arm.canRead(this.actor, fieldAddr)) {
 				return true;
 			}
 		}
 		
 		return false;
+	}
+	
+	private void checkReadAccess() throws AccessException {
+		if(!this.arm.canRead(this.actor, getBaseAddress())) {
+			throw new AccessException(this.actor + " cannot read " + getBaseAddress());
+		}
+	}
+	
+	public XAddress getBaseAddress() {
+		return this.log.getBaseAddress();
+	}
+	
+	public long getCurrentRevisionNumber() {
+		
+		checkReadAccess();
+		
+		return this.log.getCurrentRevisionNumber();
 	}
 	
 	public XEvent getEventAt(long revisionNumber) {
@@ -101,17 +97,6 @@ public class ArmProtectedChangeLog implements XChangeLog {
 		return event;
 	}
 	
-	public long getFirstRevisionNumber() {
-		
-		checkReadAccess();
-		
-		return this.log.getCurrentRevisionNumber();
-	}
-	
-	public XAddress getBaseAddress() {
-		return this.log.getBaseAddress();
-	}
-	
 	public Iterator<XEvent> getEventsBetween(long beginRevision, long endRevision) {
 		return new AbstractTransformingIterator<XEvent,XEvent>(this.log.getEventsBetween(
 		        beginRevision, endRevision)) {
@@ -120,6 +105,21 @@ public class ArmProtectedChangeLog implements XChangeLog {
 				return canSee(entry) ? entry : null;
 			}
 		};
+	}
+	
+	public Iterator<XEvent> getEventsSince(long revisionNumber) {
+		return getEventsBetween(revisionNumber, Long.MAX_VALUE);
+	}
+	
+	public Iterator<XEvent> getEventsUntil(long revisionNumber) {
+		return getEventsBetween(0, revisionNumber);
+	}
+	
+	public long getFirstRevisionNumber() {
+		
+		checkReadAccess();
+		
+		return this.log.getCurrentRevisionNumber();
 	}
 	
 }

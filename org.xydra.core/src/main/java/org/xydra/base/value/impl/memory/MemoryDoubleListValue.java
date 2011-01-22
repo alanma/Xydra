@@ -37,51 +37,6 @@ public class MemoryDoubleListValue extends MemoryListValue<Double> implements XD
 		this.list = new double[length];
 	}
 	
-	public double[] contents() {
-		double[] array = new double[this.list.length];
-		System.arraycopy(this.list, 0, array, 0, this.list.length);
-		return array;
-	}
-	
-	public Double[] toArray() {
-		Double[] array = new Double[this.list.length];
-		fillArray(array);
-		return array;
-	}
-	
-	@Override
-	public boolean equals(Object other) {
-		return other instanceof XDoubleListValue
-		        && XI.equalsIterator(this.iterator(), ((XDoubleListValue)other).iterator());
-	}
-	
-	@Override
-	public int hashCode() {
-		return Arrays.hashCode(this.list);
-	}
-	
-	@Override
-	public String toString() {
-		return Arrays.toString(this.list);
-	}
-	
-	public Double get(int index) {
-		return this.list[index];
-	}
-	
-	public int size() {
-		return this.list.length;
-	}
-	
-	public Number[] toNumberArray() {
-		Number[] array = new Number[this.list.length];
-		int i = 0;
-		for(Number e : this) {
-			array[i++] = e;
-		}
-		return array;
-	}
-	
 	public XDoubleListValue add(Double entry) {
 		return add(this.list.length, entry);
 	}
@@ -96,6 +51,27 @@ public class MemoryDoubleListValue extends MemoryListValue<Double> implements XD
 		v.list[index] = entry;
 		System.arraycopy(this.list, index, v.list, index + 1, size - index);
 		return v;
+	}
+	
+	public double[] contents() {
+		double[] array = new double[this.list.length];
+		System.arraycopy(this.list, 0, array, 0, this.list.length);
+		return array;
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		return other instanceof XDoubleListValue
+		        && XI.equalsIterator(this.iterator(), ((XDoubleListValue)other).iterator());
+	}
+	
+	public Double get(int index) {
+		return this.list[index];
+	}
+	
+	@Override
+	public int hashCode() {
+		return Arrays.hashCode(this.list);
 	}
 	
 	public XDoubleListValue remove(Double entry) {
@@ -115,6 +91,30 @@ public class MemoryDoubleListValue extends MemoryListValue<Double> implements XD
 		System.arraycopy(this.list, 0, v.list, 0, index);
 		System.arraycopy(this.list, index + 1, v.list, index, size - index - 1);
 		return v;
+	}
+	
+	public int size() {
+		return this.list.length;
+	}
+	
+	public Double[] toArray() {
+		Double[] array = new Double[this.list.length];
+		fillArray(array);
+		return array;
+	}
+	
+	public Number[] toNumberArray() {
+		Number[] array = new Number[this.list.length];
+		int i = 0;
+		for(Number e : this) {
+			array[i++] = e;
+		}
+		return array;
+	}
+	
+	@Override
+	public String toString() {
+		return Arrays.toString(this.list);
 	}
 	
 }

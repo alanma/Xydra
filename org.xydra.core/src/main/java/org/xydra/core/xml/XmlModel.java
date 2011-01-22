@@ -6,14 +6,14 @@ import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableField;
-import org.xydra.base.XReadableModel;
-import org.xydra.base.XReadableObject;
-import org.xydra.base.XReadableRepository;
 import org.xydra.base.XID;
+import org.xydra.base.XX;
+import org.xydra.base.change.XEvent;
+import org.xydra.base.rmof.XReadableField;
+import org.xydra.base.rmof.XReadableModel;
+import org.xydra.base.rmof.XReadableObject;
+import org.xydra.base.rmof.XReadableRepository;
 import org.xydra.base.value.XValue;
-import org.xydra.core.XX;
-import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XLoggedModel;
@@ -53,16 +53,16 @@ import org.xydra.store.AccessException;
 @RunsInJava
 public class XmlModel {
 	
-	private static final String XREPOSITORY_ELEMENT = "xrepository";
-	private static final String XMODEL_ELEMENT = "xmodel";
-	private static final String XOBJECT_ELEMENT = "xobject";
-	private static final String XFIELD_ELEMENT = "xfield";
-	private static final String XCHANGELOG_ELEMENT = "xlog";
-	
+	public static final long NO_REVISION = -1;
 	private static final String REVISION_ATTRIBUTE = "revision";
 	private static final String STARTREVISION_ATTRIBUTE = "startRevision";
+	private static final String XCHANGELOG_ELEMENT = "xlog";
+	private static final String XFIELD_ELEMENT = "xfield";
 	
-	public static final long NO_REVISION = -1;
+	private static final String XMODEL_ELEMENT = "xmodel";
+	private static final String XOBJECT_ELEMENT = "xobject";
+	
+	private static final String XREPOSITORY_ELEMENT = "xrepository";
 	
 	private static long getRevisionAttribute(MiniElement xml, String elementName) {
 		
@@ -80,58 +80,112 @@ public class XmlModel {
 	}
 	
 	/**
-	 * Load the repository represented by the given XML element into an
-	 * {@link XRepositoryState}.
+	 * Load the model represented by the given XML element into an
+	 * {@link XModelState}.
 	 * 
-	 * @param If this is not null the given store will be used to create the
-	 *            reository state, otherwise a {@link TemporaryRepositoryState}
-	 *            ist created
-	 * 
-	 * @return the created {@link XRepositoryState}
+	 * @param parent If parent is null, the field is loaded into a
+	 *            {@link TemporaryModelState}, otherwise it is loaded into a
+	 *            child state of parent.
+	 * @param trans The state transaction to use for creating the model.
+	 * @return the created {@link XModelState}
 	 */
-	public static XRepositoryState toRepositoryState(MiniElement xml, XStateStore store) {
+	public static void loadChangeLogState(MiniElement xml, XChangeLogState state,
+	        XStateTransaction trans) {
 		
-		XmlUtils.checkElementName(xml, XREPOSITORY_ELEMENT);
+		XmlUtils.checkElementName(xml, XCHANGELOG_ELEMENT);
 		
-		XID xid = XmlUtils.getRequiredXidAttribute(xml, XREPOSITORY_ELEMENT);
-		
-		XAddress repoAddr = XX.toAddress(xid, null, null, null);
-		XRepositoryState repositoryState = new TemporaryRepositoryState(repoAddr);
-		if(store == null) {
-			repositoryState = new TemporaryRepositoryState(repoAddr);
-		} else {
-			repositoryState = store.createRepositoryState(repoAddr);
+		long startRev = 0L;
+		String revisionString = xml.getAttribute(STARTREVISION_ATTRIBUTE);
+		if(revisionString != null) {
+			try {
+				startRev = Long.parseLong(revisionString);
+			} catch(NumberFormatException e) {
+				throw new IllegalArgumentException("<" + XCHANGELOG_ELEMENT + ">@"
+				        + STARTREVISION_ATTRIBUTE + " does not contain a long, but '"
+				        + revisionString + "'");
+			}
 		}
 		
-		XStateTransaction trans = repositoryState.beginTransaction();
+		state.setFirstRevisionNumber(startRev);
 		
-		Iterator<MiniElement> modelElementIt = xml.getElementsByTagName(XMODEL_ELEMENT);
-		while(modelElementIt.hasNext()) {
-			MiniElement modelElement = modelElementIt.next();
-			XModelState modelState = toModelState(modelElement, repositoryState, trans);
-			repositoryState.addModelState(modelState);
+		Iterator<MiniElement> eventElementIt = xml.getElements();
+		while(eventElementIt.hasNext()) {
+			MiniElement e = eventElementIt.next();
+			XEvent event = XmlEvent.toEvent(e, state.getBaseAddress(), state);
+			state.appendEvent(event, trans);
 		}
 		
-		repositoryState.save(trans);
-		
-		repositoryState.endTransaction(trans);
-		
-		return repositoryState;
 	}
 	
 	/**
-	 * Get the {@link XRepository} represented by the given XML element.
+	 * Get the {@link XField} represented by the given XML element.
 	 * 
 	 * @param actorId TODO
-	 * @param xml a partial XML document starting with &lt;xrepository&gt; and
-	 *            ending with the same &lt;/xrepository&gt;
+	 * @param xml a partial XML document starting with &lt;xfield&gt; and ending
+	 *            with the same &lt;/xfield&gt;
 	 * 
-	 * @return an {@link XRepository}
+	 * @return an {@link XField}
 	 * @throws IllegalArgumentException if the given element is not a valid
-	 *             XRepository element.
+	 *             XField element.
 	 */
-	public static XRepository toRepository(XID actorId, String passwordHash, MiniElement xml) {
-		return new MemoryRepository(actorId, passwordHash, toRepositoryState(xml, null));
+	public static XField toField(XID actorId, MiniElement xml) {
+		return new MemoryField(actorId, toFieldState(xml, null, null));
+	}
+	
+	/**
+	 * Load the field represented by the given XML element into an
+	 * {@link XFieldState}.
+	 * 
+	 * @param parent If parent is null, the field is loaded into a
+	 *            {@link TemporaryFieldState}, otherwise it is loaded into a
+	 *            child state of parent.
+	 * @param trans The state transaction to use for creating the field.
+	 * @return the created {@link XFieldState}
+	 */
+	public static XFieldState toFieldState(MiniElement xml, XObjectState parent,
+	        XStateTransaction trans) {
+		
+		XmlUtils.checkElementName(xml, XFIELD_ELEMENT);
+		
+		XID xid = XmlUtils.getRequiredXidAttribute(xml, XFIELD_ELEMENT);
+		
+		long revision = getRevisionAttribute(xml, XFIELD_ELEMENT);
+		
+		XValue xvalue = null;
+		
+		Iterator<MiniElement> valueElementIt = xml.getElements();
+		if(valueElementIt.hasNext()) {
+			MiniElement valueElement = valueElementIt.next();
+			xvalue = XmlValue.toValue(valueElement);
+		}
+		
+		XFieldState fieldState;
+		if(parent == null) {
+			XAddress fieldAddr = XX.toAddress(null, null, null, xid);
+			fieldState = new TemporaryFieldState(fieldAddr);
+		} else {
+			fieldState = parent.createFieldState(xid);
+		}
+		fieldState.setRevisionNumber(revision);
+		fieldState.setValue(xvalue);
+		
+		fieldState.save(trans);
+		return fieldState;
+	}
+	
+	/**
+	 * Get the {@link XModel} represented by the given XML element.
+	 * 
+	 * @param actorId TODO
+	 * @param xml a partial XML document starting with &lt;xmodel&gt; and ending
+	 *            with the same &lt;/xmodel&gt;
+	 * 
+	 * @return an {@link XModel}
+	 * @throws IllegalArgumentException if the given element is not a valid
+	 *             XModel element.
+	 */
+	public static XModel toModel(XID actorId, String passwordHash, MiniElement xml) {
+		return new MemoryModel(actorId, passwordHash, toModelState(xml, null, null));
 	}
 	
 	/**
@@ -194,56 +248,18 @@ public class XmlModel {
 	}
 	
 	/**
-	 * Load the model represented by the given XML element into an
-	 * {@link XModelState}.
-	 * 
-	 * @param parent If parent is null, the field is loaded into a
-	 *            {@link TemporaryModelState}, otherwise it is loaded into a
-	 *            child state of parent.
-	 * @param trans The state transaction to use for creating the model.
-	 * @return the created {@link XModelState}
-	 */
-	public static void loadChangeLogState(MiniElement xml, XChangeLogState state,
-	        XStateTransaction trans) {
-		
-		XmlUtils.checkElementName(xml, XCHANGELOG_ELEMENT);
-		
-		long startRev = 0L;
-		String revisionString = xml.getAttribute(STARTREVISION_ATTRIBUTE);
-		if(revisionString != null) {
-			try {
-				startRev = Long.parseLong(revisionString);
-			} catch(NumberFormatException e) {
-				throw new IllegalArgumentException("<" + XCHANGELOG_ELEMENT + ">@"
-				        + STARTREVISION_ATTRIBUTE + " does not contain a long, but '"
-				        + revisionString + "'");
-			}
-		}
-		
-		state.setFirstRevisionNumber(startRev);
-		
-		Iterator<MiniElement> eventElementIt = xml.getElements();
-		while(eventElementIt.hasNext()) {
-			MiniElement e = eventElementIt.next();
-			XEvent event = XmlEvent.toEvent(e, state.getBaseAddress(), state);
-			state.appendEvent(event, trans);
-		}
-		
-	}
-	
-	/**
-	 * Get the {@link XModel} represented by the given XML element.
+	 * Get the {@link XObject} represented by the given XML element.
 	 * 
 	 * @param actorId TODO
-	 * @param xml a partial XML document starting with &lt;xmodel&gt; and ending
-	 *            with the same &lt;/xmodel&gt;
+	 * @param xml a partial XML document starting with &lt;xobject&gt; and
+	 *            ending with the same &lt;/xobject&gt;
 	 * 
-	 * @return an {@link XModel}
+	 * @return an {@link XObject}
 	 * @throws IllegalArgumentException if the given element is not a valid
-	 *             XModel element.
+	 *             XObject element.
 	 */
-	public static XModel toModel(XID actorId, String passwordHash, MiniElement xml) {
-		return new MemoryModel(actorId, passwordHash, toModelState(xml, null, null));
+	public static XObject toObject(XID actorId, String passwordHash, MiniElement xml) {
+		return new MemoryObject(actorId, passwordHash, toObjectState(xml, null, null));
 	}
 	
 	/**
@@ -310,127 +326,149 @@ public class XmlModel {
 	}
 	
 	/**
-	 * Get the {@link XObject} represented by the given XML element.
+	 * Get the {@link XRepository} represented by the given XML element.
 	 * 
 	 * @param actorId TODO
-	 * @param xml a partial XML document starting with &lt;xobject&gt; and
-	 *            ending with the same &lt;/xobject&gt;
+	 * @param xml a partial XML document starting with &lt;xrepository&gt; and
+	 *            ending with the same &lt;/xrepository&gt;
 	 * 
-	 * @return an {@link XObject}
+	 * @return an {@link XRepository}
 	 * @throws IllegalArgumentException if the given element is not a valid
-	 *             XObject element.
+	 *             XRepository element.
 	 */
-	public static XObject toObject(XID actorId, String passwordHash, MiniElement xml) {
-		return new MemoryObject(actorId, passwordHash, toObjectState(xml, null, null));
+	public static XRepository toRepository(XID actorId, String passwordHash, MiniElement xml) {
+		return new MemoryRepository(actorId, passwordHash, toRepositoryState(xml, null));
 	}
 	
 	/**
-	 * Load the field represented by the given XML element into an
-	 * {@link XFieldState}.
+	 * Load the repository represented by the given XML element into an
+	 * {@link XRepositoryState}.
 	 * 
-	 * @param parent If parent is null, the field is loaded into a
-	 *            {@link TemporaryFieldState}, otherwise it is loaded into a
-	 *            child state of parent.
-	 * @param trans The state transaction to use for creating the field.
-	 * @return the created {@link XFieldState}
+	 * @param If this is not null the given store will be used to create the
+	 *            reository state, otherwise a {@link TemporaryRepositoryState}
+	 *            ist created
+	 * 
+	 * @return the created {@link XRepositoryState}
 	 */
-	public static XFieldState toFieldState(MiniElement xml, XObjectState parent,
-	        XStateTransaction trans) {
+	public static XRepositoryState toRepositoryState(MiniElement xml, XStateStore store) {
 		
-		XmlUtils.checkElementName(xml, XFIELD_ELEMENT);
+		XmlUtils.checkElementName(xml, XREPOSITORY_ELEMENT);
 		
-		XID xid = XmlUtils.getRequiredXidAttribute(xml, XFIELD_ELEMENT);
+		XID xid = XmlUtils.getRequiredXidAttribute(xml, XREPOSITORY_ELEMENT);
 		
-		long revision = getRevisionAttribute(xml, XFIELD_ELEMENT);
-		
-		XValue xvalue = null;
-		
-		Iterator<MiniElement> valueElementIt = xml.getElements();
-		if(valueElementIt.hasNext()) {
-			MiniElement valueElement = valueElementIt.next();
-			xvalue = XmlValue.toValue(valueElement);
-		}
-		
-		XFieldState fieldState;
-		if(parent == null) {
-			XAddress fieldAddr = XX.toAddress(null, null, null, xid);
-			fieldState = new TemporaryFieldState(fieldAddr);
+		XAddress repoAddr = XX.toAddress(xid, null, null, null);
+		XRepositoryState repositoryState = new TemporaryRepositoryState(repoAddr);
+		if(store == null) {
+			repositoryState = new TemporaryRepositoryState(repoAddr);
 		} else {
-			fieldState = parent.createFieldState(xid);
+			repositoryState = store.createRepositoryState(repoAddr);
 		}
-		fieldState.setRevisionNumber(revision);
-		fieldState.setValue(xvalue);
 		
-		fieldState.save(trans);
-		return fieldState;
+		XStateTransaction trans = repositoryState.beginTransaction();
+		
+		Iterator<MiniElement> modelElementIt = xml.getElementsByTagName(XMODEL_ELEMENT);
+		while(modelElementIt.hasNext()) {
+			MiniElement modelElement = modelElementIt.next();
+			XModelState modelState = toModelState(modelElement, repositoryState, trans);
+			repositoryState.addModelState(modelState);
+		}
+		
+		repositoryState.save(trans);
+		
+		repositoryState.endTransaction(trans);
+		
+		return repositoryState;
 	}
 	
 	/**
-	 * Get the {@link XField} represented by the given XML element.
+	 * Encode the given {@link XChangeLog} as an XML element.
 	 * 
-	 * @param actorId TODO
-	 * @param xml a partial XML document starting with &lt;xfield&gt; and ending
-	 *            with the same &lt;/xfield&gt;
-	 * 
-	 * @return an {@link XField}
-	 * @throws IllegalArgumentException if the given element is not a valid
-	 *             XField element.
-	 */
-	public static XField toField(XID actorId, MiniElement xml) {
-		return new MemoryField(actorId, toFieldState(xml, null, null));
-	}
-	
-	/**
-	 * Encode the given {@link XReadableRepository} as an XML element.
-	 * 
-	 * @param xmodel an {@link XReadableRepository}
+	 * @param log an {@link XChangeLog}
 	 * @param out the {@link XmlOut} that a partial XML document starting with
-	 *            &lt;xrepository&gt; and ending with the same
-	 *            &lt;/xrepository&gt; is written to. White space is permitted
-	 *            but not required.
+	 *            &lt;xfield&gt; and ending with the same &lt;/xfield&gt; is
+	 *            written to. White space is permitted but not required.
+	 */
+	public static void toXml(XChangeLog log, XmlOut xo) {
+		
+		// get values before outputting anything to prevent incomplete XML
+		// elements on errors
+		long rev = log.getFirstRevisionNumber();
+		Iterator<XEvent> events = log.getEventsBetween(0, Long.MAX_VALUE);
+		
+		xo.open(XCHANGELOG_ELEMENT);
+		if(rev != 0) {
+			xo.attribute(STARTREVISION_ATTRIBUTE, Long.toString(rev));
+		}
+		
+		while(events.hasNext()) {
+			XmlEvent.toXml(events.next(), xo, log.getBaseAddress(), log);
+		}
+		
+		xo.close(XCHANGELOG_ELEMENT);
+		
+	}
+	
+	/**
+	 * Encode the given {@link XReadableField} as an XML element, including
+	 * revision numbers.
+	 * 
+	 * @param xfield an {@link XReadableField}
+	 * @param out the {@link XmlOut} that a partial XML document starting with
+	 *            &lt;xfield&gt; and ending with the same &lt;/xfield&gt; is
+	 *            written to. White space is permitted but not required.
+	 * @throws IllegalArgumentException if the field contains an unsupported
+	 *             XValue type. See {@link XmlValueWriter} for details.
+	 */
+	public static void toXml(XReadableField xfield, XmlOut xo) {
+		toXml(xfield, xo, true);
+	}
+	
+	/**
+	 * Encode the given {@link XReadableField} as an XML element.
+	 * 
+	 * @param xfield an {@link XReadableField}
+	 * @param out the {@link XmlOut} that a partial XML document starting with
+	 *            &lt;xfield&gt; and ending with the same &lt;/xfield&gt; is
+	 *            written to. White space is permitted but not required.
 	 * @param saveRevision true if revision numbers should be saved to the xml
 	 *            file.
-	 * @param ignoreInaccessible ignore inaccessible models, objects and fields
-	 *            instead of throwing an exception
-	 * @param saveChangeLog if true, any model change logs are saved
-	 * @throws IllegalArgumentException if the model contains an unsupported
+	 * @throws IllegalArgumentException if the field contains an unsupported
 	 *             XValue type. See {@link XmlValueWriter} for details.
 	 */
-	public static void toXml(XReadableRepository xrepository, XmlOut xo, boolean saveRevision,
-	        boolean ignoreInaccessible, boolean saveChangeLog) {
+	public static void toXml(XReadableField xfield, XmlOut xo, boolean saveRevision) {
 		
-		xo.open(XREPOSITORY_ELEMENT);
-		xo.attribute(XmlUtils.XID_ATTRIBUTE, xrepository.getID().toString());
+		// get values before outputting anything to prevent incomplete XML
+		// elements on errors
+		XValue xvalue = xfield.getValue();
+		long rev = xfield.getRevisionNumber();
 		
-		for(XID modelOd : xrepository) {
-			try {
-				toXml(xrepository.getModel(modelOd), xo, saveRevision, ignoreInaccessible,
-				        saveChangeLog);
-			} catch(AccessException ae) {
-				if(!ignoreInaccessible) {
-					throw ae;
-				}
-			}
+		xo.open(XFIELD_ELEMENT);
+		xo.attribute(XmlUtils.XID_ATTRIBUTE, xfield.getID().toString());
+		if(saveRevision) {
+			xo.attribute(REVISION_ATTRIBUTE, Long.toString(rev));
 		}
 		
-		xo.close(XREPOSITORY_ELEMENT);
+		if(xvalue != null) {
+			XmlValue.toXml(xvalue, xo);
+		}
+		
+		xo.close(XFIELD_ELEMENT);
 		
 	}
 	
 	/**
-	 * Encode the given {@link XReadableRepository} as an XML element, including
+	 * Encode the given {@link XReadableModel} as an XML element, including
 	 * revision numbers and ignoring inaccessible entities.
 	 * 
-	 * @param xmodel an {@link XReadableRepository}
+	 * @param xmodel an {@link XReadableModel}
 	 * @param out the {@link XmlOut} that a partial XML document starting with
-	 *            &lt;xrepository&gt; and ending with the same
-	 *            &lt;/xrepository&gt; is written to. White space is permitted
-	 *            but not required.
+	 *            &lt;xmodel&gt; and ending with the same &lt;/xmodel&gt; is
+	 *            written to. White space is permitted but not required.
 	 * @throws IllegalArgumentException if the model contains an unsupported
 	 *             XValue type. See {@link XmlValueWriter} for details.
 	 */
-	public static void toXml(XReadableRepository xrepository, XmlOut xo) {
-		toXml(xrepository, xo, true, true, true);
+	public static void toXml(XReadableModel xmodel, XmlOut xo) {
+		toXml(xmodel, xo, true, true, true);
 	}
 	
 	/**
@@ -488,18 +526,18 @@ public class XmlModel {
 	}
 	
 	/**
-	 * Encode the given {@link XReadableModel} as an XML element, including revision
-	 * numbers and ignoring inaccessible entities.
+	 * Encode the given {@link XReadableObject} as an XML element, including
+	 * revision numbers and ignoring inaccessible entities.
 	 * 
-	 * @param xmodel an {@link XReadableModel}
+	 * @param xobject an {@link XReadableObject}
 	 * @param out the {@link XmlOut} that a partial XML document starting with
-	 *            &lt;xmodel&gt; and ending with the same &lt;/xmodel&gt; is
+	 *            &lt;xobject&gt; and ending with the same &lt;/xobject&gt; is
 	 *            written to. White space is permitted but not required.
-	 * @throws IllegalArgumentException if the model contains an unsupported
+	 * @throws IllegalArgumentException if the object contains an unsupported
 	 *             XValue type. See {@link XmlValueWriter} for details.
 	 */
-	public static void toXml(XReadableModel xmodel, XmlOut xo) {
-		toXml(xmodel, xo, true, true, true);
+	public static void toXml(XReadableObject xobject, XmlOut xo) {
+		toXml(xobject, xo, true, true, true);
 	}
 	
 	/**
@@ -557,93 +595,55 @@ public class XmlModel {
 	}
 	
 	/**
-	 * Encode the given {@link XReadableObject} as an XML element, including
+	 * Encode the given {@link XReadableRepository} as an XML element, including
 	 * revision numbers and ignoring inaccessible entities.
 	 * 
-	 * @param xobject an {@link XReadableObject}
+	 * @param xmodel an {@link XReadableRepository}
 	 * @param out the {@link XmlOut} that a partial XML document starting with
-	 *            &lt;xobject&gt; and ending with the same &lt;/xobject&gt; is
-	 *            written to. White space is permitted but not required.
-	 * @throws IllegalArgumentException if the object contains an unsupported
+	 *            &lt;xrepository&gt; and ending with the same
+	 *            &lt;/xrepository&gt; is written to. White space is permitted
+	 *            but not required.
+	 * @throws IllegalArgumentException if the model contains an unsupported
 	 *             XValue type. See {@link XmlValueWriter} for details.
 	 */
-	public static void toXml(XReadableObject xobject, XmlOut xo) {
-		toXml(xobject, xo, true, true, true);
+	public static void toXml(XReadableRepository xrepository, XmlOut xo) {
+		toXml(xrepository, xo, true, true, true);
 	}
 	
 	/**
-	 * Encode the given {@link XReadableField} as an XML element.
+	 * Encode the given {@link XReadableRepository} as an XML element.
 	 * 
-	 * @param xfield an {@link XReadableField}
+	 * @param xmodel an {@link XReadableRepository}
 	 * @param out the {@link XmlOut} that a partial XML document starting with
-	 *            &lt;xfield&gt; and ending with the same &lt;/xfield&gt; is
-	 *            written to. White space is permitted but not required.
+	 *            &lt;xrepository&gt; and ending with the same
+	 *            &lt;/xrepository&gt; is written to. White space is permitted
+	 *            but not required.
 	 * @param saveRevision true if revision numbers should be saved to the xml
 	 *            file.
-	 * @throws IllegalArgumentException if the field contains an unsupported
+	 * @param ignoreInaccessible ignore inaccessible models, objects and fields
+	 *            instead of throwing an exception
+	 * @param saveChangeLog if true, any model change logs are saved
+	 * @throws IllegalArgumentException if the model contains an unsupported
 	 *             XValue type. See {@link XmlValueWriter} for details.
 	 */
-	public static void toXml(XReadableField xfield, XmlOut xo, boolean saveRevision) {
+	public static void toXml(XReadableRepository xrepository, XmlOut xo, boolean saveRevision,
+	        boolean ignoreInaccessible, boolean saveChangeLog) {
 		
-		// get values before outputting anything to prevent incomplete XML
-		// elements on errors
-		XValue xvalue = xfield.getValue();
-		long rev = xfield.getRevisionNumber();
+		xo.open(XREPOSITORY_ELEMENT);
+		xo.attribute(XmlUtils.XID_ATTRIBUTE, xrepository.getID().toString());
 		
-		xo.open(XFIELD_ELEMENT);
-		xo.attribute(XmlUtils.XID_ATTRIBUTE, xfield.getID().toString());
-		if(saveRevision) {
-			xo.attribute(REVISION_ATTRIBUTE, Long.toString(rev));
+		for(XID modelOd : xrepository) {
+			try {
+				toXml(xrepository.getModel(modelOd), xo, saveRevision, ignoreInaccessible,
+				        saveChangeLog);
+			} catch(AccessException ae) {
+				if(!ignoreInaccessible) {
+					throw ae;
+				}
+			}
 		}
 		
-		if(xvalue != null) {
-			XmlValue.toXml(xvalue, xo);
-		}
-		
-		xo.close(XFIELD_ELEMENT);
-		
-	}
-	
-	/**
-	 * Encode the given {@link XReadableField} as an XML element, including revision
-	 * numbers.
-	 * 
-	 * @param xfield an {@link XReadableField}
-	 * @param out the {@link XmlOut} that a partial XML document starting with
-	 *            &lt;xfield&gt; and ending with the same &lt;/xfield&gt; is
-	 *            written to. White space is permitted but not required.
-	 * @throws IllegalArgumentException if the field contains an unsupported
-	 *             XValue type. See {@link XmlValueWriter} for details.
-	 */
-	public static void toXml(XReadableField xfield, XmlOut xo) {
-		toXml(xfield, xo, true);
-	}
-	
-	/**
-	 * Encode the given {@link XChangeLog} as an XML element.
-	 * 
-	 * @param log an {@link XChangeLog}
-	 * @param out the {@link XmlOut} that a partial XML document starting with
-	 *            &lt;xfield&gt; and ending with the same &lt;/xfield&gt; is
-	 *            written to. White space is permitted but not required.
-	 */
-	public static void toXml(XChangeLog log, XmlOut xo) {
-		
-		// get values before outputting anything to prevent incomplete XML
-		// elements on errors
-		long rev = log.getFirstRevisionNumber();
-		Iterator<XEvent> events = log.getEventsBetween(0, Long.MAX_VALUE);
-		
-		xo.open(XCHANGELOG_ELEMENT);
-		if(rev != 0) {
-			xo.attribute(STARTREVISION_ATTRIBUTE, Long.toString(rev));
-		}
-		
-		while(events.hasNext()) {
-			XmlEvent.toXml(events.next(), xo, log.getBaseAddress(), log);
-		}
-		
-		xo.close(XCHANGELOG_ELEMENT);
+		xo.close(XREPOSITORY_ELEMENT);
 		
 	}
 	

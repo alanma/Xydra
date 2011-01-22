@@ -7,17 +7,17 @@ import java.util.Map;
 import java.util.Set;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableField;
-import org.xydra.base.XReadableModel;
-import org.xydra.base.XReadableObject;
 import org.xydra.base.XID;
-import org.xydra.base.XHalfWritableField;
-import org.xydra.base.XHalfWritableObject;
-import org.xydra.core.XX;
-import org.xydra.core.change.XCommand;
+import org.xydra.base.XX;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.rmof.XWritableField;
+import org.xydra.base.rmof.XWritableObject;
+import org.xydra.base.rmof.XReadableField;
+import org.xydra.base.rmof.XReadableModel;
+import org.xydra.base.rmof.XReadableObject;
+import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.index.iterator.AbstractFilteringIterator;
 import org.xydra.index.iterator.BagUnionIterator;
-import org.xydra.store.base.SimpleField;
 
 
 /**
@@ -25,32 +25,32 @@ import org.xydra.store.base.SimpleField;
  * {@link XReadableObject}.
  * 
  * An {@link XReadableObject} is passed as an argument of the constructor. This
- * ChangedField will than basically represent the given {@link XReadableObject} and
- * allow changes on its set of {@link XReadableField XBaseFields}. The changes do
- * not happen directly on the passed {@link XReadableField} but rather on a sort of
- * copy that emulates the passed {@link XReadableObject}. A ChangedObject provides
- * methods to compare the current state to the state the passed
- * {@link XReadableObject} was in at creation time.
+ * ChangedField will than basically represent the given {@link XReadableObject}
+ * and allow changes on its set of {@link XReadableField XBaseFields}. The
+ * changes do not happen directly on the passed {@link XReadableField} but
+ * rather on a sort of copy that emulates the passed {@link XReadableObject}. A
+ * ChangedObject provides methods to compare the current state to the state the
+ * passed {@link XReadableObject} was in at creation time.
  * 
  * @author dscharrer
  * 
  */
-public class ChangedObject implements XHalfWritableObject {
-	
-	// Fields that are in base but have been removed.
-	// Contains no XIDs that are in added or changed.
-	private final Set<XID> removed = new HashSet<XID>();
+public class ChangedObject implements XWritableObject {
 	
 	// Fields that are not in base and have been added.
 	// Contains no XIDs that are in removed or changed.
 	private final Map<XID,SimpleField> added = new HashMap<XID,SimpleField>();
+	
+	private final XReadableObject base;
 	
 	// Fields that are in base and have not been removed.
 	// While they were changed once, those changes might have been reverted.
 	// Contains no XIDs that are in added or removed.
 	private final Map<XID,ChangedField> changed = new HashMap<XID,ChangedField>();
 	
-	private final XReadableObject base;
+	// Fields that are in base but have been removed.
+	// Contains no XIDs that are in added or changed.
+	private final Set<XID> removed = new HashSet<XID>();
 	
 	/**
 	 * Wrap an {@link XReadableObject} to record a set of changes made. Multiple
@@ -58,13 +58,13 @@ public class ChangedObject implements XHalfWritableObject {
 	 * changes remains.
 	 * 
 	 * Note that this is a very lightweight wrapper intended for a short
-	 * lifetime. As a consequence, the wrapped {@link XReadableObject} is not copied
-	 * and changes to it or any contained fields (as opposed to this
+	 * lifetime. As a consequence, the wrapped {@link XReadableObject} is not
+	 * copied and changes to it or any contained fields (as opposed to this
 	 * {@link ChangedObject}) may result in undefined behavior of the
 	 * {@link ChangedObject}.
 	 * 
-	 * @param base The {@link XReadableObject} this ChangedObject will encapsulate
-	 *            and represent
+	 * @param base The {@link XReadableObject} this ChangedObject will
+	 *            encapsulate and represent
 	 */
 	public ChangedObject(XReadableObject base) {
 		this.base = base;
@@ -92,75 +92,26 @@ public class ChangedObject implements XHalfWritableObject {
 		return true;
 	}
 	
-	public XHalfWritableField createField(XID fieldId) {
+	/**
+	 * Remove all fields.
+	 */
+	public void clear() {
 		
-		XHalfWritableField oldField = getField(fieldId);
-		if(oldField != null) {
-			return oldField;
+		this.added.clear();
+		this.changed.clear();
+		for(XID id : this.base) {
+			// IMPROVE maybe add a "cleared" flag to remove all fields more
+			// efficiently?
+			this.removed.add(id);
 		}
 		
-		XReadableField field = this.base.getField(fieldId);
-		if(field != null) {
-			
-			// If the field previously existed it must have been removed
-			// previously and we can merge the remove and add changes.
-			assert this.removed.contains(fieldId);
-			assert !this.changed.containsKey(fieldId);
-			this.removed.remove(fieldId);
-			ChangedField newField = new ChangedField(field);
-			newField.setValue(null);
-			this.changed.put(fieldId, newField);
-			
-			assert checkSetInvariants();
-			
-			return newField;
-			
-		} else {
-			
-			// Otherwise, the field is completely new.
-			XAddress fieldAddr = XX.resolveField(getAddress(), fieldId);
-			SimpleField newField = new SimpleField(fieldAddr);
-			this.added.put(fieldId, newField);
-			
-			assert checkSetInvariants();
-			
-			return newField;
-		}
-		
-	}
-	
-	/**
-	 * @return the {@link XID XIDs} of the {@link XReadableField XBaseFields} that
-	 *         existed in the original {@link XReadableObject} but have been removed
-	 */
-	public Iterable<XID> getRemovedFields() {
-		return this.removed;
-	}
-	
-	/**
-	 * @return the {@link NewField NewFields} that have been added to this
-	 *         ChangedObject and were not contained in the original
-	 *         {@link XReadableObject}
-	 */
-	public Iterable<SimpleField> getNewFields() {
-		return this.added.values();
-	}
-	
-	/**
-	 * @return an {@link Iterable} of the fields that already existed in the
-	 *         original {@link XReadableObject} but have been changed. Note: their
-	 *         current state might be the same as the original one. Use
-	 *         {@link ChangedField#isChanged()} to check if they are actually
-	 *         different form the original field.
-	 */
-	public Iterable<ChangedField> getChangedFields() {
-		return this.changed.values();
+		assert checkSetInvariants();
 	}
 	
 	/**
 	 * Count the minimal number of {@link XCommand XCommands} that would be
-	 * needed to transform the original {@link XReadableObject} to the current state
-	 * which is represented by this ChangedObject.
+	 * needed to transform the original {@link XReadableObject} to the current
+	 * state which is represented by this ChangedObject.
 	 * 
 	 * @param max An upper bound for counting the amount of needed
 	 *            {@link XCommands}. Note that setting this bound to little may
@@ -238,7 +189,59 @@ public class ChangedObject implements XHalfWritableObject {
 		return n;
 	}
 	
-	public XHalfWritableField getField(XID fieldId) {
+	public XWritableField createField(XID fieldId) {
+		
+		XWritableField oldField = getField(fieldId);
+		if(oldField != null) {
+			return oldField;
+		}
+		
+		XReadableField field = this.base.getField(fieldId);
+		if(field != null) {
+			
+			// If the field previously existed it must have been removed
+			// previously and we can merge the remove and add changes.
+			assert this.removed.contains(fieldId);
+			assert !this.changed.containsKey(fieldId);
+			this.removed.remove(fieldId);
+			ChangedField newField = new ChangedField(field);
+			newField.setValue(null);
+			this.changed.put(fieldId, newField);
+			
+			assert checkSetInvariants();
+			
+			return newField;
+			
+		} else {
+			
+			// Otherwise, the field is completely new.
+			XAddress fieldAddr = XX.resolveField(getAddress(), fieldId);
+			SimpleField newField = new SimpleField(fieldAddr);
+			this.added.put(fieldId, newField);
+			
+			assert checkSetInvariants();
+			
+			return newField;
+		}
+		
+	}
+	
+	public XAddress getAddress() {
+		return this.base.getAddress();
+	}
+	
+	/**
+	 * @return an {@link Iterable} of the fields that already existed in the
+	 *         original {@link XReadableObject} but have been changed. Note:
+	 *         their current state might be the same as the original one. Use
+	 *         {@link ChangedField#isChanged()} to check if they are actually
+	 *         different form the original field.
+	 */
+	public Iterable<ChangedField> getChangedFields() {
+		return this.changed.values();
+	}
+	
+	public XWritableField getField(XID fieldId) {
 		
 		SimpleField newField = this.added.get(fieldId);
 		if(newField != null) {
@@ -265,6 +268,87 @@ public class ChangedObject implements XHalfWritableObject {
 		assert checkSetInvariants();
 		
 		return changedField;
+	}
+	
+	public XID getID() {
+		return this.base.getID();
+	}
+	
+	/**
+	 * @return the {@link NewField NewFields} that have been added to this
+	 *         ChangedObject and were not contained in the original
+	 *         {@link XReadableObject}
+	 */
+	public Iterable<SimpleField> getNewFields() {
+		return this.added.values();
+	}
+	
+	/**
+	 * @return the {@link XReadableField} with the given {@link XID} as it
+	 *         exists in the original {@link XReadableField}.
+	 */
+	public XReadableField getOldField(XID fieldId) {
+		return this.base.getField(fieldId);
+	}
+	
+	/**
+	 * @return the {@link XID XIDs} of the {@link XReadableField XBaseFields}
+	 *         that existed in the original {@link XReadableObject} but have
+	 *         been removed
+	 */
+	public Iterable<XID> getRemovedFields() {
+		return this.removed;
+	}
+	
+	/**
+	 * Return the revision number of the wrapped {@link XReadableObject}. The
+	 * revision number does not increase with changes to this
+	 * {@link ChangedObject}.
+	 * 
+	 * @return the revision number of the original {@link XReadableObject}
+	 */
+	public long getRevisionNumber() {
+		return this.base.getRevisionNumber();
+	}
+	
+	public boolean hasField(XID fieldId) {
+		return this.added.containsKey(fieldId)
+		        || (!this.removed.contains(fieldId) && this.base.hasField(fieldId));
+	}
+	
+	public boolean isEmpty() {
+		
+		if(!this.added.isEmpty()) {
+			return false;
+		}
+		
+		if(this.removed.isEmpty()) {
+			return this.base.isEmpty();
+		}
+		
+		if(this.changed.size() > this.removed.size()) {
+			return false;
+		}
+		
+		for(XID fieldId : this.base) {
+			if(!this.removed.contains(fieldId)) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	public Iterator<XID> iterator() {
+		
+		Iterator<XID> filtered = new AbstractFilteringIterator<XID>(this.base.iterator()) {
+			@Override
+			protected boolean matchesFilter(XID entry) {
+				return !ChangedObject.this.removed.contains(entry);
+			}
+		};
+		
+		return new BagUnionIterator<XID>(filtered, this.added.keySet().iterator());
 	}
 	
 	public boolean removeField(XID fieldId) {
@@ -296,89 +380,6 @@ public class ChangedObject implements XHalfWritableObject {
 		}
 		
 		return false;
-	}
-	
-	/**
-	 * Return the revision number of the wrapped {@link XReadableObject}. The
-	 * revision number does not increase with changes to this
-	 * {@link ChangedObject}.
-	 * 
-	 * @return the revision number of the original {@link XReadableObject}
-	 */
-	public long getRevisionNumber() {
-		return this.base.getRevisionNumber();
-	}
-	
-	public XID getID() {
-		return this.base.getID();
-	}
-	
-	public boolean hasField(XID fieldId) {
-		return this.added.containsKey(fieldId)
-		        || (!this.removed.contains(fieldId) && this.base.hasField(fieldId));
-	}
-	
-	public XAddress getAddress() {
-		return this.base.getAddress();
-	}
-	
-	public Iterator<XID> iterator() {
-		
-		Iterator<XID> filtered = new AbstractFilteringIterator<XID>(this.base.iterator()) {
-			@Override
-			protected boolean matchesFilter(XID entry) {
-				return !ChangedObject.this.removed.contains(entry);
-			}
-		};
-		
-		return new BagUnionIterator<XID>(filtered, this.added.keySet().iterator());
-	}
-	
-	/**
-	 * @return the {@link XReadableField} with the given {@link XID} as it exists in
-	 *         the original {@link XReadableField}.
-	 */
-	public XReadableField getOldField(XID fieldId) {
-		return this.base.getField(fieldId);
-	}
-	
-	public boolean isEmpty() {
-		
-		if(!this.added.isEmpty()) {
-			return false;
-		}
-		
-		if(this.removed.isEmpty()) {
-			return this.base.isEmpty();
-		}
-		
-		if(this.changed.size() > this.removed.size()) {
-			return false;
-		}
-		
-		for(XID fieldId : this.base) {
-			if(!this.removed.contains(fieldId)) {
-				return false;
-			}
-		}
-		
-		return true;
-	}
-	
-	/**
-	 * Remove all fields.
-	 */
-	public void clear() {
-		
-		this.added.clear();
-		this.changed.clear();
-		for(XID id : this.base) {
-			// IMPROVE maybe add a "cleared" flag to remove all fields more
-			// efficiently?
-			this.removed.add(id);
-		}
-		
-		assert checkSetInvariants();
 	}
 	
 }

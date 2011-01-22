@@ -1,5 +1,8 @@
 package org.xydra.core.change;
 
+import org.xydra.base.change.XRepositoryEvent;
+
+
 /**
  * This interface indicates that that it is possible to register
  * {@link XRepositoryEvent XRepositoryEventListeners} to listen for

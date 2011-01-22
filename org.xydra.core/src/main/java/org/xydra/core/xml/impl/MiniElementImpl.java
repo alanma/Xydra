@@ -11,7 +11,6 @@ import org.xydra.annotations.RunsInJava;
 import org.xydra.core.xml.MiniElement;
 
 
-
 /**
  * {@link MiniElement} implementation that wraps an org.w3c.dom.Element.
  * 
@@ -38,16 +37,6 @@ public class MiniElementImpl implements MiniElement {
 		return this.element.getTextContent();
 	}
 	
-	private Iterator<MiniElement> nodeListToIterator(NodeList nodes) {
-		List<MiniElement> list = new ArrayList<MiniElement>();
-		for(int i = 0; i < nodes.getLength(); ++i) {
-			Node node = nodes.item(i);
-			if(node instanceof Element)
-				list.add(new MiniElementImpl((Element)node));
-		}
-		return list.iterator();
-	}
-	
 	public Iterator<MiniElement> getElements() {
 		final NodeList nodes = this.element.getChildNodes();
 		return nodeListToIterator(nodes);
@@ -60,6 +49,16 @@ public class MiniElementImpl implements MiniElement {
 	
 	public String getName() {
 		return this.element.getNodeName();
+	}
+	
+	private Iterator<MiniElement> nodeListToIterator(NodeList nodes) {
+		List<MiniElement> list = new ArrayList<MiniElement>();
+		for(int i = 0; i < nodes.getLength(); ++i) {
+			Node node = nodes.item(i);
+			if(node instanceof Element)
+				list.add(new MiniElementImpl((Element)node));
+		}
+		return list.iterator();
 	}
 	
 }

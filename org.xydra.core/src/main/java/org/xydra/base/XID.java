@@ -3,7 +3,6 @@ package org.xydra.base;
 import java.io.Serializable;
 
 import org.xydra.base.value.XValue;
-import org.xydra.core.model.XIDProvider;
 
 
 /**

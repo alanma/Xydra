@@ -19,16 +19,6 @@ import org.xydra.annotations.RunsInJava;
 public interface Callback<T> {
 	
 	/**
-	 * Indicates that the operation succeeded without problems.
-	 * 
-	 * After a {@link #onFailure(Throwable)} has been called, this method may
-	 * not be called.
-	 * 
-	 * @param object The result of the operation, if any.
-	 */
-	void onSuccess(T object);
-	
-	/**
 	 * Indicates that the operation failed and no changes were made.
 	 * 
 	 * This method should not be called after {@link #onSuccess(Object)} has
@@ -37,5 +27,15 @@ public interface Callback<T> {
 	 * @param exception An object describing the exception that occurred.
 	 */
 	void onFailure(Throwable exception);
+	
+	/**
+	 * Indicates that the operation succeeded without problems.
+	 * 
+	 * After a {@link #onFailure(Throwable)} has been called, this method may
+	 * not be called.
+	 * 
+	 * @param object The result of the operation, if any.
+	 */
+	void onSuccess(T object);
 	
 }

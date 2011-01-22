@@ -20,8 +20,7 @@ package org.xydra.store.impl.delegate;
  * <td>Yes, requires password</td>
  * <td>Yes</td>
  * <td> {@link org.xydra.store.XydraStore XydraStore}</td>
- * <td> {@link org.xydra.store.impl.DelegateToSingleOperationStore
- * DelegateToSingleOperationStore}</td>
+ * <td> {@link DelegateToSingleOperationStore}</td>
  * </tr>
  * 
  * <tr>
@@ -42,7 +41,7 @@ package org.xydra.store.impl.delegate;
  * <td>Yes</td>
  * <td> {@link org.xydra.store.impl.delegate.XydraBlockingStore
  * XydraBlockingStore}</td>
- * <td> {@link org.xydra.store.impl.delegate.DelegateToPersistenceAndArm
+ * <td> {@link org.xydra.store.impl.delegate.DelegateToPersistenceAndAcm
  * DelegateToPersistenceAndArm}</td>
  * </tr>
  * 

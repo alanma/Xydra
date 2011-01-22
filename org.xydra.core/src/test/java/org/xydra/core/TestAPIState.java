@@ -3,10 +3,8 @@ package org.xydra.core;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.xydra.core.model.state.TestStateStore;
 import org.xydra.core.model.state.XSPI;
-import org.xydra.core.test.AbstractTestAPI;
-import org.xydra.core.test.TestLogger;
-import org.xydra.core.test.model.state.TestStateStore;
 
 
 public class TestAPIState extends AbstractTestAPI {

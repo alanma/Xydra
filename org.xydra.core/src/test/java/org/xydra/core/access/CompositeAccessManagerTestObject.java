@@ -3,17 +3,18 @@ package org.xydra.core.access;
 import org.xydra.base.XAddress;
 import org.xydra.base.XType;
 import org.xydra.core.access.impl.memory.CompositeAccessManager;
-import org.xydra.core.access.impl.memory.MemoryAccessManager;
-import org.xydra.core.test.access.AbstractAccessManagerTest;
+import org.xydra.store.access.XAuthorisationManager;
+import org.xydra.store.access.XGroupDatabaseWithListeners;
+import org.xydra.store.access.impl.memory.MemoryAuthorisationManager;
 
 
 public class CompositeAccessManagerTestObject extends AbstractAccessManagerTest {
 	
 	@Override
-	protected XAccessManager getAccessManager(XGroupDatabaseWithListeners groups,
+	protected XAuthorisationManager getAccessManager(XGroupDatabaseWithListeners groups,
 	        XAddress rA0) {
-		XAccessManager outer = new MemoryAccessManager(groups);
-		XAccessManager inner = new MemoryAccessManager(groups);
+		XAuthorisationManager outer = new MemoryAuthorisationManager(groups);
+		XAuthorisationManager inner = new MemoryAuthorisationManager(groups);
 		XAddress addr = rA0.getParent();
 		assert addr.getAddressedType() == XType.XOBJECT;
 		return new CompositeAccessManager(addr, outer, inner);

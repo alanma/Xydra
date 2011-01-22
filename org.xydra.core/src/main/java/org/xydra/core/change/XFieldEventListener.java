@@ -1,5 +1,8 @@
 package org.xydra.core.change;
 
+import org.xydra.base.change.XFieldEvent;
+
+
 /**
  * A listener interested in {@link XFieldEvent XFieldEvents}. Can be registered
  * on classes implementing the {@link XSendsFieldEvents} interface.

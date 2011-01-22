@@ -1,9 +1,8 @@
 package org.xydra.core.model.state;
 
 import org.junit.BeforeClass;
+import org.xydra.core.TestLogger;
 import org.xydra.core.model.state.impl.memory.TemporaryStateStore;
-import org.xydra.core.test.TestLogger;
-import org.xydra.core.test.model.state.AbstractStateTest;
 
 
 public class TemporaryStateTest extends AbstractStateTest {

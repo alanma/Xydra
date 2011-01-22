@@ -4,8 +4,7 @@ import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.base.XID;
-import org.xydra.core.XX;
-import org.xydra.store.MAXTodo;
+import org.xydra.base.XX;
 
 
 /**
@@ -16,18 +15,7 @@ import org.xydra.store.MAXTodo;
 @RunsInAppEngine
 @RunsInGWT
 @RunsInJava
-@MAXTodo
 public class XA {
-	
-	/**
-	 * The access right to read content.
-	 */
-	public final static XID ACCESS_READ = XX.toId("read");
-	
-	/**
-	 * The access right to write content.
-	 */
-	public final static XID ACCESS_WRITE = XX.toId("write");
 	
 	/**
 	 * The access right to allow others access.
@@ -38,6 +26,16 @@ public class XA {
 	 * The access right to deny others access.
 	 */
 	public final static XID ACCESS_DENY = XX.toId("deny");
+	
+	/**
+	 * The access right to read content.
+	 */
+	public final static XID ACCESS_READ = XX.toId("read");
+	
+	/**
+	 * The access right to write content.
+	 */
+	public final static XID ACCESS_WRITE = XX.toId("write");
 	
 	/**
 	 * A special group that everyone is part of.

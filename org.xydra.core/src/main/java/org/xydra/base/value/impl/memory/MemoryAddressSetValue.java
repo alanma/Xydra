@@ -16,20 +16,22 @@ public class MemoryAddressSetValue extends MemorySetValue<XAddress> implements X
 	
 	private static final long serialVersionUID = -83885798275571937L;
 	
-	public MemoryAddressSetValue(XAddress[] contents) {
-		super(contents);
-	}
-	
 	public MemoryAddressSetValue(Collection<XAddress> contents) {
 		super(contents);
 	}
 	
-	public XAddress[] contents() {
-		return toArray(new XAddress[size()]);
+	public MemoryAddressSetValue(XAddress[] contents) {
+		super(contents);
 	}
 	
-	public XAddress[] toArray() {
-		return contents();
+	public XAddressSetValue add(XAddress entry) {
+		MemoryAddressSetValue v = new MemoryAddressSetValue(this.set);
+		v.set.add(entry);
+		return v;
+	}
+	
+	public XAddress[] contents() {
+		return toArray(new XAddress[size()]);
 	}
 	
 	@Override
@@ -42,16 +44,14 @@ public class MemoryAddressSetValue extends MemorySetValue<XAddress> implements X
 		return getHashCode();
 	}
 	
-	public XAddressSetValue add(XAddress entry) {
-		MemoryAddressSetValue v = new MemoryAddressSetValue(this.set);
-		v.set.add(entry);
-		return v;
-	}
-	
 	public XAddressSetValue remove(XAddress entry) {
 		MemoryAddressSetValue v = new MemoryAddressSetValue(this.set);
 		v.set.remove(entry);
 		return v;
+	}
+	
+	public XAddress[] toArray() {
+		return contents();
 	}
 	
 }

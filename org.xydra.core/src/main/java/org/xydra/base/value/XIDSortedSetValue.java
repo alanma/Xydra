@@ -15,6 +15,16 @@ import org.xydra.base.XID;
 public interface XIDSortedSetValue extends XIDSetValue {
 	
 	/**
+	 * Creates a new {@link XIDSortedSetValue} containing all entries from this
+	 * value as well as the specified entry. This value is not modified.
+	 * 
+	 * @param entry The new entry
+	 * @return a new {@link XIDSortedSetValue} containing all entries from this
+	 *         value as well as the given entry
+	 */
+	XIDSortedSetValue add(XID entry);
+	
+	/**
 	 * Returns the contents of this XIDSortedSetValue as an array.
 	 * 
 	 * Note: Changes to the returned array will not affect the
@@ -24,16 +34,6 @@ public interface XIDSortedSetValue extends XIDSetValue {
 	 *         XIDSortedSetValue in insertion order
 	 */
 	public XID[] contents();
-	
-	/**
-	 * Creates a new {@link XIDSortedSetValue} containing all entries from this
-	 * value as well as the specified entry. This value is not modified.
-	 * 
-	 * @param entry The new entry
-	 * @return a new {@link XIDSortedSetValue} containing all entries from this
-	 *         value as well as the given entry
-	 */
-	XIDSortedSetValue add(XID entry);
 	
 	/**
 	 * Creates a new {@link XIDSortedSetValue} containing all entries from this

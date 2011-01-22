@@ -18,25 +18,6 @@ public abstract class MemoryListValue<E> implements XListValue<E> {
 	
 	private static final long serialVersionUID = 7285839520276137162L;
 	
-	public int indexOf(E elem) {
-		int s = size();
-		for(int i = 0; i < s; i++) {
-			if(XI.equals(get(i), elem)) {
-				return i;
-			}
-		}
-		return -1;
-	}
-	
-	public int lastIndexOf(E elem) {
-		for(int i = size(); i >= 0; i--) {
-			if(XI.equals(get(i), elem)) {
-				return i;
-			}
-		}
-		return -1;
-	}
-	
 	public boolean contains(E elem) {
 		int s = size();
 		for(int i = 0; i < s; i++) {
@@ -47,10 +28,6 @@ public abstract class MemoryListValue<E> implements XListValue<E> {
 		return false;
 	}
 	
-	public boolean isEmpty() {
-		return (size() == 0);
-	}
-	
 	protected void fillArray(E[] array) {
 		assert array.length == size();
 		int i = 0;
@@ -59,8 +36,31 @@ public abstract class MemoryListValue<E> implements XListValue<E> {
 		}
 	}
 	
+	public int indexOf(E elem) {
+		int s = size();
+		for(int i = 0; i < s; i++) {
+			if(XI.equals(get(i), elem)) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	public boolean isEmpty() {
+		return (size() == 0);
+	}
+	
 	public Iterator<E> iterator() {
 		return new XListValueIterator<E>(this);
+	}
+	
+	public int lastIndexOf(E elem) {
+		for(int i = size(); i >= 0; i--) {
+			if(XI.equals(get(i), elem)) {
+				return i;
+			}
+		}
+		return -1;
 	}
 	
 }

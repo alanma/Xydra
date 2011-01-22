@@ -9,29 +9,6 @@ package org.xydra.base.value;
 public interface XNumberListValue<T extends Number> extends XListValue<T> {
 	
 	/**
-	 * Returns the Number values as an array in the order they were added to the
-	 * list.
-	 * 
-	 * Note: Changes to the returned array will not affect the XNumberListValue.
-	 * 
-	 * @return an array containing the list of Number values in the order they
-	 *         were added to the list
-	 */
-	Number[] toNumberArray();
-	
-	/**
-	 * Creates a new {@link XNumberListValue} containing all entries from this
-	 * value as well as the specified entry. The order of the already existing
-	 * entries is preserved and the new entry is added to the end of the list.
-	 * This value is not modified.
-	 * 
-	 * @param entry The new entry.
-	 * @return a new {@link XNumberListValue} containing all entries from this
-	 *         value as well as the specified entry.
-	 */
-	XNumberListValue<T> add(T entry);
-	
-	/**
 	 * Creates a new {@link XNumberListValue} containing all entries from this
 	 * value as well as the specified entry. The order of the already existing
 	 * entries is preserved and the new entry is added at the specified index
@@ -48,15 +25,15 @@ public interface XNumberListValue<T extends Number> extends XListValue<T> {
 	
 	/**
 	 * Creates a new {@link XNumberListValue} containing all entries from this
-	 * value except the specified entry. Only the first occurrence of the entry
-	 * is removed, if this list contains it multiple times. This value is not
-	 * modified.
+	 * value as well as the specified entry. The order of the already existing
+	 * entries is preserved and the new entry is added to the end of the list.
+	 * This value is not modified.
 	 * 
-	 * @param entry The entry which is to be removed
+	 * @param entry The new entry.
 	 * @return a new {@link XNumberListValue} containing all entries from this
-	 *         value except the given entry
+	 *         value as well as the specified entry.
 	 */
-	XNumberListValue<T> remove(T entry);
+	XNumberListValue<T> add(T entry);
 	
 	/**
 	 * Creates a new {@link XNumberListValue} containing all entries from this
@@ -71,4 +48,27 @@ public interface XNumberListValue<T extends Number> extends XListValue<T> {
 	 *             equal to size()
 	 */
 	XNumberListValue<T> remove(int index);
+	
+	/**
+	 * Creates a new {@link XNumberListValue} containing all entries from this
+	 * value except the specified entry. Only the first occurrence of the entry
+	 * is removed, if this list contains it multiple times. This value is not
+	 * modified.
+	 * 
+	 * @param entry The entry which is to be removed
+	 * @return a new {@link XNumberListValue} containing all entries from this
+	 *         value except the given entry
+	 */
+	XNumberListValue<T> remove(T entry);
+	
+	/**
+	 * Returns the Number values as an array in the order they were added to the
+	 * list.
+	 * 
+	 * Note: Changes to the returned array will not affect the XNumberListValue.
+	 * 
+	 * @return an array containing the list of Number values in the order they
+	 *         were added to the list
+	 */
+	Number[] toNumberArray();
 }

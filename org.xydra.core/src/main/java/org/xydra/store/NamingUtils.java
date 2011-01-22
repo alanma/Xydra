@@ -1,9 +1,9 @@
 package org.xydra.store;
 
+import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
-import org.xydra.core.X;
-import org.xydra.core.XX;
+import org.xydra.base.XX;
 
 
 /**
@@ -36,19 +36,95 @@ import org.xydra.core.XX;
  *         Policy Wer ein Model anlegt, dem gehört es allein
  * 
  */
+/**
+ * @author xamde
+ * 
+ */
 public class NamingUtils {
-	
-	private static final String NULL_ENCODED = "_N";
-	
-	public static final String ENCODING_SEPARATOR = "_.";
-	
-	public static final String NAMESPACE_SEPARATOR = "--";
 	
 	public static final String PREFIX_INTERNAL = "internal";
 	
-	public static final String PREFIX_RIGHTS_ID = PREFIX_INTERNAL + NAMESPACE_SEPARATOR + "rights-";
+	public static final String NAMESPACE_SEPARATOR = "--";
+	
+	public static final String ENCODING_SEPARATOR = "_.";
+	
+	/**
+	 * Default ID for the default model for accounts, created by store
+	 * implementation: {@value}
+	 */
+	public static final XID ID_AUTHENTICATION_MODEL = XX.toId(PREFIX_INTERNAL + NAMESPACE_SEPARATOR
+	        + "authentication");
+	
+	/**
+	 * Default ID for the default model for groups, created by store
+	 * implementation: {@value}
+	 */
+	public static final XID ID_GROUPS_MODEL = XX.toId(PREFIX_INTERNAL + NAMESPACE_SEPARATOR
+	        + "groups");
+	
+	/**
+	 * Default ID for the default model for the global authorisation model,
+	 * created by store implementation: {@value}
+	 */
+	public static final XID ID_REPO_AUTHORISATION_MODEL = XX.toId(PREFIX_INTERNAL
+	        + NAMESPACE_SEPARATOR + "repositoryRights");
+	
+	private static final String NULL_ENCODED = "_N";
 	
 	public static final String PREFIX_INDEX_ID = PREFIX_INTERNAL + NAMESPACE_SEPARATOR + "index-";
+	
+	public static final String PREFIX_RIGHTS_ID = PREFIX_INTERNAL + NAMESPACE_SEPARATOR + "rights-";
+	
+	/**
+	 * @param encodedXAddress created via {@link #encode(XAddress)}
+	 * @return the decoded XAddress or null if the encodedXAddress represents
+	 *         null
+	 * @throws IllegalArgumentException if decoding fails
+	 */
+	public static XAddress decodeXAddress(String encodedXAddress) {
+		if(encodedXAddress.equals(NULL_ENCODED)) {
+			return null;
+		} else {
+			String[] encParts = encodedXAddress.split("_\\.");
+			if(encParts.length != 4) {
+				throw new IllegalArgumentException("Encoded address consits not of four parts: "
+				        + encodedXAddress);
+			}
+			return X.getIDProvider().fromComponents(decodeXid(encParts[0]), decodeXid(encParts[1]),
+			        decodeXid(encParts[2]), decodeXid(encParts[3]));
+		}
+	}
+	
+	/**
+	 * Decode a string created via {@link #encode(XID)} back to an XID
+	 * 
+	 * @param encodedXid
+	 * @return an XID or null (if the string represented the null XID)
+	 * @throws IllegalArgumentException if decoding fails
+	 */
+	public static XID decodeXid(String encodedXid) {
+		String decoded = decodeXidString(encodedXid);
+		if(decoded == null) {
+			return null;
+		} else {
+			return XX.toId(decoded);
+		}
+	}
+	
+	/**
+	 * @param encodedXid
+	 * @return the decoded XID string
+	 * @throws IllegalArgumentException if decoding fails
+	 */
+	private static String decodeXidString(String encodedXid) {
+		if(encodedXid == null) {
+			throw new IllegalArgumentException("string is null");
+		}
+		if(encodedXid.equals(NULL_ENCODED))
+			return null;
+		else
+			return encodedXid.replace("_U", "_");
+	}
 	
 	/**
 	 * Encode address as XID string
@@ -95,56 +171,15 @@ public class NamingUtils {
 	}
 	
 	/**
-	 * Decode a string created via {@link #encode(XID)} back to an XID
-	 * 
-	 * @param encodedXid
-	 * @return an XID or null (if the string represented the null XID)
+	 * @param indexModelId which has been created via
+	 *            {@link #getIndexModelId(XID, String)}
+	 * @return the base model on which this index model is based. Note: Several
+	 *         indexes can be based on the same base model.
 	 */
-	public static XID decodeXid(String encodedXid) {
-		String decoded = decodeXidString(encodedXid);
-		if(decoded == null) {
-			return null;
-		} else {
-			return XX.toId(decoded);
-		}
-	}
-	
-	private static String decodeXidString(String s) {
-		assert s != null;
-		if(s.equals(NULL_ENCODED))
-			return null;
-		else
-			return s.replace("_U", "_");
-	}
-	
-	/**
-	 * @param encodedXAddress created via {@link #encode(XAddress)}
-	 * @return the decoded XAddress or null if the encodedXAddress represents
-	 *         null
-	 */
-	public static XAddress decodeXAddress(String encodedXAddress) {
-		if(encodedXAddress.equals(NULL_ENCODED)) {
-			return null;
-		} else {
-			String[] encParts = encodedXAddress.split("_\\.");
-			if(encParts.length != 4) {
-				throw new IllegalArgumentException("Encoded address consits not of four parts: "
-				        + encodedXAddress);
-			}
-			return X.getIDProvider().fromComponents(decodeXid(encParts[0]), decodeXid(encParts[1]),
-			        decodeXid(encParts[2]), decodeXid(encParts[3]));
-		}
-	}
-	
-	/**
-	 * Default ID for the default model for accounts, created by store
-	 * implementation: {@value}
-	 */
-	public static final XID ID_ACCOUNT_MODEL = XX.toId(PREFIX_INTERNAL + NAMESPACE_SEPARATOR
-	        + "accounts");
-	
-	public static XID getRightsModelId(XID modelId) {
-		return XX.toId(PREFIX_RIGHTS_ID + modelId.toString());
+	public static XID getBaseModelIdForIndexModelId(XID indexModelId) {
+		String modelIdStr = parseIndexModelId(indexModelId)[0];
+		XID modelId = XX.toId(modelIdStr);
+		return modelId;
 	}
 	
 	/***
@@ -171,23 +206,19 @@ public class NamingUtils {
 	/**
 	 * @param indexModelId which has been created via
 	 *            {@link #getIndexModelId(XID, String)}
-	 * @return the base model on which this index model is based. Note: Several
-	 *         indexes can be based on the same base model.
-	 */
-	public static XID getBaseModelIdForIndexModelId(XID indexModelId) {
-		String modelIdStr = parseIndexModelId(indexModelId)[0];
-		XID modelId = XX.toId(modelIdStr);
-		return modelId;
-	}
-	
-	/**
-	 * @param indexModelId which has been created via
-	 *            {@link #getIndexModelId(XID, String)}
 	 * @return the index name of this index. Different index models for a given
 	 *         base model must have different index names.
 	 */
 	public static String getIndexNameForIndexModelId(XID indexModelId) {
 		return parseIndexModelId(indexModelId)[1];
+	}
+	
+	public static XID getRightsModelId(XID modelId) {
+		return XX.toId(PREFIX_RIGHTS_ID + modelId.toString());
+	}
+	
+	public static boolean isRightsModelId(XID modelId) {
+		return modelId.toString().startsWith(PREFIX_RIGHTS_ID);
 	}
 	
 	/**

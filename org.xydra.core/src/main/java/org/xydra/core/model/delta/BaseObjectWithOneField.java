@@ -3,9 +3,9 @@ package org.xydra.core.model.delta;
 import java.util.Iterator;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableField;
-import org.xydra.base.XReadableObject;
 import org.xydra.base.XID;
+import org.xydra.base.rmof.XReadableField;
+import org.xydra.base.rmof.XReadableObject;
 import org.xydra.index.iterator.SingleValueIterator;
 
 
@@ -17,12 +17,16 @@ import org.xydra.index.iterator.SingleValueIterator;
  */
 public class BaseObjectWithOneField implements XReadableObject {
 	
-	private final XReadableField field;
 	private final XAddress address;
+	private final XReadableField field;
 	
 	public BaseObjectWithOneField(XAddress addr, XReadableField field) {
 		this.address = addr;
 		this.field = field;
+	}
+	
+	public XAddress getAddress() {
+		return this.address;
 	}
 	
 	public XReadableField getField(XID fieldId) {
@@ -32,28 +36,24 @@ public class BaseObjectWithOneField implements XReadableObject {
 		return this.field;
 	}
 	
-	public long getRevisionNumber() {
-		throw new IllegalArgumentException("object needed");
-	}
-	
 	public XID getID() {
 		return this.address.getObject();
+	}
+	
+	public long getRevisionNumber() {
+		throw new IllegalArgumentException("object needed");
 	}
 	
 	public boolean hasField(XID fieldId) {
 		return this.field.getID().equals(fieldId);
 	}
 	
-	public XAddress getAddress() {
-		return this.address;
+	public boolean isEmpty() {
+		return false;
 	}
 	
 	public Iterator<XID> iterator() {
 		return new SingleValueIterator<XID>(this.field.getID());
-	}
-	
-	public boolean isEmpty() {
-		return false;
 	}
 	
 }

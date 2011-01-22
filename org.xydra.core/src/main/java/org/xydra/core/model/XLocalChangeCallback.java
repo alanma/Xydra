@@ -1,6 +1,6 @@
 package org.xydra.core.model;
 
-import org.xydra.core.change.XCommand;
+import org.xydra.base.change.XCommand;
 
 
 /**

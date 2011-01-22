@@ -1,9 +1,9 @@
 package org.xydra.store;
 
 import org.xydra.base.XID;
-import org.xydra.core.XX;
-import org.xydra.store.access.XAccountDatabase;
-import org.xydra.store.base.HashUtils;
+import org.xydra.base.XX;
+import org.xydra.store.access.XAccessControlManager;
+import org.xydra.store.access.XAuthenticationDatabase;
 
 
 /**
@@ -21,6 +21,19 @@ public interface XydraStoreAdmin {
 	 * update, delete user accounts; create, read, update, delete groups;
 	 * create, read, update, delete mappings from users to groups; create, read,
 	 * update, delete all Xydra entities (model, object, field, value).
+	 * 
+	 * For security reasons, the default XydraAdmin password is set to a long,
+	 * random string. Use {@link #getAccessControlManager()} to obtain an
+	 * {@link XAccessControlManager} and then call
+	 * {@link XAccessControlManager#getAuthenticationDatabase()} to get the
+	 * {@link XAuthenticationDatabase} on which can then call
+	 * {@link XAuthenticationDatabase#setPasswordHash(XID, String)} with acotrId
+	 * = XYDRA_ADMIN_ID to set the administrator password. You can also retrieve
+	 * the current administrator password via
+	 * {@link XAuthenticationDatabase#getPasswordHash(XID)}.
+	 * 
+	 * Note: A servlet-based implementation should take configuration options
+	 * set in web.xml and set the administrator password from it.
 	 */
 	public static final XID XYDRA_ADMIN_ID = XX.toId("internal--XydraAdmin");
 	
@@ -30,23 +43,10 @@ public interface XydraStoreAdmin {
 	void clear();
 	
 	/**
-	 * For security reasons, the default XydraAdmin password is set to a long,
-	 * random string. Use this method to set your password.
-	 * 
-	 * Note: A servlet-based implementation should take configuration options
-	 * set in web.xml and call this method.
-	 * 
-	 * @param passwordHash which is a password encoded via
-	 *            {@link HashUtils#getXydraPasswordHash(String)}
+	 * @return the used {@link XAccessControlManager}. This method returns null
+	 *         if the {@link XydraStore} does not support this (e.g. an
+	 *         allow-all store).
 	 */
-	void setXydraAdminPasswordHash(String passwordHash);
-	
-	/**
-	 * @return the hash of the XydraAdmin password. It has been constructed via
-	 *         {@link HashUtils#getXydraPasswordHash(String)}.
-	 */
-	String getXydraAdminPasswordHash();
-	
-	XAccountDatabase getAccountDatabase();
+	XAccessControlManager getAccessControlManager();
 	
 }

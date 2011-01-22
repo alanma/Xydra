@@ -27,15 +27,22 @@ public abstract class AbstractRepositoryState extends AbstractState implements X
 		}
 	}
 	
-	@Override
-	public String toString() {
-		return "xrepository" + getAddress().toString() + " = " + XStateUtils.toString(iterator(), ",");
-	}
-	
-	/* Content of repository is ignored for hashCode */
-	@Override
-	public int hashCode() {
-		return getAddress().hashCode();
+	/**
+	 * Checks whether the given {@link XModelState} could be added as a child of
+	 * this AbstractRepositoryState.
+	 * 
+	 * @param modelState The {@link XModelState} which is to be checked
+	 * @throws IllegalArgumentException if the given {@link XModelState} was
+	 *             null or cannot be added to this AbstractRepositoryState
+	 */
+	protected void checkModelState(XModelState modelState) {
+		if(modelState == null) {
+			throw new IllegalArgumentException("modelState was null");
+		}
+		if(!getAddress().contains(modelState.getAddress())) {
+			throw new IllegalArgumentException("cannot add model state " + modelState.getAddress()
+			        + " to " + getAddress());
+		}
 	}
 	
 	@Override
@@ -55,22 +62,16 @@ public abstract class AbstractRepositoryState extends AbstractState implements X
 		return getAddress().getRepository();
 	}
 	
-	/**
-	 * Checks whether the given {@link XModelState} could be added as a child of
-	 * this AbstractRepositoryState.
-	 * 
-	 * @param modelState The {@link XModelState} which is to be checked
-	 * @throws IllegalArgumentException if the given {@link XModelState} was
-	 *             null or cannot be added to this AbstractRepositoryState
-	 */
-	protected void checkModelState(XModelState modelState) {
-		if(modelState == null) {
-			throw new IllegalArgumentException("modelState was null");
-		}
-		if(!getAddress().contains(modelState.getAddress())) {
-			throw new IllegalArgumentException("cannot add model state " + modelState.getAddress()
-			        + " to " + getAddress());
-		}
+	/* Content of repository is ignored for hashCode */
+	@Override
+	public int hashCode() {
+		return getAddress().hashCode();
+	}
+	
+	@Override
+	public String toString() {
+		return "xrepository" + getAddress().toString() + " = "
+		        + XStateUtils.toString(iterator(), ",");
 	}
 	
 }

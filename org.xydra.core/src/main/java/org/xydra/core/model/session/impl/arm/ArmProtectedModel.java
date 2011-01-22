@@ -1,10 +1,9 @@
 package org.xydra.core.model.session.impl.arm;
 
 import org.xydra.base.XID;
-import org.xydra.core.access.XAccessManager;
-import org.xydra.core.change.XCommand;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XModelCommand;
 import org.xydra.core.change.XFieldEventListener;
-import org.xydra.core.change.XModelCommand;
 import org.xydra.core.change.XModelEventListener;
 import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.change.XTransactionEventListener;
@@ -15,11 +14,12 @@ import org.xydra.core.model.XObject;
 import org.xydra.core.model.session.XProtectedModel;
 import org.xydra.core.model.session.XProtectedObject;
 import org.xydra.store.AccessException;
+import org.xydra.store.access.XAuthorisationManager;
 
 
 /**
  * An {@link XProtectedModel} that wraps an {@link XModel} for a specific actor
- * and checks all access against an {@link XAccessManager}.
+ * and checks all access against an {@link XAuthorisationManager}.
  * 
  * @author dscharrer
  * 
@@ -29,9 +29,37 @@ public class ArmProtectedModel extends ArmProtectedBaseModel implements XProtect
 	
 	private final XModel model;
 	
-	public ArmProtectedModel(XModel model, XAccessManager arm, XID actor) {
+	public ArmProtectedModel(XModel model, XAuthorisationManager arm, XID actor) {
 		super(model, arm, actor);
 		this.model = model;
+	}
+	
+	public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
+		
+		checkReadAccess();
+		
+		return this.model.addListenerForFieldEvents(changeListener);
+	}
+	
+	public boolean addListenerForModelEvents(XModelEventListener changeListener) {
+		
+		checkReadAccess();
+		
+		return this.model.addListenerForModelEvents(changeListener);
+	}
+	
+	public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
+		
+		checkReadAccess();
+		
+		return this.model.addListenerForObjectEvents(changeListener);
+	}
+	
+	public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
+		
+		checkReadAccess();
+		
+		return this.model.addListenerForTransactionEvents(changeListener);
 	}
 	
 	public XProtectedObject createObject(XID objectId) {
@@ -47,6 +75,15 @@ public class ArmProtectedModel extends ArmProtectedBaseModel implements XProtect
 		return new ArmProtectedObject(object, this.arm, this.actor);
 	}
 	
+	public long executeCommand(XCommand command) {
+		
+		if(!this.arm.canExecute(this.actor, command)) {
+			throw new AccessException(this.actor + " cannot execute " + command);
+		}
+		
+		return this.model.executeCommand(command);
+	}
+	
 	public long executeModelCommand(XModelCommand command) {
 		
 		if(!this.arm.canExecute(this.actor, command)) {
@@ -54,6 +91,10 @@ public class ArmProtectedModel extends ArmProtectedBaseModel implements XProtect
 		}
 		
 		return this.model.executeModelCommand(command);
+	}
+	
+	public XChangeLog getChangeLog() {
+		return new ArmProtectedChangeLog(this.model.getChangeLog(), this.arm, this.actor);
 	}
 	
 	@Override
@@ -70,6 +111,22 @@ public class ArmProtectedModel extends ArmProtectedBaseModel implements XProtect
 		return new ArmProtectedObject(object, this.arm, this.actor);
 	}
 	
+	public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
+		return this.model.removeListenerForFieldEvents(changeListener);
+	}
+	
+	public boolean removeListenerForModelEvents(XModelEventListener changeListener) {
+		return this.model.removeListenerForModelEvents(changeListener);
+	}
+	
+	public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
+		return this.model.removeListenerForObjectEvents(changeListener);
+	}
+	
+	public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
+		return this.model.removeListenerForTransactionEvents(changeListener);
+	}
+	
 	public boolean removeObject(XID objectId) {
 		
 		if(!this.arm.canRemoveObject(this.actor, getAddress(), objectId)) {
@@ -78,63 +135,6 @@ public class ArmProtectedModel extends ArmProtectedBaseModel implements XProtect
 		}
 		
 		return this.model.removeObject(objectId);
-	}
-	
-	public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
-		
-		checkReadAccess();
-		
-		return this.model.addListenerForObjectEvents(changeListener);
-	}
-	
-	public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
-		return this.model.removeListenerForObjectEvents(changeListener);
-	}
-	
-	public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
-		
-		checkReadAccess();
-		
-		return this.model.addListenerForFieldEvents(changeListener);
-	}
-	
-	public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
-		return this.model.removeListenerForFieldEvents(changeListener);
-	}
-	
-	public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
-		
-		checkReadAccess();
-		
-		return this.model.addListenerForTransactionEvents(changeListener);
-	}
-	
-	public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
-		return this.model.removeListenerForTransactionEvents(changeListener);
-	}
-	
-	public long executeCommand(XCommand command) {
-		
-		if(!this.arm.canExecute(this.actor, command)) {
-			throw new AccessException(this.actor + " cannot execute " + command);
-		}
-		
-		return this.model.executeCommand(command);
-	}
-	
-	public boolean addListenerForModelEvents(XModelEventListener changeListener) {
-		
-		checkReadAccess();
-		
-		return this.model.addListenerForModelEvents(changeListener);
-	}
-	
-	public boolean removeListenerForModelEvents(XModelEventListener changeListener) {
-		return this.model.removeListenerForModelEvents(changeListener);
-	}
-	
-	public XChangeLog getChangeLog() {
-		return new ArmProtectedChangeLog(this.model.getChangeLog(), this.arm, this.actor);
 	}
 	
 }

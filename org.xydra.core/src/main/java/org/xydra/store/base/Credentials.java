@@ -19,19 +19,19 @@ public class Credentials {
 		this.setPasswordHash(passwordHash);
 	}
 	
-	public void setActorId(XID actorId) {
-		this.actorId = actorId;
-	}
-	
 	public XID getActorId() {
 		return this.actorId;
 	}
 	
-	public void setPasswordHash(String passwordHash) {
-		this.passwordHash = passwordHash;
-	}
-	
 	public String getPasswordHash() {
 		return this.passwordHash;
+	}
+	
+	public void setActorId(XID actorId) {
+		this.actorId = actorId;
+	}
+	
+	public void setPasswordHash(String passwordHash) {
+		this.passwordHash = passwordHash;
 	}
 }

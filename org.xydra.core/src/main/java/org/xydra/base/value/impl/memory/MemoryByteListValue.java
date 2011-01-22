@@ -19,6 +19,11 @@ public class MemoryByteListValue extends MemoryListValue<Byte> implements XByteL
 	
 	private final byte[] list;
 	
+	public MemoryByteListValue(byte[] content) {
+		this.list = new byte[content.length];
+		System.arraycopy(content, 0, this.list, 0, content.length);
+	}
+	
 	public MemoryByteListValue(Collection<Byte> content) {
 		this.list = new byte[content.size()];
 		int i = 0;
@@ -27,49 +32,8 @@ public class MemoryByteListValue extends MemoryListValue<Byte> implements XByteL
 		}
 	}
 	
-	public MemoryByteListValue(byte[] content) {
-		this.list = new byte[content.length];
-		System.arraycopy(content, 0, this.list, 0, content.length);
-	}
-	
 	private MemoryByteListValue(int length) {
 		this.list = new byte[length];
-	}
-	
-	public byte[] contents() {
-		byte[] array = new byte[this.list.length];
-		System.arraycopy(this.list, 0, array, 0, this.list.length);
-		return array;
-	}
-	
-	public Byte[] toArray() {
-		Byte[] array = new Byte[this.list.length];
-		fillArray(array);
-		return array;
-	}
-	
-	@Override
-	public boolean equals(Object other) {
-		return other instanceof XByteListValue
-		        && XI.equalsIterator(this.iterator(), ((XByteListValue)other).iterator());
-	}
-	
-	@Override
-	public int hashCode() {
-		return Arrays.hashCode(this.list);
-	}
-	
-	@Override
-	public String toString() {
-		return Arrays.toString(this.list);
-	}
-	
-	public Byte get(int index) {
-		return this.list[index];
-	}
-	
-	public int size() {
-		return this.list.length;
 	}
 	
 	public XByteListValue add(Byte entry) {
@@ -86,6 +50,27 @@ public class MemoryByteListValue extends MemoryListValue<Byte> implements XByteL
 		v.list[index] = entry;
 		System.arraycopy(this.list, index, v.list, index + 1, size - index);
 		return v;
+	}
+	
+	public byte[] contents() {
+		byte[] array = new byte[this.list.length];
+		System.arraycopy(this.list, 0, array, 0, this.list.length);
+		return array;
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		return other instanceof XByteListValue
+		        && XI.equalsIterator(this.iterator(), ((XByteListValue)other).iterator());
+	}
+	
+	public Byte get(int index) {
+		return this.list[index];
+	}
+	
+	@Override
+	public int hashCode() {
+		return Arrays.hashCode(this.list);
 	}
 	
 	public XByteListValue remove(Byte entry) {
@@ -105,6 +90,21 @@ public class MemoryByteListValue extends MemoryListValue<Byte> implements XByteL
 		System.arraycopy(this.list, 0, v.list, 0, index);
 		System.arraycopy(this.list, index + 1, v.list, index, size - index - 1);
 		return v;
+	}
+	
+	public int size() {
+		return this.list.length;
+	}
+	
+	public Byte[] toArray() {
+		Byte[] array = new Byte[this.list.length];
+		fillArray(array);
+		return array;
+	}
+	
+	@Override
+	public String toString() {
+		return Arrays.toString(this.list);
 	}
 	
 }

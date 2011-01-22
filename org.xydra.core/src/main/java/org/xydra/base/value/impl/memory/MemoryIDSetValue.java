@@ -16,20 +16,22 @@ public class MemoryIDSetValue extends MemorySetValue<XID> implements XIDSetValue
 	
 	private static final long serialVersionUID = -83885798275571937L;
 	
-	public MemoryIDSetValue(XID[] contents) {
-		super(contents);
-	}
-	
 	public MemoryIDSetValue(Collection<XID> contents) {
 		super(contents);
 	}
 	
-	public XID[] contents() {
-		return toArray(new XID[size()]);
+	public MemoryIDSetValue(XID[] contents) {
+		super(contents);
 	}
 	
-	public XID[] toArray() {
-		return contents();
+	public XIDSetValue add(XID entry) {
+		MemoryIDSetValue v = new MemoryIDSetValue(this.set);
+		v.set.add(entry);
+		return v;
+	}
+	
+	public XID[] contents() {
+		return toArray(new XID[size()]);
 	}
 	
 	@Override
@@ -42,16 +44,14 @@ public class MemoryIDSetValue extends MemorySetValue<XID> implements XIDSetValue
 		return getHashCode();
 	}
 	
-	public XIDSetValue add(XID entry) {
-		MemoryIDSetValue v = new MemoryIDSetValue(this.set);
-		v.set.add(entry);
-		return v;
-	}
-	
 	public XIDSetValue remove(XID entry) {
 		MemoryIDSetValue v = new MemoryIDSetValue(this.set);
 		v.set.remove(entry);
 		return v;
+	}
+	
+	public XID[] toArray() {
+		return contents();
 	}
 	
 }

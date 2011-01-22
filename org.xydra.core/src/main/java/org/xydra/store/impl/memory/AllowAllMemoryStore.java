@@ -1,7 +1,6 @@
 package org.xydra.store.impl.memory;
 
 import org.xydra.base.XID;
-import org.xydra.store.MAXDone;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.delegate.DelegatingStore;
 
@@ -12,11 +11,10 @@ import org.xydra.store.impl.delegate.DelegatingStore;
  * 
  * @author xamde
  */
-@MAXDone
 public class AllowAllMemoryStore extends DelegatingStore {
 	
 	public AllowAllMemoryStore(XID repositoryId) {
-		super(new MemoryPersistence(repositoryId), new AllowAllAuthorisationArm());
+		super(new MemoryPersistence(repositoryId), new AllowAllAccessControlManager());
 	}
 	
 }

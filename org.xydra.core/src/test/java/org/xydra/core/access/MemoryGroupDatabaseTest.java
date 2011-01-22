@@ -1,7 +1,7 @@
 package org.xydra.core.access;
 
-import org.xydra.core.access.impl.memory.MemoryGroupDatabase;
-import org.xydra.core.test.access.AbstractGroupDatabaseTest;
+import org.xydra.store.access.XGroupDatabaseWithListeners;
+import org.xydra.store.access.impl.memory.MemoryGroupDatabase;
 
 
 public class MemoryGroupDatabaseTest extends AbstractGroupDatabaseTest {

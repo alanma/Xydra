@@ -5,11 +5,11 @@ import java.util.Iterator;
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.base.XID;
-import org.xydra.base.XHalfWritableObject;
-import org.xydra.core.change.XCommand;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XObjectCommand;
+import org.xydra.base.change.XObjectEvent;
+import org.xydra.base.rmof.XWritableObject;
 import org.xydra.core.change.XFieldEventListener;
-import org.xydra.core.change.XObjectCommand;
-import org.xydra.core.change.XObjectEvent;
 import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.change.XTransactionEventListener;
 import org.xydra.core.model.IHasChangeLog;
@@ -34,26 +34,29 @@ import org.xydra.store.AccessException;
  * @author dscharrer
  * 
  */
-public interface XProtectedObject extends XLoggedObject, XHalfWritableObject, IHasChangeLog,
+public interface XProtectedObject extends XLoggedObject, XWritableObject, IHasChangeLog,
         XExecutesCommands {
 	
 	/**
-	 * Returns the {@link XField} with the given {@link XID} contained in this
-	 * XProtectedObject as an {@link XProtectedField} linked with the actor of
-	 * this XProtectedObject.
-	 * 
-	 * @param fieldID The {@link XID} of the {@link XField} which is to be
-	 *            returned
-	 * @return The {@link XField} with the given {@link XID} as an
-	 *         {@link XProtectedField} linked with the actor of this
-	 *         XProtectedObject or null, if no corresponding {@link XField}
-	 *         exists
 	 * @throws AccessException if the actor linked with this field does not have
 	 *             the necessary access rights (read access) to execute this
 	 *             method
 	 */
-	@ReadOperation
-	XProtectedField getField(XID fieldId);
+	boolean addListenerForFieldEvents(XFieldEventListener changeListener);
+	
+	/**
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (read access) to execute this
+	 *             method
+	 */
+	boolean addListenerForObjectEvents(XObjectEventListener changeListener);
+	
+	/**
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (read access) to execute this
+	 *             method
+	 */
+	boolean addListenerForTransactionEvents(XTransactionEventListener changeListener);
 	
 	/**
 	 * Creates a new {@link XField} and adds it to this XProtectedObject or
@@ -61,7 +64,7 @@ public interface XProtectedObject extends XLoggedObject, XHalfWritableObject, IH
 	 * already taken (both as an {@link XProtectedField} linked with the actor
 	 * of this XProtectedObject)
 	 * 
-	 * @param fieldID The {@link XID} for the {@link XField} which is to be
+	 * @param fieldId The {@link XID} for the {@link XField} which is to be
 	 *            created.
 	 * @return the newly created {@link XField} or the already existing
 	 *         {@link XField} with this {@link XID} (both as an
@@ -72,22 +75,7 @@ public interface XProtectedObject extends XLoggedObject, XHalfWritableObject, IH
 	 *             method
 	 */
 	@ModificationOperation
-	XProtectedField createField(XID fieldID);
-	
-	/**
-	 * Removes the {@link XField} with the given {@link XID} from this
-	 * XProtectedObject
-	 * 
-	 * @param fieldID The {@link XID} of the {@link XField} which is to be
-	 *            removed
-	 * @return true, if the specified {@link XField} did exist and could be
-	 *         removed
-	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (write access) to execute this
-	 *             method
-	 */
-	@ModificationOperation
-	boolean removeField(XID fieldID);
+	XProtectedField createField(XID fieldId);
 	
 	/**
 	 * Executes the given {@link XObjectCommand} if possible.
@@ -118,6 +106,31 @@ public interface XProtectedObject extends XLoggedObject, XHalfWritableObject, IH
 	long executeObjectCommand(XObjectCommand command);
 	
 	/**
+	 * @return the actor that is represented by this interface. This is the
+	 *         actor that is recorded for change operations. Operations will
+	 *         only succeed if this actor has access.
+	 */
+	XID getActor();
+	
+	/**
+	 * Returns the {@link XField} with the given {@link XID} contained in this
+	 * XProtectedObject as an {@link XProtectedField} linked with the actor of
+	 * this XProtectedObject.
+	 * 
+	 * @param fieldId The {@link XID} of the {@link XField} which is to be
+	 *            returned
+	 * @return The {@link XField} with the given {@link XID} as an
+	 *         {@link XProtectedField} linked with the actor of this
+	 *         XProtectedObject or null, if no corresponding {@link XField}
+	 *         exists
+	 * @throws AccessException if the actor linked with this field does not have
+	 *             the necessary access rights (read access) to execute this
+	 *             method
+	 */
+	@ReadOperation
+	XProtectedField getField(XID fieldId);
+	
+	/**
 	 * @throws AccessException if the actor linked with this field does not have
 	 *             the necessary access rights (read access) to execute this
 	 *             method
@@ -129,7 +142,7 @@ public interface XProtectedObject extends XLoggedObject, XHalfWritableObject, IH
 	 *             the necessary access rights (read access) to execute this
 	 *             method
 	 */
-	boolean hasField(XID objectID);
+	boolean hasField(XID objectId);
 	
 	/**
 	 * @throws AccessException if the actor linked with this field does not have
@@ -146,31 +159,18 @@ public interface XProtectedObject extends XLoggedObject, XHalfWritableObject, IH
 	Iterator<XID> iterator();
 	
 	/**
+	 * Removes the {@link XField} with the given {@link XID} from this
+	 * XProtectedObject
+	 * 
+	 * @param fieldId The {@link XID} of the {@link XField} which is to be
+	 *            removed
+	 * @return true, if the specified {@link XField} did exist and could be
+	 *         removed
 	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (read access) to execute this
+	 *             the necessary access rights (write access) to execute this
 	 *             method
 	 */
-	boolean addListenerForObjectEvents(XObjectEventListener changeListener);
-	
-	/**
-	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (read access) to execute this
-	 *             method
-	 */
-	boolean addListenerForFieldEvents(XFieldEventListener changeListener);
-	
-	/**
-	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (read access) to execute this
-	 *             method
-	 */
-	boolean addListenerForTransactionEvents(XTransactionEventListener changeListener);
-	
-	/**
-	 * @return the actor that is represented by this interface. This is the
-	 *         actor that is recorded for change operations. Operations will
-	 *         only succeed if this actor has access.
-	 */
-	XID getActor();
+	@ModificationOperation
+	boolean removeField(XID fieldId);
 	
 }

@@ -12,10 +12,10 @@
 	<resources base="http://xrest.org">
 		<resource path="data">
 			<doc>Writeable resource</doc>
-			<resource path="{modelID}">
-				<resource path="{objectID}">
-					<resource path="{fieldID}">
-						<param name="fieldID" type="xsd:string" style="template"
+			<resource path="{modelId}">
+				<resource path="{objectId}">
+					<resource path="{fieldId}">
+						<param name="fieldId" type="xsd:string" style="template"
 							required="true" />
 						<method name="GET">
 							<request />

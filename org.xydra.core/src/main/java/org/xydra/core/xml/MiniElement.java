@@ -16,8 +16,6 @@ import org.xydra.annotations.RunsInJava;
 @RunsInJava
 public interface MiniElement {
 	
-	public String getName();
-	
 	/**
 	 * @param attributeName
 	 * @return the attribute value or null if it does not exist
@@ -25,9 +23,10 @@ public interface MiniElement {
 	public String getAttribute(String attributeName);
 	
 	/**
-	 * @return all matching child elements in document order
+	 * @return return the contained character data. If this element contains
+	 *         additional children, the return value is undefined.
 	 */
-	public Iterator<MiniElement> getElementsByTagName(String elementName);
+	public String getData();
 	
 	/**
 	 * @return all child elements in document order
@@ -35,9 +34,10 @@ public interface MiniElement {
 	public Iterator<MiniElement> getElements();
 	
 	/**
-	 * @return return the contained character data. If this element contains
-	 *         additional children, the return value is undefined.
+	 * @return all matching child elements in document order
 	 */
-	public String getData();
+	public Iterator<MiniElement> getElementsByTagName(String elementName);
+	
+	public String getName();
 	
 }

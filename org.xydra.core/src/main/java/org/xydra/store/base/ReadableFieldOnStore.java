@@ -3,9 +3,9 @@ package org.xydra.store.base;
 import java.io.Serializable;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableField;
-import org.xydra.base.XReadableObject;
 import org.xydra.base.XID;
+import org.xydra.base.rmof.XReadableField;
+import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.value.XValue;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
@@ -22,8 +22,8 @@ import org.xydra.store.XydraStore;
  * 
  * TODO what is the point of wrapping a snapshot like this instead of just using
  * the snapshot directly and storing the load function somewhere else (in a
- * SynchronousStore wrapper / helper class? Same applies for {@link ReadableObjectOnStore}
- * and {@link ReadableModelOnStore}
+ * SynchronousStore wrapper / helper class? Same applies for
+ * {@link ReadableObjectOnStore} and {@link ReadableModelOnStore}
  * 
  * @author voelkel
  */
@@ -31,8 +31,8 @@ public class ReadableFieldOnStore implements XReadableField, Serializable {
 	
 	private static final long serialVersionUID = -374853720614210669L;
 	protected XAddress address;
-	protected Credentials credentials;
 	protected XReadableField baseField;
+	protected Credentials credentials;
 	protected XydraStore store;
 	
 	/**
@@ -82,8 +82,8 @@ public class ReadableFieldOnStore implements XReadableField, Serializable {
 	}
 	
 	protected void load() {
-		this.store.getObjectSnapshots(this.credentials.getActorId(), this.credentials.getPasswordHash(),
-		        new XAddress[] { this.address.getParent() },
+		this.store.getObjectSnapshots(this.credentials.getActorId(),
+		        this.credentials.getPasswordHash(), new XAddress[] { this.address.getParent() },
 		        new Callback<BatchedResult<XReadableObject>[]>() {
 			        
 			        @Override
@@ -98,7 +98,8 @@ public class ReadableFieldOnStore implements XReadableField, Serializable {
 						 * TODO better error handling if getResult is null
 						 * because getException has an AccessException
 						 */
-				        ReadableFieldOnStore.this.baseField = object[0].getResult().getField(getID());
+				        ReadableFieldOnStore.this.baseField = object[0].getResult().getField(
+				                getID());
 			        }
 		        });
 	}

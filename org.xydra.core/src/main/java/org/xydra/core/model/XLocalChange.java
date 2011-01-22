@@ -1,7 +1,7 @@
 package org.xydra.core.model;
 
 import org.xydra.base.XID;
-import org.xydra.core.change.XCommand;
+import org.xydra.base.change.XCommand;
 
 
 /**
@@ -12,15 +12,15 @@ import org.xydra.core.change.XCommand;
  */
 public interface XLocalChange {
 	
-	XCommand getCommand();
-	
 	XID getActor();
+	
+	XCommand getCommand();
 	
 	String getPasswordHash();
 	
-	boolean isApplied();
-	
 	long getRemoteRevision();
+	
+	boolean isApplied();
 	
 	void setRemoteResult(long result);
 	

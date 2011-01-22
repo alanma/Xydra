@@ -1,7 +1,5 @@
 package org.xydra.base.value;
 
-
-
 /**
  * An {@link XValue} for storing a set of Java String values.
  * 
@@ -9,15 +7,6 @@ package org.xydra.base.value;
  * 
  */
 public interface XStringSetValue extends XSetValue<String> {
-	
-	/**
-	 * Returns the contents of the XStringSetValue as an array.
-	 * 
-	 * Note: Changes to the returned array will not affect the XStringSetValue
-	 * 
-	 * @return the contents of the XStringSetValue as an array
-	 */
-	String[] contents();
 	
 	/**
 	 * Creates a new {@link XStringSetValue} containing all entries from this
@@ -28,6 +17,15 @@ public interface XStringSetValue extends XSetValue<String> {
 	 *         value as well as the given entry
 	 */
 	XStringSetValue add(String entry);
+	
+	/**
+	 * Returns the contents of the XStringSetValue as an array.
+	 * 
+	 * Note: Changes to the returned array will not affect the XStringSetValue
+	 * 
+	 * @return the contents of the XStringSetValue as an array
+	 */
+	String[] contents();
 	
 	/**
 	 * Creates a new {@link XStringSetValue} containing all entries from this

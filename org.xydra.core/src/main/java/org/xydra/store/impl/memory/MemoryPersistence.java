@@ -8,13 +8,13 @@ import java.util.Set;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
-import org.xydra.base.XWritableModel;
-import org.xydra.base.XWritableObject;
 import org.xydra.base.XType;
-import org.xydra.core.XX;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XEvent;
-import org.xydra.store.MAXDone;
+import org.xydra.base.XX;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XEvent;
+import org.xydra.base.rmof.XRevWritableModel;
+import org.xydra.base.rmof.XRevWritableObject;
+
 import org.xydra.store.RequestException;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
@@ -26,29 +26,21 @@ import org.xydra.store.impl.delegate.XydraPersistence;
  * @author voelkel
  * @author dscharrer
  */
-@MAXDone
+
 public class MemoryPersistence implements XydraPersistence {
 	
-	private XID repoId;
-	
 	private Map<XID,MemoryModelPersistence> models = new HashMap<XID,MemoryModelPersistence>();
+	
+	private XID repoId;
 	
 	public MemoryPersistence(XID repositoryId) {
 		this.repoId = repositoryId;
 	}
 	
-	private MemoryModelPersistence getModelPersistence(XID modelId) {
-		if(modelId == null) {
-			throw new IllegalArgumentException("modelId must not be null");
-		}
+	@Override
+	public void clear() {
 		synchronized(this.models) {
-			MemoryModelPersistence modelPersistence = this.models.get(modelId);
-			if(modelPersistence == null) {
-				XAddress modelAddr = XX.toAddress(this.repoId, modelId, null, null);
-				modelPersistence = new MemoryModelPersistence(modelAddr);
-				this.models.put(modelId, modelPersistence);
-			}
-			return modelPersistence;
+			this.models.clear();
 		}
 	}
 	
@@ -97,6 +89,21 @@ public class MemoryPersistence implements XydraPersistence {
 		return modelIds;
 	}
 	
+	private MemoryModelPersistence getModelPersistence(XID modelId) {
+		if(modelId == null) {
+			throw new IllegalArgumentException("modelId must not be null");
+		}
+		synchronized(this.models) {
+			MemoryModelPersistence modelPersistence = this.models.get(modelId);
+			if(modelPersistence == null) {
+				XAddress modelAddr = XX.toAddress(this.repoId, modelId, null, null);
+				modelPersistence = new MemoryModelPersistence(modelAddr);
+				this.models.put(modelId, modelPersistence);
+			}
+			return modelPersistence;
+		}
+	}
+	
 	@Override
 	public long getModelRevision(XAddress address) {
 		if(address.getAddressedType() != XType.XMODEL) {
@@ -108,7 +115,7 @@ public class MemoryPersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public XWritableModel getModelSnapshot(XAddress address) {
+	public XRevWritableModel getModelSnapshot(XAddress address) {
 		if(address.getAddressedType() != XType.XMODEL) {
 			throw new RequestException("must use a model address to get a model snapshot, was "
 			        + address);
@@ -118,7 +125,7 @@ public class MemoryPersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public XWritableObject getObjectSnapshot(XAddress address) {
+	public XRevWritableObject getObjectSnapshot(XAddress address) {
 		if(address.getAddressedType() != XType.XOBJECT) {
 			throw new RequestException("must use an object address to get an object snapshot, was "
 			        + address);
@@ -130,13 +137,6 @@ public class MemoryPersistence implements XydraPersistence {
 	@Override
 	public XID getRepositoryId() {
 		return this.repoId;
-	}
-	
-	@Override
-	public void clear() {
-		synchronized(this.models) {
-			this.models.clear();
-		}
 	}
 	
 }

@@ -8,11 +8,11 @@ package org.xydra.core.model.sync;
  */
 public interface XSynchronizationCallback {
 	
-	void onRequestError(Throwable t);
-	
 	void onCommandErrror(Throwable t);
 	
 	void onEventsError(Throwable t);
+	
+	void onRequestError(Throwable t);
 	
 	void onSuccess();
 	

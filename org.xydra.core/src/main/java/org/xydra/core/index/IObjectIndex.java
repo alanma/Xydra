@@ -11,7 +11,7 @@ import org.xydra.core.model.XObject;
 
 
 /**
- * Indexes any number of objects by the value of a field. The fieldID of this
+ * Indexes any number of objects by the value of a field. The fieldId of this
  * field is defined at index construction time. Several objects can have the
  * same value.
  * 
@@ -23,20 +23,20 @@ import org.xydra.core.model.XObject;
 public interface IObjectIndex {
 	
 	/**
-	 * @param xo the given object by the fieldID configured for this index
-	 */
-	void index(XObject xo);
-	
-	/**
-	 * @param xo the given object by the fieldID configured for this index
+	 * @param xo the given object by the fieldId configured for this index
 	 */
 	void deindex(XObject xo);
+	
+	/**
+	 * @param xo the given object by the fieldId configured for this index
+	 */
+	void index(XObject xo);
 	
 	/**
 	 * @param model used to load objects from internally stored XIDs
 	 * @param value
 	 * @return all previously indexed objects (in the given model) that have
-	 *         'value' as the value of the fieldID configured for this index
+	 *         'value' as the value of the fieldId configured for this index
 	 */
 	Set<XObject> lookup(XModel model, XValue value);
 	

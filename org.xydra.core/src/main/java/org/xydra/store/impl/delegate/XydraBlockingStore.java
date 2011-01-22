@@ -3,17 +3,17 @@ package org.xydra.store.impl.delegate;
 import java.util.Set;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableModel;
-import org.xydra.base.XReadableObject;
 import org.xydra.base.XID;
-import org.xydra.core.change.XAtomicEvent;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XEvent;
-import org.xydra.core.change.XModelCommand;
-import org.xydra.core.change.XObjectCommand;
-import org.xydra.core.change.XRepositoryCommand;
-import org.xydra.core.change.XTransaction;
-import org.xydra.core.change.XTransactionEvent;
+import org.xydra.base.change.XAtomicEvent;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XEvent;
+import org.xydra.base.change.XModelCommand;
+import org.xydra.base.change.XObjectCommand;
+import org.xydra.base.change.XRepositoryCommand;
+import org.xydra.base.change.XTransaction;
+import org.xydra.base.change.XTransactionEvent;
+import org.xydra.base.rmof.XReadableModel;
+import org.xydra.base.rmof.XReadableObject;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
@@ -24,7 +24,7 @@ import org.xydra.store.Callback;
 import org.xydra.store.ConnectionException;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.InternalStoreException;
-import org.xydra.store.MAXDone;
+
 import org.xydra.store.QuotaException;
 import org.xydra.store.RequestException;
 import org.xydra.store.TimeoutException;
@@ -85,7 +85,7 @@ import org.xydra.store.XydraStoreAdmin;
  * @author voelkel
  * @author dscharrer
  */
-@MAXDone
+
 public interface XydraBlockingStore {
 	
 	/**
@@ -122,212 +122,6 @@ public interface XydraBlockingStore {
 	        InternalStoreException;
 	
 	/**
-	 * Read current state.
-	 * 
-	 * Retrieve read-only snapshots of {@link XModel} states at the point in
-	 * time when this request is processed.
-	 * 
-	 * Possible exceptions for single entries in the returned
-	 * {@link BatchedResult}:
-	 * <ul>
-	 * <li>{@link RequestException} for addresses that do not address an
-	 * {@link XModel}.</li>
-	 * <li>{@link AccessException} for a modelAddress the given actorId may not
-	 * read</li>
-	 * </ul>
-	 * 
-	 * @param actorId The actor who is performing this operation.
-	 * @param passwordHash The MD5 hash of the secret actor password prefixed
-	 *            with "Xydra" to avoid transmitting the same string over the
-	 *            network if the user uses the same password for multiple
-	 *            services. If null, all access is granted.
-	 * @param modelAddress the {@link XAddress} for which model to get a
-	 *            snapshot. The {@link XAddress} must address an {@link XModel}
-	 *            (repositoryId/modelId/-/-).
-	 * 
-	 *            TODO @Daniel: How can a client request a specific version of a
-	 *            snapshot?
-	 * 
-	 * @return a null value signals that the requested model does not exist in
-	 *         the store or that the requesting actor has not the necessary
-	 *         rights to see it.
-	 * @throws IllegalArgumentException if one of the given parameters is null
-	 *             (except passwordHash, which may be null).
-	 * @throws QuotaException to prevent brute-force attacks when too many
-	 *             operations per time use the wrong actorId/passwordHash
-	 *             combination.
-	 * @throws TimeoutException if the implementation did not respond during a
-	 *             given time
-	 * @throws ConnectionException if there is a problem to connect to the
-	 *             implementation at all. Note that a {@link TimeoutException}
-	 *             might also be thrown if there is in fact a
-	 *             {@link ConnectionException}. They are not easy to
-	 *             distinguish.
-	 * @throws InternalStoreException if the implementation encounters another
-	 *             problem, typically caused by the hosting platform, i.e. an
-	 *             I/O error.
-	 * @throws AuthorisationException if actorId and passwordHash don't match
-	 * @throws RequestException if the supplied arguments are considered
-	 *             syntactically or semantically invalid
-	 * 
-	 *             Implementation note: Implementation may choose to supply a
-	 *             lazy-loading stub only.
-	 */
-	XReadableModel getModelSnapshot(XID actorId, String passwordHash, XAddress modelAddress)
-	        throws IllegalArgumentException, QuotaException, AuthorisationException,
-	        TimeoutException, ConnectionException, RequestException, InternalStoreException;
-	
-	/**
-	 * Read current state.
-	 * 
-	 * @param actorId The actor who is performing this operation.
-	 * @param passwordHash The MD5 hash of the secret actor password prefixed
-	 *            with "Xydra" to avoid transmitting the same string over the
-	 *            network if the user uses the same password for multiple
-	 *            services. If null, all access is granted.
-	 * @param modelAddress an array of {@link XAddress} for which the latest
-	 *            model revision should be retrieved. Each {@link XAddress} must
-	 *            address an {@link XModel} (repositoryId/modelId/-/-).
-	 * @return the revision number of the addressed model as a long. A
-	 *         non-existing model (and those for which the actorId has no
-	 *         read-access) is signaled as {@link #MODEL_DOES_NOT_EXIST}.
-	 * @throws IllegalArgumentException if one of the given parameters is null
-	 *             (except passwordHash, which may be null).
-	 * @throws QuotaException to prevent brute-force attacks when too many
-	 *             operations per time use the wrong actorId/passwordHash
-	 *             combination.
-	 * @throws TimeoutException if the implementation did not respond during a
-	 *             given time
-	 * @throws ConnectionException if there is a problem to connect to the
-	 *             implementation at all. Note that a {@link TimeoutException}
-	 *             might also be thrown if there is in fact a
-	 *             {@link ConnectionException}. They are not easy to
-	 *             distinguish.
-	 * @throws InternalStoreException if the implementation encounters another
-	 *             problem, typically caused by the hosting platform, i.e. an
-	 *             I/O error.
-	 * @throws AuthorisationException if actorId and passwordHash don't match
-	 * @throws RequestException if the supplied arguments are considered
-	 *             syntactically or semantically invalid
-	 */
-	long getModelRevision(XID actorId, String passwordHash, XAddress modelAddress)
-	        throws IllegalArgumentException, QuotaException, AuthorisationException,
-	        TimeoutException, ConnectionException, RequestException, InternalStoreException;
-	
-	/**
-	 * Read current state.
-	 * 
-	 * Returns read-only snapshots of {@link XObject} state at the point in time
-	 * when this request was processed.
-	 * 
-	 * @param actorId The actor who is performing this operation.
-	 * @param passwordHash The MD5 hash of the secret actor password prefixed
-	 *            with "Xydra" to avoid transmitting the same string over the
-	 *            network if the user uses the same password for multiple
-	 *            services. If null, all access is granted.
-	 * @param objectAddress an array of {@link XAddress} for which objects to
-	 *            get snapshots. Each {@link XAddress} must address an
-	 *            {@link XObject} (repositoryId/modelId/objectId/-).
-	 * @return a {@link XReadableObject}. A null value signals that the requested
-	 *         object does not exist in the store - or that the actorId has no
-	 *         read-access on it.
-	 * @throws IllegalArgumentException if one of the given parameters is null
-	 *             (except passwordHash, which may be null).
-	 * @throws QuotaException to prevent brute-force attacks when too many
-	 *             operations per time use the wrong actorId/passwordHash
-	 *             combination.
-	 * @throws TimeoutException if the implementation did not respond during a
-	 *             given time
-	 * @throws ConnectionException if there is a problem to connect to the
-	 *             implementation at all. Note that a {@link TimeoutException}
-	 *             might also be thrown if there is in fact a
-	 *             {@link ConnectionException}. They are not easy to
-	 *             distinguish.
-	 * @throws InternalStoreException if the implementation encounters another
-	 *             problem, typically caused by the hosting platform, i.e. an
-	 *             I/O error.
-	 * @throws AuthorisationException if actorId and passwordHash don't match
-	 * @throws RequestException if the supplied arguments are considered
-	 *             syntactically or semantically invalid
-	 * 
-	 *             Implementation note: Implementation may chose to supply a
-	 *             lazy-loading stub only.
-	 */
-	XReadableObject getObjectSnapshot(XID actorId, String passwordHash, XAddress objectAddress)
-	        throws IllegalArgumentException, QuotaException, AuthorisationException,
-	        TimeoutException, ConnectionException, RequestException, InternalStoreException;
-	
-	/**
-	 * Read current state.
-	 * 
-	 * @param actorId The actor who is performing this operation.
-	 * @param passwordHash The MD5 hash of the secret actor password prefixed
-	 *            with "Xydra" to avoid transmitting the same string over the
-	 *            network if the user uses the same password for multiple
-	 *            services. If null, all access is granted.
-	 * @return a Set of all {@link XID} of all {@link XModel XModels} for which
-	 *         the given actorId has read-access in the repository.
-	 * @throws IllegalArgumentException if one of the given parameters is null
-	 *             (except passwordHash, which may be null).
-	 * @throws QuotaException to prevent brute-force attacks when too many
-	 *             operations per time use the wrong actorId/passwordHash
-	 *             combination.
-	 * @throws TimeoutException if the implementation did not respond during a
-	 *             given time
-	 * @throws ConnectionException if there is a problem to connect to the
-	 *             implementation at all. Note that a {@link TimeoutException}
-	 *             might also be thrown if there is in fact a
-	 *             {@link ConnectionException}. They are not easy to
-	 *             distinguish.
-	 * @throws InternalStoreException if the implementation encounters another
-	 *             problem, typically caused by the hosting platform, i.e. an
-	 *             I/O error.
-	 * @throws AuthorisationException if actorId and passwordHash don't match
-	 * @throws RequestException if the supplied arguments are considered
-	 *             syntactically or semantically invalid
-	 */
-	Set<XID> getModelIds(XID actorId, String passwordHash) throws IllegalArgumentException,
-	        QuotaException, AuthorisationException, TimeoutException, ConnectionException,
-	        RequestException, InternalStoreException;
-	
-	/**
-	 * Read current state.
-	 * 
-	 * One {@link XydraBlockingStore} instance refers to exactly one Xydra
-	 * {@link XRepository}.
-	 * 
-	 * Every authenticated actorId may read the repository ID.
-	 * 
-	 * @param actorId The actor who is performing this operation.
-	 * @param passwordHash The MD5 hash of the secret actor password prefixed
-	 *            with "Xydra" to avoid transmitting the same string over the
-	 *            network if the user uses the same password for multiple
-	 *            services. If null, all access is granted.
-	 * @return the repositoryId of this store.
-	 * @throws IllegalArgumentException if one of the given parameters is null
-	 *             (except passwordHash, which may be null).
-	 * @throws QuotaException to prevent brute-force attacks when too many
-	 *             operations per time use the wrong actorId/passwordHash
-	 *             combination.
-	 * @throws TimeoutException if the implementation did not respond during a
-	 *             given time
-	 * @throws ConnectionException if there is a problem to connect to the
-	 *             implementation at all. Note that a {@link TimeoutException}
-	 *             might also be thrown if there is in fact a
-	 *             {@link ConnectionException}. They are not easy to
-	 *             distinguish.
-	 * @throws InternalStoreException if the implementation encounters another
-	 *             problem, typically caused by the hosting platform, i.e. an
-	 *             I/O error.
-	 * @throws AuthorisationException if actorId and passwordHash don't match
-	 * @throws RequestException if the supplied arguments are considered
-	 *             syntactically or semantically invalid
-	 */
-	XID getRepositoryId(XID actorId, String passwordHash) throws IllegalArgumentException,
-	        QuotaException, AuthorisationException, TimeoutException, ConnectionException,
-	        RequestException, InternalStoreException;
-	
-	/**
 	 * Change state.
 	 * 
 	 * Check permissions, command pre-conditions, execute the command and log
@@ -346,7 +140,8 @@ public interface XydraBlockingStore {
 	 * 
 	 *         For successful commands that changed something, the return value
 	 *         is always a revision number that can be used to retrieve the
-	 *         corresponding event using {@link #getEvents()}
+	 *         corresponding event using
+	 *         {@link #getEvents(XID, String, GetEventsRequest)}
 	 * 
 	 *         Like any other {@link XCommand}, {@link XTransaction}s only
 	 *         "take up" a single revision, which is the one passed to the
@@ -370,13 +165,15 @@ public interface XydraBlockingStore {
 	 * 
 	 *         Even after a the callback's {@link Callback#onSuccess(Object)}
 	 *         method has been called, the change may not actually be returned
-	 *         yet by {@link #getModelSnapshots()}, {@link #getModelIds()},
-	 *         {@link #getModelRevisions()} and {@link #getObjectSnapshots()}
-	 *         yet. The change will however eventually be returned by those
-	 *         methods, and will stay persistent once it does. Also, no changes
-	 *         with greater revision numbers will become visible before this
-	 *         one, but their callbacks' {@link Callback#onSuccess(Object)}
-	 *         method might be called before this one.
+	 *         yet by {@link #getModelSnapshot(XID, String, XAddress)},
+	 *         {@link #getModelIds(XID, String)},
+	 *         {@link #getModelRevision(XID, String, XAddress)} and
+	 *         {@link #getObjectSnapshot(XID, String, XAddress)} yet. The change
+	 *         will however eventually be returned by those methods, and will
+	 *         stay persistent once it does. Also, no changes with greater
+	 *         revision numbers will become visible before this one, but their
+	 *         callbacks' {@link Callback#onSuccess(Object)} method might be
+	 *         called before this one.
 	 * @throws IllegalArgumentException if one of the given parameters is null
 	 *             (except passwordHash, which may be null).
 	 * @throws QuotaException to prevent brute-force attacks when too many
@@ -448,6 +245,212 @@ public interface XydraBlockingStore {
 	        throws IllegalArgumentException, QuotaException, AuthorisationException,
 	        AccessException, TimeoutException, ConnectionException, RequestException,
 	        InternalStoreException;
+	
+	/**
+	 * Read current state.
+	 * 
+	 * @param actorId The actor who is performing this operation.
+	 * @param passwordHash The MD5 hash of the secret actor password prefixed
+	 *            with "Xydra" to avoid transmitting the same string over the
+	 *            network if the user uses the same password for multiple
+	 *            services. If null, all access is granted.
+	 * @return a Set of all {@link XID} of all {@link XModel XModels} for which
+	 *         the given actorId has read-access in the repository.
+	 * @throws IllegalArgumentException if one of the given parameters is null
+	 *             (except passwordHash, which may be null).
+	 * @throws QuotaException to prevent brute-force attacks when too many
+	 *             operations per time use the wrong actorId/passwordHash
+	 *             combination.
+	 * @throws TimeoutException if the implementation did not respond during a
+	 *             given time
+	 * @throws ConnectionException if there is a problem to connect to the
+	 *             implementation at all. Note that a {@link TimeoutException}
+	 *             might also be thrown if there is in fact a
+	 *             {@link ConnectionException}. They are not easy to
+	 *             distinguish.
+	 * @throws InternalStoreException if the implementation encounters another
+	 *             problem, typically caused by the hosting platform, i.e. an
+	 *             I/O error.
+	 * @throws AuthorisationException if actorId and passwordHash don't match
+	 * @throws RequestException if the supplied arguments are considered
+	 *             syntactically or semantically invalid
+	 */
+	Set<XID> getModelIds(XID actorId, String passwordHash) throws IllegalArgumentException,
+	        QuotaException, AuthorisationException, TimeoutException, ConnectionException,
+	        RequestException, InternalStoreException;
+	
+	/**
+	 * Read current state.
+	 * 
+	 * @param actorId The actor who is performing this operation.
+	 * @param passwordHash The MD5 hash of the secret actor password prefixed
+	 *            with "Xydra" to avoid transmitting the same string over the
+	 *            network if the user uses the same password for multiple
+	 *            services. If null, all access is granted.
+	 * @param modelAddress an array of {@link XAddress} for which the latest
+	 *            model revision should be retrieved. Each {@link XAddress} must
+	 *            address an {@link XModel} (repositoryId/modelId/-/-).
+	 * @return the revision number of the addressed model as a long. A
+	 *         non-existing model (and those for which the actorId has no
+	 *         read-access) is signalled as {@link XCommand#FAILED}.
+	 * @throws IllegalArgumentException if one of the given parameters is null
+	 *             (except passwordHash, which may be null).
+	 * @throws QuotaException to prevent brute-force attacks when too many
+	 *             operations per time use the wrong actorId/passwordHash
+	 *             combination.
+	 * @throws TimeoutException if the implementation did not respond during a
+	 *             given time
+	 * @throws ConnectionException if there is a problem to connect to the
+	 *             implementation at all. Note that a {@link TimeoutException}
+	 *             might also be thrown if there is in fact a
+	 *             {@link ConnectionException}. They are not easy to
+	 *             distinguish.
+	 * @throws InternalStoreException if the implementation encounters another
+	 *             problem, typically caused by the hosting platform, i.e. an
+	 *             I/O error.
+	 * @throws AuthorisationException if actorId and passwordHash don't match
+	 * @throws RequestException if the supplied arguments are considered
+	 *             syntactically or semantically invalid
+	 */
+	long getModelRevision(XID actorId, String passwordHash, XAddress modelAddress)
+	        throws IllegalArgumentException, QuotaException, AuthorisationException,
+	        TimeoutException, ConnectionException, RequestException, InternalStoreException;
+	
+	/**
+	 * Read current state.
+	 * 
+	 * Retrieve read-only snapshots of {@link XModel} states at the point in
+	 * time when this request is processed.
+	 * 
+	 * Possible exceptions for single entries in the returned
+	 * {@link BatchedResult}:
+	 * <ul>
+	 * <li>{@link RequestException} for addresses that do not address an
+	 * {@link XModel}.</li>
+	 * <li>{@link AccessException} for a modelAddress the given actorId may not
+	 * read</li>
+	 * </ul>
+	 * 
+	 * @param actorId The actor who is performing this operation.
+	 * @param passwordHash The MD5 hash of the secret actor password prefixed
+	 *            with "Xydra" to avoid transmitting the same string over the
+	 *            network if the user uses the same password for multiple
+	 *            services. If null, all access is granted.
+	 * @param modelAddress the {@link XAddress} for which model to get a
+	 *            snapshot. The {@link XAddress} must address an {@link XModel}
+	 *            (repositoryId/modelId/-/-).
+	 * 
+	 *            TODO @Daniel: How can a client request a specific version of a
+	 *            snapshot?
+	 * 
+	 * @return a null value signals that the requested model does not exist in
+	 *         the store or that the requesting actor has not the necessary
+	 *         rights to see it.
+	 * @throws IllegalArgumentException if one of the given parameters is null
+	 *             (except passwordHash, which may be null).
+	 * @throws QuotaException to prevent brute-force attacks when too many
+	 *             operations per time use the wrong actorId/passwordHash
+	 *             combination.
+	 * @throws TimeoutException if the implementation did not respond during a
+	 *             given time
+	 * @throws ConnectionException if there is a problem to connect to the
+	 *             implementation at all. Note that a {@link TimeoutException}
+	 *             might also be thrown if there is in fact a
+	 *             {@link ConnectionException}. They are not easy to
+	 *             distinguish.
+	 * @throws InternalStoreException if the implementation encounters another
+	 *             problem, typically caused by the hosting platform, i.e. an
+	 *             I/O error.
+	 * @throws AuthorisationException if actorId and passwordHash don't match
+	 * @throws RequestException if the supplied arguments are considered
+	 *             syntactically or semantically invalid
+	 * 
+	 *             Implementation note: Implementation may choose to supply a
+	 *             lazy-loading stub only.
+	 */
+	XReadableModel getModelSnapshot(XID actorId, String passwordHash, XAddress modelAddress)
+	        throws IllegalArgumentException, QuotaException, AuthorisationException,
+	        TimeoutException, ConnectionException, RequestException, InternalStoreException;
+	
+	/**
+	 * Read current state.
+	 * 
+	 * Returns read-only snapshots of {@link XObject} state at the point in time
+	 * when this request was processed.
+	 * 
+	 * @param actorId The actor who is performing this operation.
+	 * @param passwordHash The MD5 hash of the secret actor password prefixed
+	 *            with "Xydra" to avoid transmitting the same string over the
+	 *            network if the user uses the same password for multiple
+	 *            services. If null, all access is granted.
+	 * @param objectAddress an array of {@link XAddress} for which objects to
+	 *            get snapshots. Each {@link XAddress} must address an
+	 *            {@link XObject} (repositoryId/modelId/objectId/-).
+	 * @return a {@link XReadableObject}. A null value signals that the
+	 *         requested object does not exist in the store - or that the
+	 *         actorId has no read-access on it.
+	 * @throws IllegalArgumentException if one of the given parameters is null
+	 *             (except passwordHash, which may be null).
+	 * @throws QuotaException to prevent brute-force attacks when too many
+	 *             operations per time use the wrong actorId/passwordHash
+	 *             combination.
+	 * @throws TimeoutException if the implementation did not respond during a
+	 *             given time
+	 * @throws ConnectionException if there is a problem to connect to the
+	 *             implementation at all. Note that a {@link TimeoutException}
+	 *             might also be thrown if there is in fact a
+	 *             {@link ConnectionException}. They are not easy to
+	 *             distinguish.
+	 * @throws InternalStoreException if the implementation encounters another
+	 *             problem, typically caused by the hosting platform, i.e. an
+	 *             I/O error.
+	 * @throws AuthorisationException if actorId and passwordHash don't match
+	 * @throws RequestException if the supplied arguments are considered
+	 *             syntactically or semantically invalid
+	 * 
+	 *             Implementation note: Implementation may chose to supply a
+	 *             lazy-loading stub only.
+	 */
+	XReadableObject getObjectSnapshot(XID actorId, String passwordHash, XAddress objectAddress)
+	        throws IllegalArgumentException, QuotaException, AuthorisationException,
+	        TimeoutException, ConnectionException, RequestException, InternalStoreException;
+	
+	/**
+	 * Read current state.
+	 * 
+	 * One {@link XydraBlockingStore} instance refers to exactly one Xydra
+	 * {@link XRepository}.
+	 * 
+	 * Every authenticated actorId may read the repository ID.
+	 * 
+	 * @param actorId The actor who is performing this operation.
+	 * @param passwordHash The MD5 hash of the secret actor password prefixed
+	 *            with "Xydra" to avoid transmitting the same string over the
+	 *            network if the user uses the same password for multiple
+	 *            services. If null, all access is granted.
+	 * @return the repositoryId of this store.
+	 * @throws IllegalArgumentException if one of the given parameters is null
+	 *             (except passwordHash, which may be null).
+	 * @throws QuotaException to prevent brute-force attacks when too many
+	 *             operations per time use the wrong actorId/passwordHash
+	 *             combination.
+	 * @throws TimeoutException if the implementation did not respond during a
+	 *             given time
+	 * @throws ConnectionException if there is a problem to connect to the
+	 *             implementation at all. Note that a {@link TimeoutException}
+	 *             might also be thrown if there is in fact a
+	 *             {@link ConnectionException}. They are not easy to
+	 *             distinguish.
+	 * @throws InternalStoreException if the implementation encounters another
+	 *             problem, typically caused by the hosting platform, i.e. an
+	 *             I/O error.
+	 * @throws AuthorisationException if actorId and passwordHash don't match
+	 * @throws RequestException if the supplied arguments are considered
+	 *             syntactically or semantically invalid
+	 */
+	XID getRepositoryId(XID actorId, String passwordHash) throws IllegalArgumentException,
+	        QuotaException, AuthorisationException, TimeoutException, ConnectionException,
+	        RequestException, InternalStoreException;
 	
 	/**
 	 * @return a {@link XydraStoreAdmin} interface that contains local

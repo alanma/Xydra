@@ -15,6 +15,16 @@ import org.xydra.base.XAddress;
 public interface XAddressSortedSetValue extends XAddressSetValue {
 	
 	/**
+	 * Creates a new {@link XAddressSortedSetValue} containing all entries from
+	 * this value as well as the specified entry. This value is not modified.
+	 * 
+	 * @param entry The new entry
+	 * @return a new {@link XAddressSortedSetValue} containing all entries from
+	 *         this value as well as the given entry
+	 */
+	XAddressSortedSetValue add(XAddress entry);
+	
+	/**
 	 * Returns the contents of this {@link XAddressSortedSetValue} as an array.
 	 * 
 	 * Note: Changes to the returned array will not affect the
@@ -24,16 +34,6 @@ public interface XAddressSortedSetValue extends XAddressSetValue {
 	 *         XAddressSortedSetValue in insertion order
 	 */
 	public XAddress[] contents();
-	
-	/**
-	 * Creates a new {@link XAddressSortedSetValue} containing all entries from
-	 * this value as well as the specified entry. This value is not modified.
-	 * 
-	 * @param entry The new entry
-	 * @return a new {@link XAddressSortedSetValue} containing all entries from
-	 *         this value as well as the given entry
-	 */
-	XAddressSortedSetValue add(XAddress entry);
 	
 	/**
 	 * Creates a new {@link XAddressSortedSetValue} containing all entries from

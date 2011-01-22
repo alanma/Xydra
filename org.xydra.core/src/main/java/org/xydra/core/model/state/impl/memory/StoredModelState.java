@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
-import org.xydra.core.XX;
+import org.xydra.base.XX;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
@@ -24,9 +24,9 @@ public class StoredModelState extends AbstractModelState {
 	
 	private static final long serialVersionUID = -509532259783788492L;
 	
+	private final XChangeLogState changeLogState;
 	private final Set<XID> objectStateIDs = new HashSet<XID>();
 	private final MemoryStateStore store;
-	private final XChangeLogState changeLogState;
 	
 	/**
 	 * @param modelStateID
@@ -52,6 +52,20 @@ public class StoredModelState extends AbstractModelState {
 		this.objectStateIDs.add(objectState.getID());
 	}
 	
+	public XObjectState createObjectState(XID id) {
+		XAddress objectAddr = XX.resolveObject(getAddress(), id);
+		return this.store.createObjectState(objectAddr);
+	}
+	
+	public void delete(XStateTransaction transaction) {
+		assert transaction == null : "no transactions needed/supported";
+		this.store.deleteModelState(getAddress());
+	}
+	
+	public XChangeLogState getChangeLogState() {
+		return this.changeLogState;
+	}
+	
 	public XObjectState getObjectState(XID objectStateID) {
 		XAddress address = XX.resolveObject(getAddress(), objectStateID);
 		return this.store.loadObjectState(address);
@@ -74,6 +88,11 @@ public class StoredModelState extends AbstractModelState {
 		this.objectStateIDs.remove(objectId);
 	}
 	
+	public void save(XStateTransaction transaction) {
+		assert transaction == null : "no transactions needed/supported";
+		this.store.save(this);
+	}
+	
 	protected void setChildrenIDs(Iterator<XID> childrenIDs) {
 		synchronized(this.objectStateIDs) {
 			this.objectStateIDs.clear();
@@ -82,25 +101,6 @@ public class StoredModelState extends AbstractModelState {
 				this.objectStateIDs.add(xid);
 			}
 		}
-	}
-	
-	public void delete(XStateTransaction transaction) {
-		assert transaction == null : "no transactions needed/supported";
-		this.store.deleteModelState(getAddress());
-	}
-	
-	public void save(XStateTransaction transaction) {
-		assert transaction == null : "no transactions needed/supported";
-		this.store.save(this);
-	}
-	
-	public XObjectState createObjectState(XID id) {
-		XAddress objectAddr = XX.resolveObject(getAddress(), id);
-		return this.store.createObjectState(objectAddr);
-	}
-	
-	public XChangeLogState getChangeLogState() {
-		return this.changeLogState;
 	}
 	
 }

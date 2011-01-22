@@ -7,24 +7,24 @@ import java.util.Map;
 import java.util.Set;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableField;
-import org.xydra.base.XReadableModel;
-import org.xydra.base.XReadableObject;
 import org.xydra.base.XID;
-import org.xydra.base.XHalfWritableField;
-import org.xydra.base.XHalfWritableModel;
-import org.xydra.base.XHalfWritableObject;
-import org.xydra.core.XX;
-import org.xydra.core.change.ChangeType;
-import org.xydra.core.change.XAtomicCommand;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XFieldCommand;
-import org.xydra.core.change.XModelCommand;
-import org.xydra.core.change.XObjectCommand;
-import org.xydra.core.change.XTransaction;
+import org.xydra.base.XX;
+import org.xydra.base.change.ChangeType;
+import org.xydra.base.change.XAtomicCommand;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XFieldCommand;
+import org.xydra.base.change.XModelCommand;
+import org.xydra.base.change.XObjectCommand;
+import org.xydra.base.change.XTransaction;
+import org.xydra.base.rmof.XWritableField;
+import org.xydra.base.rmof.XWritableModel;
+import org.xydra.base.rmof.XWritableObject;
+import org.xydra.base.rmof.XReadableField;
+import org.xydra.base.rmof.XReadableModel;
+import org.xydra.base.rmof.XReadableObject;
+import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.index.iterator.AbstractFilteringIterator;
 import org.xydra.index.iterator.BagUnionIterator;
-import org.xydra.store.base.SimpleObject;
 
 
 /**
@@ -32,32 +32,49 @@ import org.xydra.store.base.SimpleObject;
  * {@link XReadableField}.
  * 
  * An {@link XReadableField} is passed as an argument of the constructor. This
- * ChangedField will than basically represent the given {@link XReadableField} and
- * allow changes on its set of {@link XReadableObject XBaseObjects}. The changes do
- * not happen directly on the passed {@link XReadableField} but rather on a sort of
- * copy that emulates the passed {@link XReadableModel}. A ChangedModel provides
- * methods to compare the current state to the state the passed
- * {@link XReadableModel} was in at creation time.
+ * ChangedField will than basically represent the given {@link XReadableField}
+ * and allow changes on its set of {@link XReadableObject XBaseObjects}. The
+ * changes do not happen directly on the passed {@link XReadableField} but
+ * rather on a sort of copy that emulates the passed {@link XReadableModel}. A
+ * ChangedModel provides methods to compare the current state to the state the
+ * passed {@link XReadableModel} was in at creation time.
  * 
  * @author dscharrer
  * 
  */
-public class ChangedModel implements XHalfWritableModel {
+public class ChangedModel implements XWritableModel {
 	
-	// Fields that are in base but have been removed.
-	// Contains no XIDs that are in added or changed.
-	private final Set<XID> removed = new HashSet<XID>();
+	/**
+	 * Get the number of {@link XCommand XCommands} needed to create this
+	 * object.
+	 */
+	private static int countChanges(XReadableObject object, int max) {
+		int n = 1; // one to create the object
+		if(n < max) {
+			for(XID fieldId : object) {
+				n += object.getField(fieldId).isEmpty() ? 1 : 2;
+				if(n >= max) {
+					break;
+				}
+			}
+		}
+		return n;
+	}
 	
 	// Fields that are not in base and have been added.
 	// Contains no XIDs that are in removed or changed.
 	private final Map<XID,SimpleObject> added = new HashMap<XID,SimpleObject>();
+	
+	private final XReadableModel base;
 	
 	// Fields that are in base and have not been removed.
 	// While they were changed once, those changes might have been reverted.
 	// Contains no XIDs that are in added or removed.
 	private final Map<XID,ChangedObject> changed = new HashMap<XID,ChangedObject>();
 	
-	private final XReadableModel base;
+	// Fields that are in base but have been removed.
+	// Contains no XIDs that are in added or changed.
+	private final Set<XID> removed = new HashSet<XID>();
 	
 	/**
 	 * Wrap an {@link XReadableModel} to record a set of changes made. Multiple
@@ -65,13 +82,13 @@ public class ChangedModel implements XHalfWritableModel {
 	 * changes remains.
 	 * 
 	 * Note that this is a very lightweight wrapper intended for a short
-	 * lifetime. As a consequence, the wrapped {@link XReadableModel} is not copied
-	 * and changes to it or any contained objects and fields (as opposed to this
-	 * {@link ChangedModel}) may result in undefined behavior of the
+	 * lifetime. As a consequence, the wrapped {@link XReadableModel} is not
+	 * copied and changes to it or any contained objects and fields (as opposed
+	 * to this {@link ChangedModel}) may result in undefined behavior of the
 	 * {@link ChangedModel}.
 	 * 
-	 * @param base The {@link XReadableModel} this ChangedModel will encapsulate and
-	 *            represent
+	 * @param base The {@link XReadableModel} this ChangedModel will encapsulate
+	 *            and represent
 	 */
 	public ChangedModel(XReadableModel base) {
 		this.base = base;
@@ -99,90 +116,26 @@ public class ChangedModel implements XHalfWritableModel {
 		return true;
 	}
 	
-	public XHalfWritableObject createObject(XID objectId) {
+	/**
+	 * remove all objects.
+	 */
+	public void clear() {
 		
-		XHalfWritableObject oldObject = getObject(objectId);
-		if(oldObject != null) {
-			return oldObject;
+		this.added.clear();
+		this.changed.clear();
+		for(XID id : this.base) {
+			// IMPROVE maybe add a "cleared" flag to remove all fields more
+			// efficiently?
+			this.removed.add(id);
 		}
 		
-		XReadableObject object = this.base.getObject(objectId);
-		if(object != null) {
-			
-			// If the field previously existed it must have been removed
-			// previously and we can merge the remove and add changes.
-			assert this.removed.contains(objectId);
-			assert !this.changed.containsKey(objectId);
-			this.removed.remove(objectId);
-			ChangedObject newObject = new ChangedObject(object);
-			newObject.clear();
-			this.changed.put(objectId, newObject);
-			
-			assert checkSetInvariants();
-			
-			return newObject;
-			
-		} else {
-			
-			// Otherwise, the field is completely new.
-			XAddress fieldAddr = XX.resolveObject(getAddress(), objectId);
-			SimpleObject newObject = new SimpleObject(fieldAddr);
-			this.added.put(objectId, newObject);
-			
-			assert checkSetInvariants();
-			
-			return newObject;
-		}
-		
-	}
-	
-	/**
-	 * @return the {@link XID XIDs} of objects that existed in the original
-	 *         model but have been removed from this ChangedModel
-	 */
-	public Iterable<XID> getRemovedObjects() {
-		return this.removed;
-	}
-	
-	/**
-	 * @return the {@link NewObject NewObjects} that have been added to this
-	 *         ChangedModel and were not contained in the original
-	 *         {@link XReadableModel}
-	 */
-	public Iterable<SimpleObject> getNewObjects() {
-		return this.added.values();
-	}
-	
-	/**
-	 * @return an iterable of the objects that already existed in the original
-	 *         {@link XReadableModel} but have been changed. Note: their current
-	 *         state might be the same as the original one
-	 */
-	public Iterable<ChangedObject> getChangedObjects() {
-		return this.changed.values();
-	}
-	
-	/**
-	 * Get the number of {@link XCommand XCommands} needed to create this
-	 * object.
-	 */
-	private static int countChanges(XReadableObject object, int max) {
-		int n = 1; // one to create the object
-		if(n < max) {
-			for(XID fieldId : object) {
-				n += object.getField(fieldId).isEmpty() ? 1 : 2;
-				if(n >= max) {
-					break;
-				}
-			}
-		}
-		return n;
+		assert checkSetInvariants();
 	}
 	
 	/**
 	 * Count the minimal number of {@link XCommand XCommands} that would be
-	 * needed to transform the original {@link XReadableModel} to the current state
-	 * which is represented by this ChangedModel.
+	 * needed to transform the original {@link XReadableModel} to the current
+	 * state which is represented by this ChangedModel.
 	 * 
 	 * This is different to {@link #countEventsNeeded} in that a removed object
 	 * or field may cause several events while only needing one command.
@@ -268,128 +221,101 @@ public class ChangedModel implements XHalfWritableModel {
 		return n;
 	}
 	
-	public XHalfWritableObject getObject(XID objectId) {
+	public XWritableObject createObject(XID objectId) {
 		
-		XHalfWritableObject newObject = this.added.get(objectId);
-		if(newObject != null) {
-			return newObject;
-		}
-		
-		ChangedObject changedObject = this.changed.get(objectId);
-		if(changedObject != null) {
-			return changedObject;
-		}
-		
-		if(this.removed.contains(objectId)) {
-			return null;
+		XWritableObject oldObject = getObject(objectId);
+		if(oldObject != null) {
+			return oldObject;
 		}
 		
 		XReadableObject object = this.base.getObject(objectId);
-		if(object == null) {
-			return null;
-		}
-		
-		changedObject = new ChangedObject(object);
-		this.changed.put(objectId, changedObject);
-		
-		assert checkSetInvariants();
-		
-		return changedObject;
-	}
-	
-	public boolean removeObject(XID objectId) {
-		
-		if(this.added.containsKey(objectId)) {
+		if(object != null) {
 			
-			// Never existed in base, so removing from added is sufficient.
-			assert !this.base.hasObject(objectId) && !this.changed.containsKey(objectId);
-			assert !this.removed.contains(objectId);
-			
-			this.added.remove(objectId);
+			// If the field previously existed it must have been removed
+			// previously and we can merge the remove and add changes.
+			assert this.removed.contains(objectId);
+			assert !this.changed.containsKey(objectId);
+			this.removed.remove(objectId);
+			ChangedObject newObject = new ChangedObject(object);
+			newObject.clear();
+			this.changed.put(objectId, newObject);
 			
 			assert checkSetInvariants();
 			
-			return true;
+			return newObject;
 			
-		} else if(!this.removed.contains(objectId) && this.base.hasObject(objectId)) {
+		} else {
 			
-			// Exists in base and not removed yet.
-			assert !this.added.containsKey(objectId);
-			
-			this.removed.add(objectId);
-			this.changed.remove(objectId);
+			// Otherwise, the field is completely new.
+			XAddress fieldAddr = XX.resolveObject(getAddress(), objectId);
+			SimpleObject newObject = new SimpleObject(fieldAddr);
+			this.added.put(objectId, newObject);
 			
 			assert checkSetInvariants();
 			
-			return true;
+			return newObject;
 		}
 		
-		return false;
 	}
 	
 	/**
-	 * Return the revision number of the wrapped {@link XReadableModel}. The
-	 * revision number does not increase with changes to this
-	 * {@link ChangedModel}.
+	 * Apply the given command to this changed mode. Failed commands may be left
+	 * partially applied.
 	 * 
-	 * @return the revision number of the original {@link XReadableModel}
+	 * @return true if the command succeeded, false otherwise.
 	 */
-	public long getRevisionNumber() {
-		return this.base.getRevisionNumber();
-	}
-	
-	public XID getID() {
-		return this.base.getID();
-	}
-	
-	public boolean hasObject(XID objectId) {
-		return this.added.containsKey(objectId)
-		        || (!this.removed.contains(objectId) && this.base.hasObject(objectId));
-	}
-	
-	public XAddress getAddress() {
-		return this.base.getAddress();
-	}
-	
-	public Iterator<XID> iterator() {
-		
-		Iterator<XID> filtered = new AbstractFilteringIterator<XID>(this.base.iterator()) {
-			@Override
-			protected boolean matchesFilter(XID entry) {
-				return !ChangedModel.this.removed.contains(entry);
-			}
-		};
-		
-		return new BagUnionIterator<XID>(filtered, this.added.keySet().iterator());
+	public boolean executeCommand(XCommand command) {
+		if(command instanceof XTransaction) {
+			return executeCommand((XTransaction)command);
+		} else if(command instanceof XModelCommand) {
+			return executeCommand((XModelCommand)command);
+		} else if(command instanceof XObjectCommand) {
+			return executeCommand((XObjectCommand)command);
+		} else if(command instanceof XFieldCommand) {
+			return executeCommand((XFieldCommand)command);
+		} else {
+			throw new IllegalArgumentException("unexpected command type: " + command);
+		}
 	}
 	
 	/**
-	 * @return the {@link XReadableObject} with the given {@link XID} as it exists
-	 *         in the original {@link XReadableModel}.
+	 * Checks if the given {@link XFieldCommand} is valid and can be
+	 * successfully executed on this ChangedModel or if the attempt to execute
+	 * it will fail.
+	 * 
+	 * @param command The {@link XFieldCommand} which is to be checked.
+	 * 
+	 * @return true, if the {@link XFieldCommand} is valid and can be executed,
+	 *         false otherwise
 	 */
-	public XReadableObject getOldObject(XID objectId) {
-		return this.base.getObject(objectId);
-	}
-	
-	public boolean isEmpty() {
+	public boolean executeCommand(XFieldCommand command) {
 		
-		if(!this.added.isEmpty()) {
+		XWritableObject object = getObject(command.getObjectId());
+		if(object == null) {
+			// command is invalid
 			return false;
 		}
 		
-		if(this.removed.isEmpty()) {
-			return this.base.isEmpty();
-		}
-		
-		if(this.changed.size() > this.removed.size()) {
+		XWritableField field = object.getField(command.getFieldId());
+		if(field == null) {
+			// command is invalid
 			return false;
 		}
 		
-		for(XID objectId : this.base) {
-			if(!this.removed.contains(objectId)) {
+		if(!command.isForced()) {
+			if(field.getRevisionNumber() != command.getRevisionNumber()) {
+				// command is invalid (wrong revision)
+				return false;
+			}
+			// empty fields require an ADD command
+			if((command.getChangeType() == ChangeType.ADD) != field.isEmpty()) {
+				// command is invalid (wrong type)
 				return false;
 			}
 		}
+		
+		// command is OK
+		field.setValue(command.getValue());
 		
 		return true;
 	}
@@ -406,7 +332,7 @@ public class ChangedModel implements XHalfWritableModel {
 	 */
 	public boolean executeCommand(XModelCommand command) {
 		
-		XID objectId = command.getObjectID();
+		XID objectId = command.getObjectId();
 		
 		switch(command.getChangeType()) {
 		
@@ -452,13 +378,13 @@ public class ChangedModel implements XHalfWritableModel {
 	 */
 	public boolean executeCommand(XObjectCommand command) {
 		
-		XHalfWritableObject object = getObject(command.getObjectID());
+		XWritableObject object = getObject(command.getObjectId());
 		if(object == null) {
 			// command is invalid
 			return false;
 		}
 		
-		XID fieldId = command.getFieldID();
+		XID fieldId = command.getFieldId();
 		
 		switch(command.getChangeType()) {
 		
@@ -490,47 +416,6 @@ public class ChangedModel implements XHalfWritableModel {
 			throw new AssertionError("impossible type for object commands");
 		}
 		
-	}
-	
-	/**
-	 * Checks if the given {@link XFieldCommand} is valid and can be
-	 * successfully executed on this ChangedModel or if the attempt to execute
-	 * it will fail.
-	 * 
-	 * @param command The {@link XFieldCommand} which is to be checked.
-	 * 
-	 * @return true, if the {@link XFieldCommand} is valid and can be executed,
-	 *         false otherwise
-	 */
-	public boolean executeCommand(XFieldCommand command) {
-		
-		XHalfWritableObject object = getObject(command.getObjectID());
-		if(object == null) {
-			// command is invalid
-			return false;
-		}
-		
-		XHalfWritableField field = object.getField(command.getFieldID());
-		if(field == null) {
-			// command is invalid
-			return false;
-		}
-		
-		if(!command.isForced()) {
-			if(field.getRevisionNumber() != command.getRevisionNumber()) {
-				// command is invalid (wrong revision)
-				return false;
-			}
-			if((command.getChangeType() == ChangeType.ADD) != field.isEmpty()) {
-				// command is invalid (wrong type)
-				return false;
-			}
-		}
-		
-		// command is OK
-		field.setValue(command.getValue());
-		
-		return true;
 	}
 	
 	/**
@@ -571,40 +456,156 @@ public class ChangedModel implements XHalfWritableModel {
 		return true;
 	}
 	
-	/**
-	 * Apply the given command to this changed mode. Failed commands may be left
-	 * partially applied.
-	 * 
-	 * @return true if the command succeeded, false otherwise.
-	 */
-	public boolean executeCommand(XCommand command) {
-		if(command instanceof XTransaction) {
-			return executeCommand((XTransaction)command);
-		} else if(command instanceof XModelCommand) {
-			return executeCommand((XModelCommand)command);
-		} else if(command instanceof XObjectCommand) {
-			return executeCommand((XObjectCommand)command);
-		} else if(command instanceof XFieldCommand) {
-			return executeCommand((XFieldCommand)command);
-		} else {
-			throw new IllegalArgumentException("unexpected command type: " + command);
-		}
+	public XAddress getAddress() {
+		return this.base.getAddress();
 	}
 	
 	/**
-	 * remove all objects.
+	 * @return an iterable of the objects that already existed in the original
+	 *         {@link XReadableModel} but have been changed. Note: their current
+	 *         state might be the same as the original one
 	 */
-	public void clear() {
+	public Iterable<ChangedObject> getChangedObjects() {
+		return this.changed.values();
+	}
+	
+	public XID getID() {
+		return this.base.getID();
+	}
+	
+	/**
+	 * @return the {@link NewObject NewObjects} that have been added to this
+	 *         ChangedModel and were not contained in the original
+	 *         {@link XReadableModel}
+	 */
+	public Iterable<SimpleObject> getNewObjects() {
+		return this.added.values();
+	}
+	
+	public XWritableObject getObject(XID objectId) {
 		
-		this.added.clear();
-		this.changed.clear();
-		for(XID id : this.base) {
-			// IMPROVE maybe add a "cleared" flag to remove all fields more
-			// efficiently?
-			this.removed.add(id);
+		XWritableObject newObject = this.added.get(objectId);
+		if(newObject != null) {
+			return newObject;
 		}
 		
+		ChangedObject changedObject = this.changed.get(objectId);
+		if(changedObject != null) {
+			return changedObject;
+		}
+		
+		if(this.removed.contains(objectId)) {
+			return null;
+		}
+		
+		XReadableObject object = this.base.getObject(objectId);
+		if(object == null) {
+			return null;
+		}
+		
+		changedObject = new ChangedObject(object);
+		this.changed.put(objectId, changedObject);
+		
 		assert checkSetInvariants();
+		
+		return changedObject;
+	}
+	
+	/**
+	 * @return the {@link XReadableObject} with the given {@link XID} as it
+	 *         exists in the original {@link XReadableModel}.
+	 */
+	public XReadableObject getOldObject(XID objectId) {
+		return this.base.getObject(objectId);
+	}
+	
+	/**
+	 * @return the {@link XID XIDs} of objects that existed in the original
+	 *         model but have been removed from this ChangedModel
+	 */
+	public Iterable<XID> getRemovedObjects() {
+		return this.removed;
+	}
+	
+	/**
+	 * Return the revision number of the wrapped {@link XReadableModel}. The
+	 * revision number does not increase with changes to this
+	 * {@link ChangedModel}.
+	 * 
+	 * @return the revision number of the original {@link XReadableModel}
+	 */
+	public long getRevisionNumber() {
+		return this.base.getRevisionNumber();
+	}
+	
+	public boolean hasObject(XID objectId) {
+		return this.added.containsKey(objectId)
+		        || (!this.removed.contains(objectId) && this.base.hasObject(objectId));
+	}
+	
+	public boolean isEmpty() {
+		
+		if(!this.added.isEmpty()) {
+			return false;
+		}
+		
+		if(this.removed.isEmpty()) {
+			return this.base.isEmpty();
+		}
+		
+		if(this.changed.size() > this.removed.size()) {
+			return false;
+		}
+		
+		for(XID objectId : this.base) {
+			if(!this.removed.contains(objectId)) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	public Iterator<XID> iterator() {
+		
+		Iterator<XID> filtered = new AbstractFilteringIterator<XID>(this.base.iterator()) {
+			@Override
+			protected boolean matchesFilter(XID entry) {
+				return !ChangedModel.this.removed.contains(entry);
+			}
+		};
+		
+		return new BagUnionIterator<XID>(filtered, this.added.keySet().iterator());
+	}
+	
+	public boolean removeObject(XID objectId) {
+		
+		if(this.added.containsKey(objectId)) {
+			
+			// Never existed in base, so removing from added is sufficient.
+			assert !this.base.hasObject(objectId) && !this.changed.containsKey(objectId);
+			assert !this.removed.contains(objectId);
+			
+			this.added.remove(objectId);
+			
+			assert checkSetInvariants();
+			
+			return true;
+			
+		} else if(!this.removed.contains(objectId) && this.base.hasObject(objectId)) {
+			
+			// Exists in base and not removed yet.
+			assert !this.added.containsKey(objectId);
+			
+			this.removed.add(objectId);
+			this.changed.remove(objectId);
+			
+			assert checkSetInvariants();
+			
+			return true;
+		}
+		
+		return false;
 	}
 	
 }

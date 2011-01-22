@@ -1,5 +1,8 @@
 package org.xydra.core.change;
 
+import org.xydra.base.change.XTransactionEvent;
+
+
 /**
  * A listener interested in {@link XTransactionEvent XTransactionEvents}. Can be
  * registered on classes implementing the {@link XSendsTransactionEvents}

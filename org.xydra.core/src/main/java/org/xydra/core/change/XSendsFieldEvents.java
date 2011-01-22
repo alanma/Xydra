@@ -1,5 +1,8 @@
 package org.xydra.core.change;
 
+import org.xydra.base.change.XFieldEvent;
+
+
 /**
  * This interface indicates that it is possible to register
  * {@link XFieldEventListener XFieldEventListeners} to listen for

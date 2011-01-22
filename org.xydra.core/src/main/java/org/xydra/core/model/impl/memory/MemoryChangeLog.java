@@ -1,7 +1,7 @@
 package org.xydra.core.model.impl.memory;
 
 import org.xydra.base.XAddress;
-import org.xydra.core.change.XEvent;
+import org.xydra.base.change.XEvent;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XStateTransaction;
@@ -47,23 +47,16 @@ public class MemoryChangeLog extends AbstractChangeLog implements XChangeLog {
 		this.state.appendEvent(event, transaction);
 	}
 	
-	/**
-	 * Removes all {@link XEvent XEvents} that occurred after the given revision
-	 * number from this MemoryChangeLog, excluding the {@link XEvent} that
-	 * occurred at the given revision number
-	 * 
-	 * @param revisionNumber the revision number from which on the
-	 *            {@link XEvent XEvents} are to be removed
-	 * @return true, if the operation could be executed, i.e. the given revision
-	 *         number was smaller than the current revision number and greater
-	 *         than zero.
-	 */
-	protected boolean truncateToRevision(long revisionNumber, XStateTransaction transaction) {
-		return this.state.truncateToRevision(revisionNumber, transaction);
+	protected void delete(XStateTransaction transaction) {
+		this.state.delete(transaction);
 	}
 	
 	public XAddress getBaseAddress() {
 		return this.state.getBaseAddress();
+	}
+	
+	synchronized public long getCurrentRevisionNumber() {
+		return this.state.getCurrentRevisionNumber();
 	}
 	
 	synchronized public XEvent getEventAt(long revisionNumber) {
@@ -86,10 +79,6 @@ public class MemoryChangeLog extends AbstractChangeLog implements XChangeLog {
 		return event;
 	}
 	
-	synchronized public long getCurrentRevisionNumber() {
-		return this.state.getCurrentRevisionNumber();
-	}
-	
 	synchronized public long getFirstRevisionNumber() {
 		return this.state.getFirstRevisionNumber();
 	}
@@ -98,13 +87,24 @@ public class MemoryChangeLog extends AbstractChangeLog implements XChangeLog {
 		this.state.save(transaction);
 	}
 	
-	protected void delete(XStateTransaction transaction) {
-		this.state.delete(transaction);
-	}
-	
 	@Override
 	public String toString() {
 		return this.state.toString();
+	}
+	
+	/**
+	 * Removes all {@link XEvent XEvents} that occurred after the given revision
+	 * number from this MemoryChangeLog, excluding the {@link XEvent} that
+	 * occurred at the given revision number
+	 * 
+	 * @param revisionNumber the revision number from which on the
+	 *            {@link XEvent XEvents} are to be removed
+	 * @return true, if the operation could be executed, i.e. the given revision
+	 *         number was smaller than the current revision number and greater
+	 *         than zero.
+	 */
+	protected boolean truncateToRevision(long revisionNumber, XStateTransaction transaction) {
+		return this.state.truncateToRevision(revisionNumber, transaction);
 	}
 	
 }

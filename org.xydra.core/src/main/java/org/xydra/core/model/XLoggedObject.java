@@ -2,8 +2,8 @@ package org.xydra.core.model;
 
 import org.xydra.annotations.ReadOperation;
 import org.xydra.base.XID;
-import org.xydra.base.XHalfWritableObject;
-import org.xydra.core.change.XEvent;
+import org.xydra.base.change.XEvent;
+import org.xydra.base.rmof.XWritableObject;
 import org.xydra.core.change.XSendsFieldEvents;
 import org.xydra.core.change.XSendsObjectEvents;
 import org.xydra.core.change.XSendsTransactionEvents;
@@ -20,14 +20,14 @@ import org.xydra.core.change.XSendsTransactionEvents;
  * 
  * @author dscharrer
  */
-public interface XLoggedObject extends XHalfWritableObject, XSendsObjectEvents, XSendsFieldEvents,
+public interface XLoggedObject extends XWritableObject, XSendsObjectEvents, XSendsFieldEvents,
         XSendsTransactionEvents, IHasChangeLog {
 	
 	/**
 	 * Returns the {@link XLoggedField} with the given {@link XID} contained in
 	 * this object .
 	 * 
-	 * @param fieldID The {@link XID} of the {@link XLoggedField} which is to be
+	 * @param fieldId The {@link XID} of the {@link XLoggedField} which is to be
 	 *            returned
 	 * @return The {@link XLoggedField} with the given {@link XID} or null, if
 	 *         no corresponding {@link XLoggedField} exists

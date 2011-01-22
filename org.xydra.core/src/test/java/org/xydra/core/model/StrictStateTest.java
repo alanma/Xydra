@@ -7,14 +7,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xydra.base.X;
 import org.xydra.base.XID;
-import org.xydra.core.X;
-import org.xydra.core.XX;
-import org.xydra.core.change.XCommand;
+import org.xydra.base.XX;
+import org.xydra.base.change.XCommand;
+import org.xydra.core.TestLogger;
 import org.xydra.core.change.XTransactionBuilder;
+import org.xydra.core.model.state.TestStateStore;
 import org.xydra.core.model.state.XSPI;
-import org.xydra.core.test.TestLogger;
-import org.xydra.core.test.model.state.TestStateStore;
 import org.xydra.core.value.XV;
 
 
@@ -26,12 +26,12 @@ import org.xydra.core.value.XV;
  */
 public class StrictStateTest {
 	
-	static TestStateStore store;
-	static XRepository repo;
+	static XID actorId;
+	static XField field;
 	static XModel model;
 	static XObject object;
-	static XField field;
-	static XID actorId;
+	static XRepository repo;
+	static TestStateStore store;
 	
 	@BeforeClass
 	public static void init() {
@@ -76,6 +76,11 @@ public class StrictStateTest {
 	}
 	
 	@Test
+	public void testCreateField() {
+		object.createField(XX.createUniqueID());
+	}
+	
+	@Test
 	public void testCreateModel() {
 		repo.createModel(XX.createUniqueID());
 	}
@@ -86,13 +91,13 @@ public class StrictStateTest {
 	}
 	
 	@Test
-	public void testCreateField() {
-		object.createField(XX.createUniqueID());
+	public void testRemoveField() {
+		object.removeField(field.getID());
 	}
 	
 	@Test
-	public void testSetValue() {
-		field.setValue(XV.toValue(new byte[] { 'C', 'O', 'O', 'K', 'I', 'E', '!' }));
+	public void testRemoveModel() {
+		repo.removeModel(model.getID());
 	}
 	
 	@Test
@@ -101,18 +106,13 @@ public class StrictStateTest {
 	}
 	
 	@Test
-	public void testRemoveField() {
-		object.removeField(field.getID());
-	}
-	
-	@Test
 	public void testReoveObject() {
 		model.removeObject(object.getID());
 	}
 	
 	@Test
-	public void testRemoveModel() {
-		repo.removeModel(model.getID());
+	public void testSetValue() {
+		field.setValue(XV.toValue(new byte[] { 'C', 'O', 'O', 'K', 'I', 'E', '!' }));
 	}
 	
 	@Test

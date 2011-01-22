@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
-import org.xydra.core.XX;
+import org.xydra.base.XX;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XFieldState;
 import org.xydra.core.model.state.XObjectState;
@@ -24,8 +24,8 @@ public class TemporaryObjectState extends AbstractObjectState {
 	
 	private static final long serialVersionUID = 728023809328377428L;
 	
-	private final Map<XID,XFieldState> fieldStates = new HashMap<XID,XFieldState>();
 	private final XChangeLogState changeLogState;
+	private final Map<XID,XFieldState> fieldStates = new HashMap<XID,XFieldState>();
 	
 	public TemporaryObjectState(XAddress objectAddr) {
 		super(objectAddr);
@@ -40,6 +40,24 @@ public class TemporaryObjectState extends AbstractObjectState {
 	public void addFieldState(XFieldState fieldState) {
 		checkFieldState(fieldState);
 		this.fieldStates.put(fieldState.getID(), fieldState);
+	}
+	
+	public XFieldState createFieldState(XID id) {
+		XAddress fieldAddr = XX.resolveField(getAddress(), id);
+		return new TemporaryFieldState(fieldAddr);
+	}
+	
+	public void delete(XStateTransaction transaction) {
+		assert transaction == null : "no transactions needed/supported";
+		// nothing to do here
+	}
+	
+	public XChangeLogState getChangeLogState() {
+		return this.changeLogState;
+	}
+	
+	public XFieldState getFieldState(XID id) {
+		return this.fieldStates.get(id);
 	}
 	
 	public boolean hasFieldState(XID fieldStateID) {
@@ -58,27 +76,9 @@ public class TemporaryObjectState extends AbstractObjectState {
 		this.fieldStates.remove(fieldId);
 	}
 	
-	public void delete(XStateTransaction transaction) {
-		assert transaction == null : "no transactions needed/supported";
-		// nothing to do here
-	}
-	
 	public void save(XStateTransaction transaction) {
 		assert transaction == null : "no transactions needed/supported";
 		// nothing to save
-	}
-	
-	public XFieldState createFieldState(XID id) {
-		XAddress fieldAddr = XX.resolveField(getAddress(), id);
-		return new TemporaryFieldState(fieldAddr);
-	}
-	
-	public XFieldState getFieldState(XID id) {
-		return this.fieldStates.get(id);
-	}
-	
-	public XChangeLogState getChangeLogState() {
-		return this.changeLogState;
 	}
 	
 }

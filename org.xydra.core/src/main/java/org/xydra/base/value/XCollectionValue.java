@@ -10,6 +10,16 @@ package org.xydra.base.value;
 public interface XCollectionValue<E> extends XValue, Iterable<E> {
 	
 	/**
+	 * Create a new {@link XCollectionValue} containing all entries from this
+	 * value as well as the specified entry. This value is not modified.
+	 * 
+	 * @param entry The new entry.
+	 * @return a new {@link XCollectionValue} containing all entries from this
+	 *         value as well as the specified entry.
+	 */
+	XCollectionValue<E> add(E entry);
+	
+	/**
 	 * Checks whether this XCollectionValue contains the given element or not
 	 * 
 	 * @return true, if this XCollectionValue contains the given element, false
@@ -23,6 +33,16 @@ public interface XCollectionValue<E> extends XValue, Iterable<E> {
 	 * @return true, if this {@link XCollectionValue} doesn't have any entries.
 	 */
 	boolean isEmpty();
+	
+	/**
+	 * Create a new {@link XCollectionValue} containing all entries from this
+	 * value except the specified entry. This value is not modified.
+	 * 
+	 * @param entry The entry which is to be removed
+	 * @return a new {@link XCollectionValue} containing all entries from this
+	 *         value except the given entry
+	 */
+	XCollectionValue<E> remove(E entry);
 	
 	/**
 	 * Returns the number of entries in this XCollectionValue
@@ -40,25 +60,5 @@ public interface XCollectionValue<E> extends XValue, Iterable<E> {
 	 * @return the contents of this {@link XListValue} as an array.
 	 */
 	E[] toArray();
-	
-	/**
-	 * Create a new {@link XCollectionValue} containing all entries from this
-	 * value as well as the specified entry. This value is not modified.
-	 * 
-	 * @param entry The new entry.
-	 * @return a new {@link XCollectionValue} containing all entries from this
-	 *         value as well as the specified entry.
-	 */
-	XCollectionValue<E> add(E entry);
-	
-	/**
-	 * Create a new {@link XCollectionValue} containing all entries from this
-	 * value except the specified entry. This value is not modified.
-	 * 
-	 * @param entry The entry which is to be removed
-	 * @return a new {@link XCollectionValue} containing all entries from this
-	 *         value except the given entry
-	 */
-	XCollectionValue<E> remove(E entry);
 	
 }

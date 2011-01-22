@@ -5,12 +5,15 @@ import java.util.Set;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
-import org.xydra.core.access.XAccessListener;
-import org.xydra.core.access.XAccessManager;
 import org.xydra.index.query.Pair;
 import org.xydra.store.access.XA;
-import org.xydra.store.access.XAccessDefinition;
-import org.xydra.store.access.XAccessValue;
+import org.xydra.store.access.XAccessListener;
+import org.xydra.store.access.XAccessRightDefinition;
+import org.xydra.store.access.XAccessRightValue;
+import org.xydra.store.access.XAuthorisationDatabaseWitListeners;
+import org.xydra.store.access.XAuthorisationManager;
+import org.xydra.store.access.XGroupDatabaseWithListeners;
+import org.xydra.store.access.impl.AbstractAuthorisationManager;
 
 
 /**
@@ -19,34 +22,38 @@ import org.xydra.store.access.XAccessValue;
  * everything else.
  * 
  * @author dscharrer
- * 
+ * @deprecated Seems not be used anywhere. Delete or un-deprecate. ~max
  */
-public class CompositeAccessManager extends AbstractAccessManager {
+@Deprecated
+public class CompositeAccessManager extends AbstractAuthorisationManager implements
+        XAuthorisationDatabaseWitListeners {
 	
 	private static final long serialVersionUID = 2576314343471791859L;
 	
-	private final XAccessManager outer;
-	private final XAccessManager inner;
+	private final XAuthorisationManager inner;
 	private final XAddress mountPoint;
+	private final XAuthorisationManager outer;
 	
-	public CompositeAccessManager(XAddress mountPoint, XAccessManager outer,
-	        XAccessManager inner) {
+	public CompositeAccessManager(XAddress mountPoint, XAuthorisationManager outer,
+	        XAuthorisationManager inner) {
 		this.mountPoint = mountPoint;
 		this.outer = outer;
 		this.inner = inner;
 	}
 	
 	public void addListener(XAccessListener listener) {
-		this.outer.addListener(listener);
-		this.inner.addListener(listener);
+		this.outer.getAuthorisationDatabase().addListener(listener);
+		this.inner.getAuthorisationDatabase().addListener(listener);
 	}
 	
-	public XAccessValue getAccessDefinition(XID actor, XAddress resource, XID access)
+	public XAccessRightValue getAccessDefinition(XID actor, XAddress resource, XID access)
 	        throws IllegalArgumentException {
 		if(this.mountPoint.equalsOrContains(resource)) {
-			return this.inner.getAccessDefinition(actor, resource, access);
+			return this.inner.getAuthorisationDatabase().getAccessDefinition(actor, resource,
+			        access);
 		} else {
-			return this.outer.getAccessDefinition(actor, resource, access);
+			return this.outer.getAuthorisationDatabase().getAccessDefinition(actor, resource,
+			        access);
 		}
 	}
 	
@@ -65,11 +72,21 @@ public class CompositeAccessManager extends AbstractAccessManager {
 		return this.outer.getActorsWithPermission(resource, access);
 	}
 	
-	public Set<XAccessDefinition> getDefinitions() {
-		Set<XAccessDefinition> definitions = new HashSet<XAccessDefinition>();
-		definitions.addAll(this.outer.getDefinitions());
-		definitions.addAll(this.inner.getDefinitions());
+	@Override
+	public XAuthorisationDatabaseWitListeners getAuthorisationDatabase() {
+		return this;
+	}
+	
+	public Set<XAccessRightDefinition> getDefinitions() {
+		Set<XAccessRightDefinition> definitions = new HashSet<XAccessRightDefinition>();
+		definitions.addAll(this.outer.getAuthorisationDatabase().getDefinitions());
+		definitions.addAll(this.inner.getAuthorisationDatabase().getDefinitions());
 		return definitions;
+	}
+	
+	@Override
+	public XGroupDatabaseWithListeners getGroupDatabase() {
+		return this.outer.getGroupDatabase();
 	}
 	
 	public Pair<Set<XID>,Set<XID>> getPermissions(XID actor, XAddress resource) {
@@ -85,9 +102,9 @@ public class CompositeAccessManager extends AbstractAccessManager {
 		return this.outer.getPermissions(actor, resource);
 	}
 	
-	public XAccessValue hasAccess(XID actor, XAddress resource, XID access) {
+	public XAccessRightValue hasAccess(XID actor, XAddress resource, XID access) {
 		if(this.mountPoint.equalsOrContains(resource)) {
-			XAccessValue allowed = this.inner.hasAccess(actor, resource, access);
+			XAccessRightValue allowed = this.inner.hasAccess(actor, resource, access);
 			if(allowed.isDefined()) {
 				return allowed;
 			}
@@ -95,35 +112,12 @@ public class CompositeAccessManager extends AbstractAccessManager {
 		return this.outer.hasAccess(actor, resource, access);
 	}
 	
-	public XAccessValue hasAccessToSubtree(XID actor, XAddress rootResource, XID access) {
+	public XAccessRightValue hasAccessToSubresource(XID actor, XAddress rootResource, XID access) {
 		
 		if(this.mountPoint.equalsOrContains(rootResource)) {
 			
-			XAccessValue allowed = this.inner.hasAccessToSubtree(actor, rootResource, access);
-			
-			if(allowed.isDefined()) {
-				return allowed;
-			}
-			return this.outer.hasAccess(actor, rootResource, access);
-			
-		} else if(rootResource.contains(this.mountPoint)) {
-			
-			XAccessValue allowed = this.inner.hasAccessToSubtree(actor, rootResource, access);
-			
-			if(allowed.isDenied()) {
-				return allowed;
-			}
-			
-		}
-		
-		return this.outer.hasAccessToSubtree(actor, rootResource, access);
-	}
-	
-	public XAccessValue hasAccessToSubresource(XID actor, XAddress rootResource, XID access) {
-		
-		if(this.mountPoint.equalsOrContains(rootResource)) {
-			
-			XAccessValue allowed = this.inner.hasAccessToSubresource(actor, rootResource, access);
+			XAccessRightValue allowed = this.inner.hasAccessToSubresource(actor, rootResource,
+			        access);
 			
 			if(allowed.isDefined()) {
 				return allowed;
@@ -133,7 +127,8 @@ public class CompositeAccessManager extends AbstractAccessManager {
 			
 		} else if(rootResource.contains(this.mountPoint)) {
 			
-			XAccessValue allowed = this.inner.hasAccessToSubresource(actor, rootResource, access);
+			XAccessRightValue allowed = this.inner.hasAccessToSubresource(actor, rootResource,
+			        access);
 			
 			if(allowed.isAllowed()) {
 				return allowed;
@@ -144,32 +139,56 @@ public class CompositeAccessManager extends AbstractAccessManager {
 		return this.outer.hasAccessToSubresource(actor, rootResource, access);
 	}
 	
+	public XAccessRightValue hasAccessToSubtree(XID actor, XAddress rootResource, XID access) {
+		
+		if(this.mountPoint.equalsOrContains(rootResource)) {
+			
+			XAccessRightValue allowed = this.inner.hasAccessToSubtree(actor, rootResource, access);
+			
+			if(allowed.isDefined()) {
+				return allowed;
+			}
+			return this.outer.hasAccess(actor, rootResource, access);
+			
+		} else if(rootResource.contains(this.mountPoint)) {
+			
+			XAccessRightValue allowed = this.inner.hasAccessToSubtree(actor, rootResource, access);
+			
+			if(allowed.isDenied()) {
+				return allowed;
+			}
+			
+		}
+		
+		return this.outer.hasAccessToSubtree(actor, rootResource, access);
+	}
+	
 	public boolean isAccessDefined(XID actor, XAddress resource, XID access) {
 		if(this.mountPoint.equalsOrContains(resource)) {
-			return this.inner.isAccessDefined(actor, resource, access);
+			return this.inner.getAuthorisationDatabase().isAccessDefined(actor, resource, access);
 		} else {
-			return this.outer.isAccessDefined(actor, resource, access);
+			return this.outer.getAuthorisationDatabase().isAccessDefined(actor, resource, access);
 		}
 	}
 	
 	public void removeListener(XAccessListener listener) {
-		this.outer.removeListener(listener);
-		this.inner.removeListener(listener);
+		this.outer.getAuthorisationDatabase().removeListener(listener);
+		this.inner.getAuthorisationDatabase().removeListener(listener);
 	}
 	
 	public void resetAccess(XID actor, XAddress resource, XID access) {
 		if(this.mountPoint.equalsOrContains(resource)) {
-			this.inner.resetAccess(actor, resource, access);
+			this.inner.getAuthorisationDatabase().resetAccess(actor, resource, access);
 		} else {
-			this.outer.resetAccess(actor, resource, access);
+			this.outer.getAuthorisationDatabase().resetAccess(actor, resource, access);
 		}
 	}
 	
 	public void setAccess(XID actor, XAddress resource, XID access, boolean allowed) {
 		if(this.mountPoint.equalsOrContains(resource)) {
-			this.inner.setAccess(actor, resource, access, allowed);
+			this.inner.getAuthorisationDatabase().setAccess(actor, resource, access, allowed);
 		} else {
-			this.outer.setAccess(actor, resource, access, allowed);
+			this.outer.getAuthorisationDatabase().setAccess(actor, resource, access, allowed);
 		}
 	}
 	

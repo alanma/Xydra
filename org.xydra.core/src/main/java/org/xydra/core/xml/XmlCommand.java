@@ -9,20 +9,20 @@ import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.change.ChangeType;
+import org.xydra.base.change.XAtomicCommand;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XFieldCommand;
+import org.xydra.base.change.XModelCommand;
+import org.xydra.base.change.XObjectCommand;
+import org.xydra.base.change.XRepositoryCommand;
+import org.xydra.base.change.XTransaction;
+import org.xydra.base.change.impl.memory.MemoryFieldCommand;
+import org.xydra.base.change.impl.memory.MemoryModelCommand;
+import org.xydra.base.change.impl.memory.MemoryObjectCommand;
+import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
+import org.xydra.base.change.impl.memory.MemoryTransaction;
 import org.xydra.base.value.XValue;
-import org.xydra.core.change.ChangeType;
-import org.xydra.core.change.XAtomicCommand;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XFieldCommand;
-import org.xydra.core.change.XModelCommand;
-import org.xydra.core.change.XObjectCommand;
-import org.xydra.core.change.XRepositoryCommand;
-import org.xydra.core.change.XTransaction;
-import org.xydra.core.change.impl.memory.MemoryFieldCommand;
-import org.xydra.core.change.impl.memory.MemoryModelCommand;
-import org.xydra.core.change.impl.memory.MemoryObjectCommand;
-import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
-import org.xydra.core.change.impl.memory.MemoryTransaction;
 
 
 /**
@@ -36,14 +36,14 @@ import org.xydra.core.change.impl.memory.MemoryTransaction;
 @RunsInJava
 public class XmlCommand {
 	
-	private static final String XREPOSITORYCOMMAND_ELEMENT = "xrepositoryCommand";
+	private static final String FORCED_ATTRIBUTE = "forced";
+	private static final String REVISION_ATTRIBUTE = "revision";
+	private static final String XFIELDCOMMAND_ELEMENT = "xfieldCommand";
 	private static final String XMODELCOMMAND_ELEMENT = "xmodelCommand";
 	private static final String XOBJECTCOMMAND_ELEMENT = "xobjectCommand";
-	private static final String XFIELDCOMMAND_ELEMENT = "xfieldCommand";
-	private static final String XTRANSACTION_ELEMENT = "xtransaction";
 	
-	private static final String REVISION_ATTRIBUTE = "revision";
-	private static final String FORCED_ATTRIBUTE = "forced";
+	private static final String XREPOSITORYCOMMAND_ELEMENT = "xrepositoryCommand";
+	private static final String XTRANSACTION_ELEMENT = "xtransaction";
 	
 	private static long getRevision(MiniElement xml, String elementName, boolean revisioned) {
 		
@@ -83,26 +83,25 @@ public class XmlCommand {
 	}
 	
 	/**
-	 * Get the {@link XCommand} represented by the given XML element.
+	 * Encode the given {@link XAtomicCommand} as an XML element.
 	 * 
-	 * @param context The XIDs of the model, object and field to fill in if not
-	 *            specified in the XML. If the given element represents a
-	 *            transaction, the context for the contained commands will be
-	 *            given by the transaction.
-	 * @param defaultRepository If the XML element does not specify a
-	 *            repository, this will be filled in.
-	 * @return The {@link XCommand} represented by the given XML element.
-	 * @throws IllegalArgumentException if the XML element does not represent a
-	 *             valid command.
-	 * 
+	 * @param event The command to encode.
+	 * @param out The XML encoder to write to.
+	 * @param context The part of this command's target address that doesn't
+	 *            need to be encoded in the element.
 	 */
-	public static XCommand toCommand(MiniElement xml, XAddress context)
-	        throws IllegalArgumentException {
-		String name = xml.getName();
-		if(name.equals(XTRANSACTION_ELEMENT))
-			return toTransaction(xml, context);
-		else
-			return toAtomicCommand(xml, context);
+	private static void setAtomicCommandAttributes(XAtomicCommand command, XmlOut out,
+	        XAddress context, boolean saveRevision) {
+		
+		out.attribute(XmlUtils.TYPE_ATTRIBUTE, command.getChangeType().toString());
+		
+		XmlUtils.setTarget(command.getTarget(), out, context);
+		
+		if(command.isForced())
+			out.attribute(FORCED_ATTRIBUTE, Boolean.toString(true));
+		else if(saveRevision)
+			out.attribute(REVISION_ATTRIBUTE, Long.toString(command.getRevisionNumber()));
+		
 	}
 	
 	/**
@@ -135,36 +134,26 @@ public class XmlCommand {
 	}
 	
 	/**
-	 * Get the {@link XTransaction} represented by the given XML element.
+	 * Get the {@link XCommand} represented by the given XML element.
 	 * 
 	 * @param context The XIDs of the model, object and field to fill in if not
-	 *            specified in the XML. The context for the commands contained
-	 *            in the transaction will be given by the transaction.
+	 *            specified in the XML. If the given element represents a
+	 *            transaction, the context for the contained commands will be
+	 *            given by the transaction.
 	 * @param defaultRepository If the XML element does not specify a
 	 *            repository, this will be filled in.
-	 * @return The {@link XTransaction} represented by the given XML element.
+	 * @return The {@link XCommand} represented by the given XML element.
 	 * @throws IllegalArgumentException if the XML element does not represent a
 	 *             valid command.
 	 * 
 	 */
-	public static XTransaction toTransaction(MiniElement xml, XAddress context) {
-		
-		XmlUtils.checkElementName(xml, XTRANSACTION_ELEMENT);
-		
-		XAddress target = XmlUtils.getTarget(xml, context);
-		
-		if(target.getField() != null || (target.getModel() == null && target.getObject() == null))
-			throw new IllegalArgumentException("Transaction element " + xml
-			        + " does not specify a model or object target.");
-		
-		List<XAtomicCommand> commands = new ArrayList<XAtomicCommand>();
-		Iterator<MiniElement> it = xml.getElements();
-		while(it.hasNext()) {
-			MiniElement command = it.next();
-			commands.add(toAtomicCommand(command, target));
-		}
-		
-		return MemoryTransaction.createTransaction(target, commands);
+	public static XCommand toCommand(MiniElement xml, XAddress context)
+	        throws IllegalArgumentException {
+		String name = xml.getName();
+		if(name.equals(XTRANSACTION_ELEMENT))
+			return toTransaction(xml, context);
+		else
+			return toAtomicCommand(xml, context);
 	}
 	
 	/**
@@ -211,56 +200,6 @@ public class XmlCommand {
 			throw new IllegalArgumentException("<" + XFIELDCOMMAND_ELEMENT + ">@"
 			        + XmlUtils.TYPE_ATTRIBUTE
 			        + " does not contain a valid type for field commands, but '" + type + "'");
-	}
-	
-	/**
-	 * Get the {@link XObjectCommand} represented by the given XML element.
-	 * 
-	 * @param context The XIDs of the model and object to fill in if not
-	 *            specified in the XML.
-	 * @param defaultRepository If the XML element does not specify a
-	 *            repository, this will be filled in.
-	 * @return The {@link XObjectCommand} represented by the given XML element.
-	 * @throws IllegalArgumentException if the XML element does not represent a
-	 *             valid command.
-	 * 
-	 */
-	public static XObjectCommand toObjectCommand(MiniElement xml, XAddress context) {
-		
-		XmlUtils.checkElementName(xml, XOBJECTCOMMAND_ELEMENT);
-		
-		if(context.getField() != null)
-			throw new IllegalArgumentException("invalid context for object commands: " + context);
-		
-		XAddress address = XmlUtils.getTarget(xml, context);
-		
-		if(address.getObject() == null)
-			throw new IllegalArgumentException("<" + XOBJECTCOMMAND_ELEMENT + ">@"
-			        + XmlUtils.OBJECTID_ATTRIBUTE + " is missing");
-		
-		if(address.getField() == null)
-			throw new IllegalArgumentException("<" + XOBJECTCOMMAND_ELEMENT + ">@"
-			        + XmlUtils.FIELDID_ATTRIBUTE + " is missing");
-		
-		ChangeType type = XmlUtils.getChangeType(xml, XOBJECTCOMMAND_ELEMENT);
-		long rev = getRevision(xml, XOBJECTCOMMAND_ELEMENT, type != ChangeType.ADD);
-		
-		Iterator<MiniElement> it = xml.getElements();
-		if(it.hasNext())
-			throw new IllegalArgumentException("Invalid child of <" + XOBJECTCOMMAND_ELEMENT
-			        + ">: <" + it.next().getName() + ">");
-		
-		XAddress target = address.getParent();
-		XID fieldId = address.getField();
-		
-		if(type == ChangeType.ADD)
-			return MemoryObjectCommand.createAddCommand(target, rev, fieldId);
-		else if(type == ChangeType.REMOVE)
-			return MemoryObjectCommand.createRemoveCommand(target, rev, fieldId);
-		else
-			throw new IllegalArgumentException("<" + XOBJECTCOMMAND_ELEMENT + ">@"
-			        + XmlUtils.TYPE_ATTRIBUTE
-			        + " does not contain a valid type for object commands, but '" + type + "'");
 	}
 	
 	/**
@@ -314,6 +253,56 @@ public class XmlCommand {
 	}
 	
 	/**
+	 * Get the {@link XObjectCommand} represented by the given XML element.
+	 * 
+	 * @param context The XIDs of the model and object to fill in if not
+	 *            specified in the XML.
+	 * @param defaultRepository If the XML element does not specify a
+	 *            repository, this will be filled in.
+	 * @return The {@link XObjectCommand} represented by the given XML element.
+	 * @throws IllegalArgumentException if the XML element does not represent a
+	 *             valid command.
+	 * 
+	 */
+	public static XObjectCommand toObjectCommand(MiniElement xml, XAddress context) {
+		
+		XmlUtils.checkElementName(xml, XOBJECTCOMMAND_ELEMENT);
+		
+		if(context.getField() != null)
+			throw new IllegalArgumentException("invalid context for object commands: " + context);
+		
+		XAddress address = XmlUtils.getTarget(xml, context);
+		
+		if(address.getObject() == null)
+			throw new IllegalArgumentException("<" + XOBJECTCOMMAND_ELEMENT + ">@"
+			        + XmlUtils.OBJECTID_ATTRIBUTE + " is missing");
+		
+		if(address.getField() == null)
+			throw new IllegalArgumentException("<" + XOBJECTCOMMAND_ELEMENT + ">@"
+			        + XmlUtils.FIELDID_ATTRIBUTE + " is missing");
+		
+		ChangeType type = XmlUtils.getChangeType(xml, XOBJECTCOMMAND_ELEMENT);
+		long rev = getRevision(xml, XOBJECTCOMMAND_ELEMENT, type != ChangeType.ADD);
+		
+		Iterator<MiniElement> it = xml.getElements();
+		if(it.hasNext())
+			throw new IllegalArgumentException("Invalid child of <" + XOBJECTCOMMAND_ELEMENT
+			        + ">: <" + it.next().getName() + ">");
+		
+		XAddress target = address.getParent();
+		XID fieldId = address.getField();
+		
+		if(type == ChangeType.ADD)
+			return MemoryObjectCommand.createAddCommand(target, rev, fieldId);
+		else if(type == ChangeType.REMOVE)
+			return MemoryObjectCommand.createRemoveCommand(target, rev, fieldId);
+		else
+			throw new IllegalArgumentException("<" + XOBJECTCOMMAND_ELEMENT + ">@"
+			        + XmlUtils.TYPE_ATTRIBUTE
+			        + " does not contain a valid type for object commands, but '" + type + "'");
+	}
+	
+	/**
 	 * Get the {@link XRepositoryCommand} represented by the given XML element.
 	 * 
 	 * @param defaultRepository If the XML element does not specify a
@@ -364,6 +353,39 @@ public class XmlCommand {
 	}
 	
 	/**
+	 * Get the {@link XTransaction} represented by the given XML element.
+	 * 
+	 * @param context The XIDs of the model, object and field to fill in if not
+	 *            specified in the XML. The context for the commands contained
+	 *            in the transaction will be given by the transaction.
+	 * @param defaultRepository If the XML element does not specify a
+	 *            repository, this will be filled in.
+	 * @return The {@link XTransaction} represented by the given XML element.
+	 * @throws IllegalArgumentException if the XML element does not represent a
+	 *             valid command.
+	 * 
+	 */
+	public static XTransaction toTransaction(MiniElement xml, XAddress context) {
+		
+		XmlUtils.checkElementName(xml, XTRANSACTION_ELEMENT);
+		
+		XAddress target = XmlUtils.getTarget(xml, context);
+		
+		if(target.getField() != null || (target.getModel() == null && target.getObject() == null))
+			throw new IllegalArgumentException("Transaction element " + xml
+			        + " does not specify a model or object target.");
+		
+		List<XAtomicCommand> commands = new ArrayList<XAtomicCommand>();
+		Iterator<MiniElement> it = xml.getElements();
+		while(it.hasNext()) {
+			MiniElement command = it.next();
+			commands.add(toAtomicCommand(command, target));
+		}
+		
+		return MemoryTransaction.createTransaction(target, commands);
+	}
+	
+	/**
 	 * Encode the given {@link XCommand} as an XML element.
 	 * 
 	 * @param event The command to encode.
@@ -390,31 +412,6 @@ public class XmlCommand {
 	}
 	
 	/**
-	 * Encode the given {@link XTransaction} as an XML element.
-	 * 
-	 * @param event The command to encode.
-	 * @param out The XML encoder to write to.
-	 * @param context The part of this command's target address that doesn't
-	 *            need to be encoded in the element.
-	 */
-	public static void toXml(XTransaction trans, XmlOut out, XAddress context)
-	        throws IllegalArgumentException {
-		
-		out.open(XTRANSACTION_ELEMENT);
-		
-		XmlUtils.setTarget(trans.getTarget(), out, context);
-		
-		XAddress newContext = trans.getTarget();
-		
-		for(XAtomicCommand command : trans) {
-			toXml(command, out, newContext);
-		}
-		
-		out.close(XTRANSACTION_ELEMENT);
-		
-	}
-	
-	/**
 	 * Encode the given {@link XFieldCommand} as an XML element.
 	 * 
 	 * @param event The command to encode.
@@ -437,30 +434,6 @@ public class XmlCommand {
 	}
 	
 	/**
-	 * Encode the given {@link XObjectCommand} as an XML element.
-	 * 
-	 * @param event The command to encode.
-	 * @param out The XML encoder to write to.
-	 * @param context The part of this command's target address that doesn't
-	 *            need to be encoded in the element.
-	 */
-	public static void toXml(XObjectCommand command, XmlOut out, XAddress context)
-	        throws IllegalArgumentException {
-		
-		if(context.getField() != null)
-			throw new IllegalArgumentException("invalid context for object commands: " + context);
-		
-		out.open(XOBJECTCOMMAND_ELEMENT);
-		
-		setAtomicCommandAttributes(command, out, context, command.getChangeType() != ChangeType.ADD);
-		
-		out.attribute(XmlUtils.FIELDID_ATTRIBUTE, command.getFieldID().toString());
-		
-		out.close(XOBJECTCOMMAND_ELEMENT);
-		
-	}
-	
-	/**
 	 * Encode the given {@link XModelCommand} as an XML element.
 	 * 
 	 * @param event The command to encode.
@@ -478,9 +451,33 @@ public class XmlCommand {
 		
 		setAtomicCommandAttributes(command, out, context, command.getChangeType() != ChangeType.ADD);
 		
-		out.attribute(XmlUtils.OBJECTID_ATTRIBUTE, command.getObjectID().toString());
+		out.attribute(XmlUtils.OBJECTID_ATTRIBUTE, command.getObjectId().toString());
 		
 		out.close(XMODELCOMMAND_ELEMENT);
+		
+	}
+	
+	/**
+	 * Encode the given {@link XObjectCommand} as an XML element.
+	 * 
+	 * @param event The command to encode.
+	 * @param out The XML encoder to write to.
+	 * @param context The part of this command's target address that doesn't
+	 *            need to be encoded in the element.
+	 */
+	public static void toXml(XObjectCommand command, XmlOut out, XAddress context)
+	        throws IllegalArgumentException {
+		
+		if(context.getField() != null)
+			throw new IllegalArgumentException("invalid context for object commands: " + context);
+		
+		out.open(XOBJECTCOMMAND_ELEMENT);
+		
+		setAtomicCommandAttributes(command, out, context, command.getChangeType() != ChangeType.ADD);
+		
+		out.attribute(XmlUtils.FIELDID_ATTRIBUTE, command.getFieldId().toString());
+		
+		out.close(XOBJECTCOMMAND_ELEMENT);
 		
 	}
 	
@@ -503,31 +500,34 @@ public class XmlCommand {
 		
 		setAtomicCommandAttributes(command, out, context, command.getChangeType() != ChangeType.ADD);
 		
-		out.attribute(XmlUtils.MODELID_ATTRIBUTE, command.getModelID().toString());
+		out.attribute(XmlUtils.MODELID_ATTRIBUTE, command.getModelId().toString());
 		
 		out.close(XREPOSITORYCOMMAND_ELEMENT);
 		
 	}
 	
 	/**
-	 * Encode the given {@link XAtomicCommand} as an XML element.
+	 * Encode the given {@link XTransaction} as an XML element.
 	 * 
 	 * @param event The command to encode.
 	 * @param out The XML encoder to write to.
 	 * @param context The part of this command's target address that doesn't
 	 *            need to be encoded in the element.
 	 */
-	private static void setAtomicCommandAttributes(XAtomicCommand command, XmlOut out,
-	        XAddress context, boolean saveRevision) {
+	public static void toXml(XTransaction trans, XmlOut out, XAddress context)
+	        throws IllegalArgumentException {
 		
-		out.attribute(XmlUtils.TYPE_ATTRIBUTE, command.getChangeType().toString());
+		out.open(XTRANSACTION_ELEMENT);
 		
-		XmlUtils.setTarget(command.getTarget(), out, context);
+		XmlUtils.setTarget(trans.getTarget(), out, context);
 		
-		if(command.isForced())
-			out.attribute(FORCED_ATTRIBUTE, Boolean.toString(true));
-		else if(saveRevision)
-			out.attribute(REVISION_ATTRIBUTE, Long.toString(command.getRevisionNumber()));
+		XAddress newContext = trans.getTarget();
+		
+		for(XAtomicCommand command : trans) {
+			toXml(command, out, newContext);
+		}
+		
+		out.close(XTRANSACTION_ELEMENT);
 		
 	}
 	

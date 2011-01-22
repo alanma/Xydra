@@ -4,11 +4,11 @@ import java.io.Serializable;
 
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.base.XID;
-import org.xydra.base.XHalfWritableField;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XEvent;
+import org.xydra.base.change.XFieldCommand;
+import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.value.XValue;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XEvent;
-import org.xydra.core.change.XFieldCommand;
 import org.xydra.core.model.state.XFieldState;
 
 
@@ -29,21 +29,7 @@ import org.xydra.core.model.state.XFieldState;
  * @author kaidel
  * 
  */
-public interface XField extends XLoggedField, XHalfWritableField, Serializable {
-	
-	/**
-	 * Sets the {@link XValue} of this field to the given value.
-	 * 
-	 * Passing "null" as the 'value' arguments implies an remove operation (will
-	 * remove the current {@link XValue})
-	 * 
-	 * @param value The new {@link XValue}
-	 * 
-	 * @return true, if this operation actually changed the current
-	 *         {@link XValue} of this field, false otherwise
-	 */
-	@ModificationOperation
-	boolean setValue(XValue value);
+public interface XField extends XLoggedField, XWritableField, Serializable {
 	
 	/**
 	 * Executes the given {@link XCommand} if possible.
@@ -79,5 +65,19 @@ public interface XField extends XLoggedField, XHalfWritableField, Serializable {
 	 * @param actor for this field.
 	 */
 	void setSessionActor(XID actor);
+	
+	/**
+	 * Sets the {@link XValue} of this field to the given value.
+	 * 
+	 * Passing "null" as the 'value' arguments implies an remove operation (will
+	 * remove the current {@link XValue})
+	 * 
+	 * @param value The new {@link XValue}
+	 * 
+	 * @return true, if this operation actually changed the current
+	 *         {@link XValue} of this field, false otherwise
+	 */
+	@ModificationOperation
+	boolean setValue(XValue value);
 	
 }

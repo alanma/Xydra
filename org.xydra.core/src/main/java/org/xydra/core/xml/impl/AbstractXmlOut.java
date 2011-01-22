@@ -20,11 +20,63 @@ abstract public class AbstractXmlOut implements XmlOut {
 	
 	private final Stack<String> openThings = new Stack<String>();
 	
-	protected void init() {
-		append(XmlOut.XML_DECLARATION);
+	abstract protected void append(String str);
+	
+	public void attribute(String name, String value) {
+		
+		if(!(this.inElement | this.inProcessingInstruction))
+			throw new IllegalStateException("Atributes are only allowed in elements. We are here "
+			        + getOpentags() + " so cannot add " + name + "=" + value);
+		
+		append(" ");
+		append(name);
+		append("=\"");
+		append(XmlEncoder.xmlencode(value));
+		append("\"");
 	}
 	
-	abstract protected void append(String str);
+	public void close(String elementName) {
+		String open = this.openThings.pop();
+		assert open.equals(elementName) : "trying to close '" + elementName
+		        + "' but last opened was '" + open + "'";
+		
+		if(this.inElement) {
+			append("/>");
+			this.inElement = false;
+		} else {
+			append("</" + elementName + ">");
+		}
+	}
+	
+	public void closeProcessingInstruction() {
+		this.inProcessingInstruction = false;
+		append("?>");
+	}
+	
+	public void comment(String comment) {
+		if(this.inElement) {
+			append(">");
+			this.inElement = false;
+		}
+		append("\n<!-- " + comment + " -->");
+	}
+	
+	public void content(String rawContent) {
+		if(this.inElement) {
+			append(">");
+			this.inElement = false;
+		}
+		append(XmlEncoder.xmlencode(rawContent));
+	}
+	
+	public void doctype(String doctype, String publicID, String url) {
+		if(this.firstLine) {
+			this.firstLine = false;
+		} else {
+			append("\n");
+		}
+		append("<!DOCTYPE " + doctype + " PUBLIC " + publicID + " " + url + ">");
+	}
 	
 	public String getOpentags() {
 		String s = "";
@@ -33,6 +85,10 @@ abstract public class AbstractXmlOut implements XmlOut {
 			s += "/" + it.next();
 		}
 		return s;
+	}
+	
+	protected void init() {
+		append(XmlOut.XML_DECLARATION);
 	}
 	
 	public void open(String elementName) {
@@ -50,52 +106,6 @@ abstract public class AbstractXmlOut implements XmlOut {
 		this.inElement = true;
 	}
 	
-	public void attribute(String name, String value) {
-		
-		if(!(this.inElement | this.inProcessingInstruction))
-			throw new IllegalStateException("Atributes are only allowed in elements. We are here "
-			        + getOpentags() + " so cannot add " + name + "=" + value);
-		
-		append(" ");
-		append(name);
-		append("=\"");
-		append(XmlEncoder.xmlencode(value));
-		append("\"");
-	}
-	
-	public void content(String rawContent) {
-		if(this.inElement) {
-			append(">");
-			this.inElement = false;
-		}
-		append(XmlEncoder.xmlencode(rawContent));
-	}
-	
-	public void close(String elementName) {
-		String open = this.openThings.pop();
-		assert open.equals(elementName) : "trying to close '" + elementName
-		        + "' but last opened was '" + open + "'";
-		
-		if(this.inElement) {
-			append("/>");
-			this.inElement = false;
-		} else {
-			append("</" + elementName + ">");
-		}
-	}
-	
-	public void comment(String comment) {
-		if(this.inElement) {
-			append(">");
-			this.inElement = false;
-		}
-		append("\n<!-- " + comment + " -->");
-	}
-	
-	public void write(String s) {
-		append(s);
-	}
-	
 	public void openProcessingInstruction(String processingInstruction) {
 		this.inProcessingInstruction = true;
 		if(this.firstLine) {
@@ -106,18 +116,8 @@ abstract public class AbstractXmlOut implements XmlOut {
 		append("<?" + processingInstruction);
 	}
 	
-	public void closeProcessingInstruction() {
-		this.inProcessingInstruction = false;
-		append("?>");
-	}
-	
-	public void doctype(String doctype, String publicID, String url) {
-		if(this.firstLine) {
-			this.firstLine = false;
-		} else {
-			append("\n");
-		}
-		append("<!DOCTYPE " + doctype + " PUBLIC " + publicID + " " + url + ">");
+	public void write(String s) {
+		append(s);
 	}
 	
 }

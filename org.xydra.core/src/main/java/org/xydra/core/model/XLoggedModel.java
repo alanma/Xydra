@@ -2,10 +2,10 @@ package org.xydra.core.model;
 
 import org.xydra.annotations.ReadOperation;
 import org.xydra.base.XID;
-import org.xydra.base.XHalfWritableModel;
-import org.xydra.core.change.XEvent;
+import org.xydra.base.change.XEvent;
+import org.xydra.base.rmof.XWritableModel;
 import org.xydra.core.change.XSendsFieldEvents;
-import org.xydra.core.change.XSendsModelEvent;
+import org.xydra.core.change.XSendsModelEvents;
 import org.xydra.core.change.XSendsObjectEvents;
 import org.xydra.core.change.XSendsTransactionEvents;
 
@@ -21,7 +21,7 @@ import org.xydra.core.change.XSendsTransactionEvents;
  * 
  * @author dscharrer
  */
-public interface XLoggedModel extends XHalfWritableModel, XSendsModelEvent, XSendsObjectEvents,
+public interface XLoggedModel extends XWritableModel, XSendsModelEvents, XSendsObjectEvents,
         XSendsFieldEvents, XSendsTransactionEvents, IHasChangeLog {
 	
 	/**
