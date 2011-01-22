@@ -1,14 +1,23 @@
 package org.xydra.doc;
 
-import org.xydra.base.XHalfWritableField;
-import org.xydra.base.XHalfWritableModel;
-import org.xydra.base.XHalfWritableObject;
-import org.xydra.base.XHalfWritableRepository;
+import org.xydra.base.X;
 import org.xydra.base.XID;
-import org.xydra.base.XReadableField;
-import org.xydra.base.XReadableModel;
-import org.xydra.base.XReadableObject;
-import org.xydra.base.XReadableRepository;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XEvent;
+import org.xydra.base.change.XTransaction;
+import org.xydra.base.rmof.XReadableField;
+import org.xydra.base.rmof.XReadableModel;
+import org.xydra.base.rmof.XReadableObject;
+import org.xydra.base.rmof.XReadableRepository;
+import org.xydra.base.rmof.XRevWritableModel;
+import org.xydra.base.rmof.XWritableField;
+import org.xydra.base.rmof.XWritableModel;
+import org.xydra.base.rmof.XWritableObject;
+import org.xydra.base.rmof.XWritableRepository;
+import org.xydra.base.rmof.impl.memory.SimpleField;
+import org.xydra.base.rmof.impl.memory.SimpleModel;
+import org.xydra.base.rmof.impl.memory.SimpleObject;
+import org.xydra.base.rmof.impl.memory.SimpleRepository;
 import org.xydra.base.value.XBooleanValue;
 import org.xydra.base.value.XIntegerValue;
 import org.xydra.base.value.XStringListValue;
@@ -16,22 +25,23 @@ import org.xydra.base.value.XStringSetValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XValue;
 import org.xydra.base.value.XValueFactory;
-import org.xydra.core.X;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XEvent;
-import org.xydra.core.change.XTransaction;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.store.NamingUtils;
 import org.xydra.store.XydraStore;
-import org.xydra.store.base.SimpleField;
-import org.xydra.store.base.SimpleModel;
-import org.xydra.store.base.SimpleObject;
-import org.xydra.store.base.SimpleRepository;
-import org.xydra.store.impl.delegate.DelegateToPersistenceAndArm;
-import org.xydra.store.impl.delegate.XAuthorisationArm;
+import org.xydra.store.access.XAccessControlManager;
+import org.xydra.store.access.XAuthenticationDatabase;
+import org.xydra.store.access.XAuthorisationDatabase;
+import org.xydra.store.access.XAuthorisationDatabaseWitListeners;
+import org.xydra.store.access.XAuthorisationEvent;
+import org.xydra.store.access.XAuthorisationManager;
+import org.xydra.store.access.XGroupDatabaseWithListeners;
+import org.xydra.store.access.XGroupEvent;
+import org.xydra.store.access.impl.delegate.AccessControlManagerOnPersistence;
+import org.xydra.store.access.impl.memory.MemoryAuthorisationManager;
+import org.xydra.store.impl.delegate.DelegateToPersistenceAndAcm;
 import org.xydra.store.impl.delegate.XydraBlockingStore;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.delegate.XydraSingleOperationStore;
@@ -135,9 +145,9 @@ import org.xydra.store.impl.memory.MemoryPersistence;
  * locally, there is no need for batch operations.
  * 
  * The implementation of {@link XydraBlockingStore} (
- * {@link DelegateToPersistenceAndArm}) uses internally two parts: A
+ * {@link DelegateToPersistenceAndAcm}) uses internally two parts: A
  * {@link XydraPersistence} to ultimately persist data and a
- * {@link XAuthorisationArm} to decide on authorisation and access rights.
+ * {@link XAccessControlManager} to decide on authorisation and access rights.
  * 
  * The {@link XydraPersistence} is the service provider interface (SPI) for
  * different storage systems. Currently there are two implementations: In-memory
@@ -147,10 +157,10 @@ import org.xydra.store.impl.memory.MemoryPersistence;
  * use internally {@link SimpleRepository} / {@link SimpleModel} /
  * {@link SimpleObject} / {@link SimpleField} (see below).
  * 
- * The user accounts and access rights managed via {@link XAuthorisationArm} are
- * also stored in a {@link XydraPersistence}, usually the same as the user data.
- * Naming conventions (defined in {@link NamingUtils}) keep different data sets
- * separate.
+ * The user accounts and access rights managed via {@link XAccessControlManager}
+ * are also stored in a {@link XydraPersistence}, usually the same as the user
+ * data. Naming conventions (defined in {@link NamingUtils}) keep different data
+ * sets separate.
  * 
  * <pre>
  * {@link XydraStore} 
@@ -168,7 +178,7 @@ import org.xydra.store.impl.memory.MemoryPersistence;
  *        +--------------------------+
  *        |                          |
  *       \_/                        \_/
- * {@link XydraPersistence}         {@link XAuthorisationArm}
+ * {@link XydraPersistence}         {@link XAccessControlManager}
  *        |                          |
  *        | in-memory                | synchronises account data 
  *        | implementation           | and access definitions 
@@ -206,20 +216,20 @@ import org.xydra.store.impl.memory.MemoryPersistence;
  * 
  * The next bootstrapping level are simple variants that support read and write,
  * without any semantic checks. The interfaces for them are
- * {@link XHalfWritableRepository} / {@link XHalfWritableModel} /
- * {@link XHalfWritableObject} / {@link XHalfWritableField}.
+ * {@link XWritableRepository} / {@link XWritableModel} /
+ * {@link XWritableObject} / {@link XWritableField}.
  * 
  * XWritable{RMOF} extends XBase{RMOF} and offers additionally e.g.
- * {@link XHalfWritableModel#createObject(XID)} and
- * {@link XHalfWritableModel#removeObject(XID)}. {@link XHalfWritableField} has
- * respectively {@link XHalfWritableField#setValue(XValue)}. Note that
- * XWritable... does not allow to set the revision number.
+ * {@link XWritableModel#createObject(XID)} and
+ * {@link XWritableModel#removeObject(XID)}. {@link XWritableField} has
+ * respectively {@link XWritableField#setValue(XValue)}. Note that XWritable...
+ * does not allow to set the revision number.
  * 
- * XWritable{RMOF} is implemented by Simple{RMOF} in its simplest version.
- * Simple{RMOF} offers in addition e.g.
- * {@link SimpleModel#addObject(org.xydra.store.base.SimpleObject)}, and
- * {@link SimpleModel#setRevisionNumber(long)} which make it suitable to act as
- * the data container for simple in-memory implementations.
+ * XWritable{RMOF} is implemented by RevWritable{RMOF} in its simplest version.
+ * RevWritable{RMOF} offers in addition e.g.
+ * {@link XRevWritableModel#addObject(org.xydra.base.rmof.XRevWritableObject)} ,
+ * and {@link XRevWritableModel#setRevisionNumber(long)} which make it suitable
+ * to act as the data container for simple in-memory implementations.
  * 
  * 
  * <h4>{@link XydraStore} vs. {@link XRepository}</h4> A common use case
@@ -234,10 +244,44 @@ import org.xydra.store.impl.memory.MemoryPersistence;
  * set value to A, remote: set value to B).
  * 
  * 
+ * <h4>Access Control Implementation</h4> Xydra uses an
+ * {@link XAccessControlManager}. Internally, this manager uses an
+ * {@link XAuthenticationDatabase} for authentication and an
+ * {@link XAuthorisationManager} for authorisation.
+ * 
+ * The {@link XAuthenticationDatabase} to persist user accounts, their password
+ * and other authentication data such as the number of failed login attempts.
+ * 
+ * The {@link XAuthorisationManager} uses an
+ * {@link XAuthorisationDatabaseWitListeners} from which access right
+ * definitions are initially loaded. At runtime, the fast internal data
+ * structures of {@link XAuthorisationManager} are kept up-to-date by listening
+ * to {@link XAuthorisationEvent} events from the
+ * {@link XAuthorisationDatabaseWitListeners}. In a similar way a
+ * {@link XGroupDatabaseWithListeners} is used to initially build fast
+ * actor-group indexes which are kept up-to-date by listening to the
+ * {@link XGroupEvent}.
  * 
  * 
+ * <h4>Access control implementation</h4> There are several challenges when
+ * implementing access rights:
+ * <ul>
+ * <li>Speed: Access control is called for <em>every</em> access, hence it must
+ * be really fast. Hence it must be implemented completely with in-memory data
+ * structures.</li>
+ * <li>Persistent: accounts, groups and access rights need to be persisted,
+ * ultimately in a {@link XydraPersistence}.</li>
+ * <li>Up-to-date: On AppEngine, another instance might change the underlying
+ * data, this must be reflected in the in-memory data structures.</li>
+ * </ul>
  * 
+ * Speed is supported via {@link MemoryAuthorisationManager} which implements
+ * {@link XAuthorisationManager} which in turn is a
+ * {@link XAuthorisationDatabase}.
  * 
+ * Persistence can be achieved via a {@link AccessControlManagerOnPersistence}
+ * 
+ * TODO @max: finish this....
  * 
  * 
  * 

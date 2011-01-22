@@ -1,7 +1,7 @@
 package org.xydra.doc;
 
-import org.xydra.core.change.ChangeType;
-import org.xydra.core.change.XModelEvent;
+import org.xydra.base.change.ChangeType;
+import org.xydra.base.change.XModelEvent;
 import org.xydra.core.change.XModelEventListener;
 
 

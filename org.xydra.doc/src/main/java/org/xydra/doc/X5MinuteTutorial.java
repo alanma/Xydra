@@ -1,12 +1,12 @@
 package org.xydra.doc;
 
+import org.xydra.base.X;
 import org.xydra.base.XID;
+import org.xydra.base.XIDProvider;
 import org.xydra.base.value.XIntegerValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XValueFactory;
-import org.xydra.core.X;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XIDProvider;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;

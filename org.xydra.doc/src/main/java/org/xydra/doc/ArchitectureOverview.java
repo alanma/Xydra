@@ -5,9 +5,9 @@ import java.io.Serializable;
 import org.xydra.base.IHasXAddress;
 import org.xydra.base.IHasXID;
 import org.xydra.base.XID;
-import org.xydra.base.XReadableModel;
+import org.xydra.base.rmof.XReadableModel;
 import org.xydra.core.change.XSendsFieldEvents;
-import org.xydra.core.change.XSendsModelEvent;
+import org.xydra.core.change.XSendsModelEvents;
 import org.xydra.core.change.XSendsObjectEvents;
 import org.xydra.core.change.XSendsTransactionEvents;
 import org.xydra.core.model.XChangeLog;
@@ -34,7 +34,7 @@ import org.xydra.core.model.XSynchronizesChanges;
  * </ul>
  * <i>provides commands</i>
  * <ul>
- * <li>{@link XModel#executeModelCommand(org.xydra.core.change.XCommand)}</li>
+ * <li>{@link XModel#executeModelCommand(org.xydra.base.change.XModelCommand)}</li>
  * </ul>
  * <b>extends</b>
  * <ul>
@@ -56,7 +56,7 @@ import org.xydra.core.model.XSynchronizesChanges;
  * <li>{@link Iterable}<XID></li>
  * </ul>
  * </li>
- * <li>{@link XSendsModelEvent} <br />
+ * <li>{@link XSendsModelEvents} <br />
  * <i>provides model event listener</i></li>
  * <li>{@link XSendsObjectEvents} <br />
  * <i>provides object event listener</i></li>
@@ -72,13 +72,11 @@ import org.xydra.core.model.XSynchronizesChanges;
  * <li>{@link XChangeLog} {@link XSynchronizesChanges#getChangeLog()}</li>
  * <li>{@link XSynchronizesChanges#rollback(long)}</li>
  * <li>
- * {@link XSynchronizesChanges#synchronize(java.util.List, long, XID, java.util.List, java.util.List)}
- * </li>
+ * {@link XSynchronizesChanges#synchronize(org.xydra.base.change.XEvent[])}</li>
  * </ul>
  * <b>extends</b>
  * <ul>
  * <li>{@link XExecutesCommands}</li>
- * <li>{@link XExecutesTransactions}</li>
  * <li>{@link IHasXAddress}</li>
  * </ul>
  * </li>
