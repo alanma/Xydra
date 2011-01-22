@@ -43,7 +43,7 @@
 		<!-- DONE -->
 
 		<!-- Depends on: .client, GWT -->
-		<module>../org.xydra.client-gwt/</module>
+		<module>../org.xydra.gwt/</module>
 		<!-- DONE -->
 
 		<!-- No Xydra dependencies -->
@@ -63,7 +63,7 @@
 		<!-- DONE -->
 
 		<!-- Depends on: .server, GAE -->
-		<module>../org.xydra.server-gae/</module>
+		<module>../org.xydra.gae/</module>
 		<!-- DONE -->
 
 		<!-- Depends on: .restless, GAE -->
