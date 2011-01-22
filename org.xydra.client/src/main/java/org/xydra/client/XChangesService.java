@@ -3,9 +3,9 @@ package org.xydra.client;
 import java.util.List;
 
 import org.xydra.base.XAddress;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XEvent;
-import org.xydra.core.change.XRepositoryCommand;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XEvent;
+import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.store.AccessException;
 
 
@@ -46,6 +46,8 @@ public interface XChangesService {
 		 * command failed, {@link XCommand#NOCHANGE} if the command didn't
 		 * change anything or the revision number of the event caused by the
 		 * command (or {@link XCommand#CHANGED} for repository commands).
+		 * 
+		 * FIXME XCommand.CHANGED does not exist. Should it?
 		 */
 		public long getResult() {
 			return this.result;

@@ -1,18 +1,18 @@
 package org.xydra.client.impl.direct;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableField;
-import org.xydra.base.XReadableModel;
-import org.xydra.base.XReadableObject;
 import org.xydra.base.XID;
+import org.xydra.base.XX;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.impl.memory.MemoryModelCommand;
+import org.xydra.base.change.impl.memory.MemoryObjectCommand;
+import org.xydra.base.rmof.XReadableField;
+import org.xydra.base.rmof.XReadableModel;
+import org.xydra.base.rmof.XReadableObject;
 import org.xydra.client.Callback;
 import org.xydra.client.NotFoundException;
 import org.xydra.client.XDataService;
-import org.xydra.core.XX;
-import org.xydra.core.change.XCommand;
 import org.xydra.core.change.XTransactionBuilder;
-import org.xydra.core.change.impl.memory.MemoryModelCommand;
-import org.xydra.core.change.impl.memory.MemoryObjectCommand;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;

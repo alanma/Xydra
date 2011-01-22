@@ -1,9 +1,9 @@
 package org.xydra.client;
 
-import org.xydra.base.XReadableField;
-import org.xydra.base.XReadableModel;
-import org.xydra.base.XReadableObject;
 import org.xydra.base.XID;
+import org.xydra.base.rmof.XReadableField;
+import org.xydra.base.rmof.XReadableModel;
+import org.xydra.base.rmof.XReadableObject;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
@@ -130,8 +130,8 @@ public interface XDataService {
 	 * Remove the model with the given ID.
 	 * 
 	 * Fails silently if the model doesn't exist. Use
-	 * {@link XChangesService#executeCommand()} with a non-forced command to
-	 * detect this.
+	 * {@link XChangesService#executeCommand(org.xydra.base.XAddress, org.xydra.base.change.XCommand, long, Callback)}
+	 * with a non-forced command to detect this.
 	 * 
 	 * @param callback Callback to receive if the operation succeeded, may be
 	 *            null.
@@ -142,8 +142,8 @@ public interface XDataService {
 	 * Remove the object with the given ID.
 	 * 
 	 * Fails silently if the object doesn't exist. Use
-	 * {@link XChangesService#executeCommand()} with a non-forced command to
-	 * detect this.
+	 * {@link XChangesService#executeCommand(org.xydra.base.XAddress, org.xydra.base.change.XCommand, long, Callback)}
+	 * with a non-forced command to detect this.
 	 * 
 	 * If the model doesn't exist on the server, the call will fail and pass as
 	 * {@link NotFoundException} to the callback's
@@ -158,8 +158,8 @@ public interface XDataService {
 	 * Remove the field with the given ID.
 	 * 
 	 * Fails silently if the model doesn't exist. Use
-	 * {@link XChangesService#executeCommand()} with a non-forced command to
-	 * detect this.
+	 * {@link XChangesService#executeCommand(org.xydra.base.XAddress, org.xydra.base.change.XCommand, long, Callback)}
+	 * with a non-forced command to detect this.
 	 * 
 	 * If the model or object doesn't exist on the server, the call will fail
 	 * and pass as {@link NotFoundException} to the callback's

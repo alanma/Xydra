@@ -5,12 +5,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.xydra.base.XAddress;
+import org.xydra.base.XX;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XEvent;
 import org.xydra.client.Callback;
 import org.xydra.client.NotFoundException;
 import org.xydra.client.XChangesService;
-import org.xydra.core.XX;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.session.XProtectedModel;
 import org.xydra.core.model.session.XProtectedRepository;

@@ -61,18 +61,18 @@ public class DataServiceWriter implements XRepositoryEventListener, XModelEventL
 	}
 	
 	public void onChangeEvent(XRepositoryEvent event) {
-		if(event.getChangeType() == ChangeType.REMOVE && this.models.contains(event.getModelID()))
-			this.models.remove(event.getModelID());
+		if(event.getChangeType() == ChangeType.REMOVE && this.models.contains(event.getModelId()))
+			this.models.remove(event.getModelId());
 		else {
-			this.models.add(event.getModelID());
+			this.models.add(event.getModelId());
 			newEvent();
 		}
 	}
 	
 	public void onChangeEvent(XModelEvent event) {
-		if(this.models.contains(event.getModelID()))
+		if(this.models.contains(event.getModelId()))
 			return;
-		XAddress objectAddr = XX.resolveObject(event.getTarget(), event.getObjectID());
+		XAddress objectAddr = XX.resolveObject(event.getTarget(), event.getObjectId());
 		if(event.getChangeType() == ChangeType.REMOVE && this.objects.contains(objectAddr))
 			this.objects.remove(objectAddr);
 		else {
@@ -82,7 +82,7 @@ public class DataServiceWriter implements XRepositoryEventListener, XModelEventL
 	}
 	
 	public void onChangeEvent(XObjectEvent event) {
-		if(this.models.contains(event.getModelID()))
+		if(this.models.contains(event.getModelId()))
 			return;
 		if(this.objects.contains(event.getTarget()))
 			return;
@@ -92,7 +92,7 @@ public class DataServiceWriter implements XRepositoryEventListener, XModelEventL
 	}
 	
 	public void onChangeEvent(XFieldEvent event) {
-		if(this.models.contains(event.getModelID()))
+		if(this.models.contains(event.getModelId()))
 			return;
 		XAddress objectAddr = event.getTarget().getParent();
 		if(this.objects.contains(objectAddr))

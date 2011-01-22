@@ -3,12 +3,12 @@ package org.xydra.client.sync;
 import java.util.List;
 
 import org.xydra.base.XAddress;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XEvent;
 import org.xydra.client.Callback;
 import org.xydra.client.ServiceException;
 import org.xydra.client.XChangesService;
 import org.xydra.client.XChangesService.CommandResult;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XEvent;
 import org.xydra.core.model.XLocalChange;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
@@ -48,6 +48,8 @@ public class XSynchronizer {
 	 * lost. To persist changes supply the to the
 	 * {@link #executeCommand(XCommand, Callback)} Method.
 	 * 
+	 * FIXME there is no executeCommand method
+	 * 
 	 * @param addr The address of the entity on the server. This is needed for
 	 *            synchronizing single XObjects as the local copy of the entity
 	 *            will not have a parent model and thus no model XID in it's
@@ -69,6 +71,8 @@ public class XSynchronizer {
 	 * given service. Any further changes applied directly to the model will be
 	 * lost. To persist changes supply the to the
 	 * {@link #executeCommand(XCommand, Callback)} Method.
+	 * 
+	 * FIXME there is no executeCommand method
 	 */
 	public XSynchronizer(XModel entity, XChangesService service) {
 		this(entity.getAddress(), entity, service);
