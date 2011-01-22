@@ -15,14 +15,14 @@ import java.net.URL;
 import java.util.Iterator;
 
 import org.junit.Test;
+import org.xydra.base.X;
 import org.xydra.base.XID;
-import org.xydra.core.X;
+import org.xydra.base.XX;
+import org.xydra.core.DemoModelUtil;
 import org.xydra.core.XCompareUtils;
-import org.xydra.core.XX;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
-import org.xydra.core.test.DemoModelUtil;
 import org.xydra.core.value.XV;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlModel;

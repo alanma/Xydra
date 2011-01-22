@@ -2,16 +2,12 @@ package org.xydra.server.impl.memory;
 
 import java.util.Iterator;
 
+import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableModel;
 import org.xydra.base.XID;
-import org.xydra.core.X;
-import org.xydra.core.XX;
-import org.xydra.core.access.XAccessManager;
-import org.xydra.core.access.XGroupDatabaseWithListeners;
-import org.xydra.core.access.impl.memory.MemoryAccessManager;
-import org.xydra.core.access.impl.memory.MemoryGroupDatabase;
-import org.xydra.core.change.XCommand;
+import org.xydra.base.XX;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.rmof.XReadableModel;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
@@ -20,6 +16,10 @@ import org.xydra.core.model.state.impl.memory.MemoryStateStore;
 import org.xydra.log.gae.GaeLoggerFactorySPI;
 import org.xydra.server.IXydraServer;
 import org.xydra.server.rest.XydraRestServer;
+import org.xydra.store.access.XAuthorisationManager;
+import org.xydra.store.access.XGroupDatabaseWithListeners;
+import org.xydra.store.access.impl.memory.MemoryAuthorisationManager;
+import org.xydra.store.access.impl.memory.MemoryGroupDatabase;
 
 
 /**
@@ -35,12 +35,10 @@ public class MemoryXydraServer implements IXydraServer {
 	
 	private XGroupDatabaseWithListeners groups;
 	
-	private XAccessManager accessManager;
+	private XAuthorisationManager accessManager;
 	
 	/**
 	 * Parameter-less constructor. Called form {@link XydraRestServer}.
-	 * 
-	 * @param actorId TODO
 	 */
 	public MemoryXydraServer() {
 		// setup logging
@@ -52,10 +50,10 @@ public class MemoryXydraServer implements IXydraServer {
 		XID actorId = XX.toId("MemoryXydraServer");
 		this.repo = X.createMemoryRepository(actorId);
 		this.groups = new MemoryGroupDatabase();
-		this.accessManager = new MemoryAccessManager(this.groups);
+		this.accessManager = new MemoryAuthorisationManager(this.groups);
 	}
 	
-	public XAccessManager getAccessManager() {
+	public XAuthorisationManager getAccessManager() {
 		return this.accessManager;
 	}
 	

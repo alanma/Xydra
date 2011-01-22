@@ -9,17 +9,17 @@ import javax.servlet.ServletContext;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.xydra.base.XAddress;
-import org.xydra.core.access.XAccessManager;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XRepositoryCommand;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XRepositoryCommand;
+import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
+import org.xydra.core.DemoModelUtil;
 import org.xydra.core.change.XTransactionBuilder;
-import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
-import org.xydra.core.test.DemoModelUtil;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.server.IXydraServer;
 import org.xydra.server.rest.XydraRestServer;
 import org.xydra.store.access.XA;
+import org.xydra.store.access.XAuthorisationManager;
 
 
 /**
@@ -122,8 +122,8 @@ public class TestServer {
 		
 		// add a default model
 		// TODO move command into transaction
-		XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(xydraServer
-		        .getRepositoryAddress(), XCommand.SAFE, DemoModelUtil.PHONEBOOK_ID);
+		XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(
+		        xydraServer.getRepositoryAddress(), XCommand.SAFE, DemoModelUtil.PHONEBOOK_ID);
 		xydraServer.executeCommand(createCommand, null);
 		XAddress modelAddr = createCommand.getChangedEntity();
 		XTransactionBuilder tb = new XTransactionBuilder(modelAddr);
@@ -132,9 +132,9 @@ public class TestServer {
 		
 		// allow access to everyone
 		XAddress repoAddr = xydraServer.getRepositoryAddress();
-		XAccessManager arm = xydraServer.getAccessManager();
-		arm.setAccess(XA.GROUP_ALL, repoAddr, XA.ACCESS_READ, true);
-		arm.setAccess(XA.GROUP_ALL, repoAddr, XA.ACCESS_WRITE, true);
+		XAuthorisationManager arm = xydraServer.getAccessManager();
+		arm.getAuthorisationDatabase().setAccess(XA.GROUP_ALL, repoAddr, XA.ACCESS_READ, true);
+		arm.getAuthorisationDatabase().setAccess(XA.GROUP_ALL, repoAddr, XA.ACCESS_WRITE, true);
 		
 		log.info("Started embedded Jetty server. User interface is at " + uri.toString());
 		

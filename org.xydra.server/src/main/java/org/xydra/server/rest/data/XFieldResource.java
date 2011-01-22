@@ -4,11 +4,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableField;
-import org.xydra.core.XX;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XObjectCommand;
-import org.xydra.core.change.impl.memory.MemoryObjectCommand;
+import org.xydra.base.XX;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XObjectCommand;
+import org.xydra.base.change.impl.memory.MemoryObjectCommand;
+import org.xydra.base.rmof.XReadableField;
 import org.xydra.core.xml.XmlModel;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
 import org.xydra.restless.Restless;

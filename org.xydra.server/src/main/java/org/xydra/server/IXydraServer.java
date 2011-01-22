@@ -3,12 +3,12 @@ package org.xydra.server;
 import java.util.Iterator;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableModel;
 import org.xydra.base.XID;
-import org.xydra.core.access.XAccessManager;
-import org.xydra.core.access.XGroupDatabaseWithListeners;
-import org.xydra.core.change.XCommand;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.rmof.XReadableModel;
 import org.xydra.core.model.XChangeLog;
+import org.xydra.store.access.XAuthorisationManager;
+import org.xydra.store.access.XGroupDatabaseWithListeners;
 
 
 /**
@@ -57,10 +57,10 @@ public interface IXydraServer extends Iterable<XID> {
 	XGroupDatabaseWithListeners getGroups();
 	
 	/**
-	 * @return the {@link XAccessManager} responsible for accesses to the
+	 * @return the {@link XAuthorisationManager} responsible for accesses to the
 	 *         repository.
 	 */
-	XAccessManager getAccessManager();
+	XAuthorisationManager getAccessManager();
 	
 	/**
 	 * Get the available model IDs.

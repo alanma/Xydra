@@ -11,11 +11,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInJava;
-import org.xydra.base.XReadableField;
-import org.xydra.base.XReadableModel;
-import org.xydra.base.XReadableObject;
 import org.xydra.base.XID;
-import org.xydra.core.XX;
+import org.xydra.base.XX;
+import org.xydra.base.rmof.XReadableField;
+import org.xydra.base.rmof.XReadableModel;
+import org.xydra.base.rmof.XReadableObject;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
@@ -60,8 +60,7 @@ public class XydraRestServer {
 	public static IXydraServer getXydraServer(Restless restless) {
 		IXydraServer xydraServer = getXydraServerInternal(restless);
 		if(xydraServer == null) {
-			log
-			        .warn("XydraRestServer.restless hasn't been run properly before calling this method.");
+			log.warn("XydraRestServer.restless hasn't been run properly before calling this method.");
 		}
 		return xydraServer;
 	}
@@ -235,10 +234,10 @@ public class XydraRestServer {
 	/**
 	 * Get and authenticate the current user.
 	 * 
-	 * @param headers The request headers.
+	 * @param req The request
 	 * @return The authenticated actor or null if no actor was specified.
-	 * @throws WebApplicationException if an actor was specified but could not
-	 *             be authenticated
+	 * @throws RestlessException if an actor was specified but could not be
+	 *             authenticated
 	 */
 	public static synchronized XID getActor(HttpServletRequest req) {
 		
@@ -282,7 +281,8 @@ public class XydraRestServer {
 		return model;
 	}
 	
-	public static XReadableObject getObject(IXydraSession session, String modelIdStr, String objectIdStr) {
+	public static XReadableObject getObject(IXydraSession session, String modelIdStr,
+	        String objectIdStr) {
 		XID objectId = getId(objectIdStr);
 		XReadableModel model = getModel(session, modelIdStr);
 		XReadableObject object = model.getObject(objectId);
@@ -293,8 +293,8 @@ public class XydraRestServer {
 		return object;
 	}
 	
-	public static XReadableField getField(IXydraSession session, String modelIdStr, String objectIdStr,
-	        String fieldIdStr) {
+	public static XReadableField getField(IXydraSession session, String modelIdStr,
+	        String objectIdStr, String fieldIdStr) {
 		XID fieldId = getId(fieldIdStr);
 		XReadableObject object = getObject(session, modelIdStr, objectIdStr);
 		XReadableField field = object.getField(fieldId);

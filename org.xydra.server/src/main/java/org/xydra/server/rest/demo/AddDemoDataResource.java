@@ -4,11 +4,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.base.XAddress;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XRepositoryCommand;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XRepositoryCommand;
+import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
+import org.xydra.core.DemoModelUtil;
 import org.xydra.core.change.XTransactionBuilder;
-import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
-import org.xydra.core.test.DemoModelUtil;
 import org.xydra.restless.Restless;
 import org.xydra.server.IXydraSession;
 import org.xydra.server.rest.XydraRestServer;

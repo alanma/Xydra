@@ -1,9 +1,9 @@
 package org.xydra.server;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableModel;
 import org.xydra.base.XID;
-import org.xydra.core.change.XCommand;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.rmof.XReadableModel;
 import org.xydra.core.model.XChangeLog;
 
 

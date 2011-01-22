@@ -1,21 +1,21 @@
 package org.xydra.server.impl.memory;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XReadableModel;
 import org.xydra.base.XID;
-import org.xydra.core.access.XAccessManager;
-import org.xydra.core.change.XCommand;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.rmof.XReadableModel;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.session.impl.arm.ArmProtectedBaseModel;
 import org.xydra.core.model.session.impl.arm.ArmProtectedChangeLog;
 import org.xydra.server.IXydraServer;
 import org.xydra.server.IXydraSession;
 import org.xydra.store.AccessException;
+import org.xydra.store.access.XAuthorisationManager;
 
 
 /**
  * {@link IXydraSession} implementation that checks all access against an
- * {@link XAccessManager} and forwards allowed operations to an
+ * {@link XAuthorisationManager} and forwards allowed operations to an
  * {@link IXydraServer}.
  * 
  * @author dscharrer
@@ -42,7 +42,7 @@ public class ArmXydraSession implements IXydraSession {
 	
 	public XChangeLog getChangeLog(XID modelId) {
 		
-		XAccessManager arm = this.server.getAccessManager();
+		XAuthorisationManager arm = this.server.getAccessManager();
 		
 		if(!arm.canKnowAboutModel(this.actor, getRepositoryAddress(), modelId)) {
 			throw new AccessException(this.actor + " cannot read modelId " + modelId + " in "
@@ -59,7 +59,7 @@ public class ArmXydraSession implements IXydraSession {
 	
 	public XReadableModel getModelSnapshot(XID modelId) {
 		
-		XAccessManager arm = this.server.getAccessManager();
+		XAuthorisationManager arm = this.server.getAccessManager();
 		
 		if(!arm.canKnowAboutModel(this.actor, getRepositoryAddress(), modelId)) {
 			throw new AccessException(this.actor + " cannot read modelId " + modelId + " in "

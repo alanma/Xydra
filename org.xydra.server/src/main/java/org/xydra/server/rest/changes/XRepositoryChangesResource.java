@@ -4,8 +4,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.base.XAddress;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XRepositoryCommand;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.MiniXMLParser;
 import org.xydra.core.xml.XmlCommand;
