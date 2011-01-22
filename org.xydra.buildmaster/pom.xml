@@ -4,93 +4,92 @@
 
 	<groupId>org.xydra</groupId>
 	<artifactId>buildmaster</artifactId>
-	<version>0.1.2-SNAPSHOT</version>
+	<version>0.1.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Xydra Buildmaster</name>
 	<inceptionYear>2010</inceptionYear>
 
-	<!--
-
-		Run 'mvn clean compile site:site site:deploy' to re-create all sites
-		and deploy them
-	-->
+	<!-- Run 'mvn clean compile site:site site:deploy' to re-create all sites 
+		and deploy them -->
 
 	<modules>
 		<!-- No Xydra dependencies -->
 		<module>../org.xydra.log/</module>
-		<!--  DONE -->
+		<!-- DONE -->
+
+		<!-- Depends on: .log -->
+		<module>../org.xydra.log.gae/</module>
+		<!-- DONE -->
 
 		<!-- Depends on: .log, GWT -->
 		<module>../org.xydra.log.howto/</module>
-		<!--  DONE -->
+		<!-- DONE -->
 
 		<!-- Depends on: .log -->
 		<module>../org.xydra.index/</module>
-		<!--  DONE -->
+		<!-- DONE -->
 
 		<!-- Depends on .index, .log -->
 		<module>../org.xydra.textsearch/</module>
-		<!--  DONE -->
+		<!-- DONE -->
 
 		<!-- Depends on: .index, .log -->
 		<module>../org.xydra.core/</module>
-		<!--  DONE -->
+		<!-- DONE -->
 
 		<!-- Depends on: .core, .log -->
 		<module>../org.xydra.client</module>
-		<!--  DONE -->
+		<!-- DONE -->
 
 		<!-- Depends on: .client, GWT -->
 		<module>../org.xydra.client-gwt/</module>
-		<!--  DONE -->
+		<!-- DONE -->
 
 		<!-- No Xydra dependencies -->
 		<module>../org.xydra.restless/</module>
-		<!--  DONE -->
+		<!-- DONE -->
+
+		<!-- Depends on: .log, .restless -->
+		<module>../org.xydra.restless.gae-demo/</module>
+
 
 		<!-- Depends on: .core, .log, .restless -->
 		<module>../org.xydra.server/</module>
-		<!--  DONE -->
+		<!-- DONE -->
 
 		<!-- Depends on: .server, .core, .restless, .client, GWT -->
 		<module>../org.xydra.webadmin/</module>
-		<!--  DONE -->
+		<!-- DONE -->
 
 		<!-- Depends on: .server, GAE -->
 		<module>../org.xydra.server-gae/</module>
-		<!--  DONE -->
+		<!-- DONE -->
 
 		<!-- Depends on: .restless, GAE -->
 		<module>../org.xydra.gaemyadmin/</module>
-		<!--  DONE -->
+		<!-- DONE -->
 
-		<!--  Documentation. Depends on: .core -->
+		<!-- Documentation. Depends on: .core -->
 		<module>../org.xydra.doc/</module>
-		<!--  DONE -->
+		<!-- DONE -->
 
 		<!-- Experimental. Depends on: .core -->
 		<module>../org.xydra.schema/</module>
-		<!--  DONE -->
+		<!-- DONE -->
 
 		<!-- Experimental. Depends on: .core, GWT -->
 		<!-- Commented out due to test failures -->
-		<!--
-			<module>../org.xydra.dev/</module>
-		-->
-		<!--  DONE -->
+		<!-- <module>../org.xydra.dev/</module> -->
+		<!-- DONE -->
 
 
 
 
 		<!-- Experimental. Depends on: GAE -->
-		<!--
-			Commented out due to site generation error: package
-			com.google.appengine.tools.admin does not exist
-		--><!--
-		<module>../org.xydra.gaeclient/</module>
-	-->
-		<!--  DONE -->
+		<!-- Commented out due to site generation error: package com.google.appengine.tools.admin 
+			does not exist --><!-- <module>../org.xydra.gaeclient/</module> -->
+		<!-- DONE -->
 	</modules>
 
 </project>
