@@ -3,8 +3,6 @@ package org.xydra.core.model.state;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
-import org.xydra.core.model.state.XModelState;
-import org.xydra.core.model.state.XRepositoryState;
 
 
 public class TestRepositoryState extends TestState implements XRepositoryState {

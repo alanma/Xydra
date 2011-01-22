@@ -13,8 +13,8 @@ import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.value.XIntegerValue;
 import org.xydra.base.value.XStringValue;
+import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
-import org.xydra.core.value.XV;
 import org.xydra.store.access.HashUtils;
 import org.xydra.store.access.XAuthenticationDatabase;
 

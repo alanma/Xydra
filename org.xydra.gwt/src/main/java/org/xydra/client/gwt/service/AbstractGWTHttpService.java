@@ -5,8 +5,8 @@ import org.xydra.client.NotFoundException;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.MiniXMLParser;
 import org.xydra.store.ConnectionException;
-import org.xydra.store.RequestException;
 import org.xydra.store.InternalStoreException;
+import org.xydra.store.RequestException;
 import org.xydra.store.TimeoutException;
 
 import com.google.gwt.http.client.Request;

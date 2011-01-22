@@ -2,7 +2,6 @@ package org.xydra.core.model.state;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
-import org.xydra.core.model.state.XFieldState;
 
 
 public class TestFieldState extends TestState implements XFieldState {

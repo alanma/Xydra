@@ -2,8 +2,8 @@ package org.xydra.core.model.delta;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
-import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XReadableField;
+import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.value.XValue;
 import org.xydra.index.XI;
 

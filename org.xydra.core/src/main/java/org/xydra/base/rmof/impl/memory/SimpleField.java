@@ -6,8 +6,8 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
 import org.xydra.base.change.XCommand;
-import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XRevWritableField;
+import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.value.XValue;
 import org.xydra.index.XI;
 

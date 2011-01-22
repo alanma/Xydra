@@ -6,8 +6,6 @@ import java.util.Map;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.change.XEvent;
-import org.xydra.core.model.state.XChangeLogState;
-import org.xydra.core.model.state.XStateTransaction;
 import org.xydra.index.query.KeyKeyEntryTuple;
 
 

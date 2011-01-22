@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.xydra.base.value.XLongListValue;
 import org.xydra.base.value.XLongValue;
-import org.xydra.core.value.XV;
+import org.xydra.base.value.XV;
 
 
 public class XLongListEditor extends XCollectionEditor<XLongValue,XLongListValue> {

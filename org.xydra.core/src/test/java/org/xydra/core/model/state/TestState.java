@@ -8,7 +8,6 @@ import java.util.Set;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.value.XValue;
-import org.xydra.core.model.state.XStateTransaction;
 import org.xydra.index.XI;
 
 

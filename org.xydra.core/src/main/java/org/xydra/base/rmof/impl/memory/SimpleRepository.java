@@ -9,8 +9,8 @@ import org.xydra.base.XID;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
-import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.base.rmof.XRevWritableRepository;
+import org.xydra.base.rmof.XWritableRepository;
 
 
 /**

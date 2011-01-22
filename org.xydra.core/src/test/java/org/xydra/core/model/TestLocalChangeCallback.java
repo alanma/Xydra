@@ -4,7 +4,6 @@
 package org.xydra.core.model;
 
 import org.xydra.base.change.XCommand;
-import org.xydra.core.model.XLocalChangeCallback;
 
 
 /**

@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.xydra.base.value.XDoubleListValue;
 import org.xydra.base.value.XDoubleValue;
-import org.xydra.core.value.XV;
+import org.xydra.base.value.XV;
 
 
 public class XDoubleListEditor extends XCollectionEditor<XDoubleValue,XDoubleListValue> {

@@ -1,4 +1,4 @@
-package org.xydra.core.value;
+package org.xydra.base.value;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -9,27 +9,6 @@ import java.util.Set;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
-import org.xydra.base.value.XAddressListValue;
-import org.xydra.base.value.XAddressSetValue;
-import org.xydra.base.value.XAddressSortedSetValue;
-import org.xydra.base.value.XBooleanListValue;
-import org.xydra.base.value.XBooleanValue;
-import org.xydra.base.value.XByteListValue;
-import org.xydra.base.value.XDoubleListValue;
-import org.xydra.base.value.XDoubleValue;
-import org.xydra.base.value.XIDListValue;
-import org.xydra.base.value.XIDSetValue;
-import org.xydra.base.value.XIDSortedSetValue;
-import org.xydra.base.value.XIntegerListValue;
-import org.xydra.base.value.XIntegerValue;
-import org.xydra.base.value.XListValue;
-import org.xydra.base.value.XLongListValue;
-import org.xydra.base.value.XLongValue;
-import org.xydra.base.value.XStringListValue;
-import org.xydra.base.value.XStringSetValue;
-import org.xydra.base.value.XStringValue;
-import org.xydra.base.value.XValue;
-import org.xydra.base.value.XValueFactory;
 
 
 /**

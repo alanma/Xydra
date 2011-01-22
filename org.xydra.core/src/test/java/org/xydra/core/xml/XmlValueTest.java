@@ -6,8 +6,8 @@ import org.junit.Test;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
+import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
-import org.xydra.core.value.XV;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
 

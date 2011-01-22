@@ -11,13 +11,13 @@ import org.xydra.annotations.RunsInJava;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.value.XIDListValue;
+import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
 import org.xydra.core.URIFormatException;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.impl.memory.MemoryModel;
-import org.xydra.core.value.XV;
 
 
 /**

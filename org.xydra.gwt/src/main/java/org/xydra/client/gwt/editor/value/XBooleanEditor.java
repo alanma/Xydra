@@ -1,7 +1,7 @@
 package org.xydra.client.gwt.editor.value;
 
 import org.xydra.base.value.XBooleanValue;
-import org.xydra.core.value.XV;
+import org.xydra.base.value.XV;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

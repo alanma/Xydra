@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.xydra.base.XAddress;
-import org.xydra.core.model.state.XStateTransaction;
 import org.xydra.index.IPairIndex;
 import org.xydra.index.impl.MapPairIndex;
 import org.xydra.index.query.Pair;

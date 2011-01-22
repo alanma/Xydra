@@ -11,11 +11,11 @@ import org.xydra.base.X;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
+import org.xydra.base.value.XV;
 import org.xydra.core.TestLogger;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.state.TestStateStore;
 import org.xydra.core.model.state.XSPI;
-import org.xydra.core.value.XV;
 
 
 /**

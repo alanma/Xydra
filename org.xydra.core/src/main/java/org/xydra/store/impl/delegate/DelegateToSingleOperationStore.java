@@ -15,7 +15,6 @@ import org.xydra.store.AuthorisationException;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.GetEventsRequest;
-
 import org.xydra.store.StoreException;
 import org.xydra.store.XydraStore;
 import org.xydra.store.XydraStoreAdmin;

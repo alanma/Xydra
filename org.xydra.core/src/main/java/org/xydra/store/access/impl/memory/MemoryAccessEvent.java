@@ -6,8 +6,8 @@ import org.xydra.annotations.RunsInJava;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.change.ChangeType;
-import org.xydra.store.access.XAuthorisationEvent;
 import org.xydra.store.access.XAccessRightValue;
+import org.xydra.store.access.XAuthorisationEvent;
 
 
 /**

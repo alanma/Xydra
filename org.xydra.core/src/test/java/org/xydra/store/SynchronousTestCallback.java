@@ -1,7 +1,5 @@
 package org.xydra.store;
 
-import org.xydra.store.Callback;
-import org.xydra.store.XydraStore;
 
 
 /**

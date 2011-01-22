@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.xydra.base.XID;
 import org.xydra.base.value.XIDSetValue;
-import org.xydra.core.value.XV;
+import org.xydra.base.value.XV;
 
 
 public class XIDSetEditor extends XCollectionEditor<XID,XIDSetValue> {

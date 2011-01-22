@@ -31,8 +31,8 @@ import org.xydra.base.value.XSetValue;
 import org.xydra.base.value.XStringListValue;
 import org.xydra.base.value.XStringSetValue;
 import org.xydra.base.value.XStringValue;
+import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
-import org.xydra.core.value.XV;
 
 
 /**

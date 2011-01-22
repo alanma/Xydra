@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.xydra.base.value.XBooleanListValue;
 import org.xydra.base.value.XBooleanValue;
-import org.xydra.core.value.XV;
+import org.xydra.base.value.XV;
 
 
 public class XBooleanListEditor extends XCollectionEditor<XBooleanValue,XBooleanListValue> {

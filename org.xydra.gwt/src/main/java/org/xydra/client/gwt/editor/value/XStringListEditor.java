@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.xydra.base.value.XStringListValue;
 import org.xydra.base.value.XStringValue;
-import org.xydra.core.value.XV;
+import org.xydra.base.value.XV;
 
 
 public class XStringListEditor extends XCollectionEditor<XStringValue,XStringListValue> {

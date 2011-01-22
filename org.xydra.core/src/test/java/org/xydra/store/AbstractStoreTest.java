@@ -4,7 +4,6 @@ import org.xydra.base.XID;
 import org.xydra.base.change.XCommandFactory;
 import org.xydra.core.TestLogger;
 import org.xydra.core.model.XRepository;
-import org.xydra.store.XydraStore;
 
 
 /**

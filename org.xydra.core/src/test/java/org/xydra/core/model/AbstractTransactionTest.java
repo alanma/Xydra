@@ -21,19 +21,14 @@ import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.change.impl.memory.MemoryFieldEvent;
 import org.xydra.base.change.impl.memory.MemoryModelEvent;
 import org.xydra.base.change.impl.memory.MemoryObjectEvent;
+import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
 import org.xydra.core.ChangeRecorder;
 import org.xydra.core.HasChanged;
 import org.xydra.core.TestLogger;
 import org.xydra.core.change.XTransactionBuilder;
-import org.xydra.core.model.XField;
-import org.xydra.core.model.XModel;
-import org.xydra.core.model.XObject;
-import org.xydra.core.model.XRepository;
-import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryObject;
-import org.xydra.core.value.XV;
 import org.xydra.index.XI;
 
 

@@ -14,7 +14,6 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
-
 import org.xydra.store.RequestException;
 import org.xydra.store.impl.delegate.XydraPersistence;
 

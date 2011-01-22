@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.xydra.base.value.XIntegerListValue;
 import org.xydra.base.value.XIntegerValue;
-import org.xydra.core.value.XV;
+import org.xydra.base.value.XV;
 
 
 public class XIntegerListEditor extends XCollectionEditor<XIntegerValue,XIntegerListValue> {

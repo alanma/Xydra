@@ -16,13 +16,8 @@ import org.junit.Test;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
+import org.xydra.base.value.XV;
 import org.xydra.core.TestLogger;
-import org.xydra.core.model.state.XFieldState;
-import org.xydra.core.model.state.XModelState;
-import org.xydra.core.model.state.XObjectState;
-import org.xydra.core.model.state.XRepositoryState;
-import org.xydra.core.model.state.XSPI;
-import org.xydra.core.value.XV;
 
 
 /**

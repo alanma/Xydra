@@ -15,9 +15,6 @@ import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
 import org.xydra.base.rmof.XReadableModel;
-import org.xydra.store.AuthorisationException;
-import org.xydra.store.BatchedResult;
-import org.xydra.store.XydraStore;
 
 
 /**

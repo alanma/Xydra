@@ -24,7 +24,6 @@ import org.xydra.store.Callback;
 import org.xydra.store.ConnectionException;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.InternalStoreException;
-
 import org.xydra.store.QuotaException;
 import org.xydra.store.RequestException;
 import org.xydra.store.TimeoutException;

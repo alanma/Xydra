@@ -10,9 +10,9 @@ import org.xydra.base.XID;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
-import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableObject;
+import org.xydra.base.rmof.XWritableObject;
 
 
 /**
