@@ -4,14 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.xydra.base.XID;
+import org.xydra.base.change.ChangeType;
+import org.xydra.base.change.XObjectEvent;
+import org.xydra.base.change.impl.memory.MemoryModelCommand;
+import org.xydra.base.change.impl.memory.MemoryObjectCommand;
 import org.xydra.base.value.XValue;
 import org.xydra.client.gwt.editor.value.XIDEditor;
 import org.xydra.client.gwt.editor.value.XValueEditor.EditListener;
-import org.xydra.core.change.ChangeType;
-import org.xydra.core.change.XObjectEvent;
 import org.xydra.core.change.XObjectEventListener;
-import org.xydra.core.change.impl.memory.MemoryModelCommand;
-import org.xydra.core.change.impl.memory.MemoryObjectCommand;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
@@ -132,15 +132,15 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 	public void onChangeEvent(XObjectEvent event) {
 		log.info("editor: got " + event);
 		if(event.getChangeType() == ChangeType.ADD) {
-			newField(event.getFieldID());
+			newField(event.getFieldId());
 		} else {
-			fieldRemoved(event.getFieldID());
+			fieldRemoved(event.getFieldId());
 		}
 	}
 	
 	private void add(XID id) {
-		this.object.executeCommand(MemoryObjectCommand.createAddCommand(this.object.getAddress(),
-		        true, id), null);
+		this.object.executeCommand(
+		        MemoryObjectCommand.createAddCommand(this.object.getAddress(), true, id), null);
 	}
 	
 	protected void delete() {

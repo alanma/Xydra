@@ -3,11 +3,11 @@ package org.xydra.client.gwt.service;
 import java.util.List;
 
 import org.xydra.base.XAddress;
+import org.xydra.base.XX;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XEvent;
 import org.xydra.client.Callback;
 import org.xydra.client.XChangesService;
-import org.xydra.core.XX;
-import org.xydra.core.change.XCommand;
-import org.xydra.core.change.XEvent;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.MiniXMLParser;
 import org.xydra.core.xml.XmlCommand;

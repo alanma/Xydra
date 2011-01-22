@@ -4,13 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.xydra.base.XID;
+import org.xydra.base.change.ChangeType;
+import org.xydra.base.change.XModelEvent;
+import org.xydra.base.change.impl.memory.MemoryModelCommand;
 import org.xydra.base.value.XValue;
 import org.xydra.client.gwt.editor.value.XIDEditor;
 import org.xydra.client.gwt.editor.value.XValueEditor.EditListener;
-import org.xydra.core.change.ChangeType;
-import org.xydra.core.change.XModelEvent;
 import org.xydra.core.change.XModelEventListener;
-import org.xydra.core.change.impl.memory.MemoryModelCommand;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.log.Logger;
@@ -123,9 +123,9 @@ public class XModelEditor extends Composite implements XModelEventListener {
 	public void onChangeEvent(XModelEvent event) {
 		log.info("editor: got " + event);
 		if(event.getChangeType() == ChangeType.ADD) {
-			newObject(event.getObjectID());
+			newObject(event.getObjectId());
 		} else {
-			objectRemoved(event.getObjectID());
+			objectRemoved(event.getObjectId());
 		}
 	}
 	

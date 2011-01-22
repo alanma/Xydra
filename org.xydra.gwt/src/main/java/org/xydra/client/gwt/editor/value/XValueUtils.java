@@ -3,6 +3,7 @@ package org.xydra.client.gwt.editor.value;
 import java.util.Iterator;
 
 import org.xydra.base.XID;
+import org.xydra.base.XX;
 import org.xydra.base.value.XBooleanListValue;
 import org.xydra.base.value.XBooleanValue;
 import org.xydra.base.value.XByteListValue;
@@ -18,7 +19,6 @@ import org.xydra.base.value.XLongValue;
 import org.xydra.base.value.XStringListValue;
 import org.xydra.base.value.XStringSetValue;
 import org.xydra.base.value.XValue;
-import org.xydra.core.XX;
 import org.xydra.index.iterator.AbstractFilteringIterator;
 import org.xydra.index.iterator.AbstractTransformingIterator;
 import org.xydra.index.iterator.NoneIterator;

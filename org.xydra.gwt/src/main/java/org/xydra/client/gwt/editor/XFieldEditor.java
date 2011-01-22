@@ -1,6 +1,10 @@
 package org.xydra.client.gwt.editor;
 
 import org.xydra.base.XID;
+import org.xydra.base.change.XFieldCommand;
+import org.xydra.base.change.XFieldEvent;
+import org.xydra.base.change.impl.memory.MemoryFieldCommand;
+import org.xydra.base.change.impl.memory.MemoryObjectCommand;
 import org.xydra.base.value.XBooleanListValue;
 import org.xydra.base.value.XBooleanValue;
 import org.xydra.base.value.XByteListValue;
@@ -37,11 +41,7 @@ import org.xydra.client.gwt.editor.value.XStringListEditor;
 import org.xydra.client.gwt.editor.value.XStringSetEditor;
 import org.xydra.client.gwt.editor.value.XValueEditor;
 import org.xydra.client.gwt.editor.value.XValueUtils;
-import org.xydra.core.change.XFieldCommand;
-import org.xydra.core.change.XFieldEvent;
 import org.xydra.core.change.XFieldEventListener;
-import org.xydra.core.change.impl.memory.MemoryFieldCommand;
-import org.xydra.core.change.impl.memory.MemoryObjectCommand;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XObject;
 import org.xydra.index.XI;
