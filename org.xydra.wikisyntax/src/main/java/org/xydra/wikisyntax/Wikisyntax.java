@@ -60,7 +60,7 @@ public class Wikisyntax {
 	 * </pre>
 	 * 
 	 * @param wikisyntax
-	 * @return
+	 * @return the resulting HTML
 	 */
 	public static String toHtml(String wikisyntax) {
 		String result = wikisyntax;
