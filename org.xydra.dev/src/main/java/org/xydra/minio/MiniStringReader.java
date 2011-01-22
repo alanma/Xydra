@@ -1,6 +1,5 @@
 package org.xydra.minio;
 
-import java.io.IOException;
 import java.io.Reader;
 
 
@@ -34,7 +33,7 @@ public class MiniStringReader extends AbstractMiniReader implements MiniReader {
 	 * @return The character read, or -1 if the end of the stream has been
 	 *         reached
 	 * 
-	 * @exception IOException If an I/O error occurs
+	 * @throws MiniIOException If an I/O error occurs
 	 */
 	public int read() throws MiniIOException {
 		synchronized(this.lock) {
@@ -55,7 +54,7 @@ public class MiniStringReader extends AbstractMiniReader implements MiniReader {
 	 * @return The number of characters read, or -1 if the end of the stream has
 	 *         been reached
 	 * 
-	 * @exception IOException If an I/O error occurs
+	 * @exception MiniIOException If an I/O error occurs
 	 */
 	public int read(char cbuf[], int off, int len) throws MiniIOException {
 		synchronized(this.lock) {
@@ -91,7 +90,7 @@ public class MiniStringReader extends AbstractMiniReader implements MiniReader {
 	 * If the entire string has been read or skipped, then this method has no
 	 * effect and always returns 0.
 	 * 
-	 * @exception IOException If an I/O error occurs
+	 * @exception MiniIOException If an I/O error occurs
 	 */
 	public long skip(long ns) throws MiniIOException {
 		synchronized(this.lock) {
@@ -111,7 +110,7 @@ public class MiniStringReader extends AbstractMiniReader implements MiniReader {
 	 * 
 	 * @return True if the next read() is guaranteed not to block for input
 	 * 
-	 * @exception IOException If the stream is closed
+	 * @exception MiniIOException If the stream is closed
 	 */
 	public boolean ready() throws MiniIOException {
 		synchronized(this.lock) {
@@ -137,7 +136,7 @@ public class MiniStringReader extends AbstractMiniReader implements MiniReader {
 	 *            argument must not be negative, but is otherwise ignored.
 	 * 
 	 * @exception IllegalArgumentException If readAheadLimit is < 0
-	 * @exception IOException If an I/O error occurs
+	 * @exception MiniIOException If an I/O error occurs
 	 */
 	public void mark(int readAheadLimit) throws MiniIOException {
 		if(readAheadLimit < 0) {
@@ -153,7 +152,7 @@ public class MiniStringReader extends AbstractMiniReader implements MiniReader {
 	 * Reset the stream to the most recent mark, or to the beginning of the
 	 * string if it has never been marked.
 	 * 
-	 * @exception IOException If an I/O error occurs
+	 * @exception MiniIOException If an I/O error occurs
 	 */
 	public void reset() throws MiniIOException {
 		synchronized(this.lock) {

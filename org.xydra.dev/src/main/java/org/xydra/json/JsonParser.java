@@ -48,7 +48,7 @@ public class JsonParser {
 	/**
 	 * Construct a JSONTokener from a string.
 	 * 
-	 * @param reader A reader.
+	 * @param saj A {@link SAJ} reader.
 	 */
 	public JsonParser(SAJ saj) {
 		this.useLastChar = false;
@@ -224,8 +224,9 @@ public class JsonParser {
 	 * processing is done. The formal JSON format does not allow strings in
 	 * single quotes, but an implementation is allowed to accept them.
 	 * 
-	 * @param quote The quoting character, either <code>"</code>&nbsp;<small>(double
-	 *            quote)</small> or <code>'</code>&nbsp;<small>(single quote)</small>.
+	 * @param quote The quoting character, either <code>"</code>
+	 *            &nbsp;<small>(double quote)</small> or <code>'</code>
+	 *            &nbsp;<small>(single quote)</small>.
 	 * @return A String.
 	 * @throws JSONException Unterminated string.
 	 */
@@ -447,8 +448,6 @@ public class JsonParser {
 	 * JSONArray, JSONObject, Long, or String, or null.
 	 * 
 	 * @throws JSONException If syntax error.
-	 * 
-	 * @return An object.
 	 */
 	public void parseValue() throws JSONException {
 		char c = nextClean();
@@ -498,7 +497,6 @@ public class JsonParser {
 	 * can't be converted, return the string.
 	 * 
 	 * @param s A String.
-	 * @return A simple JSON value.
 	 * @throws JSONException
 	 */
 	public void parsePrimitiveValue(String s) throws JSONException {
