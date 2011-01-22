@@ -11,20 +11,19 @@ import javax.servlet.http.HttpServletResponse;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
-import org.xydra.core.X;
-import org.xydra.core.XX;
-import org.xydra.core.change.impl.memory.MemoryRepositoryCommand;
-import org.xydra.core.model.XID;
+import org.xydra.base.X;
+import org.xydra.base.XID;
+import org.xydra.base.XX;
+import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.log.gae.GaeLoggerFactorySPI;
 import org.xydra.restless.Restless;
 import org.xydra.store.Callback;
-import org.xydra.store.DelegatingAllowAllStoreReadMethodsTest;
 import org.xydra.store.GaeAllowAllStoreReadMethodsTest;
 import org.xydra.store.GaeStoreReadMethodsTest;
 import org.xydra.store.XydraStore;
-import org.xydra.store.base.HashUtils;
+import org.xydra.store.access.HashUtils;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
@@ -74,7 +73,6 @@ public class TestResource {
 	}
 	
 	private void test3(Writer w) throws IOException {
-		runJunitTest(DelegatingAllowAllStoreReadMethodsTest.class, w);
 		runJunitTest(GaeAllowAllStoreReadMethodsTest.class, w);
 		runJunitTest(GaeStoreReadMethodsTest.class, w);
 	}
@@ -102,10 +100,6 @@ public class TestResource {
 		XID actorId = XX.toId("test1");
 		String passwordHash = HashUtils.getMD5("secret");
 		
-		// TODO GroupModelWrapper doesn't exist anymore
-		// XID modelId = XX.toId("model1");
-		// GroupModelWrapper gmw = new GroupModelWrapper(store, modelId);
-		
 		log.info("Asking for repo id...");
 		store.getRepositoryId(actorId, passwordHash, new Callback<XID>() {
 			
@@ -128,8 +122,10 @@ public class TestResource {
 		w.flush();
 		XID actorId = XX.toId("testActor");
 		XID modelId = XX.toId("model1");
-		persistence.executeCommand(actorId, MemoryRepositoryCommand.createAddCommand(X
-		        .getIDProvider().fromComponents(repoId, null, null, null), true, modelId));
+		persistence.executeCommand(
+		        actorId,
+		        MemoryRepositoryCommand.createAddCommand(
+		                X.getIDProvider().fromComponents(repoId, null, null, null), true, modelId));
 		w.write("Created model1.\n");
 		w.flush();
 	}
