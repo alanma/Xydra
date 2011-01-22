@@ -16,6 +16,39 @@ import org.xydra.store.access.impl.memory.MemoryGroupDatabase;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
+/**
+ * A minimal out of date overview on the implementation strategy of this class
+ * is this:
+ * 
+ * <pre>
+ * AccessControlManagerOnPersistence
+ * -> CachingOrMemoryAuthenticationDatabase
+ *    -> AuthenticationDatabaseOnHalfWritableModel
+ *       -> HalfWritableModelOnPersistence
+ *          -> XydraPersistence
+ * -> SyncingHookAuthorisationManagerAndDb
+ *    -> MemoryAuthorisationManager (as container for groupDB)
+ *       -> SyncingHookGroupDatabase
+ *          -> MemoryGroupDatabase
+ *          -> PartialGroupDatabaseOnHalfWritableModel
+ *             -> HalfWritableModelOnPersistence
+ *                -> XydraPersistence
+ *          -> HalfWritableModelOnPersistence
+ *             -> XydraPersistence
+ *          [x] load rights
+ *          [X] user changes -> persistence
+ *          [x] persistence changed -> in memory
+ *    -> MemoryAuthorisationManager (as authorisationDB)
+ *    -> PartialAuthorisationDatabaseOnHalfWritableRepository
+ *       -> HalfWritableRepositoryOnPersistence
+ *    [x] load rights
+ *    [x] user changes -> persistence
+ *    [x] persistence changed -> in memory
+ * </pre>
+ * 
+ * @author xamde
+ * 
+ */
 public class AccessControlManagerOnPersistence extends DelegatingAccessControlManager {
 	
 	@SuppressWarnings("unused")
