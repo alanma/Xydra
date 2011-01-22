@@ -71,8 +71,9 @@ public class Restless extends HttpServlet {
 	
 	/**
 	 * Methods registered with the
-	 * {@link #addAdminOnlyMethod(String, String, Object, String, RestlessParameter...)}
-	 * are executed only if accessed visa a URL starting with this prefix.
+	 * {@link #addMethod(String, String, Object, String, boolean, RestlessParameter...)}
+	 * with the boolean set to TRUE are executed only if accessed visa a URL
+	 * starting with this prefix.
 	 */
 	public static final String ADMIN_ONLY_URL_PREFIX = "/admin";
 	public static final String CHARSET_UTF8 = "utf-8";
@@ -121,19 +122,17 @@ public class Restless extends HttpServlet {
 	}
 	
 	/**
-	 * Map contains key=value from a query string in a URL (the part after the
-	 * '?'). Multiple values for the same key are put in order of appearance in
-	 * the list. Duplicate values are omitted.
-	 * 
-	 * The members of the {@link SortedSet} may be null if the query string was
-	 * just 'a=&b=foo'.
-	 * 
-	 * Encoding UTF-8 is used for URLDecoding the key and value strings.
-	 * 
-	 * Keys and values get URL-decoded.
-	 * 
 	 * @param queryString
-	 * @return
+	 * @return a Map that contains key=value from a query string in a URL (the
+	 *         part after the '?'). Multiple values for the same key are put in
+	 *         order of appearance in the list. Duplicate values are omitted.
+	 * 
+	 *         The members of the {@link SortedSet} may be null if the query
+	 *         string was just 'a=&b=foo'.
+	 * 
+	 *         Encoding UTF-8 is used for URLDecoding the key and value strings.
+	 * 
+	 *         Keys and values get URL-decoded.
 	 */
 	public static Map<String,SortedSet<String>> getQueryStringAsMap(String queryString) {
 		Map<String,SortedSet<String>> map = new HashMap<String,SortedSet<String>>();
@@ -194,8 +193,8 @@ public class Restless extends HttpServlet {
 	}
 	
 	/**
-	 * @param object
-	 * @param methodName
+	 * @param clazz Class from which to get the method reference
+	 * @param methodName Name of Java method to get
 	 * @return a java.lang.reflect.{@link Method} from a Class with a given
 	 *         methodName
 	 */
@@ -560,10 +559,9 @@ public class Restless extends HttpServlet {
 							        + ".restless(Restless,String prefix)' failed", e);
 						}
 					} catch(NoSuchMethodException e) {
-						log
-						        .warn("Class '"
-						                + this.apps
-						                + "' has no restless( Restless restless, String prefix ) method. Relying on static initializer.");
+						log.warn("Class '"
+						        + this.apps
+						        + "' has no restless( Restless restless, String prefix ) method. Relying on static initializer.");
 						log.debug("Configured with " + clazz.getName());
 					}
 				} catch(IllegalArgumentException e) {
@@ -673,16 +671,15 @@ public class Restless extends HttpServlet {
 					res.sendError(403, "Forbidden. Admin parts must be accessed via /admin.");
 				}
 			} else {
-				res
-				        .sendError(
-				                404,
-				                "No handler matched your "
-				                        + req.getMethod()
-				                        + "-request path '"
-				                        + path
-				                        + "'. "
-				                        + (foundPath ? "Found at least a path mapping (wrong HTTP method or missing parameters)."
-				                                : "Found not even a path mapping."));
+				res.sendError(
+				        404,
+				        "No handler matched your "
+				                + req.getMethod()
+				                + "-request path '"
+				                + path
+				                + "'. "
+				                + (foundPath ? "Found at least a path mapping (wrong HTTP method or missing parameters)."
+				                        : "Found not even a path mapping."));
 			}
 			
 		} catch(IOException e) {

@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
  * @author voelkel
  * 
  */
-class PathTemplate {
+public class PathTemplate {
 	
 	/** Matches any character */
 	static final String ANY_REGEX = ".*";
@@ -117,7 +117,7 @@ class PathTemplate {
 	}
 	
 	/**
-	 * @return the regular expression to match URLs to this {@link PathTemplate}
+	 * @return the regular expression to match URLs to this
 	 */
 	public String getRegex() {
 		return this.regex;
