@@ -3,8 +3,6 @@ package org.xydra.store;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.sf.jsr107cache.Cache;
-
 import org.xydra.base.XID;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -39,12 +37,12 @@ public class XydraRuntime {
 	
 	private static XydraPlatformRuntime platformRuntime;
 	
-	private static Cache cacheInstance;
+	private static Map<Object,Object> cacheInstance;
 	
 	/**
 	 * @return a re-used instance of a Cache
 	 */
-	public static synchronized Cache getMemcache() {
+	public static synchronized Map<Object,Object> getMemcache() {
 		initialiseRuntime();
 		if(cacheInstance == null) {
 			cacheInstance = platformRuntime.getMemCache();

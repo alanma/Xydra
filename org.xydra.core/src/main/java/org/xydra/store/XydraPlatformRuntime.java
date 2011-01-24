@@ -1,6 +1,6 @@
 package org.xydra.store;
 
-import net.sf.jsr107cache.Cache;
+import java.util.Map;
 
 import org.xydra.base.XID;
 import org.xydra.store.impl.delegate.XydraPersistence;
@@ -39,7 +39,7 @@ public interface XydraPlatformRuntime {
 	 * @return a new instance of a platform specific Cache implementation or the
 	 *         Java default version if no other version has been configured.
 	 */
-	public Cache getMemCache();
+	public Map<Object,Object> getMemCache();
 	
 	/**
 	 * @param repositoryId XID of new repository

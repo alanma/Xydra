@@ -13,8 +13,8 @@ class DelegationUtils {
 	}
 	
 	/**
-	 * @param actorId
-	 * @param passwordHash
+	 * @param actorId may be null
+	 * @param passwordHash may be null
 	 * @throws IllegalArgumentException if a parameter is null.
 	 */
 	public static void assertNonNullActorAndPassword(XID actorId, String passwordHash) {
@@ -27,7 +27,7 @@ class DelegationUtils {
 	}
 	
 	/**
-	 * @param callback
+	 * @param callback may be null
 	 * @throws IllegalArgumentException if a parameter is null.
 	 */
 	public static void assertNonNullCallback(Callback<?> callback) {
