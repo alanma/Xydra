@@ -11,6 +11,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xydra.base.X;
 import org.xydra.base.XID;
+import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XValue;
 import org.xydra.core.TestLogger;
 import org.xydra.core.index.IObjectIndex;
@@ -47,6 +48,7 @@ public class TestObjectIndex {
 		list.add(X.getValueFactory().createStringSetValue(new String[] { a, b, c }));
 		return list;
 	}
+	
 	/**
 	 * @return each kind of value at least once
 	 */
@@ -62,10 +64,12 @@ public class TestObjectIndex {
 		list.add(X.getValueFactory().createStringValue(a));
 		return list;
 	}
+	
 	@BeforeClass
 	public static void init() {
 		TestLogger.init();
 	}
+	
 	private XID actor;
 	private XID emailFieldId;
 	private IndexFactoryImpl indexFactory;
@@ -106,10 +110,10 @@ public class TestObjectIndex {
 		oi.index(this.user1);
 		oi.index(this.user2);
 		oi.index(this.user3);
-		Set<XObject> user3_again_set = oi.lookup(this.model,
-		        X.getValueFactory().createStringValue("some@one.com"));
+		Set<XWritableObject> user3_again_set = oi.lookup(this.model, X.getValueFactory()
+		        .createStringValue("some@one.com"));
 		assertEquals(1, user3_again_set.size());
-		XObject user3_again = user3_again_set.iterator().next();
+		XWritableObject user3_again = user3_again_set.iterator().next();
 		assertEquals(this.user3.getID(), user3_again.getID());
 		assertEquals(this.user3, user3_again);
 	}
@@ -121,7 +125,7 @@ public class TestObjectIndex {
 		oi.index(this.user1);
 		oi.index(this.user2);
 		oi.index(this.user3);
-		XObject user3_again = oi.lookup(this.model,
+		XWritableObject user3_again = oi.lookup(this.model,
 		        X.getValueFactory().createStringValue("some@one.com"));
 		assertEquals(this.user3.getID(), user3_again.getID());
 		assertEquals(this.user3, user3_again);

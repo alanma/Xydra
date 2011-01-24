@@ -89,6 +89,13 @@
 			<classifier>sources</classifier>
 		</dependency>
 
+		<!-- For XydraRuntime.getMemcache -->
+		<dependency>
+			<groupId>net.sf.ehcache</groupId>
+			<artifactId>ehcache-jcache</artifactId>
+			<version>1.2</version>
+		</dependency>
+
 		<!-- for testing the GWT compatibility -->
 		<dependency>
 			<groupId>com.google.gwt</groupId>

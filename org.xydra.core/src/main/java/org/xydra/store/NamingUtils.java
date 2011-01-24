@@ -96,9 +96,9 @@ public class NamingUtils {
 	}
 	
 	/**
-	 * Decode a string created via {@link #encode(XID)} back to an XID
+	 * Decode back to an XID
 	 * 
-	 * @param encodedXid
+	 * @param encodedXid a string created via {@link #encode(XID)}
 	 * @return an XID or null (if the string represented the null XID)
 	 * @throws IllegalArgumentException if decoding fails
 	 */
@@ -190,7 +190,7 @@ public class NamingUtils {
 	 * Read-rights for an index model are inherited from the corresponding base
 	 * model.
 	 * 
-	 * @param modelId
+	 * @param modelId XID of model
 	 * @param indexName may not be null and not be the empty string.
 	 * @return an XID in the internal name-space following the name-space
 	 *         conventions for <em>index models</em>.

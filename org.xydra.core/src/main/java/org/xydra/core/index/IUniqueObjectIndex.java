@@ -4,9 +4,10 @@ import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.base.XID;
+import org.xydra.base.rmof.XReadableObject;
+import org.xydra.base.rmof.XWritableModel;
+import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XValue;
-import org.xydra.core.model.XModel;
-import org.xydra.core.model.XObject;
 
 
 /**
@@ -38,7 +39,7 @@ public interface IUniqueObjectIndex {
 	 * @param xo the given object by the fieldId configured for this index
 	 * @return XID of indexed object, if found. Null otherwise.
 	 */
-	XID deindex(XObject xo);
+	XID deindex(XReadableObject xo);
 	
 	/**
 	 * De-index the object with the given value.
@@ -56,14 +57,14 @@ public interface IUniqueObjectIndex {
 	 *         indexed here, null otherwise
 	 * @throws IllegalStateException
 	 */
-	XID index(XObject xo) throws IllegalStateException;
+	XID index(XReadableObject xo) throws IllegalStateException;
 	
 	/**
-	 * @param model used to load objects from internally stored XIDs
+	 * @param userModel used to load objects from internally stored XIDs
 	 * @param value
 	 * @return all previously indexed objects (in the given model) that have
 	 *         'value' as the value of the fieldId configured for this index
 	 */
-	XObject lookup(XModel model, XValue value);
+	XWritableObject lookup(XWritableModel userModel, XValue value);
 	
 }

@@ -5,9 +5,10 @@ import java.util.Set;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
+import org.xydra.base.rmof.XReadableObject;
+import org.xydra.base.rmof.XWritableModel;
+import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XValue;
-import org.xydra.core.model.XModel;
-import org.xydra.core.model.XObject;
 
 
 /**
@@ -25,12 +26,12 @@ public interface IObjectIndex {
 	/**
 	 * @param xo the given object by the fieldId configured for this index
 	 */
-	void deindex(XObject xo);
+	void deindex(XReadableObject xo);
 	
 	/**
 	 * @param xo the given object by the fieldId configured for this index
 	 */
-	void index(XObject xo);
+	void index(XReadableObject xo);
 	
 	/**
 	 * @param model used to load objects from internally stored XIDs
@@ -38,6 +39,6 @@ public interface IObjectIndex {
 	 * @return all previously indexed objects (in the given model) that have
 	 *         'value' as the value of the fieldId configured for this index
 	 */
-	Set<XObject> lookup(XModel model, XValue value);
+	Set<XWritableObject> lookup(XWritableModel model, XValue value);
 	
 }

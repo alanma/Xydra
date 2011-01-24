@@ -4,10 +4,13 @@ import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.base.XID;
+import org.xydra.base.rmof.XReadableField;
+import org.xydra.base.rmof.XReadableObject;
+import org.xydra.base.rmof.XWritableField;
+import org.xydra.base.rmof.XWritableModel;
+import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XValue;
 import org.xydra.core.index.IUniqueObjectIndex;
-import org.xydra.core.model.XField;
-import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 
 
@@ -23,7 +26,7 @@ import org.xydra.core.model.XObject;
 @RunsInJava
 public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObjectIndex {
 	
-	public UniqueObjectIndex(XID fieldId, XObject indexObject) {
+	public UniqueObjectIndex(XID fieldId, XWritableObject indexObject) {
 		super(fieldId, indexObject);
 	}
 	
@@ -35,15 +38,15 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 	
 	public boolean contains(XValue indexKey) {
 		XID key = valueToXID(indexKey);
-		XField indexField = this.indexObject.getField(key);
+		XWritableField indexField = this.indexObject.getField(key);
 		if(indexField == null) {
 			return false;
 		}
 		return true;
 	}
 	
-	public XID deindex(XObject xo) {
-		XField field = xo.getField(this.fieldId);
+	public XID deindex(XReadableObject xo) {
+		XReadableField field = xo.getField(this.fieldId);
 		if(field == null) {
 			return null;
 		}
@@ -53,7 +56,7 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 	
 	public XID deindex(XValue key) {
 		XID xid = valueToXID(key);
-		XField indexField = this.indexObject.getField(xid);
+		XWritableField indexField = this.indexObject.getField(xid);
 		if(indexField == null) {
 			// nothing to do to deindex
 			return null;
@@ -66,11 +69,11 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 		return previous;
 	}
 	
-	public XID index(XObject xo) {
+	public XID index(XReadableObject xo) {
 		if(xo == null) {
 			throw new IllegalArgumentException("Object may not be null");
 		}
-		XField field = xo.getField(this.fieldId);
+		XReadableField field = xo.getField(this.fieldId);
 		XValue keyValue = field.getValue();
 		return index(keyValue, xo.getID());
 	}
@@ -83,7 +86,7 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 			throw new IllegalArgumentException("value may not be null");
 		}
 		XID xid = valueToXID(key);
-		XField indexField = this.indexObject.createField(xid);
+		XWritableField indexField = this.indexObject.createField(xid);
 		XID indexValue = (XID)indexField.getValue();
 		XID previous;
 		if(indexValue == null) {
@@ -95,15 +98,15 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 		return previous;
 	}
 	
-	public XObject lookup(XModel model, XValue indexKey) {
+	public XWritableObject lookup(XWritableModel model, XValue indexKey) {
 		XID id = lookupID(indexKey);
-		XObject object = model.getObject(id);
+		XWritableObject object = model.getObject(id);
 		return object;
 	}
 	
 	public XID lookupID(XValue indexKey) {
 		XID key = valueToXID(indexKey);
-		XField indexField = this.indexObject.getField(key);
+		XWritableField indexField = this.indexObject.getField(key);
 		if(indexField == null) {
 			return null;
 		}

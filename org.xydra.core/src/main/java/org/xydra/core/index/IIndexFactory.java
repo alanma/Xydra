@@ -4,7 +4,7 @@ import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.base.XID;
-import org.xydra.core.model.XObject;
+import org.xydra.base.rmof.XWritableObject;
 
 
 @RunsInAppEngine
@@ -19,7 +19,7 @@ public interface IIndexFactory {
 	 * @return the given indexObject wrapped as an {@link IObjectIndex}. Index
 	 *         entries are stored as XFields.
 	 */
-	IObjectIndex createObjectIndex(XID fieldId, XObject indexObject);
+	IObjectIndex createObjectIndex(XID fieldId, XWritableObject indexObject);
 	
 	/**
 	 * @param fieldId the fieldId to index XObjects by.
@@ -28,5 +28,5 @@ public interface IIndexFactory {
 	 * @return the given indexObject wrapped as an {@link IObjectIndex}. Index
 	 *         entries are stored as XFields.
 	 */
-	IUniqueObjectIndex createUniqueObjectIndex(XID fieldId, XObject indexObject);
+	IUniqueObjectIndex createUniqueObjectIndex(XID fieldId, XWritableObject indexObject);
 }

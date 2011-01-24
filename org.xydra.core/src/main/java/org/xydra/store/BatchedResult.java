@@ -12,12 +12,12 @@ import org.xydra.index.query.Pair;
  * 
  * @author voelkel
  * 
- * @param <K>
+ * @param <K> type of result
  */
 public class BatchedResult<K> extends Pair<K,Throwable> {
 	
 	/**
-	 * @param result
+	 * @param result of {@link BatchedResult}
 	 */
 	public BatchedResult(K result) {
 		super(result, null);

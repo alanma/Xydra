@@ -9,11 +9,14 @@ import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RunsInJava;
 import org.xydra.base.X;
 import org.xydra.base.XID;
+import org.xydra.base.rmof.XReadableField;
+import org.xydra.base.rmof.XReadableObject;
+import org.xydra.base.rmof.XWritableField;
+import org.xydra.base.rmof.XWritableModel;
+import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XIDSetValue;
 import org.xydra.base.value.XValue;
 import org.xydra.core.index.IObjectIndex;
-import org.xydra.core.model.XField;
-import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 
 
@@ -29,19 +32,19 @@ import org.xydra.core.model.XObject;
 @RunsInJava
 public class ObjectIndex extends AbstractObjectIndex implements IObjectIndex {
 	
-	public ObjectIndex(XID fieldId, XObject indexObject) {
+	public ObjectIndex(XID fieldId, XWritableObject indexObject) {
 		super(fieldId, indexObject);
 	}
 	
-	public void deindex(XObject xo) {
-		XField field = xo.getField(this.fieldId);
+	public void deindex(XReadableObject xo) {
+		XReadableField field = xo.getField(this.fieldId);
 		XValue keyValue = field.getValue();
 		deindex(keyValue, xo.getID());
 	}
 	
 	public void deindex(XValue key, XID value) {
 		XID xid = valueToXID(key);
-		XField indexField = this.indexObject.createField(xid);
+		XWritableField indexField = this.indexObject.createField(xid);
 		XValue indexValue = indexField.getValue();
 		XIDSetValue indexedIds;
 		assert indexValue != null;
@@ -56,15 +59,15 @@ public class ObjectIndex extends AbstractObjectIndex implements IObjectIndex {
 		}
 	}
 	
-	public void index(XObject xo) {
-		XField field = xo.getField(this.fieldId);
+	public void index(XReadableObject xo) {
+		XReadableField field = xo.getField(this.fieldId);
 		XValue keyValue = field.getValue();
 		index(keyValue, xo.getID());
 	}
 	
 	public void index(XValue key, XID value) {
 		XID xid = valueToXID(key);
-		XField indexField = this.indexObject.createField(xid);
+		XWritableField indexField = this.indexObject.createField(xid);
 		XValue indexValue = indexField.getValue();
 		XIDSetValue indexedIds;
 		if(indexValue == null) {
@@ -83,11 +86,11 @@ public class ObjectIndex extends AbstractObjectIndex implements IObjectIndex {
 	 * org.xydra.core.ext.index.IObjectIndex#lookup(org.xydra.core.model.XModel,
 	 * org.xydra.core.value.XValue)
 	 */
-	public Set<XObject> lookup(XModel model, XValue indexKey) {
+	public Set<XWritableObject> lookup(XWritableModel model, XValue indexKey) {
 		Set<XID> ids = lookupIDs(indexKey);
-		Set<XObject> objects = new HashSet<XObject>();
+		Set<XWritableObject> objects = new HashSet<XWritableObject>();
 		for(XID id : ids) {
-			XObject object = model.getObject(id);
+			XWritableObject object = model.getObject(id);
 			objects.add(object);
 		}
 		return objects;
@@ -95,7 +98,7 @@ public class ObjectIndex extends AbstractObjectIndex implements IObjectIndex {
 	
 	public Set<XID> lookupIDs(XValue indexKey) {
 		XID key = valueToXID(indexKey);
-		XField indexField = this.indexObject.getField(key);
+		XWritableField indexField = this.indexObject.getField(key);
 		if(indexField == null) {
 			// nothing indexed
 			return Collections.emptySet();
