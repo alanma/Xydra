@@ -15,7 +15,7 @@ import org.xydra.base.value.XSetValue;
  * 
  * @author dscharrer
  * 
- * @param <E>
+ * @param <E> collection base type, e.g. XInteger
  */
 public abstract class MemorySetValue<E> implements XSetValue<E> {
 	

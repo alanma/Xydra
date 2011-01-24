@@ -12,7 +12,7 @@ import org.xydra.index.XI;
  * 
  * @author dscharrer
  * 
- * @param <E>
+ * @param <E> collection base type, e.g. XInteger
  */
 public abstract class MemoryListValue<E> implements XListValue<E> {
 	

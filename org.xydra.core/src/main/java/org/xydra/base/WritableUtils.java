@@ -109,11 +109,11 @@ public class WritableUtils {
 	}
 	
 	/**
-	 * @param repository
-	 * @param modelId
-	 * @param objectId
-	 * @param fieldId
-	 * @param value
+	 * @param repository where to set the value
+	 * @param modelId not null
+	 * @param objectId not null
+	 * @param fieldId not null
+	 * @param value can be null
 	 * @return true if the operation changed something
 	 */
 	public static boolean setValue(XWritableRepository repository, XID modelId, XID objectId,

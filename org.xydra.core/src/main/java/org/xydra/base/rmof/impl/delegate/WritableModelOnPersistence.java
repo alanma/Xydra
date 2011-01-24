@@ -35,11 +35,15 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	}
 	
 	public XWritableObject createObject(XID objectId) {
+		XWritableObject object = this.getObject(objectId);
+		if(object != null) {
+			return object;
+		}
 		// create in persistence
 		XCommand command = X.getCommandFactory().createAddObjectCommand(
 		        this.persistence.getRepositoryId(), this.modelId, objectId, false);
 		long commandResult = this.persistence.executeCommand(this.executingActorId, command);
-		assert commandResult >= 0;
+		assert commandResult >= 0 : "Command " + command + " returned " + commandResult;
 		return getObject(objectId);
 	}
 	

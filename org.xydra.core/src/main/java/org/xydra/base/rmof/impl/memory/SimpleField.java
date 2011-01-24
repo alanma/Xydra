@@ -38,8 +38,9 @@ public class SimpleField implements Serializable, XRevWritableField {
 	}
 	
 	/**
-	 * @param address
-	 * @param revisionNumber
+	 * @param address Caller is responsible to use an address that addresses a
+	 *            field.
+	 * @param revisionNumber will be initially set in this {@link SimpleField}
 	 * @param value can be null
 	 */
 	public SimpleField(XAddress address, long revisionNumber, XValue value) {

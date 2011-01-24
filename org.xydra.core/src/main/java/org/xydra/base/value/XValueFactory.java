@@ -10,7 +10,7 @@ import org.xydra.base.XID;
  * A class for creating instances of the different [@link XValue} types.
  * 
  * Convenience functions for creating {@link XValue XValues} can be found in
- * {@link org.xydra.core.value.XV}.
+ * {@link XV}.
  * 
  * @author Kaidel
  * 
