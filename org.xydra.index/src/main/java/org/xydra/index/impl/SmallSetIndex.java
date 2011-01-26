@@ -10,14 +10,13 @@ import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
 
 
-
 /**
  * Based on a simple linked list - much more memory efficient than based on a
  * HashSet - and much slower, too.
  * 
  * @author voelkel
  * 
- * @param <E>
+ * @param <E> entity type
  */
 public class SmallSetIndex<E> extends LinkedList<E> implements IEntrySet<E> {
 	

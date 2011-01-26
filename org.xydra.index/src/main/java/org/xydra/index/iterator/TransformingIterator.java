@@ -9,16 +9,16 @@ import java.util.Iterator;
  * 
  * @author voelkel
  * 
- * @param <I>
- * @param <O>
+ * @param <I> input type
+ * @param <O> output type
  */
 public class TransformingIterator<I, O> extends AbstractTransformingIterator<I,O> {
 	
 	/**
      * 
      */
-    private static final long serialVersionUID = 5011114245818703216L;
-
+	private static final long serialVersionUID = 5011114245818703216L;
+	
 	public interface Transformer<I, O> {
 		
 		O transform(I in);

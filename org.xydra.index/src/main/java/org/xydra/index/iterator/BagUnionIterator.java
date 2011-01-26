@@ -10,7 +10,7 @@ import java.util.Iterator;
  * 
  * @author voelkel
  * 
- * @param <E>
+ * @param <E> entity type
  */
 public class BagUnionIterator<E> extends AbstractCascadedIterator<Iterator<? extends E>,E>
         implements ClosableIterator<E> {

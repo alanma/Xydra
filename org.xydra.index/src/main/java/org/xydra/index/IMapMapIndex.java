@@ -6,14 +6,13 @@ import org.xydra.index.query.Constraint;
 import org.xydra.index.query.KeyKeyEntryTuple;
 
 
-
 /**
  * A map with double keys.
  * 
  * Exactly one entry can be indexed for a certain key-combination.
  * 
- * @param <K>
- * @param <E>
+ * @param <K> key type
+ * @param <E> entity type
  * 
  * @author dscharrer
  */

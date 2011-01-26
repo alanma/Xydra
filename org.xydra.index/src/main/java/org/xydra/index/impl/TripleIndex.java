@@ -117,9 +117,9 @@ public class TripleIndex<K, L, M> implements ITripleIndex<K,L,M> {
 	}
 	
 	/**
-	 * @param c1
-	 * @param c2
-	 * @param c3
+	 * @param c1 constraint for component 1 of triple (subject)
+	 * @param c2 constraint for component 2 of triple (property)
+	 * @param c3 constraint for component 3 of triple (object)
 	 * @return an {@link Iterator} over all {@link KeyKeyEntryTuple} that match
 	 *         the given constraints
 	 */

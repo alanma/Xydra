@@ -8,7 +8,7 @@ import java.util.Iterator;
  * 
  * @author voelkel
  * 
- * @param <E>
+ * @param <E> entity type
  */
 public class SingleValueIterator<E> implements Iterator<E> {
 	

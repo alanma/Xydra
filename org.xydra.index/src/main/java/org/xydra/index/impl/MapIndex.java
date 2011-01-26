@@ -14,14 +14,13 @@ import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.KeyEntryTuple;
 
 
-
 /**
  * An implementation of {@link IMapIndex} using a HashMap.
  * 
  * @author dscharrer
  * 
- * @param <K>
- * @param <E>
+ * @param <K> key type
+ * @param <E> entity type
  */
 public class MapIndex<K, E> implements IMapIndex<K,E> {
 	

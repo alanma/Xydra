@@ -8,15 +8,12 @@ package org.xydra.index.iterator;
  *         Ideally this would be a singleton , but that seems impossible with
  *         Generics.
  * 
- * @param <E>
+ * @param <E> entity type
  */
 public class NoneIterator<E> implements ClosableIterator<E> {
 	
-	/**
-     * 
-     */
-    private static final long serialVersionUID = 8727531049551996167L;
-
+	private static final long serialVersionUID = 8727531049551996167L;
+	
 	public void close() {
 		// NoneIterator needs not to be closed
 	}

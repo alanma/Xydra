@@ -5,13 +5,12 @@ import java.util.Iterator;
 import org.xydra.index.query.Constraint;
 
 
-
 /**
  * @author voelkel
  * 
  *         Multiple entries can be indexed for a certain key-combination.
  * 
- * @param <E>
+ * @param <E> entity type
  */
 public interface IEntrySet<E> extends IIndex, Iterable<E> {
 	

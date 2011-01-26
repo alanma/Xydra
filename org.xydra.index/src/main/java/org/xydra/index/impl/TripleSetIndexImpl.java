@@ -9,7 +9,6 @@ import org.xydra.index.IMapMapSetIndex;
 import org.xydra.index.query.Constraint;
 
 
-
 /**
  * Indexes sets of entries by three keys.
  * 
@@ -20,7 +19,7 @@ import org.xydra.index.query.Constraint;
  * 
  * @param <K> first part of triple
  * @param <L> second part of triple
- * @param <M> thrid part of triples
+ * @param <M> third part of triples
  * @param <E> type of entries in the indexed set
  */
 public class TripleSetIndexImpl<K, L, M, E> implements TripleSetIndex<K,L,M,E> {
@@ -76,9 +75,9 @@ public class TripleSetIndexImpl<K, L, M, E> implements TripleSetIndex<K,L,M,E> {
 	}
 	
 	/**
-	 * @param c1
-	 * @param c2
-	 * @param c3
+	 * @param c1 constraint for component 1 of triple (subject)
+	 * @param c2 constraint for component 2 of triple (property)
+	 * @param c3 constraint for component 3 of triple (object)
 	 * @return all matching entities for (c1,c2,c3)
 	 */
 	public Iterator<E> lookup(Constraint<K> c1, Constraint<L> c2, Constraint<M> c3) {

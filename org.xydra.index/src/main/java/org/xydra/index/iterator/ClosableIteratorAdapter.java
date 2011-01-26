@@ -9,14 +9,12 @@ import java.util.Iterator;
  * 
  * @author voelkel
  * 
- * @param <T>
+ * @param <T> entity type
  */
 public class ClosableIteratorAdapter<T> implements ClosableIterator<T> {
 	
-	/**
-     * 
-     */
-    private static final long serialVersionUID = -5135133229964853452L;
+	private static final long serialVersionUID = -5135133229964853452L;
+	
 	private Iterator<? extends T> iterator;
 	
 	public ClosableIteratorAdapter(Iterator<? extends T> it) {

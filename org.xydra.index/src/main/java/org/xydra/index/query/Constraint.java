@@ -5,7 +5,7 @@ package org.xydra.index.query;
  * 
  * @author voelkel
  * 
- * @param <E>
+ * @param <E> entity type
  */
 public interface Constraint<E> {
 	

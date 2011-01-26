@@ -9,7 +9,7 @@ import org.xydra.index.IEntrySet;
  * 
  * @author voelkel
  * 
- * @param <E>
+ * @param <E> entity type
  */
 public class FastEntrySetFactory<E> implements Factory<IEntrySet<E>> {
 	

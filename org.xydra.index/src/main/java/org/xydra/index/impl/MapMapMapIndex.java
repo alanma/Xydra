@@ -16,7 +16,6 @@ import org.xydra.index.query.KeyKeyKeyEntryTuple;
 import org.xydra.index.query.Wildcard;
 
 
-
 /**
  * An implementation of {@link IMapMapMapIndex} using a IMapIndex of an
  * IMapMapIndex. The IMapIndex is automatically switched between a SmallMapIndex
@@ -27,8 +26,10 @@ import org.xydra.index.query.Wildcard;
  * 
  * @author dscharrer
  * 
- * @param <K>
- * @param <E>
+ * @param <K> key1 type
+ * @param <L> key2 type
+ * @param <M> key3 type
+ * @param <E> entity type
  */
 public class MapMapMapIndex<K, L, M, E> implements IMapMapMapIndex<K,L,M,E> {
 	
@@ -212,8 +213,8 @@ public class MapMapMapIndex<K, L, M, E> implements IMapMapMapIndex<K,L,M,E> {
 			KeyKeyEntryTuple<L,M,E> in = this.base.next();
 			if(in == null)
 				return null;
-			return new KeyKeyKeyEntryTuple<K,L,M,E>(this.key1, in.getKey1(), in.getKey2(), in
-			        .getEntry());
+			return new KeyKeyKeyEntryTuple<K,L,M,E>(this.key1, in.getKey1(), in.getKey2(),
+			        in.getEntry());
 		}
 		
 	}

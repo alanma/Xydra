@@ -5,12 +5,11 @@ import java.util.Iterator;
 import org.xydra.index.query.Constraint;
 
 
-
 /**
  * An {@link ITripleIndex} with a uniform key structure -- all keys have the
  * same type.
  * 
- * @param <K>
+ * @param <K> key type
  */
 public interface IUniformTripleIndex<K> extends ITripleIndex<K,K,K> {
 	

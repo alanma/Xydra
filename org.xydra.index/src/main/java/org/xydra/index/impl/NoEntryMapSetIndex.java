@@ -13,7 +13,7 @@ import org.xydra.index.query.KeyEntryTuple;
  * 
  * @author voelkel
  * 
- * @param <E>
+ * @param <E> entity type
  */
 public class NoEntryMapSetIndex<K, E> implements IMapSetIndex<K,E> {
 	

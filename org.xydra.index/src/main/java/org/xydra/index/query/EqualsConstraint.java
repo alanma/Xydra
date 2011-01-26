@@ -3,7 +3,7 @@ package org.xydra.index.query;
 /**
  * A Constraint that matches objects that are equal to a given object.
  * 
- * @param <E>
+ * @param <E> entity type
  */
 public class EqualsConstraint<E> implements Constraint<E> {
 	

@@ -21,7 +21,7 @@ import org.xydra.log.LoggerFactory;
  * 
  * @author voelkel
  * 
- * @param <E>
+ * @param <E> entity type
  */
 public class LowercaseStringKeyMapIndex<E> implements IMapIndex<String,E> {
 	

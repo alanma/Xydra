@@ -10,15 +10,12 @@ import java.util.Iterator;
  * 
  * @author voelkel
  * 
- * @param <E>
+ * @param <E> entity type
  */
 public class LimitIterator<E> implements ClosableIterator<E> {
 	
-	/**
-     * 
-     */
-    private static final long serialVersionUID = -9068424448053147689L;
-
+	private static final long serialVersionUID = -9068424448053147689L;
+	
 	private Iterator<E> base;
 	
 	private long count;

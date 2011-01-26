@@ -20,7 +20,6 @@ import org.xydra.index.query.KeyKeyEntryTuple;
 import org.xydra.index.query.Wildcard;
 
 
-
 public class MapMapSetIndex<K, L, E> implements IMapMapSetIndex<K,L,E> {
 	
 	private static final long serialVersionUID = -1872398601112534222L;
@@ -38,10 +37,6 @@ public class MapMapSetIndex<K, L, E> implements IMapMapSetIndex<K,L,E> {
 		private K key1;
 		private Iterator<KeyEntryTuple<L,E>> tupleIterator;
 		
-		/**
-		 * @param key1
-		 * @param tupleIterator
-		 */
 		public AdaptMapEntryToTupleIterator(K key1, Iterator<KeyEntryTuple<L,E>> tupleIterator) {
 			this.key1 = key1;
 			this.tupleIterator = tupleIterator;

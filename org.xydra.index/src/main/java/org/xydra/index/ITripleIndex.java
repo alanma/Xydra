@@ -7,13 +7,12 @@ import org.xydra.index.query.Constraint;
 import org.xydra.index.query.KeyKeyEntryTuple;
 
 
-
 /**
  * An index for triples of keys that supports queries on all three keys. Indexes
  * three keys (to boolean, either a key combination is there or not).
  * 
  * 
- * @param <K>
+ * @param <K> key type
  */
 public interface ITripleIndex<K, L, M> extends IIndex {
 	

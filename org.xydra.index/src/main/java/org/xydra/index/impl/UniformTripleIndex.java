@@ -13,9 +13,9 @@ public class UniformTripleIndex<K> extends TripleIndex<K,K,K> implements IUnifor
 	private static final long serialVersionUID = 7121877986612175167L;
 	
 	/**
-	 * @param c1
-	 * @param c2
-	 * @param c3
+	 * @param c1 constraint for component 1 of triple (subject)
+	 * @param c2 constraint for component 2 of triple (property)
+	 * @param c3 constraint for component 3 of triple (object)
 	 * @param projectedConstraint (1,2, or 3)
 	 * @return an {@link Iterator} that contains all triples matching the given
 	 *         constraints, projected to a single component (first, second, or
