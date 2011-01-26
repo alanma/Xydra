@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.annotations.RunsInAppEngine;
-import org.xydra.annotations.RunsInJava;
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XReadableField;
@@ -41,8 +41,8 @@ import org.xydra.server.rest.log.LogTestResource;
  * @author voelkel
  * 
  */
-@RunsInAppEngine
-@RunsInJava
+@RunsInAppEngine(true)
+@RequiresAppEngine(false)
 public class XydraRestServer {
 	
 	private static final Logger log = LoggerFactory.getLogger(XydraRestServer.class);

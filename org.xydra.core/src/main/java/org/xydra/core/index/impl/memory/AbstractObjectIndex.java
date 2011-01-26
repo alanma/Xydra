@@ -2,7 +2,7 @@ package org.xydra.core.index.impl.memory;
 
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RunsInJava;
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.X;
 import org.xydra.base.XID;
 import org.xydra.base.rmof.XWritableObject;
@@ -16,9 +16,9 @@ import org.xydra.base.value.XValue;
 import org.xydra.store.NamingUtils;
 
 
-@RunsInAppEngine
-@RunsInGWT
-@RunsInJava
+@RunsInAppEngine(true)
+@RunsInGWT(true)
+@RequiresAppEngine(false)
 public abstract class AbstractObjectIndex {
 	
 	private static final String CLASSNAME = "org.xydra.core.index.impl.memory.AbstractObjectIndex";

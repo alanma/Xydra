@@ -4,7 +4,7 @@ import java.util.Set;
 
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RunsInJava;
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
@@ -18,9 +18,9 @@ import org.xydra.base.value.XValue;
  * 
  * @author voelkel
  */
-@RunsInAppEngine
-@RunsInGWT
-@RunsInJava
+@RunsInAppEngine(true)
+@RunsInGWT(true)
+@RequiresAppEngine(false)
 public interface IObjectIndex {
 	
 	/**

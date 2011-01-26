@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RunsInJava;
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.change.ChangeType;
@@ -34,9 +34,9 @@ import org.xydra.index.XI;
  * 
  * @author dscharrer
  */
-@RunsInGWT
-@RunsInAppEngine
-@RunsInJava
+@RunsInGWT(true)
+@RunsInAppEngine(true)
+@RequiresAppEngine(false)
 public class XmlEvent {
 	
 	private static final String ACTOR_ATTRIBUTE = "actor";

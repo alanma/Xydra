@@ -1,11 +1,11 @@
 package org.xydra.server.impl;
 
 import org.xydra.annotations.RunsInAppEngine;
-import org.xydra.annotations.RunsInJava;
+import org.xydra.annotations.RequiresAppEngine;
 
 
-@RunsInAppEngine
-@RunsInJava
+@RunsInAppEngine(true)
+@RequiresAppEngine(false)
 public interface IInfrastructureProvider {
 	
 	IMemCache createMemCache();

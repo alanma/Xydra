@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RunsInJava;
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.change.ChangeType;
@@ -31,9 +31,9 @@ import org.xydra.base.value.XValue;
  * 
  * @author dscharrer
  */
-@RunsInGWT
-@RunsInAppEngine
-@RunsInJava
+@RunsInGWT(true)
+@RunsInAppEngine(true)
+@RequiresAppEngine(false)
 public class XmlCommand {
 	
 	private static final String FORCED_ATTRIBUTE = "forced";

@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RunsInJava;
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.value.XIDListValue;
@@ -66,9 +66,9 @@ import org.xydra.core.model.impl.memory.MemoryModel;
  * 
  * @author voelkel
  */
-@RunsInJava
-@RunsInAppEngine
-@RunsInGWT
+@RequiresAppEngine(false)
+@RunsInAppEngine(true)
+@RunsInGWT(true)
 public class SimpleSyntaxUtils {
 	
 	/**

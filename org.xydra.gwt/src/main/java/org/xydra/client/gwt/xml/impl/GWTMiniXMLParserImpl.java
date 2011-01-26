@@ -16,7 +16,7 @@ import com.google.gwt.xml.client.XMLParser;
  * @author dscharrer
  * 
  */
-@RunsInGWT
+@RunsInGWT(true)
 public class GWTMiniXMLParserImpl implements MiniXMLParser {
 	
 	public MiniElement parseXml(String xml) throws IllegalArgumentException {

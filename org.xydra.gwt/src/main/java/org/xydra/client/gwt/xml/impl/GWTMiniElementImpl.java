@@ -21,7 +21,7 @@ import com.google.gwt.xml.client.NodeList;
  * @author dscharrer
  * 
  */
-@RunsInGWT
+@RunsInGWT(true)
 public class GWTMiniElementImpl implements MiniElement {
 	
 	Element element;

@@ -9,7 +9,7 @@ import java.util.Set;
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RunsInJava;
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.WritableUtils;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -53,9 +53,9 @@ import org.xydra.store.access.XAuthorisationEvent;
  * 
  * @author voelkel
  */
-@RunsInAppEngine
-@RunsInGWT
-@RunsInJava
+@RunsInAppEngine(true)
+@RunsInGWT(true)
+@RequiresAppEngine(false)
 public class PartialAuthorisationDatabaseOnWritableRepository implements XAccessListener {
 	
 	private static final Logger log = LoggerFactory

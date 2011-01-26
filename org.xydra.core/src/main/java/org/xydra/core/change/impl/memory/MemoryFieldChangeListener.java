@@ -1,6 +1,6 @@
 package org.xydra.core.change.impl.memory;
 
-import org.xydra.annotations.RunsInJava;
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.log.Logger;
@@ -13,7 +13,7 @@ import org.xydra.log.LoggerFactory;
  * @author voelkel
  * 
  */
-@RunsInJava
+@RequiresAppEngine(false)
 public class MemoryFieldChangeListener implements XFieldEventListener {
 	
 	private static Logger log = LoggerFactory.getLogger(MemoryFieldChangeListener.class);

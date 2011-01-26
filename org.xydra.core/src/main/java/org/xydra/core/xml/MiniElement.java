@@ -3,7 +3,7 @@ package org.xydra.core.xml;
 import java.util.Iterator;
 
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RunsInJava;
+import org.xydra.annotations.RequiresAppEngine;
 
 
 /**
@@ -12,8 +12,8 @@ import org.xydra.annotations.RunsInJava;
  * @author voelkel
  * 
  */
-@RunsInGWT
-@RunsInJava
+@RunsInGWT(true)
+@RequiresAppEngine(false)
 public interface MiniElement {
 	
 	/**

@@ -2,7 +2,7 @@ package org.xydra.store;
 
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RunsInJava;
+import org.xydra.annotations.RequiresAppEngine;
 
 
 /**
@@ -13,9 +13,9 @@ import org.xydra.annotations.RunsInJava;
  * 
  * @param <T> Type of the object returned on success.
  */
-@RunsInAppEngine
-@RunsInGWT
-@RunsInJava
+@RunsInAppEngine(true)
+@RunsInGWT(true)
+@RequiresAppEngine(false)
 public interface Callback<T> {
 	
 	/**

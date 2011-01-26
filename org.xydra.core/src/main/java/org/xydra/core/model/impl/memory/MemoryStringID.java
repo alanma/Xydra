@@ -1,7 +1,7 @@
 package org.xydra.core.model.impl.memory;
 
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RunsInJava;
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.XID;
 
 
@@ -12,8 +12,8 @@ import org.xydra.base.XID;
  * @author voelkel
  */
 
-@RunsInGWT
-@RunsInJava
+@RunsInGWT(true)
+@RequiresAppEngine(false)
 public class MemoryStringID implements XID {
 	
 	private static final long serialVersionUID = 3397013331330118533L;

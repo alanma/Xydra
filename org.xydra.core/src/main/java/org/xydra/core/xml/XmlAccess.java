@@ -7,7 +7,7 @@ import java.util.Set;
 
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RunsInJava;
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
@@ -24,9 +24,9 @@ import org.xydra.store.access.impl.memory.MemoryAuthorisationManager;
  * 
  * @author dscharrer
  */
-@RunsInGWT
-@RunsInAppEngine
-@RunsInJava
+@RunsInGWT(true)
+@RunsInAppEngine(true)
+@RequiresAppEngine(false)
 public class XmlAccess {
 	
 	private static final String ACCESS_ATTRIBUTE = "access";

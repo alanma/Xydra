@@ -8,7 +8,7 @@ import java.util.Set;
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RunsInJava;
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.WritableUtils;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
@@ -42,9 +42,9 @@ import org.xydra.store.access.XGroupListener;
  * 
  * @author voelkel
  */
-@RunsInAppEngine
-@RunsInGWT
-@RunsInJava
+@RunsInAppEngine(true)
+@RunsInGWT(true)
+@RequiresAppEngine(false)
 public class PartialGroupDatabaseOnWritableModel implements XGroupListener {
 	
 	public static final XID hasMember = XX.toId("hasMember");

@@ -1,7 +1,7 @@
 package org.xydra.core.xml.impl;
 
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RunsInJava;
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.core.xml.XmlOut;
 
 
@@ -11,8 +11,8 @@ import org.xydra.core.xml.XmlOut;
  * @author voelkel
  * 
  */
-@RunsInJava
-@RunsInGWT
+@RequiresAppEngine(false)
+@RunsInGWT(true)
 public class XmlOutStringBuffer extends AbstractXmlOut {
 	
 	private final StringBuffer buf = new StringBuffer();

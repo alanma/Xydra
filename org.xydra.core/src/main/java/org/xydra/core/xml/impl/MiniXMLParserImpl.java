@@ -8,7 +8,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
-import org.xydra.annotations.RunsInJava;
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.MiniXMLParser;
 
@@ -19,7 +19,7 @@ import org.xydra.core.xml.MiniXMLParser;
  * @author dscharrer
  * 
  */
-@RunsInJava
+@RequiresAppEngine(false)
 public class MiniXMLParserImpl implements MiniXMLParser {
 	
 	private static DocumentBuilder parser = null;

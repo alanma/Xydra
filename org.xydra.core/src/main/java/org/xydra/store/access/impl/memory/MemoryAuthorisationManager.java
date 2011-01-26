@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RunsInJava;
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.change.ChangeType;
@@ -37,9 +37,9 @@ import org.xydra.store.access.impl.AbstractAuthorisationManager;
  * 
  * @author dscharrer
  */
-@RunsInAppEngine
-@RunsInGWT
-@RunsInJava
+@RunsInAppEngine(true)
+@RunsInGWT(true)
+@RequiresAppEngine(false)
 public class MemoryAuthorisationManager extends AbstractAuthorisationManager implements
         XAuthorisationManager, XAuthorisationDatabaseWitListeners {
 	

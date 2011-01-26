@@ -3,7 +3,7 @@ package org.xydra.server.impl;
 import java.util.Map;
 
 import org.xydra.annotations.RunsInAppEngine;
-import org.xydra.annotations.RunsInJava;
+import org.xydra.annotations.RequiresAppEngine;
 
 
 /**
@@ -12,8 +12,8 @@ import org.xydra.annotations.RunsInJava;
  * @author voelkel
  * 
  */
-@RunsInAppEngine
-@RunsInJava
+@RunsInAppEngine(true)
+@RequiresAppEngine(false)
 public interface IMemCache {
 	
 	/**

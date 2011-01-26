@@ -23,7 +23,7 @@ import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.xydra.annotations.RunsInAppEngine;
-import org.xydra.annotations.RunsInJava;
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
@@ -55,8 +55,8 @@ import org.xydra.server.rest.XydraRestServer;
  * @author voelkel
  * 
  */
-@RunsInAppEngine
-@RunsInJava
+@RunsInAppEngine(true)
+@RequiresAppEngine(false)
 public class WebadminApp {
 	
 	public static final Logger log = LoggerFactory.getLogger(WebadminApp.class);

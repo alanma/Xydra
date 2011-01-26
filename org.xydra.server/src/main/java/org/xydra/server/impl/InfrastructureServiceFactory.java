@@ -1,7 +1,7 @@
 package org.xydra.server.impl;
 
 import org.xydra.annotations.RunsInAppEngine;
-import org.xydra.annotations.RunsInJava;
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.server.impl.memory.SimpleInfrastructureProvider;
@@ -15,8 +15,8 @@ import org.xydra.server.impl.memory.SimpleInfrastructureProvider;
  * @author voelkel
  * 
  */
-@RunsInAppEngine
-@RunsInJava
+@RunsInAppEngine(true)
+@RequiresAppEngine(false)
 public class InfrastructureServiceFactory {
 	
 	private static final Logger log = LoggerFactory.getLogger(InfrastructureServiceFactory.class);

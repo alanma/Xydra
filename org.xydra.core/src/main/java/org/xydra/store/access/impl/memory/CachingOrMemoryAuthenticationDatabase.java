@@ -7,7 +7,7 @@ import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RunsInJava;
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.XID;
 import org.xydra.store.access.XAuthenticationDatabase;
 
@@ -18,9 +18,9 @@ import org.xydra.store.access.XAuthenticationDatabase;
  * 
  * @author voelkel
  */
-@RunsInAppEngine
-@RunsInGWT
-@RunsInJava
+@RunsInAppEngine(true)
+@RunsInGWT(true)
+@RequiresAppEngine(false)
 public class CachingOrMemoryAuthenticationDatabase implements XAuthenticationDatabase {
 	
 	private static class Actor {

@@ -3,7 +3,7 @@ package org.xydra.core.model.impl.memory;
 import java.util.Random;
 
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RunsInJava;
+import org.xydra.annotations.RequiresAppEngine;
 
 
 /*
@@ -48,8 +48,8 @@ import org.xydra.annotations.RunsInJava;
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-@RunsInJava
-@RunsInGWT
+@RequiresAppEngine(false)
+@RunsInGWT(true)
 public class UUID {
 	
 	private static final char[] CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"

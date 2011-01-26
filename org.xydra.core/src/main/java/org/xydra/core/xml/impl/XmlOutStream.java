@@ -6,7 +6,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 
-import org.xydra.annotations.RunsInJava;
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.core.xml.XmlOut;
 
 
@@ -14,7 +14,7 @@ import org.xydra.core.xml.XmlOut;
  * Maps {@link XmlOut} to a {@link OutputStream}.
  * 
  */
-@RunsInJava
+@RequiresAppEngine(false)
 public class XmlOutStream extends AbstractXmlOut {
 	
 	private final Writer writer;

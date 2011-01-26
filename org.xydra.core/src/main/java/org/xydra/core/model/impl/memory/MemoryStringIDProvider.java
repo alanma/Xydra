@@ -1,7 +1,7 @@
 package org.xydra.core.model.impl.memory;
 
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RunsInJava;
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XIDProvider;
@@ -15,8 +15,8 @@ import org.xydra.core.URIFormatException;
  * @author Kaidel
  */
 
-@RunsInGWT
-@RunsInJava
+@RunsInGWT(true)
+@RequiresAppEngine(false)
 public class MemoryStringIDProvider implements XIDProvider {
 	
 	private static final String nameStartChar = "A-Z_a-z\\xC0-\\xD6\\xD8-\\xF6"

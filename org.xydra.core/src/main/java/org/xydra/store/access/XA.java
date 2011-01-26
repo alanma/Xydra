@@ -2,7 +2,7 @@ package org.xydra.store.access;
 
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RunsInJava;
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 
@@ -12,9 +12,9 @@ import org.xydra.base.XX;
  * 
  * @author dscharrer
  */
-@RunsInAppEngine
-@RunsInGWT
-@RunsInJava
+@RunsInAppEngine(true)
+@RunsInGWT(true)
+@RequiresAppEngine(false)
 public class XA {
 	
 	/**
