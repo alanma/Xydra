@@ -82,6 +82,9 @@ public interface XCommandFactory {
 	 *            {@link XField} that the {@link XValue} is to be added to.
 	 * @param fieldRevision The revision number of the {@link XField} that the
 	 *            {@link XValue} is to be added to.
+	 * 
+	 *            TODO Is this value ignored if isForced = true? What value
+	 *            should I use here if isForced = true? 0?
 	 * @param value The {@link XValue} which is to be added.
 	 * @param isForced true, if this XCommand should be a forced command, false
 	 *            otherwise
@@ -105,6 +108,9 @@ public interface XCommandFactory {
 	 *            {@link XField} which {@link XValue} is to be changed.
 	 * @param fieldRevision The revision number of the {@link XField} which
 	 *            {@link XValue} is to be changed.
+	 * 
+	 *            TODO Is this value ignored if isForced = true? What value
+	 *            should I use here if isForced = true? 0?
 	 * @param value The {@link XValue} to which the current {@link XValue} of
 	 *            the {@link XField} is to be changed to.
 	 * @param isForced true, if this XCommand should be a forced command, false
@@ -127,6 +133,9 @@ public interface XCommandFactory {
 	 *            {@link XField} is to be added to.
 	 * @param fieldRevision The revision number of the {@link XField} that is to
 	 *            be removed.
+	 * 
+	 *            TODO Is this value ignored if isForced = true? What value
+	 *            should I use here if isForced = true? 0?
 	 * @param isForced true, if this XCommand should be a forced command, false
 	 *            otherwise
 	 * @return an {@link XObjectCommand} with the specified settings
@@ -164,6 +173,9 @@ public interface XCommandFactory {
 	 *            removed.
 	 * @param objectRevision The revision number of the {@link XObject} that is
 	 *            to be removed.
+	 * 
+	 *            TODO Is this value ignored if isForced = true? What value
+	 *            should I use here if isForced = true? 0?
 	 * @param isForced true, if this XCommand should be a forced command, false
 	 *            otherwise
 	 * @return an {@link XModelCommand} with the specified settings
@@ -189,6 +201,9 @@ public interface XCommandFactory {
 	 *            {@link XField} that the {@link XValue} is to be removed from.
 	 * @param fieldRevision The revision number of the {@link XField} that the
 	 *            {@link XValue} is to be removed from.
+	 * 
+	 *            TODO Is this value ignored if isForced = true? What value
+	 *            should I use here if isForced = true? 0?
 	 * @param isForced true, if this XCommand should be a forced command, false
 	 *            otherwise
 	 * @return an {@link XFieldCommand} with the specified settings
