@@ -48,7 +48,7 @@ public class RestlessMethod {
 	/**
 	 * @param object instance to be called when web method is used - or class to
 	 *            be instantiated
-	 * @param httpMethod
+	 * @param httpMethod 'GET', 'PUT', 'POST', or' DELETE'
 	 * @param methodName instance method to be called. This method may not have
 	 *            several signatures with the same name.
 	 * 
@@ -60,7 +60,7 @@ public class RestlessMethod {
 	 *            type of text/plain is used an the method return type is
 	 *            expected to be of type String. This facility is designer to
 	 *            return status information at development time.
-	 * @param pathTemplate
+	 * @param pathTemplate see {@link PathTemplate} for syntax
 	 * @param adminOnly if true, this method can only be executed it the request
 	 *            URL starts with '/admin'.
 	 * @param parameter in order of variables in 'method'. See
@@ -84,9 +84,9 @@ public class RestlessMethod {
 	 * 
 	 * TODO distinguish query params from POST params
 	 * 
-	 * @param req
-	 * @param res
-	 * @throws IOException
+	 * @param req never null
+	 * @param res never null
+	 * @throws IOException if result writing fails
 	 */
 	public void run(final Restless restless, final HttpServletRequest req,
 	        final HttpServletResponse res) throws IOException {
@@ -107,8 +107,8 @@ public class RestlessMethod {
 			List<String> variablesFromUrlPath = this.pathTemplate.extractVariables(urlPath);
 			Map<String,String> urlParameter = new HashMap<String,String>();
 			for(int i = 0; i < this.pathTemplate.variableNames.size(); i++) {
-				urlParameter.put(this.pathTemplate.variableNames.get(i), variablesFromUrlPath
-				        .get(i));
+				urlParameter.put(this.pathTemplate.variableNames.get(i),
+				        variablesFromUrlPath.get(i));
 			}
 			
 			// extract Cookie values

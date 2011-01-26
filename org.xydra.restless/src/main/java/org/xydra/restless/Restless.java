@@ -93,7 +93,7 @@ public class Restless extends HttpServlet {
 	 * Turn all cookies that the request contains into a map, cookie name as
 	 * key, cookie value as map value.
 	 * 
-	 * @param req
+	 * @param req HttpServletRequest, never null
 	 * @return never null
 	 */
 	public static Map<String,String> getCookiesAsMap(HttpServletRequest req) {
@@ -122,10 +122,10 @@ public class Restless extends HttpServlet {
 	}
 	
 	/**
-	 * @param queryString
-	 * @return a Map that contains key=value from a query string in a URL (the
-	 *         part after the '?'). Multiple values for the same key are put in
-	 *         order of appearance in the list. Duplicate values are omitted.
+	 * @param queryString a query string in a URL (the part after the '?')
+	 * @return a Map that contains key=value from the query string. Multiple
+	 *         values for the same key are put in order of appearance in the
+	 *         list. Duplicate values are omitted.
 	 * 
 	 *         The members of the {@link SortedSet} may be null if the query
 	 *         string was just 'a=&b=foo'.
@@ -180,8 +180,8 @@ public class Restless extends HttpServlet {
 	}
 	
 	/**
-	 * @param object
-	 * @param methodName
+	 * @param object an instance or class in which to search methodName
+	 * @param methodName e.g. 'getName'
 	 * @return a java.lang.reflect.{@link Method} from a String
 	 */
 	public static Method methodByName(Object object, String methodName) {
@@ -208,7 +208,7 @@ public class Restless extends HttpServlet {
 	}
 	
 	/**
-	 * @param raw
+	 * @param raw unencoded string
 	 * @return the input string with XML escaping
 	 */
 	public static final String xmlEncode(String raw) {
@@ -248,9 +248,9 @@ public class Restless extends HttpServlet {
 	/**
 	 * Shortcut for adding addMethod( method = 'GET', admin-only = 'false' )
 	 * 
-	 * @param pathTemplate
-	 * @param instanceOrClass
-	 * @param javaMethodName
+	 * @param pathTemplate see {@link PathTemplate} for syntax
+	 * @param instanceOrClass a Java isntance or class
+	 * @param javaMethodName a method name like 'getName'
 	 */
 	public void addGet(String pathTemplate, Object instanceOrClass, String javaMethodName,
 	        RestlessParameter ... parameter) {
@@ -373,7 +373,7 @@ public class Restless extends HttpServlet {
 	}
 	
 	/**
-	 * @param req
+	 * @param req HttpServletRequest, never null
 	 * @return "/foo/" for a request uri of "/foo/bar" with a pathInfo of "bar"
 	 */
 	public static String getServletPath(HttpServletRequest req) {

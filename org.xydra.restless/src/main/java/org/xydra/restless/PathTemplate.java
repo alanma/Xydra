@@ -11,6 +11,24 @@ import java.util.regex.Pattern;
  * Internal class to represent a URL path that gets mapped to a set of variables
  * via regular expressions. Syntax inspired from JRS-311.
  * 
+ * Examples for valid patterns
+ * <ul>
+ * <li>/my/path/is/this</li>
+ * <li>/users/{userid}</li>
+ * <li>/users/{userid}/view</li>
+ * <li>/users/{userid}/view/{command}</li>
+ * </ul>
+ * 
+ * Examples for invalid patterns
+ * <dl>
+ * <dt>my/path/is/this</dt>
+ * <dd>Path must start with '/'</dd>
+ * <dt>/users/{userid}here</dt>
+ * <dd>Variable part must be between slashes '/'</dd>
+ * <dt>/users/{user/here</dt>
+ * <dd>Closing curly brace missing</dd>
+ * </dl>
+ * 
  * @author voelkel
  * 
  */
@@ -36,24 +54,6 @@ public class PathTemplate {
 	
 	/**
 	 * Create a new URL pattern with variable parts.
-	 * 
-	 * Examples for valid patterns
-	 * <ul>
-	 * <li>/my/path/is/this</li>
-	 * <li>/users/{userid}</li>
-	 * <li>/users/{userid}/view</li>
-	 * <li>/users/{userid}/view/{command}</li>
-	 * </ul>
-	 * 
-	 * Examples for invalid patterns
-	 * <dl>
-	 * <dt>my/path/is/this</dt>
-	 * <dd>Path must start with '/'</dd>
-	 * <dt>/users/{userid}here</dt>
-	 * <dd>Variable part must be between slashes '/'</dd>
-	 * <dt>/users/{user/here</dt>
-	 * <dd>Closing curly brace missing</dd>
-	 * </dl>
 	 * 
 	 * @param pathExpression must start with '/'; may not contain '//'
 	 */
@@ -132,7 +132,7 @@ public class PathTemplate {
 	}
 	
 	/**
-	 * @param path
+	 * @param path starting with slash '/'
 	 * @return true if this PathTemplate matches a given path
 	 */
 	public boolean matches(String path) {
