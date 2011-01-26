@@ -60,12 +60,11 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 	
 	/**
 	 * FIXME should be private and called from constructor?
-	 * 
-	 * @param repositoryId for which to allow everything
 	 * @param administratorGroupId usually
 	 *            {@link XGroupDatabase#ADMINISTRATOR_GROUP_ID}
+	 * @param repositoryId for which to allow everything
 	 */
-	public void grantRepositoryAllAccessToGroup(XID repositoryId, XID administratorGroupId) {
+	public void grantGroupAllAccessToRepository(XID administratorGroupId, XID repositoryId) {
 		// add built-in access rights
 		this.getAuthorisationDatabase().setAccess(administratorGroupId,
 		        XX.toAddress(repositoryId, null, null, null), XA.ACCESS_WRITE, true);

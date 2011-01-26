@@ -174,8 +174,8 @@ public class AccessControlManagerOnPersistence extends DelegatingAccessControlMa
 		MemoryAuthorisationManager memoryAuthorisationManager = new MemoryAuthorisationManager(
 		        memoryGroupDatabase);
 		// TODO this should not be necessary
-		memoryAuthorisationManager.grantRepositoryAllAccessToGroup(persistence.getRepositoryId(),
-		        XGroupDatabase.ADMINISTRATOR_GROUP_ID);
+		memoryAuthorisationManager.grantGroupAllAccessToRepository(XGroupDatabase.ADMINISTRATOR_GROUP_ID,
+		        persistence.getRepositoryId());
 		
 		// wrap persistence into groupModel-like API
 		PartialAuthorisationDatabaseOnWritableRepository partialAuthorisationDb = new PartialAuthorisationDatabaseOnWritableRepository(
