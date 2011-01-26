@@ -49,4 +49,9 @@ public interface XydraStoreAdmin {
 	 */
 	XAccessControlManager getAccessControlManager();
 	
+	/**
+	 * @return the XID of the repository being managed.
+	 */
+	XID getRepositoryId();
+	
 }

@@ -5,6 +5,8 @@ import java.util.Set;
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.base.XID;
+import org.xydra.base.XX;
+import org.xydra.store.NamingUtils;
 
 
 /**
@@ -24,6 +26,13 @@ import org.xydra.base.XID;
  */
 
 public interface XGroupDatabase {
+	
+	/**
+	 * Built-in administrator-group. All of its members are allowed to
+	 * read/write/access every resource.
+	 */
+	public static XID ADMINISTRATOR_GROUP_ID = XX.toId(NamingUtils.PREFIX_INTERNAL
+	        + NamingUtils.NAMESPACE_SEPARATOR + "AdministratorGroup");
 	
 	/**
 	 * Add an actor to a group.

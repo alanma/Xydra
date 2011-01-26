@@ -3,12 +3,15 @@ package org.xydra.store;
 import static org.junit.Assert.assertTrue;
 
 import org.xydra.base.X;
+import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommandFactory;
 import org.xydra.store.access.HashUtils;
+import org.xydra.store.access.XA;
 import org.xydra.store.access.XAccessControlManager;
 import org.xydra.store.access.XAuthenticationDatabase;
+import org.xydra.store.access.XGroupDatabase;
 import org.xydra.store.impl.memory.SecureMemoryStore;
 
 
@@ -50,6 +53,38 @@ public class DelegatingSecureStoreReadMethodsTest extends AbstractStoreReadMetho
 			        HashUtils.getXydraPasswordHash(this.correctPass));
 		}
 		assertTrue(this.acm.isAuthenticated(actorId, this.getCorrectUserPasswordHash()));
+		
+		// TODO IMPROVE give some correct rights without granting EVERYTHING
+		this.acm.getAuthorisationManager().getGroupDatabase()
+		        .addToGroup(actorId, XGroupDatabase.ADMINISTRATOR_GROUP_ID);
+		XID modelId1 = XX.toId("TestModel1");
+		XAddress model1address = XX.toAddress(this.store.getXydraStoreAdmin().getRepositoryId(),
+		        modelId1, null, null);
+		XAddress repoAddress = XX.toAddress(this.store.getXydraStoreAdmin().getRepositoryId(),
+		        null, null, null);
+		assertTrue(
+		        "admin group is allows to write repo",
+		        this.acm.getAuthorisationManager()
+		                .getAuthorisationDatabase()
+		                .getAccessDefinition(XGroupDatabase.ADMINISTRATOR_GROUP_ID, repoAddress,
+		                        XA.ACCESS_WRITE).isAllowed());
+		assertTrue(
+		        "admin group can write repo",
+		        this.acm.getAuthorisationManager().canWrite(XGroupDatabase.ADMINISTRATOR_GROUP_ID,
+		                repoAddress));
+		assertTrue(
+		        "admin group can read repo",
+		        this.acm.getAuthorisationManager().canRead(XGroupDatabase.ADMINISTRATOR_GROUP_ID,
+		                repoAddress));
+		assertTrue(
+		        "admin group can read model1",
+		        this.acm.getAuthorisationManager().canRead(XGroupDatabase.ADMINISTRATOR_GROUP_ID,
+		                model1address));
+		
+		assertTrue(this.acm.getAuthorisationManager().canKnowAboutModel(actorId, repoAddress,
+		        modelId1));
+		assertTrue(this.acm.getAuthorisationManager().canRead(actorId, model1address));
+		assertTrue(this.acm.getAuthorisationManager().canWrite(actorId, model1address));
 		
 		return actorId;
 	}

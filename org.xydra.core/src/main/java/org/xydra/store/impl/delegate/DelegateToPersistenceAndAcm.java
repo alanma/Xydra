@@ -366,4 +366,9 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 		return result;
 	}
 	
+	@Override
+	public XID getRepositoryId() {
+		return this.repoId;
+	}
+	
 }

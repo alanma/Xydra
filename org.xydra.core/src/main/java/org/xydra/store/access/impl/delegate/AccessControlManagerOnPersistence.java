@@ -9,6 +9,7 @@ import org.xydra.base.rmof.impl.delegate.WritableModelOnPersistence;
 import org.xydra.base.rmof.impl.delegate.WritableRepositoryOnPersistence;
 import org.xydra.store.NamingUtils;
 import org.xydra.store.access.XAuthenticationDatabase;
+import org.xydra.store.access.XGroupDatabase;
 import org.xydra.store.access.impl.memory.CachingOrMemoryAuthenticationDatabase;
 import org.xydra.store.access.impl.memory.DelegatingAccessControlManager;
 import org.xydra.store.access.impl.memory.MemoryAuthorisationManager;
@@ -172,6 +173,9 @@ public class AccessControlManagerOnPersistence extends DelegatingAccessControlMa
 		/* ------------ AUTHORISATION -------------- */
 		MemoryAuthorisationManager memoryAuthorisationManager = new MemoryAuthorisationManager(
 		        memoryGroupDatabase);
+		// TODO this should not be necessary
+		memoryAuthorisationManager.grantRepositoryAllAccessToGroup(persistence.getRepositoryId(),
+		        XGroupDatabase.ADMINISTRATOR_GROUP_ID);
 		
 		// wrap persistence into groupModel-like API
 		PartialAuthorisationDatabaseOnWritableRepository partialAuthorisationDb = new PartialAuthorisationDatabaseOnWritableRepository(

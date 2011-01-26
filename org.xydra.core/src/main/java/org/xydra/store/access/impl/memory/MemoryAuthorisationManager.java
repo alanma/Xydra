@@ -4,11 +4,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
 import org.xydra.index.IMapMapMapIndex;
 import org.xydra.index.XI;
@@ -25,6 +26,7 @@ import org.xydra.store.access.XAccessRightValue;
 import org.xydra.store.access.XAuthorisationDatabaseWitListeners;
 import org.xydra.store.access.XAuthorisationEvent;
 import org.xydra.store.access.XAuthorisationManager;
+import org.xydra.store.access.XGroupDatabase;
 import org.xydra.store.access.XGroupDatabaseWithListeners;
 import org.xydra.store.access.impl.AbstractAuthorisationManager;
 
@@ -54,6 +56,25 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 		this.groups = groups;
 		this.rights = new FastTripleMap<XID,XAddress,XID,Boolean>();
 		this.listeners = new HashSet<XAccessListener>();
+	}
+	
+	/**
+	 * FIXME should be private and called from constructor?
+	 * 
+	 * @param repositoryId for which to allow everything
+	 * @param administratorGroupId usually
+	 *            {@link XGroupDatabase#ADMINISTRATOR_GROUP_ID}
+	 */
+	public void grantRepositoryAllAccessToGroup(XID repositoryId, XID administratorGroupId) {
+		// add built-in access rights
+		this.getAuthorisationDatabase().setAccess(administratorGroupId,
+		        XX.toAddress(repositoryId, null, null, null), XA.ACCESS_WRITE, true);
+		this.getAuthorisationDatabase().setAccess(administratorGroupId,
+		        XX.toAddress(repositoryId, null, null, null), XA.ACCESS_READ, true);
+		this.getAuthorisationDatabase().setAccess(administratorGroupId,
+		        XX.toAddress(repositoryId, null, null, null), XA.ACCESS_DENY, true);
+		this.getAuthorisationDatabase().setAccess(administratorGroupId,
+		        XX.toAddress(repositoryId, null, null, null), XA.ACCESS_ALLOW, true);
 	}
 	
 	/**
@@ -220,7 +241,6 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 	}
 	
 	synchronized public XAccessRightValue hasAccess(XID actor, XAddress resource, XID access) {
-		
 		// check if access is defined for this resource
 		XAccessRightValue def = accessForResource(actor, resource, access);
 		if(def.isDefined()) {
