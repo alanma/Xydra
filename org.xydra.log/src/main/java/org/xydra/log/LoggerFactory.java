@@ -18,14 +18,14 @@ public class LoggerFactory {
 	/**
 	 * All log messages are also sent to a registered {@link ILogListener}
 	 * 
-	 * @param logListener
+	 * @param logListener a listener to receive all log messages
 	 */
 	public static void setLogListener(ILogListener logListener) {
 		logListener_ = logListener;
 	}
 	
 	/**
-	 * @param clazz
+	 * @param clazz used as a name for the logger
 	 * @return a logger, using the sub-system configured by
 	 */
 	public static Logger getLogger(Class<?> clazz) {
@@ -85,7 +85,7 @@ public class LoggerFactory {
 	}
 	
 	/**
-	 * @param spi
+	 * @param spi an {@link ILoggerFactorySPI} instance
 	 */
 	public static void setLoggerFactorySPI(ILoggerFactorySPI spi) {
 		loggerFactorySPI = spi;
