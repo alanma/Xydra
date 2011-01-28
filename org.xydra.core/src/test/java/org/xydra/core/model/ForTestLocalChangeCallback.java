@@ -13,7 +13,7 @@ import org.xydra.base.change.XCommand;
  * @author dscharrer
  * 
  */
-class TestLocalChangeCallback implements XLocalChangeCallback {
+class ForTestLocalChangeCallback implements XLocalChangeCallback {
 	
 	private boolean committed = false;
 	private long result;

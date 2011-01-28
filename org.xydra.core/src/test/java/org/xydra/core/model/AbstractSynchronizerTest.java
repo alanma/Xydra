@@ -557,7 +557,7 @@ abstract public class AbstractSynchronizerTest {
 		
 		// also make some local changes
 		// should be reverted on sync because of conflicting remote changes
-		TestLocalChangeCallback tlc1 = new TestLocalChangeCallback();
+		ForTestLocalChangeCallback tlc1 = new ForTestLocalChangeCallback();
 		XTransactionBuilder tb2 = new XTransactionBuilder(this.model.getAddress());
 		tb2.addObject(this.model.getAddress(), XCommand.SAFE, janeId);
 		tb2.addField(janeAddr, XCommand.SAFE, cakesId);
@@ -566,13 +566,13 @@ abstract public class AbstractSynchronizerTest {
 		final XID newfieldId = XX.toId("newField");
 		this.model.getObject(DemoModelUtil.JOHN_ID).createField(newfieldId);
 		// should be reverted on sync
-		TestLocalChangeCallback tlc2 = new TestLocalChangeCallback();
+		ForTestLocalChangeCallback tlc2 = new ForTestLocalChangeCallback();
 		XCommand command3 = MemoryModelCommand.createRemoveCommand(this.model.getAddress(),
 		        this.model.getObject(DemoModelUtil.PETER_ID).getRevisionNumber(),
 		        DemoModelUtil.PETER_ID);
 		assertTrue(this.model.executeCommand(command3, tlc2) >= 0);
 		// should sync to XCommand#NOCHANGE
-		TestLocalChangeCallback tlc3 = new TestLocalChangeCallback();
+		ForTestLocalChangeCallback tlc3 = new ForTestLocalChangeCallback();
 		XCommand command5 = MemoryModelCommand.createAddCommand(this.model.getAddress(), false,
 		        bobId);
 		assertTrue(this.model.executeCommand(command5, tlc3) >= 0);
@@ -655,8 +655,8 @@ abstract public class AbstractSynchronizerTest {
 	@Test
 	public void testSendLocalChanges() {
 		
-		TestLocalChangeCallback c1 = new TestLocalChangeCallback();
-		TestLocalChangeCallback c2 = new TestLocalChangeCallback();
+		ForTestLocalChangeCallback c1 = new ForTestLocalChangeCallback();
+		ForTestLocalChangeCallback c2 = new ForTestLocalChangeCallback();
 		
 		ForTestSynchronizationCallback sc1 = new ForTestSynchronizationCallback();
 		ForTestSynchronizationCallback sc2 = new ForTestSynchronizationCallback();

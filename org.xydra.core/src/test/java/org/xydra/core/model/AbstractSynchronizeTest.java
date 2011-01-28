@@ -235,7 +235,7 @@ abstract public class AbstractSynchronizeTest {
 		localChanges.add(removeJohnSafe); // 6
 		localChanges.add(removeJohnForced); // 7
 		
-		TestLocalChangeCallback[] lcc = new TestLocalChangeCallback[localChanges.size()];
+		ForTestLocalChangeCallback[] lcc = new ForTestLocalChangeCallback[localChanges.size()];
 		
 		// create a model identical to localModel to check events sent on sync
 		XModel checkModel = XCopyUtils.copyModel(this.actorId, this.password, this.localModel);
@@ -246,7 +246,7 @@ abstract public class AbstractSynchronizeTest {
 			long result = 0;
 			result = checkModel.executeCommand(command);
 			assertTrue("command: " + fix(command), result >= 0 || result == XCommand.NOCHANGE);
-			lcc[i] = new TestLocalChangeCallback();
+			lcc[i] = new ForTestLocalChangeCallback();
 			result = this.localModel.executeCommand(command, lcc[i]);
 			assertTrue("command: " + command, result >= 0 || result == XCommand.NOCHANGE);
 			i++;
