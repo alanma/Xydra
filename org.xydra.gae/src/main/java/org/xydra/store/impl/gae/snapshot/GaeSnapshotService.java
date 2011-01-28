@@ -57,13 +57,15 @@ public class GaeSnapshotService {
 		
 		Map<Object,Object> cache = XydraRuntime.getMemcache();
 		
+		String cachname = this.log.getBaseAddress() + "-snapshot";
+		
 		CachedModel entry = null;
 		synchronized(cache) {
 			// TODO how is cache access supposed to be synchronized?
-			entry = (CachedModel)cache.get(this.log.getBaseAddress());
+			entry = (CachedModel)cache.get(cachname);
 			if(entry == null) {
 				entry = new CachedModel();
-				cache.put(this.log.getBaseAddress(), entry);
+				cache.put(cachname, entry);
 			}
 		}
 		

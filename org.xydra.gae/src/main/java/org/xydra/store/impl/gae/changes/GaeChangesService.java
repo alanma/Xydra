@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.xydra.base.XAddress;
@@ -33,6 +34,7 @@ import org.xydra.index.XI;
 import org.xydra.index.query.Pair;
 import org.xydra.server.IXydraServer;
 import org.xydra.store.GetEventsRequest;
+import org.xydra.store.XydraRuntime;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.gae.GaeUtils;
 
@@ -326,11 +328,38 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	 *         requirement.
 	 */
 	private long getCachedLastCommitedRevision() {
-		return -1L; // TODO implement
+		
+		Map<Object,Object> cache = XydraRuntime.getMemcache();
+		
+		String cachname = getCommitedRevCacheName();
+		
+		synchronized(cache) {
+			// TODO how is cache access supposed to be synchronized?
+			Long entry = (Long)cache.get(cachname);
+			if(entry == null) {
+				return -1L;
+			}
+			return entry;
+		}
 	}
 	
 	private void setCachedLastCommitedRevision(long l) {
-		// TODO implement
+		
+		Map<Object,Object> cache = XydraRuntime.getMemcache();
+		
+		String cachname = getCommitedRevCacheName();
+		
+		synchronized(cache) {
+			// TODO how is cache access supposed to be synchronized?
+			Long entry = (Long)cache.get(cachname);
+			if(entry == null || entry < l) {
+				cache.put(cachname, l);
+			}
+		}
+	}
+	
+	private String getCommitedRevCacheName() {
+		return getBaseAddress() + "-commitedRev";
 	}
 	
 	/**
@@ -1093,6 +1122,41 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 		return this.modelAddr;
 	}
 	
+	private long getCachedCurrentRevision() {
+		
+		Map<Object,Object> cache = XydraRuntime.getMemcache();
+		
+		String cachname = getCurrentRevCacheName();
+		
+		synchronized(cache) {
+			// TODO how is cache access supposed to be synchronized?
+			Long entry = (Long)cache.get(cachname);
+			if(entry == null) {
+				return -1L;
+			}
+			return entry;
+		}
+	}
+	
+	private void setCachedCurrentRevision(long l) {
+		
+		Map<Object,Object> cache = XydraRuntime.getMemcache();
+		
+		String cachname = getCurrentRevCacheName();
+		
+		synchronized(cache) {
+			// TODO how is cache access supposed to be synchronized?
+			Long entry = (Long)cache.get(cachname);
+			if(entry == null || entry < l) {
+				cache.put(cachname, l);
+			}
+		}
+	}
+	
+	private String getCurrentRevCacheName() {
+		return getBaseAddress() + "-currentRev";
+	}
+	
 	/**
 	 * Get the model's current revision number.
 	 * 
@@ -1102,7 +1166,7 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	public long getCurrentRevisionNumber() {
 		
 		// IMPROVE cache the current revision
-		long currentRev = -1;
+		long currentRev = getCachedCurrentRevision();
 		
 		long rev = currentRev;
 		
@@ -1129,6 +1193,7 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 		}
 		
 		setCachedLastCommitedRevision(rev);
+		setCachedCurrentRevision(currentRev);
 		
 		return currentRev;
 	}
