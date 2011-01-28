@@ -74,19 +74,22 @@ public class GaeTestfixer {
 			
 			/* second check: can we load this class: 'LocalServiceTestHelper' ? */
 			try {
-				Class.forName("com.google.appengine.tools.development.testing.LocalServiceTestHelper");
+				Class
+				        .forName("com.google.appengine.tools.development.testing.LocalServiceTestHelper");
 			} catch(ClassNotFoundException e) {
 				/* ah, we are in production */
-				log.warn(
-				        "We are in fact in production (or a jar is missing): Auto-disabled test fixer.",
-				        e);
+				log
+				        .warn(
+				                "We are in fact in production (or a jar is missing): Auto-disabled test fixer.",
+				                e);
 				enabled = false;
 				return;
 			} catch(NoClassDefFoundError e) {
 				/* ah, we are in production */
-				log.warn(
-				        "We are in fact in production (or a jar is missing): Auto-disabled test fixer.",
-				        e);
+				log
+				        .warn(
+				                "We are in fact in production (or a jar is missing): Auto-disabled test fixer.",
+				                e);
 				enabled = false;
 				return;
 			}
@@ -97,7 +100,7 @@ public class GaeTestfixer {
 	}
 	
 	/**
-	 * @param datastore
+	 * @param datastore The datastore to check for a marker.
 	 * @return true if the given datastore contains a defined marker
 	 *         {@link Entity}
 	 */
@@ -115,7 +118,7 @@ public class GaeTestfixer {
 	/**
 	 * Add marker Entity to GAE dataStore
 	 * 
-	 * @param datastore
+	 * @param datastore The datastore to set a marker in.
 	 */
 	public static void setMarkerEntity(DatastoreService datastore) {
 		Key key = KeyFactory.createKey("test", "marker");

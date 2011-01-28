@@ -68,9 +68,9 @@ public class OldGaeUtils {
 	}
 	
 	/**
-	 * @param address
-	 * @return a GAE {@link Key} for an entity (repo,object,model,field) with
-	 *         the given address. Never null.
+	 * @param address The xydra entity to get the key for.
+	 * @return a GAE {@link Key} for an entity (repository,object,model,field)
+	 *         with the given address. Never null.
 	 */
 	public static Key keyForEntity(XAddress address) {
 		assert address != null;
@@ -83,7 +83,7 @@ public class OldGaeUtils {
 	}
 	
 	/**
-	 * @param address
+	 * @param address The xydra entity for which to get the change log key.
 	 * @return a GAE {@link Key} for a change log of an entity with the given
 	 *         address. Never null.
 	 */

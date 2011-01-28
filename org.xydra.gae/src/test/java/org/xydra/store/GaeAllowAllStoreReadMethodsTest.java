@@ -1,11 +1,5 @@
 package org.xydra.store;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import org.junit.Test;
 import org.xydra.base.X;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
@@ -31,24 +25,6 @@ public class GaeAllowAllStoreReadMethodsTest extends AbstractAllowAllStoreReadMe
 	@Override
 	protected XCommandFactory getCommandFactory() {
 		return X.getCommandFactory();
-	}
-	
-	/*
-	 * Tests for getRepositoryId
-	 */
-	@Test
-	public void testGetRepositoryId() {
-		XID correctUser = this.getCorrectUser();
-		String correctUserPass = this.getCorrectUserPasswordHash();
-		
-		SynchronousTestCallback<XID> callback = new SynchronousTestCallback<XID>();
-		
-		this.store.getRepositoryId(correctUser, correctUserPass, callback);
-		
-		assertTrue(waitOnCallback(callback));
-		assertNotNull(callback.getEffect());
-		assertEquals(callback.getEffect(), this.repositoryID);
-		assertNull(callback.getException());
 	}
 	
 	@Override

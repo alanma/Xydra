@@ -25,7 +25,7 @@ public class GaeUtils {
 	private static DatastoreService datastore;
 	
 	/**
-	 * @param key
+	 * @param key The key of the entity to load.
 	 * @return the GAE Entity for the given key from the store or null
 	 */
 	public static Entity getEntity(Key key) {
@@ -33,7 +33,8 @@ public class GaeUtils {
 	}
 	
 	/**
-	 * @param key
+	 * @param key The key of the entity to load.
+	 * @param trans The transaction to load the entity in.
 	 * @return the GAE Entity for the given key from the store or null
 	 */
 	public static Entity getEntity(Key key, Transaction trans) {
@@ -56,7 +57,7 @@ public class GaeUtils {
 	/**
 	 * Stores a GAE {@link Entity} in the GAE back-end
 	 * 
-	 * @param entity
+	 * @param entity The entity to write to the datastore.
 	 */
 	public static void putEntity(Entity entity) {
 		putEntity(entity, null);
@@ -65,7 +66,8 @@ public class GaeUtils {
 	/**
 	 * Stores a GAE {@link Entity} in the GAE back-end
 	 * 
-	 * @param entity
+	 * @param entity The entity to write to the datastore.
+	 * @param trans The transaction to write the entity in.
 	 */
 	public static void putEntity(Entity entity, Transaction trans) {
 		makeSureDatestoreServiceIsInitialised();
@@ -85,7 +87,7 @@ public class GaeUtils {
 	/**
 	 * Commit the given GAE transaction.
 	 * 
-	 * @param trans
+	 * @param trans The transaction to commit.
 	 */
 	public static void endTransaction(Transaction trans) throws ConcurrentModificationException {
 		makeSureDatestoreServiceIsInitialised();
@@ -95,7 +97,7 @@ public class GaeUtils {
 	/**
 	 * Deletes the {@link Entity} with the given {@link Key} from GAE
 	 * 
-	 * @param key
+	 * @param key The entity to remove from the datastore.
 	 */
 	public static void deleteEntity(Key key) {
 		deleteEntity(key, null);
@@ -104,7 +106,8 @@ public class GaeUtils {
 	/**
 	 * Deletes the {@link Entity} with the given {@link Key} from GAE
 	 * 
-	 * @param key
+	 * @param key The entity to remove from the datastore.
+	 * @param trans The transaction to remove the entity in.
 	 */
 	public static void deleteEntity(Key key, Transaction trans) {
 		makeSureDatestoreServiceIsInitialised();
@@ -114,8 +117,10 @@ public class GaeUtils {
 	/**
 	 * Prepares the given GAE query.
 	 * 
-	 * @param query
+	 * @param query The query to prepare.
 	 * @return a GAE prepared query
+	 * 
+	 * @see DatastoreService#prepare(Query)
 	 */
 	public static PreparedQuery prepareQuery(Query query) {
 		return prepareQuery(query, null);
@@ -124,8 +129,10 @@ public class GaeUtils {
 	/**
 	 * Prepares the given GAE query.
 	 * 
-	 * @param query
+	 * @param query The query to prepare.
 	 * @return a GAE prepared query
+	 * 
+	 * @see DatastoreService#prepare(Transaction, Query)
 	 */
 	public static PreparedQuery prepareQuery(Query query, Transaction trans) {
 		makeSureDatestoreServiceIsInitialised();

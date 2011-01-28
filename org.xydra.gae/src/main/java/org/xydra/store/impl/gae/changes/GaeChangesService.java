@@ -1058,8 +1058,9 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	}
 	
 	/**
-	 * @param revisionNumber
-	 * @param transindex
+	 * @param revisionNumber The revision number of the change the event is part
+	 *            of.
+	 * @param transindex The index of the event in the change.
 	 * @return the {@link XAtomicEvent} with the given index in the change with
 	 *         the given revisionNumber.
 	 */

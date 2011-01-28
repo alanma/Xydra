@@ -1,6 +1,7 @@
 package org.xydra.store.impl.gae.snapshot;
 
 import java.util.Iterator;
+import java.util.Map;
 
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicEvent;
@@ -12,12 +13,15 @@ import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XRevWritableField;
+import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
+import org.xydra.core.XCopyUtils;
 import org.xydra.core.model.XChangeLog;
+import org.xydra.store.XydraRuntime;
 
 
 /**
@@ -32,10 +36,17 @@ public class GaeSnapshotService {
 	private final XChangeLog log;
 	
 	/**
-	 * @param changeLog
+	 * @param changeLog The change log to load snapshots from.
 	 */
 	public GaeSnapshotService(XChangeLog changeLog) {
 		this.log = changeLog;
+	}
+	
+	private static class CachedModel {
+		
+		long revision = -1;
+		XRevWritableModel modelState = null; // can be null
+		
 	}
 	
 	/**
@@ -44,11 +55,32 @@ public class GaeSnapshotService {
 	 */
 	public XWritableModel getSnapshot() {
 		
-		// IMPROVE save & cache snapshots
+		Map<Object,Object> cache = XydraRuntime.getMemcache();
 		
-		SimpleModel model = null;
+		CachedModel entry = null;
+		synchronized(cache) {
+			// TODO how is cache access supposed to be synchronized?
+			entry = (CachedModel)cache.get(this.log.getBaseAddress());
+			if(entry == null) {
+				entry = new CachedModel();
+				cache.put(this.log.getBaseAddress(), entry);
+			}
+		}
 		
-		Iterator<XEvent> events = this.log.getEventsSince(0);
+		// TODO less locking
+		synchronized(entry) {
+			updateCachedModel(entry);
+			
+			// TODO save snapshot to datastore from time to time
+			
+			return XCopyUtils.createSnapshot(entry.modelState);
+		}
+		
+	}
+	
+	private void updateCachedModel(CachedModel entry) {
+		
+		Iterator<XEvent> events = this.log.getEventsSince(entry.revision + 1);
 		
 		while(events.hasNext()) {
 			XEvent event = events.next();
@@ -56,20 +88,19 @@ public class GaeSnapshotService {
 			if(event instanceof XTransactionEvent) {
 				XTransactionEvent trans = (XTransactionEvent)event;
 				for(int i = 0; i < trans.size(); i++) {
-					model = applyEvent(model, trans.getEvent(i));
+					entry.modelState = applyEvent(entry.modelState, trans.getEvent(i));
 				}
 			} else {
 				assert event instanceof XAtomicEvent;
-				model = applyEvent(model, (XAtomicEvent)event);
+				entry.modelState = applyEvent(entry.modelState, (XAtomicEvent)event);
 			}
 			
+			entry.revision = event.getRevisionNumber();
 		}
-		
-		return model;
 		
 	}
 	
-	private SimpleModel applyEvent(SimpleModel model, XAtomicEvent event) {
+	private XRevWritableModel applyEvent(XRevWritableModel model, XAtomicEvent event) {
 		
 		long rev = event.getRevisionNumber();
 		
