@@ -13,7 +13,7 @@ import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XReadableRepository;
 import org.xydra.base.value.XV;
 import org.xydra.core.DemoModelUtil;
-import org.xydra.core.TestLogger;
+import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.XCompareUtils;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XField;
@@ -42,7 +42,7 @@ public class XmlModelTest {
 	private static final Logger log = getLogger();
 	
 	private static Logger getLogger() {
-		TestLogger.init();
+		LoggerTestHelper.init();
 		return LoggerFactory.getLogger(XmlModelTest.class);
 	}
 	

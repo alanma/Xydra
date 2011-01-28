@@ -3,19 +3,19 @@ package org.xydra.core.model;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.xydra.core.TestLogger;
-import org.xydra.core.model.state.TestStateStore;
+import org.xydra.core.LoggerTestHelper;
+import org.xydra.core.model.state.MockStateStore;
 import org.xydra.core.model.state.XSPI;
 
 
 public class SynchronizerTestState extends AbstractAllowAllMemoryStoreSynchronizerTest {
 	
-	private static TestStateStore stateStore;
+	private static MockStateStore stateStore;
 	
 	@BeforeClass
 	public static void init() {
-		TestLogger.init();
-		stateStore = new TestStateStore();
+		LoggerTestHelper.init();
+		stateStore = new MockStateStore();
 		XSPI.setStateStore(stateStore);
 		AbstractAllowAllMemoryStoreSynchronizerTest.init();
 	}

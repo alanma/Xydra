@@ -24,7 +24,7 @@ import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
-import org.xydra.core.TestLogger;
+import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.change.XModelEventListener;
 import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.change.XTransactionBuilder;
@@ -84,7 +84,7 @@ public class XModelBasics {
 	private static final Logger log = getLogger();
 	
 	private static Logger getLogger() {
-		TestLogger.init();
+		LoggerTestHelper.init();
 		return LoggerFactory.getLogger(XModelBasics.class);
 	}
 	

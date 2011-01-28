@@ -2,7 +2,7 @@ package org.xydra.store;
 
 import org.xydra.base.XID;
 import org.xydra.base.change.XCommandFactory;
-import org.xydra.core.TestLogger;
+import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.model.XRepository;
 
 
@@ -21,7 +21,7 @@ import org.xydra.core.model.XRepository;
 public abstract class AbstractStoreTest {
 	
 	{
-		TestLogger.init();
+		LoggerTestHelper.init();
 	}
 	
 	/**

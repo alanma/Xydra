@@ -9,7 +9,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
-import org.xydra.core.TestLogger;
+import org.xydra.core.LoggerTestHelper;
 import org.xydra.store.access.HashUtils;
 import org.xydra.store.access.XAccessControlManager;
 import org.xydra.store.access.XAuthenticationDatabase;
@@ -34,7 +34,7 @@ public class AccessControlTest {
 	
 	@BeforeClass
 	public static void init() {
-		TestLogger.init();
+		LoggerTestHelper.init();
 	}
 	private XydraStore store;
 	@Before

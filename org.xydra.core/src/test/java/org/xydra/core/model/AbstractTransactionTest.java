@@ -25,7 +25,7 @@ import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
 import org.xydra.core.ChangeRecorder;
 import org.xydra.core.HasChanged;
-import org.xydra.core.TestLogger;
+import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryObject;
@@ -57,7 +57,7 @@ abstract public class AbstractTransactionTest {
 	protected XObject peter;
 	private XRepository repo;
 	{
-		TestLogger.init();
+		LoggerTestHelper.init();
 	}
 	
 	@Before

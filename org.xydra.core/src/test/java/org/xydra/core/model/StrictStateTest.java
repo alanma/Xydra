@@ -12,9 +12,9 @@ import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.value.XV;
-import org.xydra.core.TestLogger;
+import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.change.XTransactionBuilder;
-import org.xydra.core.model.state.TestStateStore;
+import org.xydra.core.model.state.MockStateStore;
 import org.xydra.core.model.state.XSPI;
 
 
@@ -31,12 +31,12 @@ public class StrictStateTest {
 	static XModel model;
 	static XObject object;
 	static XRepository repo;
-	static TestStateStore store;
+	static MockStateStore store;
 	
 	@BeforeClass
 	public static void init() {
-		TestLogger.init();
-		store = new TestStateStore();
+		LoggerTestHelper.init();
+		store = new MockStateStore();
 		XSPI.setStateStore(store);
 		actorId = XX.toId("StrictStateTest");
 		repo = X.createMemoryRepository(actorId);

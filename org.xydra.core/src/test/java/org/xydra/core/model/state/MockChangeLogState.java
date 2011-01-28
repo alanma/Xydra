@@ -9,13 +9,13 @@ import org.xydra.base.change.XEvent;
 import org.xydra.index.query.KeyKeyEntryTuple;
 
 
-public class TestChangeLogState implements XChangeLogState {
+public class MockChangeLogState implements XChangeLogState {
 	
 	private static final long serialVersionUID = 4745987477215964499L;
 	
 	/** the ID of the model this change log refers to **/
 	private XAddress baseAddr;
-	TestStateTransaction currentTrans;
+	MockStateTransaction currentTrans;
 	
 	Map<Long,XEvent> events = new HashMap<Long,XEvent>();
 	
@@ -26,9 +26,9 @@ public class TestChangeLogState implements XChangeLogState {
 	int saveCount;
 	
 	public boolean saved;
-	TestStateStore store;
+	MockStateStore store;
 	
-	public TestChangeLogState(TestStateStore store, XAddress baseAddr) {
+	public MockChangeLogState(MockStateStore store, XAddress baseAddr) {
 		this.baseAddr = baseAddr;
 		this.store = store;
 		this.store.allLogs.add(this);
@@ -53,7 +53,7 @@ public class TestChangeLogState implements XChangeLogState {
 		this.saved = false;
 		this.last++;
 		
-		TestStateTransaction t = getTrans(transaction);
+		MockStateTransaction t = getTrans(transaction);
 		this.currentTrans = t;
 		
 		this.events.put(i, event);
@@ -74,7 +74,7 @@ public class TestChangeLogState implements XChangeLogState {
 	
 	public void delete(XStateTransaction trans) {
 		checkActive();
-		TestStateTransaction t = getTrans(trans);
+		MockStateTransaction t = getTrans(trans);
 		this.currentTrans = t;
 		boolean ret = this.truncateToRevision(this.first - 1, t);
 		assert ret;
@@ -108,21 +108,21 @@ public class TestChangeLogState implements XChangeLogState {
 		return this.first;
 	}
 	
-	TestStateTransaction getTrans(Object trans) {
+	MockStateTransaction getTrans(Object trans) {
 		if(this.currentTrans != null) {
 			assert this.currentTrans == trans : "each entity may only be part of one transaction at a time";
 		}
 		if(trans == null) {
-			return new TestStateTransaction(this.store, this.baseAddr);
+			return new MockStateTransaction(this.store, this.baseAddr);
 		}
-		assert trans instanceof TestStateTransaction : "unexpected transaction object";
-		TestStateTransaction t = (TestStateTransaction)trans;
+		assert trans instanceof MockStateTransaction : "unexpected transaction object";
+		MockStateTransaction t = (MockStateTransaction)trans;
 		assert t.store == this.store;
 		assert t.base.equalsOrContains(this.baseAddr);
 		return t;
 	}
 	
-	void load(TestStateStore.Log log, Iterator<KeyKeyEntryTuple<XAddress,Long,XEvent>> it) {
+	void load(MockStateStore.Log log, Iterator<KeyKeyEntryTuple<XAddress,Long,XEvent>> it) {
 		this.first = log.first;
 		this.last = log.last;
 		this.events.clear();
@@ -134,7 +134,7 @@ public class TestChangeLogState implements XChangeLogState {
 	
 	public void save(XStateTransaction trans) {
 		checkActive();
-		TestStateTransaction t = getTrans(trans);
+		MockStateTransaction t = getTrans(trans);
 		this.currentTrans = t;
 		t.deletedLogs.remove(this);
 		t.savedLogs.add(this);
@@ -160,7 +160,7 @@ public class TestChangeLogState implements XChangeLogState {
 			return false;
 		}
 		
-		TestStateTransaction t = getTrans(transaction);
+		MockStateTransaction t = getTrans(transaction);
 		this.currentTrans = t;
 		
 		this.saved = false;

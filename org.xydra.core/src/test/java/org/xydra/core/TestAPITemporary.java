@@ -9,7 +9,7 @@ public class TestAPITemporary extends AbstractTestAPI {
 	
 	@BeforeClass
 	public static void init() {
-		TestLogger.init();
+		LoggerTestHelper.init();
 		XSPI.setStateStore(new TemporaryStateStore());
 	}
 	

@@ -13,7 +13,7 @@ import org.xydra.base.X;
 import org.xydra.base.XID;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XValue;
-import org.xydra.core.TestLogger;
+import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.index.IObjectIndex;
 import org.xydra.core.index.IUniqueObjectIndex;
 import org.xydra.core.index.impl.memory.IndexFactoryImpl;
@@ -67,7 +67,7 @@ public class TestObjectIndex {
 	
 	@BeforeClass
 	public static void init() {
-		TestLogger.init();
+		LoggerTestHelper.init();
 	}
 	
 	private XID actor;

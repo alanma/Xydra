@@ -32,7 +32,7 @@ import org.xydra.base.value.XValue;
 import org.xydra.core.ChangeRecorder;
 import org.xydra.core.DemoModelUtil;
 import org.xydra.core.HasChanged;
-import org.xydra.core.TestLogger;
+import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.XCompareUtils;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.change.XTransactionBuilder;
@@ -86,7 +86,7 @@ abstract public class AbstractSynchronizerTest {
 	private XSynchronizer sync;
 	
 	{
-		TestLogger.init();
+		LoggerTestHelper.init();
 	}
 	
 	private void checkEvents(XModel model) {
@@ -116,7 +116,7 @@ abstract public class AbstractSynchronizerTest {
 	/**
 	 * Wait for the given callback and check that there were no errors.
 	 */
-	private void checkSyncCallback(TestSynchronizationCallback sc) {
+	private void checkSyncCallback(ForTestSynchronizationCallback sc) {
 		if(sc.getRequestError() != null) {
 			throw new RuntimeException(sc.getRequestError());
 		}
@@ -221,7 +221,7 @@ abstract public class AbstractSynchronizerTest {
 	 * Synchronize and check that there were no errors.
 	 */
 	private void synchronize(XSynchronizer sync) {
-		TestSynchronizationCallback sc = new TestSynchronizationCallback();
+		ForTestSynchronizationCallback sc = new ForTestSynchronizationCallback();
 		sync.synchronize(sc);
 		checkSyncCallback(sc);
 	}
@@ -658,8 +658,8 @@ abstract public class AbstractSynchronizerTest {
 		TestLocalChangeCallback c1 = new TestLocalChangeCallback();
 		TestLocalChangeCallback c2 = new TestLocalChangeCallback();
 		
-		TestSynchronizationCallback sc1 = new TestSynchronizationCallback();
-		TestSynchronizationCallback sc2 = new TestSynchronizationCallback();
+		ForTestSynchronizationCallback sc1 = new ForTestSynchronizationCallback();
+		ForTestSynchronizationCallback sc2 = new ForTestSynchronizationCallback();
 		
 		// Create a command manually.
 		final XID frankId = XX.toId("Frank");

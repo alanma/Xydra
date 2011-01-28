@@ -9,7 +9,7 @@ public class TestAPIStored extends AbstractTestAPI {
 	
 	@BeforeClass
 	public static void init() {
-		TestLogger.init();
+		LoggerTestHelper.init();
 		XSPI.setStateStore(new MemoryStateStore());
 	}
 	

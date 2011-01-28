@@ -5,11 +5,11 @@ import org.xydra.base.XID;
 import org.xydra.base.XX;
 
 
-public class TestRepositoryState extends TestState implements XRepositoryState {
+public class MockRepositoryState extends MockState implements XRepositoryState {
 	
 	private static final long serialVersionUID = 8197909976435793933L;
 	
-	public TestRepositoryState(TestStateStore store, XAddress address) {
+	public MockRepositoryState(MockStateStore store, XAddress address) {
 		super(store, address);
 	}
 	

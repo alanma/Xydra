@@ -32,7 +32,7 @@ import org.xydra.base.value.XValue;
 import org.xydra.core.ChangeRecorder;
 import org.xydra.core.DemoModelUtil;
 import org.xydra.core.HasChanged;
-import org.xydra.core.TestLogger;
+import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.XCompareUtils;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.change.XTransactionBuilder;
@@ -100,7 +100,7 @@ abstract public class AbstractSynchronizeTest {
 	private XModel remoteModel;
 	
 	{
-		TestLogger.init();
+		LoggerTestHelper.init();
 	}
 	
 	private XCommand fix(XCommand command) {

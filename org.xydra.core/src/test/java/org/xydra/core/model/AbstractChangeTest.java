@@ -15,7 +15,7 @@ import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.value.impl.memory.MemoryStringValue;
-import org.xydra.core.TestLogger;
+import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.change.XModelEventListener;
 import org.xydra.core.change.XObjectEventListener;
@@ -193,7 +193,7 @@ public abstract class AbstractChangeTest {
 	private String password = null; // TODO where to get this?
 	
 	{
-		TestLogger.init();
+		LoggerTestHelper.init();
 	}
 	
 	@Test

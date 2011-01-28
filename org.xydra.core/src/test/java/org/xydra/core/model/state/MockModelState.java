@@ -5,13 +5,13 @@ import org.xydra.base.XID;
 import org.xydra.base.XX;
 
 
-public class TestModelState extends TestState implements XModelState {
+public class MockModelState extends MockState implements XModelState {
 	
 	private static final long serialVersionUID = -3093619678678194720L;
 	
 	XChangeLogState log;
 	
-	public TestModelState(TestStateStore store, XAddress addr, XChangeLogState log) {
+	public MockModelState(MockStateStore store, XAddress addr, XChangeLogState log) {
 		super(store, addr);
 		this.log = log;
 	}

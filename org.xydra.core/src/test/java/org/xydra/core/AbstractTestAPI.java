@@ -355,7 +355,7 @@ public abstract class AbstractTestAPI {
 	private String password = null; // TODO where to get this?
 	
 	{
-		TestLogger.init();
+		LoggerTestHelper.init();
 	}
 	
 	@Test

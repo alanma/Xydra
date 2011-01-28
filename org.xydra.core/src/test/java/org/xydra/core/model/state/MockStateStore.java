@@ -22,14 +22,14 @@ import org.xydra.index.query.KeyKeyEntryTuple;
 import org.xydra.index.query.Wildcard;
 
 
-public class TestStateStore implements XStateStore, Serializable {
+public class MockStateStore implements XStateStore, Serializable {
 	
 	protected static class Log {
 		
 		long first;
 		long last;
 		
-		public void save(TestChangeLogState state) {
+		public void save(MockChangeLogState state) {
 			this.first = state.first;
 			this.last = state.last;
 		}
@@ -41,7 +41,7 @@ public class TestStateStore implements XStateStore, Serializable {
 		long revision;
 		XValue value;
 		
-		public void save(TestState state) {
+		public void save(MockState state) {
 			this.revision = state.revision;
 			this.children.clear();
 			this.children.addAll(state.children);
@@ -50,30 +50,30 @@ public class TestStateStore implements XStateStore, Serializable {
 		
 	}
 	private static final long serialVersionUID = 5790667556879966890L;
-	public List<TestChangeLogState> allLogs = new ArrayList<TestChangeLogState>();
+	public List<MockChangeLogState> allLogs = new ArrayList<MockChangeLogState>();
 	
-	public List<TestState> allStates = new ArrayList<TestState>();
+	public List<MockState> allStates = new ArrayList<MockState>();
 	
-	public List<TestStateTransaction> allTrans = new ArrayList<TestStateTransaction>();
+	public List<MockStateTransaction> allTrans = new ArrayList<MockStateTransaction>();
 	
 	final IMapMapIndex<XAddress,Long,XEvent> events = new MapMapIndex<XAddress,Long,XEvent>();
-	final Map<XAddress,TestChangeLogState> loadedLogs = new HashMap<XAddress,TestChangeLogState>();
-	final Map<XAddress,TestState> loadedStates = new HashMap<XAddress,TestState>();
+	final Map<XAddress,MockChangeLogState> loadedLogs = new HashMap<XAddress,MockChangeLogState>();
+	final Map<XAddress,MockState> loadedStates = new HashMap<XAddress,MockState>();
 	
 	final Map<XAddress,Log> logs = new HashMap<XAddress,Log>();
 	final Map<XAddress,State> states = new HashMap<XAddress,State>();
 	
 	public void checkConsistency() {
 		
-		for(TestState s : this.allStates) {
+		for(MockState s : this.allStates) {
 			assert s.saved : "unsaved entity state: " + s.address;
 		}
 		
-		for(TestChangeLogState s : this.allLogs) {
+		for(MockChangeLogState s : this.allLogs) {
 			assert s.saved : "unsaved log state: " + s.getBaseAddress();
 		}
 		
-		for(TestStateTransaction t : this.allTrans) {
+		for(MockStateTransaction t : this.allTrans) {
 			assert t.committed : "uncommitted transaction: " + t.base + " : " + t;
 		}
 		
@@ -123,47 +123,47 @@ public class TestStateStore implements XStateStore, Serializable {
 	}
 	
 	public void checkOnlySavedOnce() {
-		for(TestState s : this.allStates) {
+		for(MockState s : this.allStates) {
 			assert s.saveCount <= 1 : "double save for " + s.address;
 		}
-		for(TestChangeLogState s : this.allLogs) {
+		for(MockChangeLogState s : this.allLogs) {
 			assert s.saveCount <= 1 : "double save for log " + s.getBaseAddress();
 		}
 	}
 	
-	public TestFieldState createFieldState(XAddress fieldAddr) {
+	public MockFieldState createFieldState(XAddress fieldAddr) {
 		assert fieldAddr.getAddressedType() == XType.XFIELD;
-		return new TestFieldState(this, fieldAddr);
+		return new MockFieldState(this, fieldAddr);
 	}
 	
-	public TestModelState createModelState(XAddress modelAddr) {
+	public MockModelState createModelState(XAddress modelAddr) {
 		assert modelAddr.getAddressedType() == XType.XMODEL;
-		XChangeLogState log = new TestChangeLogState(this, modelAddr);
-		return new TestModelState(this, modelAddr, log);
+		XChangeLogState log = new MockChangeLogState(this, modelAddr);
+		return new MockModelState(this, modelAddr, log);
 	}
 	
-	public TestObjectState createObjectState(XAddress objectAddr) {
+	public MockObjectState createObjectState(XAddress objectAddr) {
 		assert objectAddr.getAddressedType() == XType.XOBJECT;
-		XChangeLogState log = objectAddr.getModel() == null ? new TestChangeLogState(this,
+		XChangeLogState log = objectAddr.getModel() == null ? new MockChangeLogState(this,
 		        objectAddr) : null;
-		return new TestObjectState(this, objectAddr, log);
+		return new MockObjectState(this, objectAddr, log);
 	}
 	
-	public TestRepositoryState createRepositoryState(XAddress repoAddr) {
+	public MockRepositoryState createRepositoryState(XAddress repoAddr) {
 		assert repoAddr.getAddressedType() == XType.XREPOSITORY;
-		return new TestRepositoryState(this, repoAddr);
+		return new MockRepositoryState(this, repoAddr);
 	}
 	
-	protected void delete(TestChangeLogState state) {
+	protected void delete(MockChangeLogState state) {
 		this.logs.remove(state.getBaseAddress());
 	}
 	
-	protected void delete(TestChangeLogState state, long rev) {
+	protected void delete(MockChangeLogState state, long rev) {
 		assert state.getEvent(rev) == null;
 		this.events.deIndex(state.getBaseAddress(), rev);
 	}
 	
-	protected void delete(TestState state) {
+	protected void delete(MockState state) {
 		this.states.remove(state.getAddress());
 	}
 	
@@ -177,7 +177,7 @@ public class TestStateStore implements XStateStore, Serializable {
 		if(s == null) {
 			return null;
 		}
-		TestFieldState state = createFieldState(fieldAddr);
+		MockFieldState state = createFieldState(fieldAddr);
 		state.load(s);
 		return state;
 	}
@@ -187,7 +187,7 @@ public class TestStateStore implements XStateStore, Serializable {
 		if(l == null) {
 			return null;
 		}
-		TestChangeLogState state = new TestChangeLogState(this, addr);
+		MockChangeLogState state = new MockChangeLogState(this, addr);
 		state.load(l, this.events.tupleIterator(new EqualsConstraint<XAddress>(addr),
 		        new Wildcard<Long>()));
 		return state;
@@ -200,7 +200,7 @@ public class TestStateStore implements XStateStore, Serializable {
 			return null;
 		}
 		XChangeLogState log = loadLog(modelAddr);
-		TestModelState state = new TestModelState(this, modelAddr, log);
+		MockModelState state = new MockModelState(this, modelAddr, log);
 		state.load(s);
 		return state;
 	}
@@ -212,7 +212,7 @@ public class TestStateStore implements XStateStore, Serializable {
 			return null;
 		}
 		XChangeLogState log = loadLog(objectAddr);
-		TestObjectState state = new TestObjectState(this, objectAddr, log);
+		MockObjectState state = new MockObjectState(this, objectAddr, log);
 		state.load(s);
 		return state;
 	}
@@ -223,16 +223,16 @@ public class TestStateStore implements XStateStore, Serializable {
 		if(s == null) {
 			return null;
 		}
-		TestRepositoryState state = createRepositoryState(repoAddr);
+		MockRepositoryState state = createRepositoryState(repoAddr);
 		state.load(s);
 		return state;
 	}
 	
 	public void resetSaves() {
-		for(TestState s : this.allStates) {
+		for(MockState s : this.allStates) {
 			s.saveCount = 0;
 		}
-		for(TestChangeLogState l : this.allLogs) {
+		for(MockChangeLogState l : this.allLogs) {
 			l.saveCount = 0;
 		}
 	}
@@ -241,7 +241,7 @@ public class TestStateStore implements XStateStore, Serializable {
 		this.allTrans.clear();
 	}
 	
-	protected void save(TestChangeLogState state) {
+	protected void save(MockChangeLogState state) {
 		Log s = this.logs.get(state.getBaseAddress());
 		if(s == null) {
 			s = new Log();
@@ -250,12 +250,12 @@ public class TestStateStore implements XStateStore, Serializable {
 		s.save(state);
 	}
 	
-	protected void save(TestChangeLogState state, long rev) {
+	protected void save(MockChangeLogState state, long rev) {
 		assert state.getEvent(rev) != null;
 		this.events.index(state.getBaseAddress(), rev, state.getEvent(rev));
 	}
 	
-	protected void save(TestState state) {
+	protected void save(MockState state) {
 		State s = this.states.get(state.getAddress());
 		if(s == null) {
 			s = new State();

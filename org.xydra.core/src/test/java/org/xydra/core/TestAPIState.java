@@ -3,18 +3,18 @@ package org.xydra.core;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.xydra.core.model.state.TestStateStore;
+import org.xydra.core.model.state.MockStateStore;
 import org.xydra.core.model.state.XSPI;
 
 
 public class TestAPIState extends AbstractTestAPI {
 	
-	static TestStateStore store;
+	static MockStateStore store;
 	
 	@BeforeClass
 	public static void init() {
-		TestLogger.init();
-		store = new TestStateStore();
+		LoggerTestHelper.init();
+		store = new MockStateStore();
 		XSPI.setStateStore(store);
 	}
 	

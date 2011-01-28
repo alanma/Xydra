@@ -17,16 +17,13 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.value.XV;
-import org.xydra.core.TestLogger;
+import org.xydra.core.LoggerTestHelper;
 
 
 /**
  * Tests for other implementations should set the appropriate
  * {@link XStateResolver} and {@link XStateFactory} in {@link XSPI} in their
  * {@link BeforeClass} method.
- * 
- * This class in /src/main/java to be available for other implementations in
- * other projects.
  * 
  * @author voelkel
  */
@@ -40,13 +37,15 @@ public abstract class AbstractStateTest {
 	
 	static XID repo1 = XX.toId("repo1");
 	static XID REPOID = XX.toId("testrepo");
+	
 	static XAddress getRepositoryAddress() {
 		return XX.toAddress(REPOID, null, null, null);
 	}
+	
 	private XRepositoryState repositoryState;
 	
 	{
-		TestLogger.init();
+		LoggerTestHelper.init();
 	}
 	
 	protected boolean canPersist() {

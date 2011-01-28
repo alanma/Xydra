@@ -7,7 +7,7 @@ import org.xydra.log.LoggerFactory;
 /**
  * Helper class to initialize the logger for tests.
  */
-public class TestLogger {
+public class LoggerTestHelper {
 	
 	private static boolean initialized;
 	
@@ -17,4 +17,5 @@ public class TestLogger {
 			initialized = true;
 		}
 	}
+	
 }

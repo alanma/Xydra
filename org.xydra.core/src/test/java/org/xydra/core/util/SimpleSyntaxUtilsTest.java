@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
-import org.xydra.core.TestLogger;
+import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.model.XModel;
 import org.xydra.core.xml.XmlModel;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
@@ -35,7 +35,7 @@ public class SimpleSyntaxUtilsTest {
 	}
 	
 	private static Logger getLogger() {
-		TestLogger.init();
+		LoggerTestHelper.init();
 		return LoggerFactory.getLogger(SimpleSyntaxUtilsTest.class);
 	}
 	

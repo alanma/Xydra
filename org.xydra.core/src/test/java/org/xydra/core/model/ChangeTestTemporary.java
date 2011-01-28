@@ -1,7 +1,7 @@
 package org.xydra.core.model;
 
 import org.junit.BeforeClass;
-import org.xydra.core.TestLogger;
+import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.model.state.XSPI;
 import org.xydra.core.model.state.impl.memory.TemporaryStateStore;
 
@@ -10,7 +10,7 @@ public class ChangeTestTemporary extends AbstractChangeTest {
 	
 	@BeforeClass
 	public static void init() {
-		TestLogger.init();
+		LoggerTestHelper.init();
 		XSPI.setStateStore(new TemporaryStateStore());
 	}
 	

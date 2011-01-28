@@ -13,7 +13,7 @@ import org.xydra.core.model.sync.XSynchronizationCallback;
  * @author dscharrer
  * 
  */
-class TestSynchronizationCallback implements XSynchronizationCallback {
+class ForTestSynchronizationCallback implements XSynchronizationCallback {
 	
 	private Throwable commandError;
 	private boolean committed = false;

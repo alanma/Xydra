@@ -11,21 +11,21 @@ import org.xydra.base.value.XValue;
 import org.xydra.index.XI;
 
 
-public abstract class TestState implements Serializable {
+public abstract class MockState implements Serializable {
 	
 	private static final long serialVersionUID = 7707154420739741167L;
 	
 	XAddress address;
 	Set<XID> children = new HashSet<XID>();
-	TestStateTransaction currentTrans;
+	MockStateTransaction currentTrans;
 	long revision;
 	int saveCount;
 	boolean saved;
-	TestStateStore store;
+	MockStateStore store;
 	
 	XValue value;
 	
-	public TestState(TestStateStore store, XAddress address) {
+	public MockState(MockStateStore store, XAddress address) {
 		this.address = address;
 		this.store = store;
 		this.store.allStates.add(this);
@@ -41,7 +41,7 @@ public abstract class TestState implements Serializable {
 	
 	public XStateTransaction beginTransaction() {
 		checkActive();
-		return new TestStateTransaction(this.store, this.address);
+		return new MockStateTransaction(this.store, this.address);
 	}
 	
 	void checkActive() {
@@ -50,7 +50,7 @@ public abstract class TestState implements Serializable {
 	
 	public void delete(XStateTransaction trans) {
 		checkActive();
-		TestStateTransaction t = getTrans(trans);
+		MockStateTransaction t = getTrans(trans);
 		this.currentTrans = t;
 		t.saved.remove(this);
 		t.deleted.add(this);
@@ -63,8 +63,8 @@ public abstract class TestState implements Serializable {
 	
 	public void endTransaction(XStateTransaction trans) {
 		checkActive();
-		assert trans instanceof TestStateTransaction : "unexpected transaction object";
-		TestStateTransaction t = (TestStateTransaction)trans;
+		assert trans instanceof MockStateTransaction : "unexpected transaction object";
+		MockStateTransaction t = (MockStateTransaction)trans;
 		assert XI.equals(t.base, this.address);
 		t.commit();
 	}
@@ -80,15 +80,15 @@ public abstract class TestState implements Serializable {
 		return this.revision;
 	}
 	
-	TestStateTransaction getTrans(XStateTransaction trans) {
+	MockStateTransaction getTrans(XStateTransaction trans) {
 		if(this.currentTrans != null) {
 			assert this.currentTrans == trans : "each entity may only be part of one transaction at a time";
 		}
 		if(trans == null) {
-			return new TestStateTransaction(this.store, this.address);
+			return new MockStateTransaction(this.store, this.address);
 		}
-		assert trans instanceof TestStateTransaction : "unexpected transaction object";
-		TestStateTransaction t = (TestStateTransaction)trans;
+		assert trans instanceof MockStateTransaction : "unexpected transaction object";
+		MockStateTransaction t = (MockStateTransaction)trans;
 		assert t.store == this.store;
 		assert t.base.equalsOrContains(this.address);
 		return t;
@@ -114,7 +114,7 @@ public abstract class TestState implements Serializable {
 		return this.children.iterator();
 	}
 	
-	void load(TestStateStore.State state) {
+	void load(MockStateStore.State state) {
 		this.revision = state.revision;
 		this.children.clear();
 		this.children.addAll(state.children);
@@ -129,7 +129,7 @@ public abstract class TestState implements Serializable {
 	
 	public void save(XStateTransaction trans) {
 		checkActive();
-		TestStateTransaction t = getTrans(trans);
+		MockStateTransaction t = getTrans(trans);
 		this.currentTrans = t;
 		t.deleted.remove(this);
 		t.saved.add(this);
