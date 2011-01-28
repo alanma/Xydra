@@ -49,22 +49,11 @@ public class MemoryPersistence implements XydraPersistence {
 		// caller asserts repoId matches address
 		MemoryModelPersistence modelPersistence = getModelPersistence(address.getModel());
 		long result = modelPersistence.executeCommand(actorId, command);
-		// update internal cache map
 		/*
-		 * TODO this breaks synchronization and is different from the GAE
-		 * behavior, where removing a model does NOT destroy the event log
-		 * 
-		 * removing the MemoryModelPersistence here will cause the model
-		 * revision to be reset to zero if the model is re-created and cause old
-		 * revisions to be reused for different events, which might confuse
-		 * users of the API - especially if they never noticed that the model
-		 * was gone
+		 * even if the model has been deleted the event log must be kept. If the
+		 * model gets re-created later the revision number must strictly
+		 * increase to serve users who synchronised with the previous model.
 		 */
-		if(!modelPersistence.exists()) {
-			synchronized(this.models) {
-				this.models.remove(address.getModel());
-			}
-		}
 		return result;
 	}
 	
