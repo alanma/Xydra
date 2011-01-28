@@ -16,6 +16,8 @@ import org.xydra.core.XCopyUtils;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.DeltaUtils;
 import org.xydra.index.query.Pair;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
 
 /**
@@ -26,6 +28,8 @@ import org.xydra.index.query.Pair;
  */
 
 public class MemoryModelPersistence {
+	
+	static private Logger log = LoggerFactory.getLogger(MemoryModelPersistence.class);
 	
 	private List<XEvent> events = new ArrayList<XEvent>();
 	
@@ -96,12 +100,17 @@ public class MemoryModelPersistence {
 		long start = beginRevision < 0 ? 0 : beginRevision;
 		long end = endRevision > currentRev ? currentRev : endRevision;
 		
+		log.info("getEvents: br" + beginRevision + " er" + endRevision + " cr" + currentRev
+		        + " size" + this.events.size() + " mr"
+		        + (this.model == null ? -2 : this.model.getRevisionNumber()) + " s" + start + " e"
+		        + end);
+		
 		if(start > end) {
 			// happens if start >= currentRev, which is allowed
 			return new ArrayList<XEvent>();
 		}
 		
-		if(start == 0 && end == endRevision) {
+		if(start == 0 && end == currentRev) {
 			// we still need to copy the list because the caller might expect to
 			// have a instance it can modify when doing filtering.
 			List<XEvent> result = new ArrayList<XEvent>();

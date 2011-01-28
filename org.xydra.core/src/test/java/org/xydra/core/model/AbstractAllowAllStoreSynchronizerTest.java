@@ -17,12 +17,16 @@ import org.xydra.store.impl.delegate.XydraPersistence;
  * 
  * Subclasses should set the model state backend via
  * {@link XSPI#setStateStore(org.xydra.core.model.state.XStateStore)} and set
- * {@link #simpleStore} to a concrete implementation.
+ * protected member to a concrete implementation.
  * 
  * @author dscharrer
  */
 abstract public class AbstractAllowAllStoreSynchronizerTest extends AbstractSynchronizerTest {
 	
+	/**
+	 * The {@link XydraPersistence} to be used for testing. Subclasses should
+	 * initialize this before {@link #setUp()} gets called.
+	 */
 	protected static XydraPersistence simpleStore;
 	
 	@BeforeClass

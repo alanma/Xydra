@@ -53,22 +53,33 @@ import org.xydra.store.XydraStore;
  * an arbitrary {@link XydraStore}.
  * 
  * Subclasses should set the model state backend via
- * {@link XSPI#setStateStore(org.xydra.core.model.state.XStateStore)}, set
- * {@link #store} to a concrete implementation, and set the {@link #actorId}/
- * {@link #passwordHash} pair to one that has sufficient access (to
- * create/modify/delete/read the {@link DemoModelUtil#PHONEBOOK_ID} and
- * {@link #NEWMODEL_ID} models).
+ * {@link XSPI#setStateStore(org.xydra.core.model.state.XStateStore)} and
+ * initialize the protected members.
  * 
  * @author dscharrer
  */
 abstract public class AbstractSynchronizerTest {
 	
+	/**
+	 * The actor ID used to interact with the {@link #store}. This actor needs
+	 * to have read/write access. Subclasses should initialize this before
+	 * {@link #setUp()} gets called.
+	 */
 	protected static XID actorId;
 	
-	private static final XID NEWMODEL_ID = XX.toId("newmodel");
+	/**
+	 * The password hash for {@link #actorId}. Subclasses should initialize this
+	 * before {@link #setUp()} gets called.
+	 */
 	protected static String passwordHash;
 	
+	/**
+	 * The {@link XydraStore} to be used for testing. Subclasses should
+	 * initialize this before {@link #setUp()} gets called.
+	 */
 	protected static XydraStore store;
+	
+	private static final XID NEWMODEL_ID = XX.toId("newmodel");
 	
 	private XModel model;
 	private XAddress repoAddr;
@@ -87,9 +98,8 @@ abstract public class AbstractSynchronizerTest {
 		
 		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback;
 		callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
-		store.getEvents(actorId, passwordHash,
-		        new GetEventsRequest[] { new GetEventsRequest(model.getAddress(), startRev,
-		                Long.MAX_VALUE) }, callback);
+		store.getEvents(actorId, passwordHash, new GetEventsRequest[] { new GetEventsRequest(model
+		        .getAddress(), startRev, Long.MAX_VALUE) }, callback);
 		XEvent[] result = waitForSuccessBatched(callback);
 		Iterator<XEvent> remoteEvents = Arrays.asList(result).iterator();
 		
@@ -228,8 +238,8 @@ abstract public class AbstractSynchronizerTest {
 			
 			assertNull(loadModelSnapshot(NEWMODEL_ID));
 			
-			XRepository repo = new MemoryRepository(actorId, passwordHash,
-			        this.repoAddr.getRepository());
+			XRepository repo = new MemoryRepository(actorId, passwordHash, this.repoAddr
+			        .getRepository());
 			
 			XModel model = repo.createModel(NEWMODEL_ID);
 			XSynchronizer sync = new XSynchronizer(model, store);
@@ -365,8 +375,8 @@ abstract public class AbstractSynchronizerTest {
 			assertNull(loadModelSnapshot(NEWMODEL_ID));
 			
 			// create a model
-			XRepository repo = new MemoryRepository(actorId, passwordHash,
-			        this.repoAddr.getRepository());
+			XRepository repo = new MemoryRepository(actorId, passwordHash, this.repoAddr
+			        .getRepository());
 			XModel model = repo.createModel(NEWMODEL_ID);
 			XSynchronizer sync = new XSynchronizer(model, store);
 			synchronize(sync);
@@ -426,8 +436,8 @@ abstract public class AbstractSynchronizerTest {
 			assertNull(loadModelSnapshot(NEWMODEL_ID));
 			
 			// create a model
-			XRepository repo = new MemoryRepository(actorId, passwordHash,
-			        this.repoAddr.getRepository());
+			XRepository repo = new MemoryRepository(actorId, passwordHash, this.repoAddr
+			        .getRepository());
 			XModel model = repo.createModel(NEWMODEL_ID);
 			XObject object = model.createObject(XX.toId("bob"));
 			XField field = object.createField(XX.toId("cookies"));
@@ -518,8 +528,8 @@ abstract public class AbstractSynchronizerTest {
 		
 		// make some remote changes
 		final XID cakesId = XX.toId("cakes");
-		XCommand command = MemoryObjectCommand.createAddCommand(
-		        this.model.getObject(DemoModelUtil.JOHN_ID).getAddress(), false, cakesId);
+		XCommand command = MemoryObjectCommand.createAddCommand(this.model.getObject(
+		        DemoModelUtil.JOHN_ID).getAddress(), false, cakesId);
 		executeCommand(command);
 		
 		// make more remote changes
@@ -535,8 +545,8 @@ abstract public class AbstractSynchronizerTest {
 		executeCommand(tb.buildCommand());
 		
 		// and some more remote changes
-		XCommand command2 = MemoryObjectCommand.createAddCommand(
-		        this.model.getObject(DemoModelUtil.PETER_ID).getAddress(), false, cakesId);
+		XCommand command2 = MemoryObjectCommand.createAddCommand(this.model.getObject(
+		        DemoModelUtil.PETER_ID).getAddress(), false, cakesId);
 		executeCommand(command2);
 		
 		// and even more remote changes

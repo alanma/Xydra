@@ -23,6 +23,7 @@ public class GetEventsRequest {
 	
 	public final long beginRevision;
 	public final long endRevision;
+	
 	/**
 	 * @param address of {@link XModel} (repositoryId/modelId/-/-),
 	 *            {@link XObject} (repositoryId/modelId/objectId/-), or
@@ -44,18 +45,18 @@ public class GetEventsRequest {
 	 * @param beginRevision the beginning revision number (inclusive) of the
 	 *            interval from which all {@link XEvent XEvents} are to be
 	 *            returned - can be zero to get all {@link XEvent XEvents} up to
-	 *            endRevision. A value greater than t@link
-	 *            #getCurrentRevisionNumber()} number is allowed, since the
-	 *            caller cannot know what revision the model will have when this
-	 *            request is executed. If beginRevision is greater than the
-	 *            models current revision, an empty list of events is returned.
+	 *            endRevision. A value greater than the current revision number
+	 *            is allowed, since the caller cannot know what revision the
+	 *            model will have when this request is executed. If
+	 *            beginRevision is greater than the models current revision, an
+	 *            empty list of events is returned.
 	 * 
 	 *            TODO is there a point in allowing beginRevision < 0?
 	 * 
 	 * @param endRevision the end revision number (inclusive) of the interval
 	 *            from which all {@link XEvent XEvents} are to be returned - can
-	 *            be greater than current revision number of the addresed
-	 *            entitiy to get all {@link XEvent XEvents} since beginRevision.
+	 *            be greater than current revision number of the addressed
+	 *            entity to get all {@link XEvent XEvents} since beginRevision.
 	 *            Must be greater than beginRevision.
 	 * 
 	 *            TODO is there a point in allowing endRevision < 0?
