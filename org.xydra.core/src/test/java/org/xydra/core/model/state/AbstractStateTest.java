@@ -22,8 +22,7 @@ import org.xydra.core.LoggerTestHelper;
 
 /**
  * Tests for other implementations should set the appropriate
- * {@link XStateResolver} and {@link XStateFactory} in {@link XSPI} in their
- * {@link BeforeClass} method.
+ * {@link XStateStore} in {@link XSPI} in their {@link BeforeClass} method.
  * 
  * @author voelkel
  */
@@ -269,8 +268,8 @@ public abstract class AbstractStateTest {
 		if(canPersist()) {
 			
 			this.repositoryState = XSPI.getStateStore().loadRepositoryState(getRepositoryAddress());
-			assertTrue("created with exaclty the same ID and never deleted",
-			        this.repositoryState.hasModelState(modelId1));
+			assertTrue("created with exaclty the same ID and never deleted", this.repositoryState
+			        .hasModelState(modelId1));
 			
 			this.repositoryState = XSPI.getStateStore().loadRepositoryState(getRepositoryAddress());
 			assertTrue(this.repositoryState.hasModelState(modelId1));

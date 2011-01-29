@@ -23,7 +23,7 @@ import org.xydra.core.model.XObject;
  * A listener for events of type T that records in a boolean variable if any
  * events have been received.
  * 
- * @param <T>
+ * @author dscharrer
  */
 public class HasChanged implements XRepositoryEventListener, XModelEventListener,
         XObjectEventListener, XFieldEventListener, XTransactionEventListener {

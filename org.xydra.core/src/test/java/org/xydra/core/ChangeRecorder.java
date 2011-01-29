@@ -23,7 +23,7 @@ import org.xydra.core.model.XObject;
  * A listener for events of type T that records the received events in a
  * transaction.
  * 
- * @param <T>
+ * @author dscharrer
  */
 public class ChangeRecorder implements XRepositoryEventListener, XModelEventListener,
         XObjectEventListener, XFieldEventListener, XTransactionEventListener {
@@ -39,6 +39,7 @@ public class ChangeRecorder implements XRepositoryEventListener, XModelEventList
 		model.addListenerForFieldEvents(cr);
 		return eventList;
 	}
+	
 	/**
 	 * Record all non-transaction events to the given object.
 	 */

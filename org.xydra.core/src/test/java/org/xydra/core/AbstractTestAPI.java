@@ -135,6 +135,7 @@ public abstract class AbstractTestAPI {
 			// store those
 		}
 	}
+	
 	// A wrapper for a book copy - a book copy can be modeled as an XObject
 	static class BookCopy {
 		// we'll use XFields and XValues to store the informations about the
@@ -336,7 +337,6 @@ public abstract class AbstractTestAPI {
 	 * {@link XObject} to given stringValue on behalf of the actor with
 	 * {@link XID} 'actorID'
 	 * 
-	 * @param actorID The {@link XID} of the actor.
 	 * @param object The {@link XObject} containing the {@link XField} specified
 	 *            by'fieldId'.
 	 * @param fieldId The {@link XID} of the {@link XField} which value is to be
@@ -638,20 +638,20 @@ public abstract class AbstractTestAPI {
 	@Test
 	public void testSaveAndLoadModel() {
 		XModel model = new MemoryModel(this.actorId, this.password, XX.createUniqueID());
-		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID())
-		        .setValue(XV.toValue(true));
-		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID())
-		        .setValue(XV.toValue("Test!"));
-		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID())
-		        .setValue(XV.toValue(false));
-		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID())
-		        .setValue(XV.toValue(42));
-		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID())
-		        .setValue(XV.toValue(0L));
-		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID())
-		        .setValue(XV.toValue(3.14159265));
-		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID())
-		        .setValue(XV.toValue("Another Test!"));
+		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID()).setValue(
+		        XV.toValue(true));
+		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID()).setValue(
+		        XV.toValue("Test!"));
+		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID()).setValue(
+		        XV.toValue(false));
+		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID()).setValue(
+		        XV.toValue(42));
+		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID()).setValue(
+		        XV.toValue(0L));
+		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID()).setValue(
+		        XV.toValue(3.14159265));
+		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID()).setValue(
+		        XV.toValue("Another Test!"));
 		
 		XmlOutStringBuffer out = new XmlOutStringBuffer();
 		XmlModel.toXml(model, out);
@@ -769,17 +769,17 @@ public abstract class AbstractTestAPI {
 		// targetModel) - -
 		model = repo.createModel(XX.createUniqueID());
 		// add some content
-		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID())
-		        .setValue(XV.toValue("Test"));
+		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID()).setValue(
+		        XV.toValue("Test"));
 		
-		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID())
-		        .setValue(XV.toValue("Test2"));
+		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID()).setValue(
+		        XV.toValue("Test2"));
 		
-		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID())
-		        .setValue(XV.toValue("Test3"));
+		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID()).setValue(
+		        XV.toValue("Test3"));
 		
-		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID())
-		        .setValue(XV.toValue("Test4"));
+		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID()).setValue(
+		        XV.toValue("Test4"));
 		
 		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID());
 		
@@ -832,7 +832,7 @@ public abstract class AbstractTestAPI {
 		field1.setValue(null);
 		try {
 			CoreUtils.safeGetValue(object, fieldId); // safeGetValue should
-			                                         // throw a
+			// throw a
 			// MissingPieceException
 			assertTrue(false);
 		} catch(MissingPieceException mpe) {
@@ -866,7 +866,7 @@ public abstract class AbstractTestAPI {
 		field1.setValue(null);
 		try {
 			CoreUtils.safeGetValue(model, objectId, fieldId); // safeGetValue
-			                                                  // should
+			// should
 			// throw a
 			// MissingPieceException
 			// here
@@ -908,7 +908,7 @@ public abstract class AbstractTestAPI {
 		
 		try {
 			CoreUtils.safeGetField(object, fieldId); // safeGetField should
-			                                         // throw a
+			// throw a
 			// MissingPieceException here
 			assertTrue(false);
 		} catch(MissingPieceException mpe) {
@@ -942,7 +942,7 @@ public abstract class AbstractTestAPI {
 		
 		try {
 			CoreUtils.safeGetModel(repo, modelId); // safeGetModel should throw
-			                                       // a
+			// a
 			// MissingPieceException here
 			assertTrue(false);
 		} catch(MissingPieceException mpe) {
@@ -974,7 +974,7 @@ public abstract class AbstractTestAPI {
 		model.removeObject(object.getID());
 		try {
 			CoreUtils.safeGetObject(model, objectId); // safeGetObject should
-			                                          // throw a
+			// throw a
 			// MissingPieceException here
 			assertTrue(false);
 		} catch(MissingPieceException mpe) {
@@ -1010,7 +1010,7 @@ public abstract class AbstractTestAPI {
 		model.removeObject(object.getID());
 		try {
 			CoreUtils.safeGetObject(repo, modelId, objectId); // safeGetObject
-			                                                  // should
+			// should
 			// throw a
 			// MissingPieceException
 			// here

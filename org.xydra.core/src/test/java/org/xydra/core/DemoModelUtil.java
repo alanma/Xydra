@@ -128,7 +128,7 @@ public class DemoModelUtil {
 	/**
 	 * Add the phonebook-demo model with ID "phonebook" to the given repository.
 	 * 
-	 * @param repository
+	 * @param repository The repository to add the phonebook to.
 	 */
 	public static void addPhonebookModel(XRepository repository) {
 		
