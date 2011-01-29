@@ -16,7 +16,9 @@ import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.impl.memory.MemoryFieldCommand;
 import org.xydra.base.change.impl.memory.MemoryFieldEvent;
+import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.value.XValue;
+import org.xydra.core.XCopyUtils;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XLocalChangeCallback;
@@ -604,6 +606,14 @@ public class MemoryField implements XField, Serializable {
 	@Override
 	public String toString() {
 		return this.getID() + "-v" + this.getRevisionNumber();
+	}
+	
+	@Override
+	synchronized public XRevWritableField createSnapshot() {
+		if(this.removed) {
+			return null;
+		}
+		return XCopyUtils.createSnapshot(this);
 	}
 	
 }

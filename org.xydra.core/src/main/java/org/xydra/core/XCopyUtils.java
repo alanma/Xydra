@@ -12,6 +12,7 @@ import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.XWritableRepository;
+import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.model.XModel;
@@ -47,7 +48,7 @@ public class XCopyUtils {
 		for(XID objectId : sourceModel) {
 			XReadableObject sourceObject = sourceModel.getObject(objectId);
 			XWritableObject targetObject = targetModel.createObject(objectId);
-			XCopyUtils.copyData(sourceObject, targetObject);
+			copyData(sourceObject, targetObject);
 		}
 	}
 	
@@ -94,7 +95,7 @@ public class XCopyUtils {
 	 * deleted.
 	 * 
 	 * @param sourceModel The {@link XReadableModel} which is to be copied
-	 * @param targetModel The {@link SimpleModel} in which the data of
+	 * @param targetModel The {@link XRevWritableModel} in which the data of
 	 *            sourceModel is to be pasted.
 	 */
 	public static void copyDataAndRevisions(XReadableModel sourceModel,
@@ -103,7 +104,7 @@ public class XCopyUtils {
 		for(XID objectId : sourceModel) {
 			XReadableObject object = sourceModel.getObject(objectId);
 			XRevWritableObject localObject = targetModel.createObject(object.getID());
-			XCopyUtils.copyDataAndRevisions(object, localObject);
+			copyDataAndRevisions(object, localObject);
 		}
 	}
 	
@@ -113,7 +114,7 @@ public class XCopyUtils {
 	 * not deleted.
 	 * 
 	 * @param sourceObject The {@link XReadableObject} which is to be copied
-	 * @param targetObject The {@link SimpleObject} in which the data of
+	 * @param targetObject The {@link XRevWritableObject} in which the data of
 	 *            sourceObject is to be pasted.
 	 */
 	public static void copyDataAndRevisions(XReadableObject sourceObject,
@@ -122,9 +123,23 @@ public class XCopyUtils {
 		for(XID fieldId : sourceObject) {
 			XReadableField sourceField = sourceObject.getField(fieldId);
 			XRevWritableField targetField = targetObject.createField(fieldId);
-			targetField.setRevisionNumber(sourceField.getRevisionNumber());
-			targetField.setValue(sourceField.getValue());
+			copyDataAndRevisions(sourceField, targetField);
 		}
+	}
+	
+	/**
+	 * Copy all state information from sourceField to targetField. Possibly
+	 * targetField some data in targetObject. Existing data in targetObject is
+	 * not deleted.
+	 * 
+	 * @param sourceField The {@link XReadableField} which is to be copied
+	 * @param targetField The {@link XRevWritableField} in which the data of
+	 *            sourceField is to be pasted.
+	 */
+	public static void copyDataAndRevisions(XReadableField sourceField,
+	        XRevWritableField targetField) {
+		targetField.setRevisionNumber(sourceField.getRevisionNumber());
+		targetField.setValue(sourceField.getValue());
 	}
 	
 	public static XModel copyModel(XID actor, String password, XReadableModel modelSnapshot) {
@@ -163,6 +178,20 @@ public class XCopyUtils {
 		XRevWritableObject targetObject = new SimpleObject(sourceObject.getAddress());
 		copyDataAndRevisions(sourceObject, targetObject);
 		return targetObject;
+	}
+	
+	/**
+	 * Copy all state information from sourceField.
+	 * 
+	 * @param sourceField The {@link XReadableField} which is to be copied
+	 */
+	public static XRevWritableField createSnapshot(XReadableField sourceField) {
+		if(sourceField == null) {
+			return null;
+		}
+		XRevWritableField targetField = new SimpleField(sourceField.getAddress());
+		copyDataAndRevisions(sourceField, targetField);
+		return targetField;
 	}
 	
 }

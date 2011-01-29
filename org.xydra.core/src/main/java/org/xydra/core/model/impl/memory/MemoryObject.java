@@ -20,6 +20,8 @@ import org.xydra.base.change.impl.memory.MemoryFieldEvent;
 import org.xydra.base.change.impl.memory.MemoryObjectCommand;
 import org.xydra.base.change.impl.memory.MemoryObjectEvent;
 import org.xydra.base.rmof.XReadableModel;
+import org.xydra.base.rmof.XRevWritableObject;
+import org.xydra.core.XCopyUtils;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XLocalChangeCallback;
@@ -51,6 +53,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		MemoryChangeLog log = logState == null ? null : new MemoryChangeLog(logState);
 		return new MemoryEventManager(actorId, passwordHash, log, objectState.getRevisionNumber());
 	}
+	
 	private static XObjectState createObjectState(XID objectId) {
 		XAddress objectAddr = XX.toAddress(null, null, objectId, null);
 		XChangeLogState changeLogState = new MemoryChangeLogState(objectAddr);
@@ -270,9 +273,9 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		
 		if(field.getValue() != null) {
 			assert inTrans;
-			XFieldEvent event = MemoryFieldEvent.createRemoveEvent(actor, field.getAddress(),
-			        field.getValue(), modelRev, getRevisionNumber(), field.getRevisionNumber(),
-			        inTrans, true);
+			XFieldEvent event = MemoryFieldEvent.createRemoveEvent(actor, field.getAddress(), field
+			        .getValue(), modelRev, getRevisionNumber(), field.getRevisionNumber(), inTrans,
+			        true);
 			this.eventQueue.enqueueFieldEvent(field, event);
 		}
 		
@@ -719,6 +722,14 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	@Override
 	public String toString() {
 		return this.getID() + "-v" + this.getRevisionNumber() + " " + this.state.toString();
+	}
+	
+	@Override
+	public XRevWritableObject createSnapshot() {
+		if(this.removed) {
+			return null;
+		}
+		return XCopyUtils.createSnapshot(this);
 	}
 	
 }

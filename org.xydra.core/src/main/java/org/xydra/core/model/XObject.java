@@ -6,6 +6,7 @@ import org.xydra.base.XID;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XObjectCommand;
 import org.xydra.base.change.XObjectEvent;
+import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.core.model.state.XObjectState;
 
@@ -96,5 +97,13 @@ public interface XObject extends XLoggedObject, XWritableObject, XSynchronizesCh
 	 */
 	@ModificationOperation
 	boolean removeField(XID fieldId);
+	
+	/**
+	 * Create a consistent snapshot of this object and all contained fields.
+	 * 
+	 * @return null if this object has been removed, a consistent snapshot
+	 *         otherwise.
+	 */
+	XRevWritableObject createSnapshot();
 	
 }

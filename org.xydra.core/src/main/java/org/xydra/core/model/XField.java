@@ -7,6 +7,7 @@ import org.xydra.base.XID;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldCommand;
+import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.state.XFieldState;
@@ -79,5 +80,13 @@ public interface XField extends XLoggedField, XWritableField, Serializable {
 	 */
 	@ModificationOperation
 	boolean setValue(XValue value);
+	
+	/**
+	 * Create a consistent snapshot of this field.
+	 * 
+	 * @return null if this field has been removed, a consistent snapshot
+	 *         otherwise.
+	 */
+	XRevWritableField createSnapshot();
 	
 }

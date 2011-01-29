@@ -24,6 +24,8 @@ import org.xydra.base.change.impl.memory.MemoryModelEvent;
 import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.base.change.impl.memory.MemoryRepositoryEvent;
 import org.xydra.base.rmof.XReadableModel;
+import org.xydra.base.rmof.XRevWritableModel;
+import org.xydra.core.XCopyUtils;
 import org.xydra.core.change.XModelEventListener;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XLocalChangeCallback;
@@ -54,6 +56,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		changeLogState.setFirstRevisionNumber(modelAddr.getRepository() == null ? 1 : 0);
 		return new TemporaryModelState(modelAddr, changeLogState);
 	}
+	
 	/** The father-repository of this MemoryModel */
 	private final MemoryRepository father;
 	
@@ -74,8 +77,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	protected MemoryModel(XID actorId, String passwordHash, MemoryRepository father,
 	        XModelState modelState) {
 		super(new MemoryEventManager(actorId, passwordHash,
-		        modelState.getChangeLogState() == null ? null : new MemoryChangeLog(
-		                modelState.getChangeLogState()), modelState.getRevisionNumber()));
+		        modelState.getChangeLogState() == null ? null : new MemoryChangeLog(modelState
+		                .getChangeLogState()), modelState.getRevisionNumber()));
 		
 		this.state = modelState;
 		this.father = father;
@@ -726,6 +729,14 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	@Override
 	public String toString() {
 		return this.state.toString();
+	}
+	
+	@Override
+	public XRevWritableModel createSnapshot() {
+		if(this.removed) {
+			return null;
+		}
+		return XCopyUtils.createSnapshot(this);
 	}
 	
 }

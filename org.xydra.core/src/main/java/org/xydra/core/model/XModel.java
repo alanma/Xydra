@@ -8,6 +8,7 @@ import org.xydra.base.XID;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XModelCommand;
 import org.xydra.base.change.XModelEvent;
+import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.core.model.state.XModelState;
 
@@ -101,5 +102,14 @@ public interface XModel extends XLoggedModel, XWritableModel, Serializable, XSyn
 	 */
 	@ModificationOperation
 	boolean removeObject(XID objectId);
+	
+	/**
+	 * Create a consistent snapshot of this model and all contained objects and
+	 * fields.
+	 * 
+	 * @return null if this model has been removed, a consistent snapshot
+	 *         otherwise.
+	 */
+	XRevWritableModel createSnapshot();
 	
 }
