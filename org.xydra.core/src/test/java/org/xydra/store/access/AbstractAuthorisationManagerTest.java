@@ -1,4 +1,4 @@
-package org.xydra.core.access;
+package org.xydra.store.access;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -23,7 +23,7 @@ import org.xydra.store.access.impl.memory.MemoryGroupDatabase;
  * @author dscharrer
  * 
  */
-abstract public class AbstractAccessManagerTest {
+abstract public class AbstractAuthorisationManagerTest {
 	
 	private XID access;
 	

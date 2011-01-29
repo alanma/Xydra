@@ -1,4 +1,4 @@
-package org.xydra.core.access;
+package org.xydra.store.access;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
