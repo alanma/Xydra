@@ -132,7 +132,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	@Override
 	protected void checkRemoved() throws IllegalStateException {
 		if(this.removed) {
-			throw new IllegalStateException("this object has been removed");
+			throw new IllegalStateException("this object has been removed: " + getAddress());
 		}
 	}
 	
@@ -295,30 +295,33 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		
 		MemoryObject memoryObject = (MemoryObject)object;
 		
-		// compare revision number, father-model id (if it exists),
-		// father-repository id (if it exists)
-		boolean result = (this.getRevisionNumber() == memoryObject.getRevisionNumber())
-		        && (this.getID().equals(memoryObject.getID()));
-		
-		if(this.father != null) {
-			if(memoryObject.father == null) {
-				return false;
-			}
+		synchronized(this.eventQueue) {
 			
-			result = result && (this.father.getID().equals(memoryObject.father.getID()));
+			// compare revision number, father-model id (if it exists),
+			// father-repository id (if it exists)
+			boolean result = (this.getRevisionNumber() == memoryObject.getRevisionNumber())
+			        && (this.getID().equals(memoryObject.getID()));
 			
-			if(this.father.hasFather()) {
-				if(memoryObject.father.getFather() == null) {
+			if(this.father != null) {
+				if(memoryObject.father == null) {
 					return false;
 				}
 				
-				result = result
-				        && (this.father.getFather().getID().equals(memoryObject.father.getFather()
-				                .getID()));
+				result = result && (this.father.getID().equals(memoryObject.father.getID()));
+				
+				if(this.father.hasFather()) {
+					if(memoryObject.father.getFather() == null) {
+						return false;
+					}
+					
+					result = result
+					        && (this.father.getFather().getID().equals(memoryObject.father
+					                .getFather().getID()));
+				}
 			}
+			
+			return result;
 		}
-		
-		return result;
 	}
 	
 	public long executeCommand(XCommand command) {
@@ -336,6 +339,8 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 			MemoryField field = getField(command.getTarget().getField());
 			if(field != null) {
 				return field.executeFieldCommand((XFieldCommand)command, callback);
+			} else {
+				return XCommand.FAILED;
 			}
 		}
 		throw new IllegalArgumentException("Unknown command type: " + command);
@@ -542,18 +547,22 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	@ReadOperation
 	@Override
 	public int hashCode() {
-		int hashCode = this.getID().hashCode() + (int)this.getRevisionNumber();
-		
-		if(this.father != null) {
-			hashCode += this.father.getID().hashCode();
+		synchronized(this.eventQueue) {
 			
-			XRepository repoFather = this.father.getFather();
+			int hashCode = this.getID().hashCode() + (int)this.getRevisionNumber();
 			
-			if(repoFather != null) {
-				hashCode += repoFather.getID().hashCode();
+			if(this.father != null) {
+				hashCode += this.father.getID().hashCode();
+				
+				XRepository repoFather = this.father.getFather();
+				
+				if(repoFather != null) {
+					hashCode += repoFather.getID().hashCode();
+				}
 			}
+			
+			return hashCode;
 		}
-		return hashCode;
 	}
 	
 	protected boolean hasObject(XID objectId) {
@@ -726,10 +735,12 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	
 	@Override
 	public XRevWritableObject createSnapshot() {
-		if(this.removed) {
-			return null;
+		synchronized(this.eventQueue) {
+			if(this.removed) {
+				return null;
+			}
+			return XCopyUtils.createSnapshot(this);
 		}
-		return XCopyUtils.createSnapshot(this);
 	}
 	
 }

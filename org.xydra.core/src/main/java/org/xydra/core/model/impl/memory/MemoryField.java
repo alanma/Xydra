@@ -191,42 +191,45 @@ public class MemoryField implements XField, Serializable {
 		// Check value here to?! Max: not required, we can rely on
 		// revision Number
 		
-		boolean result = (this.getRevisionNumber() == memoryField.getRevisionNumber())
-		        && (this.getID().equals(memoryField.getID()));
-		
-		if(this.father != null) {
-			if(memoryField.father == null) {
-				return false;
-			}
+		synchronized(this.eventQueue) {
 			
-			result = result && (this.father.getID().equals(memoryField.father.getID()));
+			boolean result = (this.getRevisionNumber() == memoryField.getRevisionNumber())
+			        && (this.getID().equals(memoryField.getID()));
 			
-			MemoryModel fatherModel = this.father.getModel();
-			
-			if(fatherModel != null) {
-				MemoryModel memoryFieldModel = memoryField.father.getModel();
-				
-				if(memoryFieldModel == null) {
+			if(this.father != null) {
+				if(memoryField.father == null) {
 					return false;
 				}
 				
-				result = result && (fatherModel.getID().equals(memoryFieldModel.getID()));
+				result = result && (this.father.getID().equals(memoryField.father.getID()));
 				
-				XRepository fatherRepo = fatherModel.getFather();
+				MemoryModel fatherModel = this.father.getModel();
 				
-				if(fatherRepo != null) {
-					XRepository memoryFieldRepo = memoryFieldModel.getFather();
+				if(fatherModel != null) {
+					MemoryModel memoryFieldModel = memoryField.father.getModel();
 					
-					if(memoryFieldRepo == null) {
+					if(memoryFieldModel == null) {
 						return false;
 					}
 					
-					result = result && (fatherRepo.getID().equals(memoryFieldRepo.getID()));
+					result = result && (fatherModel.getID().equals(memoryFieldModel.getID()));
+					
+					XRepository fatherRepo = fatherModel.getFather();
+					
+					if(fatherRepo != null) {
+						XRepository memoryFieldRepo = memoryFieldModel.getFather();
+						
+						if(memoryFieldRepo == null) {
+							return false;
+						}
+						
+						result = result && (fatherRepo.getID().equals(memoryFieldRepo.getID()));
+					}
 				}
 			}
+			
+			return result;
 		}
-		
-		return result;
 	}
 	
 	public long executeFieldCommand(XFieldCommand command) {
@@ -409,7 +412,9 @@ public class MemoryField implements XField, Serializable {
 	
 	@Override
 	public XID getSessionActor() {
-		return this.eventQueue.getActor();
+		synchronized(this.eventQueue) {
+			return this.eventQueue.getActor();
+		}
 	}
 	
 	/**
@@ -434,27 +439,29 @@ public class MemoryField implements XField, Serializable {
 	
 	@Override
 	public int hashCode() {
-		int hashCode = this.getID().hashCode() + (int)this.getRevisionNumber();
-		
-		if(this.father != null) {
-			hashCode += this.father.getID().hashCode();
+		synchronized(this.eventQueue) {
+			int hashCode = this.getID().hashCode() + (int)this.getRevisionNumber();
 			
-			XModel fatherModel = this.father.getModel();
-			
-			if(fatherModel != null) {
-				hashCode += fatherModel.getID().hashCode();
+			if(this.father != null) {
+				hashCode += this.father.getID().hashCode();
 				
-				if(fatherModel instanceof MemoryModel) {
-					XRepository repoFather = ((MemoryModel)fatherModel).getFather();
+				XModel fatherModel = this.father.getModel();
+				
+				if(fatherModel != null) {
+					hashCode += fatherModel.getID().hashCode();
 					
-					if(repoFather != null) {
-						hashCode += repoFather.getID().hashCode();
+					if(fatherModel instanceof MemoryModel) {
+						XRepository repoFather = ((MemoryModel)fatherModel).getFather();
+						
+						if(repoFather != null) {
+							hashCode += repoFather.getID().hashCode();
+						}
 					}
 				}
 			}
+			
+			return hashCode;
 		}
-		
-		return hashCode;
 	}
 	
 	protected void incrementRevisionAndSave() {
@@ -507,10 +514,12 @@ public class MemoryField implements XField, Serializable {
 	
 	@Override
 	public void setSessionActor(XID actorId) {
-		if(this.father != null) {
-			throw new IllegalStateException("cannot set actor on field with a parent");
+		synchronized(this.eventQueue) {
+			if(this.father != null) {
+				throw new IllegalStateException("cannot set actor on field with a parent");
+			}
+			this.eventQueue.setSessionActor(actorId, null);
 		}
-		this.eventQueue.setSessionActor(actorId, null);
 	}
 	
 	/**

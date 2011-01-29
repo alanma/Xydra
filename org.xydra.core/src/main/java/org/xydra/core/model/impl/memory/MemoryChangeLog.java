@@ -33,7 +33,7 @@ public class MemoryChangeLog extends AbstractChangeLog implements XChangeLog {
 	 * 
 	 * @param event the {@link XEvent} which is to be appended
 	 */
-	protected void appendEvent(XEvent event, XStateTransaction transaction) {
+	synchronized protected void appendEvent(XEvent event, XStateTransaction transaction) {
 		// TODO
 		assert event == null || (event.getRevisionNumber() == getCurrentRevisionNumber() + 1) : "cannot append event with rev "
 		        + event.getRevisionNumber()
@@ -47,7 +47,7 @@ public class MemoryChangeLog extends AbstractChangeLog implements XChangeLog {
 		this.state.appendEvent(event, transaction);
 	}
 	
-	protected void delete(XStateTransaction transaction) {
+	synchronized protected void delete(XStateTransaction transaction) {
 		this.state.delete(transaction);
 	}
 	
@@ -83,12 +83,12 @@ public class MemoryChangeLog extends AbstractChangeLog implements XChangeLog {
 		return this.state.getFirstRevisionNumber();
 	}
 	
-	protected void save(XStateTransaction transaction) {
+	synchronized protected void save(XStateTransaction transaction) {
 		this.state.save(transaction);
 	}
 	
 	@Override
-	public String toString() {
+	synchronized public String toString() {
 		return this.state.toString();
 	}
 	
@@ -103,7 +103,8 @@ public class MemoryChangeLog extends AbstractChangeLog implements XChangeLog {
 	 *         number was smaller than the current revision number and greater
 	 *         than zero.
 	 */
-	protected boolean truncateToRevision(long revisionNumber, XStateTransaction transaction) {
+	synchronized protected boolean truncateToRevision(long revisionNumber,
+	        XStateTransaction transaction) {
 		return this.state.truncateToRevision(revisionNumber, transaction);
 	}
 	

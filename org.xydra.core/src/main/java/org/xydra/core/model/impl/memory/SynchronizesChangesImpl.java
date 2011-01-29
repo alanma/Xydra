@@ -137,13 +137,15 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 	
 	@Override
 	public int countUnappliedLocalChanges() {
-		int count = 0;
-		for(XLocalChange lc : this.eventQueue.getLocalChanges()) {
-			if(!lc.isApplied()) {
-				count++;
+		synchronized(this.eventQueue) {
+			int count = 0;
+			for(XLocalChange lc : this.eventQueue.getLocalChanges()) {
+				if(!lc.isApplied()) {
+					count++;
+				}
 			}
+			return count;
 		}
-		return count;
 	}
 	
 	/**
@@ -401,8 +403,10 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 	
 	@Override
 	public XLocalChange[] getLocalChanges() {
-		List<MemoryLocalChange> mlc = this.eventQueue.getLocalChanges();
-		return mlc.toArray(new XLocalChange[mlc.size()]);
+		synchronized(this.eventQueue) {
+			List<MemoryLocalChange> mlc = this.eventQueue.getLocalChanges();
+			return mlc.toArray(new XLocalChange[mlc.size()]);
+		}
 	}
 	
 	/**
@@ -433,12 +437,16 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 	
 	@Override
 	public XID getSessionActor() {
-		return this.eventQueue.getActor();
+		synchronized(this.eventQueue) {
+			return this.eventQueue.getActor();
+		}
 	}
 	
 	@Override
 	public long getSynchronizedRevision() {
-		return this.eventQueue.getSyncRevision();
+		synchronized(this.eventQueue) {
+			return this.eventQueue.getSyncRevision();
+		}
 	}
 	
 	/**
@@ -791,7 +799,9 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 	
 	@Override
 	public void setSessionActor(XID actorId, String passwordHash) {
-		this.eventQueue.setSessionActor(actorId, passwordHash);
+		synchronized(this.eventQueue) {
+			this.eventQueue.setSessionActor(actorId, passwordHash);
+		}
 	}
 	
 	public boolean synchronize(XEvent[] remoteChanges) {

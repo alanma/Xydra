@@ -157,7 +157,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	@Override
 	protected void checkRemoved() throws IllegalStateException {
 		if(this.removed) {
-			throw new IllegalStateException("this model has been removed");
+			throw new IllegalStateException("this model has been removed: " + getAddress());
 		}
 	}
 	
@@ -319,22 +319,24 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		
 		MemoryModel model = (MemoryModel)object;
 		
-		// compare revision number, repository ID & modelId
-		if(this.father != null) {
-			if(model.father == null) {
-				return false;
+		synchronized(this.eventQueue) {
+			// compare revision number, repository ID & modelId
+			if(this.father != null) {
+				if(model.father == null) {
+					return false;
+				}
+				
+				return (getRevisionNumber() == model.getRevisionNumber())
+				        && (this.father.getID().equals(model.father.getID()))
+				        && (getID().equals(model.getID()));
+			} else {
+				if(model.father != null) {
+					return false;
+				}
+				
+				return (getRevisionNumber() == model.getRevisionNumber())
+				        && (getID().equals(model.getID()));
 			}
-			
-			return (getRevisionNumber() == model.getRevisionNumber())
-			        && (this.father.getID().equals(model.father.getID()))
-			        && (getID().equals(model.getID()));
-		} else {
-			if(model.father != null) {
-				return false;
-			}
-			
-			return (getRevisionNumber() == model.getRevisionNumber())
-			        && (getID().equals(model.getID()));
 		}
 	}
 	
@@ -584,13 +586,15 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	@Override
 	@ReadOperation
 	public int hashCode() {
-		int hashCode = getID().hashCode() + (int)getRevisionNumber();
-		
-		if(this.father != null) {
-			hashCode += this.father.getID().hashCode();
+		synchronized(this.eventQueue) {
+			int hashCode = getID().hashCode() + (int)getRevisionNumber();
+			
+			if(this.father != null) {
+				hashCode += this.father.getID().hashCode();
+			}
+			
+			return hashCode;
 		}
-		
-		return hashCode;
 	}
 	
 	public boolean hasObject(XID id) {
@@ -733,10 +737,12 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	
 	@Override
 	public XRevWritableModel createSnapshot() {
-		if(this.removed) {
-			return null;
+		synchronized(this.eventQueue) {
+			if(this.removed) {
+				return null;
+			}
+			return XCopyUtils.createSnapshot(this);
 		}
-		return XCopyUtils.createSnapshot(this);
 	}
 	
 }
