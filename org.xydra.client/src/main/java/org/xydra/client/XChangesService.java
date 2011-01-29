@@ -45,7 +45,7 @@ public interface XChangesService {
 		 * XExecutesCommands#executeCommand(): {@link XCommand#FAILED} if the
 		 * command failed, {@link XCommand#NOCHANGE} if the command didn't
 		 * change anything or the revision number of the event caused by the
-		 * command (or {@link XCommand#CHANGED} for repository commands).
+		 * command.
 		 * 
 		 * FIXME XCommand.CHANGED does not exist. Should it?
 		 */

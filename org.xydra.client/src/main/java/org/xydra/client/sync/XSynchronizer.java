@@ -43,12 +43,7 @@ public class XSynchronizer {
 	boolean requestRunning = false;
 	
 	/**
-	 * Start synchronizing the given model (which has no local changes) via the
-	 * given service. Any further changes applied directly to the model will be
-	 * lost. To persist changes supply the to the
-	 * {@link #executeCommand(XCommand, Callback)} Method.
-	 * 
-	 * FIXME there is no executeCommand method
+	 * Start synchronizing the given model via the given service.
 	 * 
 	 * @param addr The address of the entity on the server. This is needed for
 	 *            synchronizing single XObjects as the local copy of the entity
@@ -67,12 +62,7 @@ public class XSynchronizer {
 	}
 	
 	/**
-	 * Start synchronizing the given model (which has no local changes) via the
-	 * given service. Any further changes applied directly to the model will be
-	 * lost. To persist changes supply the to the
-	 * {@link #executeCommand(XCommand, Callback)} Method.
-	 * 
-	 * FIXME there is no executeCommand method
+	 * Start synchronizing the given model via the given service.
 	 */
 	public XSynchronizer(XModel entity, XChangesService service) {
 		this(entity.getAddress(), entity, service);
