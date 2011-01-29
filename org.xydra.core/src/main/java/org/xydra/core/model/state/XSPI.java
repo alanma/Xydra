@@ -9,8 +9,6 @@ import org.xydra.log.LoggerFactory;
  * Service Provider Interface (SPI)
  * 
  * @author voelkel
- * 
- * @param <T> the transaction object type
  */
 public class XSPI {
 	
@@ -24,7 +22,7 @@ public class XSPI {
 	 * Note: This method is called internally and should normally not be called
 	 * by XModel API users.
 	 * 
-	 * @return the configured {@link XStateFactory} used for creating the inner
+	 * @return the configured {@link XStateStore} used for creating the inner
 	 *         state-entities.
 	 */
 	public static XStateStore getMemoryStateStore() {
@@ -38,13 +36,14 @@ public class XSPI {
 	 * Note: This method is called internally and should normally not be called
 	 * by XModel API users.
 	 * 
-	 * @return the configured {@link XStateFactory} used for creating the inner
+	 * @return the configured {@link XStateStore} used for creating the inner
 	 *         state-entities.
 	 */
 	public static XStateStore getStateStore() {
 		if(stateStore_ == null) {
 			
-			log.warn("No XStateStore has been set, defaulting to in-memory persistence. YOUR CHANGES WILL NOT BE PERSISTED ON DISK/CLOUD.");
+			log
+			        .warn("No XStateStore has been set, defaulting to in-memory persistence. YOUR CHANGES WILL NOT BE PERSISTED ON DISK/CLOUD.");
 			
 			stateStore_ = getMemoryStateStore();
 		}
@@ -52,10 +51,10 @@ public class XSPI {
 	}
 	
 	/**
-	 * Set the {@link XStateResolver} to be used by the back-end. Must be set
-	 * prior to calling {@link #getStateResolver()}.
+	 * Set the {@link XStateStore} to be used by the backend. Must be set prior
+	 * to calling {@link #getStateStore()}.
 	 * 
-	 * @param stateFactory
+	 * @param stateStore The new state backend to use.
 	 */
 	public static void setStateStore(XStateStore stateStore) {
 		stateStore_ = stateStore;

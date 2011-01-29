@@ -29,8 +29,8 @@ import org.xydra.core.model.XField;
 public interface XFieldState extends IHasXID, Serializable, IHasXAddress {
 	
 	/**
-	 * Delete this state information from the attached persistence layer, i.e.
-	 * the one determined by calling {@link XStateFactory}.create...().
+	 * Delete this state information from the attached persistence layer that
+	 * was used to create this {@link XFieldState}.
 	 * 
 	 * @param transaction If not null, persist the change at the end of the
 	 *            given transaction, otherwise persist it now. The transaction
@@ -42,10 +42,10 @@ public interface XFieldState extends IHasXID, Serializable, IHasXAddress {
 	
 	/**
 	 * Gets the current revision number of the {@link XField} which state is
-	 * being represented by this XFieldState.
+	 * being represented by this {@link XFieldState}.
 	 * 
 	 * @return The current revision number of the {@link XField} which state is
-	 *         being represented by this XFieldState.
+	 *         being represented by this {@link XFieldState}.
 	 */
 	long getRevisionNumber();
 	
@@ -59,8 +59,8 @@ public interface XFieldState extends IHasXID, Serializable, IHasXAddress {
 	XValue getValue();
 	
 	/**
-	 * Store this state information in the attached persistence layer, i.e. the
-	 * one determined by calling {@link XStateFactory}.create...().
+	 * Store this state information in the attached persistence layer that was
+	 * used to create this {@link XFieldState}.
 	 * 
 	 * @param transaction If not null, persist the change at the end of the
 	 *            given transaction, otherwise persist it now. The transaction

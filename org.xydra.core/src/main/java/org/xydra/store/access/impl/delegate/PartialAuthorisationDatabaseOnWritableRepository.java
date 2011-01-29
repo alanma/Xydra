@@ -7,9 +7,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.xydra.annotations.ModificationOperation;
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.WritableUtils;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -76,8 +76,8 @@ public class PartialAuthorisationDatabaseOnWritableRepository implements XAccess
 	/**
 	 * Apply those events with access rights change semantics.
 	 * 
-	 * @param events
-	 * @param fastAuthorisationDatabase
+	 * @param events The events to apply.
+	 * @param fastAuthorisationDatabase The database to apply the events to.
 	 */
 	public static void applyEventsTo(List<XEvent> events,
 	        XAuthorisationDatabaseWitListeners fastAuthorisationDatabase) {
@@ -143,8 +143,8 @@ public class PartialAuthorisationDatabaseOnWritableRepository implements XAccess
 			try {
 				Pair<XAddress,XID> pair = fromFieldId(fieldId);
 				XBooleanValue newAllowed = (XBooleanValue)fieldEvent.getNewValue();
-				fastDatabase.setAccess(event.getChangedEntity().getObject(), pair.getFirst(),
-				        pair.getSecond(), newAllowed.contents());
+				fastDatabase.setAccess(event.getChangedEntity().getObject(), pair.getFirst(), pair
+				        .getSecond(), newAllowed.contents());
 			} catch(IllegalArgumentException e) {
 				log.warn("Could not parse '" + fieldId + "' as encoded(XAddress/XID)");
 			}
@@ -168,8 +168,8 @@ public class PartialAuthorisationDatabaseOnWritableRepository implements XAccess
 			throw new IllegalArgumentException("Could not parse '" + fieldId
 			        + "' as XAddress/XID pair.");
 		}
-		return new Pair<XAddress,XID>(NamingUtils.decodeXAddress(parts[0]),
-		        NamingUtils.decodeXid(parts[1]));
+		return new Pair<XAddress,XID>(NamingUtils.decodeXAddress(parts[0]), NamingUtils
+		        .decodeXid(parts[1]));
 	}
 	
 	// TODO make non-public
@@ -235,7 +235,7 @@ public class PartialAuthorisationDatabaseOnWritableRepository implements XAccess
 	}
 	
 	/**
-	 * @param actorId
+	 * @param actorId Get only definitions for this actor.
 	 * @return all {@link XAccessRightDefinition} defined for actorId
 	 */
 	public Set<XAccessRightDefinition> getDefinitionsFor(XID actorId) {

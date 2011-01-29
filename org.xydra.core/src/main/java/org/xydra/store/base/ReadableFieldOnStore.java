@@ -36,10 +36,10 @@ public class ReadableFieldOnStore implements XReadableField, Serializable {
 	protected XydraStore store;
 	
 	/**
-	 * @param credentials
-	 * @param store must be in the same VM and may not be accessed over a
-	 *            network.
-	 * @param address
+	 * @param credentials The credentials used for accessing the store.
+	 * @param store The store to load from. must be in the same VM and may not
+	 *            be accessed over a network.
+	 * @param address The address of the field to load.
 	 */
 	public ReadableFieldOnStore(Credentials credentials, XydraStore store, XAddress address) {
 		this.store = store;
@@ -82,8 +82,8 @@ public class ReadableFieldOnStore implements XReadableField, Serializable {
 	}
 	
 	protected void load() {
-		this.store.getObjectSnapshots(this.credentials.getActorId(),
-		        this.credentials.getPasswordHash(), new XAddress[] { this.address.getParent() },
+		this.store.getObjectSnapshots(this.credentials.getActorId(), this.credentials
+		        .getPasswordHash(), new XAddress[] { this.address.getParent() },
 		        new Callback<BatchedResult<XReadableObject>[]>() {
 			        
 			        @Override

@@ -28,10 +28,10 @@ public class ReadableObjectOnStore implements XReadableObject, Serializable {
 	protected XydraStore store;
 	
 	/**
-	 * @param credentials
-	 * @param store must be in the same VM and may not be accessed over a
-	 *            network.
-	 * @param address
+	 * @param credentials The credentials used for accessing the store.
+	 * @param store The store to read from. must be in the same VM and may not
+	 *            be accessed over a network.
+	 * @param address The address of the object to load.
 	 */
 	public ReadableObjectOnStore(Credentials credentials, XydraStore store, XAddress address) {
 		this.store = store;
@@ -76,8 +76,8 @@ public class ReadableObjectOnStore implements XReadableObject, Serializable {
 	}
 	
 	protected void load() {
-		this.store.getObjectSnapshots(this.credentials.getActorId(),
-		        this.credentials.getPasswordHash(), new XAddress[] { this.address },
+		this.store.getObjectSnapshots(this.credentials.getActorId(), this.credentials
+		        .getPasswordHash(), new XAddress[] { this.address },
 		        new Callback<BatchedResult<XReadableObject>[]>() {
 			        
 			        @Override

@@ -86,12 +86,14 @@ public class XStateUtils {
 	}
 	
 	/**
-	 * A fast, memory efficient comparison
+	 * Check if two iterators iterate over the same elements, but not
+	 * necessarily in the same order.
 	 * 
-	 * @param <T>
-	 * @param aIterator should be the smaller iterator of the two
-	 * @param bIterator
-	 * @return
+	 * @param <T> The type being iterated over.
+	 * @param aIterator The first iterator to compare. This should be the
+	 *            smaller iterator of the two for optimal performance.
+	 * @param bIterator The second iterator.
+	 * @return true if both iterators iterate over the same elements.
 	 */
 	public static <T> boolean equals(Iterator<T> aIterator, Iterator<T> bIterator) {
 		Collection<T> aCollection = new HashSet<T>();

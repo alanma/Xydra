@@ -13,7 +13,7 @@ import java.security.NoSuchAlgorithmException;
 public class HashUtils {
 	
 	/**
-	 * @param input
+	 * @param input The string to hash.
 	 * @return the MD5 hash of the given input
 	 */
 	public static String getMD5(String input) {
@@ -34,7 +34,7 @@ public class HashUtils {
 	}
 	
 	/**
-	 * @param input
+	 * @param input The password to hash.
 	 * @return an MD5 hash of the input padded with "Xydra".
 	 */
 	public static String getXydraPasswordHash(String input) {

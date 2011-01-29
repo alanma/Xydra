@@ -31,8 +31,8 @@ public class WritableRepositoryOnStore extends ReadableRepositoryOnStore impleme
 	private static final long serialVersionUID = -6112519567015753881L;
 	
 	/**
-	 * @param credentials
-	 * @param store
+	 * @param credentials The credentials used for accessing the store.
+	 * @param store The sore to load from and persist changes to.
 	 */
 	public WritableRepositoryOnStore(Credentials credentials, XydraStore store) {
 		super(credentials, store);

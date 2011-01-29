@@ -30,8 +30,8 @@ public interface XChangeLogState extends Serializable {
 	void appendEvent(XEvent event, XStateTransaction transaction);
 	
 	/**
-	 * Delete this state information from the attached persistence layer, i.e.
-	 * the one determined by calling {@link XStateFactory}.create...().
+	 * Delete this state information from the attached persistence layer it was
+	 * created with.
 	 * 
 	 * @param transaction If not null, persist the change at the end of the
 	 *            given transaction, otherwise persist it now. The transaction
@@ -75,8 +75,8 @@ public interface XChangeLogState extends Serializable {
 	long getFirstRevisionNumber();
 	
 	/**
-	 * Store the data of this object in the attached persistence layer, i.e. the
-	 * one determined by calling {@link XStateFactory}.create...().
+	 * Store the data of this object in the attached persistence layer this
+	 * {@link XChangeLogState} was created with.
 	 * 
 	 * @param transaction If not null, persist the change at the end of the
 	 *            given transaction, otherwise persist it now. The transaction

@@ -32,9 +32,6 @@ public class MemoryChangeLogState implements XChangeLogState {
 	 * @param baseAddr The {@link XAddress} of the entity holding the
 	 *            MemoryChangeLog which is represented by this
 	 *            MemoryChangeLogState
-	 * @param revisionNumber The current revision number of the entity holding
-	 *            the MemoryChangeLog which is represented by this
-	 *            MemoryChangeLogState
 	 */
 	public MemoryChangeLogState(XAddress baseAddr) {
 		this.baseAddr = baseAddr;

@@ -57,11 +57,9 @@ public interface XAuthorisationManager {
 	public boolean canKnowAboutField(XID actor, XAddress objectAddr, XID fieldId);
 	
 	/**
-	 */
-	/**
-	 * @param actor
+	 * @param actor The actor who wan'ts to access the model.
 	 * @param repoAddr TODO why not just use the repoId here? ~~max
-	 * @param modelId
+	 * @param modelId The ID of the model being accessed.
 	 * @return true if the actor is allowed to know about the existence of the
 	 *         specified {@link XModel}
 	 */

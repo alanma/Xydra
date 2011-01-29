@@ -57,10 +57,10 @@ public class ReadableModelOnStore implements XReadableModel, Serializable {
 	protected XydraStore store;
 	
 	/**
-	 * @param credentials
-	 * @param store must be in the same VM and may not be accessed over a
-	 *            network.
-	 * @param address
+	 * @param credentials The credentials used for accessing the store.
+	 * @param store The store to load from. must be in the same VM and may not
+	 *            be accessed over a network.
+	 * @param address The address of the model to load.
 	 */
 	public ReadableModelOnStore(Credentials credentials, XydraStore store, XAddress address) {
 		this.store = store;
@@ -106,8 +106,8 @@ public class ReadableModelOnStore implements XReadableModel, Serializable {
 	
 	protected synchronized void load() {
 		LoadingCallback callback = new LoadingCallback();
-		this.store.getModelSnapshots(this.credentials.getActorId(),
-		        this.credentials.getPasswordHash(), new XAddress[] { this.address }, callback);
+		this.store.getModelSnapshots(this.credentials.getActorId(), this.credentials
+		        .getPasswordHash(), new XAddress[] { this.address }, callback);
 		while(!callback.done) {
 			try {
 				callback.wait();

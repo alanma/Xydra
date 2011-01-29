@@ -106,7 +106,7 @@ public interface XStateStore {
 	 * @param fieldAddress The {@link XAddress} of the {@link XObjectState}
 	 *            which is to be returned (must not be null)
 	 * @return a previously persisted {@link XObjectState} or null, if no
-	 *         {@link ObjectState} with the given {@link XAddress} exists.
+	 *         {@link XObjectState} with the given {@link XAddress} exists.
 	 * @throws IllegalArgumentException if the given {@link XAddress} equals
 	 *             null.
 	 */

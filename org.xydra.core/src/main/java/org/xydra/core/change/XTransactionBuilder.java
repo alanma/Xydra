@@ -33,20 +33,21 @@ import org.xydra.core.model.delta.ChangedObject;
 /**
  * An XTransactionBuilder provides methods for building {@link XTransaction
  * XTransactions} that change {@link XModel XModels}/{@link XObject XObjects}/
- * {@link XField XFields} according to the given {@link XCommands}.
+ * {@link XField XFields} according to the given {@link XCommand XCommands}.
  * 
  * To build an {@link XTransaction} using an XTransactionBuilder, simply use the
  * constructor to create an XTransactionBuider referring to the {@link XModel}/
  * {@link XObject} you want to change, use the provided method to manipulate the
- * {@link XTransaction} you want to create and get it using the
- * {@link XTransaction#build} method. It is possible to have multiple
- * XTransactionBuilders referring to the same entity at the same time.
+ * {@link XTransaction} you want to create. The resulting transaction can be
+ * retrieved using the {@link #buildCommand()} or {@link #build()} methods.It is
+ * possible to have multiple XTransactionBuilders referring to the same entity
+ * at the same time.
  * 
  * Every XTransactionBuilder should only be used to create one
  * {@link XTransaction} to avoid confusions. It is possible to create multiple
- * {@link XTransactions} with only one XTransactionBuilder, but we strongly
- * encourage you to avoid this and look at each XTransactionBuilder instance as
- * an instance to create one specific {@link XTransaction}.
+ * {@link XTransaction XTransactions} with only one XTransactionBuilder, but we
+ * strongly encourage you to avoid this and look at each XTransactionBuilder
+ * instance as an instance to create one specific {@link XTransaction}.
  * 
  * @author dscharrer
  * 
@@ -63,7 +64,7 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * @param target The address of an {@link XModel} or an {@link XObject} to
 	 *            which all the commands in the {@link XTransaction} will apply.
 	 * @throws RuntimeException if the given {@link XAddress} is not an
-	 *             {@link XAddres} of an {@link XModel} or {@link XObject}
+	 *             {@link XAddress} of an {@link XModel} or {@link XObject}
 	 */
 	public XTransactionBuilder(XAddress target) {
 		
@@ -81,8 +82,7 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * index+size of the transaction which is being built by this transaction
 	 * builder.
 	 * 
-	 * @param command The {@link XCommand} which is to be added
-	 * @return true, if adding the {@link XCommand} was successful, false if not
+	 * @param command The {@link XCommand} which is to be added.
 	 * @throws IllegalArgumentException if the command is not an
 	 *             {@link XTransaction}, {@link XFieldCommand},
 	 *             {@link XObjectCommand} (or {@link XModelCommand} for model
@@ -127,7 +127,6 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * which is being built by this transaction builder.
 	 * 
 	 * @param command The {@link XCommand} which is to be added
-	 * @return true, if adding the {@link XCommand} was successful, false if not
 	 * @throws IllegalArgumentException if the command is not an
 	 *             {@link XTransaction}, {@link XFieldCommand},
 	 *             {@link XObjectCommand} (or {@link XModelCommand} for model
@@ -338,6 +337,10 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	}
 	
 	/**
+	 * Build a transaction from the added commands. This method will always
+	 * create a {@link XTransaction}, even if there is only one command. If this
+	 * is not desired, use {@link #buildCommand()}.
+	 * 
 	 * @return an {@link XTransaction} with the current contents of this
 	 *         builder.
 	 */
@@ -388,9 +391,9 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * that will change the state of one existing {@link XModel} into that of
 	 * another.
 	 * 
-	 * The revision number of the created {@link XCommands} will be set so that
-	 * the transaction will apply to the old {@link XModel} in the state it is
-	 * in while this method is being executed. Revision numbers in the new
+	 * The revision number of the created {@link XCommand XCommands} will be set
+	 * so that the transaction will apply to the old {@link XModel} in the state
+	 * it is in while this method is being executed. Revision numbers in the new
 	 * {@link XModel} are ignored.
 	 * 
 	 * @param oldModel The old {@link XModel} that is to be changed.
@@ -432,7 +435,7 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * 
 	 * @param oldObject The old {@link XObject} that is to be changed.
 	 * @param newObject The {@link XObject} to which state the oldObject will
-	 *            being changed to by the created {@link XCommands}.
+	 *            being changed to by the created {@link XCommand XCommands}.
 	 * 
 	 * @throws IllegalArgumentException if this builders target is not the
 	 *             oldObject or its parent {@link XModel}.
@@ -514,9 +517,9 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	}
 	
 	/**
-	 * @return an iterator over the {@link XCommands} which are currently part
-	 *         of the {@link XTransaction} which is being built by this
-	 *         transaction builder.
+	 * @return an iterator over the {@link XCommand XCommands} which are
+	 *         currently part of the {@link XTransaction} which is being built
+	 *         by this transaction builder.
 	 */
 	public Iterator<XAtomicCommand> iterator() {
 		return this.commands.iterator();
@@ -526,7 +529,6 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * Removes the {@link XCommand} at the given index from the
 	 * {@link XTransaction} which is built by this transaction builder.
 	 * 
-	 * @param actorID The {@link XID} of the actor of this {@link XTransaction}
 	 * @param index The index of the {@link XCommand} which is to be removed
 	 * @return the element previously at the given index or null if the method
 	 *         fails
@@ -547,9 +549,6 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * that are contained in the given {@link XTransaction} from the
 	 * {@link XTransaction} which is being built by this transaction builder.
 	 * 
-	 * This method will fail, if:
-	 * 
-	 * @param actorID The {@link XID} of the actor of this {@link XTransaction}
 	 * @param command The {@link XCommand} which is to be deleted
 	 * @return true if the {@link XTransaction} previously contained the given
 	 *         {@link XCommand}
@@ -646,8 +645,8 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 *             oldField.
 	 */
 	public void removeField(XReadableField oldField) {
-		removeField(oldField.getAddress().getParent(), oldField.getRevisionNumber(),
-		        oldField.getID());
+		removeField(oldField.getAddress().getParent(), oldField.getRevisionNumber(), oldField
+		        .getID());
 	}
 	
 	/**
@@ -683,8 +682,8 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 *             oldObject or its parent {@link XModel}.
 	 */
 	public void removeObject(XReadableObject oldObject) {
-		removeObject(oldObject.getAddress().getParent(), oldObject.getRevisionNumber(),
-		        oldObject.getID());
+		removeObject(oldObject.getAddress().getParent(), oldObject.getRevisionNumber(), oldObject
+		        .getID());
 	}
 	
 	/**
@@ -785,7 +784,7 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	}
 	
 	/**
-	 * @return the current number of {@link XCommands} of the
+	 * @return the current number of {@link XCommand XCommands} in the
 	 *         {@link XTransaction} which is being built by this transaction
 	 *         builder.
 	 */

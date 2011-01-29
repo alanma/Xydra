@@ -1,8 +1,8 @@
 package org.xydra.core.index.impl.memory;
 
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.X;
 import org.xydra.base.XID;
 import org.xydra.base.rmof.XWritableObject;
@@ -26,7 +26,7 @@ public abstract class AbstractObjectIndex {
 	/**
 	 * convert value to key
 	 * 
-	 * @param value
+	 * @param value The value to transform into an {@link XID}.
 	 * @return an XID parsed from an encoded XValue
 	 */
 	public static XID valueToXID(XValue value) {
@@ -67,7 +67,7 @@ public abstract class AbstractObjectIndex {
 	protected XWritableObject indexObject;
 	
 	/**
-	 * @param fieldId
+	 * @param fieldId The id of the field to index.
 	 * @param indexObject see {@link NamingUtils#getIndexModelId(XID, String)}
 	 *            to obtain a suitable XID for your index object
 	 */

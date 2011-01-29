@@ -56,12 +56,12 @@ public class XFile {
 	/**
 	 * Loads the given XModel.
 	 * 
-	 * @param actorId TODO
+	 * @param actorId actorId The initial session actor for the loaded mode.
 	 * @param file The file containing the model to be loaded.
 	 * 
 	 * @return The model. null if the given filename doesn't exist or doesn't
 	 *         hold a correct XModel
-	 * @throws IOException
+	 * @throws IOException If there was an error reading the file.
 	 */
 	public static XModel loadModel(XID actorId, String passwordHash, File file) throws IOException {
 		
@@ -76,12 +76,12 @@ public class XFile {
 	/**
 	 * Loads the given XModel.
 	 * 
-	 * @param actorId TODO
+	 * @param actorId actorId The initial session actor for the loaded mode.
 	 * @param filename The filename of the model to be loaded.
 	 * 
 	 * @return The model. null if the given filename doesn't exist or doesn't
 	 *         hold a correct XModel
-	 * @throws IOException
+	 * @throws IOException If there was an error reading the file.
 	 */
 	public static XModel loadModel(XID actorId, String passwordHash, String filename)
 	        throws IOException {
@@ -91,13 +91,13 @@ public class XFile {
 	/**
 	 * Loads the given XModel.
 	 * 
-	 * @param actorId TODO
+	 * @param actorId actorId The initial session actor for the loaded mode.
 	 * @param path The path of the file to be loaded.
 	 * @param name The filename of the model to be loaded.
 	 * 
 	 * @return The model. null if the given filename doesn't exist or doesn't
 	 *         hold a correct XModel
-	 * @throws IOException
+	 * @throws IOException If there was an error reading the file.
 	 */
 	public static XModel loadModel(XID actorId, String passwordHash, String path, String name)
 	        throws IOException {
@@ -107,12 +107,12 @@ public class XFile {
 	/**
 	 * Loads the given XRepository.
 	 * 
-	 * @param actorId TODO
+	 * @param actorId actorId The initial session actor for the loaded mode.
 	 * @param file The file containing the repository to be loaded.
 	 * 
 	 * @return The repository. null if the given file doesn't exist or doesn't
 	 *         hold a correct XRepository
-	 * @throws IOException
+	 * @throws IOException If there was an error reading the file.
 	 */
 	public static XRepository loadRepository(XID actorId, String passwordHash, File file)
 	        throws IOException {
@@ -128,12 +128,12 @@ public class XFile {
 	/**
 	 * Loads the given XRepository.
 	 * 
-	 * @param actorId TODO
+	 * @param actorId actorId The initial session actor for the loaded mode.
 	 * @param filename The filename of the repository to be loaded.
 	 * 
 	 * @return The repository. null if the given filename doesn't exist or
 	 *         doesn't hold a correct XRepository
-	 * @throws IOException
+	 * @throws IOException If there was an error reading the file.
 	 */
 	public static XRepository loadRepository(XID actorId, String passwordHash, String filename)
 	        throws IOException {
@@ -143,13 +143,13 @@ public class XFile {
 	/**
 	 * Loads the given XRepository.
 	 * 
-	 * @param actorId TODO
+	 * @param actorId The initial session actor for the loaded mode.
 	 * @param path The path of the file to be loaded.
 	 * @param filename The filename of the repository to be loaded.
 	 * 
 	 * @return The repository. null if the given filename doesn't exist or
 	 *         doesn't hold a correct XRepository
-	 * @throws IOException
+	 * @throws IOException If there was an error reading the file.
 	 */
 	public static XRepository loadRepository(XID actorId, String passwordHash, String path,
 	        String filename) throws IOException {
@@ -171,7 +171,7 @@ public class XFile {
 	 * 
 	 * @param model The model which will be saved
 	 * @param file The file in which the model will be saved
-	 * @throws IOException
+	 * @throws IOException If there was an error reading the file.
 	 */
 	public static void saveModel(XModel model, File file) throws IOException {
 		
@@ -189,7 +189,7 @@ public class XFile {
 	 * 
 	 * @param model The model which will be saved
 	 * @param filename The name of the file in which the model will be saved
-	 * @throws IOException
+	 * @throws IOException If there was an error reading the file.
 	 */
 	public static void saveModel(XModel model, String filename) throws IOException {
 		saveModel(model, null, filename);
@@ -202,7 +202,7 @@ public class XFile {
 	 * @param model The model which will be saved
 	 * @param path The directory in which the file will be saved
 	 * @param name The name of the file in which the model will be saved
-	 * @throws IOException
+	 * @throws IOException If there was an error reading the file.
 	 */
 	public static void saveModel(XModel model, String path, String name) throws IOException {
 		saveModel(model, getFileForModel(path, name));
@@ -213,7 +213,7 @@ public class XFile {
 	 * 
 	 * @param repository The repository which will be saved
 	 * @param file The file in which the repository will be saved
-	 * @throws IOException
+	 * @throws IOException If there was an error reading the file.
 	 */
 	public static void saveRepository(XReadableRepository repository, File file) throws IOException {
 		
@@ -232,7 +232,7 @@ public class XFile {
 	 * @param repository The repository which will be saved
 	 * @param filename The name of the file in which the repository will be
 	 *            saved
-	 * @throws IOException
+	 * @throws IOException If there was an error reading the file.
 	 */
 	public static void saveRepository(XReadableRepository repository, String filename)
 	        throws IOException {
@@ -245,7 +245,7 @@ public class XFile {
 	 * @param repository The repository which will be saved
 	 * @param path The directory in which the file will be saved
 	 * @param name The name of the file in which the repository will be saved
-	 * @throws IOException
+	 * @throws IOException If there was an error reading the file.
 	 */
 	public static void saveRepository(XReadableRepository repository, String path, String name)
 	        throws IOException {

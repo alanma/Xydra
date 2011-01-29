@@ -3,9 +3,9 @@ package org.xydra.store.access.impl.delegate;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.WritableUtils;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
@@ -70,7 +70,7 @@ public class ModelAccessDatabaseOnWritableModel {
 	}
 	
 	/**
-	 * @param actorId
+	 * @param actorId Get only definitions that apply to this actor.
 	 * @return all {@link XAccessRightDefinition} defined for actorId
 	 */
 	public Set<XAccessRightDefinition> getDefinitionsFor(XID actorId) {

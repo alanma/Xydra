@@ -12,6 +12,7 @@ import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.change.XModelCommand;
 import org.xydra.base.change.XObjectCommand;
@@ -28,7 +29,7 @@ import org.xydra.index.iterator.BagUnionIterator;
 
 
 /**
- * An {@link XReadableField}/{@link DeltaField} that represents changes to an
+ * An {@link XWritableModel} that represents changes to an
  * {@link XReadableField}.
  * 
  * An {@link XReadableField} is passed as an argument of the constructor. This
@@ -141,10 +142,10 @@ public class ChangedModel implements XWritableModel {
 	 * or field may cause several events while only needing one command.
 	 * 
 	 * @param max An upper bound for counting the amount of needed
-	 *            {@link XCommands}. Note that setting this bound to little may
-	 *            result in the return of an integer which does not actually
-	 *            represent the minimal amount of needed {@link XCommand
-	 *            XCommands} for the transformation.
+	 *            {@link XCommand XCommands}. Note that setting this bound to
+	 *            little may result in the return of an integer which does not
+	 *            actually represent the minimal amount of needed
+	 *            {@link XCommand XCommands} for the transformation.
 	 * @result the amount of needed {@link XCommand XCommands} for the
 	 *         transformation
 	 */
@@ -168,7 +169,7 @@ public class ChangedModel implements XWritableModel {
 	}
 	
 	/**
-	 * Count the number of {@link XEvents XEvents} that would be needed to log
+	 * Count the number of {@link XEvent XEvents} that would be needed to log
 	 * the transformation of the original {@link XReadableModel} to the current
 	 * state which is represented by this ChangedModel.
 	 * 
@@ -176,11 +177,11 @@ public class ChangedModel implements XWritableModel {
 	 * object or field may cause several events while only needing one command.
 	 * 
 	 * @param max An upper bound for counting the amount of needed
-	 *            {@link XEvents XEvents}. Note that setting this bound to
-	 *            little may result in the return of an integer which does not
-	 *            actually represent the minimal amount of needed
-	 *            {@link XEvents XEvents} for the transformation.
-	 * @result the amount of needed {@link XEvents XEvents} for the
+	 *            {@link XEvent XEvents}. Note that setting this bound to little
+	 *            may result in the return of an integer which does not actually
+	 *            represent the minimal amount of needed {@link XEvent XEvents}
+	 *            for the transformation.
+	 * @result the amount of needed {@link XEvent XEvents} for the
 	 *         transformation
 	 */
 	public int countEventsNeeded(int max) {
@@ -422,7 +423,7 @@ public class ChangedModel implements XWritableModel {
 	 * Apply the {@link XCommand XCommands} contained in the given
 	 * {@link XTransaction} and return true, if all {@link XCommand XCommands}
 	 * could be applied. If one of the {@link XCommand XCommands} failed, the
-	 * {@link XTransactio}n will remain partially applied, already executed
+	 * {@link XTransaction} will remain partially applied, already executed
 	 * {@link XCommand XCommands} will not be rolled back.
 	 * 
 	 * @param transaction The {@link XTransaction} which is to be executed
@@ -474,8 +475,8 @@ public class ChangedModel implements XWritableModel {
 	}
 	
 	/**
-	 * @return the {@link NewObject NewObjects} that have been added to this
-	 *         ChangedModel and were not contained in the original
+	 * @return the {@link SimpleObject SimpleObjects} that have been added to
+	 *         this ChangedModel and were not contained in the original
 	 *         {@link XReadableModel}
 	 */
 	public Iterable<SimpleObject> getNewObjects() {

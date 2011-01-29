@@ -5,13 +5,15 @@ import java.util.Iterator;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.change.XEvent;
+import org.xydra.base.value.XValue;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
 
 
 /**
  * A change log that {@link XModel XModels} use to log changes on themselves,
- * their {@link XObjects}, their {@link XFields} and their {@link XValues}.
+ * their {@link XObject XObjects}, their {@link XField XFields} and their
+ * {@link XValue XValues}.
  * 
  * @author Kaidel
  */

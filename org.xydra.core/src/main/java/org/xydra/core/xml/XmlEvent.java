@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.change.ChangeType;
@@ -175,10 +175,10 @@ public class XmlEvent {
 	/**
 	 * Get the {@link XAtomicEvent} represented by the given XML element.
 	 * 
-	 * @param context The XIDs of the repository, model, object and field to
-	 *            fill in if not specified in the XML. If the given element
-	 *            represents a transaction, the context for the contained events
-	 *            will be given by the transaction.
+	 * @param context The {@link XID XIDs} of the repository, model, object and
+	 *            field to fill in if not specified in the XML. If the given
+	 *            element represents a transaction, the context for the
+	 *            contained events will be given by the transaction.
 	 * @return The {@link XAtomicEvent} represented by the given XML element.
 	 * @throws IllegalArgumentException if the XML element does not represent a
 	 *             valid event.
@@ -210,12 +210,10 @@ public class XmlEvent {
 	/**
 	 * Get the {@link XEvent} represented by the given XML element.
 	 * 
-	 * @param context The XIDs of the repository, model, object and field to
-	 *            fill in if not specified in the XML. If the given element
-	 *            represents a transaction, the context for the contained events
-	 *            will be given by the transaction.
-	 * @param defaultActor If the XML element does not specify an actor, this
-	 *            will be filled in.
+	 * @param context The {@link XID XIDs} of the repository, model, object and
+	 *            field to fill in if not specified in the XML. If the given
+	 *            element represents a transaction, the context for the
+	 *            contained events will be given by the transaction.
 	 * @return The {@link XEvent} represented by the given XML element.
 	 * @throws IllegalArgumentException if the XML element does not represent a
 	 *             valid event.
@@ -238,9 +236,9 @@ public class XmlEvent {
 	/**
 	 * Get the {@link XEvent} list represented by the given XML element.
 	 * 
-	 * @param context The XIDs of the repository, model, object and field to
-	 *            fill in if not specified in the XML. The context for the
-	 *            events contained in the transaction will be given by the
+	 * @param context The {@link XID XIDs} of the repository, model, object and
+	 *            field to fill in if not specified in the XML. The context for
+	 *            the events contained in the transaction will be given by the
 	 *            transaction.
 	 * @return The {@link List} of {@link XEvent}s represented by the given XML
 	 *         element.
@@ -265,8 +263,8 @@ public class XmlEvent {
 	/**
 	 * Get the {@link XFieldEvent} represented by the given XML element.
 	 * 
-	 * @param context The XIDs of the repository, model, object and field to
-	 *            fill in if not specified in the XML.
+	 * @param context The {@link XID XIDs} of the repository, model, object and
+	 *            field to fill in if not specified in the XML.
 	 * @return The {@link XFieldEvent} represented by the given XML element.
 	 * @throws IllegalArgumentException if the XML element does not represent a
 	 *             valid event.
@@ -342,8 +340,8 @@ public class XmlEvent {
 	/**
 	 * Get the {@link XModelEvent} represented by the given XML element.
 	 * 
-	 * @param context The XIDs of the repository and model to fill in if not
-	 *            specified in the XML.
+	 * @param context The {@link XID XIDs} of the repository and model to fill
+	 *            in if not specified in the XML.
 	 * @return The {@link XModelEvent} represented by the given XML element.
 	 * @throws IllegalArgumentException if the XML element does not represent a
 	 *             valid event.
@@ -400,8 +398,8 @@ public class XmlEvent {
 	/**
 	 * Get the {@link XObjectEvent} represented by the given XML element.
 	 * 
-	 * @param context The XIDs of the repository, model and object to fill in if
-	 *            not specified in the XML.
+	 * @param context The {@link XID XIDs} of the repository, model and object
+	 *            to fill in if not specified in the XML.
 	 * @return The {@link XObjectEvent} represented by the given XML element.
 	 * @throws IllegalArgumentException if the XML element does not represent a
 	 *             valid event.
@@ -459,8 +457,8 @@ public class XmlEvent {
 	/**
 	 * Get the {@link XRepositoryEvent} represented by the given XML element.
 	 * 
-	 * @param context The XID of the repository to fill in if not specified in
-	 *            the XML.
+	 * @param context The {@link XID} of the repository to fill in if not
+	 *            specified in the XML.
 	 * @return The {@link XRepositoryEvent} represented by the given XML
 	 *         element.
 	 * @throws IllegalArgumentException if the XML element does not represent a
@@ -520,9 +518,9 @@ public class XmlEvent {
 	/**
 	 * Get the {@link XTransactionEvent} represented by the given XML element.
 	 * 
-	 * @param context The XIDs of the repository, model, object and field to
-	 *            fill in if not specified in the XML. The context for the
-	 *            events contained in the transaction will be given by the
+	 * @param context The {@link XID XIDs} of the repository, model, object and
+	 *            field to fill in if not specified in the XML. The context for
+	 *            the events contained in the transaction will be given by the
 	 *            transaction.
 	 * @return The {@link XTransactionEvent} represented by the given XML
 	 *         element.
@@ -546,10 +544,10 @@ public class XmlEvent {
 			        + " does not specify a model or object target.");
 		}
 		
-		long objectRev = getRevision(xml, XFIELDEVENT_ELEMENT, OBJECTREVISION_ATTRIBUTE,
-		        target.getObject() != null);
-		long modelRev = getRevision(xml, XFIELDEVENT_ELEMENT, MODELREVISION_ATTRIBUTE,
-		        target.getObject() == null);
+		long objectRev = getRevision(xml, XFIELDEVENT_ELEMENT, OBJECTREVISION_ATTRIBUTE, target
+		        .getObject() != null);
+		long modelRev = getRevision(xml, XFIELDEVENT_ELEMENT, MODELREVISION_ATTRIBUTE, target
+		        .getObject() == null);
 		
 		XID actor = XmlUtils.getOptionalXidAttribute(xml, ACTOR_ATTRIBUTE, null);
 		
@@ -567,7 +565,7 @@ public class XmlEvent {
 	/**
 	 * Encode the given {@link XEvent} list as an XML element.
 	 * 
-	 * @param event The event to encode.
+	 * @param events The events to encode.
 	 * @param out The XML encoder to write to.
 	 * @param context The part of this event's target address that doesn't need
 	 *            to be encoded in the element.
@@ -750,7 +748,7 @@ public class XmlEvent {
 	/**
 	 * Encode the given {@link XTransactionEvent} as an XML element.
 	 * 
-	 * @param event The event to encode.
+	 * @param trans The transaction to encode.
 	 * @param out The XML encoder to write to.
 	 * @param context The part of this event's target address that doesn't need
 	 *            to be encoded in the element.

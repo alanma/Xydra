@@ -19,7 +19,8 @@ public class ExecuteCommandsUtils {
 	
 	private static class WaitingCallback implements Callback<BatchedResult<Long>[]> {
 		
-		public boolean done = false;
+		protected boolean done = false;
+		protected long result;
 		
 		@Override
 		public void onFailure(Throwable exception) {
@@ -37,7 +38,7 @@ public class ExecuteCommandsUtils {
 			 * TODO better error handling if getResult is null because
 			 * getException has an AccessException
 			 */
-			ExecuteCommandsUtils.result = object[0].getResult();
+			this.result = object[0].getResult();
 			// thread communication
 			this.done = true;
 			this.notifyAll();
@@ -47,35 +48,32 @@ public class ExecuteCommandsUtils {
 	
 	private static final Logger log = LoggerFactory.getLogger(ExecuteCommandsUtils.class);
 	
-	private static long result;
-	
 	/**
 	 * Execute a single command and return synchronously the result
 	 * 
-	 * @param credentials
-	 * @param store
-	 * @param command
+	 * @param credentials The credentials used for executing the command.
+	 * @param store The store to execute the command on.
+	 * @param command The command to execute.
 	 * @return the result of executing the command. See {@link XCommand} for
 	 *         values.
 	 */
-	// TODO why is this synchronized for all users of WritableUtils and not just
-	// for one command? ~Daniel. Max: because i dont know how
-	public static synchronized long executeCommand(Credentials credentials, XydraStore store,
-	        XCommand command) {
+	public static long executeCommand(Credentials credentials, XydraStore store, XCommand command) {
 		WaitingCallback callback = new WaitingCallback();
-		store.executeCommands(credentials.getActorId(), credentials.getPasswordHash(),
-		        new XCommand[] { command }, callback);
-		while(!callback.done) {
-			try {
-				// TODO add a suitable timeout (which should be larger than the
-				// XydraStore timeout)
-				callback.wait();
-			} catch(InterruptedException e) {
-				log.debug("Could not wait", e);
+		synchronized(callback) {
+			store.executeCommands(credentials.getActorId(), credentials.getPasswordHash(),
+			        new XCommand[] { command }, callback);
+			while(!callback.done) {
+				try {
+					// TODO add a suitable timeout (which should be larger than
+					// the XydraStore timeout)
+					callback.wait();
+				} catch(InterruptedException e) {
+					log.debug("Could not wait", e);
+				}
 			}
+			
+			return callback.result;
 		}
-		
-		return result;
 	}
 	
 }

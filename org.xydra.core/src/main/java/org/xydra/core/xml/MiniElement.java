@@ -2,8 +2,8 @@ package org.xydra.core.xml;
 
 import java.util.Iterator;
 
-import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RequiresAppEngine;
+import org.xydra.annotations.RunsInGWT;
 
 
 /**
@@ -17,7 +17,7 @@ import org.xydra.annotations.RequiresAppEngine;
 public interface MiniElement {
 	
 	/**
-	 * @param attributeName
+	 * @param attributeName The name of the attribute to get.
 	 * @return the attribute value or null if it does not exist
 	 */
 	public String getAttribute(String attributeName);

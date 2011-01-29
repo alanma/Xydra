@@ -40,8 +40,6 @@ import org.xydra.index.iterator.SingleValueIterator;
  * Various helper methods for working with {@link XEvent XEvents} and
  * {@link XCommand XCommands}.
  * 
- * TODO Fix docu - references to DeltaXXX
- * 
  * @author dscharrer
  * 
  */
@@ -111,12 +109,12 @@ public class XChanges {
 		switch(event.getChangeType()) {
 		
 		case REMOVE:
-			return MemoryFieldCommand.createAddCommand(event.getTarget(), XCommand.FORCED,
-			        event.getOldValue());
+			return MemoryFieldCommand.createAddCommand(event.getTarget(), XCommand.FORCED, event
+			        .getOldValue());
 			
 		case CHANGE:
-			return MemoryFieldCommand.createChangeCommand(event.getTarget(), XCommand.FORCED,
-			        event.getOldValue());
+			return MemoryFieldCommand.createChangeCommand(event.getTarget(), XCommand.FORCED, event
+			        .getOldValue());
 			
 		case ADD:
 			return MemoryFieldCommand.createRemoveCommand(event.getTarget(), XCommand.FORCED);
@@ -144,16 +142,16 @@ public class XChanges {
 		
 		if(event.getChangeType() == ChangeType.REMOVE) {
 			
-			return MemoryModelCommand.createAddCommand(event.getTarget(), XCommand.FORCED,
-			        event.getObjectId());
+			return MemoryModelCommand.createAddCommand(event.getTarget(), XCommand.FORCED, event
+			        .getObjectId());
 			
 		} else {
 			
 			assert event.getChangeType() == ChangeType.ADD : "unexpected change type for model events: "
 			        + event.getChangeType();
 			
-			return MemoryModelCommand.createRemoveCommand(event.getTarget(), XCommand.FORCED,
-			        event.getObjectId());
+			return MemoryModelCommand.createRemoveCommand(event.getTarget(), XCommand.FORCED, event
+			        .getObjectId());
 			
 		}
 		
@@ -175,8 +173,8 @@ public class XChanges {
 		
 		if(event.getChangeType() == ChangeType.REMOVE) {
 			
-			return MemoryObjectCommand.createAddCommand(event.getTarget(), XCommand.FORCED,
-			        event.getFieldId());
+			return MemoryObjectCommand.createAddCommand(event.getTarget(), XCommand.FORCED, event
+			        .getFieldId());
 			
 		} else {
 			
@@ -290,12 +288,12 @@ public class XChanges {
 		switch(event.getChangeType()) {
 		
 		case REMOVE:
-			return MemoryFieldCommand.createAddCommand(event.getTarget(), newRev,
-			        event.getOldValue());
+			return MemoryFieldCommand.createAddCommand(event.getTarget(), newRev, event
+			        .getOldValue());
 			
 		case CHANGE:
-			return MemoryFieldCommand.createChangeCommand(event.getTarget(), newRev,
-			        event.getOldValue());
+			return MemoryFieldCommand.createChangeCommand(event.getTarget(), newRev, event
+			        .getOldValue());
 			
 		case ADD:
 			return MemoryFieldCommand.createRemoveCommand(event.getTarget(), newRev);
@@ -324,8 +322,8 @@ public class XChanges {
 		
 		if(event.getChangeType() == ChangeType.REMOVE) {
 			
-			return MemoryModelCommand.createAddCommand(event.getTarget(), XCommand.SAFE,
-			        event.getObjectId());
+			return MemoryModelCommand.createAddCommand(event.getTarget(), XCommand.SAFE, event
+			        .getObjectId());
 			
 		} else {
 			
@@ -334,8 +332,8 @@ public class XChanges {
 			
 			long newRev = event.getOldModelRevision() + 1;
 			
-			return MemoryModelCommand.createRemoveCommand(event.getTarget(), newRev,
-			        event.getObjectId());
+			return MemoryModelCommand.createRemoveCommand(event.getTarget(), newRev, event
+			        .getObjectId());
 			
 		}
 		
@@ -359,8 +357,8 @@ public class XChanges {
 		
 		if(event.getChangeType() == ChangeType.REMOVE) {
 			
-			return MemoryObjectCommand.createAddCommand(event.getTarget(), XCommand.SAFE,
-			        event.getFieldId());
+			return MemoryObjectCommand.createAddCommand(event.getTarget(), XCommand.SAFE, event
+			        .getFieldId());
 			
 		} else {
 			
@@ -369,8 +367,8 @@ public class XChanges {
 			
 			long newRev = event.getOldModelRevision() + 1;
 			
-			return MemoryObjectCommand.createRemoveCommand(event.getTarget(), newRev,
-			        event.getFieldId());
+			return MemoryObjectCommand.createRemoveCommand(event.getTarget(), newRev, event
+			        .getFieldId());
 			
 		}
 		
@@ -394,16 +392,16 @@ public class XChanges {
 		
 		if(event.getChangeType() == ChangeType.REMOVE) {
 			
-			return MemoryRepositoryCommand.createAddCommand(event.getTarget(), XCommand.SAFE,
-			        event.getModelId());
+			return MemoryRepositoryCommand.createAddCommand(event.getTarget(), XCommand.SAFE, event
+			        .getModelId());
 			
 		} else {
 			
 			assert event.getChangeType() == ChangeType.ADD : "unexpected change type for repository events: "
 			        + event.getChangeType();
 			
-			return MemoryRepositoryCommand.createRemoveCommand(event.getTarget(), 0,
-			        event.getRepositoryId());
+			return MemoryRepositoryCommand.createRemoveCommand(event.getTarget(), 0, event
+			        .getRepositoryId());
 			
 		}
 		
@@ -464,16 +462,16 @@ public class XChanges {
 		switch(event.getChangeType()) {
 		
 		case ADD:
-			return MemoryFieldCommand.createAddCommand(event.getTarget(),
-			        event.getOldFieldRevision(), event.getNewValue());
+			return MemoryFieldCommand.createAddCommand(event.getTarget(), event
+			        .getOldFieldRevision(), event.getNewValue());
 			
 		case CHANGE:
-			return MemoryFieldCommand.createChangeCommand(event.getTarget(),
-			        event.getOldFieldRevision(), event.getNewValue());
+			return MemoryFieldCommand.createChangeCommand(event.getTarget(), event
+			        .getOldFieldRevision(), event.getNewValue());
 			
 		case REMOVE:
-			return MemoryFieldCommand.createRemoveCommand(event.getTarget(),
-			        event.getOldFieldRevision());
+			return MemoryFieldCommand.createRemoveCommand(event.getTarget(), event
+			        .getOldFieldRevision());
 			
 		default:
 			throw new AssertionError("unexpected type for field events: " + event.getChangeType());
@@ -495,16 +493,16 @@ public class XChanges {
 		
 		if(event.getChangeType() == ChangeType.ADD) {
 			
-			return MemoryModelCommand.createAddCommand(event.getTarget(), XCommand.SAFE,
-			        event.getObjectId());
+			return MemoryModelCommand.createAddCommand(event.getTarget(), XCommand.SAFE, event
+			        .getObjectId());
 			
 		} else {
 			
 			assert event.getChangeType() == ChangeType.REMOVE : "unexpected change type for model events: "
 			        + event.getChangeType();
 			
-			return MemoryModelCommand.createRemoveCommand(event.getTarget(),
-			        event.getOldObjectRevision(), event.getObjectId());
+			return MemoryModelCommand.createRemoveCommand(event.getTarget(), event
+			        .getOldObjectRevision(), event.getObjectId());
 			
 		}
 		
@@ -523,16 +521,16 @@ public class XChanges {
 		
 		if(event.getChangeType() == ChangeType.ADD) {
 			
-			return MemoryObjectCommand.createAddCommand(event.getTarget(), XCommand.SAFE,
-			        event.getFieldId());
+			return MemoryObjectCommand.createAddCommand(event.getTarget(), XCommand.SAFE, event
+			        .getFieldId());
 			
 		} else {
 			
 			assert event.getChangeType() == ChangeType.REMOVE : "unexpected change type for object events: "
 			        + event.getChangeType();
 			
-			return MemoryObjectCommand.createRemoveCommand(event.getTarget(),
-			        event.getOldFieldRevision(), event.getFieldId());
+			return MemoryObjectCommand.createRemoveCommand(event.getTarget(), event
+			        .getOldFieldRevision(), event.getFieldId());
 			
 		}
 		
@@ -551,16 +549,16 @@ public class XChanges {
 		
 		if(event.getChangeType() == ChangeType.ADD) {
 			
-			return MemoryRepositoryCommand.createAddCommand(event.getTarget(), XCommand.SAFE,
-			        event.getModelId());
+			return MemoryRepositoryCommand.createAddCommand(event.getTarget(), XCommand.SAFE, event
+			        .getModelId());
 			
 		} else {
 			
 			assert event.getChangeType() == ChangeType.REMOVE : "unexpected change type for repository events: "
 			        + event.getChangeType();
 			
-			return MemoryRepositoryCommand.createRemoveCommand(event.getTarget(),
-			        event.getOldModelRevision(), event.getModelId());
+			return MemoryRepositoryCommand.createRemoveCommand(event.getTarget(), event
+			        .getOldModelRevision(), event.getModelId());
 			
 		}
 		
@@ -570,7 +568,7 @@ public class XChanges {
 	 * Create a {@link XTransaction} that would have caused the given
 	 * {@link XTransactionEvent}
 	 * 
-	 * @param event The {@link XTransactionEvent} for which a corresponding
+	 * @param trans The {@link XTransactionEvent} for which a corresponding
 	 *            {@link XTransaction} is to be created
 	 * @return an {@link XTransaction} which execution would've created the
 	 *         given {@link XTransactionEvent}
@@ -704,8 +702,8 @@ public class XChanges {
 				throw new IllegalStateException("model already exists, cannot undo " + event);
 			}
 			
-			return MemoryRepositoryCommand.createAddCommand(event.getTarget(), XCommand.SAFE,
-			        event.getModelId());
+			return MemoryRepositoryCommand.createAddCommand(event.getTarget(), XCommand.SAFE, event
+			        .getModelId());
 			
 		} else {
 			
@@ -720,8 +718,8 @@ public class XChanges {
 				throw new IllegalStateException("model should be empty, cannot undo " + event);
 			}
 			
-			return MemoryRepositoryCommand.createRemoveCommand(event.getTarget(),
-			        event.getOldModelRevision(), event.getRepositoryId());
+			return MemoryRepositoryCommand.createRemoveCommand(event.getTarget(), event
+			        .getOldModelRevision(), event.getRepositoryId());
 			
 		}
 		
@@ -729,9 +727,9 @@ public class XChanges {
 	
 	/**
 	 * Undo the changes represented by the given {@link XAtomicEvent} on the
-	 * given {@link DeltaModel}.
+	 * given {@link XWritableModel}.
 	 * 
-	 * @param model The {@link DeltaModel} on which the given
+	 * @param model The {@link XWritableModel} on which the given
 	 *            {@link XAtomicEvent} happened
 	 * @param event The {@link XAtomicEvent} which is to be undone
 	 * 
@@ -759,9 +757,9 @@ public class XChanges {
 	
 	/**
 	 * Undo the changes represented by the given {@link XTransactionEvent} on
-	 * the given {@link DeltaModel}.
+	 * the given {@link XWritableModel}.
 	 * 
-	 * @param model The {@link DeltaModel} on which the events of the given
+	 * @param model The {@link XWritableModel} on which the events of the given
 	 *            {@link XTransactionEvent} happened
 	 * @param event The {@link XTransactionEvent} which changes are to be undone
 	 * 
@@ -770,9 +768,6 @@ public class XChanges {
 	 * @throws IllegalArgumentException if the given {@link XModel} doesn't
 	 *             contain the target of any of the events
 	 */
-	// TODO wouldn't it be better to return false instead of throwing an
-	// exception when the undo operation couldn't be executed?
-	// Exceptions are much nicer for debugging ~Daniel
 	public static void undoChanges(XWritableModel model, XEvent event) {
 		if(event instanceof XTransactionEvent) {
 			undoChanges(model, (XTransactionEvent)event);
@@ -785,9 +780,9 @@ public class XChanges {
 	
 	/**
 	 * Undo the changes represented by the given {@link XFieldEvent} on the
-	 * given {@link DeltaModel}.
+	 * given {@link XWritableModel}.
 	 * 
-	 * @param model The {@link DeltaModel} on which the given
+	 * @param model The {@link XWritableModel} on which the given
 	 *            {@link XObjectEvent} happened
 	 * @param event The {@link XObjectEvent} which is to be undone
 	 * 
@@ -823,9 +818,9 @@ public class XChanges {
 	
 	/**
 	 * Undo the changes represented by the given {@link XModelEvent} on the
-	 * given {@link DeltaModel}.
+	 * given {@link XWritableModel}.
 	 * 
-	 * @param model The {@link DeltaModel} on which the given
+	 * @param model The {@link XWritableModel} on which the given
 	 *            {@link XModelEvent} happened
 	 * @param event The {@link XModelEvent} which is to be undone
 	 * 
@@ -866,9 +861,9 @@ public class XChanges {
 	
 	/**
 	 * Undo the changes represented by the given {@link XObjectEvent} on the
-	 * given {@link DeltaModel}.
+	 * given {@link XWritableModel}.
 	 * 
-	 * @param model The {@link DeltaModel} on which the given
+	 * @param model The {@link XWritableModel} on which the given
 	 *            {@link XObjectEvent} happened
 	 * @param event The {@link XObjectEvent} which is to be undone
 	 * 
@@ -915,9 +910,9 @@ public class XChanges {
 	
 	/**
 	 * Undo the changes represented by the given {@link XTransactionEvent} on
-	 * the given {@link DeltaModel}.
+	 * the given {@link XWritableModel}.
 	 * 
-	 * @param model The {@link DeltaModel} on which the events of the given
+	 * @param model The {@link XWritableModel} on which the events of the given
 	 *            {@link XTransactionEvent} happened
 	 * @param event The {@link XTransactionEvent} which changes are to be undone
 	 * 

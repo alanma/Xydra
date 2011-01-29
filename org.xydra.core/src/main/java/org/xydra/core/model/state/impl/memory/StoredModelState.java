@@ -29,10 +29,10 @@ public class StoredModelState extends AbstractModelState {
 	private final MemoryStateStore store;
 	
 	/**
-	 * @param modelStateID
-	 * @param memoryStateStore where persistence happens on
-	 *            {@link StoredModelState#save()} and
-	 *            {@link StoredModelState#delete()}.
+	 * @param modelAddr The address of the represented model.
+	 * @param store where persistence happens on
+	 *            {@link StoredModelState#save(XStateTransaction)} and
+	 *            {@link StoredModelState#delete(XStateTransaction)}.
 	 */
 	public StoredModelState(XAddress modelAddr, MemoryStateStore store) {
 		super(modelAddr);

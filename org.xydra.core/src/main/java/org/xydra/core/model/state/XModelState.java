@@ -54,7 +54,7 @@ public interface XModelState extends IHasXID, Serializable, Iterable<XID>, IHasX
 	 * returned if the backend can guarantee that saving and deleting states is
 	 * always possible. Otherwise, changes performed with this transaction
 	 * object should not be persisted until the transaction object is passed to
-	 * {@link #endTransaction()}.
+	 * {@link #endTransaction(XStateTransaction)}.
 	 * 
 	 * Each state may only be part of at most one transaction at any given time.
 	 * 
@@ -77,8 +77,8 @@ public interface XModelState extends IHasXID, Serializable, Iterable<XID>, IHasX
 	XObjectState createObjectState(XID id);
 	
 	/**
-	 * Delete this state information from the attached persistence layer, i.e.
-	 * the one determined by calling {@link XStateFactory}.create...().
+	 * Delete this state information from the attached persistence layer that
+	 * was used to create it.
 	 * 
 	 * @param transaction If not null, persist the change at the end of the
 	 *            given transaction, otherwise persist it now. The transaction
@@ -163,7 +163,7 @@ public interface XModelState extends IHasXID, Serializable, Iterable<XID>, IHasX
 	 * Removes the specified {@link XObjectState} from this XModelState. This
 	 * does not remove the actual {@link XObjectState} from the state backend,
 	 * only the reference from this state. To cleanup the state use
-	 * {@link XObjectState#delete(Object)}
+	 * {@link XObjectState#delete(XStateTransaction)}
 	 * 
 	 * Implementations should not persist this change until the corresponding
 	 * save unless they can guarantee that no other state calls will fail.
@@ -174,8 +174,8 @@ public interface XModelState extends IHasXID, Serializable, Iterable<XID>, IHasX
 	void removeObjectState(XID objectStateId);
 	
 	/**
-	 * Store this state information in the attached persistence layer, i.e. the
-	 * one determined by calling {@link XStateFactory}.create...().
+	 * Store this state information in the attached persistence layer that was
+	 * used to create it.
 	 * 
 	 * @param transaction If not null, persist the change at the end of the
 	 *            given transaction, otherwise persist it now. The transaction

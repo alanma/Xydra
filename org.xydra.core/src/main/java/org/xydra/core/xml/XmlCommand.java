@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.change.ChangeType;
@@ -107,12 +107,10 @@ public class XmlCommand {
 	/**
 	 * Get the {@link XAtomicCommand} represented by the given XML element.
 	 * 
-	 * @param context The XIDs of the model, object and field to fill in if not
-	 *            specified in the XML. If the given element represents a
-	 *            transaction, the context for the contained commands will be
-	 *            given by the transaction.
-	 * @param defaultRepository If the XML element does not specify a
-	 *            repository, this will be filled in.
+	 * @param context The {@link XID XIDs} of the repository, model, object and
+	 *            field to fill in if not specified in the XML. If the given
+	 *            element represents a transaction, the context for the
+	 *            contained commands will be given by the transaction.
 	 * @return The {@link XAtomicCommand} represented by the given XML element.
 	 * @throws IllegalArgumentException if the XML element does not represent a
 	 *             valid command.
@@ -136,12 +134,10 @@ public class XmlCommand {
 	/**
 	 * Get the {@link XCommand} represented by the given XML element.
 	 * 
-	 * @param context The XIDs of the model, object and field to fill in if not
-	 *            specified in the XML. If the given element represents a
-	 *            transaction, the context for the contained commands will be
-	 *            given by the transaction.
-	 * @param defaultRepository If the XML element does not specify a
-	 *            repository, this will be filled in.
+	 * @param context The {@link XID XIDs} of the repository, model, object and
+	 *            field to fill in if not specified in the XML. If the given
+	 *            element represents a transaction, the context for the
+	 *            contained commands will be given by the transaction.
 	 * @return The {@link XCommand} represented by the given XML element.
 	 * @throws IllegalArgumentException if the XML element does not represent a
 	 *             valid command.
@@ -159,10 +155,8 @@ public class XmlCommand {
 	/**
 	 * Get the {@link XFieldCommand} represented by the given XML element.
 	 * 
-	 * @param context The XIDs of the model, object and field to fill in if not
-	 *            specified in the XML.
-	 * @param defaultRepository If the XML element does not specify a
-	 *            repository, this will be filled in.
+	 * @param context The {@link XID XIDs} of the repository, model, object and
+	 *            field to fill in if not specified in the XML.
 	 * @return The {@link XFieldCommand} represented by the given XML element.
 	 * @throws IllegalArgumentException if the XML element does not represent a
 	 *             valid command.
@@ -205,10 +199,8 @@ public class XmlCommand {
 	/**
 	 * Get the {@link XModelCommand} represented by the given XML element.
 	 * 
-	 * @param context The XID of the model to fill in if not specified in the
-	 *            XML.
-	 * @param defaultRepository If the XML element does not specify a
-	 *            repository, this will be filled in.
+	 * @param context The {@link XID XIDs} of the repository and model to fill
+	 *            in if not specified in the XML.
 	 * @return The {@link XModelCommand} represented by the given XML element.
 	 * @throws IllegalArgumentException if the XML element does not represent a
 	 *             valid command.
@@ -255,10 +247,8 @@ public class XmlCommand {
 	/**
 	 * Get the {@link XObjectCommand} represented by the given XML element.
 	 * 
-	 * @param context The XIDs of the model and object to fill in if not
-	 *            specified in the XML.
-	 * @param defaultRepository If the XML element does not specify a
-	 *            repository, this will be filled in.
+	 * @param context The {@link XID XIDs} of the repository, model and object
+	 *            to fill in if not specified in the XML.
 	 * @return The {@link XObjectCommand} represented by the given XML element.
 	 * @throws IllegalArgumentException if the XML element does not represent a
 	 *             valid command.
@@ -305,8 +295,8 @@ public class XmlCommand {
 	/**
 	 * Get the {@link XRepositoryCommand} represented by the given XML element.
 	 * 
-	 * @param defaultRepository If the XML element does not specify a
-	 *            repository, this will be filled in.
+	 * @param context The {@link XID} of the repository to fill in if not
+	 *            specified in the XML.
 	 * @return The {@link XRepositoryCommand} represented by the given XML
 	 *         element.
 	 * @throws IllegalArgumentException if the XML element does not represent a
@@ -355,11 +345,10 @@ public class XmlCommand {
 	/**
 	 * Get the {@link XTransaction} represented by the given XML element.
 	 * 
-	 * @param context The XIDs of the model, object and field to fill in if not
-	 *            specified in the XML. The context for the commands contained
-	 *            in the transaction will be given by the transaction.
-	 * @param defaultRepository If the XML element does not specify a
-	 *            repository, this will be filled in.
+	 * @param context The {@link XID XIDs} of the repository, model, object and
+	 *            field to fill in if not specified in the XML. The context for
+	 *            the commands contained in the transaction will be given by the
+	 *            transaction.
 	 * @return The {@link XTransaction} represented by the given XML element.
 	 * @throws IllegalArgumentException if the XML element does not represent a
 	 *             valid command.
@@ -388,7 +377,7 @@ public class XmlCommand {
 	/**
 	 * Encode the given {@link XCommand} as an XML element.
 	 * 
-	 * @param event The command to encode.
+	 * @param command The command to encode.
 	 * @param out The XML encoder to write to.
 	 * @param context The part of this command's target address that doesn't
 	 *            need to be encoded in the element.
@@ -414,7 +403,7 @@ public class XmlCommand {
 	/**
 	 * Encode the given {@link XFieldCommand} as an XML element.
 	 * 
-	 * @param event The command to encode.
+	 * @param command The command to encode.
 	 * @param out The XML encoder to write to.
 	 * @param context The part of this command's target address that doesn't
 	 *            need to be encoded in the element.
@@ -436,7 +425,7 @@ public class XmlCommand {
 	/**
 	 * Encode the given {@link XModelCommand} as an XML element.
 	 * 
-	 * @param event The command to encode.
+	 * @param command The command to encode.
 	 * @param out The XML encoder to write to.
 	 * @param context The part of this command's target address that doesn't
 	 *            need to be encoded in the element.
@@ -460,7 +449,7 @@ public class XmlCommand {
 	/**
 	 * Encode the given {@link XObjectCommand} as an XML element.
 	 * 
-	 * @param event The command to encode.
+	 * @param command The command to encode.
 	 * @param out The XML encoder to write to.
 	 * @param context The part of this command's target address that doesn't
 	 *            need to be encoded in the element.
@@ -484,7 +473,7 @@ public class XmlCommand {
 	/**
 	 * Encode the given {@link XRepositoryCommand} as an XML element.
 	 * 
-	 * @param event The command to encode.
+	 * @param command The command to encode.
 	 * @param out The XML encoder to write to.
 	 * @param context The part of this command's target address that doesn't
 	 *            need to be encoded in the element.
@@ -509,7 +498,7 @@ public class XmlCommand {
 	/**
 	 * Encode the given {@link XTransaction} as an XML element.
 	 * 
-	 * @param event The command to encode.
+	 * @param trans The transaction to encode.
 	 * @param out The XML encoder to write to.
 	 * @param context The part of this command's target address that doesn't
 	 *            need to be encoded in the element.

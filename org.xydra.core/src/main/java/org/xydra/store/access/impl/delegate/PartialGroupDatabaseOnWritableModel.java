@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.xydra.annotations.ModificationOperation;
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.WritableUtils;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
@@ -52,8 +52,8 @@ public class PartialGroupDatabaseOnWritableModel implements XGroupListener {
 	/**
 	 * Apply those events with group-actor change semantics.
 	 * 
-	 * @param events
-	 * @param fastDatabase
+	 * @param events The events to apply.
+	 * @param fastDatabase The database to apply the events to.
 	 */
 	public static void applyEventsTo(List<XEvent> events, XGroupDatabaseWithListeners fastDatabase) {
 		/* apply events */

@@ -33,7 +33,8 @@ public interface XmlOut {
 	 * Close the element with the given name -- do not confuse with
 	 * {@link #close()}
 	 * 
-	 * @param elementName
+	 * @param elementName The name of the element to close. This must be the
+	 *            same as the last call to {@link #open(String)}.
 	 */
 	public void close(String elementName);
 	

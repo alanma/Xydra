@@ -10,6 +10,7 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
@@ -21,7 +22,7 @@ import org.xydra.index.iterator.BagUnionIterator;
 
 
 /**
- * An {@link XReadableObject}/{@link DeltaObject} that represents changes to an
+ * An {@link XWritableObject} that represents changes to an
  * {@link XReadableObject}.
  * 
  * An {@link XReadableObject} is passed as an argument of the constructor. This
@@ -114,10 +115,10 @@ public class ChangedObject implements XWritableObject {
 	 * state which is represented by this ChangedObject.
 	 * 
 	 * @param max An upper bound for counting the amount of needed
-	 *            {@link XCommands}. Note that setting this bound to little may
-	 *            result in the return of an integer which does not actually
-	 *            represent the minimal amount of needed {@link XCommand
-	 *            XCommands} for the transformation.
+	 *            {@link XCommand XCommands}. Note that setting this bound to
+	 *            little may result in the return of an integer which does not
+	 *            actually represent the minimal amount of needed
+	 *            {@link XCommand XCommands} for the transformation.
 	 * @result the amount of needed {@link XCommand XCommands} for the
 	 *         transformation
 	 */
@@ -143,7 +144,7 @@ public class ChangedObject implements XWritableObject {
 	}
 	
 	/**
-	 * Count the number of {@link XEvents XEvents} that would be needed to log
+	 * Count the number of {@link XEvent XEvents} that would be needed to log
 	 * the transformation of the original {@link XReadableModel} to the current
 	 * state which is represented by this ChangedModel.
 	 * 
@@ -151,11 +152,11 @@ public class ChangedObject implements XWritableObject {
 	 * object or field may cause several events while only needing one command.
 	 * 
 	 * @param max An upper bound for counting the amount of needed
-	 *            {@link XEvents XEvents}. Note that setting this bound to
-	 *            little may result in the return of an integer which does not
-	 *            actually represent the minimal amount of needed
-	 *            {@link XEvents XEvents} for the transformation.
-	 * @result the amount of needed {@link XEvents XEvents} for the
+	 *            {@link XEvent XEvents}. Note that setting this bound to little
+	 *            may result in the return of an integer which does not actually
+	 *            represent the minimal amount of needed {@link XEvent XEvents}
+	 *            for the transformation.
+	 * @result the amount of needed {@link XEvent XEvents} for the
 	 *         transformation
 	 */
 	public int countEventsNeeded(int max) {
@@ -275,7 +276,7 @@ public class ChangedObject implements XWritableObject {
 	}
 	
 	/**
-	 * @return the {@link NewField NewFields} that have been added to this
+	 * @return the {@link SimpleField SimpleFields} that have been added to this
 	 *         ChangedObject and were not contained in the original
 	 *         {@link XReadableObject}
 	 */

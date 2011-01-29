@@ -9,7 +9,7 @@ import org.xydra.index.XI;
 
 
 /**
- * An {@link XReadableField}/{@link DeltaField} that represents changes to an
+ * An {@link XWritableField} that represents changes to an
  * {@link XReadableField}.
  * 
  * An {@link XReadableField} is passed as an argument of the constructor. This

@@ -233,7 +233,7 @@ public class Base64 {
 	}
 	
 	/**
-	 * Similar to {@link #encode(byte[], int, int, int)} but returns a byte
+	 * Similar to {@link #encode(byte[], int, int, boolean)} but returns a byte
 	 * array instead of instantiating a String. This is more efficient if you're
 	 * working with I/O streams and have large data sets to encode.
 	 * 
@@ -243,7 +243,6 @@ public class Base64 {
 	 * @param len Length of data to convert
 	 * @param breakLines Break output into multiple lines.
 	 * @return The Base64-encoded data as a String
-	 * @see #DO_BREAK_LINE
 	 * @throws NullPointerException if source array is null
 	 * @throws IllegalArgumentException if source array, offset, or length are
 	 *             invalid
