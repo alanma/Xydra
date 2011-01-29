@@ -28,7 +28,7 @@ import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.model.delta.BaseModelWithOneObject;
+import org.xydra.core.model.delta.ReadableModelWithOneObject;
 import org.xydra.core.model.state.XChangeLogState;
 import org.xydra.core.model.state.XFieldState;
 import org.xydra.core.model.state.XObjectState;
@@ -529,7 +529,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		if(this.father != null) {
 			return this.father;
 		}
-		return new BaseModelWithOneObject(this);
+		return new ReadableModelWithOneObject(this);
 	}
 	
 	public boolean hasField(XID id) {

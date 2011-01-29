@@ -15,12 +15,12 @@ import org.xydra.index.iterator.SingleValueIterator;
  * @author dscharrer
  * 
  */
-public class BaseModelWithOneObject implements XReadableModel {
+public class ReadableModelWithOneObject implements XReadableModel {
 	
 	private final XAddress address;
 	private final XReadableObject object;
 	
-	public BaseModelWithOneObject(XReadableObject object) {
+	public ReadableModelWithOneObject(XReadableObject object) {
 		this.address = object.getAddress().getParent();
 		this.object = object;
 	}
