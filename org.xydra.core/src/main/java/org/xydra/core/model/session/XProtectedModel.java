@@ -1,19 +1,11 @@
 package org.xydra.core.model.session;
 
-import java.util.Iterator;
-
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.base.XID;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XModelCommand;
 import org.xydra.base.change.XModelEvent;
-import org.xydra.base.rmof.XWritableModel;
-import org.xydra.core.change.XFieldEventListener;
-import org.xydra.core.change.XModelEventListener;
-import org.xydra.core.change.XObjectEventListener;
-import org.xydra.core.change.XTransactionEventListener;
-import org.xydra.core.model.IHasChangeLog;
 import org.xydra.core.model.XExecutesCommands;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XLoggedModel;
@@ -36,36 +28,7 @@ import org.xydra.store.AccessException;
  * @author dscharrer
  * 
  */
-public interface XProtectedModel extends XLoggedModel, XWritableModel, IHasChangeLog,
-        XExecutesCommands {
-	
-	/**
-	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (read access) to execute this
-	 *             method
-	 */
-	boolean addListenerForFieldEvents(XFieldEventListener changeListener);
-	
-	/**
-	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (read access) to execute this
-	 *             method
-	 */
-	boolean addListenerForModelEvents(XModelEventListener changeListener);
-	
-	/**
-	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (read access) to execute this
-	 *             method
-	 */
-	boolean addListenerForObjectEvents(XObjectEventListener changeListener);
-	
-	/**
-	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (read access) to execute this
-	 *             method
-	 */
-	boolean addListenerForTransactionEvents(XTransactionEventListener changeListener);
+public interface XProtectedModel extends XLoggedModel, XExecutesCommands {
 	
 	/**
 	 * Creates a new {@link XObject} with the given {@link XID} and adds it to
@@ -133,48 +96,5 @@ public interface XProtectedModel extends XLoggedModel, XWritableModel, IHasChang
 	 */
 	@ReadOperation
 	XProtectedObject getObject(XID objectId);
-	
-	/**
-	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (read access) to execute this
-	 *             method
-	 */
-	long getRevisionNumber();
-	
-	/**
-	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (read access) to execute this
-	 *             method
-	 */
-	boolean hasObject(XID objectId);
-	
-	/**
-	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (read access) to execute this
-	 *             method
-	 */
-	boolean isEmpty();
-	
-	/**
-	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (read access) to execute this
-	 *             method
-	 */
-	Iterator<XID> iterator();
-	
-	/**
-	 * Removes the {@link XObject} with the given {@link XID} from this
-	 * XProtectedModel. s
-	 * 
-	 * @param object The {@link XID} of the {@link XObject} which is to be
-	 *            removed
-	 * @return true, if an {@link XObject} with the given {@link XID} did exist
-	 *         in this XProtectedModel and could be removed
-	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (writes access) to execute this
-	 *             method
-	 */
-	@ModificationOperation
-	boolean removeObject(XID objectId);
 	
 }

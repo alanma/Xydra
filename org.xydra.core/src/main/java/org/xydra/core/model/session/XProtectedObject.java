@@ -1,18 +1,11 @@
 package org.xydra.core.model.session;
 
-import java.util.Iterator;
-
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.base.XID;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XObjectCommand;
 import org.xydra.base.change.XObjectEvent;
-import org.xydra.base.rmof.XWritableObject;
-import org.xydra.core.change.XFieldEventListener;
-import org.xydra.core.change.XObjectEventListener;
-import org.xydra.core.change.XTransactionEventListener;
-import org.xydra.core.model.IHasChangeLog;
 import org.xydra.core.model.XExecutesCommands;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XLoggedObject;
@@ -34,29 +27,7 @@ import org.xydra.store.AccessException;
  * @author dscharrer
  * 
  */
-public interface XProtectedObject extends XLoggedObject, XWritableObject, IHasChangeLog,
-        XExecutesCommands {
-	
-	/**
-	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (read access) to execute this
-	 *             method
-	 */
-	boolean addListenerForFieldEvents(XFieldEventListener changeListener);
-	
-	/**
-	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (read access) to execute this
-	 *             method
-	 */
-	boolean addListenerForObjectEvents(XObjectEventListener changeListener);
-	
-	/**
-	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (read access) to execute this
-	 *             method
-	 */
-	boolean addListenerForTransactionEvents(XTransactionEventListener changeListener);
+public interface XProtectedObject extends XLoggedObject, XExecutesCommands {
 	
 	/**
 	 * Creates a new {@link XField} and adds it to this XProtectedObject or
@@ -129,48 +100,5 @@ public interface XProtectedObject extends XLoggedObject, XWritableObject, IHasCh
 	 */
 	@ReadOperation
 	XProtectedField getField(XID fieldId);
-	
-	/**
-	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (read access) to execute this
-	 *             method
-	 */
-	long getRevisionNumber();
-	
-	/**
-	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (read access) to execute this
-	 *             method
-	 */
-	boolean hasField(XID objectId);
-	
-	/**
-	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (read access) to execute this
-	 *             method
-	 */
-	boolean isEmpty();
-	
-	/**
-	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (read access) to execute this
-	 *             method
-	 */
-	Iterator<XID> iterator();
-	
-	/**
-	 * Removes the {@link XField} with the given {@link XID} from this
-	 * XProtectedObject
-	 * 
-	 * @param fieldId The {@link XID} of the {@link XField} which is to be
-	 *            removed
-	 * @return true, if the specified {@link XField} did exist and could be
-	 *         removed
-	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (write access) to execute this
-	 *             method
-	 */
-	@ModificationOperation
-	boolean removeField(XID fieldId);
 	
 }

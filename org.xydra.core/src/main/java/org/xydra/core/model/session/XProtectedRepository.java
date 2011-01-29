@@ -8,6 +8,7 @@ import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableRepository;
+import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.core.change.XSendsFieldEvents;
 import org.xydra.core.change.XSendsModelEvents;
 import org.xydra.core.change.XSendsObjectEvents;
@@ -35,7 +36,7 @@ import org.xydra.store.AccessException;
  */
 public interface XProtectedRepository extends XReadableRepository, XSendsRepositoryEvents,
         XSendsModelEvents, XSendsObjectEvents, XSendsFieldEvents, XSendsTransactionEvents,
-        XExecutesCommands {
+        XExecutesCommands, XWritableRepository {
 	
 	/**
 	 * Creates a new {@link XModel} with the given {@link XID} and adds it to
@@ -106,15 +107,5 @@ public interface XProtectedRepository extends XReadableRepository, XSendsReposit
 	 */
 	@ReadOperation
 	XProtectedModel getModel(XID id);
-	
-	/**
-	 * Removes the specified {@link XModel} from this XProtectedRepository.
-	 * 
-	 * @param model The {@link XID} of the {@link XModel} which is to be removed
-	 * @return true, if the specified {@link XModel} could be removed, false
-	 *         otherwise
-	 */
-	@ModificationOperation
-	boolean removeModel(XID modelId);
 	
 }

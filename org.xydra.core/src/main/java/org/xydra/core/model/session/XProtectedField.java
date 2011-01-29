@@ -5,9 +5,7 @@ import org.xydra.base.XID;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldCommand;
-import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.value.XValue;
-import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XLoggedField;
 import org.xydra.store.AccessException;
@@ -27,14 +25,7 @@ import org.xydra.store.AccessException;
  * @author dscharrer
  * 
  */
-public interface XProtectedField extends XLoggedField, XWritableField {
-	
-	/**
-	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (read access) to execute this
-	 *             method
-	 */
-	boolean addListenerForFieldEvents(XFieldEventListener changeListener);
+public interface XProtectedField extends XLoggedField {
 	
 	/**
 	 * Executes the given {@link XCommand} if possible.
@@ -64,41 +55,5 @@ public interface XProtectedField extends XLoggedField, XWritableField {
 	 *         only succeed if this actor has access.
 	 */
 	XID getActor();
-	
-	/**
-	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (read access) to execute this
-	 *             method
-	 */
-	long getRevisionNumber();
-	
-	/**
-	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (read access) to execute this
-	 *             method
-	 */
-	XValue getValue();
-	
-	/**
-	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (read access) to execute this
-	 *             method
-	 */
-	boolean isEmpty();
-	
-	/**
-	 * Sets the {@link XValue} of this field to the given value.
-	 * 
-	 * Passing "null" as the 'value' arguments implies an remove operation (will
-	 * remove the current {@link XValue})
-	 * 
-	 * @param value The new {@link XValue}
-	 * @throws AccessException if the actor linked with this field does not have
-	 *             the necessary access rights (write access) to execute this
-	 *             method
-	 * 
-	 */
-	@ModificationOperation
-	boolean setValue(XValue value);
 	
 }
