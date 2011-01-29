@@ -122,20 +122,14 @@ public class TestResource {
 		w.flush();
 		XID actorId = XX.toId("testActor");
 		XID modelId = XX.toId("model1");
-		persistence.executeCommand(
-		        actorId,
-		        MemoryRepositoryCommand.createAddCommand(
-		                X.getIDProvider().fromComponents(repoId, null, null, null), true, modelId));
+		persistence.executeCommand(actorId, MemoryRepositoryCommand.createAddCommand(X
+		        .getIDProvider().fromComponents(repoId, null, null, null), true, modelId));
 		w.write("Created model1.\n");
 		w.flush();
 	}
 	
 	/**
 	 * For local testing without REST
-	 * 
-	 * @param args
-	 * @throws IOException
-	 * @throws UnsupportedEncodingException
 	 */
 	public static void main(String[] args) throws UnsupportedEncodingException, IOException {
 		TestResource tr = new TestResource();
