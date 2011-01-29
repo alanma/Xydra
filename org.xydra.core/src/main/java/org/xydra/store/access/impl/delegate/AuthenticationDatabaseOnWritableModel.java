@@ -3,9 +3,9 @@ package org.xydra.store.access.impl.delegate;
 import java.io.Serializable;
 
 import org.xydra.annotations.ModificationOperation;
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.WritableUtils;
 import org.xydra.base.X;
 import org.xydra.base.XID;
@@ -105,6 +105,11 @@ public class AuthenticationDatabaseOnWritableModel implements XAuthenticationDat
 	@Override
 	@ModificationOperation
 	public void setPasswordHash(XID actorId, String passwordHash) {
+		String currentHash = getPasswordHash(actorId);
+		if(currentHash != null && currentHash.equals(passwordHash)) {
+			// prevent NOOP
+			return;
+		}
 		XStringValue passwordHashValue = X.getValueFactory().createStringValue(passwordHash);
 		boolean result = WritableUtils.setValue(this.authenticationModel, actorId, hasPasswordHash,
 		        passwordHashValue);
