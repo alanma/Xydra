@@ -9,8 +9,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RequiresAppEngine;
+import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XReadableField;
@@ -52,7 +52,7 @@ public class XydraRestServer {
 	public static final String SERVLET_CONTEXT_ATTRIBUTE_XYDRASERVER = "org.xydra.server";
 	
 	/**
-	 * @param restless
+	 * @param restless The current Restless instance.
 	 * @return an instance of {@link IXydraServer} from the current servlet
 	 *         context that has hopefully been put there by a previous call of
 	 *         restless().
@@ -60,7 +60,8 @@ public class XydraRestServer {
 	public static IXydraServer getXydraServer(Restless restless) {
 		IXydraServer xydraServer = getXydraServerInternal(restless);
 		if(xydraServer == null) {
-			log.warn("XydraRestServer.restless hasn't been run properly before calling this method.");
+			log
+			        .warn("XydraRestServer.restless hasn't been run properly before calling this method.");
 		}
 		return xydraServer;
 	}
