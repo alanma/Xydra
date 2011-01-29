@@ -17,7 +17,6 @@ import org.xydra.base.XX;
 import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.log.gae.GaeLoggerFactorySPI;
 import org.xydra.restless.Restless;
 import org.xydra.store.Callback;
 import org.xydra.store.GaeAllowAllStoreReadMethodsTest;
@@ -30,10 +29,6 @@ import org.xydra.store.impl.gae.GaeTestfixer;
 
 
 public class TestResource {
-	
-	static {
-		LoggerFactory.setLoggerFactorySPI(new GaeLoggerFactorySPI());
-	}
 	
 	private static final Logger log = LoggerFactory.getLogger(TestResource.class);
 	
@@ -122,13 +117,15 @@ public class TestResource {
 		w.flush();
 		XID actorId = XX.toId("testActor");
 		XID modelId = XX.toId("model1");
-		persistence.executeCommand(actorId, MemoryRepositoryCommand.createAddCommand(X
-		        .getIDProvider().fromComponents(repoId, null, null, null), true, modelId));
+		persistence.executeCommand(
+		        actorId,
+		        MemoryRepositoryCommand.createAddCommand(
+		                X.getIDProvider().fromComponents(repoId, null, null, null), true, modelId));
 		w.write("Created model1.\n");
 		w.flush();
 	}
 	
-	/**
+	/*
 	 * For local testing without REST
 	 */
 	public static void main(String[] args) throws UnsupportedEncodingException, IOException {

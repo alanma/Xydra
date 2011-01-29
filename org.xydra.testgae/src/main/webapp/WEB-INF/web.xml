@@ -10,6 +10,10 @@
 			<param-name>app</param-name>
 			<param-value>org.xydra.testgae.TestGaeApp</param-value>
 		</init-param>
+		<init-param>
+		<param-name>loggerFactory</param-name>
+		<param-value>org.xydra.log.gae.GaeLoggerFactorySPI</param-value>
+		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 	<servlet-mapping>
