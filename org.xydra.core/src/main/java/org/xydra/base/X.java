@@ -9,7 +9,6 @@ import org.xydra.base.value.impl.memory.MemoryValueFactory;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.core.model.impl.memory.MemoryStringIDProvider;
-import org.xydra.core.model.state.XRepositoryState;
 import org.xydra.core.model.state.XSPI;
 
 
@@ -41,10 +40,8 @@ public class X {
 	 */
 	public static XRepository createMemoryRepository(XID actorId) {
 		XID repoId = getIDProvider().fromString(DEFAULT_REPOSITORY_ID);
-		XAddress repoAddr = getIDProvider().fromComponents(repoId, null, null, null);
-		XRepositoryState repoState = XSPI.getStateStore().createRepositoryState(repoAddr);
 		// TODO where to get the passwordHash?
-		return new MemoryRepository(actorId, null, repoState);
+		return new MemoryRepository(actorId, null, repoId);
 	}
 	
 	/**

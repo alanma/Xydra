@@ -9,9 +9,13 @@ import org.xydra.base.change.impl.memory.MemoryObjectCommand;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
+import org.xydra.base.rmof.XRevWritableField;
+import org.xydra.base.rmof.XRevWritableModel;
+import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.client.Callback;
 import org.xydra.client.NotFoundException;
 import org.xydra.client.XDataService;
+import org.xydra.core.XCopyUtils;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
@@ -24,15 +28,6 @@ import org.xydra.core.model.session.XProtectedField;
 import org.xydra.core.model.session.XProtectedModel;
 import org.xydra.core.model.session.XProtectedObject;
 import org.xydra.core.model.session.XProtectedRepository;
-import org.xydra.core.model.state.XChangeLogState;
-import org.xydra.core.model.state.XFieldState;
-import org.xydra.core.model.state.XModelState;
-import org.xydra.core.model.state.XObjectState;
-import org.xydra.core.model.state.impl.memory.MemoryChangeLogState;
-import org.xydra.core.model.state.impl.memory.TemporaryFieldState;
-import org.xydra.core.model.state.impl.memory.TemporaryModelState;
-import org.xydra.core.model.state.impl.memory.TemporaryObjectState;
-import org.xydra.core.model.state.impl.memory.XStateUtils;
 import org.xydra.store.AccessException;
 
 
@@ -136,9 +131,7 @@ public class DirectDataService implements XDataService {
 				return;
 			}
 			
-			XFieldState fieldState = new TemporaryFieldState(fieldAddr);
-			// FIXME concurrency: field may be changed during copy
-			XStateUtils.copy(field, fieldState);
+			XRevWritableField fieldState = XCopyUtils.createSnapshot(field);
 			
 			XField fieldCopy = new MemoryField(this.repo.getActor(), fieldState);
 			
@@ -163,11 +156,7 @@ public class DirectDataService implements XDataService {
 				return;
 			}
 			
-			XChangeLogState changeLogState = new MemoryChangeLogState(modelAddr);
-			changeLogState.setFirstRevisionNumber(model.getRevisionNumber() + 1);
-			XModelState modelState = new TemporaryModelState(modelAddr, changeLogState);
-			// FIXME concurrency: model may be changed during copy
-			XStateUtils.copy(model, modelState);
+			XRevWritableModel modelState = XCopyUtils.createSnapshot(model);
 			
 			XModel modelCopy = new MemoryModel(this.repo.getActor(), null, modelState);
 			
@@ -199,11 +188,7 @@ public class DirectDataService implements XDataService {
 				return;
 			}
 			
-			XChangeLogState changeLogState = new MemoryChangeLogState(objectAddr);
-			changeLogState.setFirstRevisionNumber(model.getRevisionNumber());
-			XObjectState objectState = new TemporaryObjectState(objectAddr, changeLogState);
-			// FIXME concurrency: object may be changed during copy
-			XStateUtils.copy(object, objectState);
+			XRevWritableObject objectState = XCopyUtils.createSnapshot(object);
 			
 			XObject objectCopy = new MemoryObject(this.repo.getActor(), null, objectState);
 			

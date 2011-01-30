@@ -17,11 +17,6 @@ import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.impl.memory.MemoryModel;
-import org.xydra.core.model.state.XChangeLogState;
-import org.xydra.core.model.state.XModelState;
-import org.xydra.core.model.state.impl.memory.MemoryChangeLogState;
-import org.xydra.core.model.state.impl.memory.TemporaryModelState;
-import org.xydra.core.model.state.impl.memory.XStateUtils;
 
 
 /**
@@ -143,12 +138,9 @@ public class XCopyUtils {
 	}
 	
 	public static XModel copyModel(XID actor, String password, XReadableModel modelSnapshot) {
-		XChangeLogState changeLogState = new MemoryChangeLogState(modelSnapshot.getAddress());
-		changeLogState.setFirstRevisionNumber(modelSnapshot.getRevisionNumber() + 1);
-		XModelState modelState = new TemporaryModelState(modelSnapshot.getAddress(), changeLogState);
-		XStateUtils.copy(modelSnapshot, modelState);
-		XModel model = new MemoryModel(actor, password, modelState);
-		return model;
+		XRevWritableModel modelState = createSnapshot(modelSnapshot);
+		// TODO create a method without additional copy
+		return new MemoryModel(actor, password, modelState);
 	}
 	
 	/**

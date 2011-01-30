@@ -21,6 +21,9 @@ import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.base.change.impl.memory.MemoryRepositoryEvent;
+import org.xydra.base.rmof.XRevWritableModel;
+import org.xydra.base.rmof.XRevWritableRepository;
+import org.xydra.base.rmof.impl.memory.SimpleRepository;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.change.XModelEventListener;
 import org.xydra.core.change.XObjectEventListener;
@@ -30,10 +33,8 @@ import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.state.XChangeLogState;
-import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XRepositoryState;
-import org.xydra.core.model.state.XStateTransaction;
-import org.xydra.core.model.state.impl.memory.TemporaryRepositoryState;
+import org.xydra.core.model.state.impl.memory.MemoryChangeLogState;
 
 
 /**
@@ -59,7 +60,7 @@ public class MemoryRepository implements XRepository, Serializable {
 	private XID sessionActor;
 	private String sessionPasswordHash;
 	
-	private final XRepositoryState state;
+	private final XRevWritableRepository state;
 	private Set<XTransactionEventListener> transactionListenerCollection;
 	
 	/**
@@ -69,8 +70,8 @@ public class MemoryRepository implements XRepository, Serializable {
 	 * @param repositoryId The {@link XID} for this MemoryRepository.
 	 */
 	public MemoryRepository(XID actorId, String passwordHash, XID repositoryId) {
-		this(actorId, passwordHash, new TemporaryRepositoryState(XX.toAddress(repositoryId, null,
-		        null, null)));
+		this(actorId, passwordHash, new SimpleRepository(XX.toAddress(repositoryId, null, null,
+		        null)));
 	}
 	
 	/**
@@ -80,7 +81,7 @@ public class MemoryRepository implements XRepository, Serializable {
 	 * @param repositoryState The initial {@link XRepositoryState} of this
 	 *            MemoryRepository.
 	 */
-	public MemoryRepository(XID actorId, String passwordHash, XRepositoryState repositoryState) {
+	public MemoryRepository(XID actorId, String passwordHash, XRevWritableRepository repositoryState) {
 		assert repositoryState != null;
 		
 		assert actorId != null;
@@ -125,10 +126,6 @@ public class MemoryRepository implements XRepository, Serializable {
 		}
 	}
 	
-	private XStateTransaction beginStateTransaction() {
-		return this.state.beginTransaction();
-	}
-	
 	public MemoryModel createModel(XID modelId) {
 		
 		XRepositoryCommand command = MemoryRepositoryCommand.createAddCommand(getAddress(), true,
@@ -148,25 +145,16 @@ public class MemoryRepository implements XRepository, Serializable {
 		XRepositoryEvent event = MemoryRepositoryEvent.createAddEvent(this.sessionActor,
 		        getAddress(), modelId);
 		
-		XModelState modelState = this.state.createModelState(modelId);
+		XRevWritableModel modelState = this.state.createModel(modelId);
 		
-		XChangeLogState ls = modelState.getChangeLogState();
+		XChangeLogState ls = new MemoryChangeLogState(modelState.getAddress());
+		ls.setFirstRevisionNumber(0);
 		
-		XStateTransaction trans = beginStateTransaction();
-		
-		ls.appendEvent(event, trans);
-		ls.save(trans);
-		
-		modelState.save(trans);
+		ls.appendEvent(event, null);
 		
 		MemoryModel model = new MemoryModel(this.sessionActor, this.sessionPasswordHash, this,
-		        modelState);
+		        modelState, ls);
 		assert model.getRevisionNumber() == 0;
-		
-		this.state.addModelState(modelState);
-		save(trans);
-		
-		endStateTransaction(trans);
 		
 		// in memory
 		this.loadedModels.put(model.getID(), model);
@@ -182,10 +170,6 @@ public class MemoryRepository implements XRepository, Serializable {
 		
 		model.eventQueue.sendEvents();
 		
-	}
-	
-	private void endStateTransaction(XStateTransaction transaction) {
-		this.state.endTransaction(transaction);
 	}
 	
 	@Override
@@ -395,12 +379,14 @@ public class MemoryRepository implements XRepository, Serializable {
 			return model;
 		}
 		
-		if(!this.state.hasModelState(modelId)) {
+		XRevWritableModel modelState = this.state.getModel(modelId);
+		if(modelState == null) {
 			return null;
 		}
 		
-		XModelState modelState = this.state.getModelState(modelId);
-		model = new MemoryModel(this.sessionActor, this.sessionPasswordHash, this, modelState);
+		XChangeLogState log = new MemoryChangeLogState(modelState.getAddress());
+		log.setFirstRevisionNumber(modelState.getRevisionNumber() + 1);
+		model = new MemoryModel(this.sessionActor, this.sessionPasswordHash, this, modelState, log);
 		this.loadedModels.put(modelId, model);
 		
 		return model;
@@ -417,7 +403,7 @@ public class MemoryRepository implements XRepository, Serializable {
 	}
 	
 	public synchronized boolean hasModel(XID id) {
-		return this.loadedModels.containsKey(id) || this.state.hasModelState(id);
+		return this.loadedModels.containsKey(id) || this.state.hasModel(id);
 	}
 	
 	public synchronized boolean isEmpty() {
@@ -480,10 +466,6 @@ public class MemoryRepository implements XRepository, Serializable {
 			
 			long rev = model.getRevisionNumber() + 1;
 			
-			XStateTransaction trans = beginStateTransaction();
-			assert model.eventQueue.stateTransaction == null;
-			model.eventQueue.stateTransaction = trans;
-			
 			int since = model.eventQueue.getNextPosition();
 			boolean inTrans = model.enqueueModelRemoveEvents(this.sessionActor);
 			if(inTrans) {
@@ -491,12 +473,9 @@ public class MemoryRepository implements XRepository, Serializable {
 			}
 			
 			model.delete();
-			this.state.removeModelState(modelId);
+			this.state.removeModel(modelId);
 			this.loadedModels.remove(modelId);
 			
-			save(trans);
-			
-			endStateTransaction(trans);
 			model.eventQueue.stateTransaction = null;
 			
 			model.eventQueue.newLocalChange(command, callback);
@@ -506,14 +485,6 @@ public class MemoryRepository implements XRepository, Serializable {
 			
 			return rev;
 		}
-	}
-	
-	/**
-	 * Saves the current state information of this MemoryRepository with the
-	 * currently used persistence layer
-	 */
-	private void save(XStateTransaction transaction) {
-		this.state.save(transaction);
 	}
 	
 	@Override
@@ -532,16 +503,10 @@ public class MemoryRepository implements XRepository, Serializable {
 			XID modelId = model.getID();
 			boolean hasModel = hasModel(modelId);
 			if(model.removed && hasModel) {
-				XStateTransaction trans = beginStateTransaction();
-				this.state.removeModelState(modelId);
+				this.state.removeModel(modelId);
 				this.loadedModels.remove(modelId);
-				save(trans);
-				endStateTransaction(trans);
 			} else if(!model.removed && !hasModel) {
-				XStateTransaction trans = beginStateTransaction();
-				this.state.addModelState(model.getState());
-				save(trans);
-				endStateTransaction(trans);
+				this.state.addModel(model.getState());
 				this.loadedModels.put(model.getID(), model);
 			}
 			model.eventQueue.sendEvents();

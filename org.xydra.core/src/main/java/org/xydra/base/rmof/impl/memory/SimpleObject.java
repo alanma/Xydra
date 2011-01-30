@@ -27,7 +27,7 @@ public class SimpleObject implements Serializable, XRevWritableObject {
 	private static final long serialVersionUID = 5593443685935758227L;
 	
 	private final XAddress address;
-	private final Map<XID,SimpleField> fields;
+	private final Map<XID,XRevWritableField> fields;
 	private long revisionNumber;
 	
 	public SimpleObject(XAddress address) {
@@ -38,17 +38,17 @@ public class SimpleObject implements Serializable, XRevWritableObject {
 		assert address.getAddressedType() == XType.XOBJECT;
 		this.address = address;
 		this.revisionNumber = revisionNumber;
-		this.fields = new HashMap<XID,SimpleField>(2);
+		this.fields = new HashMap<XID,XRevWritableField>(2);
 	}
 	
 	@Override
-	public void addField(SimpleField field) {
+	public void addField(XRevWritableField field) {
 		this.fields.put(field.getID(), field);
 	}
 	
 	@Override
-	public SimpleField createField(XID fieldId) {
-		SimpleField field = this.fields.get(fieldId);
+	public XRevWritableField createField(XID fieldId) {
+		XRevWritableField field = this.fields.get(fieldId);
 		if(field != null) {
 			return field;
 		}

@@ -1,14 +1,15 @@
 package org.xydra.base.rmof.impl.memory;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.Map;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
-import org.xydra.base.change.XCommand;
+import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableRepository;
 import org.xydra.base.rmof.XWritableRepository;
 
@@ -25,18 +26,22 @@ public class SimpleRepository implements XRevWritableRepository, Serializable {
 	private static final long serialVersionUID = 5593443685935758227L;
 	
 	private final XAddress address;
-	private final Set<XID> modelIds;
+	private final Map<XID,XRevWritableModel> models = new HashMap<XID,XRevWritableModel>();
 	
-	public SimpleRepository(XAddress address, Set<XID> modelIds) {
+	public SimpleRepository(XAddress address) {
 		assert address.getAddressedType() == XType.XREPOSITORY;
 		this.address = address;
-		this.modelIds = modelIds;
 	}
 	
 	@Override
-	public SimpleModel createModel(XID modelId) {
-		this.modelIds.add(modelId);
-		return getModel(modelId);
+	public XRevWritableModel createModel(XID modelId) {
+		XRevWritableModel model = this.models.get(modelId);
+		if(model != null) {
+			return model;
+		}
+		SimpleModel newModel = new SimpleModel(XX.resolveModel(this.address, modelId));
+		this.models.put(modelId, newModel);
+		return newModel;
 	}
 	
 	@Override
@@ -50,37 +55,35 @@ public class SimpleRepository implements XRevWritableRepository, Serializable {
 	}
 	
 	@Override
-	public SimpleModel getModel(XID modelId) {
-		// FIXME this returns different instances for each call
-		if(hasModel(modelId)) {
-			return new SimpleModel(XX.resolveModel(this.getAddress(), modelId), XCommand.NEW, null);
-		} else {
-			return null;
-		}
-	}
-	
-	public Set<XID> getModelIds() {
-		return this.modelIds;
+	public XRevWritableModel getModel(XID modelId) {
+		return this.models.get(modelId);
 	}
 	
 	@Override
 	public boolean hasModel(XID modelId) {
-		return this.modelIds.contains(modelId);
+		return this.models.containsKey(modelId);
 	}
 	
 	@Override
 	public boolean isEmpty() {
-		return this.modelIds.isEmpty();
+		return this.models.isEmpty();
 	}
 	
 	@Override
 	public Iterator<XID> iterator() {
-		return this.modelIds.iterator();
+		return this.models.keySet().iterator();
 	}
 	
 	@Override
 	public boolean removeModel(XID modelId) {
-		return this.modelIds.remove(modelId);
+		if(this.models.remove(modelId) != null) {
+			return true;
+		}
+		return false;
+	}
+	
+	public void addModel(XRevWritableModel model) {
+		this.models.put(model.getID(), model);
 	}
 	
 }

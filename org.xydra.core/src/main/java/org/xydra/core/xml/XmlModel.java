@@ -13,6 +13,14 @@ import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XReadableRepository;
+import org.xydra.base.rmof.XRevWritableField;
+import org.xydra.base.rmof.XRevWritableModel;
+import org.xydra.base.rmof.XRevWritableObject;
+import org.xydra.base.rmof.XRevWritableRepository;
+import org.xydra.base.rmof.impl.memory.SimpleField;
+import org.xydra.base.rmof.impl.memory.SimpleModel;
+import org.xydra.base.rmof.impl.memory.SimpleObject;
+import org.xydra.base.rmof.impl.memory.SimpleRepository;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XField;
@@ -30,13 +38,10 @@ import org.xydra.core.model.state.XFieldState;
 import org.xydra.core.model.state.XModelState;
 import org.xydra.core.model.state.XObjectState;
 import org.xydra.core.model.state.XRepositoryState;
-import org.xydra.core.model.state.XStateStore;
-import org.xydra.core.model.state.XStateTransaction;
 import org.xydra.core.model.state.impl.memory.MemoryChangeLogState;
 import org.xydra.core.model.state.impl.memory.TemporaryFieldState;
 import org.xydra.core.model.state.impl.memory.TemporaryModelState;
 import org.xydra.core.model.state.impl.memory.TemporaryObjectState;
-import org.xydra.core.model.state.impl.memory.TemporaryRepositoryState;
 import org.xydra.store.AccessException;
 
 
@@ -79,15 +84,25 @@ public class XmlModel {
 		}
 	}
 	
+	static private XChangeLogState loadChangeLogState(MiniElement xml, XAddress baseAddr) {
+		Iterator<MiniElement> logElementIt = xml.getElementsByTagName(XCHANGELOG_ELEMENT);
+		if(logElementIt.hasNext()) {
+			XChangeLogState log = new MemoryChangeLogState(baseAddr);
+			loadChangeLogState(logElementIt.next(), log);
+			if(logElementIt.hasNext()) {
+				throw new IllegalArgumentException("xml object contains multiple change logs");
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * Load the model represented by the given XML element into an
 	 * {@link XModelState}.
 	 * 
 	 * @param state The change log state to load into.
-	 * @param trans The state transaction to use for creating the model.
 	 */
-	public static void loadChangeLogState(MiniElement xml, XChangeLogState state,
-	        XStateTransaction trans) {
+	public static void loadChangeLogState(MiniElement xml, XChangeLogState state) {
 		
 		XmlUtils.checkElementName(xml, XCHANGELOG_ELEMENT);
 		
@@ -109,7 +124,7 @@ public class XmlModel {
 		while(eventElementIt.hasNext()) {
 			MiniElement e = eventElementIt.next();
 			XEvent event = XmlEvent.toEvent(e, state.getBaseAddress(), state);
-			state.appendEvent(event, trans);
+			state.appendEvent(event, null);
 		}
 		
 	}
@@ -126,7 +141,7 @@ public class XmlModel {
 	 *             XField element.
 	 */
 	public static XField toField(XID actorId, MiniElement xml) {
-		return new MemoryField(actorId, toFieldState(xml, null, null));
+		return new MemoryField(actorId, toFieldState(xml, null));
 	}
 	
 	/**
@@ -136,11 +151,9 @@ public class XmlModel {
 	 * @param parent If parent is null, the field is loaded into a
 	 *            {@link TemporaryFieldState}, otherwise it is loaded into a
 	 *            child state of parent.
-	 * @param trans The state transaction to use for creating the field.
 	 * @return the created {@link XFieldState}
 	 */
-	public static XFieldState toFieldState(MiniElement xml, XObjectState parent,
-	        XStateTransaction trans) {
+	public static XRevWritableField toFieldState(MiniElement xml, XRevWritableObject parent) {
 		
 		XmlUtils.checkElementName(xml, XFIELD_ELEMENT);
 		
@@ -156,17 +169,16 @@ public class XmlModel {
 			xvalue = XmlValue.toValue(valueElement);
 		}
 		
-		XFieldState fieldState;
+		XRevWritableField fieldState;
 		if(parent == null) {
 			XAddress fieldAddr = XX.toAddress(null, null, null, xid);
-			fieldState = new TemporaryFieldState(fieldAddr);
+			fieldState = new SimpleField(fieldAddr);
 		} else {
-			fieldState = parent.createFieldState(xid);
+			fieldState = parent.createField(xid);
 		}
 		fieldState.setRevisionNumber(revision);
 		fieldState.setValue(xvalue);
 		
-		fieldState.save(trans);
 		return fieldState;
 	}
 	
@@ -182,7 +194,13 @@ public class XmlModel {
 	 *             XModel element.
 	 */
 	public static XModel toModel(XID actorId, String passwordHash, MiniElement xml) {
-		return new MemoryModel(actorId, passwordHash, toModelState(xml, null, null));
+		XRevWritableModel state = toModelState(xml, null);
+		XChangeLogState log = loadChangeLogState(xml, state.getAddress());
+		if(log != null) {
+			return new MemoryModel(actorId, passwordHash, state, log);
+		} else {
+			return new MemoryModel(actorId, passwordHash, state);
+		}
 	}
 	
 	/**
@@ -192,11 +210,9 @@ public class XmlModel {
 	 * @param parent If parent is null, the field is loaded into a
 	 *            {@link TemporaryModelState}, otherwise it is loaded into a
 	 *            child state of parent.
-	 * @param trans The state transaction to use for creating the model.
 	 * @return the created {@link XModelState}
 	 */
-	public static XModelState toModelState(MiniElement xml, XRepositoryState parent,
-	        XStateTransaction trans) {
+	public static XRevWritableModel toModelState(MiniElement xml, XRevWritableRepository parent) {
 		
 		XmlUtils.checkElementName(xml, XMODEL_ELEMENT);
 		
@@ -204,41 +220,20 @@ public class XmlModel {
 		
 		long revision = getRevisionAttribute(xml, XMODEL_ELEMENT);
 		
-		XModelState modelState;
+		XRevWritableModel modelState;
 		if(parent == null) {
 			XAddress modelAddr = XX.toAddress(null, xid, null, null);
-			XChangeLogState changeLogState = new MemoryChangeLogState(modelAddr);
-			modelState = new TemporaryModelState(modelAddr, changeLogState);
+			modelState = new SimpleModel(modelAddr);
 		} else {
-			modelState = parent.createModelState(xid);
+			modelState = parent.createModel(xid);
 		}
 		modelState.setRevisionNumber(revision);
-		
-		XStateTransaction t = trans == null ? modelState.beginTransaction() : trans;
 		
 		Iterator<MiniElement> objectElementIt = xml.getElementsByTagName(XOBJECT_ELEMENT);
 		while(objectElementIt.hasNext()) {
 			MiniElement objectElement = objectElementIt.next();
-			XObjectState objectState = toObjectState(objectElement, modelState, t);
-			modelState.addObjectState(objectState);
-		}
-		
-		Iterator<MiniElement> logElementIt = xml.getElementsByTagName(XCHANGELOG_ELEMENT);
-		if(logElementIt.hasNext()) {
-			loadChangeLogState(logElementIt.next(), modelState.getChangeLogState(), t);
-			if(logElementIt.hasNext()) {
-				throw new IllegalArgumentException("xml model " + modelState.getAddress()
-				        + " contains multiple change logs");
-			}
-		} else {
-			modelState.getChangeLogState().setFirstRevisionNumber(revision + 1);
-		}
-		assert modelState.getChangeLogState().getCurrentRevisionNumber() == revision;
-		
-		modelState.save(null);
-		
-		if(trans == null) {
-			modelState.endTransaction(t);
+			XRevWritableObject objectState = toObjectState(objectElement, modelState);
+			assert modelState.getObject(objectState.getID()) == objectState;
 		}
 		
 		return modelState;
@@ -256,7 +251,13 @@ public class XmlModel {
 	 *             XObject element.
 	 */
 	public static XObject toObject(XID actorId, String passwordHash, MiniElement xml) {
-		return new MemoryObject(actorId, passwordHash, toObjectState(xml, null, null));
+		XRevWritableObject state = toObjectState(xml, null);
+		XChangeLogState log = loadChangeLogState(xml, state.getAddress());
+		if(log != null) {
+			return new MemoryObject(actorId, passwordHash, state, log);
+		} else {
+			return new MemoryObject(actorId, passwordHash, state);
+		}
 	}
 	
 	/**
@@ -266,11 +267,9 @@ public class XmlModel {
 	 * @param parent If parent is null, the field is loaded into a
 	 *            {@link TemporaryObjectState}, otherwise it is loaded into a
 	 *            child state of parent.
-	 * @param trans The state transaction to use for creating the object.
 	 * @return the created {@link XObjectState}
 	 */
-	public static XObjectState toObjectState(MiniElement xml, XModelState parent,
-	        XStateTransaction trans) {
+	public static XRevWritableObject toObjectState(MiniElement xml, XRevWritableModel parent) {
 		
 		XmlUtils.checkElementName(xml, XOBJECT_ELEMENT);
 		
@@ -278,45 +277,21 @@ public class XmlModel {
 		
 		long revision = getRevisionAttribute(xml, XOBJECT_ELEMENT);
 		
-		XObjectState objectState;
+		XRevWritableObject objectState;
 		if(parent == null) {
 			XAddress objectAddr = XX.toAddress(null, null, xid, null);
-			XChangeLogState changeLogState = new MemoryChangeLogState(objectAddr);
-			objectState = new TemporaryObjectState(objectAddr, changeLogState);
+			objectState = new SimpleObject(objectAddr);
 		} else {
-			objectState = parent.createObjectState(xid);
+			objectState = parent.createObject(xid);
 		}
 		
 		objectState.setRevisionNumber(revision);
 		
-		XStateTransaction t = trans == null ? objectState.beginTransaction() : trans;
-		
 		Iterator<MiniElement> fieldElementIt = xml.getElementsByTagName(XFIELD_ELEMENT);
 		while(fieldElementIt.hasNext()) {
 			MiniElement fieldElement = fieldElementIt.next();
-			XFieldState fieldState = toFieldState(fieldElement, objectState, t);
-			objectState.addFieldState(fieldState);
-		}
-		
-		Iterator<MiniElement> logElementIt = xml.getElementsByTagName(XCHANGELOG_ELEMENT);
-		if(logElementIt.hasNext()) {
-			if(parent != null) {
-				throw new IllegalArgumentException("xml object " + objectState.getAddress()
-				        + " has a change log, but is contained in a model");
-			}
-			loadChangeLogState(logElementIt.next(), objectState.getChangeLogState(), t);
-			if(logElementIt.hasNext()) {
-				throw new IllegalArgumentException("xml object " + objectState.getAddress()
-				        + " contains multiple change logs");
-			}
-		} else if(parent == null) {
-			objectState.getChangeLogState().setFirstRevisionNumber(revision);
-		}
-		
-		objectState.save(t);
-		
-		if(trans == null) {
-			objectState.endTransaction(t);
+			XRevWritableField fieldState = toFieldState(fieldElement, objectState);
+			assert objectState.getField(fieldState.getID()) == fieldState;
 		}
 		
 		return objectState;
@@ -334,45 +309,30 @@ public class XmlModel {
 	 *             XRepository element.
 	 */
 	public static XRepository toRepository(XID actorId, String passwordHash, MiniElement xml) {
-		return new MemoryRepository(actorId, passwordHash, toRepositoryState(xml, null));
+		return new MemoryRepository(actorId, passwordHash, toRepositoryState(xml));
 	}
 	
 	/**
 	 * Load the repository represented by the given XML element into an
 	 * {@link XRepositoryState}.
 	 * 
-	 * @param store If this is not null the given store will be used to create
-	 *            the repository state, otherwise a
-	 *            {@link TemporaryRepositoryState} is created
-	 * 
 	 * @return the created {@link XRepositoryState}
 	 */
-	public static XRepositoryState toRepositoryState(MiniElement xml, XStateStore store) {
+	public static XRevWritableRepository toRepositoryState(MiniElement xml) {
 		
 		XmlUtils.checkElementName(xml, XREPOSITORY_ELEMENT);
 		
 		XID xid = XmlUtils.getRequiredXidAttribute(xml, XREPOSITORY_ELEMENT);
 		
 		XAddress repoAddr = XX.toAddress(xid, null, null, null);
-		XRepositoryState repositoryState = new TemporaryRepositoryState(repoAddr);
-		if(store == null) {
-			repositoryState = new TemporaryRepositoryState(repoAddr);
-		} else {
-			repositoryState = store.createRepositoryState(repoAddr);
-		}
-		
-		XStateTransaction trans = repositoryState.beginTransaction();
+		XRevWritableRepository repositoryState = new SimpleRepository(repoAddr);
 		
 		Iterator<MiniElement> modelElementIt = xml.getElementsByTagName(XMODEL_ELEMENT);
 		while(modelElementIt.hasNext()) {
 			MiniElement modelElement = modelElementIt.next();
-			XModelState modelState = toModelState(modelElement, repositoryState, trans);
-			repositoryState.addModelState(modelState);
+			XRevWritableModel modelState = toModelState(modelElement, repositoryState);
+			assert repositoryState.getModel(modelState.getID()) == modelState;
 		}
-		
-		repositoryState.save(trans);
-		
-		repositoryState.endTransaction(trans);
 		
 		return repositoryState;
 	}

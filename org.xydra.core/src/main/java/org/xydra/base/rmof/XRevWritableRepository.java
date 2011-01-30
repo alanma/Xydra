@@ -20,4 +20,6 @@ public interface XRevWritableRepository extends XWritableRepository {
 	@ModificationOperation
 	boolean removeModel(XID modelId);
 	
+	void addModel(XRevWritableModel model);
+	
 }

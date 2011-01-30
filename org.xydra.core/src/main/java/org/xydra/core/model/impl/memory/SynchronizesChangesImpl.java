@@ -75,12 +75,12 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 	
 	protected final MemoryEventManager eventQueue;
 	
-	private Set<XFieldEventListener> fieldChangeListenerCollection;
+	private final Set<XFieldEventListener> fieldChangeListenerCollection;
 	
-	private Set<XObjectEventListener> objectChangeListenerCollection;
+	private final Set<XObjectEventListener> objectChangeListenerCollection;
 	/** Has this entity been removed? */
 	protected boolean removed = false;
-	private Set<XTransactionEventListener> transactionListenerCollection;
+	private final Set<XTransactionEventListener> transactionListenerCollection;
 	
 	public SynchronizesChangesImpl(MemoryEventManager queue) {
 		this.eventQueue = queue;
@@ -106,11 +106,6 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 			return this.transactionListenerCollection.add(changeListener);
 		}
 	}
-	
-	/**
-	 * Start a new state transaction.
-	 */
-	protected abstract void beginStateTransaction();
 	
 	/**
 	 * @throws IllegalStateException if this entity has already been removed
@@ -157,11 +152,6 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 	 * already exist.
 	 */
 	protected abstract MemoryObject createObjectInternal(XID objectId);
-	
-	/**
-	 * End the current state transaction.
-	 */
-	protected abstract void endStateTransaction();
 	
 	protected long executeTransaction(XTransaction transaction, XLocalChangeCallback callback) {
 		synchronized(this.eventQueue) {
@@ -210,13 +200,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 			
 			// only execute as transaction if there actually are multiple
 			// changes
-			boolean hasOrphans = (this.eventQueue.orphans != null);
 			if(nChanges > 1) {
-				
-				if(!hasOrphans) {
-					beginStateTransaction();
-				}
-				
 				// set "transactionInProgress" to true to stop involuntarily
 				// increasing the affected revision numbers
 				this.eventQueue.transactionInProgess = true;
@@ -270,13 +254,6 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 				
 				long newRevision = oldRev + 1;
 				
-				/*
-				 * FIXME this may fail: changes to objects and fields will use
-				 * their own actor when creating the events, which may be
-				 * different from the one of this model (object) - but
-				 * transaction(event)s should only contain events from the same
-				 * actor.
-				 */
 				this.eventQueue.createTransactionEvent(getSessionActor(), getModel(), getObject(),
 				        since);
 				
@@ -288,10 +265,8 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 						MemoryField newField = newObject.getField(fieldId);
 						assert newField != null : "should have been created above";
 						newField.setRevisionNumber(newRevision);
-						newField.save();
 					}
 					newObject.setRevisionNumber(newRevision);
-					newObject.save();
 				}
 				
 				// changed objects
@@ -306,7 +281,6 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 						MemoryField newField = oldObject.getField(field.getID());
 						assert newField != null : "should have been created above";
 						newField.setRevisionNumber(newRevision);
-						newField.save();
 						changed = true;
 					}
 					
@@ -316,14 +290,12 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 							MemoryField oldField = oldObject.getField(field.getID());
 							assert oldField != null : "should have existed already and not been removed";
 							oldField.setRevisionNumber(newRevision);
-							oldField.save();
 							changed = true;
 						}
 					}
 					
 					if(changed) {
 						oldObject.setRevisionNumber(newRevision);
-						oldObject.save();
 					}
 					
 				}
@@ -331,11 +303,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 				this.eventQueue.transactionInProgess = false;
 				
 				// really increment the model's revision number
-				incrementRevisionAndSave();
-				
-				if(!hasOrphans) {
-					endStateTransaction();
-				}
+				incrementRevision();
 				
 				// dispatch events
 				this.eventQueue.sendEvents();
@@ -457,7 +425,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 	/**
 	 * Increment this entity's revision number.
 	 */
-	protected abstract void incrementRevisionAndSave();
+	protected abstract void incrementRevision();
 	
 	public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
 		synchronized(this.eventQueue) {
@@ -528,7 +496,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 				        false);
 				this.eventQueue.enqueueRepositoryEvent(getModel().getFather(), event);
 				
-				incrementRevisionAndSave();
+				incrementRevision();
 			}
 
 			else if(command.getChangeType() == ChangeType.REMOVE) {
@@ -591,7 +559,6 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 		long result = replayCommand(replayCommand);
 		if(result < 0) {
 			setRevisionNumberIfModel(oldModelRev);
-			saveIfModel();
 			return false;
 		}
 		assert event.equals(getChangeLog().getEventAt(result));
@@ -633,7 +600,6 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 			boolean hasOrphans = (this.eventQueue.orphans != null);
 			if(!hasOrphans) {
 				this.eventQueue.orphans = new Orphans();
-				beginStateTransaction();
 			}
 			
 			try {
@@ -672,8 +638,6 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 			} finally {
 				
 				if(!hasOrphans) {
-					endStateTransaction();
-					
 					this.eventQueue.setBlockSending(oldBlock);
 					this.eventQueue.sendEvents();
 				}
@@ -726,7 +690,6 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 				MemoryObject object = createObjectInternal(objectId);
 				assert event.getOldObjectRevision() >= 0;
 				object.setRevisionNumber(event.getOldObjectRevision());
-				object.save();
 			} else {
 				assert event.getChangeType() == ChangeType.ADD;
 				assert getModel().hasObject(objectId);
@@ -753,7 +716,6 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 					MemoryField field = object.createFieldInternal(fieldId);
 					assert event.getOldFieldRevision() >= 0;
 					field.setRevisionNumber(event.getOldFieldRevision());
-					field.save();
 				} else {
 					assert event.getChangeType() == ChangeType.ADD;
 					assert object.hasField(fieldId);
@@ -775,22 +737,14 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 				field.setValueInternal(((XFieldEvent)event).getOldValue());
 				assert event.getOldFieldRevision() >= 0;
 				field.setRevisionNumber(event.getOldFieldRevision());
-				field.save();
 			}
 			
 			assert event.getOldObjectRevision() >= 0;
 			object.setRevisionNumber(event.getOldObjectRevision());
-			object.save();
 		}
 		
 		setRevisionNumberIfModel(event.getOldModelRevision());
-		saveIfModel();
 	}
-	
-	/**
-	 * Save using the persistence layer, if this is a subtype of {@link XModel}.
-	 */
-	protected abstract void saveIfModel();
 	
 	/**
 	 * Set the new revision number, if this is a subtype of {@link XModel}.
@@ -828,7 +782,6 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 			boolean oldBlock = this.eventQueue.setBlockSending(true);
 			
 			assert this.eventQueue.orphans == null;
-			beginStateTransaction();
 			this.eventQueue.orphans = new Orphans();
 			
 			int pos = this.eventQueue.getNextPosition();
@@ -887,7 +840,6 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 			cleanupOrphans();
 			
 			this.eventQueue.saveLog();
-			endStateTransaction();
 			
 			this.eventQueue.setBlockSending(oldBlock);
 			
