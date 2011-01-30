@@ -18,20 +18,20 @@ import org.xydra.store.impl.delegate.XydraPersistence;
  * 
  * @author dscharrer
  */
-abstract public class AbstractAllowAllStoreSynchronizerTest extends AbstractSynchronizerTest {
+abstract public class AbstractPersistenceSynchronizerTest extends AbstractSynchronizerTest {
 	
 	/**
 	 * The {@link XydraPersistence} to be used for testing. Subclasses should
 	 * initialize this before {@link #setUp()} gets called.
 	 */
-	protected static XydraPersistence simpleStore;
+	protected static XydraPersistence persistence;
 	
 	@BeforeClass
 	public static void init() {
-		assertNotNull(simpleStore);
+		assertNotNull(persistence);
 		actorId = XX.toId("tester");
 		passwordHash = "top secret";
-		store = new DelegatingAllowAllStore(simpleStore);
+		store = new DelegatingAllowAllStore(persistence);
 	}
 	
 }

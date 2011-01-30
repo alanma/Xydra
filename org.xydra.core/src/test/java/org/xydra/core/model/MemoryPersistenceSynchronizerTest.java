@@ -14,13 +14,13 @@ import org.xydra.store.impl.memory.MemoryPersistence;
  * 
  * @author dscharrer
  */
-public class AllowAllMemoryStoreSynchronizerTest extends AbstractAllowAllStoreSynchronizerTest {
+public class MemoryPersistenceSynchronizerTest extends AbstractPersistenceSynchronizerTest {
 	
 	@BeforeClass
 	public static void init() {
 		LoggerTestHelper.init();
-		simpleStore = new MemoryPersistence(XX.toId("repo"));
-		AbstractAllowAllStoreSynchronizerTest.init();
+		persistence = new MemoryPersistence(XX.toId("repo"));
+		AbstractPersistenceSynchronizerTest.init();
 	}
 	
 }
