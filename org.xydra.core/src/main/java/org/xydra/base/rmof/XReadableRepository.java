@@ -51,6 +51,7 @@ public interface XReadableRepository extends IHasXAddress, IHasXID, Iterable<XID
 	 * @return an iterator over the {@link XID XIDs} of the child-models of this
 	 *         XBaseRepository.
 	 */
+	@ReadOperation
 	Iterator<XID> iterator();
 	
 }

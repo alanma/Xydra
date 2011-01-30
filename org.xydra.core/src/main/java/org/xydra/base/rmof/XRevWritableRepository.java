@@ -5,6 +5,10 @@ import org.xydra.annotations.ReadOperation;
 import org.xydra.base.XID;
 
 
+/**
+ * An {@link XWritableRepository} to which existing {@link XRevWritableModel
+ * XRevWritableModels} can be added.
+ */
 public interface XRevWritableRepository extends XWritableRepository {
 	
 	/* More specific return type */
@@ -17,9 +21,14 @@ public interface XRevWritableRepository extends XWritableRepository {
 	@ReadOperation
 	XRevWritableModel getModel(XID modelId);
 	
+	/**
+	 * Add an existing model to this repository. Models created using
+	 * {@link #createModel(XID)} are automatically added.
+	 * 
+	 * This overwrites any existing model in this repository with the same
+	 * {@link XID}.
+	 */
 	@ModificationOperation
-	boolean removeModel(XID modelId);
-	
 	void addModel(XRevWritableModel model);
 	
 }

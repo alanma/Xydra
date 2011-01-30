@@ -26,6 +26,8 @@ public interface XWritableRepository extends XReadableRepository {
 	@ModificationOperation
 	XWritableModel createModel(XID modelId);
 	
+	/* More specific return type */
+	@Override
 	@ReadOperation
 	XWritableModel getModel(XID modelId);
 	

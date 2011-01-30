@@ -27,6 +27,8 @@ public interface XWritableObject extends XReadableObject {
 	@ModificationOperation
 	XWritableField createField(XID fieldId);
 	
+	/* More specific return type */
+	@Override
 	@ReadOperation
 	XWritableField getField(XID fieldId);
 	
