@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
@@ -38,7 +39,12 @@ import org.xydra.index.XI;
  * 
  * @author dscharrer
  */
-abstract public class AbstractTransactionTest {
+public class TransactionTest {
+	
+	@BeforeClass
+	public static void init() {
+		LoggerTestHelper.init();
+	}
 	
 	private static final XID ALIAS_ID = XX.toId("alias");
 	

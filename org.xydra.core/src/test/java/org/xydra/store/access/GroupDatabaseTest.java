@@ -9,8 +9,6 @@ import org.junit.Test;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.core.LoggerTestHelper;
-import org.xydra.core.model.state.XSPI;
-import org.xydra.core.model.state.impl.memory.TemporaryStateStore;
 import org.xydra.store.access.impl.memory.MemoryGroupDatabase;
 
 
@@ -27,12 +25,14 @@ public class GroupDatabaseTest {
 	static final XID group4 = XX.toId("group4");
 	static final XID group5 = XX.toId("group5");
 	static final XID group6 = XX.toId("group6");
+	
 	@BeforeClass
 	public static void init() {
 		LoggerTestHelper.init();
-		XSPI.setStateStore(new TemporaryStateStore());
 	}
+	
 	private MemoryGroupDatabase groupDb;
+	
 	@Before
 	public void before() {
 		this.groupDb = new MemoryGroupDatabase();

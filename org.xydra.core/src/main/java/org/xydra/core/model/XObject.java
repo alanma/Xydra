@@ -8,7 +8,6 @@ import org.xydra.base.change.XObjectCommand;
 import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.XWritableObject;
-import org.xydra.core.model.state.XObjectState;
 
 
 /**
@@ -19,9 +18,9 @@ import org.xydra.core.model.state.XObjectState;
  * For example an XObject might be used to model a person if we'd write a
  * phonebook application.
  * 
- * Implementations of XObject should use an {@link XObjectState} for storing and
- * representing the inner state of the XObject to allow maximum persistence
- * management flexibility.
+ * Implementations of XObject should use an {@link XRevWritableObject} for
+ * storing and representing the inner state of the XObject to allow maximum
+ * persistence management flexibility.
  * 
  * @author voelkel
  * @author Kaidel

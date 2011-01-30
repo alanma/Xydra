@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xydra.base.X;
 import org.xydra.base.XID;
@@ -25,7 +26,12 @@ import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryObject;
 
 
-public abstract class AbstractChangeTest {
+public class ChangeTest {
+	
+	@BeforeClass
+	public static void init() {
+		LoggerTestHelper.init();
+	}
 	
 	private static class DummyFieldChangeListener implements XFieldEventListener {
 		private XID field;
@@ -77,6 +83,7 @@ public abstract class AbstractChangeTest {
 			this.fired = false;
 		}
 	}
+	
 	private static class DummyModelChangeListener implements XModelEventListener {
 		public boolean fired = false;
 		private XID model;
@@ -375,8 +382,8 @@ public abstract class AbstractChangeTest {
 		assertEquals("check if the event has the right type", ChangeType.ADD, listener1.getType());
 		assertEquals("check if the object of the event is the right one", object1.getID(),
 		        listener1.getObject());
-		assertEquals("listener1.getModel() is not null but " + listener1.getModelId(),
-		        listener1.getModelId(), null);
+		assertEquals("listener1.getModel() is not null but " + listener1.getModelId(), listener1
+		        .getModelId(), null);
 		assertEquals(listener1.getRepositoryId(), null);
 		listener1.reset();
 		

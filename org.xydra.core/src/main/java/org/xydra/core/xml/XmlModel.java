@@ -23,25 +23,18 @@ import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.base.rmof.impl.memory.SimpleRepository;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XChangeLog;
+import org.xydra.core.model.XChangeLogState;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XLoggedModel;
 import org.xydra.core.model.XLoggedObject;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
+import org.xydra.core.model.impl.memory.MemoryChangeLogState;
 import org.xydra.core.model.impl.memory.MemoryField;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryObject;
 import org.xydra.core.model.impl.memory.MemoryRepository;
-import org.xydra.core.model.state.XChangeLogState;
-import org.xydra.core.model.state.XFieldState;
-import org.xydra.core.model.state.XModelState;
-import org.xydra.core.model.state.XObjectState;
-import org.xydra.core.model.state.XRepositoryState;
-import org.xydra.core.model.state.impl.memory.MemoryChangeLogState;
-import org.xydra.core.model.state.impl.memory.TemporaryFieldState;
-import org.xydra.core.model.state.impl.memory.TemporaryModelState;
-import org.xydra.core.model.state.impl.memory.TemporaryObjectState;
 import org.xydra.store.AccessException;
 
 
@@ -97,8 +90,8 @@ public class XmlModel {
 	}
 	
 	/**
-	 * Load the model represented by the given XML element into an
-	 * {@link XModelState}.
+	 * Load the change log represented by the given XML element into an
+	 * {@link XChangeLogState}.
 	 * 
 	 * @param state The change log state to load into.
 	 */
@@ -124,7 +117,7 @@ public class XmlModel {
 		while(eventElementIt.hasNext()) {
 			MiniElement e = eventElementIt.next();
 			XEvent event = XmlEvent.toEvent(e, state.getBaseAddress(), state);
-			state.appendEvent(event, null);
+			state.appendEvent(event);
 		}
 		
 	}
@@ -146,12 +139,12 @@ public class XmlModel {
 	
 	/**
 	 * Load the field represented by the given XML element into an
-	 * {@link XFieldState}.
+	 * {@link XRevWritableField}.
 	 * 
 	 * @param parent If parent is null, the field is loaded into a
-	 *            {@link TemporaryFieldState}, otherwise it is loaded into a
-	 *            child state of parent.
-	 * @return the created {@link XFieldState}
+	 *            {@link SimpleField}, otherwise it is loaded into a child state
+	 *            of parent.
+	 * @return the created {@link XRevWritableField}
 	 */
 	public static XRevWritableField toFieldState(MiniElement xml, XRevWritableObject parent) {
 		
@@ -205,12 +198,12 @@ public class XmlModel {
 	
 	/**
 	 * Load the model represented by the given XML element into an
-	 * {@link XModelState}.
+	 * {@link XRevWritableModel}.
 	 * 
 	 * @param parent If parent is null, the field is loaded into a
-	 *            {@link TemporaryModelState}, otherwise it is loaded into a
-	 *            child state of parent.
-	 * @return the created {@link XModelState}
+	 *            {@link SimpleModel}, otherwise it is loaded into a child state
+	 *            of parent.
+	 * @return the created {@link XRevWritableModel}
 	 */
 	public static XRevWritableModel toModelState(MiniElement xml, XRevWritableRepository parent) {
 		
@@ -262,12 +255,12 @@ public class XmlModel {
 	
 	/**
 	 * Load the object represented by the given XML element into an
-	 * {@link XObjectState}.
+	 * {@link XRevWritableObject}.
 	 * 
 	 * @param parent If parent is null, the field is loaded into a
-	 *            {@link TemporaryObjectState}, otherwise it is loaded into a
-	 *            child state of parent.
-	 * @return the created {@link XObjectState}
+	 *            {@link SimpleObject}, otherwise it is loaded into a child
+	 *            state of parent.
+	 * @return the created {@link XRevWritableObject}
 	 */
 	public static XRevWritableObject toObjectState(MiniElement xml, XRevWritableModel parent) {
 		
@@ -314,9 +307,9 @@ public class XmlModel {
 	
 	/**
 	 * Load the repository represented by the given XML element into an
-	 * {@link XRepositoryState}.
+	 * {@link XRevWritableRepository}.
 	 * 
-	 * @return the created {@link XRepositoryState}
+	 * @return the created {@link XRevWritableRepository}
 	 */
 	public static XRevWritableRepository toRepositoryState(MiniElement xml) {
 		

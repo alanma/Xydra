@@ -9,7 +9,6 @@ import org.xydra.base.value.impl.memory.MemoryValueFactory;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.core.model.impl.memory.MemoryStringIDProvider;
-import org.xydra.core.model.state.XSPI;
 
 
 /**
@@ -30,9 +29,7 @@ public class X {
 	private static XValueFactory valueFactory;
 	
 	/**
-	 * Creates an {@link XRepository} implementation that lives in-memory. The
-	 * underlying {@link XSPI} layer determines where persistence ultimately
-	 * happens.
+	 * Creates an {@link XRepository} implementation that lives in-memory.
 	 * 
 	 * @param actorId TODO
 	 * 

@@ -29,12 +29,10 @@ import org.xydra.core.change.XModelEventListener;
 import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.change.XRepositoryEventListener;
 import org.xydra.core.change.XTransactionEventListener;
+import org.xydra.core.model.XChangeLogState;
 import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.model.state.XChangeLogState;
-import org.xydra.core.model.state.XRepositoryState;
-import org.xydra.core.model.state.impl.memory.MemoryChangeLogState;
 
 
 /**
@@ -78,8 +76,8 @@ public class MemoryRepository implements XRepository, Serializable {
 	 * Creates a new {@link MemoryRepository}.
 	 * 
 	 * @param actorId TODO
-	 * @param repositoryState The initial {@link XRepositoryState} of this
-	 *            MemoryRepository.
+	 * @param repositoryState The initial {@link XRevWritableRepository} state
+	 *            of this MemoryRepository.
 	 */
 	public MemoryRepository(XID actorId, String passwordHash, XRevWritableRepository repositoryState) {
 		assert repositoryState != null;
@@ -150,7 +148,7 @@ public class MemoryRepository implements XRepository, Serializable {
 		XChangeLogState ls = new MemoryChangeLogState(modelState.getAddress());
 		ls.setFirstRevisionNumber(0);
 		
-		ls.appendEvent(event, null);
+		ls.appendEvent(event);
 		
 		MemoryModel model = new MemoryModel(this.sessionActor, this.sessionPasswordHash, this,
 		        modelState, ls);
@@ -475,8 +473,6 @@ public class MemoryRepository implements XRepository, Serializable {
 			model.delete();
 			this.state.removeModel(modelId);
 			this.loadedModels.remove(modelId);
-			
-			model.eventQueue.stateTransaction = null;
 			
 			model.eventQueue.newLocalChange(command, callback);
 			

@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xydra.base.X;
 import org.xydra.base.XID;
@@ -32,8 +31,6 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.model.state.XSPI;
-import org.xydra.core.model.state.impl.memory.TemporaryStateStore;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.access.XA;
@@ -86,11 +83,6 @@ public class XModelBasics {
 	private static Logger getLogger() {
 		LoggerTestHelper.init();
 		return LoggerFactory.getLogger(XModelBasics.class);
-	}
-	
-	@BeforeClass
-	public static void init() {
-		XSPI.setStateStore(new TemporaryStateStore());
 	}
 	
 	/**

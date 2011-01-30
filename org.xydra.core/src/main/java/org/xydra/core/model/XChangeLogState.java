@@ -1,11 +1,9 @@
-package org.xydra.core.model.state;
+package org.xydra.core.model;
 
 import java.io.Serializable;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.change.XEvent;
-import org.xydra.core.model.XChangeLog;
-import org.xydra.core.model.XModel;
 
 
 /**
@@ -23,28 +21,16 @@ public interface XChangeLogState extends Serializable {
 	 * @param event The {@link XEvent} which is to be logged
 	 * @param transaction If not null, persist the change at the end of the
 	 *            given transaction, otherwise persist it now. The transaction
-	 *            object must have been created by {@link XObjectState},
-	 *            {@link XModelState} or {@link XRepositoryState} containing the
+	 *            object must have been created by {@link XObject},
+	 *            {@link XModel} or {@link XRepository} containing the
 	 *            XChangeLog represented by this XChangeLogState
 	 */
-	void appendEvent(XEvent event, XStateTransaction transaction);
+	void appendEvent(XEvent event);
 	
 	/**
-	 * Delete this state information from the attached persistence layer it was
-	 * created with.
-	 * 
-	 * @param transaction If not null, persist the change at the end of the
-	 *            given transaction, otherwise persist it now. The transaction
-	 *            object must have been created by {@link XObjectState},
-	 *            {@link XModelState} or {@link XRepositoryState} containing the
-	 *            XChangeLog represented by this XChangeLogState
-	 */
-	void delete(XStateTransaction transaction);
-	
-	/**
-	 * @return the {@link XAddress} of the {@link XModelState} or
-	 *         {@link XObjectState} this changelog refers to. All contained
-	 *         events have been produced by this entity or a descendant.
+	 * @return the {@link XAddress} of the {@link XModel} or {@link XObject}
+	 *         this change log refers to. All contained events have been
+	 *         produced by this entity or a descendant.
 	 */
 	XAddress getBaseAddress();
 	
@@ -75,18 +61,6 @@ public interface XChangeLogState extends Serializable {
 	long getFirstRevisionNumber();
 	
 	/**
-	 * Store the data of this object in the attached persistence layer this
-	 * {@link XChangeLogState} was created with.
-	 * 
-	 * @param transaction If not null, persist the change at the end of the
-	 *            given transaction, otherwise persist it now. The transaction
-	 *            object must have been created by {@link XObjectState},
-	 *            {@link XModelState} or {@link XRepositoryState} containing the
-	 *            XChangeLog represented by this XChangeLogState
-	 */
-	void save(XStateTransaction transaction);
-	
-	/**
 	 * Set the first revision number. This can only be done if the change log is
 	 * empty.
 	 */
@@ -100,8 +74,8 @@ public interface XChangeLogState extends Serializable {
 	 *            {@link XEvent XEvents} are to be removed
 	 * @param transaction If not null, persist the change at the end of the
 	 *            given transaction, otherwise persist it now. The transaction
-	 *            object must have been created by {@link XObjectState},
-	 *            {@link XModelState} or {@link XRepositoryState} containing the
+	 *            object must have been created by {@link XObject},
+	 *            {@link XModel} or {@link XRepository} containing the
 	 *            XChangeLog represented by this XChangeLogState
 	 * @return true, if truncating was successful, false otherwise (may happen
 	 *         if the given revision number was bigger than the current revision
@@ -109,6 +83,6 @@ public interface XChangeLogState extends Serializable {
 	 *         number when this change log began logging)
 	 */
 	
-	boolean truncateToRevision(long revisionNumber, XStateTransaction transaction);
+	boolean truncateToRevision(long revisionNumber);
 	
 }

@@ -3,8 +3,7 @@ package org.xydra.core.model.impl.memory;
 import org.xydra.base.XAddress;
 import org.xydra.base.change.XEvent;
 import org.xydra.core.model.XChangeLog;
-import org.xydra.core.model.state.XChangeLogState;
-import org.xydra.core.model.state.XStateTransaction;
+import org.xydra.core.model.XChangeLogState;
 
 
 /**
@@ -33,7 +32,7 @@ public class MemoryChangeLog extends AbstractChangeLog implements XChangeLog {
 	 * 
 	 * @param event the {@link XEvent} which is to be appended
 	 */
-	synchronized protected void appendEvent(XEvent event, XStateTransaction transaction) {
+	synchronized protected void appendEvent(XEvent event) {
 		// TODO
 		assert event == null || (event.getRevisionNumber() == getCurrentRevisionNumber() + 1) : "cannot append event with rev "
 		        + event.getRevisionNumber()
@@ -44,11 +43,7 @@ public class MemoryChangeLog extends AbstractChangeLog implements XChangeLog {
 		// "else": event is part of a transaction and will therefore only be
 		// recorded as part of the transaction
 		
-		this.state.appendEvent(event, transaction);
-	}
-	
-	synchronized protected void delete(XStateTransaction transaction) {
-		this.state.delete(transaction);
+		this.state.appendEvent(event);
 	}
 	
 	public XAddress getBaseAddress() {
@@ -83,10 +78,6 @@ public class MemoryChangeLog extends AbstractChangeLog implements XChangeLog {
 		return this.state.getFirstRevisionNumber();
 	}
 	
-	synchronized protected void save(XStateTransaction transaction) {
-		this.state.save(transaction);
-	}
-	
 	@Override
 	synchronized public String toString() {
 		return this.state.toString();
@@ -103,9 +94,8 @@ public class MemoryChangeLog extends AbstractChangeLog implements XChangeLog {
 	 *         number was smaller than the current revision number and greater
 	 *         than zero.
 	 */
-	synchronized protected boolean truncateToRevision(long revisionNumber,
-	        XStateTransaction transaction) {
-		return this.state.truncateToRevision(revisionNumber, transaction);
+	synchronized protected boolean truncateToRevision(long revisionNumber) {
+		return this.state.truncateToRevision(revisionNumber);
 	}
 	
 }

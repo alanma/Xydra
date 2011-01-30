@@ -40,7 +40,6 @@ import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.core.model.impl.memory.SynchronizesChangesImpl;
-import org.xydra.core.model.state.XSPI;
 import org.xydra.core.model.sync.XSynchronizer;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.GetEventsRequest;
@@ -52,9 +51,7 @@ import org.xydra.store.XydraStore;
  * Test for {@link XSynchronizer} and {@link SynchronizesChangesImpl} that uses
  * an arbitrary {@link XydraStore}.
  * 
- * Subclasses should set the model state backend via
- * {@link XSPI#setStateStore(org.xydra.core.model.state.XStateStore)} and
- * initialize the protected members.
+ * Subclasses should initialize the protected members.
  * 
  * @author dscharrer
  */
@@ -360,7 +357,7 @@ abstract public class AbstractSynchronizerTest {
 		assertTrue(XCompareUtils.equalState(testModel, remoteModel));
 		
 		// check that the correct events were sent
-		AbstractSynchronizeTest.replaySyncEvents(modelCopy, events);
+		SynchronizeTest.replaySyncEvents(modelCopy, events);
 		assertTrue(XCompareUtils.equalTree(modelCopy, this.model));
 		
 		checkEvents(this.model);
@@ -603,7 +600,7 @@ abstract public class AbstractSynchronizerTest {
 		assertTrue(testModel.hasObject(bobId));
 		
 		// check events sent so far
-		AbstractSynchronizeTest.replaySyncEvents(startCopy2, startEvents);
+		SynchronizeTest.replaySyncEvents(startCopy2, startEvents);
 		assertTrue(XCompareUtils.equalTree(startCopy2, this.model));
 		
 		XModel midCopy = XCopyUtils.copyModel(actorId, passwordHash, this.model);
@@ -639,10 +636,10 @@ abstract public class AbstractSynchronizerTest {
 		assertTrue(XCompareUtils.equalState(this.model, remoteModel));
 		
 		// check that the correct events were sent
-		AbstractSynchronizeTest.replaySyncEvents(startCopy, startEvents);
+		SynchronizeTest.replaySyncEvents(startCopy, startEvents);
 		assertTrue(XCompareUtils.equalTree(startCopy, this.model));
 		
-		AbstractSynchronizeTest.replaySyncEvents(midCopy, midEvents);
+		SynchronizeTest.replaySyncEvents(midCopy, midEvents);
 		assertTrue(XCompareUtils.equalTree(midCopy, this.model));
 		
 		assertEquals(XCommand.FAILED, tlc1.waitForResult());

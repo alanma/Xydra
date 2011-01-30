@@ -24,7 +24,7 @@ import org.xydra.base.change.impl.memory.MemoryRepositoryEvent;
 import org.xydra.base.change.impl.memory.MemoryTransactionEvent;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XChangeLog;
-import org.xydra.core.model.state.XChangeLogState;
+import org.xydra.core.model.XChangeLogState;
 import org.xydra.index.XI;
 
 

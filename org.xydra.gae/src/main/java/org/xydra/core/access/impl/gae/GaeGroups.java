@@ -36,6 +36,7 @@ import com.google.appengine.api.datastore.KeyFactory;
  * @author dscharrer
  * 
  */
+@Deprecated
 public class GaeGroups {
 	
 	private static final String NAME_GROUPDB = "groups";

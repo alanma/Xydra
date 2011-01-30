@@ -28,14 +28,12 @@ import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.change.XModelEventListener;
+import org.xydra.core.model.XChangeLogState;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.model.state.XChangeLogState;
-import org.xydra.core.model.state.XModelState;
-import org.xydra.core.model.state.impl.memory.MemoryChangeLogState;
 
 
 /**
@@ -120,7 +118,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	 * Creates a new MemoryModel without father-{@link XRepository}.
 	 * 
 	 * @param actorId TODO
-	 * @param modelState The initial {@link XModelState} of this MemoryModel.
+	 * @param modelState The initial {@link XRevWritableModel} state of this
+	 *            MemoryModel.
 	 */
 	public MemoryModel(XID actorId, String passwordHash, XRevWritableModel modelState) {
 		this(actorId, passwordHash, modelState, createChangeLog(modelState));
@@ -130,7 +129,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	 * Creates a new MemoryModel without father-{@link XRepository}.
 	 * 
 	 * @param actorId TODO
-	 * @param modelState The initial {@link XModelState} of this MemoryModel.
+	 * @param modelState The initial {@link XRevWritableModel} state of this
+	 *            MemoryModel.
 	 */
 	public MemoryModel(XID actorId, String passwordHash, XRevWritableModel modelState,
 	        XChangeLogState log) {
@@ -239,7 +239,6 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 			this.state.removeObject(objectId);
 		}
 		this.state.setRevisionNumber(this.state.getRevisionNumber() + 1);
-		this.eventQueue.deleteLog();
 		this.loadedObjects.clear();
 		this.removed = true;
 	}
@@ -595,7 +594,6 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		assert !this.eventQueue.transactionInProgess;
 		long newRevision = getRevisionNumber() + 1;
 		this.state.setRevisionNumber(newRevision);
-		this.eventQueue.saveLog();
 	}
 	
 	public boolean isEmpty() {

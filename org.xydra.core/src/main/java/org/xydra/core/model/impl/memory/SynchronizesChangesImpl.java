@@ -631,8 +631,6 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 					this.eventQueue.cleanEvents(pos);
 					
 					cleanupOrphans();
-					
-					this.eventQueue.saveLog();
 				}
 				
 			} finally {
@@ -838,8 +836,6 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 			this.eventQueue.cleanEvents(pos);
 			
 			cleanupOrphans();
-			
-			this.eventQueue.saveLog();
 			
 			this.eventQueue.setBlockSending(oldBlock);
 			

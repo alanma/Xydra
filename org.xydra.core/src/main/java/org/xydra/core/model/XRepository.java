@@ -7,21 +7,21 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.change.XRepositoryEvent;
+import org.xydra.base.rmof.XRevWritableRepository;
 import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.core.change.XSendsFieldEvents;
 import org.xydra.core.change.XSendsModelEvents;
 import org.xydra.core.change.XSendsObjectEvents;
 import org.xydra.core.change.XSendsRepositoryEvents;
 import org.xydra.core.change.XSendsTransactionEvents;
-import org.xydra.core.model.state.XRepositoryState;
 
 
 /**
  * A repository manages a set of {@link XModel XModels}.
  * 
- * Implementations of XRepository should use an {@link XRepositoryState} for
- * storing and representing the inner state of the XRepository to allow maximum
- * persistence management flexibility.
+ * Implementations of XRepository should use an {@link XRevWritableRepository}
+ * for storing and representing the inner state of the XRepository to allow
+ * maximum persistence management flexibility.
  * 
  * @author voelkel
  * 

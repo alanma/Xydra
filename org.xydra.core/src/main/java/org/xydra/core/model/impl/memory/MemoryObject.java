@@ -25,14 +25,13 @@ import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.model.XChangeLog;
+import org.xydra.core.model.XChangeLogState;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.delta.ReadableModelWithOneObject;
-import org.xydra.core.model.state.XChangeLogState;
-import org.xydra.core.model.state.impl.memory.MemoryChangeLogState;
 
 
 /**
@@ -237,9 +236,6 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 			this.state.removeField(fieldId);
 		}
 		this.loadedFields.clear();
-		if(this.father == null) {
-			this.eventQueue.deleteLog();
-		}
 		this.removed = true;
 	}
 	
@@ -573,7 +569,6 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 			if(log != null) {
 				assert log.getCurrentRevisionNumber() > getRevisionNumber();
 				setRevisionNumber(log.getCurrentRevisionNumber());
-				this.eventQueue.saveLog();
 			} else {
 				setRevisionNumber(getRevisionNumber() + 1);
 			}

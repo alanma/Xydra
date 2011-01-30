@@ -4,11 +4,13 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.xydra.server.test.DataApiTest;
 import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.impl.gae.GaeUtils;
 
 
+@Ignore
 public class DataApiTestGae extends DataApiTest {
 	
 	@BeforeClass

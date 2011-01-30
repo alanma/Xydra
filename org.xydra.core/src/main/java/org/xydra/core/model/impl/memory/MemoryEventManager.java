@@ -23,7 +23,6 @@ import org.xydra.base.change.impl.memory.MemoryTransactionEvent;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.impl.memory.SynchronizesChangesImpl.Orphans;
-import org.xydra.core.model.state.XStateTransaction;
 import org.xydra.index.XI;
 
 
@@ -88,11 +87,6 @@ public class MemoryEventManager implements Serializable {
 	private XID sessionActor;
 	
 	private String sessionPasswordHash;
-	
-	/**
-	 * The current transaction of this model, object or field.
-	 */
-	protected XStateTransaction stateTransaction;
 	
 	private long syncRevision;
 	
@@ -310,10 +304,6 @@ public class MemoryEventManager implements Serializable {
 		enqueueEvent(new EventQueueEntry(repo, model, object, null, trans));
 	}
 	
-	protected void deleteLog() {
-		this.changeLog.delete(this.stateTransaction);
-	}
-	
 	/**
 	 * Enqueues the given {@link EventQueueEntry}.
 	 * 
@@ -322,7 +312,7 @@ public class MemoryEventManager implements Serializable {
 	private void enqueueEvent(EventQueueEntry entry) {
 		
 		if(this.logging && !entry.event.inTransaction()) {
-			this.changeLog.appendEvent(entry.event, this.stateTransaction);
+			this.changeLog.appendEvent(entry.event);
 		}
 		
 		this.eventQueue.add(entry);
@@ -434,7 +424,7 @@ public class MemoryEventManager implements Serializable {
 	}
 	
 	protected void logNullEvent() {
-		this.changeLog.appendEvent(null, this.stateTransaction);
+		this.changeLog.appendEvent(null);
 	}
 	
 	/**
@@ -500,10 +490,6 @@ public class MemoryEventManager implements Serializable {
 			this.localChanges.add(new MemoryLocalChange(this.sessionActor,
 			        this.sessionPasswordHash, command, callback));
 		}
-	}
-	
-	protected void saveLog() {
-		this.changeLog.save(this.stateTransaction);
 	}
 	
 	/**
@@ -646,7 +632,7 @@ public class MemoryEventManager implements Serializable {
 	}
 	
 	public void truncateLog(long revision) {
-		boolean truncated = this.changeLog.truncateToRevision(revision, this.stateTransaction);
+		boolean truncated = this.changeLog.truncateToRevision(revision);
 		assert truncated;
 		assert this.changeLog.getCurrentRevisionNumber() == revision;
 	}

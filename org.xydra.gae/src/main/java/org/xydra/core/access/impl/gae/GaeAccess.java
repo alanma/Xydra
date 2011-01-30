@@ -36,6 +36,7 @@ import com.google.appengine.api.datastore.KeyFactory;
  * @author dscharrer
  * 
  */
+@Deprecated
 public class GaeAccess {
 	
 	private static final String PREFIX_ARM = "access/";

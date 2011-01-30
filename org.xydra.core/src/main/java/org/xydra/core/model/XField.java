@@ -10,7 +10,6 @@ import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.value.XValue;
-import org.xydra.core.model.state.XFieldState;
 
 
 /**
@@ -22,8 +21,8 @@ import org.xydra.core.model.state.XFieldState;
  * her name, address, age etc. could be stored in the {@link XField XFields} of
  * this {@link XObject}.
  * 
- * Implementations of XField should use an {@link XFieldState} for storing and
- * representing the inner state of the XField to allow maximum persistence
+ * Implementations of XField should use an {@link XRevWritableField} for storing
+ * and representing the inner state of the XField to allow maximum persistence
  * management flexibility.
  * 
  * @author voelkel

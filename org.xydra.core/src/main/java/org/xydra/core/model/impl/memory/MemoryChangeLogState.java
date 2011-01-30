@@ -1,14 +1,14 @@
-package org.xydra.core.model.state.impl.memory;
+package org.xydra.core.model.impl.memory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.change.XEvent;
-import org.xydra.core.model.state.XChangeLogState;
-import org.xydra.core.model.state.XStateTransaction;
+import org.xydra.core.model.XChangeLogState;
 
 
+// TODO merge this into memory change log?
 public class MemoryChangeLogState implements XChangeLogState {
 	
 	private static final long serialVersionUID = 4745987477215964499L;
@@ -37,7 +37,7 @@ public class MemoryChangeLogState implements XChangeLogState {
 		this.baseAddr = baseAddr;
 	}
 	
-	public void appendEvent(XEvent event, XStateTransaction transaction) {
+	public void appendEvent(XEvent event) {
 		
 		if(event == null) {
 			this.events.add(null);
@@ -49,10 +49,6 @@ public class MemoryChangeLogState implements XChangeLogState {
 			
 			this.events.add(event);
 		}
-	}
-	
-	public void delete(XStateTransaction transaction) {
-		// automatically deleted by garbage collector
 	}
 	
 	public XAddress getBaseAddress() {
@@ -73,10 +69,6 @@ public class MemoryChangeLogState implements XChangeLogState {
 		return this.revisionNumber;
 	}
 	
-	public void save(XStateTransaction transaction) {
-		// memory change log cannot be saved, ignore
-	}
-	
 	public void setFirstRevisionNumber(long rev) {
 		if(!this.events.isEmpty()) {
 			throw new IllegalStateException(
@@ -91,7 +83,7 @@ public class MemoryChangeLogState implements XChangeLogState {
 		        + " currentRev=" + getCurrentRevisionNumber() + " events=" + this.events.toString();
 	}
 	
-	public boolean truncateToRevision(long revisionNumber, XStateTransaction transaction) {
+	public boolean truncateToRevision(long revisionNumber) {
 		if(revisionNumber > getCurrentRevisionNumber()) {
 			return false;
 		}
