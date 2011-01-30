@@ -127,10 +127,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		BatchedResult<Long>[] result = commandCallback.getEffect();
 		if(commandCallback.getException() != null) {
 			throw new RuntimeException(
-			        "ExecuteCommands did not work properly in setUp (threw an Exception), here's its message text: "
-			                + commandCallback.getException().getMessage() + '\n'
-			                + " and here is its StackTrace: " + '\n'
-			                + commandCallback.getException().getStackTrace(),
+			        "ExecuteCommands did not work properly in setUp (threw an Exception), here's its message text: ",
 			        commandCallback.getException());
 		}
 		
@@ -343,8 +340,8 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		 * store)
 		 */
 		for(int i = 0; i < this.modelAddresses.length; i++) {
-			assertTrue(result + " should contain " + this.modelAddresses[i].getModel(),
-			        result.contains(this.modelAddresses[i].getModel()));
+			assertTrue(result + " should contain " + this.modelAddresses[i].getModel(), result
+			        .contains(this.modelAddresses[i].getModel()));
 		}
 		
 	}
@@ -566,8 +563,8 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			// compare revision numbers
 			assertNotNull(revisionResult[i].getResult());
 			assertNull(revisionResult[i].getException());
-			assertEquals((Long)snapshotResult[i].getResult().getRevisionNumber(),
-			        revisionResult[i].getResult());
+			assertEquals((Long)snapshotResult[i].getResult().getRevisionNumber(), revisionResult[i]
+			        .getResult());
 		}
 	}
 	
