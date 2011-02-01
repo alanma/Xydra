@@ -118,17 +118,8 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		SynchronousTestCallback<BatchedResult<Long>[]> callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		XID modelId = XX.createUniqueID();
 		
-		XCommand[] commands = new XCommand[] { X.getCommandFactory().createAddModelCommand(
-		        this.repoID, modelId, true) };
-		
-		this.store.executeCommands(this.correctUser, this.correctUserPass, commands, callback);
-		
-		assertTrue(this.waitOnCallback(callback));
-		assertNotNull(callback.getEffect());
-		assertTrue(callback.getEffect().length == 1);
-		assertNull(callback.getException());
-		assertTrue((callback.getEffect())[0].getResult() > 0);
-		assertNull((callback.getEffect())[0].getException());
+		executeSucceedingCommand(
+		        X.getCommandFactory().createAddModelCommand(this.repoID, modelId, true), callback);
 		
 		// check if the model was created
 		SynchronousTestCallback<BatchedResult<XReadableModel>[]> callback2 = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
@@ -143,17 +134,11 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertEquals(result2[0].getResult().getID(), modelId);
 		
 		// remove the model again
-		commands = new XCommand[] { X.getCommandFactory().createRemoveModelCommand(this.repoID,
-		        modelId, (callback.getEffect())[0].getResult(), true) };
 		
 		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
-		this.store.executeCommands(this.correctUser, this.correctUserPass, commands, callback);
-		
-		assertTrue(this.waitOnCallback(callback));
-		assertNotNull(callback.getEffect());
-		assertTrue(callback.getEffect().length == 1);
-		assertNull(callback.getException());
-		assertTrue((callback.getEffect())[0].getResult() > 0);
+		executeSucceedingCommand(
+		        X.getCommandFactory().createRemoveModelCommand(this.repoID, modelId,
+		                (callback.getEffect())[0].getResult(), true), callback);
 		
 		// check if the model was removed
 		callback2 = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
@@ -175,17 +160,9 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		XID modelId = XX.createUniqueID();
 		SynchronousTestCallback<BatchedResult<Long>[]> callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		
-		XCommand[] commands = new XCommand[] { X.getCommandFactory().createRemoveModelCommand(
-		        this.repoID, modelId, (callback.getEffect())[0].getResult(), true) };
-		
-		this.store.executeCommands(this.correctUser, this.correctUserPass, commands, callback);
-		
-		assertTrue(this.waitOnCallback(callback));
-		assertNotNull(callback.getEffect());
-		assertTrue(callback.getEffect().length == 1);
-		assertNull(callback.getException());
-		assertTrue((callback.getEffect())[0].getResult() == XCommand.FAILED);
-		assertNull((callback.getEffect())[0].getException());
+		executeFailingCommand(
+		        X.getCommandFactory().createRemoveModelCommand(this.repoID, modelId,
+		                (callback.getEffect())[0].getResult(), true), callback);
 	}
 	
 	@Test
@@ -280,33 +257,16 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		SynchronousTestCallback<BatchedResult<Long>[]> callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		XID modelId = XX.createUniqueID();
 		
-		XCommand[] commands = new XCommand[] { X.getCommandFactory().createAddModelCommand(
-		        this.repoID, modelId, true) };
-		
-		this.store.executeCommands(this.correctUser, this.correctUserPass, commands, callback);
-		
-		assertTrue(this.waitOnCallback(callback));
-		assertNotNull(callback.getEffect());
-		assertTrue(callback.getEffect().length == 1);
-		assertNull(callback.getException());
-		assertTrue((callback.getEffect())[0].getResult() > 0);
-		assertNull((callback.getEffect())[0].getException());
+		executeSucceedingCommand(
+		        X.getCommandFactory().createAddModelCommand(this.repoID, modelId, true), callback);
 		
 		// create an object
 		SynchronousTestCallback<BatchedResult<Long>[]> callback2 = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		XID objectId = XX.createUniqueID();
 		
-		XCommand[] commands2 = new XCommand[] { X.getCommandFactory().createAddObjectCommand(
-		        this.repoID, modelId, objectId, true) };
-		
-		this.store.executeCommands(this.correctUser, this.correctUserPass, commands2, callback2);
-		
-		assertTrue(this.waitOnCallback(callback2));
-		assertNotNull(callback2.getEffect());
-		assertTrue(callback2.getEffect().length == 1);
-		assertNull(callback2.getException());
-		assertTrue((callback2.getEffect())[0].getResult() > 0);
-		assertNull((callback2.getEffect())[0].getException());
+		executeSucceedingCommand(
+		        X.getCommandFactory().createAddObjectCommand(this.repoID, modelId, objectId, true),
+		        callback2);
 		
 		// check if the object was created
 		SynchronousTestCallback<BatchedResult<XReadableObject>[]> callback3 = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
@@ -322,17 +282,11 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertEquals(result2[0].getResult().getID(), objectId);
 		
 		// remove the object again
-		commands2 = new XCommand[] { X.getCommandFactory().createRemoveObjectCommand(this.repoID,
-		        modelId, objectId, (callback.getEffect())[0].getResult(), true) };
 		callback2 = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		
-		this.store.executeCommands(this.correctUser, this.correctUserPass, commands2, callback2);
-		
-		assertTrue(this.waitOnCallback(callback2));
-		assertNotNull(callback2.getEffect());
-		assertTrue(callback2.getEffect().length == 1);
-		assertNull(callback2.getException());
-		assertTrue((callback2.getEffect())[0].getResult() > 0);
+		executeSucceedingCommand(
+		        X.getCommandFactory().createRemoveObjectCommand(this.repoID, modelId, objectId,
+		                (callback.getEffect())[0].getResult(), true), callback2);
 		
 		// check if the model was removed
 		callback3 = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
@@ -346,5 +300,30 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNotNull(result2);
 		assertNull(result2[0].getResult());
 		assertNull(result2[0].getException());
+	}
+	
+	protected void executeSucceedingCommand(XCommand command,
+	        SynchronousTestCallback<BatchedResult<Long>[]> callback) {
+		this.store.executeCommands(this.correctUser, this.correctUserPass,
+		        new XCommand[] { command }, callback);
+		
+		assertTrue(this.waitOnCallback(callback));
+		assertNotNull(callback.getEffect());
+		assertTrue(callback.getEffect().length == 1);
+		assertNull(callback.getException());
+		assertTrue((callback.getEffect())[0].getResult() > 0);
+	}
+	
+	protected void executeFailingCommand(XCommand command,
+	        SynchronousTestCallback<BatchedResult<Long>[]> callback) {
+		this.store.executeCommands(this.correctUser, this.correctUserPass,
+		        new XCommand[] { command }, callback);
+		
+		assertTrue(this.waitOnCallback(callback));
+		assertNotNull(callback.getEffect());
+		assertTrue(callback.getEffect().length == 1);
+		assertNull(callback.getException());
+		assertTrue((callback.getEffect())[0].getResult() == XCommand.FAILED);
+		assertNull((callback.getEffect())[0].getException());
 	}
 }
