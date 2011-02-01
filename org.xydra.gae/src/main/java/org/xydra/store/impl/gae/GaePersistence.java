@@ -104,6 +104,12 @@ public class GaePersistence implements XydraPersistence {
 	}
 	
 	@Override
+	// TODO PERFORMANCE try to find faster implementation
+	public boolean hasModel(XID modelId) {
+		return this.getModelIds().contains(modelId);
+	}
+	
+	@Override
 	public long getModelRevision(XAddress address) {
 		checkAddres(address);
 		if(address.getAddressedType() != XType.XMODEL) {
