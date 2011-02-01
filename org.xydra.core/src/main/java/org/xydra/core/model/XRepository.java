@@ -81,6 +81,8 @@ public interface XRepository extends XWritableRepository, XSendsRepositoryEvents
 	 *         or if executing the {@link XRepositoryCommand} succeeded the
 	 *         revision number of the {@link XRepositoryEvent} caused by the
 	 *         {@link XRepositoryCommand}.
+	 * 
+	 *         TODO what is returned if a model has been successfully removed?
 	 */
 	@ModificationOperation
 	long executeRepositoryCommand(XRepositoryCommand command);
@@ -100,6 +102,8 @@ public interface XRepository extends XWritableRepository, XSendsRepositoryEvents
 	 * @return the actor that is represented by this interface. This is the
 	 *         actor that is recorded for change operations. Operations will
 	 *         only succeed if this actor has access.
+	 * 
+	 *         TODO can this be null?
 	 */
 	XID getSessionActor();
 	

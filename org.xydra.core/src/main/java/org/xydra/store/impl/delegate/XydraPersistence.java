@@ -145,4 +145,10 @@ public interface XydraPersistence {
 	 */
 	XID getRepositoryId();
 	
+	/**
+	 * @param id
+	 * @return true if this persistence contains the given modelId.
+	 */
+	boolean hasModel(XID modelId);
+	
 }

@@ -4,6 +4,9 @@ package org.xydra.base.change;
  * An {@link XEvent} representing changes made by {@link XTransaction
  * XTransactions}
  * 
+ * TODO is it always true that this.{@link #getChangeType()} ==
+ * {@link ChangeType#TRANSACTION} ?
+ * 
  * @author Kaidel
  */
 

@@ -127,4 +127,9 @@ public class MemoryPersistence implements XydraPersistence {
 		return this.repoId;
 	}
 	
+	@Override
+	public boolean hasModel(XID modelId) {
+		return this.models.containsKey(modelId);
+	}
+	
 }
