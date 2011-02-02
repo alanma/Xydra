@@ -77,6 +77,7 @@ public class CalendarManager {
 	private static XID yearFieldId = XX.toId("year");
 	
 	public static void main(String[] args) {
+		
 		CalendarManager cm = new CalendarManager();
 		cm.registerNewUser("john", "superman");
 		// FIXME it seems the event is not added properly
@@ -94,7 +95,9 @@ public class CalendarManager {
 		// alice looks up johns events
 		String aliceEvents = cm.getEvents("alice", "wonderwomen", "john", 2000, 1, 1, 2020, 12, 31);
 		log.info(aliceEvents);
+		
 	}
+	
 	private XModel accountModel;
 	
 	/*
@@ -234,7 +237,7 @@ public class CalendarManager {
 	}
 	
 	/**
-	 * A method for checking if the given user name ist actualy taken and if it
+	 * A method for checking if the given user name is actually taken and if it
 	 * is, to check if the given password is correct
 	 * 
 	 * @param userName The name of the user
@@ -306,7 +309,7 @@ public class CalendarManager {
 		}
 		
 		// build the string representation
-		String result = "";
+		String result = "{";
 		
 		for(XID eventID : userCalendar) {
 			XObject event = userCalendar.getObject(eventID);
@@ -337,6 +340,7 @@ public class CalendarManager {
 				}
 			}
 		}
+		result += "}";
 		
 		return result;
 	}
