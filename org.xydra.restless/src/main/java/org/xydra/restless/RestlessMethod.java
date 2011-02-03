@@ -145,6 +145,7 @@ public class RestlessMethod {
 					};
 					args.add(restlessContext);
 				} else {
+					assert this.parameter.length > parameterNumber;
 					RestlessParameter param = this.parameter[parameterNumber];
 					/* 1) look in urlParameters (not query params) */
 					String value = urlParameter.get(param.name);

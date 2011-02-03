@@ -69,6 +69,8 @@ import org.xydra.log.LoggerFactory;
  */
 public class Restless extends HttpServlet {
 	
+	public static final String X_HTTP_Method_Override = "X-HTTP-Method-Override";
+	
 	/**
 	 * Methods registered with the
 	 * {@link #addMethod(String, String, Object, String, boolean, RestlessParameter...)}
@@ -622,7 +624,13 @@ public class Restless extends HttpServlet {
 		boolean foundMethod = false;
 		boolean mayAccess = false;
 		
-		String httpMethod = req.getHeader("X-HTTP-Method-Override");
+		// look in HTTP header
+		String httpMethod = req.getHeader(X_HTTP_Method_Override);
+		// look in query param
+		if(httpMethod == null) {
+			httpMethod = req.getParameter(X_HTTP_Method_Override);
+		}
+		// use given HTTP method
 		if(httpMethod == null) {
 			httpMethod = req.getMethod();
 		}
