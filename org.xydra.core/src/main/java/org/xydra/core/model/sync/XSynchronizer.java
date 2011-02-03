@@ -26,7 +26,7 @@ public class XSynchronizer {
 	static private final Logger log = LoggerFactory.getLogger(XSynchronizer.class);
 	
 	private final XSynchronizesChanges entity;
-	boolean requestRunning = false;
+	private boolean requestRunning = false;
 	
 	private final XydraStore store;
 	
@@ -80,6 +80,8 @@ public class XSynchronizer {
 		}
 		
 		protected void requestEnded(boolean noConnectionErrors) {
+			
+			assert XSynchronizer.this.requestRunning;
 			
 			if(!noConnectionErrors) {
 				// Abort if there are connection errors.
@@ -256,8 +258,7 @@ public class XSynchronizer {
 		synchronized(this) {
 			if(this.requestRunning) {
 				// There are already requests running, start this request when
-				// they
-				// are done.
+				// they are done.
 				return;
 			}
 			this.requestRunning = true;
@@ -268,6 +269,8 @@ public class XSynchronizer {
 	}
 	
 	private void doSynchronize(XSynchronizationCallback sc, boolean isFirst) {
+		
+		assert XSynchronizer.this.requestRunning;
 		
 		XLocalChange newChange;
 		boolean first = isFirst;
@@ -337,6 +340,7 @@ public class XSynchronizer {
 		} while(newChange != null);
 		
 		sc.onSuccess();
+		assert this.requestRunning;
 		this.requestRunning = false;
 		
 	}
