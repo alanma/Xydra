@@ -3,6 +3,8 @@ package org.xydra.store.impl.gae;
 import java.util.ConcurrentModificationException;
 
 import org.xydra.base.XAddress;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -22,6 +24,8 @@ import com.google.appengine.api.datastore.Transaction;
  */
 public class GaeUtils {
 	
+	private static final Logger log = LoggerFactory.getLogger(GaeUtils.class);
+	
 	private static DatastoreService datastore;
 	
 	/**
@@ -40,6 +44,8 @@ public class GaeUtils {
 	public static Entity getEntity(Key key, Transaction trans) {
 		makeSureDatestoreServiceIsInitialised();
 		try {
+			// FIXME temporary to find a nasty bug
+			log.info("Getting entity " + key.toString());
 			Entity entity = datastore.get(trans, key);
 			return entity;
 		} catch(EntityNotFoundException e) {
