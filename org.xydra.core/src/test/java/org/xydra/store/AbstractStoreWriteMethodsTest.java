@@ -161,8 +161,33 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		SynchronousTestCallback<BatchedResult<Long>[]> callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		
 		executeFailingCommand(
-		        X.getCommandFactory().createRemoveModelCommand(this.repoID, modelId,
-		                (callback.getEffect())[0].getResult(), true), callback);
+		        X.getCommandFactory().createRemoveModelCommand(this.repoID, modelId, 42, true),
+		        callback);
+		
+		// add a model
+		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		executeSucceedingCommand(
+		        X.getCommandFactory().createAddModelCommand(this.repoID, modelId, true), callback);
+		
+		// try to remove the model but use the wrong revision number
+		long revNr = (callback.getEffect())[0].getResult();
+		
+		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		executeFailingCommand(
+		        X.getCommandFactory().createRemoveModelCommand(this.repoID, modelId, revNr + 1,
+		                true), callback);
+		
+		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		executeFailingCommand(
+		        X.getCommandFactory().createRemoveModelCommand(this.repoID, modelId, revNr - 1,
+		                true), callback);
+		
+		// try to add the same model again with a not-forced command -> should
+		// fail (TODO check if this really is suppossed to fail)
+		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		executeFailingCommand(
+		        X.getCommandFactory().createAddModelCommand(this.repoID, modelId, false), callback);
+		
 	}
 	
 	@Test
@@ -302,6 +327,59 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNull(result2[0].getException());
 	}
 	
+	@Test
+	public void testExecuteCommandsIncorrectObjectCommands() {
+		// create a model
+		XID modelId = XX.createUniqueID();
+		SynchronousTestCallback<BatchedResult<Long>[]> callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		
+		executeSucceedingCommand(
+		        X.getCommandFactory().createAddModelCommand(this.repoID, modelId, true), callback);
+		
+		// try to remove non-existing model
+		XID objectId = XX.createUniqueID();
+		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		
+		executeFailingCommand(
+		        X.getCommandFactory().createRemoveObjectCommand(this.repoID, modelId, objectId, 42,
+		                true), callback);
+		
+		// add an object
+		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		executeSucceedingCommand(
+		        X.getCommandFactory().createAddObjectCommand(this.repoID, modelId, objectId, true),
+		        callback);
+		
+		// try to remove the model but use the wrong revision number
+		long revNr = (callback.getEffect())[0].getResult();
+		
+		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		executeFailingCommand(
+		        X.getCommandFactory().createRemoveObjectCommand(this.repoID, modelId, objectId,
+		                revNr + 1, true), callback);
+		
+		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		executeFailingCommand(
+		        X.getCommandFactory().createRemoveObjectCommand(this.repoID, modelId, objectId,
+		                revNr - 1, true), callback);
+		
+		// try to add the same model again with a not-forced command -> should
+		// fail (TODO check if this really is suppossed to fail)
+		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		executeFailingCommand(
+		        X.getCommandFactory().createAddObjectCommand(this.repoID, modelId, objectId, false),
+		        callback);
+		
+	}
+	
+	/**
+	 * Executes the given command (which is supposed to succeed) and checks if
+	 * everything went as expected.
+	 * 
+	 * @param command The command which is to be executed
+	 * @param callback The callback which is used to get the information about
+	 *            the commands success
+	 */
 	protected void executeSucceedingCommand(XCommand command,
 	        SynchronousTestCallback<BatchedResult<Long>[]> callback) {
 		this.store.executeCommands(this.correctUser, this.correctUserPass,
@@ -314,6 +392,14 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertTrue((callback.getEffect())[0].getResult() > 0);
 	}
 	
+	/**
+	 * Executes the given command (which is supposed to fail) and checks if
+	 * everything went as expected.
+	 * 
+	 * @param command The command which is to be executed
+	 * @param callback The callback which is used to get the information about
+	 *            the commands failure
+	 */
 	protected void executeFailingCommand(XCommand command,
 	        SynchronousTestCallback<BatchedResult<Long>[]> callback) {
 		this.store.executeCommands(this.correctUser, this.correctUserPass,
