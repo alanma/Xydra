@@ -115,7 +115,7 @@ import com.google.appengine.api.datastore.Transaction;
  * @author dscharrer
  * 
  */
-public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
+public class GaeChangesService extends AbstractChangeLog {
 	
 	private static final long serialVersionUID = -2080744796962188941L;
 	

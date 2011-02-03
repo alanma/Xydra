@@ -1,6 +1,8 @@
 package org.xydra.store.impl.gae.snapshot;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.xydra.base.change.ChangeType;
@@ -82,7 +84,53 @@ public class GaeSnapshotService {
 	
 	private void updateCachedModel(CachedModel entry) {
 		
-		Iterator<XEvent> events = this.log.getEventsSince(entry.revision + 1);
+		long curRev = this.log.getCurrentRevisionNumber();
+		if(curRev == entry.revision) {
+			return;
+		}
+		
+		// Check if we can skip eny events.
+		List<XEvent> rawEvents = new ArrayList<XEvent>();
+		for(long i = curRev; i > entry.revision; i--) {
+			XEvent event = this.log.getEventAt(i);
+			if(event == null) {
+				continue;
+			}
+			if(event instanceof XRepositoryEvent) {
+				entry.modelState = null;
+				if(event.getChangeType() == ChangeType.REMOVE) {
+					assert i > 0;
+					assert i == curRev;
+					entry.revision = curRev;
+					return;
+				} else {
+					entry.revision = i - 1;
+					rawEvents.add(0, event);
+					break;
+				}
+				
+			} else if(event instanceof XTransactionEvent) {
+				XTransactionEvent trans = (XTransactionEvent)event;
+				assert trans.size() > 1;
+				if(trans.getEvent(0) instanceof XRepositoryEvent) {
+					assert trans.getEvent(0).getChangeType() == ChangeType.ADD;
+					entry.modelState = null;
+					entry.revision = i - 1;
+					rawEvents.add(0, event);
+					break;
+				} else if(trans.getEvent(trans.size() - 1) instanceof XRepositoryEvent) {
+					assert trans.getEvent(trans.size() - 1).getChangeType() == ChangeType.REMOVE;
+					assert i > 0;
+					assert i == curRev;
+					entry.modelState = null;
+					entry.revision = curRev;
+					return;
+				}
+			}
+			rawEvents.add(0, event);
+		}
+		
+		Iterator<XEvent> events = rawEvents.iterator();
 		
 		while(events.hasNext()) {
 			XEvent event = events.next();
