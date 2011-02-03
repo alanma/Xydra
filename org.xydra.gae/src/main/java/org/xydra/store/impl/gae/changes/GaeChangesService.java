@@ -207,7 +207,7 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	 * A too long timeout however might cause the model to "starve" as processes
 	 * are be aborted by GAE while waiting for other changes.
 	 * */
-	private static final long TIMEOUT = 3000; // TODO set
+	private static final long TIMEOUT = 30000;
 	
 	/**
 	 * critical time (in milliseconds) after which a process will voluntarily
@@ -220,7 +220,7 @@ public class GaeChangesService extends AbstractChangeLog implements XChangeLog {
 	 * However, setting this too close to TIMEOUT might result in two processes
 	 * executing the same change.
 	 */
-	private static final long TIME_CRITICAL = TIMEOUT / 2;
+	private static final long TIME_CRITICAL = 27000;
 	
 	/**
 	 * Initial time to wait before re-checking the status of an event who'se
