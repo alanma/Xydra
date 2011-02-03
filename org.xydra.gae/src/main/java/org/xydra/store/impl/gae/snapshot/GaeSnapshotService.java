@@ -1,7 +1,6 @@
 package org.xydra.store.impl.gae.snapshot;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -130,15 +129,15 @@ public class GaeSnapshotService {
 			rawEvents.add(0, event);
 		}
 		
-		Iterator<XEvent> events = rawEvents.iterator();
-		
-		while(events.hasNext()) {
-			XEvent event = events.next();
+		for(XEvent event : rawEvents) {
 			
 			if(event instanceof XTransactionEvent) {
 				XTransactionEvent trans = (XTransactionEvent)event;
-				for(int i = 0; i < trans.size(); i++) {
-					entry.modelState = applyEvent(entry.modelState, trans.getEvent(i));
+				for(XAtomicEvent ae : trans) {
+					if(ae.isImplied()) {
+						continue;
+					}
+					entry.modelState = applyEvent(entry.modelState, ae);
 				}
 			} else {
 				assert event instanceof XAtomicEvent;
