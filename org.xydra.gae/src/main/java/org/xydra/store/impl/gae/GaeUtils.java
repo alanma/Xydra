@@ -135,6 +135,9 @@ public class GaeUtils {
 	public static void deleteEntity(Key key, Transaction trans) {
 		makeSureDatestoreServiceIsInitialised();
 		datastore.delete(trans, key);
+		// TODO added by max, please review
+		// delete also in memcache
+		XydraRuntime.getMemcache().remove(key);
 	}
 	
 	/**
