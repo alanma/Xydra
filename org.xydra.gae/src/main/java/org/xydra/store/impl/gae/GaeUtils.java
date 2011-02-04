@@ -89,6 +89,8 @@ public class GaeUtils {
 		return getEntity(key, null);
 	}
 	
+	private static final Entity NULL_ENTITY = new Entity("NULL-ENTITY");
+	
 	/**
 	 * @param key The key of the entity to load.
 	 * @param trans The transaction to load the entity in.
@@ -102,7 +104,11 @@ public class GaeUtils {
 				Entity cachedEntity = localVmCache.get(key);
 				if(cachedEntity != null) {
 					log.debug("Getting entity " + key.toString() + " from LocalVmCache");
-					return cachedEntity;
+					if(cachedEntity.equals(NULL_ENTITY)) {
+						return null;
+					} else {
+						return cachedEntity;
+					}
 				}
 			}
 			if(useMemCache) {
@@ -110,23 +116,35 @@ public class GaeUtils {
 				Entity cachedEntity = (Entity)XydraRuntime.getMemcache().get(key);
 				if(cachedEntity != null) {
 					log.debug("Getting entity " + key.toString() + " from MemCache");
-					return cachedEntity;
+					if(cachedEntity.equals(NULL_ENTITY)) {
+						return null;
+					} else {
+						return cachedEntity;
+					}
 				}
 			}
 			
 			log.debug("Getting entity " + key.toString() + " from GAE data store");
 			Entity entity = datastore.get(trans, key);
-			
 			if(useLocalVmCache) {
-				localVmCache.put(entity.getKey(), entity);
+				log.debug("Putting entity " + key.toString() + " in LocalVmCache");
+				localVmCache.put(key, entity);
 			}
 			if(useMemCache) {
-				// add also to the memcache
-				XydraRuntime.getMemcache().put(entity.getKey(), entity);
+				log.debug("Putting entity " + key.toString() + " in MemCache");
+				XydraRuntime.getMemcache().put(key, entity);
 			}
-			
 			return entity;
 		} catch(EntityNotFoundException e) {
+			if(useLocalVmCache) {
+				log.debug("Putting NULL_ENTITY " + key.toString() + " in LocalVmCache");
+				localVmCache.put(key, NULL_ENTITY);
+			}
+			if(useMemCache) {
+				log.debug("Putting NULL_ENTITY " + key.toString() + " in MemCache");
+				XydraRuntime.getMemcache().put(key, NULL_ENTITY);
+			}
+			
 			return null;
 		}
 	}
