@@ -1,6 +1,8 @@
 package org.xydra.store.impl.gae;
 
 import java.util.ConcurrentModificationException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.xydra.base.XAddress;
 import org.xydra.log.Logger;
@@ -29,6 +31,56 @@ public class GaeUtils {
 	
 	private static DatastoreService datastore;
 	
+	private static boolean useMemCache = true;
+	
+	private static boolean useLocalVmCache = true;
+	
+	private static Map<Key,Entity> localVmCache = new HashMap<Key,Entity>();
+	
+	/**
+	 * @param b turn GAE MemCache off or on at runtime
+	 */
+	public static void setUseMemCache(boolean b) {
+		useMemCache = b;
+	}
+	
+	/**
+	 * To be exposed via Restless.
+	 * 
+	 * @param memcache must be 'true' or 'false'
+	 * @param localvmcache must be 'true' or 'false'
+	 * @return the current configuration as a string
+	 */
+	public static String setCacheConf(String memcache, String localvmcache) {
+		boolean memcache_ = Boolean.parseBoolean(memcache);
+		boolean localvmcache_ = Boolean.parseBoolean(localvmcache);
+		setUseMemCache(memcache_);
+		setUseLocalVmCache(localvmcache_);
+		return getConf();
+	}
+	
+	public static void setUseLocalVmCache(boolean b) {
+		useLocalVmCache = b;
+	}
+	
+	public static String getConf() {
+		return
+
+		"MemCache: " + useMemCache + "\n" +
+
+		"LocalVmCache: " + useLocalVmCache + "\n"
+
+		+ getStats();
+	}
+	
+	public static String getStats() {
+		return
+
+		"MemCache: " + XydraRuntime.getMemcache().size() + " entries \n" +
+
+		"LocalVmCache: " + localVmCache.size() + " entries";
+	}
+	
 	/**
 	 * @param key The key of the entity to load.
 	 * @return the GAE Entity for the given key from the store or null
@@ -45,21 +97,33 @@ public class GaeUtils {
 	public static Entity getEntity(Key key, Transaction trans) {
 		makeSureDatestoreServiceIsInitialised();
 		try {
-			// TODO added by max, please review
-			// try to get from memcache
-			Entity cachedEntity = (Entity)XydraRuntime.getMemcache().get(key);
-			if(cachedEntity != null) {
-				log.debug("Getting entity " + key.toString() + " from memcache");
-				return cachedEntity;
-			} else {
-				log.debug("Getting entity " + key.toString() + " from DATA STORE");
+			if(useLocalVmCache) {
+				// try first to get from memcache
+				Entity cachedEntity = localVmCache.get(key);
+				if(cachedEntity != null) {
+					log.debug("Getting entity " + key.toString() + " from LocalVmCache");
+					return cachedEntity;
+				}
+			}
+			if(useMemCache) {
+				// try first to get from memcache
+				Entity cachedEntity = (Entity)XydraRuntime.getMemcache().get(key);
+				if(cachedEntity != null) {
+					log.debug("Getting entity " + key.toString() + " from MemCache");
+					return cachedEntity;
+				}
 			}
 			
+			log.debug("Getting entity " + key.toString() + " from GAE data store");
 			Entity entity = datastore.get(trans, key);
 			
-			// TODO added by max, please review
-			// add also to the memcache
-			XydraRuntime.getMemcache().put(entity.getKey(), entity);
+			if(useLocalVmCache) {
+				localVmCache.put(entity.getKey(), entity);
+			}
+			if(useMemCache) {
+				// add also to the memcache
+				XydraRuntime.getMemcache().put(entity.getKey(), entity);
+			}
 			
 			return entity;
 		} catch(EntityNotFoundException e) {
@@ -91,9 +155,13 @@ public class GaeUtils {
 	 */
 	public static void putEntity(Entity entity, Transaction trans) {
 		makeSureDatestoreServiceIsInitialised();
-		// TODO added by max, please review
-		// add also to the memcache
-		XydraRuntime.getMemcache().put(entity.getKey(), entity);
+		if(useLocalVmCache) {
+			localVmCache.put(entity.getKey(), entity);
+		}
+		if(useMemCache) {
+			// add first to memcache
+			XydraRuntime.getMemcache().put(entity.getKey(), entity);
+		}
 		datastore.put(trans, entity);
 	}
 	
@@ -134,10 +202,14 @@ public class GaeUtils {
 	 */
 	public static void deleteEntity(Key key, Transaction trans) {
 		makeSureDatestoreServiceIsInitialised();
+		if(useLocalVmCache) {
+			localVmCache.remove(key);
+		}
+		if(useMemCache) {
+			// delete first in memcache
+			XydraRuntime.getMemcache().remove(key);
+		}
 		datastore.delete(trans, key);
-		// TODO added by max, please review
-		// delete also in memcache
-		XydraRuntime.getMemcache().remove(key);
 	}
 	
 	/**
