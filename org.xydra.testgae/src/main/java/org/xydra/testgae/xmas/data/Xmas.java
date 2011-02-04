@@ -90,7 +90,7 @@ public class Xmas {
 			        + modelId + "'<br />\n"));
 			if(view.equals("expanded")) {
 				WishList list = new WishList(model);
-				writer.write(list.toHtml());
+				writer.write(list.toHtml(null));
 			}
 		}
 		s1.stop();

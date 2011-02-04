@@ -22,8 +22,15 @@ public class Stopwatch {
 		if(this.stop == 0) {
 			throw new IllegalStateException("stop watch has not been stopped");
 		}
-		return (count == 0 ? "--" : (getDuration() / count)) + " ms per '" + operation
-		        + "' based on " + count + " runs.";
+		
+		if(count == 0) {
+			return "-- per '" + operation + "'";
+		} else if(count == 1) {
+			return "'" + operation + "' in " + getDuration() + " ms.";
+		} else {
+			return getDuration() + " ms = " + (getDuration() / count) + " ms per '" + operation
+			        + "' based on " + count + " runs.";
+		}
 	}
 	
 	public long getDuration() {

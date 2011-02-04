@@ -16,6 +16,7 @@ import org.xydra.testgae.xmas.HtmlUtils;
 
 public class Wish {
 	
+	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(Wish.class);
 	
 	private XWritableObject xo;
@@ -65,7 +66,6 @@ public class Wish {
 	}
 	
 	public String getTitle() {
-		log.info("Getting title!");
 		XWritableField field = this.xo.getField(TITLE);
 		if(field == null)
 			return "";

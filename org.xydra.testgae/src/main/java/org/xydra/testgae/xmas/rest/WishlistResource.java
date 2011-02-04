@@ -84,7 +84,7 @@ public class WishlistResource {
 	public void get(String repoStr, String list, HttpServletResponse res) throws IOException {
 		ServletUtils.headers(res, "text/html");
 		init(repoStr, list);
-		res.getWriter().write(this.wishList.toHtml());
+		res.getWriter().write(this.wishList.toHtml(null));
 		
 		res.getWriter().write(
 		        HtmlUtils.form(METHOD.GET, "/xmas/" + repoStr + "/" + list + "/add")

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.xydra.base.X;
 import org.xydra.base.XID;
@@ -29,10 +30,11 @@ public class WishList {
 		
 	}
 	
-	public void addWish(String title, int price, String url) {
+	public XID addWish(String title, int price, String url) {
 		XID id = X.getIDProvider().createUniqueID();
 		XWritableObject xo = this.model.createObject(id);
 		new Wish(xo, title, price, url);
+		return id;
 	}
 	
 	public void removeWish(XID widhId) {
@@ -62,7 +64,11 @@ public class WishList {
 		}
 	}
 	
-	public String toHtml() {
+	/**
+	 * @param w for performance data
+	 * @return HTML
+	 */
+	public String toHtml(Writer w) throws IOException {
 		Stopwatch s1 = new Stopwatch().start();
 		StringBuffer buf = new StringBuffer();
 		buf.append("<b>Wishlist " + this.model.getID() + "</b>");
@@ -77,26 +83,31 @@ public class WishList {
 		}
 		buf.append("</ol>\n");
 		s1.stop();
-		buf.append(s1.getFormattedResult("read wish", count) + "<br />\n");
+		if(w != null) {
+			w.write(s1.getFormattedResult("read wish+props", count) + "<br />\n");
+		}
 		buf.append(HtmlUtils.link("/xmas/" + this.model.getAddress().getRepository() + "/"
 		        + this.model.getID() + "/clear", "Delete all wishes")
 		        + "<br />\n");
 		return buf.toString();
 	}
 	
-	public void addDemoData(int wishesCount, Writer writer) throws IOException {
+	public List<XID> addDemoData(int wishesCount, Writer writer) throws IOException {
 		Stopwatch s1 = new Stopwatch();
 		s1.start();
+		List<XID> wishIds = new LinkedList<XID>();
 		for(int w = 1; w <= wishesCount; w++) {
 			writer.write("Creating wish " + w + " in list " + this.model.getID() + " at "
 			        + System.currentTimeMillis() + "<br />\n");
 			String name = NameUtils.getProductName();
 			String nameInUrl = name.replace(" ", "+");
-			addWish("" + name, (int)Math.round(100 * Math.random()),
+			XID wishId = addWish("" + name, (int)Math.round(100 * Math.random()),
 			        "http://www.google.de/images?q=" + nameInUrl);
+			wishIds.add(wishId);
 		}
 		s1.stop();
 		writer.write(s1.getFormattedResult("create wish", wishesCount) + "<br />\n");
+		return wishIds;
 	}
 	
 }

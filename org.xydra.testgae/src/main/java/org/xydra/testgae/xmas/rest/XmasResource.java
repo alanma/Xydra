@@ -10,12 +10,16 @@ import org.xydra.restless.RestlessParameter;
 import org.xydra.testgae.ServletUtils;
 import org.xydra.testgae.xmas.HtmlUtils;
 import org.xydra.testgae.xmas.HtmlUtils.METHOD;
+import org.xydra.testgae.xmas.data.Benchmark;
 import org.xydra.testgae.xmas.data.Xmas;
 
 
 public class XmasResource {
 	
 	public static void restless(Restless r, String path) {
+		GaeConfigurator.restless(r, path + "/xmas");
+		Benchmark.restless(r, path + "/xmas");
+		
 		r.addGet(path + "/xmas/{repo}/add", XmasResource.class, "addData",
 
 		new RestlessParameter("repo", null),
