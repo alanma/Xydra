@@ -5,6 +5,7 @@ import java.util.ConcurrentModificationException;
 import org.xydra.base.XAddress;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.XydraRuntime;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -44,9 +45,22 @@ public class GaeUtils {
 	public static Entity getEntity(Key key, Transaction trans) {
 		makeSureDatestoreServiceIsInitialised();
 		try {
-			// FIXME temporary to find a nasty bug
-			log.info("Getting entity " + key.toString());
+			// TODO added by max, please review
+			// try to get from memcache
+			Entity cachedEntity = (Entity)XydraRuntime.getMemcache().get(key);
+			if(cachedEntity != null) {
+				log.debug("Getting entity " + key.toString() + " from memcache");
+				return cachedEntity;
+			} else {
+				log.debug("Getting entity " + key.toString() + " from DATA STORE");
+			}
+			
 			Entity entity = datastore.get(trans, key);
+			
+			// TODO added by max, please review
+			// add also to the memcache
+			XydraRuntime.getMemcache().put(entity.getKey(), entity);
+			
 			return entity;
 		} catch(EntityNotFoundException e) {
 			return null;
@@ -77,6 +91,9 @@ public class GaeUtils {
 	 */
 	public static void putEntity(Entity entity, Transaction trans) {
 		makeSureDatestoreServiceIsInitialised();
+		// TODO added by max, please review
+		// add also to the memcache
+		XydraRuntime.getMemcache().put(entity.getKey(), entity);
 		datastore.put(trans, entity);
 	}
 	
