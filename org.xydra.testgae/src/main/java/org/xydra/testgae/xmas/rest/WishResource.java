@@ -80,7 +80,7 @@ public class WishResource {
 		this.wish = load(Xmas.getRepository(repoStr), XX.toId(listStr), XX.toId(wishStr));
 	}
 	
-	public Wish load(XWritableRepository repo, XID listId, XID wishId) {
+	public static Wish load(XWritableRepository repo, XID listId, XID wishId) {
 		XWritableModel model = repo.createModel(listId);
 		XWritableObject xo = model.createObject(wishId);
 		return new Wish(xo);
