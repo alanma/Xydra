@@ -20,6 +20,10 @@ public class XX {
 	 * @return a new random unique {@link XID} created by the default
 	 *         {@link XIDProvider}
 	 */
+	/*
+	 * TODO Should this be renamed to createUniqueId, since where no longer
+	 * using "ID" (D in upper case) anywhere anymore?
+	 */
 	public static XID createUniqueID()
 
 	{
