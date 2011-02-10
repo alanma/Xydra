@@ -1,5 +1,8 @@
 package org.xydra.core.xml;
 
+import java.io.UnsupportedEncodingException;
+
+
 /***
  * Methods to encode and decode binary data using the Base64 encoding scheme.
  * 
@@ -7,6 +10,10 @@ package org.xydra.core.xml;
  * cleaned up so it will run in GWT.
  * 
  * @author dscharrer
+ * 
+ */
+/**
+ * @author xamde
  * 
  */
 public class Base64 {
@@ -343,6 +350,7 @@ public class Base64 {
 	 *             or there is not enough room in the array.
 	 */
 	private static int decode4to3(char[] source, int srcOffset, byte[] destination, int destOffset) {
+		assert srcOffset + 3 < source.length;
 		
 		// Example: Dk==
 		if(source[srcOffset + 2] == EQUALS_SIGN) {
@@ -498,10 +506,73 @@ public class Base64 {
 			throw new NullPointerException("Input string was null.");
 		}
 		
-		char[] source = s.toCharArray();
+		// add padding
+		String padded = s;
+		while(padded.length() % 4 > 0) {
+			padded = padded + "=";
+		}
+		
+		char[] source = padded.toCharArray();
 		
 		// Decode
 		return decode(source, 0, source.length);
+	}
+	
+	/**
+	 * Base64 encoding that doesn't need to be urlencode()ed. Exactly the same
+	 * as base64_encode except it uses '-' instead of '+' and '_' instead of
+	 * '/'.
+	 * 
+	 * This encoding is used by Facebook App API, 2011-02.
+	 * 
+	 * @param input base64UrlEncodeded string
+	 * @return byte array, most likely in utf-8 encoding (depending on encoding
+	 *         used in 'input').
+	 */
+	public static byte[] urlDecode(String input) {
+		String replaced = input.replace("-", "+");
+		replaced = replaced.replace("_", "/");
+		return decode(replaced);
+	}
+	
+	/**
+	 * Base64 encoding that doesn't need to be urlencode()ed. This encoding is
+	 * used by Facebook App API, 2011-02.
+	 * 
+	 * @param input in utf-8 encoding
+	 * @return a Base64 encoding that doesn't need to be urlencode()ed. Exactly
+	 *         the same as base64_encode except it uses '-' instead of '+' and
+	 *         '_' instead of '/'.
+	 */
+	public static String urlEncode(byte[] input) {
+		String encoded = encode(input);
+		String replaced = encoded.replace("+", "-");
+		replaced = encoded.replace("/", "_");
+		return replaced;
+	}
+	
+	/**
+	 * @param bytes interpreted as UTF-8 encoding
+	 * @return bytes as String
+	 */
+	public static String utf8(byte[] bytes) {
+		try {
+			return new String(bytes, "utf-8");
+		} catch(UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	/**
+	 * @param s to be encoded in UTF-8
+	 * @return s as bytes in UTF-8 encoding
+	 */
+	public static byte[] utf8(String s) {
+		try {
+			return s.getBytes("utf-8");
+		} catch(UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 }
