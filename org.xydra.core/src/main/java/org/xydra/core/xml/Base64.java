@@ -175,7 +175,8 @@ public class Base64 {
 	 * Encodes a byte array into Base64 notation.
 	 * 
 	 * @param source The data to convert
-	 * @return The data in Base64-encoded form
+	 * @return The data in Base64-encoded form, sometimes with '=' added to the
+	 *         end
 	 * @throws NullPointerException if source array is null
 	 */
 	public static String encode(byte[] source) {
@@ -548,6 +549,8 @@ public class Base64 {
 		String encoded = encode(input);
 		String replaced = encoded.replace("+", "-");
 		replaced = encoded.replace("/", "_");
+		// remove trailing equal signs '=' at the end
+		replaced = encoded.replace("=", "");
 		return replaced;
 	}
 	
