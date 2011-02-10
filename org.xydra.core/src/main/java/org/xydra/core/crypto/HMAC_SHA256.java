@@ -9,6 +9,10 @@ import org.xydra.annotations.RunsInGWT;
  * Computes HMAC-SHA-256 message digest. This is used, e.g., in Facebook
  * authentication code.
  * 
+ * Based on code with
+ * "Copyright (c) 1999-2004 Brian Wellington (bwelling@xbill.org)" likely
+ * bundled in http://sourceforge.net/projects/dnsjava/, BSD License
+ * 
  * @author xamde
  * 
  */
