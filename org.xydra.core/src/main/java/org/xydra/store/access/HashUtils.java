@@ -6,7 +6,9 @@ import java.security.NoSuchAlgorithmException;
 
 
 /**
- * Utility to compute an MD5 checksum.
+ * Utility to compute an MD5 checksum via javax.security.
+ * 
+ * TODO create similar implementation that works in GWT
  * 
  * @author voelkel
  */
