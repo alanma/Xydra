@@ -99,18 +99,19 @@ public class PartialGroupDatabaseOnWritableModel implements XGroupListener {
 			break;
 		case XFIELD: {
 			XFieldEvent fieldEvent = (XFieldEvent)event;
+			XID group = event.getChangedEntity().getObject();
 			// {model}.{group}.hasMember.{value}
-			Set<XID> oldMembers = XV.toIDSet(fieldEvent.getOldValue());
-			Set<XID> newMembers = XV.toIDSet(fieldEvent.getNewValue());
+			Set<XID> currentMembers = fastDatabase.getMembersOf(group);
+			Set<XID> nextMembers = XV.toIDSet(fieldEvent.getNewValue());
 			
-			for(XID oldMember : oldMembers) {
-				if(!newMembers.contains(oldMember)) {
-					fastDatabase.removeFromGroup(oldMember, event.getChangedEntity().getObject());
+			for(XID currentMember : currentMembers) {
+				if(!nextMembers.contains(currentMember)) {
+					fastDatabase.removeFromGroup(currentMember, group);
 				}
 			}
-			for(XID newMember : newMembers) {
-				if(!oldMembers.contains(newMember)) {
-					fastDatabase.addToGroup(newMember, event.getChangedEntity().getObject());
+			for(XID nextMember : nextMembers) {
+				if(!currentMembers.contains(nextMember)) {
+					fastDatabase.addToGroup(nextMember, group);
 				}
 			}
 		}
