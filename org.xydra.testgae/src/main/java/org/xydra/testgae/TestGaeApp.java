@@ -21,6 +21,7 @@ public class TestGaeApp {
 			}
 		});
 		
+		AssertResource.restless(r);
 		EchoResource.restless(r);
 		TestResource.restless(r);
 		BenchmarkResource.restless(r);
