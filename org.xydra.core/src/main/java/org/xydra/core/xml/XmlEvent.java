@@ -16,6 +16,7 @@ import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XRepositoryEvent;
+import org.xydra.base.change.XReversibleFieldEvent;
 import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.change.impl.memory.MemoryFieldEvent;
 import org.xydra.base.change.impl.memory.MemoryModelEvent;
@@ -48,6 +49,7 @@ public class XmlEvent {
 	private static final String XEVENTLIST_ELEMENT = "xevents";
 	
 	protected static final String XFIELDEVENT_ELEMENT = "xfieldEvent";
+	protected static final String XREVERSIBLEFIELDEVENT_ELEMENT = "xreversibleFieldEvent";
 	private static final String XMODELEVENT_ELEMENT = "xmodelEvent";
 	private static final String XNULL_ELEMENT = "xnull";
 	private static final String XOBJECTEVENT_ELEMENT = "xobjectEvent";
@@ -194,6 +196,8 @@ public class XmlEvent {
 		String name = xml.getName();
 		if(name.equals(XFIELDEVENT_ELEMENT)) {
 			return toFieldEvent(xml, context, cl);
+		} else if(name.equals(XREVERSIBLEFIELDEVENT_ELEMENT)) {
+			return toReversibleFieldEvent(xml, context, cl);
 		} else if(name.equals(XOBJECTEVENT_ELEMENT)) {
 			return toObjectEvent(xml, context);
 		} else if(name.equals(XMODELEVENT_ELEMENT)) {
@@ -289,6 +293,73 @@ public class XmlEvent {
 		XID actor = XmlUtils.getOptionalXidAttribute(xml, ACTOR_ATTRIBUTE, null);
 		boolean inTransaction = getInTransactionAttribute(xml);
 		
+		// XValue oldValue = null;
+		XValue newValue = null;
+		Iterator<MiniElement> it = xml.getElements();
+		// boolean loadedOldValueFromChangeLog = false;
+		// if(type != ChangeType.ADD) {
+		// // try to get the old value from a previous event
+		// if(cl != null && fieldRev > cl.getFirstRevisionNumber()
+		// && fieldRev <= cl.getCurrentRevisionNumber()) {
+		// XEvent oldEvent = cl.getEvent(fieldRev);
+		// oldValue = getOldValue(oldEvent, target);
+		// loadedOldValueFromChangeLog = true;
+		// } else {
+		// oldValue = loadValue(it, "old");
+		// }
+		// assert oldValue != null;
+		// }
+		if(type != ChangeType.REMOVE) {
+			newValue = loadValue(it, "new");
+			assert newValue != null;
+			// // if the oldValue was present in the serialized event, don't die
+			// if(loadedOldValueFromChangeLog && it.hasNext()) {
+			// assert XI.equals(oldValue, newValue);
+			// oldValue = newValue;
+			// newValue = loadValue(it, "new");
+			// }
+		}
+		if(it.hasNext()) {
+			throw new IllegalArgumentException("Invalid child of <" + XFIELDEVENT_ELEMENT + ">: <"
+			        + it.next().getName() + ">");
+		}
+		
+		if(type == ChangeType.ADD) {
+			return MemoryFieldEvent.createAddEvent(actor, target, newValue, modelRev, objectRev,
+			        fieldRev, inTransaction);
+		} else if(type == ChangeType.CHANGE) {
+			return MemoryFieldEvent.createChangeEvent(actor, target, newValue, modelRev, objectRev,
+			        fieldRev, inTransaction);
+		} else if(type == ChangeType.REMOVE) {
+			boolean implied = getImpliedAttribute(xml);
+			return MemoryFieldEvent.createRemoveEvent(actor, target, modelRev, objectRev, fieldRev,
+			        inTransaction, implied);
+		} else {
+			throw new IllegalArgumentException("<" + XFIELDEVENT_ELEMENT + ">@"
+			        + XmlUtils.TYPE_ATTRIBUTE
+			        + " does not contain a valid type for field events, but '" + type + "'");
+		}
+	}
+	
+	protected static XFieldEvent toReversibleFieldEvent(MiniElement xml, XAddress context,
+	        XChangeLogState cl) {
+		
+		XmlUtils.checkElementName(xml, XREVERSIBLEFIELDEVENT_ELEMENT);
+		
+		XAddress target = XmlUtils.getTarget(xml, context);
+		
+		ChangeType type = XmlUtils.getChangeType(xml, XREVERSIBLEFIELDEVENT_ELEMENT);
+		
+		long fieldRev = getRevision(xml, XREVERSIBLEFIELDEVENT_ELEMENT, FIELDREVISION_ATTRIBUTE,
+		        true);
+		long objectRev = getRevision(xml, XREVERSIBLEFIELDEVENT_ELEMENT, OBJECTREVISION_ATTRIBUTE,
+		        false);
+		long modelRev = getRevision(xml, XREVERSIBLEFIELDEVENT_ELEMENT, MODELREVISION_ATTRIBUTE,
+		        false);
+		
+		XID actor = XmlUtils.getOptionalXidAttribute(xml, ACTOR_ATTRIBUTE, null);
+		boolean inTransaction = getInTransactionAttribute(xml);
+		
 		XValue oldValue = null;
 		XValue newValue = null;
 		Iterator<MiniElement> it = xml.getElements();
@@ -316,22 +387,22 @@ public class XmlEvent {
 			}
 		}
 		if(it.hasNext()) {
-			throw new IllegalArgumentException("Invalid child of <" + XFIELDEVENT_ELEMENT + ">: <"
-			        + it.next().getName() + ">");
+			throw new IllegalArgumentException("Invalid child of <" + XREVERSIBLEFIELDEVENT_ELEMENT
+			        + ">: <" + it.next().getName() + ">");
 		}
 		
 		if(type == ChangeType.ADD) {
 			return MemoryFieldEvent.createAddEvent(actor, target, newValue, modelRev, objectRev,
 			        fieldRev, inTransaction);
 		} else if(type == ChangeType.CHANGE) {
-			return MemoryFieldEvent.createChangeEvent(actor, target, oldValue, newValue, modelRev,
-			        objectRev, fieldRev, inTransaction);
+			return MemoryFieldEvent.createReversibleChangeEvent(actor, target, oldValue, newValue,
+			        modelRev, objectRev, fieldRev, inTransaction);
 		} else if(type == ChangeType.REMOVE) {
 			boolean implied = getImpliedAttribute(xml);
 			return MemoryFieldEvent.createRemoveEvent(actor, target, oldValue, modelRev, objectRev,
 			        fieldRev, inTransaction, implied);
 		} else {
-			throw new IllegalArgumentException("<" + XFIELDEVENT_ELEMENT + ">@"
+			throw new IllegalArgumentException("<" + XREVERSIBLEFIELDEVENT_ELEMENT + ">@"
 			        + XmlUtils.TYPE_ATTRIBUTE
 			        + " does not contain a valid type for field events, but '" + type + "'");
 		}
@@ -544,10 +615,10 @@ public class XmlEvent {
 			        + " does not specify a model or object target.");
 		}
 		
-		long objectRev = getRevision(xml, XFIELDEVENT_ELEMENT, OBJECTREVISION_ATTRIBUTE, target
-		        .getObject() != null);
-		long modelRev = getRevision(xml, XFIELDEVENT_ELEMENT, MODELREVISION_ATTRIBUTE, target
-		        .getObject() == null);
+		long objectRev = getRevision(xml, XFIELDEVENT_ELEMENT, OBJECTREVISION_ATTRIBUTE,
+		        target.getObject() != null);
+		long modelRev = getRevision(xml, XFIELDEVENT_ELEMENT, MODELREVISION_ATTRIBUTE,
+		        target.getObject() == null);
 		
 		XID actor = XmlUtils.getOptionalXidAttribute(xml, ACTOR_ATTRIBUTE, null);
 		
@@ -632,6 +703,29 @@ public class XmlEvent {
 		
 		setAtomicEventAttributes(event, out, context);
 		
+		if(event.getChangeType() != ChangeType.REMOVE) {
+			XmlValue.toXml(event.getNewValue(), out);
+		}
+		
+		out.close(XFIELDEVENT_ELEMENT);
+		
+	}
+	
+	/**
+	 * Encode the given {@link XFieldEvent} as an XML element.
+	 * 
+	 * @param event The event to encode.
+	 * @param out The XML encoder to write to.
+	 * @param context The part of this event's target address that doesn't need
+	 *            to be encoded in the element.
+	 */
+	public static void toXml(XReversibleFieldEvent event, XmlOut out, XAddress context)
+	        throws IllegalArgumentException {
+		
+		out.open(XREVERSIBLEFIELDEVENT_ELEMENT);
+		
+		setAtomicEventAttributes(event, out, context);
+		
 		if(event.getChangeType() != ChangeType.ADD) {
 			XmlValue.toXml(event.getOldValue(), out);
 		}
@@ -639,7 +733,7 @@ public class XmlEvent {
 			XmlValue.toXml(event.getNewValue(), out);
 		}
 		
-		out.close(XFIELDEVENT_ELEMENT);
+		out.close(XREVERSIBLEFIELDEVENT_ELEMENT);
 		
 	}
 	
@@ -650,18 +744,18 @@ public class XmlEvent {
 		
 		setAtomicEventAttributes(event, out, context);
 		
-		if(event.getChangeType() != ChangeType.ADD) {
-			// don't save the old value if it is already saved in an old event
-			long fieldRev = event.getOldFieldRevision();
-			if(cl != null && fieldRev > cl.getFirstRevisionNumber()
-			        && fieldRev <= cl.getCurrentRevisionNumber()) {
-				XEvent oldEvent = cl.getEventAt(fieldRev);
-				XValue oldValue = getOldValue(oldEvent, event.getTarget());
-				assert XI.equals(event.getOldValue(), oldValue);
-			} else {
-				XmlValue.toXml(event.getOldValue(), out);
-			}
-		}
+		// if(event.getChangeType() != ChangeType.ADD) {
+		// // don't save the old value if it is already saved in an old event
+		// long fieldRev = event.getOldFieldRevision();
+		// if(cl != null && fieldRev > cl.getFirstRevisionNumber()
+		// && fieldRev <= cl.getCurrentRevisionNumber()) {
+		// XEvent oldEvent = cl.getEventAt(fieldRev);
+		// XValue oldValue = getOldValue(oldEvent, event.getTarget());
+		// assert XI.equals(event.getOldValue(), oldValue);
+		// } else {
+		// XmlValue.toXml(event.getOldValue(), out);
+		// }
+		// }
 		if(event.getChangeType() != ChangeType.REMOVE) {
 			XmlValue.toXml(event.getNewValue(), out);
 		}

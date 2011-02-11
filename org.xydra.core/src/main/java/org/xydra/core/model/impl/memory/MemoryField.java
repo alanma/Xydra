@@ -551,8 +551,8 @@ public class MemoryField implements XField, Serializable {
 			} else {
 				assert !newValue.equals(oldValue);
 				// implies change
-				event = MemoryFieldEvent.createChangeEvent(actorId, getAddress(), oldValue,
-				        newValue, modelRev, objectRev, fieldRev, inTrans);
+				event = MemoryFieldEvent.createReversibleChangeEvent(actorId, getAddress(),
+				        oldValue, newValue, modelRev, objectRev, fieldRev, inTrans);
 			}
 		}
 		

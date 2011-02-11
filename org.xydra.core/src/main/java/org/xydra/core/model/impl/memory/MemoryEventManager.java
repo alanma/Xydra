@@ -17,6 +17,7 @@ import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XRepositoryEvent;
+import org.xydra.base.change.XReversibleFieldEvent;
 import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.change.impl.memory.MemoryFieldEvent;
 import org.xydra.base.change.impl.memory.MemoryTransactionEvent;
@@ -180,10 +181,11 @@ public class MemoryEventManager implements Serializable {
 			assert e != null;
 			XEvent last = e.event;
 			
-			assert first instanceof XFieldEvent;
-			assert last instanceof XFieldEvent;
+			assert first instanceof XReversibleFieldEvent;
+			assert last instanceof XReversibleFieldEvent;
 			
-			XEvent merged = mergeFieldEvents((XFieldEvent)first, (XFieldEvent)last);
+			XEvent merged = mergeFieldEvents((XReversibleFieldEvent)first,
+			        (XReversibleFieldEvent)last);
 			
 			this.eventQueue.set(ec.first, null);
 			
@@ -436,7 +438,7 @@ public class MemoryEventManager implements Serializable {
 	 * @return The merged {@link XFieldEvent} (which may be 'last') or null if
 	 *         the given {@link XFieldEvent XFieldEvents} cancel each other out.
 	 */
-	private XFieldEvent mergeFieldEvents(XFieldEvent first, XFieldEvent last) {
+	private XFieldEvent mergeFieldEvents(XReversibleFieldEvent first, XReversibleFieldEvent last) {
 		
 		assert first.getTarget().equals(last.getTarget());
 		
@@ -453,31 +455,32 @@ public class MemoryEventManager implements Serializable {
 			}
 			assert first.getChangeType() == ChangeType.REMOVE;
 			// non matching REMOVE -> ADD => merge to CHANGE
-			return MemoryFieldEvent.createChangeEvent(last.getActor(), last.getTarget(), first
-			        .getOldValue(), last.getNewValue(), last.getOldModelRevision(), last
-			        .getOldObjectRevision(), last.getOldFieldRevision(), false);
+			return MemoryFieldEvent.createReversibleChangeEvent(last.getActor(), last.getTarget(),
+			        first.getOldValue(), last.getNewValue(), last.getOldModelRevision(),
+			        last.getOldObjectRevision(), last.getOldFieldRevision(), false);
 		case REMOVE:
 			if(first.getChangeType() == ChangeType.REMOVE) {
 				return last;
 			}
 			assert first.getChangeType() == ChangeType.CHANGE;
 			// (non matching) CHANGE->REMOVE => merge to REMOVE
-			return MemoryFieldEvent.createRemoveEvent(last.getActor(), last.getTarget(), first
-			        .getOldValue(), last.getOldModelRevision(), last.getOldObjectRevision(), last
-			        .getOldFieldRevision(), false, false);
+			return MemoryFieldEvent.createRemoveEvent(last.getActor(), last.getTarget(),
+			        first.getOldValue(), last.getOldModelRevision(), last.getOldObjectRevision(),
+			        last.getOldFieldRevision(), false, false);
 		case CHANGE:
 			assert first.getChangeType() != ChangeType.REMOVE;
 			if(first.getChangeType() == ChangeType.CHANGE) {
 				// non-matching CHANGE->CHANGE => merge to CHANGE
-				return MemoryFieldEvent.createChangeEvent(last.getActor(), last.getTarget(), first
-				        .getOldValue(), last.getNewValue(), last.getOldModelRevision(), last
-				        .getOldObjectRevision(), last.getOldFieldRevision(), false);
+				return MemoryFieldEvent.createReversibleChangeEvent(last.getActor(),
+				        last.getTarget(), first.getOldValue(), last.getNewValue(),
+				        last.getOldModelRevision(), last.getOldObjectRevision(),
+				        last.getOldFieldRevision(), false);
 			} else {
 				assert first.getChangeType() == ChangeType.ADD;
 				// non-matching ADD->CHANGE => merge to ADD
-				return MemoryFieldEvent.createAddEvent(last.getActor(), last.getTarget(), last
-				        .getNewValue(), last.getOldModelRevision(), last.getOldObjectRevision(),
-				        last.getOldFieldRevision(), false);
+				return MemoryFieldEvent.createAddEvent(last.getActor(), last.getTarget(),
+				        last.getNewValue(), last.getOldModelRevision(),
+				        last.getOldObjectRevision(), last.getOldFieldRevision(), false);
 			}
 		default:
 			throw new AssertionError("invalid event: " + last);

@@ -5,6 +5,7 @@ import org.xydra.base.XID;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldEvent;
+import org.xydra.base.change.XReversibleFieldEvent;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XField;
@@ -19,7 +20,7 @@ import org.xydra.index.XI;
  * @author voelkel
  * @author kaidel
  */
-public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
+public class MemoryFieldEvent extends MemoryAtomicEvent implements XReversibleFieldEvent {
 	
 	/**
 	 * Creates an {@link XFieldEvent} of the add-type (an {@link XValue} was
@@ -103,8 +104,8 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	 */
 	public static XFieldEvent createChangeEvent(XID actor, XAddress target, XValue oldValue,
 	        XValue newValue, long objectRevision, long fieldRevision, boolean inTransaction) {
-		return createChangeEvent(actor, target, oldValue, newValue, RevisionOfEntityNotSet,
-		        objectRevision, fieldRevision, inTransaction);
+		return createReversibleChangeEvent(actor, target, oldValue, newValue,
+		        RevisionOfEntityNotSet, objectRevision, fieldRevision, inTransaction);
 	}
 	
 	/**
@@ -131,15 +132,25 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	 *             equals {@link XEvent#RevisionOfEntityNotSet}
 	 * @throws IllegalArgumentException if either oldValue or newValue is null
 	 */
-	public static XFieldEvent createChangeEvent(XID actor, XAddress target, XValue oldValue,
-	        XValue newValue, long modelRevision, long objectRevision, long fieldRevision,
-	        boolean inTransaction) {
+	public static XReversibleFieldEvent createReversibleChangeEvent(XID actor, XAddress target,
+	        XValue oldValue, XValue newValue, long modelRevision, long objectRevision,
+	        long fieldRevision, boolean inTransaction) {
 		if(oldValue == null || newValue == null) {
 			throw new IllegalArgumentException(
-			        "oldValue and newValue must not be null for field CHANGE events");
+			        "oldValue and newValue must not be null for ´reversible field CHANGE events");
 		}
 		
 		return new MemoryFieldEvent(actor, target, oldValue, newValue, ChangeType.CHANGE,
+		        modelRevision, objectRevision, fieldRevision, inTransaction, false);
+	}
+	
+	public static XFieldEvent createChangeEvent(XID actor, XAddress target, XValue newValue,
+	        long modelRevision, long objectRevision, long fieldRevision, boolean inTransaction) {
+		if(newValue == null) {
+			throw new IllegalArgumentException("newValue must not be null for field CHANGE events");
+		}
+		
+		return new MemoryFieldEvent(actor, target, null, newValue, ChangeType.CHANGE,
 		        modelRevision, objectRevision, fieldRevision, inTransaction, false);
 	}
 	
@@ -198,15 +209,21 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	 *             equals {@link XEvent#RevisionOfEntityNotSet}
 	 * @throws IllegalArgumentException if oldValue is null
 	 */
-	public static XFieldEvent createRemoveEvent(XID actor, XAddress target, XValue oldValue,
-	        long modelRevision, long objectRevision, long fieldRevision, boolean inTransaction,
-	        boolean implied) {
+	public static XReversibleFieldEvent createRemoveEvent(XID actor, XAddress target,
+	        XValue oldValue, long modelRevision, long objectRevision, long fieldRevision,
+	        boolean inTransaction, boolean implied) {
 		if(oldValue == null) {
 			throw new IllegalArgumentException("oldValue must not be null for field REMOVE events");
 		}
 		
 		return new MemoryFieldEvent(actor, target, oldValue, null, ChangeType.REMOVE,
 		        modelRevision, objectRevision, fieldRevision, inTransaction, implied);
+	}
+	
+	public static XFieldEvent createRemoveEvent(XID actor, XAddress target, long modelRevision,
+	        long objectRevision, long fieldRevision, boolean inTransaction, boolean implied) {
+		return new MemoryFieldEvent(actor, target, null, null, ChangeType.REMOVE, modelRevision,
+		        objectRevision, fieldRevision, inTransaction, implied);
 	}
 	
 	// the revision numbers before the event happened
@@ -258,8 +275,11 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 		}
 		XFieldEvent event = (XFieldEvent)object;
 		
-		if(!XI.equals(this.oldValue, event.getOldValue())) {
-			return false;
+		/* compare old values */
+		if(event instanceof XReversibleFieldEvent) {
+			if(!XI.equals(this.oldValue, ((XReversibleFieldEvent)event).getOldValue())) {
+				return false;
+			}
 		}
 		
 		if(!XI.equals(this.newValue, event.getNewValue())) {

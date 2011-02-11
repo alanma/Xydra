@@ -20,6 +20,7 @@ import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.change.XRepositoryEvent;
+import org.xydra.base.change.XReversibleFieldEvent;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.change.impl.memory.MemoryRepositoryEvent;
@@ -732,7 +733,7 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 				        || (event.inTransaction() && event.getOldFieldRevision() == field
 				                .getRevisionNumber());
 				assert XI.equals(field.getValue(), ((XFieldEvent)event).getNewValue());
-				field.setValueInternal(((XFieldEvent)event).getOldValue());
+				field.setValueInternal(((XReversibleFieldEvent)event).getOldValue());
 				assert event.getOldFieldRevision() >= 0;
 				field.setRevisionNumber(event.getOldFieldRevision());
 			}

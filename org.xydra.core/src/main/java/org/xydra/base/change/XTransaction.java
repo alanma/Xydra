@@ -71,4 +71,10 @@ public interface XTransaction extends XCommand, Iterable<XAtomicCommand> {
 	 */
 	int size();
 	
+	/**
+	 * @return always {@link ChangeType#TRANSACTION}
+	 */
+	@Override
+	ChangeType getChangeType();
+	
 }

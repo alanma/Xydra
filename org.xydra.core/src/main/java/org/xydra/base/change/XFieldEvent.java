@@ -48,14 +48,6 @@ public interface XFieldEvent extends XAtomicEvent {
 	XID getObjectId();
 	
 	/**
-	 * WHAT was changed?
-	 * 
-	 * @return the old {@link XValue} before the change happened. null indicates
-	 *         an add event.
-	 */
-	XValue getOldValue();
-	
-	/**
 	 * WHERE did the change happen?
 	 * 
 	 * @return the {@link XID} of the Parent-{@link XRepository} of the

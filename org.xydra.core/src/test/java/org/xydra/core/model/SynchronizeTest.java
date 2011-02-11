@@ -25,6 +25,7 @@ import org.xydra.base.change.XModelCommand;
 import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectCommand;
 import org.xydra.base.change.XObjectEvent;
+import org.xydra.base.change.XReversibleFieldEvent;
 import org.xydra.base.change.impl.memory.MemoryFieldCommand;
 import org.xydra.base.change.impl.memory.MemoryModelCommand;
 import org.xydra.base.change.impl.memory.MemoryObjectCommand;
@@ -86,13 +87,20 @@ public class SynchronizeTest {
 					assertTrue(obj.getField(oe.getFieldId()).isEmpty());
 					obj.removeField(oe.getFieldId());
 				}
+			} else if(event instanceof XReversibleFieldEvent) {
+				XReversibleFieldEvent rfe = (XReversibleFieldEvent)event;
+				XObject obj = checkModel.getObject(rfe.getObjectId());
+				assertNotNull(obj);
+				XField fld = obj.getField(rfe.getFieldId());
+				assertNotNull(fld);
+				assertEquals(fld.getValue(), rfe.getOldValue());
+				fld.setValue(rfe.getNewValue());
 			} else if(event instanceof XFieldEvent) {
 				XFieldEvent fe = (XFieldEvent)event;
 				XObject obj = checkModel.getObject(fe.getObjectId());
 				assertNotNull(obj);
 				XField fld = obj.getField(fe.getFieldId());
 				assertNotNull(fld);
-				assertEquals(fld.getValue(), fe.getOldValue());
 				fld.setValue(fe.getNewValue());
 			}
 			
@@ -152,8 +160,8 @@ public class SynchronizeTest {
 	public void setUp() {
 		
 		// create two identical phonebook models
-		XRepository remoteRepo = new MemoryRepository(this.actorId, this.password, XX
-		        .toId("remoteRepo"));
+		XRepository remoteRepo = new MemoryRepository(this.actorId, this.password,
+		        XX.toId("remoteRepo"));
 		DemoModelUtil.addPhonebookModel(remoteRepo);
 		this.remoteModel = remoteRepo.getModel(DemoModelUtil.PHONEBOOK_ID);
 		
@@ -210,8 +218,8 @@ public class SynchronizeTest {
 		XAddress newFieldAddr = XX.resolveField(newObjectAddr, newFieldId);
 		XValue newValue1 = XV.toValue("chocolate chip");
 		XValue newValue2 = XV.toValue("almond");
-		XModelCommand createObject = MemoryModelCommand.createAddCommand(this.localModel
-		        .getAddress(), false, newObjectId);
+		XModelCommand createObject = MemoryModelCommand.createAddCommand(
+		        this.localModel.getAddress(), false, newObjectId);
 		XObjectCommand createField = MemoryObjectCommand.createAddCommand(newObjectAddr, false,
 		        newFieldId);
 		XFieldCommand setValue1 = MemoryFieldCommand.createAddCommand(newFieldAddr,
@@ -226,10 +234,10 @@ public class SynchronizeTest {
 		        .getRevisionNumber(), DemoModelUtil.PETER_ID);
 		
 		XObject john = this.localModel.getObject(DemoModelUtil.JOHN_ID);
-		XModelCommand removeJohnSafe = MemoryModelCommand.createRemoveCommand(this.localModel
-		        .getAddress(), john.getRevisionNumber(), john.getID());
-		XModelCommand removeJohnForced = MemoryModelCommand.createRemoveCommand(this.localModel
-		        .getAddress(), XCommand.FORCED, john.getID());
+		XModelCommand removeJohnSafe = MemoryModelCommand.createRemoveCommand(
+		        this.localModel.getAddress(), john.getRevisionNumber(), john.getID());
+		XModelCommand removeJohnForced = MemoryModelCommand.createRemoveCommand(
+		        this.localModel.getAddress(), XCommand.FORCED, john.getID());
 		
 		List<XCommand> localChanges = new ArrayList<XCommand>();
 		localChanges.add(createObject); // 0
@@ -290,11 +298,11 @@ public class SynchronizeTest {
 		// check that commands have been properly modified
 		assertEquals(createObject, lc[0].getCommand());
 		assertEquals(createField, lc[1].getCommand());
-		assertEquals(setValue1.getRevisionNumber() + remoteChanges.size(), ((XFieldCommand)lc[2]
-		        .getCommand()).getRevisionNumber());
+		assertEquals(setValue1.getRevisionNumber() + remoteChanges.size(),
+		        ((XFieldCommand)lc[2].getCommand()).getRevisionNumber());
 		assertEquals(setValue2, lc[3].getCommand());
-		assertEquals(removeField.getRevisionNumber() + remoteChanges.size(), ((XObjectCommand)lc[4]
-		        .getCommand()).getRevisionNumber());
+		assertEquals(removeField.getRevisionNumber() + remoteChanges.size(),
+		        ((XObjectCommand)lc[4].getCommand()).getRevisionNumber());
 		
 		// apply the commands remotely
 		assertTrue(this.remoteModel.executeCommand(fix(lc[0].getCommand())) >= 0);
