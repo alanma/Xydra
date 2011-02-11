@@ -27,7 +27,11 @@ public class WritableObjectOnPersistence extends AbstractWritableOnPersistence i
 	
 	public XWritableField createField(XID fieldId) {
 		// assume model and object exist
-		// create in persistence
+		XWritableField field = this.getField(fieldId);
+		if(field != null) {
+			return field;
+		}
+		// else: create in persistence
 		XCommand command = X.getCommandFactory().createAddFieldCommand(
 		        this.persistence.getRepositoryId(), this.modelId, this.objectId, fieldId, false);
 		this.persistence.executeCommand(this.executingActorId, command);
