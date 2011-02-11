@@ -50,33 +50,36 @@ import com.google.appengine.api.datastore.Transaction;
  * 
  * This class is the core of the GAE {@link IXydraServer} implementation.
  * 
+ * Keys for XMODEL, XOBJEC and XFIELD entities are encoded according to
+ * {@link KeyStructure#createEntityKey(XAddress)}.
+ * 
  * There are five different kinds of GAE Entities that are used by this class:
+ * <dl>
+ * <dt>Entity type XMODEL</dt>
+ * <dd>These are used to represent the internal state of a model and are managed
+ * by {@link InternalGaeModel}. The model entities only store the repository
+ * address (for queries). Individual objects are stored separately and the model
+ * revision is not stored at all. In fact, the contained object might not all
+ * correspond to the same object revision at the same time.</dd>
  * 
- * - Entity type XMODEL: These are used to represent the internal state of a
- * model and are managed by {@link InternalGaeModel}. The model entities only
- * store the repository address (for queries). Individual objects are stored
- * separately and the model revision is not stored at all. In fact, the
- * contained object might not all correspond to the same object revision at the
- * same time.
- * 
- * - Entity type XOBJECT: Like XMODEL. Used to represent objects and managed by
+ * <dt>Entity type XOBJECT</dt>
+ * <dd>Like XMODEL. Used to represent objects and managed by
  * {@link InternalGaeObject}. XOBJECT Entities store a revision number, but it
  * is not guaranteed to be up to date. An objects actual revision number can
  * only be calculated by locking the whole object and then calculating the
  * maximum of the stored revision and the revision numbers of all contained
- * fields.
+ * fields.</dd>
  * 
- * - Entity type XFIELD: Represent fields and managed by
- * {@link InternalGaeField}. The value is not stored in the field entity.
- * Instead, additionally to the field revision, an index into the transaction
- * (or zero) is stored that identifies the {@link XAtomicEvent} containing the
- * corresponding value.
+ * <dt>Entity type XFIELD</dt>
+ * <dd>Represent fields and managed by {@link InternalGaeField}. The value is
+ * not stored in the field entity. Instead, additionally to the field revision,
+ * an index into the transaction (or zero) is stored that identifies the
+ * {@link XAtomicEvent} containing the corresponding value.</dd>
  * 
- * Keys for XMODEL, XOBJEC and XFIELD entities are encoded according to
- * {@link KeyStructure#createEntityKey(XAddress)}.
  * 
- * - Entity type XCHANGE: These represent a change to the model resulting from a
- * single {@link XCommand} (which may be a {@link XTransaction}). These entities
+ * <dt>Entity type XCHANGE</dt>
+ * <dd>These represent a change to the model resulting from a single
+ * {@link XCommand} (which may be a {@link XTransaction}). These entities
  * represent both an entry into the {@link XChangeLog} as well as a change that
  * is currently in progress. Keys are encoded according to
  * {@link KeyStructure#createChangeKey(XAddress, long)}
@@ -104,13 +107,15 @@ import com.google.appengine.api.datastore.Transaction;
  * 
  * </pre>
  * 
- * - Entity type XEVENT: Stores a single {@link XAtomicEvent} associated with a
- * XCHANGE entity. Keys are encoded according to
- * {@link KeyStructure#createEventKey(Key, int)}. Currently events are simply
- * dumped as a XML-Encoded {@link String} using
- * {@link XmlEvent#toXml(XEvent, org.xydra.core.xml.XmlOut, XAddress)}.
+ * </dd>
  * 
- * Locking: TODO
+ * <dt>Entity type XEVENT</dt>
+ * <dd>Stores a single {@link XAtomicEvent} associated with a XCHANGE entity.
+ * Keys are encoded according to {@link KeyStructure#createEventKey(Key, int)}.
+ * Currently events are simply dumped as a XML-Encoded {@link String} using
+ * {@link XmlEvent#toXml(XEvent, org.xydra.core.xml.XmlOut, XAddress)}.</dd>
+ * </dl>
+ * * Locking: TODO
  * 
  * @author dscharrer
  * 

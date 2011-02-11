@@ -1,8 +1,6 @@
 package org.xydra.store.impl.gae;
 
 import java.util.ConcurrentModificationException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.xydra.base.XAddress;
 import org.xydra.log.Logger;
@@ -33,10 +31,6 @@ public class GaeUtils {
 	
 	private static boolean useMemCache = true;
 	
-	private static boolean useLocalVmCache = true;
-	
-	private static Map<Key,Entity> localVmCache = new HashMap<Key,Entity>();
-	
 	/**
 	 * @param b turn GAE MemCache off or on at runtime
 	 */
@@ -48,27 +42,18 @@ public class GaeUtils {
 	 * To be exposed via Restless.
 	 * 
 	 * @param memcache must be 'true' or 'false'
-	 * @param localvmcache must be 'true' or 'false'
 	 * @return the current configuration as a string
 	 */
-	public static String setCacheConf(String memcache, String localvmcache) {
+	public static String setCacheConf(String memcache) {
 		boolean memcache_ = Boolean.parseBoolean(memcache);
-		boolean localvmcache_ = Boolean.parseBoolean(localvmcache);
 		setUseMemCache(memcache_);
-		setUseLocalVmCache(localvmcache_);
 		return getConf();
-	}
-	
-	public static void setUseLocalVmCache(boolean b) {
-		useLocalVmCache = b;
 	}
 	
 	public static String getConf() {
 		return
 
-		"MemCache: " + useMemCache + "\n" +
-
-		"LocalVmCache: " + useLocalVmCache + "\n"
+		"MemCache: " + useMemCache + "\n"
 
 		+ getStats();
 	}
@@ -76,9 +61,7 @@ public class GaeUtils {
 	public static String getStats() {
 		return
 
-		"MemCache: " + XydraRuntime.getMemcache().size() + " entries \n" +
-
-		"LocalVmCache: " + localVmCache.size() + " entries";
+		"MemCache: " + XydraRuntime.getMemcache().size() + " entries \n";
 	}
 	
 	/**
@@ -99,18 +82,6 @@ public class GaeUtils {
 	public static Entity getEntity(Key key, Transaction trans) {
 		makeSureDatestoreServiceIsInitialised();
 		try {
-			if(useLocalVmCache) {
-				// try first to get from memcache
-				Entity cachedEntity = localVmCache.get(key);
-				if(cachedEntity != null) {
-					log.debug("Getting entity " + key.toString() + " from LocalVmCache");
-					if(cachedEntity.equals(NULL_ENTITY)) {
-						return null;
-					} else {
-						return cachedEntity;
-					}
-				}
-			}
 			if(useMemCache) {
 				// try first to get from memcache
 				Entity cachedEntity = (Entity)XydraRuntime.getMemcache().get(key);
@@ -126,20 +97,12 @@ public class GaeUtils {
 			
 			log.debug("Getting entity " + key.toString() + " from GAE data store");
 			Entity entity = datastore.get(trans, key);
-			if(useLocalVmCache) {
-				log.debug("Putting entity " + key.toString() + " in LocalVmCache");
-				localVmCache.put(key, entity);
-			}
 			if(useMemCache) {
 				log.debug("Putting entity " + key.toString() + " in MemCache");
 				XydraRuntime.getMemcache().put(key, entity);
 			}
 			return entity;
 		} catch(EntityNotFoundException e) {
-			if(useLocalVmCache) {
-				log.debug("Putting NULL_ENTITY " + key.toString() + " in LocalVmCache");
-				localVmCache.put(key, NULL_ENTITY);
-			}
 			if(useMemCache) {
 				log.debug("Putting NULL_ENTITY " + key.toString() + " in MemCache");
 				XydraRuntime.getMemcache().put(key, NULL_ENTITY);
@@ -173,14 +136,11 @@ public class GaeUtils {
 	 */
 	public static void putEntity(Entity entity, Transaction trans) {
 		makeSureDatestoreServiceIsInitialised();
-		if(useLocalVmCache) {
-			localVmCache.put(entity.getKey(), entity);
-		}
-		if(useMemCache) {
-			// add first to memcache
-			XydraRuntime.getMemcache().put(entity.getKey(), entity);
-		}
 		datastore.put(trans, entity);
+		if(useMemCache) {
+			// remove first from memcache
+			XydraRuntime.getMemcache().remove(entity.getKey());
+		}
 	}
 	
 	/**
@@ -220,9 +180,6 @@ public class GaeUtils {
 	 */
 	public static void deleteEntity(Key key, Transaction trans) {
 		makeSureDatestoreServiceIsInitialised();
-		if(useLocalVmCache) {
-			localVmCache.remove(key);
-		}
 		if(useMemCache) {
 			// delete first in memcache
 			XydraRuntime.getMemcache().remove(key);
