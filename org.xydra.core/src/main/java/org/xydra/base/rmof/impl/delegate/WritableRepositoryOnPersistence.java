@@ -19,11 +19,14 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 	}
 	
 	public XWritableModel createModel(XID modelId) {
-		// FIXME first check if there, then create
-		XCommand command = X.getCommandFactory().createAddModelCommand(
-		        this.persistence.getRepositoryId(), modelId, false);
-		this.persistence.executeCommand(this.executingActorId, command);
-		return getModel(modelId);
+		XWritableModel model = getModel(modelId);
+		if(model == null) {
+			XCommand command = X.getCommandFactory().createAddModelCommand(
+			        this.persistence.getRepositoryId(), modelId, false);
+			this.persistence.executeCommand(this.executingActorId, command);
+			model = getModel(modelId);
+		}
+		return model;
 	}
 	
 	@Override
