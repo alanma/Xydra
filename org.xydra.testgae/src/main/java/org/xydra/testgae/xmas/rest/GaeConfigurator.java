@@ -22,7 +22,7 @@ public class GaeConfigurator {
 	
 	public static void restless(Restless r, String path) {
 		r.addGet(path + "/gaeconf/set", GaeUtils.class, "setCacheConf", new RestlessParameter(
-		        "memcache", null), new RestlessParameter("vmcache", null));
+		        "memcache", null));
 		r.addGet(path + "/gaeconf/get", GaeUtils.class, "getConf");
 		r.addGet(path + "/gaeconf", GaeConfigurator.class, "howto");
 		
@@ -33,17 +33,11 @@ public class GaeConfigurator {
 		res.getWriter().write("GAE cache conf. ");
 		res.getWriter().write(HtmlUtils.link(req.getRequestURI() + "/get", "get stats") + "<br/>");
 		res.getWriter().write(
-		        HtmlUtils.link(req.getRequestURI() + "/set?memcache=true&vmcache=true",
-		                "set memcache=true, vmcache=true (default)") + "<br/>");
+		        HtmlUtils.link(req.getRequestURI() + "/set?memcache=true",
+		                "set memcache=true(default)") + "<br/>");
 		res.getWriter().write(
-		        HtmlUtils.link(req.getRequestURI() + "/set?memcache=true&vmcache=false",
-		                "set memcache=true, vmcache=false (default)") + "<br/>");
-		res.getWriter().write(
-		        HtmlUtils.link(req.getRequestURI() + "/set?memcache=false&vmcache=true",
-		                "set memcache=false, vmcache=true (default)") + "<br/>");
-		res.getWriter().write(
-		        HtmlUtils.link(req.getRequestURI() + "/set?memcache=false&vmcache=false",
-		                "set memcache=false, vmcache=false (default)") + "<br/>");
+		        HtmlUtils.link(req.getRequestURI() + "/set?memcache=false", "set memcache=false")
+		                + "<br/>");
 		res.getWriter().write(GaeUtils.getConf());
 	}
 	
