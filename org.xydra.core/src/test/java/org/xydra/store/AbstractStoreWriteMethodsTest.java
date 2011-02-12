@@ -14,6 +14,7 @@ import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
+import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.value.XValue;
@@ -35,9 +36,9 @@ import org.xydra.base.value.XValue;
  */
 
 /*
- * TODO Don't forget to test the cases in which commands are passed to an
- * entitiy which is lower in the hierarchy, i.e. an object command which is sent
- * to an XModel and then executed by one of its XObjects.
+ * TODO Don't forget to test the cases in which commands are passed to an entity
+ * which is lower in the hierarchy, i.e. an object command which is sent to an
+ * XModel and then executed by one of its XObjects.
  */
 
 public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
@@ -177,7 +178,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		        X.getCommandFactory().createAddModelCommand(this.repoId, modelId, true), callback);
 		
 		// try to remove the model but use the wrong revision number
-		long revNr = (callback.getEffect())[0].getResult();
+		long revNr = XCommand.NEW;
 		
 		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		executeFailingCommand(
@@ -320,7 +321,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		        X.getCommandFactory().createRemoveObjectCommand(this.repoId, modelId, objectId,
 		                (callback.getEffect())[0].getResult(), true), callback2);
 		
-		// check if the model was removed
+		// check if the object was removed
 		callback3 = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
 		objectAddress = new XAddress[] { XX.toAddress(this.repoId, modelId, objectId, null) };
 		
@@ -358,7 +359,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		        callback);
 		
 		// try to remove the object but use the wrong revision number
-		long revNr = (callback.getEffect())[0].getResult();
+		long revNr = XCommand.NEW;
 		
 		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		executeFailingCommand(
@@ -380,8 +381,235 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	}
 	
 	/*
+	 * Tests for ObjectCommands
+	 */
+	@Test
+	public void testExecuteCommandsCorrectObjectCommands() {
+		// create a model first
+		SynchronousTestCallback<BatchedResult<Long>[]> callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		XID modelId = XX.createUniqueID();
+		
+		executeSucceedingCommand(
+		        X.getCommandFactory().createAddModelCommand(this.repoId, modelId, true), callback);
+		
+		// create an object
+		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		XID objectId = XX.createUniqueID();
+		
+		executeSucceedingCommand(
+		        X.getCommandFactory().createAddObjectCommand(this.repoId, modelId, objectId, true),
+		        callback);
+		
+		// create an object
+		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		XID fieldId = XX.createUniqueID();
+		
+		executeSucceedingCommand(
+		        X.getCommandFactory().createAddFieldCommand(this.repoId, modelId, objectId,
+		                fieldId, true), callback);
+		
+		// check if the field was created
+		SynchronousTestCallback<BatchedResult<XReadableObject>[]> callback2 = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+		XAddress[] objectAddress = new XAddress[] { XX.toAddress(this.repoId, modelId, objectId,
+		        null) };
+		
+		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, objectAddress,
+		        callback2);
+		assertTrue(this.waitOnCallback(callback));
+		
+		BatchedResult<XReadableObject>[] result2 = callback2.getEffect();
+		assertNotNull(result2);
+		XReadableObject object = result2[0].getResult();
+		assertEquals(object.getID(), objectId);
+		assertTrue(object.hasField(fieldId));
+		
+		// remove the field again
+		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		
+		executeSucceedingCommand(
+		        X.getCommandFactory().createRemoveFieldCommand(this.repoId, modelId, objectId,
+		                fieldId, (callback.getEffect())[0].getResult(), true), callback);
+		
+		// check if the field was removed
+		callback2 = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+		objectAddress = new XAddress[] { XX.toAddress(this.repoId, modelId, objectId, null) };
+		
+		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, objectAddress,
+		        callback2);
+		assertTrue(this.waitOnCallback(callback));
+		
+		result2 = callback2.getEffect();
+		assertNotNull(result2);
+		object = result2[0].getResult();
+		assertEquals(object.getID(), objectId);
+		assertFalse(object.hasField(fieldId));
+	}
+	
+	@Test
+	public void testExecuteCommandsIncorrectObjectCommands() {
+		// create a model
+		XID modelId = XX.createUniqueID();
+		SynchronousTestCallback<BatchedResult<Long>[]> callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		
+		executeSucceedingCommand(
+		        X.getCommandFactory().createAddModelCommand(this.repoId, modelId, true), callback);
+		
+		// add an object
+		XID objectId = XX.createUniqueID();
+		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		
+		executeSucceedingCommand(
+		        X.getCommandFactory().createAddObjectCommand(this.repoId, modelId, objectId, true),
+		        callback);
+		
+		// try to remove non-existing field
+		XID fieldId = XX.createUniqueID();
+		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		
+		executeFailingCommand(
+		        X.getCommandFactory().createRemoveFieldCommand(this.repoId, modelId, objectId,
+		                fieldId, 42, true), callback);
+		
+		// add a field
+		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		executeSucceedingCommand(
+		        X.getCommandFactory().createAddFieldCommand(this.repoId, modelId, objectId,
+		                fieldId, true), callback);
+		
+		// try to remove the field but use the wrong revision number
+		long revNr = XCommand.NEW;
+		
+		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		executeFailingCommand(
+		        X.getCommandFactory().createRemoveFieldCommand(this.repoId, modelId, objectId,
+		                fieldId, revNr + 1, true), callback);
+		
+		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		executeFailingCommand(
+		        X.getCommandFactory().createRemoveFieldCommand(this.repoId, modelId, objectId,
+		                fieldId, revNr - 1, true), callback);
+		
+		// try to add the same field again with a not-forced command, should
+		// fail
+		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		executeFailingCommand(
+		        X.getCommandFactory().createAddFieldCommand(this.repoId, modelId, objectId,
+		                fieldId, false), callback);
+		
+	}
+	
+	/*
 	 * Tests for FieldCommands
 	 */
+	@Test
+	public void testExecuteCommandsCorrectFieldCommands() {
+		// create a model first
+		SynchronousTestCallback<BatchedResult<Long>[]> callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		XID modelId = XX.createUniqueID();
+		
+		executeSucceedingCommand(
+		        X.getCommandFactory().createAddModelCommand(this.repoId, modelId, true), callback);
+		
+		// create an object
+		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		XID objectId = XX.createUniqueID();
+		
+		executeSucceedingCommand(
+		        X.getCommandFactory().createAddObjectCommand(this.repoId, modelId, objectId, true),
+		        callback);
+		
+		// create a field
+		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		XID fieldId = XX.createUniqueID();
+		
+		executeSucceedingCommand(
+		        X.getCommandFactory().createAddFieldCommand(this.repoId, modelId, objectId,
+		                fieldId, true), callback);
+		
+		// add a value
+		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		XValue testValue = XX.createUniqueID();
+		long revNr = XCommand.NEW;
+		
+		executeSucceedingCommand(
+		        X.getCommandFactory().createAddValueCommand(this.repoId, modelId, objectId,
+		                fieldId, revNr, testValue, true), callback);
+		
+		revNr++;
+		
+		// check if the field was created
+		SynchronousTestCallback<BatchedResult<XReadableObject>[]> callback2 = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+		XAddress[] objectAddress = new XAddress[] { XX.toAddress(this.repoId, modelId, objectId,
+		        null) };
+		
+		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, objectAddress,
+		        callback2);
+		assertTrue(this.waitOnCallback(callback));
+		
+		BatchedResult<XReadableObject>[] result2 = callback2.getEffect();
+		assertNotNull(result2);
+		XReadableObject object = result2[0].getResult();
+		assertEquals(object.getID(), objectId);
+		assertTrue(object.hasField(fieldId));
+		
+		XReadableField field = object.getField(fieldId);
+		assertNotNull(field.getValue());
+		assertEquals(field.getValue(), testValue);
+		
+		// change the value
+		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		XValue testValue2 = XX.createUniqueID();
+		
+		executeSucceedingCommand(
+		        X.getCommandFactory().createChangeValueCommand(this.repoId, modelId, objectId,
+		                fieldId, revNr, testValue2, true), callback);
+		revNr++;
+		
+		// check if the value was changed
+		callback2 = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+		objectAddress = new XAddress[] { XX.toAddress(this.repoId, modelId, objectId, null) };
+		
+		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, objectAddress,
+		        callback2);
+		assertTrue(this.waitOnCallback(callback));
+		
+		result2 = callback2.getEffect();
+		assertNotNull(result2);
+		object = result2[0].getResult();
+		assertEquals(object.getID(), objectId);
+		assertTrue(object.hasField(fieldId));
+		
+		field = object.getField(fieldId);
+		assertNotNull(field.getValue());
+		assertEquals(field.getValue(), testValue2);
+		assertFalse(field.getValue().equals(testValue2));
+		
+		// remove the value again
+		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		
+		executeSucceedingCommand(
+		        X.getCommandFactory().createRemoveValueCommand(this.repoId, modelId, objectId,
+		                fieldId, revNr, true), callback);
+		revNr++;
+		
+		// check if the value was removed
+		callback2 = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+		objectAddress = new XAddress[] { XX.toAddress(this.repoId, modelId, objectId, null) };
+		
+		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, objectAddress,
+		        callback2);
+		assertTrue(this.waitOnCallback(callback));
+		
+		result2 = callback2.getEffect();
+		assertNotNull(result2);
+		object = result2[0].getResult();
+		assertEquals(object.getID(), objectId);
+		assertTrue(object.hasField(fieldId));
+		
+		field = object.getField(fieldId);
+		assertNull(field.getValue());
+	}
+	
 	@Test
 	public void testExecuteCommandsIncorrectFieldCommands() {
 		// create model, object and field
