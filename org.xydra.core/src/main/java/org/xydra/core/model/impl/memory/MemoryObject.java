@@ -12,13 +12,13 @@ import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldCommand;
-import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XObjectCommand;
 import org.xydra.base.change.XObjectEvent;
+import org.xydra.base.change.XReversibleFieldEvent;
 import org.xydra.base.change.XTransaction;
-import org.xydra.base.change.impl.memory.MemoryFieldEvent;
 import org.xydra.base.change.impl.memory.MemoryObjectCommand;
 import org.xydra.base.change.impl.memory.MemoryObjectEvent;
+import org.xydra.base.change.impl.memory.MemoryReversibleFieldEvent;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableObject;
@@ -261,9 +261,9 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		
 		if(field.getValue() != null) {
 			assert inTrans;
-			XFieldEvent event = MemoryFieldEvent.createRemoveEvent(actor, field.getAddress(), field
-			        .getValue(), modelRev, getRevisionNumber(), field.getRevisionNumber(), inTrans,
-			        true);
+			XReversibleFieldEvent event = MemoryReversibleFieldEvent.createRemoveEvent(actor, field
+			        .getAddress(), field.getValue(), modelRev, getRevisionNumber(), field
+			        .getRevisionNumber(), inTrans, true);
 			this.eventQueue.enqueueFieldEvent(field, event);
 		}
 		

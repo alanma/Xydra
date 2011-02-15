@@ -189,11 +189,11 @@ public abstract class DeltaUtils {
 		}
 		
 		for(XReadableObject object : changedModel.getNewObjects()) {
-			events.add(MemoryModelEvent.createAddEvent(actorId, changedModel.getAddress(),
-			        object.getID(), rev, inTrans));
+			events.add(MemoryModelEvent.createAddEvent(actorId, changedModel.getAddress(), object
+			        .getID(), rev, inTrans));
 			for(XID fieldId : object) {
-				DeltaUtils.createEventsForNewField(events, rev, actorId, object,
-				        object.getField(fieldId), inTrans);
+				DeltaUtils.createEventsForNewField(events, rev, actorId, object, object
+				        .getField(fieldId), inTrans);
 			}
 		}
 		
@@ -202,8 +202,8 @@ public abstract class DeltaUtils {
 			assert !implied;
 			
 			for(XID fieldId : object.getRemovedFields()) {
-				DeltaUtils.createEventsForRemovedField(events, rev, actorId, object,
-				        object.getOldField(fieldId), inTrans, false);
+				DeltaUtils.createEventsForRemovedField(events, rev, actorId, object, object
+				        .getOldField(fieldId), inTrans, false);
 			}
 			
 			for(XReadableField field : object.getNewFields()) {
@@ -213,20 +213,21 @@ public abstract class DeltaUtils {
 			for(ChangedField field : object.getChangedFields()) {
 				if(field.isChanged()) {
 					XValue oldValue = field.getOldValue();
+					// IMPROVE we only need to know if the old value exists
 					XValue newValue = field.getValue();
 					XAddress target = field.getAddress();
 					long objectRev = object.getRevisionNumber();
 					long fieldRev = field.getRevisionNumber();
 					if(newValue == null) {
 						assert oldValue != null;
-						events.add(MemoryFieldEvent.createRemoveEvent(actorId, target, oldValue,
-						        rev, objectRev, fieldRev, inTrans, false));
+						events.add(MemoryFieldEvent.createRemoveEvent(actorId, target, rev,
+						        objectRev, fieldRev, inTrans, false));
 					} else if(oldValue == null) {
 						events.add(MemoryFieldEvent.createAddEvent(actorId, target, newValue, rev,
 						        objectRev, fieldRev, inTrans));
 					} else {
-						events.add(MemoryFieldEvent.createReversibleChangeEvent(actorId, target,
-						        oldValue, newValue, rev, objectRev, fieldRev, inTrans));
+						events.add(MemoryFieldEvent.createChangeEvent(actorId, target, newValue,
+						        rev, objectRev, fieldRev, inTrans));
 					}
 					
 				}
@@ -242,8 +243,8 @@ public abstract class DeltaUtils {
 		events.add(MemoryObjectEvent.createAddEvent(actorId, object.getAddress(), field.getID(),
 		        rev, objectRev, inTrans));
 		if(!field.isEmpty()) {
-			events.add(MemoryFieldEvent.createAddEvent(actorId, field.getAddress(),
-			        field.getValue(), rev, objectRev, field.getRevisionNumber(), inTrans));
+			events.add(MemoryFieldEvent.createAddEvent(actorId, field.getAddress(), field
+			        .getValue(), rev, objectRev, field.getRevisionNumber(), inTrans));
 		}
 	}
 	
@@ -253,8 +254,8 @@ public abstract class DeltaUtils {
 		long objectRev = object.getRevisionNumber();
 		long fieldRev = field.getRevisionNumber();
 		if(!field.isEmpty()) {
-			events.add(MemoryFieldEvent.createRemoveEvent(actorId, field.getAddress(),
-			        field.getValue(), modelRev, objectRev, fieldRev, inTrans, true));
+			events.add(MemoryFieldEvent.createRemoveEvent(actorId, field.getAddress(), modelRev,
+			        objectRev, fieldRev, inTrans, true));
 		}
 		events.add(MemoryObjectEvent.createRemoveEvent(actorId, object.getAddress(), field.getID(),
 		        modelRev, objectRev, fieldRev, inTrans, implied));
@@ -263,8 +264,8 @@ public abstract class DeltaUtils {
 	public static void createEventsForRemovedObject(List<XAtomicEvent> events, long modelRev,
 	        XID actorId, XReadableObject object, boolean inTrans, boolean implied) {
 		for(XID fieldId : object) {
-			DeltaUtils.createEventsForRemovedField(events, modelRev, actorId, object,
-			        object.getField(fieldId), inTrans, true);
+			DeltaUtils.createEventsForRemovedField(events, modelRev, actorId, object, object
+			        .getField(fieldId), inTrans, true);
 		}
 		events.add(MemoryModelEvent.createRemoveEvent(actorId, object.getAddress().getParent(),
 		        object.getID(), modelRev, object.getRevisionNumber(), inTrans, implied));

@@ -22,6 +22,7 @@ import org.xydra.base.change.impl.memory.MemoryFieldEvent;
 import org.xydra.base.change.impl.memory.MemoryModelEvent;
 import org.xydra.base.change.impl.memory.MemoryObjectEvent;
 import org.xydra.base.change.impl.memory.MemoryRepositoryEvent;
+import org.xydra.base.change.impl.memory.MemoryReversibleFieldEvent;
 import org.xydra.base.change.impl.memory.MemoryTransactionEvent;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XChangeLog;
@@ -341,8 +342,8 @@ public class XmlEvent {
 		}
 	}
 	
-	protected static XFieldEvent toReversibleFieldEvent(MiniElement xml, XAddress context,
-	        XChangeLogState cl) {
+	protected static XReversibleFieldEvent toReversibleFieldEvent(MiniElement xml,
+	        XAddress context, XChangeLogState cl) {
 		
 		XmlUtils.checkElementName(xml, XREVERSIBLEFIELDEVENT_ELEMENT);
 		
@@ -392,15 +393,15 @@ public class XmlEvent {
 		}
 		
 		if(type == ChangeType.ADD) {
-			return MemoryFieldEvent.createAddEvent(actor, target, newValue, modelRev, objectRev,
-			        fieldRev, inTransaction);
+			return MemoryReversibleFieldEvent.createAddEvent(actor, target, newValue, modelRev,
+			        objectRev, fieldRev, inTransaction);
 		} else if(type == ChangeType.CHANGE) {
-			return MemoryFieldEvent.createReversibleChangeEvent(actor, target, oldValue, newValue,
+			return MemoryReversibleFieldEvent.createChangeEvent(actor, target, oldValue, newValue,
 			        modelRev, objectRev, fieldRev, inTransaction);
 		} else if(type == ChangeType.REMOVE) {
 			boolean implied = getImpliedAttribute(xml);
-			return MemoryFieldEvent.createRemoveEvent(actor, target, oldValue, modelRev, objectRev,
-			        fieldRev, inTransaction, implied);
+			return MemoryReversibleFieldEvent.createRemoveEvent(actor, target, oldValue, modelRev,
+			        objectRev, fieldRev, inTransaction, implied);
 		} else {
 			throw new IllegalArgumentException("<" + XREVERSIBLEFIELDEVENT_ELEMENT + ">@"
 			        + XmlUtils.TYPE_ATTRIBUTE
@@ -615,10 +616,10 @@ public class XmlEvent {
 			        + " does not specify a model or object target.");
 		}
 		
-		long objectRev = getRevision(xml, XFIELDEVENT_ELEMENT, OBJECTREVISION_ATTRIBUTE,
-		        target.getObject() != null);
-		long modelRev = getRevision(xml, XFIELDEVENT_ELEMENT, MODELREVISION_ATTRIBUTE,
-		        target.getObject() == null);
+		long objectRev = getRevision(xml, XFIELDEVENT_ELEMENT, OBJECTREVISION_ATTRIBUTE, target
+		        .getObject() != null);
+		long modelRev = getRevision(xml, XFIELDEVENT_ELEMENT, MODELREVISION_ATTRIBUTE, target
+		        .getObject() == null);
 		
 		XID actor = XmlUtils.getOptionalXidAttribute(xml, ACTOR_ATTRIBUTE, null);
 		

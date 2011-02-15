@@ -19,7 +19,7 @@ import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.change.XReversibleFieldEvent;
 import org.xydra.base.change.XTransactionEvent;
-import org.xydra.base.change.impl.memory.MemoryFieldEvent;
+import org.xydra.base.change.impl.memory.MemoryReversibleFieldEvent;
 import org.xydra.base.change.impl.memory.MemoryTransactionEvent;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XLocalChangeCallback;
@@ -329,7 +329,7 @@ public class MemoryEventManager implements Serializable {
 	 * @param field The {@link MemoryField} in which this event occurred.
 	 * @param event The {@link XFieldEvent}.
 	 */
-	protected void enqueueFieldEvent(MemoryField field, XFieldEvent event) {
+	protected void enqueueFieldEvent(MemoryField field, XReversibleFieldEvent event) {
 		assert field != null && event != null : "Neither field nor event may be null!";
 		
 		MemoryObject object = field.getObject();
@@ -438,7 +438,8 @@ public class MemoryEventManager implements Serializable {
 	 * @return The merged {@link XFieldEvent} (which may be 'last') or null if
 	 *         the given {@link XFieldEvent XFieldEvents} cancel each other out.
 	 */
-	private XFieldEvent mergeFieldEvents(XReversibleFieldEvent first, XReversibleFieldEvent last) {
+	private XReversibleFieldEvent mergeFieldEvents(XReversibleFieldEvent first,
+	        XReversibleFieldEvent last) {
 		
 		assert first.getTarget().equals(last.getTarget());
 		
@@ -455,30 +456,30 @@ public class MemoryEventManager implements Serializable {
 			}
 			assert first.getChangeType() == ChangeType.REMOVE;
 			// non matching REMOVE -> ADD => merge to CHANGE
-			return MemoryFieldEvent.createReversibleChangeEvent(last.getActor(), last.getTarget(),
-			        first.getOldValue(), last.getNewValue(), last.getOldModelRevision(),
-			        last.getOldObjectRevision(), last.getOldFieldRevision(), false);
+			return MemoryReversibleFieldEvent.createChangeEvent(last.getActor(), last.getTarget(),
+			        first.getOldValue(), last.getNewValue(), last.getOldModelRevision(), last
+			                .getOldObjectRevision(), last.getOldFieldRevision(), false);
 		case REMOVE:
 			if(first.getChangeType() == ChangeType.REMOVE) {
 				return last;
 			}
 			assert first.getChangeType() == ChangeType.CHANGE;
 			// (non matching) CHANGE->REMOVE => merge to REMOVE
-			return MemoryFieldEvent.createRemoveEvent(last.getActor(), last.getTarget(),
+			return MemoryReversibleFieldEvent.createRemoveEvent(last.getActor(), last.getTarget(),
 			        first.getOldValue(), last.getOldModelRevision(), last.getOldObjectRevision(),
 			        last.getOldFieldRevision(), false, false);
 		case CHANGE:
 			assert first.getChangeType() != ChangeType.REMOVE;
 			if(first.getChangeType() == ChangeType.CHANGE) {
 				// non-matching CHANGE->CHANGE => merge to CHANGE
-				return MemoryFieldEvent.createReversibleChangeEvent(last.getActor(),
-				        last.getTarget(), first.getOldValue(), last.getNewValue(),
-				        last.getOldModelRevision(), last.getOldObjectRevision(),
-				        last.getOldFieldRevision(), false);
+				return MemoryReversibleFieldEvent.createChangeEvent(last.getActor(), last
+				        .getTarget(), first.getOldValue(), last.getNewValue(), last
+				        .getOldModelRevision(), last.getOldObjectRevision(), last
+				        .getOldFieldRevision(), false);
 			} else {
 				assert first.getChangeType() == ChangeType.ADD;
 				// non-matching ADD->CHANGE => merge to ADD
-				return MemoryFieldEvent.createAddEvent(last.getActor(), last.getTarget(),
+				return MemoryReversibleFieldEvent.createAddEvent(last.getActor(), last.getTarget(),
 				        last.getNewValue(), last.getOldModelRevision(),
 				        last.getOldObjectRevision(), last.getOldFieldRevision(), false);
 			}

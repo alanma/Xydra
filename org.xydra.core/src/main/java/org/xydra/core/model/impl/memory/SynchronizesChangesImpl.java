@@ -562,7 +562,8 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 			setRevisionNumberIfModel(oldModelRev);
 			return false;
 		}
-		assert event.equals(getChangeLog().getEventAt(result));
+		XEvent newEvent = getChangeLog().getEventAt(result);
+		assert event.equals(newEvent);
 		assert getModel() == null ? getObject().getRevisionNumber() == event.getRevisionNumber()
 		        : getModel().getRevisionNumber() == event.getRevisionNumber();
 		assert getCurrentRevisionNumber() == event.getRevisionNumber();
@@ -726,13 +727,13 @@ public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChang
 				}
 				
 			} else {
-				assert event instanceof XFieldEvent;
-				MemoryField field = object.getField(((XFieldEvent)event).getFieldId());
+				assert event instanceof XReversibleFieldEvent;
+				MemoryField field = object.getField(((XReversibleFieldEvent)event).getFieldId());
 				assert field != null;
 				assert event.getRevisionNumber() == field.getRevisionNumber()
 				        || (event.inTransaction() && event.getOldFieldRevision() == field
 				                .getRevisionNumber());
-				assert XI.equals(field.getValue(), ((XFieldEvent)event).getNewValue());
+				assert XI.equals(field.getValue(), ((XReversibleFieldEvent)event).getNewValue());
 				field.setValueInternal(((XReversibleFieldEvent)event).getOldValue());
 				assert event.getOldFieldRevision() >= 0;
 				field.setRevisionNumber(event.getOldFieldRevision());

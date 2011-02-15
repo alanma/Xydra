@@ -14,8 +14,9 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.change.XFieldEvent;
+import org.xydra.base.change.XReversibleFieldEvent;
 import org.xydra.base.change.impl.memory.MemoryFieldCommand;
-import org.xydra.base.change.impl.memory.MemoryFieldEvent;
+import org.xydra.base.change.impl.memory.MemoryReversibleFieldEvent;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.base.value.XValue;
@@ -538,20 +539,20 @@ public class MemoryField implements XField, Serializable {
 		long objectRev = getObjectRevisionNumber();
 		long fieldRev = getRevisionNumber();
 		XID actorId = this.eventQueue.getActor();
-		XFieldEvent event = null;
+		XReversibleFieldEvent event = null;
 		if((oldValue == null)) {
 			assert newValue != null;
-			event = MemoryFieldEvent.createAddEvent(actorId, getAddress(), newValue, modelRev,
-			        objectRev, fieldRev, inTrans);
+			event = MemoryReversibleFieldEvent.createAddEvent(actorId, getAddress(), newValue,
+			        modelRev, objectRev, fieldRev, inTrans);
 		} else {
 			if(newValue == null) {
 				// implies remove
-				event = MemoryFieldEvent.createRemoveEvent(actorId, getAddress(), oldValue,
-				        modelRev, objectRev, fieldRev, inTrans, false);
+				event = MemoryReversibleFieldEvent.createRemoveEvent(actorId, getAddress(),
+				        oldValue, modelRev, objectRev, fieldRev, inTrans, false);
 			} else {
 				assert !newValue.equals(oldValue);
 				// implies change
-				event = MemoryFieldEvent.createReversibleChangeEvent(actorId, getAddress(),
+				event = MemoryReversibleFieldEvent.createChangeEvent(actorId, getAddress(),
 				        oldValue, newValue, modelRev, objectRev, fieldRev, inTrans);
 			}
 		}

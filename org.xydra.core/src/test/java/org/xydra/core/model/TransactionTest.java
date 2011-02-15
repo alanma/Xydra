@@ -22,6 +22,7 @@ import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.change.impl.memory.MemoryFieldEvent;
 import org.xydra.base.change.impl.memory.MemoryModelEvent;
 import org.xydra.base.change.impl.memory.MemoryObjectEvent;
+import org.xydra.base.change.impl.memory.MemoryReversibleFieldEvent;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
 import org.xydra.core.ChangeRecorder;
@@ -402,7 +403,7 @@ public class TransactionTest {
 
 		XAddress peterAddr = XX.resolveObject(modelAddr, PETER_ID);
 		XAddress peterPhoneAddr = XX.resolveField(peterAddr, PHONE_ID);
-		XEvent removePeterPhoneValue = MemoryFieldEvent.createRemoveEvent(this.actorId,
+		XEvent removePeterPhoneValue = MemoryReversibleFieldEvent.createRemoveEvent(this.actorId,
 		        peterPhoneAddr, PETER_PHONE, modelRev, peterRev, peterPhoneRev, true, true);
 		XEvent removePeterPhone = MemoryObjectEvent.createRemoveEvent(this.actorId, peterAddr,
 		        PHONE_ID, modelRev, peterRev, peterPhoneRev, true, true);
@@ -429,8 +430,8 @@ public class TransactionTest {
 		
 		/* check events received for setting john/alias */
 
-		XEvent addJohnAliasValue = MemoryFieldEvent.createAddEvent(this.actorId, aliasAddr,
-		        JOHN_ALIAS, modelRev, johnRev, XCommand.NEW, true);
+		XEvent addJohnAliasValue = MemoryReversibleFieldEvent.createAddEvent(this.actorId,
+		        aliasAddr, JOHN_ALIAS, modelRev, johnRev, XCommand.NEW, true);
 		
 		int x5 = received.indexOf(addJohnAliasValue);
 		assertTrue(x5 >= 0);
