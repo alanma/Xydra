@@ -26,6 +26,7 @@ public class HtmlUtils {
 			this.label = label;
 		}
 		
+		@Override
 		public String toString() {
 			return "<input type=\"submit\" value=\"" + this.label + "\"/>";
 		}
@@ -43,6 +44,7 @@ public class HtmlUtils {
 		private String name;
 		private String value;
 		
+		@Override
 		public String toString() {
 			return this.name + ": <input type=\"text\" name=\"" + this.name + "\" value=\""
 			        + this.value + "\"/>";
@@ -79,6 +81,7 @@ public class HtmlUtils {
 			return this;
 		}
 		
+		@Override
 		public String toString() {
 			StringBuffer buf = new StringBuffer();
 			buf.append("<form action='" + this.action + "' method='" + this.method + "'>");
