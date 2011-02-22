@@ -100,9 +100,15 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		XID objectId2 = XX.toId("TestObject2");
 		XID objectId3 = XX.toId("TestObject3");
 		
-		// FIXME In a secure store you need to give the correctUser the rights
-		// to access these models and objects
-		
+		/*
+		 * FIXME In a secure store you need to give the correctUser the rights
+		 * to access these models and objects - this should not be done by this
+		 * abstract test, but rather by the implementation. As stated in the
+		 * documentation of the "getCorrectUser" method, the test assumes that
+		 * the user returned by this method is allowed to execute the following
+		 * commands ~Bjoern
+		 */
+
 		XID repoID = getRepositoryId();
 		
 		XCommand modelCommand1 = this.factory.createAddModelCommand(repoID, modelId1, true);
@@ -340,8 +346,8 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		 * store)
 		 */
 		for(int i = 0; i < this.modelAddresses.length; i++) {
-			assertTrue(result + " should contain " + this.modelAddresses[i].getModel(), result
-			        .contains(this.modelAddresses[i].getModel()));
+			assertTrue(result + " should contain " + this.modelAddresses[i].getModel(),
+			        result.contains(this.modelAddresses[i].getModel()));
 		}
 		
 	}
@@ -563,8 +569,8 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			// compare revision numbers
 			assertNotNull(revisionResult[i].getResult());
 			assertNull(revisionResult[i].getException());
-			assertEquals((Long)snapshotResult[i].getResult().getRevisionNumber(), revisionResult[i]
-			        .getResult());
+			assertEquals((Long)snapshotResult[i].getResult().getRevisionNumber(),
+			        revisionResult[i].getResult());
 		}
 	}
 	
