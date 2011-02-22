@@ -1,7 +1,5 @@
 package org.xydra.store;
 
-import org.xydra.base.XID;
-import org.xydra.base.XX;
 import org.xydra.store.impl.memory.SecureMemoryStore;
 
 
@@ -15,13 +13,6 @@ import org.xydra.store.impl.memory.SecureMemoryStore;
  * 
  */
 public class DelegatingSecureStoreReadMethodsTest extends AbstractSecureStoreReadMethodsTest {
-	
-	@Override
-	protected XID getRepositoryId() {
-		return XX.toId("data");
-		// repositoryId as set in the standard constructor of {@link
-		// MemoryStore}
-	}
 	
 	@Override
 	protected XydraStore getStore() {
