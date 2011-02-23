@@ -65,4 +65,11 @@ public abstract class AbstractAllowAllStoreWriteMethodsTest extends AbstractStor
 		return 1;
 	}
 	
+	@Override
+	protected XID getRepositoryId() {
+		return XX.toId("data");
+		// repositoryId as set in the standard constructor of {@link
+		// MemoryStore}
+	}
+	
 }

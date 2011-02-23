@@ -1,7 +1,6 @@
 package org.xydra.store;
 
 import org.xydra.base.X;
-import org.xydra.base.XID;
 import org.xydra.base.change.XCommandFactory;
 import org.xydra.store.impl.memory.MemoryPersistence;
 
@@ -11,11 +10,6 @@ public class DelegatingAllowAllStoreWriteMethodsTest extends AbstractAllowAllSto
 	@Override
 	protected XCommandFactory getCommandFactory() {
 		return X.getCommandFactory();
-	}
-	
-	@Override
-	protected XID getRepositoryId() {
-		return this.repoId;
 	}
 	
 	@Override

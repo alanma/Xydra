@@ -145,8 +145,8 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		executeSucceedingCommand(
-		        X.getCommandFactory().createRemoveModelCommand(this.repoId, modelId,
-		                (callback.getEffect())[0].getResult(), true), callback);
+		        X.getCommandFactory().createRemoveModelCommand(this.repoId, modelId, XCommand.NEW,
+		                true), callback);
 		
 		// check if the model was removed
 		callback2 = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
@@ -169,7 +169,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		SynchronousTestCallback<BatchedResult<Long>[]> callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		
 		executeFailingCommand(
-		        X.getCommandFactory().createRemoveModelCommand(this.repoId, modelId, 42, true),
+		        X.getCommandFactory().createRemoveModelCommand(this.repoId, modelId, 42, false),
 		        callback);
 		
 		// add a model
@@ -183,12 +183,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		executeFailingCommand(
 		        X.getCommandFactory().createRemoveModelCommand(this.repoId, modelId, revNr + 1,
-		                true), callback);
-		
-		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
-		executeFailingCommand(
-		        X.getCommandFactory().createRemoveModelCommand(this.repoId, modelId, revNr - 1,
-		                true), callback);
+		                false), callback);
 		
 		// try to add the same model again with a not-forced command -> should
 		// fail
@@ -206,7 +201,9 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		int modelCount = 5;
 		XID[] modelIds = new XID[modelCount];
 		XCommand[] commands = new XCommand[modelCount];
+		
 		for(int i = 0; i < modelIds.length; i++) {
+			modelIds[i] = XX.createUniqueID();
 			commands[i] = X.getCommandFactory().createAddModelCommand(this.repoId, modelIds[i],
 			        true);
 		}
@@ -278,7 +275,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		executeFailingCommand(
 		        X.getCommandFactory().createRemoveObjectCommand(this.repoId, modelId, objectId, 42,
-		                true), callback);
+		                false), callback);
 		
 		// add an object
 		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
@@ -287,17 +284,12 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		        callback);
 		
 		// try to remove the object but use the wrong revision number
-		long revNr = XCommand.NEW;
+		long revNr = (callback.getEffect())[0].getResult();
 		
 		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		executeFailingCommand(
 		        X.getCommandFactory().createRemoveObjectCommand(this.repoId, modelId, objectId,
-		                revNr + 1, true), callback);
-		
-		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
-		executeFailingCommand(
-		        X.getCommandFactory().createRemoveObjectCommand(this.repoId, modelId, objectId,
-		                revNr - 1, true), callback);
+		                revNr + 1, false), callback);
 		
 		// try to add the same object again with a not-forced command, should
 		// fail
@@ -375,6 +367,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		XID[] objectIds = new XID[objectCount];
 		XCommand[] commands = new XCommand[objectCount];
 		for(int i = 0; i < objectIds.length; i++) {
+			objectIds[i] = XX.createUniqueID();
 			commands[i] = X.getCommandFactory().createAddObjectCommand(this.repoId, modelId,
 			        objectIds[i], true);
 		}
@@ -471,11 +464,12 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertTrue(object.hasField(fieldId));
 		
 		// remove the field again
+		long revNr = (callback.getEffect())[0].getResult();
 		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		
 		executeSucceedingCommand(
 		        X.getCommandFactory().createRemoveFieldCommand(this.repoId, modelId, objectId,
-		                fieldId, (callback.getEffect())[0].getResult(), true), callback);
+		                fieldId, revNr, true), callback);
 		
 		// check if the field was removed
 		callback2 = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
@@ -515,7 +509,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		executeFailingCommand(
 		        X.getCommandFactory().createRemoveFieldCommand(this.repoId, modelId, objectId,
-		                fieldId, 42, true), callback);
+		                fieldId, 42, false), callback);
 		
 		// add a field
 		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
@@ -524,17 +518,12 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		                fieldId, true), callback);
 		
 		// try to remove the field but use the wrong revision number
-		long revNr = XCommand.NEW;
+		long revNr = (callback.getEffect())[0].getResult();
 		
 		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		executeFailingCommand(
 		        X.getCommandFactory().createRemoveFieldCommand(this.repoId, modelId, objectId,
-		                fieldId, revNr + 1, true), callback);
-		
-		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
-		executeFailingCommand(
-		        X.getCommandFactory().createRemoveFieldCommand(this.repoId, modelId, objectId,
-		                fieldId, revNr - 1, true), callback);
+		                fieldId, revNr + 1, false), callback);
 		
 		// try to add the same field again with a not-forced command, should
 		// fail
@@ -568,6 +557,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		XID[] fieldIds = new XID[fieldCount];
 		XCommand[] commands = new XCommand[fieldCount];
 		for(int i = 0; i < fieldIds.length; i++) {
+			fieldIds[i] = XX.createUniqueID();
 			commands[i] = X.getCommandFactory().createAddFieldCommand(this.repoId, modelId,
 			        objectId, fieldIds[i], true);
 		}
@@ -612,8 +602,8 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		result2 = callback2.getEffect();
 		assertNotNull(result2);
 		for(int i = 0; i < fieldCount; i++) {
-			assertNull(result2[i].getResult());
-			assertNull(result2[i].getException());
+			assertNull(result2[0].getResult().getField(fieldIds[i]));
+			assertNull(result2[0].getException());
 		}
 	}
 	
@@ -701,7 +691,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		field = object.getField(fieldId);
 		assertNotNull(field.getValue());
 		assertEquals(field.getValue(), testValue2);
-		assertFalse(field.getValue().equals(testValue2));
+		assertFalse(field.getValue().equals(testValue));
 		
 		// remove the value again
 		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
@@ -734,6 +724,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		// create model, object and field
 		XID modelId = XX.createUniqueID();
 		XID objectId = XX.createUniqueID();
+		XID fieldId = XX.createUniqueID();
 		SynchronousTestCallback<BatchedResult<Long>[]> callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		
 		executeSucceedingCommand(
@@ -745,17 +736,21 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		        X.getCommandFactory().createAddObjectCommand(this.repoId, modelId, objectId, true),
 		        callback);
 		
-		// TODO is 0 or 1 the starting revision number?
+		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		
+		executeSucceedingCommand(
+		        X.getCommandFactory().createAddFieldCommand(this.repoId, modelId, objectId,
+		                fieldId, true), callback);
 		
 		// try to remove non-existing value
-		XID fieldId = XX.createUniqueID();
 		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		
 		executeFailingCommand(
 		        X.getCommandFactory().createRemoveValueCommand(this.repoId, modelId, objectId,
-		                fieldId, 0, false), callback);
+		                fieldId, XCommand.NEW, false), callback);
 		
 		// try to change a non-existing value
+		
 		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		XValue testValue = X.getValueFactory().createStringValue("Test");
 		
@@ -764,10 +759,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		                fieldId, 0, testValue, false), callback);
 		
 		// add a value
-		long revNr = (callback.getEffect())[0].getResult(); // TODO can I really
-		                                                    // use this here
-		                                                    // after a failed
-		                                                    // command?
+		long revNr = (callback.getEffect())[0].getResult();
 		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		
 		executeSucceedingCommand(
@@ -780,17 +772,9 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		executeFailingCommand(
 		        X.getCommandFactory().createRemoveValueCommand(this.repoId, modelId, objectId,
-		                fieldId, revNr + 1, true), callback);
-		
-		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
-		executeFailingCommand(
-		        X.getCommandFactory().createRemoveValueCommand(this.repoId, modelId, objectId,
-		                fieldId, revNr - 1, true), callback);
+		                fieldId, revNr + 1, false), callback);
 		
 	}
-	
-	// TODO Maybe rewrite this method so that it can be used for callbacks made
-	// up of more than one command
 	
 	/**
 	 * Executes the given command (which is supposed to succeed) and checks if
@@ -810,7 +794,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNull(callback.getException());
 		
 		for(int i = 0; i < commands.length; i++) {
-			assertTrue((callback.getEffect())[i].getResult() > 0);
+			assertTrue((callback.getEffect())[i].getResult() >= 0);
 			assertNull((callback.getEffect())[i].getException());
 		}
 	}
