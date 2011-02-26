@@ -19,7 +19,6 @@ import org.xydra.base.change.XCommandFactory;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.log.DefaultLoggerFactorySPI;
-import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
 
@@ -46,13 +45,10 @@ import org.xydra.log.LoggerFactory;
 
 public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	
-	private static final Logger log = LoggerFactory.getLogger(AbstractStoreReadMethodsTest.class);
-	
 	static {
 		LoggerFactory.setLoggerFactorySPI(new DefaultLoggerFactorySPI());
 	}
 	
-	protected long bfQuota;
 	private XID correctUser, incorrectUser;
 	
 	protected String correctUserPass, incorrectUserPass;
@@ -88,8 +84,6 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		this.incorrectUser = this.getIncorrectUser();
 		this.incorrectUserPass = this.getIncorrectUserPasswordHash();
 		this.incorrectActorExists = (this.incorrectUser != null);
-		
-		this.bfQuota = getQuotaForBruteForce();
 		
 		// creating some models
 		XID modelId1 = XX.toId("TestModel1");
@@ -256,47 +250,6 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		}
 	}
 	
-	// Test for checking if the QuoateException works for checkLogin
-	@Test
-	public void testCheckLoginQuotaException() {
-		if(!this.incorrectActorExists || this.bfQuota < 0) {
-			// This test only makes sense if an incorrect actorID - passwordhash
-			// combination can be provided and QuotaExceptions are thrown by the
-			// implementation which is to be tested
-			return;
-		}
-		
-		SynchronousTestCallback<Boolean> callback = null;
-		
-		assert this.bfQuota > 0;
-		// Testing the quota exception
-		for(long l = 0; l < this.bfQuota + 1; l++) {
-			callback = new SynchronousTestCallback<Boolean>();
-			
-			this.store.checkLogin(this.incorrectUser, this.incorrectUserPass, callback);
-			
-			boolean wait = waitOnCallback(callback);
-			
-			if(l <= this.bfQuota) {
-				// QuotaException shouldn't be thrown yet.
-				assertTrue(wait);
-				assertNotNull(callback.getEffect());
-				assertNull(callback.getException());
-				assertFalse(callback.getException() instanceof QuotaException);
-			} else {
-				assertFalse("should now return a QuotaException, since we exceeded the quota; l = "
-				        + l, wait);
-				assertNull(callback.getEffect());
-				assertNotNull(callback.getException());
-				assertTrue(callback.getException() instanceof QuotaException);
-			}
-		}
-		
-		// TODO also check if QuotaException keeps being thrown after the quota
-		// was exceeded by one
-		
-	}
-	
 	/**
 	 * Tests for the checkLogin()-method
 	 */
@@ -428,46 +381,6 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			fail();
 		} catch(IllegalArgumentException iae) {
 		}
-	}
-	
-	// Testing the quota exception
-	@Test
-	public void testGetModelIdsQuotaException() {
-		if(!this.incorrectActorExists || this.bfQuota < 0) {
-			// This test only makes sense if an incorrect actorID - passwordhash
-			// combination can be provided and QuotaExceptions are thrown by the
-			// implementation which is to be tested
-			return;
-		}
-		
-		SynchronousTestCallback<Set<XID>> callback = null;
-		
-		assert this.bfQuota > 0;
-		boolean foundQuotaException = false;
-		for(long l = 0; l < this.bfQuota + 1; l++) {
-			callback = new SynchronousTestCallback<Set<XID>>();
-			
-			log.info("logging in with wrong credentials " + l + " ...");
-			this.store.getModelIds(this.incorrectUser, this.incorrectUserPass, callback);
-			
-			assertFalse(waitOnCallback(callback));
-			assertNull(callback.getEffect());
-			assertNotNull(callback.getException());
-			
-			if(l < this.bfQuota) {
-				// QuotaException shouldn't be thrown yet.
-				assertFalse(callback.getException() instanceof QuotaException);
-			} else {
-				// should now return a QuotaException, since we exceeded the
-				// quota
-				assertTrue(callback.getException() instanceof QuotaException);
-				foundQuotaException = true;
-			}
-		}
-		assertTrue("We got a QuotaException", foundQuotaException);
-		
-		// TODO also check if QuotaException keeps being thrown after the quota
-		// was exceeded by one
 	}
 	
 	// Test IllegalArgumentException
@@ -667,44 +580,6 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		assertEquals(result[0].getResult(), (Long)XCommand.FAILED);
 	}
 	
-	// Testing the quota exception
-	@Test
-	public void testGetModelRevisionsQuotaException() {
-		if(!this.incorrectActorExists || this.bfQuota < 0) {
-			// This test only makes sense if an incorrect actorID - passwordhash
-			// combination can be provided and QuotaExceptions are thrown by the
-			// implementation which is to be tested
-			return;
-		}
-		
-		SynchronousTestCallback<BatchedResult<Long>[]> callback = null;
-		XAddress[] tempArray = { this.notExistingModel };
-		
-		assert this.bfQuota > 0;
-		for(long l = 0; l < this.bfQuota + 1; l++) {
-			callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
-			
-			this.store.getModelRevisions(this.incorrectUser, this.incorrectUserPass, tempArray,
-			        callback);
-			
-			assertFalse(waitOnCallback(callback));
-			assertNull(callback.getEffect());
-			assertNotNull(callback.getException());
-			
-			if(l <= this.bfQuota) {
-				// QuotaException shouldn't be thrown yet.
-				assertFalse(callback.getException() instanceof QuotaException);
-			} else {
-				// should now return a QuotaException, since we exceeded the
-				// quota
-				assertTrue(callback.getException() instanceof QuotaException);
-			}
-		}
-		
-		// TODO also check if QuotaException keeps being thrown after the quota
-		// was exceeded by one
-	}
-	
 	// Test if it behaves correctly for addresses that do not address an XModel
 	@Test
 	public void testGetModelRevisionsWrongAddress() {
@@ -885,44 +760,6 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			fail();
 		} catch(IllegalArgumentException iae) {
 		}
-	}
-	
-	// Testing the quota exception
-	@Test
-	public void testGetModelSnapshotsQuotaExcpetion() {
-		if(!this.incorrectActorExists || this.bfQuota < 0) {
-			// This test only makes sense if an incorrect actorID - passwordhash
-			// combination can be provided and QuotaExceptions are thrown by the
-			// implementation which is to be tested
-			return;
-		}
-		
-		SynchronousTestCallback<BatchedResult<XReadableModel>[]> callback = null;
-		XAddress[] tempArray = new XAddress[] { this.notExistingModel };
-		
-		assert this.bfQuota > 0;
-		for(long l = 0; l < this.bfQuota + 1; l++) {
-			callback = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
-			
-			this.store.getModelSnapshots(this.incorrectUser, this.incorrectUserPass, tempArray,
-			        callback);
-			
-			assertFalse(waitOnCallback(callback));
-			assertNull(callback.getEffect());
-			assertNotNull(callback.getException());
-			
-			if(l <= this.bfQuota) {
-				// QuotaException shouldn't be thrown yet.
-				assertFalse(callback.getException() instanceof QuotaException);
-			} else {
-				// should now return a QuotaException, since we exceeded the
-				// quota
-				assertTrue(callback.getException() instanceof QuotaException);
-			}
-		}
-		
-		// TODO also check if QuotaException keeps being thrown after the quota
-		// was exceeded by one
 	}
 	
 	// Test if it behaves correctly for addresses that do not address an XModel
@@ -1112,45 +949,6 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		}
 	}
 	
-	// Testing the quota exception
-	@Test
-	public void testGetObjectSnapshotsQuotaException() {
-		if(!this.incorrectActorExists || this.bfQuota < 0) {
-			// This test only makes sense if an incorrect actorID - passwordhash
-			// combination can be provided and QuotaExceptions are thrown by the
-			// implementation which is to be tested
-			return;
-		}
-		
-		SynchronousTestCallback<BatchedResult<XReadableObject>[]> callback = null;
-		XAddress[] tempArray = new XAddress[] { this.notExistingObject };
-		
-		assert this.bfQuota > 0;
-		for(long l = 0; l < this.bfQuota + 1; l++) {
-			callback = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
-			
-			this.store.getObjectSnapshots(this.incorrectUser, this.incorrectUserPass, tempArray,
-			        callback);
-			
-			assertFalse(waitOnCallback(callback));
-			assertNull(callback.getEffect());
-			assertNotNull(callback.getException());
-			
-			if(l <= this.bfQuota) {
-				// QuotaException shouldn't be thrown yet.
-				assertFalse(callback.getException() instanceof QuotaException);
-			} else {
-				// should now return a QuotaException, since we exceeded the
-				// quota
-				assertTrue(callback.getException() instanceof QuotaException);
-			}
-		}
-		
-		// TODO also check if QuotaException keeps being thrown after the quota
-		// was exceeded by one
-		
-	}
-	
 	// Test if it behaves correctly for addresses that do not address an XObject
 	@Test
 	public void testGetObjectSnapshotsWrongAddress() {
@@ -1261,41 +1059,5 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			fail();
 		} catch(IllegalArgumentException iae) {
 		}
-	}
-	
-	// Testing the quota exception
-	@Test
-	public void testGetRepositoryIdQuotaException() {
-		if(!this.incorrectActorExists || this.bfQuota < 0) {
-			// This test only makes sense if an incorrect actorID - passwordhash
-			// combination can be provided and QuotaExceptions are thrown by the
-			// implementation which is to be tested
-			return;
-		}
-		
-		SynchronousTestCallback<XID> callback = null;
-		
-		assert this.bfQuota > 0;
-		for(long l = 0; l < this.bfQuota + 1; l++) {
-			callback = new SynchronousTestCallback<XID>();
-			
-			this.store.getRepositoryId(this.incorrectUser, this.incorrectUserPass, callback);
-			
-			assertFalse(waitOnCallback(callback));
-			assertNull(callback.getEffect());
-			assertNotNull(callback.getException());
-			
-			if(l < this.bfQuota) {
-				// QuotaException shouldn't be thrown yet.
-				assertFalse(callback.getException() instanceof QuotaException);
-			} else {
-				// should now return a QuotaException, since we exceeded the
-				// quota
-				assertTrue(callback.getException() instanceof QuotaException);
-			}
-		}
-		
-		// TODO also check if QuotaException keeps being thrown after the quota
-		// was exceeded by one
 	}
 }

@@ -43,7 +43,6 @@ import org.xydra.base.value.XValue;
 
 public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	
-	protected long bfQuota;
 	protected XID correctUser, incorrectUser, repoId;
 	
 	protected String correctUserPass, incorrectUserPass;
@@ -83,8 +82,6 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		if(this.timeout <= 0) {
 			throw new IllegalArgumentException("Timeout for callbacks must be greater than 0!");
 		}
-		
-		this.bfQuota = getQuotaForBruteForce();
 		
 		// get the repository ID of the store
 		this.repoId = getRepositoryId();

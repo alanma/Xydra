@@ -56,15 +56,6 @@ public abstract class AbstractAllowAllStoreWriteMethodsTest extends AbstractStor
 		return new DelegatingAllowAllStore(xydraPersistence);
 	}
 	
-	/**
-	 * QuotaException cannot be tested here (no access rights mean no
-	 * QuotaException), so we can return what we want...
-	 */
-	@Override
-	protected long getQuotaForBruteForce() {
-		return 1;
-	}
-	
 	@Override
 	protected XID getRepositoryId() {
 		return XX.toId("data");

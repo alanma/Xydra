@@ -15,11 +15,6 @@ import org.xydra.store.access.XGroupDatabase;
 
 
 /**
- * TODO testing for quote exceptions is very slow, because the implementation
- * lets the caller waiting for a long time to throttle the hacking attempt - all
- * tests testing the quota stuff should go into another class so that this class
- * can also be used for performance tests.
- * 
  * (at the moment this is basically the same as
  * {@link AbstractAllowAllStoreWriteMethodsTest}, but may change in the future)
  * 
@@ -111,20 +106,9 @@ abstract public class AbstractSecureStoreWriteMethodsTest extends AbstractStoreW
 	}
 	
 	@Override
-	protected long getQuotaForBruteForce() {
-		return XydraStore.MAX_FAILED_LOGIN_ATTEMPTS;
-	}
-	
-	@Override
 	protected XID getRepositoryId() {
 		return XX.toId("data");
 		// repositoryId as set in the standard constructor of {@link
 		// MemoryStore}
 	}
-	
-	/*
-	 * TODO Tests for QuoataException are painfully slow - can we do something
-	 * about that? (Propably not, since it's a "problem" of the implementation)
-	 */
-
 }

@@ -53,13 +53,4 @@ public abstract class AbstractAllowAllStoreReadMethodsTest extends AbstractStore
 	public DelegatingAllowAllStore getNewStore(XydraPersistence xydraPersistence) {
 		return new DelegatingAllowAllStore(xydraPersistence);
 	}
-	
-	/**
-	 * QuotaException cannot be tested here (no access rights mean no
-	 * QuotaException), so we can return what we want...
-	 */
-	@Override
-	protected long getQuotaForBruteForce() {
-		return 1;
-	}
 }

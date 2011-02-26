@@ -110,17 +110,6 @@ public abstract class AbstractStoreTest {
 	abstract protected String getIncorrectUserPasswordHash();
 	
 	/**
-	 * Return value sets the amount of allowed incorrect login tries before a
-	 * QuotaException is thrown.
-	 * 
-	 * Implementations of this abstract test need to override this to return the
-	 * specific quota of the XydraStore implementation which is to be tested.
-	 * Return a value less than zero if your implementation does not support
-	 * QuotaExceptions or such a value cannot be provided.
-	 */
-	abstract protected long getQuotaForBruteForce();
-	
-	/**
 	 * Returns the {@link XID} of the {@link XRepository} used by the
 	 * {@link XydraStore} returned by {@link #getStore()}.
 	 * 
