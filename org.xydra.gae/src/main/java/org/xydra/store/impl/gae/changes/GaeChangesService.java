@@ -619,6 +619,7 @@ public class GaeChangesService extends AbstractChangeLog {
 			Key baseKey = change.entity.getKey();
 			for(int i = 0; i < events.size(); i++) {
 				XAtomicEvent ae = events.get(i);
+				assert (events.size() == 1) ^ ae.inTransaction();
 				Entity eventEntity = new Entity(KeyStructure.createEventKey(baseKey, i));
 				
 				// IMPROVE save event in a GAE-specific format:
