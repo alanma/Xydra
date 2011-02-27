@@ -162,7 +162,14 @@ public interface XydraStore {
 	 *            For successful commands that changed something, the return
 	 *            value is always a revision number that can be used to retrieve
 	 *            the corresponding event using
-	 *            {@link #getEvents(XID, String, GetEventsRequest[], Callback)}
+	 *            {@link #getEvents(XID, String, GetEventsRequest[], Callback)}.
+	 *            While this revision number is model-specific, no assumptions
+	 *            should be made about the value (even the initial value for new
+	 *            models), except that the order of the revision numbers
+	 *            reflects the order of the events. Specifically, some
+	 *            implementations may start at different revision numbers for
+	 *            different models and may skip revision numbers between
+	 *            consecutively executed events.
 	 * 
 	 *            Like any other {@link XCommand}, {@link XTransaction}s only
 	 *            "take up" a single revision, which is the one passed to the
@@ -347,8 +354,12 @@ public interface XydraStore {
 	 *            success, the returned array contains in the same order as in
 	 *            the request array (modelAddresses) the revision number of the
 	 *            addressed model as a long. Non-existing models (and those for
-	 *            which the actorId has no read-access) are signalled as
-	 *            {@link XCommand#FAILED}. Must not be null.
+	 *            which the actorId has no read-access) are signaled as
+	 *            {@link XCommand#FAILED}. For other models, the returned
+	 *            revision number is the number that can be used with
+	 *            {@link #getEvents(XID, String, GetEventsRequest[], Callback)}
+	 *            to retrieve the last event that happened to this mode. Must
+	 *            not be null.
 	 * @throws IllegalArgumentException if one of the given parameters is null.
 	 */
 	void getModelRevisions(XID actorId, String passwordHash, XAddress[] modelAddresses,
