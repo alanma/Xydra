@@ -313,7 +313,8 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, objectAddress,
 		        callback3);
-		assertTrue(this.waitOnCallback(callback2));
+		assertTrue(this.waitOnCallback(callback2)); // TODO should this be
+		// callback 3
 		
 		BatchedResult<XReadableObject>[] result2 = callback3.getEffect();
 		assertNotNull(result2);
@@ -761,7 +762,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertTrue(callback.getEffect().length == commands.length);
 		assertNull(callback.getException());
 		
-		long[] revisions = new long[callback.getEffect().length];
+		long[] revisions = new long[commands.length];
 		for(int i = 0; i < commands.length; i++) {
 			assertTrue((callback.getEffect())[i].getResult() >= 0);
 			assertNull((callback.getEffect())[i].getException());
