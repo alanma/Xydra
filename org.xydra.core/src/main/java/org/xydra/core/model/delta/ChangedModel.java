@@ -190,7 +190,7 @@ public class ChangedModel implements XWritableModel {
 			for(XID objectId : this.removed) {
 				// removing object itself already counted
 				XReadableObject oldObject = getOldObject(objectId);
-				for(XID fieldId : this.removed) {
+				for(XID fieldId : oldObject) {
 					n++; // removing the field
 					if(n >= max) {
 						return n;
