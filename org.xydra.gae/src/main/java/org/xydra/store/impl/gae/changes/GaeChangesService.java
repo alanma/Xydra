@@ -651,8 +651,8 @@ public class GaeChangesService extends AbstractChangeLog {
 				
 			}
 			
-			for(int i = 0; i < futures.length; i++) {
-				GaeUtils.waitFor(futures[i]);
+			for(Future<Key> future : futures) {
+				GaeUtils.waitFor(future);
 			}
 			
 			Integer eventCount = events.size();
@@ -698,28 +698,33 @@ public class GaeChangesService extends AbstractChangeLog {
 		Set<XID> objectsWithSavedRev = new HashSet<XID>();
 		Set<XID> objectsWithPossiblyUnsavedRev = new HashSet<XID>();
 		
+		List<Future<?>> futures = new ArrayList<Future<?>>(events.size());
+		
 		for(int i = 0; i < events.size(); i++) {
 			XAtomicEvent event = events.get(i);
 			
 			assert this.modelAddr.equalsOrContains(event.getChangedEntity());
 			assert event.getRevisionNumber() == change.rev;
 			
-			// Don't cleanup the change when timing out, as another process
-			// might still roll it forward.
-			giveUpIfTimeoutCritical(change.startTime);
-			
 			if(event instanceof XFieldEvent) {
 				assert Arrays.asList(ChangeType.REMOVE, ChangeType.ADD, ChangeType.CHANGE)
 				        .contains(event.getChangeType());
 				
 				if(((XFieldEvent)event).getNewValue() == null) {
+					if(event.isImplied()) {
+						assert event.getChangeType() == ChangeType.REMOVE;
+						// removed by the XObjectEvent
+						continue;
+					}
 					// Set the field as existing but empty.
-					InternalGaeField.set(event.getTarget(), change.rev, change.locks);
+					futures.add(InternalGaeField.set(event.getTarget(), change.rev, change.locks));
 				} else {
 					// Set the field as empty and containing the XValue stored
 					// at the specified transaction index.
-					InternalGaeField.set(event.getTarget(), change.rev, i, change.locks);
+					futures.add(InternalGaeField
+					        .set(event.getTarget(), change.rev, i, change.locks));
 				}
+				assert !event.isImplied();
 				assert event.getTarget().getObject() != null;
 				// revision saved in changed field.
 				// this assumes (correctly) that the field is not also removed
@@ -728,12 +733,13 @@ public class GaeChangesService extends AbstractChangeLog {
 				
 			} else if(event instanceof XObjectEvent) {
 				if(event.getChangeType() == ChangeType.REMOVE) {
-					InternalGaeXEntity.remove(event.getChangedEntity(), change.locks);
+					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(), change.locks));
 					// cannot save revision in the removed field
 					objectsWithPossiblyUnsavedRev.add(event.getTarget().getObject());
 				} else {
 					assert event.getChangeType() == ChangeType.ADD;
-					InternalGaeField.set(event.getChangedEntity(), change.rev, change.locks);
+					futures.add(InternalGaeField.set(event.getChangedEntity(), change.rev,
+					        change.locks));
 					// revision saved in created field
 					objectsWithSavedRev.add(event.getTarget().getObject());
 				}
@@ -742,13 +748,13 @@ public class GaeChangesService extends AbstractChangeLog {
 			} else if(event instanceof XModelEvent) {
 				XID objectId = ((XModelEvent)event).getObjectId();
 				if(event.getChangeType() == ChangeType.REMOVE) {
-					InternalGaeXEntity.remove(event.getChangedEntity(), change.locks);
+					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(), change.locks));
 					// object removed, so revision is of no interest
 					objectsWithPossiblyUnsavedRev.remove(objectId);
 				} else {
 					assert event.getChangeType() == ChangeType.ADD;
-					InternalGaeObject.createObject(event.getChangedEntity(), change.locks,
-					        change.rev);
+					futures.add(InternalGaeObject.createObject(event.getChangedEntity(),
+					        change.locks, change.rev));
 					// revision saved in new object
 					objectsWithSavedRev.add(objectId);
 				}
@@ -756,25 +762,27 @@ public class GaeChangesService extends AbstractChangeLog {
 			} else {
 				assert event instanceof XRepositoryEvent;
 				if(event.getChangeType() == ChangeType.REMOVE) {
-					InternalGaeXEntity.remove(event.getChangedEntity(), change.locks);
+					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(), change.locks));
 				} else {
 					assert event.getChangeType() == ChangeType.ADD;
-					InternalGaeModel.createModel(event.getChangedEntity(), change.locks);
+					futures.add(InternalGaeModel
+					        .createModel(event.getChangedEntity(), change.locks));
 				}
 			}
 			
 		}
 		
+		// IMPROVE can this be made asynchronous?
 		for(XID objectId : objectsWithPossiblyUnsavedRev) {
 			if(!objectsWithSavedRev.contains(objectId)) {
 				XAddress objectAddr = XX.resolveObject(this.modelAddr, objectId);
 				
-				// Don't cleanup the change when timing out, as another process
-				// might still roll it forward.
-				giveUpIfTimeoutCritical(change.startTime);
-				
 				InternalGaeObject.updateObjectRev(objectAddr, change.locks, change.rev);
 			}
+		}
+		
+		for(Future<?> future : futures) {
+			GaeUtils.waitFor(future);
 		}
 		
 		cleanupChangeEntity(change.entity, STATUS_SUCCESS_EXECUTED);

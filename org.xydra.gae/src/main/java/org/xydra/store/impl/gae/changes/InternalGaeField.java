@@ -4,6 +4,7 @@
 package org.xydra.store.impl.gae.changes;
 
 import java.util.Set;
+import java.util.concurrent.Future;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -16,6 +17,7 @@ import org.xydra.core.model.XField;
 import org.xydra.store.impl.gae.GaeUtils;
 
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
 
 
 /**
@@ -103,14 +105,15 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 	 * @param locks The locks held by the current process. These are used to
 	 *            assert that we are actually allowed to create the entity.
 	 */
-	protected static void set(XAddress fieldAddr, long fieldRev, int transindex, Set<XAddress> locks) {
+	protected static Future<Key> set(XAddress fieldAddr, long fieldRev, int transindex,
+	        Set<XAddress> locks) {
 		assert GaeChangesService.canWrite(fieldAddr, locks);
 		assert fieldAddr.getAddressedType() == XType.XFIELD;
 		Entity e = new Entity(KeyStructure.createEntityKey(fieldAddr));
 		e.setProperty(PROP_PARENT, fieldAddr.getParent().toURI());
 		e.setUnindexedProperty(PROP_REVISION, fieldRev);
 		e.setUnindexedProperty(PROP_TRANSINDEX, transindex);
-		GaeUtils.putEntity(e);
+		return GaeUtils.putEntityAsync(e);
 	}
 	
 	/**
@@ -127,8 +130,8 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 	 * @param locks The locks held by the current process. These are used to
 	 *            assert that we are actually allowed to create the entity.
 	 */
-	protected static void set(XAddress fieldAddr, long fieldRev, Set<XAddress> locks) {
-		set(fieldAddr, fieldRev, TRANSINDEX_NONE, locks);
+	protected static Future<Key> set(XAddress fieldAddr, long fieldRev, Set<XAddress> locks) {
+		return set(fieldAddr, fieldRev, TRANSINDEX_NONE, locks);
 	}
 	
 	private static int getTransIndex(Entity fieldEntity) {

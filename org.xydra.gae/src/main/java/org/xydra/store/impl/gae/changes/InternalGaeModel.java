@@ -4,6 +4,7 @@
 package org.xydra.store.impl.gae.changes;
 
 import java.util.Set;
+import java.util.concurrent.Future;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -16,6 +17,7 @@ import org.xydra.core.model.XModel;
 import org.xydra.store.impl.gae.GaeUtils;
 
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
 
 
 /**
@@ -97,12 +99,12 @@ public class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObj
 	 *            assert that we are actually allowed to create the
 	 *            {@link XModel}.
 	 */
-	public static void createModel(XAddress modelAddr, Set<XAddress> locks) {
+	public static Future<Key> createModel(XAddress modelAddr, Set<XAddress> locks) {
 		assert GaeChangesService.canWrite(modelAddr, locks);
 		assert modelAddr.getAddressedType() == XType.XMODEL;
 		Entity e = new Entity(KeyStructure.createEntityKey(modelAddr));
 		e.setProperty(PROP_PARENT, modelAddr.getParent().toURI());
-		GaeUtils.putEntity(e);
+		return GaeUtils.putEntityAsync(e);
 	}
 	
 }

@@ -2,6 +2,7 @@ package org.xydra.store.impl.gae.changes;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -40,12 +41,12 @@ public class InternalGaeXEntity {
 	 * @param locks The locks held by the current process. These are used to
 	 *            assert that we are actually allowed to remove the entity.
 	 */
-	protected static void remove(XAddress modelOrObjectOrFieldAddr, Set<XAddress> locks) {
+	protected static Future<Void> remove(XAddress modelOrObjectOrFieldAddr, Set<XAddress> locks) {
 		assert GaeChangesService.canWrite(modelOrObjectOrFieldAddr, locks);
 		assert modelOrObjectOrFieldAddr.getAddressedType() == XType.XMODEL
 		        || modelOrObjectOrFieldAddr.getAddressedType() == XType.XOBJECT
 		        || modelOrObjectOrFieldAddr.getAddressedType() == XType.XFIELD;
-		GaeUtils.deleteEntity(KeyStructure.createEntityKey(modelOrObjectOrFieldAddr));
+		return GaeUtils.deleteEntityAsync(KeyStructure.createEntityKey(modelOrObjectOrFieldAddr));
 	}
 	
 	public static Set<XID> findChildren(XAddress address) {

@@ -203,6 +203,18 @@ public class GaeUtils {
 	}
 	
 	/**
+	 * Commit the given GAE transaction asynchonously.
+	 * 
+	 * @param trans The transaction to commit.
+	 */
+	public static Future<Void> endTransactionAsync(Transaction trans)
+	        throws ConcurrentModificationException {
+		log.debug("-- end transaction (async) --");
+		makeSureDatestoreServiceIsInitialised();
+		return trans.commitAsync();
+	}
+	
+	/**
 	 * Deletes the {@link Entity} with the given {@link Key} from GAE
 	 * 
 	 * @param key The entity to remove from the datastore.

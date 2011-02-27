@@ -5,6 +5,7 @@ package org.xydra.store.impl.gae.changes;
 
 import java.util.ConcurrentModificationException;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -139,13 +140,13 @@ public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeFi
 	 * @param rev The revision number of the current change. This will be saved
 	 *            to the object entity.
 	 */
-	public static void createObject(XAddress objectAddr, Set<XAddress> locks, long rev) {
+	public static Future<Key> createObject(XAddress objectAddr, Set<XAddress> locks, long rev) {
 		assert GaeChangesService.canWrite(objectAddr, locks);
 		assert objectAddr.getAddressedType() == XType.XOBJECT;
 		Entity e = new Entity(KeyStructure.createEntityKey(objectAddr));
 		e.setProperty(PROP_PARENT, objectAddr.getParent().toURI());
 		e.setUnindexedProperty(PROP_REVISION, rev);
-		GaeUtils.putEntity(e);
+		return GaeUtils.putEntityAsync(e);
 	}
 	
 	/**
