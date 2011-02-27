@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -621,8 +622,8 @@ public class GaeChangesService extends AbstractChangeLog {
 				return events;
 			}
 			
-			// TODO is this really needed
-			Transaction trans = GaeUtils.beginTransaction();
+			@SuppressWarnings("unchecked")
+			Future<Key>[] futures = (Future<Key>[])new Future<?>[events.size()];
 			
 			Key baseKey = change.entity.getKey();
 			for(int i = 0; i < events.size(); i++) {
@@ -646,20 +647,21 @@ public class GaeChangesService extends AbstractChangeLog {
 				 * anyone until the change's status is set to STATUS_EXECUTING
 				 * (or STATUS_SUCCESS_EXECUTED)
 				 */
-				GaeUtils.putEntity(eventEntity, trans);
+				futures[i] = GaeUtils.putEntityAsync(eventEntity);
 				
 			}
 			
-			// IMPROVE free unneeded locks?
+			for(int i = 0; i < futures.length; i++) {
+				GaeUtils.waitFor(futures[i]);
+			}
 			
 			Integer eventCount = events.size();
 			change.entity.setUnindexedProperty(PROP_EVENTCOUNT, eventCount);
 			
 			change.entity.setUnindexedProperty(PROP_STATUS, STATUS_EXECUTING);
-			GaeUtils.putEntity(change.entity, trans);
+			GaeUtils.putEntity(change.entity);
 			
 			giveUpIfTimeoutCritical(change.startTime);
-			GaeUtils.endTransaction(trans);
 			
 		} catch(VoluntaryTimeoutException vte) {
 			// Since we have not changed the status to EXEUTING, no thread will

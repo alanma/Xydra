@@ -76,7 +76,7 @@ public class GaeUtils {
 	
 	private static final Entity NULL_ENTITY = new Entity("NULL-ENTITY");
 	
-	private static <T> T waitFor(Future<T> t) {
+	public static <T> T waitFor(Future<T> t) {
 		while(true) {
 			try {
 				return t.get();
