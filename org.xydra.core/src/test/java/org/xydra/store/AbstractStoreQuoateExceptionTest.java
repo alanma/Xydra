@@ -12,8 +12,12 @@ import org.junit.Test;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XCommandFactory;
+import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
+import org.xydra.index.query.Pair;
 import org.xydra.log.DefaultLoggerFactorySPI;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -42,6 +46,13 @@ public abstract class AbstractStoreQuoateExceptionTest {
 	protected long getCallbackTimeout() {
 		return 1000;
 	}
+	
+	/**
+	 * @return an implementation of {@link XCommandFactory} which works with the
+	 *         implementation of {@link XydraStore} returned by {
+	 *         {@link #getStore()};
+	 */
+	abstract protected XCommandFactory getCommandFactory();
 	
 	/**
 	 * Returns the {@link XID} of any account which is registered on the
@@ -306,7 +317,7 @@ public abstract class AbstractStoreQuoateExceptionTest {
 		
 	}
 	
-	// Testing the quota exception
+	// Testing the quota exception for getRepositoryId
 	@Test
 	public void testGetRepositoryIdQuotaException() {
 		SynchronousTestCallback<XID> callback = null;
@@ -316,6 +327,71 @@ public abstract class AbstractStoreQuoateExceptionTest {
 			callback = new SynchronousTestCallback<XID>();
 			
 			this.store.getRepositoryId(this.incorrectUser, this.incorrectUserPass, callback);
+			
+			assertFalse(waitOnCallback(callback));
+			assertNull(callback.getEffect());
+			assertNotNull(callback.getException());
+			
+			if(l < this.bfQuota) {
+				// QuotaException shouldn't be thrown yet.
+				assertFalse(callback.getException() instanceof QuotaException);
+			} else {
+				// should now return a QuotaException, since we exceeded the
+				// quota
+				assertTrue(callback.getException() instanceof QuotaException);
+			}
+		}
+		
+		// TODO also check if QuotaException keeps being thrown after the quota
+		// was exceeded by one
+	}
+	
+	// Testing the quota exception for executeCommands
+	@Test
+	public void testExecuteCommandsQuotaException() {
+		SynchronousTestCallback<BatchedResult<Long>[]> callback = null;
+		
+		assert this.bfQuota > 0;
+		for(long l = 0; l < this.bfQuota + 1; l++) {
+			callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+			XCommand[] commands = new XCommand[] { this.getCommandFactory().createAddModelCommand(
+			        XX.toId("data"), XX.createUniqueID(), true) };
+			
+			this.store.executeCommands(this.incorrectUser, this.incorrectUserPass, commands,
+			        callback);
+			
+			assertFalse(waitOnCallback(callback));
+			assertNull(callback.getEffect());
+			assertNotNull(callback.getException());
+			
+			if(l < this.bfQuota) {
+				// QuotaException shouldn't be thrown yet.
+				assertFalse(callback.getException() instanceof QuotaException);
+			} else {
+				// should now return a QuotaException, since we exceeded the
+				// quota
+				assertTrue(callback.getException() instanceof QuotaException);
+			}
+		}
+		
+		// TODO also check if QuotaException keeps being thrown after the quota
+		// was exceeded by one
+	}
+	
+	// Testing the quota exception for executeCommandsAndGetEvents
+	@Test
+	public void testExecuteCommandsAndGetEventsQuotaException() {
+		SynchronousTestCallback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback = null;
+		
+		assert this.bfQuota > 0;
+		for(long l = 0; l < this.bfQuota + 1; l++) {
+			callback = new SynchronousTestCallback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>>();
+			XCommand[] commands = new XCommand[] { this.getCommandFactory().createAddModelCommand(
+			        XX.toId("data"), XX.createUniqueID(), true) };
+			GetEventsRequest[] requests = new GetEventsRequest[1];
+			
+			this.store.executeCommandsAndGetEvents(this.incorrectUser, this.incorrectUserPass,
+			        commands, requests, callback);
 			
 			assertFalse(waitOnCallback(callback));
 			assertNull(callback.getEffect());

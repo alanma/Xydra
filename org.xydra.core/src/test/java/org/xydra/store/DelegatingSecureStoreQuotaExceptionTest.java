@@ -1,5 +1,7 @@
 package org.xydra.store;
 
+import org.xydra.base.X;
+import org.xydra.base.change.XCommandFactory;
 import org.xydra.store.impl.memory.SecureMemoryStore;
 
 
@@ -11,6 +13,11 @@ public class DelegatingSecureStoreQuotaExceptionTest extends AbstractSecureStore
 			this.store = new SecureMemoryStore();
 		}
 		return this.store;
+	}
+	
+	@Override
+	protected XCommandFactory getCommandFactory() {
+		return X.getCommandFactory();
 	}
 	
 }
