@@ -174,6 +174,8 @@ public abstract class DeltaUtils {
 			        modelAddr.getModel(), rev - 1, inTrans));
 		}
 		
+		assert inTrans ^ (events.size() == 1);
+		
 		return events;
 	}
 	
