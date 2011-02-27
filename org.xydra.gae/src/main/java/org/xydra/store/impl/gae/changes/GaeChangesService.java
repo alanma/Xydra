@@ -32,6 +32,8 @@ import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
 import org.xydra.index.XI;
 import org.xydra.index.query.Pair;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.server.IXydraServer;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.XydraRuntime;
@@ -121,6 +123,8 @@ import com.google.appengine.api.datastore.Transaction;
  * 
  */
 public class GaeChangesService extends AbstractChangeLog {
+	
+	private static final Logger log = LoggerFactory.getLogger(GaeChangesService.class);
 	
 	private static final long serialVersionUID = -2080744796962188941L;
 	
@@ -423,6 +427,9 @@ public class GaeChangesService extends AbstractChangeLog {
 				try {
 					GaeUtils.endTransaction(trans);
 				} catch(ConcurrentModificationException cme) {
+					
+					log.info("failed to take revision: " + key);
+					
 					// transaction failed as another process wrote to this
 					// entity
 					
@@ -614,6 +621,7 @@ public class GaeChangesService extends AbstractChangeLog {
 				return events;
 			}
 			
+			// TODO is this really needed
 			Transaction trans = GaeUtils.beginTransaction();
 			
 			Key baseKey = change.entity.getKey();
