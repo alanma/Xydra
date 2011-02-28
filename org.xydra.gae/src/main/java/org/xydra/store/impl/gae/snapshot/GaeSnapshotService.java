@@ -24,6 +24,7 @@ import org.xydra.core.XCopyUtils;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.gae.changes.GaeChangesService;
+import org.xydra.store.impl.gae.changes.GaeChangesService.AsyncEvent;
 
 
 /**
@@ -91,11 +92,16 @@ public class GaeSnapshotService {
 			return;
 		}
 		
+		List<AsyncEvent> batch = new ArrayList<AsyncEvent>(1);
+		batch.add(this.log.getEventAt(curRev));
+		
+		int pos = 0;
+		
 		// Check if we can skip any events.
 		List<XEvent> rawEvents = new ArrayList<XEvent>();
 		for(long i = curRev; i > entry.revision; i--) {
-			// IMPROVE make async
-			XEvent event = this.log.getEventAt(i).get();
+			
+			XEvent event = batch.get(pos).get();
 			if(event == null) {
 				continue;
 			}
@@ -131,6 +137,19 @@ public class GaeSnapshotService {
 				}
 			}
 			rawEvents.add(0, event);
+			
+			// Asynchronously fetch new change entities.
+			if(i - batch.size() > entry.revision) {
+				batch.set(pos, this.log.getEventAt(i - batch.size()));
+			}
+			pos++;
+			if(pos == batch.size()) {
+				if(i - batch.size() - 1 > entry.revision) {
+					batch.add(this.log.getEventAt(i - batch.size() - 1));
+				}
+				pos = 0;
+			}
+			
 		}
 		
 		for(XEvent event : rawEvents) {
