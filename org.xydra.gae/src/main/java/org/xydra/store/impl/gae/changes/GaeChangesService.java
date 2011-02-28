@@ -343,14 +343,20 @@ public class GaeChangesService extends AbstractChangeLog {
 		
 		String cachname = getCommitedRevCacheName();
 		
+		long rev;
 		synchronized(cache) {
 			// TODO how is cache access supposed to be synchronized?
 			Long entry = (Long)cache.get(cachname);
 			if(entry == null) {
-				return -1L;
+				rev = -1L;
+			} else {
+				rev = entry;
 			}
-			return entry;
 		}
+		
+		long current = getCachedCurrentRevision();
+		
+		return (current > rev ? current : rev);
 	}
 	
 	private void setCachedLastCommitedRevision(long l) {
@@ -607,7 +613,7 @@ public class GaeChangesService extends AbstractChangeLog {
 		        command);
 		if(c == null) {
 			giveUpIfTimeoutCritical(change.startTime);
-			cleanupChangeEntity(change.entity, STATUS_FAILED_PRECONDITIONS);
+			cleanupChangeEntity(change, STATUS_FAILED_PRECONDITIONS);
 			return null;
 		}
 		
@@ -619,7 +625,7 @@ public class GaeChangesService extends AbstractChangeLog {
 			
 			if(events.isEmpty()) {
 				giveUpIfTimeoutCritical(change.startTime);
-				cleanupChangeEntity(change.entity, STATUS_SUCCESS_NOCHANGE);
+				cleanupChangeEntity(change, STATUS_SUCCESS_NOCHANGE);
 				return events;
 			}
 			
@@ -668,7 +674,7 @@ public class GaeChangesService extends AbstractChangeLog {
 			// Since we have not changed the status to EXEUTING, no thread will
 			// be able to roll this change forward and we might as well clean it
 			// up to prevent unnecessary waits.
-			cleanupChangeEntity(change.entity, STATUS_FAILED_TIMEOUT);
+			cleanupChangeEntity(change, STATUS_FAILED_TIMEOUT);
 		}
 		
 		return events;
@@ -786,7 +792,11 @@ public class GaeChangesService extends AbstractChangeLog {
 			GaeUtils.waitFor(future);
 		}
 		
-		cleanupChangeEntity(change.entity, STATUS_SUCCESS_EXECUTED);
+		cleanupChangeEntity(change, STATUS_SUCCESS_EXECUTED);
+		
+		if(getCachedCurrentRevision() == change.rev - 1) {
+			setCachedCurrentRevision(change.rev);
+		}
 	}
 	
 	/**
@@ -960,10 +970,17 @@ public class GaeChangesService extends AbstractChangeLog {
 		return events;
 	}
 	
+	private void cleanupChangeEntity(ChangeInProgress change, int status) {
+		assert isCommitted(status);
+		cleanupChangeEntity(change.entity, status);
+		if(getCachedLastCommitedRevision() == change.rev - 1) {
+			setCachedLastCommitedRevision(change.rev);
+		}
+	}
+	
 	private void cleanupChangeEntity(Entity changeEntity, int status) {
 		changeEntity.removeProperty(PROP_LOCKS);
 		changeEntity.setUnindexedProperty(PROP_STATUS, status);
-		// IMPROVE remove saved events?
 		GaeUtils.putEntity(changeEntity);
 	}
 	
