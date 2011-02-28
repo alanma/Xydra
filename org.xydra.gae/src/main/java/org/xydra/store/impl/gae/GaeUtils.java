@@ -113,6 +113,12 @@ public class GaeUtils {
 		Future<Entity> entity = datastore.get(trans, key);
 		Entity e = waitFor(entity);
 		if(useMemCache) {
+			/*
+			 * FIXME race condition: Any changes made to this entity at this
+			 * point (between the datastore.get() and the getMemcache.put()
+			 * calls) by putEntity() or deleteEntity() might be overwritten in
+			 * the cache by us
+			 */
 			if(e != null) {
 				log.debug("Putting entity " + key.toString() + " in MemCache");
 				XydraRuntime.getMemcache().put(key, e);
