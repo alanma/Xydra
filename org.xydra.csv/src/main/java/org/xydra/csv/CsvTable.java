@@ -18,13 +18,12 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
 import java.util.Map.Entry;
+import java.util.TreeSet;
 
 import org.xydra.csv.CsvTable.Row.Cell;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-
 
 
 /**
@@ -88,7 +87,7 @@ public class CsvTable implements Iterable<CsvTable.Row> {
 		private static final String ROW_KEY = "ROW";
 		
 		/**
-		 * @param columnName
+		 * @param columnName for which to get the value in this row
 		 * @return the value or the String "null"
 		 */
 		public String getValue(String columnName) {
@@ -116,9 +115,10 @@ public class CsvTable implements Iterable<CsvTable.Row> {
 		/**
 		 * Aggregate given row into this row
 		 * 
-		 * @param row
+		 * @param row never null
 		 */
 		public void aggregate(Row row, String[] keyColumnNames) {
+			assert row != null;
 			for(String colName : CsvTable.this.columnNames) {
 				if(colName.equals(ROW_KEY)) {
 					// skip row key
@@ -198,8 +198,8 @@ public class CsvTable implements Iterable<CsvTable.Row> {
 		// }
 		
 		/**
-		 * @param columnName
-		 * @param value
+		 * @param columnName never null
+		 * @param value may be null
 		 * @param initial if false and there was a already a value.
 		 * @throws IllegalStateException if 'initial' is true and there was a
 		 *             previous value
@@ -255,7 +255,7 @@ public class CsvTable implements Iterable<CsvTable.Row> {
 		}
 		
 		/**
-		 * @param columnName
+		 * @param columnName never null
 		 * @return 0 if value is not set.
 		 * @throws WrongDatatypeException if value was set, but could not be
 		 *             parsed as long.
@@ -341,7 +341,7 @@ public class CsvTable implements Iterable<CsvTable.Row> {
 			}
 			
 			/**
-			 * @param value
+			 * @param value may be null, to store a null.
 			 * @param initial if true, throws an {@link IllegalStateException}
 			 *            if there was already a value
 			 * @throws IllegalStateException if there was already a value
@@ -367,7 +367,7 @@ public class CsvTable implements Iterable<CsvTable.Row> {
 		/**
 		 * Add all values from the otherRow to this Row
 		 * 
-		 * @param otherRow
+		 * @param otherRow from which to add all cells
 		 */
 		public void addAll(Row otherRow) {
 			for(String colName : otherRow.getColumnNames()) {
@@ -440,8 +440,8 @@ public class CsvTable implements Iterable<CsvTable.Row> {
 	}
 	
 	/**
-	 * @param row
-	 * @param column
+	 * @param row never null
+	 * @param column never null
 	 * @return the table value at cell ('row','column')
 	 */
 	public String getValue(String row, String column) {
@@ -460,8 +460,8 @@ public class CsvTable implements Iterable<CsvTable.Row> {
 	 * Increments a value at (row,column). Creates the cell before, if
 	 * necessary.
 	 * 
-	 * @param row
-	 * @param column
+	 * @param row never null
+	 * @param column never null
 	 * @param increment the increment, often '1' is used.
 	 * @throws WrongDatatypeException if the stored value cannot be cast to a
 	 *             long.
@@ -480,8 +480,8 @@ public class CsvTable implements Iterable<CsvTable.Row> {
 	 * The first row of the CVS file is interpreted as header names. The first
 	 * column is interpreted as row names.
 	 * 
-	 * @param f
-	 * @throws IOException
+	 * @param f from which to read
+	 * @throws IOException if file reading fails
 	 */
 	public void readFrom(File f) throws IOException {
 		log.info("Reading CSV table from " + f.getAbsolutePath() + " Before: " + this.rowCount()
@@ -661,8 +661,8 @@ public class CsvTable implements Iterable<CsvTable.Row> {
 	 * The first row of the CVS file is interpreted as header names. The first
 	 * column is interpreted as row names.
 	 * 
-	 * @param r
-	 * @throws IOException
+	 * @param r from which to read
+	 * @throws IOException from the underyling reader
 	 */
 	public void readFrom(Reader r) throws IOException {
 		BufferedReader br = new BufferedReader(r);
@@ -736,7 +736,7 @@ public class CsvTable implements Iterable<CsvTable.Row> {
 	/**
 	 * Removes all rows that match the given RowFilter.
 	 * 
-	 * @param rowFilter
+	 * @param rowFilter never null
 	 */
 	public void removeRowsMatching(RowFilter rowFilter) {
 		Iterator<Entry<String,Row>> it = this.table.entrySet().iterator();
@@ -769,9 +769,9 @@ public class CsvTable implements Iterable<CsvTable.Row> {
 	/**
 	 * Set an initial value to cell (rowName, columnName)
 	 * 
-	 * @param rowName
-	 * @param header
-	 * @param value
+	 * @param rowName never null
+	 * @param columnName never null
+	 * @param value may be null
 	 * @throws IllegalStateException if there was already a value
 	 */
 	public void setValueInitial(String rowName, String columnName, String value)
@@ -793,9 +793,7 @@ public class CsvTable implements Iterable<CsvTable.Row> {
 		Writer writer = new OutputStreamWriter(fos, Charset.forName(this.defaultEncoding));
 		try {
 			if(this.splitWhenWritingLargeFiles) {
-				log
-				        .info("Will write as " + ((this.table.size() / EXCEL_MAX_ROWS) + 1)
-				                + " file(s)");
+				log.info("Will write as " + ((this.table.size() / EXCEL_MAX_ROWS) + 1) + " file(s)");
 				int startRow = 0;
 				int endRow = Math.min(EXCEL_MAX_ROWS, this.table.size());
 				writeTo(writer, startRow, endRow);
@@ -836,8 +834,8 @@ public class CsvTable implements Iterable<CsvTable.Row> {
 	/**
 	 * Writes a non-sparse CSV version of this tables contents
 	 * 
-	 * @param w
-	 * @throws IOException
+	 * @param w to which to write the CSV
+	 * @throws IOException from the writer
 	 */
 	public void writeTo(Writer w) throws IOException {
 		log.info("Writing " + this.table.size() + " rows with " + this.columnNames.size()
@@ -849,10 +847,10 @@ public class CsvTable implements Iterable<CsvTable.Row> {
 	 * Writes a non-sparse CSV version of this tables contents. Writes only the
 	 * data in [startRow,endRow).
 	 * 
-	 * @param w
+	 * @param w to which to write the CSV
 	 * @param startRow inclusive
 	 * @param endRow exclusive
-	 * @throws IOException
+	 * @throws IOException from the writer
 	 * @throws ExcelLimitException if using more than 65535 rows or more than
 	 *             255 columns.
 	 */
@@ -909,7 +907,8 @@ public class CsvTable implements Iterable<CsvTable.Row> {
 	 * Returns an existing row or creates a new one. The new row is guaranteed
 	 * to be inserted into the table.
 	 * 
-	 * @param rowName a String that uniquely identifies a {@link Row}.
+	 * @param rowName a String that uniquely identifies a {@link Row}. Never
+	 *            null.
 	 * @param create if true, creates a new {@link Row} if there is none yet. If
 	 *            false and there was now row, null is returned.
 	 * @return a new or exiting {@link Row} or null (if 'create' was false and
@@ -962,7 +961,7 @@ public class CsvTable implements Iterable<CsvTable.Row> {
 	 * How many rows should maximally be read? Default is -1 = unlimited. Note
 	 * that more rows can be added later.
 	 * 
-	 * @param readMaxRows
+	 * @param readMaxRows set to -1 for unlimited (default)
 	 */
 	public void setParamReadMaxRows(int readMaxRows) {
 		this.readMaxRows = readMaxRows;
@@ -973,8 +972,7 @@ public class CsvTable implements Iterable<CsvTable.Row> {
 	 * row insertion (either during read or create).
 	 * 
 	 * @see IRowInsertionHandler
-	 * 
-	 * @param rowInsertionHandler
+	 * @param rowInsertionHandler never null
 	 */
 	public void setRowInsertionHandler(IRowInsertionHandler rowInsertionHandler) {
 		this.rowInsertionHandler = rowInsertionHandler;
@@ -1009,7 +1007,7 @@ public class CsvTable implements Iterable<CsvTable.Row> {
 	/**
 	 * Dump table to System.out
 	 * 
-	 * @throws IOException
+	 * @throws IOException from System.out
 	 */
 	public void dump() throws IOException {
 		Writer writer = new OutputStreamWriter(System.out);
@@ -1033,8 +1031,8 @@ public class CsvTable implements Iterable<CsvTable.Row> {
 	/**
 	 * Create a sub-table
 	 * 
-	 * @param key
-	 * @param value
+	 * @param key never null
+	 * @param value may be null
 	 * @return a sub-table where column key has the given value
 	 */
 	public CsvTable filter(String key, String value) {
@@ -1055,8 +1053,8 @@ public class CsvTable implements Iterable<CsvTable.Row> {
 	/**
 	 * Create a sub-table
 	 * 
-	 * @param key
-	 * @param value
+	 * @param key never null
+	 * @param value may be null
 	 * @return a sub-table where no column has for the given key the given value
 	 */
 	public CsvTable drop(String key, String value) {
@@ -1077,7 +1075,7 @@ public class CsvTable implements Iterable<CsvTable.Row> {
 	/**
 	 * Dump table to System.out in LaTeX syntax
 	 * 
-	 * @throws IOException
+	 * @throws IOException from System.out
 	 */
 	public void dumpToLaTeX() throws IOException {
 		OutputStreamWriter osw = new OutputStreamWriter(System.out);
@@ -1165,7 +1163,7 @@ public class CsvTable implements Iterable<CsvTable.Row> {
 	/**
 	 * Add all values from the other table into this table
 	 * 
-	 * @param other
+	 * @param other never null
 	 */
 	public void addAll(CsvTable other) {
 		for(Entry<String,Row> entry : other.table.entrySet()) {
@@ -1181,7 +1179,7 @@ public class CsvTable implements Iterable<CsvTable.Row> {
 	 * having the same values for 'colName'. Sorting is always performed
 	 * automatically before executing this command.
 	 * 
-	 * @param colName
+	 * @param colName never null
 	 * @return a Map from String (the value of column 'colName') to
 	 *         {@link CsvTable}
 	 */
@@ -1208,7 +1206,7 @@ public class CsvTable implements Iterable<CsvTable.Row> {
 	/**
 	 * Visit all rows with an {@link IRowVisitor}.
 	 * 
-	 * @param rowVisitor
+	 * @param rowVisitor never null
 	 */
 	public void visitRows(IRowVisitor rowVisitor) {
 		for(Row row : this) {

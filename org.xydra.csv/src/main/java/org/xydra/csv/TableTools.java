@@ -18,7 +18,6 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
 
-
 /**
  * A set of tools for {@link CsvTable}.
  * 
@@ -38,7 +37,7 @@ public class TableTools {
 		/**
 		 * @param table a shared result table (shared by all calls to 'process')
 		 * @param f a file to be processes
-		 * @throws IOException
+		 * @throws IOException from reading f
 		 */
 		public void process(CsvTable table, File f) throws IOException;
 	}
@@ -53,7 +52,7 @@ public class TableTools {
 	 * @param table to store results of processing
 	 * @param filenameFilter only matching files are processed
 	 * @param processor an {@link IFileProcessor}
-	 * @throws IOException
+	 * @throws IOException from read/write files
 	 */
 	public static void process(File startDirectory, CsvTable table, FilenameFilter filenameFilter,
 	        IFileProcessor processor) throws IOException {
@@ -73,12 +72,15 @@ public class TableTools {
 	 * Group sourceTable by keys. For each group, calculate sum, average and
 	 * count for the given columns.
 	 * 
-	 * @param sourceTable
-	 * @param keys
-	 * @param sum
-	 * @param average
-	 * @param range
-	 * @param targetTable
+	 * TODO improve docu for this function
+	 * 
+	 * @param sourceTable which table to process
+	 * @param keyList create groups of rows where columns have same values
+	 * @param sumList sum these columns up, for each group
+	 * @param averageList calculate the average of these columns, for each group
+	 * @param rangeList counts entries, for each group
+	 * @param targetTable to which to write the result (which is a much smaller
+	 *            table, with one row for each used combination of keys)
 	 */
 	public static void groupBy(CsvTable sourceTable, List<String> keyList, List<String> sumList,
 	        List<String> averageList, List<String> rangeList, CsvTable targetTable) {
@@ -199,7 +201,7 @@ public class TableTools {
 	 * @param a source file
 	 * @param b source file
 	 * @param mergeFile result file
-	 * @throws IOException
+	 * @throws IOException from file I/O
 	 */
 	public static void merge(File a, File b, File mergeFile) throws IOException {
 		CsvTable table = new CsvTable();
@@ -209,13 +211,15 @@ public class TableTools {
 	}
 	
 	/**
-	 * @param keyColumnName1
-	 * @param keyColumnName2
+	 * TODO generalize into n keys
+	 * 
+	 * @param keyColumnName1 never null
+	 * @param keyColumnName2 never null
 	 * @return an {@link IRowInsertionHandler} that aggregates all rows into one
 	 *         where the values of the key column names are equal between rows.
 	 *         If the key column names are "a" and "b", two rows with (a=3, b=5,
 	 *         c=7) and (a=3, b=5,c=10) would be merged into (a=3, b=5, c=17).
-	 *         String values are concatenated.
+	 *         Numbers are added, String values are concatenated.
 	 */
 	public static IRowInsertionHandler createGroupByTwoKeysRowInsertionHandler(
 	        final String keyColumnName1, final String keyColumnName2) {
