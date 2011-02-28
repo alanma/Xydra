@@ -3,7 +3,7 @@ package org.xydra.core.json;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.xydra.annotations.RunsInJava;
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.X;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
@@ -14,7 +14,7 @@ import org.xydra.core.model.XRepository;
 import org.xydra.json.JSONException;
 
 
-@RunsInJava
+@RequiresAppEngine(false)
 public class XJsonTest {
 	
 	XID actorId = XX.toId("XJsonTest");

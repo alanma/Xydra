@@ -6,14 +6,15 @@ import org.xydra.base.value.XIntegerValue;
 import org.xydra.base.value.XLongValue;
 import org.xydra.base.value.XStringValue;
 
+
 /*
  * TODO what is this needed for? ~~daniel
  */
 public class TypeSystem {
 	
 	/**
-	 * @param x
-	 * @param y
+	 * @param x a Class
+	 * @param y a Class
 	 * @return true iff the class of type x can hold instances of type y
 	 */
 	public static boolean canStore(Class<?> x, Class<?> y) {
