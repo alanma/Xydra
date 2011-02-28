@@ -123,6 +123,52 @@ public class GaeUtils {
 		return e;
 	}
 	
+	public static Entity[] getEntityBatch(Key[] keys) {
+		
+		Entity[] result = new Entity[keys.length];
+		
+		if(useMemCache) {
+			boolean hasAll = false;
+			for(int i = 0; i < keys.length; i++) {
+				// try first to get from memcache
+				result[i] = (Entity)XydraRuntime.getMemcache().get(keys[i]);
+				if(result[i] == null) {
+					hasAll = false;
+				}
+			}
+			if(hasAll) {
+				for(int i = 0; i < result.length; i++) {
+					if(result[i].equals(NULL_ENTITY)) {
+						result[i] = null;
+					}
+				}
+				return result;
+			}
+		}
+		
+		@SuppressWarnings("unchecked")
+		Future<Entity>[] futures = (Future<Entity>[])new Future<?>[keys.length];
+		for(int i = 0; i < keys.length; i++) {
+			if(result[i] == null) {
+				futures[i] = datastore.get(keys[i]);
+			} else if(result[i].equals(NULL_ENTITY)) {
+				result[i] = null;
+			}
+		}
+		
+		for(int i = 0; i < keys.length; i++) {
+			if(futures[i] == null) {
+				continue;
+			}
+			result[i] = waitFor(futures[i]);
+			if(useMemCache) {
+				updateCachedEntity(keys[i], null, result[i]);
+			}
+		}
+		
+		return result;
+	}
+	
 	/**
 	 * @param key The key of the entity to load.
 	 * @param trans The transaction to load the entity in.

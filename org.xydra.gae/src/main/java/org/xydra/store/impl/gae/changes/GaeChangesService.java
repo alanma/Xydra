@@ -1208,31 +1208,41 @@ public class GaeChangesService extends AbstractChangeLog {
 	 */
 	public long getCurrentRevisionNumber() {
 		
-		// IMPROVE cache the current revision
 		long currentRev = getCachedCurrentRevision();
 		
 		long rev = currentRev;
 		
-		// Check if the revision is up to date.
-		for(rev = currentRev;; rev++) {
+		int n = 1;
+		mainloop: while(true) {
 			
-			Key key = KeyStructure.createChangeKey(this.modelAddr, rev + 1);
-			Entity changeEntity = GaeUtils.getEntity(key);
-			if(changeEntity == null) {
-				break;
+			Key[] keys = new Key[n];
+			for(int i = 0; i < n; i++) {
+				keys[i] = KeyStructure.createChangeKey(this.modelAddr, rev + i + 1);
 			}
 			
-			int status = getStatus(changeEntity);
-			if(!isCommitted(status)) {
-				break;
+			Entity[] batch = GaeUtils.getEntityBatch(keys);
+			
+			for(int i = 0; i < n; i++, rev++) {
+				
+				Entity changeEntity = batch[i];
+				if(changeEntity == null) {
+					break mainloop;
+				}
+				
+				int status = getStatus(changeEntity);
+				if(!isCommitted(status)) {
+					break mainloop;
+				}
+				
+				// Only update the current revision if the command actually
+				// changed something.
+				if(status == STATUS_SUCCESS_EXECUTED) {
+					currentRev = rev + 1;
+				}
+				
 			}
 			
-			// Only update the current revision if the command actually changed
-			// something.
-			if(status == STATUS_SUCCESS_EXECUTED) {
-				currentRev = rev + 1;
-			}
-			
+			n *= 2;
 		}
 		
 		setCachedLastCommitedRevision(rev);
