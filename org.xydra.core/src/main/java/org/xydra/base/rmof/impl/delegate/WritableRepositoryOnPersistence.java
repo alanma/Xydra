@@ -55,7 +55,7 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 	public boolean hasModel(XID modelId) {
 		// FIXME PERFORMANCE: finding out if a model exists should not require
 		// to list them all
-		return this.persistence.getModelIds().contains(modelId);
+		return this.persistence.hasModel(modelId);
 	}
 	
 	public boolean isEmpty() {
