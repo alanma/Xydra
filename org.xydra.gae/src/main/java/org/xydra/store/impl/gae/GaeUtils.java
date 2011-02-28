@@ -89,6 +89,45 @@ public class GaeUtils {
 	}
 	
 	/**
+	 * Like {@link #getEntity(Key)}, but returns a non-null entity from the
+	 * cache if available, without checking the datastore.
+	 */
+	public static Entity getEntityExists(Key key, Transaction trans) {
+		
+		assert trans != null;
+		
+		makeSureDatestoreServiceIsInitialised();
+		
+		if(useMemCache) {
+			// try first to get from memcache
+			Entity cachedEntity = (Entity)XydraRuntime.getMemcache().get(key);
+			if(cachedEntity != null) {
+				log.debug("Getting entity " + key.toString() + " from MemCache");
+				if(!cachedEntity.equals(NULL_ENTITY)) {
+					return cachedEntity;
+				}
+			}
+		}
+		
+		log.debug("Getting entity " + key.toString() + " from GAE data store");
+		Future<Entity> entity = datastore.get(trans, key);
+		Entity e = waitFor(entity);
+		if(useMemCache) {
+			if(e != null) {
+				log.debug("Putting entity " + key.toString() + " in MemCache");
+				XydraRuntime.getMemcache().put(key, e);
+			} else {
+				log.debug("Putting NULL_ENTITY " + key.toString() + " in MemCache");
+				XydraRuntime.getMemcache().put(key, NULL_ENTITY);
+			}
+		}
+		if(e == null) {
+			log.debug("--> null");
+		}
+		return e;
+	}
+	
+	/**
 	 * @param key The key of the entity to load.
 	 * @param trans The transaction to load the entity in.
 	 * @return the GAE Entity for the given key from the store or null
@@ -97,7 +136,7 @@ public class GaeUtils {
 		
 		makeSureDatestoreServiceIsInitialised();
 		
-		if(useMemCache) {
+		if(useMemCache && trans == null) {
 			// try first to get from memcache
 			Entity cachedEntity = (Entity)XydraRuntime.getMemcache().get(key);
 			if(cachedEntity != null) {
@@ -109,6 +148,12 @@ public class GaeUtils {
 					return cachedEntity;
 				}
 			}
+		} else {
+			// If there is a transaction, we must read from the actual datastore
+			// so that the transaction will abort if the value is changed before
+			// trans.commit().
+			// TODO in some cases (ie: revision grabbing) it is ok to return an
+			// old entity, but returning null could be fatal.
 		}
 		
 		log.debug("Getting entity " + key.toString() + " from GAE data store");

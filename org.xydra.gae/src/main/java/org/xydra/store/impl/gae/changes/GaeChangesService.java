@@ -410,7 +410,7 @@ public class GaeChangesService extends AbstractChangeLog {
 			Key key = KeyStructure.createChangeKey(this.modelAddr, rev);
 			Transaction trans = GaeUtils.beginTransaction();
 			
-			Entity changeEntity = GaeUtils.getEntity(key, trans);
+			Entity changeEntity = GaeUtils.getEntityExists(key, trans);
 			
 			if(changeEntity == null) {
 				
