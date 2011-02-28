@@ -370,7 +370,10 @@ public abstract class AbstractStoreQuoateExceptionTest {
 			} else {
 				// should now return a QuotaException, since we exceeded the
 				// quota
-				assertTrue(callback.getException() instanceof QuotaException);
+				assertNotNull("callback contains an exception", callback.getException());
+				assertTrue("callback contains a QuotaException, was a "
+				        + callback.getException().getClass(),
+				        callback.getException() instanceof QuotaException);
 			}
 		}
 		
