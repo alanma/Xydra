@@ -1221,6 +1221,8 @@ public class GaeChangesService extends AbstractChangeLog {
 			}
 			
 			Entity[] batch = GaeUtils.getEntityBatch(keys);
+			// IMPROVE only synchronize on the entities that are actually
+			// accessed.
 			
 			for(int i = 0; i < n; i++, rev++) {
 				
