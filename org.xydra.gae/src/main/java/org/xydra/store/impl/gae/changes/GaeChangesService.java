@@ -423,7 +423,8 @@ public class GaeChangesService extends AbstractChangeLog {
 					newChange.setUnindexedProperty(PROP_ACTOR, actorId.toString());
 				}
 				
-				GaeUtils.putEntity(newChange, trans);
+				GaeUtils.putEntityAsync(newChange, trans);
+				// Synchronized by endTransaction()
 				
 				try {
 					GaeUtils.endTransaction(trans);
@@ -856,7 +857,8 @@ public class GaeChangesService extends AbstractChangeLog {
 		 * (only changing it from a voluntary timeout to a GAE enforced timeout)
 		 */
 		changeEntity.setProperty(PROP_LAST_ACTIVITY, now);
-		GaeUtils.putEntity(changeEntity, trans);
+		GaeUtils.putEntityAsync(changeEntity, trans);
+		// Synchronized by endTransaction()
 		try {
 			GaeUtils.endTransaction(trans);
 		} catch(ConcurrentModificationException cme) {

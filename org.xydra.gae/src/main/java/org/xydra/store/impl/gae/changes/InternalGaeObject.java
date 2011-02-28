@@ -195,7 +195,8 @@ public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeFi
 			}
 			
 			e.setUnindexedProperty(PROP_REVISION, rev);
-			GaeUtils.putEntity(e, trans);
+			GaeUtils.putEntityAsync(e, trans);
+			// Synchronized by endTransaction()
 			
 			try {
 				GaeUtils.endTransaction(trans);

@@ -220,9 +220,18 @@ public class GaeUtils {
 	 * @param entity The entity to write to the datastore.
 	 */
 	public static Future<Key> putEntityAsync(Entity entity) {
+		return putEntityAsync(entity, null);
+	}
+	
+	/**
+	 * Stores a GAE {@link Entity} asynchronously in the GAE back-end
+	 * 
+	 * @param entity The entity to write to the datastore.
+	 */
+	public static Future<Key> putEntityAsync(Entity entity, Transaction trans) {
 		log.debug("putting (async) " + entity.getKey());
 		makeSureDatestoreServiceIsInitialised();
-		Future<Key> result = datastore.put(entity);
+		Future<Key> result = datastore.put(trans, entity);
 		if(useMemCache) {
 			// remove first from memcache
 			XydraRuntime.getMemcache().remove(entity.getKey());
