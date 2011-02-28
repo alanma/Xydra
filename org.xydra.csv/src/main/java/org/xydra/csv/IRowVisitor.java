@@ -1,6 +1,7 @@
 package org.xydra.csv;
 
-import org.xydra.csv.CsvTable.Row;
+import org.xydra.csv.impl.memory.Row;
+
 
 public interface IRowVisitor {
 

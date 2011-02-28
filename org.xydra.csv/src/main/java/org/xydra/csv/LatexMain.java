@@ -3,6 +3,8 @@ package org.xydra.csv;
 import java.io.File;
 import java.io.IOException;
 
+import org.xydra.csv.impl.memory.CsvTable;
+
 
 /**
  * Takes a CSV file and dumps it in LaTeX syntax to System.out

@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.xydra.csv.CsvTable.IRowInsertionHandler;
-import org.xydra.csv.CsvTable.Row;
+import org.xydra.csv.impl.memory.CsvTable;
+import org.xydra.csv.impl.memory.Row;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
@@ -26,8 +26,6 @@ import org.xydra.log.LoggerFactory;
  */
 public class TableTools {
 	
-	private static Logger log = LoggerFactory.getLogger(TableTools.class);
-	
 	/**
 	 * Processes a file and writes results to a shared {@link CsvTable}.
 	 * 
@@ -39,33 +37,169 @@ public class TableTools {
 		 * @param f a file to be processes
 		 * @throws IOException from reading f
 		 */
-		public void process(CsvTable table, File f) throws IOException;
+		public void process(ICsvTable table, File f) throws IOException;
 	}
 	
 	/**
-	 * Starts in 'startDirectory' and traverses all sub-directories. On the way,
-	 * all files matching the 'filenameFilter' are processed using the given
-	 * 'processor'. A {@link CsvTable} is used to persist any results the
-	 * processor can generate.
+	 * Represents a compound key consisting of <i>n</i> columns.
 	 * 
-	 * @param startDirectory the root of the directory traversal
-	 * @param table to store results of processing
-	 * @param filenameFilter only matching files are processed
-	 * @param processor an {@link IFileProcessor}
-	 * @throws IOException from read/write files
+	 * The order of keys implies a sorting order.
+	 * 
+	 * @author voelkel
 	 */
-	public static void process(File startDirectory, CsvTable table, FilenameFilter filenameFilter,
-	        IFileProcessor processor) throws IOException {
-		for(File f : startDirectory.listFiles(filenameFilter)) {
-			processor.process(table, f);
+	private static class NKeys implements Iterable<String> {
+		final List<String> keys;
+		
+		public NKeys(List<String> keys) {
+			this.keys = keys;
 		}
-		for(File f : startDirectory.listFiles(new FileFilter() {
-			public boolean accept(File f) {
-				return f.isDirectory();
+		
+		@SuppressWarnings("unused")
+		public boolean contains(String key) {
+			return this.keys.contains(key);
+		}
+		
+		@Override
+		public boolean equals(Object other) {
+			if(other instanceof NKeys) {
+				NKeys otherKey = (NKeys)other;
+				if(otherKey.keys.size() == this.keys.size()) {
+					for(int i = 0; i < this.keys.size(); i++) {
+						if(!this.keys.get(i).equals(otherKey.keys.get(i)))
+							return false;
+					}
+					return true;
+				}
 			}
-		})) {
-			process(f, table, filenameFilter, processor);
+			return false;
 		}
+		
+		@Override
+		public int hashCode() {
+			int hash = 0;
+			for(int i = 0; i < this.keys.size(); i++) {
+				hash += this.keys.get(i).hashCode();
+			}
+			return hash;
+		}
+		
+		@Override
+        public Iterator<String> iterator() {
+			return this.keys.iterator();
+		}
+		
+		@Override
+		public String toString() {
+			StringBuffer buf = new StringBuffer();
+			for(int i = 0; i < this.keys.size(); i++) {
+				buf.append(this.keys.get(i));
+				if(i + 1 < this.keys.size()) {
+					buf.append("--");
+				}
+			}
+			return buf.toString();
+		}
+	}
+	
+	/**
+	 * Represents a compound key consisting of two columns.
+	 * 
+	 * @author voelkel
+	 * 
+	 */
+	private static class TwoKey {
+		final String a;
+		final String b;
+		
+		public TwoKey(String a, String b) {
+			this.a = a;
+			this.b = b;
+		}
+		
+		@Override
+		public boolean equals(Object other) {
+			return other instanceof TwoKey && this.a.equals(((TwoKey)other).a)
+			        && this.b.equals(((TwoKey)other).b);
+		}
+		
+		@Override
+		public int hashCode() {
+			return this.a.hashCode() + this.b.hashCode();
+		}
+	}
+	
+	private static Logger log = LoggerFactory.getLogger(TableTools.class);
+	
+	/**
+	 * TODO generalize into n keys
+	 * 
+	 * @param keyColumnName1 never null
+	 * @param keyColumnName2 never null
+	 * @return an {@link IRowInsertionHandler} that aggregates all rows into one
+	 *         where the values of the key column names are equal between rows.
+	 *         If the key column names are "a" and "b", two rows with (a=3, b=5,
+	 *         c=7) and (a=3, b=5,c=10) would be merged into (a=3, b=5, c=17).
+	 *         Numbers are added, String values are concatenated.
+	 */
+	public static IRowInsertionHandler createGroupByTwoKeysRowInsertionHandler(
+	        final String keyColumnName1, final String keyColumnName2) {
+		IRowInsertionHandler rowInsertionHandler = new IRowInsertionHandler() {
+			
+			long aggregated = 0;
+			// temporary index of occurring keys and their row
+			Map<TwoKey,Row> compoundKeys2row = new HashMap<TwoKey,Row>(100);
+			TwoKey keyColumnNames = new TwoKey(keyColumnName1, keyColumnName2);
+			// Collection<String> rowKeysToBeRemoved = new LinkedList<String>();
+			long processed = 0;
+			
+			@Override
+            public void afterRowInsertion(Row row) {
+			}
+			
+			@Override
+            public boolean beforeRowInsertion(Row row) {
+				this.processed++;
+				if(this.processed % 1000 == 0) {
+					log.info("Read aggregating processed " + this.processed + " rows, aggregated "
+					        + this.aggregated);
+				}
+				
+				/*
+				 * Calculate compound key of this row. If one or several of the
+				 * key-columns are empty, then this row is deleted.
+				 */
+				String valueA = row.getValue(this.keyColumnNames.a);
+				if(valueA == null) {
+					return false;
+				}
+				String valueB = row.getValue(this.keyColumnNames.b);
+				if(valueB == null) {
+					return false;
+				}
+				TwoKey compoundKey = new TwoKey(valueA, valueB);
+				
+				/* If we have previously seen a row with the same compundKey... */
+				if(this.compoundKeys2row.containsKey(compoundKey)) {
+					/* ... we aggregate this row into the existing row */
+					Row masterRow = this.compoundKeys2row.get(compoundKey);
+					masterRow.aggregate(row, new String[] {
+
+					keyColumnName1, keyColumnName2
+
+					});
+					this.aggregated++;
+					return false;
+				} else {
+					/*
+					 * record the row as a new potential master row and add it
+					 * also (return=true)
+					 */
+					this.compoundKeys2row.put(compoundKey, row);
+					return true;
+				}
+			}
+		};
+		return rowInsertionHandler;
 	}
 	
 	/**
@@ -82,8 +216,8 @@ public class TableTools {
 	 * @param targetTable to which to write the result (which is a much smaller
 	 *            table, with one row for each used combination of keys)
 	 */
-	public static void groupBy(CsvTable sourceTable, List<String> keyList, List<String> sumList,
-	        List<String> averageList, List<String> rangeList, CsvTable targetTable) {
+	public static void groupBy(ICsvTable sourceTable, List<String> keyList, List<String> sumList,
+	        List<String> averageList, List<String> rangeList, ICsvTable targetTable) {
 		log.info("Determine set of values in key columns.");
 		NKeys keys = new NKeys(keyList);
 		NKeys sum = new NKeys(sumList);
@@ -138,7 +272,7 @@ public class TableTools {
 			for(int i = 0; i < keys.keys.size(); i++) {
 				targetRow.setValue(keys.keys.get(i), groupKey.keys.get(i), true);
 			}
-			CsvTable groupTable = groups.get(groupKey);
+			ICsvTable groupTable = groups.get(groupKey);
 			// count
 			targetRow.setValue("count", groupTable.rowCount(), true);
 			
@@ -204,166 +338,36 @@ public class TableTools {
 	 * @throws IOException from file I/O
 	 */
 	public static void merge(File a, File b, File mergeFile) throws IOException {
-		CsvTable table = new CsvTable();
+		ICsvTable table = new CsvTable();
 		table.readFrom(a);
 		table.readFrom(b);
 		table.writeTo(mergeFile);
 	}
 	
 	/**
-	 * TODO generalize into n keys
+	 * Starts in 'startDirectory' and traverses all sub-directories. On the way,
+	 * all files matching the 'filenameFilter' are processed using the given
+	 * 'processor'. A {@link CsvTable} is used to persist any results the
+	 * processor can generate.
 	 * 
-	 * @param keyColumnName1 never null
-	 * @param keyColumnName2 never null
-	 * @return an {@link IRowInsertionHandler} that aggregates all rows into one
-	 *         where the values of the key column names are equal between rows.
-	 *         If the key column names are "a" and "b", two rows with (a=3, b=5,
-	 *         c=7) and (a=3, b=5,c=10) would be merged into (a=3, b=5, c=17).
-	 *         Numbers are added, String values are concatenated.
+	 * @param startDirectory the root of the directory traversal
+	 * @param table to store results of processing
+	 * @param filenameFilter only matching files are processed
+	 * @param processor an {@link IFileProcessor}
+	 * @throws IOException from read/write files
 	 */
-	public static IRowInsertionHandler createGroupByTwoKeysRowInsertionHandler(
-	        final String keyColumnName1, final String keyColumnName2) {
-		IRowInsertionHandler rowInsertionHandler = new CsvTable.IRowInsertionHandler() {
-			
-			// temporary index of occurring keys and their row
-			Map<TwoKey,Row> compoundKeys2row = new HashMap<TwoKey,Row>(100);
-			// Collection<String> rowKeysToBeRemoved = new LinkedList<String>();
-			long processed = 0;
-			long aggregated = 0;
-			TwoKey keyColumnNames = new TwoKey(keyColumnName1, keyColumnName2);
-			
-			public void afterRowInsertion(Row row) {
+	public static void process(File startDirectory, ICsvTable table, FilenameFilter filenameFilter,
+	        IFileProcessor processor) throws IOException {
+		for(File f : startDirectory.listFiles(filenameFilter)) {
+			processor.process(table, f);
+		}
+		for(File f : startDirectory.listFiles(new FileFilter() {
+			@Override
+            public boolean accept(File f) {
+				return f.isDirectory();
 			}
-			
-			public boolean beforeRowInsertion(Row row) {
-				this.processed++;
-				if(this.processed % 1000 == 0) {
-					log.info("Read aggregating processed " + this.processed + " rows, aggregated "
-					        + this.aggregated);
-				}
-				
-				/*
-				 * Calculate compound key of this row. If one or several of the
-				 * key-columns are empty, then this row is deleted.
-				 */
-				String valueA = row.getValue(this.keyColumnNames.a);
-				if(valueA == null) {
-					return false;
-				}
-				String valueB = row.getValue(this.keyColumnNames.b);
-				if(valueB == null) {
-					return false;
-				}
-				TwoKey compoundKey = new TwoKey(valueA, valueB);
-				
-				/* If we have previously seen a row with the same compundKey... */
-				if(this.compoundKeys2row.containsKey(compoundKey)) {
-					/* ... we aggregate this row into the existing row */
-					Row masterRow = this.compoundKeys2row.get(compoundKey);
-					masterRow.aggregate(row, new String[] {
-
-					keyColumnName1, keyColumnName2
-
-					});
-					this.aggregated++;
-					return false;
-				} else {
-					/*
-					 * record the row as a new potential master row and add it
-					 * also (return=true)
-					 */
-					this.compoundKeys2row.put(compoundKey, row);
-					return true;
-				}
-			}
-		};
-		return rowInsertionHandler;
-	}
-	
-	/**
-	 * Represents a compound key consisting of two columns.
-	 * 
-	 * @author voelkel
-	 * 
-	 */
-	private static class TwoKey {
-		final String a;
-		final String b;
-		
-		public TwoKey(String a, String b) {
-			this.a = a;
-			this.b = b;
-		}
-		
-		@Override
-		public boolean equals(Object other) {
-			return other instanceof TwoKey && this.a.equals(((TwoKey)other).a)
-			        && this.b.equals(((TwoKey)other).b);
-		}
-		
-		@Override
-		public int hashCode() {
-			return this.a.hashCode() + this.b.hashCode();
-		}
-	}
-	
-	/**
-	 * Represents a compound key consisting of <i>n</i> columns.
-	 * 
-	 * The order of keys implies a sorting order.
-	 * 
-	 * @author voelkel
-	 */
-	private static class NKeys implements Iterable<String> {
-		final List<String> keys;
-		
-		public NKeys(List<String> keys) {
-			this.keys = keys;
-		}
-		
-		@SuppressWarnings("unused")
-		public boolean contains(String key) {
-			return this.keys.contains(key);
-		}
-		
-		@Override
-		public boolean equals(Object other) {
-			if(other instanceof NKeys) {
-				NKeys otherKey = (NKeys)other;
-				if(otherKey.keys.size() == this.keys.size()) {
-					for(int i = 0; i < this.keys.size(); i++) {
-						if(!this.keys.get(i).equals(otherKey.keys.get(i)))
-							return false;
-					}
-					return true;
-				}
-			}
-			return false;
-		}
-		
-		@Override
-		public int hashCode() {
-			int hash = 0;
-			for(int i = 0; i < this.keys.size(); i++) {
-				hash += this.keys.get(i).hashCode();
-			}
-			return hash;
-		}
-		
-		@Override
-		public String toString() {
-			StringBuffer buf = new StringBuffer();
-			for(int i = 0; i < this.keys.size(); i++) {
-				buf.append(this.keys.get(i));
-				if(i + 1 < this.keys.size()) {
-					buf.append("--");
-				}
-			}
-			return buf.toString();
-		}
-		
-		public Iterator<String> iterator() {
-			return this.keys.iterator();
+		})) {
+			process(f, table, filenameFilter, processor);
 		}
 	}
 	
