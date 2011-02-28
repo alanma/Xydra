@@ -66,7 +66,6 @@ public class GaeSnapshotService {
 			entry = (CachedModel)cache.get(cachname);
 			if(entry == null) {
 				entry = new CachedModel();
-				cache.put(cachname, entry);
 			}
 		}
 		
@@ -74,8 +73,11 @@ public class GaeSnapshotService {
 		synchronized(entry) {
 			updateCachedModel(entry);
 			
+			cache.put(cachname, entry);
+			
 			// TODO save snapshot to datastore from time to time
 			
+			// TODO is this even needed? Does the cache return
 			return XCopyUtils.createSnapshot(entry.modelState);
 		}
 		
