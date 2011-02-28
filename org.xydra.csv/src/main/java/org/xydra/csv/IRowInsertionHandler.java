@@ -11,7 +11,7 @@ import org.xydra.csv.impl.memory.Row;
  * @author voelkel
  */
 public interface IRowInsertionHandler {
-	void afterRowInsertion(Row row);
+	void afterRowInsertion(IRow row);
 	
 	/**
 	 * @param row

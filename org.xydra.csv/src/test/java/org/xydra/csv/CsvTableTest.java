@@ -11,7 +11,7 @@ public class CsvTableTest {
 	
 	@Test
 	public void testGroupBy() throws IOException {
-		CsvTable ct = new CsvTable();
+		ICsvTable ct = new CsvTable();
 		ct.setValueInitial("1", "name", "Jana");
 		ct.setValueInitial("1", "profession", "computer science");
 		ct.setValueInitial("1", "age", "21");
@@ -36,7 +36,7 @@ public class CsvTableTest {
 		ct.setValueInitial("4", "sex", "male");
 		ct.setValueInitial("4", "shoesize", "7");
 		
-		CsvTable result = new CsvTable();
+		ICsvTable result = new CsvTable();
 		TableTools.groupBy(ct, Arrays.asList("profession", "sex"),
 		        Arrays.asList("age", "shoesize"), Arrays.asList("age", "shoesize"),
 		        Arrays.asList("age", "shoesize"), result);

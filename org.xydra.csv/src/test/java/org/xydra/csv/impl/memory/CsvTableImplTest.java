@@ -9,13 +9,12 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 import org.xydra.csv.ICsvTable;
 
 
-public class CsvTableTest {
+public class CsvTableImplTest {
 	
 	static byte[] toBytes(ICsvTable table) throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();

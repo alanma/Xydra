@@ -10,18 +10,18 @@ import java.io.Writer;
 public interface ICsvTable extends ISparseTable {
 	
 	/**
-	 * How many rows should maximally be read? Default is -1 = unlimited. Note
-	 * that more rows can be added later.
+	 * Dump table to System.out
 	 * 
-	 * @param readMaxRows set to -1 for unlimited (default)
+	 * @throws IOException from System.out
 	 */
-	void setParamReadMaxRows(int readMaxRows);
+	void dump() throws IOException;
 	
 	/**
-	 * @param b Default is false. If true, file writing is split into files with
-	 *            65535 records each, so that Excel can handle it.
+	 * Dump table to System.out in LaTeX syntax
+	 * 
+	 * @throws IOException from System.out
 	 */
-	void setParamSplitWhenWritingLargeFiles(boolean b);
+	void dumpToLaTeX() throws IOException;
 	
 	/**
 	 * Add the content given in the reader as CSV to this CvsTable. Multiple
@@ -47,6 +47,20 @@ public interface ICsvTable extends ISparseTable {
 	 */
 	void readFrom(Reader r) throws IOException;
 	
+	/**
+	 * How many rows should maximally be read? Default is -1 = unlimited. Note
+	 * that more rows can be added later.
+	 * 
+	 * @param readMaxRows set to -1 for unlimited (default)
+	 */
+	void setParamReadMaxRows(int readMaxRows);
+	
+	/**
+	 * @param b Default is false. If true, file writing is split into files with
+	 *            65535 records each, so that Excel can handle it.
+	 */
+	void setParamSplitWhenWritingLargeFiles(boolean b);
+	
 	void toLaTeX(Writer w) throws IOException;
 	
 	void writeTo(File f) throws FileNotFoundException;
@@ -71,5 +85,4 @@ public interface ICsvTable extends ISparseTable {
 	 *             255 columns.
 	 */
 	void writeTo(Writer w, int startRow, int endRow) throws IOException, ExcelLimitException;
-	
 }

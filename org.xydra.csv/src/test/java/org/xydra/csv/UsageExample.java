@@ -8,7 +8,6 @@ import java.io.IOException;
 
 import org.junit.Test;
 import org.xydra.csv.impl.memory.CsvTable;
-import org.xydra.csv.impl.memory.Row;
 
 
 public class UsageExample {
@@ -18,7 +17,7 @@ public class UsageExample {
 		/* Create a new in-memory table */
 		CsvTable table = new CsvTable(true);
 		/* Create a row with a unique key, using the system time */
-		Row row = table.getOrCreateRow("" + System.currentTimeMillis() + "-" + Math.random(), true);
+		IRow row = table.getOrCreateRow("" + System.currentTimeMillis() + "-" + Math.random(), true);
 		/* Set values */
 		row.setValue("bbb", "111", true);
 		row.setValue("aaa", "222", true);
@@ -38,7 +37,7 @@ public class UsageExample {
 		/* Create a new in-memory table */
 		ICsvTable table = new CsvTable();
 		/* Create a row with a unique key, using the system time */
-		Row row = table.getOrCreateRow("" + System.currentTimeMillis() + Math.random(), true);
+		IRow row = table.getOrCreateRow("" + System.currentTimeMillis() + Math.random(), true);
 		/* Set a value */
 		row.setValue("first name", "Heiko", true);
 		/* we overwrite the value */
@@ -53,7 +52,7 @@ public class UsageExample {
 		/* set another value */
 		row.setValue("last name", "Doe", true);
 		/* add a second row with values */
-		Row row2 = table.getOrCreateRow("" + System.currentTimeMillis() + Math.random(), true);
+		IRow row2 = table.getOrCreateRow("" + System.currentTimeMillis() + Math.random(), true);
 		row2.setValue("last name", "Homer", true);
 		row2.setValue("first name", "Simpson", true);
 		

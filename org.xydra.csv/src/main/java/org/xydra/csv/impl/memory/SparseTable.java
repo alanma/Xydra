@@ -11,6 +11,9 @@ import java.util.Map.Entry;
 import java.util.TreeSet;
 
 import org.xydra.csv.ExcelLimitException;
+import org.xydra.csv.ICell;
+import org.xydra.csv.IReadableRow;
+import org.xydra.csv.IRow;
 import org.xydra.csv.IRowInsertionHandler;
 import org.xydra.csv.IRowVisitor;
 import org.xydra.csv.ISparseTable;
@@ -77,14 +80,19 @@ public class SparseTable implements ISparseTable {
 	public void addAll(SparseTable other) {
 		for(Entry<String,Row> entry : other.table.entrySet()) {
 			Row thisRow = this.getOrCreateRow(entry.getKey(), true);
-			for(Entry<String,Cell> rowEntry : entry.getValue().entrySet()) {
+			for(Entry<String,ICell> rowEntry : entry.getValue().entrySet()) {
 				thisRow.setValue(rowEntry.getKey(), rowEntry.getValue().getValue());
 			}
 		}
 	}
 	
+	@Override
+	public void addColumnName(String columnName) {
+		this.columnNames.add(columnName);
+	}
+	
 	/**
-	 * Add checked
+	 * Add if {@link IRowInsertionHandler} null or does not object
 	 * 
 	 * @param rowName
 	 * @param row
@@ -126,7 +134,7 @@ public class SparseTable implements ISparseTable {
 			
 			if(compoundKeys2row.containsKey(compoundKey)) {
 				// aggregate row into existing row
-				Row masterRow = compoundKeys2row.get(compoundKey);
+				IRow masterRow = compoundKeys2row.get(compoundKey);
 				masterRow.aggregate(row, keyColumnNames);
 				aggregated++;
 				
@@ -161,7 +169,7 @@ public class SparseTable implements ISparseTable {
 	 */
 	void appendString(String row, String column, String s, int maximalFieldLength) {
 		Row r = getOrCreateRow(row, true);
-		Cell c = r.getOrCreateCell(column, true);
+		ICell c = r.getOrCreateCell(column, true);
 		c.appendString(s, maximalFieldLength);
 	}
 	
@@ -184,14 +192,14 @@ public class SparseTable implements ISparseTable {
 	 * 
 	 * @see org.xydra.csv.ICsvTable#drop(java.lang.String, java.lang.String)
 	 */
-	public ISparseTable drop(String key, String value) {
+	public ISparseTable drop(String columnName, String value) {
 		ISparseTable target = new SparseTable();
 		for(String rowName : this.rowNames) {
-			Row sourceRow = this.getOrCreateRow(rowName, false);
-			if(!sourceRow.getValue(key).equals(value)) {
+			IRow sourceRow = this.getOrCreateRow(rowName, false);
+			if(!sourceRow.getValue(columnName).equals(value)) {
 				// copy row
-				Row targetRow = target.getOrCreateRow(rowName, true);
-				for(String colName : sourceRow.keySet()) {
+				IRow targetRow = target.getOrCreateRow(rowName, true);
+				for(String colName : sourceRow.getColumnNames()) {
 					targetRow.setValue(colName, sourceRow.getValue(colName), true);
 				}
 			}
@@ -207,16 +215,22 @@ public class SparseTable implements ISparseTable {
 	public ISparseTable filter(String key, String value) {
 		ISparseTable target = new SparseTable();
 		for(String rowName : this.rowNames) {
-			Row sourceRow = this.getOrCreateRow(rowName, false);
+			IRow sourceRow = this.getOrCreateRow(rowName, false);
 			if(sourceRow.getValue(key).equals(value)) {
 				// copy row
-				Row targetRow = target.getOrCreateRow(rowName, true);
-				for(String colName : sourceRow.keySet()) {
+				IRow targetRow = target.getOrCreateRow(rowName, true);
+				for(String colName : sourceRow.getColumnNames()) {
 					targetRow.setValue(colName, sourceRow.getValue(colName), true);
 				}
 			}
 		}
 		return target;
+	}
+	
+	@Override
+	public List<String> getColumnNames() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 	/*
@@ -233,6 +247,16 @@ public class SparseTable implements ISparseTable {
 		return row;
 	}
 	
+	@Override
+	public boolean getParamAggregateStrings() {
+		return this.aggregateStrings;
+	}
+	
+	@Override
+	public boolean getParamRestrictToExcelSize() {
+		return this.restrictToExcelSize;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -243,7 +267,7 @@ public class SparseTable implements ISparseTable {
 		if(r == null) {
 			return null;
 		}
-		Cell c = r.getOrCreateCell(column, false);
+		ICell c = r.getOrCreateCell(column, false);
 		if(c == null) {
 			return null;
 		}
@@ -259,7 +283,7 @@ public class SparseTable implements ISparseTable {
 	public void incrementValue(String row, String column, int increment)
 	        throws WrongDatatypeException {
 		Row r = getOrCreateRow(row, true);
-		Cell c = r.getOrCreateCell(column, true);
+		ICell c = r.getOrCreateCell(column, true);
 		c.incrementValue(increment);
 	}
 	
@@ -272,9 +296,9 @@ public class SparseTable implements ISparseTable {
 		/* new key? */
 		if(this.table.containsKey(rowName)) {
 			// attempt a merge
-			Row existingRow = this.getOrCreateRow(rowName, false);
+			IRow existingRow = this.getOrCreateRow(rowName, false);
 			
-			for(Map.Entry<String,Cell> entry : row.entrySet()) {
+			for(Map.Entry<String,ICell> entry : row.entrySet()) {
 				try {
 					existingRow.setValue(entry.getKey(), entry.getValue().getValue(), true);
 				} catch(IllegalStateException ex) {
@@ -352,17 +376,9 @@ public class SparseTable implements ISparseTable {
 		this.rowInsertionHandler = rowInsertionHandler;
 	}
 	
-	/**
-	 * Set an initial value to cell (rowName, columnName)
-	 * 
-	 * @param rowName never null
-	 * @param columnName never null
-	 * @param value may be null
-	 * @throws IllegalStateException if there was already a value
-	 */
 	public void setValueInitial(String rowName, String columnName, String value)
 	        throws IllegalStateException {
-		Row row = getOrCreateRow(rowName, true);
+		IRow row = getOrCreateRow(rowName, true);
 		row.setValue(columnName, value, true);
 	}
 	
@@ -375,7 +391,7 @@ public class SparseTable implements ISparseTable {
 		Map<String,SparseTable> map = new HashMap<String,SparseTable>();
 		
 		for(String rowName : this.rowNames) {
-			Row row = this.getOrCreateRow(rowName, false);
+			IRow row = this.getOrCreateRow(rowName, false);
 			String currentValue = row.getValue(colName);
 			
 			SparseTable table = map.get(currentValue);
@@ -384,7 +400,7 @@ public class SparseTable implements ISparseTable {
 				map.put(currentValue, table);
 			}
 			
-			Row copyRow = table.getOrCreateRow(rowName, true);
+			IRow copyRow = table.getOrCreateRow(rowName, true);
 			copyRow.addAll(row);
 		}
 		
@@ -397,9 +413,18 @@ public class SparseTable implements ISparseTable {
 	 * @see org.xydra.csv.ICsvTable#visitRows(org.xydra.csv.IRowVisitor)
 	 */
 	public void visitRows(IRowVisitor rowVisitor) {
-		for(Row row : this) {
+		for(IRow row : this) {
 			rowVisitor.visit(row);
 		}
 	}
 	
+	@Override
+	public void appendRow(String rowName, IReadableRow readableRow) {
+		Row row = new Row(this);
+		// copy content
+		for(Entry<String,ICell> entry : readableRow.entrySet()) {
+			row.setValue(entry.getKey(), entry.getValue().getValue());
+		}
+		this.addRow(rowName, row);
+	}
 }

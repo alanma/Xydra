@@ -1,12 +1,21 @@
 package org.xydra.csv;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.xydra.csv.impl.memory.Row;
 
 
-public interface ISparseTable extends Iterable<Row> {
+public interface ISparseTable extends Iterable<Row>, IRowSink {
+	
+	/**
+	 * Adds a column name which will appear in the output but not necessarily
+	 * use any space if now rows contain entries for it.
+	 * 
+	 * @param columnName
+	 */
+	void addColumnName(String columnName);
 	
 	/**
 	 * Aggregates all rows that share the same values for the given keys.
@@ -96,18 +105,21 @@ public interface ISparseTable extends Iterable<Row> {
 	 * 
 	 * @param key never null
 	 * @param value may be null
-	 * @return a sub-table where no column has for the given key the given value
+	 * @return a sub-table with dropped rows. The resulting table has no row in
+	 *         which column 'columnName' has the given 'value'.
 	 */
-	ISparseTable drop(String key, String value);
+	ISparseTable drop(String columnName, String value);
 	
 	/**
 	 * Create a sub-table
 	 * 
-	 * @param key never null
+	 * @param columnName never null
 	 * @param value may be null
-	 * @return a sub-table where column key has the given value
+	 * @return a sub-table where in each row columnName has the given value
 	 */
-	ISparseTable filter(String key, String value);
+	ISparseTable filter(String columnName, String value);
+	
+	List<String> getColumnNames();
 	
 	/**
 	 * Returns an existing row or creates a new one. The new row is guaranteed
@@ -120,7 +132,11 @@ public interface ISparseTable extends Iterable<Row> {
 	 * @return a new or exiting {@link Row} or null (if 'create' was false and
 	 *         no {@link Row} with given 'rowName' exists).
 	 */
-	Row getOrCreateRow(String rowName, boolean create);
+	IRow getOrCreateRow(String rowName, boolean create);
+	
+	boolean getParamAggregateStrings();
+	
+	boolean getParamRestrictToExcelSize();
 	
 	/**
 	 * @param row never null
@@ -168,6 +184,16 @@ public interface ISparseTable extends Iterable<Row> {
 	 *            Default is false.
 	 */
 	void setParamRestrictToExcelSize(boolean b);
+	
+	/**
+	 * Set an initial value to cell (rowName, columnName)
+	 * 
+	 * @param rowName never null
+	 * @param columnName never null
+	 * @param value may be null
+	 * @throws IllegalStateException if there was already a value
+	 */
+	void setValueInitial(String rowName, String columnName, String value);
 	
 	/**
 	 * For every change in 'colName' a new sub-table is created with the rows

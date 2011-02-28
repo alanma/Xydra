@@ -153,7 +153,7 @@ public class TableTools {
 			long processed = 0;
 			
 			@Override
-            public void afterRowInsertion(Row row) {
+            public void afterRowInsertion(IRow row) {
 			}
 			
 			@Override
@@ -181,7 +181,7 @@ public class TableTools {
 				/* If we have previously seen a row with the same compundKey... */
 				if(this.compoundKeys2row.containsKey(compoundKey)) {
 					/* ... we aggregate this row into the existing row */
-					Row masterRow = this.compoundKeys2row.get(compoundKey);
+					IRow masterRow = this.compoundKeys2row.get(compoundKey);
 					masterRow.aggregate(row, new String[] {
 
 					keyColumnName1, keyColumnName2
@@ -226,7 +226,7 @@ public class TableTools {
 		
 		/* for each key: determine set of occurring values */
 		Map<String,Set<String>> key2valueRange = new HashMap<String,Set<String>>();
-		for(Row row : sourceTable) {
+		for(IRow row : sourceTable) {
 			for(String key : keys) {
 				Set<String> valueRange = key2valueRange.get(key);
 				if(valueRange == null) {
@@ -241,7 +241,7 @@ public class TableTools {
 		/* re-sort table into group tables */
 		long serialNumber = 1;
 		Map<NKeys,CsvTable> groups = new HashMap<NKeys,CsvTable>();
-		for(Row sourceRow : sourceTable) {
+		for(IRow sourceRow : sourceTable) {
 			/* create compound key */
 			List<String> compoundRowNameList = new LinkedList<String>();
 			for(String key : keys) {
@@ -258,7 +258,7 @@ public class TableTools {
 			relevantCols.addAll(sum.keys);
 			relevantCols.addAll(average.keys);
 			relevantCols.addAll(range.keys);
-			Row groupRow = groupTable.getOrCreateRow("" + serialNumber++, true);
+			IRow groupRow = groupTable.getOrCreateRow("" + serialNumber++, true);
 			for(String relevantCol : relevantCols) {
 				groupRow.setValue(relevantCol, sourceRow.getValue(relevantCol), true);
 			}
@@ -267,7 +267,7 @@ public class TableTools {
 		log.info("Aggregate group tables to target table.");
 		/* aggregate to targetTable */
 		for(NKeys groupKey : groups.keySet()) {
-			Row targetRow = targetTable.getOrCreateRow(groupKey.toString(), true);
+			IRow targetRow = targetTable.getOrCreateRow(groupKey.toString(), true);
 			// set key parts
 			for(int i = 0; i < keys.keys.size(); i++) {
 				targetRow.setValue(keys.keys.get(i), groupKey.keys.get(i), true);
@@ -280,7 +280,7 @@ public class TableTools {
 			for(String sumCol : sum) {
 				long longResult = 0;
 				double doubleResult = 0;
-				for(Row groupRow : groupTable) {
+				for(IRow groupRow : groupTable) {
 					try {
 						longResult += groupRow.getValueAsLong(sumCol);
 					} catch(WrongDatatypeException e) {
@@ -303,7 +303,7 @@ public class TableTools {
 			for(String averageCol : average) {
 				long longResult = 0;
 				double doubleResult = 0;
-				for(Row groupRow : groupTable) {
+				for(IRow groupRow : groupTable) {
 					try {
 						longResult += groupRow.getValueAsLong(averageCol);
 					} catch(WrongDatatypeException e) {
@@ -320,7 +320,7 @@ public class TableTools {
 			// count value range
 			for(String rangeCol : range) {
 				Set<String> seenValues = new HashSet<String>();
-				for(Row groupRow : groupTable) {
+				for(IRow groupRow : groupTable) {
 					seenValues.add(groupRow.getValue(rangeCol));
 				}
 				targetRow.setValue(rangeCol + "--range", "" + seenValues.size(), true);

@@ -1,80 +1,81 @@
 package org.xydra.csv.impl.memory;
 
+import org.xydra.csv.ICell;
+import org.xydra.csv.TypeHandler;
 import org.xydra.csv.WrongDatatypeException;
 
 
-class Cell {
+class Cell implements ICell {
 	
-	private String s;
+	private String value;
 	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.xydra.csv.impl.memory.ICell#appendString(java.lang.String, int)
+	 */
 	public void appendString(String s, int maximalFieldLength) {
-		int sLen = this.s == null ? 0 : this.s.length();
+		int sLen = this.value == null ? 0 : this.value.length();
 		// if we have any space left
 		if(sLen < maximalFieldLength) {
 			// initialise
-			if(this.s == null) {
-				this.s = "";
+			if(this.value == null) {
+				this.value = "";
 			}
 			// append
-			this.s += s.substring(0, Math.min(s.length(), maximalFieldLength - sLen));
+			this.value += s.substring(0, Math.min(s.length(), maximalFieldLength - sLen));
 		}
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.xydra.csv.impl.memory.ICell#getValue()
+	 */
 	public String getValue() {
-		return this.s;
+		return this.value;
 	}
 	
-	public double getValueAsDouble() {
-		if(this.s == null) {
-			return 0;
-		} else {
-			try {
-				return Double.parseDouble(this.s);
-			} catch(NumberFormatException e) {
-				// retry with ',' as '.'
-				String usVersion = this.s.replace(",", ".");
-				try {
-					return Double.parseDouble(usVersion);
-				} catch(NumberFormatException e2) {
-					throw new WrongDatatypeException("Content was '" + this.s
-					        + "'. Could not parse as double. Even tried to parse as '" + usVersion
-					        + "'", e);
-				}
-			}
-		}
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.xydra.csv.impl.memory.ICell#getValueAsDouble()
+	 */
+	public double getValueAsDouble() throws WrongDatatypeException {
+		return TypeHandler.asDouble(this.value);
 	}
 	
-	public long getValueAsLong() {
-		if(this.s == null) {
-			return 0;
-		} else {
-			try {
-				return Long.parseLong(this.s);
-			} catch(NumberFormatException e) {
-				throw new WrongDatatypeException("Content was '" + this.s
-				        + "'. Could not parse as long.", e);
-			}
-		}
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.xydra.csv.impl.memory.ICell#getValueAsLong()
+	 */
+	public long getValueAsLong() throws WrongDatatypeException {
+		return TypeHandler.asLong(this.value);
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.xydra.csv.impl.memory.ICell#incrementValue(int)
+	 */
 	public void incrementValue(int increment) throws WrongDatatypeException {
 		long l = getValueAsLong();
 		l = l + increment;
-		this.s = "" + l;
+		this.value = "" + l;
 	}
 	
-	/**
-	 * @param value may be null, to store a null.
-	 * @param initial if true, throws an {@link IllegalStateException} if there
-	 *            was already a value
-	 * @throws IllegalStateException if there was already a value
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.xydra.csv.impl.memory.ICell#setValue(java.lang.String, boolean)
 	 */
 	public void setValue(String value, boolean initial) {
-		if(initial && this.s != null) {
-			throw new IllegalStateException("Value was not null but '" + this.s
+		if(initial && this.value != null) {
+			throw new IllegalStateException("Value was not null but '" + this.value
 			        + "' so could not set to '" + value + "'");
 		}
-		this.s = value;
+		this.value = value;
 	}
 	
 }
