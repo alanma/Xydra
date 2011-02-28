@@ -104,9 +104,8 @@ public class GaePersistence implements XydraPersistence {
 	}
 	
 	@Override
-	// TODO PERFORMANCE try to find faster implementation
 	public boolean hasModel(XID modelId) {
-		return this.getModelIds().contains(modelId);
+		return InternalGaeXEntity.exists(getModelAddress(modelId));
 	}
 	
 	@Override

@@ -12,6 +12,7 @@ import org.xydra.core.model.XModel;
 import org.xydra.store.impl.gae.GaeUtils;
 
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.sun.org.apache.xpath.internal.objects.XObject;
@@ -72,6 +73,12 @@ public class InternalGaeXEntity {
 			return address.getModel();
 		}
 		return address.getRepository();
+	}
+	
+	public static boolean exists(XAddress address) {
+		Key key = KeyStructure.createEntityKey(address);
+		Entity entity = GaeUtils.getEntity(key);
+		return (entity != null);
 	}
 	
 }
