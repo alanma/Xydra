@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.xydra.base.XAddress;
+import org.xydra.index.XI;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.XydraRuntime;
@@ -98,9 +99,10 @@ public class GaeUtils {
 		
 		makeSureDatestoreServiceIsInitialised();
 		
+		Entity cachedEntity = null;
 		if(useMemCache) {
 			// try first to get from memcache
-			Entity cachedEntity = (Entity)XydraRuntime.getMemcache().get(key);
+			cachedEntity = (Entity)XydraRuntime.getMemcache().get(key);
 			if(cachedEntity != null) {
 				log.debug("Getting entity " + key.toString() + " from MemCache");
 				if(!cachedEntity.equals(NULL_ENTITY)) {
@@ -113,19 +115,7 @@ public class GaeUtils {
 		Future<Entity> entity = datastore.get(trans, key);
 		Entity e = waitFor(entity);
 		if(useMemCache) {
-			/*
-			 * FIXME race condition: Any changes made to this entity at this
-			 * point (between the datastore.get() and the getMemcache.put()
-			 * calls) by putEntity() or deleteEntity() might be overwritten in
-			 * the cache by us
-			 */
-			if(e != null) {
-				log.debug("Putting entity " + key.toString() + " in MemCache");
-				XydraRuntime.getMemcache().put(key, e);
-			} else {
-				log.debug("Putting NULL_ENTITY " + key.toString() + " in MemCache");
-				XydraRuntime.getMemcache().put(key, NULL_ENTITY);
-			}
+			updateCachedEntity(key, cachedEntity, e);
 		}
 		if(e == null) {
 			log.debug("--> null");
@@ -142,10 +132,11 @@ public class GaeUtils {
 		
 		makeSureDatestoreServiceIsInitialised();
 		
-		if(useMemCache && trans == null) {
+		Entity cachedEntity = null;
+		if(useMemCache) {
 			// try first to get from memcache
-			Entity cachedEntity = (Entity)XydraRuntime.getMemcache().get(key);
-			if(cachedEntity != null) {
+			cachedEntity = (Entity)XydraRuntime.getMemcache().get(key);
+			if(cachedEntity != null && trans == null) {
 				log.debug("Getting entity " + key.toString() + " from MemCache");
 				if(cachedEntity.equals(NULL_ENTITY)) {
 					log.debug("--> null");
@@ -153,31 +144,55 @@ public class GaeUtils {
 				} else {
 					return cachedEntity;
 				}
+			} else if(trans != null) {
+				/*
+				 * If there is a transaction, we must read from the actual
+				 * datastore so that the transaction will abort if the value is
+				 * changed before trans.commit(). TODO in some cases (ie:
+				 * revision grabbing) it is OK to return an old entity, but
+				 * returning null could be fatal.
+				 */
 			}
-		} else {
-			// If there is a transaction, we must read from the actual datastore
-			// so that the transaction will abort if the value is changed before
-			// trans.commit().
-			// TODO in some cases (ie: revision grabbing) it is ok to return an
-			// old entity, but returning null could be fatal.
 		}
 		
 		log.debug("Getting entity " + key.toString() + " from GAE data store");
 		Future<Entity> entity = datastore.get(trans, key);
 		Entity e = waitFor(entity);
 		if(useMemCache) {
-			if(e != null) {
-				log.debug("Putting entity " + key.toString() + " in MemCache");
-				XydraRuntime.getMemcache().put(key, e);
-			} else {
-				log.debug("Putting NULL_ENTITY " + key.toString() + " in MemCache");
-				XydraRuntime.getMemcache().put(key, NULL_ENTITY);
-			}
+			updateCachedEntity(key, cachedEntity, e);
 		}
 		if(e == null) {
 			log.debug("--> null");
 		}
 		return e;
+	}
+	
+	private static void updateCachedEntity(Key key, Entity oldEntity, Entity newEntity) {
+		
+		Entity ne = newEntity;
+		Entity oe = oldEntity;
+		
+		if(ne == null) {
+			ne = NULL_ENTITY;
+		}
+		
+		while(true) {
+			
+			Entity e = (Entity)XydraRuntime.getMemcache().put(key, ne);
+			
+			if(XI.equals(oe, e) || XI.equals(e, ne)) {
+				return;
+			}
+			
+			// Someone changed the entity, better change it back to their value.
+			
+			// FIXME this can still cause short periods where the cache is wrong
+			
+			oe = ne;
+			ne = e;
+			
+		}
+		
 	}
 	
 	private static void makeSureDatestoreServiceIsInitialised() {
