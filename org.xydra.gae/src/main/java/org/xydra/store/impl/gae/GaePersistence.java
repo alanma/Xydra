@@ -1,7 +1,5 @@
 package org.xydra.store.impl.gae;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -89,13 +87,7 @@ public class GaePersistence implements XydraPersistence {
 		if(address.getModel() == null) {
 			throw new RequestException("address must specify a model, was " + address);
 		}
-		Iterator<XEvent> it = getChangesService(address.getModel()).getEventsBetween(beginRevision,
-		        endRevision);
-		ArrayList<XEvent> events = new ArrayList<XEvent>();
-		while(it.hasNext()) {
-			events.add(it.next());
-		}
-		return events;
+		return getChangesService(address.getModel()).getEventsBetween(beginRevision, endRevision);
 	}
 	
 	@Override

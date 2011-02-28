@@ -23,6 +23,7 @@ import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.store.XydraRuntime;
+import org.xydra.store.impl.gae.changes.GaeChangesService;
 
 
 /**
@@ -34,12 +35,12 @@ import org.xydra.store.XydraRuntime;
  */
 public class GaeSnapshotService {
 	
-	private final XChangeLog log;
+	private final GaeChangesService log;
 	
 	/**
 	 * @param changeLog The change log to load snapshots from.
 	 */
-	public GaeSnapshotService(XChangeLog changeLog) {
+	public GaeSnapshotService(GaeChangesService changeLog) {
 		this.log = changeLog;
 	}
 	

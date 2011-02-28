@@ -26,7 +26,6 @@ import org.xydra.base.rmof.XReadableModel;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.DeltaUtils;
-import org.xydra.core.model.impl.memory.AbstractChangeLog;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlEvent;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
@@ -123,7 +122,7 @@ import com.google.appengine.api.datastore.Transaction;
  * @author dscharrer
  * 
  */
-public class GaeChangesService extends AbstractChangeLog {
+public class GaeChangesService {
 	
 	private static final Logger log = LoggerFactory.getLogger(GaeChangesService.class);
 	
@@ -1310,22 +1309,41 @@ public class GaeChangesService extends AbstractChangeLog {
 		return n.intValue();
 	}
 	
-	public long getFirstRevisionNumber() {
-		// We always start our revision numbers at 0.
-		return 0;
-	}
-	
-	/**
-	 * @return true if there have been any changes to this model in the past.
-	 */
-	public boolean hasLog() {
+	public List<XEvent> getEventsBetween(long beginRevision, long endRevision) {
 		
-		if(getCachedLastTakenRevision() >= 0) {
-			return true;
+		long curRev = getCurrentRevisionNumber();
+		
+		if(beginRevision < 0) {
+			throw new IndexOutOfBoundsException(
+			        "beginRevision is not a valid revision number, was " + beginRevision);
 		}
 		
-		Key key = KeyStructure.createChangeKey(this.modelAddr, 0L);
-		return (GaeUtils.getEntity(key) != null);
+		if(endRevision < 0) {
+			throw new IndexOutOfBoundsException("endRevision is not a valid revision number, was "
+			        + endRevision);
+		}
+		
+		if(beginRevision > endRevision) {
+			throw new IllegalArgumentException("beginRevision may not be greater than endRevision");
+		}
+		
+		if(beginRevision >= endRevision || endRevision <= 0) {
+			return new ArrayList<XEvent>(0);
+		}
+		
+		long begin = beginRevision < 0 ? 0 : beginRevision;
+		long end = endRevision > curRev ? curRev + 1 : endRevision;
+		
+		List<XEvent> result = new ArrayList<XEvent>((int)(end - begin));
+		
+		for(long rev = begin; rev < end; rev++) {
+			XEvent event = getEventAt(rev);
+			if(event != null) {
+				result.add(event);
+			}
+		}
+		
+		return result;
 	}
 	
 }
