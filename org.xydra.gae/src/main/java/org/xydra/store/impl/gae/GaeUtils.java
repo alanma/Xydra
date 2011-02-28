@@ -210,7 +210,11 @@ public class GaeUtils {
 		assert res != null;
 		if(useMemCache) {
 			// remove first from memcache
-			XydraRuntime.getMemcache().remove(entity.getKey());
+			if(trans == null) {
+				XydraRuntime.getMemcache().put(entity.getKey(), entity);
+			} else {
+				XydraRuntime.getMemcache().remove(entity.getKey());
+			}
 		}
 	}
 	
@@ -234,7 +238,11 @@ public class GaeUtils {
 		Future<Key> result = datastore.put(trans, entity);
 		if(useMemCache) {
 			// remove first from memcache
-			XydraRuntime.getMemcache().remove(entity.getKey());
+			if(trans == null) {
+				XydraRuntime.getMemcache().put(entity.getKey(), entity);
+			} else {
+				XydraRuntime.getMemcache().remove(entity.getKey());
+			}
 		}
 		return result;
 	}
@@ -294,7 +302,7 @@ public class GaeUtils {
 		makeSureDatestoreServiceIsInitialised();
 		if(useMemCache) {
 			// delete first in memcache
-			XydraRuntime.getMemcache().remove(key);
+			XydraRuntime.getMemcache().put(key, NULL_ENTITY);
 		}
 		return datastore.delete(key);
 	}
@@ -310,7 +318,11 @@ public class GaeUtils {
 		makeSureDatestoreServiceIsInitialised();
 		if(useMemCache) {
 			// delete first in memcache
-			XydraRuntime.getMemcache().remove(key);
+			if(trans == null) {
+				XydraRuntime.getMemcache().put(key, NULL_ENTITY);
+			} else {
+				XydraRuntime.getMemcache().remove(key);
+			}
 		}
 		Future<Void> result = datastore.delete(trans, key);
 		waitFor(result);
