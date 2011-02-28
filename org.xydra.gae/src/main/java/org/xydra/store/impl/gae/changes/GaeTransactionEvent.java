@@ -5,8 +5,8 @@ package org.xydra.store.impl.gae.changes;
 
 import java.util.Iterator;
 
+import org.xydra.base.XAddress;
 import org.xydra.base.XID;
-import org.xydra.base.XType;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XEvent;
@@ -14,6 +14,7 @@ import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.change.impl.memory.AbstractTransactionEvent;
 import org.xydra.index.XI;
+import org.xydra.store.impl.gae.changes.GaeEventService.AsyncAtomicEvent;
 
 
 /**
@@ -25,17 +26,13 @@ import org.xydra.index.XI;
  */
 class GaeTransactionEvent extends AbstractTransactionEvent {
 	
-	private final GaeChangesService changesService;
-	private final XAtomicEvent[] events;
+	private final AsyncAtomicEvent[] events;
 	
-	public GaeTransactionEvent(GaeChangesService changesService, int size, XID actor, long rev) {
-		super(actor, changesService.getBaseAddress(), rev - 1, XEvent.RevisionOfEntityNotSet);
+	public GaeTransactionEvent(XAddress modelAddr, AsyncAtomicEvent[] events, XID actor, long rev) {
+		super(actor, modelAddr, rev - 1, XEvent.RevisionOfEntityNotSet);
 		
-		this.changesService = changesService;
-		this.events = new XAtomicEvent[size];
+		this.events = events;
 		
-		assert size > 1;
-		assert changesService.getBaseAddress().getAddressedType() == XType.XMODEL;
 		assert rev >= 0;
 		
 		assert assertIsMinimal();
@@ -44,27 +41,17 @@ class GaeTransactionEvent extends AbstractTransactionEvent {
 	
 	public XAtomicEvent getEvent(int index) {
 		
-		if(index < 0 || index >= size()) {
-			throw new IndexOutOfBoundsException();
-		}
+		XAtomicEvent ae = this.events[index].get();
 		
-		XAtomicEvent ae = this.events[index];
+		assert ae != null;
+		assert XI.equals(getActor(), ae.getActor());
+		assert getTarget().equalsOrContains(ae.getChangedEntity());
+		assert ae.getChangeType() != ChangeType.TRANSACTION;
+		assert ae.inTransaction();
 		
-		if(ae == null) {
-			ae = this.events[index] = this.changesService
-			        .getAtomicEvent(getRevisionNumber(), index);
-			
-			assert ae != null;
-			assert XI.equals(getActor(), ae.getActor());
-			assert getTarget().equalsOrContains(ae.getChangedEntity());
-			assert ae.getChangeType() != ChangeType.TRANSACTION;
-			assert ae.inTransaction();
-			
-			assert (!(ae instanceof XRepositoryEvent))
-			        || ((index == 0 || index == size() - 1) && ae.getChangeType() == (index == 0 ? ChangeType.ADD
-			                : ChangeType.REMOVE));
-			
-		}
+		assert (!(ae instanceof XRepositoryEvent))
+		        || ((index == 0 || index == size() - 1) && ae.getChangeType() == (index == 0 ? ChangeType.ADD
+		                : ChangeType.REMOVE));
 		
 		return ae;
 	}

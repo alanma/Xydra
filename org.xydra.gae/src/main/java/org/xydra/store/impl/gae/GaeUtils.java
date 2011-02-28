@@ -123,50 +123,59 @@ public class GaeUtils {
 		return e;
 	}
 	
-	public static Entity[] getEntityBatch(Key[] keys) {
+	public static class AsyncEntity {
 		
-		Entity[] result = new Entity[keys.length];
+		private Future<Entity> future;
+		private Entity entity;
+		private Key key;
+		
+		private AsyncEntity(Key key, Future<Entity> future) {
+			this.future = future;
+			this.entity = null;
+			this.key = key;
+		}
+		
+		private AsyncEntity(Entity entity) {
+			this.future = null;
+			this.entity = entity;
+			this.key = null;
+		}
+		
+		public Entity get() {
+			if(this.future != null) {
+				this.entity = waitFor(this.future);
+				if(useMemCache) {
+					updateCachedEntity(this.key, null, this.entity);
+				}
+				this.future = null;
+			}
+			return this.entity;
+		}
+		
+	}
+	
+	public static AsyncEntity getEntityAsync(Key key) {
+		
+		makeSureDatestoreServiceIsInitialised();
 		
 		if(useMemCache) {
-			boolean hasAll = false;
-			for(int i = 0; i < keys.length; i++) {
-				// try first to get from memcache
-				result[i] = (Entity)XydraRuntime.getMemcache().get(keys[i]);
-				if(result[i] == null) {
-					hasAll = false;
+			// try first to get from memcache
+			Entity cachedEntity = (Entity)XydraRuntime.getMemcache().get(key);
+			if(cachedEntity != null) {
+				log.debug("Getting entity " + key.toString() + " from MemCache");
+				if(cachedEntity.equals(NULL_ENTITY)) {
+					log.debug("--> null");
+					return new AsyncEntity(null);
+				} else {
+					return new AsyncEntity(cachedEntity);
 				}
 			}
-			if(hasAll) {
-				for(int i = 0; i < result.length; i++) {
-					if(result[i].equals(NULL_ENTITY)) {
-						result[i] = null;
-					}
-				}
-				return result;
-			}
 		}
 		
-		@SuppressWarnings("unchecked")
-		Future<Entity>[] futures = (Future<Entity>[])new Future<?>[keys.length];
-		for(int i = 0; i < keys.length; i++) {
-			if(result[i] == null) {
-				futures[i] = datastore.get(keys[i]);
-			} else if(result[i].equals(NULL_ENTITY)) {
-				result[i] = null;
-			}
-		}
+		log.debug("Getting entity " + key.toString() + " from GAE data store");
+		Future<Entity> entity = datastore.get(key);
 		
-		for(int i = 0; i < keys.length; i++) {
-			if(futures[i] == null) {
-				continue;
-			}
-			result[i] = waitFor(futures[i]);
-			if(useMemCache) {
-				updateCachedEntity(keys[i], null, result[i]);
-			}
-		}
-		
-		return result;
+		return new AsyncEntity(key, entity);
 	}
 	
 	/**

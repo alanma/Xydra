@@ -33,7 +33,7 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 	// Value for PROP_TRANSINDEX if there hasn't been any XFieldEvent yet
 	private static final int TRANSINDEX_NONE = -1;
 	
-	private final GaeChangesService changesService;
+	private final XAddress modelAddr;
 	private final XAddress fieldAddr;
 	private final long fieldRev;
 	private final int transindex;
@@ -48,9 +48,8 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 	 * {@link InternalGaeObject#getField(XID)}.
 	 * 
 	 */
-	protected InternalGaeField(GaeChangesService changesService, XAddress fieldAddr,
-	        Entity fieldEntity) {
-		this.changesService = changesService;
+	protected InternalGaeField(XAddress modelAddr, XAddress fieldAddr, Entity fieldEntity) {
+		this.modelAddr = modelAddr;
 		assert fieldAddr.getAddressedType() == XType.XFIELD;
 		this.fieldAddr = fieldAddr;
 		this.fieldRev = getFieldRev(fieldEntity);
@@ -66,7 +65,8 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 			return null;
 		}
 		if(this.valueEvent == null) {
-			XAtomicEvent event = this.changesService.getAtomicEvent(this.fieldRev, this.transindex);
+			XAtomicEvent event = GaeEventService.getAtomicEvent(this.modelAddr, this.fieldRev,
+			        this.transindex).get();
 			if(!(event instanceof XFieldEvent)) {
 				throw new RuntimeException("field refers to an event that is not an XFieldEvent: "
 				        + event);

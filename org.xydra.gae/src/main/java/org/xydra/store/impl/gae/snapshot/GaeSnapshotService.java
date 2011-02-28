@@ -91,10 +91,11 @@ public class GaeSnapshotService {
 			return;
 		}
 		
-		// Check if we can skip eny events.
+		// Check if we can skip any events.
 		List<XEvent> rawEvents = new ArrayList<XEvent>();
 		for(long i = curRev; i > entry.revision; i--) {
-			XEvent event = this.log.getEventAt(i);
+			// IMPROVE make async
+			XEvent event = this.log.getEventAt(i).get();
 			if(event == null) {
 				continue;
 			}

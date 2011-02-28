@@ -26,11 +26,7 @@ import org.xydra.base.rmof.XReadableModel;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.DeltaUtils;
-import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlEvent;
-import org.xydra.core.xml.impl.MiniXMLParserImpl;
-import org.xydra.core.xml.impl.XmlOutStringBuffer;
-import org.xydra.index.XI;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -39,10 +35,10 @@ import org.xydra.store.GetEventsRequest;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.gae.GaeUtils;
+import org.xydra.store.impl.gae.GaeUtils.AsyncEntity;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.Text;
 import com.google.appengine.api.datastore.Transaction;
 
 
@@ -91,9 +87,9 @@ import com.google.appengine.api.datastore.Transaction;
  * the time the (last) process started working on the change (
  * {@link #PROP_LAST_ACTIVITY}).
  * 
- * If there are events associated with this change, {@link #PROP_EVENTCOUNT}
- * will specify how many. This property will not be set before the change has
- * reached {@link #STATUS_EXECUTING}
+ * If there are events associated with this change,
+ * {@link GaeEventService#PROP_EVENTCOUNT} will specify how many. This property
+ * will not be set before the change has reached {@link #STATUS_EXECUTING}
  * 
  * Possible status progression for XCHANGE Entities:
  * 
@@ -161,21 +157,6 @@ public class GaeChangesService {
 	 * Set when entering {@link #STATUS_CREATING}, never removed.
 	 */
 	private static final String PROP_ACTOR = "actor";
-	
-	/**
-	 * GAE Property key for the number of events that are associated with this
-	 * change.
-	 * 
-	 * Set when entering {@link #STATUS_EXECUTING}, never removed.
-	 */
-	private static final String PROP_EVENTCOUNT = "eventCount";
-	
-	// GAE Entity (type=XEVENT) property keys.
-	
-	/**
-	 * GAE Property key for the content of an individual event.
-	 */
-	private static final String PROP_EVENTCONTENT = "eventContent";
 	
 	// status IDs
 	
@@ -628,41 +609,7 @@ public class GaeChangesService {
 				return events;
 			}
 			
-			@SuppressWarnings("unchecked")
-			Future<Key>[] futures = (Future<Key>[])new Future<?>[events.size()];
-			
-			Key baseKey = change.entity.getKey();
-			for(int i = 0; i < events.size(); i++) {
-				XAtomicEvent ae = events.get(i);
-				assert (events.size() == 1) ^ ae.inTransaction();
-				Entity eventEntity = new Entity(KeyStructure.createEventKey(baseKey, i));
-				
-				// IMPROVE save event in a GAE-specific format:
-				// - don't save the "oldValue" again
-				// - don't save the actor again, as it's already in the change
-				// entity
-				// - don't save the model rev, as it is already in the key
-				XmlOutStringBuffer out = new XmlOutStringBuffer();
-				XmlEvent.toXml(ae, out, this.modelAddr);
-				Text text = new Text(out.getXml());
-				eventEntity.setUnindexedProperty(PROP_EVENTCONTENT, text);
-				
-				/*
-				 * Ignore if we are in danger of timing out (by not calling
-				 * giveUpIfTimeoutCritical()), as the events won't be read by
-				 * anyone until the change's status is set to STATUS_EXECUTING
-				 * (or STATUS_SUCCESS_EXECUTED)
-				 */
-				futures[i] = GaeUtils.putEntityAsync(eventEntity);
-				
-			}
-			
-			for(Future<Key> future : futures) {
-				GaeUtils.waitFor(future);
-			}
-			
-			Integer eventCount = events.size();
-			change.entity.setUnindexedProperty(PROP_EVENTCOUNT, eventCount);
+			GaeEventService.saveEvents(this.modelAddr, change.entity, events);
 			
 			change.entity.setUnindexedProperty(PROP_STATUS, STATUS_EXECUTING);
 			GaeUtils.putEntity(change.entity);
@@ -911,7 +858,7 @@ public class GaeChangesService {
 	/**
 	 * @return the status code associated with the given change {@link Entity}.
 	 */
-	private int getStatus(Entity changeEntity) {
+	private static int getStatus(Entity changeEntity) {
 		Number n = (Number)changeEntity.getProperty(PROP_STATUS);
 		assert n != null : "All change entities should have a status";
 		return n.intValue();
@@ -936,7 +883,7 @@ public class GaeChangesService {
 	/**
 	 * @return the actor associated with the given change {@link Entity}.
 	 */
-	private XID getActor(Entity changeEntity) {
+	private static XID getActor(Entity changeEntity) {
 		String actorStr = (String)changeEntity.getProperty(PROP_ACTOR);
 		if(actorStr == null) {
 			return null;
@@ -956,17 +903,8 @@ public class GaeChangesService {
 		assert assertRevisionInKey(change.entity.getKey(), change.rev);
 		assert Arrays.asList(STATUS_EXECUTING, STATUS_SUCCESS_EXECUTED).contains(
 		        change.entity.getProperty(PROP_STATUS));
-		assert change.entity.getProperty(PROP_EVENTCOUNT) != null;
 		
-		List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
-		
-		int eventCount = getEventCount(change.entity);
-		
-		for(int i = 0; i < eventCount; i++) {
-			events.add(getAtomicEvent(change.rev, i));
-		}
-		
-		return events;
+		return GaeEventService.loadEvents(this.modelAddr, change.entity, change.rev);
 	}
 	
 	private void cleanupChangeEntity(ChangeInProgress change, int status) {
@@ -1129,34 +1067,6 @@ public class GaeChangesService {
 	}
 	
 	/**
-	 * @param revisionNumber The revision number of the change the event is part
-	 *            of.
-	 * @param transindex The index of the event in the change.
-	 * @return the {@link XAtomicEvent} with the given index in the change with
-	 *         the given revisionNumber.
-	 */
-	public XAtomicEvent getAtomicEvent(long revisionNumber, int transindex) {
-		
-		Key changeKey = KeyStructure.createChangeKey(this.modelAddr, revisionNumber);
-		Key eventKey = KeyStructure.createEventKey(changeKey, transindex);
-		
-		// IMPROVE cache events
-		Entity eventEntity = GaeUtils.getEntity(eventKey);
-		if(eventEntity == null) {
-			return null;
-		}
-		Text eventData = (Text)eventEntity.getProperty(PROP_EVENTCONTENT);
-		
-		MiniElement eventElement = new MiniXMLParserImpl().parseXml(eventData.getValue());
-		
-		XAtomicEvent ae = XmlEvent.toAtomicEvent(eventElement, this.modelAddr);
-		
-		assert ae.getRevisionNumber() == revisionNumber;
-		
-		return ae;
-	}
-	
-	/**
 	 * @return the {@link XAddress} of the model managed by this
 	 *         {@link GaeChangesService} instance.
 	 */
@@ -1211,39 +1121,39 @@ public class GaeChangesService {
 		
 		long rev = currentRev;
 		
-		int n = 1;
-		mainloop: while(true) {
+		List<AsyncEntity> batch = new ArrayList<AsyncEntity>(1);
+		batch.add(GaeUtils.getEntityAsync(KeyStructure.createChangeKey(this.modelAddr, rev + 1)));
+		
+		int pos = 0;
+		
+		for(;; rev++) {
 			
-			Key[] keys = new Key[n];
-			for(int i = 0; i < n; i++) {
-				keys[i] = KeyStructure.createChangeKey(this.modelAddr, rev + i + 1);
+			Entity changeEntity = batch.get(pos).get();
+			if(changeEntity == null) {
+				break;
 			}
 			
-			Entity[] batch = GaeUtils.getEntityBatch(keys);
-			// IMPROVE only synchronize on the entities that are actually
-			// accessed.
-			
-			for(int i = 0; i < n; i++, rev++) {
-				
-				Entity changeEntity = batch[i];
-				if(changeEntity == null) {
-					break mainloop;
-				}
-				
-				int status = getStatus(changeEntity);
-				if(!isCommitted(status)) {
-					break mainloop;
-				}
-				
-				// Only update the current revision if the command actually
-				// changed something.
-				if(status == STATUS_SUCCESS_EXECUTED) {
-					currentRev = rev + 1;
-				}
-				
+			int status = getStatus(changeEntity);
+			if(!isCommitted(status)) {
+				break;
 			}
 			
-			n *= 2;
+			// Only update the current revision if the command actually changed
+			// something.
+			if(status == STATUS_SUCCESS_EXECUTED) {
+				currentRev = rev + 1;
+			}
+			
+			// Asynchronously fetch new change entities.
+			Key nextKey = KeyStructure.createChangeKey(this.modelAddr, rev + batch.size() + 1);
+			batch.set(pos, GaeUtils.getEntityAsync(nextKey));
+			pos++;
+			if(pos == batch.size()) {
+				Key newKey = KeyStructure.createChangeKey(this.modelAddr, rev + batch.size() + 2);
+				batch.add(GaeUtils.getEntityAsync(newKey));
+				pos = 0;
+			}
+			
 		}
 		
 		setCachedLastCommitedRevision(rev);
@@ -1252,66 +1162,60 @@ public class GaeChangesService {
 		return currentRev;
 	}
 	
+	public static class AsyncEvent {
+		
+		private final XAddress modelAddr;
+		private final AsyncEntity future;
+		private final long rev;
+		private XEvent event;
+		
+		protected AsyncEvent(XAddress modelAddr, AsyncEntity future, long rev) {
+			this.modelAddr = modelAddr;
+			this.future = future;
+			this.rev = rev;
+		}
+		
+		public Entity getEntity() {
+			return this.future.get();
+		}
+		
+		public XEvent get() {
+			
+			Entity changeEntity = this.future.get();
+			if(changeEntity == null) {
+				return null;
+			}
+			
+			int status = getStatus(changeEntity);
+			if(status != STATUS_EXECUTING && status != STATUS_SUCCESS_EXECUTED) {
+				// no events available (yet) for this revision.
+				return null;
+			}
+			
+			XID actor = getActor(changeEntity);
+			
+			this.event = GaeEventService.asEvent(this.modelAddr, this.rev, actor, changeEntity);
+			
+			return this.event;
+		}
+	}
+	
 	/**
 	 * Get the event at the specified revision number.
 	 * 
 	 * @see XydraStore#getEvents(XID, String, GetEventsRequest[],
 	 *      org.xydra.store.Callback)
 	 */
-	public XEvent getEventAt(long rev) {
+	public AsyncEvent getEventAt(long rev) {
 		
-		Entity changeEntity = GaeUtils.getEntity(KeyStructure.createChangeKey(this.modelAddr, rev));
+		Key key = KeyStructure.createChangeKey(this.modelAddr, rev);
+		AsyncEntity changeEntity = GaeUtils.getEntityAsync(key);
 		
-		if(changeEntity == null) {
-			return null;
-		}
+		return new AsyncEvent(this.modelAddr, changeEntity, rev);
 		
-		int status = getStatus(changeEntity);
-		
-		if(status != STATUS_EXECUTING && status != STATUS_SUCCESS_EXECUTED) {
-			// no events available (yet) for this revision.
-			return null;
-		}
-		
-		int eventCount = getEventCount(changeEntity);
-		assert eventCount > 0 : "executed changes should have at least one event";
-		
-		XID actor = getActor(changeEntity);
-		
-		if(eventCount > 1) {
-			
-			// IMPROVE cache transaction event
-			return new GaeTransactionEvent(this, eventCount, actor, rev);
-			
-		} else {
-			
-			XAtomicEvent ae = getAtomicEvent(rev, 0);
-			assert ae != null;
-			assert XI.equals(actor, ae.getActor());
-			assert this.modelAddr.equalsOrContains(ae.getChangedEntity());
-			assert ae.getChangeType() != ChangeType.TRANSACTION;
-			assert !ae.inTransaction();
-			return ae;
-			
-		}
-		
-	}
-	
-	/**
-	 * @return the number of {@link XAtomicEvent}s associated with the given
-	 *         change {@link Entity}.
-	 */
-	private int getEventCount(Entity changeEntity) {
-		Number n = (Number)changeEntity.getProperty(PROP_EVENTCOUNT);
-		if(n == null) {
-			return 0;
-		}
-		return n.intValue();
 	}
 	
 	public List<XEvent> getEventsBetween(long beginRevision, long endRevision) {
-		
-		long curRev = getCurrentRevisionNumber();
 		
 		if(beginRevision < 0) {
 			throw new IndexOutOfBoundsException(
@@ -1332,18 +1236,67 @@ public class GaeChangesService {
 		}
 		
 		long begin = beginRevision < 0 ? 0 : beginRevision;
-		long end = endRevision > curRev ? curRev + 1 : endRevision;
 		
-		List<XEvent> result = new ArrayList<XEvent>((int)(end - begin));
+		long currentRev = getCachedCurrentRevision();
 		
-		for(long rev = begin; rev < end; rev++) {
-			XEvent event = getEventAt(rev);
-			if(event != null) {
-				result.add(event);
-			}
+		List<XEvent> events = new ArrayList<XEvent>();
+		
+		int initialBuffer = 1;
+		if(endRevision <= currentRev) {
+			initialBuffer = (int)(endRevision - begin);
+		}
+		List<AsyncEvent> batch = new ArrayList<AsyncEvent>(initialBuffer);
+		for(int i = 0; i < initialBuffer; i++) {
+			batch.add(getEventAt(begin + i));
 		}
 		
-		return result;
+		int pos = 0;
+		
+		boolean trackCurrentRev = (begin <= currentRev) && (currentRev < endRevision);
+		
+		long rev = begin;
+		for(; rev < endRevision; rev++) {
+			
+			Entity changeEntity = batch.get(pos).getEntity();
+			if(changeEntity == null) {
+				break;
+			}
+			
+			assert assertRevisionInKey(changeEntity.getKey(), rev);
+			
+			int status = getStatus(changeEntity);
+			if(!isCommitted(status)) {
+				break;
+			}
+			
+			XEvent event = batch.get(pos).get();
+			if(event != null) {
+				if(trackCurrentRev) {
+					currentRev = rev;
+				}
+				events.add(event);
+			}
+			
+			// Asynchronously fetch new change entities.
+			if(rev + batch.size() < endRevision) {
+				batch.set(pos, getEventAt(rev + batch.size()));
+			}
+			pos++;
+			if(pos == batch.size()) {
+				if(rev + batch.size() + 1 < endRevision) {
+					batch.add(getEventAt(rev + batch.size() + 1));
+				}
+				pos = 0;
+			}
+			
+		}
+		
+		if(trackCurrentRev) {
+			setCachedLastCommitedRevision(rev - 1);
+			setCachedCurrentRevision(currentRev);
+		}
+		
+		return events;
 	}
 	
 }

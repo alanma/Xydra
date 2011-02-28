@@ -12,8 +12,8 @@ public class GaePersistenceSynchronizerTest extends AbstractPersistenceSynchroni
 	
 	@BeforeClass
 	public static void init() {
-		GaeTestfixer.enable();
 		LoggerTestHelper.init();
+		GaeTestfixer.enable();
 		persistence = new GaePersistence(XX.toId("repo"));
 		AbstractPersistenceSynchronizerTest.init();
 	}
