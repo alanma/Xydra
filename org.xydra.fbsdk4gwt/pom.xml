@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.xydra</groupId>
+		<artifactId>maven-root</artifactId>
+		<version>2011.01.22</version>
+	</parent>
+
+	<groupId>org.xydra</groupId>
+	<artifactId>fbsdk4gwt</artifactId>
+	<name>Facebook SDK for GWT wrapper</name>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<!-- Specify hard-coded project properties here -->
+	<properties>
+
+		<!-- This is just for "eclipse:eclipse" goal to always attempt downloading 
+			sources -->
+		<downloadSources>false</downloadSources>
+
+		<!-- convenience to define GWT version in one place -->
+		<gwt.version>2.0.4</gwt.version>
+
+		<!-- define a transient output directory for gwt -->
+		<gwt.output.directory>./war</gwt.output.directory>
+
+		<!-- the value of the rename-to attribute in your GWT module configuration -->
+		<gwt.module.alias>Fbsdk4gwt</gwt.module.alias>
+
+		<gwt.compiler.force>true</gwt.compiler.force>
+
+
+	</properties>
+
+	<pluginRepositories>
+
+		<pluginRepository>
+			<id>maven2-repository.dev.java.net</id>
+			<url>http://download.java.net/maven/2</url>
+			<layout>default</layout>
+		</pluginRepository>
+
+	</pluginRepositories>
+
+	<repositories>
+		<!-- For API VIZ -->
+		<repository>
+			<id>jboss.releases</id>
+			<name>JBoss releases</name>
+			<url>http://repository.jboss.org/maven2</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+
+		<!-- Java.net repo for wagon-svn -->
+		<repository>
+			<id>javanet-repo</id>
+			<url>
+				http://download.java.net/maven/2
+			</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</releases>
+		</repository>
+
+
+		<repository>
+			<id>maven2-repository.dev.java.net</id>
+			<url>http://download.java.net/maven/2</url>
+			<layout>default</layout>
+		</repository>
+
+	</repositories>
+
+	<dependencies>
+
+		<!-- GWT dependencies (from central repo) -->
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-servlet</artifactId>
+			<version>${gwt.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-user</artifactId>
+			<version>${gwt.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- gwt-log -->
+		<dependency>
+			<groupId>com.google.code.gwt-log</groupId>
+			<artifactId>gwt-log</artifactId>
+			<version>3.0.3</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>compile</scope>
+			<version>4.8.2</version>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<!-- Compile classes into the war transient directory for hosted mode live 
+			editing -->
+		<!-- This confuses the maven site generation -->
+		<outputDirectory>${gwt.output.directory}/WEB-INF/classes</outputDirectory>
+
+
+		<!-- via https://wagon-svn.dev.java.net/ -->
+		<!-- <extensions> <extension> <groupId>org.jvnet.wagon-svn</groupId> <artifactId>wagon-svn</artifactId> 
+			<version>1.9</version> </extension> <extension> <groupId>org.apache.maven.wagon</groupId> 
+			<artifactId>wagon-ssh-external</artifactId> <version>1.0-beta-2</version> 
+			</extension> </extensions> -->
+		<plugins>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>gwt-maven-plugin</artifactId>
+				<version>1.2</version>
+				<configuration>
+					<runTarget>Demo.html</runTarget>
+					<output>${gwt.output.directory}</output>
+					<logLevel>INFO</logLevel>
+					<style>DETAILED</style>
+					<module>org.xydra.fbsdk4gwt.Fbsdk4gwt</module>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>process-classes</phase>
+						<configuration>
+							<extraJvmArgs>-Xmx512M -Xss1024k</extraJvmArgs>
+						</configuration>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>gwt-test</id>
+						<phase>test</phase>
+						<goals>
+							<goal>test</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.2</version>
+				<executions>
+					<!-- This execution copies the war folder to the gwt transient output 
+						directory -->
+					<execution>
+						<id>war-folder-creation</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+								<copy todir="${gwt.output.directory}">
+									<fileset dir="${basedir}/src/main/webapp" />
+								</copy>
+							</tasks>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<!-- Include GWT compiler output in the war -->
+				<!--<configuration> <webResources> <resource> <directory>${gwt.output.directory}/${gwt.module.alias}</directory> 
+					<targetPath>${gwt.module.alias}</targetPath> </resource> </webResources> 
+					</configuration> -->
+			</plugin>
+
+			<!-- set encoding to something not platform dependent -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.3</version>
+				<configuration>
+				</configuration>
+			</plugin>
+
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>${maven.compiler.source}</source>
+					<target>${maven.compiler.target}</target>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+
+		</plugins>
+	</build>
+
+</project>
