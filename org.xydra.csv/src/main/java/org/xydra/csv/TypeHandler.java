@@ -5,8 +5,6 @@ package org.xydra.csv;
  * 
  * TODO handle boolean, floating point, string
  * 
- * TODO use this class
- * 
  * @author voelkel
  * 
  */
