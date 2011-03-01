@@ -1,6 +1,7 @@
 package org.xydra.csv.impl.memory;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -12,7 +13,17 @@ import org.xydra.csv.IReadableRow;
 
 public class SingleRow extends AbstractReadableRow implements IReadableRow {
 	
-	private Map<String,ICell> map;
+	private Map<String,ICell> map = new HashMap<String,ICell>();
+	
+	public SingleRow() {
+	}
+	
+	public SingleRow(String[][] arrayOfPairs) {
+		for(String[] pair : arrayOfPairs) {
+			assert pair.length == 2;
+			this.map.put(pair[0], new Cell(pair[1]));
+		}
+	}
 	
 	@Override
 	public Collection<String> getColumnNames() {

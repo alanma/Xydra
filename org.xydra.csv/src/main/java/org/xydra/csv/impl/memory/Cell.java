@@ -9,6 +9,13 @@ class Cell implements ICell {
 	
 	private String value;
 	
+	public Cell() {
+	}
+	
+	public Cell(String string) {
+		this.value = string;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 

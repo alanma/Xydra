@@ -1,8 +1,8 @@
 package org.xydra.csv;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.xydra.csv.impl.memory.Row;
 
@@ -125,7 +125,13 @@ public interface ISparseTable extends Iterable<Row>, IRowHandler {
 	 */
 	ISparseTable filter(String columnName, String value);
 	
-	List<String> getColumnNames();
+	Set<String> getColumnNames();
+	
+	/**
+	 * @return sorted column names or null if column names are not sorted (see
+	 *         constructor)
+	 */
+	Iterable<String> getColumnNamesSorted();
 	
 	/**
 	 * Returns an existing row or creates a new one. The new row is guaranteed

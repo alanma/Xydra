@@ -68,4 +68,15 @@ public abstract class AbstractReadableRow implements IReadableRow {
 		}
 	}
 	
+	@Override
+	public String toString() {
+		StringBuffer buf = new StringBuffer();
+		buf.append("{ ");
+		for(String colName : getColumnNames()) {
+			buf.append(colName + ": '" + getValue(colName) + "', ");
+		}
+		buf.append(" }");
+		return buf.toString();
+	}
+	
 }

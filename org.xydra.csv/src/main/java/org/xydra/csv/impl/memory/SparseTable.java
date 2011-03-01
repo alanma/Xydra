@@ -1,6 +1,5 @@
 package org.xydra.csv.impl.memory;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -8,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeSet;
 
 import org.xydra.csv.ExcelLimitException;
@@ -40,7 +40,7 @@ public class SparseTable implements ISparseTable {
 	
 	boolean aggregateStrings = true;
 	
-	Collection<String> columnNames;
+	Set<String> columnNames;
 	
 	/**
 	 * Older Excel limits: You are trying to open a file that contains more than
@@ -228,9 +228,8 @@ public class SparseTable implements ISparseTable {
 	}
 	
 	@Override
-	public List<String> getColumnNames() {
-		// TODO Auto-generated method stub
-		return null;
+	public Set<String> getColumnNames() {
+		return this.columnNames;
 	}
 	
 	/*
@@ -426,5 +425,14 @@ public class SparseTable implements ISparseTable {
 			row.setValue(entry.getKey(), entry.getValue().getValue());
 		}
 		this.addRow(rowName, row);
+	}
+	
+	@Override
+	public Iterable<String> getColumnNamesSorted() {
+		if(this.columnNames instanceof TreeSet) {
+			return this.columnNames;
+		} else {
+			return null;
+		}
 	}
 }

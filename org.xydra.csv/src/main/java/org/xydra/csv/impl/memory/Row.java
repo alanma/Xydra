@@ -25,6 +25,7 @@ public class Row extends AbstractRow implements IRow {
 	 * @param table used to read configuration and column names
 	 */
 	Row(ISparseTable table) {
+		assert table != null;
 		this.table = table;
 	}
 	
