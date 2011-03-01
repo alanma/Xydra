@@ -22,6 +22,7 @@ import org.xydra.csv.ExcelLimitException;
 import org.xydra.csv.ICsvTable;
 import org.xydra.csv.IReadableRow;
 import org.xydra.csv.IRow;
+import org.xydra.csv.IRowHandler;
 
 
 /**
@@ -200,6 +201,11 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable {
 	 * @see org.xydra.csv.ICsvTable#readFrom(java.io.Reader)
 	 */
 	public void readFrom(Reader r) throws IOException {
+		readFrom(r, this, this.readMaxRows);
+	}
+	
+	public static void readFrom(Reader r, IRowHandler rowHandler, int readMaxRows)
+	        throws IOException {
 		BufferedReader br = new BufferedReader(r);
 		String line = br.readLine();
 		long lineNumber = 1;
@@ -218,7 +224,7 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable {
 		while(line != null && /*
 							 * maybe we have to limit the number of read lines
 							 */
-		(this.readMaxRows == -1 || lineNumber < this.readMaxRows)) {
+		(readMaxRows == -1 || lineNumber < readMaxRows)) {
 			String[] datas = splitAtUnquotedSemicolon(line);
 			if(headers.length != datas.length) {
 				throw new IllegalArgumentException("Line " + lineNumber + ": Header length ("
@@ -227,7 +233,7 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable {
 			
 			// prepare row
 			String rowName = excelDecode(datas[0]);
-			Row row = new Row(this);
+			SingleRow row = new SingleRow();
 			for(int i = 1; i < headers.length; i++) {
 				try {
 					String value = excelDecode(datas[i]);
@@ -238,9 +244,8 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable {
 					        + line + "'", e);
 				}
 			}
-			
 			// add row
-			addRow(rowName, row);
+			rowHandler.handleRow(rowName, row);
 			
 			line = br.readLine();
 			lineNumber++;
@@ -249,7 +254,6 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable {
 				log.info("Parsed " + lineNumber + " lines...");
 			}
 		}
-		
 	}
 	
 	/*
@@ -423,6 +427,47 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable {
 			w.write(excelEncode(rowName));
 			IReadableRow row = this.getOrCreateRow(rowName, false);
 			writeRow(w, this.columnNames, row);
+			writtenRows++;
+		}
+	}
+	
+	/**
+	 * Write the given iterator to a CSV writer
+	 * <em>with synthetic row names</em> (ascending numbers).
+	 * 
+	 * @param w writer
+	 * @param columNames only columns listed here are written
+	 * @param rowIt from which to read rows
+	 * @throws IOException from the writer
+	 */
+	public static void writeTable(Writer w, List<String> columNames, Iterator<IReadableRow> rowIt)
+	        throws IOException {
+		// fetch first row to know column names
+		if(!rowIt.hasNext()) {
+			log.warn("No rows in rowIt, writing empty table");
+			return;
+		}
+		IReadableRow firstRow = rowIt.next();
+		
+		int writtenRows = 0;
+		// header
+		writeHeaderRow(w, columNames);
+		writtenRows++;
+		
+		// first data row
+		while(writtenRows < EXCEL_MAX_ROWS) {
+			String rowName = "" + writtenRows;
+			w.write(excelEncode(rowName));
+			writeRow(w, columNames, firstRow);
+			writtenRows++;
+		}
+		
+		// more data
+		while(rowIt.hasNext() && writtenRows < EXCEL_MAX_ROWS) {
+			String rowName = "" + writtenRows;
+			w.write(excelEncode(rowName));
+			IReadableRow row = rowIt.next();
+			writeRow(w, columNames, row);
 			writtenRows++;
 		}
 	}

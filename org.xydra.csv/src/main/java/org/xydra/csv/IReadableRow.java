@@ -15,6 +15,9 @@ public interface IReadableRow {
 	
 	Set<Entry<String,ICell>> entrySet();
 	
+	/**
+	 * @return the column names used in this row
+	 */
 	Collection<String> getColumnNames();
 	
 	/**

@@ -7,7 +7,13 @@ import java.util.Map;
 import org.xydra.csv.impl.memory.Row;
 
 
-public interface ISparseTable extends Iterable<Row>, IRowSink {
+/**
+ * Appends all rows, that it handles via its {@link IRowHandler}.
+ * 
+ * @author xamde
+ * 
+ */
+public interface ISparseTable extends Iterable<Row>, IRowHandler {
 	
 	/**
 	 * Adds a column name which will appear in the output but not necessarily
@@ -157,6 +163,7 @@ public interface ISparseTable extends Iterable<Row>, IRowSink {
 	 */
 	void incrementValue(String row, String column, int increment) throws WrongDatatypeException;
 	
+	/* implement Iterable */
 	Iterator<Row> iterator();
 	
 	/**

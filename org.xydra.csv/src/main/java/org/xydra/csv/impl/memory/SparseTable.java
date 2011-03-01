@@ -419,7 +419,7 @@ public class SparseTable implements ISparseTable {
 	}
 	
 	@Override
-	public void appendRow(String rowName, IReadableRow readableRow) {
+	public void handleRow(String rowName, IReadableRow readableRow) {
 		Row row = new Row(this);
 		// copy content
 		for(Entry<String,ICell> entry : readableRow.entrySet()) {
