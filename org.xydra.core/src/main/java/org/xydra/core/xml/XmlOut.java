@@ -24,8 +24,8 @@ public interface XmlOut {
 	public void attribute(String name, String value);
 	
 	/**
-	 * Close the stream (for steam-based implementations) -- do not confuse with
-	 * {@link #close(String)}
+	 * Close the stream (for stream-based implementations) -- do not confuse
+	 * with {@link #close(String)}
 	 */
 	public void close();
 	
