@@ -1,5 +1,6 @@
 package org.xydra.csv.impl.memory;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -36,7 +37,7 @@ public class SparseTable implements ISparseTable {
 	
 	public static final int EXCEL_MAX_ROWS = 65535;
 	
-	static Logger log = LoggerFactory.getLogger(SparseTable.class);
+	private static Logger log = LoggerFactory.getLogger(SparseTable.class);
 	
 	boolean aggregateStrings = true;
 	
@@ -240,7 +241,7 @@ public class SparseTable implements ISparseTable {
 	public Row getOrCreateRow(String rowName, boolean create) {
 		Row row = this.table.get(rowName);
 		if(row == null && create) {
-			row = new Row(this);
+			row = new Row(rowName, this);
 			this.insertRow(rowName, row);
 		}
 		return row;
@@ -419,7 +420,7 @@ public class SparseTable implements ISparseTable {
 	
 	@Override
 	public void handleRow(String rowName, IReadableRow readableRow) {
-		Row row = new Row(this);
+		Row row = new Row(rowName, this);
 		// copy content
 		for(Entry<String,ICell> entry : readableRow.entrySet()) {
 			row.setValue(entry.getKey(), entry.getValue().getValue());
@@ -434,5 +435,10 @@ public class SparseTable implements ISparseTable {
 		} else {
 			return null;
 		}
+	}
+	
+	@Override
+	public void handleHeaderRow(Collection<String> columnNames) {
+		this.columnNames.addAll(columnNames);
 	}
 }

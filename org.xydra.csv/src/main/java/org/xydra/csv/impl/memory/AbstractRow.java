@@ -7,6 +7,10 @@ import org.xydra.csv.IRow;
 
 public abstract class AbstractRow extends AbstractReadableRow implements IRow {
 	
+	AbstractRow(String key) {
+		super(key);
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 

@@ -10,7 +10,14 @@ public abstract class AbstractReadableRow implements IReadableRow {
 	
 	private static final long serialVersionUID = -1859613946021005526L;
 	
-	AbstractReadableRow() {
+	private final String key;
+	
+	AbstractReadableRow(final String key) {
+		this.key = key;
+	}
+	
+	public String getKey() {
+		return this.key;
 	}
 	
 	/**
@@ -71,9 +78,9 @@ public abstract class AbstractReadableRow implements IReadableRow {
 	@Override
 	public String toString() {
 		StringBuffer buf = new StringBuffer();
-		buf.append("{ ");
+		buf.append("{ \n");
 		for(String colName : getColumnNames()) {
-			buf.append(colName + ": '" + getValue(colName) + "', ");
+			buf.append("  " + colName + ": '" + getValue(colName) + "', \n");
 		}
 		buf.append(" }");
 		return buf.toString();

@@ -68,10 +68,10 @@ public class CsvTableImplTest {
 		
 		ICsvTable ctAB = new CsvTable();
 		Reader readerA = toReader(contentA);
-		ctAB.readFrom(readerA);
+		ctAB.readFrom(readerA, true);
 		readerA.close();
 		Reader readerB = toReader(contentB);
-		ctAB.readFrom(readerB);
+		ctAB.readFrom(readerB, true);
 		readerB.close();
 		
 		System.out.println("ct2:");
@@ -106,7 +106,7 @@ public class CsvTableImplTest {
 		ByteArrayInputStream bin = new ByteArrayInputStream(content);
 		InputStreamReader isr = new InputStreamReader(bin);
 		ICsvTable ct2 = new CsvTable();
-		ct2.readFrom(isr);
+		ct2.readFrom(isr, true);
 		
 		System.out.println("ct2:");
 		Writer w = new PrintWriter(System.out);

@@ -43,9 +43,12 @@ public interface ICsvTable extends ISparseTable {
 	 * column is interpreted as row names.
 	 * 
 	 * @param r from which to read
+	 * @param create default should be true = row keys and valued should be
+	 *            unique. Set to false to read more data into an already filled
+	 *            table and you want to silently overwrite exsting values.
 	 * @throws IOException from the underlying reader
 	 */
-	void readFrom(Reader r) throws IOException;
+	void readFrom(Reader r, boolean create) throws IOException;
 	
 	/**
 	 * How many rows should maximally be read? Default is -1 = unlimited. Note

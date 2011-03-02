@@ -1,6 +1,5 @@
 package org.xydra.csv.impl.memory;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -14,7 +13,6 @@ import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +20,8 @@ import org.xydra.csv.ExcelLimitException;
 import org.xydra.csv.ICsvTable;
 import org.xydra.csv.IReadableRow;
 import org.xydra.csv.IRow;
-import org.xydra.csv.IRowHandler;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
 
 /**
@@ -34,11 +33,13 @@ import org.xydra.csv.IRowHandler;
  */
 public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable {
 	
+	private static Logger log = LoggerFactory.getLogger(CsvTable.class);
+	
 	private static final String COLUMNNAME_ROW = "ROW";
 	
 	private static final String SEMICOLON = ";";
 	
-	private static String excelDecode(String encoded) {
+	public static String excelDecode(String encoded) {
 		if(encoded.equals("") || encoded.equals("\"\"")) {
 			return null;
 		}
@@ -58,9 +59,9 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable {
 	 * Enclosing all fields in quotes is not strictly required, but lets Excel
 	 * open an CSV file with default settings without mangling e.g. dates.
 	 * 
-	 * @param value
+	 * @param value to be encoded
 	 */
-	private static String excelEncode(String value) {
+	public static String excelEncode(String value) {
 		if(value == null) {
 			return "\"\"";
 		}
@@ -98,46 +99,6 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable {
 		}
 		
 		return s2;
-	}
-	
-	private static String[] splitAtUnquotedSemicolon(String line) {
-		boolean inQuote = false;
-		int index = 0;
-		List<String> result = new LinkedList<String>();
-		StringBuffer currentString = new StringBuffer();
-		while(index < line.length()) {
-			char c = line.charAt(index);
-			switch(c) {
-			case '\"': {
-				if(inQuote) {
-					inQuote = false;
-				} else {
-					inQuote = true;
-				}
-				currentString.append(c);
-			}
-				break;
-			case ';': {
-				if(inQuote) {
-					// just copy over
-					currentString.append(c);
-				} else {
-					// terminate current string
-					result.add(currentString.toString());
-					currentString = new StringBuffer();
-				}
-			}
-				break;
-			default: {
-				// just copy over
-				currentString.append(c);
-			}
-				break;
-			}
-			index++;
-		}
-		result.add(currentString.toString());
-		return result.toArray(new String[result.size()]);
 	}
 	
 	// TODO make setParam-able
@@ -191,7 +152,7 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable {
 		        + " rows and " + this.colCount() + " columns");
 		FileInputStream fos = new FileInputStream(f);
 		Reader reader = new InputStreamReader(fos, Charset.forName(this.defaultEncoding));
-		readFrom(reader);
+		readFrom(reader, true);
 		reader.close();
 	}
 	
@@ -200,59 +161,16 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable {
 	 * 
 	 * @see org.xydra.csv.ICsvTable#readFrom(java.io.Reader)
 	 */
-	public void readFrom(Reader r) throws IOException {
-		readFrom(r, this, this.readMaxRows);
-	}
-	
-	public static void readFrom(Reader r, IRowHandler rowHandler, int readMaxRows)
-	        throws IOException {
-		BufferedReader br = new BufferedReader(r);
-		String line = br.readLine();
-		long lineNumber = 1;
-		if(line == null) {
-			throw new IllegalArgumentException("CVS file has no content");
-		}
-		// read header
-		String[] headers = splitAtUnquotedSemicolon(line);
-		if(headers.length < 1) {
-			throw new IllegalArgumentException("Found no first column");
-		}
-		
-		// read data
-		line = br.readLine();
-		lineNumber++;
-		while(line != null && /*
-							 * maybe we have to limit the number of read lines
-							 */
-		(readMaxRows == -1 || lineNumber < readMaxRows)) {
-			String[] datas = splitAtUnquotedSemicolon(line);
-			if(headers.length != datas.length) {
-				throw new IllegalArgumentException("Line " + lineNumber + ": Header length ("
-				        + headers.length + ") is different from data length (" + datas.length + ")");
-			}
-			
-			// prepare row
-			String rowName = excelDecode(datas[0]);
-			SingleRow row = new SingleRow();
-			for(int i = 1; i < headers.length; i++) {
-				try {
-					String value = excelDecode(datas[i]);
-					String colName = excelDecode(headers[i]);
-					row.setValue(colName, value, true);
-				} catch(IllegalStateException e) {
-					throw new IllegalArgumentException("Line " + lineNumber + "> Could not parse '"
-					        + line + "'", e);
-				}
-			}
-			// add row
-			rowHandler.handleRow(rowName, row);
-			
-			line = br.readLine();
-			lineNumber++;
-			
-			if(lineNumber % 10000 == 0) {
-				log.info("Parsed " + lineNumber + " lines...");
-			}
+	public void readFrom(Reader r, boolean create) throws IOException {
+		CsvReader csvReader = new CsvReader(r, this.readMaxRows);
+		Collection<String> columnNames = csvReader.readHeaders();
+		assert this.columnNames != null;
+		this.columnNames.addAll(columnNames);
+		IReadableRow row = csvReader.readDataRow();
+		while(row != null) {
+			Row tableRow = this.getOrCreateRow(row.getKey(), true);
+			tableRow.addAll(row);
+			row = csvReader.readDataRow();
 		}
 	}
 	
@@ -424,9 +342,8 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable {
 		Iterator<String> rowIt = selectedRowNames.iterator();
 		while(rowIt.hasNext() && writtenRows < EXCEL_MAX_ROWS) {
 			String rowName = rowIt.next();
-			w.write(excelEncode(rowName));
 			IReadableRow row = this.getOrCreateRow(rowName, false);
-			writeRow(w, this.columnNames, row);
+			writeRow(w, this.columnNames, rowName, row);
 			writtenRows++;
 		}
 	}
@@ -457,17 +374,15 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable {
 		// first data row
 		while(writtenRows < EXCEL_MAX_ROWS) {
 			String rowName = "" + writtenRows;
-			w.write(excelEncode(rowName));
-			writeRow(w, columNames, firstRow);
+			writeRow(w, columNames, rowName, firstRow);
 			writtenRows++;
 		}
 		
 		// more data
 		while(rowIt.hasNext() && writtenRows < EXCEL_MAX_ROWS) {
-			String rowName = "" + writtenRows;
-			w.write(excelEncode(rowName));
 			IReadableRow row = rowIt.next();
-			writeRow(w, columNames, row);
+			String rowName = "" + writtenRows;
+			writeRow(w, columNames, rowName, row);
 			writtenRows++;
 		}
 	}
@@ -487,8 +402,9 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable {
 		w.write(SEMICOLON + "\n");
 	}
 	
-	public static void writeRow(Writer w, Collection<String> columnNames, IReadableRow row)
-	        throws IOException {
+	public static void writeRow(Writer w, Collection<String> columnNames, String rowName,
+	        IReadableRow row) throws IOException {
+		w.write(excelEncode(rowName));
 		Iterator<String> colIt = columnNames.iterator();
 		int writtenCols = 0;
 		while(colIt.hasNext() && writtenCols < EXCEL_MAX_COLS) {

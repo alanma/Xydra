@@ -13,6 +13,8 @@ import java.util.Set;
  */
 public interface IReadableRow {
 	
+	String getKey();
+	
 	Set<Entry<String,ICell>> entrySet();
 	
 	/**

@@ -21,7 +21,7 @@ public class RowDataGenerator implements Iterator<IReadableRow> {
 			throw new NoSuchElementException();
 		}
 		this.delivered++;
-		return new SingleRow(new String[][] {
+		return new SingleRow("test1", new String[][] {
 
 		new String[] { "h1", "c1" },
 

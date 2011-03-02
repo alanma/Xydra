@@ -11,9 +11,13 @@ import org.xydra.csv.ICell;
 import org.xydra.csv.IReadableRow;
 import org.xydra.csv.IRow;
 import org.xydra.csv.ISparseTable;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
 
 public class Row extends AbstractRow implements IRow {
+	
+	private static final Logger log = LoggerFactory.getLogger(Row.class);
 	
 	private static final long serialVersionUID = -1859613946021005526L;
 	
@@ -24,7 +28,8 @@ public class Row extends AbstractRow implements IRow {
 	/**
 	 * @param table used to read configuration and column names
 	 */
-	Row(ISparseTable table) {
+	Row(String key, ISparseTable table) {
+		super(key);
 		assert table != null;
 		this.table = table;
 	}
@@ -114,7 +119,7 @@ public class Row extends AbstractRow implements IRow {
 		ICell c = this.map.get(column);
 		if(c == null && create) {
 			if(this.table.getColumnNames().size() == CsvTable.EXCEL_MAX_COLS) {
-				CsvTable.log.warn("Cannot add the " + CsvTable.EXCEL_MAX_COLS
+				log.warn("Cannot add the " + CsvTable.EXCEL_MAX_COLS
 				        + "th column - that is Excels limit");
 				if(this.table.getParamRestrictToExcelSize())
 					throw new ExcelLimitException("Column limit reached");

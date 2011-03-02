@@ -15,13 +15,22 @@ public class SingleRow extends AbstractReadableRow implements IReadableRow {
 	
 	private Map<String,ICell> map = new HashMap<String,ICell>();
 	
-	public SingleRow() {
+	public SingleRow(final String key) {
+		super(key);
 	}
 	
-	public SingleRow(String[][] arrayOfPairs) {
+	public SingleRow(final String key, String[][] arrayOfPairs) {
+		this(key);
 		for(String[] pair : arrayOfPairs) {
 			assert pair.length == 2;
 			this.map.put(pair[0], new Cell(pair[1]));
+		}
+	}
+	
+	public SingleRow(final String key, Map<String,String> map) {
+		this(key);
+		for(Entry<String,String> entry : map.entrySet()) {
+			this.map.put(entry.getKey(), new Cell(entry.getValue()));
 		}
 	}
 	
