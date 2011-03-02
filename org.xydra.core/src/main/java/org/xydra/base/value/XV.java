@@ -522,4 +522,52 @@ public class XV {
 	public static XIDListValue toValue(XID[] list) {
 		return vf.createIDListValue(list);
 	}
+	
+	@SuppressWarnings("unchecked")
+	public static void toValueStream(XValue value, XValueStream stream) {
+		stream.startValue();
+		if(value.getType().isCollection()) {
+			stream.startCollection(value.getType());
+			Class<?> componentType = ValueType.getComponentType(value.getType());
+			for(Object a : ((XCollectionValue<? extends XValue>)value)) {
+				if(componentType == XAddress.class) {
+					stream.address((XAddress)a);
+				} else if(componentType == Boolean.class) {
+					stream.javaBoolean((Boolean)a);
+				} else if(componentType == Double.class) {
+					stream.javaDouble((Double)a);
+				} else if(componentType == Integer.class) {
+					stream.javaInteger((Integer)a);
+				} else if(componentType == Long.class) {
+					stream.javaLong((Long)a);
+				} else if(componentType == String.class) {
+					stream.javaString((String)a);
+				} else if(componentType == org.xydra.base.XID.class) {
+					stream.xid((XID)a);
+				}
+			}
+			stream.endCollection();
+		} else {
+			toValueStream(value, ValueType.getPrimitiveType(value.getType()), stream);
+		}
+		stream.endValue();
+	}
+	
+	private static void toValueStream(XValue value, Class<?> type, XValueStream stream) {
+		if(type == XAddress.class) {
+			stream.address((XAddress)value);
+		} else if(type == Boolean.class) {
+			stream.javaBoolean(((XBooleanValue)value).contents());
+		} else if(type == Double.class) {
+			stream.javaDouble(((XDoubleValue)value).contents());
+		} else if(type == Integer.class) {
+			stream.javaInteger(((XIntegerValue)value).contents());
+		} else if(type == Long.class) {
+			stream.javaLong(((XLongValue)value).contents());
+		} else if(type == String.class) {
+			stream.javaString(((XStringValue)value).contents());
+		} else if(type == org.xydra.base.XID.class) {
+			stream.xid((XID)value);
+		}
+	}
 }

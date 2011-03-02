@@ -3,6 +3,7 @@ package org.xydra.base.value.impl.memory;
 import java.util.Collection;
 
 import org.xydra.base.XID;
+import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XIDSetValue;
 
 
@@ -52,6 +53,11 @@ public class MemoryIDSetValue extends MemorySetValue<XID> implements XIDSetValue
 	
 	public XID[] toArray() {
 		return contents();
+	}
+	
+	@Override
+	public ValueType getType() {
+		return ValueType.XIDSet;
 	}
 	
 }

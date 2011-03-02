@@ -3,6 +3,7 @@ package org.xydra.base.value.impl.memory;
 import java.util.Collection;
 
 import org.xydra.base.XAddress;
+import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XAddressSetValue;
 
 
@@ -52,6 +53,11 @@ public class MemoryAddressSetValue extends MemorySetValue<XAddress> implements X
 	
 	public XAddress[] toArray() {
 		return contents();
+	}
+	
+	@Override
+	public ValueType getType() {
+		return ValueType.AddressSet;
 	}
 	
 }

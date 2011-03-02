@@ -3,6 +3,7 @@ package org.xydra.base.value.impl.memory;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XByteListValue;
 import org.xydra.index.XI;
 
@@ -107,4 +108,8 @@ public class MemoryByteListValue extends MemoryListValue<Byte> implements XByteL
 		return Arrays.toString(this.list);
 	}
 	
+	@Override
+	public ValueType getType() {
+		return ValueType.ByteList;
+	}
 }

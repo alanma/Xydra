@@ -1,8 +1,9 @@
 package org.xydra.core.model.impl.memory;
 
-import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RequiresAppEngine;
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XID;
+import org.xydra.base.value.ValueType;
 
 
 /**
@@ -52,6 +53,11 @@ public class MemoryStringID implements XID {
 	@Override
 	public String toString() {
 		return this.string;
+	}
+	
+	@Override
+	public ValueType getType() {
+		return ValueType.XID;
 	}
 	
 }

@@ -7,6 +7,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.xydra.base.XAddress;
+import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XAddressSortedSetValue;
 import org.xydra.base.value.XIDSortedSetValue;
 
@@ -74,4 +75,8 @@ public class MemoryAddressSortedSetValue extends MemoryAddressListValue implemen
 		return copy;
 	}
 	
+	@Override
+	public ValueType getType() {
+		return ValueType.AddressSortedSet;
+	}
 }

@@ -1,5 +1,6 @@
 package org.xydra.base.value.impl.memory;
 
+import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XIntegerValue;
 
 
@@ -44,6 +45,11 @@ public class MemoryIntegerValue implements XIntegerValue {
 	@Override
 	public String toString() {
 		return Integer.toString(this.content);
+	}
+	
+	@Override
+	public ValueType getType() {
+		return ValueType.Integer;
 	}
 	
 }

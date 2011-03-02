@@ -7,6 +7,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.xydra.base.XID;
+import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XIDSortedSetValue;
 
 
@@ -70,6 +71,11 @@ public class MemoryIDSortedSetValue extends MemoryIDListValue implements XIDSort
 			copy.add(list[i]);
 		}
 		return copy;
+	}
+	
+	@Override
+	public ValueType getType() {
+		return ValueType.XIDSortedSet;
 	}
 	
 }

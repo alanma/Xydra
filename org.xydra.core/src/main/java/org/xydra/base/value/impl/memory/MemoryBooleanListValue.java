@@ -3,6 +3,7 @@ package org.xydra.base.value.impl.memory;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XBooleanListValue;
 import org.xydra.index.XI;
 
@@ -108,4 +109,8 @@ public class MemoryBooleanListValue extends MemoryListValue<Boolean> implements 
 		return Arrays.toString(this.list);
 	}
 	
+	@Override
+	public ValueType getType() {
+		return ValueType.BooleanList;
+	}
 }

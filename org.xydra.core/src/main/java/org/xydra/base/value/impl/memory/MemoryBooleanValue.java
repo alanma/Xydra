@@ -1,5 +1,6 @@
 package org.xydra.base.value.impl.memory;
 
+import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XBooleanValue;
 
 
@@ -40,6 +41,11 @@ public class MemoryBooleanValue implements XBooleanValue {
 	@Override
 	public String toString() {
 		return Boolean.toString(this.content);
+	}
+	
+	@Override
+	public ValueType getType() {
+		return ValueType.Boolean;
 	}
 	
 }

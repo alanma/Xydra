@@ -1,5 +1,6 @@
 package org.xydra.base.value.impl.memory;
 
+import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XDoubleValue;
 
 
@@ -44,6 +45,11 @@ public class MemoryDoubleValue implements XDoubleValue {
 	@Override
 	public String toString() {
 		return Double.toString(this.content);
+	}
+	
+	@Override
+	public ValueType getType() {
+		return ValueType.Double;
 	}
 	
 }

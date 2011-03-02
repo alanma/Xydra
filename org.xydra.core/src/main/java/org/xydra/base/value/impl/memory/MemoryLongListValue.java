@@ -3,6 +3,7 @@ package org.xydra.base.value.impl.memory;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XLongListValue;
 import org.xydra.index.XI;
 
@@ -116,4 +117,8 @@ public class MemoryLongListValue extends MemoryListValue<Long> implements XLongL
 		return Arrays.toString(this.list);
 	}
 	
+	@Override
+	public ValueType getType() {
+		return ValueType.LongList;
+	}
 }

@@ -1,5 +1,6 @@
 package org.xydra.base.value.impl.memory;
 
+import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XLongValue;
 
 
@@ -44,6 +45,11 @@ public class MemoryLongValue implements XLongValue {
 	@Override
 	public String toString() {
 		return Long.toString(this.content);
+	}
+	
+	@Override
+	public ValueType getType() {
+		return ValueType.Long;
 	}
 	
 }

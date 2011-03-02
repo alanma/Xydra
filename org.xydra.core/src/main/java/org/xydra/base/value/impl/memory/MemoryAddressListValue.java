@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.xydra.base.XAddress;
+import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XAddressListValue;
 import org.xydra.base.value.XIDListValue;
 import org.xydra.index.XI;
@@ -115,6 +116,11 @@ public class MemoryAddressListValue extends MemoryListValue<XAddress> implements
 	@Override
 	public String toString() {
 		return Arrays.toString(this.list);
+	}
+	
+	@Override
+	public ValueType getType() {
+		return ValueType.AddressList;
 	}
 	
 }

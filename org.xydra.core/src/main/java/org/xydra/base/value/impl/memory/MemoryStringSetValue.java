@@ -2,6 +2,7 @@ package org.xydra.base.value.impl.memory;
 
 import java.util.Collection;
 
+import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XStringSetValue;
 
 
@@ -51,6 +52,11 @@ public class MemoryStringSetValue extends MemorySetValue<String> implements XStr
 	
 	public String[] toArray() {
 		return contents();
+	}
+	
+	@Override
+	public ValueType getType() {
+		return ValueType.StringSet;
 	}
 	
 }

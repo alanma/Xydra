@@ -1,5 +1,6 @@
 package org.xydra.base.value.impl.memory;
 
+import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XStringValue;
 import org.xydra.index.XI;
 
@@ -41,6 +42,11 @@ public class MemoryStringValue implements XStringValue {
 	@Override
 	public String toString() {
 		return this.contents();
+	}
+	
+	@Override
+	public ValueType getType() {
+		return ValueType.String;
 	}
 	
 }

@@ -3,6 +3,7 @@ package org.xydra.base.value.impl.memory;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XIntegerListValue;
 import org.xydra.index.XI;
 
@@ -116,4 +117,8 @@ public class MemoryIntegerListValue extends MemoryListValue<Integer> implements 
 		return Arrays.toString(this.list);
 	}
 	
+	@Override
+	public ValueType getType() {
+		return ValueType.IntegerList;
+	}
 }

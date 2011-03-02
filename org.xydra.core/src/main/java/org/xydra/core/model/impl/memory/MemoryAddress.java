@@ -3,6 +3,7 @@ package org.xydra.core.model.impl.memory;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
+import org.xydra.base.value.ValueType;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
@@ -348,6 +349,11 @@ public class MemoryAddress implements XAddress {
 		}
 		
 		return uri.toString();
+	}
+	
+	@Override
+	public ValueType getType() {
+		return ValueType.Address;
 	}
 	
 }

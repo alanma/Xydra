@@ -3,6 +3,7 @@ package org.xydra.base.value.impl.memory;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XDoubleListValue;
 import org.xydra.index.XI;
 
@@ -115,6 +116,11 @@ public class MemoryDoubleListValue extends MemoryListValue<Double> implements XD
 	@Override
 	public String toString() {
 		return Arrays.toString(this.list);
+	}
+	
+	@Override
+	public ValueType getType() {
+		return ValueType.DoubleList;
 	}
 	
 }
