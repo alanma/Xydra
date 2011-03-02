@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
+import org.xydra.base.rmof.XReadableModel;
 import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.model.XModel;
 import org.xydra.core.xml.XmlModel;
@@ -28,10 +29,14 @@ public class SimpleSyntaxUtilsTest {
 	        + "peter\n"
 	        + "john.phone=1234\n";
 	
-	public static final void dump(XModel model) {
+	public static final void dump(XReadableModel model) {
+		log.debug(toXml(model));
+	}
+	
+	public static final String toXml(XReadableModel model) {
 		XmlOutStringBuffer xo = new XmlOutStringBuffer();
 		XmlModel.toXml(model, xo, true, false, true);
-		log.debug(xo.getXml());
+		return xo.getXml();
 	}
 	
 	private static Logger getLogger() {

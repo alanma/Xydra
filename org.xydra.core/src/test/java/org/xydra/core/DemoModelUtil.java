@@ -27,6 +27,8 @@ import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
+import org.xydra.core.model.impl.memory.MemoryRepository;
+import org.xydra.core.util.SimpleSyntaxUtilsTest;
 
 
 /**
@@ -266,5 +268,11 @@ public class DemoModelUtil {
 			model.executeCommand(tb.getCommand(i));
 		}
 		
+	}
+	
+	public static void main(String[] args) {
+		XRepository repo = new MemoryRepository(XX.toId("actor"), "secret", XX.toId("repo"));
+		addPhonebookModel(repo);
+		System.out.println(SimpleSyntaxUtilsTest.toXml(repo.getModel(PHONEBOOK_ID)));
 	}
 }
