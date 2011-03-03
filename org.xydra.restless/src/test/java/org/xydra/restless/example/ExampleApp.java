@@ -22,6 +22,11 @@ import org.xydra.restless.RunTestJetty;
  */
 public class ExampleApp {
 	
+	/**
+	 * @param r provides some context
+	 * @param path is either the empty string or a path starting with a slash,
+	 *            but not ending with a slash.
+	 */
 	public void restless(Restless r, String path) {
 		ExampleResource.restless(r);
 		

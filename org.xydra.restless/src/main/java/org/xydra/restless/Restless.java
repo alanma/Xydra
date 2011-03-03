@@ -33,6 +33,7 @@ import org.xydra.log.LoggerFactory;
  * 
  * Usage:
  * 
+ * <p>
  * 1) in web.xml add
  * 
  * <pre>
@@ -56,13 +57,30 @@ import org.xydra.log.LoggerFactory;
  * &lt;/servlet-mapping&gt;
  * </pre>
  * 
+ * </p>
+ * 
+ * <p>
  * 2) create a corresponding class org.xydra.example.ExampleApp. See
  * org.xydra.restless.example.ExampleApp in test sources.
+ * </p>
  * 
- * 3) The ExampleApp initializes the resources of your application. See
- * org.xydra.restless.example.ExampleResource in test sources for an example.
+ * <p>
+ * 3) The ExampleApp initialises the resources of your application. More
+ * precisely, it calls
  * 
+ * <pre>
+ * public static void restless(Restless restless, String path) { ... }
+ * </pre>
+ * 
+ * where path is the empty string if called from web.xml and a path with form
+ * "/path" (by convention) if called from other Restless Apps.
+ * 
+ * See org.xydra.restless.example.ExampleApp in test sources for an example.
+ * </p>
+ * 
+ * <p>
  * 4) The configuration can be accessed at the URL "/admin/restless"
+ * </p>
  * 
  * @author voelkel
  * 
@@ -567,13 +585,19 @@ public class Restless extends HttpServlet {
 						log.debug("Configured with " + clazz.getName());
 					}
 				} catch(IllegalArgumentException e) {
-					throw new RuntimeException("new '" + appClassName + "() failed", e);
+					throw new RuntimeException("new '" + appClassName + "() failed with "
+					        + e.getClass() + ":" + e.getMessage(), e);
 				} catch(InstantiationException e) {
-					throw new RuntimeException("new '" + appClassName + "() failed", e);
+					throw new RuntimeException("new '" + appClassName + "() failed with "
+					        + e.getClass() + ":" + e.getMessage(), e);
 				} catch(IllegalAccessException e) {
-					throw new RuntimeException("new '" + appClassName + "() failed", e);
+					throw new RuntimeException(
+					        "new '" + appClassName + "() failed with " + e.getClass() + ":"
+					                + e.getMessage() + " caused by " + e.getCause() == null ? "--"
+					                : e.getCause().getClass() + ":" + e.getCause().getMessage(), e);
 				} catch(InvocationTargetException e) {
-					throw new RuntimeException("new '" + appClassName + "() failed", e);
+					throw new RuntimeException("new '" + appClassName + "() failed with "
+					        + e.getClass() + ":" + e.getMessage(), e);
 				}
 			} catch(SecurityException e) {
 				throw new RuntimeException("Class '" + appClassName + " failed to get constructor",
