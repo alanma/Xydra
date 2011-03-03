@@ -92,6 +92,9 @@ public class WritableFieldOnPersistence extends AbstractWritableOnPersistence im
 	}
 	
 	private void setValueInitially(XValue value) {
+		if(value == null) {
+			return;
+		}
 		XCommand command = X.getCommandFactory().createAddValueCommand(
 		        this.persistence.getRepositoryId(), this.modelId, this.objectId, this.fieldId,
 		        getRevisionNumber(), value, false);

@@ -15,6 +15,7 @@ import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
+import org.xydra.base.value.XValue;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.impl.memory.MemoryModel;
 
@@ -60,7 +61,8 @@ public class XCopyUtils {
 		for(XID fieldId : sourceObject) {
 			XReadableField sourceField = sourceObject.getField(fieldId);
 			XWritableField targetField = targetObject.createField(fieldId);
-			targetField.setValue(sourceField.getValue());
+			XValue sourceValue = sourceField.getValue();
+			targetField.setValue(sourceValue);
 		}
 	}
 	

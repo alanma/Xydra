@@ -32,6 +32,12 @@ public class MemoryPersistence implements XydraPersistence {
 	
 	private XID repoId;
 	
+	/**
+	 * This method is used to instantiate the persistence via reflection in
+	 * SharedXydraPersistence.
+	 * 
+	 * @param repositoryId repository ID
+	 */
 	public MemoryPersistence(XID repositoryId) {
 		this.repoId = repositoryId;
 	}
