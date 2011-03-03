@@ -1,10 +1,27 @@
 package org.xydra.restless.utils;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.LinkedList;
 import java.util.List;
 
 
 public class HtmlUtils {
+	
+	public static void writeHtmlHeaderOpenBody(Writer w, String title) throws IOException {
+		w.write("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"\r\n"
+		        + "       \"http://www.w3.org/TR/html4/loose.dtd\">\r\n"
+
+		        + "<html>\r\n" + "<head>\r\n" + "<title>Beschreibung der Seite</title>\r\n"
+		        + "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\r\n"
+		        + "</head>\r\n"
+
+		        + "<body>\r\n");
+	}
+	
+	public static void writeCloseBodyHtml(Writer w) throws IOException {
+		w.write("</body>\r\n" + "</html>");
+	}
 	
 	public static String link(String url, String text) {
 		return "<a href=\"" + url + "\">" + text + "</a>";
