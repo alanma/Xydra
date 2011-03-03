@@ -10,8 +10,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.xydra.csv.CsvTable;
-import org.xydra.csv.CsvTable.Row;
+import org.xydra.csv.impl.memory.CsvTable;
+import org.xydra.csv.impl.memory.Row;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
 
@@ -71,7 +71,7 @@ public class GaeMyAdminApp {
 	/**
 	 * Delete all data in the data store
 	 * 
-	 * @throws IOException
+	 * @throws IOException from underlying http streams or datastore
 	 */
 	public void deleteAll(HttpServletResponse res, String sure) throws IOException {
 		res.setContentType("text/plain");
@@ -126,7 +126,7 @@ public class GaeMyAdminApp {
 	/**
 	 * TODO add pagination
 	 * 
-	 * @param kind
+	 * @param kind of entity to export
 	 * @return an {@link Iterable} over all Entity of the given kind
 	 */
 	public Iterable<Entity> getEntitiesOfKind(String kind) {
