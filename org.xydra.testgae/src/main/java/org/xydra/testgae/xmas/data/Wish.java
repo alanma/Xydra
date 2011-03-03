@@ -11,7 +11,7 @@ import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XV;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.testgae.xmas.HtmlUtils;
+import org.xydra.restless.utils.HtmlUtils;
 
 
 public class Wish {

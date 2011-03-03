@@ -7,9 +7,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
+import org.xydra.restless.utils.HtmlUtils;
+import org.xydra.restless.utils.ServletUtils;
 import org.xydra.store.impl.gae.GaeUtils;
-import org.xydra.testgae.ServletUtils;
-import org.xydra.testgae.xmas.HtmlUtils;
 
 
 /**

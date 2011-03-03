@@ -11,7 +11,7 @@ import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
-import org.xydra.testgae.ServletUtils;
+import org.xydra.restless.utils.ServletUtils;
 import org.xydra.testgae.Stopwatch;
 
 

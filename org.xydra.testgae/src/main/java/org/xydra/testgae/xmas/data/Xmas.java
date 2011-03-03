@@ -11,11 +11,11 @@ import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.base.rmof.impl.delegate.WritableRepositoryOnPersistence;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.testgae.Stopwatch;
-import org.xydra.testgae.xmas.HtmlUtils;
 import org.xydra.testgae.xmas.rest.WishlistResource;
 import org.xydra.testgae.xmas.rest.XmasResource;
 

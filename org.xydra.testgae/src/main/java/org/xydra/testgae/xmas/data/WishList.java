@@ -12,8 +12,8 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.testgae.Stopwatch;
-import org.xydra.testgae.xmas.HtmlUtils;
 import org.xydra.testgae.xmas.NameUtils;
 
 
