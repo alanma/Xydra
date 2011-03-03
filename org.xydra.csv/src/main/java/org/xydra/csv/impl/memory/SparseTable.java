@@ -7,9 +7,9 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Map.Entry;
 
 import org.xydra.csv.ExcelLimitException;
 import org.xydra.csv.ICell;
@@ -430,7 +430,7 @@ public class SparseTable implements ISparseTable {
 	
 	@Override
 	public Iterable<String> getColumnNamesSorted() {
-		if(this.columnNames instanceof TreeSet) {
+		if(this.columnNames instanceof TreeSet<?>) {
 			return this.columnNames;
 		} else {
 			return null;
