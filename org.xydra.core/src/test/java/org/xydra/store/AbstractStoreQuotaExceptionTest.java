@@ -23,9 +23,10 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
 
-public abstract class AbstractStoreQuoateExceptionTest {
+public abstract class AbstractStoreQuotaExceptionTest {
 	
-	private static final Logger log = LoggerFactory.getLogger(AbstractStoreReadMethodsTest.class);
+	private static final Logger log = LoggerFactory
+	        .getLogger(AbstractStoreQuotaExceptionTest.class);
 	
 	static {
 		LoggerFactory.setLoggerFactorySPI(new DefaultLoggerFactorySPI());
@@ -105,8 +106,6 @@ public abstract class AbstractStoreQuoateExceptionTest {
 	 * 
 	 * Implementations of this abstract test need to override this to return the
 	 * specific quota of the XydraStore implementation which is to be tested.
-	 * Return a value less than zero if your implementation does not support
-	 * QuotaExceptions or such a value cannot be provided.
 	 */
 	abstract protected long getQuotaForBruteForce();
 	
@@ -168,7 +167,7 @@ public abstract class AbstractStoreQuoateExceptionTest {
 			
 			boolean wait = waitOnCallback(callback);
 			
-			if(l <= this.bfQuota) {
+			if(l < this.bfQuota) {
 				// QuotaException shouldn't be thrown yet.
 				assertTrue(wait);
 				assertNotNull(callback.getEffect());
@@ -238,7 +237,7 @@ public abstract class AbstractStoreQuoateExceptionTest {
 			assertNull(callback.getEffect());
 			assertNotNull(callback.getException());
 			
-			if(l <= this.bfQuota) {
+			if(l < this.bfQuota) {
 				// QuotaException shouldn't be thrown yet.
 				assertFalse(callback.getException() instanceof QuotaException);
 			} else {
@@ -270,7 +269,7 @@ public abstract class AbstractStoreQuoateExceptionTest {
 			assertNull(callback.getEffect());
 			assertNotNull(callback.getException());
 			
-			if(l <= this.bfQuota) {
+			if(l < this.bfQuota) {
 				// QuotaException shouldn't be thrown yet.
 				assertFalse(callback.getException() instanceof QuotaException);
 			} else {
@@ -302,7 +301,7 @@ public abstract class AbstractStoreQuoateExceptionTest {
 			assertNull(callback.getEffect());
 			assertNotNull(callback.getException());
 			
-			if(l <= this.bfQuota) {
+			if(l < this.bfQuota) {
 				// QuotaException shouldn't be thrown yet.
 				assertFalse(callback.getException() instanceof QuotaException);
 			} else {

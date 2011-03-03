@@ -11,7 +11,7 @@ import org.xydra.store.access.HashUtils;
  */
 
 public abstract class AbstractSecureStoreQuotaExceptionTest extends
-        AbstractStoreQuoateExceptionTest {
+        AbstractStoreQuotaExceptionTest {
 	
 	@Override
 	protected XID getIncorrectUser() {
