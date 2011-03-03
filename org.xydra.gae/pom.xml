@@ -13,7 +13,7 @@
 	<artifactId>gae</artifactId>
 	<version>0.1.3-SNAPSHOT</version>
 	<!-- /!\ Needs to be 'jar' for 'mvn deploy' but 'war' for 'gae:deploy' -->
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
 	<name>Xydra GAE Server</name>
 
 	<!-- Specify hard-coded project properties here -->
@@ -169,6 +169,28 @@
 			<artifactId>log</artifactId>
 			<version>0.1.3-SNAPSHOT</version>
 		</dependency>
+
+		<!-- devmode logging requires log4j libs! -->
+		<!-- compile dependencies -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.5.0</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.5.0</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<scope>compile</scope>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.14</version>
+		</dependency>
+
 
 
 		<!-- <dependency> <groupId>org.slf4j</groupId> <artifactId>jul-to-slf4j</artifactId> 

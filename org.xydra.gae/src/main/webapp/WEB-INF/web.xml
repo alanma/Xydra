@@ -8,22 +8,22 @@
 		<servlet-class>org.xydra.restless.Restless</servlet-class>
 		<init-param>
 			<param-name>app</param-name>
-			<param-value>org.xydra.server.rest.XydraRestServer</param-value>
+			<param-value>org.xydra.server.rest.ShareXydraPersistenceApp,org.xydra.gae.admin.XydraAdminApp</param-value>
 		</init-param>
 		<init-param>
-			<param-name>loggerFactor</param-name>
+			<param-name>loggerFactory</param-name>
 			<param-value>org.xydra.log.gae.GaeLoggerFactorySPI</param-value>
 		</init-param>
 		<init-param>
-			<param-name>org.xydra.server</param-name>
-			<param-value>org.xydra.server.impl.gae.GaeXydraServer</param-value>
+			<param-name>org.xydra.persistence</param-name>
+			<param-value>org.xydra.store.impl.gae.GaePersistence</param-value>
 			<!-- <param-value>org.xydra.server.impl.newgae.NewGaeXydraServer</param-value> -->
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>XydraServer</servlet-name>
-		<url-pattern>/*</url-pattern>
+		<url-pattern>/admin/*</url-pattern>
 	</servlet-mapping>
 
 </web-app>

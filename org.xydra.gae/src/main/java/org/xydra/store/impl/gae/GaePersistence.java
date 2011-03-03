@@ -33,6 +33,12 @@ public class GaePersistence implements XydraPersistence {
 	
 	private final XAddress repoAddr;
 	
+	/**
+	 * This method is used to instantiate the persistence via reflection in
+	 * SharedXydraPersistence.
+	 * 
+	 * @param repoId repository ID
+	 */
 	public GaePersistence(XID repoId) {
 		
 		// To enable local JUnit testing with multiple threads
