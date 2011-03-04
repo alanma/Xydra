@@ -52,7 +52,7 @@
 
 	<dependencies>
 
-		<!--  for compiling in GWT -->
+		<!-- for compiling in GWT -->
 		<dependency>
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-servlet</artifactId>
@@ -73,12 +73,12 @@
 			<version>3.0.3</version>
 			<scope>provided</scope>
 		</dependency>
-		
+
 		<!-- testing dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<!--  for abstract tests in main  -->
+			<!-- for abstract tests in main -->
 			<scope>compile</scope>
 			<!-- version info taken from parent -->
 		</dependency>
@@ -108,32 +108,29 @@
 			</plugin>
 
 
-          <plugin>
-            <inherited>true</inherited>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>attach-sources</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          
-          
+			<plugin>
+				<inherited>true</inherited>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+
 		</plugins>
 	</build>
 
 	<distributionManagement>
-		<!--
-			Add this to settings.xml <server> <id>xydra-repo</id>
-			<username>xamde</username> <password>********</password> </server>
-			<server> <id>xydra-snap</id> <username>xamde</username>
-			<password>********</password> </server> <server> <id>xydra-site</id>
-			<username>xamde</username> <password>********</password> </server>
-		-->
+		<!-- Add this to settings.xml <server> <id>xydra-repo</id> <username>xamde</username> 
+			<password>********</password> </server> <server> <id>xydra-snap</id> <username>xamde</username> 
+			<password>********</password> </server> <server> <id>xydra-site</id> <username>xamde</username> 
+			<password>********</password> </server> -->
 		<repository>
 			<id>xydra-repo</id>
 			<url>svn:https://xydra.googlecode.com/svn/repository</url>
