@@ -14,6 +14,7 @@ import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
+import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
@@ -687,6 +688,32 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		executeFailingCommand(X.getCommandFactory().createRemoveValueCommand(this.repoId, modelId,
 		        objectId, fieldId, revNr + 1, false));
 		
+	}
+	
+	/*
+	 * Tests for getEvents
+	 */
+
+	// Test if it behaves correctly for wrong account + password
+	// combinations
+	@Test
+	public void testGetEventsBadAccount() {
+		if(!this.incorrectActorExists) {
+			return;
+		}
+		
+		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback;
+		
+		callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
+		
+		GetEventsRequest[] requests = new GetEventsRequest[1];
+		
+		this.store.getEvents(this.incorrectUser, this.incorrectUserPass, requests, callback);
+		
+		assertFalse(this.waitOnCallback(callback));
+		assertNull(callback.getEffect());
+		assertNotNull(callback.getException());
+		assertTrue(callback.getException() instanceof AuthorisationException);
 	}
 	
 	/**
