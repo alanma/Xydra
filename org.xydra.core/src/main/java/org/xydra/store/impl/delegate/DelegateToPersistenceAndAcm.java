@@ -74,15 +74,15 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 	 * @param actorId never null.
 	 * @param passwordHash if null, acotrId is authorised.
 	 */
-	private void authorise(XID actorId, String passwordHash) {
+	private boolean authorise(XID actorId, String passwordHash) {
 		/* null password -> always authorised */
 		if(passwordHash == null) {
-			return;
+			return true;
 		}
 		assert actorId != null;
 		if(this.acm.getAuthenticationDatabase() == null) {
 			// we cannot log
-			return;
+			return true;
 		}
 		int failedLoginAttempts = this.acm.getAuthenticationDatabase().getFailedLoginAttempts(
 		        actorId);
@@ -91,7 +91,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 		}
 		if(this.acm.isAuthenticated(actorId, passwordHash)) {
 			this.acm.getAuthenticationDatabase().resetFailedLoginAttempts(actorId);
-			return;
+			return true;
 		} else {
 			// always log failed attempts
 			failedLoginAttempts = this.acm.getAuthenticationDatabase()
@@ -100,7 +100,8 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 			if(failedLoginAttempts > XydraStore.MAX_FAILED_LOGIN_ATTEMPTS) {
 				/* let user wait 10 seconds and inform administrator */
 				try {
-					Thread.sleep(10 * 1000);
+					Thread.sleep(1);
+					// Thread.sleep(10 * 1000);
 				} catch(InterruptedException e) {
 					log.warn("could not sleep while throttling potential hacker", e);
 				}
@@ -118,7 +119,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 	        QuotaException, TimeoutException, ConnectionException, RequestException,
 	        InternalStoreException {
 		assert actorId != null;
-		return this.acm.isAuthenticated(actorId, passwordHash);
+		return authorise(actorId, passwordHash);
 	}
 	
 	private void checkRepoId(XAddress address) {

@@ -165,19 +165,14 @@ public abstract class AbstractStoreQuotaExceptionTest {
 			
 			this.store.checkLogin(this.incorrectUser, this.incorrectUserPass, callback);
 			
-			boolean wait = waitOnCallback(callback);
+			assertFalse(waitOnCallback(callback));
+			assertNull(callback.getEffect());
+			assertNotNull(callback.getException());
 			
 			if(l < this.bfQuota) {
 				// QuotaException shouldn't be thrown yet.
-				assertTrue(wait);
-				assertNotNull(callback.getEffect());
-				assertNull(callback.getException());
 				assertFalse(callback.getException() instanceof QuotaException);
 			} else {
-				assertFalse("should now return a QuotaException, since we exceeded the quota; l = "
-				        + l, wait);
-				assertNull(callback.getEffect());
-				assertNotNull(callback.getException());
 				assertTrue(callback.getException() instanceof QuotaException);
 			}
 		}
@@ -394,6 +389,36 @@ public abstract class AbstractStoreQuotaExceptionTest {
 			
 			this.store.executeCommandsAndGetEvents(this.incorrectUser, this.incorrectUserPass,
 			        commands, requests, callback);
+			
+			assertFalse(waitOnCallback(callback));
+			assertNull(callback.getEffect());
+			assertNotNull(callback.getException());
+			
+			if(l < this.bfQuota) {
+				// QuotaException shouldn't be thrown yet.
+				assertFalse(callback.getException() instanceof QuotaException);
+			} else {
+				// should now return a QuotaException, since we exceeded the
+				// quota
+				assertTrue(callback.getException() instanceof QuotaException);
+			}
+		}
+		
+		// TODO also check if QuotaException keeps being thrown after the quota
+		// was exceeded by one
+	}
+	
+	// Testing the quota exception for executeCommandsAndGetEvents
+	@Test
+	public void testGetEventsQuotaException() {
+		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback = null;
+		
+		assert this.bfQuota > 0;
+		for(long l = 0; l < this.bfQuota + 1; l++) {
+			callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
+			GetEventsRequest[] requests = new GetEventsRequest[1];
+			
+			this.store.getEvents(this.incorrectUser, this.incorrectUserPass, requests, callback);
 			
 			assertFalse(waitOnCallback(callback));
 			assertNull(callback.getEffect());
