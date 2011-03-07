@@ -51,7 +51,6 @@ abstract public class AbstractSecureStoreWriteMethodsTest extends AbstractStoreW
 		}
 		assertTrue(this.acm.isAuthenticated(actorId, this.getCorrectUserPasswordHash()));
 		
-		// TODO IMPROVE give some correct rights without granting EVERYTHING
 		this.acm.getAuthorisationManager().getGroupDatabase()
 		        .addToGroup(actorId, XGroupDatabase.ADMINISTRATOR_GROUP_ID);
 		XID modelId1 = XX.toId("TestModel1");
