@@ -12,9 +12,11 @@ import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
+import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
 import org.xydra.base.change.XEvent;
+import org.xydra.base.change.XModelEvent;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
@@ -692,6 +694,9 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	
 	/*
 	 * Tests for getEvents
+	 * 
+	 * Technically, this is a read method, but I think the tests for this method
+	 * fit here better, since it heavily connected with execute commands ~Bjoern
 	 */
 
 	// Test if it behaves correctly for wrong account + password
@@ -714,6 +719,77 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNull(callback.getEffect());
 		assertNotNull(callback.getException());
 		assertTrue(callback.getException() instanceof AuthorisationException);
+	}
+	
+	// Tests for Model Events
+	@Test
+	public void testGetEventsModelEvents() {
+		
+		// create a model first
+		XID modelId = XX.createUniqueID();
+		
+		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
+		        true));
+		
+		// create an object and check if event is being thrown
+		XID objectId = XX.createUniqueID();
+		
+		executeSucceedingCommand(X.getCommandFactory().createAddObjectCommand(this.repoId, modelId,
+		        objectId, true));
+		
+		// get the right revision numbers
+		SynchronousTestCallback<BatchedResult<Long>[]> revCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		XAddress[] modelAddresses = new XAddress[] { XX.toAddress(this.repoId, modelId, null, null) };
+		this.store.getModelRevisions(this.correctUser, this.correctUserPass, modelAddresses,
+		        revCallback);
+		assertTrue(this.waitOnCallback(revCallback));
+		
+		long endRev = revCallback.getEffect()[0].getResult();
+		
+		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(
+		        modelAddresses[0], endRev, endRev) };
+		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
+		this.store.getEvents(this.correctUser, this.correctUserPass, request, callback);
+		
+		assertTrue(this.waitOnCallback(callback));
+		assertNull(callback.getException());
+		assertNotNull(callback.getEffect());
+		assertNotNull(callback.getEffect()[0].getResult());
+		assertEquals(callback.getEffect()[0].getResult().length, 1);
+		
+		XEvent event = callback.getEffect()[0].getResult()[0];
+		assertTrue(event instanceof XModelEvent);
+		assertEquals(event.getChangedEntity(), XX.toAddress(this.repoId, modelId, objectId, null));
+		assertEquals(event.getActor(), this.correctUser);
+		assertEquals(event.getChangeType(), ChangeType.ADD);
+		assertEquals(event.getTarget(), modelAddresses[0]);
+		assertEquals(event.getOldModelRevision(), endRev - 1);
+		assertEquals(event.getRevisionNumber(), endRev);
+		
+		// remove the object again
+		executeSucceedingCommand(X.getCommandFactory().createRemoveObjectCommand(this.repoId,
+		        modelId, objectId, XCommand.FORCED, true));
+		
+		// check if event was thrown
+		request = new GetEventsRequest[] { new GetEventsRequest(modelAddresses[0], endRev + 1,
+		        endRev + 1) };
+		callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
+		this.store.getEvents(this.correctUser, this.correctUserPass, request, callback);
+		
+		assertTrue(this.waitOnCallback(callback));
+		assertNull(callback.getException());
+		assertNotNull(callback.getEffect());
+		assertNotNull(callback.getEffect()[0].getResult());
+		assertEquals(callback.getEffect()[0].getResult().length, 1);
+		
+		event = callback.getEffect()[0].getResult()[0];
+		assertTrue(event instanceof XModelEvent);
+		assertEquals(event.getChangedEntity(), XX.toAddress(this.repoId, modelId, objectId, null));
+		assertEquals(event.getActor(), this.correctUser);
+		assertEquals(event.getChangeType(), ChangeType.REMOVE);
+		assertEquals(event.getTarget(), modelAddresses[0]);
+		assertEquals(event.getOldModelRevision(), endRev);
+		assertEquals(event.getRevisionNumber(), endRev + 1);
 	}
 	
 	/**
