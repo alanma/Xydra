@@ -16,6 +16,8 @@ import org.xydra.core.model.XObject;
  */
 public class MemoryObjectCommand extends MemoryAtomicCommand implements XObjectCommand {
 	
+	private static final long serialVersionUID = 3817731036782868280L;
+	
 	/**
 	 * Creates a new {@link XObjectCommand} of the add-type. Will add a new
 	 * {@link XField} with the specified {@link XID} to the {@link XObject} this

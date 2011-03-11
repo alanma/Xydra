@@ -1,5 +1,7 @@
 package org.xydra.base.change;
 
+import java.io.Serializable;
+
 import org.xydra.base.XAddress;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
@@ -14,7 +16,7 @@ import org.xydra.core.model.XObject;
  * See the more specific types (for example {@link XModelEvent} for further
  * explanations)
  */
-public interface XCommand {
+public interface XCommand extends Serializable {
 	
 	/**
 	 * Returned when executing commands to indicate that the command failed.

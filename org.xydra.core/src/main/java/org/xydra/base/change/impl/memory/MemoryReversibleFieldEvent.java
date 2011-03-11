@@ -22,6 +22,11 @@ import org.xydra.core.model.XObject;
 public class MemoryReversibleFieldEvent extends MemoryFieldEvent implements XReversibleFieldEvent {
 	
 	/**
+     * 
+     */
+    private static final long serialVersionUID = -2461624822886642985L;
+
+	/**
 	 * Creates an {@link XReversibleFieldEvent} of the add-type (an
 	 * {@link XValue} was added to the {@link XField} this event refers to)
 	 * 

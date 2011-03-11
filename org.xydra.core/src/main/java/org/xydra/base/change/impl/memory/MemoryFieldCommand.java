@@ -15,6 +15,8 @@ import org.xydra.index.XI;
 
 public class MemoryFieldCommand extends MemoryAtomicCommand implements XFieldCommand {
 	
+	private static final long serialVersionUID = -1637754092944391876L;
+	
 	/**
 	 * Creates a new {@link XFieldCommand} of the add-type. Will add the given
 	 * {@link XValue} to the specified {@link XField}, if possible.

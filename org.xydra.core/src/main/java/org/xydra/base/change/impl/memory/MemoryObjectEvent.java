@@ -21,6 +21,8 @@ import org.xydra.core.model.XObject;
 
 public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent {
 	
+	private static final long serialVersionUID = 6129548600082005223L;
+	
 	/**
 	 * Creates a new {@link XObjectEvent} of the add-type (an {@link XField} was
 	 * added to the {@link XObject} this event refers to)

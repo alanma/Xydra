@@ -14,6 +14,8 @@ import org.xydra.index.XI;
 
 abstract public class MemoryAtomicEvent implements XEvent {
 	
+	private static final long serialVersionUID = 4051446642240477244L;
+	
 	// The XID of the actor of this event.
 	private final XID actor;
 	

@@ -1,5 +1,7 @@
 package org.xydra.base.change;
 
+import java.io.Serializable;
+
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.core.model.XField;
@@ -17,7 +19,7 @@ import org.xydra.core.model.XRepository;
  * @author voelkel
  * 
  */
-public interface XEvent {
+public interface XEvent extends Serializable {
 	
 	public static long RevisionNotAvailable = -2;
 	public static long RevisionOfEntityNotSet = -1;

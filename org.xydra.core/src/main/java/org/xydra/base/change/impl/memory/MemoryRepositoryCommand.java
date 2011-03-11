@@ -17,6 +17,8 @@ import org.xydra.core.model.XRepository;
 
 public class MemoryRepositoryCommand extends MemoryAtomicCommand implements XRepositoryCommand {
 	
+	private static final long serialVersionUID = -6723215151804666417L;
+	
 	/**
 	 * Creates a new {@link XRepositoryCommand} of the add-type. Will add a new
 	 * {@link XModel} with the specified {@link XID} to the {@link XRepository}

@@ -21,6 +21,8 @@ import org.xydra.base.change.XTransaction;
  */
 public class MemoryTransaction implements XTransaction {
 	
+	private static final long serialVersionUID = 2638954432914484202L;
+	
 	/**
 	 * @return a new transaction with the specified target and commands. Changes
 	 *         to the passed {@link List} will not affect the transaction.

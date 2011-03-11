@@ -1,5 +1,7 @@
 package org.xydra.base.change.impl.memory;
 
+import java.io.Serializable;
+
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.change.ChangeType;
@@ -10,8 +12,9 @@ import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 
 
-abstract public class MemoryAtomicCommand implements XAtomicCommand {
+abstract public class MemoryAtomicCommand implements XAtomicCommand, Serializable {
 	
+	private static final long serialVersionUID = -4547419646736034654L;
 	private final ChangeType changeType;
 	private final long revision;
 	private XAddress target;

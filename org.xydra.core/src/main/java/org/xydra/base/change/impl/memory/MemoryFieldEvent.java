@@ -21,6 +21,8 @@ import org.xydra.index.XI;
  */
 public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	
+	private static final long serialVersionUID = -4274165693986851623L;
+	
 	/**
 	 * Creates an {@link XFieldEvent} of the add-type (an {@link XValue} was
 	 * added to the {@link XField} this event refers to)

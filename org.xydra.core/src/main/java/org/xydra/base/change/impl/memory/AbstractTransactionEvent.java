@@ -24,6 +24,8 @@ import org.xydra.index.XI;
  */
 public abstract class AbstractTransactionEvent implements XTransactionEvent {
 	
+	private static final long serialVersionUID = -3997550048059538237L;
+	
 	private final XID actor;
 	
 	// the revision numbers before the event happened

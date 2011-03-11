@@ -28,6 +28,8 @@ import org.xydra.index.XI;
  */
 public class MemoryTransactionEvent extends AbstractTransactionEvent {
 	
+	private static final long serialVersionUID = 6281227584641817166L;
+	
 	/**
 	 * Creates a new {@link XTransactionEvent} composed of the given array of
 	 * {@link XAtomicEvent XAtomicEvents} referring to the specified target.

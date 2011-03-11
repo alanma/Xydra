@@ -19,6 +19,8 @@ import org.xydra.core.model.XRepository;
 
 public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XRepositoryEvent {
 	
+	private static final long serialVersionUID = 4709068915672914712L;
+	
 	/**
 	 * Creates a new {@link XRepositoryEvent} of the add-type (an {@link XModel}
 	 * was added to the {@link XRepository} this event refers to)
