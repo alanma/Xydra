@@ -73,7 +73,7 @@ public class Utils {
 	 * TODO For input 'he he+ho' this method should return 'he%20he+ho', but
 	 * returns 'he+he%2Bho'
 	 * 
-	 * @param raw
+	 * @param raw to be encoded
 	 * @return the URL-encoded string
 	 */
 	public static String urlencode(String raw) {

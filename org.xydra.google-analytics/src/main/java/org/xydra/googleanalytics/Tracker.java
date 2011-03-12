@@ -69,9 +69,9 @@ public class Tracker {
 	boolean warnedAbout500Events = false;
 	
 	/**
-	 * @param focusPoint
-	 * @param refererURL
-	 * @param userinfo
+	 * @param focusPoint to be tracked
+	 * @param refererURL if any or empty string
+	 * @param userinfo for the Urchin cookie
 	 * @param gaEvent can be null
 	 */
 	public void track(FocusPoint focusPoint, String refererURL, UserInfo userinfo, GaEvent gaEvent) {

@@ -22,12 +22,12 @@ public class UrchinUrl {
 	 * utmcc=__utma%3D<utma cookie>3B%2B__utmz%3D<utmz cookie>%3B
 	 * </pre></code>
 	 * 
-	 * @param hostname
-	 * @param focusPoint
-	 * @param refererURL
-	 * @param cookie
-	 * @param trackingCode
-	 * @param gaEvent
+	 * @param hostname from which this request is sent
+	 * @param focusPoint to be tracked
+	 * @param refererURL to be tracked
+	 * @param cookie to be tracked
+	 * @param trackingCode UA-......
+	 * @param gaEvent to be tracked
 	 * @return a URL as a String
 	 */
 	public static String toURL(String hostname, FocusPoint focusPoint, String refererURL,

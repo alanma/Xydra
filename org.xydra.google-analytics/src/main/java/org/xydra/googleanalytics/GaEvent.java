@@ -12,11 +12,12 @@ public class GaEvent {
 	int optionalValue = -1;
 	
 	/**
-     * Parameter need not to be URL-encoded
-	 * @param category 
-	 * @param action 
-	 * @param optionalLabel
-	 * @param optionalValue
+	 * Parameter need not to be URL-encoded
+	 * 
+	 * @param category to be tracked
+	 * @param action to be tracked
+	 * @param optionalLabel to be tracked
+	 * @param optionalValue to be tracked
 	 */
 	public GaEvent(String category, String action, String optionalLabel, int optionalValue) {
 		super();
@@ -27,10 +28,11 @@ public class GaEvent {
 	}
 	
 	/**
-     * Parameter need not to be URL-encoded
-	 * @param category
-	 * @param action
-	 * @param optionalLabel
+	 * Parameter need not to be URL-encoded
+	 * 
+	 * @param category to be tracked
+	 * @param action to be tracked
+	 * @param optionalLabel to be tracked
 	 */
 	public GaEvent(String category, String action, String optionalLabel) {
 		super();
@@ -40,10 +42,11 @@ public class GaEvent {
 	}
 	
 	/**
-     * Parameter need not to be URL-encoded
-	 * @param category
-	 * @param action
-	 * @param optionalValue
+	 * Parameter need not to be URL-encoded
+	 * 
+	 * @param category to be tracked
+	 * @param action to be tracked
+	 * @param optionalValue to be tracked
 	 */
 	public GaEvent(String category, String action, int optionalValue) {
 		super();
@@ -53,9 +56,10 @@ public class GaEvent {
 	}
 	
 	/**
-     * Parameter need not to be URL-encoded
-	 * @param category
-	 * @param action
+	 * Parameter need not to be URL-encoded
+	 * 
+	 * @param category to be tracked
+	 * @param action to be tracked
 	 */
 	public GaEvent(String category, String action) {
 		super();
