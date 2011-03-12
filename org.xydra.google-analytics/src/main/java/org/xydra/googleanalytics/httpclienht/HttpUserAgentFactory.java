@@ -9,7 +9,7 @@ public class HttpUserAgentFactory {
 	 * @return a new instance of a {@link HttpUserAgent} implementation
 	 */
 	public static HttpUserAgent createHttpUserAgent() {
-		if(inProduction()) {
+		if(onAppEngine()) {
 			return new HttpUserAgentUrlFetch();
 		} else {
 			return new HttpUserAgentApacheCommons();
@@ -23,6 +23,16 @@ public class HttpUserAgentFactory {
 		return SystemProperty.environment.get() != null
 		        && SystemProperty.environment.value().equals(
 		                SystemProperty.Environment.Value.Production);
+	}
+	
+	public static boolean inDevelopment() {
+		return SystemProperty.environment.get() != null
+		        && SystemProperty.environment.value().equals(
+		                SystemProperty.Environment.Value.Development);
+	}
+	
+	public static boolean onAppEngine() {
+		return inProduction() || inDevelopment();
 	}
 	
 }
