@@ -26,6 +26,8 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.index.iterator.AbstractFilteringIterator;
 import org.xydra.index.iterator.BagUnionIterator;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
 
 /**
@@ -44,6 +46,8 @@ import org.xydra.index.iterator.BagUnionIterator;
  * 
  */
 public class ChangedModel implements XWritableModel {
+	
+	private static final Logger log = LoggerFactory.getLogger(ChangedModel.class);
 	
 	/**
 	 * Get the number of {@link XCommand XCommands} needed to create this
@@ -293,24 +297,25 @@ public class ChangedModel implements XWritableModel {
 		
 		XWritableObject object = getObject(command.getObjectId());
 		if(object == null) {
-			// command is invalid
+			log.info("command is invalid - object is null");
 			return false;
 		}
 		
 		XWritableField field = object.getField(command.getFieldId());
 		if(field == null) {
-			// command is invalid
+			log.info("command is invalid - field is null");
 			return false;
 		}
 		
 		if(!command.isForced()) {
 			if(field.getRevisionNumber() != command.getRevisionNumber()) {
-				// command is invalid (wrong revision)
+				log.info("command is invalid (wrong revision) field=" + field.getRevisionNumber()
+				        + " command=" + command.getRevisionNumber());
 				return false;
 			}
 			// empty fields require an ADD command
 			if((command.getChangeType() == ChangeType.ADD) != field.isEmpty()) {
-				// command is invalid (wrong type)
+				log.info("command is invalid (wrong type) command=ADD, field!=emtpy");
 				return false;
 			}
 		}
