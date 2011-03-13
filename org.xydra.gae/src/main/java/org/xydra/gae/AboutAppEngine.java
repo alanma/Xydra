@@ -19,4 +19,14 @@ public class AboutAppEngine {
 		                SystemProperty.Environment.Value.Production);
 	}
 	
+	public static boolean inDevelopment() {
+		return SystemProperty.environment.get() != null
+		        && SystemProperty.environment.value().equals(
+		                SystemProperty.Environment.Value.Development);
+	}
+	
+	public static boolean onAppEngine() {
+		return inProduction() || inDevelopment();
+	}
+	
 }

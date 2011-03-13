@@ -26,6 +26,7 @@ import org.xydra.store.impl.gae.changes.GaeEventService.AsyncAtomicEvent;
  */
 class GaeTransactionEvent extends AbstractTransactionEvent {
 	
+	private static final long serialVersionUID = -7411366480687963665L;
 	private final AsyncAtomicEvent[] events;
 	
 	public GaeTransactionEvent(XAddress modelAddr, AsyncAtomicEvent[] events, XID actor, long rev) {
