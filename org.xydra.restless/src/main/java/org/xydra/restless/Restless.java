@@ -737,7 +737,7 @@ public class Restless extends HttpServlet {
 	 * @param key attribute name
 	 * @param value attribute value
 	 */
-	void setServletContextAttribute(String key, Object value) {
+	public void setServletContextAttribute(String key, Object value) {
 		ServletContext sc = this.getServletContext();
 		if(sc == null) {
 			// lazy init
@@ -759,9 +759,8 @@ public class Restless extends HttpServlet {
 	 * is used.
 	 * 
 	 * @param key attribute name
-	 * @param value attribute value
 	 */
-	Object getServletContextAttribute(String key) {
+	public Object getServletContextAttribute(String key) {
 		ServletContext sc = this.getServletContext();
 		if(sc == null) {
 			// deal with lazy init
