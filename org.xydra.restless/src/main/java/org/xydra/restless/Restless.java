@@ -247,6 +247,7 @@ public class Restless extends HttpServlet {
 	
 	List<RestlessExceptionHandler> exceptionHandlers = new LinkedList<RestlessExceptionHandler>();
 	
+	/** Filled from web.xml */
 	private Map<String,String> initParams = new HashMap<String,String>();
 	
 	/**
@@ -255,7 +256,10 @@ public class Restless extends HttpServlet {
 	private List<RestlessMethod> methods = new LinkedList<RestlessMethod>();
 	
 	private ServletContext servletContext;
+	
 	private String loggerFactory;
+	
+	private HashMap<String,Object> localContext;
 	
 	/**
 	 * Register a handler that will receive exceptions thrown by the executed
@@ -722,4 +726,53 @@ public class Restless extends HttpServlet {
 	private boolean requestIsViaAdminUrl(HttpServletRequest req) {
 		return req.getRequestURI().startsWith(ADMIN_ONLY_URL_PREFIX);
 	}
+	
+	/**
+	 * Helper method to make writing JUnit tests easier.
+	 * 
+	 * When run in a servlet container, this method is simply a short-cut for
+	 * getServletContext().setAttribute(key,value). Otherwise a local hash-map
+	 * is used.
+	 * 
+	 * @param key attribute name
+	 * @param value attribute value
+	 */
+	void setServletContextAttribute(String key, Object value) {
+		ServletContext sc = this.getServletContext();
+		if(sc == null) {
+			// lazy init
+			if(this.localContext == null) {
+				this.localContext = new HashMap<String,Object>();
+			}
+			this.localContext.put(key, value);
+		} else {
+			// default
+			sc.setAttribute(key, value);
+		}
+	}
+	
+	/**
+	 * Helper method to make writing JUnit tests easier.
+	 * 
+	 * When run in a servlet container, this method is simply a short-cut for
+	 * getServletContext().getAttribute(key,value). Otherwise a local hash-map
+	 * is used.
+	 * 
+	 * @param key attribute name
+	 * @param value attribute value
+	 */
+	Object getServletContextAttribute(String key) {
+		ServletContext sc = this.getServletContext();
+		if(sc == null) {
+			// deal with lazy init
+			if(this.localContext == null) {
+				return null;
+			}
+			return this.localContext.get(key);
+		} else {
+			// default
+			return sc.getAttribute(key);
+		}
+	}
+	
 }
