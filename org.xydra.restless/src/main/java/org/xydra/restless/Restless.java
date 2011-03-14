@@ -738,16 +738,15 @@ public class Restless extends HttpServlet {
 	 * @param value attribute value
 	 */
 	public void setServletContextAttribute(String key, Object value) {
-		ServletContext sc = this.getServletContext();
-		if(sc == null) {
+		try {
+			ServletContext sc = this.getServletContext();
+			sc.setAttribute(key, value);
+		} catch(NullPointerException e) {
 			// lazy init
 			if(this.localContext == null) {
 				this.localContext = new HashMap<String,Object>();
 			}
 			this.localContext.put(key, value);
-		} else {
-			// default
-			sc.setAttribute(key, value);
 		}
 	}
 	
@@ -761,16 +760,15 @@ public class Restless extends HttpServlet {
 	 * @param key attribute name
 	 */
 	public Object getServletContextAttribute(String key) {
-		ServletContext sc = this.getServletContext();
-		if(sc == null) {
+		try {
+			ServletContext sc = this.getServletContext();
+			return sc.getAttribute(key);
+		} catch(NullPointerException e) {
 			// deal with lazy init
 			if(this.localContext == null) {
 				return null;
 			}
 			return this.localContext.get(key);
-		} else {
-			// default
-			return sc.getAttribute(key);
 		}
 	}
 	
