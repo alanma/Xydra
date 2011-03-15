@@ -10,6 +10,7 @@ import java.util.SortedSet;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.xydra.restless.utils.ServletUtils;
 
 
 public class RestlessTest {
@@ -46,7 +47,7 @@ public class RestlessTest {
 	
 	@Test
 	public void testQueryParamParsing() {
-		Map<String,SortedSet<String>> map = Restless
+		Map<String,SortedSet<String>> map = ServletUtils
 		        .getQueryStringAsMap("foo=bar&a=b&a=c&d=&this=that&enc=aa%3Dbb%26cc%3Ddd%26%C3%A4%C3%B6%C3%BC");
 		assertTrue(map.containsKey("foo"));
 		assertTrue(map.containsKey("a"));

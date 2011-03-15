@@ -1,31 +1,29 @@
 package org.xydra.restless;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.log.ILoggerFactorySPI;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.restless.utils.XmlUtils;
 
 
 /**
@@ -109,88 +107,6 @@ public class Restless extends HttpServlet {
 	
 	/** =========== Utilities ================ */
 	
-	/**
-	 * Turn all cookies that the request contains into a map, cookie name as
-	 * key, cookie value as map value.
-	 * 
-	 * @param req HttpServletRequest, never null
-	 * @return never null
-	 */
-	public static Map<String,String> getCookiesAsMap(HttpServletRequest req) {
-		Cookie[] cookies = req.getCookies();
-		Map<String,String> cookieMap = new HashMap<String,String>();
-		if(cookies != null) {
-			for(Cookie cookie : cookies) {
-				String name = cookie.getName();
-				String value = cookie.getValue();
-				// ignoring:
-				// cookie.getComment()
-				// cookie.getDomain()
-				// cookie.getMaxAge()
-				// cookie.getPath()
-				// cookie.getSecure() if true, sent only over HTTPS
-				// cookie.getVersion() usually = 1
-				if(cookieMap.containsKey(name)) {
-					log.warn("Found multiple cookies with the name '" + name
-					        + "' with values, e.g., '" + cookieMap.get(name) + "' or '" + value
-					        + "'");
-				}
-				cookieMap.put(name, value);
-			}
-		}
-		return cookieMap;
-	}
-	
-	/**
-	 * @param queryString a query string in a URL (the part after the '?')
-	 * @return a Map that contains key=value from the query string. Multiple
-	 *         values for the same key are put in order of appearance in the
-	 *         list. Duplicate values are omitted.
-	 * 
-	 *         The members of the {@link SortedSet} may be null if the query
-	 *         string was just 'a=&b=foo'.
-	 * 
-	 *         Encoding UTF-8 is used for URLDecoding the key and value strings.
-	 * 
-	 *         Keys and values get URL-decoded.
-	 */
-	public static Map<String,SortedSet<String>> getQueryStringAsMap(String queryString) {
-		Map<String,SortedSet<String>> map = new HashMap<String,SortedSet<String>>();
-		if(queryString == null) {
-			return map;
-		}
-		
-		String[] pairs = queryString.split("&");
-		for(String pair : pairs) {
-			String[] keyvalue = pair.split("=");
-			if(keyvalue.length > 2) {
-				// invalid pair, give up on unreliable parsing
-				throw new IllegalArgumentException("Malformed query string " + queryString);
-			} else {
-				String encKey = keyvalue[0];
-				String key;
-				try {
-					key = URLDecoder.decode(encKey, "utf-8");
-					SortedSet<String> values = map.get(key);
-					if(values == null) {
-						values = new TreeSet<String>();
-						map.put(key, values);
-					}
-					if(keyvalue.length == 2) {
-						String rawValue = keyvalue[1];
-						String value = URLDecoder.decode(rawValue, "utf-8");
-						values.add(value);
-					} else {
-						values.add(null);
-					}
-				} catch(UnsupportedEncodingException e) {
-					throw new RuntimeException("No utf-8 on this system?", e);
-				}
-			}
-		}
-		return map;
-	}
-	
 	protected static final String instanceOrClass_className(Object instanceOrClass) {
 		if(instanceOrClass instanceof Class<?>) {
 			return ((Class<?>)instanceOrClass).getCanonicalName();
@@ -227,20 +143,6 @@ public class Restless extends HttpServlet {
 		return null;
 	}
 	
-	/**
-	 * @param raw unencoded string
-	 * @return the input string with XML escaping
-	 */
-	public static final String xmlEncode(String raw) {
-		String safe = raw;
-		safe = safe.replace("&", "&amp;");
-		safe = safe.replace("<", "&lt;");
-		safe = safe.replace(">", "&gt;");
-		safe = safe.replace("'", "&apos;");
-		safe = safe.replace("\"", "&quto;");
-		return safe;
-	}
-	
 	/** =========== Instance code ================ */
 	
 	private String apps;
@@ -260,6 +162,12 @@ public class Restless extends HttpServlet {
 	private String loggerFactory;
 	
 	private HashMap<String,Object> localContext;
+	
+	/**
+	 * If true, unhandled requests (for which no mapping is found) are delegated
+	 * to the 'default' servlet of the container.
+	 */
+	public static boolean DELEGATE_UNHANDLED_TO_DEFAULT = false;
 	
 	/**
 	 * Register a handler that will receive exceptions thrown by the executed
@@ -369,7 +277,7 @@ public class Restless extends HttpServlet {
 			res.getWriter().println("<p><ol>");
 			for(RestlessMethod rm : this.methods) {
 				res.getWriter().print("<li>");
-				String url = servletPath + xmlEncode(rm.pathTemplate.getRegex());
+				String url = servletPath + XmlUtils.xmlEncode(rm.pathTemplate.getRegex());
 				res.getWriter().print(
 				        (rm.adminOnly ? "ADMIN ONLY" : "PUBLIC") + " resource <b class='resource'>"
 				                + url + "</b>: " + rm.httpMethod + " =&gt; ");
@@ -404,10 +312,7 @@ public class Restless extends HttpServlet {
 		String uri = req.getRequestURI();
 		String path = req.getPathInfo();
 		String servletPath = uri.substring(0, uri.length() - path.length());
-		
-		// FIXME
-		System.out.println("uri=" + uri + "\npath=" + path + "->" + servletPath);
-		
+		log.trace("uri=" + uri + "\npath=" + path + "->" + servletPath);
 		return servletPath;
 	}
 	
@@ -652,6 +557,7 @@ public class Restless extends HttpServlet {
 		boolean foundMethod = false;
 		boolean mayAccess = false;
 		
+		/* Determine HTTP method --------------------- */
 		// look in HTTP header
 		String httpMethod = req.getHeader(X_HTTP_Method_Override);
 		// look in query param
@@ -663,6 +569,7 @@ public class Restless extends HttpServlet {
 			httpMethod = req.getMethod();
 		}
 		
+		/* Find RestlessMethod to be called ------------------ */
 		// look through all registered methods
 		for(RestlessMethod restlessMethod : this.methods) {
 			// if path matches
@@ -701,24 +608,51 @@ public class Restless extends HttpServlet {
 		}
 		
 		try {
-			
 			if(foundMethod) {
 				if(!mayAccess) {
 					res.sendError(403, "Forbidden. Admin parts must be accessed via /admin.");
 				}
 			} else {
-				res.sendError(
-				        404,
-				        "No handler matched your "
-				                + req.getMethod()
-				                + "-request path '"
-				                + path
-				                + "'. "
-				                + (foundPath ? "Found at least a path mapping (wrong HTTP method or missing parameters)."
-				                        : "Found not even a path mapping."));
+				if(DELEGATE_UNHANDLED_TO_DEFAULT) {
+					delegateToDefaultServlet(req, res);
+				} else {
+					// produce better error message
+					res.sendError(
+					        404,
+					        "No handler matched your "
+					                + req.getMethod()
+					                + "-request path '"
+					                + path
+					                + "'. "
+					                + (foundPath ? "Found at least a path mapping (wrong HTTP method or missing parameters)."
+					                        : "Found not even a path mapping. Check your Restless App and web.xml."));
+				}
 			}
-			
 		} catch(IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	/**
+	 * Based on
+	 * http://stackoverflow.com/questions/132052/servlet-for-serving-static
+	 * -content
+	 * 
+	 * @param req
+	 * @param res
+	 * @throws IOException
+	 */
+	private void delegateToDefaultServlet(HttpServletRequest req, HttpServletResponse res)
+	        throws IOException {
+		try {
+			RequestDispatcher rd = getServletContext().getNamedDispatcher("default");
+			HttpServletRequest wrapped = new HttpServletRequestWrapper(req) {
+				public String getServletPath() {
+					return "";
+				}
+			};
+			rd.forward(wrapped, res);
+		} catch(ServletException e) {
 			throw new RuntimeException(e);
 		}
 	}

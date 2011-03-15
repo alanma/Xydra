@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.restless.utils.ServletUtils;
 
 
 /**
@@ -112,7 +113,7 @@ public class RestlessMethod {
 			}
 			
 			// extract Cookie values
-			Map<String,String> cookieMap = Restless.getCookiesAsMap(req);
+			Map<String,String> cookieMap = ServletUtils.getCookiesAsMap(req);
 			
 			int parameterNumber = 0;
 			boolean hasHttpServletResponseParameter = false;
