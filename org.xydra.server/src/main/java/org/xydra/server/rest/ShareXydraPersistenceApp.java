@@ -14,7 +14,10 @@ import org.xydra.store.impl.delegate.XydraPersistence;
  * A simple restless app that allows sharing of XydraPersistence instances in
  * the servlet context (= the Restless context).
  * 
- * The app requires an entry in web.xml with 'org.xydra.persistence'
+ * Simply load this app in your Restless as well and add an init param in
+ * web.xml with 'org.xydra.persistence' which is used as a class name to
+ * instantiate an {@link XydraPersistence}. The constructor ClassName(XID
+ * repositoryId) is called.
  * 
  * @author xamde
  */
