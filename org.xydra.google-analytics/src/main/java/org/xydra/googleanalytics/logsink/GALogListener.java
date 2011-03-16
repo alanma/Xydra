@@ -16,10 +16,9 @@ import org.xydra.log.Logger;
  * Routes Xydra log events (of level 'warn' and 'error') to Google Analytics
  * events.
  * 
- * To avoid endless loops, this class does not log anything.
+ * To avoid endless loops, this class uses no Logger itself.
  * 
  * @author voelkel
- * 
  */
 public class GALogListener implements ILogListener, UserInfo {
 	
