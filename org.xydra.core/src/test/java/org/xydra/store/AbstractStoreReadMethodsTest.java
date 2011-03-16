@@ -36,13 +36,6 @@ import org.xydra.log.LoggerFactory;
  * 
  */
 
-/*
- * TODO Test changeState in a separate class! JUnit does not guarantee a
- * specific execution order of the test methods, so changes made to the
- * XydraStore might mess up the read-methods that suppose that the XydraStore is
- * in the state which is created by the setUp method
- */
-
 public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	
 	static {
@@ -96,11 +89,13 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		
 		/*
 		 * FIXME In a secure store you need to give the correctUser the rights
-		 * to access these models and objects - this should not be done by this
-		 * abstract test, but rather by the implementation. As stated in the
-		 * documentation of the "getCorrectUser" method, the test assumes that
-		 * the user returned by this method is allowed to execute the following
-		 * commands ~Bjoern
+		 * to access these models and objects -
+		 */
+		/*
+		 * Comment by me: this should not be done by this abstract test, but
+		 * rather by the implementation. As stated in the documentation of the
+		 * "getCorrectUser" method, the test assumes that the user returned by
+		 * this method is allowed to execute the following commands ~Bjoern
 		 */
 
 		XID repoID = getRepositoryId();

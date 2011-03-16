@@ -724,12 +724,71 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertTrue(callback.getException() instanceof AuthorisationException);
 	}
 	
+	@Test
+	public void testGetEventsBadRevisions() {
+		// create a model first
+		XID modelId = XX.createUniqueID();
+		XAddress modelAddress = XX.toAddress(this.repoId, modelId, null, null);
+		
+		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
+		        true));
+		
+		// create an object and check if event is being thrown
+		XID objectId = XX.createUniqueID();
+		
+		executeSucceedingCommand(X.getCommandFactory().createAddObjectCommand(this.repoId, modelId,
+		        objectId, true));
+		
+		// get the right revision numbers
+		long modelRev = getRevisionNumber(modelAddress);
+		
+		/*
+		 * begin revision is greater than end revision - should throw a
+		 * RequestException according to the {@link XydraStore} interface
+		 * documentation.
+		 */
+		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(modelAddress,
+		        modelRev + 1, modelRev) };
+		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
+		this.store.getEvents(this.correctUser, this.correctUserPass, request, callback);
+		
+		assertTrue(this.waitOnCallback(callback));
+		assertNull(callback.getException());
+		assertNotNull(callback.getEffect());
+		assertNull(callback.getEffect()[0].getResult());
+		Throwable exception = callback.getEffect()[0].getException();
+		assertNotNull(exception);
+		assertTrue(exception instanceof RequestException);
+	}
+	
+	@Test
+	public void testGetEventsBadAddress() {
+		XAddress randomAddress = XX.toAddress(this.repoId, XX.createUniqueID(), null, null);
+		
+		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(randomAddress,
+		        0, 1) };
+		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
+		this.store.getEvents(this.correctUser, this.correctUserPass, request, callback);
+		
+		assertTrue(this.waitOnCallback(callback));
+		assertNull(callback.getException());
+		assertNotNull(callback.getEffect());
+		
+		/*
+		 * the request address does not exist, therefore the returned
+		 * BatchedResult should contain "null" according to the {@link
+		 * XydraStore} interface documentation.
+		 */
+		assertNull(callback.getEffect()[0].getResult()[0]);
+		assertNull(callback.getEffect()[0].getException());
+	}
+	
 	// Tests for Model Events
 	@Test
 	public void testGetEventsModelEventsAddType() {
-		
 		// create a model first
 		XID modelId = XX.createUniqueID();
+		XAddress modelAddress = XX.toAddress(this.repoId, modelId, null, null);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
 		        true));
@@ -742,16 +801,10 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		        objectId, true));
 		
 		// get the right revision numbers
-		SynchronousTestCallback<BatchedResult<Long>[]> revCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
-		XAddress[] modelAddresses = new XAddress[] { XX.toAddress(this.repoId, modelId, null, null) };
-		this.store.getModelRevisions(this.correctUser, this.correctUserPass, modelAddresses,
-		        revCallback);
-		assertTrue(this.waitOnCallback(revCallback));
+		long modelRev = getRevisionNumber(modelAddress);
 		
-		long modelRev = revCallback.getEffect()[0].getResult();
-		
-		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(
-		        modelAddresses[0], modelRev, modelRev) };
+		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(modelAddress,
+		        modelRev, modelRev) };
 		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
 		this.store.getEvents(this.correctUser, this.correctUserPass, request, callback);
 		
@@ -770,6 +823,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	public void testGetEventsModelEventsRemoveType() {
 		// create a model first
 		XID modelId = XX.createUniqueID();
+		XAddress modelAddress = XX.toAddress(this.repoId, modelId, null, null);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
 		        true));
@@ -785,17 +839,11 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		        modelId, objectId, XCommand.FORCED, true));
 		
 		// get the right revision numbers
-		SynchronousTestCallback<BatchedResult<Long>[]> revCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
-		XAddress[] modelAddresses = new XAddress[] { XX.toAddress(this.repoId, modelId, null, null) };
-		this.store.getModelRevisions(this.correctUser, this.correctUserPass, modelAddresses,
-		        revCallback);
-		assertTrue(this.waitOnCallback(revCallback));
-		
-		long modelRev = revCallback.getEffect()[0].getResult();
+		long modelRev = getRevisionNumber(modelAddress);
 		
 		// check if event was thrown
-		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(
-		        modelAddresses[0], modelRev, modelRev) };
+		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(modelAddress,
+		        modelRev, modelRev) };
 		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
 		this.store.getEvents(this.correctUser, this.correctUserPass, request, callback);
 		
@@ -814,6 +862,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	public void testGetEventsObjectEventsAddType() {
 		// create a model and object first
 		XID modelId = XX.createUniqueID();
+		XAddress modelAddress = XX.toAddress(this.repoId, modelId, null, null);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
 		        true));
@@ -832,25 +881,13 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		        objectId, fieldId, true));
 		
 		// get the right revision numbers
-		SynchronousTestCallback<BatchedResult<Long>[]> revCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
-		XAddress[] modelAddresses = new XAddress[] { XX.toAddress(this.repoId, modelId, null, null) };
-		this.store.getModelRevisions(this.correctUser, this.correctUserPass, modelAddresses,
-		        revCallback);
-		assertTrue(this.waitOnCallback(revCallback));
-		
-		SynchronousTestCallback<BatchedResult<XReadableObject>[]> objectCallback = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
-		XAddress[] objectAddresses = new XAddress[] { objectAddress };
-		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, objectAddresses,
-		        objectCallback);
-		assertTrue(this.waitOnCallback(objectCallback));
-		
-		long modelRev = revCallback.getEffect()[0].getResult();
-		long objectRev = objectCallback.getEffect()[0].getResult().getRevisionNumber();
+		long modelRev = getRevisionNumber(modelAddress);
+		long objectRev = getRevisionNumber(objectAddress);
 		
 		// get event from model first
 		// get the event
-		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(
-		        modelAddresses[0], modelRev, modelRev) };
+		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(modelAddress,
+		        modelRev, modelRev) };
 		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
 		this.store.getEvents(this.correctUser, this.correctUserPass, request, callback);
 		
@@ -882,6 +919,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	public void testGetEventsObjectEventsRemoveType() {
 		// create a model and object first
 		XID modelId = XX.createUniqueID();
+		XAddress modelAddress = XX.toAddress(this.repoId, modelId, null, null);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
 		        true));
@@ -902,25 +940,13 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		        modelId, objectId, fieldId, XCommand.FORCED, true));
 		
 		// get the right revision numbers
-		SynchronousTestCallback<BatchedResult<Long>[]> revCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
-		XAddress[] modelAddresses = new XAddress[] { XX.toAddress(this.repoId, modelId, null, null) };
-		this.store.getModelRevisions(this.correctUser, this.correctUserPass, modelAddresses,
-		        revCallback);
-		assertTrue(this.waitOnCallback(revCallback));
-		
-		SynchronousTestCallback<BatchedResult<XReadableObject>[]> objectCallback = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
-		XAddress[] objectAddresses = new XAddress[] { objectAddress };
-		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, objectAddresses,
-		        objectCallback);
-		assertTrue(this.waitOnCallback(objectCallback));
-		
-		long modelRev = revCallback.getEffect()[0].getResult();
-		long objectRev = objectCallback.getEffect()[0].getResult().getRevisionNumber();
+		long modelRev = getRevisionNumber(modelAddress);
+		long objectRev = getRevisionNumber(objectAddress);
 		
 		// check if event was thrown
 		// get event from model first
-		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(
-		        modelAddresses[0], modelRev, modelRev) };
+		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(modelAddress,
+		        modelRev, modelRev) };
 		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
 		this.store.getEvents(this.correctUser, this.correctUserPass, request, callback);
 		
@@ -951,9 +977,9 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	// Tests for Field Events
 	@Test
 	public void testGetEventsFieldEventsAddType() {
-		
 		// create a model, object and field first
 		XID modelId = XX.createUniqueID();
+		XAddress modelAddress = XX.toAddress(this.repoId, modelId, null, null);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
 		        true));
@@ -971,37 +997,20 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		        objectId, fieldId, true));
 		
 		// add a value to the field and check, if event is being thrown
-		SynchronousTestCallback<BatchedResult<XReadableObject>[]> objectCallback = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
-		XAddress[] objectAddresses = new XAddress[] { objectAddress };
-		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, objectAddresses,
-		        objectCallback);
-		assertTrue(this.waitOnCallback(objectCallback));
-		long fieldRev = objectCallback.getEffect()[0].getResult().getField(fieldId)
-		        .getRevisionNumber();
+		long fieldRev = getRevisionNumber(fieldAddress);
 		
 		XValue value1 = XX.createUniqueID();
 		executeSucceedingCommand(X.getCommandFactory().createAddValueCommand(this.repoId, modelId,
 		        objectId, fieldId, fieldRev, value1, true));
 		
 		// get the right revision numbers
-		SynchronousTestCallback<BatchedResult<Long>[]> revCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
-		XAddress[] modelAddresses = new XAddress[] { XX.toAddress(this.repoId, modelId, null, null) };
-		this.store.getModelRevisions(this.correctUser, this.correctUserPass, modelAddresses,
-		        revCallback);
-		assertTrue(this.waitOnCallback(revCallback));
-		
-		objectCallback = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
-		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, objectAddresses,
-		        objectCallback);
-		assertTrue(this.waitOnCallback(objectCallback));
-		
-		long modelRev = revCallback.getEffect()[0].getResult();
-		long objectRev = objectCallback.getEffect()[0].getResult().getRevisionNumber();
-		fieldRev = objectCallback.getEffect()[0].getResult().getField(fieldId).getRevisionNumber();
+		long modelRev = getRevisionNumber(modelAddress);
+		long objectRev = getRevisionNumber(objectAddress);
+		fieldRev = getRevisionNumber(fieldAddress);
 		
 		// get event from model first
-		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(
-		        modelAddresses[0], modelRev, modelRev) };
+		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(modelAddress,
+		        modelRev, modelRev) };
 		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
 		this.store.getEvents(this.correctUser, this.correctUserPass, request, callback);
 		
@@ -1049,6 +1058,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	public void testGetEventsFieldEventsChangeType() {
 		// create a model, object and field first
 		XID modelId = XX.createUniqueID();
+		XAddress modelAddress = XX.toAddress(this.repoId, modelId, null, null);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
 		        true));
@@ -1067,13 +1077,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		// add a value to the field, change it and check, if event is being
 		// thrown
-		SynchronousTestCallback<BatchedResult<XReadableObject>[]> objectCallback = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
-		XAddress[] objectAddresses = new XAddress[] { objectAddress };
-		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, objectAddresses,
-		        objectCallback);
-		assertTrue(this.waitOnCallback(objectCallback));
-		long fieldRev = objectCallback.getEffect()[0].getResult().getField(fieldId)
-		        .getRevisionNumber();
+		long fieldRev = getRevisionNumber(fieldAddress);
 		
 		XValue value1 = XX.createUniqueID();
 		executeSucceedingCommand(X.getCommandFactory().createAddValueCommand(this.repoId, modelId,
@@ -1084,24 +1088,13 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		        modelId, objectId, fieldId, fieldRev, value2, true));
 		
 		// get the right revision numbers
-		SynchronousTestCallback<BatchedResult<Long>[]> revCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
-		XAddress[] modelAddresses = new XAddress[] { XX.toAddress(this.repoId, modelId, null, null) };
-		this.store.getModelRevisions(this.correctUser, this.correctUserPass, modelAddresses,
-		        revCallback);
-		assertTrue(this.waitOnCallback(revCallback));
-		
-		objectCallback = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
-		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, objectAddresses,
-		        objectCallback);
-		assertTrue(this.waitOnCallback(objectCallback));
-		
-		long modelRev = revCallback.getEffect()[0].getResult();
-		long objectRev = objectCallback.getEffect()[0].getResult().getRevisionNumber();
-		fieldRev = objectCallback.getEffect()[0].getResult().getField(fieldId).getRevisionNumber();
+		long modelRev = getRevisionNumber(modelAddress);
+		long objectRev = getRevisionNumber(objectAddress);
+		fieldRev = getRevisionNumber(fieldAddress);
 		
 		// get event from model first
-		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(
-		        modelAddresses[0], modelRev, modelRev) };
+		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(modelAddress,
+		        modelRev, modelRev) };
 		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
 		this.store.getEvents(this.correctUser, this.correctUserPass, request, callback);
 		
@@ -1149,6 +1142,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	public void testGetEventsFieldEventsRemoveType() {
 		// create a model, object and field first
 		XID modelId = XX.createUniqueID();
+		XAddress modelAddress = XX.toAddress(this.repoId, modelId, null, null);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
 		        true));
@@ -1167,13 +1161,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		// add a value to the field, change it and check, if event is being
 		// thrown
-		SynchronousTestCallback<BatchedResult<XReadableObject>[]> objectCallback = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
-		XAddress[] objectAddresses = new XAddress[] { objectAddress };
-		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, objectAddresses,
-		        objectCallback);
-		assertTrue(this.waitOnCallback(objectCallback));
-		long fieldRev = objectCallback.getEffect()[0].getResult().getField(fieldId)
-		        .getRevisionNumber();
+		long fieldRev = getRevisionNumber(fieldAddress);
 		
 		XValue value1 = XX.createUniqueID();
 		executeSucceedingCommand(X.getCommandFactory().createAddValueCommand(this.repoId, modelId,
@@ -1184,24 +1172,13 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		        modelId, objectId, fieldId, XCommand.FORCED, true));
 		
 		// get the right revision numbers
-		SynchronousTestCallback<BatchedResult<Long>[]> revCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
-		XAddress[] modelAddresses = new XAddress[] { XX.toAddress(this.repoId, modelId, null, null) };
-		this.store.getModelRevisions(this.correctUser, this.correctUserPass, modelAddresses,
-		        revCallback);
-		assertTrue(this.waitOnCallback(revCallback));
-		
-		objectCallback = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
-		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, objectAddresses,
-		        objectCallback);
-		assertTrue(this.waitOnCallback(objectCallback));
-		
-		long modelRev = revCallback.getEffect()[0].getResult();
-		long objectRev = objectCallback.getEffect()[0].getResult().getRevisionNumber();
-		fieldRev = objectCallback.getEffect()[0].getResult().getField(fieldId).getRevisionNumber();
+		long modelRev = getRevisionNumber(modelAddress);
+		long objectRev = getRevisionNumber(objectAddress);
+		fieldRev = getRevisionNumber(fieldAddress);
 		
 		// get event from model first
-		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(
-		        modelAddresses[0], modelRev, modelRev) };
+		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(modelAddress,
+		        modelRev, modelRev) };
 		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
 		this.store.getEvents(this.correctUser, this.correctUserPass, request, callback);
 		
@@ -1355,6 +1332,37 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 			assertEquals(event.getOldObjectRevision(), revision - 1);
 		case XMODEL:
 			assertEquals(event.getOldModelRevision(), revision - 1);
+		}
+	}
+	
+	protected long getRevisionNumber(XAddress address) {
+		assert address.getAddressedType() != XType.XREPOSITORY;
+		XAddress[] addresses;
+		XType type = address.getAddressedType();
+		
+		if(type == XType.XMODEL) {
+			SynchronousTestCallback<BatchedResult<Long>[]> revCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+			addresses = new XAddress[] { address };
+			this.store.getModelRevisions(this.correctUser, this.correctUserPass, addresses,
+			        revCallback);
+			assertTrue(this.waitOnCallback(revCallback));
+			
+			return revCallback.getEffect()[0].getResult();
+		} else {
+			SynchronousTestCallback<BatchedResult<XReadableObject>[]> objectCallback = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+			
+			addresses = new XAddress[] { XX.toAddress(address.getRepository(), address.getModel(),
+			        address.getObject(), null) };
+			this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, addresses,
+			        objectCallback);
+			assertTrue(this.waitOnCallback(objectCallback));
+			
+			XReadableObject object = objectCallback.getEffect()[0].getResult();
+			if(type == XType.XOBJECT) {
+				return object.getRevisionNumber();
+			} else {
+				return object.getField(address.getField()).getRevisionNumber();
+			}
 		}
 	}
 }
