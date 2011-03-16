@@ -19,6 +19,12 @@ public class ServletUtils {
 	
 	private static Logger log = LoggerFactory.getLogger(ServletUtils.class);
 	
+	/**
+	 * Send '200 OK' with given contentType
+	 * 
+	 * @param res where to send to
+	 * @param contentType to be sent
+	 */
 	public static void headers(HttpServletResponse res, String contentType) {
 		res.setContentType(contentType);
 		res.setCharacterEncoding("utf-8");
