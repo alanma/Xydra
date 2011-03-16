@@ -101,6 +101,9 @@ public class Restless extends HttpServlet {
 	public static final String XHTML_NS = "xmlns=\"http://www.w3.org/1999/xhtml\"";
 	public static final String XML_DECLARATION = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	
+	public static final String INIT_PARAM_APP = "app";
+	public static final String INIT_PARAM_XYDRA_LOG_BACKEND = "loggerFactory";
+	
 	private static Logger log;
 	
 	private static final long serialVersionUID = -1906300614203565189L;
@@ -380,7 +383,7 @@ public class Restless extends HttpServlet {
 		 * Configuration option in web.xml to select class for logging back-end,
 		 * which must be an implementation of ILoggerFactorySPI.
 		 */
-		this.loggerFactory = servletConfig.getInitParameter("loggerFactory");
+		this.loggerFactory = servletConfig.getInitParameter(INIT_PARAM_XYDRA_LOG_BACKEND);
 		if(this.loggerFactory != null) {
 			// try to instantiate
 			try {
@@ -443,7 +446,7 @@ public class Restless extends HttpServlet {
 		        .put("context:serverInfo", servletConfig.getServletContext().getServerInfo());
 		
 		/** invoke restless(this,'/') on configured application class */
-		this.apps = servletConfig.getInitParameter("app");
+		this.apps = servletConfig.getInitParameter(INIT_PARAM_APP);
 		
 		List<String> appClassNames = parseToList(this.apps);
 		for(String appClassName : appClassNames) {
