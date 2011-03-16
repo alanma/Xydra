@@ -62,38 +62,35 @@ public class GaeTestfixer {
 		
 		/* if enabled and in production: self-disable */
 		if(!checkedProduction) {
-			log.debug("Testing if we are on the real GAE in production...");
+			log.trace("Testing if we are on the real GAE in production...");
 			checkedProduction = true;
 			if(inProduction()) {
-				log.debug("We are in production: Auto-disabled test fixer.");
+				log.debug("Testfixer: Running on AppEngine in production: Auto-disabled test fixer.");
 				enabled = false;
 				return;
 			} else {
-				log.debug("Env = local testing");
+				log.debug("Testfixer: Running locally");
 			}
 			
 			/* second check: can we load this class: 'LocalServiceTestHelper' ? */
 			try {
-				Class
-				        .forName("com.google.appengine.tools.development.testing.LocalServiceTestHelper");
+				Class.forName("com.google.appengine.tools.development.testing.LocalServiceTestHelper");
+				log.trace("We can load the test classes.");
 			} catch(ClassNotFoundException e) {
 				/* ah, we are in production */
-				log
-				        .warn(
-				                "We are in fact in production (or a jar is missing): Auto-disabled test fixer.",
-				                e);
+				log.warn(
+				        "We are in fact in production (or a jar is missing): Auto-disabled test fixer.",
+				        e);
 				enabled = false;
 				return;
 			} catch(NoClassDefFoundError e) {
 				/* ah, we are in production */
-				log
-				        .warn(
-				                "We are in fact in production (or a jar is missing): Auto-disabled test fixer.",
-				                e);
+				log.warn(
+				        "We are in fact in production (or a jar is missing): Auto-disabled test fixer.",
+				        e);
 				enabled = false;
 				return;
 			}
-			log.debug("We can load the test classes.");
 		}
 		
 		GaeTestFixer_LocalPart.initialiseHelperAndAttachToCurrentThread();
