@@ -1315,6 +1315,9 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 			assertEquals(fieldEvent.getObjectId(), changedEntity.getObject());
 			assertEquals(fieldEvent.getFieldId(), changedEntity.getField());
 			break;
+		case XREPOSITORY:
+			// TODO implement
+			break;
 		}
 		
 		// check revision numbers
@@ -1328,10 +1331,14 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		 */
 		case XFIELD:
 			assertEquals(event.getOldFieldRevision(), revision - 1);
+			//$FALL-THROUGH$
 		case XOBJECT:
 			assertEquals(event.getOldObjectRevision(), revision - 1);
+			//$FALL-THROUGH$
 		case XMODEL:
 			assertEquals(event.getOldModelRevision(), revision - 1);
+			//$FALL-THROUGH$
+		case XREPOSITORY:
 		}
 	}
 	

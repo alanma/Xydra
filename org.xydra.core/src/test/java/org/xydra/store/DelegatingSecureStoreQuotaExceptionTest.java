@@ -1,10 +1,12 @@
 package org.xydra.store;
 
+import org.junit.Ignore;
 import org.xydra.base.X;
 import org.xydra.base.change.XCommandFactory;
 import org.xydra.store.impl.memory.SecureMemoryStore;
 
 
+@Ignore
 public class DelegatingSecureStoreQuotaExceptionTest extends AbstractSecureStoreQuotaExceptionTest {
 	
 	@Override
