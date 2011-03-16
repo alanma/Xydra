@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.xydra.base.rmof.impl.delegate.WritableRepositoryOnPersistence;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
+import org.xydra.restless.utils.ServletUtils;
 import org.xydra.server.inout.CsvExport;
 
 
@@ -33,15 +34,8 @@ public class CsvImportExportResource {
 		        true, new RestlessParameter("repository", null));
 	}
 	
-	// TODO move to restless utils
-	private static void setHeaders(HttpServletResponse res, String contentType, int statusCode) {
-		res.setContentType(contentType);
-		res.setCharacterEncoding("utf-8");
-		res.setStatus(statusCode);
-	}
-	
 	public static void index(HttpServletRequest req, HttpServletResponse res) throws IOException {
-		setHeaders(res, "text/html", 200);
+		ServletUtils.headers(res, "text/html");
 		res.getWriter().println("<html><head><title>Xydra admin / CSV</title></head><body>");
 		res.getWriter().println("Export: <a href='" + req.getRequestURL() + "/export'>CSV</a>");
 		// FIXME impl.
@@ -50,17 +44,17 @@ public class CsvImportExportResource {
 	
 	public static void csvImport(String csv, String repository, HttpServletRequest req,
 	        HttpServletResponse res) throws IOException {
-		setHeaders(res, "text/html", 200);
+		ServletUtils.headers(res, "text/html");
 		res.getWriter().println(
 		        "<html><head><title>Xydra admin / CSV / Import</title></head><body>");
-		res.getWriter().println("");
+		res.getWriter().println("Not implemented yet");
 		// FIXME impl.
 		res.getWriter().println("</body></html>");
 	}
 	
 	public void csvExport(String repository, Restless restless, HttpServletRequest req,
 	        HttpServletResponse res) throws IOException {
-		setHeaders(res, "text/csv", 200);
+		ServletUtils.headers(res, "text/csv");
 		/*
 		 * via
 		 * http://stackoverflow.com/questions/398237/how-to-use-the-csv-mime-

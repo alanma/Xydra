@@ -26,7 +26,9 @@ import org.xydra.store.impl.gae.GaePersistence;
  * Currently mostly export/import to/from CSV. Also allows adding a Xydra demo
  * model.
  * 
+ * ../io -> Import/Export; Add demo data
  * 
+ * ../gaeconf -> Configure GAE caching
  * 
  * @author xamde
  */
@@ -40,6 +42,7 @@ public class XydraAdminApp {
 		restless.addMethod(path + "/io/addDemoData", "GET", XydraAdminApp.class, "addDemoData",
 		        true);
 		CsvImportExportResource.restless(restless, path + "/io");
+		GaeConfigurationResource.restless(restless, path);
 	}
 	
 	public static void index(HttpServletRequest req, HttpServletResponse res) throws IOException {
