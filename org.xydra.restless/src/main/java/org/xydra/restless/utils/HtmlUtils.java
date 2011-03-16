@@ -2,8 +2,11 @@ package org.xydra.restless.utils;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 
 public class HtmlUtils {
@@ -109,6 +112,38 @@ public class HtmlUtils {
 			return buf.toString();
 		}
 		
+	}
+	
+	/**
+	 * Utility functions to turn a Map to HTML definition list
+	 * 
+	 * @param mapEntries input, nut null
+	 * @return a string containing the resulting HTML
+	 */
+	public static String toDefinitionList(Map<String,? extends Object> mapEntries) {
+		StringBuffer buf = new StringBuffer();
+		buf.append("<dl>");
+		for(Entry<String,? extends Object> e : mapEntries.entrySet()) {
+			buf.append("<dt>" + e.getKey() + "</dt><dd>" + e.getValue() + "</dd>");
+		}
+		buf.append("</dl>");
+		return buf.toString();
+	}
+	
+	/**
+	 * Utility functions to turn a Collection of Strings to HTML ordered list
+	 * 
+	 * @param listEntries input, not null
+	 * @return a string containing the resulting HTML
+	 */
+	public static String toOrderedList(Collection<String> listEntries) {
+		StringBuffer buf = new StringBuffer();
+		buf.append("<ol>");
+		for(String li : listEntries) {
+			buf.append("<li>" + li + "</li>");
+		}
+		buf.append("</ol>");
+		return buf.toString();
 	}
 	
 }
