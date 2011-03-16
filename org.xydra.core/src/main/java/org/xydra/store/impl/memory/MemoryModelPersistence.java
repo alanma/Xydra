@@ -96,6 +96,10 @@ public class MemoryModelPersistence {
 	synchronized public List<XEvent> getEvents(XAddress address, long beginRevision,
 	        long endRevision) {
 		
+		if(this.events.isEmpty()) {
+			return null;
+		}
+		
 		long currentRev = getRevisionNumber();
 		long start = beginRevision < 0 ? 0 : beginRevision;
 		long end = endRevision > currentRev ? currentRev : endRevision;

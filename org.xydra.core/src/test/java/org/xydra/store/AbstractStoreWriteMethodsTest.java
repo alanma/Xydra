@@ -779,7 +779,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		 * BatchedResult should contain "null" according to the {@link
 		 * XydraStore} interface documentation.
 		 */
-		assertNull(callback.getEffect()[0].getResult()[0]);
+		assertNull(callback.getEffect()[0].getResult());
 		assertNull(callback.getEffect()[0].getException());
 	}
 	

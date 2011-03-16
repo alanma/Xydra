@@ -74,7 +74,16 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 	 * @param actorId never null.
 	 * @param passwordHash if null, acotrId is authorised.
 	 */
-	private boolean authorise(XID actorId, String passwordHash) {
+	private void authorise(XID actorId, String passwordHash) {
+		if(!checkLogin(actorId, passwordHash)) {
+			throw new AuthorisationException("Could not authorise '" + actorId + "'");
+		}
+	}
+	
+	@Override
+	public boolean checkLogin(XID actorId, String passwordHash) throws IllegalArgumentException,
+	        QuotaException, TimeoutException, ConnectionException, RequestException,
+	        InternalStoreException {
 		/* null password -> always authorised */
 		if(passwordHash == null) {
 			return true;
@@ -110,16 +119,8 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 				throw new QuotaException(XydraStore.MAX_FAILED_LOGIN_ATTEMPTS
 				        + " failed login attempts.");
 			}
-			throw new AuthorisationException("Could not authorise '" + actorId + "'");
+			return false;
 		}
-	}
-	
-	@Override
-	public boolean checkLogin(XID actorId, String passwordHash) throws IllegalArgumentException,
-	        QuotaException, TimeoutException, ConnectionException, RequestException,
-	        InternalStoreException {
-		assert actorId != null;
-		return authorise(actorId, passwordHash);
 	}
 	
 	private void checkRepoId(XAddress address) {
@@ -164,19 +165,31 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 		long endRevision = getEventsRequest.endRevision;
 		checkRepoId(address);
 		if(endRevision < beginRevision) {
-			throw new IllegalArgumentException("invalid revision range for getEvents: ["
-			        + beginRevision + "," + endRevision + "]");
+			throw new RequestException("invalid revision range for getEvents: [" + beginRevision
+			        + "," + endRevision + "]");
 		}
 		
+		// FIXME see fixme below
 		if(!triviallyAllowed(passwordHash)
 		        && !this.acm.getAuthorisationManager().canKnowAboutModel(actorId,
 		                this.getRepositoryAddress(), address.getModel())) {
 			// silently drop all events (if there are any)
 			return new XEvent[0];
 		}
+		
 		// assert: authenticated & mayKnowAbout model
 		List<XEvent> events = this.persistence.getEvents(address, beginRevision, endRevision);
 		/* check access rights for model, each object and each field */
+
+		if(events == null) {
+			return null;
+		}
+		
+		/*
+		 * FIXME why are the access rights not checked if passwordHash == null?
+		 * passwordHash == null only indicates that the actor is already
+		 * authenticated, not that he is authorized to view all requested info
+		 */
 		if(!triviallyAllowed(passwordHash)) {
 			assert this.acm.getAuthorisationManager() != null;
 			Iterator<XEvent> it = events.iterator();
@@ -186,25 +199,15 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 				switch(event.getChangedEntity().getAddressedType()) {
 				case XREPOSITORY: {
 					/*
-					 * TODO is the model creation event part of the models'
-					 * event log? -- Yes. On GAE this is needed for
-					 * synchronization purposes (so are model remove events).
-					 * Everywhere else this is useful to log who created/removed
-					 * the model. ~Daniel
+					 * Model creation and remove events are part of the models'
+					 * event log. On GAE this is needed for synchronization
+					 * purposes (so are model remove events). Everywhere else
+					 * this is useful to log who created/removed the model.
 					 */
-					throw new AssertionError(
-					        "This class should only return model events, not repository events");
+					break;
 				}
 				case XMODEL: {
-					// no need to filter it out
-					// TODO while (with write access to the repo) the existence
-					// of models
-				}
-					break;
-				case XOBJECT: {
 					XID objectId = event.getChangedEntity().getObject();
-					// TODO is knowAboutObject enough to get the object event?
-					// ~~max
 					if(!this.acm.getAuthorisationManager().canKnowAboutObject(actorId,
 					        XX.resolveModel(event.getChangedEntity()), objectId)) {
 						// filter event out
@@ -212,8 +215,9 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 						// IMPROVE remove in the middle of array lists is
 						// inefficient
 					}
-				}
 					break;
+				}
+				case XOBJECT:
 				case XFIELD: {
 					XID fieldId = event.getChangedEntity().getField();
 					// TODO is knowAboutObject enough to get the field event?
@@ -223,9 +227,9 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 						// filter event out
 						it.remove();
 					}
+					break;
 				}
 				}
-				break;
 			}
 		}
 		return events.toArray(new XEvent[events.size()]);
