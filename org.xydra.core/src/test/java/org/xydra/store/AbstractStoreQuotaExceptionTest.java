@@ -165,14 +165,15 @@ public abstract class AbstractStoreQuotaExceptionTest {
 			
 			this.store.checkLogin(this.incorrectUser, this.incorrectUserPass, callback);
 			
-			assertFalse(waitOnCallback(callback));
-			assertNull(callback.getEffect());
-			assertNotNull(callback.getException());
-			
 			if(l < this.bfQuota) {
+				assertTrue(waitOnCallback(callback));
+				assertFalse(callback.getEffect());
+				assertNull(callback.getException());
 				// QuotaException shouldn't be thrown yet.
-				assertFalse(callback.getException() instanceof QuotaException);
 			} else {
+				assertFalse(waitOnCallback(callback));
+				assertNull(callback.getEffect());
+				assertNotNull(callback.getException());
 				assertTrue(callback.getException() instanceof QuotaException);
 			}
 		}
@@ -250,8 +251,8 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	@Test
 	public void testGetModelSnapshotsQuotaExcpetion() {
 		SynchronousTestCallback<BatchedResult<XReadableModel>[]> callback = null;
-		XAddress[] tempArray = new XAddress[] { XX.toAddress(XX.createUniqueID(),
-		        XX.createUniqueID(), null, null) };
+		XAddress[] tempArray = new XAddress[] { XX.toAddress(XX.createUniqueID(), XX
+		        .createUniqueID(), null, null) };
 		
 		assert this.bfQuota > 0;
 		for(long l = 0; l < this.bfQuota + 1; l++) {
@@ -282,8 +283,8 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	@Test
 	public void testGetObjectSnapshotsQuotaException() {
 		SynchronousTestCallback<BatchedResult<XReadableObject>[]> callback = null;
-		XAddress[] tempArray = new XAddress[] { XX.toAddress(XX.createUniqueID(),
-		        XX.createUniqueID(), XX.createUniqueID(), null) };
+		XAddress[] tempArray = new XAddress[] { XX.toAddress(XX.createUniqueID(), XX
+		        .createUniqueID(), XX.createUniqueID(), null) };
 		
 		assert this.bfQuota > 0;
 		for(long l = 0; l < this.bfQuota + 1; l++) {
