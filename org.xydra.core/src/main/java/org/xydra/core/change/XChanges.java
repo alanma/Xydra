@@ -571,8 +571,8 @@ public class XChanges {
 	 * 
 	 * @param trans The {@link XTransactionEvent} for which a corresponding
 	 *            {@link XTransaction} is to be created
-	 * @return an {@link XTransaction} which execution would've created the
-	 *         given {@link XTransactionEvent}
+	 * @return an {@link XTransaction} or {@link XCommand} (if sufficient) which
+	 *         execution would've created the given {@link XTransactionEvent}
 	 */
 	static public XCommand createReplayCommand(XTransactionEvent trans) {
 		
