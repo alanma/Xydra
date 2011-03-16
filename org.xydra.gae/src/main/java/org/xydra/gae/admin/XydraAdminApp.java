@@ -13,18 +13,22 @@ import org.xydra.core.XCopyUtils;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.restless.Restless;
+import org.xydra.restless.utils.HtmlUtils;
+import org.xydra.restless.utils.ServletUtils;
 import org.xydra.server.rest.ShareXydraPersistenceApp;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaePersistence;
 
 
 /**
- * Admin functions.
+ * Admin functions exposed as '../io'.
  * 
- * Currently mostly export/import.
+ * Currently mostly export/import to/from CSV. Also allows adding a Xydra demo
+ * model.
+ * 
+ * 
  * 
  * @author xamde
- * 
  */
 public class XydraAdminApp {
 	
@@ -38,21 +42,15 @@ public class XydraAdminApp {
 		CsvImportExportResource.restless(restless, path + "/io");
 	}
 	
-	// TODO move to restless utils
-	private static void setHeaders(HttpServletResponse res, String contentType, int statusCode) {
-		res.setContentType(contentType);
-		res.setCharacterEncoding("utf-8");
-		res.setStatus(statusCode);
-	}
-	
 	public static void index(HttpServletRequest req, HttpServletResponse res) throws IOException {
-		setHeaders(res, "text/html", 200);
-		res.getWriter().println("<html><head><title>Xydra admin</title></head><body>");
+		ServletUtils.headers(res, "text/html");
+		HtmlUtils.writeHtmlHeaderOpenBody(res.getWriter(), "Xydra Admin");
 		res.getWriter().println(
 		        "<a href='" + req.getRequestURL() + "/addDemoData'>Add demo data</a>");
 		res.getWriter().println("Format: <a href='" + req.getRequestURL() + "/csv'>CSV</a>");
 		// TODO XML, JSON
-		res.getWriter().println("</body></html>");
+		HtmlUtils.writeCloseBodyHtml(res.getWriter());
+		
 	}
 	
 	/**
