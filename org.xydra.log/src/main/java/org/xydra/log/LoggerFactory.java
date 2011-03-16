@@ -40,15 +40,17 @@ public class LoggerFactory {
 		if(gwtEnabled() && gwtLogEnabled()) {
 			loggerFactorySPI = new GwtLoggerFactorySPI();
 			loggerFactorySPI.getLogger("ROOT", null).info(
-			        "Found no LoggerFactorySPI, using GWT Log");
+			        "Logging: Found no LoggerFactorySPI, using GWT Log");
 		} else {
 			loggerFactorySPI = new DefaultLoggerFactorySPI();
 			loggerFactorySPI.getLogger("ROOT", null).error(
-			        "Found no LoggerFactorySPI, using default to std.out");
+			        "Logging: Found no LoggerFactorySPI, using default to std.out");
 			try {
-				throw new RuntimeException("this stacktrace caused the log init()");
+				throw new RuntimeException(
+				        "Logging: FYI (Not an error) This was the first logging call which triggered the log init(). ");
 			} catch(RuntimeException e) {
-				loggerFactorySPI.getLogger("ROOT", null).info("Printing caller to System.out", e);
+				loggerFactorySPI.getLogger("ROOT", null).info(
+				        "Logging: Printing caller to System.out", e);
 				e.fillInStackTrace();
 				e.printStackTrace();
 			}
@@ -90,7 +92,7 @@ public class LoggerFactory {
 	public static void setLoggerFactorySPI(ILoggerFactorySPI spi) {
 		loggerFactorySPI = spi;
 		loggerFactorySPI.getLogger("ROOT", null).info(
-		        "Configured XydraLog with " + spi.getClass().getName());
+		        "Logging: Configured XydraLog with " + spi.getClass().getName());
 	}
 	
 }
