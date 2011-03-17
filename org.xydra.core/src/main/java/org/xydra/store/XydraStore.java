@@ -222,6 +222,11 @@ public interface XydraStore {
 	 * {@link #executeCommands(XID, String, XCommand[], Callback)} and
 	 * {@link #getEvents(XID, String, GetEventsRequest[], Callback)}.
 	 * 
+	 * TODO Specify what happens first - executing the commands or getting the
+	 * requested events? This is useful to know, since if the order is
+	 * "execute commands, get events" this method may be used to get the events
+	 * of the newly executed commands too. ~Bjoern
+	 * 
 	 * @param actorId The actor who is performing this operation.
 	 * @param passwordHash The MD5 hash of the secret actor password prefixed
 	 *            with "Xydra" to avoid transmitting the same string over the
