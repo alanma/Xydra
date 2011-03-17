@@ -22,8 +22,15 @@ public class HtmlUtils {
 		        + "<body>\r\n");
 	}
 	
+	/**
+	 * Closes the HTML and flushes the writer.
+	 * 
+	 * @param w writer
+	 * @throws IOException from writer
+	 */
 	public static void writeCloseBodyHtml(Writer w) throws IOException {
 		w.write("</body>\r\n" + "</html>");
+		w.flush();
 	}
 	
 	public static String link(String url, String text) {
