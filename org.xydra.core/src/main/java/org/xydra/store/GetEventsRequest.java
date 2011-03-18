@@ -57,7 +57,7 @@ public class GetEventsRequest {
 	 *            from which all {@link XEvent XEvents} are to be returned - can
 	 *            be greater than current revision number of the addressed
 	 *            entity to get all {@link XEvent XEvents} since beginRevision.
-	 *            Must be greater than beginRevision.
+	 *            Must be greater than or equal to beginRevision.
 	 * 
 	 *            TODO is there a point in allowing endRevision < 0?
 	 */
