@@ -62,7 +62,7 @@ public class KeyStructure {
 	 * @return a GAE {@link Key} representing an internal part of a Xydra change
 	 *         entity
 	 */
-	public static Key createEventKey(Key changeKey, int transindex) {
+	public static Key createValueKey(Key changeKey, int transindex) {
 		assert isChangeKey(changeKey);
 		return changeKey.getChild(KeyStructure.KIND_XEVENT, Integer.toString(transindex));
 	}

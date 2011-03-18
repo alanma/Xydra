@@ -16,7 +16,7 @@ import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
 
 
-public class GaeStoreReadMethodsTest extends AbstractSecureStoreReadMethodsTest {
+public class GaeStoreWriteMethodsTest extends AbstractSecureStoreWriteMethodsTest {
 	
 	@BeforeClass
 	public static void init() {

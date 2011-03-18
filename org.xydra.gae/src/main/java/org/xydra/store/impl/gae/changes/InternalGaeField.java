@@ -9,12 +9,12 @@ import java.util.concurrent.Future;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
-import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XField;
 import org.xydra.store.impl.gae.GaeUtils;
+import org.xydra.store.impl.gae.changes.GaeEventService.AsyncValue;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -31,13 +31,12 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 	
 	private static final String PROP_TRANSINDEX = "transindex";
 	// Value for PROP_TRANSINDEX if there hasn't been any XFieldEvent yet
-	private static final int TRANSINDEX_NONE = -1;
 	
 	private final XAddress modelAddr;
 	private final XAddress fieldAddr;
 	private final long fieldRev;
 	private final int transindex;
-	private XFieldEvent valueEvent;
+	private AsyncValue value;
 	
 	/**
 	 * Construct a read-only interface to an {@link XFieldEvent} in the GAE
@@ -61,24 +60,19 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 	}
 	
 	public XValue getValue() {
-		if(this.transindex == TRANSINDEX_NONE) {
+		if(this.value == null) {
+			// IMPROVE maybe get this when the field is fetched?
+			this.value = GaeEventService.getValue(this.modelAddr, this.fieldRev, this.transindex);
+		}
+		if(this.value != null) {
+			return this.value.get();
+		} else {
 			return null;
 		}
-		if(this.valueEvent == null) {
-			XAtomicEvent event = GaeEventService.getAtomicEvent(this.modelAddr, this.fieldRev,
-			        this.transindex).get();
-			if(!(event instanceof XFieldEvent)) {
-				throw new RuntimeException("field refers to an event that is not an XFieldEvent: "
-				        + event);
-			}
-			this.valueEvent = (XFieldEvent)event;
-		}
-		assert this.valueEvent != null;
-		return this.valueEvent.getNewValue();
 	}
 	
 	public boolean isEmpty() {
-		return this.transindex == TRANSINDEX_NONE;
+		return this.transindex == GaeEventService.TRANSINDEX_NONE;
 	}
 	
 	public XAddress getAddress() {
@@ -131,7 +125,7 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 	 *            assert that we are actually allowed to create the entity.
 	 */
 	protected static Future<Key> set(XAddress fieldAddr, long fieldRev, Set<XAddress> locks) {
-		return set(fieldAddr, fieldRev, TRANSINDEX_NONE, locks);
+		return set(fieldAddr, fieldRev, GaeEventService.TRANSINDEX_NONE, locks);
 	}
 	
 	private static int getTransIndex(Entity fieldEntity) {

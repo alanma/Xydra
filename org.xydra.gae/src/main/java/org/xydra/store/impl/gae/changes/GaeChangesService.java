@@ -87,9 +87,9 @@ import com.google.appengine.api.datastore.Transaction;
  * the time the (last) process started working on the change (
  * {@link #PROP_LAST_ACTIVITY}).
  * 
- * If there are events associated with this change,
- * {@link GaeEventService#PROP_EVENTCOUNT} will specify how many. This property
- * will not be set before the change has reached {@link #STATUS_EXECUTING}
+ * See {@link GaeEventService} for how events associated with this change are
+ * stored. No events are guaranteed to be set before the change has reached
+ * {@link #STATUS_EXECUTING}.
  * 
  * Possible status progression for XCHANGE Entities:
  * 
@@ -109,7 +109,7 @@ import com.google.appengine.api.datastore.Transaction;
  * 
  * <dt>Entity type XEVENT</dt>
  * <dd>Stores a single {@link XAtomicEvent} associated with a XCHANGE entity.
- * Keys are encoded according to {@link KeyStructure#createEventKey(Key, int)}.
+ * Keys are encoded according to {@link KeyStructure#createValueKey(Key, int)}.
  * Currently events are simply dumped as a XML-Encoded {@link String} using
  * {@link XmlEvent#toXml(XEvent, org.xydra.core.xml.XmlOut, XAddress)}.</dd>
  * </dl>
@@ -298,10 +298,11 @@ public class GaeChangesService {
 		
 		waitForLocks(change);
 		
-		List<XAtomicEvent> events = checkPreconditionsAndSaveEvents(change, command, actorId);
+		Pair<List<XAtomicEvent>,int[]> events = checkPreconditionsAndSaveEvents(change, command,
+		        actorId);
 		if(events == null) {
 			return XCommand.FAILED;
-		} else if(events.isEmpty()) {
+		} else if(events.getFirst().isEmpty()) {
 			// TODO maybe return revision?
 			return XCommand.NOCHANGE;
 		}
@@ -355,7 +356,7 @@ public class GaeChangesService {
 	}
 	
 	private String getCommitedRevCacheName() {
-		return getBaseAddress() + "-commitedRev";
+		return getModelAddress() + "-commitedRev";
 	}
 	
 	/**
@@ -584,7 +585,7 @@ public class GaeChangesService {
 	 * @return a copy of the created events or null if the command cannot be
 	 *         applied.
 	 */
-	private List<XAtomicEvent> checkPreconditionsAndSaveEvents(ChangeInProgress change,
+	private Pair<List<XAtomicEvent>,int[]> checkPreconditionsAndSaveEvents(ChangeInProgress change,
 	        XCommand command, XID actorId) {
 		
 		XReadableModel currentModel = InternalGaeModel.get(this, change.rev - 1, change.locks);
@@ -599,6 +600,8 @@ public class GaeChangesService {
 		
 		List<XAtomicEvent> events = DeltaUtils.createEvents(this.modelAddr, c, actorId, change.rev);
 		
+		int[] valueIds = null;
+		
 		assert events != null;
 		
 		try {
@@ -606,10 +609,17 @@ public class GaeChangesService {
 			if(events.isEmpty()) {
 				giveUpIfTimeoutCritical(change.startTime);
 				cleanupChangeEntity(change, STATUS_SUCCESS_NOCHANGE);
-				return events;
+				return new Pair<List<XAtomicEvent>,int[]>(events, null);
 			}
 			
-			GaeEventService.saveEvents(this.modelAddr, change.entity, events);
+			Pair<int[],List<Future<Key>>> res = GaeEventService.saveEvents(this.modelAddr,
+			        change.entity, events);
+			valueIds = res.getFirst();
+			
+			// Wait on all changes.
+			for(Future<Key> future : res.getSecond()) {
+				GaeUtils.waitFor(future);
+			}
 			
 			change.entity.setUnindexedProperty(PROP_STATUS, STATUS_EXECUTING);
 			GaeUtils.putEntity(change.entity);
@@ -623,7 +633,7 @@ public class GaeChangesService {
 			cleanupChangeEntity(change, STATUS_FAILED_TIMEOUT);
 		}
 		
-		return events;
+		return new Pair<List<XAtomicEvent>,int[]>(events, valueIds);
 	}
 	
 	/**
@@ -633,7 +643,7 @@ public class GaeChangesService {
 	 * @param change
 	 * @param events
 	 */
-	private void executeAndUnlock(ChangeInProgress change, List<XAtomicEvent> events) {
+	private void executeAndUnlock(ChangeInProgress change, Pair<List<XAtomicEvent>,int[]> events) {
 		
 		/*
 		 * Track which object's revision numbers we have already saved and which
@@ -651,10 +661,10 @@ public class GaeChangesService {
 		Set<XID> objectsWithSavedRev = new HashSet<XID>();
 		Set<XID> objectsWithPossiblyUnsavedRev = new HashSet<XID>();
 		
-		List<Future<?>> futures = new ArrayList<Future<?>>(events.size());
+		List<Future<?>> futures = new ArrayList<Future<?>>(events.getFirst().size());
 		
-		for(int i = 0; i < events.size(); i++) {
-			XAtomicEvent event = events.get(i);
+		for(int i = 0; i < events.getFirst().size(); i++) {
+			XAtomicEvent event = events.getFirst().get(i);
 			
 			assert this.modelAddr.equalsOrContains(event.getChangedEntity());
 			assert event.getRevisionNumber() == change.rev;
@@ -663,20 +673,17 @@ public class GaeChangesService {
 				assert Arrays.asList(ChangeType.REMOVE, ChangeType.ADD, ChangeType.CHANGE)
 				        .contains(event.getChangeType());
 				
-				if(((XFieldEvent)event).getNewValue() == null) {
-					if(event.isImplied()) {
-						assert event.getChangeType() == ChangeType.REMOVE;
-						// removed by the XObjectEvent
-						continue;
-					}
-					// Set the field as existing but empty.
-					futures.add(InternalGaeField.set(event.getTarget(), change.rev, change.locks));
-				} else {
-					// Set the field as empty and containing the XValue stored
-					// at the specified transaction index.
-					futures.add(InternalGaeField
-					        .set(event.getTarget(), change.rev, i, change.locks));
+				if(event.isImplied()) {
+					assert event.getChangeType() == ChangeType.REMOVE;
+					// removed by the XObjectEvent
+					continue;
 				}
+				
+				// Set the field as empty and containing the XValue stored
+				// at the specified transaction index.
+				futures.add(InternalGaeField.set(event.getTarget(), change.rev,
+				        events.getSecond()[i], change.locks));
+				
 				assert !event.isImplied();
 				assert event.getTarget().getObject() != null;
 				// revision saved in changed field.
@@ -829,7 +836,7 @@ public class GaeChangesService {
 		
 		ChangeInProgress change = new ChangeInProgress(rev, now, locks, changeEntity);
 		
-		List<XAtomicEvent> events = loadEvents(change);
+		Pair<List<XAtomicEvent>,int[]> events = loadEvents(change);
 		
 		executeAndUnlock(change, events);
 		
@@ -898,13 +905,16 @@ public class GaeChangesService {
 	 * @return a List of {@link XAtomicEvent} which is stored as a number of GAE
 	 *         entities
 	 */
-	private List<XAtomicEvent> loadEvents(ChangeInProgress change) {
+	private Pair<List<XAtomicEvent>,int[]> loadEvents(ChangeInProgress change) {
 		
 		assert assertRevisionInKey(change.entity.getKey(), change.rev);
 		assert Arrays.asList(STATUS_EXECUTING, STATUS_SUCCESS_EXECUTED).contains(
 		        change.entity.getProperty(PROP_STATUS));
 		
-		return GaeEventService.loadEvents(this.modelAddr, change.entity, change.rev);
+		Pair<XAtomicEvent[],int[]> res = GaeEventService.loadAtomicEvents(this.modelAddr,
+		        change.rev, null, change.entity, false);
+		
+		return new Pair<List<XAtomicEvent>,int[]>(Arrays.asList(res.getFirst()), res.getSecond());
 	}
 	
 	private void cleanupChangeEntity(ChangeInProgress change, int status) {
@@ -1070,7 +1080,7 @@ public class GaeChangesService {
 	 * @return the {@link XAddress} of the model managed by this
 	 *         {@link GaeChangesService} instance.
 	 */
-	public XAddress getBaseAddress() {
+	public XAddress getModelAddress() {
 		return this.modelAddr;
 	}
 	
@@ -1106,7 +1116,7 @@ public class GaeChangesService {
 	}
 	
 	private String getCurrentRevCacheName() {
-		return getBaseAddress() + "-currentRev";
+		return getModelAddress() + "-currentRev";
 	}
 	
 	/**
@@ -1188,13 +1198,14 @@ public class GaeChangesService {
 			
 			int status = getStatus(changeEntity);
 			if(status != STATUS_EXECUTING && status != STATUS_SUCCESS_EXECUTED) {
-				// no events available (yet) for this revision.
+				// no events available (or not yet) for this revision.
 				return null;
 			}
 			
 			XID actor = getActor(changeEntity);
 			
 			this.event = GaeEventService.asEvent(this.modelAddr, this.rev, actor, changeEntity);
+			assert this.event != null;
 			
 			return this.event;
 		}
@@ -1217,6 +1228,8 @@ public class GaeChangesService {
 	
 	public List<XEvent> getEventsBetween(long beginRevision, long endRevision) {
 		
+		log.info("getEventsBetwen " + beginRevision + " " + endRevision + " @" + getModelAddress());
+		
 		if(beginRevision < 0) {
 			throw new IndexOutOfBoundsException(
 			        "beginRevision is not a valid revision number, was " + beginRevision);
@@ -1231,7 +1244,7 @@ public class GaeChangesService {
 			throw new IllegalArgumentException("beginRevision may not be greater than endRevision");
 		}
 		
-		if(beginRevision >= endRevision || endRevision <= 0) {
+		if(endRevision <= 0) {
 			return new ArrayList<XEvent>(0);
 		}
 		
@@ -1243,7 +1256,7 @@ public class GaeChangesService {
 		
 		int initialBuffer = 1;
 		if(endRevision <= currentRev) {
-			initialBuffer = (int)(endRevision - begin);
+			initialBuffer = (int)(endRevision - begin + 1);
 		}
 		List<AsyncEvent> batch = new ArrayList<AsyncEvent>(initialBuffer);
 		for(int i = 0; i < initialBuffer; i++) {
@@ -1255,7 +1268,7 @@ public class GaeChangesService {
 		boolean trackCurrentRev = (begin <= currentRev) && (currentRev < endRevision);
 		
 		long rev = begin;
-		for(; rev < endRevision; rev++) {
+		for(; rev <= endRevision; rev++) {
 			
 			Entity changeEntity = batch.get(pos).getEntity();
 			if(changeEntity == null) {
@@ -1278,17 +1291,22 @@ public class GaeChangesService {
 			}
 			
 			// Asynchronously fetch new change entities.
-			if(rev + batch.size() < endRevision) {
+			if(rev + batch.size() <= endRevision) {
 				batch.set(pos, getEventAt(rev + batch.size()));
 			}
 			pos++;
 			if(pos == batch.size()) {
-				if(rev + batch.size() + 1 < endRevision) {
+				if(rev + batch.size() + 1 <= endRevision) {
 					batch.add(getEventAt(rev + batch.size() + 1));
 				}
 				pos = 0;
 			}
 			
+		}
+		
+		if(currentRev == -1) {
+			assert events.isEmpty();
+			return null;
 		}
 		
 		if(trackCurrentRev) {

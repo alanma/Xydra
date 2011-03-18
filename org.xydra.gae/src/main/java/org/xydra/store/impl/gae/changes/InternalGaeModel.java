@@ -74,14 +74,14 @@ public class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObj
 	public static InternalGaeModel get(GaeChangesService changesService, long modelRev,
 	        Set<XAddress> locks) {
 		
-		assert GaeChangesService.canRead(changesService.getBaseAddress(), locks);
+		assert GaeChangesService.canRead(changesService.getModelAddress(), locks);
 		Entity e = GaeUtils
-		        .getEntity(KeyStructure.createEntityKey(changesService.getBaseAddress()));
+		        .getEntity(KeyStructure.createEntityKey(changesService.getModelAddress()));
 		if(e == null) {
 			return null;
 		}
 		
-		XAddress modelAddr = changesService.getBaseAddress();
+		XAddress modelAddr = changesService.getModelAddress();
 		
 		assert modelAddr.getParent().equals(XX.toAddress((String)e.getProperty(PROP_PARENT)));
 		

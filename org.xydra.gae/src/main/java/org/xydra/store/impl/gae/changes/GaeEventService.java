@@ -6,14 +6,27 @@ import java.util.concurrent.Future;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
+import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XEvent;
+import org.xydra.base.change.XFieldEvent;
+import org.xydra.base.change.XModelEvent;
+import org.xydra.base.change.XObjectEvent;
+import org.xydra.base.change.XRepositoryEvent;
+import org.xydra.base.change.impl.memory.MemoryFieldEvent;
+import org.xydra.base.change.impl.memory.MemoryModelEvent;
+import org.xydra.base.change.impl.memory.MemoryObjectEvent;
+import org.xydra.base.change.impl.memory.MemoryRepositoryEvent;
+import org.xydra.base.change.impl.memory.MemoryTransactionEvent;
+import org.xydra.base.value.XV;
+import org.xydra.base.value.XValue;
 import org.xydra.core.xml.MiniElement;
-import org.xydra.core.xml.XmlEvent;
+import org.xydra.core.xml.XmlValue;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
-import org.xydra.index.XI;
+import org.xydra.index.query.Pair;
 import org.xydra.store.impl.gae.GaeUtils;
 import org.xydra.store.impl.gae.GaeUtils.AsyncEntity;
 
@@ -24,54 +37,196 @@ import com.google.appengine.api.datastore.Text;
 
 public class GaeEventService {
 	
-	/**
-	 * GAE Property key for the number of events that are associated with this
-	 * change.
-	 * 
-	 * Set when entering {@link #STATUS_EXECUTING}, never removed.
-	 */
-	private static final String PROP_EVENTCOUNT = "eventCount";
-	
-	// GAE Entity (type=XEVENT) property keys.
-	
-	/**
-	 * GAE Property key for the content of an individual event.
-	 */
-	private static final String PROP_EVENTCONTENT = "eventContent";
-	
-	public static class AsyncAtomicEvent {
+	enum EventType {
 		
-		private final XAddress modelAddr;
-		private AsyncEntity future;
-		private final long rev;
-		private XAtomicEvent event;
+		AddModel(1), RemoveModel(2), AddObject(3), RemoveObject(4), AddField(5), RemoveField(6), AddValue(
+		        7), ChangeValue(8), RemoveValue(9);
 		
-		private AsyncAtomicEvent(XAddress modelAddr, AsyncEntity future, long rev) {
-			this.modelAddr = modelAddr;
-			this.future = future;
-			this.rev = rev;
+		public final int id;
+		
+		private EventType(int id) {
+			this.id = id;
 		}
 		
-		public XAtomicEvent get() {
+		static EventType get(int id) {
+			switch(id) {
+			case 1:
+				return AddModel;
+			case 2:
+				return RemoveModel;
+			case 3:
+				return AddObject;
+			case 4:
+				return RemoveObject;
+			case 5:
+				return AddField;
+			case 6:
+				return RemoveField;
+			case 7:
+				return AddValue;
+			case 8:
+				return ChangeValue;
+			case 9:
+				return RemoveValue;
+			default:
+				return null;
+			}
+		}
+		
+		public ChangeType getChangeType() {
+			switch(this) {
+			case AddField:
+				return ChangeType.ADD;
+			case AddModel:
+				return ChangeType.ADD;
+			case AddObject:
+				return ChangeType.ADD;
+			case AddValue:
+				return ChangeType.ADD;
+			case ChangeValue:
+				return ChangeType.CHANGE;
+			case RemoveField:
+				return ChangeType.REMOVE;
+			case RemoveModel:
+				return ChangeType.REMOVE;
+			case RemoveObject:
+				return ChangeType.REMOVE;
+			case RemoveValue:
+				return ChangeType.REMOVE;
+			default:
+				assert false;
+				return null;
+			}
+		}
+		
+		public XType getTargetType() {
+			switch(this) {
+			case AddField:
+				return XType.XOBJECT;
+			case AddModel:
+				return XType.XREPOSITORY;
+			case AddObject:
+				return XType.XMODEL;
+			case AddValue:
+				return XType.XFIELD;
+			case ChangeValue:
+				return XType.XFIELD;
+			case RemoveField:
+				return XType.XOBJECT;
+			case RemoveModel:
+				return XType.XREPOSITORY;
+			case RemoveObject:
+				return XType.XMODEL;
+			case RemoveValue:
+				return XType.XFIELD;
+			default:
+				assert false;
+				return null;
+			}
+		}
+		
+		public static EventType get(XType entity, ChangeType change) {
+			assert change != ChangeType.TRANSACTION;
+			switch(entity) {
+			case XREPOSITORY:
+				if(change == ChangeType.ADD) {
+					return AddModel;
+				} else {
+					assert change == ChangeType.REMOVE;
+					return RemoveModel;
+				}
+			case XMODEL:
+				if(change == ChangeType.ADD) {
+					return AddObject;
+				} else {
+					assert change == ChangeType.REMOVE;
+					return RemoveObject;
+				}
+			case XOBJECT:
+				if(change == ChangeType.ADD) {
+					return AddField;
+				} else {
+					assert change == ChangeType.REMOVE;
+					return RemoveField;
+				}
+			case XFIELD:
+				switch(change) {
+				case ADD:
+					return AddValue;
+				case CHANGE:
+					return ChangeValue;
+				case REMOVE:
+					return RemoveValue;
+				default:
+					assert false;
+					return null;
+				}
+			default:
+				assert false;
+				return null;
+			}
+		}
+	}
+	
+	private static final String PROP_EVENT_TYPES = "eventTypes";
+	private static final String PROP_EVENT_TARGETS = "eventTargets";
+	private static final String PROP_EVENT_VALUES = "eventValues";
+	private static final String PROP_EVENT_REVS_OBJECT = "objectRevisions";
+	private static final String PROP_EVENT_REVS_FIELD = "fieldRevisions";
+	private static final String PROP_EVENT_IMPLIED = "eventIsImplied";
+	
+	private static final String PROP_VALUE = "value";
+	private static final String VALUE_EXTERN = "extern";
+	
+	private static final int MAX_VALUE_SIZE = 1024;
+	
+	protected static final int TRANSINDEX_NONE = -1;
+	
+	public static class AsyncValue {
+		
+		private final AsyncEntity future;
+		private final int transIndex;
+		private XValue value;
+		
+		private AsyncValue(AsyncEntity future, int transIndex) {
+			this.future = future;
+			this.transIndex = transIndex;
+		}
+		
+		public XValue get() {
 			
-			if(this.future != null) {
+			if(this.value == null) {
 				
 				Entity eventEntity = this.future.get();
 				if(eventEntity == null) {
 					return null;
 				}
-				Text eventData = (Text)eventEntity.getProperty(PROP_EVENTCONTENT);
 				
-				MiniElement eventElement = new MiniXMLParserImpl().parseXml(eventData.getValue());
+				String eventXml;
+				if(this.transIndex >= 0) {
+					@SuppressWarnings("unchecked")
+					List<String> eventValues = (List<String>)eventEntity
+					        .getProperty(PROP_EVENT_VALUES);
+					if(eventValues == null || this.transIndex >= eventValues.size()) {
+						return null;
+					}
+					eventXml = eventValues.get(this.transIndex);
+					if(eventXml == null) {
+						return null;
+					}
+				} else {
+					Text eventData = (Text)eventEntity.getProperty(PROP_VALUE);
+					eventXml = eventData.getValue();
+				}
 				
-				this.event = XmlEvent.toAtomicEvent(eventElement, this.modelAddr);
+				MiniElement eventElement = new MiniXMLParserImpl().parseXml(eventXml);
 				
-				assert this.event.getRevisionNumber() == this.rev;
+				this.value = XmlValue.toValue(eventElement);
 				
-				this.future = null;
+				assert this.value != null;
 			}
 			
-			return this.event;
+			return this.value;
 		}
 		
 	}
@@ -80,57 +235,112 @@ public class GaeEventService {
 	 * @param revisionNumber The revision number of the change the event is part
 	 *            of.
 	 * @param transindex The index of the event in the change.
-	 * @return the {@link XAtomicEvent} with the given index in the change with
-	 *         the given revisionNumber.
 	 */
-	protected static AsyncAtomicEvent getAtomicEvent(XAddress modelAddr, long revisionNumber,
-	        int transindex) {
+	protected static AsyncValue getValue(XAddress modelAddr, long revisionNumber, int transindex) {
+		
+		if(transindex == TRANSINDEX_NONE) {
+			return null;
+		}
 		
 		Key changeKey = KeyStructure.createChangeKey(modelAddr, revisionNumber);
-		Key eventKey = KeyStructure.createEventKey(changeKey, transindex);
 		
-		return new AsyncAtomicEvent(modelAddr, GaeUtils.getEntityAsync(eventKey), revisionNumber);
+		if(transindex < TRANSINDEX_NONE) {
+			int realindex = TRANSINDEX_NONE - transindex - 1;
+			return new AsyncValue(GaeUtils.getEntityAsync(changeKey), realindex);
+		} else {
+			return getExternalValue(changeKey, transindex);
+		}
 	}
 	
-	protected static void saveEvents(XAddress modelAddr, Entity changeEntity,
-	        List<XAtomicEvent> events) {
+	private static AsyncValue getExternalValue(Key changeKey, int transindex) {
+		Key valueKey = KeyStructure.createValueKey(changeKey, transindex);
+		return new AsyncValue(GaeUtils.getEntityAsync(valueKey), -1);
+	}
+	
+	protected static Pair<int[],List<Future<Key>>> saveEvents(XAddress modelAddr,
+	        Entity changeEntity, List<XAtomicEvent> events) {
 		
-		@SuppressWarnings("unchecked")
-		Future<Key>[] futures = (Future<Key>[])new Future<?>[events.size()];
+		List<Integer> types = new ArrayList<Integer>();
+		List<String> targets = new ArrayList<String>();
+		List<String> values = new ArrayList<String>();
+		List<Long> objectRevs = new ArrayList<Long>();
+		List<Long> fieldRevs = new ArrayList<Long>();
+		List<Boolean> implied = new ArrayList<Boolean>();
+		
+		int[] valueIds = new int[events.size()];
+		
+		List<Future<Key>> futures = new ArrayList<Future<Key>>();
 		
 		Key baseKey = changeEntity.getKey();
 		for(int i = 0; i < events.size(); i++) {
 			XAtomicEvent ae = events.get(i);
+			
 			assert (events.size() == 1) ^ ae.inTransaction();
-			Entity eventEntity = new Entity(KeyStructure.createEventKey(baseKey, i));
 			
-			// IMPROVE save event in a GAE-specific format:
-			// - don't save the "oldValue" again
-			// - don't save the actor again, as it's already in the change
-			// entity
-			// - don't save the model rev, as it is already in the key
-			XmlOutStringBuffer out = new XmlOutStringBuffer();
-			XmlEvent.toXml(ae, out, modelAddr);
-			Text text = new Text(out.getXml());
-			eventEntity.setUnindexedProperty(PROP_EVENTCONTENT, text);
+			types.add(EventType.get(ae.getTarget().getAddressedType(), ae.getChangeType()).id);
+			targets.add(ae.getTarget().toString());
+			implied.add(ae.isImplied());
 			
-			/*
-			 * Ignore if we are in danger of timing out (by not calling
-			 * giveUpIfTimeoutCritical()), as the events won't be read by anyone
-			 * until the change's status is set to STATUS_EXECUTING (or
-			 * STATUS_SUCCESS_EXECUTED)
-			 */
-			futures[i] = GaeUtils.putEntityAsync(eventEntity);
+			if(ae instanceof XRepositoryEvent) {
+				// nothing to set;
+				values.add(((XRepositoryEvent)ae).getModelId().toString());
+			} else if(ae instanceof XModelEvent) {
+				objectRevs.add(ae.getOldObjectRevision());
+				values.add(((XModelEvent)ae).getObjectId().toString());
+			} else if(ae instanceof XObjectEvent) {
+				objectRevs.add(ae.getOldObjectRevision());
+				fieldRevs.add(ae.getOldFieldRevision());
+				values.add(((XObjectEvent)ae).getFieldId().toString());
+			} else {
+				assert ae instanceof XFieldEvent;
+				objectRevs.add(ae.getOldObjectRevision());
+				fieldRevs.add(ae.getOldFieldRevision());
+				
+				XValue xv = ((XFieldEvent)ae).getNewValue();
+				if(xv == null) {
+					values.add(null);
+					valueIds[i] = TRANSINDEX_NONE;
+				} else {
+					XmlOutStringBuffer out = new XmlOutStringBuffer();
+					XmlValue.toXml(xv, out);
+					String value = out.getXml();
+					
+					if(value.length() > MAX_VALUE_SIZE) {
+						Key k = KeyStructure.createValueKey(baseKey, i);
+						Entity e = new Entity(k);
+						e.setUnindexedProperty(PROP_VALUE, value);
+						futures.add(GaeUtils.putEntityAsync(e));
+						values.add(VALUE_EXTERN);
+						valueIds[i] = i;
+					} else {
+						assert values.size() == i;
+						values.add(value);
+						valueIds[i] = getInternalValueId(i);
+					}
+				}
+			}
 			
 		}
 		
-		for(Future<Key> future : futures) {
-			GaeUtils.waitFor(future);
+		changeEntity.setUnindexedProperty(PROP_EVENT_TYPES, types);
+		changeEntity.setUnindexedProperty(PROP_EVENT_TARGETS, targets);
+		changeEntity.setUnindexedProperty(PROP_EVENT_VALUES, values);
+		if(!objectRevs.isEmpty()) {
+			changeEntity.setUnindexedProperty(PROP_EVENT_REVS_OBJECT, objectRevs);
 		}
+		if(!fieldRevs.isEmpty()) {
+			changeEntity.setUnindexedProperty(PROP_EVENT_REVS_FIELD, fieldRevs);
+		}
+		changeEntity.setUnindexedProperty(PROP_EVENT_IMPLIED, implied);
 		
-		Integer eventCount = events.size();
-		changeEntity.setUnindexedProperty(PROP_EVENTCOUNT, eventCount);
+		return new Pair<int[],List<Future<Key>>>(valueIds, futures);
 	}
+	
+	private static int getInternalValueId(int i) {
+		return TRANSINDEX_NONE - 1 - i;
+	}
+	
+	private static XValue VALUE_DUMMY = XV.toValue("dummy");
 	
 	/**
 	 * Load the individual events associated with the given change.
@@ -139,59 +349,159 @@ public class GaeEventService {
 	 * @return a List of {@link XAtomicEvent} which is stored as a number of GAE
 	 *         entities
 	 */
-	protected static List<XAtomicEvent> loadEvents(XAddress modelAddr, Entity changeEntity, long rev) {
+	@SuppressWarnings("null")
+	protected static Pair<XAtomicEvent[],int[]> loadAtomicEvents(XAddress modelAddr, long rev,
+	        XID actor, Entity changeEntity, boolean loadValues) {
 		
-		assert changeEntity.getProperty(PROP_EVENTCOUNT) != null;
+		@SuppressWarnings("unchecked")
+		List<Integer> types = (List<Integer>)changeEntity.getProperty(PROP_EVENT_TYPES);
+		@SuppressWarnings("unchecked")
+		List<String> targets = (List<String>)changeEntity.getProperty(PROP_EVENT_TARGETS);
+		@SuppressWarnings("unchecked")
+		List<String> values = (List<String>)changeEntity.getProperty(PROP_EVENT_VALUES);
+		@SuppressWarnings("unchecked")
+		List<Long> objectRevs = (List<Long>)changeEntity.getProperty(PROP_EVENT_REVS_OBJECT);
+		@SuppressWarnings("unchecked")
+		List<Long> fieldRevs = (List<Long>)changeEntity.getProperty(PROP_EVENT_REVS_FIELD);
+		@SuppressWarnings("unchecked")
+		List<Boolean> implied = (List<Boolean>)changeEntity.getProperty(PROP_EVENT_IMPLIED);
 		
-		List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
+		assert types != null && targets != null && values != null && implied != null;
 		
-		int eventCount = getEventCount(changeEntity);
+		XAtomicEvent[] events = new XAtomicEvent[types.size()];
 		
-		for(int i = 0; i < eventCount; i++) {
-			events.add(getAtomicEvent(modelAddr, rev, i).get());
+		assert targets.size() == events.length && implied.size() == events.length
+		        && values.size() == events.length;
+		
+		int[] valueIds = null;
+		if(!loadValues) {
+			valueIds = new int[events.length];
 		}
 		
-		return events;
+		boolean inTrans = (events.length > 1);
+		
+		int ori = 0, fri = 0;
+		
+		long modelRev = rev - 1;
+		
+		for(int i = 0; i < events.length; i++) {
+			EventType type = EventType.get(types.get(i));
+			
+			XAddress target = XX.toAddress(targets.get(i));
+			boolean isImplied = implied.get(i);
+			
+			switch(type.getTargetType()) {
+			case XREPOSITORY: {
+				XID modelId = XX.toId(values.get(i));
+				switch(type.getChangeType()) {
+				case ADD:
+					events[i] = MemoryRepositoryEvent.createAddEvent(actor, target, modelId,
+					        modelRev, inTrans);
+					break;
+				case REMOVE:
+					events[i] = MemoryRepositoryEvent.createRemoveEvent(actor, target, modelId,
+					        modelRev, inTrans);
+					break;
+				default:
+					assert false;
+				}
+				break;
+			}
+			case XMODEL: {
+				XID objectId = XX.toId(values.get(i));
+				long objectRev = objectRevs.get(ori++);
+				switch(type.getChangeType()) {
+				case ADD:
+					events[i] = MemoryModelEvent.createAddEvent(actor, target, objectId, modelRev,
+					        inTrans);
+					break;
+				case REMOVE:
+					events[i] = MemoryModelEvent.createRemoveEvent(actor, target, objectId,
+					        modelRev, objectRev, inTrans, isImplied);
+					break;
+				default:
+					assert false;
+				}
+				break;
+			}
+			case XOBJECT: {
+				XID fieldId = XX.toId(values.get(i));
+				long objectRev = objectRevs.get(ori++);
+				long fieldRev = fieldRevs.get(fri++);
+				switch(type.getChangeType()) {
+				case ADD:
+					events[i] = MemoryObjectEvent.createAddEvent(actor, target, fieldId, modelRev,
+					        objectRev, inTrans);
+					break;
+				case REMOVE:
+					events[i] = MemoryObjectEvent.createRemoveEvent(actor, target, fieldId,
+					        modelRev, objectRev, fieldRev, inTrans, isImplied);
+					break;
+				default:
+					assert false;
+				}
+				break;
+			}
+			case XFIELD: {
+				String valueStr = values.get(i);
+				long objectRev = objectRevs.get(ori++);
+				long fieldRev = fieldRevs.get(fri++);
+				XValue value;
+				if(valueStr == null) {
+					assert type.getChangeType() == ChangeType.REMOVE;
+					value = null;
+					if(!loadValues) {
+						valueIds[i] = TRANSINDEX_NONE;
+					}
+				} else {
+					assert type.getChangeType() != ChangeType.REMOVE;
+					if(!loadValues) {
+						value = VALUE_DUMMY;
+						valueIds[i] = VALUE_EXTERN.equals(valueStr) ? i : getInternalValueId(i);
+					} else if(!VALUE_EXTERN.equals(valueStr)) {
+						MiniElement eventElement = new MiniXMLParserImpl().parseXml(valueStr);
+						value = XmlValue.toValue(eventElement);
+					} else {
+						value = getExternalValue(changeEntity.getKey(), i).get();
+					}
+					assert value != null;
+				}
+				switch(type.getChangeType()) {
+				case ADD:
+					events[i] = MemoryFieldEvent.createAddEvent(actor, target, value, modelRev,
+					        objectRev, fieldRev, inTrans);
+					break;
+				case CHANGE:
+					events[i] = MemoryFieldEvent.createChangeEvent(actor, target, value, modelRev,
+					        objectRev, fieldRev, inTrans);
+					break;
+				case REMOVE:
+					events[i] = MemoryFieldEvent.createRemoveEvent(actor, target, modelRev,
+					        objectRev, fieldRev, inTrans, isImplied);
+					break;
+				default:
+					assert false;
+				}
+				// IMPROVE create async value
+			}
+				
+			}
+		}
+		
+		return new Pair<XAtomicEvent[],int[]>(events, valueIds);
 	}
 	
 	protected static XEvent asEvent(XAddress modelAddr, long rev, XID actor, Entity changeEntity) {
 		
-		int eventCount = getEventCount(changeEntity);
-		assert eventCount > 0 : "executed changes should have at least one event";
+		XAtomicEvent[] events = loadAtomicEvents(modelAddr, rev, actor, changeEntity, true)
+		        .getFirst();
 		
-		if(eventCount > 1) {
-			
-			AsyncAtomicEvent[] events = new AsyncAtomicEvent[eventCount];
-			for(int i = 0; i < eventCount; i++) {
-				events[i] = getAtomicEvent(modelAddr, rev, i);
-			}
-			
-			return new GaeTransactionEvent(modelAddr, events, actor, rev);
-			
+		if(events.length == 1) {
+			return events[0];
 		} else {
-			
-			XAtomicEvent ae = getAtomicEvent(modelAddr, rev, 0).get();
-			assert ae != null;
-			assert XI.equals(actor, ae.getActor());
-			assert modelAddr.equalsOrContains(ae.getChangedEntity());
-			assert ae.getChangeType() != ChangeType.TRANSACTION;
-			assert !ae.inTransaction();
-			return ae;
-			
+			return MemoryTransactionEvent.createTransactionEvent(actor, modelAddr, events, rev - 1,
+			        XEvent.RevisionOfEntityNotSet);
 		}
-		
-	}
-	
-	/**
-	 * @return the number of {@link XAtomicEvent}s associated with the given
-	 *         change {@link Entity}.
-	 */
-	private static int getEventCount(Entity changeEntity) {
-		Number n = (Number)changeEntity.getProperty(PROP_EVENTCOUNT);
-		if(n == null) {
-			return 0;
-		}
-		return n.intValue();
 	}
 	
 }

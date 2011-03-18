@@ -22,6 +22,8 @@ import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.model.XChangeLog;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.gae.changes.GaeChangesService;
 import org.xydra.store.impl.gae.changes.GaeChangesService.AsyncEvent;
@@ -36,13 +38,14 @@ import org.xydra.store.impl.gae.changes.GaeChangesService.AsyncEvent;
  */
 public class GaeSnapshotService {
 	
-	private final GaeChangesService log;
+	private static final Logger log = LoggerFactory.getLogger(GaeSnapshotService.class);
+	private final GaeChangesService changes;
 	
 	/**
-	 * @param changeLog The change log to load snapshots from.
+	 * @param changesService The change log to load snapshots from.
 	 */
-	public GaeSnapshotService(GaeChangesService changeLog) {
-		this.log = changeLog;
+	public GaeSnapshotService(GaeChangesService changesService) {
+		this.changes = changesService;
 	}
 	
 	private static class CachedModel {
@@ -60,7 +63,7 @@ public class GaeSnapshotService {
 		
 		Map<Object,Object> cache = XydraRuntime.getMemcache();
 		
-		String cachname = this.log.getBaseAddress() + "-snapshot";
+		String cachname = this.changes.getModelAddress() + "-snapshot";
 		
 		CachedModel entry = null;
 		synchronized(cache) {
@@ -87,18 +90,23 @@ public class GaeSnapshotService {
 	
 	private void updateCachedModel(CachedModel entry) {
 		
-		long curRev = this.log.getCurrentRevisionNumber();
+		log.info("udating cached model " + this.changes.getModelAddress() + " from rev="
+		        + entry.revision);
+		
+		long curRev = this.changes.getCurrentRevisionNumber();
 		if(curRev == entry.revision) {
+			log.info("-> nothing to update");
 			return;
 		}
 		
 		List<AsyncEvent> batch = new ArrayList<AsyncEvent>(1);
-		batch.add(this.log.getEventAt(curRev));
+		batch.add(this.changes.getEventAt(curRev));
 		
 		int pos = 0;
 		
 		// Check if we can skip any events.
-		List<XEvent> rawEvents = new ArrayList<XEvent>();
+		// Looks for the last XRepositoryEvent after entry.revision
+		List<XEvent> events = new ArrayList<XEvent>();
 		for(long i = curRev; i > entry.revision; i--) {
 			
 			XEvent event = batch.get(pos).get();
@@ -111,10 +119,12 @@ public class GaeSnapshotService {
 					assert i > 0;
 					assert i == curRev;
 					entry.revision = curRev;
+					log.info("-> removed, rev=" + entry.revision);
 					return;
 				} else {
 					entry.revision = i - 1;
-					rawEvents.add(0, event);
+					events.add(0, event);
+					log.info("-> reset, rev=" + entry.revision);
 					break;
 				}
 				
@@ -123,9 +133,11 @@ public class GaeSnapshotService {
 				assert trans.size() > 1;
 				if(trans.getEvent(0) instanceof XRepositoryEvent) {
 					assert trans.getEvent(0).getChangeType() == ChangeType.ADD;
+					assert !(trans.getEvent(trans.size() - 1) instanceof XRepositoryEvent);
 					entry.modelState = null;
 					entry.revision = i - 1;
-					rawEvents.add(0, event);
+					events.add(0, event);
+					log.info("-> reset, rev=" + entry.revision);
 					break;
 				} else if(trans.getEvent(trans.size() - 1) instanceof XRepositoryEvent) {
 					assert trans.getEvent(trans.size() - 1).getChangeType() == ChangeType.REMOVE;
@@ -133,26 +145,29 @@ public class GaeSnapshotService {
 					assert i == curRev;
 					entry.modelState = null;
 					entry.revision = curRev;
+					log.info("-> removed, rev=" + entry.revision);
 					return;
 				}
 			}
-			rawEvents.add(0, event);
+			events.add(0, event);
 			
 			// Asynchronously fetch new change entities.
 			if(i - batch.size() > entry.revision) {
-				batch.set(pos, this.log.getEventAt(i - batch.size()));
+				batch.set(pos, this.changes.getEventAt(i - batch.size()));
 			}
 			pos++;
 			if(pos == batch.size()) {
 				if(i - batch.size() - 1 > entry.revision) {
-					batch.add(this.log.getEventAt(i - batch.size() - 1));
+					batch.add(this.changes.getEventAt(i - batch.size() - 1));
 				}
 				pos = 0;
 			}
 			
 		}
 		
-		for(XEvent event : rawEvents) {
+		log.info("-> " + events.size() + " events, rev=" + entry.revision);
+		
+		for(XEvent event : events) {
 			
 			if(event instanceof XTransactionEvent) {
 				XTransactionEvent trans = (XTransactionEvent)event;
@@ -170,9 +185,14 @@ public class GaeSnapshotService {
 			entry.revision = event.getRevisionNumber();
 		}
 		
+		log.info("-> updated to new rev=" + entry.revision);
+		assert entry.modelState == null || entry.modelState.getRevisionNumber() == entry.revision;
+		
 	}
 	
 	private XRevWritableModel applyEvent(XRevWritableModel model, XAtomicEvent event) {
+		
+		log.info("--> applying " + event);
 		
 		long rev = event.getRevisionNumber();
 		
