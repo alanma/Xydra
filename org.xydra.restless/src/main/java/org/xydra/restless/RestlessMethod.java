@@ -105,12 +105,14 @@ public class RestlessMethod {
 			// build up parameters
 			
 			// extract values from path
-			String urlPath = req.getPathInfo();
-			List<String> variablesFromUrlPath = this.pathTemplate.extractVariables(urlPath);
 			Map<String,String> urlParameter = new HashMap<String,String>();
-			for(int i = 0; i < this.pathTemplate.variableNames.size(); i++) {
-				urlParameter.put(this.pathTemplate.variableNames.get(i),
-				        variablesFromUrlPath.get(i));
+			String urlPath = req.getPathInfo();
+			if(urlPath != null) {
+				List<String> variablesFromUrlPath = this.pathTemplate.extractVariables(urlPath);
+				for(int i = 0; i < this.pathTemplate.variableNames.size(); i++) {
+					urlParameter.put(this.pathTemplate.variableNames.get(i),
+					        variablesFromUrlPath.get(i));
+				}
 			}
 			
 			// extract Cookie values
