@@ -132,7 +132,8 @@ public class HtmlUtils {
 	/**
 	 * Utility functions to turn a Map to HTML definition list
 	 * 
-	 * @param mapEntries input, nut null
+	 * @param mapEntries input, nut null. Entries are NOT HTML-encoded or
+	 *            escaped in any way. Used valid HTML inside!
 	 * @return a string containing the resulting HTML
 	 */
 	public static String toDefinitionList(Map<String,? extends Object> mapEntries) {
