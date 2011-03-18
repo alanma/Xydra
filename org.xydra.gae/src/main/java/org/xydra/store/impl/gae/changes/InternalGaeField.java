@@ -64,11 +64,7 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 			// IMPROVE maybe get this when the field is fetched?
 			this.value = GaeEventService.getValue(this.modelAddr, this.fieldRev, this.transindex);
 		}
-		if(this.value != null) {
-			return this.value.get();
-		} else {
-			return null;
-		}
+		return this.value.get();
 	}
 	
 	public boolean isEmpty() {

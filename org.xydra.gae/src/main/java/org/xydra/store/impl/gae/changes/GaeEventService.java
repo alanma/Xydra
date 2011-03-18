@@ -15,7 +15,6 @@ import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XRepositoryEvent;
-import org.xydra.base.change.impl.memory.MemoryFieldEvent;
 import org.xydra.base.change.impl.memory.MemoryModelEvent;
 import org.xydra.base.change.impl.memory.MemoryObjectEvent;
 import org.xydra.base.change.impl.memory.MemoryRepositoryEvent;
@@ -193,9 +192,15 @@ public class GaeEventService {
 			this.transIndex = transIndex;
 		}
 		
+		private AsyncValue(XValue value) {
+			this.value = value;
+			this.future = null;
+			this.transIndex = TRANSINDEX_NONE;
+		}
+		
 		public XValue get() {
 			
-			if(this.value == null) {
+			if(this.value == null && this.transIndex != TRANSINDEX_NONE) {
 				
 				Entity eventEntity = this.future.get();
 				if(eventEntity == null) {
@@ -203,14 +208,15 @@ public class GaeEventService {
 				}
 				
 				String eventXml;
-				if(this.transIndex >= 0) {
+				if(this.transIndex < 0) {
+					int realindex = TRANSINDEX_NONE - this.transIndex - 1;
 					@SuppressWarnings("unchecked")
 					List<String> eventValues = (List<String>)eventEntity
 					        .getProperty(PROP_EVENT_VALUES);
-					if(eventValues == null || this.transIndex >= eventValues.size()) {
+					if(eventValues == null || realindex >= eventValues.size()) {
 						return null;
 					}
-					eventXml = eventValues.get(this.transIndex);
+					eventXml = eventValues.get(realindex);
 					if(eventXml == null) {
 						return null;
 					}
@@ -231,6 +237,8 @@ public class GaeEventService {
 		
 	}
 	
+	private static final AsyncValue VALUE_NULL = new AsyncValue(null);
+	
 	/**
 	 * @param revisionNumber The revision number of the change the event is part
 	 *            of.
@@ -239,14 +247,13 @@ public class GaeEventService {
 	protected static AsyncValue getValue(XAddress modelAddr, long revisionNumber, int transindex) {
 		
 		if(transindex == TRANSINDEX_NONE) {
-			return null;
+			return VALUE_NULL;
 		}
 		
 		Key changeKey = KeyStructure.createChangeKey(modelAddr, revisionNumber);
 		
 		if(transindex < TRANSINDEX_NONE) {
-			int realindex = TRANSINDEX_NONE - transindex - 1;
-			return new AsyncValue(GaeUtils.getEntityAsync(changeKey), realindex);
+			return new AsyncValue(GaeUtils.getEntityAsync(changeKey), transindex);
 		} else {
 			return getExternalValue(changeKey, transindex);
 		}
@@ -254,7 +261,7 @@ public class GaeEventService {
 	
 	private static AsyncValue getExternalValue(Key changeKey, int transindex) {
 		Key valueKey = KeyStructure.createValueKey(changeKey, transindex);
-		return new AsyncValue(GaeUtils.getEntityAsync(valueKey), -1);
+		return new AsyncValue(GaeUtils.getEntityAsync(valueKey), transindex);
 	}
 	
 	protected static Pair<int[],List<Future<Key>>> saveEvents(XAddress modelAddr,
@@ -340,7 +347,7 @@ public class GaeEventService {
 		return TRANSINDEX_NONE - 1 - i;
 	}
 	
-	private static XValue VALUE_DUMMY = XV.toValue("dummy");
+	private static AsyncValue VALUE_DUMMY = new AsyncValue(XV.toValue("dummy"));
 	
 	/**
 	 * Load the individual events associated with the given change.
@@ -446,10 +453,10 @@ public class GaeEventService {
 				String valueStr = values.get(i);
 				long objectRev = objectRevs.get(ori++);
 				long fieldRev = fieldRevs.get(fri++);
-				XValue value;
+				AsyncValue value;
 				if(valueStr == null) {
 					assert type.getChangeType() == ChangeType.REMOVE;
-					value = null;
+					value = VALUE_NULL;
 					if(!loadValues) {
 						valueIds[i] = TRANSINDEX_NONE;
 					}
@@ -460,29 +467,14 @@ public class GaeEventService {
 						valueIds[i] = VALUE_EXTERN.equals(valueStr) ? i : getInternalValueId(i);
 					} else if(!VALUE_EXTERN.equals(valueStr)) {
 						MiniElement eventElement = new MiniXMLParserImpl().parseXml(valueStr);
-						value = XmlValue.toValue(eventElement);
+						value = new AsyncValue(XmlValue.toValue(eventElement));
 					} else {
-						value = getExternalValue(changeEntity.getKey(), i).get();
+						value = getExternalValue(changeEntity.getKey(), i);
 					}
-					assert value != null;
 				}
-				switch(type.getChangeType()) {
-				case ADD:
-					events[i] = MemoryFieldEvent.createAddEvent(actor, target, value, modelRev,
-					        objectRev, fieldRev, inTrans);
-					break;
-				case CHANGE:
-					events[i] = MemoryFieldEvent.createChangeEvent(actor, target, value, modelRev,
-					        objectRev, fieldRev, inTrans);
-					break;
-				case REMOVE:
-					events[i] = MemoryFieldEvent.createRemoveEvent(actor, target, modelRev,
-					        objectRev, fieldRev, inTrans, isImplied);
-					break;
-				default:
-					assert false;
-				}
-				// IMPROVE create async value
+				assert value != null;
+				events[i] = new GaeFieldEvent(actor, target, value, type.getChangeType(), modelRev,
+				        objectRev, fieldRev, inTrans, isImplied);
 			}
 				
 			}

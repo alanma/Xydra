@@ -174,7 +174,7 @@ abstract public class MemoryAtomicEvent implements XEvent {
 		return this.implied;
 	}
 	
-	String rev2str(long rev) {
+	protected String rev2str(long rev) {
 		if(rev == XEvent.RevisionOfEntityNotSet) {
 			return "-";
 		} else if(rev == XEvent.RevisionNotAvailable) {
