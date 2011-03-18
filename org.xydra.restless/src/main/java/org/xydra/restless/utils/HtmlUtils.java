@@ -15,7 +15,7 @@ public class HtmlUtils {
 		w.write("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"\r\n"
 		        + "       \"http://www.w3.org/TR/html4/loose.dtd\">\r\n"
 
-		        + "<html>\r\n" + "<head>\r\n" + "<title>Beschreibung der Seite</title>\r\n"
+		        + "<html>\r\n" + "<head>\r\n" + "<title>" + title + "</title>\r\n"
 		        + "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\r\n"
 		        + "</head>\r\n"
 

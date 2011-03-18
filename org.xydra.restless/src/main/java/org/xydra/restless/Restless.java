@@ -289,7 +289,7 @@ public class Restless extends HttpServlet {
 				
 				/* list parameters */
 				res.getWriter().print("<form action='" + url + "' method='" + rm.httpMethod + "'>");
-				for(RestlessParameter parameter : rm.parameter) {
+				for(RestlessParameter parameter : rm.requiredNamedParameter) {
 					res.getWriter().print(
 					        parameter.name + " <input type='text' name='" + parameter.name
 					                + "' value='" + parameter.defaultValue + "' />");
@@ -348,7 +348,7 @@ public class Restless extends HttpServlet {
 	}
 	
 	/**
-	 * @return the configured Application class
+	 * @return the configured Application classes as a comma-separated string
 	 */
 	public String getApp() {
 		return this.apps;
@@ -423,7 +423,7 @@ public class Restless extends HttpServlet {
 		}
 		
 		log = LoggerFactory.getLogger(Restless.class);
-		log.info("Restless init. Using loggerFactory '" + this.loggerFactory + "'...");
+		log.info("Restless: Init. Using loggerFactory '" + this.loggerFactory + "'...");
 		
 		/** provide servletContext object for other parts of the application */
 		this.servletContext = servletConfig.getServletContext();
@@ -450,9 +450,9 @@ public class Restless extends HttpServlet {
 		
 		List<String> appClassNames = parseToList(this.apps);
 		for(String appClassName : appClassNames) {
-			log.info("Loading restless app '" + appClassName + "'...");
+			log.info("Restless: Loading restless app '" + appClassName + "'...");
 			instatiateAndInit(appClassName);
-			log.info("... done loading restless app '" + appClassName + "'.");
+			log.info("Restless: ... done loading restless app '" + appClassName + "'.");
 		}
 		
 		log.info(">>> Done Restless init at context path '"
@@ -468,6 +468,9 @@ public class Restless extends HttpServlet {
 		}
 	}
 	
+	/**
+	 * @param appClassName fully qualified java class name
+	 */
 	private void instatiateAndInit(String appClassName) {
 		try {
 			Class<?> clazz = Class.forName(appClassName);
@@ -554,7 +557,7 @@ public class Restless extends HttpServlet {
 		// find class mapped to path
 		String path = req.getPathInfo();
 		if(path == null) {
-			path = "";
+			path = "/";
 		}
 		boolean foundPath = false;
 		boolean foundMethod = false;

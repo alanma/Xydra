@@ -43,7 +43,8 @@ public class RestlessMethod {
 	String httpMethod;
 	Object instanceOrClass;
 	String methodName;
-	RestlessParameter[] parameter;
+	/** The parameter required by this restless method */
+	RestlessParameter[] requiredNamedParameter;
 	PathTemplate pathTemplate;
 	
 	/**
@@ -74,7 +75,7 @@ public class RestlessMethod {
 		this.methodName = methodName;
 		this.pathTemplate = pathTemplate;
 		this.adminOnly = adminOnly;
-		this.parameter = parameter;
+		this.requiredNamedParameter = parameter;
 	}
 	
 	/**
@@ -100,7 +101,7 @@ public class RestlessMethod {
 			        + "'");
 		} else {
 			// try to call it
-			List<Object> args = new ArrayList<Object>();
+			List<Object> javaMethodArgs = new ArrayList<Object>();
 			// build up parameters
 			
 			// extract values from path
@@ -115,21 +116,21 @@ public class RestlessMethod {
 			// extract Cookie values
 			Map<String,String> cookieMap = ServletUtils.getCookiesAsMap(req);
 			
-			int parameterNumber = 0;
+			int boundNamedParameterNumber = 0;
 			boolean hasHttpServletResponseParameter = false;
-			for(Class<?> paramType : method.getParameterTypes()) {
+			for(Class<?> requiredParamType : method.getParameterTypes()) {
 				
 				// try to fill each parameter
 				
 				// fill predefined types
-				if(paramType.equals(HttpServletResponse.class)) {
-					args.add(res);
+				if(requiredParamType.equals(HttpServletResponse.class)) {
+					javaMethodArgs.add(res);
 					hasHttpServletResponseParameter = true;
-				} else if(paramType.equals(HttpServletRequest.class)) {
-					args.add(req);
-				} else if(paramType.equals(Restless.class)) {
-					args.add(restless);
-				} else if(paramType.equals(IRestlessContext.class)) {
+				} else if(requiredParamType.equals(HttpServletRequest.class)) {
+					javaMethodArgs.add(req);
+				} else if(requiredParamType.equals(Restless.class)) {
+					javaMethodArgs.add(restless);
+				} else if(requiredParamType.equals(IRestlessContext.class)) {
 					IRestlessContext restlessContext = new IRestlessContext() {
 						
 						public Restless getRestless() {
@@ -144,10 +145,30 @@ public class RestlessMethod {
 							return req;
 						}
 					};
-					args.add(restlessContext);
+					javaMethodArgs.add(restlessContext);
 				} else {
-					assert this.parameter.length > parameterNumber;
-					RestlessParameter param = this.parameter[parameterNumber];
+					/* Method requires a parameter type for a named parameter */
+
+					if(this.requiredNamedParameter.length == 0) {
+						/*
+						 * Java method tries to fill a non-built-in parameter
+						 * type, i.e. a parameter type for which we need to get
+						 * a value from the request. If there is no named
+						 * parameter from which we can even try to fill the
+						 * value, throw a usage error
+						 */
+						throw new IllegalArgumentException(
+						        "It looks like you have parameters in your java method '"
+						                + instance.getClass().getCanonicalName()
+						                + "."
+						                + method.getName()
+						                + "(..)' for which there have no RestlessParameter been defined.");
+					}
+					assert this.requiredNamedParameter.length > boundNamedParameterNumber : "Require "
+					        + this.requiredNamedParameter.length
+					        + " named parameters, processed "
+					        + boundNamedParameterNumber + " parameters from request so far.";
+					RestlessParameter param = this.requiredNamedParameter[boundNamedParameterNumber];
 					/* 1) look in urlParameters (not query params) */
 					String value = urlParameter.get(param.name);
 					
@@ -192,9 +213,9 @@ public class RestlessMethod {
 					if(value == null) {
 						value = param.defaultValue;
 					}
-					args.add(value);
-					parameterNumber++;
-					if(parameterNumber > this.parameter.length) {
+					javaMethodArgs.add(value);
+					boundNamedParameterNumber++;
+					if(boundNamedParameterNumber > this.requiredNamedParameter.length) {
 						throw new IllegalArgumentException(
 						        "More non-trivial parameter required by Java method than mapped via RestlessParameters");
 					}
@@ -202,7 +223,7 @@ public class RestlessMethod {
 			}
 			
 			try {
-				Object result = method.invoke(instance, args.toArray(new Object[0]));
+				Object result = method.invoke(instance, javaMethodArgs.toArray(new Object[0]));
 				if(!hasHttpServletResponseParameter) {
 					res.setContentType(Restless.MIME_TEXT_PLAIN + "; charset="
 					        + Restless.CHARSET_UTF8);
