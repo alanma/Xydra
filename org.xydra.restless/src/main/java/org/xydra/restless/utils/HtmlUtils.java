@@ -37,6 +37,14 @@ public class HtmlUtils {
 		return "<a href=\"" + url + "\">" + text + "</a>";
 	}
 	
+	/**
+	 * @param url href target and link label
+	 * @return a HTML 'a' element using url both as label and as link target
+	 */
+	public static String link(String url) {
+		return "<a href=\"" + url + "\">" + url + "</a>";
+	}
+	
 	public static SubmitInput inputSubmit(String label) {
 		return new SubmitInput(label);
 	}
