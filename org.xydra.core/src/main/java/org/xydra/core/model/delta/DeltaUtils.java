@@ -156,7 +156,7 @@ public abstract class DeltaUtils {
 		if(model != null) {
 			nChanges += model.countEventsNeeded(2 - nChanges);
 		}
-		boolean inTrans = nChanges > 1;
+		boolean inTrans = (nChanges > 1);
 		
 		List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
 		
