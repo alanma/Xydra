@@ -423,7 +423,7 @@ public class Restless extends HttpServlet {
 		}
 		
 		log = LoggerFactory.getLogger(Restless.class);
-		log.info("Restless: Init. Using loggerFactory '" + this.loggerFactory + "'...");
+		log.debug("Restless: Init. Using loggerFactory '" + this.loggerFactory + "'...");
 		
 		/** provide servletContext object for other parts of the application */
 		this.servletContext = servletConfig.getServletContext();
@@ -452,7 +452,7 @@ public class Restless extends HttpServlet {
 		for(String appClassName : appClassNames) {
 			log.info("Restless: Loading restless app '" + appClassName + "'...");
 			instatiateAndInit(appClassName);
-			log.info("Restless: ... done loading restless app '" + appClassName + "'.");
+			log.debug("Restless: ... done loading restless app '" + appClassName + "'.");
 		}
 		
 		log.info(">>> Done Restless init at context path '"
