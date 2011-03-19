@@ -264,6 +264,17 @@ public class GaeEventService {
 		return new AsyncValue(GaeUtils.getEntityAsync(valueKey), transindex);
 	}
 	
+	/**
+	 * Save the given events in the given change entity.
+	 * 
+	 * The changeEntity is not actually put in the datastore by this method,
+	 * only properties are set. Other additional GAE entities might be save to
+	 * the datastore though.
+	 * 
+	 * @return a list of indices that can be used later to load XValues using
+	 *         {@link #getValue(XAddress, long, int)}, as well as a list of GAE
+	 *         entities that have been saved asynchronously.
+	 */
 	protected static Pair<int[],List<Future<Key>>> saveEvents(XAddress modelAddr,
 	        Entity changeEntity, List<XAtomicEvent> events) {
 		
@@ -343,6 +354,11 @@ public class GaeEventService {
 		return new Pair<int[],List<Future<Key>>>(valueIds, futures);
 	}
 	
+	/**
+	 * @return the parameter for {@link #getValue(XAddress, long, int)} to
+	 *         retrieve the value for the i-th atomic event that is stored in
+	 *         the change entity itself.
+	 */
 	private static int getInternalValueId(int i) {
 		return TRANSINDEX_NONE - 1 - i;
 	}
@@ -352,7 +368,16 @@ public class GaeEventService {
 	/**
 	 * Load the individual events associated with the given change.
 	 * 
+	 * This method should only be called if the change entity actually contains
+	 * events.
+	 * 
 	 * @param change The change whose events should be loaded.
+	 * @param loadValues If true, the actual values in XFieldEvents will be
+	 *            loaded and the second part of the return will be null. If
+	 *            false, VALUE_DUMMY will be substituted for any non-null values
+	 *            and a list of indices that can be used with
+	 *            {@link #getValue(XAddress, long, int)} to retrieve the value
+	 *            at a later time is returned.
 	 * @return a List of {@link XAtomicEvent} which is stored as a number of GAE
 	 *         entities
 	 */
@@ -483,6 +508,12 @@ public class GaeEventService {
 		return new Pair<XAtomicEvent[],int[]>(events, valueIds);
 	}
 	
+	/**
+	 * This method should only be called if the change entity actually contains
+	 * events.
+	 * 
+	 * @return the XEvent represented by the given change entity.
+	 */
 	protected static XEvent asEvent(XAddress modelAddr, long rev, XID actor, Entity changeEntity) {
 		
 		XAtomicEvent[] events = loadAtomicEvents(modelAddr, rev, actor, changeEntity, true)

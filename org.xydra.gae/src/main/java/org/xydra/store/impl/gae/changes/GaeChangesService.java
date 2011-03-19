@@ -1185,10 +1185,17 @@ public class GaeChangesService {
 			this.rev = rev;
 		}
 		
+		/**
+		 * @return the retrieved change entity.
+		 */
 		public Entity getEntity() {
 			return this.future.get();
 		}
 		
+		/**
+		 * @return the XEvent represented by the retrieved change entity or null
+		 *         of nothing changed.
+		 */
 		public XEvent get() {
 			
 			Entity changeEntity = this.future.get();
@@ -1226,6 +1233,13 @@ public class GaeChangesService {
 		
 	}
 	
+	/**
+	 * Fetch a range of events from the datastore.
+	 * 
+	 * See {@link GetEventsRequest} for parameters.
+	 * 
+	 * @return a list of events or null if this model was never created.
+	 */
 	public List<XEvent> getEventsBetween(long beginRevision, long endRevision) {
 		
 		log.info("getEventsBetwen " + beginRevision + " " + endRevision + " @" + getModelAddress());
@@ -1254,9 +1268,13 @@ public class GaeChangesService {
 		
 		List<XEvent> events = new ArrayList<XEvent>();
 		
+		// Asynchronously fetch an initial batch of change entities
 		int initialBuffer = 1;
 		if(endRevision <= currentRev) {
 			initialBuffer = (int)(endRevision - begin + 1);
+		} else {
+			// IMPROVE maybe use an initial buffer size of currentRev - begin +
+			// 1?
 		}
 		List<AsyncEvent> batch = new ArrayList<AsyncEvent>(initialBuffer);
 		for(int i = 0; i < initialBuffer; i++) {
@@ -1265,13 +1283,15 @@ public class GaeChangesService {
 		
 		int pos = 0;
 		
-		boolean trackCurrentRev = (begin <= currentRev) && (currentRev < endRevision);
+		boolean trackCurrentRev = (begin <= currentRev);
 		
 		long rev = begin;
 		for(; rev <= endRevision; rev++) {
 			
+			// Wait for the first change entities
 			Entity changeEntity = batch.get(pos).getEntity();
 			if(changeEntity == null) {
+				// Found end of the change log
 				break;
 			}
 			
@@ -1279,11 +1299,13 @@ public class GaeChangesService {
 			
 			int status = getStatus(changeEntity);
 			if(!isCommitted(status)) {
+				// Found the lastCommitedRev
 				break;
 			}
 			
 			XEvent event = batch.get(pos).get();
 			if(event != null) {
+				// Something actually changed
 				if(trackCurrentRev) {
 					currentRev = rev;
 				}
