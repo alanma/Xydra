@@ -386,15 +386,15 @@ public class GaeEventService {
 	        XID actor, Entity changeEntity, boolean loadValues) {
 		
 		@SuppressWarnings("unchecked")
-		List<Integer> types = (List<Integer>)changeEntity.getProperty(PROP_EVENT_TYPES);
+		List<Number> types = (List<Number>)changeEntity.getProperty(PROP_EVENT_TYPES);
 		@SuppressWarnings("unchecked")
 		List<String> targets = (List<String>)changeEntity.getProperty(PROP_EVENT_TARGETS);
 		@SuppressWarnings("unchecked")
 		List<String> values = (List<String>)changeEntity.getProperty(PROP_EVENT_VALUES);
 		@SuppressWarnings("unchecked")
-		List<Long> objectRevs = (List<Long>)changeEntity.getProperty(PROP_EVENT_REVS_OBJECT);
+		List<Number> objectRevs = (List<Number>)changeEntity.getProperty(PROP_EVENT_REVS_OBJECT);
 		@SuppressWarnings("unchecked")
-		List<Long> fieldRevs = (List<Long>)changeEntity.getProperty(PROP_EVENT_REVS_FIELD);
+		List<Number> fieldRevs = (List<Number>)changeEntity.getProperty(PROP_EVENT_REVS_FIELD);
 		@SuppressWarnings("unchecked")
 		List<Boolean> implied = (List<Boolean>)changeEntity.getProperty(PROP_EVENT_IMPLIED);
 		
@@ -417,7 +417,7 @@ public class GaeEventService {
 		long modelRev = rev - 1;
 		
 		for(int i = 0; i < events.length; i++) {
-			EventType type = EventType.get(types.get(i));
+			EventType type = EventType.get(types.get(i).intValue());
 			
 			XAddress target = XX.toAddress(targets.get(i));
 			boolean isImplied = implied.get(i);
@@ -441,7 +441,7 @@ public class GaeEventService {
 			}
 			case XMODEL: {
 				XID objectId = XX.toId(values.get(i));
-				long objectRev = objectRevs.get(ori++);
+				long objectRev = objectRevs.get(ori++).longValue();
 				switch(type.getChangeType()) {
 				case ADD:
 					events[i] = MemoryModelEvent.createAddEvent(actor, target, objectId, modelRev,
@@ -458,8 +458,8 @@ public class GaeEventService {
 			}
 			case XOBJECT: {
 				XID fieldId = XX.toId(values.get(i));
-				long objectRev = objectRevs.get(ori++);
-				long fieldRev = fieldRevs.get(fri++);
+				long objectRev = objectRevs.get(ori++).longValue();
+				long fieldRev = fieldRevs.get(fri++).longValue();
 				switch(type.getChangeType()) {
 				case ADD:
 					events[i] = MemoryObjectEvent.createAddEvent(actor, target, fieldId, modelRev,
@@ -476,8 +476,8 @@ public class GaeEventService {
 			}
 			case XFIELD: {
 				String valueStr = values.get(i);
-				long objectRev = objectRevs.get(ori++);
-				long fieldRev = fieldRevs.get(fri++);
+				long objectRev = objectRevs.get(ori++).longValue();
+				long fieldRev = fieldRevs.get(fri++).longValue();
 				AsyncValue value;
 				if(valueStr == null) {
 					assert type.getChangeType() == ChangeType.REMOVE;
