@@ -90,12 +90,12 @@ public class GaeSnapshotService {
 	
 	private void updateCachedModel(CachedModel entry) {
 		
-		log.info("udating cached model " + this.changes.getModelAddress() + " from rev="
+		log.debug("udating cached model " + this.changes.getModelAddress() + " from rev="
 		        + entry.revision);
 		
 		long curRev = this.changes.getCurrentRevisionNumber();
 		if(curRev == entry.revision) {
-			log.info("-> nothing to update");
+			log.debug("-> nothing to update");
 			return;
 		}
 		
@@ -119,12 +119,12 @@ public class GaeSnapshotService {
 					assert i > 0;
 					assert i == curRev;
 					entry.revision = curRev;
-					log.info("-> removed, rev=" + entry.revision);
+					log.debug("-> removed, rev=" + entry.revision);
 					return;
 				} else {
 					entry.revision = i - 1;
 					events.add(0, event);
-					log.info("-> reset, rev=" + entry.revision);
+					log.debug("-> reset, rev=" + entry.revision);
 					break;
 				}
 				
@@ -137,7 +137,7 @@ public class GaeSnapshotService {
 					entry.modelState = null;
 					entry.revision = i - 1;
 					events.add(0, event);
-					log.info("-> reset, rev=" + entry.revision);
+					log.debug("-> reset, rev=" + entry.revision);
 					break;
 				} else if(trans.getEvent(trans.size() - 1) instanceof XRepositoryEvent) {
 					assert trans.getEvent(trans.size() - 1).getChangeType() == ChangeType.REMOVE;
@@ -145,7 +145,7 @@ public class GaeSnapshotService {
 					assert i == curRev;
 					entry.modelState = null;
 					entry.revision = curRev;
-					log.info("-> removed, rev=" + entry.revision);
+					log.debug("-> removed, rev=" + entry.revision);
 					return;
 				}
 			}
@@ -165,7 +165,7 @@ public class GaeSnapshotService {
 			
 		}
 		
-		log.info("-> " + events.size() + " events, rev=" + entry.revision);
+		log.debug("-> " + events.size() + " events, rev=" + entry.revision);
 		
 		for(XEvent event : events) {
 			
@@ -185,14 +185,14 @@ public class GaeSnapshotService {
 			entry.revision = event.getRevisionNumber();
 		}
 		
-		log.info("-> updated to new rev=" + entry.revision);
+		log.debug("-> updated to new rev=" + entry.revision);
 		assert entry.modelState == null || entry.modelState.getRevisionNumber() == entry.revision;
 		
 	}
 	
 	private XRevWritableModel applyEvent(XRevWritableModel model, XAtomicEvent event) {
 		
-		log.info("--> applying " + event);
+		log.debug("--> applying " + event);
 		
 		long rev = event.getRevisionNumber();
 		
@@ -267,4 +267,5 @@ public class GaeSnapshotService {
 		
 		return model;
 	}
+	
 }
