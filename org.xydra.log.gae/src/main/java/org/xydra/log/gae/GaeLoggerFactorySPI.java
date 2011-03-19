@@ -16,7 +16,7 @@ import com.google.appengine.api.utils.SystemProperty;
  */
 public class GaeLoggerFactorySPI implements ILoggerFactorySPI {
 	
-	private static ILoggerFactorySPI factory;
+	private static ILoggerFactorySPI factory = null;
 	
 	/**
 	 * Create and register appropriate factory.
@@ -49,7 +49,9 @@ public class GaeLoggerFactorySPI implements ILoggerFactorySPI {
 	}
 	
 	public static void init() {
-		new GaeLoggerFactorySPI();
+		if(factory == null) {
+			new GaeLoggerFactorySPI();
+		}
 	}
 	
 }
