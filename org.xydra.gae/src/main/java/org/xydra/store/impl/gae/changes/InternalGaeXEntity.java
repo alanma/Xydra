@@ -43,7 +43,7 @@ public class InternalGaeXEntity {
 	 *            assert that we are actually allowed to remove the entity.
 	 */
 	protected static Future<Void> remove(XAddress modelOrObjectOrFieldAddr, Set<XAddress> locks) {
-		assert GaeChangesService.canWrite(modelOrObjectOrFieldAddr, locks);
+		assert GaeLocks.canWrite(modelOrObjectOrFieldAddr, locks);
 		assert modelOrObjectOrFieldAddr.getAddressedType() == XType.XMODEL
 		        || modelOrObjectOrFieldAddr.getAddressedType() == XType.XOBJECT
 		        || modelOrObjectOrFieldAddr.getAddressedType() == XType.XFIELD;

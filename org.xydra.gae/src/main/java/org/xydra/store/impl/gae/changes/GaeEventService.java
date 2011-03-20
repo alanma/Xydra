@@ -34,8 +34,18 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Text;
 
 
+/**
+ * Code to handle saving and loading of XEvents and XValues stored on the GAE
+ * datastore.
+ * 
+ * @author dscharrer
+ * 
+ */
 public class GaeEventService {
 	
+	/**
+	 * Enumeration to map between stored event type and {@link XEvent} types.
+	 */
 	enum EventType {
 		
 		AddModel(1), RemoveModel(2), AddObject(3), RemoveObject(4), AddField(5), RemoveField(6), AddValue(
@@ -167,6 +177,7 @@ public class GaeEventService {
 		}
 	}
 	
+	// Properties stored in the "change" GAE entity.
 	private static final String PROP_EVENT_TYPES = "eventTypes";
 	private static final String PROP_EVENT_TARGETS = "eventTargets";
 	private static final String PROP_EVENT_VALUES = "eventValues";
@@ -174,24 +185,44 @@ public class GaeEventService {
 	private static final String PROP_EVENT_REVS_FIELD = "fieldRevisions";
 	private static final String PROP_EVENT_IMPLIED = "eventIsImplied";
 	
-	private static final String PROP_VALUE = "value";
+	// Value for PROP_EVENT_VALUES if the XValue is stored externally.
 	private static final String VALUE_EXTERN = "extern";
 	
+	// Properties stored in the "value" GAE entity.
+	private static final String PROP_VALUE = "value";
+	
+	// Maximum size for XML-encoded XValues to store in change entities.
 	private static final int MAX_VALUE_SIZE = 1024;
 	
+	// Parameter for getValue() to represent a null XValue.
 	protected static final int TRANSINDEX_NONE = -1;
 	
+	/**
+	 * A reference to a (possibly asynchronously loaded) value stored on the GAE
+	 * datastore.
+	 */
 	public static class AsyncValue {
 		
 		private final AsyncEntity future;
 		private final int transIndex;
 		private XValue value;
 		
+		/**
+		 * Load a value asynchronously.
+		 * 
+		 * @param future The entity containing the value.
+		 * @param transIndex The index of the value in the entity. See
+		 *            {@link GaeEventService#getValue(XAddress, long, int)}
+		 */
 		private AsyncValue(AsyncEntity future, int transIndex) {
 			this.future = future;
 			this.transIndex = transIndex;
+			assert transIndex != TRANSINDEX_NONE;
 		}
 		
+		/**
+		 * Construct with an already-loaded value.
+		 */
 		private AsyncValue(XValue value) {
 			this.value = value;
 			this.future = null;
@@ -209,7 +240,7 @@ public class GaeEventService {
 				
 				String eventXml;
 				if(this.transIndex < 0) {
-					int realindex = TRANSINDEX_NONE - this.transIndex - 1;
+					int realindex = getInternalValueId(this.transIndex);
 					@SuppressWarnings("unchecked")
 					List<String> eventValues = (List<String>)eventEntity
 					        .getProperty(PROP_EVENT_VALUES);
@@ -242,7 +273,9 @@ public class GaeEventService {
 	/**
 	 * @param revisionNumber The revision number of the change the event is part
 	 *            of.
-	 * @param transindex The index of the event in the change.
+	 * @param transindex The index of the event in the change as returned by
+	 *            {@link #saveEvents(XAddress, Entity, List)} or
+	 *            {@link #loadAtomicEvents(XAddress, long, XID, Entity, boolean)}
 	 */
 	protected static AsyncValue getValue(XAddress modelAddr, long revisionNumber, int transindex) {
 		

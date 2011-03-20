@@ -16,7 +16,7 @@ import com.google.appengine.api.datastore.KeyFactory;
  */
 public class KeyStructure {
 	
-	private static final String KIND_XEVENT = "XEVENT";
+	private static final String KIND_XVALUE = "XEVENT";
 	private static final String KIND_XCHANGE = "XCHANGE";
 	
 	/**
@@ -58,13 +58,15 @@ public class KeyStructure {
 	 * @param changeKey The key of the "change" (as returned by
 	 *            {@link #createChangeKey(XAddress, long)}) that contains the
 	 *            desired event.
-	 * @param transindex The index of the event in the change.
+	 * @param transindex The index of the event that set the value in the
+	 *            change.
 	 * @return a GAE {@link Key} representing an internal part of a Xydra change
 	 *         entity
 	 */
 	public static Key createValueKey(Key changeKey, int transindex) {
 		assert isChangeKey(changeKey);
-		return changeKey.getChild(KeyStructure.KIND_XEVENT, Integer.toString(transindex));
+		// TODO is there a point in making KIND_XVALUE children of KIND_XCHANGE?
+		return changeKey.getChild(KIND_XVALUE, Integer.toString(transindex));
 	}
 	
 	/**
@@ -73,7 +75,24 @@ public class KeyStructure {
 	 *         entity
 	 */
 	public static boolean isChangeKey(Key key) {
-		return key.getKind() == KeyStructure.KIND_XCHANGE;
+		return key.getKind() == KIND_XCHANGE;
 	}
+
+	/**
+     * Check that the revision encoded in the given key matches the given
+     * revision.
+     * 
+     * @param key A key for a change entity as returned by
+     *            {@link createChangeKey}.
+     * @param key The key to check
+     */
+    static boolean assertRevisionInKey(Key key, long rev) {
+    	assert isChangeKey(key);
+    	String keyStr = key.getName();
+    	int p = keyStr.lastIndexOf("/");
+    	assert p > 0;
+    	String revStr = keyStr.substring(p + 1);
+    	return (Long.parseLong(revStr) == rev);
+    }
 	
 }

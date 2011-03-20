@@ -30,7 +30,6 @@ import com.google.appengine.api.datastore.Key;
 class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 	
 	private static final String PROP_TRANSINDEX = "transindex";
-	// Value for PROP_TRANSINDEX if there hasn't been any XFieldEvent yet
 	
 	private final XAddress modelAddr;
 	private final XAddress fieldAddr;
@@ -97,7 +96,7 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 	 */
 	protected static Future<Key> set(XAddress fieldAddr, long fieldRev, int transindex,
 	        Set<XAddress> locks) {
-		assert GaeChangesService.canWrite(fieldAddr, locks);
+		assert GaeLocks.canWrite(fieldAddr, locks);
 		assert fieldAddr.getAddressedType() == XType.XFIELD;
 		Entity e = new Entity(KeyStructure.createEntityKey(fieldAddr));
 		e.setProperty(PROP_PARENT, fieldAddr.getParent().toURI());

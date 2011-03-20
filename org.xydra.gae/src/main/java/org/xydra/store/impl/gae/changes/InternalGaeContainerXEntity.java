@@ -23,6 +23,9 @@ import com.google.appengine.api.datastore.Entity;
  * Internal helper class used by {@link GaeChangesService} to access the current
  * model state.
  * 
+ * Shared functionality between {@link InternalGaeModel} and
+ * {@link InternalGaeObject}.
+ * 
  * @author dscharrer
  * 
  * @param <C> type of child entities
@@ -43,7 +46,7 @@ abstract class InternalGaeContainerXEntity<C> extends InternalGaeXEntity {
 		        || (rev == XEvent.RevisionNotAvailable && addr.getAddressedType() == XType.XOBJECT);
 		this.changesService = changesService;
 		assert addr.getAddressedType() == XType.XMODEL || addr.getAddressedType() == XType.XOBJECT;
-		assert GaeChangesService.canRead(addr, locks);
+		assert GaeLocks.canRead(addr, locks);
 		this.addr = addr;
 		this.locks = locks;
 		this.rev = rev;
@@ -75,7 +78,7 @@ abstract class InternalGaeContainerXEntity<C> extends InternalGaeXEntity {
 		}
 		
 		XAddress childAddr = resolveChild(this.addr, fieldId);
-		assert GaeChangesService.canRead(childAddr, this.locks);
+		assert GaeLocks.canRead(childAddr, this.locks);
 		
 		Entity e = GaeUtils.getEntity(KeyStructure.createEntityKey(childAddr));
 		if(e == null) {
@@ -99,7 +102,7 @@ abstract class InternalGaeContainerXEntity<C> extends InternalGaeXEntity {
 		
 		if(this.cachedIds == null) {
 			
-			assert GaeChangesService.canWrite(this.addr, this.locks);
+			assert GaeLocks.canWrite(this.addr, this.locks);
 			
 			this.cachedIds = findChildren(this.addr);
 		}

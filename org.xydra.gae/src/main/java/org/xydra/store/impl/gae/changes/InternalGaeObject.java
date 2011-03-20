@@ -61,7 +61,7 @@ public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeFi
 	private static long getSavedRevison(XAddress objectAddr, Entity objectEntity,
 	        Set<XAddress> locks) {
 		long objectRev;
-		if(GaeChangesService.canWrite(objectAddr, locks)) {
+		if(GaeLocks.canWrite(objectAddr, locks)) {
 			// We need the whole object, including all fields to be in a
 			// consistent state in order to calculate
 			objectRev = (Long)objectEntity.getProperty(PROP_REVISION);
@@ -141,7 +141,7 @@ public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeFi
 	 *            to the object entity.
 	 */
 	public static Future<Key> createObject(XAddress objectAddr, Set<XAddress> locks, long rev) {
-		assert GaeChangesService.canWrite(objectAddr, locks);
+		assert GaeLocks.canWrite(objectAddr, locks);
 		assert objectAddr.getAddressedType() == XType.XOBJECT;
 		Entity e = new Entity(KeyStructure.createEntityKey(objectAddr));
 		e.setProperty(PROP_PARENT, objectAddr.getParent().toURI());
@@ -172,7 +172,7 @@ public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeFi
 		
 		// We only care that that object won't be removed, so a read lock
 		// suffices.
-		assert GaeChangesService.canRead(objectAddr, locks);
+		assert GaeLocks.canRead(objectAddr, locks);
 		assert objectAddr.getAddressedType() == XType.XOBJECT;
 		Key key = KeyStructure.createEntityKey(objectAddr);
 		

@@ -13,7 +13,6 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
-import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
@@ -26,7 +25,6 @@ import org.xydra.base.rmof.XReadableModel;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.DeltaUtils;
-import org.xydra.core.xml.XmlEvent;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -36,6 +34,7 @@ import org.xydra.store.XydraRuntime;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.gae.GaeUtils;
 import org.xydra.store.impl.gae.GaeUtils.AsyncEntity;
+import org.xydra.store.impl.gae.changes.GaeChange.Status;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -82,38 +81,31 @@ import com.google.appengine.api.datastore.Transaction;
  * is currently in progress. Keys are encoded according to
  * {@link KeyStructure#createChangeKey(XAddress, long)}
  * 
- * The XCHANGE entities are managed directly by this class stores the status of
- * the change ( {@link #PROP_STATUS}), the required locks ({@link #PROP_ACTOR},
- * the time the (last) process started working on the change (
- * {@link #PROP_LAST_ACTIVITY}).
+ * The XCHANGE entities are managed by {@link GaeChange} stores the status of
+ * the change, the required locks, the actor that initiated the change, the time
+ * the (last) process started working on the change.
  * 
  * See {@link GaeEventService} for how events associated with this change are
  * stored. No events are guaranteed to be set before the change has reached
- * {@link #STATUS_EXECUTING}.
+ * {@link Status#Executing}.
  * 
- * Possible status progression for XCHANGE Entities:
+ * Possible {@link Status} progression for XCHANGE Entities:
  * 
  * <pre>
  * 
- *  STATUS_CREATING ------> STATUS_FAILED_TIMEOUT
- *        |
- *        |----> STATUS_EXECUTING ----> STATUS_SUCCESS_EXECUTED
- *        |
- *        |----> STATUS_SUCCESS_NOCHANGE
- *        |
- *        \----> STATUS_FAILED_PRECONDITIONS
+ *  Creating ------> FailedTimeout
+ *     |
+ *     |----> Executing ----> SucessExecuted
+ *     |
+ *     |----> SuccessNochange
+ *     |
+ *     \----> FailedPreconditions
  * 
  * </pre>
  * 
  * </dd>
  * 
- * <dt>Entity type XEVENT</dt>
- * <dd>Stores a single {@link XAtomicEvent} associated with a XCHANGE entity.
- * Keys are encoded according to {@link KeyStructure#createValueKey(Key, int)}.
- * Currently events are simply dumped as a XML-Encoded {@link String} using
- * {@link XmlEvent#toXml(XEvent, org.xydra.core.xml.XmlOut, XAddress)}.</dd>
- * </dl>
- * * Locking: TODO
+ * TODO document XValue storing, locking
  * 
  * @author dscharrer
  * 
@@ -123,94 +115,6 @@ public class GaeChangesService {
 	private static final Logger log = LoggerFactory.getLogger(GaeChangesService.class);
 	
 	private static final long serialVersionUID = -2080744796962188941L;
-	
-	// GAE Entity (type=XCHANGE) property keys.
-	
-	/**
-	 * GAE Property key for the timestamp (in milliseconds) when the last thread
-	 * started working on this entity.
-	 */
-	private static final String PROP_LAST_ACTIVITY = "lastActivity";
-	
-	/**
-	 * GAE Property key for the locks held by a change. The locks are stored as
-	 * a {@link List} of the {@link String} representations of the locked
-	 * {@link XAddress XAddresses}.
-	 * 
-	 * Locks are set when entering {@link #STATUS_CREATING}, removed when
-	 * entering {@link #STATUS_SUCCESS_EXECUTED},
-	 * {@link #STATUS_SUCCESS_NOCHANGE}, {@link #STATUS_FAILED_TIMEOUT} or
-	 * {@link #STATUS_FAILED_PRECONDITIONS}.
-	 */
-	private static final String PROP_LOCKS = "locks";
-	
-	/**
-	 * GAE Property key for the status of a change. See the STATUS_* constants
-	 * for possible status values.
-	 */
-	private static final String PROP_STATUS = "status";
-	
-	/**
-	 * GAE Property key for the actor that is responsible for the change. The
-	 * actor's {@link XID} is stored as a {@link String}.
-	 * 
-	 * Set when entering {@link #STATUS_CREATING}, never removed.
-	 */
-	private static final String PROP_ACTOR = "actor";
-	
-	// status IDs
-	
-	/**
-	 * assigned revision
-	 * 
-	 * => waiting for locks / checking preconditions / writing events
-	 */
-	private static final int STATUS_CREATING = 0;
-	
-	/**
-	 * got locks, preconditions checked, events written
-	 * 
-	 * => applying changes
-	 * 
-	 * a.k.a. readyToExecute
-	 */
-	private static final int STATUS_EXECUTING = 2;
-	
-	/** changes made, locks freed */
-	private static final int STATUS_SUCCESS_EXECUTED = 3;
-	
-	/** there was nothing to change, locks freed */
-	private static final int STATUS_SUCCESS_NOCHANGE = 4;
-	
-	/** could not execute command because of preconditions, locks freed */
-	private static final int STATUS_FAILED_PRECONDITIONS = 100;
-	
-	/** timed out before saving events (status was STATUS_CREATING), locks freed */
-	private static final int STATUS_FAILED_TIMEOUT = 101;
-	
-	// Parameters for waiting for other changes.
-	
-	/**
-	 * timeout for changes in milliseconds
-	 * 
-	 * If this is set too low, longer commands may not be executed successfully.
-	 * A too long timeout however might cause the model to "starve" as processes
-	 * are be aborted by GAE while waiting for other changes.
-	 * */
-	private static final long TIMEOUT = 30000;
-	
-	/**
-	 * critical time (in milliseconds) after which a process will voluntarily
-	 * give up it's change to prevent another process from rolling it forward
-	 * while the change is still active
-	 * 
-	 * To prevent unnecessary timeouts, this should be set close enough to the
-	 * GAE timeout.
-	 * 
-	 * However, setting this too close to TIMEOUT might result in two processes
-	 * executing the same change.
-	 */
-	private static final long TIME_CRITICAL = 27000;
 	
 	/**
 	 * Initial time to wait before re-checking the status of an event who'se
@@ -224,43 +128,12 @@ public class GaeChangesService {
 	 */
 	private static final long WAIT_MAX = 1000; // TODO set
 	
-	{
-		assert TIME_CRITICAL < TIMEOUT;
-	}
-	
 	// Implementation.
 	
 	private final XAddress modelAddr;
 	
 	public GaeChangesService(XAddress modelAddr) {
 		this.modelAddr = modelAddr;
-	}
-	
-	/**
-	 * Internal helper class to track information of a change that is being
-	 * executed.
-	 * 
-	 * Manages revision, startTime, the GAE entity of the change, and a Set of
-	 * {@link XAddress} (the locks)
-	 * 
-	 * @author dscharrer
-	 * 
-	 */
-	private static class ChangeInProgress {
-		
-		final long rev;
-		final long startTime;
-		final Set<XAddress> locks;
-		
-		final Entity entity;
-		
-		private ChangeInProgress(long rev, long startTime, Set<XAddress> locks, Entity entity) {
-			this.rev = rev;
-			this.startTime = startTime;
-			this.locks = locks;
-			this.entity = entity;
-		}
-		
 	}
 	
 	/**
@@ -289,9 +162,9 @@ public class GaeChangesService {
 		assert this.modelAddr.equalsOrContains(command.getChangedEntity()) : "cannot handle command "
 		        + command;
 		
-		Set<XAddress> locks = calculateRequiredLocks(command);
+		Set<XAddress> locks = GaeLocks.calculateRequiredLocks(command);
 		
-		ChangeInProgress change = grabRevisionAndRegisterLocks(locks, actorId);
+		GaeChange change = grabRevisionAndRegisterLocks(locks, actorId);
 		
 		// IMPROVE save command to be able to roll back in case of timeout while
 		// waiting for locks / checking preconditions?
@@ -313,66 +186,6 @@ public class GaeChangesService {
 	}
 	
 	/**
-	 * @return a revision number such that all changes up to and including that
-	 *         revision number are guaranteed to be committed. This is not
-	 *         guaranteed to be the highest revision number that fits this
-	 *         requirement.
-	 */
-	private long getCachedLastCommitedRevision() {
-		
-		Map<Object,Object> cache = XydraRuntime.getMemcache();
-		
-		String cachname = getCommitedRevCacheName();
-		
-		long rev;
-		synchronized(cache) {
-			// TODO how is cache access supposed to be synchronized?
-			Long entry = (Long)cache.get(cachname);
-			if(entry == null) {
-				rev = -1L;
-			} else {
-				rev = entry;
-			}
-		}
-		
-		long current = getCachedCurrentRevision();
-		
-		return (current > rev ? current : rev);
-	}
-	
-	private void setCachedLastCommitedRevision(long l) {
-		
-		Map<Object,Object> cache = XydraRuntime.getMemcache();
-		
-		String cachname = getCommitedRevCacheName();
-		
-		synchronized(cache) {
-			// TODO how is cache access supposed to be synchronized?
-			Long entry = (Long)cache.get(cachname);
-			if(entry == null || entry < l) {
-				cache.put(cachname, l);
-			}
-		}
-	}
-	
-	private String getCommitedRevCacheName() {
-		return getModelAddress() + "-commitedRev";
-	}
-	
-	/**
-	 * @return the last known revision number that has been grabbed by a change.
-	 *         No guarantees are made that no higher revision numbers aren't
-	 *         taken already.
-	 */
-	private long getCachedLastTakenRevision() {
-		return getCachedLastCommitedRevision(); // TODO implement
-	}
-	
-	private void setCachedLastTakenRevision(long rev) {
-		// TODO implement
-	}
-	
-	/**
 	 * Grabs the first available revision number and registers a change for that
 	 * revision number with the provided locks.
 	 * 
@@ -382,13 +195,10 @@ public class GaeChangesService {
 	 *         revision, the locks, the start time and the change {@link Entity}
 	 *         .
 	 */
-	private ChangeInProgress grabRevisionAndRegisterLocks(Set<XAddress> locks, XID actorId) {
+	private GaeChange grabRevisionAndRegisterLocks(Set<XAddress> locks, XID actorId) {
 		
 		// Prepare locks to be saved in GAE entity.
-		List<String> lockStrs = new ArrayList<String>(locks.size());
-		for(XAddress a : locks) {
-			lockStrs.add(a.toURI());
-		}
+		List<String> lockStrs = GaeChange.prepareLocks(locks);
 		
 		for(long rev = getCachedLastTakenRevision() + 1;; rev++) {
 			
@@ -402,13 +212,10 @@ public class GaeChangesService {
 			if(changeEntity == null) {
 				
 				Entity newChange = new Entity(key);
-				newChange.setUnindexedProperty(PROP_LOCKS, lockStrs);
-				newChange.setUnindexedProperty(PROP_STATUS, STATUS_CREATING);
-				long startTime = now();
-				newChange.setUnindexedProperty(PROP_LAST_ACTIVITY, startTime);
-				if(actorId != null) {
-					newChange.setUnindexedProperty(PROP_ACTOR, actorId.toString());
-				}
+				GaeChange.setLocks(newChange, lockStrs);
+				GaeChange.setStatus(newChange, Status.Creating);
+				long startTime = GaeChange.registerActivity(newChange);
+				GaeChange.setActor(newChange, actorId);
 				
 				GaeUtils.putEntityAsync(newChange, trans);
 				// Synchronized by endTransaction()
@@ -433,7 +240,7 @@ public class GaeChangesService {
 				setCachedLastTakenRevision(rev);
 				
 				// transaction succeeded, we have a revision
-				return new ChangeInProgress(rev, startTime, locks, newChange);
+				return new GaeChange(rev, startTime, locks, newChange);
 				
 			} else {
 				
@@ -443,9 +250,10 @@ public class GaeChangesService {
 				
 				// Since we read the entity anyway, might as well use that
 				// information.
-				int status = getStatus(changeEntity);
-				if(!isCommitted(status) && !canRollForward(status) && isTimedOut(changeEntity)) {
-					cleanupChangeEntity(changeEntity, STATUS_FAILED_TIMEOUT);
+				int status = GaeChange.getStatus(changeEntity);
+				if(!Status.isCommitted(status) && !Status.canRollForward(status)
+				        && GaeChange.isTimedOut(changeEntity)) {
+					GaeChange.cleanup(changeEntity, Status.FailedTimeout);
 				}
 				
 			}
@@ -460,7 +268,7 @@ public class GaeChangesService {
 	 * 
 	 * @param change which lists a Set of required locks
 	 */
-	private void waitForLocks(ChangeInProgress change) {
+	private void waitForLocks(GaeChange change) {
 		
 		long commitedRev = getCachedLastCommitedRevision();
 		
@@ -474,8 +282,8 @@ public class GaeChangesService {
 			assert otherChange != null;
 			
 			// Check if the change is committed.
-			int status = getStatus(otherChange);
-			if(isCommitted(status)) {
+			int status = GaeChange.getStatus(otherChange);
+			if(Status.isCommitted(status)) {
 				if(newCommitedRev < 0) {
 					newCommitedRev = otherRev;
 				}
@@ -484,9 +292,9 @@ public class GaeChangesService {
 			}
 			
 			// Check if the change needs conflicting locks.
-			Set<XAddress> otherLocks = getLocks(otherChange);
+			Set<XAddress> otherLocks = GaeChange.getLocks(otherChange);
 			assert otherLocks != null : "locks should not be removed before change is commited";
-			if(!isConflicting(change.locks, otherLocks)) {
+			if(!GaeLocks.isConflicting(change.locks, otherLocks)) {
 				newCommitedRev = -1;
 				// not conflicting, so ignore
 				continue;
@@ -507,7 +315,7 @@ public class GaeChangesService {
 			 */
 			long waitTime = WAIT_INITIAL;
 			boolean timedOut;
-			while(!(timedOut = isTimedOut(otherChange))) {
+			while(!(timedOut = GaeChange.isTimedOut(otherChange))) {
 				
 				// IMPROVE save own command if waitTime is too long (so that we
 				// can be rolled forward in case of timeout)
@@ -521,10 +329,10 @@ public class GaeChangesService {
 				otherChange = GaeUtils.getEntity(key);
 				assert otherChange != null : "change entities should not vanish";
 				
-				status = getStatus(otherChange);
-				if(isCommitted(status)) {
+				status = GaeChange.getStatus(otherChange);
+				if(Status.isCommitted(status)) {
 					// now finished, so should have no locks anymore
-					assert otherChange.getProperty(PROP_LOCKS) == null;
+					assert !GaeChange.hasLocks(otherChange);
 					break;
 				}
 				
@@ -538,7 +346,7 @@ public class GaeChangesService {
 			}
 			
 			if(timedOut) {
-				if(canRollForward(status)) {
+				if(Status.canRollForward(status)) {
 					// IMPROVE save own command so that we can be rolled
 					// forward in case of timeout
 					
@@ -555,7 +363,7 @@ public class GaeChangesService {
 						continue;
 					}
 				} else {
-					cleanupChangeEntity(otherChange, STATUS_FAILED_TIMEOUT);
+					GaeChange.cleanup(otherChange, Status.FailedTimeout);
 				}
 			}
 			
@@ -585,7 +393,7 @@ public class GaeChangesService {
 	 * @return a copy of the created events or null if the command cannot be
 	 *         applied.
 	 */
-	private Pair<List<XAtomicEvent>,int[]> checkPreconditionsAndSaveEvents(ChangeInProgress change,
+	private Pair<List<XAtomicEvent>,int[]> checkPreconditionsAndSaveEvents(GaeChange change,
 	        XCommand command, XID actorId) {
 		
 		XReadableModel currentModel = InternalGaeModel.get(this, change.rev - 1, change.locks);
@@ -593,8 +401,8 @@ public class GaeChangesService {
 		Pair<ChangedModel,DeltaUtils.ModelChange> c = DeltaUtils.executeCommand(currentModel,
 		        command);
 		if(c == null) {
-			giveUpIfTimeoutCritical(change.startTime);
-			cleanupChangeEntity(change, STATUS_FAILED_PRECONDITIONS);
+			change.giveUpIfTimeoutCritical();
+			commit(change, Status.FailedPreconditions);
 			return null;
 		}
 		
@@ -607,8 +415,8 @@ public class GaeChangesService {
 		try {
 			
 			if(events.isEmpty()) {
-				giveUpIfTimeoutCritical(change.startTime);
-				cleanupChangeEntity(change, STATUS_SUCCESS_NOCHANGE);
+				change.giveUpIfTimeoutCritical();
+				commit(change, Status.SuccessNochange);
 				return new Pair<List<XAtomicEvent>,int[]>(events, null);
 			}
 			
@@ -621,16 +429,16 @@ public class GaeChangesService {
 				GaeUtils.waitFor(future);
 			}
 			
-			change.entity.setUnindexedProperty(PROP_STATUS, STATUS_EXECUTING);
+			GaeChange.setStatus(change.entity, Status.Executing);
 			GaeUtils.putEntity(change.entity);
 			
-			giveUpIfTimeoutCritical(change.startTime);
+			change.giveUpIfTimeoutCritical();
 			
 		} catch(VoluntaryTimeoutException vte) {
 			// Since we have not changed the status to EXEUTING, no thread will
 			// be able to roll this change forward and we might as well clean it
 			// up to prevent unnecessary waits.
-			cleanupChangeEntity(change, STATUS_FAILED_TIMEOUT);
+			commit(change, Status.FailedTimeout);
 		}
 		
 		return new Pair<List<XAtomicEvent>,int[]>(events, valueIds);
@@ -643,7 +451,7 @@ public class GaeChangesService {
 	 * @param change
 	 * @param events
 	 */
-	private void executeAndUnlock(ChangeInProgress change, Pair<List<XAtomicEvent>,int[]> events) {
+	private void executeAndUnlock(GaeChange change, Pair<List<XAtomicEvent>,int[]> events) {
 		
 		/*
 		 * Track which object's revision numbers we have already saved and which
@@ -745,28 +553,11 @@ public class GaeChangesService {
 			GaeUtils.waitFor(future);
 		}
 		
-		cleanupChangeEntity(change, STATUS_SUCCESS_EXECUTED);
+		commit(change, Status.SuccessExecuted);
 		
 		if(getCachedCurrentRevision() == change.rev - 1) {
 			setCachedCurrentRevision(change.rev);
 		}
-	}
-	
-	/**
-	 * Check that the revision encoded in the given key matches the given
-	 * revision.
-	 * 
-	 * @param key A key for a change entity as returned by
-	 *            {@link KeyStructure#createChangeKey(XAddress, long)}.
-	 * @param key The key to check
-	 */
-	private boolean assertRevisionInKey(Key key, long rev) {
-		assert KeyStructure.isChangeKey(key);
-		String keyStr = key.getName();
-		int p = keyStr.lastIndexOf("/");
-		assert p > 0;
-		String revStr = keyStr.substring(p + 1);
-		return (Long.parseLong(revStr) == rev);
 	}
 	
 	/**
@@ -780,7 +571,7 @@ public class GaeChangesService {
 	 * 
 	 * It is the responsibility of the caller to make sure that the change has
 	 * enough information to be rolled forward (all events are saved). See
-	 * {@link #canRollForward(int)}.
+	 * {@link Status#canRollForward(int)}.
 	 * 
 	 * @param rev The revision number of the change to roll forward.
 	 * @param key The key of the corresponding change entity.
@@ -790,7 +581,7 @@ public class GaeChangesService {
 	 */
 	private boolean rollForward(long rev, Key key) {
 		
-		assert assertRevisionInKey(key, rev);
+		assert KeyStructure.assertRevisionInKey(key, rev);
 		
 		// Try to "grab" the change entity to prevent multiple processes from
 		// rolling forward the same entity.
@@ -798,7 +589,7 @@ public class GaeChangesService {
 		Entity changeEntity = GaeUtils.getEntity(key, trans);
 		assert changeEntity != null;
 		
-		if(!isTimedOut(changeEntity)) {
+		if(!GaeChange.isTimedOut(changeEntity)) {
 			// Cannot roll forward, change was grabbed by another process.
 			
 			// Cleanup the transaction.
@@ -806,8 +597,6 @@ public class GaeChangesService {
 			
 			return false;
 		}
-		
-		long now = now();
 		/*
 		 * IMPROVE use the PROP_LAST_ACTIVITY of our own change instead? Both
 		 * now() and the last activity of our own change are "correct" as
@@ -819,7 +608,7 @@ public class GaeChangesService {
 		 * while not actually reducing the chance of the roll forward timing out
 		 * (only changing it from a voluntary timeout to a GAE enforced timeout)
 		 */
-		changeEntity.setProperty(PROP_LAST_ACTIVITY, now);
+		long now = GaeChange.registerActivity(changeEntity);
 		GaeUtils.putEntityAsync(changeEntity, trans);
 		// Synchronized by endTransaction()
 		try {
@@ -829,12 +618,12 @@ public class GaeChangesService {
 			return false;
 		}
 		
-		assert canRollForward(getStatus(changeEntity));
-		assert getStatus(changeEntity) == STATUS_EXECUTING;
+		assert Status.canRollForward(GaeChange.getStatus(changeEntity));
+		assert GaeChange.getStatus(changeEntity) == Status.Executing.value;
 		
-		Set<XAddress> locks = getLocks(changeEntity);
+		Set<XAddress> locks = GaeChange.getLocks(changeEntity);
 		
-		ChangeInProgress change = new ChangeInProgress(rev, now, locks, changeEntity);
+		GaeChange change = new GaeChange(rev, now, locks, changeEntity);
 		
 		Pair<List<XAtomicEvent>,int[]> events = loadEvents(change);
 		
@@ -844,72 +633,16 @@ public class GaeChangesService {
 	}
 	
 	/**
-	 * Throw an exception if this change has been worked on for more than
-	 * {@link #TIME_CRITICAL} milliseconds. This is done before writing to
-	 * prevent another process rolling forward our change while we are still
-	 * working on it.
-	 * 
-	 * @param startTime The time when we started working on the change.
-	 * @throws VoluntaryTimeoutException to abort the current change
-	 */
-	private void giveUpIfTimeoutCritical(long startTime) throws VoluntaryTimeoutException {
-		long now = now();
-		if(now - startTime > TIME_CRITICAL) {
-			// TODO use a better exception type?
-			throw new VoluntaryTimeoutException("voluntarily timing out to prevent"
-			        + " multiple processes working in the same thread; " + " start time was "
-			        + startTime + "; now is " + now);
-		}
-	}
-	
-	/**
-	 * @return the status code associated with the given change {@link Entity}.
-	 */
-	private static int getStatus(Entity changeEntity) {
-		Number n = (Number)changeEntity.getProperty(PROP_STATUS);
-		assert n != null : "All change entities should have a status";
-		return n.intValue();
-	}
-	
-	/**
-	 * @return the locks associated with the given change {@link Entity}.
-	 */
-	@SuppressWarnings("unchecked")
-	private Set<XAddress> getLocks(Entity changeEntity) {
-		List<String> lockStrs = (List<String>)changeEntity.getProperty(PROP_LOCKS);
-		if(lockStrs == null) {
-			return null;
-		}
-		Set<XAddress> otherLocks = new HashSet<XAddress>((int)(lockStrs.size() / 0.75));
-		for(String s : lockStrs) {
-			otherLocks.add(XX.toAddress(s));
-		}
-		return otherLocks;
-	}
-	
-	/**
-	 * @return the actor associated with the given change {@link Entity}.
-	 */
-	private static XID getActor(Entity changeEntity) {
-		String actorStr = (String)changeEntity.getProperty(PROP_ACTOR);
-		if(actorStr == null) {
-			return null;
-		}
-		return XX.toId(actorStr);
-	}
-	
-	/**
 	 * Load the individual events associated with the given change.
 	 * 
 	 * @param change The change whose events should be loaded.
 	 * @return a List of {@link XAtomicEvent} which is stored as a number of GAE
 	 *         entities
 	 */
-	private Pair<List<XAtomicEvent>,int[]> loadEvents(ChangeInProgress change) {
+	private Pair<List<XAtomicEvent>,int[]> loadEvents(GaeChange change) {
 		
-		assert assertRevisionInKey(change.entity.getKey(), change.rev);
-		assert Arrays.asList(STATUS_EXECUTING, STATUS_SUCCESS_EXECUTED).contains(
-		        change.entity.getProperty(PROP_STATUS));
+		assert KeyStructure.assertRevisionInKey(change.entity.getKey(), change.rev);
+		assert Status.hasEvents(GaeChange.getStatus(change.entity));
 		
 		Pair<XAtomicEvent[],int[]> res = GaeEventService.loadAtomicEvents(this.modelAddr,
 		        change.rev, null, change.entity, false);
@@ -917,163 +650,17 @@ public class GaeChangesService {
 		return new Pair<List<XAtomicEvent>,int[]>(Arrays.asList(res.getFirst()), res.getSecond());
 	}
 	
-	private void cleanupChangeEntity(ChangeInProgress change, int status) {
-		assert isCommitted(status);
-		cleanupChangeEntity(change.entity, status);
+	/**
+	 * Mark the given change as committed.
+	 * 
+	 * @param status The new (and final) status.
+	 */
+	private void commit(GaeChange change, Status status) {
+		assert Status.isCommitted(status.value);
+		GaeChange.cleanup(change.entity, status);
 		if(getCachedLastCommitedRevision() == change.rev - 1) {
 			setCachedLastCommitedRevision(change.rev);
 		}
-	}
-	
-	private void cleanupChangeEntity(Entity changeEntity, int status) {
-		changeEntity.removeProperty(PROP_LOCKS);
-		changeEntity.setUnindexedProperty(PROP_STATUS, status);
-		GaeUtils.putEntity(changeEntity);
-	}
-	
-	/**
-	 * @return the current time in milliseconds.
-	 */
-	private static long now() {
-		return System.currentTimeMillis();
-	}
-	
-	/**
-	 * @return true, if a change with the given status can be rolled forward,
-	 *         false otherwise.
-	 */
-	private boolean canRollForward(int status) {
-		return status == STATUS_EXECUTING;
-	}
-	
-	/**
-	 * @return true, if the status is either "success" or "failed".
-	 */
-	private boolean isCommitted(int status) {
-		return (isSuccess(status) || isFailure(status));
-	}
-	
-	private boolean isSuccess(int status) {
-		return (status == STATUS_SUCCESS_EXECUTED || status == STATUS_SUCCESS_NOCHANGE);
-	}
-	
-	private boolean isFailure(int status) {
-		return (status == STATUS_FAILED_PRECONDITIONS || status == STATUS_FAILED_TIMEOUT);
-	}
-	
-	/**
-	 * @param changeEntity
-	 * @return true if more than {@link #TIMEOUT} milliseconds elapsed since a
-	 *         thread started working with the given changeEntity
-	 */
-	private boolean isTimedOut(Entity changeEntity) {
-		long timer = (Long)changeEntity.getProperty(PROP_LAST_ACTIVITY);
-		return now() - timer > TIMEOUT;
-	}
-	
-	/**
-	 * Handles wild-cards in locks.
-	 * 
-	 * @return true if the given set contains any locks that imply the given
-	 *         lock (but are not the same).
-	 */
-	private static boolean hasMoreGeneralLock(Set<XAddress> locks, XAddress lock) {
-		XAddress l = lock.getParent();
-		while(l != null) {
-			if(l.contains(l)) {
-				return true;
-			}
-			l = l.getParent();
-		}
-		return false;
-	}
-	
-	/**
-	 * An address in the locks means that exclusive access is required to the
-	 * entity referred to by that address, as well as all descendant entities.
-	 * Also, a read lock on the ancestors of that entity is implied.
-	 * 
-	 * @param command The command to calculate the locks for.
-	 * @return the calculated locks required to execute the given command.
-	 */
-	private static Set<XAddress> calculateRequiredLocks(XCommand command) {
-		
-		Set<XAddress> locks = new HashSet<XAddress>();
-		if(command instanceof XTransaction) {
-			
-			XTransaction trans = (XTransaction)command;
-			Set<XAddress> tempLocks = new HashSet<XAddress>();
-			for(XAtomicCommand ac : trans) {
-				XAddress lock = ac.getChangedEntity();
-				// IMPROVE ADD events don't need to lock the whole added entity
-				// (they don't care if children change)
-				assert lock != null;
-				tempLocks.add(lock);
-			}
-			for(XAddress lock : tempLocks) {
-				if(!hasMoreGeneralLock(tempLocks, lock)) {
-					locks.add(lock);
-				}
-			}
-			
-		} else {
-			XAddress lock = command.getChangedEntity();
-			assert lock != null;
-			locks.add(lock);
-		}
-		
-		return locks;
-	}
-	
-	/**
-	 * @param a
-	 * @param b
-	 * @return if the two sets of locks conflict, i.e. one of them requires a
-	 *         lock that is implied by the other set (wild-card locks are
-	 *         respected).
-	 */
-	private static boolean isConflicting(Set<XAddress> a, Set<XAddress> b) {
-		for(XAddress lock : a) {
-			if(b.contains(lock) || hasMoreGeneralLock(b, lock)) {
-				return true;
-			}
-		}
-		for(XAddress lock : b) {
-			if(hasMoreGeneralLock(a, lock)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	/**
-	 * @param addr
-	 * @param locks
-	 * @return true if the specified locks are sufficient to read from the
-	 *         entity at the given address.
-	 */
-	protected static boolean canRead(XAddress addr, Set<XAddress> locks) {
-		for(XAddress lock : locks) {
-			if(addr.equalsOrContains(lock) || lock.contains(addr)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	/**
-	 * @param addr
-	 * @param locks
-	 * @return true if the specified locks are sufficient to write to the entity
-	 *         at the given address.
-	 */
-	protected static boolean canWrite(XAddress addr, Set<XAddress> locks) {
-		for(XAddress lock : locks) {
-			if(lock.equalsOrContains(addr)) {
-				return true;
-			}
-		}
-		return false;
 	}
 	
 	/**
@@ -1084,39 +671,110 @@ public class GaeChangesService {
 		return this.modelAddr;
 	}
 	
+	/**
+	 * @return a revision number such that all changes up to and including that
+	 *         revision number are guaranteed to be committed. This is not
+	 *         guaranteed to be the highest revision number that fits this
+	 *         requirement.
+	 */
+	private long getCachedLastCommitedRevision() {
+		
+		Map<Object,Object> cache = XydraRuntime.getMemcache();
+		
+		Long entry = (Long)cache.get(getCommitedRevCacheName());
+		long rev = (entry == null) ? -1L : entry;
+		
+		long current = getCachedCurrentRevision();
+		
+		return (current > rev ? current : rev);
+	}
+	
+	/**
+	 * Set a new value to be returned by
+	 * {@link #getCachedLastCommitedRevision()}.
+	 * 
+	 * @param l The value is set. It is ignored if the current cached value is
+	 *            less than this.
+	 */
+	private void setCachedLastCommitedRevision(long l) {
+		increaseCachedValue(getCommitedRevCacheName(), l);
+	}
+	
+	private String getCommitedRevCacheName() {
+		return getModelAddress() + "-commitedRev";
+	}
+	
+	/**
+	 * @return the last known revision number that has been grabbed by a change.
+	 *         No guarantees are made that no higher revision numbers aren't
+	 *         taken already.
+	 */
+	private long getCachedLastTakenRevision() {
+		return getCachedLastCommitedRevision(); // TODO implement
+	}
+	
+	/**
+	 * Set a new value to be returned by {@link #getCachedLastTakenRevision()}.
+	 * 
+	 * @param l The value is set. It is ignored if the current cached value is
+	 *            less than this.
+	 */
+	private void setCachedLastTakenRevision(long rev) {
+		// TODO implement
+	}
+	
+	/**
+	 * Retrieve a cached value of the current revision number as defined by
+	 * {@link #getCurrentRevisionNumber()}.
+	 * 
+	 * The returned value may be less that the actual "current" revision number,
+	 * but is guaranteed to never be greater.
+	 */
 	private long getCachedCurrentRevision() {
 		
 		Map<Object,Object> cache = XydraRuntime.getMemcache();
 		
-		String cachname = getCurrentRevCacheName();
-		
-		synchronized(cache) {
-			// TODO how is cache access supposed to be synchronized?
-			Long entry = (Long)cache.get(cachname);
-			if(entry == null) {
-				return -1L;
-			}
-			return entry;
-		}
+		Long value = (Long)cache.get(getCurrentRevCacheName());
+		return (value == null) ? -1L : value;
 	}
 	
+	/**
+	 * Set a new value to be returned by {@link #getCachedCurrentRevision()}.
+	 * 
+	 * @param l The value is set. It is ignored if the current cached value is
+	 *            less than this.
+	 */
 	private void setCachedCurrentRevision(long l) {
-		
-		Map<Object,Object> cache = XydraRuntime.getMemcache();
-		
-		String cachname = getCurrentRevCacheName();
-		
-		synchronized(cache) {
-			// TODO how is cache access supposed to be synchronized?
-			Long entry = (Long)cache.get(cachname);
-			if(entry == null || entry < l) {
-				cache.put(cachname, l);
-			}
-		}
+		increaseCachedValue(getCurrentRevCacheName(), l);
 	}
 	
+	/**
+	 * @return the name of the cached value used by
+	 *         {@link #getCachedCurrentRevision()} and
+	 *         {@link #setCachedCurrentRevision(long)}
+	 */
 	private String getCurrentRevCacheName() {
 		return getModelAddress() + "-currentRev";
+	}
+	
+	/**
+	 * Increase a cached {@link Long} value.
+	 * 
+	 * @param cachname The value to increase.
+	 * @param l The new value to set. Ignored if it is less than the current
+	 *            value.
+	 */
+	private void increaseCachedValue(String cachname, long l) {
+		Map<Object,Object> cache = XydraRuntime.getMemcache();
+		
+		Long value = l;
+		while(true) {
+			Long old = (Long)cache.put(cachname, value);
+			if(old == null || old <= value) {
+				break;
+			}
+			value = old;
+		}
 	}
 	
 	/**
@@ -1143,14 +801,14 @@ public class GaeChangesService {
 				break;
 			}
 			
-			int status = getStatus(changeEntity);
-			if(!isCommitted(status)) {
+			int status = GaeChange.getStatus(changeEntity);
+			if(!Status.isCommitted(status)) {
 				break;
 			}
 			
 			// Only update the current revision if the command actually changed
 			// something.
-			if(status == STATUS_SUCCESS_EXECUTED) {
+			if(status == Status.SuccessExecuted.value) {
 				currentRev = rev + 1;
 			}
 			
@@ -1172,6 +830,12 @@ public class GaeChangesService {
 		return currentRev;
 	}
 	
+	/**
+	 * Helper class to allow to load events asynchronously.
+	 * 
+	 * @author dscharrer
+	 * 
+	 */
 	public static class AsyncEvent {
 		
 		private final XAddress modelAddr;
@@ -1203,13 +867,12 @@ public class GaeChangesService {
 				return null;
 			}
 			
-			int status = getStatus(changeEntity);
-			if(status != STATUS_EXECUTING && status != STATUS_SUCCESS_EXECUTED) {
+			if(!Status.hasEvents(GaeChange.getStatus(changeEntity))) {
 				// no events available (or not yet) for this revision.
 				return null;
 			}
 			
-			XID actor = getActor(changeEntity);
+			XID actor = GaeChange.getActor(changeEntity);
 			
 			this.event = GaeEventService.asEvent(this.modelAddr, this.rev, actor, changeEntity);
 			assert this.event != null;
@@ -1239,6 +902,9 @@ public class GaeChangesService {
 	 * See {@link GetEventsRequest} for parameters.
 	 * 
 	 * @return a list of events or null if this model was never created.
+	 * 
+	 * @see XydraStore#getEvents(XID, String, GetEventsRequest[],
+	 *      org.xydra.store.Callback)
 	 */
 	public List<XEvent> getEventsBetween(long beginRevision, long endRevision) {
 		
@@ -1283,6 +949,8 @@ public class GaeChangesService {
 		
 		int pos = 0;
 		
+		// Only update the currentRev cache value if we aren't skipping any
+		// events.
 		boolean trackCurrentRev = (begin <= currentRev);
 		
 		long rev = begin;
@@ -1295,10 +963,10 @@ public class GaeChangesService {
 				break;
 			}
 			
-			assert assertRevisionInKey(changeEntity.getKey(), rev);
+			assert KeyStructure.assertRevisionInKey(changeEntity.getKey(), rev);
 			
-			int status = getStatus(changeEntity);
-			if(!isCommitted(status)) {
+			int status = GaeChange.getStatus(changeEntity);
+			if(!Status.isCommitted(status)) {
 				// Found the lastCommitedRev
 				break;
 			}

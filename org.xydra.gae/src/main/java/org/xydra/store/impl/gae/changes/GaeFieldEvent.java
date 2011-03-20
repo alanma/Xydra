@@ -12,7 +12,9 @@ import org.xydra.store.impl.gae.changes.GaeEventService.AsyncValue;
 
 
 /**
- * An implementation of {@link XFieldEvent}.
+ * An implementation of {@link XFieldEvent} that can load the newValue
+ * asynchronously from the GAE datastore without blocking before
+ * {@link #getNewValue()} is called.
  * 
  * @author voelkel
  * @author kaidel
@@ -24,11 +26,12 @@ public class GaeFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	// the revision numbers before the event happened
 	private final long modelRevision, objectRevision, fieldRevision;
 	
-	// the new value, after the event happened (null for "delete" events)
+	/*
+	 * the new value, after the event happened (never null, newValue.get()
+	 * returns null for "delete" events)
+	 */
 	private final AsyncValue newValue;
 	
-	// private constructor, use the createEvent-methods for instantiating a
-	// MemoryFieldEvent.
 	protected GaeFieldEvent(XID actor, XAddress target, AsyncValue newValue, ChangeType changeType,
 	        long modelRevision, long objectRevision, long fieldRevision, boolean inTransaction,
 	        boolean implied) {
@@ -39,12 +42,39 @@ public class GaeFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 		        || objectRevision == RevisionNotAvailable;
 		assert modelRevision >= 0 || modelRevision == RevisionOfEntityNotSet;
 		
+		assert newValue != null;
 		this.newValue = newValue;
 		
 		this.modelRevision = modelRevision;
 		this.objectRevision = objectRevision;
 		this.fieldRevision = fieldRevision;
 	}
+	
+	public XAddress getChangedEntity() {
+		return getTarget();
+	}
+	
+	public XValue getNewValue() {
+		return this.newValue.get();
+	}
+	
+	@Override
+	public long getOldFieldRevision() {
+		return this.fieldRevision;
+	}
+	
+	@Override
+	public long getOldModelRevision() {
+		return this.modelRevision;
+	}
+	
+	@Override
+	public long getOldObjectRevision() {
+		return this.objectRevision;
+	}
+	
+	// Overloads of standard Java equals(), hashCode() and toString() methods.
+	// These need to match other XFieldEvent implementations.
 	
 	@Override
 	public boolean equals(Object object) {
@@ -78,29 +108,6 @@ public class GaeFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 		}
 		
 		return true;
-	}
-	
-	public XAddress getChangedEntity() {
-		return getTarget();
-	}
-	
-	public XValue getNewValue() {
-		return this.newValue.get();
-	}
-	
-	@Override
-	public long getOldFieldRevision() {
-		return this.fieldRevision;
-	}
-	
-	@Override
-	public long getOldModelRevision() {
-		return this.modelRevision;
-	}
-	
-	@Override
-	public long getOldObjectRevision() {
-		return this.objectRevision;
 	}
 	
 	@Override
