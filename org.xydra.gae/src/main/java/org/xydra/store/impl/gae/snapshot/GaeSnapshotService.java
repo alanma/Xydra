@@ -99,6 +99,7 @@ public class GaeSnapshotService {
 			return;
 		}
 		
+		// Fetch one event from the back of the change log.
 		List<AsyncEvent> batch = new ArrayList<AsyncEvent>(1);
 		batch.add(this.changes.getEventAt(curRev));
 		
@@ -111,8 +112,11 @@ public class GaeSnapshotService {
 			
 			XEvent event = batch.get(pos).get();
 			if(event == null) {
+				// Nothing changed at this revision, ignore.
 				continue;
 			}
+			
+			// Check if this is the first event we need.
 			if(event instanceof XRepositoryEvent) {
 				entry.modelState = null;
 				if(event.getChangeType() == ChangeType.REMOVE) {
@@ -167,6 +171,7 @@ public class GaeSnapshotService {
 		
 		log.debug("-> " + events.size() + " events, rev=" + entry.revision);
 		
+		// Apply all changes.
 		for(XEvent event : events) {
 			
 			if(event instanceof XTransactionEvent) {
@@ -190,6 +195,20 @@ public class GaeSnapshotService {
 		
 	}
 	
+	/**
+	 * Apply the changes described by an {@link XAtomicEvent} to an
+	 * {@link XReadableModel}.
+	 * 
+	 * It is the responsibility of the caller to ensure that the provided model
+	 * is at a state where the given event applies.
+	 * 
+	 * TODO maybe this should be moved to core?
+	 * 
+	 * @param model The model to change. This can be null. If not null, it will
+	 *            be modified.
+	 * @param event The event to apply.
+	 * @return the changed model or null if the model was removed.
+	 */
 	private XRevWritableModel applyEvent(XRevWritableModel model, XAtomicEvent event) {
 		
 		log.debug("--> applying " + event);
