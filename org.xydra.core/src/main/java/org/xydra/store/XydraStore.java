@@ -365,6 +365,12 @@ public interface XydraStore {
 	 *            {@link #getEvents(XID, String, GetEventsRequest[], Callback)}
 	 *            to retrieve the last event that happened to this mode. Must
 	 *            not be null.
+	 * 
+	 *            Every successfully executed command that changes something
+	 *            increases the revision number. Unsuccessful commands or
+	 *            commands those that didn't change anything will not change the
+	 *            model revision number directly, but later commands may skip
+	 *            revision numbers.
 	 * @throws IllegalArgumentException if one of the given parameters is null.
 	 */
 	void getModelRevisions(XID actorId, String passwordHash, XAddress[] modelAddresses,
