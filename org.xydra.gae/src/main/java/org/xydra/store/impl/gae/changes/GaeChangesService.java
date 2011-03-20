@@ -831,69 +831,13 @@ public class GaeChangesService {
 	}
 	
 	/**
-	 * Helper class to allow to load events asynchronously.
-	 * 
-	 * @author dscharrer
-	 * 
-	 */
-	public static class AsyncEvent {
-		
-		private final XAddress modelAddr;
-		private final AsyncEntity future;
-		private final long rev;
-		private XEvent event;
-		
-		protected AsyncEvent(XAddress modelAddr, AsyncEntity future, long rev) {
-			this.modelAddr = modelAddr;
-			this.future = future;
-			this.rev = rev;
-		}
-		
-		/**
-		 * @return the retrieved change entity.
-		 */
-		public Entity getEntity() {
-			return this.future.get();
-		}
-		
-		/**
-		 * @return the XEvent represented by the retrieved change entity or null
-		 *         of nothing changed.
-		 */
-		public XEvent get() {
-			
-			Entity changeEntity = this.future.get();
-			if(changeEntity == null) {
-				return null;
-			}
-			
-			if(!Status.hasEvents(GaeChange.getStatus(changeEntity))) {
-				// no events available (or not yet) for this revision.
-				return null;
-			}
-			
-			XID actor = GaeChange.getActor(changeEntity);
-			
-			this.event = GaeEventService.asEvent(this.modelAddr, this.rev, actor, changeEntity);
-			assert this.event != null;
-			
-			return this.event;
-		}
-	}
-	
-	/**
 	 * Get the event at the specified revision number.
 	 * 
 	 * @see XydraStore#getEvents(XID, String, GetEventsRequest[],
 	 *      org.xydra.store.Callback)
 	 */
 	public AsyncEvent getEventAt(long rev) {
-		
-		Key key = KeyStructure.createChangeKey(this.modelAddr, rev);
-		AsyncEntity changeEntity = GaeUtils.getEntityAsync(key);
-		
-		return new AsyncEvent(this.modelAddr, changeEntity, rev);
-		
+		return new AsyncEvent(this.modelAddr, rev);
 	}
 	
 	/**

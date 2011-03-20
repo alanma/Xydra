@@ -25,8 +25,8 @@ import org.xydra.core.model.XChangeLog;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.XydraRuntime;
+import org.xydra.store.impl.gae.changes.AsyncEvent;
 import org.xydra.store.impl.gae.changes.GaeChangesService;
-import org.xydra.store.impl.gae.changes.GaeChangesService.AsyncEvent;
 
 
 /**

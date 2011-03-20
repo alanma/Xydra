@@ -182,8 +182,8 @@ class GaeChange {
 	
 	/**
 	 * @param changeEntity
-	 * @return true if more than {@link #TIMEOUT} milliseconds elapsed since a
-	 *         thread started working with the given changeEntity
+	 * @return true if more than {@link #TIMEOUT} milliseconds elapsed
+	 *         since a thread started working with the given changeEntity
 	 */
 	protected static boolean isTimedOut(Entity changeEntity) {
 		long timer = (Long)changeEntity.getProperty(PROP_LAST_ACTIVITY);
