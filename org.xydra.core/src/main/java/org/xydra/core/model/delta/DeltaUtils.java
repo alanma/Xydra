@@ -205,11 +205,11 @@ public abstract class DeltaUtils {
 		}
 		
 		for(XReadableObject object : changedModel.getNewObjects()) {
-			events.add(MemoryModelEvent.createAddEvent(actorId, changedModel.getAddress(),
-			        object.getID(), rev, inTrans));
+			events.add(MemoryModelEvent.createAddEvent(actorId, changedModel.getAddress(), object
+			        .getID(), rev, inTrans));
 			for(XID fieldId : object) {
-				DeltaUtils.createEventsForNewField(events, rev, actorId, object,
-				        object.getField(fieldId), inTrans);
+				DeltaUtils.createEventsForNewField(events, rev, actorId, object, object
+				        .getField(fieldId), inTrans);
 			}
 		}
 		
@@ -218,8 +218,8 @@ public abstract class DeltaUtils {
 			assert !implied;
 			
 			for(XID fieldId : object.getRemovedFields()) {
-				DeltaUtils.createEventsForRemovedField(events, rev, actorId, object,
-				        object.getOldField(fieldId), inTrans, false);
+				DeltaUtils.createEventsForRemovedField(events, rev, actorId, object, object
+				        .getOldField(fieldId), inTrans, false);
 			}
 			
 			for(XReadableField field : object.getNewFields()) {
@@ -259,8 +259,8 @@ public abstract class DeltaUtils {
 		events.add(MemoryObjectEvent.createAddEvent(actorId, object.getAddress(), field.getID(),
 		        rev, objectRev, inTrans));
 		if(!field.isEmpty()) {
-			events.add(MemoryFieldEvent.createAddEvent(actorId, field.getAddress(),
-			        field.getValue(), rev, objectRev, field.getRevisionNumber(), inTrans));
+			events.add(MemoryFieldEvent.createAddEvent(actorId, field.getAddress(), field
+			        .getValue(), rev, objectRev, field.getRevisionNumber(), inTrans));
 		}
 	}
 	
@@ -280,8 +280,8 @@ public abstract class DeltaUtils {
 	public static void createEventsForRemovedObject(List<XAtomicEvent> events, long modelRev,
 	        XID actorId, XReadableObject object, boolean inTrans, boolean implied) {
 		for(XID fieldId : object) {
-			DeltaUtils.createEventsForRemovedField(events, modelRev, actorId, object,
-			        object.getField(fieldId), inTrans, true);
+			DeltaUtils.createEventsForRemovedField(events, modelRev, actorId, object, object
+			        .getField(fieldId), inTrans, true);
 		}
 		events.add(MemoryModelEvent.createRemoveEvent(actorId, object.getAddress().getParent(),
 		        object.getID(), modelRev, object.getRevisionNumber(), inTrans, implied));
