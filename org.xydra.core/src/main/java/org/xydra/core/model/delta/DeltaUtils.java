@@ -21,6 +21,8 @@ import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.impl.memory.SynchronizesChangesImpl;
 import org.xydra.index.query.Pair;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
 
 /**
@@ -33,6 +35,10 @@ import org.xydra.index.query.Pair;
  * 
  */
 public abstract class DeltaUtils {
+	
+	// TODO: Whenever a command fails, make sure to log why
+	@SuppressWarnings("unused")
+	private static final Logger log = LoggerFactory.getLogger(DeltaUtils.class);
 	
 	public enum ModelChange {
 		CREATED, NOCHANGE, REMOVED

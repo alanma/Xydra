@@ -396,7 +396,7 @@ public class ChangedModel implements XWritableModel {
 		
 		case ADD:
 			if(object.hasField(fieldId)) {
-				// command is invalid or doesn't change anything
+				log.debug("command is invalid or doesn't change anything");
 				return command.isForced();
 			}
 			// command is OK and adds a new field
