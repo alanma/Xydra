@@ -20,12 +20,14 @@ public class ServletUtils {
 	private static Logger log = LoggerFactory.getLogger(ServletUtils.class);
 	
 	/**
-	 * Send '200 OK' with given contentType
+	 * Send '200 OK' with given contentType, No caching.
 	 * 
 	 * @param res where to send to
 	 * @param contentType to be sent
 	 */
 	public static void headers(HttpServletResponse res, String contentType) {
+		res.setHeader("Pragma", "no-cache");
+		res.setHeader("Expires", "Fri, 01 Jan 1990 00:00:00 GMT");
 		res.setContentType(contentType);
 		res.setCharacterEncoding("utf-8");
 		res.setStatus(200);
