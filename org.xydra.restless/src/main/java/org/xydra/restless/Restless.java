@@ -577,38 +577,49 @@ public class Restless extends HttpServlet {
 		
 		/* Find RestlessMethod to be called ------------------ */
 		// look through all registered methods
+		boolean secureAccess = requestIsViaAdminUrl(req);
+		
 		for(RestlessMethod restlessMethod : this.methods) {
-			// if path matches
-			if(restlessMethod.pathTemplate.matches(path)) {
-				foundPath = true;
-				// and HTTP method matches
-				if(httpMethod.equalsIgnoreCase(restlessMethod.httpMethod)) {
-					foundMethod = true;
-					if(restlessMethod.adminOnly) {
-						// check security
-						if(requestIsViaAdminUrl(req)) {
-							// calling from potentially secured url, run
+			
+			/*
+			 * if secure access, ignore all public methods. if insecure access,
+			 * ignore all secure methods: Skip all restlessMethods that may not
+			 * be accessed
+			 */
+			if((secureAccess && restlessMethod.adminOnly)
+			        || (!secureAccess && !restlessMethod.adminOnly)) {
+				// if path matches
+				if(restlessMethod.pathTemplate.matches(path)) {
+					foundPath = true;
+					// and HTTP method matches
+					if(httpMethod.equalsIgnoreCase(restlessMethod.httpMethod)) {
+						foundMethod = true;
+						if(restlessMethod.adminOnly) {
+							// check security
+							if(requestIsViaAdminUrl(req)) {
+								// calling from potentially secured url, run
+								mayAccess = true;
+								try {
+									restlessMethod.run(this, req, res);
+								} catch(IOException e) {
+									throw new RuntimeException(e);
+								}
+							} else {
+								// access denied
+								mayAccess = false;
+								log.warn("Someone tried to access '" + path + "'");
+							}
+						} else {
 							mayAccess = true;
+							// just run
 							try {
 								restlessMethod.run(this, req, res);
 							} catch(IOException e) {
 								throw new RuntimeException(e);
 							}
-						} else {
-							// access denied
-							mayAccess = false;
-							log.warn("Someone tried to access '" + path + "'");
 						}
-					} else {
-						mayAccess = true;
-						// just run
-						try {
-							restlessMethod.run(this, req, res);
-						} catch(IOException e) {
-							throw new RuntimeException(e);
-						}
+						break;
 					}
-					break;
 				}
 			}
 		}
