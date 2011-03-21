@@ -30,7 +30,7 @@ import org.xydra.index.query.Pair;
 /**
  * Abstract test for the write methods of {@link XydraStore}.
  * 
- * @author Bj�rn
+ * @author Kaidel
  */
 
 /*
@@ -46,11 +46,6 @@ import org.xydra.index.query.Pair;
  * TODO Don't forget to test the cases in which commands are passed to an entity
  * which is lower in the hierarchy, i.e. an object command which is sent to an
  * XModel and then executed by one of its XObjects.
- */
-
-/*
- * FIXME assertEquals should have the expected value as the first argument and
- * the actual value as the second
  */
 
 public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
@@ -149,7 +144,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		BatchedResult<XReadableModel>[] result2 = callback2.getEffect();
 		assertNotNull(result2);
-		assertEquals(result2[0].getResult().getID(), modelId);
+		assertEquals(modelId, result2[0].getResult().getID());
 		
 		// remove the model again
 		
@@ -225,7 +220,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		BatchedResult<XReadableModel>[] result2 = callback2.getEffect();
 		assertNotNull(result2);
 		for(int i = 0; i < modelCount; i++) {
-			assertEquals(result2[i].getResult().getID(), modelAddresses[i].getModel());
+			assertEquals(modelAddresses[i].getModel(), result2[i].getResult().getID());
 			assertNull(result2[i].getException());
 		}
 		
@@ -315,7 +310,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		BatchedResult<XReadableObject>[] result2 = callback3.getEffect();
 		assertNotNull(result2);
-		assertEquals(result2[0].getResult().getID(), objectId);
+		assertEquals(objectId, result2[0].getResult().getID());
 		
 		// remove the object again
 		executeSucceedingCommand(X.getCommandFactory().createRemoveObjectCommand(this.repoId,
@@ -372,8 +367,8 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		BatchedResult<XReadableObject>[] result2 = callback2.getEffect();
 		assertNotNull(result2);
 		for(int i = 0; i < objectCount; i++) {
-			assertEquals(result2[i].getResult().getAddress().getModel(), modelId);
-			assertEquals(result2[i].getResult().getID(), objectAddresses[i].getObject());
+			assertEquals(modelId, result2[i].getResult().getAddress().getModel());
+			assertEquals(objectAddresses[i].getObject(), result2[i].getResult().getID());
 			assertNull(result2[i].getException());
 		}
 		
@@ -437,7 +432,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		BatchedResult<XReadableObject>[] result2 = callback2.getEffect();
 		assertNotNull(result2);
 		XReadableObject object = result2[0].getResult();
-		assertEquals(object.getID(), objectId);
+		assertEquals(objectId, object.getID());
 		assertTrue(object.hasField(fieldId));
 		
 		// remove the field again
@@ -456,7 +451,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		result2 = callback2.getEffect();
 		assertNotNull(result2);
 		object = result2[0].getResult();
-		assertEquals(object.getID(), objectId);
+		assertEquals(objectId, object.getID());
 		assertFalse(object.hasField(fieldId));
 	}
 	
@@ -608,12 +603,12 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		BatchedResult<XReadableObject>[] result2 = callback2.getEffect();
 		assertNotNull(result2);
 		XReadableObject object = result2[0].getResult();
-		assertEquals(object.getID(), objectId);
+		assertEquals(objectId, object.getID());
 		assertTrue(object.hasField(fieldId));
 		
 		XReadableField field = object.getField(fieldId);
 		assertNotNull(field.getValue());
-		assertEquals(field.getValue(), testValue);
+		assertEquals(testValue, field.getValue());
 		
 		// change the value
 		XValue testValue2 = XX.createUniqueID();
@@ -633,12 +628,12 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		result2 = callback2.getEffect();
 		assertNotNull(result2);
 		object = result2[0].getResult();
-		assertEquals(object.getID(), objectId);
+		assertEquals(objectId, object.getID());
 		assertTrue(object.hasField(fieldId));
 		
 		field = object.getField(fieldId);
 		assertNotNull(field.getValue());
-		assertEquals(field.getValue(), testValue2);
+		assertEquals(testValue2, field.getValue());
 		assertFalse(field.getValue().equals(testValue));
 		
 		// remove the value again
@@ -657,7 +652,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		result2 = callback2.getEffect();
 		assertNotNull(result2);
 		object = result2[0].getResult();
-		assertEquals(object.getID(), objectId);
+		assertEquals(objectId, object.getID());
 		assertTrue(object.hasField(fieldId));
 		
 		field = object.getField(fieldId);
@@ -819,7 +814,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNull(callback.getException());
 		assertNotNull(callback.getEffect());
 		assertNotNull(callback.getEffect()[0].getResult());
-		assertEquals(callback.getEffect()[0].getResult().length, 1);
+		assertEquals(1, callback.getEffect()[0].getResult().length);
 		
 		XEvent event = callback.getEffect()[0].getResult()[0];
 		
@@ -858,7 +853,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNull(callback.getException());
 		assertNotNull(callback.getEffect());
 		assertNotNull(callback.getEffect()[0].getResult());
-		assertEquals(callback.getEffect()[0].getResult().length, 1);
+		assertEquals(1, callback.getEffect()[0].getResult().length);
 		
 		XEvent event = callback.getEffect()[0].getResult()[0];
 		checkEvent(event, objectAddress, ChangeType.REMOVE, XType.XMODEL, modelRev);
@@ -902,7 +897,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNull(callback.getException());
 		assertNotNull(callback.getEffect());
 		assertNotNull(callback.getEffect()[0].getResult());
-		assertEquals(callback.getEffect()[0].getResult().length, 1);
+		assertEquals(1, callback.getEffect()[0].getResult().length);
 		
 		XEvent event = callback.getEffect()[0].getResult()[0];
 		checkEvent(event, fieldAddress, ChangeType.ADD, XType.XOBJECT, objectRev);
@@ -916,7 +911,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNull(callback.getException());
 		assertNotNull(callback.getEffect());
 		assertNotNull(callback.getEffect()[0].getResult());
-		assertEquals(callback.getEffect()[0].getResult().length, 1);
+		assertEquals(1, callback.getEffect()[0].getResult().length);
 		
 		XEvent event2 = callback.getEffect()[0].getResult()[0];
 		assertEquals(event, event2);
@@ -961,7 +956,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNull(callback.getException());
 		assertNotNull(callback.getEffect());
 		assertNotNull(callback.getEffect()[0].getResult());
-		assertEquals(callback.getEffect()[0].getResult().length, 1);
+		assertEquals(1, callback.getEffect()[0].getResult().length);
 		
 		XEvent event = callback.getEffect()[0].getResult()[0];
 		checkEvent(event, fieldAddress, ChangeType.REMOVE, XType.XOBJECT, objectRev);
@@ -975,7 +970,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNull(callback.getException());
 		assertNotNull(callback.getEffect());
 		assertNotNull(callback.getEffect()[0].getResult());
-		assertEquals(callback.getEffect()[0].getResult().length, 1);
+		assertEquals(1, callback.getEffect()[0].getResult().length);
 		
 		XEvent event2 = callback.getEffect()[0].getResult()[0];
 		assertEquals(event, event2);
@@ -1030,7 +1025,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		XEvent event = callback.getEffect()[0].getResult()[0];
 		checkEvent(event, fieldAddress, ChangeType.ADD, XType.XFIELD, fieldRev);
 		
-		assertEquals(((XFieldEvent)event).getNewValue(), value1);
+		assertEquals(value1, ((XFieldEvent)event).getNewValue());
 		
 		// get event from object
 		request = new GetEventsRequest[] { new GetEventsRequest(objectAddress, objectRev, objectRev) };
@@ -1041,7 +1036,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNull(callback.getException());
 		assertNotNull(callback.getEffect());
 		assertNotNull(callback.getEffect()[0].getResult());
-		assertEquals(callback.getEffect()[0].getResult().length, 1);
+		assertEquals(1, callback.getEffect()[0].getResult().length);
 		
 		XEvent event2 = callback.getEffect()[0].getResult()[0];
 		assertEquals(event, event2);
@@ -1055,7 +1050,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNull(callback.getException());
 		assertNotNull(callback.getEffect());
 		assertNotNull(callback.getEffect()[0].getResult());
-		assertEquals(callback.getEffect()[0].getResult().length, 1);
+		assertEquals(1, callback.getEffect()[0].getResult().length);
 		
 		XEvent event3 = callback.getEffect()[0].getResult()[0];
 		assertEquals(event, event3);
@@ -1109,12 +1104,12 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNull(callback.getException());
 		assertNotNull(callback.getEffect());
 		assertNotNull(callback.getEffect()[0].getResult());
-		assertEquals(callback.getEffect()[0].getResult().length, 1);
+		assertEquals(1, callback.getEffect()[0].getResult().length);
 		
 		XEvent event = callback.getEffect()[0].getResult()[0];
 		checkEvent(event, fieldAddress, ChangeType.CHANGE, XType.XFIELD, fieldRev);
 		
-		assertEquals(((XFieldEvent)event).getNewValue(), value2);
+		assertEquals(value2, ((XFieldEvent)event).getNewValue());
 		
 		// get event from object
 		request = new GetEventsRequest[] { new GetEventsRequest(objectAddress, objectRev, objectRev) };
@@ -1125,7 +1120,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNull(callback.getException());
 		assertNotNull(callback.getEffect());
 		assertNotNull(callback.getEffect()[0].getResult());
-		assertEquals(callback.getEffect()[0].getResult().length, 1);
+		assertEquals(1, callback.getEffect()[0].getResult().length);
 		
 		XEvent event2 = callback.getEffect()[0].getResult()[0];
 		assertEquals(event, event2);
@@ -1139,7 +1134,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNull(callback.getException());
 		assertNotNull(callback.getEffect());
 		assertNotNull(callback.getEffect()[0].getResult());
-		assertEquals(callback.getEffect()[0].getResult().length, 1);
+		assertEquals(1, callback.getEffect()[0].getResult().length);
 		
 		XEvent event3 = callback.getEffect()[0].getResult()[0];
 		assertEquals(event, event3);
@@ -1193,12 +1188,12 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNull(callback.getException());
 		assertNotNull(callback.getEffect());
 		assertNotNull(callback.getEffect()[0].getResult());
-		assertEquals(callback.getEffect()[0].getResult().length, 1);
+		assertEquals(1, callback.getEffect()[0].getResult().length);
 		
 		XEvent event = callback.getEffect()[0].getResult()[0];
 		checkEvent(event, fieldAddress, ChangeType.REMOVE, XType.XFIELD, fieldRev);
 		
-		assertEquals(((XFieldEvent)event).getNewValue(), null);
+		assertEquals(null, ((XFieldEvent)event).getNewValue());
 		
 		// get event from object
 		request = new GetEventsRequest[] { new GetEventsRequest(objectAddress, objectRev, objectRev) };
@@ -1209,7 +1204,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNull(callback.getException());
 		assertNotNull(callback.getEffect());
 		assertNotNull(callback.getEffect()[0].getResult());
-		assertEquals(callback.getEffect()[0].getResult().length, 1);
+		assertEquals(1, callback.getEffect()[0].getResult().length);
 		
 		XEvent event2 = callback.getEffect()[0].getResult()[0];
 		assertEquals(event, event2);
@@ -1223,7 +1218,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNull(callback.getException());
 		assertNotNull(callback.getEffect());
 		assertNotNull(callback.getEffect()[0].getResult());
-		assertEquals(callback.getEffect()[0].getResult().length, 1);
+		assertEquals(1, callback.getEffect()[0].getResult().length);
 		
 		XEvent event3 = callback.getEffect()[0].getResult()[0];
 		assertEquals(event, event3);
@@ -1272,16 +1267,16 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		BatchedResult<Long>[] commandResult = callback.getEffect().getFirst();
 		BatchedResult<XEvent[]>[] eventResult = callback.getEffect().getSecond();
 		
-		assertEquals(commandResult.length, 1);
-		assertEquals(eventResult.length, 1);
+		assertEquals(1, commandResult.length);
+		assertEquals(1, eventResult.length);
 		
 		assertNotNull(commandResult[0].getResult());
 		assertNull(commandResult[0].getException());
-		assertEquals(commandResult[0].getResult(), (Long)(modelRev + 1));
+		assertEquals((Long)(modelRev + 1), commandResult[0].getResult());
 		
 		assertNotNull(eventResult[0].getResult());
 		assertNull(eventResult[0].getException());
-		assertEquals(eventResult[0].getResult().length, 1);
+		assertEquals(1, eventResult[0].getResult().length);
 		
 		XEvent event = eventResult[0].getResult()[0];
 		
@@ -1329,16 +1324,16 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		BatchedResult<Long>[] commandResult = callback.getEffect().getFirst();
 		BatchedResult<XEvent[]>[] eventResult = callback.getEffect().getSecond();
 		
-		assertEquals(commandResult.length, 1);
-		assertEquals(eventResult.length, 1);
+		assertEquals(1, commandResult.length);
+		assertEquals(1, eventResult.length);
 		
 		assertNotNull(commandResult[0].getResult());
 		assertNull(commandResult[0].getException());
-		assertEquals(commandResult[0].getResult(), (Long)(modelRev + 1));
+		assertEquals((Long)(modelRev + 1), commandResult[0].getResult());
 		
 		assertNotNull(eventResult[0].getResult());
 		assertNull(eventResult[0].getException());
-		assertEquals(eventResult[0].getResult().length, 1);
+		assertEquals(1, eventResult[0].getResult().length);
 		
 		XEvent event = eventResult[0].getResult()[0];
 		
@@ -1391,20 +1386,20 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		BatchedResult<Long>[] commandResult = callback.getEffect().getFirst();
 		BatchedResult<XEvent[]>[] eventResult = callback.getEffect().getSecond();
 		
-		assertEquals(commandResult.length, 1);
-		assertEquals(eventResult.length, 2);
+		assertEquals(1, commandResult.length);
+		assertEquals(2, eventResult.length);
 		
 		assertNotNull(commandResult[0].getResult());
 		assertNull(commandResult[0].getException());
-		assertEquals(commandResult[0].getResult(), (Long)(modelRev + 1));
+		assertEquals((Long)(modelRev + 1), commandResult[0].getResult());
 		
 		assertNotNull(eventResult[0].getResult());
 		assertNull(eventResult[0].getException());
-		assertEquals(eventResult[0].getResult().length, 1);
+		assertEquals(1, eventResult[0].getResult().length);
 		
 		assertNotNull(eventResult[1].getResult());
 		assertNull(eventResult[1].getException());
-		assertEquals(eventResult[1].getResult().length, 1);
+		assertEquals(1, eventResult[1].getResult().length);
 		
 		// check event returned by the model first
 		XEvent event = eventResult[0].getResult()[0];
@@ -1460,20 +1455,20 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		BatchedResult<Long>[] commandResult = callback.getEffect().getFirst();
 		BatchedResult<XEvent[]>[] eventResult = callback.getEffect().getSecond();
 		
-		assertEquals(commandResult.length, 1);
-		assertEquals(eventResult.length, 2);
+		assertEquals(1, commandResult.length);
+		assertEquals(2, eventResult.length);
 		
 		assertNotNull(commandResult[0].getResult());
 		assertNull(commandResult[0].getException());
-		assertEquals(commandResult[0].getResult(), (Long)(modelRev + 1));
+		assertEquals((Long)(modelRev + 1), commandResult[0].getResult());
 		
 		assertNotNull(eventResult[0].getResult());
 		assertNull(eventResult[0].getException());
-		assertEquals(eventResult[0].getResult().length, 1);
+		assertEquals(1, eventResult[0].getResult().length);
 		
 		assertNotNull(eventResult[1].getResult());
 		assertNull(eventResult[1].getException());
-		assertEquals(eventResult[1].getResult().length, 1);
+		assertEquals(1, eventResult[1].getResult().length);
 		
 		// check event returned by the model first
 		XEvent event = eventResult[0].getResult()[0];
@@ -1540,40 +1535,40 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	// private, because it makes assumptions about the tests
 	private void checkEvent(XEvent event, XAddress changedEntity, ChangeType type,
 	        XType expectedType, long revision) {
-		assertEquals(event.getChangedEntity(), changedEntity);
-		assertEquals(event.getActor(), this.correctUser);
-		assertEquals(event.getChangeType(), type);
+		assertEquals(changedEntity, event.getChangedEntity());
+		assertEquals(this.correctUser, event.getActor());
+		assertEquals(type, event.getChangeType());
 		
 		switch(expectedType) {
 		case XMODEL:
-			assertEquals(event.getTarget(), changedEntity.getParent());
+			assertEquals(changedEntity.getParent(), event.getTarget());
 			
 			assertTrue(event instanceof XModelEvent);
 			XModelEvent modelEvent = (XModelEvent)event;
-			assertEquals(modelEvent.getRepositoryId(), this.repoId);
-			assertEquals(modelEvent.getModelId(), changedEntity.getModel());
-			assertEquals(modelEvent.getObjectId(), changedEntity.getObject());
+			assertEquals(this.repoId, modelEvent.getRepositoryId());
+			assertEquals(changedEntity.getModel(), modelEvent.getModelId());
+			assertEquals(changedEntity.getObject(), modelEvent.getObjectId());
 			break;
 		case XOBJECT:
-			assertEquals(event.getTarget(), changedEntity.getParent());
+			assertEquals(changedEntity.getParent(), event.getTarget());
 			
 			assertTrue(event instanceof XObjectEvent);
 			XObjectEvent objectEvent = (XObjectEvent)event;
-			assertEquals(objectEvent.getRepositoryId(), this.repoId);
-			assertEquals(objectEvent.getModelId(), changedEntity.getModel());
-			assertEquals(objectEvent.getObjectId(), changedEntity.getObject());
-			assertEquals(objectEvent.getFieldId(), changedEntity.getField());
+			assertEquals(this.repoId, objectEvent.getRepositoryId());
+			assertEquals(changedEntity.getModel(), objectEvent.getModelId());
+			assertEquals(changedEntity.getObject(), objectEvent.getObjectId());
+			assertEquals(changedEntity.getField(), objectEvent.getFieldId());
 			
 			break;
 		case XFIELD:
-			assertEquals(event.getTarget(), changedEntity);
+			assertEquals(changedEntity, event.getTarget());
 			
 			assertTrue(event instanceof XFieldEvent);
 			XFieldEvent fieldEvent = (XFieldEvent)event;
-			assertEquals(fieldEvent.getRepositoryId(), this.repoId);
-			assertEquals(fieldEvent.getModelId(), changedEntity.getModel());
-			assertEquals(fieldEvent.getObjectId(), changedEntity.getObject());
-			assertEquals(fieldEvent.getFieldId(), changedEntity.getField());
+			assertEquals(this.repoId, fieldEvent.getRepositoryId());
+			assertEquals(changedEntity.getModel(), fieldEvent.getModelId());
+			assertEquals(changedEntity.getObject(), fieldEvent.getObjectId());
+			assertEquals(changedEntity.getField(), fieldEvent.getFieldId());
 			break;
 		case XREPOSITORY:
 			// TODO implement
@@ -1581,7 +1576,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		}
 		
 		// check revision numbers
-		assertEquals(event.getRevisionNumber(), revision);
+		assertEquals(revision, event.getRevisionNumber());
 		switch(expectedType) {
 		// attention: break-statements are missing on purpose
 		
@@ -1590,15 +1585,15 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		 * may use "revision -1" here for the old revisions
 		 */
 		case XFIELD:
-			assertEquals(event.getOldFieldRevision(), revision - 1);
+			assertEquals(revision - 1, event.getOldFieldRevision());
 			//$FALL-THROUGH$
 		case XOBJECT:
 			if(event.getOldObjectRevision() != XEvent.RevisionNotAvailable) {
-				assertEquals(event.getOldObjectRevision(), revision - 1);
+				assertEquals(revision - 1, event.getOldObjectRevision());
 			}
 			//$FALL-THROUGH$
 		case XMODEL:
-			assertEquals(event.getOldModelRevision(), revision - 1);
+			assertEquals(revision - 1, event.getOldModelRevision());
 			//$FALL-THROUGH$
 		case XREPOSITORY:
 		}
