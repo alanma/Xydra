@@ -197,9 +197,6 @@ public class GaeChangesService {
 	 */
 	private GaeChange grabRevisionAndRegisterLocks(Set<XAddress> locks, XID actorId) {
 		
-		// Prepare locks to be saved in GAE entity.
-		List<String> lockStrs = GaeChange.prepareLocks(locks);
-		
 		for(long rev = this.revCache.getLastTaken() + 1;; rev++) {
 			
 			// Try to grab this revision.
@@ -211,14 +208,9 @@ public class GaeChangesService {
 			
 			if(changeEntity == null) {
 				
-				Entity newChange = new Entity(key);
-				GaeChange.setLocks(newChange, lockStrs);
-				GaeChange.setStatus(newChange, Status.Creating);
-				long startTime = GaeChange.registerActivity(newChange);
-				GaeChange.setActor(newChange, actorId);
-				
-				GaeUtils.putEntityAsync(newChange, trans);
-				// Synchronized by endTransaction()
+				GaeChange change = new GaeChange(this.modelAddr, rev, locks, actorId);
+				change.setStatus(Status.Creating);
+				change.save(trans);
 				
 				try {
 					GaeUtils.endTransaction(trans);
@@ -240,7 +232,7 @@ public class GaeChangesService {
 				this.revCache.setLastTaken(rev);
 				
 				// transaction succeeded, we have a revision
-				return new GaeChange(rev, startTime, locks, newChange);
+				return change;
 				
 			} else {
 				
@@ -420,8 +412,8 @@ public class GaeChangesService {
 				return new Pair<List<XAtomicEvent>,int[]>(events, null);
 			}
 			
-			Pair<int[],List<Future<Key>>> res = GaeEventService.saveEvents(this.modelAddr,
-			        change.entity, events);
+			Pair<int[],List<Future<Key>>> res = change.setEvents(events);
+			
 			valueIds = res.getFirst();
 			
 			// Wait on all changes.
@@ -429,8 +421,8 @@ public class GaeChangesService {
 				GaeUtils.waitFor(future);
 			}
 			
-			GaeChange.setStatus(change.entity, Status.Executing);
-			GaeUtils.putEntity(change.entity);
+			change.setStatus(Status.Executing);
+			change.save();
 			
 			change.giveUpIfTimeoutCritical();
 			
@@ -597,18 +589,9 @@ public class GaeChangesService {
 			
 			return false;
 		}
-		/*
-		 * IMPROVE use the PROP_LAST_ACTIVITY of our own change instead? Both
-		 * now() and the last activity of our own change are "correct" as
-		 * whatever we set will be used for
-		 * giveUpIfTimeoutCritical(change.startTime); However if TIME_CRITICAL
-		 * is set close to the GAE timeout (as it should be to reduce
-		 * unnecessary voluntary timeouts), setting this higher than our own
-		 * start time might cause other changes to wait longer for this one
-		 * while not actually reducing the chance of the roll forward timing out
-		 * (only changing it from a voluntary timeout to a GAE enforced timeout)
-		 */
-		long now = GaeChange.registerActivity(changeEntity);
+		
+		GaeChange change = new GaeChange(this.modelAddr, rev, changeEntity);
+		
 		GaeUtils.putEntityAsync(changeEntity, trans);
 		// Synchronized by endTransaction()
 		try {
@@ -621,33 +604,11 @@ public class GaeChangesService {
 		assert Status.canRollForward(GaeChange.getStatus(changeEntity));
 		assert GaeChange.getStatus(changeEntity) == Status.Executing.value;
 		
-		Set<XAddress> locks = GaeChange.getLocks(changeEntity);
-		
-		GaeChange change = new GaeChange(rev, now, locks, changeEntity);
-		
-		Pair<List<XAtomicEvent>,int[]> events = loadEvents(change);
+		Pair<List<XAtomicEvent>,int[]> events = change.loadEvents();
 		
 		executeAndUnlock(change, events);
 		
 		return true;
-	}
-	
-	/**
-	 * Load the individual events associated with the given change.
-	 * 
-	 * @param change The change whose events should be loaded.
-	 * @return a List of {@link XAtomicEvent} which is stored as a number of GAE
-	 *         entities
-	 */
-	private Pair<List<XAtomicEvent>,int[]> loadEvents(GaeChange change) {
-		
-		assert KeyStructure.assertRevisionInKey(change.entity.getKey(), change.rev);
-		assert Status.hasEvents(GaeChange.getStatus(change.entity));
-		
-		Pair<XAtomicEvent[],int[]> res = GaeEventService.loadAtomicEvents(this.modelAddr,
-		        change.rev, null, change.entity, false);
-		
-		return new Pair<List<XAtomicEvent>,int[]>(Arrays.asList(res.getFirst()), res.getSecond());
 	}
 	
 	/**
@@ -657,7 +618,7 @@ public class GaeChangesService {
 	 */
 	private void commit(GaeChange change, Status status) {
 		assert Status.isCommitted(status.value);
-		GaeChange.cleanup(change.entity, status);
+		change.cleanup(status);
 		if(this.revCache.getLastCommited() == change.rev - 1) {
 			this.revCache.setLastCommited(change.rev);
 		}

@@ -1,16 +1,22 @@
 package org.xydra.store.impl.gae.changes;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
+import org.xydra.base.change.XAtomicEvent;
+import org.xydra.index.query.Pair;
 import org.xydra.store.impl.gae.GaeUtils;
 
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.Transaction;
 
 
 /**
@@ -157,16 +163,37 @@ class GaeChange {
 	// non-static members
 	
 	protected final long rev;
-	protected final long startTime;
+	private final long startTime;
 	protected final Set<XAddress> locks;
+	private final XAddress modelAddr;
+	private final Entity entity;
 	
-	protected final Entity entity;
-	
-	protected GaeChange(long rev, long startTime, Set<XAddress> locks, Entity entity) {
+	public GaeChange(XAddress modelAddr, long rev, Set<XAddress> locks, XID actorId) {
+		
 		this.rev = rev;
-		this.startTime = startTime;
 		this.locks = locks;
+		this.modelAddr = modelAddr;
+		this.entity = new Entity(KeyStructure.createChangeKey(modelAddr, rev));
+		
+		if(actorId != null) {
+			this.entity.setUnindexedProperty(PROP_ACTOR, actorId.toString());
+		}
+		setLocks(this.entity, locks);
+		
+		this.startTime = registerActivity(this.entity);
+		
+		// Synchronized by endTransaction()
+		
+		// TODO Auto-generated constructor stub
+	}
+	
+	public GaeChange(XAddress modelAddr, long rev, Entity entity) {
 		this.entity = entity;
+		this.rev = rev;
+		this.modelAddr = modelAddr;
+		assert KeyStructure.assertRevisionInKey(entity.getKey(), rev);
+		this.locks = getLocks(this.entity);
+		this.startTime = registerActivity(this.entity);
 	}
 	
 	/**
@@ -182,8 +209,8 @@ class GaeChange {
 	
 	/**
 	 * @param changeEntity
-	 * @return true if more than {@link #TIMEOUT} milliseconds elapsed
-	 *         since a thread started working with the given changeEntity
+	 * @return true if more than {@link #TIMEOUT} milliseconds elapsed since a
+	 *         thread started working with the given changeEntity
 	 */
 	protected static boolean isTimedOut(Entity changeEntity) {
 		long timer = (Long)changeEntity.getProperty(PROP_LAST_ACTIVITY);
@@ -203,6 +230,10 @@ class GaeChange {
 	
 	protected static void setStatus(Entity changeEntity, Status status) {
 		changeEntity.setUnindexedProperty(PROP_STATUS, status.value);
+	}
+	
+	protected void setStatus(Status status) {
+		setStatus(this.entity, status);
 	}
 	
 	/**
@@ -230,31 +261,21 @@ class GaeChange {
 		return n.intValue();
 	}
 	
-	protected static void setActor(Entity changeEntity, XID actorId) {
-		if(actorId != null) {
-			changeEntity.setUnindexedProperty(PROP_ACTOR, actorId.toString());
-		} else {
-			changeEntity.removeProperty(PROP_ACTOR);
-		}
-	}
-	
 	protected static boolean hasLocks(Entity otherChange) {
 		return otherChange.getProperty(PROP_LOCKS) != null;
 	}
 	
-	protected static List<String> prepareLocks(Set<XAddress> locks) {
+	private static void setLocks(Entity changeEntity, Set<XAddress> locks) {
+		
 		List<String> lockStrs = new ArrayList<String>(locks.size());
 		for(XAddress a : locks) {
 			lockStrs.add(a.toURI());
 		}
-		return lockStrs;
-	}
-	
-	protected static void setLocks(Entity changeEntity, List<String> lockStrs) {
+		
 		changeEntity.setUnindexedProperty(PROP_LOCKS, lockStrs);
 	}
 	
-	protected static long registerActivity(Entity newChange) {
+	private static long registerActivity(Entity newChange) {
 		long startTime = now();
 		newChange.setUnindexedProperty(PROP_LAST_ACTIVITY, startTime);
 		return startTime;
@@ -284,6 +305,39 @@ class GaeChange {
 			        + " multiple processes working in the same thread; " + " start time was "
 			        + this.startTime + "; now is " + now);
 		}
+	}
+	
+	protected Pair<int[],List<Future<Key>>> setEvents(List<XAtomicEvent> events) {
+		return GaeEventService.saveEvents(this.modelAddr, this.entity, events);
+	}
+	
+	protected void save(Transaction trans) {
+		// Synchronized by endTransaction()
+		GaeUtils.putEntityAsync(this.entity, trans);
+	}
+	
+	protected void save() {
+		GaeUtils.putEntity(this.entity);
+	}
+	
+	/**
+	 * Load the individual events associated with this change.
+	 * 
+	 * @return a List of {@link XAtomicEvent} which is stored as a number of GAE
+	 *         entities
+	 */
+	public Pair<List<XAtomicEvent>,int[]> loadEvents() {
+		
+		assert Status.hasEvents(GaeChange.getStatus(this.entity));
+		
+		Pair<XAtomicEvent[],int[]> res = GaeEventService.loadAtomicEvents(this.modelAddr, this.rev,
+		        null, this.entity, false);
+		
+		return new Pair<List<XAtomicEvent>,int[]>(Arrays.asList(res.getFirst()), res.getSecond());
+	}
+	
+	protected void cleanup(Status status) {
+		cleanup(this.entity, status);
 	}
 	
 }
