@@ -162,9 +162,15 @@ public abstract class DeltaUtils {
 		if(model != null) {
 			nChanges += model.countEventsNeeded(2 - nChanges);
 		}
-		boolean inTrans = (nChanges > 1);
 		
 		List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
+		
+		if(nChanges == 0) {
+			return events;
+		}
+		
+		assert nChanges > 0;
+		boolean inTrans = (nChanges > 1);
 		
 		if(mc == ModelChange.CREATED) {
 			events.add(MemoryRepositoryEvent.createAddEvent(actorId, modelAddr.getParent(),
@@ -182,6 +188,7 @@ public abstract class DeltaUtils {
 		
 		assert inTrans ^ (events.size() == 1) : "inTrans?" + inTrans + " events.size=="
 		        + events.size();
+		assert nChanges == 1 ? events.size() == 1 : events.size() >= 2;
 		
 		return events;
 	}
