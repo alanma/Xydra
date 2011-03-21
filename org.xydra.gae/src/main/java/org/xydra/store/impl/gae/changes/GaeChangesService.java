@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 
@@ -30,7 +29,6 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.server.IXydraServer;
 import org.xydra.store.GetEventsRequest;
-import org.xydra.store.XydraRuntime;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.gae.GaeUtils;
 import org.xydra.store.impl.gae.GaeUtils.AsyncEntity;
@@ -131,9 +129,11 @@ public class GaeChangesService {
 	// Implementation.
 	
 	private final XAddress modelAddr;
+	private final RevisionCache revCache;
 	
 	public GaeChangesService(XAddress modelAddr) {
 		this.modelAddr = modelAddr;
+		this.revCache = new RevisionCache(modelAddr);
 	}
 	
 	/**
@@ -200,7 +200,7 @@ public class GaeChangesService {
 		// Prepare locks to be saved in GAE entity.
 		List<String> lockStrs = GaeChange.prepareLocks(locks);
 		
-		for(long rev = getCachedLastTakenRevision() + 1;; rev++) {
+		for(long rev = this.revCache.getLastTaken() + 1;; rev++) {
 			
 			// Try to grab this revision.
 			
@@ -237,7 +237,7 @@ public class GaeChangesService {
 					continue;
 				}
 				
-				setCachedLastTakenRevision(rev);
+				this.revCache.setLastTaken(rev);
 				
 				// transaction succeeded, we have a revision
 				return new GaeChange(rev, startTime, locks, newChange);
@@ -270,7 +270,7 @@ public class GaeChangesService {
 	 */
 	private void waitForLocks(GaeChange change) {
 		
-		long commitedRev = getCachedLastCommitedRevision();
+		long commitedRev = this.revCache.getLastCommited();
 		
 		// Track if we find a greater last commitedRev.
 		long newCommitedRev = -1;
@@ -376,7 +376,7 @@ public class GaeChangesService {
 		}
 		
 		if(newCommitedRev > 0) {
-			setCachedLastCommitedRevision(newCommitedRev);
+			this.revCache.setLastCommited(newCommitedRev);
 		}
 	}
 	
@@ -555,8 +555,8 @@ public class GaeChangesService {
 		
 		commit(change, Status.SuccessExecuted);
 		
-		if(getCachedCurrentRevision() == change.rev - 1) {
-			setCachedCurrentRevision(change.rev);
+		if(this.revCache.getCurrent() == change.rev - 1) {
+			this.revCache.setCurrent(change.rev);
 		}
 	}
 	
@@ -658,8 +658,8 @@ public class GaeChangesService {
 	private void commit(GaeChange change, Status status) {
 		assert Status.isCommitted(status.value);
 		GaeChange.cleanup(change.entity, status);
-		if(getCachedLastCommitedRevision() == change.rev - 1) {
-			setCachedLastCommitedRevision(change.rev);
+		if(this.revCache.getLastCommited() == change.rev - 1) {
+			this.revCache.setLastCommited(change.rev);
 		}
 	}
 	
@@ -672,112 +672,6 @@ public class GaeChangesService {
 	}
 	
 	/**
-	 * @return a revision number such that all changes up to and including that
-	 *         revision number are guaranteed to be committed. This is not
-	 *         guaranteed to be the highest revision number that fits this
-	 *         requirement.
-	 */
-	private long getCachedLastCommitedRevision() {
-		
-		Map<Object,Object> cache = XydraRuntime.getMemcache();
-		
-		Long entry = (Long)cache.get(getCommitedRevCacheName());
-		long rev = (entry == null) ? -1L : entry;
-		
-		long current = getCachedCurrentRevision();
-		
-		return (current > rev ? current : rev);
-	}
-	
-	/**
-	 * Set a new value to be returned by
-	 * {@link #getCachedLastCommitedRevision()}.
-	 * 
-	 * @param l The value is set. It is ignored if the current cached value is
-	 *            less than this.
-	 */
-	private void setCachedLastCommitedRevision(long l) {
-		increaseCachedValue(getCommitedRevCacheName(), l);
-	}
-	
-	private String getCommitedRevCacheName() {
-		return getModelAddress() + "-commitedRev";
-	}
-	
-	/**
-	 * @return the last known revision number that has been grabbed by a change.
-	 *         No guarantees are made that no higher revision numbers aren't
-	 *         taken already.
-	 */
-	private long getCachedLastTakenRevision() {
-		return getCachedLastCommitedRevision(); // TODO implement
-	}
-	
-	/**
-	 * Set a new value to be returned by {@link #getCachedLastTakenRevision()}.
-	 * 
-	 * @param l The value is set. It is ignored if the current cached value is
-	 *            less than this.
-	 */
-	private void setCachedLastTakenRevision(long rev) {
-		// TODO implement
-	}
-	
-	/**
-	 * Retrieve a cached value of the current revision number as defined by
-	 * {@link #getCurrentRevisionNumber()}.
-	 * 
-	 * The returned value may be less that the actual "current" revision number,
-	 * but is guaranteed to never be greater.
-	 */
-	private long getCachedCurrentRevision() {
-		
-		Map<Object,Object> cache = XydraRuntime.getMemcache();
-		
-		Long value = (Long)cache.get(getCurrentRevCacheName());
-		return (value == null) ? -1L : value;
-	}
-	
-	/**
-	 * Set a new value to be returned by {@link #getCachedCurrentRevision()}.
-	 * 
-	 * @param l The value is set. It is ignored if the current cached value is
-	 *            less than this.
-	 */
-	private void setCachedCurrentRevision(long l) {
-		increaseCachedValue(getCurrentRevCacheName(), l);
-	}
-	
-	/**
-	 * @return the name of the cached value used by
-	 *         {@link #getCachedCurrentRevision()} and
-	 *         {@link #setCachedCurrentRevision(long)}
-	 */
-	private String getCurrentRevCacheName() {
-		return getModelAddress() + "-currentRev";
-	}
-	
-	/**
-	 * Increase a cached {@link Long} value.
-	 * 
-	 * @param cachname The value to increase.
-	 * @param l The new value to set. Ignored if it is less than the current
-	 *            value.
-	 */
-	private void increaseCachedValue(String cachname, long l) {
-		Map<Object,Object> cache = XydraRuntime.getMemcache();
-		
-		Long value = l;
-		while(true) {
-			Long old = (Long)cache.put(cachname, value);
-			if(old == null || old <= value) {
-				break;
-			}
-			value = old;
-		}
-	}
-	
-	/**
 	 * Get the model's current revision number.
 	 * 
 	 * @see XydraStore#getModelRevisions(XID, String, XAddress[],
@@ -785,10 +679,11 @@ public class GaeChangesService {
 	 */
 	public long getCurrentRevisionNumber() {
 		
-		long currentRev = getCachedCurrentRevision();
+		long currentRev = this.revCache.getCurrent();
 		
 		long rev = currentRev;
 		
+		// Try to fetch one change past the last known "current" revision.
 		List<AsyncEntity> batch = new ArrayList<AsyncEntity>(1);
 		batch.add(GaeUtils.getEntityAsync(KeyStructure.createChangeKey(this.modelAddr, rev + 1)));
 		
@@ -824,8 +719,8 @@ public class GaeChangesService {
 			
 		}
 		
-		setCachedLastCommitedRevision(rev);
-		setCachedCurrentRevision(currentRev);
+		this.revCache.setLastCommited(rev);
+		this.revCache.setCurrent(currentRev);
 		
 		return currentRev;
 	}
@@ -874,7 +769,7 @@ public class GaeChangesService {
 		
 		long begin = beginRevision < 0 ? 0 : beginRevision;
 		
-		long currentRev = getCachedCurrentRevision();
+		long currentRev = this.revCache.getCurrent();
 		
 		List<XEvent> events = new ArrayList<XEvent>();
 		
@@ -944,8 +839,8 @@ public class GaeChangesService {
 		}
 		
 		if(trackCurrentRev) {
-			setCachedLastCommitedRevision(rev - 1);
-			setCachedCurrentRevision(currentRev);
+			this.revCache.setLastCommited(rev - 1);
+			this.revCache.setCurrent(currentRev);
 		}
 		
 		return events;
