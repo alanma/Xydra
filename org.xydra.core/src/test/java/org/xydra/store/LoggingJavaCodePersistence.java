@@ -1,4 +1,4 @@
-package org.xydra.store.impl.delegate;
+package org.xydra.store;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -44,6 +44,7 @@ import org.xydra.core.XCopyUtils;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.memory.MemoryPersistence;
 
 
