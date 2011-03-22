@@ -10,10 +10,19 @@ import org.xydra.base.XX;
 import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XTransaction;
+import org.xydra.core.model.XField;
+import org.xydra.core.model.XModel;
+
+import com.sun.org.apache.xpath.internal.objects.XObject;
 
 
 /**
  * Implementation of the lock semantics used by {@link GaeChangesService}.
+ * 
+ * Locks can be acquired for each par of the MOF tree.
+ * 
+ * A lock on a {@link XModel} or {@link XObject} implies locks locks on all
+ * contained {@link XObject XObjects} and {@link XField XFields}.
  * 
  * @author dscharrer
  * 
@@ -25,7 +34,7 @@ public class GaeLocks {
 	private final Set<XAddress> locks;
 	
 	/**
-	 * Get the locks needed to execute the given {@link XCommand}.
+	 * Get the minimal locks needed to execute the given {@link XCommand}.
 	 * 
 	 * An address in the locks means that exclusive access is required to the
 	 * entity referred to by that address, as well as all descendant entities.
