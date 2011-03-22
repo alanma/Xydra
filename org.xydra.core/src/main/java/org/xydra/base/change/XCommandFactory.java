@@ -12,8 +12,7 @@ import org.xydra.core.model.XRepository;
 /**
  * A factory for creating {@link XCommand}s of different kinds.
  * 
- * TODO Why don't the methods accept an {@link XAddress} for the target instead
- * of multiple {@link XCommand}s? ~Daniel
+ * TODO Specify the exception cases, i.e. if a wrong address is given.
  * 
  * @author Kaidel
  * 
@@ -31,12 +30,27 @@ public interface XCommandFactory {
 	 *            {@link XObject} that the {@link XField} shall be added to.
 	 * @param objectId The {@link XID} of the {@link XObject} that the
 	 *            {@link XField} is to be added to.
+	 * @param fieldId The {@link XID} of the new {@link XField}
 	 * @param isForced true, if this XCommand should be a forced command, false
 	 *            otherwise
 	 * @return an {@link XObjectCommand} with the specified settings
 	 */
 	public XObjectCommand createAddFieldCommand(XID repositoryId, XID modelId, XID objectId,
 	        XID fieldId, boolean isForced);
+	
+	/**
+	 * Creates an {@link XObjectCommand} that will add an {@link XField} to the
+	 * specified {@link XObject}
+	 * 
+	 * @param objectAddress the {@link XAddress} of the {@link XObject} to which
+	 *            the {@link XField} shall be added.
+	 * @param fieldId The {@link XID} of the new {@link XField}
+	 * @param isForced true, if this XCommand should be a forced command, false
+	 *            otherwise
+	 * @return an {@link XObjectCommand} with the specified settings
+	 */
+	public XObjectCommand createAddFieldCommand(XAddress objectAddress, XID fieldId,
+	        boolean isForced);
 	
 	/**
 	 * Creates an {@link XRepositoryCommand} that will add an {@link XModel} to
@@ -68,6 +82,20 @@ public interface XCommandFactory {
 	        boolean isForced);
 	
 	/**
+	 * Creates an {@link XModelCommand} that will add an {@link XObject} to the
+	 * specified {@link XModel}
+	 * 
+	 * @param modelAddress The {@link XAddress} to which the {@link XModel} is
+	 *            to be added.
+	 * @param objectId The {@link XID} for the new {@link XObject}.
+	 * @param isForced true, if this XCommand should be a forced command, false
+	 *            otherwise
+	 * @return an {@link XModelCommand} with the specified settings
+	 */
+	public XModelCommand createAddObjectCommand(XAddress modelAddress, XID objectId,
+	        boolean isForced);
+	
+	/**
 	 * Creates an {@link XFieldCommand} that will add an {@link XValue} to the
 	 * specified {@link XField}
 	 * 
@@ -92,6 +120,25 @@ public interface XCommandFactory {
 	 */
 	public XFieldCommand createAddValueCommand(XID repositoryId, XID modelId, XID objectId,
 	        XID fieldId, long fieldRevision, XValue value, boolean isForced);
+	
+	/**
+	 * Creates an {@link XFieldCommand} that will add an {@link XValue} to the
+	 * specified {@link XField}
+	 * 
+	 * @param fieldAddress the {@link XAddress} of the {@link XField} to which
+	 *            the {@link XValue} is to be added.
+	 * @param fieldRevision The revision number of the {@link XField} that the
+	 *            {@link XValue} is to be added to.
+	 * 
+	 *            TODO Is this value ignored if isForced = true? What value
+	 *            should I use here if isForced = true? 0?
+	 * @param value The {@link XValue} which is to be added.
+	 * @param isForced true, if this XCommand should be a forced command, false
+	 *            otherwise
+	 * @return an {@link XFieldCommand} with the specified settings
+	 */
+	public XFieldCommand createAddValueCommand(XAddress fieldAddress, long fieldRevision,
+	        XValue value, boolean isForced);
 	
 	/**
 	 * Creates an {@link XFieldCommand} that will change the {@link XValue} of
@@ -121,6 +168,26 @@ public interface XCommandFactory {
 	        XID fieldId, long fieldRevision, XValue value, boolean isForced);
 	
 	/**
+	 * Creates an {@link XFieldCommand} that will change the {@link XValue} of
+	 * the specified {@link XField}
+	 * 
+	 * @param fieldAddress the {@link XAddress} of the {@link XField} of which
+	 *            the {@link XValue} is to be changed.
+	 * @param fieldRevision The revision number of the {@link XField} that the
+	 *            {@link XValue} is to be added to.
+	 * 
+	 *            TODO Is this value ignored if isForced = true? What value
+	 *            should I use here if isForced = true? 0?
+	 * @param value The {@link XValue} to which the current {@link XValue} of
+	 *            the {@link XField} is to be changed to.
+	 * @param isForced true, if this XCommand should be a forced command, false
+	 *            otherwise
+	 * @return an {@link XFieldCommand} with the specified settings
+	 */
+	public XFieldCommand createChangeValueCommand(XAddress fieldAddress, long fieldRevision,
+	        XValue value, boolean isForced);
+	
+	/**
 	 * Creates an {@link XObjectCommand} that will remove the specified
 	 * {@link XField} from the specified {@link XObject}
 	 * 
@@ -144,6 +211,24 @@ public interface XCommandFactory {
 	        XID fieldId, long fieldRevision, boolean isForced);
 	
 	/**
+	 * Creates an {@link XObjectCommand} that will remove the specified
+	 * {@link XField} from the specified {@link XObject}
+	 * 
+	 * @param fieldAddress the {@link XAddress} of the {@link XField} which is
+	 *            to be removed.
+	 * @param fieldRevision The revision number of the {@link XField} that is to
+	 *            be removed.
+	 * 
+	 *            TODO Is this value ignored if isForced = true? What value
+	 *            should I use here if isForced = true? 0?
+	 * @param isForced true, if this XCommand should be a forced command, false
+	 *            otherwise
+	 * @return an {@link XObjectCommand} with the specified settings
+	 */
+	public XObjectCommand createRemoveFieldCommand(XAddress fieldAddress, long fieldRevision,
+	        boolean isForced);
+	
+	/**
 	 * Creates an {@link XRepositoryCommand} that will remove the specified
 	 * {@link XModel} from the specified {@link XRepository}
 	 * 
@@ -159,6 +244,21 @@ public interface XCommandFactory {
 	 */
 	public XRepositoryCommand createRemoveModelCommand(XID repositoryId, XID modelId,
 	        long modelRevision, boolean isForced);
+	
+	/**
+	 * Creates an {@link XRepositoryCommand} that will remove the specified
+	 * {@link XModel} from the specified {@link XRepository}
+	 * 
+	 * @param modelAddress The {@link XAddress} of the {@link XModel} which is
+	 *            to be removed
+	 * @param modelRevision The revision number of the {@link XModel} that is to
+	 *            be removed.
+	 * @param isForced true, if this XCommand should be a forced command, false
+	 *            otherwise
+	 * @return an {@link XRepositoryCommand} with the specified settings
+	 */
+	public XRepositoryCommand createRemoveModelCommand(XAddress modelAddress, long modelRevision,
+	        boolean isForced);
 	
 	/**
 	 * Creates an {@link XModelCommand} that will remove the specified
@@ -187,6 +287,27 @@ public interface XCommandFactory {
 	        long objectRevision, boolean isForced);
 	
 	/**
+	 * Creates an {@link XModelCommand} that will remove the specified
+	 * {@link XObject} from the specified {@link XModel}
+	 * 
+	 * @param objectAddress the {@link XAddress} of the {@link XObject} which is
+	 *            to be removed
+	 * @param objectRevision The revision number of the {@link XObject} that is
+	 *            to be removed.
+	 * 
+	 *            TODO Is this value ignored if isForced = true? What value
+	 *            should I use here if isForced = true? 0?
+	 * @param isForced true, if this XCommand should be a forced command, false
+	 *            otherwise
+	 * @return an {@link XModelCommand} with the specified settings
+	 * 
+	 *         TODO max: Why can I indicate FORCED via a special objectRevision
+	 *         AND the boolean flag?
+	 */
+	public XModelCommand createRemoveObjectCommand(XAddress objectAddress, long objectRevision,
+	        boolean isForced);
+	
+	/**
 	 * Creates an {@link XFieldCommand} that will remove the specified
 	 * {@link XValue} from the specified {@link XField}
 	 * 
@@ -211,4 +332,21 @@ public interface XCommandFactory {
 	public XFieldCommand createRemoveValueCommand(XID repositoryId, XID modelId, XID objectId,
 	        XID fieldId, long fieldRevision, boolean isForced);
 	
+	/**
+	 * Creates an {@link XFieldCommand} that will remove the specified
+	 * {@link XValue} from the specified {@link XField}
+	 * 
+	 * @param fieldAddress the {@link XAddress} of the {@link XField} which is
+	 *            to be removed
+	 * @param fieldRevision The revision number of the {@link XField} that the
+	 *            {@link XValue} is to be removed from.
+	 * 
+	 *            TODO Is this value ignored if isForced = true? What value
+	 *            should I use here if isForced = true? 0?
+	 * @param isForced true, if this XCommand should be a forced command, false
+	 *            otherwise
+	 * @return an {@link XFieldCommand} with the specified settings
+	 */
+	public XFieldCommand createRemoveValueCommand(XAddress fieldAddress, long fieldRevision,
+	        boolean isForced);
 }

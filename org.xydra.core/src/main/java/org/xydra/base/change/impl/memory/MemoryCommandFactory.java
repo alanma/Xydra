@@ -872,4 +872,60 @@ public class MemoryCommandFactory implements XCommandFactory {
 		return MemoryFieldCommand.createRemoveCommand(target, revNr);
 	}
 	
+	@Override
+	public XObjectCommand createAddFieldCommand(XAddress objectAddress, XID fieldId,
+	        boolean isForced) {
+		return createAddFieldCommand(objectAddress.getRepository(), objectAddress.getModel(),
+		        objectAddress.getObject(), fieldId, isForced);
+	}
+	
+	@Override
+	public XModelCommand createAddObjectCommand(XAddress modelAddress, XID objectId,
+	        boolean isForced) {
+		return createAddObjectCommand(modelAddress.getRepository(), modelAddress.getModel(),
+		        objectId, isForced);
+	}
+	
+	@Override
+	public XFieldCommand createAddValueCommand(XAddress fieldAddress, long fieldRevision,
+	        XValue value, boolean isForced) {
+		return createAddValueCommand(fieldAddress.getRepository(), fieldAddress.getModel(),
+		        fieldAddress.getObject(), fieldAddress.getField(), fieldRevision, value, isForced);
+	}
+	
+	@Override
+	public XFieldCommand createChangeValueCommand(XAddress fieldAddress, long fieldRevision,
+	        XValue value, boolean isForced) {
+		return createChangeValueCommand(fieldAddress.getRepository(), fieldAddress.getModel(),
+		        fieldAddress.getObject(), fieldAddress.getField(), fieldRevision, value, isForced);
+	}
+	
+	@Override
+	public XObjectCommand createRemoveFieldCommand(XAddress fieldAddress, long fieldRevision,
+	        boolean isForced) {
+		return createRemoveFieldCommand(fieldAddress.getRepository(), fieldAddress.getModel(),
+		        fieldAddress.getObject(), fieldAddress.getField(), fieldRevision, isForced);
+	}
+	
+	@Override
+	public XRepositoryCommand createRemoveModelCommand(XAddress modelAddress, long modelRevision,
+	        boolean isForced) {
+		return createRemoveModelCommand(modelAddress.getRepository(), modelAddress.getModel(),
+		        modelRevision, isForced);
+	}
+	
+	@Override
+	public XModelCommand createRemoveObjectCommand(XAddress objectAddress, long objectRevision,
+	        boolean isForced) {
+		return createRemoveObjectCommand(objectAddress.getRepository(), objectAddress.getModel(),
+		        objectAddress.getObject(), objectRevision, isForced);
+	}
+	
+	@Override
+	public XFieldCommand createRemoveValueCommand(XAddress fieldAddress, long fieldRevision,
+	        boolean isForced) {
+		return createRemoveValueCommand(fieldAddress.getRepository(), fieldAddress.getModel(),
+		        fieldAddress.getObject(), fieldAddress.getField(), fieldRevision, isForced);
+	}
+	
 }
