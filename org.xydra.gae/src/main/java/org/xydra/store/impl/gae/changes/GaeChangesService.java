@@ -97,6 +97,19 @@ import com.google.appengine.api.datastore.Transaction;
  * 
  * </dd>
  * 
+ * As commands need to be executed in a well defined order each change needs to
+ * grab a revision number before executing. This is done using a GAE
+ * transaction.
+ * 
+ * To synchronize access to the internal MOF tree, the first thing each change
+ * does is declare it's required locks in the change entity when grabbing the
+ * revision. Before executing, a change checks any uncommitted changes with
+ * lower revision numbers for conflicting locks. If a conflict is found, the
+ * change will have to wait or abort / roll forward the conflicting change after
+ * a timeout. Other pending changes that don't conflict can be safely ignored as
+ * they will never touch the same part of the MOF tree. After a change is done,
+ * it removes all locks from the change entity.
+ * 
  * Locks are managed by {@link GaeLocks}.
  * 
  * @author dscharrer
