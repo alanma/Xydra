@@ -4,7 +4,6 @@
 package org.xydra.store.impl.gae.changes;
 
 import java.util.ConcurrentModificationException;
-import java.util.Set;
 import java.util.concurrent.Future;
 
 import org.xydra.base.XAddress;
@@ -52,16 +51,15 @@ public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeFi
 	 *            we have to return {@link XEvent#RevisionNotAvailable} instead.
 	 */
 	protected InternalGaeObject(GaeChangesService changesService, XAddress objectAddr,
-	        Entity objectEntity, Set<XAddress> locks) {
+	        Entity objectEntity, GaeLocks locks) {
 		super(changesService, objectAddr, getSavedRevison(objectAddr, objectEntity, locks), locks);
 		assert KeyStructure.toAddress(objectEntity.getKey()).equals(objectAddr);
 		assert objectAddr.getAddressedType() == XType.XOBJECT;
 	}
 	
-	private static long getSavedRevison(XAddress objectAddr, Entity objectEntity,
-	        Set<XAddress> locks) {
+	private static long getSavedRevison(XAddress objectAddr, Entity objectEntity, GaeLocks locks) {
 		long objectRev;
-		if(GaeLocks.canWrite(objectAddr, locks)) {
+		if(locks.canWrite(objectAddr)) {
 			// We need the whole object, including all fields to be in a
 			// consistent state in order to calculate
 			objectRev = (Long)objectEntity.getProperty(PROP_REVISION);
@@ -140,8 +138,8 @@ public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeFi
 	 * @param rev The revision number of the current change. This will be saved
 	 *            to the object entity.
 	 */
-	public static Future<Key> createObject(XAddress objectAddr, Set<XAddress> locks, long rev) {
-		assert GaeLocks.canWrite(objectAddr, locks);
+	public static Future<Key> createObject(XAddress objectAddr, GaeLocks locks, long rev) {
+		assert locks.canWrite(objectAddr);
 		assert objectAddr.getAddressedType() == XType.XOBJECT;
 		Entity e = new Entity(KeyStructure.createEntityKey(objectAddr));
 		e.setProperty(PROP_PARENT, objectAddr.getParent().toURI());
@@ -168,11 +166,11 @@ public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeFi
 	 * @param rev The new revision number of the object. The objects revision
 	 *            number will not be lowered if it is already higher than this.
 	 */
-	public static void updateObjectRev(XAddress objectAddr, Set<XAddress> locks, long rev) {
+	public static void updateObjectRev(XAddress objectAddr, GaeLocks locks, long rev) {
 		
 		// We only care that that object won't be removed, so a read lock
 		// suffices.
-		assert GaeLocks.canRead(objectAddr, locks);
+		assert locks.canRead(objectAddr);
 		assert objectAddr.getAddressedType() == XType.XOBJECT;
 		Key key = KeyStructure.createEntityKey(objectAddr);
 		

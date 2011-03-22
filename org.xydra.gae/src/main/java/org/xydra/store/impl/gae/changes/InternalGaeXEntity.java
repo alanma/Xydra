@@ -42,8 +42,8 @@ public class InternalGaeXEntity {
 	 * @param locks The locks held by the current process. These are used to
 	 *            assert that we are actually allowed to remove the entity.
 	 */
-	protected static Future<Void> remove(XAddress modelOrObjectOrFieldAddr, Set<XAddress> locks) {
-		assert GaeLocks.canWrite(modelOrObjectOrFieldAddr, locks);
+	protected static Future<Void> remove(XAddress modelOrObjectOrFieldAddr, GaeLocks locks) {
+		assert locks.canRemove(modelOrObjectOrFieldAddr);
 		assert modelOrObjectOrFieldAddr.getAddressedType() == XType.XMODEL
 		        || modelOrObjectOrFieldAddr.getAddressedType() == XType.XOBJECT
 		        || modelOrObjectOrFieldAddr.getAddressedType() == XType.XFIELD;

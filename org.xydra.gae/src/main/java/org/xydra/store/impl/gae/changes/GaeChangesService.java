@@ -21,6 +21,7 @@ import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XReadableModel;
+import org.xydra.base.value.XValue;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.DeltaUtils;
@@ -68,8 +69,9 @@ import com.google.appengine.api.datastore.Transaction;
  * <dt>Entity type XFIELD</dt>
  * <dd>Represent fields and managed by {@link InternalGaeField}. The value is
  * not stored in the field entity. Instead, additionally to the field revision,
- * an index into the transaction (or zero) is stored that identifies the
- * {@link XAtomicEvent} containing the corresponding value.</dd>
+ * an index into the transaction (or zero) is stored that can be used with
+ * {@link GaeEventService#getValue(XAddress, long, int)} to load the
+ * {@link XValue}.</dd>
  * 
  * 
  * <dt>Entity type XCHANGE</dt>
@@ -83,27 +85,19 @@ import com.google.appengine.api.datastore.Transaction;
  * the change, the required locks, the actor that initiated the change, the time
  * the (last) process started working on the change.
  * 
- * See {@link GaeEventService} for how events associated with this change are
- * stored. No events are guaranteed to be set before the change has reached
- * {@link Status#Executing}.
+ * Events and small XValues are also saved in the XCHANGE entities. These
+ * properties are managed by {@link GaeEventService}. No events are guaranteed
+ * to be set before the change has reached {@link Status#Executing}.
  * 
- * Possible {@link Status} progression for XCHANGE Entities:
  * 
- * <pre>
- * 
- *  Creating ------> FailedTimeout
- *     |
- *     |----> Executing ----> SucessExecuted
- *     |
- *     |----> SuccessNochange
- *     |
- *     \----> FailedPreconditions
- * 
- * </pre>
+ * <dt>Entity type XEVENT</dt>
+ * <dd>Stores an {@link XValue} set by an {@link XFieldEvent} that was too large
+ * to be stored directly in the corresponding XCHANGE entity. These are managed
+ * by {@link GaeEventService}.
  * 
  * </dd>
  * 
- * TODO document XValue storing, locking
+ * Locks are managed by {@link GaeLocks}.
  * 
  * @author dscharrer
  * 
@@ -162,7 +156,7 @@ public class GaeChangesService {
 		assert this.modelAddr.equalsOrContains(command.getChangedEntity()) : "cannot handle command "
 		        + command;
 		
-		Set<XAddress> locks = GaeLocks.calculateRequiredLocks(command);
+		GaeLocks locks = new GaeLocks(command);
 		
 		GaeChange change = grabRevisionAndRegisterLocks(locks, actorId);
 		
@@ -195,7 +189,7 @@ public class GaeChangesService {
 	 *         revision, the locks, the start time and the change {@link Entity}
 	 *         .
 	 */
-	private GaeChange grabRevisionAndRegisterLocks(Set<XAddress> locks, XID actorId) {
+	private GaeChange grabRevisionAndRegisterLocks(GaeLocks locks, XID actorId) {
 		
 		for(long rev = this.revCache.getLastTaken() + 1;; rev++) {
 			
@@ -284,9 +278,9 @@ public class GaeChangesService {
 			}
 			
 			// Check if the change needs conflicting locks.
-			Set<XAddress> otherLocks = GaeChange.getLocks(otherChange);
+			GaeLocks otherLocks = GaeChange.getLocks(otherChange);
 			assert otherLocks != null : "locks should not be removed before change is commited";
-			if(!GaeLocks.isConflicting(change.locks, otherLocks)) {
+			if(!change.locks.isConflicting(otherLocks)) {
 				newCommitedRev = -1;
 				// not conflicting, so ignore
 				continue;

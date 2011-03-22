@@ -1,16 +1,16 @@
 package org.xydra.store.impl.gae.changes;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.Future;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.change.XAtomicEvent;
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XTransaction;
+import org.xydra.core.model.XChangeLog;
 import org.xydra.index.query.Pair;
 import org.xydra.store.impl.gae.GaeUtils;
 
@@ -22,6 +22,16 @@ import com.google.appengine.api.datastore.Transaction;
 /**
  * Internal helper class to track information of a change that is being
  * executed.
+ * 
+ * This class manages GAE entities of kind XCHANGE
+ * 
+ * These represent a change to the model resulting from a single
+ * {@link XCommand} (which may be a {@link XTransaction}). These entities
+ * represent both an entry into the {@link XChangeLog} as well as a change that
+ * is currently in progress.
+ * 
+ * Keys are encoded according to
+ * {@link KeyStructure#createChangeKey(XAddress, long)}
  * 
  * Manages revision, startTime, the GAE entity of the change, and a Set of
  * {@link XAddress} (the locks)
@@ -64,6 +74,29 @@ class GaeChange {
 	 */
 	private static final String PROP_ACTOR = "actor";
 	
+	/**
+	 * The status of a change entity.
+	 * 
+	 * These are stored as integers in the {@link GaeChange#PROP_STATUS}
+	 * property.
+	 * 
+	 * Possible {@link Status} progression for XCHANGE Entities:
+	 * 
+	 * <pre>
+	 * 
+	 *  Creating ------> FailedTimeout
+	 *     |
+	 *     |----> Executing ----> SucessExecuted
+	 *     |
+	 *     |----> SuccessNochange
+	 *     |
+	 *     \----> FailedPreconditions
+	 * 
+	 * </pre>
+	 * 
+	 * @author dscharrer
+	 * 
+	 */
 	enum Status {
 		
 		/**
@@ -103,10 +136,18 @@ class GaeChange {
 			this.value = value;
 		}
 		
+		/**
+		 * @return true if the given status indicates that the change has failed
+		 *         to execute.
+		 */
 		protected static boolean isFailure(int status) {
 			return (status == FailedPreconditions.value || status == FailedTimeout.value);
 		}
 		
+		/**
+		 * @return true if the given status indicates that the change has been
+		 *         successfully executed.
+		 */
 		protected static boolean isSuccess(int status) {
 			return (status == SuccessExecuted.value || status == SuccessNochange.value);
 		}
@@ -126,6 +167,10 @@ class GaeChange {
 			return status == Executing.value;
 		}
 		
+		/**
+		 * @return true if the given status indicates that events are stored in
+		 *         the change entity.
+		 */
 		protected static boolean hasEvents(int status) {
 			return (status == Executing.value || status == SuccessExecuted.value);
 		}
@@ -164,11 +209,15 @@ class GaeChange {
 	
 	protected final long rev;
 	private final long startTime;
-	protected final Set<XAddress> locks;
+	protected final GaeLocks locks;
 	private final XAddress modelAddr;
 	private final Entity entity;
 	
-	public GaeChange(XAddress modelAddr, long rev, Set<XAddress> locks, XID actorId) {
+	/**
+	 * Construct a new change entity with the given properties. The entity is
+	 * created but not put into the datastore.
+	 */
+	public GaeChange(XAddress modelAddr, long rev, GaeLocks locks, XID actorId) {
 		
 		this.rev = rev;
 		this.locks = locks;
@@ -178,7 +227,7 @@ class GaeChange {
 		if(actorId != null) {
 			this.entity.setUnindexedProperty(PROP_ACTOR, actorId.toString());
 		}
-		setLocks(this.entity, locks);
+		this.entity.setUnindexedProperty(PROP_LOCKS, locks.encode());
 		
 		this.startTime = registerActivity(this.entity);
 		
@@ -187,6 +236,10 @@ class GaeChange {
 		// TODO Auto-generated constructor stub
 	}
 	
+	/**
+	 * Take over the given change entity. The entity is updated but the updated
+	 * version is not put back into the datastore.
+	 */
 	public GaeChange(XAddress modelAddr, long rev, Entity entity) {
 		this.entity = entity;
 		this.rev = rev;
@@ -208,9 +261,8 @@ class GaeChange {
 	}
 	
 	/**
-	 * @param changeEntity
 	 * @return true if more than {@link #TIMEOUT} milliseconds elapsed since a
-	 *         thread started working with the given changeEntity
+	 *         thread started working with the given change entity
 	 */
 	protected static boolean isTimedOut(Entity changeEntity) {
 		long timer = (Long)changeEntity.getProperty(PROP_LAST_ACTIVITY);
@@ -228,10 +280,16 @@ class GaeChange {
 		GaeUtils.putEntity(changeEntity);
 	}
 	
+	/**
+	 * Update the status of the given change entity.
+	 */
 	protected static void setStatus(Entity changeEntity, Status status) {
 		changeEntity.setUnindexedProperty(PROP_STATUS, status.value);
 	}
 	
+	/**
+	 * @see #setStatus(Entity, Status)
+	 */
 	protected void setStatus(Status status) {
 		setStatus(this.entity, status);
 	}
@@ -240,16 +298,12 @@ class GaeChange {
 	 * @return the locks associated with the given change {@link Entity}.
 	 */
 	@SuppressWarnings("unchecked")
-	protected static Set<XAddress> getLocks(Entity changeEntity) {
+	protected static GaeLocks getLocks(Entity changeEntity) {
 		List<String> lockStrs = (List<String>)changeEntity.getProperty(PROP_LOCKS);
 		if(lockStrs == null) {
 			return null;
 		}
-		Set<XAddress> otherLocks = new HashSet<XAddress>((int)(lockStrs.size() / 0.75));
-		for(String s : lockStrs) {
-			otherLocks.add(XX.toAddress(s));
-		}
-		return otherLocks;
+		return new GaeLocks(lockStrs);
 	}
 	
 	/**
@@ -261,18 +315,11 @@ class GaeChange {
 		return n.intValue();
 	}
 	
-	protected static boolean hasLocks(Entity otherChange) {
-		return otherChange.getProperty(PROP_LOCKS) != null;
-	}
-	
-	private static void setLocks(Entity changeEntity, Set<XAddress> locks) {
-		
-		List<String> lockStrs = new ArrayList<String>(locks.size());
-		for(XAddress a : locks) {
-			lockStrs.add(a.toURI());
-		}
-		
-		changeEntity.setUnindexedProperty(PROP_LOCKS, lockStrs);
+	/**
+	 * @return true if the given change entity has any locks set.
+	 */
+	protected static boolean hasLocks(Entity changeEntity) {
+		return changeEntity.getProperty(PROP_LOCKS) != null;
 	}
 	
 	private static long registerActivity(Entity newChange) {
@@ -311,11 +358,18 @@ class GaeChange {
 		return GaeEventService.saveEvents(this.modelAddr, this.entity, events);
 	}
 	
+	/**
+	 * Asynchronously put this change entity into datastore withing the given
+	 * transaction.
+	 */
 	protected void save(Transaction trans) {
 		// Synchronized by endTransaction()
 		GaeUtils.putEntityAsync(this.entity, trans);
 	}
 	
+	/**
+	 * Put this change entity in the datastore.
+	 */
 	protected void save() {
 		GaeUtils.putEntity(this.entity);
 	}
@@ -336,6 +390,9 @@ class GaeChange {
 		return new Pair<List<XAtomicEvent>,int[]>(Arrays.asList(res.getFirst()), res.getSecond());
 	}
 	
+	/**
+	 * @see #cleanup(Entity, Status)
+	 */
 	protected void cleanup(Status status) {
 		cleanup(this.entity, status);
 	}

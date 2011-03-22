@@ -95,8 +95,8 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 	 *            assert that we are actually allowed to create the entity.
 	 */
 	protected static Future<Key> set(XAddress fieldAddr, long fieldRev, int transindex,
-	        Set<XAddress> locks) {
-		assert GaeLocks.canWrite(fieldAddr, locks);
+	        GaeLocks locks) {
+		assert locks.canWrite(fieldAddr);
 		assert fieldAddr.getAddressedType() == XType.XFIELD;
 		Entity e = new Entity(KeyStructure.createEntityKey(fieldAddr));
 		e.setProperty(PROP_PARENT, fieldAddr.getParent().toURI());
@@ -119,7 +119,7 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 	 * @param locks The locks held by the current process. These are used to
 	 *            assert that we are actually allowed to create the entity.
 	 */
-	protected static Future<Key> set(XAddress fieldAddr, long fieldRev, Set<XAddress> locks) {
+	protected static Future<Key> set(XAddress fieldAddr, long fieldRev, GaeLocks locks) {
 		return set(fieldAddr, fieldRev, GaeEventService.TRANSINDEX_NONE, locks);
 	}
 	

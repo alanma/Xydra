@@ -37,16 +37,16 @@ abstract class InternalGaeContainerXEntity<C> extends InternalGaeXEntity {
 	private final XAddress addr;
 	private Set<XID> cachedIds;
 	private final Set<XID> cachedMisses = new HashSet<XID>();
-	private final Set<XAddress> locks;
+	private final GaeLocks locks;
 	private final long rev;
 	
 	protected InternalGaeContainerXEntity(GaeChangesService changesService, XAddress addr,
-	        long rev, Set<XAddress> locks) {
+	        long rev, GaeLocks locks) {
 		assert rev >= 0
 		        || (rev == XEvent.RevisionNotAvailable && addr.getAddressedType() == XType.XOBJECT);
 		this.changesService = changesService;
 		assert addr.getAddressedType() == XType.XMODEL || addr.getAddressedType() == XType.XOBJECT;
-		assert GaeLocks.canRead(addr, locks);
+		assert locks.canRead(addr);
 		this.addr = addr;
 		this.locks = locks;
 		this.rev = rev;
@@ -78,7 +78,7 @@ abstract class InternalGaeContainerXEntity<C> extends InternalGaeXEntity {
 		}
 		
 		XAddress childAddr = resolveChild(this.addr, fieldId);
-		assert GaeLocks.canRead(childAddr, this.locks);
+		assert this.locks.canRead(childAddr);
 		
 		Entity e = GaeUtils.getEntity(KeyStructure.createEntityKey(childAddr));
 		if(e == null) {
@@ -102,14 +102,14 @@ abstract class InternalGaeContainerXEntity<C> extends InternalGaeXEntity {
 		
 		if(this.cachedIds == null) {
 			
-			assert GaeLocks.canWrite(this.addr, this.locks);
+			assert this.locks.canWrite(this.addr);
 			
 			this.cachedIds = findChildren(this.addr);
 		}
 		return this.cachedIds.iterator();
 	}
 	
-	protected Set<XAddress> getLocks() {
+	protected GaeLocks getLocks() {
 		return this.locks;
 	}
 	

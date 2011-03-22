@@ -38,6 +38,22 @@ import com.google.appengine.api.datastore.Text;
  * Code to handle saving and loading of XEvents and XValues stored on the GAE
  * datastore.
  * 
+ * Events are stored as properties in the XCHANGE GAE entities normally managed
+ * by {@link GaeChange}. Only for {@link XFieldEvent XFieldEvents},
+ * {@link XValue XValues} whose XML-encoding is longer than
+ * {@link #MAX_VALUE_SIZE} are stored in their own GAE entity.
+ * 
+ * The values stored for the events are also referenced by the internal field
+ * state ({@link InternalGaeField}) by the revision number that set the value
+ * and a special index indicating where the value is stored (as there could have
+ * been multiple events in a transaction). A value of {@link #TRANSINDEX_NONE}
+ * indicates that there is no value (null), a positive value (including 0)
+ * indicates that the value is stored in it's own GAE entity and the value can
+ * be used with {@link KeyStructure#createValueKey(Key, int)} to get the key for
+ * that entity. All other values can be passed to
+ * {@link #getInternalValueId(int)} to get an index into the values (
+ * {@link #PROP_EVENT_VALUES}) stored in the XCHANGE entity.
+ * 
  * @author dscharrer
  * 
  */
@@ -276,6 +292,7 @@ public class GaeEventService {
 	 * @param transindex The index of the event in the change as returned by
 	 *            {@link #saveEvents(XAddress, Entity, List)} or
 	 *            {@link #loadAtomicEvents(XAddress, long, XID, Entity, boolean)}
+	 * @return Never null but {@link AsyncValue#get()} may return null.
 	 */
 	protected static AsyncValue getValue(XAddress modelAddr, long revisionNumber, int transindex) {
 		
@@ -418,6 +435,12 @@ public class GaeEventService {
 	protected static Pair<XAtomicEvent[],int[]> loadAtomicEvents(XAddress modelAddr, long rev,
 	        XID actor, Entity changeEntity, boolean loadValues) {
 		
+		/*
+		 * Load the event properties that were set in saveEvents().
+		 * 
+		 * Be careful with types, as GAE might not return the exact same type
+		 * that was set.
+		 */
 		@SuppressWarnings("unchecked")
 		List<Number> types = (List<Number>)changeEntity.getProperty(PROP_EVENT_TYPES);
 		@SuppressWarnings("unchecked")

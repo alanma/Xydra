@@ -3,7 +3,6 @@
  */
 package org.xydra.store.impl.gae.changes;
 
-import java.util.Set;
 import java.util.concurrent.Future;
 
 import org.xydra.base.XAddress;
@@ -31,7 +30,7 @@ public class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObj
         XReadableModel {
 	
 	private InternalGaeModel(GaeChangesService changesService, XAddress modelAddr, long modelRev,
-	        Set<XAddress> locks) {
+	        GaeLocks locks) {
 		super(changesService, modelAddr, modelRev, locks);
 		assert modelAddr.getAddressedType() == XType.XMODEL;
 	}
@@ -72,11 +71,11 @@ public class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObj
 	 * @return A {@link XModel} interface or null if the model doesn't exist.
 	 */
 	public static InternalGaeModel get(GaeChangesService changesService, long modelRev,
-	        Set<XAddress> locks) {
+	        GaeLocks locks) {
 		
-		assert GaeLocks.canRead(changesService.getModelAddress(), locks);
-		Entity e = GaeUtils
-		        .getEntity(KeyStructure.createEntityKey(changesService.getModelAddress()));
+		assert locks.canRead(changesService.getModelAddress());
+		Entity e = GaeUtils.getEntity(KeyStructure
+		        .createEntityKey(changesService.getModelAddress()));
 		if(e == null) {
 			return null;
 		}
@@ -99,8 +98,8 @@ public class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObj
 	 *            assert that we are actually allowed to create the
 	 *            {@link XModel}.
 	 */
-	public static Future<Key> createModel(XAddress modelAddr, Set<XAddress> locks) {
-		assert GaeLocks.canWrite(modelAddr, locks);
+	public static Future<Key> createModel(XAddress modelAddr, GaeLocks locks) {
+		assert locks.canWrite(modelAddr);
 		assert modelAddr.getAddressedType() == XType.XMODEL;
 		Entity e = new Entity(KeyStructure.createEntityKey(modelAddr));
 		e.setProperty(PROP_PARENT, modelAddr.getParent().toURI());
