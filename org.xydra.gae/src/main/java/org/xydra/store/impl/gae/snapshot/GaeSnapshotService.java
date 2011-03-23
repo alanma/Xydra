@@ -231,7 +231,6 @@ public class GaeSnapshotService {
 			throw new IllegalArgumentException("Model may not be null for event "
 			        + event.getClass());
 		}
-		assert model != null;
 		model.setRevisionNumber(rev);
 		
 		if(event instanceof XModelEvent) {
