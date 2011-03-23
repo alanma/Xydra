@@ -353,7 +353,7 @@ public class GaeChangesService {
 					// rolling forward, as rolling forward will have a start
 					// time equal to or greater than that of our own change. So
 					// if the roll forward is close to timeout, our own change
-					// is vent more so.
+					// is even more so.
 					
 					if(!rollForward(otherRev, otherChange.getKey())) {
 						// Someone else grabbed the revision, check again if it
@@ -593,7 +593,7 @@ public class GaeChangesService {
 			
 			// Cleanup the transaction.
 			GaeUtils.endTransaction(trans);
-			
+			GaeChange.cleanup(changeEntity, Status.FailedTimeout);
 			return false;
 		}
 		
@@ -664,9 +664,21 @@ public class GaeChangesService {
 				break;
 			}
 			
+			assert KeyStructure.assertRevisionInKey(changeEntity.getKey(), rev + 1);
+			
 			int status = GaeChange.getStatus(changeEntity);
 			if(!Status.isCommitted(status)) {
-				break;
+				if(GaeChange.isTimedOut(changeEntity)) {
+					if(handleTimeout(rev, changeEntity, status)) {
+						Key key = KeyStructure.createChangeKey(this.modelAddr, rev + 1);
+						batch.set(pos, GaeUtils.getEntityAsync(key));
+						rev--;
+						continue;
+					}
+				} else {
+					// Found the lastCommitedRev
+					break;
+				}
 			}
 			
 			// Only update the current revision if the command actually changed
@@ -774,8 +786,16 @@ public class GaeChangesService {
 			
 			int status = GaeChange.getStatus(changeEntity);
 			if(!Status.isCommitted(status)) {
-				// Found the lastCommitedRev
-				break;
+				if(GaeChange.isTimedOut(changeEntity)) {
+					if(handleTimeout(rev, changeEntity, status)) {
+						batch.set(pos, getEventAt(rev));
+						rev--;
+						continue;
+					}
+				} else {
+					// Found the lastCommitedRev
+					break;
+				}
 			}
 			
 			XEvent event = batch.get(pos).get();
@@ -812,6 +832,22 @@ public class GaeChangesService {
 		}
 		
 		return events;
+	}
+	
+	/**
+	 * Roll forward a timed out entity if possible, otherwise just mark it as
+	 * timed out.
+	 * 
+	 * @return false if the entity could not have been rolled forward.
+	 */
+	private boolean handleTimeout(long rev, Entity changeEntity, int status) {
+		if(Status.canRollForward(status)) {
+			rollForward(rev, changeEntity.getKey());
+			return true;
+		} else {
+			GaeChange.cleanup(changeEntity, Status.FailedTimeout);
+			return false;
+		}
 	}
 	
 }
