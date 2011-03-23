@@ -3,6 +3,7 @@ package org.xydra.store.impl.gae.changes;
 import org.xydra.base.XAddress;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
+import org.xydra.base.value.XValue;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
@@ -16,7 +17,7 @@ import com.google.appengine.api.datastore.KeyFactory;
  */
 public class KeyStructure {
 	
-	private static final String KIND_XVALUE = "XEVENT";
+	private static final String KIND_XVALUE = "XVALUE";
 	private static final String KIND_XCHANGE = "XCHANGE";
 	
 	/**
@@ -55,18 +56,16 @@ public class KeyStructure {
 	}
 	
 	/**
-	 * @param changeKey The key of the "change" (as returned by
-	 *            {@link #createChangeKey(XAddress, long)}) that contains the
-	 *            desired event.
+	 * @param modelAddr The address of the model containing the {@link XValue}.
+	 * @param rev The revision number of the change that set the value.
 	 * @param transindex The index of the event that set the value in the
 	 *            change.
 	 * @return a GAE {@link Key} representing an internal part of a Xydra change
 	 *         entity
 	 */
-	public static Key createValueKey(Key changeKey, int transindex) {
-		assert isChangeKey(changeKey);
-		// TODO is there a point in making KIND_XVALUE children of KIND_XCHANGE?
-		return changeKey.getChild(KIND_XVALUE, Integer.toString(transindex));
+	public static Key createValueKey(XAddress modelAddr, long rev, int transindex) {
+		assert modelAddr.getAddressedType() == XType.XMODEL;
+		return KeyFactory.createKey(KIND_XVALUE, modelAddr.toURI() + "/" + rev + "+" + transindex);
 	}
 	
 	/**
@@ -77,22 +76,22 @@ public class KeyStructure {
 	public static boolean isChangeKey(Key key) {
 		return key.getKind() == KIND_XCHANGE;
 	}
-
+	
 	/**
-     * Check that the revision encoded in the given key matches the given
-     * revision.
-     * 
-     * @param key A key for a change entity as returned by
-     *            {@link createChangeKey}.
-     * @param key The key to check
-     */
-    static boolean assertRevisionInKey(Key key, long rev) {
-    	assert isChangeKey(key);
-    	String keyStr = key.getName();
-    	int p = keyStr.lastIndexOf("/");
-    	assert p > 0;
-    	String revStr = keyStr.substring(p + 1);
-    	return (Long.parseLong(revStr) == rev);
-    }
+	 * Check that the revision encoded in the given key matches the given
+	 * revision.
+	 * 
+	 * @param key A key for a change entity as returned by
+	 *            {@link createChangeKey}.
+	 * @param key The key to check
+	 */
+	static boolean assertRevisionInKey(Key key, long rev) {
+		assert isChangeKey(key);
+		String keyStr = key.getName();
+		int p = keyStr.lastIndexOf("/");
+		assert p > 0;
+		String revStr = keyStr.substring(p + 1);
+		return (Long.parseLong(revStr) == rev);
+	}
 	
 }

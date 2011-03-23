@@ -49,8 +49,8 @@ import com.google.appengine.api.datastore.Text;
  * been multiple events in a transaction). A value of {@link #TRANSINDEX_NONE}
  * indicates that there is no value (null), a positive value (including 0)
  * indicates that the value is stored in it's own GAE entity and the value can
- * be used with {@link KeyStructure#createValueKey(Key, int)} to get the key for
- * that entity. All other values can be passed to
+ * be used with {@link KeyStructure#createValueKey(XAddress, long, int)} to get
+ * the key for that entity. All other values can be passed to
  * {@link #getInternalValueId(int)} to get an index into the values (
  * {@link #PROP_EVENT_VALUES}) stored in the XCHANGE entity.
  * 
@@ -202,12 +202,16 @@ public class GaeEventService {
 	private static final String PROP_EVENT_IMPLIED = "eventIsImplied";
 	
 	// Value for PROP_EVENT_VALUES if the XValue is stored externally.
-	private static final String VALUE_EXTERN = "extern";
+	private static final Text VALUE_EXTERN = new Text("extern");
 	
 	// Properties stored in the "value" GAE entity.
 	private static final String PROP_VALUE = "value";
 	
 	// Maximum size for XML-encoded XValues to store in change entities.
+	/*
+	 * TODO should we set this to 500 (the GAE limit for String properties) so
+	 * we can use a List<String> for PROP_EVENT_VALUES?
+	 */
 	private static final int MAX_VALUE_SIZE = 1024;
 	
 	// Parameter for getValue() to represent a null XValue.
@@ -254,12 +258,11 @@ public class GaeEventService {
 					return null;
 				}
 				
-				String eventXml;
+				Text eventXml;
 				if(this.transIndex < 0) {
 					int realindex = getInternalValueId(this.transIndex);
 					@SuppressWarnings("unchecked")
-					List<String> eventValues = (List<String>)eventEntity
-					        .getProperty(PROP_EVENT_VALUES);
+					List<Text> eventValues = (List<Text>)eventEntity.getProperty(PROP_EVENT_VALUES);
 					if(eventValues == null || realindex >= eventValues.size()) {
 						return null;
 					}
@@ -268,11 +271,10 @@ public class GaeEventService {
 						return null;
 					}
 				} else {
-					Text eventData = (Text)eventEntity.getProperty(PROP_VALUE);
-					eventXml = eventData.getValue();
+					eventXml = (Text)eventEntity.getProperty(PROP_VALUE);
 				}
 				
-				MiniElement eventElement = new MiniXMLParserImpl().parseXml(eventXml);
+				MiniElement eventElement = new MiniXMLParserImpl().parseXml(eventXml.getValue());
 				
 				this.value = XmlValue.toValue(eventElement);
 				
@@ -300,17 +302,17 @@ public class GaeEventService {
 			return VALUE_NULL;
 		}
 		
-		Key changeKey = KeyStructure.createChangeKey(modelAddr, revisionNumber);
-		
 		if(transindex < TRANSINDEX_NONE) {
+			Key changeKey = KeyStructure.createChangeKey(modelAddr, revisionNumber);
 			return new AsyncValue(GaeUtils.getEntityAsync(changeKey), transindex);
 		} else {
-			return getExternalValue(changeKey, transindex);
+			return getExternalValue(modelAddr, revisionNumber, transindex);
 		}
 	}
 	
-	private static AsyncValue getExternalValue(Key changeKey, int transindex) {
-		Key valueKey = KeyStructure.createValueKey(changeKey, transindex);
+	private static AsyncValue getExternalValue(XAddress modelAddr, long revisionNumber,
+	        int transindex) {
+		Key valueKey = KeyStructure.createValueKey(modelAddr, revisionNumber, transindex);
 		return new AsyncValue(GaeUtils.getEntityAsync(valueKey), transindex);
 	}
 	
@@ -330,7 +332,7 @@ public class GaeEventService {
 		
 		List<Integer> types = new ArrayList<Integer>();
 		List<String> targets = new ArrayList<String>();
-		List<String> values = new ArrayList<String>();
+		List<Text> values = new ArrayList<Text>();
 		List<Long> objectRevs = new ArrayList<Long>();
 		List<Long> fieldRevs = new ArrayList<Long>();
 		List<Boolean> implied = new ArrayList<Boolean>();
@@ -339,7 +341,6 @@ public class GaeEventService {
 		
 		List<Future<Key>> futures = new ArrayList<Future<Key>>();
 		
-		Key baseKey = changeEntity.getKey();
 		for(int i = 0; i < events.size(); i++) {
 			XAtomicEvent ae = events.get(i);
 			
@@ -351,14 +352,14 @@ public class GaeEventService {
 			
 			if(ae instanceof XRepositoryEvent) {
 				// nothing to set;
-				values.add(((XRepositoryEvent)ae).getModelId().toString());
+				values.add(new Text(((XRepositoryEvent)ae).getModelId().toString()));
 			} else if(ae instanceof XModelEvent) {
 				objectRevs.add(ae.getOldObjectRevision());
-				values.add(((XModelEvent)ae).getObjectId().toString());
+				values.add(new Text(((XModelEvent)ae).getObjectId().toString()));
 			} else if(ae instanceof XObjectEvent) {
 				objectRevs.add(ae.getOldObjectRevision());
 				fieldRevs.add(ae.getOldFieldRevision());
-				values.add(((XObjectEvent)ae).getFieldId().toString());
+				values.add(new Text(((XObjectEvent)ae).getFieldId().toString()));
 			} else {
 				assert ae instanceof XFieldEvent;
 				objectRevs.add(ae.getOldObjectRevision());
@@ -371,10 +372,12 @@ public class GaeEventService {
 				} else {
 					XmlOutStringBuffer out = new XmlOutStringBuffer();
 					XmlValue.toXml(xv, out);
-					String value = out.getXml();
+					String valueStr = out.getXml();
+					Text value = new Text(valueStr);
 					
-					if(value.length() > MAX_VALUE_SIZE) {
-						Key k = KeyStructure.createValueKey(baseKey, i);
+					if(valueStr.length() > MAX_VALUE_SIZE) {
+						Key k = KeyStructure.createValueKey(modelAddr,
+						        ae.getOldModelRevision() + 1, i);
 						Entity e = new Entity(k);
 						e.setUnindexedProperty(PROP_VALUE, value);
 						futures.add(GaeUtils.putEntityAsync(e));
@@ -446,7 +449,7 @@ public class GaeEventService {
 		@SuppressWarnings("unchecked")
 		List<String> targets = (List<String>)changeEntity.getProperty(PROP_EVENT_TARGETS);
 		@SuppressWarnings("unchecked")
-		List<String> values = (List<String>)changeEntity.getProperty(PROP_EVENT_VALUES);
+		List<Text> values = (List<Text>)changeEntity.getProperty(PROP_EVENT_VALUES);
 		@SuppressWarnings("unchecked")
 		List<Number> objectRevs = (List<Number>)changeEntity.getProperty(PROP_EVENT_REVS_OBJECT);
 		@SuppressWarnings("unchecked")
@@ -480,7 +483,7 @@ public class GaeEventService {
 			
 			switch(type.getTargetType()) {
 			case XREPOSITORY: {
-				XID modelId = XX.toId(values.get(i));
+				XID modelId = XX.toId(values.get(i).getValue());
 				switch(type.getChangeType()) {
 				case ADD:
 					events[i] = MemoryRepositoryEvent.createAddEvent(actor, target, modelId,
@@ -496,7 +499,7 @@ public class GaeEventService {
 				break;
 			}
 			case XMODEL: {
-				XID objectId = XX.toId(values.get(i));
+				XID objectId = XX.toId(values.get(i).getValue());
 				long objectRev = objectRevs.get(ori++).longValue();
 				switch(type.getChangeType()) {
 				case ADD:
@@ -513,7 +516,7 @@ public class GaeEventService {
 				break;
 			}
 			case XOBJECT: {
-				XID fieldId = XX.toId(values.get(i));
+				XID fieldId = XX.toId(values.get(i).getValue());
 				long objectRev = objectRevs.get(ori++).longValue();
 				long fieldRev = fieldRevs.get(fri++).longValue();
 				switch(type.getChangeType()) {
@@ -531,11 +534,11 @@ public class GaeEventService {
 				break;
 			}
 			case XFIELD: {
-				String valueStr = values.get(i);
+				Text valueTxt = values.get(i);
 				long objectRev = objectRevs.get(ori++).longValue();
 				long fieldRev = fieldRevs.get(fri++).longValue();
 				AsyncValue value;
-				if(valueStr == null) {
+				if(valueTxt == null) {
 					assert type.getChangeType() == ChangeType.REMOVE;
 					value = VALUE_NULL;
 					if(!loadValues) {
@@ -543,14 +546,16 @@ public class GaeEventService {
 					}
 				} else {
 					assert type.getChangeType() != ChangeType.REMOVE;
+					boolean isExtern = VALUE_EXTERN.equals(valueTxt);
 					if(!loadValues) {
 						value = VALUE_DUMMY;
-						valueIds[i] = VALUE_EXTERN.equals(valueStr) ? i : getInternalValueId(i);
-					} else if(!VALUE_EXTERN.equals(valueStr)) {
-						MiniElement eventElement = new MiniXMLParserImpl().parseXml(valueStr);
+						valueIds[i] = isExtern ? i : getInternalValueId(i);
+					} else if(!isExtern) {
+						String valueXml = valueTxt.getValue();
+						MiniElement eventElement = new MiniXMLParserImpl().parseXml(valueXml);
 						value = new AsyncValue(XmlValue.toValue(eventElement));
 					} else {
-						value = getExternalValue(changeEntity.getKey(), i);
+						value = getExternalValue(modelAddr, rev, i);
 					}
 				}
 				assert value != null;
