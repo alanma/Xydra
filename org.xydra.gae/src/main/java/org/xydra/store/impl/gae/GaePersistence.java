@@ -40,6 +40,9 @@ public class GaePersistence implements XydraPersistence {
 	 * @param repoId repository ID
 	 */
 	public GaePersistence(XID repoId) {
+		if(repoId == null) {
+			throw new IllegalArgumentException("repoId was null");
+		}
 		
 		// To enable local JUnit testing with multiple threads
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
@@ -66,6 +69,9 @@ public class GaePersistence implements XydraPersistence {
 	}
 	
 	public XReadableModel getModelSnapshot(XID modelId) {
+		if(modelId == null) {
+			throw new IllegalArgumentException("modelId was null");
+		}
 		
 		GaeSnapshotService s = getSnapshotService(modelId);
 		
@@ -78,6 +84,12 @@ public class GaePersistence implements XydraPersistence {
 	
 	@Override
 	public long executeCommand(XID actorId, XCommand command) {
+		if(actorId == null) {
+			throw new IllegalArgumentException("actorId was null");
+		}
+		if(command == null) {
+			throw new IllegalArgumentException("command was null");
+		}
 		checkAddres(command.getTarget());
 		
 		XID modelId = command.getChangedEntity().getModel();
@@ -103,6 +115,9 @@ public class GaePersistence implements XydraPersistence {
 	
 	@Override
 	public boolean hasModel(XID modelId) {
+		if(modelId == null) {
+			throw new IllegalArgumentException("modelId was null");
+		}
 		return InternalGaeXEntity.exists(getModelAddress(modelId));
 	}
 	
@@ -135,6 +150,9 @@ public class GaePersistence implements XydraPersistence {
 	}
 	
 	private void checkAddres(XAddress address) {
+		if(address == null) {
+			throw new IllegalArgumentException("address was null");
+		}
 		if(!this.repoAddr.equalsOrContains(address)) {
 			throw new RequestException("address " + address + " is not contained in repository "
 			        + this.repoAddr);
