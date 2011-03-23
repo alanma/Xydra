@@ -105,15 +105,7 @@ public class RestlessMethod {
 			// build up parameters
 			
 			// extract values from path
-			Map<String,String> urlParameter = new HashMap<String,String>();
-			String urlPath = req.getPathInfo();
-			if(urlPath != null) {
-				List<String> variablesFromUrlPath = this.pathTemplate.extractVariables(urlPath);
-				for(int i = 0; i < this.pathTemplate.variableNames.size(); i++) {
-					urlParameter.put(this.pathTemplate.variableNames.get(i),
-					        variablesFromUrlPath.get(i));
-				}
-			}
+			Map<String,String> urlParameter = getUrlParametersAsMap(req, this.pathTemplate);
 			
 			// extract Cookie values
 			Map<String,String> cookieMap = ServletUtils.getCookiesAsMap(req);
@@ -275,6 +267,19 @@ public class RestlessMethod {
 			}
 			
 		}
+	}
+	
+	public static Map<String,String> getUrlParametersAsMap(HttpServletRequest req,
+	        PathTemplate pathTemplate) {
+		Map<String,String> urlParameter = new HashMap<String,String>();
+		String urlPath = req.getPathInfo();
+		if(urlPath != null) {
+			List<String> variablesFromUrlPath = pathTemplate.extractVariables(urlPath);
+			for(int i = 0; i < pathTemplate.variableNames.size(); i++) {
+				urlParameter.put(pathTemplate.variableNames.get(i), variablesFromUrlPath.get(i));
+			}
+		}
+		return urlParameter;
 	}
 	
 	/**
