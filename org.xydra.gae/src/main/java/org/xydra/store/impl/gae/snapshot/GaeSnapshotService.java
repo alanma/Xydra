@@ -184,7 +184,11 @@ public class GaeSnapshotService {
 				}
 			} else {
 				assert event instanceof XAtomicEvent;
-				entry.modelState = applyEvent(entry.modelState, (XAtomicEvent)event);
+				XRevWritableModel entryModelState = entry.modelState;
+				if (entryModelState == null) {
+					throw new IllegalStateException("entry.modelState was null where it may not");
+				}
+				entry.modelState = applyEvent(entryModelState, (XAtomicEvent)event);
 			}
 			
 			entry.revision = event.getRevisionNumber();
@@ -210,8 +214,10 @@ public class GaeSnapshotService {
 	 * @return the changed model or null if the model was removed.
 	 */
 	private XRevWritableModel applyEvent(XRevWritableModel model, XAtomicEvent event) {
-		
 		log.debug("--> applying " + event);
+		if(model == null) {
+			throw new IllegalArgumentException("Model may not be null");
+		}
 		
 		long rev = event.getRevisionNumber();
 		
