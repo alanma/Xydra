@@ -593,7 +593,6 @@ public class GaeChangesService {
 			
 			// Cleanup the transaction.
 			GaeUtils.endTransaction(trans);
-			GaeChange.cleanup(changeEntity, Status.FailedTimeout);
 			return false;
 		}
 		
