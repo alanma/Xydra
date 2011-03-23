@@ -185,9 +185,6 @@ public class GaeSnapshotService {
 			} else {
 				assert event instanceof XAtomicEvent;
 				XRevWritableModel entryModelState = entry.modelState;
-				if (entryModelState == null) {
-					throw new IllegalStateException("entry.modelState was null where it may not");
-				}
 				entry.modelState = applyEvent(entryModelState, (XAtomicEvent)event);
 			}
 			
@@ -215,10 +212,6 @@ public class GaeSnapshotService {
 	 */
 	private XRevWritableModel applyEvent(XRevWritableModel model, XAtomicEvent event) {
 		log.debug("--> applying " + event);
-		if(model == null) {
-			throw new IllegalArgumentException("Model may not be null");
-		}
-		
 		long rev = event.getRevisionNumber();
 		
 		// repository events
@@ -234,6 +227,10 @@ public class GaeSnapshotService {
 		}
 		
 		// model, object and field events
+		if(model == null) {
+			throw new IllegalArgumentException("Model may not be null for event "
+			        + event.getClass());
+		}
 		assert model != null;
 		model.setRevisionNumber(rev);
 		
