@@ -9,7 +9,7 @@ public class XIDLengthException extends RequestException {
 	private static final long serialVersionUID = -6686217386195204050L;
 	
 	public XIDLengthException(XID id) {
-		super("Too long ID for the GAE backend: " + id);
+		super("To long XID for the GAE backend: " + id);
 	}
 	
 }
