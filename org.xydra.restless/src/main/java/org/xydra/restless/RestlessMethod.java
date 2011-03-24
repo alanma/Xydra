@@ -1,8 +1,10 @@
 package org.xydra.restless;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -216,6 +218,7 @@ public class RestlessMethod {
 				}
 			}
 			
+			Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
 			try {
 				Object result = method.invoke(instance, javaMethodArgs.toArray(new Object[0]));
 				if(!hasHttpServletResponseParameter) {
@@ -223,13 +226,12 @@ public class RestlessMethod {
 					        + Restless.CHARSET_UTF8);
 					res.setStatus(200);
 					// we need to send back something standard ourselves
-					res.getWriter().print(
-					        "Executed " + instance.getClass().getSimpleName() + "."
-					                + this.methodName + "\n");
+					w.write("Executed " + instance.getClass().getSimpleName() + "."
+					        + this.methodName + "\n");
 					if(result != null && result instanceof String) {
-						res.getWriter().print("Result: " + result);
+						w.write("Result: " + result);
 					}
-					res.getWriter().flush();
+					new OutputStreamWriter(res.getOutputStream(), "utf-8").flush();
 				}
 			} catch(InvocationTargetException e) {
 				Throwable cause = e.getCause();
@@ -238,7 +240,7 @@ public class RestlessMethod {
 					res.setStatus(re.getStatusCode());
 					res.setContentType(Restless.MIME_TEXT_PLAIN + "; charset="
 					        + Restless.CHARSET_UTF8);
-					res.getWriter().print(re.getMessage());
+					w.write(re.getMessage());
 				} else {
 					boolean handled = false;
 					for(RestlessExceptionHandler handler : restless.exceptionHandlers) {

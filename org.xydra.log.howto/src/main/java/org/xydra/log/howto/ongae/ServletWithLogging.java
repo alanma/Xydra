@@ -1,6 +1,7 @@
 package org.xydra.log.howto.ongae;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -25,11 +26,11 @@ public class ServletWithLogging extends HttpServlet {
 	
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
-		res.getWriter().write("Starting log test ...");
-		res.getWriter().flush();
+		new OutputStreamWriter(res.getOutputStream(), "utf-8").write("Starting log test ...");
+		new OutputStreamWriter(res.getOutputStream(), "utf-8").flush();
 		log();
-		res.getWriter().write("Done with log test.");
-		res.getWriter().flush();
+		new OutputStreamWriter(res.getOutputStream(), "utf-8").write("Done with log test.");
+		new OutputStreamWriter(res.getOutputStream(), "utf-8").flush();
 	}
 	
 	public static void log() {

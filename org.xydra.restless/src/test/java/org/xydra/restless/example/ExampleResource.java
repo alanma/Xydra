@@ -1,6 +1,8 @@
 package org.xydra.restless.example;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
@@ -63,15 +65,12 @@ public class ExampleResource {
 		res.setContentType("text/html");
 		
 		/* usually use a template engine or XML generating library here */
-		res
-		        .getWriter()
-		        .println(
-		                "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n"
-		                        + "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">\r\n");
-		res.getWriter().println("<head><title>A valid restless response</title></head>");
-		res.getWriter().println(
-		        "<body><p>name = " + this.name + ", age = " + this.age + "</p></body>");
-		res.getWriter().println("</html>");
+		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		w.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n"
+		        + "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">\r\n");
+		w.write("<head><title>A valid restless response</title></head>");
+		w.write("<body><p>name = " + this.name + ", age = " + this.age + "</p></body>");
+		w.write("</html>");
 	}
 	
 	public String silly(IRestlessContext restlessContext) {

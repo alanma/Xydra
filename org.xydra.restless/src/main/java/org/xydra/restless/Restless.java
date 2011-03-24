@@ -1,6 +1,8 @@
 package org.xydra.restless;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -264,43 +266,40 @@ public class Restless extends HttpServlet {
 		res.setContentType(MIME_XHTML);
 		res.setCharacterEncoding(CHARSET_UTF8);
 		try {
-			res.getWriter().println(XML_DECLARATION);
-			res.getWriter().println(XHTML_DOCTYPE);
-			res.getWriter().println(
-			        "<html " + XHTML_NS + "><head><title>Restless Configuration</title>" +
-			        /* styling */
-			        "<style type='text/css'> \n" +
+			Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+			w.write(XML_DECLARATION);
+			w.write(XHTML_DOCTYPE);
+			w.write("<html " + XHTML_NS + "><head><title>Restless Configuration</title>" +
+			/* styling */
+			"<style type='text/css'> \n" +
 
-			        "body { font-family: Verdana,sans-serif; }" + "\n"
+			"body { font-family: Verdana,sans-serif; }" + "\n"
 
-			        + "</style>\n" +
+			+ "</style>\n" +
 
-			        "</head><body>");
-			res.getWriter().println("<h3>Restless configuration</h3>");
-			res.getWriter().println("<p><ol>");
+			"</head><body>");
+			w.write("<h3>Restless configuration</h3>");
+			w.write("<p><ol>");
 			for(RestlessMethod rm : this.methods) {
-				res.getWriter().print("<li>");
+				w.write("<li>");
 				String url = servletPath + XmlUtils.xmlEncode(rm.pathTemplate.getRegex());
-				res.getWriter().print(
-				        (rm.adminOnly ? "ADMIN ONLY" : "PUBLIC") + " resource <b class='resource'>"
-				                + url + "</b>: " + rm.httpMethod + " =&gt; ");
-				res.getWriter().print(
-				        instanceOrClass_className(rm.instanceOrClass) + "#" + rm.methodName);
+				w.write((rm.adminOnly ? "ADMIN ONLY" : "PUBLIC") + " resource <b class='resource'>"
+				        + url + "</b>: " + rm.httpMethod + " =&gt; ");
+				w.write(instanceOrClass_className(rm.instanceOrClass) + "#" + rm.methodName);
 				
 				/* list parameters */
-				res.getWriter().print("<form action='" + url + "' method='" + rm.httpMethod + "'>");
+				w.write("<form action='" + url + "' method='" + rm.httpMethod + "'>");
 				for(RestlessParameter parameter : rm.requiredNamedParameter) {
-					res.getWriter().print(
-					        parameter.name + " <input type='text' name='" + parameter.name
-					                + "' value='" + parameter.defaultValue + "' />");
+					w.write(parameter.name + " <input type='text' name='" + parameter.name
+					        + "' value='" + parameter.defaultValue + "' />");
 				}
-				res.getWriter().print("<input type='submit' value='Send' /></form>");
+				w.write("<input type='submit' value='Send' /></form>");
 				
-				res.getWriter().println("</li>");
+				w.write("</li>");
 			}
-			res.getWriter().println("</ol></p>");
-			res.getWriter().println("</body></html>");
-			res.getWriter().flush();
+			w.write("</ol></p>");
+			w.write("</body></html>");
+			new OutputStreamWriter(res.getOutputStream(), "utf-8").flush();
 		} catch(IOException e) {
 			throw new RuntimeException(e);
 		}
