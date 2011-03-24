@@ -7,8 +7,10 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
+import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
+import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
@@ -20,6 +22,7 @@ import org.xydra.store.impl.delegate.DelegatingSecureStore;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.changes.GaeChangesService;
 import org.xydra.store.impl.gae.changes.InternalGaeXEntity;
+import org.xydra.store.impl.gae.changes.XIDLengthException;
 import org.xydra.store.impl.gae.snapshot.GaeSnapshotService;
 
 
@@ -43,6 +46,7 @@ public class GaePersistence implements XydraPersistence {
 		if(repoId == null) {
 			throw new IllegalArgumentException("repoId was null");
 		}
+		checkIdLength(repoId);
 		
 		// To enable local JUnit testing with multiple threads
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
@@ -51,6 +55,32 @@ public class GaePersistence implements XydraPersistence {
 		InfrastructureServiceFactory.setProvider(new GaeInfrastructureProvider());
 		
 		this.repoAddr = XX.toAddress(repoId, null, null, null);
+	}
+	
+	private static final int MAX_ID_LENGTH = 100;
+	
+	private static void checkIdLength(XID id) {
+		if(id != null && id.toString().length() > MAX_ID_LENGTH) {
+			throw new XIDLengthException(id);
+		}
+	}
+	
+	private static void checkIdLengths(XAtomicCommand command) {
+		XAddress addr = command.getChangedEntity();
+		// repo and model IDs already checked
+		checkIdLength(addr.getObject());
+		checkIdLength(addr.getField());
+	}
+	
+	private static void checkIdLengths(XCommand command) {
+		if(command instanceof XTransaction) {
+			for(XAtomicCommand ac : (XTransaction)command) {
+				checkIdLengths(ac);
+			}
+		} else {
+			assert command instanceof XAtomicCommand;
+			checkIdLengths((XAtomicCommand)command);
+		}
 	}
 	
 	private XAddress getModelAddress(XID modelId) {
@@ -92,7 +122,10 @@ public class GaePersistence implements XydraPersistence {
 		}
 		checkAddres(command.getTarget());
 		
+		checkIdLengths(command);
+		
 		XID modelId = command.getChangedEntity().getModel();
+		checkIdLength(modelId);
 		
 		// TODO wrap GAE exceptions in InternalStoreExceptions
 		
