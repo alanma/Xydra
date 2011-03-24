@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.URLEncoder;
@@ -22,8 +23,8 @@ import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RequiresAppEngine;
+import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
@@ -80,11 +81,13 @@ public class WebadminApp {
 		InputStreamReader isr = new InputStreamReader(in, "utf-8");
 		BufferedReader br = new BufferedReader(isr);
 		String line = br.readLine();
+		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
 		while(line != null) {
 			// copy line & output
-			res.getWriter().write(line + "\r\n");
+			w.write(line + "\r\n");
 			line = br.readLine();
 		}
+		w.flush();
 	}
 	
 	public void backup(Restless restless, HttpServletResponse res, String logs) throws IOException {
@@ -227,8 +230,8 @@ public class WebadminApp {
 				existed = true;
 				overwritten++;
 			} else {
-				XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(server
-				        .getRepositoryAddress(), XCommand.FORCED, model.getID());
+				XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(
+				        server.getRepositoryAddress(), XCommand.FORCED, model.getID());
 				server.executeCommand(createCommand, actor);
 				oldModel = server.getModelSnapshot(model.getID());
 			}
@@ -262,7 +265,7 @@ public class WebadminApp {
 			count++;
 		}
 		
-		Writer w = res.getWriter();
+		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
 		
 		w.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>"
 		        + "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\""
