@@ -1,6 +1,7 @@
 package org.xydra.testgae.xmas.rest;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,15 +31,15 @@ public class GaeConfigurator {
 	
 	public static void howto(HttpServletRequest req, HttpServletResponse res) throws IOException {
 		ServletUtils.headers(res, "text/html");
-		res.getWriter().write("GAE cache conf. ");
-		res.getWriter().write(HtmlUtils.link(req.getRequestURI() + "/get", "get stats") + "<br/>");
-		res.getWriter().write(
+		new OutputStreamWriter(res.getOutputStream(), "utf-8").write("GAE cache conf. ");
+		new OutputStreamWriter(res.getOutputStream(), "utf-8").write(HtmlUtils.link(req.getRequestURI() + "/get", "get stats") + "<br/>");
+		new OutputStreamWriter(res.getOutputStream(), "utf-8").write(
 		        HtmlUtils.link(req.getRequestURI() + "/set?memcache=true",
 		                "set memcache=true(default)") + "<br/>");
-		res.getWriter().write(
+		new OutputStreamWriter(res.getOutputStream(), "utf-8").write(
 		        HtmlUtils.link(req.getRequestURI() + "/set?memcache=false", "set memcache=false")
 		                + "<br/>");
-		res.getWriter().write(GaeUtils.getConf());
+		new OutputStreamWriter(res.getOutputStream(), "utf-8").write(GaeUtils.getConf());
 	}
 	
 }

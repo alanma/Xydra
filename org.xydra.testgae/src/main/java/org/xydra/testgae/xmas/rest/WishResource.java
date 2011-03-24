@@ -1,6 +1,8 @@
 package org.xydra.testgae.xmas.rest;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -54,26 +56,27 @@ public class WishResource {
 	public void delete(String repoStr, String listStr, String wishStr, HttpServletRequest req,
 	        HttpServletResponse res) throws IOException {
 		ServletUtils.headers(res, "text/html");
-		res.getWriter().println("Deleting<br />");
+		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		w.write("Deleting<br />");
 		
 		Stopwatch s1 = new Stopwatch().start();
 		WishlistResource.load(Xmas.getRepository(repoStr), XX.toId(listStr)).removeWish(
 		        XX.toId(wishStr));
 		s1.stop();
-		res.getWriter().write(s1.getFormattedResult("delete wish", 1) + "<br/>\n");
+		w.write(s1.getFormattedResult("delete wish", 1) + "<br/>\n");
 		
-		res.getWriter().write(HtmlUtils.link("..", "See all wishes in this list"));
-		res.getWriter().flush();
+		w.write(HtmlUtils.link("..", "See all wishes in this list"));
+		w.flush();
 	}
 	
 	public void get(String repoStr, String listStr, String wishStr, HttpServletResponse res)
 	        throws IOException {
 		ServletUtils.headers(res, "text/html");
 		init(repoStr, listStr, wishStr);
-		res.getWriter().write(this.wish.toHtml());
-		res.getWriter().write(
-		        HtmlUtils.link("/xmas/" + repoStr + "/" + listStr, "See all wishes in this lists"));
-		res.getWriter().flush();
+		new OutputStreamWriter(res.getOutputStream(), "utf-8").write(this.wish.toHtml());
+		new OutputStreamWriter(res.getOutputStream(), "utf-8").write(HtmlUtils.link("/xmas/"
+		        + repoStr + "/" + listStr, "See all wishes in this lists"));
+		new OutputStreamWriter(res.getOutputStream(), "utf-8").flush();
 	}
 	
 	private void init(String repoStr, String listStr, String wishStr) {

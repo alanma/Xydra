@@ -1,6 +1,8 @@
 package org.xydra.testgae.xmas.rest;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -61,36 +63,38 @@ public class WishlistResource {
 	public void addData(String repoStr, String list, String wishesStr, HttpServletRequest req,
 	        HttpServletResponse res) throws IOException {
 		ServletUtils.headers(res, "text/html");
-		res.getWriter().println(
-		        "Adding test data ...?wishes=" + wishesStr + " wishes. Start at "
-		                + System.currentTimeMillis());
+		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		w.write("Adding test data ...?wishes=" + wishesStr + " wishes. Start at "
+		        + System.currentTimeMillis() + "\n");
 		int wishesCount = Integer.parseInt(wishesStr);
 		init(repoStr, list);
-		this.wishList.addDemoData(wishesCount, res.getWriter());
-		res.getWriter().write(HtmlUtils.link(".", "See all wishes"));
-		res.getWriter().flush();
+		this.wishList.addDemoData(wishesCount, new OutputStreamWriter(res.getOutputStream(),
+		        "utf-8"));
+		w.write(HtmlUtils.link(".", "See all wishes"));
+		w.flush();
 	}
 	
 	public void deleteAllWishes(String repoStr, String list, HttpServletRequest req,
 	        HttpServletResponse res) throws IOException {
 		ServletUtils.headers(res, "text/html");
-		res.getWriter().println("Deleting all wishes.");
+		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		w.write("Deleting all wishes.");
 		init(repoStr, list);
-		this.wishList.removeAllWishes(res.getWriter());
-		res.getWriter().write(HtmlUtils.link("/xmas/" + repoStr, "See all wish lists"));
-		res.getWriter().flush();
+		this.wishList.removeAllWishes(new OutputStreamWriter(res.getOutputStream(), "utf-8"));
+		w.write(HtmlUtils.link("/xmas/" + repoStr, "See all wish lists"));
+		new OutputStreamWriter(res.getOutputStream(), "utf-8").flush();
 	}
 	
 	public void get(String repoStr, String list, HttpServletResponse res) throws IOException {
 		ServletUtils.headers(res, "text/html");
 		init(repoStr, list);
-		res.getWriter().write(this.wishList.toHtml(null));
+		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		w.write(this.wishList.toHtml(null));
 		
-		res.getWriter().write(
-		        HtmlUtils.form(METHOD.GET, "/xmas/" + repoStr + "/" + list + "/add")
-		                .withInputText("wishes", "1").withInputSubmit("Add wishes").toString());
-		res.getWriter().write(HtmlUtils.link("/xmas/" + repoStr, "See all wish lists"));
-		res.getWriter().flush();
+		w.write(HtmlUtils.form(METHOD.GET, "/xmas/" + repoStr + "/" + list + "/add")
+		        .withInputText("wishes", "1").withInputSubmit("Add wishes").toString());
+		w.write(HtmlUtils.link("/xmas/" + repoStr, "See all wish lists"));
+		new OutputStreamWriter(res.getOutputStream(), "utf-8").flush();
 	}
 	
 	private void init(String repoStr, String wishlistId) {

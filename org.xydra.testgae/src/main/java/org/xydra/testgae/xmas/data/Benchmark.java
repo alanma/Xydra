@@ -1,6 +1,7 @@
 package org.xydra.testgae.xmas.data;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.List;
 
@@ -37,7 +38,7 @@ public class Benchmark {
 	        String createAgain, HttpServletResponse res) throws NumberFormatException, IOException {
 		ServletUtils.headers(res, "text/html");
 		runBenchmark(repo, list, Integer.parseInt(createInitially), Integer.parseInt(delete),
-		        Integer.parseInt(createAgain), res.getWriter());
+		        Integer.parseInt(createAgain), new OutputStreamWriter(res.getOutputStream(), "utf-8"));
 	}
 	
 	public static void runBenchmark(String repo, String list, int createInitially, int delete,

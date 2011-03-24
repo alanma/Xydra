@@ -1,6 +1,8 @@
 package org.xydra.testgae.xmas.rest;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -46,22 +48,21 @@ public class XmasResource {
 		ServletUtils.headers(res, "text/html");
 		int listCount = Integer.parseInt(listsStr);
 		int wishesCount = Integer.parseInt(wishesStr);
-		res.getWriter().println(
-		        "Adding test data ...?lists=" + listsStr + "&wishes=" + wishesStr
-		                + " wishes.<br />");
-		Xmas.addData(repoStr, listCount, wishesCount, res.getWriter());
-		res.getWriter().println(
-		        "<a href='.'>See all wish lists in repository '" + repoStr + "'</a>");
+		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		w.write("Adding test data ...?lists=" + listsStr + "&wishes=" + wishesStr
+		        + " wishes.<br />");
+		Xmas.addData(repoStr, listCount, wishesCount, new OutputStreamWriter(res.getOutputStream(),
+		        "utf-8"));
+		w.write("<a href='.'>See all wish lists in repository '" + repoStr + "'</a>");
 	}
 	
 	public void get(String repoStr, String view, HttpServletResponse res) throws IOException {
 		ServletUtils.headers(res, "text/html");
-		Xmas.get(repoStr, view, res.getWriter());
+		Xmas.get(repoStr, view, new OutputStreamWriter(res.getOutputStream(), "utf-8"));
 		
-		res.getWriter().write(
-		        HtmlUtils.form(METHOD.GET, "/xmas/" + repoStr + "/add").withInputText("lists", "1")
-		                .withInputText("wishes", "1").withInputSubmit("Add lists with wishes")
-		                .toString());
+		new OutputStreamWriter(res.getOutputStream(), "utf-8").write(HtmlUtils
+		        .form(METHOD.GET, "/xmas/" + repoStr + "/add").withInputText("lists", "1")
+		        .withInputText("wishes", "1").withInputSubmit("Add lists with wishes").toString());
 	}
 	
 }

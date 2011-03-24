@@ -42,25 +42,28 @@ public class TestResource {
 	public void test1(HttpServletRequest req, HttpServletResponse res) throws IOException {
 		res.setContentType("text/plain");
 		res.setStatus(200);
-		res.getWriter().println("Test1 start.");
+		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		w.write("Test1 start.");
 		test1();
-		res.getWriter().println("Test1 stop. Some operations might still be pending.");
+		w.write("Test1 stop. Some operations might still be pending.");
 	}
 	
 	public void test2(HttpServletRequest req, HttpServletResponse res) throws IOException {
 		res.setContentType("text/plain");
 		res.setStatus(200);
-		res.getWriter().println("Test2 start.");
-		test2(res.getWriter());
-		res.getWriter().println("Test2 stop. Some operations might still be pending.");
+		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		w.write("Test2 start.");
+		test2(new OutputStreamWriter(res.getOutputStream(), "utf-8"));
+		w.write("Test2 stop. Some operations might still be pending.");
 	}
 	
 	public void test3(HttpServletRequest req, HttpServletResponse res) throws IOException {
 		res.setContentType("text/plain");
 		res.setStatus(200);
-		res.getWriter().println("Test3 start.");
-		test3(res.getWriter());
-		res.getWriter().println("Test3 stop. Some operations might still be pending.");
+		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		w.write("Test3 start.");
+		test3(new OutputStreamWriter(res.getOutputStream(), "utf-8"));
+		w.write("Test3 stop. Some operations might still be pending.");
 	}
 	
 	public String info() {

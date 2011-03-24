@@ -1,6 +1,8 @@
 package org.xydra.testgae;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,31 +30,31 @@ public class BenchmarkResource {
 	        throws IOException {
 		res.setContentType("text/plain");
 		res.setStatus(200);
-		res.getWriter().println(
-		        "Benchmark with ...?turns=" + turnsStr + " start at " + System.currentTimeMillis());
+		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		w.write("Benchmark with ...?turns=" + turnsStr + " start at " + System.currentTimeMillis()
+		        + "\n");
 		int turns = Integer.parseInt(turnsStr);
-		res.getWriter().println("Initializing at " + System.currentTimeMillis());
+		w.write("Initializing at " + System.currentTimeMillis() + "\n");
 		long id = System.currentTimeMillis();
 		XydraPersistence persistence = new GaePersistence(XX.toId("benchmark-" + id));
 		WritableRepositoryOnPersistence repo = new WritableRepositoryOnPersistence(persistence,
 		        XX.toId("benchmark-user"));
-		res.getWriter().println("Init done at " + System.currentTimeMillis());
+		w.write("Init done at " + System.currentTimeMillis() + "\n");
 		long duration = 0;
 		for(int i = 1; i <= turns; i++) {
 			long start = System.currentTimeMillis();
-			res.getWriter().println("Turn " + i + " at " + start);
+			w.write("Turn " + i + " at " + start + "\n");
 			XWritableModel model1 = repo.createModel(XX.toId("model" + i));
 			XWritableObject object1 = model1.createObject(XX.toId("object" + i));
 			XWritableField field1 = object1.createField(XX.toId("field" + i));
 			field1.setValue(X.getValueFactory().createStringValue("value in model1-object1-field1"));
 			long stop = System.currentTimeMillis();
-			res.getWriter().println(
-			        "Created model, object, field, value at " + stop + " took " + (stop - start)
-			                + "ms");
+			w.write("Created model, object, field, value at " + stop + " took " + (stop - start)
+			        + "ms" + "\n");
 			duration += (stop - start);
 		}
-		res.getWriter().println(
-		        "Benchmark stop. Duration " + duration + " = " + (duration / turns) + " per turn");
+		w.write("Benchmark stop. Duration " + duration + " = " + (duration / turns) + " per turn"
+		        + "\n");
 	}
 	
 }
