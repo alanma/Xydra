@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RequiresAppEngine;
+import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.server.impl.IMemCache;
 
 

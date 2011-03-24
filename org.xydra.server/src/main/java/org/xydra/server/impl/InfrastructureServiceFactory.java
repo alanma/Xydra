@@ -1,7 +1,7 @@
 package org.xydra.server.impl;
 
-import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RequiresAppEngine;
+import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.server.impl.memory.SimpleInfrastructureProvider;

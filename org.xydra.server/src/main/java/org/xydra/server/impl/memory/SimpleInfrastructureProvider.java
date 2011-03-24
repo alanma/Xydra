@@ -1,7 +1,7 @@
 package org.xydra.server.impl.memory;
 
-import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RequiresAppEngine;
+import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.server.impl.IInfrastructureProvider;
 import org.xydra.server.impl.IMemCache;
 

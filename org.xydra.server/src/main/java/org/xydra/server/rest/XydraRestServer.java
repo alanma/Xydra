@@ -1,7 +1,9 @@
 package org.xydra.server.rest;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
@@ -60,8 +62,7 @@ public class XydraRestServer {
 	public static IXydraServer getXydraServer(Restless restless) {
 		IXydraServer xydraServer = getXydraServerInternal(restless);
 		if(xydraServer == null) {
-			log
-			        .warn("XydraRestServer.restless hasn't been run properly before calling this method.");
+			log.warn("XydraRestServer.restless hasn't been run properly before calling this method.");
 		}
 		return xydraServer;
 	}
@@ -157,9 +158,10 @@ public class XydraRestServer {
 		res.setStatus(200);
 		res.setContentType("text/plain");
 		res.setCharacterEncoding("utf-8");
-		res.getWriter().write("Running. Server time = " + System.currentTimeMillis());
-		res.getWriter().flush();
-		res.getWriter().close();
+		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		w.write("Running. Server time = " + System.currentTimeMillis());
+		w.flush();
+		w.close();
 	}
 	
 	public static XID getId(String idStr) {
@@ -184,7 +186,7 @@ public class XydraRestServer {
 		res.setContentType(contentType);
 		res.setStatus(statusCode);
 		try {
-			res.getWriter().write(xml);
+			new OutputStreamWriter(res.getOutputStream(), "utf-8").write(xml);
 		} catch(IOException ioe) {
 			throw new RuntimeException("IOException while sending response", ioe);
 		}
