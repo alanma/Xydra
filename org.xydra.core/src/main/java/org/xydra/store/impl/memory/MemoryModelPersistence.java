@@ -11,7 +11,6 @@ import org.xydra.base.change.XEvent;
 import org.xydra.base.change.impl.memory.MemoryTransactionEvent;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
-import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.DeltaUtils;
@@ -37,7 +36,7 @@ public class MemoryModelPersistence {
 	 * The current state of the model, or null if the model doesn't currently
 	 * exist.
 	 */
-	private SimpleModel model = null;
+	private XRevWritableModel model = null;
 	XAddress modelAddr;
 	
 	public MemoryModelPersistence(XAddress modelAddr) {

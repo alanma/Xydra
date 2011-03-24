@@ -16,20 +16,17 @@ import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XRevWritableField;
+import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.value.XValue;
-import org.xydra.core.model.impl.memory.SynchronizesChangesImpl;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
 
 /**
- * Helper class for generating the necessary events when executing commands.
- * 
- * TODO move this to core and merge with event generation in MemoryModel if
- * possible
+ * Helper class for executing commands and generating matching events.
  * 
  * @author dscharrer
  * 
@@ -40,15 +37,17 @@ public abstract class DeltaUtils {
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(DeltaUtils.class);
 	
+	/**
+	 * A description of what happened to the model itself.
+	 * 
+	 * Changes to individual objects and fields are described by
+	 * {@link ChangedModel}.
+	 */
 	public enum ModelChange {
 		CREATED, NOCHANGE, REMOVED
 	}
 	
-	/**
-	 * IMPROVE some of this could be shared with {@link SynchronizesChangesImpl}
-	 * , but revision numbers are handled differently.
-	 */
-	public static void applyChanges(SimpleModel model, ChangedModel changedModel, long rev) {
+	private static void applyChanges(XRevWritableModel model, ChangedModel changedModel, long rev) {
 		
 		for(XID objectId : changedModel.getRemovedObjects()) {
 			assert model.hasObject(objectId);
@@ -104,6 +103,8 @@ public abstract class DeltaUtils {
 	}
 	
 	/**
+	 * Apply the given changes to a {@link SimpleModel}.
+	 * 
 	 * @param modelAddr The address of the model to change. This is used if the
 	 *            model needs to be created first (modelToChange is null).
 	 * @param modelToChange The model to change. This may be null if the model
@@ -114,10 +115,10 @@ public abstract class DeltaUtils {
 	 * @return a model with the changes applied or null if model has been
 	 *         removed by the changes.
 	 */
-	public static SimpleModel applyChanges(XAddress modelAddr, SimpleModel modelToChange,
-	        Pair<ChangedModel,ModelChange> change, long rev) {
+	public static XRevWritableModel applyChanges(XAddress modelAddr,
+	        XRevWritableModel modelToChange, Pair<ChangedModel,ModelChange> change, long rev) {
 		
-		SimpleModel model = modelToChange;
+		XRevWritableModel model = modelToChange;
 		ChangedModel changedModel = change.getFirst();
 		ModelChange mc = change.getSecond();
 		
@@ -137,7 +138,7 @@ public abstract class DeltaUtils {
 		return model;
 	}
 	
-	public static void applyChanges(XRevWritableObject object, XReadableField field, long rev) {
+	private static void applyChanges(XRevWritableObject object, XReadableField field, long rev) {
 		assert !object.hasField(field.getID());
 		XRevWritableField newField = object.createField(field.getID());
 		newField.setValue(field.getValue());
@@ -145,6 +146,13 @@ public abstract class DeltaUtils {
 	}
 	
 	/**
+	 * Calculated the events describing the given change.
+	 * 
+	 * @param modelAddr The model the change applies to.
+	 * @param change A change as created by
+	 *            {@link #executeCommand(XReadableModel, XCommand)}.
+	 * @param actorId The actor that initiated the change.
+	 * @param rev The revision number of the change.
 	 * @return the appropriate events for the change (as returned by
 	 *         {@link #executeCommand(XReadableModel, XCommand)}
 	 */
@@ -178,6 +186,7 @@ public abstract class DeltaUtils {
 		}
 		
 		if(model != null) {
+			assert model.getAddress().equals(modelAddr);
 			createEventsForChangedModel(events, actorId, model, inTrans, mc == ModelChange.REMOVED);
 		}
 		
@@ -193,7 +202,7 @@ public abstract class DeltaUtils {
 		return events;
 	}
 	
-	public static void createEventsForChangedModel(List<XAtomicEvent> events, XID actorId,
+	private static void createEventsForChangedModel(List<XAtomicEvent> events, XID actorId,
 	        ChangedModel changedModel, boolean inTrans, boolean implied) {
 		
 		long rev = changedModel.getRevisionNumber();
@@ -253,7 +262,7 @@ public abstract class DeltaUtils {
 		
 	}
 	
-	public static void createEventsForNewField(List<XAtomicEvent> events, long rev, XID actorId,
+	private static void createEventsForNewField(List<XAtomicEvent> events, long rev, XID actorId,
 	        XReadableObject object, XReadableField field, boolean inTrans) {
 		long objectRev = object.getRevisionNumber();
 		events.add(MemoryObjectEvent.createAddEvent(actorId, object.getAddress(), field.getID(),
@@ -264,7 +273,7 @@ public abstract class DeltaUtils {
 		}
 	}
 	
-	public static void createEventsForRemovedField(List<XAtomicEvent> events, long modelRev,
+	private static void createEventsForRemovedField(List<XAtomicEvent> events, long modelRev,
 	        XID actorId, XReadableObject object, XReadableField field, boolean inTrans,
 	        boolean implied) {
 		long objectRev = object.getRevisionNumber();
@@ -277,7 +286,7 @@ public abstract class DeltaUtils {
 		        modelRev, objectRev, fieldRev, inTrans, implied));
 	}
 	
-	public static void createEventsForRemovedObject(List<XAtomicEvent> events, long modelRev,
+	private static void createEventsForRemovedObject(List<XAtomicEvent> events, long modelRev,
 	        XID actorId, XReadableObject object, boolean inTrans, boolean implied) {
 		for(XID fieldId : object) {
 			DeltaUtils.createEventsForRemovedField(events, modelRev, actorId, object, object
@@ -288,7 +297,8 @@ public abstract class DeltaUtils {
 	}
 	
 	/**
-	 * Execute the current command on the model.
+	 * Calculate the changes resulting from executing the given command on the
+	 * given model.
 	 * 
 	 * @param model The model to modify. Null if the model currently doesn't
 	 *            exist. This instance is modified.
