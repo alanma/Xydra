@@ -1,6 +1,8 @@
 package org.xydra.gae.admin;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -36,20 +38,21 @@ public class CsvImportExportResource {
 	
 	public static void index(HttpServletRequest req, HttpServletResponse res) throws IOException {
 		ServletUtils.headers(res, "text/html");
-		res.getWriter().println("<html><head><title>Xydra admin / CSV</title></head><body>");
-		res.getWriter().println("Export: <a href='" + req.getRequestURL() + "/export'>CSV</a>");
+		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		w.write("<html><head><title>Xydra admin / CSV</title></head><body>");
+		w.write("Export: <a href='" + req.getRequestURL() + "/export'>CSV</a>");
 		// FIXME impl.
-		res.getWriter().println("</body></html>");
+		w.write("</body></html>");
 	}
 	
 	public static void csvImport(String csv, String repository, HttpServletRequest req,
 	        HttpServletResponse res) throws IOException {
 		ServletUtils.headers(res, "text/html");
-		res.getWriter().println(
-		        "<html><head><title>Xydra admin / CSV / Import</title></head><body>");
-		res.getWriter().println("Not implemented yet");
+		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		w.write("<html><head><title>Xydra admin / CSV / Import</title></head><body>");
+		w.write("Not implemented yet");
 		// FIXME impl.
-		res.getWriter().println("</body></html>");
+		w.write("</body></html>");
 	}
 	
 	public void csvExport(String repository, Restless restless, HttpServletRequest req,
@@ -63,8 +66,8 @@ public class CsvImportExportResource {
 		WritableRepositoryOnPersistence repo = XydraAdminApp.getRepository(restless, repository);
 		res.setHeader("Content-disposition", "attachment;filename=" + repo.getID() + ".csv");
 		
-		CsvExport.toWriter(repo, res.getWriter());
-		res.getWriter().flush();
+		CsvExport.toWriter(repo, new OutputStreamWriter(res.getOutputStream(), "utf-8"));
+		new OutputStreamWriter(res.getOutputStream(), "utf-8").flush();
 	}
 	
 }

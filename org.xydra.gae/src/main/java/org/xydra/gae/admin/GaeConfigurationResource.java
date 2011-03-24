@@ -1,6 +1,7 @@
 package org.xydra.gae.admin;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,18 +33,18 @@ public class GaeConfigurationResource {
 		res.setCharacterEncoding("utf-8");
 		res.setContentType("Text/html");
 		res.setStatus(200);
-		res.getWriter().write("GAE cache conf. ");
-		res.getWriter().write(
+		new OutputStreamWriter(res.getOutputStream(), "utf-8").write("GAE cache conf. ");
+		new OutputStreamWriter(res.getOutputStream(), "utf-8").write(
 		        org.xydra.restless.utils.HtmlUtils.link(req.getRequestURI() + "/get", "get stats")
 		                + "<br/>");
-		res.getWriter().write(
+		new OutputStreamWriter(res.getOutputStream(), "utf-8").write(
 		        org.xydra.restless.utils.HtmlUtils.link(req.getRequestURI() + "/set?memcache=true",
 		                "set memcache=true(default)") + "<br/>");
-		res.getWriter().write(
+		new OutputStreamWriter(res.getOutputStream(), "utf-8").write(
 		        org.xydra.restless.utils.HtmlUtils.link(
 		                req.getRequestURI() + "/set?memcache=false", "set memcache=false")
 		                + "<br/>");
-		res.getWriter().write(GaeUtils.getConf());
+		new OutputStreamWriter(res.getOutputStream(), "utf-8").write(GaeUtils.getConf());
 	}
 	
 }

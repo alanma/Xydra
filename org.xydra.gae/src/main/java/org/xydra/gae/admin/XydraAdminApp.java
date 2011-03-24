@@ -1,6 +1,8 @@
 package org.xydra.gae.admin;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -47,12 +49,13 @@ public class XydraAdminApp {
 	
 	public static void index(HttpServletRequest req, HttpServletResponse res) throws IOException {
 		ServletUtils.headers(res, "text/html");
-		HtmlUtils.writeHtmlHeaderOpenBody(res.getWriter(), "Xydra Admin");
-		res.getWriter().println(
-		        "<a href='" + req.getRequestURL() + "/addDemoData'>Add demo data</a>");
-		res.getWriter().println("Format: <a href='" + req.getRequestURL() + "/csv'>CSV</a>");
+		HtmlUtils.writeHtmlHeaderOpenBody(new OutputStreamWriter(res.getOutputStream(), "utf-8"),
+		        "Xydra Admin");
+		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		w.write("<a href='" + req.getRequestURL() + "/addDemoData'>Add demo data</a>");
+		w.write("Format: <a href='" + req.getRequestURL() + "/csv'>CSV</a>");
 		// TODO XML, JSON
-		HtmlUtils.writeCloseBodyHtml(res.getWriter());
+		HtmlUtils.writeCloseBodyHtml(new OutputStreamWriter(res.getOutputStream(), "utf-8"));
 		
 	}
 	
