@@ -13,6 +13,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.csv.impl.memory.CsvTable;
 import org.xydra.csv.impl.memory.Row;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
 
@@ -46,6 +48,8 @@ import com.google.apphosting.api.ApiProxy;
  * 
  */
 public class GaeMyAdminApp {
+	
+	private static final Logger log = LoggerFactory.getLogger(GaeMyAdminApp.class);
 	
 	public static void restless(Restless restless, String prefix) {
 		restless.addMethod("/stats", "GET", GaeMyAdminApp.class, "stats", true,
@@ -100,7 +104,13 @@ public class GaeMyAdminApp {
 					keys.add(entity.getKey());
 				}
 				w.write("Bulk delete ... ");
-				datastore.delete(keys);
+				try {
+					datastore.delete(keys);
+				} catch(Exception e) {
+					log.warn("Could not delete kind '" + kind + "'", e);
+					w.write("Could not delete kind '" + kind + "'.");
+					
+				}
 				w.write("Deleted all '" + kind + "'.\n");
 			}
 		} else {
@@ -138,18 +148,18 @@ public class GaeMyAdminApp {
 	        throws IOException {
 		long start = System.currentTimeMillis();
 		
-		new OutputStreamWriter(res.getOutputStream(), "utf-8").write("=== Version 2010-11-10 $Revision$\n");
+		new OutputStreamWriter(res.getOutputStream(), "utf-8")
+		        .write("=== Version 2010-11-10 $Revision$\n");
 		
 		DatastoreServiceConfig defaultConfig = DatastoreServiceConfig.Builder.withDefaults();
-		new OutputStreamWriter(res.getOutputStream(), "utf-8").write(
-		        "Default datastore config\n"
+		new OutputStreamWriter(res.getOutputStream(), "utf-8").write("Default datastore config\n"
 
-		        + "* deadline: " + defaultConfig.getDeadline() + "\n"
+		+ "* deadline: " + defaultConfig.getDeadline() + "\n"
 
-		        + "* implicitTransactionManagementPolicy: "
-		                + defaultConfig.getImplicitTransactionManagementPolicy().name() + "\n"
+		+ "* implicitTransactionManagementPolicy: "
+		        + defaultConfig.getImplicitTransactionManagementPolicy().name() + "\n"
 
-		                + "* readPolicy: " + defaultConfig.getReadPolicy().getConsistency() + "\n"
+		        + "* readPolicy: " + defaultConfig.getReadPolicy().getConsistency() + "\n"
 
 		);
 		
@@ -158,9 +168,11 @@ public class GaeMyAdminApp {
 		Entity dummyEntity = new Entity(key);
 		try {
 			this.datastore.put(dummyEntity);
-			new OutputStreamWriter(res.getOutputStream(), "utf-8").write("Datastore health: Fully functional and writeable\n");
+			new OutputStreamWriter(res.getOutputStream(), "utf-8")
+			        .write("Datastore health: Fully functional and writeable\n");
 		} catch(ApiProxy.CapabilityDisabledException e) {
-			new OutputStreamWriter(res.getOutputStream(), "utf-8").write("Datastore health: /!\\ READ-ONLY MODE /!\\ \n");
+			new OutputStreamWriter(res.getOutputStream(), "utf-8")
+			        .write("Datastore health: /!\\ READ-ONLY MODE /!\\ \n");
 		}
 		
 		MemcacheService ms = MemcacheServiceFactory.getMemcacheService();
@@ -168,15 +180,17 @@ public class GaeMyAdminApp {
 		
 		try {
 			ms.put("dummy", "dummy");
-			new OutputStreamWriter(res.getOutputStream(), "utf-8").write("Memcache health:  Fully functional and writeable\n");
+			new OutputStreamWriter(res.getOutputStream(), "utf-8")
+			        .write("Memcache health:  Fully functional and writeable\n");
 		} catch(com.google.appengine.api.memcache.MemcacheServiceException e) {
 			// Memcache is down, degrade gracefully
-			new OutputStreamWriter(res.getOutputStream(), "utf-8").write(
-			        "Memcache health:  /!\\ READ-ONLY MODE /!\\ Will return no hits\n");
+			new OutputStreamWriter(res.getOutputStream(), "utf-8")
+			        .write("Memcache health:  /!\\ READ-ONLY MODE /!\\ Will return no hits\n");
 		}
 		
 		Collection<Transaction> txns = this.datastore.getActiveTransactions();
-		new OutputStreamWriter(res.getOutputStream(), "utf-8").write("Active transactions: " + txns.size() + "\n");
+		new OutputStreamWriter(res.getOutputStream(), "utf-8").write("Active transactions: "
+		        + txns.size() + "\n");
 		
 		FetchOptions defaultFetchOptions = FetchOptions.Builder.withDefaults();
 		new OutputStreamWriter(res.getOutputStream(), "utf-8").write("Default fetchOptions\n"
@@ -206,26 +220,30 @@ public class GaeMyAdminApp {
 		if(resultFormat.equals("text")) {
 			new OutputStreamWriter(res.getOutputStream(), "utf-8").write("All kinds of entities\n");
 			for(String kind : getAllKinds()) {
-				new OutputStreamWriter(res.getOutputStream(), "utf-8").write("* Kind: " + kind + "\n");
+				new OutputStreamWriter(res.getOutputStream(), "utf-8").write("* Kind: " + kind
+				        + "\n");
 				
 				for(Entity e : getEntitiesOfKind(kind)) {
 					// handle entity
-					new OutputStreamWriter(res.getOutputStream(), "utf-8").write(
-					        "** appid:" + e.getAppId() + " namespace:" + e.getNamespace()
-					                + " props:" + e.getProperties().keySet() + "\n");
+					new OutputStreamWriter(res.getOutputStream(), "utf-8").write("** appid:"
+					        + e.getAppId() + " namespace:" + e.getNamespace() + " props:"
+					        + e.getProperties().keySet() + "\n");
 					
 					// handle properties
 					Map<String,Object> props = e.getProperties();
 					for(Map.Entry<String,Object> me : props.entrySet()) {
-						new OutputStreamWriter(res.getOutputStream(), "utf-8").write("*** " + me.getKey() + " = " + me.getValue() + "\n");
+						new OutputStreamWriter(res.getOutputStream(), "utf-8").write("*** "
+						        + me.getKey() + " = " + me.getValue() + "\n");
 					}
 				}
 			}
 		} else {
 			CsvTable csv = new CsvTable();
-			new OutputStreamWriter(res.getOutputStream(), "utf-8").write("Fetching kind names...\n");
+			new OutputStreamWriter(res.getOutputStream(), "utf-8")
+			        .write("Fetching kind names...\n");
 			for(String kind : getAllKinds()) {
-				new OutputStreamWriter(res.getOutputStream(), "utf-8").write("Processing all elements of kind: " + kind + "\n");
+				new OutputStreamWriter(res.getOutputStream(), "utf-8")
+				        .write("Processing all elements of kind: " + kind + "\n");
 				for(Entity e : getEntitiesOfKind(kind)) {
 					// handle entity
 					Row row = csv.getOrCreateRow(e.getKey().toString(), true);
@@ -257,9 +275,11 @@ public class GaeMyAdminApp {
 				}
 			}
 			
-			new OutputStreamWriter(res.getOutputStream(), "utf-8").write("--------- >8 ----- CSV \n");
+			new OutputStreamWriter(res.getOutputStream(), "utf-8")
+			        .write("--------- >8 ----- CSV \n");
 			csv.writeTo(new OutputStreamWriter(res.getOutputStream(), "utf-8"));
-			new OutputStreamWriter(res.getOutputStream(), "utf-8").write("--------- >8 ----- CSV \n");
+			new OutputStreamWriter(res.getOutputStream(), "utf-8")
+			        .write("--------- >8 ----- CSV \n");
 		}
 		
 		// __Stat_Kind_IsRootEntity__
@@ -333,16 +353,16 @@ public class GaeMyAdminApp {
 		if(statTotal != null) {
 			Long totalBytes = (Long)statTotal.getProperty("bytes");
 			Long totalEntities = (Long)statTotal.getProperty("count");
-			new OutputStreamWriter(res.getOutputStream(), "utf-8")
-			        .write("Datastore contains " + totalBytes + " bytes in " + totalEntities
-			                + " entities");
+			new OutputStreamWriter(res.getOutputStream(), "utf-8").write("Datastore contains "
+			        + totalBytes + " bytes in " + totalEntities + " entities");
 		} else {
 			new OutputStreamWriter(res.getOutputStream(), "utf-8")
 			        .write("No entity named '__Stat_Total__' found. Works maybe only in production. Stats are computed only once a day.");
 		}
 		
 		long stop = System.currentTimeMillis();
-		new OutputStreamWriter(res.getOutputStream(), "utf-8").write("Done processing in " + ((stop - start) / 1000) + " seconds");
+		new OutputStreamWriter(res.getOutputStream(), "utf-8").write("Done processing in "
+		        + ((stop - start) / 1000) + " seconds");
 		
 		res.setContentType("text/plain");
 		res.setCharacterEncoding("utf-8");
