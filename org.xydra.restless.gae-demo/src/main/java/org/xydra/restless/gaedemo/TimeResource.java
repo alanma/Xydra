@@ -1,6 +1,7 @@
 package org.xydra.restless.gaedemo;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -27,7 +28,7 @@ public class TimeResource {
 	
 	public void getTimeFromBrowser(HttpServletResponse res, String millisAtCallTime)
 	        throws IOException {
-		Writer w = res.getWriter();
+		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
 		w.write("It is now: \r\n"
 		        + "<script type=\"text/javascript\">\r\n"
 		        + "<!--\r\n"
