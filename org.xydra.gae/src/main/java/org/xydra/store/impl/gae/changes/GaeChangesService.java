@@ -30,6 +30,7 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.server.IXydraServer;
 import org.xydra.store.GetEventsRequest;
+import org.xydra.store.XydraRuntime;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.gae.GaeUtils;
 import org.xydra.store.impl.gae.GaeUtils.AsyncEntity;
@@ -532,8 +533,7 @@ public class GaeChangesService {
 					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(), change.locks));
 				} else {
 					assert event.getChangeType() == ChangeType.ADD;
-					futures.add(InternalGaeModel
-					        .createModel(event.getChangedEntity(), change.locks));
+					futures.add(InternalGaeModel.createModel(event.getChangedEntity(), change.locks));
 				}
 			}
 			
@@ -557,6 +557,10 @@ public class GaeChangesService {
 		if(this.revCache.getCurrent() == change.rev - 1) {
 			this.revCache.setCurrent(change.rev);
 		}
+		
+		/* update revNr in memcache */
+		XydraRuntime.getMemcache().put(this.modelAddr + "-currentRev", change.rev);
+		
 	}
 	
 	/**
@@ -645,6 +649,15 @@ public class GaeChangesService {
 	 *      org.xydra.store.Callback)
 	 */
 	public long getCurrentRevisionNumber() {
+		/*
+		 * try to find the exact information in memcache which has been updated
+		 * by all methods that can change a model.
+		 */
+		Object o = XydraRuntime.getMemcache().get(this.modelAddr + "-currentRev");
+		if(o != null) {
+			Long l = (Long)o;
+			return l;
+		}
 		
 		long currentRev = this.revCache.getCurrent();
 		
