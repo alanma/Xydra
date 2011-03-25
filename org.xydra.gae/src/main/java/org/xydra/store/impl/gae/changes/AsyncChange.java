@@ -1,6 +1,5 @@
 package org.xydra.store.impl.gae.changes;
 
-import org.xydra.base.XAddress;
 import org.xydra.store.impl.gae.GaeUtils;
 import org.xydra.store.impl.gae.GaeUtils.AsyncEntity;
 
@@ -16,7 +15,7 @@ import com.google.appengine.api.datastore.Key;
  */
 public class AsyncChange {
 	
-	private final XAddress modelAddr;
+	private final GaeChangesService gcs;
 	private final AsyncEntity future;
 	private final long rev;
 	private GaeChange change;
@@ -24,13 +23,21 @@ public class AsyncChange {
 	/**
 	 * Get the change at the specified revision number.
 	 */
-	protected AsyncChange(XAddress modelAddr, long rev) {
+	protected AsyncChange(GaeChangesService gcs, long rev) {
 		
-		this.modelAddr = modelAddr;
+		this.gcs = gcs;
 		this.rev = rev;
 		
-		Key key = KeyStructure.createChangeKey(modelAddr, rev);
+		Key key = KeyStructure.createChangeKey(gcs.getModelAddress(), rev);
 		this.future = GaeUtils.getEntityAsync(key);
+	}
+	
+	protected AsyncChange(GaeChange change) {
+		assert change != null;
+		this.change = change;
+		this.future = null;
+		this.rev = -1;
+		this.gcs = null;
 	}
 	
 	/**
@@ -44,7 +51,10 @@ public class AsyncChange {
 			if(changeEntity == null) {
 				return null;
 			}
-			this.change = new GaeChange(this.modelAddr, this.rev, changeEntity);
+			this.change = new GaeChange(this.gcs.getModelAddress(), this.rev, changeEntity);
+			if(this.change.getStatus().isCommitted()) {
+				this.gcs.cacheCommittedChange(this.change);
+			}
 		}
 		return this.change;
 	}

@@ -241,7 +241,7 @@ public class GaeEventService {
 		/**
 		 * Construct with an already-loaded value.
 		 */
-		private AsyncValue(XValue value) {
+		protected AsyncValue(XValue value) {
 			this.value = value;
 			this.future = null;
 			this.transIndex = TRANSINDEX_NONE;
@@ -550,6 +550,10 @@ public class GaeEventService {
 		}
 		
 		return new Pair<XAtomicEvent[],int[]>(events, valueIds);
+	}
+	
+	public static int getEventIndex(int transindex) {
+		return transindex < TRANSINDEX_NONE ? getInternalValueId(transindex) : transindex;
 	}
 	
 }

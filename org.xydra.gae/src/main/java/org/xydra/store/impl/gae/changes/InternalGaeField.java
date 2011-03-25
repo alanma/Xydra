@@ -31,7 +31,7 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 	
 	private static final String PROP_TRANSINDEX = "transindex";
 	
-	private final XAddress modelAddr;
+	private final GaeChangesService gcs;
 	private final XAddress fieldAddr;
 	private final long fieldRev;
 	private final int transindex;
@@ -46,8 +46,8 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 	 * {@link InternalGaeObject#getField(XID)}.
 	 * 
 	 */
-	protected InternalGaeField(XAddress modelAddr, XAddress fieldAddr, Entity fieldEntity) {
-		this.modelAddr = modelAddr;
+	protected InternalGaeField(GaeChangesService gcs, XAddress fieldAddr, Entity fieldEntity) {
+		this.gcs = gcs;
 		assert fieldAddr.getAddressedType() == XType.XFIELD;
 		this.fieldAddr = fieldAddr;
 		this.fieldRev = getFieldRev(fieldEntity);
@@ -61,7 +61,7 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 	public XValue getValue() {
 		if(this.value == null) {
 			// IMPROVE maybe get this when the field is fetched?
-			this.value = GaeEventService.getValue(this.modelAddr, this.fieldRev, this.transindex);
+			this.value = this.gcs.getValue(this.fieldRev, this.transindex);
 		}
 		return this.value.get();
 	}

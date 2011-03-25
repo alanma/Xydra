@@ -3,8 +3,10 @@ package org.xydra.store.impl.gae.changes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.ConcurrentModificationException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 
@@ -20,6 +22,7 @@ import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.change.XTransaction;
+import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XChangeLog;
@@ -33,6 +36,7 @@ import org.xydra.store.GetEventsRequest;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.gae.GaeUtils;
 import org.xydra.store.impl.gae.changes.GaeChange.Status;
+import org.xydra.store.impl.gae.changes.GaeEventService.AsyncValue;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -280,6 +284,7 @@ public class GaeChangesService {
 			
 			// Check if the change is committed.
 			if(otherChange.getStatus().isCommitted()) {
+				cacheCommittedChange(otherChange);
 				if(newCommitedRev < 0) {
 					newCommitedRev = otherRev;
 				}
@@ -628,6 +633,16 @@ public class GaeChangesService {
 		if(this.revCache.getLastCommited() == change.rev - 1) {
 			this.revCache.setLastCommited(change.rev);
 		}
+		cacheCommittedChange(change);
+	}
+	
+	protected void cacheCommittedChange(GaeChange change) {
+		assert change.getStatus().isCommitted();
+		if(useLocalVMCache) {
+			synchronized(this.committedChangeCache) {
+				this.committedChangeCache.put(change.rev, change);
+			}
+		}
 	}
 	
 	/**
@@ -717,7 +732,16 @@ public class GaeChangesService {
 	 * Get the change at the specified revision number.
 	 */
 	public AsyncChange getChangeAt(long rev) {
-		return new AsyncChange(this.modelAddr, rev);
+		if(useLocalVMCache) {
+			// IMPROVE use a map that supports concurrency instead?
+			synchronized(this.committedChangeCache) {
+				GaeChange change = this.committedChangeCache.get(rev);
+				if(change != null) {
+					return new AsyncChange(change);
+				}
+			}
+		}
+		return new AsyncChange(this, rev);
 	}
 	
 	/**
@@ -864,4 +888,32 @@ public class GaeChangesService {
 		}
 	}
 	
+	private static final boolean useLocalVMCache = true;
+	private Map<Long,GaeChange> committedChangeCache = new HashMap<Long,GaeChange>();
+	
+	public AsyncValue getValue(long rev, int transindex) {
+		
+		if(useLocalVMCache) {
+			GaeChange change;
+			synchronized(this.committedChangeCache) {
+				change = this.committedChangeCache.get(rev);
+			}
+			if(change != null) {
+				int realindex = GaeEventService.getEventIndex(transindex);
+				if(realindex >= 0) {
+					XEvent event = change.getEvent();
+					if(event instanceof XTransactionEvent) {
+						assert ((XTransactionEvent)event).size() > realindex;
+						event = ((XTransactionEvent)event).getEvent(realindex);
+					} else {
+						assert realindex == 0;
+					}
+					assert event instanceof XFieldEvent;
+					return new AsyncValue(((XFieldEvent)event).getNewValue());
+				}
+			}
+		}
+		
+		return GaeEventService.getValue(this.modelAddr, rev, transindex);
+	}
 }

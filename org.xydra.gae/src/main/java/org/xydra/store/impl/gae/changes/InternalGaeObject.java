@@ -117,7 +117,7 @@ public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeFi
 	
 	@Override
 	protected InternalGaeField loadChild(XAddress childAddr, Entity childEntity) {
-		return new InternalGaeField(getChangesService().getModelAddress(), childAddr, childEntity);
+		return new InternalGaeField(getChangesService(), childAddr, childEntity);
 	}
 	
 	@Override
