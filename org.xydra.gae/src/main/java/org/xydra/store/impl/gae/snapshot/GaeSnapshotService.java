@@ -228,8 +228,7 @@ public class GaeSnapshotService {
 		
 		// model, object and field events
 		if(model == null) {
-			throw new IllegalArgumentException("Model may not be null for event "
-			        + event.getClass());
+			throw new IllegalArgumentException("Model may not be null for event " + event);
 		}
 		model.setRevisionNumber(rev);
 		
