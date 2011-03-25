@@ -1,6 +1,8 @@
 package org.xydra.store.impl.gae;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.xydra.annotations.RunsInAppEngine;
@@ -91,10 +93,18 @@ public class GaePersistence implements XydraPersistence {
 		return XX.resolveModel(this.repoAddr, modelId);
 	}
 	
+	private Map<XID,GaeChangesService> gcsCache = new HashMap<XID,GaeChangesService>();
+	
 	private GaeChangesService getChangesService(XID modelId) {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		// IMPROVE cache GaeChangesService instances?
-		return new GaeChangesService(getModelAddress(modelId));
+		synchronized(this.gcsCache) {
+			GaeChangesService gcs = this.gcsCache.get(modelId);
+			if(gcs == null) {
+				gcs = new GaeChangesService(getModelAddress(modelId));
+				this.gcsCache.put(modelId, gcs);
+			}
+			return gcs;
+		}
 	}
 	
 	private GaeSnapshotService getSnapshotService(XID modelId) {
