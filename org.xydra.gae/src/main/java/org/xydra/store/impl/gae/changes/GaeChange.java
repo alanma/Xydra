@@ -292,12 +292,14 @@ public class GaeChange {
 	}
 	
 	public void reload(Transaction trans) {
+		assert !getStatus().isCommitted();
 		this.entity = GaeUtils.getEntity(this.entity.getKey(), trans);
 		assert this.entity != null : "change entities should not vanish";
 		clearCache();
 	}
 	
 	public void reload() {
+		assert !getStatus().isCommitted();
 		reload(null);
 	}
 	
@@ -306,11 +308,13 @@ public class GaeChange {
 	 */
 	protected XID getActor() {
 		if(this.actor == null) {
-			String actorStr = (String)this.entity.getProperty(PROP_ACTOR);
-			if(actorStr == null) {
-				return null;
+			synchronized(this) {
+				String actorStr = (String)this.entity.getProperty(PROP_ACTOR);
+				if(actorStr == null) {
+					return null;
+				}
+				this.actor = XX.toId(actorStr);
 			}
-			this.actor = XX.toId(actorStr);
 		}
 		return this.actor;
 	}
@@ -320,6 +324,7 @@ public class GaeChange {
 	 *         thread started working with the given change entity
 	 */
 	protected boolean isTimedOut() {
+		assert !getStatus().isCommitted();
 		if(this.lastActivity < 0) {
 			this.lastActivity = (Long)this.entity.getProperty(PROP_LAST_ACTIVITY);
 		}
@@ -332,16 +337,18 @@ public class GaeChange {
 	 * @param status The new status of the entity.
 	 */
 	protected void commit(Status status) {
+		assert !getStatus().isCommitted();
 		this.locks = null;
 		this.entity.removeProperty(PROP_LOCKS);
 		setStatus(status);
-		save();
+		GaeUtils.putEntity(this.entity);
 	}
 	
 	/**
 	 * Update the status of this change.
 	 */
 	protected void setStatus(Status status) {
+		assert !getStatus().isCommitted();
 		this.status = status;
 		this.entity.setUnindexedProperty(PROP_STATUS, status.value);
 	}
@@ -351,6 +358,7 @@ public class GaeChange {
 	 */
 	@SuppressWarnings("unchecked")
 	protected GaeLocks getLocks() {
+		assert !getStatus().isCommitted();
 		if(this.locks == null) {
 			List<String> lockStrs = (List<String>)this.entity.getProperty(PROP_LOCKS);
 			if(lockStrs == null) {
@@ -366,9 +374,11 @@ public class GaeChange {
 	 */
 	protected Status getStatus() {
 		if(this.status == null) {
-			Number n = (Number)this.entity.getProperty(PROP_STATUS);
-			assert n != null : "All change entities should have a status";
-			this.status = Status.get(n.intValue());
+			synchronized(this) {
+				Number n = (Number)this.entity.getProperty(PROP_STATUS);
+				assert n != null : "All change entities should have a status";
+				this.status = Status.get(n.intValue());
+			}
 		}
 		return this.status;
 	}
@@ -381,6 +391,7 @@ public class GaeChange {
 	}
 	
 	protected void registerActivity() {
+		assert !getStatus().isCommitted();
 		this.lastActivity = now();
 		this.entity.setUnindexedProperty(PROP_LAST_ACTIVITY, this.lastActivity);
 	}
@@ -402,6 +413,7 @@ public class GaeChange {
 	 * @throws VoluntaryTimeoutException to abort the current change
 	 */
 	protected void giveUpIfTimeoutCritical() throws VoluntaryTimeoutException {
+		assert !getStatus().isCommitted();
 		long now = now();
 		if(now - this.lastActivity > TIME_CRITICAL) {
 			// TODO use a better exception type?
@@ -412,6 +424,7 @@ public class GaeChange {
 	}
 	
 	protected Pair<int[],List<Future<Key>>> setEvents(List<XAtomicEvent> events) {
+		assert !getStatus().isCommitted();
 		Pair<int[],List<Future<Key>>> res = GaeEventService.saveEvents(this.modelAddr, this.entity,
 		        events);
 		this.events = new Pair<List<XAtomicEvent>,int[]>(events, res.getFirst());
@@ -423,6 +436,7 @@ public class GaeChange {
 	 * transaction.
 	 */
 	protected void save(Transaction trans) {
+		assert !getStatus().isCommitted();
 		// Synchronized by endTransaction()
 		GaeUtils.putEntityAsync(this.entity, trans);
 	}
@@ -431,6 +445,7 @@ public class GaeChange {
 	 * Put this change entity in the datastore.
 	 */
 	protected void save() {
+		assert !getStatus().isCommitted();
 		GaeUtils.putEntity(this.entity);
 	}
 	
@@ -445,12 +460,13 @@ public class GaeChange {
 		assert getStatus().hasEvents();
 		
 		if(this.events == null) {
-			
-			Pair<XAtomicEvent[],int[]> res = GaeEventService.loadAtomicEvents(this.modelAddr,
-			        this.rev, getActor(), this.entity);
-			
-			this.events = new Pair<List<XAtomicEvent>,int[]>(Arrays.asList(res.getFirst()), res
-			        .getSecond());
+			synchronized(this) {
+				Pair<XAtomicEvent[],int[]> res = GaeEventService.loadAtomicEvents(this.modelAddr,
+				        this.rev, getActor(), this.entity);
+				
+				this.events = new Pair<List<XAtomicEvent>,int[]>(Arrays.asList(res.getFirst()), res
+				        .getSecond());
+			}
 		}
 		return this.events;
 	}
@@ -472,24 +488,25 @@ public class GaeChange {
 	public XEvent getEvent() {
 		
 		if(this.event == null) {
-			
-			if(!getStatus().hasEvents()) {
-				// no events available (or not yet) for this revision.
-				return null;
+			synchronized(this) {
+				if(!getStatus().hasEvents()) {
+					// no events available (or not yet) for this revision.
+					return null;
+				}
+				
+				List<XAtomicEvent> events = getAtomicEvents().getFirst();
+				assert events.size() > 0;
+				
+				if(events.size() == 1) {
+					this.event = events.get(0);
+				} else {
+					this.event = MemoryTransactionEvent.createTransactionEvent(getActor(),
+					        this.modelAddr, events, this.rev - 1, XEvent.RevisionOfEntityNotSet);
+				}
+				
+				// Not needed anymore.
+				this.events = null;
 			}
-			
-			List<XAtomicEvent> events = getAtomicEvents().getFirst();
-			assert events.size() > 0;
-			
-			if(events.size() == 1) {
-				this.event = events.get(0);
-			} else {
-				this.event = MemoryTransactionEvent.createTransactionEvent(getActor(),
-				        this.modelAddr, events, this.rev - 1, XEvent.RevisionOfEntityNotSet);
-			}
-			
-			// Not needed anymore.
-			this.events = null;
 		}
 		
 		return this.event;
