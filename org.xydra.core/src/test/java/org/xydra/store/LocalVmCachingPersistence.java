@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XWritableModel;
@@ -32,6 +33,9 @@ public class LocalVmCachingPersistence implements XydraPersistence {
 	
 	/**
 	 * Locally cache snapshots
+	 * 
+	 * FIXME concurrency: access to these maps needs to be synchronized (or need
+	 * to use implementations that are already synchronized themselves)
 	 */
 	private static Map<String,XWritableModel> localVmCache_modelSnapshot = new HashMap<String,XWritableModel>();
 	private static Map<String,XWritableObject> localVmCache_objectSnapshot = new HashMap<String,XWritableObject>();
@@ -48,6 +52,8 @@ public class LocalVmCachingPersistence implements XydraPersistence {
 	}
 	
 	private static String toKey(XAddress modelAddress, long rev) {
+		assert modelAddress.getAddressedType() != XType.XFIELD;
+		// IMPROVE separator needed if this needs to support field addresses
 		return modelAddress.toString() + rev;
 	}
 	
@@ -82,7 +88,10 @@ public class LocalVmCachingPersistence implements XydraPersistence {
 			return cachedSnapshot;
 		} else {
 			XWritableModel loadedSnapshot = this.persistence.getModelSnapshot(address);
-			localVmCache_modelSnapshot.put(toKey(address, currentRevision), loadedSnapshot);
+			if(loadedSnapshot != null) {
+				localVmCache_modelSnapshot.put(toKey(address, loadedSnapshot.getRevisionNumber()),
+				        loadedSnapshot);
+			}
 			return loadedSnapshot;
 		}
 	}
@@ -101,6 +110,9 @@ public class LocalVmCachingPersistence implements XydraPersistence {
 		}
 		XWritableObject loadedSnapshot = this.persistence.getObjectSnapshot(address);
 		if(CACHE_OBJECT_SNAPSHOTS) {
+			// FIXME snapshot may be for a model revision number newer than
+			// currentRevision, but there is no way to get the real revision
+			// number
 			localVmCache_objectSnapshot.put(toKey(address, currentRevision), loadedSnapshot);
 		}
 		return loadedSnapshot;
