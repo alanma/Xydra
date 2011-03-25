@@ -714,6 +714,9 @@ public class GaeChangesService {
 		this.revCache.setLastCommited(rev);
 		this.revCache.setCurrent(currentRev);
 		
+		/* put also in MemCache which seems to have moved this out */
+		XydraRuntime.getMemcache().put(this.modelAddr + "-currentRev", currentRev);
+		
 		return currentRev;
 	}
 	
