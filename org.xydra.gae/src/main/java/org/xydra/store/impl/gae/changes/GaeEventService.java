@@ -18,8 +18,6 @@ import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.change.impl.memory.MemoryModelEvent;
 import org.xydra.base.change.impl.memory.MemoryObjectEvent;
 import org.xydra.base.change.impl.memory.MemoryRepositoryEvent;
-import org.xydra.base.change.impl.memory.MemoryTransactionEvent;
-import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlValue;
@@ -416,8 +414,6 @@ public class GaeEventService {
 		return TRANSINDEX_NONE - 1 - i;
 	}
 	
-	private static AsyncValue VALUE_DUMMY = new AsyncValue(XV.toValue("dummy"));
-	
 	/**
 	 * Load the individual events associated with the given change.
 	 * 
@@ -425,18 +421,11 @@ public class GaeEventService {
 	 * events.
 	 * 
 	 * @param change The change whose events should be loaded.
-	 * @param loadValues If true, the actual values in XFieldEvents will be
-	 *            loaded and the second part of the return will be null. If
-	 *            false, VALUE_DUMMY will be substituted for any non-null values
-	 *            and a list of indices that can be used with
-	 *            {@link #getValue(XAddress, long, int)} to retrieve the value
-	 *            at a later time is returned.
 	 * @return a List of {@link XAtomicEvent} which is stored as a number of GAE
 	 *         entities
 	 */
-	@SuppressWarnings("null")
 	protected static Pair<XAtomicEvent[],int[]> loadAtomicEvents(XAddress modelAddr, long rev,
-	        XID actor, Entity changeEntity, boolean loadValues) {
+	        XID actor, Entity changeEntity) {
 		
 		/*
 		 * Load the event properties that were set in saveEvents().
@@ -464,10 +453,7 @@ public class GaeEventService {
 		assert targets.size() == events.length && implied.size() == events.length
 		        && values.size() == events.length;
 		
-		int[] valueIds = null;
-		if(!loadValues) {
-			valueIds = new int[events.length];
-		}
+		int[] valueIds = new int[events.length];
 		
 		boolean inTrans = (events.length > 1);
 		
@@ -541,21 +527,18 @@ public class GaeEventService {
 				if(valueTxt == null) {
 					assert type.getChangeType() == ChangeType.REMOVE;
 					value = VALUE_NULL;
-					if(!loadValues) {
-						valueIds[i] = TRANSINDEX_NONE;
-					}
+					valueIds[i] = TRANSINDEX_NONE;
 				} else {
 					assert type.getChangeType() != ChangeType.REMOVE;
 					boolean isExtern = VALUE_EXTERN.equals(valueTxt);
-					if(!loadValues) {
-						value = VALUE_DUMMY;
-						valueIds[i] = isExtern ? i : getInternalValueId(i);
-					} else if(!isExtern) {
+					if(!isExtern) {
 						String valueXml = valueTxt.getValue();
 						MiniElement eventElement = new MiniXMLParserImpl().parseXml(valueXml);
 						value = new AsyncValue(XmlValue.toValue(eventElement));
+						valueIds[i] = getInternalValueId(i);
 					} else {
 						value = getExternalValue(modelAddr, rev, i);
+						valueIds[i] = i;
 					}
 				}
 				assert value != null;
@@ -567,25 +550,6 @@ public class GaeEventService {
 		}
 		
 		return new Pair<XAtomicEvent[],int[]>(events, valueIds);
-	}
-	
-	/**
-	 * This method should only be called if the change entity actually contains
-	 * events.
-	 * 
-	 * @return the XEvent represented by the given change entity.
-	 */
-	protected static XEvent asEvent(XAddress modelAddr, long rev, XID actor, Entity changeEntity) {
-		
-		XAtomicEvent[] events = loadAtomicEvents(modelAddr, rev, actor, changeEntity, true)
-		        .getFirst();
-		
-		if(events.length == 1) {
-			return events[0];
-		} else {
-			return MemoryTransactionEvent.createTransactionEvent(actor, modelAddr, events, rev - 1,
-			        XEvent.RevisionOfEntityNotSet);
-		}
 	}
 	
 }

@@ -32,9 +32,16 @@ public class RevisionCache {
 		return (current > rev ? current : rev);
 	}
 	
+	protected long getLastCommitedIfSet() {
+		
+		Map<Object,Object> cache = XydraRuntime.getMemcache();
+		
+		Long entry = (Long)cache.get(getCommitedRevCacheName());
+		return (entry == null) ? NOT_SET : entry;
+	}
+	
 	/**
-	 * Set a new value to be returned by
-	 * {@link #getLastCommited()}.
+	 * Set a new value to be returned by {@link #getLastCommited()}.
 	 * 
 	 * @param l The value is set. It is ignored if the current cached value is
 	 *            less than this.
@@ -81,6 +88,23 @@ public class RevisionCache {
 		return (value == null) ? -1L : value;
 	}
 	
+	protected static final long NOT_SET = -2L;
+	
+	/**
+	 * Retrieve a cached value of the current revision number as defined by
+	 * {@link #getCurrentRevisionNumber()}.
+	 * 
+	 * The returned value may be less that the actual "current" revision number,
+	 * but is guaranteed to never be greater.
+	 */
+	protected long getCurrentIfSet() {
+		
+		Map<Object,Object> cache = XydraRuntime.getMemcache();
+		
+		Long value = (Long)cache.get(getCurrentRevCacheName());
+		return (value == null) ? NOT_SET : value;
+	}
+	
 	/**
 	 * Set a new value to be returned by {@link #getCurrent()}.
 	 * 
@@ -92,8 +116,7 @@ public class RevisionCache {
 	}
 	
 	/**
-	 * @return the name of the cached value used by
-	 *         {@link #getCurrent()} and
+	 * @return the name of the cached value used by {@link #getCurrent()} and
 	 *         {@link #setCurrent(long)}
 	 */
 	protected String getCurrentRevCacheName() {

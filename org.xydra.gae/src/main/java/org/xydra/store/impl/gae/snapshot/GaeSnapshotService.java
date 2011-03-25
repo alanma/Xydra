@@ -25,7 +25,7 @@ import org.xydra.core.model.XChangeLog;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.XydraRuntime;
-import org.xydra.store.impl.gae.changes.AsyncEvent;
+import org.xydra.store.impl.gae.changes.AsyncChange;
 import org.xydra.store.impl.gae.changes.GaeChangesService;
 
 
@@ -100,8 +100,8 @@ public class GaeSnapshotService {
 		}
 		
 		// Fetch one event from the back of the change log.
-		List<AsyncEvent> batch = new ArrayList<AsyncEvent>(1);
-		batch.add(this.changes.getEventAt(curRev));
+		List<AsyncChange> batch = new ArrayList<AsyncChange>(1);
+		batch.add(this.changes.getChangeAt(curRev));
 		
 		int pos = 0;
 		
@@ -110,7 +110,7 @@ public class GaeSnapshotService {
 		List<XEvent> events = new ArrayList<XEvent>();
 		for(long i = curRev; i > entry.revision; i--) {
 			
-			XEvent event = batch.get(pos).get();
+			XEvent event = batch.get(pos).get().getEvent();
 			if(event == null) {
 				// Nothing changed at this revision, ignore.
 				continue;
@@ -157,12 +157,12 @@ public class GaeSnapshotService {
 			
 			// Asynchronously fetch new change entities.
 			if(i - batch.size() > entry.revision) {
-				batch.set(pos, this.changes.getEventAt(i - batch.size()));
+				batch.set(pos, this.changes.getChangeAt(i - batch.size()));
 			}
 			pos++;
 			if(pos == batch.size()) {
 				if(i - batch.size() - 1 > entry.revision) {
-					batch.add(this.changes.getEventAt(i - batch.size() - 1));
+					batch.add(this.changes.getChangeAt(i - batch.size() - 1));
 				}
 				pos = 0;
 			}

@@ -30,10 +30,8 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.server.IXydraServer;
 import org.xydra.store.GetEventsRequest;
-import org.xydra.store.XydraRuntime;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.gae.GaeUtils;
-import org.xydra.store.impl.gae.GaeUtils.AsyncEntity;
 import org.xydra.store.impl.gae.changes.GaeChange.Status;
 
 import com.google.appengine.api.datastore.Entity;
@@ -216,9 +214,8 @@ public class GaeChangesService {
 			
 			if(changeEntity == null) {
 				
-				GaeChange change = new GaeChange(this.modelAddr, rev, locks, actorId);
-				change.setStatus(Status.Creating);
-				change.save(trans);
+				GaeChange newChange = new GaeChange(this.modelAddr, rev, locks, actorId);
+				newChange.save(trans);
 				
 				try {
 					GaeUtils.endTransaction(trans);
@@ -240,9 +237,11 @@ public class GaeChangesService {
 				this.revCache.setLastTaken(rev);
 				
 				// transaction succeeded, we have a revision
-				return change;
+				return newChange;
 				
 			} else {
+				
+				GaeChange change = new GaeChange(this.modelAddr, rev, changeEntity);
 				
 				// Revision already taken.
 				
@@ -250,10 +249,9 @@ public class GaeChangesService {
 				
 				// Since we read the entity anyway, might as well use that
 				// information.
-				int status = GaeChange.getStatus(changeEntity);
-				if(!Status.isCommitted(status) && !Status.canRollForward(status)
-				        && GaeChange.isTimedOut(changeEntity)) {
-					GaeChange.cleanup(changeEntity, Status.FailedTimeout);
+				Status status = change.getStatus();
+				if(!status.isCommitted() && !status.canRollForward() && change.isTimedOut()) {
+					commit(change, Status.FailedTimeout);
 				}
 				
 			}
@@ -278,12 +276,10 @@ public class GaeChangesService {
 		for(long otherRev = change.rev - 1; otherRev > commitedRev; otherRev--) {
 			
 			Key key = KeyStructure.createChangeKey(this.modelAddr, otherRev);
-			Entity otherChange = GaeUtils.getEntity(key);
-			assert otherChange != null;
+			GaeChange otherChange = new GaeChange(this.modelAddr, otherRev, GaeUtils.getEntity(key));
 			
 			// Check if the change is committed.
-			int status = GaeChange.getStatus(otherChange);
-			if(Status.isCommitted(status)) {
+			if(otherChange.getStatus().isCommitted()) {
 				if(newCommitedRev < 0) {
 					newCommitedRev = otherRev;
 				}
@@ -292,9 +288,7 @@ public class GaeChangesService {
 			}
 			
 			// Check if the change needs conflicting locks.
-			GaeLocks otherLocks = GaeChange.getLocks(otherChange);
-			assert otherLocks != null : "locks should not be removed before change is commited";
-			if(!change.locks.isConflicting(otherLocks)) {
+			if(!change.isConflicting(otherChange)) {
 				newCommitedRev = -1;
 				// not conflicting, so ignore
 				continue;
@@ -315,7 +309,7 @@ public class GaeChangesService {
 			 */
 			long waitTime = WAIT_INITIAL;
 			boolean timedOut;
-			while(!(timedOut = GaeChange.isTimedOut(otherChange))) {
+			while(!(timedOut = otherChange.isTimedOut())) {
 				
 				// IMPROVE save own command if waitTime is too long (so that we
 				// can be rolled forward in case of timeout)
@@ -326,13 +320,11 @@ public class GaeChangesService {
 				}
 				// IMPROVE update own lastActivity?
 				
-				otherChange = GaeUtils.getEntity(key);
-				assert otherChange != null : "change entities should not vanish";
+				otherChange.reload();
 				
-				status = GaeChange.getStatus(otherChange);
-				if(Status.isCommitted(status)) {
+				if(otherChange.getStatus().isCommitted()) {
 					// now finished, so should have no locks anymore
-					assert !GaeChange.hasLocks(otherChange);
+					assert !otherChange.hasLocks();
 					break;
 				}
 				
@@ -346,7 +338,7 @@ public class GaeChangesService {
 			}
 			
 			if(timedOut) {
-				if(Status.canRollForward(status)) {
+				if(otherChange.getStatus().canRollForward()) {
 					// IMPROVE save own command so that we can be rolled
 					// forward in case of timeout
 					
@@ -356,14 +348,14 @@ public class GaeChangesService {
 					// if the roll forward is close to timeout, our own change
 					// is even more so.
 					
-					if(!rollForward(otherRev, otherChange.getKey())) {
+					if(!rollForward(otherChange)) {
 						// Someone else grabbed the revision, check again if it
 						// is rolled forward.
 						otherRev++;
 						continue;
 					}
 				} else {
-					GaeChange.cleanup(otherChange, Status.FailedTimeout);
+					commit(otherChange, Status.FailedTimeout);
 				}
 			}
 			
@@ -396,7 +388,7 @@ public class GaeChangesService {
 	private Pair<List<XAtomicEvent>,int[]> checkPreconditionsAndSaveEvents(GaeChange change,
 	        XCommand command, XID actorId) {
 		
-		XReadableModel currentModel = InternalGaeModel.get(this, change.rev - 1, change.locks);
+		XReadableModel currentModel = InternalGaeModel.get(this, change.rev - 1, change.getLocks());
 		
 		Pair<ChangedModel,DeltaUtils.ModelChange> c = DeltaUtils.executeCommand(currentModel,
 		        command);
@@ -490,7 +482,7 @@ public class GaeChangesService {
 				// Set the field as empty and containing the XValue stored
 				// at the specified transaction index.
 				futures.add(InternalGaeField.set(event.getTarget(), change.rev,
-				        events.getSecond()[i], change.locks));
+				        events.getSecond()[i], change.getLocks()));
 				
 				assert !event.isImplied();
 				assert event.getTarget().getObject() != null;
@@ -501,13 +493,14 @@ public class GaeChangesService {
 				
 			} else if(event instanceof XObjectEvent) {
 				if(event.getChangeType() == ChangeType.REMOVE) {
-					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(), change.locks));
+					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(), change
+					        .getLocks()));
 					// cannot save revision in the removed field
 					objectsWithPossiblyUnsavedRev.add(event.getTarget().getObject());
 				} else {
 					assert event.getChangeType() == ChangeType.ADD;
-					futures.add(InternalGaeField.set(event.getChangedEntity(), change.rev,
-					        change.locks));
+					futures.add(InternalGaeField.set(event.getChangedEntity(), change.rev, change
+					        .getLocks()));
 					// revision saved in created field
 					objectsWithSavedRev.add(event.getTarget().getObject());
 				}
@@ -516,13 +509,14 @@ public class GaeChangesService {
 			} else if(event instanceof XModelEvent) {
 				XID objectId = ((XModelEvent)event).getObjectId();
 				if(event.getChangeType() == ChangeType.REMOVE) {
-					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(), change.locks));
+					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(), change
+					        .getLocks()));
 					// object removed, so revision is of no interest
 					objectsWithPossiblyUnsavedRev.remove(objectId);
 				} else {
 					assert event.getChangeType() == ChangeType.ADD;
-					futures.add(InternalGaeObject.createObject(event.getChangedEntity(),
-					        change.locks, change.rev));
+					futures.add(InternalGaeObject.createObject(event.getChangedEntity(), change
+					        .getLocks(), change.rev));
 					// revision saved in new object
 					objectsWithSavedRev.add(objectId);
 				}
@@ -530,10 +524,12 @@ public class GaeChangesService {
 			} else {
 				assert event instanceof XRepositoryEvent;
 				if(event.getChangeType() == ChangeType.REMOVE) {
-					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(), change.locks));
+					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(), change
+					        .getLocks()));
 				} else {
 					assert event.getChangeType() == ChangeType.ADD;
-					futures.add(InternalGaeModel.createModel(event.getChangedEntity(), change.locks));
+					futures.add(InternalGaeModel.createModel(event.getChangedEntity(), change
+					        .getLocks()));
 				}
 			}
 			
@@ -544,7 +540,7 @@ public class GaeChangesService {
 			if(!objectsWithSavedRev.contains(objectId)) {
 				XAddress objectAddr = XX.resolveObject(this.modelAddr, objectId);
 				
-				InternalGaeObject.updateObjectRev(objectAddr, change.locks, change.rev);
+				InternalGaeObject.updateObjectRev(objectAddr, change.getLocks(), change.rev);
 			}
 		}
 		
@@ -554,13 +550,9 @@ public class GaeChangesService {
 		
 		commit(change, Status.SuccessExecuted);
 		
-		if(this.revCache.getCurrent() == change.rev - 1) {
-			this.revCache.setCurrent(change.rev);
+		if(this.revCache.getLastCommited() >= change.rev) {
+			updateCurrentRev(Math.max(change.rev, this.revCache.getCurrent()));
 		}
-		
-		/* update revNr in memcache */
-		XydraRuntime.getMemcache().put(this.modelAddr + "-currentRev", change.rev);
-		
 	}
 	
 	/**
@@ -582,17 +574,19 @@ public class GaeChangesService {
 	 * @return True if the change was rolled forward or false if the change was
 	 *         grabbed by another process.
 	 */
-	private boolean rollForward(long rev, Key key) {
+	private boolean rollForward(GaeChange change) {
 		
-		assert KeyStructure.assertRevisionInKey(key, rev);
+		assert change.isTimedOut() && change.getStatus().canRollForward();
 		
 		// Try to "grab" the change entity to prevent multiple processes from
 		// rolling forward the same entity.
 		Transaction trans = GaeUtils.beginTransaction();
-		Entity changeEntity = GaeUtils.getEntity(key, trans);
-		assert changeEntity != null;
 		
-		if(!GaeChange.isTimedOut(changeEntity)) {
+		// We need to re-load the change in the transaction so we will notice
+		// when someone else modifies it.
+		change.reload(trans);
+		
+		if(!change.isTimedOut()) {
 			// Cannot roll forward, change was grabbed by another process.
 			
 			// Cleanup the transaction.
@@ -600,9 +594,10 @@ public class GaeChangesService {
 			return false;
 		}
 		
-		GaeChange change = new GaeChange(this.modelAddr, rev, changeEntity);
+		// Grab the change.
+		change.registerActivity();
 		
-		GaeUtils.putEntityAsync(changeEntity, trans);
+		change.save(trans);
 		// Synchronized by endTransaction()
 		try {
 			GaeUtils.endTransaction(trans);
@@ -611,10 +606,10 @@ public class GaeChangesService {
 			return false;
 		}
 		
-		assert Status.canRollForward(GaeChange.getStatus(changeEntity));
-		assert GaeChange.getStatus(changeEntity) == Status.Executing.value;
+		assert change.getStatus().canRollForward();
+		assert change.getStatus() == Status.Executing;
 		
-		Pair<List<XAtomicEvent>,int[]> events = change.loadEvents();
+		Pair<List<XAtomicEvent>,int[]> events = change.getAtomicEvents();
 		
 		executeAndUnlock(change, events);
 		
@@ -627,8 +622,9 @@ public class GaeChangesService {
 	 * @param status The new (and final) status.
 	 */
 	private void commit(GaeChange change, Status status) {
-		assert Status.isCommitted(status.value);
-		change.cleanup(status);
+		assert status.isCommitted();
+		assert !change.getStatus().isCommitted();
+		change.commit(status);
 		if(this.revCache.getLastCommited() == change.rev - 1) {
 			this.revCache.setLastCommited(change.rev);
 		}
@@ -649,41 +645,43 @@ public class GaeChangesService {
 	 *      org.xydra.store.Callback)
 	 */
 	public long getCurrentRevisionNumber() {
-		/*
-		 * try to find the exact information in memcache which has been updated
-		 * by all methods that can change a model.
-		 */
-		Object o = XydraRuntime.getMemcache().get(this.modelAddr + "-currentRev");
-		if(o != null) {
-			Long l = (Long)o;
-			return l;
+		
+		long currentRev = this.revCache.getCurrentIfSet();
+		if(currentRev != RevisionCache.NOT_SET) {
+			return currentRev;
+		} else {
+			return updateCurrentRev(-1L);
 		}
+	}
+	
+	private long updateCurrentRev(long lastCurrentRev) {
 		
-		long currentRev = this.revCache.getCurrent();
-		
+		long currentRev = lastCurrentRev;
 		long rev = currentRev;
 		
 		// Try to fetch one change past the last known "current" revision.
-		List<AsyncEntity> batch = new ArrayList<AsyncEntity>(1);
-		batch.add(GaeUtils.getEntityAsync(KeyStructure.createChangeKey(this.modelAddr, rev + 1)));
+		List<AsyncChange> batch = new ArrayList<AsyncChange>(1);
+		batch.add(getChangeAt(rev + 1));
 		
 		int pos = 0;
 		
-		for(;; rev++) {
+		long end = this.revCache.getLastCommitedIfSet();
+		if(end == RevisionCache.NOT_SET) {
+			end = Long.MAX_VALUE;
+		}
+		
+		for(; rev <= end; rev++) {
 			
-			Entity changeEntity = batch.get(pos).get();
-			if(changeEntity == null) {
+			GaeChange change = batch.get(pos).get();
+			if(change == null) {
 				break;
 			}
 			
-			assert KeyStructure.assertRevisionInKey(changeEntity.getKey(), rev + 1);
-			
-			int status = GaeChange.getStatus(changeEntity);
-			if(!Status.isCommitted(status)) {
-				if(GaeChange.isTimedOut(changeEntity)) {
-					if(handleTimeout(rev, changeEntity, status)) {
-						Key key = KeyStructure.createChangeKey(this.modelAddr, rev + 1);
-						batch.set(pos, GaeUtils.getEntityAsync(key));
+			Status status = change.getStatus();
+			if(!status.isCommitted()) {
+				if(change.isTimedOut()) {
+					if(handleTimeout(change)) {
+						change.reload();
 						rev--;
 						continue;
 					}
@@ -695,17 +693,15 @@ public class GaeChangesService {
 			
 			// Only update the current revision if the command actually changed
 			// something.
-			if(status == Status.SuccessExecuted.value) {
+			if(status == Status.SuccessExecuted) {
 				currentRev = rev + 1;
 			}
 			
 			// Asynchronously fetch new change entities.
-			Key nextKey = KeyStructure.createChangeKey(this.modelAddr, rev + batch.size() + 1);
-			batch.set(pos, GaeUtils.getEntityAsync(nextKey));
+			batch.set(pos, getChangeAt(rev + batch.size() + 1));
 			pos++;
 			if(pos == batch.size()) {
-				Key newKey = KeyStructure.createChangeKey(this.modelAddr, rev + batch.size() + 2);
-				batch.add(GaeUtils.getEntityAsync(newKey));
+				batch.add(getChangeAt(rev + batch.size() + 2));
 				pos = 0;
 			}
 			
@@ -714,20 +710,14 @@ public class GaeChangesService {
 		this.revCache.setLastCommited(rev);
 		this.revCache.setCurrent(currentRev);
 		
-		/* put also in MemCache which seems to have moved this out */
-		XydraRuntime.getMemcache().put(this.modelAddr + "-currentRev", currentRev);
-		
 		return currentRev;
 	}
 	
 	/**
-	 * Get the event at the specified revision number.
-	 * 
-	 * @see XydraStore#getEvents(XID, String, GetEventsRequest[],
-	 *      org.xydra.store.Callback)
+	 * Get the change at the specified revision number.
 	 */
-	public AsyncEvent getEventAt(long rev) {
-		return new AsyncEvent(this.modelAddr, rev);
+	public AsyncChange getChangeAt(long rev) {
+		return new AsyncChange(this.modelAddr, rev);
 	}
 	
 	/**
@@ -740,7 +730,9 @@ public class GaeChangesService {
 	 * @see XydraStore#getEvents(XID, String, GetEventsRequest[],
 	 *      org.xydra.store.Callback)
 	 */
-	public List<XEvent> getEventsBetween(long beginRevision, long endRevision) {
+	public List<XEvent> getEventsBetween(long beginRevision, long _endRevision) {
+		
+		long endRevision = _endRevision;
 		
 		log.info("getEventsBetwen " + beginRevision + " " + endRevision + " @" + getModelAddress());
 		
@@ -764,7 +756,16 @@ public class GaeChangesService {
 		
 		long begin = beginRevision < 0 ? 0 : beginRevision;
 		
-		long currentRev = this.revCache.getCurrent();
+		long currentRev = this.revCache.getCurrentIfSet();
+		
+		// Don't try to get more events than there actually are.
+		if(currentRev == RevisionCache.NOT_SET) {
+			currentRev = -1L;
+		} else if(beginRevision > currentRev) {
+			return new ArrayList<XEvent>(0);
+		} else if(endRevision > currentRev) {
+			endRevision = currentRev;
+		}
 		
 		List<XEvent> events = new ArrayList<XEvent>();
 		
@@ -776,9 +777,9 @@ public class GaeChangesService {
 			// IMPROVE maybe use an initial buffer size of currentRev - begin +
 			// 1?
 		}
-		List<AsyncEvent> batch = new ArrayList<AsyncEvent>(initialBuffer);
+		List<AsyncChange> batch = new ArrayList<AsyncChange>(initialBuffer);
 		for(int i = 0; i < initialBuffer; i++) {
-			batch.add(getEventAt(begin + i));
+			batch.add(getChangeAt(begin + i));
 		}
 		
 		int pos = 0;
@@ -791,19 +792,17 @@ public class GaeChangesService {
 		for(; rev <= endRevision; rev++) {
 			
 			// Wait for the first change entities
-			Entity changeEntity = batch.get(pos).getEntity();
-			if(changeEntity == null) {
+			GaeChange change = batch.get(pos).get();
+			if(change == null) {
 				// Found end of the change log
 				break;
 			}
 			
-			assert KeyStructure.assertRevisionInKey(changeEntity.getKey(), rev);
-			
-			int status = GaeChange.getStatus(changeEntity);
-			if(!Status.isCommitted(status)) {
-				if(GaeChange.isTimedOut(changeEntity)) {
-					if(handleTimeout(rev, changeEntity, status)) {
-						batch.set(pos, getEventAt(rev));
+			Status status = change.getStatus();
+			if(!status.isCommitted()) {
+				if(change.isTimedOut()) {
+					if(handleTimeout(change)) {
+						change.reload();
 						rev--;
 						continue;
 					}
@@ -813,7 +812,7 @@ public class GaeChangesService {
 				}
 			}
 			
-			XEvent event = batch.get(pos).get();
+			XEvent event = change.getEvent();
 			if(event != null) {
 				// Something actually changed
 				if(trackCurrentRev) {
@@ -824,12 +823,12 @@ public class GaeChangesService {
 			
 			// Asynchronously fetch new change entities.
 			if(rev + batch.size() <= endRevision) {
-				batch.set(pos, getEventAt(rev + batch.size()));
+				batch.set(pos, getChangeAt(rev + batch.size()));
 			}
 			pos++;
 			if(pos == batch.size()) {
 				if(rev + batch.size() + 1 <= endRevision) {
-					batch.add(getEventAt(rev + batch.size() + 1));
+					batch.add(getChangeAt(rev + batch.size() + 1));
 				}
 				pos = 0;
 			}
@@ -853,14 +852,14 @@ public class GaeChangesService {
 	 * Roll forward a timed out entity if possible, otherwise just mark it as
 	 * timed out.
 	 * 
-	 * @return false if the entity could not have been rolled forward.
+	 * @return false if the entity could not be rolled forward.
 	 */
-	private boolean handleTimeout(long rev, Entity changeEntity, int status) {
-		if(Status.canRollForward(status)) {
-			rollForward(rev, changeEntity.getKey());
+	private boolean handleTimeout(GaeChange change) {
+		if(change.getStatus().canRollForward()) {
+			rollForward(change);
 			return true;
 		} else {
-			GaeChange.cleanup(changeEntity, Status.FailedTimeout);
+			commit(change, Status.FailedTimeout);
 			return false;
 		}
 	}

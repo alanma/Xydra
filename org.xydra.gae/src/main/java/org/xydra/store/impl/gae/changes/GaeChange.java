@@ -9,7 +9,9 @@ import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XTransaction;
+import org.xydra.base.change.impl.memory.MemoryTransactionEvent;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.index.query.Pair;
 import org.xydra.store.impl.gae.GaeUtils;
@@ -39,7 +41,7 @@ import com.google.appengine.api.datastore.Transaction;
  * @author dscharrer
  * 
  */
-class GaeChange {
+public class GaeChange {
 	
 	// GAE Entity (type=XCHANGE) property keys.
 	
@@ -130,7 +132,7 @@ class GaeChange {
 		 */
 		FailedTimeout(101);
 		
-		protected final int value;
+		private final int value;
 		
 		Status(int value) {
 			this.value = value;
@@ -140,39 +142,65 @@ class GaeChange {
 		 * @return true if the given status indicates that the change has failed
 		 *         to execute.
 		 */
-		protected static boolean isFailure(int status) {
-			return (status == FailedPreconditions.value || status == FailedTimeout.value);
+		protected boolean isFailure() {
+			return (this == FailedPreconditions || this == FailedTimeout);
 		}
 		
 		/**
 		 * @return true if the given status indicates that the change has been
 		 *         successfully executed.
 		 */
-		protected static boolean isSuccess(int status) {
-			return (status == SuccessExecuted.value || status == SuccessNochange.value);
+		protected boolean isSuccess() {
+			return (this == SuccessExecuted || this == SuccessNochange);
 		}
 		
 		/**
 		 * @return true, if the status is either "success" or "failed".
 		 */
-		protected static boolean isCommitted(int status) {
-			return (isSuccess(status) || isFailure(status));
+		protected boolean isCommitted() {
+			return (isSuccess() || isFailure());
 		}
 		
 		/**
 		 * @return true, if a change with the given status can be rolled
 		 *         forward, false otherwise.
 		 */
-		protected static boolean canRollForward(int status) {
-			return status == Executing.value;
+		protected boolean canRollForward() {
+			return (this == Executing);
 		}
 		
 		/**
 		 * @return true if the given status indicates that events are stored in
 		 *         the change entity.
 		 */
-		protected static boolean hasEvents(int status) {
-			return (status == Executing.value || status == SuccessExecuted.value);
+		protected boolean hasEvents() {
+			return (this == Executing || this == SuccessExecuted);
+		}
+		
+		public static Status get(int value) {
+			Status status = null;
+			switch(value) {
+			case 0:
+				status = Creating;
+				break;
+			case 2:
+				status = Executing;
+				break;
+			case 3:
+				status = SuccessExecuted;
+				break;
+			case 4:
+				status = SuccessNochange;
+				break;
+			case 100:
+				status = FailedPreconditions;
+				break;
+			case 101:
+				status = FailedTimeout;
+				break;
+			}
+			assert status != null && status.value == value;
+			return status;
 		}
 		
 	}
@@ -208,10 +236,14 @@ class GaeChange {
 	// non-static members
 	
 	protected final long rev;
-	private final long startTime;
-	protected final GaeLocks locks;
+	private long lastActivity;
+	private GaeLocks locks;
 	private final XAddress modelAddr;
-	private final Entity entity;
+	private Entity entity;
+	private Status status;
+	private XID actor;
+	private Pair<List<XAtomicEvent>,int[]> events;
+	private XEvent event;
 	
 	/**
 	 * Construct a new change entity with the given properties. The entity is
@@ -219,21 +251,31 @@ class GaeChange {
 	 */
 	public GaeChange(XAddress modelAddr, long rev, GaeLocks locks, XID actorId) {
 		
+		this.status = Status.Creating;
+		
 		this.rev = rev;
 		this.locks = locks;
 		this.modelAddr = modelAddr;
 		this.entity = new Entity(KeyStructure.createChangeKey(modelAddr, rev));
 		
+		this.actor = actorId;
 		if(actorId != null) {
 			this.entity.setUnindexedProperty(PROP_ACTOR, actorId.toString());
 		}
 		this.entity.setUnindexedProperty(PROP_LOCKS, locks.encode());
 		
-		this.startTime = registerActivity(this.entity);
+		registerActivity();
 		
 		// Synchronized by endTransaction()
-		
-		// TODO Auto-generated constructor stub
+	}
+	
+	private void clearCache() {
+		this.locks = null;
+		this.lastActivity = -1;
+		this.actor = null;
+		this.status = null;
+		this.events = null;
+		this.event = null;
 	}
 	
 	/**
@@ -241,32 +283,47 @@ class GaeChange {
 	 * version is not put back into the datastore.
 	 */
 	public GaeChange(XAddress modelAddr, long rev, Entity entity) {
+		assert entity != null;
 		this.entity = entity;
 		this.rev = rev;
 		this.modelAddr = modelAddr;
 		assert KeyStructure.assertRevisionInKey(entity.getKey(), rev);
-		this.locks = getLocks(this.entity);
-		this.startTime = registerActivity(this.entity);
+		clearCache();
+	}
+	
+	public void reload(Transaction trans) {
+		this.entity = GaeUtils.getEntity(this.entity.getKey(), trans);
+		assert this.entity != null : "change entities should not vanish";
+		clearCache();
+	}
+	
+	public void reload() {
+		reload(null);
 	}
 	
 	/**
 	 * @return the actor associated with the given change {@link Entity}.
 	 */
-	protected static XID getActor(Entity changeEntity) {
-		String actorStr = (String)changeEntity.getProperty(PROP_ACTOR);
-		if(actorStr == null) {
-			return null;
+	protected XID getActor() {
+		if(this.actor == null) {
+			String actorStr = (String)this.entity.getProperty(PROP_ACTOR);
+			if(actorStr == null) {
+				return null;
+			}
+			this.actor = XX.toId(actorStr);
 		}
-		return XX.toId(actorStr);
+		return this.actor;
 	}
 	
 	/**
 	 * @return true if more than {@link #TIMEOUT} milliseconds elapsed since a
 	 *         thread started working with the given change entity
 	 */
-	protected static boolean isTimedOut(Entity changeEntity) {
-		long timer = (Long)changeEntity.getProperty(PROP_LAST_ACTIVITY);
-		return now() - timer > TIMEOUT;
+	protected boolean isTimedOut() {
+		if(this.lastActivity < 0) {
+			this.lastActivity = (Long)this.entity.getProperty(PROP_LAST_ACTIVITY);
+		}
+		return now() - this.lastActivity > TIMEOUT;
 	}
 	
 	/**
@@ -274,58 +331,58 @@ class GaeChange {
 	 * 
 	 * @param status The new status of the entity.
 	 */
-	protected static void cleanup(Entity changeEntity, Status status) {
-		changeEntity.removeProperty(PROP_LOCKS);
-		setStatus(changeEntity, status);
-		GaeUtils.putEntity(changeEntity);
+	protected void commit(Status status) {
+		this.locks = null;
+		this.entity.removeProperty(PROP_LOCKS);
+		setStatus(status);
+		save();
 	}
 	
 	/**
-	 * Update the status of the given change entity.
-	 */
-	protected static void setStatus(Entity changeEntity, Status status) {
-		changeEntity.setUnindexedProperty(PROP_STATUS, status.value);
-	}
-	
-	/**
-	 * @see #setStatus(Entity, Status)
+	 * Update the status of this change.
 	 */
 	protected void setStatus(Status status) {
-		setStatus(this.entity, status);
+		this.status = status;
+		this.entity.setUnindexedProperty(PROP_STATUS, status.value);
 	}
 	
 	/**
-	 * @return the locks associated with the given change {@link Entity}.
+	 * @return the locks associated with this change.
 	 */
 	@SuppressWarnings("unchecked")
-	protected static GaeLocks getLocks(Entity changeEntity) {
-		List<String> lockStrs = (List<String>)changeEntity.getProperty(PROP_LOCKS);
-		if(lockStrs == null) {
-			return null;
+	protected GaeLocks getLocks() {
+		if(this.locks == null) {
+			List<String> lockStrs = (List<String>)this.entity.getProperty(PROP_LOCKS);
+			if(lockStrs == null) {
+				return null;
+			}
+			this.locks = new GaeLocks(lockStrs);
 		}
-		return new GaeLocks(lockStrs);
+		return this.locks;
 	}
 	
 	/**
 	 * @return the status code associated with the given change {@link Entity}.
 	 */
-	protected static int getStatus(Entity changeEntity) {
-		Number n = (Number)changeEntity.getProperty(PROP_STATUS);
-		assert n != null : "All change entities should have a status";
-		return n.intValue();
+	protected Status getStatus() {
+		if(this.status == null) {
+			Number n = (Number)this.entity.getProperty(PROP_STATUS);
+			assert n != null : "All change entities should have a status";
+			this.status = Status.get(n.intValue());
+		}
+		return this.status;
 	}
 	
 	/**
 	 * @return true if the given change entity has any locks set.
 	 */
-	protected static boolean hasLocks(Entity changeEntity) {
-		return changeEntity.getProperty(PROP_LOCKS) != null;
+	protected boolean hasLocks() {
+		return (this.locks != null || this.entity.getProperty(PROP_LOCKS) != null);
 	}
 	
-	private static long registerActivity(Entity newChange) {
-		long startTime = now();
-		newChange.setUnindexedProperty(PROP_LAST_ACTIVITY, startTime);
-		return startTime;
+	protected void registerActivity() {
+		this.lastActivity = now();
+		this.entity.setUnindexedProperty(PROP_LAST_ACTIVITY, this.lastActivity);
 	}
 	
 	/**
@@ -341,21 +398,24 @@ class GaeChange {
 	 * prevent another process rolling forward our change while we are still
 	 * working on it.
 	 * 
-	 * @param startTime The time when we started working on the change.
+	 * @param lastActivity The time when we started working on the change.
 	 * @throws VoluntaryTimeoutException to abort the current change
 	 */
 	protected void giveUpIfTimeoutCritical() throws VoluntaryTimeoutException {
 		long now = now();
-		if(now - this.startTime > TIME_CRITICAL) {
+		if(now - this.lastActivity > TIME_CRITICAL) {
 			// TODO use a better exception type?
 			throw new VoluntaryTimeoutException("voluntarily timing out to prevent"
 			        + " multiple processes working in the same thread; " + " start time was "
-			        + this.startTime + "; now is " + now);
+			        + this.lastActivity + "; now is " + now);
 		}
 	}
 	
 	protected Pair<int[],List<Future<Key>>> setEvents(List<XAtomicEvent> events) {
-		return GaeEventService.saveEvents(this.modelAddr, this.entity, events);
+		Pair<int[],List<Future<Key>>> res = GaeEventService.saveEvents(this.modelAddr, this.entity,
+		        events);
+		this.events = new Pair<List<XAtomicEvent>,int[]>(events, res.getFirst());
+		return res;
 	}
 	
 	/**
@@ -380,21 +440,59 @@ class GaeChange {
 	 * @return a List of {@link XAtomicEvent} which is stored as a number of GAE
 	 *         entities
 	 */
-	public Pair<List<XAtomicEvent>,int[]> loadEvents() {
+	protected Pair<List<XAtomicEvent>,int[]> getAtomicEvents() {
 		
-		assert Status.hasEvents(GaeChange.getStatus(this.entity));
+		assert getStatus().hasEvents();
 		
-		Pair<XAtomicEvent[],int[]> res = GaeEventService.loadAtomicEvents(this.modelAddr, this.rev,
-		        null, this.entity, false);
-		
-		return new Pair<List<XAtomicEvent>,int[]>(Arrays.asList(res.getFirst()), res.getSecond());
+		if(this.events == null) {
+			
+			Pair<XAtomicEvent[],int[]> res = GaeEventService.loadAtomicEvents(this.modelAddr,
+			        this.rev, getActor(), this.entity);
+			
+			this.events = new Pair<List<XAtomicEvent>,int[]>(Arrays.asList(res.getFirst()), res
+			        .getSecond());
+		}
+		return this.events;
+	}
+	
+	public boolean isConflicting(GaeChange otherChange) {
+		GaeLocks ourLocks = getLocks();
+		GaeLocks otherLocks = otherChange.getLocks();
+		assert ourLocks != null : "our locks should not be removed before change is commited";
+		assert otherLocks != null : "locks should not be removed before change is commited";
+		return ourLocks.isConflicting(otherLocks);
 	}
 	
 	/**
-	 * @see #cleanup(Entity, Status)
+	 * This method should only be called if the change entity actually contains
+	 * events.
+	 * 
+	 * @return the XEvent represented by this change.
 	 */
-	protected void cleanup(Status status) {
-		cleanup(this.entity, status);
+	public XEvent getEvent() {
+		
+		if(this.event == null) {
+			
+			if(!getStatus().hasEvents()) {
+				// no events available (or not yet) for this revision.
+				return null;
+			}
+			
+			List<XAtomicEvent> events = getAtomicEvents().getFirst();
+			assert events.size() > 0;
+			
+			if(events.size() == 1) {
+				this.event = events.get(0);
+			} else {
+				this.event = MemoryTransactionEvent.createTransactionEvent(getActor(),
+				        this.modelAddr, events, this.rev - 1, XEvent.RevisionOfEntityNotSet);
+			}
+			
+			// Not needed anymore.
+			this.events = null;
+		}
+		
+		return this.event;
 	}
 	
 }
