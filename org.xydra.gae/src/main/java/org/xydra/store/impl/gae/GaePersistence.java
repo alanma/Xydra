@@ -3,6 +3,8 @@ package org.xydra.store.impl.gae;
 import java.util.List;
 import java.util.Set;
 
+import org.xydra.annotations.RunsInAppEngine;
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
@@ -32,6 +34,8 @@ import org.xydra.store.impl.gae.snapshot.GaeSnapshotService;
  * 
  * @author dscharrer
  */
+@RunsInAppEngine(true)
+@RunsInGWT(false)
 public class GaePersistence implements XydraPersistence {
 	
 	private final XAddress repoAddr;
