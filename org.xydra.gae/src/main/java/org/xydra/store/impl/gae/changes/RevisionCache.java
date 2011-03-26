@@ -3,9 +3,16 @@ package org.xydra.store.impl.gae.changes;
 import java.util.Map;
 
 import org.xydra.base.XAddress;
+import org.xydra.core.model.XModel;
 import org.xydra.store.XydraRuntime;
 
 
+/**
+ * There is one revision cache per {@link XModel}.
+ * 
+ * @author dscharrer
+ * 
+ */
 public class RevisionCache {
 	
 	private final XAddress modelAddr;
