@@ -187,7 +187,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		this.store.checkLogin(this.incorrectUser, this.incorrectUserPass, callback);
 		
 		assertTrue(this.waitOnCallback(callback));
-		assertEquals(callback.getEffect(), false);
+		assertEquals(false, callback.getEffect());
 		assertNull(callback.getException());
 	}
 	
@@ -258,7 +258,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		this.store.checkLogin(this.correctUser, this.correctUserPass, callback);
 		
 		assertTrue(this.waitOnCallback(callback));
-		assertEquals(callback.getEffect(), true);
+		assertEquals(true, callback.getEffect());
 		assertNull(callback.getException());
 		
 	}
@@ -294,8 +294,8 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		 * store)
 		 */
 		for(int i = 0; i < this.modelAddresses.length; i++) {
-			assertTrue(result + " should contain " + this.modelAddresses[i].getModel(), result
-			        .contains(this.modelAddresses[i].getModel()));
+			assertTrue(result + " should contain " + this.modelAddresses[i].getModel(),
+			        result.contains(this.modelAddresses[i].getModel()));
 		}
 		
 	}
@@ -464,10 +464,10 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		assertNull(snapshotCallback.getException());
 		
 		BatchedResult<XReadableModel>[] snapshotResult = snapshotCallback.getEffect();
-		assertEquals(snapshotResult.length, this.modelAddresses.length);
+		assertEquals(this.modelAddresses.length, snapshotResult.length);
 		
 		BatchedResult<Long>[] revisionResult = revisionCallback.getEffect();
-		assertEquals(revisionResult.length, this.modelAddresses.length);
+		assertEquals(this.modelAddresses.length, revisionResult.length);
 		
 		// check order of returned snapshots
 		for(int i = 0; i < this.modelAddresses.length; i++) {
@@ -477,8 +477,8 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			// compare revision numbers
 			assertNotNull(revisionResult[i].getResult());
 			assertNull(revisionResult[i].getException());
-			assertEquals((Long)snapshotResult[i].getResult().getRevisionNumber(), revisionResult[i]
-			        .getResult());
+			assertEquals((Long)snapshotResult[i].getResult().getRevisionNumber(),
+			        revisionResult[i].getResult());
 		}
 	}
 	
@@ -531,17 +531,17 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		assertNull(snapshotCallback.getException());
 		
 		BatchedResult<XReadableModel>[] snapshotResult = snapshotCallback.getEffect();
-		assertEquals(snapshotResult.length, tempArray.length);
+		assertEquals(tempArray.length, snapshotResult.length);
 		
 		BatchedResult<Long>[] revisionResult = revisionCallback.getEffect();
-		assertEquals(revisionResult.length, tempArray.length);
+		assertEquals(tempArray.length, revisionResult.length);
 		
 		// check order of returned snapshots
 		for(int i = 0; i < this.modelAddresses.length; i++) {
 			if(i == this.modelAddresses.length) {
 				// this index contains an XAddress of a not existing XModel
 				assertNull(snapshotResult[i].getResult());
-				assertEquals(revisionResult[i].getResult(), (Long)XCommand.FAILED);
+				assertEquals((Long)XCommand.FAILED, revisionResult[i].getResult());
 				assertNull(revisionResult[i].getException());
 			} else {
 				assertEquals(this.modelAddresses[i], snapshotResult[i].getResult().getAddress());
@@ -610,7 +610,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		assertNull(callback.getException());
 		
 		BatchedResult<XReadableModel>[] result = callback.getEffect();
-		assertEquals(result.length, this.modelAddresses.length);
+		assertEquals(this.modelAddresses.length, result.length);
 		
 		// check order of returned snapshots
 		for(int i = 0; i < this.modelAddresses.length; i++) {
@@ -660,7 +660,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		assertNull(callback.getException());
 		
 		BatchedResult<XReadableModel>[] result = callback.getEffect();
-		assertEquals(result.length, tempArray.length);
+		assertEquals(tempArray.length, result.length);
 		
 		// check order of returned snapshots
 		for(int i = 0; i < this.modelAddresses.length; i++) {
@@ -791,7 +791,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		assertNull(callback.getException());
 		
 		BatchedResult<XReadableObject>[] result = callback.getEffect();
-		assertEquals(result.length, this.objectAddresses.length);
+		assertEquals(this.objectAddresses.length, result.length);
 		
 		// check order of returned snapshots
 		for(int i = 0; i < this.objectAddresses.length; i++) {
@@ -845,7 +845,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		assertNull(callback.getException());
 		
 		BatchedResult<XReadableObject>[] result = callback.getEffect();
-		assertEquals(result.length, tempArray.length);
+		assertEquals(tempArray.length, result.length);
 		
 		// check order of returned snapshots
 		for(int i = 0; i < this.objectAddresses.length; i++) {
@@ -982,7 +982,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		
 		assertTrue(waitOnCallback(callback));
 		assertNotNull(callback.getEffect());
-		assertEquals(callback.getEffect(), this.getRepositoryId());
+		assertEquals(this.getRepositoryId(), callback.getEffect());
 		assertNull(callback.getException());
 	}
 	
