@@ -239,7 +239,7 @@ public class XX {
 	 * Creates an {@link XID} from a given {@link String} using the default
 	 * {@link XIDProvider}. The {@link String} must be a valid XML name and may
 	 * not contain any ':' characters. The string SHOULD be at most 100
-	 * characters long.
+	 * characters long. TODO Why?
 	 * 
 	 * @param idString The String which will be used to create the {@link XID}.
 	 * @return a new unique {@link XID} object calculated from the given URI

@@ -18,9 +18,9 @@ public interface XID extends XValue, Serializable, Comparable<XID> {
 	/**
 	 * To convert this XID to a byte[] representation use the ByteUtils (TBD).
 	 * 
-	 * @return a compact String which can be turned into an XID again via. The
-	 *         length of the string SHOULD be at most 100 characters.
-	 *         {@link XIDProvider#fromString(String)}
+	 * @return a compact String which can be turned into an XID again via
+	 *         {@link XIDProvider#fromString(String)}. The length of the string
+	 *         SHOULD be at most 100 characters. TODO Why?
 	 */
 	String toString();
 	
