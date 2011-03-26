@@ -19,10 +19,10 @@ import com.sun.org.apache.xpath.internal.objects.XObject;
 /**
  * Implementation of the lock semantics used by {@link GaeChangesService}.
  * 
- * Locks can be acquired for each par of the MOF tree.
+ * Locks can be acquired for each part of the MOF tree.
  * 
- * A lock on a {@link XModel} or {@link XObject} implies locks locks on all
- * contained {@link XObject XObjects} and {@link XField XFields}.
+ * A lock on a {@link XModel} or {@link XObject} implies locks on all contained
+ * {@link XObject XObjects} and {@link XField XFields}.
  * 
  * @author dscharrer
  * 
