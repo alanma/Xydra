@@ -131,7 +131,7 @@ public class GaeChangesService {
 	private static final long WAIT_INITIAL = 10;
 	
 	/**
-	 * Maximum time to wait before re-checking the status of an event who'se
+	 * Maximum time to wait before re-checking the status of an event who's
 	 * locks we need.
 	 */
 	private static final long WAIT_MAX = 1000; // TODO set
@@ -498,14 +498,14 @@ public class GaeChangesService {
 				
 			} else if(event instanceof XObjectEvent) {
 				if(event.getChangeType() == ChangeType.REMOVE) {
-					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(), change
-					        .getLocks()));
+					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(),
+					        change.getLocks()));
 					// cannot save revision in the removed field
 					objectsWithPossiblyUnsavedRev.add(event.getTarget().getObject());
 				} else {
 					assert event.getChangeType() == ChangeType.ADD;
-					futures.add(InternalGaeField.set(event.getChangedEntity(), change.rev, change
-					        .getLocks()));
+					futures.add(InternalGaeField.set(event.getChangedEntity(), change.rev,
+					        change.getLocks()));
 					// revision saved in created field
 					objectsWithSavedRev.add(event.getTarget().getObject());
 				}
@@ -514,14 +514,14 @@ public class GaeChangesService {
 			} else if(event instanceof XModelEvent) {
 				XID objectId = ((XModelEvent)event).getObjectId();
 				if(event.getChangeType() == ChangeType.REMOVE) {
-					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(), change
-					        .getLocks()));
+					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(),
+					        change.getLocks()));
 					// object removed, so revision is of no interest
 					objectsWithPossiblyUnsavedRev.remove(objectId);
 				} else {
 					assert event.getChangeType() == ChangeType.ADD;
-					futures.add(InternalGaeObject.createObject(event.getChangedEntity(), change
-					        .getLocks(), change.rev));
+					futures.add(InternalGaeObject.createObject(event.getChangedEntity(),
+					        change.getLocks(), change.rev));
 					// revision saved in new object
 					objectsWithSavedRev.add(objectId);
 				}
@@ -529,12 +529,12 @@ public class GaeChangesService {
 			} else {
 				assert event instanceof XRepositoryEvent;
 				if(event.getChangeType() == ChangeType.REMOVE) {
-					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(), change
-					        .getLocks()));
+					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(),
+					        change.getLocks()));
 				} else {
 					assert event.getChangeType() == ChangeType.ADD;
-					futures.add(InternalGaeModel.createModel(event.getChangedEntity(), change
-					        .getLocks()));
+					futures.add(InternalGaeModel.createModel(event.getChangedEntity(),
+					        change.getLocks()));
 				}
 			}
 			
