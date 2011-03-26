@@ -3,6 +3,7 @@ package org.xydra.gaemyadmin;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,6 +18,8 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
+import org.xydra.restless.utils.HtmlUtils;
+import org.xydra.restless.utils.ServletUtils;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceConfig;
@@ -52,6 +55,7 @@ public class GaeMyAdminApp {
 	private static final Logger log = LoggerFactory.getLogger(GaeMyAdminApp.class);
 	
 	public static void restless(Restless restless, String prefix) {
+		restless.addMethod("/", "GET", GaeMyAdminApp.class, "index", true);
 		restless.addMethod("/stats", "GET", GaeMyAdminApp.class, "stats", true,
 
 		new RestlessParameter("resultFormat", "text")
@@ -60,6 +64,26 @@ public class GaeMyAdminApp {
 		restless.addMethod("/backup", "GET", GaeMyAdminApp.class, "backup", true);
 		restless.addMethod("/deleteAll", "GET", GaeMyAdminApp.class, "deleteAll", true,
 		        new RestlessParameter("sure", "no"));
+		
+		MemcacheResource.restless(restless, prefix + "/memcache");
+	}
+	
+	public void index(HttpServletResponse res) throws IOException {
+		ServletUtils.headers(res, "text/html");
+		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		HtmlUtils.writeHtmlHeaderOpenBody(w, "GaeMyAdmin");
+		w.write(HtmlUtils.toOrderedList(Arrays.asList(
+
+		HtmlUtils.link("stats", "Statistics"),
+
+		HtmlUtils.link("deleteAll",
+		        "Page to delete all data - clicking this link just lists all data"),
+
+		HtmlUtils.link("memcache", "Memcache admin")
+
+		)));
+		HtmlUtils.writeCloseBodyHtml(w);
+		w.flush();
 	}
 	
 	private DatastoreService datastore;
