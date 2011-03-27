@@ -425,7 +425,7 @@ public class GaeChange {
 	
 	protected Pair<int[],List<Future<Key>>> setEvents(List<XAtomicEvent> events) {
 		assert !getStatus().isCommitted();
-		Pair<int[],List<Future<Key>>> res = GaeEventService.saveEvents(this.modelAddr, this.entity,
+		Pair<int[],List<Future<Key>>> res = GaeEvents.saveEvents(this.modelAddr, this.entity,
 		        events);
 		this.events = new Pair<List<XAtomicEvent>,int[]>(events, res.getFirst());
 		return res;
@@ -461,7 +461,7 @@ public class GaeChange {
 		
 		if(this.events == null) {
 			synchronized(this) {
-				Pair<XAtomicEvent[],int[]> res = GaeEventService.loadAtomicEvents(this.modelAddr,
+				Pair<XAtomicEvent[],int[]> res = GaeEvents.loadAtomicEvents(this.modelAddr,
 				        this.rev, getActor(), this.entity);
 				
 				this.events = new Pair<List<XAtomicEvent>,int[]>(Arrays.asList(res.getFirst()), res

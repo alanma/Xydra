@@ -36,7 +36,7 @@ import org.xydra.store.GetEventsRequest;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.gae.GaeUtils;
 import org.xydra.store.impl.gae.changes.GaeChange.Status;
-import org.xydra.store.impl.gae.changes.GaeEventService.AsyncValue;
+import org.xydra.store.impl.gae.changes.GaeEvents.AsyncValue;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -73,7 +73,7 @@ import com.google.appengine.api.datastore.Transaction;
  * <dd>Represent fields and managed by {@link InternalGaeField}. The value is
  * not stored in the field entity. Instead, additionally to the field revision,
  * an index into the transaction (or zero) is stored that can be used with
- * {@link GaeEventService#getValue(XAddress, long, int)} to load the
+ * {@link GaeEvents#getValue(XAddress, long, int)} to load the
  * {@link XValue}.</dd>
  * 
  * 
@@ -89,14 +89,14 @@ import com.google.appengine.api.datastore.Transaction;
  * the (last) process started working on the change.
  * 
  * Events and small XValues are also saved in the XCHANGE entities. These
- * properties are managed by {@link GaeEventService}. No events are guaranteed
+ * properties are managed by {@link GaeEvents}. No events are guaranteed
  * to be set before the change has reached {@link Status#Executing}.
  * 
  * 
  * <dt>Entity type XEVENT</dt>
  * <dd>Stores an {@link XValue} set by an {@link XFieldEvent} that was too large
  * to be stored directly in the corresponding XCHANGE entity. These are managed
- * by {@link GaeEventService}.
+ * by {@link GaeEvents}.
  * 
  * </dd>
  * 
@@ -899,7 +899,7 @@ public class GaeChangesService {
 				change = this.committedChangeCache.get(rev);
 			}
 			if(change != null) {
-				int realindex = GaeEventService.getEventIndex(transindex);
+				int realindex = GaeEvents.getEventIndex(transindex);
 				if(realindex >= 0) {
 					XEvent event = change.getEvent();
 					if(event instanceof XTransactionEvent) {
@@ -914,6 +914,6 @@ public class GaeChangesService {
 			}
 		}
 		
-		return GaeEventService.getValue(this.modelAddr, rev, transindex);
+		return GaeEvents.getValue(this.modelAddr, rev, transindex);
 	}
 }

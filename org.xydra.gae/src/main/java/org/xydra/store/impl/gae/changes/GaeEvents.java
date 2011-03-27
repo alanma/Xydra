@@ -55,7 +55,7 @@ import com.google.appengine.api.datastore.Text;
  * @author dscharrer
  * 
  */
-public class GaeEventService {
+public class GaeEvents {
 	
 	/**
 	 * Enumeration to map between stored event type and {@link XEvent} types.
@@ -230,7 +230,7 @@ public class GaeEventService {
 		 * 
 		 * @param future The entity containing the value.
 		 * @param transIndex The index of the value in the entity. See
-		 *            {@link GaeEventService#getValue(XAddress, long, int)}
+		 *            {@link GaeEvents#getValue(XAddress, long, int)}
 		 */
 		private AsyncValue(AsyncEntity future, int transIndex) {
 			this.future = future;

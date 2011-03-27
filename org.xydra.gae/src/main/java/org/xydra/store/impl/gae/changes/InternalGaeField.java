@@ -14,7 +14,7 @@ import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XField;
 import org.xydra.store.impl.gae.GaeUtils;
-import org.xydra.store.impl.gae.changes.GaeEventService.AsyncValue;
+import org.xydra.store.impl.gae.changes.GaeEvents.AsyncValue;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -67,7 +67,7 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 	}
 	
 	public boolean isEmpty() {
-		return this.transindex == GaeEventService.TRANSINDEX_NONE;
+		return this.transindex == GaeEvents.TRANSINDEX_NONE;
 	}
 	
 	public XAddress getAddress() {
@@ -120,7 +120,7 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 	 *            assert that we are actually allowed to create the entity.
 	 */
 	protected static Future<Key> set(XAddress fieldAddr, long fieldRev, GaeLocks locks) {
-		return set(fieldAddr, fieldRev, GaeEventService.TRANSINDEX_NONE, locks);
+		return set(fieldAddr, fieldRev, GaeEvents.TRANSINDEX_NONE, locks);
 	}
 	
 	private static int getTransIndex(Entity fieldEntity) {
