@@ -20,9 +20,14 @@ import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectEvent;
+import org.xydra.base.change.impl.memory.MemoryFieldCommand;
+import org.xydra.base.change.impl.memory.MemoryModelCommand;
+import org.xydra.base.change.impl.memory.MemoryObjectCommand;
+import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
+import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
 import org.xydra.index.query.Pair;
 
@@ -1532,6 +1537,29 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNull((callback.getEffect())[0].getException());
 	}
 	
+	/**
+	 * Executes the given command (which is supposed to succeed but not change
+	 * anything) and checks if everything went as expected.
+	 * 
+	 * @param command The command which is to be executed
+	 * @param callback The callback which is used to get the information about
+	 *            the commands failure
+	 */
+	protected void executeNochangeCommand(XCommand command) {
+		
+		SynchronousTestCallback<BatchedResult<Long>[]> callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		
+		this.store.executeCommands(this.correctUser, this.correctUserPass,
+		        new XCommand[] { command }, callback);
+		
+		assertTrue(this.waitOnCallback(callback));
+		assertNotNull(callback.getEffect());
+		assertTrue(callback.getEffect().length == 1);
+		assertNull(callback.getException());
+		assertTrue((callback.getEffect())[0].getResult() == XCommand.NOCHANGE);
+		assertNull((callback.getEffect())[0].getException());
+	}
+	
 	// private, because it makes assumptions about the tests
 	private void checkEvent(XEvent event, XAddress changedEntity, ChangeType type,
 	        XType expectedType, long revision) {
@@ -1629,4 +1657,45 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 			}
 		}
 	}
+	
+	/*
+	 * Test that getModelSnapshot works if there revision numbers in the change
+	 * log that don't have events associated with them.
+	 */
+	@Test
+	public void testGetModelSnapshotWithHolesInChangeLog() {
+		
+		XAddress repoAddr = XX.toAddress(getRepositoryId(), null, null, null);
+		XID modelId = XX.toId("model");
+		
+		executeSucceedingCommand(MemoryRepositoryCommand.createAddCommand(repoAddr, true, modelId));
+		
+		XAddress modelAddr = XX.resolveModel(repoAddr, modelId);
+		XID objectId = XX.toId("object");
+		executeSucceedingCommand(MemoryModelCommand.createAddCommand(modelAddr, true, objectId));
+		XAddress objectAddr = XX.resolveObject(modelAddr, objectId);
+		XID fieldA = XX.toId("A");
+		executeSucceedingCommand(MemoryObjectCommand.createAddCommand(objectAddr, true, fieldA));
+		XAddress fieldAddr = XX.resolveField(objectAddr, fieldA);
+		executeSucceedingCommand(MemoryFieldCommand.createAddCommand(fieldAddr, XCommand.FORCED, XV
+		        .toValue("test")));
+		executeNochangeCommand(MemoryFieldCommand.createAddCommand(fieldAddr, XCommand.FORCED, XV
+		        .toValue("test")));
+		executeSucceedingCommand(MemoryObjectCommand.createAddCommand(objectAddr, true, XX
+		        .toId("B")));
+		
+		// check if we can get a snapshot
+		SynchronousTestCallback<BatchedResult<XReadableModel>[]> callback2 = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
+		XAddress[] modelAddress = new XAddress[] { modelAddr };
+		
+		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, modelAddress,
+		        callback2);
+		assertTrue(this.waitOnCallback(callback2));
+		
+		BatchedResult<XReadableModel>[] result2 = callback2.getEffect();
+		assertNotNull(result2);
+		assertEquals(modelId, result2[0].getResult().getID());
+		
+	}
+	
 }
