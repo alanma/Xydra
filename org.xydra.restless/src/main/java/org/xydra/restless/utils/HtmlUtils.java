@@ -1,12 +1,15 @@
 package org.xydra.restless.utils;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import javax.servlet.http.HttpServletResponse;
 
 
 public class HtmlUtils {
@@ -160,6 +163,14 @@ public class HtmlUtils {
 		}
 		buf.append("</ol>");
 		return buf.toString();
+	}
+	
+	public static void writeHtmlPage(HttpServletResponse res, String title, String content)
+	        throws IOException {
+		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		writeHtmlHeaderOpenBody(w, title);
+		w.write(content);
+		writeCloseBodyHtml(w);
 	}
 	
 }
