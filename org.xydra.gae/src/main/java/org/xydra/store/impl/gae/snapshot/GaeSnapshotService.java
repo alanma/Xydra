@@ -113,47 +113,48 @@ public class GaeSnapshotService {
 			XEvent event = batch.get(pos).get().getEvent();
 			if(event == null) {
 				// Nothing changed at this revision, ignore.
-				continue;
-			}
-			
-			// Check if this is the first event we need.
-			if(event instanceof XRepositoryEvent) {
-				entry.modelState = null;
-				if(event.getChangeType() == ChangeType.REMOVE) {
-					assert i > 0;
-					assert i == curRev;
-					entry.revision = curRev;
-					log.debug("-> removed, rev=" + entry.revision);
-					return;
-				} else {
-					entry.revision = i - 1;
-					events.add(0, event);
-					log.debug("-> reset, rev=" + entry.revision);
-					break;
-				}
+			} else {
 				
-			} else if(event instanceof XTransactionEvent) {
-				XTransactionEvent trans = (XTransactionEvent)event;
-				assert trans.size() > 1;
-				if(trans.getEvent(0) instanceof XRepositoryEvent) {
-					assert trans.getEvent(0).getChangeType() == ChangeType.ADD;
-					assert !(trans.getEvent(trans.size() - 1) instanceof XRepositoryEvent);
+				// Check if this is the first event we need.
+				if(event instanceof XRepositoryEvent) {
 					entry.modelState = null;
-					entry.revision = i - 1;
-					events.add(0, event);
-					log.debug("-> reset, rev=" + entry.revision);
-					break;
-				} else if(trans.getEvent(trans.size() - 1) instanceof XRepositoryEvent) {
-					assert trans.getEvent(trans.size() - 1).getChangeType() == ChangeType.REMOVE;
-					assert i > 0;
-					assert i == curRev;
-					entry.modelState = null;
-					entry.revision = curRev;
-					log.debug("-> removed, rev=" + entry.revision);
-					return;
+					if(event.getChangeType() == ChangeType.REMOVE) {
+						assert i > 0;
+						assert i == curRev;
+						entry.revision = curRev;
+						log.debug("-> removed, rev=" + entry.revision);
+						return;
+					} else {
+						entry.revision = i - 1;
+						events.add(0, event);
+						log.debug("-> reset, rev=" + entry.revision);
+						break;
+					}
+					
+				} else if(event instanceof XTransactionEvent) {
+					XTransactionEvent trans = (XTransactionEvent)event;
+					assert trans.size() > 1;
+					if(trans.getEvent(0) instanceof XRepositoryEvent) {
+						assert trans.getEvent(0).getChangeType() == ChangeType.ADD;
+						assert !(trans.getEvent(trans.size() - 1) instanceof XRepositoryEvent);
+						entry.modelState = null;
+						entry.revision = i - 1;
+						events.add(0, event);
+						log.debug("-> reset, rev=" + entry.revision);
+						break;
+					} else if(trans.getEvent(trans.size() - 1) instanceof XRepositoryEvent) {
+						assert trans.getEvent(trans.size() - 1).getChangeType() == ChangeType.REMOVE;
+						assert i > 0;
+						assert i == curRev;
+						entry.modelState = null;
+						entry.revision = curRev;
+						log.debug("-> removed, rev=" + entry.revision);
+						return;
+					}
 				}
+				events.add(0, event);
+				
 			}
-			events.add(0, event);
 			
 			// Asynchronously fetch new change entities.
 			if(i - batch.size() > entry.revision) {
