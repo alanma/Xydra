@@ -66,6 +66,7 @@ public class GaeMyAdminApp {
 		        new RestlessParameter("sure", "no"));
 		
 		MemcacheResource.restless(restless, prefix + "/memcache");
+		LogConfResource.restless(restless, prefix + "/logconf");
 	}
 	
 	public void index(HttpServletResponse res) throws IOException {
