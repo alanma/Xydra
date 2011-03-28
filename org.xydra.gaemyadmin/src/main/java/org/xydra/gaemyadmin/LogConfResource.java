@@ -53,6 +53,8 @@ public class LogConfResource {
 	public void post(HttpServletRequest req, HttpServletResponse res) throws IOException {
 		// set each logger to the given level, if different from before
 		
+		// TODO persist settings in datastore and load from there
+		
 		Map<String,String> params = ServletUtils.getRequestparametersAsMap(req);
 		LogManager lm = LogManager.getLogManager();
 		for(Map.Entry<String,String> param : params.entrySet()) {
