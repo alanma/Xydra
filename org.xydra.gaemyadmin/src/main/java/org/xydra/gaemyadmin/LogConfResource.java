@@ -28,9 +28,9 @@ public class LogConfResource {
 	private static String URL;
 	
 	public static void restless(Restless restless, String prefix) {
-		restless.addMethod(prefix + "/", "GET", MemcacheResource.class, "index", true);
-		restless.addMethod(prefix + "/", "POST", MemcacheResource.class, "post", true);
-		URL = prefix + "/";
+		restless.addMethod(prefix + "/", "GET", LogConfResource.class, "index", true);
+		restless.addMethod(prefix + "/", "POST", LogConfResource.class, "post", true);
+		URL = "/admin" + prefix + "/";
 	}
 	
 	public void index(HttpServletResponse res) throws IOException {
@@ -44,8 +44,12 @@ public class LogConfResource {
 		while(enu.hasMoreElements()) {
 			String loggerName = enu.nextElement();
 			java.util.logging.Logger logger = lm.getLogger(loggerName);
-			ul.inputText("Logger '" + loggerName + "'", loggerName, logger.getLevel().getName());
+			Level currentLevel = logger.getLevel();
+			ul.li().inputText("Logger '" + loggerName + "'", "logger-" + loggerName,
+			        currentLevel == null ? "" : currentLevel.getName());
 		}
+		ul.li().inputSubmit("Set");
+		
 		HtmlUtils.writeContent(res, form.toHtml("  "));
 		HtmlUtils.endHtmlPage(res);
 	}
@@ -58,14 +62,20 @@ public class LogConfResource {
 		Map<String,String> params = ServletUtils.getRequestparametersAsMap(req);
 		LogManager lm = LogManager.getLogManager();
 		for(Map.Entry<String,String> param : params.entrySet()) {
-			Logger logger = lm.getLogger(param.getKey());
+			String key = param.getKey();
+			String loggerName = key.substring("logger-".length());
+			Logger logger = lm.getLogger(loggerName);
 			if(logger == null) {
-				throw new IllegalArgumentException("Logger '" + param.getKey() + "' was null");
+				throw new IllegalArgumentException("Logger '" + loggerName + "' was null");
 			}
 			Level current = logger.getLevel();
-			Level planned = Level.parse(param.getValue());
-			if(!current.equals(planned)) {
-				logger.setLevel(planned);
+			Level planned = null;
+			try {
+				planned = Level.parse(param.getValue());
+				if(current == null || !current.equals(planned)) {
+					logger.setLevel(planned);
+				}
+			} catch(IllegalArgumentException e) {
 			}
 		}
 		
