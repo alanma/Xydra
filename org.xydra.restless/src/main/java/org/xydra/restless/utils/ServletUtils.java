@@ -130,7 +130,8 @@ public class ServletUtils {
 	}
 	
 	/**
-	 * @return all get and post parameters as delivered in the servlet API
+	 * @return all get and post parameters as delivered in the servlet API - but
+	 *         additionally URL-decoded
 	 * @throws IllegalStateException if one of the parameters has more than one
 	 *             value
 	 */
@@ -150,9 +151,17 @@ public class ServletUtils {
 			if(values.length > 0) {
 				value = values[0];
 			}
-			map.put(name, value);
+			map.put(urldecode(name), urldecode(value));
 		}
 		return map;
+	}
+	
+	public static String urldecode(String encoded) {
+		try {
+			return URLDecoder.decode(encoded, "utf-8");
+		} catch(UnsupportedEncodingException e) {
+			throw new AssertionError(e);
+		}
 	}
 	
 }

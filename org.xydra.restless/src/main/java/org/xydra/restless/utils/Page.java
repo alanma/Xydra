@@ -1,6 +1,8 @@
 package org.xydra.restless.utils;
 
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,6 +15,8 @@ import java.util.List;
  * 
  */
 public class Page {
+	
+	private static final ToHtml BR = new HtmlNode("<br />");
 	
 	public static class Attribute {
 		public Attribute(String name, String value) {
@@ -78,6 +82,7 @@ public class Page {
 			input.parent = this;
 			this.children.add(new TextNode(label));
 			this.children.add(input);
+			this.children.add(BR);
 			return this;
 		}
 		
@@ -97,7 +102,8 @@ public class Page {
 		
 		public String toHtml(String indent) {
 			return Page.renderToHtml(indent, this.first, RenderMode.Block, this.tag,
-			        Page.toHtml("  " + indent, this.children));
+			        Page.toHtml("  " + indent, this.children),
+			        this.attributes.toArray(new Attribute[0]));
 		}
 		
 	}
@@ -140,10 +146,18 @@ public class Page {
 	 */
 	public static class TextInput extends Input {
 		public TextInput(ToHtml parent, String name, String value) {
-			super("input", parent, new Attribute("type", "text"), new Attribute("name", name),
-			        new Attribute("value", value));
+			super("input", parent, new Attribute("type", "text"), new Attribute("name",
+			        urlencode(name)), new Attribute("value", urlencode(value)));
 		}
 		
+	}
+	
+	public static String urlencode(String s) {
+		try {
+			return URLEncoder.encode(s, "utf-8");
+		} catch(UnsupportedEncodingException e) {
+			throw new AssertionError(e);
+		}
 	}
 	
 	public static class DefinitionList extends BlockElement {
@@ -171,11 +185,18 @@ public class Page {
 			return this;
 		}
 		
+		public Listitem li() {
+			Listitem li = new Listitem(this);
+			this.children.add(li);
+			return li;
+			
+		}
+		
 	}
 	
-	public static class Listitem extends InlineElement {
+	public static class Listitem extends BlockElement {
 		public Listitem(ToHtml parent, Attribute ... attributes) {
-			super("li", parent, RenderMode.InlineBlock, attributes);
+			super("li", parent, false, attributes);
 		}
 		
 		public Listitem(UnsortedList parent, String content) {
@@ -304,6 +325,24 @@ public class Page {
 		public String toHtml(String indent) {
 			return Page.renderToHtml(indent, false, RenderMode.InlineBlock, this.tag,
 			        this.content.toHtml(""));
+		}
+		
+	}
+	
+	public static class HtmlNode implements ToHtml {
+		
+		private String content;
+		
+		/**
+		 * @param content will NOT be HTML-escaped
+		 */
+		public HtmlNode(final String content) {
+			this.content = content;
+		}
+		
+		@Override
+		public String toHtml(String indent) {
+			return this.content;
 		}
 		
 	}
