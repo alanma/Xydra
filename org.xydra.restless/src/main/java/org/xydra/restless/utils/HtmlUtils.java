@@ -167,10 +167,31 @@ public class HtmlUtils {
 	
 	public static void writeHtmlPage(HttpServletResponse res, String title, String content)
 	        throws IOException {
+		startHtmlPage(res, title);
+		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		w.write(content);
+		endHtmlPage(res);
+	}
+	
+	public static void endHtmlPage(HttpServletResponse res) throws IOException {
+		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		writeCloseBodyHtml(w);
+	}
+	
+	public static void startHtmlPage(HttpServletResponse res, String title) throws IOException {
 		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
 		writeHtmlHeaderOpenBody(w, title);
-		w.write(content);
-		writeCloseBodyHtml(w);
+		w.flush();
+	}
+	
+	/**
+	 * @param res ..
+	 * @param safeHtml must be safe. No further encoding is applied.
+	 */
+	public static void writeContent(HttpServletResponse res, String safeHtml) throws IOException {
+		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		w.write(safeHtml);
+		w.flush();
 	}
 	
 }

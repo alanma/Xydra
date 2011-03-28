@@ -2,6 +2,7 @@ package org.xydra.restless.utils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
@@ -124,6 +125,32 @@ public class ServletUtils {
 					throw new RuntimeException("No utf-8 on this system?", e);
 				}
 			}
+		}
+		return map;
+	}
+	
+	/**
+	 * @return all get and post parameters as delivered in the servlet API
+	 * @throws IllegalStateException if one of the parameters has more than one
+	 *             value
+	 */
+	public static Map<String,String> getRequestparametersAsMap(HttpServletRequest req)
+	        throws IllegalStateException {
+		Map<String,String> map = new HashMap<String,String>();
+		@SuppressWarnings("rawtypes")
+		Enumeration en = req.getParameterNames();
+		while(en.hasMoreElements()) {
+			String name = (String)en.nextElement();
+			String[] values = req.getParameterValues(name);
+			if(values.length > 1) {
+				throw new IllegalStateException("param '" + name
+				        + "' has more than one value, namely " + values);
+			}
+			String value = null;
+			if(values.length > 0) {
+				value = values[0];
+			}
+			map.put(name, value);
 		}
 		return map;
 	}

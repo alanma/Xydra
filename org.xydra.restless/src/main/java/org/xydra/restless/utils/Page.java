@@ -2,6 +2,7 @@ package org.xydra.restless.utils;
 
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -13,17 +14,38 @@ import java.util.List;
  */
 public class Page {
 	
-	public static abstract class BlockElement extends ElementWithChildren {
+	public static class Attribute {
+		public Attribute(String name, String value) {
+			this.name = name;
+			this.value = value;
+		}
 		
-		private BlockElement parent = null;
+		String name;
+		String value;
+		
+		public String toHtml() {
+			return " " + this.name + "=\"" + xmlEncode(this.value) + "\"";
+		}
+	}
+	
+	public static abstract class BlockElement extends ElementWithChildren implements ToHtml {
+		
+		public BlockElement(String tag, ToHtml parent, boolean first, Attribute ... attributes) {
+			super(tag, parent, first, attributes);
+		}
 		
 		public Html endBodyEndHtml() {
 			// get up parents until we have the body
+			if(this.parent == null) {
+				// element is standalone
+				return null;
+			}
 			assert this.parent != null;
 			if(this.parent instanceof Body) {
-				return ((Body)this.parent).html;
+				Body body = (Body)this.parent;
+				return (Html)body.parent;
 			} else {
-				return this.parent.endBodyEndHtml();
+				return ((BlockElement)this.parent).endBodyEndHtml();
 			}
 		}
 		
@@ -33,42 +55,136 @@ public class Page {
 			return p;
 		}
 		
-		public String toHtml(String indent, String tag) {
-			return Page.toHtmlBlock(indent, tag, Page.toHtml("  " + indent, this.children));
+		public Form form(METHOD method, String action) {
+			Form form = new Form(this, method, action);
+			form.parent = this;
+			this.children.add(form);
+			return form;
+		}
+		
+		public BlockElement inputSubmit(String label) {
+			SubmitInput input = new SubmitInput(this, label);
+			input.parent = this;
+			this.children.add(input);
+			return this;
+		}
+		
+		/**
+		 * @param name form name
+		 * @param value current value, can be null
+		 */
+		public BlockElement inputText(String label, String name, String value) {
+			TextInput input = new TextInput(this, name, value);
+			input.parent = this;
+			this.children.add(new TextNode(label));
+			this.children.add(input);
+			return this;
+		}
+		
+		public DefinitionList definitionList() {
+			DefinitionList dl = new DefinitionList(this);
+			dl.parent = this;
+			this.children.add(dl);
+			return dl;
+		}
+		
+		public UnsortedList unsortedList() {
+			UnsortedList ul = new UnsortedList(this);
+			ul.parent = this;
+			this.children.add(ul);
+			return ul;
+		}
+		
+		public String toHtml(String indent) {
+			return Page.renderToHtml(indent, this.first, RenderMode.Block, this.tag,
+			        Page.toHtml("  " + indent, this.children));
 		}
 		
 	}
 	
 	public static class Body extends BlockElement {
 		
-		private Html html;
-		
 		protected Body(Html html) {
-			this.html = html;
-		}
-		
-		@Override
-		public String toHtmlBlock(String indent) {
-			return super.toHtml(indent, "body");
+			super("body", html, false);
 		}
 		
 	}
 	
-	public class DefinitionList extends BlockElement {
+	public static enum METHOD {
+		GET, POST
+	}
+	
+	public static class Form extends BlockElement {
+		
+		public Form(ToHtml parent, METHOD method, String action) {
+			super("form", parent, false, new Attribute("action", action), new Attribute("method",
+			        method.name()));
+		}
+		
+	}
+	
+	public abstract static class Input extends InlineElement {
+		public Input(String tag, ToHtml parent, Attribute ... attributes) {
+			super(tag, parent, RenderMode.InlineBlock, attributes);
+		}
+	}
+	
+	public static class SubmitInput extends Input {
+		public SubmitInput(ToHtml parent, String label) {
+			super("input", parent, new Attribute("type", "submit"), new Attribute("value", label));
+		}
+	}
+	
+	/**
+	 * Rendered as 'name: [ value ]'
+	 */
+	public static class TextInput extends Input {
+		public TextInput(ToHtml parent, String name, String value) {
+			super("input", parent, new Attribute("type", "text"), new Attribute("name", name),
+			        new Attribute("value", value));
+		}
+		
+	}
+	
+	public static class DefinitionList extends BlockElement {
+		
+		public DefinitionList(ToHtml parent, Attribute ... attributes) {
+			super("dl", parent, false, attributes);
+		}
 		
 		public DefinitionList define(String term, String definition) {
 			this.children.add(new DefinitionListTermDefinition(term, definition));
 			return this;
 		}
 		
-		@Override
-		public String toHtmlBlock(String indent) {
-			return super.toHtml(indent, "dl");
+	}
+	
+	public static class UnsortedList extends BlockElement {
+		
+		public UnsortedList(ToHtml parent, Attribute ... attributes) {
+			super("ul", parent, false, attributes);
+		}
+		
+		public UnsortedList li(String content) {
+			Listitem li = new Listitem(this, content);
+			this.children.add(li);
+			return this;
 		}
 		
 	}
 	
-	public static class DefinitionListTermDefinition implements ToHtmlBlock {
+	public static class Listitem extends InlineElement {
+		public Listitem(ToHtml parent, Attribute ... attributes) {
+			super("li", parent, RenderMode.InlineBlock, attributes);
+		}
+		
+		public Listitem(UnsortedList parent, String content) {
+			this(parent);
+			this.children.add(new TextNode(content));
+		}
+	}
+	
+	public static class DefinitionListTermDefinition implements ToHtml {
 		
 		protected TextNode dt, dd;
 		
@@ -78,28 +194,49 @@ public class Page {
 		}
 		
 		@Override
-		public String toHtmlBlock(String indent) {
-			return indent + "<dt>" + this.dt.toHtmlInline() + "</dt><dd>" + this.dd.toHtmlInline()
+		public String toHtml(String indent) {
+			return indent + "<dt>" + this.dt.toHtml("") + "</dt><dd>" + this.dd.toHtml("")
 			        + "</dd>\n";
 		}
 		
 	}
 	
-	public static abstract class ElementWithChildren implements ToHtmlBlock {
-		protected List<ToHtml> children = new ArrayList<Page.ToHtml>();
+	public static abstract class ElementWithChildren implements ToHtml {
+		protected String tag;
+		protected List<ToHtml> children = new ArrayList<ToHtml>();
+		protected ToHtml parent = null;
+		protected List<Attribute> attributes;
+		protected boolean first;
+		
+		/**
+		 * @param tag never null
+		 * @param parent may be null
+		 * @param attributes optional
+		 */
+		public ElementWithChildren(String tag, ToHtml parent, boolean first,
+		        Attribute ... attributes) {
+			this.tag = tag;
+			this.parent = parent;
+			this.first = first;
+			this.attributes = Arrays.asList(attributes);
+		}
+		
+		public void addAttribute(String name, String value) {
+			this.attributes.add(new Attribute(name, value));
+		}
+		
 	}
 	
-	public static class Head extends ElementWithChildren {
-		
-		private Html html;
+	public static class Head extends BlockElement {
 		
 		protected Head(Html html) {
-			this.html = html;
+			super("head", html, false);
 		}
 		
 		public Body endHeadStartBody() {
-			Body body = new Body(this.html);
-			this.html.body = body;
+			Html html = (Html)this.parent;
+			Body body = new Body(html);
+			html.children.add(body);
 			return body;
 		}
 		
@@ -107,71 +244,71 @@ public class Page {
 			this.children.add(new Tag("title", title));
 		}
 		
-		public String toHtmlBlock(String indent) {
-			return Page.toHtmlBlock(indent, "head", Page.toHtml("  " + indent, this.children));
-		}
-		
 	}
 	
-	public static class Html implements ToHtmlBlock {
+	public static class Html extends BlockElement implements ToHtml {
 		
-		private Body body;
-		private Head head;
+		public Html() {
+			super("html", null, true);
+		}
 		
 		public Head head() {
 			Head head = new Head(this);
-			this.head = head;
+			this.children.add(head);
 			return head;
 		}
 		
-		@Override
-		public String toHtmlBlock(String indent) {
-			return Page.toHtmlBlock(indent, "html", this.head.toHtmlBlock("  " + indent)
-			        + this.body.toHtmlBlock("  " + indent));
+		public String toString() {
+			return this.toHtml("");
 		}
 		
 	}
 	
-	public abstract static class InlineElement implements ToHtmlInline {
+	public abstract static class InlineElement extends ElementWithChildren implements ToHtml {
+		private RenderMode renderMode;
 		
+		public InlineElement(String tag, ToHtml parent, RenderMode renderMode,
+		        Attribute ... attributes) {
+			super(tag, parent, false, attributes);
+			this.renderMode = renderMode;
+		}
+		
+		public String toHtml(String indent) {
+			return Page.renderToHtml(indent, false, this.renderMode, this.tag,
+			        Page.toHtml("", this.children), this.attributes.toArray(new Attribute[0]));
+		}
 	}
 	
 	public static class Paragraph extends BlockElement {
-		
 		public Paragraph(BlockElement parent, String content) {
-			super.parent = parent;
+			super("p", parent, false);
 			this.children.add(new TextNode(content));
 		}
-		
-		@Override
-		public String toHtmlBlock(String indent) {
-			return Page.toHtmlInline(indent, "p", Page.toHtml(indent, this.children));
-		}
-		
 	}
 	
-	public static class Tag implements ToHtmlBlock {
+	public static class Tag implements ToHtml {
 		
-		private ToHtmlInline content;
+		private ToHtml content;
 		private String tag;
 		
 		public Tag(String tag, String content) {
 			this(tag, new TextNode(content));
 		}
 		
-		public Tag(String tag, ToHtmlInline content) {
+		public Tag(String tag, ToHtml content) {
 			this.tag = tag;
 			this.content = content;
 		}
 		
 		@Override
-		public String toHtmlBlock(String indent) {
-			return Page.toHtmlInline(indent, this.tag, this.content.toHtmlInline());
+		public String toHtml(String indent) {
+			return Page.renderToHtml(indent, false, RenderMode.InlineBlock, this.tag,
+			        this.content.toHtml(""));
 		}
 		
 	}
 	
-	public static class TextNode implements ToHtmlInline {
+	public static class TextNode implements ToHtml {
 		
 		private String content;
 		
@@ -183,24 +320,14 @@ public class Page {
 		}
 		
 		@Override
-		public String toHtmlInline() {
+		public String toHtml(String indent) {
 			return xmlEncode(this.content);
 		}
 		
 	}
 	
-	/**
-	 * Marker interface
-	 */
 	public static interface ToHtml {
-	}
-	
-	public static interface ToHtmlBlock extends ToHtml {
-		public String toHtmlBlock(String indent);
-	}
-	
-	public static interface ToHtmlInline extends ToHtml {
-		public String toHtmlInline();
+		public String toHtml(String indent);
 	}
 	
 	public static Head htmlHead(Writer w) {
@@ -215,37 +342,70 @@ public class Page {
 		return head;
 	}
 	
-	public static void main(String[] args) {
-		String s2 = Page.htmlHeadTitle("Hello World").endHeadStartBody().paragraph("Foo")
-		        .endBodyEndHtml().toHtmlBlock("");
-		
-		System.out.println(s2);
-	}
-	
 	public static String toHtml(String indent, List<ToHtml> children) {
 		StringBuffer buf = new StringBuffer();
-		for(ToHtml toHtml : children) {
-			
-			if(toHtml instanceof ToHtmlBlock) {
-				buf.append(((ToHtmlBlock)toHtml).toHtmlBlock(indent));
-			} else {
-				assert toHtml instanceof ToHtmlInline;
-				buf.append(((ToHtmlInline)toHtml).toHtmlInline());
-			}
+		for(ToHtml child : children) {
+			buf.append(child.toHtml(indent));
 		}
 		return buf.toString();
 	}
 	
-	private static String toHtmlBlock(String indent, String tag, String content) {
-		return indent + "<" + tag + ">\n"
+	private static enum RenderMode {
+		
+		/** No whitespace added */
+		Inline,
 
-		+ content
+		/** Starts on a new line */
+		InlineBlock,
 
-		+ indent + "</" + tag + ">\n";
+		/** Starts on a new line */
+		Block
 	}
 	
-	private static String toHtmlInline(String indent, String tag, String content) {
-		return indent + "<" + tag + ">" + content + "</" + tag + ">\n";
+	/**
+	 * @param indent
+	 * @param first no newline at start
+	 * @param compact no whitespace added
+	 * @param block generous newlines
+	 * @param tag
+	 * @param content
+	 * @param attributes
+	 * @return
+	 */
+	private static String renderToHtml(String indent, boolean first, RenderMode renderMode,
+	        String tag, String content, Attribute ... attributes) {
+		StringBuffer buf = new StringBuffer();
+		
+		if(!first && renderMode != RenderMode.Inline) {
+			buf.append("\n");
+		}
+		if(renderMode == RenderMode.Block || renderMode == RenderMode.InlineBlock) {
+			buf.append(indent);
+		}
+		
+		buf.append("<").append(tag).append(toHtmlAttributes(attributes));
+		
+		if(content == null || content.equals("")) {
+			buf.append(" />");
+		} else {
+			buf.append(">");
+			buf.append(content);
+			if(renderMode == RenderMode.Block) {
+				buf.append("\n");
+				buf.append(indent);
+			}
+			buf.append("</").append(tag).append(">");
+		}
+		return buf.toString();
+	}
+	
+	private static String toHtmlAttributes(Attribute ... attributes) {
+		StringBuffer buf = new StringBuffer();
+		for(Attribute attribute : attributes) {
+			if(attribute.value != null)
+				buf.append(attribute.toHtml());
+		}
+		return buf.toString();
 	}
 	
 	public static final String xmlEncode(String raw) {
@@ -255,5 +415,17 @@ public class Page {
 		safe = safe.replace("'", "&apos;");
 		safe = safe.replace("\"", "&quot;");
 		return safe;
+	}
+	
+	public static void main(String[] args) {
+		String s2 = Page.htmlHeadTitle("Hello World").endHeadStartBody().paragraph("Foo")
+		        .form(METHOD.GET, "/my/url").inputText("Name: ", "name", "John Doe")
+		        .inputSubmit("Abschicken").endBodyEndHtml().toString();
+		System.out.println(s2);
+		
+		Form form = new Form(null, METHOD.GET, "/my/url");
+		String s3 = form.inputText("Name: ", "name", "John Doe").inputSubmit("Abschicken")
+		        .toHtml("");
+		System.out.println(s3);
 	}
 }
