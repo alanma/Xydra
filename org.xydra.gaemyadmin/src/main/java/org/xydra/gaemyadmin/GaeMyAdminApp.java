@@ -55,14 +55,14 @@ public class GaeMyAdminApp {
 	private static final Logger log = LoggerFactory.getLogger(GaeMyAdminApp.class);
 	
 	public static void restless(Restless restless, String prefix) {
-		restless.addMethod("/", "GET", GaeMyAdminApp.class, "index", true);
-		restless.addMethod("/stats", "GET", GaeMyAdminApp.class, "stats", true,
+		restless.addMethod(prefix + "/", "GET", GaeMyAdminApp.class, "index", true);
+		restless.addMethod(prefix + "/stats", "GET", GaeMyAdminApp.class, "stats", true,
 
 		new RestlessParameter("resultFormat", "text")
 
 		);
-		restless.addMethod("/backup", "GET", GaeMyAdminApp.class, "backup", true);
-		restless.addMethod("/deleteAll", "GET", GaeMyAdminApp.class, "deleteAll", true,
+		restless.addMethod(prefix + "/backup", "GET", GaeMyAdminApp.class, "backup", true);
+		restless.addMethod(prefix + "/deleteAll", "GET", GaeMyAdminApp.class, "deleteAll", true,
 		        new RestlessParameter("sure", "no"));
 		
 		MemcacheResource.restless(restless, prefix + "/memcache");
