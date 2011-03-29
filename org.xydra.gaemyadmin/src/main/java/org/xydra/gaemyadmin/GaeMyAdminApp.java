@@ -75,12 +75,14 @@ public class GaeMyAdminApp {
 		HtmlUtils.writeHtmlHeaderOpenBody(w, "GaeMyAdmin");
 		w.write(HtmlUtils.toOrderedList(Arrays.asList(
 
-		HtmlUtils.link("stats", "Statistics"),
+		HtmlUtils.link("stats/", "Statistics"),
 
 		HtmlUtils.link("deleteAll",
 		        "Page to delete all data - clicking this link just lists all data"),
 
-		HtmlUtils.link("memcache", "Memcache admin")
+		HtmlUtils.link("memcache/", "Memcache admin"),
+
+		HtmlUtils.link("logconf/", "Logger config")
 
 		)));
 		HtmlUtils.writeCloseBodyHtml(w);

@@ -29,7 +29,7 @@ public class MemcacheResource {
 		HtmlUtils.writeHtmlHeaderOpenBody(w, "GaeMyAdmin :: Memcache");
 		w.write(HtmlUtils.toOrderedList(Arrays.asList(
 
-		HtmlUtils.link("stats", "Memcache Statistics")
+		HtmlUtils.link("stats/", "Memcache Statistics")
 
 		)));
 		HtmlUtils.writeCloseBodyHtml(w);
@@ -37,10 +37,7 @@ public class MemcacheResource {
 	}
 	
 	public void stats(HttpServletResponse res) throws IOException {
-		ServletUtils.headers(res, "text/html");
-		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
-		HtmlUtils.writeHtmlHeaderOpenBody(w, "GaeMyAdmin :: Memcache stats");
-		
+		Writer w = HtmlUtils.startHtmlPage(res, "GaeMyAdmin :: Memcache stats");
 		w.write("Loading stats...");
 		w.flush();
 		
@@ -50,21 +47,25 @@ public class MemcacheResource {
 		
 		Stats stats = mcs.getStatistics();
 		
-		w.write(HtmlUtils.toOrderedList(Arrays.asList(
+		if(stats == null) {
+			w.write("No stats available.");
+		} else {
+			w.write(HtmlUtils.toOrderedList(Arrays.asList(
 
-		"BytesReturnedForHits: " + stats.getBytesReturnedForHits(),
+			"BytesReturnedForHits: " + stats.getBytesReturnedForHits(),
 
-		"HitCount: " + stats.getHitCount(),
+			"HitCount: " + stats.getHitCount(),
 
-		"ItemCount: " + stats.getItemCount(),
+			"ItemCount: " + stats.getItemCount(),
 
-		"MaxTimeWithoutAccess: " + stats.getMaxTimeWithoutAccess(),
+			"MaxTimeWithoutAccess: " + stats.getMaxTimeWithoutAccess(),
 
-		"MissCount: " + stats.getMissCount(),
+			"MissCount: " + stats.getMissCount(),
 
-		"TotalItemBytes: " + stats.getTotalItemBytes()
+			"TotalItemBytes: " + stats.getTotalItemBytes()
 
-		)));
+			)));
+		}
 		w.flush();
 		HtmlUtils.writeCloseBodyHtml(w);
 	}
