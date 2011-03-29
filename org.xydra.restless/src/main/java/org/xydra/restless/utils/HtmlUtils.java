@@ -178,10 +178,11 @@ public class HtmlUtils {
 		writeCloseBodyHtml(w);
 	}
 	
-	public static void startHtmlPage(HttpServletResponse res, String title) throws IOException {
+	public static Writer startHtmlPage(HttpServletResponse res, String title) throws IOException {
 		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
 		writeHtmlHeaderOpenBody(w, title);
 		w.flush();
+		return w;
 	}
 	
 	/**
