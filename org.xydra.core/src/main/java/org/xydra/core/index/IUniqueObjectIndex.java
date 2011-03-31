@@ -1,8 +1,8 @@
 package org.xydra.core.index;
 
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.XID;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XWritableModel;
@@ -66,5 +66,7 @@ public interface IUniqueObjectIndex {
 	 *         'value' as the value of the fieldId configured for this index
 	 */
 	XWritableObject lookup(XWritableModel userModel, XValue value);
+	
+	XID lookupID(XValue indexKey);
 	
 }
