@@ -134,7 +134,7 @@ public interface XydraPersistence {
 	/**
 	 * @param address of an {@link XObject}
 	 * @return the current snapshot of the {@link XObject} addressed with
-	 *         'address'.
+	 *         'address'. TODO Whats is returned if there is no such object?
 	 */
 	XWritableObject getObjectSnapshot(XAddress address);
 	
