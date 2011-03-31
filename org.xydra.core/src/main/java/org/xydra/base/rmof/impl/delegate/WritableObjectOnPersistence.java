@@ -40,6 +40,7 @@ public class WritableObjectOnPersistence extends AbstractWritableOnPersistence i
 	
 	@Override
 	public XAddress getAddress() {
+		/* cache object after construction */
 		if(this.address == null) {
 			this.address = X.getIDProvider().fromComponents(this.persistence.getRepositoryId(),
 			        this.modelId, this.objectId, null);
@@ -62,10 +63,18 @@ public class WritableObjectOnPersistence extends AbstractWritableOnPersistence i
 		return this.objectId;
 	}
 	
+	/**
+	 * @return always a fresh snapshot from the {@link XydraPersistence}
+	 */
 	private XWritableObject getObjectSnapshot() {
-		return this.persistence.getModelSnapshot(
-		        X.getIDProvider().fromComponents(this.persistence.getRepositoryId(), this.modelId,
-		                null, null)).getObject(this.objectId);
+		// TODO test and delete old impl
+		return this.persistence.getObjectSnapshot(this.getAddress());
+		
+		/* old, slower but working impl */
+		// return this.persistence.getModelSnapshot(
+		// X.getIDProvider().fromComponents(this.persistence.getRepositoryId(),
+		// this.modelId,
+		// null, null)).getObject(this.objectId);
 	}
 	
 	public long getRevisionNumber() {
