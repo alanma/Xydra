@@ -127,14 +127,14 @@ public class XX {
 		return toAddress(repositoryAddress.getRepository(), modelId, null, null);
 	}
 	
-	public static XAddress resolveObject(XAddress ofAddress) {
-		if(ofAddress.getAddressedType() == XType.XREPOSITORY
-		        || ofAddress.getAddressedType() == XType.XMODEL) {
-			throw new IllegalArgumentException("Given address '" + ofAddress
+	public static XAddress resolveObject(XAddress objectAddress) {
+		if(objectAddress.getAddressedType() == XType.XREPOSITORY
+		        || objectAddress.getAddressedType() == XType.XMODEL) {
+			throw new IllegalArgumentException("Given address '" + objectAddress
 			        + "' cannot be resolved to an object");
 		}
-		return X.getIDProvider().fromComponents(ofAddress.getRepository(), ofAddress.getModel(),
-		        ofAddress.getObject(), null);
+		return X.getIDProvider().fromComponents(objectAddress.getRepository(), objectAddress.getModel(),
+		        objectAddress.getObject(), null);
 	}
 	
 	/**
@@ -239,7 +239,7 @@ public class XX {
 	 * Creates an {@link XID} from a given {@link String} using the default
 	 * {@link XIDProvider}. The {@link String} must be a valid XML name and may
 	 * not contain any ':' characters. The string SHOULD be at most 100
-	 * characters long. TODO Why?
+	 * characters long for maximum compatibility with all back-ends (e.g. Google AppEngine).
 	 * 
 	 * @param idString The String which will be used to create the {@link XID}.
 	 * @return a new unique {@link XID} object calculated from the given URI

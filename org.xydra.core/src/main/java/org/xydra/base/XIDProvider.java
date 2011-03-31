@@ -67,7 +67,8 @@ public interface XIDProvider {
 	/**
 	 * Creates an {@link XID} from a given string. The string must be a valid
 	 * XML name and may not contain any ':' characters. The string SHOULD be at
-	 * most 100 characters long. TODO Why?
+	 * most 100 characters long for maximal compatibility with all back-ends
+	 * such as Google AppEngine.
 	 * 
 	 * @param name the String which will be used to create the {@link XID}.
 	 * @return a new unique {@link XID} object calculated from the given name
