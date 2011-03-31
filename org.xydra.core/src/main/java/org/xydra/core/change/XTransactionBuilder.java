@@ -203,6 +203,8 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * which will add the given {@link XField} to the {@link XObject} with the
 	 * given {@link XAddress}.
 	 * 
+	 * Creates a FORCED command within the transaction.
+	 * 
 	 * @param newField The new {@link XField} that is to be added.
 	 * 
 	 * @throws IllegalArgumentException if this builders target is not the
@@ -476,6 +478,9 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * which will change an {@link XField} containing an {@link XValue} into one
 	 * containing another {@link XValue}.
 	 * 
+	 * TODO Clarify documentation: When should I used this method and when
+	 * {@link #changeValue(XAddress, long, XValue)}?
+	 * 
 	 * @param fieldAddr Address of the {@link XField} which is to be changed.
 	 * @param revision Current revision number of the {@link XField}.
 	 * @param oldValue The old {@link XValue} that the {@link XField} contains
@@ -645,8 +650,8 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 *             oldField.
 	 */
 	public void removeField(XReadableField oldField) {
-		removeField(oldField.getAddress().getParent(), oldField.getRevisionNumber(), oldField
-		        .getID());
+		removeField(oldField.getAddress().getParent(), oldField.getRevisionNumber(),
+		        oldField.getID());
 	}
 	
 	/**
@@ -682,8 +687,8 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 *             oldObject or its parent {@link XModel}.
 	 */
 	public void removeObject(XReadableObject oldObject) {
-		removeObject(oldObject.getAddress().getParent(), oldObject.getRevisionNumber(), oldObject
-		        .getID());
+		removeObject(oldObject.getAddress().getParent(), oldObject.getRevisionNumber(),
+		        oldObject.getID());
 	}
 	
 	/**
