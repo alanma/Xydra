@@ -13,6 +13,7 @@ import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.change.impl.memory.MemoryTransactionEvent;
 import org.xydra.core.model.XChangeLog;
+import org.xydra.gae.AboutAppEngine;
 import org.xydra.index.query.Pair;
 import org.xydra.store.impl.gae.GaeUtils;
 
@@ -413,6 +414,10 @@ public class GaeChange {
 	 * @throws VoluntaryTimeoutException to abort the current change
 	 */
 	protected void giveUpIfTimeoutCritical() throws VoluntaryTimeoutException {
+		/* Don't give up in development mode to let the debugger step through */
+		if(!AboutAppEngine.inProduction()) {
+			return;
+		}
 		assert !getStatus().isCommitted();
 		long now = now();
 		if(now - this.lastActivity > TIME_CRITICAL) {
@@ -464,8 +469,8 @@ public class GaeChange {
 				Pair<XAtomicEvent[],int[]> res = GaeEvents.loadAtomicEvents(this.modelAddr,
 				        this.rev, getActor(), this.entity);
 				
-				this.events = new Pair<List<XAtomicEvent>,int[]>(Arrays.asList(res.getFirst()), res
-				        .getSecond());
+				this.events = new Pair<List<XAtomicEvent>,int[]>(Arrays.asList(res.getFirst()),
+				        res.getSecond());
 			}
 		}
 		return this.events;

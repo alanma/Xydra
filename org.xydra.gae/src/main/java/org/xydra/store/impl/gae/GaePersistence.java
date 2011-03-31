@@ -193,9 +193,18 @@ public class GaePersistence implements XydraPersistence {
 			throw new RequestException("address must refer to an object, was " + address);
 		}
 		// IMPROVE generate the object snapshot directly
-		return getSnapshotService(address.getModel()).getSnapshot().getObject(address.getObject());
+		XWritableModel modelSnapshot = getSnapshotService(address.getModel()).getSnapshot();
+		if(modelSnapshot == null) {
+			return null;
+		}
+		return modelSnapshot.getObject(address.getObject());
 	}
 	
+	/**
+	 * Check for null and if the address is within this repo
+	 * 
+	 * @param address
+	 */
 	private void checkAddres(XAddress address) {
 		if(address == null) {
 			throw new IllegalArgumentException("address was null");
