@@ -14,6 +14,18 @@ import org.xydra.store.impl.delegate.XydraPersistence;
  */
 public abstract class AbstractWritableOnPersistence implements IHasXAddress {
 	
+	public XAddress getAddress() {
+		return this.address;
+	}
+	
+	public XID getExecutingActorId() {
+		return this.executingActorId;
+	}
+	
+	public XydraPersistence getPersistence() {
+		return this.persistence;
+	}
+	
 	protected transient XAddress address;
 	
 	protected XID executingActorId;
