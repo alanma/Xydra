@@ -103,4 +103,11 @@ public class WritableObjectOnPersistence extends AbstractWritableOnPersistence i
 		return result;
 	}
 	
+	public XID getModelId() {
+		return this.modelId;
+	}
+	
+	public XID getObjectId() {
+		return this.objectId;
+	}
 }
