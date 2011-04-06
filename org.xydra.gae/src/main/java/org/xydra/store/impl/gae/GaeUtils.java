@@ -465,11 +465,6 @@ public class GaeUtils {
 			makeSureStoredKeyInitialised();
 			log.info("Deleting " + storedKeys.size() + " entities (" + storedKeys
 			        + ") from local GAE datastore");
-			for(Key key : storedKeys) {
-				Future<Entity> keyResult = datastore.get(key);
-				Entity e = waitFor(keyResult);
-				assert e != null;
-			}
 			Future<Void> result = datastore.delete(storedKeys);
 			waitFor(result);
 			assert result.isDone();
