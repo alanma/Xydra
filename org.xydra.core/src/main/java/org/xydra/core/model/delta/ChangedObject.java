@@ -68,6 +68,7 @@ public class ChangedObject implements XWritableObject {
 	 *            encapsulate and represent
 	 */
 	public ChangedObject(XReadableObject base) {
+		assert base != null;
 		this.base = base;
 	}
 	
@@ -243,6 +244,8 @@ public class ChangedObject implements XWritableObject {
 	}
 	
 	public XWritableField getField(XID fieldId) {
+		assert fieldId != null;
+		assert this.base != null;
 		
 		SimpleField newField = this.added.get(fieldId);
 		if(newField != null) {
@@ -383,4 +386,12 @@ public class ChangedObject implements XWritableObject {
 		return false;
 	}
 	
+	public boolean isChanged() {
+		boolean changed = !this.added.isEmpty();
+		changed |= !this.removed.isEmpty();
+		for(ChangedField cf : this.changed.values()) {
+			changed |= cf.isChanged();
+		}
+		return changed;
+	}
 }
