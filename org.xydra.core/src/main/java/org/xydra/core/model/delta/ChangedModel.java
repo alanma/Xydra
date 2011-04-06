@@ -99,7 +99,13 @@ public class ChangedModel implements XWritableModel {
 		this.base = base;
 	}
 	
-	private boolean checkSetInvariants() {
+	/**
+	 * Run a number of assert statements.
+	 * 
+	 * @return always true. A return value allows this method to be used in
+	 *         assert statements.
+	 */
+	public boolean checkSetInvariants() {
 		
 		for(XID id : this.removed) {
 			assert !this.added.containsKey(id) && !this.changed.containsKey(id);
@@ -108,7 +114,7 @@ public class ChangedModel implements XWritableModel {
 		
 		for(XID id : this.added.keySet()) {
 			assert !this.removed.contains(id) && !this.changed.containsKey(id);
-			assert !this.base.hasObject(id);
+			assert !this.base.hasObject(id) : "baseModel contains added object '" + id + "'";
 			assert id.equals(this.added.get(id).getID());
 		}
 		
@@ -297,20 +303,20 @@ public class ChangedModel implements XWritableModel {
 		
 		XWritableObject object = getObject(command.getObjectId());
 		if(object == null) {
-			log.info("command is invalid - object is null");
+			log.info("FieldCommand is invalid - object is null");
 			return false;
 		}
 		
 		XWritableField field = object.getField(command.getFieldId());
 		if(field == null) {
-			log.info("command is invalid - field is null");
+			log.info("FieldCommand is invalid - field is null");
 			return false;
 		}
 		
 		if(!command.isForced()) {
 			if(field.getRevisionNumber() != command.getRevisionNumber()) {
-				log.info("command is invalid (wrong revision) field=" + field.getRevisionNumber()
-				        + " command=" + command.getRevisionNumber());
+				log.info("Safe FieldCommand is invalid (wrong revision) field="
+				        + field.getRevisionNumber() + " command=" + command.getRevisionNumber());
 				return false;
 			}
 			// empty fields require an ADD command
@@ -345,6 +351,7 @@ public class ChangedModel implements XWritableModel {
 		case ADD:
 			if(hasObject(objectId)) {
 				// command is invalid or doesn't change anything
+				log.warn("XModelCommand ADDs object '" + objectId + "' which is already there");
 				return command.isForced();
 			}
 			// command is OK and adds a new object
@@ -356,10 +363,12 @@ public class ChangedModel implements XWritableModel {
 			
 			if(object == null) {
 				// command is invalid or doesn't change anything
+				log.warn("XModelCommand REMOVE is invalid or doesn't change anything");
 				return command.isForced();
 			}
 			if(object.getRevisionNumber() != command.getRevisionNumber() && !command.isForced()) {
 				// command is invalid
+				log.warn("Safe XModelCommand is invalid (revNr mismatch)");
 				return false;
 			}
 			// command is OK and removes an existing object
@@ -386,7 +395,7 @@ public class ChangedModel implements XWritableModel {
 		
 		XWritableObject object = getObject(command.getObjectId());
 		if(object == null) {
-			// command is invalid
+			log.warn("XObjectCommand is invalid: " + command);
 			return false;
 		}
 		
@@ -396,7 +405,7 @@ public class ChangedModel implements XWritableModel {
 		
 		case ADD:
 			if(object.hasField(fieldId)) {
-				log.debug("command is invalid or doesn't change anything");
+				log.warn("XObjectCommand ADD is invalid or doesn't change anything");
 				return command.isForced();
 			}
 			// command is OK and adds a new field
@@ -408,10 +417,12 @@ public class ChangedModel implements XWritableModel {
 			
 			if(field == null) {
 				// command is invalid or doesn't change anything
+				log.warn("XObjectCommand REMOVE is invalid or doesn't change anything");
 				return command.isForced();
 			}
 			if(field.getRevisionNumber() != command.getRevisionNumber() && !command.isForced()) {
 				// command is invalid
+				log.warn("Safe XObjectCommand REMOVE revNr mismatch");
 				return false;
 			}
 			// command is OK and removes an existing field
@@ -504,11 +515,11 @@ public class ChangedModel implements XWritableModel {
 			return null;
 		}
 		
+		/* look in base */
 		XReadableObject object = this.base.getObject(objectId);
 		if(object == null) {
 			return null;
 		}
-		
 		changedObject = new ChangedObject(object);
 		this.changed.put(objectId, changedObject);
 		
@@ -545,8 +556,12 @@ public class ChangedModel implements XWritableModel {
 	}
 	
 	public boolean hasObject(XID objectId) {
-		return this.added.containsKey(objectId)
-		        || (!this.removed.contains(objectId) && this.base.hasObject(objectId));
+		if(this.added.containsKey(objectId))
+			return true;
+		if(this.removed.contains(objectId)) {
+			return false;
+		}
+		return this.base.hasObject(objectId);
 	}
 	
 	public boolean isEmpty() {
