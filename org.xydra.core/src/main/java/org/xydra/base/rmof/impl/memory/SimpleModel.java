@@ -35,7 +35,7 @@ public class SimpleModel implements Serializable, XRevWritableModel {
 	}
 	
 	public SimpleModel(XAddress address, long revisionNumber) {
-		assert address.getAddressedType() == XType.XMODEL;
+		assert address.getAddressedType() == XType.XMODEL : address;
 		this.address = address;
 		this.revisionNumber = revisionNumber;
 		this.objects = new HashMap<XID,XRevWritableObject>(2);
