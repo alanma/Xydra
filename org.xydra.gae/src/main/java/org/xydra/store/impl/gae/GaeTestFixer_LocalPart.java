@@ -1,6 +1,8 @@
 package org.xydra.store.impl.gae;
 
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.dev.LocalDatastoreService;
+import com.google.appengine.tools.development.ApiProxyLocal;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.apphosting.api.ApiProxy;
@@ -25,12 +27,19 @@ public class GaeTestFixer_LocalPart {
 	public static void initialiseHelperAndAttachToCurrentThread() {
 		if(helper_ == null) {
 			// create new environment
-			helper_ = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+			LocalDatastoreServiceTestConfig localDatastoreServiceTestConfig = new LocalDatastoreServiceTestConfig()
+			        .setNoStorage(true).setBackingStoreLocation(null);
+			helper_ = new LocalServiceTestHelper(localDatastoreServiceTestConfig);
+			
 			setUp();
 			
 			// remember it
 			env = ApiProxy.getCurrentEnvironment();
 			delegate = ApiProxy.getDelegate();
+			
+			// hopeless attempt to get a clean datastore in JUnit tests
+			ApiProxyLocal proxy = (ApiProxyLocal)delegate;
+			proxy.setProperty(LocalDatastoreService.NO_STORAGE_PROPERTY, Boolean.TRUE.toString());
 			
 			GaeTestfixer.setMarkerEntity(DatastoreServiceFactory.getDatastoreService());
 			
@@ -66,6 +75,12 @@ public class GaeTestFixer_LocalPart {
 	
 	public static synchronized void tearDown() {
 		assert setup;
+		
+		// ApiProxyLocal proxy = (ApiProxyLocal)ApiProxy.getDelegate();
+		// LocalDatastoreService datastoreService = (LocalDatastoreService)proxy
+		// .getService("datastore_v3");
+		// datastoreService.clearProfiles();
+		
 		helper_.tearDown();
 		setup = false;
 	}
