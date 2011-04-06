@@ -34,7 +34,6 @@ import org.xydra.log.LoggerFactory;
 public abstract class DeltaUtils {
 	
 	// TODO: Whenever a command fails, make sure to log why
-	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(DeltaUtils.class);
 	
 	/**
@@ -164,7 +163,8 @@ public abstract class DeltaUtils {
 		ChangedModel model = change.getFirst();
 		ModelChange mc = change.getSecond();
 		
-		assert model == null || rev - 1 == model.getRevisionNumber();
+		assert model == null || (rev - 1 == model.getRevisionNumber()) : ("rev=" + rev
+		        + " modelRev=" + model.getRevisionNumber());
 		
 		int nChanges = (mc == ModelChange.NOCHANGE ? 0 : 1);
 		if(model != null) {
@@ -214,11 +214,11 @@ public abstract class DeltaUtils {
 		}
 		
 		for(XReadableObject object : changedModel.getNewObjects()) {
-			events.add(MemoryModelEvent.createAddEvent(actorId, changedModel.getAddress(), object
-			        .getID(), rev, inTrans));
+			events.add(MemoryModelEvent.createAddEvent(actorId, changedModel.getAddress(),
+			        object.getID(), rev, inTrans));
 			for(XID fieldId : object) {
-				DeltaUtils.createEventsForNewField(events, rev, actorId, object, object
-				        .getField(fieldId), inTrans);
+				DeltaUtils.createEventsForNewField(events, rev, actorId, object,
+				        object.getField(fieldId), inTrans);
 			}
 		}
 		
@@ -227,8 +227,8 @@ public abstract class DeltaUtils {
 			assert !implied;
 			
 			for(XID fieldId : object.getRemovedFields()) {
-				DeltaUtils.createEventsForRemovedField(events, rev, actorId, object, object
-				        .getOldField(fieldId), inTrans, false);
+				DeltaUtils.createEventsForRemovedField(events, rev, actorId, object,
+				        object.getOldField(fieldId), inTrans, false);
 			}
 			
 			for(XReadableField field : object.getNewFields()) {
@@ -268,8 +268,8 @@ public abstract class DeltaUtils {
 		events.add(MemoryObjectEvent.createAddEvent(actorId, object.getAddress(), field.getID(),
 		        rev, objectRev, inTrans));
 		if(!field.isEmpty()) {
-			events.add(MemoryFieldEvent.createAddEvent(actorId, field.getAddress(), field
-			        .getValue(), rev, objectRev, field.getRevisionNumber(), inTrans));
+			events.add(MemoryFieldEvent.createAddEvent(actorId, field.getAddress(),
+			        field.getValue(), rev, objectRev, field.getRevisionNumber(), inTrans));
 		}
 	}
 	
@@ -289,8 +289,8 @@ public abstract class DeltaUtils {
 	private static void createEventsForRemovedObject(List<XAtomicEvent> events, long modelRev,
 	        XID actorId, XReadableObject object, boolean inTrans, boolean implied) {
 		for(XID fieldId : object) {
-			DeltaUtils.createEventsForRemovedField(events, modelRev, actorId, object, object
-			        .getField(fieldId), inTrans, true);
+			DeltaUtils.createEventsForRemovedField(events, modelRev, actorId, object,
+			        object.getField(fieldId), inTrans, true);
 		}
 		events.add(MemoryModelEvent.createRemoveEvent(actorId, object.getAddress().getParent(),
 		        object.getID(), modelRev, object.getRevisionNumber(), inTrans, implied));
@@ -321,12 +321,14 @@ public abstract class DeltaUtils {
 				} else if(rc.isForced()) {
 					return new Pair<ChangedModel,ModelChange>(null, ModelChange.NOCHANGE);
 				} else {
+					log.warn("Safe RepositoryCommand ADD failed; model!=null");
 					return null;
 				}
 				
 			case REMOVE:
 				if((model == null || model.getRevisionNumber() != rc.getRevisionNumber())
 				        && !rc.isForced()) {
+					log.warn("Safe RepositoryCommand REMOVE failed");
 					return null;
 				} else if(model != null) {
 					ChangedModel changedModel = new ChangedModel(model);
@@ -343,6 +345,7 @@ public abstract class DeltaUtils {
 		} else {
 			
 			if(model == null) {
+				log.warn("Safe Non-RepositoryCommand failed on null-model");
 				return null;
 			}
 			
