@@ -1,6 +1,10 @@
 package org.xydra.store.impl.gae;
 
 import java.util.ConcurrentModificationException;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -33,6 +37,9 @@ public class GaeUtils {
 	private static AsyncDatastoreService datastore;
 	
 	private static boolean useMemCache = true;
+	
+	/* used only in test mode */
+	private static Set<Key> storedKeys;
 	
 	/**
 	 * @param b turn GAE MemCache off or on at runtime
@@ -251,10 +258,10 @@ public class GaeUtils {
 	}
 	
 	private static void makeSureDatestoreServiceIsInitialised() {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		if(datastore == null) {
 			datastore = DatastoreServiceFactory.getAsyncDatastoreService();
 		}
-		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 	}
 	
 	/**
@@ -278,6 +285,11 @@ public class GaeUtils {
 		Future<Key> result = datastore.put(trans, entity);
 		Key res = waitFor(result);
 		assert res != null;
+		if(GaeTestfixer.isEnabled()) {
+			makeSureStoredKeyInitialised();
+			storedKeys.add(res);
+		}
+		
 		if(useMemCache) {
 			// remove first from memcache
 			if(trans == null) {
@@ -285,6 +297,12 @@ public class GaeUtils {
 			} else {
 				XydraRuntime.getMemcache().remove(entity.getKey());
 			}
+		}
+	}
+	
+	private static void makeSureStoredKeyInitialised() {
+		if(storedKeys == null) {
+			storedKeys = new HashSet<Key>();
 		}
 	}
 	
@@ -313,6 +331,11 @@ public class GaeUtils {
 			} else {
 				XydraRuntime.getMemcache().remove(entity.getKey());
 			}
+		}
+		if(GaeTestfixer.isEnabled()) {
+			makeSureStoredKeyInitialised();
+			Key key = waitFor(result);
+			storedKeys.add(key);
 		}
 		return result;
 	}
@@ -430,6 +453,67 @@ public class GaeUtils {
 	 */
 	public static boolean transactionsActive() {
 		return !datastore.getActiveTransactions().isEmpty();
+	}
+	
+	/**
+	 * Delete ALL local data. Use with care.
+	 */
+	public static void clear() {
+		makeSureDatestoreServiceIsInitialised();
+		
+		if(GaeTestfixer.isEnabled()) {
+			makeSureStoredKeyInitialised();
+			log.info("Deleting " + storedKeys.size() + " entities (" + storedKeys
+			        + ") from local GAE datastore");
+			for(Key key : storedKeys) {
+				Future<Entity> keyResult = datastore.get(key);
+				Entity e = waitFor(keyResult);
+				assert e != null;
+			}
+			Future<Void> result = datastore.delete(storedKeys);
+			waitFor(result);
+			assert result.isDone();
+			for(Key key : storedKeys) {
+				Future<Entity> keyResult = datastore.get(key);
+				Entity e = waitFor(keyResult);
+				assert e == null;
+			}
+		} else {
+			deleteAllDataOnLiveDatastore();
+		}
+	}
+	
+	private static void deleteAllDataOnLiveDatastore() {
+		List<String> kinds = getAllKinds();
+		for(String kind : kinds) {
+			List<Key> keys = new LinkedList<Key>();
+			Query q = new Query(kind).setKeysOnly();
+			PreparedQuery pq = datastore.prepare(q);
+			for(Entity entity : pq.asIterable()) {
+				keys.add(entity.getKey());
+			}
+			try {
+				datastore.delete(keys);
+			} catch(Exception e) {
+				log.warn("Could not delete kind '" + kind + "'", e);
+			}
+		}
+	}
+	
+	/**
+	 * @return all kinds that do not start with '__'
+	 */
+	public static List<String> getAllKinds() {
+		makeSureDatestoreServiceIsInitialised();
+		List<String> kinds = new LinkedList<String>();
+		Iterable<Entity> statKinds = datastore.prepare(new Query("__Stat_Kind__")).asIterable();
+		for(Entity statKind : statKinds) {
+			String kind = statKind.getProperty("kind_name").toString();
+			if(!kind.startsWith("__")) {
+				kinds.add(kind);
+			}
+		}
+		return kinds;
 	}
 	
 }
