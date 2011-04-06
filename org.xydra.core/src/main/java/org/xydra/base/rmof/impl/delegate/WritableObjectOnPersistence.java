@@ -8,6 +8,7 @@ import org.xydra.base.XID;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableObject;
+import org.xydra.index.iterator.NoneIterator;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -82,15 +83,18 @@ public class WritableObjectOnPersistence extends AbstractWritableOnPersistence i
 	}
 	
 	public boolean hasField(XID fieldId) {
-		return getObjectSnapshot().hasField(fieldId);
+		XWritableObject snapshot = getObjectSnapshot();
+		return snapshot != null && snapshot.hasField(fieldId);
 	}
 	
 	public boolean isEmpty() {
-		return getObjectSnapshot().isEmpty();
+		XWritableObject snapshot = getObjectSnapshot();
+		return snapshot == null || snapshot.isEmpty();
 	}
 	
 	public Iterator<XID> iterator() {
-		return this.getObjectSnapshot().iterator();
+		XWritableObject snapshot = getObjectSnapshot();
+		return snapshot == null ? new NoneIterator<XID>() : snapshot.iterator();
 	}
 	
 	public boolean removeField(XID fieldId) {
