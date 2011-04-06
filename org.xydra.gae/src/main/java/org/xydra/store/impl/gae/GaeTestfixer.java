@@ -39,6 +39,10 @@ public class GaeTestfixer {
 		checkedProduction = false;
 	}
 	
+	public static boolean isEnabled() {
+		return enabled;
+	}
+	
 	/**
 	 * @return true if app is running on a real remote GAE server
 	 */
