@@ -197,6 +197,7 @@ public class GaePersistence implements XydraPersistence {
 		if(modelSnapshot == null) {
 			return null;
 		}
+		
 		return modelSnapshot.getObject(address.getObject());
 	}
 	
@@ -236,7 +237,7 @@ public class GaePersistence implements XydraPersistence {
 	
 	@Override
 	public void clear() {
-		// FIXME implement: delete ALL local data
+		GaeUtils.clear();
 	}
 	
 }
