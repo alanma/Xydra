@@ -10,6 +10,7 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
+import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XRevWritableModel;
@@ -60,6 +61,15 @@ public class MemoryPersistence implements XydraPersistence {
 		 * model gets re-created later the revision number must strictly
 		 * increase to serve users who synchronised with the previous model.
 		 */
+
+		/* adapt cache */
+		if(result >= 0 && command.getTarget().getAddressedType() == XType.XREPOSITORY) {
+			// model ADD or REMOVE command that executed succesfully
+			if(command.getChangeType() == ChangeType.REMOVE) {
+				this.models.remove(command.getChangedEntity().getModel());
+			}
+		}
+		
 		return result;
 	}
 	
