@@ -250,6 +250,8 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * which will add the given {@link XObject} to the {@link XModel} with the
 	 * given {@link XAddress}.
 	 * 
+	 * TODO How to create a forced command?
+	 * 
 	 * @param modelAddr The {@link XAddress} of the {@link XModel} to which the
 	 *            given {@link XObject} is to be added by the {@link XCommand
 	 *            XCommands} that will be created
