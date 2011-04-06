@@ -30,7 +30,7 @@ public class StatsPersistence implements XydraPersistence {
 	
 	public Map<String,Data> stats = new HashMap<String,StatsPersistence.Data>();
 	
-	public static StatsPersistence INSTANCE = null;
+	private static StatsPersistence INSTANCE = null;
 	
 	private static class Data {
 		public long count = 0;
@@ -139,10 +139,19 @@ public class StatsPersistence implements XydraPersistence {
 	public StatsPersistence(XydraPersistence persistence) {
 		super();
 		this.persistence = persistence;
-		// hack to have first instance available statically
+		// hack to have first instance also available statically for easy
+		// dumping
 		if(INSTANCE == null) {
 			INSTANCE = this;
 		}
+	}
+	
+	public static void staticDumpStats() {
+		if(INSTANCE == null) {
+			log.warn("No StatsPersistence has been created");
+		}
+		INSTANCE.dumpStats();
+		
 	}
 	
 }
