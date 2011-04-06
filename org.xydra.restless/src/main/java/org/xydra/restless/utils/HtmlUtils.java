@@ -178,6 +178,12 @@ public class HtmlUtils {
 		writeCloseBodyHtml(w);
 	}
 	
+	/**
+	 * @param res ..
+	 * @param title HTML head - title
+	 * @return a UTF-8 writer for the result stream
+	 * @throws IOException from underlying streams
+	 */
 	public static Writer startHtmlPage(HttpServletResponse res, String title) throws IOException {
 		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
 		writeHtmlHeaderOpenBody(w, title);
