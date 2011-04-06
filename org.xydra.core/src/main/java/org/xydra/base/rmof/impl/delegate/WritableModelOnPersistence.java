@@ -10,6 +10,7 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
+import org.xydra.index.iterator.NoneIterator;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -35,6 +36,7 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	}
 	
 	public XWritableObject createObject(XID objectId) {
+		assert this.persistence.hasModel(this.modelId);
 		XWritableObject object = this.getObject(objectId);
 		if(object != null) {
 			return object;
@@ -93,7 +95,11 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	}
 	
 	public boolean hasObject(XID objectId) {
-		return this.persistence.getModelSnapshot(getAddress()).hasObject(objectId);
+		XWritableModel modelSnapshot = this.persistence.getModelSnapshot(getAddress());
+		if(modelSnapshot == null) {
+			return false;
+		}
+		return modelSnapshot.hasObject(objectId);
 	}
 	
 	/**
@@ -108,7 +114,11 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	}
 	
 	public Iterator<XID> iterator() {
-		return this.persistence.getModelSnapshot(getAddress()).iterator();
+		XWritableModel modelSnapshot = this.persistence.getModelSnapshot(getAddress());
+		if(modelSnapshot == null || modelSnapshot.isEmpty()) {
+			return new NoneIterator<XID>();
+		}
+		return modelSnapshot.iterator();
 	}
 	
 	public boolean removeObject(XID objectId) {
@@ -119,4 +129,5 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 		assert commandResult >= 0;
 		return result && commandResult >= 0;
 	}
+	
 }
