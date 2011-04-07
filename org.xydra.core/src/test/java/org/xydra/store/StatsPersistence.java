@@ -149,9 +149,9 @@ public class StatsPersistence implements XydraPersistence {
 	public static void staticDumpStats() {
 		if(INSTANCE == null) {
 			log.warn("No StatsPersistence has been created");
+		} else {
+			INSTANCE.dumpStats();
 		}
-		INSTANCE.dumpStats();
-		
 	}
 	
 }
