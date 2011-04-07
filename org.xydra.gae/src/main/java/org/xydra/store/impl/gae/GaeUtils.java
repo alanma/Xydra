@@ -460,6 +460,7 @@ public class GaeUtils {
 	 */
 	public static void clear() {
 		makeSureDatestoreServiceIsInitialised();
+		XydraRuntime.getMemcache().clear();
 		
 		if(GaeTestfixer.isEnabled()) {
 			makeSureStoredKeyInitialised();
