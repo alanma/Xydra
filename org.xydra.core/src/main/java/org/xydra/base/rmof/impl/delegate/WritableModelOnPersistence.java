@@ -37,6 +37,7 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	
 	public XWritableObject createObject(XID objectId) {
 		assert this.persistence.hasModel(this.modelId);
+		
 		XWritableObject object = this.getObject(objectId);
 		if(object != null) {
 			return object;

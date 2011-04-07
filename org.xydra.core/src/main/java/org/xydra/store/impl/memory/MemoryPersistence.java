@@ -100,6 +100,7 @@ public class MemoryPersistence implements XydraPersistence {
 		synchronized(this.models) {
 			MemoryModelPersistence modelPersistence = this.models.get(modelId);
 			if(modelPersistence == null) {
+				/* return a model persistence that does not exist */
 				XAddress modelAddr = XX.toAddress(this.repoId, modelId, null, null);
 				modelPersistence = new MemoryModelPersistence(modelAddr);
 				this.models.put(modelId, modelPersistence);
