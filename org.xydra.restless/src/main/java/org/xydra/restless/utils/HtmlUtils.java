@@ -170,11 +170,10 @@ public class HtmlUtils {
 		startHtmlPage(res, title);
 		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
 		w.write(content);
-		endHtmlPage(res);
+		endHtmlPage(w);
 	}
 	
-	public static void endHtmlPage(HttpServletResponse res) throws IOException {
-		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+	public static void endHtmlPage(Writer w) throws IOException {
 		writeCloseBodyHtml(w);
 	}
 	
