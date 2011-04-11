@@ -1,6 +1,7 @@
 package org.xydra.gaemyadmin;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.logging.Level;
@@ -34,7 +35,7 @@ public class LogConfResource {
 	}
 	
 	public void index(HttpServletResponse res) throws IOException {
-		HtmlUtils.startHtmlPage(res, "Logging Configuration");
+		Writer w = HtmlUtils.startHtmlPage(res, "Logging Configuration");
 		
 		Form form = new Form(null, METHOD.POST, URL);
 		UnsortedList ul = form.unsortedList();
@@ -50,8 +51,8 @@ public class LogConfResource {
 		}
 		ul.li().inputSubmit("Set");
 		
-		HtmlUtils.writeContent(res, form.toHtml("  "));
-		HtmlUtils.endHtmlPage(res);
+		w.write(form.toHtml("  "));
+		HtmlUtils.endHtmlPage(w);
 	}
 	
 	public void post(HttpServletRequest req, HttpServletResponse res) throws IOException {
