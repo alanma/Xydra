@@ -31,7 +31,7 @@ public class MiniXMLParserImpl implements MiniXMLParser {
 		return parser;
 	}
 	
-	public MiniElement parseXml(String string) {
+	public synchronized MiniElement parseXml(String string) {
 		InputSource is = new InputSource(new StringReader(string));
 		Document document;
 		try {
