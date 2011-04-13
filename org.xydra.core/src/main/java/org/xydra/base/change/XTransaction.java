@@ -34,6 +34,15 @@ import org.xydra.core.model.XSynchronizesChanges;
  *         transaction itself, will not do anything, such commands will not be
  *         added.
  * 
+ *         Concerning revision numbers, {@link XCommand XCommands} added to the
+ *         transaction need to refer to the revision number of the entity they
+ *         want to change BEFORE any command in the transaction is executed. For
+ *         example, suppose you want to add 2 {@link XObject XObjects} to and
+ *         {@link XModel} with the current revision number 78. Then you'll need
+ *         to add two commands that refer to the revision number 78 (and not in
+ *         a way, that the first command refers to 78 and the second one to 79 -
+ *         this is wrong).
+ * 
  *         XTransaction is a subclass of {@link XCommand}, so it is possible to
  *         add a Transaction to a Transaction. Adding a Transaction to another
  *         Transaction will not directly add the Transaction, but get all
@@ -56,7 +65,7 @@ import org.xydra.core.model.XSynchronizesChanges;
  * 
  *         The {@link XAddress} of a transaction is address of the model or
  *         object that contains all the objects/fields modified by the
- *         transaction
+ *         transaction.
  * 
  */
 public interface XTransaction extends XCommand, Iterable<XAtomicCommand> {
