@@ -82,8 +82,6 @@ public class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObj
 		
 		XAddress modelAddr = changesService.getModelAddress();
 		
-		assert modelAddr.getParent().equals(XX.toAddress((String)e.getProperty(PROP_PARENT)));
-		
 		return new InternalGaeModel(changesService, modelAddr, modelRev, locks);
 	}
 	
@@ -102,7 +100,6 @@ public class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObj
 		assert locks.canWrite(modelAddr);
 		assert modelAddr.getAddressedType() == XType.XMODEL;
 		Entity e = new Entity(KeyStructure.createEntityKey(modelAddr));
-		e.setProperty(PROP_PARENT, modelAddr.getParent().toURI());
 		return GaeUtils.putEntityAsync(e);
 	}
 	

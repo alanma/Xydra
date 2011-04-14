@@ -29,7 +29,6 @@ import com.sun.org.apache.xpath.internal.objects.XObject;
 public class InternalGaeXEntity {
 	
 	protected static final String PROP_KEY = "__key__";
-	protected static final String PROP_PARENT = "parent";
 	protected static final String PROP_REVISION = "revision";
 	
 	/**

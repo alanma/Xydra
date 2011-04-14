@@ -99,7 +99,6 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 		assert locks.canWrite(fieldAddr);
 		assert fieldAddr.getAddressedType() == XType.XFIELD;
 		Entity e = new Entity(KeyStructure.createEntityKey(fieldAddr));
-		e.setProperty(PROP_PARENT, fieldAddr.getParent().toURI());
 		e.setUnindexedProperty(PROP_REVISION, fieldRev);
 		e.setUnindexedProperty(PROP_TRANSINDEX, transindex);
 		return GaeUtils.putEntityAsync(e);

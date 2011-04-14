@@ -142,7 +142,6 @@ public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeFi
 		assert locks.canWrite(objectAddr);
 		assert objectAddr.getAddressedType() == XType.XOBJECT;
 		Entity e = new Entity(KeyStructure.createEntityKey(objectAddr));
-		e.setProperty(PROP_PARENT, objectAddr.getParent().toURI());
 		e.setUnindexedProperty(PROP_REVISION, rev);
 		return GaeUtils.putEntityAsync(e);
 	}
