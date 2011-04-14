@@ -203,7 +203,9 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * which will add the given {@link XField} to the {@link XObject} with the
 	 * given {@link XAddress}.
 	 * 
-	 * Creates a FORCED command within the transaction.
+	 * Creates a SAFE command within the transaction: The transaction will fail
+	 * if the field already existed and hasn't been removed before in the
+	 * transaction.
 	 * 
 	 * @param newField The new {@link XField} that is to be added.
 	 * 
@@ -215,7 +217,7 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 		addField(objectAddr, XCommand.SAFE, newField.getID());
 		if(newField.getValue() != null) {
 			XAddress fieldAddr = XX.resolveField(objectAddr, newField.getID());
-			addValue(fieldAddr, XCommand.FORCED, newField.getValue());
+			addValue(fieldAddr, XCommand.NEW, newField.getValue());
 		}
 	}
 	
@@ -249,6 +251,14 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * Adds {@link XCommand XCommands} to the transaction which is being built
 	 * which will add the given {@link XObject} to the {@link XModel} with the
 	 * given {@link XAddress}.
+	 * 
+	 * Creates a SAFE command within the transaction: The transaction will fail
+	 * if the object already existed and hasn't been removed before in the
+	 * transaction.
+	 * 
+	 * Use {@link #setObject(XAddress, XReadableObject)} to create a command
+	 * that will always create an object with the specified state (removing any
+	 * existing object including fields).
 	 * 
 	 * TODO How to create a forced command?
 	 * 
@@ -290,6 +300,14 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * Adds {@link XCommand XCommands} to the transaction which is being built
 	 * which will apply the changes represented by the given
 	 * {@link ChangedField}.
+	 * 
+	 * Creates a SAFE command within the transaction: The transaction will fail
+	 * if the value has been modified in the {@link ChangedField} and also in
+	 * the model the transaction is executed on. This only includes the current
+	 * diff specified by the {@link ChangedField} , not the complete history of
+	 * modifications made to the value in the {@link ChangedField}. Any changes
+	 * to parts of the model or object which are not touched by the given
+	 * {@link ChangedModel} will not impact the execution of this transaction.
 	 */
 	public void applyChanges(ChangedField field) {
 		XAddress target = field.getAddress();
@@ -300,7 +318,48 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	/**
 	 * Adds {@link XCommand XCommands} to the transaction which is being built
 	 * which will apply the changes represented by the given
+	 * {@link ChangedObject}.
+	 * 
+	 * Creates a SAFE command within the transaction: The transaction will fail
+	 * if any fields added in the {@link ChangedObject} already exist, if any
+	 * fields removed in the {@link ChangedObject} have already been removed or
+	 * if the fields containing values modified in the {@link ChangedObject}
+	 * have been modified. This only includes the current diff specified by the
+	 * {@link ChangedObject}, not the complete history of modifications made to
+	 * the {@link ChangedObject}. Any changes to parts of the model or object
+	 * which are not touched by the given {@link ChangedObject} will not impact
+	 * the execution of this transaction.
+	 */
+	public void applyChanges(ChangedObject object) {
+		
+		for(XID fieldId : object.getRemovedFields()) {
+			XReadableField field = object.getOldField(fieldId);
+			removeField(field);
+		}
+		
+		for(XReadableField field : object.getNewFields()) {
+			addField(object.getAddress(), field);
+		}
+		
+		for(ChangedField field : object.getChangedFields()) {
+			applyChanges(field);
+		}
+	}
+	
+	/**
+	 * Adds {@link XCommand XCommands} to the transaction which is being built
+	 * which will apply the changes represented by the given
 	 * {@link ChangedModel}
+	 * 
+	 * Creates a SAFE command within the transaction: The transaction will fail
+	 * if any objects or fields added in the {@link ChangedModel} already exist,
+	 * if any objects or fields removed in the {@link ChangedModel} have already
+	 * been removed or if the fields containing values modified in the
+	 * {@link ChangedModel} have been modified. This only includes the current
+	 * diff specified by the {@link ChangedModel}, not the complete history of
+	 * modifications made to the {@link ChangedModel}. Any changes to parts of
+	 * the model or object which are not touched by the given
+	 * {@link ChangedModel} will not impact the execution of this transaction.
 	 */
 	public void applyChanges(ChangedModel model) {
 		
@@ -317,27 +376,6 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 			applyChanges(object);
 		}
 		
-	}
-	
-	/**
-	 * Adds {@link XCommand XCommands} to the transaction which is being built
-	 * which will apply the changes represented by the given
-	 * {@link ChangedObject}.
-	 */
-	public void applyChanges(ChangedObject object) {
-		
-		for(XID fieldId : object.getRemovedFields()) {
-			XReadableField field = object.getOldField(fieldId);
-			removeField(field);
-		}
-		
-		for(XReadableField field : object.getNewFields()) {
-			addField(object.getAddress(), field);
-		}
-		
-		for(ChangedField field : object.getChangedFields()) {
-			applyChanges(field);
-		}
 	}
 	
 	/**
@@ -460,6 +498,14 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * will change the {@link XValue} of the specified {@link XField} (which
 	 * {@link XValue} needs to be set!) to the given {@link XValue})
 	 * 
+	 * Unless the provided revision is XCommand#FORCED, the created command will
+	 * fail if the field doesn't have a value.
+	 * 
+	 * Use {@link #addValue(XAddress, long, XValue)} to add values to fields
+	 * that don't have an existing value or use
+	 * {@link #setValue(XAddress, XValue)} to always set the value no matter
+	 * what the field's current value is.
+	 * 
 	 * @param fieldAddr The {@link XAddress} of the {@link XField} which
 	 *            {@link XValue} is to be changed.
 	 * @param revision The old revision number of the {@link XField} or
@@ -480,8 +526,15 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * which will change an {@link XField} containing an {@link XValue} into one
 	 * containing another {@link XValue}.
 	 * 
-	 * TODO Clarify documentation: When should I used this method and when
-	 * {@link #changeValue(XAddress, long, XValue)}?
+	 * This will add a CHANGE, ADD or REMOVE command or no command at all
+	 * depending on how the newValue compares to the oldValue.
+	 * 
+	 * Use {@link #addValue(XAddress, long, XValue)},
+	 * {@link #changeValue(XAddress, long, XValue)},
+	 * {@link #removeValue(XAddress, long)} to create
+	 * 
+	 * Use {@link #setValue(XAddress, XValue)} to force a specific value no
+	 * matter what the fields current value is.
 	 * 
 	 * @param fieldAddr Address of the {@link XField} which is to be changed.
 	 * @param revision Current revision number of the {@link XField}.
@@ -652,8 +705,8 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 *             oldField.
 	 */
 	public void removeField(XReadableField oldField) {
-		removeField(oldField.getAddress().getParent(), oldField.getRevisionNumber(),
-		        oldField.getID());
+		removeField(oldField.getAddress().getParent(), oldField.getRevisionNumber(), oldField
+		        .getID());
 	}
 	
 	/**
@@ -689,8 +742,8 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 *             oldObject or its parent {@link XModel}.
 	 */
 	public void removeObject(XReadableObject oldObject) {
-		removeObject(oldObject.getAddress().getParent(), oldObject.getRevisionNumber(),
-		        oldObject.getID());
+		removeObject(oldObject.getAddress().getParent(), oldObject.getRevisionNumber(), oldObject
+		        .getID());
 	}
 	
 	/**
@@ -708,6 +761,18 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 */
 	public void removeValue(XAddress fieldAddr, long revision) {
 		addCommand(MemoryFieldCommand.createRemoveCommand(fieldAddr, revision));
+	}
+	
+	/**
+	 * Sets the value of the field with the given address no matter what the
+	 * fields current value or revision is.
+	 * 
+	 * This is equivalent to {@link #addValue(XAddress, long, XValue)} or
+	 * {@link #changeValue(XAddress, long, XValue)} with a revision of
+	 * {@link XCommand#FORCED}.
+	 */
+	public void setValue(XAddress fieldAddr, XValue value) {
+		changeValue(fieldAddr, XCommand.FORCED, value);
 	}
 	
 	/**
@@ -803,5 +868,15 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	public String toString() {
 		return "TransactionBuilder for " + this.target + ": " + this.commands.toString();
 	}
+	
+	/**
+	 * TODO the methods {@link #setObject(XReadableModel, XReadableObject)},
+	 * {@link #setField(XReadableObject, XReadableField)},
+	 * {@link #changeModel(XReadableModel, XReadableModel)},
+	 * {@link #changeObject(XReadableObject, XReadableObject)} and
+	 * {@link #changeField(XReadableField, XReadableField)} have unclear
+	 * semantics when executing the resulting transaction on a model with a
+	 * state different from the first operand.
+	 */
 	
 }
