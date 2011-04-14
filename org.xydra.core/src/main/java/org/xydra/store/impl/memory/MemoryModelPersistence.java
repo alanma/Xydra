@@ -5,8 +5,6 @@ import java.util.List;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
-import org.xydra.base.XType;
-import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
@@ -46,11 +44,6 @@ public class MemoryModelPersistence {
 	}
 	
 	synchronized public long executeCommand(XID actorId, XCommand command) {
-		
-		assert this.model != null
-		        || (command.getChangedEntity().getAddressedType() == XType.XMODEL && command
-		                .getChangeType() == ChangeType.ADD) : "Cannot execute command " + command
-		        + " on a model " + this.modelAddr + " that has not been created with a command yet";
 		
 		long newRev = getRevisionNumber() + 1;
 		
