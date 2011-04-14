@@ -10,7 +10,6 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
-import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XRevWritableModel;
@@ -56,20 +55,16 @@ public class MemoryPersistence implements XydraPersistence {
 		// caller asserts repoId matches address
 		MemoryModelPersistence modelPersistence = getModelPersistence(address.getModel());
 		long result = modelPersistence.executeCommand(actorId, command);
+		
 		/*
+		 * DO NOT remove the MemoryModelPersistence from the model map, even if
+		 * the model has been removed
+		 * 
 		 * even if the model has been deleted the event log must be kept. If the
 		 * model gets re-created later the revision number must strictly
 		 * increase to serve users who synchronised with the previous model.
 		 */
 
-		/* adapt cache */
-		if(result >= 0 && command.getTarget().getAddressedType() == XType.XREPOSITORY) {
-			// model ADD or REMOVE command that executed succesfully
-			if(command.getChangeType() == ChangeType.REMOVE) {
-				this.models.remove(command.getChangedEntity().getModel());
-			}
-		}
-		
 		return result;
 	}
 	
@@ -84,12 +79,12 @@ public class MemoryPersistence implements XydraPersistence {
 	public Set<XID> getModelIds() {
 		Set<XID> modelIds = new HashSet<XID>();
 		synchronized(this.models) {
-			modelIds.addAll(this.models.keySet());
+			for(Map.Entry<XID,MemoryModelPersistence> p : this.models.entrySet()) {
+				if(p.getValue().exists()) {
+					modelIds.add(p.getKey());
+				}
+			}
 		}
-		// TODO filter to exclude models that don't actually exist right
-		// now? Max: Is this fixed now by removing the removed models
-		// (via executeCommand) also from out map? Yes, but doing so introduces
-		// other problems. ~Daniel
 		return modelIds;
 	}
 	
@@ -147,7 +142,8 @@ public class MemoryPersistence implements XydraPersistence {
 	@Override
 	public boolean hasModel(XID modelId) {
 		synchronized(this.models) {
-			return this.models.containsKey(modelId);
+			MemoryModelPersistence modelPersistence = this.models.get(modelId);
+			return modelPersistence != null && modelPersistence.exists();
 		}
 	}
 	
