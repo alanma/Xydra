@@ -13,6 +13,7 @@ import org.xydra.store.impl.gae.GaeUtils;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.sun.org.apache.xpath.internal.objects.XObject;
@@ -27,6 +28,7 @@ import com.sun.org.apache.xpath.internal.objects.XObject;
  */
 public class InternalGaeXEntity {
 	
+	protected static final String PROP_KEY = "__key__";
 	protected static final String PROP_PARENT = "parent";
 	protected static final String PROP_REVISION = "revision";
 	
@@ -51,9 +53,31 @@ public class InternalGaeXEntity {
 	}
 	
 	public static Set<XID> findChildren(XAddress address) {
+		
+		assert address.getRepository() != null;
+		assert address.getField() == null;
+		StringBuffer uri = new StringBuffer();
+		uri.append('/');
+		uri.append(address.getRepository().toString());
+		uri.append('/');
+		if(address.getModel() != null) {
+			uri.append(address.getModel().toString());
+			uri.append('/');
+			if(address.getObject() != null) {
+				uri.append(address.getObject().toString());
+				uri.append('/');
+			}
+		}
+		
+		String kind = address.getAddressedType().getChildType().toString();
+		
+		Key first = KeyFactory.createKey(kind, uri.toString());
+		Key last = KeyFactory.createKey(kind, first.getName() + "\uFFFF");
+		
 		Set<XID> childIds = new HashSet<XID>();
-		Query q = new Query(address.getAddressedType().getChildType().toString()).addFilter(
-		        PROP_PARENT, FilterOperator.EQUAL, address.toURI()).setKeysOnly();
+		
+		Query q = new Query(kind).addFilter(PROP_KEY, FilterOperator.GREATER_THAN, first)
+		        .addFilter(PROP_KEY, FilterOperator.LESS_THAN, last).setKeysOnly();
 		for(Entity e : GaeUtils.prepareQuery(q).asIterable()) {
 			XAddress childAddr = KeyStructure.toAddress(e.getKey());
 			assert address.equals(childAddr.getParent());
