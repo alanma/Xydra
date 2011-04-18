@@ -13,19 +13,24 @@ import org.xydra.core.model.XObject;
  * for example on an {@link XModel}. They can be used to add new entities,
  * remove entities, execute transactions, change values etc.
  * 
- * There are two types of XCommands. Forced commands and normal commands. he
- * only difference is, that forced XCommands are always succeeding, whereas
- * unforced ones fail, if they cannot be executed. Suppose you want to add an
- * XModel to an XRepository, but your chosen XID is already taken, executing an
- * unforced XCommand will fail and return an error code, whereas the same
- * XCommand with isForced set to true will still "succeed", but actually change
- * nothing. So forced XCommands are used if you do not care if the actions
- * described in the XCommand are actually executed by this command and only care
- * if they were executed at some point in time, for example you might not
- * interested wether the XModel you wanted to add already existed or if you
- * actually added it, your only interested in the fact that it exists after
- * you've sent your XCommand for execution, i.e. you're only interested in the
- * post-condition.
+ * There are general two types of XCommands. Forced commands and normal
+ * commands. The only difference is, that forced XCommands are always
+ * succeeding, whereas unforced ones fail, if they cannot be executed. Suppose
+ * you want to add an XModel to an XRepository, but your chosen XID is already
+ * taken, executing an unforced XCommand will fail and return an error code,
+ * whereas the same XCommand with isForced set to true will still "succeed", but
+ * actually change nothing. So forced XCommands are used if you do not care if
+ * the actions described in the XCommand are actually executed by this command
+ * and only care if they were executed at some point in time, for example you
+ * might not interested whether the XModel you wanted to add already existed or
+ * if you actually added it, your only interested in the fact that it exists
+ * after you've sent your XCommand for execution, i.e. you're only interested in
+ * the post-condition.
+ * 
+ * Not every XCommand-Type comes in these two variations, but if this is
+ * possible, the XCommand needs to specify a "isForced"-command returning a
+ * boolean to tell whether it is forced or not. For example, see
+ * {@link XModelCommand}.
  * 
  * See the more specific types (for example {@link XModelEvent} for further
  * explanations)
