@@ -3,6 +3,7 @@ package org.xydra.restless.utils;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -198,6 +199,10 @@ public class HtmlUtils {
 		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
 		w.write(safeHtml);
 		w.flush();
+	}
+	
+	public static String toOrderedList(String ... listItemContent) {
+		return toOrderedList(Arrays.asList(listItemContent));
 	}
 	
 }

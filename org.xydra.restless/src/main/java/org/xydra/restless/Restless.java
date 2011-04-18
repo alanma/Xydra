@@ -25,6 +25,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.xydra.log.ILoggerFactorySPI;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.restless.utils.HtmlUtils;
+import org.xydra.restless.utils.ServletUtils;
 import org.xydra.restless.utils.XmlUtils;
 
 
@@ -263,13 +265,20 @@ public class Restless extends HttpServlet {
 	 */
 	private void doIntrospection(HttpServletRequest req, HttpServletResponse res) {
 		String servletPath = getServletPath(req);
-		res.setContentType(MIME_XHTML);
-		res.setCharacterEncoding(CHARSET_UTF8);
+		ServletUtils.headers(res, MIME_XHTML);
 		try {
 			Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
-			w.write(XML_DECLARATION);
-			w.write(XHTML_DOCTYPE);
-			w.write("<html " + XHTML_NS + "><head><title>Restless Configuration</title>" +
+			w.write("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"\r\n"
+			        + "       \"http://www.w3.org/TR/html4/loose.dtd\">\r\n");
+			
+			w.write("<html " + XHTML_NS + ">\n" +
+
+			"<head>\\n" +
+
+			"<title>Restless Configuration</title>\\n" +
+
+			"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n" +
+
 			/* styling */
 			"<style type='text/css'> \n" +
 
@@ -298,8 +307,7 @@ public class Restless extends HttpServlet {
 				w.write("</li>");
 			}
 			w.write("</ol></p>");
-			w.write("</body></html>");
-			new OutputStreamWriter(res.getOutputStream(), "utf-8").flush();
+			HtmlUtils.endHtmlPage(w);
 		} catch(IOException e) {
 			throw new RuntimeException(e);
 		}
