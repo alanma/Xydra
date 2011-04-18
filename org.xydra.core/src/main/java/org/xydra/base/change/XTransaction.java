@@ -13,16 +13,17 @@ import org.xydra.core.model.XSynchronizesChanges;
  * 
  * @author Kaidel
  * 
- *         A Transaction basically is a list of {@link XCommand}s that need to
- *         be executed in an "all or nothing" manner. If one command of the
- *         Transaction is not executable or an error/exception occurs while it
- *         is being executed, the whole Transaction will be rolled back (all
+ *         A Transaction basically is a list of {@link XCommand XCommands} that
+ *         need to be executed in an "all or nothing" manner. If one command of
+ *         the Transaction is not executable or an error/exception occurs while
+ *         it is being executed, the whole Transaction will be rolled back (all
  *         commands that were already executed need to be undone). The
  *         Transaction itself is not responsible that it will or can be executed
  *         in this manner. Classes that implement the
  *         {@link XSynchronizesChanges} interfaces provide an
- *         executeTransaction() method that needs to be implemented in such a
- *         way that this behavior is guaranteed.
+ *         {@link XSynchronizesChanges#executeCommand(XCommand)} method that
+ *         needs to be implemented in such a way that this behavior is
+ *         guaranteed, if an XTransaction is passed as the argument.
  * 
  *         The added commands will be executed in the order of the underlying
  *         list, the command with index 0 will be executed first, then the
@@ -37,7 +38,7 @@ import org.xydra.core.model.XSynchronizesChanges;
  *         Concerning revision numbers, {@link XCommand XCommands} added to the
  *         transaction need to refer to the revision number of the entity they
  *         want to change BEFORE any command in the transaction is executed. For
- *         example, suppose you want to add 2 {@link XObject XObjects} to and
+ *         example, suppose you want to add 2 {@link XObject XObjects} to an
  *         {@link XModel} with the current revision number 78. Then you'll need
  *         to add two commands that refer to the revision number 78 (and not in
  *         a way, that the first command refers to 78 and the second one to 79 -
