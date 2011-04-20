@@ -928,4 +928,251 @@ public class MemoryCommandFactory implements XCommandFactory {
 		        fieldAddress.getObject(), fieldAddress.getField(), fieldRevision, isForced);
 	}
 	
+	@Override
+	public XObjectCommand createSafeAddFieldCommand(XID repositoryId, XID modelId, XID objectId,
+	        XID fieldId) {
+		return createAddFieldCommand(repositoryId, modelId, objectId, fieldId, false);
+	}
+	
+	@Override
+	public XObjectCommand createForcedAddFieldCommand(XID repositoryId, XID modelId, XID objectId,
+	        XID fieldId) {
+		return createAddFieldCommand(repositoryId, modelId, objectId, fieldId, true);
+	}
+	
+	@Override
+	public XObjectCommand createSafeAddFieldCommand(XAddress objectAddress, XID fieldId) {
+		return createAddFieldCommand(objectAddress, fieldId, false);
+	}
+	
+	@Override
+	public XObjectCommand createForcedAddFieldCommand(XAddress objectAddress, XID fieldId) {
+		return createAddFieldCommand(objectAddress, fieldId, true);
+	}
+	
+	@Override
+	public XRepositoryCommand createSafeAddModelCommand(XID repositoryId, XID modelId) {
+		return createAddModelCommand(repositoryId, modelId, false);
+	}
+	
+	@Override
+	public XRepositoryCommand createForcedAddModelCommand(XID repositoryId, XID modelId) {
+		return createAddModelCommand(repositoryId, modelId, true);
+	}
+	
+	@Override
+	public XModelCommand createForcedAddObjectCommand(XID repositoryId, XID modelId, XID objectId) {
+		return createAddObjectCommand(repositoryId, modelId, objectId, true);
+	}
+	
+	@Override
+	public XModelCommand createSafeAddObjectCommand(XAddress modelAddress, XID objectId) {
+		return createAddObjectCommand(modelAddress, objectId, false);
+	}
+	
+	@Override
+	public XModelCommand createForcedAddObjectCommand(XAddress modelAddress, XID objectId) {
+		return createAddObjectCommand(modelAddress, objectId, true);
+	}
+	
+	@Override
+	public XFieldCommand createSafeAddValueCommand(XID repositoryId, XID modelId, XID objectId,
+	        XID fieldId, long fieldRevision, XValue value) {
+		if(fieldRevision == XCommand.FORCED) {
+			throw new IllegalArgumentException(
+			        "Safe commands cannot have XCommand.FORCED as their revision number.");
+		}
+		
+		return createAddValueCommand(repositoryId, modelId, objectId, fieldId, fieldRevision,
+		        value, false);
+	}
+	
+	@Override
+	public XFieldCommand createForcedAddValueCommand(XID repositoryId, XID modelId, XID objectId,
+	        XID fieldId, XValue value) {
+		return createAddValueCommand(repositoryId, modelId, objectId, fieldId, XCommand.FORCED,
+		        value, true);
+	}
+	
+	@Override
+	public XFieldCommand createSafeAddValueCommand(XAddress fieldAddress, long fieldRevision,
+	        XValue value) {
+		if(fieldRevision == XCommand.FORCED) {
+			throw new IllegalArgumentException(
+			        "Safe commands cannot have XCommand.FORCED as their revision number.");
+		}
+		
+		return createAddValueCommand(fieldAddress, fieldRevision, value, false);
+	}
+	
+	@Override
+	public XFieldCommand createForcedAddValueCommand(XAddress fieldAddress, XValue value) {
+		return createAddValueCommand(fieldAddress, XCommand.FORCED, value, true);
+	}
+	
+	@Override
+	public XFieldCommand createSafeChangeValueCommand(XID repositoryId, XID modelId, XID objectId,
+	        XID fieldId, long fieldRevision, XValue value) {
+		if(fieldRevision == XCommand.FORCED) {
+			throw new IllegalArgumentException(
+			        "Safe commands cannot have XCommand.FORCED as their revision number.");
+		}
+		
+		return createChangeValueCommand(repositoryId, modelId, objectId, fieldId, fieldRevision,
+		        value, false);
+	}
+	
+	@Override
+	public XFieldCommand createForcedChangeValueCommand(XID repositoryId, XID modelId,
+	        XID objectId, XID fieldId, XValue value) {
+		return createChangeValueCommand(repositoryId, modelId, objectId, fieldId, XCommand.FORCED,
+		        value, true);
+	}
+	
+	@Override
+	public XFieldCommand createSafeChangeValueCommand(XAddress fieldAddress, long fieldRevision,
+	        XValue value) {
+		if(fieldRevision == XCommand.FORCED) {
+			throw new IllegalArgumentException(
+			        "Safe commands cannot have XCommand.FORCED as their revision number.");
+		}
+		return createChangeValueCommand(fieldAddress, fieldRevision, value, false);
+	}
+	
+	@Override
+	public XFieldCommand createForcedChangeValueCommand(XAddress fieldAddress, XValue value) {
+		return createChangeValueCommand(fieldAddress, XCommand.FORCED, value, true);
+	}
+	
+	@Override
+	public XObjectCommand createSafeRemoveFieldCommand(XID repositoryId, XID modelId, XID objectId,
+	        XID fieldId, long fieldRevision) {
+		if(fieldRevision == XCommand.FORCED) {
+			throw new IllegalArgumentException(
+			        "Safe commands cannot have XCommand.FORCED as their revision number.");
+		}
+		
+		return createRemoveFieldCommand(repositoryId, modelId, objectId, fieldId, fieldRevision,
+		        false);
+	}
+	
+	@Override
+	public XObjectCommand createForcedRemoveFieldCommand(XID repositoryId, XID modelId,
+	        XID objectId, XID fieldId) {
+		return createRemoveFieldCommand(repositoryId, modelId, objectId, fieldId, XCommand.FORCED,
+		        true);
+	}
+	
+	@Override
+	public XObjectCommand createSafeRemoveFieldCommand(XAddress fieldAddress, long fieldRevision) {
+		if(fieldRevision == XCommand.FORCED) {
+			throw new IllegalArgumentException(
+			        "Safe commands cannot have XCommand.FORCED as their revision number.");
+		}
+		
+		return createRemoveFieldCommand(fieldAddress, fieldRevision, false);
+	}
+	
+	@Override
+	public XObjectCommand createForcedRemoveFieldCommand(XAddress fieldAddress) {
+		return createRemoveFieldCommand(fieldAddress, XCommand.FORCED, true);
+	}
+	
+	@Override
+	public XRepositoryCommand createSafeRemoveModelCommand(XID repositoryId, XID modelId,
+	        long modelRevision) {
+		if(modelRevision == XCommand.FORCED) {
+			throw new IllegalArgumentException(
+			        "Safe commands cannot have XCommand.FORCED as their revision number.");
+		}
+		return createRemoveModelCommand(repositoryId, modelId, modelRevision, false);
+	}
+	
+	@Override
+	public XRepositoryCommand createForcedRemoveModelCommand(XID repositoryId, XID modelId) {
+		return createRemoveModelCommand(repositoryId, modelId, XCommand.FORCED, true);
+	}
+	
+	@Override
+	public XRepositoryCommand createSafeRemoveModelCommand(XAddress modelAddress, long modelRevision) {
+		if(modelRevision == XCommand.FORCED) {
+			throw new IllegalArgumentException(
+			        "Safe commands cannot have XCommand.FORCED as their revision number.");
+		}
+		
+		return createRemoveModelCommand(modelAddress, modelRevision, false);
+	}
+	
+	@Override
+	public XRepositoryCommand createForcedRemoveModelCommand(XAddress modelAddress) {
+		return createRemoveModelCommand(modelAddress, XCommand.FORCED, true);
+	}
+	
+	@Override
+	public XModelCommand createSafeRemoveObjectCommand(XID repositoryId, XID modelId, XID objectId,
+	        long objectRevision) {
+		if(objectRevision == XCommand.FORCED) {
+			throw new IllegalArgumentException(
+			        "Safe commands cannot have XCommand.FORCED as their revision number.");
+		}
+		
+		return createRemoveObjectCommand(repositoryId, modelId, objectId, objectRevision, false);
+	}
+	
+	@Override
+	public XModelCommand createForcedRemoveObjectCommand(XID repositoryId, XID modelId, XID objectId) {
+		return createRemoveObjectCommand(repositoryId, modelId, objectId, XCommand.FORCED, true);
+	}
+	
+	@Override
+	public XModelCommand createSafeRemoveObjectCommand(XAddress objectAddress, long objectRevision) {
+		if(objectRevision == XCommand.FORCED) {
+			throw new IllegalArgumentException(
+			        "Safe commands cannot have XCommand.FORCED as their revision number.");
+		}
+		return createRemoveObjectCommand(objectAddress, objectRevision, false);
+	}
+	
+	@Override
+	public XModelCommand createForcedRemoveObjectCommand(XAddress objectAddress) {
+		return createRemoveObjectCommand(objectAddress, XCommand.FORCED, true);
+	}
+	
+	@Override
+	public XFieldCommand createSafeRemoveValueCommand(XID repositoryId, XID modelId, XID objectId,
+	        XID fieldId, long fieldRevision) {
+		if(fieldRevision == XCommand.FORCED) {
+			throw new IllegalArgumentException(
+			        "Safe commands cannot have XCommand.FORCED as their revision number.");
+		}
+		return createRemoveValueCommand(repositoryId, modelId, objectId, fieldId, fieldRevision,
+		        false);
+	}
+	
+	@Override
+	public XFieldCommand createForcedRemoveValueCommand(XID repositoryId, XID modelId,
+	        XID objectId, XID fieldId) {
+		return createRemoveValueCommand(repositoryId, modelId, objectId, fieldId, XCommand.FORCED,
+		        true);
+	}
+	
+	@Override
+	public XFieldCommand createSafeRemoveValueCommand(XAddress fieldAddress, long fieldRevision) {
+		if(fieldRevision == XCommand.FORCED) {
+			throw new IllegalArgumentException(
+			        "Safe commands cannot have XCommand.FORCED as their revision number.");
+		}
+		return createRemoveValueCommand(fieldAddress, fieldRevision, false);
+	}
+	
+	@Override
+	public XFieldCommand createForcedRemoveValueCommand(XAddress fieldAddress) {
+		return createRemoveValueCommand(fieldAddress, XCommand.FORCED, true);
+	}
+	
+	@Override
+	public XModelCommand createSafeAddObjectCommand(XID repositoryId, XID modelId, XID objectId) {
+		return createAddObjectCommand(repositoryId, modelId, objectId, true);
+	}
+	
 }
