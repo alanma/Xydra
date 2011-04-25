@@ -43,14 +43,15 @@ public interface XCommand extends Serializable {
 	static final long FAILED = -1;
 	
 	/**
-	 * special revision for commands that should be executed no matter what the
-	 * current revision is
+	 * A special revision that is returned for commands that should be executed
+	 * no matter what the current revision is. They have been created with a
+	 * createForce... method,
 	 */
 	static final long FORCED = -1;
 	
 	/**
-	 * revision of new models, objects and fields, before they are assigned a
-	 * proper revision number (for example during a transaction).
+	 * The returned revision of new models, objects and fields, before they are
+	 * assigned a proper revision number (for example during a transaction).
 	 * 
 	 * TODO use a different constant? Max: Better yes. 0 = not set/bug. 1...n =
 	 * proper revNr. < 0 = special state
@@ -65,7 +66,8 @@ public interface XCommand extends Serializable {
 	
 	/**
 	 * only for ADD events (except XFieldCommand), others should use a specific
-	 * revision
+	 * revision TODO document better - really for ADD *events*? Or ADD
+	 * *commands*? Make clear this revNr is only returned.
 	 */
 	static final long SAFE = -2;
 	
