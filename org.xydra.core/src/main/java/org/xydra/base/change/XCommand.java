@@ -44,8 +44,13 @@ public interface XCommand extends Serializable {
 	
 	/**
 	 * A special revision that is returned for commands that should be executed
-	 * no matter what the current revision is. They have been created with a
-	 * createForce... method,
+	 * no matter what the current revision of the entity that is to be changed
+	 * is.
+	 * 
+	 * Commands with this revision number were (most likely) created by a
+	 * createForced...Command method of {@XCommandFactory}. We
+	 * strongly advise to NOT use this revision number in manually created
+	 * commands!
 	 */
 	static final long FORCED = -1;
 	
@@ -65,9 +70,16 @@ public interface XCommand extends Serializable {
 	static final long NOCHANGE = -2;
 	
 	/**
-	 * only for ADD events (except XFieldCommand), others should use a specific
-	 * revision TODO document better - really for ADD *events*? Or ADD
-	 * *commands*? Make clear this revNr is only returned.
+	 * The returned revision of ADD-type XCommands for XModels and XObjects
+	 * (since these commands do not necessarily refer to a specific revision of
+	 * the targeted entity). Only used in XCommands as a marker that the
+	 * XCommand is a safe command and not a forced command and never used as the
+	 * revision number of any entity or event.
+	 * 
+	 * Commands with this revision number were (most likely) created by a
+	 * createSafe...Command method of {@XCommandFactory}. We
+	 * strongly advise NOT use this revision number in manually created
+	 * commands!
 	 */
 	static final long SAFE = -2;
 	
