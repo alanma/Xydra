@@ -345,6 +345,11 @@ public class MemoryCommandFactory implements XCommandFactory {
 	
 	public XFieldCommand createAddValueCommand(XID repositoryId, XID modelId, XID objectId,
 	        XID fieldId, long fieldRevision, XValue value, boolean isForced) {
+		if(fieldRevision == XCommand.FORCED && !isForced) {
+			throw new IllegalArgumentException(
+			        "Safe commands cannot have XCommand.FORCED as their revision number.");
+		}
+		
 		long revNr = fieldRevision;
 		
 		if(isForced) {
@@ -500,10 +505,13 @@ public class MemoryCommandFactory implements XCommandFactory {
 		        value, false);
 	}
 	
-	// TODO change API: remove isForced and document you need to set revision to
-	// XCommand.FORCED
 	public XFieldCommand createChangeValueCommand(XID repositoryId, XID modelId, XID objectId,
 	        XID fieldId, long fieldRevision, XValue value, boolean isForced) {
+		if(fieldRevision == XCommand.FORCED && !isForced) {
+			throw new IllegalArgumentException(
+			        "Safe commands cannot have XCommand.FORCED as their revision number.");
+		}
+		
 		long revNr = fieldRevision;
 		
 		if(isForced) {
@@ -618,6 +626,10 @@ public class MemoryCommandFactory implements XCommandFactory {
 	
 	public XObjectCommand createRemoveFieldCommand(XID repositoryId, XID modelId, XID objectId,
 	        XID fieldId, long fieldRevision, boolean isForced) {
+		if(fieldRevision == XCommand.FORCED && !isForced) {
+			throw new IllegalArgumentException(
+			        "Safe commands cannot have XCommand.FORCED as their revision number.");
+		}
 		
 		long revNr = fieldRevision;
 		
@@ -649,6 +661,11 @@ public class MemoryCommandFactory implements XCommandFactory {
 	
 	public XRepositoryCommand createRemoveModelCommand(XID repositoryId, XID modelId,
 	        long modelRevision, boolean isForced) {
+		if(modelRevision == XCommand.FORCED && !isForced) {
+			throw new IllegalArgumentException(
+			        "Safe commands cannot have XCommand.FORCED as their revision number.");
+		}
+		
 		long revNr = modelRevision;
 		
 		if(isForced) {
@@ -717,6 +734,11 @@ public class MemoryCommandFactory implements XCommandFactory {
 	
 	public XModelCommand createRemoveObjectCommand(XID repositoryId, XID modelId, XID objectId,
 	        long objectRevision, boolean isForced) {
+		if(objectRevision == XCommand.FORCED && !isForced) {
+			throw new IllegalArgumentException(
+			        "Safe commands cannot have XCommand.FORCED as their revision number.");
+		}
+		
 		long revNr = objectRevision;
 		
 		if(isForced) {
@@ -861,6 +883,11 @@ public class MemoryCommandFactory implements XCommandFactory {
 	
 	public XFieldCommand createRemoveValueCommand(XID repositoryId, XID modelId, XID objectId,
 	        XID fieldId, long fieldRevision, boolean isForced) {
+		if(fieldRevision == XCommand.FORCED && !isForced) {
+			throw new IllegalArgumentException(
+			        "Safe commands cannot have XCommand.FORCED as their revision number.");
+		}
+		
 		long revNr = fieldRevision;
 		
 		if(isForced) {

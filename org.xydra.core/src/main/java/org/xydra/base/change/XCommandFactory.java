@@ -262,12 +262,15 @@ public interface XCommandFactory {
 	 *            {@link XValue} is to be added to.
 	 * 
 	 *            Passing {@link XCommand#FORCED} when {#isForced} is set to
-	 *            false will throw a {@link Runtime Exception}. If {#isForced}
-	 *            is set to true, the given long value will be ignored.
+	 *            false will throw a {@link IllegalArgumentException}. If
+	 *            {#isForced} is set to true, the given long value will be
+	 *            ignored.
 	 * @param value The {@link XValue} which is to be added.
 	 * @param isForced true, if this XCommand should be a forced command, false
 	 *            otherwise
 	 * @return an {@link XFieldCommand} with the specified settings
+	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
+	 *             {#fieldRevision} and {#isForced} is set to false.
 	 */
 	public XFieldCommand createAddValueCommand(XID repositoryId, XID modelId, XID objectId,
 	        XID fieldId, long fieldRevision, XValue value, boolean isForced);
@@ -288,10 +291,12 @@ public interface XCommandFactory {
 	 * @param fieldRevision The revision number of the {@link XField} that the
 	 *            {@link XValue} is to be added to. Since this method is used to
 	 *            create safe commands, passing XCommand.FORCED as the revision
-	 *            number will throw a {@link RuntimeException}
+	 *            number will throw a {@link IllegalArgumentException}
 	 * 
 	 * @param value The {@link XValue} which is to be added.
 	 * @return an {@link XFieldCommand} with the specified settings
+	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
+	 *             {#fieldRevision}.
 	 */
 	public XFieldCommand createSafeAddValueCommand(XID repositoryId, XID modelId, XID objectId,
 	        XID fieldId, long fieldRevision, XValue value);
@@ -329,12 +334,15 @@ public interface XCommandFactory {
 	 *            {@link XValue} is to be added to.
 	 * 
 	 *            Passing {@link XCommand#FORCED} when {#isForced} is set to
-	 *            false will throw a {@link Runtime Exception}. If {#isForced}
-	 *            is set to true, the given long value will be ignored.
+	 *            false will throw a {@link IllegalArgumentException}. If
+	 *            {#isForced} is set to true, the given long value will be
+	 *            ignored.
 	 * @param value The {@link XValue} which is to be added.
 	 * @param isForced true, if this XCommand should be a forced command, false
 	 *            otherwise
 	 * @return an {@link XFieldCommand} with the specified settings
+	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
+	 *             {#fieldRevision} and {#isForced} is set to false.
 	 */
 	public XFieldCommand createAddValueCommand(XAddress fieldAddress, long fieldRevision,
 	        XValue value, boolean isForced);
@@ -348,9 +356,11 @@ public interface XCommandFactory {
 	 * @param fieldRevision The revision number of the {@link XField} that the
 	 *            {@link XValue} is to be added to. Since this method is used to
 	 *            create safe commands, passing XCommand.FORCED as the revision
-	 *            number will throw a {@link RuntimeException}
+	 *            number will throw a {@link IllegalArgumentException}
 	 * @param value The {@link XValue} which is to be added.
 	 * @return an {@link XFieldCommand} with the specified settings
+	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
+	 *             {#fieldRevision}.
 	 */
 	public XFieldCommand createSafeAddValueCommand(XAddress fieldAddress, long fieldRevision,
 	        XValue value);
@@ -388,13 +398,16 @@ public interface XCommandFactory {
 	 *            {@link XValue} is to be changed.
 	 * 
 	 *            Passing {@link XCommand#FORCED} when {#isForced} is set to
-	 *            false will throw a {@link Runtime Exception}. If {#isForced}
-	 *            is set to true, the given long value will be ignored.
+	 *            false will throw a {@link IllegalArgumentException}. If
+	 *            {#isForced} is set to true, the given long value will be
+	 *            ignored.
 	 * @param value The {@link XValue} to which the current {@link XValue} of
 	 *            the {@link XField} is to be changed to.
 	 * @param isForced true, if this XCommand should be a forced command, false
 	 *            otherwise
 	 * @return an {@link XFieldCommand} with the specified settings
+	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
+	 *             {#fieldRevision} and {#isForced} is set to false.
 	 */
 	public XFieldCommand createChangeValueCommand(XID repositoryId, XID modelId, XID objectId,
 	        XID fieldId, long fieldRevision, XValue value, boolean isForced);
@@ -415,10 +428,12 @@ public interface XCommandFactory {
 	 * @param fieldRevision The revision number of the {@link XField} which
 	 *            {@link XValue} is to be changed. Since this method is used to
 	 *            create safe commands, passing XCommand.FORCED as the revision
-	 *            number will throw a {@link RuntimeException}
+	 *            number will throw a {@link IllegalArgumentException}
 	 * @param value The {@link XValue} to which the current {@link XValue} of
 	 *            the {@link XField} is to be changed to.
 	 * @return an {@link XFieldCommand} with the specified settings
+	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
+	 *             {#fieldRevision}.
 	 */
 	public XFieldCommand createSafeChangeValueCommand(XID repositoryId, XID modelId, XID objectId,
 	        XID fieldId, long fieldRevision, XValue value);
@@ -457,13 +472,16 @@ public interface XCommandFactory {
 	 *            {@link XValue} is to be added to.
 	 * 
 	 *            Passing {@link XCommand#FORCED} when {#isForced} is set to
-	 *            false will throw a {@link Runtime Exception}. If {#isForced}
-	 *            is set to true, the given long value will be ignored.
+	 *            false will throw a {@link IllegalArgumentException}. If
+	 *            {#isForced} is set to true, the given long value will be
+	 *            ignored.
 	 * @param value The {@link XValue} to which the current {@link XValue} of
 	 *            the {@link XField} is to be changed to.
 	 * @param isForced true, if this XCommand should be a forced command, false
 	 *            otherwise
 	 * @return an {@link XFieldCommand} with the specified settings
+	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
+	 *             {#fieldRevision} and {#isForced} is set to false.
 	 */
 	public XFieldCommand createChangeValueCommand(XAddress fieldAddress, long fieldRevision,
 	        XValue value, boolean isForced);
@@ -477,10 +495,12 @@ public interface XCommandFactory {
 	 * @param fieldRevision The revision number of the {@link XField} that the
 	 *            {@link XValue} is to be added to. Since this method is used to
 	 *            create safe commands, passing XCommand.FORCED as the revision
-	 *            number will throw a {@link RuntimeException}
+	 *            number will throw a {@link IllegalArgumentException}
 	 * @param value The {@link XValue} to which the current {@link XValue} of
 	 *            the {@link XField} is to be changed to.
 	 * @return an {@link XFieldCommand} with the specified settings
+	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
+	 *             {#fieldRevision}.
 	 */
 	public XFieldCommand createSafeChangeValueCommand(XAddress fieldAddress, long fieldRevision,
 	        XValue value);
@@ -516,11 +536,14 @@ public interface XCommandFactory {
 	 *            be removed.
 	 * 
 	 *            Passing {@link XCommand#FORCED} when {#isForced} is set to
-	 *            false will throw a {@link Runtime Exception}. If {#isForced}
-	 *            is set to true, the given long value will be ignored.
+	 *            false will throw a {@link IllegalArgumentException}. If
+	 *            {#isForced} is set to true, the given long value will be
+	 *            ignored.
 	 * @param isForced true, if this XCommand should be a forced command, false
 	 *            otherwise
 	 * @return an {@link XObjectCommand} with the specified settings
+	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
+	 *             {#fieldRevision} and {#isForced} is set to false.
 	 */
 	public XObjectCommand createRemoveFieldCommand(XID repositoryId, XID modelId, XID objectId,
 	        XID fieldId, long fieldRevision, boolean isForced);
@@ -539,8 +562,11 @@ public interface XCommandFactory {
 	 * @param fieldRevision The revision number of the {@link XField} that is to
 	 *            be removed. Since this method is used to create safe commands,
 	 *            passing XCommand.FORCED as the revision number will throw a
-	 *            {@link RuntimeException}
+	 *            {@link IllegalArgumentException}
 	 * @return an {@link XObjectCommand} with the specified settings
+	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
+	 *             {#fieldRevision}.
+	 * 
 	 */
 	public XObjectCommand createSafeRemoveFieldCommand(XID repositoryId, XID modelId, XID objectId,
 	        XID fieldId, long fieldRevision);
@@ -575,11 +601,14 @@ public interface XCommandFactory {
 	 *            be removed.
 	 * 
 	 *            Passing {@link XCommand#FORCED} when {#isForced} is set to
-	 *            false will throw a {@link Runtime Exception}. If {#isForced}
-	 *            is set to true, the given long value will be ignored.
+	 *            false will throw a {@link IllegalArgumentException}. If
+	 *            {#isForced} is set to true, the given long value will be
+	 *            ignored.
 	 * @param isForced true, if this XCommand should be a forced command, false
 	 *            otherwise
 	 * @return an {@link XObjectCommand} with the specified settings
+	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
+	 *             {#fieldRevision} and {#isForced} is set to false.
 	 */
 	public XObjectCommand createRemoveFieldCommand(XAddress fieldAddress, long fieldRevision,
 	        boolean isForced);
@@ -593,8 +622,10 @@ public interface XCommandFactory {
 	 * @param fieldRevision The revision number of the {@link XField} that is to
 	 *            be removed. Since this method is used to create safe commands,
 	 *            passing XCommand.FORCED as the revision number will throw a
-	 *            {@link RuntimeException}
+	 *            {@link IllegalArgumentException}
 	 * @return an {@link XObjectCommand} with the specified settings
+	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
+	 *             {#fieldRevision}.
 	 */
 	public XObjectCommand createSafeRemoveFieldCommand(XAddress fieldAddress, long fieldRevision);
 	
@@ -626,9 +657,12 @@ public interface XCommandFactory {
 	 *            otherwise
 	 * 
 	 *            Passing {@link XCommand#FORCED} when {#isForced} is set to
-	 *            false will throw a {@link Runtime Exception}. If {#isForced}
-	 *            is set to true, the given long value will be ignored.
+	 *            false will throw a {@link IllegalArgumentException}. If
+	 *            {#isForced} is set to true, the given long value will be
+	 *            ignored.
 	 * @return an {@link XRepositoryCommand} with the specified settings
+	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
+	 *             {#modelRevision} and {#isForced} is set to false.
 	 */
 	public XRepositoryCommand createRemoveModelCommand(XID repositoryId, XID modelId,
 	        long modelRevision, boolean isForced);
@@ -644,8 +678,10 @@ public interface XCommandFactory {
 	 * @param modelRevision The revision number of the {@link XModel} that is to
 	 *            be removed. Since this method is used to create safe commands,
 	 *            passing XCommand.FORCED as the revision number will throw a
-	 *            {@link RuntimeException}
+	 *            {@link IllegalArgumentException}
 	 * @return an {@link XRepositoryCommand} with the specified settings
+	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
+	 *             {#modelRevision}.
 	 */
 	public XRepositoryCommand createSafeRemoveModelCommand(XID repositoryId, XID modelId,
 	        long modelRevision);
@@ -678,9 +714,12 @@ public interface XCommandFactory {
 	 *            otherwise
 	 * 
 	 *            Passing {@link XCommand#FORCED} when {#isForced} is set to
-	 *            false will throw a {@link Runtime Exception}. If {#isForced}
-	 *            is set to true, the given long value will be ignored.
+	 *            false will throw a {@link IllegalArgumentException}. If
+	 *            {#isForced} is set to true, the given long value will be
+	 *            ignored.
 	 * @return an {@link XRepositoryCommand} with the specified settings
+	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
+	 *             {#modelRevision} and {#isForced} is set to false.
 	 */
 	public XRepositoryCommand createRemoveModelCommand(XAddress modelAddress, long modelRevision,
 	        boolean isForced);
@@ -694,8 +733,10 @@ public interface XCommandFactory {
 	 * @param modelRevision The revision number of the {@link XModel} that is to
 	 *            be removed. Since this method is used to create safe commands,
 	 *            passing XCommand.FORCED as the revision number will throw a
-	 *            {@link RuntimeException}
+	 *            {@link IllegalArgumentException}
 	 * @return an {@link XRepositoryCommand} with the specified settings
+	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
+	 *             {#modelRevision}.
 	 */
 	public XRepositoryCommand createSafeRemoveModelCommand(XAddress modelAddress, long modelRevision);
 	
@@ -728,11 +769,14 @@ public interface XCommandFactory {
 	 *            to be removed.
 	 * 
 	 *            Passing {@link XCommand#FORCED} when {#isForced} is set to
-	 *            false will throw a {@link Runtime Exception}. If {#isForced}
-	 *            is set to true, the given long value will be ignored.
+	 *            false will throw a {@link IllegalArgumentException}. If
+	 *            {#isForced} is set to true, the given long value will be
+	 *            ignored.
 	 * @param isForced true, if this XCommand should be a forced command, false
 	 *            otherwise
 	 * @return an {@link XModelCommand} with the specified settings
+	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
+	 *             {#objectRevision} and {#isForced} is set to false.
 	 */
 	public XModelCommand createRemoveObjectCommand(XID repositoryId, XID modelId, XID objectId,
 	        long objectRevision, boolean isForced);
@@ -751,9 +795,11 @@ public interface XCommandFactory {
 	 * @param objectRevision The revision number of the {@link XObject} that is
 	 *            to be removed. Since this method is used to create safe
 	 *            commands, passing XCommand.FORCED as the revision number will
-	 *            throw a {@link RuntimeException}
+	 *            throw a {@link IllegalArgumentException}
 	 * 
 	 * @return an {@link XModelCommand} with the specified settings
+	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
+	 *             {#objectRevision}.
 	 */
 	public XModelCommand createSafeRemoveObjectCommand(XID repositoryId, XID modelId, XID objectId,
 	        long objectRevision);
@@ -788,11 +834,14 @@ public interface XCommandFactory {
 	 *            to be removed.
 	 * 
 	 *            Passing {@link XCommand#FORCED} when {#isForced} is set to
-	 *            false will throw a {@link Runtime Exception}. If {#isForced}
-	 *            is set to true, the given long value will be ignored.
+	 *            false will throw a {@link IllegalArgumentException}. If
+	 *            {#isForced} is set to true, the given long value will be
+	 *            ignored.
 	 * @param isForced true, if this XCommand should be a forced command, false
 	 *            otherwise
 	 * @return an {@link XModelCommand} with the specified settings
+	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
+	 *             {#objectRevision} and {#isForced} is set to false.
 	 */
 	public XModelCommand createRemoveObjectCommand(XAddress objectAddress, long objectRevision,
 	        boolean isForced);
@@ -806,8 +855,10 @@ public interface XCommandFactory {
 	 * @param objectRevision The revision number of the {@link XObject} that is
 	 *            to be removed. Since this method is used to create safe
 	 *            commands, passing XCommand.FORCED as the revision number will
-	 *            throw a {@link RuntimeException}
+	 *            throw a {@link IllegalArgumentException}
 	 * @return an {@link XModelCommand} with the specified settings
+	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
+	 *             {#objectRevision}.
 	 */
 	public XModelCommand createSafeRemoveObjectCommand(XAddress objectAddress, long objectRevision);
 	
@@ -842,11 +893,14 @@ public interface XCommandFactory {
 	 *            {@link XValue} is to be removed from.
 	 * 
 	 *            Passing {@link XCommand#FORCED} when {#isForced} is set to
-	 *            false will throw a {@link Runtime Exception}. If {#isForced}
-	 *            is set to true, the given long value will be ignored.
+	 *            false will throw a {@link IllegalArgumentException}. If
+	 *            {#isForced} is set to true, the given long value will be
+	 *            ignored.
 	 * @param isForced true, if this XCommand should be a forced command, false
 	 *            otherwise
 	 * @return an {@link XFieldCommand} with the specified settings
+	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
+	 *             {#fieldRevision} and {#isForced} is set to false.
 	 */
 	public XFieldCommand createRemoveValueCommand(XID repositoryId, XID modelId, XID objectId,
 	        XID fieldId, long fieldRevision, boolean isForced);
@@ -867,8 +921,10 @@ public interface XCommandFactory {
 	 * @param fieldRevision The revision number of the {@link XField} that the
 	 *            {@link XValue} is to be removed from. Since this method is
 	 *            used to create safe commands, passing XCommand.FORCED as the
-	 *            revision number will throw a {@link RuntimeException}
+	 *            revision number will throw a {@link IllegalArgumentException}
 	 * @return an {@link XFieldCommand} with the specified settings
+	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
+	 *             {#fieldRevision}.
 	 */
 	public XFieldCommand createSafeRemoveValueCommand(XID repositoryId, XID modelId, XID objectId,
 	        XID fieldId, long fieldRevision);
@@ -905,11 +961,14 @@ public interface XCommandFactory {
 	 *            {@link XValue} is to be removed from.
 	 * 
 	 *            Passing {@link XCommand#FORCED} when {#isForced} is set to
-	 *            false will throw a {@link Runtime Exception}. If {#isForced}
-	 *            is set to true, the given long value will be ignored.
+	 *            false will throw a {@link IllegalArgumentException}. If
+	 *            {#isForced} is set to true, the given long value will be
+	 *            ignored.
 	 * @param isForced true, if this XCommand should be a forced command, false
 	 *            otherwise
 	 * @return an {@link XFieldCommand} with the specified settings
+	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
+	 *             {#fieldRevision} and {#isForced} is set to false.
 	 */
 	public XFieldCommand createRemoveValueCommand(XAddress fieldAddress, long fieldRevision,
 	        boolean isForced);
@@ -923,8 +982,10 @@ public interface XCommandFactory {
 	 * @param fieldRevision The revision number of the {@link XField} that the
 	 *            {@link XValue} is to be removed from. Since this method is
 	 *            used to create safe commands, passing XCommand.FORCED as the
-	 *            revision number will throw a {@link RuntimeException}
+	 *            revision number will throw a {@link IllegalArgumentException}
 	 * @return an {@link XFieldCommand} with the specified settings
+	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
+	 *             {#fieldRevision}.
 	 */
 	public XFieldCommand createSafeRemoveValueCommand(XAddress fieldAddress, long fieldRevision);
 	
