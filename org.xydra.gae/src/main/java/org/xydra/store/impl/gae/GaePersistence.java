@@ -113,28 +113,24 @@ public class GaePersistence implements XydraPersistence {
 	}
 	
 	public XReadableModel getModelSnapshot(XID modelId) {
+		
 		if(modelId == null) {
 			throw new IllegalArgumentException("modelId was null");
 		}
 		
-		GaeSnapshotService s = getSnapshotService(modelId);
-		
-		if(s == null) {
-			return null;
-		}
-		
-		return s.getSnapshot();
+		return getSnapshotService(modelId).getSnapshot();
 	}
 	
 	@Override
 	public long executeCommand(XID actorId, XCommand command) {
+		
 		if(actorId == null) {
 			throw new IllegalArgumentException("actorId was null");
 		}
 		if(command == null) {
 			throw new IllegalArgumentException("command was null");
 		}
-		checkAddres(command.getTarget());
+		checkAddress(command.getTarget());
 		
 		checkIdLengths(command);
 		
@@ -148,10 +144,15 @@ public class GaePersistence implements XydraPersistence {
 	
 	@Override
 	public List<XEvent> getEvents(XAddress address, long beginRevision, long endRevision) {
-		checkAddres(address);
+		
+		checkAddress(address);
+		
 		if(address.getModel() == null) {
 			throw new RequestException("address must specify a model, was " + address);
 		}
+		
+		// TODO filter events if address is not a model address?
+		
 		return getChangesService(address.getModel()).getEventsBetween(beginRevision, endRevision);
 	}
 	
@@ -170,7 +171,7 @@ public class GaePersistence implements XydraPersistence {
 	
 	@Override
 	public long getModelRevision(XAddress address) {
-		checkAddres(address);
+		checkAddress(address);
 		if(address.getAddressedType() != XType.XMODEL) {
 			throw new RequestException("address must refer to a model, was " + address);
 		}
@@ -179,7 +180,7 @@ public class GaePersistence implements XydraPersistence {
 	
 	@Override
 	public XWritableModel getModelSnapshot(XAddress address) {
-		checkAddres(address);
+		checkAddress(address);
 		if(address.getAddressedType() != XType.XMODEL) {
 			throw new RequestException("address must refer to a model, was " + address);
 		}
@@ -188,7 +189,7 @@ public class GaePersistence implements XydraPersistence {
 	
 	@Override
 	public XWritableObject getObjectSnapshot(XAddress address) {
-		checkAddres(address);
+		checkAddress(address);
 		if(address.getAddressedType() != XType.XOBJECT) {
 			throw new RequestException("address must refer to an object, was " + address);
 		}
@@ -206,7 +207,7 @@ public class GaePersistence implements XydraPersistence {
 	 * 
 	 * @param address
 	 */
-	private void checkAddres(XAddress address) {
+	private void checkAddress(XAddress address) {
 		if(address == null) {
 			throw new IllegalArgumentException("address was null");
 		}
