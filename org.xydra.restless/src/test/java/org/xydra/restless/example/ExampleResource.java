@@ -1,7 +1,6 @@
 package org.xydra.restless.example;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Enumeration;
 import java.util.LinkedList;
@@ -65,7 +64,7 @@ public class ExampleResource {
 		res.setContentType("text/html");
 		
 		/* usually use a template engine or XML generating library here */
-		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		Writer w = res.getWriter();
 		w.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n"
 		        + "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">\r\n");
 		w.write("<head><title>A valid restless response</title></head>");

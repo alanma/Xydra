@@ -1,7 +1,6 @@
 package org.xydra.restless;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -267,7 +266,7 @@ public class Restless extends HttpServlet {
 		String servletPath = getServletPath(req);
 		ServletUtils.headers(res, MIME_XHTML);
 		try {
-			Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+			Writer w = res.getWriter();
 			w.write("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"\r\n"
 			        + "       \"http://www.w3.org/TR/html4/loose.dtd\">\r\n");
 			

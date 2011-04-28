@@ -168,8 +168,7 @@ public class HtmlUtils {
 	
 	public static void writeHtmlPage(HttpServletResponse res, String title, String content)
 	        throws IOException {
-		startHtmlPage(res, title);
-		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		Writer w = startHtmlPage(res, title);
 		w.write(content);
 		endHtmlPage(w);
 	}
@@ -179,13 +178,16 @@ public class HtmlUtils {
 	}
 	
 	/**
-	 * @param res ..
+	 * Creates a text/html, UTF8, non-cached HTML page header
+	 * 
+	 * @param res sets content type html + encoding UTF8
 	 * @param title HTML head - title
 	 * @return a UTF-8 writer for the result stream
 	 * @throws IOException from underlying streams
 	 */
 	public static Writer startHtmlPage(HttpServletResponse res, String title) throws IOException {
-		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		ServletUtils.headers(res, "text/html");
+		Writer w = res.getWriter();
 		writeHtmlHeaderOpenBody(w, title);
 		w.flush();
 		return w;
@@ -194,7 +196,9 @@ public class HtmlUtils {
 	/**
 	 * @param res ..
 	 * @param safeHtml must be safe. No further encoding is applied.
+	 * @deprecated use Writer directly
 	 */
+	@Deprecated
 	public static void writeContent(HttpServletResponse res, String safeHtml) throws IOException {
 		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
 		w.write(safeHtml);

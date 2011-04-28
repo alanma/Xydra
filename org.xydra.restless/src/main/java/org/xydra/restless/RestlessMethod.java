@@ -1,7 +1,6 @@
 package org.xydra.restless;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -218,20 +217,20 @@ public class RestlessMethod {
 				}
 			}
 			
-			Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
 			try {
 				Object result = method.invoke(instance, javaMethodArgs.toArray(new Object[0]));
 				if(!hasHttpServletResponseParameter) {
 					res.setContentType(Restless.MIME_TEXT_PLAIN + "; charset="
 					        + Restless.CHARSET_UTF8);
 					res.setStatus(200);
+					Writer w = res.getWriter();
 					// we need to send back something standard ourselves
 					w.write("Executed " + instance.getClass().getSimpleName() + "."
 					        + this.methodName + "\n");
 					if(result != null && result instanceof String) {
 						w.write("Result: " + result);
 					}
-					new OutputStreamWriter(res.getOutputStream(), "utf-8").flush();
+					w.flush();
 				}
 			} catch(InvocationTargetException e) {
 				Throwable cause = e.getCause();
@@ -240,6 +239,7 @@ public class RestlessMethod {
 					res.setStatus(re.getStatusCode());
 					res.setContentType(Restless.MIME_TEXT_PLAIN + "; charset="
 					        + Restless.CHARSET_UTF8);
+					Writer w = res.getWriter();
 					w.write(re.getMessage());
 				} else {
 					boolean handled = false;
