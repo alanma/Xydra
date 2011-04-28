@@ -16,7 +16,7 @@ public abstract class AbstractSecureStoreQuotaExceptionTest extends
 	@Override
 	protected XID getIncorrectUser() {
 		/*
-		 * By definition of createUniqueID this ID is unknown an is therefore
+		 * By definition of createUniqueID this ID is unknown and is therefore
 		 * not registered in the accountDb
 		 */
 		return XX.createUniqueId();
