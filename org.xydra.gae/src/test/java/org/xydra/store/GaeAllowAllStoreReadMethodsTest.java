@@ -17,7 +17,7 @@ public class GaeAllowAllStoreReadMethodsTest extends AbstractAllowAllStoreReadMe
 		LoggerTestHelper.init();
 	}
 	
-	private XID repositoryId = XX.createUniqueID();
+	private XID repositoryId = XX.createUniqueId();
 	
 	@Override
 	protected XydraStore getStore() {

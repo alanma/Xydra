@@ -89,7 +89,7 @@ abstract public class XValueUtils {
 	static public XID asXID(XValue value) {
 		
 		if(value == null) {
-			return XX.createUniqueID();
+			return XX.createUniqueId();
 		}
 		
 		if(value instanceof XID) {
@@ -99,12 +99,12 @@ abstract public class XValueUtils {
 			if(!lv.isEmpty()) {
 				return lv.get(0);
 			} else {
-				return XX.createUniqueID();
+				return XX.createUniqueId();
 			}
 		} else {
 			XID id = generateXid(asString(value));
 			if(id == null) {
-				return XX.createUniqueID();
+				return XX.createUniqueId();
 			}
 			return id;
 		}

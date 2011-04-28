@@ -27,8 +27,8 @@ public class GaePersistenceTest {
 		
 		XydraPersistence pers = new GaePersistence(XX.toId("test-repo"));
 		
-		XID modelId = XX.createUniqueID();
-		XID objectId = XX.createUniqueID();
+		XID modelId = XX.createUniqueId();
+		XID objectId = XX.createUniqueId();
 		
 		XAddress repoAddr = XX.toAddress(pers.getRepositoryId(), null, null, null);
 		pers.executeCommand(ACTOR, MemoryRepositoryCommand
