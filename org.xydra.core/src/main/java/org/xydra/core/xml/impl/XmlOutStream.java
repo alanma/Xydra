@@ -19,18 +19,26 @@ public class XmlOutStream extends AbstractXmlOut {
 	
 	private final Writer writer;
 	
-	public XmlOutStream(OutputStream os) {
+	public XmlOutStream(OutputStream os, boolean writeHeader) {
 		try {
 			this.writer = new OutputStreamWriter(os, "UTF-8");
 		} catch(UnsupportedEncodingException e) {
 			throw new RuntimeException("missing UTF-8 charset", e);
 		}
-		init();
+		init(writeHeader);
+	}
+	
+	public XmlOutStream(OutputStream os) {
+		this(os, true);
+	}
+	
+	public XmlOutStream(Writer writer, boolean writeHeader) {
+		this.writer = writer;
+		init(writeHeader);
 	}
 	
 	public XmlOutStream(Writer writer) {
-		this.writer = writer;
-		init();
+		this(writer, true);
 	}
 	
 	@Override

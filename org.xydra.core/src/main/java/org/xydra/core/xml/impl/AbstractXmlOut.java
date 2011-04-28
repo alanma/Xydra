@@ -87,8 +87,10 @@ abstract public class AbstractXmlOut implements XmlOut {
 		return s;
 	}
 	
-	protected void init() {
-		append(XmlOut.XML_DECLARATION);
+	protected void init(boolean writeHeader) {
+		if(writeHeader) {
+			append(XmlOut.XML_DECLARATION);
+		}
 	}
 	
 	public void open(String elementName) {

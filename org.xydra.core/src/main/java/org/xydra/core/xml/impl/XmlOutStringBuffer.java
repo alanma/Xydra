@@ -1,7 +1,7 @@
 package org.xydra.core.xml.impl;
 
-import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RequiresAppEngine;
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.core.xml.XmlOut;
 
 
@@ -17,8 +17,12 @@ public class XmlOutStringBuffer extends AbstractXmlOut {
 	
 	private final StringBuffer buf = new StringBuffer();
 	
+	public XmlOutStringBuffer(boolean writeHeader) {
+		init(writeHeader);
+	}
+	
 	public XmlOutStringBuffer() {
-		init();
+		this(true);
 	}
 	
 	@Override
