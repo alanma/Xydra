@@ -18,7 +18,7 @@ public interface XIDProvider {
 	/**
 	 * @return a new random unique {@link XID}
 	 */
-	XID createUniqueID();
+	XID createUniqueId();
 	
 	/**
 	 * Creates an {@link XAddress} object from its string representation. Valid

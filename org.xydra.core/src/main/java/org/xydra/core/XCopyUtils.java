@@ -139,9 +139,11 @@ public class XCopyUtils {
 		targetField.setValue(sourceField.getValue());
 	}
 	
+	/**
+	 * Create a XModel with the same initial state as the given model snapshot.
+	 */
 	public static XModel copyModel(XID actor, String password, XReadableModel modelSnapshot) {
 		XRevWritableModel modelState = createSnapshot(modelSnapshot);
-		// TODO create a method without additional copy
 		return new MemoryModel(actor, password, modelState);
 	}
 	

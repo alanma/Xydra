@@ -22,7 +22,7 @@ public class XmlValueTest {
 	
 	@Test
 	public void testAddressListValue() {
-		testValue(XV.toValue(new XAddress[] { XX.toAddress(XX.createUniqueID(), null, null, null),
+		testValue(XV.toValue(new XAddress[] { XX.toAddress(XX.createUniqueId(), null, null, null),
 		        XX.toAddress("/cookie/monster/-/-") }));
 	}
 	
@@ -39,7 +39,7 @@ public class XmlValueTest {
 	@Test
 	public void testAddressSetValue() {
 		testValue(XV.toAddressSetValue(new XAddress[] {
-		        XX.toAddress(XX.createUniqueID(), null, null, null),
+		        XX.toAddress(XX.createUniqueId(), null, null, null),
 		        XX.toAddress("/cookie/monster/-/-") }));
 	}
 	
@@ -56,7 +56,7 @@ public class XmlValueTest {
 	@Test
 	public void testAddressSortedSetValue() {
 		testValue(XV.toAddressSortedSetValue(new XAddress[] {
-		        XX.toAddress(XX.createUniqueID(), null, null, null),
+		        XX.toAddress(XX.createUniqueId(), null, null, null),
 		        XX.toAddress("/cookie/monster/-/-") }));
 	}
 	
@@ -72,7 +72,7 @@ public class XmlValueTest {
 	
 	@Test
 	public void testAddressValue() {
-		testValue(XX.toAddress(XX.createUniqueID(), null, null, null));
+		testValue(XX.toAddress(XX.createUniqueId(), null, null, null));
 	}
 	
 	@Test
@@ -127,7 +127,7 @@ public class XmlValueTest {
 	
 	@Test
 	public void testIdListValue() {
-		testValue(XV.toValue(new XID[] { XX.createUniqueID(), XX.toId("cookie") }));
+		testValue(XV.toValue(new XID[] { XX.createUniqueId(), XX.toId("cookie") }));
 	}
 	
 	@Test
@@ -142,7 +142,7 @@ public class XmlValueTest {
 	
 	@Test
 	public void testIdSetValue() {
-		testValue(XV.toIDSetValue(new XID[] { XX.createUniqueID(), XX.toId("cookie") }));
+		testValue(XV.toIDSetValue(new XID[] { XX.createUniqueId(), XX.toId("cookie") }));
 	}
 	
 	@Test
@@ -157,7 +157,7 @@ public class XmlValueTest {
 	
 	@Test
 	public void testIdSortedSetValue() {
-		testValue(XV.toIDSortedSetValue(new XID[] { XX.createUniqueID(), XX.toId("cookie") }));
+		testValue(XV.toIDSortedSetValue(new XID[] { XX.createUniqueId(), XX.toId("cookie") }));
 	}
 	
 	@Test
@@ -172,7 +172,7 @@ public class XmlValueTest {
 	
 	@Test
 	public void testIdValue() {
-		testValue(XX.createUniqueID());
+		testValue(XX.createUniqueId());
 	}
 	
 	@Test(expected = NullPointerException.class)

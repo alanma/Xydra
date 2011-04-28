@@ -220,7 +220,7 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	@Test
 	public void testGetModelRevisionsQuotaException() {
 		SynchronousTestCallback<BatchedResult<Long>[]> callback = null;
-		XAddress[] tempArray = { XX.toAddress(XX.createUniqueID(), XX.createUniqueID(), null, null) };
+		XAddress[] tempArray = { XX.toAddress(XX.createUniqueId(), XX.createUniqueId(), null, null) };
 		
 		assert this.bfQuota > 0;
 		for(long l = 0; l < this.bfQuota + 1; l++) {
@@ -251,8 +251,8 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	@Test
 	public void testGetModelSnapshotsQuotaExcpetion() {
 		SynchronousTestCallback<BatchedResult<XReadableModel>[]> callback = null;
-		XAddress[] tempArray = new XAddress[] { XX.toAddress(XX.createUniqueID(), XX
-		        .createUniqueID(), null, null) };
+		XAddress[] tempArray = new XAddress[] { XX.toAddress(XX.createUniqueId(), XX
+		        .createUniqueId(), null, null) };
 		
 		assert this.bfQuota > 0;
 		for(long l = 0; l < this.bfQuota + 1; l++) {
@@ -283,8 +283,8 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	@Test
 	public void testGetObjectSnapshotsQuotaException() {
 		SynchronousTestCallback<BatchedResult<XReadableObject>[]> callback = null;
-		XAddress[] tempArray = new XAddress[] { XX.toAddress(XX.createUniqueID(), XX
-		        .createUniqueID(), XX.createUniqueID(), null) };
+		XAddress[] tempArray = new XAddress[] { XX.toAddress(XX.createUniqueId(), XX
+		        .createUniqueId(), XX.createUniqueId(), null) };
 		
 		assert this.bfQuota > 0;
 		for(long l = 0; l < this.bfQuota + 1; l++) {
@@ -350,7 +350,7 @@ public abstract class AbstractStoreQuotaExceptionTest {
 		for(long l = 0; l < this.bfQuota + 1; l++) {
 			callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 			XCommand[] commands = new XCommand[] { this.getCommandFactory().createAddModelCommand(
-			        XX.toId("data"), XX.createUniqueID(), true) };
+			        XX.toId("data"), XX.createUniqueId(), true) };
 			
 			this.store.executeCommands(this.incorrectUser, this.incorrectUserPass, commands,
 			        callback);
@@ -385,7 +385,7 @@ public abstract class AbstractStoreQuotaExceptionTest {
 		for(long l = 0; l < this.bfQuota + 1; l++) {
 			callback = new SynchronousTestCallback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>>();
 			XCommand[] commands = new XCommand[] { this.getCommandFactory().createAddModelCommand(
-			        XX.toId("data"), XX.createUniqueID(), true) };
+			        XX.toId("data"), XX.createUniqueId(), true) };
 			GetEventsRequest[] requests = new GetEventsRequest[1];
 			
 			this.store.executeCommandsAndGetEvents(this.incorrectUser, this.incorrectUserPass,

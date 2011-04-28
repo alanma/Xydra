@@ -205,7 +205,7 @@ public class TestAPI {
 		
 		// a method to add a new book to the library
 		public XID addBook(XID actorID, String title, String author) {
-			XID bookID = XX.createUniqueID();
+			XID bookID = XX.createUniqueId();
 			XObject book = this.library.getModel(booksID).createObject(bookID);
 			
 			Book bookWrapper = new Book(book); // we'll use the book wrapper to
@@ -225,7 +225,7 @@ public class TestAPI {
 			XObject book = this.library.getModel(booksID).getObject(bookID);
 			if(book != null) {
 				Book bookWrapper = new Book(book);
-				XID bookCopyID = XX.createUniqueID();
+				XID bookCopyID = XX.createUniqueId();
 				XObject bookCopy = this.library.getModel(bookCopiesID).createObject(bookCopyID);
 				
 				BookCopy bookCopyWrapper = new BookCopy(bookCopy); // we'll use
@@ -354,7 +354,7 @@ public class TestAPI {
 	@Test
 	public void testField() {
 		// create a field
-		XField field = new MemoryField(this.actorId, XX.createUniqueID());
+		XField field = new MemoryField(this.actorId, XX.createUniqueId());
 		
 		// check that the value isn't set
 		assertNull(field.getValue());
@@ -381,10 +381,10 @@ public class TestAPI {
 		
 		// - do the same with a field that was created by an object -
 		XRepository repo = X.createMemoryRepository(this.actorId);
-		XID modelId = XX.createUniqueID();
+		XID modelId = XX.createUniqueId();
 		XModel model = repo.createModel(modelId);
-		XObject object = model.createObject(XX.createUniqueID());
-		field = object.createField(XX.createUniqueID());
+		XObject object = model.createObject(XX.createUniqueId());
+		field = object.createField(XX.createUniqueId());
 		
 		// check that the value isn't set
 		assertNull(field.getValue());
@@ -435,7 +435,7 @@ public class TestAPI {
 	public void testLibrary() {
 		// Use the omnipotent X to get a repository
 		XRepository libraryRepo = X.createMemoryRepository(this.actorId);
-		XID actorID = XX.createUniqueID();
+		XID actorID = XX.createUniqueId();
 		
 		// Wrap it with the library class and set it up
 		Library library = new Library(libraryRepo);
@@ -467,8 +467,8 @@ public class TestAPI {
 		daVinciCopies.add(library.addBookyCopy(actorID, daVinciID));
 		
 		// Create some userIDs
-		XID user1 = XX.createUniqueID();
-		XID user2 = XX.createUniqueID();
+		XID user1 = XX.createUniqueId();
+		XID user2 = XX.createUniqueId();
 		
 		// borrow some books
 		assertTrue(library.hasUnborrowedCopies(hitchhikerID));
@@ -512,11 +512,11 @@ public class TestAPI {
 	@Test
 	public void testModel() {
 		// create a model
-		XModel model = X.createMemoryRepository(this.actorId).createModel(XX.createUniqueID());
+		XModel model = X.createMemoryRepository(this.actorId).createModel(XX.createUniqueId());
 		assertTrue(model.getRevisionNumber() >= 0);
 		
 		// add an object to the model
-		XID objectId = XX.createUniqueID(); // create an ID for
+		XID objectId = XX.createUniqueId(); // create an ID for
 		// the object
 		XObject object = model.createObject(objectId);
 		
@@ -533,12 +533,12 @@ public class TestAPI {
 		
 		// - do the same with a model that was created by a repository -
 		
-		XRepository repo = new MemoryRepository(this.actorId, this.password, XX.createUniqueID());
-		XID modelId = XX.createUniqueID();
+		XRepository repo = new MemoryRepository(this.actorId, this.password, XX.createUniqueId());
+		XID modelId = XX.createUniqueId();
 		model = repo.createModel(modelId);
 		
 		// add an object to the model
-		XID object2ID = XX.createUniqueID(); // create an ID for
+		XID object2ID = XX.createUniqueId(); // create an ID for
 		// the object
 		XObject object2 = model.createObject(object2ID);
 		
@@ -558,10 +558,10 @@ public class TestAPI {
 	@Test
 	public void testObject() {
 		// create an object
-		XObject object = new MemoryObject(this.actorId, this.password, XX.createUniqueID());
+		XObject object = new MemoryObject(this.actorId, this.password, XX.createUniqueId());
 		
 		// add a field to the object
-		XID fieldId = XX.createUniqueID(); // create an ID for
+		XID fieldId = XX.createUniqueId(); // create an ID for
 		// the field
 		XField field = object.createField(fieldId);
 		
@@ -579,12 +579,12 @@ public class TestAPI {
 		
 		// - do the same with an object that was created by a model -
 		XRepository repo = X.createMemoryRepository(this.actorId);
-		XID modelId = XX.createUniqueID();
+		XID modelId = XX.createUniqueId();
 		XModel model = repo.createModel(modelId);
-		object = model.createObject(XX.createUniqueID());
+		object = model.createObject(XX.createUniqueId());
 		
 		// add a field to the object
-		XID field2ID = XX.createUniqueID(); // create an ID for
+		XID field2ID = XX.createUniqueId(); // create an ID for
 		// the field
 		XField field2 = object.createField(field2ID);
 		
@@ -609,10 +609,10 @@ public class TestAPI {
 	public void testRepository() {
 		
 		// create a repository
-		XRepository repo = new MemoryRepository(this.actorId, this.password, XX.createUniqueID());
+		XRepository repo = new MemoryRepository(this.actorId, this.password, XX.createUniqueId());
 		
 		// add a model to the repository
-		XID modelId = XX.createUniqueID(); // create an ID for
+		XID modelId = XX.createUniqueId(); // create an ID for
 		// the model
 		XModel model = repo.createModel(modelId);
 		
@@ -630,20 +630,20 @@ public class TestAPI {
 	
 	@Test
 	public void testSaveAndLoadModel() {
-		XModel model = new MemoryModel(this.actorId, this.password, XX.createUniqueID());
-		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID()).setValue(
+		XModel model = new MemoryModel(this.actorId, this.password, XX.createUniqueId());
+		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId()).setValue(
 		        XV.toValue(true));
-		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID()).setValue(
+		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId()).setValue(
 		        XV.toValue("Test!"));
-		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID()).setValue(
+		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId()).setValue(
 		        XV.toValue(false));
-		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID()).setValue(
+		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId()).setValue(
 		        XV.toValue(42));
-		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID()).setValue(
+		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId()).setValue(
 		        XV.toValue(0L));
-		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID()).setValue(
+		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId()).setValue(
 		        XV.toValue(3.14159265));
-		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID()).setValue(
+		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId()).setValue(
 		        XV.toValue("Another Test!"));
 		
 		XmlOutStringBuffer out = new XmlOutStringBuffer();
@@ -662,7 +662,7 @@ public class TestAPI {
 	public void testSaveAndLoadRepository() {
 		// we'll use our library classes to create a repository with content
 		XRepository repo = X.createMemoryRepository(this.actorId);
-		XID actorID = XX.createUniqueID();
+		XID actorID = XX.createUniqueId();
 		
 		// add some books and copies
 		Library library = new Library(repo);
@@ -716,9 +716,9 @@ public class TestAPI {
 		// - - Method: XField setValue(XID actorID, XObject object, XID fieldId,
 		// XValue value) - -
 		XRepository repo = X.createMemoryRepository(this.actorId);
-		XModel model = repo.createModel(XX.createUniqueID());
-		XObject object = model.createObject(XX.createUniqueID());
-		XField field1 = object.createField(XX.createUniqueID());
+		XModel model = repo.createModel(XX.createUniqueId());
+		XObject object = model.createObject(XX.createUniqueId());
+		XField field1 = object.createField(XX.createUniqueId());
 		XValue value1 = XV.toValue("Test value");
 		
 		// Add value to an existing field
@@ -742,7 +742,7 @@ public class TestAPI {
 		assertNull(field1.getValue());
 		
 		// Add value to a not existing field (should create a fitting field)
-		XID newID = XX.createUniqueID();
+		XID newID = XX.createUniqueId();
 		field2 = CoreUtils.setValue(object, newID, value1);
 		assertTrue(object.hasField(newID)); // did it create a new field?
 		assertEquals(object.getField(newID), field2);
@@ -751,7 +751,7 @@ public class TestAPI {
 		
 		// Remove a value from a not existing field (should create a new field
 		// which value isn't set)
-		newID = XX.createUniqueID();
+		newID = XX.createUniqueId();
 		field2 = CoreUtils.setValue(object, newID, null);
 		assertTrue(object.hasField(newID));
 		assertEquals(object.getField(newID), field2);
@@ -760,23 +760,23 @@ public class TestAPI {
 		
 		// - - Method: void copy(XID actorID, XModel sourceModel, XModel
 		// targetModel) - -
-		model = repo.createModel(XX.createUniqueID());
+		model = repo.createModel(XX.createUniqueId());
 		// add some content
-		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID()).setValue(
+		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId()).setValue(
 		        XV.toValue("Test"));
 		
-		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID()).setValue(
+		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId()).setValue(
 		        XV.toValue("Test2"));
 		
-		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID()).setValue(
+		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId()).setValue(
 		        XV.toValue("Test3"));
 		
-		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID()).setValue(
+		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId()).setValue(
 		        XV.toValue("Test4"));
 		
-		model.createObject(XX.createUniqueID()).createField(XX.createUniqueID());
+		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId());
 		
-		model.createObject(XX.createUniqueID());
+		model.createObject(XX.createUniqueId());
 		
 		// copy it!
 		XModel copyModel = new MemoryModel(this.actorId, this.password, model.getID());
@@ -788,19 +788,19 @@ public class TestAPI {
 		
 		// - - Method: void copy(XID actorID, XObject sourceObject, XObject
 		// targetObject) - -
-		model = repo.createModel(XX.createUniqueID());
-		object = model.createObject(XX.createUniqueID());
+		model = repo.createModel(XX.createUniqueId());
+		object = model.createObject(XX.createUniqueId());
 		
 		// add some content
-		object.createField(XX.createUniqueID()).setValue(XV.toValue("Test"));
+		object.createField(XX.createUniqueId()).setValue(XV.toValue("Test"));
 		
-		object.createField(XX.createUniqueID()).setValue(XV.toValue("Test 2"));
+		object.createField(XX.createUniqueId()).setValue(XV.toValue("Test 2"));
 		
-		object.createField(XX.createUniqueID()).setValue(XV.toValue("Test 3"));
+		object.createField(XX.createUniqueId()).setValue(XV.toValue("Test 3"));
 		
-		object.createField(XX.createUniqueID()).setValue(XV.toValue("Test 4"));
+		object.createField(XX.createUniqueId()).setValue(XV.toValue("Test 4"));
 		
-		object.createField(XX.createUniqueID());
+		object.createField(XX.createUniqueId());
 		
 		// copy it!
 		XObject copyObject = new MemoryObject(this.actorId, this.password, object.getID());
@@ -811,8 +811,8 @@ public class TestAPI {
 		assertTrue(XCompareUtils.equalTree(object, copyObject));
 		
 		// - - Method: XValue safeGetValue(XObject object, XID fieldId) - -
-		object = model.createObject(XX.createUniqueID());
-		XID fieldId = XX.createUniqueID();
+		object = model.createObject(XX.createUniqueId());
+		XID fieldId = XX.createUniqueId();
 		field1 = object.createField(fieldId);
 		field1.setValue(XV.toValue("Test"));
 		XValue value = field1.getValue();
@@ -835,7 +835,7 @@ public class TestAPI {
 		// try to get the value of a not existing field
 		try {
 			// safeGetValue should throw a MissingPieceException
-			CoreUtils.safeGetValue(object, XX.createUniqueID());
+			CoreUtils.safeGetValue(object, XX.createUniqueId());
 			assertTrue(false);
 		} catch(MissingPieceException mpe) {
 			assertTrue(true);
@@ -843,10 +843,10 @@ public class TestAPI {
 		
 		// - - Method: XValue safeGetValue(XModel model, XID objectId, XID
 		// fieldId - -
-		model = repo.createModel(XX.createUniqueID());
-		XID objectId = XX.createUniqueID();
+		model = repo.createModel(XX.createUniqueId());
+		XID objectId = XX.createUniqueId();
 		object = model.createObject(objectId);
-		fieldId = XX.createUniqueID();
+		fieldId = XX.createUniqueId();
 		field1 = object.createField(fieldId);
 		field1.setValue(XV.toValue("Test"));
 		value = field1.getValue();
@@ -871,7 +871,7 @@ public class TestAPI {
 		// try to get the value of a not existing field
 		try {
 			// safeGetValue should throw a MissingPieceException here
-			CoreUtils.safeGetValue(model, objectId, XX.createUniqueID());
+			CoreUtils.safeGetValue(model, objectId, XX.createUniqueId());
 			assertTrue(false);
 		} catch(MissingPieceException mpe) {
 			assertTrue(true);
@@ -880,16 +880,16 @@ public class TestAPI {
 		// try to get the value of a field in an not existing object
 		try {
 			// safeGetValue should throw a MissingPieceException here
-			CoreUtils.safeGetValue(model, XX.createUniqueID(), XX.createUniqueID());
+			CoreUtils.safeGetValue(model, XX.createUniqueId(), XX.createUniqueId());
 			assertTrue(false);
 		} catch(MissingPieceException mpe) {
 			assertTrue(true);
 		}
 		
 		// - - Method: XField safeGetField(XObject object, XID fieldId) - -
-		model = repo.createModel(XX.createUniqueID());
-		object = model.createObject(XX.createUniqueID());
-		fieldId = XX.createUniqueID();
+		model = repo.createModel(XX.createUniqueId());
+		object = model.createObject(XX.createUniqueId());
+		fieldId = XX.createUniqueId();
 		field1 = object.createField(fieldId);
 		
 		// get an existing field of an existing object
@@ -910,7 +910,7 @@ public class TestAPI {
 		
 		// try to get a not existing field
 		try {
-			CoreUtils.safeGetField(object, XX.createUniqueID()); // safeGetField
+			CoreUtils.safeGetField(object, XX.createUniqueId()); // safeGetField
 			// should
 			// throw
 			// a
@@ -923,7 +923,7 @@ public class TestAPI {
 		
 		// - - Method: XModel safeGetModel(XRepository repository, XID modelId)
 		// - -
-		XID modelId = XX.createUniqueID();
+		XID modelId = XX.createUniqueId();
 		model = repo.createModel(modelId);
 		
 		// get an existing model of an existing object
@@ -944,7 +944,7 @@ public class TestAPI {
 		
 		// try to get a not existing model
 		try {
-			CoreUtils.safeGetModel(repo, XX.createUniqueID()); // safeGetModel
+			CoreUtils.safeGetModel(repo, XX.createUniqueId()); // safeGetModel
 			// should
 			// throw a
 			// MissingPieceException
@@ -955,8 +955,8 @@ public class TestAPI {
 		}
 		
 		// - - Method: XObject safeGetObject(XModel model, XID objectId) - -
-		model = repo.createModel(XX.createUniqueID());
-		objectId = XX.createUniqueID();
+		model = repo.createModel(XX.createUniqueId());
+		objectId = XX.createUniqueId();
 		object = model.createObject(objectId);
 		
 		// get existing object
@@ -976,7 +976,7 @@ public class TestAPI {
 		
 		// try to get a not existing object
 		try {
-			CoreUtils.safeGetObject(model, XX.createUniqueID()); // safeGetObject
+			CoreUtils.safeGetObject(model, XX.createUniqueId()); // safeGetObject
 			// should
 			// throw
 			// a
@@ -990,9 +990,9 @@ public class TestAPI {
 		// - - Method: XObject safeGetObject(XRepository repository, XID
 		// modelId, XID objectId) - -
 		repo = X.createMemoryRepository(this.actorId);
-		modelId = XX.createUniqueID();
+		modelId = XX.createUniqueId();
 		model = repo.createModel(modelId);
-		objectId = XX.createUniqueID();
+		objectId = XX.createUniqueId();
 		object = model.createObject(objectId);
 		
 		// get existing object
@@ -1014,7 +1014,7 @@ public class TestAPI {
 		
 		// try to get a not existing object
 		try {
-			CoreUtils.safeGetObject(repo, modelId, XX.createUniqueID()); // safeGetObject
+			CoreUtils.safeGetObject(repo, modelId, XX.createUniqueId()); // safeGetObject
 			// should
 			// throw
 			// a
@@ -1027,7 +1027,7 @@ public class TestAPI {
 		
 		// try to get a not existing object of a not existing model
 		try {
-			CoreUtils.safeGetObject(repo, XX.createUniqueID(), XX.createUniqueID()); // safeGetObject
+			CoreUtils.safeGetObject(repo, XX.createUniqueId(), XX.createUniqueId()); // safeGetObject
 			// should
 			// throw a
 			// MissingPieceException
@@ -1039,8 +1039,8 @@ public class TestAPI {
 		
 		// - - Method: void safeSetStringValue(XID actorID, XObject object, XID
 		// fieldId, String stringValue) - -
-		object = new MemoryObject(this.actorId, this.password, XX.createUniqueID());
-		fieldId = XX.createUniqueID();
+		object = new MemoryObject(this.actorId, this.password, XX.createUniqueId());
+		fieldId = XX.createUniqueId();
 		field1 = object.createField(fieldId);
 		
 		// set the value of an existing field
@@ -1049,7 +1049,7 @@ public class TestAPI {
 		assertEquals("Test", ((XStringValue)field1.getValue()).contents());
 		
 		// set the value of a not existing field
-		newID = XX.createUniqueID();
+		newID = XX.createUniqueId();
 		assertFalse(object.hasField(newID));
 		TestAPI.safeSetStringValue(object, newID, "Test");
 		assertTrue(object.hasField(newID));
@@ -1060,9 +1060,9 @@ public class TestAPI {
 		// id) - -
 		// - - Method: XIDListValue removeIDFromList(XID actorID, XField field,
 		// XID id) - -
-		field1 = new MemoryField(this.actorId, XX.createUniqueID());
-		field1.setValue(new MemoryIDListValue(new XID[] { XX.createUniqueID() }));
-		newID = XX.createUniqueID();
+		field1 = new MemoryField(this.actorId, XX.createUniqueId());
+		field1.setValue(new MemoryIDListValue(new XID[] { XX.createUniqueId() }));
+		newID = XX.createUniqueId();
 		
 		XIDListValue listValue = (XIDListValue)field1.getValue();
 		assertFalse(listValue.contains(newID));

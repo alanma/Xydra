@@ -19,7 +19,7 @@ public abstract class AbstractSecureStoreQuotaExceptionTest extends
 		 * By definition of createUniqueID this ID is unknown an is therefore
 		 * not registered in the accountDb
 		 */
-		return XX.createUniqueID();
+		return XX.createUniqueId();
 	}
 	
 	@Override

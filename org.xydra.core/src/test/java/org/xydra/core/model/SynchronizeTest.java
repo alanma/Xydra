@@ -139,17 +139,17 @@ public class SynchronizeTest {
 	
 	private void makeAdditionalChanges(XModel model) {
 		
-		assertNotNull(model.createObject(XX.createUniqueID()));
+		assertNotNull(model.createObject(XX.createUniqueId()));
 		
 		assertTrue(model.removeObject(DemoModelUtil.JOHN_ID));
 		
-		assertNotNull(model.getObject(DemoModelUtil.PETER_ID).createField(XX.createUniqueID()));
+		assertNotNull(model.getObject(DemoModelUtil.PETER_ID).createField(XX.createUniqueId()));
 		
 		XTransactionBuilder tb = new XTransactionBuilder(model.getAddress());
-		XID objId = XX.createUniqueID();
+		XID objId = XX.createUniqueId();
 		tb.addObject(model.getAddress(), XCommand.SAFE, objId);
 		XAddress objAddr = XX.resolveObject(model.getAddress(), objId);
-		tb.addField(objAddr, XCommand.SAFE, XX.createUniqueID());
+		tb.addField(objAddr, XCommand.SAFE, XX.createUniqueId());
 		assertTrue(model.executeCommand(tb.build()) >= 0);
 		
 		assertTrue(model.removeObject(DemoModelUtil.CLAUDIA_ID));

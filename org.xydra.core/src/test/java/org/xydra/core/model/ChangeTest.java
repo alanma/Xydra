@@ -207,9 +207,9 @@ public class ChangeTest {
 	public void testFieldChangeListening() {
 		// Prepare other objects for event propagating test later
 		XRepository repo = X.createMemoryRepository(this.actorId);
-		XModel model = repo.createModel(XX.createUniqueID());
-		XObject object = model.createObject(XX.createUniqueID());
-		XField field = object.createField(XX.createUniqueID());
+		XModel model = repo.createModel(XX.createUniqueId());
+		XObject object = model.createObject(XX.createUniqueId());
+		XField field = object.createField(XX.createUniqueId());
 		
 		DummyFieldChangeListener fieldListener = new DummyFieldChangeListener();
 		field.addListenerForFieldEvents(fieldListener);
@@ -301,12 +301,12 @@ public class ChangeTest {
 	@Test
 	public void testModelChangeListenening() {
 		
-		XModel model = new MemoryModel(this.actorId, this.password, XX.createUniqueID());
+		XModel model = new MemoryModel(this.actorId, this.password, XX.createUniqueId());
 		DummyModelChangeListener modelListener = new DummyModelChangeListener();
 		model.addListenerForModelEvents(modelListener);
 		
 		// Test add-event
-		XObject addObject = model.createObject(XX.createUniqueID());
+		XObject addObject = model.createObject(XX.createUniqueId());
 		assertTrue(modelListener.hasFired()); // check if the listener has fired
 		assertTrue(modelListener.getType() == ChangeType.ADD); // check if the
 		// event
@@ -319,7 +319,7 @@ public class ChangeTest {
 		assertNull(modelListener.getRepository());
 		modelListener.reset();
 		
-		model.createObject(XX.createUniqueID());
+		model.createObject(XX.createUniqueId());
 		assertTrue(modelListener.hasFired());
 		assertTrue(modelListener.getType() == ChangeType.ADD);
 		modelListener.reset();
@@ -339,8 +339,8 @@ public class ChangeTest {
 		
 		// Test if event-propagating works
 		XRepository repo = X.createMemoryRepository(this.actorId);
-		XModel model = repo.createModel(XX.createUniqueID());
-		model.createObject(XX.createUniqueID());
+		XModel model = repo.createModel(XX.createUniqueId());
+		model.createObject(XX.createUniqueId());
 		
 		DummyModelChangeListener modelListener = new DummyModelChangeListener();
 		DummyModelChangeListener repoListener = new DummyModelChangeListener();
@@ -349,7 +349,7 @@ public class ChangeTest {
 		model.addListenerForModelEvents(modelListener);
 		
 		// Test add-event
-		XObject addObject = model.createObject(XX.createUniqueID());
+		XObject addObject = model.createObject(XX.createUniqueId());
 		assertTrue(repoListener.hasFired());
 		assertTrue(repoListener.getType() == ChangeType.ADD);
 		assertTrue(modelListener.hasFired());
@@ -370,13 +370,13 @@ public class ChangeTest {
 	@Test
 	public void testObjectChangeListening() {
 		
-		MemoryObject object1 = new MemoryObject(this.actorId, this.password, XX.createUniqueID());
+		MemoryObject object1 = new MemoryObject(this.actorId, this.password, XX.createUniqueId());
 		DummyObjectChangeListener listener1 = new DummyObjectChangeListener();
 		object1.addListenerForObjectEvents(listener1);
 		
 		// Test add-event
 		// create field and fire event
-		MemoryField field1 = object1.createField(XX.createUniqueID());
+		MemoryField field1 = object1.createField(XX.createUniqueId());
 		
 		assertTrue("check if the listener has fired", listener1.hasFired());
 		assertEquals("check if the event has the right type", ChangeType.ADD, listener1.getType());
@@ -387,7 +387,7 @@ public class ChangeTest {
 		assertEquals(listener1.getRepositoryId(), null);
 		listener1.reset();
 		
-		object1.createField(XX.createUniqueID());
+		object1.createField(XX.createUniqueId());
 		assertTrue(listener1.hasFired());
 		assertEquals(ChangeType.ADD, listener1.getType());
 		listener1.reset();
@@ -404,9 +404,9 @@ public class ChangeTest {
 		
 		// Test if event-propagating works
 		XRepository repo = X.createMemoryRepository(this.actorId);
-		XModel model = repo.createModel(XX.createUniqueID());
-		XObject object2 = model.createObject(XX.createUniqueID());
-		object2.createField(XX.createUniqueID());
+		XModel model = repo.createModel(XX.createUniqueId());
+		XObject object2 = model.createObject(XX.createUniqueId());
+		object2.createField(XX.createUniqueId());
 		
 		DummyObjectChangeListener repoListener = new DummyObjectChangeListener();
 		repo.addListenerForObjectEvents(repoListener);
@@ -417,7 +417,7 @@ public class ChangeTest {
 		DummyObjectChangeListener objectListener = new DummyObjectChangeListener();
 		object2.addListenerForObjectEvents(objectListener);
 		
-		XField field3 = object2.createField(XX.createUniqueID());
+		XField field3 = object2.createField(XX.createUniqueId());
 		assertTrue(repoListener.hasFired()); // event was propagated to the
 		// father repository
 		assertTrue(repoListener.getType() == ChangeType.ADD);
@@ -449,7 +449,7 @@ public class ChangeTest {
 		repo.addListenerForRepositoryEvents(repoListener);
 		
 		// Test add-event
-		XModel addModel = repo.createModel(XX.createUniqueID());
+		XModel addModel = repo.createModel(XX.createUniqueId());
 		// check if the listener has fired
 		assertTrue(repoListener.hasFired());
 		// check if the event has the right type
@@ -458,7 +458,7 @@ public class ChangeTest {
 		assertTrue(repo.getID().equals(repoListener.getRepository()));
 		repoListener.reset();
 		
-		repo.createModel(XX.createUniqueID());
+		repo.createModel(XX.createUniqueId());
 		assertTrue(repoListener.hasFired());
 		assertTrue(repoListener.getType() == ChangeType.ADD);
 		repoListener.reset();
@@ -470,10 +470,10 @@ public class ChangeTest {
 		repoListener.reset();
 		
 		// Test if event-propagating works
-		repo.createModel(XX.createUniqueID());
+		repo.createModel(XX.createUniqueId());
 		
 		// Test add-event
-		addModel = repo.createModel(XX.createUniqueID());
+		addModel = repo.createModel(XX.createUniqueId());
 		assertTrue(repoListener.hasFired());
 		assertTrue(repoListener.getType() == ChangeType.ADD);
 		

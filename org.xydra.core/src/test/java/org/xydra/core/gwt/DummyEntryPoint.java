@@ -18,7 +18,7 @@ public class DummyEntryPoint implements EntryPoint {
 	
 	public void onModuleLoad() {
 		XID actorId = XX.toId("gwt-moduleload");
-		X.createMemoryRepository(actorId).createModel(XX.createUniqueID())
+		X.createMemoryRepository(actorId).createModel(XX.createUniqueId())
 		        .createObject(XX.toId("hello world"));
 	}
 	

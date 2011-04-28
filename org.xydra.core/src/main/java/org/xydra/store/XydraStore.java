@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XX;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
@@ -380,7 +381,9 @@ public interface XydraStore {
 	 * Read current state.
 	 * 
 	 * Retrieve read-only snapshots of {@link XModel} states at the point in
-	 * time when this request is processed.
+	 * time when this request is processed. Use
+	 * {@link XX#wrap(XID, String, XReadableModel)} to get a writable
+	 * {@link XModel} instance.
 	 * 
 	 * Possible exceptions to be received via callback.onError (see class
 	 * comment in {@link XydraStore} and comments in each exception):

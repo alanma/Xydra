@@ -99,7 +99,7 @@ abstract public class AbstractSecureStoreReadMethodsTest extends AbstractStoreRe
 		 * By definition of createUniqueID this ID is unknown an is therefore
 		 * not registered in the accountDb
 		 */
-		return XX.createUniqueID();
+		return XX.createUniqueId();
 	}
 	
 	@Override

@@ -116,7 +116,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		
 		XCommand[] commands = new XCommand[] { X.getCommandFactory().createAddModelCommand(
-		        this.repoId, XX.createUniqueID(), true) };
+		        this.repoId, XX.createUniqueId(), true) };
 		
 		this.store.executeCommands(this.incorrectUser, this.incorrectUserPass, commands, callback);
 		
@@ -132,7 +132,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	@Test
 	public void testExecuteCommandsCorrectRepoCommands() {
 		// create a model
-		XID modelId = XX.createUniqueID();
+		XID modelId = XX.createUniqueId();
 		
 		long modelRev = executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(
 		        this.repoId, modelId, true));
@@ -173,7 +173,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	@Test
 	public void testExecuteCommandsIncorrectRepoCommands() {
 		// try to remove non-existing model
-		XID modelId = XX.createUniqueID();
+		XID modelId = XX.createUniqueId();
 		
 		executeFailingCommand(X.getCommandFactory().createRemoveModelCommand(this.repoId, modelId,
 		        42, false));
@@ -202,7 +202,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		XCommand[] commands = new XCommand[modelCount];
 		
 		for(int i = 0; i < modelIds.length; i++) {
-			modelIds[i] = XX.createUniqueID();
+			modelIds[i] = XX.createUniqueId();
 			commands[i] = X.getCommandFactory().createAddModelCommand(this.repoId, modelIds[i],
 			        true);
 		}
@@ -263,13 +263,13 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	public void testExecuteCommandsIncorrectModelCommands() {
 		
 		// create a model
-		XID modelId = XX.createUniqueID();
+		XID modelId = XX.createUniqueId();
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
 		        true));
 		
 		// try to remove non-existing object
-		XID objectId = XX.createUniqueID();
+		XID objectId = XX.createUniqueId();
 		
 		executeFailingCommand(X.getCommandFactory().createRemoveObjectCommand(this.repoId, modelId,
 		        objectId, 42, false));
@@ -293,13 +293,13 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	public void testExecuteCommandsCorrectModelCommands() {
 		
 		// create a model first
-		XID modelId = XX.createUniqueID();
+		XID modelId = XX.createUniqueId();
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
 		        true));
 		
 		// create an object
-		XID objectId = XX.createUniqueID();
+		XID objectId = XX.createUniqueId();
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddObjectCommand(this.repoId, modelId,
 		        objectId, true));
@@ -338,7 +338,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	@Test
 	public void testExecuteCommandsMixedCorrectModelCommands() {
 		// create a model first
-		XID modelId = XX.createUniqueID();
+		XID modelId = XX.createUniqueId();
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
 		        true));
@@ -349,7 +349,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		XID[] objectIds = new XID[objectCount];
 		XCommand[] commands = new XCommand[objectCount];
 		for(int i = 0; i < objectIds.length; i++) {
-			objectIds[i] = XX.createUniqueID();
+			objectIds[i] = XX.createUniqueId();
 			commands[i] = X.getCommandFactory().createAddObjectCommand(this.repoId, modelId,
 			        objectIds[i], true);
 		}
@@ -408,19 +408,19 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	@Test
 	public void testExecuteCommandsCorrectObjectCommands() {
 		// create a model first
-		XID modelId = XX.createUniqueID();
+		XID modelId = XX.createUniqueId();
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
 		        true));
 		
 		// create an object
-		XID objectId = XX.createUniqueID();
+		XID objectId = XX.createUniqueId();
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddObjectCommand(this.repoId, modelId,
 		        objectId, true));
 		
 		// create an object
-		XID fieldId = XX.createUniqueID();
+		XID fieldId = XX.createUniqueId();
 		
 		long revNr = executeSucceedingCommand(X.getCommandFactory().createAddFieldCommand(
 		        this.repoId, modelId, objectId, fieldId, true));
@@ -463,19 +463,19 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	@Test
 	public void testExecuteCommandsIncorrectObjectCommands() {
 		// create a model
-		XID modelId = XX.createUniqueID();
+		XID modelId = XX.createUniqueId();
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
 		        true));
 		
 		// add an object
-		XID objectId = XX.createUniqueID();
+		XID objectId = XX.createUniqueId();
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddObjectCommand(this.repoId, modelId,
 		        objectId, true));
 		
 		// try to remove non-existing field
-		XID fieldId = XX.createUniqueID();
+		XID fieldId = XX.createUniqueId();
 		
 		executeFailingCommand(X.getCommandFactory().createRemoveFieldCommand(this.repoId, modelId,
 		        objectId, fieldId, 42, false));
@@ -499,12 +499,12 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	@Test
 	public void testExecuteCommandsMixedCorrectObjectCommands() {
 		// create a model and object first
-		XID modelId = XX.createUniqueID();
+		XID modelId = XX.createUniqueId();
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
 		        true));
 		
-		XID objectId = XX.createUniqueID();
+		XID objectId = XX.createUniqueId();
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddObjectCommand(this.repoId, modelId,
 		        objectId, true));
@@ -514,7 +514,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		XID[] fieldIds = new XID[fieldCount];
 		XCommand[] commands = new XCommand[fieldCount];
 		for(int i = 0; i < fieldIds.length; i++) {
-			fieldIds[i] = XX.createUniqueID();
+			fieldIds[i] = XX.createUniqueId();
 			commands[i] = X.getCommandFactory().createAddFieldCommand(this.repoId, modelId,
 			        objectId, fieldIds[i], true);
 		}
@@ -570,25 +570,25 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	@Test
 	public void testExecuteCommandsCorrectFieldCommands() {
 		// create a model first
-		XID modelId = XX.createUniqueID();
+		XID modelId = XX.createUniqueId();
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
 		        true));
 		
 		// create an object
-		XID objectId = XX.createUniqueID();
+		XID objectId = XX.createUniqueId();
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddObjectCommand(this.repoId, modelId,
 		        objectId, true));
 		
 		// create a field
-		XID fieldId = XX.createUniqueID();
+		XID fieldId = XX.createUniqueId();
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddFieldCommand(this.repoId, modelId,
 		        objectId, fieldId, true));
 		
 		// add a value
-		XValue testValue = XX.createUniqueID();
+		XValue testValue = XX.createUniqueId();
 		long revNr = XCommand.NEW;
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddValueCommand(this.repoId, modelId,
@@ -616,7 +616,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertEquals(testValue, field.getValue());
 		
 		// change the value
-		XValue testValue2 = XX.createUniqueID();
+		XValue testValue2 = XX.createUniqueId();
 		
 		executeSucceedingCommand(X.getCommandFactory().createChangeValueCommand(this.repoId,
 		        modelId, objectId, fieldId, revNr, testValue2, true));
@@ -667,9 +667,9 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	@Test
 	public void testExecuteCommandsIncorrectFieldCommands() {
 		// create model, object and field
-		XID modelId = XX.createUniqueID();
-		XID objectId = XX.createUniqueID();
-		XID fieldId = XX.createUniqueID();
+		XID modelId = XX.createUniqueId();
+		XID objectId = XX.createUniqueId();
+		XID fieldId = XX.createUniqueId();
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
 		        true));
@@ -734,14 +734,14 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	@Test
 	public void testGetEventsBadRevisions() {
 		// create a model first
-		XID modelId = XX.createUniqueID();
+		XID modelId = XX.createUniqueId();
 		XAddress modelAddress = XX.toAddress(this.repoId, modelId, null, null);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
 		        true));
 		
 		// create an object and check if event is being thrown
-		XID objectId = XX.createUniqueID();
+		XID objectId = XX.createUniqueId();
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddObjectCommand(this.repoId, modelId,
 		        objectId, true));
@@ -770,7 +770,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	
 	@Test
 	public void testGetEventsBadAddress() {
-		XAddress randomAddress = XX.toAddress(this.repoId, XX.createUniqueID(), null, null);
+		XAddress randomAddress = XX.toAddress(this.repoId, XX.createUniqueId(), null, null);
 		
 		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(randomAddress,
 		        0, 1) };
@@ -794,14 +794,14 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	@Test
 	public void testGetEventsModelEventsAddType() {
 		// create a model first
-		XID modelId = XX.createUniqueID();
+		XID modelId = XX.createUniqueId();
 		XAddress modelAddress = XX.toAddress(this.repoId, modelId, null, null);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
 		        true));
 		
 		// create an object and check if event is being thrown
-		XID objectId = XX.createUniqueID();
+		XID objectId = XX.createUniqueId();
 		XAddress objectAddress = XX.toAddress(this.repoId, modelId, objectId, null);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddObjectCommand(this.repoId, modelId,
@@ -829,14 +829,14 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	@Test
 	public void testGetEventsModelEventsRemoveType() {
 		// create a model first
-		XID modelId = XX.createUniqueID();
+		XID modelId = XX.createUniqueId();
 		XAddress modelAddress = XX.toAddress(this.repoId, modelId, null, null);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
 		        true));
 		
 		// create an object and check if event is being thrown
-		XID objectId = XX.createUniqueID();
+		XID objectId = XX.createUniqueId();
 		XAddress objectAddress = XX.toAddress(this.repoId, modelId, objectId, null);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddObjectCommand(this.repoId, modelId,
@@ -868,20 +868,20 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	@Test
 	public void testGetEventsObjectEventsAddType() {
 		// create a model and object first
-		XID modelId = XX.createUniqueID();
+		XID modelId = XX.createUniqueId();
 		XAddress modelAddress = XX.toAddress(this.repoId, modelId, null, null);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
 		        true));
 		
-		XID objectId = XX.createUniqueID();
+		XID objectId = XX.createUniqueId();
 		XAddress objectAddress = XX.toAddress(this.repoId, modelId, objectId, null);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddObjectCommand(this.repoId, modelId,
 		        objectId, true));
 		
 		// create a field and check if event is being thrown
-		XID fieldId = XX.createUniqueID();
+		XID fieldId = XX.createUniqueId();
 		XAddress fieldAddress = XX.toAddress(this.repoId, modelId, objectId, fieldId);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddFieldCommand(this.repoId, modelId,
@@ -925,20 +925,20 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	@Test
 	public void testGetEventsObjectEventsRemoveType() {
 		// create a model and object first
-		XID modelId = XX.createUniqueID();
+		XID modelId = XX.createUniqueId();
 		XAddress modelAddress = XX.toAddress(this.repoId, modelId, null, null);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
 		        true));
 		
-		XID objectId = XX.createUniqueID();
+		XID objectId = XX.createUniqueId();
 		XAddress objectAddress = XX.toAddress(this.repoId, modelId, objectId, null);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddObjectCommand(this.repoId, modelId,
 		        objectId, true));
 		
 		// create and remove a field and check if event is being thrown
-		XID fieldId = XX.createUniqueID();
+		XID fieldId = XX.createUniqueId();
 		XAddress fieldAddress = XX.toAddress(this.repoId, modelId, objectId, fieldId);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddFieldCommand(this.repoId, modelId,
@@ -985,19 +985,19 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	@Test
 	public void testGetEventsFieldEventsAddType() {
 		// create a model, object and field first
-		XID modelId = XX.createUniqueID();
+		XID modelId = XX.createUniqueId();
 		XAddress modelAddress = XX.toAddress(this.repoId, modelId, null, null);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
 		        true));
 		
-		XID objectId = XX.createUniqueID();
+		XID objectId = XX.createUniqueId();
 		XAddress objectAddress = XX.toAddress(this.repoId, modelId, objectId, null);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddObjectCommand(this.repoId, modelId,
 		        objectId, true));
 		
-		XID fieldId = XX.createUniqueID();
+		XID fieldId = XX.createUniqueId();
 		XAddress fieldAddress = XX.toAddress(this.repoId, modelId, objectId, fieldId);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddFieldCommand(this.repoId, modelId,
@@ -1006,7 +1006,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		// add a value to the field and check, if event is being thrown
 		long fieldRev = getRevisionNumber(fieldAddress);
 		
-		XValue value1 = XX.createUniqueID();
+		XValue value1 = XX.createUniqueId();
 		executeSucceedingCommand(X.getCommandFactory().createAddValueCommand(this.repoId, modelId,
 		        objectId, fieldId, fieldRev, value1, true));
 		
@@ -1064,19 +1064,19 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	@Test
 	public void testGetEventsFieldEventsChangeType() {
 		// create a model, object and field first
-		XID modelId = XX.createUniqueID();
+		XID modelId = XX.createUniqueId();
 		XAddress modelAddress = XX.toAddress(this.repoId, modelId, null, null);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
 		        true));
 		
-		XID objectId = XX.createUniqueID();
+		XID objectId = XX.createUniqueId();
 		XAddress objectAddress = XX.toAddress(this.repoId, modelId, objectId, null);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddObjectCommand(this.repoId, modelId,
 		        objectId, true));
 		
-		XID fieldId = XX.createUniqueID();
+		XID fieldId = XX.createUniqueId();
 		XAddress fieldAddress = XX.toAddress(this.repoId, modelId, objectId, fieldId);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddFieldCommand(this.repoId, modelId,
@@ -1086,11 +1086,11 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		// thrown
 		long fieldRev = getRevisionNumber(fieldAddress);
 		
-		XValue value1 = XX.createUniqueID();
+		XValue value1 = XX.createUniqueId();
 		executeSucceedingCommand(X.getCommandFactory().createAddValueCommand(this.repoId, modelId,
 		        objectId, fieldId, fieldRev, value1, true));
 		// change the value
-		XValue value2 = XX.createUniqueID();
+		XValue value2 = XX.createUniqueId();
 		executeSucceedingCommand(X.getCommandFactory().createChangeValueCommand(this.repoId,
 		        modelId, objectId, fieldId, fieldRev, value2, true));
 		
@@ -1148,19 +1148,19 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	@Test
 	public void testGetEventsFieldEventsRemoveType() {
 		// create a model, object and field first
-		XID modelId = XX.createUniqueID();
+		XID modelId = XX.createUniqueId();
 		XAddress modelAddress = XX.toAddress(this.repoId, modelId, null, null);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
 		        true));
 		
-		XID objectId = XX.createUniqueID();
+		XID objectId = XX.createUniqueId();
 		XAddress objectAddress = XX.toAddress(this.repoId, modelId, objectId, null);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddObjectCommand(this.repoId, modelId,
 		        objectId, true));
 		
-		XID fieldId = XX.createUniqueID();
+		XID fieldId = XX.createUniqueId();
 		XAddress fieldAddress = XX.toAddress(this.repoId, modelId, objectId, fieldId);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddFieldCommand(this.repoId, modelId,
@@ -1170,7 +1170,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		// thrown
 		long fieldRev = getRevisionNumber(fieldAddress);
 		
-		XValue value1 = XX.createUniqueID();
+		XValue value1 = XX.createUniqueId();
 		executeSucceedingCommand(X.getCommandFactory().createAddValueCommand(this.repoId, modelId,
 		        objectId, fieldId, fieldRev, value1, true));
 		
@@ -1236,13 +1236,13 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	@Test
 	public void testExecuteCommandsAndGetEventsModelEventsAddType() {
 		// create a model first
-		XID modelId = XX.createUniqueID();
+		XID modelId = XX.createUniqueId();
 		XAddress modelAddress = XX.toAddress(this.repoId, modelId, null, null);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
 		        true));
 		
-		XID objectId = XX.createUniqueID();
+		XID objectId = XX.createUniqueId();
 		XAddress objectAddress = XX.toAddress(this.repoId, modelId, objectId, null);
 		
 		// get the right revision numbers
@@ -1291,13 +1291,13 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	@Test
 	public void testExecuteCommandsAndGetEventsModelEventsRemoveType() {
 		// create a model first
-		XID modelId = XX.createUniqueID();
+		XID modelId = XX.createUniqueId();
 		XAddress modelAddress = XX.toAddress(this.repoId, modelId, null, null);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
 		        true));
 		
-		XID objectId = XX.createUniqueID();
+		XID objectId = XX.createUniqueId();
 		XAddress objectAddress = XX.toAddress(this.repoId, modelId, objectId, null);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddObjectCommand(this.repoId, modelId,
@@ -1349,18 +1349,18 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	@Test
 	public void testExecuteCommandsAndGetEventsObjectEventsAddType() {
 		// create a model & object first
-		XID modelId = XX.createUniqueID();
+		XID modelId = XX.createUniqueId();
 		XAddress modelAddress = XX.toAddress(this.repoId, modelId, null, null);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
 		        true));
 		
-		XID objectId = XX.createUniqueID();
+		XID objectId = XX.createUniqueId();
 		XAddress objectAddress = XX.toAddress(this.repoId, modelId, objectId, null);
 		executeSucceedingCommand(X.getCommandFactory().createAddObjectCommand(this.repoId, modelId,
 		        objectId, true));
 		
-		XID fieldId = XX.createUniqueID();
+		XID fieldId = XX.createUniqueId();
 		XAddress fieldAddress = XX.toAddress(this.repoId, modelId, objectId, fieldId);
 		
 		// get the right revision numbers
@@ -1416,18 +1416,18 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	@Test
 	public void testExecuteCommandsAndGetEventsObjectEventsRemoveType() {
 		// create a model & object first
-		XID modelId = XX.createUniqueID();
+		XID modelId = XX.createUniqueId();
 		XAddress modelAddress = XX.toAddress(this.repoId, modelId, null, null);
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
 		        true));
 		
-		XID objectId = XX.createUniqueID();
+		XID objectId = XX.createUniqueId();
 		XAddress objectAddress = XX.toAddress(this.repoId, modelId, objectId, null);
 		executeSucceedingCommand(X.getCommandFactory().createAddObjectCommand(this.repoId, modelId,
 		        objectId, true));
 		
-		XID fieldId = XX.createUniqueID();
+		XID fieldId = XX.createUniqueId();
 		XAddress fieldAddress = XX.toAddress(this.repoId, modelId, objectId, fieldId);
 		executeSucceedingCommand(X.getCommandFactory().createAddFieldCommand(this.repoId, modelId,
 		        objectId, fieldId, true));

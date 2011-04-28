@@ -34,7 +34,7 @@ public class MemoryStringIDProvider implements XIDProvider {
 	 * but GWT doesn't support that class
 	 */
 
-	public XID createUniqueID() {
+	public XID createUniqueId() {
 		/* leading 'a' ensures legal XML name */
 		return new MemoryStringID("a" + UUID.uuid());
 	}

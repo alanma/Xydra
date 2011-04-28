@@ -8,7 +8,7 @@ import org.xydra.store.impl.memory.MemoryPersistence;
 
 
 public class DelegatingAllowAllStoreReadMethodsTest extends AbstractAllowAllStoreReadMethodsTest {
-	private XID repositoryId = XX.createUniqueID();
+	private XID repositoryId = XX.createUniqueId();
 	
 	@Override
 	protected XCommandFactory getCommandFactory() {

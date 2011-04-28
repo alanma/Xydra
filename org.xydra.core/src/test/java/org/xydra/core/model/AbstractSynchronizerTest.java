@@ -164,10 +164,7 @@ abstract public class AbstractSynchronizerTest {
 		XReadableModel modelSnapshot = loadModelSnapshot(modelId);
 		assertNotNull(modelSnapshot);
 		
-		// TODO there should be a better way to get a proper XModel from an
-		// XBaseModel
-		XModel model = XCopyUtils.copyModel(actorId, passwordHash, modelSnapshot);
-		return model;
+		return XX.wrap(actorId, passwordHash, modelSnapshot);
 	}
 	
 	private XReadableModel loadModelSnapshot(XID modelId) {

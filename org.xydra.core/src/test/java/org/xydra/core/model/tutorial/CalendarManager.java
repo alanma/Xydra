@@ -116,7 +116,7 @@ public class CalendarManager {
 	private XGroupDatabaseWithListeners groups;
 	
 	public CalendarManager() {
-		this.accountModel = new MemoryModel(managerID, null, XX.createUniqueID());
+		this.accountModel = new MemoryModel(managerID, null, XX.createUniqueId());
 		
 		this.calendarRepo = X.createMemoryRepository(managerID);
 		this.calendarRepoID = this.calendarRepo.getID();
@@ -166,7 +166,7 @@ public class CalendarManager {
 		// we'll use commands to execute the changes
 		XCommandFactory cmdFactory = X.getCommandFactory();
 		
-		XID eventID = XX.createUniqueID();
+		XID eventID = XX.createUniqueId();
 		XCommand addEvent = cmdFactory.createAddObjectCommand(this.calendarRepoID, userID, eventID,
 		        false);
 		

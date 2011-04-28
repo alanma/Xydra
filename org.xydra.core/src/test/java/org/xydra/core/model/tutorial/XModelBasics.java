@@ -113,7 +113,7 @@ public class XModelBasics {
 		XID stringID = XX.toId("ExampleModel");
 		
 		// creating a random & unique ID
-		XX.createUniqueID();
+		XX.createUniqueId();
 		
 		// actually creating the model
 		XModel model = repository.createModel(stringID);
@@ -213,7 +213,7 @@ public class XModelBasics {
 		XID user3ID = XX.toId("ExampleUser3");
 		
 		XRepository repo = X.createMemoryRepository(actorID);
-		XModel model = repo.createModel(XX.createUniqueID());
+		XModel model = repo.createModel(XX.createUniqueId());
 		
 		// creating an XAccessManager and an XGroupDatabase
 		XGroupDatabaseWithListeners groups = new MemoryGroupDatabase();
@@ -311,7 +311,7 @@ public class XModelBasics {
 		 * Here's how we'd to the above using XCommands:
 		 */
 
-		XID modelId = XX.createUniqueID();
+		XID modelId = XX.createUniqueId();
 		XRepositoryCommand repositoryCommand = commandFactory.createAddModelCommand(repositoryId,
 		        modelId, false);
 		
@@ -325,8 +325,8 @@ public class XModelBasics {
 		// ITransactionAdapter t = model.getAdapter(ITransactionAdapter.class);
 		
 		// adding the objects
-		XID object1ID = XX.createUniqueID();
-		XID object2ID = XX.createUniqueID();
+		XID object1ID = XX.createUniqueId();
+		XID object2ID = XX.createUniqueId();
 		
 		XModelCommand modelCommand1 = commandFactory.createAddObjectCommand(repositoryId, modelId,
 		        object1ID, false);
@@ -373,7 +373,7 @@ public class XModelBasics {
 		assertEquals(model.getObject(object2ID), null);
 		
 		// lets add a field to object1
-		XID fieldId = XX.createUniqueID();
+		XID fieldId = XX.createUniqueId();
 		XObjectCommand objectCommand = commandFactory.createAddFieldCommand(repositoryId, modelId,
 		        object1ID, fieldId, false);
 		object1.executeCommand(objectCommand);
@@ -424,7 +424,7 @@ public class XModelBasics {
 		
 		XID actorID = XX.toId("ExampleActor");
 		XRepository repository = X.createMemoryRepository(actorID);
-		XModel model = repository.createModel(XX.createUniqueID());
+		XModel model = repository.createModel(XX.createUniqueId());
 		
 		/*
 		 * For example, if we want to be notified when objects are added to or
@@ -522,7 +522,7 @@ public class XModelBasics {
 		// creating the XModel
 		XCommandFactory commandFactory = X.getCommandFactory();
 		
-		XID modelId = XX.createUniqueID();
+		XID modelId = XX.createUniqueId();
 		XRepositoryCommand repositoryCommand = commandFactory.createAddModelCommand(repositoryId,
 		        modelId, false);
 		
@@ -533,8 +533,8 @@ public class XModelBasics {
 		assertNotNull(model);
 		
 		// building the commands
-		XID objectId = XX.createUniqueID();
-		XID fieldId = XX.createUniqueID();
+		XID objectId = XX.createUniqueId();
+		XID fieldId = XX.createUniqueId();
 		XValue doubleValue = XV.toValue(3.14159);
 		
 		XModelCommand addObjectCommandCommand = commandFactory.createAddObjectCommand(repositoryId,

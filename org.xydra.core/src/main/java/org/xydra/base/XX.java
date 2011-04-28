@@ -1,10 +1,14 @@
 package org.xydra.base;
 
+import org.xydra.base.rmof.XReadableModel;
+import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.core.URIFormatException;
+import org.xydra.core.XCopyUtils;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
+import org.xydra.core.model.impl.memory.MemoryModel;
 
 
 /**
@@ -20,14 +24,8 @@ public class XX {
 	 * @return a new random unique {@link XID} created by the default
 	 *         {@link XIDProvider}
 	 */
-	/*
-	 * TODO Should this be renamed to createUniqueId, since where no longer
-	 * using "ID" (D in upper case) anywhere anymore?
-	 */
-	public static XID createUniqueID()
-
-	{
-		return X.getIDProvider().createUniqueID();
+	public static XID createUniqueId() {
+		return X.getIDProvider().createUniqueId();
 	}
 	
 	/**
@@ -46,8 +44,8 @@ public class XX {
 		if(objectAddress.getAddressedType() != XType.XOBJECT) {
 			throw new IllegalArgumentException(objectAddress + " is not an object address");
 		}
-		return toAddress(objectAddress.getRepository(), objectAddress.getModel(),
-		        objectAddress.getObject(), fieldId);
+		return toAddress(objectAddress.getRepository(), objectAddress.getModel(), objectAddress
+		        .getObject(), fieldId);
 	}
 	
 	/**
@@ -133,8 +131,8 @@ public class XX {
 			throw new IllegalArgumentException("Given address '" + objectAddress
 			        + "' cannot be resolved to an object");
 		}
-		return X.getIDProvider().fromComponents(objectAddress.getRepository(), objectAddress.getModel(),
-		        objectAddress.getObject(), null);
+		return X.getIDProvider().fromComponents(objectAddress.getRepository(),
+		        objectAddress.getModel(), objectAddress.getObject(), null);
 	}
 	
 	/**
@@ -239,7 +237,8 @@ public class XX {
 	 * Creates an {@link XID} from a given {@link String} using the default
 	 * {@link XIDProvider}. The {@link String} must be a valid XML name and may
 	 * not contain any ':' characters. The string SHOULD be at most 100
-	 * characters long for maximum compatibility with all back-ends (e.g. Google AppEngine).
+	 * characters long for maximum compatibility with all back-ends (e.g. Google
+	 * AppEngine).
 	 * 
 	 * @param idString The String which will be used to create the {@link XID}.
 	 * @return a new unique {@link XID} object calculated from the given URI
@@ -248,6 +247,26 @@ public class XX {
 	 */
 	public static XID toId(String idString) {
 		return X.getIDProvider().fromString(idString);
+	}
+	
+	/**
+	 * Create a XModel with the same initial state as the given model snapshot.
+	 * The returned model may be backed by the provided XReadableModel instance,
+	 * so it should no longer be modified directly or the behavior of the model
+	 * is undefined.
+	 * 
+	 * Use {@link XCopyUtils#copyModel(XID, String, XReadableModel)} if the
+	 * resulting model should not be backed by the XReadableModel.
+	 * 
+	 * @param actor The session actor to use for the returned model.
+	 * @param password The password corresponding to the given actor.
+	 */
+	public static XModel wrap(XID actor, String password, XReadableModel modelSnapshot) {
+		if(modelSnapshot instanceof XRevWritableModel) {
+			return new MemoryModel(actor, password, (XRevWritableModel)modelSnapshot);
+		} else {
+			return XCopyUtils.copyModel(actor, password, modelSnapshot);
+		}
 	}
 	
 }

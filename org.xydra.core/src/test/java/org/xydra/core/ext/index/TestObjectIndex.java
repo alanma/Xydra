@@ -34,7 +34,7 @@ public class TestObjectIndex {
 		String c = "Sven Väth";
 		XID id1 = X.getIDProvider().fromString("test-id1");
 		XID id2 = X.getIDProvider().fromString("test-id2");
-		XID id3 = X.getIDProvider().createUniqueID();
+		XID id3 = X.getIDProvider().createUniqueId();
 		LinkedList<XValue> list = new LinkedList<XValue>();
 		list.addAll(allSingleValueTypes());
 		list.add(X.getValueFactory().createBooleanListValue(new boolean[] { true, false, true }));
@@ -88,7 +88,7 @@ public class TestObjectIndex {
 		this.actor = X.getIDProvider().fromString("testIndexXObject");
 		this.indexFactory = new IndexFactoryImpl();
 		this.repo = X.createMemoryRepository(this.actor);
-		this.model = this.repo.createModel(X.getIDProvider().createUniqueID());
+		this.model = this.repo.createModel(X.getIDProvider().createUniqueId());
 		this.indexObject = this.model.createObject(X.getIDProvider().fromString("index-email"));
 		
 		this.emailFieldId = X.getIDProvider().fromString("email");
