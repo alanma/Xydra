@@ -368,7 +368,7 @@ public class GaeEvents {
 					values.add(null);
 					valueIds[i] = TRANSINDEX_NONE;
 				} else {
-					XmlOutStringBuffer out = new XmlOutStringBuffer();
+					XmlOutStringBuffer out = new XmlOutStringBuffer(false);
 					XmlValue.toXml(xv, out);
 					String valueStr = out.getXml();
 					Text value = new Text(valueStr);
