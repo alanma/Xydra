@@ -1,16 +1,34 @@
 package org.xydra.core.model.sync;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.xydra.base.XID;
+import org.xydra.base.change.ChangeType;
+import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
+import org.xydra.base.change.XFieldCommand;
+import org.xydra.base.change.XModelCommand;
+import org.xydra.base.change.XObjectCommand;
+import org.xydra.base.change.XRepositoryCommand;
+import org.xydra.base.change.XTransaction;
+import org.xydra.base.change.impl.memory.MemoryFieldCommand;
+import org.xydra.base.change.impl.memory.MemoryModelCommand;
+import org.xydra.base.change.impl.memory.MemoryObjectCommand;
+import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
+import org.xydra.base.change.impl.memory.MemoryTransaction;
 import org.xydra.core.model.XLocalChange;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XSynchronizesChanges;
+import org.xydra.index.XI;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.GetEventsRequest;
+import org.xydra.store.RequestException;
 import org.xydra.store.XydraStore;
 
 
@@ -117,82 +135,89 @@ public class XSynchronizer {
 	        SyncCallback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> {
 		
 		protected long syncRev;
-		private XLocalChange change;
+		private List<XLocalChange> changes;
 		
-		protected CommandsCallback(XSynchronizationCallback sc, long syncRev, XLocalChange change) {
+		protected CommandsCallback(XSynchronizationCallback sc, long syncRev,
+		        List<XLocalChange> changes) {
 			super(sc);
-			this.change = change;
+			this.changes = changes;
 		}
 		
 		@Override
 		public void onSuccess(Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]> res) {
 			
-			assert res.getFirst().length == 1;
+			assert res.getFirst().length == this.changes.size();
 			assert res.getSecond().length == 1;
 			
-			BatchedResult<Long> commandRes = res.getFirst()[0];
+			BatchedResult<Long>[] commandRess = res.getFirst();
 			BatchedResult<XEvent[]> eventsRes = res.getSecond()[0];
 			
 			XEvent[] events = eventsRes.getResult();
 			boolean gotEvents = (events != null && events.length != 0);
 			
 			boolean success = true;
-			if(commandRes.getException() != null) {
-				assert commandRes.getResult() == null;
-				log.error("sync: error sending command", commandRes.getException());
-				success = false;
-				if(this.sc != null) {
-					this.sc.onCommandErrror(commandRes.getException());
-				}
+			for(int i = 0; i < commandRess.length; i++) {
 				
-			} else {
+				BatchedResult<Long> commandRes = commandRess[i];
 				
-				assert commandRes.getResult() != null;
-				long commandRev = commandRes.getResult();
-				
-				// command successfully synchronized
-				if(commandRev >= 0) {
-					
-					if(commandRev <= this.syncRev) {
-						log.error("sync: store returned a command revision " + commandRev
-						        + " that isn't greater than our already synced revison "
-						        + this.syncRev + " - store error?");
-						// lost sync -> bad!!!
-					}
-					
-					if(!gotEvents) {
-						log.warn("sync: command applied remotely with revision " + commandRev
-						        + ", but no new events - store error?");
-						// lost sync -> bad!!!
-					} else {
-						log.info("sync: command applied remotely with revision " + commandRev);
-					}
-					
-					this.change.setRemoteResult(commandRev);
-					
-				} else if(commandRev == XCommand.NOCHANGE) {
-					if(!gotEvents) {
-						log.warn("sync: command didn't change anything remotely, "
-						        + "but no new events, sync lost?");
-						// lost sync -> bad!!!
-					} else {
-						log.info("sync: command didn't change anything remotely, "
-						        + "got new events");
-						// command should be marked as redundant when
-						// merging remote events
+				if(commandRes.getException() != null) {
+					assert commandRes.getResult() == null;
+					log.error("sync: error sending command", commandRes.getException());
+					success = false;
+					if(this.sc != null) {
+						this.sc.onCommandErrror(commandRes.getException());
 					}
 					
 				} else {
-					assert commandRev == XCommand.FAILED;
-					if(!gotEvents) {
-						log.warn("sync: command failed but no new events, sync lost?");
-						// lost sync -> bad!!!
+					
+					assert commandRes.getResult() != null;
+					long commandRev = commandRes.getResult();
+					
+					// command successfully synchronized
+					if(commandRev >= 0) {
+						
+						if(commandRev <= this.syncRev) {
+							log.error("sync: store returned a command revision " + commandRev
+							        + " that isn't greater than our already synced revison "
+							        + this.syncRev + " - store error?");
+							// lost sync -> bad!!!
+						}
+						
+						if(!gotEvents) {
+							log.warn("sync: command applied remotely with revision " + commandRev
+							        + ", but no new events - store error?");
+							// lost sync -> bad!!!
+						} else {
+							log.info("sync: command applied remotely with revision " + commandRev);
+						}
+						
+						this.changes.get(i).setRemoteResult(commandRev);
+						
+					} else if(commandRev == XCommand.NOCHANGE) {
+						if(!gotEvents) {
+							log.warn("sync: command didn't change anything remotely, "
+							        + "but no new events, sync lost?");
+							// lost sync -> bad!!!
+						} else {
+							log.info("sync: command didn't change anything remotely, "
+							        + "got new events");
+							// command should be marked as redundant when
+							// merging remote events
+						}
+						
 					} else {
-						log.info("sync: command failed remotely, got new events");
-						// command should be marked as failed when
-						// merging
-						// remote events
+						assert commandRev == XCommand.FAILED;
+						if(!gotEvents) {
+							log.warn("sync: command failed but no new events, sync lost?");
+							// lost sync -> bad!!!
+						} else {
+							log.info("sync: command failed remotely, got new events");
+							// command should be marked as failed when
+							// merging
+							// remote events
+						}
 					}
+					
 				}
 				
 			}
@@ -213,7 +238,6 @@ public class XSynchronizer {
 			applyEvents(events);
 			requestEnded(success);
 		}
-		
 	}
 	
 	private class EventsCallback extends SyncCallback<BatchedResult<XEvent[]>[]> {
@@ -268,11 +292,93 @@ public class XSynchronizer {
 		
 	}
 	
+	private XCommand fixCommand(long syncRev, XCommand command, int idx) {
+		
+		if(command == null) {
+			throw new RequestException("command was null");
+		}
+		
+		if(command instanceof XAtomicCommand) {
+			return fixAtomicCommand(syncRev, idx, (XAtomicCommand)command);
+		}
+		
+		assert command instanceof XTransaction;
+		XTransaction trans = (XTransaction)command;
+		
+		boolean isRelative = false;
+		for(XAtomicCommand ac : trans) {
+			if(!ac.isForced() && ac.getRevisionNumber() > syncRev) {
+				assert ac.getRevisionNumber() < XCommand.RELATIVE_REV;
+				isRelative = true;
+				break;
+			}
+		}
+		
+		if(!isRelative) {
+			return trans;
+		}
+		
+		XAtomicCommand[] fixedCommands = new XAtomicCommand[trans.size()];
+		for(int i = 0; i < trans.size(); i++) {
+			fixedCommands[i] = fixAtomicCommand(syncRev, idx, trans.getCommand(i));
+			if(fixedCommands[i] == null) {
+				return null;
+			}
+		}
+		
+		return MemoryTransaction.createTransaction(trans.getTarget(), fixedCommands);
+	}
+	
+	private XAtomicCommand fixAtomicCommand(long syncRev, int i, XAtomicCommand ac) {
+		
+		if(ac.isForced() || ac.getRevisionNumber() <= syncRev) {
+			// not relative
+			return ac;
+		}
+		
+		assert ac.getRevisionNumber() < XCommand.RELATIVE_REV;
+		
+		assert ac instanceof XFieldCommand || ac.getChangeType() != ChangeType.ADD : " add entity commands don't have real / relative revisions";
+		
+		long rev = ac.getRevisionNumber() - syncRev + XCommand.RELATIVE_REV;
+		
+		assert rev < XCommand.RELATIVE_REV + i;
+		
+		if(ac instanceof XRepositoryCommand) {
+			assert ac.getChangeType() == ChangeType.REMOVE;
+			return MemoryRepositoryCommand.createRemoveCommand(ac.getTarget(), rev,
+			        ((XRepositoryCommand)ac).getModelId());
+		} else if(ac instanceof XModelCommand) {
+			assert ac.getChangeType() == ChangeType.REMOVE;
+			return MemoryModelCommand.createRemoveCommand(ac.getTarget(), rev, ((XModelCommand)ac)
+			        .getObjectId());
+		} else if(ac instanceof XObjectCommand) {
+			assert ac.getChangeType() == ChangeType.REMOVE;
+			return MemoryObjectCommand.createRemoveCommand(ac.getTarget(), rev,
+			        ((XObjectCommand)ac).getFieldId());
+		} else if(ac instanceof XFieldCommand) {
+			switch(ac.getChangeType()) {
+			case ADD:
+				return MemoryFieldCommand.createAddCommand(ac.getTarget(), rev, ((XFieldCommand)ac)
+				        .getValue());
+			case CHANGE:
+				return MemoryFieldCommand.createChangeCommand(ac.getTarget(), rev,
+				        ((XFieldCommand)ac).getValue());
+			case REMOVE:
+				return MemoryFieldCommand.createRemoveCommand(ac.getTarget(), rev);
+			default:
+				throw new AssertionError("unexpected command: " + ac);
+			}
+		} else {
+			throw new AssertionError("unexpected command: " + ac);
+		}
+	}
+	
 	private void doSynchronize(XSynchronizationCallback sc, boolean isFirst) {
 		
 		assert XSynchronizer.this.requestRunning;
 		
-		XLocalChange newChange;
+		final List<XLocalChange> newChanges = new ArrayList<XLocalChange>();
 		boolean first = isFirst;
 		do {
 			
@@ -282,16 +388,24 @@ public class XSynchronizer {
 			
 			// Find the first local command that has not been sent to the server
 			// yet.
-			newChange = null;
+			newChanges.clear();
+			XID actorId = null;
+			String psw = null;
 			for(int i = 0; i < changes.length; i++) {
 				if(!changes[i].isApplied()) {
-					newChange = changes[i];
-					break;
+					if(!newChanges.isEmpty()
+					        && (!XI.equals(actorId, changes[i].getActor()) || !XI.equals(psw,
+					                changes[i].getPasswordHash()))) {
+						break;
+					}
+					newChanges.add(changes[i]);
+					actorId = changes[i].getActor();
+					psw = changes[i].getPasswordHash();
 				}
 			}
 			
 			SyncCallback<?> callback = null;
-			if(newChange != null) {
+			if(!newChanges.isEmpty()) {
 				
 				// There are commands to send.
 				
@@ -303,13 +417,23 @@ public class XSynchronizer {
 				 * and those that refer to remote changes.
 				 */
 
-				log.info("sync: sending command " + newChange.getCommand() + ", rev is " + syncRev);
+				log.info("sync: sending commands " + newChanges + ", rev is " + syncRev);
 				
-				CommandsCallback cc = new CommandsCallback(sc, syncRev, newChange);
+				CommandsCallback cc = new CommandsCallback(sc, syncRev, newChanges);
 				callback = cc;
 				
-				this.store.executeCommandsAndGetEvents(newChange.getActor(), newChange
-				        .getPasswordHash(), new XCommand[] { newChange.getCommand() },
+				XCommand[] commands = new XCommand[newChanges.size()];
+				int i = 0;
+				for(XLocalChange lc : newChanges) {
+					if(i == 0) {
+						commands[i] = lc.getCommand();
+					} else {
+						commands[i] = fixCommand(syncRev, lc.getCommand(), i);
+					}
+					i++;
+				}
+				
+				this.store.executeCommandsAndGetEvents(actorId, psw, commands,
 				        new GetEventsRequest[] { new GetEventsRequest(this.entity.getAddress(),
 				                syncRev + 1, Long.MAX_VALUE) }, cc);
 				
@@ -337,7 +461,7 @@ public class XSynchronizer {
 			
 			first = false;
 			
-		} while(newChange != null);
+		} while(!newChanges.isEmpty());
 		
 		sc.onSuccess();
 		assert this.requestRunning;
