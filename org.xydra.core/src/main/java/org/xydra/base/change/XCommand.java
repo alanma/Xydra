@@ -84,6 +84,12 @@ public interface XCommand extends Serializable {
 	static final long SAFE = -2;
 	
 	/**
+	 * A threshold indicating that the revision number should be interpreted as
+	 * that of another command a batch of commands.
+	 */
+	static final long RELATIVE_REV = Long.MAX_VALUE / 2;
+	
+	/**
 	 * WHAT will be changed?
 	 * 
 	 * @return the {@link XAddress} of the {@link XModel}, {@link XObject} or

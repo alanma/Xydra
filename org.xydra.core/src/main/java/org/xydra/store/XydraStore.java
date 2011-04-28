@@ -154,6 +154,19 @@ public interface XydraStore {
 	 *            individual command might fail or succeed. If you want
 	 *            transaction semantics, you need to wrap commands in a
 	 *            {@link XTransaction}.
+	 * 
+	 *            To allow to send a batch of interdependent commands special
+	 *            revision numbers greater than {@link XCommand#RELATIVE_REV}
+	 *            can be used to indicate that the revision of another command
+	 *            in the batch should be filled in. If a revision r >
+	 *            {@link XCommand#RELATIVE_REV} is given or the revision of the
+	 *            (r-{@link XCommand#RELATIVE_REV})-th command in the batch is
+	 *            filled in. If a command has a relative revision that refers to
+	 *            itself or a command with a greater index in the batch is
+	 *            invalid and results in a RequestException. If a command uses a
+	 *            relative revisions that refers to a failed command, it will
+	 *            fail.
+	 * 
 	 * @param callback Asynchronous callback to signal success or failure. On
 	 *            success, the supplied array contains in the same order as the
 	 *            supplied commands the result of executing the command. A
