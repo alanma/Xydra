@@ -24,7 +24,7 @@ public class X5MinuteTutorial {
 		XRepository exampleRepo = X.createMemoryRepository(actorID);
 		
 		// creating a random and unique XID for our phonebook XModel
-		XID phonebookID = idProvider.createUniqueID();
+		XID phonebookID = idProvider.createUniqueId();
 		
 		XModel phonebook = exampleRepo.createModel(phonebookID);
 		
