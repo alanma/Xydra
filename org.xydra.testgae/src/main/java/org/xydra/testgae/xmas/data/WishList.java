@@ -31,7 +31,7 @@ public class WishList {
 	}
 	
 	public XID addWish(String title, int price, String url) {
-		XID id = X.getIDProvider().createUniqueID();
+		XID id = X.getIDProvider().createUniqueId();
 		XWritableObject xo = this.model.createObject(id);
 		new Wish(xo, title, price, url);
 		return id;
