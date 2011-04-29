@@ -70,12 +70,8 @@ public class ServletUtils {
 			res.setDateHeader("Expires", 0);
 		} else if(cachingInMinutes > 0) {
 			long millisSinceEpoch = System.currentTimeMillis() + (cachingInMinutes * 60 * 1000);
+			// TODO test header set correctly
 			res.setDateHeader("Expires", millisSinceEpoch);
-			
-			// DEBUG
-			while(true) {
-				
-			}
 		}
 	}
 	
@@ -103,31 +99,10 @@ public class ServletUtils {
 		Map<String,Double> contentType2q = new HashMap<String,Double>();
 		while(enu.hasMoreElements()) {
 			String headerValue = enu.nextElement();
-			if(!headerValue.contains(",")) {
-				log.warn("Accept header contains a comma: '" + headerValue + "'");
-				break;
+			String[] headerValues = headerValue.split(",");
+			for(String s : headerValues) {
+				parseAcceptHeaderPart(s, contentType2q);
 			}
-			String[] parts = headerValue.split(";");
-			String contentDef = parts[0];
-			Double q;
-			if(parts.length > 1) {
-				String qs = parts[1].trim();
-				if(!qs.startsWith("q=")) {
-					log.warn("q-value '" + qs + "' wrong in Accept header '" + headerValue + "'");
-					break;
-				}
-				qs = qs.substring(2);
-				try {
-					q = Double.parseDouble(qs);
-				} catch(NumberFormatException e) {
-					log.warn("q-value '" + qs + "' not parsable as double in Accept header '"
-					        + headerValue + "'");
-					break;
-				}
-			} else {
-				q = null;
-			}
-			contentType2q.put(contentDef, q);
 		}
 		// process
 		if(contentType2q.containsKey(CONTENTTYPE_APPLICATION_XHTML_XML)) {
@@ -151,6 +126,28 @@ public class ServletUtils {
 		// evil fall-back:
 		log.warn("Could not extract meaningful wish from accept header, using oldschool html");
 		return CONTENTTYPE_TEXT_HTML;
+	}
+	
+	private static void parseAcceptHeaderPart(String headerValue, Map<String,Double> contentType2q) {
+		String[] parts = headerValue.split(";");
+		String contentDef = parts[0];
+		if(parts.length > 1) {
+			String qs = parts[1].trim();
+			if(!qs.startsWith("q=")) {
+				log.warn("q-value '" + qs + "' wrong in Accept header '" + headerValue + "'");
+			} else {
+				qs = qs.substring(2);
+				try {
+					double q = Double.parseDouble(qs);
+					contentType2q.put(contentDef, q);
+				} catch(NumberFormatException e) {
+					log.warn("q-value '" + qs + "' not parsable as double in Accept header '"
+					        + headerValue + "'");
+				}
+			}
+		} else {
+			contentType2q.put(contentDef, null);
+		}
 	}
 	
 	/**
