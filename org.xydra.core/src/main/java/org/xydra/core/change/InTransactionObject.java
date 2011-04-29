@@ -20,10 +20,14 @@ import org.xydra.core.model.XObject;
 /**
  * TODO Document
  * 
- * @author Björn
+ * @author Bjoern
+ * 
+ *         Using the German o-Umlaut leads to '[INFO] Compilation failure
+ *         \2010\org
+ *         .xydra.core\src\main\java\org\xydra\core\change\InTransactionObject
+ *         .java:[23,13] unmappable character for encoding UTF-8'
  * 
  */
-
 public class InTransactionObject implements XObject {
 	private XObject object;
 	private TransactionModel model;
