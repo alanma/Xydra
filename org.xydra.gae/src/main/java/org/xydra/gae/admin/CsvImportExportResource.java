@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.xydra.base.rmof.impl.delegate.WritableRepositoryOnPersistence;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
+import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.ServletUtils;
 import org.xydra.server.inout.CsvExport;
 
@@ -37,12 +38,10 @@ public class CsvImportExportResource {
 	}
 	
 	public static void index(HttpServletRequest req, HttpServletResponse res) throws IOException {
-		ServletUtils.headers(res, "text/html");
-		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
-		w.write("<html><head><title>Xydra admin / CSV</title></head><body>");
+		Writer w = HtmlUtils.startHtmlPage(res, "Xydra admin / CSV");
 		w.write("Export: <a href='" + req.getRequestURL() + "/export'>CSV</a>");
 		// FIXME impl.
-		w.write("</body></html>");
+		HtmlUtils.endHtmlPage(w);
 	}
 	
 	public static void csvImport(String csv, String repository, HttpServletRequest req,
@@ -66,8 +65,10 @@ public class CsvImportExportResource {
 		WritableRepositoryOnPersistence repo = XydraAdminApp.getRepository(restless, repository);
 		res.setHeader("Content-disposition", "attachment;filename=" + repo.getID() + ".csv");
 		
-		CsvExport.toWriter(repo, new OutputStreamWriter(res.getOutputStream(), "utf-8"));
-		new OutputStreamWriter(res.getOutputStream(), "utf-8").flush();
+		Writer w = res.getWriter();
+		CsvExport.toWriter(repo, w);
+		w.flush();
+		w.close();
 	}
 	
 }

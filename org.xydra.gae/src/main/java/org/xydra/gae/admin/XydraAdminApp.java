@@ -16,7 +16,6 @@ import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.restless.Restless;
 import org.xydra.restless.utils.HtmlUtils;
-import org.xydra.restless.utils.ServletUtils;
 import org.xydra.server.rest.ShareXydraPersistenceApp;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaePersistence;
@@ -48,10 +47,7 @@ public class XydraAdminApp {
 	}
 	
 	public static void index(HttpServletRequest req, HttpServletResponse res) throws IOException {
-		ServletUtils.headers(res, "text/html");
-		HtmlUtils.writeHtmlHeaderOpenBody(new OutputStreamWriter(res.getOutputStream(), "utf-8"),
-		        "Xydra Admin");
-		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		Writer w = HtmlUtils.startHtmlPage(res, "Xydra Admin");
 		w.write("<a href='" + req.getRequestURL() + "/addDemoData'>Add demo data</a>");
 		w.write("Format: <a href='" + req.getRequestURL() + "/csv'>CSV</a>");
 		// TODO XML, JSON

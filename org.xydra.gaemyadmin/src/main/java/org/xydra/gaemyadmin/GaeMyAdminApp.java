@@ -19,7 +19,6 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
 import org.xydra.restless.utils.HtmlUtils;
-import org.xydra.restless.utils.ServletUtils;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceConfig;
@@ -70,9 +69,7 @@ public class GaeMyAdminApp {
 	}
 	
 	public void index(HttpServletResponse res) throws IOException {
-		ServletUtils.headers(res, "text/html");
-		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
-		HtmlUtils.writeHtmlHeaderOpenBody(w, "GaeMyAdmin");
+		Writer w = HtmlUtils.startHtmlPage(res, "GaeMyAdmin");
 		w.write(HtmlUtils.toOrderedList(Arrays.asList(
 
 		HtmlUtils.link("stats/", "Statistics"),

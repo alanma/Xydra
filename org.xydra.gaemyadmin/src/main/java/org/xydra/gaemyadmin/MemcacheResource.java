@@ -1,7 +1,6 @@
 package org.xydra.gaemyadmin;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Arrays;
 
@@ -9,7 +8,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.restless.Restless;
 import org.xydra.restless.utils.HtmlUtils;
-import org.xydra.restless.utils.ServletUtils;
 
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
@@ -24,9 +22,7 @@ public class MemcacheResource {
 	}
 	
 	public void index(HttpServletResponse res) throws IOException {
-		ServletUtils.headers(res, "text/html");
-		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
-		HtmlUtils.writeHtmlHeaderOpenBody(w, "GaeMyAdmin :: Memcache");
+		Writer w = HtmlUtils.startHtmlPage(res, "GaeMyAdmin :: Memcache");
 		w.write(HtmlUtils.toOrderedList(Arrays.asList(
 
 		HtmlUtils.link("stats/", "Memcache Statistics")
