@@ -20,8 +20,20 @@ public class ServletUtils {
 	
 	private static Logger log = LoggerFactory.getLogger(ServletUtils.class);
 	
+	public static final String HEADER_ACCEPT = "Accept";
+	
+	public static final String CONTENTTYPE_APPLICATION_XHTML_XML = "application/xhtml+xml";
+	
+	public static final String CONTENTTYPE_TEXT_HTML = "text/html";
+	
+	public static final String CONTENTTYPE_STAR_STAR = "*/*";
+	
 	/**
 	 * Set UTF8, given contentType, No caching. Send '200 OK'.
+	 * 
+	 * See
+	 * {@link #headersXhtmlViaConneg(HttpServletRequest, HttpServletResponse, int, long)}
+	 * for a variant with content-negotiation.
 	 * 
 	 * @param res where to send to
 	 * @param contentType to be sent
@@ -32,6 +44,113 @@ public class ServletUtils {
 		res.setStatus(200);
 		res.setHeader("Pragma", "no-cache");
 		res.setHeader("Expires", "Fri, 01 Jan 1990 00:00:00 GMT");
+	}
+	
+	/**
+	 * Compute best header to send for XHTML content.
+	 * 
+	 * @param req ..
+	 * @param res ..
+	 * @param status if 0 no header is set.
+	 * @param cachingInMinutes if 0 no header is set. If -1, caching is
+	 *            explicitly disabled via headers. Positive numbers are the time
+	 *            to cache the response in minutes.
+	 */
+	public static void headersXhtmlViaConneg(HttpServletRequest req, HttpServletResponse res,
+	        int status, long cachingInMinutes) {
+		String chosenContentType = conneg(req);
+		res.setCharacterEncoding("utf-8");
+		res.setContentType(chosenContentType);
+		if(status > 0) {
+			res.setStatus(status);
+		}
+		if(cachingInMinutes == -1) {
+			res.setHeader("Cache-Control", "no-cache");
+			/* "Fri, 01 Jan 1990 00:00:00 GMT" */
+			res.setDateHeader("Expires", 0);
+		} else if(cachingInMinutes > 0) {
+			long millisSinceEpoch = System.currentTimeMillis() + (cachingInMinutes * 60 * 1000);
+			res.setDateHeader("Expires", millisSinceEpoch);
+			
+			// DEBUG
+			while(true) {
+				
+			}
+		}
+	}
+	
+	/**
+	 * If the Accept header explicitly contains application/xhtml+xml (with
+	 * either no "q" parameter or a positive "q" value) deliver the document
+	 * using that media type.
+	 * 
+	 * If the Accept header explicitly contains text/html (with either no "q"
+	 * parameter or a positive "q" value) deliver the document using that media
+	 * type.
+	 * 
+	 * If the accept header contains "star/star" (a convention some user agents
+	 * use to indicate that they will accept anything), deliver the document
+	 * using text/html.
+	 * 
+	 * @param req containing the Accept header
+	 * @return a single chosen content-Type.
+	 */
+	public static String conneg(HttpServletRequest req) {
+		// parse
+		@SuppressWarnings("unchecked")
+		Enumeration<String> enu = req.getHeaders(HEADER_ACCEPT);
+		assert enu != null : "Container allows no header access";
+		Map<String,Double> contentType2q = new HashMap<String,Double>();
+		while(enu.hasMoreElements()) {
+			String headerValue = enu.nextElement();
+			if(!headerValue.contains(",")) {
+				log.warn("Accept header contains a comma: '" + headerValue + "'");
+				break;
+			}
+			String[] parts = headerValue.split(";");
+			String contentDef = parts[0];
+			Double q;
+			if(parts.length > 1) {
+				String qs = parts[1].trim();
+				if(!qs.startsWith("q=")) {
+					log.warn("q-value '" + qs + "' wrong in Accept header '" + headerValue + "'");
+					break;
+				}
+				qs = qs.substring(2);
+				try {
+					q = Double.parseDouble(qs);
+				} catch(NumberFormatException e) {
+					log.warn("q-value '" + qs + "' not parsable as double in Accept header '"
+					        + headerValue + "'");
+					break;
+				}
+			} else {
+				q = null;
+			}
+			contentType2q.put(contentDef, q);
+		}
+		// process
+		if(contentType2q.containsKey(CONTENTTYPE_APPLICATION_XHTML_XML)) {
+			Double q = contentType2q.get(CONTENTTYPE_APPLICATION_XHTML_XML);
+			if(q == null || q > 0) {
+				return CONTENTTYPE_APPLICATION_XHTML_XML;
+			}
+		}
+		
+		if(contentType2q.containsKey(CONTENTTYPE_TEXT_HTML)) {
+			Double q = contentType2q.get(CONTENTTYPE_TEXT_HTML);
+			if(q == null || q > 0) {
+				return CONTENTTYPE_TEXT_HTML;
+			}
+		}
+		
+		if(contentType2q.containsKey(CONTENTTYPE_STAR_STAR)) {
+			return CONTENTTYPE_TEXT_HTML;
+		}
+		
+		// evil fall-back:
+		log.warn("Could not extract meaningful wish from accept header, using oldschool html");
+		return CONTENTTYPE_TEXT_HTML;
 	}
 	
 	/**

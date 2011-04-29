@@ -16,14 +16,15 @@ import javax.servlet.http.HttpServletResponse;
 public class HtmlUtils {
 	
 	public static void writeHtmlHeaderOpenBody(Writer w, String title) throws IOException {
-		w.write("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"\r\n"
-		        + "       \"http://www.w3.org/TR/html4/loose.dtd\">\r\n"
+		w.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"\r\n"
+		        + "		          \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n"
 
-		        + "<html>\r\n" + "<head>\r\n" + "<title>" + title + "</title>\r\n"
-		        + "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\r\n"
+		        + "<html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n" + "<head>\r\n" + "<title>"
+		        + title + "</title>\r\n"
+		        + "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\r\n"
 		        + "</head>\r\n"
 
-		        + "<body>\r\n");
+		        + "<body><div>\r\n");
 	}
 	
 	/**
@@ -33,7 +34,7 @@ public class HtmlUtils {
 	 * @throws IOException from writer
 	 */
 	public static void writeCloseBodyHtml(Writer w) throws IOException {
-		w.write("</body>\r\n" + "</html>");
+		w.write("</div></body>\r\n" + "</html>");
 		w.flush();
 	}
 	
@@ -187,7 +188,7 @@ public class HtmlUtils {
 	 * @throws IOException from underlying streams
 	 */
 	public static Writer startHtmlPage(HttpServletResponse res, String title) throws IOException {
-		ServletUtils.headers(res, "text/html");
+		ServletUtils.headers(res, ServletUtils.CONTENTTYPE_APPLICATION_XHTML_XML);
 		Writer w = res.getWriter();
 		writeHtmlHeaderOpenBody(w, title);
 		w.flush();
@@ -208,6 +209,24 @@ public class HtmlUtils {
 	
 	public static String toOrderedList(String ... listItemContent) {
 		return toOrderedList(Arrays.asList(listItemContent));
+	}
+	
+	/**
+	 * @param s may be null
+	 * @return a sanitised form of s that cannot have malicious side effects.
+	 *         Result is XHTML compliant.
+	 */
+	public static String sanitize(String s) {
+		if(s == null) {
+			return null;
+		}
+		return XmlUtils.xmlEncode(s);
+	}
+	
+	private static final String MALICIOUS_INPUT_SAMPLE = "Dirk<script>alert('test');</script>";
+	
+	public static void main(String[] args) {
+		System.out.println(sanitize(MALICIOUS_INPUT_SAMPLE));
 	}
 	
 }
