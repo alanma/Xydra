@@ -30,7 +30,8 @@ import org.xydra.core.model.XObject;
  * @author Kaidel
  * 
  */
-
+// suppressing warning while this is in flux ~~max
+@SuppressWarnings("unused")
 public class TransactionModel implements XModel {
 	private static final long serialVersionUID = -5636313889791653240L;
 	
