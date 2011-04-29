@@ -175,6 +175,7 @@ public class HtmlUtils {
 	
 	public static void endHtmlPage(Writer w) throws IOException {
 		writeCloseBodyHtml(w);
+		w.close();
 	}
 	
 	/**

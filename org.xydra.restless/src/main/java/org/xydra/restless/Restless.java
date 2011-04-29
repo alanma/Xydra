@@ -310,7 +310,6 @@ public class Restless extends HttpServlet {
 		} catch(IOException e) {
 			throw new RuntimeException(e);
 		}
-		res.setStatus(200);
 	}
 	
 	/**
