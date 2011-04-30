@@ -45,6 +45,7 @@ public class XmlCommand {
 	private static final String XREPOSITORYCOMMAND_ELEMENT = "xrepositoryCommand";
 	private static final String XTRANSACTION_ELEMENT = "xtransaction";
 	private static final String REVISION_RELATIVE_ATTRIBUTE = "relative";
+	private static final String XCOMMANDLIST_ELEMENT = "xcommands";
 	
 	private static long getRevision(MiniElement xml, String elementName, boolean revisioned) {
 		
@@ -539,6 +540,54 @@ public class XmlCommand {
 		
 		out.close(XTRANSACTION_ELEMENT);
 		
+	}
+	
+	/**
+	 * Encode the given {@link XCommand} list as an XML element.
+	 * 
+	 * @param commands The commands to encode.
+	 * @param out The XML encoder to write to.
+	 * @param context The part of this event's target address that doesn't need
+	 *            to be encoded in the element.
+	 */
+	public static void toXml(Iterator<XCommand> commands, XmlOut out, XAddress context)
+	        throws IllegalArgumentException {
+		
+		out.open(XCOMMANDLIST_ELEMENT);
+		
+		while(commands.hasNext()) {
+			toXml(commands.next(), out, context);
+		}
+		
+		out.close(XCOMMANDLIST_ELEMENT);
+		
+	}
+	
+	/**
+	 * Get the {@link XCommand} list represented by the given XML element.
+	 * 
+	 * @param context The {@link XID XIDs} of the repository, model, object and
+	 *            field to fill in if not specified in the XML. The context for
+	 *            the commands contained in a transaction will be given by the
+	 *            transaction.
+	 * @return The {@link List} of {@link XCommand}s represented by the given
+	 *         XML element.
+	 * @throws IllegalArgumentException if the XML element does not represent a
+	 *             valid command list.
+	 * 
+	 */
+	public static List<XCommand> toCommandList(MiniElement xml, XAddress context) {
+		
+		XmlUtils.checkElementName(xml, XCOMMANDLIST_ELEMENT);
+		
+		List<XCommand> events = new ArrayList<XCommand>();
+		Iterator<MiniElement> it = xml.getElements();
+		while(it.hasNext()) {
+			MiniElement command = it.next();
+			events.add(toCommand(command, context));
+		}
+		
+		return events;
 	}
 	
 }
