@@ -60,7 +60,7 @@ public class RestlessMethod {
 	 *            the corresponding instances from the servlet environment.
 	 * 
 	 *            If no {@link HttpServletResponse} is used, a default content
-	 *            type of text/plain is used an the method return type is
+	 *            type of text/plain is used and the method return type is
 	 *            expected to be of type String. This facility is designer to
 	 *            return status information at development time.
 	 * @param pathTemplate see {@link PathTemplate} for syntax
