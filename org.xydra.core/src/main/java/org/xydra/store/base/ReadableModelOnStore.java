@@ -7,11 +7,9 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
 import org.xydra.store.BatchedResult;
-import org.xydra.store.Callback;
 import org.xydra.store.StoreException;
+import org.xydra.store.WaitingCallback;
 import org.xydra.store.XydraStore;
 
 
@@ -22,32 +20,6 @@ import org.xydra.store.XydraStore;
  * @author voelkel
  */
 public class ReadableModelOnStore implements XReadableModel, Serializable {
-	
-	private final class LoadingCallback implements Callback<BatchedResult<XReadableModel>[]> {
-		public boolean done = false;
-		
-		@Override
-		public synchronized void onFailure(Throwable error) {
-			this.done = true;
-			// TODO is the notify necessary?
-			notify();
-			throw new StoreException("", error);
-		}
-		
-		@Override
-		public synchronized void onSuccess(BatchedResult<XReadableModel>[] model) {
-			assert model.length == 1;
-			this.done = true;
-			/*
-			 * TODO better error handling if getResult is null because
-			 * getException has an AccessException
-			 */
-			ReadableModelOnStore.this.baseModel = model[0].getResult();
-			notify();
-		}
-	}
-	
-	private static final Logger log = LoggerFactory.getLogger(ReadableModelOnStore.class);
 	
 	private static final long serialVersionUID = 2086217765670621565L;
 	protected XAddress address;
@@ -105,16 +77,26 @@ public class ReadableModelOnStore implements XReadableModel, Serializable {
 	}
 	
 	protected synchronized void load() {
-		LoadingCallback callback = new LoadingCallback();
+		
+		WaitingCallback<BatchedResult<XReadableModel>[]> callback = new WaitingCallback<BatchedResult<XReadableModel>[]>();
 		this.store.getModelSnapshots(this.credentials.getActorId(), this.credentials
 		        .getPasswordHash(), new XAddress[] { this.address }, callback);
-		while(!callback.done) {
-			try {
-				callback.wait();
-			} catch(InterruptedException e) {
-				log.debug("Could not wait", e);
-			}
+		
+		if(callback.getException() != null) {
+			throw new StoreException("re-throw", callback.getException());
 		}
+		
+		BatchedResult<XReadableModel>[] res = callback.getResult();
+		
+		assert res.length == 1;
+		assert res[0] != null;
+		
+		if(res[0].getException() != null) {
+			throw new StoreException("re-throw", res[0].getException());
+		}
+		
+		assert res[0].getResult() != null;
+		
+		this.baseModel = res[0].getResult();
 	}
-	
 }

@@ -29,6 +29,7 @@ import org.xydra.store.Callback;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.RequestException;
 import org.xydra.store.StoreException;
+import org.xydra.store.WaitingCallback;
 import org.xydra.store.XydraStore;
 import org.xydra.store.XydraStoreAdmin;
 
@@ -50,7 +51,7 @@ import org.xydra.store.XydraStoreAdmin;
 
 public class DelegateToSingleOperationStore implements XydraStore {
 	
-	private static class SingleOpCallback<T> implements Callback<T> {
+	private static class SingleOpCallback<T> extends WaitingCallback<T> {
 		
 		MultiOpCallback<T> multi;
 		int index;
@@ -60,56 +61,16 @@ public class DelegateToSingleOperationStore implements XydraStore {
 			this.index = index;
 		}
 		
-		public SingleOpCallback() {
-			this.multi = null;
-		}
-		
-		private boolean done = false;
-		private Throwable exception;
-		private T result;
-		
 		@Override
 		public synchronized void onFailure(Throwable exception) {
-			assert !this.done;
-			this.exception = exception;
-			this.done = true;
-			notify();
-			if(this.multi != null) {
-				this.multi.addResult(this.index, new BatchedResult<T>(exception));
-			}
+			super.onFailure(exception);
+			this.multi.addResult(this.index, new BatchedResult<T>(exception));
 		}
 		
 		@Override
 		public synchronized void onSuccess(T result) {
-			assert !this.done;
-			this.result = result;
-			this.done = true;
-			notify();
-			if(this.multi != null) {
-				this.multi.addResult(this.index, new BatchedResult<T>(result));
-			}
-		}
-		
-		public T getResult() {
-			while(!this.done) {
-				try {
-					wait();
-				} catch(InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-			return this.result;
-		}
-		
-		public Throwable getException() {
-			while(!this.done) {
-				try {
-					wait();
-				} catch(InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-			return this.exception;
+			super.onSuccess(result);
+			this.multi.addResult(this.index, new BatchedResult<T>(result));
 		}
 		
 	}
@@ -540,7 +501,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 	 */
 	private synchronized boolean validLogin(XID actorId, String passwordHash, Callback<?> callback) {
 		
-		SingleOpCallback<Boolean> loginCallback = new SingleOpCallback<Boolean>();
+		WaitingCallback<Boolean> loginCallback = new WaitingCallback<Boolean>();
 		this.singleOpStore.checkLogin(actorId, passwordHash, loginCallback);
 		
 		Throwable exception = loginCallback.getException();
@@ -559,8 +520,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 			}
 			return false;
 		}
-		assert loginCallback.done && loginCallback.getResult() != null
-		        && loginCallback.getResult() == true;
+		assert loginCallback.getResult() != null && loginCallback.getResult() == Boolean.TRUE;
 		return true;
 	}
 	

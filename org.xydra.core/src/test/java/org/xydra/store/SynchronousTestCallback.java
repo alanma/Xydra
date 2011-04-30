@@ -1,7 +1,5 @@
 package org.xydra.store;
 
-
-
 /**
  * A simple {@link Callback} implementation for tests of {@link XydraStore}
  * 

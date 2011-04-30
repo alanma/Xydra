@@ -1,11 +1,9 @@
 package org.xydra.store.base;
 
 import org.xydra.base.change.XCommand;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
 import org.xydra.store.BatchedResult;
-import org.xydra.store.Callback;
 import org.xydra.store.StoreException;
+import org.xydra.store.WaitingCallback;
 import org.xydra.store.XydraStore;
 
 
@@ -17,37 +15,6 @@ import org.xydra.store.XydraStore;
  */
 public class ExecuteCommandsUtils {
 	
-	private static class WaitingCallback implements Callback<BatchedResult<Long>[]> {
-		
-		protected boolean done = false;
-		protected long result;
-		
-		@Override
-		public void onFailure(Throwable exception) {
-			// thread communication
-			this.done = true;
-			// wake up waiting threads implicitly via exception
-			throw new StoreException("re-throw", exception);
-		}
-		
-		@Override
-		public synchronized void onSuccess(BatchedResult<Long>[] object) {
-			assert object.length == 1;
-			assert object[0] != null;
-			/*
-			 * TODO better error handling if getResult is null because
-			 * getException has an AccessException
-			 */
-			this.result = object[0].getResult();
-			// thread communication
-			this.done = true;
-			this.notifyAll();
-		}
-		
-	}
-	
-	private static final Logger log = LoggerFactory.getLogger(ExecuteCommandsUtils.class);
-	
 	/**
 	 * Execute a single command and return synchronously the result
 	 * 
@@ -58,22 +25,27 @@ public class ExecuteCommandsUtils {
 	 *         values.
 	 */
 	public static long executeCommand(Credentials credentials, XydraStore store, XCommand command) {
-		WaitingCallback callback = new WaitingCallback();
-		synchronized(callback) {
-			store.executeCommands(credentials.getActorId(), credentials.getPasswordHash(),
-			        new XCommand[] { command }, callback);
-			while(!callback.done) {
-				try {
-					// TODO add a suitable timeout (which should be larger than
-					// the XydraStore timeout)
-					callback.wait();
-				} catch(InterruptedException e) {
-					log.debug("Could not wait", e);
-				}
-			}
-			
-			return callback.result;
+		WaitingCallback<BatchedResult<Long>[]> callback = new WaitingCallback<BatchedResult<Long>[]>();
+		
+		store.executeCommands(credentials.getActorId(), credentials.getPasswordHash(),
+		        new XCommand[] { command }, callback);
+		
+		if(callback.getException() != null) {
+			throw new StoreException("re-throw", callback.getException());
 		}
+		
+		BatchedResult<Long>[] res = callback.getResult();
+		
+		assert res.length == 1;
+		assert res[0] != null;
+		
+		if(res[0].getException() != null) {
+			throw new StoreException("re-throw", res[0].getException());
+		}
+		
+		assert res[0].getResult() != null;
+		
+		return res[0].getResult();
+		
 	}
-	
 }
