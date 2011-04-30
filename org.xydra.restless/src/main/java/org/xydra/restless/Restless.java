@@ -499,9 +499,10 @@ public class Restless extends HttpServlet {
 							        + ".restless(Restless,String prefix)' failed", e);
 						}
 					} catch(NoSuchMethodException e) {
-						log.warn("Class '"
-						        + this.apps
-						        + "' has no restless( Restless restless, String prefix ) method. Relying on static initializer.");
+						log
+						        .warn("Class '"
+						                + this.apps
+						                + "' has no restless( Restless restless, String prefix ) method. Relying on static initializer.");
 						log.debug("Configured with " + clazz.getName());
 					}
 				} catch(IllegalArgumentException e) {
@@ -639,15 +640,16 @@ public class Restless extends HttpServlet {
 					delegateToDefaultServlet(req, res);
 				} else {
 					// produce better error message
-					res.sendError(
-					        404,
-					        "No handler matched your "
-					                + req.getMethod()
-					                + "-request path '"
-					                + path
-					                + "'. "
-					                + (foundPath ? "Found at least a path mapping (wrong HTTP method or missing parameters)."
-					                        : "Found not even a path mapping. Check your Restless App and web.xml."));
+					res
+					        .sendError(
+					                404,
+					                "No handler matched your "
+					                        + req.getMethod()
+					                        + "-request path '"
+					                        + path
+					                        + "'. "
+					                        + (foundPath ? "Found at least a path mapping (wrong HTTP method or missing parameters)."
+					                                : "Found not even a path mapping. Check your Restless App and web.xml."));
 				}
 			}
 		} catch(IOException e) {
@@ -669,6 +671,7 @@ public class Restless extends HttpServlet {
 		try {
 			RequestDispatcher rd = getServletContext().getNamedDispatcher("default");
 			HttpServletRequest wrapped = new HttpServletRequestWrapper(req) {
+				@Override
 				public String getServletPath() {
 					return "";
 				}

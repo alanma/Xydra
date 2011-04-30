@@ -254,8 +254,7 @@ public class ServletUtils {
 	public static Map<String,String> getRequestparametersAsMap(HttpServletRequest req)
 	        throws IllegalStateException {
 		Map<String,String> map = new HashMap<String,String>();
-		@SuppressWarnings("rawtypes")
-		Enumeration en = req.getParameterNames();
+		Enumeration<?> en = req.getParameterNames();
 		while(en.hasMoreElements()) {
 			String name = (String)en.nextElement();
 			String[] values = req.getParameterValues(name);
