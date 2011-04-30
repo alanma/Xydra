@@ -26,7 +26,7 @@ class XmlUtils {
 	
 	protected static void checkElementName(MiniElement xml, String expectedName) {
 		if(!xml.getName().equals(expectedName)) {
-			throw new IllegalArgumentException("Given element " + xml + " is not an <"
+			throw new IllegalArgumentException("Given element " + xml.getName() + " is not an <"
 			        + expectedName + "> element.");
 		}
 	}

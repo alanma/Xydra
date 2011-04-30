@@ -232,7 +232,7 @@ public class XmlCommand {
 		
 		XmlUtils.checkElementName(xml, XMODELCOMMAND_ELEMENT);
 		
-		if(context.getObject() != null || context.getField() != null)
+		if(context != null && (context.getObject() != null || context.getField() != null))
 			throw new IllegalArgumentException("invalid context for model commands: " + context);
 		
 		XAddress address = XmlUtils.getTarget(xml, context);
@@ -280,7 +280,7 @@ public class XmlCommand {
 		
 		XmlUtils.checkElementName(xml, XOBJECTCOMMAND_ELEMENT);
 		
-		if(context.getField() != null)
+		if(context != null && context.getField() != null)
 			throw new IllegalArgumentException("invalid context for object commands: " + context);
 		
 		XAddress address = XmlUtils.getTarget(xml, context);
@@ -329,7 +329,8 @@ public class XmlCommand {
 		
 		XmlUtils.checkElementName(xml, XREPOSITORYCOMMAND_ELEMENT);
 		
-		if(context.getModel() != null || context.getObject() != null || context.getField() != null)
+		if(context != null
+		        && (context.getModel() != null || context.getObject() != null || context.getField() != null))
 			throw new IllegalArgumentException("invalid context for repository commands: "
 			        + context);
 		
@@ -455,7 +456,7 @@ public class XmlCommand {
 	public static void toXml(XModelCommand command, XmlOut out, XAddress context)
 	        throws IllegalArgumentException {
 		
-		if(context.getObject() != null || context.getField() != null)
+		if(context != null && (context.getObject() != null || context.getField() != null))
 			throw new IllegalArgumentException("invalid context for model commands: " + context);
 		
 		out.open(XMODELCOMMAND_ELEMENT);
@@ -479,7 +480,7 @@ public class XmlCommand {
 	public static void toXml(XObjectCommand command, XmlOut out, XAddress context)
 	        throws IllegalArgumentException {
 		
-		if(context.getField() != null)
+		if(context != null && context.getField() != null)
 			throw new IllegalArgumentException("invalid context for object commands: " + context);
 		
 		out.open(XOBJECTCOMMAND_ELEMENT);
@@ -503,7 +504,8 @@ public class XmlCommand {
 	public static void toXml(XRepositoryCommand command, XmlOut out, XAddress context)
 	        throws IllegalArgumentException {
 		
-		if(context.getModel() != null || context.getObject() != null || context.getField() != null)
+		if(context != null
+		        && (context.getModel() != null || context.getObject() != null || context.getField() != null))
 			throw new IllegalArgumentException("invalid context for repository commands: "
 			        + context);
 		

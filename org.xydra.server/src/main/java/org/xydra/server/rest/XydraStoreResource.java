@@ -27,11 +27,8 @@ import org.xydra.index.query.Pair;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessExceptionHandler;
 import org.xydra.restless.RestlessParameter;
-import org.xydra.store.AccessException;
-import org.xydra.store.AuthorisationException;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.GetEventsRequest;
-import org.xydra.store.QuotaException;
 import org.xydra.store.RequestException;
 import org.xydra.store.StoreException;
 import org.xydra.store.WaitingCallback;
@@ -70,6 +67,8 @@ public class XydraStoreResource {
 		restless.addMethod(prefix + "/repository/id", "GET", XydraStoreResource.class,
 		        "getRepositoryId", false, actorId, passwordHash);
 		
+		restless.addMethod(prefix + "/ping", "GET", XydraStoreResource.class, "ping", false);
+		
 		restless.addExceptionHandler(new RestlessExceptionHandler() {
 			@Override
 			public boolean handleException(Throwable t, HttpServletRequest req,
@@ -79,17 +78,19 @@ public class XydraStoreResource {
 					return false;
 				}
 				
-				int statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-				if(t instanceof RequestException) {
-					statusCode = HttpServletResponse.SC_BAD_REQUEST;
-				} else if(t instanceof AccessException) {
-					statusCode = HttpServletResponse.SC_FORBIDDEN;
-				} else if(t instanceof AuthorisationException) {
-					statusCode = HttpServletResponse.SC_UNAUTHORIZED;
-				} else if(t instanceof QuotaException) {
-					statusCode = HttpServletResponse.SC_FORBIDDEN;
-				}
+				int statusCode = HttpServletResponse.SC_OK;
 				
+				/*
+				 * HttpServletResponse. SC_INTERNAL_SERVER_ERROR ; if(t
+				 * instanceof RequestException) { statusCode =
+				 * HttpServletResponse .SC_BAD_REQUEST; } else if(t instanceof
+				 * AccessException) { statusCode = HttpServletResponse
+				 * .SC_FORBIDDEN; } else if(t instanceof AuthorisationException
+				 * ) { statusCode = HttpServletResponse .SC_FORBIDDEN; } else
+				 * if(t instanceof QuotaException) { statusCode =
+				 * HttpServletResponse .SC_FORBIDDEN; }
+				 */
+
 				XmlOut out = startOutput(res, statusCode);
 				XmlStore.toXml(t, out);
 				out.flush();
@@ -407,6 +408,10 @@ public class XydraStoreResource {
 		
 		out.flush();
 		
+	}
+	
+	public String ping() {
+		return "Hello World!";
 	}
 	
 }

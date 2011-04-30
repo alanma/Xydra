@@ -106,8 +106,8 @@ public abstract class AbstractRestApiTest {
 		
 		// add something to the server for testing
 		
-		XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(
-		        xydraServer.getRepositoryAddress(), XCommand.SAFE, DemoModelUtil.PHONEBOOK_ID);
+		XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(xydraServer
+		        .getRepositoryAddress(), XCommand.SAFE, DemoModelUtil.PHONEBOOK_ID);
 		assertTrue(xydraServer.executeCommand(createCommand, ACTOR_TESTER) >= 0);
 		XAddress modelAddr = createCommand.getChangedEntity();
 		XTransactionBuilder tb = new XTransactionBuilder(modelAddr);
@@ -119,8 +119,8 @@ public abstract class AbstractRestApiTest {
 			assertTrue(xydraServer.executeCommand(ac, ACTOR_TESTER) != XCommand.FAILED);
 		}
 		
-		XRepositoryCommand createCommand2 = MemoryRepositoryCommand.createAddCommand(
-		        repo.getAddress(), XCommand.SAFE, DemoModelUtil.PHONEBOOK_ID);
+		XRepositoryCommand createCommand2 = MemoryRepositoryCommand.createAddCommand(repo
+		        .getAddress(), XCommand.SAFE, DemoModelUtil.PHONEBOOK_ID);
 		assertTrue(repo.executeCommand(createCommand2) >= 0);
 		XAddress localModelAddr = createCommand2.getChangedEntity();
 		XTransactionBuilder tb2 = new XTransactionBuilder(localModelAddr);
@@ -139,8 +139,8 @@ public abstract class AbstractRestApiTest {
 		        XCommand.FORCED, DemoModelUtil.PHONEBOOK_ID);
 		assertTrue(repo.executeCommand(removeCommand2) != XCommand.FAILED);
 		
-		XCommand removeCommand = MemoryRepositoryCommand.createRemoveCommand(
-		        xydraServer.getRepositoryAddress(), XCommand.FORCED, DemoModelUtil.PHONEBOOK_ID);
+		XCommand removeCommand = MemoryRepositoryCommand.createRemoveCommand(xydraServer
+		        .getRepositoryAddress(), XCommand.FORCED, DemoModelUtil.PHONEBOOK_ID);
 		assertTrue(xydraServer.executeCommand(removeCommand, ACTOR_TESTER) != XCommand.FAILED);
 		
 	}

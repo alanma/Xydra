@@ -156,7 +156,9 @@ public class XmlStore {
 		setRevisionListContents(commandRes, out);
 		out.close(ELEMENT_COMMANDRESULTS);
 		
-		toXml(ger, eventsRes, out);
+		if(eventsRes != null) {
+			toXml(ger, eventsRes, out);
+		}
 		
 		out.close(ELEMENT_RESULTS);
 		
@@ -173,13 +175,13 @@ public class XmlStore {
 		}
 		MiniElement commandsEle = it.next();
 		
-		XmlUtils.checkElementName(xml, ELEMENT_COMMANDRESULTS);
+		XmlUtils.checkElementName(commandsEle, ELEMENT_COMMANDRESULTS);
 		
 		BatchedResult<Long>[] commandResults = getRevisionListContents(commandsEle);
 		
 		BatchedResult<XEvent[]>[] eventResults = null;
 		if(it.hasNext()) {
-			eventResults = toEventResults(xml, context);
+			eventResults = toEventResults(it.next(), context);
 		}
 		
 		return new Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>(commandResults,
@@ -370,9 +372,9 @@ public class XmlStore {
 	
 	public static class Snapshots {
 		
-		XReadableModel[] models;
-		XReadableObject[] objects;
-		Throwable[] exceptions;
+		public XReadableModel[] models;
+		public XReadableObject[] objects;
+		public Throwable[] exceptions;
 		
 	}
 	

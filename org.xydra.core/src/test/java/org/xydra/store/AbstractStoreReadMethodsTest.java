@@ -294,8 +294,8 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		 * store)
 		 */
 		for(int i = 0; i < this.modelAddresses.length; i++) {
-			assertTrue(result + " should contain " + this.modelAddresses[i].getModel(),
-			        result.contains(this.modelAddresses[i].getModel()));
+			assertTrue(result + " should contain " + this.modelAddresses[i].getModel(), result
+			        .contains(this.modelAddresses[i].getModel()));
 		}
 		
 	}
@@ -325,7 +325,8 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		assertFalse(this.waitOnCallback(callback));
 		assertNull(callback.getEffect());
 		assertNotNull(callback.getException());
-		assertTrue(callback.getException() instanceof AuthorisationException);
+		assertTrue("unexpected exception: " + callback.getException(),
+		        callback.getException() instanceof AuthorisationException);
 	}
 	
 	// Test IllegalArgumentException
@@ -477,8 +478,8 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			// compare revision numbers
 			assertNotNull(revisionResult[i].getResult());
 			assertNull(revisionResult[i].getException());
-			assertEquals((Long)snapshotResult[i].getResult().getRevisionNumber(),
-			        revisionResult[i].getResult());
+			assertEquals((Long)snapshotResult[i].getResult().getRevisionNumber(), revisionResult[i]
+			        .getResult());
 		}
 	}
 	
