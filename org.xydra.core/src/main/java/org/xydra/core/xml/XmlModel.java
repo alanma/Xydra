@@ -597,4 +597,8 @@ public class XmlModel {
 		
 	}
 	
+	public static boolean isModel(MiniElement xml) {
+		return XMODEL_ELEMENT.equals(xml.getName());
+	}
+	
 }

@@ -17,6 +17,11 @@ public class TimeoutException extends ConnectionException {
 		this.timeout = timeout;
 	}
 	
+	public TimeoutException(String message) {
+		super(message);
+		this.timeout = -1;
+	}
+	
 	/**
 	 * @return the timeout in milliseconds
 	 */
