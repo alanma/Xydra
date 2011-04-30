@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
@@ -68,6 +68,7 @@ public class XmlValue {
 	private static final String XSTRING_ELEMENT = "xstring";
 	private static final String XSTRINGLIST_ELEMENT = "xstringList";
 	private static final String XSTRINGSET_ELEMENT = "xstringSet";
+	private static final String XNULL_ELEMENT = "xnull";
 	
 	private static List<XAddress> getAddressListContents(MiniElement xml) {
 		
@@ -1029,4 +1030,12 @@ public class XmlValue {
 		
 	}
 	
+	public static boolean isNullElement(MiniElement xml) {
+		return XNULL_ELEMENT.equals(xml.getName());
+	}
+	
+	public static void saveNullElement(XmlOut out) {
+		out.open(XNULL_ELEMENT);
+		out.close(XNULL_ELEMENT);
+	}
 }

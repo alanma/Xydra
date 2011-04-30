@@ -25,9 +25,6 @@ import org.xydra.base.change.impl.memory.MemoryRepositoryEvent;
 import org.xydra.base.change.impl.memory.MemoryReversibleFieldEvent;
 import org.xydra.base.change.impl.memory.MemoryTransactionEvent;
 import org.xydra.base.value.XValue;
-import org.xydra.core.model.XChangeLog;
-import org.xydra.core.model.XChangeLogState;
-import org.xydra.index.XI;
 
 
 /**
@@ -52,7 +49,6 @@ public class XmlEvent {
 	protected static final String XFIELDEVENT_ELEMENT = "xfieldEvent";
 	protected static final String XREVERSIBLEFIELDEVENT_ELEMENT = "xreversibleFieldEvent";
 	private static final String XMODELEVENT_ELEMENT = "xmodelEvent";
-	private static final String XNULL_ELEMENT = "xnull";
 	private static final String XOBJECTEVENT_ELEMENT = "xobjectEvent";
 	private static final String XREPOSITORYEVENT_ELEMENT = "xrepositoryEvent";
 	private static final String XTRANSACTIONEVENT_ELEMENT = "xtransactionEvent";
@@ -65,41 +61,6 @@ public class XmlEvent {
 	private static boolean getInTransactionAttribute(MiniElement xml) {
 		String booleanString = xml.getAttribute(INTRANSACTION_ATTRIBUTE);
 		return Boolean.parseBoolean(booleanString);
-	}
-	
-	private static XValue getOldValue(XEvent oldEvent, XAddress target) {
-		
-		if(oldEvent instanceof XFieldEvent) {
-			
-			ChangeType ct = oldEvent.getChangeType();
-			if(!target.equals(oldEvent.getTarget())
-			        || (ct != ChangeType.ADD && ct != ChangeType.CHANGE)) {
-				throw new RuntimeException("error de-serializing XFieldEvent (target=" + target
-				        + ") in change log: fieldRev refers to non-matching event: " + oldEvent);
-			}
-			
-			return ((XFieldEvent)oldEvent).getNewValue();
-			
-		} else if(oldEvent instanceof XTransactionEvent) {
-			XTransactionEvent te = (XTransactionEvent)oldEvent;
-			for(int i = te.size() - 1; i > 0; i--) {
-				XAtomicEvent ae = te.getEvent(i);
-				if(ae instanceof XFieldEvent && target.equals(ae.getTarget())) {
-					ChangeType ct = ae.getChangeType();
-					if((ct != ChangeType.ADD && ct != ChangeType.CHANGE)) {
-						throw new RuntimeException("error de-serializing XFieldEvent (target="
-						        + target
-						        + ") in change log: fieldRev refers to non-matching event: "
-						        + oldEvent);
-					}
-					return ((XFieldEvent)ae).getNewValue();
-				}
-			}
-			
-		}
-		
-		throw new RuntimeException("error de-serializing XFieldEvent (target=" + target
-		        + ") in change log: fieldRev refers to non-matching event: " + oldEvent);
 	}
 	
 	private static long getRevision(MiniElement xml, String elementName, String attribute,
@@ -134,13 +95,14 @@ public class XmlEvent {
 		return XmlValue.toValue(valueElement);
 	}
 	
-	private static void setAtomicEventAttributes(XAtomicEvent event, XmlOut out, XAddress context) {
+	private static void setAtomicEventAttributes(XAtomicEvent event, XmlOut out, XAddress context,
+	        boolean inTrans) {
 		
 		out.attribute(XmlUtils.TYPE_ATTRIBUTE, event.getChangeType().toString());
 		
-		setCommonAttributes(event, out, context);
+		setCommonAttributes(event, out, context, inTrans);
 		
-		if(event.inTransaction()) {
+		if(!inTrans && event.inTransaction()) {
 			out.attribute(INTRANSACTION_ATTRIBUTE, Boolean.toString(true));
 		}
 		
@@ -153,16 +115,21 @@ public class XmlEvent {
 	/**
 	 * Encode attributes common to all event types.
 	 */
-	private static void setCommonAttributes(XEvent event, XmlOut out, XAddress context) {
+	private static void setCommonAttributes(XEvent event, XmlOut out, XAddress context,
+	        boolean inTrans) {
 		
 		XmlUtils.setTarget(event.getTarget(), out, context);
 		
-		if(event.getActor() != null) {
-			out.attribute(ACTOR_ATTRIBUTE, event.getActor().toString());
-		}
-		
-		if(event.getOldModelRevision() != XEvent.RevisionOfEntityNotSet) {
-			out.attribute(MODELREVISION_ATTRIBUTE, Long.toString(event.getOldModelRevision()));
+		if(!inTrans) {
+			
+			if(event.getActor() != null) {
+				out.attribute(ACTOR_ATTRIBUTE, event.getActor().toString());
+			}
+			
+			if(event.getOldModelRevision() != XEvent.RevisionOfEntityNotSet) {
+				out.attribute(MODELREVISION_ATTRIBUTE, Long.toString(event.getOldModelRevision()));
+			}
+			
 		}
 		
 		if(event.getOldObjectRevision() != XEvent.RevisionOfEntityNotSet) {
@@ -175,38 +142,19 @@ public class XmlEvent {
 		
 	}
 	
-	/**
-	 * Get the {@link XAtomicEvent} represented by the given XML element.
-	 * 
-	 * @param context The {@link XID XIDs} of the repository, model, object and
-	 *            field to fill in if not specified in the XML. If the given
-	 *            element represents a transaction, the context for the
-	 *            contained events will be given by the transaction.
-	 * @return The {@link XAtomicEvent} represented by the given XML element.
-	 * @throws IllegalArgumentException if the XML element does not represent a
-	 *             valid event.
-	 * 
-	 */
-	public static XAtomicEvent toAtomicEvent(MiniElement xml, XAddress context)
+	private static XAtomicEvent toAtomicEvent(MiniElement xml, XAddress context, TempTrans trans)
 	        throws IllegalArgumentException {
-		return toAtomicEvent(xml, context, null);
-	}
-	
-	protected static XAtomicEvent toAtomicEvent(MiniElement xml, XAddress context,
-	        XChangeLogState cl) throws IllegalArgumentException {
 		String name = xml.getName();
 		if(name.equals(XFIELDEVENT_ELEMENT)) {
-			return toFieldEvent(xml, context, cl);
+			return toFieldEvent(xml, context, trans);
 		} else if(name.equals(XREVERSIBLEFIELDEVENT_ELEMENT)) {
-			return toReversibleFieldEvent(xml, context, cl);
+			return toReversibleFieldEvent(xml, context, trans);
 		} else if(name.equals(XOBJECTEVENT_ELEMENT)) {
-			return toObjectEvent(xml, context);
+			return toObjectEvent(xml, context, trans);
 		} else if(name.equals(XMODELEVENT_ELEMENT)) {
-			return toModelEvent(xml, context);
+			return toModelEvent(xml, context, trans);
 		} else if(name.equals(XREPOSITORYEVENT_ELEMENT)) {
-			return toRepositoryEvent(xml, context);
-		} else if(name.equals(XNULL_ELEMENT)) {
-			return null;
+			return toRepositoryEvent(xml, context, trans);
 		} else {
 			throw new IllegalArgumentException("Unexpected event element: <" + name + ">.");
 		}
@@ -225,16 +173,13 @@ public class XmlEvent {
 	 * 
 	 */
 	public static XEvent toEvent(MiniElement xml, XAddress context) throws IllegalArgumentException {
-		return toEvent(xml, context, null);
-	}
-	
-	protected static XEvent toEvent(MiniElement xml, XAddress context, XChangeLogState cl)
-	        throws IllegalArgumentException {
 		String name = xml.getName();
-		if(name.equals(XTRANSACTIONEVENT_ELEMENT)) {
-			return toTransactionEvent(xml, context, cl);
+		if(XmlValue.isNullElement(xml)) {
+			return null;
+		} else if(name.equals(XTRANSACTIONEVENT_ELEMENT)) {
+			return toTransactionEvent(xml, context);
 		} else {
-			return toAtomicEvent(xml, context, cl);
+			return toAtomicEvent(xml, context, null);
 		}
 	}
 	
@@ -265,21 +210,7 @@ public class XmlEvent {
 		return events;
 	}
 	
-	/**
-	 * Get the {@link XFieldEvent} represented by the given XML element.
-	 * 
-	 * @param context The {@link XID XIDs} of the repository, model, object and
-	 *            field to fill in if not specified in the XML.
-	 * @return The {@link XFieldEvent} represented by the given XML element.
-	 * @throws IllegalArgumentException if the XML element does not represent a
-	 *             valid event.
-	 * 
-	 */
-	public static XFieldEvent toFieldEvent(MiniElement xml, XAddress context) {
-		return toFieldEvent(xml, context, null);
-	}
-	
-	protected static XFieldEvent toFieldEvent(MiniElement xml, XAddress context, XChangeLogState cl) {
+	private static XFieldEvent toFieldEvent(MiniElement xml, XAddress context, TempTrans trans) {
 		
 		XmlUtils.checkElementName(xml, XFIELDEVENT_ELEMENT);
 		
@@ -289,36 +220,19 @@ public class XmlEvent {
 		
 		long fieldRev = getRevision(xml, XFIELDEVENT_ELEMENT, FIELDREVISION_ATTRIBUTE, true);
 		long objectRev = getRevision(xml, XFIELDEVENT_ELEMENT, OBJECTREVISION_ATTRIBUTE, false);
-		long modelRev = getRevision(xml, XFIELDEVENT_ELEMENT, MODELREVISION_ATTRIBUTE, false);
+		long modelRev = trans != null ? trans.modelRev : getRevision(xml, XFIELDEVENT_ELEMENT,
+		        MODELREVISION_ATTRIBUTE, false);
 		
-		XID actor = XmlUtils.getOptionalXidAttribute(xml, ACTOR_ATTRIBUTE, null);
-		boolean inTransaction = getInTransactionAttribute(xml);
+		XID actor = trans != null ? trans.actor : XmlUtils.getOptionalXidAttribute(xml,
+		        ACTOR_ATTRIBUTE, null);
+		boolean inTransaction = trans != null || getInTransactionAttribute(xml);
 		
 		// XValue oldValue = null;
 		XValue newValue = null;
 		Iterator<MiniElement> it = xml.getElements();
-		// boolean loadedOldValueFromChangeLog = false;
-		// if(type != ChangeType.ADD) {
-		// // try to get the old value from a previous event
-		// if(cl != null && fieldRev > cl.getFirstRevisionNumber()
-		// && fieldRev <= cl.getCurrentRevisionNumber()) {
-		// XEvent oldEvent = cl.getEvent(fieldRev);
-		// oldValue = getOldValue(oldEvent, target);
-		// loadedOldValueFromChangeLog = true;
-		// } else {
-		// oldValue = loadValue(it, "old");
-		// }
-		// assert oldValue != null;
-		// }
 		if(type != ChangeType.REMOVE) {
 			newValue = loadValue(it, "new");
 			assert newValue != null;
-			// // if the oldValue was present in the serialized event, don't die
-			// if(loadedOldValueFromChangeLog && it.hasNext()) {
-			// assert XI.equals(oldValue, newValue);
-			// oldValue = newValue;
-			// newValue = loadValue(it, "new");
-			// }
 		}
 		if(it.hasNext()) {
 			throw new IllegalArgumentException("Invalid child of <" + XFIELDEVENT_ELEMENT + ">: <"
@@ -342,8 +256,8 @@ public class XmlEvent {
 		}
 	}
 	
-	protected static XReversibleFieldEvent toReversibleFieldEvent(MiniElement xml,
-	        XAddress context, XChangeLogState cl) {
+	private static XReversibleFieldEvent toReversibleFieldEvent(MiniElement xml, XAddress context,
+	        TempTrans trans) {
 		
 		XmlUtils.checkElementName(xml, XREVERSIBLEFIELDEVENT_ELEMENT);
 		
@@ -355,37 +269,23 @@ public class XmlEvent {
 		        true);
 		long objectRev = getRevision(xml, XREVERSIBLEFIELDEVENT_ELEMENT, OBJECTREVISION_ATTRIBUTE,
 		        false);
-		long modelRev = getRevision(xml, XREVERSIBLEFIELDEVENT_ELEMENT, MODELREVISION_ATTRIBUTE,
-		        false);
+		long modelRev = trans != null ? trans.modelRev : getRevision(xml,
+		        XREVERSIBLEFIELDEVENT_ELEMENT, MODELREVISION_ATTRIBUTE, false);
 		
-		XID actor = XmlUtils.getOptionalXidAttribute(xml, ACTOR_ATTRIBUTE, null);
-		boolean inTransaction = getInTransactionAttribute(xml);
+		XID actor = trans != null ? trans.actor : XmlUtils.getOptionalXidAttribute(xml,
+		        ACTOR_ATTRIBUTE, null);
+		boolean inTransaction = trans != null || getInTransactionAttribute(xml);
 		
 		XValue oldValue = null;
 		XValue newValue = null;
 		Iterator<MiniElement> it = xml.getElements();
-		boolean loadedOldValueFromChangeLog = false;
 		if(type != ChangeType.ADD) {
-			// try to get the old value from a previous event
-			if(cl != null && fieldRev > cl.getFirstRevisionNumber()
-			        && fieldRev <= cl.getCurrentRevisionNumber()) {
-				XEvent oldEvent = cl.getEvent(fieldRev);
-				oldValue = getOldValue(oldEvent, target);
-				loadedOldValueFromChangeLog = true;
-			} else {
-				oldValue = loadValue(it, "old");
-			}
+			oldValue = loadValue(it, "old");
 			assert oldValue != null;
 		}
 		if(type != ChangeType.REMOVE) {
 			newValue = loadValue(it, "new");
 			assert newValue != null;
-			// if the oldValue was present in the serialized event, don't die
-			if(loadedOldValueFromChangeLog && it.hasNext()) {
-				assert XI.equals(oldValue, newValue);
-				oldValue = newValue;
-				newValue = loadValue(it, "new");
-			}
 		}
 		if(it.hasNext()) {
 			throw new IllegalArgumentException("Invalid child of <" + XREVERSIBLEFIELDEVENT_ELEMENT
@@ -409,17 +309,7 @@ public class XmlEvent {
 		}
 	}
 	
-	/**
-	 * Get the {@link XModelEvent} represented by the given XML element.
-	 * 
-	 * @param context The {@link XID XIDs} of the repository and model to fill
-	 *            in if not specified in the XML.
-	 * @return The {@link XModelEvent} represented by the given XML element.
-	 * @throws IllegalArgumentException if the XML element does not represent a
-	 *             valid event.
-	 * 
-	 */
-	public static XModelEvent toModelEvent(MiniElement xml, XAddress context) {
+	private static XModelEvent toModelEvent(MiniElement xml, XAddress context, TempTrans trans) {
 		
 		XmlUtils.checkElementName(xml, XMODELEVENT_ELEMENT);
 		
@@ -443,10 +333,12 @@ public class XmlEvent {
 		
 		long objectRev = getRevision(xml, XMODELEVENT_ELEMENT, OBJECTREVISION_ATTRIBUTE,
 		        type == ChangeType.REMOVE);
-		long modelRev = getRevision(xml, XMODELEVENT_ELEMENT, MODELREVISION_ATTRIBUTE, true);
+		long modelRev = trans != null ? trans.modelRev : getRevision(xml, XMODELEVENT_ELEMENT,
+		        MODELREVISION_ATTRIBUTE, true);
 		
-		XID actor = XmlUtils.getOptionalXidAttribute(xml, ACTOR_ATTRIBUTE, null);
-		boolean inTransaction = getInTransactionAttribute(xml);
+		XID actor = trans != null ? trans.actor : XmlUtils.getOptionalXidAttribute(xml,
+		        ACTOR_ATTRIBUTE, null);
+		boolean inTransaction = trans != null || getInTransactionAttribute(xml);
 		
 		XmlUtils.checkHasNoChildren(xml, XMODELEVENT_ELEMENT);
 		
@@ -467,17 +359,7 @@ public class XmlEvent {
 		}
 	}
 	
-	/**
-	 * Get the {@link XObjectEvent} represented by the given XML element.
-	 * 
-	 * @param context The {@link XID XIDs} of the repository, model and object
-	 *            to fill in if not specified in the XML.
-	 * @return The {@link XObjectEvent} represented by the given XML element.
-	 * @throws IllegalArgumentException if the XML element does not represent a
-	 *             valid event.
-	 * 
-	 */
-	public static XObjectEvent toObjectEvent(MiniElement xml, XAddress context) {
+	private static XObjectEvent toObjectEvent(MiniElement xml, XAddress context, TempTrans trans) {
 		
 		XmlUtils.checkElementName(xml, XOBJECTEVENT_ELEMENT);
 		
@@ -502,10 +384,12 @@ public class XmlEvent {
 		long fieldRev = getRevision(xml, XOBJECTEVENT_ELEMENT, FIELDREVISION_ATTRIBUTE,
 		        type == ChangeType.REMOVE);
 		long objectRev = getRevision(xml, XOBJECTEVENT_ELEMENT, OBJECTREVISION_ATTRIBUTE, true);
-		long modelRev = getRevision(xml, XOBJECTEVENT_ELEMENT, MODELREVISION_ATTRIBUTE, false);
+		long modelRev = trans != null ? trans.modelRev : getRevision(xml, XOBJECTEVENT_ELEMENT,
+		        MODELREVISION_ATTRIBUTE, false);
 		
-		XID actor = XmlUtils.getOptionalXidAttribute(xml, ACTOR_ATTRIBUTE, null);
-		boolean inTransaction = getInTransactionAttribute(xml);
+		XID actor = trans != null ? trans.actor : XmlUtils.getOptionalXidAttribute(xml,
+		        ACTOR_ATTRIBUTE, null);
+		boolean inTransaction = trans != null || getInTransactionAttribute(xml);
 		
 		XmlUtils.checkHasNoChildren(xml, XOBJECTEVENT_ELEMENT);
 		
@@ -526,18 +410,8 @@ public class XmlEvent {
 		}
 	}
 	
-	/**
-	 * Get the {@link XRepositoryEvent} represented by the given XML element.
-	 * 
-	 * @param context The {@link XID} of the repository to fill in if not
-	 *            specified in the XML.
-	 * @return The {@link XRepositoryEvent} represented by the given XML
-	 *         element.
-	 * @throws IllegalArgumentException if the XML element does not represent a
-	 *             valid event.
-	 * 
-	 */
-	public static XRepositoryEvent toRepositoryEvent(MiniElement xml, XAddress context) {
+	private static XRepositoryEvent toRepositoryEvent(MiniElement xml, XAddress context,
+	        TempTrans trans) {
 		
 		XmlUtils.checkElementName(xml, XREPOSITORYEVENT_ELEMENT);
 		
@@ -559,11 +433,12 @@ public class XmlEvent {
 		
 		ChangeType type = XmlUtils.getChangeType(xml, XREPOSITORYEVENT_ELEMENT);
 		
-		long modelRev = getRevision(xml, XREPOSITORYEVENT_ELEMENT, MODELREVISION_ATTRIBUTE,
-		        type == ChangeType.REMOVE);
+		long modelRev = trans != null ? trans.modelRev : getRevision(xml, XREPOSITORYEVENT_ELEMENT,
+		        MODELREVISION_ATTRIBUTE, type == ChangeType.REMOVE);
 		
-		XID actor = XmlUtils.getOptionalXidAttribute(xml, ACTOR_ATTRIBUTE, null);
-		boolean inTransaction = getInTransactionAttribute(xml);
+		XID actor = trans != null ? trans.actor : XmlUtils.getOptionalXidAttribute(xml,
+		        ACTOR_ATTRIBUTE, null);
+		boolean inTransaction = trans != null || getInTransactionAttribute(xml);
 		
 		Iterator<MiniElement> it = xml.getElements();
 		if(it.hasNext()) {
@@ -587,25 +462,19 @@ public class XmlEvent {
 		}
 	}
 	
-	/**
-	 * Get the {@link XTransactionEvent} represented by the given XML element.
-	 * 
-	 * @param context The {@link XID XIDs} of the repository, model, object and
-	 *            field to fill in if not specified in the XML. The context for
-	 *            the events contained in the transaction will be given by the
-	 *            transaction.
-	 * @return The {@link XTransactionEvent} represented by the given XML
-	 *         element.
-	 * @throws IllegalArgumentException if the XML element does not represent a
-	 *             valid event.
-	 * 
-	 */
-	public static XTransactionEvent toTransactionEvent(MiniElement xml, XAddress context) {
-		return toTransactionEvent(xml, context, null);
+	private static class TempTrans {
+		
+		final XID actor;
+		final long modelRev;
+		
+		public TempTrans(XID actor, long modelRev) {
+			this.actor = actor;
+			this.modelRev = modelRev;
+		}
+		
 	}
 	
-	protected static XTransactionEvent toTransactionEvent(MiniElement xml, XAddress context,
-	        XChangeLogState cl) {
+	private static XTransactionEvent toTransactionEvent(MiniElement xml, XAddress context) {
 		
 		XmlUtils.checkElementName(xml, XTRANSACTIONEVENT_ELEMENT);
 		
@@ -623,11 +492,13 @@ public class XmlEvent {
 		
 		XID actor = XmlUtils.getOptionalXidAttribute(xml, ACTOR_ATTRIBUTE, null);
 		
+		TempTrans tt = new TempTrans(actor, modelRev);
+		
 		List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
 		Iterator<MiniElement> it = xml.getElements();
 		while(it.hasNext()) {
 			MiniElement event = it.next();
-			events.add(toAtomicEvent(event, target, cl));
+			events.add(toAtomicEvent(event, target, tt));
 		}
 		
 		return MemoryTransactionEvent.createTransactionEvent(actor, target, events, modelRev,
@@ -665,44 +536,39 @@ public class XmlEvent {
 	 */
 	public static void toXml(XEvent event, XmlOut out, XAddress context)
 	        throws IllegalArgumentException {
-		toXml(event, out, context, null);
+		if(event == null) {
+			XmlValue.saveNullElement(out);
+		} else if(event instanceof XTransactionEvent) {
+			toXml((XTransactionEvent)event, out, context);
+		} else {
+			toXml((XAtomicEvent)event, out, context, false);
+		}
 	}
 	
-	protected static void toXml(XEvent event, XmlOut out, XAddress context, XChangeLog cl)
+	private static void toXml(XAtomicEvent event, XmlOut out, XAddress context, boolean inTrans)
 	        throws IllegalArgumentException {
-		if(event == null) {
-			out.open(XNULL_ELEMENT);
-			out.close(XNULL_ELEMENT);
-		} else if(event instanceof XTransactionEvent) {
-			toXml((XTransactionEvent)event, out, context, cl);
+		if(event instanceof XReversibleFieldEvent) {
+			toXml((XReversibleFieldEvent)event, out, context, inTrans);
 		} else if(event instanceof XFieldEvent) {
-			toXml((XFieldEvent)event, out, context, cl);
+			toXml((XFieldEvent)event, out, context, inTrans);
 		} else if(event instanceof XObjectEvent) {
-			toXml((XObjectEvent)event, out, context);
+			toXml((XObjectEvent)event, out, context, inTrans);
 		} else if(event instanceof XModelEvent) {
-			toXml((XModelEvent)event, out, context);
+			toXml((XModelEvent)event, out, context, inTrans);
 		} else if(event instanceof XRepositoryEvent) {
-			toXml((XRepositoryEvent)event, out, context);
+			toXml((XRepositoryEvent)event, out, context, inTrans);
 		} else {
 			throw new RuntimeException("event " + event + " is of unexpected type: "
 			        + event.getClass());
 		}
 	}
 	
-	/**
-	 * Encode the given {@link XFieldEvent} as an XML element.
-	 * 
-	 * @param event The event to encode.
-	 * @param out The XML encoder to write to.
-	 * @param context The part of this event's target address that doesn't need
-	 *            to be encoded in the element.
-	 */
-	public static void toXml(XFieldEvent event, XmlOut out, XAddress context)
+	private static void toXml(XFieldEvent event, XmlOut out, XAddress context, boolean inTrans)
 	        throws IllegalArgumentException {
 		
 		out.open(XFIELDEVENT_ELEMENT);
 		
-		setAtomicEventAttributes(event, out, context);
+		setAtomicEventAttributes(event, out, context, inTrans);
 		
 		if(event.getChangeType() != ChangeType.REMOVE) {
 			XmlValue.toXml(event.getNewValue(), out);
@@ -712,20 +578,12 @@ public class XmlEvent {
 		
 	}
 	
-	/**
-	 * Encode the given {@link XFieldEvent} as an XML element.
-	 * 
-	 * @param event The event to encode.
-	 * @param out The XML encoder to write to.
-	 * @param context The part of this event's target address that doesn't need
-	 *            to be encoded in the element.
-	 */
-	public static void toXml(XReversibleFieldEvent event, XmlOut out, XAddress context)
-	        throws IllegalArgumentException {
+	private static void toXml(XReversibleFieldEvent event, XmlOut out, XAddress context,
+	        boolean inTrans) throws IllegalArgumentException {
 		
 		out.open(XREVERSIBLEFIELDEVENT_ELEMENT);
 		
-		setAtomicEventAttributes(event, out, context);
+		setAtomicEventAttributes(event, out, context, inTrans);
 		
 		if(event.getChangeType() != ChangeType.ADD) {
 			XmlValue.toXml(event.getOldValue(), out);
@@ -738,42 +596,7 @@ public class XmlEvent {
 		
 	}
 	
-	protected static void toXml(XFieldEvent event, XmlOut out, XAddress context, XChangeLog cl)
-	        throws IllegalArgumentException {
-		
-		out.open(XFIELDEVENT_ELEMENT);
-		
-		setAtomicEventAttributes(event, out, context);
-		
-		// if(event.getChangeType() != ChangeType.ADD) {
-		// // don't save the old value if it is already saved in an old event
-		// long fieldRev = event.getOldFieldRevision();
-		// if(cl != null && fieldRev > cl.getFirstRevisionNumber()
-		// && fieldRev <= cl.getCurrentRevisionNumber()) {
-		// XEvent oldEvent = cl.getEventAt(fieldRev);
-		// XValue oldValue = getOldValue(oldEvent, event.getTarget());
-		// assert XI.equals(event.getOldValue(), oldValue);
-		// } else {
-		// XmlValue.toXml(event.getOldValue(), out);
-		// }
-		// }
-		if(event.getChangeType() != ChangeType.REMOVE) {
-			XmlValue.toXml(event.getNewValue(), out);
-		}
-		
-		out.close(XFIELDEVENT_ELEMENT);
-		
-	}
-	
-	/**
-	 * Encode the given {@link XModelEvent} as an XML element.
-	 * 
-	 * @param event The event to encode.
-	 * @param out The XML encoder to write to.
-	 * @param context The part of this event's target address that doesn't need
-	 *            to be encoded in the element.
-	 */
-	public static void toXml(XModelEvent event, XmlOut out, XAddress context)
+	private static void toXml(XModelEvent event, XmlOut out, XAddress context, boolean inTrans)
 	        throws IllegalArgumentException {
 		
 		if(context.getObject() != null || context.getField() != null) {
@@ -782,7 +605,7 @@ public class XmlEvent {
 		
 		out.open(XMODELEVENT_ELEMENT);
 		
-		setAtomicEventAttributes(event, out, context);
+		setAtomicEventAttributes(event, out, context, inTrans);
 		
 		out.attribute(XmlUtils.OBJECTID_ATTRIBUTE, event.getObjectId().toString());
 		
@@ -790,15 +613,7 @@ public class XmlEvent {
 		
 	}
 	
-	/**
-	 * Encode the given {@link XObjectEvent} as an XML element.
-	 * 
-	 * @param event The event to encode.
-	 * @param out The XML encoder to write to.
-	 * @param context The part of this event's target address that doesn't need
-	 *            to be encoded in the element.
-	 */
-	public static void toXml(XObjectEvent event, XmlOut out, XAddress context)
+	private static void toXml(XObjectEvent event, XmlOut out, XAddress context, boolean inTrans)
 	        throws IllegalArgumentException {
 		
 		if(context.getField() != null) {
@@ -807,7 +622,7 @@ public class XmlEvent {
 		
 		out.open(XOBJECTEVENT_ELEMENT);
 		
-		setAtomicEventAttributes(event, out, context);
+		setAtomicEventAttributes(event, out, context, inTrans);
 		
 		out.attribute(XmlUtils.FIELDID_ATTRIBUTE, event.getFieldId().toString());
 		
@@ -815,15 +630,7 @@ public class XmlEvent {
 		
 	}
 	
-	/**
-	 * Encode the given {@link XRepositoryEvent} as an XML element.
-	 * 
-	 * @param event The event to encode.
-	 * @param out The XML encoder to write to.
-	 * @param context The part of this event's target address that doesn't need
-	 *            to be encoded in the element.
-	 */
-	public static void toXml(XRepositoryEvent event, XmlOut out, XAddress context)
+	private static void toXml(XRepositoryEvent event, XmlOut out, XAddress context, boolean inTrans)
 	        throws IllegalArgumentException {
 		
 		if(context.getObject() != null || context.getField() != null) {
@@ -832,7 +639,7 @@ public class XmlEvent {
 		
 		out.open(XREPOSITORYEVENT_ELEMENT);
 		
-		setAtomicEventAttributes(event, out, context);
+		setAtomicEventAttributes(event, out, context, inTrans);
 		
 		out.attribute(XmlUtils.MODELID_ATTRIBUTE, event.getModelId().toString());
 		
@@ -840,31 +647,18 @@ public class XmlEvent {
 		
 	}
 	
-	/**
-	 * Encode the given {@link XTransactionEvent} as an XML element.
-	 * 
-	 * @param trans The transaction to encode.
-	 * @param out The XML encoder to write to.
-	 * @param context The part of this event's target address that doesn't need
-	 *            to be encoded in the element.
-	 */
-	public static void toXml(XTransactionEvent trans, XmlOut out, XAddress context)
-	        throws IllegalArgumentException {
-		toXml(trans, out, context, null);
-	}
-	
-	public static void toXml(XTransactionEvent trans, XmlOut out, XAddress context, XChangeLog cl)
+	private static void toXml(XTransactionEvent trans, XmlOut out, XAddress context)
 	        throws IllegalArgumentException {
 		
 		out.open(XTRANSACTIONEVENT_ELEMENT);
 		
-		setCommonAttributes(trans, out, context);
+		setCommonAttributes(trans, out, context, false);
 		
 		XAddress newContext = trans.getTarget();
 		
 		for(XAtomicEvent event : trans) {
 			assert event != null;
-			toXml(event, out, newContext, cl);
+			toXml(event, out, newContext, true);
 		}
 		
 		out.close(XTRANSACTIONEVENT_ELEMENT);
