@@ -81,8 +81,8 @@ class XmlUtils {
 		
 		boolean match = (context != null);
 		
-		XID repoId = getOptionalXidAttribute(xml, REPOSITORYID_ATTRIBUTE,
-		        match ? context.getRepository() : null);
+		XID repoId = getOptionalXidAttribute(xml, REPOSITORYID_ATTRIBUTE, match ? context
+		        .getRepository() : null);
 		match = match && XI.equals(repoId, context.getRepository());
 		XID modelId = getOptionalXidAttribute(xml, MODELID_ATTRIBUTE, match ? context.getModel()
 		        : null);

@@ -44,6 +44,7 @@ public class XmlCommand {
 	
 	private static final String XREPOSITORYCOMMAND_ELEMENT = "xrepositoryCommand";
 	private static final String XTRANSACTION_ELEMENT = "xtransaction";
+	private static final String REVISION_RELATIVE_ATTRIBUTE = "relative";
 	
 	private static long getRevision(MiniElement xml, String elementName, boolean revisioned) {
 		
@@ -74,12 +75,23 @@ public class XmlCommand {
 			throw new IllegalArgumentException("<" + elementName + ">@" + REVISION_ATTRIBUTE
 			        + " is missing from non-forced change");
 		
+		long rev;
 		try {
-			return Long.parseLong(revisionString);
+			rev = Long.parseLong(revisionString);
 		} catch(NumberFormatException e) {
 			throw new IllegalArgumentException("<" + elementName + ">@" + REVISION_ATTRIBUTE
 			        + " does not contain a long, but '" + revisionString + "'");
 		}
+		
+		String relativeString = xml.getAttribute(REVISION_RELATIVE_ATTRIBUTE);
+		if(relativeString != null) {
+			assert rev < XCommand.RELATIVE_REV;
+			if(Boolean.parseBoolean(relativeString)) {
+				rev += XCommand.RELATIVE_REV;
+			}
+		}
+		
+		return rev;
 	}
 	
 	/**
@@ -99,8 +111,17 @@ public class XmlCommand {
 		
 		if(command.isForced())
 			out.attribute(FORCED_ATTRIBUTE, Boolean.toString(true));
-		else if(saveRevision)
-			out.attribute(REVISION_ATTRIBUTE, Long.toString(command.getRevisionNumber()));
+		else if(saveRevision) {
+			
+			long rev = command.getRevisionNumber();
+			
+			if(rev >= XCommand.RELATIVE_REV) {
+				out.attribute(REVISION_RELATIVE_ATTRIBUTE, Boolean.toString(true));
+				rev -= XCommand.RELATIVE_REV;
+			}
+			
+			out.attribute(REVISION_ATTRIBUTE, Long.toString(rev));
+		}
 		
 	}
 	

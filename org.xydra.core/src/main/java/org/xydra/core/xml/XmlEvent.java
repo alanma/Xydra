@@ -212,8 +212,6 @@ public class XmlEvent {
 	
 	private static XFieldEvent toFieldEvent(MiniElement xml, XAddress context, TempTrans trans) {
 		
-		XmlUtils.checkElementName(xml, XFIELDEVENT_ELEMENT);
-		
 		XAddress target = XmlUtils.getTarget(xml, context);
 		
 		ChangeType type = XmlUtils.getChangeType(xml, XFIELDEVENT_ELEMENT);
@@ -258,8 +256,6 @@ public class XmlEvent {
 	
 	private static XReversibleFieldEvent toReversibleFieldEvent(MiniElement xml, XAddress context,
 	        TempTrans trans) {
-		
-		XmlUtils.checkElementName(xml, XREVERSIBLEFIELDEVENT_ELEMENT);
 		
 		XAddress target = XmlUtils.getTarget(xml, context);
 		
@@ -311,8 +307,6 @@ public class XmlEvent {
 	
 	private static XModelEvent toModelEvent(MiniElement xml, XAddress context, TempTrans trans) {
 		
-		XmlUtils.checkElementName(xml, XMODELEVENT_ELEMENT);
-		
 		if(context.getObject() != null || context.getField() != null) {
 			throw new IllegalArgumentException("invalid context for model events: " + context);
 		}
@@ -360,8 +354,6 @@ public class XmlEvent {
 	}
 	
 	private static XObjectEvent toObjectEvent(MiniElement xml, XAddress context, TempTrans trans) {
-		
-		XmlUtils.checkElementName(xml, XOBJECTEVENT_ELEMENT);
 		
 		if(context.getField() != null) {
 			throw new IllegalArgumentException("invalid context for object events: " + context);
@@ -412,8 +404,6 @@ public class XmlEvent {
 	
 	private static XRepositoryEvent toRepositoryEvent(MiniElement xml, XAddress context,
 	        TempTrans trans) {
-		
-		XmlUtils.checkElementName(xml, XREPOSITORYEVENT_ELEMENT);
 		
 		if(context.getObject() != null || context.getField() != null) {
 			throw new IllegalArgumentException("invalid context for model events: " + context);
@@ -475,8 +465,6 @@ public class XmlEvent {
 	}
 	
 	private static XTransactionEvent toTransactionEvent(MiniElement xml, XAddress context) {
-		
-		XmlUtils.checkElementName(xml, XTRANSACTIONEVENT_ELEMENT);
 		
 		XAddress target = XmlUtils.getTarget(xml, context);
 		

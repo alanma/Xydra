@@ -82,7 +82,7 @@ public class XmlValue {
 		return list;
 	}
 	
-	private static List<XID> getIdListContents(MiniElement xml) {
+	public static List<XID> getIdListContents(MiniElement xml) {
 		
 		List<XID> list = new ArrayList<XID>();
 		
@@ -797,8 +797,7 @@ public class XmlValue {
 		
 		xo.open(XIDLIST_ELEMENT);
 		
-		for(XID value : xvalue)
-			toXml(value, xo);
+		setIdListContents(xvalue, xo);
 		
 		xo.close(XIDLIST_ELEMENT);
 		
@@ -818,10 +817,16 @@ public class XmlValue {
 		
 		xo.open(XIDSET_ELEMENT);
 		
-		for(XID value : xvalue)
-			toXml(value, xo);
+		setIdListContents(xvalue, xo);
 		
 		xo.close(XIDSET_ELEMENT);
+		
+	}
+	
+	public static void setIdListContents(Iterable<XID> list, XmlOut xo) {
+		
+		for(XID value : list)
+			toXml(value, xo);
 		
 	}
 	
@@ -834,8 +839,7 @@ public class XmlValue {
 		
 		xo.open(XIDSORTEDSET_ELEMENT);
 		
-		for(XID value : xvalue)
-			toXml(value, xo);
+		setIdListContents(xvalue, xo);
 		
 		xo.close(XIDSORTEDSET_ELEMENT);
 		
