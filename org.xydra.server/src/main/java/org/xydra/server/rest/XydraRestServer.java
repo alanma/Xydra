@@ -33,6 +33,9 @@ import org.xydra.server.rest.data.XObjectResource;
 import org.xydra.server.rest.data.XRepositoryResource;
 import org.xydra.server.rest.demo.AddDemoDataResource;
 import org.xydra.server.rest.log.LogTestResource;
+import org.xydra.store.InternalStoreException;
+import org.xydra.store.XydraStore;
+import org.xydra.store.impl.delegate.XydraPersistence;
 
 
 /**
@@ -50,8 +53,10 @@ public class XydraRestServer {
 	private static final Logger log = LoggerFactory.getLogger(XydraRestServer.class);
 	
 	public static final String INIT_PARAM_XYDRASERVER = "org.xydra.server";
+	public static final String INIT_PARAM_XYDRASTORE = "org.xydra.store";
 	
 	public static final String SERVLET_CONTEXT_ATTRIBUTE_XYDRASERVER = "org.xydra.server";
+	public static final String SERVLET_CONTEXT_ATTRIBUTE_XYDRASTORE = "org.xydra.store";
 	
 	/**
 	 * @param restless The current Restless instance.
@@ -62,7 +67,8 @@ public class XydraRestServer {
 	public static IXydraServer getXydraServer(Restless restless) {
 		IXydraServer xydraServer = getXydraServerInternal(restless);
 		if(xydraServer == null) {
-			log.warn("XydraRestServer.restless hasn't been run properly before calling this method.");
+			log
+			        .warn("XydraRestServer.restless hasn't been run properly before calling this method.");
 		}
 		return xydraServer;
 	}
@@ -71,6 +77,15 @@ public class XydraRestServer {
 		IXydraServer xydraServer = (IXydraServer)restless.getServletContext().getAttribute(
 		        SERVLET_CONTEXT_ATTRIBUTE_XYDRASERVER);
 		return xydraServer;
+	}
+	
+	public static XydraStore getXydraStore(Restless restless) {
+		XydraStore store = (XydraStore)restless.getServletContext().getAttribute(
+		        SERVLET_CONTEXT_ATTRIBUTE_XYDRASTORE);
+		if(store == null) {
+			throw new InternalStoreException("XydraRestSever not initialized");
+		}
+		return store;
 	}
 	
 	/**
@@ -85,6 +100,10 @@ public class XydraRestServer {
 		initializeServer(restless);
 		
 		restless.addExceptionHandler(new XAccessExceptionHandler());
+		
+		// init store resources
+		String storePrefix = prefix + "/store/v1";
+		XydraStoreResource.restless(restless, storePrefix);
 		
 		// init data/snapshot handling resources
 		String dataPrefix = prefix + "/data";
@@ -152,6 +171,29 @@ public class XydraRestServer {
 		        serverInstance);
 		log.info("XydraServer instance stored in servletContext at key '"
 		        + SERVLET_CONTEXT_ATTRIBUTE_XYDRASERVER + "'");
+		
+		String storeClassName = restless.getInitParameter(INIT_PARAM_XYDRASTORE);
+		XydraStore storeInstance;
+		if(storeClassName != null) {
+			try {
+				Class<?> storeClass = Class.forName(storeClassName);
+				Constructor<?> cons = storeClass.getConstructor();
+				assert XydraPersistence.class.isAssignableFrom(storeClass) : storeClass.getClass()
+				        + " is not a XydraPersistence";
+				storeInstance = (XydraStore)cons.newInstance();
+			} catch(Exception e) {
+				throw new RuntimeException("Error configuring XydraStore from persistence class '"
+				        + storeClassName + "'", e);
+			}
+		} else {
+			throw new RuntimeException("no xydra store backend configured in web.xml");
+		}
+		
+		// store in context
+		restless.getServletContext().setAttribute(SERVLET_CONTEXT_ATTRIBUTE_XYDRASTORE,
+		        storeInstance);
+		log.info("XydraStore instance stored in servletContext at key '"
+		        + SERVLET_CONTEXT_ATTRIBUTE_XYDRASTORE + "'");
 	}
 	
 	public void ping(HttpServletResponse res) throws IOException {

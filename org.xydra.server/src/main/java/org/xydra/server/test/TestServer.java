@@ -9,16 +9,22 @@ import javax.servlet.ServletContext;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.xydra.base.XAddress;
+import org.xydra.base.XID;
+import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.core.DemoModelUtil;
+import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.server.IXydraServer;
 import org.xydra.server.rest.XydraRestServer;
+import org.xydra.store.XydraStore;
+import org.xydra.store.XydraStoreAdmin;
 import org.xydra.store.access.XA;
+import org.xydra.store.access.XAuthenticationDatabase;
 import org.xydra.store.access.XAuthorisationManager;
 
 
@@ -45,7 +51,12 @@ import org.xydra.store.access.XAuthorisationManager;
  */
 public class TestServer {
 	
-	private static Logger log = LoggerFactory.getLogger(TestServer.class);
+	private static final Logger log = getLogger();
+	
+	private static Logger getLogger() {
+		LoggerTestHelper.init();
+		return LoggerFactory.getLogger(TestServer.class);
+	}
 	
 	private int port;
 	
@@ -112,6 +123,14 @@ public class TestServer {
 		return (IXydraServer)sc.getAttribute(XydraRestServer.SERVLET_CONTEXT_ATTRIBUTE_XYDRASERVER);
 	}
 	
+	public XydraStore getStore() {
+		if(this.webapp == null) {
+			throw new RuntimeException("cannot get backend before server is started");
+		}
+		ServletContext sc = this.webapp.getServletContext();
+		return (XydraStore)sc.getAttribute(XydraRestServer.SERVLET_CONTEXT_ATTRIBUTE_XYDRASTORE);
+	}
+	
 	public static void main(String[] args) throws Exception {
 		
 		// start jetty
@@ -122,13 +141,13 @@ public class TestServer {
 		
 		// add a default model
 		// TODO move command into transaction
-		XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(
-		        xydraServer.getRepositoryAddress(), XCommand.SAFE, DemoModelUtil.PHONEBOOK_ID);
+		XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(xydraServer
+		        .getRepositoryAddress(), XCommand.SAFE, DemoModelUtil.PHONEBOOK_ID);
 		xydraServer.executeCommand(createCommand, null);
 		XAddress modelAddr = createCommand.getChangedEntity();
 		XTransactionBuilder tb = new XTransactionBuilder(modelAddr);
 		DemoModelUtil.setupPhonebook(modelAddr, tb);
-		xydraServer.executeCommand(tb.build(), null);
+		xydraServer.executeCommand(tb.buildCommand(), null);
 		
 		// allow access to everyone
 		XAddress repoAddr = xydraServer.getRepositoryAddress();
@@ -136,8 +155,30 @@ public class TestServer {
 		arm.getAuthorisationDatabase().setAccess(XA.GROUP_ALL, repoAddr, XA.ACCESS_READ, true);
 		arm.getAuthorisationDatabase().setAccess(XA.GROUP_ALL, repoAddr, XA.ACCESS_WRITE, true);
 		
+		// initialize the store
+		
+		XydraStore store = server.getStore();
+		
+		XydraStoreAdmin admin = store.getXydraStoreAdmin();
+		XAuthenticationDatabase auth = admin.getAccessControlManager().getAuthenticationDatabase();
+		XID actorId = XX.toId("tester");
+		String passwordHash = "secret";
+		auth.setPasswordHash(actorId, "secret");
+		XAuthorisationManager access = admin.getAccessControlManager().getAuthorisationManager();
+		XAddress repoAddr2 = XX.toAddress(admin.getRepositoryId(), null, null, null);
+		access.getAuthorisationDatabase().setAccess(actorId, repoAddr2, XA.ACCESS_READ, true);
+		access.getAuthorisationDatabase().setAccess(actorId, repoAddr2, XA.ACCESS_WRITE, true);
+		
+		XRepositoryCommand createCommand2 = MemoryRepositoryCommand.createAddCommand(repoAddr2,
+		        XCommand.SAFE, DemoModelUtil.PHONEBOOK_ID);
+		XAddress modelAddr2 = createCommand2.getChangedEntity();
+		XTransactionBuilder tb2 = new XTransactionBuilder(modelAddr2);
+		DemoModelUtil.setupPhonebook(modelAddr2, tb2);
+		
+		store.executeCommands(actorId, passwordHash, new XCommand[] { createCommand2,
+		        tb2.buildCommand() }, null);
+		
 		log.info("Started embedded Jetty server. User interface is at " + uri.toString());
 		
 	}
-	
 }

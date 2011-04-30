@@ -16,6 +16,10 @@
 			<param-name>org.xydra.server</param-name>
 			<param-value>org.xydra.server.impl.memory.MemoryXydraServer</param-value>
 		</init-param>
+		<init-param>
+			<param-name>org.xydra.store</param-name>
+			<param-value>org.xydra.store.impl.memory.SecureMemoryStore</param-value>
+		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 	<servlet-mapping>
