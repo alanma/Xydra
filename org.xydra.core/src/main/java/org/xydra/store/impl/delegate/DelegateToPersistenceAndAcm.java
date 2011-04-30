@@ -158,6 +158,11 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 	
 	@Override
 	public XEvent[] getEvents(XID actorId, String passwordHash, GetEventsRequest getEventsRequest) {
+		
+		if(getEventsRequest == null) {
+			throw new RequestException("getEventsRequest must not be null");
+		}
+		
 		assert actorId != null;
 		authorise(actorId, passwordHash);
 		XAddress address = getEventsRequest.address;

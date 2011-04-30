@@ -86,6 +86,11 @@ public class DelegateToSingleOperationStore implements XydraStore {
 			this.batchedResult = new BatchedResult[nCommands];
 			this.resultsRemaining = nCommands;
 			this.cb = cb;
+			if(this.resultsRemaining == 0) {
+				if(this.cb != null) {
+					this.cb.onSuccess(this.batchedResult);
+				}
+			}
 		}
 		
 		synchronized protected void addResult(int index, BatchedResult<T> result) {
@@ -96,7 +101,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 				if(this.cb != null) {
 					this.cb.onSuccess(this.batchedResult);
 				}
-				notify();
+				notifyAll();
 			}
 		}
 		
@@ -176,6 +181,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 	        Callback<BatchedResult<Long>[]> callback) {
 		
 		MultiOpCallback<Long> multi = new MultiOpCallback<Long>(commands.length, callback);
+		
 		@SuppressWarnings("unchecked")
 		SingleOpCallback<Long>[] soc = new SingleOpCallback[commands.length];
 		
