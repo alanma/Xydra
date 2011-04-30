@@ -8,7 +8,10 @@ package org.xydra.restless;
 public class RestlessParameter {
 	
 	String name;
-	String defaultValue;
+	Object defaultValue;
+	boolean isArray;
+	
+	private static final String[] defaultArray = new String[0];
 	
 	/**
 	 * 
@@ -20,6 +23,18 @@ public class RestlessParameter {
 		super();
 		this.name = name;
 		this.defaultValue = defaultValue;
+		this.isArray = false;
+	}
+	
+	/**
+	 * @param name for binding it to variable names
+	 * @param isArray true if there can be multiple values
+	 */
+	public RestlessParameter(String name, boolean isArray) {
+		super();
+		this.name = name;
+		this.defaultValue = isArray ? defaultArray : null;
+		this.isArray = true;
 	}
 	
 	/**

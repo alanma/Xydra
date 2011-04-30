@@ -164,15 +164,22 @@ public class RestlessMethod {
 					        + " named parameters, processed "
 					        + boundNamedParameterNumber + " parameters from request so far.";
 					RestlessParameter param = this.requiredNamedParameter[boundNamedParameterNumber];
+					
+					Object value = null;
+					
 					/* 1) look in urlParameters (not query params) */
-					String value = urlParameter.get(param.name);
+					if(!param.isArray) {
+						value = urlParameter.get(param.name);
+					}
 					
 					/* 2) look in POST params and query params */
 					if(value == null) {
 						String[] values = req.getParameterValues(param.name);
 						if(values != null) {
 							// handle POST and query param values
-							if(values.length > 1) {
+							if(param.isArray) {
+								value = values;
+							} else if(values.length > 1) {
 								// remove redundant
 								Set<String> uniqueValues = new HashSet<String>();
 								for(String s : values) {
@@ -200,7 +207,7 @@ public class RestlessMethod {
 					}
 					
 					/* 3) look in cookies */
-					if(value == null) {
+					if(value == null && !param.isArray) {
 						value = cookieMap.get(param.name);
 					}
 					
