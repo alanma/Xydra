@@ -271,10 +271,10 @@ public class XydraStoreRestClient implements XydraStore {
 				assert false;
 			}
 			
-			sb.append("beginRevision=");
+			sb.append("&beginRevision=");
 			sb.append(ger.beginRevision);
 			
-			sb.append("endRevision=");
+			sb.append("&endRevision=");
 			if(ger.endRevision != Long.MAX_VALUE) {
 				sb.append(ger.beginRevision);
 			}

@@ -69,11 +69,13 @@ public class XydraStoreResource {
 		
 		restless.addMethod(prefix + "/ping", "GET", XydraStoreResource.class, "ping", false);
 		
+		// TODO support class-specific exception handlers
 		restless.addExceptionHandler(new RestlessExceptionHandler() {
 			@Override
 			public boolean handleException(Throwable t, HttpServletRequest req,
 			        HttpServletResponse res) {
 				
+				// TODO remove
 				if(!(t instanceof StoreException)) {
 					return false;
 				}
@@ -151,7 +153,7 @@ public class XydraStoreResource {
 		XydraStore store = XydraRestServer.getXydraStore(restless);
 		XID actorId = getActorId(actorIdStr);
 		
-		EventsRequest ger = parseEventsReques(addresses, from, to);
+		EventsRequest ger = parseEventsRequests(addresses, from, to);
 		
 		WaitingCallback<XID> revId = new WaitingCallback<XID>();
 		store.getRepositoryId(actorId, passwordHash, revId);
@@ -209,7 +211,7 @@ public class XydraStoreResource {
 		
 	}
 	
-	private EventsRequest parseEventsReques(String[] addresses, String[] from, String[] to) {
+	private EventsRequest parseEventsRequests(String[] addresses, String[] from, String[] to) {
 		
 		if(addresses.length < from.length || addresses.length < to.length) {
 			throw new RequestException("illegal parameter combination: addresses=" + addresses
@@ -257,7 +259,7 @@ public class XydraStoreResource {
 		XydraStore store = XydraRestServer.getXydraStore(restless);
 		XID actorId = getActorId(actorIdStr);
 		
-		EventsRequest ger = parseEventsReques(addresses, from, to);
+		EventsRequest ger = parseEventsRequests(addresses, from, to);
 		
 		WaitingCallback<BatchedResult<XEvent[]>[]> callback = new WaitingCallback<BatchedResult<XEvent[]>[]>();
 		store.getEvents(actorId, passwordHash, ger.requests, callback);

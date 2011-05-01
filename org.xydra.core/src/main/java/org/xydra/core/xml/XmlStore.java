@@ -234,7 +234,7 @@ public class XmlStore {
 			}
 			assert i < results.length;
 			
-			Throwable t = toException(xml);
+			Throwable t = toException(ele);
 			if(t != null) {
 				results[i] = new BatchedResult<XEvent[]>(t);
 				continue;
@@ -247,7 +247,7 @@ public class XmlStore {
 			
 			try {
 				
-				List<XEvent> events = XmlEvent.toEventList(xml, context[i].address);
+				List<XEvent> events = XmlEvent.toEventList(ele, context[i].address);
 				
 				results[i] = new BatchedResult<XEvent[]>(events.toArray(new XEvent[events.size()]));
 				
