@@ -723,6 +723,9 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		GetEventsRequest[] requests = new GetEventsRequest[1];
 		
+		// Add a valid request.
+		requests[0] = new GetEventsRequest(XX.toAddress("/data/somewhere"), 0, 1);
+		
 		this.store.getEvents(this.incorrectUser, this.incorrectUserPass, requests, callback);
 		
 		assertFalse(this.waitOnCallback(callback));
