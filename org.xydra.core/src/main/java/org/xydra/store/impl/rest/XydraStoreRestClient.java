@@ -5,18 +5,22 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableModel;
@@ -24,13 +28,14 @@ import org.xydra.base.rmof.XReadableObject;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlCommand;
 import org.xydra.core.xml.XmlStore;
-import org.xydra.core.xml.XmlStore.Snapshots;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XmlOutStringBuffer;
 import org.xydra.index.query.Pair;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.GetEventsRequest;
+import org.xydra.store.InternalStoreException;
+import org.xydra.store.RequestException;
 import org.xydra.store.XydraStore;
 import org.xydra.store.XydraStoreAdmin;
 
@@ -53,8 +58,13 @@ public class XydraStoreRestClient implements XydraStore {
 			throw new IllegalArgumentException("passwordHash must not be null");
 		}
 		
-		// TODO escaping
-		con.setRequestProperty("Cookie", "actorId=" + actorId + "; passwordHash=" + passwordHash);
+		try {
+			con.setRequestProperty("Cookie", "actorId="
+			        + URLEncoder.encode(actorId.toString(), "UTF-8") + "; passwordHash="
+			        + URLEncoder.encode(passwordHash.toString(), "UTF-8"));
+		} catch(UnsupportedEncodingException e) {
+			assert false;
+		}
 		
 	}
 	
@@ -157,6 +167,10 @@ public class XydraStoreRestClient implements XydraStore {
 	public void executeCommands(XID actorId, String passwordHash, XCommand[] commands,
 	        Callback<BatchedResult<Long>[]> callback) throws IllegalArgumentException {
 		
+		if(commands == null) {
+			throw new IllegalArgumentException("commands array must not be null");
+		}
+		
 		XmlOutStringBuffer out = new XmlOutStringBuffer();
 		XmlCommand.toXml(Arrays.asList(commands).iterator(), out, null);
 		
@@ -165,23 +179,36 @@ public class XydraStoreRestClient implements XydraStore {
 			return;
 		}
 		
-		Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]> res = XmlStore.toCommandResults(xml,
-		        null);
+		@SuppressWarnings("unchecked")
+		BatchedResult<Long>[] res = new BatchedResult[commands.length];
 		
-		assert res.getSecond() == null;
+		XmlStore.toCommandResults(xml, null, res, null);
 		
 		if(callback != null) {
-			callback.onSuccess(res.getFirst());
+			callback.onSuccess(res);
 		}
 		
 	}
 	
 	@Override
 	public void executeCommandsAndGetEvents(XID actorId, String passwordHash, XCommand[] commands,
-	        GetEventsRequest[] getEventRequests,
+	        GetEventsRequest[] getEventsRequests,
 	        Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback)
 	        throws IllegalArgumentException {
-		String uri = "execute?" + encodeEventsRequests(getEventRequests);
+		
+		if(commands == null) {
+			throw new IllegalArgumentException("commands array must not be null");
+		}
+		
+		if(getEventsRequests == null) {
+			throw new IllegalArgumentException("getEventsRequests array must not be null");
+		}
+		
+		@SuppressWarnings("unchecked")
+		BatchedResult<XEvent[]>[] eventsRes = new BatchedResult[getEventsRequests.length];
+		String req = encodeEventsRequests(getEventsRequests, eventsRes);
+		
+		String uri = req == null ? "execute" : "execute?" + req;
 		
 		XmlOutStringBuffer out = new XmlOutStringBuffer();
 		XmlCommand.toXml(Arrays.asList(commands).iterator(), out, null);
@@ -191,19 +218,45 @@ public class XydraStoreRestClient implements XydraStore {
 			return;
 		}
 		
-		Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]> res = XmlStore.toCommandResults(xml,
-		        getEventRequests);
+		@SuppressWarnings("unchecked")
+		BatchedResult<Long>[] commandsRes = new BatchedResult[commands.length];
 		
-		callback.onSuccess(res);
+		XmlStore.toCommandResults(xml, getEventsRequests, commandsRes, eventsRes);
+		
+		callback.onSuccess(new Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>(commandsRes,
+		        eventsRes));
 	}
 	
-	private String encodeEventsRequests(GetEventsRequest[] getEventRequests) {
+	private String encodeEventsRequests(GetEventsRequest[] getEventRequests,
+	        BatchedResult<XEvent[]>[] res) {
+		
+		assert getEventRequests.length == res.length;
 		
 		StringBuilder sb = new StringBuilder();
 		
 		boolean first = true;
 		
-		for(GetEventsRequest ger : getEventRequests) {
+		for(int i = 0; i < getEventRequests.length; i++) {
+			GetEventsRequest ger = getEventRequests[i];
+			
+			if(ger == null) {
+				res[i] = new BatchedResult<XEvent[]>(new RequestException(
+				        "GetEventsRequest must not be null"));
+				continue;
+			} else if(ger.address == null) {
+				res[i] = new BatchedResult<XEvent[]>(new RequestException(
+				        "address must not be null"));
+				continue;
+			} else if(ger.address.getModel() == null) {
+				res[i] = new BatchedResult<XEvent[]>(new RequestException(
+				        "invalid get events adddress: " + ger.address));
+				continue;
+			} else if(ger.endRevision < ger.beginRevision) {
+				res[i] = new BatchedResult<XEvent[]>(new RequestException(
+				        "invalid GetEventsRequest range: [" + ger.beginRevision + ","
+				                + ger.endRevision + "]"));
+				continue;
+			}
 			
 			if(first) {
 				first = false;
@@ -211,10 +264,12 @@ public class XydraStoreRestClient implements XydraStore {
 				sb.append('&');
 			}
 			
-			// TODO escaping
-			
 			sb.append("address=");
-			sb.append(ger.address);
+			try {
+				sb.append(URLEncoder.encode(ger.address.toString(), "UTF-8"));
+			} catch(UnsupportedEncodingException e) {
+				assert false;
+			}
 			
 			sb.append("beginRevision=");
 			sb.append(ger.beginRevision);
@@ -226,21 +281,37 @@ public class XydraStoreRestClient implements XydraStore {
 			
 		}
 		
+		if(first) {
+			return null;
+		}
+		
 		return sb.toString();
 	}
 	
 	@Override
-	public void getEvents(XID actorId, String passwordHash, GetEventsRequest[] getEventsRequest,
+	public void getEvents(XID actorId, String passwordHash, GetEventsRequest[] getEventsRequests,
 	        Callback<BatchedResult<XEvent[]>[]> callback) throws IllegalArgumentException {
 		
-		String uri = "events?" + encodeEventsRequests(getEventsRequest);
+		if(getEventsRequests == null) {
+			throw new IllegalArgumentException("getEventsRequests array must not be null");
+		}
+		
+		@SuppressWarnings("unchecked")
+		BatchedResult<XEvent[]>[] res = new BatchedResult[getEventsRequests.length];
+		String req = encodeEventsRequests(getEventsRequests, res);
+		if(req == null) {
+			callback.onSuccess(res);
+			return;
+		}
+		
+		String uri = "events?" + req;
 		
 		MiniElement xml = get(uri, actorId, passwordHash, callback);
 		if(xml == null) {
 			return;
 		}
 		
-		BatchedResult<XEvent[]>[] res = XmlStore.toEventResults(xml, getEventsRequest);
+		XmlStore.toEventResults(xml, getEventsRequests, res);
 		
 		callback.onSuccess(res);
 		
@@ -305,19 +376,25 @@ public class XydraStoreRestClient implements XydraStore {
 		}
 	}
 	
-	private String encodeAddresses(XAddress[] addresses) {
+	private <T> String encodeAddresses(XAddress[] addresses, BatchedResult<T>[] res, XType type) {
 		
-		if(addresses == null) {
-			throw new IllegalArgumentException("address array must not be null");
-		}
-		
-		// TODO check address type
+		assert res.length == addresses.length;
 		
 		StringBuilder sb = new StringBuilder();
 		
 		boolean first = true;
 		
-		for(XAddress address : addresses) {
+		for(int i = 0; i < addresses.length; i++) {
+			XAddress address = addresses[i];
+			
+			if(address == null) {
+				res[i] = new BatchedResult<T>(new RequestException("address must not be null"));
+				continue;
+			} else if(address.getAddressedType() != type) {
+				res[i] = new BatchedResult<T>(new RequestException("address " + address
+				        + " is not of type " + type));
+				continue;
+			}
 			
 			if(first) {
 				first = false;
@@ -325,11 +402,17 @@ public class XydraStoreRestClient implements XydraStore {
 				sb.append('&');
 			}
 			
-			// TODO escaping
-			
 			sb.append("address=");
-			sb.append(address);
+			try {
+				sb.append(URLEncoder.encode(address.toString(), "UTF-8"));
+			} catch(UnsupportedEncodingException e) {
+				assert false;
+			}
 			
+		}
+		
+		if(first) {
+			return null;
 		}
 		
 		return sb.toString();
@@ -339,62 +422,91 @@ public class XydraStoreRestClient implements XydraStore {
 	public void getModelRevisions(XID actorId, String passwordHash, XAddress[] modelAddresses,
 	        Callback<BatchedResult<Long>[]> callback) throws IllegalArgumentException {
 		
-		String uri = "revisions?" + encodeAddresses(modelAddresses);
+		if(modelAddresses == null) {
+			throw new IllegalArgumentException("modelAddresses array must not be null");
+		}
+		
+		@SuppressWarnings("unchecked")
+		BatchedResult<Long>[] res = new BatchedResult[modelAddresses.length];
+		String req = encodeAddresses(modelAddresses, res, XType.XMODEL);
+		if(req == null) {
+			callback.onSuccess(res);
+			return;
+		}
+		
+		String uri = "revisions?" + req;
 		
 		MiniElement xml = get(uri, actorId, passwordHash, callback);
 		if(xml == null) {
 			return;
 		}
 		
-		BatchedResult<Long>[] revisions = XmlStore.toModelRevisions(xml);
+		XmlStore.toModelRevisions(xml, res);
 		
-		callback.onSuccess(revisions);
+		callback.onSuccess(res);
 		
 	}
 	
-	public <T, V> BatchedResult<T>[] merge(Throwable[] exceptions, T[] results, V[] third) {
+	public <T> void toBatchedResults(List<Object> snapshots, Class<T> cls, BatchedResult<T>[] result) {
 		
-		assert exceptions.length == results.length;
-		assert third.length == results.length;
-		
-		@SuppressWarnings("unchecked")
-		BatchedResult<T>[] merged = new BatchedResult[results.length];
-		
-		for(int i = 0; i < results.length; i++) {
+		int i = 0;
+		for(Object o : snapshots) {
 			
-			assert exceptions[i] == null || results[i] == null;
-			assert results[i] == null || third[i] == null;
+			while(result[i] != null) {
+				i++;
+			}
 			
-			if(exceptions[i] != null) {
-				merged[i] = new BatchedResult<T>(exceptions[i]);
+			assert i < result.length;
+			
+			if(o == null) {
+				result[i] = new BatchedResult<T>((T)null);
+			} else if(cls.isAssignableFrom(o.getClass())) {
+				@SuppressWarnings("unchecked")
+				T t = (T)o;
+				result[i] = new BatchedResult<T>(t);
+			} else if(o instanceof Throwable) {
+				result[i] = new BatchedResult<T>((Throwable)o);
 			} else {
-				merged[i] = new BatchedResult<T>(results[i]);
+				result[i] = new BatchedResult<T>(new InternalStoreException("Unexpected class: "
+				        + o.getClass()));
 			}
 			
 		}
 		
-		return merged;
+		for(; i < result.length; i++) {
+			assert result[i] != null;
+		}
+		
 	}
 	
 	@Override
 	public void getModelSnapshots(XID actorId, String passwordHash, XAddress[] modelAddresses,
 	        Callback<BatchedResult<XReadableModel>[]> callback) throws IllegalArgumentException {
 		
-		String uri = "snapshots?" + encodeAddresses(modelAddresses);
+		if(modelAddresses == null) {
+			throw new IllegalArgumentException("modelAddresses array must not be null");
+		}
+		
+		@SuppressWarnings("unchecked")
+		BatchedResult<XReadableModel>[] res = new BatchedResult[modelAddresses.length];
+		String req = encodeAddresses(modelAddresses, res, XType.XMODEL);
+		if(req == null) {
+			callback.onSuccess(res);
+			return;
+		}
+		
+		String uri = "snapshots?" + req;
 		
 		MiniElement xml = get(uri, actorId, passwordHash, callback);
 		if(xml == null) {
 			return;
 		}
 		
-		Snapshots snapshots = XmlStore.toSnapshots(xml);
+		List<Object> snapshots = XmlStore.toSnapshots(xml, modelAddresses);
 		
-		BatchedResult<XReadableModel>[] result = merge(snapshots.exceptions, snapshots.models,
-		        snapshots.objects);
+		toBatchedResults(snapshots, XReadableModel.class, res);
 		
-		assert result.length == modelAddresses.length;
-		
-		callback.onSuccess(result);
+		callback.onSuccess(res);
 		
 	}
 	
@@ -402,19 +514,30 @@ public class XydraStoreRestClient implements XydraStore {
 	public void getObjectSnapshots(XID actorId, String passwordHash, XAddress[] objectAddresses,
 	        Callback<BatchedResult<XReadableObject>[]> callback) throws IllegalArgumentException {
 		
-		String uri = "snapshots?" + encodeAddresses(objectAddresses);
+		if(objectAddresses == null) {
+			throw new IllegalArgumentException("objectAddresses array must not be null");
+		}
+		
+		@SuppressWarnings("unchecked")
+		BatchedResult<XReadableObject>[] res = new BatchedResult[objectAddresses.length];
+		String req = encodeAddresses(objectAddresses, res, XType.XOBJECT);
+		if(req == null) {
+			callback.onSuccess(res);
+			return;
+		}
+		
+		String uri = "snapshots?" + req;
 		
 		MiniElement xml = get(uri, actorId, passwordHash, callback);
 		if(xml == null) {
 			return;
 		}
 		
-		Snapshots snapshots = XmlStore.toSnapshots(xml);
+		List<Object> snapshots = XmlStore.toSnapshots(xml, objectAddresses);
 		
-		BatchedResult<XReadableObject>[] result = merge(snapshots.exceptions, snapshots.objects,
-		        snapshots.models);
+		toBatchedResults(snapshots, XReadableObject.class, res);
 		
-		callback.onSuccess(result);
+		callback.onSuccess(res);
 		
 	}
 	

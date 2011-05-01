@@ -472,7 +472,11 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		
 		// check order of returned snapshots
 		for(int i = 0; i < this.modelAddresses.length; i++) {
+			
 			// test addresses
+			assertNull("Unexpected exception: " + snapshotResult[i].getException(),
+			        snapshotResult[i].getException());
+			assertNotNull(snapshotResult[i].getResult());
 			assertEquals(this.modelAddresses[i], snapshotResult[i].getResult().getAddress());
 			
 			// compare revision numbers

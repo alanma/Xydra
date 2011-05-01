@@ -7,11 +7,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
-import org.xydra.index.query.Pair;
 import org.xydra.store.AccessException;
 import org.xydra.store.AuthorisationException;
 import org.xydra.store.BatchedResult;
@@ -164,8 +164,8 @@ public class XmlStore {
 		
 	}
 	
-	public static Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]> toCommandResults(
-	        MiniElement xml, GetEventsRequest[] context) {
+	public static void toCommandResults(MiniElement xml, GetEventsRequest[] context,
+	        BatchedResult<Long>[] commandResults, BatchedResult<XEvent[]>[] eventResults) {
 		
 		XmlUtils.checkElementName(xml, ELEMENT_RESULTS);
 		
@@ -177,15 +177,12 @@ public class XmlStore {
 		
 		XmlUtils.checkElementName(commandsEle, ELEMENT_COMMANDRESULTS);
 		
-		BatchedResult<Long>[] commandResults = getRevisionListContents(commandsEle);
+		getRevisionListContents(commandsEle, commandResults);
 		
-		BatchedResult<XEvent[]>[] eventResults = null;
-		if(it.hasNext()) {
-			eventResults = toEventResults(it.next(), context);
+		if(eventResults != null && it.hasNext()) {
+			toEventResults(it.next(), context, eventResults);
 		}
 		
-		return new Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>(commandResults,
-		        eventResults);
 	}
 	
 	public static void toXml(EventsRequest ger, BatchedResult<XEvent[]>[] results, XmlOut out) {
@@ -219,47 +216,50 @@ public class XmlStore {
 		
 	}
 	
-	public static BatchedResult<XEvent[]>[] toEventResults(MiniElement xml,
-	        GetEventsRequest[] context) {
+	public static void toEventResults(MiniElement xml, GetEventsRequest[] context,
+	        BatchedResult<XEvent[]>[] results) {
 		
 		XmlUtils.checkElementName(xml, ELEMENT_EVENTRESULTS);
 		
-		List<BatchedResult<XEvent[]>> results = new ArrayList<BatchedResult<XEvent[]>>();
+		assert context.length == results.length;
 		
-		int i = 0 - 1;
+		int i = 0;
 		
 		Iterator<MiniElement> it = xml.getElements();
 		while(it.hasNext()) {
 			MiniElement ele = it.next();
-			i++;
+			
+			while(results[i] != null) {
+				i++;
+			}
+			assert i < results.length;
 			
 			Throwable t = toException(xml);
 			if(t != null) {
-				results.add(new BatchedResult<XEvent[]>(t));
+				results[i] = new BatchedResult<XEvent[]>(t);
 				continue;
 			}
 			
 			if(XmlValue.isNullElement(ele)) {
-				results.add(new BatchedResult<XEvent[]>((XEvent[])null));
+				results[i] = new BatchedResult<XEvent[]>((XEvent[])null);
 				continue;
 			}
 			
 			try {
 				
-				List<XEvent> events = XmlEvent.toEventList(xml,
-				        context != null ? i < context.length ? context[i].address : null : null);
+				List<XEvent> events = XmlEvent.toEventList(xml, context[i].address);
 				
-				results.add(new BatchedResult<XEvent[]>(events.toArray(new XEvent[events.size()])));
+				results[i] = new BatchedResult<XEvent[]>(events.toArray(new XEvent[events.size()]));
 				
 			} catch(Throwable th) {
-				results.add(new BatchedResult<XEvent[]>(th));
+				results[i] = new BatchedResult<XEvent[]>(th);
 			}
 			
 		}
 		
-		@SuppressWarnings("unchecked")
-		BatchedResult<XEvent[]>[] arr = new BatchedResult[results.size()];
-		return results.toArray(arr);
+		for(; i < results.length; i++) {
+			assert results[i] != null;
+		}
 	}
 	
 	public static void toModelRevisions(BatchedResult<Long>[] result, XmlOut out) {
@@ -270,11 +270,11 @@ public class XmlStore {
 		
 	}
 	
-	public static BatchedResult<Long>[] toModelRevisions(MiniElement xml) {
+	public static void toModelRevisions(MiniElement xml, BatchedResult<Long>[] res) {
 		
 		XmlUtils.checkElementName(xml, ELEMENT_MODEL_REVISIONS);
 		
-		return getRevisionListContents(xml);
+		getRevisionListContents(xml, res);
 	}
 	
 	private static void setRevisionListContents(BatchedResult<Long>[] results, XmlOut out) {
@@ -295,17 +295,22 @@ public class XmlStore {
 		
 	}
 	
-	private static BatchedResult<Long>[] getRevisionListContents(MiniElement xml) {
+	private static void getRevisionListContents(MiniElement xml, BatchedResult<Long>[] results) {
 		
-		List<BatchedResult<Long>> results = new ArrayList<BatchedResult<Long>>();
+		int i = 0;
 		
 		Iterator<MiniElement> it = xml.getElements();
 		while(it.hasNext()) {
 			MiniElement ele = it.next();
 			
-			Throwable t = toException(xml);
+			while(results[i] != null) {
+				i++;
+			}
+			assert i < results.length;
+			
+			Throwable t = toException(ele);
 			if(t != null) {
-				results.add(new BatchedResult<Long>(t));
+				results[i] = new BatchedResult<Long>(t);
 				continue;
 			}
 			
@@ -315,17 +320,17 @@ public class XmlStore {
 				
 				long rev = Long.parseLong(ele.getData());
 				
-				results.add(new BatchedResult<Long>(rev));
+				results[i] = new BatchedResult<Long>(rev);
 				
 			} catch(Throwable th) {
-				results.add(new BatchedResult<Long>(th));
+				results[i] = new BatchedResult<Long>(th);
 			}
 			
 		}
 		
-		@SuppressWarnings("unchecked")
-		BatchedResult<Long>[] arr = new BatchedResult[results.size()];
-		return results.toArray(arr);
+		for(; i < results.length; i++) {
+			assert results[i] != null;
+		}
 	}
 	
 	public static void toXml(StoreException[] ex, boolean[] isModel,
@@ -370,58 +375,42 @@ public class XmlStore {
 		
 	}
 	
-	public static class Snapshots {
-		
-		public XReadableModel[] models;
-		public XReadableObject[] objects;
-		public Throwable[] exceptions;
-		
-	}
-	
-	public static Snapshots toSnapshots(MiniElement xml) {
+	public static List<Object> toSnapshots(MiniElement xml, XAddress[] context) {
 		
 		XmlUtils.checkElementName(xml, ELEMENT_SNAPSHOTS);
 		
-		List<XReadableModel> models = new ArrayList<XReadableModel>();
-		List<XReadableObject> objects = new ArrayList<XReadableObject>();
-		List<Throwable> exceptions = new ArrayList<Throwable>();
+		List<Object> results = new ArrayList<Object>();
+		
+		int i = 0 - 1;
 		
 		Iterator<MiniElement> it = xml.getElements();
 		while(it.hasNext()) {
 			MiniElement ele = it.next();
+			i++;
 			
 			Throwable t = toException(xml);
-			exceptions.add(t);
 			if(t != null) {
+				results.add(t);
 				continue;
 			}
 			
 			try {
 				
 				if(XmlValue.isNullElement(ele)) {
-					models.add(null);
-					objects.add(null);
-				} else if(XmlModel.isModel(xml)) {
-					models.add(XmlModel.toModelState(xml, null));
-					objects.add(null);
+					results.add(null);
+				} else if(XmlModel.isModel(ele)) {
+					results.add(XmlModel.toModelState(ele, context[i]));
 				} else {
-					objects.add(XmlModel.toObjectState(xml, null));
-					models.add(null);
+					results.add(XmlModel.toObjectState(ele, context[i]));
 				}
 				
 			} catch(Throwable th) {
-				exceptions.set(exceptions.size() - 1, th);
+				results.add(null);
 			}
 			
 		}
 		
-		Snapshots s = new Snapshots();
-		
-		s.models = models.toArray(new XReadableModel[models.size()]);
-		s.objects = objects.toArray(new XReadableObject[objects.size()]);
-		s.exceptions = exceptions.toArray(new Throwable[exceptions.size()]);
-		
-		return s;
+		return results;
 	}
 	
 	public static void toModelIds(Set<XID> result, XmlOut out) {

@@ -187,7 +187,7 @@ public class XmlModel {
 	 *             XModel element.
 	 */
 	public static XModel toModel(XID actorId, String passwordHash, MiniElement xml) {
-		XRevWritableModel state = toModelState(xml, null);
+		XRevWritableModel state = toModelState(xml, null, null);
 		XChangeLogState log = loadChangeLogState(xml, state.getAddress());
 		if(log != null) {
 			return new MemoryModel(actorId, passwordHash, state, log);
@@ -206,6 +206,15 @@ public class XmlModel {
 	 * @return the created {@link XRevWritableModel}
 	 */
 	public static XRevWritableModel toModelState(MiniElement xml, XRevWritableRepository parent) {
+		return toModelState(xml, parent, null);
+	}
+	
+	public static XRevWritableModel toModelState(MiniElement xml, XAddress context) {
+		return toModelState(xml, null, context);
+	}
+	
+	private static XRevWritableModel toModelState(MiniElement xml, XRevWritableRepository parent,
+	        XAddress context) {
 		
 		XmlUtils.checkElementName(xml, XMODEL_ELEMENT);
 		
@@ -215,7 +224,12 @@ public class XmlModel {
 		
 		XRevWritableModel modelState;
 		if(parent == null) {
-			XAddress modelAddr = XX.toAddress(null, xid, null, null);
+			XAddress modelAddr;
+			if(context != null) {
+				modelAddr = XX.toAddress(context.getRepository(), xid, null, null);
+			} else {
+				modelAddr = XX.toAddress(null, xid, null, null);
+			}
 			modelState = new SimpleModel(modelAddr);
 		} else {
 			modelState = parent.createModel(xid);
@@ -244,7 +258,7 @@ public class XmlModel {
 	 *             XObject element.
 	 */
 	public static XObject toObject(XID actorId, String passwordHash, MiniElement xml) {
-		XRevWritableObject state = toObjectState(xml, null);
+		XRevWritableObject state = toObjectState(xml, null, null);
 		XChangeLogState log = loadChangeLogState(xml, state.getAddress());
 		if(log != null) {
 			return new MemoryObject(actorId, passwordHash, state, log);
@@ -263,6 +277,15 @@ public class XmlModel {
 	 * @return the created {@link XRevWritableObject}
 	 */
 	public static XRevWritableObject toObjectState(MiniElement xml, XRevWritableModel parent) {
+		return toObjectState(xml, parent, null);
+	}
+	
+	public static XRevWritableObject toObjectState(MiniElement xml, XAddress context) {
+		return toObjectState(xml, null, context);
+	}
+	
+	private static XRevWritableObject toObjectState(MiniElement xml, XRevWritableModel parent,
+	        XAddress context) {
 		
 		XmlUtils.checkElementName(xml, XOBJECT_ELEMENT);
 		
@@ -272,7 +295,12 @@ public class XmlModel {
 		
 		XRevWritableObject objectState;
 		if(parent == null) {
-			XAddress objectAddr = XX.toAddress(null, null, xid, null);
+			XAddress objectAddr;
+			if(context != null) {
+				objectAddr = XX.toAddress(context.getRepository(), context.getModel(), xid, null);
+			} else {
+				objectAddr = XX.toAddress(null, null, xid, null);
+			}
 			objectState = new SimpleObject(objectAddr);
 		} else {
 			objectState = parent.createObject(xid);
