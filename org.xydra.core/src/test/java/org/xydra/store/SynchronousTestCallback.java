@@ -41,10 +41,11 @@ public class SynchronousTestCallback<T> implements Callback<T> {
 		notifyAll();
 	}
 	
-	public int waitOnCallback(long timeout) {
+	public synchronized int waitOnCallback(long timeout) {
+		
 		if(!this.success && !this.failure) {
 			try {
-				Thread.sleep(timeout);
+				wait(timeout);
 			} catch(InterruptedException ie) {
 				ie.printStackTrace();
 				return UNKNOWN_ERROR;

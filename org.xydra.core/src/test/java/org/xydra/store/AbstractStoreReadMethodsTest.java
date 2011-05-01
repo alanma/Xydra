@@ -191,6 +191,31 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		assertNull(callback.getException());
 	}
 	
+	@Test
+	public void testCheckLoginSuccessAfterFailure() {
+		if(!this.incorrectActorExists) {
+			// This test only makes sense if an incorrect actorID - passwordhash
+			// combination can be provided
+			return;
+		}
+		
+		SynchronousTestCallback<Boolean> callback = new SynchronousTestCallback<Boolean>();
+		
+		this.store.checkLogin(this.correctUser, XX.createUniqueId().toString(), callback);
+		
+		assertTrue(this.waitOnCallback(callback));
+		assertNull(callback.getException());
+		assertEquals(false, callback.getEffect());
+		
+		SynchronousTestCallback<Boolean> callback2 = new SynchronousTestCallback<Boolean>();
+		
+		this.store.checkLogin(this.correctUser, this.correctUserPass, callback2);
+		
+		assertTrue(this.waitOnCallback(callback2));
+		assertNull(callback2.getException());
+		assertEquals(true, callback2.getEffect());
+	}
+	
 	// Test if checkLogin actually throws IllegalArgumentExceptions if null is
 	// passed
 	@Test

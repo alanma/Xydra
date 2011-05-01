@@ -27,9 +27,16 @@ public class WritableFieldOnPersistence extends AbstractWritableOnPersistence im
 	}
 	
 	private boolean changeValueTo(XValue value) {
-		XCommand command = X.getCommandFactory().createChangeValueCommand(
-		        this.persistence.getRepositoryId(), this.modelId, this.objectId, this.fieldId,
-		        getRevisionNumber(), value, false);
+		XCommand command;
+		if(value != null) {
+			command = X.getCommandFactory().createChangeValueCommand(
+			        this.persistence.getRepositoryId(), this.modelId, this.objectId, this.fieldId,
+			        getRevisionNumber(), value, false);
+		} else {
+			command = X.getCommandFactory().createRemoveValueCommand(
+			        this.persistence.getRepositoryId(), this.modelId, this.objectId, this.fieldId,
+			        getRevisionNumber(), false);
+		}
 		long result = this.persistence.executeCommand(this.executingActorId, command);
 		if(result == XCommand.FAILED) {
 			// TODO throw exception?
@@ -52,11 +59,9 @@ public class WritableFieldOnPersistence extends AbstractWritableOnPersistence im
 	}
 	
 	private XWritableField getFieldSnapshot() {
-		return this.persistence
-		        .getModelSnapshot(
-		                X.getIDProvider().fromComponents(this.persistence.getRepositoryId(),
-		                        this.modelId, null, null)).getObject(this.objectId)
-		        .getField(this.fieldId);
+		return this.persistence.getModelSnapshot(
+		        X.getIDProvider().fromComponents(this.persistence.getRepositoryId(), this.modelId,
+		                null, null)).getObject(this.objectId).getField(this.fieldId);
 	}
 	
 	@Override
