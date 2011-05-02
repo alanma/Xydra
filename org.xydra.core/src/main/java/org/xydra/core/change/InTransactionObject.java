@@ -9,26 +9,19 @@ import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XObjectCommand;
-import org.xydra.base.rmof.XRevWritableObject;
+import org.xydra.base.rmof.XWritableField;
+import org.xydra.base.rmof.XWritableObject;
 import org.xydra.core.model.XChangeLog;
-import org.xydra.core.model.XField;
-import org.xydra.core.model.XLocalChange;
 import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XObject;
 
 
 /**
- * TODO Document
+ * TODO Document & Implement
  * 
- * @author Bjoern
- * 
- *         Using the German o-Umlaut leads to '[INFO] Compilation failure
- *         \2010\org
- *         .xydra.core\src\main\java\org\xydra\core\change\InTransactionObject
- *         .java:[23,13] unmappable character for encoding UTF-8'
- * 
+ * @author Kaidel
  */
-public class InTransactionObject implements XObject {
+public class InTransactionObject implements XWritableObject {
 	private XObject object;
 	private TransactionModel model;
 	
@@ -54,7 +47,7 @@ public class InTransactionObject implements XObject {
 		return this.model.executeCommand(command);
 	}
 	
-	public long executeCommand(XCommand command, XLocalChangeCallback callback) {
+	public synchronized long executeCommand(XCommand command, XLocalChangeCallback callback) {
 		// pass it to the transaction model!
 		return this.model.executeCommand(command, callback);
 	}
@@ -63,7 +56,7 @@ public class InTransactionObject implements XObject {
 		return this.model.getObjectRevisionNumber(this.object.getID());
 	}
 	
-	public XField createField(XID fieldId) {
+	public XWritableField createField(XID fieldId) {
 		XCommand fieldCommand = X.getCommandFactory().createSafeAddFieldCommand(
 		        this.model.getAddress(), fieldId);
 		this.model.executeCommand(fieldCommand);
@@ -73,8 +66,8 @@ public class InTransactionObject implements XObject {
 	}
 	
 	public boolean hasField(XID fieldId) {
-		XField field = this.model.getField(XX.toAddress(this.model.getAddress().getRepository(),
-		        this.model.getID(), this.object.getID(), fieldId));
+		XWritableField field = this.model.getField(XX.toAddress(this.model.getAddress()
+		        .getRepository(), this.model.getID(), this.object.getID(), fieldId));
 		
 		return (field != null);
 	}
@@ -94,7 +87,7 @@ public class InTransactionObject implements XObject {
 		throw new UnsupportedOperationException();
 	}
 	
-	public XField getField(XID fieldId) {
+	public XWritableField getField(XID fieldId) {
 		XAddress fieldAddress = XX.toAddress(this.model.getAddress().getRepository(),
 		        this.model.getID(), this.object.getID(), fieldId);
 		return this.model.getField(fieldAddress);
@@ -115,71 +108,6 @@ public class InTransactionObject implements XObject {
 	
 	@Override
 	public Iterator<XID> iterator() {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public int countUnappliedLocalChanges() {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public XLocalChange[] getLocalChanges() {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public XID getSessionActor() {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public long getSynchronizedRevision() {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public void rollback(long revision) {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public void setSessionActor(XID actorId, String passwordHash) {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public XRevWritableObject createSnapshot() {
 		throw new UnsupportedOperationException();
 	}
 }

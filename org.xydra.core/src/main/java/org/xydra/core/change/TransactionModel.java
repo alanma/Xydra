@@ -1,18 +1,20 @@
 package org.xydra.core.change;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
+import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.change.XCommand;
-import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XModelCommand;
-import org.xydra.base.rmof.XRevWritableModel;
-import org.xydra.core.model.XChangeLog;
+import org.xydra.base.rmof.XWritableField;
+import org.xydra.base.rmof.XWritableModel;
+import org.xydra.base.rmof.XWritableObject;
+import org.xydra.base.value.XValue;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XLocalChange;
 import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
@@ -32,21 +34,37 @@ import org.xydra.core.model.XObject;
  */
 // suppressing warning while this is in flux ~~max
 @SuppressWarnings("unused")
-public class TransactionModel implements XModel {
+public class TransactionModel implements XWritableModel {
 	private static final long serialVersionUID = -5636313889791653240L;
 	
 	private XModel baseModel;
+	private long revisionNumber;
 	
 	private Map<XID,XObject> changedObjects;
 	private Map<XAddress,XField> changedFields;
+	private Map<XAddress,XValue> changedValues;
 	
 	private Map<XID,XObject> removedObjects;
 	private Map<XAddress,XField> removedFields;
 	
+	private Map<XID,Long> objectRevisionNumbers;
+	private Map<XAddress,Long> fieldRevisionNumbers;
+	
 	private LinkedList<XCommand> commands;
 	
-	public XChangeLog getChangeLog() {
-		return this.baseModel.getChangeLog();
+	public TransactionModel(XModel model) {
+		this.baseModel = model;
+		this.revisionNumber = model.getRevisionNumber();
+		
+		this.changedObjects = new HashMap<XID,XObject>();
+		this.changedFields = new HashMap<XAddress,XField>();
+		this.changedValues = new HashMap<XAddress,XValue>();
+		this.removedObjects = new HashMap<XID,XObject>();
+		this.removedFields = new HashMap<XAddress,XField>();
+		this.objectRevisionNumbers = new HashMap<XID,Long>();
+		this.fieldRevisionNumbers = new HashMap<XAddress,Long>();
+		
+		this.commands = new LinkedList<XCommand>();
 	}
 	
 	public XAddress getAddress() {
@@ -58,35 +76,73 @@ public class TransactionModel implements XModel {
 	}
 	
 	public long executeCommand(XCommand command) {
+		// TODO implement
 		return this.baseModel.executeCommand(command);
 	}
 	
 	public long executeCommand(XCommand command, XLocalChangeCallback callback) {
+		// TODO Implement!
+		// TODO Maybe ignore Transactions?
+		/*
+		 * Make sure that revision numbers are increased correctly
+		 */
+
 		return this.baseModel.executeCommand(command, callback);
 	}
 	
 	public long getRevisionNumber() {
-		return this.baseModel.getRevisionNumber();
+		return this.revisionNumber;
 	}
 	
 	public boolean hasObject(XID objectId) {
-		return this.baseModel.hasObject(objectId);
+		/*
+		 * only return true if the object is new or if it wasn't removed and it
+		 * part of the baseModel
+		 */
+
+		return this.changedObjects.containsKey(objectId)
+		        || (this.baseModel.hasObject(objectId) && !this.removedObjects
+		                .containsKey(objectId));
 	}
 	
-	public XObject createObject(XID id) {
-		return this.baseModel.createObject(id);
+	public XWritableObject createObject(XID id) {
+		XCommand addCommand = X.getCommandFactory().createSafeAddObjectCommand(
+		        this.baseModel.getAddress(), id);
+		
+		executeCommand(addCommand);
+		
+		return getObject(id);
 	}
 	
 	public boolean isEmpty() {
-		return this.baseModel.isEmpty();
+		return this.baseModel.isEmpty() && this.changedObjects.isEmpty()
+		        && this.changedFields.isEmpty();
 	}
 	
 	public long executeModelCommand(XModelCommand command) {
+		// TODO use executeCommand
 		return this.baseModel.executeModelCommand(command);
 	}
 	
-	public XObject getObject(XID objectId) {
-		return this.baseModel.getObject(objectId);
+	public XWritableObject getObject(XID objectId) {
+		XObject object = null;
+		
+		if(this.changedObjects.containsKey(objectId)) {
+			object = this.changedObjects.get(objectId);
+		} else {
+			/*
+			 * only look into the base model if the object wasn't removed
+			 */
+			if(!this.removedObjects.containsKey(objectId)) {
+				object = this.baseModel.getObject(objectId);
+			}
+		}
+		
+		if(object == null) {
+			return null;
+		} else {
+			return new InTransactionObject(object, this);
+		}
 	}
 	
 	public boolean removeObject(XID objectId) {
@@ -98,105 +154,75 @@ public class TransactionModel implements XModel {
 	 * InTransactionField
 	 */
 
-	protected XField getField(XAddress address) {
-		// TODO Auto-generated method stub
-		return null;
+	protected XWritableField getField(XAddress address) {
+		XField field = null;
+		
+		if(this.changedFields.containsKey(address)) {
+			field = this.changedFields.get(address);
+		} else {
+			/*
+			 * only look into the base model if the field wasn't removed
+			 */
+			if(!this.removedFields.containsKey(address)) {
+				XObject object = this.baseModel.getObject(address.getObject());
+				
+				if(object != null) {
+					field = object.getField(address.getField());
+				}
+			}
+		}
+		
+		if(field == null) {
+			return null;
+		} else {
+			return new InTransactionField(field, this);
+		}
 	}
 	
 	protected long getObjectRevisionNumber(XID id) {
-		// TODO Auto-generated method stub
-		return 0;
+		// assert: there exists and XObject with the given id either in
+		// changedObjects or baseModel
+		
+		long revNr = 0;
+		
+		if(this.objectRevisionNumbers.containsKey(id)) {
+			revNr = this.objectRevisionNumbers.get(id);
+		} else {
+			XObject object = this.baseModel.getObject(id);
+			
+			assert object != null;
+			revNr = object.getRevisionNumber();
+		}
+		
+		return revNr;
 	}
 	
 	protected long getFieldRevisionNumber(XAddress fieldAddress) {
-		// TODO Auto-generated method stub
-		return 0;
+		// assert: there exists and XField with the given address either in
+		// changedFields or baseModel
+		
+		long revNr = 0;
+		
+		if(this.fieldRevisionNumbers.containsKey(fieldAddress)) {
+			revNr = this.fieldRevisionNumbers.get(fieldAddress);
+		} else {
+			XObject object = this.baseModel.getObject(fieldAddress.getObject());
+			
+			assert object != null;
+			
+			XField field = object.getField(fieldAddress.getField());
+			
+			assert field != null;
+			
+			revNr = field.getRevisionNumber();
+		}
+		
+		return revNr;
 	}
 	
 	// Unsupported Methods
 	@Override
 	public Iterator<XID> iterator() {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public boolean addListenerForModelEvents(XModelEventListener changeListener) {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public boolean removeListenerForModelEvents(XModelEventListener changeListener) {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public int countUnappliedLocalChanges() {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public XLocalChange[] getLocalChanges() {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public XID getSessionActor() {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public long getSynchronizedRevision() {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public void rollback(long revision) {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public void setSessionActor(XID actorId, String passwordHash) {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public boolean synchronize(XEvent[] remoteChanges) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-	
-	@Override
-	public XRevWritableModel createSnapshot() {
 		throw new UnsupportedOperationException();
 	}
 }
