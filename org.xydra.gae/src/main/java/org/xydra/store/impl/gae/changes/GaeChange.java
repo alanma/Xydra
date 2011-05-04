@@ -378,7 +378,8 @@ public class GaeChange {
 			synchronized(this) {
 				Number n = (Number)this.entity.getProperty(PROP_STATUS);
 				assert n != null : "All change entities should have a status";
-				this.status = Status.get(n.intValue());
+				int index = n.intValue();
+				this.status = Status.get(index);
 			}
 		}
 		return this.status;
