@@ -62,6 +62,18 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 	private Writer w;
 	private long count = 0;
 	private boolean active = false;
+	private boolean laxMode = false;
+	
+	/**
+	 * In lax mode revisions numbers are treated lightly. They are not compared
+	 * and all commands are created as forced commands, ignoring all revision
+	 * numbers.
+	 * 
+	 * @param b ..
+	 */
+	public void setLaxMode(boolean b) {
+		this.laxMode = b;
+	}
 	
 	/**
 	 * Call {@link #setActive(boolean)} with 'true' to enable source code
@@ -106,7 +118,9 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 			java("// result: "
 			        + ((result == XCommand.FAILED) ? "FAILED"
 			                : (result == XCommand.NOCHANGE ? "NOCHANGE" : result)));
-			java("expectedVsActual(" + result + "," + var + ");");
+			if(!this.laxMode) {
+				java("expectedVsActual(" + result + "," + var + ");");
+			}
 			return result;
 		} else {
 			return this.persistence.executeCommand(actorId, command);
@@ -173,8 +187,8 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 					        + toJava(command.getChangedEntity().getObject()) + ", "
 					        + toJava(command.getChangedEntity().getField()) + ", "
 					        + fieldCommand.getRevisionNumber() + ", "
-					        + toJava(fieldCommand.getValue()) + ", " + fieldCommand.isForced()
-					        + ")";
+					        + toJava(fieldCommand.getValue()) + ", "
+					        + toForced(fieldCommand.isForced()) + ")";
 				} else {
 					assert command instanceof XObjectCommand;
 					return "X.getCommandFactory().createAddFieldCommand("
@@ -182,19 +196,19 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 					        + toJava(command.getChangedEntity().getModel()) + ", "
 					        + toJava(command.getChangedEntity().getObject()) + ", "
 					        + toJava(command.getChangedEntity().getField()) + ", "
-					        + command.isForced() + ")";
+					        + toForced(command.isForced()) + ")";
 				}
 			case XOBJECT:
 				return "X.getCommandFactory().createAddObjectCommand("
 				        + toJava(command.getChangedEntity().getRepository()) + ", "
 				        + toJava(command.getChangedEntity().getModel()) + ", "
 				        + toJava(command.getChangedEntity().getObject()) + ", "
-				        + command.isForced() + ")";
+				        + toForced(command.isForced()) + ")";
 			case XMODEL:
 				return "X.getCommandFactory().createAddModelCommand("
 				        + toJava(command.getChangedEntity().getRepository()) + ", "
-				        + toJava(command.getChangedEntity().getModel()) + ", " + command.isForced()
-				        + ")";
+				        + toJava(command.getChangedEntity().getModel()) + ", "
+				        + toForced(command.isForced()) + ")";
 			case XREPOSITORY:
 				throw new IllegalStateException();
 			}
@@ -209,26 +223,28 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 					        + toJava(command.getChangedEntity().getModel()) + ", "
 					        + toJava(command.getChangedEntity().getObject()) + ", "
 					        + toJava(command.getChangedEntity().getField()) + ", "
-					        + command.getRevisionNumber() + ", " + command.isForced() + ")";
+					        + command.getRevisionNumber() + ", " + toForced(command.isForced())
+					        + ")";
 				} else {
 					return "X.getCommandFactory().createRemoveFieldCommand("
 					        + toJava(command.getChangedEntity().getRepository()) + ", "
 					        + toJava(command.getChangedEntity().getModel()) + ", "
 					        + toJava(command.getChangedEntity().getObject()) + ", "
 					        + toJava(command.getChangedEntity().getField()) + ", "
-					        + command.getRevisionNumber() + ", " + command.isForced() + ")";
+					        + command.getRevisionNumber() + ", " + toForced(command.isForced())
+					        + ")";
 				}
 			case XOBJECT:
 				return "X.getCommandFactory().createRemoveObjectCommand("
 				        + toJava(command.getChangedEntity().getRepository()) + ", "
 				        + toJava(command.getChangedEntity().getModel()) + ", "
 				        + toJava(command.getChangedEntity().getObject()) + ", "
-				        + command.getRevisionNumber() + ", " + command.isForced() + ")";
+				        + command.getRevisionNumber() + ", " + toForced(command.isForced()) + ")";
 			case XMODEL:
 				return "X.getCommandFactory().createRemoveModelCommand("
 				        + toJava(command.getChangedEntity().getRepository()) + ", "
 				        + toJava(command.getChangedEntity().getModel()) + ", "
-				        + command.getRevisionNumber() + ", " + command.isForced() + ")";
+				        + command.getRevisionNumber() + ", " + toForced(command.isForced()) + ")";
 			case XREPOSITORY:
 				throw new IllegalStateException();
 			}
@@ -242,13 +258,17 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 			        + toJava(command.getChangedEntity().getObject()) + ", "
 			        + toJava(command.getChangedEntity().getField()) + ", "
 			        + command.getRevisionNumber() + ", " + toJava(fieldCommand.getValue()) + ", "
-			        + command.isForced() + ")";
+			        + toForced(command.isForced()) + ")";
 		}
 		case TRANSACTION: {
 			throw new IllegalStateException();
 		}
 		}
 		throw new IllegalStateException();
+	}
+	
+	private boolean toForced(boolean forced) {
+		return forced || this.laxMode;
 	}
 	
 	private String toJavaArray(XValue[] values) {
