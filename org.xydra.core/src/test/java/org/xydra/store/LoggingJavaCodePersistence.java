@@ -61,8 +61,12 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 	private XydraPersistence persistence;
 	private Writer w;
 	private long count = 0;
+	private boolean active = false;
 	
 	/**
+	 * Call {@link #setActive(boolean)} with 'true' to enable source code
+	 * logging.
+	 * 
 	 * @param persistence a {@link XydraPersistence}
 	 * @param w where to write the Java code to
 	 */
@@ -70,7 +74,9 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 		super();
 		this.persistence = persistence;
 		this.w = w;
-		java("// ----------- " + new Date(System.currentTimeMillis()));
+		if(this.active) {
+			java("// ----------- " + new Date(System.currentTimeMillis()));
+		}
 	}
 	
 	private void java(String string) {
@@ -85,20 +91,26 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 	
 	public void clear() {
 		this.persistence.clear();
-		java("this.p.clear();");
+		if(this.active) {
+			java("this.p.clear();");
+		}
 	}
 	
 	public long executeCommand(XID actorId, XCommand command) {
-		stacktrace();
-		String var = getVar();
-		java("long " + var + " = this.p.executeCommand(" + toJava(actorId) + ", " + toJava(command)
-		        + " );");
-		long result = this.persistence.executeCommand(actorId, command);
-		java("// result: "
-		        + ((result == XCommand.FAILED) ? "FAILED"
-		                : (result == XCommand.NOCHANGE ? "NOCHANGE" : result)));
-		java("expectedVsActual(" + result + "," + var + ");");
-		return result;
+		if(this.active) {
+			stacktrace();
+			String var = getVar();
+			java("long " + var + " = this.p.executeCommand(" + toJava(actorId) + ", "
+			        + toJava(command) + " );");
+			long result = this.persistence.executeCommand(actorId, command);
+			java("// result: "
+			        + ((result == XCommand.FAILED) ? "FAILED"
+			                : (result == XCommand.NOCHANGE ? "NOCHANGE" : result)));
+			java("expectedVsActual(" + result + "," + var + ");");
+			return result;
+		} else {
+			return this.persistence.executeCommand(actorId, command);
+		}
 	}
 	
 	private void stacktrace() {
@@ -254,6 +266,9 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 	}
 	
 	private String toJava(XValue value) {
+		if(value == null) {
+			return "null";
+		}
 		switch(value.getType()) {
 		case Address:
 			return "XX.toAddress(\"" + value.toString() + "\")";
@@ -452,53 +467,68 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 	}
 	
 	public List<XEvent> getEvents(XAddress address, long beginRevision, long endRevision) {
-		String var = getVar();
-		java("List<XEvent> " + var + " = this.p.getEvents( " + toJava(address) + ", "
-		        + beginRevision + ", " + endRevision + ");");
-		java("consume(" + var + ");");
+		if(this.active) {
+			String var = getVar();
+			java("List<XEvent> " + var + " = this.p.getEvents( " + toJava(address) + ", "
+			        + beginRevision + ", " + endRevision + ");");
+			java("consume(" + var + ");");
+		}
 		return this.persistence.getEvents(address, beginRevision, endRevision);
 	}
 	
 	public Set<XID> getModelIds() {
-		String var = getVar();
-		java("Set<XID> " + var + " = p.getModelIds();");
-		java("consume(" + var + ");");
+		if(this.active) {
+			String var = getVar();
+			java("Set<XID> " + var + " = p.getModelIds();");
+			java("consume(" + var + ");");
+		}
 		return this.persistence.getModelIds();
 	}
 	
 	public long getModelRevision(XAddress address) {
-		String var = getVar();
-		java("long " + var + " = this.p.getModelRevision(" + toJava(address) + ");");
-		java("consume(" + var + ");");
+		if(this.active) {
+			String var = getVar();
+			java("long " + var + " = this.p.getModelRevision(" + toJava(address) + ");");
+			java("consume(" + var + ");");
+		}
 		return this.persistence.getModelRevision(address);
 	}
 	
 	public XWritableModel getModelSnapshot(XAddress address) {
-		String var = getVar();
-		java("XWritableModel " + var + " = this.p.getModelSnapshot(" + toJava(address) + ");");
-		java("consume(" + var + ");");
+		if(this.active) {
+			String var = getVar();
+			java("XWritableModel " + var + " = this.p.getModelSnapshot(" + toJava(address) + ");");
+			java("consume(" + var + ");");
+		}
 		return this.persistence.getModelSnapshot(address);
 	}
 	
 	public XWritableObject getObjectSnapshot(XAddress address) {
-		String var = getVar();
-		java("XWritableObject " + var + " = this.p.getObjectSnapshot(" + toJava(address) + ");");
-		java("consume(" + var + ");");
+		if(this.active) {
+			String var = getVar();
+			java("XWritableObject " + var + " = this.p.getObjectSnapshot(" + toJava(address) + ");");
+			java("consume(" + var + ");");
+		}
 		return this.persistence.getObjectSnapshot(address);
 	}
 	
 	public XID getRepositoryId() {
-		String var = getVar();
-		java("XID " + var + " = this.p.getRepositoryId();");
-		XID result = this.persistence.getRepositoryId();
-		java("expectedVsActual(" + toJava(result) + "," + var + ");");
-		return result;
+		if(this.active) {
+			String var = getVar();
+			java("XID " + var + " = this.p.getRepositoryId();");
+			XID result = this.persistence.getRepositoryId();
+			java("expectedVsActual(" + toJava(result) + "," + var + ");");
+			return result;
+		} else
+			return this.persistence.getRepositoryId();
 	}
 	
 	public boolean hasModel(XID modelId) {
-		String var = getVar();
-		java("boolean " + var + " = this.p.hasModel(" + toJava(modelId) + ");");
-		java("consume(" + var + ");");
+		if(this.active) {
+			String var = getVar();
+			java("boolean " + var + " = this.p.hasModel(" + toJava(modelId) + ");");
+			java("consume(" + var + ");");
+		}
 		return this.persistence.hasModel(modelId);
 	}
 	
@@ -506,6 +536,7 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 		XydraPersistence p = new MemoryPersistence(XX.toId("memrepo"));
 		Writer w = new OutputStreamWriter(System.out);
 		LoggingJavaCodePersistence lp = new LoggingJavaCodePersistence(p, w);
+		lp.setActive(true);
 		XWritableRepository testRepo = new WritableRepositoryOnPersistence(lp, XX.toId("testactor"));
 		
 		// set up demo data
@@ -517,6 +548,13 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 		XCopyUtils.copyData(demoRepo, testRepo);
 		w.flush();
 		w.close();
+	}
+	
+	/**
+	 * @param b set to true to enable source code logging
+	 */
+	public void setActive(boolean b) {
+		this.active = b;
 	}
 	
 }
