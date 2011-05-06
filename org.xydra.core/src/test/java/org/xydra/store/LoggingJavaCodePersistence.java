@@ -60,7 +60,8 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 	
 	private XydraPersistence persistence;
 	private Writer w;
-	private long count = 0;
+	/** used to generate unique variable names */
+	private long varCount = 0;
 	private boolean active = false;
 	private boolean laxMode = false;
 	
@@ -166,7 +167,7 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 	}
 	
 	private String toJava(XTransaction txn) {
-		long count = this.count++;
+		long count = this.varCount++;
 		java("XTransactionBuilder txnBuilder" + count
 		        + " = new XTransactionBuilder(txn.getTarget());");
 		java("for( XCommand command : txn) { txnBuilder" + count + ".addCommand(command); }");
@@ -483,7 +484,7 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 	}
 	
 	private String getVar() {
-		return "var" + this.count++;
+		return "var" + this.varCount++;
 	}
 	
 	public List<XEvent> getEvents(XAddress address, long beginRevision, long endRevision) {
@@ -575,6 +576,14 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 	 */
 	public void setActive(boolean b) {
 		this.active = b;
+	}
+	
+	public boolean isActive() {
+		return this.active;
+	}
+	
+	public boolean isLaxMode() {
+		return this.laxMode;
 	}
 	
 }
