@@ -586,4 +586,8 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 		return this.laxMode;
 	}
 	
+	public Writer getSourceCodeWriter() {
+		return this.w;
+	}
+	
 }
