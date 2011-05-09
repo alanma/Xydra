@@ -8,6 +8,12 @@ import org.xydra.restless.RestlessExceptionHandler;
 import org.xydra.testgae.xmas.rest.XmasResource;
 
 
+/**
+ * This is not a test -- this is the main Restless app for the TestGAE project.
+ * 
+ * @author xamde
+ * 
+ */
 public class TestGaeApp {
 	
 	public void restless(Restless r, String path) {

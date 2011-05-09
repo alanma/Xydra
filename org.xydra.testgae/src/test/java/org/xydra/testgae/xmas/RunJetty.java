@@ -44,10 +44,10 @@ public class RunJetty {
 		
 		// start jetty
 		CheckClasspathTool.checkGaeToolsJarIsPresentAndAppstatsFilterClassCanBeLoaded();
-		Jetty jetty = new Jetty();
+		Jetty jetty = new Jetty(8787);
 		
 		CheckClasspathTool.checkGaeToolsJarIsPresentAndAppstatsFilterClassCanBeLoaded();
-		URI uri = jetty.startServer("", new File("src/main/webapp"));
+		URI uri = jetty.startServer("", new File("/src/main/webapp"));
 		CheckClasspathTool.checkGaeToolsJarIsPresentAndAppstatsFilterClassCanBeLoaded();
 		log.info("Started embedded Jetty server. User interface is at " + uri.toString());
 		

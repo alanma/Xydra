@@ -18,11 +18,13 @@ import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
+import org.xydra.restless.utils.ServletUtils;
 import org.xydra.store.Callback;
 import org.xydra.store.GaeAllowAllStoreReadMethodsTest;
 import org.xydra.store.GaeStoreReadMethodsTest;
 import org.xydra.store.XydraStore;
 import org.xydra.store.access.HashUtils;
+import org.xydra.store.impl.delegate.DelegatingAllowAllStore;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
@@ -34,36 +36,59 @@ public class TestResource {
 	
 	public static void restless(Restless r) {
 		r.addGet("/test1", TestResource.class, "test1");
+		r.addGet("/test1nosec", TestResource.class, "test1noSecurity");
+		r.addGet("/test1nosecloop", TestResource.class, "test1loop");
 		r.addGet("/test2", TestResource.class, "test2");
 		r.addGet("/test3", TestResource.class, "test3");
 		r.addGet("/info", TestResource.class, "info");
 	}
 	
 	public void test1(HttpServletRequest req, HttpServletResponse res) throws IOException {
-		res.setContentType("text/plain");
-		res.setStatus(200);
-		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		ServletUtils.headers(res, "text/plain");
+		Writer w = res.getWriter();
 		w.write("Test1 start.");
 		test1();
 		w.write("Test1 stop. Some operations might still be pending.");
+		w.flush();
+		w.close();
+	}
+	
+	public void test1loop(HttpServletRequest req, HttpServletResponse res) throws IOException {
+		ServletUtils.headers(res, "text/plain");
+		Writer w = res.getWriter();
+		boolean error = false;
+		while(!error) {
+			w.write("Test1 start.");
+			try {
+				test1();
+			} catch(Throwable e) {
+				error = true;
+				throw new RuntimeException("Triggered bug in Xydra", e);
+			}
+			w.write("Test1 stop. Some operations might still be pending.");
+			w.flush();
+		}
+		w.close();
 	}
 	
 	public void test2(HttpServletRequest req, HttpServletResponse res) throws IOException {
-		res.setContentType("text/plain");
-		res.setStatus(200);
-		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		ServletUtils.headers(res, "text/plain");
+		Writer w = res.getWriter();
 		w.write("Test2 start.");
 		test2(new OutputStreamWriter(res.getOutputStream(), "utf-8"));
 		w.write("Test2 stop. Some operations might still be pending.");
+		w.flush();
+		w.close();
 	}
 	
 	public void test3(HttpServletRequest req, HttpServletResponse res) throws IOException {
-		res.setContentType("text/plain");
-		res.setStatus(200);
-		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		ServletUtils.headers(res, "text/plain");
+		Writer w = res.getWriter();
 		w.write("Test3 start.");
 		test3(new OutputStreamWriter(res.getOutputStream(), "utf-8"));
 		w.write("Test3 stop. Some operations might still be pending.");
+		w.flush();
+		w.close();
 	}
 	
 	public String info() {
@@ -91,6 +116,33 @@ public class TestResource {
 	}
 	
 	XID test1_repoId = null;
+	
+	/**
+	 * Use no security
+	 */
+	private void test1noSecurity() {
+		log.info("Setting up store");
+		XydraStore store = new DelegatingAllowAllStore(new GaePersistence(
+		        GaePersistence.getDefaultRepositoryId()));
+		
+		XID actorId = XX.toId("test1");
+		String passwordHash = HashUtils.getMD5("secret");
+		
+		log.info("Asking for repo id...");
+		store.getRepositoryId(actorId, passwordHash, new Callback<XID>() {
+			
+			public void onSuccess(XID repoId) {
+				log.info("Success: " + repoId);
+				TestResource.this.test1_repoId = repoId;
+			}
+			
+			public void onFailure(Throwable exception) {
+				log.info("Error:", exception);
+				throw new RuntimeException(exception);
+			}
+		});
+		log.info("fired...");
+	}
 	
 	private void test1() {
 		log.info("Setting up store");

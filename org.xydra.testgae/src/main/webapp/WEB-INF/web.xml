@@ -5,6 +5,10 @@
 http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	version="2.5">
 
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+	</welcome-file-list>
+	
 	<servlet>
 		<servlet-name>TestGae</servlet-name>
 		<servlet-class>org.xydra.restless.Restless</servlet-class>

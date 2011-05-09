@@ -48,21 +48,23 @@ public class XmasResource {
 		ServletUtils.headers(res, "text/html");
 		int listCount = Integer.parseInt(listsStr);
 		int wishesCount = Integer.parseInt(wishesStr);
-		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		Writer w = HtmlUtils.startHtmlPage(res, "Xmas | Adding test data");
 		w.write("Adding test data ...?lists=" + listsStr + "&wishes=" + wishesStr
 		        + " wishes.<br />");
 		Xmas.addData(repoStr, listCount, wishesCount, new OutputStreamWriter(res.getOutputStream(),
 		        "utf-8"));
 		w.write("<a href='.'>See all wish lists in repository '" + repoStr + "'</a>");
+		HtmlUtils.endHtmlPage(w);
 	}
 	
 	public void get(String repoStr, String view, HttpServletResponse res) throws IOException {
 		ServletUtils.headers(res, "text/html");
-		Xmas.get(repoStr, view, new OutputStreamWriter(res.getOutputStream(), "utf-8"));
+		Writer w = HtmlUtils.startHtmlPage(res, "Xmas | Adding test data");
 		
-		new OutputStreamWriter(res.getOutputStream(), "utf-8").write(HtmlUtils
-		        .form(METHOD.GET, "/xmas/" + repoStr + "/add").withInputText("lists", "1")
+		Xmas.get(repoStr, view, w);
+		w.write(HtmlUtils.form(METHOD.GET, "/xmas/" + repoStr + "/add").withInputText("lists", "1")
 		        .withInputText("wishes", "1").withInputSubmit("Add lists with wishes").toString());
+		HtmlUtils.endHtmlPage(w);
 	}
 	
 }
