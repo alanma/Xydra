@@ -120,6 +120,7 @@ public class TestResource {
 	/**
 	 * Use no security
 	 */
+	@SuppressWarnings("unused")
 	private void test1noSecurity() {
 		log.info("Setting up store");
 		XydraStore store = new DelegatingAllowAllStore(new GaePersistence(
