@@ -252,12 +252,13 @@ public class GaeChange {
 	 */
 	public GaeChange(XAddress modelAddr, long rev, GaeLocks locks, XID actorId) {
 		
-		this.status = Status.Creating;
-		
 		this.rev = rev;
 		this.locks = locks;
 		this.modelAddr = modelAddr;
 		this.entity = new Entity(KeyStructure.createChangeKey(modelAddr, rev));
+		
+		this.status = Status.Creating;
+		this.entity.setUnindexedProperty(PROP_STATUS, this.status.value);
 		
 		this.actor = actorId;
 		if(actorId != null) {
@@ -300,7 +301,6 @@ public class GaeChange {
 	}
 	
 	public void reload() {
-		assert !getStatus().isCommitted();
 		reload(null);
 	}
 	
@@ -470,8 +470,8 @@ public class GaeChange {
 				Pair<XAtomicEvent[],int[]> res = GaeEvents.loadAtomicEvents(this.modelAddr,
 				        this.rev, getActor(), this.entity);
 				
-				this.events = new Pair<List<XAtomicEvent>,int[]>(Arrays.asList(res.getFirst()),
-				        res.getSecond());
+				this.events = new Pair<List<XAtomicEvent>,int[]>(Arrays.asList(res.getFirst()), res
+				        .getSecond());
 			}
 		}
 		return this.events;
