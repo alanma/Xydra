@@ -141,7 +141,7 @@ public class TransactionModel implements XWritableModel {
 		if(object == null) {
 			return null;
 		} else {
-			return new InTransactionObject(object, this);
+			return new InModelTransactionObject(object, this);
 		}
 	}
 	
@@ -175,7 +175,7 @@ public class TransactionModel implements XWritableModel {
 		if(field == null) {
 			return null;
 		} else {
-			return new InTransactionField(field, this);
+			return new InModelTransactionField(field, this);
 		}
 	}
 	
