@@ -123,8 +123,9 @@ public class TransactionObject implements XWritableObject {
 	}
 	
 	public long executeCommand(XCommand command, XLocalChangeCallback callback) {
-		if(callback == null) {
-			callback = new DummyCallback();
+		XLocalChangeCallback usedCallback = callback;
+		if(usedCallback == null) {
+			usedCallback = new DummyCallback();
 		}
 		
 		/*
@@ -137,13 +138,13 @@ public class TransactionObject implements XWritableObject {
 				long result = executeCommand(transaction.getCommand(i));
 				
 				if(result == XCommand.FAILED) {
-					callback.onFailure();
+					usedCallback.onFailure();
 					return XCommand.FAILED;
 				}
 			}
 			
 			// Transaction "succeeded"
-			callback.onSuccess(this.revisionNumber);
+			usedCallback.onSuccess(this.revisionNumber);
 			return this.revisionNumber;
 		}
 		
@@ -154,7 +155,7 @@ public class TransactionObject implements XWritableObject {
 		// check wether the given command actually refers to the this object
 		if(!command.getTarget().getObject().equals(this.getID())
 		        || !command.getTarget().getModel().equals(this.getAddress().getModel())) {
-			callback.onFailure();
+			usedCallback.onFailure();
 			return XCommand.FAILED;
 		}
 		
@@ -164,7 +165,7 @@ public class TransactionObject implements XWritableObject {
 			
 			// check revision number
 			if(objectCommand.getRevisionNumber() != this.revisionNumber) {
-				callback.onFailure();
+				usedCallback.onFailure();
 				return XCommand.FAILED;
 			}
 			
@@ -175,7 +176,7 @@ public class TransactionObject implements XWritableObject {
 					if(!objectCommand.isForced()) {
 						// not forced, tried to add something that already
 						// existed
-						callback.onFailure();
+						usedCallback.onFailure();
 						return XCommand.FAILED;
 					}
 				}
@@ -193,7 +194,7 @@ public class TransactionObject implements XWritableObject {
 				// command succeeded -> add it to the list
 				this.commands.add((XAtomicCommand)command);
 				
-				callback.onSuccess(this.revisionNumber);
+				usedCallback.onSuccess(this.revisionNumber);
 				return this.revisionNumber;
 			}
 
@@ -202,7 +203,7 @@ public class TransactionObject implements XWritableObject {
 					if(!objectCommand.isForced()) {
 						// not forced, tried to remove something that didn't
 						// exist
-						callback.onFailure();
+						usedCallback.onFailure();
 						return XCommand.FAILED;
 					}
 				}
@@ -221,7 +222,7 @@ public class TransactionObject implements XWritableObject {
 				// command succeeded -> add it to the list
 				this.commands.add((XAtomicCommand)command);
 				
-				callback.onSuccess(this.revisionNumber);
+				usedCallback.onSuccess(this.revisionNumber);
 				return this.revisionNumber;
 			}
 		}
@@ -232,7 +233,7 @@ public class TransactionObject implements XWritableObject {
 			XID fieldId = command.getChangedEntity().getField();
 			
 			if(!hasField(fieldId)) {
-				callback.onFailure();
+				usedCallback.onFailure();
 				return XCommand.FAILED;
 			}
 			
@@ -243,14 +244,14 @@ public class TransactionObject implements XWritableObject {
 			
 			// check revision number
 			if(fieldCommand.getRevisionNumber() != field.getRevisionNumber()) {
-				callback.onFailure();
+				usedCallback.onFailure();
 				return XCommand.FAILED;
 			}
 			
 			if(fieldCommand.getChangeType() == ChangeType.ADD) {
 				if(field.getValue() != null) {
 					if(!fieldCommand.isForced()) {
-						callback.onFailure();
+						usedCallback.onFailure();
 						return XCommand.FAILED;
 					}
 				}
@@ -265,14 +266,14 @@ public class TransactionObject implements XWritableObject {
 				// command succeeded -> add it to the list
 				this.commands.add((XAtomicCommand)command);
 				
-				callback.onSuccess(this.revisionNumber);
+				usedCallback.onSuccess(this.revisionNumber);
 				return this.revisionNumber;
 			}
 
 			else if(fieldCommand.getChangeType() == ChangeType.REMOVE) {
 				if(field.getValue() == null) {
 					if(!fieldCommand.isForced()) {
-						callback.onFailure();
+						usedCallback.onFailure();
 						return XCommand.FAILED;
 					}
 				}
@@ -287,7 +288,7 @@ public class TransactionObject implements XWritableObject {
 				// command succeeded -> add it to the list
 				this.commands.add((XAtomicCommand)command);
 				
-				callback.onSuccess(this.revisionNumber);
+				usedCallback.onSuccess(this.revisionNumber);
 				return this.revisionNumber;
 			}
 
@@ -311,7 +312,7 @@ public class TransactionObject implements XWritableObject {
 				// command succeeded -> add it to the list
 				this.commands.add((XAtomicCommand)command);
 				
-				callback.onSuccess(this.revisionNumber);
+				usedCallback.onSuccess(this.revisionNumber);
 				return this.revisionNumber;
 			}
 		}
