@@ -16,6 +16,10 @@ import org.xydra.core.model.XRepository;
  * 
  * @author Kaidel
  * 
+ *         FIXME max: method signatures in this class are inconsistent. E.g.
+ *         removeField takes a fieldAddress, addField takes an objectAddress and
+ *         a fieldId. Better use addresses everywhere.
+ * 
  */
 public interface XCommandFactory {
 	
