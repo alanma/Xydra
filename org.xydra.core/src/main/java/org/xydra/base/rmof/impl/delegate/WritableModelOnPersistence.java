@@ -6,6 +6,7 @@ import java.util.List;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XWritableModel;
@@ -96,11 +97,12 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	}
 	
 	public boolean hasObject(XID objectId) {
-		XWritableModel modelSnapshot = this.persistence.getModelSnapshot(getAddress());
-		if(modelSnapshot == null) {
+		XWritableObject objectSnapshot = this.persistence.getObjectSnapshot(XX.resolveObject(
+		        getAddress(), objectId));
+		if(objectSnapshot == null) {
 			return false;
 		}
-		return modelSnapshot.hasObject(objectId);
+		return true;
 	}
 	
 	/**
