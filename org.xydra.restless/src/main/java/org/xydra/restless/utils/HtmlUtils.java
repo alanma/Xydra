@@ -188,7 +188,7 @@ public class HtmlUtils {
 	 * @throws IOException from underlying streams
 	 */
 	public static Writer startHtmlPage(HttpServletResponse res, String title) throws IOException {
-		ServletUtils.headers(res, ServletUtils.CONTENTTYPE_APPLICATION_XHTML_XML);
+		ServletUtils.headers(res, ServletUtils.CONTENTTYPE_TEXT_HTML);
 		Writer w = res.getWriter();
 		writeHtmlHeaderOpenBody(w, title);
 		w.flush();
