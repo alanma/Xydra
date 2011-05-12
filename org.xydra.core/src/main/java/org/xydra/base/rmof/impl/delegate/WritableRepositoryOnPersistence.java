@@ -5,7 +5,6 @@ import java.util.Iterator;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
-import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableRepository;
@@ -23,7 +22,7 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 		XWritableModel model = getModel(modelId);
 		if(model == null) {
 			XCommand command = X.getCommandFactory().createAddModelCommand(
-			        this.persistence.getRepositoryId(), modelId, false);
+			        this.persistence.getRepositoryId(), modelId, true);
 			this.persistence.executeCommand(this.executingActorId, command);
 			model = getModel(modelId);
 		}
@@ -67,10 +66,11 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 	
 	public boolean removeModel(XID modelId) {
 		boolean result = hasModel(modelId);
-		long modelRevision = this.persistence.getModelRevision(XX.resolveModel(getAddress(),
-		        modelId));
+		// long modelRevision =
+		// this.persistence.getModelRevision(XX.resolveModel(getAddress(),
+		// modelId));
 		XCommand command = X.getCommandFactory().createRemoveModelCommand(
-		        this.persistence.getRepositoryId(), modelId, modelRevision, true);
+		        this.persistence.getRepositoryId(), modelId, XCommand.FORCED, true);
 		long commandResult = this.persistence.executeCommand(this.executingActorId, command);
 		assert commandResult >= 0;
 		return result;

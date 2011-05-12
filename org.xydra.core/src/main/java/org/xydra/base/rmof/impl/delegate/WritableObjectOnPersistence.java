@@ -34,7 +34,7 @@ public class WritableObjectOnPersistence extends AbstractWritableOnPersistence i
 		}
 		// else: create in persistence
 		XCommand command = X.getCommandFactory().createAddFieldCommand(
-		        this.persistence.getRepositoryId(), this.modelId, this.objectId, fieldId, false);
+		        this.persistence.getRepositoryId(), this.modelId, this.objectId, fieldId, true);
 		this.persistence.executeCommand(this.executingActorId, command);
 		return getField(fieldId);
 	}
@@ -101,7 +101,7 @@ public class WritableObjectOnPersistence extends AbstractWritableOnPersistence i
 		boolean result = hasField(fieldId);
 		XCommand command = X.getCommandFactory().createRemoveFieldCommand(
 		        this.persistence.getRepositoryId(), this.modelId, this.objectId, fieldId,
-		        XCommand.FORCED, false);
+		        XCommand.FORCED, true);
 		long commandResult = this.persistence.executeCommand(this.executingActorId, command);
 		assert commandResult >= 0;
 		return result;

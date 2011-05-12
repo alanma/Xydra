@@ -31,11 +31,11 @@ public class WritableFieldOnPersistence extends AbstractWritableOnPersistence im
 		if(value != null) {
 			command = X.getCommandFactory().createChangeValueCommand(
 			        this.persistence.getRepositoryId(), this.modelId, this.objectId, this.fieldId,
-			        getRevisionNumber(), value, false);
+			        XCommand.FORCED, value, true);
 		} else {
 			command = X.getCommandFactory().createRemoveValueCommand(
 			        this.persistence.getRepositoryId(), this.modelId, this.objectId, this.fieldId,
-			        getRevisionNumber(), false);
+			        XCommand.FORCED, true);
 		}
 		long result = this.persistence.executeCommand(this.executingActorId, command);
 		if(result == XCommand.FAILED) {
@@ -59,9 +59,11 @@ public class WritableFieldOnPersistence extends AbstractWritableOnPersistence im
 	}
 	
 	private XWritableField getFieldSnapshot() {
-		return this.persistence.getModelSnapshot(
-		        X.getIDProvider().fromComponents(this.persistence.getRepositoryId(), this.modelId,
-		                null, null)).getObject(this.objectId).getField(this.fieldId);
+		return this.persistence
+		        .getModelSnapshot(
+		                X.getIDProvider().fromComponents(this.persistence.getRepositoryId(),
+		                        this.modelId, null, null)).getObject(this.objectId)
+		        .getField(this.fieldId);
 	}
 	
 	@Override
@@ -102,7 +104,7 @@ public class WritableFieldOnPersistence extends AbstractWritableOnPersistence im
 		}
 		XCommand command = X.getCommandFactory().createAddValueCommand(
 		        this.persistence.getRepositoryId(), this.modelId, this.objectId, this.fieldId,
-		        getRevisionNumber(), value, false);
+		        XCommand.FORCED, value, true);
 		long result = this.persistence.executeCommand(this.executingActorId, command);
 		if(result == XCommand.FAILED) {
 			throw new RuntimeException("Could not execute set-value-initially for value " + value
