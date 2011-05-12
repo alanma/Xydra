@@ -15,6 +15,8 @@ public class LoggerFactory {
 	private static ILoggerFactorySPI loggerFactorySPI;
 	private static ILogListener logListener_;
 	
+	public static final String ROOT_LOGGER_NAME = "org.xydra.log.system";
+	
 	/**
 	 * All log messages are also sent to a registered {@link ILogListener}
 	 * 
@@ -22,6 +24,8 @@ public class LoggerFactory {
 	 */
 	public static void setLogListener(ILogListener logListener) {
 		logListener_ = logListener;
+		loggerFactorySPI.getLogger(ROOT_LOGGER_NAME, null).info(
+		        "Logging: Attached log listener " + logListener.getClass().getName());
 	}
 	
 	/**
@@ -91,7 +95,7 @@ public class LoggerFactory {
 	 */
 	public static void setLoggerFactorySPI(ILoggerFactorySPI spi) {
 		loggerFactorySPI = spi;
-		loggerFactorySPI.getLogger("ROOT", null).info(
+		loggerFactorySPI.getLogger(ROOT_LOGGER_NAME, null).info(
 		        "Logging: Configured XydraLog with " + spi.getClass().getName());
 	}
 	
