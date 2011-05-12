@@ -65,13 +65,13 @@ public class JulLogger extends Logger {
 			if(this.logListener == null) {
 				record.setSourceClassName(e.getStackTrace()[3].getClassName());
 				record.setSourceMethodName(e.getStackTrace()[3].getMethodName());
-				record.setMessage(record.getMessage() + " (no listener)");
+				record.setMessage(record.getMessage());
 				// e.getStackTrace()[1].getLineNumber();
 			} else {
 				record.setSourceClassName(e.getStackTrace()[4].getClassName());
 				record.setSourceMethodName(e.getStackTrace()[4].getMethodName());
 				// e.getStackTrace()[1].getLineNumber();
-				record.setMessage(record.getMessage() + " (with listener)");
+				record.setMessage(record.getMessage());
 			}
 		}
 		
