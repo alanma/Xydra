@@ -138,11 +138,12 @@ public class MemoryFieldCommand extends MemoryAtomicCommand implements XFieldCom
 	
 	@Override
 	public String toString() {
-		String suffix = " @" + getTarget();
+		String suffix = "";
 		if(isForced())
 			suffix += " (forced)";
 		else
 			suffix += " r" + getRevisionNumber();
+		suffix += " @" + getTarget();
 		switch(getChangeType()) {
 		case ADD:
 			return "FieldCommand: ADD " + this.newValue + suffix;
