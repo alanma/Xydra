@@ -15,6 +15,8 @@ import org.xydra.base.change.impl.memory.MemoryTransactionEvent;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.gae.AboutAppEngine;
 import org.xydra.index.query.Pair;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.store.impl.gae.GaeUtils;
 
 import com.google.appengine.api.datastore.Entity;
@@ -43,6 +45,8 @@ import com.google.appengine.api.datastore.Transaction;
  * 
  */
 public class GaeChange {
+	
+	private static final Logger log = LoggerFactory.getLogger(GaeChange.class);
 	
 	// GAE Entity (type=XCHANGE) property keys.
 	
@@ -377,6 +381,13 @@ public class GaeChange {
 		if(this.status == null) {
 			synchronized(this) {
 				Number n = (Number)this.entity.getProperty(PROP_STATUS);
+				if(n == null) {
+					try {
+						throw new RuntimeException("Tracing caller of getStatus()");
+					} catch(RuntimeException e) {
+						log.error("change entity without status", e);
+					}
+				}
 				assert n != null : "All change entities should have a status";
 				int index = n.intValue();
 				this.status = Status.get(index);
@@ -470,8 +481,8 @@ public class GaeChange {
 				Pair<XAtomicEvent[],int[]> res = GaeEvents.loadAtomicEvents(this.modelAddr,
 				        this.rev, getActor(), this.entity);
 				
-				this.events = new Pair<List<XAtomicEvent>,int[]>(Arrays.asList(res.getFirst()), res
-				        .getSecond());
+				this.events = new Pair<List<XAtomicEvent>,int[]>(Arrays.asList(res.getFirst()),
+				        res.getSecond());
 			}
 		}
 		return this.events;

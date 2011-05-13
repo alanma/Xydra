@@ -73,8 +73,7 @@ import com.google.appengine.api.datastore.Transaction;
  * <dd>Represent fields and managed by {@link InternalGaeField}. The value is
  * not stored in the field entity. Instead, additionally to the field revision,
  * an index into the transaction (or zero) is stored that can be used with
- * {@link GaeEvents#getValue(XAddress, long, int)} to load the
- * {@link XValue}.</dd>
+ * {@link GaeEvents#getValue(XAddress, long, int)} to load the {@link XValue}.</dd>
  * 
  * 
  * <dt>Entity type XCHANGE</dt>
@@ -89,8 +88,8 @@ import com.google.appengine.api.datastore.Transaction;
  * the (last) process started working on the change.
  * 
  * Events and small XValues are also saved in the XCHANGE entities. These
- * properties are managed by {@link GaeEvents}. No events are guaranteed
- * to be set before the change has reached {@link Status#Executing}.
+ * properties are managed by {@link GaeEvents}. No events are guaranteed to be
+ * set before the change has reached {@link Status#Executing}.
  * 
  * 
  * <dt>Entity type XEVENT</dt>
@@ -164,7 +163,8 @@ public class GaeChangesService {
 	 * @see XydraStore#executeCommands(XID, String, XCommand[],
 	 *      org.xydra.store.Callback)
 	 */
-	public long executeCommand(XCommand command, XID actorId) {
+	// TODO consider removing the synchronized here
+	public synchronized long executeCommand(XCommand command, XID actorId) {
 		
 		// IMPROVE maybe let the caller provide an XID that can be used to check
 		// the status in case there is a GAE timeout?
@@ -659,7 +659,8 @@ public class GaeChangesService {
 	 * @see XydraStore#getModelRevisions(XID, String, XAddress[],
 	 *      org.xydra.store.Callback)
 	 */
-	public long getCurrentRevisionNumber() {
+	// TODO consider removing the synchronized here
+	public synchronized long getCurrentRevisionNumber() {
 		
 		long currentRev = this.revCache.getCurrentIfSet();
 		if(currentRev != RevisionCache.NOT_SET) {
@@ -731,7 +732,8 @@ public class GaeChangesService {
 	/**
 	 * Get the change at the specified revision number.
 	 */
-	public AsyncChange getChangeAt(long rev) {
+	// TODO consider removing the synchronized here
+	public synchronized AsyncChange getChangeAt(long rev) {
 		if(useLocalVMCache) {
 			// IMPROVE use a map that supports concurrency instead?
 			synchronized(this.committedChangeCache) {
@@ -754,7 +756,8 @@ public class GaeChangesService {
 	 * @see XydraStore#getEvents(XID, String, GetEventsRequest[],
 	 *      org.xydra.store.Callback)
 	 */
-	public List<XEvent> getEventsBetween(long beginRevision, long _endRevision) {
+	// TODO consider removing the synchronized here
+	public synchronized List<XEvent> getEventsBetween(long beginRevision, long _endRevision) {
 		
 		long endRevision = _endRevision;
 		
@@ -891,7 +894,8 @@ public class GaeChangesService {
 	private static final boolean useLocalVMCache = true;
 	private Map<Long,GaeChange> committedChangeCache = new HashMap<Long,GaeChange>();
 	
-	public AsyncValue getValue(long rev, int transindex) {
+	// TODO consider removing the synchronized here
+	public synchronized AsyncValue getValue(long rev, int transindex) {
 		
 		if(useLocalVMCache) {
 			GaeChange change;
