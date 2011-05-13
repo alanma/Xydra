@@ -18,6 +18,7 @@ import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
+import org.xydra.core.model.impl.memory.UUID;
 import org.xydra.server.impl.InfrastructureServiceFactory;
 import org.xydra.store.RequestException;
 import org.xydra.store.XydraStore;
@@ -39,6 +40,9 @@ import org.xydra.store.impl.gae.snapshot.GaeSnapshotService;
 @RunsInAppEngine(true)
 @RunsInGWT(false)
 public class GaePersistence implements XydraPersistence {
+	
+	/** A unique ID to distinguish several AppEngine instances */
+	public static final String INSTANCE_ID = UUID.uuid(9);
 	
 	private final XAddress repoAddr;
 	

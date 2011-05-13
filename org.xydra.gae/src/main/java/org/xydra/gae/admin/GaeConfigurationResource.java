@@ -1,13 +1,16 @@
 package org.xydra.gae.admin;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
+import org.xydra.restless.utils.HtmlUtils;
+import org.xydra.restless.utils.ServletUtils;
+import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.store.impl.gae.GaeUtils;
 
 
@@ -25,26 +28,23 @@ public class GaeConfigurationResource {
 		r.addMethod(path + "/gaeconf/set", "GET", GaeUtils.class, "setCacheConf", true,
 		        new RestlessParameter("memcache", null));
 		r.addMethod(path + "/gaeconf/get", "GET", GaeUtils.class, "getConf", true);
-		r.addMethod(path + "/gaeconf", "GET", GaeConfigurationResource.class, "howto", true);
+		r.addMethod(path + "/gaeconf", "GET", GaeConfigurationResource.class, "index", true);
 		
 	}
 	
-	public static void howto(HttpServletRequest req, HttpServletResponse res) throws IOException {
-		res.setCharacterEncoding("utf-8");
-		res.setContentType("Text/html");
-		res.setStatus(200);
-		new OutputStreamWriter(res.getOutputStream(), "utf-8").write("GAE cache conf. ");
-		new OutputStreamWriter(res.getOutputStream(), "utf-8").write(
-		        org.xydra.restless.utils.HtmlUtils.link(req.getRequestURI() + "/get", "get stats")
-		                + "<br/>");
-		new OutputStreamWriter(res.getOutputStream(), "utf-8").write(
-		        org.xydra.restless.utils.HtmlUtils.link(req.getRequestURI() + "/set?memcache=true",
-		                "set memcache=true(default)") + "<br/>");
-		new OutputStreamWriter(res.getOutputStream(), "utf-8").write(
-		        org.xydra.restless.utils.HtmlUtils.link(
-		                req.getRequestURI() + "/set?memcache=false", "set memcache=false")
-		                + "<br/>");
-		new OutputStreamWriter(res.getOutputStream(), "utf-8").write(GaeUtils.getConf());
+	public static void index(HttpServletRequest req, HttpServletResponse res) throws IOException {
+		ServletUtils.headers(res, "text/html");
+		Writer w = HtmlUtils.startHtmlPage(res, "GAE cache conf on instance "
+		        + GaePersistence.INSTANCE_ID);
+		w.write("GAE cache conf. ");
+		w.write(HtmlUtils.link(req.getRequestURI() + "/get", "get stats") + "<br/>");
+		w.write(HtmlUtils.link(req.getRequestURI() + "/set?memcache=true",
+		        "set memcache=true(default)") + "<br/>");
+		w.write(HtmlUtils.link(req.getRequestURI() + "/set?memcache=false", "set memcache=false")
+		        + "<br/>");
+		w.write(GaeUtils.getConf());
+		w.flush();
+		w.close();
 	}
 	
 }
