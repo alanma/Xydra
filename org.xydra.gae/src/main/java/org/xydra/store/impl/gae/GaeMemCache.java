@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.cache.Cache;
 import javax.cache.CacheException;
 import javax.cache.CacheManager;
+import javax.cache.CacheStatistics;
 
 import org.xydra.server.impl.IMemCache;
 
@@ -56,8 +57,8 @@ public class GaeMemCache implements IMemCache {
 	
 	public GaeMemCache() {
 		try {
-			this.cache = CacheManager.getInstance().getCacheFactory().createCache(
-			        Collections.emptyMap());
+			this.cache = CacheManager.getInstance().getCacheFactory()
+			        .createCache(Collections.emptyMap());
 		} catch(CacheException e) {
 			throw new RuntimeException(e);
 		}
@@ -67,6 +68,16 @@ public class GaeMemCache implements IMemCache {
 	@Override
 	public boolean containsKey(String key) {
 		return this.cache.containsKey(key);
+	}
+	
+	@Override
+	public String stats() {
+		CacheStatistics stats = this.cache.getCacheStatistics();
+		int hits = stats.getCacheHits();
+		int misses = stats.getCacheMisses();
+		int objectcount = stats.getObjectCount();
+		return "In-memory, size: " + size() + " objectcount: " + objectcount + " hits: " + hits
+		        + " misses: " + misses;
 	}
 	
 }

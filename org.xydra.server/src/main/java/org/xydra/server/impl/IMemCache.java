@@ -65,4 +65,9 @@ public interface IMemCache {
 	 * more of the JCache API
 	 */
 
+	/**
+	 * @return a string containing human-readable information about this cache
+	 */
+	String stats();
+	
 }

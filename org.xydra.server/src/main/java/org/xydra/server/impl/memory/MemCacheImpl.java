@@ -72,4 +72,9 @@ public class MemCacheImpl implements IMemCache {
 		return this.map.containsKey(key);
 	}
 	
+	@Override
+	public String stats() {
+		return "In-memory, size " + size();
+	}
+	
 }
