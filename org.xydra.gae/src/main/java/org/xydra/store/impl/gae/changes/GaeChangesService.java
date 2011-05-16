@@ -244,6 +244,7 @@ public class GaeChangesService {
 				return newChange;
 				
 			} else {
+				assert changeEntity != null; // but may still be NULL-ENTITY
 				
 				GaeChange change = new GaeChange(this.modelAddr, rev, changeEntity);
 				

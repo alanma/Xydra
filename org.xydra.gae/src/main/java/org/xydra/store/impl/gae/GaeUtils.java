@@ -115,6 +115,7 @@ public class GaeUtils {
 				if(!cachedEntity.equals(NULL_ENTITY)) {
 					return cachedEntity;
 				}
+				// FIXME max: why not return null in else-case?
 			}
 		}
 		
@@ -127,6 +128,7 @@ public class GaeUtils {
 		if(e == null) {
 			log.debug("--> null");
 		}
+		
 		return e;
 	}
 	

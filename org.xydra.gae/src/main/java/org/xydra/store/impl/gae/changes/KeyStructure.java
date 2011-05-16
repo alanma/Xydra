@@ -74,7 +74,7 @@ public class KeyStructure {
 	 *         entity
 	 */
 	public static boolean isChangeKey(Key key) {
-		return key.getKind() == KIND_XCHANGE;
+		return key.getKind().equals(KIND_XCHANGE);
 	}
 	
 	/**
@@ -86,7 +86,7 @@ public class KeyStructure {
 	 * @param key The key to check
 	 */
 	static boolean assertRevisionInKey(Key key, long rev) {
-		assert isChangeKey(key) : "key = " + key;
+		assert isChangeKey(key) : "key = " + key + " with kind " + key.getKind();
 		String keyStr = key.getName();
 		int p = keyStr.lastIndexOf("/");
 		assert p > 0;
