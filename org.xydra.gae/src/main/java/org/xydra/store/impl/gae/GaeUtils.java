@@ -69,9 +69,9 @@ public class GaeUtils {
 	}
 	
 	public static String getStats() {
-		return
-
-		"MemCache: " + XydraRuntime.getMemcache().size() + " entries \n";
+		return "tbd";
+		
+		// FIXME "MemCache: " + XydraRuntime.getMemcache().stats();
 	}
 	
 	/**

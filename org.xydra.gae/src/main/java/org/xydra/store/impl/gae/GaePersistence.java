@@ -19,8 +19,8 @@ import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.core.model.impl.memory.UUID;
-import org.xydra.server.impl.InfrastructureServiceFactory;
 import org.xydra.store.RequestException;
+import org.xydra.store.XydraRuntime;
 import org.xydra.store.XydraStore;
 import org.xydra.store.XydraStoreAdmin;
 import org.xydra.store.impl.delegate.DelegatingSecureStore;
@@ -62,7 +62,7 @@ public class GaePersistence implements XydraPersistence {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		
 		// Register AppEngine infrastructure services
-		InfrastructureServiceFactory.setProvider(new GaeInfrastructureProvider());
+		XydraRuntime.setPlatformRuntime(new GaePlatformRuntime());
 		
 		this.repoAddr = XX.toAddress(repoId, null, null, null);
 	}

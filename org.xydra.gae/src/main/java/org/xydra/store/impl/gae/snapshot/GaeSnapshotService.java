@@ -1,8 +1,8 @@
 package org.xydra.store.impl.gae.snapshot;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicEvent;
@@ -24,6 +24,7 @@ import org.xydra.core.XCopyUtils;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.IMemCache;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.gae.changes.AsyncChange;
 import org.xydra.store.impl.gae.changes.GaeChangesService;
@@ -48,8 +49,9 @@ public class GaeSnapshotService {
 		this.changes = changesService;
 	}
 	
-	private static class CachedModel {
+	private static class CachedModel implements Serializable {
 		
+		private static final long serialVersionUID = -6271321788554091709L;
 		long revision = -1;
 		XRevWritableModel modelState = null; // can be null
 		
@@ -61,7 +63,7 @@ public class GaeSnapshotService {
 	 */
 	public XWritableModel getSnapshot() {
 		
-		Map<Object,Object> cache = XydraRuntime.getMemcache();
+		IMemCache cache = XydraRuntime.getMemcache();
 		
 		String cachname = this.changes.getModelAddress() + "-snapshot";
 		

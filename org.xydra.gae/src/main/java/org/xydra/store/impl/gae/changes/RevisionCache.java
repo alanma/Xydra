@@ -1,9 +1,8 @@
 package org.xydra.store.impl.gae.changes;
 
-import java.util.Map;
-
 import org.xydra.base.XAddress;
 import org.xydra.core.model.XModel;
+import org.xydra.store.IMemCache;
 import org.xydra.store.XydraRuntime;
 
 
@@ -29,7 +28,7 @@ public class RevisionCache {
 	 */
 	protected long getLastCommited() {
 		
-		Map<Object,Object> cache = XydraRuntime.getMemcache();
+		IMemCache cache = XydraRuntime.getMemcache();
 		
 		Long entry = (Long)cache.get(getCommitedRevCacheName());
 		long rev = (entry == null) ? -1L : entry;
@@ -41,7 +40,7 @@ public class RevisionCache {
 	
 	protected long getLastCommitedIfSet() {
 		
-		Map<Object,Object> cache = XydraRuntime.getMemcache();
+		IMemCache cache = XydraRuntime.getMemcache();
 		
 		Long entry = (Long)cache.get(getCommitedRevCacheName());
 		return (entry == null) ? NOT_SET : entry;
@@ -89,7 +88,7 @@ public class RevisionCache {
 	 */
 	protected long getCurrent() {
 		
-		Map<Object,Object> cache = XydraRuntime.getMemcache();
+		IMemCache cache = XydraRuntime.getMemcache();
 		
 		Long value = (Long)cache.get(getCurrentRevCacheName());
 		return (value == null) ? -1L : value;
@@ -106,7 +105,7 @@ public class RevisionCache {
 	 */
 	protected long getCurrentIfSet() {
 		
-		Map<Object,Object> cache = XydraRuntime.getMemcache();
+		IMemCache cache = XydraRuntime.getMemcache();
 		
 		Long value = (Long)cache.get(getCurrentRevCacheName());
 		return (value == null) ? NOT_SET : value;
@@ -138,7 +137,7 @@ public class RevisionCache {
 	 *            value.
 	 */
 	private void increaseCachedValue(String cachname, long l) {
-		Map<Object,Object> cache = XydraRuntime.getMemcache();
+		IMemCache cache = XydraRuntime.getMemcache();
 		
 		Long current = (Long)cache.get(cachname);
 		if(current != null && current > l) {

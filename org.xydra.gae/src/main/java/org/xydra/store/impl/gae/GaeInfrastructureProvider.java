@@ -1,14 +1,16 @@
 package org.xydra.store.impl.gae;
 
+import org.xydra.server.impl.IGaeMemCache;
 import org.xydra.server.impl.IInfrastructureProvider;
-import org.xydra.server.impl.IMemCache;
 
 
+@SuppressWarnings("deprecation")
+@Deprecated
 public class GaeInfrastructureProvider implements IInfrastructureProvider {
 	
 	@Override
-	public IMemCache createMemCache() {
-		return new GaeMemCache();
+	public IGaeMemCache createMemCache() {
+		return new GaeMemCacheUnused();
 	}
 	
 }
