@@ -86,7 +86,7 @@ public class KeyStructure {
 	 * @param key The key to check
 	 */
 	static boolean assertRevisionInKey(Key key, long rev) {
-		assert isChangeKey(key);
+		assert isChangeKey(key) : "key = " + key;
 		String keyStr = key.getName();
 		int p = keyStr.lastIndexOf("/");
 		assert p > 0;
