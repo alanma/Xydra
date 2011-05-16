@@ -4,6 +4,8 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.dev.LocalDatastoreService;
 import com.google.appengine.tools.development.ApiProxyLocal;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
+import com.google.appengine.tools.development.testing.LocalMemcacheServiceTestConfig;
+import com.google.appengine.tools.development.testing.LocalMemcacheServiceTestConfig.SizeUnit;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.apphosting.api.ApiProxy;
 import com.google.apphosting.api.ApiProxy.Delegate;
@@ -29,7 +31,10 @@ public class GaeTestFixer_LocalPart {
 			// create new environment
 			LocalDatastoreServiceTestConfig localDatastoreServiceTestConfig = new LocalDatastoreServiceTestConfig()
 			        .setNoStorage(true).setBackingStoreLocation(null);
-			helper_ = new LocalServiceTestHelper(localDatastoreServiceTestConfig);
+			LocalMemcacheServiceTestConfig localMemcacheServiceTestConfig = new LocalMemcacheServiceTestConfig()
+			        .setMaxSize(10, SizeUnit.MB);
+			helper_ = new LocalServiceTestHelper(localDatastoreServiceTestConfig,
+			        localMemcacheServiceTestConfig);
 			
 			setUp();
 			
