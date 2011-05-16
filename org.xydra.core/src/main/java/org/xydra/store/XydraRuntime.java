@@ -14,8 +14,9 @@ import org.xydra.store.impl.memory.MemoryRuntime;
  * A singleton for accessing platform specific variants of certain services such
  * as a cache which is a different thing on Google AppEngine and on plain Java.
  * 
- * The initialisation process runs in three phases and is triggered with the
- * first call to {@link #getMemcache()} or {@link #getPersistence(XID)}.
+ * The initialisation process is triggered with the first call to
+ * {@link #getMemcache()} or {@link #getPersistence(XID)}. The initialisation
+ * process runs in three phases:
  * <ol>
  * <li>Let another class set a {@link XydraPlatformRuntime}</li>
  * <li>Try to load {@link #PLATFORM_CLASS} which must have a zero-argument
@@ -37,12 +38,12 @@ public class XydraRuntime {
 	
 	private static XydraPlatformRuntime platformRuntime;
 	
-	private static Map<Object,Object> cacheInstance;
+	private static IMemCache cacheInstance;
 	
 	/**
 	 * @return a re-used instance of a Cache
 	 */
-	public static synchronized Map<Object,Object> getMemcache() {
+	public static synchronized IMemCache getMemcache() {
 		initialiseRuntime();
 		if(cacheInstance == null) {
 			cacheInstance = platformRuntime.getMemCache();
