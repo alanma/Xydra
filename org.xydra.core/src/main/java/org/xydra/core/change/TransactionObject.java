@@ -44,7 +44,7 @@ public class TransactionObject implements XWritableObject {
 	private XObject baseObject;
 	private long revisionNumber;
 	
-	private Map<XID,XField> changedFields;
+	private Set<XID> changedFields;
 	private Map<XID,XValue> changedValues;
 	
 	private Set<XID> removedFields;
@@ -57,7 +57,7 @@ public class TransactionObject implements XWritableObject {
 		this.baseObject = object;
 		this.revisionNumber = object.getRevisionNumber();
 		
-		this.changedFields = new HashMap<XID,XField>();
+		this.changedFields = new HashSet<XID>();
 		this.changedValues = new HashMap<XID,XValue>();
 		this.removedFields = new HashSet<XID>();
 		this.fieldRevisionNumbers = new HashMap<XID,Long>();
@@ -77,7 +77,6 @@ public class TransactionObject implements XWritableObject {
 	}
 	
 	public long commit() {
-		// TODO maybe use the builder directly instead of the LinkedList
 		XTransactionBuilder builder = new XTransactionBuilder(this.getAddress());
 		
 		for(int i = 0; i < this.commands.size(); i++) {
@@ -98,9 +97,16 @@ public class TransactionObject implements XWritableObject {
 		/*
 		 * TODO what happens with currently used InObjectTransactionFields when
 		 * this method is called?
+		 * 
+		 * Maybe implement a "stateCounter" which is incremented every time this
+		 * method is called, initialize the InObjectTransactionFields with this
+		 * counter and the InObjectTransactionFields need to check whether their
+		 * counter is the same as the counter of their TransactionObject. If
+		 * not, throw an exception. Problem: Renders already returned
+		 * InObjectTransactionFields useless.
 		 */
 
-		this.changedFields = new HashMap<XID,XField>();
+		this.changedFields = new HashSet<XID>();
 		this.changedValues = new HashMap<XID,XValue>();
 		this.removedFields = new HashSet<XID>();
 		this.fieldRevisionNumbers = new HashMap<XID,Long>();
@@ -128,9 +134,7 @@ public class TransactionObject implements XWritableObject {
 			usedCallback = new DummyCallback();
 		}
 		
-		/*
-		 * Make sure that revision numbers are increased correctly
-		 */
+		// check if it is a transaction
 		if(command.getChangeType() == ChangeType.TRANSACTION) {
 			XTransaction transaction = (XTransaction)command;
 			
@@ -143,14 +147,18 @@ public class TransactionObject implements XWritableObject {
 				}
 			}
 			
+			/*
+			 * TODO Improve transaction handling (rollback etc.)
+			 */
+
 			// Transaction "succeeded"
 			usedCallback.onSuccess(this.revisionNumber);
 			return this.revisionNumber;
 		}
 		
-		// Simulate the action the given command would actually execute
+		// given command is no transaction
 		
-		// no transaction
+		// Simulate the action the given command would actually execute
 		
 		// check wether the given command actually refers to the this object
 		if(!command.getTarget().getObject().equals(this.getID())
@@ -164,7 +172,8 @@ public class TransactionObject implements XWritableObject {
 			XObjectCommand objectCommand = (XObjectCommand)command;
 			
 			// check revision number
-			if(objectCommand.getRevisionNumber() != this.revisionNumber) {
+			if(objectCommand.getRevisionNumber() != this.revisionNumber
+			        && !objectCommand.isForced()) {
 				usedCallback.onFailure();
 				return XCommand.FAILED;
 			}
@@ -189,7 +198,7 @@ public class TransactionObject implements XWritableObject {
 				this.fieldRevisionNumbers.put(fieldId, this.revisionNumber);
 				
 				XField field = new MemoryField(null, fieldId);
-				this.changedFields.put(fieldId, field);
+				this.changedFields.add(fieldId);
 				
 				// command succeeded -> add it to the list
 				this.commands.add((XAtomicCommand)command);
@@ -243,7 +252,8 @@ public class TransactionObject implements XWritableObject {
 			assert field instanceof InModelTransactionField;
 			
 			// check revision number
-			if(fieldCommand.getRevisionNumber() != field.getRevisionNumber()) {
+			if(fieldCommand.getRevisionNumber() != field.getRevisionNumber()
+			        && !fieldCommand.isForced()) {
 				usedCallback.onFailure();
 				return XCommand.FAILED;
 			}
@@ -260,7 +270,7 @@ public class TransactionObject implements XWritableObject {
 				this.revisionNumber++;
 				this.fieldRevisionNumbers.put(fieldId, this.revisionNumber);
 				
-				// "change" the value
+				// "add" the value
 				this.changedValues.put(fieldId, fieldCommand.getValue());
 				
 				// command succeeded -> add it to the list
@@ -282,7 +292,7 @@ public class TransactionObject implements XWritableObject {
 				this.revisionNumber++;
 				this.fieldRevisionNumbers.put(fieldId, this.revisionNumber);
 				
-				// "change" the value
+				// "remove" the value
 				this.changedValues.put(fieldId, null);
 				
 				// command succeeded -> add it to the list
@@ -293,15 +303,13 @@ public class TransactionObject implements XWritableObject {
 			}
 
 			else if(fieldCommand.getChangeType() == ChangeType.CHANGE) {
-				/*
-				 * if(field.getValue() != fieldCommand.g) {
-				 * if(!fieldCommand.isForced()) { callback.onFailure(); return
-				 * XCommand.FAILED; } }
-				 * 
-				 * 
-				 * TODO Check how forced Change Commands work!
-				 */
-
+				if(field.getValue() == null) {
+					if(!fieldCommand.isForced()) {
+						usedCallback.onFailure();
+						return XCommand.FAILED;
+					}
+				}
+				
 				// increase revision numbers
 				this.revisionNumber++;
 				this.fieldRevisionNumbers.put(fieldId, this.revisionNumber);
@@ -333,7 +341,7 @@ public class TransactionObject implements XWritableObject {
 	public boolean hasField(XID fieldId) {
 		XField field = null;
 		
-		if(this.changedFields.containsKey(fieldId)) {
+		if(this.changedFields.contains(fieldId)) {
 			return true;
 		} else {
 			/*
@@ -376,26 +384,25 @@ public class TransactionObject implements XWritableObject {
 	 */
 
 	public XWritableField getField(XID fieldId) {
-		/*
-		 * TODO maybe already add the value and the field itself to
-		 * changedFields as soon as someone asks for it to speed up look-up
-		 * times?
-		 */
-
-		XField field = null;
+		boolean exists = false;
 		
-		if(this.changedFields.containsKey(fieldId)) {
-			field = this.changedFields.get(fieldId);
+		if(this.changedFields.contains(fieldId)) {
+			exists = true;
 		} else {
 			/*
 			 * only look into the base model if the field wasn't removed
 			 */
 			if(!this.removedFields.contains(fieldId)) {
-				field = this.baseObject.getField(fieldId);
+				XField field = this.baseObject.getField(fieldId);
+				if(field != null) {
+					this.changedFields.add(fieldId);
+					this.fieldRevisionNumbers.put(fieldId, field.getRevisionNumber());
+					exists = true;
+				}
 			}
 		}
 		
-		if(field == null) {
+		if(exists == false) {
 			return null;
 		} else {
 			return new InObjectTransactionField(fieldId, this);
@@ -422,7 +429,8 @@ public class TransactionObject implements XWritableObject {
 	}
 	
 	public XValue getValue(XID id) {
-		// TODO maybe improve handling of removed fields
+		// TODO maybe improve handling of removed fields (throw exception or
+		// something)
 		
 		if(this.removedFields.contains(id)) {
 			return null;
