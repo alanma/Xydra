@@ -163,8 +163,7 @@ public class GaeChangesService {
 	 * @see XydraStore#executeCommands(XID, String, XCommand[],
 	 *      org.xydra.store.Callback)
 	 */
-	// TODO consider removing the synchronized here
-	public synchronized long executeCommand(XCommand command, XID actorId) {
+	public long executeCommand(XCommand command, XID actorId) {
 		
 		// IMPROVE maybe let the caller provide an XID that can be used to check
 		// the status in case there is a GAE timeout?
@@ -498,14 +497,14 @@ public class GaeChangesService {
 				
 			} else if(event instanceof XObjectEvent) {
 				if(event.getChangeType() == ChangeType.REMOVE) {
-					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(),
-					        change.getLocks()));
+					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(), change
+					        .getLocks()));
 					// cannot save revision in the removed field
 					objectsWithPossiblyUnsavedRev.add(event.getTarget().getObject());
 				} else {
 					assert event.getChangeType() == ChangeType.ADD;
-					futures.add(InternalGaeField.set(event.getChangedEntity(), change.rev,
-					        change.getLocks()));
+					futures.add(InternalGaeField.set(event.getChangedEntity(), change.rev, change
+					        .getLocks()));
 					// revision saved in created field
 					objectsWithSavedRev.add(event.getTarget().getObject());
 				}
@@ -514,14 +513,14 @@ public class GaeChangesService {
 			} else if(event instanceof XModelEvent) {
 				XID objectId = ((XModelEvent)event).getObjectId();
 				if(event.getChangeType() == ChangeType.REMOVE) {
-					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(),
-					        change.getLocks()));
+					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(), change
+					        .getLocks()));
 					// object removed, so revision is of no interest
 					objectsWithPossiblyUnsavedRev.remove(objectId);
 				} else {
 					assert event.getChangeType() == ChangeType.ADD;
-					futures.add(InternalGaeObject.createObject(event.getChangedEntity(),
-					        change.getLocks(), change.rev));
+					futures.add(InternalGaeObject.createObject(event.getChangedEntity(), change
+					        .getLocks(), change.rev));
 					// revision saved in new object
 					objectsWithSavedRev.add(objectId);
 				}
@@ -529,12 +528,12 @@ public class GaeChangesService {
 			} else {
 				assert event instanceof XRepositoryEvent;
 				if(event.getChangeType() == ChangeType.REMOVE) {
-					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(),
-					        change.getLocks()));
+					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(), change
+					        .getLocks()));
 				} else {
 					assert event.getChangeType() == ChangeType.ADD;
-					futures.add(InternalGaeModel.createModel(event.getChangedEntity(),
-					        change.getLocks()));
+					futures.add(InternalGaeModel.createModel(event.getChangedEntity(), change
+					        .getLocks()));
 				}
 			}
 			
@@ -659,8 +658,7 @@ public class GaeChangesService {
 	 * @see XydraStore#getModelRevisions(XID, String, XAddress[],
 	 *      org.xydra.store.Callback)
 	 */
-	// TODO consider removing the synchronized here
-	public synchronized long getCurrentRevisionNumber() {
+	public long getCurrentRevisionNumber() {
 		
 		long currentRev = this.revCache.getCurrentIfSet();
 		if(currentRev != RevisionCache.NOT_SET) {
@@ -732,8 +730,7 @@ public class GaeChangesService {
 	/**
 	 * Get the change at the specified revision number.
 	 */
-	// TODO consider removing the synchronized here
-	public synchronized AsyncChange getChangeAt(long rev) {
+	public AsyncChange getChangeAt(long rev) {
 		if(useLocalVMCache) {
 			// IMPROVE use a map that supports concurrency instead?
 			synchronized(this.committedChangeCache) {
@@ -756,8 +753,7 @@ public class GaeChangesService {
 	 * @see XydraStore#getEvents(XID, String, GetEventsRequest[],
 	 *      org.xydra.store.Callback)
 	 */
-	// TODO consider removing the synchronized here
-	public synchronized List<XEvent> getEventsBetween(long beginRevision, long _endRevision) {
+	public List<XEvent> getEventsBetween(long beginRevision, long _endRevision) {
 		
 		long endRevision = _endRevision;
 		
@@ -894,8 +890,7 @@ public class GaeChangesService {
 	private static final boolean useLocalVMCache = true;
 	private Map<Long,GaeChange> committedChangeCache = new HashMap<Long,GaeChange>();
 	
-	// TODO consider removing the synchronized here
-	public synchronized AsyncValue getValue(long rev, int transindex) {
+	public AsyncValue getValue(long rev, int transindex) {
 		
 		if(useLocalVMCache) {
 			GaeChange change;
