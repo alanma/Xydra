@@ -208,6 +208,11 @@ public class GaeChangesService {
 		
 		for(long rev = this.revCache.getLastTaken() + 1;; rev++) {
 			
+			if(getCachedChange(rev) != null) {
+				// Revision already taken.
+				continue;
+			}
+			
 			// Try to grab this revision.
 			
 			Key key = KeyStructure.createChangeKey(this.modelAddr, rev);
@@ -253,7 +258,9 @@ public class GaeChangesService {
 				// Since we read the entity anyway, might as well use that
 				// information.
 				Status status = change.getStatus();
-				if(!status.isCommitted() && !status.canRollForward() && change.isTimedOut()) {
+				if(status.isCommitted()) {
+					cacheCommittedChange(change);
+				} else if(!status.canRollForward() && change.isTimedOut()) {
 					commit(change, Status.FailedTimeout);
 				}
 				
@@ -278,8 +285,14 @@ public class GaeChangesService {
 		
 		for(long otherRev = change.rev - 1; otherRev > commitedRev; otherRev--) {
 			
+			GaeChange otherChange = getCachedChange(otherRev);
+			if(otherChange != null) {
+				// Change already committed, so it won't conflict.
+				continue;
+			}
+			
 			Key key = KeyStructure.createChangeKey(this.modelAddr, otherRev);
-			GaeChange otherChange = new GaeChange(this.modelAddr, otherRev, GaeUtils.getEntity(key));
+			otherChange = new GaeChange(this.modelAddr, otherRev, GaeUtils.getEntity(key));
 			
 			// Check if the change is committed.
 			if(otherChange.getStatus().isCommitted()) {
@@ -327,6 +340,7 @@ public class GaeChangesService {
 				otherChange.reload();
 				
 				if(otherChange.getStatus().isCommitted()) {
+					cacheCommittedChange(otherChange);
 					// now finished, so should have no locks anymore
 					assert !otherChange.hasLocks();
 					break;
@@ -635,13 +649,33 @@ public class GaeChangesService {
 		cacheCommittedChange(change);
 	}
 	
+	private static final boolean useLocalVMCache = true;
+	private Map<Long,GaeChange> committedChangeCache = new HashMap<Long,GaeChange>();
+	
 	protected void cacheCommittedChange(GaeChange change) {
 		assert change.getStatus().isCommitted();
 		if(useLocalVMCache) {
+			log.info("cache PUT " + this.modelAddr + " rev=" + change.rev + " := " + change);
 			synchronized(this.committedChangeCache) {
 				this.committedChangeCache.put(change.rev, change);
 			}
 		}
+	}
+	
+	protected GaeChange getCachedChange(long rev) {
+		if(!useLocalVMCache) {
+			return null;
+		}
+		GaeChange change;
+		synchronized(this.committedChangeCache) {
+			change = this.committedChangeCache.get(rev);
+			
+		}
+		if(change != null) {
+			assert change.getStatus().isCommitted();
+		}
+		log.info("cache GET " + this.modelAddr + " rev=" + rev + " => " + change);
+		return change;
 	}
 	
 	/**
@@ -731,15 +765,12 @@ public class GaeChangesService {
 	 * Get the change at the specified revision number.
 	 */
 	public AsyncChange getChangeAt(long rev) {
-		if(useLocalVMCache) {
-			// IMPROVE use a map that supports concurrency instead?
-			synchronized(this.committedChangeCache) {
-				GaeChange change = this.committedChangeCache.get(rev);
-				if(change != null) {
-					return new AsyncChange(change);
-				}
-			}
+		
+		GaeChange change = getCachedChange(rev);
+		if(change != null) {
+			return new AsyncChange(change);
 		}
+		
 		return new AsyncChange(this, rev);
 	}
 	
@@ -887,29 +918,21 @@ public class GaeChangesService {
 		}
 	}
 	
-	private static final boolean useLocalVMCache = true;
-	private Map<Long,GaeChange> committedChangeCache = new HashMap<Long,GaeChange>();
-	
 	public AsyncValue getValue(long rev, int transindex) {
 		
-		if(useLocalVMCache) {
-			GaeChange change;
-			synchronized(this.committedChangeCache) {
-				change = this.committedChangeCache.get(rev);
-			}
-			if(change != null) {
-				int realindex = GaeEvents.getEventIndex(transindex);
-				if(realindex >= 0) {
-					XEvent event = change.getEvent();
-					if(event instanceof XTransactionEvent) {
-						assert ((XTransactionEvent)event).size() > realindex;
-						event = ((XTransactionEvent)event).getEvent(realindex);
-					} else {
-						assert realindex == 0;
-					}
-					assert event instanceof XFieldEvent;
-					return new AsyncValue(((XFieldEvent)event).getNewValue());
+		GaeChange change = getCachedChange(rev);
+		if(change != null) {
+			int realindex = GaeEvents.getEventIndex(transindex);
+			if(realindex >= 0) {
+				XEvent event = change.getEvent();
+				if(event instanceof XTransactionEvent) {
+					assert ((XTransactionEvent)event).size() > realindex;
+					event = ((XTransactionEvent)event).getEvent(realindex);
+				} else {
+					assert realindex == 0;
 				}
+				assert event instanceof XFieldEvent;
+				return new AsyncValue(((XFieldEvent)event).getNewValue());
 			}
 		}
 		

@@ -504,7 +504,7 @@ public class GaeChange {
 	 */
 	synchronized public XEvent getEvent() {
 		
-		if(this.event != null) {
+		if(this.event == null) {
 			if(!getStatus().hasEvents()) {
 				// no events available (or not yet) for this revision.
 				return null;

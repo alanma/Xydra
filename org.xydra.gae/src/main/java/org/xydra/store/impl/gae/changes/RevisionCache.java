@@ -20,6 +20,9 @@ public class RevisionCache {
 		this.modelAddr = modelAddr;
 	}
 	
+	// IMPROVE don't call the memcache for every request, complement it with a
+	// local VM cache
+	
 	/**
 	 * @return a revision number such that all changes up to and including that
 	 *         revision number are guaranteed to be committed. This is not
