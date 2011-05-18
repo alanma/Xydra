@@ -70,10 +70,12 @@ public class GaeMemCache implements IMemCache {
 		return this.map.entrySet();
 	}
 	
+	@Override
 	public boolean equals(Object o) {
 		return this.map.equals(o);
 	}
 	
+	@Override
 	public int hashCode() {
 		return this.map.hashCode();
 	}
