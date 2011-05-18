@@ -362,7 +362,8 @@ public class GaeChange {
 	 * @return the locks associated with this change.
 	 */
 	@SuppressWarnings("unchecked")
-	protected GaeLocks getLocks() {
+	synchronized public GaeLocks getLocks() {
+		
 		assert !getStatus().isCommitted();
 		if(this.locks == null) {
 			List<String> lockStrs = (List<String>)this.entity.getProperty(PROP_LOCKS);
@@ -371,28 +372,29 @@ public class GaeChange {
 			}
 			this.locks = new GaeLocks(lockStrs);
 		}
+		
 		return this.locks;
 	}
 	
 	/**
 	 * @return the status code associated with the given change {@link Entity}.
 	 */
-	protected Status getStatus() {
+	synchronized public Status getStatus() {
+		
 		if(this.status == null) {
-			synchronized(this) {
-				Number n = (Number)this.entity.getProperty(PROP_STATUS);
-				if(n == null) {
-					try {
-						throw new RuntimeException("Tracing caller of getStatus()");
-					} catch(RuntimeException e) {
-						log.error("change entity without status", e);
-					}
+			Number n = (Number)this.entity.getProperty(PROP_STATUS);
+			if(n == null) {
+				try {
+					throw new RuntimeException("Tracing caller of getStatus()");
+				} catch(RuntimeException e) {
+					log.error("change entity without status", e);
 				}
-				assert n != null : "All change entities should have a status";
-				int index = n.intValue();
-				this.status = Status.get(index);
 			}
+			assert n != null : "All change entities should have a status";
+			int index = n.intValue();
+			this.status = Status.get(index);
 		}
+		
 		return this.status;
 	}
 	
@@ -449,7 +451,7 @@ public class GaeChange {
 	}
 	
 	/**
-	 * Asynchronously put this change entity into datastore withing the given
+	 * Asynchronously put this change entity into datastore within the given
 	 * transaction.
 	 */
 	protected void save(Transaction trans) {
@@ -472,18 +474,16 @@ public class GaeChange {
 	 * @return a List of {@link XAtomicEvent} which is stored as a number of GAE
 	 *         entities
 	 */
-	protected Pair<List<XAtomicEvent>,int[]> getAtomicEvents() {
+	synchronized protected Pair<List<XAtomicEvent>,int[]> getAtomicEvents() {
 		
 		assert getStatus().hasEvents();
 		
 		if(this.events == null) {
-			synchronized(this) {
-				Pair<XAtomicEvent[],int[]> res = GaeEvents.loadAtomicEvents(this.modelAddr,
-				        this.rev, getActor(), this.entity);
-				
-				this.events = new Pair<List<XAtomicEvent>,int[]>(Arrays.asList(res.getFirst()),
-				        res.getSecond());
-			}
+			Pair<XAtomicEvent[],int[]> res = GaeEvents.loadAtomicEvents(this.modelAddr, this.rev,
+			        getActor(), this.entity);
+			
+			this.events = new Pair<List<XAtomicEvent>,int[]>(Arrays.asList(res.getFirst()), res
+			        .getSecond());
 		}
 		return this.events;
 	}
@@ -502,28 +502,26 @@ public class GaeChange {
 	 * 
 	 * @return the XEvent represented by this change.
 	 */
-	public XEvent getEvent() {
+	synchronized public XEvent getEvent() {
 		
-		if(this.event == null) {
-			synchronized(this) {
-				if(!getStatus().hasEvents()) {
-					// no events available (or not yet) for this revision.
-					return null;
-				}
-				
-				List<XAtomicEvent> events = getAtomicEvents().getFirst();
-				assert events.size() > 0;
-				
-				if(events.size() == 1) {
-					this.event = events.get(0);
-				} else {
-					this.event = MemoryTransactionEvent.createTransactionEvent(getActor(),
-					        this.modelAddr, events, this.rev - 1, XEvent.RevisionOfEntityNotSet);
-				}
-				
-				// Not needed anymore.
-				this.events = null;
+		if(this.event != null) {
+			if(!getStatus().hasEvents()) {
+				// no events available (or not yet) for this revision.
+				return null;
 			}
+			
+			List<XAtomicEvent> events = getAtomicEvents().getFirst();
+			assert events.size() > 0;
+			
+			if(events.size() == 1) {
+				this.event = events.get(0);
+			} else {
+				this.event = MemoryTransactionEvent.createTransactionEvent(getActor(),
+				        this.modelAddr, events, this.rev - 1, XEvent.RevisionOfEntityNotSet);
+			}
+			
+			// Not needed anymore.
+			this.events = null;
 		}
 		
 		return this.event;
