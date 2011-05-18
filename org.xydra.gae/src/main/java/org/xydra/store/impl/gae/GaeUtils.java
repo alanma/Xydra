@@ -82,7 +82,7 @@ public class GaeUtils {
 		return getEntity(key, null);
 	}
 	
-	private static final Entity NULL_ENTITY = new Entity("NULL-ENTITY");
+	private static final Entity NULL_ENTITY = new Entity("NULL-ENTITY", "null");
 	
 	public static <T> T waitFor(Future<T> t) {
 		while(true) {
