@@ -173,7 +173,7 @@ public class TransactionObject implements XWritableObject {
 			
 			// check revision number
 			if(objectCommand.getRevisionNumber() != this.revisionNumber
-			        && !objectCommand.isForced()) {
+			        && !objectCommand.isForced() && objectCommand.getChangeType() != ChangeType.ADD) {
 				usedCallback.onFailure();
 				return XCommand.FAILED;
 			}
@@ -326,7 +326,7 @@ public class TransactionObject implements XWritableObject {
 		}
 		
 		throw new IllegalArgumentException(
-		        "Given Command was neither a correct instance of XObjectCommand, XTransactio or XFieldCommand!");
+		        "Given Command was neither a correct instance of XObjectCommand, XTransaction or XFieldCommand!");
 	}
 	
 	public long getRevisionNumber() {
@@ -334,6 +334,13 @@ public class TransactionObject implements XWritableObject {
 	}
 	
 	public boolean isEmpty() {
+		/*
+		 * FIXME This method is not that easy... someone could remove a field
+		 * from the TransactionObject, which was already part of the baseObject.
+		 * This will then not be removed from the baseObject and therefore the
+		 * returned value might not be correct
+		 */
+
 		return this.baseObject.isEmpty() && this.changedFields.isEmpty();
 	}
 	
@@ -360,7 +367,9 @@ public class TransactionObject implements XWritableObject {
 	public XWritableField createField(XID fieldId) {
 		XObjectCommand command = X.getCommandFactory().createSafeAddFieldCommand(this.getAddress(),
 		        fieldId);
-		this.executeCommand(command);
+		if(!hasField(fieldId)) {
+			this.executeCommand(command);
+		}
 		
 		return this.getField(fieldId);
 	}
@@ -370,10 +379,9 @@ public class TransactionObject implements XWritableObject {
 		long revNr = this.getField(fieldId).getRevisionNumber();
 		XAddress temp = this.getAddress();
 		XAddress address = XX.toAddress(temp.getRepository(), temp.getModel(), temp.getObject(),
-		        temp.getField());
+		        fieldId);
 		
-		XObjectCommand command = X.getCommandFactory().createSafeRemoveFieldCommand(
-		        this.getAddress(), revNr);
+		XObjectCommand command = X.getCommandFactory().createSafeRemoveFieldCommand(address, revNr);
 		this.executeCommand(command);
 		
 		return this.getField(fieldId) == null;
