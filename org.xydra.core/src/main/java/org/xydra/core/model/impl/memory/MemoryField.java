@@ -175,40 +175,42 @@ public class MemoryField implements XField, Serializable {
 		synchronized(this.eventQueue) {
 			
 			boolean result = (this.getRevisionNumber() == memoryField.getRevisionNumber())
-			        && (this.getID().equals(memoryField.getID()));
+			        && (this.getAddress().equals(memoryField.getAddress()));
 			
-			if(this.father != null) {
-				if(memoryField.father == null) {
-					return false;
-				}
-				
-				result = result && (this.father.getID().equals(memoryField.father.getID()));
-				
-				MemoryModel fatherModel = this.father.getModel();
-				
-				if(fatherModel != null) {
-					MemoryModel memoryFieldModel = memoryField.father.getModel();
-					
-					if(memoryFieldModel == null) {
-						return false;
-					}
-					
-					result = result && (fatherModel.getID().equals(memoryFieldModel.getID()));
-					
-					XRepository fatherRepo = fatherModel.getFather();
-					
-					if(fatherRepo != null) {
-						XRepository memoryFieldRepo = memoryFieldModel.getFather();
-						
-						if(memoryFieldRepo == null) {
-							return false;
-						}
-						
-						result = result && (fatherRepo.getID().equals(memoryFieldRepo.getID()));
-					}
-				}
-			}
-			
+			/*
+			 * TODO Couldn't all those "if"-clause be checked, if we put
+			 * "this.getAddress().equals(memoryField.getAddress())" into
+			 * "result"? The if clauses only check the XIDs of the parents,
+			 * anyway. I think that would work ~bjoern
+			 */
+			/*
+			 * if(this.father != null) { if(memoryField.father == null) { return
+			 * false; }
+			 * 
+			 * result = result &&
+			 * (this.father.getID().equals(memoryField.father.getID()));
+			 * 
+			 * MemoryModel fatherModel = this.father.getModel();
+			 * 
+			 * if(fatherModel != null) { MemoryModel memoryFieldModel =
+			 * memoryField.father.getModel();
+			 * 
+			 * if(memoryFieldModel == null) { return false; }
+			 * 
+			 * result = result &&
+			 * (fatherModel.getID().equals(memoryFieldModel.getID()));
+			 * 
+			 * XRepository fatherRepo = fatherModel.getFather();
+			 * 
+			 * if(fatherRepo != null) { XRepository memoryFieldRepo =
+			 * memoryFieldModel.getFather();
+			 * 
+			 * if(memoryFieldRepo == null) { return false; }
+			 * 
+			 * result = result &&
+			 * (fatherRepo.getID().equals(memoryFieldRepo.getID())); } } }
+			 */
+
 			return result;
 		}
 	}
