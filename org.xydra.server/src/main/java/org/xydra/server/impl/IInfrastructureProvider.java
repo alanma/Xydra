@@ -6,8 +6,9 @@ import org.xydra.annotations.RunsInAppEngine;
 
 @RunsInAppEngine(true)
 @RequiresAppEngine(false)
+@Deprecated
 public interface IInfrastructureProvider {
 	
-	IMemCache createMemCache();
+	IGaeMemCache createMemCache();
 	
 }

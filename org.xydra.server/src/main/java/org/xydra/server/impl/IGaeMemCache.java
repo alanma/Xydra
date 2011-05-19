@@ -14,7 +14,7 @@ import org.xydra.annotations.RunsInAppEngine;
  */
 @RunsInAppEngine(true)
 @RequiresAppEngine(false)
-public interface IMemCache {
+public interface IGaeMemCache {
 	
 	/**
 	 * Overwrite existing keys-value assignment, if present.

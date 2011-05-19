@@ -10,19 +10,21 @@ import org.xydra.server.impl.memory.SimpleInfrastructureProvider;
 /**
  * A factory for back-end infrastructure services.
  * 
- * Acts as an {@link IMemCache} factory.
+ * Acts as an {@link IGaeMemCache} factory.
  * 
  * @author voelkel
  * 
  */
 @RunsInAppEngine(true)
 @RequiresAppEngine(false)
+@SuppressWarnings("deprecation")
+@Deprecated
 public class InfrastructureServiceFactory {
 	
 	private static final Logger log = LoggerFactory.getLogger(InfrastructureServiceFactory.class);
 	
 	private static IInfrastructureProvider provider = new SimpleInfrastructureProvider();
-	private static IMemCache memcache;
+	private static IGaeMemCache memcache;
 	
 	/**
 	 * This method needs to be called by other infrastructure environments to
@@ -41,8 +43,7 @@ public class InfrastructureServiceFactory {
 		}
 		
 		if(memcache != null) {
-			log
-			        .warn("Changing infrastructure provider after services have been used. This is likely leads to inconsistencies!");
+			log.warn("Changing infrastructure provider after services have been used. This is likely leads to inconsistencies!");
 		}
 		
 		// reset instances
@@ -50,9 +51,9 @@ public class InfrastructureServiceFactory {
 	}
 	
 	/**
-	 * @return the {@link IMemCache} singleton.
+	 * @return the {@link IGaeMemCache} singleton.
 	 */
-	public static synchronized IMemCache getMemCache() {
+	public static synchronized IGaeMemCache getMemCache() {
 		if(memcache == null) {
 			memcache = provider.createMemCache();
 		}

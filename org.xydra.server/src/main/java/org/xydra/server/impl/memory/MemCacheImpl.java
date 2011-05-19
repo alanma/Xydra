@@ -7,7 +7,7 @@ import java.util.Set;
 
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
-import org.xydra.server.impl.IMemCache;
+import org.xydra.server.impl.IGaeMemCache;
 
 
 /**
@@ -18,7 +18,7 @@ import org.xydra.server.impl.IMemCache;
  */
 @RunsInAppEngine(true)
 @RequiresAppEngine(false)
-public class MemCacheImpl implements IMemCache {
+public class MemCacheImpl implements IGaeMemCache {
 	
 	private Map<String,byte[]> map = new HashMap<String,byte[]>();
 	

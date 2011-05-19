@@ -6,16 +6,18 @@ import static org.junit.Assert.assertTrue;
 import java.io.UnsupportedEncodingException;
 
 import org.junit.Test;
-import org.xydra.server.impl.IMemCache;
+import org.xydra.server.impl.IGaeMemCache;
 import org.xydra.server.impl.InfrastructureServiceFactory;
 
 
+@SuppressWarnings("deprecation")
+@Deprecated
 public class InfrastructureProviderTest {
 	
 	@Test
 	public void test() throws UnsupportedEncodingException {
-		IMemCache cache1 = InfrastructureServiceFactory.getMemCache();
-		IMemCache cache2 = InfrastructureServiceFactory.getMemCache();
+		IGaeMemCache cache1 = InfrastructureServiceFactory.getMemCache();
+		IGaeMemCache cache2 = InfrastructureServiceFactory.getMemCache();
 		assertTrue(cache1 == cache2);
 		byte[] test;
 		test = "test".getBytes("utf-8");
