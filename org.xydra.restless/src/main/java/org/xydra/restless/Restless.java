@@ -32,6 +32,8 @@ import org.xydra.restless.utils.XmlUtils;
 /**
  * A minimalistic servlet to help using servlets.
  * 
+ * Most configuration happens in Java code.
+ * 
  * Usage:
  * 
  * <p>
@@ -80,7 +82,7 @@ import org.xydra.restless.utils.XmlUtils;
  * </p>
  * 
  * <p>
- * 4) The configuration can be accessed at the URL "/admin/restless"
+ * 4) The configuration can always be accessed at the URL "/admin/restless"
  * </p>
  * 
  * @author voelkel
@@ -188,7 +190,9 @@ public class Restless extends HttpServlet {
 	 * 
 	 * @param pathTemplate see {@link PathTemplate} for syntax
 	 * @param instanceOrClass a Java isntance or class
-	 * @param javaMethodName a method name like 'getName'
+	 * @param javaMethodName a method name like 'getName', see
+	 *            {@link #addMethod(String, String, Object, String, boolean, RestlessParameter...)}
+	 *            for handling of this parameter
 	 */
 	public void addGet(String pathTemplate, Object instanceOrClass, String javaMethodName,
 	        RestlessParameter ... parameter) {
@@ -204,7 +208,8 @@ public class Restless extends HttpServlet {
 	 * @param pathTemplate see {@link PathTemplate} for syntax
 	 * @param httpMethod one of 'GET', 'PUT', 'POST', or 'DELETE'
 	 * @param instanceOrClass Java instance to be called or Java class to be
-	 *            instantiated
+	 *            instantiated. If a class is given, the instance is created on
+	 *            first access and cached in memory from there on.
 	 * @param javaMethodName to be called on the Java instance. This method may
 	 *            not have several signatures.
 	 * @param parameter in the order in which they are used in the Java method.
@@ -378,6 +383,7 @@ public class Restless extends HttpServlet {
 	 */
 	@Override
 	public void init(ServletConfig servletConfig) {
+		long start = System.currentTimeMillis();
 		try {
 			super.init(servletConfig);
 		} catch(ServletException e) {
@@ -390,41 +396,7 @@ public class Restless extends HttpServlet {
 		 */
 		this.loggerFactory = servletConfig.getInitParameter(INIT_PARAM_XYDRA_LOG_BACKEND);
 		if(this.loggerFactory != null) {
-			// try to instantiate
-			try {
-				Class<?> loggerFactoryClass = Class.forName(this.loggerFactory);
-				try {
-					Constructor<?> constructor = loggerFactoryClass.getConstructor();
-					try {
-						Object instance = constructor.newInstance();
-						try {
-							ILoggerFactorySPI spi = (ILoggerFactorySPI)instance;
-							LoggerFactory.setLoggerFactorySPI(spi);
-						} catch(ClassCastException e) {
-							throw new RuntimeException(
-							        "Given loggerFactory class is not an implementation of ILoggerFactorySPI",
-							        e);
-						}
-					} catch(IllegalArgumentException e) {
-						throw new RuntimeException("Could not instantiate loggerFactory class", e);
-					} catch(InstantiationException e) {
-						throw new RuntimeException("Could not instantiate loggerFactory class", e);
-					} catch(IllegalAccessException e) {
-						throw new RuntimeException("Could not instantiate loggerFactory class", e);
-					} catch(InvocationTargetException e) {
-						throw new RuntimeException("Could not instantiate loggerFactory class", e);
-					}
-				} catch(SecurityException e) {
-					throw new RuntimeException("Could not get constructor of loggerFactory class",
-					        e);
-				} catch(NoSuchMethodException e) {
-					throw new RuntimeException(
-					        "Found no parameterless constructor in loggerFactory class", e);
-				}
-				
-			} catch(ClassNotFoundException e) {
-				throw new RuntimeException("Could not load loggerFactory class", e);
-			}
+			initLoggerFactory();
 		}
 		
 		log = LoggerFactory.getLogger(Restless.class);
@@ -451,7 +423,7 @@ public class Restless extends HttpServlet {
 		        .put("context:serverInfo", servletConfig.getServletContext().getServerInfo());
 		
 		/** invoke restless(this,'/') on configured application class */
-		this.apps = servletConfig.getInitParameter(INIT_PARAM_APP);
+		this.apps = this.initParams.get(INIT_PARAM_APP);
 		
 		List<String> appClassNames = parseToList(this.apps);
 		for(String appClassName : appClassNames) {
@@ -460,9 +432,6 @@ public class Restless extends HttpServlet {
 			log.debug("Restless: ... done loading restless app '" + appClassName + "'.");
 		}
 		
-		log.info(">>> Done Restless init at context path '"
-		        + this.initParams.get("context:contextPath") + "'. Admin interface at '"
-		        + this.initParams.get("context:contextPath") + "/admin/restless'");
 		if(log.isDebugEnabled()) {
 			for(RestlessMethod rm : this.methods) {
 				log.debug("Mapping " + rm.httpMethod + " " + rm.pathTemplate.getRegex() + " --> "
@@ -470,6 +439,48 @@ public class Restless extends HttpServlet {
 				        + " access:" + (rm.adminOnly ? "ADMIN ONLY" : "PUBLIC"));
 			}
 			
+		}
+		log.info(">>> Done Restless init at context path '"
+		        + this.initParams.get("context:contextPath") + "'. Admin interface at '"
+		        + this.initParams.get("context:contextPath") + "/admin/restless'. "
+
+		        + "Init took " + (System.currentTimeMillis() - start) + " ms.");
+	}
+	
+	private void initLoggerFactory() {
+		// try to instantiate
+		try {
+			Class<?> loggerFactoryClass = Class.forName(this.loggerFactory);
+			try {
+				Constructor<?> constructor = loggerFactoryClass.getConstructor();
+				try {
+					Object instance = constructor.newInstance();
+					try {
+						ILoggerFactorySPI spi = (ILoggerFactorySPI)instance;
+						LoggerFactory.setLoggerFactorySPI(spi);
+					} catch(ClassCastException e) {
+						throw new RuntimeException(
+						        "Given loggerFactory class is not an implementation of ILoggerFactorySPI",
+						        e);
+					}
+				} catch(IllegalArgumentException e) {
+					throw new RuntimeException("Could not instantiate loggerFactory class", e);
+				} catch(InstantiationException e) {
+					throw new RuntimeException("Could not instantiate loggerFactory class", e);
+				} catch(IllegalAccessException e) {
+					throw new RuntimeException("Could not instantiate loggerFactory class", e);
+				} catch(InvocationTargetException e) {
+					throw new RuntimeException("Could not instantiate loggerFactory class", e);
+				}
+			} catch(SecurityException e) {
+				throw new RuntimeException("Could not get constructor of loggerFactory class", e);
+			} catch(NoSuchMethodException e) {
+				throw new RuntimeException(
+				        "Found no parameterless constructor in loggerFactory class", e);
+			}
+			
+		} catch(ClassNotFoundException e) {
+			throw new RuntimeException("Could not load loggerFactory class", e);
 		}
 	}
 	
@@ -499,10 +510,9 @@ public class Restless extends HttpServlet {
 							        + ".restless(Restless,String prefix)' failed", e);
 						}
 					} catch(NoSuchMethodException e) {
-						log
-						        .warn("Class '"
-						                + this.apps
-						                + "' has no restless( Restless restless, String prefix ) method. Relying on static initializer.");
+						log.warn("Class '"
+						        + this.apps
+						        + "' has no restless( Restless restless, String prefix ) method. Relying on static initializer.");
 						log.debug("Configured with " + clazz.getName());
 					}
 				} catch(IllegalArgumentException e) {
@@ -640,16 +650,15 @@ public class Restless extends HttpServlet {
 					delegateToDefaultServlet(req, res);
 				} else {
 					// produce better error message
-					res
-					        .sendError(
-					                404,
-					                "No handler matched your "
-					                        + req.getMethod()
-					                        + "-request path '"
-					                        + path
-					                        + "'. "
-					                        + (foundPath ? "Found at least a path mapping (wrong HTTP method or missing parameters)."
-					                                : "Found not even a path mapping. Check your Restless App and web.xml."));
+					res.sendError(
+					        404,
+					        "No handler matched your "
+					                + req.getMethod()
+					                + "-request path '"
+					                + path
+					                + "'. "
+					                + (foundPath ? "Found at least a path mapping (wrong HTTP method or missing parameters)."
+					                        : "Found not even a path mapping. Check your Restless App and web.xml."));
 				}
 			}
 		} catch(IOException e) {
