@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.xydra.log.ILoggerFactorySPI;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.restless.utils.Clock;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.ServletUtils;
 import org.xydra.restless.utils.XmlUtils;
@@ -383,13 +384,16 @@ public class Restless extends HttpServlet {
 	 */
 	@Override
 	public void init(ServletConfig servletConfig) {
-		long start = System.currentTimeMillis();
+		Clock clock = new Clock();
+		clock.start();
 		try {
 			super.init(servletConfig);
 		} catch(ServletException e) {
 			throw new RuntimeException("Could not initialise super servlet", e);
 		}
+		clock.stop("super.init");
 		
+		clock.start();
 		/**
 		 * Configuration option in web.xml to select class for logging back-end,
 		 * which must be an implementation of ILoggerFactorySPI.
@@ -398,7 +402,9 @@ public class Restless extends HttpServlet {
 		if(this.loggerFactory != null) {
 			initLoggerFactory();
 		}
+		clock.stop("logger-init");
 		
+		clock.start();
 		log = LoggerFactory.getLogger(Restless.class);
 		log.debug("Restless: Init. Using loggerFactory '" + this.loggerFactory + "'...");
 		
@@ -426,9 +432,12 @@ public class Restless extends HttpServlet {
 		this.apps = this.initParams.get(INIT_PARAM_APP);
 		
 		List<String> appClassNames = parseToList(this.apps);
+		clock.stop("param-parsing");
 		for(String appClassName : appClassNames) {
 			log.info("Restless: Loading restless app '" + appClassName + "'...");
+			clock.start();
 			instatiateAndInit(appClassName);
+			clock.stop("init-app-" + appClassName);
 			log.debug("Restless: ... done loading restless app '" + appClassName + "'.");
 		}
 		
@@ -444,7 +453,7 @@ public class Restless extends HttpServlet {
 		        + this.initParams.get("context:contextPath") + "'. Admin interface at '"
 		        + this.initParams.get("context:contextPath") + "/admin/restless'. "
 
-		        + "Init took " + (System.currentTimeMillis() - start) + " ms.");
+		        + "Init performance " + clock.getStats());
 	}
 	
 	private void initLoggerFactory() {
@@ -485,7 +494,7 @@ public class Restless extends HttpServlet {
 	}
 	
 	/**
-	 * @param appClassName fully qualified java class name
+	 * @param appClassName fully qualified java class name TODO make this faster
 	 */
 	private void instatiateAndInit(String appClassName) {
 		try {
