@@ -16,6 +16,13 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.store.IMemCache;
 
 
+/**
+ * An implementation of {@link IMemCache} using the javax.cache API. As this one
+ * will be deprecated by Google, we migrate to the {@link GaeLowLevelMemCache}.
+ * 
+ * @author xamde
+ * 
+ */
 public class GaeMemCache implements IMemCache {
 	
 	private static final Logger log = LoggerFactory.getLogger(GaeMemCache.class);

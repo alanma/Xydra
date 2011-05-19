@@ -20,7 +20,6 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
-import org.xydra.core.XCopyUtils;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -84,8 +83,11 @@ public class GaeSnapshotService {
 			
 			// TODO save snapshot to datastore from time to time
 			
-			// TODO is this even needed? Does the cache return
-			return XCopyUtils.createSnapshot(entry.modelState);
+			/*
+			 * cache result is directly returned without copy, because cache
+			 * results are always de-deserialized from byte[] arrays anyways
+			 */
+			return entry.modelState;
 		}
 		
 	}

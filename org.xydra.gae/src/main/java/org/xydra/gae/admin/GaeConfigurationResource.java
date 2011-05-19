@@ -25,14 +25,10 @@ public class GaeConfigurationResource {
 	/**
 	 * Clear the memcache.
 	 */
-	public static void clearCache(String instanceId, HttpServletResponse res) throws IOException {
-		Writer w = startPage(instanceId, res);
-		if(rightInstance(instanceId)) {
-			XydraRuntime.getMemcache().clear();
-			w.write("Memcache cleared.");
-		} else {
-			w.write("No action. Please retry and hope your request will hit the right instance.");
-		}
+	public static void clearCache(HttpServletResponse res) throws IOException {
+		Writer w = startPage(GaePersistence.INSTANCE_ID, res);
+		XydraRuntime.getMemcache().clear();
+		w.write("Memcache cleared.");
 	}
 	
 	public static void index(HttpServletRequest req, HttpServletResponse res) throws IOException {
@@ -48,6 +44,7 @@ public class GaeConfigurationResource {
 		w.write(HtmlUtils.link(req.getRequestURI() + "/set?instance=" + GaePersistence.INSTANCE_ID
 		        + "&memcache=false", "set memcache=false on this instance")
 		        + "<br/>");
+		w.write(HtmlUtils.link("/admin/gaeconf/clear-cache", "Clear MemCache for all instances"));
 		w.write(GaeUtils.getConf());
 		w.flush();
 	}
@@ -66,7 +63,12 @@ public class GaeConfigurationResource {
 		
 	}
 	
-	private static boolean rightInstance(String instanceId) {
+	/**
+	 * @param instanceId
+	 * @return true if the given instanceId matches the ID of this AppEngine
+	 *         server instance.
+	 */
+	private static boolean onRightInstance(String instanceId) {
 		return GaePersistence.INSTANCE_ID.equals(instanceId);
 	}
 	
@@ -76,8 +78,8 @@ public class GaeConfigurationResource {
 	 */
 	public static void setCacheConf(String instanceId, String memcache, HttpServletResponse res)
 	        throws IOException {
-		Writer w = startPage(instanceId, res);
-		if(rightInstance(instanceId)) {
+		Writer w = startPage(GaePersistence.INSTANCE_ID, res);
+		if(onRightInstance(instanceId)) {
 			boolean memcache_ = Boolean.parseBoolean(memcache);
 			GaeUtils.setUseMemCache(memcache_);
 			w.write("Memcache set to " + memcache);

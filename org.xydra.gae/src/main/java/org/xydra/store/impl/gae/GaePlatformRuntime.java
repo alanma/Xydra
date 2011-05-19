@@ -19,7 +19,7 @@ public class GaePlatformRuntime implements XydraPlatformRuntime {
 	
 	@Override
 	public synchronized IMemCache getMemCache() {
-		return new GaeMemCache();
+		return new GaeLowLevelMemCache();
 	}
 	
 	@Override
