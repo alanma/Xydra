@@ -10,6 +10,7 @@ import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.ServletUtils;
+import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.impl.gae.GaeUtils;
@@ -22,15 +23,16 @@ import org.xydra.store.impl.gae.GaeUtils;
 public class GaeConfigurationResource {
 	
 	/**
-	 * @param r restless
-	 * @param path should be empty string
+	 * Clear the memcache.
 	 */
-	public static void restless(Restless r, String path) {
-		r.addMethod(path + "/gaeconf/set", "GET", GaeConfigurationResource.class, "setCacheConf",
-		        true, new RestlessParameter("instance", null), new RestlessParameter("memcache",
-		                null));
-		r.addMethod(path + "/gaeconf", "GET", GaeConfigurationResource.class, "index", true);
-		
+	public static void clearCache(String instanceId, HttpServletResponse res) throws IOException {
+		Writer w = startPage(instanceId, res);
+		if(rightInstance(instanceId)) {
+			XydraRuntime.getMemcache().clear();
+			w.write("Memcache cleared.");
+		} else {
+			w.write("No action. Please retry and hope your request will hit the right instance.");
+		}
 	}
 	
 	public static void index(HttpServletRequest req, HttpServletResponse res) throws IOException {
@@ -51,25 +53,48 @@ public class GaeConfigurationResource {
 	}
 	
 	/**
+	 * @param r restless
+	 * @param path should be empty string
+	 */
+	public static void restless(Restless r, String path) {
+		r.addMethod(path + "/gaeconf/set", "GET", GaeConfigurationResource.class, "setCacheConf",
+		        true, new RestlessParameter("instance", null), new RestlessParameter("memcache",
+		                null));
+		r.addMethod(path + "/gaeconf/clear-cache", "GET", GaeConfigurationResource.class,
+		        "clearCache", true, new RestlessParameter("instance", null));
+		r.addMethod(path + "/gaeconf", "GET", GaeConfigurationResource.class, "index", true);
+		
+	}
+	
+	private static boolean rightInstance(String instanceId) {
+		return GaePersistence.INSTANCE_ID.equals(instanceId);
+	}
+	
+	/**
 	 * @param memcache 'true' or 'false'
 	 * @throws IOException ...
 	 */
 	public static void setCacheConf(String instanceId, String memcache, HttpServletResponse res)
 	        throws IOException {
-		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		if(GaePersistence.INSTANCE_ID.equals(instanceId)) {
+		Writer w = startPage(instanceId, res);
+		if(rightInstance(instanceId)) {
 			boolean memcache_ = Boolean.parseBoolean(memcache);
 			GaeUtils.setUseMemCache(memcache_);
-			res.sendRedirect("/admin/gaeconf");
+			w.write("Memcache set to " + memcache);
 		} else {
-			ServletUtils.headers(res, "text/html");
-			Writer w = HtmlUtils.startHtmlPage(res, "GAE cache conf on instance "
-			        + GaePersistence.INSTANCE_ID);
-			w.write("InstandID: " + GaePersistence.INSTANCE_ID + "<br />");
-			w.write("Requested instance: " + instanceId + "<br />");
 			w.write("No action. Please retry and hope your request will hit the right instance.");
 		}
 		
 	}
 	
+	private static Writer startPage(String instanceId, HttpServletResponse res) throws IOException {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		
+		ServletUtils.headers(res, "text/html");
+		Writer w = HtmlUtils.startHtmlPage(res, "GAE cache conf on instance "
+		        + GaePersistence.INSTANCE_ID);
+		w.write("InstanceID: " + GaePersistence.INSTANCE_ID + "<br />");
+		w.write("Requested instance: " + instanceId + "<br />");
+		return w;
+	}
 }
