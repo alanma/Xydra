@@ -183,34 +183,41 @@ public class MemoryField implements XField, Serializable {
 			 * "result"? The if clauses only check the XIDs of the parents,
 			 * anyway. I think that would work ~bjoern
 			 */
-			/*
-			 * if(this.father != null) { if(memoryField.father == null) { return
-			 * false; }
-			 * 
-			 * result = result &&
-			 * (this.father.getID().equals(memoryField.father.getID()));
-			 * 
-			 * MemoryModel fatherModel = this.father.getModel();
-			 * 
-			 * if(fatherModel != null) { MemoryModel memoryFieldModel =
-			 * memoryField.father.getModel();
-			 * 
-			 * if(memoryFieldModel == null) { return false; }
-			 * 
-			 * result = result &&
-			 * (fatherModel.getID().equals(memoryFieldModel.getID()));
-			 * 
-			 * XRepository fatherRepo = fatherModel.getFather();
-			 * 
-			 * if(fatherRepo != null) { XRepository memoryFieldRepo =
-			 * memoryFieldModel.getFather();
-			 * 
-			 * if(memoryFieldRepo == null) { return false; }
-			 * 
-			 * result = result &&
-			 * (fatherRepo.getID().equals(memoryFieldRepo.getID())); } } }
-			 */
-
+			// if(this.father != null) {
+			// if(memoryField.father == null) {
+			// return false;
+			// }
+			//
+			// result = result &&
+			// (this.father.getID().equals(memoryField.father.getID()));
+			//
+			// MemoryModel fatherModel = this.father.getModel();
+			//
+			// if(fatherModel != null) {
+			// MemoryModel memoryFieldModel = memoryField.father.getModel();
+			//
+			// if(memoryFieldModel == null) {
+			// return false;
+			// }
+			//
+			// result = result &&
+			// (fatherModel.getID().equals(memoryFieldModel.getID()));
+			//
+			// XRepository fatherRepo = fatherModel.getFather();
+			//
+			// if(fatherRepo != null) {
+			// XRepository memoryFieldRepo = memoryFieldModel.getFather();
+			//
+			// if(memoryFieldRepo == null) {
+			// return false;
+			// }
+			//
+			// result = result &&
+			// (fatherRepo.getID().equals(memoryFieldRepo.getID()));
+			// }
+			// }
+			// }
+			
 			return result;
 		}
 	}
