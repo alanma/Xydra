@@ -45,8 +45,7 @@ public class InObjectTransactionField implements XWritableField {
 	@Override
 	public XAddress getAddress() {
 		XAddress temp = this.object.getAddress();
-		return XX.toAddress(temp.getRepository(), temp.getModel(), temp.getObject(),
-		        temp.getField());
+		return XX.toAddress(temp.getRepository(), temp.getModel(), temp.getObject(), this.fieldId);
 	}
 	
 	@Override
@@ -75,5 +74,40 @@ public class InObjectTransactionField implements XWritableField {
 		}
 		
 		return this.object.executeCommand(command) != XCommand.FAILED;
+	}
+	
+	@Override
+	public boolean equals(Object object) {
+		if(object instanceof InObjectTransactionField) {
+			InObjectTransactionField field = (InObjectTransactionField)object;
+			
+			/*
+			 * Two InObjectTransactionFields are equal if they have the same
+			 * XID, the same value and the same parent-TransactionObject
+			 */
+			boolean result = this.fieldId.equals(field.fieldId) && this.object.equals(field.object);
+			
+			if(this.getValue() == null) {
+				result &= field.getValue() == null;
+			} else {
+				result &= this.getValue().equals(field.getValue());
+			}
+			
+			return result;
+		} else if(object instanceof XWritableField) {
+			
+			/*
+			 * this can only happen when someone gets a field from transObject
+			 * that already existed in the underlying XObject of the
+			 * transObject, so we'll need to simulate the equals relation of
+			 * XWritableField here
+			 */
+
+			XWritableField field = (XWritableField)object;
+			return field.getAddress().equals(this.getAddress())
+			        && field.getRevisionNumber() == this.getRevisionNumber();
+			
+		}
+		return false;
 	}
 }

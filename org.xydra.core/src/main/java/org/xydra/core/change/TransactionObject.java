@@ -376,7 +376,14 @@ public class TransactionObject implements XWritableObject {
 	
 	@Override
 	public boolean removeField(XID fieldId) {
-		long revNr = this.getField(fieldId).getRevisionNumber();
+		XWritableField field = this.getField(fieldId);
+		
+		if(field == null) {
+			// field doesn't exist
+			return false;
+		}
+		
+		long revNr = field.getRevisionNumber();
 		XAddress temp = this.getAddress();
 		XAddress address = XX.toAddress(temp.getRepository(), temp.getModel(), temp.getObject(),
 		        fieldId);
@@ -387,10 +394,27 @@ public class TransactionObject implements XWritableObject {
 		return this.getField(fieldId) == null;
 	}
 	
-	/*
-	 * Special methods needed for the helperclass InObjectTransactionField
-	 */
-
+	@Override
+	public boolean equals(Object object) {
+		if(object instanceof TransactionObject) {
+			TransactionObject transObj = (TransactionObject)object;
+			
+			return this.baseObject.equals(transObj.baseObject)
+			        && this.changedFields.equals(transObj.changedFields)
+			        && this.changedValues.equals(transObj.changedValues)
+			        && this.fieldRevisionNumbers.equals(transObj.fieldRevisionNumbers)
+			        && this.removedFields.equals(transObj.removedFields)
+			        && this.revisionNumber == transObj.revisionNumber;
+		} else if(object instanceof XWritableObject) {
+			XWritableObject writObject = (XWritableObject)object;
+			
+			return this.getAddress().equals(writObject.getAddress())
+			        && this.revisionNumber == writObject.getRevisionNumber();
+		}
+		
+		return false;
+	}
+	
 	public XWritableField getField(XID fieldId) {
 		boolean exists = false;
 		
@@ -417,6 +441,10 @@ public class TransactionObject implements XWritableObject {
 		}
 	}
 	
+	/*
+	 * Special methods needed for the helperclass InObjectTransactionField
+	 */
+
 	protected long getFieldRevisionNumber(XID fieldId) {
 		// assert: there exists and XField with the given address either in
 		// changedFields or baseObject
@@ -436,7 +464,7 @@ public class TransactionObject implements XWritableObject {
 		return revNr;
 	}
 	
-	public XValue getValue(XID id) {
+	protected XValue getValue(XID id) {
 		// TODO maybe improve handling of removed fields (throw exception or
 		// something)
 		
@@ -461,6 +489,7 @@ public class TransactionObject implements XWritableObject {
 	// Unsupported Methods
 	@Override
 	public Iterator<XID> iterator() {
+		// TODO implement!
 		throw new UnsupportedOperationException();
 	}
 	
