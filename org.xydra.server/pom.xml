@@ -11,7 +11,7 @@
 
 	<groupId>org.xydra</groupId>
 	<artifactId>server</artifactId>
-	<version>0.1.3-SNAPSHOT</version>
+	<version>0.1.3</version>
 	<!-- /!\ Needs to be 'jar' for 'mvn deploy' but 'war' for 'gae:deploy' -->
 	<packaging>jar</packaging>
 	<name>Xydra Server</name>
@@ -104,7 +104,7 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
-			<version>0.1.3-SNAPSHOT</version>
+			<version>0.1.3</version>
 		</dependency>
 		
 		<!-- Depend on tests in core as explained in -->
@@ -112,7 +112,7 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
-			<version>0.1.3-SNAPSHOT</version>
+			<version>0.1.3</version>
 			<type>test-jar</type>
 		</dependency>
 
@@ -120,32 +120,32 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>restless</artifactId>
-			<version>0.1.3-SNAPSHOT</version>
+			<version>0.1.3</version>
 		</dependency>
 		
 		<!--  CSV export -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>csv</artifactId>
-			<version>0.1.2-SNAPSHOT</version>
+			<version>0.1.3</version>
 		</dependency>
 		<!--  JSON export -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>json</artifactId>
-			<version>0.1.3-SNAPSHOT</version>
+			<version>0.1.3</version>
 		</dependency>
 
 		<!-- logging -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
-			<version>0.1.3-SNAPSHOT</version>
+			<version>0.1.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log.gae</artifactId>
-			<version>0.1.3-SNAPSHOT</version>
+			<version>0.1.3</version>
 		</dependency>
 
 		<!-- testing dependencies, scope compile as some tests are exposed to be sub-classed -->
