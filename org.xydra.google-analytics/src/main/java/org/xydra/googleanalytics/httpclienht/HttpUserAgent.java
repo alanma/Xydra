@@ -11,7 +11,7 @@ import java.util.concurrent.Future;
  */
 public interface HttpUserAgent {
 	
-	void setUserAgentIdentifier(String uSERAGENT);
+	void setUserAgentIdentifier(String userAgent);
 	
 	void setConnectionTimeout(int maxMillis);
 	
