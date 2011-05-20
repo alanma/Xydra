@@ -493,6 +493,12 @@ public class TransactionObject implements XWritableObject {
 		throw new UnsupportedOperationException();
 	}
 	
+	@Override
+	public int hashCode() {
+		// TODO Auto-generated method stub
+		return super.hashCode();
+	}
+	
 	private class DummyCallback implements XLocalChangeCallback {
 		
 		@Override
