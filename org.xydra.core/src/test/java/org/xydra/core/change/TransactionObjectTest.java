@@ -33,7 +33,7 @@ public class TransactionObjectTest {
 		XID objectId = XX.createUniqueId();
 		XID fieldId = XX.createUniqueId();
 		
-		XRepository repo = X.createMemoryRepository(null);
+		XRepository repo = X.createMemoryRepository(XX.toId("testActor"));
 		XModel model = repo.createModel(modelId);
 		this.object = model.createObject(objectId);
 		
@@ -115,6 +115,9 @@ public class TransactionObjectTest {
 	public void testGetField() {
 		// try to get an already existing object
 		XWritableField field2 = this.transObject.getField(this.field.getID());
+		
+		assertTrue(field2.equals(this.field));
+		assertTrue(this.field.equals(field2));
 		
 		assertEquals(field2, this.field);
 		assertEquals(this.field, field2);

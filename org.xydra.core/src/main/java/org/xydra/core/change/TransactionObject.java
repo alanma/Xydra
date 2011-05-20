@@ -197,7 +197,9 @@ public class TransactionObject implements XWritableObject {
 				this.revisionNumber++;
 				this.fieldRevisionNumbers.put(fieldId, this.revisionNumber);
 				
-				XField field = new MemoryField(null, fieldId);
+				// TODO use another actor, either some constant or via
+				// constructor
+				XField field = new MemoryField(XX.toId("TransactionObject"), fieldId);
 				this.changedFields.add(fieldId);
 				
 				// command succeeded -> add it to the list

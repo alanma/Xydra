@@ -17,6 +17,7 @@ import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XReversibleFieldEvent;
 import org.xydra.base.change.impl.memory.MemoryFieldCommand;
 import org.xydra.base.change.impl.memory.MemoryReversibleFieldEvent;
+import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.base.value.XValue;
@@ -160,11 +161,11 @@ public class MemoryField implements XField, Serializable {
 	@Override
 	@ReadOperation
 	public boolean equals(Object object) {
-		if(!(object instanceof MemoryField)) {
+		if(!(object instanceof XReadableField)) {
 			return false;
 		}
 		
-		MemoryField memoryField = (MemoryField)object;
+		XReadableField readableField = (XReadableField)object;
 		
 		// compare revision number, father-object id (if it exists),
 		// father-model id (if it exists), father-repo id (if it exists)
@@ -174,8 +175,8 @@ public class MemoryField implements XField, Serializable {
 		
 		synchronized(this.eventQueue) {
 			
-			boolean result = (this.getRevisionNumber() == memoryField.getRevisionNumber())
-			        && (this.getAddress().equals(memoryField.getAddress()));
+			boolean result = (this.getRevisionNumber() == readableField.getRevisionNumber())
+			        && (this.getAddress().equals(readableField.getAddress()));
 			
 			/*
 			 * TODO Couldn't all those "if"-clause be checked, if we put
