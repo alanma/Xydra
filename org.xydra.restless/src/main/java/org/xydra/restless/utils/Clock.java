@@ -46,4 +46,9 @@ public class Clock {
 		c.stop("d");
 		System.out.println(c.getStats());
 	}
+	
+	public Clock append(String s) {
+		this.stats.append(s);
+		return this;
+	}
 }

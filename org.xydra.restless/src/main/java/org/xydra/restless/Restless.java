@@ -436,8 +436,9 @@ public class Restless extends HttpServlet {
 		for(String appClassName : appClassNames) {
 			log.info("Restless: Loading restless app '" + appClassName + "'...");
 			clock.start();
-			instatiateAndInit(appClassName);
+			String stats = instatiateAndInit(appClassName);
 			clock.stop("init-app-" + appClassName);
+			clock.append(" { ").append(stats).append(" } ");
 			log.debug("Restless: ... done loading restless app '" + appClassName + "'.");
 		}
 		
@@ -495,19 +496,27 @@ public class Restless extends HttpServlet {
 	
 	/**
 	 * @param appClassName fully qualified java class name TODO make this faster
+	 * @return a String with statistics
 	 */
-	private void instatiateAndInit(String appClassName) {
+	private String instatiateAndInit(String appClassName) {
+		Clock clock = new Clock();
+		clock.start();
 		try {
 			Class<?> clazz = Class.forName(appClassName);
 			try {
 				Constructor<?> cons = clazz.getConstructor();
 				try {
 					Object appInstance = cons.newInstance();
+					clock.stop(appClassName + "-newinstance");
 					try {
+						clock.start();
 						Method restlessMethod = clazz.getMethod("restless", Restless.class,
 						        String.class);
+						clock.stop(appClassName + "-get-restless-method");
 						try {
+							clock.start();
 							restlessMethod.invoke(appInstance, this, "");
+							clock.stop(appClassName + "-invoke-restless-method");
 						} catch(IllegalArgumentException e) {
 							throw new RuntimeException("Class '" + appClassName
 							        + ".restless(Restless,String prefix)' failed", e);
@@ -549,6 +558,7 @@ public class Restless extends HttpServlet {
 		} catch(ClassNotFoundException e) {
 			throw new RuntimeException("Class '" + appClassName + "' not found");
 		}
+		return clock.getStats();
 	}
 	
 	/**
