@@ -21,12 +21,21 @@ import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.model.XChangeLog;
+import org.xydra.core.xml.MiniElement;
+import org.xydra.core.xml.XmlModel;
+import org.xydra.core.xml.impl.MiniXMLParserImpl;
+import org.xydra.core.xml.impl.XmlOutStringBuffer;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.store.IMemCache;
 import org.xydra.store.XydraRuntime;
+import org.xydra.store.impl.gae.GaeUtils;
 import org.xydra.store.impl.gae.changes.AsyncChange;
 import org.xydra.store.impl.gae.changes.GaeChangesService;
+
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.Text;
 
 
 /**
@@ -40,6 +49,12 @@ public class GaeSnapshotService {
 	
 	private static final Logger log = LoggerFactory.getLogger(GaeSnapshotService.class);
 	private final GaeChangesService changes;
+	
+	private static final String KIND_SNAPSHOT = "XSNAPSHOT";
+	private static final String PROPERTY_SNAPSHOT = "snapshot";
+	private static final String PROPERTY_REVISION = "revision";
+	
+	private static final long SNAPSHOT_PERSISTENCE_THRESHOLD = 10;
 	
 	/**
 	 * @param changesService The change log to load snapshots from.
@@ -60,28 +75,23 @@ public class GaeSnapshotService {
 	 * @return an {@link XReadableModel} by applying all events in the
 	 *         {@link XChangeLog}
 	 */
-	public XWritableModel getSnapshot() {
+	synchronized public XWritableModel getSnapshot() {
 		
-		IMemCache cache = XydraRuntime.getMemcache();
+		final String cachname = this.changes.getModelAddress() + "-snapshot";
 		
-		String cachname = this.changes.getModelAddress() + "-snapshot";
+		CachedModel entry = (CachedModel)XydraRuntime.getMemcache().get(cachname);
 		
-		CachedModel entry = null;
-		synchronized(cache) {
-			// TODO how is cache access supposed to be synchronized?
-			entry = (CachedModel)cache.get(cachname);
-			if(entry == null) {
-				entry = new CachedModel();
-			}
+		if(entry == null) {
+			entry = loadSnapshot();
 		}
 		
 		// TODO less locking
 		synchronized(entry) {
 			updateCachedModel(entry);
 			
-			cache.put(cachname, entry);
+			XydraRuntime.getMemcache().put(cachname, entry);
 			
-			// TODO save snapshot to datastore from time to time
+			saveSnapshot(entry);
 			
 			/*
 			 * cache result is directly returned without copy, because cache
@@ -89,6 +99,64 @@ public class GaeSnapshotService {
 			 */
 			return entry.modelState;
 		}
+		
+	}
+	
+	private Key getSnapshotKey() {
+		return KeyFactory.createKey(KIND_SNAPSHOT, this.changes.getModelAddress().toURI());
+	}
+	
+	private String getSnapshotRevKey() {
+		return this.changes.getModelAddress() + "-snapshot-Rev";
+	}
+	
+	private CachedModel loadSnapshot() {
+		
+		CachedModel entry = new CachedModel();
+		
+		Entity snapshotEntity = GaeUtils.getEntity(getSnapshotKey());
+		if(snapshotEntity == null) {
+			return entry;
+		}
+		
+		long rev = (Long)snapshotEntity.getProperty(PROPERTY_REVISION);
+		
+		Text snapshotStr = (Text)snapshotEntity.getProperty(PROPERTY_SNAPSHOT);
+		
+		XRevWritableModel snapshot = null;
+		if(snapshotStr != null) {
+			MiniElement snapshotXml = new MiniXMLParserImpl().parseXml(snapshotStr.getValue());
+			snapshot = XmlModel.toModelState(snapshotXml, this.changes.getModelAddress());
+		}
+		
+		entry.revision = rev;
+		entry.modelState = snapshot;
+		
+		XydraRuntime.getMemcache().put(getSnapshotRevKey(), rev);
+		
+		return entry;
+	}
+	
+	private void saveSnapshot(CachedModel entry) {
+		
+		Long savedRevLong = (Long)XydraRuntime.getMemcache().get(getSnapshotRevKey());
+		long savedRev = (savedRevLong == null ? -1L : savedRevLong);
+		
+		if(entry.revision <= savedRev || entry.revision - savedRev < SNAPSHOT_PERSISTENCE_THRESHOLD) {
+			// Don't persist the snapshot.
+			return;
+		}
+		
+		Entity snapshotEntity = new Entity(getSnapshotKey());
+		snapshotEntity.setUnindexedProperty(PROPERTY_REVISION, entry.revision);
+		
+		if(entry.modelState != null) {
+			XmlOutStringBuffer out = new XmlOutStringBuffer();
+			XmlModel.toXml(entry.modelState, out);
+			snapshotEntity.setUnindexedProperty(PROPERTY_SNAPSHOT, new Text(out.getXml()));
+		}
+		
+		XydraRuntime.getMemcache().put(getSnapshotRevKey(), entry.revision);
 		
 	}
 	
