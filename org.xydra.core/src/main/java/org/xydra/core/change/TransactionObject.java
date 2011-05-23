@@ -399,6 +399,12 @@ public class TransactionObject implements XWritableObject {
 	@Override
 	public boolean equals(Object object) {
 		if(object instanceof TransactionObject) {
+			
+			// TODO restricting equals when comparing two TransactionObjects (as
+			// opposed to a TransactionObject and a XWritableObject) breaks the
+			// transitivity property of the equals relation (see Object#equals()
+			// javadoc)
+			
 			TransactionObject transObj = (TransactionObject)object;
 			
 			return this.baseObject.equals(transObj.baseObject)
