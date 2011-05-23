@@ -5,7 +5,7 @@
 
 	<groupId>org.xydra</groupId>
 	<artifactId>google-analytics</artifactId>
-	<!--  last deployed: 0.1.2b -->
+	<!--  last deployed: 0.1.2c -->
 	<version>0.1.2c</version>
 	<packaging>jar</packaging>
 	<name>Google Analytics Sender</name>
