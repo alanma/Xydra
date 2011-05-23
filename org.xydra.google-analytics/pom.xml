@@ -5,7 +5,8 @@
 
 	<groupId>org.xydra</groupId>
 	<artifactId>google-analytics</artifactId>
-	<version>0.1.2b</version>
+	<!--  last deployed: 0.1.2b -->
+	<version>0.1.2c</version>
 	<packaging>jar</packaging>
 	<name>Google Analytics Sender</name>
 	<description>Sends events to Google Analytics like the urchin.js does</description>

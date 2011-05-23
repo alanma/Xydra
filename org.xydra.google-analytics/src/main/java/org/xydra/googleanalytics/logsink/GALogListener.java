@@ -28,6 +28,7 @@ public class GALogListener implements ILogListener, UserInfo {
 	
 	private long thirtyOneBitId = Utils.random31bitInteger();
 	private Tracker tracker;
+	
 	/**
 	 * @param trackerCode like 'UA-271022-28'
 	 * @param domainName without leading www. Other 3rd level domain names may
@@ -96,7 +97,7 @@ public class GALogListener implements ILogListener, UserInfo {
 		return 1;
 	}
 	
-	Tracker getTracker() {
+	public Tracker getTracker() {
 		return this.tracker;
 	}
 	
