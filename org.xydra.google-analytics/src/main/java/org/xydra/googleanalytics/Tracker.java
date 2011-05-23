@@ -51,6 +51,10 @@ public class Tracker {
 	
 	private String trackerCode;
 	
+	public String getTrackerCode() {
+		return this.trackerCode;
+	}
+	
 	private int trackCount = 0;
 	
 	private HttpUserAgent httpClient;
