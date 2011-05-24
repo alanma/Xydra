@@ -261,9 +261,9 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		
 		if(field.getValue() != null) {
 			assert inTrans;
-			XReversibleFieldEvent event = MemoryReversibleFieldEvent.createRemoveEvent(actor, field
-			        .getAddress(), field.getValue(), modelRev, getRevisionNumber(), field
-			        .getRevisionNumber(), inTrans, true);
+			XReversibleFieldEvent event = MemoryReversibleFieldEvent.createRemoveEvent(actor,
+			        field.getAddress(), field.getValue(), modelRev, getRevisionNumber(),
+			        field.getRevisionNumber(), inTrans, true);
 			this.eventQueue.enqueueFieldEvent(field, event);
 		}
 		
@@ -277,38 +277,8 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	@ReadOperation
 	@Override
 	public boolean equals(Object object) {
-		if(!(object instanceof MemoryObject)) {
-			return false;
-		}
-		
-		MemoryObject memoryObject = (MemoryObject)object;
-		
 		synchronized(this.eventQueue) {
-			
-			// compare revision number, father-model id (if it exists),
-			// father-repository id (if it exists)
-			boolean result = (this.getRevisionNumber() == memoryObject.getRevisionNumber())
-			        && (this.getID().equals(memoryObject.getID()));
-			
-			if(this.father != null) {
-				if(memoryObject.father == null) {
-					return false;
-				}
-				
-				result = result && (this.father.getID().equals(memoryObject.father.getID()));
-				
-				if(this.father.hasFather()) {
-					if(memoryObject.father.getFather() == null) {
-						return false;
-					}
-					
-					result = result
-					        && (this.father.getFather().getID().equals(memoryObject.father
-					                .getFather().getID()));
-				}
-			}
-			
-			return result;
+			return super.equals(object);
 		}
 	}
 	
@@ -531,24 +501,15 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		}
 	}
 	
+	public AbstractEntity getFather() {
+		return this.father;
+	}
+	
 	@ReadOperation
 	@Override
 	public int hashCode() {
 		synchronized(this.eventQueue) {
-			
-			int hashCode = this.getID().hashCode() + (int)this.getRevisionNumber();
-			
-			if(this.father != null) {
-				hashCode += this.father.getID().hashCode();
-				
-				XRepository repoFather = this.father.getFather();
-				
-				if(repoFather != null) {
-					hashCode += repoFather.getID().hashCode();
-				}
-			}
-			
-			return hashCode;
+			return super.hashCode();
 		}
 	}
 	

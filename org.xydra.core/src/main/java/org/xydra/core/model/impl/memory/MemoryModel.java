@@ -491,7 +491,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	 * @return The father of this MemoryModel (may be null).
 	 */
 	@ReadOperation
-	protected MemoryRepository getFather() {
+    public MemoryRepository getFather() {
 		return this.father;
 	}
 	

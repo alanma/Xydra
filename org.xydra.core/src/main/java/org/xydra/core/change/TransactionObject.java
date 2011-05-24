@@ -24,8 +24,9 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XLocalChangeCallback;
-import org.xydra.core.model.XObject;
+import org.xydra.core.model.impl.memory.AbstractEntity;
 import org.xydra.core.model.impl.memory.MemoryField;
+import org.xydra.core.model.impl.memory.MemoryObject;
 
 
 /**
@@ -39,9 +40,9 @@ import org.xydra.core.model.impl.memory.MemoryField;
  */
 // suppressing warning while this is in flux ~~max
 @SuppressWarnings("unused")
-public class TransactionObject implements XWritableObject {
+public class TransactionObject extends AbstractEntity implements XWritableObject {
 	
-	private XObject baseObject;
+	private MemoryObject baseObject;
 	private long revisionNumber;
 	
 	private Set<XID> changedFields;
@@ -53,7 +54,7 @@ public class TransactionObject implements XWritableObject {
 	
 	private ArrayList<XAtomicCommand> commands;
 	
-	public TransactionObject(XObject object) {
+	public TransactionObject(MemoryObject object) {
 		this.baseObject = object;
 		this.revisionNumber = object.getRevisionNumber();
 		
@@ -521,5 +522,10 @@ public class TransactionObject implements XWritableObject {
 			
 		}
 		
+	}
+	
+	@Override
+	public AbstractEntity getFather() {
+		return this.baseObject.getFather();
 	}
 }

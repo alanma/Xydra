@@ -45,7 +45,7 @@ import org.xydra.core.model.XRepository;
  * @author Kaidel
  * 
  */
-public class MemoryRepository implements XRepository, Serializable {
+public class MemoryRepository extends AbstractEntity implements XRepository, Serializable {
 	
 	private static final long serialVersionUID = 2412386047787717740L;
 	
@@ -172,11 +172,7 @@ public class MemoryRepository implements XRepository, Serializable {
 	
 	@Override
 	public boolean equals(Object object) {
-		if(!(object instanceof XRepository)) {
-			return false;
-		}
-		
-		return getID().equals(((XRepository)object).getID());
+		return super.equals(object);
 	}
 	
 	public long executeCommand(XCommand command) {
@@ -397,7 +393,7 @@ public class MemoryRepository implements XRepository, Serializable {
 	
 	@Override
 	public int hashCode() {
-		return getID().hashCode();
+		return super.hashCode();
 	}
 	
 	public synchronized boolean hasModel(XID id) {
@@ -509,4 +505,15 @@ public class MemoryRepository implements XRepository, Serializable {
 		}
 	}
 	
+	/*
+	 * TODO Why do repositories have no revision number?
+	 */
+	@Override
+	public long getRevisionNumber() {
+		return 0;
+	}
+	
+	public AbstractEntity getFather() {
+		return null;
+	}
 }

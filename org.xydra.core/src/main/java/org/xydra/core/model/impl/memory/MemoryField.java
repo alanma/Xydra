@@ -17,7 +17,6 @@ import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XReversibleFieldEvent;
 import org.xydra.base.change.impl.memory.MemoryFieldCommand;
 import org.xydra.base.change.impl.memory.MemoryReversibleFieldEvent;
-import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.base.value.XValue;
@@ -25,9 +24,7 @@ import org.xydra.core.XCopyUtils;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XLocalChangeCallback;
-import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
-import org.xydra.core.model.XRepository;
 import org.xydra.index.XI;
 
 
@@ -39,7 +36,7 @@ import org.xydra.index.XI;
  * 
  */
 
-public class MemoryField implements XField, Serializable {
+public class MemoryField extends AbstractEntity implements XField, Serializable {
 	
 	private static final long serialVersionUID = -4390811955475742528L;
 	
@@ -161,65 +158,8 @@ public class MemoryField implements XField, Serializable {
 	@Override
 	@ReadOperation
 	public boolean equals(Object object) {
-		if(!(object instanceof XReadableField)) {
-			return false;
-		}
-		
-		XReadableField readableField = (XReadableField)object;
-		
-		// compare revision number, father-object id (if it exists),
-		// father-model id (if it exists), father-repo id (if it exists)
-		
-		// Check value here to?! Max: not required, we can rely on
-		// revision Number
-		
 		synchronized(this.eventQueue) {
-			
-			boolean result = (this.getRevisionNumber() == readableField.getRevisionNumber())
-			        && (this.getAddress().equals(readableField.getAddress()));
-			
-			/*
-			 * TODO Couldn't all those "if"-clause be checked, if we put
-			 * "this.getAddress().equals(memoryField.getAddress())" into
-			 * "result"? The if clauses only check the XIDs of the parents,
-			 * anyway. I think that would work ~bjoern
-			 */
-			// if(this.father != null) {
-			// if(memoryField.father == null) {
-			// return false;
-			// }
-			//
-			// result = result &&
-			// (this.father.getID().equals(memoryField.father.getID()));
-			//
-			// MemoryModel fatherModel = this.father.getModel();
-			//
-			// if(fatherModel != null) {
-			// MemoryModel memoryFieldModel = memoryField.father.getModel();
-			//
-			// if(memoryFieldModel == null) {
-			// return false;
-			// }
-			//
-			// result = result &&
-			// (fatherModel.getID().equals(memoryFieldModel.getID()));
-			//
-			// XRepository fatherRepo = fatherModel.getFather();
-			//
-			// if(fatherRepo != null) {
-			// XRepository memoryFieldRepo = memoryFieldModel.getFather();
-			//
-			// if(memoryFieldRepo == null) {
-			// return false;
-			// }
-			//
-			// result = result &&
-			// (fatherRepo.getID().equals(memoryFieldRepo.getID()));
-			// }
-			// }
-			// }
-			
-			return result;
+			return super.equals(object);
 		}
 	}
 	
@@ -428,30 +368,14 @@ public class MemoryField implements XField, Serializable {
 		}
 	}
 	
+	public AbstractEntity getFather() {
+		return this.father;
+	}
+	
 	@Override
 	public int hashCode() {
 		synchronized(this.eventQueue) {
-			int hashCode = this.getID().hashCode() + (int)this.getRevisionNumber();
-			
-			if(this.father != null) {
-				hashCode += this.father.getID().hashCode();
-				
-				XModel fatherModel = this.father.getModel();
-				
-				if(fatherModel != null) {
-					hashCode += fatherModel.getID().hashCode();
-					
-					if(fatherModel instanceof MemoryModel) {
-						XRepository repoFather = ((MemoryModel)fatherModel).getFather();
-						
-						if(repoFather != null) {
-							hashCode += repoFather.getID().hashCode();
-						}
-					}
-				}
-			}
-			
-			return hashCode;
+			return super.hashCode();
 		}
 	}
 	

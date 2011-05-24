@@ -8,6 +8,7 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.value.XValue;
+import org.xydra.core.model.impl.memory.AbstractEntity;
 
 
 /**
@@ -17,7 +18,7 @@ import org.xydra.base.value.XValue;
  * 
  */
 
-public class InObjectTransactionField implements XWritableField {
+public class InObjectTransactionField extends AbstractEntity implements XWritableField {
 	private XID fieldId;
 	private TransactionObject object;
 	
@@ -78,42 +79,32 @@ public class InObjectTransactionField implements XWritableField {
 	
 	@Override
 	public boolean equals(Object object) {
-		if(object instanceof InObjectTransactionField) {
-			InObjectTransactionField field = (InObjectTransactionField)object;
-			
-			/*
-			 * Two InObjectTransactionFields are equal if they have the same
-			 * XID, the same value and the same parent-TransactionObject
-			 */
-			boolean result = this.fieldId.equals(field.fieldId) && this.object.equals(field.object);
-			
-			if(this.getValue() == null) {
-				result &= field.getValue() == null;
-			} else {
-				result &= this.getValue().equals(field.getValue());
-			}
-			
-			return result;
-		} else if(object instanceof XWritableField) {
-			
-			/*
-			 * this can only happen when someone gets a field from transObject
-			 * that already existed in the underlying XObject of the
-			 * transObject, so we'll need to simulate the equals relation of
-			 * XWritableField here
-			 */
-
-			XWritableField field = (XWritableField)object;
-			return field.getAddress().equals(this.getAddress())
-			        && field.getRevisionNumber() == this.getRevisionNumber();
-			
+		return super.equals(object);
+	}
+	
+	public boolean equalInObjectTransactionField(InObjectTransactionField field) {
+		/*
+		 * Two InObjectTransactionFields are equal if they have the same XID,
+		 * the same value and the same parent-TransactionObject
+		 */
+		boolean result = this.fieldId.equals(field.fieldId) && this.object.equals(field.object);
+		
+		if(this.getValue() == null) {
+			result &= field.getValue() == null;
+		} else {
+			result &= this.getValue().equals(field.getValue());
 		}
-		return false;
+		
+		return result;
 	}
 	
 	@Override
 	public int hashCode() {
-		// TODO Auto-generated method stub
 		return super.hashCode();
+	}
+	
+	@Override
+    public AbstractEntity getFather() {
+		return this.object;
 	}
 }

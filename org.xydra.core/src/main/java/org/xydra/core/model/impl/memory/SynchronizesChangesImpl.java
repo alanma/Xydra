@@ -57,9 +57,9 @@ import org.xydra.log.LoggerFactory;
  * 
  * @author dscharrer
  */
-public abstract class SynchronizesChangesImpl implements IHasXAddress, IHasChangeLog,
-        XSynchronizesChanges, XExecutesCommands, XSendsObjectEvents, XSendsFieldEvents,
-        XSendsTransactionEvents, Serializable {
+public abstract class SynchronizesChangesImpl extends AbstractEntity implements IHasXAddress,
+        IHasChangeLog, XSynchronizesChanges, XExecutesCommands, XSendsObjectEvents,
+        XSendsFieldEvents, XSendsTransactionEvents, Serializable {
 	
 	protected static class Orphans implements Serializable {
 		

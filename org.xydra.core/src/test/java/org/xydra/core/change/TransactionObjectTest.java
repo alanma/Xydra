@@ -13,14 +13,14 @@ import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.core.LoggerTestHelper;
-import org.xydra.core.model.XModel;
-import org.xydra.core.model.XObject;
-import org.xydra.core.model.XRepository;
+import org.xydra.core.model.impl.memory.MemoryModel;
+import org.xydra.core.model.impl.memory.MemoryObject;
+import org.xydra.core.model.impl.memory.MemoryRepository;
 
 
 public class TransactionObjectTest {
 	private TransactionObject transObject;
-	private XObject object;
+	private MemoryObject object;
 	private XWritableField field;
 	
 	{
@@ -33,8 +33,8 @@ public class TransactionObjectTest {
 		XID objectId = XX.createUniqueId();
 		XID fieldId = XX.createUniqueId();
 		
-		XRepository repo = X.createMemoryRepository(XX.toId("testActor"));
-		XModel model = repo.createModel(modelId);
+		MemoryRepository repo = (MemoryRepository)X.createMemoryRepository(XX.toId("testActor"));
+		MemoryModel model = repo.createModel(modelId);
 		this.object = model.createObject(objectId);
 		
 		// add a single field
