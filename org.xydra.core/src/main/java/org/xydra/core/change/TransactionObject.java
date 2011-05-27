@@ -172,16 +172,14 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		if(command instanceof XObjectCommand) {
 			XObjectCommand objectCommand = (XObjectCommand)command;
 			
-			// check revision number
-			if(objectCommand.getRevisionNumber() != this.revisionNumber
-			        && !objectCommand.isForced() && objectCommand.getChangeType() != ChangeType.ADD) {
-				usedCallback.onFailure();
-				return XCommand.FAILED;
-			}
-			
 			XID fieldId = command.getChangedEntity().getField();
 			
 			if(command.getChangeType() == ChangeType.ADD) {
+				
+				/*
+				 * TODO Do I need to check the revision number here?
+				 */
+
 				if(hasField(fieldId)) {
 					if(!objectCommand.isForced()) {
 						// not forced, tried to add something that already
@@ -215,6 +213,21 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 					if(!objectCommand.isForced()) {
 						// not forced, tried to remove something that didn't
 						// exist
+						usedCallback.onFailure();
+						return XCommand.FAILED;
+					}
+				}
+				
+				XWritableField field = this.getField(fieldId);
+				if(field == null && !objectCommand.isForced()) {
+					usedCallback.onFailure();
+					return XCommand.FAILED;
+				}
+				
+				// check revision number
+				if(!objectCommand.isForced()) {
+					assert field != null;
+					if(objectCommand.getRevisionNumber() != field.getRevisionNumber()) {
 						usedCallback.onFailure();
 						return XCommand.FAILED;
 					}

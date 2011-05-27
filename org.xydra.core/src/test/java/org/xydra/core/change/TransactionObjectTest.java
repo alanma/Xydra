@@ -27,7 +27,7 @@ import org.xydra.core.model.impl.memory.MemoryRepository;
 public class TransactionObjectTest {
 	private TransactionObject transObject;
 	private MemoryObject object;
-	private XWritableField field;
+	private XWritableField field, fieldWithValue;
 	
 	{
 		LoggerTestHelper.init();
@@ -38,13 +38,19 @@ public class TransactionObjectTest {
 		XID modelId = XX.createUniqueId();
 		XID objectId = XX.createUniqueId();
 		XID fieldId = XX.createUniqueId();
+		XID fieldWithValueId = XX.createUniqueId();
 		
 		MemoryRepository repo = (MemoryRepository)X.createMemoryRepository(XX.toId("testActor"));
 		MemoryModel model = repo.createModel(modelId);
 		this.object = model.createObject(objectId);
 		
-		// add a single field
+		// add two fields
 		this.field = this.object.createField(fieldId);
+		this.fieldWithValue = this.object.createField(fieldWithValueId);
+		
+		// set its value
+		XValue value = X.getValueFactory().createStringValue("test value");
+		this.fieldWithValue.setValue(value);
 		
 		this.transObject = new TransactionObject(this.object);
 	}
@@ -453,6 +459,71 @@ public class TransactionObjectTest {
 		
 		assertEquals(value2, changedField.getValue());
 		assertFalse(value2.equals(this.field.getValue()));
+	}
+	
+	@Test
+	public void testExecuteCommandsSafeChangeValueCommands() {
+		XCommandFactory factory = X.getCommandFactory();
+		XID newFieldId = X.getIDProvider().createUniqueId();
+		TestCallback callback = new TestCallback();
+		
+		XValue value = X.getValueFactory().createStringValue("test");
+		
+		// change a value of a not existing field, should fail
+		assertFalse(this.transObject.hasField(newFieldId));
+		
+		XAddress temp = this.transObject.getAddress();
+		XAddress address = XX.toAddress(temp.getRepository(), temp.getModel(), temp.getObject(),
+		        newFieldId);
+		XCommand changeCommand = factory.createSafeChangeValueCommand(address, 0, value);
+		
+		long result = this.transObject.executeCommand(changeCommand, callback);
+		assertEquals(XCommand.FAILED, result);
+		
+		// check callback
+		assertTrue(callback.failed);
+		assertNull(callback.revision);
+		
+		// change the value of a field, which value is not set - should fail
+		changeCommand = factory.createSafeChangeValueCommand(this.field.getAddress(),
+		        this.field.getRevisionNumber(), value);
+		callback = new TestCallback();
+		
+		result = this.transObject.executeCommand(changeCommand, callback);
+		assertEquals(XCommand.FAILED, result);
+		
+		// check callback
+		assertTrue(callback.failed);
+		assertNull(callback.revision);
+		
+		// check that nothing was changed
+		XWritableField simulatedField = this.transObject.getField(this.field.getID());
+		assertNull(simulatedField.getValue());
+		assertNull(this.field.getValue());
+		
+		// change the value of a field, which value is already set - should
+		// succeed
+		changeCommand = factory.createSafeChangeValueCommand(this.fieldWithValue.getAddress(),
+		        this.fieldWithValue.getRevisionNumber(), value);
+		callback = new TestCallback();
+		
+		result = this.transObject.executeCommand(changeCommand, callback);
+		assertTrue(result > 0);
+		assertEquals(this.transObject.getRevisionNumber(), result);
+		assertFalse(this.object.getRevisionNumber() == result);
+		
+		// check callback
+		assertFalse(callback.failed);
+		assertEquals((Long)result, callback.revision);
+		
+		// check whether the simulated field was changed and the real field
+		// wasn't
+		XWritableField changedField = this.transObject.getField(this.fieldWithValue.getID());
+		assertEquals((Long)result, (Long)changedField.getRevisionNumber());
+		assertFalse(result == this.field.getRevisionNumber());
+		
+		assertEquals(value, changedField.getValue());
+		assertFalse(value.equals(this.fieldWithValue.getValue()));
 	}
 	
 	private class TestCallback implements XLocalChangeCallback {
