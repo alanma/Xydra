@@ -18,11 +18,11 @@ import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlCommand;
-import org.xydra.core.xml.XmlOut;
 import org.xydra.core.xml.XmlStore;
+import org.xydra.core.xml.XydraOut;
 import org.xydra.core.xml.XmlStore.EventsRequest;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
-import org.xydra.core.xml.impl.XmlOutStream;
+import org.xydra.core.xml.impl.XydraOutXml;
 import org.xydra.index.query.Pair;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessExceptionHandler;
@@ -93,7 +93,7 @@ public class XydraStoreResource {
 				 * HttpServletResponse .SC_FORBIDDEN; }
 				 */
 
-				XmlOut out = startOutput(res, statusCode);
+				XydraOut out = startOutput(res, statusCode);
 				XmlStore.toXml(t, out);
 				out.flush();
 				
@@ -114,12 +114,12 @@ public class XydraStoreResource {
 		
 	}
 	
-	private static XmlOut startOutput(HttpServletResponse res, int statusCode) {
+	private static XydraOut startOutput(HttpServletResponse res, int statusCode) {
 		res.setStatus(statusCode);
 		res.setContentType("application/xml; charset=UTF-8");
 		res.setCharacterEncoding("utf-8");
 		try {
-			return new XmlOutStream(res.getOutputStream());
+			return new XydraOutXml(res.getOutputStream());
 		} catch(IOException e) {
 			throw new RuntimeException("re-throw", e);
 		}
@@ -138,7 +138,7 @@ public class XydraStoreResource {
 			throw callback.getException();
 		}
 		
-		XmlOut out = startOutput(res, HttpServletResponse.SC_OK);
+		XydraOut out = startOutput(res, HttpServletResponse.SC_OK);
 		
 		XmlStore.toAuthenticationResult(callback.getResult(), out);
 		
@@ -203,7 +203,7 @@ public class XydraStoreResource {
 			eventsRes = callback.getResult().getSecond();
 		}
 		
-		XmlOut out = startOutput(res, HttpServletResponse.SC_OK);
+		XydraOut out = startOutput(res, HttpServletResponse.SC_OK);
 		
 		XmlStore.toXml(commandRes, ger, eventsRes, out);
 		
@@ -268,7 +268,7 @@ public class XydraStoreResource {
 			throw callback.getException();
 		}
 		
-		XmlOut out = startOutput(res, HttpServletResponse.SC_OK);
+		XydraOut out = startOutput(res, HttpServletResponse.SC_OK);
 		
 		XmlStore.toXml(ger, callback.getResult(), out);
 		
@@ -300,7 +300,7 @@ public class XydraStoreResource {
 			throw callback.getException();
 		}
 		
-		XmlOut out = startOutput(res, HttpServletResponse.SC_OK);
+		XydraOut out = startOutput(res, HttpServletResponse.SC_OK);
 		
 		XmlStore.toModelRevisions(callback.getResult(), out);
 		
@@ -359,7 +359,7 @@ public class XydraStoreResource {
 		}
 		assert oc.getResult() != null && oc.getResult().length == oa.length;
 		
-		XmlOut out = startOutput(res, HttpServletResponse.SC_OK);
+		XydraOut out = startOutput(res, HttpServletResponse.SC_OK);
 		
 		BatchedResult<XReadableModel>[] mr = mc.getResult();
 		BatchedResult<XReadableObject>[] or = oc.getResult();
@@ -383,7 +383,7 @@ public class XydraStoreResource {
 			throw callback.getException();
 		}
 		
-		XmlOut out = startOutput(res, HttpServletResponse.SC_OK);
+		XydraOut out = startOutput(res, HttpServletResponse.SC_OK);
 		
 		XmlStore.toModelIds(callback.getResult(), out);
 		
@@ -404,7 +404,7 @@ public class XydraStoreResource {
 			throw callback.getException();
 		}
 		
-		XmlOut out = startOutput(res, HttpServletResponse.SC_OK);
+		XydraOut out = startOutput(res, HttpServletResponse.SC_OK);
 		
 		XmlStore.toRepositoryId(callback.getResult(), out);
 		

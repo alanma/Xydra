@@ -23,8 +23,9 @@ import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlModel;
+import org.xydra.core.xml.XydraOut;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
-import org.xydra.core.xml.impl.XmlOutStringBuffer;
+import org.xydra.core.xml.impl.XydraOutXml;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.XydraRuntime;
@@ -151,9 +152,9 @@ public class GaeSnapshotService {
 		snapshotEntity.setUnindexedProperty(PROPERTY_REVISION, entry.revision);
 		
 		if(entry.modelState != null) {
-			XmlOutStringBuffer out = new XmlOutStringBuffer();
+			XydraOut out = new XydraOutXml();
 			XmlModel.toXml(entry.modelState, out);
-			snapshotEntity.setUnindexedProperty(PROPERTY_SNAPSHOT, new Text(out.getXml()));
+			snapshotEntity.setUnindexedProperty(PROPERTY_SNAPSHOT, new Text(out.getData()));
 		}
 		
 		XydraRuntime.getMemcache().put(getSnapshotRevKey(), entry.revision);

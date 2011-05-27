@@ -17,8 +17,9 @@ import org.xydra.core.model.session.XProtectedRepository;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlCommand;
 import org.xydra.core.xml.XmlEvent;
+import org.xydra.core.xml.XydraOut;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
-import org.xydra.core.xml.impl.XmlOutStringBuffer;
+import org.xydra.core.xml.impl.XydraOutXml;
 import org.xydra.store.AccessException;
 
 
@@ -103,9 +104,9 @@ public class DirectChangesService implements XChangesService {
 		
 		// IMPROVE do this without XML serialization
 		// Map addresses from clientContext to serverContext.
-		XmlOutStringBuffer xo = new XmlOutStringBuffer();
+		XydraOut xo = new XydraOutXml();
 		XmlCommand.toXml(command, xo, clientContext);
-		MiniElement e = new MiniXMLParserImpl().parseXml(xo.getXml());
+		MiniElement e = new MiniXMLParserImpl().parseXml(xo.getData());
 		return XmlCommand.toCommand(e, serverContext);
 		
 	}
@@ -114,9 +115,9 @@ public class DirectChangesService implements XChangesService {
 		
 		// IMPROVE do this without XML serialization
 		// Map addresses from serverContext to clientContext.
-		XmlOutStringBuffer o = new XmlOutStringBuffer();
+		XydraOut o = new XydraOutXml();
 		XmlEvent.toXml(event, o, serverContext);
-		MiniElement e = new MiniXMLParserImpl().parseXml(o.getXml());
+		MiniElement e = new MiniXMLParserImpl().parseXml(o.getData());
 		return XmlEvent.toEvent(e, clientContext);
 		
 	}

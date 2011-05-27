@@ -28,8 +28,9 @@ import org.xydra.base.rmof.XReadableObject;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlCommand;
 import org.xydra.core.xml.XmlStore;
+import org.xydra.core.xml.XydraOut;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
-import org.xydra.core.xml.impl.XmlOutStringBuffer;
+import org.xydra.core.xml.impl.XydraOutXml;
 import org.xydra.index.query.Pair;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
@@ -171,10 +172,10 @@ public class XydraStoreRestClient implements XydraStore {
 			throw new IllegalArgumentException("commands array must not be null");
 		}
 		
-		XmlOutStringBuffer out = new XmlOutStringBuffer();
+		XydraOut out = new XydraOutXml();
 		XmlCommand.toXml(Arrays.asList(commands).iterator(), out, null);
 		
-		MiniElement xml = post("execute", actorId, passwordHash, out.getXml(), callback);
+		MiniElement xml = post("execute", actorId, passwordHash, out.getData(), callback);
 		if(xml == null) {
 			return;
 		}
@@ -210,10 +211,10 @@ public class XydraStoreRestClient implements XydraStore {
 		
 		String uri = req == null ? "execute" : "execute?" + req;
 		
-		XmlOutStringBuffer out = new XmlOutStringBuffer();
+		XydraOut out = new XydraOutXml();
 		XmlCommand.toXml(Arrays.asList(commands).iterator(), out, null);
 		
-		MiniElement xml = post(uri, actorId, passwordHash, out.getXml(), callback);
+		MiniElement xml = post(uri, actorId, passwordHash, out.getData(), callback);
 		if(xml == null) {
 			return;
 		}

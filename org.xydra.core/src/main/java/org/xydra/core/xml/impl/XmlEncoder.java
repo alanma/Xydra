@@ -8,9 +8,12 @@ package org.xydra.core.xml.impl;
  */
 public class XmlEncoder {
 	
-	public static String XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+	/**
+	 * Standard XML header with UTF-8 encoding.
+	 */
+	public static final String XML_DECLARATION = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
 	
-	public static String xmldecode(String in) {
+	public static String decode(String in) {
 		String result = in;
 		result = result.replace("&amp;", "&");
 		result = result.replace("&lt;", "<");
@@ -21,7 +24,7 @@ public class XmlEncoder {
 		
 	}
 	
-	public static String xmlencode(String in) {
+	public static String encode(String in) {
 		String result = in;
 		result = result.replace("&", "&amp;");
 		result = result.replace("<", "&lt;");

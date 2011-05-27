@@ -21,8 +21,9 @@ import org.xydra.base.change.impl.memory.MemoryRepositoryEvent;
 import org.xydra.base.value.XValue;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlValue;
+import org.xydra.core.xml.XydraOut;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
-import org.xydra.core.xml.impl.XmlOutStringBuffer;
+import org.xydra.core.xml.impl.XydraOutXml;
 import org.xydra.index.query.Pair;
 import org.xydra.store.impl.gae.GaeUtils;
 import org.xydra.store.impl.gae.GaeUtils.AsyncEntity;
@@ -368,9 +369,9 @@ public class GaeEvents {
 					values.add(null);
 					valueIds[i] = TRANSINDEX_NONE;
 				} else {
-					XmlOutStringBuffer out = new XmlOutStringBuffer(false);
+					XydraOut out = new XydraOutXml(false);
 					XmlValue.toXml(xv, out);
-					String valueStr = out.getXml();
+					String valueStr = out.getData();
 					Text value = new Text(valueStr);
 					
 					if(valueStr.length() > MAX_VALUE_SIZE) {

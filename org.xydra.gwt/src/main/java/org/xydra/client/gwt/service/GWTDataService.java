@@ -13,7 +13,8 @@ import org.xydra.core.model.XObject;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.MiniXMLParser;
 import org.xydra.core.xml.XmlModel;
-import org.xydra.core.xml.impl.XmlOutStringBuffer;
+import org.xydra.core.xml.XydraOut;
+import org.xydra.core.xml.impl.XydraOutXml;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
@@ -177,28 +178,28 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 	
 	public void setModel(XReadableModel model, Callback<Boolean> callback) {
 		
-		XmlOutStringBuffer xo = new XmlOutStringBuffer();
+		XydraOut xo = new XydraOutXml();
 		XmlModel.toXml(model, xo, false, false, false);
 		
-		send("", xo.getXml(), callback);
+		send("", xo.getData(), callback);
 		
 	}
 	
 	public void setObject(XID modelId, XReadableObject object, Callback<Boolean> callback) {
 		
-		XmlOutStringBuffer xo = new XmlOutStringBuffer();
+		XydraOut xo = new XydraOutXml();
 		XmlModel.toXml(object, xo, false, false, false);
 		
-		send(modelId.toString(), xo.getXml(), callback);
+		send(modelId.toString(), xo.getData(), callback);
 		
 	}
 	
 	public void setField(XID modelId, XID objectId, XReadableField field, Callback<Boolean> callback) {
 		
-		XmlOutStringBuffer xo = new XmlOutStringBuffer();
+		XydraOut xo = new XydraOutXml();
 		XmlModel.toXml(field, xo, false);
 		
-		send(modelId.toString() + "/" + objectId.toString(), xo.getXml(), callback);
+		send(modelId.toString() + "/" + objectId.toString(), xo.getData(), callback);
 		
 	}
 	

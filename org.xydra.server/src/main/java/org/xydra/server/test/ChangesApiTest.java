@@ -38,8 +38,9 @@ import org.xydra.core.model.XObject;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlCommand;
 import org.xydra.core.xml.XmlEvent;
+import org.xydra.core.xml.XydraOut;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
-import org.xydra.core.xml.impl.XmlOutStringBuffer;
+import org.xydra.core.xml.impl.XydraOutXml;
 import org.xydra.index.iterator.AbstractTransformingIterator;
 
 
@@ -96,7 +97,7 @@ public abstract class ChangesApiTest extends AbstractRestApiTest {
 			context = XX.toAddress(target.getRepository(), target.getModel(), null, null);
 		}
 		
-		XmlOutStringBuffer out = new XmlOutStringBuffer();
+		XydraOut out = new XydraOutXml();
 		XmlCommand.toXml(command, out, context);
 		
 		HttpURLConnection c = (HttpURLConnection)targetUrl.openConnection();
@@ -105,7 +106,7 @@ public abstract class ChangesApiTest extends AbstractRestApiTest {
 		c.setRequestMethod("POST");
 		c.setRequestProperty("Content-Type", "application/xml");
 		Writer w = new OutputStreamWriter(c.getOutputStream(), "UTF-8");
-		w.write(out.getXml());
+		w.write(out.getData());
 		w.flush();
 		c.connect();
 		
@@ -321,8 +322,8 @@ public abstract class ChangesApiTest extends AbstractRestApiTest {
 	public void testGetMoreComponentsUrl() throws IOException {
 		
 		URL url = changesapi.resolve(DemoModelUtil.PHONEBOOK_ID.toString() + "/").resolve(
-		        DemoModelUtil.JOHN_ID.toString() + "/").resolve(DemoModelUtil.ALIASES_ID.toString())
-		        .toURL();
+		        DemoModelUtil.JOHN_ID.toString() + "/")
+		        .resolve(DemoModelUtil.ALIASES_ID.toString()).toURL();
 		
 		HttpURLConnection c = (HttpURLConnection)url.openConnection();
 		setLoginDetails(c);
@@ -346,8 +347,8 @@ public abstract class ChangesApiTest extends AbstractRestApiTest {
 	@Test
 	public void testGetChangesMissingObject() throws IOException {
 		
-		URL url = changesapi.resolve(DemoModelUtil.PHONEBOOK_ID.toString() + "/").resolve(MISSING_ID)
-		        .toURL();
+		URL url = changesapi.resolve(DemoModelUtil.PHONEBOOK_ID.toString() + "/").resolve(
+		        MISSING_ID).toURL();
 		
 		HttpURLConnection c = (HttpURLConnection)url.openConnection();
 		setLoginDetails(c);

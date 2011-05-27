@@ -10,7 +10,8 @@ import org.xydra.base.change.XObjectCommand;
 import org.xydra.base.change.impl.memory.MemoryObjectCommand;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.core.xml.XmlModel;
-import org.xydra.core.xml.impl.XmlOutStringBuffer;
+import org.xydra.core.xml.XydraOut;
+import org.xydra.core.xml.impl.XydraOutXml;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
 import org.xydra.server.IXydraSession;
@@ -37,10 +38,10 @@ public class XFieldResource {
 		IXydraSession session = XydraRestServer.getSession(restless, req);
 		XReadableField field = XydraRestServer.getField(session, modelId, objectId, fieldId);
 		
-		XmlOutStringBuffer xo = new XmlOutStringBuffer();
+		XydraOut xo = new XydraOutXml();
 		XmlModel.toXml(field, xo, true);
 		
-		XydraRestServer.xmlResponse(res, HttpServletResponse.SC_OK, xo.getXml());
+		XydraRestServer.xmlResponse(res, HttpServletResponse.SC_OK, xo.getData());
 	}
 	
 	public void delete(Restless restless, HttpServletRequest req, HttpServletResponse res,

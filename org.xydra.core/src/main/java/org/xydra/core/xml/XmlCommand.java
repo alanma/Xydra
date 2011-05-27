@@ -103,7 +103,7 @@ public class XmlCommand {
 	 * @param context The part of this command's target address that doesn't
 	 *            need to be encoded in the element.
 	 */
-	private static void setAtomicCommandAttributes(XAtomicCommand command, XmlOut out,
+	private static void setAtomicCommandAttributes(XAtomicCommand command, XydraOut out,
 	        XAddress context, boolean saveRevision) {
 		
 		out.attribute(XmlUtils.TYPE_ATTRIBUTE, command.getChangeType().toString());
@@ -405,7 +405,7 @@ public class XmlCommand {
 	 * @param context The part of this command's target address that doesn't
 	 *            need to be encoded in the element.
 	 */
-	public static void toXml(XCommand command, XmlOut out, XAddress context)
+	public static void toXml(XCommand command, XydraOut out, XAddress context)
 	        throws IllegalArgumentException {
 		if(command instanceof XTransaction) {
 			toXml((XTransaction)command, out, context);
@@ -431,7 +431,7 @@ public class XmlCommand {
 	 * @param context The part of this command's target address that doesn't
 	 *            need to be encoded in the element.
 	 */
-	public static void toXml(XFieldCommand command, XmlOut out, XAddress context)
+	public static void toXml(XFieldCommand command, XydraOut out, XAddress context)
 	        throws IllegalArgumentException {
 		
 		out.open(XFIELDCOMMAND_ELEMENT);
@@ -453,7 +453,7 @@ public class XmlCommand {
 	 * @param context The part of this command's target address that doesn't
 	 *            need to be encoded in the element.
 	 */
-	public static void toXml(XModelCommand command, XmlOut out, XAddress context)
+	public static void toXml(XModelCommand command, XydraOut out, XAddress context)
 	        throws IllegalArgumentException {
 		
 		if(context != null && (context.getObject() != null || context.getField() != null))
@@ -477,7 +477,7 @@ public class XmlCommand {
 	 * @param context The part of this command's target address that doesn't
 	 *            need to be encoded in the element.
 	 */
-	public static void toXml(XObjectCommand command, XmlOut out, XAddress context)
+	public static void toXml(XObjectCommand command, XydraOut out, XAddress context)
 	        throws IllegalArgumentException {
 		
 		if(context != null && context.getField() != null)
@@ -501,7 +501,7 @@ public class XmlCommand {
 	 * @param context The part of this command's target address that doesn't
 	 *            need to be encoded in the element.
 	 */
-	public static void toXml(XRepositoryCommand command, XmlOut out, XAddress context)
+	public static void toXml(XRepositoryCommand command, XydraOut out, XAddress context)
 	        throws IllegalArgumentException {
 		
 		if(context != null
@@ -527,7 +527,7 @@ public class XmlCommand {
 	 * @param context The part of this command's target address that doesn't
 	 *            need to be encoded in the element.
 	 */
-	public static void toXml(XTransaction trans, XmlOut out, XAddress context)
+	public static void toXml(XTransaction trans, XydraOut out, XAddress context)
 	        throws IllegalArgumentException {
 		
 		out.open(XTRANSACTION_ELEMENT);
@@ -552,7 +552,7 @@ public class XmlCommand {
 	 * @param context The part of this event's target address that doesn't need
 	 *            to be encoded in the element.
 	 */
-	public static void toXml(Iterator<XCommand> commands, XmlOut out, XAddress context)
+	public static void toXml(Iterator<XCommand> commands, XydraOut out, XAddress context)
 	        throws IllegalArgumentException {
 		
 		out.open(XCOMMANDLIST_ELEMENT);

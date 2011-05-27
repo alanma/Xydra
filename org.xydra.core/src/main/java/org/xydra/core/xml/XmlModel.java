@@ -51,6 +51,11 @@ import org.xydra.store.AccessException;
 @RequiresAppEngine(false)
 public class XmlModel {
 	
+	private static final String NAME_EVENTS = "events";
+	private static final String NAME_VALUE = "value";
+	private static final String NAME_OBJECTS = "objects";
+	private static final String NAME_FIELDS = "fields";
+	private static final String NAME_MODELS = "models";
 	public static final long NO_REVISION = -1;
 	private static final String REVISION_ATTRIBUTE = "revision";
 	private static final String STARTREVISION_ATTRIBUTE = "startRevision";
@@ -362,11 +367,11 @@ public class XmlModel {
 	 * Encode the given {@link XChangeLog} as an XML element.
 	 * 
 	 * @param log an {@link XChangeLog}
-	 * @param xo the {@link XmlOut} that a partial XML document starting with
+	 * @param xo the {@link XydraOut} that a partial XML document starting with
 	 *            &lt;xfield&gt; and ending with the same &lt;/xfield&gt; is
 	 *            written to. White space is permitted but not required.
 	 */
-	public static void toXml(XChangeLog log, XmlOut xo) {
+	public static void toXml(XChangeLog log, XydraOut xo) {
 		
 		// get values before outputting anything to prevent incomplete XML
 		// elements on errors
@@ -378,6 +383,7 @@ public class XmlModel {
 			xo.attribute(STARTREVISION_ATTRIBUTE, Long.toString(rev));
 		}
 		
+		xo.children(NAME_EVENTS, true);
 		while(events.hasNext()) {
 			XmlEvent.toXml(events.next(), xo, log.getBaseAddress());
 		}
@@ -391,13 +397,13 @@ public class XmlModel {
 	 * revision numbers.
 	 * 
 	 * @param xfield an {@link XReadableField}
-	 * @param xo the {@link XmlOut} that a partial XML document starting with
+	 * @param xo the {@link XydraOut} that a partial XML document starting with
 	 *            &lt;xfield&gt; and ending with the same &lt;/xfield&gt; is
 	 *            written to. White space is permitted but not required.
 	 * @throws IllegalArgumentException if the field contains an unsupported
 	 *             XValue type. See {@link XmlValue} for details.
 	 */
-	public static void toXml(XReadableField xfield, XmlOut xo) {
+	public static void toXml(XReadableField xfield, XydraOut xo) {
 		toXml(xfield, xo, true);
 	}
 	
@@ -405,7 +411,7 @@ public class XmlModel {
 	 * Encode the given {@link XReadableField} as an XML element.
 	 * 
 	 * @param xfield an {@link XReadableField}
-	 * @param xo the {@link XmlOut} that a partial XML document starting with
+	 * @param xo the {@link XydraOut} that a partial XML document starting with
 	 *            &lt;xfield&gt; and ending with the same &lt;/xfield&gt; is
 	 *            written to. White space is permitted but not required.
 	 * @param saveRevision true if revision numbers should be saved to the xml
@@ -413,7 +419,7 @@ public class XmlModel {
 	 * @throws IllegalArgumentException if the field contains an unsupported
 	 *             XValue type. See {@link XmlValue} for details.
 	 */
-	public static void toXml(XReadableField xfield, XmlOut xo, boolean saveRevision) {
+	public static void toXml(XReadableField xfield, XydraOut xo, boolean saveRevision) {
 		
 		// get values before outputting anything to prevent incomplete XML
 		// elements on errors
@@ -426,6 +432,7 @@ public class XmlModel {
 			xo.attribute(REVISION_ATTRIBUTE, Long.toString(rev));
 		}
 		
+		xo.children(NAME_VALUE, false);
 		if(xvalue != null) {
 			XmlValue.toXml(xvalue, xo);
 		}
@@ -439,13 +446,13 @@ public class XmlModel {
 	 * revision numbers and ignoring inaccessible entities.
 	 * 
 	 * @param xmodel an {@link XReadableModel}
-	 * @param xo the {@link XmlOut} that a partial XML document starting with
+	 * @param xo the {@link XydraOut} that a partial XML document starting with
 	 *            &lt;xmodel&gt; and ending with the same &lt;/xmodel&gt; is
 	 *            written to. White space is permitted but not required.
 	 * @throws IllegalArgumentException if the model contains an unsupported
 	 *             XValue type. See {@link XmlValue} for details.
 	 */
-	public static void toXml(XReadableModel xmodel, XmlOut xo) {
+	public static void toXml(XReadableModel xmodel, XydraOut xo) {
 		toXml(xmodel, xo, true, true, true);
 	}
 	
@@ -453,7 +460,7 @@ public class XmlModel {
 	 * Encode the given {@link XReadableModel} as an XML element.
 	 * 
 	 * @param xmodel an {@link XReadableModel}
-	 * @param xo the {@link XmlOut} that a partial XML document starting with
+	 * @param xo the {@link XydraOut} that a partial XML document starting with
 	 *            &lt;xmodel&gt; and ending with the same &lt;/xmodel&gt; is
 	 *            written to. White space is permitted but not required.
 	 * @param saveRevision true if revision numbers should be saved to the xml
@@ -464,7 +471,7 @@ public class XmlModel {
 	 * @throws IllegalArgumentException if the model contains an unsupported
 	 *             XValue type. See {@link XmlValue} for details.
 	 */
-	public static void toXml(XReadableModel xmodel, XmlOut xo, boolean saveRevision,
+	public static void toXml(XReadableModel xmodel, XydraOut xo, boolean saveRevision,
 	        boolean ignoreInaccessible, boolean saveChangeLog) {
 		
 		if(!saveRevision && saveChangeLog) {
@@ -481,6 +488,7 @@ public class XmlModel {
 			xo.attribute(REVISION_ATTRIBUTE, Long.toString(rev));
 		}
 		
+		xo.children(NAME_OBJECTS, true);
 		for(XID objectId : xmodel) {
 			try {
 				toXml(xmodel.getObject(objectId), xo, saveRevision, ignoreInaccessible, false);
@@ -508,13 +516,13 @@ public class XmlModel {
 	 * revision numbers and ignoring inaccessible entities.
 	 * 
 	 * @param xobject an {@link XReadableObject}
-	 * @param xo the {@link XmlOut} that a partial XML document starting with
+	 * @param xo the {@link XydraOut} that a partial XML document starting with
 	 *            &lt;xobject&gt; and ending with the same &lt;/xobject&gt; is
 	 *            written to. White space is permitted but not required.
 	 * @throws IllegalArgumentException if the object contains an unsupported
 	 *             XValue type. See {@link XmlValue} for details.
 	 */
-	public static void toXml(XReadableObject xobject, XmlOut xo) {
+	public static void toXml(XReadableObject xobject, XydraOut xo) {
 		toXml(xobject, xo, true, true, true);
 	}
 	
@@ -522,7 +530,7 @@ public class XmlModel {
 	 * Encode the given {@link XReadableObject} as an XML element.
 	 * 
 	 * @param xobject an {@link XObject}
-	 * @param xo the {@link XmlOut} that a partial XML document starting with
+	 * @param xo the {@link XydraOut} that a partial XML document starting with
 	 *            &lt;xobject&gt; and ending with the same &lt;/xobject&gt; is
 	 *            written to. White space is permitted but not required.
 	 * @param saveRevision true if revision numbers should be saved to the xml
@@ -533,7 +541,7 @@ public class XmlModel {
 	 * @throws IllegalArgumentException if the object contains an unsupported
 	 *             XValue type. See {@link XmlValue} for details.
 	 */
-	public static void toXml(XReadableObject xobject, XmlOut xo, boolean saveRevision,
+	public static void toXml(XReadableObject xobject, XydraOut xo, boolean saveRevision,
 	        boolean ignoreInaccessible, boolean saveChangeLog) {
 		
 		if(!saveRevision && saveChangeLog) {
@@ -550,6 +558,7 @@ public class XmlModel {
 			xo.attribute(REVISION_ATTRIBUTE, Long.toString(rev));
 		}
 		
+		xo.children(NAME_FIELDS, true);
 		for(XID fieldId : xobject) {
 			try {
 				toXml(xobject.getField(fieldId), xo, saveRevision);
@@ -577,14 +586,14 @@ public class XmlModel {
 	 * revision numbers and ignoring inaccessible entities.
 	 * 
 	 * @param xrepository an {@link XReadableRepository}
-	 * @param xo the {@link XmlOut} that a partial XML document starting with
+	 * @param xo the {@link XydraOut} that a partial XML document starting with
 	 *            &lt;xrepository&gt; and ending with the same
 	 *            &lt;/xrepository&gt; is written to. White space is permitted
 	 *            but not required.
 	 * @throws IllegalArgumentException if the model contains an unsupported
 	 *             XValue type. See {@link XmlValue} for details.
 	 */
-	public static void toXml(XReadableRepository xrepository, XmlOut xo) {
+	public static void toXml(XReadableRepository xrepository, XydraOut xo) {
 		toXml(xrepository, xo, true, true, true);
 	}
 	
@@ -592,7 +601,7 @@ public class XmlModel {
 	 * Encode the given {@link XReadableRepository} as an XML element.
 	 * 
 	 * @param xrepository an {@link XReadableRepository}
-	 * @param xo the {@link XmlOut} that a partial XML document starting with
+	 * @param xo the {@link XydraOut} that a partial XML document starting with
 	 *            &lt;xrepository&gt; and ending with the same
 	 *            &lt;/xrepository&gt; is written to. White space is permitted
 	 *            but not required.
@@ -604,12 +613,13 @@ public class XmlModel {
 	 * @throws IllegalArgumentException if the model contains an unsupported
 	 *             XValue type. See {@link XmlValue} for details.
 	 */
-	public static void toXml(XReadableRepository xrepository, XmlOut xo, boolean saveRevision,
+	public static void toXml(XReadableRepository xrepository, XydraOut xo, boolean saveRevision,
 	        boolean ignoreInaccessible, boolean saveChangeLog) {
 		
 		xo.open(XREPOSITORY_ELEMENT);
 		xo.attribute(XmlUtils.XID_ATTRIBUTE, xrepository.getID().toString());
 		
+		xo.children(NAME_MODELS, true);
 		for(XID modelOd : xrepository) {
 			try {
 				toXml(xrepository.getModel(modelOd), xo, saveRevision, ignoreInaccessible,

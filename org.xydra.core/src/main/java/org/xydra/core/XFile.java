@@ -14,9 +14,9 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlModel;
-import org.xydra.core.xml.XmlOut;
+import org.xydra.core.xml.XydraOut;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
-import org.xydra.core.xml.impl.XmlOutStream;
+import org.xydra.core.xml.impl.XydraOutXml;
 
 
 /**
@@ -177,7 +177,7 @@ public class XFile {
 		
 		FileOutputStream fos = new FileOutputStream(file);
 		
-		XmlOut out = new XmlOutStream(fos);
+		XydraOut out = new XydraOutXml(fos);
 		XmlModel.toXml(model, out, true, false, true);
 		
 		fos.close();
@@ -219,7 +219,7 @@ public class XFile {
 		
 		FileOutputStream fos = new FileOutputStream(file);
 		
-		XmlOut out = new XmlOutStream(fos);
+		XydraOut out = new XydraOutXml(fos);
 		XmlModel.toXml(repository, out, true, false, true);
 		
 		fos.close();

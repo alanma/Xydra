@@ -15,8 +15,9 @@ import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.MiniXMLParser;
 import org.xydra.core.xml.XmlCommand;
 import org.xydra.core.xml.XmlEvent;
+import org.xydra.core.xml.XydraOut;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
-import org.xydra.core.xml.impl.XmlOutStringBuffer;
+import org.xydra.core.xml.impl.XydraOutXml;
 import org.xydra.index.iterator.AbstractTransformingIterator;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessException;
@@ -165,9 +166,9 @@ public class XSynchronizeChangesResource {
 			};
 		}
 		
-		XmlOutStringBuffer out = new XmlOutStringBuffer();
+		XydraOut out = new XydraOutXml();
 		XmlEvent.toXml(events, out, addr);
-		return out.getXml();
+		return out.getData();
 	}
 	
 }

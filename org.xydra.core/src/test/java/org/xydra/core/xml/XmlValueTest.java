@@ -1,6 +1,7 @@
 package org.xydra.core.xml;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.xydra.base.XAddress;
@@ -9,7 +10,7 @@ import org.xydra.base.XX;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
-import org.xydra.core.xml.impl.XmlOutStringBuffer;
+import org.xydra.core.xml.impl.XydraOutXml;
 
 
 /**
@@ -175,9 +176,8 @@ public class XmlValueTest {
 		testValue(XX.createUniqueId());
 	}
 	
-	@Test(expected = NullPointerException.class)
-	public void testIdValueNull() {
-		testValue((XID)null);
+	public void testValueNull() {
+		testValue(null);
 	}
 	
 	@Test
@@ -316,10 +316,14 @@ public class XmlValueTest {
 	}
 	
 	private void testValue(XValue value) {
-		XmlOutStringBuffer out = new XmlOutStringBuffer();
+		
+		XydraOutXml out = new XydraOutXml();
 		XmlValue.toXml(value, out);
-		assertEquals("", out.getOpentags());
-		String xml = out.getXml();
+		assertTrue(out.isClosed());
+		String xml = out.getData();
+		
+		System.out.print(xml);
+		
 		MiniElement e = new MiniXMLParserImpl().parseXml(xml);
 		XValue valueAgain = XmlValue.toValue(e);
 		assertEquals(value, valueAgain);

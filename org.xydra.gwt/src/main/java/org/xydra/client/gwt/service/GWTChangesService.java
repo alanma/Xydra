@@ -12,7 +12,8 @@ import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.MiniXMLParser;
 import org.xydra.core.xml.XmlCommand;
 import org.xydra.core.xml.XmlEvent;
-import org.xydra.core.xml.impl.XmlOutStringBuffer;
+import org.xydra.core.xml.XydraOut;
+import org.xydra.core.xml.impl.XydraOutXml;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
@@ -81,10 +82,10 @@ public class GWTChangesService extends AbstractGWTHttpService implements XChange
 		
 		RequestBuilder rb = new RequestBuilder(RequestBuilder.POST, this.baseUrl + "/" + url);
 		
-		XmlOutStringBuffer xo = new XmlOutStringBuffer();
+		XydraOut xo = new XydraOutXml();
 		XmlCommand.toXml(command, xo, context);
 		
-		rb.setRequestData(xo.getXml());
+		rb.setRequestData(xo.getData());
 		
 		rb.setHeader("Content-Type", "application/xml");
 		

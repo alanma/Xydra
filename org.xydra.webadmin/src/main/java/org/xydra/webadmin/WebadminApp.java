@@ -36,9 +36,9 @@ import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.XModel;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlModel;
-import org.xydra.core.xml.XmlOut;
+import org.xydra.core.xml.XydraOut;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
-import org.xydra.core.xml.impl.XmlOutStream;
+import org.xydra.core.xml.impl.XydraOutXml;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
@@ -133,7 +133,7 @@ public class WebadminApp {
 			
 			log.info("adding model \"" + modelId.toString() + "\" as \"" + filename + "\"");
 			
-			XmlOut out = new XmlOutStream(zos);
+			XydraOut out = new XydraOutXml(zos);
 			XmlModel.toXml(server.getModelSnapshot(modelId), out, true, false, includeLogs);
 			out.flush();
 			
@@ -230,8 +230,8 @@ public class WebadminApp {
 				existed = true;
 				overwritten++;
 			} else {
-				XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(
-				        server.getRepositoryAddress(), XCommand.FORCED, model.getID());
+				XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(server
+				        .getRepositoryAddress(), XCommand.FORCED, model.getID());
 				server.executeCommand(createCommand, actor);
 				oldModel = server.getModelSnapshot(model.getID());
 			}

@@ -120,7 +120,7 @@ public class XmlAccess {
 	 * 
 	 * @param out The XML encoder to write to.
 	 */
-	public static void toXml(Set<XAccessRightDefinition> defs, XmlOut out)
+	public static void toXml(Set<XAccessRightDefinition> defs, XydraOut out)
 	        throws IllegalArgumentException {
 		
 		out.open(XACCESSDEFS_ELEMENT);
@@ -138,7 +138,7 @@ public class XmlAccess {
 	 * 
 	 * @param out The XML encoder to write to.
 	 */
-	public static void toXml(XAccessRightDefinition def, XmlOut out)
+	public static void toXml(XAccessRightDefinition def, XydraOut out)
 	        throws IllegalArgumentException {
 		
 		out.open(XACCESSDEFINITION_ELEMENT);
@@ -159,7 +159,7 @@ public class XmlAccess {
 	 * 
 	 * @param out The XML encoder to write to.
 	 */
-	public static void toXml(XAuthorisationManager arm, XmlOut out) throws IllegalArgumentException {
+	public static void toXml(XAuthorisationManager arm, XydraOut out) throws IllegalArgumentException {
 		if(arm.getAuthorisationDatabase() != null) {
 			toXml(arm.getAuthorisationDatabase().getDefinitions(), out);
 		}

@@ -34,15 +34,20 @@ import org.xydra.store.XydraStore;
  */
 public class XmlStore {
 	
+	private static final String NAME_AUTHENTICATED = "authenticated";
+	private static final String NAME_MESSAGE = "message";
+	private static final String NAME_REVISION = "revision";
+	private static final String NAME_REVISIONS = "revisions";
+	private static final String NAME_SNAPSHOTS = "snapshots";
 	private static final String ELEMENT_REPOSITORY_ID = "repositoryId";
 	private static final String ELEMENT_MODEL_IDS = "modelIds";
 	private static final String ELEMENT_AUTHENTICATED = "authenticated";
 	private static final String ELEMENT_EVENTRESULTS = "eventResults";
 	private static final String ELEMENT_COMMANDRESULTS = "commandResults";
-	private static final String ELEMENT_MODEL_REVISIONS = "revisions";
+	private static final String ELEMENT_MODEL_REVISIONS = NAME_REVISIONS;
 	private static final String ELEMENT_XREVISION = "xrevision";
 	private static final String ELEMENT_RESULTS = "results";
-	private static final String ELEMENT_SNAPSHOTS = "snapshots";
+	private static final String ELEMENT_SNAPSHOTS = NAME_SNAPSHOTS;
 	private static final String ELEMENT_XERROR = "xerror";
 	private static final String ATTRIBUTE_TYPE = "type";
 	private static final String TYPE_ACCESS = "access";
@@ -54,7 +59,7 @@ public class XmlStore {
 	private static final String TYPE_REQUEST = "request";
 	private static final String TYPE_STORE = "store";
 	
-	public static void toXml(Throwable t, XmlOut out) {
+	public static void toXml(Throwable t, XydraOut out) {
 		
 		out.open(ELEMENT_XERROR);
 		
@@ -82,7 +87,7 @@ public class XmlStore {
 		
 		String m = t.getMessage();
 		if(m != null && !m.isEmpty()) {
-			out.content(t.getMessage());
+			out.content(NAME_MESSAGE, t.getMessage());
 		}
 		
 		out.close(ELEMENT_XERROR);
@@ -120,10 +125,10 @@ public class XmlStore {
 		
 	}
 	
-	public static void toAuthenticationResult(boolean result, XmlOut out) {
+	public static void toAuthenticationResult(boolean result, XydraOut out) {
 		
 		out.open(ELEMENT_AUTHENTICATED);
-		out.content(Boolean.toString(result));
+		out.content(NAME_AUTHENTICATED, Boolean.toString(result));
 		out.close(ELEMENT_AUTHENTICATED);
 		
 	}
@@ -148,7 +153,7 @@ public class XmlStore {
 	}
 	
 	public static void toXml(BatchedResult<Long>[] commandRes, EventsRequest ger,
-	        BatchedResult<XEvent[]>[] eventsRes, XmlOut out) {
+	        BatchedResult<XEvent[]>[] eventsRes, XydraOut out) {
 		
 		out.open(ELEMENT_RESULTS);
 		
@@ -185,10 +190,11 @@ public class XmlStore {
 		
 	}
 	
-	public static void toXml(EventsRequest ger, BatchedResult<XEvent[]>[] results, XmlOut out) {
+	public static void toXml(EventsRequest ger, BatchedResult<XEvent[]>[] results, XydraOut out) {
 		
 		out.open(ELEMENT_EVENTRESULTS);
 		
+		out.children("events", true);
 		assert results.length == ger.requests.length;
 		for(int i = 0; i < results.length; i++) {
 			BatchedResult<XEvent[]> result = results[i];
@@ -262,7 +268,7 @@ public class XmlStore {
 		}
 	}
 	
-	public static void toModelRevisions(BatchedResult<Long>[] result, XmlOut out) {
+	public static void toModelRevisions(BatchedResult<Long>[] result, XydraOut out) {
 		
 		out.open(ELEMENT_MODEL_REVISIONS);
 		setRevisionListContents(result, out);
@@ -277,8 +283,9 @@ public class XmlStore {
 		getRevisionListContents(xml, res);
 	}
 	
-	private static void setRevisionListContents(BatchedResult<Long>[] results, XmlOut out) {
+	private static void setRevisionListContents(BatchedResult<Long>[] results, XydraOut out) {
 		
+		out.children(NAME_REVISIONS, true);
 		for(BatchedResult<Long> result : results) {
 			
 			if(result.getException() != null) {
@@ -288,7 +295,7 @@ public class XmlStore {
 			
 			out.open(ELEMENT_XREVISION);
 			assert result.getResult() != null;
-			out.content(Long.toString(result.getResult()));
+			out.content(NAME_REVISION, Long.toString(result.getResult()));
 			out.close(ELEMENT_XREVISION);
 			
 		}
@@ -334,12 +341,13 @@ public class XmlStore {
 	}
 	
 	public static void toXml(StoreException[] ex, boolean[] isModel,
-	        BatchedResult<XReadableModel>[] mr, BatchedResult<XReadableObject>[] or, XmlOut out) {
+	        BatchedResult<XReadableModel>[] mr, BatchedResult<XReadableObject>[] or, XydraOut out) {
 		
 		out.open(ELEMENT_SNAPSHOTS);
 		
 		int mi = 0, oi = 0;
 		
+		out.children(NAME_SNAPSHOTS, true);
 		for(int i = 0; i < isModel.length; i++) {
 			
 			if(ex[i] != null) {
@@ -413,7 +421,7 @@ public class XmlStore {
 		return results;
 	}
 	
-	public static void toModelIds(Set<XID> result, XmlOut out) {
+	public static void toModelIds(Set<XID> result, XydraOut out) {
 		
 		out.open(ELEMENT_MODEL_IDS);
 		XmlValue.setIdListContents(result, out);
@@ -430,7 +438,7 @@ public class XmlStore {
 		return new HashSet<XID>(ids);
 	}
 	
-	public static void toRepositoryId(XID result, XmlOut out) {
+	public static void toRepositoryId(XID result, XydraOut out) {
 		
 		out.open(ELEMENT_REPOSITORY_ID);
 		XmlValue.toXml(result, out);

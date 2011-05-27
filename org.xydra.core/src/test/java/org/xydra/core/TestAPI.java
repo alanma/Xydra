@@ -30,8 +30,9 @@ import org.xydra.core.model.impl.memory.MemoryObject;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlModel;
+import org.xydra.core.xml.XydraOut;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
-import org.xydra.core.xml.impl.XmlOutStringBuffer;
+import org.xydra.core.xml.impl.XydraOutXml;
 
 
 /**
@@ -646,11 +647,11 @@ public class TestAPI {
 		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId()).setValue(
 		        XV.toValue("Another Test!"));
 		
-		XmlOutStringBuffer out = new XmlOutStringBuffer();
+		XydraOut out = new XydraOutXml();
 		XmlModel.toXml(model, out);
 		
 		// try to load it
-		MiniElement e = new MiniXMLParserImpl().parseXml(out.getXml());
+		MiniElement e = new MiniXMLParserImpl().parseXml(out.getData());
 		XModel loadedModel = XmlModel.toModel(this.actorId, this.password, e);
 		assertTrue(loadedModel != null);
 		assertEquals(loadedModel, model);
@@ -694,11 +695,11 @@ public class TestAPI {
 		
 		// We now created a little repository with some content, so saving makes
 		// sense
-		XmlOutStringBuffer out = new XmlOutStringBuffer();
+		XydraOut out = new XydraOutXml();
 		XmlModel.toXml(repo, out);
 		
 		// try to load it
-		MiniElement e = new MiniXMLParserImpl().parseXml(out.getXml());
+		MiniElement e = new MiniXMLParserImpl().parseXml(out.getData());
 		XRepository loadedRepo = XmlModel.toRepository(this.actorId, this.password, e);
 		// if loadedRepo == null, saving wasn't successful
 		assertNotNull(loadedRepo);

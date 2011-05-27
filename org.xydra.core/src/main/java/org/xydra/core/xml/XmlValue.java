@@ -47,7 +47,6 @@ import org.xydra.base.value.XValue;
 public class XmlValue {
 	
 	private static final String NULL_ATTRIBUTE = "isNull";
-	private static final String NULL_VALUE = "true";
 	private static final String XADDRESS_ELEMENT = "xaddress";
 	private static final String XADDRESSLIST_ELEMENT = "xaddressList";
 	private static final String XADDRESSSET_ELEMENT = "xaddressSet";
@@ -69,6 +68,9 @@ public class XmlValue {
 	private static final String XSTRINGLIST_ELEMENT = "xstringList";
 	private static final String XSTRINGSET_ELEMENT = "xstringSet";
 	private static final String XNULL_ELEMENT = "xnull";
+	private static final String NAME_CONTENT = "value";
+	private static final String NAME_VALUES = "values";
+	private static final String NULL_VALUE = "true";
 	
 	private static List<XAddress> getAddressListContents(MiniElement xml) {
 		
@@ -124,7 +126,7 @@ public class XmlValue {
 			return XX.toAddress(data);
 		} catch(Exception e) {
 			throw new RuntimeException("An <" + XADDRESS_ELEMENT
-			        + "> element must contain a valid XAddress, got " + data, e);
+			        + "> element must contain a valid XAddress, got \"" + data + '"', e);
 		}
 		
 	}
@@ -511,6 +513,11 @@ public class XmlValue {
 	 *             representation of an {@link XValue}
 	 */
 	public static XValue toValue(MiniElement xml) {
+		
+		if(isNullElement(xml)) {
+			return null;
+		}
+		
 		// IMPROVE consider using a (hash)map as the number of XValue types
 		// increases
 		String elementName = xml.getName();
@@ -558,73 +565,13 @@ public class XmlValue {
 		throw new RuntimeException("Cannot deserialize " + xml + " as an XValue.");
 	}
 	
-	private static void toXml(boolean xvalue, XmlOut xo) {
-		
-		xo.open(XBOOLEAN_ELEMENT);
-		
-		xo.content(Boolean.toString(xvalue));
-		
-		xo.close(XBOOLEAN_ELEMENT);
-		
-	}
-	
-	private static void toXml(double xvalue, XmlOut xo) {
-		
-		xo.open(XDOUBLE_ELEMENT);
-		
-		xo.content(Double.toString(xvalue));
-		
-		xo.close(XDOUBLE_ELEMENT);
-		
-	}
-	
-	private static void toXml(int xvalue, XmlOut xo) {
-		
-		xo.open(XINTEGER_ELEMENT);
-		
-		xo.content(Integer.toString(xvalue));
-		
-		xo.close(XINTEGER_ELEMENT);
-		
-	}
-	
-	private static void toXml(long xvalue, XmlOut xo) {
-		
-		xo.open(XLONG_ELEMENT);
-		
-		xo.content(Long.toString(xvalue));
-		
-		xo.close(XLONG_ELEMENT);
-		
-	}
-	
-	private static void toXml(String xvalue, XmlOut xo) {
-		
-		xo.open(XSTRING_ELEMENT);
-		
-		if(xvalue != null) {
-			xo.content(xvalue);
-		} else {
-			xo.attribute(NULL_ATTRIBUTE, NULL_VALUE);
-		}
-		
-		xo.close(XSTRING_ELEMENT);
-		
-	}
-	
 	/**
 	 * Emit the XML representation of the given {@link XAddress}.
 	 */
-	public static void toXml(XAddress xvalue, XmlOut xo) {
+	private static void toXml(XAddress xvalue, XydraOut xo) {
 		
 		xo.open(XADDRESS_ELEMENT);
-		
-		if(xvalue != null) {
-			xo.content(xvalue.toURI());
-		} else {
-			xo.attribute(NULL_ATTRIBUTE, NULL_VALUE);
-		}
-		
+		xo.content(NAME_CONTENT, xvalue.toURI());
 		xo.close(XADDRESS_ELEMENT);
 		
 	}
@@ -634,12 +581,11 @@ public class XmlValue {
 	 * 
 	 * @throws NullPointerException if xvalue or xo is null.
 	 */
-	public static void toXml(XAddressListValue xvalue, XmlOut xo) {
+	private static void toXml(XAddressListValue xvalue, XydraOut xo) {
 		
 		xo.open(XADDRESSLIST_ELEMENT);
 		
-		for(XAddress value : xvalue)
-			toXml(value, xo);
+		setAddressListContents(xvalue, xo);
 		
 		xo.close(XADDRESSLIST_ELEMENT);
 		
@@ -650,7 +596,7 @@ public class XmlValue {
 	 * 
 	 * @throws NullPointerException if xvalue or xo is null.
 	 */
-	public static void toXml(XAddressSetValue xvalue, XmlOut xo) {
+	private static void toXml(XAddressSetValue xvalue, XydraOut xo) {
 		
 		if(xvalue instanceof XAddressSortedSetValue) {
 			toXml((XAddressSortedSetValue)xvalue, xo);
@@ -659,8 +605,7 @@ public class XmlValue {
 		
 		xo.open(XADDRESSSET_ELEMENT);
 		
-		for(XAddress value : xvalue)
-			toXml(value, xo);
+		setAddressListContents(xvalue, xo);
 		
 		xo.close(XADDRESSSET_ELEMENT);
 		
@@ -671,14 +616,22 @@ public class XmlValue {
 	 * 
 	 * @throws NullPointerException if xvalue or xo is null.
 	 */
-	public static void toXml(XAddressSortedSetValue xvalue, XmlOut xo) {
+	private static void toXml(XAddressSortedSetValue xvalue, XydraOut xo) {
 		
 		xo.open(XADDRESSSORTEDSET_ELEMENT);
 		
-		for(XAddress value : xvalue)
-			toXml(value, xo);
+		setAddressListContents(xvalue, xo);
 		
 		xo.close(XADDRESSSORTEDSET_ELEMENT);
+		
+	}
+	
+	public static void setAddressListContents(Iterable<XAddress> xvalue, XydraOut xo) {
+		
+		xo.children(NAME_VALUES, true);
+		for(XAddress value : xvalue) {
+			xo.value(XADDRESS_ELEMENT, value == null ? null : value.toURI());
+		}
 		
 	}
 	
@@ -687,12 +640,14 @@ public class XmlValue {
 	 * 
 	 * @throws NullPointerException if xvalue or xo is null.
 	 */
-	public static void toXml(XBooleanListValue xvalue, XmlOut xo) {
+	private static void toXml(XBooleanListValue xvalue, XydraOut xo) {
 		
 		xo.open(XBOOLEANLIST_ELEMENT);
 		
-		for(Boolean value : xvalue)
-			toXml(value.booleanValue(), xo);
+		xo.children(NAME_VALUES, true);
+		for(Boolean value : xvalue) {
+			xo.value(XBOOLEAN_ELEMENT, value.toString());
+		}
 		
 		xo.close(XBOOLEANLIST_ELEMENT);
 		
@@ -703,8 +658,12 @@ public class XmlValue {
 	 * 
 	 * @throws NullPointerException if xvalue or xo is null.
 	 */
-	public static void toXml(XBooleanValue xvalue, XmlOut xo) {
-		toXml(xvalue.contents(), xo);
+	private static void toXml(XBooleanValue xvalue, XydraOut xo) {
+		
+		xo.open(XBOOLEAN_ELEMENT);
+		xo.content(NAME_CONTENT, Boolean.toString(xvalue.contents()));
+		xo.close(XBOOLEAN_ELEMENT);
+		
 	}
 	
 	/**
@@ -712,12 +671,10 @@ public class XmlValue {
 	 * 
 	 * @throws NullPointerException if xvalue or xo is null.
 	 */
-	public static void toXml(XByteListValue xvalue, XmlOut xo) {
+	private static void toXml(XByteListValue xvalue, XydraOut xo) {
 		
 		xo.open(XBYTELIST_ELEMENT);
-		
-		xo.content(Base64.encode(xvalue.contents(), true));
-		
+		xo.content(NAME_CONTENT, Base64.encode(xvalue.contents(), true));
 		xo.close(XBYTELIST_ELEMENT);
 		
 	}
@@ -729,11 +686,7 @@ public class XmlValue {
 	 *             unrecognized type.
 	 * @throws NullPointerException if xvalue or xo is null.
 	 */
-	public static void toXml(XCollectionValue<?> xvalue, XmlOut xo) {
-		
-		if(xvalue == null) {
-			throw new NullPointerException("value is null");
-		}
+	private static void toXml(XCollectionValue<?> xvalue, XydraOut xo) {
 		
 		if(xvalue instanceof XListValue<?>) {
 			toXml((XListValue<?>)xvalue, xo);
@@ -751,12 +704,14 @@ public class XmlValue {
 	 * 
 	 * @throws NullPointerException if xvalue or xo is null.
 	 */
-	public static void toXml(XDoubleListValue xvalue, XmlOut xo) {
+	private static void toXml(XDoubleListValue xvalue, XydraOut xo) {
 		
 		xo.open(XDOUBLELIST_ELEMENT);
 		
-		for(Double value : xvalue)
-			toXml(value.doubleValue(), xo);
+		xo.children(NAME_VALUES, true);
+		for(Double value : xvalue) {
+			xo.value(XDOUBLE_ELEMENT, value.toString());
+		}
 		
 		xo.close(XDOUBLELIST_ELEMENT);
 		
@@ -767,22 +722,22 @@ public class XmlValue {
 	 * 
 	 * @throws NullPointerException if xvalue or xo is null.
 	 */
-	public static void toXml(XDoubleValue xvalue, XmlOut xo) {
-		toXml(xvalue.contents(), xo);
+	private static void toXml(XDoubleValue xvalue, XydraOut xo) {
+		
+		xo.open(XDOUBLE_ELEMENT);
+		xo.content(NAME_CONTENT, Double.toString(xvalue.contents()));
+		xo.close(XDOUBLE_ELEMENT);
+		
 	}
 	
 	/**
 	 * Emit the XML representation of the given {@link XID}.
 	 */
-	public static void toXml(XID xvalue, XmlOut xo) {
+	private static void toXml(XID xvalue, XydraOut xo) {
 		
 		xo.open(XID_ELEMENT);
 		
-		if(xvalue != null) {
-			xo.content(xvalue.toString());
-		} else {
-			xo.attribute(NULL_ATTRIBUTE, NULL_VALUE);
-		}
+		xo.content(NAME_CONTENT, xvalue.toString());
 		
 		xo.close(XID_ELEMENT);
 		
@@ -793,7 +748,7 @@ public class XmlValue {
 	 * 
 	 * @throws NullPointerException if xvalue or xo is null.
 	 */
-	public static void toXml(XIDListValue xvalue, XmlOut xo) {
+	private static void toXml(XIDListValue xvalue, XydraOut xo) {
 		
 		xo.open(XIDLIST_ELEMENT);
 		
@@ -808,7 +763,7 @@ public class XmlValue {
 	 * 
 	 * @throws NullPointerException if xvalue or xo is null.
 	 */
-	public static void toXml(XIDSetValue xvalue, XmlOut xo) {
+	private static void toXml(XIDSetValue xvalue, XydraOut xo) {
 		
 		if(xvalue instanceof XIDSortedSetValue) {
 			toXml((XIDSortedSetValue)xvalue, xo);
@@ -823,10 +778,12 @@ public class XmlValue {
 		
 	}
 	
-	public static void setIdListContents(Iterable<XID> list, XmlOut xo) {
+	public static void setIdListContents(Iterable<XID> list, XydraOut xo) {
 		
-		for(XID value : list)
-			toXml(value, xo);
+		xo.children(NAME_VALUES, true);
+		for(XID value : list) {
+			xo.value(XID_ELEMENT, value == null ? null : value.toString());
+		}
 		
 	}
 	
@@ -835,7 +792,7 @@ public class XmlValue {
 	 * 
 	 * @throws NullPointerException if xvalue or xo is null.
 	 */
-	public static void toXml(XIDSortedSetValue xvalue, XmlOut xo) {
+	private static void toXml(XIDSortedSetValue xvalue, XydraOut xo) {
 		
 		xo.open(XIDSORTEDSET_ELEMENT);
 		
@@ -850,12 +807,14 @@ public class XmlValue {
 	 * 
 	 * @throws NullPointerException if xvalue or xo is null.
 	 */
-	public static void toXml(XIntegerListValue xvalue, XmlOut xo) {
+	private static void toXml(XIntegerListValue xvalue, XydraOut xo) {
 		
 		xo.open(XINTEGERLIST_ELEMENT);
 		
-		for(Integer value : xvalue)
-			toXml(value.intValue(), xo);
+		xo.children(NAME_VALUES, true);
+		for(Integer value : xvalue) {
+			xo.value(XINTEGER_ELEMENT, value.toString());
+		}
 		
 		xo.close(XINTEGERLIST_ELEMENT);
 		
@@ -866,8 +825,12 @@ public class XmlValue {
 	 * 
 	 * @throws NullPointerException if xvalue or xo is null.
 	 */
-	public static void toXml(XIntegerValue xvalue, XmlOut xo) {
-		toXml(xvalue.contents(), xo);
+	private static void toXml(XIntegerValue xvalue, XydraOut xo) {
+		
+		xo.open(XINTEGER_ELEMENT);
+		xo.content(NAME_CONTENT, Integer.toString(xvalue.contents()));
+		xo.close(XINTEGER_ELEMENT);
+		
 	}
 	
 	/**
@@ -877,7 +840,7 @@ public class XmlValue {
 	 *             unrecognized type.
 	 * @throws NullPointerException if xvalue or xo is null.
 	 */
-	public static void toXml(XListValue<?> xvalue, XmlOut xo) {
+	private static void toXml(XListValue<?> xvalue, XydraOut xo) {
 		
 		if(xvalue == null) {
 			throw new NullPointerException("value is null");
@@ -911,12 +874,14 @@ public class XmlValue {
 	 * 
 	 * @throws NullPointerException if xvalue or xo is null.
 	 */
-	public static void toXml(XLongListValue xvalue, XmlOut xo) {
+	private static void toXml(XLongListValue xvalue, XydraOut xo) {
 		
 		xo.open(XLONGLIST_ELEMENT);
 		
-		for(Long value : xvalue)
-			toXml(value.longValue(), xo);
+		xo.children(NAME_VALUES, true);
+		for(Long value : xvalue) {
+			xo.value(XLONG_ELEMENT, value.toString());
+		}
 		
 		xo.close(XLONGLIST_ELEMENT);
 		
@@ -927,8 +892,12 @@ public class XmlValue {
 	 * 
 	 * @throws NullPointerException if xvalue or xo is null.
 	 */
-	public static void toXml(XLongValue xvalue, XmlOut xo) {
-		toXml(xvalue.contents(), xo);
+	private static void toXml(XLongValue xvalue, XydraOut xo) {
+		
+		xo.open(XLONG_ELEMENT);
+		xo.content(NAME_CONTENT, Long.toString(xvalue.contents()));
+		xo.close(XLONG_ELEMENT);
+		
 	}
 	
 	/**
@@ -938,11 +907,7 @@ public class XmlValue {
 	 *             unrecognized type.
 	 * @throws NullPointerException if xvalue or xo is null.
 	 */
-	public static void toXml(XSetValue<?> xvalue, XmlOut xo) {
-		
-		if(xvalue == null) {
-			throw new NullPointerException("value is null");
-		}
+	private static void toXml(XSetValue<?> xvalue, XydraOut xo) {
 		
 		if(xvalue instanceof XIDSetValue) {
 			toXml((XIDSetValue)xvalue, xo);
@@ -962,12 +927,14 @@ public class XmlValue {
 	 * 
 	 * @throws NullPointerException if xvalue or xo is null.
 	 */
-	public static void toXml(XStringListValue xvalue, XmlOut xo) {
+	private static void toXml(XStringListValue xvalue, XydraOut xo) {
 		
 		xo.open(XSTRINGLIST_ELEMENT);
 		
-		for(String value : xvalue)
-			toXml(value, xo);
+		xo.children(NAME_VALUES, true);
+		for(String value : xvalue) {
+			xo.value(XSTRING_ELEMENT, value);
+		}
 		
 		xo.close(XSTRINGLIST_ELEMENT);
 		
@@ -978,12 +945,14 @@ public class XmlValue {
 	 * 
 	 * @throws NullPointerException if xvalue or xo is null.
 	 */
-	public static void toXml(XStringSetValue xvalue, XmlOut xo) {
+	private static void toXml(XStringSetValue xvalue, XydraOut xo) {
 		
 		xo.open(XSTRINGSET_ELEMENT);
 		
-		for(String value : xvalue)
-			toXml(value, xo);
+		xo.children(NAME_VALUES, true);
+		for(String value : xvalue) {
+			xo.value(XSTRING_ELEMENT, value);
+		}
 		
 		xo.close(XSTRINGSET_ELEMENT);
 		
@@ -994,8 +963,18 @@ public class XmlValue {
 	 * 
 	 * @throws NullPointerException if xvalue or xo is null.
 	 */
-	public static void toXml(XStringValue xvalue, XmlOut xo) {
-		toXml(xvalue.contents(), xo);
+	private static void toXml(XStringValue xvalue, XydraOut xo) {
+		
+		xo.open(XSTRING_ELEMENT);
+		
+		if(xvalue.contents() == null) {
+			xo.attribute(NULL_ATTRIBUTE, NULL_VALUE);
+		} else {
+			xo.content(NAME_CONTENT, xvalue.contents());
+		}
+		
+		xo.close(XSTRING_ELEMENT);
+		
 	}
 	
 	/**
@@ -1005,13 +984,11 @@ public class XmlValue {
 	 *             unrecognized type.
 	 * @throws NullPointerException if xvalue or xo is null.
 	 */
-	public static void toXml(XValue xvalue, XmlOut xo) {
+	public static void toXml(XValue xvalue, XydraOut xo) {
 		
 		if(xvalue == null) {
-			throw new NullPointerException("value is null");
-		}
-		
-		if(xvalue instanceof XCollectionValue<?>) {
+			saveNullElement(xo);
+		} else if(xvalue instanceof XCollectionValue<?>) {
 			toXml((XCollectionValue<?>)xvalue, xo);
 		} else if(xvalue instanceof XBooleanValue) {
 			toXml((XBooleanValue)xvalue, xo);
@@ -1038,7 +1015,7 @@ public class XmlValue {
 		return XNULL_ELEMENT.equals(xml.getName());
 	}
 	
-	public static void saveNullElement(XmlOut out) {
+	public static void saveNullElement(XydraOut out) {
 		out.open(XNULL_ELEMENT);
 		out.close(XNULL_ELEMENT);
 	}

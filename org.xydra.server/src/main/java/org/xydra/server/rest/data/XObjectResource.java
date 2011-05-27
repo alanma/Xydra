@@ -15,8 +15,9 @@ import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.MiniXMLParser;
 import org.xydra.core.xml.XmlModel;
+import org.xydra.core.xml.XydraOut;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
-import org.xydra.core.xml.impl.XmlOutStringBuffer;
+import org.xydra.core.xml.impl.XydraOutXml;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessException;
 import org.xydra.restless.RestlessParameter;
@@ -46,10 +47,10 @@ public class XObjectResource {
 		IXydraSession session = XydraRestServer.getSession(restless, req);
 		XReadableObject object = XydraRestServer.getObject(session, modelId, objectId);
 		
-		XmlOutStringBuffer xo = new XmlOutStringBuffer();
+		XydraOut xo = new XydraOutXml();
 		XmlModel.toXml(object, xo, true, true, false);
 		
-		XydraRestServer.xmlResponse(res, HttpServletResponse.SC_OK, xo.getXml());
+		XydraRestServer.xmlResponse(res, HttpServletResponse.SC_OK, xo.getData());
 	}
 	
 	public void setField(Restless restless, HttpServletRequest req, HttpServletResponse res,

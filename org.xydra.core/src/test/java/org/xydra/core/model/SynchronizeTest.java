@@ -44,8 +44,9 @@ import org.xydra.core.model.impl.memory.SynchronizesChangesImpl;
 import org.xydra.core.xml.MiniElement;
 import org.xydra.core.xml.XmlCommand;
 import org.xydra.core.xml.XmlEvent;
+import org.xydra.core.xml.XydraOut;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
-import org.xydra.core.xml.impl.XmlOutStringBuffer;
+import org.xydra.core.xml.impl.XydraOutXml;
 
 
 /**
@@ -119,20 +120,20 @@ public class SynchronizeTest {
 	
 	private XCommand fix(XCommand command) {
 		
-		XmlOutStringBuffer out = new XmlOutStringBuffer();
+		XydraOut out = new XydraOutXml();
 		XmlCommand.toXml(command, out, this.localModel.getAddress());
 		
-		MiniElement e = new MiniXMLParserImpl().parseXml(out.getXml());
+		MiniElement e = new MiniXMLParserImpl().parseXml(out.getData());
 		return XmlCommand.toCommand(e, this.remoteModel.getAddress());
 		
 	}
 	
 	private XEvent fix(XEvent event) {
 		
-		XmlOutStringBuffer out = new XmlOutStringBuffer();
+		XydraOut out = new XydraOutXml();
 		XmlEvent.toXml(event, out, this.remoteModel.getAddress());
 		
-		MiniElement e = new MiniXMLParserImpl().parseXml(out.getXml());
+		MiniElement e = new MiniXMLParserImpl().parseXml(out.getData());
 		return XmlEvent.toEvent(e, this.localModel.getAddress());
 		
 	}
@@ -160,8 +161,8 @@ public class SynchronizeTest {
 	public void setUp() {
 		
 		// create two identical phonebook models
-		XRepository remoteRepo = new MemoryRepository(this.actorId, this.password,
-		        XX.toId("remoteRepo"));
+		XRepository remoteRepo = new MemoryRepository(this.actorId, this.password, XX
+		        .toId("remoteRepo"));
 		DemoModelUtil.addPhonebookModel(remoteRepo);
 		this.remoteModel = remoteRepo.getModel(DemoModelUtil.PHONEBOOK_ID);
 		
@@ -218,8 +219,8 @@ public class SynchronizeTest {
 		XAddress newFieldAddr = XX.resolveField(newObjectAddr, newFieldId);
 		XValue newValue1 = XV.toValue("chocolate chip");
 		XValue newValue2 = XV.toValue("almond");
-		XModelCommand createObject = MemoryModelCommand.createAddCommand(
-		        this.localModel.getAddress(), false, newObjectId);
+		XModelCommand createObject = MemoryModelCommand.createAddCommand(this.localModel
+		        .getAddress(), false, newObjectId);
 		XObjectCommand createField = MemoryObjectCommand.createAddCommand(newObjectAddr, false,
 		        newFieldId);
 		XFieldCommand setValue1 = MemoryFieldCommand.createAddCommand(newFieldAddr,
@@ -234,10 +235,10 @@ public class SynchronizeTest {
 		        .getRevisionNumber(), DemoModelUtil.PETER_ID);
 		
 		XObject john = this.localModel.getObject(DemoModelUtil.JOHN_ID);
-		XModelCommand removeJohnSafe = MemoryModelCommand.createRemoveCommand(
-		        this.localModel.getAddress(), john.getRevisionNumber(), john.getID());
-		XModelCommand removeJohnForced = MemoryModelCommand.createRemoveCommand(
-		        this.localModel.getAddress(), XCommand.FORCED, john.getID());
+		XModelCommand removeJohnSafe = MemoryModelCommand.createRemoveCommand(this.localModel
+		        .getAddress(), john.getRevisionNumber(), john.getID());
+		XModelCommand removeJohnForced = MemoryModelCommand.createRemoveCommand(this.localModel
+		        .getAddress(), XCommand.FORCED, john.getID());
 		
 		List<XCommand> localChanges = new ArrayList<XCommand>();
 		localChanges.add(createObject); // 0
@@ -298,11 +299,11 @@ public class SynchronizeTest {
 		// check that commands have been properly modified
 		assertEquals(createObject, lc[0].getCommand());
 		assertEquals(createField, lc[1].getCommand());
-		assertEquals(setValue1.getRevisionNumber() + remoteChanges.size(),
-		        ((XFieldCommand)lc[2].getCommand()).getRevisionNumber());
+		assertEquals(setValue1.getRevisionNumber() + remoteChanges.size(), ((XFieldCommand)lc[2]
+		        .getCommand()).getRevisionNumber());
 		assertEquals(setValue2, lc[3].getCommand());
-		assertEquals(removeField.getRevisionNumber() + remoteChanges.size(),
-		        ((XObjectCommand)lc[4].getCommand()).getRevisionNumber());
+		assertEquals(removeField.getRevisionNumber() + remoteChanges.size(), ((XObjectCommand)lc[4]
+		        .getCommand()).getRevisionNumber());
 		
 		// apply the commands remotely
 		assertTrue(this.remoteModel.executeCommand(fix(lc[0].getCommand())) >= 0);

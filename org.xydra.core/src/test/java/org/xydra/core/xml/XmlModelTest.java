@@ -25,7 +25,7 @@ import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryObject;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
-import org.xydra.core.xml.impl.XmlOutStringBuffer;
+import org.xydra.core.xml.impl.XydraOutXml;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
@@ -95,20 +95,20 @@ public class XmlModelTest {
 	private void testField(XReadableField field) {
 		
 		// test serializing with revisions
-		XmlOutStringBuffer out = new XmlOutStringBuffer();
+		XydraOutXml out = new XydraOutXml();
 		XmlModel.toXml(field, out);
-		assertEquals("", out.getOpentags());
-		String xml = out.getXml();
+		assertTrue(out.isClosed());
+		String xml = out.getData();
 		log.debug(xml);
 		MiniElement e = new MiniXMLParserImpl().parseXml(xml);
 		XField fieldAgain = XmlModel.toField(this.actorId, e);
 		assertTrue(XCompareUtils.equalState(field, fieldAgain));
 		
 		// test serializing without revisions
-		out = new XmlOutStringBuffer();
+		out = new XydraOutXml();
 		XmlModel.toXml(field, out, false);
-		assertEquals("", out.getOpentags());
-		xml = out.getXml();
+		assertTrue(out.isClosed());
+		xml = out.getData();
 		log.debug(xml);
 		e = new MiniXMLParserImpl().parseXml(xml);
 		fieldAgain = XmlModel.toField(this.actorId, e);
@@ -148,10 +148,10 @@ public class XmlModelTest {
 	private void testModel(XReadableModel model) {
 		
 		// test serializing with revisions
-		XmlOutStringBuffer out = new XmlOutStringBuffer();
+		XydraOutXml out = new XydraOutXml();
 		XmlModel.toXml(model, out);
-		assertEquals("", out.getOpentags());
-		String xml = out.getXml();
+		assertTrue(out.isClosed());
+		String xml = out.getData();
 		log.debug(xml);
 		MiniElement e = new MiniXMLParserImpl().parseXml(xml);
 		XModel modelAgain = XmlModel.toModel(this.actorId, null, e);
@@ -162,10 +162,10 @@ public class XmlModelTest {
 		assertNotNull(changeLog);
 		
 		// test serializing without revisions
-		out = new XmlOutStringBuffer();
+		out = new XydraOutXml();
 		XmlModel.toXml(model, out, false, true, false);
-		assertEquals("", out.getOpentags());
-		xml = out.getXml();
+		assertTrue(out.isClosed());
+		xml = out.getData();
 		log.debug(xml);
 		e = new MiniXMLParserImpl().parseXml(xml);
 		modelAgain = XmlModel.toModel(this.actorId, null, e);
@@ -177,10 +177,10 @@ public class XmlModelTest {
 	private void testObject(XReadableObject object) {
 		
 		// test serializing with revisions
-		XmlOutStringBuffer out = new XmlOutStringBuffer();
+		XydraOutXml out = new XydraOutXml();
 		XmlModel.toXml(object, out);
-		assertEquals("", out.getOpentags());
-		String xml = out.getXml();
+		assertTrue(out.isClosed());
+		String xml = out.getData();
 		log.debug(xml);
 		MiniElement e = new MiniXMLParserImpl().parseXml(xml);
 		XObject objectAgain = XmlModel.toObject(this.actorId, null, e);
@@ -191,10 +191,10 @@ public class XmlModelTest {
 		assertNotNull(changeLog);
 		
 		// test serializing without revisions
-		out = new XmlOutStringBuffer();
+		out = new XydraOutXml();
 		XmlModel.toXml(object, out, false, true, false);
-		assertEquals("", out.getOpentags());
-		xml = out.getXml();
+		assertTrue(out.isClosed());
+		xml = out.getData();
 		log.debug(xml);
 		e = new MiniXMLParserImpl().parseXml(xml);
 		objectAgain = XmlModel.toObject(this.actorId, null, e);
@@ -206,20 +206,20 @@ public class XmlModelTest {
 	private void testRepository(XReadableRepository repo) {
 		
 		// test serializing with revisions
-		XmlOutStringBuffer out = new XmlOutStringBuffer();
+		XydraOutXml out = new XydraOutXml();
 		XmlModel.toXml(repo, out);
-		assertEquals("", out.getOpentags());
-		String xml = out.getXml();
+		assertTrue(out.isClosed());
+		String xml = out.getData();
 		log.debug(xml);
 		MiniElement e = new MiniXMLParserImpl().parseXml(xml);
 		XRepository repoAgain = XmlModel.toRepository(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalState(repo, repoAgain));
 		
 		// test serializing without revisions
-		out = new XmlOutStringBuffer();
+		out = new XydraOutXml();
 		XmlModel.toXml(repo, out, false, true, false);
-		assertEquals("", out.getOpentags());
-		xml = out.getXml();
+		assertTrue(out.isClosed());
+		xml = out.getData();
 		log.debug(xml);
 		e = new MiniXMLParserImpl().parseXml(xml);
 		repoAgain = XmlModel.toRepository(this.actorId, null, e);

@@ -97,7 +97,7 @@ class XmlUtils {
 	}
 	
 	@SuppressWarnings("null")
-	protected static void setTarget(XAddress target, XmlOut out, XAddress context) {
+	protected static void setTarget(XAddress target, XydraOut out, XAddress context) {
 		
 		boolean match = (context != null);
 		

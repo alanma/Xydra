@@ -38,6 +38,9 @@ import org.xydra.base.value.XValue;
 @RequiresAppEngine(false)
 public class XmlEvent {
 	
+	private static final String NAME_VALUE = "value";
+	private static final String NAME_VALUES = "values";
+	private static final String NAME_EVENTS = "events";
 	private static final String ACTOR_ATTRIBUTE = "actor";
 	private static final String FIELDREVISION_ATTRIBUTE = "fieldRevision";
 	private static final String IMPLIED_ATTRIBUTE = "implied";
@@ -95,8 +98,8 @@ public class XmlEvent {
 		return XmlValue.toValue(valueElement);
 	}
 	
-	private static void setAtomicEventAttributes(XAtomicEvent event, XmlOut out, XAddress context,
-	        boolean inTrans) {
+	private static void setAtomicEventAttributes(XAtomicEvent event, XydraOut out,
+	        XAddress context, boolean inTrans) {
 		
 		out.attribute(XmlUtils.TYPE_ATTRIBUTE, event.getChangeType().toString());
 		
@@ -115,7 +118,7 @@ public class XmlEvent {
 	/**
 	 * Encode attributes common to all event types.
 	 */
-	private static void setCommonAttributes(XEvent event, XmlOut out, XAddress context,
+	private static void setCommonAttributes(XEvent event, XydraOut out, XAddress context,
 	        boolean inTrans) {
 		
 		XmlUtils.setTarget(event.getTarget(), out, context);
@@ -501,11 +504,12 @@ public class XmlEvent {
 	 * @param context The part of this event's target address that doesn't need
 	 *            to be encoded in the element.
 	 */
-	public static void toXml(Iterator<XEvent> events, XmlOut out, XAddress context)
+	public static void toXml(Iterator<XEvent> events, XydraOut out, XAddress context)
 	        throws IllegalArgumentException {
 		
 		out.open(XEVENTLIST_ELEMENT);
 		
+		out.children(NAME_EVENTS, true);
 		while(events.hasNext()) {
 			toXml(events.next(), out, context);
 		}
@@ -522,7 +526,7 @@ public class XmlEvent {
 	 * @param context The part of this event's target address that doesn't need
 	 *            to be encoded in the element.
 	 */
-	public static void toXml(XEvent event, XmlOut out, XAddress context)
+	public static void toXml(XEvent event, XydraOut out, XAddress context)
 	        throws IllegalArgumentException {
 		if(event == null) {
 			XmlValue.saveNullElement(out);
@@ -533,7 +537,7 @@ public class XmlEvent {
 		}
 	}
 	
-	private static void toXml(XAtomicEvent event, XmlOut out, XAddress context, boolean inTrans)
+	private static void toXml(XAtomicEvent event, XydraOut out, XAddress context, boolean inTrans)
 	        throws IllegalArgumentException {
 		if(event instanceof XReversibleFieldEvent) {
 			toXml((XReversibleFieldEvent)event, out, context, inTrans);
@@ -551,13 +555,14 @@ public class XmlEvent {
 		}
 	}
 	
-	private static void toXml(XFieldEvent event, XmlOut out, XAddress context, boolean inTrans)
+	private static void toXml(XFieldEvent event, XydraOut out, XAddress context, boolean inTrans)
 	        throws IllegalArgumentException {
 		
 		out.open(XFIELDEVENT_ELEMENT);
 		
 		setAtomicEventAttributes(event, out, context, inTrans);
 		
+		out.children(NAME_VALUE, false);
 		if(event.getChangeType() != ChangeType.REMOVE) {
 			XmlValue.toXml(event.getNewValue(), out);
 		}
@@ -566,13 +571,14 @@ public class XmlEvent {
 		
 	}
 	
-	private static void toXml(XReversibleFieldEvent event, XmlOut out, XAddress context,
+	private static void toXml(XReversibleFieldEvent event, XydraOut out, XAddress context,
 	        boolean inTrans) throws IllegalArgumentException {
 		
 		out.open(XREVERSIBLEFIELDEVENT_ELEMENT);
 		
 		setAtomicEventAttributes(event, out, context, inTrans);
 		
+		out.children(NAME_VALUES, true);
 		if(event.getChangeType() != ChangeType.ADD) {
 			XmlValue.toXml(event.getOldValue(), out);
 		}
@@ -584,7 +590,7 @@ public class XmlEvent {
 		
 	}
 	
-	private static void toXml(XModelEvent event, XmlOut out, XAddress context, boolean inTrans)
+	private static void toXml(XModelEvent event, XydraOut out, XAddress context, boolean inTrans)
 	        throws IllegalArgumentException {
 		
 		if(context.getObject() != null || context.getField() != null) {
@@ -601,7 +607,7 @@ public class XmlEvent {
 		
 	}
 	
-	private static void toXml(XObjectEvent event, XmlOut out, XAddress context, boolean inTrans)
+	private static void toXml(XObjectEvent event, XydraOut out, XAddress context, boolean inTrans)
 	        throws IllegalArgumentException {
 		
 		if(context.getField() != null) {
@@ -618,8 +624,8 @@ public class XmlEvent {
 		
 	}
 	
-	private static void toXml(XRepositoryEvent event, XmlOut out, XAddress context, boolean inTrans)
-	        throws IllegalArgumentException {
+	private static void toXml(XRepositoryEvent event, XydraOut out, XAddress context,
+	        boolean inTrans) throws IllegalArgumentException {
 		
 		if(context.getObject() != null || context.getField() != null) {
 			throw new IllegalArgumentException("invalid context for repository events: " + context);
@@ -635,7 +641,7 @@ public class XmlEvent {
 		
 	}
 	
-	private static void toXml(XTransactionEvent trans, XmlOut out, XAddress context)
+	private static void toXml(XTransactionEvent trans, XydraOut out, XAddress context)
 	        throws IllegalArgumentException {
 		
 		out.open(XTRANSACTIONEVENT_ELEMENT);
@@ -644,6 +650,7 @@ public class XmlEvent {
 		
 		XAddress newContext = trans.getTarget();
 		
+		out.children(NAME_EVENTS, true);
 		for(XAtomicEvent event : trans) {
 			assert event != null;
 			toXml(event, out, newContext, true);
