@@ -63,10 +63,8 @@ public class XmlOut extends AbstractXydraOut {
 			this.writer.write('>');
 			
 		} else {
-			this.writer.write(" />");
+			this.writer.write("/>");
 		}
-		
-		this.writer.write('\n');
 		
 	}
 	
@@ -85,7 +83,7 @@ public class XmlOut extends AbstractXydraOut {
 		
 		element.depth = container.depth + 1;
 		
-		if(!container.hasContent()) {
+		if(container.type != Type.Root) {
 			this.writer.write('\n');
 		}
 		
@@ -108,23 +106,21 @@ public class XmlOut extends AbstractXydraOut {
 	@Override
 	protected <T> void outputValue(Frame container, String type, T value) {
 		
-		if(!container.hasContent()) {
-			this.writer.write('\n');
-		}
+		this.writer.write('\n');
 		
 		indent(container.depth + 1);
 		
 		if(value == null) {
 			this.writer.write('<');
 			this.writer.write(type);
-			this.writer.write(" isNull=\"true\" />");
+			this.writer.write(" isNull=\"true\"/>");
 		} else {
 			
 			this.writer.write('<');
 			this.writer.write(type);
 			String valueStr = value.toString();
 			if(valueStr.isEmpty()) {
-				this.writer.write(" />");
+				this.writer.write("/>");
 			} else {
 				this.writer.write('>');
 				this.writer.write(XmlEncoder.encode(valueStr));
