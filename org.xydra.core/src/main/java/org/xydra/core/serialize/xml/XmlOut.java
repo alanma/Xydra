@@ -83,9 +83,7 @@ public class XmlOut extends AbstractXydraOut {
 		
 		element.depth = container.depth + 1;
 		
-		if(container.type != Type.Root) {
-			this.writer.write('\n');
-		}
+		this.writer.write('\n');
 		
 		indent(element.depth);
 		this.writer.write('<');
