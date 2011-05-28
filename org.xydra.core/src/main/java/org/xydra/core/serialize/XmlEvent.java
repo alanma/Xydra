@@ -1,4 +1,4 @@
-package org.xydra.core.xml;
+package org.xydra.core.serialize;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -57,19 +57,19 @@ public class XmlEvent {
 	private static final String XTRANSACTIONEVENT_ELEMENT = "xtransactionEvent";
 	
 	private static boolean getImpliedAttribute(MiniElement xml) {
-		String booleanString = xml.getAttribute(IMPLIED_ATTRIBUTE);
-		return Boolean.parseBoolean(booleanString);
+		Object booleanString = xml.getAttribute(IMPLIED_ATTRIBUTE);
+		return booleanString == null ? false : XmlValue.toBoolean(booleanString);
 	}
 	
 	private static boolean getInTransactionAttribute(MiniElement xml) {
-		String booleanString = xml.getAttribute(INTRANSACTION_ATTRIBUTE);
-		return Boolean.parseBoolean(booleanString);
+		Object booleanString = xml.getAttribute(INTRANSACTION_ATTRIBUTE);
+		return booleanString == null ? false : XmlValue.toBoolean(booleanString);
 	}
 	
 	private static long getRevision(MiniElement xml, String elementName, String attribute,
 	        boolean required) {
 		
-		String revisionString = xml.getAttribute(attribute);
+		Object revisionString = xml.getAttribute(attribute);
 		
 		if(revisionString == null) {
 			
@@ -81,12 +81,7 @@ public class XmlEvent {
 			return XEvent.RevisionOfEntityNotSet;
 		}
 		
-		try {
-			return Long.parseLong(revisionString);
-		} catch(NumberFormatException e) {
-			throw new IllegalArgumentException("<" + elementName + ">@" + attribute
-			        + " does not contain a long, but '" + revisionString + "'");
-		}
+		return XmlValue.toLong(revisionString);
 	}
 	
 	private static XValue loadValue(Iterator<MiniElement> it, String type) {
@@ -101,16 +96,16 @@ public class XmlEvent {
 	private static void setAtomicEventAttributes(XAtomicEvent event, XydraOut out,
 	        XAddress context, boolean inTrans) {
 		
-		out.attribute(XmlUtils.TYPE_ATTRIBUTE, event.getChangeType().toString());
+		out.attribute(XmlUtils.TYPE_ATTRIBUTE, event.getChangeType());
 		
 		setCommonAttributes(event, out, context, inTrans);
 		
 		if(!inTrans && event.inTransaction()) {
-			out.attribute(INTRANSACTION_ATTRIBUTE, Boolean.toString(true));
+			out.attribute(INTRANSACTION_ATTRIBUTE, true);
 		}
 		
 		if(event.isImplied()) {
-			out.attribute(IMPLIED_ATTRIBUTE, Boolean.toString(true));
+			out.attribute(IMPLIED_ATTRIBUTE, true);
 		}
 		
 	}
@@ -126,28 +121,28 @@ public class XmlEvent {
 		if(!inTrans) {
 			
 			if(event.getActor() != null) {
-				out.attribute(ACTOR_ATTRIBUTE, event.getActor().toString());
+				out.attribute(ACTOR_ATTRIBUTE, event.getActor());
 			}
 			
 			if(event.getOldModelRevision() != XEvent.RevisionOfEntityNotSet) {
-				out.attribute(MODELREVISION_ATTRIBUTE, Long.toString(event.getOldModelRevision()));
+				out.attribute(MODELREVISION_ATTRIBUTE, event.getOldModelRevision());
 			}
 			
 		}
 		
 		if(event.getOldObjectRevision() != XEvent.RevisionOfEntityNotSet) {
-			out.attribute(OBJECTREVISION_ATTRIBUTE, Long.toString(event.getOldObjectRevision()));
+			out.attribute(OBJECTREVISION_ATTRIBUTE, event.getOldObjectRevision());
 		}
 		
 		if(event.getOldFieldRevision() != XEvent.RevisionOfEntityNotSet) {
-			out.attribute(FIELDREVISION_ATTRIBUTE, Long.toString(event.getOldFieldRevision()));
+			out.attribute(FIELDREVISION_ATTRIBUTE, event.getOldFieldRevision());
 		}
 		
 	}
 	
 	private static XAtomicEvent toAtomicEvent(MiniElement xml, XAddress context, TempTrans trans)
 	        throws IllegalArgumentException {
-		String name = xml.getName();
+		String name = xml.getType();
 		if(name.equals(XFIELDEVENT_ELEMENT)) {
 			return toFieldEvent(xml, context, trans);
 		} else if(name.equals(XREVERSIBLEFIELDEVENT_ELEMENT)) {
@@ -176,7 +171,7 @@ public class XmlEvent {
 	 * 
 	 */
 	public static XEvent toEvent(MiniElement xml, XAddress context) throws IllegalArgumentException {
-		String name = xml.getName();
+		String name = xml.getType();
 		if(XmlValue.isNullElement(xml)) {
 			return null;
 		} else if(name.equals(XTRANSACTIONEVENT_ELEMENT)) {
@@ -204,7 +199,7 @@ public class XmlEvent {
 		XmlUtils.checkElementName(xml, XEVENTLIST_ELEMENT);
 		
 		List<XEvent> events = new ArrayList<XEvent>();
-		Iterator<MiniElement> it = xml.getElements();
+		Iterator<MiniElement> it = xml.getChildren(NAME_EVENTS);
 		while(it.hasNext()) {
 			MiniElement event = it.next();
 			events.add(toEvent(event, context));
@@ -230,14 +225,14 @@ public class XmlEvent {
 		
 		// XValue oldValue = null;
 		XValue newValue = null;
-		Iterator<MiniElement> it = xml.getElements();
+		Iterator<MiniElement> it = xml.getChildren(NAME_VALUE);
 		if(type != ChangeType.REMOVE) {
 			newValue = loadValue(it, "new");
 			assert newValue != null;
 		}
 		if(it.hasNext()) {
 			throw new IllegalArgumentException("Invalid child of <" + XFIELDEVENT_ELEMENT + ">: <"
-			        + it.next().getName() + ">");
+			        + it.next().getType() + ">");
 		}
 		
 		if(type == ChangeType.ADD) {
@@ -277,7 +272,7 @@ public class XmlEvent {
 		
 		XValue oldValue = null;
 		XValue newValue = null;
-		Iterator<MiniElement> it = xml.getElements();
+		Iterator<MiniElement> it = xml.getChildren(NAME_VALUES);
 		if(type != ChangeType.ADD) {
 			oldValue = loadValue(it, "old");
 			assert oldValue != null;
@@ -288,7 +283,7 @@ public class XmlEvent {
 		}
 		if(it.hasNext()) {
 			throw new IllegalArgumentException("Invalid child of <" + XREVERSIBLEFIELDEVENT_ELEMENT
-			        + ">: <" + it.next().getName() + ">");
+			        + ">: <" + it.next().getType() + ">");
 		}
 		
 		if(type == ChangeType.ADD) {
@@ -337,8 +332,6 @@ public class XmlEvent {
 		        ACTOR_ATTRIBUTE, null);
 		boolean inTransaction = trans != null || getInTransactionAttribute(xml);
 		
-		XmlUtils.checkHasNoChildren(xml, XMODELEVENT_ELEMENT);
-		
 		XAddress target = address.getParent();
 		XID objectId = address.getObject();
 		
@@ -386,8 +379,6 @@ public class XmlEvent {
 		        ACTOR_ATTRIBUTE, null);
 		boolean inTransaction = trans != null || getInTransactionAttribute(xml);
 		
-		XmlUtils.checkHasNoChildren(xml, XOBJECTEVENT_ELEMENT);
-		
 		XAddress target = address.getParent();
 		XID fieldId = address.getField();
 		
@@ -432,12 +423,6 @@ public class XmlEvent {
 		XID actor = trans != null ? trans.actor : XmlUtils.getOptionalXidAttribute(xml,
 		        ACTOR_ATTRIBUTE, null);
 		boolean inTransaction = trans != null || getInTransactionAttribute(xml);
-		
-		Iterator<MiniElement> it = xml.getElements();
-		if(it.hasNext()) {
-			throw new IllegalArgumentException("Invalid child of <" + XREPOSITORYEVENT_ELEMENT
-			        + ">: <" + it.next().getName() + ">");
-		}
 		
 		XAddress target = address.getParent();
 		XID modelId = address.getModel();
@@ -486,7 +471,7 @@ public class XmlEvent {
 		TempTrans tt = new TempTrans(actor, modelRev);
 		
 		List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
-		Iterator<MiniElement> it = xml.getElements();
+		Iterator<MiniElement> it = xml.getChildren(NAME_EVENTS);
 		while(it.hasNext()) {
 			MiniElement event = it.next();
 			events.add(toAtomicEvent(event, target, tt));
@@ -601,7 +586,7 @@ public class XmlEvent {
 		
 		setAtomicEventAttributes(event, out, context, inTrans);
 		
-		out.attribute(XmlUtils.OBJECTID_ATTRIBUTE, event.getObjectId().toString());
+		out.attribute(XmlUtils.OBJECTID_ATTRIBUTE, event.getObjectId());
 		
 		out.close(XMODELEVENT_ELEMENT);
 		
@@ -618,7 +603,7 @@ public class XmlEvent {
 		
 		setAtomicEventAttributes(event, out, context, inTrans);
 		
-		out.attribute(XmlUtils.FIELDID_ATTRIBUTE, event.getFieldId().toString());
+		out.attribute(XmlUtils.FIELDID_ATTRIBUTE, event.getFieldId());
 		
 		out.close(XOBJECTEVENT_ELEMENT);
 		
@@ -635,7 +620,7 @@ public class XmlEvent {
 		
 		setAtomicEventAttributes(event, out, context, inTrans);
 		
-		out.attribute(XmlUtils.MODELID_ATTRIBUTE, event.getModelId().toString());
+		out.attribute(XmlUtils.MODELID_ATTRIBUTE, event.getModelId());
 		
 		out.close(XREPOSITORYEVENT_ELEMENT);
 		

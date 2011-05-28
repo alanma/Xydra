@@ -6,7 +6,7 @@ import java.security.NoSuchAlgorithmException;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.core.xml.Base64;
+import org.xydra.core.serialize.Base64;
 
 
 /**

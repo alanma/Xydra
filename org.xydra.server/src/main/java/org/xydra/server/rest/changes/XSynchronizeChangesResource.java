@@ -11,13 +11,13 @@ import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.core.model.XChangeLog;
-import org.xydra.core.xml.MiniElement;
-import org.xydra.core.xml.MiniXMLParser;
-import org.xydra.core.xml.XmlCommand;
-import org.xydra.core.xml.XmlEvent;
-import org.xydra.core.xml.XydraOut;
-import org.xydra.core.xml.impl.MiniXMLParserImpl;
-import org.xydra.core.xml.impl.XydraOutXml;
+import org.xydra.core.serialize.MiniElement;
+import org.xydra.core.serialize.MiniParser;
+import org.xydra.core.serialize.XmlCommand;
+import org.xydra.core.serialize.XmlEvent;
+import org.xydra.core.serialize.XydraOut;
+import org.xydra.core.serialize.xml.MiniParserXml;
+import org.xydra.core.serialize.xml.XydraOutXml;
 import org.xydra.index.iterator.AbstractTransformingIterator;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessException;
@@ -109,8 +109,8 @@ public class XSynchronizeChangesResource {
 		XCommand command;
 		try {
 			
-			MiniXMLParser parser = new MiniXMLParserImpl();
-			MiniElement commandElement = parser.parseXml(commandXml);
+			MiniParser parser = new MiniParserXml();
+			MiniElement commandElement = parser.parse(commandXml);
 			
 			command = XmlCommand.toCommand(commandElement, addr);
 			

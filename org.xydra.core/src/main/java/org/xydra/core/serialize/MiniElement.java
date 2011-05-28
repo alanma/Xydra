@@ -1,4 +1,4 @@
-package org.xydra.core.xml;
+package org.xydra.core.serialize;
 
 import java.util.Iterator;
 
@@ -17,27 +17,31 @@ import org.xydra.annotations.RunsInGWT;
 public interface MiniElement {
 	
 	/**
-	 * @param attributeName The name of the attribute to get.
+	 * @param name The name of the attribute to get.
 	 * @return the attribute value or null if it does not exist
 	 */
-	public String getAttribute(String attributeName);
+	public Object getAttribute(String name);
 	
 	/**
 	 * @return return the contained character data. If this element contains
 	 *         additional children, the return value is undefined.
 	 */
-	public String getData();
+	public Object getContent(String name);
 	
 	/**
 	 * @return all child elements in document order
 	 */
-	public Iterator<MiniElement> getElements();
+	public Iterator<MiniElement> getChildren(String name);
 	
 	/**
 	 * @return all matching child elements in document order
 	 */
-	public Iterator<MiniElement> getElementsByTagName(String elementName);
+	public Iterator<MiniElement> getChildrenByType(String name, String type);
 	
-	public String getName();
+	public MiniElement getChild(String type);
+	
+	public String getType();
+	
+	public Iterator<Object> getValues(String name, String type);
 	
 }

@@ -9,9 +9,9 @@ import org.xydra.base.XX;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.model.XModel;
-import org.xydra.core.xml.XmlModel;
-import org.xydra.core.xml.XydraOut;
-import org.xydra.core.xml.impl.XydraOutXml;
+import org.xydra.core.serialize.XmlModel;
+import org.xydra.core.serialize.XydraOut;
+import org.xydra.core.serialize.xml.XydraOutXml;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 

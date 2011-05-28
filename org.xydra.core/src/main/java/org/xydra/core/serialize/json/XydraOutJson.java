@@ -1,5 +1,6 @@
-package org.xydra.core.xml.impl;
+package org.xydra.core.serialize.json;
 
+import org.xydra.core.serialize.AbstractXydraOut;
 import org.xydra.minio.MiniWriter;
 
 
@@ -15,11 +16,15 @@ public class XydraOutJson extends AbstractXydraOut {
 	
 	private void outputName(Frame frame, String name) {
 		
-		this.writer.write(",\n");
+		if(frame.hasAttributes() || frame.hasContent()) {
+			this.writer.write(',');
+		}
+		whitespace('\n');
 		indent(frame.depth + 1);
 		this.writer.write('"');
 		this.writer.write(name);
-		this.writer.write("\": ");
+		this.writer.write("\":");
+		whitespace(' ');
 		
 	}
 	
@@ -62,10 +67,10 @@ public class XydraOutJson extends AbstractXydraOut {
 	protected void outputCloseElement(Frame container, Frame element) {
 		
 		if(element.hasContent() || element.hasAttributes()) {
-			this.writer.write("\n");
+			whitespace('\n');
 			indent(element.depth);
 		} else {
-			this.writer.write(' ');
+			whitespace(' ');
 		}
 		this.writer.write('}');
 		
@@ -80,10 +85,10 @@ public class XydraOutJson extends AbstractXydraOut {
 	protected void outputEndChildren(Frame element, Frame children) {
 		
 		if(children.hasContent()) {
-			this.writer.write("\n");
+			whitespace('\n');
 			indent(children.depth);
 		} else {
-			this.writer.write(' ');
+			whitespace(' ');
 		}
 		this.writer.write(']');
 		
@@ -98,19 +103,32 @@ public class XydraOutJson extends AbstractXydraOut {
 			
 			if(container.hasContent()) {
 				// This is not the first child element
-				this.writer.write(", ");
+				this.writer.write(',');
+				whitespace(' ');
 			}
 			
-			this.writer.write("{ \"$type\": \"");
-			this.writer.write(element.name);
-			this.writer.write('"');
+			this.writer.write('{');
+			if(container.element == null) {
+				whitespace(' ');
+				this.writer.write("\"$type\":");
+				whitespace(' ');
+				this.writer.write('"');
+				this.writer.write(element.name);
+				this.writer.write('"');
+			}
 			
 		} else if(container.type == Type.Child) {
 			
 			outputName(container, container.name);
-			this.writer.write("{ \"$type\": \"");
-			this.writer.write(element.name);
-			this.writer.write('"');
+			this.writer.write('{');
+			if(container.element == null) {
+				whitespace(' ');
+				this.writer.write("\"$type\":");
+				whitespace(' ');
+				this.writer.write('"');
+				this.writer.write(element.name);
+				this.writer.write('"');
+			}
 			
 		} else {
 			
@@ -130,7 +148,7 @@ public class XydraOutJson extends AbstractXydraOut {
 			// This is not the first child element
 			this.writer.write(',');
 		}
-		this.writer.write(' ');
+		whitespace(' ');
 		
 		if(value == null) {
 			this.writer.write("null");
@@ -147,12 +165,15 @@ public class XydraOutJson extends AbstractXydraOut {
 	
 	@Override
 	protected void end() {
-		this.writer.write('\n');
+		whitespace('\n');
 	}
 	
 	@Override
 	protected void outputBeginChild(Frame element, Frame child) {
 		child.depth = element.depth;
+		if(element.hasAttributes() || element.hasContent()) {
+			this.writer.write(',');
+		}
 	}
 	
 }

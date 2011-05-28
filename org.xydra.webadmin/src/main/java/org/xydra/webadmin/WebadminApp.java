@@ -34,11 +34,11 @@ import org.xydra.base.rmof.XReadableModel;
 import org.xydra.core.XFile;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.XModel;
-import org.xydra.core.xml.MiniElement;
-import org.xydra.core.xml.XmlModel;
-import org.xydra.core.xml.XydraOut;
-import org.xydra.core.xml.impl.MiniXMLParserImpl;
-import org.xydra.core.xml.impl.XydraOutXml;
+import org.xydra.core.serialize.MiniElement;
+import org.xydra.core.serialize.XmlModel;
+import org.xydra.core.serialize.XydraOut;
+import org.xydra.core.serialize.xml.MiniParserXml;
+import org.xydra.core.serialize.xml.XydraOutXml;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.minio.MiniStreamWriter;
@@ -217,7 +217,7 @@ public class WebadminApp {
 			// Parse the model.
 			XModel model;
 			try {
-				MiniElement e = new MiniXMLParserImpl().parseXml(b.toString());
+				MiniElement e = new MiniParserXml().parse(b.toString());
 				model = XmlModel.toModel(XX.toId("WebadminApp"), null, e);
 			} catch(Exception e) {
 				throw new RuntimeException("error parsing model file \"" + name + "\"", e);

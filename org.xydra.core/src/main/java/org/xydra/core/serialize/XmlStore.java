@@ -1,4 +1,4 @@
-package org.xydra.core.xml;
+package org.xydra.core.serialize;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XX;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
@@ -34,6 +35,7 @@ import org.xydra.store.XydraStore;
  */
 public class XmlStore {
 	
+	private static final String NAME_EVENTS = "events";
 	private static final String NAME_AUTHENTICATED = "authenticated";
 	private static final String NAME_MESSAGE = "message";
 	private static final String NAME_REVISION = "revision";
@@ -58,6 +60,7 @@ public class XmlStore {
 	private static final String TYPE_QUOTA = "quota";
 	private static final String TYPE_REQUEST = "request";
 	private static final String TYPE_STORE = "store";
+	private static final String NAME_XID = "xid";
 	
 	public static void toXml(Throwable t, XydraOut out) {
 		
@@ -96,12 +99,13 @@ public class XmlStore {
 	
 	public static Throwable toException(MiniElement xml) {
 		
-		if(!ELEMENT_XERROR.equals(xml.getName())) {
+		if(!ELEMENT_XERROR.equals(xml.getType())) {
 			return null;
 		}
 		
-		String type = xml.getAttribute(ATTRIBUTE_TYPE);
-		String message = xml.getData();
+		String type = xml.getAttribute(ATTRIBUTE_TYPE).toString();
+		Object messageObj = xml.getContent(NAME_MESSAGE);
+		String message = messageObj == null ? "" : messageObj.toString();
 		
 		if(TYPE_ACCESS.equals(type)) {
 			return new AccessException(message);
@@ -128,7 +132,7 @@ public class XmlStore {
 	public static void toAuthenticationResult(boolean result, XydraOut out) {
 		
 		out.open(ELEMENT_AUTHENTICATED);
-		out.content(NAME_AUTHENTICATED, Boolean.toString(result));
+		out.content(NAME_AUTHENTICATED, result);
 		out.close(ELEMENT_AUTHENTICATED);
 		
 	}
@@ -137,7 +141,7 @@ public class XmlStore {
 		
 		XmlUtils.checkElementName(xml, ELEMENT_AUTHENTICATED);
 		
-		return Boolean.parseBoolean(xml.getData());
+		return XmlValue.toBoolean(xml.getContent(NAME_AUTHENTICATED));
 	}
 	
 	public static class EventsRequest {
@@ -174,18 +178,18 @@ public class XmlStore {
 		
 		XmlUtils.checkElementName(xml, ELEMENT_RESULTS);
 		
-		Iterator<MiniElement> it = xml.getElements();
-		if(!it.hasNext()) {
+		MiniElement commandsEle = xml.getChild(ELEMENT_COMMANDRESULTS);
+		if(commandsEle == null) {
 			throw new IllegalArgumentException("missing command results");
 		}
-		MiniElement commandsEle = it.next();
 		
 		XmlUtils.checkElementName(commandsEle, ELEMENT_COMMANDRESULTS);
 		
 		getRevisionListContents(commandsEle, commandResults);
 		
-		if(eventResults != null && it.hasNext()) {
-			toEventResults(it.next(), context, eventResults);
+		MiniElement eventsEle = xml.getChild(ELEMENT_EVENTRESULTS);
+		if(eventResults != null && eventsEle != null) {
+			toEventResults(eventsEle, context, eventResults);
 		}
 		
 	}
@@ -194,7 +198,7 @@ public class XmlStore {
 		
 		out.open(ELEMENT_EVENTRESULTS);
 		
-		out.children("events", true);
+		out.children(NAME_EVENTS, true);
 		assert results.length == ger.requests.length;
 		for(int i = 0; i < results.length; i++) {
 			BatchedResult<XEvent[]> result = results[i];
@@ -231,7 +235,7 @@ public class XmlStore {
 		
 		int i = 0;
 		
-		Iterator<MiniElement> it = xml.getElements();
+		Iterator<MiniElement> it = xml.getChildren(NAME_EVENTS);
 		while(it.hasNext()) {
 			MiniElement ele = it.next();
 			
@@ -295,7 +299,7 @@ public class XmlStore {
 			
 			out.open(ELEMENT_XREVISION);
 			assert result.getResult() != null;
-			out.content(NAME_REVISION, Long.toString(result.getResult()));
+			out.content(NAME_REVISION, result.getResult());
 			out.close(ELEMENT_XREVISION);
 			
 		}
@@ -306,7 +310,7 @@ public class XmlStore {
 		
 		int i = 0;
 		
-		Iterator<MiniElement> it = xml.getElements();
+		Iterator<MiniElement> it = xml.getChildren(NAME_REVISIONS);
 		while(it.hasNext()) {
 			MiniElement ele = it.next();
 			
@@ -325,7 +329,7 @@ public class XmlStore {
 				
 				XmlUtils.checkElementName(ele, ELEMENT_XREVISION);
 				
-				long rev = Long.parseLong(ele.getData());
+				long rev = XmlValue.toLong(ele.getContent(NAME_REVISION));
 				
 				results[i] = new BatchedResult<Long>(rev);
 				
@@ -391,7 +395,7 @@ public class XmlStore {
 		
 		int i = 0 - 1;
 		
-		Iterator<MiniElement> it = xml.getElements();
+		Iterator<MiniElement> it = xml.getChildren(NAME_SNAPSHOTS);
 		while(it.hasNext()) {
 			MiniElement ele = it.next();
 			i++;
@@ -441,7 +445,7 @@ public class XmlStore {
 	public static void toRepositoryId(XID result, XydraOut out) {
 		
 		out.open(ELEMENT_REPOSITORY_ID);
-		XmlValue.toXml(result, out);
+		out.content(NAME_XID, result);
 		out.close(ELEMENT_REPOSITORY_ID);
 		
 	}
@@ -450,13 +454,9 @@ public class XmlStore {
 		
 		XmlUtils.checkElementName(xml, ELEMENT_REPOSITORY_ID);
 		
-		Iterator<MiniElement> it = xml.getElements();
+		Object id = xml.getContent(NAME_XID);
 		
-		if(!it.hasNext()) {
-			throw new IllegalArgumentException("missing repository id");
-		}
-		
-		return XmlValue.toId(it.next());
+		return XX.toId(id.toString());
 		
 	}
 	

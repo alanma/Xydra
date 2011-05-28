@@ -1,10 +1,9 @@
-package org.xydra.core.xml.impl;
+package org.xydra.core.serialize;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
 
-import org.xydra.core.xml.XydraOut;
 import org.xydra.minio.MiniStringWriter;
 import org.xydra.minio.MiniWriter;
 
@@ -13,7 +12,8 @@ abstract public class AbstractXydraOut implements XydraOut {
 	
 	protected final MiniWriter writer;
 	
-	private final boolean indent = true;
+	private boolean indent = true;
+	private boolean whitespace = false;
 	
 	public AbstractXydraOut(MiniWriter writer) {
 		this.writer = writer;
@@ -34,6 +34,8 @@ abstract public class AbstractXydraOut implements XydraOut {
 		
 		public final Type type;
 		
+		public final String element;
+		
 		public int depth = -1; // to be used by subclasses
 		
 		private Set<String> names;
@@ -44,6 +46,13 @@ abstract public class AbstractXydraOut implements XydraOut {
 		public Frame(Type type, String name) {
 			this.type = type;
 			this.name = name;
+			this.element = null;
+		}
+		
+		public Frame(Type type, String name, String element) {
+			this.type = type;
+			this.name = name;
+			this.element = element;
 		}
 		
 		public boolean hasContent() {
@@ -104,6 +113,20 @@ abstract public class AbstractXydraOut implements XydraOut {
 		
 		Frame container = getCurrent();
 		
+		if(container.element != null && !container.element.equals(name)) {
+			if(container.type == Type.Child) {
+				error("missing child element, cannot open element" + name);
+				this.stack.pop();
+				container = this.stack.peek();
+			} else if(container.type == Type.Children) {
+				Frame children = container;
+				assert !this.stack.empty();
+				this.stack.pop();
+				container = this.stack.peek();
+				outputEndChildren(container, children);
+			}
+		}
+		
 		if(container.type == Type.Element) {
 			recordName(container, name);
 			if(!container.hasContent()) {
@@ -111,8 +134,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 			}
 		} else if(container.type == Type.Text) {
 			error("cannot add children once text has been set");
-		} else if(container.type == Type.Child
-		        && (container.hasAttributes || container.hasContent())) {
+		} else if(container.type == Type.Child && container.hasContent()) {
 			error("must declare beforehand to add multiple children");
 		}
 		
@@ -122,6 +144,9 @@ abstract public class AbstractXydraOut implements XydraOut {
 		outputOpenElement(container, current);
 		
 		container.contentType = Type.Element;
+		if(container.type != Type.Element && container.element == null) {
+			current.hasAttributes = true;
+		}
 	}
 	
 	protected abstract void outputOpenElement(Frame container, Frame element);
@@ -137,7 +162,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 			error("can only add values to child lists");
 		}
 		
-		if(container.type == Type.Child && (container.hasAttributes || container.hasContent())) {
+		if(container.type == Type.Child && container.hasContent()) {
 			error("must declare beforehand to add multiple children");
 		}
 		
@@ -150,6 +175,11 @@ abstract public class AbstractXydraOut implements XydraOut {
 	
 	@Override
 	public void children(String name, boolean multiple) {
+		children(name, multiple, null);
+	}
+	
+	@Override
+	public void children(String name, boolean multiple, String type) {
 		
 		Frame element = getCurrent();
 		
@@ -166,7 +196,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 		
 		recordName(element, name);
 		
-		Frame children = new Frame(multiple ? Type.Children : Type.Child, name);
+		Frame children = new Frame(multiple ? Type.Children : Type.Child, name, type);
 		this.stack.push(children);
 		
 		outputElementBeginContent(element);
@@ -189,6 +219,9 @@ abstract public class AbstractXydraOut implements XydraOut {
 		Frame current = getCurrent();
 		
 		if(current.type == Type.Child) {
+			if(!current.hasContent()) {
+				error("missing child element");
+			}
 			this.stack.pop();
 			current = this.stack.peek();
 		} else if(current.type == Type.Children) {
@@ -220,8 +253,9 @@ abstract public class AbstractXydraOut implements XydraOut {
 			this.stack.pop();
 			assert this.stack.isEmpty();
 			end();
+		} else {
+			container.hasAttributes = true;
 		}
-		
 	}
 	
 	protected abstract void outputEndChildren(Frame element, Frame children);
@@ -260,12 +294,18 @@ abstract public class AbstractXydraOut implements XydraOut {
 	
 	protected void indent(int count) {
 		
-		if(!this.indent) {
+		if(!this.indent || !this.whitespace) {
 			return;
 		}
 		
 		for(int i = 0; i < count; i++) {
 			this.writer.write('\t');
+		}
+	}
+	
+	protected void whitespace(char c) {
+		if(this.whitespace) {
+			this.writer.write(c);
 		}
 	}
 	
@@ -298,10 +338,15 @@ abstract public class AbstractXydraOut implements XydraOut {
 				bt.append("(root)");
 				break;
 			}
-			if(this.stack.isEmpty()) {
-				bt.append("(end)");
+			if(frame.type != null) {
+				bt.append('{');
+				bt.append(frame.type);
+				bt.append('}');
 			}
 			
+		}
+		if(this.stack.isEmpty()) {
+			bt.append("(end)");
 		}
 		
 		throw new IllegalStateException(desc + "; am at " + bt.toString());

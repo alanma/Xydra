@@ -1,4 +1,4 @@
-package org.xydra.core.xml;
+package org.xydra.core.serialize;
 
 /**
  * A minimal interface for writing XML-based or JSON-based streams.
@@ -12,11 +12,13 @@ package org.xydra.core.xml;
  */
 public interface XydraOut {
 	
-	void open(String elementName);
+	void open(String type);
 	
 	<T> void attribute(String name, T value);
 	
 	void children(String name, boolean multiple);
+	
+	void children(String name, boolean multiple, String type);
 	
 	<T> void value(String type, T value);
 	
@@ -28,7 +30,7 @@ public interface XydraOut {
 	 * @param elementName The name of the element to close. This must be the
 	 *            same as the last call to {@link #open(String)}.
 	 */
-	void close(String elementName);
+	void close(String type);
 	
 	boolean isClosed();
 	

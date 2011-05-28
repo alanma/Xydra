@@ -8,12 +8,12 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.client.Callback;
 import org.xydra.client.XChangesService;
-import org.xydra.core.xml.MiniElement;
-import org.xydra.core.xml.MiniXMLParser;
-import org.xydra.core.xml.XmlCommand;
-import org.xydra.core.xml.XmlEvent;
-import org.xydra.core.xml.XydraOut;
-import org.xydra.core.xml.impl.XydraOutXml;
+import org.xydra.core.serialize.MiniElement;
+import org.xydra.core.serialize.MiniParser;
+import org.xydra.core.serialize.XmlCommand;
+import org.xydra.core.serialize.XmlEvent;
+import org.xydra.core.serialize.XydraOut;
+import org.xydra.core.serialize.xml.XydraOutXml;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
@@ -28,7 +28,7 @@ import com.google.gwt.http.client.Response;
  */
 public class GWTChangesService extends AbstractGWTHttpService implements XChangesService {
 	
-	public GWTChangesService(String baseUrl, MiniXMLParser parser) {
+	public GWTChangesService(String baseUrl, MiniParser parser) {
 		super(baseUrl, parser);
 	}
 	
@@ -111,7 +111,7 @@ public class GWTChangesService extends AbstractGWTHttpService implements XChange
 					if(entity.getModel() != null && (result == 0 || since != NONE)) {
 						
 						MiniElement element = GWTChangesService.this.parser
-						        .parseXml(resp.getText());
+						        .parse(resp.getText());
 						events = XmlEvent.toEventList(element, context);
 						
 						// fill in a concrete revision number instead of

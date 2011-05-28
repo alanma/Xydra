@@ -1,4 +1,4 @@
-package org.xydra.core.xml;
+package org.xydra.core.serialize;
 
 import java.util.Iterator;
 
@@ -69,27 +69,21 @@ public class XmlModel {
 	
 	private static long getRevisionAttribute(MiniElement xml, String elementName) {
 		
-		String revisionString = xml.getAttribute(REVISION_ATTRIBUTE);
+		Object revisionString = xml.getAttribute(REVISION_ATTRIBUTE);
 		
-		if(revisionString == null)
+		if(revisionString == null) {
 			return NO_REVISION;
-		
-		try {
-			return Long.parseLong(revisionString);
-		} catch(NumberFormatException e) {
-			throw new IllegalArgumentException("<" + elementName + ">@" + REVISION_ATTRIBUTE
-			        + " does not contain a long, but '" + revisionString + "'");
 		}
+		
+		return XmlValue.toLong(revisionString);
 	}
 	
 	static private XChangeLogState loadChangeLogState(MiniElement xml, XAddress baseAddr) {
-		Iterator<MiniElement> logElementIt = xml.getElementsByTagName(XCHANGELOG_ELEMENT);
-		if(logElementIt.hasNext()) {
+		MiniElement logElement = xml.getChild(XCHANGELOG_ELEMENT);
+		if(logElement != null) {
 			XChangeLogState log = new MemoryChangeLogState(baseAddr);
-			loadChangeLogState(logElementIt.next(), log);
-			if(logElementIt.hasNext()) {
-				throw new IllegalArgumentException("xml object contains multiple change logs");
-			}
+			loadChangeLogState(logElement, log);
+			return log;
 		}
 		return null;
 	}
@@ -105,20 +99,14 @@ public class XmlModel {
 		XmlUtils.checkElementName(xml, XCHANGELOG_ELEMENT);
 		
 		long startRev = 0L;
-		String revisionString = xml.getAttribute(STARTREVISION_ATTRIBUTE);
+		Object revisionString = xml.getAttribute(STARTREVISION_ATTRIBUTE);
 		if(revisionString != null) {
-			try {
-				startRev = Long.parseLong(revisionString);
-			} catch(NumberFormatException e) {
-				throw new IllegalArgumentException("<" + XCHANGELOG_ELEMENT + ">@"
-				        + STARTREVISION_ATTRIBUTE + " does not contain a long, but '"
-				        + revisionString + "'");
-			}
+			startRev = XmlValue.toLong(revisionString);
 		}
 		
 		state.setFirstRevisionNumber(startRev);
 		
-		Iterator<MiniElement> eventElementIt = xml.getElements();
+		Iterator<MiniElement> eventElementIt = xml.getChildren(NAME_EVENTS);
 		while(eventElementIt.hasNext()) {
 			MiniElement e = eventElementIt.next();
 			XEvent event = XmlEvent.toEvent(e, state.getBaseAddress());
@@ -161,7 +149,7 @@ public class XmlModel {
 		
 		XValue xvalue = null;
 		
-		Iterator<MiniElement> valueElementIt = xml.getElements();
+		Iterator<MiniElement> valueElementIt = xml.getChildren(NAME_VALUE);
 		if(valueElementIt.hasNext()) {
 			MiniElement valueElement = valueElementIt.next();
 			xvalue = XmlValue.toValue(valueElement);
@@ -241,7 +229,8 @@ public class XmlModel {
 		}
 		modelState.setRevisionNumber(revision);
 		
-		Iterator<MiniElement> objectElementIt = xml.getElementsByTagName(XOBJECT_ELEMENT);
+		Iterator<MiniElement> objectElementIt = xml
+		        .getChildrenByType(NAME_OBJECTS, XOBJECT_ELEMENT);
 		while(objectElementIt.hasNext()) {
 			MiniElement objectElement = objectElementIt.next();
 			XRevWritableObject objectState = toObjectState(objectElement, modelState);
@@ -313,7 +302,7 @@ public class XmlModel {
 		
 		objectState.setRevisionNumber(revision);
 		
-		Iterator<MiniElement> fieldElementIt = xml.getElementsByTagName(XFIELD_ELEMENT);
+		Iterator<MiniElement> fieldElementIt = xml.getChildrenByType(NAME_FIELDS, XFIELD_ELEMENT);
 		while(fieldElementIt.hasNext()) {
 			MiniElement fieldElement = fieldElementIt.next();
 			XRevWritableField fieldState = toFieldState(fieldElement, objectState);
@@ -353,7 +342,7 @@ public class XmlModel {
 		XAddress repoAddr = XX.toAddress(xid, null, null, null);
 		XRevWritableRepository repositoryState = new SimpleRepository(repoAddr);
 		
-		Iterator<MiniElement> modelElementIt = xml.getElementsByTagName(XMODEL_ELEMENT);
+		Iterator<MiniElement> modelElementIt = xml.getChildrenByType(NAME_MODELS, XMODEL_ELEMENT);
 		while(modelElementIt.hasNext()) {
 			MiniElement modelElement = modelElementIt.next();
 			XRevWritableModel modelState = toModelState(modelElement, repositoryState);
@@ -380,7 +369,7 @@ public class XmlModel {
 		
 		xo.open(XCHANGELOG_ELEMENT);
 		if(rev != 0) {
-			xo.attribute(STARTREVISION_ATTRIBUTE, Long.toString(rev));
+			xo.attribute(STARTREVISION_ATTRIBUTE, rev);
 		}
 		
 		xo.children(NAME_EVENTS, true);
@@ -427,13 +416,13 @@ public class XmlModel {
 		long rev = xfield.getRevisionNumber();
 		
 		xo.open(XFIELD_ELEMENT);
-		xo.attribute(XmlUtils.XID_ATTRIBUTE, xfield.getID().toString());
+		xo.attribute(XmlUtils.XID_ATTRIBUTE, xfield.getID());
 		if(saveRevision) {
-			xo.attribute(REVISION_ATTRIBUTE, Long.toString(rev));
+			xo.attribute(REVISION_ATTRIBUTE, rev);
 		}
 		
-		xo.children(NAME_VALUE, false);
 		if(xvalue != null) {
+			xo.children(NAME_VALUE, false);
 			XmlValue.toXml(xvalue, xo);
 		}
 		
@@ -483,12 +472,12 @@ public class XmlModel {
 		long rev = xmodel.getRevisionNumber();
 		
 		xo.open(XMODEL_ELEMENT);
-		xo.attribute(XmlUtils.XID_ATTRIBUTE, xmodel.getID().toString());
+		xo.attribute(XmlUtils.XID_ATTRIBUTE, xmodel.getID());
 		if(saveRevision) {
-			xo.attribute(REVISION_ATTRIBUTE, Long.toString(rev));
+			xo.attribute(REVISION_ATTRIBUTE, rev);
 		}
 		
-		xo.children(NAME_OBJECTS, true);
+		xo.children(NAME_OBJECTS, true, XOBJECT_ELEMENT);
 		for(XID objectId : xmodel) {
 			try {
 				toXml(xmodel.getObject(objectId), xo, saveRevision, ignoreInaccessible, false);
@@ -553,12 +542,12 @@ public class XmlModel {
 		long rev = xobject.getRevisionNumber();
 		
 		xo.open(XOBJECT_ELEMENT);
-		xo.attribute(XmlUtils.XID_ATTRIBUTE, xobject.getID().toString());
+		xo.attribute(XmlUtils.XID_ATTRIBUTE, xobject.getID());
 		if(saveRevision) {
-			xo.attribute(REVISION_ATTRIBUTE, Long.toString(rev));
+			xo.attribute(REVISION_ATTRIBUTE, rev);
 		}
 		
-		xo.children(NAME_FIELDS, true);
+		xo.children(NAME_FIELDS, true, XFIELD_ELEMENT);
 		for(XID fieldId : xobject) {
 			try {
 				toXml(xobject.getField(fieldId), xo, saveRevision);
@@ -617,9 +606,9 @@ public class XmlModel {
 	        boolean ignoreInaccessible, boolean saveChangeLog) {
 		
 		xo.open(XREPOSITORY_ELEMENT);
-		xo.attribute(XmlUtils.XID_ATTRIBUTE, xrepository.getID().toString());
+		xo.attribute(XmlUtils.XID_ATTRIBUTE, xrepository.getID());
 		
-		xo.children(NAME_MODELS, true);
+		xo.children(NAME_MODELS, true, XMODEL_ELEMENT);
 		for(XID modelOd : xrepository) {
 			try {
 				toXml(xrepository.getModel(modelOd), xo, saveRevision, ignoreInaccessible,
@@ -636,7 +625,7 @@ public class XmlModel {
 	}
 	
 	public static boolean isModel(MiniElement xml) {
-		return XMODEL_ELEMENT.equals(xml.getName());
+		return XMODEL_ELEMENT.equals(xml.getType());
 	}
 	
 }

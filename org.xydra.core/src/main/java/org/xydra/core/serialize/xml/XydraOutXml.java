@@ -1,5 +1,6 @@
-package org.xydra.core.xml.impl;
+package org.xydra.core.serialize.xml;
 
+import org.xydra.core.serialize.AbstractXydraOut;
 import org.xydra.minio.MiniWriter;
 
 

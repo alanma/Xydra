@@ -2,8 +2,8 @@ package org.xydra.client.gwt.service;
 
 import org.xydra.client.Callback;
 import org.xydra.client.NotFoundException;
-import org.xydra.core.xml.MiniElement;
-import org.xydra.core.xml.MiniXMLParser;
+import org.xydra.core.serialize.MiniElement;
+import org.xydra.core.serialize.MiniParser;
 import org.xydra.store.ConnectionException;
 import org.xydra.store.InternalStoreException;
 import org.xydra.store.RequestException;
@@ -25,9 +25,9 @@ import com.google.gwt.http.client.Response;
 public abstract class AbstractGWTHttpService {
 	
 	protected final String baseUrl;
-	protected final MiniXMLParser parser;
+	protected final MiniParser parser;
 	
-	public AbstractGWTHttpService(String baseUrl, MiniXMLParser parser) {
+	public AbstractGWTHttpService(String baseUrl, MiniParser parser) {
 		this.baseUrl = baseUrl;
 		this.parser = parser;
 	}
@@ -72,7 +72,7 @@ public abstract class AbstractGWTHttpService {
 				}
 				MiniElement element;
 				try {
-					element = AbstractGWTHttpService.this.parser.parseXml(resp.getText());
+					element = AbstractGWTHttpService.this.parser.parse(resp.getText());
 				} catch(Exception e) {
 					callback.onFailure(e);
 					return;

@@ -31,9 +31,9 @@ import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryRepository;
-import org.xydra.core.xml.MiniElement;
-import org.xydra.core.xml.XmlModel;
-import org.xydra.core.xml.impl.MiniXMLParserImpl;
+import org.xydra.core.serialize.MiniElement;
+import org.xydra.core.serialize.XmlModel;
+import org.xydra.core.serialize.xml.MiniParserXml;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.server.IXydraServer;
@@ -203,7 +203,7 @@ public abstract class AbstractRestApiTest {
 		String data = readAll((InputStream)c.getContent());
 		
 		try {
-			return new MiniXMLParserImpl().parseXml(data);
+			return new MiniParserXml().parse(data);
 		} catch(IllegalArgumentException iae) {
 			fail(iae.getMessage());
 			throw new RuntimeException();

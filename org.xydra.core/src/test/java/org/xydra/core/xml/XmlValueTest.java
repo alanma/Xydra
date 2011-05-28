@@ -9,8 +9,11 @@ import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
-import org.xydra.core.xml.impl.MiniXMLParserImpl;
-import org.xydra.core.xml.impl.XydraOutXml;
+import org.xydra.core.serialize.MiniElement;
+import org.xydra.core.serialize.XmlValue;
+import org.xydra.core.serialize.XydraOut;
+import org.xydra.core.serialize.xml.MiniParserXml;
+import org.xydra.core.serialize.xml.XydraOutXml;
 
 
 /**
@@ -324,7 +327,7 @@ public class XmlValueTest {
 		
 		System.out.print(xml);
 		
-		MiniElement e = new MiniXMLParserImpl().parseXml(xml);
+		MiniElement e = new MiniParserXml().parse(xml);
 		XValue valueAgain = XmlValue.toValue(e);
 		assertEquals(value, valueAgain);
 	}

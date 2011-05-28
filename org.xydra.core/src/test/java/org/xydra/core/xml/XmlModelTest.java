@@ -24,8 +24,11 @@ import org.xydra.core.model.impl.memory.MemoryField;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryObject;
 import org.xydra.core.model.impl.memory.MemoryRepository;
-import org.xydra.core.xml.impl.MiniXMLParserImpl;
-import org.xydra.core.xml.impl.XydraOutXml;
+import org.xydra.core.serialize.MiniElement;
+import org.xydra.core.serialize.XmlModel;
+import org.xydra.core.serialize.XydraOut;
+import org.xydra.core.serialize.xml.MiniParserXml;
+import org.xydra.core.serialize.xml.XydraOutXml;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
@@ -95,12 +98,12 @@ public class XmlModelTest {
 	private void testField(XReadableField field) {
 		
 		// test serializing with revisions
-		XydraOutXml out = new XydraOutXml();
+		XydraOut out = new XydraOutXml();
 		XmlModel.toXml(field, out);
 		assertTrue(out.isClosed());
 		String xml = out.getData();
-		log.debug(xml);
-		MiniElement e = new MiniXMLParserImpl().parseXml(xml);
+		log.info(xml);
+		MiniElement e = new MiniParserXml().parse(xml);
 		XField fieldAgain = XmlModel.toField(this.actorId, e);
 		assertTrue(XCompareUtils.equalState(field, fieldAgain));
 		
@@ -109,8 +112,8 @@ public class XmlModelTest {
 		XmlModel.toXml(field, out, false);
 		assertTrue(out.isClosed());
 		xml = out.getData();
-		log.debug(xml);
-		e = new MiniXMLParserImpl().parseXml(xml);
+		log.info(xml);
+		e = new MiniParserXml().parse(xml);
 		fieldAgain = XmlModel.toField(this.actorId, e);
 		assertTrue(XCompareUtils.equalTree(field, fieldAgain));
 		checkNoRevisions(fieldAgain);
@@ -148,12 +151,12 @@ public class XmlModelTest {
 	private void testModel(XReadableModel model) {
 		
 		// test serializing with revisions
-		XydraOutXml out = new XydraOutXml();
+		XydraOut out = new XydraOutXml();
 		XmlModel.toXml(model, out);
 		assertTrue(out.isClosed());
 		String xml = out.getData();
-		log.debug(xml);
-		MiniElement e = new MiniXMLParserImpl().parseXml(xml);
+		log.info(xml);
+		MiniElement e = new MiniParserXml().parse(xml);
 		XModel modelAgain = XmlModel.toModel(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalState(model, modelAgain));
 		
@@ -166,8 +169,8 @@ public class XmlModelTest {
 		XmlModel.toXml(model, out, false, true, false);
 		assertTrue(out.isClosed());
 		xml = out.getData();
-		log.debug(xml);
-		e = new MiniXMLParserImpl().parseXml(xml);
+		log.info(xml);
+		e = new MiniParserXml().parse(xml);
 		modelAgain = XmlModel.toModel(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalTree(model, modelAgain));
 		checkNoRevisions(modelAgain);
@@ -177,12 +180,12 @@ public class XmlModelTest {
 	private void testObject(XReadableObject object) {
 		
 		// test serializing with revisions
-		XydraOutXml out = new XydraOutXml();
+		XydraOut out = new XydraOutXml();
 		XmlModel.toXml(object, out);
 		assertTrue(out.isClosed());
 		String xml = out.getData();
-		log.debug(xml);
-		MiniElement e = new MiniXMLParserImpl().parseXml(xml);
+		log.info(xml);
+		MiniElement e = new MiniParserXml().parse(xml);
 		XObject objectAgain = XmlModel.toObject(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalState(object, objectAgain));
 		
@@ -195,8 +198,8 @@ public class XmlModelTest {
 		XmlModel.toXml(object, out, false, true, false);
 		assertTrue(out.isClosed());
 		xml = out.getData();
-		log.debug(xml);
-		e = new MiniXMLParserImpl().parseXml(xml);
+		log.info(xml);
+		e = new MiniParserXml().parse(xml);
 		objectAgain = XmlModel.toObject(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalTree(object, objectAgain));
 		checkNoRevisions(objectAgain);
@@ -206,12 +209,12 @@ public class XmlModelTest {
 	private void testRepository(XReadableRepository repo) {
 		
 		// test serializing with revisions
-		XydraOutXml out = new XydraOutXml();
+		XydraOut out = new XydraOutXml();
 		XmlModel.toXml(repo, out);
 		assertTrue(out.isClosed());
 		String xml = out.getData();
-		log.debug(xml);
-		MiniElement e = new MiniXMLParserImpl().parseXml(xml);
+		log.info(xml);
+		MiniElement e = new MiniParserXml().parse(xml);
 		XRepository repoAgain = XmlModel.toRepository(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalState(repo, repoAgain));
 		
@@ -220,8 +223,8 @@ public class XmlModelTest {
 		XmlModel.toXml(repo, out, false, true, false);
 		assertTrue(out.isClosed());
 		xml = out.getData();
-		log.debug(xml);
-		e = new MiniXMLParserImpl().parseXml(xml);
+		log.info(xml);
+		e = new MiniParserXml().parse(xml);
 		repoAgain = XmlModel.toRepository(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalTree(repo, repoAgain));
 		checkNoRevisions(repoAgain);

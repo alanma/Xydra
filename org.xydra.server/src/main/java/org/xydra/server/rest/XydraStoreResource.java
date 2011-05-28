@@ -16,13 +16,13 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
-import org.xydra.core.xml.MiniElement;
-import org.xydra.core.xml.XmlCommand;
-import org.xydra.core.xml.XmlStore;
-import org.xydra.core.xml.XydraOut;
-import org.xydra.core.xml.XmlStore.EventsRequest;
-import org.xydra.core.xml.impl.MiniXMLParserImpl;
-import org.xydra.core.xml.impl.XydraOutXml;
+import org.xydra.core.serialize.MiniElement;
+import org.xydra.core.serialize.XmlCommand;
+import org.xydra.core.serialize.XmlStore;
+import org.xydra.core.serialize.XydraOut;
+import org.xydra.core.serialize.XmlStore.EventsRequest;
+import org.xydra.core.serialize.xml.MiniParserXml;
+import org.xydra.core.serialize.xml.XydraOutXml;
 import org.xydra.index.query.Pair;
 import org.xydra.minio.MiniStreamWriter;
 import org.xydra.restless.Restless;
@@ -167,7 +167,7 @@ public class XydraStoreResource {
 		String commandsXml = XydraRestServer.readPostData(req);
 		List<XCommand> commandsList;
 		try {
-			MiniElement xml = new MiniXMLParserImpl().parseXml(commandsXml);
+			MiniElement xml = new MiniParserXml().parse(commandsXml);
 			commandsList = XmlCommand.toCommandList(xml, repoAddr);
 		} catch(Exception e) {
 			throw new RequestException("error parsing commands list: " + e.getMessage());

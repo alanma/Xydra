@@ -21,11 +21,11 @@ import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.model.XChangeLog;
-import org.xydra.core.xml.MiniElement;
-import org.xydra.core.xml.XmlModel;
-import org.xydra.core.xml.XydraOut;
-import org.xydra.core.xml.impl.MiniXMLParserImpl;
-import org.xydra.core.xml.impl.XydraOutXml;
+import org.xydra.core.serialize.MiniElement;
+import org.xydra.core.serialize.XmlModel;
+import org.xydra.core.serialize.XydraOut;
+import org.xydra.core.serialize.xml.MiniParserXml;
+import org.xydra.core.serialize.xml.XydraOutXml;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.XydraRuntime;
@@ -126,7 +126,7 @@ public class GaeSnapshotService {
 		
 		XRevWritableModel snapshot = null;
 		if(snapshotStr != null) {
-			MiniElement snapshotXml = new MiniXMLParserImpl().parseXml(snapshotStr.getValue());
+			MiniElement snapshotXml = new MiniParserXml().parse(snapshotStr.getValue());
 			snapshot = XmlModel.toModelState(snapshotXml, this.changes.getModelAddress());
 		}
 		

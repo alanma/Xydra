@@ -41,12 +41,12 @@ import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.core.model.impl.memory.SynchronizesChangesImpl;
-import org.xydra.core.xml.MiniElement;
-import org.xydra.core.xml.XmlCommand;
-import org.xydra.core.xml.XmlEvent;
-import org.xydra.core.xml.XydraOut;
-import org.xydra.core.xml.impl.MiniXMLParserImpl;
-import org.xydra.core.xml.impl.XydraOutXml;
+import org.xydra.core.serialize.MiniElement;
+import org.xydra.core.serialize.XmlCommand;
+import org.xydra.core.serialize.XmlEvent;
+import org.xydra.core.serialize.XydraOut;
+import org.xydra.core.serialize.xml.MiniParserXml;
+import org.xydra.core.serialize.xml.XydraOutXml;
 
 
 /**
@@ -123,7 +123,7 @@ public class SynchronizeTest {
 		XydraOut out = new XydraOutXml();
 		XmlCommand.toXml(command, out, this.localModel.getAddress());
 		
-		MiniElement e = new MiniXMLParserImpl().parseXml(out.getData());
+		MiniElement e = new MiniParserXml().parse(out.getData());
 		return XmlCommand.toCommand(e, this.remoteModel.getAddress());
 		
 	}
@@ -133,7 +133,7 @@ public class SynchronizeTest {
 		XydraOut out = new XydraOutXml();
 		XmlEvent.toXml(event, out, this.remoteModel.getAddress());
 		
-		MiniElement e = new MiniXMLParserImpl().parseXml(out.getData());
+		MiniElement e = new MiniParserXml().parse(out.getData());
 		return XmlEvent.toEvent(e, this.localModel.getAddress());
 		
 	}

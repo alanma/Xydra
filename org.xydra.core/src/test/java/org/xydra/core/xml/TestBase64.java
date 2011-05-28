@@ -3,6 +3,7 @@ package org.xydra.core.xml;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+import org.xydra.core.serialize.Base64;
 
 
 public class TestBase64 {

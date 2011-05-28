@@ -25,12 +25,12 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
-import org.xydra.core.xml.MiniElement;
-import org.xydra.core.xml.XmlCommand;
-import org.xydra.core.xml.XmlStore;
-import org.xydra.core.xml.XydraOut;
-import org.xydra.core.xml.impl.MiniXMLParserImpl;
-import org.xydra.core.xml.impl.XydraOutXml;
+import org.xydra.core.serialize.MiniElement;
+import org.xydra.core.serialize.XmlCommand;
+import org.xydra.core.serialize.XmlStore;
+import org.xydra.core.serialize.XydraOut;
+import org.xydra.core.serialize.xml.MiniParserXml;
+import org.xydra.core.serialize.xml.XydraOutXml;
 import org.xydra.index.query.Pair;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
@@ -144,7 +144,7 @@ public class XydraStoreRestClient implements XydraStore {
 				return null;
 			}
 			
-			MiniElement xml = new MiniXMLParserImpl().parseXml(content);
+			MiniElement xml = new MiniParserXml().parse(content);
 			
 			Throwable t = XmlStore.toException(xml);
 			if(t != null) {
@@ -361,7 +361,7 @@ public class XydraStoreRestClient implements XydraStore {
 				return null;
 			}
 			
-			MiniElement xml = new MiniXMLParserImpl().parseXml(content);
+			MiniElement xml = new MiniParserXml().parse(content);
 			
 			Throwable t = XmlStore.toException(xml);
 			if(t != null) {

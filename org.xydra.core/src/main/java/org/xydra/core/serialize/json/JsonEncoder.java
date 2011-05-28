@@ -1,7 +1,7 @@
 /*
  * Created on 16.05.2005
  */
-package org.xydra.core.xml.impl;
+package org.xydra.core.serialize.json;
 
 public class JsonEncoder {
 	

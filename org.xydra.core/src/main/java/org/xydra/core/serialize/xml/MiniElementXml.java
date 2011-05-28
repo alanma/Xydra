@@ -1,42 +1,29 @@
-package org.xydra.client.gwt.xml.impl;
+package org.xydra.core.serialize.xml;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.xydra.annotations.RunsInGWT;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.core.serialize.MiniElement;
-
-import com.google.gwt.xml.client.CharacterData;
-import com.google.gwt.xml.client.Element;
-import com.google.gwt.xml.client.Node;
-import com.google.gwt.xml.client.NodeList;
 
 
 /**
- * {@link MiniElement} implementation that wraps an
- * com.google.gwt.xml.client.Element.
+ * {@link MiniElement} implementation that wraps an org.w3c.dom.Element.
  * 
  * @author dscharrer
  * 
  */
-@RunsInGWT(true)
-public class GWTMiniElementImpl implements MiniElement {
+@RequiresAppEngine(false)
+public class MiniElementXml implements MiniElement {
 	
 	Element element;
 	
-	protected GWTMiniElementImpl(Element element) {
+	protected MiniElementXml(Element element) {
 		this.element = element;
-	}
-	
-	private Iterator<MiniElement> nodeListToIterator(NodeList nodes) {
-		List<MiniElement> list = new ArrayList<MiniElement>();
-		for(int i = 0; i < nodes.getLength(); ++i) {
-			Node node = nodes.item(i);
-			if(node instanceof Element)
-				list.add(new GWTMiniElementImpl((Element)node));
-		}
-		return list.iterator();
 	}
 	
 	public String getAttribute(String attributeName) {
@@ -45,6 +32,17 @@ public class GWTMiniElementImpl implements MiniElement {
 		} else {
 			return null;
 		}
+	}
+	
+	private Iterator<MiniElement> nodeListToIterator(NodeList nodes) {
+		List<MiniElement> list = new ArrayList<MiniElement>();
+		for(int i = 0; i < nodes.getLength(); ++i) {
+			Node node = nodes.item(i);
+			if(node instanceof Element) {
+				list.add(new MiniElementXml((Element)node));
+			}
+		}
+		return list.iterator();
 	}
 	
 	@Override
@@ -61,18 +59,7 @@ public class GWTMiniElementImpl implements MiniElement {
 	
 	@Override
 	public String getContent(String name) {
-		return getTextContent(this.element);
-	}
-	
-	private String getTextContent(Node element) {
-		StringBuffer sb = new StringBuffer();
-		final NodeList nodes = element.getChildNodes();
-		for(int i = 0; i < nodes.getLength(); ++i) {
-			Node node = nodes.item(i);
-			if(node instanceof CharacterData)
-				sb.append(((CharacterData)node).getData());
-		}
-		return sb.toString();
+		return this.element.getTextContent();
 	}
 	
 	@Override
@@ -81,7 +68,7 @@ public class GWTMiniElementImpl implements MiniElement {
 		for(int i = 0; i < nodes.getLength(); ++i) {
 			Node node = nodes.item(i);
 			if(node instanceof Element) {
-				return new GWTMiniElementImpl((Element)node);
+				return new MiniElementXml((Element)node);
 			}
 		}
 		return null;
@@ -102,7 +89,7 @@ public class GWTMiniElementImpl implements MiniElement {
 				if(((Element)node).hasAttribute("isNull")) {
 					objects.add(null);
 				} else {
-					objects.add(getTextContent(node));
+					objects.add(node.getTextContent());
 				}
 			}
 		}

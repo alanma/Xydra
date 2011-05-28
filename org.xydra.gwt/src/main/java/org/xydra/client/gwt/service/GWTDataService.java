@@ -10,11 +10,11 @@ import org.xydra.client.XDataService;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
-import org.xydra.core.xml.MiniElement;
-import org.xydra.core.xml.MiniXMLParser;
-import org.xydra.core.xml.XmlModel;
-import org.xydra.core.xml.XydraOut;
-import org.xydra.core.xml.impl.XydraOutXml;
+import org.xydra.core.serialize.MiniElement;
+import org.xydra.core.serialize.MiniParser;
+import org.xydra.core.serialize.XmlModel;
+import org.xydra.core.serialize.XydraOut;
+import org.xydra.core.serialize.xml.XydraOutXml;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
@@ -37,7 +37,7 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 	
 	static private final XID actorId = XX.toId(GWTDataService.class.getName());
 	
-	public GWTDataService(String baseUrl, MiniXMLParser parser) {
+	public GWTDataService(String baseUrl, MiniParser parser) {
 		super(baseUrl, parser);
 	}
 	

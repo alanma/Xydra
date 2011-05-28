@@ -1,13 +1,13 @@
-package org.xydra.core.xml;
+package org.xydra.core.serialize;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
@@ -29,6 +29,7 @@ import org.xydra.store.access.impl.memory.MemoryAuthorisationManager;
 @RequiresAppEngine(false)
 public class XmlAccess {
 	
+	private static final String NAME_DEFINITIONS = "rights";
 	private static final String ACCESS_ATTRIBUTE = "access";
 	private static final String ACTOR_ATTRIBUTE = "actor";
 	
@@ -49,21 +50,21 @@ public class XmlAccess {
 		
 		XmlUtils.checkElementName(xml, XACCESSDEFINITION_ELEMENT);
 		
-		String actorStr = XmlUtils.getRequiredAttribbute(xml, ACTOR_ATTRIBUTE,
+		Object actorStr = XmlUtils.getRequiredAttribute(xml, ACTOR_ATTRIBUTE,
 		        XACCESSDEFINITION_ELEMENT);
-		XID actor = actorStr == null ? null : XX.toId(actorStr);
+		XID actor = actorStr == null ? null : XX.toId(actorStr.toString());
 		
-		String resourceStr = XmlUtils.getRequiredAttribbute(xml, RESOURCE_ATTRIBUTE,
+		Object resourceStr = XmlUtils.getRequiredAttribute(xml, RESOURCE_ATTRIBUTE,
 		        XACCESSDEFINITION_ELEMENT);
-		XAddress resource = XX.toAddress(resourceStr);
+		XAddress resource = XX.toAddress(resourceStr.toString());
 		
-		String accessStr = XmlUtils.getRequiredAttribbute(xml, ACCESS_ATTRIBUTE,
+		Object accessStr = XmlUtils.getRequiredAttribute(xml, ACCESS_ATTRIBUTE,
 		        XACCESSDEFINITION_ELEMENT);
-		XID access = XX.toId(accessStr);
+		XID access = XX.toId(accessStr.toString());
 		
-		String allowedStr = XmlUtils.getRequiredAttribbute(xml, ALLOWED_ATTRIBUTE,
+		Object allowedStr = XmlUtils.getRequiredAttribute(xml, ALLOWED_ATTRIBUTE,
 		        XACCESSDEFINITION_ELEMENT);
-		boolean allowed = Boolean.parseBoolean(allowedStr);
+		boolean allowed = XmlValue.toBoolean(allowedStr);
 		
 		return new MemoryAccessDefinition(access, resource, actor, allowed);
 	}
@@ -83,7 +84,8 @@ public class XmlAccess {
 		
 		List<XAccessRightDefinition> result = new ArrayList<XAccessRightDefinition>();
 		
-		Iterator<MiniElement> it = xml.getElements();
+		Iterator<MiniElement> it = xml.getChildrenByType(NAME_DEFINITIONS,
+		        XACCESSDEFINITION_ELEMENT);
 		while(it.hasNext()) {
 			result.add(toAccessDefinition(it.next()));
 		}
@@ -105,7 +107,8 @@ public class XmlAccess {
 		
 		XAuthorisationManager arm = new MemoryAuthorisationManager(groups);
 		
-		Iterator<MiniElement> it = xml.getElements();
+		Iterator<MiniElement> it = xml.getChildrenByType(NAME_DEFINITIONS,
+		        XACCESSDEFINITION_ELEMENT);
 		while(it.hasNext()) {
 			XAccessRightDefinition def = toAccessDefinition(it.next());
 			arm.getAuthorisationDatabase().setAccess(def.getActor(), def.getResource(),
@@ -125,6 +128,7 @@ public class XmlAccess {
 		
 		out.open(XACCESSDEFS_ELEMENT);
 		
+		out.children(NAME_DEFINITIONS, true, XACCESSDEFINITION_ELEMENT);
 		for(XAccessRightDefinition def : defs) {
 			toXml(def, out);
 		}
@@ -143,11 +147,11 @@ public class XmlAccess {
 		
 		out.open(XACCESSDEFINITION_ELEMENT);
 		
-		out.attribute(ACCESS_ATTRIBUTE, def.getAccess().toString());
-		out.attribute(RESOURCE_ATTRIBUTE, def.getResource().toString());
+		out.attribute(ACCESS_ATTRIBUTE, def.getAccess());
+		out.attribute(RESOURCE_ATTRIBUTE, def.getResource());
 		if(def.getActor() != null)
-			out.attribute(ACTOR_ATTRIBUTE, def.getActor().toString());
-		out.attribute(ALLOWED_ATTRIBUTE, Boolean.toString(def.isAllowed()));
+			out.attribute(ACTOR_ATTRIBUTE, def.getActor());
+		out.attribute(ALLOWED_ATTRIBUTE, def.isAllowed());
 		
 		out.close(XACCESSDEFINITION_ELEMENT);
 		
@@ -159,7 +163,8 @@ public class XmlAccess {
 	 * 
 	 * @param out The XML encoder to write to.
 	 */
-	public static void toXml(XAuthorisationManager arm, XydraOut out) throws IllegalArgumentException {
+	public static void toXml(XAuthorisationManager arm, XydraOut out)
+	        throws IllegalArgumentException {
 		if(arm.getAuthorisationDatabase() != null) {
 			toXml(arm.getAuthorisationDatabase().getDefinitions(), out);
 		}

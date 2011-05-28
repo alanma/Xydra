@@ -1,4 +1,4 @@
-package org.xydra.core.xml;
+package org.xydra.core.serialize;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -37,7 +37,7 @@ import org.xydra.base.value.XValue;
 
 /**
  * Collection of methods to (de-)serialize variants of {@link XValue} to and
- * from their XML representation.
+ * from their XML or JSON representation.
  * 
  * @author dscharrer
  */
@@ -72,37 +72,37 @@ public class XmlValue {
 	private static final String NAME_VALUES = "values";
 	private static final String NULL_VALUE = "true";
 	
-	private static List<XAddress> getAddressListContents(MiniElement xml) {
+	public static List<XAddress> getAddressListContents(MiniElement ele) {
 		
 		List<XAddress> list = new ArrayList<XAddress>();
 		
-		Iterator<MiniElement> entryIterator = xml.getElementsByTagName(XADDRESS_ELEMENT);
+		Iterator<Object> entryIterator = ele.getValues(NAME_VALUES, XADDRESS_ELEMENT);
 		while(entryIterator.hasNext()) {
-			MiniElement entryElement = entryIterator.next();
-			list.add(toAddress(entryElement));
+			Object value = entryIterator.next();
+			list.add(value == null ? null : XX.toAddress(value.toString()));
 		}
 		return list;
 	}
 	
-	public static List<XID> getIdListContents(MiniElement xml) {
+	public static List<XID> getIdListContents(MiniElement ele) {
 		
 		List<XID> list = new ArrayList<XID>();
 		
-		Iterator<MiniElement> entryIterator = xml.getElementsByTagName(XID_ELEMENT);
+		Iterator<Object> entryIterator = ele.getValues(NAME_VALUES, XID_ELEMENT);
 		while(entryIterator.hasNext()) {
-			MiniElement entryElement = entryIterator.next();
-			list.add(toId(entryElement));
+			Object value = entryIterator.next();
+			list.add(value == null ? null : XX.toId(value.toString()));
 		}
 		return list;
 	}
 	
-	private static List<String> getStringListContents(MiniElement xml) {
+	public static List<String> getStringListContents(MiniElement ele) {
 		List<String> list = new ArrayList<String>();
 		
-		Iterator<MiniElement> entryIterator = xml.getElementsByTagName(XSTRING_ELEMENT);
+		Iterator<Object> entryIterator = ele.getValues(NAME_VALUES, XSTRING_ELEMENT);
 		while(entryIterator.hasNext()) {
-			MiniElement entryElement = entryIterator.next();
-			list.add(toString(entryElement));
+			Object value = entryIterator.next();
+			list.add(value == null ? null : value.toString());
 		}
 		return list;
 	}
@@ -112,15 +112,15 @@ public class XmlValue {
 	 * @throws IllegalArgumentException if the given XML element is not a valid
 	 *             representation of an {@link XAddress}
 	 */
-	public static XAddress toAddress(MiniElement xml) {
+	public static XAddress toAddress(MiniElement ele) {
 		
-		XmlUtils.checkElementName(xml, XADDRESS_ELEMENT);
+		XmlUtils.checkElementName(ele, XADDRESS_ELEMENT);
 		
-		if(xml.getAttribute(NULL_ATTRIBUTE) != null) {
+		if(ele.getAttribute(NULL_ATTRIBUTE) != null) {
 			return null;
 		}
 		
-		String data = xml.getData();
+		String data = ele.getContent(NAME_CONTENT).toString();
 		
 		try {
 			return XX.toAddress(data);
@@ -137,11 +137,11 @@ public class XmlValue {
 	 * @throws IllegalArgumentException if the given XML element is not a valid
 	 *             representation of an {@link XAddressListValue}
 	 */
-	public static XAddressListValue toAddressListValue(MiniElement xml) {
+	public static XAddressListValue toAddressListValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(xml, XADDRESSLIST_ELEMENT);
+		XmlUtils.checkElementName(ele, XADDRESSLIST_ELEMENT);
 		
-		List<XAddress> list = getAddressListContents(xml);
+		List<XAddress> list = getAddressListContents(ele);
 		
 		return XV.toAddressListValue(list);
 		
@@ -153,15 +153,15 @@ public class XmlValue {
 	 * @throws IllegalArgumentException if the given XML element is not a valid
 	 *             representation of an {@link XAddressSetValue}
 	 */
-	public static XAddressSetValue toAddressSetValue(MiniElement xml) {
+	public static XAddressSetValue toAddressSetValue(MiniElement ele) {
 		
-		if(xml.getName().equals(XADDRESSSORTEDSET_ELEMENT)) {
-			return toAddressSortedSetValue(xml);
+		if(ele.getType().equals(XADDRESSSORTEDSET_ELEMENT)) {
+			return toAddressSortedSetValue(ele);
 		}
 		
-		XmlUtils.checkElementName(xml, XADDRESSSET_ELEMENT);
+		XmlUtils.checkElementName(ele, XADDRESSSET_ELEMENT);
 		
-		List<XAddress> list = getAddressListContents(xml);
+		List<XAddress> list = getAddressListContents(ele);
 		
 		return XV.toAddressSetValue(list);
 		
@@ -173,18 +173,14 @@ public class XmlValue {
 	 * @throws IllegalArgumentException if the given XML element is not a valid
 	 *             representation of an {@link XAddressSortedSetValue}
 	 */
-	public static XAddressSortedSetValue toAddressSortedSetValue(MiniElement xml) {
+	public static XAddressSortedSetValue toAddressSortedSetValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(xml, XADDRESSSORTEDSET_ELEMENT);
+		XmlUtils.checkElementName(ele, XADDRESSSORTEDSET_ELEMENT);
 		
-		List<XAddress> list = getAddressListContents(xml);
+		List<XAddress> list = getAddressListContents(ele);
 		
 		return XV.toAddressSortedSetValue(list);
 		
-	}
-	
-	private static boolean toBoolean(MiniElement xml) {
-		return Boolean.parseBoolean(xml.getData());
 	}
 	
 	/**
@@ -194,20 +190,32 @@ public class XmlValue {
 	 *             representation of an {@link XBooleanListValue}
 	 */
 	@SuppressWarnings("boxing")
-	public static XBooleanListValue toBooleanListValue(MiniElement xml) {
+	public static XBooleanListValue toBooleanListValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(xml, XBOOLEANLIST_ELEMENT);
+		XmlUtils.checkElementName(ele, XBOOLEANLIST_ELEMENT);
 		
 		List<Boolean> list = new ArrayList<Boolean>();
 		
-		Iterator<MiniElement> entryIterator = xml.getElementsByTagName(XBOOLEAN_ELEMENT);
+		Iterator<Object> entryIterator = ele.getValues(NAME_VALUES, XBOOLEAN_ELEMENT);
 		while(entryIterator.hasNext()) {
-			MiniElement entryElement = entryIterator.next();
-			list.add(toBoolean(entryElement));
+			Object value = entryIterator.next();
+			if(value == null) {
+				list.add(Boolean.FALSE);
+			} else {
+				list.add(toBoolean(value));
+			}
 		}
 		
 		return XV.toBooleanListValue(list);
 		
+	}
+	
+	public static boolean toBoolean(Object value) {
+		if(value instanceof Boolean) {
+			return (Boolean)value;
+		} else {
+			return Boolean.valueOf(value.toString());
+		}
 	}
 	
 	/**
@@ -215,11 +223,13 @@ public class XmlValue {
 	 * @throws IllegalArgumentException if the given XML element is not a valid
 	 *             representation of an {@link XBooleanValue}
 	 */
-	public static XBooleanValue toBooleanValue(MiniElement xml) {
+	public static XBooleanValue toBooleanValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(xml, XBOOLEAN_ELEMENT);
+		XmlUtils.checkElementName(ele, XBOOLEAN_ELEMENT);
 		
-		return XV.toValue(toBoolean(xml));
+		boolean value = toBoolean(ele.getContent(NAME_CONTENT));
+		
+		return XV.toValue(value);
 	}
 	
 	/**
@@ -227,25 +237,26 @@ public class XmlValue {
 	 * @throws IllegalArgumentException if the given XML element is not a valid
 	 *             representation of an {@link XByteListValue}
 	 */
-	public static XByteListValue toByteListValue(MiniElement xml) {
+	public static XByteListValue toByteListValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(xml, XBYTELIST_ELEMENT);
+		XmlUtils.checkElementName(ele, XBYTELIST_ELEMENT);
 		
-		byte[] array = Base64.decode(xml.getData());
+		byte[] array = Base64.decode(ele.getContent(NAME_CONTENT).toString());
 		
 		return XV.toValue(array);
 		
 	}
 	
-	private static double toDouble(MiniElement xml) {
+	public static double toDouble(Object value) {
 		
-		String data = xml.getData();
+		if(value instanceof Number) {
+			return ((Number)value).doubleValue();
+		}
 		
 		try {
-			return Double.parseDouble(data);
+			return Double.parseDouble(value.toString());
 		} catch(Exception e) {
-			throw new RuntimeException("An <" + XDOUBLE_ELEMENT
-			        + "> element must contain a valid double, got " + data, e);
+			throw new RuntimeException("Expected a valid double, got " + value, e);
 		}
 		
 	}
@@ -257,16 +268,16 @@ public class XmlValue {
 	 *             representation of an {@link XDoubleListValue}
 	 */
 	@SuppressWarnings("boxing")
-	public static XDoubleListValue toDoubleListValue(MiniElement xml) {
+	public static XDoubleListValue toDoubleListValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(xml, XDOUBLELIST_ELEMENT);
+		XmlUtils.checkElementName(ele, XDOUBLELIST_ELEMENT);
 		
 		List<Double> list = new ArrayList<Double>();
 		
-		Iterator<MiniElement> entryIterator = xml.getElementsByTagName(XDOUBLE_ELEMENT);
+		Iterator<Object> entryIterator = ele.getValues(NAME_VALUES, XDOUBLE_ELEMENT);
 		while(entryIterator.hasNext()) {
-			MiniElement entryElement = entryIterator.next();
-			list.add(toDouble(entryElement));
+			Object value = entryIterator.next();
+			list.add(toDouble(value));
 		}
 		
 		return XV.toDoubleListValue(list);
@@ -278,11 +289,11 @@ public class XmlValue {
 	 * @throws IllegalArgumentException if the given XML element is not a valid
 	 *             representation of an {@link XDoubleValue}
 	 */
-	public static XDoubleValue toDoubleValue(MiniElement xml) {
+	public static XDoubleValue toDoubleValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(xml, XDOUBLE_ELEMENT);
+		XmlUtils.checkElementName(ele, XDOUBLE_ELEMENT);
 		
-		return XV.toValue(toDouble(xml));
+		return XV.toValue(toDouble(ele.getContent(NAME_CONTENT)));
 	}
 	
 	/**
@@ -290,15 +301,15 @@ public class XmlValue {
 	 * @throws IllegalArgumentException if the given XML element is not a valid
 	 *             representation of an {@link XID}
 	 */
-	public static XID toId(MiniElement xml) {
+	public static XID toId(MiniElement ele) {
 		
-		XmlUtils.checkElementName(xml, XID_ELEMENT);
+		XmlUtils.checkElementName(ele, XID_ELEMENT);
 		
-		if(xml.getAttribute(NULL_ATTRIBUTE) != null) {
+		if(ele.getAttribute(NULL_ATTRIBUTE) != null) {
 			return null;
 		}
 		
-		String data = xml.getData();
+		String data = ele.getContent(NAME_CONTENT).toString();
 		
 		try {
 			return XX.toId(data);
@@ -314,11 +325,11 @@ public class XmlValue {
 	 * @throws IllegalArgumentException if the given XML element is not a valid
 	 *             representation of an {@link XIDListValue}
 	 */
-	public static XIDListValue toIdListValue(MiniElement xml) {
+	public static XIDListValue toIdListValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(xml, XIDLIST_ELEMENT);
+		XmlUtils.checkElementName(ele, XIDLIST_ELEMENT);
 		
-		List<XID> list = getIdListContents(xml);
+		List<XID> list = getIdListContents(ele);
 		
 		return XV.toIDListValue(list);
 		
@@ -329,15 +340,15 @@ public class XmlValue {
 	 * @throws IllegalArgumentException if the given XML element is not a valid
 	 *             representation of an {@link XIDSetValue}
 	 */
-	public static XIDSetValue toIdSetValue(MiniElement xml) {
+	public static XIDSetValue toIdSetValue(MiniElement ele) {
 		
-		if(xml.getName().equals(XIDSORTEDSET_ELEMENT)) {
-			return toIdSortedSetValue(xml);
+		if(ele.getType().equals(XIDSORTEDSET_ELEMENT)) {
+			return toIdSortedSetValue(ele);
 		}
 		
-		XmlUtils.checkElementName(xml, XIDSET_ELEMENT);
+		XmlUtils.checkElementName(ele, XIDSET_ELEMENT);
 		
-		List<XID> list = getIdListContents(xml);
+		List<XID> list = getIdListContents(ele);
 		
 		return XV.toIDSetValue(list);
 		
@@ -349,25 +360,26 @@ public class XmlValue {
 	 * @throws IllegalArgumentException if the given XML element is not a valid
 	 *             representation of an {@link XIDSortedSetValue}
 	 */
-	public static XIDSortedSetValue toIdSortedSetValue(MiniElement xml) {
+	public static XIDSortedSetValue toIdSortedSetValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(xml, XIDSORTEDSET_ELEMENT);
+		XmlUtils.checkElementName(ele, XIDSORTEDSET_ELEMENT);
 		
-		List<XID> list = getIdListContents(xml);
+		List<XID> list = getIdListContents(ele);
 		
 		return XV.toIDSortedSetValue(list);
 		
 	}
 	
-	private static int toInteger(MiniElement xml) {
+	public static int toInteger(Object value) {
 		
-		String data = xml.getData();
+		if(value instanceof Number) {
+			return ((Number)value).intValue();
+		}
 		
 		try {
-			return Integer.parseInt(data);
+			return Integer.parseInt(value.toString());
 		} catch(Exception e) {
-			throw new RuntimeException("An <" + XINTEGER_ELEMENT
-			        + "> element must contain a valid integer, got " + data, e);
+			throw new RuntimeException("Expected a valid integer, got " + value, e);
 		}
 		
 	}
@@ -379,16 +391,16 @@ public class XmlValue {
 	 *             representation of an {@link XIntegerListValue}
 	 */
 	@SuppressWarnings("boxing")
-	public static XIntegerListValue toIntegerListValue(MiniElement xml) {
+	public static XIntegerListValue toIntegerListValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(xml, XINTEGERLIST_ELEMENT);
+		XmlUtils.checkElementName(ele, XINTEGERLIST_ELEMENT);
 		
 		List<Integer> list = new ArrayList<Integer>();
 		
-		Iterator<MiniElement> entryIterator = xml.getElementsByTagName(XINTEGER_ELEMENT);
+		Iterator<Object> entryIterator = ele.getValues(NAME_VALUES, XINTEGER_ELEMENT);
 		while(entryIterator.hasNext()) {
-			MiniElement entryElement = entryIterator.next();
-			list.add(toInteger(entryElement));
+			Object value = entryIterator.next();
+			list.add(toInteger(value));
 		}
 		
 		return XV.toIntegerListValue(list);
@@ -400,22 +412,23 @@ public class XmlValue {
 	 * @throws IllegalArgumentException if the given XML element is not a valid
 	 *             representation of an {@link XIntegerValue}
 	 */
-	public static XIntegerValue toIntegerValue(MiniElement xml) {
+	public static XIntegerValue toIntegerValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(xml, XINTEGER_ELEMENT);
+		XmlUtils.checkElementName(ele, XINTEGER_ELEMENT);
 		
-		return XV.toValue(toInteger(xml));
+		return XV.toValue(toInteger(ele.getContent(NAME_CONTENT)));
 	}
 	
-	private static long toLong(MiniElement xml) {
+	public static long toLong(Object value) {
 		
-		String data = xml.getData();
+		if(value instanceof Number) {
+			return ((Number)value).longValue();
+		}
 		
 		try {
-			return Long.parseLong(data);
+			return Long.parseLong(value.toString());
 		} catch(Exception e) {
-			throw new RuntimeException("An <" + XLONG_ELEMENT
-			        + "> element must contain a valid long, got " + data, e);
+			throw new RuntimeException("Expected a valid long, got " + value, e);
 		}
 		
 	}
@@ -426,16 +439,16 @@ public class XmlValue {
 	 *             representation of an {@link XLongListValue}
 	 */
 	@SuppressWarnings("boxing")
-	public static XLongListValue toLongListValue(MiniElement xml) {
+	public static XLongListValue toLongListValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(xml, XLONGLIST_ELEMENT);
+		XmlUtils.checkElementName(ele, XLONGLIST_ELEMENT);
 		
 		List<Long> list = new ArrayList<Long>();
 		
-		Iterator<MiniElement> entryIterator = xml.getElementsByTagName(XLONG_ELEMENT);
+		Iterator<Object> entryIterator = ele.getValues(NAME_VALUES, XLONG_ELEMENT);
 		while(entryIterator.hasNext()) {
-			MiniElement entryElement = entryIterator.next();
-			list.add(toLong(entryElement));
+			Object value = entryIterator.next();
+			list.add(toLong(value));
 		}
 		
 		return XV.toLongListValue(list);
@@ -447,21 +460,11 @@ public class XmlValue {
 	 * @throws IllegalArgumentException if the given XML element is not a valid
 	 *             representation of an {@link XLongValue}
 	 */
-	public static XLongValue toLongValue(MiniElement xml) {
+	public static XLongValue toLongValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(xml, XLONG_ELEMENT);
+		XmlUtils.checkElementName(ele, XLONG_ELEMENT);
 		
-		return XV.toValue(toLong(xml));
-	}
-	
-	private static String toString(MiniElement xml) {
-		
-		if(xml.getAttribute(NULL_ATTRIBUTE) != null) {
-			return null;
-		}
-		
-		return xml.getData();
-		
+		return XV.toValue(toLong(ele.getContent(NAME_CONTENT)));
 	}
 	
 	/**
@@ -470,11 +473,11 @@ public class XmlValue {
 	 * @throws IllegalArgumentException if the given XML element is not a valid
 	 *             representation of an {@link XStringListValue}
 	 */
-	public static XStringListValue toStringListValue(MiniElement xml) {
+	public static XStringListValue toStringListValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(xml, XSTRINGLIST_ELEMENT);
+		XmlUtils.checkElementName(ele, XSTRINGLIST_ELEMENT);
 		
-		List<String> list = getStringListContents(xml);
+		List<String> list = getStringListContents(ele);
 		
 		return XV.toStringListValue(list);
 		
@@ -485,11 +488,11 @@ public class XmlValue {
 	 * @throws IllegalArgumentException if the given XML element is not a valid
 	 *             representation of an {@link XStringSetValue}
 	 */
-	public static XStringSetValue toStringSetValue(MiniElement xml) {
+	public static XStringSetValue toStringSetValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(xml, XSTRINGSET_ELEMENT);
+		XmlUtils.checkElementName(ele, XSTRINGSET_ELEMENT);
 		
-		List<String> list = getStringListContents(xml);
+		List<String> list = getStringListContents(ele);
 		
 		return XV.toStringSetValue(list);
 		
@@ -500,11 +503,15 @@ public class XmlValue {
 	 * @throws IllegalArgumentException if the given XML element is not a valid
 	 *             representation of an {@link XStringValue}
 	 */
-	public static XStringValue toStringValue(MiniElement xml) {
+	public static XStringValue toStringValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(xml, XSTRING_ELEMENT);
+		XmlUtils.checkElementName(ele, XSTRING_ELEMENT);
 		
-		return XV.toValue(toString(xml));
+		if(ele.getAttribute(NULL_ATTRIBUTE) != null) {
+			return XV.toValue((String)null);
+		}
+		
+		return XV.toValue(ele.getContent(NAME_CONTENT).toString());
 	}
 	
 	/**
@@ -512,57 +519,57 @@ public class XmlValue {
 	 * @throws IllegalArgumentException if the given XML element is not a valid
 	 *             representation of an {@link XValue}
 	 */
-	public static XValue toValue(MiniElement xml) {
+	public static XValue toValue(MiniElement ele) {
 		
-		if(isNullElement(xml)) {
+		if(isNullElement(ele)) {
 			return null;
 		}
 		
 		// IMPROVE consider using a (hash)map as the number of XValue types
 		// increases
-		String elementName = xml.getName();
+		String elementName = ele.getType();
 		if(elementName.equals(XBOOLEAN_ELEMENT)) {
-			return toBooleanValue(xml);
+			return toBooleanValue(ele);
 		} else if(elementName.equals(XDOUBLE_ELEMENT)) {
-			return toDoubleValue(xml);
+			return toDoubleValue(ele);
 		} else if(elementName.equals(XINTEGER_ELEMENT)) {
-			return toIntegerValue(xml);
+			return toIntegerValue(ele);
 		} else if(elementName.equals(XLONG_ELEMENT)) {
-			return toLongValue(xml);
+			return toLongValue(ele);
 		} else if(elementName.equals(XSTRING_ELEMENT)) {
-			return toStringValue(xml);
+			return toStringValue(ele);
 		} else if(elementName.equals(XID_ELEMENT)) {
-			return toId(xml);
+			return toId(ele);
 		} else if(elementName.equals(XADDRESS_ELEMENT)) {
-			return toAddress(xml);
+			return toAddress(ele);
 		} else if(elementName.equals(XBOOLEANLIST_ELEMENT)) {
-			return toBooleanListValue(xml);
+			return toBooleanListValue(ele);
 		} else if(elementName.equals(XDOUBLELIST_ELEMENT)) {
-			return toDoubleListValue(xml);
+			return toDoubleListValue(ele);
 		} else if(elementName.equals(XINTEGERLIST_ELEMENT)) {
-			return toIntegerListValue(xml);
+			return toIntegerListValue(ele);
 		} else if(elementName.equals(XLONGLIST_ELEMENT)) {
-			return toLongListValue(xml);
+			return toLongListValue(ele);
 		} else if(elementName.equals(XSTRINGLIST_ELEMENT)) {
-			return toStringListValue(xml);
+			return toStringListValue(ele);
 		} else if(elementName.equals(XIDLIST_ELEMENT)) {
-			return toIdListValue(xml);
+			return toIdListValue(ele);
 		} else if(elementName.equals(XADDRESSLIST_ELEMENT)) {
-			return toAddressListValue(xml);
+			return toAddressListValue(ele);
 		} else if(elementName.equals(XSTRINGSET_ELEMENT)) {
-			return toStringSetValue(xml);
+			return toStringSetValue(ele);
 		} else if(elementName.equals(XIDSET_ELEMENT)) {
-			return toIdSetValue(xml);
+			return toIdSetValue(ele);
 		} else if(elementName.equals(XADDRESSSET_ELEMENT)) {
-			return toAddressSetValue(xml);
+			return toAddressSetValue(ele);
 		} else if(elementName.equals(XBYTELIST_ELEMENT)) {
-			return toByteListValue(xml);
+			return toByteListValue(ele);
 		} else if(elementName.equals(XIDSORTEDSET_ELEMENT)) {
-			return toIdSortedSetValue(xml);
+			return toIdSortedSetValue(ele);
 		} else if(elementName.equals(XADDRESSSORTEDSET_ELEMENT)) {
-			return toAddressSortedSetValue(xml);
+			return toAddressSortedSetValue(ele);
 		}
-		throw new RuntimeException("Cannot deserialize " + xml + " as an XValue.");
+		throw new RuntimeException("Cannot deserialize " + ele + " as an XValue.");
 	}
 	
 	/**
@@ -737,7 +744,7 @@ public class XmlValue {
 		
 		xo.open(XID_ELEMENT);
 		
-		xo.content(NAME_CONTENT, xvalue.toString());
+		xo.content(NAME_CONTENT, xvalue);
 		
 		xo.close(XID_ELEMENT);
 		
@@ -782,7 +789,7 @@ public class XmlValue {
 		
 		xo.children(NAME_VALUES, true);
 		for(XID value : list) {
-			xo.value(XID_ELEMENT, value == null ? null : value.toString());
+			xo.value(XID_ELEMENT, value);
 		}
 		
 	}
@@ -1011,8 +1018,8 @@ public class XmlValue {
 		
 	}
 	
-	public static boolean isNullElement(MiniElement xml) {
-		return XNULL_ELEMENT.equals(xml.getName());
+	public static boolean isNullElement(MiniElement ele) {
+		return XNULL_ELEMENT.equals(ele.getType());
 	}
 	
 	public static void saveNullElement(XydraOut out) {

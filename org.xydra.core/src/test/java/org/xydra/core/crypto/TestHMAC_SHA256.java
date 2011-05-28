@@ -3,7 +3,7 @@ package org.xydra.core.crypto;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.xydra.core.xml.Base64;
+import org.xydra.core.serialize.Base64;
 
 
 public class TestHMAC_SHA256 {

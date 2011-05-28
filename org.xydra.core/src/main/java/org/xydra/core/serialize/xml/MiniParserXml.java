@@ -1,4 +1,4 @@
-package org.xydra.core.xml.impl;
+package org.xydra.core.serialize.xml;
 
 import java.io.StringReader;
 
@@ -9,18 +9,18 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xydra.annotations.RequiresAppEngine;
-import org.xydra.core.xml.MiniElement;
-import org.xydra.core.xml.MiniXMLParser;
+import org.xydra.core.serialize.MiniElement;
+import org.xydra.core.serialize.MiniParser;
 
 
 /**
- * {@link MiniXMLParser} implementation that uses a standard java XML parser.
+ * {@link MiniParser} implementation that uses a standard java XML parser.
  * 
  * @author dscharrer
  * 
  */
 @RequiresAppEngine(false)
-public class MiniXMLParserImpl implements MiniXMLParser {
+public class MiniParserXml implements MiniParser {
 	
 	private static DocumentBuilder parser = null;
 	
@@ -31,7 +31,7 @@ public class MiniXMLParserImpl implements MiniXMLParser {
 		return parser;
 	}
 	
-	public synchronized MiniElement parseXml(String string) {
+	public synchronized MiniElement parse(String string) {
 		InputSource is = new InputSource(new StringReader(string));
 		Document document;
 		try {
@@ -39,7 +39,7 @@ public class MiniXMLParserImpl implements MiniXMLParser {
 		} catch(Exception e) {
 			throw new IllegalArgumentException(e);
 		}
-		return new MiniElementImpl(document.getDocumentElement());
+		return new MiniElementXml(document.getDocumentElement());
 	}
 	
 }
