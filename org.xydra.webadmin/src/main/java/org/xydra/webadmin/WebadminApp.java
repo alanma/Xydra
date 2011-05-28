@@ -41,6 +41,7 @@ import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XydraOutXml;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.minio.MiniStreamWriter;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
 import org.xydra.server.IXydraServer;
@@ -133,7 +134,7 @@ public class WebadminApp {
 			
 			log.info("adding model \"" + modelId.toString() + "\" as \"" + filename + "\"");
 			
-			XydraOut out = new XydraOutXml(zos);
+			XydraOut out = new XydraOutXml(new MiniStreamWriter(zos));
 			XmlModel.toXml(server.getModelSnapshot(modelId), out, true, false, includeLogs);
 			out.flush();
 			

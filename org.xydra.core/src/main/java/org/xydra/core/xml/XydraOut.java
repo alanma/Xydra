@@ -14,13 +14,13 @@ public interface XydraOut {
 	
 	void open(String elementName);
 	
-	void attribute(String name, String value);
+	<T> void attribute(String name, T value);
 	
 	void children(String name, boolean multiple);
 	
-	void value(String type, String value);
+	<T> void value(String type, T value);
 	
-	void content(String name, String content);
+	<T> void content(String name, T content);
 	
 	/**
 	 * Close the current element, which must have the given name.

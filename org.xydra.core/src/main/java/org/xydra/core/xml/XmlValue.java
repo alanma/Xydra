@@ -646,7 +646,7 @@ public class XmlValue {
 		
 		xo.children(NAME_VALUES, true);
 		for(Boolean value : xvalue) {
-			xo.value(XBOOLEAN_ELEMENT, value.toString());
+			xo.value(XBOOLEAN_ELEMENT, value);
 		}
 		
 		xo.close(XBOOLEANLIST_ELEMENT);
@@ -661,7 +661,7 @@ public class XmlValue {
 	private static void toXml(XBooleanValue xvalue, XydraOut xo) {
 		
 		xo.open(XBOOLEAN_ELEMENT);
-		xo.content(NAME_CONTENT, Boolean.toString(xvalue.contents()));
+		xo.content(NAME_CONTENT, xvalue.contents());
 		xo.close(XBOOLEAN_ELEMENT);
 		
 	}
@@ -710,7 +710,7 @@ public class XmlValue {
 		
 		xo.children(NAME_VALUES, true);
 		for(Double value : xvalue) {
-			xo.value(XDOUBLE_ELEMENT, value.toString());
+			xo.value(XDOUBLE_ELEMENT, value);
 		}
 		
 		xo.close(XDOUBLELIST_ELEMENT);
@@ -725,7 +725,7 @@ public class XmlValue {
 	private static void toXml(XDoubleValue xvalue, XydraOut xo) {
 		
 		xo.open(XDOUBLE_ELEMENT);
-		xo.content(NAME_CONTENT, Double.toString(xvalue.contents()));
+		xo.content(NAME_CONTENT, xvalue.contents());
 		xo.close(XDOUBLE_ELEMENT);
 		
 	}
@@ -813,7 +813,7 @@ public class XmlValue {
 		
 		xo.children(NAME_VALUES, true);
 		for(Integer value : xvalue) {
-			xo.value(XINTEGER_ELEMENT, value.toString());
+			xo.value(XINTEGER_ELEMENT, value);
 		}
 		
 		xo.close(XINTEGERLIST_ELEMENT);
@@ -828,7 +828,7 @@ public class XmlValue {
 	private static void toXml(XIntegerValue xvalue, XydraOut xo) {
 		
 		xo.open(XINTEGER_ELEMENT);
-		xo.content(NAME_CONTENT, Integer.toString(xvalue.contents()));
+		xo.content(NAME_CONTENT, xvalue.contents());
 		xo.close(XINTEGER_ELEMENT);
 		
 	}
@@ -880,7 +880,7 @@ public class XmlValue {
 		
 		xo.children(NAME_VALUES, true);
 		for(Long value : xvalue) {
-			xo.value(XLONG_ELEMENT, value.toString());
+			xo.value(XLONG_ELEMENT, value);
 		}
 		
 		xo.close(XLONGLIST_ELEMENT);
@@ -895,7 +895,7 @@ public class XmlValue {
 	private static void toXml(XLongValue xvalue, XydraOut xo) {
 		
 		xo.open(XLONG_ELEMENT);
-		xo.content(NAME_CONTENT, Long.toString(xvalue.contents()));
+		xo.content(NAME_CONTENT, xvalue.contents());
 		xo.close(XLONG_ELEMENT);
 		
 	}

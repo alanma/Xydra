@@ -24,6 +24,7 @@ import org.xydra.core.xml.XmlStore.EventsRequest;
 import org.xydra.core.xml.impl.MiniXMLParserImpl;
 import org.xydra.core.xml.impl.XydraOutXml;
 import org.xydra.index.query.Pair;
+import org.xydra.minio.MiniStreamWriter;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessExceptionHandler;
 import org.xydra.restless.RestlessParameter;
@@ -119,7 +120,7 @@ public class XydraStoreResource {
 		res.setContentType("application/xml; charset=UTF-8");
 		res.setCharacterEncoding("utf-8");
 		try {
-			return new XydraOutXml(res.getOutputStream());
+			return new XydraOutXml(new MiniStreamWriter(res.getOutputStream()));
 		} catch(IOException e) {
 			throw new RuntimeException("re-throw", e);
 		}

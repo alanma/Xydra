@@ -312,12 +312,12 @@ public class XmlValueTest {
 	
 	@Test
 	public void testStringValueUnsafe() {
-		testValue(XV.toValue("&gt;<"));
+		testValue(XV.toValue("&gt;<\"\\"));
 	}
 	
 	private void testValue(XValue value) {
 		
-		XydraOutXml out = new XydraOutXml();
+		XydraOut out = new XydraOutXml();
 		XmlValue.toXml(value, out);
 		assertTrue(out.isClosed());
 		String xml = out.getData();

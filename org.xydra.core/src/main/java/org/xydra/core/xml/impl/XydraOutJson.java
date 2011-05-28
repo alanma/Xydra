@@ -1,17 +1,11 @@
 package org.xydra.core.xml.impl;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
+import org.xydra.minio.MiniWriter;
 
 
 public class XydraOutJson extends AbstractXydraOut {
 	
-	public XydraOutJson(OutputStream os) {
-		super(os);
-	}
-	
-	public XydraOutJson(Writer writer) {
+	public XydraOutJson(MiniWriter writer) {
 		super(writer);
 	}
 	
@@ -19,7 +13,7 @@ public class XydraOutJson extends AbstractXydraOut {
 		super();
 	}
 	
-	private void outputName(Frame frame, String name) throws IOException {
+	private void outputName(Frame frame, String name) {
 		
 		this.writer.write(",\n");
 		indent(frame.depth + 1);
@@ -29,24 +23,33 @@ public class XydraOutJson extends AbstractXydraOut {
 		
 	}
 	
-	private void value(Frame frame, String name, String value) throws IOException {
+	private <T> void output(T value) {
 		
-		outputName(frame, name);
-		
-		// IMPROVE: don't escape numbers
-		this.writer.write('"');
-		this.writer.write(JsonEncoder.encode(value));
-		this.writer.write('"');
+		if(value instanceof Boolean || value instanceof Float || value instanceof Integer
+		        || value instanceof Double) {
+			this.writer.write(value.toString());
+		} else if(value instanceof Long && (Long)value >= Integer.MIN_VALUE
+		        && (Long)value <= Integer.MAX_VALUE) {
+			this.writer.write(value.toString());
+		} else {
+			this.writer.write('"');
+			this.writer.write(JsonEncoder.encode(value.toString()));
+			this.writer.write('"');
+		}
 		
 	}
 	
 	@Override
-	protected void outputAttribute(Frame element, String name, String value) throws IOException {
-		value(element, name, value);
+	protected <T> void outputAttribute(Frame element, String name, T value) {
+		
+		outputName(element, name);
+		
+		output(value);
+		
 	}
 	
 	@Override
-	void outputBeginChildren(Frame element, Frame children) throws IOException {
+	protected void outputBeginChildren(Frame element, Frame children) {
 		
 		outputName(element, children.name);
 		this.writer.write('[');
@@ -56,7 +59,7 @@ public class XydraOutJson extends AbstractXydraOut {
 	}
 	
 	@Override
-	void outputCloseElement(Frame container, Frame element) throws IOException {
+	protected void outputCloseElement(Frame container, Frame element) {
 		
 		if(element.hasContent() || element.hasAttributes()) {
 			this.writer.write("\n");
@@ -69,12 +72,12 @@ public class XydraOutJson extends AbstractXydraOut {
 	}
 	
 	@Override
-	void outputContent(Frame element, Frame content, String data) throws IOException {
-		value(element, content.name, data);
+	protected <T> void outputContent(Frame element, Frame content, T data) {
+		outputAttribute(element, content.name, data);
 	}
 	
 	@Override
-	void outputEndChildren(Frame element, Frame children) throws IOException {
+	protected void outputEndChildren(Frame element, Frame children) {
 		
 		if(children.hasContent()) {
 			this.writer.write("\n");
@@ -87,7 +90,7 @@ public class XydraOutJson extends AbstractXydraOut {
 	}
 	
 	@Override
-	void outputOpenElement(Frame container, Frame element) throws IOException {
+	protected void outputOpenElement(Frame container, Frame element) {
 		
 		element.depth = container.depth + 1;
 		
@@ -121,36 +124,34 @@ public class XydraOutJson extends AbstractXydraOut {
 	}
 	
 	@Override
-	void outputValue(Frame container, String type, String value) throws IOException {
+	protected <T> void outputValue(Frame container, String type, T value) {
 		
-		if(container.hasContent()) {
+		if(container.hasContent() || container.hasAttributes()) {
 			// This is not the first child element
-			this.writer.write(", ");
+			this.writer.write(',');
 		}
+		this.writer.write(' ');
 		
 		if(value == null) {
 			this.writer.write("null");
 		} else {
-			// IMPROVE: don't escape numbers
-			this.writer.write('"');
-			this.writer.write(JsonEncoder.encode(value));
-			this.writer.write('"');
+			output(value);
 		}
 		
 	}
 	
 	@Override
-	void outputElementBeginContent(Frame element) {
+	protected void outputElementBeginContent(Frame element) {
 		// nothing to do here
 	}
 	
 	@Override
-	protected void end() throws IOException {
+	protected void end() {
 		this.writer.write('\n');
 	}
 	
 	@Override
-	void outputBeginChild(Frame element, Frame child) {
+	protected void outputBeginChild(Frame element, Frame child) {
 		child.depth = element.depth;
 	}
 	

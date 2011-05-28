@@ -1,17 +1,11 @@
 package org.xydra.core.xml.impl;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
+import org.xydra.minio.MiniWriter;
 
 
 public class XydraOutXml extends AbstractXydraOut {
 	
-	public XydraOutXml(OutputStream os) {
-		this(os, true);
-	}
-	
-	public XydraOutXml(Writer writer) {
+	public XydraOutXml(MiniWriter writer) {
 		this(writer, true);
 	}
 	
@@ -19,12 +13,7 @@ public class XydraOutXml extends AbstractXydraOut {
 		this(true);
 	}
 	
-	public XydraOutXml(OutputStream os, boolean writeHeader) {
-		super(os);
-		init(writeHeader);
-	}
-	
-	public XydraOutXml(Writer writer, boolean writeHeader) {
+	public XydraOutXml(MiniWriter writer, boolean writeHeader) {
 		super(writer);
 		init(writeHeader);
 	}
@@ -40,32 +29,27 @@ public class XydraOutXml extends AbstractXydraOut {
 			return;
 		}
 		
-		try {
-			this.writer.write(XmlEncoder.XML_DECLARATION);
-		} catch(IOException e) {
-			throw new RuntimeException(e);
-		}
-		
+		this.writer.write(XmlEncoder.XML_DECLARATION);
 	}
 	
 	@Override
-	protected void outputAttribute(Frame element, String name, String value) throws IOException {
+	protected <T> void outputAttribute(Frame element, String name, T value) {
 		
 		this.writer.write(" ");
 		this.writer.write(name);
 		this.writer.write("=\"");
-		this.writer.write(XmlEncoder.encode(value));
+		this.writer.write(XmlEncoder.encode(value.toString()));
 		this.writer.write("\"");
 		
 	}
 	
 	@Override
-	void outputBeginChildren(Frame element, Frame children) {
+	protected void outputBeginChildren(Frame element, Frame children) {
 		children.depth = element.depth;
 	}
 	
 	@Override
-	void outputCloseElement(Frame container, Frame element) throws IOException {
+	protected void outputCloseElement(Frame container, Frame element) {
 		
 		if(element.hasContent()) {
 			
@@ -86,17 +70,17 @@ public class XydraOutXml extends AbstractXydraOut {
 	}
 	
 	@Override
-	void outputContent(Frame element, Frame content, String data) throws IOException {
-		this.writer.write(XmlEncoder.encode(data));
+	protected <T> void outputContent(Frame element, Frame content, T data) {
+		this.writer.write(XmlEncoder.encode(data.toString()));
 	}
 	
 	@Override
-	void outputEndChildren(Frame element, Frame children) {
+	protected void outputEndChildren(Frame element, Frame children) {
 		// nothing to do here
 	}
 	
 	@Override
-	void outputOpenElement(Frame container, Frame element) throws IOException {
+	protected void outputOpenElement(Frame container, Frame element) {
 		
 		element.depth = container.depth + 1;
 		
@@ -111,17 +95,17 @@ public class XydraOutXml extends AbstractXydraOut {
 	}
 	
 	@Override
-	void outputElementBeginContent(Frame element) throws IOException {
+	protected void outputElementBeginContent(Frame element) {
 		this.writer.write(">");
 	}
 	
 	@Override
-	void outputBeginChild(Frame element, Frame child) {
+	protected void outputBeginChild(Frame element, Frame child) {
 		child.depth = element.depth;
 	}
 	
 	@Override
-	void outputValue(Frame container, String type, String value) throws IOException {
+	protected <T> void outputValue(Frame container, String type, T value) {
 		
 		if(!container.hasContent()) {
 			this.writer.write('\n');
@@ -137,13 +121,19 @@ public class XydraOutXml extends AbstractXydraOut {
 			
 			this.writer.write('<');
 			this.writer.write(type);
-			this.writer.write('>');
-			this.writer.write(XmlEncoder.encode(value));
-			this.writer.write("</");
-			this.writer.write(type);
-			this.writer.write('>');
+			String valueStr = value.toString();
+			if(valueStr.isEmpty()) {
+				this.writer.write(" />");
+			} else {
+				this.writer.write('>');
+				this.writer.write(XmlEncoder.encode(valueStr));
+				this.writer.write("</");
+				this.writer.write(type);
+				this.writer.write('>');
+			}
 			
 		}
 		
 	}
+	
 }

@@ -1,11 +1,13 @@
 package org.xydra.minio;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 
-import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RequiresAppEngine;
-
+import org.xydra.annotations.RunsInAppEngine;
 
 
 /**
@@ -22,6 +24,18 @@ public class MiniStreamWriter implements MiniWriter {
 	
 	public MiniStreamWriter(Writer w) {
 		this.w = w;
+	}
+	
+	public MiniStreamWriter(OutputStream os) {
+		this(wrap(os));
+	}
+	
+	private static Writer wrap(OutputStream os) {
+		try {
+			return new OutputStreamWriter(os, "UTF-8");
+		} catch(UnsupportedEncodingException e) {
+			throw new RuntimeException("missing UTF-8 charset", e);
+		}
 	}
 	
 	public void close() throws MiniIOException {

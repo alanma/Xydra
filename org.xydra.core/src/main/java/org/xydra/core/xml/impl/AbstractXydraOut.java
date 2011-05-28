@@ -1,43 +1,27 @@
 package org.xydra.core.xml.impl;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
 
 import org.xydra.core.xml.XydraOut;
+import org.xydra.minio.MiniStringWriter;
+import org.xydra.minio.MiniWriter;
 
 
 abstract public class AbstractXydraOut implements XydraOut {
 	
-	protected final Writer writer;
+	protected final MiniWriter writer;
 	
 	private final boolean indent = true;
 	
-	public AbstractXydraOut(OutputStream os) {
-		this(wrap(os));
-	}
-	
-	private static Writer wrap(OutputStream os) {
-		try {
-			return new OutputStreamWriter(os, "UTF-8");
-		} catch(UnsupportedEncodingException e) {
-			throw new RuntimeException("missing UTF-8 charset", e);
-		}
-	}
-	
-	public AbstractXydraOut(Writer writer) {
+	public AbstractXydraOut(MiniWriter writer) {
 		this.writer = writer;
 		this.stack.push(new Frame(Type.Root, "(root)"));
 	}
 	
 	public AbstractXydraOut() {
-		this(new StringWriter());
+		this(new MiniStringWriter());
 	}
 	
 	protected enum Type {
@@ -93,7 +77,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 	private final Stack<Frame> stack = new Stack<Frame>();
 	
 	@Override
-	public void attribute(String name, String value) {
+	public <T> void attribute(String name, T value) {
 		
 		Frame element = getCurrent();
 		
@@ -107,18 +91,13 @@ abstract public class AbstractXydraOut implements XydraOut {
 		
 		recordName(element, name);
 		
-		try {
-			outputAttribute(element, name, value);
-		} catch(IOException e) {
-			throw new RuntimeException(e);
-		}
+		outputAttribute(element, name, value);
 		
 		element.hasAttributes = true;
 		
 	}
 	
-	protected abstract void outputAttribute(Frame element, String name, String value)
-	        throws IOException;
+	protected abstract <T> void outputAttribute(Frame element, String name, T value);
 	
 	@Override
 	public void open(String name) {
@@ -128,11 +107,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 		if(container.type == Type.Element) {
 			recordName(container, name);
 			if(!container.hasContent()) {
-				try {
-					outputElementBeginContent(container);
-				} catch(IOException e) {
-					throw new RuntimeException(e);
-				}
+				outputElementBeginContent(container);
 			}
 		} else if(container.type == Type.Text) {
 			error("cannot add children once text has been set");
@@ -144,21 +119,17 @@ abstract public class AbstractXydraOut implements XydraOut {
 		Frame current = new Frame(Type.Element, name);
 		this.stack.push(current);
 		
-		try {
-			outputOpenElement(container, current);
-		} catch(IOException e) {
-			throw new RuntimeException(e);
-		}
+		outputOpenElement(container, current);
 		
 		container.contentType = Type.Element;
 	}
 	
-	abstract void outputOpenElement(Frame container, Frame element) throws IOException;
+	protected abstract void outputOpenElement(Frame container, Frame element);
 	
-	abstract void outputElementBeginContent(Frame element) throws IOException;
+	protected abstract void outputElementBeginContent(Frame element);
 	
 	@Override
-	public void value(String type, String value) {
+	public <T> void value(String type, T value) {
 		
 		Frame container = getCurrent();
 		
@@ -170,16 +141,12 @@ abstract public class AbstractXydraOut implements XydraOut {
 			error("must declare beforehand to add multiple children");
 		}
 		
-		try {
-			outputValue(container, type, value);
-		} catch(IOException e) {
-			throw new RuntimeException(e);
-		}
+		outputValue(container, type, value);
 		
 		container.hasAttributes = true;
 	}
 	
-	abstract void outputValue(Frame container, String type, String value) throws IOException;
+	protected abstract <T> void outputValue(Frame container, String type, T value);
 	
 	@Override
 	public void children(String name, boolean multiple) {
@@ -202,23 +169,19 @@ abstract public class AbstractXydraOut implements XydraOut {
 		Frame children = new Frame(multiple ? Type.Children : Type.Child, name);
 		this.stack.push(children);
 		
-		try {
-			outputElementBeginContent(element);
-			if(multiple) {
-				outputBeginChildren(element, children);
-			} else {
-				outputBeginChild(element, children);
-			}
-		} catch(IOException e) {
-			throw new RuntimeException(e);
+		outputElementBeginContent(element);
+		if(multiple) {
+			outputBeginChildren(element, children);
+		} else {
+			outputBeginChild(element, children);
 		}
 		
 		element.contentType = children.type;
 	}
 	
-	abstract void outputBeginChildren(Frame element, Frame children) throws IOException;
+	protected abstract void outputBeginChildren(Frame element, Frame children);
 	
-	abstract void outputBeginChild(Frame element, Frame child) throws IOException;
+	protected abstract void outputBeginChild(Frame element, Frame child);
 	
 	@Override
 	public void close(String name) {
@@ -233,11 +196,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 			assert !this.stack.empty();
 			this.stack.pop();
 			current = this.stack.peek();
-			try {
-				outputEndChildren(current, children);
-			} catch(IOException e) {
-				throw new RuntimeException(e);
-			}
+			outputEndChildren(current, children);
 		} else if(current.type == Type.Text) {
 			this.stack.pop();
 			current = this.stack.peek();
@@ -255,36 +214,26 @@ abstract public class AbstractXydraOut implements XydraOut {
 		this.stack.pop();
 		Frame container = this.stack.peek();
 		
-		try {
-			outputCloseElement(container, current);
-		} catch(IOException e) {
-			throw new RuntimeException(e);
-		}
+		outputCloseElement(container, current);
 		
 		if(container.type == Type.Root) {
 			this.stack.pop();
 			assert this.stack.isEmpty();
-			try {
-				end();
-				this.writer.flush();
-			} catch(IOException e) {
-				throw new RuntimeException(e);
-			}
+			end();
 		}
 		
 	}
 	
-	abstract void outputEndChildren(Frame element, Frame children) throws IOException;
+	protected abstract void outputEndChildren(Frame element, Frame children);
 	
-	abstract void outputCloseElement(Frame container, Frame element) throws IOException;
+	protected abstract void outputCloseElement(Frame container, Frame element);
 	
-	@SuppressWarnings("unused")
-	protected void end() throws IOException {
+	protected void end() {
 		// to be overwritten by children if needed
 	}
 	
 	@Override
-	public void content(String name, String data) {
+	public <T> void content(String name, T data) {
 		
 		Frame element = getCurrent();
 		
@@ -301,19 +250,15 @@ abstract public class AbstractXydraOut implements XydraOut {
 		Frame content = new Frame(Type.Text, name);
 		this.stack.push(content);
 		
-		try {
-			outputElementBeginContent(element);
-			outputContent(element, content, data);
-		} catch(IOException e) {
-			throw new RuntimeException(e);
-		}
+		outputElementBeginContent(element);
+		outputContent(element, content, data);
 		
 		element.contentType = Type.Text;
 	}
 	
-	abstract void outputContent(Frame element, Frame content, String data) throws IOException;
+	protected abstract <T> void outputContent(Frame element, Frame content, T data);
 	
-	protected void indent(int count) throws IOException {
+	protected void indent(int count) {
 		
 		if(!this.indent) {
 			return;
@@ -377,12 +322,12 @@ abstract public class AbstractXydraOut implements XydraOut {
 			error("cannot get result before closing all elements");
 		}
 		
-		if(!(this.writer instanceof StringWriter)) {
+		if(!(this.writer instanceof MiniStringWriter)) {
 			throw new IllegalStateException(
-			        "can only use this method when constructed with a StringWriter");
+			        "can only use this method when constructed with a MiniStringWriter");
 		}
 		
-		return ((StringWriter)this.writer).getBuffer().toString();
+		return this.writer.toString();
 	}
 	
 	public boolean isClosed() {
@@ -390,12 +335,6 @@ abstract public class AbstractXydraOut implements XydraOut {
 	}
 	
 	public void flush() {
-		
-		try {
-			this.writer.flush();
-		} catch(IOException e) {
-			throw new RuntimeException(e);
-		}
-		
+		this.writer.flush();
 	}
 }
