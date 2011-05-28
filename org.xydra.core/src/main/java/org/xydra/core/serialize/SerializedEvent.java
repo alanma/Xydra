@@ -305,7 +305,7 @@ public class SerializedEvent {
 	
 	private static XModelEvent toModelEvent(MiniElement xml, XAddress context, TempTrans trans) {
 		
-		if(context.getObject() != null || context.getField() != null) {
+		if(context != null && (context.getObject() != null || context.getField() != null)) {
 			throw new IllegalArgumentException("invalid context for model events: " + context);
 		}
 		
@@ -351,7 +351,7 @@ public class SerializedEvent {
 	
 	private static XObjectEvent toObjectEvent(MiniElement xml, XAddress context, TempTrans trans) {
 		
-		if(context.getField() != null) {
+		if(context != null && context.getField() != null) {
 			throw new IllegalArgumentException("invalid context for object events: " + context);
 		}
 		
@@ -399,7 +399,7 @@ public class SerializedEvent {
 	private static XRepositoryEvent toRepositoryEvent(MiniElement xml, XAddress context,
 	        TempTrans trans) {
 		
-		if(context.getObject() != null || context.getField() != null) {
+		if(context != null && (context.getObject() != null || context.getField() != null)) {
 			throw new IllegalArgumentException("invalid context for model events: " + context);
 		}
 		
@@ -547,8 +547,8 @@ public class SerializedEvent {
 		
 		setAtomicEventAttributes(event, out, context, inTrans);
 		
-		out.children(NAME_VALUE, false);
 		if(event.getChangeType() != ChangeType.REMOVE) {
+			out.children(NAME_VALUE, false);
 			SerializedValue.toXml(event.getNewValue(), out);
 		}
 		
@@ -578,7 +578,7 @@ public class SerializedEvent {
 	private static void toXml(XModelEvent event, XydraOut out, XAddress context, boolean inTrans)
 	        throws IllegalArgumentException {
 		
-		if(context.getObject() != null || context.getField() != null) {
+		if(context != null && (context.getObject() != null || context.getField() != null)) {
 			throw new IllegalArgumentException("invalid context for model events: " + context);
 		}
 		
@@ -595,7 +595,7 @@ public class SerializedEvent {
 	private static void toXml(XObjectEvent event, XydraOut out, XAddress context, boolean inTrans)
 	        throws IllegalArgumentException {
 		
-		if(context.getField() != null) {
+		if(context != null && context.getField() != null) {
 			throw new IllegalArgumentException("invalid context for object events: " + context);
 		}
 		
@@ -612,7 +612,7 @@ public class SerializedEvent {
 	private static void toXml(XRepositoryEvent event, XydraOut out, XAddress context,
 	        boolean inTrans) throws IllegalArgumentException {
 		
-		if(context.getObject() != null || context.getField() != null) {
+		if(context != null && (context.getObject() != null || context.getField() != null)) {
 			throw new IllegalArgumentException("invalid context for repository events: " + context);
 		}
 		

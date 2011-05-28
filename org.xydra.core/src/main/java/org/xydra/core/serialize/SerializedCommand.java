@@ -419,9 +419,10 @@ public class SerializedCommand {
 		
 		setAtomicCommandAttributes(command, out, context, true);
 		
-		out.children(NAME_VALUE, false);
-		if(command.getValue() != null)
+		if(command.getValue() != null) {
+			out.children(NAME_VALUE, false);
 			SerializedValue.toXml(command.getValue(), out);
+		}
 		
 		out.close(XFIELDCOMMAND_ELEMENT);
 		

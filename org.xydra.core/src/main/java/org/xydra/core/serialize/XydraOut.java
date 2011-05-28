@@ -38,4 +38,6 @@ public interface XydraOut {
 	
 	void flush();
 	
+	void enableWhitespace(boolean whitespace, boolean idententation);
+	
 }

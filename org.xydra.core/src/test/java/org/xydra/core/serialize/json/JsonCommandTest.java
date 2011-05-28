@@ -1,11 +1,11 @@
 package org.xydra.core.serialize.json;
 
-import org.xydra.core.serialize.AbstractSerializedModelTest;
+import org.xydra.core.serialize.AbstractSerializedCommandTest;
 import org.xydra.core.serialize.MiniParser;
 import org.xydra.core.serialize.XydraOut;
 
 
-public class JsonModelTest extends AbstractSerializedModelTest {
+public class JsonCommandTest extends AbstractSerializedCommandTest {
 	
 	@Override
 	protected XydraOut getNewOut() {

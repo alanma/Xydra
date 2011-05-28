@@ -9,6 +9,9 @@ import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
+import org.xydra.core.LoggerTestHelper;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
 
 /**
@@ -18,6 +21,13 @@ import org.xydra.base.value.XValue;
  * 
  */
 abstract public class AbstractSerializedValueTest {
+	
+	private static final Logger log = getLogger();
+	
+	private static Logger getLogger() {
+		LoggerTestHelper.init();
+		return LoggerFactory.getLogger(AbstractSerializedValueTest.class);
+	}
 	
 	@Test
 	public void testAddressListValue() {
@@ -320,7 +330,7 @@ abstract public class AbstractSerializedValueTest {
 		assertTrue(out.isClosed());
 		String xml = out.getData();
 		
-		System.out.println(xml);
+		log.debug(xml);
 		
 		MiniElement e = getParser().parse(xml);
 		XValue valueAgain = SerializedValue.toValue(e);

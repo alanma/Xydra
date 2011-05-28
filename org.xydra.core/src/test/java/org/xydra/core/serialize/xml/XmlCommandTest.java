@@ -1,11 +1,11 @@
 package org.xydra.core.serialize.xml;
 
-import org.xydra.core.serialize.AbstractSerializedModelTest;
+import org.xydra.core.serialize.AbstractSerializedCommandTest;
 import org.xydra.core.serialize.MiniParser;
 import org.xydra.core.serialize.XydraOut;
 
 
-public class XmlModelTest extends AbstractSerializedModelTest {
+public class XmlCommandTest extends AbstractSerializedCommandTest {
 	
 	@Override
 	protected XydraOut getNewOut() {

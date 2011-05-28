@@ -5,11 +5,13 @@ import org.xydra.core.serialize.MiniParser;
 import org.xydra.core.serialize.XydraOut;
 
 
-public class XmlModelTest extends AbstractSerializedModelTest {
+public class XmlValueTestWhitespace extends AbstractSerializedModelTest {
 	
 	@Override
 	protected XydraOut getNewOut() {
-		return new XmlOut();
+		XydraOut out = new XmlOut();
+		out.enableWhitespace(true, true);
+		return out;
 	}
 	
 	@Override

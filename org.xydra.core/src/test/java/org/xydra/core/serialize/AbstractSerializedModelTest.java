@@ -101,7 +101,7 @@ abstract public class AbstractSerializedModelTest {
 		SerializedModel.toXml(field, out);
 		assertTrue(out.isClosed());
 		String xml = out.getData();
-		log.info(xml);
+		log.debug(xml);
 		MiniElement e = getParser().parse(xml);
 		XField fieldAgain = SerializedModel.toField(this.actorId, e);
 		assertTrue(XCompareUtils.equalState(field, fieldAgain));
@@ -111,7 +111,7 @@ abstract public class AbstractSerializedModelTest {
 		SerializedModel.toXml(field, out, false);
 		assertTrue(out.isClosed());
 		xml = out.getData();
-		log.info(xml);
+		log.debug(xml);
 		e = getParser().parse(xml);
 		fieldAgain = SerializedModel.toField(this.actorId, e);
 		assertTrue(XCompareUtils.equalTree(field, fieldAgain));
@@ -154,7 +154,7 @@ abstract public class AbstractSerializedModelTest {
 		SerializedModel.toXml(model, out);
 		assertTrue(out.isClosed());
 		String xml = out.getData();
-		log.info(xml);
+		log.debug(xml);
 		MiniElement e = getParser().parse(xml);
 		XModel modelAgain = SerializedModel.toModel(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalState(model, modelAgain));
@@ -168,7 +168,7 @@ abstract public class AbstractSerializedModelTest {
 		SerializedModel.toXml(model, out, false, true, false);
 		assertTrue(out.isClosed());
 		xml = out.getData();
-		log.info(xml);
+		log.debug(xml);
 		e = getParser().parse(xml);
 		modelAgain = SerializedModel.toModel(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalTree(model, modelAgain));
@@ -183,7 +183,7 @@ abstract public class AbstractSerializedModelTest {
 		SerializedModel.toXml(object, out);
 		assertTrue(out.isClosed());
 		String xml = out.getData();
-		log.info(xml);
+		log.debug(xml);
 		MiniElement e = getParser().parse(xml);
 		XObject objectAgain = SerializedModel.toObject(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalState(object, objectAgain));
@@ -197,7 +197,7 @@ abstract public class AbstractSerializedModelTest {
 		SerializedModel.toXml(object, out, false, true, false);
 		assertTrue(out.isClosed());
 		xml = out.getData();
-		log.info(xml);
+		log.debug(xml);
 		e = getParser().parse(xml);
 		objectAgain = SerializedModel.toObject(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalTree(object, objectAgain));
@@ -212,7 +212,7 @@ abstract public class AbstractSerializedModelTest {
 		SerializedModel.toXml(repo, out);
 		assertTrue(out.isClosed());
 		String xml = out.getData();
-		log.info(xml);
+		log.debug(xml);
 		MiniElement e = getParser().parse(xml);
 		XRepository repoAgain = SerializedModel.toRepository(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalState(repo, repoAgain));
@@ -222,7 +222,7 @@ abstract public class AbstractSerializedModelTest {
 		SerializedModel.toXml(repo, out, false, true, false);
 		assertTrue(out.isClosed());
 		xml = out.getData();
-		log.info(xml);
+		log.debug(xml);
 		e = getParser().parse(xml);
 		repoAgain = SerializedModel.toRepository(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalTree(repo, repoAgain));

@@ -15,6 +15,11 @@ abstract public class AbstractXydraOut implements XydraOut {
 	private boolean indent = true;
 	private boolean whitespace = false;
 	
+	public void enableWhitespace(boolean whitespace, boolean idententation) {
+		this.whitespace = whitespace;
+		this.indent = idententation;
+	}
+	
 	public AbstractXydraOut(MiniWriter writer) {
 		this.writer = writer;
 		this.stack.push(new Frame(Type.Root, "(root)"));

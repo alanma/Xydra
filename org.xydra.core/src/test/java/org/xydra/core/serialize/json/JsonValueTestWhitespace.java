@@ -1,20 +1,22 @@
-package org.xydra.core.serialize.xml;
+package org.xydra.core.serialize.json;
 
 import org.xydra.core.serialize.AbstractSerializedModelTest;
 import org.xydra.core.serialize.MiniParser;
 import org.xydra.core.serialize.XydraOut;
 
 
-public class XmlModelTest extends AbstractSerializedModelTest {
+public class JsonValueTestWhitespace extends AbstractSerializedModelTest {
 	
 	@Override
 	protected XydraOut getNewOut() {
-		return new XmlOut();
+		XydraOut out = new JsonOut();
+		out.enableWhitespace(true, true);
+		return out;
 	}
 	
 	@Override
 	protected MiniParser getParser() {
-		return new MiniParserXml();
+		return new MiniParserJson();
 	}
 	
 }
