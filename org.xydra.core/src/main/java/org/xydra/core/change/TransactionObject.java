@@ -265,7 +265,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 			XWritableField field = this.getField(fieldId);
 			// remember: this actually is an InTransactionField
 			assert field != null;
-			assert field instanceof InModelTransactionField;
+			assert field instanceof InObjectTransactionField;
 			
 			// check revision number
 			if(fieldCommand.getRevisionNumber() != field.getRevisionNumber()
@@ -460,6 +460,9 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		if(exists == false) {
 			return null;
 		} else {
+			// IMPROVE the HashSet for changedFields uses a HashMap internally
+			// anyway, so we may as well use it to cache
+			// InObjectTransactionField instances
 			return new InObjectTransactionField(fieldId, this);
 		}
 	}

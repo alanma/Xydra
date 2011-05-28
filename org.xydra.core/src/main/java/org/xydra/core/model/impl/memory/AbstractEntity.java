@@ -27,7 +27,7 @@ public abstract class AbstractEntity implements IHasXAddress, IHasXID {
 		}
 	}
 	
-	public abstract AbstractEntity getFather();
+	protected abstract AbstractEntity getFather();
 	
 	@Override
 	public int hashCode() {

@@ -514,12 +514,12 @@ public class MemoryRepository extends AbstractEntity implements XRepository, Ser
 	 * model, object and field change, which would quickly become a bottleneck.
 	 */
 	@Override
-	public long getRevisionNumber() {
+	protected long getRevisionNumber() {
 		return 0;
 	}
 	
 	@Override
-	public AbstractEntity getFather() {
+	protected AbstractEntity getFather() {
 		return null;
 	}
 	
