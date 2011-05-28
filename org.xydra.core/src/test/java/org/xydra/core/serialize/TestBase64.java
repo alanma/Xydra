@@ -1,4 +1,4 @@
-package org.xydra.core.xml;
+package org.xydra.core.serialize;
 
 import static org.junit.Assert.assertEquals;
 
@@ -16,10 +16,12 @@ public class TestBase64 {
 		assertEquals("hello world}", decoded);
 	}
 	
+	@Test
 	public void testUtf8() {
 		assertEquals("hello", Base64.utf8(Base64.utf8("hello")));
 	}
 	
+	@Test
 	public void testUrlCode() {
 		String raw = "hel-lo/foo+bar_he";
 		String enc = Base64.urlEncode(Base64.utf8(raw));

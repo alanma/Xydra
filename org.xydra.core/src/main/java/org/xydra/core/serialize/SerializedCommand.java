@@ -34,7 +34,7 @@ import org.xydra.base.value.XValue;
 @RunsInGWT(true)
 @RunsInAppEngine(true)
 @RequiresAppEngine(false)
-public class XmlCommand {
+public class SerializedCommand {
 	
 	private static final String NAME_COMMANDS = "commands";
 	private static final String NAME_VALUE = "value";
@@ -58,7 +58,7 @@ public class XmlCommand {
 		if(forcedString == null)
 			forced = false;
 		else
-			forced = XmlValue.toBoolean(forcedString);
+			forced = SerializedValue.toBoolean(forcedString);
 		
 		if(forced) {
 			if(revisionString != null)
@@ -78,12 +78,12 @@ public class XmlCommand {
 			throw new IllegalArgumentException("<" + elementName + ">@" + REVISION_ATTRIBUTE
 			        + " is missing from non-forced change");
 		
-		long rev = XmlValue.toLong(revisionString);
+		long rev = SerializedValue.toLong(revisionString);
 		
 		Object relativeString = xml.getAttribute(REVISION_RELATIVE_ATTRIBUTE);
 		if(relativeString != null) {
 			assert rev < XCommand.RELATIVE_REV;
-			if(XmlValue.toBoolean(relativeString)) {
+			if(SerializedValue.toBoolean(relativeString)) {
 				rev += XCommand.RELATIVE_REV;
 			}
 		}
@@ -102,9 +102,9 @@ public class XmlCommand {
 	private static void setAtomicCommandAttributes(XAtomicCommand command, XydraOut out,
 	        XAddress context, boolean saveRevision) {
 		
-		out.attribute(XmlUtils.TYPE_ATTRIBUTE, command.getChangeType());
+		out.attribute(SerializingUtils.TYPE_ATTRIBUTE, command.getChangeType());
 		
-		XmlUtils.setTarget(command.getTarget(), out, context);
+		SerializingUtils.setTarget(command.getTarget(), out, context);
 		
 		if(command.isForced())
 			out.attribute(FORCED_ATTRIBUTE, true);
@@ -182,11 +182,11 @@ public class XmlCommand {
 	 */
 	public static XFieldCommand toFieldCommand(MiniElement xml, XAddress context) {
 		
-		XmlUtils.checkElementName(xml, XFIELDCOMMAND_ELEMENT);
+		SerializingUtils.checkElementName(xml, XFIELDCOMMAND_ELEMENT);
 		
-		XAddress target = XmlUtils.getTarget(xml, context);
+		XAddress target = SerializingUtils.getTarget(xml, context);
 		
-		ChangeType type = XmlUtils.getChangeType(xml, XFIELDCOMMAND_ELEMENT);
+		ChangeType type = SerializingUtils.getChangeType(xml, XFIELDCOMMAND_ELEMENT);
 		long rev = getRevision(xml, XFIELDCOMMAND_ELEMENT, true);
 		
 		XValue value = null;
@@ -196,7 +196,7 @@ public class XmlCommand {
 				throw new IllegalArgumentException("<" + XFIELDCOMMAND_ELEMENT
 				        + "> is missing it's xvalue child element");
 			MiniElement valueElement = it.next();
-			value = XmlValue.toValue(valueElement);
+			value = SerializedValue.toValue(valueElement);
 		}
 		if(it.hasNext())
 			throw new IllegalArgumentException("Invalid child of <" + XFIELDCOMMAND_ELEMENT
@@ -210,7 +210,7 @@ public class XmlCommand {
 			return MemoryFieldCommand.createRemoveCommand(target, rev);
 		else
 			throw new IllegalArgumentException("<" + XFIELDCOMMAND_ELEMENT + ">@"
-			        + XmlUtils.TYPE_ATTRIBUTE
+			        + SerializingUtils.TYPE_ATTRIBUTE
 			        + " does not contain a valid type for field commands, but '" + type + "'");
 	}
 	
@@ -226,22 +226,22 @@ public class XmlCommand {
 	 */
 	public static XModelCommand toModelCommand(MiniElement xml, XAddress context) {
 		
-		XmlUtils.checkElementName(xml, XMODELCOMMAND_ELEMENT);
+		SerializingUtils.checkElementName(xml, XMODELCOMMAND_ELEMENT);
 		
 		if(context != null && (context.getObject() != null || context.getField() != null))
 			throw new IllegalArgumentException("invalid context for model commands: " + context);
 		
-		XAddress address = XmlUtils.getTarget(xml, context);
+		XAddress address = SerializingUtils.getTarget(xml, context);
 		
 		if(address.getModel() == null)
 			throw new IllegalArgumentException("<" + XMODELCOMMAND_ELEMENT + ">@"
-			        + XmlUtils.MODELID_ATTRIBUTE + " is missing");
+			        + SerializingUtils.MODELID_ATTRIBUTE + " is missing");
 		
 		if(address.getObject() == null)
 			throw new IllegalArgumentException("<" + XMODELCOMMAND_ELEMENT + ">@"
-			        + XmlUtils.OBJECTID_ATTRIBUTE + " is missing");
+			        + SerializingUtils.OBJECTID_ATTRIBUTE + " is missing");
 		
-		ChangeType type = XmlUtils.getChangeType(xml, XMODELCOMMAND_ELEMENT);
+		ChangeType type = SerializingUtils.getChangeType(xml, XMODELCOMMAND_ELEMENT);
 		long rev = getRevision(xml, XMODELCOMMAND_ELEMENT, type != ChangeType.ADD);
 		
 		XAddress target = address.getParent();
@@ -253,7 +253,7 @@ public class XmlCommand {
 			return MemoryModelCommand.createRemoveCommand(target, rev, objectId);
 		else
 			throw new IllegalArgumentException("<" + XMODELCOMMAND_ELEMENT + ">@"
-			        + XmlUtils.TYPE_ATTRIBUTE
+			        + SerializingUtils.TYPE_ATTRIBUTE
 			        + " does not contain a valid type for model commands, but '" + type + "'");
 	}
 	
@@ -269,22 +269,22 @@ public class XmlCommand {
 	 */
 	public static XObjectCommand toObjectCommand(MiniElement xml, XAddress context) {
 		
-		XmlUtils.checkElementName(xml, XOBJECTCOMMAND_ELEMENT);
+		SerializingUtils.checkElementName(xml, XOBJECTCOMMAND_ELEMENT);
 		
 		if(context != null && context.getField() != null)
 			throw new IllegalArgumentException("invalid context for object commands: " + context);
 		
-		XAddress address = XmlUtils.getTarget(xml, context);
+		XAddress address = SerializingUtils.getTarget(xml, context);
 		
 		if(address.getObject() == null)
 			throw new IllegalArgumentException("<" + XOBJECTCOMMAND_ELEMENT + ">@"
-			        + XmlUtils.OBJECTID_ATTRIBUTE + " is missing");
+			        + SerializingUtils.OBJECTID_ATTRIBUTE + " is missing");
 		
 		if(address.getField() == null)
 			throw new IllegalArgumentException("<" + XOBJECTCOMMAND_ELEMENT + ">@"
-			        + XmlUtils.FIELDID_ATTRIBUTE + " is missing");
+			        + SerializingUtils.FIELDID_ATTRIBUTE + " is missing");
 		
-		ChangeType type = XmlUtils.getChangeType(xml, XOBJECTCOMMAND_ELEMENT);
+		ChangeType type = SerializingUtils.getChangeType(xml, XOBJECTCOMMAND_ELEMENT);
 		long rev = getRevision(xml, XOBJECTCOMMAND_ELEMENT, type != ChangeType.ADD);
 		
 		XAddress target = address.getParent();
@@ -296,7 +296,7 @@ public class XmlCommand {
 			return MemoryObjectCommand.createRemoveCommand(target, rev, fieldId);
 		else
 			throw new IllegalArgumentException("<" + XOBJECTCOMMAND_ELEMENT + ">@"
-			        + XmlUtils.TYPE_ATTRIBUTE
+			        + SerializingUtils.TYPE_ATTRIBUTE
 			        + " does not contain a valid type for object commands, but '" + type + "'");
 	}
 	
@@ -313,24 +313,24 @@ public class XmlCommand {
 	 */
 	public static XRepositoryCommand toRepositoryCommand(MiniElement xml, XAddress context) {
 		
-		XmlUtils.checkElementName(xml, XREPOSITORYCOMMAND_ELEMENT);
+		SerializingUtils.checkElementName(xml, XREPOSITORYCOMMAND_ELEMENT);
 		
 		if(context != null
 		        && (context.getModel() != null || context.getObject() != null || context.getField() != null))
 			throw new IllegalArgumentException("invalid context for repository commands: "
 			        + context);
 		
-		XAddress address = XmlUtils.getTarget(xml, context);
+		XAddress address = SerializingUtils.getTarget(xml, context);
 		
 		if(address.getRepository() == null)
 			throw new IllegalArgumentException("<" + XREPOSITORYCOMMAND_ELEMENT + ">@"
-			        + XmlUtils.REPOSITORYID_ATTRIBUTE + " is missing");
+			        + SerializingUtils.REPOSITORYID_ATTRIBUTE + " is missing");
 		
 		if(address.getModel() == null)
 			throw new IllegalArgumentException("<" + XREPOSITORYCOMMAND_ELEMENT + ">@"
-			        + XmlUtils.MODELID_ATTRIBUTE + " is missing");
+			        + SerializingUtils.MODELID_ATTRIBUTE + " is missing");
 		
-		ChangeType type = XmlUtils.getChangeType(xml, XREPOSITORYCOMMAND_ELEMENT);
+		ChangeType type = SerializingUtils.getChangeType(xml, XREPOSITORYCOMMAND_ELEMENT);
 		long rev = getRevision(xml, XREPOSITORYCOMMAND_ELEMENT, type != ChangeType.ADD);
 		
 		XAddress target = address.getParent();
@@ -342,7 +342,7 @@ public class XmlCommand {
 			return MemoryRepositoryCommand.createRemoveCommand(target, rev, modelId);
 		else
 			throw new IllegalArgumentException("<" + XREPOSITORYCOMMAND_ELEMENT + ">@"
-			        + XmlUtils.TYPE_ATTRIBUTE
+			        + SerializingUtils.TYPE_ATTRIBUTE
 			        + " does not contain a valid type for repository commands, but '" + type + "'");
 	}
 	
@@ -360,9 +360,9 @@ public class XmlCommand {
 	 */
 	public static XTransaction toTransaction(MiniElement xml, XAddress context) {
 		
-		XmlUtils.checkElementName(xml, XTRANSACTION_ELEMENT);
+		SerializingUtils.checkElementName(xml, XTRANSACTION_ELEMENT);
 		
-		XAddress target = XmlUtils.getTarget(xml, context);
+		XAddress target = SerializingUtils.getTarget(xml, context);
 		
 		if(target.getField() != null || (target.getModel() == null && target.getObject() == null))
 			throw new IllegalArgumentException("Transaction element " + xml
@@ -421,7 +421,7 @@ public class XmlCommand {
 		
 		out.children(NAME_VALUE, false);
 		if(command.getValue() != null)
-			XmlValue.toXml(command.getValue(), out);
+			SerializedValue.toXml(command.getValue(), out);
 		
 		out.close(XFIELDCOMMAND_ELEMENT);
 		
@@ -445,7 +445,7 @@ public class XmlCommand {
 		
 		setAtomicCommandAttributes(command, out, context, command.getChangeType() != ChangeType.ADD);
 		
-		out.attribute(XmlUtils.OBJECTID_ATTRIBUTE, command.getObjectId());
+		out.attribute(SerializingUtils.OBJECTID_ATTRIBUTE, command.getObjectId());
 		
 		out.close(XMODELCOMMAND_ELEMENT);
 		
@@ -469,7 +469,7 @@ public class XmlCommand {
 		
 		setAtomicCommandAttributes(command, out, context, command.getChangeType() != ChangeType.ADD);
 		
-		out.attribute(XmlUtils.FIELDID_ATTRIBUTE, command.getFieldId());
+		out.attribute(SerializingUtils.FIELDID_ATTRIBUTE, command.getFieldId());
 		
 		out.close(XOBJECTCOMMAND_ELEMENT);
 		
@@ -495,7 +495,7 @@ public class XmlCommand {
 		
 		setAtomicCommandAttributes(command, out, context, command.getChangeType() != ChangeType.ADD);
 		
-		out.attribute(XmlUtils.MODELID_ATTRIBUTE, command.getModelId());
+		out.attribute(SerializingUtils.MODELID_ATTRIBUTE, command.getModelId());
 		
 		out.close(XREPOSITORYCOMMAND_ELEMENT);
 		
@@ -514,7 +514,7 @@ public class XmlCommand {
 		
 		out.open(XTRANSACTION_ELEMENT);
 		
-		XmlUtils.setTarget(trans.getTarget(), out, context);
+		SerializingUtils.setTarget(trans.getTarget(), out, context);
 		
 		XAddress newContext = trans.getTarget();
 		
@@ -564,7 +564,7 @@ public class XmlCommand {
 	 */
 	public static List<XCommand> toCommandList(MiniElement xml, XAddress context) {
 		
-		XmlUtils.checkElementName(xml, XCOMMANDLIST_ELEMENT);
+		SerializingUtils.checkElementName(xml, XCOMMANDLIST_ELEMENT);
 		
 		List<XCommand> events = new ArrayList<XCommand>();
 		Iterator<MiniElement> it = xml.getChildren(NAME_COMMANDS);

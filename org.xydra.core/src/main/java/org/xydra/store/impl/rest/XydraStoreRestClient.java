@@ -26,11 +26,11 @@ import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.core.serialize.MiniElement;
-import org.xydra.core.serialize.XmlCommand;
-import org.xydra.core.serialize.XmlStore;
+import org.xydra.core.serialize.SerializedCommand;
+import org.xydra.core.serialize.SerializedStore;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.xml.MiniParserXml;
-import org.xydra.core.serialize.xml.XydraOutXml;
+import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.index.query.Pair;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
@@ -78,7 +78,7 @@ public class XydraStoreRestClient implements XydraStore {
 			return;
 		}
 		
-		boolean auth = XmlStore.toAuthenticationResult(xml);
+		boolean auth = SerializedStore.toAuthenticationResult(xml);
 		
 		callback.onSuccess(auth);
 	}
@@ -146,7 +146,7 @@ public class XydraStoreRestClient implements XydraStore {
 			
 			MiniElement xml = new MiniParserXml().parse(content);
 			
-			Throwable t = XmlStore.toException(xml);
+			Throwable t = SerializedStore.toException(xml);
 			if(t != null) {
 				if(callback != null) {
 					callback.onFailure(t);
@@ -172,8 +172,8 @@ public class XydraStoreRestClient implements XydraStore {
 			throw new IllegalArgumentException("commands array must not be null");
 		}
 		
-		XydraOut out = new XydraOutXml();
-		XmlCommand.toXml(Arrays.asList(commands).iterator(), out, null);
+		XydraOut out = new XmlOut();
+		SerializedCommand.toXml(Arrays.asList(commands).iterator(), out, null);
 		
 		MiniElement xml = post("execute", actorId, passwordHash, out.getData(), callback);
 		if(xml == null) {
@@ -183,7 +183,7 @@ public class XydraStoreRestClient implements XydraStore {
 		@SuppressWarnings("unchecked")
 		BatchedResult<Long>[] res = new BatchedResult[commands.length];
 		
-		XmlStore.toCommandResults(xml, null, res, null);
+		SerializedStore.toCommandResults(xml, null, res, null);
 		
 		if(callback != null) {
 			callback.onSuccess(res);
@@ -211,8 +211,8 @@ public class XydraStoreRestClient implements XydraStore {
 		
 		String uri = req == null ? "execute" : "execute?" + req;
 		
-		XydraOut out = new XydraOutXml();
-		XmlCommand.toXml(Arrays.asList(commands).iterator(), out, null);
+		XydraOut out = new XmlOut();
+		SerializedCommand.toXml(Arrays.asList(commands).iterator(), out, null);
 		
 		MiniElement xml = post(uri, actorId, passwordHash, out.getData(), callback);
 		if(xml == null) {
@@ -222,7 +222,7 @@ public class XydraStoreRestClient implements XydraStore {
 		@SuppressWarnings("unchecked")
 		BatchedResult<Long>[] commandsRes = new BatchedResult[commands.length];
 		
-		XmlStore.toCommandResults(xml, getEventsRequests, commandsRes, eventsRes);
+		SerializedStore.toCommandResults(xml, getEventsRequests, commandsRes, eventsRes);
 		
 		callback.onSuccess(new Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>(commandsRes,
 		        eventsRes));
@@ -312,7 +312,7 @@ public class XydraStoreRestClient implements XydraStore {
 			return;
 		}
 		
-		XmlStore.toEventResults(xml, getEventsRequests, res);
+		SerializedStore.toEventResults(xml, getEventsRequests, res);
 		
 		callback.onSuccess(res);
 		
@@ -327,7 +327,7 @@ public class XydraStoreRestClient implements XydraStore {
 			return;
 		}
 		
-		Set<XID> modelIds = XmlStore.toModelIds(xml);
+		Set<XID> modelIds = SerializedStore.toModelIds(xml);
 		
 		callback.onSuccess(modelIds);
 		
@@ -363,7 +363,7 @@ public class XydraStoreRestClient implements XydraStore {
 			
 			MiniElement xml = new MiniParserXml().parse(content);
 			
-			Throwable t = XmlStore.toException(xml);
+			Throwable t = SerializedStore.toException(xml);
 			if(t != null) {
 				callback.onFailure(t);
 				return null;
@@ -442,7 +442,7 @@ public class XydraStoreRestClient implements XydraStore {
 			return;
 		}
 		
-		XmlStore.toModelRevisions(xml, res);
+		SerializedStore.toModelRevisions(xml, res);
 		
 		callback.onSuccess(res);
 		
@@ -503,7 +503,7 @@ public class XydraStoreRestClient implements XydraStore {
 			return;
 		}
 		
-		List<Object> snapshots = XmlStore.toSnapshots(xml, modelAddresses);
+		List<Object> snapshots = SerializedStore.toSnapshots(xml, modelAddresses);
 		
 		toBatchedResults(snapshots, XReadableModel.class, res);
 		
@@ -534,7 +534,7 @@ public class XydraStoreRestClient implements XydraStore {
 			return;
 		}
 		
-		List<Object> snapshots = XmlStore.toSnapshots(xml, objectAddresses);
+		List<Object> snapshots = SerializedStore.toSnapshots(xml, objectAddresses);
 		
 		toBatchedResults(snapshots, XReadableObject.class, res);
 		
@@ -551,7 +551,7 @@ public class XydraStoreRestClient implements XydraStore {
 			return;
 		}
 		
-		XID repoId = XmlStore.toRepositoryId(xml);
+		XID repoId = SerializedStore.toRepositoryId(xml);
 		
 		callback.onSuccess(repoId);
 		

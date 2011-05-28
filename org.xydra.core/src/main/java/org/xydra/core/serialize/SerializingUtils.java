@@ -13,7 +13,7 @@ import org.xydra.index.XI;
  * @author dscharrer
  * 
  */
-class XmlUtils {
+class SerializingUtils {
 	
 	protected static final String FIELDID_ATTRIBUTE = "fieldId";
 	protected static final String MODELID_ATTRIBUTE = "modelId";

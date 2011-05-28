@@ -35,10 +35,10 @@ import org.xydra.core.XFile;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.XModel;
 import org.xydra.core.serialize.MiniElement;
-import org.xydra.core.serialize.XmlModel;
+import org.xydra.core.serialize.SerializedModel;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.xml.MiniParserXml;
-import org.xydra.core.serialize.xml.XydraOutXml;
+import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.minio.MiniStreamWriter;
@@ -134,8 +134,8 @@ public class WebadminApp {
 			
 			log.info("adding model \"" + modelId.toString() + "\" as \"" + filename + "\"");
 			
-			XydraOut out = new XydraOutXml(new MiniStreamWriter(zos));
-			XmlModel.toXml(server.getModelSnapshot(modelId), out, true, false, includeLogs);
+			XydraOut out = new XmlOut(new MiniStreamWriter(zos));
+			SerializedModel.toXml(server.getModelSnapshot(modelId), out, true, false, includeLogs);
 			out.flush();
 			
 			zos.closeEntry();
@@ -218,7 +218,7 @@ public class WebadminApp {
 			XModel model;
 			try {
 				MiniElement e = new MiniParserXml().parse(b.toString());
-				model = XmlModel.toModel(XX.toId("WebadminApp"), null, e);
+				model = SerializedModel.toModel(XX.toId("WebadminApp"), null, e);
 			} catch(Exception e) {
 				throw new RuntimeException("error parsing model file \"" + name + "\"", e);
 			}

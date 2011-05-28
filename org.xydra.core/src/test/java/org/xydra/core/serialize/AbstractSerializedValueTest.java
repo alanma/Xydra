@@ -1,4 +1,4 @@
-package org.xydra.core.xml;
+package org.xydra.core.serialize;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -9,11 +9,6 @@ import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
-import org.xydra.core.serialize.MiniElement;
-import org.xydra.core.serialize.XmlValue;
-import org.xydra.core.serialize.XydraOut;
-import org.xydra.core.serialize.xml.MiniParserXml;
-import org.xydra.core.serialize.xml.XydraOutXml;
 
 
 /**
@@ -22,7 +17,7 @@ import org.xydra.core.serialize.xml.XydraOutXml;
  * @author dscharrer
  * 
  */
-public class XmlValueTest {
+abstract public class AbstractSerializedValueTest {
 	
 	@Test
 	public void testAddressListValue() {
@@ -320,16 +315,20 @@ public class XmlValueTest {
 	
 	private void testValue(XValue value) {
 		
-		XydraOut out = new XydraOutXml();
-		XmlValue.toXml(value, out);
+		XydraOut out = getNewOut();
+		SerializedValue.toXml(value, out);
 		assertTrue(out.isClosed());
 		String xml = out.getData();
 		
-		System.out.print(xml);
+		System.out.println(xml);
 		
-		MiniElement e = new MiniParserXml().parse(xml);
-		XValue valueAgain = XmlValue.toValue(e);
+		MiniElement e = getParser().parse(xml);
+		XValue valueAgain = SerializedValue.toValue(e);
 		assertEquals(value, valueAgain);
 	}
+	
+	protected abstract XydraOut getNewOut();
+	
+	protected abstract MiniParser getParser();
 	
 }

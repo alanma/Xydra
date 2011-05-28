@@ -36,7 +36,7 @@ import org.xydra.base.value.XValue;
 @RunsInGWT(true)
 @RunsInAppEngine(true)
 @RequiresAppEngine(false)
-public class XmlEvent {
+public class SerializedEvent {
 	
 	private static final String NAME_VALUE = "value";
 	private static final String NAME_VALUES = "values";
@@ -58,12 +58,12 @@ public class XmlEvent {
 	
 	private static boolean getImpliedAttribute(MiniElement xml) {
 		Object booleanString = xml.getAttribute(IMPLIED_ATTRIBUTE);
-		return booleanString == null ? false : XmlValue.toBoolean(booleanString);
+		return booleanString == null ? false : SerializedValue.toBoolean(booleanString);
 	}
 	
 	private static boolean getInTransactionAttribute(MiniElement xml) {
 		Object booleanString = xml.getAttribute(INTRANSACTION_ATTRIBUTE);
-		return booleanString == null ? false : XmlValue.toBoolean(booleanString);
+		return booleanString == null ? false : SerializedValue.toBoolean(booleanString);
 	}
 	
 	private static long getRevision(MiniElement xml, String elementName, String attribute,
@@ -81,7 +81,7 @@ public class XmlEvent {
 			return XEvent.RevisionOfEntityNotSet;
 		}
 		
-		return XmlValue.toLong(revisionString);
+		return SerializedValue.toLong(revisionString);
 	}
 	
 	private static XValue loadValue(Iterator<MiniElement> it, String type) {
@@ -90,13 +90,13 @@ public class XmlEvent {
 			        + type + "Value child element");
 		}
 		MiniElement valueElement = it.next();
-		return XmlValue.toValue(valueElement);
+		return SerializedValue.toValue(valueElement);
 	}
 	
 	private static void setAtomicEventAttributes(XAtomicEvent event, XydraOut out,
 	        XAddress context, boolean inTrans) {
 		
-		out.attribute(XmlUtils.TYPE_ATTRIBUTE, event.getChangeType());
+		out.attribute(SerializingUtils.TYPE_ATTRIBUTE, event.getChangeType());
 		
 		setCommonAttributes(event, out, context, inTrans);
 		
@@ -116,7 +116,7 @@ public class XmlEvent {
 	private static void setCommonAttributes(XEvent event, XydraOut out, XAddress context,
 	        boolean inTrans) {
 		
-		XmlUtils.setTarget(event.getTarget(), out, context);
+		SerializingUtils.setTarget(event.getTarget(), out, context);
 		
 		if(!inTrans) {
 			
@@ -172,7 +172,7 @@ public class XmlEvent {
 	 */
 	public static XEvent toEvent(MiniElement xml, XAddress context) throws IllegalArgumentException {
 		String name = xml.getType();
-		if(XmlValue.isNullElement(xml)) {
+		if(SerializedValue.isNullElement(xml)) {
 			return null;
 		} else if(name.equals(XTRANSACTIONEVENT_ELEMENT)) {
 			return toTransactionEvent(xml, context);
@@ -196,7 +196,7 @@ public class XmlEvent {
 	 */
 	public static List<XEvent> toEventList(MiniElement xml, XAddress context) {
 		
-		XmlUtils.checkElementName(xml, XEVENTLIST_ELEMENT);
+		SerializingUtils.checkElementName(xml, XEVENTLIST_ELEMENT);
 		
 		List<XEvent> events = new ArrayList<XEvent>();
 		Iterator<MiniElement> it = xml.getChildren(NAME_EVENTS);
@@ -210,16 +210,16 @@ public class XmlEvent {
 	
 	private static XFieldEvent toFieldEvent(MiniElement xml, XAddress context, TempTrans trans) {
 		
-		XAddress target = XmlUtils.getTarget(xml, context);
+		XAddress target = SerializingUtils.getTarget(xml, context);
 		
-		ChangeType type = XmlUtils.getChangeType(xml, XFIELDEVENT_ELEMENT);
+		ChangeType type = SerializingUtils.getChangeType(xml, XFIELDEVENT_ELEMENT);
 		
 		long fieldRev = getRevision(xml, XFIELDEVENT_ELEMENT, FIELDREVISION_ATTRIBUTE, true);
 		long objectRev = getRevision(xml, XFIELDEVENT_ELEMENT, OBJECTREVISION_ATTRIBUTE, false);
 		long modelRev = trans != null ? trans.modelRev : getRevision(xml, XFIELDEVENT_ELEMENT,
 		        MODELREVISION_ATTRIBUTE, false);
 		
-		XID actor = trans != null ? trans.actor : XmlUtils.getOptionalXidAttribute(xml,
+		XID actor = trans != null ? trans.actor : SerializingUtils.getOptionalXidAttribute(xml,
 		        ACTOR_ATTRIBUTE, null);
 		boolean inTransaction = trans != null || getInTransactionAttribute(xml);
 		
@@ -247,7 +247,7 @@ public class XmlEvent {
 			        inTransaction, implied);
 		} else {
 			throw new IllegalArgumentException("<" + XFIELDEVENT_ELEMENT + ">@"
-			        + XmlUtils.TYPE_ATTRIBUTE
+			        + SerializingUtils.TYPE_ATTRIBUTE
 			        + " does not contain a valid type for field events, but '" + type + "'");
 		}
 	}
@@ -255,9 +255,9 @@ public class XmlEvent {
 	private static XReversibleFieldEvent toReversibleFieldEvent(MiniElement xml, XAddress context,
 	        TempTrans trans) {
 		
-		XAddress target = XmlUtils.getTarget(xml, context);
+		XAddress target = SerializingUtils.getTarget(xml, context);
 		
-		ChangeType type = XmlUtils.getChangeType(xml, XREVERSIBLEFIELDEVENT_ELEMENT);
+		ChangeType type = SerializingUtils.getChangeType(xml, XREVERSIBLEFIELDEVENT_ELEMENT);
 		
 		long fieldRev = getRevision(xml, XREVERSIBLEFIELDEVENT_ELEMENT, FIELDREVISION_ATTRIBUTE,
 		        true);
@@ -266,7 +266,7 @@ public class XmlEvent {
 		long modelRev = trans != null ? trans.modelRev : getRevision(xml,
 		        XREVERSIBLEFIELDEVENT_ELEMENT, MODELREVISION_ATTRIBUTE, false);
 		
-		XID actor = trans != null ? trans.actor : XmlUtils.getOptionalXidAttribute(xml,
+		XID actor = trans != null ? trans.actor : SerializingUtils.getOptionalXidAttribute(xml,
 		        ACTOR_ATTRIBUTE, null);
 		boolean inTransaction = trans != null || getInTransactionAttribute(xml);
 		
@@ -298,7 +298,7 @@ public class XmlEvent {
 			        objectRev, fieldRev, inTransaction, implied);
 		} else {
 			throw new IllegalArgumentException("<" + XREVERSIBLEFIELDEVENT_ELEMENT + ">@"
-			        + XmlUtils.TYPE_ATTRIBUTE
+			        + SerializingUtils.TYPE_ATTRIBUTE
 			        + " does not contain a valid type for field events, but '" + type + "'");
 		}
 	}
@@ -309,26 +309,26 @@ public class XmlEvent {
 			throw new IllegalArgumentException("invalid context for model events: " + context);
 		}
 		
-		XAddress address = XmlUtils.getTarget(xml, context);
+		XAddress address = SerializingUtils.getTarget(xml, context);
 		
 		if(address.getModel() == null) {
 			throw new IllegalArgumentException("<" + XMODELEVENT_ELEMENT + ">@"
-			        + XmlUtils.MODELID_ATTRIBUTE + " is missing");
+			        + SerializingUtils.MODELID_ATTRIBUTE + " is missing");
 		}
 		
 		if(address.getObject() == null) {
 			throw new IllegalArgumentException("<" + XMODELEVENT_ELEMENT + ">@"
-			        + XmlUtils.OBJECTID_ATTRIBUTE + " is missing");
+			        + SerializingUtils.OBJECTID_ATTRIBUTE + " is missing");
 		}
 		
-		ChangeType type = XmlUtils.getChangeType(xml, XMODELEVENT_ELEMENT);
+		ChangeType type = SerializingUtils.getChangeType(xml, XMODELEVENT_ELEMENT);
 		
 		long objectRev = getRevision(xml, XMODELEVENT_ELEMENT, OBJECTREVISION_ATTRIBUTE,
 		        type == ChangeType.REMOVE);
 		long modelRev = trans != null ? trans.modelRev : getRevision(xml, XMODELEVENT_ELEMENT,
 		        MODELREVISION_ATTRIBUTE, true);
 		
-		XID actor = trans != null ? trans.actor : XmlUtils.getOptionalXidAttribute(xml,
+		XID actor = trans != null ? trans.actor : SerializingUtils.getOptionalXidAttribute(xml,
 		        ACTOR_ATTRIBUTE, null);
 		boolean inTransaction = trans != null || getInTransactionAttribute(xml);
 		
@@ -344,7 +344,7 @@ public class XmlEvent {
 			        inTransaction, implied);
 		} else {
 			throw new IllegalArgumentException("<" + XMODELEVENT_ELEMENT + ">@"
-			        + XmlUtils.TYPE_ATTRIBUTE
+			        + SerializingUtils.TYPE_ATTRIBUTE
 			        + " does not contain a valid type for model events, but '" + type + "'");
 		}
 	}
@@ -355,19 +355,19 @@ public class XmlEvent {
 			throw new IllegalArgumentException("invalid context for object events: " + context);
 		}
 		
-		XAddress address = XmlUtils.getTarget(xml, context);
+		XAddress address = SerializingUtils.getTarget(xml, context);
 		
 		if(address.getObject() == null) {
 			throw new IllegalArgumentException("<" + XOBJECTEVENT_ELEMENT + ">@"
-			        + XmlUtils.OBJECTID_ATTRIBUTE + " is missing");
+			        + SerializingUtils.OBJECTID_ATTRIBUTE + " is missing");
 		}
 		
 		if(address.getField() == null) {
 			throw new IllegalArgumentException("<" + XOBJECTEVENT_ELEMENT + ">@"
-			        + XmlUtils.FIELDID_ATTRIBUTE + " is missing");
+			        + SerializingUtils.FIELDID_ATTRIBUTE + " is missing");
 		}
 		
-		ChangeType type = XmlUtils.getChangeType(xml, XOBJECTEVENT_ELEMENT);
+		ChangeType type = SerializingUtils.getChangeType(xml, XOBJECTEVENT_ELEMENT);
 		
 		long fieldRev = getRevision(xml, XOBJECTEVENT_ELEMENT, FIELDREVISION_ATTRIBUTE,
 		        type == ChangeType.REMOVE);
@@ -375,7 +375,7 @@ public class XmlEvent {
 		long modelRev = trans != null ? trans.modelRev : getRevision(xml, XOBJECTEVENT_ELEMENT,
 		        MODELREVISION_ATTRIBUTE, false);
 		
-		XID actor = trans != null ? trans.actor : XmlUtils.getOptionalXidAttribute(xml,
+		XID actor = trans != null ? trans.actor : SerializingUtils.getOptionalXidAttribute(xml,
 		        ACTOR_ATTRIBUTE, null);
 		boolean inTransaction = trans != null || getInTransactionAttribute(xml);
 		
@@ -391,7 +391,7 @@ public class XmlEvent {
 			        fieldRev, inTransaction, implied);
 		} else {
 			throw new IllegalArgumentException("<" + XOBJECTEVENT_ELEMENT + ">@"
-			        + XmlUtils.TYPE_ATTRIBUTE
+			        + SerializingUtils.TYPE_ATTRIBUTE
 			        + " does not contain a valid type for object events, but '" + type + "'");
 		}
 	}
@@ -403,24 +403,24 @@ public class XmlEvent {
 			throw new IllegalArgumentException("invalid context for model events: " + context);
 		}
 		
-		XAddress address = XmlUtils.getTarget(xml, context);
+		XAddress address = SerializingUtils.getTarget(xml, context);
 		
 		if(address.getRepository() == null) {
 			throw new IllegalArgumentException("<" + XREPOSITORYEVENT_ELEMENT + ">@"
-			        + XmlUtils.REPOSITORYID_ATTRIBUTE + " is missing");
+			        + SerializingUtils.REPOSITORYID_ATTRIBUTE + " is missing");
 		}
 		
 		if(address.getModel() == null) {
 			throw new IllegalArgumentException("<" + XREPOSITORYEVENT_ELEMENT + ">@"
-			        + XmlUtils.MODELID_ATTRIBUTE + " is missing");
+			        + SerializingUtils.MODELID_ATTRIBUTE + " is missing");
 		}
 		
-		ChangeType type = XmlUtils.getChangeType(xml, XREPOSITORYEVENT_ELEMENT);
+		ChangeType type = SerializingUtils.getChangeType(xml, XREPOSITORYEVENT_ELEMENT);
 		
 		long modelRev = trans != null ? trans.modelRev : getRevision(xml, XREPOSITORYEVENT_ELEMENT,
 		        MODELREVISION_ATTRIBUTE, type == ChangeType.REMOVE);
 		
-		XID actor = trans != null ? trans.actor : XmlUtils.getOptionalXidAttribute(xml,
+		XID actor = trans != null ? trans.actor : SerializingUtils.getOptionalXidAttribute(xml,
 		        ACTOR_ATTRIBUTE, null);
 		boolean inTransaction = trans != null || getInTransactionAttribute(xml);
 		
@@ -435,7 +435,7 @@ public class XmlEvent {
 			        inTransaction);
 		} else {
 			throw new IllegalArgumentException("<" + XREPOSITORYEVENT_ELEMENT + ">@"
-			        + XmlUtils.TYPE_ATTRIBUTE
+			        + SerializingUtils.TYPE_ATTRIBUTE
 			        + " does not contain a valid type for repository events, but '" + type + "'");
 		}
 	}
@@ -454,7 +454,7 @@ public class XmlEvent {
 	
 	private static XTransactionEvent toTransactionEvent(MiniElement xml, XAddress context) {
 		
-		XAddress target = XmlUtils.getTarget(xml, context);
+		XAddress target = SerializingUtils.getTarget(xml, context);
 		
 		if(target.getField() != null || (target.getModel() == null && target.getObject() == null)) {
 			throw new IllegalArgumentException("TransactionEvent element " + xml
@@ -466,7 +466,7 @@ public class XmlEvent {
 		long modelRev = getRevision(xml, XFIELDEVENT_ELEMENT, MODELREVISION_ATTRIBUTE, target
 		        .getObject() == null);
 		
-		XID actor = XmlUtils.getOptionalXidAttribute(xml, ACTOR_ATTRIBUTE, null);
+		XID actor = SerializingUtils.getOptionalXidAttribute(xml, ACTOR_ATTRIBUTE, null);
 		
 		TempTrans tt = new TempTrans(actor, modelRev);
 		
@@ -514,7 +514,7 @@ public class XmlEvent {
 	public static void toXml(XEvent event, XydraOut out, XAddress context)
 	        throws IllegalArgumentException {
 		if(event == null) {
-			XmlValue.saveNullElement(out);
+			SerializedValue.saveNullElement(out);
 		} else if(event instanceof XTransactionEvent) {
 			toXml((XTransactionEvent)event, out, context);
 		} else {
@@ -549,7 +549,7 @@ public class XmlEvent {
 		
 		out.children(NAME_VALUE, false);
 		if(event.getChangeType() != ChangeType.REMOVE) {
-			XmlValue.toXml(event.getNewValue(), out);
+			SerializedValue.toXml(event.getNewValue(), out);
 		}
 		
 		out.close(XFIELDEVENT_ELEMENT);
@@ -565,10 +565,10 @@ public class XmlEvent {
 		
 		out.children(NAME_VALUES, true);
 		if(event.getChangeType() != ChangeType.ADD) {
-			XmlValue.toXml(event.getOldValue(), out);
+			SerializedValue.toXml(event.getOldValue(), out);
 		}
 		if(event.getChangeType() != ChangeType.REMOVE) {
-			XmlValue.toXml(event.getNewValue(), out);
+			SerializedValue.toXml(event.getNewValue(), out);
 		}
 		
 		out.close(XREVERSIBLEFIELDEVENT_ELEMENT);
@@ -586,7 +586,7 @@ public class XmlEvent {
 		
 		setAtomicEventAttributes(event, out, context, inTrans);
 		
-		out.attribute(XmlUtils.OBJECTID_ATTRIBUTE, event.getObjectId());
+		out.attribute(SerializingUtils.OBJECTID_ATTRIBUTE, event.getObjectId());
 		
 		out.close(XMODELEVENT_ELEMENT);
 		
@@ -603,7 +603,7 @@ public class XmlEvent {
 		
 		setAtomicEventAttributes(event, out, context, inTrans);
 		
-		out.attribute(XmlUtils.FIELDID_ATTRIBUTE, event.getFieldId());
+		out.attribute(SerializingUtils.FIELDID_ATTRIBUTE, event.getFieldId());
 		
 		out.close(XOBJECTEVENT_ELEMENT);
 		
@@ -620,7 +620,7 @@ public class XmlEvent {
 		
 		setAtomicEventAttributes(event, out, context, inTrans);
 		
-		out.attribute(XmlUtils.MODELID_ATTRIBUTE, event.getModelId());
+		out.attribute(SerializingUtils.MODELID_ATTRIBUTE, event.getModelId());
 		
 		out.close(XREPOSITORYEVENT_ELEMENT);
 		

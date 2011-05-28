@@ -9,9 +9,9 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XObjectCommand;
 import org.xydra.base.change.impl.memory.MemoryObjectCommand;
 import org.xydra.base.rmof.XReadableField;
-import org.xydra.core.serialize.XmlModel;
+import org.xydra.core.serialize.SerializedModel;
 import org.xydra.core.serialize.XydraOut;
-import org.xydra.core.serialize.xml.XydraOutXml;
+import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
 import org.xydra.server.IXydraSession;
@@ -38,8 +38,8 @@ public class XFieldResource {
 		IXydraSession session = XydraRestServer.getSession(restless, req);
 		XReadableField field = XydraRestServer.getField(session, modelId, objectId, fieldId);
 		
-		XydraOut xo = new XydraOutXml();
-		XmlModel.toXml(field, xo, true);
+		XydraOut xo = new XmlOut();
+		SerializedModel.toXml(field, xo, true);
 		
 		XydraRestServer.xmlResponse(res, HttpServletResponse.SC_OK, xo.getData());
 	}

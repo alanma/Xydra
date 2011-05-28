@@ -15,11 +15,11 @@ import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.session.XProtectedModel;
 import org.xydra.core.model.session.XProtectedRepository;
 import org.xydra.core.serialize.MiniElement;
-import org.xydra.core.serialize.XmlCommand;
-import org.xydra.core.serialize.XmlEvent;
+import org.xydra.core.serialize.SerializedCommand;
+import org.xydra.core.serialize.SerializedEvent;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.xml.MiniParserXml;
-import org.xydra.core.serialize.xml.XydraOutXml;
+import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.store.AccessException;
 
 
@@ -104,10 +104,10 @@ public class DirectChangesService implements XChangesService {
 		
 		// IMPROVE do this without XML serialization
 		// Map addresses from clientContext to serverContext.
-		XydraOut xo = new XydraOutXml();
-		XmlCommand.toXml(command, xo, clientContext);
+		XydraOut xo = new XmlOut();
+		SerializedCommand.toXml(command, xo, clientContext);
 		MiniElement e = new MiniParserXml().parse(xo.getData());
-		return XmlCommand.toCommand(e, serverContext);
+		return SerializedCommand.toCommand(e, serverContext);
 		
 	}
 	
@@ -115,10 +115,10 @@ public class DirectChangesService implements XChangesService {
 		
 		// IMPROVE do this without XML serialization
 		// Map addresses from serverContext to clientContext.
-		XydraOut o = new XydraOutXml();
-		XmlEvent.toXml(event, o, serverContext);
+		XydraOut o = new XmlOut();
+		SerializedEvent.toXml(event, o, serverContext);
 		MiniElement e = new MiniParserXml().parse(o.getData());
-		return XmlEvent.toEvent(e, clientContext);
+		return SerializedEvent.toEvent(e, clientContext);
 		
 	}
 	

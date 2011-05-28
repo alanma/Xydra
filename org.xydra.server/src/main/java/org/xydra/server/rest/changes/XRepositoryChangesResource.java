@@ -8,7 +8,7 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.core.serialize.MiniElement;
 import org.xydra.core.serialize.MiniParser;
-import org.xydra.core.serialize.XmlCommand;
+import org.xydra.core.serialize.SerializedCommand;
 import org.xydra.core.serialize.xml.MiniParserXml;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessException;
@@ -36,7 +36,7 @@ public class XRepositoryChangesResource {
 			MiniElement commandElement = parser.parse(commandXml);
 			
 			XAddress repoAddr = session.getRepositoryAddress();
-			command = XmlCommand.toRepositoryCommand(commandElement, repoAddr);
+			command = SerializedCommand.toRepositoryCommand(commandElement, repoAddr);
 			// TODO allow other command types?
 			
 		} catch(IllegalArgumentException iae) {

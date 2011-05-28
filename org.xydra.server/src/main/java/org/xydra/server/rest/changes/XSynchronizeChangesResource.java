@@ -13,11 +13,11 @@ import org.xydra.base.change.XEvent;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.serialize.MiniElement;
 import org.xydra.core.serialize.MiniParser;
-import org.xydra.core.serialize.XmlCommand;
-import org.xydra.core.serialize.XmlEvent;
+import org.xydra.core.serialize.SerializedCommand;
+import org.xydra.core.serialize.SerializedEvent;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.xml.MiniParserXml;
-import org.xydra.core.serialize.xml.XydraOutXml;
+import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.index.iterator.AbstractTransformingIterator;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessException;
@@ -112,7 +112,7 @@ public class XSynchronizeChangesResource {
 			MiniParser parser = new MiniParserXml();
 			MiniElement commandElement = parser.parse(commandXml);
 			
-			command = XmlCommand.toCommand(commandElement, addr);
+			command = SerializedCommand.toCommand(commandElement, addr);
 			
 		} catch(IllegalArgumentException iae) {
 			throw new RestlessException(RestlessException.Bad_request,
@@ -166,8 +166,8 @@ public class XSynchronizeChangesResource {
 			};
 		}
 		
-		XydraOut out = new XydraOutXml();
-		XmlEvent.toXml(events, out, addr);
+		XydraOut out = new XmlOut();
+		SerializedEvent.toXml(events, out, addr);
 		return out.getData();
 	}
 	

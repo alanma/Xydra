@@ -4,13 +4,13 @@ import org.xydra.core.serialize.AbstractXydraOut;
 import org.xydra.minio.MiniWriter;
 
 
-public class XydraOutJson extends AbstractXydraOut {
+public class JsonOut extends AbstractXydraOut {
 	
-	public XydraOutJson(MiniWriter writer) {
+	public JsonOut(MiniWriter writer) {
 		super(writer);
 	}
 	
-	public XydraOutJson() {
+	public JsonOut() {
 		super();
 	}
 	

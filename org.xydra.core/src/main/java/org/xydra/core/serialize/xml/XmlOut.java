@@ -4,22 +4,22 @@ import org.xydra.core.serialize.AbstractXydraOut;
 import org.xydra.minio.MiniWriter;
 
 
-public class XydraOutXml extends AbstractXydraOut {
+public class XmlOut extends AbstractXydraOut {
 	
-	public XydraOutXml(MiniWriter writer) {
+	public XmlOut(MiniWriter writer) {
 		this(writer, true);
 	}
 	
-	public XydraOutXml() {
+	public XmlOut() {
 		this(true);
 	}
 	
-	public XydraOutXml(MiniWriter writer, boolean writeHeader) {
+	public XmlOut(MiniWriter writer, boolean writeHeader) {
 		super(writer);
 		init(writeHeader);
 	}
 	
-	public XydraOutXml(boolean writeHeader) {
+	public XmlOut(boolean writeHeader) {
 		super();
 		init(writeHeader);
 	}

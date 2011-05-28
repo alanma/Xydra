@@ -36,11 +36,11 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.serialize.MiniElement;
-import org.xydra.core.serialize.XmlCommand;
-import org.xydra.core.serialize.XmlEvent;
+import org.xydra.core.serialize.SerializedCommand;
+import org.xydra.core.serialize.SerializedEvent;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.xml.MiniParserXml;
-import org.xydra.core.serialize.xml.XydraOutXml;
+import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.index.iterator.AbstractTransformingIterator;
 
 
@@ -97,8 +97,8 @@ public abstract class ChangesApiTest extends AbstractRestApiTest {
 			context = XX.toAddress(target.getRepository(), target.getModel(), null, null);
 		}
 		
-		XydraOut out = new XydraOutXml();
-		XmlCommand.toXml(command, out, context);
+		XydraOut out = new XmlOut();
+		SerializedCommand.toXml(command, out, context);
 		
 		HttpURLConnection c = (HttpURLConnection)targetUrl.openConnection();
 		setLoginDetails(c);
@@ -138,7 +138,7 @@ public abstract class ChangesApiTest extends AbstractRestApiTest {
 			
 			try {
 				MiniElement eventsElement = new MiniParserXml().parse(data);
-				events = XmlEvent.toEventList(eventsElement, context);
+				events = SerializedEvent.toEventList(eventsElement, context);
 			} catch(IllegalArgumentException iae) {
 				fail(iae.getMessage());
 				throw new RuntimeException();
@@ -178,7 +178,7 @@ public abstract class ChangesApiTest extends AbstractRestApiTest {
 			return null;
 		}
 		
-		return XmlEvent.toEventList(eventsElement, addr);
+		return SerializedEvent.toEventList(eventsElement, addr);
 	}
 	
 	public void testGetChanges(final XAddress addr, long since, long until) throws IOException {

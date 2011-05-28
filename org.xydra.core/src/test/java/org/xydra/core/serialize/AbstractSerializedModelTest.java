@@ -1,4 +1,4 @@
-package org.xydra.core.xml;
+package org.xydra.core.serialize;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -24,11 +24,6 @@ import org.xydra.core.model.impl.memory.MemoryField;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryObject;
 import org.xydra.core.model.impl.memory.MemoryRepository;
-import org.xydra.core.serialize.MiniElement;
-import org.xydra.core.serialize.XmlModel;
-import org.xydra.core.serialize.XydraOut;
-import org.xydra.core.serialize.xml.MiniParserXml;
-import org.xydra.core.serialize.xml.XydraOutXml;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
@@ -40,30 +35,34 @@ import org.xydra.log.LoggerFactory;
  * @author dscharrer
  * 
  */
-public class XmlModelTest {
+abstract public class AbstractSerializedModelTest {
+	
+	protected abstract XydraOut getNewOut();
+	
+	protected abstract MiniParser getParser();
 	
 	private static final Logger log = getLogger();
 	
 	private static Logger getLogger() {
 		LoggerTestHelper.init();
-		return LoggerFactory.getLogger(XmlModelTest.class);
+		return LoggerFactory.getLogger(AbstractSerializedModelTest.class);
 	}
 	
 	private XID actorId = XX.toId("a-test-user");
 	
 	void checkNoRevisions(XReadableField field) {
-		assertEquals(XmlModel.NO_REVISION, field.getRevisionNumber());
+		assertEquals(SerializedModel.NO_REVISION, field.getRevisionNumber());
 	}
 	
 	void checkNoRevisions(XReadableModel model) {
-		assertEquals(XmlModel.NO_REVISION, model.getRevisionNumber());
+		assertEquals(SerializedModel.NO_REVISION, model.getRevisionNumber());
 		for(XID objectId : model) {
 			checkNoRevisions(model.getObject(objectId));
 		}
 	}
 	
 	void checkNoRevisions(XReadableObject object) {
-		assertEquals(XmlModel.NO_REVISION, object.getRevisionNumber());
+		assertEquals(SerializedModel.NO_REVISION, object.getRevisionNumber());
 		for(XID fieldId : object) {
 			checkNoRevisions(object.getField(fieldId));
 		}
@@ -98,23 +97,23 @@ public class XmlModelTest {
 	private void testField(XReadableField field) {
 		
 		// test serializing with revisions
-		XydraOut out = new XydraOutXml();
-		XmlModel.toXml(field, out);
+		XydraOut out = getNewOut();
+		SerializedModel.toXml(field, out);
 		assertTrue(out.isClosed());
 		String xml = out.getData();
 		log.info(xml);
-		MiniElement e = new MiniParserXml().parse(xml);
-		XField fieldAgain = XmlModel.toField(this.actorId, e);
+		MiniElement e = getParser().parse(xml);
+		XField fieldAgain = SerializedModel.toField(this.actorId, e);
 		assertTrue(XCompareUtils.equalState(field, fieldAgain));
 		
 		// test serializing without revisions
-		out = new XydraOutXml();
-		XmlModel.toXml(field, out, false);
+		out = getNewOut();
+		SerializedModel.toXml(field, out, false);
 		assertTrue(out.isClosed());
 		xml = out.getData();
 		log.info(xml);
-		e = new MiniParserXml().parse(xml);
-		fieldAgain = XmlModel.toField(this.actorId, e);
+		e = getParser().parse(xml);
+		fieldAgain = SerializedModel.toField(this.actorId, e);
 		assertTrue(XCompareUtils.equalTree(field, fieldAgain));
 		checkNoRevisions(fieldAgain);
 		
@@ -151,13 +150,13 @@ public class XmlModelTest {
 	private void testModel(XReadableModel model) {
 		
 		// test serializing with revisions
-		XydraOut out = new XydraOutXml();
-		XmlModel.toXml(model, out);
+		XydraOut out = getNewOut();
+		SerializedModel.toXml(model, out);
 		assertTrue(out.isClosed());
 		String xml = out.getData();
 		log.info(xml);
-		MiniElement e = new MiniParserXml().parse(xml);
-		XModel modelAgain = XmlModel.toModel(this.actorId, null, e);
+		MiniElement e = getParser().parse(xml);
+		XModel modelAgain = SerializedModel.toModel(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalState(model, modelAgain));
 		
 		// check that there is a change log
@@ -165,13 +164,13 @@ public class XmlModelTest {
 		assertNotNull(changeLog);
 		
 		// test serializing without revisions
-		out = new XydraOutXml();
-		XmlModel.toXml(model, out, false, true, false);
+		out = getNewOut();
+		SerializedModel.toXml(model, out, false, true, false);
 		assertTrue(out.isClosed());
 		xml = out.getData();
 		log.info(xml);
-		e = new MiniParserXml().parse(xml);
-		modelAgain = XmlModel.toModel(this.actorId, null, e);
+		e = getParser().parse(xml);
+		modelAgain = SerializedModel.toModel(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalTree(model, modelAgain));
 		checkNoRevisions(modelAgain);
 		
@@ -180,13 +179,13 @@ public class XmlModelTest {
 	private void testObject(XReadableObject object) {
 		
 		// test serializing with revisions
-		XydraOut out = new XydraOutXml();
-		XmlModel.toXml(object, out);
+		XydraOut out = getNewOut();
+		SerializedModel.toXml(object, out);
 		assertTrue(out.isClosed());
 		String xml = out.getData();
 		log.info(xml);
-		MiniElement e = new MiniParserXml().parse(xml);
-		XObject objectAgain = XmlModel.toObject(this.actorId, null, e);
+		MiniElement e = getParser().parse(xml);
+		XObject objectAgain = SerializedModel.toObject(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalState(object, objectAgain));
 		
 		// check that there is a change log
@@ -194,13 +193,13 @@ public class XmlModelTest {
 		assertNotNull(changeLog);
 		
 		// test serializing without revisions
-		out = new XydraOutXml();
-		XmlModel.toXml(object, out, false, true, false);
+		out = getNewOut();
+		SerializedModel.toXml(object, out, false, true, false);
 		assertTrue(out.isClosed());
 		xml = out.getData();
 		log.info(xml);
-		e = new MiniParserXml().parse(xml);
-		objectAgain = XmlModel.toObject(this.actorId, null, e);
+		e = getParser().parse(xml);
+		objectAgain = SerializedModel.toObject(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalTree(object, objectAgain));
 		checkNoRevisions(objectAgain);
 		
@@ -209,23 +208,23 @@ public class XmlModelTest {
 	private void testRepository(XReadableRepository repo) {
 		
 		// test serializing with revisions
-		XydraOut out = new XydraOutXml();
-		XmlModel.toXml(repo, out);
+		XydraOut out = getNewOut();
+		SerializedModel.toXml(repo, out);
 		assertTrue(out.isClosed());
 		String xml = out.getData();
 		log.info(xml);
-		MiniElement e = new MiniParserXml().parse(xml);
-		XRepository repoAgain = XmlModel.toRepository(this.actorId, null, e);
+		MiniElement e = getParser().parse(xml);
+		XRepository repoAgain = SerializedModel.toRepository(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalState(repo, repoAgain));
 		
 		// test serializing without revisions
-		out = new XydraOutXml();
-		XmlModel.toXml(repo, out, false, true, false);
+		out = getNewOut();
+		SerializedModel.toXml(repo, out, false, true, false);
 		assertTrue(out.isClosed());
 		xml = out.getData();
 		log.info(xml);
-		e = new MiniParserXml().parse(xml);
-		repoAgain = XmlModel.toRepository(this.actorId, null, e);
+		e = getParser().parse(xml);
+		repoAgain = SerializedModel.toRepository(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalTree(repo, repoAgain));
 		checkNoRevisions(repoAgain);
 		

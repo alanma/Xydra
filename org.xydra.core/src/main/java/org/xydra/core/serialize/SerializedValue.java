@@ -44,7 +44,7 @@ import org.xydra.base.value.XValue;
 @RunsInGWT(true)
 @RunsInAppEngine(true)
 @RequiresAppEngine(false)
-public class XmlValue {
+public class SerializedValue {
 	
 	private static final String NULL_ATTRIBUTE = "isNull";
 	private static final String XADDRESS_ELEMENT = "xaddress";
@@ -114,7 +114,7 @@ public class XmlValue {
 	 */
 	public static XAddress toAddress(MiniElement ele) {
 		
-		XmlUtils.checkElementName(ele, XADDRESS_ELEMENT);
+		SerializingUtils.checkElementName(ele, XADDRESS_ELEMENT);
 		
 		if(ele.getAttribute(NULL_ATTRIBUTE) != null) {
 			return null;
@@ -139,7 +139,7 @@ public class XmlValue {
 	 */
 	public static XAddressListValue toAddressListValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(ele, XADDRESSLIST_ELEMENT);
+		SerializingUtils.checkElementName(ele, XADDRESSLIST_ELEMENT);
 		
 		List<XAddress> list = getAddressListContents(ele);
 		
@@ -159,7 +159,7 @@ public class XmlValue {
 			return toAddressSortedSetValue(ele);
 		}
 		
-		XmlUtils.checkElementName(ele, XADDRESSSET_ELEMENT);
+		SerializingUtils.checkElementName(ele, XADDRESSSET_ELEMENT);
 		
 		List<XAddress> list = getAddressListContents(ele);
 		
@@ -175,7 +175,7 @@ public class XmlValue {
 	 */
 	public static XAddressSortedSetValue toAddressSortedSetValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(ele, XADDRESSSORTEDSET_ELEMENT);
+		SerializingUtils.checkElementName(ele, XADDRESSSORTEDSET_ELEMENT);
 		
 		List<XAddress> list = getAddressListContents(ele);
 		
@@ -192,7 +192,7 @@ public class XmlValue {
 	@SuppressWarnings("boxing")
 	public static XBooleanListValue toBooleanListValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(ele, XBOOLEANLIST_ELEMENT);
+		SerializingUtils.checkElementName(ele, XBOOLEANLIST_ELEMENT);
 		
 		List<Boolean> list = new ArrayList<Boolean>();
 		
@@ -225,7 +225,7 @@ public class XmlValue {
 	 */
 	public static XBooleanValue toBooleanValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(ele, XBOOLEAN_ELEMENT);
+		SerializingUtils.checkElementName(ele, XBOOLEAN_ELEMENT);
 		
 		boolean value = toBoolean(ele.getContent(NAME_CONTENT));
 		
@@ -239,7 +239,7 @@ public class XmlValue {
 	 */
 	public static XByteListValue toByteListValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(ele, XBYTELIST_ELEMENT);
+		SerializingUtils.checkElementName(ele, XBYTELIST_ELEMENT);
 		
 		byte[] array = Base64.decode(ele.getContent(NAME_CONTENT).toString());
 		
@@ -270,7 +270,7 @@ public class XmlValue {
 	@SuppressWarnings("boxing")
 	public static XDoubleListValue toDoubleListValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(ele, XDOUBLELIST_ELEMENT);
+		SerializingUtils.checkElementName(ele, XDOUBLELIST_ELEMENT);
 		
 		List<Double> list = new ArrayList<Double>();
 		
@@ -291,7 +291,7 @@ public class XmlValue {
 	 */
 	public static XDoubleValue toDoubleValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(ele, XDOUBLE_ELEMENT);
+		SerializingUtils.checkElementName(ele, XDOUBLE_ELEMENT);
 		
 		return XV.toValue(toDouble(ele.getContent(NAME_CONTENT)));
 	}
@@ -303,7 +303,7 @@ public class XmlValue {
 	 */
 	public static XID toId(MiniElement ele) {
 		
-		XmlUtils.checkElementName(ele, XID_ELEMENT);
+		SerializingUtils.checkElementName(ele, XID_ELEMENT);
 		
 		if(ele.getAttribute(NULL_ATTRIBUTE) != null) {
 			return null;
@@ -327,7 +327,7 @@ public class XmlValue {
 	 */
 	public static XIDListValue toIdListValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(ele, XIDLIST_ELEMENT);
+		SerializingUtils.checkElementName(ele, XIDLIST_ELEMENT);
 		
 		List<XID> list = getIdListContents(ele);
 		
@@ -346,7 +346,7 @@ public class XmlValue {
 			return toIdSortedSetValue(ele);
 		}
 		
-		XmlUtils.checkElementName(ele, XIDSET_ELEMENT);
+		SerializingUtils.checkElementName(ele, XIDSET_ELEMENT);
 		
 		List<XID> list = getIdListContents(ele);
 		
@@ -362,7 +362,7 @@ public class XmlValue {
 	 */
 	public static XIDSortedSetValue toIdSortedSetValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(ele, XIDSORTEDSET_ELEMENT);
+		SerializingUtils.checkElementName(ele, XIDSORTEDSET_ELEMENT);
 		
 		List<XID> list = getIdListContents(ele);
 		
@@ -393,7 +393,7 @@ public class XmlValue {
 	@SuppressWarnings("boxing")
 	public static XIntegerListValue toIntegerListValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(ele, XINTEGERLIST_ELEMENT);
+		SerializingUtils.checkElementName(ele, XINTEGERLIST_ELEMENT);
 		
 		List<Integer> list = new ArrayList<Integer>();
 		
@@ -414,7 +414,7 @@ public class XmlValue {
 	 */
 	public static XIntegerValue toIntegerValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(ele, XINTEGER_ELEMENT);
+		SerializingUtils.checkElementName(ele, XINTEGER_ELEMENT);
 		
 		return XV.toValue(toInteger(ele.getContent(NAME_CONTENT)));
 	}
@@ -441,7 +441,7 @@ public class XmlValue {
 	@SuppressWarnings("boxing")
 	public static XLongListValue toLongListValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(ele, XLONGLIST_ELEMENT);
+		SerializingUtils.checkElementName(ele, XLONGLIST_ELEMENT);
 		
 		List<Long> list = new ArrayList<Long>();
 		
@@ -462,7 +462,7 @@ public class XmlValue {
 	 */
 	public static XLongValue toLongValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(ele, XLONG_ELEMENT);
+		SerializingUtils.checkElementName(ele, XLONG_ELEMENT);
 		
 		return XV.toValue(toLong(ele.getContent(NAME_CONTENT)));
 	}
@@ -475,7 +475,7 @@ public class XmlValue {
 	 */
 	public static XStringListValue toStringListValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(ele, XSTRINGLIST_ELEMENT);
+		SerializingUtils.checkElementName(ele, XSTRINGLIST_ELEMENT);
 		
 		List<String> list = getStringListContents(ele);
 		
@@ -490,7 +490,7 @@ public class XmlValue {
 	 */
 	public static XStringSetValue toStringSetValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(ele, XSTRINGSET_ELEMENT);
+		SerializingUtils.checkElementName(ele, XSTRINGSET_ELEMENT);
 		
 		List<String> list = getStringListContents(ele);
 		
@@ -505,7 +505,7 @@ public class XmlValue {
 	 */
 	public static XStringValue toStringValue(MiniElement ele) {
 		
-		XmlUtils.checkElementName(ele, XSTRING_ELEMENT);
+		SerializingUtils.checkElementName(ele, XSTRING_ELEMENT);
 		
 		if(ele.getAttribute(NULL_ATTRIBUTE) != null) {
 			return XV.toValue((String)null);

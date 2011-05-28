@@ -12,9 +12,9 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.serialize.MiniElement;
 import org.xydra.core.serialize.MiniParser;
-import org.xydra.core.serialize.XmlModel;
+import org.xydra.core.serialize.SerializedModel;
 import org.xydra.core.serialize.XydraOut;
-import org.xydra.core.serialize.xml.XydraOutXml;
+import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
@@ -52,7 +52,7 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 			public void onSuccess(MiniElement xml) {
 				XModel model;
 				try {
-					model = XmlModel.toModel(actorId, null, xml);
+					model = SerializedModel.toModel(actorId, null, xml);
 				} catch(Exception e) {
 					callback.onFailure(e);
 					return;
@@ -76,7 +76,7 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 			public void onSuccess(MiniElement xml) {
 				XObject object;
 				try {
-					object = XmlModel.toObject(actorId, null, xml);
+					object = SerializedModel.toObject(actorId, null, xml);
 				} catch(Exception e) {
 					callback.onFailure(e);
 					return;
@@ -100,7 +100,7 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 			public void onSuccess(MiniElement xml) {
 				XField field;
 				try {
-					field = XmlModel.toField(actorId, xml);
+					field = SerializedModel.toField(actorId, xml);
 				} catch(Exception e) {
 					callback.onFailure(e);
 					return;
@@ -178,8 +178,8 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 	
 	public void setModel(XReadableModel model, Callback<Boolean> callback) {
 		
-		XydraOut xo = new XydraOutXml();
-		XmlModel.toXml(model, xo, false, false, false);
+		XydraOut xo = new XmlOut();
+		SerializedModel.toXml(model, xo, false, false, false);
 		
 		send("", xo.getData(), callback);
 		
@@ -187,8 +187,8 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 	
 	public void setObject(XID modelId, XReadableObject object, Callback<Boolean> callback) {
 		
-		XydraOut xo = new XydraOutXml();
-		XmlModel.toXml(object, xo, false, false, false);
+		XydraOut xo = new XmlOut();
+		SerializedModel.toXml(object, xo, false, false, false);
 		
 		send(modelId.toString(), xo.getData(), callback);
 		
@@ -196,8 +196,8 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 	
 	public void setField(XID modelId, XID objectId, XReadableField field, Callback<Boolean> callback) {
 		
-		XydraOut xo = new XydraOutXml();
-		XmlModel.toXml(field, xo, false);
+		XydraOut xo = new XmlOut();
+		SerializedModel.toXml(field, xo, false);
 		
 		send(modelId.toString() + "/" + objectId.toString(), xo.getData(), callback);
 		

@@ -14,10 +14,10 @@ import org.xydra.base.rmof.XReadableObject;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.serialize.MiniElement;
 import org.xydra.core.serialize.MiniParser;
-import org.xydra.core.serialize.XmlModel;
+import org.xydra.core.serialize.SerializedModel;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.xml.MiniParserXml;
-import org.xydra.core.serialize.xml.XydraOutXml;
+import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessException;
 import org.xydra.restless.RestlessParameter;
@@ -44,8 +44,8 @@ public class XModelResource {
 		IXydraSession session = XydraRestServer.getSession(restless, req);
 		XReadableModel model = XydraRestServer.getModel(session, modelId);
 		
-		XydraOut xo = new XydraOutXml();
-		XmlModel.toXml(model, xo, true, true, false);
+		XydraOut xo = new XmlOut();
+		SerializedModel.toXml(model, xo, true, true, false);
 		
 		XydraRestServer.xmlResponse(res, HttpServletResponse.SC_OK, xo.getData());
 	}
@@ -62,7 +62,7 @@ public class XModelResource {
 			MiniParser parser = new MiniParserXml();
 			MiniElement objectElement = parser.parse(objectXml);
 			
-			newObject = XmlModel.toObject(actorId, null, objectElement);
+			newObject = SerializedModel.toObject(actorId, null, objectElement);
 			
 		} catch(IllegalArgumentException iae) {
 			throw new RestlessException(RestlessException.Bad_request,

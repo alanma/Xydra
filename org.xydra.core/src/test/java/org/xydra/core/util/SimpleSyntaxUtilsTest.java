@@ -9,9 +9,9 @@ import org.xydra.base.XX;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.model.XModel;
-import org.xydra.core.serialize.XmlModel;
+import org.xydra.core.serialize.SerializedModel;
 import org.xydra.core.serialize.XydraOut;
-import org.xydra.core.serialize.xml.XydraOutXml;
+import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
@@ -35,8 +35,8 @@ public class SimpleSyntaxUtilsTest {
 	}
 	
 	public static final String toXml(XReadableModel model) {
-		XydraOut out = new XydraOutXml();
-		XmlModel.toXml(model, out, true, false, true);
+		XydraOut out = new XmlOut();
+		SerializedModel.toXml(model, out, true, false, true);
 		return out.getData();
 	}
 	

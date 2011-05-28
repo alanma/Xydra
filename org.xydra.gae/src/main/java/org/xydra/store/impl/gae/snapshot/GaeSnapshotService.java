@@ -22,10 +22,10 @@ import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.serialize.MiniElement;
-import org.xydra.core.serialize.XmlModel;
+import org.xydra.core.serialize.SerializedModel;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.xml.MiniParserXml;
-import org.xydra.core.serialize.xml.XydraOutXml;
+import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.XydraRuntime;
@@ -127,7 +127,7 @@ public class GaeSnapshotService {
 		XRevWritableModel snapshot = null;
 		if(snapshotStr != null) {
 			MiniElement snapshotXml = new MiniParserXml().parse(snapshotStr.getValue());
-			snapshot = XmlModel.toModelState(snapshotXml, this.changes.getModelAddress());
+			snapshot = SerializedModel.toModelState(snapshotXml, this.changes.getModelAddress());
 		}
 		
 		entry.revision = rev;
@@ -152,8 +152,8 @@ public class GaeSnapshotService {
 		snapshotEntity.setUnindexedProperty(PROPERTY_REVISION, entry.revision);
 		
 		if(entry.modelState != null) {
-			XydraOut out = new XydraOutXml();
-			XmlModel.toXml(entry.modelState, out);
+			XydraOut out = new XmlOut();
+			SerializedModel.toXml(entry.modelState, out);
 			snapshotEntity.setUnindexedProperty(PROPERTY_SNAPSHOT, new Text(out.getData()));
 		}
 		

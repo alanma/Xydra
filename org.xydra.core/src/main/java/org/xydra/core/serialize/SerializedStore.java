@@ -33,7 +33,7 @@ import org.xydra.store.XydraStore;
  * @author dscharrer
  * 
  */
-public class XmlStore {
+public class SerializedStore {
 	
 	private static final String NAME_EVENTS = "events";
 	private static final String NAME_AUTHENTICATED = "authenticated";
@@ -139,9 +139,9 @@ public class XmlStore {
 	
 	public static boolean toAuthenticationResult(MiniElement xml) {
 		
-		XmlUtils.checkElementName(xml, ELEMENT_AUTHENTICATED);
+		SerializingUtils.checkElementName(xml, ELEMENT_AUTHENTICATED);
 		
-		return XmlValue.toBoolean(xml.getContent(NAME_AUTHENTICATED));
+		return SerializedValue.toBoolean(xml.getContent(NAME_AUTHENTICATED));
 	}
 	
 	public static class EventsRequest {
@@ -176,14 +176,14 @@ public class XmlStore {
 	public static void toCommandResults(MiniElement xml, GetEventsRequest[] context,
 	        BatchedResult<Long>[] commandResults, BatchedResult<XEvent[]>[] eventResults) {
 		
-		XmlUtils.checkElementName(xml, ELEMENT_RESULTS);
+		SerializingUtils.checkElementName(xml, ELEMENT_RESULTS);
 		
 		MiniElement commandsEle = xml.getChild(ELEMENT_COMMANDRESULTS);
 		if(commandsEle == null) {
 			throw new IllegalArgumentException("missing command results");
 		}
 		
-		XmlUtils.checkElementName(commandsEle, ELEMENT_COMMANDRESULTS);
+		SerializingUtils.checkElementName(commandsEle, ELEMENT_COMMANDRESULTS);
 		
 		getRevisionListContents(commandsEle, commandResults);
 		
@@ -215,9 +215,9 @@ public class XmlStore {
 			
 			XEvent[] events = result.getResult();
 			if(events == null) {
-				XmlValue.saveNullElement(out);
+				SerializedValue.saveNullElement(out);
 			} else {
-				XmlEvent.toXml(Arrays.asList(events).iterator(), out, ger.requests[i].address);
+				SerializedEvent.toXml(Arrays.asList(events).iterator(), out, ger.requests[i].address);
 			}
 			
 		}
@@ -229,7 +229,7 @@ public class XmlStore {
 	public static void toEventResults(MiniElement xml, GetEventsRequest[] context,
 	        BatchedResult<XEvent[]>[] results) {
 		
-		XmlUtils.checkElementName(xml, ELEMENT_EVENTRESULTS);
+		SerializingUtils.checkElementName(xml, ELEMENT_EVENTRESULTS);
 		
 		assert context.length == results.length;
 		
@@ -250,14 +250,14 @@ public class XmlStore {
 				continue;
 			}
 			
-			if(XmlValue.isNullElement(ele)) {
+			if(SerializedValue.isNullElement(ele)) {
 				results[i] = new BatchedResult<XEvent[]>((XEvent[])null);
 				continue;
 			}
 			
 			try {
 				
-				List<XEvent> events = XmlEvent.toEventList(ele, context[i].address);
+				List<XEvent> events = SerializedEvent.toEventList(ele, context[i].address);
 				
 				results[i] = new BatchedResult<XEvent[]>(events.toArray(new XEvent[events.size()]));
 				
@@ -282,7 +282,7 @@ public class XmlStore {
 	
 	public static void toModelRevisions(MiniElement xml, BatchedResult<Long>[] res) {
 		
-		XmlUtils.checkElementName(xml, ELEMENT_MODEL_REVISIONS);
+		SerializingUtils.checkElementName(xml, ELEMENT_MODEL_REVISIONS);
 		
 		getRevisionListContents(xml, res);
 	}
@@ -327,9 +327,9 @@ public class XmlStore {
 			
 			try {
 				
-				XmlUtils.checkElementName(ele, ELEMENT_XREVISION);
+				SerializingUtils.checkElementName(ele, ELEMENT_XREVISION);
 				
-				long rev = XmlValue.toLong(ele.getContent(NAME_REVISION));
+				long rev = SerializedValue.toLong(ele.getContent(NAME_REVISION));
 				
 				results[i] = new BatchedResult<Long>(rev);
 				
@@ -368,16 +368,16 @@ public class XmlStore {
 			if(isModel[i]) {
 				XReadableModel model = mr[mi - 1].getResult();
 				if(model == null) {
-					XmlValue.saveNullElement(out);
+					SerializedValue.saveNullElement(out);
 				} else {
-					XmlModel.toXml(model, out);
+					SerializedModel.toXml(model, out);
 				}
 			} else {
 				XReadableObject object = or[oi - 1].getResult();
 				if(object == null) {
-					XmlValue.saveNullElement(out);
+					SerializedValue.saveNullElement(out);
 				} else {
-					XmlModel.toXml(object, out);
+					SerializedModel.toXml(object, out);
 				}
 			}
 			
@@ -389,7 +389,7 @@ public class XmlStore {
 	
 	public static List<Object> toSnapshots(MiniElement xml, XAddress[] context) {
 		
-		XmlUtils.checkElementName(xml, ELEMENT_SNAPSHOTS);
+		SerializingUtils.checkElementName(xml, ELEMENT_SNAPSHOTS);
 		
 		List<Object> results = new ArrayList<Object>();
 		
@@ -408,12 +408,12 @@ public class XmlStore {
 			
 			try {
 				
-				if(XmlValue.isNullElement(ele)) {
+				if(SerializedValue.isNullElement(ele)) {
 					results.add(null);
-				} else if(XmlModel.isModel(ele)) {
-					results.add(XmlModel.toModelState(ele, context[i]));
+				} else if(SerializedModel.isModel(ele)) {
+					results.add(SerializedModel.toModelState(ele, context[i]));
 				} else {
-					results.add(XmlModel.toObjectState(ele, context[i]));
+					results.add(SerializedModel.toObjectState(ele, context[i]));
 				}
 				
 			} catch(Throwable th) {
@@ -428,16 +428,16 @@ public class XmlStore {
 	public static void toModelIds(Set<XID> result, XydraOut out) {
 		
 		out.open(ELEMENT_MODEL_IDS);
-		XmlValue.setIdListContents(result, out);
+		SerializedValue.setIdListContents(result, out);
 		out.close(ELEMENT_MODEL_IDS);
 		
 	}
 	
 	public static Set<XID> toModelIds(MiniElement xml) {
 		
-		XmlUtils.checkElementName(xml, ELEMENT_MODEL_IDS);
+		SerializingUtils.checkElementName(xml, ELEMENT_MODEL_IDS);
 		
-		List<XID> ids = XmlValue.getIdListContents(xml);
+		List<XID> ids = SerializedValue.getIdListContents(xml);
 		
 		return new HashSet<XID>(ids);
 	}
@@ -452,7 +452,7 @@ public class XmlStore {
 	
 	public static XID toRepositoryId(MiniElement xml) {
 		
-		XmlUtils.checkElementName(xml, ELEMENT_REPOSITORY_ID);
+		SerializingUtils.checkElementName(xml, ELEMENT_REPOSITORY_ID);
 		
 		Object id = xml.getContent(NAME_XID);
 		

@@ -12,7 +12,7 @@ import org.xydra.base.rmof.XReadableModel;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.serialize.MiniElement;
 import org.xydra.core.serialize.MiniParser;
-import org.xydra.core.serialize.XmlModel;
+import org.xydra.core.serialize.SerializedModel;
 import org.xydra.core.serialize.xml.MiniParserXml;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessException;
@@ -39,7 +39,7 @@ public class XRepositoryResource {
 			MiniParser parser = new MiniParserXml();
 			MiniElement modelElement = parser.parse(modelXml);
 			
-			newModel = XmlModel.toModel(actorId, null, modelElement);
+			newModel = SerializedModel.toModel(actorId, null, modelElement);
 			
 		} catch(IllegalArgumentException iae) {
 			throw new RestlessException(RestlessException.Bad_request,

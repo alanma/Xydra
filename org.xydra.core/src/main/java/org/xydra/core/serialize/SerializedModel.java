@@ -49,7 +49,7 @@ import org.xydra.store.AccessException;
 @RunsInGWT(true)
 @RunsInAppEngine(true)
 @RequiresAppEngine(false)
-public class XmlModel {
+public class SerializedModel {
 	
 	private static final String NAME_EVENTS = "events";
 	private static final String NAME_VALUE = "value";
@@ -75,7 +75,7 @@ public class XmlModel {
 			return NO_REVISION;
 		}
 		
-		return XmlValue.toLong(revisionString);
+		return SerializedValue.toLong(revisionString);
 	}
 	
 	static private XChangeLogState loadChangeLogState(MiniElement xml, XAddress baseAddr) {
@@ -96,12 +96,12 @@ public class XmlModel {
 	 */
 	public static void loadChangeLogState(MiniElement xml, XChangeLogState state) {
 		
-		XmlUtils.checkElementName(xml, XCHANGELOG_ELEMENT);
+		SerializingUtils.checkElementName(xml, XCHANGELOG_ELEMENT);
 		
 		long startRev = 0L;
 		Object revisionString = xml.getAttribute(STARTREVISION_ATTRIBUTE);
 		if(revisionString != null) {
-			startRev = XmlValue.toLong(revisionString);
+			startRev = SerializedValue.toLong(revisionString);
 		}
 		
 		state.setFirstRevisionNumber(startRev);
@@ -109,7 +109,7 @@ public class XmlModel {
 		Iterator<MiniElement> eventElementIt = xml.getChildren(NAME_EVENTS);
 		while(eventElementIt.hasNext()) {
 			MiniElement e = eventElementIt.next();
-			XEvent event = XmlEvent.toEvent(e, state.getBaseAddress());
+			XEvent event = SerializedEvent.toEvent(e, state.getBaseAddress());
 			state.appendEvent(event);
 		}
 		
@@ -141,9 +141,9 @@ public class XmlModel {
 	 */
 	public static XRevWritableField toFieldState(MiniElement xml, XRevWritableObject parent) {
 		
-		XmlUtils.checkElementName(xml, XFIELD_ELEMENT);
+		SerializingUtils.checkElementName(xml, XFIELD_ELEMENT);
 		
-		XID xid = XmlUtils.getRequiredXidAttribute(xml, XFIELD_ELEMENT);
+		XID xid = SerializingUtils.getRequiredXidAttribute(xml, XFIELD_ELEMENT);
 		
 		long revision = getRevisionAttribute(xml, XFIELD_ELEMENT);
 		
@@ -152,7 +152,7 @@ public class XmlModel {
 		Iterator<MiniElement> valueElementIt = xml.getChildren(NAME_VALUE);
 		if(valueElementIt.hasNext()) {
 			MiniElement valueElement = valueElementIt.next();
-			xvalue = XmlValue.toValue(valueElement);
+			xvalue = SerializedValue.toValue(valueElement);
 		}
 		
 		XRevWritableField fieldState;
@@ -209,9 +209,9 @@ public class XmlModel {
 	private static XRevWritableModel toModelState(MiniElement xml, XRevWritableRepository parent,
 	        XAddress context) {
 		
-		XmlUtils.checkElementName(xml, XMODEL_ELEMENT);
+		SerializingUtils.checkElementName(xml, XMODEL_ELEMENT);
 		
-		XID xid = XmlUtils.getRequiredXidAttribute(xml, XMODEL_ELEMENT);
+		XID xid = SerializingUtils.getRequiredXidAttribute(xml, XMODEL_ELEMENT);
 		
 		long revision = getRevisionAttribute(xml, XMODEL_ELEMENT);
 		
@@ -281,9 +281,9 @@ public class XmlModel {
 	private static XRevWritableObject toObjectState(MiniElement xml, XRevWritableModel parent,
 	        XAddress context) {
 		
-		XmlUtils.checkElementName(xml, XOBJECT_ELEMENT);
+		SerializingUtils.checkElementName(xml, XOBJECT_ELEMENT);
 		
-		XID xid = XmlUtils.getRequiredXidAttribute(xml, XOBJECT_ELEMENT);
+		XID xid = SerializingUtils.getRequiredXidAttribute(xml, XOBJECT_ELEMENT);
 		
 		long revision = getRevisionAttribute(xml, XOBJECT_ELEMENT);
 		
@@ -335,9 +335,9 @@ public class XmlModel {
 	 */
 	public static XRevWritableRepository toRepositoryState(MiniElement xml) {
 		
-		XmlUtils.checkElementName(xml, XREPOSITORY_ELEMENT);
+		SerializingUtils.checkElementName(xml, XREPOSITORY_ELEMENT);
 		
-		XID xid = XmlUtils.getRequiredXidAttribute(xml, XREPOSITORY_ELEMENT);
+		XID xid = SerializingUtils.getRequiredXidAttribute(xml, XREPOSITORY_ELEMENT);
 		
 		XAddress repoAddr = XX.toAddress(xid, null, null, null);
 		XRevWritableRepository repositoryState = new SimpleRepository(repoAddr);
@@ -374,7 +374,7 @@ public class XmlModel {
 		
 		xo.children(NAME_EVENTS, true);
 		while(events.hasNext()) {
-			XmlEvent.toXml(events.next(), xo, log.getBaseAddress());
+			SerializedEvent.toXml(events.next(), xo, log.getBaseAddress());
 		}
 		
 		xo.close(XCHANGELOG_ELEMENT);
@@ -390,7 +390,7 @@ public class XmlModel {
 	 *            &lt;xfield&gt; and ending with the same &lt;/xfield&gt; is
 	 *            written to. White space is permitted but not required.
 	 * @throws IllegalArgumentException if the field contains an unsupported
-	 *             XValue type. See {@link XmlValue} for details.
+	 *             XValue type. See {@link SerializedValue} for details.
 	 */
 	public static void toXml(XReadableField xfield, XydraOut xo) {
 		toXml(xfield, xo, true);
@@ -406,7 +406,7 @@ public class XmlModel {
 	 * @param saveRevision true if revision numbers should be saved to the xml
 	 *            file.
 	 * @throws IllegalArgumentException if the field contains an unsupported
-	 *             XValue type. See {@link XmlValue} for details.
+	 *             XValue type. See {@link SerializedValue} for details.
 	 */
 	public static void toXml(XReadableField xfield, XydraOut xo, boolean saveRevision) {
 		
@@ -416,14 +416,14 @@ public class XmlModel {
 		long rev = xfield.getRevisionNumber();
 		
 		xo.open(XFIELD_ELEMENT);
-		xo.attribute(XmlUtils.XID_ATTRIBUTE, xfield.getID());
+		xo.attribute(SerializingUtils.XID_ATTRIBUTE, xfield.getID());
 		if(saveRevision) {
 			xo.attribute(REVISION_ATTRIBUTE, rev);
 		}
 		
 		if(xvalue != null) {
 			xo.children(NAME_VALUE, false);
-			XmlValue.toXml(xvalue, xo);
+			SerializedValue.toXml(xvalue, xo);
 		}
 		
 		xo.close(XFIELD_ELEMENT);
@@ -439,7 +439,7 @@ public class XmlModel {
 	 *            &lt;xmodel&gt; and ending with the same &lt;/xmodel&gt; is
 	 *            written to. White space is permitted but not required.
 	 * @throws IllegalArgumentException if the model contains an unsupported
-	 *             XValue type. See {@link XmlValue} for details.
+	 *             XValue type. See {@link SerializedValue} for details.
 	 */
 	public static void toXml(XReadableModel xmodel, XydraOut xo) {
 		toXml(xmodel, xo, true, true, true);
@@ -458,7 +458,7 @@ public class XmlModel {
 	 *            of throwing an exception
 	 * @param saveChangeLog if true, the change log is saved
 	 * @throws IllegalArgumentException if the model contains an unsupported
-	 *             XValue type. See {@link XmlValue} for details.
+	 *             XValue type. See {@link SerializedValue} for details.
 	 */
 	public static void toXml(XReadableModel xmodel, XydraOut xo, boolean saveRevision,
 	        boolean ignoreInaccessible, boolean saveChangeLog) {
@@ -472,7 +472,7 @@ public class XmlModel {
 		long rev = xmodel.getRevisionNumber();
 		
 		xo.open(XMODEL_ELEMENT);
-		xo.attribute(XmlUtils.XID_ATTRIBUTE, xmodel.getID());
+		xo.attribute(SerializingUtils.XID_ATTRIBUTE, xmodel.getID());
 		if(saveRevision) {
 			xo.attribute(REVISION_ATTRIBUTE, rev);
 		}
@@ -509,7 +509,7 @@ public class XmlModel {
 	 *            &lt;xobject&gt; and ending with the same &lt;/xobject&gt; is
 	 *            written to. White space is permitted but not required.
 	 * @throws IllegalArgumentException if the object contains an unsupported
-	 *             XValue type. See {@link XmlValue} for details.
+	 *             XValue type. See {@link SerializedValue} for details.
 	 */
 	public static void toXml(XReadableObject xobject, XydraOut xo) {
 		toXml(xobject, xo, true, true, true);
@@ -528,7 +528,7 @@ public class XmlModel {
 	 *            an exception
 	 * @param saveChangeLog if true, any object change log is saved
 	 * @throws IllegalArgumentException if the object contains an unsupported
-	 *             XValue type. See {@link XmlValue} for details.
+	 *             XValue type. See {@link SerializedValue} for details.
 	 */
 	public static void toXml(XReadableObject xobject, XydraOut xo, boolean saveRevision,
 	        boolean ignoreInaccessible, boolean saveChangeLog) {
@@ -542,7 +542,7 @@ public class XmlModel {
 		long rev = xobject.getRevisionNumber();
 		
 		xo.open(XOBJECT_ELEMENT);
-		xo.attribute(XmlUtils.XID_ATTRIBUTE, xobject.getID());
+		xo.attribute(SerializingUtils.XID_ATTRIBUTE, xobject.getID());
 		if(saveRevision) {
 			xo.attribute(REVISION_ATTRIBUTE, rev);
 		}
@@ -580,7 +580,7 @@ public class XmlModel {
 	 *            &lt;/xrepository&gt; is written to. White space is permitted
 	 *            but not required.
 	 * @throws IllegalArgumentException if the model contains an unsupported
-	 *             XValue type. See {@link XmlValue} for details.
+	 *             XValue type. See {@link SerializedValue} for details.
 	 */
 	public static void toXml(XReadableRepository xrepository, XydraOut xo) {
 		toXml(xrepository, xo, true, true, true);
@@ -600,13 +600,13 @@ public class XmlModel {
 	 *            instead of throwing an exception
 	 * @param saveChangeLog if true, any model change logs are saved
 	 * @throws IllegalArgumentException if the model contains an unsupported
-	 *             XValue type. See {@link XmlValue} for details.
+	 *             XValue type. See {@link SerializedValue} for details.
 	 */
 	public static void toXml(XReadableRepository xrepository, XydraOut xo, boolean saveRevision,
 	        boolean ignoreInaccessible, boolean saveChangeLog) {
 		
 		xo.open(XREPOSITORY_ELEMENT);
-		xo.attribute(XmlUtils.XID_ATTRIBUTE, xrepository.getID());
+		xo.attribute(SerializingUtils.XID_ATTRIBUTE, xrepository.getID());
 		
 		xo.children(NAME_MODELS, true, XMODEL_ELEMENT);
 		for(XID modelOd : xrepository) {

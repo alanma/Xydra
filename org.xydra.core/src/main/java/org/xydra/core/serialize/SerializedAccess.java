@@ -27,7 +27,7 @@ import org.xydra.store.access.impl.memory.MemoryAuthorisationManager;
 @RunsInGWT(true)
 @RunsInAppEngine(true)
 @RequiresAppEngine(false)
-public class XmlAccess {
+public class SerializedAccess {
 	
 	private static final String NAME_DEFINITIONS = "rights";
 	private static final String ACCESS_ATTRIBUTE = "access";
@@ -48,23 +48,23 @@ public class XmlAccess {
 	public static XAccessRightDefinition toAccessDefinition(MiniElement xml)
 	        throws IllegalArgumentException {
 		
-		XmlUtils.checkElementName(xml, XACCESSDEFINITION_ELEMENT);
+		SerializingUtils.checkElementName(xml, XACCESSDEFINITION_ELEMENT);
 		
-		Object actorStr = XmlUtils.getRequiredAttribute(xml, ACTOR_ATTRIBUTE,
+		Object actorStr = SerializingUtils.getRequiredAttribute(xml, ACTOR_ATTRIBUTE,
 		        XACCESSDEFINITION_ELEMENT);
 		XID actor = actorStr == null ? null : XX.toId(actorStr.toString());
 		
-		Object resourceStr = XmlUtils.getRequiredAttribute(xml, RESOURCE_ATTRIBUTE,
+		Object resourceStr = SerializingUtils.getRequiredAttribute(xml, RESOURCE_ATTRIBUTE,
 		        XACCESSDEFINITION_ELEMENT);
 		XAddress resource = XX.toAddress(resourceStr.toString());
 		
-		Object accessStr = XmlUtils.getRequiredAttribute(xml, ACCESS_ATTRIBUTE,
+		Object accessStr = SerializingUtils.getRequiredAttribute(xml, ACCESS_ATTRIBUTE,
 		        XACCESSDEFINITION_ELEMENT);
 		XID access = XX.toId(accessStr.toString());
 		
-		Object allowedStr = XmlUtils.getRequiredAttribute(xml, ALLOWED_ATTRIBUTE,
+		Object allowedStr = SerializingUtils.getRequiredAttribute(xml, ALLOWED_ATTRIBUTE,
 		        XACCESSDEFINITION_ELEMENT);
-		boolean allowed = XmlValue.toBoolean(allowedStr);
+		boolean allowed = SerializedValue.toBoolean(allowedStr);
 		
 		return new MemoryAccessDefinition(access, resource, actor, allowed);
 	}
@@ -80,7 +80,7 @@ public class XmlAccess {
 	public static List<XAccessRightDefinition> toAccessDefinitionList(MiniElement xml)
 	        throws IllegalArgumentException {
 		
-		XmlUtils.checkElementName(xml, XACCESSDEFS_ELEMENT);
+		SerializingUtils.checkElementName(xml, XACCESSDEFS_ELEMENT);
 		
 		List<XAccessRightDefinition> result = new ArrayList<XAccessRightDefinition>();
 		
@@ -103,7 +103,7 @@ public class XmlAccess {
 	public static XAuthorisationManager toAccessManager(MiniElement xml,
 	        XGroupDatabaseWithListeners groups) throws IllegalArgumentException {
 		
-		XmlUtils.checkElementName(xml, XACCESSDEFS_ELEMENT);
+		SerializingUtils.checkElementName(xml, XACCESSDEFS_ELEMENT);
 		
 		XAuthorisationManager arm = new MemoryAuthorisationManager(groups);
 		

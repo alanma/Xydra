@@ -32,7 +32,7 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.core.serialize.MiniElement;
-import org.xydra.core.serialize.XmlModel;
+import org.xydra.core.serialize.SerializedModel;
 import org.xydra.core.serialize.xml.MiniParserXml;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -220,7 +220,7 @@ public abstract class AbstractRestApiTest {
 		}
 		
 		try {
-			return XmlModel.toModel(ACTOR_TESTER, null, modelElement);
+			return SerializedModel.toModel(ACTOR_TESTER, null, modelElement);
 		} catch(IllegalArgumentException iae) {
 			fail(iae.getMessage());
 			throw new RuntimeException();

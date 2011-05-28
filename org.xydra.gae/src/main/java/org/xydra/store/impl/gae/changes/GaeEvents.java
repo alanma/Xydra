@@ -20,10 +20,10 @@ import org.xydra.base.change.impl.memory.MemoryObjectEvent;
 import org.xydra.base.change.impl.memory.MemoryRepositoryEvent;
 import org.xydra.base.value.XValue;
 import org.xydra.core.serialize.MiniElement;
-import org.xydra.core.serialize.XmlValue;
+import org.xydra.core.serialize.SerializedValue;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.xml.MiniParserXml;
-import org.xydra.core.serialize.xml.XydraOutXml;
+import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.index.query.Pair;
 import org.xydra.store.impl.gae.GaeUtils;
 import org.xydra.store.impl.gae.GaeUtils.AsyncEntity;
@@ -275,7 +275,7 @@ public class GaeEvents {
 				
 				MiniElement eventElement = new MiniParserXml().parse(eventXml.getValue());
 				
-				this.value = XmlValue.toValue(eventElement);
+				this.value = SerializedValue.toValue(eventElement);
 				
 				assert this.value != null;
 			}
@@ -369,8 +369,8 @@ public class GaeEvents {
 					values.add(null);
 					valueIds[i] = TRANSINDEX_NONE;
 				} else {
-					XydraOut out = new XydraOutXml(false);
-					XmlValue.toXml(xv, out);
+					XydraOut out = new XmlOut(false);
+					SerializedValue.toXml(xv, out);
 					String valueStr = out.getData();
 					Text value = new Text(valueStr);
 					
@@ -535,7 +535,7 @@ public class GaeEvents {
 					if(!isExtern) {
 						String valueXml = valueTxt.getValue();
 						MiniElement eventElement = new MiniParserXml().parse(valueXml);
-						value = new AsyncValue(XmlValue.toValue(eventElement));
+						value = new AsyncValue(SerializedValue.toValue(eventElement));
 						valueIds[i] = getInternalValueId(i);
 					} else {
 						value = getExternalValue(modelAddr, rev, i);

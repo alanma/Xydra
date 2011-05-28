@@ -13,10 +13,10 @@ import org.xydra.base.rmof.XReadableRepository;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.serialize.MiniElement;
-import org.xydra.core.serialize.XmlModel;
+import org.xydra.core.serialize.SerializedModel;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.xml.MiniParserXml;
-import org.xydra.core.serialize.xml.XydraOutXml;
+import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.minio.MiniStreamWriter;
 
 
@@ -71,7 +71,7 @@ public class XFile {
 		String data = readAll(fin);
 		MiniElement element = new MiniParserXml().parse(data);
 		
-		return XmlModel.toModel(actorId, passwordHash, element);
+		return SerializedModel.toModel(actorId, passwordHash, element);
 	}
 	
 	/**
@@ -123,7 +123,7 @@ public class XFile {
 		String data = readAll(fin);
 		MiniElement element = new MiniParserXml().parse(data);
 		
-		return XmlModel.toRepository(actorId, passwordHash, element);
+		return SerializedModel.toRepository(actorId, passwordHash, element);
 	}
 	
 	/**
@@ -178,8 +178,8 @@ public class XFile {
 		
 		FileOutputStream fos = new FileOutputStream(file);
 		
-		XydraOut out = new XydraOutXml(new MiniStreamWriter(fos));
-		XmlModel.toXml(model, out, true, false, true);
+		XydraOut out = new XmlOut(new MiniStreamWriter(fos));
+		SerializedModel.toXml(model, out, true, false, true);
 		
 		fos.close();
 	}
@@ -220,8 +220,8 @@ public class XFile {
 		
 		FileOutputStream fos = new FileOutputStream(file);
 		
-		XydraOut out = new XydraOutXml(new MiniStreamWriter(fos));
-		XmlModel.toXml(repository, out, true, false, true);
+		XydraOut out = new XmlOut(new MiniStreamWriter(fos));
+		SerializedModel.toXml(repository, out, true, false, true);
 		
 		fos.close();
 	}

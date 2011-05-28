@@ -29,10 +29,10 @@ import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryObject;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.core.serialize.MiniElement;
-import org.xydra.core.serialize.XmlModel;
+import org.xydra.core.serialize.SerializedModel;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.xml.MiniParserXml;
-import org.xydra.core.serialize.xml.XydraOutXml;
+import org.xydra.core.serialize.xml.XmlOut;
 
 
 /**
@@ -647,12 +647,12 @@ public class TestAPI {
 		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId()).setValue(
 		        XV.toValue("Another Test!"));
 		
-		XydraOut out = new XydraOutXml();
-		XmlModel.toXml(model, out);
+		XydraOut out = new XmlOut();
+		SerializedModel.toXml(model, out);
 		
 		// try to load it
 		MiniElement e = new MiniParserXml().parse(out.getData());
-		XModel loadedModel = XmlModel.toModel(this.actorId, this.password, e);
+		XModel loadedModel = SerializedModel.toModel(this.actorId, this.password, e);
 		assertTrue(loadedModel != null);
 		assertEquals(loadedModel, model);
 		assertTrue(XCompareUtils.equalState(loadedModel, model));
@@ -695,12 +695,12 @@ public class TestAPI {
 		
 		// We now created a little repository with some content, so saving makes
 		// sense
-		XydraOut out = new XydraOutXml();
-		XmlModel.toXml(repo, out);
+		XydraOut out = new XmlOut();
+		SerializedModel.toXml(repo, out);
 		
 		// try to load it
 		MiniElement e = new MiniParserXml().parse(out.getData());
-		XRepository loadedRepo = XmlModel.toRepository(this.actorId, this.password, e);
+		XRepository loadedRepo = SerializedModel.toRepository(this.actorId, this.password, e);
 		// if loadedRepo == null, saving wasn't successful
 		assertNotNull(loadedRepo);
 		// assert that the saving process really saved our repo

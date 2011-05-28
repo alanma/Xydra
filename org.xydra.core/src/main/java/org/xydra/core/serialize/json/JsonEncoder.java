@@ -9,6 +9,7 @@ public class JsonEncoder {
 		String result = in;
 		result = result.replace("\\", "\\\\");
 		result = result.replace("\"", "\\\"");
+		result = result.replace("\n", "\\n");
 		return result;
 	}
 }
