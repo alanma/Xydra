@@ -46,7 +46,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 		private Set<String> names;
 		
 		private Type contentType = null;
-		private boolean hasAttributes = false;
+		private int nAttributes = 0;
 		
 		public Frame(Type type, String name) {
 			this.type = type;
@@ -68,8 +68,8 @@ abstract public class AbstractXydraOut implements XydraOut {
 			return this.contentType;
 		}
 		
-		public boolean hasAttributes() {
-			return this.hasAttributes;
+		public int getAttrCount() {
+			return this.nAttributes;
 		}
 		
 	}
@@ -107,7 +107,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 		
 		outputAttribute(element, name, value);
 		
-		element.hasAttributes = true;
+		element.nAttributes++;
 		
 	}
 	
@@ -150,7 +150,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 		
 		container.contentType = Type.Element;
 		if(container.type != Type.Element && container.element == null) {
-			current.hasAttributes = true;
+			current.nAttributes++;
 		}
 	}
 	
@@ -173,7 +173,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 		
 		outputValue(container, type, value);
 		
-		container.hasAttributes = true;
+		container.nAttributes++;
 	}
 	
 	protected abstract <T> void outputValue(Frame container, String type, T value);
@@ -259,7 +259,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 			assert this.stack.isEmpty();
 			end();
 		} else {
-			container.hasAttributes = true;
+			container.nAttributes++;
 		}
 	}
 	

@@ -16,7 +16,7 @@ public class JsonOut extends AbstractXydraOut {
 	
 	private void outputName(Frame frame, String name) {
 		
-		if(frame.hasAttributes() || frame.hasContent()) {
+		if(frame.getAttrCount() > 0 || frame.hasContent()) {
 			this.writer.write(',');
 		}
 		whitespace('\n');
@@ -66,7 +66,9 @@ public class JsonOut extends AbstractXydraOut {
 	@Override
 	protected void outputCloseElement(Frame container, Frame element) {
 		
-		if(element.hasContent() || element.hasAttributes()) {
+		int t = (container.type == Type.Element || container.element != null) ? 0 : 1;
+		
+		if(element.hasContent() || element.getAttrCount() > t) {
 			whitespace('\n');
 			indent(element.depth);
 		} else {
@@ -99,27 +101,24 @@ public class JsonOut extends AbstractXydraOut {
 		
 		element.depth = container.depth + 1;
 		
-		if(container.type == Type.Root || container.type == Type.Children) {
+		if(container.type == Type.Root || container.type == Type.Children
+		        || container.type == Type.Child) {
 			
-			if(container.hasContent()) {
-				// This is not the first child element
-				this.writer.write(',');
-				whitespace(' ');
+			if(container.type == Type.Children) {
+				if(container.hasContent()) {
+					// This is not the first child element
+					this.writer.write(',');
+				}
+				if(!container.hasContent() || container.element == null) {
+					whitespace('\n');
+					indent(element.depth);
+				} else {
+					whitespace(' ');
+				}
+			} else if(container.type == Type.Child) {
+				outputName(container, container.name);
 			}
 			
-			this.writer.write('{');
-			if(container.element == null) {
-				whitespace(' ');
-				this.writer.write("\"$type\":");
-				whitespace(' ');
-				this.writer.write('"');
-				this.writer.write(element.name);
-				this.writer.write('"');
-			}
-			
-		} else if(container.type == Type.Child) {
-			
-			outputName(container, container.name);
 			this.writer.write('{');
 			if(container.element == null) {
 				whitespace(' ');
@@ -144,7 +143,7 @@ public class JsonOut extends AbstractXydraOut {
 	@Override
 	protected <T> void outputValue(Frame container, String type, T value) {
 		
-		if(container.hasContent() || container.hasAttributes()) {
+		if(container.hasContent() || container.getAttrCount() > 0) {
 			// This is not the first child element
 			this.writer.write(',');
 		}
@@ -171,7 +170,7 @@ public class JsonOut extends AbstractXydraOut {
 	@Override
 	protected void outputBeginChild(Frame element, Frame child) {
 		child.depth = element.depth;
-		if(element.hasAttributes() || element.hasContent()) {
+		if(element.getAttrCount() > 0 || element.hasContent()) {
 			this.writer.write(',');
 		}
 	}
