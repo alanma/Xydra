@@ -334,6 +334,7 @@ public class MemoryField extends AbstractEntity implements XField, Serializable 
 	 * @throws IllegalStateException if this method is called after this
 	 *             MemoryField was already removed
 	 */
+	@Override
 	@ReadOperation
 	public long getRevisionNumber() {
 		synchronized(this.eventQueue) {
@@ -368,7 +369,8 @@ public class MemoryField extends AbstractEntity implements XField, Serializable 
 		}
 	}
 	
-	public AbstractEntity getFather() {
+	@Override
+	public MemoryObject getFather() {
 		return this.father;
 	}
 	

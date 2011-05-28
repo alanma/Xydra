@@ -345,6 +345,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		        "Given Command was neither a correct instance of XObjectCommand, XTransaction or XFieldCommand!");
 	}
 	
+	@Override
 	public long getRevisionNumber() {
 		return this.revisionNumber;
 	}

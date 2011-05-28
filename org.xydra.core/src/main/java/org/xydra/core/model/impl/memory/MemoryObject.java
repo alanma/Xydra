@@ -261,9 +261,9 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		
 		if(field.getValue() != null) {
 			assert inTrans;
-			XReversibleFieldEvent event = MemoryReversibleFieldEvent.createRemoveEvent(actor,
-			        field.getAddress(), field.getValue(), modelRev, getRevisionNumber(),
-			        field.getRevisionNumber(), inTrans, true);
+			XReversibleFieldEvent event = MemoryReversibleFieldEvent.createRemoveEvent(actor, field
+			        .getAddress(), field.getValue(), modelRev, getRevisionNumber(), field
+			        .getRevisionNumber(), inTrans, true);
 			this.eventQueue.enqueueFieldEvent(field, event);
 		}
 		
@@ -476,6 +476,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		return this.father == null ? null : this.father.getRepositoryId();
 	}
 	
+	@Override
 	public long getRevisionNumber() {
 		synchronized(this.eventQueue) {
 			return this.state.getRevisionNumber();
@@ -501,7 +502,8 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		}
 	}
 	
-	public AbstractEntity getFather() {
+	@Override
+	public MemoryModel getFather() {
 		return this.father;
 	}
 	

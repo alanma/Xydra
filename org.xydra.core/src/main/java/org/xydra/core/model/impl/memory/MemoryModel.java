@@ -490,8 +490,9 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	 * 
 	 * @return The father of this MemoryModel (may be null).
 	 */
+	@Override
 	@ReadOperation
-    public MemoryRepository getFather() {
+	public MemoryRepository getFather() {
 		return this.father;
 	}
 	
@@ -542,6 +543,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		return this.father == null ? null : this.father.getID();
 	}
 	
+	@Override
 	public long getRevisionNumber() {
 		synchronized(this.eventQueue) {
 			return this.state.getRevisionNumber();

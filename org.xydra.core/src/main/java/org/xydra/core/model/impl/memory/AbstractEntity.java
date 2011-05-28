@@ -33,6 +33,8 @@ public abstract class AbstractEntity implements IHasXAddress, IHasXID {
 	public int hashCode() {
 		int hashCode = this.getID().hashCode() + (int)this.getRevisionNumber();
 		
+		// TODO this causes objects which are "equal" to have different hash
+		// codes, as equals does not check the parent revisions
 		AbstractEntity father = this.getFather();
 		if(father != null) {
 			hashCode += father.hashCode();

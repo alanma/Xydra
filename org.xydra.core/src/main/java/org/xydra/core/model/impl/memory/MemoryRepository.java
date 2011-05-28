@@ -506,14 +506,21 @@ public class MemoryRepository extends AbstractEntity implements XRepository, Ser
 	}
 	
 	/*
-	 * TODO Why do repositories have no revision number?
+	 * TODO Why do repositories have no revision number? -- Because everything
+	 * that uses revision numbers (synchronizing, change logs, transactions,
+	 * locking in GAE) is per model. Having revision numbers (with a semantic
+	 * consistent with existing model, object and field revisions) for
+	 * repositories would mean increasing the revision for every repository,
+	 * model, object and field change, which would quickly become a bottleneck.
 	 */
 	@Override
 	public long getRevisionNumber() {
 		return 0;
 	}
 	
+	@Override
 	public AbstractEntity getFather() {
 		return null;
 	}
+	
 }
