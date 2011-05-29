@@ -25,7 +25,7 @@ public class Clock {
 			throw new IllegalStateException("Cannot stop a clock that was never started.");
 		}
 		long stop = System.nanoTime();
-		double durationInMs = (stop - this.start) / 1000d;
+		double durationInMs = (stop - this.start) / 1000000d;
 		this.stats.append(name).append("=").append(durationInMs).append("ms <br />\n");
 		this.start = -1;
 	}
