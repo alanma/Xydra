@@ -5,6 +5,7 @@
 
 	<groupId>org.xydra</groupId>
 	<artifactId>restless</artifactId>
+	<!-- last relased: 0.1.3a -->
 	<version>0.1.4-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>Xydra Restless</name>
