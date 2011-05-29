@@ -25,13 +25,13 @@ public class UrchinUrl {
 	 * @param hostname from which this request is sent
 	 * @param focusPoint to be tracked
 	 * @param refererURL to be tracked
-	 * @param cookie to be tracked
+	 * @param cookieString to be tracked
 	 * @param trackingCode UA-......
 	 * @param gaEvent to be tracked
 	 * @return a URL as a String
 	 */
 	public static String toURL(String hostname, FocusPoint focusPoint, String refererURL,
-	        UrchinCookie cookie, String trackingCode, GaEvent gaEvent) {
+	        String cookieString, String trackingCode, GaEvent gaEvent) {
 		StringBuffer url = new StringBuffer(TRACKING_URL_Prefix);
 		
 		// Function:Tracking code version
@@ -113,7 +113,7 @@ public class UrchinUrl {
 		// Example:utmcc=__utma%3D117243.1695285.22%3B%2B
 		// __utmz%3D117945243.1202416366.21.10. utmcsr%3Db%7C
 		// utmccn%3D(referral)%7C utmcmd%3Dreferral%7C utmcct%3D%252Fissue%3B%2B
-		appendIfNotEmpty(url, "utmcc", cookie.getCookieString(), true);
+		appendIfNotEmpty(url, "utmcc", cookieString, true);
 		
 		/** === Optional parameters === */
 		

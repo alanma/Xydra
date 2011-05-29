@@ -72,19 +72,10 @@ public class Tracker {
 	
 	boolean warnedAbout500Events = false;
 	
-	/**
-	 * @param focusPoint to be tracked
-	 * @param refererURL if any or empty string
-	 * @param userinfo for the Urchin cookie
-	 * @param gaEvent can be null
-	 */
-	public void track(FocusPoint focusPoint, String refererURL, UserInfo userinfo, GaEvent gaEvent) {
-		log.debug("Tracking asynchronously focusPoint=" + focusPoint.getContentTitle());
-		
-		UrchinCookie cookie = new UrchinCookie(userinfo);
-		String hostname = userinfo.getHostName();
-		String url = UrchinUrl.toURL(hostname, focusPoint, refererURL, cookie, this.trackerCode,
-		        gaEvent);
+	public void trackLowLevel(String hostname, FocusPoint focusPoint, String refererURL,
+	        String cookie, String trackerCode, GaEvent gaEvent) {
+		String url = UrchinUrl
+		        .toURL(hostname, focusPoint, refererURL, cookie, trackerCode, gaEvent);
 		
 		Future<Integer> result = this.httpClient.GET(url);
 		this.trackCount++;
@@ -107,6 +98,21 @@ public class Tracker {
 			        + "- they don't track more");
 			this.warnedAbout500Events = true;
 		}
+	}
+	
+	/**
+	 * @param focusPoint to be tracked
+	 * @param refererURL if any or empty string
+	 * @param userinfo for the Urchin cookie
+	 * @param gaEvent can be null
+	 */
+	public void track(FocusPoint focusPoint, String refererURL, UserInfo userinfo, GaEvent gaEvent) {
+		log.debug("Tracking asynchronously focusPoint=" + focusPoint.getContentTitle());
+		
+		UrchinCookie cookie = new UrchinCookie(userinfo);
+		String hostname = userinfo.getHostName();
+		trackLowLevel(hostname, focusPoint, refererURL, cookie.getCookieString(), this.trackerCode,
+		        gaEvent);
 	}
 	
 }
