@@ -4,6 +4,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -16,6 +18,10 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
 
+/**
+ * @author xamde
+ * 
+ */
 public class ServletUtils {
 	
 	private static Logger log = LoggerFactory.getLogger(ServletUtils.class);
@@ -59,8 +65,21 @@ public class ServletUtils {
 	public static void headersXhtmlViaConneg(HttpServletRequest req, HttpServletResponse res,
 	        int status, long cachingInMinutes) {
 		String chosenContentType = conneg(req);
+		headers(req, res, status, cachingInMinutes, chosenContentType);
+	}
+	
+	/**
+	 * @param req ..
+	 * @param res ..
+	 * @param status if 0 no header is set.
+	 * @param cachingInMinutes if 0 no header is set. If -1, caching is
+	 *            explicitly disabled via headers. Positive numbers are the time
+	 *            to cache the response in minutes.
+	 */
+	public static void headers(HttpServletRequest req, HttpServletResponse res, int status,
+	        long cachingInMinutes, String contentType) {
 		res.setCharacterEncoding("utf-8");
-		res.setContentType(chosenContentType);
+		res.setContentType(contentType);
 		if(status > 0) {
 			res.setStatus(status);
 		}
@@ -277,6 +296,26 @@ public class ServletUtils {
 		} catch(UnsupportedEncodingException e) {
 			throw new AssertionError(e);
 		}
+	}
+	
+	/**
+	 * @param req ..
+	 * @return all headers of the given request as map headerName -&gt; values
+	 *         (as a list).
+	 */
+	public static Map<String,List<String>> getHeadersAsMap(HttpServletRequest req) {
+		Map<String,List<String>> map = new HashMap<String,List<String>>();
+		Enumeration<?> en = req.getHeaderNames();
+		while(en.hasMoreElements()) {
+			String name = (String)en.nextElement();
+			Enumeration<?> valueEn = req.getHeaders(name);
+			List<String> valueList = new LinkedList<String>();
+			while(valueEn.hasMoreElements()) {
+				valueList.add((String)valueEn.nextElement());
+			}
+			map.put(name, valueList);
+		}
+		return map;
 	}
 	
 }
