@@ -21,8 +21,8 @@ import org.xydra.core.serialize.SerializedCommand;
 import org.xydra.core.serialize.SerializedStore;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.SerializedStore.EventsRequest;
+import org.xydra.core.serialize.json.JsonOut;
 import org.xydra.core.serialize.xml.MiniParserXml;
-import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.index.query.Pair;
 import org.xydra.minio.MiniStreamWriter;
 import org.xydra.restless.Restless;
@@ -77,7 +77,7 @@ public class XydraStoreResource {
 			        HttpServletResponse res) {
 				
 				// TODO remove?
-				if(!(t instanceof StoreException)) {
+				if(!(t instanceof StoreException) && !(t instanceof IllegalArgumentException)) {
 					return false;
 				}
 				
@@ -95,7 +95,7 @@ public class XydraStoreResource {
 				 */
 
 				XydraOut out = startOutput(res, statusCode);
-				SerializedStore.toXml(t, out);
+				SerializedStore.serializeException(t, out);
 				out.flush();
 				
 				return true;
@@ -117,10 +117,13 @@ public class XydraStoreResource {
 	
 	private static XydraOut startOutput(HttpServletResponse res, int statusCode) {
 		res.setStatus(statusCode);
-		res.setContentType("application/xml; charset=UTF-8");
+		// res.setContentType("application/xml; charset=UTF-8");
+		res.setContentType("text/plain; charset=UTF-8");
 		res.setCharacterEncoding("utf-8");
 		try {
-			return new XmlOut(new MiniStreamWriter(res.getOutputStream()));
+			XydraOut out = new JsonOut(new MiniStreamWriter(res.getOutputStream()));
+			out.enableWhitespace(true, true);
+			return out;
 		} catch(IOException e) {
 			throw new RuntimeException("re-throw", e);
 		}
@@ -206,7 +209,7 @@ public class XydraStoreResource {
 		
 		XydraOut out = startOutput(res, HttpServletResponse.SC_OK);
 		
-		SerializedStore.toXml(commandRes, ger, eventsRes, out);
+		SerializedStore.serializeCommandResults(commandRes, ger, eventsRes, out);
 		
 		out.flush();
 		
@@ -271,7 +274,7 @@ public class XydraStoreResource {
 		
 		XydraOut out = startOutput(res, HttpServletResponse.SC_OK);
 		
-		SerializedStore.toXml(ger, callback.getResult(), out);
+		SerializedStore.serializeEventsResults(ger, callback.getResult(), out);
 		
 		out.flush();
 		
@@ -303,7 +306,7 @@ public class XydraStoreResource {
 		
 		XydraOut out = startOutput(res, HttpServletResponse.SC_OK);
 		
-		SerializedStore.toModelRevisions(callback.getResult(), out);
+		SerializedStore.serializeModelRevisions(callback.getResult(), out);
 		
 		out.flush();
 		
@@ -365,7 +368,7 @@ public class XydraStoreResource {
 		BatchedResult<XReadableModel>[] mr = mc.getResult();
 		BatchedResult<XReadableObject>[] or = oc.getResult();
 		
-		SerializedStore.toXml(ex, isModel, mr, or, out);
+		SerializedStore.serializeSnapshots(ex, isModel, mr, or, out);
 		
 		out.flush();
 		
@@ -386,7 +389,7 @@ public class XydraStoreResource {
 		
 		XydraOut out = startOutput(res, HttpServletResponse.SC_OK);
 		
-		SerializedStore.toModelIds(callback.getResult(), out);
+		SerializedStore.serializeModelIds(callback.getResult(), out);
 		
 		out.flush();
 		
@@ -407,7 +410,7 @@ public class XydraStoreResource {
 		
 		XydraOut out = startOutput(res, HttpServletResponse.SC_OK);
 		
-		SerializedStore.toRepositoryId(callback.getResult(), out);
+		SerializedStore.serializeRepositoryId(callback.getResult(), out);
 		
 		out.flush();
 		

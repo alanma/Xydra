@@ -121,4 +121,10 @@ public class MemoryIntegerListValue extends MemoryListValue<Integer> implements 
 	public ValueType getType() {
 		return ValueType.IntegerList;
 	}
+	
+	@Override
+	public ValueType getComponentType() {
+		return ValueType.Integer;
+	}
+	
 }

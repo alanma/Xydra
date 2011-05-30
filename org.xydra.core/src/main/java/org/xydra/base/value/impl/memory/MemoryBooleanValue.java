@@ -48,4 +48,9 @@ public class MemoryBooleanValue implements XBooleanValue {
 		return ValueType.Boolean;
 	}
 	
+	@Override
+	public Boolean getValue() {
+		return this.content;
+	}
+	
 }

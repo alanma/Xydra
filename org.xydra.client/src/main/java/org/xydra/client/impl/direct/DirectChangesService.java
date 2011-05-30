@@ -105,7 +105,7 @@ public class DirectChangesService implements XChangesService {
 		// IMPROVE do this without XML serialization
 		// Map addresses from clientContext to serverContext.
 		XydraOut xo = new XmlOut();
-		SerializedCommand.toXml(command, xo, clientContext);
+		SerializedCommand.serialize(command, xo, clientContext);
 		MiniElement e = new MiniParserXml().parse(xo.getData());
 		return SerializedCommand.toCommand(e, serverContext);
 		
@@ -116,7 +116,7 @@ public class DirectChangesService implements XChangesService {
 		// IMPROVE do this without XML serialization
 		// Map addresses from serverContext to clientContext.
 		XydraOut o = new XmlOut();
-		SerializedEvent.toXml(event, o, serverContext);
+		SerializedEvent.serialize(event, o, serverContext);
 		MiniElement e = new MiniParserXml().parse(o.getData());
 		return SerializedEvent.toEvent(e, clientContext);
 		

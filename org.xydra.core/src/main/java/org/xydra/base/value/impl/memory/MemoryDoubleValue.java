@@ -52,4 +52,9 @@ public class MemoryDoubleValue implements XDoubleValue {
 		return ValueType.Double;
 	}
 	
+	@Override
+	public Double getValue() {
+		return this.content;
+	}
+	
 }

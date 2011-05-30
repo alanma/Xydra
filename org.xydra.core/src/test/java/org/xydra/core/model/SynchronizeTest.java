@@ -121,7 +121,7 @@ public class SynchronizeTest {
 	private XCommand fix(XCommand command) {
 		
 		XydraOut out = new XmlOut();
-		SerializedCommand.toXml(command, out, this.localModel.getAddress());
+		SerializedCommand.serialize(command, out, this.localModel.getAddress());
 		
 		MiniElement e = new MiniParserXml().parse(out.getData());
 		return SerializedCommand.toCommand(e, this.remoteModel.getAddress());
@@ -131,7 +131,7 @@ public class SynchronizeTest {
 	private XEvent fix(XEvent event) {
 		
 		XydraOut out = new XmlOut();
-		SerializedEvent.toXml(event, out, this.remoteModel.getAddress());
+		SerializedEvent.serialize(event, out, this.remoteModel.getAddress());
 		
 		MiniElement e = new MiniParserXml().parse(out.getData());
 		return SerializedEvent.toEvent(e, this.localModel.getAddress());

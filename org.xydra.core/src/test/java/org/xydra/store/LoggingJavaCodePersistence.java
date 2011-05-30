@@ -366,21 +366,21 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 			buf.append("})");
 			return buf.toString();
 		}
-		case XID:
+		case Id:
 			return toJava((XID)value);
-		case XIDList: {
+		case IdList: {
 			StringBuffer buf = new StringBuffer("XV.toValue( new XID[] { ");
 			buf.append(toJavaArray(((XIDListValue)value).contents()));
 			buf.append("})");
 			return buf.toString();
 		}
-		case XIDSet: {
+		case IdSet: {
 			StringBuffer buf = new StringBuffer("XV.toIDSetValue( new XID[] { ");
 			buf.append(toJavaArray(((XIDSetValue)value).contents()));
 			buf.append("})");
 			return buf.toString();
 		}
-		case XIDSortedSet: {
+		case IdSortedSet: {
 			StringBuffer buf = new StringBuffer("XV.toIDSortedSetValue( new XID[] { ");
 			buf.append(toJavaArray(((XIDSortedSetValue)value).contents()));
 			buf.append("})");

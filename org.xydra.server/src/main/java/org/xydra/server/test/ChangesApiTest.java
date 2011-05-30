@@ -98,7 +98,7 @@ public abstract class ChangesApiTest extends AbstractRestApiTest {
 		}
 		
 		XydraOut out = new XmlOut();
-		SerializedCommand.toXml(command, out, context);
+		SerializedCommand.serialize(command, out, context);
 		
 		HttpURLConnection c = (HttpURLConnection)targetUrl.openConnection();
 		setLoginDetails(c);

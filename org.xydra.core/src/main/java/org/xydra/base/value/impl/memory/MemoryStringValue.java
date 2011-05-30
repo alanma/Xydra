@@ -49,4 +49,9 @@ public class MemoryStringValue implements XStringValue {
 		return ValueType.String;
 	}
 	
+	@Override
+	public String getValue() {
+		return this.string;
+	}
+	
 }

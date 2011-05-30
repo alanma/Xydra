@@ -52,4 +52,9 @@ public class MemoryIntegerValue implements XIntegerValue {
 		return ValueType.Integer;
 	}
 	
+	@Override
+	public Integer getValue() {
+		return this.content;
+	}
+	
 }

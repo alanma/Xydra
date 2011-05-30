@@ -60,4 +60,9 @@ public class MemoryAddressSetValue extends MemorySetValue<XAddress> implements X
 		return ValueType.AddressSet;
 	}
 	
+	@Override
+	public ValueType getComponentType() {
+		return ValueType.Address;
+	}
+	
 }

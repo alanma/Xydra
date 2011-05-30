@@ -1,6 +1,7 @@
 package org.xydra.base.value;
 
 import org.xydra.base.XAddress;
+import org.xydra.base.XID;
 
 
 /**
@@ -21,7 +22,7 @@ public enum ValueType {
 
 	DoubleList(XDoubleListValue.class), Double(XDoubleValue.class),
 
-	XID(org.xydra.base.XID.class), XIDList(XIDListValue.class), XIDSet(XIDSetValue.class), XIDSortedSet(
+	Id(org.xydra.base.XID.class), IdList(XIDListValue.class), IdSet(XIDSetValue.class), IdSortedSet(
 	        XIDSortedSetValue.class),
 
 	IntegerList(XIntegerListValue.class), Integer(XIntegerValue.class), LongList(
@@ -33,21 +34,26 @@ public enum ValueType {
 	
 	public boolean isSortedCollection() {
 		return this == AddressList || this == AddressSortedSet || this == BooleanList
-		        || this == DoubleList || this == XIDList || this == XIDSortedSet
+		        || this == DoubleList || this == IdList || this == IdSortedSet
 		        || this == IntegerList || this == LongList || this == StringSet
 		        || this == StringList;
 	}
 	
 	public boolean isCollection() {
 		return this == AddressList || this == AddressSet || this == AddressSortedSet
-		        || this == BooleanList || this == DoubleList || this == XIDList || this == XIDSet
-		        || this == XIDSortedSet || this == IntegerList || this == LongList
+		        || this == BooleanList || this == DoubleList || this == IdList || this == IdSet
+		        || this == IdSortedSet || this == IntegerList || this == LongList
 		        || this == StringSet || this == StringList;
 	}
 	
+	public boolean isSingle() {
+		return this == Address || this == Boolean || this == Double || this == Id
+		        || this == Integer || this == Long || this == String;
+	}
+	
 	public boolean isSet() {
-		return this == AddressSet || this == AddressSortedSet || this == XIDSet
-		        || this == XIDSortedSet || this == StringSet;
+		return this == AddressSet || this == AddressSortedSet || this == IdSet
+		        || this == IdSortedSet || this == StringSet;
 	}
 	
 	ValueType(Class<?> xydraInterface) {
@@ -60,6 +66,8 @@ public enum ValueType {
 	
 	/**
 	 * Note that {@link XByteListValue} is considered a non-collection type.
+	 * TODO this is inconsistent with {@link XByteListValue} extending
+	 * {@link XCollectionValue}
 	 * 
 	 * @param type must be a collection type
 	 * @return the Java class component type of the given collection type or
@@ -83,17 +91,17 @@ public enum ValueType {
 		case StringList:
 		case StringSet:
 			return String.class;
-		case XIDList:
-		case XIDSet:
-		case XIDSortedSet:
-			return org.xydra.base.XID.class;
+		case IdList:
+		case IdSet:
+		case IdSortedSet:
+			return XID.class;
 		default:
 			return null;
 		}
 	}
 	
 	public static Class<?> getPrimitiveType(ValueType type) {
-		assert !type.isCollection();
+		assert type.isSingle();
 		switch(type) {
 		case Address:
 			return XAddress.class;
@@ -107,8 +115,8 @@ public enum ValueType {
 			return Long.class;
 		case String:
 			return String.class;
-		case XID:
-			return org.xydra.base.XID.class;
+		case Id:
+			return XID.class;
 		default:
 			return null;
 		}

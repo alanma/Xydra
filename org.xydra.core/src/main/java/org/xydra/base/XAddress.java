@@ -2,7 +2,7 @@ package org.xydra.base;
 
 import java.io.Serializable;
 
-import org.xydra.base.value.XValue;
+import org.xydra.base.value.XSingleValue;
 import org.xydra.core.model.XRepository;
 
 
@@ -13,7 +13,7 @@ import org.xydra.core.model.XRepository;
  * 
  * @author dscharrer
  */
-public interface XAddress extends Serializable, XValue, Comparable<XAddress> {
+public interface XAddress extends Serializable, XSingleValue<XAddress>, Comparable<XAddress> {
 	
 	/**
 	 * Checks whether the entity referred to by {@link XAddress} descendant is a

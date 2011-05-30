@@ -83,7 +83,7 @@ public class GWTChangesService extends AbstractGWTHttpService implements XChange
 		RequestBuilder rb = new RequestBuilder(RequestBuilder.POST, this.baseUrl + "/" + url);
 		
 		XydraOut xo = new XmlOut();
-		SerializedCommand.toXml(command, xo, context);
+		SerializedCommand.serialize(command, xo, context);
 		
 		rb.setRequestData(xo.getData());
 		

@@ -2,18 +2,14 @@ package org.xydra.core.serialize;
 
 import java.util.Iterator;
 
-import org.xydra.annotations.RequiresAppEngine;
-import org.xydra.annotations.RunsInGWT;
-
 
 /**
- * A minimal XML DOM-like API
+ * A minimal abstraction API to access XML/JSON elements created with XydraOut.
  * 
  * @author voelkel
+ * @author dscharrer
  * 
  */
-@RunsInGWT(true)
-@RequiresAppEngine(false)
 public interface MiniElement {
 	
 	/**
@@ -36,12 +32,24 @@ public interface MiniElement {
 	/**
 	 * @return all matching child elements in document order
 	 */
-	public Iterator<MiniElement> getChildrenByType(String name, String type);
+	public Iterator<MiniElement> getChildren(String name, String type);
 	
-	public MiniElement getChild(String type);
+	public MiniElement getChild(String name);
+	
+	public MiniElement getChild(String name, int index);
+	
+	public MiniElement getChild(String name, String type);
+	
+	public MiniElement getElement(String type);
 	
 	public String getType();
 	
-	public Iterator<Object> getValues(String name, String type);
+	public Iterator<Object> getValueList(String name);
+	
+	public Iterator<Object> getValueList(String name, String type);
+	
+	public Object getValue(String name, int index);
+	
+	public Object getValue(String name, String type);
 	
 }

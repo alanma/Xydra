@@ -121,4 +121,10 @@ public class MemoryLongListValue extends MemoryListValue<Long> implements XLongL
 	public ValueType getType() {
 		return ValueType.LongList;
 	}
+	
+	@Override
+	public ValueType getComponentType() {
+		return ValueType.Long;
+	}
+	
 }

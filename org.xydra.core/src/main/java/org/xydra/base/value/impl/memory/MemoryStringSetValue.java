@@ -59,4 +59,9 @@ public class MemoryStringSetValue extends MemorySetValue<String> implements XStr
 		return ValueType.StringSet;
 	}
 	
+	@Override
+	public ValueType getComponentType() {
+		return ValueType.String;
+	}
+	
 }

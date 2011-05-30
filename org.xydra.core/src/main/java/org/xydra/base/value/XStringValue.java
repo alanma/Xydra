@@ -6,7 +6,7 @@ package org.xydra.base.value;
  * @author Kaidel
  * 
  */
-public interface XStringValue extends XValue {
+public interface XStringValue extends XSingleValue<String> {
 	
 	/**
 	 * Returns the stored String value.

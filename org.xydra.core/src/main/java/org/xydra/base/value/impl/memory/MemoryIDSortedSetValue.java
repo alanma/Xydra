@@ -75,7 +75,7 @@ public class MemoryIDSortedSetValue extends MemoryIDListValue implements XIDSort
 	
 	@Override
 	public ValueType getType() {
-		return ValueType.XIDSortedSet;
+		return ValueType.IdSortedSet;
 	}
 	
 }

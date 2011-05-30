@@ -52,4 +52,9 @@ public class MemoryLongValue implements XLongValue {
 		return ValueType.Long;
 	}
 	
+	@Override
+	public Long getValue() {
+		return this.content;
+	}
+	
 }

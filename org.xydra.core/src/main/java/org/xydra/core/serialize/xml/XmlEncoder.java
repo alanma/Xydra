@@ -3,9 +3,17 @@
  */
 package org.xydra.core.serialize.xml;
 
+import org.xydra.annotations.RequiresAppEngine;
+import org.xydra.annotations.RunsInAppEngine;
+import org.xydra.annotations.RunsInGWT;
+
+
 /**
  * Helper class for XML encoding and decoding of XML escaped characters
  */
+@RunsInGWT(true)
+@RunsInAppEngine(true)
+@RequiresAppEngine(false)
 public class XmlEncoder {
 	
 	/**

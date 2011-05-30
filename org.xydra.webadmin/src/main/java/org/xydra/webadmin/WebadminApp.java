@@ -135,7 +135,7 @@ public class WebadminApp {
 			log.info("adding model \"" + modelId.toString() + "\" as \"" + filename + "\"");
 			
 			XydraOut out = new XmlOut(new MiniStreamWriter(zos));
-			SerializedModel.toXml(server.getModelSnapshot(modelId), out, true, false, includeLogs);
+			SerializedModel.serialize(server.getModelSnapshot(modelId), out, true, false, includeLogs);
 			out.flush();
 			
 			zos.closeEntry();

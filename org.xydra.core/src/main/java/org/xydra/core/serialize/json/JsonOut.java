@@ -1,9 +1,17 @@
 package org.xydra.core.serialize.json;
 
+import org.xydra.annotations.RequiresAppEngine;
+import org.xydra.annotations.RunsInAppEngine;
+import org.xydra.annotations.RunsInGWT;
+import org.xydra.base.value.XBooleanValue;
+import org.xydra.base.value.XNumberValue;
 import org.xydra.core.serialize.AbstractXydraOut;
 import org.xydra.minio.MiniWriter;
 
 
+@RunsInGWT(true)
+@RunsInAppEngine(true)
+@RequiresAppEngine(false)
 public class JsonOut extends AbstractXydraOut {
 	
 	public JsonOut(MiniWriter writer) {
@@ -30,11 +38,8 @@ public class JsonOut extends AbstractXydraOut {
 	
 	private <T> void output(T value) {
 		
-		if(value instanceof Boolean || value instanceof Float || value instanceof Integer
-		        || value instanceof Double) {
-			this.writer.write(value.toString());
-		} else if(value instanceof Long && (Long)value >= Integer.MIN_VALUE
-		        && (Long)value <= Integer.MAX_VALUE) {
+		if(value instanceof Boolean || value instanceof Number || value instanceof XBooleanValue
+		        || value instanceof XNumberValue) {
 			this.writer.write(value.toString());
 		} else {
 			this.writer.write('"');
@@ -80,7 +85,14 @@ public class JsonOut extends AbstractXydraOut {
 	
 	@Override
 	protected <T> void outputContent(Frame element, Frame content, T data) {
-		outputAttribute(element, content.name, data);
+		
+		outputName(element, content.name);
+		
+		if(data == null) {
+			this.writer.write("null");
+		} else {
+			output(data);
+		}
 	}
 	
 	@Override
@@ -97,6 +109,36 @@ public class JsonOut extends AbstractXydraOut {
 	}
 	
 	@Override
+	protected void outputNullElement(Frame container) {
+		
+		assert container.type == Type.Root || container.type == Type.Children
+		        || container.type == Type.Child;
+		
+		beginChild(container, true);
+		
+		this.writer.write("null");
+		
+	}
+	
+	private void beginChild(Frame container, boolean newline) {
+		
+		if(container.type == Type.Children || container.type == Type.Array) {
+			if(container.hasContent() || container.getAttrCount() > 0) {
+				// This is not the first child element
+				this.writer.write(',');
+			}
+			if(newline && (!container.hasContent() || container.element == null)) {
+				whitespace('\n');
+				indent(container.depth + 1);
+			} else {
+				whitespace(' ');
+			}
+		} else if(container.type == Type.Child) {
+			outputName(container, container.name);
+		}
+	}
+	
+	@Override
 	protected void outputOpenElement(Frame container, Frame element) {
 		
 		element.depth = container.depth + 1;
@@ -104,20 +146,7 @@ public class JsonOut extends AbstractXydraOut {
 		if(container.type == Type.Root || container.type == Type.Children
 		        || container.type == Type.Child) {
 			
-			if(container.type == Type.Children) {
-				if(container.hasContent()) {
-					// This is not the first child element
-					this.writer.write(',');
-				}
-				if(!container.hasContent() || container.element == null) {
-					whitespace('\n');
-					indent(element.depth);
-				} else {
-					whitespace(' ');
-				}
-			} else if(container.type == Type.Child) {
-				outputName(container, container.name);
-			}
+			beginChild(container, true);
 			
 			this.writer.write('{');
 			if(container.element == null) {
@@ -141,25 +170,15 @@ public class JsonOut extends AbstractXydraOut {
 	}
 	
 	@Override
-	protected <T> void outputValue(Frame container, String type, T value) {
+	protected <T> void outputValue(Frame container, T value) {
 		
-		if(container.hasContent() || container.getAttrCount() > 0) {
-			// This is not the first child element
-			this.writer.write(',');
-		}
-		whitespace(' ');
+		beginChild(container, false);
 		
 		if(value == null) {
 			this.writer.write("null");
 		} else {
 			output(value);
 		}
-		
-	}
-	
-	@Override
-	protected void outputElementBeginContent(Frame element) {
-		// nothing to do here
 	}
 	
 	@Override
@@ -173,6 +192,29 @@ public class JsonOut extends AbstractXydraOut {
 		if(element.getAttrCount() > 0 || element.hasContent()) {
 			this.writer.write(',');
 		}
+	}
+	
+	@Override
+	protected void outputBeginArray(Frame container, Frame array) {
+		
+		beginChild(container, true);
+		
+		this.writer.write('[');
+		
+		array.depth = container.depth + 1;
+	}
+	
+	@Override
+	protected void outputEndArray(Frame container, Frame array) {
+		
+		if(array.hasContent()) {
+			whitespace('\n');
+			indent(array.depth);
+		} else {
+			whitespace(' ');
+		}
+		this.writer.write(']');
+		
 	}
 	
 }

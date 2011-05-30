@@ -106,4 +106,10 @@ public class MemoryStringListValue extends MemoryListValue<String> implements XS
 	public ValueType getType() {
 		return ValueType.StringList;
 	}
+	
+	@Override
+	public ValueType getComponentType() {
+		return ValueType.String;
+	}
+	
 }

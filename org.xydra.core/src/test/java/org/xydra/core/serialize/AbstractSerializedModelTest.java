@@ -98,7 +98,7 @@ abstract public class AbstractSerializedModelTest {
 		
 		// test serializing with revisions
 		XydraOut out = getNewOut();
-		SerializedModel.toXml(field, out);
+		SerializedModel.serialize(field, out);
 		assertTrue(out.isClosed());
 		String xml = out.getData();
 		log.debug(xml);
@@ -108,7 +108,7 @@ abstract public class AbstractSerializedModelTest {
 		
 		// test serializing without revisions
 		out = getNewOut();
-		SerializedModel.toXml(field, out, false);
+		SerializedModel.serialize(field, out, false);
 		assertTrue(out.isClosed());
 		xml = out.getData();
 		log.debug(xml);
@@ -151,7 +151,7 @@ abstract public class AbstractSerializedModelTest {
 		
 		// test serializing with revisions
 		XydraOut out = getNewOut();
-		SerializedModel.toXml(model, out);
+		SerializedModel.serialize(model, out);
 		assertTrue(out.isClosed());
 		String xml = out.getData();
 		log.debug(xml);
@@ -165,7 +165,7 @@ abstract public class AbstractSerializedModelTest {
 		
 		// test serializing without revisions
 		out = getNewOut();
-		SerializedModel.toXml(model, out, false, true, false);
+		SerializedModel.serialize(model, out, false, true, false);
 		assertTrue(out.isClosed());
 		xml = out.getData();
 		log.debug(xml);
@@ -180,7 +180,7 @@ abstract public class AbstractSerializedModelTest {
 		
 		// test serializing with revisions
 		XydraOut out = getNewOut();
-		SerializedModel.toXml(object, out);
+		SerializedModel.serialize(object, out);
 		assertTrue(out.isClosed());
 		String xml = out.getData();
 		log.debug(xml);
@@ -194,7 +194,7 @@ abstract public class AbstractSerializedModelTest {
 		
 		// test serializing without revisions
 		out = getNewOut();
-		SerializedModel.toXml(object, out, false, true, false);
+		SerializedModel.serialize(object, out, false, true, false);
 		assertTrue(out.isClosed());
 		xml = out.getData();
 		log.debug(xml);
@@ -209,7 +209,7 @@ abstract public class AbstractSerializedModelTest {
 		
 		// test serializing with revisions
 		XydraOut out = getNewOut();
-		SerializedModel.toXml(repo, out);
+		SerializedModel.serialize(repo, out);
 		assertTrue(out.isClosed());
 		String xml = out.getData();
 		log.debug(xml);
@@ -219,7 +219,7 @@ abstract public class AbstractSerializedModelTest {
 		
 		// test serializing without revisions
 		out = getNewOut();
-		SerializedModel.toXml(repo, out, false, true, false);
+		SerializedModel.serialize(repo, out, false, true, false);
 		assertTrue(out.isClosed());
 		xml = out.getData();
 		log.debug(xml);

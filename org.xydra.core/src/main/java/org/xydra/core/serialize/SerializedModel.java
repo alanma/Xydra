@@ -41,7 +41,7 @@ import org.xydra.store.AccessException;
 /**
  * Collection of methods to (de-)serialize variants of
  * {@link XReadableRepository}, {@link XReadableModel}, {@link XReadableObject}
- * and {@link XReadableField} to and from their XML representation.
+ * and {@link XReadableField} to and from their XML/JSON representation.
  * 
  * @author dscharrer
  * 
@@ -67,19 +67,19 @@ public class SerializedModel {
 	
 	private static final String XREPOSITORY_ELEMENT = "xrepository";
 	
-	private static long getRevisionAttribute(MiniElement xml, String elementName) {
+	private static long getRevisionAttribute(MiniElement element) {
 		
-		Object revisionString = xml.getAttribute(REVISION_ATTRIBUTE);
+		Object revisionString = element.getAttribute(REVISION_ATTRIBUTE);
 		
 		if(revisionString == null) {
 			return NO_REVISION;
 		}
 		
-		return SerializedValue.toLong(revisionString);
+		return SerializingUtils.toLong(revisionString);
 	}
 	
-	static private XChangeLogState loadChangeLogState(MiniElement xml, XAddress baseAddr) {
-		MiniElement logElement = xml.getChild(XCHANGELOG_ELEMENT);
+	public static XChangeLogState loadChangeLogState(MiniElement element, XAddress baseAddr) {
+		MiniElement logElement = element.getElement(XCHANGELOG_ELEMENT);
 		if(logElement != null) {
 			XChangeLogState log = new MemoryChangeLogState(baseAddr);
 			loadChangeLogState(logElement, log);
@@ -89,24 +89,24 @@ public class SerializedModel {
 	}
 	
 	/**
-	 * Load the change log represented by the given XML element into an
+	 * Load the change log represented by the given XML/JSON element into an
 	 * {@link XChangeLogState}.
 	 * 
 	 * @param state The change log state to load into.
 	 */
-	public static void loadChangeLogState(MiniElement xml, XChangeLogState state) {
+	public static void loadChangeLogState(MiniElement element, XChangeLogState state) {
 		
-		SerializingUtils.checkElementName(xml, XCHANGELOG_ELEMENT);
+		SerializingUtils.checkElementType(element, XCHANGELOG_ELEMENT);
 		
 		long startRev = 0L;
-		Object revisionString = xml.getAttribute(STARTREVISION_ATTRIBUTE);
+		Object revisionString = element.getAttribute(STARTREVISION_ATTRIBUTE);
 		if(revisionString != null) {
-			startRev = SerializedValue.toLong(revisionString);
+			startRev = SerializingUtils.toLong(revisionString);
 		}
 		
 		state.setFirstRevisionNumber(startRev);
 		
-		Iterator<MiniElement> eventElementIt = xml.getChildren(NAME_EVENTS);
+		Iterator<MiniElement> eventElementIt = element.getChildren(NAME_EVENTS);
 		while(eventElementIt.hasNext()) {
 			MiniElement e = eventElementIt.next();
 			XEvent event = SerializedEvent.toEvent(e, state.getBaseAddress());
@@ -116,22 +116,18 @@ public class SerializedModel {
 	}
 	
 	/**
-	 * Get the {@link XField} represented by the given XML element.
-	 * 
-	 * @param actorId TODO
-	 * @param xml a partial XML document starting with &lt;xfield&gt; and ending
-	 *            with the same &lt;/xfield&gt;
+	 * Get the {@link XField} represented by the given XML/JSON element.
 	 * 
 	 * @return an {@link XField}
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XField element.
 	 */
-	public static XField toField(XID actorId, MiniElement xml) {
-		return new MemoryField(actorId, toFieldState(xml, null));
+	public static XField toField(XID actorId, MiniElement element) {
+		return new MemoryField(actorId, toFieldState(element, null));
 	}
 	
 	/**
-	 * Load the field represented by the given XML element into an
+	 * Load the field represented by the given XML/JSON element into an
 	 * {@link XRevWritableField}.
 	 * 
 	 * @param parent If parent is null, the field is loaded into a
@@ -139,17 +135,17 @@ public class SerializedModel {
 	 *            of parent.
 	 * @return the created {@link XRevWritableField}
 	 */
-	public static XRevWritableField toFieldState(MiniElement xml, XRevWritableObject parent) {
+	public static XRevWritableField toFieldState(MiniElement element, XRevWritableObject parent) {
 		
-		SerializingUtils.checkElementName(xml, XFIELD_ELEMENT);
+		SerializingUtils.checkElementType(element, XFIELD_ELEMENT);
 		
-		XID xid = SerializingUtils.getRequiredXidAttribute(xml, XFIELD_ELEMENT);
+		XID xid = SerializingUtils.getRequiredXidAttribute(element);
 		
-		long revision = getRevisionAttribute(xml, XFIELD_ELEMENT);
+		long revision = getRevisionAttribute(element);
 		
 		XValue xvalue = null;
 		
-		Iterator<MiniElement> valueElementIt = xml.getChildren(NAME_VALUE);
+		Iterator<MiniElement> valueElementIt = element.getChildren(NAME_VALUE);
 		if(valueElementIt.hasNext()) {
 			MiniElement valueElement = valueElementIt.next();
 			xvalue = SerializedValue.toValue(valueElement);
@@ -169,19 +165,15 @@ public class SerializedModel {
 	}
 	
 	/**
-	 * Get the {@link XModel} represented by the given XML element.
-	 * 
-	 * @param actorId TODO
-	 * @param xml a partial XML document starting with &lt;xmodel&gt; and ending
-	 *            with the same &lt;/xmodel&gt;
+	 * Get the {@link XModel} represented by the given XML/JSON element.
 	 * 
 	 * @return an {@link XModel}
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XModel element.
 	 */
-	public static XModel toModel(XID actorId, String passwordHash, MiniElement xml) {
-		XRevWritableModel state = toModelState(xml, null, null);
-		XChangeLogState log = loadChangeLogState(xml, state.getAddress());
+	public static XModel toModel(XID actorId, String passwordHash, MiniElement element) {
+		XRevWritableModel state = toModelState(element, null, null);
+		XChangeLogState log = loadChangeLogState(element, state.getAddress());
 		if(log != null) {
 			return new MemoryModel(actorId, passwordHash, state, log);
 		} else {
@@ -190,7 +182,7 @@ public class SerializedModel {
 	}
 	
 	/**
-	 * Load the model represented by the given XML element into an
+	 * Load the model represented by the given XML/JSON element into an
 	 * {@link XRevWritableModel}.
 	 * 
 	 * @param parent If parent is null, the field is loaded into a
@@ -198,22 +190,22 @@ public class SerializedModel {
 	 *            of parent.
 	 * @return the created {@link XRevWritableModel}
 	 */
-	public static XRevWritableModel toModelState(MiniElement xml, XRevWritableRepository parent) {
-		return toModelState(xml, parent, null);
+	public static XRevWritableModel toModelState(MiniElement element, XRevWritableRepository parent) {
+		return toModelState(element, parent, null);
 	}
 	
-	public static XRevWritableModel toModelState(MiniElement xml, XAddress context) {
-		return toModelState(xml, null, context);
+	public static XRevWritableModel toModelState(MiniElement element, XAddress context) {
+		return toModelState(element, null, context);
 	}
 	
-	private static XRevWritableModel toModelState(MiniElement xml, XRevWritableRepository parent,
-	        XAddress context) {
+	private static XRevWritableModel toModelState(MiniElement element,
+	        XRevWritableRepository parent, XAddress context) {
 		
-		SerializingUtils.checkElementName(xml, XMODEL_ELEMENT);
+		SerializingUtils.checkElementType(element, XMODEL_ELEMENT);
 		
-		XID xid = SerializingUtils.getRequiredXidAttribute(xml, XMODEL_ELEMENT);
+		XID xid = SerializingUtils.getRequiredXidAttribute(element);
 		
-		long revision = getRevisionAttribute(xml, XMODEL_ELEMENT);
+		long revision = getRevisionAttribute(element);
 		
 		XRevWritableModel modelState;
 		if(parent == null) {
@@ -229,8 +221,7 @@ public class SerializedModel {
 		}
 		modelState.setRevisionNumber(revision);
 		
-		Iterator<MiniElement> objectElementIt = xml
-		        .getChildrenByType(NAME_OBJECTS, XOBJECT_ELEMENT);
+		Iterator<MiniElement> objectElementIt = element.getChildren(NAME_OBJECTS, XOBJECT_ELEMENT);
 		while(objectElementIt.hasNext()) {
 			MiniElement objectElement = objectElementIt.next();
 			XRevWritableObject objectState = toObjectState(objectElement, modelState);
@@ -241,19 +232,15 @@ public class SerializedModel {
 	}
 	
 	/**
-	 * Get the {@link XObject} represented by the given XML element.
-	 * 
-	 * @param actorId TODO
-	 * @param xml a partial XML document starting with &lt;xobject&gt; and
-	 *            ending with the same &lt;/xobject&gt;
+	 * Get the {@link XObject} represented by the given XML/JSON element.
 	 * 
 	 * @return an {@link XObject}
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XObject element.
 	 */
-	public static XObject toObject(XID actorId, String passwordHash, MiniElement xml) {
-		XRevWritableObject state = toObjectState(xml, null, null);
-		XChangeLogState log = loadChangeLogState(xml, state.getAddress());
+	public static XObject toObject(XID actorId, String passwordHash, MiniElement element) {
+		XRevWritableObject state = toObjectState(element, null, null);
+		XChangeLogState log = loadChangeLogState(element, state.getAddress());
 		if(log != null) {
 			return new MemoryObject(actorId, passwordHash, state, log);
 		} else {
@@ -262,7 +249,7 @@ public class SerializedModel {
 	}
 	
 	/**
-	 * Load the object represented by the given XML element into an
+	 * Load the object represented by the given XML/JSON element into an
 	 * {@link XRevWritableObject}.
 	 * 
 	 * @param parent If parent is null, the field is loaded into a
@@ -270,22 +257,22 @@ public class SerializedModel {
 	 *            state of parent.
 	 * @return the created {@link XRevWritableObject}
 	 */
-	public static XRevWritableObject toObjectState(MiniElement xml, XRevWritableModel parent) {
-		return toObjectState(xml, parent, null);
+	public static XRevWritableObject toObjectState(MiniElement element, XRevWritableModel parent) {
+		return toObjectState(element, parent, null);
 	}
 	
-	public static XRevWritableObject toObjectState(MiniElement xml, XAddress context) {
-		return toObjectState(xml, null, context);
+	public static XRevWritableObject toObjectState(MiniElement element, XAddress context) {
+		return toObjectState(element, null, context);
 	}
 	
-	private static XRevWritableObject toObjectState(MiniElement xml, XRevWritableModel parent,
+	private static XRevWritableObject toObjectState(MiniElement element, XRevWritableModel parent,
 	        XAddress context) {
 		
-		SerializingUtils.checkElementName(xml, XOBJECT_ELEMENT);
+		SerializingUtils.checkElementType(element, XOBJECT_ELEMENT);
 		
-		XID xid = SerializingUtils.getRequiredXidAttribute(xml, XOBJECT_ELEMENT);
+		XID xid = SerializingUtils.getRequiredXidAttribute(element);
 		
-		long revision = getRevisionAttribute(xml, XOBJECT_ELEMENT);
+		long revision = getRevisionAttribute(element);
 		
 		XRevWritableObject objectState;
 		if(parent == null) {
@@ -302,7 +289,7 @@ public class SerializedModel {
 		
 		objectState.setRevisionNumber(revision);
 		
-		Iterator<MiniElement> fieldElementIt = xml.getChildrenByType(NAME_FIELDS, XFIELD_ELEMENT);
+		Iterator<MiniElement> fieldElementIt = element.getChildren(NAME_FIELDS, XFIELD_ELEMENT);
 		while(fieldElementIt.hasNext()) {
 			MiniElement fieldElement = fieldElementIt.next();
 			XRevWritableField fieldState = toFieldState(fieldElement, objectState);
@@ -313,36 +300,32 @@ public class SerializedModel {
 	}
 	
 	/**
-	 * Get the {@link XRepository} represented by the given XML element.
-	 * 
-	 * @param actorId TODO
-	 * @param xml a partial XML document starting with &lt;xrepository&gt; and
-	 *            ending with the same &lt;/xrepository&gt;
+	 * Get the {@link XRepository} represented by the given XML/JSON element.
 	 * 
 	 * @return an {@link XRepository}
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XRepository element.
 	 */
-	public static XRepository toRepository(XID actorId, String passwordHash, MiniElement xml) {
-		return new MemoryRepository(actorId, passwordHash, toRepositoryState(xml));
+	public static XRepository toRepository(XID actorId, String passwordHash, MiniElement element) {
+		return new MemoryRepository(actorId, passwordHash, toRepositoryState(element));
 	}
 	
 	/**
-	 * Load the repository represented by the given XML element into an
+	 * Load the repository represented by the given XML/JSON element into an
 	 * {@link XRevWritableRepository}.
 	 * 
 	 * @return the created {@link XRevWritableRepository}
 	 */
-	public static XRevWritableRepository toRepositoryState(MiniElement xml) {
+	public static XRevWritableRepository toRepositoryState(MiniElement element) {
 		
-		SerializingUtils.checkElementName(xml, XREPOSITORY_ELEMENT);
+		SerializingUtils.checkElementType(element, XREPOSITORY_ELEMENT);
 		
-		XID xid = SerializingUtils.getRequiredXidAttribute(xml, XREPOSITORY_ELEMENT);
+		XID xid = SerializingUtils.getRequiredXidAttribute(element);
 		
 		XAddress repoAddr = XX.toAddress(xid, null, null, null);
 		XRevWritableRepository repositoryState = new SimpleRepository(repoAddr);
 		
-		Iterator<MiniElement> modelElementIt = xml.getChildrenByType(NAME_MODELS, XMODEL_ELEMENT);
+		Iterator<MiniElement> modelElementIt = element.getChildren(NAME_MODELS, XMODEL_ELEMENT);
 		while(modelElementIt.hasNext()) {
 			MiniElement modelElement = modelElementIt.next();
 			XRevWritableModel modelState = toModelState(modelElement, repositoryState);
@@ -353,265 +336,258 @@ public class SerializedModel {
 	}
 	
 	/**
-	 * Encode the given {@link XChangeLog} as an XML element.
+	 * Encode the given {@link XChangeLog} as an XML/JSON element.
 	 * 
 	 * @param log an {@link XChangeLog}
-	 * @param xo the {@link XydraOut} that a partial XML document starting with
-	 *            &lt;xfield&gt; and ending with the same &lt;/xfield&gt; is
-	 *            written to. White space is permitted but not required.
+	 * @param out the {@link XydraOut} that a partial XML/JSON document is
+	 *            written to.
 	 */
-	public static void toXml(XChangeLog log, XydraOut xo) {
+	public static void serialize(XChangeLog log, XydraOut out) {
 		
-		// get values before outputting anything to prevent incomplete XML
+		// get values before outputting anything to prevent incomplete
 		// elements on errors
 		long rev = log.getFirstRevisionNumber();
 		Iterator<XEvent> events = log.getEventsBetween(0, Long.MAX_VALUE);
 		
-		xo.open(XCHANGELOG_ELEMENT);
+		out.open(XCHANGELOG_ELEMENT);
 		if(rev != 0) {
-			xo.attribute(STARTREVISION_ATTRIBUTE, rev);
+			out.attribute(STARTREVISION_ATTRIBUTE, rev);
 		}
 		
-		xo.children(NAME_EVENTS, true);
+		out.beginChildren(NAME_EVENTS, true);
 		while(events.hasNext()) {
-			SerializedEvent.toXml(events.next(), xo, log.getBaseAddress());
+			SerializedEvent.serialize(events.next(), out, log.getBaseAddress());
 		}
+		out.endChildren();
 		
-		xo.close(XCHANGELOG_ELEMENT);
+		out.close(XCHANGELOG_ELEMENT);
 		
 	}
 	
 	/**
-	 * Encode the given {@link XReadableField} as an XML element, including
+	 * Encode the given {@link XReadableField} as an XML/JSON element, including
 	 * revision numbers.
 	 * 
 	 * @param xfield an {@link XReadableField}
-	 * @param xo the {@link XydraOut} that a partial XML document starting with
-	 *            &lt;xfield&gt; and ending with the same &lt;/xfield&gt; is
-	 *            written to. White space is permitted but not required.
+	 * @param out the {@link XydraOut} that a partial XML/JSON document is
+	 *            written to.
 	 * @throws IllegalArgumentException if the field contains an unsupported
 	 *             XValue type. See {@link SerializedValue} for details.
 	 */
-	public static void toXml(XReadableField xfield, XydraOut xo) {
-		toXml(xfield, xo, true);
+	public static void serialize(XReadableField xfield, XydraOut out) {
+		serialize(xfield, out, true);
 	}
 	
 	/**
-	 * Encode the given {@link XReadableField} as an XML element.
+	 * Encode the given {@link XReadableField} as an XML/JSON element.
 	 * 
 	 * @param xfield an {@link XReadableField}
-	 * @param xo the {@link XydraOut} that a partial XML document starting with
-	 *            &lt;xfield&gt; and ending with the same &lt;/xfield&gt; is
-	 *            written to. White space is permitted but not required.
-	 * @param saveRevision true if revision numbers should be saved to the xml
-	 *            file.
+	 * @param out the {@link XydraOut} that a partial XML/JSON document is
+	 *            written to.
+	 * @param saveRevision true if revision numbers should be saved in the
+	 *            element.
 	 * @throws IllegalArgumentException if the field contains an unsupported
 	 *             XValue type. See {@link SerializedValue} for details.
 	 */
-	public static void toXml(XReadableField xfield, XydraOut xo, boolean saveRevision) {
+	public static void serialize(XReadableField xfield, XydraOut out, boolean saveRevision) {
 		
-		// get values before outputting anything to prevent incomplete XML
+		// get values before outputting anything to prevent incomplete
 		// elements on errors
 		XValue xvalue = xfield.getValue();
 		long rev = xfield.getRevisionNumber();
 		
-		xo.open(XFIELD_ELEMENT);
-		xo.attribute(SerializingUtils.XID_ATTRIBUTE, xfield.getID());
+		out.open(XFIELD_ELEMENT);
+		out.attribute(SerializingUtils.XID_ATTRIBUTE, xfield.getID());
 		if(saveRevision) {
-			xo.attribute(REVISION_ATTRIBUTE, rev);
+			out.attribute(REVISION_ATTRIBUTE, rev);
 		}
 		
 		if(xvalue != null) {
-			xo.children(NAME_VALUE, false);
-			SerializedValue.toXml(xvalue, xo);
+			out.beginChildren(NAME_VALUE, false);
+			SerializedValue.serialize(xvalue, out);
+			out.endChildren();
 		}
 		
-		xo.close(XFIELD_ELEMENT);
+		out.close(XFIELD_ELEMENT);
 		
 	}
 	
 	/**
-	 * Encode the given {@link XReadableModel} as an XML element, including
+	 * Encode the given {@link XReadableModel} as an XML/JSON element, including
 	 * revision numbers and ignoring inaccessible entities.
 	 * 
 	 * @param xmodel an {@link XReadableModel}
-	 * @param xo the {@link XydraOut} that a partial XML document starting with
-	 *            &lt;xmodel&gt; and ending with the same &lt;/xmodel&gt; is
-	 *            written to. White space is permitted but not required.
+	 * @param out the {@link XydraOut} that a partial XML/JSON document is
+	 *            written to.
 	 * @throws IllegalArgumentException if the model contains an unsupported
 	 *             XValue type. See {@link SerializedValue} for details.
 	 */
-	public static void toXml(XReadableModel xmodel, XydraOut xo) {
-		toXml(xmodel, xo, true, true, true);
+	public static void serialize(XReadableModel xmodel, XydraOut out) {
+		serialize(xmodel, out, true, true, true);
 	}
 	
 	/**
-	 * Encode the given {@link XReadableModel} as an XML element.
+	 * Encode the given {@link XReadableModel} as an XML/JSON element.
 	 * 
 	 * @param xmodel an {@link XReadableModel}
-	 * @param xo the {@link XydraOut} that a partial XML document starting with
-	 *            &lt;xmodel&gt; and ending with the same &lt;/xmodel&gt; is
-	 *            written to. White space is permitted but not required.
-	 * @param saveRevision true if revision numbers should be saved to the xml
-	 *            file.
+	 * @param out the {@link XydraOut} that a partial XML/JSON document is
+	 *            written to.
+	 * @param saveRevision true if revision numbers should be saved to the
+	 *            element.
 	 * @param ignoreInaccessible ignore inaccessible objects and fields instead
 	 *            of throwing an exception
 	 * @param saveChangeLog if true, the change log is saved
 	 * @throws IllegalArgumentException if the model contains an unsupported
 	 *             XValue type. See {@link SerializedValue} for details.
 	 */
-	public static void toXml(XReadableModel xmodel, XydraOut xo, boolean saveRevision,
+	public static void serialize(XReadableModel xmodel, XydraOut out, boolean saveRevision,
 	        boolean ignoreInaccessible, boolean saveChangeLog) {
 		
 		if(!saveRevision && saveChangeLog) {
 			throw new IllegalArgumentException("cannot save change log without saving revisions");
 		}
 		
-		// get revision before outputting anything to prevent incomplete XML
+		// get revision before outputting anything to prevent incomplete
 		// elements on errors
 		long rev = xmodel.getRevisionNumber();
 		
-		xo.open(XMODEL_ELEMENT);
-		xo.attribute(SerializingUtils.XID_ATTRIBUTE, xmodel.getID());
+		out.open(XMODEL_ELEMENT);
+		out.attribute(SerializingUtils.XID_ATTRIBUTE, xmodel.getID());
 		if(saveRevision) {
-			xo.attribute(REVISION_ATTRIBUTE, rev);
+			out.attribute(REVISION_ATTRIBUTE, rev);
 		}
 		
-		xo.children(NAME_OBJECTS, true, XOBJECT_ELEMENT);
+		out.beginChildren(NAME_OBJECTS, true, XOBJECT_ELEMENT);
 		for(XID objectId : xmodel) {
 			try {
-				toXml(xmodel.getObject(objectId), xo, saveRevision, ignoreInaccessible, false);
+				serialize(xmodel.getObject(objectId), out, saveRevision, ignoreInaccessible, false);
 			} catch(AccessException ae) {
 				if(!ignoreInaccessible) {
 					throw ae;
 				}
 			}
 		}
+		out.endChildren();
 		
 		if(saveChangeLog && xmodel instanceof XLoggedModel) {
 			XChangeLog log = ((XLoggedModel)xmodel).getChangeLog();
 			if(log != null) {
-				toXml(log, xo);
+				serialize(log, out);
 				assert log.getCurrentRevisionNumber() == xmodel.getRevisionNumber();
 			}
 		}
 		
-		xo.close(XMODEL_ELEMENT);
+		out.close(XMODEL_ELEMENT);
 		
 	}
 	
 	/**
-	 * Encode the given {@link XReadableObject} as an XML element, including
-	 * revision numbers and ignoring inaccessible entities.
+	 * Encode the given {@link XReadableObject} as an XML/JSON element,
+	 * including revision numbers and ignoring inaccessible entities.
 	 * 
 	 * @param xobject an {@link XReadableObject}
-	 * @param xo the {@link XydraOut} that a partial XML document starting with
-	 *            &lt;xobject&gt; and ending with the same &lt;/xobject&gt; is
-	 *            written to. White space is permitted but not required.
+	 * @param out the {@link XydraOut} that a partial XML/JSON document is
+	 *            written to.
 	 * @throws IllegalArgumentException if the object contains an unsupported
 	 *             XValue type. See {@link SerializedValue} for details.
 	 */
-	public static void toXml(XReadableObject xobject, XydraOut xo) {
-		toXml(xobject, xo, true, true, true);
+	public static void serialize(XReadableObject xobject, XydraOut out) {
+		serialize(xobject, out, true, true, true);
 	}
 	
 	/**
-	 * Encode the given {@link XReadableObject} as an XML element.
+	 * Encode the given {@link XReadableObject} as an XML/JSON element.
 	 * 
 	 * @param xobject an {@link XObject}
-	 * @param xo the {@link XydraOut} that a partial XML document starting with
-	 *            &lt;xobject&gt; and ending with the same &lt;/xobject&gt; is
-	 *            written to. White space is permitted but not required.
-	 * @param saveRevision true if revision numbers should be saved to the xml
-	 *            file.
+	 * @param out the {@link XydraOut} that a partial XML/JSON document is
+	 *            written to.
+	 * @param saveRevision true if revision numbers should be saved to the
+	 *            element.
 	 * @param ignoreInaccessible ignore inaccessible fields instead of throwing
 	 *            an exception
 	 * @param saveChangeLog if true, any object change log is saved
 	 * @throws IllegalArgumentException if the object contains an unsupported
 	 *             XValue type. See {@link SerializedValue} for details.
 	 */
-	public static void toXml(XReadableObject xobject, XydraOut xo, boolean saveRevision,
+	public static void serialize(XReadableObject xobject, XydraOut out, boolean saveRevision,
 	        boolean ignoreInaccessible, boolean saveChangeLog) {
 		
 		if(!saveRevision && saveChangeLog) {
 			throw new IllegalArgumentException("cannot save change log without saving revisions");
 		}
 		
-		// get revision before outputting anything to prevent incomplete XML
+		// get revision before outputting anything to prevent incomplete
 		// elements on errors
 		long rev = xobject.getRevisionNumber();
 		
-		xo.open(XOBJECT_ELEMENT);
-		xo.attribute(SerializingUtils.XID_ATTRIBUTE, xobject.getID());
+		out.open(XOBJECT_ELEMENT);
+		out.attribute(SerializingUtils.XID_ATTRIBUTE, xobject.getID());
 		if(saveRevision) {
-			xo.attribute(REVISION_ATTRIBUTE, rev);
+			out.attribute(REVISION_ATTRIBUTE, rev);
 		}
 		
-		xo.children(NAME_FIELDS, true, XFIELD_ELEMENT);
+		out.beginChildren(NAME_FIELDS, true, XFIELD_ELEMENT);
 		for(XID fieldId : xobject) {
 			try {
-				toXml(xobject.getField(fieldId), xo, saveRevision);
+				serialize(xobject.getField(fieldId), out, saveRevision);
 			} catch(AccessException ae) {
 				if(!ignoreInaccessible) {
 					throw ae;
 				}
 			}
 		}
+		out.endChildren();
 		
 		if(saveChangeLog && xobject instanceof XLoggedObject) {
 			XChangeLog log = ((XLoggedObject)xobject).getChangeLog();
 			if(log != null && log.getBaseAddress().equals(xobject.getAddress())) {
-				toXml(log, xo);
+				serialize(log, out);
 				assert log.getCurrentRevisionNumber() == xobject.getRevisionNumber();
 			}
 		}
 		
-		xo.close(XOBJECT_ELEMENT);
+		out.close(XOBJECT_ELEMENT);
 		
 	}
 	
 	/**
-	 * Encode the given {@link XReadableRepository} as an XML element, including
-	 * revision numbers and ignoring inaccessible entities.
+	 * Encode the given {@link XReadableRepository} as an XML/JSON element,
+	 * including revision numbers and ignoring inaccessible entities.
 	 * 
 	 * @param xrepository an {@link XReadableRepository}
-	 * @param xo the {@link XydraOut} that a partial XML document starting with
-	 *            &lt;xrepository&gt; and ending with the same
-	 *            &lt;/xrepository&gt; is written to. White space is permitted
-	 *            but not required.
+	 * @param out the {@link XydraOut} that a partial XML/JSON document is
+	 *            written to.
 	 * @throws IllegalArgumentException if the model contains an unsupported
 	 *             XValue type. See {@link SerializedValue} for details.
 	 */
-	public static void toXml(XReadableRepository xrepository, XydraOut xo) {
-		toXml(xrepository, xo, true, true, true);
+	public static void serialize(XReadableRepository xrepository, XydraOut out) {
+		serialize(xrepository, out, true, true, true);
 	}
 	
 	/**
-	 * Encode the given {@link XReadableRepository} as an XML element.
+	 * Encode the given {@link XReadableRepository} as an XML/JSON element.
 	 * 
 	 * @param xrepository an {@link XReadableRepository}
-	 * @param xo the {@link XydraOut} that a partial XML document starting with
-	 *            &lt;xrepository&gt; and ending with the same
-	 *            &lt;/xrepository&gt; is written to. White space is permitted
-	 *            but not required.
-	 * @param saveRevision true if revision numbers should be saved to the xml
-	 *            file.
+	 * @param out the {@link XydraOut} that a partial XML document is written
+	 *            to.
+	 * @param saveRevision true if revision numbers should be saved to the
+	 *            element.
 	 * @param ignoreInaccessible ignore inaccessible models, objects and fields
 	 *            instead of throwing an exception
 	 * @param saveChangeLog if true, any model change logs are saved
 	 * @throws IllegalArgumentException if the model contains an unsupported
 	 *             XValue type. See {@link SerializedValue} for details.
 	 */
-	public static void toXml(XReadableRepository xrepository, XydraOut xo, boolean saveRevision,
-	        boolean ignoreInaccessible, boolean saveChangeLog) {
+	public static void serialize(XReadableRepository xrepository, XydraOut out,
+	        boolean saveRevision, boolean ignoreInaccessible, boolean saveChangeLog) {
 		
-		xo.open(XREPOSITORY_ELEMENT);
-		xo.attribute(SerializingUtils.XID_ATTRIBUTE, xrepository.getID());
+		out.open(XREPOSITORY_ELEMENT);
+		out.attribute(SerializingUtils.XID_ATTRIBUTE, xrepository.getID());
 		
-		xo.children(NAME_MODELS, true, XMODEL_ELEMENT);
+		out.beginChildren(NAME_MODELS, true, XMODEL_ELEMENT);
 		for(XID modelOd : xrepository) {
 			try {
-				toXml(xrepository.getModel(modelOd), xo, saveRevision, ignoreInaccessible,
+				serialize(xrepository.getModel(modelOd), out, saveRevision, ignoreInaccessible,
 				        saveChangeLog);
 			} catch(AccessException ae) {
 				if(!ignoreInaccessible) {
@@ -619,13 +595,14 @@ public class SerializedModel {
 				}
 			}
 		}
+		out.endChildren();
 		
-		xo.close(XREPOSITORY_ELEMENT);
+		out.close(XREPOSITORY_ELEMENT);
 		
 	}
 	
-	public static boolean isModel(MiniElement xml) {
-		return XMODEL_ELEMENT.equals(xml.getType());
+	public static boolean isModel(MiniElement element) {
+		return element == null || XMODEL_ELEMENT.equals(element.getType());
 	}
 	
 }

@@ -113,4 +113,10 @@ public class MemoryBooleanListValue extends MemoryListValue<Boolean> implements 
 	public ValueType getType() {
 		return ValueType.BooleanList;
 	}
+	
+	@Override
+	public ValueType getComponentType() {
+		return ValueType.Boolean;
+	}
+	
 }

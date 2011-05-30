@@ -356,4 +356,9 @@ public class MemoryAddress implements XAddress {
 		return ValueType.Address;
 	}
 	
+	@Override
+	public XAddress getValue() {
+		return this;
+	}
+	
 }

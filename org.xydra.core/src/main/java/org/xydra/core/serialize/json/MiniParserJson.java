@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import org.xydra.annotations.RequiresAppEngine;
+import org.xydra.annotations.RunsInAppEngine;
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.core.serialize.MiniElement;
 import org.xydra.core.serialize.MiniParser;
 import org.xydra.json.JSONException;
@@ -13,6 +16,9 @@ import org.xydra.json.JsonParser;
 import org.xydra.json.SAJ;
 
 
+@RunsInGWT(true)
+@RunsInAppEngine(true)
+@RequiresAppEngine(false)
 public class MiniParserJson implements MiniParser {
 	
 	private static class MiniSaj implements SAJ {
@@ -25,8 +31,10 @@ public class MiniParserJson implements MiniParser {
 		private void onObject(Object o) {
 			if(this.map != null) {
 				this.map.put(this.key, o);
-			} else {
+			} else if(this.list != null) {
 				this.list.add(o);
+			} else if(o != null) {
+				throw new IllegalArgumentException("the root must be an object or null, was: " + o);
 			}
 		}
 		
@@ -129,8 +137,9 @@ public class MiniParserJson implements MiniParser {
 			throw new IllegalArgumentException(e);
 		}
 		
-		assert saj.map != null;
-		
-		return new MiniElementJson(saj.map);
+		if(saj.map == null) {
+			return null;
+		}
+		return new MiniElementJson(saj.map, null);
 	}
 }

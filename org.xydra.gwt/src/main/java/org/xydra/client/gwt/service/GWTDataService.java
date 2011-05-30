@@ -179,7 +179,7 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 	public void setModel(XReadableModel model, Callback<Boolean> callback) {
 		
 		XydraOut xo = new XmlOut();
-		SerializedModel.toXml(model, xo, false, false, false);
+		SerializedModel.serialize(model, xo, false, false, false);
 		
 		send("", xo.getData(), callback);
 		
@@ -188,7 +188,7 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 	public void setObject(XID modelId, XReadableObject object, Callback<Boolean> callback) {
 		
 		XydraOut xo = new XmlOut();
-		SerializedModel.toXml(object, xo, false, false, false);
+		SerializedModel.serialize(object, xo, false, false, false);
 		
 		send(modelId.toString(), xo.getData(), callback);
 		
@@ -197,7 +197,7 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 	public void setField(XID modelId, XID objectId, XReadableField field, Callback<Boolean> callback) {
 		
 		XydraOut xo = new XmlOut();
-		SerializedModel.toXml(field, xo, false);
+		SerializedModel.serialize(field, xo, false);
 		
 		send(modelId.toString() + "/" + objectId.toString(), xo.getData(), callback);
 		

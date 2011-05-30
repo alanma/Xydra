@@ -153,7 +153,7 @@ public class GaeSnapshotService {
 		
 		if(entry.modelState != null) {
 			XydraOut out = new XmlOut();
-			SerializedModel.toXml(entry.modelState, out);
+			SerializedModel.serialize(entry.modelState, out);
 			snapshotEntity.setUnindexedProperty(PROPERTY_SNAPSHOT, new Text(out.getData()));
 		}
 		

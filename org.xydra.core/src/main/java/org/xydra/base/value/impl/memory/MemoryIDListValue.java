@@ -118,6 +118,12 @@ public class MemoryIDListValue extends MemoryListValue<XID> implements XIDListVa
 	
 	@Override
 	public ValueType getType() {
-		return ValueType.XIDList;
+		return ValueType.IdList;
 	}
+	
+	@Override
+	public ValueType getComponentType() {
+		return ValueType.Id;
+	}
+	
 }

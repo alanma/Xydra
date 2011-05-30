@@ -48,7 +48,7 @@ public class XObjectResource {
 		XReadableObject object = XydraRestServer.getObject(session, modelId, objectId);
 		
 		XydraOut xo = new XmlOut();
-		SerializedModel.toXml(object, xo, true, true, false);
+		SerializedModel.serialize(object, xo, true, true, false);
 		
 		XydraRestServer.xmlResponse(res, HttpServletResponse.SC_OK, xo.getData());
 	}

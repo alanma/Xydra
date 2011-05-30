@@ -167,7 +167,7 @@ public class XSynchronizeChangesResource {
 		}
 		
 		XydraOut out = new XmlOut();
-		SerializedEvent.toXml(events, out, addr);
+		SerializedEvent.serialize(events, out, addr);
 		return out.getData();
 	}
 	

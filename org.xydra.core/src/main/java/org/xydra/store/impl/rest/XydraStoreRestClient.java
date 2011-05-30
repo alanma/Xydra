@@ -173,7 +173,7 @@ public class XydraStoreRestClient implements XydraStore {
 		}
 		
 		XydraOut out = new XmlOut();
-		SerializedCommand.toXml(Arrays.asList(commands).iterator(), out, null);
+		SerializedCommand.serialize(Arrays.asList(commands).iterator(), out, null);
 		
 		MiniElement xml = post("execute", actorId, passwordHash, out.getData(), callback);
 		if(xml == null) {
@@ -212,7 +212,7 @@ public class XydraStoreRestClient implements XydraStore {
 		String uri = req == null ? "execute" : "execute?" + req;
 		
 		XydraOut out = new XmlOut();
-		SerializedCommand.toXml(Arrays.asList(commands).iterator(), out, null);
+		SerializedCommand.serialize(Arrays.asList(commands).iterator(), out, null);
 		
 		MiniElement xml = post(uri, actorId, passwordHash, out.getData(), callback);
 		if(xml == null) {

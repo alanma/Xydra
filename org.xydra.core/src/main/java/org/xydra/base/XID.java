@@ -2,7 +2,7 @@ package org.xydra.base;
 
 import java.io.Serializable;
 
-import org.xydra.base.value.XValue;
+import org.xydra.base.value.XSingleValue;
 
 
 /**
@@ -13,7 +13,7 @@ import org.xydra.base.value.XValue;
  * 
  * @author voelkel
  */
-public interface XID extends XValue, Serializable, Comparable<XID> {
+public interface XID extends XSingleValue<XID>, Serializable, Comparable<XID> {
 	
 	/**
 	 * To convert this XID to a byte[] representation use the ByteUtils (TBD).

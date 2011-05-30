@@ -123,4 +123,9 @@ public class MemoryAddressListValue extends MemoryListValue<XAddress> implements
 		return ValueType.AddressList;
 	}
 	
+	@Override
+	public ValueType getComponentType() {
+		return ValueType.Address;
+	}
+	
 }

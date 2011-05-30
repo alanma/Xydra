@@ -112,4 +112,10 @@ public class MemoryByteListValue extends MemoryListValue<Byte> implements XByteL
 	public ValueType getType() {
 		return ValueType.ByteList;
 	}
+	
+	@Override
+	public ValueType getComponentType() {
+		return null;
+	}
+	
 }

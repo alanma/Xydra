@@ -68,7 +68,7 @@ public class CsvValueReader {
 			return X.getValueFactory().createLongValue(Long.parseLong(valueString.trim()));
 		case String:
 			return X.getValueFactory().createStringValue(valueString.trim());
-		case XID:
+		case Id:
 			return XX.toId(valueString.trim());
 		default:
 			throw new AssertionError("Not a plain type? " + type);
@@ -111,19 +111,19 @@ public class CsvValueReader {
 					throw new AssertionError();
 				}
 			}
-			case XIDList:
-			case XIDSet:
-			case XIDSortedSet: {
+			case IdList:
+			case IdSet:
+			case IdSortedSet: {
 				ArrayList<XID> list = new ArrayList<XID>();
 				for(String s : parts) {
-					list.add((XID)parsePlainValue(s.trim(), ValueType.XID));
+					list.add((XID)parsePlainValue(s.trim(), ValueType.Id));
 				}
 				switch(type) {
-				case XIDList:
+				case IdList:
 					return XV.toIDListValue(list);
-				case XIDSet:
+				case IdSet:
 					return XV.toIDSetValue(list);
-				case XIDSortedSet:
+				case IdSortedSet:
 					return XV.toIDSortedSetValue(list);
 				default:
 					throw new AssertionError();
@@ -206,9 +206,9 @@ public class CsvValueReader {
 			}
 			break;
 		}
-		case XIDList:
-		case XIDSet:
-		case XIDSortedSet: {
+		case IdList:
+		case IdSet:
+		case IdSortedSet: {
 			for(Object o : value) {
 				if(!first) {
 					buf.append(COMMA);
@@ -333,7 +333,7 @@ public class CsvValueReader {
 		case Double:
 		case Integer:
 		case Long:
-		case XID:
+		case Id:
 			return value.toString();
 		case ByteList: {
 			byte[] bytes = ((XByteListValue)value).contents();

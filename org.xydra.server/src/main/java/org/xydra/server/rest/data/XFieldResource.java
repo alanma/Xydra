@@ -39,7 +39,7 @@ public class XFieldResource {
 		XReadableField field = XydraRestServer.getField(session, modelId, objectId, fieldId);
 		
 		XydraOut xo = new XmlOut();
-		SerializedModel.toXml(field, xo, true);
+		SerializedModel.serialize(field, xo, true);
 		
 		XydraRestServer.xmlResponse(res, HttpServletResponse.SC_OK, xo.getData());
 	}

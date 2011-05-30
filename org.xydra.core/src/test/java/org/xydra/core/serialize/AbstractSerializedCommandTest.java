@@ -188,7 +188,7 @@ abstract public class AbstractSerializedCommandTest {
 	private void testCommand(XCommand command) {
 		
 		XydraOut out = getNewOut();
-		SerializedCommand.toXml(command, out, null);
+		SerializedCommand.serialize(command, out, null);
 		assertTrue(out.isClosed());
 		String xml = out.getData();
 		
@@ -201,7 +201,7 @@ abstract public class AbstractSerializedCommandTest {
 		// now test with a different context
 		
 		out = getNewOut();
-		SerializedCommand.toXml(command, out, command.getTarget());
+		SerializedCommand.serialize(command, out, command.getTarget());
 		assertTrue(out.isClosed());
 		xml = out.getData();
 		

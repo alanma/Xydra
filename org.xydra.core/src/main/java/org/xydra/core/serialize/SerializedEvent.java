@@ -29,7 +29,7 @@ import org.xydra.base.value.XValue;
 
 /**
  * Collection of methods to (de-)serialize variants of {@link XEvent} to and
- * from their XML representation.
+ * from their XML/JSON representation.
  * 
  * @author dscharrer
  */
@@ -38,8 +38,8 @@ import org.xydra.base.value.XValue;
 @RequiresAppEngine(false)
 public class SerializedEvent {
 	
+	private static final String NAME_OLD_VALUE = "oldValue";
 	private static final String NAME_VALUE = "value";
-	private static final String NAME_VALUES = "values";
 	private static final String NAME_EVENTS = "events";
 	private static final String ACTOR_ATTRIBUTE = "actor";
 	private static final String FIELDREVISION_ATTRIBUTE = "fieldRevision";
@@ -56,41 +56,28 @@ public class SerializedEvent {
 	private static final String XREPOSITORYEVENT_ELEMENT = "xrepositoryEvent";
 	private static final String XTRANSACTIONEVENT_ELEMENT = "xtransactionEvent";
 	
-	private static boolean getImpliedAttribute(MiniElement xml) {
-		Object booleanString = xml.getAttribute(IMPLIED_ATTRIBUTE);
-		return booleanString == null ? false : SerializedValue.toBoolean(booleanString);
+	private static boolean getImpliedAttribute(MiniElement element) {
+		Object booleanString = element.getAttribute(IMPLIED_ATTRIBUTE);
+		return booleanString == null ? false : SerializingUtils.toBoolean(booleanString);
 	}
 	
-	private static boolean getInTransactionAttribute(MiniElement xml) {
-		Object booleanString = xml.getAttribute(INTRANSACTION_ATTRIBUTE);
-		return booleanString == null ? false : SerializedValue.toBoolean(booleanString);
+	private static boolean getInTransactionAttribute(MiniElement element) {
+		Object booleanString = element.getAttribute(INTRANSACTION_ATTRIBUTE);
+		return booleanString == null ? false : SerializingUtils.toBoolean(booleanString);
 	}
 	
-	private static long getRevision(MiniElement xml, String elementName, String attribute,
-	        boolean required) {
+	private static long getRevision(MiniElement element, String attribute, boolean required) {
 		
-		Object revisionString = xml.getAttribute(attribute);
+		Object revisionString = element.getAttribute(attribute);
 		
 		if(revisionString == null) {
-			
 			if(required) {
-				throw new IllegalArgumentException("<" + elementName + ">@" + attribute
-				        + " attribute is missing");
+				throw new ParsingError(element, "Missing attribute '" + attribute + "'");
 			}
-			
 			return XEvent.RevisionOfEntityNotSet;
 		}
 		
-		return SerializedValue.toLong(revisionString);
-	}
-	
-	private static XValue loadValue(Iterator<MiniElement> it, String type) {
-		if(!it.hasNext()) {
-			throw new IllegalArgumentException("<" + XFIELDEVENT_ELEMENT + "> is missing it's "
-			        + type + "Value child element");
-		}
-		MiniElement valueElement = it.next();
-		return SerializedValue.toValue(valueElement);
+		return SerializingUtils.toLong(revisionString);
 	}
 	
 	private static void setAtomicEventAttributes(XAtomicEvent event, XydraOut out,
@@ -116,7 +103,7 @@ public class SerializedEvent {
 	private static void setCommonAttributes(XEvent event, XydraOut out, XAddress context,
 	        boolean inTrans) {
 		
-		SerializingUtils.setTarget(event.getTarget(), out, context);
+		SerializingUtils.setAddress(event.getChangedEntity(), out, context);
 		
 		if(!inTrans) {
 			
@@ -140,66 +127,65 @@ public class SerializedEvent {
 		
 	}
 	
-	private static XAtomicEvent toAtomicEvent(MiniElement xml, XAddress context, TempTrans trans)
-	        throws IllegalArgumentException {
-		String name = xml.getType();
+	private static XAtomicEvent toAtomicEvent(MiniElement element, XAddress context, TempTrans trans)
+	        throws ParsingError {
+		String name = element.getType();
 		if(name.equals(XFIELDEVENT_ELEMENT)) {
-			return toFieldEvent(xml, context, trans);
+			return toFieldEvent(element, context, trans);
 		} else if(name.equals(XREVERSIBLEFIELDEVENT_ELEMENT)) {
-			return toReversibleFieldEvent(xml, context, trans);
+			return toReversibleFieldEvent(element, context, trans);
 		} else if(name.equals(XOBJECTEVENT_ELEMENT)) {
-			return toObjectEvent(xml, context, trans);
+			return toObjectEvent(element, context, trans);
 		} else if(name.equals(XMODELEVENT_ELEMENT)) {
-			return toModelEvent(xml, context, trans);
+			return toModelEvent(element, context, trans);
 		} else if(name.equals(XREPOSITORYEVENT_ELEMENT)) {
-			return toRepositoryEvent(xml, context, trans);
+			return toRepositoryEvent(element, context, trans);
 		} else {
-			throw new IllegalArgumentException("Unexpected event element: <" + name + ">.");
+			throw new ParsingError(element, "Unexpected event element.");
 		}
 	}
 	
 	/**
-	 * Get the {@link XEvent} represented by the given XML element.
+	 * Get the {@link XEvent} represented by the given XML/JSON element.
 	 * 
 	 * @param context The {@link XID XIDs} of the repository, model, object and
-	 *            field to fill in if not specified in the XML. If the given
-	 *            element represents a transaction, the context for the
+	 *            field to fill in if not specified in the XML/JSON. If the
+	 *            given element represents a transaction, the context for the
 	 *            contained events will be given by the transaction.
-	 * @return The {@link XEvent} represented by the given XML element.
-	 * @throws IllegalArgumentException if the XML element does not represent a
-	 *             valid event.
+	 * @return The {@link XEvent} represented by the given XML/JSON element.
+	 * @throws ParsingError if the XML/JSON element does not represent a valid
+	 *             event.
 	 * 
 	 */
-	public static XEvent toEvent(MiniElement xml, XAddress context) throws IllegalArgumentException {
-		String name = xml.getType();
-		if(SerializedValue.isNullElement(xml)) {
+	public static XEvent toEvent(MiniElement element, XAddress context) throws ParsingError {
+		if(element == null) {
 			return null;
-		} else if(name.equals(XTRANSACTIONEVENT_ELEMENT)) {
-			return toTransactionEvent(xml, context);
+		} else if(element.getType().equals(XTRANSACTIONEVENT_ELEMENT)) {
+			return toTransactionEvent(element, context);
 		} else {
-			return toAtomicEvent(xml, context, null);
+			return toAtomicEvent(element, context, null);
 		}
 	}
 	
 	/**
-	 * Get the {@link XEvent} list represented by the given XML element.
+	 * Get the {@link XEvent} list represented by the given XML/JSON element.
 	 * 
 	 * @param context The {@link XID XIDs} of the repository, model, object and
-	 *            field to fill in if not specified in the XML. The context for
-	 *            the events contained in the transaction will be given by the
-	 *            transaction.
-	 * @return The {@link List} of {@link XEvent}s represented by the given XML
-	 *         element.
-	 * @throws IllegalArgumentException if the XML element does not represent a
-	 *             valid event list.
+	 *            field to fill in if not specified in the XML/JSON. The context
+	 *            for the events contained in the transaction will be given by
+	 *            the transaction.
+	 * @return The {@link List} of {@link XEvent}s represented by the given
+	 *         XML/JSON element.
+	 * @throws ParsingError if the XML element does not represent a valid event
+	 *             list.
 	 * 
 	 */
-	public static List<XEvent> toEventList(MiniElement xml, XAddress context) {
+	public static List<XEvent> toEventList(MiniElement element, XAddress context) {
 		
-		SerializingUtils.checkElementName(xml, XEVENTLIST_ELEMENT);
+		SerializingUtils.checkElementType(element, XEVENTLIST_ELEMENT);
 		
 		List<XEvent> events = new ArrayList<XEvent>();
-		Iterator<MiniElement> it = xml.getChildren(NAME_EVENTS);
+		Iterator<MiniElement> it = element.getChildren(NAME_EVENTS);
 		while(it.hasNext()) {
 			MiniElement event = it.next();
 			events.add(toEvent(event, context));
@@ -208,31 +194,26 @@ public class SerializedEvent {
 		return events;
 	}
 	
-	private static XFieldEvent toFieldEvent(MiniElement xml, XAddress context, TempTrans trans) {
+	private static XFieldEvent toFieldEvent(MiniElement element, XAddress context, TempTrans trans) {
 		
-		XAddress target = SerializingUtils.getTarget(xml, context);
+		XAddress target = SerializingUtils.getAddress(element, context);
 		
-		ChangeType type = SerializingUtils.getChangeType(xml, XFIELDEVENT_ELEMENT);
+		ChangeType type = SerializingUtils.getChangeType(element);
 		
-		long fieldRev = getRevision(xml, XFIELDEVENT_ELEMENT, FIELDREVISION_ATTRIBUTE, true);
-		long objectRev = getRevision(xml, XFIELDEVENT_ELEMENT, OBJECTREVISION_ATTRIBUTE, false);
-		long modelRev = trans != null ? trans.modelRev : getRevision(xml, XFIELDEVENT_ELEMENT,
+		long fieldRev = getRevision(element, FIELDREVISION_ATTRIBUTE, true);
+		long objectRev = getRevision(element, OBJECTREVISION_ATTRIBUTE, false);
+		long modelRev = trans != null ? trans.modelRev : getRevision(element,
 		        MODELREVISION_ATTRIBUTE, false);
 		
-		XID actor = trans != null ? trans.actor : SerializingUtils.getOptionalXidAttribute(xml,
+		XID actor = trans != null ? trans.actor : SerializingUtils.getOptionalXidAttribute(element,
 		        ACTOR_ATTRIBUTE, null);
-		boolean inTransaction = trans != null || getInTransactionAttribute(xml);
+		boolean inTransaction = trans != null || getInTransactionAttribute(element);
 		
 		// XValue oldValue = null;
 		XValue newValue = null;
-		Iterator<MiniElement> it = xml.getChildren(NAME_VALUE);
 		if(type != ChangeType.REMOVE) {
-			newValue = loadValue(it, "new");
+			newValue = SerializedValue.toValue(element.getChild(NAME_VALUE, 0));
 			assert newValue != null;
-		}
-		if(it.hasNext()) {
-			throw new IllegalArgumentException("Invalid child of <" + XFIELDEVENT_ELEMENT + ">: <"
-			        + it.next().getType() + ">");
 		}
 		
 		if(type == ChangeType.ADD) {
@@ -242,48 +223,42 @@ public class SerializedEvent {
 			return MemoryFieldEvent.createChangeEvent(actor, target, newValue, modelRev, objectRev,
 			        fieldRev, inTransaction);
 		} else if(type == ChangeType.REMOVE) {
-			boolean implied = getImpliedAttribute(xml);
+			boolean implied = getImpliedAttribute(element);
 			return MemoryFieldEvent.createRemoveEvent(actor, target, modelRev, objectRev, fieldRev,
 			        inTransaction, implied);
 		} else {
-			throw new IllegalArgumentException("<" + XFIELDEVENT_ELEMENT + ">@"
-			        + SerializingUtils.TYPE_ATTRIBUTE
+			throw new ParsingError(element, "Attribute " + SerializingUtils.TYPE_ATTRIBUTE
 			        + " does not contain a valid type for field events, but '" + type + "'");
 		}
 	}
 	
-	private static XReversibleFieldEvent toReversibleFieldEvent(MiniElement xml, XAddress context,
-	        TempTrans trans) {
+	private static XReversibleFieldEvent toReversibleFieldEvent(MiniElement element,
+	        XAddress context, TempTrans trans) {
 		
-		XAddress target = SerializingUtils.getTarget(xml, context);
+		XAddress target = SerializingUtils.getAddress(element, context);
 		
-		ChangeType type = SerializingUtils.getChangeType(xml, XREVERSIBLEFIELDEVENT_ELEMENT);
+		ChangeType type = SerializingUtils.getChangeType(element);
 		
-		long fieldRev = getRevision(xml, XREVERSIBLEFIELDEVENT_ELEMENT, FIELDREVISION_ATTRIBUTE,
-		        true);
-		long objectRev = getRevision(xml, XREVERSIBLEFIELDEVENT_ELEMENT, OBJECTREVISION_ATTRIBUTE,
-		        false);
-		long modelRev = trans != null ? trans.modelRev : getRevision(xml,
-		        XREVERSIBLEFIELDEVENT_ELEMENT, MODELREVISION_ATTRIBUTE, false);
+		long fieldRev = getRevision(element, FIELDREVISION_ATTRIBUTE, true);
+		long objectRev = getRevision(element, OBJECTREVISION_ATTRIBUTE, false);
+		long modelRev = trans != null ? trans.modelRev : getRevision(element,
+		        MODELREVISION_ATTRIBUTE, false);
 		
-		XID actor = trans != null ? trans.actor : SerializingUtils.getOptionalXidAttribute(xml,
+		XID actor = trans != null ? trans.actor : SerializingUtils.getOptionalXidAttribute(element,
 		        ACTOR_ATTRIBUTE, null);
-		boolean inTransaction = trans != null || getInTransactionAttribute(xml);
+		boolean inTransaction = trans != null || getInTransactionAttribute(element);
 		
 		XValue oldValue = null;
 		XValue newValue = null;
-		Iterator<MiniElement> it = xml.getChildren(NAME_VALUES);
+		int idx = 0;
 		if(type != ChangeType.ADD) {
-			oldValue = loadValue(it, "old");
+			oldValue = SerializedValue.toValue(element.getChild(NAME_OLD_VALUE, idx));
+			idx++;
 			assert oldValue != null;
 		}
 		if(type != ChangeType.REMOVE) {
-			newValue = loadValue(it, "new");
+			newValue = SerializedValue.toValue(element.getChild(NAME_VALUE, idx));
 			assert newValue != null;
-		}
-		if(it.hasNext()) {
-			throw new IllegalArgumentException("Invalid child of <" + XREVERSIBLEFIELDEVENT_ELEMENT
-			        + ">: <" + it.next().getType() + ">");
 		}
 		
 		if(type == ChangeType.ADD) {
@@ -293,44 +268,42 @@ public class SerializedEvent {
 			return MemoryReversibleFieldEvent.createChangeEvent(actor, target, oldValue, newValue,
 			        modelRev, objectRev, fieldRev, inTransaction);
 		} else if(type == ChangeType.REMOVE) {
-			boolean implied = getImpliedAttribute(xml);
+			boolean implied = getImpliedAttribute(element);
 			return MemoryReversibleFieldEvent.createRemoveEvent(actor, target, oldValue, modelRev,
 			        objectRev, fieldRev, inTransaction, implied);
 		} else {
-			throw new IllegalArgumentException("<" + XREVERSIBLEFIELDEVENT_ELEMENT + ">@"
-			        + SerializingUtils.TYPE_ATTRIBUTE
+			throw new ParsingError(element, "Attribute " + SerializingUtils.TYPE_ATTRIBUTE
 			        + " does not contain a valid type for field events, but '" + type + "'");
 		}
 	}
 	
-	private static XModelEvent toModelEvent(MiniElement xml, XAddress context, TempTrans trans) {
+	private static XModelEvent toModelEvent(MiniElement element, XAddress context, TempTrans trans) {
 		
 		if(context != null && (context.getObject() != null || context.getField() != null)) {
 			throw new IllegalArgumentException("invalid context for model events: " + context);
 		}
 		
-		XAddress address = SerializingUtils.getTarget(xml, context);
+		XAddress address = SerializingUtils.getAddress(element, context);
 		
 		if(address.getModel() == null) {
-			throw new IllegalArgumentException("<" + XMODELEVENT_ELEMENT + ">@"
-			        + SerializingUtils.MODELID_ATTRIBUTE + " is missing");
+			throw new ParsingError(element, "Missing attribute "
+			        + SerializingUtils.MODELID_ATTRIBUTE);
 		}
 		
 		if(address.getObject() == null) {
-			throw new IllegalArgumentException("<" + XMODELEVENT_ELEMENT + ">@"
-			        + SerializingUtils.OBJECTID_ATTRIBUTE + " is missing");
+			throw new ParsingError(element, "Missing attribute "
+			        + SerializingUtils.OBJECTID_ATTRIBUTE);
 		}
 		
-		ChangeType type = SerializingUtils.getChangeType(xml, XMODELEVENT_ELEMENT);
+		ChangeType type = SerializingUtils.getChangeType(element);
 		
-		long objectRev = getRevision(xml, XMODELEVENT_ELEMENT, OBJECTREVISION_ATTRIBUTE,
-		        type == ChangeType.REMOVE);
-		long modelRev = trans != null ? trans.modelRev : getRevision(xml, XMODELEVENT_ELEMENT,
+		long objectRev = getRevision(element, OBJECTREVISION_ATTRIBUTE, type == ChangeType.REMOVE);
+		long modelRev = trans != null ? trans.modelRev : getRevision(element,
 		        MODELREVISION_ATTRIBUTE, true);
 		
-		XID actor = trans != null ? trans.actor : SerializingUtils.getOptionalXidAttribute(xml,
+		XID actor = trans != null ? trans.actor : SerializingUtils.getOptionalXidAttribute(element,
 		        ACTOR_ATTRIBUTE, null);
-		boolean inTransaction = trans != null || getInTransactionAttribute(xml);
+		boolean inTransaction = trans != null || getInTransactionAttribute(element);
 		
 		XAddress target = address.getParent();
 		XID objectId = address.getObject();
@@ -339,45 +312,43 @@ public class SerializedEvent {
 			return MemoryModelEvent
 			        .createAddEvent(actor, target, objectId, modelRev, inTransaction);
 		} else if(type == ChangeType.REMOVE) {
-			boolean implied = getImpliedAttribute(xml);
+			boolean implied = getImpliedAttribute(element);
 			return MemoryModelEvent.createRemoveEvent(actor, target, objectId, modelRev, objectRev,
 			        inTransaction, implied);
 		} else {
-			throw new IllegalArgumentException("<" + XMODELEVENT_ELEMENT + ">@"
-			        + SerializingUtils.TYPE_ATTRIBUTE
+			throw new ParsingError(element, "Attribute " + SerializingUtils.TYPE_ATTRIBUTE
 			        + " does not contain a valid type for model events, but '" + type + "'");
 		}
 	}
 	
-	private static XObjectEvent toObjectEvent(MiniElement xml, XAddress context, TempTrans trans) {
+	private static XObjectEvent toObjectEvent(MiniElement element, XAddress context, TempTrans trans) {
 		
 		if(context != null && context.getField() != null) {
 			throw new IllegalArgumentException("invalid context for object events: " + context);
 		}
 		
-		XAddress address = SerializingUtils.getTarget(xml, context);
+		XAddress address = SerializingUtils.getAddress(element, context);
 		
 		if(address.getObject() == null) {
-			throw new IllegalArgumentException("<" + XOBJECTEVENT_ELEMENT + ">@"
-			        + SerializingUtils.OBJECTID_ATTRIBUTE + " is missing");
+			throw new ParsingError(element, "Missing attribute "
+			        + SerializingUtils.OBJECTID_ATTRIBUTE);
 		}
 		
 		if(address.getField() == null) {
-			throw new IllegalArgumentException("<" + XOBJECTEVENT_ELEMENT + ">@"
-			        + SerializingUtils.FIELDID_ATTRIBUTE + " is missing");
+			throw new ParsingError(element, "Missing attribute "
+			        + SerializingUtils.FIELDID_ATTRIBUTE);
 		}
 		
-		ChangeType type = SerializingUtils.getChangeType(xml, XOBJECTEVENT_ELEMENT);
+		ChangeType type = SerializingUtils.getChangeType(element);
 		
-		long fieldRev = getRevision(xml, XOBJECTEVENT_ELEMENT, FIELDREVISION_ATTRIBUTE,
-		        type == ChangeType.REMOVE);
-		long objectRev = getRevision(xml, XOBJECTEVENT_ELEMENT, OBJECTREVISION_ATTRIBUTE, true);
-		long modelRev = trans != null ? trans.modelRev : getRevision(xml, XOBJECTEVENT_ELEMENT,
+		long fieldRev = getRevision(element, FIELDREVISION_ATTRIBUTE, type == ChangeType.REMOVE);
+		long objectRev = getRevision(element, OBJECTREVISION_ATTRIBUTE, true);
+		long modelRev = trans != null ? trans.modelRev : getRevision(element,
 		        MODELREVISION_ATTRIBUTE, false);
 		
-		XID actor = trans != null ? trans.actor : SerializingUtils.getOptionalXidAttribute(xml,
+		XID actor = trans != null ? trans.actor : SerializingUtils.getOptionalXidAttribute(element,
 		        ACTOR_ATTRIBUTE, null);
-		boolean inTransaction = trans != null || getInTransactionAttribute(xml);
+		boolean inTransaction = trans != null || getInTransactionAttribute(element);
 		
 		XAddress target = address.getParent();
 		XID fieldId = address.getField();
@@ -386,43 +357,42 @@ public class SerializedEvent {
 			return MemoryObjectEvent.createAddEvent(actor, target, fieldId, modelRev, objectRev,
 			        inTransaction);
 		} else if(type == ChangeType.REMOVE) {
-			boolean implied = getImpliedAttribute(xml);
+			boolean implied = getImpliedAttribute(element);
 			return MemoryObjectEvent.createRemoveEvent(actor, target, fieldId, modelRev, objectRev,
 			        fieldRev, inTransaction, implied);
 		} else {
-			throw new IllegalArgumentException("<" + XOBJECTEVENT_ELEMENT + ">@"
-			        + SerializingUtils.TYPE_ATTRIBUTE
+			throw new ParsingError(element, "Attribute " + SerializingUtils.TYPE_ATTRIBUTE
 			        + " does not contain a valid type for object events, but '" + type + "'");
 		}
 	}
 	
-	private static XRepositoryEvent toRepositoryEvent(MiniElement xml, XAddress context,
+	private static XRepositoryEvent toRepositoryEvent(MiniElement element, XAddress context,
 	        TempTrans trans) {
 		
 		if(context != null && (context.getObject() != null || context.getField() != null)) {
 			throw new IllegalArgumentException("invalid context for model events: " + context);
 		}
 		
-		XAddress address = SerializingUtils.getTarget(xml, context);
+		XAddress address = SerializingUtils.getAddress(element, context);
 		
 		if(address.getRepository() == null) {
-			throw new IllegalArgumentException("<" + XREPOSITORYEVENT_ELEMENT + ">@"
+			throw new ParsingError(element, "Missing attribute "
 			        + SerializingUtils.REPOSITORYID_ATTRIBUTE + " is missing");
 		}
 		
 		if(address.getModel() == null) {
-			throw new IllegalArgumentException("<" + XREPOSITORYEVENT_ELEMENT + ">@"
+			throw new ParsingError(element, "Missing attribute "
 			        + SerializingUtils.MODELID_ATTRIBUTE + " is missing");
 		}
 		
-		ChangeType type = SerializingUtils.getChangeType(xml, XREPOSITORYEVENT_ELEMENT);
+		ChangeType type = SerializingUtils.getChangeType(element);
 		
-		long modelRev = trans != null ? trans.modelRev : getRevision(xml, XREPOSITORYEVENT_ELEMENT,
+		long modelRev = trans != null ? trans.modelRev : getRevision(element,
 		        MODELREVISION_ATTRIBUTE, type == ChangeType.REMOVE);
 		
-		XID actor = trans != null ? trans.actor : SerializingUtils.getOptionalXidAttribute(xml,
+		XID actor = trans != null ? trans.actor : SerializingUtils.getOptionalXidAttribute(element,
 		        ACTOR_ATTRIBUTE, null);
-		boolean inTransaction = trans != null || getInTransactionAttribute(xml);
+		boolean inTransaction = trans != null || getInTransactionAttribute(element);
 		
 		XAddress target = address.getParent();
 		XID modelId = address.getModel();
@@ -434,8 +404,7 @@ public class SerializedEvent {
 			return MemoryRepositoryEvent.createRemoveEvent(actor, target, modelId, modelRev,
 			        inTransaction);
 		} else {
-			throw new IllegalArgumentException("<" + XREPOSITORYEVENT_ELEMENT + ">@"
-			        + SerializingUtils.TYPE_ATTRIBUTE
+			throw new ParsingError(element, "Atribute " + SerializingUtils.TYPE_ATTRIBUTE
 			        + " does not contain a valid type for repository events, but '" + type + "'");
 		}
 	}
@@ -452,26 +421,23 @@ public class SerializedEvent {
 		
 	}
 	
-	private static XTransactionEvent toTransactionEvent(MiniElement xml, XAddress context) {
+	private static XTransactionEvent toTransactionEvent(MiniElement element, XAddress context) {
 		
-		XAddress target = SerializingUtils.getTarget(xml, context);
+		XAddress target = SerializingUtils.getAddress(element, context);
 		
 		if(target.getField() != null || (target.getModel() == null && target.getObject() == null)) {
-			throw new IllegalArgumentException("TransactionEvent element " + xml
-			        + " does not specify a model or object target.");
+			throw new ParsingError(element, "Missing model or object target.");
 		}
 		
-		long objectRev = getRevision(xml, XFIELDEVENT_ELEMENT, OBJECTREVISION_ATTRIBUTE, target
-		        .getObject() != null);
-		long modelRev = getRevision(xml, XFIELDEVENT_ELEMENT, MODELREVISION_ATTRIBUTE, target
-		        .getObject() == null);
+		long objectRev = getRevision(element, OBJECTREVISION_ATTRIBUTE, target.getObject() != null);
+		long modelRev = getRevision(element, MODELREVISION_ATTRIBUTE, target.getObject() == null);
 		
-		XID actor = SerializingUtils.getOptionalXidAttribute(xml, ACTOR_ATTRIBUTE, null);
+		XID actor = SerializingUtils.getOptionalXidAttribute(element, ACTOR_ATTRIBUTE, null);
 		
 		TempTrans tt = new TempTrans(actor, modelRev);
 		
 		List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
-		Iterator<MiniElement> it = xml.getChildren(NAME_EVENTS);
+		Iterator<MiniElement> it = element.getChildren(NAME_EVENTS);
 		while(it.hasNext()) {
 			MiniElement event = it.next();
 			events.add(toAtomicEvent(event, target, tt));
@@ -482,65 +448,66 @@ public class SerializedEvent {
 	}
 	
 	/**
-	 * Encode the given {@link XEvent} list as an XML element.
+	 * Encode the given {@link XEvent} list as an XML/JSON element.
 	 * 
 	 * @param events The events to encode.
-	 * @param out The XML encoder to write to.
+	 * @param out The XML/JSON encoder to write to.
 	 * @param context The part of this event's target address that doesn't need
 	 *            to be encoded in the element.
 	 */
-	public static void toXml(Iterator<XEvent> events, XydraOut out, XAddress context)
+	public static void serialize(Iterator<XEvent> events, XydraOut out, XAddress context)
 	        throws IllegalArgumentException {
 		
 		out.open(XEVENTLIST_ELEMENT);
 		
-		out.children(NAME_EVENTS, true);
+		out.beginChildren(NAME_EVENTS, true);
 		while(events.hasNext()) {
-			toXml(events.next(), out, context);
+			serialize(events.next(), out, context);
 		}
+		out.endChildren();
 		
 		out.close(XEVENTLIST_ELEMENT);
 		
 	}
 	
 	/**
-	 * Encode the given {@link XEvent} as an XML element.
+	 * Encode the given {@link XEvent} as an XML/JSON element.
 	 * 
 	 * @param event The event to encode.
-	 * @param out The XML encoder to write to.
+	 * @param out The XML/JSON encoder to write to.
 	 * @param context The part of this event's target address that doesn't need
 	 *            to be encoded in the element.
 	 */
-	public static void toXml(XEvent event, XydraOut out, XAddress context)
+	public static void serialize(XEvent event, XydraOut out, XAddress context)
 	        throws IllegalArgumentException {
 		if(event == null) {
-			SerializedValue.saveNullElement(out);
+			out.nullElement();
 		} else if(event instanceof XTransactionEvent) {
-			toXml((XTransactionEvent)event, out, context);
+			serialize((XTransactionEvent)event, out, context);
 		} else {
-			toXml((XAtomicEvent)event, out, context, false);
+			serialize((XAtomicEvent)event, out, context, false);
 		}
 	}
 	
-	private static void toXml(XAtomicEvent event, XydraOut out, XAddress context, boolean inTrans)
-	        throws IllegalArgumentException {
+	private static void serialize(XAtomicEvent event, XydraOut out, XAddress context,
+	        boolean inTrans) throws IllegalArgumentException {
 		if(event instanceof XReversibleFieldEvent) {
-			toXml((XReversibleFieldEvent)event, out, context, inTrans);
+			serialize((XReversibleFieldEvent)event, out, context, inTrans);
 		} else if(event instanceof XFieldEvent) {
-			toXml((XFieldEvent)event, out, context, inTrans);
+			serialize((XFieldEvent)event, out, context, inTrans);
 		} else if(event instanceof XObjectEvent) {
-			toXml((XObjectEvent)event, out, context, inTrans);
+			serialize((XObjectEvent)event, out, context, inTrans);
 		} else if(event instanceof XModelEvent) {
-			toXml((XModelEvent)event, out, context, inTrans);
+			serialize((XModelEvent)event, out, context, inTrans);
 		} else if(event instanceof XRepositoryEvent) {
-			toXml((XRepositoryEvent)event, out, context, inTrans);
+			serialize((XRepositoryEvent)event, out, context, inTrans);
 		} else {
 			throw new RuntimeException("event " + event + " is of unexpected type: "
 			        + event.getClass());
 		}
 	}
 	
-	private static void toXml(XFieldEvent event, XydraOut out, XAddress context, boolean inTrans)
+	private static void serialize(XFieldEvent event, XydraOut out, XAddress context, boolean inTrans)
 	        throws IllegalArgumentException {
 		
 		out.open(XFIELDEVENT_ELEMENT);
@@ -548,34 +515,38 @@ public class SerializedEvent {
 		setAtomicEventAttributes(event, out, context, inTrans);
 		
 		if(event.getChangeType() != ChangeType.REMOVE) {
-			out.children(NAME_VALUE, false);
-			SerializedValue.toXml(event.getNewValue(), out);
+			out.beginChildren(NAME_VALUE, false);
+			SerializedValue.serialize(event.getNewValue(), out);
+			out.endChildren();
 		}
 		
 		out.close(XFIELDEVENT_ELEMENT);
 		
 	}
 	
-	private static void toXml(XReversibleFieldEvent event, XydraOut out, XAddress context,
+	private static void serialize(XReversibleFieldEvent event, XydraOut out, XAddress context,
 	        boolean inTrans) throws IllegalArgumentException {
 		
 		out.open(XREVERSIBLEFIELDEVENT_ELEMENT);
 		
 		setAtomicEventAttributes(event, out, context, inTrans);
 		
-		out.children(NAME_VALUES, true);
 		if(event.getChangeType() != ChangeType.ADD) {
-			SerializedValue.toXml(event.getOldValue(), out);
+			out.beginChildren(NAME_OLD_VALUE, false);
+			SerializedValue.serialize(event.getOldValue(), out);
+			out.endChildren();
 		}
 		if(event.getChangeType() != ChangeType.REMOVE) {
-			SerializedValue.toXml(event.getNewValue(), out);
+			out.beginChildren(NAME_VALUE, false);
+			SerializedValue.serialize(event.getNewValue(), out);
+			out.endChildren();
 		}
 		
 		out.close(XREVERSIBLEFIELDEVENT_ELEMENT);
 		
 	}
 	
-	private static void toXml(XModelEvent event, XydraOut out, XAddress context, boolean inTrans)
+	private static void serialize(XModelEvent event, XydraOut out, XAddress context, boolean inTrans)
 	        throws IllegalArgumentException {
 		
 		if(context != null && (context.getObject() != null || context.getField() != null)) {
@@ -583,33 +554,25 @@ public class SerializedEvent {
 		}
 		
 		out.open(XMODELEVENT_ELEMENT);
-		
 		setAtomicEventAttributes(event, out, context, inTrans);
-		
-		out.attribute(SerializingUtils.OBJECTID_ATTRIBUTE, event.getObjectId());
-		
 		out.close(XMODELEVENT_ELEMENT);
 		
 	}
 	
-	private static void toXml(XObjectEvent event, XydraOut out, XAddress context, boolean inTrans)
-	        throws IllegalArgumentException {
+	private static void serialize(XObjectEvent event, XydraOut out, XAddress context,
+	        boolean inTrans) throws IllegalArgumentException {
 		
 		if(context != null && context.getField() != null) {
 			throw new IllegalArgumentException("invalid context for object events: " + context);
 		}
 		
 		out.open(XOBJECTEVENT_ELEMENT);
-		
 		setAtomicEventAttributes(event, out, context, inTrans);
-		
-		out.attribute(SerializingUtils.FIELDID_ATTRIBUTE, event.getFieldId());
-		
 		out.close(XOBJECTEVENT_ELEMENT);
 		
 	}
 	
-	private static void toXml(XRepositoryEvent event, XydraOut out, XAddress context,
+	private static void serialize(XRepositoryEvent event, XydraOut out, XAddress context,
 	        boolean inTrans) throws IllegalArgumentException {
 		
 		if(context != null && (context.getObject() != null || context.getField() != null)) {
@@ -617,16 +580,12 @@ public class SerializedEvent {
 		}
 		
 		out.open(XREPOSITORYEVENT_ELEMENT);
-		
 		setAtomicEventAttributes(event, out, context, inTrans);
-		
-		out.attribute(SerializingUtils.MODELID_ATTRIBUTE, event.getModelId());
-		
 		out.close(XREPOSITORYEVENT_ELEMENT);
 		
 	}
 	
-	private static void toXml(XTransactionEvent trans, XydraOut out, XAddress context)
+	private static void serialize(XTransactionEvent trans, XydraOut out, XAddress context)
 	        throws IllegalArgumentException {
 		
 		out.open(XTRANSACTIONEVENT_ELEMENT);
@@ -635,11 +594,12 @@ public class SerializedEvent {
 		
 		XAddress newContext = trans.getTarget();
 		
-		out.children(NAME_EVENTS, true);
+		out.beginChildren(NAME_EVENTS, true);
 		for(XAtomicEvent event : trans) {
 			assert event != null;
-			toXml(event, out, newContext, true);
+			serialize(event, out, newContext, true);
 		}
+		out.endChildren();
 		
 		out.close(XTRANSACTIONEVENT_ELEMENT);
 		

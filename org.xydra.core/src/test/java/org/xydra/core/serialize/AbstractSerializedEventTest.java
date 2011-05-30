@@ -334,7 +334,7 @@ abstract public class AbstractSerializedEventTest {
 	private void testEvent(XEvent event) {
 		
 		XydraOut out = getNewOut();
-		SerializedEvent.toXml(event, out, null);
+		SerializedEvent.serialize(event, out, null);
 		assertTrue(out.isClosed());
 		String xml = out.getData();
 		
@@ -347,7 +347,7 @@ abstract public class AbstractSerializedEventTest {
 		// now test with a different context
 		
 		out = getNewOut();
-		SerializedEvent.toXml(event, out, event.getTarget());
+		SerializedEvent.serialize(event, out, event.getTarget());
 		assertTrue(out.isClosed());
 		xml = out.getData();
 		

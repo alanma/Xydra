@@ -48,23 +48,19 @@ public class SerializedAccess {
 	public static XAccessRightDefinition toAccessDefinition(MiniElement xml)
 	        throws IllegalArgumentException {
 		
-		SerializingUtils.checkElementName(xml, XACCESSDEFINITION_ELEMENT);
+		SerializingUtils.checkElementType(xml, XACCESSDEFINITION_ELEMENT);
 		
-		Object actorStr = SerializingUtils.getRequiredAttribute(xml, ACTOR_ATTRIBUTE,
-		        XACCESSDEFINITION_ELEMENT);
+		Object actorStr = SerializingUtils.getRequiredAttribute(xml, ACTOR_ATTRIBUTE);
 		XID actor = actorStr == null ? null : XX.toId(actorStr.toString());
 		
-		Object resourceStr = SerializingUtils.getRequiredAttribute(xml, RESOURCE_ATTRIBUTE,
-		        XACCESSDEFINITION_ELEMENT);
+		Object resourceStr = SerializingUtils.getRequiredAttribute(xml, RESOURCE_ATTRIBUTE);
 		XAddress resource = XX.toAddress(resourceStr.toString());
 		
-		Object accessStr = SerializingUtils.getRequiredAttribute(xml, ACCESS_ATTRIBUTE,
-		        XACCESSDEFINITION_ELEMENT);
+		Object accessStr = SerializingUtils.getRequiredAttribute(xml, ACCESS_ATTRIBUTE);
 		XID access = XX.toId(accessStr.toString());
 		
-		Object allowedStr = SerializingUtils.getRequiredAttribute(xml, ALLOWED_ATTRIBUTE,
-		        XACCESSDEFINITION_ELEMENT);
-		boolean allowed = SerializedValue.toBoolean(allowedStr);
+		Object allowedStr = SerializingUtils.getRequiredAttribute(xml, ALLOWED_ATTRIBUTE);
+		boolean allowed = SerializingUtils.toBoolean(allowedStr);
 		
 		return new MemoryAccessDefinition(access, resource, actor, allowed);
 	}
@@ -80,12 +76,11 @@ public class SerializedAccess {
 	public static List<XAccessRightDefinition> toAccessDefinitionList(MiniElement xml)
 	        throws IllegalArgumentException {
 		
-		SerializingUtils.checkElementName(xml, XACCESSDEFS_ELEMENT);
+		SerializingUtils.checkElementType(xml, XACCESSDEFS_ELEMENT);
 		
 		List<XAccessRightDefinition> result = new ArrayList<XAccessRightDefinition>();
 		
-		Iterator<MiniElement> it = xml.getChildrenByType(NAME_DEFINITIONS,
-		        XACCESSDEFINITION_ELEMENT);
+		Iterator<MiniElement> it = xml.getChildren(NAME_DEFINITIONS, XACCESSDEFINITION_ELEMENT);
 		while(it.hasNext()) {
 			result.add(toAccessDefinition(it.next()));
 		}
@@ -103,12 +98,11 @@ public class SerializedAccess {
 	public static XAuthorisationManager toAccessManager(MiniElement xml,
 	        XGroupDatabaseWithListeners groups) throws IllegalArgumentException {
 		
-		SerializingUtils.checkElementName(xml, XACCESSDEFS_ELEMENT);
+		SerializingUtils.checkElementType(xml, XACCESSDEFS_ELEMENT);
 		
 		XAuthorisationManager arm = new MemoryAuthorisationManager(groups);
 		
-		Iterator<MiniElement> it = xml.getChildrenByType(NAME_DEFINITIONS,
-		        XACCESSDEFINITION_ELEMENT);
+		Iterator<MiniElement> it = xml.getChildren(NAME_DEFINITIONS, XACCESSDEFINITION_ELEMENT);
 		while(it.hasNext()) {
 			XAccessRightDefinition def = toAccessDefinition(it.next());
 			arm.getAuthorisationDatabase().setAccess(def.getActor(), def.getResource(),
@@ -128,10 +122,11 @@ public class SerializedAccess {
 		
 		out.open(XACCESSDEFS_ELEMENT);
 		
-		out.children(NAME_DEFINITIONS, true, XACCESSDEFINITION_ELEMENT);
+		out.beginChildren(NAME_DEFINITIONS, true, XACCESSDEFINITION_ELEMENT);
 		for(XAccessRightDefinition def : defs) {
 			toXml(def, out);
 		}
+		out.endChildren();
 		
 		out.close(XACCESSDEFS_ELEMENT);
 		
@@ -149,8 +144,9 @@ public class SerializedAccess {
 		
 		out.attribute(ACCESS_ATTRIBUTE, def.getAccess());
 		out.attribute(RESOURCE_ATTRIBUTE, def.getResource());
-		if(def.getActor() != null)
+		if(def.getActor() != null) {
 			out.attribute(ACTOR_ATTRIBUTE, def.getActor());
+		}
 		out.attribute(ALLOWED_ATTRIBUTE, def.isAllowed());
 		
 		out.close(XACCESSDEFINITION_ELEMENT);

@@ -5,7 +5,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.change.XCommand;
-import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.core.serialize.MiniElement;
 import org.xydra.core.serialize.MiniParser;
 import org.xydra.core.serialize.SerializedCommand;
@@ -29,15 +28,14 @@ public class XRepositoryChangesResource {
 		
 		String commandXml = XydraRestServer.readPostData(req);
 		
-		XRepositoryCommand command;
+		XCommand command;
 		try {
 			
 			MiniParser parser = new MiniParserXml();
 			MiniElement commandElement = parser.parse(commandXml);
 			
 			XAddress repoAddr = session.getRepositoryAddress();
-			command = SerializedCommand.toRepositoryCommand(commandElement, repoAddr);
-			// TODO allow other command types?
+			command = SerializedCommand.toCommand(commandElement, repoAddr);
 			
 		} catch(IllegalArgumentException iae) {
 			throw new RestlessException(RestlessException.Bad_request,

@@ -36,7 +36,7 @@ public class SimpleSyntaxUtilsTest {
 	
 	public static final String toXml(XReadableModel model) {
 		XydraOut out = new XmlOut();
-		SerializedModel.toXml(model, out, true, false, true);
+		SerializedModel.serialize(model, out, true, false, true);
 		return out.getData();
 	}
 	

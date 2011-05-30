@@ -61,4 +61,10 @@ public interface XCollectionValue<E> extends XValue, Iterable<E> {
 	 */
 	E[] toArray();
 	
+	/**
+	 * @return The type for an {@link XValue} that would wrap a single component
+	 *         of this value.
+	 */
+	ValueType getComponentType();
+	
 }

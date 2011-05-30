@@ -57,7 +57,12 @@ public class MemoryIDSetValue extends MemorySetValue<XID> implements XIDSetValue
 	
 	@Override
 	public ValueType getType() {
-		return ValueType.XIDSet;
+		return ValueType.IdSet;
+	}
+	
+	@Override
+	public ValueType getComponentType() {
+		return ValueType.Id;
 	}
 	
 }

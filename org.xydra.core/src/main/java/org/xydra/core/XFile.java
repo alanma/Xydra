@@ -179,7 +179,7 @@ public class XFile {
 		FileOutputStream fos = new FileOutputStream(file);
 		
 		XydraOut out = new XmlOut(new MiniStreamWriter(fos));
-		SerializedModel.toXml(model, out, true, false, true);
+		SerializedModel.serialize(model, out, true, false, true);
 		
 		fos.close();
 	}
@@ -221,7 +221,7 @@ public class XFile {
 		FileOutputStream fos = new FileOutputStream(file);
 		
 		XydraOut out = new XmlOut(new MiniStreamWriter(fos));
-		SerializedModel.toXml(repository, out, true, false, true);
+		SerializedModel.serialize(repository, out, true, false, true);
 		
 		fos.close();
 	}

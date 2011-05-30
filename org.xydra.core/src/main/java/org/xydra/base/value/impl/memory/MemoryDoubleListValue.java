@@ -123,4 +123,9 @@ public class MemoryDoubleListValue extends MemoryListValue<Double> implements XD
 		return ValueType.DoubleList;
 	}
 	
+	@Override
+	public ValueType getComponentType() {
+		return ValueType.Double;
+	}
+	
 }

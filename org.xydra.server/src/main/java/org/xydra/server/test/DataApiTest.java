@@ -257,7 +257,7 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		model.removeObject(DemoModelUtil.PETER_ID);
 		
 		XydraOut out = new XmlOut();
-		SerializedModel.toXml(model, out, false, false, false);
+		SerializedModel.serialize(model, out, false, false, false);
 		postDataAndExpectHttpCreatedResponse(dataapi.toURL(), out.getData());
 		
 		XModel updatedModel = getRemoteModel(DemoModelUtil.PHONEBOOK_ID);
@@ -299,7 +299,7 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		phone.setValue(XV.toValue("342-170984-7892"));
 		
 		XydraOut out = new XmlOut();
-		SerializedModel.toXml(john, out, false, false, false);
+		SerializedModel.serialize(john, out, false, false, false);
 		postDataAndExpectHttpCreatedResponse(dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toString())
 		        .toURL(), out.getData());
 		
@@ -336,7 +336,7 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		phone.setValue(XV.toValue("342-170984-7892"));
 		
 		XydraOut out = new XmlOut();
-		SerializedModel.toXml(phone, out, false);
+		SerializedModel.serialize(phone, out, false);
 		postDataAndExpectHttpCreatedResponse(dataapi.resolve(
 		        DemoModelUtil.PHONEBOOK_ID.toString() + "/").resolve(
 		        DemoModelUtil.JOHN_ID.toString()).toURL(), out.getData());

@@ -370,7 +370,7 @@ public class GaeEvents {
 					valueIds[i] = TRANSINDEX_NONE;
 				} else {
 					XydraOut out = new XmlOut(false);
-					SerializedValue.toXml(xv, out);
+					SerializedValue.serialize(xv, out);
 					String valueStr = out.getData();
 					Text value = new Text(valueStr);
 					

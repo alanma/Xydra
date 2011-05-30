@@ -6,7 +6,7 @@ package org.xydra.base.value;
  * @author Kaidel
  * 
  */
-public interface XIntegerValue extends XNumberValue {
+public interface XIntegerValue extends XNumberValue, XSingleValue<Integer> {
 	
 	/**
 	 * Returns the stored integer value.

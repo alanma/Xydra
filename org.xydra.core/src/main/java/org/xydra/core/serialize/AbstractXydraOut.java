@@ -4,10 +4,16 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
 
+import org.xydra.annotations.RequiresAppEngine;
+import org.xydra.annotations.RunsInAppEngine;
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.minio.MiniStringWriter;
 import org.xydra.minio.MiniWriter;
 
 
+@RunsInGWT(true)
+@RunsInAppEngine(true)
+@RequiresAppEngine(false)
 abstract public class AbstractXydraOut implements XydraOut {
 	
 	protected final MiniWriter writer;
@@ -30,7 +36,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 	}
 	
 	protected enum Type {
-		Element, Children, Text, Root, Child
+		Element, Children, Text, Root, Child, Array
 	}
 	
 	protected static class Frame {
@@ -97,9 +103,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 		
 		if(element.type != Type.Element) {
 			error("cannot only set attributes on elements");
-		}
-		
-		if(element.hasContent()) {
+		} else if(element.hasContent()) {
 			error("cannot set attribute for element that already has content");
 		}
 		
@@ -113,37 +117,45 @@ abstract public class AbstractXydraOut implements XydraOut {
 	
 	protected abstract <T> void outputAttribute(Frame element, String name, T value);
 	
-	@Override
-	public void open(String name) {
+	public void nullElement() {
 		
 		Frame container = getCurrent();
 		
-		if(container.element != null && !container.element.equals(name)) {
-			if(container.type == Type.Child) {
-				error("missing child element, cannot open element" + name);
-				this.stack.pop();
-				container = this.stack.peek();
-			} else if(container.type == Type.Children) {
-				Frame children = container;
-				assert !this.stack.empty();
-				this.stack.pop();
-				container = this.stack.peek();
-				outputEndChildren(container, children);
-			}
-		}
-		
 		if(container.type == Type.Element) {
-			recordName(container, name);
-			if(!container.hasContent()) {
-				outputElementBeginContent(container);
-			}
+			error("must cannot add null element without a name for children");
 		} else if(container.type == Type.Text) {
 			error("cannot add children once text has been set");
 		} else if(container.type == Type.Child && container.hasContent()) {
 			error("must declare beforehand to add multiple children");
 		}
 		
-		Frame current = new Frame(Type.Element, name);
+		outputNullElement(container);
+		
+		container.contentType = Type.Element;
+		
+		closedChild(container);
+	}
+	
+	protected abstract void outputNullElement(Frame container);
+	
+	@Override
+	public void open(String type) {
+		
+		Frame container = getCurrent();
+		
+		if(container.element != null && !container.element.equals(type)) {
+			error("error mismatched child type: " + type);
+		} else if(container.contentType == Type.Root) {
+			error("cannot add content to element after adding type-less children");
+		} else if(container.type == Type.Element) {
+			recordName(container, type);
+		} else if(container.type == Type.Text) {
+			error("cannot add children once text has been set");
+		} else if(container.type == Type.Child && container.hasContent()) {
+			error("must declare beforehand to add multiple children");
+		}
+		
+		Frame current = new Frame(Type.Element, type);
 		this.stack.push(current);
 		
 		outputOpenElement(container, current);
@@ -156,35 +168,31 @@ abstract public class AbstractXydraOut implements XydraOut {
 	
 	protected abstract void outputOpenElement(Frame container, Frame element);
 	
-	protected abstract void outputElementBeginContent(Frame element);
-	
 	@Override
-	public <T> void value(String type, T value) {
+	public <T> void value(T value) {
 		
 		Frame container = getCurrent();
 		
 		if(container.type != Type.Children && container.type != Type.Child) {
 			error("can only add values to child lists");
-		}
-		
-		if(container.type == Type.Child && container.hasContent()) {
+		} else if(container.type == Type.Child && container.hasContent()) {
 			error("must declare beforehand to add multiple children");
 		}
 		
-		outputValue(container, type, value);
+		outputValue(container, value);
 		
 		container.nAttributes++;
 	}
 	
-	protected abstract <T> void outputValue(Frame container, String type, T value);
+	protected abstract <T> void outputValue(Frame container, T value);
 	
 	@Override
-	public void children(String name, boolean multiple) {
-		children(name, multiple, null);
+	public void beginChildren(String name, boolean multiple) {
+		beginChildren(name, multiple, null);
 	}
 	
 	@Override
-	public void children(String name, boolean multiple, String type) {
+	public void beginChildren(String name, boolean multiple, String type) {
 		
 		Frame element = getCurrent();
 		
@@ -192,10 +200,13 @@ abstract public class AbstractXydraOut implements XydraOut {
 			error("can only start child list once");
 		} else if(element.type == Type.Text) {
 			error("cannot add children once content has been set");
+		} else if(element.type == Type.Array) {
+			error("cannot add children to array");
 		} else if(element.type == Type.Root) {
 			error("must open root element before starting children");
-		} else if(element.hasContent()) {
-			error("must not add a child list after adding children");
+		} else if((multiple && type == null) ? element.hasContent()
+		        : element.contentType == Type.Root) {
+			error("must not add untyped child list after adding children");
 		}
 		assert element.type == Type.Element;
 		
@@ -204,37 +215,50 @@ abstract public class AbstractXydraOut implements XydraOut {
 		Frame children = new Frame(multiple ? Type.Children : Type.Child, name, type);
 		this.stack.push(children);
 		
-		outputElementBeginContent(element);
 		if(multiple) {
 			outputBeginChildren(element, children);
 		} else {
 			outputBeginChild(element, children);
 		}
 		
-		element.contentType = children.type;
+		element.contentType = (type == null && multiple) ? Type.Root : children.type;
 	}
 	
 	protected abstract void outputBeginChildren(Frame element, Frame children);
 	
 	protected abstract void outputBeginChild(Frame element, Frame child);
 	
-	@Override
-	public void close(String name) {
+	public void endChildren() {
 		
-		Frame current = getCurrent();
+		Frame children = getCurrent();
 		
-		if(current.type == Type.Child) {
-			if(!current.hasContent()) {
+		if(children.type != Type.Child && children.type != Type.Children) {
+			error("no children are open");
+		}
+		
+		if(children.type == Type.Child) {
+			if(!children.hasContent()) {
 				error("missing child element");
 			}
 			this.stack.pop();
-			current = this.stack.peek();
-		} else if(current.type == Type.Children) {
-			Frame children = current;
+		} else {
 			assert !this.stack.empty();
 			this.stack.pop();
-			current = this.stack.peek();
-			outputEndChildren(current, children);
+			outputEndChildren(this.stack.peek(), children);
+		}
+		
+	}
+	
+	abstract protected void outputEndChildren(Frame element, Frame children);
+	
+	@Override
+	public void close(String type) {
+		
+		Frame current = getCurrent();
+		
+		if(current.type == Type.Child || current.type == Type.Children
+		        || current.type == Type.Array) {
+			error("must end children before closing element");
 		} else if(current.type == Type.Text) {
 			this.stack.pop();
 			current = this.stack.peek();
@@ -244,8 +268,8 @@ abstract public class AbstractXydraOut implements XydraOut {
 		
 		assert current.type == Type.Element;
 		
-		if(current.name != name) {
-			error("cannot close element " + name + " while element " + current.name + " is open");
+		if(current.name != type) {
+			error("cannot close element " + type + " while element " + current.name + " is open");
 		}
 		
 		assert !this.stack.isEmpty();
@@ -254,6 +278,10 @@ abstract public class AbstractXydraOut implements XydraOut {
 		
 		outputCloseElement(container, current);
 		
+		closedChild(container);
+	}
+	
+	private void closedChild(Frame container) {
 		if(container.type == Type.Root) {
 			this.stack.pop();
 			assert this.stack.isEmpty();
@@ -262,8 +290,6 @@ abstract public class AbstractXydraOut implements XydraOut {
 			container.nAttributes++;
 		}
 	}
-	
-	protected abstract void outputEndChildren(Frame element, Frame children);
 	
 	protected abstract void outputCloseElement(Frame container, Frame element);
 	
@@ -289,7 +315,6 @@ abstract public class AbstractXydraOut implements XydraOut {
 		Frame content = new Frame(Type.Text, name);
 		this.stack.push(content);
 		
-		outputElementBeginContent(element);
 		outputContent(element, content, data);
 		
 		element.contentType = Type.Text;
@@ -342,10 +367,13 @@ abstract public class AbstractXydraOut implements XydraOut {
 			case Root:
 				bt.append("(root)");
 				break;
+			case Array:
+				bt.append(".[]");
+				break;
 			}
-			if(frame.type != null) {
+			if(frame.element != null) {
 				bt.append('{');
-				bt.append(frame.type);
+				bt.append(frame.element);
 				bt.append('}');
 			}
 			
@@ -387,4 +415,81 @@ abstract public class AbstractXydraOut implements XydraOut {
 	public void flush() {
 		this.writer.flush();
 	}
+	
+	@Override
+	public <T> void value(String name, String type, T value) {
+		beginChildren(name, false, type);
+		value(value);
+		endChildren();
+	}
+	
+	@Override
+	public <T> void values(String name, String type, Iterable<T> values) {
+		beginChildren(name, true, type);
+		for(T value : values) {
+			value(value);
+		}
+		endChildren();
+	}
+	
+	@Override
+	public <T> void element(String type, String name, T content) {
+		open(type);
+		content(name, content);
+		close(type);
+	}
+	
+	@Override
+	public <T> void element(String type) {
+		open(type);
+		close(type);
+	}
+	
+	@Override
+	public void beginArray() {
+		beginArray(null);
+	}
+	
+	@Override
+	public void beginArray(String type) {
+		
+		Frame container = getCurrent();
+		
+		if(container.type == Type.Element) {
+			error("mist be in child list or array to start an array");
+		} else if(container.type == Type.Text) {
+			error("cannot add array once content has been set");
+		} else if(container.type == Type.Root) {
+			error("must open root element before starting array");
+		}
+		assert container.type == Type.Children || container.type == Type.Child
+		        || container.type == Type.Array;
+		
+		Frame array = new Frame(Type.Array, type);
+		this.stack.push(array);
+		
+		outputBeginArray(container, array);
+		
+		container.contentType = Type.Array;
+	}
+	
+	protected abstract void outputBeginArray(Frame container, Frame array);
+	
+	@Override
+	public void endArray() {
+		
+		Frame array = getCurrent();
+		
+		if(array.type != Type.Array) {
+			error("no array is open");
+		}
+		
+		assert !this.stack.empty();
+		this.stack.pop();
+		outputEndArray(this.stack.peek(), array);
+		
+	}
+	
+	protected abstract void outputEndArray(Frame container, Frame array);
+	
 }

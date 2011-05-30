@@ -6,7 +6,7 @@ package org.xydra.base.value;
  * @author Kaidel
  * 
  */
-public interface XBooleanValue extends XValue {
+public interface XBooleanValue extends XSingleValue<Boolean> {
 	
 	/**
 	 * Returns the stored boolean value.

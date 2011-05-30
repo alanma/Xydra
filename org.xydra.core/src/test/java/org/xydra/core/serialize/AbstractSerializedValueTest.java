@@ -30,6 +30,11 @@ abstract public class AbstractSerializedValueTest {
 	}
 	
 	@Test
+	public void testNullValue() {
+		testValue(null);
+	}
+	
+	@Test
 	public void testAddressListValue() {
 		testValue(XV.toValue(new XAddress[] { XX.toAddress(XX.createUniqueId(), null, null, null),
 		        XX.toAddress("/cookie/monster/-/-") }));
@@ -184,10 +189,6 @@ abstract public class AbstractSerializedValueTest {
 		testValue(XX.createUniqueId());
 	}
 	
-	public void testValueNull() {
-		testValue(null);
-	}
-	
 	@Test
 	public void testIntegerListValue() {
 		testValue(XV.toValue(new int[] { 1, 42, -8 }));
@@ -326,7 +327,7 @@ abstract public class AbstractSerializedValueTest {
 	private void testValue(XValue value) {
 		
 		XydraOut out = getNewOut();
-		SerializedValue.toXml(value, out);
+		SerializedValue.serialize(value, out);
 		assertTrue(out.isClosed());
 		String xml = out.getData();
 		

@@ -648,7 +648,7 @@ public class TestAPI {
 		        XV.toValue("Another Test!"));
 		
 		XydraOut out = new XmlOut();
-		SerializedModel.toXml(model, out);
+		SerializedModel.serialize(model, out);
 		
 		// try to load it
 		MiniElement e = new MiniParserXml().parse(out.getData());
@@ -696,7 +696,7 @@ public class TestAPI {
 		// We now created a little repository with some content, so saving makes
 		// sense
 		XydraOut out = new XmlOut();
-		SerializedModel.toXml(repo, out);
+		SerializedModel.serialize(repo, out);
 		
 		// try to load it
 		MiniElement e = new MiniParserXml().parse(out.getData());

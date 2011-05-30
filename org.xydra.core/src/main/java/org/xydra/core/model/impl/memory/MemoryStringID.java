@@ -57,7 +57,12 @@ public class MemoryStringID implements XID {
 	
 	@Override
 	public ValueType getType() {
-		return ValueType.XID;
+		return ValueType.Id;
+	}
+	
+	@Override
+	public XID getValue() {
+		return this;
 	}
 	
 }
