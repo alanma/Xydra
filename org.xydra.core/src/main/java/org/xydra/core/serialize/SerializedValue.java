@@ -57,7 +57,7 @@ public class SerializedValue {
 		
 		List<XAddress> list = new ArrayList<XAddress>();
 		
-		Iterator<Object> entryIterator = element.getValueList(NAME_DATA, XADDRESS_ELEMENT);
+		Iterator<Object> entryIterator = element.getValues(NAME_DATA, XADDRESS_ELEMENT);
 		while(entryIterator.hasNext()) {
 			Object value = entryIterator.next();
 			list.add(SerializingUtils.toAddress(value));
@@ -69,7 +69,7 @@ public class SerializedValue {
 		
 		List<XID> list = new ArrayList<XID>();
 		
-		Iterator<Object> entryIterator = element.getValueList(NAME_DATA, XID_ELEMENT);
+		Iterator<Object> entryIterator = element.getValues(NAME_DATA, XID_ELEMENT);
 		while(entryIterator.hasNext()) {
 			Object value = entryIterator.next();
 			list.add(SerializingUtils.toId(value));
@@ -81,7 +81,7 @@ public class SerializedValue {
 		
 		List<String> list = new ArrayList<String>();
 		
-		Iterator<Object> entryIterator = element.getValueList(NAME_DATA, XSTRING_ELEMENT);
+		Iterator<Object> entryIterator = element.getValues(NAME_DATA, XSTRING_ELEMENT);
 		while(entryIterator.hasNext()) {
 			Object value = entryIterator.next();
 			list.add(SerializingUtils.toString(value));
@@ -131,7 +131,7 @@ public class SerializedValue {
 		
 		List<Boolean> list = new ArrayList<Boolean>();
 		
-		Iterator<Object> entryIterator = element.getValueList(NAME_DATA, XBOOLEAN_ELEMENT);
+		Iterator<Object> entryIterator = element.getValues(NAME_DATA, XBOOLEAN_ELEMENT);
 		while(entryIterator.hasNext()) {
 			Object value = entryIterator.next();
 			list.add(SerializingUtils.toBoolean(value));
@@ -143,7 +143,7 @@ public class SerializedValue {
 		
 		List<Double> list = new ArrayList<Double>();
 		
-		Iterator<Object> entryIterator = element.getValueList(NAME_DATA, XDOUBLE_ELEMENT);
+		Iterator<Object> entryIterator = element.getValues(NAME_DATA, XDOUBLE_ELEMENT);
 		while(entryIterator.hasNext()) {
 			Object value = entryIterator.next();
 			list.add(SerializingUtils.toDouble(value));
@@ -178,7 +178,7 @@ public class SerializedValue {
 		
 		List<Integer> list = new ArrayList<Integer>();
 		
-		Iterator<Object> entryIterator = element.getValueList(NAME_DATA, XINTEGER_ELEMENT);
+		Iterator<Object> entryIterator = element.getValues(NAME_DATA, XINTEGER_ELEMENT);
 		while(entryIterator.hasNext()) {
 			Object value = entryIterator.next();
 			list.add(SerializingUtils.toInteger(value));
@@ -190,7 +190,7 @@ public class SerializedValue {
 		
 		List<Long> list = new ArrayList<Long>();
 		
-		Iterator<Object> entryIterator = element.getValueList(NAME_DATA, XLONG_ELEMENT);
+		Iterator<Object> entryIterator = element.getValues(NAME_DATA, XLONG_ELEMENT);
 		while(entryIterator.hasNext()) {
 			Object value = entryIterator.next();
 			list.add(SerializingUtils.toLong(value));

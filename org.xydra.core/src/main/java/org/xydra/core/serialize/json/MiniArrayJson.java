@@ -64,13 +64,13 @@ public class MiniArrayJson implements MiniElement {
 	}
 	
 	@Override
-	public Iterator<Object> getValueList(String name, String type) {
+	public Iterator<Object> getValues(String name, String type) {
 		return this.data.iterator();
 	}
 	
 	@Override
-	public Iterator<Object> getValueList(String name) {
-		return getValueList(name, null);
+	public Iterator<Object> getValues(String name) {
+		return getValues(name, null);
 	}
 	
 	@Override

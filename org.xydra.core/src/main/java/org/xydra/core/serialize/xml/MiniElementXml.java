@@ -141,13 +141,13 @@ public class MiniElementXml implements MiniElement {
 	}
 	
 	@Override
-	public Iterator<Object> getValueList(String name, String type) {
+	public Iterator<Object> getValues(String name, String type) {
 		final NodeList nodes = this.element.getElementsByTagName(type);
 		return nodeListToValues(nodes);
 	}
 	
 	@Override
-	public Iterator<Object> getValueList(String name) {
+	public Iterator<Object> getValues(String name) {
 		final NodeList nodes = this.element.getChildNodes();
 		return nodeListToValues(nodes);
 	}

@@ -116,7 +116,7 @@ public class MiniElementJson implements MiniElement {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public Iterator<Object> getValueList(String name, String type) {
+	public Iterator<Object> getValues(String name, String type) {
 		
 		Object obj = this.data.get(name);
 		if(!this.data.containsKey(name) || !(obj instanceof List<?>)) {
@@ -127,8 +127,8 @@ public class MiniElementJson implements MiniElement {
 	}
 	
 	@Override
-	public Iterator<Object> getValueList(String name) {
-		return getValueList(name, null);
+	public Iterator<Object> getValues(String name) {
+		return getValues(name, null);
 	}
 	
 	@Override

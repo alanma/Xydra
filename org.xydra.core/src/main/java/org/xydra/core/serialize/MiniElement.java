@@ -44,9 +44,9 @@ public interface MiniElement {
 	
 	public String getType();
 	
-	public Iterator<Object> getValueList(String name);
+	public Iterator<Object> getValues(String name);
 	
-	public Iterator<Object> getValueList(String name, String type);
+	public Iterator<Object> getValues(String name, String type);
 	
 	public Object getValue(String name, int index);
 	
