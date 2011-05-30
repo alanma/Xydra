@@ -93,11 +93,11 @@ public class UrchinUrl {
 		
 		// Function:Referral, complete URL.
 		// Example:utmr=http://www.example.com/aboutUs/index.php?var=selected
-		String useRefererUrl = refererURL;
-		if(useRefererUrl == null) {
-			useRefererUrl = "-";
+		String usedRefererUrl = refererURL;
+		if(usedRefererUrl == null) {
+			usedRefererUrl = "-";
 		}
-		appendIfNotEmpty(url, "utmr", useRefererUrl, true);
+		appendIfNotEmpty(url, "utmr", usedRefererUrl, true);
 		
 		// Function:Page request of the current page.
 		// Example:utmp=/testDirectory/myPage.html

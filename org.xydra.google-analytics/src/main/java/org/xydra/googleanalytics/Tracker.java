@@ -78,9 +78,9 @@ public class Tracker {
 		        .toURL(hostname, focusPoint, refererURL, cookie, trackerCode, gaEvent);
 		
 		Future<Integer> result = this.httpClient.GET(url);
-		this.trackCount++;
 		
 		// check every 50 requests if they work
+		this.trackCount++;
 		if(this.trackCount % 50 == 10) {
 			log.debug("Verifying HTTP GET to Google Analytics");
 			try {
@@ -92,7 +92,6 @@ public class Tracker {
 				log.warn("Could not finish HTTP GET in time", e);
 			}
 		}
-		
 		if(this.trackCount > 500 && !this.warnedAbout500Events) {
 			log.warn("Sent over 500 requests in this session to Google Analytics "
 			        + "- they don't track more");
