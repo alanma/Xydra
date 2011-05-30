@@ -20,6 +20,7 @@ public class UrchinUrl {
 	 * utmp=<URL>& 
 	 * utmac=UA-XXXX-1&
 	 * utmcc=__utma%3D<utma cookie>3B%2B__utmz%3D<utmz cookie>%3B
+	 * utms=<internal session counter>
 	 * </pre></code>
 	 * 
 	 * @param hostname from which this request is sent
@@ -28,10 +29,12 @@ public class UrchinUrl {
 	 * @param cookieString to be tracked
 	 * @param trackingCode UA-......
 	 * @param gaEvent to be tracked
+	 * @param sessionCounter starts at 1 and should be incremented for every
+	 *            request in the same session
 	 * @return a URL as a String
 	 */
 	public static String toURL(String hostname, FocusPoint focusPoint, String refererURL,
-	        String cookieString, String trackingCode, GaEvent gaEvent) {
+	        String cookieString, String trackingCode, GaEvent gaEvent, int sessionCounter) {
 		StringBuffer url = new StringBuffer(TRACKING_URL_Prefix);
 		
 		// Function:Tracking code version
@@ -210,6 +213,14 @@ public class UrchinUrl {
 		// Function:Tax. Values as for unit and price.
 		// Example:utmttx=29.16
 		
+		url.append("?utms=" + sessionCounter);
+		
+		/*
+		 * utmu = internal GA statistics, see
+		 * http://glucik.blogspot.com/2011/02/
+		 * utmu-google-analytics-request-parameter.html
+		 */
+
 		return url.toString();
 	}
 	

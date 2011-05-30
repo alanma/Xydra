@@ -42,6 +42,9 @@ public interface UserInfo {
 	 */
 	public String getVar();
 	
+	/**
+	 * @return the hostname <em>to</em> which this access happened
+	 */
 	public String getHostName();
 	
 	public long get31BitId();

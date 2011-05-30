@@ -70,17 +70,22 @@ public class Tracker {
 		this.httpClient.setAutoRetry(false);
 	}
 	
+	/**
+	 * warn only once when going over 500 events - which is the limit GA tracks
+	 * per session
+	 */
 	boolean warnedAbout500Events = false;
 	
 	public void trackLowLevel(String hostname, FocusPoint focusPoint, String refererURL,
 	        String cookie, String trackerCode, GaEvent gaEvent) {
-		String url = UrchinUrl
-		        .toURL(hostname, focusPoint, refererURL, cookie, trackerCode, gaEvent);
+		// start at 1 when sending to Google
+		this.trackCount++;
+		String url = UrchinUrl.toURL(hostname, focusPoint, refererURL, cookie, trackerCode,
+		        gaEvent, this.trackCount);
 		
 		Future<Integer> result = this.httpClient.GET(url);
 		
 		// check every 50 requests if they work
-		this.trackCount++;
 		if(this.trackCount % 50 == 10) {
 			log.debug("Verifying HTTP GET to Google Analytics");
 			try {
