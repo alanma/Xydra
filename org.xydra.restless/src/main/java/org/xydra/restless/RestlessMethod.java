@@ -141,6 +141,7 @@ public class RestlessMethod {
 						}
 					};
 					javaMethodArgs.add(restlessContext);
+					hasHttpServletResponseParameter = true;
 				} else {
 					/* Method requires a parameter type for a named parameter */
 
