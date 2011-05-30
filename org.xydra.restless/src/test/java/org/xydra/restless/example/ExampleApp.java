@@ -1,8 +1,6 @@
 package org.xydra.restless.example;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import org.xydra.restless.IRestlessContext;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessExceptionHandler;
 import org.xydra.restless.RunTestJetty;
@@ -33,10 +31,9 @@ public class ExampleApp {
 		/** a rather useless exception handler */
 		r.addExceptionHandler(new RestlessExceptionHandler() {
 			
-			public boolean handleException(Throwable t, HttpServletRequest req,
-			        HttpServletResponse res) {
+			public boolean handleException(Throwable t, IRestlessContext context) {
 				System.err.println("Restless error");
-				throw new RuntimeException("" + req, t);
+				throw new RuntimeException("" + context.getRequest(), t);
 			}
 		});
 		

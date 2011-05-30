@@ -251,7 +251,20 @@ public class RestlessMethod {
 				} else {
 					boolean handled = false;
 					for(RestlessExceptionHandler handler : restless.exceptionHandlers) {
-						if(handler.handleException(cause, req, res)) {
+						if(handler.handleException(cause, new IRestlessContext() {
+							
+							public Restless getRestless() {
+								return restless;
+							}
+							
+							public HttpServletResponse getResponse() {
+								return res;
+							}
+							
+							public HttpServletRequest getRequest() {
+								return req;
+							}
+						})) {
 							handled = true;
 							break;
 						}

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.base.XAddress;
@@ -25,6 +24,7 @@ import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.index.query.Pair;
 import org.xydra.minio.MiniStreamWriter;
+import org.xydra.restless.IRestlessContext;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessExceptionHandler;
 import org.xydra.restless.RestlessParameter;
@@ -73,8 +73,7 @@ public class XydraStoreResource {
 		// TODO support class-specific exception handlers
 		restless.addExceptionHandler(new RestlessExceptionHandler() {
 			@Override
-			public boolean handleException(Throwable t, HttpServletRequest req,
-			        HttpServletResponse res) {
+			public boolean handleException(Throwable t, IRestlessContext context) {
 				
 				// TODO remove?
 				if(!(t instanceof StoreException) && !(t instanceof IllegalArgumentException)) {
@@ -94,7 +93,7 @@ public class XydraStoreResource {
 				 * HttpServletResponse .SC_FORBIDDEN; }
 				 */
 
-				XydraOut out = startOutput(res, statusCode);
+				XydraOut out = startOutput(context, statusCode);
 				SerializedStore.serializeException(t, out);
 				out.flush();
 				
@@ -115,7 +114,8 @@ public class XydraStoreResource {
 		
 	}
 	
-	private static XydraOut startOutput(HttpServletResponse res, int statusCode) {
+	private static XydraOut startOutput(IRestlessContext context, int statusCode) {
+		HttpServletResponse res = context.getResponse();
 		res.setStatus(statusCode);
 		res.setContentType("application/xml; charset=UTF-8");
 		res.setCharacterEncoding("utf-8");
@@ -127,10 +127,10 @@ public class XydraStoreResource {
 		}
 	}
 	
-	public void checkLogin(Restless restless, HttpServletResponse res, String actorIdStr,
-	        String passwordHash) throws Throwable {
+	public void checkLogin(IRestlessContext context, String actorIdStr, String passwordHash)
+	        throws Throwable {
 		
-		XydraStore store = XydraRestServer.getXydraStore(restless);
+		XydraStore store = XydraRestServer.getXydraStore(context.getRestless());
 		XID actorId = getActorId(actorIdStr);
 		
 		WaitingCallback<Boolean> callback = new WaitingCallback<Boolean>();
@@ -140,7 +140,7 @@ public class XydraStoreResource {
 			throw callback.getException();
 		}
 		
-		XydraOut out = startOutput(res, HttpServletResponse.SC_OK);
+		XydraOut out = startOutput(context, HttpServletResponse.SC_OK);
 		
 		SerializedStore.serializeAuthenticationResult(callback.getResult(), out);
 		
@@ -148,11 +148,10 @@ public class XydraStoreResource {
 		
 	}
 	
-	public void executeCommands(Restless restless, HttpServletRequest req, HttpServletResponse res,
-	        String actorIdStr, String passwordHash, String[] addresses, String[] from, String[] to)
-	        throws Throwable {
+	public void executeCommands(IRestlessContext context, String actorIdStr, String passwordHash,
+	        String[] addresses, String[] from, String[] to) throws Throwable {
 		
-		XydraStore store = XydraRestServer.getXydraStore(restless);
+		XydraStore store = XydraRestServer.getXydraStore(context.getRestless());
 		XID actorId = getActorId(actorIdStr);
 		
 		EventsRequest ger = parseEventsRequest(addresses, from, to);
@@ -165,7 +164,7 @@ public class XydraStoreResource {
 		}
 		XAddress repoAddr = XX.toAddress(revId.getResult(), null, null, null);
 		
-		String commandsXml = XydraRestServer.readPostData(req);
+		String commandsXml = XydraRestServer.readPostData(context.getRequest());
 		List<XCommand> commandsList;
 		try {
 			XydraElement xml = new XmlParser().parse(commandsXml);
@@ -205,7 +204,7 @@ public class XydraStoreResource {
 			eventsRes = callback.getResult().getSecond();
 		}
 		
-		XydraOut out = startOutput(res, HttpServletResponse.SC_OK);
+		XydraOut out = startOutput(context, HttpServletResponse.SC_OK);
 		
 		SerializedStore.serializeCommandResults(commandRes, ger, eventsRes, out);
 		
@@ -255,10 +254,10 @@ public class XydraStoreResource {
 		return new EventsRequest(exceptions, requests);
 	}
 	
-	public void getEvents(Restless restless, HttpServletResponse res, String actorIdStr,
-	        String passwordHash, String[] addresses, String[] from, String[] to) throws Throwable {
+	public void getEvents(IRestlessContext context, String actorIdStr, String passwordHash,
+	        String[] addresses, String[] from, String[] to) throws Throwable {
 		
-		XydraStore store = XydraRestServer.getXydraStore(restless);
+		XydraStore store = XydraRestServer.getXydraStore(context.getRestless());
 		XID actorId = getActorId(actorIdStr);
 		
 		EventsRequest ger = parseEventsRequest(addresses, from, to);
@@ -270,7 +269,7 @@ public class XydraStoreResource {
 			throw callback.getException();
 		}
 		
-		XydraOut out = startOutput(res, HttpServletResponse.SC_OK);
+		XydraOut out = startOutput(context, HttpServletResponse.SC_OK);
 		
 		SerializedStore.serializeEventsResults(ger, callback.getResult(), out);
 		
@@ -278,10 +277,10 @@ public class XydraStoreResource {
 		
 	}
 	
-	public void getModelRevisions(Restless restless, HttpServletResponse res, String actorIdStr,
-	        String passwordHash, String[] addresses) throws Throwable {
+	public void getModelRevisions(IRestlessContext context, String actorIdStr, String passwordHash,
+	        String[] addresses) throws Throwable {
 		
-		XydraStore store = XydraRestServer.getXydraStore(restless);
+		XydraStore store = XydraRestServer.getXydraStore(context.getRestless());
 		XID actorId = getActorId(actorIdStr);
 		
 		StoreException[] ex = new StoreException[addresses.length];
@@ -302,7 +301,7 @@ public class XydraStoreResource {
 			throw callback.getException();
 		}
 		
-		XydraOut out = startOutput(res, HttpServletResponse.SC_OK);
+		XydraOut out = startOutput(context, HttpServletResponse.SC_OK);
 		
 		SerializedStore.serializeModelRevisions(callback.getResult(), out);
 		
@@ -310,10 +309,10 @@ public class XydraStoreResource {
 		
 	}
 	
-	public void getSnapshots(Restless restless, HttpServletResponse res, String actorIdStr,
-	        String passwordHash, String[] addressStrs) throws Throwable {
+	public void getSnapshots(IRestlessContext context, String actorIdStr, String passwordHash,
+	        String[] addressStrs) throws Throwable {
 		
-		XydraStore store = XydraRestServer.getXydraStore(restless);
+		XydraStore store = XydraRestServer.getXydraStore(context.getRestless());
 		XID actorId = getActorId(actorIdStr);
 		
 		List<XAddress> modelAddrs = new ArrayList<XAddress>();
@@ -361,7 +360,7 @@ public class XydraStoreResource {
 		}
 		assert oc.getResult() != null && oc.getResult().length == oa.length;
 		
-		XydraOut out = startOutput(res, HttpServletResponse.SC_OK);
+		XydraOut out = startOutput(context, HttpServletResponse.SC_OK);
 		
 		BatchedResult<XReadableModel>[] mr = mc.getResult();
 		BatchedResult<XReadableObject>[] or = oc.getResult();
@@ -372,10 +371,10 @@ public class XydraStoreResource {
 		
 	}
 	
-	public void getModelIds(Restless restless, HttpServletResponse res, String actorIdStr,
-	        String passwordHash) throws Throwable {
+	public void getModelIds(IRestlessContext context, String actorIdStr, String passwordHash)
+	        throws Throwable {
 		
-		XydraStore store = XydraRestServer.getXydraStore(restless);
+		XydraStore store = XydraRestServer.getXydraStore(context.getRestless());
 		XID actorId = getActorId(actorIdStr);
 		
 		WaitingCallback<Set<XID>> callback = new WaitingCallback<Set<XID>>();
@@ -385,7 +384,7 @@ public class XydraStoreResource {
 			throw callback.getException();
 		}
 		
-		XydraOut out = startOutput(res, HttpServletResponse.SC_OK);
+		XydraOut out = startOutput(context, HttpServletResponse.SC_OK);
 		
 		SerializedStore.serializeModelIds(callback.getResult(), out);
 		
@@ -393,10 +392,10 @@ public class XydraStoreResource {
 		
 	}
 	
-	public void getRepositoryId(Restless restless, HttpServletResponse res, String actorIdStr,
-	        String passwordHash) throws Throwable {
+	public void getRepositoryId(IRestlessContext context, String actorIdStr, String passwordHash)
+	        throws Throwable {
 		
-		XydraStore store = XydraRestServer.getXydraStore(restless);
+		XydraStore store = XydraRestServer.getXydraStore(context.getRestless());
 		XID actorId = getActorId(actorIdStr);
 		
 		WaitingCallback<XID> callback = new WaitingCallback<XID>();
@@ -406,7 +405,7 @@ public class XydraStoreResource {
 			throw callback.getException();
 		}
 		
-		XydraOut out = startOutput(res, HttpServletResponse.SC_OK);
+		XydraOut out = startOutput(context, HttpServletResponse.SC_OK);
 		
 		SerializedStore.serializeRepositoryId(callback.getResult(), out);
 		

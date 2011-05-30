@@ -87,7 +87,7 @@ public abstract class AbstractRestClientWriteMethodsTest extends AbstractStoreWr
 		 * the webapp root. Therefore we leave the slash out here.
 		 */
 		
-		URI storeapi = apiprefix.resolve("store/v1/");
+		storeapi = apiprefix.resolve("store/v1/");
 		log.info("Using store API url = " + storeapi.toASCIIString());
 		
 		XydraStore store = server.getStore();
