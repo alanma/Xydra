@@ -2,9 +2,12 @@ package org.xydra.server.rest;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.base.XAddress;
@@ -19,11 +22,15 @@ import org.xydra.core.serialize.SerializedCommand;
 import org.xydra.core.serialize.SerializedStore;
 import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.XydraOut;
+import org.xydra.core.serialize.XydraParser;
 import org.xydra.core.serialize.SerializedStore.EventsRequest;
+import org.xydra.core.serialize.json.JsonOut;
+import org.xydra.core.serialize.json.JsonParser;
 import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.index.query.Pair;
 import org.xydra.minio.MiniStreamWriter;
+import org.xydra.minio.MiniWriter;
 import org.xydra.restless.IRestlessContext;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessExceptionHandler;
@@ -38,7 +45,26 @@ import org.xydra.store.XydraStore;
 
 public class XydraStoreResource {
 	
+	private final static XydraParser jsonParser = new JsonParser();
+	private final static XydraParser xmlParser = new XmlParser();
+	private final static Set<String> jsonMimes = new HashSet<String>();
+	private final static Set<String> xmlMimes = new HashSet<String>();
+	private final static Set<String> mimes = new HashSet<String>();
+	
+	private static final String DEFAULT_CONTENT_TYPE = "application/xml";
+	
 	public static void restless(Restless restless, String prefix) {
+		
+		jsonMimes.add("application/json");
+		jsonMimes.add("application/x-javascript");
+		jsonMimes.add("text/javascript");
+		jsonMimes.add("text/x-javascript");
+		jsonMimes.add("text/x-json");
+		mimes.addAll(jsonMimes);
+		
+		xmlMimes.add("application/xml");
+		xmlMimes.add("text/xml");
+		mimes.addAll(xmlMimes);
 		
 		RestlessParameter actorId = new RestlessParameter("actorId");
 		RestlessParameter passwordHash = new RestlessParameter("passwordHash");
@@ -114,13 +140,83 @@ public class XydraStoreResource {
 		
 	}
 	
+	private static String getBestContentType(IRestlessContext context) {
+		
+		HttpServletRequest req = context.getRequest();
+		
+		String mime = req.getParameter("contentType");
+		if(mime != null) {
+			mime = mime.trim();
+			if(!mimes.contains(mime)) {
+				try {
+					context.getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST,
+					        "Unknown content type: " + mime);
+				} catch(IOException e) {
+					// ignored
+				}
+				throw new RuntimeException();
+			}
+			return mime;
+		}
+		
+		String best = DEFAULT_CONTENT_TYPE;
+		float bestScore = Float.MIN_VALUE;
+		
+		@SuppressWarnings("unchecked")
+		Enumeration<String> headers = req.getHeaders("Accept");
+		
+		while(headers.hasMoreElements()) {
+			
+			String accept = headers.nextElement();
+			
+			String[] types = accept.split(",");
+			for(String type : types) {
+				
+				String[] parts = type.split(";");
+				if(!mimes.contains(parts[0])) {
+					continue;
+				}
+				float score = 1.f;
+				if(parts.length > 1) {
+					String[] param = parts[1].split("=");
+					if(param.length > 1 && param[0].trim() == "q") {
+						score = Float.parseFloat(param[1].trim());
+					}
+				}
+				if(score > bestScore) {
+					best = parts[0];
+					bestScore = score;
+				}
+			}
+			
+		}
+		
+		return best;
+	}
+	
 	private static XydraOut startOutput(IRestlessContext context, int statusCode) {
+		
 		HttpServletResponse res = context.getResponse();
+		
+		String mime = getBestContentType(context);
+		
 		res.setStatus(statusCode);
-		res.setContentType("application/xml; charset=UTF-8");
+		res.setContentType(mime + "; charset=UTF-8");
 		res.setCharacterEncoding("utf-8");
 		try {
-			XydraOut out = new XmlOut(new MiniStreamWriter(res.getOutputStream()));
+			MiniWriter writer = new MiniStreamWriter(res.getOutputStream());
+			XydraOut out;
+			if(xmlMimes.contains(mime)) {
+				out = new XmlOut(writer);
+			} else if(jsonMimes.contains(mime)) {
+				out = new JsonOut(writer);
+			} else {
+				throw new AssertionError();
+			}
+			String format = context.getRequest().getParameter("format");
+			if("pretty".equals(format)) {
+				out.enableWhitespace(true, true);
+			}
 			return out;
 		} catch(IOException e) {
 			throw new RuntimeException("re-throw", e);
@@ -164,11 +260,24 @@ public class XydraStoreResource {
 		}
 		XAddress repoAddr = XX.toAddress(revId.getResult(), null, null, null);
 		
-		String commandsXml = XydraRestServer.readPostData(context.getRequest());
+		String rawCommands = XydraRestServer.readPostData(context.getRequest());
 		List<XCommand> commandsList;
 		try {
-			XydraElement xml = new XmlParser().parse(commandsXml);
-			commandsList = SerializedCommand.toCommandList(xml, repoAddr);
+			XydraElement element;
+			if(jsonMimes.contains(context.getRequest().getContentType())) {
+				try {
+					element = jsonParser.parse(rawCommands);
+				} catch(Exception e) {
+					element = xmlParser.parse(rawCommands);
+				}
+			} else {
+				try {
+					element = xmlParser.parse(rawCommands);
+				} catch(Exception e) {
+					element = jsonParser.parse(rawCommands);
+				}
+			}
+			commandsList = SerializedCommand.toCommandList(element, repoAddr);
 		} catch(Exception e) {
 			throw new RequestException("error parsing commands list: " + e.getMessage());
 		}
