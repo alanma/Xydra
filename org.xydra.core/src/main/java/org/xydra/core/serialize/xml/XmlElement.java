@@ -20,7 +20,7 @@ import org.xydra.core.serialize.MiniElement;
  */
 @RunsInGWT(false)
 @RequiresAppEngine(false)
-public class MiniElementXml implements MiniElement {
+public class XmlElement implements MiniElement {
 	
 	private static final String ELEMENT_XNULL = "xnull";
 	private static final String ATTRIBUTE_IS_NULL = "isNull";
@@ -28,7 +28,7 @@ public class MiniElementXml implements MiniElement {
 	
 	Element element;
 	
-	protected MiniElementXml(Element element) {
+	protected XmlElement(Element element) {
 		this.element = element;
 	}
 	
@@ -80,7 +80,7 @@ public class MiniElementXml implements MiniElement {
 			Node node = nodes.item(i);
 			if(node instanceof Element) {
 				if(idx == index) {
-					return new MiniElementXml((Element)node);
+					return new XmlElement((Element)node);
 				} else {
 					idx++;
 				}
@@ -100,7 +100,7 @@ public class MiniElementXml implements MiniElement {
 		for(int i = 0; i < nodes.getLength(); ++i) {
 			Node node = nodes.item(i);
 			if(node instanceof Element) {
-				return new MiniElementXml((Element)node);
+				return new XmlElement((Element)node);
 			}
 		}
 		return null;
@@ -165,8 +165,8 @@ public class MiniElementXml implements MiniElement {
 		return objects.iterator();
 	}
 	
-	static MiniElementXml wrap(Element element) {
-		return isNull(element) ? null : new MiniElementXml(element);
+	static XmlElement wrap(Element element) {
+		return isNull(element) ? null : new XmlElement(element);
 	}
 	
 	static String getValue(Element element) {

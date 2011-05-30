@@ -13,12 +13,12 @@ import org.xydra.core.serialize.ParsingError;
 @RunsInGWT(true)
 @RunsInAppEngine(true)
 @RequiresAppEngine(false)
-public class MiniArrayJson implements MiniElement {
+public class JsonArray implements MiniElement {
 	
 	private final List<Object> data;
 	private final String type;
 	
-	public MiniArrayJson(List<Object> data, String type) {
+	public JsonArray(List<Object> data, String type) {
 		this.data = data;
 		this.type = type == null ? "xarray" : type;
 	}
@@ -40,7 +40,7 @@ public class MiniArrayJson implements MiniElement {
 	
 	@Override
 	public Iterator<MiniElement> getChildren(String name, String type) {
-		return MiniElementJson.transform(this.data.iterator(), type);
+		return JsonElement.transform(this.data.iterator(), type);
 	}
 	
 	@Override

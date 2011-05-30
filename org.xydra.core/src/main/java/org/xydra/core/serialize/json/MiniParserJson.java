@@ -140,6 +140,6 @@ public class MiniParserJson implements MiniParser {
 		if(saj.map == null) {
 			return null;
 		}
-		return new MiniElementJson(saj.map, null);
+		return new JsonElement(saj.map, null);
 	}
 }

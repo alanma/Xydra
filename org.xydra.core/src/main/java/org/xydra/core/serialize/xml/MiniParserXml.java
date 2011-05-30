@@ -41,7 +41,7 @@ public class MiniParserXml implements MiniParser {
 		} catch(Exception e) {
 			throw new IllegalArgumentException(e);
 		}
-		return MiniElementXml.wrap(document.getDocumentElement());
+		return XmlElement.wrap(document.getDocumentElement());
 	}
 	
 }
