@@ -32,8 +32,20 @@ import org.xydra.core.model.impl.memory.MemoryObject;
 /**
  * TODO Document
  * 
- * TODO check if this implementation is thread-safe "enough" TODO implement
- * better handling of Transaction-commands
+ * TODO check if this implementation is thread-safe "enough"
+ * 
+ * 
+ * 
+ * TODO implement better handling of Transaction-commands
+ * 
+ * 
+ * FIXME Revision number handling is not true to the way the revision numbers
+ * are increased in a real XObject, because the revision number of the father is
+ * never used. How can this be changed? One problem is, that changes to the
+ * father or one of its other children directly influence the way how revision
+ * numbers are increased for every child. Simple fix seems to be to just
+ * increase the fathers revNr, but then we might have a lot of revNrs with no
+ * assocciated events...
  * 
  * @author Kaidel
  * 
