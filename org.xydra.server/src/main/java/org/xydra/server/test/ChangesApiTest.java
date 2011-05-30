@@ -35,11 +35,11 @@ import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
-import org.xydra.core.serialize.MiniElement;
+import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.SerializedCommand;
 import org.xydra.core.serialize.SerializedEvent;
 import org.xydra.core.serialize.XydraOut;
-import org.xydra.core.serialize.xml.MiniParserXml;
+import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.index.iterator.AbstractTransformingIterator;
 
@@ -137,7 +137,7 @@ public abstract class ChangesApiTest extends AbstractRestApiTest {
 			String data = readAll((InputStream)c.getContent());
 			
 			try {
-				MiniElement eventsElement = new MiniParserXml().parse(data);
+				XydraElement eventsElement = new XmlParser().parse(data);
 				events = SerializedEvent.toEventList(eventsElement, context);
 			} catch(IllegalArgumentException iae) {
 				fail(iae.getMessage());
@@ -173,7 +173,7 @@ public abstract class ChangesApiTest extends AbstractRestApiTest {
 		
 		URL modelUrl = changesapi.resolve(name).toURL();
 		
-		MiniElement eventsElement = loadXml(modelUrl);
+		XydraElement eventsElement = loadXml(modelUrl);
 		if(eventsElement == null) {
 			return null;
 		}

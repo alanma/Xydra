@@ -10,10 +10,10 @@ import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.core.change.XTransactionBuilder;
-import org.xydra.core.serialize.MiniElement;
-import org.xydra.core.serialize.MiniParser;
+import org.xydra.core.serialize.XydraElement;
+import org.xydra.core.serialize.XydraParser;
 import org.xydra.core.serialize.SerializedModel;
-import org.xydra.core.serialize.xml.MiniParserXml;
+import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessException;
 import org.xydra.server.IXydraSession;
@@ -36,8 +36,8 @@ public class XRepositoryResource {
 		XReadableModel newModel;
 		try {
 			
-			MiniParser parser = new MiniParserXml();
-			MiniElement modelElement = parser.parse(modelXml);
+			XydraParser parser = new XmlParser();
+			XydraElement modelElement = parser.parse(modelXml);
 			
 			newModel = SerializedModel.toModel(actorId, null, modelElement);
 			

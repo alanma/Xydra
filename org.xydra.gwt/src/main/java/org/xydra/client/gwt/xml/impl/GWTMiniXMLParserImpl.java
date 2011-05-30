@@ -1,8 +1,8 @@
 package org.xydra.client.gwt.xml.impl;
 
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.core.serialize.MiniElement;
-import org.xydra.core.serialize.MiniParser;
+import org.xydra.core.serialize.XydraElement;
+import org.xydra.core.serialize.XydraParser;
 
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.XMLParser;
@@ -10,16 +10,16 @@ import com.google.gwt.xml.client.XMLParser;
 
 
 /**
- * {@link MiniParser} implementation that uses the GWT browser-supported
+ * {@link XydraParser} implementation that uses the GWT browser-supported
  * XMLParser
  * 
  * @author dscharrer
  * 
  */
 @RunsInGWT(true)
-public class GWTMiniXMLParserImpl implements MiniParser {
+public class GWTMiniXMLParserImpl implements XydraParser {
 	
-	public MiniElement parse(String xml) throws IllegalArgumentException {
+	public XydraElement parse(String xml) throws IllegalArgumentException {
 		
 		Document document;
 		try {

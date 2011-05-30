@@ -10,8 +10,8 @@ import org.xydra.client.XDataService;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
-import org.xydra.core.serialize.MiniElement;
-import org.xydra.core.serialize.MiniParser;
+import org.xydra.core.serialize.XydraElement;
+import org.xydra.core.serialize.XydraParser;
 import org.xydra.core.serialize.SerializedModel;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.xml.XmlOut;
@@ -37,19 +37,19 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 	
 	static private final XID actorId = XX.toId(GWTDataService.class.getName());
 	
-	public GWTDataService(String baseUrl, MiniParser parser) {
+	public GWTDataService(String baseUrl, XydraParser parser) {
 		super(baseUrl, parser);
 	}
 	
 	public void getModel(XID modelId, final Callback<XModel> callback) {
 		
-		getXml(modelId.toString(), new Callback<MiniElement>() {
+		getXml(modelId.toString(), new Callback<XydraElement>() {
 			
 			public void onFailure(Throwable error) {
 				callback.onFailure(error);
 			}
 			
-			public void onSuccess(MiniElement xml) {
+			public void onSuccess(XydraElement xml) {
 				XModel model;
 				try {
 					model = SerializedModel.toModel(actorId, null, xml);
@@ -67,13 +67,13 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 	public void getObject(XID modelId, XID objectId, final Callback<XObject> callback) {
 		
 		String addr = modelId.toString() + "/" + objectId.toString();
-		getXml(addr, new Callback<MiniElement>() {
+		getXml(addr, new Callback<XydraElement>() {
 			
 			public void onFailure(Throwable error) {
 				callback.onFailure(error);
 			}
 			
-			public void onSuccess(MiniElement xml) {
+			public void onSuccess(XydraElement xml) {
 				XObject object;
 				try {
 					object = SerializedModel.toObject(actorId, null, xml);
@@ -91,13 +91,13 @@ public class GWTDataService extends AbstractGWTHttpService implements XDataServi
 	public void getField(XID modelId, XID objectId, XID fieldId, final Callback<XField> callback) {
 		
 		String addr = modelId.toString() + "/" + objectId.toString() + "/" + fieldId.toString();
-		getXml(addr, new Callback<MiniElement>() {
+		getXml(addr, new Callback<XydraElement>() {
 			
 			public void onFailure(Throwable error) {
 				callback.onFailure(error);
 			}
 			
-			public void onSuccess(MiniElement xml) {
+			public void onSuccess(XydraElement xml) {
 				XField field;
 				try {
 					field = SerializedModel.toField(actorId, xml);

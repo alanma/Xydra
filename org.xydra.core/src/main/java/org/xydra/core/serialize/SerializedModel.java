@@ -67,7 +67,7 @@ public class SerializedModel {
 	
 	private static final String XREPOSITORY_ELEMENT = "xrepository";
 	
-	private static long getRevisionAttribute(MiniElement element) {
+	private static long getRevisionAttribute(XydraElement element) {
 		
 		Object revisionString = element.getAttribute(REVISION_ATTRIBUTE);
 		
@@ -78,8 +78,8 @@ public class SerializedModel {
 		return SerializingUtils.toLong(revisionString);
 	}
 	
-	public static XChangeLogState loadChangeLogState(MiniElement element, XAddress baseAddr) {
-		MiniElement logElement = element.getElement(XCHANGELOG_ELEMENT);
+	public static XChangeLogState loadChangeLogState(XydraElement element, XAddress baseAddr) {
+		XydraElement logElement = element.getElement(XCHANGELOG_ELEMENT);
 		if(logElement != null) {
 			XChangeLogState log = new MemoryChangeLogState(baseAddr);
 			loadChangeLogState(logElement, log);
@@ -94,7 +94,7 @@ public class SerializedModel {
 	 * 
 	 * @param state The change log state to load into.
 	 */
-	public static void loadChangeLogState(MiniElement element, XChangeLogState state) {
+	public static void loadChangeLogState(XydraElement element, XChangeLogState state) {
 		
 		SerializingUtils.checkElementType(element, XCHANGELOG_ELEMENT);
 		
@@ -106,9 +106,9 @@ public class SerializedModel {
 		
 		state.setFirstRevisionNumber(startRev);
 		
-		Iterator<MiniElement> eventElementIt = element.getChildren(NAME_EVENTS);
+		Iterator<XydraElement> eventElementIt = element.getChildren(NAME_EVENTS);
 		while(eventElementIt.hasNext()) {
-			MiniElement e = eventElementIt.next();
+			XydraElement e = eventElementIt.next();
 			XEvent event = SerializedEvent.toEvent(e, state.getBaseAddress());
 			state.appendEvent(event);
 		}
@@ -122,7 +122,7 @@ public class SerializedModel {
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XField element.
 	 */
-	public static XField toField(XID actorId, MiniElement element) {
+	public static XField toField(XID actorId, XydraElement element) {
 		return new MemoryField(actorId, toFieldState(element, null));
 	}
 	
@@ -135,7 +135,7 @@ public class SerializedModel {
 	 *            of parent.
 	 * @return the created {@link XRevWritableField}
 	 */
-	public static XRevWritableField toFieldState(MiniElement element, XRevWritableObject parent) {
+	public static XRevWritableField toFieldState(XydraElement element, XRevWritableObject parent) {
 		
 		SerializingUtils.checkElementType(element, XFIELD_ELEMENT);
 		
@@ -145,9 +145,9 @@ public class SerializedModel {
 		
 		XValue xvalue = null;
 		
-		Iterator<MiniElement> valueElementIt = element.getChildren(NAME_VALUE);
+		Iterator<XydraElement> valueElementIt = element.getChildren(NAME_VALUE);
 		if(valueElementIt.hasNext()) {
-			MiniElement valueElement = valueElementIt.next();
+			XydraElement valueElement = valueElementIt.next();
 			xvalue = SerializedValue.toValue(valueElement);
 		}
 		
@@ -171,7 +171,7 @@ public class SerializedModel {
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XModel element.
 	 */
-	public static XModel toModel(XID actorId, String passwordHash, MiniElement element) {
+	public static XModel toModel(XID actorId, String passwordHash, XydraElement element) {
 		XRevWritableModel state = toModelState(element, null, null);
 		XChangeLogState log = loadChangeLogState(element, state.getAddress());
 		if(log != null) {
@@ -190,15 +190,15 @@ public class SerializedModel {
 	 *            of parent.
 	 * @return the created {@link XRevWritableModel}
 	 */
-	public static XRevWritableModel toModelState(MiniElement element, XRevWritableRepository parent) {
+	public static XRevWritableModel toModelState(XydraElement element, XRevWritableRepository parent) {
 		return toModelState(element, parent, null);
 	}
 	
-	public static XRevWritableModel toModelState(MiniElement element, XAddress context) {
+	public static XRevWritableModel toModelState(XydraElement element, XAddress context) {
 		return toModelState(element, null, context);
 	}
 	
-	private static XRevWritableModel toModelState(MiniElement element,
+	private static XRevWritableModel toModelState(XydraElement element,
 	        XRevWritableRepository parent, XAddress context) {
 		
 		SerializingUtils.checkElementType(element, XMODEL_ELEMENT);
@@ -221,9 +221,9 @@ public class SerializedModel {
 		}
 		modelState.setRevisionNumber(revision);
 		
-		Iterator<MiniElement> objectElementIt = element.getChildren(NAME_OBJECTS, XOBJECT_ELEMENT);
+		Iterator<XydraElement> objectElementIt = element.getChildren(NAME_OBJECTS, XOBJECT_ELEMENT);
 		while(objectElementIt.hasNext()) {
-			MiniElement objectElement = objectElementIt.next();
+			XydraElement objectElement = objectElementIt.next();
 			XRevWritableObject objectState = toObjectState(objectElement, modelState);
 			assert modelState.getObject(objectState.getID()) == objectState;
 		}
@@ -238,7 +238,7 @@ public class SerializedModel {
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XObject element.
 	 */
-	public static XObject toObject(XID actorId, String passwordHash, MiniElement element) {
+	public static XObject toObject(XID actorId, String passwordHash, XydraElement element) {
 		XRevWritableObject state = toObjectState(element, null, null);
 		XChangeLogState log = loadChangeLogState(element, state.getAddress());
 		if(log != null) {
@@ -257,15 +257,15 @@ public class SerializedModel {
 	 *            state of parent.
 	 * @return the created {@link XRevWritableObject}
 	 */
-	public static XRevWritableObject toObjectState(MiniElement element, XRevWritableModel parent) {
+	public static XRevWritableObject toObjectState(XydraElement element, XRevWritableModel parent) {
 		return toObjectState(element, parent, null);
 	}
 	
-	public static XRevWritableObject toObjectState(MiniElement element, XAddress context) {
+	public static XRevWritableObject toObjectState(XydraElement element, XAddress context) {
 		return toObjectState(element, null, context);
 	}
 	
-	private static XRevWritableObject toObjectState(MiniElement element, XRevWritableModel parent,
+	private static XRevWritableObject toObjectState(XydraElement element, XRevWritableModel parent,
 	        XAddress context) {
 		
 		SerializingUtils.checkElementType(element, XOBJECT_ELEMENT);
@@ -289,9 +289,9 @@ public class SerializedModel {
 		
 		objectState.setRevisionNumber(revision);
 		
-		Iterator<MiniElement> fieldElementIt = element.getChildren(NAME_FIELDS, XFIELD_ELEMENT);
+		Iterator<XydraElement> fieldElementIt = element.getChildren(NAME_FIELDS, XFIELD_ELEMENT);
 		while(fieldElementIt.hasNext()) {
-			MiniElement fieldElement = fieldElementIt.next();
+			XydraElement fieldElement = fieldElementIt.next();
 			XRevWritableField fieldState = toFieldState(fieldElement, objectState);
 			assert objectState.getField(fieldState.getID()) == fieldState;
 		}
@@ -306,7 +306,7 @@ public class SerializedModel {
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XRepository element.
 	 */
-	public static XRepository toRepository(XID actorId, String passwordHash, MiniElement element) {
+	public static XRepository toRepository(XID actorId, String passwordHash, XydraElement element) {
 		return new MemoryRepository(actorId, passwordHash, toRepositoryState(element));
 	}
 	
@@ -316,7 +316,7 @@ public class SerializedModel {
 	 * 
 	 * @return the created {@link XRevWritableRepository}
 	 */
-	public static XRevWritableRepository toRepositoryState(MiniElement element) {
+	public static XRevWritableRepository toRepositoryState(XydraElement element) {
 		
 		SerializingUtils.checkElementType(element, XREPOSITORY_ELEMENT);
 		
@@ -325,9 +325,9 @@ public class SerializedModel {
 		XAddress repoAddr = XX.toAddress(xid, null, null, null);
 		XRevWritableRepository repositoryState = new SimpleRepository(repoAddr);
 		
-		Iterator<MiniElement> modelElementIt = element.getChildren(NAME_MODELS, XMODEL_ELEMENT);
+		Iterator<XydraElement> modelElementIt = element.getChildren(NAME_MODELS, XMODEL_ELEMENT);
 		while(modelElementIt.hasNext()) {
-			MiniElement modelElement = modelElementIt.next();
+			XydraElement modelElement = modelElementIt.next();
 			XRevWritableModel modelState = toModelState(modelElement, repositoryState);
 			assert repositoryState.getModel(modelState.getID()) == modelState;
 		}
@@ -601,7 +601,7 @@ public class SerializedModel {
 		
 	}
 	
-	public static boolean isModel(MiniElement element) {
+	public static boolean isModel(XydraElement element) {
 		return element == null || XMODEL_ELEMENT.equals(element.getType());
 	}
 	

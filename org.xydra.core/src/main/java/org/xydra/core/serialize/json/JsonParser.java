@@ -9,17 +9,17 @@ import java.util.Stack;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.core.serialize.MiniElement;
-import org.xydra.core.serialize.MiniParser;
+import org.xydra.core.serialize.XydraElement;
+import org.xydra.core.serialize.XydraParser;
 import org.xydra.json.JSONException;
-import org.xydra.json.JsonParser;
+import org.xydra.json.JsonParserSAJ;
 import org.xydra.json.SAJ;
 
 
 @RunsInGWT(true)
 @RunsInAppEngine(true)
 @RequiresAppEngine(false)
-public class MiniParserJson implements MiniParser {
+public class JsonParser implements XydraParser {
 	
 	private static class MiniSaj implements SAJ {
 		
@@ -126,11 +126,11 @@ public class MiniParserJson implements MiniParser {
 	}
 	
 	@Override
-	public MiniElement parse(String data) throws IllegalArgumentException {
+	public XydraElement parse(String data) throws IllegalArgumentException {
 		
 		MiniSaj saj = new MiniSaj();
 		
-		JsonParser parser = new JsonParser(saj);
+		JsonParserSAJ parser = new JsonParserSAJ(saj);
 		try {
 			parser.parse(data);
 		} catch(JSONException e) {

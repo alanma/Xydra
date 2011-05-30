@@ -56,17 +56,17 @@ public class SerializedEvent {
 	private static final String XREPOSITORYEVENT_ELEMENT = "xrepositoryEvent";
 	private static final String XTRANSACTIONEVENT_ELEMENT = "xtransactionEvent";
 	
-	private static boolean getImpliedAttribute(MiniElement element) {
+	private static boolean getImpliedAttribute(XydraElement element) {
 		Object booleanString = element.getAttribute(IMPLIED_ATTRIBUTE);
 		return booleanString == null ? false : SerializingUtils.toBoolean(booleanString);
 	}
 	
-	private static boolean getInTransactionAttribute(MiniElement element) {
+	private static boolean getInTransactionAttribute(XydraElement element) {
 		Object booleanString = element.getAttribute(INTRANSACTION_ATTRIBUTE);
 		return booleanString == null ? false : SerializingUtils.toBoolean(booleanString);
 	}
 	
-	private static long getRevision(MiniElement element, String attribute, boolean required) {
+	private static long getRevision(XydraElement element, String attribute, boolean required) {
 		
 		Object revisionString = element.getAttribute(attribute);
 		
@@ -127,7 +127,7 @@ public class SerializedEvent {
 		
 	}
 	
-	private static XAtomicEvent toAtomicEvent(MiniElement element, XAddress context, TempTrans trans)
+	private static XAtomicEvent toAtomicEvent(XydraElement element, XAddress context, TempTrans trans)
 	        throws ParsingError {
 		String name = element.getType();
 		if(name.equals(XFIELDEVENT_ELEMENT)) {
@@ -157,7 +157,7 @@ public class SerializedEvent {
 	 *             event.
 	 * 
 	 */
-	public static XEvent toEvent(MiniElement element, XAddress context) throws ParsingError {
+	public static XEvent toEvent(XydraElement element, XAddress context) throws ParsingError {
 		if(element == null) {
 			return null;
 		} else if(element.getType().equals(XTRANSACTIONEVENT_ELEMENT)) {
@@ -180,21 +180,21 @@ public class SerializedEvent {
 	 *             list.
 	 * 
 	 */
-	public static List<XEvent> toEventList(MiniElement element, XAddress context) {
+	public static List<XEvent> toEventList(XydraElement element, XAddress context) {
 		
 		SerializingUtils.checkElementType(element, XEVENTLIST_ELEMENT);
 		
 		List<XEvent> events = new ArrayList<XEvent>();
-		Iterator<MiniElement> it = element.getChildren(NAME_EVENTS);
+		Iterator<XydraElement> it = element.getChildren(NAME_EVENTS);
 		while(it.hasNext()) {
-			MiniElement event = it.next();
+			XydraElement event = it.next();
 			events.add(toEvent(event, context));
 		}
 		
 		return events;
 	}
 	
-	private static XFieldEvent toFieldEvent(MiniElement element, XAddress context, TempTrans trans) {
+	private static XFieldEvent toFieldEvent(XydraElement element, XAddress context, TempTrans trans) {
 		
 		XAddress target = SerializingUtils.getAddress(element, context);
 		
@@ -232,7 +232,7 @@ public class SerializedEvent {
 		}
 	}
 	
-	private static XReversibleFieldEvent toReversibleFieldEvent(MiniElement element,
+	private static XReversibleFieldEvent toReversibleFieldEvent(XydraElement element,
 	        XAddress context, TempTrans trans) {
 		
 		XAddress target = SerializingUtils.getAddress(element, context);
@@ -277,7 +277,7 @@ public class SerializedEvent {
 		}
 	}
 	
-	private static XModelEvent toModelEvent(MiniElement element, XAddress context, TempTrans trans) {
+	private static XModelEvent toModelEvent(XydraElement element, XAddress context, TempTrans trans) {
 		
 		if(context != null && (context.getObject() != null || context.getField() != null)) {
 			throw new IllegalArgumentException("invalid context for model events: " + context);
@@ -321,7 +321,7 @@ public class SerializedEvent {
 		}
 	}
 	
-	private static XObjectEvent toObjectEvent(MiniElement element, XAddress context, TempTrans trans) {
+	private static XObjectEvent toObjectEvent(XydraElement element, XAddress context, TempTrans trans) {
 		
 		if(context != null && context.getField() != null) {
 			throw new IllegalArgumentException("invalid context for object events: " + context);
@@ -366,7 +366,7 @@ public class SerializedEvent {
 		}
 	}
 	
-	private static XRepositoryEvent toRepositoryEvent(MiniElement element, XAddress context,
+	private static XRepositoryEvent toRepositoryEvent(XydraElement element, XAddress context,
 	        TempTrans trans) {
 		
 		if(context != null && (context.getObject() != null || context.getField() != null)) {
@@ -421,7 +421,7 @@ public class SerializedEvent {
 		
 	}
 	
-	private static XTransactionEvent toTransactionEvent(MiniElement element, XAddress context) {
+	private static XTransactionEvent toTransactionEvent(XydraElement element, XAddress context) {
 		
 		XAddress target = SerializingUtils.getAddress(element, context);
 		
@@ -437,9 +437,9 @@ public class SerializedEvent {
 		TempTrans tt = new TempTrans(actor, modelRev);
 		
 		List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
-		Iterator<MiniElement> it = element.getChildren(NAME_EVENTS);
+		Iterator<XydraElement> it = element.getChildren(NAME_EVENTS);
 		while(it.hasNext()) {
-			MiniElement event = it.next();
+			XydraElement event = it.next();
 			events.add(toAtomicEvent(event, target, tt));
 		}
 		

@@ -24,7 +24,7 @@ import org.xydra.core.XCompareUtils;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
-import org.xydra.core.serialize.MiniElement;
+import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.SerializedModel;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.xml.XmlOut;
@@ -80,7 +80,7 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		URL objectUrl = dataapi.resolve(DemoModelUtil.PHONEBOOK_ID.toString() + "/").resolve(
 		        DemoModelUtil.JOHN_ID.toString()).toURL();
 		
-		MiniElement objectElement = loadXml(objectUrl);
+		XydraElement objectElement = loadXml(objectUrl);
 		assertNotNull(objectElement);
 		
 		XObject retrievedObject;
@@ -105,7 +105,7 @@ public abstract class DataApiTest extends AbstractRestApiTest {
 		        DemoModelUtil.JOHN_ID.toString() + "/").resolve(DemoModelUtil.PHONE_ID.toString())
 		        .toURL();
 		
-		MiniElement fieldElement = loadXml(fieldUrl);
+		XydraElement fieldElement = loadXml(fieldUrl);
 		assertNotNull(fieldElement);
 		
 		XField retrievedField;

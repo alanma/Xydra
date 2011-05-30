@@ -104,7 +104,7 @@ public class SerializedStore {
 		
 	}
 	
-	public static Throwable toException(MiniElement element) {
+	public static Throwable toException(XydraElement element) {
 		
 		if(element == null || !ELEMENT_XERROR.equals(element.getType())) {
 			return null;
@@ -140,7 +140,7 @@ public class SerializedStore {
 		out.element(ELEMENT_AUTHENTICATED, NAME_AUTHENTICATED, result);
 	}
 	
-	public static boolean toAuthenticationResult(MiniElement xml) {
+	public static boolean toAuthenticationResult(XydraElement xml) {
 		
 		SerializingUtils.checkElementType(xml, ELEMENT_AUTHENTICATED);
 		
@@ -183,12 +183,12 @@ public class SerializedStore {
 		
 	}
 	
-	public static void toCommandResults(MiniElement element, GetEventsRequest[] context,
+	public static void toCommandResults(XydraElement element, GetEventsRequest[] context,
 	        BatchedResult<Long>[] commandResults, BatchedResult<XEvent[]>[] eventResults) {
 		
 		SerializingUtils.checkElementType(element, ELEMENT_RESULTS);
 		
-		MiniElement commandsEle = element.getElement(ELEMENT_COMMANDRESULTS);
+		XydraElement commandsEle = element.getElement(ELEMENT_COMMANDRESULTS);
 		if(commandsEle == null) {
 			throw new IllegalArgumentException("missing command results");
 		}
@@ -197,7 +197,7 @@ public class SerializedStore {
 		
 		getRevisionListContents(commandsEle, commandResults);
 		
-		MiniElement eventsEle = element.getElement(ELEMENT_EVENTRESULTS);
+		XydraElement eventsEle = element.getElement(ELEMENT_EVENTRESULTS);
 		if(eventResults != null && eventsEle != null) {
 			toEventResults(eventsEle, context, eventResults);
 		}
@@ -244,7 +244,7 @@ public class SerializedStore {
 		}
 	}
 	
-	public static void toEventResults(MiniElement element, GetEventsRequest[] context,
+	public static void toEventResults(XydraElement element, GetEventsRequest[] context,
 	        BatchedResult<XEvent[]>[] results) {
 		
 		SerializingUtils.checkElementType(element, ELEMENT_EVENTRESULTS);
@@ -253,9 +253,9 @@ public class SerializedStore {
 		
 		int i = 0;
 		
-		Iterator<MiniElement> it = element.getChildren(NAME_EVENTS);
+		Iterator<XydraElement> it = element.getChildren(NAME_EVENTS);
 		while(it.hasNext()) {
-			MiniElement result = it.next();
+			XydraElement result = it.next();
 			
 			while(results[i] != null) {
 				i++;
@@ -298,7 +298,7 @@ public class SerializedStore {
 		
 	}
 	
-	public static void toModelRevisions(MiniElement element, BatchedResult<Long>[] res) {
+	public static void toModelRevisions(XydraElement element, BatchedResult<Long>[] res) {
 		
 		SerializingUtils.checkElementType(element, ELEMENT_MODEL_REVISIONS);
 		
@@ -317,13 +317,13 @@ public class SerializedStore {
 		}
 	}
 	
-	private static void getRevisionListContents(MiniElement element, BatchedResult<Long>[] results) {
+	private static void getRevisionListContents(XydraElement element, BatchedResult<Long>[] results) {
 		
 		int i = 0;
 		
-		Iterator<MiniElement> it = element.getChildren(NAME_REVISIONS);
+		Iterator<XydraElement> it = element.getChildren(NAME_REVISIONS);
 		while(it.hasNext()) {
-			MiniElement result = it.next();
+			XydraElement result = it.next();
 			
 			while(results[i] != null) {
 				i++;
@@ -399,7 +399,7 @@ public class SerializedStore {
 		
 	}
 	
-	public static List<Object> toSnapshots(MiniElement element, XAddress[] context) {
+	public static List<Object> toSnapshots(XydraElement element, XAddress[] context) {
 		
 		SerializingUtils.checkElementType(element, ELEMENT_SNAPSHOTS);
 		
@@ -407,9 +407,9 @@ public class SerializedStore {
 		
 		int i = 0 - 1;
 		
-		Iterator<MiniElement> it = element.getChildren(NAME_SNAPSHOTS);
+		Iterator<XydraElement> it = element.getChildren(NAME_SNAPSHOTS);
 		while(it.hasNext()) {
-			MiniElement result = it.next();
+			XydraElement result = it.next();
 			i++;
 			
 			try {
@@ -445,7 +445,7 @@ public class SerializedStore {
 		
 	}
 	
-	public static Set<XID> toModelIds(MiniElement element) {
+	public static Set<XID> toModelIds(XydraElement element) {
 		
 		SerializingUtils.checkElementType(element, ELEMENT_MODEL_IDS);
 		
@@ -456,7 +456,7 @@ public class SerializedStore {
 		out.element(ELEMENT_REPOSITORY_ID, NAME_XID, result);
 	}
 	
-	public static XID toRepositoryId(MiniElement element) {
+	public static XID toRepositoryId(XydraElement element) {
 		
 		SerializingUtils.checkElementType(element, ELEMENT_REPOSITORY_ID);
 		

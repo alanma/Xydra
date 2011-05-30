@@ -12,11 +12,11 @@ import org.xydra.base.change.impl.memory.MemoryModelCommand;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.core.change.XTransactionBuilder;
-import org.xydra.core.serialize.MiniElement;
-import org.xydra.core.serialize.MiniParser;
+import org.xydra.core.serialize.XydraElement;
+import org.xydra.core.serialize.XydraParser;
 import org.xydra.core.serialize.SerializedModel;
 import org.xydra.core.serialize.XydraOut;
-import org.xydra.core.serialize.xml.MiniParserXml;
+import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessException;
@@ -62,8 +62,8 @@ public class XObjectResource {
 		XReadableField newField;
 		try {
 			
-			MiniParser parser = new MiniParserXml();
-			MiniElement fieldElement = parser.parse(fieldXml);
+			XydraParser parser = new XmlParser();
+			XydraElement fieldElement = parser.parse(fieldXml);
 			
 			newField = SerializedModel.toField(actorId, fieldElement);
 			

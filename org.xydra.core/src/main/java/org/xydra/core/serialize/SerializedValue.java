@@ -53,7 +53,7 @@ public class SerializedValue {
 	private static final String XSTRINGSET_ELEMENT = "xstringSet";
 	private static final String NAME_DATA = "data";
 	
-	private static List<XAddress> getAddressListContents(MiniElement element) {
+	private static List<XAddress> getAddressListContents(XydraElement element) {
 		
 		List<XAddress> list = new ArrayList<XAddress>();
 		
@@ -65,7 +65,7 @@ public class SerializedValue {
 		return list;
 	}
 	
-	protected static List<XID> getIdListContents(MiniElement element) {
+	protected static List<XID> getIdListContents(XydraElement element) {
 		
 		List<XID> list = new ArrayList<XID>();
 		
@@ -77,7 +77,7 @@ public class SerializedValue {
 		return list;
 	}
 	
-	private static List<String> getStringListContents(MiniElement element) {
+	private static List<String> getStringListContents(XydraElement element) {
 		
 		List<String> list = new ArrayList<String>();
 		
@@ -94,7 +94,7 @@ public class SerializedValue {
 	 * @throws IllegalArgumentException if the given XML/JSON element is not a
 	 *             valid representation of an {@link XAddress}
 	 */
-	public static XAddress toAddress(MiniElement element) {
+	public static XAddress toAddress(XydraElement element) {
 		
 		if(element == null) {
 			return null;
@@ -113,11 +113,11 @@ public class SerializedValue {
 		
 	}
 	
-	private static String getStringContent(MiniElement element) {
+	private static String getStringContent(XydraElement element) {
 		return getNonNullContent(element).toString();
 	}
 	
-	private static Object getNonNullContent(MiniElement element) {
+	private static Object getNonNullContent(XydraElement element) {
 		
 		Object data = element.getContent(NAME_DATA);
 		if(data == null) {
@@ -127,7 +127,7 @@ public class SerializedValue {
 		return data;
 	}
 	
-	private static List<Boolean> getBooleanListContents(MiniElement element) {
+	private static List<Boolean> getBooleanListContents(XydraElement element) {
 		
 		List<Boolean> list = new ArrayList<Boolean>();
 		
@@ -139,7 +139,7 @@ public class SerializedValue {
 		return list;
 	}
 	
-	private static List<Double> getDoubleListContents(MiniElement element) {
+	private static List<Double> getDoubleListContents(XydraElement element) {
 		
 		List<Double> list = new ArrayList<Double>();
 		
@@ -156,7 +156,7 @@ public class SerializedValue {
 	 * @throws IllegalArgumentException if the given XML/JSON element is not a
 	 *             valid representation of an {@link XID}
 	 */
-	public static XID toId(MiniElement element) {
+	public static XID toId(XydraElement element) {
 		
 		if(element == null) {
 			return null;
@@ -174,7 +174,7 @@ public class SerializedValue {
 		
 	}
 	
-	private static List<Integer> getIntegerListContents(MiniElement element) {
+	private static List<Integer> getIntegerListContents(XydraElement element) {
 		
 		List<Integer> list = new ArrayList<Integer>();
 		
@@ -186,7 +186,7 @@ public class SerializedValue {
 		return list;
 	}
 	
-	private static List<Long> getLongListContents(MiniElement element) {
+	private static List<Long> getLongListContents(XydraElement element) {
 		
 		List<Long> list = new ArrayList<Long>();
 		
@@ -204,7 +204,7 @@ public class SerializedValue {
 	 * @throws IllegalArgumentException if the given XML/JSON element is not a
 	 *             valid representation of an {@link XValue}
 	 */
-	public static XValue toValue(MiniElement element) {
+	public static XValue toValue(XydraElement element) {
 		
 		if(element == null) {
 			return null;

@@ -1,20 +1,20 @@
 package org.xydra.core.serialize.json;
 
 import org.xydra.core.serialize.AbstractSerializedCommandTest;
-import org.xydra.core.serialize.MiniParser;
-import org.xydra.core.serialize.XydraOut;
+import org.xydra.core.serialize.XydraParser;
+import org.xydra.core.serialize.XydraSerializer;
 
 
 public class JsonCommandTest extends AbstractSerializedCommandTest {
 	
 	@Override
-	protected XydraOut getNewOut() {
-		return new JsonOut();
+	protected XydraParser getParser() {
+		return new JsonParser();
 	}
 	
 	@Override
-	protected MiniParser getParser() {
-		return new MiniParserJson();
+	protected XydraSerializer getSerializer() {
+		return new JsonSerializer();
 	}
 	
 }

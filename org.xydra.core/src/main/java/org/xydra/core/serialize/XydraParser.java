@@ -6,7 +6,7 @@ package org.xydra.core.serialize;
  * @author dscharrer
  * 
  */
-public interface MiniParser {
+public interface XydraParser {
 	
 	/**
 	 * Parse the given String as a document and return the root element.
@@ -14,6 +14,6 @@ public interface MiniParser {
 	 * @throws IllegalArgumentException if the given string is not a valid
 	 *             document.
 	 */
-	MiniElement parse(String data) throws IllegalArgumentException;
+	XydraElement parse(String data) throws IllegalArgumentException;
 	
 }

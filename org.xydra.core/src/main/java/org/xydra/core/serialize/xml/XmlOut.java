@@ -203,4 +203,9 @@ public class XmlOut extends AbstractXydraOut {
 		
 	}
 	
+	@Override
+	public String getContentType() {
+		return "application/xml";
+	}
+	
 }

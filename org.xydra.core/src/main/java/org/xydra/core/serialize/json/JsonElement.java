@@ -7,7 +7,7 @@ import java.util.Map;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.core.serialize.MiniElement;
+import org.xydra.core.serialize.XydraElement;
 import org.xydra.index.iterator.AbstractTransformingIterator;
 import org.xydra.index.iterator.NoneIterator;
 import org.xydra.index.iterator.SingleValueIterator;
@@ -16,9 +16,9 @@ import org.xydra.index.iterator.SingleValueIterator;
 @RunsInGWT(true)
 @RunsInAppEngine(true)
 @RequiresAppEngine(false)
-public class JsonElement implements MiniElement {
+public class JsonElement implements XydraElement {
 	
-	private static final Iterator<MiniElement> none = new NoneIterator<MiniElement>();
+	private static final Iterator<XydraElement> none = new NoneIterator<XydraElement>();
 	private static final Iterator<Object> noValue = new NoneIterator<Object>();
 	
 	private final Map<String,Object> data;
@@ -53,7 +53,7 @@ public class JsonElement implements MiniElement {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public MiniElement getElement(String type) {
+	public XydraElement getElement(String type) {
 		
 		Object obj = this.data.get(type);
 		if(obj instanceof Map<?,?>) {
@@ -64,41 +64,41 @@ public class JsonElement implements MiniElement {
 	}
 	
 	@Override
-	public Iterator<MiniElement> getChildren(String name) {
+	public Iterator<XydraElement> getChildren(String name) {
 		return getChildren(name, null);
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public Iterator<MiniElement> getChildren(String name, String type) {
+	public Iterator<XydraElement> getChildren(String name, String type) {
 		
 		Object obj = this.data.get(name);
 		if(obj instanceof List<?>) {
 			return transform(((List<?>)obj).iterator(), type);
 		} else if(obj instanceof Map<?,?>) {
-			return new SingleValueIterator<MiniElement>(new JsonElement((Map<String,Object>)obj,
+			return new SingleValueIterator<XydraElement>(new JsonElement((Map<String,Object>)obj,
 			        type));
 		} else if(obj == null && this.data.containsKey(name)) {
-			return new SingleValueIterator<MiniElement>(null);
+			return new SingleValueIterator<XydraElement>(null);
 		} else {
 			return none;
 		}
 	}
 	
 	@Override
-	public MiniElement getChild(String name, int index) {
+	public XydraElement getChild(String name, int index) {
 		return getChild(name, null);
 	}
 	
 	@Override
-	public MiniElement getChild(String name, String type) {
+	public XydraElement getChild(String name, String type) {
 		return wrap(this.data.get(name), type);
 	}
 	
-	protected static Iterator<MiniElement> transform(Iterator<?> iterator, final String type) {
-		return new AbstractTransformingIterator<Object,MiniElement>(iterator) {
+	protected static Iterator<XydraElement> transform(Iterator<?> iterator, final String type) {
+		return new AbstractTransformingIterator<Object,XydraElement>(iterator) {
 			@Override
-			public MiniElement transform(Object in) {
+			public XydraElement transform(Object in) {
 				return wrap(in, type);
 			}
 		};
@@ -155,12 +155,12 @@ public class JsonElement implements MiniElement {
 	}
 	
 	@Override
-	public MiniElement getChild(String name) {
+	public XydraElement getChild(String name) {
 		return getChild(name, 0);
 	}
 	
 	@SuppressWarnings("unchecked")
-	private static MiniElement wrap(Object obj, String type) {
+	private static XydraElement wrap(Object obj, String type) {
 		
 		if(obj instanceof List<?>) {
 			return new JsonArray((List<Object>)obj, type);

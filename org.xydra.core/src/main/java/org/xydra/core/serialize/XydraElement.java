@@ -11,7 +11,7 @@ import java.util.Iterator;
  * @author dscharrer
  * 
  */
-public interface MiniElement {
+public interface XydraElement {
 	
 	/**
 	 * Get an attribute of this element.
@@ -62,7 +62,7 @@ public interface MiniElement {
 	 *            for XML. For JSON this determines the property name.
 	 * @return all child elements in document order
 	 */
-	public Iterator<MiniElement> getChildren(String name);
+	public Iterator<XydraElement> getChildren(String name);
 	
 	/**
 	 * Get all child elements of a specific type.
@@ -84,7 +84,7 @@ public interface MiniElement {
 	 *            stored in the JSON.
 	 * @return all matching child elements in document order
 	 */
-	public Iterator<MiniElement> getChildren(String name, String type);
+	public Iterator<XydraElement> getChildren(String name, String type);
 	
 	/**
 	 * Get the first child element.
@@ -104,7 +104,7 @@ public interface MiniElement {
 	 *            XML. For JSON this determines the property name.
 	 * @return the first child element in document order
 	 */
-	public MiniElement getChild(String name);
+	public XydraElement getChild(String name);
 	
 	/**
 	 * Get the i'th child element.
@@ -126,7 +126,7 @@ public interface MiniElement {
 	 *            JSON.
 	 * @return the child element in document order at the given index
 	 */
-	public MiniElement getChild(String name, int index);
+	public XydraElement getChild(String name, int index);
 	
 	/**
 	 * Get the first child element of a specific type.
@@ -149,7 +149,7 @@ public interface MiniElement {
 	 *            stored in the JSON.
 	 * @return the first matching child element in document order
 	 */
-	public MiniElement getChild(String name, String type);
+	public XydraElement getChild(String name, String type);
 	
 	/**
 	 * Get the child element of a specific type.
@@ -169,7 +169,7 @@ public interface MiniElement {
 	 *            also determines the property name.
 	 * @return the first matching child element in document order
 	 */
-	public MiniElement getElement(String type);
+	public XydraElement getElement(String type);
 	
 	/**
 	 * @return The type of this element. This is never null.

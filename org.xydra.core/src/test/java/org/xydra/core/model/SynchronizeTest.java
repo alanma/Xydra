@@ -41,11 +41,11 @@ import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.core.model.impl.memory.SynchronizesChangesImpl;
-import org.xydra.core.serialize.MiniElement;
+import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.SerializedCommand;
 import org.xydra.core.serialize.SerializedEvent;
 import org.xydra.core.serialize.XydraOut;
-import org.xydra.core.serialize.xml.MiniParserXml;
+import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.core.serialize.xml.XmlOut;
 
 
@@ -123,7 +123,7 @@ public class SynchronizeTest {
 		XydraOut out = new XmlOut();
 		SerializedCommand.serialize(command, out, this.localModel.getAddress());
 		
-		MiniElement e = new MiniParserXml().parse(out.getData());
+		XydraElement e = new XmlParser().parse(out.getData());
 		return SerializedCommand.toCommand(e, this.remoteModel.getAddress());
 		
 	}
@@ -133,7 +133,7 @@ public class SynchronizeTest {
 		XydraOut out = new XmlOut();
 		SerializedEvent.serialize(event, out, this.remoteModel.getAddress());
 		
-		MiniElement e = new MiniParserXml().parse(out.getData());
+		XydraElement e = new XmlParser().parse(out.getData());
 		return SerializedEvent.toEvent(e, this.localModel.getAddress());
 		
 	}

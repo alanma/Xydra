@@ -43,14 +43,14 @@ public interface XydraOut {
 	 * 
 	 * <p>
 	 * Child elements can be retrieved using
-	 * {@link MiniElement#getElement(String)} if created in an element context
-	 * using {@link MiniElement#getChild(String)} or
-	 * {@link MiniElement#getChild(String, int)} if created in an untyped
+	 * {@link XydraElement#getElement(String)} if created in an element context
+	 * using {@link XydraElement#getChild(String)} or
+	 * {@link XydraElement#getChild(String, int)} if created in an untyped
 	 * single-item child list, using
-	 * {@link MiniElement#getChild(String, String)} if created in a typed
-	 * single-item child list, using {@link MiniElement#getChildren(String)}
+	 * {@link XydraElement#getChild(String, String)} if created in a typed
+	 * single-item child list, using {@link XydraElement#getChildren(String)}
 	 * when created in an untyped multiple-item child list or array and using
-	 * {@link MiniElement#getValues(String, String)} when created in a typed
+	 * {@link XydraElement#getValues(String, String)} when created in a typed
 	 * multiple-array child list or array.
 	 * </p>
 	 * 
@@ -85,7 +85,7 @@ public interface XydraOut {
 	 * 
 	 * <p>
 	 * Attributes can be retrieved using
-	 * {@link MiniElement#getAttribute(String)}.
+	 * {@link XydraElement#getAttribute(String)}.
 	 * </p>
 	 * 
 	 * @param <T> The type of the attribute. Some types like {@link Boolean
@@ -140,16 +140,16 @@ public interface XydraOut {
 	 * 
 	 * <p>
 	 * Child elements can be retrieved using
-	 * {@link MiniElement#getChild(String)} or
-	 * {@link MiniElement#getChild(String, int)} if created in an single-item
-	 * child list or using {@link MiniElement#getChildren(String)} when created
+	 * {@link XydraElement#getChild(String)} or
+	 * {@link XydraElement#getChild(String, int)} if created in an single-item
+	 * child list or using {@link XydraElement#getChildren(String)} when created
 	 * in an multiple-item child list.
 	 * 
-	 * Arrays are retrieved as {@link MiniElement}s with no text content.
+	 * Arrays are retrieved as {@link XydraElement}s with no text content.
 	 * 
-	 * Values can be retrieved using {@link MiniElement#getValue(String, int)}
+	 * Values can be retrieved using {@link XydraElement#getValue(String, int)}
 	 * for single-item child lists or using
-	 * {@link MiniElement#getValues(String)} for multiple-item child lists.
+	 * {@link XydraElement#getValues(String)} for multiple-item child lists.
 	 * </p>
 	 * 
 	 * @param name A name for the child list. This must not be null and a unique
@@ -205,15 +205,16 @@ public interface XydraOut {
 	 * 
 	 * <p>
 	 * Child elements can be retrieved using
-	 * {@link MiniElement#getChild(String, String)} if created in an single-item
-	 * child list or using {@link MiniElement#getChildren(String, String)} when
-	 * created in an multiple-item child list.
+	 * {@link XydraElement#getChild(String, String)} if created in an
+	 * single-item child list or using
+	 * {@link XydraElement#getChildren(String, String)} when created in an
+	 * multiple-item child list.
 	 * 
-	 * Arrays are retrieved as {@link MiniElement}s with no text content.
+	 * Arrays are retrieved as {@link XydraElement}s with no text content.
 	 * 
 	 * Values can be retrieved using
-	 * {@link MiniElement#getValue(String, String)} for single-item child lists
-	 * or using {@link MiniElement#getValues(String, String)} for multiple-item
+	 * {@link XydraElement#getValue(String, String)} for single-item child lists
+	 * or using {@link XydraElement#getValues(String, String)} for multiple-item
 	 * child lists.
 	 * </p>
 	 * 
@@ -278,13 +279,13 @@ public interface XydraOut {
 	 * </p>
 	 * 
 	 * <p>
-	 * Arrays are retrieved as {@link MiniElement}s with no text content.
+	 * Arrays are retrieved as {@link XydraElement}s with no text content.
 	 * 
 	 * Child elements can be retrieved using
-	 * {@link MiniElement#getChildren(String)} on the array element. The name
+	 * {@link XydraElement#getChildren(String)} on the array element. The name
 	 * parameter is ignored.
 	 * 
-	 * Values can be retrieved using {@link MiniElement#getValues(String)} on
+	 * Values can be retrieved using {@link XydraElement#getValues(String)} on
 	 * the array element. The name parameter is ignored.
 	 * </p>
 	 * 
@@ -334,13 +335,13 @@ public interface XydraOut {
 	 * </p>
 	 * 
 	 * <p>
-	 * Arrays are retrieved as {@link MiniElement}s with no text content.
+	 * Arrays are retrieved as {@link XydraElement}s with no text content.
 	 * 
 	 * Child elements can be retrieved using
-	 * {@link MiniElement#getChildren(String)} on the array element. The name
+	 * {@link XydraElement#getChildren(String)} on the array element. The name
 	 * parameter is ignored.
 	 * 
-	 * Values can be retrieved using {@link MiniElement#getValues(String)} on
+	 * Values can be retrieved using {@link XydraElement#getValues(String)} on
 	 * the array element. The name parameter is ignored.
 	 * </p>
 	 * 
@@ -402,12 +403,12 @@ public interface XydraOut {
 	 * </p>
 	 * 
 	 * <p>
-	 * Values can be retrieved using {@link MiniElement#getValue(String, int)}
+	 * Values can be retrieved using {@link XydraElement#getValue(String, int)}
 	 * for untyped single-item contexts, using
-	 * {@link MiniElement#getValue(String, String)} for typed single-item
-	 * contexts, using {@link MiniElement#getValues(String)} for untyped
+	 * {@link XydraElement#getValue(String, String)} for typed single-item
+	 * contexts, using {@link XydraElement#getValues(String)} for untyped
 	 * multiple-item contexts and using
-	 * {@link MiniElement#getValues(String, String)} for typed multiple-item
+	 * {@link XydraElement#getValues(String, String)} for typed multiple-item
 	 * contexts. Array contexts are always multiple-item.
 	 * </p>
 	 * 
@@ -574,7 +575,7 @@ public interface XydraOut {
 	 * </p>
 	 * 
 	 * <p>
-	 * This can be decoded using {@link MiniElement#getValues(String, String)}
+	 * This can be decoded using {@link XydraElement#getValues(String, String)}
 	 * </p>
 	 * 
 	 * @see #beginChildren(String, boolean, String)
@@ -620,7 +621,7 @@ public interface XydraOut {
 	 * </p>
 	 * 
 	 * <p>
-	 * This can be decoded using {@link MiniElement#getValue(String, String)}
+	 * This can be decoded using {@link XydraElement#getValue(String, String)}
 	 * </p>
 	 * 
 	 * @see #beginChildren(String, boolean, String)
@@ -737,5 +738,10 @@ public interface XydraOut {
 	 * @see #close(String)
 	 */
 	<T> void element(String type);
+	
+	/**
+	 * @return the MIME content type of the produced output.
+	 */
+	String getContentType();
 	
 }

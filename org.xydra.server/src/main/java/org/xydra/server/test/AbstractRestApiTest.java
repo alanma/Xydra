@@ -31,9 +31,9 @@ import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryRepository;
-import org.xydra.core.serialize.MiniElement;
+import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.SerializedModel;
-import org.xydra.core.serialize.xml.MiniParserXml;
+import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.server.IXydraServer;
@@ -189,7 +189,7 @@ public abstract class AbstractRestApiTest {
 		return resp;
 	}
 	
-	protected MiniElement loadXml(URL url) throws IOException {
+	protected XydraElement loadXml(URL url) throws IOException {
 		HttpURLConnection c = (HttpURLConnection)url.openConnection();
 		setLoginDetails(c);
 		c.connect();
@@ -203,7 +203,7 @@ public abstract class AbstractRestApiTest {
 		String data = readAll((InputStream)c.getContent());
 		
 		try {
-			return new MiniParserXml().parse(data);
+			return new XmlParser().parse(data);
 		} catch(IllegalArgumentException iae) {
 			fail(iae.getMessage());
 			throw new RuntimeException();
@@ -214,7 +214,7 @@ public abstract class AbstractRestApiTest {
 		
 		URL modelUrl = dataapi.resolve(modelId.toString()).toURL();
 		
-		MiniElement modelElement = loadXml(modelUrl);
+		XydraElement modelElement = loadXml(modelUrl);
 		if(modelElement == null) {
 			return null;
 		}

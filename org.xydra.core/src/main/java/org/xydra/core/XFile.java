@@ -12,10 +12,10 @@ import org.xydra.base.XID;
 import org.xydra.base.rmof.XReadableRepository;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.serialize.MiniElement;
+import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.SerializedModel;
 import org.xydra.core.serialize.XydraOut;
-import org.xydra.core.serialize.xml.MiniParserXml;
+import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.minio.MiniStreamWriter;
 
@@ -69,7 +69,7 @@ public class XFile {
 		FileInputStream fin = new FileInputStream(file);
 		
 		String data = readAll(fin);
-		MiniElement element = new MiniParserXml().parse(data);
+		XydraElement element = new XmlParser().parse(data);
 		
 		return SerializedModel.toModel(actorId, passwordHash, element);
 	}
@@ -121,7 +121,7 @@ public class XFile {
 		FileInputStream fin = new FileInputStream(file);
 		
 		String data = readAll(fin);
-		MiniElement element = new MiniParserXml().parse(data);
+		XydraElement element = new XmlParser().parse(data);
 		
 		return SerializedModel.toRepository(actorId, passwordHash, element);
 	}

@@ -37,7 +37,7 @@ import org.xydra.minio.MiniStringReader;
  * @author JSON.org
  * @version 2008-09-18
  */
-public class JsonParser {
+public class JsonParserSAJ {
 	
 	private int index;
 	private MiniReader reader;
@@ -50,7 +50,7 @@ public class JsonParser {
 	 * 
 	 * @param saj A {@link SAJ} reader.
 	 */
-	public JsonParser(SAJ saj) {
+	public JsonParserSAJ(SAJ saj) {
 		this.useLastChar = false;
 		this.index = 0;
 		this.saj = saj;

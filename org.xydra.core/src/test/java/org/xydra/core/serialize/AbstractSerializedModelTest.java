@@ -35,11 +35,7 @@ import org.xydra.log.LoggerFactory;
  * @author dscharrer
  * 
  */
-abstract public class AbstractSerializedModelTest {
-	
-	protected abstract XydraOut getNewOut();
-	
-	protected abstract MiniParser getParser();
+abstract public class AbstractSerializedModelTest extends AbstractSerializingTest {
 	
 	private static final Logger log = getLogger();
 	
@@ -97,22 +93,22 @@ abstract public class AbstractSerializedModelTest {
 	private void testField(XReadableField field) {
 		
 		// test serializing with revisions
-		XydraOut out = getNewOut();
+		XydraOut out = create();
 		SerializedModel.serialize(field, out);
 		assertTrue(out.isClosed());
-		String xml = out.getData();
-		log.debug(xml);
-		MiniElement e = getParser().parse(xml);
+		String data = out.getData();
+		log.debug(data);
+		XydraElement e = parse(data);
 		XField fieldAgain = SerializedModel.toField(this.actorId, e);
 		assertTrue(XCompareUtils.equalState(field, fieldAgain));
 		
 		// test serializing without revisions
-		out = getNewOut();
+		out = create();
 		SerializedModel.serialize(field, out, false);
 		assertTrue(out.isClosed());
-		xml = out.getData();
-		log.debug(xml);
-		e = getParser().parse(xml);
+		data = out.getData();
+		log.debug(data);
+		e = parse(data);
 		fieldAgain = SerializedModel.toField(this.actorId, e);
 		assertTrue(XCompareUtils.equalTree(field, fieldAgain));
 		checkNoRevisions(fieldAgain);
@@ -150,12 +146,12 @@ abstract public class AbstractSerializedModelTest {
 	private void testModel(XReadableModel model) {
 		
 		// test serializing with revisions
-		XydraOut out = getNewOut();
+		XydraOut out = create();
 		SerializedModel.serialize(model, out);
 		assertTrue(out.isClosed());
-		String xml = out.getData();
-		log.debug(xml);
-		MiniElement e = getParser().parse(xml);
+		String data = out.getData();
+		log.debug(data);
+		XydraElement e = parse(data);
 		XModel modelAgain = SerializedModel.toModel(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalState(model, modelAgain));
 		
@@ -164,12 +160,12 @@ abstract public class AbstractSerializedModelTest {
 		assertNotNull(changeLog);
 		
 		// test serializing without revisions
-		out = getNewOut();
+		out = create();
 		SerializedModel.serialize(model, out, false, true, false);
 		assertTrue(out.isClosed());
-		xml = out.getData();
-		log.debug(xml);
-		e = getParser().parse(xml);
+		data = out.getData();
+		log.debug(data);
+		e = parse(data);
 		modelAgain = SerializedModel.toModel(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalTree(model, modelAgain));
 		checkNoRevisions(modelAgain);
@@ -179,12 +175,12 @@ abstract public class AbstractSerializedModelTest {
 	private void testObject(XReadableObject object) {
 		
 		// test serializing with revisions
-		XydraOut out = getNewOut();
+		XydraOut out = create();
 		SerializedModel.serialize(object, out);
 		assertTrue(out.isClosed());
-		String xml = out.getData();
-		log.debug(xml);
-		MiniElement e = getParser().parse(xml);
+		String data = out.getData();
+		log.debug(data);
+		XydraElement e = parse(data);
 		XObject objectAgain = SerializedModel.toObject(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalState(object, objectAgain));
 		
@@ -193,12 +189,12 @@ abstract public class AbstractSerializedModelTest {
 		assertNotNull(changeLog);
 		
 		// test serializing without revisions
-		out = getNewOut();
+		out = create();
 		SerializedModel.serialize(object, out, false, true, false);
 		assertTrue(out.isClosed());
-		xml = out.getData();
-		log.debug(xml);
-		e = getParser().parse(xml);
+		data = out.getData();
+		log.debug(data);
+		e = parse(data);
 		objectAgain = SerializedModel.toObject(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalTree(object, objectAgain));
 		checkNoRevisions(objectAgain);
@@ -208,22 +204,22 @@ abstract public class AbstractSerializedModelTest {
 	private void testRepository(XReadableRepository repo) {
 		
 		// test serializing with revisions
-		XydraOut out = getNewOut();
+		XydraOut out = create();
 		SerializedModel.serialize(repo, out);
 		assertTrue(out.isClosed());
-		String xml = out.getData();
-		log.debug(xml);
-		MiniElement e = getParser().parse(xml);
+		String data = out.getData();
+		log.debug(data);
+		XydraElement e = parse(data);
 		XRepository repoAgain = SerializedModel.toRepository(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalState(repo, repoAgain));
 		
 		// test serializing without revisions
-		out = getNewOut();
+		out = create();
 		SerializedModel.serialize(repo, out, false, true, false);
 		assertTrue(out.isClosed());
-		xml = out.getData();
-		log.debug(xml);
-		e = getParser().parse(xml);
+		data = out.getData();
+		log.debug(data);
+		e = parse(data);
 		repoAgain = SerializedModel.toRepository(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalTree(repo, repoAgain));
 		checkNoRevisions(repoAgain);

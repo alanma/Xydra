@@ -8,8 +8,8 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.client.Callback;
 import org.xydra.client.XChangesService;
-import org.xydra.core.serialize.MiniElement;
-import org.xydra.core.serialize.MiniParser;
+import org.xydra.core.serialize.XydraElement;
+import org.xydra.core.serialize.XydraParser;
 import org.xydra.core.serialize.SerializedCommand;
 import org.xydra.core.serialize.SerializedEvent;
 import org.xydra.core.serialize.XydraOut;
@@ -28,7 +28,7 @@ import com.google.gwt.http.client.Response;
  */
 public class GWTChangesService extends AbstractGWTHttpService implements XChangesService {
 	
-	public GWTChangesService(String baseUrl, MiniParser parser) {
+	public GWTChangesService(String baseUrl, XydraParser parser) {
 		super(baseUrl, parser);
 	}
 	
@@ -110,7 +110,7 @@ public class GWTChangesService extends AbstractGWTHttpService implements XChange
 					
 					if(entity.getModel() != null && (result == 0 || since != NONE)) {
 						
-						MiniElement element = GWTChangesService.this.parser
+						XydraElement element = GWTChangesService.this.parser
 						        .parse(resp.getText());
 						events = SerializedEvent.toEventList(element, context);
 						
@@ -156,13 +156,13 @@ public class GWTChangesService extends AbstractGWTHttpService implements XChange
 		
 		String url = getUrl(entity, since, until);
 		
-		getXml(url, new Callback<MiniElement>() {
+		getXml(url, new Callback<XydraElement>() {
 			
 			public void onFailure(Throwable error) {
 				callback.onFailure(error);
 			}
 			
-			public void onSuccess(MiniElement xml) {
+			public void onSuccess(XydraElement xml) {
 				List<XEvent> events;
 				try {
 					events = SerializedEvent.toEventList(xml, context);

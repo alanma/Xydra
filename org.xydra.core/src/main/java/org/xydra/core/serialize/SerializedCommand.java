@@ -49,7 +49,7 @@ public class SerializedCommand {
 	private static final String REVISION_RELATIVE_ATTRIBUTE = "relative";
 	private static final String XCOMMANDLIST_ELEMENT = "xcommands";
 	
-	private static long getRevision(MiniElement element, boolean revisioned) {
+	private static long getRevision(XydraElement element, boolean revisioned) {
 		
 		Object forcedString = element.getAttribute(FORCED_ATTRIBUTE);
 		Object revisionString = element.getAttribute(REVISION_ATTRIBUTE);
@@ -124,7 +124,7 @@ public class SerializedCommand {
 		
 	}
 	
-	private static XAtomicCommand toAtomicCommand(MiniElement element, XAddress context)
+	private static XAtomicCommand toAtomicCommand(XydraElement element, XAddress context)
 	        throws ParsingError {
 		String name = element.getType();
 		if(name.equals(XFIELDCOMMAND_ELEMENT)) {
@@ -152,7 +152,7 @@ public class SerializedCommand {
 	 *             valid command.
 	 * 
 	 */
-	public static XCommand toCommand(MiniElement element, XAddress context)
+	public static XCommand toCommand(XydraElement element, XAddress context)
 	        throws IllegalArgumentException {
 		String name = element.getType();
 		if(name.equals(XTRANSACTION_ELEMENT)) {
@@ -162,7 +162,7 @@ public class SerializedCommand {
 		}
 	}
 	
-	private static XFieldCommand toFieldCommand(MiniElement element, XAddress context) {
+	private static XFieldCommand toFieldCommand(XydraElement element, XAddress context) {
 		
 		SerializingUtils.checkElementType(element, XFIELDCOMMAND_ELEMENT);
 		
@@ -191,7 +191,7 @@ public class SerializedCommand {
 		}
 	}
 	
-	private static XModelCommand toModelCommand(MiniElement element, XAddress context) {
+	private static XModelCommand toModelCommand(XydraElement element, XAddress context) {
 		
 		SerializingUtils.checkElementType(element, XMODELCOMMAND_ELEMENT);
 		
@@ -226,7 +226,7 @@ public class SerializedCommand {
 		}
 	}
 	
-	private static XObjectCommand toObjectCommand(MiniElement element, XAddress context) {
+	private static XObjectCommand toObjectCommand(XydraElement element, XAddress context) {
 		
 		SerializingUtils.checkElementType(element, XOBJECTCOMMAND_ELEMENT);
 		
@@ -262,7 +262,7 @@ public class SerializedCommand {
 		}
 	}
 	
-	private static XRepositoryCommand toRepositoryCommand(MiniElement element, XAddress context) {
+	private static XRepositoryCommand toRepositoryCommand(XydraElement element, XAddress context) {
 		
 		SerializingUtils.checkElementType(element, XREPOSITORYCOMMAND_ELEMENT);
 		
@@ -300,7 +300,7 @@ public class SerializedCommand {
 		}
 	}
 	
-	private static XTransaction toTransaction(MiniElement element, XAddress context) {
+	private static XTransaction toTransaction(XydraElement element, XAddress context) {
 		
 		SerializingUtils.checkElementType(element, XTRANSACTION_ELEMENT);
 		
@@ -312,9 +312,9 @@ public class SerializedCommand {
 		}
 		
 		List<XAtomicCommand> commands = new ArrayList<XAtomicCommand>();
-		Iterator<MiniElement> it = element.getChildren(NAME_COMMANDS);
+		Iterator<XydraElement> it = element.getChildren(NAME_COMMANDS);
 		while(it.hasNext()) {
-			MiniElement command = it.next();
+			XydraElement command = it.next();
 			commands.add(toAtomicCommand(command, target));
 		}
 		
@@ -432,8 +432,8 @@ public class SerializedCommand {
 	 * @param context The part of this event's target address that doesn't need
 	 *            to be encoded in the element.
 	 */
-	public static void serialize(Iterator<XCommand> commands, XydraOut out, XAddress context)
-	        throws IllegalArgumentException {
+	public static void serialize(Iterator<? extends XCommand> commands, XydraOut out,
+	        XAddress context) throws IllegalArgumentException {
 		
 		out.open(XCOMMANDLIST_ELEMENT);
 		
@@ -460,14 +460,14 @@ public class SerializedCommand {
 	 *             represent a valid command list.
 	 * 
 	 */
-	public static List<XCommand> toCommandList(MiniElement element, XAddress context) {
+	public static List<XCommand> toCommandList(XydraElement element, XAddress context) {
 		
 		SerializingUtils.checkElementType(element, XCOMMANDLIST_ELEMENT);
 		
 		List<XCommand> events = new ArrayList<XCommand>();
-		Iterator<MiniElement> it = element.getChildren(NAME_COMMANDS);
+		Iterator<XydraElement> it = element.getChildren(NAME_COMMANDS);
 		while(it.hasNext()) {
-			MiniElement command = it.next();
+			XydraElement command = it.next();
 			events.add(toCommand(command, context));
 		}
 		

@@ -217,4 +217,9 @@ public class JsonOut extends AbstractXydraOut {
 		
 	}
 	
+	@Override
+	public String getContentType() {
+		return "application/json";
+	}
+	
 }

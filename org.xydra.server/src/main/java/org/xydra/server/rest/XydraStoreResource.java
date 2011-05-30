@@ -16,13 +16,13 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
-import org.xydra.core.serialize.MiniElement;
+import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.SerializedCommand;
 import org.xydra.core.serialize.SerializedStore;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.SerializedStore.EventsRequest;
 import org.xydra.core.serialize.json.JsonOut;
-import org.xydra.core.serialize.xml.MiniParserXml;
+import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.index.query.Pair;
 import org.xydra.minio.MiniStreamWriter;
 import org.xydra.restless.Restless;
@@ -170,7 +170,7 @@ public class XydraStoreResource {
 		String commandsXml = XydraRestServer.readPostData(req);
 		List<XCommand> commandsList;
 		try {
-			MiniElement xml = new MiniParserXml().parse(commandsXml);
+			XydraElement xml = new XmlParser().parse(commandsXml);
 			commandsList = SerializedCommand.toCommandList(xml, repoAddr);
 		} catch(Exception e) {
 			throw new RequestException("error parsing commands list: " + e.getMessage());

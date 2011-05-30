@@ -8,7 +8,7 @@ import org.xydra.json.BuilderSAJ;
 import org.xydra.json.DumpSAJ;
 import org.xydra.json.JSONException;
 import org.xydra.json.JSONObject;
-import org.xydra.json.JsonParser;
+import org.xydra.json.JsonParserSAJ;
 import org.xydra.json.SAJ;
 
 
@@ -21,7 +21,7 @@ public class TestJsonParser {
 	@Test
 	public void testSimple() throws JSONException {
 		SAJ saj = new DumpSAJ();
-		JsonParser jsonParser = new JsonParser(saj);
+		JsonParserSAJ jsonParser = new JsonParserSAJ(saj);
 		jsonParser.parse(test);
 	}
 	
@@ -32,7 +32,7 @@ public class TestJsonParser {
 		BroadcastSAJ broadcastSAJ = new BroadcastSAJ();
 		broadcastSAJ.addSAJ(saj);
 		broadcastSAJ.addSAJ(dumpSAJ);
-		JsonParser jsonParser = new JsonParser(broadcastSAJ);
+		JsonParserSAJ jsonParser = new JsonParserSAJ(broadcastSAJ);
 		jsonParser.parse(test);
 		Object o = saj.getParsed();
 		assertTrue(o instanceof JSONObject);

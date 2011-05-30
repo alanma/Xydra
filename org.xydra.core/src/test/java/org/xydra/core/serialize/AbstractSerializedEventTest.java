@@ -32,7 +32,7 @@ import org.xydra.log.LoggerFactory;
  * @author dscharrer
  * 
  */
-abstract public class AbstractSerializedEventTest {
+abstract public class AbstractSerializedEventTest extends AbstractSerializingTest {
 	
 	private static final Logger log = getLogger();
 	
@@ -333,34 +333,30 @@ abstract public class AbstractSerializedEventTest {
 	
 	private void testEvent(XEvent event) {
 		
-		XydraOut out = getNewOut();
+		XydraOut out = create();
 		SerializedEvent.serialize(event, out, null);
 		assertTrue(out.isClosed());
-		String xml = out.getData();
+		String data = out.getData();
 		
-		log.debug(xml);
+		log.debug(data);
 		
-		MiniElement e = getParser().parse(xml);
+		XydraElement e = parse(data);
 		XEvent eventAgain = SerializedEvent.toEvent(e, null);
 		assertEquals(event, eventAgain);
 		
 		// now test with a different context
 		
-		out = getNewOut();
+		out = create();
 		SerializedEvent.serialize(event, out, event.getTarget());
 		assertTrue(out.isClosed());
-		xml = out.getData();
+		data = out.getData();
 		
-		log.debug(xml);
+		log.debug(data);
 		
-		e = getParser().parse(xml);
+		e = parse(data);
 		eventAgain = SerializedEvent.toEvent(e, event.getTarget());
 		assertEquals(event, eventAgain);
 		
 	}
-	
-	protected abstract XydraOut getNewOut();
-	
-	protected abstract MiniParser getParser();
 	
 }

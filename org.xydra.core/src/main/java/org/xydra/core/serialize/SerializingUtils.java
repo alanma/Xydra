@@ -28,13 +28,13 @@ class SerializingUtils {
 	protected static final String TYPE_ATTRIBUTE = "type";
 	protected static final String XID_ATTRIBUTE = "xid";
 	
-	protected static void checkElementType(MiniElement element, String expectedName) {
+	protected static void checkElementType(XydraElement element, String expectedName) {
 		if(element == null || !element.getType().equals(expectedName)) {
 			throw new ParsingError(element, "Expected <" + expectedName + "> element.");
 		}
 	}
 	
-	protected static ChangeType getChangeType(MiniElement element) {
+	protected static ChangeType getChangeType(XydraElement element) {
 		Object typeString = getRequiredAttribute(element, TYPE_ATTRIBUTE);
 		ChangeType type = ChangeType.fromString(typeString.toString());
 		if(type == null) {
@@ -44,7 +44,7 @@ class SerializingUtils {
 		return type;
 	}
 	
-	protected static XID getOptionalXidAttribute(MiniElement element, String attributeName, XID def) {
+	protected static XID getOptionalXidAttribute(XydraElement element, String attributeName, XID def) {
 		Object xidString = element.getAttribute(attributeName);
 		if(xidString == null) {
 			return def;
@@ -52,7 +52,7 @@ class SerializingUtils {
 		return XX.toId(xidString.toString());
 	}
 	
-	protected static Object getRequiredAttribute(MiniElement element, String attribute) {
+	protected static Object getRequiredAttribute(XydraElement element, String attribute) {
 		Object value = element.getAttribute(attribute);
 		if(value == null) {
 			throw new ParsingError(element, "Missing attribute '" + attribute + "'.");
@@ -60,13 +60,13 @@ class SerializingUtils {
 		return value;
 	}
 	
-	protected static XID getRequiredXidAttribute(MiniElement element) {
+	protected static XID getRequiredXidAttribute(XydraElement element) {
 		Object xidString = getRequiredAttribute(element, XID_ATTRIBUTE);
 		return XX.toId(xidString.toString());
 	}
 	
 	@SuppressWarnings("null")
-	protected static XAddress getAddress(MiniElement element, XAddress context) {
+	protected static XAddress getAddress(XydraElement element, XAddress context) {
 		
 		boolean match = (context != null);
 		

@@ -1,20 +1,20 @@
 package org.xydra.core.serialize.xml;
 
 import org.xydra.core.serialize.AbstractSerializedModelTest;
-import org.xydra.core.serialize.MiniParser;
-import org.xydra.core.serialize.XydraOut;
+import org.xydra.core.serialize.XydraParser;
+import org.xydra.core.serialize.XydraSerializer;
 
 
 public class XmlModelTest extends AbstractSerializedModelTest {
 	
 	@Override
-	protected XydraOut getNewOut() {
-		return new XmlOut();
+	protected XydraParser getParser() {
+		return new XmlParser();
 	}
 	
 	@Override
-	protected MiniParser getParser() {
-		return new MiniParserXml();
+	protected XydraSerializer getSerializer() {
+		return new XmlSerializer();
 	}
 	
 }

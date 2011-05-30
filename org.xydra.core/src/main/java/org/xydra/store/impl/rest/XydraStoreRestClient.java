@@ -25,11 +25,11 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
-import org.xydra.core.serialize.MiniElement;
+import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.SerializedCommand;
 import org.xydra.core.serialize.SerializedStore;
 import org.xydra.core.serialize.XydraOut;
-import org.xydra.core.serialize.xml.MiniParserXml;
+import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.index.query.Pair;
 import org.xydra.store.BatchedResult;
@@ -73,7 +73,7 @@ public class XydraStoreRestClient implements XydraStore {
 	public void checkLogin(XID actorId, String passwordHash, Callback<Boolean> callback)
 	        throws IllegalArgumentException {
 		
-		MiniElement xml = get("login", actorId, passwordHash, callback);
+		XydraElement xml = get("login", actorId, passwordHash, callback);
 		if(xml == null) {
 			return;
 		}
@@ -108,7 +108,7 @@ public class XydraStoreRestClient implements XydraStore {
 		return readAll(is);
 	}
 	
-	private MiniElement post(String uri, XID actorId, String passwordHash, String data,
+	private XydraElement post(String uri, XID actorId, String passwordHash, String data,
 	        Callback<?> callback) {
 		
 		URL url;
@@ -144,7 +144,7 @@ public class XydraStoreRestClient implements XydraStore {
 				return null;
 			}
 			
-			MiniElement xml = new MiniParserXml().parse(content);
+			XydraElement xml = new XmlParser().parse(content);
 			
 			Throwable t = SerializedStore.toException(xml);
 			if(t != null) {
@@ -175,7 +175,7 @@ public class XydraStoreRestClient implements XydraStore {
 		XydraOut out = new XmlOut();
 		SerializedCommand.serialize(Arrays.asList(commands).iterator(), out, null);
 		
-		MiniElement xml = post("execute", actorId, passwordHash, out.getData(), callback);
+		XydraElement xml = post("execute", actorId, passwordHash, out.getData(), callback);
 		if(xml == null) {
 			return;
 		}
@@ -214,7 +214,7 @@ public class XydraStoreRestClient implements XydraStore {
 		XydraOut out = new XmlOut();
 		SerializedCommand.serialize(Arrays.asList(commands).iterator(), out, null);
 		
-		MiniElement xml = post(uri, actorId, passwordHash, out.getData(), callback);
+		XydraElement xml = post(uri, actorId, passwordHash, out.getData(), callback);
 		if(xml == null) {
 			return;
 		}
@@ -307,7 +307,7 @@ public class XydraStoreRestClient implements XydraStore {
 		
 		String uri = "events?" + req;
 		
-		MiniElement xml = get(uri, actorId, passwordHash, callback);
+		XydraElement xml = get(uri, actorId, passwordHash, callback);
 		if(xml == null) {
 			return;
 		}
@@ -322,7 +322,7 @@ public class XydraStoreRestClient implements XydraStore {
 	public void getModelIds(XID actorId, String passwordHash, Callback<Set<XID>> callback)
 	        throws IllegalArgumentException {
 		
-		MiniElement xml = get("repository/models", actorId, passwordHash, callback);
+		XydraElement xml = get("repository/models", actorId, passwordHash, callback);
 		if(xml == null) {
 			return;
 		}
@@ -333,7 +333,7 @@ public class XydraStoreRestClient implements XydraStore {
 		
 	}
 	
-	private MiniElement get(String uri, XID actorId, String passwordHash, Callback<?> callback) {
+	private XydraElement get(String uri, XID actorId, String passwordHash, Callback<?> callback) {
 		
 		if(callback == null) {
 			throw new IllegalArgumentException("callback may not be null");
@@ -361,7 +361,7 @@ public class XydraStoreRestClient implements XydraStore {
 				return null;
 			}
 			
-			MiniElement xml = new MiniParserXml().parse(content);
+			XydraElement xml = new XmlParser().parse(content);
 			
 			Throwable t = SerializedStore.toException(xml);
 			if(t != null) {
@@ -437,7 +437,7 @@ public class XydraStoreRestClient implements XydraStore {
 		
 		String uri = "revisions?" + req;
 		
-		MiniElement xml = get(uri, actorId, passwordHash, callback);
+		XydraElement xml = get(uri, actorId, passwordHash, callback);
 		if(xml == null) {
 			return;
 		}
@@ -498,7 +498,7 @@ public class XydraStoreRestClient implements XydraStore {
 		
 		String uri = "snapshots?" + req;
 		
-		MiniElement xml = get(uri, actorId, passwordHash, callback);
+		XydraElement xml = get(uri, actorId, passwordHash, callback);
 		if(xml == null) {
 			return;
 		}
@@ -529,7 +529,7 @@ public class XydraStoreRestClient implements XydraStore {
 		
 		String uri = "snapshots?" + req;
 		
-		MiniElement xml = get(uri, actorId, passwordHash, callback);
+		XydraElement xml = get(uri, actorId, passwordHash, callback);
 		if(xml == null) {
 			return;
 		}
@@ -546,7 +546,7 @@ public class XydraStoreRestClient implements XydraStore {
 	public void getRepositoryId(XID actorId, String passwordHash, Callback<XID> callback)
 	        throws IllegalArgumentException {
 		
-		MiniElement xml = get("repository/id", actorId, passwordHash, callback);
+		XydraElement xml = get("repository/id", actorId, passwordHash, callback);
 		if(xml == null) {
 			return;
 		}

@@ -6,14 +6,14 @@ import java.util.List;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.core.serialize.MiniElement;
+import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.ParsingError;
 
 
 @RunsInGWT(true)
 @RunsInAppEngine(true)
 @RequiresAppEngine(false)
-public class JsonArray implements MiniElement {
+public class JsonArray implements XydraElement {
 	
 	private final List<Object> data;
 	private final String type;
@@ -29,27 +29,27 @@ public class JsonArray implements MiniElement {
 	}
 	
 	@Override
-	public MiniElement getElement(String type) {
+	public XydraElement getElement(String type) {
 		return getChild(null, type);
 	}
 	
 	@Override
-	public Iterator<MiniElement> getChildren(String name) {
+	public Iterator<XydraElement> getChildren(String name) {
 		return getChildren(name, null);
 	}
 	
 	@Override
-	public Iterator<MiniElement> getChildren(String name, String type) {
+	public Iterator<XydraElement> getChildren(String name, String type) {
 		return JsonElement.transform(this.data.iterator(), type);
 	}
 	
 	@Override
-	public MiniElement getChild(String name, int index) {
+	public XydraElement getChild(String name, int index) {
 		return getChild(name, null);
 	}
 	
 	@Override
-	public MiniElement getChild(String name, String type) {
+	public XydraElement getChild(String name, String type) {
 		throw new ParsingError(this, "Unexpected array.");
 	}
 	
@@ -89,7 +89,7 @@ public class JsonArray implements MiniElement {
 	}
 	
 	@Override
-	public MiniElement getChild(String name) {
+	public XydraElement getChild(String name) {
 		return getChild(name, 0);
 	}
 	

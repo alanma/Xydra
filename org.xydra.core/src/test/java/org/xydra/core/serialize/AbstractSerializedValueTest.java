@@ -20,7 +20,7 @@ import org.xydra.log.LoggerFactory;
  * @author dscharrer
  * 
  */
-abstract public class AbstractSerializedValueTest {
+abstract public class AbstractSerializedValueTest extends AbstractSerializingTest {
 	
 	private static final Logger log = getLogger();
 	
@@ -326,20 +326,31 @@ abstract public class AbstractSerializedValueTest {
 	
 	private void testValue(XValue value) {
 		
-		XydraOut out = getNewOut();
+		XydraOut out = create();
 		SerializedValue.serialize(value, out);
 		assertTrue(out.isClosed());
-		String xml = out.getData();
+		String data = out.getData();
 		
-		log.debug(xml);
+		log.debug(data);
 		
-		MiniElement e = getParser().parse(xml);
+		XydraElement e = parse(data);
 		XValue valueAgain = SerializedValue.toValue(e);
 		assertEquals(value, valueAgain);
+		
+		// test with whitespace enabled
+		
+		out = create();
+		out.enableWhitespace(true, true);
+		SerializedValue.serialize(value, out);
+		assertTrue(out.isClosed());
+		data = out.getData();
+		
+		log.debug(data);
+		
+		e = parse(data);
+		valueAgain = SerializedValue.toValue(e);
+		assertEquals(value, valueAgain);
+		
 	}
-	
-	protected abstract XydraOut getNewOut();
-	
-	protected abstract MiniParser getParser();
 	
 }

@@ -10,19 +10,19 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.core.serialize.MiniElement;
-import org.xydra.core.serialize.MiniParser;
+import org.xydra.core.serialize.XydraElement;
+import org.xydra.core.serialize.XydraParser;
 
 
 /**
- * {@link MiniParser} implementation that uses a standard java XML parser.
+ * {@link XydraParser} implementation that uses a standard java XML parser.
  * 
  * @author dscharrer
  * 
  */
 @RunsInGWT(false)
 @RequiresAppEngine(false)
-public class MiniParserXml implements MiniParser {
+public class XmlParser implements XydraParser {
 	
 	private static DocumentBuilder parser = null;
 	
@@ -33,7 +33,7 @@ public class MiniParserXml implements MiniParser {
 		return parser;
 	}
 	
-	public synchronized MiniElement parse(String string) {
+	public synchronized XydraElement parse(String string) {
 		InputSource is = new InputSource(new StringReader(string));
 		Document document;
 		try {

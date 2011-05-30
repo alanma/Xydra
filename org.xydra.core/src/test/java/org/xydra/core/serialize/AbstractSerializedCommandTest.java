@@ -1,13 +1,17 @@
 package org.xydra.core.serialize;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+
+import java.util.List;
 
 import org.junit.Test;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XTransaction;
 import org.xydra.base.change.impl.memory.MemoryFieldCommand;
 import org.xydra.base.change.impl.memory.MemoryModelCommand;
 import org.xydra.base.change.impl.memory.MemoryObjectCommand;
@@ -17,6 +21,8 @@ import org.xydra.base.value.XValue;
 import org.xydra.core.DemoModelUtil;
 import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.change.XTransactionBuilder;
+import org.xydra.index.XI;
+import org.xydra.index.iterator.NoneIterator;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
@@ -27,7 +33,7 @@ import org.xydra.log.LoggerFactory;
  * @author dscharrer
  * 
  */
-abstract public class AbstractSerializedCommandTest {
+abstract public class AbstractSerializedCommandTest extends AbstractSerializingTest {
 	
 	private static final Logger log = getLogger();
 	
@@ -180,41 +186,96 @@ abstract public class AbstractSerializedCommandTest {
 		XTransactionBuilder tb = new XTransactionBuilder(model);
 		DemoModelUtil.setupPhonebook(model, tb);
 		
-		testCommand(tb.build());
+		XTransaction trans = tb.build();
+		testCommand(trans);
+		
+		// now also test the command list
+		XydraOut out = create();
+		SerializedCommand.serialize(trans.iterator(), out, null);
+		assertTrue(out.isClosed());
+		String data = out.getData();
+		
+		log.debug(data);
+		
+		XydraElement e = parse(data);
+		List<XCommand> commandAgain = SerializedCommand.toCommandList(e, null);
+		assertNotNull(commandAgain);
+		XI.equalsIterator(trans.iterator(), commandAgain.iterator());
+		
+		// now test with a different context
+		
+		out = create();
+		SerializedCommand.serialize(trans.iterator(), out, model);
+		assertTrue(out.isClosed());
+		data = out.getData();
+		
+		log.debug(data);
+		
+		e = parse(data);
+		commandAgain = SerializedCommand.toCommandList(e, model);
+		assertNotNull(commandAgain);
+		XI.equalsIterator(trans.iterator(), commandAgain.iterator());
+	}
+	
+	@Test
+	public void testEmptyCommandList() {
+		
+		// now also test the command list
+		XydraOut out = create();
+		SerializedCommand.serialize(new NoneIterator<XCommand>(), out, null);
+		assertTrue(out.isClosed());
+		String data = out.getData();
+		
+		log.debug(data);
+		
+		XydraElement e = parse(data);
+		List<XCommand> commandAgain = SerializedCommand.toCommandList(e, null);
+		assertNotNull(commandAgain);
+		assertTrue(commandAgain.isEmpty());
+		
+		// now test with a different context
+		
+		out = create();
+		SerializedCommand.serialize(new NoneIterator<XCommand>(), out, model);
+		assertTrue(out.isClosed());
+		data = out.getData();
+		
+		log.debug(data);
+		
+		e = parse(data);
+		commandAgain = SerializedCommand.toCommandList(e, model);
+		assertNotNull(commandAgain);
+		assertTrue(commandAgain.isEmpty());
 	}
 	
 	// helper functions
 	
 	private void testCommand(XCommand command) {
 		
-		XydraOut out = getNewOut();
+		XydraOut out = create();
 		SerializedCommand.serialize(command, out, null);
 		assertTrue(out.isClosed());
-		String xml = out.getData();
+		String data = out.getData();
 		
-		log.debug(xml);
+		log.debug(data);
 		
-		MiniElement e = getParser().parse(xml);
+		XydraElement e = parse(data);
 		XCommand commandAgain = SerializedCommand.toCommand(e, null);
 		assertEquals(command, commandAgain);
 		
 		// now test with a different context
 		
-		out = getNewOut();
+		out = create();
 		SerializedCommand.serialize(command, out, command.getTarget());
 		assertTrue(out.isClosed());
-		xml = out.getData();
+		data = out.getData();
 		
-		log.debug(xml);
+		log.debug(data);
 		
-		e = getParser().parse(xml);
+		e = parse(data);
 		commandAgain = SerializedCommand.toCommand(e, command.getTarget());
 		assertEquals(command, commandAgain);
 		
 	}
-	
-	protected abstract XydraOut getNewOut();
-	
-	protected abstract MiniParser getParser();
 	
 }

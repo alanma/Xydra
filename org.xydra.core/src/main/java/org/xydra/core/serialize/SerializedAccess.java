@@ -45,7 +45,7 @@ public class SerializedAccess {
 	 *             valid access definition.
 	 * 
 	 */
-	public static XAccessRightDefinition toAccessDefinition(MiniElement xml)
+	public static XAccessRightDefinition toAccessDefinition(XydraElement xml)
 	        throws IllegalArgumentException {
 		
 		SerializingUtils.checkElementType(xml, XACCESSDEFINITION_ELEMENT);
@@ -73,14 +73,14 @@ public class SerializedAccess {
 	 *             valid access definition list.
 	 * 
 	 */
-	public static List<XAccessRightDefinition> toAccessDefinitionList(MiniElement xml)
+	public static List<XAccessRightDefinition> toAccessDefinitionList(XydraElement xml)
 	        throws IllegalArgumentException {
 		
 		SerializingUtils.checkElementType(xml, XACCESSDEFS_ELEMENT);
 		
 		List<XAccessRightDefinition> result = new ArrayList<XAccessRightDefinition>();
 		
-		Iterator<MiniElement> it = xml.getChildren(NAME_DEFINITIONS, XACCESSDEFINITION_ELEMENT);
+		Iterator<XydraElement> it = xml.getChildren(NAME_DEFINITIONS, XACCESSDEFINITION_ELEMENT);
 		while(it.hasNext()) {
 			result.add(toAccessDefinition(it.next()));
 		}
@@ -95,14 +95,14 @@ public class SerializedAccess {
 	 *             valid access manager.
 	 * 
 	 */
-	public static XAuthorisationManager toAccessManager(MiniElement xml,
+	public static XAuthorisationManager toAccessManager(XydraElement xml,
 	        XGroupDatabaseWithListeners groups) throws IllegalArgumentException {
 		
 		SerializingUtils.checkElementType(xml, XACCESSDEFS_ELEMENT);
 		
 		XAuthorisationManager arm = new MemoryAuthorisationManager(groups);
 		
-		Iterator<MiniElement> it = xml.getChildren(NAME_DEFINITIONS, XACCESSDEFINITION_ELEMENT);
+		Iterator<XydraElement> it = xml.getChildren(NAME_DEFINITIONS, XACCESSDEFINITION_ELEMENT);
 		while(it.hasNext()) {
 			XAccessRightDefinition def = toAccessDefinition(it.next());
 			arm.getAuthorisationDatabase().setAccess(def.getActor(), def.getResource(),

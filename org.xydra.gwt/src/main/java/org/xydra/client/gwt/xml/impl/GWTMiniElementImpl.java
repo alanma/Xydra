@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.core.serialize.MiniElement;
+import org.xydra.core.serialize.XydraElement;
 
 import com.google.gwt.xml.client.CharacterData;
 import com.google.gwt.xml.client.Element;
@@ -14,14 +14,14 @@ import com.google.gwt.xml.client.NodeList;
 
 
 /**
- * {@link MiniElement} implementation that wraps an
+ * {@link XydraElement} implementation that wraps an
  * com.google.gwt.xml.client.Element.
  * 
  * @author dscharrer
  * 
  */
 @RunsInGWT(true)
-public class GWTMiniElementImpl implements MiniElement {
+public class GWTMiniElementImpl implements XydraElement {
 	
 	private static final String ELEMENT_XNULL = "xnull";
 	private static final String ATTRIBUTE_IS_NULL = "isNull";
@@ -41,8 +41,8 @@ public class GWTMiniElementImpl implements MiniElement {
 		}
 	}
 	
-	private Iterator<MiniElement> nodeListToIterator(NodeList nodes) {
-		List<MiniElement> list = new ArrayList<MiniElement>();
+	private Iterator<XydraElement> nodeListToIterator(NodeList nodes) {
+		List<XydraElement> list = new ArrayList<XydraElement>();
 		for(int i = 0; i < nodes.getLength(); ++i) {
 			Node node = nodes.item(i);
 			if(node instanceof Element) {
@@ -53,13 +53,13 @@ public class GWTMiniElementImpl implements MiniElement {
 	}
 	
 	@Override
-	public Iterator<MiniElement> getChildren(String name) {
+	public Iterator<XydraElement> getChildren(String name) {
 		final NodeList nodes = this.element.getChildNodes();
 		return nodeListToIterator(nodes);
 	}
 	
 	@Override
-	public Iterator<MiniElement> getChildren(String name, String type) {
+	public Iterator<XydraElement> getChildren(String name, String type) {
 		final NodeList nodes = this.element.getElementsByTagName(type);
 		return nodeListToIterator(nodes);
 	}
@@ -74,7 +74,7 @@ public class GWTMiniElementImpl implements MiniElement {
 	}
 	
 	@Override
-	public MiniElement getChild(String name, int index) {
+	public XydraElement getChild(String name, int index) {
 		int idx = 0;
 		final NodeList nodes = this.element.getChildNodes();
 		for(int i = 0; i < nodes.getLength(); ++i) {
@@ -91,12 +91,12 @@ public class GWTMiniElementImpl implements MiniElement {
 	}
 	
 	@Override
-	public MiniElement getChild(String name, String type) {
+	public XydraElement getChild(String name, String type) {
 		return getElement(type);
 	}
 	
 	@Override
-	public MiniElement getElement(String type) {
+	public XydraElement getElement(String type) {
 		final NodeList nodes = this.element.getElementsByTagName(type);
 		for(int i = 0; i < nodes.getLength(); ++i) {
 			Node node = nodes.item(i);
@@ -142,13 +142,13 @@ public class GWTMiniElementImpl implements MiniElement {
 	}
 	
 	@Override
-	public Iterator<Object> getValueList(String name, String type) {
+	public Iterator<Object> getValues(String name, String type) {
 		final NodeList nodes = this.element.getElementsByTagName(type);
 		return nodeListToValues(nodes);
 	}
 	
 	@Override
-	public Iterator<Object> getValueList(String name) {
+	public Iterator<Object> getValues(String name) {
 		final NodeList nodes = this.element.getChildNodes();
 		return nodeListToValues(nodes);
 	}
@@ -186,7 +186,7 @@ public class GWTMiniElementImpl implements MiniElement {
 	}
 	
 	@Override
-	public MiniElement getChild(String name) {
+	public XydraElement getChild(String name) {
 		return getChild(name, 0);
 	}
 	

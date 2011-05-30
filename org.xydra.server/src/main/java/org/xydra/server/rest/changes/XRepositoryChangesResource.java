@@ -5,10 +5,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.change.XCommand;
-import org.xydra.core.serialize.MiniElement;
-import org.xydra.core.serialize.MiniParser;
+import org.xydra.core.serialize.XydraElement;
+import org.xydra.core.serialize.XydraParser;
 import org.xydra.core.serialize.SerializedCommand;
-import org.xydra.core.serialize.xml.MiniParserXml;
+import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessException;
 import org.xydra.server.IXydraSession;
@@ -31,8 +31,8 @@ public class XRepositoryChangesResource {
 		XCommand command;
 		try {
 			
-			MiniParser parser = new MiniParserXml();
-			MiniElement commandElement = parser.parse(commandXml);
+			XydraParser parser = new XmlParser();
+			XydraElement commandElement = parser.parse(commandXml);
 			
 			XAddress repoAddr = session.getRepositoryAddress();
 			command = SerializedCommand.toCommand(commandElement, repoAddr);

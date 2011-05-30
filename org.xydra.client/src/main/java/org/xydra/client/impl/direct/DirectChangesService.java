@@ -14,11 +14,11 @@ import org.xydra.client.XChangesService;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.session.XProtectedModel;
 import org.xydra.core.model.session.XProtectedRepository;
-import org.xydra.core.serialize.MiniElement;
+import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.SerializedCommand;
 import org.xydra.core.serialize.SerializedEvent;
 import org.xydra.core.serialize.XydraOut;
-import org.xydra.core.serialize.xml.MiniParserXml;
+import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.store.AccessException;
 
@@ -106,7 +106,7 @@ public class DirectChangesService implements XChangesService {
 		// Map addresses from clientContext to serverContext.
 		XydraOut xo = new XmlOut();
 		SerializedCommand.serialize(command, xo, clientContext);
-		MiniElement e = new MiniParserXml().parse(xo.getData());
+		XydraElement e = new XmlParser().parse(xo.getData());
 		return SerializedCommand.toCommand(e, serverContext);
 		
 	}
@@ -117,7 +117,7 @@ public class DirectChangesService implements XChangesService {
 		// Map addresses from serverContext to clientContext.
 		XydraOut o = new XmlOut();
 		SerializedEvent.serialize(event, o, serverContext);
-		MiniElement e = new MiniParserXml().parse(o.getData());
+		XydraElement e = new XmlParser().parse(o.getData());
 		return SerializedEvent.toEvent(e, clientContext);
 		
 	}
