@@ -6,6 +6,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -45,6 +46,16 @@ import org.xydra.store.XydraStore;
 
 public class XydraStoreResource {
 	
+	private static class InitException extends RuntimeException {
+		
+		private static final long serialVersionUID = -1357932793964520833L;
+		
+		public InitException(String message) {
+			super(message);
+		}
+		
+	}
+	
 	private final static XydraParser jsonParser = new JsonParser();
 	private final static XydraParser xmlParser = new XmlParser();
 	private final static Set<String> jsonMimes = new HashSet<String>();
@@ -52,6 +63,9 @@ public class XydraStoreResource {
 	private final static Set<String> mimes = new HashSet<String>();
 	
 	private static final String DEFAULT_CONTENT_TYPE = "application/xml";
+	private static final String DEFAULT_JSON_CONTENT_TYPE = "application/json";
+	
+	private static final Pattern callbackRegex = Pattern.compile("^[a-z0-9_]+$");
 	
 	public static void restless(Restless restless, String prefix) {
 		
@@ -101,6 +115,16 @@ public class XydraStoreResource {
 			@Override
 			public boolean handleException(Throwable t, IRestlessContext context) {
 				
+				if(t instanceof InitException) {
+					try {
+						context.getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST,
+						        t.getMessage());
+					} catch(IOException e) {
+						throw new RuntimeException(e);
+					}
+					return true;
+				}
+				
 				// TODO remove?
 				if(!(t instanceof StoreException) && !(t instanceof IllegalArgumentException)) {
 					return false;
@@ -140,26 +164,21 @@ public class XydraStoreResource {
 		
 	}
 	
-	private static String getBestContentType(IRestlessContext context) {
+	private static String getBestContentType(IRestlessContext context, Set<String> choices,
+	        String def) {
 		
 		HttpServletRequest req = context.getRequest();
 		
 		String mime = req.getParameter("contentType");
 		if(mime != null) {
 			mime = mime.trim();
-			if(!mimes.contains(mime)) {
-				try {
-					context.getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST,
-					        "Unknown content type: " + mime);
-				} catch(IOException e) {
-					// ignored
-				}
-				throw new RuntimeException();
+			if(!choices.contains(mime)) {
+				throw new InitException("Unexpected content type: " + mime);
 			}
 			return mime;
 		}
 		
-		String best = DEFAULT_CONTENT_TYPE;
+		String best = def;
 		float bestScore = Float.MIN_VALUE;
 		
 		@SuppressWarnings("unchecked")
@@ -173,7 +192,7 @@ public class XydraStoreResource {
 			for(String type : types) {
 				
 				String[] parts = type.split(";");
-				if(!mimes.contains(parts[0])) {
+				if(!choices.contains(parts[0])) {
 					continue;
 				}
 				float score = 1.f;
@@ -198,7 +217,18 @@ public class XydraStoreResource {
 		
 		HttpServletResponse res = context.getResponse();
 		
-		String mime = getBestContentType(context);
+		String callback = context.getRequest().getParameter("callback");
+		String mime;
+		if(callback != null) {
+			// Validate the callback to prevent cross-site scripting
+			// vulnerabilities.
+			if(!callbackRegex.matcher(callback).matches()) {
+				throw new InitException("Invalid callback: " + callback);
+			}
+			mime = getBestContentType(context, jsonMimes, DEFAULT_JSON_CONTENT_TYPE);
+		} else {
+			mime = getBestContentType(context, mimes, DEFAULT_CONTENT_TYPE);
+		}
 		
 		res.setStatus(statusCode);
 		res.setContentType(mime + "; charset=UTF-8");
@@ -209,7 +239,7 @@ public class XydraStoreResource {
 			if(xmlMimes.contains(mime)) {
 				out = new XmlOut(writer);
 			} else if(jsonMimes.contains(mime)) {
-				out = new JsonOut(writer);
+				out = callback != null ? new JsonOut(writer, callback) : new JsonOut(writer);
 			} else {
 				throw new AssertionError();
 			}

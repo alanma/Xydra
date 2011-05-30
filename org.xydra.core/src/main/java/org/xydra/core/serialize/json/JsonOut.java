@@ -14,12 +14,33 @@ import org.xydra.minio.MiniWriter;
 @RequiresAppEngine(false)
 public class JsonOut extends AbstractXydraOut {
 	
+	private final String callback;
+	
 	public JsonOut(MiniWriter writer) {
-		super(writer);
+		this(writer, null);
 	}
 	
 	public JsonOut() {
+		this((String)null);
+	}
+	
+	public JsonOut(MiniWriter writer, String callback) {
+		super(writer);
+		this.callback = callback;
+		init();
+	}
+	
+	public JsonOut(String callback) {
 		super();
+		this.callback = callback;
+		init();
+	}
+	
+	private void init() {
+		if(this.callback != null) {
+			this.writer.write(this.callback);
+			this.writer.write('(');
+		}
 	}
 	
 	private void outputName(Frame frame, String name) {
@@ -183,6 +204,9 @@ public class JsonOut extends AbstractXydraOut {
 	
 	@Override
 	protected void end() {
+		if(this.callback != null) {
+			this.writer.write(");");
+		}
 		whitespace('\n');
 	}
 	
