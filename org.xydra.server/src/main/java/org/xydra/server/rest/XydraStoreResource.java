@@ -16,12 +16,12 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
-import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.SerializedCommand;
 import org.xydra.core.serialize.SerializedStore;
+import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.SerializedStore.EventsRequest;
-import org.xydra.core.serialize.json.JsonOut;
+import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.index.query.Pair;
 import org.xydra.minio.MiniStreamWriter;
@@ -117,12 +117,10 @@ public class XydraStoreResource {
 	
 	private static XydraOut startOutput(HttpServletResponse res, int statusCode) {
 		res.setStatus(statusCode);
-		// res.setContentType("application/xml; charset=UTF-8");
-		res.setContentType("text/plain; charset=UTF-8");
+		res.setContentType("application/xml; charset=UTF-8");
 		res.setCharacterEncoding("utf-8");
 		try {
-			XydraOut out = new JsonOut(new MiniStreamWriter(res.getOutputStream()));
-			out.enableWhitespace(true, true);
+			XydraOut out = new XmlOut(new MiniStreamWriter(res.getOutputStream()));
 			return out;
 		} catch(IOException e) {
 			throw new RuntimeException("re-throw", e);
@@ -144,7 +142,7 @@ public class XydraStoreResource {
 		
 		XydraOut out = startOutput(res, HttpServletResponse.SC_OK);
 		
-		SerializedStore.toAuthenticationResult(callback.getResult(), out);
+		SerializedStore.serializeAuthenticationResult(callback.getResult(), out);
 		
 		out.flush();
 		

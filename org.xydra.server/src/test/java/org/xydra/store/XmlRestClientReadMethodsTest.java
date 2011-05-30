@@ -1,11 +1,12 @@
-package org.xydra.core.serialize.xml;
+package org.xydra.store;
 
-import org.xydra.core.serialize.AbstractSerializedModelTest;
 import org.xydra.core.serialize.XydraParser;
 import org.xydra.core.serialize.XydraSerializer;
+import org.xydra.core.serialize.xml.XmlParser;
+import org.xydra.core.serialize.xml.XmlSerializer;
 
 
-public class XmlValueTestWhitespace extends AbstractSerializedModelTest {
+public class XmlRestClientReadMethodsTest extends AbstractRestClientReadMethodsTest {
 	
 	@Override
 	protected XydraParser getParser() {

@@ -43,5 +43,10 @@ public class XmlParser implements XydraParser {
 		}
 		return XmlElement.wrap(document.getDocumentElement());
 	}
+
+	@Override
+    public String getContentType() {
+	    return "application/xml";
+    }
 	
 }

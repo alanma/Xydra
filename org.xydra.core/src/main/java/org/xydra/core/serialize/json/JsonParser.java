@@ -142,4 +142,9 @@ public class JsonParser implements XydraParser {
 		}
 		return new JsonElement(saj.map, null);
 	}
+	
+	@Override
+	public String getContentType() {
+		return "application/json";
+	}
 }

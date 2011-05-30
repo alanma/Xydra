@@ -1,11 +1,12 @@
-package org.xydra.core.serialize.json;
+package org.xydra.store;
 
-import org.xydra.core.serialize.AbstractSerializedModelTest;
 import org.xydra.core.serialize.XydraParser;
 import org.xydra.core.serialize.XydraSerializer;
+import org.xydra.core.serialize.json.JsonParser;
+import org.xydra.core.serialize.json.JsonSerializer;
 
 
-public class JsonValueTestWhitespace extends AbstractSerializedModelTest {
+public class JsonRestClientReadMethodsTest extends AbstractRestClientReadMethodsTest {
 	
 	@Override
 	protected XydraParser getParser() {

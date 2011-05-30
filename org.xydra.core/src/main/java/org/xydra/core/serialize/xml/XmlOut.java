@@ -188,7 +188,7 @@ public class XmlOut extends AbstractXydraOut {
 	@Override
 	protected void outputEndArray(Frame container, Frame array) {
 		
-		if(array.hasContent() || array.getAttrCount() > 0) {
+		if(!array.hasContent() && array.getAttrCount() == 0) {
 			this.writer.write("/>\n");
 		} else {
 			indent(array.depth);

@@ -2,9 +2,11 @@ package org.xydra.server;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.xydra.server.test.ChangesApiTest;
 
 
+@Ignore
 public class ChangesApiTestMemory extends ChangesApiTest {
 	
 	@BeforeClass

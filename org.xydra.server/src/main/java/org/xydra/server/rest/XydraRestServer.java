@@ -35,7 +35,6 @@ import org.xydra.server.rest.demo.AddDemoDataResource;
 import org.xydra.server.rest.log.LogTestResource;
 import org.xydra.store.InternalStoreException;
 import org.xydra.store.XydraStore;
-import org.xydra.store.impl.delegate.XydraPersistence;
 
 
 /**
@@ -178,11 +177,12 @@ public class XydraRestServer {
 			try {
 				Class<?> storeClass = Class.forName(storeClassName);
 				Constructor<?> cons = storeClass.getConstructor();
-				assert XydraPersistence.class.isAssignableFrom(storeClass) : storeClass.getClass()
-				        + " is not a XydraPersistence";
+				if(!XydraStore.class.isAssignableFrom(storeClass)) {
+					throw new RuntimeException(storeClass.getClass() + " is not a XydraStore");
+				}
 				storeInstance = (XydraStore)cons.newInstance();
 			} catch(Exception e) {
-				throw new RuntimeException("Error configuring XydraStore from persistence class '"
+				throw new RuntimeException("Error configuring XydraStore from class '"
 				        + storeClassName + "'", e);
 			}
 		} else {

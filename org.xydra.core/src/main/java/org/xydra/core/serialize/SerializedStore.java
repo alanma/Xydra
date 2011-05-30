@@ -119,7 +119,7 @@ public class SerializedStore {
 		} else if(TYPE_AUTHORIZATION.equals(type)) {
 			return new AuthorisationException(message);
 		} else if(TYPE_TIMEOUT.equals(type)) {
-			return new TimeoutException(message);
+			return new TimeoutException(message, true);
 		} else if(TYPE_CONNECTION.equals(type)) {
 			return new ConnectionException(message, true);
 		} else if(TYPE_INTERNAL.equals(type)) {
@@ -136,15 +136,15 @@ public class SerializedStore {
 		
 	}
 	
-	public static void toAuthenticationResult(boolean result, XydraOut out) {
+	public static void serializeAuthenticationResult(boolean result, XydraOut out) {
 		out.element(ELEMENT_AUTHENTICATED, NAME_AUTHENTICATED, result);
 	}
 	
-	public static boolean toAuthenticationResult(XydraElement xml) {
+	public static boolean toAuthenticationResult(XydraElement element) {
 		
-		SerializingUtils.checkElementType(xml, ELEMENT_AUTHENTICATED);
+		SerializingUtils.checkElementType(element, ELEMENT_AUTHENTICATED);
 		
-		return SerializingUtils.toBoolean(xml.getContent(NAME_AUTHENTICATED));
+		return SerializingUtils.toBoolean(element.getContent(NAME_AUTHENTICATED));
 	}
 	
 	public static class EventsRequest {
@@ -169,7 +169,6 @@ public class SerializedStore {
 		setRevisionListContents(commandRes, out);
 		out.endArray();
 		out.endChildren();
-		out.close(ELEMENT_COMMANDRESULTS);
 		
 		if(eventsRes != null) {
 			out.beginChildren(NAME_EVENTRESULTS, false, ELEMENT_EVENTRESULTS);
@@ -188,16 +187,14 @@ public class SerializedStore {
 		
 		SerializingUtils.checkElementType(element, ELEMENT_RESULTS);
 		
-		XydraElement commandsEle = element.getElement(ELEMENT_COMMANDRESULTS);
+		XydraElement commandsEle = element.getChild(NAME_COMMANDRESULTS, ELEMENT_COMMANDRESULTS);
 		if(commandsEle == null) {
 			throw new IllegalArgumentException("missing command results");
 		}
 		
-		SerializingUtils.checkElementType(commandsEle, ELEMENT_COMMANDRESULTS);
-		
 		getRevisionListContents(commandsEle, commandResults);
 		
-		XydraElement eventsEle = element.getElement(ELEMENT_EVENTRESULTS);
+		XydraElement eventsEle = element.getChild(NAME_EVENTRESULTS, ELEMENT_EVENTRESULTS);
 		if(eventResults != null && eventsEle != null) {
 			toEventResults(eventsEle, context, eventResults);
 		}
@@ -357,6 +354,8 @@ public class SerializedStore {
 	
 	public static void serializeSnapshots(StoreException[] ex, boolean[] isModel,
 	        BatchedResult<XReadableModel>[] mr, BatchedResult<XReadableObject>[] or, XydraOut out) {
+		
+		assert ex.length == isModel.length;
 		
 		out.open(ELEMENT_SNAPSHOTS);
 		

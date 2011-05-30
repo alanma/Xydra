@@ -18,7 +18,7 @@ public class ConnectionException extends StoreException {
 		super("connection error: " + message);
 	}
 	
-	public ConnectionException(String message, boolean dummy) {
+	public ConnectionException(String message, boolean asIs) {
 		super(message);
 	}
 	

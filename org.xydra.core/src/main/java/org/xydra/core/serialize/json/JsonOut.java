@@ -112,7 +112,7 @@ public class JsonOut extends AbstractXydraOut {
 	protected void outputNullElement(Frame container) {
 		
 		assert container.type == Type.Root || container.type == Type.Children
-		        || container.type == Type.Child;
+		        || container.type == Type.Child || container.type == Type.Array;
 		
 		beginChild(container, true);
 		
@@ -144,7 +144,7 @@ public class JsonOut extends AbstractXydraOut {
 		element.depth = container.depth + 1;
 		
 		if(container.type == Type.Root || container.type == Type.Children
-		        || container.type == Type.Child) {
+		        || container.type == Type.Child || container.type == Type.Array) {
 			
 			beginChild(container, true);
 			

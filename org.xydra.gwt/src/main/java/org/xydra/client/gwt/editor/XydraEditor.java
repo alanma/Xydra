@@ -9,7 +9,7 @@ import org.xydra.client.XChangesService;
 import org.xydra.client.XDataService;
 import org.xydra.client.gwt.service.GWTChangesService;
 import org.xydra.client.gwt.service.GWTDataService;
-import org.xydra.client.gwt.xml.impl.GWTMiniXMLParserImpl;
+import org.xydra.client.gwt.xml.impl.GwtXmlParser;
 import org.xydra.client.sync.XSynchronizer;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
@@ -40,9 +40,9 @@ public class XydraEditor implements EntryPoint {
 	private static final Logger log = LoggerFactory.getLogger(XydraEditor.class);
 	
 	private final XDataService data = new GWTDataService("/xclient/cxm/data",
-	        new GWTMiniXMLParserImpl());
+	        new GwtXmlParser());
 	private final XChangesService changes = new GWTChangesService("/xclient/cxm/changes",
-	        new GWTMiniXMLParserImpl());
+	        new GwtXmlParser());
 	
 	VerticalPanel panel = new VerticalPanel();
 	

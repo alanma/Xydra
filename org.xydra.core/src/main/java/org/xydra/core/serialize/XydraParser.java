@@ -16,4 +16,9 @@ public interface XydraParser {
 	 */
 	XydraElement parse(String data) throws IllegalArgumentException;
 	
+	/**
+	 * @return The MIME content type accepted by this parser.
+	 */
+	String getContentType();
+	
 }

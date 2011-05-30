@@ -25,12 +25,12 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
-import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.SerializedCommand;
 import org.xydra.core.serialize.SerializedStore;
+import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.XydraOut;
-import org.xydra.core.serialize.xml.XmlParser;
-import org.xydra.core.serialize.xml.XmlOut;
+import org.xydra.core.serialize.XydraParser;
+import org.xydra.core.serialize.XydraSerializer;
 import org.xydra.index.query.Pair;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
@@ -41,13 +41,24 @@ import org.xydra.store.XydraStore;
 import org.xydra.store.XydraStoreAdmin;
 
 
+/**
+ * {@link XydraStore} implementation that connects to a xydra store REST server
+ * using synchronous network operations.
+ * 
+ * @author dscharrer
+ * 
+ */
 @RunsInGWT(false)
 public class XydraStoreRestClient implements XydraStore {
 	
 	private final URI prefix;
+	private final XydraSerializer serializer;
+	private final XydraParser parser;
 	
-	public XydraStoreRestClient(URI apiLocation) {
+	public XydraStoreRestClient(URI apiLocation, XydraSerializer serializer, XydraParser parser) {
 		this.prefix = apiLocation;
+		this.serializer = serializer;
+		this.parser = parser;
 	}
 	
 	private final void setLoginData(HttpURLConnection con, XID actorId, String passwordHash) {
@@ -108,7 +119,7 @@ public class XydraStoreRestClient implements XydraStore {
 		return readAll(is);
 	}
 	
-	private XydraElement post(String uri, XID actorId, String passwordHash, String data,
+	private XydraElement post(String uri, XID actorId, String passwordHash, XydraOut data,
 	        Callback<?> callback) {
 		
 		URL url;
@@ -128,9 +139,10 @@ public class XydraStoreRestClient implements XydraStore {
 			
 			con.setDoOutput(true);
 			con.setRequestMethod("POST");
-			con.setRequestProperty("Content-Type", "application/xml");
+			con.setRequestProperty("Content-Type", data.getContentType());
+			con.setRequestProperty("Accept", this.parser.getContentType());
 			Writer w = new OutputStreamWriter(con.getOutputStream(), "UTF-8");
-			w.write(data);
+			w.write(data.getData());
 			w.flush();
 			
 			con.connect();
@@ -144,7 +156,7 @@ public class XydraStoreRestClient implements XydraStore {
 				return null;
 			}
 			
-			XydraElement xml = new XmlParser().parse(content);
+			XydraElement xml = this.parser.parse(content);
 			
 			Throwable t = SerializedStore.toException(xml);
 			if(t != null) {
@@ -172,10 +184,10 @@ public class XydraStoreRestClient implements XydraStore {
 			throw new IllegalArgumentException("commands array must not be null");
 		}
 		
-		XydraOut out = new XmlOut();
+		XydraOut out = this.serializer.create();
 		SerializedCommand.serialize(Arrays.asList(commands).iterator(), out, null);
 		
-		XydraElement xml = post("execute", actorId, passwordHash, out.getData(), callback);
+		XydraElement xml = post("execute", actorId, passwordHash, out, callback);
 		if(xml == null) {
 			return;
 		}
@@ -211,10 +223,10 @@ public class XydraStoreRestClient implements XydraStore {
 		
 		String uri = req == null ? "execute" : "execute?" + req;
 		
-		XydraOut out = new XmlOut();
+		XydraOut out = this.serializer.create();
 		SerializedCommand.serialize(Arrays.asList(commands).iterator(), out, null);
 		
-		XydraElement xml = post(uri, actorId, passwordHash, out.getData(), callback);
+		XydraElement xml = post(uri, actorId, passwordHash, out, callback);
 		if(xml == null) {
 			return;
 		}
@@ -351,6 +363,7 @@ public class XydraStoreRestClient implements XydraStore {
 			HttpURLConnection con = (HttpURLConnection)url.openConnection();
 			
 			setLoginData(con, actorId, passwordHash);
+			con.setRequestProperty("Accept", this.parser.getContentType());
 			
 			con.connect();
 			
@@ -361,7 +374,7 @@ public class XydraStoreRestClient implements XydraStore {
 				return null;
 			}
 			
-			XydraElement xml = new XmlParser().parse(content);
+			XydraElement xml = this.parser.parse(content);
 			
 			Throwable t = SerializedStore.toException(xml);
 			if(t != null) {

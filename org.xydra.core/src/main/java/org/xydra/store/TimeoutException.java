@@ -18,7 +18,11 @@ public class TimeoutException extends ConnectionException {
 	}
 	
 	public TimeoutException(String message) {
-		super(message);
+		this(message, false);
+	}
+	
+	public TimeoutException(String message, boolean asIs) {
+		super(message, asIs);
 		this.timeout = -1;
 	}
 	

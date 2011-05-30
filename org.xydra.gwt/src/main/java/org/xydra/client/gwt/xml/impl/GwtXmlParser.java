@@ -8,7 +8,6 @@ import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.XMLParser;
 
 
-
 /**
  * {@link XydraParser} implementation that uses the GWT browser-supported
  * XMLParser
@@ -17,7 +16,7 @@ import com.google.gwt.xml.client.XMLParser;
  * 
  */
 @RunsInGWT(true)
-public class GWTMiniXMLParserImpl implements XydraParser {
+public class GwtXmlParser implements XydraParser {
 	
 	public XydraElement parse(String xml) throws IllegalArgumentException {
 		
@@ -29,6 +28,11 @@ public class GWTMiniXMLParserImpl implements XydraParser {
 		}
 		
 		return new GWTMiniElementImpl(document.getDocumentElement());
+	}
+	
+	@Override
+	public String getContentType() {
+		return "application/xml";
 	}
 	
 }

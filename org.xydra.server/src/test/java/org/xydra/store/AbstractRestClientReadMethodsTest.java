@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
@@ -17,6 +18,10 @@ import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
 import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
+import org.xydra.core.serialize.XydraElement;
+import org.xydra.core.serialize.XydraOut;
+import org.xydra.core.serialize.XydraParser;
+import org.xydra.core.serialize.XydraSerializer;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.server.test.TestServer;
@@ -32,16 +37,38 @@ import org.xydra.store.impl.rest.XydraStoreRestClient;
  * @author dscharrer
  * 
  */
-public class RestClientWriteMethodsTest extends AbstractStoreWriteMethodsTest {
+public abstract class AbstractRestClientReadMethodsTest extends AbstractStoreReadMethodsTest {
+	
+	abstract protected XydraSerializer getSerializer();
+	
+	abstract protected XydraParser getParser();
+	
+	private final XydraSerializer serializer;
+	private final XydraParser parser;
+	
+	protected AbstractRestClientReadMethodsTest() {
+		this.serializer = getSerializer();
+		this.parser = getParser();
+	}
+	
+	protected XydraOut create() {
+		return this.serializer.create();
+	}
+	
+	protected XydraElement parse(String data) {
+		return this.parser.parse(data);
+	}
 	
 	private static final String PASSWORD_TESTER = "secret";
 	
 	private static final XID ACTOR_TESTER = XX.toId("tester");
 	
-	private static final Logger log = LoggerFactory.getLogger(RestClientWriteMethodsTest.class);
+	private static final Logger log = LoggerFactory
+	        .getLogger(AbstractRestClientReadMethodsTest.class);
 	
-	private static XydraStore clientStore;
+	private XydraStore clientStore;
 	private static TestServer server;
+	private static URI storeapi;
 	
 	@BeforeClass
 	public static void init() {
@@ -60,7 +87,7 @@ public class RestClientWriteMethodsTest extends AbstractStoreWriteMethodsTest {
 		 * the webapp root. Therefore we leave the slash out here.
 		 */
 		
-		URI storeapi = apiprefix.resolve("store/v1/");
+		storeapi = apiprefix.resolve("store/v1/");
 		log.info("Using store API url = " + storeapi.toASCIIString());
 		
 		XydraStore store = server.getStore();
@@ -72,8 +99,13 @@ public class RestClientWriteMethodsTest extends AbstractStoreWriteMethodsTest {
 		XAddress repoAddr = XX.toAddress(admin.getRepositoryId(), null, null, null);
 		access.getAuthorisationDatabase().setAccess(ACTOR_TESTER, repoAddr, XA.ACCESS_READ, true);
 		access.getAuthorisationDatabase().setAccess(ACTOR_TESTER, repoAddr, XA.ACCESS_WRITE, true);
-		
-		clientStore = new XydraStoreRestClient(storeapi);
+	}
+	
+	@Override
+	@Before
+	public void setUp() {
+		this.clientStore = new XydraStoreRestClient(storeapi, this.serializer, this.parser);
+		super.setUp();
 	}
 	
 	@After
@@ -145,7 +177,7 @@ public class RestClientWriteMethodsTest extends AbstractStoreWriteMethodsTest {
 	
 	@Override
 	protected XydraStore getStore() {
-		return clientStore;
+		return this.clientStore;
 	}
 	
 }
