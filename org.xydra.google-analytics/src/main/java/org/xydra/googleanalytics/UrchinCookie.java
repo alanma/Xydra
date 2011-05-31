@@ -19,39 +19,41 @@ package org.xydra.googleanalytics;
  */
 public class UrchinCookie {
 	
+	/** always cookie with base data */
 	public Utma utma;
+	/** begin of session cookie */
 	public Utmb utmb;
+	/** close of session cookie */
 	public Utmc utmc;
+	/** variables from user cookie */
 	public Utmv utmv;
+	/** zource cookie, campaign tracking */
 	public Utmz utmz;
 	
 	public UrchinCookie(UserInfo userinfo) {
 		this.utma = new Utma(userinfo.getDomainName(), userinfo.get31BitId(),
 		        userinfo.getFirstVisitStartTime(), userinfo.getLastVisitStartTime(),
 		        userinfo.getCurrentSessionStartTime(), userinfo.getSessionCount());
-		this.utmb = new Utmb(userinfo.getDomainName(), userinfo.getCurrentSessionStartTime(),
+		this.utmb = new Utmb(userinfo.getDomainName(), null, userinfo.getCurrentSessionStartTime(),
 		        userinfo.getSessionCount());
-		this.utmc = null;
+		this.utmc = new Utmc(userinfo.getDomainName(), null);
 		if(userinfo.getVar() != null) {
 			this.utmv = new Utmv(userinfo.getVar());
 		}
-		this.utmz = new Utmz();
-		this.utmz.domainName = userinfo.getDomainName();
+		this.utmz = new Utmz(userinfo.getDomainName(), null);
 		
 	}
 	
 	public UrchinCookie(String utmaCookie, String utmzCookie) {
-		this.utma = new Utma();
-		this.utma.setFromCookieString(utmaCookie);
-		this.utmb = new Utmb();
-		this.utmb.domainHash = this.utma.getDomainHash();
+		this.utma = new Utma(utmaCookie);
+		String domainHash = this.utma.getDomainHash();
+		this.utmb = new Utmb(null, domainHash);
 		this.utmb.currentSessionStartTime = Utils.getCurrentTimeInSeconds();
 		this.utmb.sessionCount = this.utma.sessionCount;
-		this.utmc = null;
+		this.utmc = new Utmc(null, domainHash);
 		// TODO consider parsing from cookie
 		this.utmv = null;
-		this.utmz = new Utmz();
-		this.utmz.setFromCookieString(utmzCookie);
+		this.utmz = new Utmz(utmzCookie);
 	}
 	
 	/**
@@ -138,13 +140,17 @@ public class UrchinCookie {
 		/**
 		 * State must be set via {@link #setFromCookieString(String)}
 		 */
-		public Utma() {
-			super();
+		public Utma(String domainName, String domainHash) {
+			super(domainName, domainHash);
+		}
+		
+		public Utma(String cookieString) {
+			setFromCookieString(cookieString);
 		}
 		
 		public Utma(String domainName, long the31BitId, long firstVisitStartTime,
 		        long lastVisitStartTime, long currentSessionStartTime, long sessionCount) {
-			super(domainName, currentSessionStartTime, sessionCount);
+			super(domainName, null, currentSessionStartTime, sessionCount);
 			this.the31BitId = the31BitId;
 			this.firstVisitStartTime = firstVisitStartTime;
 			this.lastVisitStartTime = lastVisitStartTime;
@@ -189,6 +195,24 @@ public class UrchinCookie {
 	}
 	
 	static class DomainHashCookie {
+		
+		/**
+		 * One of the two may be null.
+		 * 
+		 * @param domainName may be null if domainHash is set
+		 * @param domainHash may be null if domainName is set
+		 */
+		public DomainHashCookie(String domainName, String domainHash) {
+			assert domainName != null || domainHash != null;
+			this.domainName = domainName;
+			this.domainHash = domainHash;
+		}
+		
+		/**
+		 * Need to set state
+		 */
+		protected DomainHashCookie() {
+		}
 		
 		public String getDomainHash() {
 			if(this.domainHash != null) {
@@ -239,9 +263,9 @@ public class UrchinCookie {
 	 */
 	static class Utmb extends DomainHashCookie {
 		
-		public Utmb(String domainName, long currentSessionStartTime, long sessionCount) {
-			super();
-			this.domainName = domainName;
+		public Utmb(String domainName, String domainHash, long currentSessionStartTime,
+		        long sessionCount) {
+			super(domainName, domainHash);
 			this.currentSessionStartTime = currentSessionStartTime;
 			this.sessionCount = sessionCount;
 		}
@@ -249,7 +273,11 @@ public class UrchinCookie {
 		/**
 		 * Need to set state via {@link #setFromCookieString(String)}
 		 */
-		public Utmb() {
+		protected Utmb() {
+		}
+		
+		public Utmb(String domainName, String domainHash) {
+			super(domainName, domainHash);
 		}
 		
 		/**
@@ -308,6 +336,10 @@ public class UrchinCookie {
 	 */
 	static class Utmc extends DomainHashCookie {
 		
+		public Utmc(String domainName, String domainHash) {
+			super(domainName, domainHash);
+		}
+		
 		public String toCookieString() {
 			return "" + getDomainHash();
 		}
@@ -359,10 +391,11 @@ public class UrchinCookie {
 	 */
 	static class Utmz extends DomainHashCookie {
 		
-		public Utmz(String campaignCreationTime, String campaignSessions, String responseCount,
-		        String campaignSource, String campaignName, String campaignMedium,
-		        String campaignTerms, String campaignContent) {
-			super();
+		public Utmz(String domainName, String domainHash, String campaignCreationTime,
+		        String campaignSessions, String responseCount, String campaignSource,
+		        String campaignName, String campaignMedium, String campaignTerms,
+		        String campaignContent) {
+			super(domainName, domainHash);
 			this.campaignCreationTime = campaignCreationTime;
 			this.campaignSessions = campaignSessions;
 			this.responseCount = responseCount;
@@ -376,7 +409,12 @@ public class UrchinCookie {
 		/**
 		 * Make sure to set content via {@link #setFromCookieString(String)}
 		 */
-		public Utmz() {
+		public Utmz(String domainName, String domainHash) {
+			super(domainName, domainHash);
+		}
+		
+		public Utmz(String utmzCookie) {
+			setFromCookieString(utmzCookie);
 		}
 		
 		private String campaignCreationTime = "" + Utils.getCurrentTimeInSeconds();
