@@ -35,8 +35,6 @@ import org.xydra.index.query.Pair;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.GetEventsRequest;
-import org.xydra.store.InternalStoreException;
-import org.xydra.store.RequestException;
 import org.xydra.store.XydraStore;
 import org.xydra.store.XydraStoreAdmin;
 
@@ -49,16 +47,13 @@ import org.xydra.store.XydraStoreAdmin;
  * 
  */
 @RunsInGWT(false)
-public class XydraStoreRestClient implements XydraStore {
+public class XydraStoreRestClient extends AbstractXydraStoreRestClient {
 	
 	private final URI prefix;
-	private final XydraSerializer serializer;
-	private final XydraParser parser;
 	
 	public XydraStoreRestClient(URI apiLocation, XydraSerializer serializer, XydraParser parser) {
+		super(serializer, parser);
 		this.prefix = apiLocation;
-		this.serializer = serializer;
-		this.parser = parser;
 	}
 	
 	private final void setLoginData(HttpURLConnection con, XID actorId, String passwordHash) {
@@ -84,12 +79,12 @@ public class XydraStoreRestClient implements XydraStore {
 	public void checkLogin(XID actorId, String passwordHash, Callback<Boolean> callback)
 	        throws IllegalArgumentException {
 		
-		XydraElement xml = get("login", actorId, passwordHash, callback);
-		if(xml == null) {
+		XydraElement element = get("login", actorId, passwordHash, callback);
+		if(element == null) {
 			return;
 		}
 		
-		boolean auth = SerializedStore.toAuthenticationResult(xml);
+		boolean auth = SerializedStore.toAuthenticationResult(element);
 		
 		callback.onSuccess(auth);
 	}
@@ -156,9 +151,9 @@ public class XydraStoreRestClient implements XydraStore {
 				return null;
 			}
 			
-			XydraElement xml = this.parser.parse(content);
+			XydraElement element = this.parser.parse(content);
 			
-			Throwable t = SerializedStore.toException(xml);
+			Throwable t = SerializedStore.toException(element);
 			if(t != null) {
 				if(callback != null) {
 					callback.onFailure(t);
@@ -166,7 +161,7 @@ public class XydraStoreRestClient implements XydraStore {
 				return null;
 			}
 			
-			return xml;
+			return element;
 			
 		} catch(IOException e) {
 			if(callback != null) {
@@ -187,15 +182,15 @@ public class XydraStoreRestClient implements XydraStore {
 		XydraOut out = this.serializer.create();
 		SerializedCommand.serialize(Arrays.asList(commands).iterator(), out, null);
 		
-		XydraElement xml = post("execute", actorId, passwordHash, out, callback);
-		if(xml == null) {
+		XydraElement element = post("execute", actorId, passwordHash, out, callback);
+		if(element == null) {
 			return;
 		}
 		
 		@SuppressWarnings("unchecked")
 		BatchedResult<Long>[] res = new BatchedResult[commands.length];
 		
-		SerializedStore.toCommandResults(xml, null, res, null);
+		SerializedStore.toCommandResults(element, null, res, null);
 		
 		if(callback != null) {
 			callback.onSuccess(res);
@@ -226,79 +221,18 @@ public class XydraStoreRestClient implements XydraStore {
 		XydraOut out = this.serializer.create();
 		SerializedCommand.serialize(Arrays.asList(commands).iterator(), out, null);
 		
-		XydraElement xml = post(uri, actorId, passwordHash, out, callback);
-		if(xml == null) {
+		XydraElement element = post(uri, actorId, passwordHash, out, callback);
+		if(element == null) {
 			return;
 		}
 		
 		@SuppressWarnings("unchecked")
 		BatchedResult<Long>[] commandsRes = new BatchedResult[commands.length];
 		
-		SerializedStore.toCommandResults(xml, getEventsRequests, commandsRes, eventsRes);
+		SerializedStore.toCommandResults(element, getEventsRequests, commandsRes, eventsRes);
 		
 		callback.onSuccess(new Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>(commandsRes,
 		        eventsRes));
-	}
-	
-	private String encodeEventsRequests(GetEventsRequest[] getEventRequests,
-	        BatchedResult<XEvent[]>[] res) {
-		
-		assert getEventRequests.length == res.length;
-		
-		StringBuilder sb = new StringBuilder();
-		
-		boolean first = true;
-		
-		for(int i = 0; i < getEventRequests.length; i++) {
-			GetEventsRequest ger = getEventRequests[i];
-			
-			if(ger == null) {
-				res[i] = new BatchedResult<XEvent[]>(new RequestException(
-				        "GetEventsRequest must not be null"));
-				continue;
-			} else if(ger.address == null) {
-				res[i] = new BatchedResult<XEvent[]>(new RequestException(
-				        "address must not be null"));
-				continue;
-			} else if(ger.address.getModel() == null) {
-				res[i] = new BatchedResult<XEvent[]>(new RequestException(
-				        "invalid get events adddress: " + ger.address));
-				continue;
-			} else if(ger.endRevision < ger.beginRevision) {
-				res[i] = new BatchedResult<XEvent[]>(new RequestException(
-				        "invalid GetEventsRequest range: [" + ger.beginRevision + ","
-				                + ger.endRevision + "]"));
-				continue;
-			}
-			
-			if(first) {
-				first = false;
-			} else {
-				sb.append('&');
-			}
-			
-			sb.append("address=");
-			try {
-				sb.append(URLEncoder.encode(ger.address.toString(), "UTF-8"));
-			} catch(UnsupportedEncodingException e) {
-				assert false;
-			}
-			
-			sb.append("&beginRevision=");
-			sb.append(ger.beginRevision);
-			
-			sb.append("&endRevision=");
-			if(ger.endRevision != Long.MAX_VALUE) {
-				sb.append(ger.beginRevision);
-			}
-			
-		}
-		
-		if(first) {
-			return null;
-		}
-		
-		return sb.toString();
 	}
 	
 	@Override
@@ -319,12 +253,12 @@ public class XydraStoreRestClient implements XydraStore {
 		
 		String uri = "events?" + req;
 		
-		XydraElement xml = get(uri, actorId, passwordHash, callback);
-		if(xml == null) {
+		XydraElement element = get(uri, actorId, passwordHash, callback);
+		if(element == null) {
 			return;
 		}
 		
-		SerializedStore.toEventResults(xml, getEventsRequests, res);
+		SerializedStore.toEventResults(element, getEventsRequests, res);
 		
 		callback.onSuccess(res);
 		
@@ -334,12 +268,12 @@ public class XydraStoreRestClient implements XydraStore {
 	public void getModelIds(XID actorId, String passwordHash, Callback<Set<XID>> callback)
 	        throws IllegalArgumentException {
 		
-		XydraElement xml = get("repository/models", actorId, passwordHash, callback);
-		if(xml == null) {
+		XydraElement element = get("repository/models", actorId, passwordHash, callback);
+		if(element == null) {
 			return;
 		}
 		
-		Set<XID> modelIds = SerializedStore.toModelIds(xml);
+		Set<XID> modelIds = SerializedStore.toModelIds(element);
 		
 		callback.onSuccess(modelIds);
 		
@@ -374,62 +308,20 @@ public class XydraStoreRestClient implements XydraStore {
 				return null;
 			}
 			
-			XydraElement xml = this.parser.parse(content);
+			XydraElement element = this.parser.parse(content);
 			
-			Throwable t = SerializedStore.toException(xml);
+			Throwable t = SerializedStore.toException(element);
 			if(t != null) {
 				callback.onFailure(t);
 				return null;
 			}
 			
-			return xml;
+			return element;
 			
 		} catch(IOException e) {
 			callback.onFailure(new ConnectException(e.getMessage()));
 			return null;
 		}
-	}
-	
-	private <T> String encodeAddresses(XAddress[] addresses, BatchedResult<T>[] res, XType type) {
-		
-		assert res.length == addresses.length;
-		
-		StringBuilder sb = new StringBuilder();
-		
-		boolean first = true;
-		
-		for(int i = 0; i < addresses.length; i++) {
-			XAddress address = addresses[i];
-			
-			if(address == null) {
-				res[i] = new BatchedResult<T>(new RequestException("address must not be null"));
-				continue;
-			} else if(address.getAddressedType() != type) {
-				res[i] = new BatchedResult<T>(new RequestException("address " + address
-				        + " is not of type " + type));
-				continue;
-			}
-			
-			if(first) {
-				first = false;
-			} else {
-				sb.append('&');
-			}
-			
-			sb.append("address=");
-			try {
-				sb.append(URLEncoder.encode(address.toString(), "UTF-8"));
-			} catch(UnsupportedEncodingException e) {
-				assert false;
-			}
-			
-		}
-		
-		if(first) {
-			return null;
-		}
-		
-		return sb.toString();
 	}
 	
 	@Override
@@ -450,46 +342,14 @@ public class XydraStoreRestClient implements XydraStore {
 		
 		String uri = "revisions?" + req;
 		
-		XydraElement xml = get(uri, actorId, passwordHash, callback);
-		if(xml == null) {
+		XydraElement element = get(uri, actorId, passwordHash, callback);
+		if(element == null) {
 			return;
 		}
 		
-		SerializedStore.toModelRevisions(xml, res);
+		SerializedStore.toModelRevisions(element, res);
 		
 		callback.onSuccess(res);
-		
-	}
-	
-	public <T> void toBatchedResults(List<Object> snapshots, Class<T> cls, BatchedResult<T>[] result) {
-		
-		int i = 0;
-		for(Object o : snapshots) {
-			
-			while(result[i] != null) {
-				i++;
-			}
-			
-			assert i < result.length;
-			
-			if(o == null) {
-				result[i] = new BatchedResult<T>((T)null);
-			} else if(cls.isAssignableFrom(o.getClass())) {
-				@SuppressWarnings("unchecked")
-				T t = (T)o;
-				result[i] = new BatchedResult<T>(t);
-			} else if(o instanceof Throwable) {
-				result[i] = new BatchedResult<T>((Throwable)o);
-			} else {
-				result[i] = new BatchedResult<T>(new InternalStoreException("Unexpected class: "
-				        + o.getClass()));
-			}
-			
-		}
-		
-		for(; i < result.length; i++) {
-			assert result[i] != null;
-		}
 		
 	}
 	
@@ -511,14 +371,14 @@ public class XydraStoreRestClient implements XydraStore {
 		
 		String uri = "snapshots?" + req;
 		
-		XydraElement xml = get(uri, actorId, passwordHash, callback);
-		if(xml == null) {
+		XydraElement element = get(uri, actorId, passwordHash, callback);
+		if(element == null) {
 			return;
 		}
 		
-		List<Object> snapshots = SerializedStore.toSnapshots(xml, modelAddresses);
+		List<Object> snapshots = SerializedStore.toSnapshots(element, modelAddresses);
 		
-		toBatchedResults(snapshots, XReadableModel.class, res);
+		toBatchedResults(snapshots, res, true);
 		
 		callback.onSuccess(res);
 		
@@ -542,14 +402,14 @@ public class XydraStoreRestClient implements XydraStore {
 		
 		String uri = "snapshots?" + req;
 		
-		XydraElement xml = get(uri, actorId, passwordHash, callback);
-		if(xml == null) {
+		XydraElement element = get(uri, actorId, passwordHash, callback);
+		if(element == null) {
 			return;
 		}
 		
-		List<Object> snapshots = SerializedStore.toSnapshots(xml, objectAddresses);
+		List<Object> snapshots = SerializedStore.toSnapshots(element, objectAddresses);
 		
-		toBatchedResults(snapshots, XReadableObject.class, res);
+		toBatchedResults(snapshots, res, false);
 		
 		callback.onSuccess(res);
 		
@@ -559,12 +419,12 @@ public class XydraStoreRestClient implements XydraStore {
 	public void getRepositoryId(XID actorId, String passwordHash, Callback<XID> callback)
 	        throws IllegalArgumentException {
 		
-		XydraElement xml = get("repository/id", actorId, passwordHash, callback);
-		if(xml == null) {
+		XydraElement element = get("repository/id", actorId, passwordHash, callback);
+		if(element == null) {
 			return;
 		}
 		
-		XID repoId = SerializedStore.toRepositoryId(xml);
+		XID repoId = SerializedStore.toRepositoryId(element);
 		
 		callback.onSuccess(repoId);
 		
@@ -573,6 +433,15 @@ public class XydraStoreRestClient implements XydraStore {
 	@Override
 	public XydraStoreAdmin getXydraStoreAdmin() {
 		return null;
+	}
+	
+	@Override
+	protected String urlencode(String string) {
+		try {
+			return URLEncoder.encode(string, "UTF-8");
+		} catch(UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 }
