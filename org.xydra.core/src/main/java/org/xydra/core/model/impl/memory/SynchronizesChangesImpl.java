@@ -412,6 +412,13 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 	}
 	
 	@Override
+	public String getSessionPassword() {
+		synchronized(this.eventQueue) {
+			return this.eventQueue.getPasswordHash();
+		}
+	}
+	
+	@Override
 	public long getSynchronizedRevision() {
 		synchronized(this.eventQueue) {
 			return this.eventQueue.getSyncRevision();
