@@ -8,6 +8,7 @@ import java.io.Writer;
 
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
+import org.xydra.annotations.RunsInGWT;
 
 
 /**
@@ -16,6 +17,7 @@ import org.xydra.annotations.RunsInAppEngine;
  * @author voelkel
  * 
  */
+@RunsInGWT(false)
 @RunsInAppEngine(true)
 @RequiresAppEngine(false)
 public class MiniStreamWriter implements MiniWriter {
