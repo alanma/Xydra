@@ -147,10 +147,11 @@ abstract public class AbstractSerializedModelTest extends AbstractSerializingTes
 		
 		// test serializing with revisions
 		XydraOut out = create();
+		out.enableWhitespace(true, true);
 		SerializedModel.serialize(model, out);
 		assertTrue(out.isClosed());
 		String data = out.getData();
-		log.debug(data);
+		log.info(data);
 		XydraElement e = parse(data);
 		XModel modelAgain = SerializedModel.toModel(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalState(model, modelAgain));

@@ -15,9 +15,9 @@ public interface XydraOut {
 	 * Start a new child element.
 	 * 
 	 * <p>
-	 * This method can be called when in the context of an element, child list
-	 * or array. No child elements can be added to elements that have a text
-	 * content created using {@link #content(String, Object)}.
+	 * This method can be called when in the context of a child list or array.
+	 * No child elements can be added to elements that have a text content
+	 * created using {@link #content(String, Object)}.
 	 * </p>
 	 * 
 	 * <p>
@@ -31,9 +31,9 @@ public interface XydraOut {
 	 * <p>
 	 * For JSON, elements are encoded as objects.
 	 * 
-	 * For element and typed child list or array contexts the type is not saved
-	 * in the object. For untyped child list and array contexts, the type is
-	 * saved in the "$type" property:
+	 * For typed child list or array contexts the type is not saved in the
+	 * object. For untyped child list and array contexts, the type is saved in
+	 * the "$type" property:
 	 * 
 	 * <pre>
 	 * { "$type": "type" ... }
@@ -101,7 +101,7 @@ public interface XydraOut {
 	<T> void attribute(String name, T value);
 	
 	/**
-	 * Start a new untyped child list.
+	 * Start a new child list.
 	 * 
 	 * <p>
 	 * This method can only be called when in the context of an element.
@@ -119,23 +119,8 @@ public interface XydraOut {
 	 * </p>
 	 * 
 	 * <p>
-	 * For JSON, this is encoded as a property with the given name.
-	 * 
-	 * For multiple-item child lists, the value of that property is a JSON array
-	 * containing all items (elements, values or arrays) added between this call
-	 * and the corresponding {@link #endChildren()} call:
-	 * 
-	 * <pre>
-	 * "name": [ ... ]
-	 * </pre>
-	 * 
-	 * For single-item child lists, the value of that property is the added
-	 * item.
-	 * 
-	 * <pre>
-	 * "name": ...
-	 * </pre>
-	 * 
+	 * For JSON, this is encoded as a property with the given name. The value of
+	 * that property will be whatever is added as a child.
 	 * </p>
 	 * 
 	 * <p>
@@ -163,87 +148,39 @@ public interface XydraOut {
 	 *            Elements with a untyped multiple-item child list cannot have
 	 *            any other content or child lists.
 	 */
-	void beginChildren(String name, boolean multiple);
+	void child(String name);
 	
 	/**
-	 * Start a new typed child list.
+	 * Set the child type for the current context,.
 	 * 
-	 * <p>
-	 * This method can only be called when in the context of an element.
-	 * </p>
-	 * 
-	 * <p>
-	 * This method changes the context to a new typed child list context. If
-	 * this context allows multiple items depends on the parameter @param
-	 * multiple.
-	 * </p>
-	 * 
-	 * <p>
-	 * For XML, this does not produce any direct output, only affects the
-	 * encoding of children.
-	 * </p>
-	 * 
-	 * <p>
-	 * For JSON, this is encoded as a property with the given name.
-	 * 
-	 * For multiple-item child lists, the value of that property is a JSON array
-	 * containing all items (elements or values) added between this call and the
-	 * corresponding {@link #endChildren()} call:
-	 * 
-	 * <pre>
-	 * "name": [ ... ]
-	 * </pre>
-	 * 
-	 * For single-item child lists, the value of that property is the added
-	 * item.
-	 * 
-	 * <pre>
-	 * "name": ...
-	 * </pre>
-	 * 
-	 * </p>
-	 * 
-	 * <p>
-	 * Child elements can be retrieved using
-	 * {@link XydraElement#getChild(String, String)} if created in an
-	 * single-item child list or using
-	 * {@link XydraElement#getChildren(String, String)} when created in an
-	 * multiple-item child list.
-	 * 
-	 * Arrays are retrieved as {@link XydraElement}s with no text content.
-	 * 
-	 * Values can be retrieved using
-	 * {@link XydraElement#getValue(String, String)} for single-item child lists
-	 * or using {@link XydraElement#getValues(String, String)} for multiple-item
-	 * child lists.
-	 * </p>
-	 * 
-	 * @param name A name for the child list. This must not be null and a unique
-	 *            attribute name for this element. 'isNull' and 'nullContent'
-	 *            are reserved names.
-	 * @param multiple True to create a multiple-item child list, false to
-	 *            create a single-item child list.
-	 * 
-	 *            Single-item child list must contain exactly one child.
-	 * 
-	 * @param type The type of the child list. This must be a valid XML element
-	 *            name and a unique type unique for all child lists and elements
-	 *            in the containing element.
+	 * @param type The type of the child / children. This must be a valid XML
+	 *            element name and a unique type unique for all child lists and
+	 *            elements in the containing element.
 	 * 
 	 *            All elements in this child list must have this type.
 	 */
-	void beginChildren(String name, boolean multiple, String type);
+	void setChildType(String type);
+	
+	void beginMap(String attribute);
+	
+	void entry(String id);
+	
+	void endMap();
+	
+	void setDefaultType(String type);
 	
 	/**
-	 * End the current child list.
+	 * Shortcut for:
 	 * 
-	 * If a child list has been started, this must be called before closing the
-	 * containing element.
+	 * <pre>
+	 * beginMap(attribute);
+	 * setChildType(type);
+	 * </pre>
 	 */
-	void endChildren();
+	void beginMap(String attribute, String type);
 	
 	/**
-	 * Start a new untyped array.
+	 * Start a new array.
 	 * 
 	 * <p>
 	 * This method can only be called when in the context of a child list or
@@ -298,58 +235,12 @@ public interface XydraOut {
 	void beginArray();
 	
 	/**
-	 * Start a new typed array.
-	 * 
-	 * <p>
-	 * This method can only be called when in the context of a child list or
-	 * array.
-	 * </p>
-	 * 
-	 * <p>
-	 * This method changes the context to a new typed array context (which
-	 * always allows multiple items).
-	 * </p>
-	 * 
-	 * <p>
-	 * For XML, this is mapped to a an element containing all entries of the
-	 * array.
-	 * 
-	 * If the array is created in a typed context with type 'type', it is
-	 * created as:
+	 * Shortcut for:
 	 * 
 	 * <pre>
-	 * &lt;type&gt;...&lt;/type&gt;
+	 * beginArray();
+	 * setChildType(type);
 	 * </pre>
-	 * 
-	 * if created in an untyped context (even as though the array context itself
-	 * is typed), the array is created as
-	 * 
-	 * <pre>
-	 * &lt;xarray&gt;...&lt;/xarray&gt;
-	 * </pre>
-	 * 
-	 * </p>
-	 * 
-	 * <p>
-	 * For JSON, this is mapped to a native JSON array.
-	 * </p>
-	 * 
-	 * <p>
-	 * Arrays are retrieved as {@link XydraElement}s with no text content.
-	 * 
-	 * Child elements can be retrieved using
-	 * {@link XydraElement#getChildren(String)} on the array element. The name
-	 * parameter is ignored.
-	 * 
-	 * Values can be retrieved using {@link XydraElement#getValues(String)} on
-	 * the array element. The name parameter is ignored.
-	 * </p>
-	 * 
-	 * @param type The type of the child list. This must be a valid XML element
-	 *            name and a unique type unique for all child lists and elements
-	 *            in the containing element.
-	 * 
-	 *            All elements in this child list must have this type.
 	 */
 	void beginArray(String type);
 	
@@ -421,31 +312,12 @@ public interface XydraOut {
 	<T> void value(T value);
 	
 	/**
-	 * Set the content of the current element.
+	 * Shortcut for:
 	 * 
-	 * <p>
-	 * This method can only be called when in the context of an element. No
-	 * content can be set for elements that have children or child list.
-	 * </p>
-	 * 
-	 * <p>
-	 * For XML this maps to the element's text content. Null values are encoded
-	 * using the attribute 'nullContent="true"' and an empty content.
-	 * </p>
-	 * 
-	 * <p>
-	 * For JSON the content is saved as an object property with the given name.
-	 * The content is encoded like any other value or attribute.
-	 * </p>
-	 * 
-	 * @param <T> The type of the content. Some types like {@link Boolean
-	 *            Booleans} and {@link Number Numbers} can be encoded
-	 *            differently. For everything else, the object's
-	 *            {@link T#toString()} method will determine the encoded string.
-	 * @param name A name for the content. This must not be null and a unique
-	 *            attribute name for this element. 'isNull' and 'nullContent'
-	 *            are reserved names.
-	 * @param content The content to set. This can be null.
+	 * <pre>
+	 * child(name);
+	 * value(content);
+	 * </pre>
 	 */
 	<T> void content(String name, T content);
 	
@@ -535,6 +407,19 @@ public interface XydraOut {
 	void enableWhitespace(boolean whitespace, boolean idententation);
 	
 	/**
+	 * Shortcut for:
+	 * 
+	 * <pre>
+	 * child(name);
+	 * setChildType(type);
+	 * </pre>
+	 * 
+	 * @see #child(String)
+	 * @see #setChildType(String)
+	 */
+	void child(String name, String type);
+	
+	/**
 	 * Convenience method to add a value list.
 	 * 
 	 * <p>
@@ -545,11 +430,12 @@ public interface XydraOut {
 	 * Shortcut for:
 	 * 
 	 * <pre>
-	 * beginChildren(name, true, type);
+	 * child(name);
+	 * beginArray(type);
 	 * for(T value : values) {
 	 * 	value(value);
 	 * }
-	 * endChildren();
+	 * endArray();
 	 * </pre>
 	 * 
 	 * </p>
@@ -578,9 +464,10 @@ public interface XydraOut {
 	 * This can be decoded using {@link XydraElement#getValues(String, String)}
 	 * </p>
 	 * 
-	 * @see #beginChildren(String, boolean, String)
+	 * @see #child(String)
+	 * @see #beginArray()
 	 * @see #value(Object)
-	 * @see #endChildren()
+	 * @see #endArray()
 	 */
 	<T> void values(String name, String type, Iterable<T> values);
 	
@@ -595,9 +482,8 @@ public interface XydraOut {
 	 * Shortcut for:
 	 * 
 	 * <pre>
-	 * beginChildren(name, false, type);
+	 * child(name, type);
 	 * value(value);
-	 * endChildren();
 	 * </pre>
 	 * 
 	 * </p>
@@ -624,9 +510,8 @@ public interface XydraOut {
 	 * This can be decoded using {@link XydraElement#getValue(String, String)}
 	 * </p>
 	 * 
-	 * @see #beginChildren(String, boolean, String)
+	 * @see #child(String, String)
 	 * @see #value(Object)
-	 * @see #endChildren()
 	 */
 	<T> void value(String name, String type, T value);
 	

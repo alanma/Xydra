@@ -35,6 +35,7 @@ import org.xydra.core.model.impl.memory.MemoryField;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryObject;
 import org.xydra.core.model.impl.memory.MemoryRepository;
+import org.xydra.index.query.Pair;
 import org.xydra.store.AccessException;
 
 
@@ -51,6 +52,7 @@ import org.xydra.store.AccessException;
 @RequiresAppEngine(false)
 public class SerializedModel {
 	
+	private static final String LOG_NAME = "log";
 	private static final String NAME_EVENTS = "events";
 	private static final String NAME_VALUE = "value";
 	private static final String NAME_OBJECTS = "objects";
@@ -79,7 +81,7 @@ public class SerializedModel {
 	}
 	
 	public static XChangeLogState loadChangeLogState(XydraElement element, XAddress baseAddr) {
-		XydraElement logElement = element.getElement(XCHANGELOG_ELEMENT);
+		XydraElement logElement = element.getChild(LOG_NAME, XCHANGELOG_ELEMENT);
 		if(logElement != null) {
 			XChangeLogState log = new MemoryChangeLogState(baseAddr);
 			loadChangeLogState(logElement, log);
@@ -136,10 +138,20 @@ public class SerializedModel {
 	 * @return the created {@link XRevWritableField}
 	 */
 	public static XRevWritableField toFieldState(XydraElement element, XRevWritableObject parent) {
+		return toFieldState(element, parent, null);
+	}
+	
+	public static XRevWritableField toFieldState(XydraElement element, XRevWritableObject parent,
+	        XAddress context) {
 		
 		SerializingUtils.checkElementType(element, XFIELD_ELEMENT);
 		
-		XID xid = SerializingUtils.getRequiredXidAttribute(element);
+		XID xid;
+		if(context != null && context.getField() != null) {
+			xid = context.getField();
+		} else {
+			xid = SerializingUtils.getRequiredXidAttribute(element);
+		}
 		
 		long revision = getRevisionAttribute(element);
 		
@@ -203,13 +215,18 @@ public class SerializedModel {
 		
 		SerializingUtils.checkElementType(element, XMODEL_ELEMENT);
 		
-		XID xid = SerializingUtils.getRequiredXidAttribute(element);
+		XID xid;
+		if(context != null && context.getModel() != null) {
+			xid = context.getModel();
+		} else {
+			xid = SerializingUtils.getRequiredXidAttribute(element);
+		}
 		
 		long revision = getRevisionAttribute(element);
 		
 		XRevWritableModel modelState;
+		XAddress modelAddr;
 		if(parent == null) {
-			XAddress modelAddr;
 			if(context != null) {
 				modelAddr = XX.toAddress(context.getRepository(), xid, null, null);
 			} else {
@@ -218,13 +235,20 @@ public class SerializedModel {
 			modelState = new SimpleModel(modelAddr);
 		} else {
 			modelState = parent.createModel(xid);
+			modelAddr = modelState.getAddress();
 		}
 		modelState.setRevisionNumber(revision);
 		
-		Iterator<XydraElement> objectElementIt = element.getChildren(NAME_OBJECTS, XOBJECT_ELEMENT);
+		XydraElement objects = element.getContainer(NAME_OBJECTS);
+		
+		Iterator<Pair<String,XydraElement>> objectElementIt = objects.getEntries(
+		        SerializingUtils.XID_ATTRIBUTE, XOBJECT_ELEMENT);
 		while(objectElementIt.hasNext()) {
-			XydraElement objectElement = objectElementIt.next();
-			XRevWritableObject objectState = toObjectState(objectElement, modelState);
+			Pair<String,XydraElement> objectElement = objectElementIt.next();
+			XID objectId = XX.toId(objectElement.getFirst());
+			XAddress objectAddr = XX.resolveObject(modelAddr, objectId);
+			XRevWritableObject objectState = toObjectState(objectElement.getSecond(), modelState,
+			        objectAddr);
 			assert modelState.getObject(objectState.getID()) == objectState;
 		}
 		
@@ -270,13 +294,18 @@ public class SerializedModel {
 		
 		SerializingUtils.checkElementType(element, XOBJECT_ELEMENT);
 		
-		XID xid = SerializingUtils.getRequiredXidAttribute(element);
+		XID xid;
+		if(context != null && context.getObject() != null) {
+			xid = context.getObject();
+		} else {
+			xid = SerializingUtils.getRequiredXidAttribute(element);
+		}
 		
 		long revision = getRevisionAttribute(element);
 		
 		XRevWritableObject objectState;
+		XAddress objectAddr;
 		if(parent == null) {
-			XAddress objectAddr;
 			if(context != null) {
 				objectAddr = XX.toAddress(context.getRepository(), context.getModel(), xid, null);
 			} else {
@@ -285,14 +314,21 @@ public class SerializedModel {
 			objectState = new SimpleObject(objectAddr);
 		} else {
 			objectState = parent.createObject(xid);
+			objectAddr = objectState.getAddress();
 		}
 		
 		objectState.setRevisionNumber(revision);
 		
-		Iterator<XydraElement> fieldElementIt = element.getChildren(NAME_FIELDS, XFIELD_ELEMENT);
+		XydraElement fields = element.getContainer(NAME_FIELDS);
+		
+		Iterator<Pair<String,XydraElement>> fieldElementIt = fields.getEntries(
+		        SerializingUtils.XID_ATTRIBUTE, XFIELD_ELEMENT);
 		while(fieldElementIt.hasNext()) {
-			XydraElement fieldElement = fieldElementIt.next();
-			XRevWritableField fieldState = toFieldState(fieldElement, objectState);
+			Pair<String,XydraElement> fieldElement = fieldElementIt.next();
+			XID fieldId = XX.toId(fieldElement.getFirst());
+			XAddress fieldAddr = XX.resolveField(objectAddr, fieldId);
+			XRevWritableField fieldState = toFieldState(fieldElement.getSecond(), objectState,
+			        fieldAddr);
 			assert objectState.getField(fieldState.getID()) == fieldState;
 		}
 		
@@ -325,10 +361,17 @@ public class SerializedModel {
 		XAddress repoAddr = XX.toAddress(xid, null, null, null);
 		XRevWritableRepository repositoryState = new SimpleRepository(repoAddr);
 		
-		Iterator<XydraElement> modelElementIt = element.getChildren(NAME_MODELS, XMODEL_ELEMENT);
+		XydraElement models = element.getContainer(NAME_MODELS);
+		
+		Iterator<Pair<String,XydraElement>> modelElementIt = models.getEntries(
+		        SerializingUtils.XID_ATTRIBUTE, XMODEL_ELEMENT);
 		while(modelElementIt.hasNext()) {
-			XydraElement modelElement = modelElementIt.next();
-			XRevWritableModel modelState = toModelState(modelElement, repositoryState);
+			Pair<String,XydraElement> modelElement = modelElementIt.next();
+			XID modelId = XX.toId(modelElement.getFirst());
+			XAddress modelAddr = XX.resolveModel(repoAddr, modelId);
+			
+			XRevWritableModel modelState = toModelState(modelElement.getSecond(), repositoryState,
+			        modelAddr);
 			assert repositoryState.getModel(modelState.getID()) == modelState;
 		}
 		
@@ -354,11 +397,12 @@ public class SerializedModel {
 			out.attribute(STARTREVISION_ATTRIBUTE, rev);
 		}
 		
-		out.beginChildren(NAME_EVENTS, true);
+		out.child(NAME_EVENTS);
+		out.beginArray();
 		while(events.hasNext()) {
 			SerializedEvent.serialize(events.next(), out, log.getBaseAddress());
 		}
-		out.endChildren();
+		out.endArray();
 		
 		out.close(XCHANGELOG_ELEMENT);
 		
@@ -390,6 +434,11 @@ public class SerializedModel {
 	 *             XValue type. See {@link SerializedValue} for details.
 	 */
 	public static void serialize(XReadableField xfield, XydraOut out, boolean saveRevision) {
+		serialize(xfield, out, saveRevision, true);
+	}
+	
+	public static void serialize(XReadableField xfield, XydraOut out, boolean saveRevision,
+	        boolean saveId) {
 		
 		// get values before outputting anything to prevent incomplete
 		// elements on errors
@@ -397,15 +446,16 @@ public class SerializedModel {
 		long rev = xfield.getRevisionNumber();
 		
 		out.open(XFIELD_ELEMENT);
-		out.attribute(SerializingUtils.XID_ATTRIBUTE, xfield.getID());
+		if(saveId) {
+			out.attribute(SerializingUtils.XID_ATTRIBUTE, xfield.getID());
+		}
 		if(saveRevision) {
 			out.attribute(REVISION_ATTRIBUTE, rev);
 		}
 		
 		if(xvalue != null) {
-			out.beginChildren(NAME_VALUE, false);
+			out.child(NAME_VALUE);
 			SerializedValue.serialize(xvalue, out);
-			out.endChildren();
 		}
 		
 		out.close(XFIELD_ELEMENT);
@@ -442,6 +492,11 @@ public class SerializedModel {
 	 */
 	public static void serialize(XReadableModel xmodel, XydraOut out, boolean saveRevision,
 	        boolean ignoreInaccessible, boolean saveChangeLog) {
+		serialize(xmodel, out, saveRevision, ignoreInaccessible, saveChangeLog, true);
+	}
+	
+	public static void serialize(XReadableModel xmodel, XydraOut out, boolean saveRevision,
+	        boolean ignoreInaccessible, boolean saveChangeLog, boolean saveId) {
 		
 		if(!saveRevision && saveChangeLog) {
 			throw new IllegalArgumentException("cannot save change log without saving revisions");
@@ -452,26 +507,33 @@ public class SerializedModel {
 		long rev = xmodel.getRevisionNumber();
 		
 		out.open(XMODEL_ELEMENT);
-		out.attribute(SerializingUtils.XID_ATTRIBUTE, xmodel.getID());
+		if(saveId) {
+			out.attribute(SerializingUtils.XID_ATTRIBUTE, xmodel.getID());
+		}
 		if(saveRevision) {
 			out.attribute(REVISION_ATTRIBUTE, rev);
 		}
 		
-		out.beginChildren(NAME_OBJECTS, true, XOBJECT_ELEMENT);
+		out.child(NAME_OBJECTS);
+		out.beginMap(SerializingUtils.XID_ATTRIBUTE, XOBJECT_ELEMENT);
 		for(XID objectId : xmodel) {
+			out.entry(objectId.toString());
 			try {
-				serialize(xmodel.getObject(objectId), out, saveRevision, ignoreInaccessible, false);
+				serialize(xmodel.getObject(objectId), out, saveRevision, ignoreInaccessible, false,
+				        false);
 			} catch(AccessException ae) {
 				if(!ignoreInaccessible) {
 					throw ae;
 				}
 			}
 		}
-		out.endChildren();
+		out.endMap();
 		
 		if(saveChangeLog && xmodel instanceof XLoggedModel) {
 			XChangeLog log = ((XLoggedModel)xmodel).getChangeLog();
 			if(log != null) {
+				out.child(LOG_NAME);
+				out.setChildType(XCHANGELOG_ELEMENT);
 				serialize(log, out);
 				assert log.getCurrentRevisionNumber() == xmodel.getRevisionNumber();
 			}
@@ -511,6 +573,11 @@ public class SerializedModel {
 	 */
 	public static void serialize(XReadableObject xobject, XydraOut out, boolean saveRevision,
 	        boolean ignoreInaccessible, boolean saveChangeLog) {
+		serialize(xobject, out, saveRevision, ignoreInaccessible, saveChangeLog, true);
+	}
+	
+	public static void serialize(XReadableObject xobject, XydraOut out, boolean saveRevision,
+	        boolean ignoreInaccessible, boolean saveChangeLog, boolean saveId) {
 		
 		if(!saveRevision && saveChangeLog) {
 			throw new IllegalArgumentException("cannot save change log without saving revisions");
@@ -521,26 +588,32 @@ public class SerializedModel {
 		long rev = xobject.getRevisionNumber();
 		
 		out.open(XOBJECT_ELEMENT);
-		out.attribute(SerializingUtils.XID_ATTRIBUTE, xobject.getID());
+		if(saveId) {
+			out.attribute(SerializingUtils.XID_ATTRIBUTE, xobject.getID());
+		}
 		if(saveRevision) {
 			out.attribute(REVISION_ATTRIBUTE, rev);
 		}
 		
-		out.beginChildren(NAME_FIELDS, true, XFIELD_ELEMENT);
+		out.child(NAME_FIELDS);
+		out.beginMap(SerializingUtils.XID_ATTRIBUTE, XFIELD_ELEMENT);
 		for(XID fieldId : xobject) {
+			out.entry(fieldId.toString());
 			try {
-				serialize(xobject.getField(fieldId), out, saveRevision);
+				serialize(xobject.getField(fieldId), out, saveRevision, false);
 			} catch(AccessException ae) {
 				if(!ignoreInaccessible) {
 					throw ae;
 				}
 			}
 		}
-		out.endChildren();
+		out.endMap();
 		
 		if(saveChangeLog && xobject instanceof XLoggedObject) {
 			XChangeLog log = ((XLoggedObject)xobject).getChangeLog();
 			if(log != null && log.getBaseAddress().equals(xobject.getAddress())) {
+				out.child(LOG_NAME);
+				out.setChildType(XCHANGELOG_ELEMENT);
 				serialize(log, out);
 				assert log.getCurrentRevisionNumber() == xobject.getRevisionNumber();
 			}
@@ -584,18 +657,20 @@ public class SerializedModel {
 		out.open(XREPOSITORY_ELEMENT);
 		out.attribute(SerializingUtils.XID_ATTRIBUTE, xrepository.getID());
 		
-		out.beginChildren(NAME_MODELS, true, XMODEL_ELEMENT);
-		for(XID modelOd : xrepository) {
+		out.child(NAME_MODELS);
+		out.beginMap(SerializingUtils.XID_ATTRIBUTE, XMODEL_ELEMENT);
+		for(XID modelId : xrepository) {
+			out.entry(modelId.toString());
 			try {
-				serialize(xrepository.getModel(modelOd), out, saveRevision, ignoreInaccessible,
-				        saveChangeLog);
+				serialize(xrepository.getModel(modelId), out, saveRevision, ignoreInaccessible,
+				        saveChangeLog, false);
 			} catch(AccessException ae) {
 				if(!ignoreInaccessible) {
 					throw ae;
 				}
 			}
 		}
-		out.endChildren();
+		out.endMap();
 		
 		out.close(XREPOSITORY_ELEMENT);
 		

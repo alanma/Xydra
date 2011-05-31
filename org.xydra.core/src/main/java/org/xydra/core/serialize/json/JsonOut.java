@@ -38,34 +38,20 @@ public class JsonOut extends AbstractXydraOut {
 	
 	private void init() {
 		if(this.callback != null) {
-			this.writer.write(this.callback);
-			this.writer.write('(');
+			write(this.callback);
+			write('(');
 		}
-	}
-	
-	private void outputName(Frame frame, String name) {
-		
-		if(frame.getAttrCount() > 0 || frame.hasContent()) {
-			this.writer.write(',');
-		}
-		whitespace('\n');
-		indent(frame.depth + 1);
-		this.writer.write('"');
-		this.writer.write(name);
-		this.writer.write("\":");
-		whitespace(' ');
-		
 	}
 	
 	private <T> void output(T value) {
 		
 		if(value instanceof Boolean || value instanceof Number || value instanceof XBooleanValue
 		        || value instanceof XNumberValue) {
-			this.writer.write(value.toString());
+			write(value.toString());
 		} else {
-			this.writer.write('"');
-			this.writer.write(JsonEncoder.encode(value.toString()));
-			this.writer.write('"');
+			write('"');
+			write(JsonEncoder.encode(value.toString()));
+			write('"');
 		}
 		
 	}
@@ -80,112 +66,75 @@ public class JsonOut extends AbstractXydraOut {
 	}
 	
 	@Override
-	protected void outputBeginChildren(Frame element, Frame children) {
+	protected void outputChild(Frame child) {
 		
-		outputName(element, children.name);
-		this.writer.write('[');
+		outputName(child.parent, child.name);
 		
-		children.depth = element.depth + 1;
-		
-	}
-	
-	@Override
-	protected void outputCloseElement(Frame container, Frame element) {
-		
-		int t = (container.type == Type.Element || container.element != null) ? 0 : 1;
-		
-		if(element.hasContent() || element.getAttrCount() > t) {
-			whitespace('\n');
-			indent(element.depth);
-		} else {
-			whitespace(' ');
-		}
-		this.writer.write('}');
+		child.depth = child.parent.depth;
 		
 	}
 	
 	@Override
-	protected <T> void outputContent(Frame element, Frame content, T data) {
-		
-		outputName(element, content.name);
-		
-		if(data == null) {
-			this.writer.write("null");
-		} else {
-			output(data);
-		}
-	}
-	
-	@Override
-	protected void outputEndChildren(Frame element, Frame children) {
-		
-		if(children.hasContent()) {
-			whitespace('\n');
-			indent(children.depth);
-		} else {
-			whitespace(' ');
-		}
-		this.writer.write(']');
-		
+	protected void outputCloseElement(Frame element) {
+		endContainer(element, '}');
 	}
 	
 	@Override
 	protected void outputNullElement(Frame container) {
 		
-		assert container.type == Type.Root || container.type == Type.Children
-		        || container.type == Type.Child || container.type == Type.Array;
+		begin(container, true);
 		
-		beginChild(container, true);
-		
-		this.writer.write("null");
+		write("null");
 		
 	}
 	
-	private void beginChild(Frame container, boolean newline) {
+	private void outputName(Frame frame, String name) {
 		
-		if(container.type == Type.Children || container.type == Type.Array) {
-			if(container.hasContent() || container.getAttrCount() > 0) {
-				// This is not the first child element
-				this.writer.write(',');
-			}
-			if(newline && (!container.hasContent() || container.element == null)) {
+		begin(frame, true);
+		
+		write('"');
+		write(name);
+		write("\":");
+		whitespace(' ');
+		
+	}
+	
+	private void begin(Frame frame, boolean newline) {
+		
+		if(frame.hasContent || frame.hasSpecialContent) {
+			// This is not the first child element
+			write(',');
+		}
+		if(newline) {
+			frame.hasContent = true;
+		} else {
+			frame.hasSpecialContent = true;
+		}
+		if(frame.type != Type.Root && frame.type != Type.Child && frame.type != Type.Entry) {
+			if(newline) {
 				whitespace('\n');
-				indent(container.depth + 1);
+				indent(frame.depth + 1);
 			} else {
 				whitespace(' ');
 			}
-		} else if(container.type == Type.Child) {
-			outputName(container, container.name);
 		}
 	}
 	
 	@Override
-	protected void outputOpenElement(Frame container, Frame element) {
+	protected void outputOpenElement(Frame element) {
 		
-		element.depth = container.depth + 1;
+		boolean saveType = !element.name.equals(element.parent.getChildType());
 		
-		if(container.type == Type.Root || container.type == Type.Children
-		        || container.type == Type.Child || container.type == Type.Array) {
-			
-			beginChild(container, true);
-			
-			this.writer.write('{');
-			if(container.element == null) {
-				whitespace(' ');
-				this.writer.write("\"$type\":");
-				whitespace(' ');
-				this.writer.write('"');
-				this.writer.write(element.name);
-				this.writer.write('"');
-			}
-			
-		} else {
-			
-			assert container.type == Type.Element;
-			
-			outputName(container, element.name);
-			this.writer.write('{');
-			
+		beginContainer(element, '{', saveType && element.parent.type != Type.Child);
+		
+		if(saveType) {
+			whitespace(' ');
+			write("\"$type\":");
+			whitespace(' ');
+			write('"');
+			write(element.name);
+			write('"');
+			element.hasSpecialContent = true;
 		}
 		
 	}
@@ -193,57 +142,71 @@ public class JsonOut extends AbstractXydraOut {
 	@Override
 	protected <T> void outputValue(Frame container, T value) {
 		
-		beginChild(container, false);
+		begin(container, false);
 		
 		if(value == null) {
-			this.writer.write("null");
+			write("null");
 		} else {
 			output(value);
 		}
 	}
 	
 	@Override
-	protected void end() {
+	protected void outpuEnd() {
 		if(this.callback != null) {
-			this.writer.write(");");
+			write(");");
 		}
 		whitespace('\n');
 	}
 	
 	@Override
-	protected void outputBeginChild(Frame element, Frame child) {
-		child.depth = element.depth;
-		if(element.getAttrCount() > 0 || element.hasContent()) {
-			this.writer.write(',');
-		}
+	protected void outputBeginArray(Frame array) {
+		beginContainer(array, '[', false);
 	}
 	
 	@Override
-	protected void outputBeginArray(Frame container, Frame array) {
-		
-		beginChild(container, true);
-		
-		this.writer.write('[');
-		
-		array.depth = container.depth + 1;
-	}
-	
-	@Override
-	protected void outputEndArray(Frame container, Frame array) {
-		
-		if(array.hasContent()) {
-			whitespace('\n');
-			indent(array.depth);
-		} else {
-			whitespace(' ');
-		}
-		this.writer.write(']');
-		
+	protected void outputEndArray(Frame array) {
+		endContainer(array, ']');
 	}
 	
 	@Override
 	public String getContentType() {
 		return "application/json";
+	}
+	
+	@Override
+	protected void outputBeginMap(Frame map) {
+		beginContainer(map, '{', false);
+	}
+	
+	private void beginContainer(Frame container, char c, boolean newline) {
+		
+		begin(container.parent, newline);
+		
+		write(c);
+		
+		container.depth = container.parent.depth + 1;
+	}
+	
+	@Override
+	protected void outputEndMap(Frame map) {
+		endContainer(map, '}');
+	}
+	
+	private void endContainer(Frame container, char c) {
+		
+		if(container.hasContent) {
+			whitespace('\n');
+			indent(container.depth);
+		} else {
+			whitespace(' ');
+		}
+		write(c);
+	}
+	
+	@Override
+	protected void outputEntry(Frame entry) {
+		outputChild(entry);
 	}
 	
 }

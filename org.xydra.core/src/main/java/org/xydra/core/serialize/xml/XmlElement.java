@@ -10,6 +10,7 @@ import org.w3c.dom.NodeList;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.core.serialize.XydraElement;
+import org.xydra.index.query.Pair;
 
 
 /**
@@ -21,10 +22,6 @@ import org.xydra.core.serialize.XydraElement;
 @RunsInGWT(false)
 @RequiresAppEngine(false)
 public class XmlElement implements XydraElement {
-	
-	private static final String ELEMENT_XNULL = "xnull";
-	private static final String ATTRIBUTE_IS_NULL = "isNull";
-	private static final String ATTRIBUTE_NULL_CONTENT = "nullContent";
 	
 	Element element;
 	
@@ -65,8 +62,8 @@ public class XmlElement implements XydraElement {
 	
 	@Override
 	public String getContent(String name) {
-		if(this.element.hasAttribute(ATTRIBUTE_NULL_CONTENT)
-		        && Boolean.valueOf(this.element.getAttribute(ATTRIBUTE_NULL_CONTENT))) {
+		if(this.element.hasAttribute(XmlEncoder.NULL_CONTENT_ATTRIBUTE)
+		        && Boolean.valueOf(this.element.getAttribute(XmlEncoder.NULL_CONTENT_ATTRIBUTE))) {
 			return null;
 		}
 		return this.element.getTextContent();
@@ -174,9 +171,9 @@ public class XmlElement implements XydraElement {
 	}
 	
 	private static boolean isNull(Element element) {
-		return (ELEMENT_XNULL.equals(element.getNodeName()) || element
-		        .hasAttribute(ATTRIBUTE_IS_NULL)
-		        && Boolean.valueOf(element.getAttribute(ATTRIBUTE_IS_NULL)));
+		return (XmlEncoder.XNULL_ELEMENT.equals(element.getNodeName()) || (element
+		        .hasAttribute(XmlEncoder.NULL_ATTRIBUTE) && Boolean.valueOf(element
+		        .getAttribute(XmlEncoder.NULL_ATTRIBUTE))));
 	}
 	
 	@Override
@@ -187,6 +184,38 @@ public class XmlElement implements XydraElement {
 	@Override
 	public XydraElement getChild(String name) {
 		return getChild(name, 0);
+	}
+	
+	@Override
+	public XydraElement getContainer(String name) {
+		return this;
+	}
+	
+	@Override
+	public Iterator<Pair<String,XydraElement>> getEntries(String attribute) {
+		final NodeList nodes = this.element.getChildNodes();
+		return nodeListToMapIterator(nodes, attribute);
+	}
+	
+	@Override
+	public Iterator<Pair<String,XydraElement>> getEntries(String attribute, String type) {
+		final NodeList nodes = this.element.getElementsByTagName(type);
+		return nodeListToMapIterator(nodes, attribute);
+	}
+	
+	private Iterator<Pair<String,XydraElement>> nodeListToMapIterator(NodeList nodes,
+	        String attribute) {
+		List<Pair<String,XydraElement>> list = new ArrayList<Pair<String,XydraElement>>();
+		for(int i = 0; i < nodes.getLength(); ++i) {
+			Node node = nodes.item(i);
+			if(node instanceof Element && ((Element)node).hasAttribute(attribute)) {
+				Element element = (Element)node;
+				
+				list.add(new Pair<String,XydraElement>(element.getAttribute(attribute),
+				        wrap(element)));
+			}
+		}
+		return list.iterator();
 	}
 	
 }

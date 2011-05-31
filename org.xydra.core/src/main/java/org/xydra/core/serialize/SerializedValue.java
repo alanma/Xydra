@@ -323,7 +323,6 @@ public class SerializedValue {
 		out.open(element);
 		out.values(NAME_DATA, componentElement, xvalue);
 		out.close(element);
-		
 	}
 	
 	private static void serialize(XByteListValue xvalue, XydraOut out) {

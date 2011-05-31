@@ -2,6 +2,8 @@ package org.xydra.core.serialize;
 
 import java.util.Iterator;
 
+import org.xydra.index.query.Pair;
+
 
 /**
  * A minimal abstraction API to access XML/JSON elements created with
@@ -259,5 +261,11 @@ public interface XydraElement {
 	 * @return the first matching value in document order
 	 */
 	public Object getValue(String name, String type);
+	
+	public XydraElement getContainer(String name);
+	
+	public Iterator<Pair<String,XydraElement>> getEntries(String attribute);
+	
+	public Iterator<Pair<String,XydraElement>> getEntries(String attribute, String type);
 	
 }

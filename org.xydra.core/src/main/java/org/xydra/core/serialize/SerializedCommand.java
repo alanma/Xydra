@@ -355,9 +355,8 @@ public class SerializedCommand {
 		setAtomicCommandAttributes(command, out, context, true);
 		
 		if(command.getValue() != null) {
-			out.beginChildren(NAME_VALUE, false);
+			out.child(NAME_VALUE);
 			SerializedValue.serialize(command.getValue(), out);
-			out.endChildren();
 		}
 		
 		out.close(XFIELDCOMMAND_ELEMENT);
@@ -414,11 +413,12 @@ public class SerializedCommand {
 		
 		XAddress newContext = trans.getTarget();
 		
-		out.beginChildren(NAME_COMMANDS, true);
+		out.child(NAME_COMMANDS);
+		out.beginArray();
 		for(XAtomicCommand command : trans) {
 			serialize(command, out, newContext);
 		}
-		out.endChildren();
+		out.endArray();
 		
 		out.close(XTRANSACTION_ELEMENT);
 		
@@ -437,14 +437,14 @@ public class SerializedCommand {
 		
 		out.open(XCOMMANDLIST_ELEMENT);
 		
-		out.beginChildren(NAME_COMMANDS, true);
+		out.child(NAME_COMMANDS);
+		out.beginArray();
 		while(commands.hasNext()) {
 			serialize(commands.next(), out, context);
 		}
-		out.endChildren();
+		out.endArray();
 		
 		out.close(XCOMMANDLIST_ELEMENT);
-		
 	}
 	
 	/**

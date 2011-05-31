@@ -42,22 +42,22 @@ public class SerializedStore {
 	
 	private static final String NAME_EVENTRESULTS = "eventResults";
 	private static final String NAME_COMMANDRESULTS = "commandResults";
-	private static final String NAME_EVENTS = "events";
+	private static final String NAME_EVENTS = "results";
 	private static final String NAME_AUTHENTICATED = "authenticated";
 	private static final String NAME_MESSAGE = "message";
 	private static final String NAME_REVISION = "revision";
 	private static final String NAME_REVISIONS = "revisions";
 	private static final String NAME_SNAPSHOTS = "snapshots";
-	private static final String ELEMENT_REPOSITORY_ID = "repositoryId";
-	private static final String ELEMENT_MODEL_IDS = "modelIds";
-	private static final String ELEMENT_AUTHENTICATED = "authenticated";
-	private static final String ELEMENT_EVENTRESULTS = NAME_EVENTRESULTS;
-	private static final String ELEMENT_COMMANDRESULTS = NAME_COMMANDRESULTS;
-	private static final String ELEMENT_MODEL_REVISIONS = NAME_REVISIONS;
-	private static final String ELEMENT_XREVISION = "xrevision";
-	private static final String ELEMENT_RESULTS = "results";
-	private static final String ELEMENT_SNAPSHOTS = NAME_SNAPSHOTS;
-	private static final String ELEMENT_XERROR = "xerror";
+	public static final String ELEMENT_REPOSITORY_ID = "repositoryId";
+	public static final String ELEMENT_MODEL_IDS = "modelIds";
+	public static final String ELEMENT_AUTHENTICATED = "authenticated";
+	public static final String ELEMENT_EVENTRESULTS = NAME_EVENTRESULTS;
+	public static final String ELEMENT_COMMANDRESULTS = NAME_COMMANDRESULTS;
+	public static final String ELEMENT_MODEL_REVISIONS = NAME_REVISIONS;
+	public static final String ELEMENT_XREVISION = "xrevision";
+	public static final String ELEMENT_RESULTS = "results";
+	public static final String ELEMENT_SNAPSHOTS = NAME_SNAPSHOTS;
+	public static final String ELEMENT_XERROR = "xerror";
 	private static final String ATTRIBUTE_TYPE = "type";
 	private static final String TYPE_ACCESS = "access";
 	private static final String TYPE_AUTHORIZATION = "authorization";
@@ -164,18 +164,16 @@ public class SerializedStore {
 		
 		out.open(ELEMENT_RESULTS);
 		
-		out.beginChildren(NAME_COMMANDRESULTS, false, ELEMENT_COMMANDRESULTS);
+		out.child(NAME_COMMANDRESULTS, ELEMENT_COMMANDRESULTS);
 		out.beginArray();
 		setRevisionListContents(commandRes, out);
 		out.endArray();
-		out.endChildren();
 		
 		if(eventsRes != null) {
-			out.beginChildren(NAME_EVENTRESULTS, false, ELEMENT_EVENTRESULTS);
+			out.child(NAME_EVENTRESULTS, ELEMENT_EVENTRESULTS);
 			out.beginArray();
 			serialize(ger, eventsRes, out);
 			out.endArray();
-			out.endChildren();
 		}
 		
 		out.close(ELEMENT_RESULTS);
@@ -206,9 +204,10 @@ public class SerializedStore {
 		
 		out.open(ELEMENT_EVENTRESULTS);
 		
-		out.beginChildren(NAME_EVENTS, true);
+		out.child(NAME_EVENTS);
+		out.beginArray();
 		serialize(ger, results, out);
-		out.endChildren();
+		out.endArray();
 		
 		out.close(ELEMENT_EVENTRESULTS);
 		
@@ -288,9 +287,10 @@ public class SerializedStore {
 	public static void serializeModelRevisions(BatchedResult<Long>[] result, XydraOut out) {
 		
 		out.open(ELEMENT_MODEL_REVISIONS);
-		out.beginChildren(NAME_REVISIONS, true);
+		out.child(NAME_REVISIONS);
+		out.beginArray();
 		setRevisionListContents(result, out);
-		out.endChildren();
+		out.endArray();
 		out.close(ELEMENT_MODEL_REVISIONS);
 		
 	}
@@ -361,7 +361,8 @@ public class SerializedStore {
 		
 		int mi = 0, oi = 0;
 		
-		out.beginChildren(NAME_SNAPSHOTS, true);
+		out.child(NAME_SNAPSHOTS);
+		out.beginArray();
 		for(int i = 0; i < isModel.length; i++) {
 			
 			if(ex[i] != null) {
@@ -392,7 +393,7 @@ public class SerializedStore {
 			}
 			
 		}
-		out.endChildren();
+		out.endArray();
 		
 		out.close(ELEMENT_SNAPSHOTS);
 		

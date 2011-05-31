@@ -6,8 +6,9 @@ import java.util.List;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.ParsingError;
+import org.xydra.core.serialize.XydraElement;
+import org.xydra.index.query.Pair;
 
 
 @RunsInGWT(true)
@@ -93,4 +94,18 @@ public class JsonArray implements XydraElement {
 		return getChild(name, 0);
 	}
 	
+	@Override
+	public XydraElement getContainer(String name) {
+		throw new ParsingError(this, "tried to get container from JSON array");
+	}
+	
+	@Override
+	public Iterator<Pair<String,XydraElement>> getEntries(String attribute) {
+		throw new ParsingError(this, "tried to get map entries from JSON array");
+	}
+	
+	@Override
+	public Iterator<Pair<String,XydraElement>> getEntries(String attribute, String type) {
+		throw new ParsingError(this, "tried to get map entries from JSON array");
+	}
 }

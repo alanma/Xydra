@@ -11,6 +11,7 @@ import org.xydra.core.serialize.XydraElement;
 import org.xydra.index.iterator.AbstractTransformingIterator;
 import org.xydra.index.iterator.NoneIterator;
 import org.xydra.index.iterator.SingleValueIterator;
+import org.xydra.index.query.Pair;
 
 
 @RunsInGWT(true)
@@ -33,10 +34,11 @@ public class JsonElement implements XydraElement {
 			}
 			this.type = type;
 		} else {
-			if(key == null) {
-				throw new IllegalArgumentException("missing type");
+			if(key != null) {
+				this.type = key.toString();
+			} else {
+				this.type = null;
 			}
-			this.type = key.toString();
 		}
 	}
 	
@@ -169,6 +171,32 @@ public class JsonElement implements XydraElement {
 		} else {
 			return null;
 		}
+	}
+	
+	@Override
+	public XydraElement getContainer(String name) {
+		return getChild(name);
+	}
+	
+	@Override
+	public Iterator<Pair<String,XydraElement>> getEntries(String attribute) {
+		return getEntries(attribute, null);
+	}
+	
+	protected static Iterator<Pair<String,XydraElement>> transformMap(
+	        Iterator<Map.Entry<String,Object>> iterator, final String type) {
+		return new AbstractTransformingIterator<Map.Entry<String,Object>,Pair<String,XydraElement>>(
+		        iterator) {
+			@Override
+			public Pair<String,XydraElement> transform(Map.Entry<String,Object> in) {
+				return new Pair<String,XydraElement>(in.getKey(), wrap(in.getValue(), type));
+			}
+		};
+	}
+	
+	@Override
+	public Iterator<Pair<String,XydraElement>> getEntries(String attribute, String type) {
+		return transformMap(this.data.entrySet().iterator(), type);
 	}
 	
 }

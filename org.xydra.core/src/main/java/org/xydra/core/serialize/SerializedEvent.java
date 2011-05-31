@@ -47,14 +47,14 @@ public class SerializedEvent {
 	private static final String INTRANSACTION_ATTRIBUTE = "inTransaction";
 	private static final String MODELREVISION_ATTRIBUTE = "modelRevision";
 	private static final String OBJECTREVISION_ATTRIBUTE = "objectRevision";
-	private static final String XEVENTLIST_ELEMENT = "xevents";
 	
-	protected static final String XFIELDEVENT_ELEMENT = "xfieldEvent";
-	protected static final String XREVERSIBLEFIELDEVENT_ELEMENT = "xreversibleFieldEvent";
-	private static final String XMODELEVENT_ELEMENT = "xmodelEvent";
-	private static final String XOBJECTEVENT_ELEMENT = "xobjectEvent";
-	private static final String XREPOSITORYEVENT_ELEMENT = "xrepositoryEvent";
-	private static final String XTRANSACTIONEVENT_ELEMENT = "xtransactionEvent";
+	public static final String XEVENTLIST_ELEMENT = "xevents";
+	public static final String XFIELDEVENT_ELEMENT = "xfieldEvent";
+	public static final String XREVERSIBLEFIELDEVENT_ELEMENT = "xreversibleFieldEvent";
+	public static final String XMODELEVENT_ELEMENT = "xmodelEvent";
+	public static final String XOBJECTEVENT_ELEMENT = "xobjectEvent";
+	public static final String XREPOSITORYEVENT_ELEMENT = "xrepositoryEvent";
+	public static final String XTRANSACTIONEVENT_ELEMENT = "xtransactionEvent";
 	
 	private static boolean getImpliedAttribute(XydraElement element) {
 		Object booleanString = element.getAttribute(IMPLIED_ATTRIBUTE);
@@ -127,8 +127,8 @@ public class SerializedEvent {
 		
 	}
 	
-	private static XAtomicEvent toAtomicEvent(XydraElement element, XAddress context, TempTrans trans)
-	        throws ParsingError {
+	private static XAtomicEvent toAtomicEvent(XydraElement element, XAddress context,
+	        TempTrans trans) throws ParsingError {
 		String name = element.getType();
 		if(name.equals(XFIELDEVENT_ELEMENT)) {
 			return toFieldEvent(element, context, trans);
@@ -321,7 +321,8 @@ public class SerializedEvent {
 		}
 	}
 	
-	private static XObjectEvent toObjectEvent(XydraElement element, XAddress context, TempTrans trans) {
+	private static XObjectEvent toObjectEvent(XydraElement element, XAddress context,
+	        TempTrans trans) {
 		
 		if(context != null && context.getField() != null) {
 			throw new IllegalArgumentException("invalid context for object events: " + context);
@@ -460,11 +461,12 @@ public class SerializedEvent {
 		
 		out.open(XEVENTLIST_ELEMENT);
 		
-		out.beginChildren(NAME_EVENTS, true);
+		out.child(NAME_EVENTS);
+		out.beginArray();
 		while(events.hasNext()) {
 			serialize(events.next(), out, context);
 		}
-		out.endChildren();
+		out.endArray();
 		
 		out.close(XEVENTLIST_ELEMENT);
 		
@@ -515,9 +517,8 @@ public class SerializedEvent {
 		setAtomicEventAttributes(event, out, context, inTrans);
 		
 		if(event.getChangeType() != ChangeType.REMOVE) {
-			out.beginChildren(NAME_VALUE, false);
+			out.child(NAME_VALUE);
 			SerializedValue.serialize(event.getNewValue(), out);
-			out.endChildren();
 		}
 		
 		out.close(XFIELDEVENT_ELEMENT);
@@ -532,14 +533,12 @@ public class SerializedEvent {
 		setAtomicEventAttributes(event, out, context, inTrans);
 		
 		if(event.getChangeType() != ChangeType.ADD) {
-			out.beginChildren(NAME_OLD_VALUE, false);
+			out.child(NAME_OLD_VALUE);
 			SerializedValue.serialize(event.getOldValue(), out);
-			out.endChildren();
 		}
 		if(event.getChangeType() != ChangeType.REMOVE) {
-			out.beginChildren(NAME_VALUE, false);
+			out.child(NAME_VALUE);
 			SerializedValue.serialize(event.getNewValue(), out);
-			out.endChildren();
 		}
 		
 		out.close(XREVERSIBLEFIELDEVENT_ELEMENT);
@@ -594,12 +593,13 @@ public class SerializedEvent {
 		
 		XAddress newContext = trans.getTarget();
 		
-		out.beginChildren(NAME_EVENTS, true);
+		out.child(NAME_EVENTS);
+		out.beginArray();
 		for(XAtomicEvent event : trans) {
 			assert event != null;
 			serialize(event, out, newContext, true);
 		}
-		out.endChildren();
+		out.endArray();
 		
 		out.close(XTRANSACTIONEVENT_ELEMENT);
 		

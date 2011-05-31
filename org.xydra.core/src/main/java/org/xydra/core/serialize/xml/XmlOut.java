@@ -36,108 +36,81 @@ public class XmlOut extends AbstractXydraOut {
 			return;
 		}
 		
-		this.writer.write(XmlEncoder.XML_DECLARATION);
-		this.writer.write('\n');
+		write(XmlEncoder.XML_DECLARATION);
+		write('\n');
 	}
 	
 	@Override
 	protected <T> void outputAttribute(Frame element, String name, T value) {
 		
-		this.writer.write(" ");
-		this.writer.write(name);
-		this.writer.write("=\"");
-		this.writer.write(XmlEncoder.encode(value.toString()));
-		this.writer.write("\"");
-		
+		write(" ");
+		write(name);
+		write("=\"");
+		write(XmlEncoder.encode(value.toString()));
+		write("\"");
 	}
 	
 	@Override
-	protected void outputBeginChildren(Frame element, Frame children) {
-		if(!element.hasContent()) {
-			this.writer.write(">\n");
-		}
-		children.depth = element.depth;
+	protected void outputChild(Frame child) {
+		child.depth = child.parent.depth;
 	}
 	
-	@Override
-	protected void outputCloseElement(Frame container, Frame element) {
+	Frame getElement(Frame frame) {
 		
-		if(element.hasContent()) {
-			if(element.getContentType() != Type.Text) {
-				indent(element.depth);
-				this.writer.write("</");
-				this.writer.write(element.name);
-				this.writer.write(">\n");
-			}
-		} else {
-			this.writer.write("/>\n");
-		}
+		Frame element = frame;
 		
-	}
-	
-	@Override
-	protected <T> void outputContent(Frame element, Frame content, T data) {
-		if(data == null) {
-			this.writer.write(" nullContent=\"true\"/>\n");
-		} else {
-			String dataStr = data.toString();
-			if(dataStr.isEmpty()) {
-				this.writer.write("/>\n");
+		switch(element.type) {
+		case Child:
+			return element.parent;
+		case Element:
+			return element;
+		case Entry:
+			element = element.parent;
+			//$FALL-THROUGH$
+		case Array:
+		case Map:
+			if(element.parent.type == Type.Child && element.parent.getChildType() == null) {
+				assert element.parent.parent.type == Type.Element;
+				return element.parent.parent;
 			} else {
-				this.writer.write('>');
-				this.writer.write(XmlEncoder.encode(data.toString()));
-				this.writer.write("</");
-				this.writer.write(element.name);
-				this.writer.write(">\n");
+				return element;
 			}
+		case Root:
+			return element;
+		case Text:
+			assert false;
+		}
+		
+		return null;
+	}
+	
+	private void begin(Frame frame) {
+		
+		Frame element = getElement(frame);
+		
+		if(element.type != Type.Root) {
+			if(!element.hasContent) {
+				write('>');
+				element.hasContent = true;
+			}
+			write('\n');
+			indent(element.depth + 1);
 		}
 	}
 	
 	@Override
-	protected void outputEndChildren(Frame element, Frame children) {
-		// nothing to do here
-	}
-	
-	@Override
-	protected void outputOpenElement(Frame container, Frame element) {
+	protected void outputCloseElement(Frame element) {
 		
-		beginChild(container);
-		
-		element.depth = container.depth + 1;
-		
-		this.writer.write('<');
-		this.writer.write(element.name);
-		
-	}
-	
-	@Override
-	protected void outputBeginChild(Frame element, Frame child) {
-		outputBeginChildren(element, child);
-	}
-	
-	private void beginChild(Frame container) {
-		
-		if((container.type == Type.Element && !container.hasContent())
-		        || (container.type == Type.Array && !container.hasContent() && container
-		                .getAttrCount() == 0)) {
-			this.writer.write(">\n");
-		}
-		
-		indent(container.depth + 1);
-		
-	}
-	
-	@Override
-	protected void outputNullElement(Frame container) {
-		
-		beginChild(container);
-		
-		if(container.element == null) {
-			this.writer.write("<xnull/>\n");
+		if(element.hasContent) {
+			if(!element.hasSpecialContent) {
+				write('\n');
+				indent(element.depth);
+			}
+			write("</");
+			write(element.name);
+			write(">");
 		} else {
-			this.writer.write('<');
-			this.writer.write(container.element);
-			this.writer.write(" isNull=\"true\"/>\n");
+			write("/>");
 		}
 		
 	}
@@ -145,67 +118,163 @@ public class XmlOut extends AbstractXydraOut {
 	@Override
 	protected <T> void outputValue(Frame container, T value) {
 		
-		if(value == null) {
+		if(isInlined(container)) {
+			
+			assert !container.parent.hasContent;
+			
+			if(value == null) {
+				outputAttribute(container, XmlEncoder.NULL_CONTENT_ATTRIBUTE,
+				        XmlEncoder.NULL_CONTENT_VALUE);
+			} else {
+				String valueStr = value.toString();
+				if(!valueStr.isEmpty()) {
+					write('>');
+					write(XmlEncoder.encode(valueStr));
+					container.parent.hasContent = true;
+					container.parent.hasSpecialContent = true;
+				}
+			}
+		} else if(value == null) {
 			outputNullElement(container);
 		} else {
 			
-			beginChild(container);
+			begin(container);
 			
-			String type = container.element == null ? "xvalue" : container.element;
+			String type = container.isChildTypeForced() ? container.getChildType() : "xvalue";
 			
-			this.writer.write('<');
-			this.writer.write(type);
+			write('<');
+			write(type);
+			outputId(container);
 			String valueStr = value.toString();
 			if(valueStr.isEmpty()) {
-				this.writer.write("/>\n");
+				write("/>");
 			} else {
-				this.writer.write('>');
-				this.writer.write(XmlEncoder.encode(valueStr));
-				this.writer.write("</");
-				this.writer.write(type);
-				this.writer.write(">\n");
+				write('>');
+				write(XmlEncoder.encode(valueStr));
+				write("</");
+				write(type);
+				write(">");
 			}
 			
 		}
 		
 	}
 	
+	private boolean isInlined(Frame container) {
+		return container.type == Type.Child && container.getChildType() == null;
+	}
+	
 	@Override
-	protected void outputBeginArray(Frame container, Frame array) {
+	protected void outputNullElement(Frame container) {
 		
-		array.depth = container.depth + 1;
-		indent(array.depth);
+		begin(container);
 		
-		if(container.element == null) {
-			this.writer.write("<xarray");
+		write('<');
+		if(!container.isChildTypeForced()) {
+			write(XmlEncoder.XNULL_ELEMENT);
+			outputId(container);
 		} else {
-			this.writer.write('<');
-			this.writer.write(container.element);
+			write(container.getChildType());
+			outputId(container);
+			outputAttribute(null, XmlEncoder.NULL_ATTRIBUTE, XmlEncoder.NULL_VALUE);
 		}
+		write("/>");
 		
 	}
 	
 	@Override
-	protected void outputEndArray(Frame container, Frame array) {
+	protected void outputOpenElement(Frame element) {
 		
-		if(!array.hasContent() && array.getAttrCount() == 0) {
-			this.writer.write("/>\n");
-		} else {
-			indent(array.depth);
-			if(container.element == null) {
-				this.writer.write("</xarray>\n");
-			} else {
-				this.writer.write("</");
-				this.writer.write(container.element);
-				this.writer.write(">\n");
-			}
-		}
+		begin(element.parent);
 		
+		element.depth = element.parent.depth + 1;
+		
+		write('<');
+		write(element.name);
+		outputId(element.parent);
+	}
+	
+	@Override
+	protected void outputBeginArray(Frame array) {
+		beginContainer(array, XmlEncoder.XARRAY_ELEMENT);
+	}
+	
+	@Override
+	protected void outputEndArray(Frame array) {
+		endContainer(array, XmlEncoder.XARRAY_ELEMENT);
 	}
 	
 	@Override
 	public String getContentType() {
 		return "application/xml";
+	}
+	
+	@Override
+	protected void outpuEnd() {
+		write('\n');
+	}
+	
+	@Override
+	protected void outputBeginMap(Frame map) {
+		beginContainer(map, XmlEncoder.XMAP_ELEMENT);
+	}
+	
+	private void beginContainer(Frame container, String type) {
+		
+		if(isInlined(container.parent)) {
+			
+			assert !container.parent.parent.hasContent;
+			container.depth = container.parent.depth;
+			
+		} else {
+			
+			begin(container.parent);
+			
+			write('<');
+			write(container.parent.isChildTypeForced() ? container.parent.getChildType() : type);
+			outputId(container.parent);
+			
+			container.depth = container.parent.depth + 1;
+			indent(container.depth);
+		}
+	}
+	
+	@Override
+	protected void outputEndMap(Frame map) {
+		endContainer(map, XmlEncoder.XMAP_ELEMENT);
+	}
+	
+	private void endContainer(Frame container, String type) {
+		
+		if(isInlined(container.parent)) {
+			
+			// do nothing
+			
+		} else {
+			
+			if(!container.hasContent) {
+				write("/>");
+			} else {
+				write('\n');
+				indent(container.depth);
+				write("</");
+				write(container.parent.isChildTypeForced() ? container.parent.getChildType() : type);
+				write('>');
+			}
+			
+		}
+	}
+	
+	@Override
+	protected void outputEntry(Frame entry) {
+		entry.depth = entry.parent.depth;
+	}
+	
+	private void outputId(Frame container) {
+		if(container.type == Type.Entry) {
+			outputAttribute(null, container.parent.name, container.name);
+		}
+		
 	}
 	
 }

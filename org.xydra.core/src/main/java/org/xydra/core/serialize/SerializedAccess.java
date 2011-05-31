@@ -122,11 +122,12 @@ public class SerializedAccess {
 		
 		out.open(XACCESSDEFS_ELEMENT);
 		
-		out.beginChildren(NAME_DEFINITIONS, true, XACCESSDEFINITION_ELEMENT);
+		out.child(NAME_DEFINITIONS);
+		out.beginArray(XACCESSDEFINITION_ELEMENT);
 		for(XAccessRightDefinition def : defs) {
 			toXml(def, out);
 		}
-		out.endChildren();
+		out.endArray();
 		
 		out.close(XACCESSDEFS_ELEMENT);
 		
