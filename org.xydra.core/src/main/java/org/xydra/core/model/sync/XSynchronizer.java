@@ -409,14 +409,6 @@ public class XSynchronizer {
 				
 				// There are commands to send.
 				
-				/*
-				 * IMPROVE synchronize more than one change at a time
-				 * 
-				 * To do this, the server needs to be able to differentiate
-				 * between revisions in the command that refer to local changes
-				 * and those that refer to remote changes.
-				 */
-
 				log.info("sync: sending commands " + newChanges + ", rev is " + syncRev);
 				
 				CommandsCallback cc = new CommandsCallback(sc, syncRev, newChanges);
@@ -447,9 +439,9 @@ public class XSynchronizer {
 				callback = ec;
 				
 				// FIXME where to get the passwordHash?
-				this.store.getEvents(this.entity.getSessionActor(), "",
-				        new GetEventsRequest[] { new GetEventsRequest(this.entity.getAddress(),
-				                syncRev + 1, Long.MAX_VALUE) }, ec);
+				this.store.getEvents(this.entity.getSessionActor(), this.entity
+				        .getSessionPassword(), new GetEventsRequest[] { new GetEventsRequest(
+				        this.entity.getAddress(), syncRev + 1, Long.MAX_VALUE) }, ec);
 				
 			}
 			
