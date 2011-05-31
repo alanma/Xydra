@@ -92,6 +92,35 @@ public class HtmlUtils {
 		
 	}
 	
+	public static class TextAreaInput extends Input {
+		
+		private int rows;
+		private int cols;
+		
+		public TextAreaInput(String name, String value, int cols, int rows) {
+			super();
+			this.name = name;
+			this.value = value;
+			this.cols = cols;
+			this.rows = rows;
+		}
+		
+		private String name;
+		private String value;
+		
+		@Override
+		public String toString() {
+			return this.name + ": <textarea name=\"" + this.name
+
+			+ "\" cols=\"" + this.cols
+
+			+ "\" rows=\"" + this.rows
+
+			+ "\">" + this.value + "</textarea>";
+		}
+		
+	}
+	
 	public static Form form(METHOD method, String action) {
 		return new Form(method, action);
 	}
@@ -111,8 +140,25 @@ public class HtmlUtils {
 			this.action = action;
 		}
 		
+		/**
+		 * @param name form name
+		 * @param value predefined form value
+		 * @return the {@link Form} for a fluent API
+		 */
 		public Form withInputText(String name, String value) {
 			this.inputs.add(new TextInput(name, value));
+			return this;
+		}
+		
+		/**
+		 * @param name form name
+		 * @param value predefined form value
+		 * @param cols number of columns
+		 * @param rows number of rows
+		 * @return the {@link Form} for a fluent API
+		 */
+		public Form withInputTextArea(String name, String value, int cols, int rows) {
+			this.inputs.add(new TextAreaInput(name, value, cols, rows));
 			return this;
 		}
 		
