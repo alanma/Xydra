@@ -52,6 +52,8 @@ public interface XSynchronizesChanges extends IHasChangeLog, XExecutesCommands, 
 	 */
 	XID getSessionActor();
 	
+	String getSessionPassword();
+	
 	// TODO document
 	long getSynchronizedRevision();
 	
