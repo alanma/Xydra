@@ -108,7 +108,8 @@ public class TransactionObjectTest {
 		assertFalse(this.transObject.removeField(fieldId));
 		
 		// try to remove an existing field
-		assertTrue(this.transObject.removeField(this.field.getID()));
+		boolean he = this.transObject.removeField(this.field.getID());
+		assertTrue(he);
 		assertFalse(this.transObject.hasField(this.field.getID()));
 		
 		// make sure it wasn't removed from the underlying object
@@ -142,7 +143,10 @@ public class TransactionObjectTest {
 		this.transObject.executeCommand(command);
 		
 		field2 = this.transObject.getField(this.field.getID());
-		assertFalse(this.field.equals(field2));
+		
+		// revision numbers are not increased/managed by the TransactionObject,
+		// therefore this should succeed
+		assertTrue(this.field.equals(field2));
 	}
 	
 	/*
@@ -169,9 +173,7 @@ public class TransactionObjectTest {
 		        newFieldId);
 		
 		long result = this.transObject.executeCommand(addCommand, callback);
-		assertTrue(result > 0);
-		assertEquals(this.transObject.getRevisionNumber(), result);
-		assertFalse(this.object.getRevisionNumber() == result);
+		assertTrue(result != XCommand.FAILED);
 		
 		// check callback
 		assertFalse(callback.failed);
@@ -181,8 +183,7 @@ public class TransactionObjectTest {
 		assertTrue(this.transObject.hasField(newFieldId));
 		
 		XWritableField field = this.transObject.getField(newFieldId);
-		assertEquals((Long)field.getRevisionNumber(), callback.revision);
-		assertEquals(field.getRevisionNumber(), result);
+		assertTrue(field.getRevisionNumber() >= 0);
 		
 		assertFalse(this.object.hasField(newFieldId));
 		
@@ -213,9 +214,7 @@ public class TransactionObjectTest {
 		        newFieldId);
 		
 		long result = this.transObject.executeCommand(addCommand, callback);
-		assertTrue(result > 0);
-		assertEquals(this.transObject.getRevisionNumber(), result);
-		assertFalse(this.object.getRevisionNumber() == result);
+		assertTrue(result != XCommand.FAILED);
 		
 		// check callback
 		assertFalse(callback.failed);
@@ -225,8 +224,7 @@ public class TransactionObjectTest {
 		assertTrue(this.transObject.hasField(newFieldId));
 		
 		XWritableField field = this.transObject.getField(newFieldId);
-		assertEquals((Long)field.getRevisionNumber(), callback.revision);
-		assertEquals(field.getRevisionNumber(), result);
+		assertTrue(field.getRevisionNumber() >= 0);
 		
 		assertFalse(this.object.hasField(newFieldId));
 		
@@ -236,7 +234,7 @@ public class TransactionObjectTest {
 		callback = new TestCallback();
 		
 		result = this.transObject.executeCommand(addCommand, callback);
-		assertTrue(result > 0);
+		assertTrue(result != XCommand.FAILED);
 		
 		// check callback
 		assertFalse(callback.failed);
@@ -272,9 +270,7 @@ public class TransactionObjectTest {
 		callback = new TestCallback();
 		
 		result = this.transObject.executeCommand(removeCommand, callback);
-		assertTrue(result > 0);
-		assertEquals(this.transObject.getRevisionNumber(), result);
-		assertFalse(this.object.getRevisionNumber() == result);
+		assertTrue(result != XCommand.FAILED);
 		
 		// check callback
 		assertFalse(callback.failed);
@@ -302,9 +298,7 @@ public class TransactionObjectTest {
 		XCommand removeCommand = factory.createForcedRemoveFieldCommand(address);
 		
 		long result = this.transObject.executeCommand(removeCommand, callback);
-		assertTrue(result > 0);
-		assertEquals(this.transObject.getRevisionNumber(), result);
-		assertFalse(this.object.getRevisionNumber() == result);
+		assertTrue(result != XCommand.FAILED);
 		
 		// check callback
 		assertFalse(callback.failed);
@@ -315,7 +309,7 @@ public class TransactionObjectTest {
 		callback = new TestCallback();
 		
 		result = this.transObject.executeCommand(removeCommand, callback);
-		assertTrue(result > 0);
+		assertTrue(result != XCommand.FAILED);
 		
 		// check callback
 		assertFalse(callback.failed);
@@ -355,9 +349,7 @@ public class TransactionObjectTest {
 		callback = new TestCallback();
 		
 		result = this.transObject.executeCommand(addCommand, callback);
-		assertTrue(result > 0);
-		assertEquals(this.transObject.getRevisionNumber(), result);
-		assertFalse(this.object.getRevisionNumber() == result);
+		assertTrue(result != XCommand.FAILED);
 		
 		// check callback
 		assertFalse(callback.failed);
@@ -366,8 +358,6 @@ public class TransactionObjectTest {
 		// check whether the simulated field was changed and the real field
 		// wasn't
 		XWritableField changedField = this.transObject.getField(this.field.getID());
-		assertEquals((Long)result, (Long)changedField.getRevisionNumber());
-		assertFalse(result == this.field.getRevisionNumber());
 		
 		assertEquals(value, changedField.getValue());
 		assertFalse(value.equals(this.field.getValue()));
@@ -413,9 +403,7 @@ public class TransactionObjectTest {
 		callback = new TestCallback();
 		
 		result = this.transObject.executeCommand(addCommand, callback);
-		assertTrue(result > 0);
-		assertEquals(this.transObject.getRevisionNumber(), result);
-		assertFalse(this.object.getRevisionNumber() == result);
+		assertTrue(result != XCommand.FAILED);
 		
 		// check callback
 		assertFalse(callback.failed);
@@ -424,8 +412,6 @@ public class TransactionObjectTest {
 		// check whether the simulated field was changed and the real field
 		// wasn't
 		XWritableField changedField = this.transObject.getField(this.field.getID());
-		assertEquals((Long)result, (Long)changedField.getRevisionNumber());
-		assertFalse(result == this.field.getRevisionNumber());
 		
 		assertEquals(value, changedField.getValue());
 		assertFalse(value.equals(this.field.getValue()));
@@ -436,9 +422,7 @@ public class TransactionObjectTest {
 		callback = new TestCallback();
 		
 		result = this.transObject.executeCommand(addCommand, callback);
-		assertTrue(result > 0);
-		assertEquals(this.transObject.getRevisionNumber(), result);
-		assertFalse(this.object.getRevisionNumber() == result);
+		assertTrue(result != XCommand.FAILED);
 		
 		// try to add value to a field which value is already set (use another
 		// same value), should succeed
@@ -447,15 +431,11 @@ public class TransactionObjectTest {
 		callback = new TestCallback();
 		
 		result = this.transObject.executeCommand(addCommand, callback);
-		assertTrue(result > 0);
-		assertEquals(this.transObject.getRevisionNumber(), result);
-		assertFalse(this.object.getRevisionNumber() == result);
+		assertTrue(result != XCommand.FAILED);
 		
 		// check whether the simulated field was changed and the real field
 		// wasn't
 		changedField = this.transObject.getField(this.field.getID());
-		assertEquals((Long)result, (Long)changedField.getRevisionNumber());
-		assertFalse(result == this.field.getRevisionNumber());
 		
 		assertEquals(value2, changedField.getValue());
 		assertFalse(value2.equals(this.field.getValue()));
@@ -508,9 +488,7 @@ public class TransactionObjectTest {
 		callback = new TestCallback();
 		
 		result = this.transObject.executeCommand(changeCommand, callback);
-		assertTrue(result > 0);
-		assertEquals(this.transObject.getRevisionNumber(), result);
-		assertFalse(this.object.getRevisionNumber() == result);
+		assertTrue(result != XCommand.FAILED);
 		
 		// check callback
 		assertFalse(callback.failed);
@@ -519,8 +497,6 @@ public class TransactionObjectTest {
 		// check whether the simulated field was changed and the real field
 		// wasn't
 		XWritableField changedField = this.transObject.getField(this.fieldWithValue.getID());
-		assertEquals((Long)result, (Long)changedField.getRevisionNumber());
-		assertFalse(result == this.field.getRevisionNumber());
 		
 		assertEquals(value, changedField.getValue());
 		assertFalse(value.equals(this.fieldWithValue.getValue()));

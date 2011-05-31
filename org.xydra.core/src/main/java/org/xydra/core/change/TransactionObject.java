@@ -25,7 +25,6 @@ import org.xydra.base.value.XValue;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.impl.memory.AbstractEntity;
-import org.xydra.core.model.impl.memory.MemoryField;
 import org.xydra.core.model.impl.memory.MemoryObject;
 
 
@@ -39,14 +38,6 @@ import org.xydra.core.model.impl.memory.MemoryObject;
  * TODO implement better handling of Transaction-commands
  * 
  * 
- * FIXME Revision number handling is not true to the way the revision numbers
- * are increased in a real XObject, because the revision number of the father is
- * never used. How can this be changed? One problem is, that changes to the
- * father or one of its other children directly influence the way how revision
- * numbers are increased for every child. Simple fix seems to be to just
- * increase the fathers revNr, but then we might have a lot of revNrs with no
- * assocciated events...
- * 
  * @author Kaidel
  * 
  */
@@ -57,12 +48,10 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	private MemoryObject baseObject;
 	private long revisionNumber;
 	
-	private Set<XID> changedFields;
+	private HashMap<XID,InObjectTransactionField> changedFields;
 	private Map<XID,XValue> changedValues;
 	
 	private Set<XID> removedFields;
-	
-	private Map<XID,Long> fieldRevisionNumbers;
 	
 	private ArrayList<XAtomicCommand> commands;
 	
@@ -70,10 +59,9 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		this.baseObject = object;
 		this.revisionNumber = object.getRevisionNumber();
 		
-		this.changedFields = new HashSet<XID>();
+		this.changedFields = new HashMap<XID,InObjectTransactionField>();
 		this.changedValues = new HashMap<XID,XValue>();
 		this.removedFields = new HashSet<XID>();
-		this.fieldRevisionNumbers = new HashMap<XID,Long>();
 		
 		this.commands = new ArrayList<XAtomicCommand>();
 	}
@@ -119,10 +107,9 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		 * InObjectTransactionFields useless.
 		 */
 
-		this.changedFields = new HashSet<XID>();
+		this.changedFields = new HashMap<XID,InObjectTransactionField>();
 		this.changedValues = new HashMap<XID,XValue>();
 		this.removedFields = new HashSet<XID>();
-		this.fieldRevisionNumbers = new HashMap<XID,Long>();
 		
 		this.commands = new ArrayList<XAtomicCommand>();
 	}
@@ -187,11 +174,6 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 			XID fieldId = command.getChangedEntity().getField();
 			
 			if(command.getChangeType() == ChangeType.ADD) {
-				
-				/*
-				 * TODO Do I need to check the revision number here?
-				 */
-
 				if(hasField(fieldId)) {
 					if(!objectCommand.isForced()) {
 						// not forced, tried to add something that already
@@ -204,20 +186,17 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 				// remove from list of removed fields, if needed
 				this.removedFields.remove(fieldId);
 				
-				// increase revision numbers
-				this.revisionNumber++;
-				this.fieldRevisionNumbers.put(fieldId, this.revisionNumber);
-				
 				// TODO use another actor, either some constant or via
 				// constructor
-				XField field = new MemoryField(XX.toId("TransactionObject"), fieldId);
-				this.changedFields.add(fieldId);
+				InObjectTransactionField field = new InObjectTransactionField(fieldId,
+				        XCommand.NEW, this);
+				this.changedFields.put(fieldId, field);
 				
 				// command succeeded -> add it to the list
 				this.commands.add((XAtomicCommand)command);
 				
-				usedCallback.onSuccess(this.revisionNumber);
-				return this.revisionNumber;
+				usedCallback.onSuccess(this.getRevisionNumber());
+				return this.getRevisionNumber();
 			}
 
 			else if(command.getChangeType() == ChangeType.REMOVE) {
@@ -245,22 +224,20 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 					}
 				}
 				
-				// increase revision numbers
-				this.revisionNumber++;
-				
 				// mark it as removed
 				this.removedFields.add(fieldId);
 				
 				// remove info from all other maps
 				this.changedFields.remove(fieldId);
 				this.changedValues.remove(fieldId);
-				this.fieldRevisionNumbers.remove(fieldId);
 				
 				// command succeeded -> add it to the list
 				this.commands.add((XAtomicCommand)command);
 				
-				usedCallback.onSuccess(this.revisionNumber);
-				return this.revisionNumber;
+				long revNr = XCommand.FAILED;
+				
+				usedCallback.onSuccess(this.getRevisionNumber());
+				return this.getRevisionNumber();
 			}
 		}
 		
@@ -294,18 +271,14 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 					}
 				}
 				
-				// increase revision numbers
-				this.revisionNumber++;
-				this.fieldRevisionNumbers.put(fieldId, this.revisionNumber);
-				
 				// "add" the value
 				this.changedValues.put(fieldId, fieldCommand.getValue());
 				
 				// command succeeded -> add it to the list
 				this.commands.add((XAtomicCommand)command);
 				
-				usedCallback.onSuccess(this.revisionNumber);
-				return this.revisionNumber;
+				usedCallback.onSuccess(field.getRevisionNumber());
+				return field.getRevisionNumber();
 			}
 
 			else if(fieldCommand.getChangeType() == ChangeType.REMOVE) {
@@ -316,18 +289,14 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 					}
 				}
 				
-				// increase revision numbers
-				this.revisionNumber++;
-				this.fieldRevisionNumbers.put(fieldId, this.revisionNumber);
-				
 				// "remove" the value
 				this.changedValues.put(fieldId, null);
 				
 				// command succeeded -> add it to the list
 				this.commands.add((XAtomicCommand)command);
 				
-				usedCallback.onSuccess(this.revisionNumber);
-				return this.revisionNumber;
+				usedCallback.onSuccess(field.getRevisionNumber());
+				return field.getRevisionNumber();
 			}
 
 			else if(fieldCommand.getChangeType() == ChangeType.CHANGE) {
@@ -338,18 +307,14 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 					}
 				}
 				
-				// increase revision numbers
-				this.revisionNumber++;
-				this.fieldRevisionNumbers.put(fieldId, this.revisionNumber);
-				
 				// "change" the value
 				this.changedValues.put(fieldId, fieldCommand.getValue());
 				
 				// command succeeded -> add it to the list
 				this.commands.add((XAtomicCommand)command);
 				
-				usedCallback.onSuccess(this.revisionNumber);
-				return this.revisionNumber;
+				usedCallback.onSuccess(field.getRevisionNumber());
+				return field.getRevisionNumber();
 			}
 		}
 		
@@ -377,7 +342,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	public boolean hasField(XID fieldId) {
 		XField field = null;
 		
-		if(this.changedFields.contains(fieldId)) {
+		if(this.changedFields.containsKey(fieldId)) {
 			return true;
 		} else {
 			/*
@@ -425,22 +390,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	
 	@Override
 	public boolean equals(Object object) {
-		if(object instanceof TransactionObject) {
-			
-			// TODO restricting equals when comparing two TransactionObjects (as
-			// opposed to a TransactionObject and a XWritableObject) breaks the
-			// transitivity property of the equals relation (see Object#equals()
-			// javadoc)
-			
-			TransactionObject transObj = (TransactionObject)object;
-			
-			return this.baseObject.equals(transObj.baseObject)
-			        && this.changedFields.equals(transObj.changedFields)
-			        && this.changedValues.equals(transObj.changedValues)
-			        && this.fieldRevisionNumbers.equals(transObj.fieldRevisionNumbers)
-			        && this.removedFields.equals(transObj.removedFields)
-			        && this.revisionNumber == transObj.revisionNumber;
-		} else if(object instanceof XWritableObject) {
+		if(object instanceof XWritableObject) {
 			XWritableObject writObject = (XWritableObject)object;
 			
 			return this.getAddress().equals(writObject.getAddress())
@@ -450,10 +400,18 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		return false;
 	}
 	
+	public boolean equalTransactionObject(TransactionObject object) {
+		return this.baseObject.equals(object.baseObject)
+		        && this.changedFields.equals(object.changedFields)
+		        && this.changedValues.equals(object.changedValues)
+		        && this.removedFields.equals(object.removedFields)
+		        && this.revisionNumber == object.revisionNumber;
+	}
+	
 	public XWritableField getField(XID fieldId) {
 		boolean exists = false;
 		
-		if(this.changedFields.contains(fieldId)) {
+		if(this.changedFields.containsKey(fieldId)) {
 			exists = true;
 		} else {
 			/*
@@ -462,8 +420,8 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 			if(!this.removedFields.contains(fieldId)) {
 				XField field = this.baseObject.getField(fieldId);
 				if(field != null) {
-					this.changedFields.add(fieldId);
-					this.fieldRevisionNumbers.put(fieldId, field.getRevisionNumber());
+					this.changedFields.put(fieldId,
+					        new InObjectTransactionField(fieldId, field.getRevisionNumber(), this));
 					exists = true;
 				}
 			}
@@ -472,10 +430,9 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		if(exists == false) {
 			return null;
 		} else {
-			// IMPROVE the HashSet for changedFields uses a HashMap internally
-			// anyway, so we may as well use it to cache
-			// InObjectTransactionField instances
-			return new InObjectTransactionField(fieldId, this);
+			assert this.changedFields.containsKey(fieldId);
+			
+			return this.changedFields.get(fieldId);
 		}
 	}
 	
@@ -483,25 +440,6 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	 * Special methods needed for the helperclass InObjectTransactionField
 	 */
 
-	protected long getFieldRevisionNumber(XID fieldId) {
-		// assert: there exists and XField with the given address either in
-		// changedFields or baseObject
-		
-		long revNr = 0;
-		
-		if(this.fieldRevisionNumbers.containsKey(fieldId)) {
-			revNr = this.fieldRevisionNumbers.get(fieldId);
-		} else {
-			XField field = this.baseObject.getField(fieldId);
-			
-			assert field != null;
-			
-			revNr = field.getRevisionNumber();
-		}
-		
-		return revNr;
-	}
-	
 	protected XValue getValue(XID id) {
 		// TODO maybe improve handling of removed fields (throw exception or
 		// something)

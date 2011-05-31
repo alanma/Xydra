@@ -21,15 +21,17 @@ import org.xydra.core.model.impl.memory.AbstractEntity;
 public class InObjectTransactionField extends AbstractEntity implements XWritableField {
 	private XID fieldId;
 	private TransactionObject object;
+	private long revisionNumber;
 	
-	public InObjectTransactionField(XID fieldId, TransactionObject object) {
+	public InObjectTransactionField(XID fieldId, long revisionNumber, TransactionObject object) {
 		this.fieldId = fieldId;
 		this.object = object;
+		this.revisionNumber = revisionNumber;
 	}
 	
 	@Override
 	public long getRevisionNumber() {
-		return this.object.getFieldRevisionNumber(this.getID());
+		return this.revisionNumber;
 	}
 	
 	@Override
@@ -104,7 +106,7 @@ public class InObjectTransactionField extends AbstractEntity implements XWritabl
 	}
 	
 	@Override
-    public AbstractEntity getFather() {
+	public AbstractEntity getFather() {
 		return this.object;
 	}
 }
