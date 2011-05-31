@@ -19,11 +19,11 @@ package org.xydra.googleanalytics;
  */
 public class UrchinCookie {
 	
-	private Utma utma;
-	private Utmb utmb;
-	private Utmc utmc;
-	private Utmv utmv;
-	private Utmz utmz;
+	public Utma utma;
+	public Utmb utmb;
+	public Utmc utmc;
+	public Utmv utmv;
+	public Utmz utmz;
 	
 	public UrchinCookie(UserInfo userinfo) {
 		this.utma = new Utma(userinfo.getDomainName(), userinfo.get31BitId(),
