@@ -1,8 +1,8 @@
 package org.xydra.googleanalytics;
 
 /**
- * This class models a cookie as used by Google Analytics 4.3. As a pure Java
- * application have no cookies, the application must provide useful values.
+ * A cookie as used by Google Analytics 4.3. As a pure Java application has no
+ * cookies, the application must provide useful values.
  * 
  * 
  * A sample string, not URL encoded looks like this: <code>
@@ -387,6 +387,9 @@ public class UrchinCookie {
 	 * 
 	 * 19047217.1243945311.1.1.utmcsr=(direct)| utmccn=(direct)|utmcmd=(none);
 	 * 
+	 * 58336141.1306734704.35.2.utmcsr=some.nested.domain.name|utmccn=(referral)
+	 * |utmcmd=referral|utmcct=/hop/f7nrPL5
+	 * 
 	 * @author xamde
 	 */
 	static class Utmz extends DomainHashCookie {
@@ -430,16 +433,25 @@ public class UrchinCookie {
 		
 		public void setFromCookieString(String utmzCookie) throws IllegalArgumentException {
 			String[] dotParts = utmzCookie.split("\\.");
-			if(dotParts.length != 5) {
-				throw new IllegalArgumentException("Could not parse '" + utmzCookie
-				        + " to five dot-parts.");
+			if(dotParts.length < 5) {
+				throw new IllegalArgumentException(
+				        "Could not parse into at least five dot-parts: '" + utmzCookie + "'");
 			}
 			this.domainHash = dotParts[0];
 			this.campaignCreationTime = dotParts[1];
 			this.campaignSessions = dotParts[2];
 			this.responseCount = dotParts[3];
+			
+			/*
+			 * cannot continue to use dot as separator, because it occurs in
+			 * domain name of 'utmscr' param.
+			 */
+			int processed = dotParts[0].length() + 1 + dotParts[1].length() + 1
+			        + dotParts[2].length() + 1 + dotParts[3].length() + 1;
+			String secondPart = utmzCookie.substring(processed);
+			
 			// more parsing to 'name=value' pairs
-			String[] pipeParts = dotParts[4].split("\\|");
+			String[] pipeParts = secondPart.split("\\|");
 			for(String p : pipeParts) {
 				String[] nameValue = p.split("=");
 				if(nameValue.length == 2) {
@@ -490,6 +502,13 @@ public class UrchinCookie {
 		} catch(NumberFormatException e) {
 			throw new IllegalArgumentException(e);
 		}
+	}
+	
+	public void setCurrentSessionStartTimeToNow() {
+		long now = Utils.getCurrentTimeInSeconds();
+		this.utma.currentSessionStartTime = now;
+		this.utmb.currentSessionStartTime = now;
+		assert this.utmc != null;
 	}
 	
 }

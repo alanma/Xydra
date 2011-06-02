@@ -76,15 +76,23 @@ public class Tracker {
 	 */
 	boolean warnedAbout500Events = false;
 	
-	public void trackLowLevel(String hostname, FocusPoint focusPoint, String refererURL,
-	        String cookie, String trackerCode, GaEvent gaEvent) {
+	/**
+	 * @param hostname DOCUMENT ME
+	 * @param focusPoint DOCUMENT ME
+	 * @param refererURL DOCUMENT ME
+	 * @param cookie DOCUMENT ME
+	 * @param gaEvent can be null
+	 * @return for debugging, this methods returns the URL it used to make the
+	 *         GET request
+	 */
+	public String trackLowLevel(String hostname, FocusPoint focusPoint, String refererURL,
+	        String cookie, GaEvent gaEvent) {
 		// start at 1 when sending to Google
 		this.trackCount++;
-		String url = UrchinUrl.toURL(hostname, focusPoint, refererURL, cookie, trackerCode,
+		String url = UrchinUrl.toURL(hostname, focusPoint, refererURL, cookie, this.trackerCode,
 		        gaEvent, this.trackCount);
 		
 		Future<Integer> result = this.httpClient.GET(url);
-		
 		// check every 50 requests if they work
 		if(this.trackCount % 50 == 10) {
 			log.debug("Verifying HTTP GET to Google Analytics");
@@ -102,6 +110,8 @@ public class Tracker {
 			        + "- they don't track more");
 			this.warnedAbout500Events = true;
 		}
+		
+		return url;
 	}
 	
 	/**
@@ -115,8 +125,7 @@ public class Tracker {
 		
 		UrchinCookie cookie = new UrchinCookie(userinfo);
 		String hostname = userinfo.getHostName();
-		trackLowLevel(hostname, focusPoint, refererURL, cookie.getCookieString(), this.trackerCode,
-		        gaEvent);
+		trackLowLevel(hostname, focusPoint, refererURL, cookie.getCookieString(), gaEvent);
 	}
 	
 }
