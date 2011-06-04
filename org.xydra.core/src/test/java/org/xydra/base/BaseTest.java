@@ -5,10 +5,10 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.xydra.base.rmof.XWritableRepository;
-import org.xydra.base.rmof.impl.delegate.WritableRepositoryOnPersistence;
 import org.xydra.core.util.DumpUtils;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.memory.MemoryPersistence;
+import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
 
 
 public class BaseTest {

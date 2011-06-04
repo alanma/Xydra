@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.base.XID;
 import org.xydra.base.XX;
-import org.xydra.base.rmof.impl.delegate.WritableRepositoryOnPersistence;
 import org.xydra.core.DemoModelUtil;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.model.XRepository;
@@ -19,6 +18,7 @@ import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.server.rest.ShareXydraPersistenceApp;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaePersistence;
+import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
 
 
 /**

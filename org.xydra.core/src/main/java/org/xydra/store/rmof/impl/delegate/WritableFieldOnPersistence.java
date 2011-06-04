@@ -1,4 +1,4 @@
-package org.xydra.base.rmof.impl.delegate;
+package org.xydra.store.rmof.impl.delegate;
 
 import org.xydra.base.X;
 import org.xydra.base.XAddress;

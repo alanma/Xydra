@@ -4,13 +4,13 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableRepository;
-import org.xydra.base.rmof.impl.delegate.WritableRepositoryOnPersistence;
 import org.xydra.core.DemoModelUtil;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
+import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
 
 
 public class PerformanceTest {

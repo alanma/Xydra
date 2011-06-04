@@ -19,7 +19,6 @@ import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.XWritableRepository;
-import org.xydra.base.rmof.impl.delegate.WritableRepositoryOnPersistence;
 import org.xydra.base.value.XAddressListValue;
 import org.xydra.base.value.XAddressSetValue;
 import org.xydra.base.value.XAddressSortedSetValue;
@@ -46,6 +45,7 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.memory.MemoryPersistence;
+import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
 
 
 /**

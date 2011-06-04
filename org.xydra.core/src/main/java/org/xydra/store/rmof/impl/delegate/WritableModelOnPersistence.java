@@ -1,4 +1,4 @@
-package org.xydra.base.rmof.impl.delegate;
+package org.xydra.store.rmof.impl.delegate;
 
 import java.util.Iterator;
 import java.util.List;

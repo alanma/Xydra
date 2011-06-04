@@ -7,12 +7,12 @@ import java.io.Writer;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.xydra.base.rmof.impl.delegate.WritableRepositoryOnPersistence;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.ServletUtils;
 import org.xydra.server.inout.CsvExport;
+import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
 
 
 /**
