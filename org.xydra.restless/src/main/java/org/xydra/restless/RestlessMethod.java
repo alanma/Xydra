@@ -250,26 +250,40 @@ public class RestlessMethod {
 					Writer w = res.getWriter();
 					w.write(re.getMessage());
 				} else {
+					
+					IRestlessContext context = new IRestlessContext() {
+						
+						public Restless getRestless() {
+							return restless;
+						}
+						
+						public HttpServletResponse getResponse() {
+							return res;
+						}
+						
+						public HttpServletRequest getRequest() {
+							return req;
+						}
+					};
+					
 					boolean handled = false;
-					for(RestlessExceptionHandler handler : restless.exceptionHandlers) {
-						if(handler.handleException(cause, new IRestlessContext() {
-							
-							public Restless getRestless() {
-								return restless;
-							}
-							
-							public HttpServletResponse getResponse() {
-								return res;
-							}
-							
-							public HttpServletRequest getRequest() {
-								return req;
-							}
-						})) {
-							handled = true;
-							break;
+					
+					try {
+						handled = callLocalExceptionHandler(cause, instance, context);
+					} catch(InvocationTargetException ite) {
+						cause = new ExceptionHandlerException(e.getCause());
+					} catch(Throwable th) {
+						cause = new ExceptionHandlerException(th);
+					}
+					
+					if(!handled) {
+						try {
+							handled = callGlobalExceptionHandlers(cause, context);
+						} catch(Throwable th) {
+							cause = new ExceptionHandlerException(th);
 						}
 					}
+					
 					if(!handled) {
 						// TODO hide internal messages better from user
 						StringWriter sw = new StringWriter();
@@ -290,6 +304,51 @@ public class RestlessMethod {
 			}
 			
 		}
+	}
+	
+	private boolean callLocalExceptionHandler(Throwable cause, Object instance,
+	        IRestlessContext context) throws InvocationTargetException, IllegalArgumentException,
+	        IllegalAccessException {
+		
+		Method method = Restless.methodByName(instance, "onException");
+		if(method == null) {
+			// no local exception handler available
+			return false;
+		}
+		
+		List<Object> javaMethodArgs = new ArrayList<Object>();
+		
+		for(Class<?> requiredParamType : method.getParameterTypes()) {
+			
+			if(requiredParamType.equals(Throwable.class)) {
+				javaMethodArgs.add(cause);
+			} else if(requiredParamType.equals(HttpServletResponse.class)) {
+				javaMethodArgs.add(context.getResponse());
+			} else if(requiredParamType.equals(HttpServletRequest.class)) {
+				javaMethodArgs.add(context.getRequest());
+			} else if(requiredParamType.equals(Restless.class)) {
+				javaMethodArgs.add(context.getRestless());
+			} else if(requiredParamType.equals(IRestlessContext.class)) {
+				javaMethodArgs.add(context);
+			}
+		}
+		
+		Object result = method.invoke(instance, javaMethodArgs.toArray(new Object[0]));
+		
+		if(result instanceof Boolean) {
+			return (Boolean)result;
+		}
+		
+		return true;
+	}
+	
+	private boolean callGlobalExceptionHandlers(Throwable cause, IRestlessContext context) {
+		for(RestlessExceptionHandler handler : context.getRestless().exceptionHandlers) {
+			if(handler.handleException(cause, context)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public static Map<String,String> getUrlParametersAsMap(HttpServletRequest req,
