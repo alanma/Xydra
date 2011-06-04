@@ -1,8 +1,6 @@
 package org.xydra.base.rmof;
 
 import org.xydra.annotations.ReadOperation;
-import org.xydra.base.IHasXAddress;
-import org.xydra.base.IHasXID;
 import org.xydra.base.value.XValue;
 
 
@@ -12,7 +10,7 @@ import org.xydra.base.value.XValue;
  * @author dscharrer
  * 
  */
-public interface XReadableField extends IHasXAddress, IHasXID {
+public interface XReadableField extends XEntity {
 	
 	/**
 	 * Gets the current revision number of this XBaseField

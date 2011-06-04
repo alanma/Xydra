@@ -2,6 +2,7 @@ package org.xydra.core.change;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XField;
@@ -15,6 +16,7 @@ import org.xydra.core.model.XField;
  */
 
 public class InModelTransactionField implements XWritableField {
+	
 	private XField field;
 	private TransactionModel model;
 	
@@ -54,6 +56,11 @@ public class InModelTransactionField implements XWritableField {
 	public boolean setValue(XValue value) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+	
+	@Override
+	public XType getType() {
+		return XType.XFIELD;
 	}
 	
 }

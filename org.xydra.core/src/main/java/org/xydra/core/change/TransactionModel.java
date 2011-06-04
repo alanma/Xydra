@@ -8,6 +8,7 @@ import java.util.Map;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XModelCommand;
 import org.xydra.base.rmof.XWritableField;
@@ -35,6 +36,7 @@ import org.xydra.core.model.XObject;
 // suppressing warning while this is in flux ~~max
 @SuppressWarnings("unused")
 public class TransactionModel implements XWritableModel {
+	
 	private static final long serialVersionUID = -5636313889791653240L;
 	
 	private XModel baseModel;
@@ -225,4 +227,10 @@ public class TransactionModel implements XWritableModel {
 	public Iterator<XID> iterator() {
 		throw new UnsupportedOperationException();
 	}
+	
+	@Override
+	public XType getType() {
+		return XType.XMODEL;
+	}
+	
 }

@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.store.AccessException;
@@ -99,6 +100,11 @@ public class ArmProtectedBaseObject implements XReadableObject {
 		
 		return this.object.iterator();
 		
+	}
+	
+	@Override
+	public XType getType() {
+		return XType.XOBJECT;
 	}
 	
 }

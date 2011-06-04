@@ -132,4 +132,9 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 		return fieldRev;
 	}
 	
+	@Override
+	public XType getType() {
+		return XType.XFIELD;
+	}
+	
 }

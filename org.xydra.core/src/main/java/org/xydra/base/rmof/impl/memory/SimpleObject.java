@@ -103,4 +103,9 @@ public class SimpleObject implements Serializable, XRevWritableObject {
 		this.revisionNumber = rev;
 	}
 	
+	@Override
+	public XType getType() {
+		return XType.XOBJECT;
+	}
+	
 }

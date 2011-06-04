@@ -86,4 +86,9 @@ public class SimpleField implements Serializable, XRevWritableField {
 		return changed;
 	}
 	
+	@Override
+	public XType getType() {
+		return XType.XFIELD;
+	}
+	
 }

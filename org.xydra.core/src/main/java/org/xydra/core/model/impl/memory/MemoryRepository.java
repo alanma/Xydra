@@ -10,6 +10,7 @@ import java.util.Set;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XCommand;
@@ -521,6 +522,11 @@ public class MemoryRepository extends AbstractEntity implements XRepository, Ser
 	@Override
 	protected AbstractEntity getFather() {
 		return null;
+	}
+	
+	@Override
+	public XType getType() {
+		return XType.XREPOSITORY;
 	}
 	
 }

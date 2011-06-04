@@ -3,8 +3,6 @@ package org.xydra.base.rmof;
 import java.util.Iterator;
 
 import org.xydra.annotations.ReadOperation;
-import org.xydra.base.IHasXAddress;
-import org.xydra.base.IHasXID;
 import org.xydra.base.XID;
 
 
@@ -14,7 +12,7 @@ import org.xydra.base.XID;
  * @author dscharrer
  * 
  */
-public interface XReadableObject extends IHasXAddress, IHasXID, Iterable<XID> {
+public interface XReadableObject extends XEntity, Iterable<XID> {
 	
 	/**
 	 * Returns the {@link XReadableField} contained in this object with the

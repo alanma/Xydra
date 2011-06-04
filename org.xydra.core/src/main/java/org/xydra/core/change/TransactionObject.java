@@ -12,6 +12,7 @@ import java.util.Set;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicCommand;
@@ -420,8 +421,8 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 			if(!this.removedFields.contains(fieldId)) {
 				XField field = this.baseObject.getField(fieldId);
 				if(field != null) {
-					this.changedFields.put(fieldId,
-					        new InObjectTransactionField(fieldId, field.getRevisionNumber(), this));
+					this.changedFields.put(fieldId, new InObjectTransactionField(fieldId, field
+					        .getRevisionNumber(), this));
 					exists = true;
 				}
 			}
@@ -495,4 +496,10 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	public AbstractEntity getFather() {
 		return this.baseObject.getFather();
 	}
+	
+	@Override
+	public XType getType() {
+		return XType.XOBJECT;
+	}
+	
 }

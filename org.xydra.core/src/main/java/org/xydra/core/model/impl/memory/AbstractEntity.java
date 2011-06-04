@@ -1,7 +1,6 @@
 package org.xydra.core.model.impl.memory;
 
-import org.xydra.base.IHasXAddress;
-import org.xydra.base.IHasXID;
+import org.xydra.base.rmof.XEntity;
 
 
 /**
@@ -12,7 +11,7 @@ import org.xydra.base.IHasXID;
  * 
  */
 
-public abstract class AbstractEntity implements IHasXAddress, IHasXID {
+public abstract class AbstractEntity implements XEntity {
 	
 	protected abstract long getRevisionNumber();
 	

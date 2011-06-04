@@ -3,6 +3,7 @@ package org.xydra.base.rmof.impl.delegate;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.value.XValue;
@@ -59,11 +60,9 @@ public class WritableFieldOnPersistence extends AbstractWritableOnPersistence im
 	}
 	
 	private XWritableField getFieldSnapshot() {
-		return this.persistence
-		        .getModelSnapshot(
-		                X.getIDProvider().fromComponents(this.persistence.getRepositoryId(),
-		                        this.modelId, null, null)).getObject(this.objectId)
-		        .getField(this.fieldId);
+		return this.persistence.getModelSnapshot(
+		        X.getIDProvider().fromComponents(this.persistence.getRepositoryId(), this.modelId,
+		                null, null)).getObject(this.objectId).getField(this.fieldId);
 	}
 	
 	@Override
@@ -115,6 +114,11 @@ public class WritableFieldOnPersistence extends AbstractWritableOnPersistence im
 			        "How can the command to set a null value to something not work?");
 		}
 		assert result >= 0;
+	}
+	
+	@Override
+	public XType getType() {
+		return XType.XFIELD;
 	}
 	
 }

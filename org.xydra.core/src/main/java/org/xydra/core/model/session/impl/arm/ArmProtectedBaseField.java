@@ -2,6 +2,7 @@ package org.xydra.core.model.session.impl.arm;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.value.XValue;
 import org.xydra.store.AccessException;
@@ -68,6 +69,11 @@ public class ArmProtectedBaseField implements XReadableField {
 		checkReadAccess();
 		
 		return this.field.isEmpty();
+	}
+	
+	@Override
+	public XType getType() {
+		return XType.XFIELD;
 	}
 	
 }

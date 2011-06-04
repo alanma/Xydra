@@ -42,6 +42,7 @@ import org.xydra.store.RequestException;
 import org.xydra.store.StoreException;
 import org.xydra.store.WaitingCallback;
 import org.xydra.store.XydraStore;
+import org.xydra.store.impl.rest.XydraStoreRestInterface;
 
 
 public class XydraStoreResource {
@@ -62,12 +63,9 @@ public class XydraStoreResource {
 	private final static Set<String> xmlMimes = new HashSet<String>();
 	private final static Set<String> mimes = new HashSet<String>();
 	
-	private static final String DEFAULT_CONTENT_TYPE = "application/xml";
-	private static final String DEFAULT_JSON_CONTENT_TYPE = "application/json";
-	
 	private static final Pattern callbackRegex = Pattern.compile("^[a-z0-9_]+$");
 	
-	public static void restless(Restless restless, String prefix) {
+	public static void restless(Restless restless, String apiLocation) {
 		
 		jsonMimes.add("application/json");
 		jsonMimes.add("application/x-javascript");
@@ -80,35 +78,44 @@ public class XydraStoreResource {
 		xmlMimes.add("text/xml");
 		mimes.addAll(xmlMimes);
 		
-		RestlessParameter actorId = new RestlessParameter("actorId");
-		RestlessParameter passwordHash = new RestlessParameter("passwordHash");
+		String prefix = apiLocation + "/";
 		
-		restless.addMethod(prefix + "/login", "GET", XydraStoreResource.class, "checkLogin", false,
-		        actorId, passwordHash);
+		RestlessParameter actorId = new RestlessParameter(XydraStoreRestInterface.ARG_ACTOR_ID);
+		RestlessParameter passwordHash = new RestlessParameter(
+		        XydraStoreRestInterface.ARG_PASSWORD_HASH);
 		
-		RestlessParameter addresses = new RestlessParameter("address", true);
-		RestlessParameter from = new RestlessParameter("beginRevision", true);
-		RestlessParameter to = new RestlessParameter("endRevision", true);
+		restless.addMethod(prefix + XydraStoreRestInterface.URL_LOGIN, "GET",
+		        XydraStoreResource.class, "checkLogin", false, actorId, passwordHash);
 		
-		restless.addMethod(prefix + "/execute", "POST", XydraStoreResource.class,
-		        "executeCommands", false, actorId, passwordHash, addresses, from, to);
+		RestlessParameter addresses = new RestlessParameter(XydraStoreRestInterface.ARG_ADDRESS,
+		        true);
+		RestlessParameter from = new RestlessParameter(XydraStoreRestInterface.ARG_BEGIN_REVISION,
+		        true);
+		RestlessParameter to = new RestlessParameter(XydraStoreRestInterface.ARG_END_REVISION, true);
 		
-		restless.addMethod(prefix + "/events", "GET", XydraStoreResource.class, "getEvents", false,
-		        actorId, passwordHash, addresses, from, to);
+		restless.addMethod(prefix + XydraStoreRestInterface.URL_EXECUTE, "POST",
+		        XydraStoreResource.class, "executeCommands", false, actorId, passwordHash,
+		        addresses, from, to);
 		
-		restless.addMethod(prefix + "/revisions", "GET", XydraStoreResource.class,
-		        "getModelRevisions", false, actorId, passwordHash, addresses);
+		restless.addMethod(prefix + XydraStoreRestInterface.URL_EVENTS, "GET",
+		        XydraStoreResource.class, "getEvents", false, actorId, passwordHash, addresses,
+		        from, to);
 		
-		restless.addMethod(prefix + "/snapshots", "GET", XydraStoreResource.class, "getSnapshots",
-		        false, actorId, passwordHash, addresses);
+		restless.addMethod(prefix + XydraStoreRestInterface.URL_REVISIONS, "GET",
+		        XydraStoreResource.class, "getModelRevisions", false, actorId, passwordHash,
+		        addresses);
 		
-		restless.addMethod(prefix + "/repository/models", "GET", XydraStoreResource.class,
-		        "getModelIds", false, actorId, passwordHash);
+		restless.addMethod(prefix + XydraStoreRestInterface.URL_SNAPSHOTS, "GET",
+		        XydraStoreResource.class, "getSnapshots", false, actorId, passwordHash, addresses);
 		
-		restless.addMethod(prefix + "/repository/id", "GET", XydraStoreResource.class,
-		        "getRepositoryId", false, actorId, passwordHash);
+		restless.addMethod(prefix + XydraStoreRestInterface.URL_MODEL_IDS, "GET",
+		        XydraStoreResource.class, "getModelIds", false, actorId, passwordHash);
 		
-		restless.addMethod(prefix + "/ping", "GET", XydraStoreResource.class, "ping", false);
+		restless.addMethod(prefix + XydraStoreRestInterface.URL_REPOSITORY_ID, "GET",
+		        XydraStoreResource.class, "getRepositoryId", false, actorId, passwordHash);
+		
+		restless.addMethod(prefix + XydraStoreRestInterface.URL_PING, "GET",
+		        XydraStoreResource.class, "ping", false);
 		
 		// TODO support class-specific exception handlers
 		restless.addExceptionHandler(new RestlessExceptionHandler() {
@@ -130,20 +137,7 @@ public class XydraStoreResource {
 					return false;
 				}
 				
-				int statusCode = HttpServletResponse.SC_OK;
-				
-				/*
-				 * HttpServletResponse. SC_INTERNAL_SERVER_ERROR ; if(t
-				 * instanceof RequestException) { statusCode =
-				 * HttpServletResponse .SC_BAD_REQUEST; } else if(t instanceof
-				 * AccessException) { statusCode = HttpServletResponse
-				 * .SC_FORBIDDEN; } else if(t instanceof AuthorisationException
-				 * ) { statusCode = HttpServletResponse .SC_FORBIDDEN; } else
-				 * if(t instanceof QuotaException) { statusCode =
-				 * HttpServletResponse .SC_FORBIDDEN; }
-				 */
-
-				XydraOut out = startOutput(context, statusCode);
+				XydraOut out = startOutput(context, HttpServletResponse.SC_OK);
 				SerializedStore.serializeException(t, out);
 				out.flush();
 				
@@ -169,7 +163,7 @@ public class XydraStoreResource {
 		
 		HttpServletRequest req = context.getRequest();
 		
-		String mime = req.getParameter("contentType");
+		String mime = req.getParameter(XydraStoreRestInterface.ARG_ACCEPT);
 		if(mime != null) {
 			mime = mime.trim();
 			if(!choices.contains(mime)) {
@@ -217,7 +211,7 @@ public class XydraStoreResource {
 		
 		HttpServletResponse res = context.getResponse();
 		
-		String callback = context.getRequest().getParameter("callback");
+		String callback = context.getRequest().getParameter(XydraStoreRestInterface.ARG_CALLBACK);
 		String mime;
 		if(callback != null) {
 			// Validate the callback to prevent cross-site scripting
@@ -225,9 +219,10 @@ public class XydraStoreResource {
 			if(!callbackRegex.matcher(callback).matches()) {
 				throw new InitException("Invalid callback: " + callback);
 			}
-			mime = getBestContentType(context, jsonMimes, DEFAULT_JSON_CONTENT_TYPE);
+			mime = getBestContentType(context, jsonMimes,
+			        XydraStoreRestInterface.DEFAULT_JSON_CONTENT_TYPE);
 		} else {
-			mime = getBestContentType(context, mimes, DEFAULT_CONTENT_TYPE);
+			mime = getBestContentType(context, mimes, XydraStoreRestInterface.DEFAULT_CONTENT_TYPE);
 		}
 		
 		res.setStatus(statusCode);
@@ -354,8 +349,10 @@ public class XydraStoreResource {
 	private EventsRequest parseEventsRequest(String[] addresses, String[] from, String[] to) {
 		
 		if(addresses.length < from.length || addresses.length < to.length) {
-			throw new RequestException("illegal parameter combination: addresses=" + addresses
-			        + ", beginRevisions=" + from + ", endRevisions=" + to);
+			throw new RequestException("illegal parameter combination: "
+			        + XydraStoreRestInterface.ARG_ADDRESS + "s=" + addresses + ", "
+			        + XydraStoreRestInterface.ARG_BEGIN_REVISION + "s=" + from + ", "
+			        + XydraStoreRestInterface.ARG_END_REVISION + "s=" + to);
 		}
 		
 		StoreException[] exceptions = new StoreException[addresses.length];
@@ -366,7 +363,8 @@ public class XydraStoreResource {
 			try {
 				address = XX.toAddress(addresses[i]);
 			} catch(Exception e) {
-				exceptions[i] = new RequestException("invalid address: " + addresses[i]);
+				exceptions[i] = new RequestException("invalid "
+				        + XydraStoreRestInterface.ARG_ADDRESS + ": " + addresses[i]);
 				continue;
 			}
 			long begin = 0;
@@ -375,7 +373,8 @@ public class XydraStoreResource {
 				try {
 					begin = Long.parseLong(from[i]);
 				} catch(Exception e) {
-					exceptions[i] = new RequestException("invalid beginRevision: " + from[i]);
+					exceptions[i] = new RequestException("invalid "
+					        + XydraStoreRestInterface.ARG_BEGIN_REVISION + ": " + from[i]);
 					continue;
 				}
 			}
@@ -383,7 +382,8 @@ public class XydraStoreResource {
 				try {
 					end = Long.parseLong(to[i]);
 				} catch(Exception e) {
-					exceptions[i] = new RequestException("invalid endRevision: " + to[i]);
+					exceptions[i] = new RequestException("invalid "
+					        + XydraStoreRestInterface.ARG_END_REVISION + ": " + to[i]);
 					continue;
 				}
 			}

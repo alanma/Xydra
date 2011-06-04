@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.value.XValue;
@@ -102,6 +103,11 @@ public class ReadableFieldOnStore implements XReadableField, Serializable {
 				                getID());
 			        }
 		        });
+	}
+	
+	@Override
+	public XType getType() {
+		return XType.XFIELD;
 	}
 	
 }

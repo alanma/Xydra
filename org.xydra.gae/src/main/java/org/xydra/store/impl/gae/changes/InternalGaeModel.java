@@ -103,4 +103,9 @@ public class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObj
 		return GaeUtils.putEntityAsync(e);
 	}
 	
+	@Override
+	public XType getType() {
+		return XType.XMODEL;
+	}
+	
 }

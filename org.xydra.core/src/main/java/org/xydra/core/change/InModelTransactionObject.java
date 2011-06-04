@@ -5,6 +5,7 @@ import java.util.Iterator;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
@@ -22,6 +23,7 @@ import org.xydra.core.model.XObject;
  * @author Kaidel
  */
 public class InModelTransactionObject implements XWritableObject {
+	
 	private XObject object;
 	private TransactionModel model;
 	
@@ -61,8 +63,8 @@ public class InModelTransactionObject implements XWritableObject {
 		        this.model.getAddress(), fieldId);
 		this.model.executeCommand(fieldCommand);
 		
-		return this.model.getField(XX.toAddress(this.model.getAddress().getRepository(),
-		        this.model.getID(), this.object.getID(), fieldId));
+		return this.model.getField(XX.toAddress(this.model.getAddress().getRepository(), this.model
+		        .getID(), this.object.getID(), fieldId));
 	}
 	
 	public boolean hasField(XID fieldId) {
@@ -88,14 +90,14 @@ public class InModelTransactionObject implements XWritableObject {
 	}
 	
 	public XWritableField getField(XID fieldId) {
-		XAddress fieldAddress = XX.toAddress(this.model.getAddress().getRepository(),
-		        this.model.getID(), this.object.getID(), fieldId);
+		XAddress fieldAddress = XX.toAddress(this.model.getAddress().getRepository(), this.model
+		        .getID(), this.object.getID(), fieldId);
 		return this.model.getField(fieldAddress);
 	}
 	
 	public boolean removeField(XID fieldId) {
-		XAddress fieldAddress = XX.toAddress(this.model.getAddress().getRepository(),
-		        this.model.getID(), this.object.getID(), fieldId);
+		XAddress fieldAddress = XX.toAddress(this.model.getAddress().getRepository(), this.model
+		        .getID(), this.object.getID(), fieldId);
 		long fieldRevision = this.model.getFieldRevisionNumber(fieldAddress);
 		
 		XCommand fieldCommand = X.getCommandFactory().createSafeRemoveFieldCommand(fieldAddress,
@@ -109,5 +111,10 @@ public class InModelTransactionObject implements XWritableObject {
 	@Override
 	public Iterator<XID> iterator() {
 		throw new UnsupportedOperationException();
+	}
+	
+	@Override
+	public XType getType() {
+		return XType.XOBJECT;
 	}
 }

@@ -22,4 +22,8 @@ public class ConnectionException extends StoreException {
 		super(message);
 	}
 	
+	public ConnectionException(String message, Throwable cause) {
+		super("connection error: " + message, cause);
+	}
+	
 }

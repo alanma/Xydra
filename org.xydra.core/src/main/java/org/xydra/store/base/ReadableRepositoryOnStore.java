@@ -58,8 +58,8 @@ public class ReadableRepositoryOnStore implements XReadableRepository, Serializa
 	
 	@Override
 	public XReadableModel getModel(XID id) {
-		ReadableModelOnStore model = new ReadableModelOnStore(this.credentials, this.store,
-		        XX.resolveModel(getAddress(), id));
+		ReadableModelOnStore model = new ReadableModelOnStore(this.credentials, this.store, XX
+		        .resolveModel(getAddress(), id));
 		if(model.baseModel == null) {
 			return null;
 		}
@@ -130,6 +130,11 @@ public class ReadableRepositoryOnStore implements XReadableRepository, Serializa
 	public Iterator<XID> iterator() {
 		initModelIds();
 		return this.modelIds.iterator();
+	}
+	
+	@Override
+	public XType getType() {
+		return XType.XREPOSITORY;
 	}
 	
 }

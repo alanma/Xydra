@@ -17,4 +17,8 @@ public class InternalStoreException extends StoreException {
 		super(message);
 	}
 	
+	public InternalStoreException(String message, Throwable cause) {
+		super(message, cause);
+	}
+	
 }

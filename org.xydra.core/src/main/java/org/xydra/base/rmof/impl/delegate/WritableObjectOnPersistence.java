@@ -5,6 +5,7 @@ import java.util.Iterator;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableObject;
@@ -113,5 +114,10 @@ public class WritableObjectOnPersistence extends AbstractWritableOnPersistence i
 	
 	public XID getObjectId() {
 		return this.objectId;
+	}
+	
+	@Override
+	public XType getType() {
+		return XType.XOBJECT;
 	}
 }

@@ -5,6 +5,7 @@ import java.util.Iterator;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.store.BatchedResult;
@@ -95,6 +96,11 @@ public class ReadableObjectOnStore implements XReadableObject, Serializable {
 				        ReadableObjectOnStore.this.baseObject = object[0].getResult();
 			        }
 		        });
+	}
+	
+	@Override
+	public XType getType() {
+		return XType.XOBJECT;
 	}
 	
 }

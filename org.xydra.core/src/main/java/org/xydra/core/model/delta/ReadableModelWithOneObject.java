@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.index.iterator.SingleValueIterator;
@@ -54,6 +55,11 @@ public class ReadableModelWithOneObject implements XReadableModel {
 	
 	public Iterator<XID> iterator() {
 		return new SingleValueIterator<XID>(this.object.getID());
+	}
+	
+	@Override
+	public XType getType() {
+		return XType.XOBJECT;
 	}
 	
 }

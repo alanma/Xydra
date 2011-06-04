@@ -110,4 +110,9 @@ public class SimpleModel implements Serializable, XRevWritableModel {
 		this.revisionNumber = rev;
 	}
 	
+	@Override
+	public XType getType() {
+		return XType.XMODEL;
+	}
+	
 }

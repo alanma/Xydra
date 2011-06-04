@@ -1,6 +1,7 @@
 package org.xydra.core.model.session.impl.arm;
 
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.session.XProtectedRepository;
 import org.xydra.store.access.XAuthorisationManager;
@@ -23,6 +24,11 @@ public class ArmProtectedRepository extends AbstractArmProtectedRepository {
 	@Override
 	protected XAuthorisationManager getArmForModel(XID modelId) {
 		return getArm();
+	}
+	
+	@Override
+	public XType getType() {
+		return XType.XREPOSITORY;
 	}
 	
 }

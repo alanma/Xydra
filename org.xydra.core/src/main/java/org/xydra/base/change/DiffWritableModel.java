@@ -9,6 +9,7 @@ import java.util.Set;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
@@ -23,6 +24,8 @@ import org.xydra.core.change.XTransactionBuilder;
  * base {@link XWritableModel}. Via {@link #toCommandList()} a minimal list of
  * commands that changes the base model into the current state can be created.
  * The base model is changed at no times.
+ * 
+ * TODO why is this in base?
  * 
  * @author xamde
  */
@@ -207,6 +210,11 @@ public class DiffWritableModel implements XWritableModel {
 			return DiffWritableModel.this.objectRemoveField(this.objectId, fieldId);
 		}
 		
+		@Override
+		public XType getType() {
+			return XType.XOBJECT;
+		}
+		
 	}
 	
 	protected boolean objectHasField(XID objectId, XID fieldId) {
@@ -355,6 +363,11 @@ public class DiffWritableModel implements XWritableModel {
 			return DiffWritableModel.this.fieldSetValue(this.objectId, this.fieldId, value);
 		}
 		
+		@Override
+		public XType getType() {
+			return XType.XFIELD;
+		}
+		
 	}
 	
 	protected boolean fieldIsEmpty(XID objectId, XID fieldId) {
@@ -452,6 +465,11 @@ public class DiffWritableModel implements XWritableModel {
 			builder.addCommand(command);
 		}
 		return builder.build();
+	}
+	
+	@Override
+	public XType getType() {
+		return XType.XMODEL;
 	}
 	
 }

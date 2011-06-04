@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicCommand;
@@ -627,6 +628,11 @@ public class ChangedModel implements XWritableModel {
 		}
 		
 		return false;
+	}
+	
+	@Override
+	public XType getType() {
+		return XType.XMODEL;
 	}
 	
 }

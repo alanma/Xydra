@@ -5,6 +5,7 @@ import java.util.Iterator;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.store.BatchedResult;
@@ -98,5 +99,10 @@ public class ReadableModelOnStore implements XReadableModel, Serializable {
 		assert res[0].getResult() != null;
 		
 		this.baseModel = res[0].getResult();
+	}
+	
+	@Override
+	public XType getType() {
+		return XType.XMODEL;
 	}
 }

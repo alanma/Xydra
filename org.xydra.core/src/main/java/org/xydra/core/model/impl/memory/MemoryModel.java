@@ -9,6 +9,7 @@ import java.util.Set;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XCommand;
@@ -708,6 +709,11 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 			}
 			return XCopyUtils.createSnapshot(this);
 		}
+	}
+	
+	@Override
+	public XType getType() {
+		return XType.XMODEL;
 	}
 	
 }

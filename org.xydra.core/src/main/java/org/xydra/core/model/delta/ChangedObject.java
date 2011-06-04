@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
@@ -393,5 +394,10 @@ public class ChangedObject implements XWritableObject {
 			changed |= cf.isChanged();
 		}
 		return changed;
+	}
+	
+	@Override
+	public XType getType() {
+		return XType.XOBJECT;
 	}
 }

@@ -4,8 +4,6 @@ import java.io.Serializable;
 import java.util.Iterator;
 
 import org.xydra.annotations.ReadOperation;
-import org.xydra.base.IHasXAddress;
-import org.xydra.base.IHasXID;
 import org.xydra.base.XID;
 
 
@@ -17,7 +15,7 @@ import org.xydra.base.XID;
  * @author dscharrer
  * 
  */
-public interface XReadableModel extends IHasXAddress, IHasXID, Iterable<XID> {
+public interface XReadableModel extends XEntity, Iterable<XID> {
 	
 	/**
 	 * Returns the {@link XReadableObject} contained in this model with the

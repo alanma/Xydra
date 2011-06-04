@@ -2,6 +2,7 @@ package org.xydra.core.model.delta;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.value.XValue;
@@ -96,6 +97,11 @@ public class ChangedField implements XWritableField {
 		this.changed = !XI.equals(value, this.base.getValue());
 		this.value = value;
 		return changes;
+	}
+	
+	@Override
+	public XType getType() {
+		return XType.XFIELD;
 	}
 	
 }

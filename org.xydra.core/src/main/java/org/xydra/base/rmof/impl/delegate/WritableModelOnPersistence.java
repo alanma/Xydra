@@ -6,6 +6,7 @@ import java.util.List;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
@@ -131,6 +132,11 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 		long commandResult = this.persistence.executeCommand(this.executingActorId, command);
 		assert commandResult >= 0;
 		return result && commandResult >= 0;
+	}
+	
+	@Override
+	public XType getType() {
+		return XType.XMODEL;
 	}
 	
 }

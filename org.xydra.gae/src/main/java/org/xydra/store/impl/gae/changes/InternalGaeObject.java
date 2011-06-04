@@ -224,4 +224,9 @@ public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeFi
 		
 	}
 	
+	@Override
+	public XType getType() {
+		return XType.XOBJECT;
+	}
+	
 }

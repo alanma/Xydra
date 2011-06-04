@@ -7,6 +7,7 @@ import java.util.concurrent.Future;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
+import org.xydra.base.rmof.XEntity;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.store.impl.gae.GaeUtils;
@@ -26,7 +27,7 @@ import com.sun.org.apache.xpath.internal.objects.XObject;
  * @author dscharrer
  * 
  */
-public class InternalGaeXEntity {
+abstract public class InternalGaeXEntity implements XEntity {
 	
 	protected static final String PROP_KEY = "__key__";
 	protected static final String PROP_REVISION = "revision";

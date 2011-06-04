@@ -1,7 +1,7 @@
 package org.xydra.base.rmof;
 
-import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.IHasXAddress;
+import org.xydra.base.IHasXID;
 import org.xydra.base.XType;
 
 
@@ -12,11 +12,8 @@ import org.xydra.base.XType;
  * 
  */
 
-public interface XEntity {
+public interface XEntity extends IHasXAddress, IHasXID {
 	
 	public XType getType();
 	
-	public XID getID();
-	
-	public XAddress getAddress();
 }
