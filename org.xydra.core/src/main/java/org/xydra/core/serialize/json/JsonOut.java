@@ -183,7 +183,7 @@ public class JsonOut extends AbstractXydraOut {
 	
 	private void beginContainer(Frame container, char c, boolean newline) {
 		
-		begin(container.parent, newline);
+		begin(container.parent, newline || !container.parent.hasContent);
 		
 		write(c);
 		
