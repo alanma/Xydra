@@ -88,7 +88,7 @@ public class SerializedStore {
 				out.attribute(ATTRIBUTE_TYPE, TYPE_INTERNAL);
 			} else if(t instanceof QuotaException) {
 				out.attribute(ATTRIBUTE_TYPE, TYPE_QUOTA);
-			} else if(t instanceof RequestException) {
+			} else if(t instanceof RequestException || t instanceof IllegalArgumentException) {
 				out.attribute(ATTRIBUTE_TYPE, TYPE_REQUEST);
 			} else {
 				out.attribute(ATTRIBUTE_TYPE, TYPE_STORE);
