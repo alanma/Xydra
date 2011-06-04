@@ -34,7 +34,6 @@ import org.xydra.minio.MiniStreamWriter;
 import org.xydra.minio.MiniWriter;
 import org.xydra.restless.IRestlessContext;
 import org.xydra.restless.Restless;
-import org.xydra.restless.RestlessExceptionHandler;
 import org.xydra.restless.RestlessParameter;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.GetEventsRequest;
@@ -117,35 +116,28 @@ public class XydraStoreResource {
 		restless.addMethod(prefix + XydraStoreRestInterface.URL_PING, "GET",
 		        XydraStoreResource.class, "ping", false);
 		
-		// TODO support class-specific exception handlers
-		restless.addExceptionHandler(new RestlessExceptionHandler() {
-			@Override
-			public boolean handleException(Throwable t, IRestlessContext context) {
-				
-				if(t instanceof InitException) {
-					try {
-						context.getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST,
-						        t.getMessage());
-					} catch(IOException e) {
-						throw new RuntimeException(e);
-					}
-					return true;
-				}
-				
-				// TODO remove?
-				if(!(t instanceof StoreException) && !(t instanceof IllegalArgumentException)) {
-					return false;
-				}
-				
-				XydraOut out = startOutput(context, HttpServletResponse.SC_OK);
-				SerializedStore.serializeException(t, out);
-				out.flush();
-				
-				return true;
-			}
-			
-		});
+	}
+	
+	public boolean onException(Throwable t, IRestlessContext context) {
 		
+		if(t instanceof InitException) {
+			try {
+				context.getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST, t.getMessage());
+			} catch(IOException e) {
+				throw new RuntimeException(e);
+			}
+			return true;
+		}
+		
+		if(!(t instanceof StoreException) && !(t instanceof IllegalArgumentException)) {
+			return false;
+		}
+		
+		XydraOut out = startOutput(context, HttpServletResponse.SC_OK);
+		SerializedStore.serializeException(t, out);
+		out.flush();
+		
+		return true;
 	}
 	
 	private XID getActorId(String actorIdString) {
