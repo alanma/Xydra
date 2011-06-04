@@ -2,6 +2,7 @@ package org.xydra.server.rest;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
@@ -342,9 +343,10 @@ public class XydraStoreResource {
 		
 		if(addresses.length < from.length || addresses.length < to.length) {
 			throw new RequestException("illegal parameter combination: "
-			        + XydraStoreRestInterface.ARG_ADDRESS + "s=" + addresses + ", "
-			        + XydraStoreRestInterface.ARG_BEGIN_REVISION + "s=" + from + ", "
-			        + XydraStoreRestInterface.ARG_END_REVISION + "s=" + to);
+			        + XydraStoreRestInterface.ARG_ADDRESS + "es=" + Arrays.toString(addresses)
+			        + ", " + XydraStoreRestInterface.ARG_BEGIN_REVISION + "s="
+			        + Arrays.toString(from) + ", " + XydraStoreRestInterface.ARG_END_REVISION
+			        + "s=" + Arrays.toString(to));
 		}
 		
 		StoreException[] exceptions = new StoreException[addresses.length];
