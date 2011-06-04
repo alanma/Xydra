@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import org.xydra.annotations.RequiresAppEngine;
+import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -39,6 +41,8 @@ import org.xydra.store.XydraStoreAdmin;
  * 
  */
 @RunsInGWT(true)
+@RunsInAppEngine(true)
+@RequiresAppEngine(false)
 public abstract class AbstractXydraStoreRestClient implements XydraStore {
 	
 	protected static final String HAEDER_CONTENT_TYPE = "Content-Type";

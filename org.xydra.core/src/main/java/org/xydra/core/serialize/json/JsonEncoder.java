@@ -20,4 +20,6 @@ public class JsonEncoder {
 		result = result.replace("\n", "\\n");
 		return result;
 	}
+	
+	public static final String PROPERTY_TYPE = "$t";
 }

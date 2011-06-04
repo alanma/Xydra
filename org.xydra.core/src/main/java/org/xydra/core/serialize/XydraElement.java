@@ -47,6 +47,10 @@ public interface XydraElement {
 	 */
 	public Object getContent(String name);
 	
+	public Iterator<XydraElement> getChildren();
+	
+	public Iterator<XydraElement> getChildren(String defaultType);
+	
 	/**
 	 * Get all child elements.
 	 * 
@@ -64,7 +68,9 @@ public interface XydraElement {
 	 *            for XML. For JSON this determines the property name.
 	 * @return all child elements in document order
 	 */
-	public Iterator<XydraElement> getChildren(String name);
+	public Iterator<XydraElement> getChildrenByName(String name);
+	
+	public Iterator<XydraElement> getChildrenByName(String name, String defaultType);
 	
 	/**
 	 * Get all child elements of a specific type.
@@ -86,7 +92,7 @@ public interface XydraElement {
 	 *            stored in the JSON.
 	 * @return all matching child elements in document order
 	 */
-	public Iterator<XydraElement> getChildren(String name, String type);
+	public Iterator<XydraElement> getChildrenByType(String name, String type);
 	
 	/**
 	 * Get the first child element.
@@ -106,14 +112,14 @@ public interface XydraElement {
 	 *            XML. For JSON this determines the property name.
 	 * @return the first child element in document order
 	 */
-	public XydraElement getChild(String name);
+	public XydraElement getElement(String name);
 	
 	/**
 	 * Get the i'th child element.
 	 * 
 	 * For XML this returns the i'th child.
 	 * 
-	 * For JSON this is equivalent to {@link #getChild(String)}.
+	 * For JSON this is equivalent to {@link #getElement(String)}.
 	 * 
 	 * If this element wraps a JSON array, this throws an error.
 	 * 
@@ -128,7 +134,7 @@ public interface XydraElement {
 	 *            JSON.
 	 * @return the child element in document order at the given index
 	 */
-	public XydraElement getChild(String name, int index);
+	public XydraElement getElement(String name, int index);
 	
 	/**
 	 * Get the first child element of a specific type.
@@ -154,29 +160,11 @@ public interface XydraElement {
 	public XydraElement getChild(String name, String type);
 	
 	/**
-	 * Get the child element of a specific type.
-	 * 
-	 * For XML this returns the first child of that type.
-	 * 
-	 * For JSON this returns the value of that property, but only if it is an
-	 * object.
-	 * 
-	 * If this element wraps a JSON array, this throws an error.
-	 * 
-	 * This method is meant to be used for retrieving elements that have been
-	 * added using {@link XydraOut#open(String)} directly to the containing
-	 * element without a child list.
-	 * 
-	 * @param type Only get elements with the specified type. For JSON, this
-	 *            also determines the property name.
-	 * @return the first matching child element in document order
-	 */
-	public XydraElement getElement(String type);
-	
-	/**
 	 * @return The type of this element. This is never null.
 	 */
 	public String getType();
+	
+	public Iterator<Object> getValues();
 	
 	/**
 	 * Get all values.
@@ -262,10 +250,12 @@ public interface XydraElement {
 	 */
 	public Object getValue(String name, String type);
 	
-	public XydraElement getContainer(String name);
+	public XydraElement getChild(String name);
 	
 	public Iterator<Pair<String,XydraElement>> getEntries(String attribute);
 	
-	public Iterator<Pair<String,XydraElement>> getEntries(String attribute, String type);
+	public Iterator<Pair<String,XydraElement>> getEntries(String attribute, String defaultType);
+	
+	public Iterator<Pair<String,XydraElement>> getEntriesByType(String attribute, String type);
 	
 }

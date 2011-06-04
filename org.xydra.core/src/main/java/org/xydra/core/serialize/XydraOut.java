@@ -43,12 +43,11 @@ public interface XydraOut {
 	 * 
 	 * <p>
 	 * Child elements can be retrieved using
-	 * {@link XydraElement#getElement(String)} if created in an element context
-	 * using {@link XydraElement#getChild(String)} or
-	 * {@link XydraElement#getChild(String, int)} if created in an untyped
+	 * {@link XydraElement#getElement(String)} or
+	 * {@link XydraElement#getElement(String, int)} if created in an untyped
 	 * single-item child list, using
 	 * {@link XydraElement#getChild(String, String)} if created in a typed
-	 * single-item child list, using {@link XydraElement#getChildren(String)}
+	 * single-item child list, using {@link XydraElement#getChildrenByName(String)}
 	 * when created in an untyped multiple-item child list or array and using
 	 * {@link XydraElement#getValues(String, String)} when created in a typed
 	 * multiple-array child list or array.
@@ -125,9 +124,9 @@ public interface XydraOut {
 	 * 
 	 * <p>
 	 * Child elements can be retrieved using
-	 * {@link XydraElement#getChild(String)} or
-	 * {@link XydraElement#getChild(String, int)} if created in an single-item
-	 * child list or using {@link XydraElement#getChildren(String)} when created
+	 * {@link XydraElement#getElement(String)} or
+	 * {@link XydraElement#getElement(String, int)} if created in an single-item
+	 * child list or using {@link XydraElement#getChildrenByName(String)} when created
 	 * in an multiple-item child list.
 	 * 
 	 * Arrays are retrieved as {@link XydraElement}s with no text content.
@@ -219,7 +218,7 @@ public interface XydraOut {
 	 * Arrays are retrieved as {@link XydraElement}s with no text content.
 	 * 
 	 * Child elements can be retrieved using
-	 * {@link XydraElement#getChildren(String)} on the array element. The name
+	 * {@link XydraElement#getChildrenByName(String)} on the array element. The name
 	 * parameter is ignored.
 	 * 
 	 * Values can be retrieved using {@link XydraElement#getValues(String)} on

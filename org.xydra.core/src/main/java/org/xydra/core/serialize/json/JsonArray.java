@@ -8,55 +8,26 @@ import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.core.serialize.ParsingError;
 import org.xydra.core.serialize.XydraElement;
+import org.xydra.core.serialize.xml.XmlEncoder;
 import org.xydra.index.query.Pair;
 
 
 @RunsInGWT(true)
 @RunsInAppEngine(true)
 @RequiresAppEngine(false)
-public class JsonArray implements XydraElement {
+public class JsonArray extends AbstractJsonElement {
 	
 	private final List<Object> data;
 	private final String type;
 	
 	public JsonArray(List<Object> data, String type) {
 		this.data = data;
-		this.type = type == null ? "xarray" : type;
+		this.type = type == null ? XmlEncoder.XARRAY_ELEMENT : type;
 	}
 	
 	@Override
-	public Object getAttribute(String name) {
-		throw new ParsingError(this, "Unexpected array.");
-	}
-	
-	@Override
-	public XydraElement getElement(String type) {
-		return getChild(null, type);
-	}
-	
-	@Override
-	public Iterator<XydraElement> getChildren(String name) {
-		return getChildren(name, null);
-	}
-	
-	@Override
-	public Iterator<XydraElement> getChildren(String name, String type) {
-		return JsonElement.transform(this.data.iterator(), type);
-	}
-	
-	@Override
-	public XydraElement getChild(String name, int index) {
-		return getChild(name, null);
-	}
-	
-	@Override
-	public XydraElement getChild(String name, String type) {
-		throw new ParsingError(this, "Unexpected array.");
-	}
-	
-	@Override
-	public Object getContent(String name) {
-		return getAttribute(name);
+	public Iterator<XydraElement> getChildren(String defaultType) {
+		return transform(this.data.iterator(), defaultType);
 	}
 	
 	@Override
@@ -65,23 +36,8 @@ public class JsonArray implements XydraElement {
 	}
 	
 	@Override
-	public Iterator<Object> getValues(String name, String type) {
+	public Iterator<Object> getValues() {
 		return this.data.iterator();
-	}
-	
-	@Override
-	public Iterator<Object> getValues(String name) {
-		return getValues(name, null);
-	}
-	
-	@Override
-	public Object getValue(String name, String type) {
-		throw new ParsingError(this, "Unexpected array.");
-	}
-	
-	@Override
-	public Object getValue(String name, int index) {
-		return getValue(name, null);
 	}
 	
 	@Override
@@ -90,22 +46,43 @@ public class JsonArray implements XydraElement {
 	}
 	
 	@Override
+	public Object getAttribute(String name) {
+		throw new ParsingError(this, "cannot get attribute from JSON array");
+	}
+	
+	@Override
+	public XydraElement getChild(String name, String type) {
+		throw new ParsingError(this, "cannot get single child from JSON array");
+	}
+	
+	@Override
+	public Iterator<XydraElement> getChildrenByName(String name, String defaultType) {
+		throw new ParsingError(this, "cannot get named children from JSON array");
+	}
+	
+	@Override
 	public XydraElement getChild(String name) {
-		return getChild(name, 0);
+		throw new ParsingError(this, "cannot get container from JSON array");
 	}
 	
 	@Override
-	public XydraElement getContainer(String name) {
-		throw new ParsingError(this, "tried to get container from JSON array");
+	public Object getContent(String name) {
+		throw new ParsingError(this, "cannot get content from JSON array");
 	}
 	
 	@Override
-	public Iterator<Pair<String,XydraElement>> getEntries(String attribute) {
-		throw new ParsingError(this, "tried to get map entries from JSON array");
+	public Iterator<Pair<String,XydraElement>> getEntries(String attribute, String defaultType) {
+		throw new ParsingError(this, "cannot get entries from JSON array");
 	}
 	
 	@Override
-	public Iterator<Pair<String,XydraElement>> getEntries(String attribute, String type) {
-		throw new ParsingError(this, "tried to get map entries from JSON array");
+	public Object getValue(String name, int index) {
+		throw new ParsingError(this, "cannot get attribute from JSON array");
 	}
+	
+	@Override
+	public Iterator<Object> getValues(String name) {
+		throw new ParsingError(this, "cannot get named values from JSON array");
+	}
+	
 }

@@ -108,7 +108,7 @@ public class SerializedModel {
 		
 		state.setFirstRevisionNumber(startRev);
 		
-		Iterator<XydraElement> eventElementIt = element.getChildren(NAME_EVENTS);
+		Iterator<XydraElement> eventElementIt = element.getChildrenByName(NAME_EVENTS);
 		while(eventElementIt.hasNext()) {
 			XydraElement e = eventElementIt.next();
 			XEvent event = SerializedEvent.toEvent(e, state.getBaseAddress());
@@ -156,10 +156,8 @@ public class SerializedModel {
 		long revision = getRevisionAttribute(element);
 		
 		XValue xvalue = null;
-		
-		Iterator<XydraElement> valueElementIt = element.getChildren(NAME_VALUE);
-		if(valueElementIt.hasNext()) {
-			XydraElement valueElement = valueElementIt.next();
+		XydraElement valueElement = element.getElement(NAME_VALUE);
+		if(valueElement != null) {
 			xvalue = SerializedValue.toValue(valueElement);
 		}
 		
@@ -239,9 +237,9 @@ public class SerializedModel {
 		}
 		modelState.setRevisionNumber(revision);
 		
-		XydraElement objects = element.getContainer(NAME_OBJECTS);
+		XydraElement objects = element.getChild(NAME_OBJECTS);
 		
-		Iterator<Pair<String,XydraElement>> objectElementIt = objects.getEntries(
+		Iterator<Pair<String,XydraElement>> objectElementIt = objects.getEntriesByType(
 		        SerializingUtils.XID_ATTRIBUTE, XOBJECT_ELEMENT);
 		while(objectElementIt.hasNext()) {
 			Pair<String,XydraElement> objectElement = objectElementIt.next();
@@ -319,9 +317,9 @@ public class SerializedModel {
 		
 		objectState.setRevisionNumber(revision);
 		
-		XydraElement fields = element.getContainer(NAME_FIELDS);
+		XydraElement fields = element.getChild(NAME_FIELDS);
 		
-		Iterator<Pair<String,XydraElement>> fieldElementIt = fields.getEntries(
+		Iterator<Pair<String,XydraElement>> fieldElementIt = fields.getEntriesByType(
 		        SerializingUtils.XID_ATTRIBUTE, XFIELD_ELEMENT);
 		while(fieldElementIt.hasNext()) {
 			Pair<String,XydraElement> fieldElement = fieldElementIt.next();
@@ -361,9 +359,9 @@ public class SerializedModel {
 		XAddress repoAddr = XX.toAddress(xid, null, null, null);
 		XRevWritableRepository repositoryState = new SimpleRepository(repoAddr);
 		
-		XydraElement models = element.getContainer(NAME_MODELS);
+		XydraElement models = element.getChild(NAME_MODELS);
 		
-		Iterator<Pair<String,XydraElement>> modelElementIt = models.getEntries(
+		Iterator<Pair<String,XydraElement>> modelElementIt = models.getEntriesByType(
 		        SerializingUtils.XID_ATTRIBUTE, XMODEL_ELEMENT);
 		while(modelElementIt.hasNext()) {
 			Pair<String,XydraElement> modelElement = modelElementIt.next();

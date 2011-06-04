@@ -173,7 +173,7 @@ public class SerializedCommand {
 		
 		XValue value = null;
 		if(type != ChangeType.REMOVE) {
-			value = SerializedValue.toValue(element.getChild(NAME_VALUE));
+			value = SerializedValue.toValue(element.getElement(NAME_VALUE));
 			if(value == null) {
 				throw new ParsingError(element, "Missing xvalue.");
 			}
@@ -312,7 +312,7 @@ public class SerializedCommand {
 		}
 		
 		List<XAtomicCommand> commands = new ArrayList<XAtomicCommand>();
-		Iterator<XydraElement> it = element.getChildren(NAME_COMMANDS);
+		Iterator<XydraElement> it = element.getChildrenByName(NAME_COMMANDS);
 		while(it.hasNext()) {
 			XydraElement command = it.next();
 			commands.add(toAtomicCommand(command, target));
@@ -465,7 +465,7 @@ public class SerializedCommand {
 		SerializingUtils.checkElementType(element, XCOMMANDLIST_ELEMENT);
 		
 		List<XCommand> events = new ArrayList<XCommand>();
-		Iterator<XydraElement> it = element.getChildren(NAME_COMMANDS);
+		Iterator<XydraElement> it = element.getChildrenByName(NAME_COMMANDS);
 		while(it.hasNext()) {
 			XydraElement command = it.next();
 			events.add(toCommand(command, context));

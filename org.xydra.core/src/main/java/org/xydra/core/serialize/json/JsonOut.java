@@ -129,7 +129,9 @@ public class JsonOut extends AbstractXydraOut {
 		
 		if(saveType) {
 			whitespace(' ');
-			write("\"$type\":");
+			write('"');
+			write(JsonEncoder.PROPERTY_TYPE);
+			write("\":");
 			whitespace(' ');
 			write('"');
 			write(element.name);

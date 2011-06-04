@@ -185,7 +185,7 @@ public class SerializedEvent {
 		SerializingUtils.checkElementType(element, XEVENTLIST_ELEMENT);
 		
 		List<XEvent> events = new ArrayList<XEvent>();
-		Iterator<XydraElement> it = element.getChildren(NAME_EVENTS);
+		Iterator<XydraElement> it = element.getChildrenByName(NAME_EVENTS);
 		while(it.hasNext()) {
 			XydraElement event = it.next();
 			events.add(toEvent(event, context));
@@ -212,7 +212,7 @@ public class SerializedEvent {
 		// XValue oldValue = null;
 		XValue newValue = null;
 		if(type != ChangeType.REMOVE) {
-			newValue = SerializedValue.toValue(element.getChild(NAME_VALUE, 0));
+			newValue = SerializedValue.toValue(element.getElement(NAME_VALUE, 0));
 			assert newValue != null;
 		}
 		
@@ -252,12 +252,12 @@ public class SerializedEvent {
 		XValue newValue = null;
 		int idx = 0;
 		if(type != ChangeType.ADD) {
-			oldValue = SerializedValue.toValue(element.getChild(NAME_OLD_VALUE, idx));
+			oldValue = SerializedValue.toValue(element.getElement(NAME_OLD_VALUE, idx));
 			idx++;
 			assert oldValue != null;
 		}
 		if(type != ChangeType.REMOVE) {
-			newValue = SerializedValue.toValue(element.getChild(NAME_VALUE, idx));
+			newValue = SerializedValue.toValue(element.getElement(NAME_VALUE, idx));
 			assert newValue != null;
 		}
 		
@@ -438,7 +438,7 @@ public class SerializedEvent {
 		TempTrans tt = new TempTrans(actor, modelRev);
 		
 		List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
-		Iterator<XydraElement> it = element.getChildren(NAME_EVENTS);
+		Iterator<XydraElement> it = element.getChildrenByName(NAME_EVENTS);
 		while(it.hasNext()) {
 			XydraElement event = it.next();
 			events.add(toAtomicEvent(event, target, tt));

@@ -80,7 +80,7 @@ public class SerializedAccess {
 		
 		List<XAccessRightDefinition> result = new ArrayList<XAccessRightDefinition>();
 		
-		Iterator<XydraElement> it = xml.getChildren(NAME_DEFINITIONS, XACCESSDEFINITION_ELEMENT);
+		Iterator<XydraElement> it = xml.getChildrenByType(NAME_DEFINITIONS, XACCESSDEFINITION_ELEMENT);
 		while(it.hasNext()) {
 			result.add(toAccessDefinition(it.next()));
 		}
@@ -102,7 +102,7 @@ public class SerializedAccess {
 		
 		XAuthorisationManager arm = new MemoryAuthorisationManager(groups);
 		
-		Iterator<XydraElement> it = xml.getChildren(NAME_DEFINITIONS, XACCESSDEFINITION_ELEMENT);
+		Iterator<XydraElement> it = xml.getChildrenByType(NAME_DEFINITIONS, XACCESSDEFINITION_ELEMENT);
 		while(it.hasNext()) {
 			XAccessRightDefinition def = toAccessDefinition(it.next());
 			arm.getAuthorisationDatabase().setAccess(def.getActor(), def.getResource(),

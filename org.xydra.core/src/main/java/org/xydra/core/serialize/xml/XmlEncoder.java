@@ -42,12 +42,13 @@ public class XmlEncoder {
 		return result;
 	}
 	
-	static final String XMAP_ELEMENT = "xmap";
-	static final String XARRAY_ELEMENT = "xarray";
-	static final String XNULL_ELEMENT = "xnull";
-	static final String NULL_ATTRIBUTE = "isNull";
-	static final String NULL_VALUE = "true";
-	static final String NULL_CONTENT_ATTRIBUTE = "nullContent";
-	static final String NULL_CONTENT_VALUE = "true";
+	public static final String XMAP_ELEMENT = "xmap";
+	public static final String XARRAY_ELEMENT = "xarray";
+	public static final String XNULL_ELEMENT = "xnull";
+	public static final String XVALUE_ELEMENT = "xvalue";
+	public static final String NULL_ATTRIBUTE = "isNull";
+	public static final String NULL_VALUE = "true";
+	public static final String NULL_CONTENT_ATTRIBUTE = "nullContent";
+	public static final String NULL_CONTENT_VALUE = "true";
 	
 }

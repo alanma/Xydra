@@ -140,7 +140,7 @@ public class XmlOut extends AbstractXydraOut {
 			
 			begin(container);
 			
-			String type = container.isChildTypeForced() ? container.getChildType() : "xvalue";
+			String type = container.isChildTypeForced() ? container.getChildType() : XmlEncoder.XVALUE_ELEMENT;
 			
 			write('<');
 			write(type);

@@ -194,7 +194,7 @@ public class SerializedStore {
 		
 		XydraElement eventsEle = element.getChild(NAME_EVENTRESULTS, ELEMENT_EVENTRESULTS);
 		if(eventResults != null && eventsEle != null) {
-			toEventResults(eventsEle, context, eventResults);
+			toEventResultLists(eventsEle, context, eventResults);
 		}
 		
 	}
@@ -245,11 +245,17 @@ public class SerializedStore {
 		
 		SerializingUtils.checkElementType(element, ELEMENT_EVENTRESULTS);
 		
+		toEventResultLists(element.getChild(NAME_EVENTS), context, results);
+	}
+	
+	private static void toEventResultLists(XydraElement element, GetEventsRequest[] context,
+	        BatchedResult<XEvent[]>[] results) {
+		
 		assert context.length == results.length;
 		
 		int i = 0;
 		
-		Iterator<XydraElement> it = element.getChildren(NAME_EVENTS);
+		Iterator<XydraElement> it = element.getChildren();
 		while(it.hasNext()) {
 			XydraElement result = it.next();
 			
@@ -299,7 +305,7 @@ public class SerializedStore {
 		
 		SerializingUtils.checkElementType(element, ELEMENT_MODEL_REVISIONS);
 		
-		getRevisionListContents(element, res);
+		getRevisionListContents(element.getChild(NAME_REVISIONS), res);
 	}
 	
 	private static void setRevisionListContents(BatchedResult<Long>[] results, XydraOut out) {
@@ -318,7 +324,7 @@ public class SerializedStore {
 		
 		int i = 0;
 		
-		Iterator<XydraElement> it = element.getChildren(NAME_REVISIONS);
+		Iterator<XydraElement> it = element.getChildren();
 		while(it.hasNext()) {
 			XydraElement result = it.next();
 			
@@ -407,7 +413,7 @@ public class SerializedStore {
 		
 		int i = 0 - 1;
 		
-		Iterator<XydraElement> it = element.getChildren(NAME_SNAPSHOTS);
+		Iterator<XydraElement> it = element.getChildrenByName(NAME_SNAPSHOTS);
 		while(it.hasNext()) {
 			XydraElement result = it.next();
 			i++;
