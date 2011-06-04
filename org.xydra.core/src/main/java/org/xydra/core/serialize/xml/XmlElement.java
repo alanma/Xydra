@@ -224,4 +224,9 @@ public class XmlElement extends AbstractXydraElement {
 		return list.iterator();
 	}
 	
+	@Override
+	public Object getContent() {
+		return getContent(null);
+	}
+	
 }

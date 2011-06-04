@@ -57,8 +57,16 @@ abstract public class AbstractXydraOut implements XydraOut {
 			this.name = name;
 		}
 		
+		public String getChildType(String def) {
+			return this.childType == null ? def : this.childType;
+		}
+		
 		public String getChildType() {
 			return this.childType;
+		}
+		
+		public boolean hasChildType() {
+			return this.childType != null;
 		}
 		
 		public boolean isChildTypeForced() {

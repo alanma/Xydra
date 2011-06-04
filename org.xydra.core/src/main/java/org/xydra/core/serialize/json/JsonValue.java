@@ -30,13 +30,18 @@ public class JsonValue extends AbstractJsonElement {
 	}
 	
 	@Override
-	public Object getContent(String name) {
+	public Object getContent() {
 		return this.value;
 	}
 	
 	@Override
 	public String toString() {
 		return this.type + ": " + this.value;
+	}
+	
+	@Override
+	public Object getContent(String name) {
+		throw new ParsingError(this, "cannot get named content from JSON value");
 	}
 	
 	@Override

@@ -23,17 +23,12 @@ public class JsonElement extends AbstractJsonElement {
 	public JsonElement(Map<String,Object> data, String type) {
 		this.data = data;
 		Object key = this.data.get(JsonEncoder.PROPERTY_TYPE);
-		if(type != null) {
-			if(key != null && !key.toString().equals(type)) {
-				throw new IllegalArgumentException("conflicting type: " + type + " vs. " + key);
-			}
+		if(key != null) {
+			this.type = key.toString();
+		} else if(type != null) {
 			this.type = type;
 		} else {
-			if(key != null) {
-				this.type = key.toString();
-			} else {
-				this.type = XmlEncoder.XMAP_ELEMENT;
-			}
+			this.type = XmlEncoder.XMAP_ELEMENT;
 		}
 	}
 	
@@ -120,6 +115,11 @@ public class JsonElement extends AbstractJsonElement {
 		}
 		
 		return ((List<Object>)childList).iterator();
+	}
+	
+	@Override
+	public Object getContent() {
+		throw new ParsingError(this, "cannot get unnamed content from JSON object");
 	}
 	
 }

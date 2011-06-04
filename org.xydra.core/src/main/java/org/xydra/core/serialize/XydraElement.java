@@ -33,6 +33,20 @@ public interface XydraElement {
 	/**
 	 * Get this element's text content.
 	 * 
+	 * @return return the contained character data. If this element contains
+	 *         additional children, the return value is undefined.
+	 * 
+	 *         This may be null, a {@link String}, a {@link Boolean} or a
+	 *         {@link Number}.
+	 * 
+	 *         The type of the returned object may differ from that used for
+	 *         {@link XydraOut#content(String, Object)}
+	 */
+	public Object getContent();
+	
+	/**
+	 * Get this element's text content.
+	 * 
 	 * @param name The name under which the content is saved. This is not used
 	 *            for XML. For JSON this is the same as
 	 *            {@link #getAttribute(String)}.

@@ -24,8 +24,11 @@ import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.base.value.XV;
+import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.XCompareUtils;
 import org.xydra.core.serialize.SerializedStore.EventsRequest;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.store.AccessException;
 import org.xydra.store.AuthorisationException;
 import org.xydra.store.BatchedResult;
@@ -39,6 +42,13 @@ import org.xydra.store.TimeoutException;
 
 
 abstract public class AbstractSerializedStoreTest extends AbstractSerializingTest {
+	
+	private static final Logger log = getLogger();
+	
+	private static Logger getLogger() {
+		LoggerTestHelper.init();
+		return LoggerFactory.getLogger(AbstractSerializedStoreTest.class);
+	}
 	
 	private static final XAddress address = XX.toAddress("/a/b/c/d");
 	private static final XEvent event = MemoryFieldEvent.createAddEvent(XX.toId("actor"), address,
@@ -228,7 +238,10 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		GetEventsRequest[] req = preparePostRequests(eventRes);
 		BatchedResult<XEvent[]>[] res2 = preparePost(eventRes);
 		
-		XydraElement element = parse(out.getData());
+		String data = out.getData();
+		log.info(data);
+		
+		XydraElement element = parse(data);
 		assertNotNull(element);
 		SerializedStore.toEventResults(element, req, res2);
 		
@@ -253,7 +266,11 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		GetEventsRequest[] req = preparePostRequests(eventRes);
 		BatchedResult<XEvent[]>[] res2 = preparePost(eventRes);
 		
-		XydraElement element = parse(out.getData());
+		String data = out.getData();
+		
+		log.info(data);
+		
+		XydraElement element = parse(data);
 		assertNotNull(element);
 		SerializedStore.toCommandResults(element, req, res, res2);
 		

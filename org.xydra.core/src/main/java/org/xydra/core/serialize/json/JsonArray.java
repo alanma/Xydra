@@ -85,4 +85,9 @@ public class JsonArray extends AbstractJsonElement {
 		throw new ParsingError(this, "cannot get named values from JSON array");
 	}
 	
+	@Override
+	public Object getContent() {
+		throw new ParsingError(this, "cannot get content from JSON array");
+	}
+	
 }

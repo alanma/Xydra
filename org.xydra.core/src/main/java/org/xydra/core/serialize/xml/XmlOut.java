@@ -69,7 +69,7 @@ public class XmlOut extends AbstractXydraOut {
 			//$FALL-THROUGH$
 		case Array:
 		case Map:
-			if(element.parent.type == Type.Child && element.parent.getChildType() == null) {
+			if(element.parent.type == Type.Child && !element.parent.hasChildType()) {
 				assert element.parent.parent.type == Type.Element;
 				return element.parent.parent;
 			} else {
@@ -140,7 +140,7 @@ public class XmlOut extends AbstractXydraOut {
 			
 			begin(container);
 			
-			String type = container.isChildTypeForced() ? container.getChildType() : XmlEncoder.XVALUE_ELEMENT;
+			String type = container.getChildType(XmlEncoder.XVALUE_ELEMENT);
 			
 			write('<');
 			write(type);
@@ -161,7 +161,7 @@ public class XmlOut extends AbstractXydraOut {
 	}
 	
 	private boolean isInlined(Frame container) {
-		return container.type == Type.Child && container.getChildType() == null;
+		return container.type == Type.Child && !container.hasChildType();
 	}
 	
 	@Override
@@ -231,7 +231,7 @@ public class XmlOut extends AbstractXydraOut {
 			begin(container.parent);
 			
 			write('<');
-			write(container.parent.isChildTypeForced() ? container.parent.getChildType() : type);
+			write(container.parent.getChildType(type));
 			outputId(container.parent);
 			
 			container.depth = container.parent.depth + 1;
@@ -258,7 +258,7 @@ public class XmlOut extends AbstractXydraOut {
 				write('\n');
 				indent(container.depth);
 				write("</");
-				write(container.parent.isChildTypeForced() ? container.parent.getChildType() : type);
+				write(container.parent.getChildType(type));
 				write('>');
 			}
 			
