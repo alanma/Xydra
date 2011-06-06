@@ -187,8 +187,6 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 				// remove from list of removed fields, if needed
 				this.removedFields.remove(fieldId);
 				
-				// TODO use another actor, either some constant or via
-				// constructor
 				InObjectTransactionField field = new InObjectTransactionField(fieldId,
 				        XCommand.NEW, this);
 				this.changedFields.put(fieldId, field);
@@ -421,8 +419,8 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 			if(!this.removedFields.contains(fieldId)) {
 				XField field = this.baseObject.getField(fieldId);
 				if(field != null) {
-					this.changedFields.put(fieldId, new InObjectTransactionField(fieldId, field
-					        .getRevisionNumber(), this));
+					this.changedFields.put(fieldId,
+					        new InObjectTransactionField(fieldId, field.getRevisionNumber(), this));
 					exists = true;
 				}
 			}
@@ -435,6 +433,21 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 			
 			return this.changedFields.get(fieldId);
 		}
+	}
+	
+	@Override
+	public int hashCode() {
+		return super.hashCode();
+	}
+	
+	@Override
+	public AbstractEntity getFather() {
+		return this.baseObject.getFather();
+	}
+	
+	@Override
+	public XType getType() {
+		return XType.XOBJECT;
 	}
 	
 	/*
@@ -470,12 +483,6 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		throw new UnsupportedOperationException();
 	}
 	
-	@Override
-	public int hashCode() {
-		// TODO Auto-generated method stub
-		return super.hashCode();
-	}
-	
 	private class DummyCallback implements XLocalChangeCallback {
 		
 		@Override
@@ -490,16 +497,6 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 			
 		}
 		
-	}
-	
-	@Override
-	public AbstractEntity getFather() {
-		return this.baseObject.getFather();
-	}
-	
-	@Override
-	public XType getType() {
-		return XType.XOBJECT;
 	}
 	
 }

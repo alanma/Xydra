@@ -55,98 +55,16 @@ public class TransactionObjectTest {
 		this.transObject = new TransactionObject(this.object);
 	}
 	
+	// Tests for getAddress()
 	@Test
 	public void testGetAddress() {
 		assertEquals(this.object.getAddress(), this.transObject.getAddress());
 	}
 	
+	// Tests for getId()
 	@Test
 	public void testGetId() {
 		assertEquals(this.object.getID(), this.transObject.getID());
-	}
-	
-	// TODO the isEmpty method currently doesn't work at all, so ignore this
-	// test at the moment - I need to fix this!
-	@Test
-	@Ignore
-	public void testIsEmpty() {
-		// At first, the value should be the same as that of object.isEmpty()
-		assertEquals(this.object.isEmpty(), this.transObject.isEmpty());
-		
-		// remove the field from transObject
-		assertTrue(this.transObject.removeField(this.field.getID()));
-		
-		assertTrue(this.transObject.isEmpty());
-		assertFalse(this.object.isEmpty());
-	}
-	
-	@Test
-	public void testCreateField() {
-		XID fieldId = XX.createUniqueId();
-		XWritableField field = this.transObject.createField(fieldId);
-		
-		assertNotNull(field);
-		
-		// make sure it exists in the transObject but not in object
-		assertFalse(this.object.hasField(fieldId));
-		assertTrue(this.transObject.hasField(fieldId));
-		
-		// try to add the same field again
-		XWritableField field2 = this.transObject.createField(fieldId);
-		assertEquals(field, field2);
-		
-		// make sure it exists in the transObject but not in object
-		assertFalse(this.object.hasField(fieldId));
-		assertTrue(this.transObject.hasField(fieldId));
-	}
-	
-	@Test
-	public void testRemoveField() {
-		// try to remove a not existing field
-		XID fieldId = XX.createUniqueId();
-		
-		assertFalse(this.transObject.removeField(fieldId));
-		
-		// try to remove an existing field
-		boolean he = this.transObject.removeField(this.field.getID());
-		assertTrue(he);
-		assertFalse(this.transObject.hasField(this.field.getID()));
-		
-		// make sure it wasn't removed from the underlying object
-		assertTrue(this.object.hasField(this.field.getID()));
-		
-		// add a field an remove it again
-		this.transObject.createField(fieldId);
-		assertTrue(this.transObject.hasField(fieldId));
-		
-		assertTrue(this.transObject.removeField(fieldId));
-		assertFalse(this.transObject.hasField(fieldId));
-		assertFalse(this.object.hasField(fieldId));
-	}
-	
-	@Test
-	public void testGetField() {
-		// try to get an already existing field
-		XWritableField field2 = this.transObject.getField(this.field.getID());
-		
-		assertEquals(this.field, field2);
-		
-		// try to get a not existing field
-		assertNull(this.transObject.getField(X.getIDProvider().createUniqueId()));
-		
-		// change the existing field and get it again
-		XCommandFactory factory = X.getCommandFactory();
-		XValue value = X.getValueFactory().createStringValue("test");
-		XCommand command = factory.createSafeAddValueCommand(this.field.getAddress(),
-		        this.field.getRevisionNumber(), value);
-		
-		this.transObject.executeCommand(command);
-		
-		field2 = this.transObject.getField(this.field.getID());
-		
-		// revision numbers are not increased/managed by the TransactionObject,
-		// therefore this should succeed
-		assertTrue(this.field.equals(field2));
 	}
 	
 	/*
@@ -154,10 +72,6 @@ public class TransactionObjectTest {
 	 * 
 	 * Note: the other executeCommand without the callback-parameter needs no
 	 * extra tests, since the only thing it does is call this method
-	 */
-
-	/*
-	 * TODO Check that failing operations do not change old revisionnumbers
 	 */
 	@Test
 	public void testExecuteCommandsSafeAddFieldCommands() {
@@ -264,6 +178,19 @@ public class TransactionObjectTest {
 		assertTrue(callback.failed);
 		assertNull(callback.revision);
 		
+		// try to remove a field that already exists & use wrong revNr - should
+		// faill
+		removeCommand = factory.createSafeRemoveFieldCommand(this.field.getAddress(),
+		        this.field.getRevisionNumber() + 1);
+		callback = new TestCallback();
+		
+		result = this.transObject.executeCommand(removeCommand, callback);
+		assertEquals(XCommand.FAILED, result);
+		
+		// check callback
+		assertTrue(callback.failed);
+		assertNull(callback.revision);
+		
 		// try to remove a field that already exists, should succeed
 		removeCommand = factory.createSafeRemoveFieldCommand(this.field.getAddress(),
 		        this.field.getRevisionNumber());
@@ -337,6 +264,18 @@ public class TransactionObjectTest {
 		XCommand addCommand = factory.createSafeAddValueCommand(address, 0, value);
 		
 		long result = this.transObject.executeCommand(addCommand, callback);
+		assertEquals(XCommand.FAILED, result);
+		
+		// check callback
+		assertTrue(callback.failed);
+		assertNull(callback.revision);
+		
+		// add a value to an existing field, use wrong revNr - should fail
+		addCommand = factory.createSafeAddValueCommand(this.field.getAddress(),
+		        this.field.getRevisionNumber() + 1, value);
+		callback = new TestCallback();
+		
+		result = this.transObject.executeCommand(addCommand, callback);
 		assertEquals(XCommand.FAILED, result);
 		
 		// check callback
@@ -481,6 +420,26 @@ public class TransactionObjectTest {
 		assertNull(simulatedField.getValue());
 		assertNull(this.field.getValue());
 		
+		// change the value of a field, which value is already set, but use
+		// wrong revNr - should fail
+		changeCommand = factory.createSafeChangeValueCommand(this.fieldWithValue.getAddress(),
+		        this.fieldWithValue.getRevisionNumber() + 1, value);
+		callback = new TestCallback();
+		
+		result = this.transObject.executeCommand(changeCommand, callback);
+		assertEquals(XCommand.FAILED, result);
+		
+		// check callback
+		assertTrue(callback.failed);
+		assertNull(callback.revision);
+		
+		// check whether the simulated field was changed and the real field
+		// wasn't
+		XWritableField changedField = this.transObject.getField(this.fieldWithValue.getID());
+		
+		assertFalse(value.equals(changedField.getValue()));
+		assertFalse(value.equals(this.fieldWithValue.getValue()));
+		
 		// change the value of a field, which value is already set - should
 		// succeed
 		changeCommand = factory.createSafeChangeValueCommand(this.fieldWithValue.getAddress(),
@@ -496,10 +455,315 @@ public class TransactionObjectTest {
 		
 		// check whether the simulated field was changed and the real field
 		// wasn't
+		changedField = this.transObject.getField(this.fieldWithValue.getID());
+		
+		assertEquals(value, changedField.getValue());
+		assertFalse(value.equals(this.fieldWithValue.getValue()));
+	}
+	
+	@Test
+	public void testExecuteCommandsForcedChangeValueCommands() {
+		XCommandFactory factory = X.getCommandFactory();
+		XID newFieldId = X.getIDProvider().createUniqueId();
+		TestCallback callback = new TestCallback();
+		
+		XValue value = X.getValueFactory().createStringValue("test");
+		
+		// change a value of a not existing field, should fail
+		assertFalse(this.transObject.hasField(newFieldId));
+		
+		XAddress temp = this.transObject.getAddress();
+		XAddress address = XX.toAddress(temp.getRepository(), temp.getModel(), temp.getObject(),
+		        newFieldId);
+		XCommand changeCommand = factory.createForcedChangeValueCommand(address, value);
+		
+		long result = this.transObject.executeCommand(changeCommand, callback);
+		assertEquals(XCommand.FAILED, result);
+		
+		// check callback
+		assertTrue(callback.failed);
+		assertNull(callback.revision);
+		
+		// change the value of a field, which value is not set - should succeed
+		changeCommand = factory.createForcedChangeValueCommand(this.field.getAddress(), value);
+		callback = new TestCallback();
+		
+		result = this.transObject.executeCommand(changeCommand, callback);
+		assertTrue(result != XCommand.FAILED);
+		
+		// check callback
+		assertFalse(callback.failed);
+		assertEquals((Long)result, callback.revision);
+		
+		// check the changes
+		XWritableField simulatedField = this.transObject.getField(this.field.getID());
+		assertEquals(value, simulatedField.getValue());
+		assertNull(this.field.getValue());
+		
+		// change the value of a field, which value is already set - should
+		// succeed
+		changeCommand = factory.createForcedChangeValueCommand(this.fieldWithValue.getAddress(),
+		        value);
+		callback = new TestCallback();
+		
+		result = this.transObject.executeCommand(changeCommand, callback);
+		assertTrue(result != XCommand.FAILED);
+		
+		// check callback
+		assertFalse(callback.failed);
+		assertEquals((Long)result, callback.revision);
+		
+		// check whether the simulated field was changed and the real field
+		// wasn't
 		XWritableField changedField = this.transObject.getField(this.fieldWithValue.getID());
 		
 		assertEquals(value, changedField.getValue());
 		assertFalse(value.equals(this.fieldWithValue.getValue()));
+	}
+	
+	@Test
+	public void testExecuteCommandsSafeRemoveValueCommands() {
+		XCommandFactory factory = X.getCommandFactory();
+		XID newFieldId = X.getIDProvider().createUniqueId();
+		TestCallback callback = new TestCallback();
+		
+		// remove a value from a not existing field, should fail
+		assertFalse(this.transObject.hasField(newFieldId));
+		
+		XAddress temp = this.transObject.getAddress();
+		XAddress address = XX.toAddress(temp.getRepository(), temp.getModel(), temp.getObject(),
+		        newFieldId);
+		XCommand removeCommand = factory.createSafeRemoveValueCommand(address, 0);
+		
+		long result = this.transObject.executeCommand(removeCommand, callback);
+		assertEquals(XCommand.FAILED, result);
+		
+		// check callback
+		assertTrue(callback.failed);
+		assertNull(callback.revision);
+		
+		// remove a value from an existing field, without a set value - should
+		// fail
+		removeCommand = factory.createSafeRemoveValueCommand(this.field.getAddress(),
+		        this.field.getRevisionNumber());
+		callback = new TestCallback();
+		
+		result = this.transObject.executeCommand(removeCommand, callback);
+		assertEquals(XCommand.FAILED, result);
+		
+		// check callback
+		assertTrue(callback.failed);
+		assertNull(callback.revision);
+		
+		// remove a value from an existing field with set value, use wrong revNr
+		// - should succeed
+		removeCommand = factory.createSafeRemoveValueCommand(this.fieldWithValue.getAddress(),
+		        this.fieldWithValue.getRevisionNumber() + 1);
+		callback = new TestCallback();
+		
+		result = this.transObject.executeCommand(removeCommand, callback);
+		assertEquals(XCommand.FAILED, result);
+		
+		// check callback
+		assertTrue(callback.failed);
+		assertNull(callback.revision);
+		
+		// remove a value from an existing field with set value - should succeed
+		removeCommand = factory.createSafeRemoveValueCommand(this.fieldWithValue.getAddress(),
+		        this.fieldWithValue.getRevisionNumber());
+		callback = new TestCallback();
+		
+		result = this.transObject.executeCommand(removeCommand, callback);
+		assertTrue(result != XCommand.FAILED);
+		
+		// check callback
+		assertFalse(callback.failed);
+		assertEquals((Long)result, callback.revision);
+		
+		// check whether the simulated field was changed and the real field
+		// wasn't
+		XWritableField changedField = this.transObject.getField(this.fieldWithValue.getID());
+		
+		assertNull(changedField.getValue());
+		assertNotNull(this.fieldWithValue.getValue());
+	}
+	
+	@Test
+	public void testExecuteCommandsForcedRemoveValueCommands() {
+		XCommandFactory factory = X.getCommandFactory();
+		XID newFieldId = X.getIDProvider().createUniqueId();
+		TestCallback callback = new TestCallback();
+		
+		// remove a value from a not existing field, should fail
+		assertFalse(this.transObject.hasField(newFieldId));
+		
+		XAddress temp = this.transObject.getAddress();
+		XAddress address = XX.toAddress(temp.getRepository(), temp.getModel(), temp.getObject(),
+		        newFieldId);
+		XCommand removeCommand = factory.createForcedRemoveValueCommand(address);
+		
+		long result = this.transObject.executeCommand(removeCommand, callback);
+		assertEquals(XCommand.FAILED, result);
+		
+		// check callback
+		assertTrue(callback.failed);
+		assertNull(callback.revision);
+		
+		// remove a value from an existing field, without a set value - should
+		// succeed
+		removeCommand = factory.createForcedRemoveValueCommand(this.field.getAddress());
+		callback = new TestCallback();
+		
+		result = this.transObject.executeCommand(removeCommand, callback);
+		assertTrue(result != XCommand.FAILED);
+		
+		// check callback
+		assertFalse(callback.failed);
+		assertEquals((Long)result, callback.revision);
+		
+		// remove a value from an existing field with set value - should succeed
+		removeCommand = factory.createForcedRemoveValueCommand(this.fieldWithValue.getAddress());
+		callback = new TestCallback();
+		
+		result = this.transObject.executeCommand(removeCommand, callback);
+		assertTrue(result != XCommand.FAILED);
+		
+		// check callback
+		assertFalse(callback.failed);
+		assertEquals((Long)result, callback.revision);
+		
+		// check whether the simulated field was changed and the real field
+		// wasn't
+		XWritableField changedField = this.transObject.getField(this.fieldWithValue.getID());
+		
+		assertNull(changedField.getValue());
+		assertNotNull(this.fieldWithValue.getValue());
+	}
+	
+	// Tests for getRevisionNumber
+	@Test
+	public void testGetRevisionNumber() {
+		assertEquals(this.object.getRevisionNumber(), this.transObject.getRevisionNumber());
+	}
+	
+	// Tests for isEmpty
+	// TODO the isEmpty method currently doesn't work at all, so ignore this
+	// test at the moment - I need to fix this!
+	@Test
+	@Ignore
+	public void testIsEmpty() {
+		// At first, the value should be the same as that of object.isEmpty()
+		assertEquals(this.object.isEmpty(), this.transObject.isEmpty());
+		
+		// remove the field from transObject
+		assertTrue(this.transObject.removeField(this.field.getID()));
+		
+		assertTrue(this.transObject.isEmpty());
+		assertFalse(this.object.isEmpty());
+	}
+	
+	// Tests for hasField()
+	@Test
+	public void testHasField() {
+		assertTrue(this.transObject.hasField(this.field.getID()));
+		assertTrue(this.transObject.hasField(this.fieldWithValue.getID()));
+		
+		// add a field
+		XID newFieldId = XX.createUniqueId();
+		assertFalse(this.transObject.hasField(newFieldId));
+		
+		this.transObject.createField(newFieldId);
+		assertTrue(this.transObject.hasField(newFieldId));
+		
+		// remove a field
+		this.transObject.removeField(newFieldId);
+		assertFalse(this.transObject.hasField(newFieldId));
+		
+		// do the same with commands
+		XCommand addCommand = X.getCommandFactory().createSafeAddFieldCommand(
+		        this.transObject.getAddress(), newFieldId);
+		this.transObject.executeCommand(addCommand);
+		assertTrue(this.transObject.hasField(newFieldId));
+		
+		XAddress temp = this.object.getAddress();
+		XAddress fieldAddress = XX.toAddress(temp.getRepository(), temp.getModel(),
+		        temp.getObject(), newFieldId);
+		XCommand removeCommand = X.getCommandFactory().createSafeRemoveFieldCommand(fieldAddress,
+		        XCommand.NEW);
+		this.transObject.executeCommand(removeCommand);
+		assertFalse(this.transObject.hasField(newFieldId));
+	}
+	
+	// Tests for createField()
+	@Test
+	public void testCreateField() {
+		XID fieldId = XX.createUniqueId();
+		XWritableField field = this.transObject.createField(fieldId);
+		
+		assertNotNull(field);
+		
+		// make sure it exists in the transObject but not in object
+		assertFalse(this.object.hasField(fieldId));
+		assertTrue(this.transObject.hasField(fieldId));
+		
+		// try to add the same field again
+		XWritableField field2 = this.transObject.createField(fieldId);
+		assertEquals(field, field2);
+		
+		// make sure it exists in the transObject but not in object
+		assertFalse(this.object.hasField(fieldId));
+		assertTrue(this.transObject.hasField(fieldId));
+	}
+	
+	// Tests for removeField()
+	@Test
+	public void testRemoveField() {
+		// try to remove a not existing field
+		XID fieldId = XX.createUniqueId();
+		
+		assertFalse(this.transObject.removeField(fieldId));
+		
+		// try to remove an existing field
+		boolean he = this.transObject.removeField(this.field.getID());
+		assertTrue(he);
+		assertFalse(this.transObject.hasField(this.field.getID()));
+		
+		// make sure it wasn't removed from the underlying object
+		assertTrue(this.object.hasField(this.field.getID()));
+		
+		// add a field an remove it again
+		this.transObject.createField(fieldId);
+		assertTrue(this.transObject.hasField(fieldId));
+		
+		assertTrue(this.transObject.removeField(fieldId));
+		assertFalse(this.transObject.hasField(fieldId));
+		assertFalse(this.object.hasField(fieldId));
+	}
+	
+	// Tests for getField()
+	@Test
+	public void testGetField() {
+		// try to get an already existing field
+		XWritableField field2 = this.transObject.getField(this.field.getID());
+		
+		assertEquals(this.field, field2);
+		
+		// try to get a not existing field
+		assertNull(this.transObject.getField(X.getIDProvider().createUniqueId()));
+		
+		// change the existing field and get it again
+		XCommandFactory factory = X.getCommandFactory();
+		XValue value = X.getValueFactory().createStringValue("test");
+		XCommand command = factory.createSafeAddValueCommand(this.field.getAddress(),
+		        this.field.getRevisionNumber(), value);
+		
+		this.transObject.executeCommand(command);
+		
+		field2 = this.transObject.getField(this.field.getID());
+		
+		// revision numbers are not increased/managed by the TransactionObject,
+		// therefore this should succeed
+		assertTrue(this.field.equals(field2));
 	}
 	
 	private class TestCallback implements XLocalChangeCallback {
