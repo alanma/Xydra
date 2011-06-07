@@ -473,4 +473,14 @@ public class DiffWritableModel implements XWritableModel {
 		return XType.XMODEL;
 	}
 	
+	/**
+	 * Allows to end a transaction and go back to using the base object.
+	 * 
+	 * @return the base object that has been used to created this wrapped
+	 *         {@link DiffWritableObject}.
+	 */
+	public XWritableModel getBase() {
+		return this.base;
+	}
+	
 }

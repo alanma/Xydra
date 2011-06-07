@@ -62,7 +62,8 @@ public class DiffWritableObject implements XWritableObject {
 		
 		@Override
 		public boolean isEmpty() {
-			return DiffWritableObject.this.fieldIsEmpty(this.fieldId);
+			XValue value = getValue();
+			return value == null;
 		}
 		
 		@Override
@@ -113,8 +114,13 @@ public class DiffWritableObject implements XWritableObject {
 	
 	@Override
 	public XWritableField createField(XID fieldId) {
-		XWritableField f = createField(fieldId);
+		XWritableField f = this.getField(fieldId);
+		if(f == null) {
+			f = this.added.createField(fieldId);
+			this.removed.removeField(fieldId);
+		}
 		return new WrappedField(f.getID());
+		
 	}
 	
 	protected XValue fieldGetValue(XID fieldId) {
@@ -128,12 +134,6 @@ public class DiffWritableObject implements XWritableObject {
 			return null;
 		}
 		return f.getValue();
-	}
-	
-	protected boolean fieldIsEmpty(XID fieldId) {
-		assert hasField(fieldId);
-		
-		return getField(fieldId).isEmpty();
 	}
 	
 	protected boolean fieldSetValue(XID fieldId, XValue value) {
@@ -295,6 +295,16 @@ public class DiffWritableObject implements XWritableObject {
 	@Override
 	public XType getType() {
 		return XType.XOBJECT;
+	}
+	
+	/**
+	 * Allows to end a transaction and go back to using the base object.
+	 * 
+	 * @return the base object that has been used to created this wrapped
+	 *         {@link DiffWritableObject}.
+	 */
+	public XWritableObject getBase() {
+		return this.base;
 	}
 	
 }
