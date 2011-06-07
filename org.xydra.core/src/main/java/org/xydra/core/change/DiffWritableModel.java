@@ -1,4 +1,4 @@
-package org.xydra.base.change;
+package org.xydra.core.change;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -11,21 +11,22 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
+import org.xydra.base.change.XAtomicCommand;
+import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.value.XValue;
-import org.xydra.core.change.XTransactionBuilder;
 
 
 /**
+ * A helper class to minimise the number and size of persistence accesses.
+ * 
  * An implementation of {@link XWritableModel} that works as a diff on top of a
  * base {@link XWritableModel}. Via {@link #toCommandList()} a minimal list of
  * commands that changes the base model into the current state can be created.
  * The base model is changed at no times.
- * 
- * TODO why is this in base?
  * 
  * @author xamde
  */

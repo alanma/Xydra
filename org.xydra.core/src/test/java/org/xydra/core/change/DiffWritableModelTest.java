@@ -8,7 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
-import org.xydra.base.change.DiffWritableModel;
 import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleModel;

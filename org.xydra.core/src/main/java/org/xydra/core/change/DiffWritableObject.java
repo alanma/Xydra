@@ -1,0 +1,300 @@
+package org.xydra.core.change;
+
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
+import org.xydra.base.X;
+import org.xydra.base.XAddress;
+import org.xydra.base.XID;
+import org.xydra.base.XType;
+import org.xydra.base.XX;
+import org.xydra.base.change.XAtomicCommand;
+import org.xydra.base.change.XTransaction;
+import org.xydra.base.rmof.XWritableField;
+import org.xydra.base.rmof.XWritableObject;
+import org.xydra.base.rmof.impl.memory.SimpleObject;
+import org.xydra.base.value.XValue;
+
+
+/**
+ * A helper class to minimise the number and size of persistence accesses.
+ * 
+ * An implementation of {@link XWritableObject} that works as a diff on top of a
+ * base {@link XWritableObject}. Via {@link #toCommandList()} a minimal list of
+ * commands that changes the base model into the current state can be created.
+ * The base model is changed at no times.
+ * 
+ * @author xamde
+ */
+public class DiffWritableObject implements XWritableObject {
+	
+	private class WrappedField implements XWritableField {
+		
+		private XID fieldId;
+		
+		public WrappedField(XID fieldId) {
+			this.fieldId = fieldId;
+		}
+		
+		@Override
+		public XAddress getAddress() {
+			XAddress parent = DiffWritableObject.this.base.getAddress();
+			return XX.resolveField(parent, this.fieldId);
+		}
+		
+		@Override
+		public XID getID() {
+			return this.fieldId;
+		}
+		
+		@Override
+		public long getRevisionNumber() {
+			throw new UnsupportedOperationException("not implementable for DiffWritableObject");
+		}
+		
+		@Override
+		public XValue getValue() {
+			return DiffWritableObject.this.fieldGetValue(this.fieldId);
+		}
+		
+		@Override
+		public boolean isEmpty() {
+			return DiffWritableObject.this.fieldIsEmpty(this.fieldId);
+		}
+		
+		@Override
+		public boolean setValue(XValue value) {
+			return DiffWritableObject.this.fieldSetValue(this.fieldId, value);
+		}
+		
+		@Override
+		public XType getType() {
+			return XType.XFIELD;
+		}
+		
+	}
+	
+	protected static <E> Set<E> toSet(Iterator<E> it) {
+		Set<E> set = new HashSet<E>();
+		while(it.hasNext()) {
+			set.add(it.next());
+		}
+		return set;
+	}
+	
+	/* representing added stuff */
+	private XWritableObject added;
+	
+	private final XWritableObject base;
+	
+	/*
+	 * representing removed stuff. Empty objects denote a deletion of the
+	 * complete object. Objects that have fields denote only deletion of these
+	 * fields. Individual removal of values but keeping of the fields is not
+	 * supported in this implementation.
+	 */
+	private XWritableObject removed;
+	
+	public DiffWritableObject(final XWritableObject base) {
+		this.base = base;
+		this.added = new SimpleObject(base.getAddress());
+		this.removed = new SimpleObject(base.getAddress());
+	}
+	
+	private XValue baseGetValue(XID fieldId) {
+		XWritableField f = this.base.getField(fieldId);
+		if(f == null)
+			return null;
+		return f.getValue();
+	}
+	
+	@Override
+	public XWritableField createField(XID fieldId) {
+		XWritableField f = createField(fieldId);
+		return new WrappedField(f.getID());
+	}
+	
+	protected XValue fieldGetValue(XID fieldId) {
+		XWritableField f;
+		if(this.added.hasField(fieldId)) {
+			f = this.added.getField(fieldId);
+		} else {
+			f = this.base.getField(fieldId);
+		}
+		if(f == null) {
+			return null;
+		}
+		return f.getValue();
+	}
+	
+	protected boolean fieldIsEmpty(XID fieldId) {
+		assert hasField(fieldId);
+		
+		return getField(fieldId).isEmpty();
+	}
+	
+	protected boolean fieldSetValue(XID fieldId, XValue value) {
+		assert hasField(fieldId);
+		
+		XWritableField f;
+		if(this.added.hasField(fieldId)) {
+			f = this.added.getField(fieldId);
+		} else {
+			f = this.added.createField(fieldId);
+		}
+		return f.setValue(value);
+	}
+	
+	@Override
+	public XAddress getAddress() {
+		return this.base.getAddress();
+	}
+	
+	@Override
+	public XWritableField getField(XID fieldId) {
+		XWritableField f = getFieldInternal(fieldId);
+		if(f == null) {
+			return null;
+		}
+		return new WrappedField(f.getID());
+	}
+	
+	private XWritableField getFieldInternal(XID fieldId) {
+		XWritableField f = this.added.getField(fieldId);
+		if(f != null) {
+			// fine
+			assert !this.removed.hasField(fieldId);
+		} else {
+			if(this.removed.hasField(fieldId)) {
+				assert !this.added.hasField(fieldId);
+				return null;
+			} else {
+				f = this.base.getField(fieldId);
+				if(f == null) {
+					return null;
+				}
+			}
+		}
+		return f;
+	}
+	
+	public XID getID() {
+		return this.base.getID();
+	}
+	
+	@Override
+	public long getRevisionNumber() {
+		throw new UnsupportedOperationException("not implementable for DiffWritableObject");
+	}
+	
+	@Override
+	public boolean hasField(XID fieldId) {
+		if(this.added.hasField(fieldId)) {
+			return true;
+		} else if(this.removed.hasField(fieldId)) {
+			return false;
+		} else {
+			return this.base.hasField(fieldId);
+		}
+	}
+	
+	protected Set<XID> ids() {
+		Set<XID> set = toSet(this.base.iterator());
+		set.removeAll(toSet(this.removed.iterator()));
+		set.addAll(toSet(this.added.iterator()));
+		return set;
+	}
+	
+	public boolean isEmpty() {
+		return this.ids().isEmpty();
+	}
+	
+	protected boolean isEmpty(XID objectId) {
+		return fieldIds().isEmpty();
+	}
+	
+	public Iterator<XID> iterator() {
+		return this.ids().iterator();
+	}
+	
+	protected Iterator<XID> iterator(XID objectId) {
+		return fieldIds().iterator();
+	}
+	
+	protected Set<XID> fieldIds() {
+		Set<XID> set = new HashSet<XID>();
+		
+		set.addAll(toSet(this.base.iterator()));
+		set.removeAll(toSet(this.removed.iterator()));
+		set.addAll(toSet(this.added.iterator()));
+		return set;
+	}
+	
+	@Override
+	public boolean removeField(XID fieldId) {
+		// if added, add less
+		if(this.added.hasField(fieldId)) {
+			this.added.removeField(fieldId);
+			return true;
+		}
+		// if removed ...
+		if(this.removed.hasField(fieldId)) {
+			// already scheduled for deletion
+			return false;
+		} else {
+			this.removed.createField(fieldId);
+			return true;
+		}
+	}
+	
+	public List<XAtomicCommand> toCommandList() {
+		List<XAtomicCommand> list = new LinkedList<XAtomicCommand>();
+		
+		// remove
+		for(XID fId : this.removed) {
+			XWritableField f = getField(fId);
+			// remove field
+			list.add(X.getCommandFactory().createForcedRemoveFieldCommand(f.getAddress()));
+		}
+		
+		// add
+		for(XID fId : this.added) {
+			XWritableField f = getField(fId);
+			// add field
+			list.add(X.getCommandFactory().createForcedAddFieldCommand(getAddress(), fId));
+			// set value
+			if(!f.isEmpty()) {
+				XValue currentValue = baseGetValue(fId);
+				if(currentValue == null) {
+					// add value
+					list.add(X.getCommandFactory().createForcedAddValueCommand(f.getAddress(),
+					        f.getValue()));
+				} else {
+					// change value
+					list.add(X.getCommandFactory().createForcedChangeValueCommand(f.getAddress(),
+					        f.getValue()));
+				}
+			}
+		}
+		
+		return list;
+	}
+	
+	public XTransaction toTransaction() {
+		XTransactionBuilder builder = new XTransactionBuilder(this.getAddress());
+		List<XAtomicCommand> list = toCommandList();
+		for(XAtomicCommand command : list) {
+			builder.addCommand(command);
+		}
+		return builder.build();
+	}
+	
+	@Override
+	public XType getType() {
+		return XType.XOBJECT;
+	}
+	
+}
