@@ -25,25 +25,31 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XLocalChangeCallback;
+import org.xydra.core.model.XObject;
 import org.xydra.core.model.impl.memory.AbstractEntity;
 import org.xydra.core.model.impl.memory.MemoryObject;
 
 
 /**
- * TODO Document
+ * A helper class to create {@link XTransaction XTransactions} for a specific
+ * {@link XObject}. This class wraps the given {@link XObject} and then acts as
+ * a simulator. It provides all methods for changing the state of an
+ * {@link XObject}, but the changes that are executed on this TransactionObject
+ * are not actually executed on the {@link XObject}, but just simulated and
+ * safed. After you've made all changes, you can then execute them in a single
+ * {@link XTransaction} on the given {@link XObject} by calling the
+ * {@link #commit()} method.
  * 
- * TODO check if this implementation is thread-safe "enough"
- * 
- * 
- * 
- * TODO implement better handling of Transaction-commands
- * 
+ * In short, this class makes creating and executing an {@link XTransaction} as
+ * simple as executing some methods on an {@link XObject}
  * 
  * @author Kaidel
  * 
  */
-// suppressing warning while this is in flux ~~max
-@SuppressWarnings("unused")
+
+/**
+ * TODO check if this implementation is thread-safe "enough" *
+ */
 public class TransactionObject extends AbstractEntity implements XWritableObject {
 	
 	private MemoryObject baseObject;
@@ -69,6 +75,13 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	
 	// Transaction methods
 	
+	/**
+	 * Returns the current list of commands that were stored after the last call
+	 * of {@link #commit()}.
+	 * 
+	 * @return the current list of commands that were stored after the last call
+	 *         of {@link #commit()}.
+	 */
 	public LinkedList<XCommand> getCurrentCommandList() {
 		// return a copy so that it is not possible to directly change the
 		// internal list
@@ -78,6 +91,16 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		return copy;
 	}
 	
+	/**
+	 * Executes the stored commands as an {@link XTransaction} on the wrapped
+	 * {@link XObject}. If it succeeds, this TransactionObject will be reset and
+	 * can then be used to create a new XTransaction, if the transaction fails,
+	 * nothing happens.
+	 * 
+	 * @return the revision number of the wrapped {@link XObject} after the
+	 *         execution of the {@link XTransaction} or XCommand.FAILED if the
+	 *         execution fails
+	 */
 	public long commit() {
 		XTransactionBuilder builder = new XTransactionBuilder(this.getAddress());
 		
@@ -92,9 +115,16 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		if(revNr != XCommand.FAILED) {
 			this.clear(); // restarts the TransactionObject
 		}
+		this.revisionNumber = revNr;
 		return revNr;
 	}
 	
+	/**
+	 * Resets the TransactionObject, i.e. gets rid of all changes made to the
+	 * TransactionObject, but not to the wrapped {@link XObject}. After the
+	 * execution, the TransactionObject will then represent the state the
+	 * wrapped {@link XObject} currently is in.
+	 */
 	public void clear() {
 		/*
 		 * TODO what happens with currently used InObjectTransactionFields when
@@ -108,11 +138,34 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		 * InObjectTransactionFields useless.
 		 */
 
-		this.changedFields = new HashMap<XID,InObjectTransactionField>();
-		this.changedValues = new HashMap<XID,XValue>();
-		this.removedFields = new HashSet<XID>();
+		this.changedFields.clear();
+		this.changedValues.clear();
+		this.removedFields.clear();
 		
-		this.commands = new ArrayList<XAtomicCommand>();
+		this.commands.clear();
+	}
+	
+	/**
+	 * Returns the current number of stored commands, which would be executed by
+	 * calling {@link #commit()}.
+	 * 
+	 * @return the current number of stored commands, which would be executed by
+	 *         calling {@link #commit()}.
+	 */
+	public int size() {
+		return this.commands.size();
+	}
+	
+	/**
+	 * Returns true, if the state of the TransactionObject is different than the
+	 * state of the wrapped {@link XObject}, false otherwise.
+	 * 
+	 * @return true, if the state of the TransactionObject is different than the
+	 *         state of the wrapped {@link XObject}, false otherwise.
+	 */
+	public boolean isChanged() {
+		return !(this.changedFields.isEmpty() && this.removedFields.isEmpty() && this.changedValues
+		        .isEmpty());
 	}
 	
 	// XWritableObject-specific methods
@@ -233,8 +286,6 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 				// command succeeded -> add it to the list
 				this.commands.add((XAtomicCommand)command);
 				
-				long revNr = XCommand.FAILED;
-				
 				usedCallback.onSuccess(this.getRevisionNumber());
 				return this.getRevisionNumber();
 			}
@@ -327,20 +378,20 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	}
 	
 	public boolean isEmpty() {
-		/*
-		 * FIXME This method is not that easy... someone could remove a field
-		 * from the TransactionObject, which was already part of the baseObject.
-		 * This will then not be removed from the baseObject and therefore the
-		 * returned value might not be correct
-		 */
-
-		return this.baseObject.isEmpty() && this.changedFields.isEmpty();
+		if(!this.baseObject.isEmpty()) {
+			for(XID id : this.baseObject) {
+				if(!this.removedFields.contains(id)) {
+					// field wasn't removed in the TransactionObject
+					return false;
+				}
+			}
+		}
+		
+		return this.changedFields.isEmpty();
 	}
 	
 	@Override
 	public boolean hasField(XID fieldId) {
-		XField field = null;
-		
 		if(this.changedFields.containsKey(fieldId)) {
 			return true;
 		} else {
@@ -441,7 +492,31 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	}
 	
 	@Override
-	public AbstractEntity getFather() {
+	public Iterator<XID> iterator() {
+		/*
+		 * TODO this is probably not the most effective implementation of this
+		 * method
+		 */
+
+		// get all ids of objects in the baseObject that weren't removed
+		HashSet<XID> currentIds = new HashSet<XID>();
+		
+		for(XID id : this.baseObject) {
+			if(!this.removedFields.contains(id)) {
+				currentIds.add(id);
+			}
+		}
+		
+		// get all ids of newly added fields
+		for(XID id : this.changedFields.keySet()) {
+			currentIds.add(id);
+		}
+		
+		return currentIds.iterator();
+	}
+	
+	@Override
+	protected AbstractEntity getFather() {
 		return this.baseObject.getFather();
 	}
 	
@@ -476,13 +551,6 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		}
 	}
 	
-	// Unsupported Methods
-	@Override
-	public Iterator<XID> iterator() {
-		// TODO implement!
-		throw new UnsupportedOperationException();
-	}
-	
 	private class DummyCallback implements XLocalChangeCallback {
 		
 		@Override
@@ -498,5 +566,4 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		}
 		
 	}
-	
 }
