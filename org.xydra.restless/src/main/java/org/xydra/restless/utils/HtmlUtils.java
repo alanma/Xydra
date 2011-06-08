@@ -75,10 +75,16 @@ public class HtmlUtils {
 	
 	public static class TextInput extends Input {
 		
+		private int size;
+		
 		public TextInput(String name, String value) {
-			super();
+			this(name, value, 30);
+		}
+		
+		public TextInput(String name, String value, int size) {
 			this.name = name;
 			this.value = value;
+			this.size = size;
 		}
 		
 		private String name;
@@ -86,8 +92,17 @@ public class HtmlUtils {
 		
 		@Override
 		public String toString() {
-			return this.name + ": <input type=\"text\" name=\"" + this.name + "\" value=\""
-			        + this.value + "\"/>";
+			return this.name + ": <input" +
+
+			" type=\"text\"" +
+
+			" name=\"" + this.name + "\"" +
+
+			" value=\"" + this.value + "\"" +
+
+			" size=\"" + this.size + "\"" +
+
+			"/>";
 		}
 		
 	}
@@ -141,12 +156,23 @@ public class HtmlUtils {
 		}
 		
 		/**
-		 * @param name form name
+		 * @param name input name
 		 * @param value predefined form value
 		 * @return the {@link Form} for a fluent API
 		 */
 		public Form withInputText(String name, String value) {
 			this.inputs.add(new TextInput(name, value));
+			return this;
+		}
+		
+		/**
+		 * @param name input name
+		 * @param value predefined form value
+		 * @param size of text field
+		 * @return the {@link Form} for a fluent API
+		 */
+		public Form withInputText(String name, String value, int size) {
+			this.inputs.add(new TextInput(name, value, size));
 			return this;
 		}
 		
