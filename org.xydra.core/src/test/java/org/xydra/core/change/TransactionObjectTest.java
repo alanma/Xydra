@@ -7,7 +7,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
@@ -23,6 +22,10 @@ import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryObject;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 
+
+/*
+ * TODO Add tests for the methods of InTransactionField
+ */
 
 public class TransactionObjectTest {
 	private TransactionObject transObject;
@@ -53,6 +56,211 @@ public class TransactionObjectTest {
 		this.fieldWithValue.setValue(value);
 		
 		this.transObject = new TransactionObject(this.object);
+	}
+	
+	// Tests for commit() {
+	
+	@Test
+	public void testCommitSingleCommands() {
+		// add a new XField
+		XID fieldId = X.getIDProvider().createUniqueId();
+		assertFalse(this.transObject.hasField(fieldId) || this.object.hasField(fieldId));
+		
+		this.transObject.createField(fieldId);
+		assertEquals(1, this.transObject.size());
+		
+		assertTrue(this.transObject.isChanged());
+		
+		long oldRevNr = this.object.getRevisionNumber();
+		long revNr = this.transObject.commit();
+		
+		assertFalse(this.transObject.isChanged());
+		
+		assertTrue(revNr != XCommand.FAILED);
+		assertEquals(oldRevNr + 1, revNr);
+		assertEquals(0, this.transObject.size());
+		assertEquals(revNr, this.transObject.getRevisionNumber());
+		
+		// check that the field was added to the real object
+		assertTrue(this.object.hasField(fieldId));
+		
+		// remove an XField
+		this.transObject.removeField(fieldId);
+		assertEquals(1, this.transObject.size());
+		
+		assertTrue(this.transObject.isChanged());
+		
+		oldRevNr = this.object.getRevisionNumber();
+		revNr = this.transObject.commit();
+		
+		assertFalse(this.transObject.isChanged());
+		
+		assertTrue(revNr != XCommand.FAILED);
+		assertEquals(oldRevNr + 1, revNr);
+		assertEquals(0, this.transObject.size());
+		assertEquals(revNr, this.transObject.getRevisionNumber());
+		
+		// check that the field was removed from the real object
+		assertFalse(this.object.hasField(fieldId));
+		
+		// add a value
+		XValue value = X.getValueFactory().createStringValue("testValue");
+		XWritableField field = this.transObject.getField(this.field.getID());
+		
+		field.setValue(value);
+		
+		assertTrue(this.transObject.isChanged());
+		
+		oldRevNr = this.object.getRevisionNumber();
+		revNr = this.transObject.commit();
+		
+		assertFalse(this.transObject.isChanged());
+		
+		assertTrue(revNr != XCommand.FAILED);
+		assertEquals(oldRevNr + 1, revNr);
+		assertEquals(0, this.transObject.size());
+		assertEquals(revNr, this.transObject.getRevisionNumber());
+		
+		// check that the value was added to the field
+		assertEquals(value, this.field.getValue());
+		
+		// change a value
+		value = X.getValueFactory().createStringValue("testValue2");
+		field = this.transObject.getField(this.field.getID());
+		
+		field.setValue(value);
+		
+		assertTrue(this.transObject.isChanged());
+		
+		oldRevNr = this.object.getRevisionNumber();
+		revNr = this.transObject.commit();
+		
+		assertFalse(this.transObject.isChanged());
+		
+		assertTrue(revNr != XCommand.FAILED);
+		assertEquals(oldRevNr + 1, revNr);
+		assertEquals(0, this.transObject.size());
+		assertEquals(revNr, this.transObject.getRevisionNumber());
+		
+		// check that the value of the field was changed
+		assertEquals(value, this.field.getValue());
+		
+		// remove a value
+		field = this.transObject.getField(this.field.getID());
+		
+		field.setValue(null);
+		
+		assertTrue(this.transObject.isChanged());
+		
+		oldRevNr = this.object.getRevisionNumber();
+		revNr = this.transObject.commit();
+		
+		assertFalse(this.transObject.isChanged());
+		
+		assertTrue(revNr != XCommand.FAILED);
+		assertEquals(oldRevNr + 1, revNr);
+		assertEquals(0, this.transObject.size());
+		assertEquals(revNr, this.transObject.getRevisionNumber());
+		
+		// check that the value was removed from the field
+		assertEquals(null, this.field.getValue());
+	}
+	
+	@Test
+	public void testCommitTransaction() {
+		// add some fields
+		XID fieldId1 = X.getIDProvider().createUniqueId();
+		XID fieldId2 = X.getIDProvider().createUniqueId();
+		XID fieldId3 = X.getIDProvider().createUniqueId();
+		
+		this.transObject.createField(fieldId1);
+		this.transObject.createField(fieldId2);
+		this.transObject.createField(fieldId3);
+		
+		// remove some fields
+		this.transObject.removeField(this.field.getID());
+		this.transObject.removeField(fieldId3);
+		
+		// add some values
+		XValue value = X.getValueFactory().createStringValue("testValue");
+		XWritableField field1 = this.transObject.getField(fieldId1);
+		XWritableField field2 = this.transObject.getField(fieldId2);
+		
+		field1.setValue(value);
+		field2.setValue(value);
+		
+		// remove a value
+		field2.setValue(null);
+		
+		// change a value
+		XWritableField temp = this.transObject.getField(this.fieldWithValue.getID());
+		temp.setValue(value);
+		
+		// commit the transaction
+		assertTrue(this.transObject.isChanged());
+		
+		long oldRevNr = this.object.getRevisionNumber();
+		long revNr = this.transObject.commit();
+		
+		assertFalse(this.transObject.isChanged());
+		
+		assertTrue(revNr != XCommand.FAILED);
+		assertEquals(oldRevNr + 1, revNr);
+		assertEquals(0, this.transObject.size());
+		assertEquals(revNr, this.transObject.getRevisionNumber());
+		
+		// check that the changes were actually executed
+		assertTrue(this.object.hasField(fieldId1));
+		assertTrue(this.object.hasField(fieldId2));
+		
+		assertFalse(this.object.hasField(this.field.getID()));
+		assertFalse(this.object.hasField(fieldId3));
+		
+		field1 = this.object.getField(fieldId1);
+		assertEquals(value, field1.getValue());
+		
+		field2 = this.object.getField(fieldId2);
+		assertEquals(null, field2.getValue());
+		
+		assertEquals(value, this.fieldWithValue.getValue());
+		
+		/*
+		 * execute another transaction to test whether cleared
+		 * TransactionObjects can be reused
+		 */
+
+		this.transObject.createField(fieldId3);
+		XWritableField field3 = this.transObject.getField(fieldId3);
+		
+		field3.setValue(value);
+		
+		temp = this.transObject.getField(this.fieldWithValue.getID());
+		temp.setValue(null);
+		
+		this.transObject.removeField(fieldId1);
+		
+		// commit the transaction
+		assertTrue(this.transObject.isChanged());
+		
+		oldRevNr = this.object.getRevisionNumber();
+		revNr = this.transObject.commit();
+		
+		assertFalse(this.transObject.isChanged());
+		
+		assertTrue(revNr != XCommand.FAILED);
+		assertEquals(oldRevNr + 1, revNr);
+		assertEquals(0, this.transObject.size());
+		assertEquals(revNr, this.transObject.getRevisionNumber());
+		
+		// check that the changes were actually executed
+		assertTrue(this.transObject.hasField(fieldId3));
+		
+		assertFalse(this.transObject.hasField(fieldId1));
+		
+		field3 = this.object.getField(fieldId3);
+		assertEquals(value, field3.getValue());
+		
+		assertEquals(null, this.fieldWithValue.getValue());
 	}
 	
 	// Tests for getAddress()
@@ -647,17 +855,26 @@ public class TransactionObjectTest {
 	}
 	
 	// Tests for isEmpty
-	// TODO the isEmpty method currently doesn't work at all, so ignore this
-	// test at the moment - I need to fix this!
 	@Test
-	@Ignore
 	public void testIsEmpty() {
 		// At first, the value should be the same as that of object.isEmpty()
 		assertEquals(this.object.isEmpty(), this.transObject.isEmpty());
 		
-		// remove the field from transObject
+		// remove all fields from transObject
 		assertTrue(this.transObject.removeField(this.field.getID()));
+		assertTrue(this.transObject.removeField(this.fieldWithValue.getID()));
 		
+		assertTrue(this.transObject.isEmpty());
+		assertFalse(this.object.isEmpty());
+		
+		// add a new field, remove it, check again
+		XID newFieldId = X.getIDProvider().createUniqueId();
+		this.transObject.createField(newFieldId);
+		
+		assertTrue(this.transObject.hasField(newFieldId));
+		assertFalse(this.object.hasField(newFieldId));
+		
+		this.transObject.removeField(newFieldId);
 		assertTrue(this.transObject.isEmpty());
 		assertFalse(this.object.isEmpty());
 	}
@@ -764,6 +981,66 @@ public class TransactionObjectTest {
 		// revision numbers are not increased/managed by the TransactionObject,
 		// therefore this should succeed
 		assertTrue(this.field.equals(field2));
+		
+		this.transObject.getFather();
+	}
+	
+	/*
+	 * Tests for the methods of {@link InObjectTransactionField}
+	 */
+
+	@Test
+	public void testInObjectTransactionField() {
+		XWritableField temp = this.transObject.getField(this.field.getID());
+		assertTrue(temp instanceof InObjectTransactionField);
+		
+		InObjectTransactionField transField = (InObjectTransactionField)temp;
+		
+		assertEquals(this.field.getRevisionNumber(), transField.getRevisionNumber());
+		assertEquals(this.field.getID(), transField.getID());
+		assertEquals(this.field.isEmpty(), transField.isEmpty());
+		assertEquals(this.field.getAddress(), transField.getAddress());
+		assertEquals(this.field.getValue(), transField.getValue());
+		assertEquals(this.field, transField);
+	}
+	
+	@Test
+	public void testInObjectTransactionFieldSetValueCorrectUsage() {
+		XValue value = X.getValueFactory().createStringValue("42");
+		XValue value2 = X.getValueFactory().createStringValue("test");
+		
+		XWritableField temp = this.transObject.getField(this.field.getID());
+		assertTrue(temp instanceof InObjectTransactionField);
+		
+		InObjectTransactionField transField = (InObjectTransactionField)temp;
+		
+		// add value
+		assertTrue(transField.setValue(value));
+		
+		assertEquals(value, transField.getValue());
+		assertEquals(null, this.field.getValue());
+		
+		// change value
+		assertTrue(transField.setValue(value2));
+		
+		assertEquals(value2, transField.getValue());
+		assertEquals(null, this.field.getValue());
+		
+		// remove value
+		assertTrue(transField.setValue(null));
+		
+		assertEquals(null, transField.getValue());
+	}
+	
+	@Test
+	public void testInObjectTransactionFieldSetValueIncorrectUsage() {
+		XWritableField temp = this.transObject.getField(this.field.getID());
+		assertTrue(temp instanceof InObjectTransactionField);
+		
+		InObjectTransactionField transField = (InObjectTransactionField)temp;
+		
+		// try to remove not existing value
+		assertFalse(transField.setValue(null));
 	}
 	
 	private class TestCallback implements XLocalChangeCallback {
