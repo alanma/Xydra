@@ -450,12 +450,21 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		return false;
 	}
 	
-	public boolean equalTransactionObject(TransactionObject object) {
+	/**
+	 * Tests whether two given TransactionObjects have the same state. Two
+	 * TransactionObjects have the same state, if the same actions were executed
+	 * on them and not yet propagated to their wrapped {@link XObject} (the
+	 * order of how these changeds were executed doesn't matter) and they have
+	 * the same wrapped {@link XObject}
+	 * 
+	 * @param object object, to which this object should be compared to.
+	 * @return true, if both objects have the same state, false otherwise
+	 */
+	public boolean equalTransactionObjectState(TransactionObject object) {
 		return this.baseObject.equals(object.baseObject)
 		        && this.changedFields.equals(object.changedFields)
 		        && this.changedValues.equals(object.changedValues)
-		        && this.removedFields.equals(object.removedFields)
-		        && this.revisionNumber == object.revisionNumber;
+		        && this.removedFields.equals(object.removedFields);
 	}
 	
 	public XWritableField getField(XID fieldId) {
