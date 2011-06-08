@@ -9,11 +9,15 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.value.XValue;
+import org.xydra.core.model.XObject;
 import org.xydra.core.model.impl.memory.AbstractEntity;
 
 
 /**
- * TODO Document & Implement
+ * A class that simulates the behavior of an {@link XWritableField}, used by
+ * {@link TransactionObject} to simulate the behavior of a wrapped
+ * {@link XObject} without making any changes to the state of the wrapped
+ * object.
  * 
  * @author Kaidel
  * 
@@ -43,8 +47,7 @@ public class InObjectTransactionField extends AbstractEntity implements XWritabl
 	
 	@Override
 	public boolean isEmpty() {
-		// TODO implement
-		throw new UnsupportedOperationException();
+		return getValue() == null;
 	}
 	
 	@Override
@@ -86,12 +89,19 @@ public class InObjectTransactionField extends AbstractEntity implements XWritabl
 		return super.equals(object);
 	}
 	
-	public boolean equalInObjectTransactionField(InObjectTransactionField field) {
-		/*
-		 * Two InObjectTransactionFields are equal if they have the same XID,
-		 * the same value and the same parent-TransactionObject
-		 */
-		boolean result = this.fieldId.equals(field.fieldId) && this.object.equals(field.object);
+	/**
+	 * Compares the states of two {@link InObjectTransactionField
+	 * InObjectTransactionFields}. Two InObjectTransactionFields are equal if
+	 * they have the same XID, the same value and the same
+	 * parent-TransactionObject.
+	 * 
+	 * @param field the field to which this field is to be compared
+	 * @return true, if the given field has the same XID, the same value and the
+	 *         same parent-TransactionObject as this field
+	 */
+	public boolean equalInObjectTransactionFieldState(InObjectTransactionField field) {
+		boolean result = this.fieldId.equals(field.fieldId)
+		        && this.object.equalTransactionObjectState(field.object);
 		
 		if(this.getValue() == null) {
 			result &= field.getValue() == null;
