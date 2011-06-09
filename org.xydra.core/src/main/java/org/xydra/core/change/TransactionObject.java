@@ -213,7 +213,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		
 		// Simulate the action the given command would actually execute
 		
-		// check wether the given command actually refers to the this object
+		// check whether the given command actually refers to the this object
 		if(!command.getTarget().getObject().equals(this.getID())
 		        || !command.getTarget().getModel().equals(this.getAddress().getModel())) {
 			usedCallback.onFailure();
@@ -234,6 +234,10 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 						usedCallback.onFailure();
 						return XCommand.FAILED;
 					}
+					
+					// forced command -> already finished with the execution
+					usedCallback.onSuccess(this.getRevisionNumber());
+					return this.getRevisionNumber();
 				}
 				
 				// remove from list of removed fields, if needed
@@ -262,21 +266,22 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 						usedCallback.onFailure();
 						return XCommand.FAILED;
 					}
+					
+					// forced command -> already finished with the execution
+					usedCallback.onSuccess(this.getRevisionNumber());
+					return this.getRevisionNumber();
 				}
 				
 				XWritableField field = this.getField(fieldId);
-				if(field == null && !objectCommand.isForced()) {
-					usedCallback.onFailure();
-					return XCommand.FAILED;
-				}
+				// remember: this acctually is an InModelTransactionField
+				assert field != null;
+				assert field instanceof InModelTransactionField;
 				
 				// check revision number
-				if(!objectCommand.isForced()) {
-					assert field != null;
-					if(objectCommand.getRevisionNumber() != field.getRevisionNumber()) {
-						usedCallback.onFailure();
-						return XCommand.FAILED;
-					}
+				if(!objectCommand.isForced()
+				        && objectCommand.getRevisionNumber() != field.getRevisionNumber()) {
+					usedCallback.onFailure();
+					return XCommand.FAILED;
 				}
 				
 				// mark it as removed
@@ -305,7 +310,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 			}
 			
 			XWritableField field = this.getField(fieldId);
-			// remember: this actually is an InTransactionField
+			// remember: this actually is an InObjectTransactionField
 			assert field != null;
 			assert field instanceof InObjectTransactionField;
 			
@@ -372,7 +377,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		}
 		
 		throw new IllegalArgumentException(
-		        "Given Command was neither a correct instance of XObjectCommand, XTransaction or XFieldCommand!");
+		        "Given Command was neither a correct instance of XObjectCommand, XFieldCommand or XTransaction!");
 	}
 	
 	@Override
