@@ -17,8 +17,9 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XLocalChangeCallback;
-import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
+import org.xydra.core.model.impl.memory.AbstractEntity;
+import org.xydra.core.model.impl.memory.MemoryModel;
 
 
 /**
@@ -35,11 +36,11 @@ import org.xydra.core.model.XObject;
  */
 // suppressing warning while this is in flux ~~max
 @SuppressWarnings("unused")
-public class TransactionModel implements XWritableModel {
+public class TransactionModel extends AbstractEntity implements XWritableModel {
 	
 	private static final long serialVersionUID = -5636313889791653240L;
 	
-	private XModel baseModel;
+	private MemoryModel baseModel;
 	private long revisionNumber;
 	
 	private Map<XID,XObject> changedObjects;
@@ -49,12 +50,9 @@ public class TransactionModel implements XWritableModel {
 	private Map<XID,XObject> removedObjects;
 	private Map<XAddress,XField> removedFields;
 	
-	private Map<XID,Long> objectRevisionNumbers;
-	private Map<XAddress,Long> fieldRevisionNumbers;
-	
 	private LinkedList<XCommand> commands;
 	
-	public TransactionModel(XModel model) {
+	public TransactionModel(MemoryModel model) {
 		this.baseModel = model;
 		this.revisionNumber = model.getRevisionNumber();
 		
@@ -63,8 +61,6 @@ public class TransactionModel implements XWritableModel {
 		this.changedValues = new HashMap<XAddress,XValue>();
 		this.removedObjects = new HashMap<XID,XObject>();
 		this.removedFields = new HashMap<XAddress,XField>();
-		this.objectRevisionNumbers = new HashMap<XID,Long>();
-		this.fieldRevisionNumbers = new HashMap<XAddress,Long>();
 		
 		this.commands = new LinkedList<XCommand>();
 	}
@@ -143,7 +139,8 @@ public class TransactionModel implements XWritableModel {
 		if(object == null) {
 			return null;
 		} else {
-			return new InModelTransactionObject(object, this);
+			return new InModelTransactionObject(object.getAddress(), object.getRevisionNumber(),
+			        this);
 		}
 	}
 	
@@ -157,6 +154,7 @@ public class TransactionModel implements XWritableModel {
 	 */
 
 	protected XWritableField getField(XAddress address) {
+		assert address.getAddressedType() == XType.XFIELD;
 		XField field = null;
 		
 		if(this.changedFields.containsKey(address)) {
@@ -177,49 +175,15 @@ public class TransactionModel implements XWritableModel {
 		if(field == null) {
 			return null;
 		} else {
-			return new InModelTransactionField(field, this);
+			return new InModelTransactionField(field.getAddress(), field.getRevisionNumber(), this);
 		}
 	}
 	
-	protected long getObjectRevisionNumber(XID id) {
-		// assert: there exists and XObject with the given id either in
-		// changedObjects or baseModel
+	protected XValue getValue(XAddress address) {
+		assert address.getAddressedType() == XType.XFIELD;
 		
-		long revNr = 0;
-		
-		if(this.objectRevisionNumbers.containsKey(id)) {
-			revNr = this.objectRevisionNumbers.get(id);
-		} else {
-			XObject object = this.baseModel.getObject(id);
-			
-			assert object != null;
-			revNr = object.getRevisionNumber();
-		}
-		
-		return revNr;
-	}
-	
-	protected long getFieldRevisionNumber(XAddress fieldAddress) {
-		// assert: there exists and XField with the given address either in
-		// changedFields or baseModel
-		
-		long revNr = 0;
-		
-		if(this.fieldRevisionNumbers.containsKey(fieldAddress)) {
-			revNr = this.fieldRevisionNumbers.get(fieldAddress);
-		} else {
-			XObject object = this.baseModel.getObject(fieldAddress.getObject());
-			
-			assert object != null;
-			
-			XField field = object.getField(fieldAddress.getField());
-			
-			assert field != null;
-			
-			revNr = field.getRevisionNumber();
-		}
-		
-		return revNr;
+		// TODO implement
+		return null;
 	}
 	
 	// Unsupported Methods
@@ -231,6 +195,11 @@ public class TransactionModel implements XWritableModel {
 	@Override
 	public XType getType() {
 		return XType.XMODEL;
+	}
+	
+	@Override
+	protected AbstractEntity getFather() {
+		return this.baseModel.getFather();
 	}
 	
 }

@@ -14,7 +14,7 @@ import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XLocalChangeCallback;
-import org.xydra.core.model.XObject;
+import org.xydra.core.model.impl.memory.AbstractEntity;
 
 
 /**
@@ -22,26 +22,24 @@ import org.xydra.core.model.XObject;
  * 
  * @author Kaidel
  */
-public class InModelTransactionObject implements XWritableObject {
+public class InModelTransactionObject extends AbstractEntity implements XWritableObject {
 	
-	private XObject object;
+	private XAddress address;
 	private TransactionModel model;
+	private long revisionNumber;
 	
-	public InModelTransactionObject(XObject object, TransactionModel model) {
-		this.object = object;
+	public InModelTransactionObject(XAddress address, long revisionNumber, TransactionModel model) {
+		this.address = address;
+		this.revisionNumber = revisionNumber;
 		this.model = model;
 	}
 	
-	public XChangeLog getChangeLog() {
-		throw new UnsupportedOperationException();
-	}
-	
 	public XAddress getAddress() {
-		return this.object.getAddress();
+		return this.address;
 	}
 	
 	public XID getID() {
-		return this.object.getID();
+		return this.address.getObject();
 	}
 	
 	public long executeCommand(XCommand command) {
@@ -55,7 +53,7 @@ public class InModelTransactionObject implements XWritableObject {
 	}
 	
 	public long getRevisionNumber() {
-		return this.model.getObjectRevisionNumber(this.object.getID());
+		return this.revisionNumber;
 	}
 	
 	public XWritableField createField(XID fieldId) {
@@ -63,15 +61,62 @@ public class InModelTransactionObject implements XWritableObject {
 		        this.model.getAddress(), fieldId);
 		this.model.executeCommand(fieldCommand);
 		
-		return this.model.getField(XX.toAddress(this.model.getAddress().getRepository(), this.model
-		        .getID(), this.object.getID(), fieldId));
+		return this.model.getField(XX.toAddress(this.address.getRepository(),
+		        this.address.getModel(), this.address.getObject(), fieldId));
 	}
 	
 	public boolean hasField(XID fieldId) {
-		XWritableField field = this.model.getField(XX.toAddress(this.model.getAddress()
-		        .getRepository(), this.model.getID(), this.object.getID(), fieldId));
+		XWritableField field = this.model.getField(XX.toAddress(this.address.getRepository(),
+		        this.address.getModel(), this.address.getObject(), fieldId));
 		
 		return (field != null);
+	}
+	
+	public long executeObjectCommand(XObjectCommand command) {
+		// pass it to the transaction model!
+		return this.model.executeCommand(command);
+	}
+	
+	public XWritableField getField(XID fieldId) {
+		XAddress fieldAddress = XX.toAddress(this.address.getRepository(), this.address.getModel(),
+		        this.address.getObject(), fieldId);
+		return this.model.getField(fieldAddress);
+	}
+	
+	public boolean removeField(XID fieldId) {
+		XAddress fieldAddress = XX.toAddress(this.address.getRepository(), this.address.getModel(),
+		        this.address.getObject(), fieldId);
+		XWritableField field = this.model.getField(fieldAddress);
+		// TODO Maybe implement a "getFieldRevNr" method in TransactionModel
+		
+		XCommand fieldCommand = X.getCommandFactory().createSafeRemoveFieldCommand(fieldAddress,
+		        field.getRevisionNumber());
+		
+		// this.model.executeCommand(...) != XCommand.FAILED
+		// and != XCommand.NOCHANGE
+		return (this.model.executeCommand(fieldCommand) >= 0);
+	}
+	
+	@Override
+	public AbstractEntity getFather() {
+		return this.model;
+	}
+	
+	@Override
+	public XType getType() {
+		return XType.XOBJECT;
+	}
+	
+	@Override
+	public boolean equals(Object object) {
+		return super.equals(object);
+	}
+	
+	/*
+	 * Unsupported Method
+	 */
+	public XChangeLog getChangeLog() {
+		throw new UnsupportedOperationException();
 	}
 	
 	public boolean isEmpty() {
@@ -80,41 +125,13 @@ public class InModelTransactionObject implements XWritableObject {
 		throw new UnsupportedOperationException();
 	}
 	
-	public long executeObjectCommand(XObjectCommand command) {
-		// pass it to the transaction model!
-		return this.model.executeCommand(command);
-	}
-	
 	public boolean synchronize(XEvent[] remoteChanges) {
 		throw new UnsupportedOperationException();
 	}
 	
-	public XWritableField getField(XID fieldId) {
-		XAddress fieldAddress = XX.toAddress(this.model.getAddress().getRepository(), this.model
-		        .getID(), this.object.getID(), fieldId);
-		return this.model.getField(fieldAddress);
-	}
-	
-	public boolean removeField(XID fieldId) {
-		XAddress fieldAddress = XX.toAddress(this.model.getAddress().getRepository(), this.model
-		        .getID(), this.object.getID(), fieldId);
-		long fieldRevision = this.model.getFieldRevisionNumber(fieldAddress);
-		
-		XCommand fieldCommand = X.getCommandFactory().createSafeRemoveFieldCommand(fieldAddress,
-		        fieldRevision);
-		
-		// this.model.executeCommand(...) != XCommand.FAILED
-		// and != XCommand.NOCHANGE
-		return (this.model.executeCommand(fieldCommand) >= 0);
-	}
-	
 	@Override
 	public Iterator<XID> iterator() {
+		// TODO Implement
 		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public XType getType() {
-		return XType.XOBJECT;
 	}
 }
