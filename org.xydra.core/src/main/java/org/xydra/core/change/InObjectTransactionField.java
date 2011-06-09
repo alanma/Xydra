@@ -4,7 +4,6 @@ import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
-import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.rmof.XWritableField;
@@ -25,12 +24,13 @@ import org.xydra.core.model.impl.memory.AbstractEntity;
 
 public class InObjectTransactionField extends AbstractEntity implements XWritableField {
 	
-	private XID fieldId;
+	private XAddress address;
 	private TransactionObject object;
 	private long revisionNumber;
 	
-	public InObjectTransactionField(XID fieldId, long revisionNumber, TransactionObject object) {
-		this.fieldId = fieldId;
+	public InObjectTransactionField(XAddress fieldAddress, long revisionNumber,
+	        TransactionObject object) {
+		this.address = fieldAddress;
 		this.object = object;
 		this.revisionNumber = revisionNumber;
 	}
@@ -52,13 +52,12 @@ public class InObjectTransactionField extends AbstractEntity implements XWritabl
 	
 	@Override
 	public XAddress getAddress() {
-		XAddress temp = this.object.getAddress();
-		return XX.toAddress(temp.getRepository(), temp.getModel(), temp.getObject(), this.fieldId);
+		return this.address;
 	}
 	
 	@Override
 	public XID getID() {
-		return this.fieldId;
+		return this.address.getField();
 	}
 	
 	@Override
@@ -100,7 +99,7 @@ public class InObjectTransactionField extends AbstractEntity implements XWritabl
 	 *         same parent-TransactionObject as this field
 	 */
 	public boolean equalInObjectTransactionFieldState(InObjectTransactionField field) {
-		boolean result = this.fieldId.equals(field.fieldId)
+		boolean result = this.address.equals(field.address)
 		        && this.object.equalTransactionObjectState(field.object);
 		
 		if(this.getValue() == null) {

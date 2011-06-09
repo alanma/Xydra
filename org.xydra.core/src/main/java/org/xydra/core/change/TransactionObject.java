@@ -25,23 +25,22 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XLocalChangeCallback;
-import org.xydra.core.model.XObject;
 import org.xydra.core.model.impl.memory.AbstractEntity;
 import org.xydra.core.model.impl.memory.MemoryObject;
 
 
 /**
  * A helper class to create {@link XTransaction XTransactions} for a specific
- * {@link XObject}. This class wraps the given {@link XObject} and then acts as
- * a simulator. It provides all methods for changing the state of an
- * {@link XObject}, but the changes that are executed on this TransactionObject
- * are not actually executed on the {@link XObject}, but just simulated and
- * safed. After you've made all changes, you can then execute them in a single
- * {@link XTransaction} on the given {@link XObject} by calling the
- * {@link #commit()} method.
+ * {@link MemoryObject}. This class wraps the given {@link XObject} and then
+ * acts as a simulator. It provides all methods for changing the state of an
+ * {@link MemoryObject}, but the changes that are executed on this
+ * TransactionObject are not actually executed on the {@link MemoryObject}, but
+ * just simulated and safed. After you've made all changes, you can then execute
+ * them in a single {@link XTransaction} on the given {@link MemoryObject} by
+ * calling the {@link #commit()} method.
  * 
  * In short, this class makes creating and executing an {@link XTransaction} as
- * simple as executing some methods on an {@link XObject}
+ * simple as executing some methods on an {@link MemoryObject}
  * 
  * @author Kaidel
  * 
@@ -93,11 +92,11 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	
 	/**
 	 * Executes the stored commands as an {@link XTransaction} on the wrapped
-	 * {@link XObject}. If it succeeds, this TransactionObject will be reset and
-	 * can then be used to create a new XTransaction, if the transaction fails,
-	 * nothing happens.
+	 * {@link MemoryObject}. If it succeeds, this TransactionObject will be
+	 * reset and can then be used to create a new XTransaction, if the
+	 * transaction fails, nothing happens.
 	 * 
-	 * @return the revision number of the wrapped {@link XObject} after the
+	 * @return the revision number of the wrapped {@link MemoryObject} after the
 	 *         execution of the {@link XTransaction} or XCommand.FAILED if the
 	 *         execution fails
 	 */
@@ -121,9 +120,9 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	
 	/**
 	 * Resets the TransactionObject, i.e. gets rid of all changes made to the
-	 * TransactionObject, but not to the wrapped {@link XObject}. After the
+	 * TransactionObject, but not to the wrapped {@link MemoryObject}. After the
 	 * execution, the TransactionObject will then represent the state the
-	 * wrapped {@link XObject} currently is in.
+	 * wrapped {@link MemoryObject} currently is in.
 	 */
 	public void clear() {
 		/*
@@ -158,10 +157,10 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	
 	/**
 	 * Returns true, if the state of the TransactionObject is different than the
-	 * state of the wrapped {@link XObject}, false otherwise.
+	 * state of the wrapped {@link MemoryObject}, false otherwise.
 	 * 
 	 * @return true, if the state of the TransactionObject is different than the
-	 *         state of the wrapped {@link XObject}, false otherwise.
+	 *         state of the wrapped {@link MemoryObject}, false otherwise.
 	 */
 	public boolean isChanged() {
 		return !(this.changedFields.isEmpty() && this.removedFields.isEmpty() && this.changedValues
@@ -240,7 +239,11 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 				// remove from list of removed fields, if needed
 				this.removedFields.remove(fieldId);
 				
-				InObjectTransactionField field = new InObjectTransactionField(fieldId,
+				XAddress temp = this.getAddress();
+				XAddress address = XX.toAddress(temp.getRepository(), temp.getModel(),
+				        temp.getObject(), fieldId);
+				
+				InObjectTransactionField field = new InObjectTransactionField(address,
 				        XCommand.NEW, this);
 				this.changedFields.put(fieldId, field);
 				
@@ -453,9 +456,9 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	/**
 	 * Tests whether two given TransactionObjects have the same state. Two
 	 * TransactionObjects have the same state, if the same actions were executed
-	 * on them and not yet propagated to their wrapped {@link XObject} (the
-	 * order of how these changeds were executed doesn't matter) and they have
-	 * the same wrapped {@link XObject}
+	 * on them and not yet propagated to their wrapped {@link MemoryObject} (the
+	 * order in which these changes were executed doesn't matter) and they have
+	 * the same wrapped {@link MemoryObject}
 	 * 
 	 * @param object object, to which this object should be compared to.
 	 * @return true, if both objects have the same state, false otherwise
@@ -479,8 +482,8 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 			if(!this.removedFields.contains(fieldId)) {
 				XField field = this.baseObject.getField(fieldId);
 				if(field != null) {
-					this.changedFields.put(fieldId,
-					        new InObjectTransactionField(fieldId, field.getRevisionNumber(), this));
+					this.changedFields.put(fieldId, new InObjectTransactionField(
+					        field.getAddress(), field.getRevisionNumber(), this));
 					exists = true;
 				}
 			}
