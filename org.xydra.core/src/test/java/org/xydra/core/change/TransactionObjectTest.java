@@ -25,6 +25,9 @@ import org.xydra.core.model.impl.memory.MemoryRepository;
 
 /*
  * TODO Add tests for the methods of InTransactionField
+ * 
+ * TODO Add tests for all cases in which executing commands and transactions
+ * would fail - some important cases are not covered at the moment
  */
 
 public class TransactionObjectTest {
