@@ -3,8 +3,8 @@ package org.xydra.core.serialize;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.minio.MiniStringWriter;
-import org.xydra.minio.MiniWriter;
+import org.xydra.base.minio.MiniStringWriter;
+import org.xydra.base.minio.MiniWriter;
 
 
 @RunsInGWT(true)

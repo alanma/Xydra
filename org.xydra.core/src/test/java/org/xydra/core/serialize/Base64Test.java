@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.xydra.core.serialize.Base64;
 
 
-public class TestBase64 {
+public class Base64Test {
 	
 	@Test
 	public void testRound() {

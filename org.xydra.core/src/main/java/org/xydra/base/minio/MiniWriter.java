@@ -1,4 +1,4 @@
-package org.xydra.minio;
+package org.xydra.base.minio;
 
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;

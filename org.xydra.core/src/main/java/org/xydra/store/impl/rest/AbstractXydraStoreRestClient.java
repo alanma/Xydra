@@ -1,6 +1,5 @@
 package org.xydra.store.impl.rest;
 
-import java.net.ConnectException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -96,7 +95,7 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 			}
 			
 			if(content == null || content.isEmpty()) {
-				this.callback.onFailure(new ConnectException("no content, response is " + code
+				this.callback.onFailure(new ConnectionException("no content, response is " + code
 				        + " " + message));
 				return;
 			}

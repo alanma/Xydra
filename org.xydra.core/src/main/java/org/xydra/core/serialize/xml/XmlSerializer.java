@@ -3,9 +3,9 @@ package org.xydra.core.serialize.xml;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
+import org.xydra.base.minio.MiniWriter;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.XydraSerializer;
-import org.xydra.minio.MiniWriter;
 
 
 /**

@@ -1,6 +1,6 @@
 package org.xydra.core.serialize;
 
-import org.xydra.minio.MiniStreamWriter;
+import org.xydra.base.minio.MiniStreamWriter;
 
 
 /**

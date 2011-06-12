@@ -24,7 +24,7 @@ import org.xydra.index.query.Pair;
 @RequiresAppEngine(false)
 public class XmlElement extends AbstractXmlElement {
 	
-	Element element;
+	private final Element element;
 	
 	protected XmlElement(Element element) {
 		this.element = element;

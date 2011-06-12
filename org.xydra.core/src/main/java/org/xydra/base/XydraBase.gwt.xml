@@ -1,0 +1,12 @@
+<module>
+	
+	<inherits name="org.xydra.annotations.Annotations" />
+	<inherits name="org.xydra.index.XydraIndex" />
+	<inherits name='org.xydra.log.Xlog'/>
+	
+	<source path="">
+		<exclude name="**/*Test.java" />
+		<exclude name="minio/MiniStreamWriter.java" />
+	</source>
+	
+</module>

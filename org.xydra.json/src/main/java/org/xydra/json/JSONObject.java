@@ -29,8 +29,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
-import org.xydra.minio.MiniIOException;
-import org.xydra.minio.MiniWriter;
+import org.xydra.base.minio.MiniIOException;
+import org.xydra.base.minio.MiniWriter;
+import org.xydra.core.serialize.json.JSONException;
 
 
 /**

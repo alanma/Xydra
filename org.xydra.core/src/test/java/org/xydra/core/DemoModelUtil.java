@@ -28,7 +28,9 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryRepository;
-import org.xydra.core.util.SimpleSyntaxUtilsTest;
+import org.xydra.core.serialize.SerializedModel;
+import org.xydra.core.serialize.XydraOut;
+import org.xydra.core.serialize.xml.XmlOut;
 
 
 /**
@@ -273,6 +275,8 @@ public class DemoModelUtil {
 	public static void main(String[] args) {
 		XRepository repo = new MemoryRepository(XX.toId("actor"), "secret", XX.toId("repo"));
 		addPhonebookModel(repo);
-		System.out.println(SimpleSyntaxUtilsTest.toXml(repo.getModel(PHONEBOOK_ID)));
+		XydraOut out = new XmlOut();
+		SerializedModel.serialize(repo.getModel(PHONEBOOK_ID), out, true, false, true);
+		System.out.println(out.getData());
 	}
 }

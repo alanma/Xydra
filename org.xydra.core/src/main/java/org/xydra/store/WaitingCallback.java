@@ -3,6 +3,10 @@
  */
 package org.xydra.store;
 
+import org.xydra.annotations.RunsInGWT;
+
+
+@RunsInGWT(false)
 public class WaitingCallback<T> implements Callback<T> {
 	
 	private boolean done = false;

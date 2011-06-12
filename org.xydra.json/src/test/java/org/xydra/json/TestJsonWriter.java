@@ -3,10 +3,10 @@ package org.xydra.json;
 import java.io.PrintWriter;
 
 import org.junit.Test;
-import org.xydra.json.JSONException;
+import org.xydra.base.minio.MiniStreamWriter;
+import org.xydra.base.minio.MiniWriter;
+import org.xydra.core.serialize.json.JSONException;
 import org.xydra.json.JSONWriter;
-import org.xydra.minio.MiniStreamWriter;
-import org.xydra.minio.MiniWriter;
 
 
 

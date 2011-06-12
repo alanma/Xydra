@@ -1,21 +1,16 @@
 <module>
-	<!-- 
-	This is 
-		<inherits name="org.xydra.core.XydraCore" />
-	 -->
-	<inherits name="com.google.gwt.user.User" />
-	<inherits name="org.xydra.index.XydraIndex" />
-	<inherits name="org.xydra.annotations.Platform" />
-
-	<!-- Inherit Xydra Logging -->
-	<inherits name='org.xydra.log.Xlog'/>
+	
+	<inherits name="org.xydra.base.XydraBase" />
+	<inherits name="org.xydra.store.XydraStore" />
 	
 	<source path="">
+		<exclude name="**/*Test.java" />
 		<exclude name="XFile.java" />
-		<exclude name="xml/impl/MiniElementImpl.java" />
-		<exclude name="xml/impl/MiniXMLParserImpl.java" />
-		<exclude name="xml/impl/XmlOutStream.java" />
-		<exclude name="test/**" />
+		<exclude name="model/ForTestLocalChangeCallback.java" />
+		<exclude name="model/ForTestSynchronizationCallback.java" />
+		<exclude name="model/tutorial/*" />
+		<exclude name="serialize/xml/XmlElement.java" />
+		<exclude name="serialize/xml/XmlParser.java" />
 	</source>
 	
 </module>

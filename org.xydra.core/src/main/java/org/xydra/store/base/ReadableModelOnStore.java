@@ -3,6 +3,7 @@ package org.xydra.store.base;
 import java.io.Serializable;
 import java.util.Iterator;
 
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
@@ -18,8 +19,11 @@ import org.xydra.store.XydraStore;
  * An {@link XReadableModel} which pulls state <em>once</em> lazily via a
  * snapshot from a local {@link XydraStore}.
  * 
+ * TODO {@link WaitingCallback} doesn't work with GWT
+ * 
  * @author voelkel
  */
+@RunsInGWT(false)
 public class ReadableModelOnStore implements XReadableModel, Serializable {
 	
 	private static final long serialVersionUID = 2086217765670621565L;

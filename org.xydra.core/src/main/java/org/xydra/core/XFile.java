@@ -8,16 +8,17 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XID;
+import org.xydra.base.minio.MiniStreamWriter;
 import org.xydra.base.rmof.XReadableRepository;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.SerializedModel;
+import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.XydraOut;
-import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.core.serialize.xml.XmlOut;
-import org.xydra.minio.MiniStreamWriter;
+import org.xydra.core.serialize.xml.XmlParser;
 
 
 /**
@@ -27,6 +28,7 @@ import org.xydra.minio.MiniStreamWriter;
  * @author Kaidel
  * 
  */
+@RunsInGWT(false)
 public class XFile {
 	
 	public static final String XML_SUFFIX = ".xml";

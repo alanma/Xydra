@@ -2,6 +2,7 @@ package org.xydra.store.base;
 
 import java.io.Serializable;
 
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.X;
 import org.xydra.base.XID;
 import org.xydra.base.change.XCommand;
@@ -24,6 +25,7 @@ import org.xydra.store.XydraStore;
  * @author voelkel
  */
 @Deprecated
+@RunsInGWT(false)
 public class WritableRepositoryOnStore extends ReadableRepositoryOnStore implements Serializable,
         XWritableRepository {
 	

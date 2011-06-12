@@ -2,6 +2,9 @@ package org.xydra.json;
 
 import java.util.Stack;
 
+import org.xydra.core.serialize.json.JSONException;
+import org.xydra.core.serialize.json.SAJ;
+
 
 public class BuilderSAJ implements SAJ {
 	

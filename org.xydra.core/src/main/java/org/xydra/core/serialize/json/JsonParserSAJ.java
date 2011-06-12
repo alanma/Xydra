@@ -1,9 +1,9 @@
-package org.xydra.json;
+package org.xydra.core.serialize.json;
 
-import org.xydra.minio.MiniBufferedReader;
-import org.xydra.minio.MiniIOException;
-import org.xydra.minio.MiniReader;
-import org.xydra.minio.MiniStringReader;
+import org.xydra.base.minio.MiniBufferedReader;
+import org.xydra.base.minio.MiniIOException;
+import org.xydra.base.minio.MiniReader;
+import org.xydra.base.minio.MiniStringReader;
 
 
 /*

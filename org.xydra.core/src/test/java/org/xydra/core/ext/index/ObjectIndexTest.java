@@ -23,7 +23,7 @@ import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 
 
-public class TestObjectIndex {
+public class ObjectIndexTest {
 	
 	/**
 	 * @return each kind of value at least once

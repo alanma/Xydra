@@ -1,4 +1,4 @@
-package org.xydra.minio;
+package org.xydra.base.minio;
 
 public interface MiniReader {
 	

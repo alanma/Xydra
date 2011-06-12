@@ -1,4 +1,4 @@
-package org.xydra.minio;
+package org.xydra.base.minio;
 
 /**
  * Common super-class for all kinds of Mini-Readers. Copied from JDK.

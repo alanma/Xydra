@@ -3,6 +3,9 @@ package org.xydra.json;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.xydra.core.serialize.json.JSONException;
+import org.xydra.core.serialize.json.SAJ;
+
 
 /**
  * Sends SAJ events to multiple SAJs. Mostly used for debugging.

@@ -1,4 +1,4 @@
-package org.xydra.json;
+package org.xydra.core.serialize.json;
 
 /**
  * SAX-like API for JSON.

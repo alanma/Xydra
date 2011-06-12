@@ -11,9 +11,6 @@ import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.XydraParser;
-import org.xydra.json.JSONException;
-import org.xydra.json.JsonParserSAJ;
-import org.xydra.json.SAJ;
 
 
 @RunsInGWT(true)

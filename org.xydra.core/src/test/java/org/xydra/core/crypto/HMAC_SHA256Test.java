@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.xydra.core.serialize.Base64;
 
 
-public class TestHMAC_SHA256 {
+public class HMAC_SHA256Test {
 	
 	@Test
 	public void testEncodingAndHashing() {

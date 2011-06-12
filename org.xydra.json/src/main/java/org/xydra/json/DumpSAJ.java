@@ -1,5 +1,7 @@
 package org.xydra.json;
 
+import org.xydra.core.serialize.json.SAJ;
+
 public class DumpSAJ implements SAJ {
 	
 	private String indent = "";

@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -45,8 +46,11 @@ import org.xydra.store.impl.memory.AllowAllAccessControlManager;
  * 
  * The implementation assumes the actorId is never null.
  * 
+ * TODO GWT doesn't have Thread
+ * 
  * @author voelkel
  */
+@RunsInGWT(false)
 public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraStoreAdmin {
 	
 	private static final Logger log = LoggerFactory.getLogger(DelegateToPersistenceAndAcm.class);

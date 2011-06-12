@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -20,8 +21,11 @@ import org.xydra.store.XydraStore;
  * An {@link XReadableRepository} which pulls state <em>once</em> lazily via a
  * snapshot from a local {@link XydraStore}.
  * 
+ * TODO GWT doesn't have a Thread class
+ * 
  * @author voelkel
  */
+@RunsInGWT(false)
 public class ReadableRepositoryOnStore implements XReadableRepository, Serializable {
 	
 	private static final long serialVersionUID = -5943088597508682530L;

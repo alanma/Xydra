@@ -2,6 +2,7 @@ package org.xydra.store.base;
 
 import java.io.Serializable;
 
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -20,6 +21,7 @@ import org.xydra.store.XydraStore;
  * @author voelkel
  */
 @Deprecated
+@RunsInGWT(false)
 public class WritableModelOnStore extends ReadableModelOnStore implements XWritableModel,
         Serializable {
 	

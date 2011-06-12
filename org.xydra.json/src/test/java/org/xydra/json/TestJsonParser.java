@@ -3,13 +3,13 @@ package org.xydra.json;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.xydra.core.serialize.json.JSONException;
+import org.xydra.core.serialize.json.JsonParserSAJ;
+import org.xydra.core.serialize.json.SAJ;
 import org.xydra.json.BroadcastSAJ;
 import org.xydra.json.BuilderSAJ;
 import org.xydra.json.DumpSAJ;
-import org.xydra.json.JSONException;
 import org.xydra.json.JSONObject;
-import org.xydra.json.JsonParserSAJ;
-import org.xydra.json.SAJ;
 
 
 public class TestJsonParser {

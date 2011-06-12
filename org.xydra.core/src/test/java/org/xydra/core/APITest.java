@@ -38,7 +38,7 @@ import org.xydra.core.serialize.xml.XmlOut;
 /**
  * @author voelkel
  */
-public class TestAPI {
+public class APITest {
 	
 	// A wrapper for the books - A book can be modeled as an XObject
 	static class Book {
@@ -1045,14 +1045,14 @@ public class TestAPI {
 		field1 = object.createField(fieldId);
 		
 		// set the value of an existing field
-		TestAPI.safeSetStringValue(object, fieldId, "Test");
+		APITest.safeSetStringValue(object, fieldId, "Test");
 		assertTrue(field1.getValue() instanceof XStringValue);
 		assertEquals("Test", ((XStringValue)field1.getValue()).contents());
 		
 		// set the value of a not existing field
 		newID = XX.createUniqueId();
 		assertFalse(object.hasField(newID));
-		TestAPI.safeSetStringValue(object, newID, "Test");
+		APITest.safeSetStringValue(object, newID, "Test");
 		assertTrue(object.hasField(newID));
 		assertTrue(object.getField(newID).getValue() instanceof XStringValue);
 		assertEquals("Test", ((XStringValue)object.getField(newID).getValue()).contents());

@@ -3,6 +3,7 @@ package org.xydra.store;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XID;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -24,8 +25,11 @@ import org.xydra.store.impl.memory.MemoryRuntime;
  * <li>Use an in-memory platform as a fall-back</li>
  * </ol>
  * 
+ * TODO GWT doesn't have Class.forName()
+ * 
  * @author xamde
  */
+@RunsInGWT(false)
 public class XydraRuntime {
 	
 	private static final Logger log = LoggerFactory.getLogger(XydraRuntime.class);
