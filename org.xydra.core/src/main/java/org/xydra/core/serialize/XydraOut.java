@@ -1,6 +1,6 @@
 package org.xydra.core.serialize;
 
-import org.xydra.base.minio.MiniStreamWriter;
+import org.xydra.base.minio.MiniWriter;
 
 
 /**
@@ -47,8 +47,9 @@ public interface XydraOut {
 	 * {@link XydraElement#getElement(String, int)} if created in an untyped
 	 * single-item child list, using
 	 * {@link XydraElement#getChild(String, String)} if created in a typed
-	 * single-item child list, using {@link XydraElement#getChildrenByName(String)}
-	 * when created in an untyped multiple-item child list or array and using
+	 * single-item child list, using
+	 * {@link XydraElement#getChildrenByName(String)} when created in an untyped
+	 * multiple-item child list or array and using
 	 * {@link XydraElement#getValues(String, String)} when created in a typed
 	 * multiple-array child list or array.
 	 * </p>
@@ -126,8 +127,8 @@ public interface XydraOut {
 	 * Child elements can be retrieved using
 	 * {@link XydraElement#getElement(String)} or
 	 * {@link XydraElement#getElement(String, int)} if created in an single-item
-	 * child list or using {@link XydraElement#getChildrenByName(String)} when created
-	 * in an multiple-item child list.
+	 * child list or using {@link XydraElement#getChildrenByName(String)} when
+	 * created in an multiple-item child list.
 	 * 
 	 * Arrays are retrieved as {@link XydraElement}s with no text content.
 	 * 
@@ -218,8 +219,8 @@ public interface XydraOut {
 	 * Arrays are retrieved as {@link XydraElement}s with no text content.
 	 * 
 	 * Child elements can be retrieved using
-	 * {@link XydraElement#getChildrenByName(String)} on the array element. The name
-	 * parameter is ignored.
+	 * {@link XydraElement#getChildrenByName(String)} on the array element. The
+	 * name parameter is ignored.
 	 * 
 	 * Values can be retrieved using {@link XydraElement#getValues(String)} on
 	 * the array element. The name parameter is ignored.
@@ -383,7 +384,7 @@ public interface XydraOut {
 	 * Get the encoded data.
 	 * 
 	 * This only works if the {@link XydraOut} was not constructed with a
-	 * {@link MiniStreamWriter}.
+	 * streaming {@link MiniWriter}.
 	 * 
 	 * The root element must have been closed.
 	 * 
@@ -392,7 +393,7 @@ public interface XydraOut {
 	String getData();
 	
 	/**
-	 * Flush the underlying {@link MiniStreamWriter}.
+	 * Flush the underlying {@link MiniWriter}.
 	 */
 	void flush();
 	
