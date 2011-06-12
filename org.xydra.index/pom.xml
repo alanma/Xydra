@@ -35,14 +35,14 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
-			<version>0.1.3-SNAPSHOT</version>
+			<version>0.1.4-SNAPSHOT</version>
 		</dependency>
 		
 		<!--  This is only required for logging in GWT -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
-			<version>0.1.3-SNAPSHOT</version>
+			<version>0.1.4-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
 
