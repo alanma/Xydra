@@ -7,6 +7,7 @@ package org.xydra.client;
  * 
  * @param <T> Type of the object returned on success.
  */
+@Deprecated
 public interface Callback<T> {
 	
 	/**

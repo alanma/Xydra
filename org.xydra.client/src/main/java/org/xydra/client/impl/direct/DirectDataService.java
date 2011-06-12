@@ -37,6 +37,7 @@ import org.xydra.store.AccessException;
  * 
  * @author voelkel
  */
+@Deprecated
 public class DirectDataService implements XDataService {
 	
 	private XProtectedRepository repo;

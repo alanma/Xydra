@@ -2,11 +2,13 @@
 <module>
 	
 	<!-- Inherit the Xydra Core -->
-	<inherits name='org.xydra.core.XydraCore'/>
+	<inherits name='org.xydra.XydraCore'/>
 	
 	<!-- Inherit Xydra Logging -->
 	<inherits name='org.xydra.log.Xlog'/>
 	
-	<source path=""/>
+	<source path="">
+		<exclude name="impl/direct/**" />
+	</source>
 	
 </module>

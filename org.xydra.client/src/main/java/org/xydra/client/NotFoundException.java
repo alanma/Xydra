@@ -15,6 +15,7 @@ import org.xydra.store.RequestException;
  * @author dscharrer
  * 
  */
+@Deprecated
 public class NotFoundException extends RequestException {
 	
 	private static final long serialVersionUID = 3076607855891669653L;

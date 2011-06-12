@@ -2,6 +2,7 @@ package org.xydra.client;
 
 import junit.framework.TestCase;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.xydra.base.X;
 import org.xydra.base.XID;
@@ -36,6 +37,8 @@ import org.xydra.store.access.impl.memory.MemoryGroupDatabase;
  * @author dscharrer
  * 
  */
+@Deprecated
+@Ignore
 public class SynchronizerTest extends TestCase {
 	
 	private XDataService dataService;

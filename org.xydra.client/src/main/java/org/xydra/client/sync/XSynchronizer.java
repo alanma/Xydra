@@ -28,9 +28,12 @@ import org.xydra.store.XydraStore;
  * TODO remove this once the store-based implementation in core works and there
  * is a {@link XydraStore} network implementation
  * 
+ * Deprecated, replaced by {@link org.xydra.core.model.sync.XSynchronizer}
+ * 
  * @author dscharrer
  * 
  */
+@Deprecated
 public class XSynchronizer {
 	
 	static private final Logger log = LoggerFactory.getLogger(XSynchronizer.class);

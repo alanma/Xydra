@@ -8,10 +8,13 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.store.AccessException;
+import org.xydra.store.XydraStore;
 
 
 /**
  * An interface for interacting with the "/data" API on remote CXM servers.
+ * 
+ * Deprecated, replaced by {@link XydraStore}.
  * 
  * Errors while executing the operation (except those caused by illegal
  * arguments) are passed to the callback's {@link Callback#onFailure(Throwable)}
@@ -28,6 +31,7 @@ import org.xydra.store.AccessException;
  * TODO The server should implement this interface, too (and interface belongs
  * to server project)
  */
+@Deprecated
 public interface XDataService {
 	
 	/**

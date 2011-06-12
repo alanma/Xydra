@@ -14,15 +14,16 @@ import org.xydra.client.XChangesService;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.session.XProtectedModel;
 import org.xydra.core.model.session.XProtectedRepository;
-import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.SerializedCommand;
 import org.xydra.core.serialize.SerializedEvent;
+import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.XydraOut;
-import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.core.serialize.xml.XmlOut;
+import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.store.AccessException;
 
 
+@Deprecated
 public class DirectChangesService implements XChangesService {
 	
 	private XProtectedRepository repo;
