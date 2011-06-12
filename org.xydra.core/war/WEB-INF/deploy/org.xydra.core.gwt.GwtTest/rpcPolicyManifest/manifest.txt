@@ -1,0 +1,2 @@
+# Module org.xydra.core.gwt.GwtTest
+# RPC service class, partial path of RPC policy file
