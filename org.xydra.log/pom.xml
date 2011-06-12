@@ -46,7 +46,7 @@
 	<properties>
 
 		<!-- convenience to define GWT version in one place -->
-		<gwt.version>2.2.0</gwt.version>
+		<gwt.version>2.3.0</gwt.version>
 
 	</properties>
 
@@ -70,7 +70,7 @@
 		<dependency>
 			<groupId>com.google.code.gwt-log</groupId>
 			<artifactId>gwt-log</artifactId>
-			<version>3.0.3</version>
+			<version>3.1.2</version>
 			<scope>provided</scope>
 		</dependency>
 
