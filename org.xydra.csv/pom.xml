@@ -105,28 +105,21 @@
 	</pluginRepositories>
 
 	<distributionManagement>
-		<!--
-			Add this to settings.xml <server> <id>smyle-repo</id>
-			<username>xamde</username> <password>********</password> </server>
-			<server> <id>smyle-snap</id> <username>xamde</username>
-			<password>********</password> </server> <server> <id>smyle-site</id>
-			<username>xamde</username> <password>********</password> </server>
-		-->
+		<!-- Add this to settings.xml <server> <id>xydra-repo</id> <username>xamde</username> 
+			<password>********</password> </server> <server> <id>xydra-snap</id> <username>xamde</username> 
+			<password>********</password> </server> <server> <id>xydra-site</id> <username>xamde</username> 
+			<password>********</password> </server> -->
 		<repository>
-			<id>smyle-repo</id>
-			<url>dav:https://smyle.repositoryhosting.com/svn/smyle_mavenrepo/trunk/mavenrepo/</url>
+			<id>xydra-repo</id>
+			<url>svn:https://xydra.googlecode.com/svn/repository</url>
 		</repository>
 		<snapshotRepository>
-			<id>smyle-snap</id>
-			<url>dav:https://smyle.repositoryhosting.com/svn/smyle_mavenrepo/trunk/mavensnap/</url>
+			<id>xydra-snap</id>
+			<url>svn:https://xydra.googlecode.com/svn/snapshots</url>
 		</snapshotRepository>
 		<site>
-			<id>smyle-site</id>
-			<url>dav:https://smyle.repositoryhosting.com/svn/smyle_mavenrepo/trunk/site/com.calpano.common</url>
-			<!--
-				view at
-				https://smyle.repositoryhosting.com/trac/smyle_mavenrepo/browser/trunk/site
-			-->
+			<id>xydra-site</id>
+			<url>scp://${xydra.site}/${artifactId}</url>
 		</site>
 	</distributionManagement>
 
