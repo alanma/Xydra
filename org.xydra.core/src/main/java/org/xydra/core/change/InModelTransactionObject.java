@@ -52,6 +52,7 @@ public class InModelTransactionObject extends AbstractEntity implements XWritabl
 		return this.model.executeCommand(command, callback);
 	}
 	
+	@Override
 	public long getRevisionNumber() {
 		return this.revisionNumber;
 	}
@@ -61,8 +62,8 @@ public class InModelTransactionObject extends AbstractEntity implements XWritabl
 		        this.model.getAddress(), fieldId);
 		this.model.executeCommand(fieldCommand);
 		
-		return this.model.getField(XX.toAddress(this.address.getRepository(),
-		        this.address.getModel(), this.address.getObject(), fieldId));
+		return this.model.getField(XX.toAddress(this.address.getRepository(), this.address
+		        .getModel(), this.address.getObject(), fieldId));
 	}
 	
 	public boolean hasField(XID fieldId) {

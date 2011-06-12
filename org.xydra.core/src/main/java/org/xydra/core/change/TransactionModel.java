@@ -14,7 +14,6 @@ import org.xydra.base.XID;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
-import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.change.XModelCommand;
@@ -249,7 +248,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 				this.changedObjects.put(objectId, object);
 				
 				// command succeeded -> add it to the list
-				this.commands.add((XAtomicCommand)command);
+				this.commands.add(command);
 				
 				usedCallback.onSuccess(this.getRevisionNumber());
 				return this.getRevisionNumber();
@@ -288,7 +287,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 				this.changedObjects.remove(objectId);
 				
 				// command succeeded -> add it to the list
-				this.commands.add((XAtomicCommand)command);
+				this.commands.add(command);
 				
 				usedCallback.onSuccess(this.getRevisionNumber());
 				return this.getRevisionNumber();
@@ -329,15 +328,15 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 				this.removedFields.remove(fieldId);
 				
 				XAddress temp = object.getAddress();
-				XAddress address = XX.toAddress(temp.getRepository(), temp.getModel(),
-				        temp.getObject(), fieldId);
+				XAddress address = XX.toAddress(temp.getRepository(), temp.getModel(), temp
+				        .getObject(), fieldId);
 				
 				InModelTransactionField field = new InModelTransactionField(address, XCommand.NEW,
 				        this);
 				this.changedFields.put(address, field);
 				
 				// command succeeded -> add it to the list
-				this.commands.add((XAtomicCommand)command);
+				this.commands.add(command);
 				
 				usedCallback.onSuccess(this.getRevisionNumber());
 				return this.getRevisionNumber();
@@ -379,7 +378,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 				this.changedValues.remove(fieldAddress);
 				
 				// command succeeded -> add it to the list
-				this.commands.add((XAtomicCommand)command);
+				this.commands.add(command);
 				
 				usedCallback.onSuccess(this.getRevisionNumber());
 				return this.getRevisionNumber();
@@ -432,7 +431,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 				this.changedValues.put(fieldAddress, fieldCommand.getValue());
 				
 				// command succeeded -> add it to the list
-				this.commands.add((XAtomicCommand)command);
+				this.commands.add(command);
 				
 				usedCallback.onSuccess(field.getRevisionNumber());
 				return field.getRevisionNumber();
@@ -450,7 +449,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 				this.changedValues.put(fieldAddress, null);
 				
 				// command succeeded -> add it to the list
-				this.commands.add((XAtomicCommand)command);
+				this.commands.add(command);
 				
 				usedCallback.onSuccess(field.getRevisionNumber());
 				return field.getRevisionNumber();
@@ -468,7 +467,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 				this.changedValues.put(fieldAddress, fieldCommand.getValue());
 				
 				// command succeeded -> add it to the list
-				this.commands.add((XAtomicCommand)command);
+				this.commands.add(command);
 				
 				usedCallback.onSuccess(field.getRevisionNumber());
 				return field.getRevisionNumber();
@@ -479,6 +478,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 		        "Given Command was neither a correct instance of XModelCommand, XObjectCommand, XFieldCommand or XTransaction!");
 	}
 	
+	@Override
 	public long getRevisionNumber() {
 		return this.revisionNumber;
 	}
