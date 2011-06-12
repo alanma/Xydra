@@ -24,7 +24,6 @@ import org.xydra.store.XydraStore;
  * @author voelkel
  */
 @Deprecated
-@SuppressWarnings("deprecation")
 public class WritableRepositoryOnStore extends ReadableRepositoryOnStore implements Serializable,
         XWritableRepository {
 	

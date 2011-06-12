@@ -20,7 +20,6 @@ import org.xydra.store.XydraStore;
  * @author voelkel
  */
 @Deprecated
-@SuppressWarnings("deprecation")
 public class WritableModelOnStore extends ReadableModelOnStore implements XWritableModel,
         Serializable {
 	

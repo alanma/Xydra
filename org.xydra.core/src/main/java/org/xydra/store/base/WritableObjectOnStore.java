@@ -19,7 +19,6 @@ import org.xydra.store.XydraStore;
  * @author voelkel
  */
 @Deprecated
-@SuppressWarnings("deprecation")
 public class WritableObjectOnStore extends ReadableObjectOnStore implements XWritableObject,
         Serializable {
 	
