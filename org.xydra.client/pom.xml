@@ -5,7 +5,7 @@
 
 	<groupId>org.xydra</groupId>
 	<artifactId>client</artifactId>
-	<version>0.1.3-SNAPSHOT</version>
+	<version>0.1.4-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>Xydra Client</name>
 
@@ -49,7 +49,7 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
-			<version>0.1.3-SNAPSHOT</version>
+			<version>0.1.4-SNAPSHOT</version>
 		</dependency>
 
 		<!-- Depend on tests in core as explained in -->
@@ -57,15 +57,15 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
-			<version>0.1.3-SNAPSHOT</version>
+			<version>0.1.4-SNAPSHOT</version>
 			<type>test-jar</type>
 		</dependency>
 
-		<!-- gwt-log -->
+		<!-- logging -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
-			<version>0.1.3-SNAPSHOT</version>
+			<version>0.1.4-SNAPSHOT</version>
 		</dependency>
 
 		<!-- testing dependencies -->
