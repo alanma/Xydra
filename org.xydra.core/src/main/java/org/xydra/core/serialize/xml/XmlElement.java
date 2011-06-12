@@ -9,20 +9,20 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.core.serialize.AbstractXydraElement;
 import org.xydra.core.serialize.XydraElement;
 import org.xydra.index.query.Pair;
 
 
 /**
- * {@link XydraElement} implementation that wraps an org.w3c.dom.Element.
+ * {@link XydraElement} implementation that wraps an {@link org.w3c.dom.Element}
+ * .
  * 
  * @author dscharrer
  * 
  */
 @RunsInGWT(false)
 @RequiresAppEngine(false)
-public class XmlElement extends AbstractXydraElement {
+public class XmlElement extends AbstractXmlElement {
 	
 	Element element;
 	
@@ -30,6 +30,7 @@ public class XmlElement extends AbstractXydraElement {
 		this.element = element;
 	}
 	
+	@Override
 	public String getAttribute(String attributeName) {
 		if(this.element.hasAttribute(attributeName)) {
 			return this.element.getAttribute(attributeName);
@@ -56,18 +57,13 @@ public class XmlElement extends AbstractXydraElement {
 	}
 	
 	@Override
-	public Iterator<XydraElement> getChildrenByName(String name, String defaultType) {
-		return getChildren(defaultType);
-	}
-	
-	@Override
 	public Iterator<XydraElement> getChildrenByType(String name, String type) {
 		final NodeList nodes = this.element.getElementsByTagName(type);
 		return nodeListToIterator(nodes);
 	}
 	
 	@Override
-	public String getContent(String name) {
+	public String getContent() {
 		if(this.element.hasAttribute(XmlEncoder.NULL_CONTENT_ATTRIBUTE)
 		        && Boolean.valueOf(this.element.getAttribute(XmlEncoder.NULL_CONTENT_ATTRIBUTE))) {
 			return null;
@@ -150,11 +146,6 @@ public class XmlElement extends AbstractXydraElement {
 		return nodeListToValues(nodes);
 	}
 	
-	@Override
-	public Iterator<Object> getValues(String name) {
-		return getValues();
-	}
-	
 	private Iterator<Object> nodeListToValues(final NodeList nodes) {
 		
 		List<Object> objects = new ArrayList<Object>();
@@ -188,16 +179,6 @@ public class XmlElement extends AbstractXydraElement {
 	}
 	
 	@Override
-	public XydraElement getElement(String name) {
-		return getElement(name, 0);
-	}
-	
-	@Override
-	public XydraElement getChild(String name) {
-		return this;
-	}
-	
-	@Override
 	public Iterator<Pair<String,XydraElement>> getEntries(String attribute, String defaultType) {
 		final NodeList nodes = this.element.getChildNodes();
 		return nodeListToMapIterator(nodes, attribute);
@@ -222,11 +203,6 @@ public class XmlElement extends AbstractXydraElement {
 			}
 		}
 		return list.iterator();
-	}
-	
-	@Override
-	public Object getContent() {
-		return getContent(null);
 	}
 	
 }
