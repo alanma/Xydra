@@ -30,10 +30,9 @@ public class Pair<K, L> {
 	
 	@Override
 	public boolean equals(Object other) {
-		if(!(other instanceof Pair))
+		if(!(other instanceof Pair<?,?>))
 			return false;
-		@SuppressWarnings("rawtypes")
-		Pair p = (Pair)other;
+		Pair<?,?> p = (Pair<?,?>)other;
 		return (this.first == null ? p.first == null : this.first.equals(p.first))
 		        && (this.second == null ? p.second == null : this.second.equals(p.second));
 		
