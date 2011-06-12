@@ -4,7 +4,7 @@
 	<inherits name="com.google.gwt.user.User" />
 	
 	<!-- add gwt-log support -->
-	<inherits name='com.allen_sauer.gwt.log.gwt-log-OFF' />
+	<inherits name='com.allen_sauer.gwt.log.gwt-log-impl' />
 	
 	<source path="" >
 		<exclude name="XydraLogTest.java"/>
