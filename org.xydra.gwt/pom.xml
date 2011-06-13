@@ -85,6 +85,7 @@
 		</dependency>
 		
 		<!--  Xydra Client -->
+		<!-- TODO we don't actually need this anymore, but provide implementations of deprecated APIs -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>client</artifactId>
