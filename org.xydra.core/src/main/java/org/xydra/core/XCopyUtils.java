@@ -17,7 +17,9 @@ import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XModel;
+import org.xydra.core.model.XObject;
 import org.xydra.core.model.impl.memory.MemoryModel;
+import org.xydra.core.model.impl.memory.MemoryObject;
 
 
 /**
@@ -140,11 +142,20 @@ public class XCopyUtils {
 	}
 	
 	/**
-	 * Create a XModel with the same initial state as the given model snapshot.
+	 * Create a {@link XModel} with the same initial state as the given model
+	 * snapshot.
 	 */
 	public static XModel copyModel(XID actor, String password, XReadableModel modelSnapshot) {
 		XRevWritableModel modelState = createSnapshot(modelSnapshot);
 		return new MemoryModel(actor, password, modelState);
+	}
+	
+	/**
+	 * Create a XObject with the same initial state as the given model snapshot.
+	 */
+	public static XObject copyObject(XID actor, String password, XReadableObject objectSnapshot) {
+		XRevWritableObject objectState = createSnapshot(objectSnapshot);
+		return new MemoryObject(actor, password, objectState);
 	}
 	
 	/**

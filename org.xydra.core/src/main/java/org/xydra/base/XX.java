@@ -1,7 +1,9 @@
 package org.xydra.base;
 
 import org.xydra.base.rmof.XReadableModel;
+import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XRevWritableModel;
+import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.core.URIFormatException;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.model.XField;
@@ -9,6 +11,7 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryModel;
+import org.xydra.core.model.impl.memory.MemoryObject;
 
 
 /**
@@ -250,10 +253,10 @@ public class XX {
 	}
 	
 	/**
-	 * Create a XModel with the same initial state as the given model snapshot.
-	 * The returned model may be backed by the provided XReadableModel instance,
-	 * so it should no longer be modified directly or the behavior of the model
-	 * is undefined.
+	 * Create a {@link XModel} with the same initial state as the given model
+	 * snapshot. The returned model may be backed by the provided XReadableModel
+	 * instance, so it should no longer be modified directly or the behavior of
+	 * the model is undefined.
 	 * 
 	 * Use {@link XCopyUtils#copyModel(XID, String, XReadableModel)} if the
 	 * resulting model should not be backed by the XReadableModel.
@@ -266,6 +269,26 @@ public class XX {
 			return new MemoryModel(actor, password, (XRevWritableModel)modelSnapshot);
 		} else {
 			return XCopyUtils.copyModel(actor, password, modelSnapshot);
+		}
+	}
+	
+	/**
+	 * Create an {@link XObject} with the same initial state as the given object
+	 * snapshot. The returned object may be backed by the provided
+	 * XReadableObject instance, so it should no longer be modified directly or
+	 * the behavior of the model is undefined.
+	 * 
+	 * Use {@link XCopyUtils#copyObject(XID, String, XReadableObject)} if the
+	 * resulting object should not be backed by the XReadableObject.
+	 * 
+	 * @param actor The session actor to use for the returned object.
+	 * @param password The password corresponding to the given actor.
+	 */
+	public static XObject wrap(XID actor, String password, XReadableObject objectSnapshot) {
+		if(objectSnapshot instanceof XRevWritableObject) {
+			return new MemoryObject(actor, password, (XRevWritableObject)objectSnapshot);
+		} else {
+			return XCopyUtils.copyObject(actor, password, objectSnapshot);
 		}
 	}
 	
