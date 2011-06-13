@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+
+	<servlet>
+		<servlet-name>XydraServer</servlet-name>
+		<servlet-class>org.xydra.restless.Restless</servlet-class>
+		<init-param>
+			<param-name>app</param-name>
+			<param-value>org.xydra.server.rest.XydraRestServer</param-value>
+		</init-param>
+		<!-- on Gae: <init-param> <param-name>loggerFactory</param-name> <param-value>org.xydra.log.gae.GaeLoggerFactorySPI</param-value> 
+			</init-param> -->
+		<init-param>
+			<param-name>org.xydra.server</param-name>
+			<param-value>org.xydra.server.impl.memory.MemoryXydraServer</param-value>
+		</init-param>
+		<init-param>
+			<param-name>org.xydra.store</param-name>
+			<param-value>org.xydra.store.impl.memory.SecureMemoryStore</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>XydraServer</servlet-name>
+		<url-pattern>/*</url-pattern>
+	</servlet-mapping>
+
+</web-app>
