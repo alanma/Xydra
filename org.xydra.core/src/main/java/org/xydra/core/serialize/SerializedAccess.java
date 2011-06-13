@@ -10,7 +10,6 @@ import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
-import org.xydra.base.XX;
 import org.xydra.store.access.XAccessRightDefinition;
 import org.xydra.store.access.XAuthorisationManager;
 import org.xydra.store.access.XGroupDatabaseWithListeners;
@@ -50,17 +49,14 @@ public class SerializedAccess {
 		
 		SerializingUtils.checkElementType(xml, XACCESSDEFINITION_ELEMENT);
 		
-		Object actorStr = SerializingUtils.getRequiredAttribute(xml, ACTOR_ATTRIBUTE);
-		XID actor = actorStr == null ? null : XX.toId(actorStr.toString());
-		
-		Object resourceStr = SerializingUtils.getRequiredAttribute(xml, RESOURCE_ATTRIBUTE);
-		XAddress resource = XX.toAddress(resourceStr.toString());
-		
-		Object accessStr = SerializingUtils.getRequiredAttribute(xml, ACCESS_ATTRIBUTE);
-		XID access = XX.toId(accessStr.toString());
-		
-		Object allowedStr = SerializingUtils.getRequiredAttribute(xml, ALLOWED_ATTRIBUTE);
-		boolean allowed = SerializingUtils.toBoolean(allowedStr);
+		XID actor = SerializingUtils.toId(SerializingUtils.getRequiredAttribute(xml,
+		        ACTOR_ATTRIBUTE));
+		XAddress resource = SerializingUtils.toAddress(SerializingUtils.getRequiredAttribute(xml,
+		        RESOURCE_ATTRIBUTE));
+		XID access = SerializingUtils.toId(SerializingUtils.getRequiredAttribute(xml,
+		        ACCESS_ATTRIBUTE));
+		boolean allowed = SerializingUtils.toBoolean(SerializingUtils.getRequiredAttribute(xml,
+		        ALLOWED_ATTRIBUTE));
 		
 		return new MemoryAccessDefinition(access, resource, actor, allowed);
 	}
@@ -80,7 +76,8 @@ public class SerializedAccess {
 		
 		List<XAccessRightDefinition> result = new ArrayList<XAccessRightDefinition>();
 		
-		Iterator<XydraElement> it = xml.getChildrenByType(NAME_DEFINITIONS, XACCESSDEFINITION_ELEMENT);
+		Iterator<XydraElement> it = xml.getChildrenByType(NAME_DEFINITIONS,
+		        XACCESSDEFINITION_ELEMENT);
 		while(it.hasNext()) {
 			result.add(toAccessDefinition(it.next()));
 		}
@@ -102,7 +99,8 @@ public class SerializedAccess {
 		
 		XAuthorisationManager arm = new MemoryAuthorisationManager(groups);
 		
-		Iterator<XydraElement> it = xml.getChildrenByType(NAME_DEFINITIONS, XACCESSDEFINITION_ELEMENT);
+		Iterator<XydraElement> it = xml.getChildrenByType(NAME_DEFINITIONS,
+		        XACCESSDEFINITION_ELEMENT);
 		while(it.hasNext()) {
 			XAccessRightDefinition def = toAccessDefinition(it.next());
 			arm.getAuthorisationDatabase().setAccess(def.getActor(), def.getResource(),

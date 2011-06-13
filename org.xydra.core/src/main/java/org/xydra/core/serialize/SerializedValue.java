@@ -18,6 +18,8 @@ import org.xydra.base.value.XCollectionValue;
 import org.xydra.base.value.XSingleValue;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
 
 /**
@@ -30,6 +32,8 @@ import org.xydra.base.value.XValue;
 @RunsInAppEngine(true)
 @RequiresAppEngine(false)
 public class SerializedValue {
+	
+	private static final Logger log = LoggerFactory.getLogger(SerializedValue.class);
 	
 	private static final String XADDRESS_ELEMENT = "xaddress";
 	private static final String XADDRESSLIST_ELEMENT = "xaddressList";
@@ -114,12 +118,8 @@ public class SerializedValue {
 	}
 	
 	private static String getStringContent(XydraElement element) {
-		return getNonNullContent(element).toString();
-	}
-	
-	private static Object getNonNullContent(XydraElement element) {
 		
-		Object data = element.getContent(NAME_DATA);
+		String data = SerializingUtils.toString(element.getContent(NAME_DATA));
 		if(data == null) {
 			throw new ParsingError(element, "Content must not be null.");
 		}
@@ -250,11 +250,22 @@ public class SerializedValue {
 		} else if(elementName.equals(XBYTELIST_ELEMENT)) {
 			return XV.toValue(Base64.decode(getStringContent(element)));
 		} else if(elementName.equals(XIDSORTEDSET_ELEMENT)) {
-			return XV.toIDSortedSetValue(getIdListContents(element));
+			return toISSV(element);
 		} else if(elementName.equals(XADDRESSSORTEDSET_ELEMENT)) {
 			return XV.toAddressSortedSetValue(getAddressListContents(element));
 		}
 		throw new ParsingError(element, "Unexpected element for an XValue.");
+	}
+	
+	private static XValue toISSV(XydraElement element) {
+		
+		List<XID> xids = getIdListContents(element);
+		
+		XValue value = XV.toIDSortedSetValue(xids);
+		
+		log.info(value.toString());
+		
+		return value;
 	}
 	
 	private static final Map<ValueType,String> singleElements = new HashMap<ValueType,String>();

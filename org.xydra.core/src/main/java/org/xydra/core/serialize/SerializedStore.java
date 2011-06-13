@@ -109,9 +109,11 @@ public class SerializedStore {
 			return null;
 		}
 		
-		String type = element.getAttribute(ATTRIBUTE_TYPE).toString();
-		Object messageObj = element.getContent(NAME_MESSAGE);
-		String message = messageObj == null ? "" : messageObj.toString();
+		String type = SerializingUtils.toString(element.getAttribute(ATTRIBUTE_TYPE));
+		String message = SerializingUtils.toString(element.getContent(NAME_MESSAGE));
+		if(message == null) {
+			message = "";
+		}
 		
 		if(TYPE_ACCESS.equals(type)) {
 			return new AccessException(message);
@@ -445,7 +447,7 @@ public class SerializedStore {
 				}
 				
 			} catch(Throwable th) {
-				results.add(null);
+				results.add(th);
 			}
 			
 		}

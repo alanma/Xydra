@@ -36,7 +36,7 @@ class SerializingUtils {
 	
 	protected static ChangeType getChangeType(XydraElement element) {
 		Object typeString = getRequiredAttribute(element, TYPE_ATTRIBUTE);
-		ChangeType type = ChangeType.fromString(typeString.toString());
+		ChangeType type = ChangeType.fromString(toString(typeString));
 		if(type == null) {
 			throw new ParsingError(element, "Attribute '" + TYPE_ATTRIBUTE
 			        + "' does not contain a valid type, but '" + typeString + "'");
@@ -45,11 +45,11 @@ class SerializingUtils {
 	}
 	
 	protected static XID getOptionalXidAttribute(XydraElement element, String attributeName, XID def) {
-		Object xidString = element.getAttribute(attributeName);
+		String xidString = toString(element.getAttribute(attributeName));
 		if(xidString == null) {
 			return def;
 		}
-		return XX.toId(xidString.toString());
+		return XX.toId(xidString);
 	}
 	
 	protected static Object getRequiredAttribute(XydraElement element, String attribute) {
@@ -61,8 +61,7 @@ class SerializingUtils {
 	}
 	
 	protected static XID getRequiredXidAttribute(XydraElement element) {
-		Object xidString = getRequiredAttribute(element, XID_ATTRIBUTE);
-		return XX.toId(xidString.toString());
+		return XX.toId(toString(getRequiredAttribute(element, XID_ATTRIBUTE)));
 	}
 	
 	@SuppressWarnings("null")
@@ -125,7 +124,7 @@ class SerializingUtils {
 		}
 		
 		try {
-			return Integer.parseInt(value.toString());
+			return Integer.parseInt(toString(value));
 		} catch(Exception e) {
 			throw new RuntimeException("Expected a valid integer, got " + value, e);
 		}
@@ -141,7 +140,7 @@ class SerializingUtils {
 		}
 		
 		try {
-			return Double.parseDouble(value.toString());
+			return Double.parseDouble(toString(value));
 		} catch(Exception e) {
 			throw new RuntimeException("Expected a valid double, got " + value, e);
 		}
@@ -155,36 +154,44 @@ class SerializingUtils {
 		} else if(value instanceof Boolean) {
 			return (Boolean)value;
 		} else {
-			return Boolean.valueOf(value.toString());
+			return Boolean.valueOf(toString(value));
 		}
 	}
 	
 	protected static XID toId(Object object) {
-		return object == null ? null : XX.toId(object.toString());
+		return object == null ? null : XX.toId(toString(object));
 	}
 	
 	protected static XAddress toAddress(Object object) {
-		return object == null ? null : XX.toAddress(object.toString());
+		return object == null ? null : XX.toAddress(toString(object));
 	}
 	
 	protected static String toString(Object object) {
+		if(object instanceof String) {
+			/*
+			 * FIXME workaround for GWT bug
+			 * http://code.google.com/p/google-web-toolkit
+			 * /issues/detail?id=4301: avoid using String#toString()
+			 */
+			return (String)object;
+		}
 		return object == null ? null : object.toString();
 	}
-
+	
 	protected static long toLong(Object value) {
-    	
-    	if(value == null) {
-    		return 0l;
-    	} else if(value instanceof Number) {
-    		return ((Number)value).longValue();
-    	}
-    	
-    	try {
-    		return Long.parseLong(value.toString());
-    	} catch(Exception e) {
-    		throw new RuntimeException("Expected a valid long, got " + value, e);
-    	}
-    	
-    }
+		
+		if(value == null) {
+			return 0l;
+		} else if(value instanceof Number) {
+			return ((Number)value).longValue();
+		}
+		
+		try {
+			return Long.parseLong(toString(value));
+		} catch(Exception e) {
+			throw new RuntimeException("Expected a valid long, got " + value, e);
+		}
+		
+	}
 	
 }
