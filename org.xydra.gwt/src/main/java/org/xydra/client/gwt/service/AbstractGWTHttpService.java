@@ -4,11 +4,11 @@ import org.xydra.client.Callback;
 import org.xydra.client.NotFoundException;
 import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.XydraParser;
+import org.xydra.gwt.store.GwtXydraStoreRestClient;
 import org.xydra.store.ConnectionException;
 import org.xydra.store.InternalStoreException;
 import org.xydra.store.RequestException;
 import org.xydra.store.TimeoutException;
-import org.xydra.store.impl.gwt.GwtXydraStoreRestClient;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;

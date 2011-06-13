@@ -1,8 +1,8 @@
 package org.xydra.gwt;
 
 import org.junit.Test;
-import org.xydra.core.model.serialize.gwt.GwtXmlParser;
 import org.xydra.core.serialize.XydraParser;
+import org.xydra.gwt.xml.GwtXmlParser;
 
 import com.google.gwt.junit.client.GWTTestCase;
 

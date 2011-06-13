@@ -15,9 +15,9 @@ import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.XydraParser;
 import org.xydra.core.serialize.xml.XmlOut;
+import org.xydra.gwt.store.GwtXydraStoreRestClient;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.store.impl.gwt.GwtXydraStoreRestClient;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;

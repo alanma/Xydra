@@ -1,4 +1,4 @@
-package org.xydra.store.impl.gwt;
+package org.xydra.gwt.store;
 
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.XydraParser;

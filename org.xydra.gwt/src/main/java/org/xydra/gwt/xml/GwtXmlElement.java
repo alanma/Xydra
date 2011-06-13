@@ -1,4 +1,4 @@
-package org.xydra.core.model.serialize.gwt;
+package org.xydra.gwt.xml;
 
 import java.util.ArrayList;
 import java.util.Iterator;

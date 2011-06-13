@@ -1,4 +1,4 @@
-package org.xydra.core.model.serialize.gwt;
+package org.xydra.gwt.xml;
 
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.core.serialize.XydraElement;

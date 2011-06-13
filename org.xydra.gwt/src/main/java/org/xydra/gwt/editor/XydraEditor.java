@@ -11,13 +11,13 @@ import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.core.model.sync.XSynchronizer;
 import org.xydra.core.serialize.json.JsonParser;
 import org.xydra.core.serialize.json.JsonSerializer;
+import org.xydra.gwt.store.GwtXydraStoreRestClient;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.StoreException;
 import org.xydra.store.XydraStore;
-import org.xydra.store.impl.gwt.GwtXydraStoreRestClient;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;

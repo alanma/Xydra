@@ -8,13 +8,10 @@
       <inherits name='com.google.gwt.xml.XML'/>
       
       <!-- Inherit the Xydra Core -->
-      <inherits name='org.xydra.XydraCore'/>
+      <inherits name='org.xydra.core.XydraCore'/>
       
-      <!-- Inherit the Xydra Client -->
-      <inherits name='org.xydra.client.XydraClient'/>
-      
-      <!-- Inherit the GWT-specific Xydra Client bits -->
-      <inherits name='org.xydra.client.gwt.XydraClientGWT'/>
+      <!-- Inherit the GWT-specific Xydra bits -->
+      <inherits name='org.xydra.gwt.XydraGwt'/>
       
       <set-property name="user.agent" value="gecko" /> 
       
