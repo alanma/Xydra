@@ -1,13 +1,10 @@
 package org.xydra.editor;
 
-import java.util.Arrays;
-
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
-import org.xydra.base.value.XV;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XSynchronizesChanges;
@@ -96,9 +93,6 @@ public class XydraEditor implements EntryPoint {
 	}
 	
 	public void init() {
-		
-		log.info(XV.toIDSetValue(new XID[] { null }).toString());
-		log.info(Arrays.toString(new Object[] { null }));
 		
 		log.info("starting the xydra editor");
 		
