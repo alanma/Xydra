@@ -12,7 +12,7 @@
 	<!--  work around same-origin policy -->
 	<servlet>
 		<servlet-name>ProxyServlet</servlet-name>
-		<servlet-class>org.xydra.client.gwt.ProxyServlet</servlet-class>
+		<servlet-class>org.xydra.gwt.ProxyServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>ProxyServlet</servlet-name>

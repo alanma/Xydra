@@ -2,6 +2,8 @@ package org.xydra.gwt;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -23,8 +25,10 @@ import org.mortbay.jetty.handler.HandlerList;
 import org.mortbay.jetty.handler.ResourceHandler;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.webapp.WebAppContext;
+import org.xydra.log.DefaultLoggerFactorySPI;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.server.test.TestServer;
 
 
 /**
@@ -48,9 +52,14 @@ import org.xydra.log.LoggerFactory;
  * @author voelkel
  * 
  */
-public class Jetty {
+public class GwtTestServer {
 	
-	private static Logger log = LoggerFactory.getLogger(Jetty.class);
+	private static Logger log = getLogger();
+	
+	private static Logger getLogger() {
+		LoggerFactory.setLoggerFactorySPI(new DefaultLoggerFactorySPI());
+		return LoggerFactory.getLogger(GwtTestServer.class);
+	}
 	
 	private int port;
 	
@@ -58,20 +67,20 @@ public class Jetty {
 	
 	private WebAppContext webapp;
 	
-	public Jetty() {
+	public GwtTestServer() {
 		this(8888);
 	}
 	
-	public Jetty(int port) {
+	public GwtTestServer(int port) {
 		this.port = port;
 	}
 	
-	private void startServer() throws Exception {
+	private URI startServer() throws Exception {
 		
 		// Create an instance of the jetty server.
 		this.server = new Server(this.port);
 		
-		String contextPath = "/xclient";
+		String contextPath = "/";
 		
 		// Where to server files from.
 		File docRoot = new File("target/gwt-0.1.4-SNAPSHOT");
@@ -153,13 +162,28 @@ public class Jetty {
 		} catch(Exception e) {
 			throw new RuntimeException(e);
 		}
-		log.info("Started embedded Jetty server. User interface is at http://localhost:"
-		        + this.port + "/");
+		
+		try {
+			URI uri = new URI("http://localhost:" + this.port + "/");
+			if(contextPath != "" && contextPath != "/") {
+				uri = uri.resolve(contextPath + "/");
+			}
+			return uri;
+		} catch(URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
+		
 	}
 	
 	public static void main(String[] args) throws Exception {
-		Jetty jetty = new Jetty();
-		jetty.startServer();
+		
+		URI store = new TestServer().startXydraServer(new File("src/test/resources/webapp"));
+		
+		URI ui = new GwtTestServer().startServer();
+		
+		log.info("Started servers.");
+		log.info(" - Backend is at " + store);
+		log.info(" - User interface is at " + ui + "XydraEditor.html");
+		
 	}
-	
 }

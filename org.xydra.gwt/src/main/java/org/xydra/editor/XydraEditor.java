@@ -1,10 +1,13 @@
 package org.xydra.editor;
 
+import java.util.Arrays;
+
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
+import org.xydra.base.value.XV;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XSynchronizesChanges;
@@ -45,7 +48,7 @@ public class XydraEditor implements EntryPoint {
 	
 	private static final Logger log = LoggerFactory.getLogger(XydraEditor.class);
 	
-	private static final XydraStore store = new GwtXydraStoreRestClient("/xclient/cxm/store/v1/",
+	private static final XydraStore store = new GwtXydraStoreRestClient("/cxm/store/v1/",
 	        new JsonSerializer(), new JsonParser());
 	
 	VerticalPanel panel = new VerticalPanel();
@@ -93,6 +96,9 @@ public class XydraEditor implements EntryPoint {
 	}
 	
 	public void init() {
+		
+		log.info(XV.toIDSetValue(new XID[] { null }).toString());
+		log.info(Arrays.toString(new Object[] { null }));
 		
 		log.info("starting the xydra editor");
 		

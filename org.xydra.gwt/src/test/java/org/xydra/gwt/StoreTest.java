@@ -11,7 +11,7 @@ public class StoreTest extends GWTTestCase {
 	
 	@Override
 	public String getModuleName() {
-		return "org.xydra.client.gwt.editor.XydraEditor";
+		return "org.xydra.gwt.XydraGwtTest";
 	}
 	
 	@Test

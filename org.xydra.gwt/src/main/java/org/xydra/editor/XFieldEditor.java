@@ -149,14 +149,11 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 	
 	protected void changeValue(XValue value) {
 		
-		// log.info(value == null ? "null" : value.getType().toString());
-		// log.info(value == null ? "null" : value.toString());
-		
 		String str;
 		if(value == null) {
 			str = "(no value)";
 		} else {
-			str = "";// value.toString();
+			str = value.toString();
 			if(value instanceof XCollectionValue<?>) {
 				if(value instanceof XListValue<?>) {
 					if(value instanceof XStringListValue) {
@@ -190,7 +187,8 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 					} else if(value instanceof XAddressSetValue) {
 						str += " (address set)";
 					} else {
-						throw new RuntimeException("Unexpected XSetValue type: " + value);
+						throw new RuntimeException("Unexpected XSetValue type: " + value.getClass()
+						        + ": " + value.getType());
 					}
 				} else {
 					throw new RuntimeException("Unexpected XCollectionValue type: " + value);
