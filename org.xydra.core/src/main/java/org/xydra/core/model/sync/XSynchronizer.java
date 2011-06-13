@@ -455,7 +455,9 @@ public class XSynchronizer {
 			
 		} while(!newChanges.isEmpty());
 		
-		sc.onSuccess();
+		if(sc != null) {
+			sc.onSuccess();
+		}
 		assert this.requestRunning;
 		this.requestRunning = false;
 		
