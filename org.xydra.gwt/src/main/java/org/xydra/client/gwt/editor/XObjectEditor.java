@@ -37,6 +37,10 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 	private final Button add = new Button("Add Field");
 	private final Map<XID,XFieldEditor> fields = new HashMap<XID,XFieldEditor>();
 	
+	public XObjectEditor(XObject object) {
+		this(null, object);
+	}
+	
 	public XObjectEditor(XModel model, XObject object) {
 		super();
 		
@@ -49,7 +53,7 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 		this.inner.add(new Label(object.getID().toString()));
 		this.inner.add(this.add);
 		
-		if(this.object.getAddress().getModel() != null) {
+		if(this.model != null) {
 			Button delete = new Button("Remove Object");
 			this.inner.add(delete);
 			delete.addClickHandler(new ClickHandler() {
@@ -139,11 +143,12 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 	}
 	
 	private void add(XID id) {
-		this.object.executeCommand(
-		        MemoryObjectCommand.createAddCommand(this.object.getAddress(), true, id), null);
+		this.object.executeCommand(MemoryObjectCommand.createAddCommand(this.object.getAddress(),
+		        true, id), null);
 	}
 	
 	protected void delete() {
+		assert this.model != null;
 		this.model.executeCommand(MemoryModelCommand.createRemoveCommand(this.object.getAddress()
 		        .getParent(), this.object.getRevisionNumber(), this.object.getID()), null);
 	}

@@ -5,8 +5,8 @@ import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
-import org.xydra.client.ServiceException;
 import org.xydra.core.model.XModel;
+import org.xydra.core.model.XObject;
 import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.core.model.sync.XSynchronizer;
 import org.xydra.core.serialize.json.JsonParser;
@@ -15,15 +15,16 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
+import org.xydra.store.StoreException;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.gwt.GwtXydraStoreRestClient;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -84,7 +85,7 @@ public class XydraEditor implements EntryPoint {
 		});
 		
 		// use a deferred command so that the handler catches init() exceptions
-		DeferredCommand.addCommand(new Command() {
+		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 			public void execute() {
 				init();
 			}
@@ -208,7 +209,7 @@ public class XydraEditor implements EntryPoint {
 	}
 	
 	private void handleError(Throwable error) {
-		if(error instanceof ServiceException) {
+		if(error instanceof StoreException) {
 			this.panel.add(new Label(error.getMessage()));
 		} else {
 			this.panel.add(new Label(error.toString()));
@@ -227,11 +228,16 @@ public class XydraEditor implements EntryPoint {
 		this.panel.add(new XModelEditor(model));
 	}
 	
-	protected void loadedObject(XReadableObject object) {
+	protected void loadedObject(XReadableObject objectSnapshot) {
 		
 		log.info("editor: loaded object, starting synchronizer");
 		
-		// TODO implement
+		XObject object = XX.wrap(ACTOR, PSW, objectSnapshot);
+		
+		startSynchronizer(object);
+		
+		this.panel.add(new Label(object.getAddress().toString()));
+		this.panel.add(new XObjectEditor(object));
 	}
 	
 	private void startSynchronizer(XSynchronizesChanges entity) {
