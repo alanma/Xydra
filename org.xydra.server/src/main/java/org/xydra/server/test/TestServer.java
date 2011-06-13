@@ -134,10 +134,15 @@ public class TestServer {
 	public static void main(String[] args) throws Exception {
 		
 		// start jetty
-		TestServer server = new TestServer();
-		URI uri = server.startServer("/xydra", new File("src/main/webapp"));
+		new TestServer().startXydraServer(new File("src/main/webapp"));
 		
-		IXydraServer xydraServer = server.getBackend();
+	}
+	
+	public URI startXydraServer(File webapp) {
+		
+		URI uri = startServer("/xydra", webapp);
+		
+		IXydraServer xydraServer = getBackend();
 		
 		// add a default model
 		// TODO move command into transaction
@@ -157,7 +162,7 @@ public class TestServer {
 		
 		// initialize the store
 		
-		XydraStore store = server.getStore();
+		XydraStore store = getStore();
 		
 		XydraStoreAdmin admin = store.getXydraStoreAdmin();
 		XAuthenticationDatabase auth = admin.getAccessControlManager().getAuthenticationDatabase();
@@ -180,5 +185,6 @@ public class TestServer {
 		
 		log.info("Started embedded Jetty server. User interface is at " + uri.toString());
 		
+		return uri;
 	}
 }
