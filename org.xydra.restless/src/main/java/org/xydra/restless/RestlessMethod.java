@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.log.Logger;
@@ -96,6 +97,11 @@ public class RestlessMethod {
 		Object instance = toInstance(this.instanceOrClass);
 		
 		Method method = Restless.methodByName(instance, this.methodName);
+		// FIXME
+		/* If running on localhost, we might tweak the host */
+		boolean runningOnLocalhost = TweakedRequest.isLocalhost(req.getServerName());
+		final HttpServletRequest reqHandedDown = runningOnLocalhost ? new TweakedRequest(req) : req;
+		
 		if(method == null) {
 			res.sendError(500, "Malconfigured server. Method '" + this.methodName
 			        + "' not found in '" + Restless.instanceOrClass_className(this.instanceOrClass)
@@ -106,10 +112,11 @@ public class RestlessMethod {
 			// build up parameters
 			
 			// extract values from path
-			Map<String,String> urlParameter = getUrlParametersAsMap(req, this.pathTemplate);
+			Map<String,String> urlParameter = getUrlParametersAsMap(reqHandedDown,
+			        this.pathTemplate);
 			
 			// extract Cookie values
-			Map<String,String> cookieMap = ServletUtils.getCookiesAsMap(req);
+			Map<String,String> cookieMap = ServletUtils.getCookiesAsMap(reqHandedDown);
 			
 			int boundNamedParameterNumber = 0;
 			boolean hasHttpServletResponseParameter = false;
@@ -122,7 +129,7 @@ public class RestlessMethod {
 					javaMethodArgs.add(res);
 					hasHttpServletResponseParameter = true;
 				} else if(requiredParamType.equals(HttpServletRequest.class)) {
-					javaMethodArgs.add(req);
+					javaMethodArgs.add(reqHandedDown);
 				} else if(requiredParamType.equals(Restless.class)) {
 					javaMethodArgs.add(restless);
 				} else if(requiredParamType.equals(IRestlessContext.class)) {
@@ -137,7 +144,7 @@ public class RestlessMethod {
 						}
 						
 						public HttpServletRequest getRequest() {
-							return req;
+							return reqHandedDown;
 						}
 					};
 					javaMethodArgs.add(restlessContext);
@@ -175,7 +182,7 @@ public class RestlessMethod {
 					
 					/* 2) look in POST params and query params */
 					if(value == null) {
-						String[] values = req.getParameterValues(param.name);
+						String[] values = reqHandedDown.getParameterValues(param.name);
 						if(values != null) {
 							// handle POST and query param values
 							if(param.isArray) {
@@ -262,7 +269,7 @@ public class RestlessMethod {
 						}
 						
 						public HttpServletRequest getRequest() {
-							return req;
+							return reqHandedDown;
 						}
 					};
 					
@@ -411,6 +418,30 @@ public class RestlessMethod {
 		} else {
 			return instanceOrClass;
 		}
+	}
+	
+	private static class TweakedRequest extends HttpServletRequestWrapper {
+		
+		public TweakedRequest(HttpServletRequest baseReq) {
+			super(baseReq);
+		}
+		
+		@Override
+		public String getServerName() {
+			String serverName = super.getServerName();
+			assert isLocalhost(serverName);
+			// look for override param
+			String hostOverride = super.getParameter(Restless.X_HOST_Override);
+			if(hostOverride != null) {
+				return hostOverride;
+			}
+			return serverName;
+		}
+		
+		private static boolean isLocalhost(String serverName) {
+			return serverName.equals("localhost") || serverName.equals("127.0.0.1");
+		}
+		
 	}
 	
 }

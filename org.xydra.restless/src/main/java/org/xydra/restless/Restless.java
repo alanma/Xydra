@@ -92,6 +92,8 @@ import org.xydra.restless.utils.XmlUtils;
 public class Restless extends HttpServlet {
 	
 	public static final String X_HTTP_Method_Override = "X-HTTP-Method-Override";
+	/** Only effective on localhost for security reasons. Helps testing */
+	public static final String X_HOST_Override = "X-HTTP-Host-Override";
 	
 	/**
 	 * Methods registered with the
