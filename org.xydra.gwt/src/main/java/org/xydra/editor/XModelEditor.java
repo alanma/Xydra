@@ -1,4 +1,4 @@
-package org.xydra.gwt.editor;
+package org.xydra.editor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,8 +11,8 @@ import org.xydra.base.value.XValue;
 import org.xydra.core.change.XModelEventListener;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
-import org.xydra.gwt.editor.value.XIDEditor;
-import org.xydra.gwt.editor.value.XValueEditor.EditListener;
+import org.xydra.editor.value.XIDEditor;
+import org.xydra.editor.value.XValueEditor.EditListener;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 

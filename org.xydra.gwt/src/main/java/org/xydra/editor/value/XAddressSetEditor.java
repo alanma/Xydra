@@ -1,17 +1,17 @@
-package org.xydra.gwt.editor.value;
+package org.xydra.editor.value;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.value.XAddressListValue;
+import org.xydra.base.value.XAddressSetValue;
 import org.xydra.base.value.XV;
 
 
-public class XAddressListEditor extends XCollectionEditor<XAddress,XAddressListValue> {
+public class XAddressSetEditor extends XCollectionEditor<XAddress,XAddressSetValue> {
 	
-	public XAddressListEditor(Iterator<XAddress> value, EditListener listener) {
+	public XAddressSetEditor(Iterator<XAddress> value, EditListener listener) {
 		super(listener);
 		
 		if(value == null)
@@ -23,11 +23,11 @@ public class XAddressListEditor extends XCollectionEditor<XAddress,XAddressListV
 	}
 	
 	@Override
-	protected XAddressListValue asCollectionValue(Iterator<XAddress> entries) {
+	protected XAddressSetValue asCollectionValue(Iterator<XAddress> entries) {
 		List<XAddress> lst = new ArrayList<XAddress>();
 		while(entries.hasNext())
 			lst.add(entries.next());
-		return XV.toAddressListValue(lst);
+		return XV.toAddressSetValue(lst);
 	}
 	
 	@Override

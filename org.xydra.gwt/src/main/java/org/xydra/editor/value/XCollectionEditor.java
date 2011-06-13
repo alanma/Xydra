@@ -1,4 +1,4 @@
-package org.xydra.gwt.editor.value;
+package org.xydra.editor.value;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.xydra.base.value.XCollectionValue;
 import org.xydra.base.value.XValue;
-import org.xydra.gwt.editor.value.XValueEditor.EditListener;
+import org.xydra.editor.value.XValueEditor.EditListener;
 import org.xydra.index.iterator.AbstractTransformingIterator;
 
 import com.google.gwt.event.dom.client.ClickEvent;

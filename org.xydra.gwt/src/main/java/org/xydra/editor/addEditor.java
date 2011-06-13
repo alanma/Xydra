@@ -1,4 +1,4 @@
-package org.xydra.gwt.editor;
+package org.xydra.editor;
 
 public interface addEditor {
 	

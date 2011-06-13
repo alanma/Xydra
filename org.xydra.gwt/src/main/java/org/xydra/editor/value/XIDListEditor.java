@@ -1,17 +1,17 @@
-package org.xydra.gwt.editor.value;
+package org.xydra.editor.value;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.xydra.base.XID;
-import org.xydra.base.value.XIDSetValue;
+import org.xydra.base.value.XIDListValue;
 import org.xydra.base.value.XV;
 
 
-public class XIDSetEditor extends XCollectionEditor<XID,XIDSetValue> {
+public class XIDListEditor extends XCollectionEditor<XID,XIDListValue> {
 	
-	public XIDSetEditor(Iterator<XID> value, EditListener listener) {
+	public XIDListEditor(Iterator<XID> value, EditListener listener) {
 		super(listener);
 		
 		if(value == null)
@@ -23,11 +23,11 @@ public class XIDSetEditor extends XCollectionEditor<XID,XIDSetValue> {
 	}
 	
 	@Override
-	protected XIDSetValue asCollectionValue(Iterator<XID> entries) {
+	protected XIDListValue asCollectionValue(Iterator<XID> entries) {
 		List<XID> lst = new ArrayList<XID>();
 		while(entries.hasNext())
 			lst.add(entries.next());
-		return XV.toIDSetValue(lst);
+		return XV.toIDListValue(lst);
 	}
 	
 	@Override

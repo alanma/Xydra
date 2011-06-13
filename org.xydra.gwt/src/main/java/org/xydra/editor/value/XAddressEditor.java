@@ -1,4 +1,4 @@
-package org.xydra.gwt.editor.value;
+package org.xydra.editor.value;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XX;

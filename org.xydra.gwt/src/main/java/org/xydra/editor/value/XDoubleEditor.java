@@ -1,6 +1,6 @@
-package org.xydra.gwt.editor.value;
+package org.xydra.editor.value;
 
-import org.xydra.base.value.XIntegerValue;
+import org.xydra.base.value.XDoubleValue;
 import org.xydra.base.value.XV;
 
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -9,14 +9,14 @@ import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.ui.TextBox;
 
 
-public class XIntegerEditor extends AtomicXValueEditor<XIntegerValue> implements KeyPressHandler {
+public class XDoubleEditor extends AtomicXValueEditor<XDoubleValue> implements KeyPressHandler {
 	
 	private final TextBox editor = new TextBox();
 	
-	public XIntegerEditor(int oldValue, EditListener listener) {
+	public XDoubleEditor(double oldValue, EditListener listener) {
 		super(listener);
 		
-		this.editor.setText(Integer.toString(oldValue));
+		this.editor.setText(Double.toString(oldValue));
 		
 		this.editor.addKeyPressHandler(this);
 		
@@ -24,13 +24,13 @@ public class XIntegerEditor extends AtomicXValueEditor<XIntegerValue> implements
 	}
 	
 	@Override
-	public XIntegerValue getValue() {
-		int v = 0;
+	public XDoubleValue getValue() {
+		double v = 0;
 		try {
-			v = Integer.parseInt(this.editor.getText());
+			v = Double.parseDouble(this.editor.getText());
 		} catch(NumberFormatException nfe) {
-			v = (int)XValueUtils.generateLong(this.editor.getText());
-			this.editor.setText(Integer.toString(v));
+			v = XValueUtils.generateDouble(this.editor.getText());
+			this.editor.setText(Double.toString(v));
 		}
 		return XV.toValue(v);
 	}
@@ -55,6 +55,9 @@ public class XIntegerEditor extends AtomicXValueEditor<XIntegerValue> implements
 		}
 		
 		if(cc >= '0' && cc <= '9')
+			return;
+		
+		if(cc == '.' && this.editor.getText().indexOf('.') < 0)
 			return;
 		
 		e.preventDefault();

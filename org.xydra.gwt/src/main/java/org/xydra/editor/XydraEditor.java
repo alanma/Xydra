@@ -1,4 +1,4 @@
-package org.xydra.gwt.editor;
+package org.xydra.editor;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;

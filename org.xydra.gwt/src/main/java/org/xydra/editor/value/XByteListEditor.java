@@ -1,4 +1,4 @@
-package org.xydra.gwt.editor.value;
+package org.xydra.editor.value;
 
 import org.xydra.base.value.XByteListValue;
 import org.xydra.base.value.XV;
