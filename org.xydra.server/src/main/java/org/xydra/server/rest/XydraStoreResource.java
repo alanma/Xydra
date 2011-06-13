@@ -72,6 +72,9 @@ public class XydraStoreResource {
 		jsonMimes.add("text/javascript");
 		jsonMimes.add("text/x-javascript");
 		jsonMimes.add("text/x-json");
+		jsonMimes.add("application/javascript");
+		jsonMimes.add("text/ecmascript");
+		jsonMimes.add("application/ecmascript");
 		mimes.addAll(jsonMimes);
 		
 		xmlMimes.add("application/xml");
@@ -158,7 +161,7 @@ public class XydraStoreResource {
 		
 		String mime = req.getParameter(XydraStoreRestInterface.ARG_ACCEPT);
 		if(mime != null) {
-			mime = mime.trim();
+			mime = mime.trim().toLowerCase();
 			if(!choices.contains(mime)) {
 				throw new InitException("Unexpected content type: " + mime);
 			}
@@ -173,7 +176,7 @@ public class XydraStoreResource {
 		
 		while(headers.hasMoreElements()) {
 			
-			String accept = headers.nextElement();
+			String accept = headers.nextElement().toLowerCase();
 			
 			String[] types = accept.split(",");
 			for(String type : types) {
@@ -213,7 +216,7 @@ public class XydraStoreResource {
 				throw new InitException("Invalid callback: " + callback);
 			}
 			mime = getBestContentType(context, jsonMimes,
-			        XydraStoreRestInterface.DEFAULT_JSON_CONTENT_TYPE);
+			        XydraStoreRestInterface.DEFAULT_CALLBACK_CONTENT_TYPE);
 		} else {
 			mime = getBestContentType(context, mimes, XydraStoreRestInterface.DEFAULT_CONTENT_TYPE);
 		}
@@ -282,7 +285,8 @@ public class XydraStoreResource {
 		List<XCommand> commandsList;
 		try {
 			XydraElement element;
-			if(jsonMimes.contains(context.getRequest().getContentType())) {
+			String mime = context.getRequest().getContentType();
+			if(mime != null && jsonMimes.contains(mime.toLowerCase())) {
 				try {
 					element = jsonParser.parse(rawCommands);
 				} catch(Exception e) {

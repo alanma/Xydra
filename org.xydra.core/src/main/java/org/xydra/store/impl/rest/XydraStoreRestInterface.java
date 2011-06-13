@@ -44,7 +44,7 @@ public interface XydraStoreRestInterface {
 	static final String ARG_BEGIN_REVISION = "beginRevision";
 	
 	static final String DEFAULT_CONTENT_TYPE = "application/xml";
-	static final String DEFAULT_JSON_CONTENT_TYPE = "application/json";
+	static final String DEFAULT_CALLBACK_CONTENT_TYPE = "text/javascript";
 	
 	/** Argument name for the JSON callback. */
 	static final String ARG_CALLBACK = "callback";
