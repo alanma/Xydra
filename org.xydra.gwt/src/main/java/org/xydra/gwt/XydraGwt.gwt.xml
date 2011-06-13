@@ -1,23 +1,25 @@
 <!DOCTYPE module PUBLIC "//gwt-module/" "http://google-web-toolkit.googlecode.com/svn/tags/1.6.2/distro-source/core/src/gwt-module.dtd">
 <module>
-
-      <!-- Inherit the core Web Toolkit stuff. -->
-      <inherits name='com.google.gwt.user.User'/>
-      
-      <!-- Inherit the core GWT XML module. -->
-      <inherits name='com.google.gwt.xml.XML'/>
-	    
-	    <!-- Inherit the core GWT HTTP module. -->
-	    <inherits name="com.google.gwt.http.HTTP"/>
-      
-      <!-- Inherit the Xydra Core -->
-      <inherits name='org.xydra.core.XydraCore'/>
-      
-	    <!-- Inherit Xydra Logging -->
-	    <inherits name='org.xydra.log.Xlog'/>
-      
-      <source path="">
-      	<exclude name="editor/**" />
-      </source>
-      
+	
+	<!-- Inherit the core Web Toolkit stuff. -->
+	<inherits name='com.google.gwt.user.User'/>
+	
+	<!-- Inherit the core GWT XML module. -->
+	<inherits name='com.google.gwt.xml.XML'/>
+	
+	<!-- Inherit the core GWT HTTP module. -->
+	<inherits name="com.google.gwt.http.HTTP"/>
+	
+	<!-- Inherit the Xydra Core -->
+	<inherits name='org.xydra.core.XydraCore'/>
+	
+	<!-- Inherit Xydra Logging -->
+	<inherits name='org.xydra.log.Xlog'/>
+	
+	<source path="">
+		<exclude name="**/*Test.java" />
+		<exclude name="Jetty.java" />
+		<exclude name="ProxyServlet.java" />
+	</source>
+	
 </module>

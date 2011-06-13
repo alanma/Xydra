@@ -146,7 +146,7 @@
 					<output>${gwt.output.directory}</output>
 					<logLevel>INFO</logLevel>
 					<style>DETAILED</style>
-					<module>org.xydra.client.gwt.editor.XydraEditor</module>
+					<module>org.xydra.editor.XydraEditor</module>
 				</configuration>
 				<executions>
 					<execution>
