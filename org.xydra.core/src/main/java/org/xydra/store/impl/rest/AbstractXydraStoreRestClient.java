@@ -59,7 +59,7 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 	protected abstract class Request<T> {
 		
 		final public XID actor;
-		final protected String password;
+		final public String password;
 		final private Callback<T> callback;
 		
 		protected Request(XID actor, String password, Callback<T> callback) {
@@ -142,9 +142,9 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 		
 	}
 	
-	abstract void get(String uri, Request<?> req);
+	protected abstract void get(String uri, Request<?> req);
 	
-	abstract void post(String uri, XydraOut data, Request<?> req);
+	protected abstract void post(String uri, XydraOut data, Request<?> req);
 	
 	private String encodeEventsRequests(GetEventsRequest[] getEventsRequests,
 	        BatchedResult<XEvent[]>[] res) {
