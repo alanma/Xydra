@@ -4,7 +4,7 @@
 
 	<groupId>org.xydra</groupId>
 	<artifactId>webadmin</artifactId>
-	<version>0.1.3-SNAPSHOT</version>
+	<version>0.1.4-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>Xydra Webadmin</name>
 
@@ -77,35 +77,21 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>restless</artifactId>
-			<version>0.1.3-SNAPSHOT</version>
+			<version>0.1.4-SNAPSHOT</version>
 		</dependency>
 
 		<!--  Xydra Core -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
-			<version>0.1.3-SNAPSHOT</version>
-		</dependency>
-		
-		<!--  Xydra Client -->
-		<dependency>
-			<groupId>org.xydra</groupId>
-			<artifactId>client</artifactId>
-			<version>0.1.3-SNAPSHOT</version>
+			<version>0.1.4-SNAPSHOT</version>
 		</dependency>
 		
 		<!--  Xydra Server -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>server</artifactId>
-			<version>0.1.3-SNAPSHOT</version>
-		</dependency>
-		
-		<!-- gwt-log -->
-		<dependency>
-			<groupId>com.google.code.gwt-log</groupId>
-			<artifactId>gwt-log</artifactId>
-			<version>3.0.3</version>
+			<version>0.1.4-SNAPSHOT</version>
 		</dependency>
 		
 		<!-- FileUpload utilities from http://commons.apache.org/fileupload/ -->
