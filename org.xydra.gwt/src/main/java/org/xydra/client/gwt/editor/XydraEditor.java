@@ -3,19 +3,20 @@ package org.xydra.client.gwt.editor;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
-import org.xydra.client.Callback;
+import org.xydra.base.rmof.XReadableModel;
+import org.xydra.base.rmof.XReadableObject;
 import org.xydra.client.ServiceException;
-import org.xydra.client.XChangesService;
-import org.xydra.client.XDataService;
-import org.xydra.client.gwt.service.GWTChangesService;
-import org.xydra.client.gwt.service.GWTDataService;
-import org.xydra.client.gwt.xml.impl.GwtXmlParser;
-import org.xydra.client.sync.XSynchronizer;
 import org.xydra.core.model.XModel;
-import org.xydra.core.model.XObject;
 import org.xydra.core.model.XSynchronizesChanges;
+import org.xydra.core.model.sync.XSynchronizer;
+import org.xydra.core.serialize.json.JsonParser;
+import org.xydra.core.serialize.json.JsonSerializer;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.BatchedResult;
+import org.xydra.store.Callback;
+import org.xydra.store.XydraStore;
+import org.xydra.store.impl.gwt.GwtXydraStoreRestClient;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -37,12 +38,14 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  */
 public class XydraEditor implements EntryPoint {
 	
+	private static final String PSW = "secret";
+	
+	private static final XID ACTOR = XX.toId("tester");
+	
 	private static final Logger log = LoggerFactory.getLogger(XydraEditor.class);
 	
-	private final XDataService data = new GWTDataService("/xclient/cxm/data",
-	        new GwtXmlParser());
-	private final XChangesService changes = new GWTChangesService("/xclient/cxm/changes",
-	        new GwtXmlParser());
+	private static final XydraStore store = new GwtXydraStoreRestClient("/xclient/cxm/store/v1/",
+	        new JsonSerializer(), new JsonParser());
 	
 	VerticalPanel panel = new VerticalPanel();
 	
@@ -51,7 +54,7 @@ public class XydraEditor implements EntryPoint {
 	Timer timer = new Timer() {
 		@Override
 		public void run() {
-			XydraEditor.this.manager.synchronize();
+			XydraEditor.this.manager.synchronize(null);
 		}
 	};
 	
@@ -146,31 +149,56 @@ public class XydraEditor implements EntryPoint {
 			return;
 		}
 		
-		this.addr = XX.toAddress(null, modelId, objectId, null);
+		this.addr = XX.toAddress(XX.toId("data"), modelId, objectId, null);
 		
 		try {
 			if(objectId != null) {
-				this.data.getObject(modelId, objectId, new Callback<XObject>() {
-					public void onSuccess(final XObject object) {
-						loadedObject(object);
-					}
+				Callback<BatchedResult<XReadableObject>[]> cb = new Callback<BatchedResult<XReadableObject>[]>() {
 					
+					@Override
 					public void onFailure(Throwable error) {
 						handleError(error);
 					}
 					
-				});
+					@Override
+					public void onSuccess(BatchedResult<XReadableObject>[] object) {
+						assert object.length == 1;
+						if(object[0].getException() != null) {
+							handleError(object[0].getException());
+						} else if(object[0].getResult() == null) {
+							handleError(new RuntimeException("object not found: "
+							        + XydraEditor.this.addr));
+						} else {
+							loadedObject(object[0].getResult());
+						}
+					}
+					
+				};
+				store.getObjectSnapshots(ACTOR, PSW, new XAddress[] { this.addr }, cb);
+				
 			} else {
-				this.data.getModel(modelId, new Callback<XModel>() {
-					public void onSuccess(final XModel model) {
-						loadedModel(model);
-					}
+				Callback<BatchedResult<XReadableModel>[]> cb = new Callback<BatchedResult<XReadableModel>[]>() {
 					
+					@Override
 					public void onFailure(Throwable error) {
 						handleError(error);
 					}
 					
-				});
+					@Override
+					public void onSuccess(BatchedResult<XReadableModel>[] object) {
+						assert object.length == 1;
+						if(object[0].getException() != null) {
+							handleError(object[0].getException());
+						} else if(object[0].getResult() == null) {
+							handleError(new RuntimeException("model not found: "
+							        + XydraEditor.this.addr));
+						} else {
+							loadedModel(object[0].getResult());
+						}
+					}
+					
+				};
+				store.getModelSnapshots(ACTOR, PSW, new XAddress[] { this.addr }, cb);
 			}
 			
 		} catch(Exception e) {
@@ -187,26 +215,27 @@ public class XydraEditor implements EntryPoint {
 		}
 	}
 	
-	protected void loadedModel(XModel model) {
+	protected void loadedModel(XReadableModel modelSnapshot) {
 		
 		log.info("editor: loaded model, starting synchronizer");
 		
+		XModel model = XX.wrap(ACTOR, PSW, modelSnapshot);
+		
 		startSynchronizer(model);
 		
+		this.panel.add(new Label(model.getAddress().toString()));
 		this.panel.add(new XModelEditor(model));
 	}
 	
-	protected void loadedObject(XObject object) {
+	protected void loadedObject(XReadableObject object) {
 		
 		log.info("editor: loaded object, starting synchronizer");
 		
-		startSynchronizer(object);
-		
-		this.panel.add(new XObjectEditor(null, object));
+		// TODO implement
 	}
 	
 	private void startSynchronizer(XSynchronizesChanges entity) {
-		this.manager = new XSynchronizer(this.addr, entity, XydraEditor.this.changes);
+		this.manager = new XSynchronizer(entity, store);
 		this.timer.scheduleRepeating(5000);
 	}
 	

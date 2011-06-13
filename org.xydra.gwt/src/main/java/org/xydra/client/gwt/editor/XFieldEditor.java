@@ -1,10 +1,14 @@
 package org.xydra.client.gwt.editor;
 
+import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.impl.memory.MemoryFieldCommand;
 import org.xydra.base.change.impl.memory.MemoryObjectCommand;
+import org.xydra.base.value.XAddressListValue;
+import org.xydra.base.value.XAddressSetValue;
+import org.xydra.base.value.XAddressSortedSetValue;
 import org.xydra.base.value.XBooleanListValue;
 import org.xydra.base.value.XBooleanValue;
 import org.xydra.base.value.XByteListValue;
@@ -13,6 +17,7 @@ import org.xydra.base.value.XDoubleListValue;
 import org.xydra.base.value.XDoubleValue;
 import org.xydra.base.value.XIDListValue;
 import org.xydra.base.value.XIDSetValue;
+import org.xydra.base.value.XIDSortedSetValue;
 import org.xydra.base.value.XIntegerListValue;
 import org.xydra.base.value.XIntegerValue;
 import org.xydra.base.value.XListValue;
@@ -23,6 +28,10 @@ import org.xydra.base.value.XStringListValue;
 import org.xydra.base.value.XStringSetValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XValue;
+import org.xydra.client.gwt.editor.value.XAddressEditor;
+import org.xydra.client.gwt.editor.value.XAddressListEditor;
+import org.xydra.client.gwt.editor.value.XAddressSetEditor;
+import org.xydra.client.gwt.editor.value.XAddressSortedSetEditor;
 import org.xydra.client.gwt.editor.value.XBooleanEditor;
 import org.xydra.client.gwt.editor.value.XBooleanListEditor;
 import org.xydra.client.gwt.editor.value.XByteListEditor;
@@ -32,6 +41,7 @@ import org.xydra.client.gwt.editor.value.XDoubleListEditor;
 import org.xydra.client.gwt.editor.value.XIDEditor;
 import org.xydra.client.gwt.editor.value.XIDListEditor;
 import org.xydra.client.gwt.editor.value.XIDSetEditor;
+import org.xydra.client.gwt.editor.value.XIDSortedSetEditor;
 import org.xydra.client.gwt.editor.value.XIntegerEditor;
 import org.xydra.client.gwt.editor.value.XIntegerListEditor;
 import org.xydra.client.gwt.editor.value.XLongEditor;
@@ -66,8 +76,8 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 	private static final int IDX_NOVALUE = 0;
 	private static final int IDX_LIST_STRING = 1;
 	private static final int IDX_STRING = 2;
-	private static final int IDX_LIST_XID = 3;
-	private static final int IDX_XID = 4;
+	private static final int IDX_LIST_ID = 3;
+	private static final int IDX_ID = 4;
 	private static final int IDX_LIST_BOOLEAN = 5;
 	private static final int IDX_BOOLEAN = 6;
 	private static final int IDX_LIST_DOUBLE = 7;
@@ -77,8 +87,13 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 	private static final int IDX_LIST_INTEGER = 11;
 	private static final int IDX_INTEGER = 12;
 	private static final int IDX_SET_STRING = 13;
-	private static final int IDX_SET_XID = 14;
+	private static final int IDX_SET_ID = 14;
 	private static final int IDX_LIST_BYTE = 15;
+	private static final int IDX_ADDRESS = 16;
+	private static final int IDX_LIST_ADDRESS = 17;
+	private static final int IDX_SET_ADDRESS = 18;
+	private static final int IDX_SET_ADDRESS_SORTED = 19;
+	private static final int IDX_SET_ID_SORTED = 20;
 	
 	private final XObject object;
 	private final XField field;
@@ -134,17 +149,20 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 	
 	protected void changeValue(XValue value) {
 		
+		// log.info(value == null ? "null" : value.getType().toString());
+		// log.info(value == null ? "null" : value.toString());
+		
 		String str;
 		if(value == null) {
 			str = "(no value)";
 		} else {
-			str = value.toString();
+			str = "";// value.toString();
 			if(value instanceof XCollectionValue<?>) {
 				if(value instanceof XListValue<?>) {
 					if(value instanceof XStringListValue) {
 						str += " (string list)";
 					} else if(value instanceof XIDListValue) {
-						str += " (xid list)";
+						str += " (id list)";
 					} else if(value instanceof XBooleanListValue) {
 						str += " (boolean list)";
 					} else if(value instanceof XDoubleListValue) {
@@ -155,14 +173,22 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 						str += " (integer list)";
 					} else if(value instanceof XByteListValue) {
 						str += " (byte list)";
+					} else if(value instanceof XAddressListValue) {
+						str += " (address list)";
 					} else {
 						throw new RuntimeException("Unexpected XListValue type: " + value);
 					}
 				} else if(value instanceof XSetValue<?>) {
 					if(value instanceof XStringSetValue) {
 						str += " (string set)";
+					} else if(value instanceof XIDSortedSetValue) {
+						str += " (sorted id set)";
 					} else if(value instanceof XIDSetValue) {
-						str += " (xid set)";
+						str += " (id set)";
+					} else if(value instanceof XAddressSortedSetValue) {
+						str += " (sorted address set)";
+					} else if(value instanceof XAddressSetValue) {
+						str += " (address set)";
 					} else {
 						throw new RuntimeException("Unexpected XSetValue type: " + value);
 					}
@@ -173,7 +199,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 				if(value instanceof XStringValue) {
 					str += " (string)";
 				} else if(value instanceof XID) {
-					str += " (xid)";
+					str += " (id)";
 				} else if(value instanceof XBooleanValue) {
 					str += " (boolean)";
 				} else if(value instanceof XDoubleValue) {
@@ -182,6 +208,8 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 					str += " (long)";
 				} else if(value instanceof XIntegerValue) {
 					str += " (integer)";
+				} else if(value instanceof XAddress) {
+					str += " (address)";
 				} else {
 					throw new RuntimeException("Unexpected non-list XValue type: " + value);
 				}
@@ -262,8 +290,8 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		this.type.addItem("(No Value)");
 		this.type.addItem("string list");
 		this.type.addItem("string");
-		this.type.addItem("xid list");
-		this.type.addItem("xid");
+		this.type.addItem("id list");
+		this.type.addItem("id");
 		this.type.addItem("boolean list");
 		this.type.addItem("boolean");
 		this.type.addItem("double list");
@@ -275,6 +303,12 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		this.type.addItem("string set");
 		this.type.addItem("xid set");
 		this.type.addItem("byte list");
+		this.type.addItem("address");
+		this.type.addItem("address list");
+		this.type.addItem("address set");
+		this.type.addItem("sorted address set");
+		this.type.addItem("sorted id set");
+		
 		this.inner.insert(this.type, this.innerIndex);
 		this.type.addChangeHandler(new ChangeHandler() {
 			public void onChange(ChangeEvent e) {
@@ -293,7 +327,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 					if(value instanceof XStringListValue) {
 						this.type.setSelectedIndex(IDX_LIST_STRING);
 					} else if(value instanceof XIDListValue) {
-						this.type.setSelectedIndex(IDX_LIST_XID);
+						this.type.setSelectedIndex(IDX_LIST_ID);
 					} else if(value instanceof XBooleanListValue) {
 						this.type.setSelectedIndex(IDX_LIST_BOOLEAN);
 					} else if(value instanceof XDoubleListValue) {
@@ -304,14 +338,22 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 						this.type.setSelectedIndex(IDX_LIST_INTEGER);
 					} else if(value instanceof XByteListValue) {
 						this.type.setSelectedIndex(IDX_LIST_BYTE);
+					} else if(value instanceof XAddressListValue) {
+						this.type.setSelectedIndex(IDX_LIST_ADDRESS);
 					} else {
 						throw new RuntimeException("Unexpected XListValue type: " + value);
 					}
 				} else if(value instanceof XSetValue<?>) {
 					if(value instanceof XStringSetValue) {
 						this.type.setSelectedIndex(IDX_SET_STRING);
+					} else if(value instanceof XIDSortedSetValue) {
+						this.type.setSelectedIndex(IDX_SET_ID_SORTED);
 					} else if(value instanceof XIDSetValue) {
-						this.type.setSelectedIndex(IDX_SET_XID);
+						this.type.setSelectedIndex(IDX_SET_ID);
+					} else if(value instanceof XAddressSortedSetValue) {
+						this.type.setSelectedIndex(IDX_SET_ADDRESS_SORTED);
+					} else if(value instanceof XAddressSetValue) {
+						this.type.setSelectedIndex(IDX_SET_ADDRESS);
 					} else {
 						throw new RuntimeException("Unexpected XSetValue type: " + value);
 					}
@@ -322,7 +364,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 				if(value instanceof XStringValue) {
 					this.type.setSelectedIndex(IDX_STRING);
 				} else if(value instanceof XID) {
-					this.type.setSelectedIndex(IDX_XID);
+					this.type.setSelectedIndex(IDX_ID);
 				} else if(value instanceof XBooleanValue) {
 					this.type.setSelectedIndex(IDX_BOOLEAN);
 				} else if(value instanceof XDoubleValue) {
@@ -331,6 +373,8 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 					this.type.setSelectedIndex(IDX_LONG);
 				} else if(value instanceof XIntegerValue) {
 					this.type.setSelectedIndex(IDX_INTEGER);
+				} else if(value instanceof XAddress) {
+					this.type.setSelectedIndex(IDX_ADDRESS);
 				} else {
 					throw new RuntimeException("Unexpected non-collection XValue type: " + value);
 				}
@@ -392,8 +436,11 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		case IDX_LIST_STRING:
 			this.editor = new XStringListEditor(XValueUtils.asStringList(value), null);
 			break;
-		case IDX_LIST_XID:
+		case IDX_LIST_ID:
 			this.editor = new XIDListEditor(XValueUtils.asXIDList(value), null);
+			break;
+		case IDX_LIST_ADDRESS:
+			this.editor = new XAddressListEditor(XValueUtils.asAddressList(value), null);
 			break;
 		case IDX_LIST_BOOLEAN:
 			this.editor = new XBooleanListEditor(XValueUtils.asBooleanList(value), null);
@@ -414,8 +461,11 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		case IDX_STRING:
 			this.editor = new XStringEditor(XValueUtils.asString(value), null);
 			break;
-		case IDX_XID:
+		case IDX_ID:
 			this.editor = new XIDEditor(XValueUtils.asXID(value), null);
+			break;
+		case IDX_ADDRESS:
+			this.editor = new XAddressEditor(XValueUtils.asAddress(value), null);
 			break;
 		case IDX_BOOLEAN:
 			this.editor = new XBooleanEditor(XValueUtils.asBoolean(value), null);
@@ -433,8 +483,17 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		case IDX_SET_STRING:
 			this.editor = new XStringSetEditor(XValueUtils.asStringList(value), null);
 			break;
-		case IDX_SET_XID:
+		case IDX_SET_ID:
 			this.editor = new XIDSetEditor(XValueUtils.asXIDList(value), null);
+			break;
+		case IDX_SET_ID_SORTED:
+			this.editor = new XIDSortedSetEditor(XValueUtils.asXIDList(value), null);
+			break;
+		case IDX_SET_ADDRESS:
+			this.editor = new XAddressSetEditor(XValueUtils.asAddressList(value), null);
+			break;
+		case IDX_SET_ADDRESS_SORTED:
+			this.editor = new XAddressSortedSetEditor(XValueUtils.asAddressList(value), null);
 			break;
 		
 		default:

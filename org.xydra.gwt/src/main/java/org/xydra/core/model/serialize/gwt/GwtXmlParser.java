@@ -1,4 +1,4 @@
-package org.xydra.client.gwt.xml.impl;
+package org.xydra.core.model.serialize.gwt;
 
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.core.serialize.XydraElement;
@@ -27,7 +27,7 @@ public class GwtXmlParser implements XydraParser {
 			throw new IllegalArgumentException();
 		}
 		
-		return new GWTMiniElementImpl(document.getDocumentElement());
+		return new GwtXmlElement(document.getDocumentElement());
 	}
 	
 	@Override

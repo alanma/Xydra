@@ -8,7 +8,7 @@
       <inherits name='com.google.gwt.xml.XML'/>
       
       <!-- Inherit the Xydra Core -->
-      <inherits name='org.xydra.core.XydraCore'/>
+      <inherits name='org.xydra.XydraCore'/>
       
       <!-- Inherit the Xydra Client -->
       <inherits name='org.xydra.client.XydraClient'/>
@@ -16,11 +16,14 @@
       <!-- Inherit the GWT-specific Xydra Client bits -->
       <inherits name='org.xydra.client.gwt.XydraClientGWT'/>
       
+      <set-property name="user.agent" value="gecko" /> 
+      
 	    <!-- Inherit Xydra Logging -->
 	    <inherits name='org.xydra.log.Xlog'/>
       
 	    <!-- add gwt-log support -->
 	    <inherits name='com.allen_sauer.gwt.log.gwt-log-OFF' />
+       <extend-property name="log_level" values="TRACE"/>
         
       <!--  ENABLED or DISABLED  -->
       <set-property name="log_DivLogger" value="DISABLED" />

@@ -10,13 +10,14 @@ import org.xydra.client.XDataService;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
-import org.xydra.core.serialize.XydraElement;
-import org.xydra.core.serialize.XydraParser;
 import org.xydra.core.serialize.SerializedModel;
+import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.XydraOut;
+import org.xydra.core.serialize.XydraParser;
 import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.impl.gwt.GwtXydraStoreRestClient;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
@@ -30,7 +31,10 @@ import com.google.gwt.http.client.Response;
  * {@link RequestBuilder} to perform the HTTP requests.
  * 
  * The delete method is emulated using the "X-HTTP-Method-Override" header.
+ * 
+ * Deprecated, use {@link GwtXydraStoreRestClient} instead.
  */
+@Deprecated
 public class GWTDataService extends AbstractGWTHttpService implements XDataService {
 	
 	static private final Logger log = LoggerFactory.getLogger(GWTDataService.class);

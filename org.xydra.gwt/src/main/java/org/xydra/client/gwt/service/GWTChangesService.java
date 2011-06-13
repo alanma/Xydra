@@ -8,12 +8,13 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.client.Callback;
 import org.xydra.client.XChangesService;
-import org.xydra.core.serialize.XydraElement;
-import org.xydra.core.serialize.XydraParser;
 import org.xydra.core.serialize.SerializedCommand;
 import org.xydra.core.serialize.SerializedEvent;
+import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.XydraOut;
+import org.xydra.core.serialize.XydraParser;
 import org.xydra.core.serialize.xml.XmlOut;
+import org.xydra.store.impl.gwt.GwtXydraStoreRestClient;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
@@ -25,7 +26,10 @@ import com.google.gwt.http.client.Response;
 /**
  * A GWT implementation of the {@link XChangesService} API that uses a
  * {@link RequestBuilder} to perform the HTTP requests.
+ * 
+ * Deprecated, use {@link GwtXydraStoreRestClient} instead.
  */
+@Deprecated
 public class GWTChangesService extends AbstractGWTHttpService implements XChangesService {
 	
 	public GWTChangesService(String baseUrl, XydraParser parser) {
@@ -110,8 +114,7 @@ public class GWTChangesService extends AbstractGWTHttpService implements XChange
 					
 					if(entity.getModel() != null && (result == 0 || since != NONE)) {
 						
-						XydraElement element = GWTChangesService.this.parser
-						        .parse(resp.getText());
+						XydraElement element = GWTChangesService.this.parser.parse(resp.getText());
 						events = SerializedEvent.toEventList(element, context);
 						
 						// fill in a concrete revision number instead of

@@ -2,8 +2,10 @@ package org.xydra.client.gwt.editor.value;
 
 import java.util.Iterator;
 
+import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
+import org.xydra.base.value.XAddressListValue;
 import org.xydra.base.value.XBooleanListValue;
 import org.xydra.base.value.XBooleanValue;
 import org.xydra.base.value.XByteListValue;
@@ -81,6 +83,9 @@ abstract public class XValueUtils {
 		return new AbstractTransformingIterator<E,String>(value.iterator()) {
 			@Override
 			public String transform(E in) {
+				if(in == null) {
+					return null;
+				}
 				return in.toString();
 			}
 		};
@@ -110,6 +115,33 @@ abstract public class XValueUtils {
 		}
 	}
 	
+	static public XAddress asAddress(XValue value) {
+		
+		if(value == null) {
+			return XX.toAddress(XX.createUniqueId(), XX.createUniqueId(), XX.createUniqueId(), XX
+			        .createUniqueId());
+		}
+		
+		if(value instanceof XAddress) {
+			return ((XAddress)value);
+		} else if(value instanceof XAddressListValue) {
+			XAddressListValue lv = (XAddressListValue)value;
+			if(!lv.isEmpty()) {
+				return lv.get(0);
+			} else {
+				return XX.toAddress(XX.createUniqueId(), XX.createUniqueId(), XX.createUniqueId(),
+				        XX.createUniqueId());
+			}
+		} else {
+			XAddress id = generateAddress(asString(value));
+			if(id == null) {
+				return XX.toAddress(XX.createUniqueId(), XX.createUniqueId(), XX.createUniqueId(),
+				        XX.createUniqueId());
+			}
+			return id;
+		}
+	}
+	
 	private static final String nameStartChar = "A-Z_a-z\\xC0-\\xD6\\xD8-\\xF6"
 	        + "\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D"
 	        + "\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF" + "\\uFDF0-\\uFFFD";
@@ -132,6 +164,49 @@ abstract public class XValueUtils {
 		return XX.toId(cleaned);
 	}
 	
+	public static XAddress generateAddress(String text) {
+		
+		try {
+			return XX.toAddress(text);
+		} catch(Exception e) {
+			return XX.toAddress("dummy");
+		}
+	}
+	
+	static public Iterator<XAddress> asAddressList(XValue value) {
+		if(value == null) {
+			return new NoneIterator<XAddress>();
+		} else if(value instanceof XAddressListValue) {
+			return ((XAddressListValue)value).iterator();
+		}
+		if(value instanceof XAddressListValue) {
+			return ((XAddressListValue)value).iterator();
+		} else if(value instanceof XListValue<?>) {
+			Iterator<XAddress> it = new AbstractTransformingIterator<String,XAddress>(
+			        transform((XListValue<?>)value)) {
+				@Override
+				public XAddress transform(String in) {
+					if(in == null) {
+						return null;
+					}
+					return generateAddress(in);
+				}
+			};
+			return new AbstractFilteringIterator<XAddress>(it) {
+				@Override
+				protected boolean matchesFilter(XAddress entry) {
+					return entry != null;
+				}
+			};
+		} else {
+			XAddress xid = asAddress(value);
+			if(xid == null) {
+				return new NoneIterator<XAddress>();
+			}
+			return new SingleValueIterator<XAddress>(xid);
+		}
+	}
+	
 	static public Iterator<XID> asXIDList(XValue value) {
 		if(value == null) {
 			return new NoneIterator<XID>();
@@ -145,6 +220,9 @@ abstract public class XValueUtils {
 			        transform((XListValue<?>)value)) {
 				@Override
 				public XID transform(String in) {
+					if(in == null) {
+						return null;
+					}
 					return generateXid(in);
 				}
 			};
@@ -166,7 +244,7 @@ abstract public class XValueUtils {
 	static public double asDouble(XValue value) {
 		
 		if(value == null) {
-			return 0.0;
+			return 0.;
 		}
 		
 		if(value instanceof XDoubleValue) {
@@ -180,13 +258,13 @@ abstract public class XValueUtils {
 		}
 		if(value instanceof XListValue<?>) {
 			Object o = listGetFirst((XListValue<?>)value);
-			if(o instanceof Double) {
+			if(o == null) {
+				return 0.;
+			} else if(o instanceof Double) {
 				return (Double)o;
-			}
-			if(o instanceof Integer) {
+			} else if(o instanceof Integer) {
 				return (Integer)o;
-			}
-			if(o instanceof Long) {
+			} else if(o instanceof Long) {
 				return (Long)o;
 			}
 			return generateDouble(o.toString());
@@ -217,6 +295,9 @@ abstract public class XValueUtils {
 		return new AbstractTransformingIterator<E,Double>(value.iterator()) {
 			@Override
 			public Double transform(E in) {
+				if(in == null) {
+					return 0.;
+				}
 				return generateDouble(in);
 			}
 		};
@@ -226,6 +307,9 @@ abstract public class XValueUtils {
 		return new AbstractTransformingIterator<E,Integer>(value.iterator()) {
 			@Override
 			public Integer transform(E in) {
+				if(in == null) {
+					return 0;
+				}
 				return (int)generateLong(in);
 			}
 		};
@@ -235,6 +319,9 @@ abstract public class XValueUtils {
 		return new AbstractTransformingIterator<E,Long>(value.iterator()) {
 			@Override
 			public Long transform(E in) {
+				if(in == null) {
+					return 0l;
+				}
 				return generateLong(in);
 			}
 		};
@@ -318,6 +405,9 @@ abstract public class XValueUtils {
 		return new AbstractTransformingIterator<E,Boolean>(value.iterator()) {
 			@Override
 			public Boolean transform(E in) {
+				if(in == null) {
+					return false;
+				}
 				return generateBoolean(in.toString());
 			}
 		};
@@ -340,13 +430,13 @@ abstract public class XValueUtils {
 		}
 		if(value instanceof XListValue<?>) {
 			Object o = listGetFirst((XListValue<?>)value);
-			if(o instanceof Double) {
+			if(o == null) {
+				return 0L;
+			} else if(o instanceof Double) {
 				return ((Double)o).longValue();
-			}
-			if(o instanceof Integer) {
+			} else if(o instanceof Integer) {
 				return (Integer)o;
-			}
-			if(o instanceof Long) {
+			} else if(o instanceof Long) {
 				return (Long)o;
 			}
 			return generateLong(o.toString());

@@ -1,4 +1,4 @@
-package org.xydra.client.gwt.xml.impl;
+package org.xydra.core.model.serialize.gwt;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -6,6 +6,9 @@ import java.util.List;
 
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.core.serialize.XydraElement;
+import org.xydra.core.serialize.xml.AbstractXmlElement;
+import org.xydra.core.serialize.xml.XmlEncoder;
+import org.xydra.index.query.Pair;
 
 import com.google.gwt.xml.client.CharacterData;
 import com.google.gwt.xml.client.Element;
@@ -15,24 +18,25 @@ import com.google.gwt.xml.client.NodeList;
 
 /**
  * {@link XydraElement} implementation that wraps an
- * com.google.gwt.xml.client.Element.
+ * {@link com.google.gwt.xml.client.Element}.
+ * 
+ * This is an exact character-for-character copy of XmlElement, but it uses XML
+ * classes from the com.google.gw.xml.client package instead of the standard
+ * java XML classes, which are not available in GWT.
  * 
  * @author dscharrer
  * 
  */
 @RunsInGWT(true)
-public class GWTMiniElementImpl implements XydraElement {
+public class GwtXmlElement extends AbstractXmlElement {
 	
-	private static final String ELEMENT_XNULL = "xnull";
-	private static final String ATTRIBUTE_IS_NULL = "isNull";
-	private static final String ATTRIBUTE_NULL_CONTENT = "nullContent";
+	private final Element element;
 	
-	Element element;
-	
-	protected GWTMiniElementImpl(Element element) {
+	protected GwtXmlElement(Element element) {
 		this.element = element;
 	}
 	
+	@Override
 	public String getAttribute(String attributeName) {
 		if(this.element.hasAttribute(attributeName)) {
 			return this.element.getAttribute(attributeName);
@@ -53,35 +57,35 @@ public class GWTMiniElementImpl implements XydraElement {
 	}
 	
 	@Override
-	public Iterator<XydraElement> getChildren(String name) {
+	public Iterator<XydraElement> getChildren(String defaultType) {
 		final NodeList nodes = this.element.getChildNodes();
 		return nodeListToIterator(nodes);
 	}
 	
 	@Override
-	public Iterator<XydraElement> getChildren(String name, String type) {
+	public Iterator<XydraElement> getChildrenByType(String name, String type) {
 		final NodeList nodes = this.element.getElementsByTagName(type);
 		return nodeListToIterator(nodes);
 	}
 	
 	@Override
-	public String getContent(String name) {
-		if(this.element.hasAttribute(ATTRIBUTE_NULL_CONTENT)
-		        && Boolean.valueOf(this.element.getAttribute(ATTRIBUTE_NULL_CONTENT))) {
+	public String getContent() {
+		if(this.element.hasAttribute(XmlEncoder.NULL_CONTENT_ATTRIBUTE)
+		        && Boolean.valueOf(this.element.getAttribute(XmlEncoder.NULL_CONTENT_ATTRIBUTE))) {
 			return null;
 		}
 		return getTextContent(this.element);
 	}
 	
 	@Override
-	public XydraElement getChild(String name, int index) {
+	public XydraElement getElement(String name, int index) {
 		int idx = 0;
 		final NodeList nodes = this.element.getChildNodes();
 		for(int i = 0; i < nodes.getLength(); ++i) {
 			Node node = nodes.item(i);
 			if(node instanceof Element) {
 				if(idx == index) {
-					return new GWTMiniElementImpl((Element)node);
+					return new GwtXmlElement((Element)node);
 				} else {
 					idx++;
 				}
@@ -92,16 +96,11 @@ public class GWTMiniElementImpl implements XydraElement {
 	
 	@Override
 	public XydraElement getChild(String name, String type) {
-		return getElement(type);
-	}
-	
-	@Override
-	public XydraElement getElement(String type) {
 		final NodeList nodes = this.element.getElementsByTagName(type);
 		for(int i = 0; i < nodes.getLength(); ++i) {
 			Node node = nodes.item(i);
 			if(node instanceof Element) {
-				return new GWTMiniElementImpl((Element)node);
+				return new GwtXmlElement((Element)node);
 			}
 		}
 		return null;
@@ -148,7 +147,7 @@ public class GWTMiniElementImpl implements XydraElement {
 	}
 	
 	@Override
-	public Iterator<Object> getValues(String name) {
+	public Iterator<Object> getValues() {
 		final NodeList nodes = this.element.getChildNodes();
 		return nodeListToValues(nodes);
 	}
@@ -166,8 +165,8 @@ public class GWTMiniElementImpl implements XydraElement {
 		return objects.iterator();
 	}
 	
-	static GWTMiniElementImpl wrap(Element element) {
-		return isNull(element) ? null : new GWTMiniElementImpl(element);
+	static GwtXmlElement wrap(Element element) {
+		return isNull(element) ? null : new GwtXmlElement(element);
 	}
 	
 	static String getValue(Element element) {
@@ -175,9 +174,9 @@ public class GWTMiniElementImpl implements XydraElement {
 	}
 	
 	private static boolean isNull(Element element) {
-		return (ELEMENT_XNULL.equals(element.getNodeName()) || element
-		        .hasAttribute(ATTRIBUTE_IS_NULL)
-		        && Boolean.valueOf(element.getAttribute(ATTRIBUTE_IS_NULL)));
+		return (XmlEncoder.XNULL_ELEMENT.equals(element.getNodeName()) || (element
+		        .hasAttribute(XmlEncoder.NULL_ATTRIBUTE) && Boolean.valueOf(element
+		        .getAttribute(XmlEncoder.NULL_ATTRIBUTE))));
 	}
 	
 	@Override
@@ -186,8 +185,30 @@ public class GWTMiniElementImpl implements XydraElement {
 	}
 	
 	@Override
-	public XydraElement getChild(String name) {
-		return getChild(name, 0);
+	public Iterator<Pair<String,XydraElement>> getEntries(String attribute, String defaultType) {
+		final NodeList nodes = this.element.getChildNodes();
+		return nodeListToMapIterator(nodes, attribute);
+	}
+	
+	@Override
+	public Iterator<Pair<String,XydraElement>> getEntriesByType(String attribute, String type) {
+		final NodeList nodes = this.element.getElementsByTagName(type);
+		return nodeListToMapIterator(nodes, attribute);
+	}
+	
+	private Iterator<Pair<String,XydraElement>> nodeListToMapIterator(NodeList nodes,
+	        String attribute) {
+		List<Pair<String,XydraElement>> list = new ArrayList<Pair<String,XydraElement>>();
+		for(int i = 0; i < nodes.getLength(); ++i) {
+			Node node = nodes.item(i);
+			if(node instanceof Element && ((Element)node).hasAttribute(attribute)) {
+				Element element = (Element)node;
+				
+				list.add(new Pair<String,XydraElement>(element.getAttribute(attribute),
+				        wrap(element)));
+			}
+		}
+		return list.iterator();
 	}
 	
 	private static String getTextContent(Node element) {

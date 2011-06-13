@@ -6,9 +6,12 @@
       
       <!-- Inherit the core GWT XML module. -->
       <inherits name='com.google.gwt.xml.XML'/>
+	    
+	    <!-- Inherit the core GWT HTTP module. -->
+	    <inherits name="com.google.gwt.http.HTTP"/>
       
       <!-- Inherit the Xydra Core -->
-      <inherits name='org.xydra.core.XydraCore'/>
+      <inherits name='org.xydra.XydraCore'/>
       
       <!-- Inherit the Xydra Client -->
       <inherits name='org.xydra.client.XydraClient'/>

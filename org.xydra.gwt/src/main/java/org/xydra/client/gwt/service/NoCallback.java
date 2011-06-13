@@ -14,6 +14,7 @@ import com.google.gwt.http.client.Response;
  * @author dscharrer
  * 
  */
+@Deprecated
 class NoCallback implements RequestCallback {
 	
 	static private final Logger log = LoggerFactory.getLogger(NoCallback.class);

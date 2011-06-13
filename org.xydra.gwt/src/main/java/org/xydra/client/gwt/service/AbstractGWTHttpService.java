@@ -8,6 +8,7 @@ import org.xydra.store.ConnectionException;
 import org.xydra.store.InternalStoreException;
 import org.xydra.store.RequestException;
 import org.xydra.store.TimeoutException;
+import org.xydra.store.impl.gwt.GwtXydraStoreRestClient;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
@@ -19,9 +20,12 @@ import com.google.gwt.http.client.Response;
 /**
  * Abstract base class for GWT-based X*Service implementations.
  * 
+ * Deprecated, use {@link GwtXydraStoreRestClient} instead.
+ * 
  * @author dscharrer
  * 
  */
+@Deprecated
 public abstract class AbstractGWTHttpService {
 	
 	protected final String baseUrl;
