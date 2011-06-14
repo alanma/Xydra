@@ -591,30 +591,35 @@ public class Restless extends HttpServlet {
 	 * @param res
 	 */
 	protected void restlessService(HttpServletRequest req, HttpServletResponse res) {
+		/* If running on localhost, we might tweak the host */
+		boolean runningOnLocalhost = TweakedRequest.isLocalhost(req.getServerName());
+		final HttpServletRequest reqHandedDown = runningOnLocalhost ? new TweakedRequest(req) : req;
+		
 		// find class mapped to path
-		String path = req.getPathInfo();
+		String path = reqHandedDown.getPathInfo();
 		if(path == null) {
 			path = "/";
 		}
+		
 		boolean foundPath = false;
 		boolean foundMethod = false;
 		boolean mayAccess = false;
 		
 		/* Determine HTTP method --------------------- */
 		// look in HTTP header
-		String httpMethod = req.getHeader(X_HTTP_Method_Override);
+		String httpMethod = reqHandedDown.getHeader(X_HTTP_Method_Override);
 		// look in query param
 		if(httpMethod == null) {
-			httpMethod = req.getParameter(X_HTTP_Method_Override);
+			httpMethod = reqHandedDown.getParameter(X_HTTP_Method_Override);
 		}
 		// use given HTTP method
 		if(httpMethod == null) {
-			httpMethod = req.getMethod();
+			httpMethod = reqHandedDown.getMethod();
 		}
 		
 		/* Find RestlessMethod to be called ------------------ */
 		// look through all registered methods
-		boolean secureAccess = requestIsViaAdminUrl(req);
+		boolean secureAccess = requestIsViaAdminUrl(reqHandedDown);
 		
 		for(RestlessMethod restlessMethod : this.methods) {
 			
@@ -633,11 +638,11 @@ public class Restless extends HttpServlet {
 						foundMethod = true;
 						if(restlessMethod.adminOnly) {
 							// check security
-							if(requestIsViaAdminUrl(req)) {
+							if(requestIsViaAdminUrl(reqHandedDown)) {
 								// calling from potentially secured url, run
 								mayAccess = true;
 								try {
-									restlessMethod.run(this, req, res);
+									restlessMethod.run(this, reqHandedDown, res);
 								} catch(IOException e) {
 									throw new RuntimeException(e);
 								}
@@ -650,7 +655,7 @@ public class Restless extends HttpServlet {
 							mayAccess = true;
 							// just run
 							try {
-								restlessMethod.run(this, req, res);
+								restlessMethod.run(this, reqHandedDown, res);
 							} catch(IOException e) {
 								throw new RuntimeException(e);
 							}
@@ -668,13 +673,13 @@ public class Restless extends HttpServlet {
 				}
 			} else {
 				if(DELEGATE_UNHANDLED_TO_DEFAULT) {
-					delegateToDefaultServlet(req, res);
+					delegateToDefaultServlet(reqHandedDown, res);
 				} else {
 					// produce better error message
 					res.sendError(
 					        404,
 					        "No handler matched your "
-					                + req.getMethod()
+					                + reqHandedDown.getMethod()
 					                + "-request path '"
 					                + path
 					                + "'. "

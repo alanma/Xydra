@@ -103,12 +103,12 @@ public class PathTemplate {
 			throw new IllegalArgumentException("Path contains a different number of variables ("
 			        + m.groupCount() + ") than the template (" + this.variableNames.size() + ")");
 		}
-		List<String> values = new ArrayList<String>();
 		
 		if(!m.matches()) {
 			return Collections.emptyList();
 		}
 		
+		List<String> values = new ArrayList<String>();
 		for(int i = 1; i <= m.groupCount(); i++) {
 			String value = m.group(i);
 			values.add(value);
