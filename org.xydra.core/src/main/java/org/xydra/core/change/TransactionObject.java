@@ -516,7 +516,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		 */
 
 		// get all ids of objects in the baseObject that weren't removed
-		HashSet<XID> currentIds = new HashSet<XID>();
+		LinkedList<XID> currentIds = new LinkedList<XID>();
 		
 		for(XID id : this.baseObject) {
 			if(!this.removedFields.contains(id)) {
