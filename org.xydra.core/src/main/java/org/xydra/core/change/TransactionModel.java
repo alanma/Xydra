@@ -14,6 +14,7 @@ import org.xydra.base.XID;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
+import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.change.XModelCommand;
@@ -23,6 +24,7 @@ import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XValue;
+import org.xydra.core.model.XField;
 import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.impl.memory.AbstractEntity;
@@ -248,7 +250,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 				this.changedObjects.put(objectId, object);
 				
 				// command succeeded -> add it to the list
-				this.commands.add(command);
+				this.commands.add((XAtomicCommand)command);
 				
 				usedCallback.onSuccess(this.getRevisionNumber());
 				return this.getRevisionNumber();
@@ -287,7 +289,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 				this.changedObjects.remove(objectId);
 				
 				// command succeeded -> add it to the list
-				this.commands.add(command);
+				this.commands.add((XAtomicCommand)command);
 				
 				usedCallback.onSuccess(this.getRevisionNumber());
 				return this.getRevisionNumber();
@@ -328,15 +330,15 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 				this.removedFields.remove(fieldId);
 				
 				XAddress temp = object.getAddress();
-				XAddress address = XX.toAddress(temp.getRepository(), temp.getModel(), temp
-				        .getObject(), fieldId);
+				XAddress address = XX.toAddress(temp.getRepository(), temp.getModel(),
+				        temp.getObject(), fieldId);
 				
 				InModelTransactionField field = new InModelTransactionField(address, XCommand.NEW,
 				        this);
 				this.changedFields.put(address, field);
 				
 				// command succeeded -> add it to the list
-				this.commands.add(command);
+				this.commands.add((XAtomicCommand)command);
 				
 				usedCallback.onSuccess(this.getRevisionNumber());
 				return this.getRevisionNumber();
@@ -378,7 +380,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 				this.changedValues.remove(fieldAddress);
 				
 				// command succeeded -> add it to the list
-				this.commands.add(command);
+				this.commands.add((XAtomicCommand)command);
 				
 				usedCallback.onSuccess(this.getRevisionNumber());
 				return this.getRevisionNumber();
@@ -431,7 +433,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 				this.changedValues.put(fieldAddress, fieldCommand.getValue());
 				
 				// command succeeded -> add it to the list
-				this.commands.add(command);
+				this.commands.add((XAtomicCommand)command);
 				
 				usedCallback.onSuccess(field.getRevisionNumber());
 				return field.getRevisionNumber();
@@ -449,7 +451,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 				this.changedValues.put(fieldAddress, null);
 				
 				// command succeeded -> add it to the list
-				this.commands.add(command);
+				this.commands.add((XAtomicCommand)command);
 				
 				usedCallback.onSuccess(field.getRevisionNumber());
 				return field.getRevisionNumber();
@@ -467,7 +469,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 				this.changedValues.put(fieldAddress, fieldCommand.getValue());
 				
 				// command succeeded -> add it to the list
-				this.commands.add(command);
+				this.commands.add((XAtomicCommand)command);
 				
 				usedCallback.onSuccess(field.getRevisionNumber());
 				return field.getRevisionNumber();
@@ -503,10 +505,16 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	}
 	
 	public boolean isEmpty() {
-		// TODO Implement correctly!
+		if(!this.baseModel.isEmpty()) {
+			for(XID id : this.baseModel) {
+				if(!this.removedObjects.contains(id)) {
+					// field wasn't removed in the TransactionObject
+					return false;
+				}
+			}
+		}
 		
-		return this.baseModel.isEmpty() && this.changedObjects.isEmpty()
-		        && this.changedFields.isEmpty();
+		return this.changedObjects.isEmpty() && this.changedFields.isEmpty();
 	}
 	
 	public long executeModelCommand(XModelCommand command) {
@@ -536,7 +544,21 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	}
 	
 	public boolean removeObject(XID objectId) {
-		return this.baseModel.removeObject(objectId);
+		XWritableObject object = this.getObject(objectId);
+		
+		if(object == null) {
+			// field doesn't exist
+			return false;
+		}
+		
+		long revNr = object.getRevisionNumber();
+		XAddress temp = this.getAddress();
+		XAddress address = XX.toAddress(temp.getRepository(), temp.getModel(), objectId, null);
+		
+		XModelCommand command = X.getCommandFactory().createSafeRemoveObjectCommand(address, revNr);
+		this.executeCommand(command);
+		
+		return this.getObject(objectId) == null;
 	}
 	
 	@Override
@@ -583,14 +605,50 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	protected XValue getValue(XAddress address) {
 		assert address.getAddressedType() == XType.XFIELD;
 		
-		// TODO implement
-		return null;
+		// TODO maybe improve handling of removed fields (throw exception or
+		// something)
+		
+		if(this.removedFields.contains(address)) {
+			return null;
+		} else if(this.changedValues.containsKey(address)) {
+			return this.changedValues.get(address);
+		} else {
+			XObject object = this.baseModel.getObject(address.getObject());
+			XField field = object.getField(address.getField());
+			
+			if(field != null) {
+				return field.getValue();
+			}
+
+			else {
+				// field doesn't exist
+				return null;
+			}
+		}
 	}
 	
-	// Unsupported Methods
 	@Override
 	public Iterator<XID> iterator() {
-		throw new UnsupportedOperationException();
+		/*
+		 * TODO this is probably not the most effective implementation of this
+		 * method
+		 */
+
+		// get all ids of objects in the baseModel that weren't removed
+		LinkedList<XID> currentIds = new LinkedList<XID>();
+		
+		for(XID id : this.baseModel) {
+			if(!this.removedObjects.contains(id)) {
+				currentIds.add(id);
+			}
+		}
+		
+		// get all ids of newly added fields
+		for(XID id : this.changedObjects.keySet()) {
+			currentIds.add(id);
+		}
+		
+		return currentIds.iterator();
 	}
 	
 	private class DummyCallback implements XLocalChangeCallback {
