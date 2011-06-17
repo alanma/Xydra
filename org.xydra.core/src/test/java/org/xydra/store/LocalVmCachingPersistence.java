@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
+import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XWritableModel;
@@ -39,7 +40,8 @@ public class LocalVmCachingPersistence implements XydraPersistence {
 	 */
 	private static Map<String,XWritableModel> localVmCache_modelSnapshot = new ConcurrentHashMap<String,XWritableModel>();
 	private static Map<String,XWritableObject> localVmCache_objectSnapshot = new ConcurrentHashMap<String,XWritableObject>();
-	private static final boolean CACHE_OBJECT_SNAPSHOTS = true;
+	/* Makes no sense while getting current objectRevNr is soo cumbersome */
+	private static final boolean CACHE_OBJECT_SNAPSHOTS = false;
 	
 	private XydraPersistence persistence;
 	
@@ -96,16 +98,32 @@ public class LocalVmCachingPersistence implements XydraPersistence {
 		}
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.xydra.store.impl.delegate.XydraPersistence#getObjectSnapshot(org.
+	 * xydra.base.XAddress)
+	 */
 	public XWritableObject getObjectSnapshot(XAddress address) {
 		long currentRevision;
 		if(CACHE_OBJECT_SNAPSHOTS) {
-			currentRevision = getModelSnapshot(address).getObject(address.getObject())
-			        .getRevisionNumber();
-			XWritableObject cachedSnapshot = localVmCache_objectSnapshot.get(toKey(address,
-			        currentRevision));
-			if(cachedSnapshot != null) {
-				log.trace("Return cached object snapshot");
-				return cachedSnapshot;
+			/*
+			 * If the only way to get the current revNr of an object is through
+			 * getting ModelSnapshot and ObjectSnapshit, aching makes no sense.
+			 */
+			XWritableModel modelSnapshot = getModelSnapshot(XX.resolveModel(address));
+			if(modelSnapshot != null) {
+				XWritableObject objectSnapshot = modelSnapshot.getObject(address.getObject());
+				if(objectSnapshot != null) {
+					currentRevision = objectSnapshot.getRevisionNumber();
+					XWritableObject cachedSnapshot = localVmCache_objectSnapshot.get(toKey(address,
+					        currentRevision));
+					if(cachedSnapshot != null) {
+						log.trace("Return cached object snapshot");
+						return cachedSnapshot;
+					}
+				}
 			}
 		}
 		XWritableObject loadedSnapshot = this.persistence.getObjectSnapshot(address);
