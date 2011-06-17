@@ -1,9 +1,9 @@
 package org.xydra.store;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -37,9 +37,9 @@ public class LocalVmCachingPersistence implements XydraPersistence {
 	 * FIXME concurrency: access to these maps needs to be synchronized (or need
 	 * to use implementations that are already synchronized themselves)
 	 */
-	private static Map<String,XWritableModel> localVmCache_modelSnapshot = new HashMap<String,XWritableModel>();
-	private static Map<String,XWritableObject> localVmCache_objectSnapshot = new HashMap<String,XWritableObject>();
-	private static final boolean CACHE_OBJECT_SNAPSHOTS = false;
+	private static Map<String,XWritableModel> localVmCache_modelSnapshot = new ConcurrentHashMap<String,XWritableModel>();
+	private static Map<String,XWritableObject> localVmCache_objectSnapshot = new ConcurrentHashMap<String,XWritableObject>();
+	private static final boolean CACHE_OBJECT_SNAPSHOTS = true;
 	
 	private XydraPersistence persistence;
 	
