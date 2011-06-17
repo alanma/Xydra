@@ -63,10 +63,64 @@ public class TransactionModelTest {
 	
 	// Tests for commit() {
 	
+	/*
+	 * for commit():
+	 * 
+	 * TODO check cases were something that already existed gets deleted and
+	 * something new with the same address gets added (see if the old thing is
+	 * actually replaced by something new)
+	 * 
+	 * TODO maybe check forced commands in transactions
+	 */
+
 	@Test
-	public void testCommitSingleCommands() {
-		// TODO Add cases for model commands!
+	public void testCommitSingleModelCommands() {
 		
+		// add a new XObject
+		XID objectId = X.getIDProvider().createUniqueId();
+		assertFalse(this.transModel.hasObject(objectId) || this.model.hasObject(objectId));
+		
+		this.transModel.createObject(objectId);
+		assertEquals(1, this.transModel.size());
+		
+		assertTrue(this.transModel.isChanged());
+		
+		long oldRevNr = this.model.getRevisionNumber();
+		long revNr = this.transModel.commit();
+		
+		assertFalse(this.transModel.isChanged());
+		
+		assertTrue(revNr != XCommand.FAILED);
+		assertEquals(oldRevNr + 1, revNr);
+		assertEquals(0, this.transModel.size());
+		assertEquals(revNr, this.transModel.getRevisionNumber());
+		
+		// check that the object was added to the real model
+		assertTrue(this.model.hasObject(objectId));
+		
+		// remove an XObject
+		
+		this.transModel.removeObject(objectId);
+		assertEquals(1, this.transModel.size());
+		
+		assertTrue(this.transModel.isChanged());
+		
+		oldRevNr = this.model.getRevisionNumber();
+		revNr = this.transModel.commit();
+		
+		assertFalse(this.transModel.isChanged());
+		
+		assertTrue(revNr != XCommand.FAILED);
+		assertEquals(oldRevNr + 1, revNr);
+		assertEquals(0, this.transModel.size());
+		assertEquals(revNr, this.transModel.getRevisionNumber());
+		
+		// check that the object was removed from the real model
+		assertFalse(this.model.hasObject(objectId));
+	}
+	
+	@Test
+	public void testCommitSingleObjectCommands() {
 		InModelTransactionObject transObject = (InModelTransactionObject)this.transModel
 		        .getObject(this.object.getID());
 		
@@ -111,6 +165,12 @@ public class TransactionModelTest {
 		
 		// check that the field was removed from the real object
 		assertFalse(this.object.hasField(fieldId));
+	}
+	
+	@Test
+	public void testSingeFieldCommands() {
+		InModelTransactionObject transObject = (InModelTransactionObject)this.transModel
+		        .getObject(this.object.getID());
 		
 		// add a value
 		transObject = (InModelTransactionObject)this.transModel.getObject(this.object.getID());
@@ -121,8 +181,8 @@ public class TransactionModelTest {
 		
 		assertTrue(this.transModel.isChanged());
 		
-		oldRevNr = this.model.getRevisionNumber();
-		revNr = this.transModel.commit();
+		long oldRevNr = this.model.getRevisionNumber();
+		long revNr = this.transModel.commit();
 		
 		assertFalse(this.transModel.isChanged());
 		
@@ -180,7 +240,16 @@ public class TransactionModelTest {
 	
 	@Test
 	public void testCommitTransaction() {
-		// TODO add some model commands!
+		// add some objects
+		XID objectId1 = X.getIDProvider().createUniqueId();
+		XID objectId2 = X.getIDProvider().createUniqueId();
+		
+		this.transModel.createObject(objectId1);
+		this.transModel.createObject(objectId2);
+		
+		// remove an object
+		
+		this.transModel.removeObject(objectId2);
 		
 		// add some fields
 		XID fieldId1 = X.getIDProvider().createUniqueId();
@@ -227,6 +296,10 @@ public class TransactionModelTest {
 		assertEquals(revNr, this.transModel.getRevisionNumber());
 		
 		// check that the changes were actually executed
+		assertTrue(this.model.hasObject(objectId1));
+		
+		assertFalse(this.model.hasObject(objectId2));
+		
 		assertTrue(this.object.hasField(fieldId1));
 		assertTrue(this.object.hasField(fieldId2));
 		
@@ -245,6 +318,8 @@ public class TransactionModelTest {
 		 * execute another transaction to test whether cleared
 		 * TransactionObjects can be reused
 		 */
+		this.transModel.removeObject(objectId1);
+		
 		transObject = (InModelTransactionObject)this.transModel.getObject(this.object.getID());
 		transObject.createField(fieldId3);
 		XWritableField field3 = transObject.getField(fieldId3);
@@ -270,6 +345,8 @@ public class TransactionModelTest {
 		assertEquals(revNr, this.transModel.getRevisionNumber());
 		
 		// check that the changes were actually executed
+		assertFalse(this.model.hasObject(objectId1));
+		
 		assertTrue(this.object.hasField(fieldId3));
 		
 		assertFalse(this.object.hasField(fieldId1));
@@ -300,7 +377,185 @@ public class TransactionModelTest {
 	 * extra tests, since the only thing it does is call this method
 	 */
 
-	// TODO add tests for model commands!
+	/*
+	 * TODO remove duplicate code for safe & forced command by writing helper
+	 * methods using a boolean parameter
+	 */
+
+	@Test
+	public void testExecuteCommandsSafeAddObjectCommands() {
+		XCommandFactory factory = X.getCommandFactory();
+		XID newObjectId = X.getIDProvider().createUniqueId();
+		TestCallback callback = new TestCallback();
+		
+		// make sure there is no object with this ID
+		assertFalse(this.transModel.hasObject(newObjectId));
+		
+		// add the object
+		XCommand addCommand = factory.createSafeAddObjectCommand(this.transModel.getAddress(),
+		        newObjectId);
+		
+		long result = this.transModel.executeCommand(addCommand, callback);
+		assertTrue(result != XCommand.FAILED);
+		
+		// check callback
+		assertFalse(callback.failed);
+		assertEquals((Long)result, callback.revision);
+		
+		// check whether the field was added correctly
+		assertTrue(this.transModel.hasObject(newObjectId));
+		
+		XWritableObject object = this.transModel.getObject(newObjectId);
+		assertTrue(object.getRevisionNumber() >= 0);
+		
+		assertFalse(this.model.hasObject(newObjectId));
+		
+		// try to add an object that already exists, should fail
+		addCommand = factory.createSafeAddObjectCommand(this.transModel.getAddress(),
+		        this.object.getID());
+		callback = new TestCallback();
+		
+		result = this.transModel.executeCommand(addCommand, callback);
+		assertEquals(XCommand.FAILED, result);
+		
+		// check callback
+		assertTrue(callback.failed);
+		assertNull(callback.revision);
+	}
+	
+	@Test
+	public void testExecuteCommandsForcedAddObjectCommands() {
+		XCommandFactory factory = X.getCommandFactory();
+		XID newObjectId = X.getIDProvider().createUniqueId();
+		TestCallback callback = new TestCallback();
+		
+		// make sure there is no object with this ID
+		assertFalse(this.transModel.hasObject(newObjectId));
+		
+		// add the object
+		XCommand addCommand = factory.createForcedAddObjectCommand(this.transModel.getAddress(),
+		        newObjectId);
+		
+		long result = this.transModel.executeCommand(addCommand, callback);
+		assertTrue(result != XCommand.FAILED);
+		
+		// check callback
+		assertFalse(callback.failed);
+		assertEquals((Long)result, callback.revision);
+		
+		// check whether the field was added correctly
+		assertTrue(this.transModel.hasObject(newObjectId));
+		
+		XWritableObject object = this.transModel.getObject(newObjectId);
+		assertTrue(object.getRevisionNumber() >= 0);
+		
+		assertFalse(this.model.hasObject(newObjectId));
+		
+		// try to add an object that already exists, should succeed
+		addCommand = factory.createForcedAddObjectCommand(this.transModel.getAddress(),
+		        this.object.getID());
+		callback = new TestCallback();
+		
+		result = this.transModel.executeCommand(addCommand, callback);
+		assertTrue(result != XCommand.FAILED);
+		
+		// check callback
+		assertFalse(callback.failed);
+		assertEquals((Long)result, callback.revision);
+	}
+	
+	@Test
+	public void testExecuteCommandsSafeRemoveObjectCommands() {
+		XCommandFactory factory = X.getCommandFactory();
+		XID newObjectId = X.getIDProvider().createUniqueId();
+		TestCallback callback = new TestCallback();
+		
+		// make sure there is no field with this ID
+		assertFalse(this.transModel.hasObject(newObjectId));
+		
+		// try to remove not existing object - should fail
+		XAddress temp = this.transModel.getAddress();
+		XAddress address = XX.toAddress(temp.getRepository(), temp.getModel(), newObjectId, null);
+		
+		XCommand removeCommand = factory.createSafeRemoveObjectCommand(address, 0);
+		
+		long result = this.transModel.executeCommand(removeCommand, callback);
+		assertEquals(XCommand.FAILED, result);
+		
+		// check callback
+		assertTrue(callback.failed);
+		assertNull(callback.revision);
+		
+		// try to remove an object that already exists & use wrong revNr -
+		// should fail
+		removeCommand = factory.createSafeRemoveObjectCommand(this.object.getAddress(),
+		        this.object.getRevisionNumber() + 1);
+		callback = new TestCallback();
+		
+		result = this.transModel.executeCommand(removeCommand, callback);
+		assertEquals(XCommand.FAILED, result);
+		
+		// check callback
+		assertTrue(callback.failed);
+		assertNull(callback.revision);
+		
+		// try to remove an object that already exists, should succeed
+		removeCommand = factory.createSafeRemoveObjectCommand(this.object.getAddress(),
+		        this.object.getRevisionNumber());
+		callback = new TestCallback();
+		
+		result = this.transModel.executeCommand(removeCommand, callback);
+		assertTrue(result != XCommand.FAILED);
+		
+		// check callback
+		assertFalse(callback.failed);
+		assertEquals((Long)result, callback.revision);
+		
+		// check whether the object was removed correctly
+		assertFalse(this.transModel.hasObject(this.object.getID()));
+		assertTrue(this.model.hasObject(this.object.getID()));
+	}
+	
+	@Test
+	public void testExecuteCommandsForcedRemoveObjectCommands() {
+		XCommandFactory factory = X.getCommandFactory();
+		XID newObjectId = X.getIDProvider().createUniqueId();
+		TestCallback callback = new TestCallback();
+		
+		// make sure there is no field with this ID
+		assertFalse(this.transModel.hasObject(newObjectId));
+		
+		// try to remove not existing object - should succeed
+		XAddress temp = this.transModel.getAddress();
+		XAddress address = XX.toAddress(temp.getRepository(), temp.getModel(), newObjectId, null);
+		
+		XCommand removeCommand = factory.createForcedRemoveObjectCommand(address);
+		
+		long result = this.transModel.executeCommand(removeCommand, callback);
+		assertTrue(result != XCommand.FAILED);
+		
+		// check callback
+		assertFalse(callback.failed);
+		assertEquals((Long)result, callback.revision);
+		
+		// try to remove an object that already exists, should succeed
+		removeCommand = factory.createForcedRemoveObjectCommand(this.object.getAddress());
+		callback = new TestCallback();
+		
+		result = this.transModel.executeCommand(removeCommand, callback);
+		assertTrue(result != XCommand.FAILED);
+		
+		// check callback
+		assertFalse(callback.failed);
+		assertEquals((Long)result, callback.revision);
+		
+		// check whether the object was removed correctly
+		assertFalse(this.transModel.hasObject(this.object.getID()));
+		assertTrue(this.model.hasObject(this.object.getID()));
+	}
+	
+	// TODO check if all forced cases check the postcondition that they really
+	// did something!
 	
 	@Test
 	public void testExecuteCommandsSafeAddFieldCommands() {
@@ -386,6 +641,14 @@ public class TransactionModelTest {
 		// check callback
 		assertFalse(callback.failed);
 		assertEquals((Long)result, callback.revision);
+		
+		// check whether the field was added correctly
+		assertTrue(transObject.hasField(newFieldId));
+		
+		field = transObject.getField(newFieldId);
+		assertTrue(field.getRevisionNumber() >= 0);
+		
+		assertFalse(this.object.hasField(newFieldId));
 	}
 	
 	@Test
