@@ -37,7 +37,11 @@ public class GaeConfigurationResource {
 		Writer w = HtmlUtils.startHtmlPage(res, "GAE cache conf on instance "
 		        + GaePersistence.INSTANCE_ID);
 		w.write("<h2>GAE cache conf on instance " + GaePersistence.INSTANCE_ID + " </h2>");
-		w.write(HtmlUtils.link("/admin/gaeconf/get", "get stats") + "<br/>");
+		w.write("<p>Memcache Conf: " + GaeUtils.getConf() + "</p>");
+		
+		w.write("<p>Memcache Stats: " + XydraRuntime.getMemcache().stats() + " Size: "
+		        + XydraRuntime.getMemcache().size() + "</p>");
+		
 		w.write(HtmlUtils.link("/admin/gaeconf/set?instance=" + GaePersistence.INSTANCE_ID
 		        + "&memcache=true", "set memcache=true(default) on this instance")
 		        + "<br/>");
