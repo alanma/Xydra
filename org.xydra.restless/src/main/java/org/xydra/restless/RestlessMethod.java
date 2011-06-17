@@ -144,8 +144,10 @@ public class RestlessMethod {
 					javaMethodArgs.add(restlessContext);
 					hasHttpServletResponseParameter = true;
 				} else {
-					/* Method requires a parameter type for a named parameter */
-
+					/*
+					 * Method might require a non-trivial parameter type for a
+					 * named parameter (usually: String)
+					 */
 					if(this.requiredNamedParameter.length == 0) {
 						/*
 						 * Java method tries to fill a non-built-in parameter
@@ -164,7 +166,10 @@ public class RestlessMethod {
 					assert this.requiredNamedParameter.length > boundNamedParameterNumber : "Require "
 					        + this.requiredNamedParameter.length
 					        + " named parameters, processed "
-					        + boundNamedParameterNumber + " parameters from request so far.";
+					        + boundNamedParameterNumber
+					        + " parameters from request so far. Required parameters: "
+					        + this.requiredNamedParameter
+					        + ". I.e. your Java method wants more parameters than defined in your restless() method.";
 					RestlessParameter param = this.requiredNamedParameter[boundNamedParameterNumber];
 					
 					Object value = null;
