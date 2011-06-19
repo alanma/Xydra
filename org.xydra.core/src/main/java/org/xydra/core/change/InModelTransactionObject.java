@@ -90,6 +90,10 @@ public class InModelTransactionObject extends AbstractEntity implements XWritabl
 		XWritableField field = this.model.getField(fieldAddress);
 		// TODO Maybe implement a "getFieldRevNr" method in TransactionModel
 		
+		if(field == null) {
+			return false;
+		}
+		
 		XCommand fieldCommand = X.getCommandFactory().createSafeRemoveFieldCommand(fieldAddress,
 		        field.getRevisionNumber());
 		
@@ -113,6 +117,15 @@ public class InModelTransactionObject extends AbstractEntity implements XWritabl
 		return super.equals(object);
 	}
 	
+	public boolean isEmpty() {
+		return this.model.objectIsEmpty(this.getID());
+	}
+	
+	@Override
+	public Iterator<XID> iterator() {
+		return this.model.objectIterator(this.getID());
+	}
+	
 	/*
 	 * Unsupported Method
 	 */
@@ -120,19 +133,8 @@ public class InModelTransactionObject extends AbstractEntity implements XWritabl
 		throw new UnsupportedOperationException();
 	}
 	
-	public boolean isEmpty() {
-		// TODO maybe implement a simple "isEmpty" method in
-		// TransactionModel?
-		throw new UnsupportedOperationException();
-	}
-	
 	public boolean synchronize(XEvent[] remoteChanges) {
 		throw new UnsupportedOperationException();
 	}
 	
-	@Override
-	public Iterator<XID> iterator() {
-		// TODO Implement
-		throw new UnsupportedOperationException();
-	}
 }

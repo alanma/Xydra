@@ -35,9 +35,6 @@ import org.xydra.core.model.impl.memory.MemoryObject;
 /**
  * TODO Document
  * 
- * TODO create special XObject- and XField-types that pass all changes that are
- * done on them to the TransactionModel and return these when a user tries to
- * get them by using the TransactionModel.
  * 
  * TODO check if this implementation is thread-safe "enough"
  * 
@@ -571,6 +568,30 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 		return this.baseModel.getFather();
 	}
 	
+	@Override
+	public Iterator<XID> iterator() {
+		/*
+		 * IMPROVE this is probably not the most effective implementation of
+		 * this method
+		 */
+
+		// get all ids of objects in the baseModel that weren't removed
+		LinkedList<XID> currentIds = new LinkedList<XID>();
+		
+		for(XID id : this.baseModel) {
+			if(!this.removedObjects.contains(id)) {
+				currentIds.add(id);
+			}
+		}
+		
+		// get all ids of newly added fields
+		for(XID id : this.changedObjects.keySet()) {
+			currentIds.add(id);
+		}
+		
+		return currentIds.iterator();
+	}
+	
 	/*
 	 * Special methods needed for the helperclasses InTransactionObject and
 	 * InTransactionField
@@ -605,9 +626,6 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	protected XValue getValue(XAddress address) {
 		assert address.getAddressedType() == XType.XFIELD;
 		
-		// TODO maybe improve handling of removed fields (throw exception or
-		// something)
-		
 		if(this.removedFields.contains(address)) {
 			return null;
 		} else if(this.changedValues.containsKey(address)) {
@@ -627,28 +645,65 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 		}
 	}
 	
-	@Override
-	public Iterator<XID> iterator() {
-		/*
-		 * TODO this is probably not the most effective implementation of this
-		 * method
-		 */
-
-		// get all ids of objects in the baseModel that weren't removed
-		LinkedList<XID> currentIds = new LinkedList<XID>();
+	protected boolean objectIsEmpty(XID objectId) {
+		assert this.hasObject(objectId);
+		XWritableObject object = this.baseModel.getObject(objectId);
 		
-		for(XID id : this.baseModel) {
-			if(!this.removedObjects.contains(id)) {
-				currentIds.add(id);
+		// check whether really existing fields were "removed"
+		if(object != null) {
+			if(!object.isEmpty()) {
+				XAddress temp = object.getAddress();
+				
+				for(XID id : object) {
+					
+					XAddress address = XX
+					        .toAddress(temp.getObject(), temp.getModel(), objectId, id);
+					if(!this.removedFields.contains(address)) {
+						// field wasn't removed in the TransactionObject
+						return false;
+					}
+				}
 			}
 		}
 		
-		// get all ids of newly added fields
-		for(XID id : this.changedObjects.keySet()) {
-			currentIds.add(id);
+		// check if no new fields were added
+		for(XAddress address : this.changedFields.keySet()) {
+			if(address.getObject().equals(objectId)) {
+				return false;
+			}
 		}
 		
-		return currentIds.iterator();
+		return true;
+	}
+	
+	protected Iterator<XID> objectIterator(XID objectId) {
+		assert this.hasObject(objectId);
+		
+		XWritableObject object = this.baseModel.getObject(objectId);
+		HashSet<XID> set = new HashSet<XID>();
+		
+		// add ids of the fields of the base object which were not removed
+		if(object != null) {
+			XAddress temp = object.getAddress();
+			
+			for(XID id : object) {
+				
+				XAddress address = XX.toAddress(temp.getObject(), temp.getModel(), objectId, id);
+				if(!this.removedFields.contains(address)) {
+					// field wasn't removed in the TransactionObject
+					set.add(id);
+				}
+			}
+		}
+		
+		// add ids of newly added fields
+		for(XAddress address : this.changedFields.keySet()) {
+			if(address.getObject().equals(objectId)) {
+				set.add(address.getField());
+			}
+		}
+		
+		return set.iterator();
 	}
 	
 	private class DummyCallback implements XLocalChangeCallback {
