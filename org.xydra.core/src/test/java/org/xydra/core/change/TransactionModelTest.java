@@ -1188,7 +1188,83 @@ public class TransactionModelTest {
 	}
 	
 	/*
-	 * TODO Tests for the methods of {@link InModelTransactionObject}
+	 * Tests for the methods of {@link InModelTransactionObject}
+	 */
+
+	@Test
+	public void testInModelTransactionObject() {
+		XWritableObject temp = this.transModel.getObject(this.object.getID());
+		assertTrue(temp instanceof InModelTransactionObject);
+		
+		InModelTransactionObject transObject = (InModelTransactionObject)temp;
+		
+		assertEquals(this.object.getAddress(), transObject.getAddress());
+		assertEquals(this.object.getID(), transObject.getID());
+		assertEquals(this.object.getRevisionNumber(), transObject.getRevisionNumber());
+		assertEquals(this.object.isEmpty(), transObject.isEmpty());
+		assertEquals(this.object, transObject);
+		
+		assertTrue(transObject.hasField(this.field.getID()));
+	}
+	
+	@Test
+	public void testInModelTransactionObjectAddField() {
+		XWritableObject temp = this.transModel.getObject(this.object.getID());
+		assertTrue(temp instanceof InModelTransactionObject);
+		
+		InModelTransactionObject transObject = (InModelTransactionObject)temp;
+		
+		XID fieldId = X.getIDProvider().createUniqueId();
+		
+		XWritableField field = transObject.createField(fieldId);
+		assertNotNull(field);
+		assertTrue(field instanceof InModelTransactionField);
+		
+		// make sure it exists in the transObject but not in object
+		assertFalse(this.object.hasField(fieldId));
+		assertTrue(transObject.hasField(fieldId));
+		
+		// try to add the same field again
+		XWritableField field2 = transObject.createField(fieldId);
+		assertEquals(field, field2);
+		
+		// make sure it exists in the transObject but not in object
+		assertFalse(this.object.hasField(fieldId));
+		assertTrue(transObject.hasField(fieldId));
+	}
+	
+	@Test
+	public void testInModelTransactionObjectRemoveField() {
+		XWritableObject temp = this.transModel.getObject(this.object.getID());
+		assertTrue(temp instanceof InModelTransactionObject);
+		
+		InModelTransactionObject transObject = (InModelTransactionObject)temp;
+		
+		// try to remove a not existing field
+		XID fieldId = XX.createUniqueId();
+		
+		assertFalse(transObject.removeField(fieldId));
+		
+		// try to remove an existing field
+		assertTrue(transObject.removeField(this.field.getID()));
+		assertFalse(transObject.hasField(this.field.getID()));
+		
+		// make sure it wasn't removed from the underlying object
+		assertTrue(this.object.hasField(this.field.getID()));
+		
+		// add a field and remove it again
+		transObject.createField(fieldId);
+		assertTrue(transObject.hasField(fieldId));
+		
+		assertTrue(transObject.removeField(fieldId));
+		assertFalse(transObject.hasField(fieldId));
+		assertFalse(this.object.hasField(fieldId));
+	}
+	
+	/*
+	 * Note: there is no need to test the "executeCommand" methods of {@link
+	 * InModelTransactionObject}, since they only pass the command to their
+	 * TransactionModel and do nothing else
 	 */
 
 	/*
@@ -1196,7 +1272,7 @@ public class TransactionModelTest {
 	 */
 
 	@Test
-	public void testInObjectTransactionField() {
+	public void testInModelTransactionField() {
 		InModelTransactionObject transObject = (InModelTransactionObject)this.transModel
 		        .getObject(this.object.getID());
 		XWritableField temp = transObject.getField(this.field.getID());
@@ -1213,7 +1289,7 @@ public class TransactionModelTest {
 	}
 	
 	@Test
-	public void testInObjectTransactionFieldSetValueCorrectUsage() {
+	public void testInModelTransactionFieldSetValueCorrectUsage() {
 		XValue value = X.getValueFactory().createStringValue("42");
 		XValue value2 = X.getValueFactory().createStringValue("test");
 		InModelTransactionObject transObject = (InModelTransactionObject)this.transModel
@@ -1243,7 +1319,7 @@ public class TransactionModelTest {
 	}
 	
 	@Test
-	public void testInObjectTransactionFieldSetValueIncorrectUsage() {
+	public void testInModelTransactionFieldSetValueIncorrectUsage() {
 		InModelTransactionObject transObject = (InModelTransactionObject)this.transModel
 		        .getObject(this.object.getID());
 		
