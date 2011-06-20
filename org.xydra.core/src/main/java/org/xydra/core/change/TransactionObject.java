@@ -59,7 +59,16 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	
 	private Set<XID> removedFields;
 	
+	// help objects for executing transactions
+	private HashMap<XID,InObjectTransactionField> transChangedFields;
+	private Map<XID,XValue> transChangedValues;
+	
+	private Set<XID> transRemovedFields;
+	
 	private ArrayList<XAtomicCommand> commands;
+	private ArrayList<XAtomicCommand> transCommands;
+	
+	private boolean inTransaction = false;
 	
 	public TransactionObject(MemoryObject object) {
 		this.baseObject = object;
@@ -69,7 +78,12 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		this.changedValues = new HashMap<XID,XValue>();
 		this.removedFields = new HashSet<XID>();
 		
+		this.transChangedFields = new HashMap<XID,InObjectTransactionField>();
+		this.transChangedValues = new HashMap<XID,XValue>();
+		this.transRemovedFields = new HashSet<XID>();
+		
 		this.commands = new ArrayList<XAtomicCommand>();
+		this.transCommands = new ArrayList<XAtomicCommand>();
 	}
 	
 	// Transaction methods
@@ -141,7 +155,12 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		this.changedValues.clear();
 		this.removedFields.clear();
 		
+		this.transChangedFields.clear();
+		this.transChangedValues.clear();
+		this.transRemovedFields.clear();
+		
 		this.commands.clear();
+		this.transCommands.clear();
 	}
 	
 	/**
@@ -190,23 +209,14 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		// check if it is a transaction
 		if(command.getChangeType() == ChangeType.TRANSACTION) {
 			XTransaction transaction = (XTransaction)command;
+			long result = this.handleTransaction(transaction);
 			
-			for(int i = 0; i < transaction.size(); i++) {
-				long result = executeCommand(transaction.getCommand(i));
-				
-				if(result == XCommand.FAILED) {
-					usedCallback.onFailure();
-					return XCommand.FAILED;
-				}
+			if(result == XCommand.FAILED) {
+				usedCallback.onFailure();
+			} else {
+				usedCallback.onSuccess(this.getRevisionNumber());
 			}
-			
-			/*
-			 * TODO Improve transaction handling (rollback etc.)
-			 */
-
-			// Transaction "succeeded"
-			usedCallback.onSuccess(this.revisionNumber);
-			return this.revisionNumber;
+			return this.getRevisionNumber();
 		}
 		
 		// given command is no transaction
@@ -216,9 +226,13 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		// check whether the given command actually refers to the this object
 		if(!command.getTarget().getObject().equals(this.getID())
 		        || !command.getTarget().getModel().equals(this.getAddress().getModel())) {
-			usedCallback.onFailure();
+			if(!this.inTransaction) {
+				usedCallback.onFailure();
+			}
 			return XCommand.FAILED;
 		}
+		
+		// TODO comment inTransaction cases!
 		
 		// Object Commands
 		if(command instanceof XObjectCommand) {
@@ -231,17 +245,19 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 					if(!objectCommand.isForced()) {
 						// not forced, tried to add something that already
 						// existed
-						usedCallback.onFailure();
+						
+						if(!this.inTransaction) {
+							usedCallback.onFailure();
+						}
 						return XCommand.FAILED;
 					}
 					
 					// forced command -> already finished with the execution
-					usedCallback.onSuccess(this.getRevisionNumber());
+					if(!this.inTransaction) {
+						usedCallback.onSuccess(this.getRevisionNumber());
+					}
 					return this.getRevisionNumber();
 				}
-				
-				// remove from list of removed fields, if needed
-				this.removedFields.remove(fieldId);
 				
 				XAddress temp = this.getAddress();
 				XAddress address = XX.toAddress(temp.getRepository(), temp.getModel(),
@@ -249,12 +265,23 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 				
 				InObjectTransactionField field = new InObjectTransactionField(address,
 				        XCommand.NEW, this);
-				this.changedFields.put(fieldId, field);
 				
-				// command succeeded -> add it to the list
-				this.commands.add((XAtomicCommand)command);
+				if(this.inTransaction) {
+					this.transChangedFields.put(fieldId, field);
+					
+					this.transCommands.add((XAtomicCommand)command);
+				} else {
+					// remove from list of removed fields, if needed
+					this.removedFields.remove(fieldId);
+					
+					this.changedFields.put(fieldId, field);
+					
+					// command succeeded -> add it to the list
+					this.commands.add((XAtomicCommand)command);
+					
+					usedCallback.onSuccess(this.getRevisionNumber());
+				}
 				
-				usedCallback.onSuccess(this.getRevisionNumber());
 				return this.getRevisionNumber();
 			}
 
@@ -263,38 +290,51 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 					if(!objectCommand.isForced()) {
 						// not forced, tried to remove something that didn't
 						// exist
-						usedCallback.onFailure();
+						if(!this.inTransaction) {
+							usedCallback.onFailure();
+						}
 						return XCommand.FAILED;
 					}
 					
 					// forced command -> already finished with the execution
-					usedCallback.onSuccess(this.getRevisionNumber());
+					if(!this.inTransaction) {
+						usedCallback.onSuccess(this.getRevisionNumber());
+					}
 					return this.getRevisionNumber();
 				}
 				
 				XWritableField field = this.getField(fieldId);
-				// remember: this acctually is an InModelTransactionField
+				// remember: this actually is an InModelTransactionField
 				assert field != null;
 				assert field instanceof InModelTransactionField;
 				
 				// check revision number
 				if(!objectCommand.isForced()
 				        && objectCommand.getRevisionNumber() != field.getRevisionNumber()) {
-					usedCallback.onFailure();
+					if(!this.inTransaction) {
+						usedCallback.onFailure();
+					}
 					return XCommand.FAILED;
 				}
 				
-				// mark it as removed
-				this.removedFields.add(fieldId);
+				if(this.inTransaction) {
+					this.transRemovedFields.add(fieldId);
+					
+					this.transCommands.add((XAtomicCommand)command);
+				} else {
+					// mark it as removed
+					this.removedFields.add(fieldId);
+					
+					// remove info from all other maps
+					this.changedFields.remove(fieldId);
+					this.changedValues.remove(fieldId);
+					
+					// command succeeded -> add it to the list
+					this.commands.add((XAtomicCommand)command);
+					
+					usedCallback.onSuccess(this.getRevisionNumber());
+				}
 				
-				// remove info from all other maps
-				this.changedFields.remove(fieldId);
-				this.changedValues.remove(fieldId);
-				
-				// command succeeded -> add it to the list
-				this.commands.add((XAtomicCommand)command);
-				
-				usedCallback.onSuccess(this.getRevisionNumber());
 				return this.getRevisionNumber();
 			}
 		}
@@ -305,7 +345,9 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 			XID fieldId = command.getChangedEntity().getField();
 			
 			if(!hasField(fieldId)) {
-				usedCallback.onFailure();
+				if(!this.inTransaction) {
+					usedCallback.onFailure();
+				}
 				return XCommand.FAILED;
 			}
 			
@@ -317,67 +359,113 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 			// check revision number
 			if(fieldCommand.getRevisionNumber() != field.getRevisionNumber()
 			        && !fieldCommand.isForced()) {
-				usedCallback.onFailure();
+				if(!this.inTransaction) {
+					usedCallback.onFailure();
+				}
 				return XCommand.FAILED;
 			}
 			
 			if(fieldCommand.getChangeType() == ChangeType.ADD) {
 				if(field.getValue() != null) {
 					if(!fieldCommand.isForced()) {
-						usedCallback.onFailure();
+						if(!this.inTransaction) {
+							usedCallback.onFailure();
+						}
 						return XCommand.FAILED;
 					}
 				}
 				
-				// "add" the value
-				this.changedValues.put(fieldId, fieldCommand.getValue());
-				
-				// command succeeded -> add it to the list
-				this.commands.add((XAtomicCommand)command);
-				
-				usedCallback.onSuccess(field.getRevisionNumber());
+				if(this.inTransaction) {
+					this.transChangedValues.put(fieldId, fieldCommand.getValue());
+					
+					this.transCommands.add((XAtomicCommand)command);
+				} else {
+					// "add" the value
+					this.changedValues.put(fieldId, fieldCommand.getValue());
+					
+					// command succeeded -> add it to the list
+					this.commands.add((XAtomicCommand)command);
+					
+					usedCallback.onSuccess(field.getRevisionNumber());
+				}
 				return field.getRevisionNumber();
 			}
 
 			else if(fieldCommand.getChangeType() == ChangeType.REMOVE) {
 				if(field.getValue() == null) {
 					if(!fieldCommand.isForced()) {
-						usedCallback.onFailure();
+						if(!this.inTransaction) {
+							usedCallback.onFailure();
+						}
 						return XCommand.FAILED;
 					}
 				}
 				
-				// "remove" the value
-				this.changedValues.put(fieldId, null);
-				
-				// command succeeded -> add it to the list
-				this.commands.add((XAtomicCommand)command);
-				
-				usedCallback.onSuccess(field.getRevisionNumber());
+				if(this.inTransaction) {
+					this.transChangedValues.put(fieldId, null);
+					
+					this.transCommands.add((XAtomicCommand)command);
+				} else {
+					// "remove" the value
+					this.changedValues.put(fieldId, null);
+					
+					// command succeeded -> add it to the list
+					this.commands.add((XAtomicCommand)command);
+					
+					usedCallback.onSuccess(field.getRevisionNumber());
+				}
 				return field.getRevisionNumber();
 			}
 
 			else if(fieldCommand.getChangeType() == ChangeType.CHANGE) {
 				if(field.getValue() == null) {
 					if(!fieldCommand.isForced()) {
-						usedCallback.onFailure();
+						if(!this.inTransaction) {
+							usedCallback.onFailure();
+						}
 						return XCommand.FAILED;
 					}
 				}
 				
-				// "change" the value
-				this.changedValues.put(fieldId, fieldCommand.getValue());
+				if(this.inTransaction) {
+					this.transChangedValues.put(fieldId, fieldCommand.getValue());
+					
+					this.transCommands.add((XAtomicCommand)command);
+				} else {
+					// "change" the value
+					this.changedValues.put(fieldId, fieldCommand.getValue());
+					
+					// command succeeded -> add it to the list
+					this.commands.add((XAtomicCommand)command);
+					
+					usedCallback.onSuccess(field.getRevisionNumber());
+				}
 				
-				// command succeeded -> add it to the list
-				this.commands.add((XAtomicCommand)command);
-				
-				usedCallback.onSuccess(field.getRevisionNumber());
 				return field.getRevisionNumber();
 			}
 		}
 		
 		throw new IllegalArgumentException(
 		        "Given Command was neither a correct instance of XObjectCommand, XFieldCommand or XTransaction!");
+	}
+	
+	private long handleTransaction(XTransaction transaction) {
+		this.inTransaction = true;
+		
+		for(int i = 0; i < transaction.size(); i++) {
+			XCommand command = transaction.getCommand(i);
+			long result = executeCommand(command);
+			
+			if(result == XCommand.FAILED) {
+				// rollback happens implicitly, since nothing was really changed
+				return XCommand.FAILED;
+			}
+		}
+		
+		this.inTransaction = false;
+		
+		// Transaction "succeeded"
+		return this.revisionNumber;
 	}
 	
 	@Override
