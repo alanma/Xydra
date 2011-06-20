@@ -9,11 +9,16 @@ import org.xydra.base.XType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableRepository;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
 public class WritableRepositoryOnPersistence extends AbstractWritableOnPersistence implements
         XWritableRepository {
+	
+	private static final Logger log = LoggerFactory
+	        .getLogger(WritableRepositoryOnPersistence.class);
 	
 	public WritableRepositoryOnPersistence(XydraPersistence persistence, XID executingActorId) {
 		super(persistence, executingActorId);
@@ -24,7 +29,10 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 		if(model == null) {
 			XCommand command = X.getCommandFactory().createAddModelCommand(
 			        this.persistence.getRepositoryId(), modelId, true);
-			this.persistence.executeCommand(this.executingActorId, command);
+			long l = this.persistence.executeCommand(this.executingActorId, command);
+			if(l < 0) {
+				log.warn("creating model '" + modelId + "' failed with " + l);
+			}
 			model = getModel(modelId);
 		}
 		return model;
