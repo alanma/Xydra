@@ -106,34 +106,45 @@ public class LocalVmCachingPersistence implements XydraPersistence {
 	 * xydra.base.XAddress)
 	 */
 	public XWritableObject getObjectSnapshot(XAddress address) {
-		long currentRevision;
-		if(CACHE_OBJECT_SNAPSHOTS) {
-			/*
-			 * If the only way to get the current revNr of an object is through
-			 * getting ModelSnapshot and ObjectSnapshit, aching makes no sense.
-			 */
-			XWritableModel modelSnapshot = getModelSnapshot(XX.resolveModel(address));
-			if(modelSnapshot != null) {
-				XWritableObject objectSnapshot = modelSnapshot.getObject(address.getObject());
-				if(objectSnapshot != null) {
-					currentRevision = objectSnapshot.getRevisionNumber();
-					XWritableObject cachedSnapshot = localVmCache_objectSnapshot.get(toKey(address,
-					        currentRevision));
-					if(cachedSnapshot != null) {
-						log.trace("Return cached object snapshot");
-						return cachedSnapshot;
-					}
-				}
-			}
+		XWritableModel modelSnapshot = getModelSnapshot(XX.resolveModel(address));
+		if(modelSnapshot == null) {
+			return null;
 		}
-		XWritableObject loadedSnapshot = this.persistence.getObjectSnapshot(address);
-		if(CACHE_OBJECT_SNAPSHOTS) {
-			// FIXME snapshot may be for a model revision number newer than
-			// currentRevision, but there is no way to get the real revision
-			// number
-			localVmCache_objectSnapshot.put(toKey(address, currentRevision), loadedSnapshot);
-		}
-		return loadedSnapshot;
+		return modelSnapshot.getObject(address.getObject());
+		
+		// long currentRevision;
+		// if(CACHE_OBJECT_SNAPSHOTS) {
+		// /*
+		// * If the only way to get the current revNr of an object is through
+		// * getting ModelSnapshot and ObjectSnapshit, aching makes no sense.
+		// */
+		// XWritableModel modelSnapshot =
+		// getModelSnapshot(XX.resolveModel(address));
+		// if(modelSnapshot != null) {
+		// XWritableObject objectSnapshot =
+		// modelSnapshot.getObject(address.getObject());
+		// if(objectSnapshot != null) {
+		// currentRevision = objectSnapshot.getRevisionNumber();
+		// XWritableObject cachedSnapshot =
+		// localVmCache_objectSnapshot.get(toKey(address,
+		// currentRevision));
+		// if(cachedSnapshot != null) {
+		// log.trace("Return cached object snapshot");
+		// return cachedSnapshot;
+		// }
+		// }
+		// }
+		// }
+		// XWritableObject loadedSnapshot =
+		// this.persistence.getObjectSnapshot(address);
+		// if(CACHE_OBJECT_SNAPSHOTS) {
+		// // FIXME snapshot may be for a model revision number newer than
+		// // currentRevision, but there is no way to get the real revision
+		// // number
+		// localVmCache_objectSnapshot.put(toKey(address, currentRevision),
+		// loadedSnapshot);
+		// }
+		// return loadedSnapshot;
 	}
 	
 	public XID getRepositoryId() {
