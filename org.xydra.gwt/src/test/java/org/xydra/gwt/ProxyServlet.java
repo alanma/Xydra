@@ -21,6 +21,10 @@ import javax.servlet.http.HttpServletResponse;
  * 
  * @author dscharrer
  * 
+ *         TODO Max: switch to proper logging
+ * 
+ *         TODO Max: adapt to AppEngine (Max has some helper classes for
+ *         this...)
  */
 public class ProxyServlet extends HttpServlet {
 	
