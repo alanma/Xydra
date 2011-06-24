@@ -14,9 +14,11 @@ import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
+import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.value.XValue;
 import org.xydra.core.LoggerTestHelper;
+import org.xydra.core.model.XField;
 import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryObject;
@@ -26,6 +28,15 @@ import org.xydra.core.model.impl.memory.MemoryRepository;
 /*
  * TODO Add tests for all cases in which executing commands and transactions
  * would fail - some important cases are not covered at the moment
+ */
+
+/*
+ * TODO Check whether failed executions actually add no commands to the command
+ * list
+ */
+
+/*
+ * TODO Refactor safe and forced tests (like in TransactionModelTest)
  */
 
 public class TransactionObjectTest {
@@ -848,6 +859,85 @@ public class TransactionObjectTest {
 		
 		assertNull(changedField.getValue());
 		assertNotNull(this.fieldWithValue.getValue());
+	}
+	
+	@Test
+	public void testExecuteCommandSucceedingTransaction() {
+		// manually build a transaction
+		XTransactionBuilder builder = new XTransactionBuilder(this.object.getAddress());
+		
+		// add some fields
+		XID fieldId1 = X.getIDProvider().createUniqueId();
+		XID fieldId2 = X.getIDProvider().createUniqueId();
+		
+		builder.addField(this.object.getAddress(), XCommand.SAFE, fieldId1);
+		builder.addField(this.object.getAddress(), XCommand.SAFE, fieldId2);
+		
+		// remove some fields
+		builder.removeField(this.object.getAddress(), this.field.getRevisionNumber(),
+		        this.field.getID());
+		
+		// add some values
+		XValue value = X.getValueFactory().createStringValue("testValue");
+		XAddress fieldAddress1 = XX.toAddress(this.object.getAddress().getRepository(), this.object
+		        .getAddress().getModel(), this.object.getAddress().getObject(), fieldId1);
+		XAddress fieldAddress2 = XX.toAddress(this.object.getAddress().getRepository(), this.object
+		        .getAddress().getModel(), this.object.getAddress().getObject(), fieldId2);
+		
+		builder.addValue(fieldAddress1, XCommand.NEW, value);
+		builder.addValue(fieldAddress2, XCommand.NEW, value);
+		
+		// remove a value
+		builder.removeValue(this.fieldWithValue.getAddress(),
+		        this.fieldWithValue.getRevisionNumber());
+		
+		// execute the transaction - should succeed
+		XTransaction transaction = builder.build();
+		TestCallback callback = new TestCallback();
+		
+		long result = this.transObject.executeCommand(transaction, callback);
+		
+		assertTrue(result != XCommand.FAILED);
+		assertTrue(this.transObject.isChanged());
+		
+		// check callback
+		assertFalse(callback.failed);
+		assertEquals((Long)result, callback.revision);
+		
+		assertEquals(transaction.size(), this.transObject.size());
+		
+		/*
+		 * we do not need to check whether the single commands in the
+		 * transaction were correctly executed, since they all are executed by
+		 * separately calling the executeCommand() method, which was already
+		 * thoroughly tested above
+		 */
+
+		// commit the transaction
+		
+		long oldRevNr = this.object.getRevisionNumber();
+		long revNr = this.transObject.commit();
+		
+		assertFalse(this.transObject.isChanged());
+		
+		assertTrue(revNr != XCommand.FAILED);
+		assertEquals(oldRevNr + 1, revNr);
+		assertEquals(0, this.transObject.size());
+		assertEquals(revNr, this.transObject.getRevisionNumber());
+		
+		// check that the changes were actually executed
+		assertTrue(this.object.hasField(fieldId1));
+		assertTrue(this.object.hasField(fieldId2));
+		
+		assertFalse(this.object.hasField(this.field.getID()));
+		
+		XField field1 = this.object.getField(fieldId1);
+		assertEquals(value, field1.getValue());
+		
+		XField field2 = this.object.getField(fieldId2);
+		assertEquals(value, field2.getValue());
+		
+		assertEquals(null, this.fieldWithValue.getValue());
 	}
 	
 	// Tests for getRevisionNumber
