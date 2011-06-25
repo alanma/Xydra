@@ -100,17 +100,16 @@
 			</releases>
 		</repository>
 
+		<!-- for GAE stuff -->
+		<repository>
+			<id>gae-repo</id>
+			<url>http://maven-gae-plugin.googlecode.com/svn/repository/</url>
+		</repository>
 
 		<repository>
 			<id>maven2-repository.dev.java.net</id>
 			<url>http://download.java.net/maven/2</url>
 			<layout>default</layout>
-		</repository>
-
-		<!-- for GAE stuff -->
-		<repository>
-			<id>gae-repo</id>
-			<url>http://maven-gae-plugin.googlecode.com/svn/repository/</url>
 		</repository>
 
 	</repositories>
@@ -121,6 +120,16 @@
 			<groupId>org.xydra</groupId>
 			<artifactId>gae</artifactId>
 			<version>0.1.4-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.google.gwt</groupId>
+					<artifactId>gwt-servlet</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.google.gwt</groupId>
+					<artifactId>gwt-user</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
@@ -191,7 +200,7 @@
 			<scope>test</scope><!-- Don't ask -->
 		</dependency>
 
-		<!-- used by local Jetty and local AppEngine-->
+		<!-- used by local Jetty and local AppEngine -->
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
@@ -251,6 +260,38 @@
 					<sdkDir>${gae.home}</sdkDir>
 				</configuration>
 			</plugin>
+
+			<!-- http://maven.apache.org/plugins/maven-war-plugin/ -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.1.1</version>
+				<configuration>
+					<!-- The file containing the webapp structure cache. Default value is: 
+						${project.build.directory}/war/work/webapp-cache.xml. -->
+					<cacheFile>${project.build.directory}/temp/webapp-cache.xml</cacheFile>
+
+					<!-- The directory for the generated WAR. Default value is: ${project.build.directory}. -->
+					<!-- <outputDirectory></outputDirectory> -->
+
+					<!-- The name of the generated WAR. Default value is: ${project.build.finalName}. -->
+					<!--<warName>war</warName> --><!-- Single directory for extra files to include in the WAR. This is 
+						where you place your JSP files. Default value is: ${basedir}/src/main/webapp. -->
+					<!-- <warSourceDirectory></warSourceDirectory> -->
+
+					<!-- The directory where the webapp is built. Default value is: ${project.build.directory}/${project.build.finalName}. --><!-- <webappDirectory>war</webappDirectory> -->
+					<packagingExcludes>
+						WEB-INF/lib/*-sources.jar,
+						WEB-INF/lib/gwt-dev-*.jar,
+						WEB-INF/lib/gwt-user-*.jar,
+						WEB-INF/lib/appengine-testing-*.jar,
+						WEB-INF/lib/appengine-api-stubs-*.jar,
+						WEB-INF/lib/geronimo*.jar,
+						WEB-INF/lib/appengine-tools-sdk*.jar
+					</packagingExcludes>
+				</configuration>
+			</plugin>
+
 
 		</plugins>
 	</build>

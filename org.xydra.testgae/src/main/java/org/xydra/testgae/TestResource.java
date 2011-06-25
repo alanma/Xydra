@@ -18,6 +18,7 @@ import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
+import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.ServletUtils;
 import org.xydra.store.Callback;
 import org.xydra.store.GaeAllowAllStoreReadMethodsTest;
@@ -41,6 +42,51 @@ public class TestResource {
 		r.addGet("/test2", TestResource.class, "test2");
 		r.addGet("/test3", TestResource.class, "test3");
 		r.addGet("/info", TestResource.class, "info");
+		r.addGet("/", TestResource.class, "index");
+	}
+	
+	public void index(HttpServletRequest req, HttpServletResponse res) throws IOException {
+		Writer w = HtmlUtils.startHtmlPage(res, "Xydra Test GAE");
+		w.write("<p>This webapp tests the <a href=\"http://xydra.org\">Xydra GAE datamodel for Google AppEngine</a>.</p>");
+		
+		w.write("<h2>Generic tools</h2>");
+		w.write(HtmlUtils.toOrderedList(
+
+		HtmlUtils.link("/assert",
+		        "Shows status of virtual machine 'assert' keyword, should be off on GAE"),
+
+		HtmlUtils.link("/info", "Is this test running on real GAE in production or not?"),
+
+		HtmlUtils.link("/echo", "Echo current time to verify basic functionality"),
+
+		HtmlUtils.link("/admin/restless", "Introspect all Restless methods")
+
+		));
+		
+		w.write("<h2>Run JUnit tests</h2>");
+		w.write(HtmlUtils.toOrderedList(
+
+		HtmlUtils.link("/test1", "Run Pre-defined JUnit test1"),
+
+		HtmlUtils.link("/test1nosec", "Run test1 with no security checks"),
+
+		HtmlUtils.link("/benchmark", "Runs a benchmark test")
+
+		));
+		
+		w.write("<h2>Xmas Wish List example app</h2>");
+		
+		w.write(HtmlUtils.toOrderedList(
+
+		HtmlUtils.link("/xmas/repo1",
+		        "Xmas example, repo1. You can use any repo with /xmas/{repoId}.")
+
+		));
+		
+		w.write("Start any request URL with '/logged/' to record AppStats.");
+		
+		w.flush();
+		w.close();
 	}
 	
 	public void test1(HttpServletRequest req, HttpServletResponse res) throws IOException {
@@ -95,12 +141,12 @@ public class TestResource {
 		return "GAE is in production? " + GaeTestfixer.inProduction();
 	}
 	
-	private void test3(Writer w) throws IOException {
+	public void test3(Writer w) throws IOException {
 		runJunitTest(GaeAllowAllStoreReadMethodsTest.class, w);
 		runJunitTest(GaeStoreReadMethodsTest.class, w);
 	}
 	
-	private void runJunitTest(Class<?> clazz, Writer w) throws IOException {
+	public void runJunitTest(Class<?> clazz, Writer w) throws IOException {
 		w.write("Running " + clazz.getName() + "...\n");
 		Result result = JUnitCore.runClasses(clazz);
 		w.write(result.getIgnoreCount() + " ignored, " + result.getRunCount() + " run, "
@@ -120,8 +166,7 @@ public class TestResource {
 	/**
 	 * Use no security
 	 */
-	@SuppressWarnings("unused")
-	private void test1noSecurity() {
+	public void test1noSecurity() {
 		log.info("Setting up store");
 		XydraStore store = new DelegatingAllowAllStore(new GaePersistence(
 		        GaePersistence.getDefaultRepositoryId()));
@@ -145,7 +190,7 @@ public class TestResource {
 		log.info("fired...");
 	}
 	
-	private void test1() {
+	public void test1() {
 		log.info("Setting up store");
 		XydraStore store = GaePersistence.get();
 		XID actorId = XX.toId("test1");
@@ -166,7 +211,7 @@ public class TestResource {
 		log.info("fired...");
 	}
 	
-	private void test2(Writer w) throws IOException {
+	public void test2(Writer w) throws IOException {
 		XID repoId = XX.toId("repo1");
 		XydraPersistence persistence = new GaePersistence(repoId);
 		w.write("RepoId = " + persistence.getRepositoryId() + "\n");

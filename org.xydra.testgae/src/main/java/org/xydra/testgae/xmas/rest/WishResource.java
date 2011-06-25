@@ -1,7 +1,6 @@
 package org.xydra.testgae.xmas.rest;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 
 import javax.servlet.http.HttpServletRequest;
@@ -56,7 +55,7 @@ public class WishResource {
 	public void delete(String repoStr, String listStr, String wishStr, HttpServletRequest req,
 	        HttpServletResponse res) throws IOException {
 		ServletUtils.headers(res, "text/html");
-		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		Writer w = HtmlUtils.startHtmlPage(res, "Delete");
 		w.write("Deleting<br />");
 		
 		Stopwatch s1 = new Stopwatch().start();
@@ -73,10 +72,10 @@ public class WishResource {
 	        throws IOException {
 		ServletUtils.headers(res, "text/html");
 		init(repoStr, listStr, wishStr);
-		new OutputStreamWriter(res.getOutputStream(), "utf-8").write(this.wish.toHtml());
-		new OutputStreamWriter(res.getOutputStream(), "utf-8").write(HtmlUtils.link("/xmas/"
-		        + repoStr + "/" + listStr, "See all wishes in this lists"));
-		new OutputStreamWriter(res.getOutputStream(), "utf-8").flush();
+		Writer w = HtmlUtils.startHtmlPage(res, "List");
+		w.write(this.wish.toHtml());
+		w.write(HtmlUtils.link("/xmas/" + repoStr + "/" + listStr, "See all wishes in this lists"));
+		w.flush();
 	}
 	
 	private void init(String repoStr, String listStr, String wishStr) {

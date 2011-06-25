@@ -1,7 +1,6 @@
 package org.xydra.testgae.xmas.rest;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 
 import javax.servlet.http.HttpServletRequest;
@@ -63,13 +62,13 @@ public class WishlistResource {
 	public void addData(String repoStr, String list, String wishesStr, HttpServletRequest req,
 	        HttpServletResponse res) throws IOException {
 		ServletUtils.headers(res, "text/html");
-		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		
+		Writer w = HtmlUtils.startHtmlPage(res, "Add Data");
 		w.write("Adding test data ...?wishes=" + wishesStr + " wishes. Start at "
 		        + System.currentTimeMillis() + "\n");
 		int wishesCount = Integer.parseInt(wishesStr);
 		init(repoStr, list);
-		this.wishList.addDemoData(wishesCount, new OutputStreamWriter(res.getOutputStream(),
-		        "utf-8"));
+		this.wishList.addDemoData(wishesCount, w);
 		w.write(HtmlUtils.link(".", "See all wishes"));
 		w.flush();
 	}
@@ -77,24 +76,24 @@ public class WishlistResource {
 	public void deleteAllWishes(String repoStr, String list, HttpServletRequest req,
 	        HttpServletResponse res) throws IOException {
 		ServletUtils.headers(res, "text/html");
-		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		Writer w = HtmlUtils.startHtmlPage(res, "Delete Wishes");
 		w.write("Deleting all wishes.");
 		init(repoStr, list);
-		this.wishList.removeAllWishes(new OutputStreamWriter(res.getOutputStream(), "utf-8"));
+		this.wishList.removeAllWishes(w);
 		w.write(HtmlUtils.link("/xmas/" + repoStr, "See all wish lists"));
-		new OutputStreamWriter(res.getOutputStream(), "utf-8").flush();
+		w.flush();
 	}
 	
 	public void get(String repoStr, String list, HttpServletResponse res) throws IOException {
 		ServletUtils.headers(res, "text/html");
 		init(repoStr, list);
-		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
+		Writer w = HtmlUtils.startHtmlPage(res, "Wishes");
 		w.write(this.wishList.toHtml(null));
 		
 		w.write(HtmlUtils.form(METHOD.GET, "/xmas/" + repoStr + "/" + list + "/add")
 		        .withInputText("wishes", "1").withInputSubmit("Add wishes").toString());
 		w.write(HtmlUtils.link("/xmas/" + repoStr, "See all wish lists"));
-		new OutputStreamWriter(res.getOutputStream(), "utf-8").flush();
+		w.flush();
 	}
 	
 	private void init(String repoStr, String wishlistId) {

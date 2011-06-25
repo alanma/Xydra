@@ -1,7 +1,6 @@
 package org.xydra.testgae.xmas.rest;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 
 import javax.servlet.http.HttpServletRequest;
@@ -51,8 +50,7 @@ public class XmasResource {
 		Writer w = HtmlUtils.startHtmlPage(res, "Xmas | Adding test data");
 		w.write("Adding test data ...?lists=" + listsStr + "&wishes=" + wishesStr
 		        + " wishes.<br />");
-		Xmas.addData(repoStr, listCount, wishesCount, new OutputStreamWriter(res.getOutputStream(),
-		        "utf-8"));
+		Xmas.addData(repoStr, listCount, wishesCount, w);
 		w.write("<a href='.'>See all wish lists in repository '" + repoStr + "'</a>");
 		HtmlUtils.endHtmlPage(w);
 	}
