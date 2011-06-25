@@ -134,6 +134,16 @@
 			<groupId>org.xydra</groupId>
 			<artifactId>json</artifactId>
 			<version>0.1.4-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.google.gwt</groupId>
+					<artifactId>gwt-servlet</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.google.gwt</groupId>
+					<artifactId>gwt-user</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- logging -->
