@@ -2,11 +2,13 @@ package org.xydra.testgae.xmas;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.junit.Test;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+
+import com.google.appengine.repackaged.org.apache.http.HttpResponse;
+import com.google.appengine.repackaged.org.apache.http.client.methods.HttpGet;
+import com.google.appengine.repackaged.org.apache.http.impl.client.DefaultHttpClient;
 
 
 public class StressTest {
@@ -58,9 +60,14 @@ public class StressTest {
 	public static void assertUrl(String logMsg, String absoluteUrl) {
 		log.info(logMsg + " trying url " + absoluteUrl);
 		try {
-			HttpClient httpclient = new HttpClient();
-			GetMethod httpget = new GetMethod(absoluteUrl);
-			int status = httpclient.executeMethod(httpget);
+			DefaultHttpClient httpclient = new DefaultHttpClient();
+			
+			HttpGet httpget = new HttpGet(absoluteUrl);
+			
+			HttpResponse res = httpclient.execute(httpget);
+			
+			int status = res.getStatusLine().getStatusCode();
+			
 			assertEquals(absoluteUrl, 200, status);
 		} catch(Exception e) {
 			throw new RuntimeException("Failed on " + absoluteUrl, e);

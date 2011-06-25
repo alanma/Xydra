@@ -24,7 +24,7 @@
 
 		<!-- Specify AppEngine version for your project. It should match SDK version 
 			pointed to by ${gae.home} property (Typically, one used by your Eclipse plug-in) -->
-		<gae.version>1.4.2</gae.version>
+		<gae.version>1.5.0.1</gae.version>
 		<!-- /!\ Must point to your local GAE/J installation -->
 		<gae.home>
 			${settings.localRepository}/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}
@@ -246,7 +246,7 @@
 			<plugin>
 				<groupId>net.kindleit</groupId>
 				<artifactId>maven-gae-plugin</artifactId>
-				<version>0.8.2</version>
+				<version>0.8.4</version>
 				<configuration>
 					<sdkDir>${gae.home}</sdkDir>
 				</configuration>
