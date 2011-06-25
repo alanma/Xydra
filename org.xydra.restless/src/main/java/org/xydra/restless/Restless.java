@@ -275,14 +275,13 @@ public class Restless extends HttpServlet {
 		ServletUtils.headers(res, MIME_XHTML);
 		try {
 			Writer w = res.getWriter();
-			w.write("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"\r\n"
-			        + "       \"http://www.w3.org/TR/html4/loose.dtd\">\r\n");
+			w.write(XHTML_DOCTYPE);
 			
 			w.write("<html " + XHTML_NS + ">\n" +
 
-			"<head>\\n" +
+			"<head>\n" +
 
-			"<title>Restless Configuration</title>\\n" +
+			"<title>Restless Configuration</title>\n" +
 
 			"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n" +
 
@@ -293,9 +292,9 @@ public class Restless extends HttpServlet {
 
 			+ "</style>\n" +
 
-			"</head><body>");
-			w.write("<h3>Restless configuration</h3>");
-			w.write("<p><ol>");
+			"</head><body><div>");
+			w.write("<h3>Restless configuration</h3>\n");
+			w.write("<ol>");
 			for(RestlessMethod rm : this.methods) {
 				w.write("<li>");
 				String url = servletPath + XmlUtils.xmlEncode(rm.pathTemplate.getRegex());
@@ -304,16 +303,17 @@ public class Restless extends HttpServlet {
 				w.write(instanceOrClass_className(rm.instanceOrClass) + "#" + rm.methodName);
 				
 				/* list parameters */
-				w.write("<form action='" + url + "' method='" + rm.httpMethod + "'>");
+				w.write("<form action='" + url + "' method='" + rm.httpMethod.toLowerCase()
+				        + "'><div>");
 				for(RestlessParameter parameter : rm.requiredNamedParameter) {
 					w.write(parameter.name + " <input type='text' name='" + parameter.name
 					        + "' value='" + parameter.defaultValue + "' />");
 				}
-				w.write("<input type='submit' value='Send' /></form>");
+				w.write("<input type='submit' value='Send' /></div></form>");
 				
-				w.write("</li>");
+				w.write("</li>\n");
 			}
-			w.write("</ol></p>");
+			w.write("</ol>");
 			HtmlUtils.endHtmlPage(w);
 		} catch(IOException e) {
 			throw new RuntimeException(e);
