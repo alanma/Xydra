@@ -173,8 +173,8 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	 *         state of the wrapped {@link MemoryObject}, false otherwise.
 	 */
 	public boolean isChanged() {
-		return !(this.changedFields.isEmpty() && this.removedFields.isEmpty() && this.changedValues
-		        .isEmpty());
+		return !(this.changedFields.isEmpty() && this.removedFields.isEmpty()
+		        && this.changedValues.isEmpty() && this.commands.isEmpty());
 	}
 	
 	// XWritableObject-specific methods
@@ -256,7 +256,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 					
 				} else {
 					this.transRemovedFields.remove(fieldId);
-					this.changedFields.put(fieldId, field);
+					this.transChangedFields.put(fieldId, field);
 				}
 				
 				usedCallback.onSuccess(this.getRevisionNumber());
@@ -304,8 +304,8 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 					
 				} else {
 					this.transRemovedFields.add(fieldId);
-					this.changedFields.remove(fieldId);
-					this.changedValues.remove(fieldId);
+					this.transChangedFields.remove(fieldId);
+					this.transChangedValues.remove(fieldId);
 				}
 				
 				usedCallback.onSuccess(this.getRevisionNumber());
