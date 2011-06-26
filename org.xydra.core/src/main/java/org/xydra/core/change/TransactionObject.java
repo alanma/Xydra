@@ -192,6 +192,10 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	}
 	
 	public long executeCommand(XCommand command, XLocalChangeCallback callback) {
+		/*
+		 * TODO fix all "hasField" and "getField" calls for inTransaction-cases!
+		 */
+
 		XLocalChangeCallback usedCallback = callback;
 		if(usedCallback == null) {
 			usedCallback = new DummyCallback();
