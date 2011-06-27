@@ -1,4 +1,4 @@
-package org.xydra.testgae;
+package org.xydra.testgae.server.rest.experimental;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -28,41 +28,30 @@ import org.xydra.store.access.HashUtils;
 import org.xydra.store.impl.delegate.DelegatingAllowAllStore;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaePersistence;
-import org.xydra.store.impl.gae.GaeTestfixer;
 
 
-public class TestResource {
+/**
+ * FIXME not ready - not required
+ * 
+ * Can run JUnit tests on the server side.
+ * 
+ * @author xamde
+ */
+public class JunitResource {
 	
-	private static final Logger log = LoggerFactory.getLogger(TestResource.class);
+	private static final Logger log = LoggerFactory.getLogger(JunitResource.class);
 	
 	public static void restless(Restless r) {
-		r.addGet("/test1", TestResource.class, "test1");
-		r.addGet("/test1nosec", TestResource.class, "test1noSecurity");
-		r.addGet("/test1nosecloop", TestResource.class, "test1loop");
-		r.addGet("/test2", TestResource.class, "test2");
-		r.addGet("/test3", TestResource.class, "test3");
-		r.addGet("/info", TestResource.class, "info");
-		r.addGet("/", TestResource.class, "index");
+		r.addGet("/test1", JunitResource.class, "test1");
+		r.addGet("/test2", JunitResource.class, "test2");
+		r.addGet("/test3", JunitResource.class, "test3");
+		// .. add more tests here
+		r.addGet("/info", JunitResource.class, "info");
+		r.addGet("/", JunitResource.class, "index");
 	}
 	
 	public void index(HttpServletRequest req, HttpServletResponse res) throws IOException {
 		Writer w = HtmlUtils.startHtmlPage(res, "Xydra Test GAE");
-		w.write("<p>This webapp tests the <a href=\"http://xydra.org\">Xydra GAE datamodel for Google AppEngine</a>.</p>");
-		
-		w.write("<h2>Generic tools</h2>");
-		w.write(HtmlUtils.toOrderedList(
-
-		HtmlUtils.link("/assert",
-		        "Shows status of virtual machine 'assert' keyword, should be off on GAE"),
-
-		HtmlUtils.link("/info", "Is this test running on real GAE in production or not?"),
-
-		HtmlUtils.link("/echo", "Echo current time to verify basic functionality"),
-
-		HtmlUtils.link("/admin/restless", "Introspect all Restless methods")
-
-		));
-		
 		w.write("<h2>Run JUnit tests</h2>");
 		w.write(HtmlUtils.toOrderedList(
 
@@ -73,17 +62,6 @@ public class TestResource {
 		HtmlUtils.link("/benchmark", "Runs a benchmark test")
 
 		));
-		
-		w.write("<h2>Xmas Wish List example app</h2>");
-		
-		w.write(HtmlUtils.toOrderedList(
-
-		HtmlUtils.link("/xmas/repo1",
-		        "Xmas example, repo1. You can use any repo with /xmas/{repoId}.")
-
-		));
-		
-		w.write("Start any request URL with '/logged/' to record AppStats.");
 		
 		w.flush();
 		w.close();
@@ -137,15 +115,18 @@ public class TestResource {
 		w.close();
 	}
 	
-	public String info() {
-		return "GAE is in production? " + GaeTestfixer.inProduction();
-	}
-	
 	public void test3(Writer w) throws IOException {
 		runJunitTest(GaeAllowAllStoreReadMethodsTest.class, w);
 		runJunitTest(GaeStoreReadMethodsTest.class, w);
 	}
 	
+	/**
+	 * Runs all tests in given class
+	 * 
+	 * @param clazz should contain @Test methods
+	 * @param w a writer where results are printed as HTML
+	 * @throws IOException if the writer has {@link IOException}
+	 */
 	public void runJunitTest(Class<?> clazz, Writer w) throws IOException {
 		w.write("Running " + clazz.getName() + "...\n");
 		Result result = JUnitCore.runClasses(clazz);
@@ -179,7 +160,7 @@ public class TestResource {
 			
 			public void onSuccess(XID repoId) {
 				log.info("Success: " + repoId);
-				TestResource.this.test1_repoId = repoId;
+				JunitResource.this.test1_repoId = repoId;
 			}
 			
 			public void onFailure(Throwable exception) {
@@ -201,7 +182,7 @@ public class TestResource {
 			
 			public void onSuccess(XID repoId) {
 				log.info("Success: " + repoId);
-				TestResource.this.test1_repoId = repoId;
+				JunitResource.this.test1_repoId = repoId;
 			}
 			
 			public void onFailure(Throwable exception) {
@@ -230,7 +211,7 @@ public class TestResource {
 	 * For local testing without REST
 	 */
 	public static void main(String[] args) throws UnsupportedEncodingException, IOException {
-		TestResource tr = new TestResource();
+		JunitResource tr = new JunitResource();
 		Writer w = new OutputStreamWriter(System.out, "utf-8");
 		tr.test3(w);
 		w.flush();
