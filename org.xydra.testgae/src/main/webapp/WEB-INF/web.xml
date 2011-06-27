@@ -14,7 +14,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 		<servlet-class>org.xydra.restless.Restless</servlet-class>
 		<init-param>
 			<param-name>app</param-name>
-			<param-value>org.xydra.testgae.TestGaeApp</param-value>
+			<param-value>org.xydra.testgae.server.XmasApp</param-value>
 		</init-param>
 		<init-param>
 			<param-name>loggerFactory</param-name>
