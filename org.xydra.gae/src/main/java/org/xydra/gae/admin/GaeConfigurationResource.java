@@ -76,8 +76,8 @@ public class GaeConfigurationResource {
 		        "clearCache", true, new RestlessParameter("instance", null));
 		
 		r.addMethod(path + "/gaeconf/assert/set", "GET", GaeConfigurationResource.class,
-		        "setCacheConf", true, new RestlessParameter("instance", null),
-		        new RestlessParameter("assert", null));
+		        "setAssert", true, new RestlessParameter("instance", null), new RestlessParameter(
+		                "assert", null));
 		
 		r.addMethod(path + "/gaeconf", "GET", GaeConfigurationResource.class, "index", true);
 	}
@@ -101,11 +101,22 @@ public class GaeConfigurationResource {
 		if(onRightInstance(instanceId)) {
 			boolean memcache_ = Boolean.parseBoolean(memcache);
 			GaeUtils.setUseMemCache(memcache_);
-			w.write("Memcache set to " + memcache);
+			w.write("Memcache set to " + memcache + "<br />");
 		} else {
 			w.write("No action. Please retry and hope your request will hit the right instance.");
 		}
-		
+	}
+	
+	public static void setAssert(String instanceId, String gaeAssert, HttpServletResponse res)
+	        throws IOException {
+		Writer w = startPage(GaePersistence.INSTANCE_ID, res);
+		if(onRightInstance(instanceId)) {
+			boolean gaeAssert_ = Boolean.parseBoolean(gaeAssert);
+			GaeUtils.setUseMemCache(gaeAssert_);
+			w.write("GaeAssert set to " + gaeAssert + "<br />");
+		} else {
+			w.write("No action. Please retry and hope your request will hit the right instance.");
+		}
 	}
 	
 	private static Writer startPage(String instanceId, HttpServletResponse res) throws IOException {
