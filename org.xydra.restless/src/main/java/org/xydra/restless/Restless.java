@@ -356,6 +356,26 @@ public class Restless extends HttpServlet {
 	 * , javax.servlet.http.HttpServletResponse)
 	 */
 	@Override
+	public void doHead(HttpServletRequest req, HttpServletResponse res) {
+		try {
+			super.doHead(req, res);
+		} catch(ServletException e) {
+			throw new RuntimeException(e);
+		} catch(IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	/*
+	 * Called from servlet environment.
+	 * 
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * javax.servlet.http.HttpServlet#doPut(javax.servlet.http.HttpServletRequest
+	 * , javax.servlet.http.HttpServletResponse)
+	 */
+	@Override
 	public void doPut(HttpServletRequest req, HttpServletResponse res) {
 		restlessService(req, res);
 	}
@@ -666,29 +686,43 @@ public class Restless extends HttpServlet {
 			}
 		}
 		
-		try {
-			if(foundMethod) {
-				if(!mayAccess) {
-					res.sendError(403, "Forbidden. Admin parts must be accessed via /admin.");
-				}
-			} else {
-				if(DELEGATE_UNHANDLED_TO_DEFAULT) {
-					delegateToDefaultServlet(reqHandedDown, res);
-				} else {
-					// produce better error message
-					res.sendError(
-					        404,
-					        "No handler matched your "
-					                + reqHandedDown.getMethod()
-					                + "-request path '"
-					                + path
-					                + "'. "
-					                + (foundPath ? "Found at least a path mapping (wrong HTTP method or missing parameters)."
-					                        : "Found not even a path mapping. Check your Restless App and web.xml."));
+		if(foundMethod) {
+			if(!mayAccess) {
+				String msg = "Forbidden. Admin parts must be accessed via /admin.";
+				log.warn(msg);
+				try {
+					res.sendError(403, msg);
+				} catch(IOException e) {
 				}
 			}
+		} else {
+			if(DELEGATE_UNHANDLED_TO_DEFAULT) {
+				try {
+					delegateToDefaultServlet(reqHandedDown, res);
+				} catch(IOException e) {
+					throw new RuntimeException(e);
+				}
+			} else {
+				// produce better error message
+				String msg = "No handler matched your "
+				        + reqHandedDown.getMethod()
+				        + "-request path '"
+				        + path
+				        + "'. "
+				        + (foundPath ? "Found at least a path mapping (wrong HTTP method or missing parameters)."
+				                : "Found not even a path mapping. Check your Restless App and web.xml.");
+				log.warn(msg);
+				try {
+					res.sendError(404, msg);
+				} catch(IOException e) {
+				}
+			}
+		}
+		
+		// make super-sure all buffers are flushed
+		try {
+			res.flushBuffer();
 		} catch(IOException e) {
-			throw new RuntimeException(e);
 		}
 	}
 	
