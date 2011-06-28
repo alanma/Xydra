@@ -11,6 +11,7 @@ import org.xydra.restless.RestlessParameter;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.ServletUtils;
 import org.xydra.store.XydraRuntime;
+import org.xydra.store.impl.gae.GaeAssert;
 import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.impl.gae.GaeUtils;
@@ -42,13 +43,24 @@ public class GaeConfigurationResource {
 		w.write("<p>Memcache Stats: " + XydraRuntime.getMemcache().stats() + " Size: "
 		        + XydraRuntime.getMemcache().size() + "</p>");
 		
-		w.write(HtmlUtils.link("/admin/gaeconf/set?instance=" + GaePersistence.INSTANCE_ID
-		        + "&memcache=true", "set memcache=true(default) on this instance")
+		w.write(HtmlUtils.link("/admin/gaeconf/memcachse/set?instance="
+		        + GaePersistence.INSTANCE_ID + "&memcache=true",
+		        "set memcache=true(default) on this instance")
 		        + "<br/>");
-		w.write(HtmlUtils.link(req.getRequestURI() + "/set?instance=" + GaePersistence.INSTANCE_ID
+		w.write(HtmlUtils.link("/admin/gaeconf/memcache/set?instance=" + GaePersistence.INSTANCE_ID
 		        + "&memcache=false", "set memcache=false on this instance")
 		        + "<br/>");
-		w.write(HtmlUtils.link("/admin/gaeconf/clear-cache", "Clear MemCache for all instances"));
+		w.write(HtmlUtils.link("/admin/gaeconf/memcache/clear", "Clear MemCache for all instances"));
+		
+		w.write("<p>GaeAssert enabled? " + GaeAssert.isEnabled() + "</p>");
+		w.write(HtmlUtils.link("/admin/gaeconf/memcachse/set?instance="
+		        + GaePersistence.INSTANCE_ID + "&asert=false",
+		        "set assert=´false(default) on this instance")
+		        + "<br/>");
+		w.write(HtmlUtils.link("/admin/gaeconf/memcachse/set?instance="
+		        + GaePersistence.INSTANCE_ID + "&asert=true", "set assert=true on this instance")
+		        + "<br/>");
+		
 		w.write(GaeUtils.getConf());
 		w.flush();
 	}
@@ -58,13 +70,17 @@ public class GaeConfigurationResource {
 	 * @param path should be empty string
 	 */
 	public static void restless(Restless r, String path) {
-		r.addMethod(path + "/gaeconf/set", "GET", GaeConfigurationResource.class, "setCacheConf",
-		        true, new RestlessParameter("instance", null), new RestlessParameter("memcache",
-		                null));
-		r.addMethod(path + "/gaeconf/clear-cache", "GET", GaeConfigurationResource.class,
+		r.addMethod(path + "/gaeconf/memcache/set", "GET", GaeConfigurationResource.class,
+		        "setCacheConf", true, new RestlessParameter("instance", null),
+		        new RestlessParameter("memcache", null));
+		r.addMethod(path + "/gaeconf/memcache/clear", "GET", GaeConfigurationResource.class,
 		        "clearCache", true, new RestlessParameter("instance", null));
-		r.addMethod(path + "/gaeconf", "GET", GaeConfigurationResource.class, "index", true);
 		
+		r.addMethod(path + "/gaeconf/assert/set", "GET", GaeConfigurationResource.class,
+		        "setCacheConf", true, new RestlessParameter("instance", null),
+		        new RestlessParameter("assert", null));
+		
+		r.addMethod(path + "/gaeconf", "GET", GaeConfigurationResource.class, "index", true);
 	}
 	
 	/**

@@ -19,12 +19,13 @@ import org.xydra.base.change.impl.memory.MemoryModelEvent;
 import org.xydra.base.change.impl.memory.MemoryObjectEvent;
 import org.xydra.base.change.impl.memory.MemoryRepositoryEvent;
 import org.xydra.base.value.XValue;
-import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.SerializedValue;
+import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.XydraOut;
-import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.core.serialize.xml.XmlOut;
+import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.index.query.Pair;
+import org.xydra.store.impl.gae.GaeAssert;
 import org.xydra.store.impl.gae.GaeUtils;
 import org.xydra.store.impl.gae.GaeUtils.AsyncEntity;
 
@@ -447,6 +448,7 @@ public class GaeEvents {
 		@SuppressWarnings("unchecked")
 		List<Boolean> implied = (List<Boolean>)changeEntity.getProperty(PROP_EVENT_IMPLIED);
 		
+		GaeAssert.gaeAssert(types != null, "changeEntity.PROP_EVENT_TYPES was null");
 		assert types != null && targets != null && values != null && implied != null;
 		
 		XAtomicEvent[] events = new XAtomicEvent[types.size()];
