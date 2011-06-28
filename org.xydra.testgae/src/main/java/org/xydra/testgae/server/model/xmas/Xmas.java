@@ -42,6 +42,10 @@ public class Xmas {
 	 */
 	private static WritableRepositoryOnPersistence repo;
 	
+	public static XID timebasedUniqueId() {
+		return XX.toId("benchmark-" + System.currentTimeMillis());
+	}
+	
 	/**
 	 * @param repoIdStr may be null. If null, a unique one-time repository with
 	 *            the ID 'benchmark-{curentTimestamp}' is used.
@@ -50,8 +54,7 @@ public class Xmas {
 	public static XWritableRepository getRepository(String repoIdStr) {
 		/* if there is no repo or the wrong one: init */
 		if(repo == null || (repoIdStr != null && !repo.getID().toString().equals(repoIdStr))) {
-			XID repoId = repoIdStr == null ? XX.toId("benchmark-" + System.currentTimeMillis())
-			        : XX.toId(repoIdStr);
+			XID repoId = repoIdStr == null ? timebasedUniqueId() : XX.toId(repoIdStr);
 			Clock c = new Clock().start();
 			
 			/* Create persistence */
@@ -119,9 +122,10 @@ public class Xmas {
 			        + "<br />\n");
 		}
 		int count = 0;
-		for(XID modelId : getRepository(repoStr)) {
+		XWritableRepository repo = getRepository(repoStr);
+		for(XID modelId : repo) {
 			count++;
-			XWritableModel model = Xmas.getRepository(repoStr).getModel(modelId);
+			XWritableModel model = repo.getModel(modelId);
 			writer.write(HtmlUtils.link("/xmas/" + repoStr + "/" + modelId + "", "Wish list '"
 			        + modelId + "'<br />\n"));
 			if(view.equals("expanded")) {

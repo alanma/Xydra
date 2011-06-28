@@ -22,7 +22,7 @@ import org.xydra.restless.utils.HtmlUtils;
  * 
  * @author xamde
  */
-public class WishList {
+public class WishList implements Iterable<XID> {
 	
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(WishList.class);
@@ -120,6 +120,11 @@ public class WishList {
 			writer.write(s1.getStats() + "<br />\n");
 		}
 		return wishIds;
+	}
+	
+	@Override
+	public Iterator<XID> iterator() {
+		return this.model.iterator();
 	}
 	
 }

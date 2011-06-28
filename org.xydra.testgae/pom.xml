@@ -170,6 +170,13 @@
 			<type>test-jar</type>
 		</dependency>
 
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>restless</artifactId>
+			<version>0.1.4-SNAPSHOT</version>
+			<type>test-jar</type>
+		</dependency>
+
 		<!-- logging -->
 		<dependency>
 			<groupId>org.xydra</groupId>
@@ -206,7 +213,6 @@
 			<groupId>com.google.appengine</groupId>
 			<artifactId>appengine-api-stubs</artifactId>
 			<version>${gae.version}</version>
-			<scope>test</scope>
 		</dependency>
 
 		<dependency>

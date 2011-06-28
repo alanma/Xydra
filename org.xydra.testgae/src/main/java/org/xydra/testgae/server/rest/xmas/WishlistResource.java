@@ -17,6 +17,7 @@ import org.xydra.restless.RestlessParameter;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.HtmlUtils.METHOD;
 import org.xydra.restless.utils.ServletUtils;
+import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.testgae.server.model.xmas.WishList;
 import org.xydra.testgae.server.model.xmas.Xmas;
 
@@ -28,7 +29,6 @@ import org.xydra.testgae.server.model.xmas.Xmas;
  */
 public class WishlistResource {
 	
-	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(WishlistResource.class);
 	
 	public static void restless(Restless r, String path) {
@@ -39,7 +39,8 @@ public class WishlistResource {
 		);
 		r.addGet(path + "/{repo}/{list}", WishlistResource.class, "get",// .
 		        new RestlessParameter("repo", null),// .
-		        new RestlessParameter("list", null)// .
+		        new RestlessParameter("list", null),// .
+		        new RestlessParameter("format", "html")// .
 		);
 		r.addGet(path + "/{repo}/{list}/clear", WishlistResource.class, "deleteAllWishes",// .
 		        new RestlessParameter("repo", null),// .
@@ -51,6 +52,7 @@ public class WishlistResource {
 	
 	public static synchronized void addData(String repoStr, String list, String wishesStr,
 	        HttpServletRequest req, HttpServletResponse res) throws IOException {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		ServletUtils.headers(res, "text/html");
 		
 		Writer w = HtmlUtils.startHtmlPage(res, "Add Data");
@@ -61,10 +63,12 @@ public class WishlistResource {
 		wishList.addDemoData(wishesCount, w);
 		w.write(HtmlUtils.link(".", "See all wishes"));
 		w.flush();
+		w.close();
 	}
 	
 	public static synchronized void deleteAllWishes(String repoStr, String list,
 	        HttpServletRequest req, HttpServletResponse res) throws IOException {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		ServletUtils.headers(res, "text/html");
 		Writer w = HtmlUtils.startHtmlPage(res, "Delete Wishes");
 		w.write("Deleting all wishes.");
@@ -72,19 +76,42 @@ public class WishlistResource {
 		wishList.removeAllWishes(w);
 		w.write(HtmlUtils.link("/xmas/" + repoStr, "See all wish lists"));
 		w.flush();
+		w.close();
 	}
 	
-	public static synchronized void get(String repoStr, String list, HttpServletResponse res)
-	        throws IOException {
-		ServletUtils.headers(res, "text/html");
+	/**
+	 * @param repoStr ..
+	 * @param list ..
+	 * @param format can be "html" (default) for "urls" for machine access
+	 * @param res ..
+	 * @throws IOException ...
+	 */
+	public static synchronized void get(String repoStr, String list, String format,
+	        HttpServletResponse res) throws IOException {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		WishList wishList = load(repoStr, list);
-		Writer w = HtmlUtils.startHtmlPage(res, "Wishes");
-		w.write(wishList.toHtml());
-		
-		w.write(HtmlUtils.form(METHOD.GET, "/xmas/" + repoStr + "/" + list + "/add")
-		        .withInputText("wishes", "1").withInputSubmit("Add wishes").toString());
-		w.write(HtmlUtils.link("/xmas/" + repoStr, "See all wish lists"));
-		w.flush();
+		if(format.equals("urls")) {
+			ServletUtils.headers(res, "text/plain");
+			Writer w = res.getWriter();
+			for(XID wishId : wishList) {
+				w.write(WishResource.toRootRelativeUrl(repoStr, list, wishId) + "\n");
+			}
+			// always write at least a single blank line
+			w.write("\n");
+			w.flush();
+			w.close();
+		} else {
+			ServletUtils.headers(res, "text/html");
+			Writer w = HtmlUtils.startHtmlPage(res, "Wishes");
+			w.write(wishList.toHtml());
+			
+			w.write(HtmlUtils.form(METHOD.GET, "/xmas/" + repoStr + "/" + list + "/add")
+			        .withInputText("wishes", "1").withInputSubmit("Add wishes").toString());
+			w.write(HtmlUtils.link("/xmas/" + repoStr, "See all wish lists"));
+			HtmlUtils.endHtmlPage(w);
+		}
+		log.info("Done " + repoStr + "/" + list + "&format=" + format + " at "
+		        + System.currentTimeMillis());
 	}
 	
 	private static WishList load(String repoStr, String wishlistId) {
@@ -92,8 +119,18 @@ public class WishlistResource {
 	}
 	
 	public static synchronized WishList load(XWritableRepository repo, XID listId) {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		XWritableModel model = repo.createModel(listId);
 		return new WishList(model);
+	}
+	
+	/**
+	 * @param modelId ~ wish list id
+	 * @return a URL relative to the server root
+	 */
+	public static String toRelativeUrl(String repoId, XID modelId) {
+		assert !modelId.toString().endsWith("/");
+		return "/xmas/" + repoId + "/" + modelId;
 	}
 	
 }

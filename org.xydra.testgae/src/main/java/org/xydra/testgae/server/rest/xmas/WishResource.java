@@ -18,6 +18,7 @@ import org.xydra.restless.RestlessParameter;
 import org.xydra.restless.utils.Clock;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.ServletUtils;
+import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.testgae.server.model.xmas.Wish;
 import org.xydra.testgae.server.model.xmas.Xmas;
 
@@ -49,6 +50,7 @@ public class WishResource {
 	
 	public static synchronized void delete(String repoStr, String listStr, String wishStr,
 	        HttpServletRequest req, HttpServletResponse res) throws IOException {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		ServletUtils.headers(res, "text/html");
 		Writer w = HtmlUtils.startHtmlPage(res, "Delete");
 		w.write("Deleting<br />");
@@ -61,16 +63,19 @@ public class WishResource {
 		
 		w.write(HtmlUtils.link("..", "See all wishes in this list"));
 		w.flush();
+		w.close();
 	}
 	
 	public static synchronized void get(String repoStr, String listStr, String wishStr,
 	        HttpServletResponse res) throws IOException {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		ServletUtils.headers(res, "text/html");
 		Wish wish = load(repoStr, listStr, wishStr);
 		Writer w = HtmlUtils.startHtmlPage(res, "List");
 		w.write(wish.toHtml());
 		w.write(HtmlUtils.link("/xmas/" + repoStr + "/" + listStr, "See all wishes in this lists"));
 		w.flush();
+		w.close();
 	}
 	
 	private static Wish load(String repoStr, String listStr, String wishStr) {
@@ -78,9 +83,14 @@ public class WishResource {
 	}
 	
 	public static Wish load(XWritableRepository repo, XID listId, XID wishId) {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		XWritableModel model = repo.createModel(listId);
 		XWritableObject xo = model.createObject(wishId);
 		return new Wish(xo);
+	}
+	
+	public static String toRootRelativeUrl(String repoStr, String list, XID wishId) {
+		return "/xmas/" + repoStr + "/" + list + "/" + wishId;
 	}
 	
 }
