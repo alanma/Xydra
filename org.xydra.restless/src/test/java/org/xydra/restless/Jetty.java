@@ -31,15 +31,28 @@ import org.xydra.log.LoggerFactory;
 
 
 /**
- * This class is starts a Jetty server configured to allow testing of the
- * webapp.
+ * This class starts a Jetty server configured to allow testing of the webapp,
+ * loading static files directly from src/main/webapp. This class is not
+ * required to run the webapp.
+ * 
+ * This class requires to build and assemble the web app: call
+ * <code>mvn clean compile gwt:compile gwt:mergewebxml war:war -Dmaven.test.skip=true -o
+ * </code>
+ * 
+ * <p>
+ * If only the client source code changed, use <code>mvn gwt:compile</code>
+ * 
+ * <p>
+ * If the web.xml changed use
+ * <code>mvn gwt:mergwebxml war:war to update the web.xml in target/{appname}-SNAPSHOT/WEB-INF
+ * 
+ * <p>If only static files have been modified, no call is neccesary as this Jetty is configured to load the directly from src/main/webapp.
  * 
  * @author voelkel
  * 
  */
 public class Jetty {
 	
-	@SuppressWarnings("unused")
 	private static Logger log = LoggerFactory.getLogger(Jetty.class);
 	
 	private int port;
@@ -47,6 +60,8 @@ public class Jetty {
 	private Server server;
 	
 	private WebAppContext webapp;
+	
+	protected int requests;
 	
 	public Jetty() {
 		this(8080);
@@ -77,9 +92,8 @@ public class Jetty {
 		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
 		
 		this.webapp.setClassLoader(classloader);
-		FilterHolder filterHolder = new FilterHolder();
-		
 		// caching
+		FilterHolder filterHolder = new FilterHolder();
 		filterHolder.setFilter(new Filter() {
 			
 			public void destroy() {
@@ -88,7 +102,7 @@ public class Jetty {
 			
 			public void doFilter(ServletRequest request, ServletResponse response,
 			        FilterChain filterChain) throws IOException, ServletException {
-				System.out.println("Jetty GET " + ((HttpServletRequest)request).getRequestURI());
+				log.info("Filter GET " + ((HttpServletRequest)request).getRequestURI());
 				HttpServletResponseWrapper responseWrapper = new HttpServletResponseWrapper(
 				        (HttpServletResponse)response);
 				
@@ -119,6 +133,28 @@ public class Jetty {
 		this.webapp.addFilter(filterHolder, "*.png", Handler.ALL);
 		this.webapp.addFilter(filterHolder, "*.gif", Handler.ALL);
 		this.webapp.addFilter(filterHolder, ".cache.*", Handler.ALL);
+		
+		// count requests
+		// caching
+		FilterHolder filterHolderForCounting = new FilterHolder();
+		filterHolderForCounting.setFilter(new Filter() {
+			
+			public void destroy() {
+				// do nothing
+			}
+			
+			public void doFilter(ServletRequest request, ServletResponse response,
+			        FilterChain filterChain) throws IOException, ServletException {
+				log.info("Request Nr. " + Jetty.this.requests + " at " + System.currentTimeMillis());
+				Jetty.this.requests++;
+				filterChain.doFilter(request, response);
+			}
+			
+			public void init(FilterConfig filterConfig) {
+				// do nothing
+			}
+		});
+		this.webapp.addFilter(filterHolderForCounting, "*", Handler.ALL);
 		
 		/*
 		 * Add simple security handler that puts anybody with the name 'admin'
