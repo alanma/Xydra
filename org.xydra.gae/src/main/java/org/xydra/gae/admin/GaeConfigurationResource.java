@@ -112,7 +112,7 @@ public class GaeConfigurationResource {
 		Writer w = startPage(GaePersistence.INSTANCE_ID, res);
 		if(onRightInstance(instanceId)) {
 			boolean gaeAssert_ = Boolean.parseBoolean(gaeAssert);
-			GaeUtils.setUseMemCache(gaeAssert_);
+			GaeAssert.setEnabled(gaeAssert_);
 			w.write("GaeAssert set to " + gaeAssert + "<br />");
 		} else {
 			w.write("No action. Please retry and hope your request will hit the right instance.");
