@@ -296,7 +296,9 @@ public class RestlessMethod {
 						PrintWriter pw = new PrintWriter(sw);
 						e.printStackTrace(pw);
 						String stacktrace = sw.toString();
-						res.sendError(500, e + " -- " + stacktrace);
+						if(!res.isCommitted()) {
+							res.sendError(500, e + " -- " + stacktrace);
+						}
 						log.error("Exception while executing RESTless method. Stacktrace: "
 						        + stacktrace, cause);
 					}
