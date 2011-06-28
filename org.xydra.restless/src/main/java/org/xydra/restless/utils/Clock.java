@@ -13,8 +13,13 @@ public class Clock {
 	/** -1 = not running */
 	private long start = -1;
 	
-	public void start() {
+	/**
+	 * @return itself to allow elegant fluent code like this
+	 *         <code>Clock c = new Clock().start();</code>
+	 */
+	public Clock start() {
 		this.start = System.nanoTime();
+		return this;
 	}
 	
 	/**
