@@ -20,9 +20,9 @@ import org.xydra.store.impl.gae.GaeTestfixer;
  */
 public class GaeInfoResource {
 	
-	public static void restless(Restless r) {
-		r.addGet("/gaeinfo", GaeInfoResource.class, "index");
-		r.addGet("/echo", GaeInfoResource.class, "echo");
+	public static void restless(Restless r, String path) {
+		r.addGet(path + "/gaeinfo", GaeInfoResource.class, "index");
+		r.addGet(path + "/echo", GaeInfoResource.class, "echo");
 	}
 	
 	public void index(HttpServletResponse res) throws IOException {

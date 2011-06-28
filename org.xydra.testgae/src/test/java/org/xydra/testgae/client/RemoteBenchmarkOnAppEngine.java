@@ -1,7 +1,5 @@
 package org.xydra.testgae.client;
 
-
-
 /**
  * Benchmark test for a remote server
  * 
@@ -11,7 +9,7 @@ package org.xydra.testgae.client;
 public class RemoteBenchmarkOnAppEngine {
 	
 	public static void main(String[] args) throws InterruptedException {
-		RemoteBenchmark.runBenchmark("http://localhost:8787");
+		RemoteBenchmark.runBenchmark("http://testgae.latest.xydra-live.appspot.com");
 	}
 	
 }

@@ -4,7 +4,6 @@ import org.xydra.restless.IRestlessContext;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessExceptionHandler;
 import org.xydra.testgae.server.rest.AdminDashboardResource;
-import org.xydra.testgae.server.rest.GaeInfoResource;
 import org.xydra.testgae.server.rest.xmas.XmasResource;
 
 
@@ -26,9 +25,7 @@ public class XmasApp {
 			
 		});
 		
-		GaeInfoResource.restless(r);
-		
-		AdminDashboardResource.restless(r);
+		AdminDashboardResource.restless(r, path);
 		
 		XmasResource.restless(r, path);
 	}

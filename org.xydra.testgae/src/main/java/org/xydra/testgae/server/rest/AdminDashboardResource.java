@@ -6,6 +6,7 @@ import java.io.Writer;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.xydra.gae.admin.GaeConfigurationResource;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
@@ -22,8 +23,11 @@ public class AdminDashboardResource {
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(AdminDashboardResource.class);
 	
-	public static void restless(Restless r) {
-		r.addGet("/", AdminDashboardResource.class, "index");
+	public static void restless(Restless r, String path) {
+		r.addGet(path + "/", AdminDashboardResource.class, "index");
+		
+		GaeInfoResource.restless(r, path);
+		GaeConfigurationResource.restless(r, "/admin");
 	}
 	
 	public static void index(HttpServletRequest req, HttpServletResponse res) throws IOException {
@@ -37,7 +41,9 @@ public class AdminDashboardResource {
 
 		HtmlUtils.link("/echo", "Echo current time to verify basic functionality"),
 
-		HtmlUtils.link("/admin/restless", "Introspect all Restless methods")
+		HtmlUtils.link("/admin/restless", "Introspect all Restless methods - Admin only"),
+
+		HtmlUtils.link("/admin/gaeconf", "Gae Config - Admin only")
 
 		));
 		
