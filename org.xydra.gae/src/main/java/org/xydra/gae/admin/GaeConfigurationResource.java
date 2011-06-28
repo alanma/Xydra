@@ -53,12 +53,11 @@ public class GaeConfigurationResource {
 		w.write(HtmlUtils.link("/admin/gaeconf/memcache/clear", "Clear MemCache for all instances"));
 		
 		w.write("<p>GaeAssert enabled? " + GaeAssert.isEnabled() + "</p>");
-		w.write(HtmlUtils.link("/admin/gaeconf/memcachse/set?instance="
-		        + GaePersistence.INSTANCE_ID + "&asert=false",
-		        "set assert=´false(default) on this instance")
+		w.write(HtmlUtils.link("/admin/gaeconf/assert/set?instance=" + GaePersistence.INSTANCE_ID
+		        + "&asert=false", "set assert=´false(default) on this instance")
 		        + "<br/>");
-		w.write(HtmlUtils.link("/admin/gaeconf/memcachse/set?instance="
-		        + GaePersistence.INSTANCE_ID + "&asert=true", "set assert=true on this instance")
+		w.write(HtmlUtils.link("/admin/gaeconf/assert/set?instance=" + GaePersistence.INSTANCE_ID
+		        + "&asert=true", "set assert=true on this instance")
 		        + "<br/>");
 		
 		w.write(GaeUtils.getConf());
