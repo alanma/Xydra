@@ -1,7 +1,6 @@
 package org.xydra.restless.utils;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.Collection;
@@ -265,18 +264,6 @@ public class HtmlUtils {
 		writeHtmlHeaderOpenBody(w, title);
 		w.flush();
 		return w;
-	}
-	
-	/**
-	 * @param res ..
-	 * @param safeHtml must be safe. No further encoding is applied.
-	 * @deprecated use Writer directly
-	 */
-	@Deprecated
-	public static void writeContent(HttpServletResponse res, String safeHtml) throws IOException {
-		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
-		w.write(safeHtml);
-		w.flush();
 	}
 	
 	public static String toOrderedList(String ... listItemContent) {
