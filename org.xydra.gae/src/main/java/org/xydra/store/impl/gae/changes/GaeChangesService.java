@@ -811,6 +811,10 @@ public class GaeChangesService {
 		
 		long currentRev = getCurrentRevisionNumber();
 		
+		if(currentRev == -1) {
+			return null;
+		}
+		
 		// Don't try to get more events than there actually are.
 		if(beginRevision > currentRev) {
 			return new ArrayList<XEvent>(0);
