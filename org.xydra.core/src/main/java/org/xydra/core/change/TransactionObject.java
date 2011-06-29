@@ -47,7 +47,7 @@ import org.xydra.core.model.impl.memory.MemoryObject;
  */
 
 /**
- * TODO check if this implementation is thread-safe "enough" *
+ * TODO check if this implementation is thread-safe "enough"
  */
 public class TransactionObject extends AbstractEntity implements XWritableObject {
 	
@@ -192,10 +192,6 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	}
 	
 	public long executeCommand(XCommand command, XLocalChangeCallback callback) {
-		/*
-		 * TODO fix all "hasField" and "getField" calls for inTransaction-cases!
-		 */
-
 		XLocalChangeCallback usedCallback = callback;
 		if(usedCallback == null) {
 			usedCallback = new DummyCallback();
@@ -221,14 +217,26 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		
 		// TODO comment inTransaction cases!
 		
+		// all commands concern fields -> check if it exists
+		XID fieldId = command.getChangedEntity().getField();
+		
+		boolean fieldExists = this.hasField(fieldId);
+		
+		if(this.inTransaction) {
+			// set it to true, if the field was added during the
+			// transaction
+			fieldExists |= this.transChangedFields.containsKey(fieldId);
+			
+			// set it to false, if the field was removed
+			fieldExists &= !this.transRemovedFields.contains(fieldId);
+		}
+		
 		// Object Commands
 		if(command instanceof XObjectCommand) {
 			XObjectCommand objectCommand = (XObjectCommand)command;
 			
-			XID fieldId = command.getChangedEntity().getField();
-			
 			if(command.getChangeType() == ChangeType.ADD) {
-				if(hasField(fieldId)) {
+				if(fieldExists) {
 					if(!objectCommand.isForced()) {
 						// not forced, tried to add something that already
 						// existed
@@ -268,7 +276,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 			}
 
 			else if(command.getChangeType() == ChangeType.REMOVE) {
-				if(!hasField(fieldId)) {
+				if(!fieldExists) {
 					if(!objectCommand.isForced()) {
 						// not forced, tried to remove something that didn't
 						// exist
@@ -283,7 +291,14 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 					return this.getRevisionNumber();
 				}
 				
-				XWritableField field = this.getField(fieldId);
+				XWritableField field;
+				
+				if(this.inTransaction && this.transChangedFields.containsKey(fieldId)) {
+					field = this.transChangedFields.get(fieldId);
+				} else {
+					field = this.getField(fieldId);
+				}
+				
 				// remember: this actually is an InModelTransactionField
 				assert field != null;
 				assert field instanceof InModelTransactionField;
@@ -320,23 +335,15 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		// XFieldCommands
 		if(command instanceof XFieldCommand) {
 			XFieldCommand fieldCommand = (XFieldCommand)command;
-			XID fieldId = command.getChangedEntity().getField();
 			
-			if(!this.inTransaction) {
-				if(!hasField(fieldId)) {
-					usedCallback.onFailure();
-					return XCommand.FAILED;
-				}
-			} else {
-				if(!hasField(fieldId) && !this.transChangedFields.containsKey(fieldId)) {
-					usedCallback.onFailure();
-					return XCommand.FAILED;
-				}
+			if(!fieldExists) {
+				usedCallback.onFailure();
+				return XCommand.FAILED;
 			}
 			
 			XWritableField field = this.getField(fieldId);
 			
-			if(field == null && this.inTransaction) {
+			if(this.inTransaction && this.transChangedFields.containsKey(fieldId)) {
 				field = this.transChangedFields.get(fieldId);
 			}
 			
@@ -587,10 +594,8 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	}
 	
 	public XWritableField getField(XID fieldId) {
-		boolean exists = false;
-		
 		if(this.changedFields.containsKey(fieldId)) {
-			exists = true;
+			return this.changedFields.get(fieldId);
 		} else {
 			/*
 			 * only look into the base model if the field wasn't removed
@@ -598,20 +603,17 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 			if(!this.removedFields.contains(fieldId)) {
 				XField field = this.baseObject.getField(fieldId);
 				if(field != null) {
-					this.changedFields.put(fieldId, new InObjectTransactionField(
-					        field.getAddress(), field.getRevisionNumber(), this));
-					exists = true;
+					InObjectTransactionField transField = new InObjectTransactionField(
+					        field.getAddress(), field.getRevisionNumber(), this);
+					
+					this.changedFields.put(fieldId, transField);
+					
+					return transField;
 				}
 			}
 		}
 		
-		if(exists == false) {
-			return null;
-		} else {
-			assert this.changedFields.containsKey(fieldId);
-			
-			return this.changedFields.get(fieldId);
-		}
+		return null;
 	}
 	
 	@Override
