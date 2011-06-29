@@ -31,7 +31,6 @@ import org.xydra.core.model.delta.DeltaUtils;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.server.IXydraServer;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.gae.GaeUtils;
@@ -47,7 +46,7 @@ import com.google.appengine.api.datastore.Transaction;
  * A class responsible for executing and logging changes to a specific XModel in
  * the GAE datastore.
  * 
- * This class is the core of the GAE {@link IXydraServer} implementation.
+ * This class is the core of the GAE {@link XydraStore} implementation.
  * 
  * Keys for XMODEL, XOBJEC and XFIELD entities are encoded according to
  * {@link KeyStructure#createEntityKey(XAddress)}.
@@ -511,14 +510,14 @@ public class GaeChangesService {
 				
 			} else if(event instanceof XObjectEvent) {
 				if(event.getChangeType() == ChangeType.REMOVE) {
-					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(),
-					        change.getLocks()));
+					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(), change
+					        .getLocks()));
 					// cannot save revision in the removed field
 					objectsWithPossiblyUnsavedRev.add(event.getTarget().getObject());
 				} else {
 					assert event.getChangeType() == ChangeType.ADD;
-					futures.add(InternalGaeField.set(event.getChangedEntity(), change.rev,
-					        change.getLocks()));
+					futures.add(InternalGaeField.set(event.getChangedEntity(), change.rev, change
+					        .getLocks()));
 					// revision saved in created field
 					objectsWithSavedRev.add(event.getTarget().getObject());
 				}
@@ -527,14 +526,14 @@ public class GaeChangesService {
 			} else if(event instanceof XModelEvent) {
 				XID objectId = ((XModelEvent)event).getObjectId();
 				if(event.getChangeType() == ChangeType.REMOVE) {
-					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(),
-					        change.getLocks()));
+					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(), change
+					        .getLocks()));
 					// object removed, so revision is of no interest
 					objectsWithPossiblyUnsavedRev.remove(objectId);
 				} else {
 					assert event.getChangeType() == ChangeType.ADD;
-					futures.add(InternalGaeObject.createObject(event.getChangedEntity(),
-					        change.getLocks(), change.rev));
+					futures.add(InternalGaeObject.createObject(event.getChangedEntity(), change
+					        .getLocks(), change.rev));
 					// revision saved in new object
 					objectsWithSavedRev.add(objectId);
 				}
@@ -542,12 +541,12 @@ public class GaeChangesService {
 			} else {
 				assert event instanceof XRepositoryEvent;
 				if(event.getChangeType() == ChangeType.REMOVE) {
-					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(),
-					        change.getLocks()));
+					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(), change
+					        .getLocks()));
 				} else {
 					assert event.getChangeType() == ChangeType.ADD;
-					futures.add(InternalGaeModel.createModel(event.getChangedEntity(),
-					        change.getLocks()));
+					futures.add(InternalGaeModel.createModel(event.getChangedEntity(), change
+					        .getLocks()));
 				}
 			}
 			
