@@ -39,9 +39,10 @@ public class LocalVmCachingPersistence implements XydraPersistence {
 	 * to use implementations that are already synchronized themselves)
 	 */
 	private static Map<String,XWritableModel> localVmCache_modelSnapshot = new ConcurrentHashMap<String,XWritableModel>();
-	private static Map<String,XWritableObject> localVmCache_objectSnapshot = new ConcurrentHashMap<String,XWritableObject>();
+	// private static Map<String,XWritableObject> localVmCache_objectSnapshot =
+	// new ConcurrentHashMap<String,XWritableObject>();
 	/* Makes no sense while getting current objectRevNr is soo cumbersome */
-	private static final boolean CACHE_OBJECT_SNAPSHOTS = false;
+	// private static final boolean CACHE_OBJECT_SNAPSHOTS = false;
 	
 	private XydraPersistence persistence;
 	
