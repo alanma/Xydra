@@ -20,12 +20,13 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
+import org.xydra.core.XCopyUtils;
 import org.xydra.core.model.XChangeLog;
-import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.SerializedModel;
+import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.XydraOut;
-import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.core.serialize.xml.XmlOut;
+import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.XydraRuntime;
@@ -72,34 +73,45 @@ public class GaeSnapshotService {
 		
 	}
 	
+	private CachedModel localVmCache = null;
+	
 	/**
 	 * @return an {@link XReadableModel} by applying all events in the
 	 *         {@link XChangeLog}
 	 */
 	synchronized public XWritableModel getSnapshot() {
 		
+		long curRev = this.changes.getCurrentRevisionNumber();
+		if(this.localVmCache != null && this.localVmCache.revision >= curRev) {
+			return XCopyUtils.createSnapshot(this.localVmCache.modelState);
+		}
+		
+		// IMPROVE if the local VM cache is only behind a few revisions, it
+		// might be faster to update it than to load a snapshot from the
+		// memcache
+		
 		final String cachname = this.changes.getModelAddress() + "-snapshot";
 		
 		CachedModel entry = (CachedModel)XydraRuntime.getMemcache().get(cachname);
 		
 		if(entry == null) {
-			entry = loadSnapshot();
+			entry = this.localVmCache;
+			if(entry == null) {
+				entry = loadSnapshot();
+			}
 		}
 		
-		// TODO less locking
-		synchronized(entry) {
-			updateCachedModel(entry);
-			
-			XydraRuntime.getMemcache().put(cachname, entry);
-			
-			saveSnapshot(entry);
-			
-			/*
-			 * cache result is directly returned without copy, because cache
-			 * results are always de-deserialized from byte[] arrays anyways
-			 */
-			return entry.modelState;
-		}
+		updateCachedModel(entry, curRev);
+		
+		this.localVmCache = entry;
+		XydraRuntime.getMemcache().put(cachname, entry);
+		saveSnapshot(entry);
+		
+		/*
+		 * cache result is directly returned without copy, because cache results
+		 * are always de-deserialized from byte[] arrays anyways
+		 */
+		return XCopyUtils.createSnapshot(entry.modelState);
 		
 	}
 	
@@ -161,16 +173,10 @@ public class GaeSnapshotService {
 		
 	}
 	
-	private void updateCachedModel(CachedModel entry) {
+	private void updateCachedModel(CachedModel entry, long curRev) {
 		
-		log.debug("udating cached model " + this.changes.getModelAddress() + " from rev="
+		log.info("udating cached model " + this.changes.getModelAddress() + " from rev="
 		        + entry.revision);
-		
-		long curRev = this.changes.getCurrentRevisionNumber();
-		if(curRev == entry.revision) {
-			log.debug("-> nothing to update");
-			return;
-		}
 		
 		// Fetch one event from the back of the change log.
 		List<AsyncChange> batch = new ArrayList<AsyncChange>(1);
