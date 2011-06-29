@@ -14,6 +14,8 @@ import org.xydra.store.XydraRuntime;
  */
 public class RevisionCache {
 	
+	private static final long LOCAL_VM_CACHE_TIMEOUT = 500;
+	
 	private final XAddress modelAddr;
 	
 	public RevisionCache(XAddress modelAddr) {
@@ -82,6 +84,10 @@ public class RevisionCache {
 		// TODO implement
 	}
 	
+	// Local VM cache of the "current" revision number.
+	private long cachedCurrentRev = NOT_SET;
+	private long cachedCurrentRevTime = -1;
+	
 	/**
 	 * Retrieve a cached value of the current revision number as defined by
 	 * {@link #getCurrentRevisionNumber()}.
@@ -91,10 +97,9 @@ public class RevisionCache {
 	 */
 	protected long getCurrent() {
 		
-		IMemCache cache = XydraRuntime.getMemcache();
+		long rev = getCurrentIfSet();
 		
-		Long value = (Long)cache.get(getCurrentRevCacheName());
-		return (value == null) ? -1L : value;
+		return (rev == NOT_SET) ? -1L : rev;
 	}
 	
 	protected static final long NOT_SET = -2L;
@@ -107,6 +112,13 @@ public class RevisionCache {
 	 * but is guaranteed to never be greater.
 	 */
 	protected long getCurrentIfSet() {
+		
+		synchronized(this) {
+			long now = System.currentTimeMillis();
+			if(now < this.cachedCurrentRevTime + LOCAL_VM_CACHE_TIMEOUT) {
+				return this.cachedCurrentRev;
+			}
+		}
 		
 		IMemCache cache = XydraRuntime.getMemcache();
 		
@@ -121,7 +133,21 @@ public class RevisionCache {
 	 *            less than this.
 	 */
 	protected void setCurrent(long l) {
-		increaseCachedValue(getCurrentRevCacheName(), l);
+		
+		synchronized(this) {
+			if(this.cachedCurrentRev >= l) {
+				return;
+			}
+		}
+		
+		long val = increaseCachedValue(getCurrentRevCacheName(), l);
+		
+		synchronized(this) {
+			if(val >= this.cachedCurrentRev) {
+				this.cachedCurrentRev = val;
+				this.cachedCurrentRevTime = System.currentTimeMillis();
+			}
+		}
 	}
 	
 	/**
@@ -139,19 +165,19 @@ public class RevisionCache {
 	 * @param l The new value to set. Ignored if it is less than the current
 	 *            value.
 	 */
-	private void increaseCachedValue(String cachname, long l) {
+	private long increaseCachedValue(String cachname, long l) {
 		IMemCache cache = XydraRuntime.getMemcache();
 		
 		Long current = (Long)cache.get(cachname);
 		if(current != null && current > l) {
-			return;
+			return current;
 		}
 		
 		Long value = l;
 		while(true) {
 			Long old = (Long)cache.put(cachname, value);
 			if(old == null || old <= value) {
-				break;
+				return value;
 			}
 			value = old;
 		}

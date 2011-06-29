@@ -809,12 +809,10 @@ public class GaeChangesService {
 		
 		long begin = beginRevision < 0 ? 0 : beginRevision;
 		
-		long currentRev = this.revCache.getCurrentIfSet();
+		long currentRev = getCurrentRevisionNumber();
 		
 		// Don't try to get more events than there actually are.
-		if(currentRev == RevisionCache.NOT_SET) {
-			currentRev = -1L;
-		} else if(beginRevision > currentRev) {
+		if(beginRevision > currentRev) {
 			return new ArrayList<XEvent>(0);
 		} else if(endRevision > currentRev) {
 			endRevision = currentRev;
