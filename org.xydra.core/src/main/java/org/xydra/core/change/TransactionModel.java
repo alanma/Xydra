@@ -56,7 +56,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	private Set<XID> removedObjects, transRemovedObjects;
 	private Set<XAddress> removedFields, transRemovedFields;
 	
-	private LinkedList<XCommand> commands;
+	private LinkedList<XAtomicCommand> commands;
 	
 	private boolean inTransaction;
 	
@@ -76,7 +76,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 		this.transRemovedObjects = new HashSet<XID>();
 		this.transRemovedFields = new HashSet<XAddress>();
 		
-		this.commands = new LinkedList<XCommand>();
+		this.commands = new LinkedList<XAtomicCommand>();
 	}
 	
 	// Transaction methods
@@ -341,8 +341,8 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 				this.removedFields.remove(fieldId);
 				
 				XAddress temp = object.getAddress();
-				XAddress address = XX.toAddress(temp.getRepository(), temp.getModel(),
-				        temp.getObject(), fieldId);
+				XAddress address = XX.toAddress(temp.getRepository(), temp.getModel(), temp
+				        .getObject(), fieldId);
 				
 				InModelTransactionField field = new InModelTransactionField(address, XCommand.NEW,
 				        this);
