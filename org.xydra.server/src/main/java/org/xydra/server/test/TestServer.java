@@ -19,7 +19,6 @@ import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.server.IXydraServer;
 import org.xydra.server.rest.XydraRestServer;
 import org.xydra.store.XydraStore;
 import org.xydra.store.XydraStoreAdmin;
@@ -115,14 +114,6 @@ public class TestServer {
 		}
 	}
 	
-	public IXydraServer getBackend() {
-		if(this.webapp == null) {
-			throw new RuntimeException("cannot get backend before server is started");
-		}
-		ServletContext sc = this.webapp.getServletContext();
-		return (IXydraServer)sc.getAttribute(XydraRestServer.SERVLET_CONTEXT_ATTRIBUTE_XYDRASERVER);
-	}
-	
 	public XydraStore getStore() {
 		if(this.webapp == null) {
 			throw new RuntimeException("cannot get backend before server is started");
@@ -141,24 +132,6 @@ public class TestServer {
 	public URI startXydraServer(File webapp) {
 		
 		URI uri = startServer("/xydra", webapp);
-		
-		IXydraServer xydraServer = getBackend();
-		
-		// add a default model
-		// TODO move command into transaction
-		XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(xydraServer
-		        .getRepositoryAddress(), XCommand.SAFE, DemoModelUtil.PHONEBOOK_ID);
-		xydraServer.executeCommand(createCommand, null);
-		XAddress modelAddr = createCommand.getChangedEntity();
-		XTransactionBuilder tb = new XTransactionBuilder(modelAddr);
-		DemoModelUtil.setupPhonebook(modelAddr, tb);
-		xydraServer.executeCommand(tb.buildCommand(), null);
-		
-		// allow access to everyone
-		XAddress repoAddr = xydraServer.getRepositoryAddress();
-		XAuthorisationManager arm = xydraServer.getAccessManager();
-		arm.getAuthorisationDatabase().setAccess(XA.GROUP_ALL, repoAddr, XA.ACCESS_READ, true);
-		arm.getAuthorisationDatabase().setAccess(XA.GROUP_ALL, repoAddr, XA.ACCESS_WRITE, true);
 		
 		// initialize the store
 		

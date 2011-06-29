@@ -4,14 +4,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.base.XAddress;
+import org.xydra.base.XID;
+import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.core.DemoModelUtil;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.restless.Restless;
-import org.xydra.server.IXydraSession;
 import org.xydra.server.rest.XydraRestServer;
+import org.xydra.store.BatchedResult;
+import org.xydra.store.WaitingCallback;
+import org.xydra.store.XydraStore;
 
 
 /**
@@ -26,19 +30,30 @@ public class AddDemoDataResource {
 	}
 	
 	public void init(Restless restless, HttpServletRequest req, HttpServletResponse res) {
-		IXydraSession session = XydraRestServer.getSession(restless, req);
+		
+		XydraStore store = XydraRestServer.getStore(restless);
+		
+		// TODO use a real user
+		XID actorId = XX.toId("admin");
+		String passwordHash = "secret";
+		
+		WaitingCallback<XID> repoAddr = new WaitingCallback<XID>();
+		store.getRepositoryId(actorId, passwordHash, repoAddr);
+		
+		WaitingCallback<BatchedResult<Long>[]> result = new WaitingCallback<BatchedResult<Long>[]>();
 		
 		// TODO move command into transaction
-		XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(session
-		        .getRepositoryAddress(), XCommand.SAFE, DemoModelUtil.PHONEBOOK_ID);
-		session.executeCommand(createCommand);
+		XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(XX.toAddress(
+		        repoAddr.getResult(), null, null, null), XCommand.SAFE, DemoModelUtil.PHONEBOOK_ID);
+		store.executeCommands(actorId, passwordHash, new XCommand[] { createCommand }, result);
+		
+		result.getException(); // wait for command to execute
 		
 		XAddress modelAddr = createCommand.getChangedEntity();
 		XTransactionBuilder tb = new XTransactionBuilder(modelAddr);
 		DemoModelUtil.setupPhonebook(modelAddr, tb);
-		session.executeCommand(tb.build());
+		store.executeCommands(actorId, passwordHash, new XCommand[] { tb.build() }, null);
 		
 		XydraRestServer.textResponse(res, HttpServletResponse.SC_OK, "Added phonebook model.");
 	}
-	
 }

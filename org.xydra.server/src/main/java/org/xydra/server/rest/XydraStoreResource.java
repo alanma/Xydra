@@ -247,7 +247,7 @@ public class XydraStoreResource {
 	public void checkLogin(IRestlessContext context, String actorIdStr, String passwordHash)
 	        throws Throwable {
 		
-		XydraStore store = XydraRestServer.getXydraStore(context.getRestless());
+		XydraStore store = XydraRestServer.getStore(context.getRestless());
 		XID actorId = getActorId(actorIdStr);
 		
 		WaitingCallback<Boolean> callback = new WaitingCallback<Boolean>();
@@ -268,7 +268,7 @@ public class XydraStoreResource {
 	public void executeCommands(IRestlessContext context, String actorIdStr, String passwordHash,
 	        String[] addresses, String[] from, String[] to) throws Throwable {
 		
-		XydraStore store = XydraRestServer.getXydraStore(context.getRestless());
+		XydraStore store = XydraRestServer.getStore(context.getRestless());
 		XID actorId = getActorId(actorIdStr);
 		
 		EventsRequest ger = parseEventsRequest(addresses, from, to);
@@ -394,7 +394,7 @@ public class XydraStoreResource {
 	public void getEvents(IRestlessContext context, String actorIdStr, String passwordHash,
 	        String[] addresses, String[] from, String[] to) throws Throwable {
 		
-		XydraStore store = XydraRestServer.getXydraStore(context.getRestless());
+		XydraStore store = XydraRestServer.getStore(context.getRestless());
 		XID actorId = getActorId(actorIdStr);
 		
 		EventsRequest ger = parseEventsRequest(addresses, from, to);
@@ -417,7 +417,7 @@ public class XydraStoreResource {
 	public void getModelRevisions(IRestlessContext context, String actorIdStr, String passwordHash,
 	        String[] addresses) throws Throwable {
 		
-		XydraStore store = XydraRestServer.getXydraStore(context.getRestless());
+		XydraStore store = XydraRestServer.getStore(context.getRestless());
 		XID actorId = getActorId(actorIdStr);
 		
 		StoreException[] ex = new StoreException[addresses.length];
@@ -449,7 +449,7 @@ public class XydraStoreResource {
 	public void getSnapshots(IRestlessContext context, String actorIdStr, String passwordHash,
 	        String[] addressStrs) throws Throwable {
 		
-		XydraStore store = XydraRestServer.getXydraStore(context.getRestless());
+		XydraStore store = XydraRestServer.getStore(context.getRestless());
 		XID actorId = getActorId(actorIdStr);
 		
 		List<XAddress> modelAddrs = new ArrayList<XAddress>();
@@ -511,7 +511,7 @@ public class XydraStoreResource {
 	public void getModelIds(IRestlessContext context, String actorIdStr, String passwordHash)
 	        throws Throwable {
 		
-		XydraStore store = XydraRestServer.getXydraStore(context.getRestless());
+		XydraStore store = XydraRestServer.getStore(context.getRestless());
 		XID actorId = getActorId(actorIdStr);
 		
 		WaitingCallback<Set<XID>> callback = new WaitingCallback<Set<XID>>();
@@ -532,7 +532,7 @@ public class XydraStoreResource {
 	public void getRepositoryId(IRestlessContext context, String actorIdStr, String passwordHash)
 	        throws Throwable {
 		
-		XydraStore store = XydraRestServer.getXydraStore(context.getRestless());
+		XydraStore store = XydraRestServer.getStore(context.getRestless());
 		XID actorId = getActorId(actorIdStr);
 		
 		WaitingCallback<XID> callback = new WaitingCallback<XID>();
