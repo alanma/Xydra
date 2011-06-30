@@ -63,6 +63,8 @@ public class Jetty {
 	
 	protected int requests;
 	
+	protected long startTime;
+	
 	public Jetty() {
 		this(8080);
 	}
@@ -102,7 +104,7 @@ public class Jetty {
 			
 			public void doFilter(ServletRequest request, ServletResponse response,
 			        FilterChain filterChain) throws IOException, ServletException {
-				log.info("Filter GET " + ((HttpServletRequest)request).getRequestURI());
+				log.trace("JETTY Image GET " + ((HttpServletRequest)request).getRequestURI());
 				HttpServletResponseWrapper responseWrapper = new HttpServletResponseWrapper(
 				        (HttpServletResponse)response);
 				
@@ -135,7 +137,6 @@ public class Jetty {
 		this.webapp.addFilter(filterHolder, ".cache.*", Handler.ALL);
 		
 		// count requests
-		// caching
 		FilterHolder filterHolderForCounting = new FilterHolder();
 		filterHolderForCounting.setFilter(new Filter() {
 			
@@ -143,11 +144,17 @@ public class Jetty {
 				// do nothing
 			}
 			
-			public void doFilter(ServletRequest request, ServletResponse response,
+			public void doFilter(ServletRequest req, ServletResponse response,
 			        FilterChain filterChain) throws IOException, ServletException {
-				log.info("Request Nr. " + Jetty.this.requests + " at " + System.currentTimeMillis());
 				Jetty.this.requests++;
-				filterChain.doFilter(request, response);
+				if(req instanceof HttpServletRequest) {
+					HttpServletRequest hreq = (HttpServletRequest)req;
+					log.info("JETTY #" + Jetty.this.requests + " " + hreq.getMethod() + " "
+					        + hreq.getRequestURL() + " @" + timeSinceStart());
+				} else {
+					log.info("JETTY Request Nr. " + Jetty.this.requests + " @" + timeSinceStart());
+				}
+				filterChain.doFilter(req, response);
 			}
 			
 			public void init(FilterConfig filterConfig) {
@@ -201,9 +208,45 @@ public class Jetty {
 			}
 		});
 		
+		// route requests to static content
+		FilterHolder filterHolderForStaticContent = new FilterHolder();
+		filterHolderForStaticContent.setFilter(new Filter() {
+			
+			public void destroy() {
+				// do nothing
+			}
+			
+			public void doFilter(ServletRequest req, ServletResponse response,
+			        FilterChain filterChain) throws IOException, ServletException {
+				if(req instanceof HttpServletRequest) {
+					HttpServletRequest hreq = (HttpServletRequest)req;
+					String path = hreq.getPathInfo();
+					if(path == null) {
+						path = "";
+					}
+					path = path.toLowerCase();
+					if(path.contains("favicon.ico")) {
+						// block
+						log.info("JETTY Blocked: " + hreq.getRequestURL());
+					} else {
+						// don't block
+						filterChain.doFilter(req, response);
+					}
+				} else {
+					filterChain.doFilter(req, response);
+				}
+			}
+			
+			public void init(FilterConfig filterConfig) {
+				// do nothing
+			}
+		});
+		this.webapp.addFilter(filterHolderForStaticContent, "*", Handler.ALL);
+		
 		// Add the webapp to the server.
 		this.server.setHandler(this.webapp);
 		
+		this.startTime = System.currentTimeMillis();
 		try {
 			this.server.start();
 		} catch(Exception e) {
@@ -216,6 +259,10 @@ public class Jetty {
 			throw new RuntimeException(e);
 		}
 		
+	}
+	
+	public long timeSinceStart() {
+		return System.currentTimeMillis() - this.startTime;
 	}
 	
 	public void stopServer() {
