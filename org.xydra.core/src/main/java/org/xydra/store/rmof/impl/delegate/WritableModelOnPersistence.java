@@ -13,6 +13,8 @@ import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.index.iterator.NoneIterator;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -26,6 +28,8 @@ import org.xydra.store.impl.delegate.XydraPersistence;
  */
 public class WritableModelOnPersistence extends AbstractWritableOnPersistence implements
         XWritableModel {
+	
+	private static final Logger log = LoggerFactory.getLogger(WritableModelOnPersistence.class);
 	
 	private long lastRev = 0;
 	
@@ -95,6 +99,10 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	
 	public long getRevisionNumber() {
 		XWritableModel snapshot = this.persistence.getModelSnapshot(getAddress());
+		if(snapshot == null) {
+			log.warn("Modelsnapshot for " + getAddress() + " is null");
+			return XCommand.NEW;
+		}
 		return snapshot.getRevisionNumber();
 	}
 	

@@ -29,7 +29,9 @@ import org.xydra.base.value.XValue;
  * The base model is changed at no times.
  * 
  * @author xamde
+ * @deprecated trying to find all references...
  */
+@Deprecated
 public class DiffWritableModel implements XWritableModel {
 	
 	/* representing added stuff */
