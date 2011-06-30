@@ -213,14 +213,26 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 			return XCommand.FAILED;
 		}
 		
+		// all commands somehow concern objects -> check if it exists
+		XID objectId = command.getChangedEntity().getObject();
+		
+		boolean objectExists = this.hasObject(objectId);
+		
+		if(this.inTransaction) {
+			// set it to true, if the object was added during the
+			// transaction
+			objectExists |= this.transChangedObjects.containsKey(objectId);
+			
+			// set it to false, if the field was removed
+			objectExists &= !this.transRemovedObjects.contains(objectId);
+		}
+		
 		// Model Commands
 		if(command instanceof XModelCommand) {
 			XModelCommand modelCommand = (XModelCommand)command;
 			
-			XID objectId = command.getChangedEntity().getObject();
-			
 			if(command.getChangeType() == ChangeType.ADD) {
-				if(hasObject(objectId)) {
+				if(objectExists) {
 					if(!modelCommand.isForced()) {
 						// not forced, tried to add something that already
 						// existed
@@ -258,7 +270,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 			}
 
 			else if(command.getChangeType() == ChangeType.REMOVE) {
-				if(!hasObject(objectId)) {
+				if(objectExists) {
 					if(!modelCommand.isForced()) {
 						// not forced, tried to remove something that didn't
 						// exist
@@ -271,7 +283,9 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 					return this.getRevisionNumber();
 				}
 				
-				XWritableObject object = this.getObject(objectId);
+				XWritableObject object = (!this.inTransaction) ? this.getObject(objectId) : this
+				        .getObjectInTransaction(objectId);
+				
 				// remember: this actually is an InModelTransactionObject
 				assert object != null;
 				assert object instanceof InModelTransactionObject;
@@ -289,18 +303,28 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 					XAddress fieldAddress = XX.toAddress(temp.getRepository(), temp.getModel(),
 					        temp.getObject(), fieldId);
 					
-					this.removedFields.add(fieldAddress);
-					this.changedFields.remove(fieldAddress);
+					if(!this.inTransaction) {
+						this.removedFields.add(fieldAddress);
+						this.changedFields.remove(fieldAddress);
+					} else {
+						this.transRemovedFields.add(fieldAddress);
+						this.transChangedFields.remove(fieldAddress);
+					}
 				}
 				
-				// mark it as removed
-				this.removedObjects.add(objectId);
-				
-				// remove info from all other maps
-				this.changedObjects.remove(objectId);
-				
-				// command succeeded -> add it to the list
-				this.commands.add((XAtomicCommand)command);
+				if(!this.inTransaction) {
+					// mark it as removed
+					this.removedObjects.add(objectId);
+					
+					// remove info from all other maps
+					this.changedObjects.remove(objectId);
+					
+					// command succeeded -> add it to the list
+					this.commands.add((XAtomicCommand)command);
+				} else {
+					this.transRemovedObjects.add(objectId);
+					this.transChangedObjects.remove(objectId);
+				}
 				
 				usedCallback.onSuccess(this.getRevisionNumber());
 				return this.getRevisionNumber();
@@ -311,20 +335,34 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 		else if(command instanceof XObjectCommand) {
 			XObjectCommand objectCommand = (XObjectCommand)command;
 			
-			XID fieldId = command.getChangedEntity().getField();
-			
-			if(!hasObject(command.getTarget().getObject())) {
+			if(!objectExists) {
 				usedCallback.onFailure();
 				return XCommand.FAILED;
 			}
 			
-			XWritableObject object = this.getObject(command.getTarget().getObject());
+			XWritableObject object = (!this.inTransaction) ? this.getObject(objectId) : this
+			        .getObjectInTransaction(objectId);
 			// remember: this is actually an InModelTransactionObject
 			assert object != null;
 			assert object instanceof InModelTransactionObject;
 			
+			// all commands concern fields -> check if it exists
+			XID fieldId = command.getChangedEntity().getField();
+			XAddress fieldAddress = command.getChangedEntity();
+			
+			boolean fieldExists = object.hasField(fieldId);
+			
+			if(this.inTransaction) {
+				// set it to true, if the field was added during the
+				// transaction
+				fieldExists |= this.transChangedFields.containsKey(fieldAddress);
+				
+				// set it to false, if the field was removed
+				fieldExists &= !this.transRemovedFields.contains(fieldAddress);
+			}
+			
 			if(command.getChangeType() == ChangeType.ADD) {
-				if(object.hasField(fieldId)) {
+				if(fieldExists) {
 					if(!objectCommand.isForced()) {
 						// not forced, tried to add something that already
 						// existed
@@ -337,26 +375,29 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 					return this.getRevisionNumber();
 				}
 				
-				// remove from list of removed fields, if needed
-				this.removedFields.remove(fieldId);
+				InModelTransactionField field = new InModelTransactionField(fieldAddress,
+				        XCommand.NEW, this);
 				
-				XAddress temp = object.getAddress();
-				XAddress address = XX.toAddress(temp.getRepository(), temp.getModel(), temp
-				        .getObject(), fieldId);
-				
-				InModelTransactionField field = new InModelTransactionField(address, XCommand.NEW,
-				        this);
-				this.changedFields.put(address, field);
-				
-				// command succeeded -> add it to the list
-				this.commands.add((XAtomicCommand)command);
+				if(!this.inTransaction) {
+					// remove from list of removed fields, if needed
+					this.removedFields.remove(fieldAddress);
+					
+					this.changedFields.put(fieldAddress, field);
+					
+					// command succeeded -> add it to the list
+					this.commands.add((XAtomicCommand)command);
+				} else {
+					this.transRemovedFields.remove(fieldAddress);
+					
+					this.transChangedFields.put(fieldAddress, field);
+				}
 				
 				usedCallback.onSuccess(this.getRevisionNumber());
 				return this.getRevisionNumber();
 			}
 
 			else if(command.getChangeType() == ChangeType.REMOVE) {
-				if(!object.hasField(fieldId)) {
+				if(!fieldExists) {
 					if(!objectCommand.isForced()) {
 						// not forced, tried to remove something that didn't
 						// exist
@@ -369,9 +410,8 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 					return this.getRevisionNumber();
 				}
 				
-				XAddress fieldAddress = command.getChangedEntity();
-				
-				XWritableField field = this.getField(fieldAddress);
+				XWritableField field = (!this.inTransaction) ? this.getField(fieldAddress) : this
+				        .getFieldInTransaction(fieldAddress);
 				// remember: this actually is an InModelTransactionField
 				assert field != null;
 				assert field instanceof InModelTransactionField;
@@ -383,27 +423,32 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 					return XCommand.FAILED;
 				}
 				
-				// mark it as removed
-				this.removedFields.add(fieldAddress);
-				
-				// remove info from all other maps
-				this.changedFields.remove(fieldAddress);
-				this.changedValues.remove(fieldAddress);
-				
-				// command succeeded -> add it to the list
-				this.commands.add((XAtomicCommand)command);
+				if(!this.inTransaction) {
+					// mark it as removed
+					this.removedFields.add(fieldAddress);
+					
+					// remove info from all other maps
+					this.changedFields.remove(fieldAddress);
+					this.changedValues.remove(fieldAddress);
+					
+					// command succeeded -> add it to the list
+					this.commands.add((XAtomicCommand)command);
+				} else {
+					this.transRemovedFields.add(fieldAddress);
+					this.transChangedFields.remove(fieldAddress);
+					this.transChangedValues.remove(fieldAddress);
+				}
 				
 				usedCallback.onSuccess(this.getRevisionNumber());
 				return this.getRevisionNumber();
 			}
 		}
-		
+
 		// XFieldCommands
-		if(command instanceof XFieldCommand) {
+		else if(command instanceof XFieldCommand) {
 			XFieldCommand fieldCommand = (XFieldCommand)command;
 			XAddress fieldAddress = command.getChangedEntity();
 			XID fieldId = fieldAddress.getField();
-			XID objectId = fieldAddress.getObject();
 			
 			if(!hasObject(objectId)) {
 				usedCallback.onFailure();
@@ -492,11 +537,6 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	}
 	
 	private long handleTransaction(XTransaction transaction, XLocalChangeCallback callback) {
-		/*
-		 * TODO do XModelTransactions and XObjectTransaction have to be treated
-		 * differently?
-		 */
-
 		this.inTransaction = true;
 		
 		assert callback != null;
@@ -634,6 +674,44 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 		// Transaction "succeeded"
 		callback.onSuccess(this.getRevisionNumber());
 		return this.getRevisionNumber();
+	}
+	
+	private XWritableObject getObjectInTransaction(XID objectId) {
+		/*
+		 * extra method for this is useful concerning concurrent access,
+		 * rewriting getObject would make some problems here
+		 * 
+		 * TODO extra method is not necessary if we do not care about concurrent
+		 * access
+		 */
+		XWritableObject object = null;
+		
+		if(this.inTransaction && this.transChangedObjects.containsKey(objectId)) {
+			object = this.transChangedObjects.get(objectId);
+		} else if(object == null) {
+			object = this.getObject(objectId);
+		}
+		
+		return object;
+	}
+	
+	private XWritableField getFieldInTransaction(XAddress fieldAddress) {
+		/*
+		 * extra method for this is useful concerning concurrent access,
+		 * rewriting getfield would make some problems here
+		 * 
+		 * TODO extra method is not necessary if we do not care about concurrent
+		 * access
+		 */
+		XWritableField field = null;
+		
+		if(this.inTransaction && this.transChangedFields.containsKey(fieldAddress)) {
+			field = this.transChangedFields.get(fieldAddress);
+		} else if(field == null) {
+			field = this.getField(fieldAddress);
+		}
+		
+		return field;
 	}
 	
 	@Override
