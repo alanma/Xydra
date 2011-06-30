@@ -295,7 +295,8 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 				
 				if(this.inTransaction && this.transChangedFields.containsKey(fieldId)) {
 					field = this.transChangedFields.get(fieldId);
-				} else if(field == null) {
+				} else {
+					assert field == null;
 					field = this.getField(fieldId);
 				}
 				

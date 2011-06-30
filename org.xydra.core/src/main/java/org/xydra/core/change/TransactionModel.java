@@ -688,7 +688,8 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 		
 		if(this.inTransaction && this.transChangedObjects.containsKey(objectId)) {
 			object = this.transChangedObjects.get(objectId);
-		} else if(object == null) {
+		} else {
+			assert object == null;
 			object = this.getObject(objectId);
 		}
 		
@@ -707,7 +708,8 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 		
 		if(this.inTransaction && this.transChangedFields.containsKey(fieldAddress)) {
 			field = this.transChangedFields.get(fieldAddress);
-		} else if(field == null) {
+		} else {
+			assert field == null;
 			field = this.getField(fieldAddress);
 		}
 		
