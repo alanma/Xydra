@@ -73,6 +73,10 @@ public class GaeSnapshotService {
 		
 	}
 	
+	/**
+	 * TODO right now, this cache will never have a hit, as new snapshot
+	 * services are created all the time ~~max
+	 */
 	private CachedModel localVmCache = null;
 	
 	/**
@@ -80,9 +84,12 @@ public class GaeSnapshotService {
 	 *         {@link XChangeLog}
 	 */
 	synchronized public XWritableModel getSnapshot() {
-		
+		/* get fresh current revNr */
 		long curRev = this.changes.getCurrentRevisionNumber();
+		/* if localVmCache has fresh version, use it */
 		if(this.localVmCache != null && this.localVmCache.revision >= curRev) {
+			log.trace("re-using locamVmCache with revNr " + this.localVmCache.revision + " for "
+			        + curRev);
 			return XCopyUtils.createSnapshot(this.localVmCache.modelState);
 		}
 		
@@ -90,21 +97,29 @@ public class GaeSnapshotService {
 		// might be faster to update it than to load a snapshot from the
 		// memcache
 		
+		/* try to get a snapshot from memcache TODO why is revNr not checked? */
 		final String cachname = this.changes.getModelAddress() + "-snapshot";
-		
 		CachedModel entry = (CachedModel)XydraRuntime.getMemcache().get(cachname);
-		
 		if(entry == null) {
+			/*
+			 * if memcache has no snapshot, use localVmCache and ignore wrong
+			 * revNr
+			 */
 			entry = this.localVmCache;
 			if(entry == null) {
+				/* if nothing else works: load snapshot */
 				entry = loadSnapshot();
 			}
 		}
+		assert entry != null;
 		
+		/* update entry with new events from change log */
 		updateCachedModel(entry, curRev);
-		
+		/* cache it locally */
 		this.localVmCache = entry;
+		/* update latest snapshot in memcache for other threads/instances */
 		XydraRuntime.getMemcache().put(cachname, entry);
+		/* store revision-specific snapshots in datastore and memcache */
 		saveSnapshot(entry);
 		
 		/*
@@ -119,6 +134,9 @@ public class GaeSnapshotService {
 		return KeyFactory.createKey(KIND_SNAPSHOT, this.changes.getModelAddress().toURI());
 	}
 	
+	/**
+	 * @return a revision-specific key string
+	 */
 	private String getSnapshotRevKey() {
 		return this.changes.getModelAddress() + "-snapshot-Rev";
 	}
@@ -150,6 +168,12 @@ public class GaeSnapshotService {
 		return entry;
 	}
 	
+	/**
+	 * Save revision-specific snapshot as XML in data store (every k writes) and
+	 * put also in memcache
+	 * 
+	 * @param entry to be stored
+	 */
 	private void saveSnapshot(CachedModel entry) {
 		
 		Long savedRevLong = (Long)XydraRuntime.getMemcache().get(getSnapshotRevKey());
@@ -173,10 +197,23 @@ public class GaeSnapshotService {
 		
 	}
 	
+	/**
+	 * Update snapshots in caches with new events from change log
+	 * 
+	 * @param entry to be updated
+	 * @param curRev current revision
+	 */
 	private void updateCachedModel(CachedModel entry, long curRev) {
 		
-		log.info("udating cached model " + this.changes.getModelAddress() + " from rev="
-		        + entry.revision);
+		/*
+		 * FIXME Max: This seems correct and makes XydraGae much faster - am I
+		 * missing something?
+		 */
+		if(entry.revision == curRev) {
+			return;
+		}
+		log.info("udating cached model " + this.changes.getModelAddress() + " from lastRev="
+		        + entry.revision + " to curRev=" + curRev);
 		
 		// Fetch one event from the back of the change log.
 		List<AsyncChange> batch = new ArrayList<AsyncChange>(1);
@@ -274,6 +311,8 @@ public class GaeSnapshotService {
 		log.debug("-> updated to new rev=" + entry.revision);
 		assert entry.modelState == null || entry.modelState.getRevisionNumber() == entry.revision;
 		
+		log.trace("udated cached model " + this.changes.getModelAddress() + " to newRev="
+		        + entry.revision);
 	}
 	
 	/**
