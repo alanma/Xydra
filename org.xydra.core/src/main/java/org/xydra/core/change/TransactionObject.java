@@ -291,16 +291,16 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 					return this.getRevisionNumber();
 				}
 				
-				XWritableField field;
+				XWritableField field = null;
 				
 				if(this.inTransaction && this.transChangedFields.containsKey(fieldId)) {
 					field = this.transChangedFields.get(fieldId);
-				} else {
+				} else if(field == null) {
 					field = this.getField(fieldId);
 				}
 				
 				// remember: this actually is an InModelTransactionField
-				assert field != null;
+				assert field != null; // because "fieldExists" was true
 				assert field instanceof InModelTransactionField;
 				
 				// check revision number

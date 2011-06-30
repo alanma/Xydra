@@ -325,8 +325,8 @@ public class TransactionObjectTest {
 		assertFalse(this.object.hasField(newFieldId));
 		
 		// try to add a field that already exists
-		addCommand = factory.createAddFieldCommand(this.transObject.getAddress(), this.field
-		        .getID(), isForced);
+		addCommand = factory.createAddFieldCommand(this.transObject.getAddress(),
+		        this.field.getID(), isForced);
 		callback = new TestCallback();
 		
 		sizeBefore = this.transObject.size();
@@ -416,8 +416,8 @@ public class TransactionObjectTest {
 		}
 		
 		// try to remove a field that already exists, should succeed
-		removeCommand = factory.createRemoveFieldCommand(this.field.getAddress(), this.field
-		        .getRevisionNumber(), isForced);
+		removeCommand = factory.createRemoveFieldCommand(this.field.getAddress(),
+		        this.field.getRevisionNumber(), isForced);
 		callback = new TestCallback();
 		
 		sizeBefore = this.transObject.size();
@@ -469,8 +469,8 @@ public class TransactionObjectTest {
 		assertNull(callback.revision);
 		
 		// add a value to an existing field, use wrong revNr
-		addCommand = factory.createAddValueCommand(this.field.getAddress(), this.field
-		        .getRevisionNumber() + 1, value, isForced);
+		addCommand = factory.createAddValueCommand(this.field.getAddress(),
+		        this.field.getRevisionNumber() + 1, value, isForced);
 		callback = new TestCallback();
 		
 		sizeBefore = this.transObject.size();
@@ -497,8 +497,8 @@ public class TransactionObjectTest {
 		}
 		
 		// add a value to an existing field, should succeed
-		addCommand = factory.createAddValueCommand(this.field.getAddress(), this.field
-		        .getRevisionNumber(), value, isForced);
+		addCommand = factory.createAddValueCommand(this.field.getAddress(),
+		        this.field.getRevisionNumber(), value, isForced);
 		callback = new TestCallback();
 		
 		sizeBefore = this.transObject.size();
@@ -519,8 +519,8 @@ public class TransactionObjectTest {
 		
 		// try to add a value to a field which value is already set
 		XValue value2 = XX.createUniqueId();
-		addCommand = factory.createAddValueCommand(this.field.getAddress(), this.field
-		        .getRevisionNumber(), value2, isForced);
+		addCommand = factory.createAddValueCommand(this.field.getAddress(),
+		        this.field.getRevisionNumber(), value2, isForced);
 		callback = new TestCallback();
 		
 		sizeBefore = this.transObject.size();
@@ -585,8 +585,8 @@ public class TransactionObjectTest {
 		assertNull(callback.revision);
 		
 		// change the value of a field, which value is not set
-		changeCommand = factory.createChangeValueCommand(this.field.getAddress(), this.field
-		        .getRevisionNumber(), value, isForced);
+		changeCommand = factory.createChangeValueCommand(this.field.getAddress(),
+		        this.field.getRevisionNumber(), value, isForced);
 		callback = new TestCallback();
 		
 		sizeBefore = this.transObject.size();
@@ -714,8 +714,8 @@ public class TransactionObjectTest {
 		assertNull(callback.revision);
 		
 		// remove a value from an existing field, without a set value
-		removeCommand = factory.createRemoveValueCommand(this.field.getAddress(), this.field
-		        .getRevisionNumber(), isForced);
+		removeCommand = factory.createRemoveValueCommand(this.field.getAddress(),
+		        this.field.getRevisionNumber(), isForced);
 		callback = new TestCallback();
 		
 		sizeBefore = this.transObject.size();
@@ -816,9 +816,14 @@ public class TransactionObjectTest {
 		builder.addField(this.object.getAddress(), XCommand.SAFE, fieldId1);
 		builder.addField(this.object.getAddress(), XCommand.SAFE, fieldId2);
 		
+		// add something, remove it again
+		XID temp = X.getIDProvider().createUniqueId();
+		builder.addField(this.object.getAddress(), XCommand.SAFE, temp);
+		builder.removeField(this.object.getAddress(), XCommand.NEW, temp);
+		
 		// remove some fields
-		builder.removeField(this.object.getAddress(), this.field.getRevisionNumber(), this.field
-		        .getID());
+		builder.removeField(this.object.getAddress(), this.field.getRevisionNumber(),
+		        this.field.getID());
 		
 		// add some values
 		XValue value = X.getValueFactory().createStringValue("testValue");
@@ -830,9 +835,10 @@ public class TransactionObjectTest {
 		builder.addValue(fieldAddress1, XCommand.NEW, value);
 		builder.addValue(fieldAddress2, XCommand.NEW, value);
 		
-		// remove a value
-		builder.removeValue(this.fieldWithValue.getAddress(), this.fieldWithValue
-		        .getRevisionNumber());
+		// remove values
+		builder.removeValue(this.fieldWithValue.getAddress(),
+		        this.fieldWithValue.getRevisionNumber());
+		builder.removeValue(fieldAddress2, XCommand.NEW);
 		
 		// execute the transaction - should succeed
 		XTransaction transaction = builder.build();
@@ -873,12 +879,13 @@ public class TransactionObjectTest {
 		assertTrue(this.object.hasField(fieldId2));
 		
 		assertFalse(this.object.hasField(this.field.getID()));
+		assertFalse(this.object.hasField(temp));
 		
 		XField field1 = this.object.getField(fieldId1);
 		assertEquals(value, field1.getValue());
 		
 		XField field2 = this.object.getField(fieldId2);
-		assertEquals(value, field2.getValue());
+		assertNull(field2.getValue());
 		
 		assertEquals(null, this.fieldWithValue.getValue());
 	}
@@ -929,8 +936,8 @@ public class TransactionObjectTest {
 			switch(changeType) {
 			case ADD:
 				// try to add a value to a field which value is already set
-				builder.addValue(this.fieldWithValue.getAddress(), XCommand.SAFE, XX
-				        .createUniqueId());
+				builder.addValue(this.fieldWithValue.getAddress(), XCommand.SAFE,
+				        XX.createUniqueId());
 				break;
 			
 			case REMOVE:
@@ -940,8 +947,8 @@ public class TransactionObjectTest {
 			case CHANGE:
 				// try to change the value of a field which value is set, but
 				// use wrong revision number
-				builder.changeValue(this.fieldWithValue.getAddress(), this.fieldWithValue
-				        .getRevisionNumber() + 1, XX.createUniqueId());
+				builder.changeValue(this.fieldWithValue.getAddress(),
+				        this.fieldWithValue.getRevisionNumber() + 1, XX.createUniqueId());
 				break;
 			case TRANSACTION:
 				assert false : "unexpected change type " + changeType + " for xtype " + type;
@@ -1065,8 +1072,8 @@ public class TransactionObjectTest {
 		assertTrue(this.transObject.hasField(newFieldId));
 		
 		XAddress temp = this.object.getAddress();
-		XAddress fieldAddress = XX.toAddress(temp.getRepository(), temp.getModel(), temp
-		        .getObject(), newFieldId);
+		XAddress fieldAddress = XX.toAddress(temp.getRepository(), temp.getModel(),
+		        temp.getObject(), newFieldId);
 		XCommand removeCommand = X.getCommandFactory().createSafeRemoveFieldCommand(fieldAddress,
 		        XCommand.NEW);
 		this.transObject.executeCommand(removeCommand);
@@ -1133,8 +1140,8 @@ public class TransactionObjectTest {
 		// change the existing field and get it again
 		XCommandFactory factory = X.getCommandFactory();
 		XValue value = X.getValueFactory().createStringValue("test");
-		XCommand command = factory.createSafeAddValueCommand(this.field.getAddress(), this.field
-		        .getRevisionNumber(), value);
+		XCommand command = factory.createSafeAddValueCommand(this.field.getAddress(),
+		        this.field.getRevisionNumber(), value);
 		
 		this.transObject.executeCommand(command);
 		
