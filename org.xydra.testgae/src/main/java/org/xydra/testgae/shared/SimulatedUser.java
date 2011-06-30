@@ -1,11 +1,14 @@
 package org.xydra.testgae.shared;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.restless.utils.Clock;
 
 
 /**
@@ -72,6 +75,41 @@ public class SimulatedUser extends Thread {
 		this.repoIdStr = repo;
 	}
 	
+	/**
+	 * @param w can be null
+	 * @throws IOException ...
+	 */
+	public void doBenchmark1(Writer w) throws IOException {
+		Clock c = new Clock();
+		
+		// add 20 lists
+		c.start();
+		doAction(Action.CreateList, 10);
+		c.stop("CreateList");
+		doAction(Action.CreateList, 10);
+		
+		// delete 10 lists
+		c.start();
+		doAction(Action.DeleteList, 10);
+		c.stop("DeleteList");
+		
+		// add 20 wishes
+		c.start();
+		doAction(Action.EditListAddWish, 10);
+		c.stop("EditListAddWish");
+		doAction(Action.EditListAddWish, 10);
+		
+		// delete 10 wishes
+		c.start();
+		doAction(Action.EditListDeleteWish, 10);
+		c.stop("EditListDeleteWish");
+		
+		if(w != null) {
+			w.write(c.getStats());
+		}
+		log.info("Benchmark1: " + c.getStats());
+	}
+	
 	@Override
 	public void run() {
 		while(!this.stopSoon) {
@@ -87,15 +125,30 @@ public class SimulatedUser extends Thread {
 					}
 				}
 			}
-			this.actions++;
 			yield();
 		}
 		log.info("Thread done");
 	}
 	
-	private void doRandomAction() {
+	public void doRandomAction() {
 		/* choose action */
 		Action action = Action.randomAction();
+		doAction(action);
+	}
+	
+	/**
+	 * Do action n times
+	 * 
+	 * @param action ..
+	 * @param n ..
+	 */
+	public void doAction(Action action, int n) {
+		for(int i = 0; i < n; i++) {
+			doAction(action);
+		}
+	}
+	
+	public void doAction(Action action) {
 		log.info("Trying action " + this.actions + " = " + action);
 		/*
 		 * some actions make no sense under some circumstances, but we cannot
@@ -144,6 +197,7 @@ public class SimulatedUser extends Thread {
 				log.info("Found no list for " + action);
 			}
 		}
+		this.actions++;
 	}
 	
 	/**

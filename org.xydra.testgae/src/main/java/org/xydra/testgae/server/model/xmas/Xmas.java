@@ -6,17 +6,17 @@ import java.io.Writer;
 
 import org.xydra.base.XID;
 import org.xydra.base.XX;
+import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableRepository;
+import org.xydra.core.change.DiffWritableModel;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.utils.Clock;
 import org.xydra.restless.utils.HtmlUtils;
-import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
-import org.xydra.testgae.server.rest.xmas.WishlistResource;
 import org.xydra.testgae.server.rest.xmas.XmasResource;
 
 import com.google.apphosting.api.DeadlineExceededException;
@@ -37,10 +37,14 @@ public class Xmas {
 	
 	private static final Logger log = LoggerFactory.getLogger(Xmas.class);
 	
+	private static final XID ACTOR_ID = XX.toId("_Xmas-benchmark-user");
+	
 	/**
 	 * A cached instance used to load and persist data
 	 */
 	private static WritableRepositoryOnPersistence repo;
+	
+	private static GaePersistence persistence;
 	
 	public static XID timebasedUniqueId() {
 		return XX.toId("benchmark-" + System.currentTimeMillis());
@@ -58,9 +62,9 @@ public class Xmas {
 			Clock c = new Clock().start();
 			
 			/* Create persistence */
-			XydraPersistence persistence = new GaePersistence(repoId);
+			persistence = new GaePersistence(repoId);
 			/* Wrap as XWritableRepository and cache instance */
-			repo = new WritableRepositoryOnPersistence(persistence, XX.toId("benchmark-user"));
+			repo = new WritableRepositoryOnPersistence(persistence, ACTOR_ID);
 			
 			c.stop("init-repo");
 			log.info("Initialised repository '" + repoId + "'. Stats: " + c.getStats());
@@ -80,20 +84,42 @@ public class Xmas {
 	 */
 	public static void addData(String repoStr, int listCount, int wishesCount, Writer writer)
 	        throws IOException {
-		writer.write("Adding to repository '" + getRepository(repoStr).getID() + "'<br />\n");
+		XWritableRepository repo = getRepository(repoStr);
+		writer.write("Adding to repository '" + repo.getID() + "'<br />\n");
 		Clock s2 = new Clock();
 		s2.start();
-		for(int l = 1; l <= listCount; l++) {
+		for(int l = 0; l <= listCount; l++) {
 			writer.write("Creating/loading model <br />\n");
-			XWritableModel model = getRepository(repoStr).createModel(XX.toId("list" + l));
-			WishList wishList = WishlistResource.load(getRepository(repoStr), model.getID());
+			XWritableModel model = getOrCreateModel(repoStr, XX.createUniqueId());
+			// txn
+			DiffWritableModel txnModel = new DiffWritableModel(model);
+			WishList wishList = new WishList(txnModel);
 			wishList.addDemoData(wishesCount, writer);
 			writer.write(HtmlUtils.link("/xmas/" + repoStr + "/" + model.getID(), "See list '"
 			        + model.getID() + "'")
 			        + "<br />\n");
+			// commit txn
+			XTransaction txn = txnModel.toTransaction();
+			executeTransaction(txn);
+			
 		}
 		s2.stop("create " + listCount + " lists with " + wishesCount + " wishes");
 		writer.write(s2.getStats() + "<br />\n");
+		log.info("Created " + listCount + " lists in " + repoStr + " with " + wishesCount
+		        + " wishes initially each");
+	}
+	
+	public static synchronized XWritableModel getOrCreateModel(String repoIdStr, XID modelId) {
+		XWritableRepository repo = getRepository(repoIdStr);
+		XWritableModel model = repo.getModel(modelId);
+		if(model == null) {
+			model = repo.createModel(modelId);
+		}
+		return model;
+	}
+	
+	public static void executeTransaction(XTransaction txn) {
+		persistence.executeCommand(ACTOR_ID, txn);
 	}
 	
 	/**

@@ -1,5 +1,6 @@
 package org.xydra.testgae.client;
 
+import java.io.IOException;
 
 
 /**
@@ -10,7 +11,7 @@ package org.xydra.testgae.client;
  */
 public class RemoteBenchmarkOnLocalhost {
 	
-	public static void main(String[] args) throws InterruptedException {
+	public static void main(String[] args) throws InterruptedException, IOException {
 		RemoteBenchmark.runBenchmark("http://localhost:8787");
 	}
 	

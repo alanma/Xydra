@@ -8,8 +8,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.base.XID;
 import org.xydra.base.XX;
+import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableRepository;
+import org.xydra.core.change.DiffWritableModel;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
@@ -59,21 +61,51 @@ public class WishlistResource {
 		w.write("Adding test data ...?wishes=" + wishesStr + " wishes. Start at "
 		        + System.currentTimeMillis() + "\n");
 		int wishesCount = Integer.parseInt(wishesStr);
-		WishList wishList = load(repoStr, list);
+		XWritableModel model = getModel(repoStr, list);
+		DiffWritableModel txnModel = new DiffWritableModel(model);
+		WishList wishList = new WishList(txnModel);
 		wishList.addDemoData(wishesCount, w);
+		XTransaction txn = txnModel.toTransaction();
+		Xmas.executeTransaction(txn);
 		w.write(HtmlUtils.link(".", "See all wishes"));
 		w.flush();
 		w.close();
 	}
 	
+	private static XWritableModel getModel(String repoStr, String modelIdStr) {
+		XWritableRepository repo = Xmas.getRepository(repoStr);
+		XID modelId = XX.toId(modelIdStr);
+		XWritableModel model = repo.getModel(modelId);
+		return model;
+	}
+	
+	/**
+	 * Delete all wishes and the list itself
+	 * 
+	 * @param repoStr ..
+	 * @param list ..
+	 * @param req ..
+	 * @param res ..
+	 * @throws IOException ...
+	 */
 	public static synchronized void deleteAllWishes(String repoStr, String list,
 	        HttpServletRequest req, HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		ServletUtils.headers(res, "text/html");
 		Writer w = HtmlUtils.startHtmlPage(res, "Delete Wishes");
 		w.write("Deleting all wishes.");
-		WishList wishList = load(repoStr, list);
+		// create txn
+		DiffWritableModel txnModel = new DiffWritableModel(Xmas.getOrCreateModel(repoStr,
+		        XX.toId(list)));
+		WishList wishList = new WishList(txnModel);
+		// manipulate txn
 		wishList.removeAllWishes(w);
+		// execute txn
+		XTransaction txn = txnModel.toTransaction();
+		Xmas.executeTransaction(txn);
+		
+		XWritableRepository repo = Xmas.getRepository(repoStr);
+		repo.removeModel(XX.toId(list));
 		w.write(HtmlUtils.link("/xmas/" + repoStr, "See all wish lists"));
 		w.flush();
 		w.close();
@@ -89,7 +121,8 @@ public class WishlistResource {
 	public static synchronized void get(String repoStr, String list, String format,
 	        HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		WishList wishList = load(repoStr, list);
+		// no txn, read only
+		WishList wishList = new WishList(Xmas.getOrCreateModel(repoStr, XX.toId(list)));
 		if(format.equals("urls")) {
 			ServletUtils.headers(res, "text/plain");
 			Writer w = res.getWriter();
@@ -112,16 +145,6 @@ public class WishlistResource {
 		}
 		log.info("Done " + repoStr + "/" + list + "&format=" + format + " at "
 		        + System.currentTimeMillis());
-	}
-	
-	private static WishList load(String repoStr, String wishlistId) {
-		return load(Xmas.getRepository(repoStr), XX.toId(wishlistId));
-	}
-	
-	public static synchronized WishList load(XWritableRepository repo, XID listId) {
-		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		XWritableModel model = repo.createModel(listId);
-		return new WishList(model);
 	}
 	
 	/**

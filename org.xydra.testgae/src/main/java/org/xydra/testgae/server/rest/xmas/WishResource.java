@@ -8,9 +8,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.base.XID;
 import org.xydra.base.XX;
+import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.XWritableRepository;
+import org.xydra.core.change.DiffWritableModel;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
@@ -20,6 +22,7 @@ import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.ServletUtils;
 import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.testgae.server.model.xmas.Wish;
+import org.xydra.testgae.server.model.xmas.WishList;
 import org.xydra.testgae.server.model.xmas.Xmas;
 
 
@@ -56,8 +59,17 @@ public class WishResource {
 		w.write("Deleting<br />");
 		
 		Clock s1 = new Clock().start();
-		WishlistResource.load(Xmas.getRepository(repoStr), XX.toId(listStr)).removeWish(
-		        XX.toId(wishStr));
+		
+		// create txn
+		DiffWritableModel txnModel = new DiffWritableModel(Xmas.getOrCreateModel(repoStr,
+		        XX.toId(listStr)));
+		WishList wishList = new WishList(txnModel);
+		// manipulate txn
+		wishList.removeWish(XX.toId(wishStr));
+		// execute txn
+		XTransaction txn = txnModel.toTransaction();
+		Xmas.executeTransaction(txn);
+		
 		s1.stop("delete a wish");
 		w.write(s1.getStats() + "<br/>\n");
 		

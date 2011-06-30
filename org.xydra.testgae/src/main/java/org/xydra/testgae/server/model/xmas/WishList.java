@@ -57,6 +57,7 @@ public class WishList implements Iterable<XID> {
 		for(XID xid : list) {
 			this.model.removeObject(xid);
 		}
+		
 		s1.stop("removeAllWishes");
 		writer.write(s1.getStats());
 	}
