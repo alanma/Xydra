@@ -212,7 +212,7 @@ public class GaeSnapshotService {
 		if(entry.revision == curRev) {
 			return;
 		}
-		log.info("udating cached model " + this.changes.getModelAddress() + " from lastRev="
+		log.debug("udating cached model " + this.changes.getModelAddress() + " from lastRev="
 		        + entry.revision + " to curRev=" + curRev);
 		
 		// Fetch one event from the back of the change log.
