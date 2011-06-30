@@ -19,12 +19,19 @@ public class AboutAppEngine {
 		                SystemProperty.Environment.Value.Production);
 	}
 	
+	/**
+	 * @return only if on AppEngine development mode (i.e. locally)
+	 */
 	public static boolean inDevelopment() {
 		return SystemProperty.environment.get() != null
 		        && SystemProperty.environment.value().equals(
 		                SystemProperty.Environment.Value.Development);
 	}
 	
+	/**
+	 * @return true if on AppEngine (regardless whether in production or in
+	 *         development mode)
+	 */
 	public static boolean onAppEngine() {
 		return inProduction() || inDevelopment();
 	}
