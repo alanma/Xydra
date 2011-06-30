@@ -94,12 +94,13 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	}
 	
 	public long getRevisionNumber() {
-		return this.persistence.getModelSnapshot(getAddress()).getRevisionNumber();
+		XWritableModel snapshot = this.persistence.getModelSnapshot(getAddress());
+		return snapshot.getRevisionNumber();
 	}
 	
 	public boolean hasObject(XID objectId) {
-		XWritableObject objectSnapshot = this.persistence.getObjectSnapshot(XX.resolveObject(
-		        getAddress(), objectId));
+		XAddress objectAddress = XX.resolveObject(getAddress(), objectId);
+		XWritableObject objectSnapshot = this.persistence.getObjectSnapshot(objectAddress);
 		if(objectSnapshot == null) {
 			return false;
 		}

@@ -21,6 +21,7 @@ import org.xydra.store.XydraStore;
  * @author voelkel
  */
 @Deprecated
+@SuppressWarnings("deprecation")
 @RunsInGWT(false)
 public class WritableModelOnStore extends ReadableModelOnStore implements XWritableModel,
         Serializable {

@@ -17,6 +17,8 @@ public interface IHasXID {
 	 * @throws IllegalStateException if this entity has already been removed
 	 */
 	@ReadOperation
+	// FIXME Max should rename to getId() when all dependenden projects are
+	// linked in eclipse
 	XID getID();
 	
 }
