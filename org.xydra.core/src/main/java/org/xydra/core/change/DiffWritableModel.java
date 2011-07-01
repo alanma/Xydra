@@ -18,6 +18,8 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.value.XValue;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
 
 /**
@@ -29,10 +31,10 @@ import org.xydra.base.value.XValue;
  * The base model is changed at no times.
  * 
  * @author xamde
- * @deprecated trying to find all references...
  */
-@Deprecated
 public class DiffWritableModel implements XWritableModel {
+	
+	private static final Logger log = LoggerFactory.getLogger(DiffWritableModel.class);
 	
 	/* representing added stuff */
 	private XWritableModel added;
@@ -46,6 +48,7 @@ public class DiffWritableModel implements XWritableModel {
 	private final XWritableModel base;
 	
 	public DiffWritableModel(final XWritableModel base) {
+		assert base != null;
 		this.base = base;
 		this.added = new SimpleModel(base.getAddress());
 		this.removed = new SimpleModel(base.getAddress());
@@ -466,6 +469,10 @@ public class DiffWritableModel implements XWritableModel {
 		List<XAtomicCommand> list = toCommandList();
 		for(XAtomicCommand command : list) {
 			builder.addCommand(command);
+		}
+		if(builder.isEmpty()) {
+			log.info("No command in txn");
+			return null;
 		}
 		return builder.build();
 	}

@@ -14,9 +14,6 @@ import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.value.XV;
 
 
-/** Max this is in sleep mode - do not kill it yet */
-@SuppressWarnings("deprecation")
-@Deprecated
 public class DiffWritableModelTest {
 	
 	private SimpleModel base;
