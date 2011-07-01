@@ -204,9 +204,9 @@ public class ServletUtils {
 				// cookie.getSecure() if true, sent only over HTTPS
 				// cookie.getVersion() usually = 1
 				if(cookieMap.containsKey(name)) {
-					log.warn("Found multiple cookies with the name '" + name
-					        + "' with values, e.g., '" + cookieMap.get(name) + "' or '" + value
-					        + "'");
+					log.info("Found multiple cookies with the name '" + name
+					        + "' with values. Using last one. E.g., '" + cookieMap.get(name)
+					        + "' is overwritten by '" + value + "'");
 				}
 				cookieMap.put(name, value);
 			}
