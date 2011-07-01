@@ -40,9 +40,6 @@ public class GaeConfigurationResource {
 		w.write("<h2>GAE cache conf on instance " + GaePersistence.INSTANCE_ID + " </h2>");
 		w.write("<p>Memcache Conf: " + GaeUtils.getConf() + "</p>");
 		
-		w.write("<p>Memcache Stats: " + XydraRuntime.getMemcache().stats() + " Size: "
-		        + XydraRuntime.getMemcache().size() + "</p>");
-		
 		w.write(HtmlUtils.link("/admin/gaeconf/memcachse/set?instance="
 		        + GaePersistence.INSTANCE_ID + "&memcache=true",
 		        "set memcache=true(default) on this instance")
@@ -61,6 +58,10 @@ public class GaeConfigurationResource {
 		        + "<br/>");
 		
 		w.write(GaeUtils.getConf());
+		
+		w.write("<h3>Memcache Stats</h3> " + XydraRuntime.getMemcache().stats() + " Size: "
+		        + XydraRuntime.getMemcache().size() + "</p>");
+		
 		w.flush();
 	}
 	
