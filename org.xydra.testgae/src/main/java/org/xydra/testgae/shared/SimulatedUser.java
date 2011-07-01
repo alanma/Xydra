@@ -37,7 +37,7 @@ public class SimulatedUser extends Thread {
 	}
 	
 	private static enum Action {
-		CreateList(50), DeleteList(1), EditListAddWish(200), EditListDeleteWish(5), EditListEditWish(
+		CreateList(10), DeleteList(1), EditListAddWish(20), EditListDeleteWish(5), EditListEditWish(
 		        10);
 		
 		private int howOften;

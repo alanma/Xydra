@@ -61,7 +61,7 @@ public class WishlistResource {
 		w.write("Adding test data ...?wishes=" + wishesStr + " wishes. Start at "
 		        + System.currentTimeMillis() + "\n");
 		int wishesCount = Integer.parseInt(wishesStr);
-		XWritableModel model = getModel(repoStr, list);
+		XWritableModel model = Xmas.getOrCreateModel(repoStr, XX.toId(list));
 		DiffWritableModel txnModel = new DiffWritableModel(model);
 		WishList wishList = new WishList(txnModel);
 		wishList.addDemoData(wishesCount, w);
@@ -70,13 +70,6 @@ public class WishlistResource {
 		w.write(HtmlUtils.link(".", "See all wishes"));
 		w.flush();
 		w.close();
-	}
-	
-	private static XWritableModel getModel(String repoStr, String modelIdStr) {
-		XWritableRepository repo = Xmas.getRepository(repoStr);
-		XID modelId = XX.toId(modelIdStr);
-		XWritableModel model = repo.getModel(modelId);
-		return model;
 	}
 	
 	/**

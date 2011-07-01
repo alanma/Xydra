@@ -118,8 +118,13 @@ public class Xmas {
 		return model;
 	}
 	
+	/**
+	 * @param txn may be null
+	 */
 	public static void executeTransaction(XTransaction txn) {
-		persistence.executeCommand(ACTOR_ID, txn);
+		if(txn != null) {
+			persistence.executeCommand(ACTOR_ID, txn);
+		}
 	}
 	
 	/**
