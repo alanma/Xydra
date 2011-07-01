@@ -320,7 +320,7 @@ public class GaeEvents {
 	 * Save the given events in the given change entity.
 	 * 
 	 * The changeEntity is not actually put in the datastore by this method,
-	 * only properties are set. Other additional GAE entities might be save to
+	 * only properties are set. Other additional GAE entities might be saved to
 	 * the datastore though.
 	 * 
 	 * @return a list of indices that can be used later to load XValues using

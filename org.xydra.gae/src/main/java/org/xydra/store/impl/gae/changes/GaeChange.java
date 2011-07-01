@@ -17,6 +17,7 @@ import org.xydra.gae.AboutAppEngine;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.impl.gae.GaeAssert;
 import org.xydra.store.impl.gae.GaeUtils;
 
 import com.google.appengine.api.datastore.Entity;
@@ -465,6 +466,9 @@ public class GaeChange {
 	 */
 	protected void save() {
 		assert !getStatus().isCommitted();
+		GaeAssert.gaeAssert(!getStatus().isCommitted(), "!getStatus().isCommitted()");
+		GaeAssert.gaeAssert(this.entity.getProperty("eventTypes") != null,
+		        "Trying to save changeEntity with PROP_EVENT_TYPES==null");
 		GaeUtils.putEntity(this.entity);
 	}
 	
@@ -482,8 +486,8 @@ public class GaeChange {
 			Pair<XAtomicEvent[],int[]> res = GaeEvents.loadAtomicEvents(this.modelAddr, this.rev,
 			        getActor(), this.entity);
 			
-			this.events = new Pair<List<XAtomicEvent>,int[]>(Arrays.asList(res.getFirst()), res
-			        .getSecond());
+			this.events = new Pair<List<XAtomicEvent>,int[]>(Arrays.asList(res.getFirst()),
+			        res.getSecond());
 		}
 		return this.events;
 	}

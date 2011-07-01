@@ -41,7 +41,7 @@ public class AsyncChange {
 	}
 	
 	/**
-	 * @return the XEvent represented by the retrieved change entity or null of
+	 * @return the XEvent represented by the retrieved change entity or null if
 	 *         nothing changed.
 	 */
 	public GaeChange get() {
