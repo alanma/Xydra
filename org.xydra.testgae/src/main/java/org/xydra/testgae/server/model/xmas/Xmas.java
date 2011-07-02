@@ -90,7 +90,7 @@ public class Xmas {
 		s2.start();
 		for(int l = 0; l <= listCount; l++) {
 			writer.write("Creating/loading model <br />\n");
-			XWritableModel model = getOrCreateModel(repoStr, XX.createUniqueId());
+			XWritableModel model = createModel(repoStr, XX.createUniqueId());
 			// txn
 			DiffWritableModel txnModel = new DiffWritableModel(model);
 			WishList wishList = new WishList(txnModel);
@@ -109,12 +109,9 @@ public class Xmas {
 		        + " wishes initially each");
 	}
 	
-	public static synchronized XWritableModel getOrCreateModel(String repoIdStr, XID modelId) {
+	public static synchronized XWritableModel createModel(String repoIdStr, XID modelId) {
 		XWritableRepository repo = getRepository(repoIdStr);
-		XWritableModel model = repo.getModel(modelId);
-		if(model == null) {
-			model = repo.createModel(modelId);
-		}
+		XWritableModel model = repo.createModel(modelId);
 		return model;
 	}
 	

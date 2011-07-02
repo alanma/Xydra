@@ -61,7 +61,7 @@ public class WishResource {
 		Clock s1 = new Clock().start();
 		
 		// create txn
-		DiffWritableModel txnModel = new DiffWritableModel(Xmas.getOrCreateModel(repoStr,
+		DiffWritableModel txnModel = new DiffWritableModel(Xmas.createModel(repoStr,
 		        XX.toId(listStr)));
 		WishList wishList = new WishList(txnModel);
 		// manipulate txn

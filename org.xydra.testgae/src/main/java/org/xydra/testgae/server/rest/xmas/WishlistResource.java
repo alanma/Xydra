@@ -61,7 +61,7 @@ public class WishlistResource {
 		w.write("Adding test data ...?wishes=" + wishesStr + " wishes. Start at "
 		        + System.currentTimeMillis() + "\n");
 		int wishesCount = Integer.parseInt(wishesStr);
-		XWritableModel model = Xmas.getOrCreateModel(repoStr, XX.toId(list));
+		XWritableModel model = Xmas.createModel(repoStr, XX.toId(list));
 		DiffWritableModel txnModel = new DiffWritableModel(model);
 		WishList wishList = new WishList(txnModel);
 		wishList.addDemoData(wishesCount, w);
@@ -88,7 +88,7 @@ public class WishlistResource {
 		Writer w = HtmlUtils.startHtmlPage(res, "Delete Wishes");
 		w.write("Deleting all wishes.");
 		// create txn
-		DiffWritableModel txnModel = new DiffWritableModel(Xmas.getOrCreateModel(repoStr,
+		DiffWritableModel txnModel = new DiffWritableModel(Xmas.createModel(repoStr,
 		        XX.toId(list)));
 		WishList wishList = new WishList(txnModel);
 		// manipulate txn
@@ -115,7 +115,7 @@ public class WishlistResource {
 	        HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		// no txn, read only
-		WishList wishList = new WishList(Xmas.getOrCreateModel(repoStr, XX.toId(list)));
+		WishList wishList = new WishList(Xmas.createModel(repoStr, XX.toId(list)));
 		if(format.equals("urls")) {
 			ServletUtils.headers(res, "text/plain");
 			Writer w = res.getWriter();
