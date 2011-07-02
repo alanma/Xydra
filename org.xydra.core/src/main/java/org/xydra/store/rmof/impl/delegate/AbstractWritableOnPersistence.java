@@ -26,6 +26,9 @@ public abstract class AbstractWritableOnPersistence implements IHasXAddress {
 		return this.persistence;
 	}
 	
+	/**
+	 * Set by sub-classes
+	 */
 	protected transient XAddress address;
 	
 	protected XID executingActorId;
