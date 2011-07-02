@@ -1,7 +1,7 @@
 package org.xydra.restless.utils;
 
 /**
- * A simple named clock for measuring time.
+ * A simple named clock for measuring time. Nanosecond precision.
  * 
  * @author xamde
  * 
