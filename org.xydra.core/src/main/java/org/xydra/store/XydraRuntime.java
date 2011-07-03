@@ -7,6 +7,7 @@ import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XID;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.perf.StatsGatheringPersistenceWrapper;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.memory.MemoryRuntime;
 
@@ -36,23 +37,39 @@ public class XydraRuntime {
 	
 	public static final String PLATFORM_CLASS = "org.xydra.store.platform.RuntimeBinding";
 	
-	private static Map<XID,XydraPersistence> persistenceInstance = new HashMap<XID,XydraPersistence>();
+	public static final String PROP_MEMCACHESTATS = "memcacheStats";
+	
+	public static final String PROP_PERSISTENCESTATS = "persistenceStats";
+	
+	private static Map<XID,XydraPersistence> persistenceInstanceCache = new HashMap<XID,XydraPersistence>();
 	
 	private static boolean platformInitialised = false;
 	
 	private static XydraPlatformRuntime platformRuntime;
 	
-	private static IMemCache cacheInstance;
+	private static IMemCache memcacheInstance;
+	
+	/** Runtime configuration that can be set from outside */
+	private static Map<String,String> configMap;
 	
 	/**
 	 * @return a re-used instance of a Cache
 	 */
 	public static synchronized IMemCache getMemcache() {
-		initialiseRuntime();
-		if(cacheInstance == null) {
-			cacheInstance = platformRuntime.getMemCache();
+		initialiseRuntimeOnce();
+		if(memcacheInstance == null) {
+			memcacheInstance = platformRuntime.getMemCache();
 		}
-		return cacheInstance;
+		return memcacheInstance;
+	}
+	
+	/**
+	 * Allows test setups to inject another memcache instance.
+	 * 
+	 * @param memcache can be set to null to force re-initialisation
+	 */
+	public static synchronized void setMemcacheInstance(IMemCache memcache) {
+		memcacheInstance = memcache;
 	}
 	
 	public static synchronized void setPlatformRuntime(XydraPlatformRuntime platformRuntime_) {
@@ -63,7 +80,7 @@ public class XydraRuntime {
 		platformInitialised = true;
 	}
 	
-	private static synchronized void initialiseRuntime() {
+	private static synchronized void initialiseRuntimeOnce() {
 		if(platformInitialised) {
 			return;
 		}
@@ -99,16 +116,42 @@ public class XydraRuntime {
 		platformInitialised = true;
 	}
 	
+	public static void setParameter(String key, String value) {
+		configMap.put(key, value);
+	}
+	
 	/**
 	 * @return a re-used instance of a {@link XydraPersistence}
 	 */
 	public static synchronized XydraPersistence getPersistence(XID repositoryId) {
-		initialiseRuntime();
-		XydraPersistence xp = persistenceInstance.get(repositoryId);
-		if(xp == null) {
-			xp = platformRuntime.getPersistence(repositoryId);
+		initialiseRuntimeOnce();
+		XydraPersistence persistence = persistenceInstanceCache.get(repositoryId);
+		if(persistence == null) {
+			persistence = platformRuntime.getPersistence(repositoryId);
+			/** Check if we are gathering stats */
+			
+			String persistenceStatsStr = configMap.get(PROP_PERSISTENCESTATS);
+			boolean persistenceStats = persistenceStatsStr != null
+			        && persistenceStatsStr.equalsIgnoreCase("true");
+			if(persistenceStats) {
+				/**
+				 * Statistics can be accesses by getting the persistence and
+				 * casting it to StatsPersistence
+				 */
+				StatsGatheringPersistenceWrapper statsPersistence = new StatsGatheringPersistenceWrapper(persistence);
+				persistence = statsPersistence;
+			}
+			// put in cache
+			persistenceInstanceCache.put(repositoryId, persistence);
 		}
-		return xp;
+		return persistence;
+	}
+	
+	public static synchronized void forceReInitialisation() {
+		// keep configMap as it is
+		memcacheInstance = null;
+		persistenceInstanceCache.clear();
+		platformInitialised = false;
 	}
 	
 }

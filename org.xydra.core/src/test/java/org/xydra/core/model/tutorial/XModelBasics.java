@@ -565,7 +565,7 @@ public class XModelBasics {
 		
 		// getting the transaction
 		XTransaction transaction = transBuilder.build();
-		// FIXME
+		// FIXME Bjoern
 		// transaction.execute(model)
 		
 		// executing the transaction on the model
