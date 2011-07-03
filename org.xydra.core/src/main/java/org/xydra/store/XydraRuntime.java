@@ -50,7 +50,7 @@ public class XydraRuntime {
 	private static IMemCache memcacheInstance;
 	
 	/** Runtime configuration that can be set from outside */
-	private static Map<String,String> configMap;
+	private static Map<String,String> configMap = new HashMap<String,String>();
 	
 	/**
 	 * @return a re-used instance of a Cache
@@ -138,7 +138,8 @@ public class XydraRuntime {
 				 * Statistics can be accesses by getting the persistence and
 				 * casting it to StatsPersistence
 				 */
-				StatsGatheringPersistenceWrapper statsPersistence = new StatsGatheringPersistenceWrapper(persistence);
+				StatsGatheringPersistenceWrapper statsPersistence = new StatsGatheringPersistenceWrapper(
+				        persistence);
 				persistence = statsPersistence;
 			}
 			// put in cache
