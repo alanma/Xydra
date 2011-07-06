@@ -126,7 +126,8 @@ public class GaeSnapshotService {
 		 * cache result is directly returned without copy, because cache results
 		 * are always de-deserialized from byte[] arrays anyways
 		 */
-		return XCopyUtils.createSnapshot(entry.modelState);
+		return entry.modelState;
+		// was: return XCopyUtils.createSnapshot(entry.modelState);
 		
 	}
 	
