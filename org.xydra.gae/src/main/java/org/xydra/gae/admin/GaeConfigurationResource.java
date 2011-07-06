@@ -9,13 +9,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.perf.StatsGatheringMemCacheWrapper;
 import org.xydra.perf.StatsGatheringPersistenceWrapper;
 import org.xydra.restless.Restless;
 import org.xydra.restless.utils.Clock;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.ServletUtils;
-import org.xydra.store.IMemCache;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.gae.GaeAssert;
 import org.xydra.store.impl.gae.GaePersistence;
@@ -217,17 +215,8 @@ public class GaeConfigurationResource {
 	}
 	
 	private static void setMemcacheStats(boolean memcachestats) {
-		if(memcachestats) {
-			// force creating a new memcache
-			XydraRuntime.setMemcacheInstance(null);
-			IMemCache memcache = XydraRuntime.getMemcache();
-			// wrap
-			IMemCache statsMemcache = new StatsGatheringMemCacheWrapper(memcache);
-			XydraRuntime.setMemcacheInstance(statsMemcache);
-		} else {
-			// force creating a new memcache
-			XydraRuntime.setMemcacheInstance(null);
-		}
+		XydraRuntime.setParameter(XydraRuntime.PROP_MEMCACHESTATS, "" + memcachestats);
+		XydraRuntime.forceReInitialisation();
 	}
 	
 	private static void setPersistenceStats(boolean persistencestats) {
