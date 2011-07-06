@@ -27,6 +27,7 @@ import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.core.serialize.xml.XmlParser;
+import org.xydra.gae.AboutAppEngine;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.XydraRuntime;
@@ -126,8 +127,11 @@ public class GaeSnapshotService {
 		 * cache result is directly returned without copy, because cache results
 		 * are always de-deserialized from byte[] arrays anyways
 		 */
+		if (AboutAppEngine.onAppEngine()) {
 		return entry.modelState;
-		// was: return XCopyUtils.createSnapshot(entry.modelState);
+		}
+		else 
+			return XCopyUtils.createSnapshot(entry.modelState);
 		
 	}
 	
