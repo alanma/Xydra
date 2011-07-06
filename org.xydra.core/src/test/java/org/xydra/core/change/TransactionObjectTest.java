@@ -41,8 +41,6 @@ public class TransactionObjectTest {
 	private MemoryObject object;
 	private XWritableField field, fieldWithValue;
 	
-	private XID fieldId1, fieldId2;
-	
 	{
 		LoggerTestHelper.init();
 	}
@@ -890,24 +888,24 @@ public class TransactionObjectTest {
 		assertEquals(null, this.fieldWithValue.getValue());
 	}
 	
-	private void testExecuteCommandsFailingTransactionObjectCommand(XType type,
+	private void testExecuteCommandsFailingTransaction(XType type,
 	        ChangeType changeType) {
 		// manually build a transaction
 		XTransactionBuilder builder = new XTransactionBuilder(this.object.getAddress());
 		
 		// add some fields
-		this.fieldId1 = X.getIDProvider().createUniqueId();
-		this.fieldId2 = X.getIDProvider().createUniqueId();
+		XID fieldId1 = X.getIDProvider().createUniqueId();
+		XID fieldId2 = X.getIDProvider().createUniqueId();
 		
-		builder.addField(this.object.getAddress(), XCommand.SAFE, this.fieldId1);
-		builder.addField(this.object.getAddress(), XCommand.SAFE, this.fieldId2);
+		builder.addField(this.object.getAddress(), XCommand.SAFE, fieldId1);
+		builder.addField(this.object.getAddress(), XCommand.SAFE, fieldId2);
 		
 		// add some values
 		XValue value = X.getValueFactory().createStringValue("testValue");
 		XAddress fieldAddress1 = XX.toAddress(this.object.getAddress().getRepository(), this.object
-		        .getAddress().getModel(), this.object.getAddress().getObject(), this.fieldId1);
+		        .getAddress().getModel(), this.object.getAddress().getObject(), fieldId1);
 		XAddress fieldAddress2 = XX.toAddress(this.object.getAddress().getRepository(), this.object
-		        .getAddress().getModel(), this.object.getAddress().getObject(), this.fieldId2);
+		        .getAddress().getModel(), this.object.getAddress().getObject(), fieldId2);
 		
 		builder.addValue(fieldAddress1, XCommand.NEW, value);
 		builder.addValue(fieldAddress2, XCommand.NEW, value);
@@ -980,8 +978,8 @@ public class TransactionObjectTest {
 		// check that nothing was changed by the transaction
 		assertEquals(sizeBefore, this.transObject.size());
 		
-		assertFalse(this.transObject.hasField(this.fieldId1));
-		assertFalse(this.transObject.hasField(this.fieldId2));
+		assertFalse(this.transObject.hasField(fieldId1));
+		assertFalse(this.transObject.hasField(fieldId2));
 	}
 	
 	/*
@@ -990,12 +988,12 @@ public class TransactionObjectTest {
 
 	@Test
 	public void testExecuteCommandsFailingTransactionAddObjectCommand() {
-		testExecuteCommandsFailingTransactionObjectCommand(XType.XOBJECT, ChangeType.ADD);
+		testExecuteCommandsFailingTransaction(XType.XOBJECT, ChangeType.ADD);
 	}
 	
 	@Test
 	public void testExecuteCommandsFailingTransactionRemoveObjectCommand() {
-		testExecuteCommandsFailingTransactionObjectCommand(XType.XOBJECT, ChangeType.REMOVE);
+		testExecuteCommandsFailingTransaction(XType.XOBJECT, ChangeType.REMOVE);
 	}
 	
 	/*
@@ -1004,17 +1002,17 @@ public class TransactionObjectTest {
 
 	@Test
 	public void testExecuteCommandsFailingTransactionAddFieldCommand() {
-		testExecuteCommandsFailingTransactionObjectCommand(XType.XFIELD, ChangeType.ADD);
+		testExecuteCommandsFailingTransaction(XType.XFIELD, ChangeType.ADD);
 	}
 	
 	@Test
 	public void testExecuteCommandsFailingTransactionRemoveFieldCommand() {
-		testExecuteCommandsFailingTransactionObjectCommand(XType.XFIELD, ChangeType.REMOVE);
+		testExecuteCommandsFailingTransaction(XType.XFIELD, ChangeType.REMOVE);
 	}
 	
 	@Test
 	public void testExecuteCommandsFailingTransactionChangeFieldCommand() {
-		testExecuteCommandsFailingTransactionObjectCommand(XType.XFIELD, ChangeType.CHANGE);
+		testExecuteCommandsFailingTransaction(XType.XFIELD, ChangeType.CHANGE);
 	}
 	
 	// Tests for getRevisionNumber
