@@ -147,6 +147,9 @@ public class GaeChangesService {
 	/**
 	 * Execute the given {@link XCommand} as a transaction.
 	 * 
+	 * // IMPROVE maybe let the caller provide an XID that can be used to check
+	 * // the status in case there is a GAE timeout?
+	 * 
 	 * @param command The command to execute. (can be a {@link XTransaction})
 	 * @param actorId The actor to log in the resulting event.
 	 * @return If the command executed successfully, the revision of the
@@ -163,12 +166,8 @@ public class GaeChangesService {
 	 *      org.xydra.store.Callback)
 	 */
 	public long executeCommand(XCommand command, XID actorId) {
-		
-		// IMPROVE maybe let the caller provide an XID that can be used to check
-		// the status in case there is a GAE timeout?
-		
 		assert this.modelAddr.equalsOrContains(command.getChangedEntity()) : "cannot handle command "
-		        + command;
+		        + command + " - it does not address a model";
 		
 		GaeLocks locks = new GaeLocks(command);
 		
@@ -510,14 +509,14 @@ public class GaeChangesService {
 				
 			} else if(event instanceof XObjectEvent) {
 				if(event.getChangeType() == ChangeType.REMOVE) {
-					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(), change
-					        .getLocks()));
+					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(),
+					        change.getLocks()));
 					// cannot save revision in the removed field
 					objectsWithPossiblyUnsavedRev.add(event.getTarget().getObject());
 				} else {
 					assert event.getChangeType() == ChangeType.ADD;
-					futures.add(InternalGaeField.set(event.getChangedEntity(), change.rev, change
-					        .getLocks()));
+					futures.add(InternalGaeField.set(event.getChangedEntity(), change.rev,
+					        change.getLocks()));
 					// revision saved in created field
 					objectsWithSavedRev.add(event.getTarget().getObject());
 				}
@@ -526,14 +525,14 @@ public class GaeChangesService {
 			} else if(event instanceof XModelEvent) {
 				XID objectId = ((XModelEvent)event).getObjectId();
 				if(event.getChangeType() == ChangeType.REMOVE) {
-					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(), change
-					        .getLocks()));
+					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(),
+					        change.getLocks()));
 					// object removed, so revision is of no interest
 					objectsWithPossiblyUnsavedRev.remove(objectId);
 				} else {
 					assert event.getChangeType() == ChangeType.ADD;
-					futures.add(InternalGaeObject.createObject(event.getChangedEntity(), change
-					        .getLocks(), change.rev));
+					futures.add(InternalGaeObject.createObject(event.getChangedEntity(),
+					        change.getLocks(), change.rev));
 					// revision saved in new object
 					objectsWithSavedRev.add(objectId);
 				}
@@ -541,12 +540,12 @@ public class GaeChangesService {
 			} else {
 				assert event instanceof XRepositoryEvent;
 				if(event.getChangeType() == ChangeType.REMOVE) {
-					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(), change
-					        .getLocks()));
+					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(),
+					        change.getLocks()));
 				} else {
 					assert event.getChangeType() == ChangeType.ADD;
-					futures.add(InternalGaeModel.createModel(event.getChangedEntity(), change
-					        .getLocks()));
+					futures.add(InternalGaeModel.createModel(event.getChangedEntity(),
+					        change.getLocks()));
 				}
 			}
 			
