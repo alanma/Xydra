@@ -13,7 +13,7 @@ import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
 
 
-public class PerformanceTest {
+public class LocalVmCachingPerformanceTest {
 	
 	@BeforeClass
 	public static void setup() {
