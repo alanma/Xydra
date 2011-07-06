@@ -11,13 +11,17 @@ import org.junit.Test;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.base.XX;
+import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
+import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XValue;
 import org.xydra.core.LoggerTestHelper;
+import org.xydra.core.model.XField;
 import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.impl.memory.MemoryModel;
@@ -32,7 +36,7 @@ import org.xydra.core.model.impl.memory.MemoryRepository;
 public class TransactionModelTest {
 	private TransactionModel transModel;
 	private MemoryModel model;
-	private XObject object;
+	private XObject object, object2;
 	private XWritableField field, fieldWithValue;
 	
 	{
@@ -43,12 +47,14 @@ public class TransactionModelTest {
 	public void setup() {
 		XID modelId = XX.createUniqueId();
 		XID objectId = XX.createUniqueId();
+		XID object2Id = XX.createUniqueId();
 		XID fieldId = XX.createUniqueId();
 		XID fieldWithValueId = XX.createUniqueId();
 		
 		MemoryRepository repo = (MemoryRepository)X.createMemoryRepository(XX.toId("testActor"));
 		this.model = repo.createModel(modelId);
 		this.object = this.model.createObject(objectId);
+		this.object2 = this.model.createObject(object2Id);
 		
 		// add two fields
 		this.field = this.object.createField(fieldId);
@@ -1052,6 +1058,264 @@ public class TransactionModelTest {
 	@Test
 	public void testExecuteCommandsForcedRemoveValueCommands() {
 		executeCommandsRemoveValueCommands(true);
+	}
+	
+	// Tests for transactions
+	
+	@Test
+	public void testExecuteCommandSucceedingTransaction() {
+		// manually build a transaction
+		XTransactionBuilder builder = new XTransactionBuilder(this.model.getAddress());
+		
+		// add some objects
+		XID objectId1 = X.getIDProvider().createUniqueId();
+		XID objectId2 = X.getIDProvider().createUniqueId();
+		
+		builder.addObject(this.model.getAddress(), XCommand.SAFE, objectId1);
+		builder.addObject(this.model.getAddress(), XCommand.SAFE, objectId2);
+		
+		// remove some objects
+		builder.removeObject(this.model.getAddress(), XCommand.SAFE, this.object2.getID());
+		
+		// add some fields
+		XID fieldId1 = X.getIDProvider().createUniqueId();
+		XID fieldId2 = X.getIDProvider().createUniqueId();
+		
+		builder.addField(this.object.getAddress(), XCommand.SAFE, fieldId1);
+		builder.addField(this.object.getAddress(), XCommand.SAFE, fieldId2);
+		
+		// add something, remove it again
+		XID temp = X.getIDProvider().createUniqueId();
+		builder.addField(this.object.getAddress(), XCommand.SAFE, temp);
+		builder.removeField(this.object.getAddress(), XCommand.NEW, temp);
+		
+		// remove some fields
+		builder.removeField(this.object.getAddress(), this.field.getRevisionNumber(),
+		        this.field.getID());
+		
+		// add some values
+		XValue value = X.getValueFactory().createStringValue("testValue");
+		XAddress fieldAddress1 = XX.toAddress(this.object.getAddress().getRepository(), this.object
+		        .getAddress().getModel(), this.object.getAddress().getObject(), fieldId1);
+		XAddress fieldAddress2 = XX.toAddress(this.object.getAddress().getRepository(), this.object
+		        .getAddress().getModel(), this.object.getAddress().getObject(), fieldId2);
+		
+		builder.addValue(fieldAddress1, XCommand.NEW, value);
+		builder.addValue(fieldAddress2, XCommand.NEW, value);
+		
+		// remove values
+		builder.removeValue(this.fieldWithValue.getAddress(),
+		        this.fieldWithValue.getRevisionNumber());
+		builder.removeValue(fieldAddress2, XCommand.NEW);
+		
+		// execute the transaction - should succeed
+		XTransaction transaction = builder.build();
+		TestCallback callback = new TestCallback();
+		
+		long result = this.transModel.executeCommand(transaction, callback);
+		
+		assertTrue(result != XCommand.FAILED);
+		assertTrue(this.transModel.isChanged());
+		
+		// check callback
+		assertFalse(callback.failed);
+		assertEquals((Long)result, callback.revision);
+		
+		assertEquals(transaction.size(), this.transModel.size());
+		
+		/*
+		 * we do not need to check whether the single commands in the
+		 * transaction were correctly executed, since they all are executed by
+		 * separately calling the executeCommand() method, which was already
+		 * thoroughly tested above
+		 */
+
+		// commit the transaction
+		
+		long oldRevNr = this.object.getRevisionNumber();
+		long revNr = this.transModel.commit();
+		
+		assertFalse(this.transModel.isChanged());
+		
+		assertTrue(revNr != XCommand.FAILED);
+		assertEquals(oldRevNr + 1, revNr);
+		assertEquals(0, this.transModel.size());
+		assertEquals(revNr, this.transModel.getRevisionNumber());
+		
+		// check that the changes were actually executed
+		assertTrue(this.object.hasField(fieldId1));
+		assertTrue(this.object.hasField(fieldId2));
+		
+		assertFalse(this.object.hasField(this.field.getID()));
+		assertFalse(this.object.hasField(temp));
+		
+		XField field1 = this.object.getField(fieldId1);
+		assertEquals(value, field1.getValue());
+		
+		XField field2 = this.object.getField(fieldId2);
+		assertNull(field2.getValue());
+		
+		assertEquals(null, this.fieldWithValue.getValue());
+	}
+	
+	private void testExecuteCommandsFailingTransaction(XType type, ChangeType changeType) {
+		// manually build a transaction
+		XTransactionBuilder builder = new XTransactionBuilder(this.model.getAddress());
+		
+		// add some fields
+		XID fieldId1 = X.getIDProvider().createUniqueId();
+		XID fieldId2 = X.getIDProvider().createUniqueId();
+		
+		builder.addField(this.object.getAddress(), XCommand.SAFE, fieldId1);
+		builder.addField(this.object.getAddress(), XCommand.SAFE, fieldId2);
+		
+		// add some values
+		XValue value = X.getValueFactory().createStringValue("testValue");
+		XAddress fieldAddress1 = XX.toAddress(this.object.getAddress().getRepository(), this.object
+		        .getAddress().getModel(), this.object.getAddress().getObject(), fieldId1);
+		XAddress fieldAddress2 = XX.toAddress(this.object.getAddress().getRepository(), this.object
+		        .getAddress().getModel(), this.object.getAddress().getObject(), fieldId2);
+		
+		builder.addValue(fieldAddress1, XCommand.NEW, value);
+		builder.addValue(fieldAddress2, XCommand.NEW, value);
+		
+		// add failing command
+		assert type == XType.XMODEL || type == XType.XOBJECT || type == XType.XFIELD;
+		
+		if(type == XType.XMODEL) {
+			assert changeType != ChangeType.CHANGE;
+			
+			switch(changeType) {
+			case ADD:
+				// try to add an object which already exists
+				builder.addObject(this.model.getAddress(), XCommand.SAFE, this.object.getID());
+				break;
+			
+			case REMOVE:
+				// try to remove an object which doesn't exist
+				builder.removeObject(this.model.getAddress(), XCommand.SAFE, XX.createUniqueId());
+				break;
+			case CHANGE:
+			case TRANSACTION:
+				assert false : "unexpected change type " + changeType + " for xtype " + type;
+			}
+			
+		} else if(type == XType.XOBJECT) {
+			assert changeType != ChangeType.CHANGE;
+			
+			switch(changeType) {
+			case ADD:
+				// try to add a field which already exists
+				builder.addField(this.object.getAddress(), XCommand.SAFE, this.field.getID());
+				break;
+			
+			case REMOVE:
+				// try to remove a field which doesn't exist
+				builder.removeField(this.object.getAddress(), XCommand.SAFE, XX.createUniqueId());
+				break;
+			case CHANGE:
+			case TRANSACTION:
+				assert false : "unexpected change type " + changeType + " for xtype " + type;
+			}
+		} else {
+			switch(changeType) {
+			case ADD:
+				// try to add a value to a field which value is already set
+				builder.addValue(this.fieldWithValue.getAddress(), XCommand.SAFE,
+				        XX.createUniqueId());
+				break;
+			
+			case REMOVE:
+				// try to remove the vale from a field which value isn't set
+				builder.removeValue(this.field.getAddress(), XCommand.SAFE);
+				break;
+			case CHANGE:
+				// try to change the value of a field which value is set, but
+				// use wrong revision number
+				builder.changeValue(this.fieldWithValue.getAddress(),
+				        this.fieldWithValue.getRevisionNumber() + 1, XX.createUniqueId());
+				break;
+			case TRANSACTION:
+				assert false : "unexpected change type " + changeType + " for xtype " + type;
+			}
+			
+		}
+		
+		// add some more commands after the command which should fail
+		builder.addField(this.object.getAddress(), XCommand.SAFE, XX.createUniqueId());
+		builder.addField(this.object.getAddress(), XCommand.SAFE, XX.createUniqueId());
+		builder.addValue(this.field.getAddress(), XCommand.FORCED, XX.createUniqueId());
+		
+		// execute something before the transaction
+		this.transModel.createObject(XX.createUniqueId());
+		
+		// execute the transaction - should fail
+		XTransaction transaction = builder.build();
+		TestCallback callback = new TestCallback();
+		
+		int sizeBefore = this.transModel.size();
+		long result = this.transModel.executeCommand(transaction, callback);
+		
+		assertEquals(XCommand.FAILED, result);
+		
+		// check callback
+		assertTrue(callback.failed);
+		assertNull(callback.revision);
+		
+		// check that nothing was changed by the transaction
+		assertEquals(sizeBefore, this.transModel.size());
+		
+		XWritableObject transObject = this.transModel.getObject(this.object.getID());
+		
+		assertFalse(transObject.hasField(fieldId1));
+		assertFalse(transObject.hasField(fieldId2));
+	}
+	
+	/*
+	 * Tests for failing transaction that fail because of an XModelCommand
+	 */
+
+	@Test
+	public void testExecuteCommandsFailingTransactionModelCommandAdd() {
+		testExecuteCommandsFailingTransaction(XType.XMODEL, ChangeType.ADD);
+	}
+	
+	@Test
+	public void testExecuteCommandsFailingTransactionModelCommandRemove() {
+		testExecuteCommandsFailingTransaction(XType.XMODEL, ChangeType.REMOVE);
+	}
+	
+	/*
+	 * Tests for failing transaction that fail because of an XObjectCommand
+	 */
+
+	@Test
+	public void testExecuteCommandsFailingTransactionObjectCommandAdd() {
+		testExecuteCommandsFailingTransaction(XType.XOBJECT, ChangeType.ADD);
+	}
+	
+	@Test
+	public void testExecuteCommandsFailingTransactionObjectCommandRemove() {
+		testExecuteCommandsFailingTransaction(XType.XOBJECT, ChangeType.REMOVE);
+	}
+	
+	/*
+	 * Tests for transactions which fail because of an XFieldCommand
+	 */
+
+	@Test
+	public void testExecuteCommandsFailingTransactionFieldCommandAdd() {
+		testExecuteCommandsFailingTransaction(XType.XFIELD, ChangeType.ADD);
+	}
+	
+	@Test
+	public void testExecuteCommandsFailingTransactionFieldCommandRemove() {
+		testExecuteCommandsFailingTransaction(XType.XFIELD, ChangeType.REMOVE);
+	}
+	
+	@Test
+	public void testExecuteCommandsFailingTransactionFieldCommandChange() {
+		testExecuteCommandsFailingTransaction(XType.XFIELD, ChangeType.CHANGE);
 	}
 	
 	// Tests for getRevisionNumber
