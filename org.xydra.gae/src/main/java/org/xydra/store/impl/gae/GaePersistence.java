@@ -116,7 +116,7 @@ public class GaePersistence implements XydraPersistence {
 		return new GaeSnapshotService(getChangesService(modelId));
 	}
 	
-	public XReadableModel getModelSnapshot(XID modelId) {
+	public synchronized XReadableModel getModelSnapshot(XID modelId) {
 		
 		if(modelId == null) {
 			throw new IllegalArgumentException("modelId was null");
@@ -126,7 +126,7 @@ public class GaePersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public long executeCommand(XID actorId, XCommand command) {
+	public synchronized long executeCommand(XID actorId, XCommand command) {
 		
 		if(actorId == null) {
 			throw new IllegalArgumentException("actorId was null");
@@ -147,7 +147,8 @@ public class GaePersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public List<XEvent> getEvents(XAddress address, long beginRevision, long endRevision) {
+	public synchronized List<XEvent> getEvents(XAddress address, long beginRevision,
+	        long endRevision) {
 		
 		checkAddress(address);
 		
@@ -161,12 +162,12 @@ public class GaePersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public Set<XID> getModelIds() {
+	public synchronized Set<XID> getModelIds() {
 		return InternalGaeXEntity.findChildren(this.repoAddr);
 	}
 	
 	@Override
-	public boolean hasModel(XID modelId) {
+	public synchronized boolean hasModel(XID modelId) {
 		if(modelId == null) {
 			throw new IllegalArgumentException("modelId was null");
 		}
@@ -174,7 +175,7 @@ public class GaePersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public long getModelRevision(XAddress address) {
+	public synchronized long getModelRevision(XAddress address) {
 		checkAddress(address);
 		if(address.getAddressedType() != XType.XMODEL) {
 			throw new RequestException("address must refer to a model, was " + address);
@@ -183,7 +184,7 @@ public class GaePersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public XWritableModel getModelSnapshot(XAddress address) {
+	public synchronized XWritableModel getModelSnapshot(XAddress address) {
 		checkAddress(address);
 		if(address.getAddressedType() != XType.XMODEL) {
 			throw new RequestException("address must refer to a model, was " + address);
@@ -192,7 +193,7 @@ public class GaePersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public XWritableObject getObjectSnapshot(XAddress address) {
+	public synchronized XWritableObject getObjectSnapshot(XAddress address) {
 		checkAddress(address);
 		if(address.getAddressedType() != XType.XOBJECT) {
 			throw new RequestException("address must refer to an object, was " + address);
@@ -226,7 +227,7 @@ public class GaePersistence implements XydraPersistence {
 		return this.repoAddr.getRepository();
 	}
 	
-	static public XydraStore get() {
+	static synchronized public XydraStore get() {
 		return new DelegatingSecureStore(new GaePersistence(getDefaultRepositoryId()),
 		        XydraStoreAdmin.XYDRA_ADMIN_ID);
 	}
@@ -241,7 +242,7 @@ public class GaePersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public void clear() {
+	public synchronized void clear() {
 		GaeUtils.clear();
 	}
 	
