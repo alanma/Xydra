@@ -16,10 +16,17 @@ public class RevisionCache {
 	
 	private static final long LOCAL_VM_CACHE_TIMEOUT = 500;
 	
-	private final XAddress modelAddr;
+	private final String commitedRevCacheName;
+	
+	/**
+	 * The name of the cached value used by {@link #getCurrent()} and
+	 * {@link #setCurrent(long)}
+	 */
+	private final String currentRevCacheName;
 	
 	public RevisionCache(XAddress modelAddr) {
-		this.modelAddr = modelAddr;
+		this.commitedRevCacheName = modelAddr + "-commitedRev";
+		this.currentRevCacheName = modelAddr + "-currentRev";
 	}
 	
 	// IMPROVE don't call the memcache for every request, complement it with a
@@ -32,10 +39,9 @@ public class RevisionCache {
 	 *         requirement.
 	 */
 	protected long getLastCommited() {
-		
 		IMemCache cache = XydraRuntime.getMemcache();
 		
-		Long entry = (Long)cache.get(getCommitedRevCacheName());
+		Long entry = (Long)cache.get(this.commitedRevCacheName);
 		long rev = (entry == null) ? -1L : entry;
 		
 		long current = getCurrent();
@@ -44,10 +50,9 @@ public class RevisionCache {
 	}
 	
 	protected long getLastCommitedIfSet() {
-		
 		IMemCache cache = XydraRuntime.getMemcache();
 		
-		Long entry = (Long)cache.get(getCommitedRevCacheName());
+		Long entry = (Long)cache.get(this.commitedRevCacheName);
 		return (entry == null) ? NOT_SET : entry;
 	}
 	
@@ -58,11 +63,7 @@ public class RevisionCache {
 	 *            less than this.
 	 */
 	protected void setLastCommited(long l) {
-		increaseCachedValue(getCommitedRevCacheName(), l);
-	}
-	
-	private String getCommitedRevCacheName() {
-		return this.modelAddr + "-commitedRev";
+		increaseCachedValue(this.commitedRevCacheName, l);
 	}
 	
 	/**
@@ -84,9 +85,10 @@ public class RevisionCache {
 		// TODO implement
 	}
 	
-	// Local VM cache of the "current" revision number.
-	private long cachedCurrentRev = NOT_SET;
-	private long cachedCurrentRevTime = -1;
+	/** Local VM cache of the "current" revision number. */
+	private long localVmCacheCurrentRev = NOT_SET;
+	/** Age of Local VM cache of the "current" revision number. */
+	private long localVmCacheCurrentRevTime = -1;
 	
 	/**
 	 * Retrieve a cached value of the current revision number as defined by
@@ -96,9 +98,7 @@ public class RevisionCache {
 	 * but is guaranteed to never be greater.
 	 */
 	protected long getCurrent() {
-		
 		long rev = getCurrentIfSet();
-		
 		return (rev == NOT_SET) ? -1L : rev;
 	}
 	
@@ -112,17 +112,16 @@ public class RevisionCache {
 	 * but is guaranteed to never be greater.
 	 */
 	protected long getCurrentIfSet() {
-		
+		// localVmCache
 		synchronized(this) {
 			long now = System.currentTimeMillis();
-			if(now < this.cachedCurrentRevTime + LOCAL_VM_CACHE_TIMEOUT) {
-				return this.cachedCurrentRev;
+			if(now < this.localVmCacheCurrentRevTime + LOCAL_VM_CACHE_TIMEOUT) {
+				return this.localVmCacheCurrentRev;
 			}
 		}
-		
+		// memCache
 		IMemCache cache = XydraRuntime.getMemcache();
-		
-		Long value = (Long)cache.get(getCurrentRevCacheName());
+		Long value = (Long)cache.get(this.currentRevCacheName);
 		return (value == null) ? NOT_SET : value;
 	}
 	
@@ -135,27 +134,19 @@ public class RevisionCache {
 	protected void setCurrent(long l) {
 		
 		synchronized(this) {
-			if(this.cachedCurrentRev >= l) {
+			if(this.localVmCacheCurrentRev >= l) {
 				return;
 			}
 		}
 		
-		long val = increaseCachedValue(getCurrentRevCacheName(), l);
+		long val = increaseCachedValue(this.currentRevCacheName, l);
 		
 		synchronized(this) {
-			if(val >= this.cachedCurrentRev) {
-				this.cachedCurrentRev = val;
-				this.cachedCurrentRevTime = System.currentTimeMillis();
+			if(val >= this.localVmCacheCurrentRev) {
+				this.localVmCacheCurrentRev = val;
+				this.localVmCacheCurrentRevTime = System.currentTimeMillis();
 			}
 		}
-	}
-	
-	/**
-	 * @return the name of the cached value used by {@link #getCurrent()} and
-	 *         {@link #setCurrent(long)}
-	 */
-	protected String getCurrentRevCacheName() {
-		return this.modelAddr + "-currentRev";
 	}
 	
 	/**
