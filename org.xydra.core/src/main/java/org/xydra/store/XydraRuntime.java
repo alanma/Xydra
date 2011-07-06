@@ -7,6 +7,7 @@ import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XID;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.perf.StatsGatheringMemCacheWrapper;
 import org.xydra.perf.StatsGatheringPersistenceWrapper;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.memory.MemoryRuntime;
@@ -41,6 +42,8 @@ public class XydraRuntime {
 	
 	public static final String PROP_PERSISTENCESTATS = "persistenceStats";
 	
+	public static final String PROP_USEMEMCACHE = "usememcache";
+	
 	private static Map<XID,XydraPersistence> persistenceInstanceCache = new HashMap<XID,XydraPersistence>();
 	
 	private static boolean platformInitialised = false;
@@ -59,17 +62,15 @@ public class XydraRuntime {
 		initialiseRuntimeOnce();
 		if(memcacheInstance == null) {
 			memcacheInstance = platformRuntime.getMemCache();
+			// wrap if requested
+			String memcacheStatsStr = configMap.get(PROP_MEMCACHESTATS);
+			boolean memcacheStats = memcacheStatsStr != null
+			        && memcacheStatsStr.equalsIgnoreCase("true");
+			if(memcacheStats) {
+				memcacheInstance = new StatsGatheringMemCacheWrapper(memcacheInstance);
+			}
 		}
 		return memcacheInstance;
-	}
-	
-	/**
-	 * Allows test setups to inject another memcache instance.
-	 * 
-	 * @param memcache can be set to null to force re-initialisation
-	 */
-	public static synchronized void setMemcacheInstance(IMemCache memcache) {
-		memcacheInstance = memcache;
 	}
 	
 	public static synchronized void setPlatformRuntime(XydraPlatformRuntime platformRuntime_) {
@@ -93,6 +94,8 @@ public class XydraRuntime {
 					XydraPlatformRuntime xPlatformInstance = (XydraPlatformRuntime)platformInstance;
 					platformRuntime = xPlatformInstance;
 					platformInitialised = true;
+					log.info("Using default platform "
+					        + xPlatformInstance.getClass().getCanonicalName());
 				} catch(ClassCastException e) {
 					log.warn("Found the class with name " + PLATFORM_CLASS
 					        + " but it is not implementing " + XydraPlatformRuntime.class, e);
@@ -112,6 +115,7 @@ public class XydraRuntime {
 			return;
 		}
 		// still no platform, use defaults
+		log.info("Using default MemoryRuntime");
 		platformRuntime = new MemoryRuntime();
 		platformInitialised = true;
 	}

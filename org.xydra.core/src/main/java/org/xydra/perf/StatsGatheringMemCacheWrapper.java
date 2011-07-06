@@ -53,6 +53,7 @@ public class StatsGatheringMemCacheWrapper implements IMemCache {
 	}
 	
 	public Object get(Object key) {
+		count("get");
 		Object value = this.base.get(key);
 		this.mapstats.recordGet(key.toString(), value != null);
 		return value;

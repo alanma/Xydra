@@ -1,9 +1,13 @@
 package org.xydra.perf;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,6 +30,10 @@ import org.xydra.log.LoggerFactory;
 public class MapStats {
 	
 	private static final Logger log = LoggerFactory.getLogger(MapStats.class);
+	
+	private static final int RECORD_FIRST_N_ACTIONS = 100;
+	
+	public static boolean RECORD_STACKTRACES = true;
 	
 	/**
 	 * Statistics about one cache entry
@@ -63,11 +71,70 @@ public class MapStats {
 		}
 		
 		public void writeStats(Writer w) throws IOException {
-			w.write(this.key + " = " + this.entryGets + " gets, " + this.entryPuts
-			        + " puts<br />\n");
+			w.write("  " + this.key + " = " + this.entryGets + " gets, " + this.entryPuts
+			        + " puts, " + this.misses + " misses<br />\n");
 			
 		}
 	}
+	
+	class Action {
+		public Action(String method, String key, Object value) {
+			super();
+			this.method = method;
+			this.key = key;
+			this.value = value;
+			
+			if(RECORD_STACKTRACES) {
+				try {
+					throw new RuntimeException("HERE");
+				} catch(Exception e) {
+					this.t = e.fillInStackTrace();
+				}
+			}
+			log.debug("Recorded action on map: " + method + " " + key + " = " + value + " \n"
+			        + (this.t != null ? "  " + firstNLines(this.t, 5) : ""));
+		}
+		
+		private String firstNLines(Throwable t, int n) {
+			StringWriter sw = new StringWriter();
+			t.printStackTrace(new PrintWriter(sw));
+			StringReader sr = new StringReader(sw.getBuffer().toString());
+			BufferedReader br = new BufferedReader(sr);
+			String line;
+			try {
+				// skip first 4 lines
+				line = br.readLine();
+				line = br.readLine();
+				line = br.readLine();
+				line = br.readLine();
+				line = br.readLine();
+				StringBuffer buf = new StringBuffer();
+				for(int i = 0; i < n; i++) {
+					buf.append(line + "\n");
+					line = br.readLine();
+				}
+				return buf.toString();
+			} catch(IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
+		Throwable t;
+		String method, key;
+		Object value;
+		
+		public void writeStats(Writer w) throws IOException {
+			w.write("  "
+			        + this.method
+			        + " '"
+			        + this.key
+			        + "'"
+			        + (this.value == null ? "" : " = '" + this.value.getClass().getCanonicalName()
+			                + "'") + "     <br/>\n");
+		}
+	}
+	
+	private List<Action> first_k_actions = new LinkedList<MapStats.Action>();
 	
 	Map<String,Entry> statsMap = new HashMap<String,MapStats.Entry>();
 	long gets = 0, puts = 0;
@@ -82,6 +149,9 @@ public class MapStats {
 		e.entryGets++;
 		if(!found) {
 			e.misses++;
+		}
+		if(this.first_k_actions.size() < RECORD_FIRST_N_ACTIONS) {
+			this.first_k_actions.add(new Action("Get-" + (found ? "HIT!!!" : "Miss  "), key, null));
 		}
 	}
 	
@@ -113,6 +183,9 @@ public class MapStats {
 		MapStats.this.puts++;
 		e.entryPuts++;
 		e.values.add(value);
+		if(this.first_k_actions.size() < RECORD_FIRST_N_ACTIONS) {
+			this.first_k_actions.add(new Action("Put " + "      ", key, value));
+		}
 	}
 	
 	public int size() {
@@ -123,19 +196,23 @@ public class MapStats {
 		Summary summary = calcSummary();
 		
 		int k = 10;
-		w.write("Largest " + k + " entries by current value:<br />");
+		w.write("Largest " + k + " entries by current value:<br />\n");
 		for(Entry e : summary.getEntriesSortedByCurrentValueSizeDescending(k)) {
 			e.writeStats(w);
 		}
 		w.write("Total memory used by current values: " + summary.getTotalCurrentMemorySize()
-		        + "<br />");
-		w.write("The " + k + " most frequently put'ed entries:<br />");
+		        + "<br />\n");
+		w.write("The " + k + " most frequently put'ed entries:<br />\n");
 		for(Entry e : summary.getMostFrequentlyPuttetEntries(k)) {
 			e.writeStats(w);
 		}
-		w.write("The " + k + " most frequent cache misses:<br />");
+		w.write("The " + k + " most frequent cache misses:<br />\n");
 		for(Entry e : summary.getMostFrequentlyCacheMisses(k)) {
 			e.writeStats(w);
+		}
+		w.write("The first " + RECORD_FIRST_N_ACTIONS + " actions:<br />\n");
+		for(Action action : this.first_k_actions) {
+			action.writeStats(w);
 		}
 	}
 	
@@ -145,10 +222,10 @@ public class MapStats {
 	
 	private static List<Entry> getTopKByComparator(Collection<Entry> entries, int k,
 	        Comparator<Entry> comparator) {
-		List<Entry> sorted = new ArrayList<Entry>();
-		Collections.sort(sorted, comparator);
+		List<Entry> sorted = new ArrayList<Entry>(entries.size());
 		sorted.addAll(entries);
-		return sorted.subList(0, k);
+		Collections.sort(sorted, comparator);
+		return sorted.subList(0, Math.min(sorted.size(), k));
 	}
 	
 	class Summary {
@@ -161,7 +238,7 @@ public class MapStats {
 			return getTopKByComparator(MapStats.this.statsMap.values(), k, new Comparator<Entry>() {
 				@Override
 				public int compare(Entry a, Entry b) {
-					return (int)(a.currentValueSize() - b.currentValueSize());
+					return (int)(b.currentValueSize() - a.currentValueSize());
 				}
 			});
 		}
@@ -170,7 +247,7 @@ public class MapStats {
 			return getTopKByComparator(MapStats.this.statsMap.values(), k, new Comparator<Entry>() {
 				@Override
 				public int compare(Entry a, Entry b) {
-					return (int)(a.misses - b.misses);
+					return (int)(b.misses - a.misses);
 				}
 			});
 		}
@@ -179,7 +256,7 @@ public class MapStats {
 			return getTopKByComparator(MapStats.this.statsMap.values(), k, new Comparator<Entry>() {
 				@Override
 				public int compare(Entry a, Entry b) {
-					return (int)(a.entryPuts - b.entryPuts);
+					return (int)(b.entryPuts - a.entryPuts);
 				}
 			});
 		}
@@ -201,6 +278,7 @@ public class MapStats {
 		this.statsMap.clear();
 		this.gets = 0;
 		this.puts = 0;
+		this.first_k_actions.clear();
 	}
 	
 }
