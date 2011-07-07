@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.xydra.store.IMemCache;
 import org.xydra.store.XydraRuntime;
+import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.impl.gae.GaeUtils;
 
 import com.google.appengine.api.datastore.Entity;
@@ -31,6 +32,7 @@ public class GaeConfiguration {
 	private transient long validUntilUTC;
 	
 	public static GaeConfiguration createWithLifetime(long lifetimeInMs) {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		GaeConfiguration conf = new GaeConfiguration();
 		conf.setValidUntilUTC(System.currentTimeMillis() + lifetimeInMs);
 		return conf;
