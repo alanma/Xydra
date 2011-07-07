@@ -7,6 +7,7 @@ import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -94,9 +95,7 @@ public class RestlessMethod {
 	 */
 	public void run(final Restless restless, final HttpServletRequest req,
 	        final HttpServletResponse res) throws IOException {
-		Object instance = toInstance(this.instanceOrClass);
-		
-		Method method = Restless.methodByName(instance, this.methodName);
+		Method method = Restless.methodByName(this.instanceOrClass, this.methodName);
 		if(method == null) {
 			res.sendError(500, "Malconfigured server. Method '" + this.methodName
 			        + "' not found in '" + Restless.instanceOrClass_className(this.instanceOrClass)
@@ -158,10 +157,8 @@ public class RestlessMethod {
 						 */
 						throw new IllegalArgumentException(
 						        "It looks like you have parameters in your java method '"
-						                + instance.getClass().getCanonicalName()
-						                + "."
-						                + method.getName()
-						                + "(..)' for which there have no RestlessParameter been defined.");
+						                + methodReference(this.instanceOrClass, method)
+						                + "' for which there have no RestlessParameter been defined.");
 					}
 					assert this.requiredNamedParameter.length > boundNamedParameterNumber : "Require "
 					        + this.requiredNamedParameter.length
@@ -232,15 +229,16 @@ public class RestlessMethod {
 			}
 			
 			try {
-				Object result = method.invoke(instance, javaMethodArgs.toArray(new Object[0]));
+				
+				Object result = invokeMethod(method, this.instanceOrClass, javaMethodArgs);
+				
 				if(!hasHttpServletResponseParameter) {
 					res.setContentType(Restless.MIME_TEXT_PLAIN + "; charset="
 					        + Restless.CHARSET_UTF8);
 					res.setStatus(200);
 					Writer w = res.getWriter();
 					// we need to send back something standard ourselves
-					w.write("Executed " + instance.getClass().getSimpleName() + "."
-					        + this.methodName + "\n");
+					w.write("Executed " + methodReference(this.instanceOrClass, method) + "\n");
 					if(result != null && result instanceof String) {
 						w.write("Result: " + result);
 					}
@@ -275,7 +273,7 @@ public class RestlessMethod {
 					boolean handled = false;
 					
 					try {
-						handled = callLocalExceptionHandler(cause, instance, context);
+						handled = callLocalExceptionHandler(cause, this.instanceOrClass, context);
 					} catch(InvocationTargetException ite) {
 						cause = new ExceptionHandlerException(e.getCause());
 					} catch(Throwable th) {
@@ -314,11 +312,34 @@ public class RestlessMethod {
 		}
 	}
 	
-	private boolean callLocalExceptionHandler(Throwable cause, Object instance,
+	private String methodReference(Object instanceOrClass, Method method) {
+		Class<?> clazz;
+		if(instanceOrClass instanceof Class<?>) {
+			clazz = (Class<?>)instanceOrClass;
+		} else {
+			clazz = instanceOrClass.getClass();
+		}
+		return clazz.getSimpleName() + "." + method.getName() + "(..)";
+	}
+	
+	private static Object invokeMethod(Method method, Object instanceOrClass,
+	        List<Object> javaMethodArgs) throws IllegalArgumentException, IllegalAccessException,
+	        InvocationTargetException {
+		/* Instantiate only for non-static methods */
+		boolean isStatic = Modifier.isStatic(method.getModifiers());
+		if(isStatic) {
+			return method.invoke(null, javaMethodArgs.toArray(new Object[0]));
+		} else {
+			Object instance = toInstance(instanceOrClass);
+			return method.invoke(instance, javaMethodArgs.toArray(new Object[0]));
+		}
+	}
+	
+	private boolean callLocalExceptionHandler(Throwable cause, Object instanceOrClass,
 	        IRestlessContext context) throws InvocationTargetException, IllegalArgumentException,
 	        IllegalAccessException {
 		
-		Method method = Restless.methodByName(instance, "onException");
+		Method method = Restless.methodByName(instanceOrClass, "onException");
 		if(method == null) {
 			// no local exception handler available
 			return false;
@@ -341,7 +362,7 @@ public class RestlessMethod {
 			}
 		}
 		
-		Object result = method.invoke(instance, javaMethodArgs.toArray(new Object[0]));
+		Object result = invokeMethod(method, instanceOrClass, javaMethodArgs);
 		
 		if(result instanceof Boolean) {
 			return (Boolean)result;
@@ -379,7 +400,7 @@ public class RestlessMethod {
 	 * @param instanceOrClass
 	 * @return an instance
 	 */
-	private Object toInstance(Object instanceOrClass) {
+	private static Object toInstance(Object instanceOrClass) {
 		if(instanceOrClass instanceof Class<?>) {
 			// need to created instance
 			Class<?> clazz = (Class<?>)instanceOrClass;

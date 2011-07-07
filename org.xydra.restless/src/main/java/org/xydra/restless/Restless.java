@@ -127,15 +127,15 @@ public class Restless extends HttpServlet {
 	}
 	
 	/**
-	 * @param object an instance or class in which to search methodName
+	 * @param instanceOrClass an instance or class in which to search methodName
 	 * @param methodName e.g. 'getName'
 	 * @return a java.lang.reflect.{@link Method} from a String
 	 */
-	public static Method methodByName(Object object, String methodName) {
-		if(object instanceof Class<?>) {
-			return methodByName((Class<?>)object, methodName);
+	public static Method methodByName(Object instanceOrClass, String methodName) {
+		if(instanceOrClass instanceof Class<?>) {
+			return methodByName((Class<?>)instanceOrClass, methodName);
 		} else {
-			return methodByName(object.getClass(), methodName);
+			return methodByName(instanceOrClass.getClass(), methodName);
 		}
 	}
 	
