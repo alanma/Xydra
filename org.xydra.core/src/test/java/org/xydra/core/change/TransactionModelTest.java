@@ -29,8 +29,7 @@ import org.xydra.core.model.impl.memory.MemoryRepository;
 
 
 /*
- * TODO Add tests for all cases in which executing commands and transactions
- * would fail - some important cases are not covered at the moment
+ * TODO maybe test executing transactions more thoroughly
  */
 
 public class TransactionModelTest {
@@ -383,6 +382,50 @@ public class TransactionModelTest {
 	 * extra tests, since the only thing it does is call this method
 	 */
 
+	@Test
+	public void testExecuteCommandsWrongXAddress() {
+		XCommandFactory factory = X.getCommandFactory();
+		XID newId = X.getIDProvider().createUniqueId();
+		TestCallback callback = new TestCallback();
+		XAddress randomFieldAddress = XX.toAddress(XX.createUniqueId(), XX.createUniqueId(),
+		        XX.createUniqueId(), XX.createUniqueId());
+		XAddress randomObjectAddress = XX.toAddress(XX.createUniqueId(), XX.createUniqueId(),
+		        XX.createUniqueId(), null);
+		
+		XCommand objectCommand = factory.createAddFieldCommand(randomObjectAddress, newId,
+		        false);
+		
+		long result = this.transModel.executeCommand(objectCommand, callback);
+		assertEquals(XCommand.FAILED, result);
+		assertFalse(this.transModel.isChanged());
+		
+		// check callback
+		assertTrue(callback.failed);
+		assertNull(callback.revision);
+		
+		XCommand fieldCommand = factory
+		        .createAddFieldCommand(randomFieldAddress, newId, false);
+		
+		result = this.transModel.executeCommand(fieldCommand, callback);
+		assertEquals(XCommand.FAILED, result);
+		assertFalse(this.transModel.isChanged());
+		
+		// check callback
+		assertTrue(callback.failed);
+		assertNull(callback.revision);
+		
+		XCommand valueCommand = factory.createAddValueCommand(randomFieldAddress, 0,
+		        XX.createUniqueId(), false);
+		
+		result = this.transModel.executeCommand(valueCommand, callback);
+		assertEquals(XCommand.FAILED, result);
+		assertFalse(this.transModel.isChanged());
+		
+		// check callback
+		assertTrue(callback.failed);
+		assertNull(callback.revision);
+	}
+	
 	// Tests for model commands
 	
 	public void executeCommandsAddObjectCommands(boolean forced) {
@@ -1075,7 +1118,8 @@ public class TransactionModelTest {
 		builder.addObject(this.model.getAddress(), XCommand.SAFE, objectId2);
 		
 		// remove some objects
-		builder.removeObject(this.model.getAddress(), XCommand.SAFE, this.object2.getID());
+		builder.removeObject(this.model.getAddress(), this.object2.getRevisionNumber(),
+		        this.object2.getID());
 		
 		// add some fields
 		XID fieldId1 = X.getIDProvider().createUniqueId();
@@ -1332,6 +1376,7 @@ public class TransactionModelTest {
 		
 		// remove object
 		assertTrue(this.transModel.removeObject(this.object.getID()));
+		assertTrue(this.transModel.removeObject(this.object2.getID()));
 		
 		assertTrue(this.transModel.isEmpty());
 		assertFalse(this.model.isEmpty());

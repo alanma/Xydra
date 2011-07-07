@@ -28,11 +28,6 @@ import org.xydra.core.model.impl.memory.MemoryRepository;
 
 
 /*
- * TODO Add tests for all cases in which executing commands and transactions
- * would fail - some important cases are not covered at the moment
- */
-
-/*
  * TODO Maybe test executing transactions more thoroughly
  */
 
@@ -292,6 +287,36 @@ public class TransactionObjectTest {
 	 * extra tests, since the only thing it does is call this method
 	 */
 
+	@Test
+	public void testExecuteCommandsWrongXAddress() {
+		XCommandFactory factory = X.getCommandFactory();
+		XID newFieldId = X.getIDProvider().createUniqueId();
+		TestCallback callback = new TestCallback();
+		XAddress randomAddress = XX.toAddress(XX.createUniqueId(), XX.createUniqueId(),
+		        XX.createUniqueId(), XX.createUniqueId());
+		
+		XCommand fieldCommand = factory.createAddFieldCommand(randomAddress, newFieldId, false);
+		
+		long result = this.transObject.executeCommand(fieldCommand, callback);
+		assertEquals(XCommand.FAILED, result);
+		assertFalse(this.transObject.isChanged());
+		
+		// check callback
+		assertTrue(callback.failed);
+		assertNull(callback.revision);
+		
+		XCommand valueCommand = factory.createAddValueCommand(randomAddress, 0,
+		        XX.createUniqueId(), false);
+		
+		result = this.transObject.executeCommand(valueCommand, callback);
+		assertEquals(XCommand.FAILED, result);
+		assertFalse(this.transObject.isChanged());
+		
+		// check callback
+		assertTrue(callback.failed);
+		assertNull(callback.revision);
+	}
+	
 	private void testExecuteCommandsAddFieldCommands(boolean isForced) {
 		XCommandFactory factory = X.getCommandFactory();
 		XID newFieldId = X.getIDProvider().createUniqueId();
@@ -888,8 +913,7 @@ public class TransactionObjectTest {
 		assertEquals(null, this.fieldWithValue.getValue());
 	}
 	
-	private void testExecuteCommandsFailingTransaction(XType type,
-	        ChangeType changeType) {
+	private void testExecuteCommandsFailingTransaction(XType type, ChangeType changeType) {
 		// manually build a transaction
 		XTransactionBuilder builder = new XTransactionBuilder(this.object.getAddress());
 		
