@@ -148,10 +148,10 @@ public class DiffWritableModel implements XWritableModel {
 	public boolean hasObject(XID objectId) {
 		if(this.added.containsKey(new EqualsConstraint<XID>(objectId), new Wildcard<XID>())) {
 			assert !this.removed.containsKey(new EqualsConstraint<XID>(objectId),
-			        new Wildcard<XID>());
+			        new EqualsConstraint<XID>(NONE));
 			return true;
-		} else if(this.removed
-		        .containsKey(new EqualsConstraint<XID>(objectId), new Wildcard<XID>())) {
+		} else if(this.removed.containsKey(new EqualsConstraint<XID>(objectId),
+		        new EqualsConstraint<XID>(NONE))) {
 			assert !this.added
 			        .containsKey(new EqualsConstraint<XID>(objectId), new Wildcard<XID>());
 			return false;
