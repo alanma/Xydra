@@ -54,7 +54,7 @@ public class MapIndex<K, E> implements IMapIndex<K,E> {
 	
 	public boolean containsKey(Constraint<K> c1) {
 		if(c1.isStar())
-			return isEmpty();
+			return !isEmpty();
 		else {
 			K key = ((EqualsConstraint<K>)c1).getKey();
 			return this.index.containsKey(key);
