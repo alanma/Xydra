@@ -1,6 +1,7 @@
 package org.xydra.core.change;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
@@ -34,6 +35,7 @@ public class DiffWritableModelTest {
 	@Test
 	public void test1() {
 		XWritableObject adamObject = this.diffModel.createObject(adam);
+		assertTrue(this.diffModel.hasObject(adam));
 		adamObject.createField(fon).setValue(XV.toValue("123"));
 		adamObject.createField(mail).setValue(XV.toValue("a@ex.com"));
 		XWritableObject bertObject = this.diffModel.createObject(bert);
@@ -41,9 +43,9 @@ public class DiffWritableModelTest {
 		bertObject.createField(mail).setValue(XV.toValue("b@ex.com"));
 		
 		List<XAtomicCommand> list = this.diffModel.toCommandList();
-		// for(XAtomicCommand ac : list) {
-		// System.out.println(ac);
-		// }
+		for(XAtomicCommand ac : list) {
+			System.out.println(ac);
+		}
 		assertEquals(10, list.size());
 	}
 	
