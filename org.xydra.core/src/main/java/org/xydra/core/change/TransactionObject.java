@@ -280,7 +280,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 				this.changedFields.put(fieldId, field);
 				
 				// command succeeded -> add it to the list
-				this.commands.add((XAtomicCommand)objectCommand);
+				this.commands.add(objectCommand);
 				
 			} else {
 				/*
@@ -342,7 +342,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 				this.changedValues.remove(fieldId);
 				
 				// command succeeded -> add it to the list
-				this.commands.add((XAtomicCommand)objectCommand);
+				this.commands.add(objectCommand);
 				
 			} else {
 				/*
@@ -426,7 +426,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 			this.changedValues.put(fieldId, fieldCommand.getValue());
 			
 			// command succeeded -> add it to the list
-			this.commands.add((XAtomicCommand)fieldCommand);
+			this.commands.add(fieldCommand);
 		} else {
 			/*
 			 * Do not execute the changes just yet. They will be executed after

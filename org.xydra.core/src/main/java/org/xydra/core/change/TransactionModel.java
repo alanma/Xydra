@@ -307,7 +307,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 				this.changedObjects.put(objectId, object);
 				
 				// command succeeded -> add it to the list
-				this.commands.add((XAtomicCommand)modelCommand);
+				this.commands.add(modelCommand);
 				
 			} else {
 				/*
@@ -374,7 +374,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 				this.changedObjects.remove(objectId);
 				
 				// command succeeded -> add it to the list
-				this.commands.add((XAtomicCommand)modelCommand);
+				this.commands.add(modelCommand);
 			} else {
 				/*
 				 * Do not execute the changes just yet. They will be executed
@@ -438,7 +438,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 				this.changedFields.put(fieldAddress, field);
 				
 				// command succeeded -> add it to the list
-				this.commands.add((XAtomicCommand)objectCommand);
+				this.commands.add(objectCommand);
 			} else {
 				/*
 				 * Do not execute the changes just yet. They will be executed
@@ -489,7 +489,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 				this.changedValues.remove(fieldAddress);
 				
 				// command succeeded -> add it to the list
-				this.commands.add((XAtomicCommand)objectCommand);
+				this.commands.add(objectCommand);
 			} else {
 				/*
 				 * Do not execute the changes just yet. They will be executed
@@ -588,7 +588,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 			this.changedValues.put(fieldAddress, fieldCommand.getValue());
 			
 			// command succeeded -> add it to the list
-			this.commands.add((XAtomicCommand)fieldCommand);
+			this.commands.add(fieldCommand);
 		} else {
 			/*
 			 * Do not execute the changes just yet. They will be executed after
