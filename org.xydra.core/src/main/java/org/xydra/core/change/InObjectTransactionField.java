@@ -27,41 +27,56 @@ public class InObjectTransactionField extends AbstractEntity implements XWritabl
 	private XAddress address;
 	private TransactionObject object;
 	private long revisionNumber;
+	private long transactionNumber;
+	private boolean isRemoved;
 	
 	public InObjectTransactionField(XAddress fieldAddress, long revisionNumber,
 	        TransactionObject object) {
 		this.address = fieldAddress;
 		this.object = object;
 		this.revisionNumber = revisionNumber;
+		this.transactionNumber = object.getTransactionNumber();
 	}
 	
 	@Override
 	public long getRevisionNumber() {
+		isValid();
+		
 		return this.revisionNumber;
 	}
 	
 	@Override
 	public XValue getValue() {
+		isValid();
+		
 		return this.object.getValue(this.getID());
 	}
 	
 	@Override
 	public boolean isEmpty() {
+		isValid();
+		
 		return getValue() == null;
 	}
 	
 	@Override
 	public XAddress getAddress() {
+		isValid();
+		
 		return this.address;
 	}
 	
 	@Override
 	public XID getID() {
+		isValid();
+		
 		return this.address.getField();
 	}
 	
 	@Override
 	public boolean setValue(XValue value) {
+		isValid();
+		
 		XFieldCommand command;
 		
 		if(value == null) {
@@ -85,6 +100,8 @@ public class InObjectTransactionField extends AbstractEntity implements XWritabl
 	
 	@Override
 	public boolean equals(Object object) {
+		isValid();
+		
 		return super.equals(object);
 	}
 	
@@ -99,6 +116,8 @@ public class InObjectTransactionField extends AbstractEntity implements XWritabl
 	 *         same parent-TransactionObject as this field
 	 */
 	public boolean equalInObjectTransactionFieldState(InObjectTransactionField field) {
+		isValid();
+		
 		boolean result = this.address.equals(field.address)
 		        && this.object.equalTransactionObjectState(field.object);
 		
@@ -113,17 +132,38 @@ public class InObjectTransactionField extends AbstractEntity implements XWritabl
 	
 	@Override
 	public int hashCode() {
+		isValid();
+		
 		return super.hashCode();
 	}
 	
 	@Override
 	public AbstractEntity getFather() {
+		isValid();
+		
 		return this.object;
 	}
 	
 	@Override
 	public XType getType() {
+		isValid();
+		
 		return XType.XFIELD;
 	}
 	
+	private void isValid() {
+		if(this.isRemoved) {
+			throw new IllegalArgumentException(
+			        "InObjecTransactionField was already removed and can no longer be used.");
+		} else if(this.transactionNumber != this.object.getTransactionNumber()) {
+			throw new IllegalArgumentException(
+			        "InObjectTransactionField refers to an already committed or canceled transaction and "
+			                + "can no longer be used.");
+		}
+		
+	}
+	
+	protected void setRemoved() {
+		this.isRemoved = true;
+	}
 }

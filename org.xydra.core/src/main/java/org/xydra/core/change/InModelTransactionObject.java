@@ -27,37 +27,56 @@ public class InModelTransactionObject extends AbstractEntity implements XWritabl
 	private XAddress address;
 	private TransactionModel model;
 	private long revisionNumber;
+	private long transactionNumber;
+	private boolean isRemoved;
 	
 	public InModelTransactionObject(XAddress address, long revisionNumber, TransactionModel model) {
 		this.address = address;
 		this.revisionNumber = revisionNumber;
 		this.model = model;
+		this.transactionNumber = model.getTransactionNumber();
+		this.isRemoved = false;
 	}
 	
+	@Override
 	public XAddress getAddress() {
+		isValid();
+		
 		return this.address;
 	}
 	
+	@Override
 	public XID getID() {
+		isValid();
+		
 		return this.address.getObject();
 	}
 	
 	public long executeCommand(XCommand command) {
+		isValid();
+		
 		// pass it to the transaction model!
 		return this.model.executeCommand(command);
 	}
 	
 	public synchronized long executeCommand(XCommand command, XLocalChangeCallback callback) {
+		isValid();
+		
 		// pass it to the transaction model!
 		return this.model.executeCommand(command, callback);
 	}
 	
 	@Override
 	public long getRevisionNumber() {
+		isValid();
+		
 		return this.revisionNumber;
 	}
 	
+	@Override
 	public XWritableField createField(XID fieldId) {
+		isValid();
+		
 		XCommand fieldCommand = X.getCommandFactory().createSafeAddFieldCommand(this.address,
 		        fieldId);
 		this.model.executeCommand(fieldCommand);
@@ -66,7 +85,10 @@ public class InModelTransactionObject extends AbstractEntity implements XWritabl
 		        this.address.getModel(), this.address.getObject(), fieldId));
 	}
 	
+	@Override
 	public boolean hasField(XID fieldId) {
+		isValid();
+		
 		XWritableField field = this.model.getField(XX.toAddress(this.address.getRepository(),
 		        this.address.getModel(), this.address.getObject(), fieldId));
 		
@@ -74,17 +96,25 @@ public class InModelTransactionObject extends AbstractEntity implements XWritabl
 	}
 	
 	public long executeObjectCommand(XObjectCommand command) {
+		isValid();
+		
 		// pass it to the transaction model!
 		return this.model.executeCommand(command);
 	}
 	
+	@Override
 	public XWritableField getField(XID fieldId) {
+		isValid();
+		
 		XAddress fieldAddress = XX.toAddress(this.address.getRepository(), this.address.getModel(),
 		        this.address.getObject(), fieldId);
 		return this.model.getField(fieldAddress);
 	}
 	
+	@Override
 	public boolean removeField(XID fieldId) {
+		isValid();
+		
 		XAddress fieldAddress = XX.toAddress(this.address.getRepository(), this.address.getModel(),
 		        this.address.getObject(), fieldId);
 		XWritableField field = this.model.getField(fieldAddress);
@@ -104,26 +134,53 @@ public class InModelTransactionObject extends AbstractEntity implements XWritabl
 	
 	@Override
 	public AbstractEntity getFather() {
+		isValid();
+		
 		return this.model;
 	}
 	
 	@Override
 	public XType getType() {
+		isValid();
+		
 		return XType.XOBJECT;
 	}
 	
 	@Override
 	public boolean equals(Object object) {
+		isValid();
+		
 		return super.equals(object);
 	}
 	
+	@Override
 	public boolean isEmpty() {
+		isValid();
+		
 		return this.model.objectIsEmpty(this.getID());
 	}
 	
 	@Override
 	public Iterator<XID> iterator() {
+		isValid();
+		
 		return this.model.objectIterator(this.getID());
+	}
+	
+	private void isValid() {
+		if(this.isRemoved) {
+			throw new IllegalArgumentException(
+			        "InModelTransactionObject was already removed and can no longer be used.");
+		} else if(this.transactionNumber != this.model.getTransactionNumber()) {
+			throw new IllegalArgumentException(
+			        "InModelTransactionObject refers to an already committed or canceled transaction and "
+			                + "can no longer be used.");
+		}
+		
+	}
+	
+	protected void setRemoved() {
+		this.isRemoved = true;
 	}
 	
 	/*
