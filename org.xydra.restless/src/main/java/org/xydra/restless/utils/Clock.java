@@ -22,6 +22,11 @@ public class Clock {
 		return this;
 	}
 	
+	public void reset() {
+		this.start = -1;
+		this.stats = new StringBuffer();
+	}
+	
 	/**
 	 * @param name for the statistics
 	 */
@@ -34,6 +39,11 @@ public class Clock {
 		this.stats.append(name).append("=").append(durationInMs).append("ms <br />\n");
 		this.start = -1;
 		return this;
+	}
+	
+	public void stopAndStart(String name) {
+		stop(name);
+		start();
 	}
 	
 	public String getStats() {
