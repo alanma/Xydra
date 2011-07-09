@@ -63,6 +63,16 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	
 	private boolean inTransaction = false;
 	
+	/*
+	 * counts the number of the transaction which is currently being
+	 * constructed. It's incremented each time a new transaction starts or a
+	 * transaction is canceled. It's used to signal the
+	 * InObjectTransactionFields which were returned during the construction of
+	 * the transaction which was canceled/committed that a new transaction is
+	 * being constructed and they are no longer valid.
+	 */
+	private long transactionNumber;
+	
 	public TransactionObject(MemoryObject object) {
 		this.baseObject = object;
 		this.revisionNumber = object.getRevisionNumber();
@@ -120,6 +130,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		if(revNr != XCommand.FAILED) {
 			this.clear(); // restarts the TransactionObject
 		}
+		
 		this.revisionNumber = revNr;
 		return revNr;
 	}
@@ -131,18 +142,6 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	 * wrapped {@link MemoryObject} currently is in.
 	 */
 	public void clear() {
-		/*
-		 * TODO what happens with currently used InObjectTransactionFields when
-		 * this method is called?
-		 * 
-		 * Maybe implement a "stateCounter" which is incremented every time this
-		 * method is called, initialize the InObjectTransactionFields with this
-		 * counter and the InObjectTransactionFields need to check whether their
-		 * counter is the same as the counter of their TransactionObject. If
-		 * not, throw an exception. Problem: Renders already returned
-		 * InObjectTransactionFields useless.
-		 */
-
 		this.changedFields.clear();
 		this.changedValues.clear();
 		this.removedFields.clear();
@@ -152,6 +151,8 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		this.transRemovedFields.clear();
 		
 		this.commands.clear();
+		
+		this.transactionNumber++;
 	}
 	
 	/**
@@ -177,12 +178,18 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		        && this.changedValues.isEmpty() && this.commands.isEmpty());
 	}
 	
+	protected long getTransactionNumber() {
+		return this.transactionNumber;
+	}
+	
 	// XWritableObject-specific methods
 	
+	@Override
 	public XAddress getAddress() {
 		return this.baseObject.getAddress();
 	}
 	
+	@Override
 	public XID getID() {
 		return this.baseObject.getID();
 	}
@@ -273,23 +280,11 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 			InObjectTransactionField field = new InObjectTransactionField(address, XCommand.NEW,
 			        this);
 			
+			this.addFieldToCurrentTransaction(field, this.inTransaction);
+			
 			if(!this.inTransaction) {
-				// remove from list of removed fields, if needed
-				this.removedFields.remove(fieldId);
-				
-				this.changedFields.put(fieldId, field);
-				
 				// command succeeded -> add it to the list
 				this.commands.add(objectCommand);
-				
-			} else {
-				/*
-				 * Do not execute the changes just yet. They will be executed
-				 * after it is certain that all commands of the transaction can
-				 * be safely executed.
-				 */
-				this.transRemovedFields.remove(fieldId);
-				this.transChangedFields.put(fieldId, field);
 			}
 			
 			callback.onSuccess(this.getRevisionNumber());
@@ -323,7 +318,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 			
 			// remember: this actually is an InModelTransactionField
 			assert field != null; // because "fieldExists" was true
-			assert field instanceof InModelTransactionField : "field is instanceof "
+			assert field instanceof InObjectTransactionField : "field is instanceof "
 			        + field.getClass().getCanonicalName();
 			
 			// check revision number
@@ -333,26 +328,11 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 				return XCommand.FAILED;
 			}
 			
+			this.removeFieldFromCurrentTransaction(fieldId, this.inTransaction);
+			
 			if(!this.inTransaction) {
-				// mark it as removed
-				this.removedFields.add(fieldId);
-				
-				// remove info from all other maps
-				this.changedFields.remove(fieldId);
-				this.changedValues.remove(fieldId);
-				
 				// command succeeded -> add it to the list
 				this.commands.add(objectCommand);
-				
-			} else {
-				/*
-				 * Do not execute the changes just yet. They will be executed
-				 * after it is certain that all commands of the transaction can
-				 * be safely executed.
-				 */
-				this.transRemovedFields.add(fieldId);
-				this.transChangedFields.remove(fieldId);
-				this.transChangedValues.remove(fieldId);
 			}
 			
 			callback.onSuccess(this.getRevisionNumber());
@@ -421,19 +401,12 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 			}
 		}
 		
+		this.manipulateValueInCurrentTransaction(fieldId, fieldCommand.getValue(),
+		        this.inTransaction);
+		
 		if(!this.inTransaction) {
-			// "add"/"remove"/"change" the value
-			this.changedValues.put(fieldId, fieldCommand.getValue());
-			
 			// command succeeded -> add it to the list
 			this.commands.add(fieldCommand);
-		} else {
-			/*
-			 * Do not execute the changes just yet. They will be executed after
-			 * it is certain that all commands of the transaction can be safely
-			 * executed.
-			 */
-			this.transChangedValues.put(fieldId, fieldCommand.getValue());
 		}
 		
 		callback.onSuccess(field.getRevisionNumber());
@@ -479,8 +452,6 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 						 * anything here
 						 */
 
-						this.removedFields.remove(fieldId);
-						
 						XAddress temp = this.getAddress();
 						XAddress address = XX.toAddress(temp.getRepository(), temp.getModel(),
 						        temp.getObject(), fieldId);
@@ -488,7 +459,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 						InObjectTransactionField field = new InObjectTransactionField(address,
 						        XCommand.NEW, this);
 						
-						this.changedFields.put(fieldId, field);
+						this.addFieldToCurrentTransaction(field, false);
 					}
 				} else {
 					assert objCmd.getChangeType() == ChangeType.REMOVE;
@@ -500,12 +471,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 					 * just do nothing
 					 */
 
-					// mark it as removed
-					this.removedFields.add(fieldId);
-					
-					// remove info from all other maps
-					this.changedFields.remove(fieldId);
-					this.changedValues.remove(fieldId);
+					this.removeFieldFromCurrentTransaction(fieldId, false);
 				}
 			} else {
 				assert command instanceof XFieldCommand;
@@ -516,7 +482,8 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 				 * always the same, no matter what the command type was
 				 */
 
-				this.changedValues.put(fieldId, ((XFieldCommand)command).getValue());
+				this.manipulateValueInCurrentTransaction(fieldId,
+				        ((XFieldCommand)command).getValue(), false);
 			}
 			
 			// add command to the command list
@@ -530,11 +497,75 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		return this.getRevisionNumber();
 	}
 	
+	// TODO comment!
+	private void addFieldToCurrentTransaction(InObjectTransactionField field, boolean inTransaction) {
+		XID fieldId = field.getID();
+		
+		if(!inTransaction) {
+			// remove from list of removed fields, if needed
+			this.removedFields.remove(fieldId);
+			
+			this.changedFields.put(fieldId, field);
+			
+		} else {
+			/*
+			 * Do not execute the changes just yet. They will be executed after
+			 * it is certain that all commands of the transaction can be safely
+			 * executed.
+			 */
+			this.transRemovedFields.remove(fieldId);
+			this.transChangedFields.put(fieldId, field);
+		}
+	}
+	
+	private void removeFieldFromCurrentTransaction(XID fieldId, boolean inTransaction) {
+		if(!inTransaction) {
+			// mark it as removed
+			this.removedFields.add(fieldId);
+			
+			// remove info from all other maps
+			InObjectTransactionField removedField = this.changedFields.remove(fieldId);
+			if(removedField != null) {
+				removedField.setRemoved();
+			}
+			
+			this.changedValues.remove(fieldId);
+			
+		} else {
+			/*
+			 * Do not execute the changes just yet. They will be executed after
+			 * it is certain that all commands of the transaction can be safely
+			 * executed.
+			 */
+			this.transRemovedFields.add(fieldId);
+			this.transChangedFields.remove(fieldId);
+			this.transChangedValues.remove(fieldId);
+		}
+	}
+	
+	private void manipulateValueInCurrentTransaction(XID fieldId, XValue value,
+	        boolean inTransaction) {
+		if(!inTransaction) {
+			// "add"/"remove"/"change" the value
+			this.changedValues.put(fieldId, value);
+			
+		} else {
+			/*
+			 * Do not execute the changes just yet. They will be executed after
+			 * it is certain that all commands of the transaction can be safely
+			 * executed.
+			 */
+			this.transChangedValues.put(fieldId, value);
+		}
+		
+	}
+	
 	@Override
 	public long getRevisionNumber() {
 		return this.revisionNumber;
 	}
 	
+	@Override
 	public boolean isEmpty() {
 		if(!this.baseObject.isEmpty()) {
 			for(XID id : this.baseObject) {
@@ -625,6 +656,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		        && this.removedFields.equals(object.removedFields);
 	}
 	
+	@Override
 	public XWritableField getField(XID fieldId) {
 		if(this.changedFields.containsKey(fieldId)) {
 			return this.changedFields.get(fieldId);
