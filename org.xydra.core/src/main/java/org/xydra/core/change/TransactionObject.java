@@ -48,6 +48,11 @@ import org.xydra.core.model.impl.memory.MemoryObject;
 
 /**
  * TODO consider making this implementation thread-safe
+ * 
+ * Contra argument: Might not be a good idea, since the order of the commands in
+ * a transaction usually matters. If multiple threads manipulate the same
+ * TransactionObject it the same time, no order can be guaranteed, because the
+ * Java scheduler does not execute the threads in a specific order.
  */
 public class TransactionObject extends AbstractEntity implements XWritableObject {
 	
@@ -178,6 +183,11 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		        && this.changedValues.isEmpty() && this.commands.isEmpty());
 	}
 	
+	/**
+	 * Returns the number of the transaction which is currently being built.
+	 * 
+	 * @return the number of the transaction which is currently being built.
+	 */
 	protected long getTransactionNumber() {
 		return this.transactionNumber;
 	}
@@ -236,6 +246,20 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		        "Given Command was neither a correct instance of XObjectCommand, XFieldCommand or XTransaction!");
 	}
 	
+	/**
+	 * Checks whether the specified field exists at the moment.
+	 * 
+	 * Might return true, even though the specified field is not yet added (used
+	 * in transaction handling of {@link #executeCommand(XCommand)}). This only
+	 * happens if this TransactionObject is currently executing a transaction
+	 * which may add the specified field (i.e. contains a command for adding
+	 * this field, which was already tentatively executed), so that the field
+	 * appears as existing for the rest of the commands which still need to be
+	 * evaluated.
+	 * 
+	 * @param fieldId The {@link XID} of the field
+	 * @return true, if the specified field exists
+	 */
 	private boolean fieldExists(XID fieldId) {
 		boolean fieldExists = this.hasField(fieldId);
 		
@@ -251,6 +275,14 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		return fieldExists;
 	}
 	
+	/**
+	 * Executes the given {@link XObjectCommand}.
+	 * 
+	 * @param objectCommand the command which is to be executed
+	 * @param callback the used callback.
+	 * @return the revision number of the TransactionObject after the execution
+	 *         or {@link XCommand#FAILED} if the execution failed
+	 */
 	private long handleObjectCommand(XObjectCommand objectCommand, XLocalChangeCallback callback) {
 		assert callback != null;
 		
@@ -280,7 +312,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 			InObjectTransactionField field = new InObjectTransactionField(address, XCommand.NEW,
 			        this);
 			
-			this.addFieldToCurrentTransaction(field, this.inTransaction);
+			this.addFieldToTransactionObject(field, this.inTransaction);
 			
 			if(!this.inTransaction) {
 				// command succeeded -> add it to the list
@@ -328,7 +360,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 				return XCommand.FAILED;
 			}
 			
-			this.removeFieldFromCurrentTransaction(fieldId, this.inTransaction);
+			this.removeFieldFromTransactionObject(fieldId, this.inTransaction);
 			
 			if(!this.inTransaction) {
 				// command succeeded -> add it to the list
@@ -343,6 +375,14 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		        "Given Command was not a correct instance of XObjectCommand!");
 	}
 	
+	/**
+	 * Executes the given {@link XFieldCommand}.
+	 * 
+	 * @param fieldCommand the command which is to be executed
+	 * @param callback the used callback.
+	 * @return the revision number of the TransactionObject after the execution
+	 *         or {@link XCommand#FAILED} if the execution failed
+	 */
 	private long handleFieldCommand(XFieldCommand fieldCommand, XLocalChangeCallback callback) {
 		assert callback != null;
 		XID fieldId = fieldCommand.getChangedEntity().getField();
@@ -401,7 +441,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 			}
 		}
 		
-		this.manipulateValueInCurrentTransaction(fieldId, fieldCommand.getValue(),
+		this.manipulateValueInTransactionObject(fieldId, fieldCommand.getValue(),
 		        this.inTransaction);
 		
 		if(!this.inTransaction) {
@@ -413,6 +453,14 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		return field.getRevisionNumber();
 	}
 	
+	/**
+	 * Executes the given {@link XTransaction}.
+	 * 
+	 * @param transaction the transaction which is to be executed
+	 * @param callback the used callback.
+	 * @return the revision number of the TransactionObject after the execution
+	 *         or {@link XCommand#FAILED} if the execution failed
+	 */
 	private long handleTransaction(XTransaction transaction, XLocalChangeCallback callback) {
 		this.inTransaction = true;
 		
@@ -459,7 +507,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 						InObjectTransactionField field = new InObjectTransactionField(address,
 						        XCommand.NEW, this);
 						
-						this.addFieldToCurrentTransaction(field, false);
+						this.addFieldToTransactionObject(field, false);
 					}
 				} else {
 					assert objCmd.getChangeType() == ChangeType.REMOVE;
@@ -471,7 +519,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 					 * just do nothing
 					 */
 
-					this.removeFieldFromCurrentTransaction(fieldId, false);
+					this.removeFieldFromTransactionObject(fieldId, false);
 				}
 			} else {
 				assert command instanceof XFieldCommand;
@@ -482,7 +530,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 				 * always the same, no matter what the command type was
 				 */
 
-				this.manipulateValueInCurrentTransaction(fieldId,
+				this.manipulateValueInTransactionObject(fieldId,
 				        ((XFieldCommand)command).getValue(), false);
 			}
 			
@@ -497,8 +545,18 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		return this.getRevisionNumber();
 	}
 	
-	// TODO comment!
-	private void addFieldToCurrentTransaction(InObjectTransactionField field, boolean inTransaction) {
+	/**
+	 * Adds a new field to this TransactionObject.
+	 * 
+	 * @param field The {@link InObjectTransactionField} which is to be added
+	 * @param inTransaction true, if a transaction is being executed at the
+	 *            moment. The field will not yet be added, but appear as added
+	 *            for the rest of the commands of the transaction, because it is
+	 *            not yet clear if all commands of the transaction can be
+	 *            executed (used in transaction handling of
+	 *            {@link #executeCommand(XCommand)})
+	 */
+	private void addFieldToTransactionObject(InObjectTransactionField field, boolean inTransaction) {
 		XID fieldId = field.getID();
 		
 		if(!inTransaction) {
@@ -518,7 +576,18 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		}
 	}
 	
-	private void removeFieldFromCurrentTransaction(XID fieldId, boolean inTransaction) {
+	/**
+	 * Removes the specified field from this TransactionObject.
+	 * 
+	 * @param fieldId The {@link XID} of the field which is to be removed
+	 * @param inTransaction true, if a transaction is being executed at the
+	 *            moment. The field will not yet be removed, but appear as
+	 *            removed for the rest of the commands of the transaction,
+	 *            because it is not yet clear if all commands of the transaction
+	 *            can be executed (used in transaction handling of
+	 *            {@link #executeCommand(XCommand)})
+	 */
+	private void removeFieldFromTransactionObject(XID fieldId, boolean inTransaction) {
 		if(!inTransaction) {
 			// mark it as removed
 			this.removedFields.add(fieldId);
@@ -543,8 +612,20 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		}
 	}
 	
-	private void manipulateValueInCurrentTransaction(XID fieldId, XValue value,
-	        boolean inTransaction) {
+	/**
+	 * Sets the {@link XValue} of the specified field to the given value.
+	 * 
+	 * @param fieldId The {@link XID} of the field which value is to be
+	 *            manipulated
+	 * @param value The new {@link XValue}
+	 * @param inTransaction true, if a transaction is being executed at the
+	 *            moment. The value will not yet be changed, but appear as
+	 *            changed for the rest of the commands of the transaction,
+	 *            because it is not yet clear if all commands of the transaction
+	 *            can be executed (used in transaction handling of
+	 *            {@link #executeCommand(XCommand)})
+	 */
+	private void manipulateValueInTransactionObject(XID fieldId, XValue value, boolean inTransaction) {
 		if(!inTransaction) {
 			// "add"/"remove"/"change" the value
 			this.changedValues.put(fieldId, value);
@@ -723,13 +804,20 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	 * Special methods needed for the helperclass InObjectTransactionField
 	 */
 
-	protected XValue getValue(XID id) {
-		if(this.removedFields.contains(id)) {
+	/**
+	 * Returns the value of the specified field (if it exists)
+	 * 
+	 * @param fieldId the {@link XID} which {@link XValue} is to be returned
+	 * @return the {@link XValue} of the specified field (null if the field
+	 *         doesn't exist)
+	 */
+	protected XValue getValue(XID fieldId) {
+		if(this.removedFields.contains(fieldId)) {
 			return null;
-		} else if(this.changedValues.containsKey(id)) {
-			return this.changedValues.get(id);
+		} else if(this.changedValues.containsKey(fieldId)) {
+			return this.changedValues.get(fieldId);
 		} else {
-			XField field = this.baseObject.getField(id);
+			XField field = this.baseObject.getField(fieldId);
 			
 			if(field != null) {
 				return field.getValue();
