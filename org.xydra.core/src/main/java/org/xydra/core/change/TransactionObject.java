@@ -46,7 +46,7 @@ import org.xydra.core.model.impl.memory.MemoryObject;
  * 
  */
 
-/**
+/*
  * TODO consider making this implementation thread-safe
  * 
  * Contra argument: Might not be a good idea, since the order of the commands in
@@ -66,6 +66,9 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	
 	private ArrayList<XAtomicCommand> commands;
 	
+	/*
+	 * true, if events of a transaction are currently being added
+	 */
 	private boolean inTransaction = false;
 	
 	/*

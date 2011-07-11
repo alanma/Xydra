@@ -73,6 +73,9 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	
 	private LinkedList<XAtomicCommand> commands;
 	
+	/*
+	 * true, if events of a transaction are currently being added
+	 */
 	private boolean inTransaction;
 	
 	/*
@@ -900,7 +903,20 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 		}
 	}
 	
-	// TODO comment
+	/**
+	 * Gets the specified object.
+	 * 
+	 * Might return true, even though the specified object was not yet added
+	 * (used in transaction handling of {@link #executeCommand(XCommand)}). This
+	 * only happens if this TransactionModel is currently executing a
+	 * transaction which may add the specified object (i.e. contains a command
+	 * for adding this object, which was already tentatively executed), so that
+	 * the object appears as existing for the rest of the commands which still
+	 * need to be evaluated.
+	 * 
+	 * @param objectId The {@link XID} of the object
+	 * @return The specified object or null if it doesn't exist.
+	 */
 	private XWritableObject getObjectInTransaction(XID objectId) {
 		/*
 		 * extra method for this is useful concerning concurrent access,
@@ -921,7 +937,20 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 		return object;
 	}
 	
-	// TODO comment
+	/**
+	 * Gets the specified field.
+	 * 
+	 * Might return true, even though the specified field was not yet added
+	 * (used in transaction handling of {@link #executeCommand(XCommand)}). This
+	 * only happens if this TransactionModel is currently executing a
+	 * transaction which may add the specified field (i.e. contains a command
+	 * for adding this object, which was already tentatively executed), so that
+	 * the field appears as existing for the rest of the commands which still
+	 * need to be evaluated.
+	 * 
+	 * @param fieldAddress The {@link XAddress} of the field
+	 * @return The specified field or null if it doesn't exist.
+	 */
 	private XWritableField getFieldInTransaction(XAddress fieldAddress) {
 		/*
 		 * extra method for this is useful concerning concurrent access,
@@ -1067,7 +1096,12 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	 * InTransactionField
 	 */
 
-	// TODO comment
+	/**
+	 * Gets the specified field. Used by {@link InModelTransactionObject}.
+	 * 
+	 * @param address the {@link XAddress} of the field
+	 * @return the specified field or null if it doesn't exist
+	 */
 	protected XWritableField getField(XAddress address) {
 		assert address.getAddressedType() == XType.XFIELD;
 		XWritableField field = null;
@@ -1094,7 +1128,13 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 		}
 	}
 	
-	// TODO comment
+	/**
+	 * Checks whether the specified field exists in this TransactionModel. Used
+	 * by {@link InModelTransactionObject}.
+	 * 
+	 * @param address the {@link XAddress} of the field
+	 * @return true, if the field exists, false otherwise
+	 */
 	private boolean hasField(XAddress address) {
 		assert address.getAddressedType() == XType.XFIELD;
 		
@@ -1116,7 +1156,14 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 		return false;
 	}
 	
-	// TODO comment
+	/**
+	 * Gets the value of the specified field. Used by
+	 * {@link InModelTransactionField}.
+	 * 
+	 * @param address the {@link XAddress} of the field
+	 * @return the value of the field (null if the specified field doesn't
+	 *         exist)
+	 */
 	protected XValue getValue(XAddress address) {
 		assert address.getAddressedType() == XType.XFIELD;
 		
@@ -1139,7 +1186,13 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 		}
 	}
 	
-	// TODO comment
+	/**
+	 * Checks whether the specified object is empty. Used by
+	 * {@link InModelTransactionObject}.
+	 * 
+	 * @param objectId the {@link XID} of the object
+	 * @return true, if it is empty, false otherwise
+	 */
 	protected boolean objectIsEmpty(XID objectId) {
 		assert this.hasObject(objectId);
 		XWritableObject object = this.baseModel.getObject(objectId);
@@ -1171,7 +1224,14 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 		return true;
 	}
 	
-	// TODO comment
+	/**
+	 * Returns an iterator over the {@link XID XIDs} of the fields in the
+	 * specified object. Used by {@link InModelTransactionObject}.
+	 * 
+	 * @param object the {@link XID} of the object
+	 * @return an iterator over the {@link XID XIDs} of the fields in the
+	 *         specified object
+	 */
 	protected Iterator<XID> objectIterator(XID objectId) {
 		assert this.hasObject(objectId);
 		
