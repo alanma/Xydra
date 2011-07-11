@@ -30,7 +30,7 @@ import org.xydra.log.LoggerFactory;
 
 
 /**
- * A helper class to minimise the number and size of persistence accesses.
+ * A helper class to minimize the number and size of persistence accesses.
  * 
  * An implementation of {@link XWritableModel} that works as a diff on top of a
  * base {@link XWritableModel}. Via {@link #toCommandList()} a minimal list of
@@ -58,20 +58,24 @@ public class DiffWritableModel implements XWritableModel {
 		this.removed = new MapMapIndex<XID,XID,XValue>();
 	}
 	
+	@Override
 	public XAddress getAddress() {
 		return this.base.getAddress();
 	}
 	
+	@Override
 	public XID getID() {
 		return this.base.getID();
 	}
 	
+	@Override
 	public XWritableObject createObject(XID objectId) {
 		this.added.index(objectId, NONE, NOVALUE);
 		this.removed.deIndex(objectId, NONE);
 		return new WrappedObject(objectId);
 	}
 	
+	@Override
 	public XWritableObject getObject(XID objectId) {
 		if(hasObject(objectId)) {
 			return new WrappedObject(objectId);
@@ -80,6 +84,7 @@ public class DiffWritableModel implements XWritableModel {
 		}
 	}
 	
+	@Override
 	public boolean removeObject(XID objectId) {
 		if(this.added.containsKey(new EqualsConstraint<XID>(objectId), new Wildcard<XID>())) {
 			// fine
@@ -131,10 +136,12 @@ public class DiffWritableModel implements XWritableModel {
 		return set;
 	}
 	
+	@Override
 	public boolean isEmpty() {
 		return this.ids().isEmpty();
 	}
 	
+	@Override
 	public Iterator<XID> iterator() {
 		return this.ids().iterator();
 	}

@@ -20,7 +20,7 @@ import org.xydra.base.value.XValue;
 
 
 /**
- * A helper class to minimise the number and size of persistence accesses.
+ * A helper class to minimize the number and size of persistence accesses.
  * 
  * An implementation of {@link XWritableObject} that works as a diff on top of a
  * base {@link XWritableObject}. Via {@link #toCommandList()} a minimal list of
@@ -181,6 +181,7 @@ public class DiffWritableObject implements XWritableObject {
 		return f;
 	}
 	
+	@Override
 	public XID getID() {
 		return this.base.getID();
 	}
@@ -208,6 +209,7 @@ public class DiffWritableObject implements XWritableObject {
 		return set;
 	}
 	
+	@Override
 	public boolean isEmpty() {
 		return this.ids().isEmpty();
 	}
@@ -216,6 +218,7 @@ public class DiffWritableObject implements XWritableObject {
 		return fieldIds().isEmpty();
 	}
 	
+	@Override
 	public Iterator<XID> iterator() {
 		return this.ids().iterator();
 	}
