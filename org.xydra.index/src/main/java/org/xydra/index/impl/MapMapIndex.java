@@ -55,7 +55,12 @@ public class MapMapIndex<K, L, E> implements IMapMapIndex<K,L,E> {
 		IMapIndex<L,E> map = this.index.lookup(key1);
 		if(map == null)
 			return false;
-		return map.containsKey(c2);
+		
+		if(c2.isStar()) {
+			return true;
+		} else {
+			return map.containsKey(c2);
+		}
 	}
 	
 	public void deIndex(K key1, L key2) {
