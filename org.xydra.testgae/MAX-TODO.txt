@@ -15,13 +15,4 @@ NO fridge compare?
 fix all URLS genereated in xmas code
 ONLINE: reprio issues
 
---------------Calpano
-
-FAVR Done
-templates must switch from ..ID to ..Id
-
-FAVR TODO
-make sure resource classes handle transactions where needed -- model should never do this
-
-
 FIX FIXME

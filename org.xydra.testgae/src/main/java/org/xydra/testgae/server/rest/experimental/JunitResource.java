@@ -31,7 +31,7 @@ import org.xydra.store.impl.gae.GaePersistence;
 
 
 /**
- * FIXME not ready - not required
+ * FIXME Max to max: not ready - not required
  * 
  * Can run JUnit tests on the server side.
  * 
