@@ -45,12 +45,20 @@ public class GaeConfigurationResource {
 		r.addMethod(path + "/gaeconf", "GET", GaeConfigurationResource.class, "index", true);
 	}
 	
+	private static void addCommonStyle(Writer w) throws IOException {
+		w.write("<style>\n"
+
+		+ "form { display:inline; } \n"
+
+		+ "</style>");
+	}
+	
 	public static void index(HttpServletRequest req, HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		GaeConfigurationResource.getCurrentConfiguration().applyIfNecessary();
-		
 		Writer w = HtmlUtils.startHtmlPage(res, "GAE cache conf on instance "
 		        + GaePersistence.INSTANCE_ID);
+		addCommonStyle(w);
 		w.write("<h2>Instance " + GaePersistence.INSTANCE_ID + " </h2>");
 		
 		w.write("Last config processing on XydraRuntime in this instance was "
