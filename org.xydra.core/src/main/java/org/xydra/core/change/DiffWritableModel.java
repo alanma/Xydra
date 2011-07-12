@@ -107,7 +107,8 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	protected boolean field_setValue(XID objectId, XID fieldId, XValue value) {
 		assert objectId != null;
 		assert fieldId != null;
-		assert hasObject(objectId) : "Expected " + objectId;
+		assert hasObject(objectId) : "Missing object with id " + objectId + " to set field "
+		        + fieldId;
 		assert this.removed.lookup(objectId, fieldId) == null;
 		assert getObject(objectId).hasField(fieldId);
 		
