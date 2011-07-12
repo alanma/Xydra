@@ -234,7 +234,7 @@ public class HtmlUtils {
 			StringBuffer buf = new StringBuffer();
 			buf.append("<form action='" + this.action + "' method='" + this.method + "'>");
 			for(Input input : this.inputs) {
-				buf.append(input.toString() + "<br />\n");
+				buf.append(input.toString() + "\n");
 			}
 			buf.append("</form>");
 			return buf.toString();
