@@ -29,8 +29,8 @@ public class MemcachePerformanceTest {
 	
 	@Test
 	public void testWithCaching() {
-		XydraRuntime.setParameter(XydraRuntime.PROP_USEMEMCACHE, "true");
-		XydraRuntime.setParameter(XydraRuntime.PROP_MEMCACHESTATS, "true");
+		XydraRuntime.getConfigMap().put(XydraRuntime.PROP_USEMEMCACHE, "true");
+		XydraRuntime.getConfigMap().put(XydraRuntime.PROP_MEMCACHESTATS, "true");
 		XydraPersistence pers = XydraRuntime.getPersistence(XX.toId("test-repo"));
 		assertNotNull(pers);
 		assertTrue(pers instanceof GaePersistence);

@@ -9,10 +9,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.perf.StatsGatheringPersistenceWrapper;
 import org.xydra.restless.Restless;
 import org.xydra.restless.utils.Clock;
 import org.xydra.restless.utils.HtmlUtils;
+import org.xydra.restless.utils.HtmlUtils.METHOD;
 import org.xydra.restless.utils.ServletUtils;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.gae.GaeAssert;
@@ -29,26 +29,10 @@ public class GaeConfigurationResource {
 	
 	private static final Logger log = LoggerFactory.getLogger(GaeConfigurationResource.class);
 	
-	public static final String PROP_ASSERT = "assert";
-	
-	private static final String PROP_USEMEMCACHE = "usememcache";
+	private static GaeConfiguration currentConf = GaeConfiguration.DEFAULT;
 	
 	/** only used for incoming web request to clear memcache immediately */
 	private static final String PROP_CLEARMEMCACHE_NOW = "clearmemcache";
-	
-	private static GaeConfiguration currentConf = null;
-	
-	/** first 60 seconds after boot this config is valid */
-	public static final GaeConfiguration DEFAULT = GaeConfiguration.createWithLifetime(60 * 1000);
-	
-	static {
-		DEFAULT.map().put(PROP_ASSERT, "false");
-		DEFAULT.map().put(PROP_USEMEMCACHE, "true");
-		// no PROP_CLEARMEMCACHE_NOW
-		DEFAULT.map().put(XydraRuntime.PROP_MEMCACHESTATS, "false");
-		DEFAULT.map().put(XydraRuntime.PROP_PERSISTENCESTATS, "false");
-		currentConf = DEFAULT;
-	}
 	
 	/**
 	 * @param r restless
@@ -63,57 +47,78 @@ public class GaeConfigurationResource {
 	
 	public static void index(HttpServletRequest req, HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		GaeConfigurationResource.getCurrentConfiguration().applyIfNecessary();
+		
 		Writer w = HtmlUtils.startHtmlPage(res, "GAE cache conf on instance "
 		        + GaePersistence.INSTANCE_ID);
-		w.write("<h2>GAE cache conf on instance " + GaePersistence.INSTANCE_ID + " </h2>");
-		w.write("<p>Memcache Conf: " + GaeUtils.getConf() + "</p>");
+		w.write("<h2>Instance " + GaePersistence.INSTANCE_ID + " </h2>");
 		
-		w.write(HtmlUtils.link("/admin/gaeconf/memcachse/set?instance="
-		        + GaePersistence.INSTANCE_ID + "&memcache=true",
-		        "set memcache=true(default) on this instance")
-		        + "<br/>");
-		w.write(HtmlUtils.link("/admin/gaeconf/memcache/set?instance=" + GaePersistence.INSTANCE_ID
-		        + "&memcache=false", "set memcache=false on this instance")
-		        + "<br/>");
+		w.write("Last config processing on XydraRuntime in this instance was "
+		        + (System.currentTimeMillis() - XydraRuntime.getLastTimeInitialisedAt())
+		        + " ms ago. Every instance checks every " + GaeConfiguration.CONFIG_APPLY_INTERVAL
+		        + "ms to update.");
+		w.flush();
+		
+		w.write("<h3>GaeUtils Conf</h3>"
+
+		+ "<p>" + GaeUtils.getConf() + "</p>");
+		
+		w.write("<h3>XydraRuntime</h3>");
+		writeToggle(GaeConfiguration.PROP_USEMEMCACHE, w);
 		w.write(HtmlUtils.link("/admin/gaeconf/memcache/clear", "Clear MemCache for all instances"));
+		writeToggle(XydraRuntime.PROP_MEMCACHESTATS, w);
+		writeToggle(XydraRuntime.PROP_PERSISTENCESTATS, w);
 		
-		w.write("<p>GaeAssert enabled? " + GaeAssert.isEnabled() + "</p>");
-		w.write(HtmlUtils.link("/admin/gaeconf/assert/set?instance=" + GaePersistence.INSTANCE_ID
-		        + "&assert=false", "set assert=´false(default) on this instance")
-		        + "<br/>");
-		w.write(HtmlUtils.link("/admin/gaeconf/assert/set?instance=" + GaePersistence.INSTANCE_ID
-		        + "&assert=true", "set assert=true on this instance")
-		        + "<br/>");
-		
-		w.write(GaeUtils.getConf());
+		w.write("<h3>GaeAssert</h3>");
+		w.write("<p>Enabled? " + GaeAssert.isEnabled() + "</p>");
+		writeToggle(GaeConfiguration.PROP_ASSERT, w);
 		
 		w.write("<h3>Memcache Stats</h3> " + XydraRuntime.getMemcache().stats() + " Size: "
 		        + XydraRuntime.getMemcache().size() + "</p>");
 		
-		// FIXME ...
-		// --------------------------------------- stats
-		if(StatsGatheringPersistenceWrapper.isEnabled()) {
-			w.write(HtmlUtils.link("/admin/statsPersistence/stop", "Stop")
-			        + " stats-gathering persistence");
-		} else {
-			w.write(HtmlUtils.link("/admin/statsPersistence/start", "Stop")
-			        + " stats-gathering persistence");
-		}
-		
+		w.write("<h3>XydraRuntime (" + XydraRuntime.getConfigMap().size() + " entries)</h3>");
+		w.write(HtmlUtils.toDefinitionList(XydraRuntime.getConfigMap()));
 		w.flush();
 	}
 	
-	/**
-	 * @param instanceId
-	 * @return true if the given instanceId matches the ID of this AppEngine
-	 *         server instance.
-	 */
-	private static boolean onRightInstance(String instanceId) {
-		return GaePersistence.INSTANCE_ID.equals(instanceId);
+	private static void writeToggle(String property, Writer w) throws IOException {
+		String current = XydraRuntime.getConfigMap().get(property);
+		
+		w.write(property
+		        + " is '"
+		        + (current == null ? "false" : current)
+		        + "'. Set to "
+		        
+		        + HtmlUtils
+		                .form(METHOD.GET, "/admin/gaeconf/set")
+		                .withHiddenInputText(property, "true")
+		                .withHiddenInputText(GaeConfiguration.PROP_VALID_UTC,
+		                        "" + (System.currentTimeMillis() + 60 * 1000))
+		                .withInputSubmit("true")
+		        
+		        + HtmlUtils
+		                .form(METHOD.GET, "/admin/gaeconf/set")
+		                .withHiddenInputText(property, "false")
+		                .withHiddenInputText(GaeConfiguration.PROP_VALID_UTC,
+		                        "" + (System.currentTimeMillis() + 60 * 1000))
+		                .withInputSubmit("false")
+
+		        + "<br/>");
 	}
 	
 	/**
-	 * Set some parameters just for a specific instance
+	 * @param requestedInstanceId
+	 * @return true if the given instanceId matches the ID of this AppEngine
+	 *         server instance.
+	 */
+	private static boolean onRightInstance(String requestedInstanceId) {
+		return GaePersistence.INSTANCE_ID.equals(requestedInstanceId);
+	}
+	
+	/**
+	 * Set some parameters just for a specific instance.
+	 * 
+	 * Currently, there are no instance specific parameters.
 	 * 
 	 * @throws IOException ...
 	 */
@@ -146,6 +151,7 @@ public class GaeConfigurationResource {
 		Writer w = HtmlUtils.startHtmlPage(res, "Setting GAE Configuration");
 		Map<String,String> params = ServletUtils.getRequestparametersAsMap(req);
 		
+		// ------------------ clearmemcache
 		if(params.containsKey(PROP_CLEARMEMCACHE_NOW)) {
 			w.write("Clearing memcache (effective for all instances)<br />");
 			w.flush();
@@ -160,7 +166,7 @@ public class GaeConfigurationResource {
 		w.write("Loading current conf ...<br />");
 		w.flush();
 		GaeConfiguration conf = getCurrentConfiguration();
-		w.write("Stll valid for " + conf.getTimeToLive() + " ms (until " + conf.getValidUntilUTC()
+		w.write("Still valid for " + conf.getTimeToLive() + " ms (until " + conf.getValidUntilUTC()
 		        + ") -- and there is nothing (yet) you can do to speed this up<br />");
 		w.write("Updating conf ...<br />");
 		w.flush();
@@ -192,36 +198,11 @@ public class GaeConfigurationResource {
 		w.write("Persisting conf... <br />");
 		w.flush();
 		persistsConfiguration(conf);
-		w.write("Processing conf (now all the stuff you said becomes effective - ON THIS INSTANCE only)<br />");
+		w.write("<h3>Current configuration in XydraRuntime:</h3>");
+		w.write(HtmlUtils.toDefinitionList(XydraRuntime.getConfigMap()));
 		w.flush();
-		processConfiguration(conf);
 		w.write("Done with config update. Stats: " + c.stop("request").getStats());
 		HtmlUtils.endHtmlPage(w);
-	}
-	
-	private static void processConfiguration(GaeConfiguration conf) {
-		// assertions
-		boolean gaeAssert = conf.getAsBoolean(PROP_ASSERT);
-		GaeAssert.setEnabled(gaeAssert);
-		// memcache
-		boolean usememcache = Boolean.parseBoolean(PROP_USEMEMCACHE);
-		GaeUtils.setUseMemCache(usememcache);
-		// memcache stats
-		boolean memcachestats = Boolean.parseBoolean(XydraRuntime.PROP_MEMCACHESTATS);
-		setMemcacheStats(memcachestats);
-		// memcache stats
-		boolean persistencestats = Boolean.parseBoolean(XydraRuntime.PROP_PERSISTENCESTATS);
-		setPersistenceStats(persistencestats);
-	}
-	
-	private static void setMemcacheStats(boolean memcachestats) {
-		XydraRuntime.setParameter(XydraRuntime.PROP_MEMCACHESTATS, "" + memcachestats);
-		XydraRuntime.forceReInitialisation();
-	}
-	
-	private static void setPersistenceStats(boolean persistencestats) {
-		XydraRuntime.setParameter(XydraRuntime.PROP_PERSISTENCESTATS, "" + persistencestats);
-		XydraRuntime.forceReInitialisation();
 	}
 	
 	private static void persistsConfiguration(GaeConfiguration conf) {
