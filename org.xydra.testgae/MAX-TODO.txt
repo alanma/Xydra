@@ -1,17 +1,9 @@
 === Xmas App
-DONE
-clean up redundant code
-create a simple sample test
-deprecated stopwatch, switch to clock
-invite to google doc
-MAIL jens+björn to shorten comm. path
-
 TODO
 docu classes
 docu url structure
 consider adding a raw xydra server test/restlesss = exposde a xydra rest endpoint
 4 days
-NO fridge compare?
 fix all URLS genereated in xmas code
 ONLINE: reprio issues
 
