@@ -31,6 +31,11 @@ public interface IMapIndex<K, E> extends IIndex {
 	 */
 	Iterator<E> iterator();
 	
+	/**
+	 * @param key Depending on implementation, a null-key might be permitted and
+	 *            usually maps to null.
+	 * @return the value stored for the given key or null
+	 */
 	E lookup(K key);
 	
 	boolean containsKey(Constraint<K> c1);
