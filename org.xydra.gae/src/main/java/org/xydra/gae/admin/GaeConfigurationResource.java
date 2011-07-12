@@ -78,7 +78,8 @@ public class GaeConfigurationResource {
 		
 		w.write("<h3>XydraRuntime</h3>");
 		writeToggle(GaeConfiguration.PROP_USEMEMCACHE, w);
-		w.write(HtmlUtils.link("/admin/gaeconf/memcache/clear", "Clear MemCache for all instances"));
+		w.write(HtmlUtils.link("/admin/gaeconf/set?" + PROP_CLEARMEMCACHE_NOW,
+		        "Clear MemCache for all instances") + "<br />");
 		writeToggle(XydraRuntime.PROP_MEMCACHESTATS, w);
 		writeToggle(XydraRuntime.PROP_PERSISTENCESTATS, w);
 		
@@ -174,10 +175,10 @@ public class GaeConfigurationResource {
 			w.write("Clearing memcache (effective for all instances)<br />");
 			w.flush();
 			XydraRuntime.getMemcache().clear();
-			w.write("Cleared memcache.<br />");
+			w.write("<b>Cleared memcache</b>.<br />");
 			w.flush();
 		} else {
-			w.write("No memcache clear. Request one with ../?" + PROP_CLEARMEMCACHE_NOW + "<br />");
+			w.write("No memcache clear.");
 			
 		}
 		
