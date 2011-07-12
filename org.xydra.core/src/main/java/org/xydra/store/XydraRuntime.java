@@ -66,6 +66,8 @@ public class XydraRuntime {
 	/** Runtime configuration that can be set from outside */
 	private static Map<String,String> configMap = new HashMap<String,String>();
 	
+	private static long lastTimeInitialisedAt = -1;
+	
 	/**
 	 * @param booleanString can be null
 	 * @return true if string is not null and equals true (case ignored).
@@ -121,6 +123,7 @@ public class XydraRuntime {
 		if(platformInitialised) {
 			return;
 		}
+		lastTimeInitialisedAt = System.currentTimeMillis();
 		// try to load dynamically
 		try {
 			Class<?> platformClass = Class.forName(PLATFORM_CLASS);
@@ -188,8 +191,8 @@ public class XydraRuntime {
 	}
 	
 	/**
-	 * @return the current configuration that can also be changed. Calles should
-	 *         issue a {@link #forceReInitialisation()} if this
+	 * @return the current configuration that can also be changed. Callers
+	 *         should issue a {@link #forceReInitialisation()} if this
 	 *         {@link XydraRuntime} instance has already handed out
 	 *         {@link IMemCache} or {@link XydraPersistence} instances.
 	 */
@@ -203,10 +206,15 @@ public class XydraRuntime {
 	 * information.
 	 */
 	public static synchronized void forceReInitialisation() {
-		// keep configMap as it is
+		lastTimeInitialisedAt = System.currentTimeMillis();
+		// keep configMap as it is, so that changing it has an effect
 		memcacheInstance = null;
 		persistenceInstanceCache.clear();
 		platformInitialised = false;
+	}
+	
+	public static long getLastTimeInitialisedAt() {
+		return lastTimeInitialisedAt;
 	}
 	
 }
