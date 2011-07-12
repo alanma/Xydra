@@ -12,7 +12,8 @@ import org.xydra.base.value.XValue;
 
 
 /**
- * Utility class for creating and managing indexes.
+ * Utility class for creating and managing indexes, like an index from email
+ * addresses to users. Not to be confused with the basic xydra.index package.
  * 
  * @author xamde
  */

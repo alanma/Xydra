@@ -19,7 +19,8 @@ import org.xydra.store.impl.delegate.XydraPersistence;
 
 
 /**
- * Delegates all reads and writes to a {@link XydraPersistence}
+ * Delegates all reads and writes to a {@link XydraPersistence}. No caching is
+ * used.
  * 
  * Additionally you can retrieve all events that happened since the revision of
  * this entity since the last call of {@link #ignoreAllEventsUntilNow()}.

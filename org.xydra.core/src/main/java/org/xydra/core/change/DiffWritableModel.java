@@ -11,7 +11,6 @@ import java.util.Set;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
-import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XTransaction;
@@ -20,8 +19,8 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
+import org.xydra.index.IndexUtils;
 import org.xydra.index.impl.MapMapIndex;
-import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.KeyKeyEntryTuple;
 import org.xydra.index.query.Wildcard;
@@ -32,6 +31,8 @@ import org.xydra.log.LoggerFactory;
 /**
  * A helper class to minimize the number and size of persistence accesses.
  * 
+ * Does not support revision numbers.
+ * 
  * An implementation of {@link XWritableModel} that works as a diff on top of a
  * base {@link XWritableModel}. Via {@link #toCommandList()} a minimal list of
  * commands that changes the base model into the current state can be created.
@@ -39,33 +40,41 @@ import org.xydra.log.LoggerFactory;
  * 
  * @author xamde
  */
-public class DiffWritableModel implements XWritableModel {
+public class DiffWritableModel extends AbstractDelegatingWritableModel implements XWritableModel {
 	
 	private static final Logger log = LoggerFactory.getLogger(DiffWritableModel.class);
 	
 	private static final XID NONE = XX.toId("_NONE");
+	
 	private static final XValue NOVALUE = XV.toValue("_NONE");
 	
-	/* object, field, value */
+	/*
+	 * Each index has the structure (object, field, value) with the notion to
+	 * represent content in this model within a given repository.
+	 * 
+	 * An object without fields is represented as (objectId, NONE, NOVALUE).
+	 * 
+	 * A field without values is (objectId, fieldId, NOVALUE).
+	 */
 	MapMapIndex<XID,XID,XValue> added, removed;
 	
 	private final XWritableModel base;
 	
 	public DiffWritableModel(final XWritableModel base) {
 		assert base != null;
-		this.base = base;
+		this.base = new CachingWritableModel(base);
 		this.added = new MapMapIndex<XID,XID,XValue>();
 		this.removed = new MapMapIndex<XID,XID,XValue>();
 	}
 	
-	@Override
-	public XAddress getAddress() {
-		return this.base.getAddress();
-	}
-	
-	@Override
-	public XID getID() {
-		return this.base.getID();
+	private XValue getFieldValueFromBase(XID objectId, XID fieldId) {
+		XWritableObject o = this.base.getObject(objectId);
+		if(o == null)
+			return null;
+		XWritableField f = o.getField(fieldId);
+		if(f == null)
+			return null;
+		return f.getValue();
 	}
 	
 	@Override
@@ -76,79 +85,60 @@ public class DiffWritableModel implements XWritableModel {
 	}
 	
 	@Override
-	public XWritableObject getObject(XID objectId) {
-		if(hasObject(objectId)) {
-			return new WrappedObject(objectId);
+	protected XValue field_getValue(XID objectId, XID fieldId) {
+		assert hasObject(objectId) : "Object '" + resolveObject(objectId)
+		        + "' not found when looking for field '" + fieldId + "'";
+		assert getObject(objectId).hasField(fieldId);
+		
+		XValue value = this.added.lookup(objectId, fieldId);
+		if(value != null) {
+			return value;
 		} else {
-			return null;
+			value = this.removed.lookup(objectId, fieldId);
+			if(value != null) {
+				return null;
+			} else {
+				return this.base.getObject(objectId).getField(fieldId).getValue();
+			}
 		}
 	}
 	
 	@Override
-	public boolean removeObject(XID objectId) {
-		if(this.added.containsKey(new EqualsConstraint<XID>(objectId), new Wildcard<XID>())) {
-			// fine
-			deIndex(this.added, new EqualsConstraint<XID>(objectId), new Wildcard<XID>());
-			return true;
-		} else if(this.removed
-		        .containsKey(new EqualsConstraint<XID>(objectId), new Wildcard<XID>())) {
-			assert !this.added
-			        .containsKey(new EqualsConstraint<XID>(objectId), new Wildcard<XID>());
+	protected boolean field_setValue(XID objectId, XID fieldId, XValue value) {
+		assert objectId != null;
+		assert fieldId != null;
+		assert hasObject(objectId) : "Expected " + objectId;
+		assert this.removed.lookup(objectId, fieldId) == null;
+		assert getObject(objectId).hasField(fieldId);
+		
+		XValue v = field_getValue(objectId, fieldId);
+		if((v == null && value == null) || (v != null && v.equals(value))) {
 			return false;
-		} else {
-			// base
-			return this.base.removeObject(objectId);
 		}
+		
+		this.added.index(objectId, fieldId, value);
+		this.removed.deIndex(objectId, fieldId);
+		return true;
+	}
+	
+	@Override
+	public XAddress getAddress() {
+		return this.base.getAddress();
 	}
 	
 	/**
-	 * TODO Move to Xydra Index Utils
+	 * Allows to end a transaction and go back to using the base object.
 	 * 
-	 * @param mapMapIndex ..
-	 * @param c1 ..
-	 * @param c2 ..
+	 * @return the base object that has been used to created this wrapped
+	 *         {@link DiffWritableObject}.
 	 */
-	public static void deIndex(MapMapIndex<XID,XID,XValue> mapMapIndex, Constraint<XID> c1,
-	        Constraint<XID> c2) {
-		Iterator<KeyKeyEntryTuple<XID,XID,XValue>> it = mapMapIndex.tupleIterator(c1, c2);
-		Set<KeyKeyEntryTuple<XID,XID,XValue>> toDelete = new HashSet<KeyKeyEntryTuple<XID,XID,XValue>>();
-		while(it.hasNext()) {
-			KeyKeyEntryTuple<XID,XID,XValue> entry = it.next();
-			toDelete.add(entry);
-		}
-		for(KeyKeyEntryTuple<XID,XID,XValue> entry : toDelete) {
-			mapMapIndex.deIndex(entry.getKey1(), entry.getKey2());
-		}
-	}
-	
-	protected static <E> Set<E> toSet(Iterator<E> it) {
-		Set<E> set = new HashSet<E>();
-		while(it.hasNext()) {
-			set.add(it.next());
-		}
-		return set;
-	}
-	
-	protected Set<XID> ids() {
-		Set<XID> set = toSet(this.base.iterator());
-		set.removeAll(toSet(this.removed.key1Iterator()));
-		set.addAll(toSet(this.added.key1Iterator()));
-		return set;
+	public XWritableModel getBase() {
+		return this.base;
 	}
 	
 	@Override
-	public boolean isEmpty() {
-		return this.ids().isEmpty();
-	}
-	
-	@Override
-	public Iterator<XID> iterator() {
-		return this.ids().iterator();
-	}
-	
-	@Override
-	public long getRevisionNumber() {
-		throw new UnsupportedOperationException("not implementable for DiffWritableModel");
+	public XID getID() {
+		return this.base.getID();
 	}
 	
 	@Override
@@ -167,67 +157,33 @@ public class DiffWritableModel implements XWritableModel {
 		}
 	}
 	
-	private class WrappedObject implements XWritableObject {
-		
-		private XID objectId;
-		
-		public WrappedObject(XID baseObjectId) {
-			this.objectId = baseObjectId;
-		}
-		
-		@Override
-		public long getRevisionNumber() {
-			throw new UnsupportedOperationException("not implementable for DiffWritableModel");
-		}
-		
-		@Override
-		public boolean hasField(XID fieldId) {
-			return DiffWritableModel.this.objectHasField(this.objectId, fieldId);
-		}
-		
-		@Override
-		public boolean isEmpty() {
-			return DiffWritableModel.this.objectIsEmpty(this.objectId);
-		}
-		
-		@Override
-		public Iterator<XID> iterator() {
-			return DiffWritableModel.this.objectIterator(this.objectId);
-		}
-		
-		@Override
-		public XAddress getAddress() {
-			return XX.resolveObject(DiffWritableModel.this.getAddress(), this.objectId);
-		}
-		
-		@Override
-		public XID getID() {
-			return this.objectId;
-		}
-		
-		@Override
-		public XWritableField createField(XID fieldId) {
-			return DiffWritableModel.this.objectCreateField(this.objectId, fieldId);
-		}
-		
-		@Override
-		public XWritableField getField(XID fieldId) {
-			return DiffWritableModel.this.objectGetField(this.objectId, fieldId);
-		}
-		
-		@Override
-		public boolean removeField(XID fieldId) {
-			return DiffWritableModel.this.objectRemoveField(this.objectId, fieldId);
-		}
-		
-		@Override
-		public XType getType() {
-			return XType.XOBJECT;
-		}
-		
+	protected Set<XID> idsAsSet() {
+		return IndexUtils.diff(this.base.iterator(), this.added.key1Iterator(),
+		        this.removed.key1Iterator());
 	}
 	
-	protected boolean objectHasField(XID objectId, XID fieldId) {
+	public boolean isEmpty() {
+		return this.idsAsSet().isEmpty();
+	}
+	
+	public Iterator<XID> iterator() {
+		return this.idsAsSet().iterator();
+	}
+	
+	protected XWritableField object_createField(XID objectId, XID fieldId) {
+		assert objectId != null;
+		assert fieldId != null;
+		assert this.hasObject(objectId);
+		if(!object_hasField(objectId, fieldId)) {
+			this.added.index(objectId, fieldId, NOVALUE);
+			this.removed.deIndex(objectId, fieldId);
+		}
+		return new WrappedField(objectId, fieldId);
+	}
+	
+	protected boolean object_hasField(XID objectId, XID fieldId) {
+		assert objectId != null;
+		assert fieldId != null;
 		if(this.added.tupleIterator(new EqualsConstraint<XID>(objectId),
 		        new EqualsConstraint<XID>(fieldId)).hasNext()) {
 			return true;
@@ -239,146 +195,64 @@ public class DiffWritableModel implements XWritableModel {
 		}
 	}
 	
-	protected boolean objectRemoveField(XID objectId, XID fieldId) {
-		boolean b = objectHasField(objectId, fieldId);
+	protected boolean object_isEmpty(XID objectId) {
+		assert objectId != null;
+		return object_idsAsSet(objectId).isEmpty();
+	}
+	
+	protected Iterator<XID> object_iterator(XID objectId) {
+		assert objectId != null;
+		return object_idsAsSet(objectId).iterator();
+	}
+	
+	protected boolean object_removeField(XID objectId, XID fieldId) {
+		assert objectId != null;
+		assert fieldId != null;
+		boolean b = object_hasField(objectId, fieldId);
 		this.added.deIndex(objectId, fieldId);
 		this.removed.index(objectId, fieldId, NOVALUE);
 		return b;
 	}
 	
-	protected XWritableField objectGetField(XID objectId, XID fieldId) {
-		if(objectHasField(objectId, fieldId)) {
-			return new WrappedField(objectId, fieldId);
-		} else {
-			return null;
-		}
-	}
-	
-	protected XWritableField objectCreateField(XID objectId, XID fieldId) {
-		assert this.hasObject(objectId);
-		if(!objectHasField(objectId, fieldId)) {
-			this.added.index(objectId, fieldId, NOVALUE);
-			this.removed.deIndex(objectId, fieldId);
-		}
-		return new WrappedField(objectId, fieldId);
-	}
-	
-	protected Set<XID> objectIds(XID objectId) {
+	protected Set<XID> object_idsAsSet(XID objectId) {
+		assert objectId != null;
+		// add all from base
 		Set<XID> set = new HashSet<XID>();
-		
 		if(this.base.hasObject(objectId)) {
-			set.addAll(toSet(this.base.getObject(objectId).iterator()));
+			set.addAll(IndexUtils.toSet(this.base.getObject(objectId).iterator()));
 		}
-		// adjust
-		
+		// remove all from removed
 		Iterator<KeyKeyEntryTuple<XID,XID,XValue>> it = this.removed.tupleIterator(
 		        new EqualsConstraint<XID>(objectId), new Wildcard<XID>());
 		while(it.hasNext()) {
 			KeyKeyEntryTuple<XID,XID,XValue> entry = it.next();
 			set.remove(entry.getKey2());
 		}
+		// add all from added
 		it = this.added.tupleIterator(new EqualsConstraint<XID>(objectId), new Wildcard<XID>());
 		while(it.hasNext()) {
 			KeyKeyEntryTuple<XID,XID,XValue> entry = it.next();
 			set.add(entry.getKey2());
 		}
-		
+		// done
 		return set;
 	}
 	
-	protected Iterator<XID> objectIterator(XID objectId) {
-		return objectIds(objectId).iterator();
-	}
-	
-	protected boolean objectIsEmpty(XID objectId) {
-		return objectIds(objectId).isEmpty();
-	}
-	
-	private class WrappedField implements XWritableField {
-		
-		private XID objectId;
-		private XID fieldId;
-		
-		public WrappedField(XID objectId, XID fieldId) {
-			this.objectId = objectId;
-			this.fieldId = fieldId;
-		}
-		
-		@Override
-		public long getRevisionNumber() {
-			throw new UnsupportedOperationException("not implementable for DiffWritableModel");
-		}
-		
-		@Override
-		public XValue getValue() {
-			return DiffWritableModel.this.fieldGetValue(this.objectId, this.fieldId);
-		}
-		
-		@Override
-		public boolean isEmpty() {
-			return DiffWritableModel.this.fieldIsEmpty(this.objectId, this.fieldId);
-		}
-		
-		@Override
-		public XAddress getAddress() {
-			return XX.toAddress(DiffWritableModel.this.base.getAddress().getRepository(),
-			        DiffWritableModel.this.base.getAddress().getModel(), this.objectId,
-			        this.fieldId);
-		}
-		
-		@Override
-		public XID getID() {
-			return this.fieldId;
-		}
-		
-		@Override
-		public boolean setValue(XValue value) {
-			return DiffWritableModel.this.fieldSetValue(this.objectId, this.fieldId, value);
-		}
-		
-		@Override
-		public XType getType() {
-			return XType.XFIELD;
-		}
-		
-	}
-	
-	protected boolean fieldIsEmpty(XID objectId, XID fieldId) {
-		assert hasObject(objectId);
-		assert getObject(objectId).hasField(fieldId);
-		
-		return getObject(objectId).getField(fieldId).isEmpty();
-	}
-	
-	protected boolean fieldSetValue(XID objectId, XID fieldId, XValue value) {
-		assert hasObject(objectId);
-		assert getObject(objectId).hasField(fieldId);
-		
-		XValue v = fieldGetValue(objectId, fieldId);
-		if(v.equals(value)) {
+	public boolean removeObject(XID objectId) {
+		assert objectId != null;
+		if(this.added.containsKey(new EqualsConstraint<XID>(objectId), new Wildcard<XID>())) {
+			// fine
+			IndexUtils
+			        .deIndex(this.added, new EqualsConstraint<XID>(objectId), new Wildcard<XID>());
+			return true;
+		} else if(this.removed
+		        .containsKey(new EqualsConstraint<XID>(objectId), new Wildcard<XID>())) {
+			assert !this.added
+			        .containsKey(new EqualsConstraint<XID>(objectId), new Wildcard<XID>());
 			return false;
-		}
-		
-		this.added.index(objectId, fieldId, value);
-		this.removed.deIndex(objectId, fieldId);
-		return true;
-	}
-	
-	protected XValue fieldGetValue(XID objectId, XID fieldId) {
-		assert hasObject(objectId) : "model." + objectId + " not found when looking for field "
-		        + fieldId;
-		assert getObject(objectId).hasField(fieldId);
-		
-		XValue value = this.added.lookup(objectId, fieldId);
-		if(value != null) {
-			return value;
 		} else {
-			value = this.removed.lookup(objectId, fieldId);
-			if(value != null) {
-				return null;
-			} else {
-				return this.base.getObject(objectId).getField(fieldId).getValue();
-			}
+			// base
+			return this.base.removeObject(objectId);
 		}
 	}
 	
@@ -389,18 +263,15 @@ public class DiffWritableModel implements XWritableModel {
 		Iterator<KeyKeyEntryTuple<XID,XID,XValue>> it = this.removed.tupleIterator(
 		        new Wildcard<XID>(), new Wildcard<XID>());
 		while(it.hasNext()) {
-			KeyKeyEntryTuple<XID,XID,XValue> e = it.next();
-			if(e.getKey2().equals(NONE)) {
+			KeyKeyEntryTuple<XID,XID,XValue> objectFieldValue = it.next();
+			if(objectFieldValue.getKey2().equals(NONE)) {
 				// remove object
 				list.add(X.getCommandFactory().createForcedRemoveObjectCommand(
-				        resolveObject(e.getKey1())));
-			} else if(e.getEntry().equals(NOVALUE)) {
-				// remove field
-				list.add(X.getCommandFactory().createForcedRemoveFieldCommand(
-				        resolveField(e.getKey1(), e.getKey2())));
+				        resolveObject(objectFieldValue.getKey1())));
 			} else {
-				// remove value
-				// TODO ???
+				// remove empty field or field with value
+				list.add(X.getCommandFactory().createForcedRemoveFieldCommand(
+				        resolveField(objectFieldValue.getKey1(), objectFieldValue.getKey2())));
 			}
 		}
 		
@@ -418,7 +289,7 @@ public class DiffWritableModel implements XWritableModel {
 				        resolveObject(e.getKey1()), e.getKey2()));
 			} else {
 				// value
-				XValue currentValue = baseGetValue(e.getKey1(), e.getKey2());
+				XValue currentValue = getFieldValueFromBase(e.getKey1(), e.getKey2());
 				if(currentValue == null) {
 					// maybe still add field
 					if(!this.base.hasObject(e.getKey1())
@@ -437,8 +308,12 @@ public class DiffWritableModel implements XWritableModel {
 			}
 		}
 		
+		/*
+		 * Make sure model commands come before object commands; object commands
+		 * come before field commands. This avoid e.g. deleting a field before
+		 * deleting its object parent.
+		 */
 		Collections.sort(list, new Comparator<XAtomicCommand>() {
-			
 			@Override
 			public int compare(XAtomicCommand a, XAtomicCommand b) {
 				return b.getChangedEntity().getAddressedType()
@@ -447,26 +322,6 @@ public class DiffWritableModel implements XWritableModel {
 		});
 		
 		return list;
-	}
-	
-	private XAddress resolveObject(XID objectId) {
-		return XX.toAddress(this.base.getAddress().getRepository(), this.base.getID(), objectId,
-		        null);
-	}
-	
-	private XAddress resolveField(XID objectId, XID fieldId) {
-		return XX.toAddress(this.base.getAddress().getRepository(), this.base.getID(), objectId,
-		        fieldId);
-	}
-	
-	private XValue baseGetValue(XID objectId, XID fieldId) {
-		XWritableObject o = this.base.getObject(objectId);
-		if(o == null)
-			return null;
-		XWritableField f = o.getField(fieldId);
-		if(f == null)
-			return null;
-		return f.getValue();
 	}
 	
 	/**
@@ -483,21 +338,6 @@ public class DiffWritableModel implements XWritableModel {
 			return null;
 		}
 		return builder.build();
-	}
-	
-	@Override
-	public XType getType() {
-		return XType.XMODEL;
-	}
-	
-	/**
-	 * Allows to end a transaction and go back to using the base object.
-	 * 
-	 * @return the base object that has been used to created this wrapped
-	 *         {@link DiffWritableObject}.
-	 */
-	public XWritableModel getBase() {
-		return this.base;
 	}
 	
 }

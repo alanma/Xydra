@@ -3,6 +3,8 @@ package org.xydra.store;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.xydra.annotations.RequiresAppEngine;
+import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XID;
 import org.xydra.log.Logger;
@@ -32,6 +34,8 @@ import org.xydra.store.impl.memory.MemoryRuntime;
  * @author xamde
  */
 @RunsInGWT(false)
+@RequiresAppEngine(false)
+@RunsInAppEngine(true)
 public class XydraRuntime {
 	
 	private static final Logger log = LoggerFactory.getLogger(XydraRuntime.class);
@@ -42,8 +46,15 @@ public class XydraRuntime {
 	
 	public static final String PROP_PERSISTENCESTATS = "persistenceStats";
 	
-	public static final String PROP_USEMEMCACHE = "usememcache";
+	/**
+	 * To enable or disable memcache completely in the {@link XydraPersistence}
+	 * instances.
+	 */
+	public static final String PROP_USEMEMCACHE = "useMemcacheInPersistenceImpl";
 	
+	/**
+	 * For each repository Id, one {@link XydraPersistence} is cached.
+	 */
 	private static Map<XID,XydraPersistence> persistenceInstanceCache = new HashMap<XID,XydraPersistence>();
 	
 	private static boolean platformInitialised = false;
@@ -56,29 +67,54 @@ public class XydraRuntime {
 	private static Map<String,String> configMap = new HashMap<String,String>();
 	
 	/**
-	 * @return a re-used instance of a Cache
+	 * @param booleanString can be null
+	 * @return true if string is not null and equals true (case ignored).
+	 */
+	public static boolean isTrue(String booleanString) {
+		return booleanString != null && booleanString.equalsIgnoreCase("true");
+	}
+	
+	/**
+	 * @return a (potentially cached) instance of a IMemCache
 	 */
 	public static synchronized IMemCache getMemcache() {
 		initialiseRuntimeOnce();
 		if(memcacheInstance == null) {
 			memcacheInstance = platformRuntime.getMemCache();
-			// wrap if requested
+			
+			// if configured this way: wrap in StatsGatheringMemCacheWrapper
 			String memcacheStatsStr = configMap.get(PROP_MEMCACHESTATS);
-			boolean memcacheStats = memcacheStatsStr != null
-			        && memcacheStatsStr.equalsIgnoreCase("true");
-			if(memcacheStats) {
+			if(isTrue(memcacheStatsStr)) {
 				memcacheInstance = new StatsGatheringMemCacheWrapper(memcacheInstance);
 			}
 		}
 		return memcacheInstance;
 	}
 	
+	/**
+	 * Allows to explicitly set a {@link XydraPlatformRuntime} to be used. This
+	 * is an alternative configuration approach compared to the RuntimeBinding.
+	 * 
+	 * @param platformRuntime_ ..
+	 */
 	public static synchronized void setPlatformRuntime(XydraPlatformRuntime platformRuntime_) {
 		if(platformRuntime_ == null) {
 			throw new IllegalArgumentException("XydraPlatformRuntime may not be null");
 		}
 		platformRuntime = platformRuntime_;
 		platformInitialised = true;
+	}
+	
+	/**
+	 * Directly manipulate the internal persistence cache. Use with care. This
+	 * instance is replaced with another one from the platform runtime after the
+	 * next call of {@link #forceReInitialisation()}.
+	 * 
+	 * @param repositoryId ..
+	 * @param persistence ..
+	 */
+	public static synchronized void setPersistence(XID repositoryId, XydraPersistence persistence) {
+		persistenceInstanceCache.put(repositoryId, persistence);
 	}
 	
 	private static synchronized void initialiseRuntimeOnce() {
@@ -115,22 +151,21 @@ public class XydraRuntime {
 			return;
 		}
 		// still no platform, use defaults
-		log.info("Using default MemoryRuntime");
+		log.warn("No platform configured. Using default MemoryRuntime");
 		platformRuntime = new MemoryRuntime();
 		platformInitialised = true;
 	}
 	
-	public static void setParameter(String key, String value) {
-		configMap.put(key, value);
-	}
-	
 	/**
-	 * @return a re-used instance of a {@link XydraPersistence}
+	 * @param repositoryId ..
+	 * @return a (potentially cached) instance of a {@link XydraPersistence}
+	 *         with the given repositoryId
 	 */
 	public static synchronized XydraPersistence getPersistence(XID repositoryId) {
 		initialiseRuntimeOnce();
 		XydraPersistence persistence = persistenceInstanceCache.get(repositoryId);
 		if(persistence == null) {
+			/** Get basic instance */
 			persistence = platformRuntime.getPersistence(repositoryId);
 			/** Check if we are gathering stats */
 			
@@ -152,6 +187,21 @@ public class XydraRuntime {
 		return persistence;
 	}
 	
+	/**
+	 * @return the current configuration that can also be changed. Calles should
+	 *         issue a {@link #forceReInitialisation()} if this
+	 *         {@link XydraRuntime} instance has already handed out
+	 *         {@link IMemCache} or {@link XydraPersistence} instances.
+	 */
+	public static Map<String,String> getConfigMap() {
+		return configMap;
+	}
+	
+	/**
+	 * Clears all cached instances, so that the next call to each of them will
+	 * be based on the current configuration. Looses about all caching
+	 * information.
+	 */
 	public static synchronized void forceReInitialisation() {
 		// keep configMap as it is
 		memcacheInstance = null;

@@ -14,6 +14,12 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
+/**
+ * An implementation of {@link XWritableRepository} that uses no internal
+ * caching.
+ * 
+ * @author xamde
+ */
 public class WritableRepositoryOnPersistence extends AbstractWritableOnPersistence implements
         XWritableRepository {
 	
@@ -24,6 +30,7 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 		super(persistence, executingActorId);
 	}
 	
+	/** First try to get model, if not found: create it. */
 	public XWritableModel createModel(XID modelId) {
 		XWritableModel model = getModel(modelId);
 		if(model == null) {

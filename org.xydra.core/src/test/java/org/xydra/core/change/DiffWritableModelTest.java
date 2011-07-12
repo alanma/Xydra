@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.change.XAtomicCommand;
+import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.value.XV;
@@ -36,7 +37,8 @@ public class DiffWritableModelTest {
 	public void test1() {
 		XWritableObject adamObject = this.diffModel.createObject(adam);
 		assertTrue(this.diffModel.hasObject(adam));
-		adamObject.createField(fon).setValue(XV.toValue("123"));
+		XWritableField adamFon = adamObject.createField(fon);
+		adamFon.setValue(XV.toValue("123"));
 		adamObject.createField(mail).setValue(XV.toValue("a@ex.com"));
 		XWritableObject bertObject = this.diffModel.createObject(bert);
 		bertObject.createField(fon).setValue(XV.toValue("456"));
