@@ -91,7 +91,7 @@ public class HtmlUtils {
 		
 		@Override
 		public String toString() {
-			return this.name + ": <input" +
+			return "<input" +
 
 			" type=\"hidden\"" +
 
@@ -101,7 +101,6 @@ public class HtmlUtils {
 
 			"/>";
 		}
-		
 	}
 	
 	public static class TextInput extends KeyValueInput {
