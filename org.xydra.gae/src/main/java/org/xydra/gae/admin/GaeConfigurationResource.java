@@ -58,6 +58,11 @@ public class GaeConfigurationResource {
 		GaeConfigurationResource.getCurrentConfiguration().applyIfNecessary();
 		Writer w = HtmlUtils.startHtmlPage(res, "GAE cache conf on instance "
 		        + GaePersistence.INSTANCE_ID);
+		writeIndex(w);
+		HtmlUtils.endHtmlPage(w);
+	}
+	
+	private static void writeIndex(Writer w) throws IOException {
 		addCommonStyle(w);
 		w.write("<h2>Instance " + GaePersistence.INSTANCE_ID + " </h2>");
 		
@@ -92,8 +97,10 @@ public class GaeConfigurationResource {
 	private static void writeToggle(String property, Writer w) throws IOException {
 		String current = XydraRuntime.getConfigMap().get(property);
 		
-		w.write(property
-		        + " is '"
+		w.write("Property '"
+		        + property
+		        + "'"
+		        + " = '"
 		        + (current == null ? "false" : current)
 		        + "'. Set to "
 		        
@@ -149,11 +156,14 @@ public class GaeConfigurationResource {
 	 * Take all parameters found {@link HttpServletRequest} and put them in the
 	 * current configuration.
 	 * 
+	 * @param req ..
+	 * @param res ..
 	 * @throws IOException ...
 	 */
 	public static void setConfiguration(HttpServletRequest req, HttpServletResponse res)
 	        throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		GaeConfigurationResource.getCurrentConfiguration().applyIfNecessary();
 		
 		Clock c = new Clock().start();
 		Writer w = HtmlUtils.startHtmlPage(res, "Setting GAE Configuration");
@@ -167,26 +177,30 @@ public class GaeConfigurationResource {
 			w.write("Cleared memcache.<br />");
 			w.flush();
 		} else {
-			w.write("No memcache clear. Request one with &" + PROP_CLEARMEMCACHE_NOW + "<br />");
+			w.write("No memcache clear. Request one with ../?" + PROP_CLEARMEMCACHE_NOW + "<br />");
 			
 		}
 		
+		// ------------- load conf
 		w.write("Loading current conf ...<br />");
 		w.flush();
 		GaeConfiguration conf = getCurrentConfiguration();
 		w.write("Still valid for " + conf.getTimeToLive() + " ms (until " + conf.getValidUntilUTC()
-		        + ") -- and there is nothing (yet) you can do to speed this up<br />");
+		        + ") -- and there is nothing (yet ;-) you can do to speed this up<br />");
 		w.write("Updating conf ...<br />");
 		w.flush();
 		String validUntilUtcStr = params.get(GaeConfiguration.PROP_VALID_UTC);
 		if(validUntilUtcStr == null) {
-			throw new IllegalArgumentException("paramter '" + GaeConfiguration.PROP_VALID_UTC
-			        + "' must be set");
+			log.warn("No paramter '" + GaeConfiguration.PROP_VALID_UTC
+			        + "' set. Using default 60 seconds.");
+			conf.setValidUntilUTC(System.currentTimeMillis() + 60 * 1000);
+		} else {
+			conf.setValidUntilUTC(Long.parseLong(validUntilUtcStr));
 		}
-		conf.setValidUntilUTC(Long.parseLong(validUntilUtcStr));
-		w.write("New config valid until " + conf.getValidUntilUTC() + " = expires in "
-		        + conf.getTimeToLive() + "+ms<br />");
+		w.write("New config valid until " + conf.getValidUntilUTC()
+		        + " (set from web request) = expires in " + conf.getTimeToLive() + " ms<br />");
 		w.flush();
+		w.write("<b>Updates</b><br />");
 		for(String key : params.keySet()) {
 			if(key.equals(GaeConfiguration.PROP_VALID_UTC)) {
 				continue;
@@ -198,8 +212,8 @@ public class GaeConfigurationResource {
 				        + "' before)<br />");
 			} else {
 				String previous = conf.map().put(key, value);
-				w.write("Setting key '" + key + "' to '" + value + "' in config (was set to '"
-				        + previous + "' before)<br />");
+				w.write("Setting property '" + key + "' = '" + value + "' (Old: '" + previous
+				        + "')<br />");
 			}
 			w.flush();
 		}
@@ -210,6 +224,7 @@ public class GaeConfigurationResource {
 		w.write(HtmlUtils.toDefinitionList(XydraRuntime.getConfigMap()));
 		w.flush();
 		w.write("Done with config update. Stats: " + c.stop("request").getStats());
+		writeIndex(w);
 		HtmlUtils.endHtmlPage(w);
 	}
 	

@@ -38,7 +38,7 @@ public class GaeConfiguration {
 	/** first 60 seconds after boot this config is valid */
 	public static final GaeConfiguration DEFAULT = GaeConfiguration.createWithLifetime(6 * 1000);
 	
-	public static final long CONFIG_APPLY_INTERVAL = 5 * 1000;
+	public static final long CONFIG_APPLY_INTERVAL = 45 * 1000;
 	
 	static {
 		DEFAULT.map().put(GaeConfiguration.PROP_ASSERT, "false");
@@ -138,7 +138,9 @@ public class GaeConfiguration {
 		}
 		conf.validUntilUTC = Long.parseLong(conf.map.get(PROP_VALID_UTC));
 		if(!conf.isStillValid()) {
-			log.warn("Freshly loaded GaeConfiguration is already out of date.");
+			log.warn("Freshly loaded GaeConfiguration is already out of date. Setting time to live to 60 seconds");
+			conf.setValidUntilUTC(System.currentTimeMillis() + 60 * 1000);
+			store(conf);
 		}
 		return conf;
 	}
