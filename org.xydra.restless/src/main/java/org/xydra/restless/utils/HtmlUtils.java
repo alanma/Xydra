@@ -72,7 +72,39 @@ public class HtmlUtils {
 		
 	}
 	
-	public static class TextInput extends Input {
+	static class KeyValueInput extends Input {
+		
+		protected String name;
+		protected String value;
+		
+		public KeyValueInput(String name, String value) {
+			this.name = name;
+			this.value = value;
+		}
+	}
+	
+	public static class HiddenInput extends KeyValueInput {
+		
+		public HiddenInput(String name, String value) {
+			super(name, value);
+		}
+		
+		@Override
+		public String toString() {
+			return this.name + ": <input" +
+
+			" type=\"hidden\"" +
+
+			" name=\"" + this.name + "\"" +
+
+			" value=\"" + this.value + "\"" +
+
+			"/>";
+		}
+		
+	}
+	
+	public static class TextInput extends KeyValueInput {
 		
 		private int size;
 		
@@ -81,13 +113,9 @@ public class HtmlUtils {
 		}
 		
 		public TextInput(String name, String value, int size) {
-			this.name = name;
-			this.value = value;
+			super(name, value);
 			this.size = size;
 		}
-		
-		private String name;
-		private String value;
 		
 		@Override
 		public String toString() {
@@ -161,6 +189,16 @@ public class HtmlUtils {
 		 */
 		public Form withInputText(String name, String value) {
 			this.inputs.add(new TextInput(name, value));
+			return this;
+		}
+		
+		/**
+		 * @param name input name
+		 * @param value predefined form value
+		 * @return the {@link Form} for a fluent API
+		 */
+		public Form withHiddenInputText(String name, String value) {
+			this.inputs.add(new HiddenInput(name, value));
 			return this;
 		}
 		
