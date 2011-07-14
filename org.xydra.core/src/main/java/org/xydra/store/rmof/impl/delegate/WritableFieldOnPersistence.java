@@ -7,11 +7,15 @@ import org.xydra.base.XType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.value.XValue;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
 public class WritableFieldOnPersistence extends AbstractWritableOnPersistence implements
         XWritableField {
+	
+	private static final Logger log = LoggerFactory.getLogger(WritableFieldOnPersistence.class);
 	
 	private XID fieldId;
 	
@@ -41,9 +45,11 @@ public class WritableFieldOnPersistence extends AbstractWritableOnPersistence im
 		long result = this.persistence.executeCommand(this.executingActorId, command);
 		if(result == XCommand.FAILED) {
 			// TODO throw exception?
+			log.warn("Could not execute command " + command);
 			return false;
 		}
 		if(result == XCommand.NOCHANGE) {
+			log.info("Command made no change " + command);
 			return false;
 		}
 		assert result >= 0;
@@ -60,9 +66,11 @@ public class WritableFieldOnPersistence extends AbstractWritableOnPersistence im
 	}
 	
 	private XWritableField getFieldSnapshot() {
-		return this.persistence.getModelSnapshot(
-		        X.getIDProvider().fromComponents(this.persistence.getRepositoryId(), this.modelId,
-		                null, null)).getObject(this.objectId).getField(this.fieldId);
+		return this.persistence
+		        .getModelSnapshot(
+		                X.getIDProvider().fromComponents(this.persistence.getRepositoryId(),
+		                        this.modelId, null, null)).getObject(this.objectId)
+		        .getField(this.fieldId);
 	}
 	
 	@Override
