@@ -2,6 +2,7 @@ package org.xydra.core.index.impl.memory;
 
 import org.xydra.base.X;
 import org.xydra.base.XID;
+import org.xydra.base.XX;
 import org.xydra.base.value.XBooleanValue;
 import org.xydra.base.value.XCollectionValue;
 import org.xydra.base.value.XDoubleValue;
@@ -35,14 +36,7 @@ public class IndexUtils {
 		assert value != null;
 		String key;
 		if(value instanceof XStringValue) {
-			key = "" + ((XStringValue)value).contents().hashCode();
-			if(key.startsWith("-")) {
-				// like 'minus'
-				key = "m" + key.substring(1);
-			} else {
-				// like 'plus'
-				key = "p" + key;
-			}
+			return stringToXID(((XStringValue)value).contents());
 		} else if(value instanceof XDoubleValue) {
 			key = "" + ((XDoubleValue)value).contents();
 			key = "a" + key.replace('.', '-');
@@ -64,6 +58,24 @@ public class IndexUtils {
 		}
 		XID xid = X.getIDProvider().fromString(key);
 		return xid;
+	}
+	
+	/**
+	 * Create a hash XID from given string
+	 * 
+	 * @param s any string
+	 * @return a valid XID
+	 */
+	public static XID stringToXID(String s) {
+		String key = "" + s.hashCode();
+		if(key.startsWith("-")) {
+			// like 'minus'
+			key = "m" + key.substring(1);
+		} else {
+			// like 'plus'
+			key = "p" + key;
+		}
+		return XX.toId(key);
 	}
 	
 }
