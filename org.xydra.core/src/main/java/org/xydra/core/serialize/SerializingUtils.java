@@ -64,27 +64,25 @@ class SerializingUtils {
 		return XX.toId(toString(getRequiredAttribute(element, XID_ATTRIBUTE)));
 	}
 	
-	@SuppressWarnings("null")
 	protected static XAddress getAddress(XydraElement element, XAddress context) {
 		
 		boolean match = (context != null);
 		
-		XID repoId = getOptionalXidAttribute(element, REPOSITORYID_ATTRIBUTE, match ? context
-		        .getRepository() : null);
+		XID repoId = getOptionalXidAttribute(element, REPOSITORYID_ATTRIBUTE,
+		        match ? context.getRepository() : null);
 		match = match && XI.equals(repoId, context.getRepository());
-		XID modelId = getOptionalXidAttribute(element, MODELID_ATTRIBUTE, match ? context
-		        .getModel() : null);
+		XID modelId = getOptionalXidAttribute(element, MODELID_ATTRIBUTE,
+		        match ? context.getModel() : null);
 		match = match && XI.equals(modelId, context.getModel());
-		XID objectId = getOptionalXidAttribute(element, OBJECTID_ATTRIBUTE, match ? context
-		        .getObject() : null);
+		XID objectId = getOptionalXidAttribute(element, OBJECTID_ATTRIBUTE,
+		        match ? context.getObject() : null);
 		match = match && XI.equals(objectId, context.getObject());
-		XID fieldId = getOptionalXidAttribute(element, FIELDID_ATTRIBUTE, match ? context
-		        .getField() : null);
+		XID fieldId = getOptionalXidAttribute(element, FIELDID_ATTRIBUTE,
+		        match ? context.getField() : null);
 		
 		return XX.toAddress(repoId, modelId, objectId, fieldId);
 	}
 	
-	@SuppressWarnings("null")
 	protected static void setAddress(XAddress target, XydraOut out, XAddress context) {
 		
 		boolean match = (context != null);
