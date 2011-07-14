@@ -27,8 +27,6 @@ public class ReadCachingWritableRepository extends AbstractDelegatingWritableRep
 		return readCachingModel;
 	}
 	
-	// FIXME 19.50 -
-	
 	@Override
 	public Iterator<XID> iterator() {
 		return modelIds().iterator();

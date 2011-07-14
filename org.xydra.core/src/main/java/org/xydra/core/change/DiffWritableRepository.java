@@ -42,6 +42,8 @@ public class DiffWritableRepository extends AbstractDelegatingWritableRepository
 		}
 		if(this.baseRepository.hasModel(modelId)) {
 			XWritableModel baseModel = this.baseRepository.getModel(modelId);
+			assert baseModel instanceof ReadCachingWritableModel;
+			baseModel = ((ReadCachingWritableModel)baseModel).getBase();
 			DiffWritableModel diffModel = new DiffWritableModel(baseModel);
 			this.potentiallyChanged.put(modelId, diffModel);
 			return diffModel;
@@ -90,6 +92,8 @@ public class DiffWritableRepository extends AbstractDelegatingWritableRepository
 		if(model == null) {
 			model = this.baseRepository.getModel(modelId);
 			if(model != null) {
+				assert model instanceof ReadCachingWritableModel;
+				model = ((ReadCachingWritableModel)model).getBase();
 				model = new DiffWritableModel(model);
 				this.potentiallyChanged.put(modelId, (DiffWritableModel)model);
 			}

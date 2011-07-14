@@ -35,7 +35,8 @@ import org.xydra.log.LoggerFactory;
  * 
  * @author xamde
  */
-public class ReadCachingWritableModel extends AbstractDelegatingWritableModel implements XWritableModel {
+public class ReadCachingWritableModel extends AbstractDelegatingWritableModel implements
+        XWritableModel {
 	
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(ReadCachingWritableModel.class);
@@ -68,6 +69,7 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	
 	public ReadCachingWritableModel(final XWritableModel base) {
 		assert base != null;
+		assert !(base instanceof ReadCachingWritableModel);
 		this.base = base;
 		this.cache = new MapMapIndex<XID,XID,XValue>();
 		// prefetch
@@ -220,11 +222,13 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 				return false;
 			}
 			// else
-			boolean b = this.base.hasObject(objectId)
+			boolean baseHasField = this.base.hasObject(objectId)
 			        && this.base.getObject(objectId).hasField(fieldId);
 			// index
-			this.cache.index(objectId, fieldId, NOVALUE);
-			return b;
+			if(baseHasField) {
+				this.cache.index(objectId, fieldId, NOVALUE);
+			}
+			return baseHasField;
 		}
 	}
 	

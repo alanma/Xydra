@@ -44,9 +44,9 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	
 	private static final Logger log = LoggerFactory.getLogger(DiffWritableModel.class);
 	
-	private static final XID NONE = XX.toId("_NONE");
+	private static final XID NONE = XX.toId("_NoIdDiff");
 	
-	private static final XValue NOVALUE = XV.toValue("_NONE");
+	private static final XValue NOVALUE = XV.toValue("_NoValueDiff");
 	
 	/*
 	 * Each index has the structure (object, field, value) with the notion to
@@ -62,6 +62,7 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	
 	public DiffWritableModel(final XWritableModel base) {
 		assert base != null;
+		assert !(base instanceof ReadCachingWritableModel);
 		this.base = new ReadCachingWritableModel(base);
 		this.added = new MapMapIndex<XID,XID,XValue>();
 		this.removed = new MapMapIndex<XID,XID,XValue>();
@@ -79,6 +80,10 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	
 	@Override
 	public XWritableObject createObject(XID objectId) {
+		if(hasObject(objectId)) {
+			return getObject(objectId);
+		}
+		
 		this.removed.deIndex(objectId, NONE);
 		this.added.index(objectId, NONE, NOVALUE);
 		return new WrappedObject(objectId);
@@ -191,12 +196,13 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 		if(this.added.tupleIterator(new EqualsConstraint<XID>(objectId),
 		        new EqualsConstraint<XID>(fieldId)).hasNext()) {
 			return true;
-		} else if(this.removed.tupleIterator(new EqualsConstraint<XID>(objectId),
+		}
+		if(this.removed.tupleIterator(new EqualsConstraint<XID>(objectId),
 		        new EqualsConstraint<XID>(fieldId)).hasNext()) {
 			return false;
-		} else {
-			return this.base.hasObject(objectId) && this.base.getObject(objectId).hasField(fieldId);
 		}
+		// else
+		return this.base.hasObject(objectId) && this.base.getObject(objectId).hasField(fieldId);
 	}
 	
 	protected boolean object_isEmpty(XID objectId) {
@@ -294,7 +300,7 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 				list.add(X.getCommandFactory().createForcedAddObjectCommand(getAddress(),
 				        e.getKey1()));
 			} else if(e.getEntry().equals(NOVALUE)) {
-				// add field
+				// add empty field
 				list.add(X.getCommandFactory().createForcedAddFieldCommand(
 				        resolveObject(e.getKey1()), e.getKey2()));
 			} else {
