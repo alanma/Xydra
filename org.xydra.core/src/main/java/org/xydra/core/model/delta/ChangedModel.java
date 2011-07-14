@@ -310,7 +310,8 @@ public class ChangedModel implements XWritableModel {
 		
 		XWritableField field = object.getField(command.getFieldId());
 		if(field == null) {
-			log.info("FieldCommand is invalid - field is null");
+			log.info("FieldCommand is invalid - field '" + command.getFieldId()
+			        + "' not found in object '" + command.getObjectId() + "'");
 			return false;
 		}
 		
