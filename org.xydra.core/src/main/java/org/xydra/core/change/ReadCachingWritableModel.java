@@ -35,10 +35,10 @@ import org.xydra.log.LoggerFactory;
  * 
  * @author xamde
  */
-public class CachingWritableModel extends AbstractDelegatingWritableModel implements XWritableModel {
+public class ReadCachingWritableModel extends AbstractDelegatingWritableModel implements XWritableModel {
 	
 	@SuppressWarnings("unused")
-	private static final Logger log = LoggerFactory.getLogger(CachingWritableModel.class);
+	private static final Logger log = LoggerFactory.getLogger(ReadCachingWritableModel.class);
 	
 	private static final XID NONE = XX.toId("_NoId");
 	
@@ -66,7 +66,7 @@ public class CachingWritableModel extends AbstractDelegatingWritableModel implem
 	
 	private final XWritableModel base;
 	
-	public CachingWritableModel(final XWritableModel base) {
+	public ReadCachingWritableModel(final XWritableModel base) {
 		assert base != null;
 		this.base = base;
 		this.cache = new MapMapIndex<XID,XID,XValue>();

@@ -62,7 +62,7 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	
 	public DiffWritableModel(final XWritableModel base) {
 		assert base != null;
-		this.base = new CachingWritableModel(base);
+		this.base = new ReadCachingWritableModel(base);
 		this.added = new MapMapIndex<XID,XID,XValue>();
 		this.removed = new MapMapIndex<XID,XID,XValue>();
 	}
@@ -79,8 +79,8 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	
 	@Override
 	public XWritableObject createObject(XID objectId) {
-		this.added.index(objectId, NONE, NOVALUE);
 		this.removed.deIndex(objectId, NONE);
+		this.added.index(objectId, NONE, NOVALUE);
 		return new WrappedObject(objectId);
 	}
 	
@@ -92,6 +92,9 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 		
 		XValue value = this.added.lookup(objectId, fieldId);
 		if(value != null) {
+			if(value == NOVALUE) {
+				return null;
+			}
 			return value;
 		} else {
 			value = this.removed.lookup(objectId, fieldId);
@@ -117,8 +120,8 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 			return false;
 		}
 		
-		this.added.index(objectId, fieldId, value);
 		this.removed.deIndex(objectId, fieldId);
+		this.added.index(objectId, fieldId, value);
 		return true;
 	}
 	
@@ -176,8 +179,8 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 		assert fieldId != null;
 		assert this.hasObject(objectId);
 		if(!object_hasField(objectId, fieldId)) {
-			this.added.index(objectId, fieldId, NOVALUE);
 			this.removed.deIndex(objectId, fieldId);
+			this.added.index(objectId, fieldId, NOVALUE);
 		}
 		return new WrappedField(objectId, fieldId);
 	}
@@ -210,8 +213,14 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 		assert objectId != null;
 		assert fieldId != null;
 		boolean b = object_hasField(objectId, fieldId);
-		this.added.deIndex(objectId, fieldId);
-		this.removed.index(objectId, fieldId, NOVALUE);
+		
+		if(this.added.containsKey(new EqualsConstraint<XID>(objectId), new EqualsConstraint<XID>(
+		        fieldId))) {
+			this.added.deIndex(objectId, fieldId);
+		} else {
+			this.removed.index(objectId, fieldId, NOVALUE);
+		}
+		
 		return b;
 	}
 	
@@ -339,6 +348,10 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 			return null;
 		}
 		return builder.build();
+	}
+	
+	public boolean hasChanges() {
+		return !this.added.isEmpty() || !this.removed.isEmpty();
 	}
 	
 }
