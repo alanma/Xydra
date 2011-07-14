@@ -345,7 +345,7 @@ public abstract class DeltaUtils {
 		} else {
 			
 			if(model == null) {
-				log.warn("Safe Non-RepositoryCommand failed on null-model");
+				log.warn("Safe Non-RepositoryCommand '" + command + "' failed on null-model");
 				return null;
 			}
 			

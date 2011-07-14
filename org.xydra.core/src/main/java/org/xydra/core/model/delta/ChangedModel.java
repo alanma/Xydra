@@ -418,7 +418,8 @@ public class ChangedModel implements XWritableModel {
 			
 			if(field == null) {
 				// command is invalid or doesn't change anything
-				log.warn("XObjectCommand REMOVE is invalid or doesn't change anything");
+				log.warn("XObjectCommand REMOVE '" + command
+				        + "'is invalid or doesn't change anything");
 				return command.isForced();
 			}
 			if(field.getRevisionNumber() != command.getRevisionNumber() && !command.isForced()) {
