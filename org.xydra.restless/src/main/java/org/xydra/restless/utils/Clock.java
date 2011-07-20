@@ -31,6 +31,11 @@ public class Clock {
 	 * @param name for the statistics
 	 */
 	public Clock stop(String name) {
+		stopAndGetDuration(name);
+		return this;
+	}
+	
+	public long stopAndGetDuration(String name) {
 		if(this.start == -1) {
 			throw new IllegalStateException("Cannot stop a clock that was never started.");
 		}
@@ -38,7 +43,7 @@ public class Clock {
 		double durationInMs = (stop - this.start) / 1000000d;
 		this.stats.append(name).append("=").append(durationInMs).append("ms <br />\n");
 		this.start = -1;
-		return this;
+		return (long)durationInMs;
 	}
 	
 	public void stopAndStart(String name) {
