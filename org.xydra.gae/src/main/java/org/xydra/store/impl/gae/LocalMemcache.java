@@ -17,15 +17,16 @@ import org.xydra.store.IMemCache;
 
 
 /**
- * An implementation of {@link IMemCache} using the javax.cache API. As this one
- * will be deprecated by Google, we migrate to the {@link GaeLowLevelMemCache}.
+ * To fix an issue with the Gae local test implementation (takes more and more
+ * memory), this implementation can be restricted in memory use. This
+ * implementation keeps 5 MB of memory free.
  * 
  * @author xamde
  * 
  */
-public class GaeMemCache implements IMemCache {
+public class LocalMemcache implements IMemCache {
 	
-	private static final Logger log = LoggerFactory.getLogger(GaeMemCache.class);
+	private static final Logger log = LoggerFactory.getLogger(LocalMemcache.class);
 	
 	private Cache javaxCache;
 	
@@ -50,7 +51,19 @@ public class GaeMemCache implements IMemCache {
 	}
 	
 	public Object put(Object key, Object value) {
+		controlCacheSize();
 		return this.map.put(key, value);
+	}
+	
+	private static final long RESERVE_MEMORY = 5 * 1024 * 1024;
+	
+	private void controlCacheSize() {
+		long free = Runtime.getRuntime().freeMemory();
+		if(free < RESERVE_MEMORY) {
+			log.warn("Free memory = " + free + ", require " + RESERVE_MEMORY + " -> Auto-clear.");
+			this.clear();
+			System.gc();
+		}
 	}
 	
 	public Object remove(Object key) {
@@ -90,15 +103,17 @@ public class GaeMemCache implements IMemCache {
 	private Map<Object,Object> map;
 	
 	@SuppressWarnings("unchecked")
-	public GaeMemCache() {
+	public LocalMemcache() {
+		log.info("Using LocalMemcache");
 		assert this.javaxCache == null;
 		try {
+			// FIXME make sure to keep cache memory usage below some threshold
 			CacheFactory cacheFactory = CacheManager.getInstance().getCacheFactory();
 			Cache cache = cacheFactory.createCache(Collections.emptyMap());
 			this.javaxCache = cache;
 			this.map = cache;
 		} catch(CacheException e) {
-			log.error("Could not create MemCache instance", e);
+			log.error("Could not create LocalMemcache instance", e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -113,69 +128,4 @@ public class GaeMemCache implements IMemCache {
 		        + " misses: " + misses;
 	}
 	
-	// @Override
-	// public int size() {
-	// return this.javaxCache.size();
-	// }
-	//
-	// @Override
-	// public boolean isEmpty() {
-	// return this.javaxCache.isEmpty();
-	// }
-	//
-	// @Override
-	// public boolean containsKey(Object key) {
-	// return this.javaxCache.containsKey(key);
-	// }
-	//
-	// @Override
-	// public boolean containsValue(Object value) {
-	// return this.javaxCache.containsValue(value);
-	// }
-	//
-	// @Override
-	// public Object get(Object key) {
-	// return this.javaxCache.get(key);
-	// }
-	//
-	// @SuppressWarnings("unchecked")
-	// @Override
-	// public Object put(Object key, Object value) {
-	// return this.javaxCache.put(key, value);
-	// }
-	//
-	// @Override
-	// public Object remove(Object key) {
-	// return this.javaxCache.remove(key);
-	// }
-	//
-	// @SuppressWarnings("unchecked")
-	// @Override
-	// public void putAll(Map<? extends Object,? extends Object> m) {
-	// this.javaxCache.putAll(m);
-	//
-	// }
-	//
-	// @Override
-	// public void clear() {
-	// this.javaxCache.clear();
-	// }
-	//
-	// @SuppressWarnings("unchecked")
-	// @Override
-	// public Set<Object> keySet() {
-	// return this.javaxCache.keySet();
-	// }
-	//
-	// @SuppressWarnings("unchecked")
-	// @Override
-	// public Collection<Object> values() {
-	// return this.javaxCache.values();
-	// }
-	//
-	// @SuppressWarnings("unchecked")
-	// @Override
-	// public Set<java.util.Map.Entry<Object,Object>> entrySet() {
-	// return this.javaxCache.entrySet();
-	// }
 }

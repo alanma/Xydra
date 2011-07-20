@@ -1,4 +1,4 @@
-package org.xydra.server.impl.gae;
+package org.xydra.gae;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;

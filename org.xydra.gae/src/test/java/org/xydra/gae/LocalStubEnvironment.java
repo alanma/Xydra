@@ -1,4 +1,4 @@
-package org.xydra.server.impl.gae;
+package org.xydra.gae;
 
 import java.util.HashMap;
 import java.util.Map;

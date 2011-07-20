@@ -1,6 +1,7 @@
 package org.xydra.store.impl.gae;
 
 import org.xydra.base.XID;
+import org.xydra.gae.AboutAppEngine;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.IMemCache;
@@ -21,7 +22,11 @@ public class GaePlatformRuntime implements XydraPlatformRuntime {
 	@Override
 	public synchronized IMemCache getMemCache() {
 		log.info("Instantiating a new IMemcache instance.");
-		return new GaeLowLevelMemCache();
+		if(AboutAppEngine.inProduction()) {
+			return new GaeLowLevelMemCache();
+		} else {
+			return new LocalMemcache();
+		}
 	}
 	
 	@Override
