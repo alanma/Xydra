@@ -13,8 +13,16 @@ import org.xydra.index.IndexUtils;
 
 public class ReadCachingWritableRepository extends AbstractDelegatingWritableRepository {
 	
-	public ReadCachingWritableRepository(XWritableRepository baseRepository) {
+	private boolean prefetchModels;
+	
+	/**
+	 * @param baseRepository ..
+	 * @param prefetchModels if true, all new models are pre-fetched at first
+	 *            call
+	 */
+	public ReadCachingWritableRepository(XWritableRepository baseRepository, boolean prefetchModels) {
 		super(baseRepository);
+		this.prefetchModels = prefetchModels;
 	}
 	
 	protected Map<XID,ReadCachingWritableModel> map = new HashMap<XID,ReadCachingWritableModel>();
@@ -22,7 +30,7 @@ public class ReadCachingWritableRepository extends AbstractDelegatingWritableRep
 	@Override
 	public XWritableModel createModel(XID modelId) {
 		XWritableModel baseModel = this.baseRepository.createModel(modelId);
-		ReadCachingWritableModel readCachingModel = new ReadCachingWritableModel(baseModel);
+		ReadCachingWritableModel readCachingModel = new ReadCachingWritableModel(baseModel, true);
 		this.map.put(modelId, readCachingModel);
 		return readCachingModel;
 	}
@@ -54,7 +62,8 @@ public class ReadCachingWritableRepository extends AbstractDelegatingWritableRep
 		if(model == null) {
 			model = this.baseRepository.getModel(modelId);
 			if(model != null) {
-				ReadCachingWritableModel cacheModel = new ReadCachingWritableModel(model);
+				ReadCachingWritableModel cacheModel = new ReadCachingWritableModel(model,
+				        this.prefetchModels);
 				this.map.put(modelId, cacheModel);
 				return cacheModel;
 			}

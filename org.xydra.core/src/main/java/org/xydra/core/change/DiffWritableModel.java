@@ -60,10 +60,16 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	
 	private final XWritableModel base;
 	
-	public DiffWritableModel(final XWritableModel base) {
+	/**
+	 * @param base any model or a {@link ReadCachingWritableModel}
+	 * @param prefetchModel if true and base is not yet a
+	 *            {@link ReadCachingWritableModel}, construct one that
+	 *            pre-fetches all model content at constructor call time
+	 */
+	public DiffWritableModel(final XWritableModel base, boolean prefetchModel) {
 		assert base != null;
 		assert !(base instanceof ReadCachingWritableModel);
-		this.base = new ReadCachingWritableModel(base);
+		this.base = new ReadCachingWritableModel(base, prefetchModel);
 		this.added = new MapMapIndex<XID,XID,XValue>();
 		this.removed = new MapMapIndex<XID,XID,XValue>();
 	}

@@ -30,7 +30,7 @@ public class DiffWritableModelTest {
 	@Before
 	public void setUp() throws Exception {
 		this.base = new SimpleModel(XX.toAddress(XX.toId("repo1"), phonebook, null, null));
-		this.diffModel = new DiffWritableModel(this.base);
+		this.diffModel = new DiffWritableModel(this.base, true);
 	}
 	
 	@Test

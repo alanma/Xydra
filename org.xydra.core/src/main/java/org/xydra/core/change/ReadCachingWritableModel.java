@@ -38,12 +38,11 @@ import org.xydra.log.LoggerFactory;
 public class ReadCachingWritableModel extends AbstractDelegatingWritableModel implements
         XWritableModel {
 	
-	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(ReadCachingWritableModel.class);
 	
-	private static final XID NONE = XX.toId("_NoId");
+	private static final XID NONE = XX.toId("_NoIdReadCache");
 	
-	private static final XValue NOVALUE = XV.toValue("_NoValue");
+	private static final XValue NOVALUE = XV.toValue("_NoValueReadCache");
 	
 	/**
 	 * Index has the structure (object, field, value) with the notion to
@@ -67,18 +66,30 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	
 	private final XWritableModel base;
 	
-	public ReadCachingWritableModel(final XWritableModel base) {
+	/**
+	 * @param base any {@link XWritableModel}, should not be itself a
+	 *            {@link ReadCachingWritableModel}
+	 * @param prefetchModel if true, construct one that pre-fetches all model
+	 *            content at constructor call time
+	 */
+	public ReadCachingWritableModel(final XWritableModel base, boolean prefetchModel) {
 		assert base != null;
 		assert !(base instanceof ReadCachingWritableModel);
 		this.base = base;
 		this.cache = new MapMapIndex<XID,XID,XValue>();
-		// prefetch
-		this.retrieveAllObjectsIdsFromBaseAndCache();
-		for(XID objectId : this.idsAsSet()) {
-			this.retrieveAllFieldIdsOfObjectFromBaseAndCache(objectId);
-			for(XID fieldId : this.object_idsAsSet(objectId)) {
-				this.retrieveValueFromBaseAndCache(objectId, fieldId);
+		if(prefetchModel) {
+			long start = System.nanoTime();
+			this.retrieveAllObjectsIdsFromBaseAndCache();
+			Set<XID> ids = this.idsAsSet();
+			for(XID objectId : ids) {
+				this.retrieveAllFieldIdsOfObjectFromBaseAndCache(objectId);
+				for(XID fieldId : this.object_idsAsSet(objectId)) {
+					this.retrieveValueFromBaseAndCache(objectId, fieldId);
+				}
 			}
+			long stop = System.nanoTime();
+			log.info("Prefetching " + ids.size() + " objects in model '" + base.getID() + "' took "
+			        + ((stop - start) / 1000000) + "ms");
 		}
 	}
 	

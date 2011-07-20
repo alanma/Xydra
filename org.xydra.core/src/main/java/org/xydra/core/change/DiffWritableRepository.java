@@ -19,6 +19,8 @@ import org.xydra.index.IndexUtils;
  * All write operations are kept here and can be retrieved as a set of added
  * models, removed models and changed models.
  * 
+ * TODO manage pre-fetching config (currently: always on)
+ * 
  * @author xamde
  * 
  */
@@ -44,12 +46,12 @@ public class DiffWritableRepository extends AbstractDelegatingWritableRepository
 			XWritableModel baseModel = this.baseRepository.getModel(modelId);
 			assert baseModel instanceof ReadCachingWritableModel;
 			baseModel = ((ReadCachingWritableModel)baseModel).getBase();
-			DiffWritableModel diffModel = new DiffWritableModel(baseModel);
+			DiffWritableModel diffModel = new DiffWritableModel(baseModel, true);
 			this.potentiallyChanged.put(modelId, diffModel);
 			return diffModel;
 		} else {
 			DiffWritableModel diffModel = new DiffWritableModel(new SimpleModel(XX.toAddress(
-			        getID(), modelId, null, null)));
+			        getID(), modelId, null, null)), true);
 			this.added.put(modelId, diffModel);
 			this.removed.remove(modelId);
 			this.potentiallyChanged.remove(modelId);
@@ -94,7 +96,7 @@ public class DiffWritableRepository extends AbstractDelegatingWritableRepository
 			if(model != null) {
 				assert model instanceof ReadCachingWritableModel;
 				model = ((ReadCachingWritableModel)model).getBase();
-				model = new DiffWritableModel(model);
+				model = new DiffWritableModel(model, true);
 				this.potentiallyChanged.put(modelId, (DiffWritableModel)model);
 			}
 		}
