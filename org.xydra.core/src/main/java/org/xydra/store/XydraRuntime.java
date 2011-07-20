@@ -154,7 +154,7 @@ public class XydraRuntime {
 			return;
 		}
 		// still no platform, use defaults
-		log.warn("No platform configured. Using default MemoryRuntime");
+		log.warn("No platform configured. Using default MemoryRuntime.");
 		platformRuntime = new MemoryRuntime();
 		platformInitialised = true;
 	}
