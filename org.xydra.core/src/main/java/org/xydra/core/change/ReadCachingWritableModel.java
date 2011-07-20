@@ -84,6 +84,7 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	
 	@Override
 	public XWritableObject createObject(XID objectId) {
+		assert objectId != null;
 		this.cache.index(objectId, NONE, NOVALUE);
 		return new WrappedObject(objectId);
 	}
@@ -129,7 +130,7 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 		
 		// NOP?
 		XValue v = field_getValue(objectId, fieldId);
-		if(v.equals(value)) {
+		if(bothNullOrEqual(v, value)) {
 			return false;
 		}
 		
@@ -137,6 +138,14 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 		this.cache.index(objectId, fieldId, value);
 		
 		return true;
+	}
+	
+	private static boolean bothNullOrEqual(Object a, Object b) {
+		if(a == null) {
+			return b == null;
+		} else {
+			return a.equals(b);
+		}
 	}
 	
 	@Override

@@ -217,4 +217,9 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 		return XX.toAddress(this.getAddress().getRepository(), this.getID(), objectId, null);
 	}
 	
+	@Override
+	public String toString() {
+		return this.getID() + " (" + this.getClass().getName() + ") " + this.hashCode();
+	}
+	
 }
