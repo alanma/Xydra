@@ -92,7 +92,7 @@ public class Xmas {
 			writer.write("Creating/loading model <br />\n");
 			XWritableModel model = createModel(repoStr, XX.createUniqueId());
 			// txn
-			DiffWritableModel txnModel = new DiffWritableModel(model);
+			DiffWritableModel txnModel = new DiffWritableModel(model, true);
 			WishList wishList = new WishList(txnModel);
 			wishList.addDemoData(wishesCount, writer);
 			writer.write(HtmlUtils.link("/xmas/" + repoStr + "/" + model.getID(), "See list '"

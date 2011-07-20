@@ -6,7 +6,6 @@ import java.net.URI;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Jetty;
-import org.xydra.server.impl.gae.CheckClasspathTool;
 import org.xydra.store.impl.gae.GaeTestfixer;
 
 
@@ -33,9 +32,6 @@ public class RunXmasJetty {
 		
 		// start jetty
 		Jetty jetty = new Jetty(8787);
-		
-		// verify classpath has no weird errors
-		CheckClasspathTool.checkGaeToolsJarIsPresentAndAppstatsFilterClassCanBeLoaded();
 		
 		URI uri = jetty.startServer("", new File("src/main/webapp"));
 		

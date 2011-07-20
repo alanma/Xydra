@@ -12,6 +12,7 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
+import org.xydra.restless.utils.Clock;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.HtmlUtils.METHOD;
 import org.xydra.restless.utils.ServletUtils;
@@ -67,6 +68,7 @@ public class XmasResource {
 	 */
 	public void get(String repoStr, String view, String format, HttpServletResponse res)
 	        throws IOException {
+		Clock c = new Clock().start();
 		log.info("Getting " + repoStr + "?view=" + view + "&format=" + format);
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		if(format.equals("urls")) {
@@ -91,8 +93,9 @@ public class XmasResource {
 			        .withInputSubmit("Add lists with wishes").toString());
 			HtmlUtils.endHtmlPage(w);
 		}
+		c.stop("get");
 		log.info("Done " + repoStr + "?view=" + view + "&format=" + format + " at "
-		        + System.currentTimeMillis());
+		        + System.currentTimeMillis() + " " + c.getStats());
 	}
 	
 }

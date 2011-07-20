@@ -62,7 +62,7 @@ public class WishResource {
 		
 		// create txn
 		DiffWritableModel txnModel = new DiffWritableModel(Xmas.createModel(repoStr,
-		        XX.toId(listStr)));
+		        XX.toId(listStr)), true);
 		WishList wishList = new WishList(txnModel);
 		// manipulate txn
 		wishList.removeWish(XX.toId(wishStr));
