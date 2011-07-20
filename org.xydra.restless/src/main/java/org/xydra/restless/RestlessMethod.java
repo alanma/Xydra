@@ -162,7 +162,11 @@ public class RestlessMethod {
 					}
 					assert this.requiredNamedParameter.length > boundNamedParameterNumber : "Require "
 					        + this.requiredNamedParameter.length
-					        + " named parameters, processed "
+					        + " named parameters in method '"
+					        + Restless.toClass(this.instanceOrClass).getCanonicalName()
+					        + ":"
+					        + method.getName()
+					        + "', processed "
 					        + boundNamedParameterNumber
 					        + " parameters from request so far. Required parameters: "
 					        + this.requiredNamedParameter

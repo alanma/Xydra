@@ -132,10 +132,14 @@ public class Restless extends HttpServlet {
 	 * @return a java.lang.reflect.{@link Method} from a String
 	 */
 	public static Method methodByName(Object instanceOrClass, String methodName) {
+		return methodByName(toClass(instanceOrClass), methodName);
+	}
+	
+	public static Class<?> toClass(Object instanceOrClass) {
 		if(instanceOrClass instanceof Class<?>) {
-			return methodByName((Class<?>)instanceOrClass, methodName);
+			return (Class<?>)instanceOrClass;
 		} else {
-			return methodByName(instanceOrClass.getClass(), methodName);
+			return instanceOrClass.getClass();
 		}
 	}
 	
