@@ -44,7 +44,7 @@ import org.xydra.store.XydraStoreAdmin;
  * TODO wouldn't it be better to either delegate to a {@link XydraBlockingStore}
  * (a {@link XydraBlockingStore}->{@link XydraSingleOperationStore} wrapper can
  * then be used) -OR- to not wait for callbacks before returning and handle the
- * batched callback in the last called {@link SingleOpCallback}?
+ * batched callback in the last called SingleOpCallback?
  * 
  * @author xamde
  */
@@ -269,8 +269,8 @@ public class DelegateToSingleOperationStore implements XydraStore {
 			        ((XRepositoryCommand)ac).getModelId());
 		} else if(ac instanceof XModelCommand) {
 			assert ac.getChangeType() == ChangeType.REMOVE;
-			return MemoryModelCommand.createRemoveCommand(ac.getTarget(), rev, ((XModelCommand)ac)
-			        .getObjectId());
+			return MemoryModelCommand.createRemoveCommand(ac.getTarget(), rev,
+			        ((XModelCommand)ac).getObjectId());
 		} else if(ac instanceof XObjectCommand) {
 			assert ac.getChangeType() == ChangeType.REMOVE;
 			return MemoryObjectCommand.createRemoveCommand(ac.getTarget(), rev,
@@ -278,8 +278,8 @@ public class DelegateToSingleOperationStore implements XydraStore {
 		} else if(ac instanceof XFieldCommand) {
 			switch(ac.getChangeType()) {
 			case ADD:
-				return MemoryFieldCommand.createAddCommand(ac.getTarget(), rev, ((XFieldCommand)ac)
-				        .getValue());
+				return MemoryFieldCommand.createAddCommand(ac.getTarget(), rev,
+				        ((XFieldCommand)ac).getValue());
 			case CHANGE:
 				return MemoryFieldCommand.createChangeCommand(ac.getTarget(), rev,
 				        ((XFieldCommand)ac).getValue());

@@ -57,6 +57,7 @@ public class WritableObjectOnStore extends ReadableObjectOnStore implements XWri
 	}
 	
 	@Override
+	@SuppressWarnings("deprecation")
 	public XWritableField getField(XID fieldId) {
 		// this returns different instances for each call
 		XReadableField baseField = super.getField(fieldId);

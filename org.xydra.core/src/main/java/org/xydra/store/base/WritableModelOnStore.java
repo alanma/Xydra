@@ -57,6 +57,7 @@ public class WritableModelOnStore extends ReadableModelOnStore implements XWrita
 	}
 	
 	@Override
+	@SuppressWarnings("deprecation")
 	public XWritableObject getObject(XID objectId) {
 		XReadableObject baseObject = super.getObject(objectId);
 		
