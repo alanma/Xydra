@@ -26,7 +26,7 @@ import com.google.appengine.api.datastore.Key;
  * @author dscharrer
  * 
  */
-public class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObject> implements
+class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObject> implements
         XReadableModel {
 	
 	private InternalGaeModel(GaeChangesService changesService, XAddress modelAddr, long modelRev,
@@ -70,12 +70,11 @@ public class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObj
 	 *            {@link XEvent#RevisionNotAvailable} instead.
 	 * @return A {@link XModel} interface or null if the model doesn't exist.
 	 */
-	public static InternalGaeModel get(GaeChangesService changesService, long modelRev,
-	        GaeLocks locks) {
+	static InternalGaeModel get(GaeChangesService changesService, long modelRev, GaeLocks locks) {
 		
 		assert locks.canRead(changesService.getModelAddress());
-		Entity e = GaeUtils.getEntity(KeyStructure
-		        .createEntityKey(changesService.getModelAddress()));
+		Entity e = GaeUtils
+		        .getEntity(KeyStructure.createEntityKey(changesService.getModelAddress()));
 		if(e == null) {
 			return null;
 		}
@@ -96,7 +95,7 @@ public class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObj
 	 *            assert that we are actually allowed to create the
 	 *            {@link XModel}.
 	 */
-	public static Future<Key> createModel(XAddress modelAddr, GaeLocks locks) {
+	static Future<Key> createModel(XAddress modelAddr, GaeLocks locks) {
 		assert locks.canWrite(modelAddr);
 		assert modelAddr.getAddressedType() == XType.XMODEL;
 		Entity e = new Entity(KeyStructure.createEntityKey(modelAddr));

@@ -36,16 +36,19 @@ public class GaeUtils {
 	
 	private static AsyncDatastoreService datastore;
 	
-	private static boolean useMemCache = true;
+	private static boolean useMemCacheInThisClass = true;
 	
-	/* used only in test mode */
+	/*
+	 * used only in test mode to be able to delete all entites from datastore
+	 * that have been created
+	 */
 	private static Set<Key> storedKeys;
 	
 	/**
 	 * @param b turn GAE MemCache off or on at runtime
 	 */
 	public static void setUseMemCache(boolean b) {
-		useMemCache = b;
+		useMemCacheInThisClass = b;
 	}
 	
 	/**
@@ -61,17 +64,7 @@ public class GaeUtils {
 	}
 	
 	public static String getConf() {
-		return
-
-		"MemCache: " + useMemCache + "\n"
-
-		+ getStats();
-	}
-	
-	public static String getStats() {
-		return "tbd";
-		
-		// FIXME "MemCache: " + XydraRuntime.getMemcache().stats();
+		return "MemCache = " + useMemCacheInThisClass;
 	}
 	
 	/**
@@ -79,17 +72,33 @@ public class GaeUtils {
 	 * @return the GAE Entity for the given key from the store or null
 	 */
 	public static Entity getEntity(Key key) {
-		return getEntity(key, null);
+		return getEntity(key, null, true);
 	}
 	
-	private static final Entity NULL_ENTITY = new Entity("NULL-ENTITY", "null");
+	/**
+	 * Ask directly the datastore. Never ask the memcache.
+	 * 
+	 * @param key The key of the entity to load.
+	 * @return the GAE Entity for the given key from the store or null
+	 */
+	public static Entity getEntityFromDatastore(Key key) {
+		return getEntity(key, null, false);
+	}
+	
+	public static final String NULL_ENTITY_KIND = "NULL-ENTITY";
+	
+	/**
+	 * A null-entity is required to cache the fact, that the datastore
+	 * <em>does not</em> contain a certain key
+	 */
+	private static final Entity NULL_ENTITY = new Entity(NULL_ENTITY_KIND, "null");
 	
 	public static <T> T waitFor(Future<T> t) {
 		while(true) {
 			try {
 				return t.get();
 			} catch(InterruptedException e) {
-				e.printStackTrace();
+				log.warn("interrrupted while waiting for datastore get", e);
 			} catch(ExecutionException e) {
 				return null;
 			}
@@ -97,17 +106,20 @@ public class GaeUtils {
 	}
 	
 	/**
-	 * Like {@link #getEntity(Key)}, but returns a non-null entity from the
-	 * cache if available, without checking the datastore.
+	 * Similar to {@link #getEntity(Key)}
+	 * 
+	 * @param key .
+	 * @param trans never null
+	 * @return a non-null entity from the cache if available, without checking
+	 *         the datastore.
 	 */
+	@GaeOperation(memcacheRead = true ,memcacheWrite = true ,datastoreRead = true)
 	public static Entity getEntityExists(Key key, Transaction trans) {
-		
 		assert trans != null;
-		
 		makeSureDatestoreServiceIsInitialised();
 		
 		Entity cachedEntity = null;
-		if(useMemCache) {
+		if(useMemCacheInThisClass) {
 			// try first to get from memcache
 			cachedEntity = (Entity)XydraRuntime.getMemcache().get(key);
 			if(cachedEntity != null) {
@@ -115,14 +127,17 @@ public class GaeUtils {
 				if(!cachedEntity.equals(NULL_ENTITY)) {
 					return cachedEntity;
 				}
-				// FIXME max: why not return null in else-case?
+				// FIXME added by max: return null in else-case
+				else {
+					return null;
+				}
 			}
 		}
 		
 		log.debug("Getting entity " + key.toString() + " from GAE data store");
 		Future<Entity> entity = datastore.get(trans, key);
 		Entity e = waitFor(entity);
-		if(useMemCache) {
+		if(useMemCacheInThisClass) {
 			updateCachedEntity(key, cachedEntity, e);
 		}
 		if(e == null) {
@@ -153,7 +168,7 @@ public class GaeUtils {
 		public Entity get() {
 			if(this.future != null) {
 				this.entity = waitFor(this.future);
-				if(useMemCache) {
+				if(useMemCacheInThisClass) {
 					updateCachedEntity(this.key, null, this.entity);
 				}
 				this.future = null;
@@ -167,7 +182,7 @@ public class GaeUtils {
 		
 		makeSureDatestoreServiceIsInitialised();
 		
-		if(useMemCache) {
+		if(useMemCacheInThisClass) {
 			// try first to get from memcache
 			Entity cachedEntity = (Entity)XydraRuntime.getMemcache().get(key);
 			if(cachedEntity != null) {
@@ -190,23 +205,24 @@ public class GaeUtils {
 	/**
 	 * @param key The key of the entity to load.
 	 * @param trans The transaction to load the entity in.
+	 * @param useMemcache if true, memcache is used in this request (only if
+	 *            also enabled in this class)
 	 * @return the GAE Entity for the given key from the store or null
 	 */
-	public static Entity getEntity(Key key, Transaction trans) {
-		
+	public static Entity getEntity(Key key, Transaction trans, boolean useMemcache) {
 		makeSureDatestoreServiceIsInitialised();
+		Entity memcachedEntity = null;
 		
-		Entity cachedEntity = null;
-		if(useMemCache) {
+		if(useMemCacheInThisClass && useMemcache) {
 			// try first to get from memcache
-			cachedEntity = (Entity)XydraRuntime.getMemcache().get(key);
-			if(cachedEntity != null && trans == null) {
+			memcachedEntity = (Entity)XydraRuntime.getMemcache().get(key);
+			if(memcachedEntity != null && trans == null) {
 				log.debug("Getting entity " + key.toString() + " from MemCache");
-				if(cachedEntity.equals(NULL_ENTITY)) {
+				if(memcachedEntity.equals(NULL_ENTITY)) {
 					log.debug("--> null");
 					return null;
 				} else {
-					return cachedEntity;
+					return memcachedEntity;
 				}
 			} else if(trans != null) {
 				/*
@@ -220,40 +236,54 @@ public class GaeUtils {
 		}
 		
 		log.debug("Getting entity " + key.toString() + " from GAE data store");
-		Future<Entity> entity = datastore.get(trans, key);
-		Entity e = waitFor(entity);
-		if(useMemCache) {
-			updateCachedEntity(key, cachedEntity, e);
+		Future<Entity> futureEntity = datastore.get(trans, key);
+		Entity entityFromDatastore = waitFor(futureEntity);
+		if(useMemCacheInThisClass && useMemcache) {
+			updateCachedEntity(key, memcachedEntity, entityFromDatastore);
 		}
-		if(e == null) {
+		if(entityFromDatastore == null) {
 			log.debug("--> null");
 		}
-		return e;
+		return entityFromDatastore;
 	}
 	
-	private static void updateCachedEntity(Key key, Entity oldEntity, Entity newEntity) {
-		
-		Entity ne = newEntity;
-		Entity oe = oldEntity;
-		
-		if(ne == null) {
-			ne = NULL_ENTITY;
+	/**
+	 * A careful put to the memcache that makes sure no other process has
+	 * modified the same key.
+	 * 
+	 * @param key ..
+	 * @param currentlyCachedEntity current value retrieved from memcache
+	 * @param entityToBeCached to be put in memcache, can be null
+	 */
+	private static void updateCachedEntity(Key key, Entity currentlyCachedEntity,
+	        Entity entityToBeCached) {
+		Entity entityToBeCached_ = entityToBeCached;
+		if(entityToBeCached_ == null) {
+			entityToBeCached_ = NULL_ENTITY;
 		}
+		Entity currentlyCachedEntity_ = currentlyCachedEntity;
 		
 		while(true) {
-			
-			Entity e = (Entity)XydraRuntime.getMemcache().put(key, ne);
-			
-			if(XI.equals(oe, e) || XI.equals(e, ne)) {
+			Entity previouslyCacheEntity = (Entity)XydraRuntime.getMemcache().put(key,
+			        entityToBeCached_);
+			/*
+			 * If memcache contained still the value that we once got from
+			 * there, it's fine. Or if it contains already the value we just
+			 * stored.
+			 */
+			if(XI.equals(currentlyCachedEntity_, previouslyCacheEntity)
+			        || XI.equals(previouslyCacheEntity, entityToBeCached_)) {
 				return;
 			}
-			
-			// Someone changed the entity, better change it back to their value.
-			
+			/*
+			 * Else: Someone changed the entity before this method was called:
+			 * Better change it back to their value.
+			 */
+
 			// FIXME this can still cause short periods where the cache is wrong
 			
-			oe = ne;
-			ne = e;
+			currentlyCachedEntity_ = entityToBeCached_;
+			entityToBeCached_ = previouslyCacheEntity;
 			
 		}
 		
@@ -292,7 +322,7 @@ public class GaeUtils {
 			storedKeys.add(res);
 		}
 		
-		if(useMemCache) {
+		if(useMemCacheInThisClass) {
 			// remove first from memcache
 			if(trans == null) {
 				XydraRuntime.getMemcache().put(entity.getKey(), entity);
@@ -326,7 +356,7 @@ public class GaeUtils {
 		log.debug("putting (async) " + entity.getKey());
 		makeSureDatestoreServiceIsInitialised();
 		Future<Key> result = datastore.put(trans, entity);
-		if(useMemCache) {
+		if(useMemCacheInThisClass) {
 			// remove first from memcache
 			if(trans == null) {
 				XydraRuntime.getMemcache().put(entity.getKey(), entity);
@@ -395,7 +425,7 @@ public class GaeUtils {
 	public static Future<Void> deleteEntityAsync(Key key) {
 		log.debug("deleting (async) " + key);
 		makeSureDatestoreServiceIsInitialised();
-		if(useMemCache) {
+		if(useMemCacheInThisClass) {
 			// delete first in memcache
 			XydraRuntime.getMemcache().put(key, NULL_ENTITY);
 		}
@@ -411,7 +441,7 @@ public class GaeUtils {
 	public static void deleteEntity(Key key, Transaction trans) {
 		log.debug("deleting " + key);
 		makeSureDatestoreServiceIsInitialised();
-		if(useMemCache) {
+		if(useMemCacheInThisClass) {
 			// delete first in memcache
 			if(trans == null) {
 				XydraRuntime.getMemcache().put(key, NULL_ENTITY);

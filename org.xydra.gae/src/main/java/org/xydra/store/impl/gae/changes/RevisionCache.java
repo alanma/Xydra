@@ -4,27 +4,40 @@ import org.xydra.base.XAddress;
 import org.xydra.core.model.XModel;
 import org.xydra.store.IMemCache;
 import org.xydra.store.XydraRuntime;
+import org.xydra.store.impl.gae.GaeOperation;
 
 
 /**
  * There is one revision cache per {@link XModel}.
  * 
- * @author dscharrer
+ * A model has a <em>current revision number</em>. It is incremented every time
+ * a change operation succeeds. Not necessarily only one step.
  * 
+ * 
+ * 
+ * 
+ * 
+ * The order of revision number is this:
+ * 
+ * @author dscharrer
  */
-public class RevisionCache {
+class RevisionCache {
 	
+	/**
+	 * How many milliseconds to consider the locally cached value valid
+	 */
 	private static final long LOCAL_VM_CACHE_TIMEOUT = 500;
 	
 	private final String commitedRevCacheName;
 	
 	/**
-	 * The name of the cached value used by {@link #getCurrent()} and
-	 * {@link #setCurrent(long)}
+	 * The name of the cached value used by {@link #getCurrentModelRev()} and
+	 * {@link #setCurrentModelRev(long)}
 	 */
 	private final String currentRevCacheName;
 	
-	public RevisionCache(XAddress modelAddr) {
+	@GaeOperation()
+	RevisionCache(XAddress modelAddr) {
 		this.commitedRevCacheName = modelAddr + "-commitedRev";
 		this.currentRevCacheName = modelAddr + "-currentRev";
 	}
@@ -38,13 +51,15 @@ public class RevisionCache {
 	 *         guaranteed to be the highest revision number that fits this
 	 *         requirement.
 	 */
+	@GaeOperation(memcacheRead = true)
+	// FIXME all ops
 	protected long getLastCommited() {
 		IMemCache cache = XydraRuntime.getMemcache();
 		
 		Long entry = (Long)cache.get(this.commitedRevCacheName);
 		long rev = (entry == null) ? -1L : entry;
 		
-		long current = getCurrent();
+		long current = getCurrentModelRev();
 		
 		return (current > rev ? current : rev);
 	}
@@ -86,19 +101,19 @@ public class RevisionCache {
 	}
 	
 	/** Local VM cache of the "current" revision number. */
-	private long localVmCacheCurrentRev = NOT_SET;
+	private long localVmCacheCurrentModelRev = NOT_SET;
 	/** Age of Local VM cache of the "current" revision number. */
-	private long localVmCacheCurrentRevTime = -1;
+	private long localVmCacheCurrentModelRevTime = -1;
 	
 	/**
-	 * Retrieve a cached value of the current revision number as defined by
-	 * {@link #getCurrentRevisionNumber()}.
+	 * @return a cached value of the current revision number as defined by
+	 *         {@link GaeChangesService#getCurrentRevisionNumber()}.
 	 * 
-	 * The returned value may be less that the actual "current" revision number,
-	 * but is guaranteed to never be greater.
+	 *         The returned value may be less that the actual "current" revision
+	 *         number, but is guaranteed to never be greater.
 	 */
-	protected long getCurrent() {
-		long rev = getCurrentIfSet();
+	protected long getCurrentModelRev() {
+		long rev = getCurrentModelRevIfSet();
 		return (rev == NOT_SET) ? -1L : rev;
 	}
 	
@@ -106,17 +121,18 @@ public class RevisionCache {
 	
 	/**
 	 * Retrieve a cached value of the current revision number as defined by
-	 * {@link #getCurrentRevisionNumber()}.
+	 * {@link GaeChangesService#getCurrentRevisionNumber()}.
 	 * 
 	 * The returned value may be less that the actual "current" revision number,
 	 * but is guaranteed to never be greater.
 	 */
-	protected long getCurrentIfSet() {
+	@GaeOperation(memcacheRead = true)
+	protected long getCurrentModelRevIfSet() {
 		// localVmCache
 		synchronized(this) {
 			long now = System.currentTimeMillis();
-			if(now < this.localVmCacheCurrentRevTime + LOCAL_VM_CACHE_TIMEOUT) {
-				return this.localVmCacheCurrentRev;
+			if(now < this.localVmCacheCurrentModelRevTime + LOCAL_VM_CACHE_TIMEOUT) {
+				return this.localVmCacheCurrentModelRev;
 			}
 		}
 		// memCache
@@ -126,15 +142,15 @@ public class RevisionCache {
 	}
 	
 	/**
-	 * Set a new value to be returned by {@link #getCurrent()}.
+	 * Set a new value to be returned by {@link #getCurrentModelRev()}.
 	 * 
 	 * @param l The value is set. It is ignored if the current cached value is
 	 *            less than this.
 	 */
-	protected void setCurrent(long l) {
+	protected void setCurrentModelRev(long l) {
 		
 		synchronized(this) {
-			if(this.localVmCacheCurrentRev >= l) {
+			if(this.localVmCacheCurrentModelRev >= l) {
 				return;
 			}
 		}
@@ -142,9 +158,9 @@ public class RevisionCache {
 		long val = increaseCachedValue(this.currentRevCacheName, l);
 		
 		synchronized(this) {
-			if(val >= this.localVmCacheCurrentRev) {
-				this.localVmCacheCurrentRev = val;
-				this.localVmCacheCurrentRevTime = System.currentTimeMillis();
+			if(val >= this.localVmCacheCurrentModelRev) {
+				this.localVmCacheCurrentModelRev = val;
+				this.localVmCacheCurrentModelRevTime = System.currentTimeMillis();
 			}
 		}
 	}
@@ -156,6 +172,7 @@ public class RevisionCache {
 	 * @param l The new value to set. Ignored if it is less than the current
 	 *            value.
 	 */
+	@GaeOperation(memcacheRead = true ,memcacheWrite = true)
 	private long increaseCachedValue(String cachname, long l) {
 		IMemCache cache = XydraRuntime.getMemcache();
 		

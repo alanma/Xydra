@@ -19,7 +19,7 @@ import org.xydra.store.impl.gae.changes.GaeEvents.AsyncValue;
  * @author voelkel
  * @author kaidel
  */
-public class GaeFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
+class GaeFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	
 	private static final long serialVersionUID = -4274165693986851623L;
 	

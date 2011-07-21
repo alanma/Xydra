@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
@@ -15,20 +16,17 @@ import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XTransaction;
-import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
-import org.xydra.core.model.impl.memory.UUID;
 import org.xydra.store.RequestException;
-import org.xydra.store.XydraRuntime;
 import org.xydra.store.XydraStore;
 import org.xydra.store.XydraStoreAdmin;
 import org.xydra.store.impl.delegate.DelegatingSecureStore;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.changes.GaeChangesService;
 import org.xydra.store.impl.gae.changes.InternalGaeXEntity;
+import org.xydra.store.impl.gae.changes.Utils;
 import org.xydra.store.impl.gae.changes.XIDLengthException;
-import org.xydra.store.impl.gae.snapshot.GaeSnapshotService;
 
 
 /**
@@ -39,42 +37,19 @@ import org.xydra.store.impl.gae.snapshot.GaeSnapshotService;
  */
 @RunsInAppEngine(true)
 @RunsInGWT(false)
+@RequiresAppEngine(true)
 public class GaePersistence implements XydraPersistence {
-	
-	/** A unique ID to distinguish several AppEngine instances */
-	public static final String INSTANCE_ID = UUID.uuid(9);
-	
-	private final XAddress repoAddr;
-	
-	/**
-	 * This method is used to instantiate the persistence via reflection in
-	 * SharedXydraPersistence.
-	 * 
-	 * @param repoId repository ID
-	 */
-	public GaePersistence(XID repoId) {
-		if(repoId == null) {
-			throw new IllegalArgumentException("repoId was null");
-		}
-		checkIdLength(repoId);
-		
-		// To enable local JUnit testing with multiple threads
-		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		
-		// Register AppEngine infrastructure services
-		XydraRuntime.setPlatformRuntime(new GaePlatformRuntime());
-		
-		this.repoAddr = XX.toAddress(repoId, null, null, null);
-	}
 	
 	private static final int MAX_ID_LENGTH = 100;
 	
+	@GaeOperation()
 	private static void checkIdLength(XID id) {
 		if(id != null && id.toString().length() > MAX_ID_LENGTH) {
 			throw new XIDLengthException(id);
 		}
 	}
 	
+	@GaeOperation()
 	private static void checkIdLengths(XAtomicCommand command) {
 		XAddress addr = command.getChangedEntity();
 		// repo and model IDs already checked
@@ -82,6 +57,7 @@ public class GaePersistence implements XydraPersistence {
 		checkIdLength(addr.getField());
 	}
 	
+	@GaeOperation()
 	private static void checkIdLengths(XCommand command) {
 		if(command instanceof XTransaction) {
 			for(XAtomicCommand ac : (XTransaction)command) {
@@ -93,118 +69,40 @@ public class GaePersistence implements XydraPersistence {
 		}
 	}
 	
-	private XAddress getModelAddress(XID modelId) {
-		return XX.resolveModel(this.repoAddr, modelId);
+	/**
+	 * @return a secure {@link XydraStore} instance based on a
+	 *         {@link GaePersistence} with the default repository id
+	 */
+	static synchronized public XydraStore get() {
+		return new DelegatingSecureStore(new GaePersistence(getDefaultRepositoryId()),
+		        XydraStoreAdmin.XYDRA_ADMIN_ID);
 	}
 	
-	private Map<XID,GaeChangesService> gcsCache = new HashMap<XID,GaeChangesService>();
-	
-	private GaeChangesService getChangesService(XID modelId) {
-		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		synchronized(this.gcsCache) {
-			GaeChangesService gcs = this.gcsCache.get(modelId);
-			if(gcs == null) {
-				gcs = new GaeChangesService(getModelAddress(modelId));
-				this.gcsCache.put(modelId, gcs);
-			}
-			return gcs;
-		}
+	/**
+	 * @return the default repository id, as used e.g. by {@link #get()}
+	 */
+	@GaeOperation()
+	static public XID getDefaultRepositoryId() {
+		return XX.toId("data");
 	}
 	
-	private GaeSnapshotService getSnapshotService(XID modelId) {
-		// IMPROVE cache GaeSnapshotService instances?
-		return new GaeSnapshotService(getChangesService(modelId));
-	}
+	private Map<XID,GaeModelPersistence> modelPersistenceMap = new HashMap<XID,GaeModelPersistence>();
 	
-	public synchronized XReadableModel getModelSnapshot(XID modelId) {
-		
-		if(modelId == null) {
-			throw new IllegalArgumentException("modelId was null");
-		}
-		
-		return getSnapshotService(modelId).getSnapshot();
-	}
+	private final XAddress repoAddr;
 	
-	@Override
-	public synchronized long executeCommand(XID actorId, XCommand command) {
-		
-		if(actorId == null) {
-			throw new IllegalArgumentException("actorId was null");
+	/**
+	 * This method is used to instantiate the persistence
+	 * 
+	 * @param repoId repository ID
+	 */
+	@GaeOperation()
+	public GaePersistence(XID repoId) {
+		if(repoId == null) {
+			throw new IllegalArgumentException("repoId was null");
 		}
-		if(command == null) {
-			throw new IllegalArgumentException("command was null");
-		}
-		checkAddress(command.getTarget());
+		checkIdLength(repoId);
 		
-		checkIdLengths(command);
-		
-		XID modelId = command.getChangedEntity().getModel();
-		checkIdLength(modelId);
-		
-		// TODO wrap GAE exceptions in InternalStoreExceptions
-		
-		return getChangesService(modelId).executeCommand(command, actorId);
-	}
-	
-	@Override
-	public synchronized List<XEvent> getEvents(XAddress address, long beginRevision,
-	        long endRevision) {
-		
-		checkAddress(address);
-		
-		if(address.getModel() == null) {
-			throw new RequestException("address must specify a model, was " + address);
-		}
-		
-		// TODO filter events if address is not a model address?
-		
-		return getChangesService(address.getModel()).getEventsBetween(beginRevision, endRevision);
-	}
-	
-	@Override
-	public synchronized Set<XID> getModelIds() {
-		return InternalGaeXEntity.findChildren(this.repoAddr);
-	}
-	
-	@Override
-	public synchronized boolean hasModel(XID modelId) {
-		if(modelId == null) {
-			throw new IllegalArgumentException("modelId was null");
-		}
-		return InternalGaeXEntity.exists(getModelAddress(modelId));
-	}
-	
-	@Override
-	public synchronized long getModelRevision(XAddress address) {
-		checkAddress(address);
-		if(address.getAddressedType() != XType.XMODEL) {
-			throw new RequestException("address must refer to a model, was " + address);
-		}
-		return getChangesService(address.getModel()).getCurrentRevisionNumber();
-	}
-	
-	@Override
-	public synchronized XWritableModel getModelSnapshot(XAddress address) {
-		checkAddress(address);
-		if(address.getAddressedType() != XType.XMODEL) {
-			throw new RequestException("address must refer to a model, was " + address);
-		}
-		return getSnapshotService(address.getModel()).getSnapshot();
-	}
-	
-	@Override
-	public synchronized XWritableObject getObjectSnapshot(XAddress address) {
-		checkAddress(address);
-		if(address.getAddressedType() != XType.XOBJECT) {
-			throw new RequestException("address must refer to an object, was " + address);
-		}
-		// IMPROVE generate the object snapshot directly
-		XWritableModel modelSnapshot = getSnapshotService(address.getModel()).getSnapshot();
-		if(modelSnapshot == null) {
-			return null;
-		}
-		
-		return modelSnapshot.getObject(address.getObject());
+		this.repoAddr = XX.toAddress(repoId, null, null, null);
 	}
 	
 	/**
@@ -212,6 +110,7 @@ public class GaePersistence implements XydraPersistence {
 	 * 
 	 * @param address
 	 */
+	@GaeOperation()
 	private void checkAddress(XAddress address) {
 		if(address == null) {
 			throw new IllegalArgumentException("address was null");
@@ -223,27 +122,109 @@ public class GaePersistence implements XydraPersistence {
 	}
 	
 	@Override
+	public synchronized void clear() {
+		GaeUtils.clear();
+	}
+	
+	@Override
+	public synchronized long executeCommand(XID actorId, XCommand command) {
+		if(actorId == null) {
+			throw new IllegalArgumentException("actorId was null");
+		}
+		if(command == null) {
+			throw new IllegalArgumentException("command was null");
+		}
+		checkAddress(command.getTarget());
+		checkIdLengths(command);
+		
+		XID modelId = command.getChangedEntity().getModel();
+		checkIdLength(modelId);
+		
+		// TODO IMPROVE wrap GAE exceptions in InternalStoreExceptions
+		return getModelPersistence(modelId).executeCommand(command, actorId);
+	}
+	
+	/**
+	 * @param modelId ..
+	 * @return the {@link GaeChangesService} responsible for managing the given
+	 *         modelId
+	 */
+	@GaeOperation()
+	private GaeModelPersistence getModelPersistence(XID modelId) {
+		synchronized(this.modelPersistenceMap) {
+			GaeModelPersistence modelPersistence = this.modelPersistenceMap.get(modelId);
+			if(modelPersistence == null) {
+				modelPersistence = new GaeModelPersistence(getModelAddress(modelId));
+				this.modelPersistenceMap.put(modelId, modelPersistence);
+			}
+			return modelPersistence;
+		}
+	}
+	
+	@Override
+	public synchronized List<XEvent> getEvents(XAddress address, long beginRevision,
+	        long endRevision) {
+		checkAddress(address);
+		if(address.getModel() == null) {
+			throw new RequestException("address must specify a model, was " + address);
+		}
+		
+		// TODO filter events if address is not a model address?
+		
+		return getModelPersistence(address.getModel()).getEventsBetween(beginRevision, endRevision);
+	}
+	
+	@GaeOperation()
+	private XAddress getModelAddress(XID modelId) {
+		return XX.resolveModel(this.repoAddr, modelId);
+	}
+	
+	@Override
+	@GaeOperation(datastoreRead = true)
+	public synchronized Set<XID> getModelIds() {
+		return Utils.findChildren(this.repoAddr);
+	}
+	
+	@Override
+	public synchronized long getModelRevision(XAddress address) {
+		checkAddress(address);
+		if(address.getAddressedType() != XType.XMODEL) {
+			throw new RequestException("address must refer to a model, was " + address);
+		}
+		return getModelPersistence(address.getModel()).getCurrentRevisionNumber();
+	}
+	
+	@Override
+	public synchronized XWritableModel getModelSnapshot(XAddress address) {
+		checkAddress(address);
+		if(address.getAddressedType() != XType.XMODEL) {
+			throw new RequestException("address must refer to a model, was " + address);
+		}
+		
+		return getModelPersistence(address.getModel()).getSnapshot();
+	}
+	
+	@Override
+	public synchronized XWritableObject getObjectSnapshot(XAddress address) {
+		checkAddress(address);
+		if(address.getAddressedType() != XType.XOBJECT) {
+			throw new RequestException("address must refer to an object, was " + address);
+		}
+		return getModelPersistence(address.getModel()).getObjectSnapshot(address.getObject());
+	}
+	
+	@Override
+	@GaeOperation()
 	public XID getRepositoryId() {
 		return this.repoAddr.getRepository();
 	}
 	
-	static synchronized public XydraStore get() {
-		return new DelegatingSecureStore(new GaePersistence(getDefaultRepositoryId()),
-		        XydraStoreAdmin.XYDRA_ADMIN_ID);
-	}
-	
-	/**
-	 * This method is used in tests.
-	 * 
-	 * @return the default repository id used by {@link #get()}
-	 */
-	static public XID getDefaultRepositoryId() {
-		return XX.toId("data");
-	}
-	
 	@Override
-	public synchronized void clear() {
-		GaeUtils.clear();
+	public synchronized boolean hasModel(XID modelId) {
+		if(modelId == null) {
+			throw new IllegalArgumentException("modelId was null");
+		}
+		return InternalGaeXEntity.exists(getModelAddress(modelId));
 	}
 	
 }

@@ -26,6 +26,7 @@ import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XChangeLog;
+import org.xydra.core.model.XModel;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.DeltaUtils;
 import org.xydra.index.query.Pair;
@@ -33,6 +34,7 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.XydraStore;
+import org.xydra.store.impl.gae.GaeOperation;
 import org.xydra.store.impl.gae.GaeUtils;
 import org.xydra.store.impl.gae.changes.GaeChange.Status;
 import org.xydra.store.impl.gae.changes.GaeEvents.AsyncValue;
@@ -43,12 +45,12 @@ import com.google.appengine.api.datastore.Transaction;
 
 
 /**
- * A class responsible for executing and logging changes to a specific XModel in
- * the GAE datastore.
+ * A class responsible for executing and logging changes to a specific
+ * {@link XModel} in the GAE datastore.
  * 
  * This class is the core of the GAE {@link XydraStore} implementation.
  * 
- * Keys for XMODEL, XOBJEC and XFIELD entities are encoded according to
+ * Keys for XMODEL, XOBJECT and XFIELD entities are encoded according to
  * {@link KeyStructure#createEntityKey(XAddress)}.
  * 
  * There are five different kinds of GAE Entities that are used by this class:
@@ -69,10 +71,11 @@ import com.google.appengine.api.datastore.Transaction;
  * fields.</dd>
  * 
  * <dt>Entity type XFIELD</dt>
- * <dd>Represent fields and managed by {@link InternalGaeField}. The value is
- * not stored in the field entity. Instead, additionally to the field revision,
- * an index into the transaction (or zero) is stored that can be used with
- * {@link GaeEvents#getValue(XAddress, long, int)} to load the {@link XValue}.</dd>
+ * <dd>They represent fields and are managed by {@link InternalGaeField}. The
+ * value is not stored in the field entity. Instead, additionally to the field
+ * revision, an index into the transaction (or zero) is stored that can be used
+ * with {@link GaeEvents#getValue(XAddress, long, int)} to load the
+ * {@link XValue}.</dd>
  * 
  * 
  * <dt>Entity type XCHANGE</dt>
@@ -82,9 +85,9 @@ import com.google.appengine.api.datastore.Transaction;
  * is currently in progress. Keys are encoded according to
  * {@link KeyStructure#createChangeKey(XAddress, long)}
  * 
- * The XCHANGE entities are managed by {@link GaeChange} stores the status of
- * the change, the required locks, the actor that initiated the change, the time
- * the (last) process started working on the change.
+ * The XCHANGE entities are managed by {@link GaeChange}. They store the status
+ * of the change, the required locks, the actor that initiated the change, and
+ * the time the (last) process started working on the change.
  * 
  * Events and small XValues are also saved in the XCHANGE entities. These
  * properties are managed by {@link GaeEvents}. No events are guaranteed to be
@@ -139,6 +142,7 @@ public class GaeChangesService {
 	private final XAddress modelAddr;
 	private final RevisionCache revCache;
 	
+	@GaeOperation()
 	public GaeChangesService(XAddress modelAddr) {
 		this.modelAddr = modelAddr;
 		this.revCache = new RevisionCache(modelAddr);
@@ -169,14 +173,25 @@ public class GaeChangesService {
 		assert this.modelAddr.equalsOrContains(command.getChangedEntity()) : "cannot handle command "
 		        + command + " - it does not address a model";
 		
-		GaeLocks locks = new GaeLocks(command);
+		GaeLocks locks = GaeLocks.createLocks(command);
 		
+		log.debug("Phase 1: grabRevisionAndRegister " + locks.size() + " locks");
 		GaeChange change = grabRevisionAndRegisterLocks(locks, actorId);
+		
+		// // FIXME kill
+		// System.out.println(StatsGatheringMemCacheWrapper.INSTANCE == null ?
+		// ""
+		// : StatsGatheringMemCacheWrapper.INSTANCE.stats());
 		
 		// IMPROVE save command to be able to roll back in case of timeout while
 		// waiting for locks / checking preconditions?
 		
 		waitForLocks(change);
+		
+		// // FIXME kill
+		// System.out.println(StatsGatheringMemCacheWrapper.INSTANCE == null ?
+		// ""
+		// : StatsGatheringMemCacheWrapper.INSTANCE.stats());
 		
 		Pair<List<XAtomicEvent>,int[]> events = checkPreconditionsAndSaveEvents(change, command,
 		        actorId);
@@ -193,8 +208,8 @@ public class GaeChangesService {
 	}
 	
 	/**
-	 * Grabs the first available revision number and registers a change for that
-	 * revision number with the provided locks.
+	 * Grabs the lowest available revision number and registers a change for
+	 * that revision number with the provided locks.
 	 * 
 	 * @param locks which locks to get
 	 * @param actorId The actor to record in the change {@link Entity}.
@@ -567,7 +582,7 @@ public class GaeChangesService {
 		commit(change, Status.SuccessExecuted);
 		
 		if(this.revCache.getLastCommited() >= change.rev) {
-			updateCurrentRev(Math.max(change.rev, this.revCache.getCurrent()));
+			updateCurrentRev(Math.max(change.rev, this.revCache.getCurrentModelRev()));
 		}
 	}
 	
@@ -660,7 +675,7 @@ public class GaeChangesService {
 		}
 	}
 	
-	protected GaeChange getCachedChange(long rev) {
+	private GaeChange getCachedChange(long rev) {
 		if(!useLocalVMCache) {
 			return null;
 		}
@@ -685,14 +700,13 @@ public class GaeChangesService {
 	}
 	
 	/**
-	 * Get the model's current revision number.
-	 * 
+	 * @return the model's current revision number.
 	 * @see XydraStore#getModelRevisions(XID, String, XAddress[],
 	 *      org.xydra.store.Callback)
 	 */
 	public long getCurrentRevisionNumber() {
 		
-		long currentRev = this.revCache.getCurrentIfSet();
+		long currentRev = this.revCache.getCurrentModelRevIfSet();
 		if(currentRev != RevisionCache.NOT_SET) {
 			return currentRev;
 		} else {
@@ -754,7 +768,7 @@ public class GaeChangesService {
 		}
 		
 		this.revCache.setLastCommited(rev);
-		this.revCache.setCurrent(currentRev);
+		this.revCache.setCurrentModelRev(currentRev);
 		
 		return currentRev;
 	}
@@ -777,32 +791,39 @@ public class GaeChangesService {
 	 * 
 	 * See {@link GetEventsRequest} for parameters.
 	 * 
-	 * @return a list of events or null if this model was never created.
+	 * @return a list of events or null if this model was never created. The
+	 *         list might contain fewer elements than the range implies.
+	 * 
+	 *         TODO are these all model/object/field-events or do they also
+	 *         contains RepositoryEvents for this model?
 	 * 
 	 * @see XydraStore#getEvents(XID, String, GetEventsRequest[],
 	 *      org.xydra.store.Callback)
+	 * 
+	 *      TODO Implementation should cache retrieved events in a localVmCache
+	 *      and never ask for them again.
 	 */
-	public List<XEvent> getEventsBetween(long beginRevision, long _endRevision) {
+	public List<XEvent> getEventsBetween(long beginRevision, long endRevision) {
+		log.info("getEventsBetwen [" + beginRevision + "," + endRevision + ") @"
+		        + getModelAddress());
 		
-		long endRevision = _endRevision;
-		
-		log.info("getEventsBetwen " + beginRevision + " " + endRevision + " @" + getModelAddress());
+		long endRev = endRevision;
 		
 		if(beginRevision < 0) {
 			throw new IndexOutOfBoundsException(
 			        "beginRevision is not a valid revision number, was " + beginRevision);
 		}
 		
-		if(endRevision < 0) {
+		if(endRev < 0) {
 			throw new IndexOutOfBoundsException("endRevision is not a valid revision number, was "
-			        + endRevision);
+			        + endRev);
 		}
 		
-		if(beginRevision > endRevision) {
+		if(beginRevision > endRev) {
 			throw new IllegalArgumentException("beginRevision may not be greater than endRevision");
 		}
 		
-		if(endRevision <= 0) {
+		if(endRev <= 0) {
 			return new ArrayList<XEvent>(0);
 		}
 		
@@ -817,16 +838,16 @@ public class GaeChangesService {
 		// Don't try to get more events than there actually are.
 		if(beginRevision > currentRev) {
 			return new ArrayList<XEvent>(0);
-		} else if(endRevision > currentRev) {
-			endRevision = currentRev;
+		} else if(endRev > currentRev) {
+			endRev = currentRev;
 		}
 		
 		List<XEvent> events = new ArrayList<XEvent>();
 		
 		// Asynchronously fetch an initial batch of change entities
 		int initialBuffer = 1;
-		if(endRevision <= currentRev) {
-			initialBuffer = (int)(endRevision - begin + 1);
+		if(endRev <= currentRev) {
+			initialBuffer = (int)(endRev - begin + 1);
 		} else {
 			// IMPROVE maybe use an initial buffer size of currentRev - begin +
 			// 1?
@@ -843,7 +864,7 @@ public class GaeChangesService {
 		boolean trackCurrentRev = (begin <= currentRev);
 		
 		long rev = begin;
-		for(; rev <= endRevision; rev++) {
+		for(; rev <= endRev; rev++) {
 			
 			// Wait for the first change entities
 			GaeChange change = batch.get(pos).get();
@@ -876,12 +897,12 @@ public class GaeChangesService {
 			}
 			
 			// Asynchronously fetch new change entities.
-			if(rev + batch.size() <= endRevision) {
+			if(rev + batch.size() <= endRev) {
 				batch.set(pos, getChangeAt(rev + batch.size()));
 			}
 			pos++;
 			if(pos == batch.size()) {
-				if(rev + batch.size() + 1 <= endRevision) {
+				if(rev + batch.size() + 1 <= endRev) {
 					batch.add(getChangeAt(rev + batch.size() + 1));
 				}
 				pos = 0;
@@ -896,7 +917,7 @@ public class GaeChangesService {
 		
 		if(trackCurrentRev) {
 			this.revCache.setLastCommited(rev - 1);
-			this.revCache.setCurrent(currentRev);
+			this.revCache.setCurrentModelRev(currentRev);
 		}
 		
 		return events;
@@ -918,7 +939,7 @@ public class GaeChangesService {
 		}
 	}
 	
-	public AsyncValue getValue(long rev, int transindex) {
+	AsyncValue getValue(long rev, int transindex) {
 		
 		GaeChange change = getCachedChange(rev);
 		if(change != null) {
@@ -938,4 +959,5 @@ public class GaeChangesService {
 		
 		return GaeEvents.getValue(this.modelAddr, rev, transindex);
 	}
+	
 }

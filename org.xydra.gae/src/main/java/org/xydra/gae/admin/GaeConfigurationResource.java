@@ -16,7 +16,6 @@ import org.xydra.restless.utils.HtmlUtils.METHOD;
 import org.xydra.restless.utils.ServletUtils;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.gae.GaeAssert;
-import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.impl.gae.GaeUtils;
 
@@ -56,15 +55,15 @@ public class GaeConfigurationResource {
 	public static void index(HttpServletRequest req, HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		GaeConfigurationResource.getCurrentConfiguration().applyIfNecessary();
-		Writer w = HtmlUtils.startHtmlPage(res, "GAE cache conf on instance "
-		        + GaePersistence.INSTANCE_ID);
+		Writer w = HtmlUtils.startHtmlPage(res,
+		        "GAE cache conf on instance " + XydraRuntime.getInstanceId());
 		writeIndex(w);
 		HtmlUtils.endHtmlPage(w);
 	}
 	
 	private static void writeIndex(Writer w) throws IOException {
 		addCommonStyle(w);
-		w.write("<h2>Instance " + GaePersistence.INSTANCE_ID + " </h2>");
+		w.write("<h2>Instance " + XydraRuntime.getInstanceId() + " </h2>");
 		
 		w.write("Last config processing on XydraRuntime in this instance was "
 		        + (System.currentTimeMillis() - XydraRuntime.getLastTimeInitialisedAt())
@@ -128,7 +127,7 @@ public class GaeConfigurationResource {
 	 *         server instance.
 	 */
 	private static boolean onRightInstance(String requestedInstanceId) {
-		return GaePersistence.INSTANCE_ID.equals(requestedInstanceId);
+		return XydraRuntime.getInstanceId().equals(requestedInstanceId);
 	}
 	
 	/**
@@ -142,9 +141,9 @@ public class GaeConfigurationResource {
 	        throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		
-		Writer w = HtmlUtils.startHtmlPage(res, "Setting configuration on instance "
-		        + GaePersistence.INSTANCE_ID);
-		w.write("InstanceID: " + GaePersistence.INSTANCE_ID + "<br />");
+		Writer w = HtmlUtils.startHtmlPage(res,
+		        "Setting configuration on instance " + XydraRuntime.getInstanceId());
+		w.write("InstanceID: " + XydraRuntime.getInstanceId() + "<br />");
 		w.write("Requested instance: " + instanceId + "<br />");
 		if(onRightInstance(instanceId)) {
 			w.write("Yeah, right instance");

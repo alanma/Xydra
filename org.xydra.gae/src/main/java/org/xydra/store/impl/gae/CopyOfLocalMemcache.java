@@ -1,10 +1,15 @@
 package org.xydra.store.impl.gae;
 
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+
+import javax.cache.Cache;
+import javax.cache.CacheException;
+import javax.cache.CacheFactory;
+import javax.cache.CacheManager;
+import javax.cache.CacheStatistics;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -12,6 +17,8 @@ import org.xydra.store.IMemCache;
 
 
 /**
+ * TODO find a way to use a cool eviction policy for tests
+ * 
  * To fix an issue with the Gae local test implementation (takes more and more
  * memory), this implementation can be restricted in memory use. This
  * implementation keeps 5 MB of memory free.
@@ -19,9 +26,11 @@ import org.xydra.store.IMemCache;
  * @author xamde
  * 
  */
-class LocalMemcache implements IMemCache {
+public class CopyOfLocalMemcache implements IMemCache {
 	
-	private static final Logger log = LoggerFactory.getLogger(LocalMemcache.class);
+	private static final Logger log = LoggerFactory.getLogger(CopyOfLocalMemcache.class);
+	
+	private Cache javaxCache;
 	
 	public int size() {
 		return this.map.size();
@@ -95,26 +104,35 @@ class LocalMemcache implements IMemCache {
 	
 	private Map<Object,Object> map;
 	
-	public LocalMemcache() {
+	@SuppressWarnings("unchecked")
+	public CopyOfLocalMemcache() {
 		log.info("Using LocalMemcache");
-		this.map = new ConcurrentHashMap<Object,Object>();
+		assert this.javaxCache == null;
+		try {
+			CacheFactory cacheFactory = CacheManager.getInstance().getCacheFactory();
+			Cache cache = cacheFactory.createCache(Collections.emptyMap());
+			this.javaxCache = cache;
+			this.map = cache;
+		} catch(CacheException e) {
+			log.error("Could not create LocalMemcache instance", e);
+			throw new RuntimeException(e);
+		}
 	}
 	
 	@Override
 	public String stats() {
-		return "In-memory, items: " + size();
+		CacheStatistics stats = this.javaxCache.getCacheStatistics();
+		int hits = stats.getCacheHits();
+		int misses = stats.getCacheMisses();
+		int objectcount = stats.getObjectCount();
+		return "In-memory, size: " + size() + " objectcount: " + objectcount + " hits: " + hits
+		        + " misses: " + misses;
 	}
 	
 	@Override
 	public Map<Object,Object> getAll(Collection<Object> keys) {
-		Map<Object,Object> result = new HashMap<Object,Object>();
-		for(Object key : keys) {
-			Object value = this.get(key);
-			if(value != null) {
-				result.put(key, value);
-			}
-		}
-		return result;
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

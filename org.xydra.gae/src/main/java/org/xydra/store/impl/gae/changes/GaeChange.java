@@ -255,7 +255,7 @@ public class GaeChange {
 	 * Construct a new change entity with the given properties. The entity is
 	 * created but not put into the datastore.
 	 */
-	public GaeChange(XAddress modelAddr, long rev, GaeLocks locks, XID actorId) {
+	GaeChange(XAddress modelAddr, long rev, GaeLocks locks, XID actorId) {
 		
 		this.rev = rev;
 		this.locks = locks;
@@ -289,7 +289,7 @@ public class GaeChange {
 	 * Take over the given change entity. The entity is updated but the updated
 	 * version is not put back into the datastore.
 	 */
-	public GaeChange(XAddress modelAddr, long rev, Entity entity) {
+	GaeChange(XAddress modelAddr, long rev, Entity entity) {
 		assert entity != null;
 		this.entity = entity;
 		this.rev = rev;
@@ -298,21 +298,21 @@ public class GaeChange {
 		clearCache();
 	}
 	
-	public void reload(Transaction trans) {
+	void reload(Transaction trans) {
 		assert !getStatus().isCommitted();
-		this.entity = GaeUtils.getEntity(this.entity.getKey(), trans);
+		this.entity = GaeUtils.getEntity(this.entity.getKey(), trans, true);
 		assert this.entity != null : "change entities should not vanish";
 		clearCache();
 	}
 	
-	public void reload() {
+	void reload() {
 		reload(null);
 	}
 	
 	/**
 	 * @return the actor associated with the given change {@link Entity}.
 	 */
-	protected XID getActor() {
+	private XID getActor() {
 		if(this.actor == null) {
 			synchronized(this) {
 				String actorStr = (String)this.entity.getProperty(PROP_ACTOR);
@@ -415,7 +415,7 @@ public class GaeChange {
 	/**
 	 * @return the current time in milliseconds.
 	 */
-	protected static long now() {
+	private static long now() {
 		return System.currentTimeMillis();
 	}
 	
@@ -492,7 +492,7 @@ public class GaeChange {
 		return this.events;
 	}
 	
-	public boolean isConflicting(GaeChange otherChange) {
+	boolean isConflicting(GaeChange otherChange) {
 		GaeLocks ourLocks = getLocks();
 		GaeLocks otherLocks = otherChange.getLocks();
 		assert ourLocks != null : "our locks should not be removed before change is commited";

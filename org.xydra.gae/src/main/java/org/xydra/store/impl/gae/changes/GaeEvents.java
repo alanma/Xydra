@@ -57,12 +57,12 @@ import com.google.appengine.api.datastore.Text;
  * @author dscharrer
  * 
  */
-public class GaeEvents {
+class GaeEvents {
 	
 	/**
 	 * Enumeration to map between stored event type and {@link XEvent} types.
 	 */
-	enum EventType {
+	private enum EventType {
 		
 		AddModel(1), RemoveModel(2), AddObject(3), RemoveObject(4), AddField(5), RemoveField(6), AddValue(
 		        7), ChangeValue(8), RemoveValue(9);
@@ -218,10 +218,10 @@ public class GaeEvents {
 	protected static final int TRANSINDEX_NONE = -1;
 	
 	/**
-	 * A reference to a (possibly asynchronously loaded) value stored on the GAE
-	 * datastore.
+	 * A reference to a (possibly asynchronously loaded) {@link XValue} stored
+	 * on the GAE datastore.
 	 */
-	public static class AsyncValue {
+	static class AsyncValue {
 		
 		private final AsyncEntity future;
 		private final int transIndex;
@@ -249,7 +249,7 @@ public class GaeEvents {
 			this.transIndex = TRANSINDEX_NONE;
 		}
 		
-		public XValue get() {
+		XValue get() {
 			
 			if(this.value == null && this.transIndex != TRANSINDEX_NONE) {
 				
@@ -555,7 +555,7 @@ public class GaeEvents {
 		return new Pair<XAtomicEvent[],int[]>(events, valueIds);
 	}
 	
-	public static int getEventIndex(int transindex) {
+	static int getEventIndex(int transindex) {
 		return transindex < TRANSINDEX_NONE ? getInternalValueId(transindex) : transindex;
 	}
 	

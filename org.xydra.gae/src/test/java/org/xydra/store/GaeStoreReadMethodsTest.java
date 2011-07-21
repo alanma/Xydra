@@ -26,6 +26,7 @@ public class GaeStoreReadMethodsTest extends AbstractSecureStoreReadMethodsTest 
 	@Override
 	protected XydraStore getStore() {
 		GaeTestfixer.enable();
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		
 		if(this.store == null) {
 			this.store = GaePersistence.get();

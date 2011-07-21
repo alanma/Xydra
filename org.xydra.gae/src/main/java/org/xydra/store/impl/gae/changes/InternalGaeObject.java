@@ -30,12 +30,12 @@ import com.sun.org.apache.xpath.internal.objects.XObject;
  * @author dscharrer
  * 
  */
-public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> implements
+class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> implements
         XReadableObject {
 	
 	private static final Logger log = LoggerFactory.getLogger(InternalGaeObject.class);
 	
-	long objectRev = XEvent.RevisionNotAvailable;
+	private long objectRev = XEvent.RevisionNotAvailable;
 	
 	/**
 	 * Construct a read-only interface to an {@link XObject} in the GAE
@@ -138,7 +138,7 @@ public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeFi
 	 * @param rev The revision number of the current change. This will be saved
 	 *            to the object entity.
 	 */
-	public static Future<Key> createObject(XAddress objectAddr, GaeLocks locks, long rev) {
+	static Future<Key> createObject(XAddress objectAddr, GaeLocks locks, long rev) {
 		assert locks.canWrite(objectAddr);
 		assert objectAddr.getAddressedType() == XType.XOBJECT;
 		Entity e = new Entity(KeyStructure.createEntityKey(objectAddr));
@@ -165,7 +165,7 @@ public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeFi
 	 * @param rev The new revision number of the object. The objects revision
 	 *            number will not be lowered if it is already higher than this.
 	 */
-	public static void updateObjectRev(XAddress objectAddr, GaeLocks locks, long rev) {
+	static void updateObjectRev(XAddress objectAddr, GaeLocks locks, long rev) {
 		
 		// We only care that that object won't be removed, so a read lock
 		// suffices.
@@ -176,7 +176,7 @@ public class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeFi
 		while(true) {
 			Transaction trans = GaeUtils.beginTransaction();
 			
-			Entity e = GaeUtils.getEntity(key, trans);
+			Entity e = GaeUtils.getEntity(key, trans, true);
 			assert e != null : "should not be removed while we hold a lock to a contained field";
 			long oldRev = (Long)e.getProperty(PROP_REVISION);
 			

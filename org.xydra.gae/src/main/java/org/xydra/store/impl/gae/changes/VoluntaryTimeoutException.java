@@ -14,7 +14,7 @@ public class VoluntaryTimeoutException extends InternalStoreException {
 	
 	private static final long serialVersionUID = 3509805951788168084L;
 	
-	public VoluntaryTimeoutException(String message) {
+	VoluntaryTimeoutException(String message) {
 		super(message);
 	}
 }

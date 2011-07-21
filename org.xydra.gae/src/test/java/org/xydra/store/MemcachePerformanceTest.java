@@ -31,6 +31,7 @@ public class MemcachePerformanceTest {
 	public void testWithCaching() {
 		XydraRuntime.getConfigMap().put(XydraRuntime.PROP_USEMEMCACHE, "true");
 		XydraRuntime.getConfigMap().put(XydraRuntime.PROP_MEMCACHESTATS, "true");
+		XydraRuntime.forceReInitialisation();
 		XydraPersistence pers = XydraRuntime.getPersistence(XX.toId("test-repo"));
 		assertNotNull(pers);
 		assertTrue(pers instanceof GaePersistence);
@@ -50,7 +51,8 @@ public class MemcachePerformanceTest {
 		
 		// get stats
 		IMemCache memcache = XydraRuntime.getMemcache();
-		assertTrue(memcache instanceof StatsGatheringMemCacheWrapper);
+		assertTrue("memcache is " + memcache.getClass().getCanonicalName(),
+		        memcache instanceof StatsGatheringMemCacheWrapper);
 		System.out.println(((StatsGatheringMemCacheWrapper)memcache).stats());
 	}
 	

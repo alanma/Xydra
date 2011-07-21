@@ -12,6 +12,7 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XTransaction;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
+import org.xydra.store.impl.gae.GaeOperation;
 
 import com.sun.org.apache.xpath.internal.objects.XObject;
 
@@ -27,7 +28,7 @@ import com.sun.org.apache.xpath.internal.objects.XObject;
  * @author dscharrer
  * 
  */
-public class GaeLocks {
+class GaeLocks {
 	
 	private static final long serialVersionUID = 4334940263327007176L;
 	
@@ -42,33 +43,39 @@ public class GaeLocks {
 	 * 
 	 * @param command The command to calculate the locks for.
 	 */
-	protected GaeLocks(XCommand command) {
-		
-		this.locks = new HashSet<XAddress>();
-		
+	@GaeOperation()
+	protected static GaeLocks createLocks(XCommand command) {
+		GaeLocks gaeLocks = new GaeLocks();
 		if(command instanceof XTransaction) {
 			
-			XTransaction trans = (XTransaction)command;
+			XTransaction transaction = (XTransaction)command;
 			Set<XAddress> tempLocks = new HashSet<XAddress>();
-			for(XAtomicCommand ac : trans) {
-				XAddress lock = ac.getChangedEntity();
-				// IMPROVE ADD events don't need to lock the whole added entity
-				// (they don't care if children change)
+			for(XAtomicCommand atomicCommand : transaction) {
+				XAddress lock = atomicCommand.getChangedEntity();
 				assert lock != null;
+				/*
+				 * TODO IMPROVE: ADD events don't need to lock the whole added
+				 * entity (they don't care if children change)
+				 */
 				tempLocks.add(lock);
 			}
 			for(XAddress lock : tempLocks) {
-				if(!hasMoreGeneralLock(lock)) {
-					this.locks.add(lock);
+				if(!gaeLocks.hasMoreGeneralLock(lock)) {
+					gaeLocks.add(lock);
 				}
 			}
 			
 		} else {
 			XAddress lock = command.getChangedEntity();
 			assert lock != null;
-			this.locks.add(lock);
+			gaeLocks.add(lock);
 		}
-		
+		return gaeLocks;
+	}
+	
+	private void add(XAddress lockAddress) {
+		assert lockAddress != null;
+		this.locks.add(lockAddress);
 	}
 	
 	/**
@@ -83,7 +90,11 @@ public class GaeLocks {
 		}
 	}
 	
-	public List<String> encode() {
+	public GaeLocks() {
+		this.locks = new HashSet<XAddress>();
+	}
+	
+	List<String> encode() {
 		List<String> lockStrs = new ArrayList<String>(this.locks.size());
 		for(XAddress a : this.locks) {
 			lockStrs.add(a.toURI());
@@ -157,8 +168,15 @@ public class GaeLocks {
 	 * @return true if the specified locks are sufficient to delete the entity
 	 *         at the given address.
 	 */
-	public boolean canRemove(XAddress addr) {
+	boolean canRemove(XAddress addr) {
 		return canWrite(addr);
+	}
+	
+	/**
+	 * @return number of locks
+	 */
+	public int size() {
+		return this.locks.size();
 	}
 	
 }

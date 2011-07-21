@@ -24,6 +24,7 @@ public class GaeLowLevelMemCache implements IMemCache {
 	/* used to prefix all keys */
 	private String appVersion;
 	
+	@GaeOperation()
 	public GaeLowLevelMemCache() {
 		this.memcacheService = MemcacheServiceFactory.getMemcacheService();
 		// format: user-chosen-versionId-from-appengine-xml '.' timestamp
@@ -34,6 +35,7 @@ public class GaeLowLevelMemCache implements IMemCache {
 	}
 	
 	@Override
+	@GaeOperation(memcacheRead = true)
 	public String stats() {
 		Stats stats = this.memcacheService.getStatistics();
 		return "In-memory, size: " + size()
@@ -50,23 +52,28 @@ public class GaeLowLevelMemCache implements IMemCache {
 	}
 	
 	@Override
+	@GaeOperation(memcacheRead = true)
 	public int size() {
 		return (int)this.memcacheService.getStatistics().getItemCount();
 	}
 	
 	@Override
+	@GaeOperation(memcacheRead = true)
 	public boolean isEmpty() {
 		return this.size() == 0;
 	}
 	
 	@Override
+	@GaeOperation(memcacheRead = true)
 	public boolean containsKey(Object key) {
 		return this.memcacheService.contains(keyUniqueForCurrentAppVersion(key));
 	}
 	
+	@GaeOperation()
 	private Object keyUniqueForCurrentAppVersion(Object key) {
 		return key;
-		// FIXME ...
+		// TODO use a memcache key that is specific for a certain app-version
+		// to avoid conflicts
 		
 		// if(key instanceof String) {
 		// return this.appVersion + key;
@@ -92,8 +99,15 @@ public class GaeLowLevelMemCache implements IMemCache {
 	}
 	
 	@Override
+	@GaeOperation(memcacheRead = true)
 	public Object get(Object key) {
 		return this.memcacheService.get(keyUniqueForCurrentAppVersion(key));
+	}
+	
+	@Override
+	@GaeOperation(memcacheRead = true)
+	public Map<Object,Object> getAll(Collection<Object> keys) {
+		return this.memcacheService.getAll(keys);
 	}
 	
 	/**
@@ -102,27 +116,31 @@ public class GaeLowLevelMemCache implements IMemCache {
 	 * faster.
 	 */
 	@Override
+	@GaeOperation(memcacheWrite = true)
 	public Object put(Object key, Object value) {
 		this.memcacheService.put(keyUniqueForCurrentAppVersion(key), value);
 		return null;
 	}
 	
 	@Override
+	@GaeOperation(memcacheWrite = true)
 	public Object remove(Object key) {
 		return this.memcacheService.delete(keyUniqueForCurrentAppVersion(key));
 	}
 	
 	@Override
+	@GaeOperation(memcacheWrite = true)
 	public void putAll(Map<? extends Object,? extends Object> m) {
 		// transform keys
-		Map<Object,Object> transMap = new HashMap<Object,Object>();
+		Map<Object,Object> keyTransformedMap = new HashMap<Object,Object>();
 		for(java.util.Map.Entry<? extends Object,? extends Object> entry : m.entrySet()) {
-			transMap.put(keyUniqueForCurrentAppVersion(entry.getKey()), entry.getValue());
+			keyTransformedMap.put(keyUniqueForCurrentAppVersion(entry.getKey()), entry.getValue());
 		}
-		this.memcacheService.putAll(transMap);
+		this.memcacheService.putAll(keyTransformedMap);
 	}
 	
 	@Override
+	@GaeOperation(memcacheWrite = true)
 	public void clear() {
 		this.memcacheService.clearAll();
 	}

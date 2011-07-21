@@ -15,7 +15,7 @@ import com.google.appengine.api.datastore.KeyFactory;
  * @author scharrer
  * 
  */
-public class KeyStructure {
+class KeyStructure {
 	
 	private static final String KIND_XVALUE = "XVALUE";
 	private static final String KIND_XCHANGE = "XCHANGE";
@@ -26,7 +26,7 @@ public class KeyStructure {
 	 * @return a GAE {@link Key} addressing an internal Xydra entity (not a
 	 *         snapshot entity)
 	 */
-	public static Key createEntityKey(XAddress address) {
+	static Key createEntityKey(XAddress address) {
 		String kind = address.getAddressedType().name();
 		Key key = KeyFactory.createKey(kind, address.toURI());
 		return key;
@@ -37,7 +37,7 @@ public class KeyStructure {
 	 * @return a Xydra {@link XAddress} from a entity (via
 	 *         {@link #createEntityKey(XAddress)}) GAE {@link Key}
 	 */
-	public static XAddress toAddress(Key entityKey) {
+	static XAddress toAddress(Key entityKey) {
 		String combinedKeyString = entityKey.getName();
 		XAddress address = XX.toAddress(combinedKeyString);
 		assert address.getAddressedType().toString().equals(entityKey.getKind());
@@ -50,7 +50,7 @@ public class KeyStructure {
 	 * @param revision The revision number of the change.
 	 * @return a GAE {@link Key} representing a Xydra change entity
 	 */
-	public static Key createChangeKey(XAddress modelAddr, long revision) {
+	static Key createChangeKey(XAddress modelAddr, long revision) {
 		assert modelAddr.getAddressedType() == XType.XMODEL;
 		return KeyFactory.createKey(KIND_XCHANGE, modelAddr.toURI() + "/" + revision);
 	}
@@ -63,7 +63,7 @@ public class KeyStructure {
 	 * @return a GAE {@link Key} representing an internal part of a Xydra change
 	 *         entity
 	 */
-	public static Key createValueKey(XAddress modelAddr, long rev, int transindex) {
+	static Key createValueKey(XAddress modelAddr, long rev, int transindex) {
 		assert modelAddr.getAddressedType() == XType.XMODEL;
 		return KeyFactory.createKey(KIND_XVALUE, modelAddr.toURI() + "/" + rev + "+" + transindex);
 	}
@@ -73,7 +73,7 @@ public class KeyStructure {
 	 * @return true if the given GAE {@link Key} represents a Xydra change
 	 *         entity
 	 */
-	public static boolean isChangeKey(Key key) {
+	private static boolean isChangeKey(Key key) {
 		return key.getKind().equals(KIND_XCHANGE);
 	}
 	

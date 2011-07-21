@@ -102,7 +102,7 @@ abstract class InternalGaeContainerXEntity<C> extends InternalGaeXEntity {
 			
 			assert this.locks.canWrite(this.addr);
 			
-			this.cachedIds = findChildren(this.addr);
+			this.cachedIds = Utils.findChildren(this.addr);
 		}
 		return this.cachedIds.iterator();
 	}

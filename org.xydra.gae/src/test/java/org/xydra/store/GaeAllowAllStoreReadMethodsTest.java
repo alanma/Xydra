@@ -22,6 +22,7 @@ public class GaeAllowAllStoreReadMethodsTest extends AbstractAllowAllStoreReadMe
 	@Override
 	protected XydraStore getStore() {
 		GaeTestfixer.enable();
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		
 		if(this.store == null) {
 			this.store = getNewStore(new GaePersistence(this.repositoryId));

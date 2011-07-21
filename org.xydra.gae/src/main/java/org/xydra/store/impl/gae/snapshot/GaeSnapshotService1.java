@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.xydra.base.XAddress;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XEvent;
@@ -48,49 +49,55 @@ import com.google.appengine.api.datastore.Text;
  * @author dscharrer
  * 
  */
-public class GaeSnapshotService {
+public class GaeSnapshotService1 {
 	
-	private static final Logger log = LoggerFactory.getLogger(GaeSnapshotService.class);
-	private final GaeChangesService changes;
+	private static final Logger log = LoggerFactory.getLogger(GaeSnapshotService1.class);
+	private final GaeChangesService changesService;
+	private final XAddress modelAddress;
 	
 	private static final String KIND_SNAPSHOT = "XSNAPSHOT";
 	private static final String PROPERTY_SNAPSHOT = "snapshot";
 	private static final String PROPERTY_REVISION = "revision";
 	
+	/** a revision-specific key string */
+	private final String snapshotRevKey;
+	
 	private static final long SNAPSHOT_PERSISTENCE_THRESHOLD = 10;
 	
 	/**
+	 * @param modelAddress TODO
 	 * @param changesService The change log to load snapshots from.
 	 */
-	public GaeSnapshotService(GaeChangesService changesService) {
-		this.changes = changesService;
+	public GaeSnapshotService1(XAddress modelAddress, GaeChangesService changesService) {
+		this.modelAddress = modelAddress;
+		this.changesService = changesService;
+		this.snapshotRevKey = this.modelAddress + "-snapshot-Rev";
 	}
 	
+	/**
+	 * A holder for an model snapshot
+	 */
 	private static class CachedModel implements Serializable {
-		
 		private static final long serialVersionUID = -6271321788554091709L;
 		long revision = -1;
 		XRevWritableModel modelState = null; // can be null
-		
 	}
 	
-	/**
-	 * TODO right now, this cache will never have a hit, as new snapshot
-	 * services are created all the time ~~max
-	 */
 	private CachedModel localVmCache = null;
+	private Key snapshotKey;
 	
 	/**
+	 * @param revisionNumber which is the minimum revision number that the
+	 *            returned snapshot will have, i.e. the caller might get an even
+	 *            more recent snapshot
 	 * @return an {@link XReadableModel} by applying all events in the
 	 *         {@link XChangeLog}
 	 */
-	synchronized public XWritableModel getSnapshot() {
-		/* get fresh current revNr */
-		long curRev = this.changes.getCurrentRevisionNumber();
-		/* if localVmCache has fresh version, use it */
-		if(this.localVmCache != null && this.localVmCache.revision >= curRev) {
+	synchronized public XWritableModel getSnapshot(long revisionNumber) {
+		/* if localVmCache has requested version or newer, use it */
+		if(this.localVmCache != null && this.localVmCache.revision >= revisionNumber) {
 			log.trace("re-using locamVmCache with revNr " + this.localVmCache.revision + " for "
-			        + curRev);
+			        + revisionNumber);
 			return XCopyUtils.createSnapshot(this.localVmCache.modelState);
 		}
 		
@@ -99,7 +106,7 @@ public class GaeSnapshotService {
 		// memcache
 		
 		/* try to get a snapshot from memcache TODO why is revNr not checked? */
-		final String cachname = this.changes.getModelAddress() + "-snapshot";
+		final String cachname = this.modelAddress + "-snapshot";
 		CachedModel entry = (CachedModel)XydraRuntime.getMemcache().get(cachname);
 		if(entry == null) {
 			/*
@@ -115,7 +122,7 @@ public class GaeSnapshotService {
 		assert entry != null;
 		
 		/* update entry with new events from change log */
-		updateCachedModel(entry, curRev);
+		updateCachedModel(entry, revisionNumber);
 		/* cache it locally */
 		this.localVmCache = entry;
 		/* update latest snapshot in memcache for other threads/instances */
@@ -127,23 +134,19 @@ public class GaeSnapshotService {
 		 * cache result is directly returned without copy, because cache results
 		 * are always de-deserialized from byte[] arrays anyways
 		 */
-		if (AboutAppEngine.onAppEngine()) {
-		return entry.modelState;
-		}
-		else 
+		if(AboutAppEngine.onAppEngine()) {
+			return entry.modelState;
+		} else
 			return XCopyUtils.createSnapshot(entry.modelState);
 		
 	}
 	
-	private Key getSnapshotKey() {
-		return KeyFactory.createKey(KIND_SNAPSHOT, this.changes.getModelAddress().toURI());
-	}
-	
-	/**
-	 * @return a revision-specific key string
-	 */
-	private String getSnapshotRevKey() {
-		return this.changes.getModelAddress() + "-snapshot-Rev";
+	/** lazy init */
+	private synchronized Key getSnapshotKey() {
+		if(this.snapshotKey == null) {
+			this.snapshotKey = KeyFactory.createKey(KIND_SNAPSHOT, this.modelAddress.toURI());
+		}
+		return this.snapshotKey;
 	}
 	
 	private CachedModel loadSnapshot() {
@@ -162,13 +165,13 @@ public class GaeSnapshotService {
 		XRevWritableModel snapshot = null;
 		if(snapshotStr != null) {
 			XydraElement snapshotXml = new XmlParser().parse(snapshotStr.getValue());
-			snapshot = SerializedModel.toModelState(snapshotXml, this.changes.getModelAddress());
+			snapshot = SerializedModel.toModelState(snapshotXml, this.modelAddress);
 		}
 		
 		entry.revision = rev;
 		entry.modelState = snapshot;
 		
-		XydraRuntime.getMemcache().put(getSnapshotRevKey(), rev);
+		XydraRuntime.getMemcache().put(this.snapshotRevKey, rev);
 		
 		return entry;
 	}
@@ -181,7 +184,7 @@ public class GaeSnapshotService {
 	 */
 	private void saveSnapshot(CachedModel entry) {
 		
-		Long savedRevLong = (Long)XydraRuntime.getMemcache().get(getSnapshotRevKey());
+		Long savedRevLong = (Long)XydraRuntime.getMemcache().get(this.snapshotRevKey);
 		long savedRev = (savedRevLong == null ? -1L : savedRevLong);
 		
 		if(entry.revision <= savedRev || entry.revision - savedRev < SNAPSHOT_PERSISTENCE_THRESHOLD) {
@@ -198,7 +201,7 @@ public class GaeSnapshotService {
 			snapshotEntity.setUnindexedProperty(PROPERTY_SNAPSHOT, new Text(out.getData()));
 		}
 		
-		XydraRuntime.getMemcache().put(getSnapshotRevKey(), entry.revision);
+		XydraRuntime.getMemcache().put(this.snapshotRevKey, entry.revision);
 		
 	}
 	
@@ -217,12 +220,12 @@ public class GaeSnapshotService {
 		if(entry.revision == curRev) {
 			return;
 		}
-		log.debug("udating cached model " + this.changes.getModelAddress() + " from lastRev="
-		        + entry.revision + " to curRev=" + curRev);
+		log.debug("udating cached model " + this.modelAddress + " from lastRev=" + entry.revision
+		        + " to curRev=" + curRev);
 		
 		// Fetch one event from the back of the change log.
 		List<AsyncChange> batch = new ArrayList<AsyncChange>(1);
-		batch.add(this.changes.getChangeAt(curRev));
+		batch.add(this.changesService.getChangeAt(curRev));
 		
 		int pos = 0;
 		
@@ -279,12 +282,12 @@ public class GaeSnapshotService {
 			
 			// Asynchronously fetch new change entities.
 			if(i - batch.size() > entry.revision) {
-				batch.set(pos, this.changes.getChangeAt(i - batch.size()));
+				batch.set(pos, this.changesService.getChangeAt(i - batch.size()));
 			}
 			pos++;
 			if(pos == batch.size()) {
 				if(i - batch.size() - 1 > entry.revision) {
-					batch.add(this.changes.getChangeAt(i - batch.size() - 1));
+					batch.add(this.changesService.getChangeAt(i - batch.size() - 1));
 				}
 				pos = 0;
 			}
@@ -316,8 +319,7 @@ public class GaeSnapshotService {
 		log.debug("-> updated to new rev=" + entry.revision);
 		assert entry.modelState == null || entry.modelState.getRevisionNumber() == entry.revision;
 		
-		log.trace("udated cached model " + this.changes.getModelAddress() + " to newRev="
-		        + entry.revision);
+		log.trace("udated cached model " + this.modelAddress + " to newRev=" + entry.revision);
 	}
 	
 	/**
@@ -334,7 +336,7 @@ public class GaeSnapshotService {
 	 * @param event The event to apply.
 	 * @return the changed model or null if the model was removed.
 	 */
-	private XRevWritableModel applyEvent(XRevWritableModel model, XAtomicEvent event) {
+	static XRevWritableModel applyEvent(XRevWritableModel model, XAtomicEvent event) {
 		log.debug("--> applying " + event);
 		long rev = event.getRevisionNumber();
 		
