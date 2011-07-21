@@ -11,7 +11,11 @@ import org.xydra.store.IMemCache;
 
 
 /**
- * A wrapper around an IMemCache to gather runtime access statistics
+ * A wrapper around an IMemCache to gather runtime access statistics.
+ * 
+ * Records every cache get and put, as well as all values a key ever has.
+ * 
+ * Very memory expensive!
  * 
  * @author xamde
  * 
@@ -20,9 +24,12 @@ public class StatsGatheringMemCacheWrapper implements IMemCache {
 	
 	private MapStats mapstats = new MapStats();
 	private Map<String,Long> stats = new HashMap<String,Long>();
+	/** Allows any other process easy runtime-access to the stats */
+	public static StatsGatheringMemCacheWrapper INSTANCE;
 	
 	public StatsGatheringMemCacheWrapper(IMemCache memcache) {
 		this.base = memcache;
+		INSTANCE = this;
 	}
 	
 	public int size() {
@@ -55,8 +62,22 @@ public class StatsGatheringMemCacheWrapper implements IMemCache {
 	public Object get(Object key) {
 		count("get");
 		Object value = this.base.get(key);
-		this.mapstats.recordGet(key.toString(), value != null);
+		this.mapstats.recordGet(key.toString(), value != null, 1);
 		return value;
+	}
+	
+	@Override
+	public Map<Object,Object> getAll(Collection<Object> keys) {
+		count("getAll");
+		Map<Object,Object> result = new HashMap<Object,Object>();
+		for(Object key : keys) {
+			Object value = this.base.get(key);
+			this.mapstats.recordGet(key.toString(), value != null, keys.size());
+			if(value != null) {
+				result.put(key, value);
+			}
+		}
+		return result;
 	}
 	
 	public Object put(Object key, Object value) {
@@ -114,7 +135,7 @@ public class StatsGatheringMemCacheWrapper implements IMemCache {
 		for(String s : this.stats.keySet()) {
 			buf.append(s + " = " + this.stats.get(s) + "<br />\n");
 		}
-		buf.append("Access stats<br />\n");
+		buf.append("Access stats ===================================================== <br />\n");
 		try {
 			StringWriter sw = new StringWriter();
 			this.mapstats.writeStats(sw);

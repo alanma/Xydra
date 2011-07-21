@@ -152,7 +152,6 @@ public class PartialGroupDatabaseOnWritableModel implements XGroupListener {
 	}
 	
 	public Set<XID> getGroups() {
-		this.groupModel.iterator();
 		Set<XID> result = new HashSet<XID>();
 		for(XID xid : this.groupModel) {
 			result.add(xid);

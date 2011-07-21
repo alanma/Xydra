@@ -66,7 +66,6 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	
 	@Before
 	public void setUp() {
-		
 		this.store = this.getStore();
 		this.factory = this.getCommandFactory();
 		
@@ -149,6 +148,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		BatchedResult<XReadableModel>[] result2 = callback2.getEffect();
 		assertNotNull(result2);
+		assertNotNull(result2[0].getResult());
 		assertEquals(modelId, result2[0].getResult().getID());
 		
 		// remove the model again
@@ -166,7 +166,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		result2 = callback2.getEffect();
 		assertNotNull(result2);
-		assertNull(result2[0].getResult());
+		assertNull("was not null but" + result2[0].getResult(), result2[0].getResult());
 		assertNull(result2[0].getException());
 	}
 	
@@ -1680,12 +1680,12 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		XID fieldA = XX.toId("A");
 		executeSucceedingCommand(MemoryObjectCommand.createAddCommand(objectAddr, true, fieldA));
 		XAddress fieldAddr = XX.resolveField(objectAddr, fieldA);
-		executeSucceedingCommand(MemoryFieldCommand.createAddCommand(fieldAddr, XCommand.FORCED, XV
-		        .toValue("test")));
-		executeNochangeCommand(MemoryFieldCommand.createAddCommand(fieldAddr, XCommand.FORCED, XV
-		        .toValue("test")));
-		executeSucceedingCommand(MemoryObjectCommand.createAddCommand(objectAddr, true, XX
-		        .toId("B")));
+		executeSucceedingCommand(MemoryFieldCommand.createAddCommand(fieldAddr, XCommand.FORCED,
+		        XV.toValue("test")));
+		executeNochangeCommand(MemoryFieldCommand.createAddCommand(fieldAddr, XCommand.FORCED,
+		        XV.toValue("test")));
+		executeSucceedingCommand(MemoryObjectCommand.createAddCommand(objectAddr, true,
+		        XX.toId("B")));
 		
 		// check if we can get a snapshot
 		SynchronousTestCallback<BatchedResult<XReadableModel>[]> callback2 = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();

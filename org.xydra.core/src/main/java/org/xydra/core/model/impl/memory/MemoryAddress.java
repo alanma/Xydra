@@ -316,6 +316,8 @@ public class MemoryAddress implements XAddress {
 	 * @return a unique, complete representation of this {@link XAddress} with
 	 *         the fixed format = '/' + repoID + '/' + modelId + '/' + objectId
 	 *         + '/' + fieldId. Empty {@link XID XIDs} are represented by '-'.
+	 * 
+	 *         Always starts with '/', never ends with '/'.
 	 */
 	public String toURI() {
 		StringBuffer uri = new StringBuffer();

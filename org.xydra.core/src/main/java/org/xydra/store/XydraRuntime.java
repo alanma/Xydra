@@ -7,6 +7,7 @@ import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XID;
+import org.xydra.core.model.impl.memory.UUID;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.perf.StatsGatheringMemCacheWrapper;
@@ -215,6 +216,18 @@ public class XydraRuntime {
 	
 	public static long getLastTimeInitialisedAt() {
 		return lastTimeInitialisedAt;
+	}
+	
+	/** A unique ID to distinguish several AppEngine instances */
+	public static final String INSTANCE_ID = UUID.uuid(9);
+	
+	/**
+	 * @return a unique string identifying this runtime instance. Within one JVM
+	 *         this string can be the same for several
+	 *         {@link XydraPlatformRuntime} instances.
+	 */
+	public static String getInstanceId() {
+		return INSTANCE_ID;
 	}
 	
 }

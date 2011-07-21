@@ -1,6 +1,8 @@
 package org.xydra.store.impl.memory;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
@@ -26,6 +28,18 @@ public class MemoryMemCache extends HashMap<Object,Object> implements IMemCache 
 	@Override
 	public String stats() {
 		return "MemoryCache, no stats";
+	}
+	
+	@Override
+	public Map<Object,Object> getAll(Collection<Object> keys) {
+		Map<Object,Object> result = new HashMap<Object,Object>();
+		for(Object key : keys) {
+			Object value = this.get(key);
+			if(value != null) {
+				result.put(key, value);
+			}
+		}
+		return result;
 	}
 	
 }

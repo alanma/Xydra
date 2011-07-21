@@ -33,6 +33,9 @@ public class MapStats {
 	
 	private static final int RECORD_FIRST_N_ACTIONS = 100;
 	
+	/**
+	 * Very memory and performance intensive
+	 */
 	public static boolean RECORD_STACKTRACES = true;
 	
 	/**
@@ -44,6 +47,8 @@ public class MapStats {
 		long entryPuts;
 		List<Object> values = new LinkedList<Object>();
 		long misses;
+		/* local list of actions per key */
+		List<Action> first_k_actions_per_entry = new LinkedList<MapStats.Action>();
 		
 		public Entry(String key) {
 			this.key = key;
@@ -73,11 +78,24 @@ public class MapStats {
 		public void writeStats(Writer w) throws IOException {
 			w.write("  " + this.key + " = " + this.entryGets + " gets, " + this.entryPuts
 			        + " puts, " + this.misses + " misses<br />\n");
-			
+			// write actions per key
+			w.write("  Actions: <br />\n");
+			for(Action action : this.first_k_actions_per_entry) {
+				action.writeStats("    ", w);
+			}
+		}
+		
+		public void recordAction(Action action) {
+			// unlimited adding!
+			this.first_k_actions_per_entry.add(action);
 		}
 	}
 	
 	class Action {
+		Throwable t;
+		String method, key;
+		Object value;
+		
 		public Action(String method, String key, Object value) {
 			super();
 			this.method = method;
@@ -92,54 +110,34 @@ public class MapStats {
 				}
 			}
 			log.debug("Recorded action on map: " + method + " " + key + " = " + value + " \n"
-			        + (this.t != null ? "  " + firstNLines(this.t, 5) : ""));
+			        + stacktrace());
 		}
 		
-		private String firstNLines(Throwable t, int n) {
-			StringWriter sw = new StringWriter();
-			t.printStackTrace(new PrintWriter(sw));
-			StringReader sr = new StringReader(sw.getBuffer().toString());
-			BufferedReader br = new BufferedReader(sr);
-			String line;
-			try {
-				// skip first 4 lines
-				line = br.readLine();
-				line = br.readLine();
-				line = br.readLine();
-				line = br.readLine();
-				line = br.readLine();
-				StringBuffer buf = new StringBuffer();
-				for(int i = 0; i < n; i++) {
-					buf.append(line + "\n");
-					line = br.readLine();
-				}
-				return buf.toString();
-			} catch(IOException e) {
-				throw new RuntimeException(e);
-			}
+		public String stacktrace() {
+			if(this.t == null)
+				return "  ";
+			else
+				return firstNLines(this.t, 7);
 		}
 		
-		Throwable t;
-		String method, key;
-		Object value;
-		
-		public void writeStats(Writer w) throws IOException {
-			w.write("  "
+		public void writeStats(String whitespace, Writer w) throws IOException {
+			w.write(whitespace
 			        + this.method
 			        + " '"
 			        + this.key
 			        + "'"
 			        + (this.value == null ? "" : " = '" + this.value.getClass().getCanonicalName()
-			                + "'") + "     <br/>\n");
+			                + "'") + "     <br/>\n" + stacktrace());
 		}
 	}
 	
+	/* global list of actions */
 	private List<Action> first_k_actions = new LinkedList<MapStats.Action>();
 	
 	Map<String,Entry> statsMap = new HashMap<String,MapStats.Entry>();
 	long gets = 0, puts = 0;
 	
-	public void recordGet(String key, boolean found) {
+	public void recordGet(String key, boolean found, int batchSize) {
 		Entry e = this.statsMap.get(key);
 		if(e == null) {
 			e = new Entry(key);
@@ -150,8 +148,12 @@ public class MapStats {
 		if(!found) {
 			e.misses++;
 		}
+		
+		Action action = new Action("Get-" + (found ? "HIT!!!" : "Miss  ") + " "
+		        + (batchSize == 1 ? "single" : "batch-" + batchSize), key, null);
+		e.recordAction(action);
 		if(this.first_k_actions.size() < RECORD_FIRST_N_ACTIONS) {
-			this.first_k_actions.add(new Action("Get-" + (found ? "HIT!!!" : "Miss  "), key, null));
+			this.first_k_actions.add(action);
 		}
 	}
 	
@@ -183,8 +185,10 @@ public class MapStats {
 		MapStats.this.puts++;
 		e.entryPuts++;
 		e.values.add(value);
+		Action action = new Action("Put " + "      ", key, value);
+		e.recordAction(action);
 		if(this.first_k_actions.size() < RECORD_FIRST_N_ACTIONS) {
-			this.first_k_actions.add(new Action("Put " + "      ", key, value));
+			this.first_k_actions.add(action);
 		}
 	}
 	
@@ -196,23 +200,25 @@ public class MapStats {
 		Summary summary = calcSummary();
 		
 		int k = 10;
-		w.write("Largest " + k + " entries by current value:<br />\n");
+		w.write("Largest " + k + " entries by current value: ----------------------------<br />\n");
 		for(Entry e : summary.getEntriesSortedByCurrentValueSizeDescending(k)) {
 			e.writeStats(w);
 		}
 		w.write("Total memory used by current values: " + summary.getTotalCurrentMemorySize()
 		        + "<br />\n");
-		w.write("The " + k + " most frequently put'ed entries:<br />\n");
+		w.write("The " + k
+		        + " most frequently put'ed entries: ----------------------------<br />\n");
 		for(Entry e : summary.getMostFrequentlyPuttetEntries(k)) {
 			e.writeStats(w);
 		}
-		w.write("The " + k + " most frequent cache misses:<br />\n");
+		w.write("The " + k + " most frequent cache misses: ----------------------------<br />\n");
 		for(Entry e : summary.getMostFrequentlyCacheMisses(k)) {
 			e.writeStats(w);
 		}
-		w.write("The first " + RECORD_FIRST_N_ACTIONS + " actions:<br />\n");
+		w.write("The first max " + RECORD_FIRST_N_ACTIONS
+		        + " actions: ----------------------------<br />\n");
 		for(Action action : this.first_k_actions) {
-			action.writeStats(w);
+			action.writeStats("  ", w);
 		}
 	}
 	
@@ -279,6 +285,36 @@ public class MapStats {
 		this.gets = 0;
 		this.puts = 0;
 		this.first_k_actions.clear();
+	}
+	
+	/**
+	 * @param t the {@link Throwable} to inspect
+	 * @param n number of lines
+	 * @return the first n lines of the given {@link Throwable} t, separated by
+	 *         new line characters + br tags
+	 */
+	public static String firstNLines(Throwable t, int n) {
+		StringWriter sw = new StringWriter();
+		t.printStackTrace(new PrintWriter(sw));
+		StringReader sr = new StringReader(sw.getBuffer().toString());
+		BufferedReader br = new BufferedReader(sr);
+		String line;
+		try {
+			// skip first 4 lines
+			line = br.readLine();
+			line = br.readLine();
+			line = br.readLine();
+			line = br.readLine();
+			line = br.readLine();
+			StringBuffer buf = new StringBuffer();
+			for(int i = 0; i < n; i++) {
+				buf.append(line + " <br />\n");
+				line = br.readLine();
+			}
+			return buf.toString();
+		} catch(IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 }

@@ -372,10 +372,12 @@ public interface XydraStore {
 	 * @param callback Asynchronous callback to signal success or failure. On
 	 *            success, the returned array contains in the same order as in
 	 *            the request array (modelAddresses) the revision number of the
-	 *            addressed model as a long. Non-existing models (and those for
-	 *            which the actorId has no read-access) are signaled as
-	 *            {@link XCommand#FAILED}. For other models, the returned
-	 *            revision number is the number that can be used with
+	 *            addressed model as a long.
+	 * 
+	 *            Non-existing models (and those for which the actorId has no
+	 *            read-access) are signaled as {@link XCommand#FAILED}. For
+	 *            other models, the returned revision number is the number that
+	 *            can be used with
 	 *            {@link #getEvents(XID, String, GetEventsRequest[], Callback)}
 	 *            to retrieve the last event that happened to this mode. Must
 	 *            not be null.
