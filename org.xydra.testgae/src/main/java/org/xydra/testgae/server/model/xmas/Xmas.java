@@ -88,7 +88,7 @@ public class Xmas {
 		writer.write("Adding to repository '" + repo.getID() + "'<br />\n");
 		Clock s2 = new Clock();
 		s2.start();
-		for(int l = 0; l <= listCount; l++) {
+		for(int l = 0; l < listCount; l++) {
 			writer.write("Creating/loading model <br />\n");
 			XWritableModel model = createModel(repoStr, XX.createUniqueId());
 			// txn
