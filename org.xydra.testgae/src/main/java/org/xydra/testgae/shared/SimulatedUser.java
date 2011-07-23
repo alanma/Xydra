@@ -185,8 +185,9 @@ public class SimulatedUser extends Thread {
 								log.info("Deleted wish");
 							} else {
 								assert (action == Action.EditListEditWish);
-								// TODO edit wish, not yet implemented
-								log.info("Edit wish - not yet impl");
+								// edit wish
+								HttpUtils.makeGetRequest(absoluteListUrl + "/edit");
+								log.info("Edited wish");
 							}
 						} else {
 							log.info("Found no wish for " + action);
