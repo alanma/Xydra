@@ -75,6 +75,10 @@ public class Wish {
 		        + HtmlUtils.link("/xmas/" + this.xo.getAddress().getRepository() + "/"
 		                + this.xo.getAddress().getModel() + "/" + this.xo.getID() + "/delete",
 		                "[Delete this wish]")
+		        
+		        + HtmlUtils.link("/xmas/" + this.xo.getAddress().getRepository() + "/"
+		                + this.xo.getAddress().getModel() + "/" + this.xo.getID() + "/edit",
+		                "[Edit this wish]")
 
 		        + "<br />\n";
 	}
