@@ -76,9 +76,16 @@ public class Wish {
 		                + this.xo.getAddress().getModel() + "/" + this.xo.getID() + "/delete",
 		                "[Delete this wish]")
 		        
+		        // TODO implement edit functionalities
 		        + HtmlUtils.link("/xmas/" + this.xo.getAddress().getRepository() + "/"
-		                + this.xo.getAddress().getModel() + "/" + this.xo.getID() + "/edit",
-		                "[Edit this wish]")
+		                + this.xo.getAddress().getModel() + "/" + this.xo.getID()
+		                + "/editName?name=test", "[Edit name]")
+		        + HtmlUtils.link("/xmas/" + this.xo.getAddress().getRepository() + "/"
+		                + this.xo.getAddress().getModel() + "/" + this.xo.getID()
+		                + "/editPrice?price=1", "[Edit price]")
+		        + HtmlUtils.link("/xmas/" + this.xo.getAddress().getRepository() + "/"
+		                + this.xo.getAddress().getModel() + "/" + this.xo.getID()
+		                + "/editUrl?url=www.test.test", "[Edit URL]")
 
 		        + "<br />\n";
 	}

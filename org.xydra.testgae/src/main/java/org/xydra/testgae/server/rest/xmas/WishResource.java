@@ -21,7 +21,6 @@ import org.xydra.restless.utils.Clock;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.ServletUtils;
 import org.xydra.store.impl.gae.GaeTestfixer;
-import org.xydra.testgae.server.model.xmas.NameUtils;
 import org.xydra.testgae.server.model.xmas.Wish;
 import org.xydra.testgae.server.model.xmas.WishList;
 import org.xydra.testgae.server.model.xmas.Xmas;
@@ -45,10 +44,28 @@ public class WishResource {
 		        new RestlessParameter("wish", null)// .
 		);
 		
-		r.addMethod(path + "/{repo}/{list}/{wish}/edit", "GET", WishResource.class, "edit", false, // .
+		r.addMethod(path + "/{repo}/{list}/{wish}/editName", "GET", WishResource.class, "editName",
+		        false, // .
 		        new RestlessParameter("repo", null),// .
 		        new RestlessParameter("list", null),// .
-		        new RestlessParameter("wish", null)// .
+		        new RestlessParameter("wish", null), // .
+		        new RestlessParameter("name", null) // .
+		);
+		
+		r.addMethod(path + "/{repo}/{list}/{wish}/editPrice", "GET", WishResource.class,
+		        "editPrice", false, // .
+		        new RestlessParameter("repo", null),// .
+		        new RestlessParameter("list", null),// .
+		        new RestlessParameter("wish", null), // .
+		        new RestlessParameter("price", "0") // .
+		);
+		
+		r.addMethod(path + "/{repo}/{list}/{wish}/editUrl", "GET", WishResource.class, "editUrl",
+		        false, // .
+		        new RestlessParameter("repo", null),// .
+		        new RestlessParameter("list", null),// .
+		        new RestlessParameter("wish", null), // .
+		        new RestlessParameter("url", null) // .
 		);
 		
 		r.addGet(path + "/{repo}/{list}/{wish}", WishResource.class, "get",// .
@@ -85,13 +102,12 @@ public class WishResource {
 		w.close();
 	}
 	
-	public static synchronized void edit(String repoStr, String listStr, String wishStr,
-	        HttpServletResponse res) throws IOException {
+	public static synchronized void editName(String repoStr, String listStr, String wishStr,
+	        String name, HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		ServletUtils.headers(res, "text/html");
-		Writer w = HtmlUtils.startHtmlPage(res, "Delete");
-		String newName = NameUtils.getProductName();
-		w.write("Renaming to " + newName + " <br />");
+		Writer w = HtmlUtils.startHtmlPage(res, "Edit Name");
+		w.write("Renaming to " + name + " <br />");
 		
 		Clock s1 = new Clock().start();
 		
@@ -100,7 +116,62 @@ public class WishResource {
 		        XX.toId(listStr)), true);
 		WishList wishList = new WishList(txnModel);
 		// manipulate txn
-		wishList.editWish(XX.toId(wishStr), newName);
+		wishList.editWishName(XX.toId(wishStr), name);
+		// execute txn
+		XTransaction txn = txnModel.toTransaction();
+		Xmas.executeTransaction(txn);
+		
+		s1.stop("edit a wish");
+		w.write(s1.getStats() + "<br/>\n");
+		
+		w.write(HtmlUtils.link("..", "See all wishes in this list"));
+		w.flush();
+		w.close();
+	}
+	
+	public static synchronized void editPrice(String repoStr, String listStr, String wishStr,
+	        String priceStr, HttpServletResponse res) throws IOException {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		ServletUtils.headers(res, "text/html");
+		Writer w = HtmlUtils.startHtmlPage(res, "Edit Price");
+		w.write("Changig price to " + priceStr + " <br />");
+		
+		Clock s1 = new Clock().start();
+		
+		// create txn
+		DiffWritableModel txnModel = new DiffWritableModel(Xmas.createModel(repoStr,
+		        XX.toId(listStr)), true);
+		WishList wishList = new WishList(txnModel);
+		// manipulate txn
+		int price = Integer.parseInt(priceStr);
+		wishList.editWishPrice(XX.toId(wishStr), price);
+		// execute txn
+		XTransaction txn = txnModel.toTransaction();
+		Xmas.executeTransaction(txn);
+		
+		s1.stop("edit a wish");
+		w.write(s1.getStats() + "<br/>\n");
+		
+		w.write(HtmlUtils.link("..", "See all wishes in this list"));
+		w.flush();
+		w.close();
+	}
+	
+	public static synchronized void editUrl(String repoStr, String listStr, String wishStr,
+	        String urlStr, HttpServletResponse res) throws IOException {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		ServletUtils.headers(res, "text/html");
+		Writer w = HtmlUtils.startHtmlPage(res, "Edit URL");
+		w.write("Changing URL to " + urlStr + " <br />");
+		
+		Clock s1 = new Clock().start();
+		
+		// create txn
+		DiffWritableModel txnModel = new DiffWritableModel(Xmas.createModel(repoStr,
+		        XX.toId(listStr)), true);
+		WishList wishList = new WishList(txnModel);
+		// manipulate txn
+		wishList.editWishUrl(XX.toId(wishStr), urlStr);
 		// execute txn
 		XTransaction txn = txnModel.toTransaction();
 		Xmas.executeTransaction(txn);

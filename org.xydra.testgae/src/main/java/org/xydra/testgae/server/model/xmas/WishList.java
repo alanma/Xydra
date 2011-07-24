@@ -48,11 +48,22 @@ public class WishList implements Iterable<XID> {
 		this.model.removeObject(widhId);
 	}
 	
-	public void editWish(XID wishId, String productName) {
-		// TODO not final implementation
+	public void editWishName(XID wishId, String productName) {
 		XWritableObject xo = this.model.getObject(wishId);
 		XWritableField title = xo.getField(Wish.TITLE);
 		title.setValue(XV.toValue(productName));
+	}
+	
+	public void editWishPrice(XID wishId, int price) {
+		XWritableObject xo = this.model.getObject(wishId);
+		XWritableField priceField = xo.getField(Wish.PRICE);
+		priceField.setValue(XV.toValue(price));
+	}
+	
+	public void editWishUrl(XID wishId, String url) {
+		XWritableObject xo = this.model.getObject(wishId);
+		XWritableField urlField = xo.getField(Wish.URL);
+		urlField.setValue(XV.toValue(url));
 	}
 	
 	public void removeAllWishes(Writer writer) throws IOException {

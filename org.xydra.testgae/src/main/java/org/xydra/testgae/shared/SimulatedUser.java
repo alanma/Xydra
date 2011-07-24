@@ -9,6 +9,7 @@ import java.util.List;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.utils.Clock;
+import org.xydra.testgae.server.model.xmas.NameUtils;
 
 
 /**
@@ -37,8 +38,8 @@ public class SimulatedUser extends Thread {
 	}
 	
 	private static enum Action {
-		CreateList(10), DeleteList(1), EditListAddWish(20), EditListDeleteWish(5), EditListEditWish(
-		        10);
+		CreateList(10), DeleteList(1), EditListAddWish(20), EditListDeleteWish(5), EditListEditWishName(
+		        10), EditListEditWishPrice(10), EditListEditWishUrl(10);
 		
 		private int howOften;
 		
@@ -184,10 +185,27 @@ public class SimulatedUser extends Thread {
 								HttpUtils.makeGetRequest(absoluteListUrl + "/delete");
 								log.info("Deleted wish");
 							} else {
-								assert (action == Action.EditListEditWish);
 								// edit wish
-								HttpUtils.makeGetRequest(absoluteListUrl + "/edit");
-								log.info("Edited wish");
+								if(action == Action.EditListEditWishName) {
+									String name = NameUtils.getProductName();
+									
+									HttpUtils.makeGetRequest(absoluteListUrl + "/editName?name="
+									        + name);
+									log.info("Edited name of wish");
+								} else if(action == Action.EditListEditWishPrice) {
+									int price = (int)(Math.random() * 1000);
+									HttpUtils.makeGetRequest(absoluteListUrl + "/editPrice?price="
+									        + price);
+									log.info("Edited price of wish");
+								} else {
+									assert (action == Action.EditListEditWishUrl);
+									String url = "http://www.google.de/images?q="
+									        + NameUtils.getProductName();
+									HttpUtils.makeGetRequest(absoluteListUrl + "/editUrl?url="
+									        + url);
+									log.info("Edited url of wish");
+								}
+								
 							}
 						} else {
 							log.info("Found no wish for " + action);
