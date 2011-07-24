@@ -10,9 +10,11 @@ import org.xydra.base.XID;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
+import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.XWritableModel;
+import org.xydra.core.XCompareUtils;
 
 
 /**
@@ -113,6 +115,17 @@ public class SimpleModel implements Serializable, XRevWritableModel {
 	@Override
 	public XType getType() {
 		return XType.XMODEL;
+	}
+	
+	@Override
+	public int hashCode() {
+		return (int)(this.getAddress().hashCode() + this.getRevisionNumber());
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		return other instanceof XReadableModel
+		        && XCompareUtils.equalState(this, (XReadableModel)other);
 	}
 	
 }
