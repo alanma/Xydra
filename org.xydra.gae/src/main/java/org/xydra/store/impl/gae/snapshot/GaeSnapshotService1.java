@@ -94,6 +94,7 @@ public class GaeSnapshotService1 {
 	 *         {@link XChangeLog}
 	 */
 	synchronized public XWritableModel getSnapshot(long revisionNumber) {
+		log.debug("Get snapshot " + this.modelAddress + " " + revisionNumber);
 		/* if localVmCache has requested version or newer, use it */
 		if(this.localVmCache != null && this.localVmCache.revision >= revisionNumber) {
 			log.trace("re-using locamVmCache with revNr " + this.localVmCache.revision + " for "

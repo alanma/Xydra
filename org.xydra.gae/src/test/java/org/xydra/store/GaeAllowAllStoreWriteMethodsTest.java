@@ -1,5 +1,6 @@
 package org.xydra.store;
 
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.xydra.base.X;
 import org.xydra.base.XX;
@@ -21,10 +22,15 @@ public class GaeAllowAllStoreWriteMethodsTest extends AbstractAllowAllStoreWrite
 		return X.getCommandFactory();
 	}
 	
+	@Before
+	public void setUp() {
+		GaeTestfixer.enable();
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		super.setUp();
+	}
+	
 	@Override
 	protected XydraStore getStore() {
-		GaeTestfixer.enable();
-		
 		if(this.store == null) {
 			this.store = getNewStore(new GaePersistence(XX.toId("data")));
 		}

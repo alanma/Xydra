@@ -8,8 +8,9 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
+import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.store.impl.gae.changes.GaeChangesService;
-import org.xydra.store.impl.gae.snapshot.GaeSnapshotService1;
+import org.xydra.store.impl.gae.snapshot.GaeSnapshotService2;
 
 
 /**
@@ -27,12 +28,12 @@ public class GaeModelPersistence {
 	
 	private XAddress modelAddress;
 	private GaeChangesService changesService;
-	private GaeSnapshotService1 snapshotService;
+	private GaeSnapshotService2 snapshotService;
 	
 	public GaeModelPersistence(XAddress modelAddress) {
 		this.modelAddress = modelAddress;
 		this.changesService = new GaeChangesService(this.modelAddress);
-		this.snapshotService = new GaeSnapshotService1(this.modelAddress, this.changesService);
+		this.snapshotService = new GaeSnapshotService2(this.modelAddress, this.changesService);
 	}
 	
 	public long executeCommand(XCommand command, XID actorId) {
@@ -50,6 +51,13 @@ public class GaeModelPersistence {
 	synchronized public XWritableModel getSnapshot() {
 		/* get fresh current revNr */
 		long currentRevNr = this.changesService.getCurrentRevisionNumber();
+		if(currentRevNr == -1) {
+			return null;
+		}
+		if(currentRevNr == 0) {
+			// model is empty
+			return new SimpleModel(this.modelAddress);
+		}
 		XWritableModel snapshot = this.snapshotService.getSnapshot(currentRevNr);
 		return snapshot;
 	}

@@ -6,10 +6,12 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.xydra.base.XAddress;
+import org.xydra.base.XID;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldEvent;
@@ -22,9 +24,7 @@ import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.XWritableModel;
-import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
-import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.serialize.SerializedModel;
@@ -55,6 +55,10 @@ import com.google.appengine.api.datastore.Text;
  * @author xamde
  * 
  */
+/**
+ * @author xamde
+ * 
+ */
 public class GaeSnapshotService2 {
 	
 	private static final Logger log = LoggerFactory.getLogger(GaeSnapshotService2.class);
@@ -66,10 +70,11 @@ public class GaeSnapshotService2 {
 	private static final String PROP_XML = "xml";
 	
 	private static final long SNAPSHOT_PERSISTENCE_THRESHOLD = 10;
+	
 	private static final long MODEL_DOES_NOT_EXIST = -1;
 	
 	/**
-	 * @param modelAddress TODO
+	 * @param modelAddress of which model is this the changes service
 	 * @param changesService The change log to load snapshots from.
 	 */
 	public GaeSnapshotService2(XAddress modelAddress, GaeChangesService changesService) {
@@ -107,30 +112,25 @@ public class GaeSnapshotService2 {
 	/**
 	 * Precise, slower.
 	 * 
-	 * @param revisionNumber of the returned snapshot
+	 * @param requestedRevNr of the returned snapshot
 	 * @return an {@link XReadableModel} by applying all events in the
 	 *         {@link XChangeLog} or null if the model was not present at the
 	 *         requested revisionNumber
 	 */
-	synchronized public XWritableModel getSnapshot(long revisionNumber) {
-		if(revisionNumber < 0) {
-			return null;
-		}
-		
-		XWritableModel snapshot;
+	synchronized public XWritableModel getSnapshot(long requestedRevNr) {
+		assert requestedRevNr > 0 & this.changesService.getCurrentRevisionNumber() > 0;
+		log.debug("Get snapshot " + this.modelAddress + " " + requestedRevNr);
 		
 		/* if localVmCache has exact requested version, use it */
-		XReadableModel cached = this.localVmModelSnapshotsCache.get(revisionNumber);
+		XWritableModel cached = localVmCacheGet(requestedRevNr);
 		if(cached != null) {
-			assert cached.getRevisionNumber() == revisionNumber;
-			snapshot = XCopyUtils.createSnapshot(cached);
+			return cached;
 		}
 		
 		// IMPROVE if the local VM cache is only behind a few revisions, it
 		// might be faster to update it than to load a snapshot from the
 		// memcache
-		snapshot = getSnapshotFromMemcacheOrDatastore(revisionNumber);
-		
+		XWritableModel snapshot = getSnapshotFromMemcacheOrDatastore(requestedRevNr);
 		if(snapshot.getRevisionNumber() == MODEL_DOES_NOT_EXIST)
 			return null;
 		else
@@ -138,69 +138,86 @@ public class GaeSnapshotService2 {
 	}
 	
 	/**
+	 * @param requestedRevNr
+	 * @return a copy of the cached model or null
+	 */
+	@GaeOperation()
+	private XWritableModel localVmCacheGet(long requestedRevNr) {
+		XReadableModel cachedModel = this.localVmModelSnapshotsCache.get(requestedRevNr);
+		if(cachedModel == null)
+			return null;
+		else {
+			assert cachedModel.getRevisionNumber() == requestedRevNr;
+			return XCopyUtils.createSnapshot(cachedModel);
+		}
+	}
+	
+	/**
 	 * Implementation note: As XEntites are not {@link Serializable} by default,
 	 * an XML-serialisation is stored in data store and memcache.
 	 * 
-	 * @param revisionNumber for which to retrieve a snapshot.
+	 * @param requestedRevNr for which to retrieve a snapshot.
 	 * @return a snapshot with the requested revisionNumber of null if model was
 	 *         null at that revision.
 	 */
 	@GaeOperation(datastoreRead = true ,memcacheRead = true)
-	synchronized private XWritableModel getSnapshotFromMemcacheOrDatastore(long revisionNumber) {
-		XRevWritableModel snapshot;
+	synchronized private XWritableModel getSnapshotFromMemcacheOrDatastore(long requestedRevNr) {
+		assert requestedRevNr > 0 & this.changesService.getCurrentRevisionNumber() > 0;
 		// try to retrieve an exact match for the required revisionNumber
 		// memcache + datastore read
-		
-		Key key = getSnapshotKey(revisionNumber);
+		Key key = getSnapshotKey(requestedRevNr);
 		Object o = XydraRuntime.getMemcache().get(key);
 		if(o != null) {
-			snapshot = (XRevWritableModel)o;
-		} else {
-			// ask datastore
-			Entity e = GaeUtils.getEntityFromDatastore(key);
-			if(e != null) {
-				Text xmlText = (Text)e.getProperty(PROP_XML);
-				if(xmlText == null) {
-					// model was null at that revision
-					return null;
-				}
-				String xml = xmlText.getValue();
-				XydraElement snapshotXml = new XmlParser().parse(xml);
-				snapshot = SerializedModel.toModelState(snapshotXml, this.modelAddress);
-				
-			} else {
-				// this snapshot has not been computed OR there exists no
-				// snapshot
-				// at such high numbers
-				long modelRev = this.changesService.getCurrentRevisionNumber();
-				if(revisionNumber > modelRev) {
-					log.warn("Requested snapshot version " + revisionNumber
-					        + " higher than latest model version " + modelRev);
-					return null;
-				}
-				// need to compute snapshot from an older version
-				snapshot = computeSnapshot(revisionNumber);
-			}
+			XRevWritableModel snapshot = (XRevWritableModel)o;
+			assert snapshot.getRevisionNumber() == requestedRevNr;
+			localVmCachePut(snapshot);
+			return snapshot;
 		}
-		
-		// cache in local vm cache
-		this.localVmModelSnapshotsCache.put(snapshot.getRevisionNumber(), snapshot);
+		// else: look for direct match in datastore
+		Entity e = GaeUtils.getEntityFromDatastore(key);
+		if(e != null) {
+			Text xmlText = (Text)e.getProperty(PROP_XML);
+			if(xmlText == null) {
+				// model was null at that revision
+				return null;
+			}
+			String xml = xmlText.getValue();
+			XydraElement snapshotXml = new XmlParser().parse(xml);
+			XRevWritableModel snapshot = SerializedModel.toModelState(snapshotXml,
+			        this.modelAddress);
+			localVmCachePut(snapshot);
+			return snapshot;
+		}
+		// else: need to compute snapshot from an older version
+		XRevWritableModel snapshot = computeSnapshot(requestedRevNr);
 		return snapshot;
+	}
+	
+	/**
+	 * @param snapshot a copy of it is stored
+	 */
+	@GaeOperation()
+	private void localVmCachePut(XRevWritableModel snapshot) {
+		this.localVmModelSnapshotsCache.put(snapshot.getRevisionNumber(),
+		        XCopyUtils.createSnapshot(snapshot));
 	}
 	
 	/**
 	 * Compute requested snapshot by using an older snapshot version (if one is
 	 * found in memcache). Puts intermediary version in the respective caches.
 	 * 
-	 * @param revisionNumber which is required but has no direct match in the
+	 * @param requestedRevNr which is required but has no direct match in the
 	 *            datastore or memcache
 	 * @return a computed model snapshot
 	 */
-	private XRevWritableModel computeSnapshot(long revisionNumber) {
+	private XRevWritableModel computeSnapshot(long requestedRevNr) {
+		assert requestedRevNr <= this.changesService.getCurrentRevisionNumber() : "Requested snapshot version "
+		        + requestedRevNr
+		        + " higher than latest model version "
+		        + this.changesService.getCurrentRevisionNumber();
 		
-		long askNr = revisionNumber - 1;
 		Map<Object,Object> batchResult = Collections.emptyMap();
-		
+		long askNr = requestedRevNr - 1;
 		while(askNr >= 0 && batchResult.isEmpty()) {
 			// prepare a batch-fetch in the mem-cache
 			List<Object> keys = new LinkedList<Object>();
@@ -210,6 +227,7 @@ public class GaeSnapshotService2 {
 			}
 			// execute
 			batchResult = XydraRuntime.getMemcache().getAll(keys);
+			assert cacheResultIsConsistent(batchResult);
 			// batch result will usually contain 1 hits
 			if(askNr >= 0 && batchResult.size() != 1) {
 				log.warn("Got a batch result from memcache when asking for snapshot with "
@@ -217,10 +235,10 @@ public class GaeSnapshotService2 {
 				        + new ArrayList<Object>(keys).toArray());
 			}
 			// Pump all results (if any) to localVmcache
-			for(Object snapshotfromMemcache : batchResult.values()) {
-				assert snapshotfromMemcache instanceof XRevWritableModel;
-				XRevWritableModel snapshot = (XRevWritableModel)snapshotfromMemcache;
-				this.localVmModelSnapshotsCache.put(snapshot.getRevisionNumber(), snapshot);
+			for(Object o : batchResult.values()) {
+				assert o instanceof XRevWritableModel;
+				XRevWritableModel snapshotFromMemcache = (XRevWritableModel)o;
+				localVmCachePut(snapshotFromMemcache);
 			}
 		}
 		
@@ -239,10 +257,8 @@ public class GaeSnapshotService2 {
 			assert base.getAddress().equals(this.modelAddress);
 		}
 		
-		XRevWritableModel requestedSnapshot = computeSnapshotFromBase(base, revisionNumber);
-		// cache it
-		this.localVmModelSnapshotsCache.put(requestedSnapshot.getRevisionNumber(),
-		        requestedSnapshot);
+		XRevWritableModel requestedSnapshot = computeSnapshotFromBase(base, requestedRevNr);
+		localVmCachePut(requestedSnapshot);
 		// cache it in memcache
 		XydraRuntime.getMemcache().put(this.getSnapshotKey(requestedSnapshot.getRevisionNumber()),
 		        requestedSnapshot);
@@ -250,51 +266,57 @@ public class GaeSnapshotService2 {
 		return requestedSnapshot;
 	}
 	
+	private boolean cacheResultIsConsistent(Map<Object,Object> batchResult) {
+		for(Entry<Object,Object> entry : batchResult.entrySet()) {
+			if(!entry.getKey().equals(
+			        getSnapshotKey(((XRevWritableModel)entry.getValue()).getRevisionNumber()))) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	/**
 	 * Compute a snapshot by applying all events that happened between base's
 	 * revision and the requested revisionNumber.
 	 * 
-	 * @param base might have revNr == -1
-	 * @param revisionNumber
+	 * @param base might have revNr == -1; content will not be changed.
+	 * @param requestedRevNr
 	 * @return a serialisable, computed snapshot
 	 */
-	private XRevWritableModel computeSnapshotFromBase(XRevWritableModel base, long revisionNumber) {
-		assert revisionNumber >= 0;
-		log.info("Compute snapshot of model '" + this.modelAddress + "' from rev="
-		        + base.getRevisionNumber() + " to rev=" + revisionNumber);
+	private XRevWritableModel computeSnapshotFromBase(XRevWritableModel base, long requestedRevNr) {
+		assert requestedRevNr > 0;
+		assert requestedRevNr > base.getRevisionNumber();
+		log.debug("Compute snapshot of model '" + this.modelAddress + "' from rev="
+		        + base.getRevisionNumber() + " to rev=" + requestedRevNr);
 		// prepare base
-		XRevWritableModel model = XCopyUtils.createSnapshot(base);
-		
-		// FIXME ???
-		if(revisionNumber == 0) {
-			return base;
-		}
+		XRevWritableModel baseModel = XCopyUtils.createSnapshot(base);
 		
 		// get events between [ start, end )
 		List<XEvent> events = this.changesService.getEventsBetween(
-		        Math.max(model.getRevisionNumber(), 0), revisionNumber);
+		        Math.max(baseModel.getRevisionNumber() + 1, 0), requestedRevNr);
 		
 		// apply events to base
 		for(XEvent event : events) {
-			// FIXME
-			System.out.println("Applying " + event);
-			
-			applyEvent(model, event);
-			
-			// cache
-			this.localVmModelSnapshotsCache.put(model.getRevisionNumber(), model);
+			log.trace("Applying " + event);
+			applyEvent(baseModel, event);
+			localVmCachePut(baseModel);
 		}
-		return model;
+		return baseModel;
 	}
 	
 	private static void applyEvent(XRevWritableModel model, XEvent event) {
 		if(event instanceof XTransactionEvent) {
 			for(XEvent txnEvent : ((XTransactionEvent)event)) {
+				if(txnEvent.isImplied()) {
+					continue;
+				}
 				applyEvent(model, txnEvent);
 			}
 		} else {
 			assert event instanceof XAtomicEvent;
 			XAtomicEvent atomicEvent = (XAtomicEvent)event;
+			
 			switch(atomicEvent.getTarget().getAddressedType()) {
 			case XREPOSITORY:
 				applyRepositoryEvent(model, (XRepositoryEvent)event);
@@ -311,20 +333,21 @@ public class GaeSnapshotService2 {
 				assert model.getRevisionNumber() >= 0;
 				applyFieldEvent(model, (XFieldEvent)event);
 			}
+			
 		}
+		
 	}
 	
 	private static void applyFieldEvent(XRevWritableModel model, XFieldEvent event) {
 		assert event.getTarget().getParent().getParent().equals(model.getAddress());
 		XRevWritableObject object = model.getObject(event.getObjectId());
-		assert object != null;
+		assert object != null : "object null for event " + event;
 		XRevWritableField field = object.getField(event.getFieldId());
 		assert field != null;
 		
 		switch(event.getChangeType()) {
 		case ADD:
-			// FIXME seems not no hold: assert field.isEmpty() :
-			// field.getValue();
+			assert field.isEmpty() : field.getValue();
 			field.setValue(event.getNewValue());
 			break;
 		case CHANGE:
@@ -349,11 +372,13 @@ public class GaeSnapshotService2 {
 		
 		switch(event.getChangeType()) {
 		case ADD: {
+			assert !object.hasField(event.getFieldId());
 			XRevWritableField field = object.createField(event.getFieldId());
 			field.setRevisionNumber(event.getRevisionNumber());
 			break;
 		}
 		case REMOVE: {
+			assert object.hasField(event.getFieldId());
 			object.removeField(event.getFieldId());
 			break;
 		}
@@ -369,11 +394,13 @@ public class GaeSnapshotService2 {
 		assert event.getTarget().equals(model.getAddress());
 		switch(event.getChangeType()) {
 		case ADD: {
+			assert !model.hasObject(event.getObjectId());
 			XRevWritableObject object = model.createObject(event.getObjectId());
 			object.setRevisionNumber(event.getRevisionNumber());
 			break;
 		}
 		case REMOVE: {
+			assert model.hasObject(event.getObjectId());
 			model.removeObject(event.getObjectId());
 			break;
 		}
@@ -388,13 +415,21 @@ public class GaeSnapshotService2 {
 		assert event.getChangedEntity().equals(model.getAddress());
 		switch(event.getChangeType()) {
 		case ADD: {
-			assert model.getRevisionNumber() == MODEL_DOES_NOT_EXIST;
+			assert model.isEmpty() : " event " + event;
 			model.setRevisionNumber(event.getRevisionNumber());
 			break;
 		}
 		case REMOVE: {
 			assert model.getRevisionNumber() >= 0;
 			model.setRevisionNumber(MODEL_DOES_NOT_EXIST);
+			// clear model
+			List<XID> ids = new LinkedList<XID>();
+			for(XID id : model) {
+				ids.add(id);
+			}
+			for(XID id : ids) {
+				model.removeObject(id);
+			}
 			break;
 		}
 		case CHANGE:

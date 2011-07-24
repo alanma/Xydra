@@ -213,6 +213,19 @@ public class GaeChange {
 	
 	// timeouts
 	
+	public static final long GAE_WEB_REQUEST_TIMEOUT = 30000;
+	
+	public static final long APPLICATION_RESERVED_TIME = 10000;
+	
+	/**
+	 * timeout for changes in milliseconds
+	 * 
+	 * If this is set too low, longer commands may not be executed successfully.
+	 * A too long timeout however might cause the model to "starve" as processes
+	 * are be aborted by GAE while waiting for other changes.
+	 * */
+	private static final long TIMEOUT = GAE_WEB_REQUEST_TIMEOUT - APPLICATION_RESERVED_TIME;
+	
 	/**
 	 * critical time (in milliseconds) after which a process will voluntarily
 	 * give up it's change to prevent another process from rolling it forward
@@ -224,16 +237,7 @@ public class GaeChange {
 	 * However, setting this too close to TIMEOUT might result in two processes
 	 * executing the same change.
 	 */
-	private static final long TIME_CRITICAL = 27000;
-	
-	/**
-	 * timeout for changes in milliseconds
-	 * 
-	 * If this is set too low, longer commands may not be executed successfully.
-	 * A too long timeout however might cause the model to "starve" as processes
-	 * are be aborted by GAE while waiting for other changes.
-	 * */
-	private static final long TIMEOUT = 30000;
+	private static final long TIME_CRITICAL = TIMEOUT - 3000;
 	
 	{
 		assert TIME_CRITICAL < TIMEOUT;

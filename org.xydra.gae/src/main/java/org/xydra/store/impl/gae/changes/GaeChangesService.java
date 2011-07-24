@@ -655,6 +655,9 @@ public class GaeChangesService {
 	private void commit(GaeChange change, Status status) {
 		assert status.isCommitted();
 		assert !change.getStatus().isCommitted();
+		if(status == Status.FailedTimeout) {
+			log.warn("Comitting timed out change " + change);
+		}
 		change.commit(status);
 		if(this.revCache.getLastCommited() == change.rev - 1) {
 			this.revCache.setLastCommited(change.rev);
@@ -804,7 +807,7 @@ public class GaeChangesService {
 	 *      and never ask for them again.
 	 */
 	public List<XEvent> getEventsBetween(long beginRevision, long endRevision) {
-		log.info("getEventsBetwen [" + beginRevision + "," + endRevision + ") @"
+		log.debug("getEventsBetwen [" + beginRevision + "," + endRevision + ") @"
 		        + getModelAddress());
 		
 		long endRev = endRevision;
@@ -876,6 +879,7 @@ public class GaeChangesService {
 			Status status = change.getStatus();
 			if(!status.isCommitted()) {
 				if(change.isTimedOut()) {
+					log.warn("Changed timed out " + change);
 					if(handleTimeout(change)) {
 						change.reload();
 						rev--;
