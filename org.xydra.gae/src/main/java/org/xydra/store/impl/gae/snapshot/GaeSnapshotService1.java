@@ -215,8 +215,8 @@ public class GaeSnapshotService1 {
 	private void updateCachedModel(CachedModel entry, long curRev) {
 		
 		/*
-		 * FIXME Max: This seems correct and makes XydraGae much faster - am I
-		 * missing something?
+		 * FIXME To Daniel: This seems correct and makes XydraGae much faster -
+		 * am I missing something?
 		 */
 		if(entry.revision == curRev) {
 			return;

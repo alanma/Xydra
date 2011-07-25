@@ -11,21 +11,15 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
-import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XEvent;
-import org.xydra.base.change.XFieldEvent;
-import org.xydra.base.change.XModelEvent;
-import org.xydra.base.change.XObjectEvent;
-import org.xydra.base.change.XRepositoryEvent;
-import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.rmof.XReadableModel;
-import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableModel;
-import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.XWritableModel;
+import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
+import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.XCopyUtils;
+import org.xydra.core.change.EventUtils;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.serialize.SerializedModel;
 import org.xydra.core.serialize.XydraElement;
@@ -53,11 +47,6 @@ import com.google.appengine.api.datastore.Text;
  * 
  * @author dscharrer
  * @author xamde
- * 
- */
-/**
- * @author xamde
- * 
  */
 public class GaeSnapshotService2 {
 	
@@ -230,7 +219,11 @@ public class GaeSnapshotService2 {
 			assert cacheResultIsConsistent(batchResult);
 			// batch result will usually contain 1 hits
 			if(askNr >= 0 && batchResult.size() != 1) {
-				log.warn("Got a batch result from memcache when asking for snapshot with "
+				/*
+				 * TODO IMPROVE make sure changes service puts every K versions
+				 * a snapshot in memcache
+				 */
+				log.info("Got a batch result from memcache when asking for snapshot with "
 				        + batchResult.size() + " entries for keys "
 				        + new ArrayList<Object>(keys).toArray());
 			}
@@ -244,13 +237,13 @@ public class GaeSnapshotService2 {
 		
 		// TODO if no hits, ask datastore for older snapshots
 		
-		// first element can serve as base for further computation
 		XRevWritableModel base;
 		if(batchResult.isEmpty()) {
 			// we start from scratch, nobody has ever saved a snapshot
 			base = new SimpleModel(this.modelAddress);
 			base.setRevisionNumber(MODEL_DOES_NOT_EXIST);
 		} else {
+			// first element can serve as base for further computation
 			Object snapshotfromMemcache = batchResult.values().iterator().next();
 			assert snapshotfromMemcache instanceof XRevWritableModel;
 			base = (XRevWritableModel)snapshotfromMemcache;
@@ -299,143 +292,10 @@ public class GaeSnapshotService2 {
 		// apply events to base
 		for(XEvent event : events) {
 			log.trace("Applying " + event);
-			applyEvent(baseModel, event);
+			EventUtils.applyEvent(baseModel, event);
 			localVmCachePut(baseModel);
 		}
 		return baseModel;
-	}
-	
-	private static void applyEvent(XRevWritableModel model, XEvent event) {
-		if(event instanceof XTransactionEvent) {
-			for(XEvent txnEvent : ((XTransactionEvent)event)) {
-				if(txnEvent.isImplied()) {
-					continue;
-				}
-				applyEvent(model, txnEvent);
-			}
-		} else {
-			assert event instanceof XAtomicEvent;
-			XAtomicEvent atomicEvent = (XAtomicEvent)event;
-			
-			switch(atomicEvent.getTarget().getAddressedType()) {
-			case XREPOSITORY:
-				applyRepositoryEvent(model, (XRepositoryEvent)event);
-				break;
-			case XMODEL:
-				assert model.getRevisionNumber() >= 0;
-				applyModelEvent(model, (XModelEvent)event);
-				break;
-			case XOBJECT:
-				assert model.getRevisionNumber() >= 0;
-				applyObjectEvent(model, (XObjectEvent)event);
-				break;
-			case XFIELD:
-				assert model.getRevisionNumber() >= 0;
-				applyFieldEvent(model, (XFieldEvent)event);
-			}
-			
-		}
-		
-	}
-	
-	private static void applyFieldEvent(XRevWritableModel model, XFieldEvent event) {
-		assert event.getTarget().getParent().getParent().equals(model.getAddress());
-		XRevWritableObject object = model.getObject(event.getObjectId());
-		assert object != null : "object null for event " + event;
-		XRevWritableField field = object.getField(event.getFieldId());
-		assert field != null;
-		
-		switch(event.getChangeType()) {
-		case ADD:
-			assert field.isEmpty() : field.getValue();
-			field.setValue(event.getNewValue());
-			break;
-		case CHANGE:
-			assert !field.isEmpty();
-			field.setValue(event.getNewValue());
-			break;
-		case REMOVE:
-			field.setValue(null);
-			break;
-		case TRANSACTION:
-			throw new IllegalStateException("XFieldEvent cannot be this " + event);
-		}
-		field.setRevisionNumber(event.getRevisionNumber());
-		object.setRevisionNumber(event.getRevisionNumber());
-		model.setRevisionNumber(event.getRevisionNumber());
-	}
-	
-	private static void applyObjectEvent(XRevWritableModel model, XObjectEvent event) {
-		assert event.getTarget().getParent().equals(model.getAddress());
-		XRevWritableObject object = model.getObject(event.getObjectId());
-		assert object != null;
-		
-		switch(event.getChangeType()) {
-		case ADD: {
-			assert !object.hasField(event.getFieldId());
-			XRevWritableField field = object.createField(event.getFieldId());
-			field.setRevisionNumber(event.getRevisionNumber());
-			break;
-		}
-		case REMOVE: {
-			assert object.hasField(event.getFieldId());
-			object.removeField(event.getFieldId());
-			break;
-		}
-		case CHANGE:
-		case TRANSACTION:
-			throw new IllegalStateException("XObjectEvents cannot be this " + event);
-		}
-		object.setRevisionNumber(event.getRevisionNumber());
-		model.setRevisionNumber(event.getRevisionNumber());
-	}
-	
-	private static void applyModelEvent(XRevWritableModel model, XModelEvent event) {
-		assert event.getTarget().equals(model.getAddress());
-		switch(event.getChangeType()) {
-		case ADD: {
-			assert !model.hasObject(event.getObjectId());
-			XRevWritableObject object = model.createObject(event.getObjectId());
-			object.setRevisionNumber(event.getRevisionNumber());
-			break;
-		}
-		case REMOVE: {
-			assert model.hasObject(event.getObjectId());
-			model.removeObject(event.getObjectId());
-			break;
-		}
-		case CHANGE:
-		case TRANSACTION:
-			throw new IllegalStateException("MovelEvents cannot be this " + event);
-		}
-		model.setRevisionNumber(event.getRevisionNumber());
-	}
-	
-	private static void applyRepositoryEvent(XRevWritableModel model, XRepositoryEvent event) {
-		assert event.getChangedEntity().equals(model.getAddress());
-		switch(event.getChangeType()) {
-		case ADD: {
-			assert model.isEmpty() : " event " + event;
-			model.setRevisionNumber(event.getRevisionNumber());
-			break;
-		}
-		case REMOVE: {
-			assert model.getRevisionNumber() >= 0;
-			model.setRevisionNumber(MODEL_DOES_NOT_EXIST);
-			// clear model
-			List<XID> ids = new LinkedList<XID>();
-			for(XID id : model) {
-				ids.add(id);
-			}
-			for(XID id : ids) {
-				model.removeObject(id);
-			}
-			break;
-		}
-		case CHANGE:
-		case TRANSACTION:
-			throw new IllegalStateException("XRepositoryEvent cannot be this " + event);
-		}
 	}
 	
 	private synchronized Key getSnapshotKey(long revNr) {

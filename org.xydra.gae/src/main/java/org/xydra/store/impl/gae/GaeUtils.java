@@ -268,7 +268,7 @@ public class GaeUtils {
 			        entityToBeCached_);
 			/*
 			 * If memcache contained still the value that we once got from
-			 * there, it's fine. Or if it contains already the value we just
+			 * there, it's fine. Or if it contained already the value we just
 			 * stored.
 			 */
 			if(XI.equals(currentlyCachedEntity_, previouslyCacheEntity)

@@ -178,20 +178,10 @@ public class GaeChangesService {
 		log.debug("Phase 1: grabRevisionAndRegister " + locks.size() + " locks");
 		GaeChange change = grabRevisionAndRegisterLocks(locks, actorId);
 		
-		// // FIXME kill
-		// System.out.println(StatsGatheringMemCacheWrapper.INSTANCE == null ?
-		// ""
-		// : StatsGatheringMemCacheWrapper.INSTANCE.stats());
-		
 		// IMPROVE save command to be able to roll back in case of timeout while
 		// waiting for locks / checking preconditions?
 		
 		waitForLocks(change);
-		
-		// // FIXME kill
-		// System.out.println(StatsGatheringMemCacheWrapper.INSTANCE == null ?
-		// ""
-		// : StatsGatheringMemCacheWrapper.INSTANCE.stats());
 		
 		Pair<List<XAtomicEvent>,int[]> events = checkPreconditionsAndSaveEvents(change, command,
 		        actorId);
@@ -809,35 +799,29 @@ public class GaeChangesService {
 	public List<XEvent> getEventsBetween(long beginRevision, long endRevision) {
 		log.debug("getEventsBetwen [" + beginRevision + "," + endRevision + ") @"
 		        + getModelAddress());
-		
-		long endRev = endRevision;
-		
+		/* sanity checks */
 		if(beginRevision < 0) {
 			throw new IndexOutOfBoundsException(
 			        "beginRevision is not a valid revision number, was " + beginRevision);
 		}
-		
-		if(endRev < 0) {
+		if(endRevision < 0) {
 			throw new IndexOutOfBoundsException("endRevision is not a valid revision number, was "
-			        + endRev);
+			        + endRevision);
 		}
-		
-		if(beginRevision > endRev) {
+		if(beginRevision > endRevision) {
 			throw new IllegalArgumentException("beginRevision may not be greater than endRevision");
 		}
-		
-		if(endRev <= 0) {
+		if(endRevision <= 0) {
 			return new ArrayList<XEvent>(0);
 		}
 		
+		/* adjust range */
+		long endRev = endRevision;
 		long begin = beginRevision < 0 ? 0 : beginRevision;
-		
 		long currentRev = getCurrentRevisionNumber();
-		
 		if(currentRev == -1) {
 			return null;
 		}
-		
 		// Don't try to get more events than there actually are.
 		if(beginRevision > currentRev) {
 			return new ArrayList<XEvent>(0);
@@ -862,8 +846,10 @@ public class GaeChangesService {
 		
 		int pos = 0;
 		
-		// Only update the currentRev cache value if we aren't skipping any
-		// events.
+		/*
+		 * Only update the currentRev cache value if we aren't skipping any
+		 * events.
+		 */
 		boolean trackCurrentRev = (begin <= currentRev);
 		
 		long rev = begin;
