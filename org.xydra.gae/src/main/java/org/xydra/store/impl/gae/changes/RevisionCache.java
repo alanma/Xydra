@@ -36,9 +36,6 @@ import org.xydra.store.impl.gae.GaeOperation;
  * 
  * Invariants: LAST_TAKEN >= COMMITTED >= CURRENT
  * 
- * TODO IMPROVE don't call the memcache for every request, complement it with a
- * local VM cache
- * 
  * @author dscharrer
  * @author xamde
  */
@@ -134,6 +131,10 @@ class RevisionCache {
 		 * @param writeMemcache if true, value is also written to memcache
 		 */
 		private void setValue(long value, boolean writeMemcache) {
+			if(value < this.value) {
+				return;
+				// TODO IMPROVE change caller code so that this doesnt happen
+			}
 			setLocalValue(value);
 			if(writeMemcache) {
 				IMemCache cache = XydraRuntime.getMemcache();
