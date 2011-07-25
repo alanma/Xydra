@@ -36,6 +36,9 @@ import org.xydra.store.impl.gae.GaeOperation;
  * 
  * Invariants: LAST_TAKEN >= COMMITTED >= CURRENT
  * 
+ * TODO IMPROVE don't call the memcache for every request, complement it with a
+ * local VM cache
+ * 
  * @author dscharrer
  * @author xamde
  */
@@ -44,30 +47,110 @@ class RevisionCache {
 	/**
 	 * How many milliseconds to consider the locally cached value valid
 	 */
-	private static final long LOCAL_VM_CACHE_TIMEOUT = 500;
+	private static final long LOCAL_VM_CACHE_TIMEOUT = 30 * 1000; // was 500
 	
 	protected static final long NOT_SET = -2L;
 	
-	private final String commitedRevCacheName;
+	private class CachedLong {
+		private CachedLong(String memcacheKey) {
+			this.memcacheKey = memcacheKey;
+			this.value = NOT_SET;
+			this.time = NOT_SET;
+		}
+		
+		/** Local VM cache of the "current" revision number. */
+		private long value;
+		/** Age of Local VM cache of the "current" revision number. */
+		private long time;
+		private final String memcacheKey;
+		
+		/**
+		 * @return true if value cached in local JVM is set and not too old
+		 */
+		private boolean hasValidLocalValue() {
+			if(this.value == NOT_SET)
+				return false;
+			long now = System.currentTimeMillis();
+			return now < this.time + LOCAL_VM_CACHE_TIMEOUT;
+		}
+		
+		/**
+		 * @return the value from memcache or NOT_SET, never null.
+		 */
+		@GaeOperation(memcacheRead = true)
+		private long askMemcache() {
+			IMemCache cache = XydraRuntime.getMemcache();
+			Long value = (Long)cache.get(this.memcacheKey);
+			if(value == null) {
+				// cache the fact that memcache doesnt know it
+				setLocalValue(NOT_SET);
+				return NOT_SET;
+			} else {
+				setLocalValue(value);
+				return value;
+			}
+		}
+		
+		/**
+		 * @param value
+		 * @return true if value changed
+		 */
+		private boolean setLocalValue(long value) {
+			if(value < this.value) {
+				return false;
+				// TODO IMPROVE change caller code so that this doesnt happen
+			}
+			this.time = System.currentTimeMillis();
+			if(value == this.value) {
+				return false;
+			}
+			this.value = value;
+			return true;
+		}
+		
+		/**
+		 * @return cached value or NOT_SET
+		 */
+		private long getValueIfSet() {
+			synchronized(this) {
+				if(this.hasValidLocalValue()) {
+					return this.value;
+				} else {
+					return this.askMemcache();
+				}
+			}
+		}
+		
+		/**
+		 * @return cached value or -1
+		 */
+		private long getValue() {
+			long rev = getValueIfSet();
+			return (rev == NOT_SET) ? -1L : rev;
+		}
+		
+		/**
+		 * @param value to set
+		 * @param writeMemcache if true, value is also written to memcache
+		 */
+		private void setValue(long value, boolean writeMemcache) {
+			setLocalValue(value);
+			if(writeMemcache) {
+				IMemCache cache = XydraRuntime.getMemcache();
+				Object previous = cache.put(this.memcacheKey, value);
+				assert previous == null || ((Long)previous) <= value;
+			}
+		}
+	}
 	
-	private final String currentRevCacheName;
-	
-	private final String lastTakenRevCacheName;
-	
-	// TODO IMPROVE don't call the memcache for every request, complement it
-	// with a local VM cache
-	
-	/** Local VM cache of the "current" revision number. */
-	private long localVmCacheCurrentModelRev = NOT_SET;
-	
-	/** Age of Local VM cache of the "current" revision number. */
-	private long localVmCacheCurrentModelRevTime = -1;
+	private final CachedLong current, committed, lastTaken;
 	
 	@GaeOperation()
 	RevisionCache(XAddress modelAddr) {
-		this.commitedRevCacheName = modelAddr + "-commitedRev";
-		this.currentRevCacheName = modelAddr + "-currentRev";
-		this.lastTakenRevCacheName = modelAddr + "-lastTakenRev";
+		// init caches
+		this.current = new CachedLong(modelAddr + "-currentRev");
+		this.committed = new CachedLong(modelAddr + "-commitedRev");
+		this.lastTaken = new CachedLong(modelAddr + "-lastTakenRev");
 	}
 	
 	/**
@@ -79,30 +162,19 @@ class RevisionCache {
 	 */
 	@GaeOperation(memcacheRead = true)
 	protected long getCurrentModelRev() {
-		long rev = getCurrentModelRevIfSet();
-		return (rev == NOT_SET) ? -1L : rev;
+		return this.current.getValue();
 	}
 	
 	/**
-	 * Retrieve a cached value of the current revision number as defined by
-	 * {@link GaeChangesService#getCurrentRevisionNumber()}.
+	 * @return a cached value of the current revision number as defined by
+	 *         {@link GaeChangesService#getCurrentRevisionNumber()} or NOT_SET.
 	 * 
-	 * The returned value may be less that the actual "current" revision number,
-	 * but is guaranteed to never be greater.
+	 *         The returned value may be less that the actual "current" revision
+	 *         number, but is guaranteed to never be greater.
 	 */
 	@GaeOperation(memcacheRead = true)
 	protected long getCurrentModelRevIfSet() {
-		// localVmCache
-		synchronized(this) {
-			long now = System.currentTimeMillis();
-			if(now < this.localVmCacheCurrentModelRevTime + LOCAL_VM_CACHE_TIMEOUT) {
-				return this.localVmCacheCurrentModelRev;
-			}
-		}
-		// memCache
-		IMemCache cache = XydraRuntime.getMemcache();
-		Long value = (Long)cache.get(this.currentRevCacheName);
-		return (value == null) ? NOT_SET : value;
+		return this.current.getValueIfSet();
 	}
 	
 	/**
@@ -113,21 +185,11 @@ class RevisionCache {
 	 */
 	@GaeOperation(memcacheRead = true)
 	protected long getLastCommited() {
-		IMemCache cache = XydraRuntime.getMemcache();
-		
-		Long entry = (Long)cache.get(this.commitedRevCacheName);
-		long rev = (entry == null) ? -1L : entry;
-		
-		long current = getCurrentModelRev();
-		
-		return (current > rev ? current : rev);
+		return this.lastTaken.getValue();
 	}
 	
 	protected long getLastCommitedIfSet() {
-		IMemCache cache = XydraRuntime.getMemcache();
-		
-		Long entry = (Long)cache.get(this.commitedRevCacheName);
-		return (entry == null) ? NOT_SET : entry;
+		return this.committed.getValueIfSet();
 	}
 	
 	/**
@@ -136,39 +198,7 @@ class RevisionCache {
 	 *         taken already.
 	 */
 	protected long getLastTaken() {
-		IMemCache cache = XydraRuntime.getMemcache();
-		
-		Long entry = (Long)cache.get(this.lastTakenRevCacheName);
-		long lastTaken = (entry == null) ? -1L : entry;
-		
-		long committed = getLastCommited();
-		return Math.max(committed, lastTaken);
-	}
-	
-	/**
-	 * Increase a cached {@link Long} value.
-	 * 
-	 * @param cachname The value to increase.
-	 * @param l The new value to set. Ignored if it is less than the current
-	 *            value.
-	 */
-	@GaeOperation(memcacheRead = true ,memcacheWrite = true)
-	private long increaseCachedValue(String cachname, long l) {
-		IMemCache cache = XydraRuntime.getMemcache();
-		
-		Long current = (Long)cache.get(cachname);
-		if(current != null && current > l) {
-			return current;
-		}
-		
-		Long value = l;
-		while(true) {
-			Long old = (Long)cache.put(cachname, value);
-			if(old == null || old <= value) {
-				return value;
-			}
-			value = old;
-		}
+		return this.lastTaken.getValue();
 	}
 	
 	/**
@@ -178,22 +208,25 @@ class RevisionCache {
 	 *            less than this.
 	 */
 	protected void setCurrentModelRev(long l) {
-		
-		synchronized(this) {
-			if(this.localVmCacheCurrentModelRev >= l) {
-				// TODO IMPROVE try to change caller so that this does not
-				// happen
-				return;
+		boolean changes = this.current.setLocalValue(l);
+		if(changes) {
+			maintainInvariants(true);
+		}
+	}
+	
+	private void maintainInvariants(boolean currentChanged) {
+		/* Make sure: current <= committed <= lastTaken */
+		long committed = this.committed.getValue();
+		if(currentChanged) {
+			long current = this.current.getValue();
+			if(current > committed) {
+				this.committed.setValue(current, true);
+				committed = current;
 			}
 		}
-		
-		long val = increaseCachedValue(this.currentRevCacheName, l);
-		
-		synchronized(this) {
-			if(val >= this.localVmCacheCurrentModelRev) {
-				this.localVmCacheCurrentModelRev = val;
-				this.localVmCacheCurrentModelRevTime = System.currentTimeMillis();
-			}
+		long lastTaken = this.lastTaken.getValue();
+		if(committed > lastTaken) {
+			this.lastTaken.setLocalValue(committed);
 		}
 	}
 	
@@ -204,7 +237,10 @@ class RevisionCache {
 	 *            less than this.
 	 */
 	protected void setLastCommited(long l) {
-		increaseCachedValue(this.commitedRevCacheName, l);
+		boolean changes = this.committed.setLocalValue(l);
+		if(changes) {
+			maintainInvariants(false);
+		}
 	}
 	
 	/**
@@ -214,7 +250,7 @@ class RevisionCache {
 	 *            less than this.
 	 */
 	protected void setLastTaken(long l) {
-		increaseCachedValue(this.lastTakenRevCacheName, l);
+		this.lastTaken.setLocalValue(l);
 	}
 	
 }
