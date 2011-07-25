@@ -1,9 +1,15 @@
 package org.xydra.testgae.client;
 
-import java.io.IOException;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
+
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Exchanger;
 
+import org.junit.Test;
 import org.xydra.testgae.shared.SimulatedUser;
 
 
@@ -14,29 +20,52 @@ import org.xydra.testgae.shared.SimulatedUser;
  * 
  */
 public class RemoteBenchmark {
+	protected String absoluteUrl;
 	
-	public static void runBenchmark(String absoluteUrl) throws InterruptedException, IOException {
+	@Test
+	public void testRunBenchmark() {
 		System.out.println("---- Running benchmark1 -----");
-		SimulatedUser u1 = new SimulatedUser(absoluteUrl, "repo1");
+		SimulatedUser u1 = new SimulatedUser(this.absoluteUrl, "repo1", new Exchanger<Exception>());
 		Writer w = new OutputStreamWriter(System.out);
-		u1.doBenchmark1(w);
+		try {
+			u1.doBenchmark1(w);
+		} catch(Exception e) {
+			fail(e.toString());
+		}
 		
-		runLoadTest(absoluteUrl, "repo2", 20, 3 * 60 * 1000);
 	}
 	
-	public static void runLoadTest(String absoluteUrl, String repoId, int users, int testDurationMs)
+	@Test
+	public void testRunLoadTest() {
+		try {
+			runLoadTest(this.absoluteUrl, "repo2", 20, 3 * 60 * 1000);
+		} catch(Exception e) {
+			assertFalse(e.toString(), true);
+		}
+	}
+	
+	public void runLoadTest(String absoluteUrl, String repoId, int users, int testDurationMs)
 	        throws InterruptedException {
 		System.out.println("---- " + (testDurationMs / 1000) + "s of random actions by " + users
 		        + " users -----");
 		SimulatedUser[] u = new SimulatedUser[users];
+		List<Exchanger<Exception>> exchangers = new ArrayList<Exchanger<Exception>>();
 		for(int i = 0; i < u.length; i++) {
-			u[i] = new SimulatedUser(absoluteUrl, repoId);
+			// TODO Document exchangers!
+			
+			Exchanger<Exception> exchanger = new Exchanger<Exception>();
+			exchangers.add(i, exchanger);
+			u[i] = new SimulatedUser(absoluteUrl, repoId, exchanger);
 		}
 		// starting them slowly
 		long startPhaseMs = testDurationMs / 2;
 		long startPerUserMs = startPhaseMs / users;
 		for(int i = 0; i < u.length; i++) {
-			u[i].start();
+			try {
+				u[i].start();
+			} catch(Exception e) {
+				assertFalse(true);
+			}
 			System.out.println("Running " + (i + 1) + " users");
 			Thread.sleep(startPerUserMs);
 		}
@@ -46,6 +75,15 @@ public class RemoteBenchmark {
 		System.out.println("Shutting down users ...");
 		for(int i = 0; i < u.length; i++) {
 			u[i].pleaseStopSoon();
+		}
+		
+		// check exchangers
+		for(Exchanger<Exception> ex : exchangers) {
+			Exception exception = ex.exchange(null);
+			
+			if(exception != null) {
+				fail("There was at least one exception: " + exception.toString());
+			}
 		}
 	}
 	

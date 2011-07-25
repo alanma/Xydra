@@ -1,6 +1,6 @@
 package org.xydra.testgae.client;
 
-import java.io.IOException;
+import org.junit.Before;
 
 
 /**
@@ -9,10 +9,10 @@ import java.io.IOException;
  * @author xamde
  * 
  */
-public class RemoteBenchmarkOnAppEngine {
+public class RemoteBenchmarkOnAppEngine extends RemoteBenchmark {
 	
-	public static void main(String[] args) throws InterruptedException, IOException {
-		RemoteBenchmark.runBenchmark("http://testgae.latest.xydra-live.appspot.com");
+	@Before
+	public void setup() {
+		this.absoluteUrl = "http://testgae.latest.xydra-live.appspot.com";
 	}
-	
 }

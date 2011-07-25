@@ -5,6 +5,7 @@ import java.io.Writer;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Exchanger;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -28,6 +29,8 @@ public class SimulatedUser extends Thread {
 	private String repoIdStr;
 	
 	private int actions = 0;
+	
+	private Exchanger<Exception> exchanger;
 	
 	int getActions() {
 		return this.actions;
@@ -70,10 +73,13 @@ public class SimulatedUser extends Thread {
 	 * @param serverUrl should not include repository. May not have a trailing
 	 *            slash at the end.
 	 */
-	public SimulatedUser(String serverUrl, String repo) {
+	public SimulatedUser(String serverUrl, String repo, Exchanger<Exception> exchanger) {
 		super();
 		this.serverUrl = serverUrl;
 		this.repoIdStr = repo;
+		
+		// TODO Document
+		this.exchanger = exchanger;
 	}
 	
 	/**
@@ -113,10 +119,15 @@ public class SimulatedUser extends Thread {
 	
 	@Override
 	public void run() {
+		Exception exception = null;
+		
 		while(!this.stopSoon) {
 			try {
 				doRandomAction();
 			} catch(RuntimeException e) {
+				
+				exception = e;
+				
 				if(e.getCause().getClass().equals(SocketTimeoutException.class)) {
 					if(this.stopSoon) {
 						// fine
@@ -125,8 +136,17 @@ public class SimulatedUser extends Thread {
 						log.warn("Socket timeout", e);
 					}
 				}
+				
+				break;
 			}
 			yield();
+		}
+		
+		// TODO document exchange
+		try {
+			this.exchanger.exchange(exception);
+		} catch(InterruptedException ie) {
+			// do nothing
 		}
 		log.info("Thread done");
 	}
@@ -190,7 +210,7 @@ public class SimulatedUser extends Thread {
 									String name = NameUtils.getProductName();
 									
 									HttpUtils.makeGetRequest(absoluteListUrl + "/editName?name="
-									        + name);
+									        + name.replace(" ", "+"));
 									log.info("Edited name of wish");
 								} else if(action == Action.EditListEditWishPrice) {
 									int price = (int)(Math.random() * 1000);
@@ -202,7 +222,7 @@ public class SimulatedUser extends Thread {
 									String url = "http://www.google.de/images?q="
 									        + NameUtils.getProductName();
 									HttpUtils.makeGetRequest(absoluteListUrl + "/editUrl?url="
-									        + url);
+									        + url.replace(" ", "+"));
 									log.info("Edited url of wish");
 								}
 								
@@ -284,7 +304,8 @@ public class SimulatedUser extends Thread {
 	}
 	
 	public static void main(String[] args) {
-		SimulatedUser su = new SimulatedUser("http://localhost:8787", "repo1");
+		// TODO fix the SimulatedUser creation
+		SimulatedUser su = new SimulatedUser("http://localhost:8787", "repo1", null);
 		System.out.println(su.listAllWishesInList(su.listAllListsInRepository("repo1").get(0)));
 		su.pleaseStopSoon();
 		System.out.println("Performed " + su.getActions() + " actions");
