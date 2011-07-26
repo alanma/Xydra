@@ -209,7 +209,7 @@ public class GaeChangesService {
 	 */
 	private GaeChange grabRevisionAndRegisterLocks(GaeLocks locks, XID actorId) {
 		
-		for(long rev = this.revCache.getLastTaken() + 1;; rev++) {
+		for(long rev = this.revCache.getLastTaken(true) + 1;; rev++) {
 			
 			if(getCachedChange(rev) != null) {
 				// Revision already taken.
@@ -281,7 +281,7 @@ public class GaeChangesService {
 	 */
 	private void waitForLocks(GaeChange change) {
 		
-		long commitedRev = this.revCache.getLastCommited();
+		long commitedRev = this.revCache.getLastCommited(true);
 		
 		// Track if we find a greater last commitedRev.
 		long newCommitedRev = -1;
@@ -571,8 +571,11 @@ public class GaeChangesService {
 		
 		commit(change, Status.SuccessExecuted);
 		
-		if(this.revCache.getLastCommited() >= change.rev) {
-			updateCurrentRev(Math.max(change.rev, this.revCache.getCurrentModelRev()));
+		// TODO do we really need to ask the memcache here?
+		if(this.revCache.getLastCommited(true) >= change.rev) {
+			updateCurrentRev(Math.max(change.rev,
+			// TODO do we really need to ask the memcache here?
+			        this.revCache.getCurrentModelRev(true)));
 		}
 	}
 	
@@ -649,7 +652,8 @@ public class GaeChangesService {
 			log.warn("Comitting timed out change " + change);
 		}
 		change.commit(status);
-		if(this.revCache.getLastCommited() == change.rev - 1) {
+		// TODO do we really need to ask the memcache here?
+		if(this.revCache.getLastCommited(true) == change.rev - 1) {
 			this.revCache.setLastCommited(change.rev);
 		}
 		cacheCommittedChange(change);
@@ -699,7 +703,7 @@ public class GaeChangesService {
 	 */
 	public long getCurrentRevisionNumber() {
 		
-		long currentRev = this.revCache.getCurrentModelRevIfSet();
+		long currentRev = this.revCache.getCurrentModelRevIfSet(true);
 		if(currentRev != RevisionCache.NOT_SET) {
 			return currentRev;
 		} else {
@@ -718,7 +722,7 @@ public class GaeChangesService {
 		
 		int pos = 0;
 		
-		long end = this.revCache.getLastCommitedIfSet();
+		long end = this.revCache.getLastCommitedIfSet(true);
 		if(end == RevisionCache.NOT_SET) {
 			end = Long.MAX_VALUE;
 		}
