@@ -36,6 +36,9 @@ public class XmasResource {
 		        new RestlessParameter("lists", "1"),// .
 		        new RestlessParameter("wishes", "1")// .
 		);
+		r.addGet(path + "/xmas/{repo}/clear", XmasResource.class, "clearRepository", // .
+		        new RestlessParameter("repo", null)// .
+		);
 		r.addGet(path + "/xmas/{repo}", XmasResource.class, "get",// .
 		        new RestlessParameter("repo", null),// .
 		        new RestlessParameter("view", "collapsed"),// .
@@ -56,6 +59,18 @@ public class XmasResource {
 		        + " wishes.<br />");
 		Xmas.addData(repoStr, listCount, wishesCount, w);
 		w.write("<a href='.'>See all wish lists in repository '" + repoStr + "'</a>");
+		HtmlUtils.endHtmlPage(w);
+	}
+	
+	public void clearRepository(String repoStr, HttpServletRequest req, HttpServletResponse res)
+	        throws IOException {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		ServletUtils.headers(res, "text/html");
+		
+		Writer w = HtmlUtils.startHtmlPage(res, "Xmas | Clearing repository");
+		w.write("Deleting all wishlists from repository '" + repoStr + "'.<br />");
+		Xmas.clearRepository(repoStr);
+		w.write("<a href='.'>Go back to repository '" + repoStr + "'</a>");
 		HtmlUtils.endHtmlPage(w);
 	}
 	
@@ -91,6 +106,8 @@ public class XmasResource {
 			w.write(HtmlUtils.form(METHOD.GET, "/xmas/" + repoStr + "/add")
 			        .withInputText("lists", "1").withInputText("wishes", "1")
 			        .withInputSubmit("Add lists with wishes").toString());
+			w.write(HtmlUtils.form(METHOD.GET, "/xmas/" + repoStr + "/clear")
+			        .withInputSubmit("Delete all lists").toString());
 			HtmlUtils.endHtmlPage(w);
 		}
 		c.stop("get");

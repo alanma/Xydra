@@ -109,6 +109,13 @@ public class Xmas {
 		        + " wishes initially each");
 	}
 	
+	public static void clearRepository(String repoStr) {
+		XWritableRepository repo = getRepository(repoStr);
+		for(XID modelId : repo) {
+			repo.removeModel(modelId);
+		}
+	}
+	
 	public static synchronized XWritableModel createModel(String repoIdStr, XID modelId) {
 		XWritableRepository repo = getRepository(repoIdStr);
 		XWritableModel model = repo.createModel(modelId);
