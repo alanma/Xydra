@@ -69,6 +69,7 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	public DiffWritableModel(final XWritableModel base, boolean prefetchModel) {
 		assert base != null;
 		assert !(base instanceof ReadCachingWritableModel);
+		// TODO make sure ReadCachingWritableModel is only initialised once
 		this.base = new ReadCachingWritableModel(base, prefetchModel);
 		this.added = new MapMapIndex<XID,XID,XValue>();
 		this.removed = new MapMapIndex<XID,XID,XValue>();
