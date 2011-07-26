@@ -50,9 +50,49 @@ class RevisionCache {
 	
 	protected static final long NOT_SET = -2L;
 	
+	private static final boolean USE_MEMCACHE = false;
+	
+	private String memcacheKey;
+	
+	@SuppressWarnings("unused")
+	private void writeToMemcache() {
+		if(!USE_MEMCACHE)
+			return;
+		
+		long[] entity = new long[] { this.current.getValue(false, false),
+		        this.committed.getValue(false, false), this.lastTaken.getValue(false, false) };
+		IMemCache cache = XydraRuntime.getMemcache();
+		Object previous = cache.put(this.memcacheKey, entity);
+		assert previous == null ||
+
+		((((long[])previous)[0] <= entity[0])
+
+		& (((long[])previous)[1] <= entity[1])
+
+		& (((long[])previous)[2] <= entity[2]));
+	}
+	
+	@SuppressWarnings("unused")
+	private void loadFromMemcache() {
+		if(!USE_MEMCACHE)
+			return;
+		
+		IMemCache cache = XydraRuntime.getMemcache();
+		long[] entity = (long[])cache.get(this.memcacheKey);
+		if(entity == null) {
+			this.current.setLocalValue(NOT_SET);
+			this.committed.setLocalValue(NOT_SET);
+			this.lastTaken.setLocalValue(NOT_SET);
+		} else {
+			assert entity.length == 3;
+			this.current.setLocalValue(entity[0]);
+			this.committed.setLocalValue(entity[1]);
+			this.lastTaken.setLocalValue(entity[2]);
+		}
+	}
+	
 	private class CachedLong {
-		private CachedLong(String memcacheKey) {
-			this.memcacheKey = memcacheKey;
+		private CachedLong() {
 			this.value = NOT_SET;
 			this.time = NOT_SET;
 		}
@@ -61,7 +101,6 @@ class RevisionCache {
 		private long value;
 		/** Age of Local VM cache of the "current" revision number. */
 		private long time;
-		private final String memcacheKey;
 		
 		/**
 		 * @return true if value cached in local JVM is not too old
@@ -69,23 +108,6 @@ class RevisionCache {
 		private boolean hasValidLocalValue() {
 			long now = System.currentTimeMillis();
 			return now < this.time + LOCAL_VM_CACHE_TIMEOUT;
-		}
-		
-		/**
-		 * @return the value from memcache or NOT_SET, never null.
-		 */
-		@GaeOperation(memcacheRead = true)
-		private long askMemcache() {
-			IMemCache cache = XydraRuntime.getMemcache();
-			Long value = (Long)cache.get(this.memcacheKey);
-			if(value == null) {
-				// cache the fact that memcache doesn't know it
-				setLocalValue(NOT_SET);
-				return NOT_SET;
-			} else {
-				setLocalValue(value);
-				return value;
-			}
 		}
 		
 		/**
@@ -114,7 +136,8 @@ class RevisionCache {
 				if(this.hasValidLocalValue()) {
 					value = this.value;
 				} else if(mayAskMemcache) {
-					value = this.askMemcache();
+					RevisionCache.this.loadFromMemcache();
+					value = this.value;
 				} else {
 					value = NOT_SET;
 				}
@@ -138,9 +161,7 @@ class RevisionCache {
 			}
 			setLocalValue(value);
 			if(writeMemcache) {
-				IMemCache cache = XydraRuntime.getMemcache();
-				Object previous = cache.put(this.memcacheKey, value);
-				assert previous == null || ((Long)previous) <= value;
+				RevisionCache.this.writeToMemcache();
 			}
 		}
 	}
@@ -149,10 +170,11 @@ class RevisionCache {
 	
 	@GaeOperation()
 	RevisionCache(XAddress modelAddr) {
+		this.memcacheKey = modelAddr + "-revisions";
 		// init caches
-		this.current = new CachedLong(modelAddr + "-currentRev");
-		this.committed = new CachedLong(modelAddr + "-commitedRev");
-		this.lastTaken = new CachedLong(modelAddr + "-lastTakenRev");
+		this.current = new CachedLong();
+		this.committed = new CachedLong();
+		this.lastTaken = new CachedLong();
 	}
 	
 	/**
