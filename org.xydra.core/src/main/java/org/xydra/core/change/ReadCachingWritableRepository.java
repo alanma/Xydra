@@ -9,9 +9,13 @@ import org.xydra.base.XID;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.index.IndexUtils;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
 
 public class ReadCachingWritableRepository extends AbstractDelegatingWritableRepository {
+	
+	private static final Logger log = LoggerFactory.getLogger(ReadCachingWritableRepository.class);
 	
 	private boolean prefetchModels;
 	
@@ -62,10 +66,13 @@ public class ReadCachingWritableRepository extends AbstractDelegatingWritableRep
 		if(model == null) {
 			model = this.baseRepository.getModel(modelId);
 			if(model != null) {
+				log.info("Model '" + modelId + "' not found in cache, but in base.");
 				ReadCachingWritableModel cacheModel = new ReadCachingWritableModel(model,
 				        this.prefetchModels);
 				this.map.put(modelId, cacheModel);
 				return cacheModel;
+			} else {
+				log.info("Model '" + modelId + "' not found in cache & not in base.");
 			}
 		}
 		return model;

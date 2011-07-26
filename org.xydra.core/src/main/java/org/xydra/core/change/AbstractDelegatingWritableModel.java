@@ -10,6 +10,8 @@ import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XValue;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
 
 /**
@@ -20,6 +22,11 @@ import org.xydra.base.value.XValue;
  * @author xamde
  */
 public abstract class AbstractDelegatingWritableModel implements XWritableModel {
+	
+	private static final Logger log = LoggerFactory
+	        .getLogger(AbstractDelegatingWritableModel.class);
+	
+	public static final long UNDEFINED = -2;
 	
 	/**
 	 * State-less wrapper pulling all state from the cache index or base model
@@ -50,7 +57,8 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 		
 		@Override
 		public long getRevisionNumber() {
-			throw new UnsupportedOperationException("not implementable");
+			log.warn("Returning UNDEFINED as revision number");
+			return UNDEFINED;
 		}
 		
 		@Override
@@ -114,7 +122,8 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 		
 		@Override
 		public long getRevisionNumber() {
-			throw new UnsupportedOperationException("not implementable for DiffWritableModel");
+			log.warn("Returning UNDEFINED as revision number");
+			return UNDEFINED;
 		}
 		
 		@Override
@@ -171,7 +180,8 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 	
 	@Override
 	public long getRevisionNumber() {
-		throw new UnsupportedOperationException("not implementable for DiffWritableModel");
+		log.warn("Returning UNDEFINED as revision number");
+		return UNDEFINED;
 	}
 	
 	@Override
