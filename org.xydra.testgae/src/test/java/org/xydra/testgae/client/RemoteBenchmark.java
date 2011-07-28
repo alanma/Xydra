@@ -96,7 +96,7 @@ public class RemoteBenchmark {
 		try {
 			HttpUtils.makeGetRequest(this.absoluteUrl + "/xmas/repo1/add?lists=1&wishes=10000");
 		} catch(Exception e) {
-			fail("LOL");
+			fail("Exception! " + e.toString());
 		}
 	}
 	
