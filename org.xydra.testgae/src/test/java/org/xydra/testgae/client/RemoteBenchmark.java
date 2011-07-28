@@ -1,6 +1,7 @@
 package org.xydra.testgae.client;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.OutputStreamWriter;
@@ -94,9 +95,11 @@ public class RemoteBenchmark {
 	@Test
 	public void testAddTooManyWishes() {
 		try {
-			HttpUtils.makeGetRequest(this.absoluteUrl + "/xmas/repo1/add?lists=1&wishes=10");
+			assertTrue(HttpUtils.makeGetRequest(this.absoluteUrl
+			        + "/xmas/repo1/add?lists=1&wishes=10"));
 			
-			HttpUtils.makeGetRequest(this.absoluteUrl + "/xmas/repo1/add?lists=1&wishes=1000");
+			assertTrue(HttpUtils.makeGetRequest(this.absoluteUrl
+			        + "/xmas/repo1/add?lists=1&wishes=1000"));
 		} catch(Exception e) {
 			fail("Exception! " + e.toString());
 		}
