@@ -9,7 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Exchanger;
 
+import org.junit.Ignore;
 import org.junit.Test;
+import org.xydra.testgae.shared.HttpUtils;
 import org.xydra.testgae.shared.SimulatedUser;
 
 
@@ -23,6 +25,7 @@ public class RemoteBenchmark {
 	protected String absoluteUrl;
 	
 	@Test
+	@Ignore
 	public void testRunBenchmark() {
 		System.out.println("---- Running benchmark1 -----");
 		SimulatedUser u1 = new SimulatedUser(this.absoluteUrl, "repo1", new Exchanger<Exception>());
@@ -36,6 +39,7 @@ public class RemoteBenchmark {
 	}
 	
 	@Test
+	@Ignore
 	public void testRunLoadTest() {
 		try {
 			runLoadTest(this.absoluteUrl, "repo2", 20, 3 * 60 * 1000);
@@ -84,6 +88,15 @@ public class RemoteBenchmark {
 			if(exception != null) {
 				fail("There was at least one exception: " + exception.toString());
 			}
+		}
+	}
+	
+	@Test
+	public void testAddTooManyWishes() {
+		try {
+			HttpUtils.makeGetRequest(this.absoluteUrl + "/xmas/repo1/add?lists=1&wishes=10000");
+		} catch(Exception e) {
+			fail("LOL");
 		}
 	}
 	
