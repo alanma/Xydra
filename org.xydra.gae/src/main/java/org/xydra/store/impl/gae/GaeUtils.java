@@ -9,7 +9,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.xydra.base.XAddress;
-import org.xydra.index.XI;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.XydraRuntime;
@@ -72,7 +71,7 @@ public class GaeUtils {
 	 * @return the GAE Entity for the given key from the store or null
 	 */
 	public static Entity getEntity(Key key) {
-		return getEntity(key, null, true);
+		return getEntity_MemcacheFirst_DatastoreFinal(key, true);
 	}
 	
 	/**
@@ -82,7 +81,7 @@ public class GaeUtils {
 	 * @return the GAE Entity for the given key from the store or null
 	 */
 	public static Entity getEntityFromDatastore(Key key) {
-		return getEntity(key, null, false);
+		return getEntity_MemcacheFirst_DatastoreFinal(key, false);
 	}
 	
 	public static final String NULL_ENTITY_KIND = "NULL-ENTITY";
@@ -93,6 +92,11 @@ public class GaeUtils {
 	 */
 	private static final Entity NULL_ENTITY = new Entity(NULL_ENTITY_KIND, "null");
 	
+	/**
+	 * @param <T> future type
+	 * @param t a future
+	 * @return value or null
+	 */
 	public static <T> T waitFor(Future<T> t) {
 		while(true) {
 			try {
@@ -114,7 +118,7 @@ public class GaeUtils {
 	 *         the datastore.
 	 */
 	@GaeOperation(memcacheRead = true ,memcacheWrite = true ,datastoreRead = true)
-	public static Entity getEntityExists(Key key, Transaction trans) {
+	public static Entity getEntity_MemcachePositive_DatastoreFinal(Key key, Transaction trans) {
 		assert trans != null;
 		makeSureDatestoreServiceIsInitialised();
 		
@@ -127,18 +131,18 @@ public class GaeUtils {
 				if(!cachedEntity.equals(NULL_ENTITY)) {
 					return cachedEntity;
 				}
-				// FIXME added by max: return null in else-case
-				else {
-					return null;
-				}
 			}
 		}
 		
 		log.debug("Getting entity " + key.toString() + " from GAE data store");
+		/*
+		 * IMPROVE use synchronous code for the synchronous parts -- /!\
+		 * gae-transations might not work across the two datastore interfaces
+		 */
 		Future<Entity> entity = datastore.get(trans, key);
 		Entity e = waitFor(entity);
 		if(useMemCacheInThisClass) {
-			updateCachedEntity(key, cachedEntity, e);
+			updateCachedEntity(key, e);
 		}
 		if(e == null) {
 			log.debug("--> null");
@@ -169,7 +173,7 @@ public class GaeUtils {
 			if(this.future != null) {
 				this.entity = waitFor(this.future);
 				if(useMemCacheInThisClass) {
-					updateCachedEntity(this.key, null, this.entity);
+					updateCachedEntity(this.key, this.entity);
 				}
 				this.future = null;
 			}
@@ -204,19 +208,17 @@ public class GaeUtils {
 	
 	/**
 	 * @param key The key of the entity to load.
-	 * @param trans The transaction to load the entity in.
 	 * @param useMemcache if true, memcache is used in this request (only if
 	 *            also enabled in this class)
 	 * @return the GAE Entity for the given key from the store or null
 	 */
-	public static Entity getEntity(Key key, Transaction trans, boolean useMemcache) {
+	public static Entity getEntity_MemcacheFirst_DatastoreFinal(Key key, boolean useMemcache) {
 		makeSureDatestoreServiceIsInitialised();
-		Entity memcachedEntity = null;
 		
 		if(useMemCacheInThisClass && useMemcache) {
 			// try first to get from memcache
-			memcachedEntity = (Entity)XydraRuntime.getMemcache().get(key);
-			if(memcachedEntity != null && trans == null) {
+			Entity memcachedEntity = (Entity)XydraRuntime.getMemcache().get(key);
+			if(memcachedEntity != null) {
 				log.debug("Getting entity " + key.toString() + " from MemCache");
 				if(memcachedEntity.equals(NULL_ENTITY)) {
 					log.debug("--> null");
@@ -224,22 +226,39 @@ public class GaeUtils {
 				} else {
 					return memcachedEntity;
 				}
-			} else if(trans != null) {
-				/*
-				 * If there is a transaction, we must read from the actual
-				 * datastore so that the transaction will abort if the value is
-				 * changed before trans.commit(). TODO in some cases (ie:
-				 * revision grabbing) it is OK to return an old entity, but
-				 * returning null could be fatal.
-				 */
 			}
 		}
 		
 		log.debug("Getting entity " + key.toString() + " from GAE data store");
-		Future<Entity> futureEntity = datastore.get(trans, key);
+		Future<Entity> futureEntity = datastore.get(null, key);
 		Entity entityFromDatastore = waitFor(futureEntity);
 		if(useMemCacheInThisClass && useMemcache) {
-			updateCachedEntity(key, memcachedEntity, entityFromDatastore);
+			updateCachedEntity(key, entityFromDatastore);
+		}
+		if(entityFromDatastore == null) {
+			log.debug("--> null");
+		}
+		return entityFromDatastore;
+	}
+	
+	/**
+	 * If there is a transaction, we must read from the actual datastore so that
+	 * the transaction will abort if the value is changed before trans.commit().
+	 * 
+	 * @param key never null
+	 * @param trans never null
+	 * @return the entity from datastore
+	 */
+	public static Entity getEntity_MemcacheFirst_DatastoreFinal(Key key, Transaction trans) {
+		assert key != null;
+		assert trans != null;
+		makeSureDatestoreServiceIsInitialised();
+		
+		log.debug("Getting entity " + key.toString() + " from GAE data store");
+		Future<Entity> futureEntity = datastore.get(trans, key);
+		Entity entityFromDatastore = waitFor(futureEntity);
+		if(useMemCacheInThisClass) {
+			updateCachedEntity(key, entityFromDatastore);
 		}
 		if(entityFromDatastore == null) {
 			log.debug("--> null");
@@ -252,41 +271,15 @@ public class GaeUtils {
 	 * modified the same key.
 	 * 
 	 * @param key ..
-	 * @param currentlyCachedEntity current value retrieved from memcache
 	 * @param entityToBeCached to be put in memcache, can be null
 	 */
-	private static void updateCachedEntity(Key key, Entity currentlyCachedEntity,
-	        Entity entityToBeCached) {
+	@GaeOperation(memcacheWrite = true)
+	private static void updateCachedEntity(Key key, Entity entityToBeCached) {
 		Entity entityToBeCached_ = entityToBeCached;
 		if(entityToBeCached_ == null) {
 			entityToBeCached_ = NULL_ENTITY;
 		}
-		Entity currentlyCachedEntity_ = currentlyCachedEntity;
-		
-		while(true) {
-			Entity previouslyCacheEntity = (Entity)XydraRuntime.getMemcache().put(key,
-			        entityToBeCached_);
-			/*
-			 * If memcache contained still the value that we once got from
-			 * there, it's fine. Or if it contained already the value we just
-			 * stored.
-			 */
-			if(XI.equals(currentlyCachedEntity_, previouslyCacheEntity)
-			        || XI.equals(previouslyCacheEntity, entityToBeCached_)) {
-				return;
-			}
-			/*
-			 * Else: Someone changed the entity before this method was called:
-			 * Better change it back to their value.
-			 */
-
-			// FIXME this can still cause short periods where the cache is wrong
-			
-			currentlyCachedEntity_ = entityToBeCached_;
-			entityToBeCached_ = previouslyCacheEntity;
-			
-		}
-		
+		XydraRuntime.getMemcache().putIfValueIsNull(key, entityToBeCached_);
 	}
 	
 	private static void makeSureDatestoreServiceIsInitialised() {

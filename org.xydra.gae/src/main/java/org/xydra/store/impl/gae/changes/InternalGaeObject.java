@@ -20,7 +20,6 @@ import org.xydra.store.impl.gae.GaeUtils;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
-import com.sun.org.apache.xpath.internal.objects.XObject;
 
 
 /**
@@ -68,8 +67,11 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 			// can't be used here.
 			objectRev = XEvent.RevisionNotAvailable;
 			
-			// FIXME we don't always have the locks to get the objectRev
-			// this way => some events may be missing the objectRev
+			/*
+			 * Note: we don't always have the locks to get the objectRev this
+			 * way => some events may not have an objectRev. However needs the
+			 * objectRev has the locks, so that it can be computed then.
+			 */
 		}
 		return objectRev;
 	}
@@ -176,7 +178,7 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 		while(true) {
 			Transaction trans = GaeUtils.beginTransaction();
 			
-			Entity e = GaeUtils.getEntity(key, trans, true);
+			Entity e = GaeUtils.getEntity_MemcacheFirst_DatastoreFinal(key, trans);
 			assert e != null : "should not be removed while we hold a lock to a contained field";
 			long oldRev = (Long)e.getProperty(PROP_REVISION);
 			
@@ -212,7 +214,7 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 				
 				try {
 					// Sleep a minimal amount of time.
-					// TODO sleep longer to prevent busy loop?
+					// TODO @Daniel sleep longer to prevent busy loop?
 					Thread.sleep(0);
 				} catch(InterruptedException e1) {
 					// ignore

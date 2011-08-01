@@ -7,6 +7,7 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.store.IMemCache;
 import org.xydra.store.XydraPlatformRuntime;
 import org.xydra.store.impl.delegate.XydraPersistence;
+import org.xydra.store.impl.memory.LocalMemcache;
 
 
 /**

@@ -7,7 +7,9 @@ import java.util.Set;
 
 import org.xydra.store.IMemCache;
 
+import com.google.appengine.api.memcache.Expiration;
 import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheService.SetPolicy;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.api.memcache.Stats;
 import com.google.appengine.api.utils.SystemProperty;
@@ -72,9 +74,11 @@ public class GaeLowLevelMemCache implements IMemCache {
 	@GaeOperation()
 	private Object keyUniqueForCurrentAppVersion(Object key) {
 		return key;
-		// TODO use a memcache key that is specific for a certain app-version
-		// to avoid conflicts
-		
+		/*
+		 * TODO(stability) @Daniel: use a memcache key that is specific for a
+		 * certain app-version to avoid conflicts
+		 */
+
 		// if(key instanceof String) {
 		// return this.appVersion + key;
 		// } else {
@@ -158,6 +162,13 @@ public class GaeLowLevelMemCache implements IMemCache {
 	@Override
 	public Set<java.util.Map.Entry<Object,Object>> entrySet() {
 		throw new UnsupportedOperationException("GaeMemcache does not support this");
+	}
+	
+	@Override
+	// Expires in 10 days. There is no default.
+	public void putIfValueIsNull(Object key, Object entityToBeCached) {
+		this.memcacheService.put(key, entityToBeCached,
+		        Expiration.byDeltaSeconds(60 * 60 * 24 * 10), SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
 	}
 	
 }

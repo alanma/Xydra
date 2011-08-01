@@ -40,7 +40,11 @@ public class GaeModelPersistence {
 		return this.changesService.executeCommand(command, actorId);
 	}
 	
-	public List<XEvent> getEventsBetween(long beginRevision, long endRevision) {
+	public List<XEvent> getEventsBetween(XAddress address, long beginRevision, long endRevision) {
+		/*
+		 * TODO(Complete Impl) filter events (objectevents, fieldevents) if
+		 * address is not a model address?
+		 */
 		return this.changesService.getEventsBetween(beginRevision, endRevision);
 	}
 	
@@ -63,7 +67,17 @@ public class GaeModelPersistence {
 	}
 	
 	public XWritableObject getObjectSnapshot(XID objectId) {
-		// TODO IMPROVE generate the object snapshot directly
+		/*
+		 * IMPROVE(performance, defer) generate the object snapshot directly.
+		 * While reading the change events, one could skip reading large,
+		 * unaffected XVALUes.
+		 * 
+		 * Idea 2: Put object snapshots individually in a cache -- maybe only
+		 * large ones?
+		 * 
+		 * Ideas 3: Easy to implement: If localVMcache has it, copy directly
+		 * just the object from it.
+		 */
 		XWritableModel modelSnapshot = getSnapshot();
 		if(modelSnapshot == null) {
 			return null;

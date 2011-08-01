@@ -65,7 +65,7 @@ public class GaeSnapshotService1 {
 	private static final long SNAPSHOT_PERSISTENCE_THRESHOLD = 10;
 	
 	/**
-	 * @param modelAddress TODO
+	 * @param modelAddress ..
 	 * @param changesService The change log to load snapshots from.
 	 */
 	public GaeSnapshotService1(XAddress modelAddress, GaeChangesService changesService) {
@@ -106,7 +106,7 @@ public class GaeSnapshotService1 {
 		// might be faster to update it than to load a snapshot from the
 		// memcache
 		
-		/* try to get a snapshot from memcache TODO why is revNr not checked? */
+		/* try to get the (one and only cached) snapshot from memcache */
 		final String cachname = this.modelAddress + "-snapshot";
 		CachedModel entry = (CachedModel)XydraRuntime.getMemcache().get(cachname);
 		if(entry == null) {
@@ -213,11 +213,6 @@ public class GaeSnapshotService1 {
 	 * @param curRev current revision
 	 */
 	private void updateCachedModel(CachedModel entry, long curRev) {
-		
-		/*
-		 * FIXME To Daniel: This seems correct and makes XydraGae much faster -
-		 * am I missing something?
-		 */
 		if(entry.revision == curRev) {
 			return;
 		}
@@ -330,7 +325,7 @@ public class GaeSnapshotService1 {
 	 * It is the responsibility of the caller to ensure that the provided model
 	 * is at a state where the given event applies.
 	 * 
-	 * TODO maybe this should be moved to core?
+	 * Note: maybe this should be moved to core?
 	 * 
 	 * @param model The model to change. This can be null. If not null, it will
 	 *            be modified.

@@ -14,8 +14,6 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.store.impl.gae.GaeOperation;
 
-import com.sun.org.apache.xpath.internal.objects.XObject;
-
 
 /**
  * Implementation of the lock semantics used by {@link GaeChangesService}.
@@ -54,8 +52,8 @@ class GaeLocks {
 				XAddress lock = atomicCommand.getChangedEntity();
 				assert lock != null;
 				/*
-				 * TODO IMPROVE: ADD events don't need to lock the whole added
-				 * entity (they don't care if children change)
+				 * IMPROVE: ADD events don't need to lock the whole added entity
+				 * (they don't care if children change)
 				 */
 				tempLocks.add(lock);
 			}

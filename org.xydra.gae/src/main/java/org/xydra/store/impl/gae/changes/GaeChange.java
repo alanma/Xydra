@@ -304,7 +304,7 @@ public class GaeChange {
 	
 	void reload(Transaction trans) {
 		assert !getStatus().isCommitted();
-		this.entity = GaeUtils.getEntity(this.entity.getKey(), trans, true);
+		this.entity = GaeUtils.getEntity_MemcacheFirst_DatastoreFinal(this.entity.getKey(), trans);
 		assert this.entity != null : "change entities should not vanish";
 		clearCache();
 	}

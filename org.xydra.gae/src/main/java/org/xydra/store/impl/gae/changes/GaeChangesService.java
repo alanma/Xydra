@@ -94,7 +94,7 @@ import com.google.appengine.api.datastore.Transaction;
  * set before the change has reached {@link Status#Executing}.
  * 
  * 
- * <dt>Entity type XEVENT</dt>
+ * <dt>Entity type XVALUE</dt>
  * <dd>Stores an {@link XValue} set by an {@link XFieldEvent} that was too large
  * to be stored directly in the corresponding XCHANGE entity. These are managed
  * by {@link GaeEvents}.
@@ -219,9 +219,10 @@ public class GaeChangesService {
 			// Try to grab this revision.
 			
 			Key key = KeyStructure.createChangeKey(this.modelAddr, rev);
+			/* use txn to do: avoid overwriting existing change entities */
 			Transaction trans = GaeUtils.beginTransaction();
 			
-			Entity changeEntity = GaeUtils.getEntityExists(key, trans);
+			Entity changeEntity = GaeUtils.getEntity_MemcachePositive_DatastoreFinal(key, trans);
 			
 			if(changeEntity == null) {
 				
@@ -388,7 +389,10 @@ public class GaeChangesService {
 			// IMPROVE: maybe re-read commitedRev?
 		}
 		
-		if(newCommitedRev > 0) {
+		log.info("Current working window size ["
+		        + (newCommitedRev >= 0 ? newCommitedRev : commitedRev) + "," + change.rev + "]");
+		
+		if(newCommitedRev >= 0) {
 			this.revCache.setLastCommited(newCommitedRev);
 		}
 	}
@@ -791,8 +795,6 @@ public class GaeChangesService {
 	 * @return a list of events or null if this model was never created. The
 	 *         list might contain fewer elements than the range implies.
 	 * 
-	 *         TODO are these all model/object/field-events or do they also
-	 *         contains RepositoryEvents for this model?
 	 * 
 	 * @see XydraStore#getEvents(XID, String, GetEventsRequest[],
 	 *      org.xydra.store.Callback)
@@ -801,7 +803,7 @@ public class GaeChangesService {
 	 *      and never ask for them again.
 	 */
 	public List<XEvent> getEventsBetween(long beginRevision, long endRevision) {
-		log.debug("getEventsBetwen [" + beginRevision + "," + endRevision + ") @"
+		log.debug("getEventsBetween [" + beginRevision + "," + endRevision + ") @"
 		        + getModelAddress());
 		/* sanity checks */
 		if(beginRevision < 0) {

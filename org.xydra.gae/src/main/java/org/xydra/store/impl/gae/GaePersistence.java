@@ -140,7 +140,7 @@ public class GaePersistence implements XydraPersistence {
 		XID modelId = command.getChangedEntity().getModel();
 		checkIdLength(modelId);
 		
-		// TODO IMPROVE wrap GAE exceptions in InternalStoreExceptions
+		// IMPROVE wrap GAE exceptions in InternalStoreExceptions
 		return getModelPersistence(modelId).executeCommand(command, actorId);
 	}
 	
@@ -169,9 +169,8 @@ public class GaePersistence implements XydraPersistence {
 			throw new RequestException("address must specify a model, was " + address);
 		}
 		
-		// TODO filter events if address is not a model address?
-		
-		return getModelPersistence(address.getModel()).getEventsBetween(beginRevision, endRevision);
+		return getModelPersistence(address.getModel()).getEventsBetween(address, beginRevision,
+		        endRevision);
 	}
 	
 	@GaeOperation()

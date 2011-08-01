@@ -13,6 +13,8 @@ import org.xydra.store.impl.gae.GaeOperation;
  * A model has a <em>current revision number</em>. It is incremented every time
  * a change operation succeeds. Not necessarily only one step.
  * 
+ * TODO @Daniel make sure this is thread-safe
+ * 
  * The order of revision number is this (highest numbers first):
  * 
  * <pre>
@@ -36,7 +38,7 @@ import org.xydra.store.impl.gae.GaeOperation;
  * 
  * Invariants: LAST_TAKEN >= COMMITTED >= CURRENT
  * 
- * TODO improve on first fetch to memcache, fetch all 3 values
+ * IMPROVE on first fetch to memcache, fetch all 3 values
  * 
  * @author dscharrer
  * @author xamde
@@ -50,6 +52,7 @@ class RevisionCache {
 	
 	protected static final long NOT_SET = -2L;
 	
+	/* IMPROVE experiment with this flag */
 	private static final boolean USE_MEMCACHE = false;
 	
 	private String memcacheKey;
@@ -63,6 +66,7 @@ class RevisionCache {
 		        this.committed.getValue(false, false), this.lastTaken.getValue(false, false) };
 		IMemCache cache = XydraRuntime.getMemcache();
 		Object previous = cache.put(this.memcacheKey, entity);
+		// IMPROVE turn the assert cond. into a method
 		assert previous == null ||
 
 		((((long[])previous)[0] <= entity[0])
@@ -117,7 +121,8 @@ class RevisionCache {
 		private boolean setLocalValue(long value) {
 			if(value < this.value) {
 				return false;
-				// TODO IMPROVE change caller code so that this doesnt happen
+				// IMPROVE change caller code so that this doesnt happen maybe
+				// it never happens
 			}
 			this.time = System.currentTimeMillis();
 			if(value == this.value) {
@@ -157,7 +162,8 @@ class RevisionCache {
 		private void setValue(long value, boolean writeMemcache) {
 			if(value < this.value) {
 				return;
-				// TODO IMPROVE change caller code so that this doesnt happen
+				// IMPROVE change caller code so that this doesnt happen - maybe
+				// it never happens
 			}
 			setLocalValue(value);
 			if(writeMemcache) {
@@ -178,7 +184,7 @@ class RevisionCache {
 	}
 	
 	/**
-	 * @param mayAskMemcache TODO
+	 * @param mayAskMemcache ..
 	 * @return a cached value of the current revision number as defined by
 	 *         {@link GaeChangesService#getCurrentRevisionNumber()}.
 	 * 
@@ -191,7 +197,7 @@ class RevisionCache {
 	}
 	
 	/**
-	 * @param mayAskMemcache TODO
+	 * @param mayAskMemcache ..
 	 * @return a cached value of the current revision number as defined by
 	 *         {@link GaeChangesService#getCurrentRevisionNumber()} or NOT_SET.
 	 * 
@@ -204,7 +210,7 @@ class RevisionCache {
 	}
 	
 	/**
-	 * @param mayAskMemcache TODO
+	 * @param mayAskMemcache ..
 	 * @return a revision number such that all changes up to and including that
 	 *         revision number are guaranteed to be committed. This is not
 	 *         guaranteed to be the highest revision number that fits this
@@ -220,7 +226,7 @@ class RevisionCache {
 	}
 	
 	/**
-	 * @param mayAskMemcache TODO
+	 * @param mayAskMemcache ..
 	 * @return the last known revision number that has been grabbed by a change.
 	 *         No guarantees are made that no higher revision numbers aren't
 	 *         taken already.

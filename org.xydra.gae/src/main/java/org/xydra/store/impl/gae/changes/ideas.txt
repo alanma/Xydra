@@ -1,0 +1,16 @@
+reading locks could be done in batch (current pos, start of working window)
+
+roll forward: maybe better delegate to task queue?
+
+1 MB limit in memcache & datastore -- where to warn? ... blobstore
+
+store api & co should allow retrieving snapshots with a specific version (or a range)
+
+performance idea: changes service should spawn a new tread after it has doen its work. the new 
+thread should put the just computed current snapshot in memstore; sometimes also in datastore.
+every 20 revs.
+
+what is the average/typical/edge case size of the working window? measure it.
+
+
+

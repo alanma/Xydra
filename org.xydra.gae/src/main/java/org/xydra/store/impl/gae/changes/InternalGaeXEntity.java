@@ -11,7 +11,6 @@ import org.xydra.store.impl.gae.GaeUtils;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
-import com.sun.org.apache.xpath.internal.objects.XObject;
 
 
 /**

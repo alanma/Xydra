@@ -19,7 +19,7 @@ import com.google.appengine.api.utils.SystemProperty;
  * different thread and need to take additional measure to tell this thread
  * about the GAE-test-setup
  * 
- * TODO Remove class if AppEngine issue is ever fixed by Google
+ * IMPROVE @Max: Remove class if AppEngine issue is ever fixed by Google
  * 
  * http://code.google.com/p/googleappengine/issues/detail?id=2201
  * 
