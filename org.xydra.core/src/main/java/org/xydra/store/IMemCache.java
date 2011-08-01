@@ -24,4 +24,13 @@ public interface IMemCache extends Map<Object,Object> {
 	 */
 	Map<Object,Object> getAll(Collection<Object> keys);
 	
+	/**
+	 * Put entityToBeCached if currently the {@link #get(Object)} would return
+	 * null.
+	 * 
+	 * @param key
+	 * @param entityToBeCached
+	 */
+	void putIfValueIsNull(Object key, Object entityToBeCached);
+	
 }

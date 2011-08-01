@@ -8,9 +8,13 @@ import org.xydra.base.XID;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
+import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XModelCommand;
+import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectCommand;
+import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XRepositoryCommand;
+import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.rmof.XWritableModel;
@@ -108,7 +112,9 @@ public interface XydraPersistence {
 	 *            be greater than current revision number of the addressed
 	 *            entity to get all {@link XEvent XEvents} since beginRevision.
 	 * @return all events that occurred in the entity addressed with 'address'
-	 *         between beginRevision and endRevision.
+	 *         between beginRevision and endRevision. Contains
+	 *         {@link XRepositoryEvent}, {@link XModelEvent},
+	 *         {@link XObjectEvent} and {@link XFieldEvent}.
 	 */
 	List<XEvent> getEvents(XAddress address, long beginRevision, long endRevision);
 	
@@ -120,7 +126,9 @@ public interface XydraPersistence {
 	
 	/**
 	 * @param address of an {@link XModel}
-	 * @return the current revision number of the addressed {@link XModel}.
+	 * @return the current revision number of the addressed {@link XModel}. You
+	 *         may get a revision number even if the model does not exist. In
+	 *         this case, it did exist and just got deleted.
 	 */
 	long getModelRevision(XAddress address);
 	
@@ -134,7 +142,7 @@ public interface XydraPersistence {
 	/**
 	 * @param address of an {@link XObject}
 	 * @return the current snapshot of the {@link XObject} addressed with
-	 *         'address'. TODO Whats is returned if there is no such object?
+	 *         'address' or null, if object does not exist.
 	 */
 	XWritableObject getObjectSnapshot(XAddress address);
 	

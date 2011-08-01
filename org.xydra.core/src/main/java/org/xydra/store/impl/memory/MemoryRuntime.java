@@ -10,7 +10,7 @@ public class MemoryRuntime implements XydraPlatformRuntime {
 	
 	@Override
 	public IMemCache getMemCache() {
-		return new MemoryMemCache();
+		return new LocalMemcache();
 	}
 	
 	@Override

@@ -14,8 +14,15 @@ import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
+import org.xydra.core.model.delta.DeltaUtils;
 
 
+/**
+ * Note: This is similar to {@link DeltaUtils}.
+ * 
+ * @author xamde
+ * 
+ */
 public class EventUtils {
 	
 	private static final long MODEL_DOES_NOT_EXIST = -1;

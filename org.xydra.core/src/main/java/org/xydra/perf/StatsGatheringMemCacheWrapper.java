@@ -86,6 +86,13 @@ public class StatsGatheringMemCacheWrapper implements IMemCache {
 		return this.base.put(key, value);
 	}
 	
+	@Override
+	public void putIfValueIsNull(Object key, Object value) {
+		count("putIfValueIsNull");
+		this.mapstats.recordPut(key.toString(), value);
+		this.base.putIfValueIsNull(key, value);
+	}
+	
 	public Object remove(Object key) {
 		count("remove");
 		return this.base.remove(key);
