@@ -13,6 +13,6 @@ public class RemoteBenchmarkOnAppEngine extends RemoteBenchmark {
 	
 	@Before
 	public void setup() {
-		this.absoluteUrl = "http://testgae.latest.xydra-live.appspot.com";
+		this.absoluteUrl = "http://testgae.latest.xydra-live.appspot.com/logged";
 	}
 }
