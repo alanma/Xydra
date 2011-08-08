@@ -46,7 +46,7 @@ public class StressTest {
 		public void run() {
 			while(true) {
 				assertUrl("id " + this.id + " has count " + this.count++,
-				        "http://localhost:8080/test1");
+				        "http://localhost:8787/test1");
 				try {
 					sleep((long)(Math.random() * 1000));
 				} catch(InterruptedException e) {

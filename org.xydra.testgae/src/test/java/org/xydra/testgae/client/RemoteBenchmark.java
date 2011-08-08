@@ -115,14 +115,16 @@ public class RemoteBenchmark {
 		}
 	}
 	
+	public static final int RUNS = 1000;
+	
 	@Test
 	public void testBenchmarkAddingOneWish() {
 		List<Long> times = new LinkedList<Long>();
 		
 		String listStr = addList("/repo1");
 		
-		for(int i = 0; i < 1000; i++) {
-			if(i % 100 == 0) {
+		for(int i = 0; i < RUNS; i++) {
+			if(i % (RUNS / 10) == 0) {
 				System.out.println("Adding " + i + "th wish.");
 			}
 			
@@ -140,7 +142,7 @@ public class RemoteBenchmark {
 			avgTime += time;
 		}
 		
-		avgTime = avgTime / 1000;
+		avgTime = avgTime / RUNS;
 		
 		System.out.println("Average time (in ms) to add one wish: " + avgTime);
 	}
