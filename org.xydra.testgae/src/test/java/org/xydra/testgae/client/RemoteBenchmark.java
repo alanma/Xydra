@@ -15,6 +15,8 @@ import java.util.concurrent.Exchanger;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.xydra.testgae.Operation;
+import org.xydra.testgae.OperationWorker;
 import org.xydra.testgae.shared.HttpUtils;
 import org.xydra.testgae.shared.SimulatedUser;
 
@@ -115,38 +117,59 @@ public class RemoteBenchmark {
 		}
 	}
 	
-	public static final int RUNS = 1000;
-	
 	@Test
 	public void testBenchmarkAddingOneWish() {
-		List<Long> times = new LinkedList<Long>();
+		
+		int numberOfWorkers = 20;
+		int operationCount = 50;
 		
 		String listStr = addList("/repo1");
+		OperationWorker[] workers = new OperationWorker[numberOfWorkers];
 		
-		for(int i = 0; i < RUNS; i++) {
-			if(i % (RUNS / 10) == 0) {
-				System.out.println("Adding " + i + "th wish.");
+		System.out.println("Starting threads");
+		for(int i = 0; i < workers.length; i++) {
+			workers[i] = new OperationWorker(operationCount, new AddOperation(this.absoluteUrl
+			        + listStr));
+			workers[i].start();
+		}
+		
+		boolean workersFinished = false;
+		
+		do {
+			try {
+				Thread.sleep(1000);
+			} catch(InterruptedException ie) {
+				// do nothing
 			}
 			
-			long time = System.currentTimeMillis();
-			assertTrue(HttpUtils.makeGetRequest(this.absoluteUrl + listStr + "/add?wishes=1"));
-			time = System.currentTimeMillis() - time;
+			workersFinished = true;
+			for(int i = 0; i < workers.length; i++) {
+				workersFinished &= !workers[i].isAlive();
+			}
 			
-			times.add(time);
-			
-			assertTrue(HttpUtils.makeGetRequest(this.absoluteUrl + listStr + "/clear"));
-		}
+		} while(!workersFinished);
 		
 		double avgTime = 0l;
-		for(long time : times) {
-			avgTime += time;
+		int addExceptions = 0;
+		int clearExceptions = 0;
+		for(int i = 0; i < workers.length; i++) {
+			AddOperation operation = (AddOperation)workers[i].getOperation();
+			avgTime += operation.getTimesSum();
+			addExceptions += operation.getAddExceptions();
+			clearExceptions += operation.getClearExceptions();
 		}
 		
-		avgTime = avgTime / RUNS;
+		int successfulOperations = (numberOfWorkers * operationCount) - addExceptions;
 		
-		System.out.println("Average time (in ms) to add one wish: " + avgTime);
+		avgTime = avgTime / successfulOperations;
+		
+		System.out.println("Added " + successfulOperations
+		        + " wishes sequentially. Average time (in ms) to add one wish: " + avgTime);
+		System.out.println("Number of exceptions while adding wishes: " + addExceptions);
+		System.out.println("Number of exceptions while clearing the list: " + clearExceptions);
 	}
 	
+	@Ignore
 	@Test
 	public void testBenchmarkDeletingOneWish() {
 		List<Long> times = new LinkedList<Long>();
@@ -210,5 +233,51 @@ public class RemoteBenchmark {
 		String[] lines = response.split("\n");
 		
 		return lines[0];
+	}
+	
+	private class AddOperation implements Operation {
+		private String listUrl;
+		private int addExceptions;
+		private int clearExceptions;
+		private List<Long> times;
+		
+		public AddOperation(String listUrl) {
+			this.listUrl = listUrl;
+			this.times = new LinkedList<Long>();
+		}
+		
+		public void doOperation() {
+			try {
+				long time = System.currentTimeMillis();
+				assertTrue(HttpUtils.makeGetRequest(this.listUrl + "/add?wishes=1"));
+				time = System.currentTimeMillis() - time;
+				
+				this.times.add(time);
+			} catch(Exception e) {
+				this.addExceptions++;
+			}
+			
+			try {
+				assertTrue(HttpUtils.makeGetRequest(this.listUrl + "/clear"));
+			} catch(Exception e) {
+				this.clearExceptions++;
+			}
+		}
+		
+		public long getTimesSum() {
+			long result = 0l;
+			for(long time : this.times) {
+				result += time;
+			}
+			return result;
+		}
+		
+		public int getAddExceptions() {
+			return this.addExceptions;
+		}
+		
+		public int getClearExceptions() {
+			return this.clearExceptions;
+		}
 	}
 }
