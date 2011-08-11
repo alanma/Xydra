@@ -72,4 +72,19 @@ public class DiffWritableModelTest {
 		List<XAtomicCommand> list = this.diffModel.toCommandList();
 		assertEquals(3, list.size());
 	}
+	
+	@Test
+	public void testDeleteNonexistingField() {
+		XWritableObject adamObject = this.diffModel.createObject(adam);
+		adamObject.removeField(fon);
+		
+		List<XAtomicCommand> list = this.diffModel.toCommandList();
+		
+		// FIXME
+		for(XAtomicCommand a : list) {
+			System.out.println(a);
+		}
+		
+		assertEquals(1, list.size());
+	}
 }

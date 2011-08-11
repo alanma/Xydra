@@ -225,16 +225,16 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	protected boolean object_removeField(XID objectId, XID fieldId) {
 		assert objectId != null;
 		assert fieldId != null;
-		boolean b = object_hasField(objectId, fieldId);
-		
-		if(this.added.containsKey(new EqualsConstraint<XID>(objectId), new EqualsConstraint<XID>(
-		        fieldId))) {
-			this.added.deIndex(objectId, fieldId);
-		} else {
-			this.removed.index(objectId, fieldId, NOVALUE);
+		boolean hasField = object_hasField(objectId, fieldId);
+		if(hasField) {
+			if(this.added.containsKey(new EqualsConstraint<XID>(objectId),
+			        new EqualsConstraint<XID>(fieldId))) {
+				this.added.deIndex(objectId, fieldId);
+			} else {
+				this.removed.index(objectId, fieldId, NOVALUE);
+			}
 		}
-		
-		return b;
+		return hasField;
 	}
 	
 	protected Set<XID> object_idsAsSet(XID objectId) {
