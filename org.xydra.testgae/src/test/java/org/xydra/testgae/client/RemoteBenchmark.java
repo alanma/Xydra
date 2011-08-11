@@ -120,8 +120,10 @@ public class RemoteBenchmark {
 	@Test
 	public void testBenchmarkAddingOneWish() {
 		
-		int numberOfWorkers = 20;
-		int operationCount = 50;
+		// Multiple Threads
+		
+		int numberOfWorkers = 100;
+		int operationCount = 10;
 		
 		String listStr = addList("/repo1");
 		OperationWorker[] workers = new OperationWorker[numberOfWorkers];
@@ -130,6 +132,8 @@ public class RemoteBenchmark {
 		for(int i = 0; i < workers.length; i++) {
 			workers[i] = new OperationWorker(operationCount, new AddOperation(this.absoluteUrl
 			        + listStr));
+			
+			System.out.println("Starting thread " + i + ".");
 			workers[i].start();
 		}
 		
@@ -149,21 +153,66 @@ public class RemoteBenchmark {
 			
 		} while(!workersFinished);
 		
-		double avgTime = 0l;
-		int addExceptions = 0;
-		int clearExceptions = 0;
+		double threadsAvgTime = 0l;
+		int threadsAddExceptions = 0;
+		int threadsClearExceptions = 0;
 		for(int i = 0; i < workers.length; i++) {
 			AddOperation operation = (AddOperation)workers[i].getOperation();
-			avgTime += operation.getTimesSum();
-			addExceptions += operation.getAddExceptions();
-			clearExceptions += operation.getClearExceptions();
+			threadsAvgTime += operation.getTimesSum();
+			threadsAddExceptions += operation.getAddExceptions();
+			threadsClearExceptions += operation.getClearExceptions();
 		}
 		
-		int successfulOperations = (numberOfWorkers * operationCount) - addExceptions;
+		int threadsSuccessfulOperations = (numberOfWorkers * operationCount) - threadsAddExceptions;
 		
-		avgTime = avgTime / successfulOperations;
+		threadsAvgTime = threadsAvgTime / threadsSuccessfulOperations;
 		
-		System.out.println("Added " + successfulOperations
+		// Single Thread
+		
+		// Results
+		
+		System.out.println(" -------- Multiple Threads ---------");
+		System.out.println("Added " + threadsSuccessfulOperations
+		        + " wishes sequentially. Average time (in ms) to add one wish: " + threadsAvgTime);
+		System.out.println("Number of exceptions while adding wishes: " + threadsAddExceptions);
+		System.out.println("Number of exceptions while clearing the list: "
+		        + threadsClearExceptions);
+	}
+	
+	@Test
+	public void testBenchmarkAddingOneWishOneThread() {
+		LinkedList<Long> times = new LinkedList<Long>();
+		String listStr = addList("/repo1");
+		int addExceptions = 0;
+		int clearExceptions = 0;
+		
+		for(int i = 0; i < 1000; i++) {
+			try {
+				long time = System.currentTimeMillis();
+				assertTrue(HttpUtils.makeGetRequest(this.absoluteUrl + listStr + "/add?wishes=1"));
+				time = System.currentTimeMillis() - time;
+				
+				times.add(time);
+			} catch(Exception e) {
+				addExceptions++;
+			}
+			
+			try {
+				assertTrue(HttpUtils.makeGetRequest(this.absoluteUrl + listStr + "/clear"));
+			} catch(Exception e) {
+				clearExceptions++;
+			}
+		}
+		
+		double avgTime = 0l;
+		for(long time : times) {
+			avgTime += time;
+		}
+		
+		avgTime = avgTime / 1000;
+		
+		System.out.println(" -------- Single Thread ---------");
+		System.out.println("Added " + times.size()
 		        + " wishes sequentially. Average time (in ms) to add one wish: " + avgTime);
 		System.out.println("Number of exceptions while adding wishes: " + addExceptions);
 		System.out.println("Number of exceptions while clearing the list: " + clearExceptions);

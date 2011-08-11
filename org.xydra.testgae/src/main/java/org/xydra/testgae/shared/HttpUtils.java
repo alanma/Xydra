@@ -32,10 +32,10 @@ public class HttpUtils {
 		DefaultHttpClient httpclient = createHttpClient();
 		HttpGet httpget = new HttpGet(absoluteUrl);
 		try {
-			log.info("GET STATUS " + absoluteUrl);
+			// log.info("GET STATUS " + absoluteUrl);
 			HttpResponse res = httpclient.execute(httpget);
 			int status = res.getStatusLine().getStatusCode();
-			log.info("GOT STATUS " + absoluteUrl + " => " + status);
+			// log.info("GOT STATUS " + absoluteUrl + " => " + status);
 			return status == 200;
 		} catch(Exception e) {
 			// In case of an unexpected exception you may want to abort
