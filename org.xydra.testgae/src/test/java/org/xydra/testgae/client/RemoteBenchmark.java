@@ -103,37 +103,32 @@ public class RemoteBenchmark {
 		}
 	}
 	
-	@Ignore
 	@Test
 	public void testAddTooManyWishes() {
-		try {
-			assertTrue(HttpUtils.makeGetRequest(this.absoluteUrl
-			        + "/xmas/repo1/add?lists=1&wishes=10"));
-			
-			assertTrue(HttpUtils.makeGetRequest(this.absoluteUrl
-			        + "/xmas/repo1/add?lists=1&wishes=1000"));
-		} catch(Exception e) {
-			fail("Exception! " + e.toString());
-		}
+		assertTrue(HttpUtils.makeGetRequest(this.absoluteUrl + "/xmas/repo1/add?lists=1&wishes=10"));
+		
+		assertTrue(HttpUtils.makeGetRequest(this.absoluteUrl
+		        + "/xmas/repo1/add?lists=1&wishes=1000"));
 	}
 	
+	@Ignore
 	@Test
 	public void testBenchmarkAddingOneWish() {
 		
 		// Multiple Threads
 		
-		int numberOfWorkers = 100;
-		int operationCount = 10;
+		int numberOfWorkers = 10;
+		int operationCount = 100;
 		
-		String listStr = addList("/repo1");
 		OperationWorker[] workers = new OperationWorker[numberOfWorkers];
 		
 		System.out.println("Starting threads");
 		for(int i = 0; i < workers.length; i++) {
+			String listStr = addList("/repo1");
 			workers[i] = new OperationWorker(operationCount, new AddOperation(this.absoluteUrl
 			        + listStr));
 			
-			System.out.println("Starting thread " + i + ".");
+			// System.out.println("Starting thread " + i + ".");
 			workers[i].start();
 		}
 		
@@ -179,20 +174,25 @@ public class RemoteBenchmark {
 		        + threadsClearExceptions);
 	}
 	
+	@Ignore
 	@Test
 	public void testBenchmarkAddingOneWishOneThread() {
-		LinkedList<Long> times = new LinkedList<Long>();
 		String listStr = addList("/repo1");
 		int addExceptions = 0;
 		int clearExceptions = 0;
+		int counter = 0;
 		
+		double avgTime = 0;
 		for(int i = 0; i < 1000; i++) {
 			try {
 				long time = System.currentTimeMillis();
 				assertTrue(HttpUtils.makeGetRequest(this.absoluteUrl + listStr + "/add?wishes=1"));
 				time = System.currentTimeMillis() - time;
 				
-				times.add(time);
+				System.out.println(time);
+				
+				avgTime += time;
+				counter++;
 			} catch(Exception e) {
 				addExceptions++;
 			}
@@ -204,15 +204,10 @@ public class RemoteBenchmark {
 			}
 		}
 		
-		double avgTime = 0l;
-		for(long time : times) {
-			avgTime += time;
-		}
-		
-		avgTime = avgTime / 1000;
+		avgTime = avgTime / (1000 - addExceptions);
 		
 		System.out.println(" -------- Single Thread ---------");
-		System.out.println("Added " + times.size()
+		System.out.println("Added " + counter
 		        + " wishes sequentially. Average time (in ms) to add one wish: " + avgTime);
 		System.out.println("Number of exceptions while adding wishes: " + addExceptions);
 		System.out.println("Number of exceptions while clearing the list: " + clearExceptions);
@@ -300,6 +295,8 @@ public class RemoteBenchmark {
 				long time = System.currentTimeMillis();
 				assertTrue(HttpUtils.makeGetRequest(this.listUrl + "/add?wishes=1"));
 				time = System.currentTimeMillis() - time;
+				
+				System.out.println(time);
 				
 				this.times.add(time);
 			} catch(Exception e) {
