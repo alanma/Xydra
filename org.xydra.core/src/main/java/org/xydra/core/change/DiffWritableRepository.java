@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.xydra.base.XID;
 import org.xydra.base.XX;
+import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
@@ -34,6 +35,7 @@ public class DiffWritableRepository extends AbstractDelegatingWritableRepository
 	protected Map<XID,DiffWritableModel> potentiallyChanged = new HashMap<XID,DiffWritableModel>();
 	protected Set<XID> removed = new HashSet<XID>();
 	
+	/* make sure to return always the same DiffWritableModel references */
 	@Override
 	public XWritableModel createModel(XID modelId) {
 		if(this.added.containsKey(modelId)) {
@@ -44,15 +46,13 @@ public class DiffWritableRepository extends AbstractDelegatingWritableRepository
 		}
 		if(this.baseRepository.hasModel(modelId)) {
 			XWritableModel baseModel = this.baseRepository.getModel(modelId);
-			assert baseModel instanceof ReadCachingWritableModel;
-			// FIXME
-			// baseModel = ((ReadCachingWritableModel)baseModel).getBase();
-			DiffWritableModel diffModel = new DiffWritableModel(baseModel, true);
+			DiffWritableModel diffModel = new DiffWritableModel(baseModel);
 			this.potentiallyChanged.put(modelId, diffModel);
 			return diffModel;
 		} else {
+			// model did not exist yet
 			DiffWritableModel diffModel = new DiffWritableModel(new SimpleModel(XX.toAddress(
-			        getID(), modelId, null, null)), true);
+			        getID(), modelId, null, null)));
 			this.added.put(modelId, diffModel);
 			this.removed.remove(modelId);
 			this.potentiallyChanged.remove(modelId);
@@ -86,6 +86,7 @@ public class DiffWritableRepository extends AbstractDelegatingWritableRepository
 		return modelIds().isEmpty();
 	}
 	
+	/* make sure to return always the same DiffWritableModel references */
 	@Override
 	public XWritableModel getModel(XID modelId) {
 		XWritableModel model = this.added.get(modelId);
@@ -95,9 +96,7 @@ public class DiffWritableRepository extends AbstractDelegatingWritableRepository
 		if(model == null) {
 			model = this.baseRepository.getModel(modelId);
 			if(model != null) {
-				assert model instanceof ReadCachingWritableModel;
-				model = ((ReadCachingWritableModel)model).getBase();
-				model = new DiffWritableModel(model, true);
+				model = new DiffWritableModel(model);
 				this.potentiallyChanged.put(modelId, (DiffWritableModel)model);
 			}
 		}
@@ -133,6 +132,19 @@ public class DiffWritableRepository extends AbstractDelegatingWritableRepository
 			}
 		}
 		return false;
+	}
+	
+	public String changesToString() {
+		StringBuffer buf = new StringBuffer();
+		for(DiffWritableModel model : this.potentiallyChanged.values()) {
+			if(model.hasChanges()) {
+				buf.append("=== " + model.getID() + " === <br/>\n");
+				for(XAtomicCommand command : model.toCommandList()) {
+					buf.append(" " + command + " <br/>\n");
+				}
+			}
+		}
+		return buf.toString();
 	}
 	
 }

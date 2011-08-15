@@ -11,8 +11,10 @@ import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.rmof.XWritableField;
+import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
+import org.xydra.base.rmof.impl.memory.SimpleRepository;
 import org.xydra.base.value.XV;
 
 
@@ -30,7 +32,7 @@ public class DiffWritableModelTest {
 	@Before
 	public void setUp() throws Exception {
 		this.base = new SimpleModel(XX.toAddress(XX.toId("repo1"), phonebook, null, null));
-		this.diffModel = new DiffWritableModel(this.base, true);
+		this.diffModel = new DiffWritableModel(this.base);
 	}
 	
 	@Test
@@ -79,5 +81,39 @@ public class DiffWritableModelTest {
 		adamObject.removeField(fon);
 		List<XAtomicCommand> list = this.diffModel.toCommandList();
 		assertEquals(1, list.size());
+	}
+	
+	@Test
+	public void testDiffWritableRepositoryOnBase() {
+		// create repo with minimal content
+		SimpleRepository srepo = new SimpleRepository(XX.toAddress("/srepo/-/-/-"));
+		srepo.createModel(XX.toId("smodel")).createObject(XX.toId("sobject"))
+		        .createField(XX.toId("sfield")).setValue(XV.toValue("svalue"));
+		// verify simpemodel
+		assertTrue(srepo.getModel(XX.toId("smodel")).hasObject(XX.toId("sobject")));
+		
+		DiffWritableRepository drepo = new DiffWritableRepository(srepo);
+		// add some content here
+		XWritableModel dmodel = drepo.createModel(XX.toId("dmodel"));
+		dmodel.createObject(XX.toId("dobject")).createField(XX.toId("dfield"))
+		        .setValue(XV.toValue("dvalue"));
+		
+		// check txn & content
+		assertTrue(drepo.hasModel(XX.toId("smodel")));
+		assertTrue(drepo.hasModel(XX.toId("dmodel")));
+		XWritableModel smodel = drepo.getModel(XX.toId("smodel"));
+		assertTrue(smodel.hasObject(XX.toId("sobject")));
+		assertTrue(drepo.getModel(XX.toId("dmodel")).hasObject(XX.toId("dobject")));
+		assertTrue(drepo.getModel(XX.toId("smodel")).getObject(XX.toId("sobject"))
+		        .hasField(XX.toId("sfield")));
+		assertTrue(drepo.getModel(XX.toId("dmodel")).getObject(XX.toId("dobject"))
+		        .hasField(XX.toId("dfield")));
+		assertTrue(drepo.getModel(XX.toId("smodel")).getObject(XX.toId("sobject"))
+		        .getField(XX.toId("sfield")).getValue().equals(XV.toValue("svalue")));
+		assertTrue(drepo.getModel(XX.toId("dmodel")).getObject(XX.toId("dobject"))
+		        .getField(XX.toId("dfield")).getValue().equals(XV.toValue("dvalue")));
+		DiffWritableModel diffModel = (DiffWritableModel)drepo.getModel(XX.toId("dmodel"));
+		List<XAtomicCommand> list = diffModel.toCommandList();
+		assertEquals("add dobject, dfield, dvalue", 3, list.size());
 	}
 }

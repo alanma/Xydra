@@ -44,9 +44,9 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	
 	private static final Logger log = LoggerFactory.getLogger(DiffWritableModel.class);
 	
-	private static final XID NONE = XX.toId("_NoIdDiff");
+	private static final XID NONE = XX.toId("_NoId_DWModel");
 	
-	private static final XValue NOVALUE = XV.toValue("_NoValueDiff");
+	private static final XValue NOVALUE = XV.toValue("_NoValue_DWModel");
 	
 	/*
 	 * Each index has the structure (object, field, value) with the notion to
@@ -61,19 +61,11 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	private final XWritableModel base;
 	
 	/**
-	 * @param base any model or a {@link ReadCachingWritableModel}
-	 * @param prefetchModel if true and base is not yet a
-	 *            {@link ReadCachingWritableModel}, construct one that
-	 *            pre-fetches all model content at constructor call time
+	 * @param base any model
 	 */
-	public DiffWritableModel(final XWritableModel base, boolean prefetchModel) {
+	public DiffWritableModel(final XWritableModel base) {
 		assert base != null;
-		if(base instanceof ReadCachingWritableModel) {
-			this.base = base;
-		} else {
-			// wrap
-			this.base = new ReadCachingWritableModel(base, prefetchModel);
-		}
+		this.base = base;
 		this.added = new MapMapIndex<XID,XID,XValue>();
 		this.removed = new MapMapIndex<XID,XID,XValue>();
 	}
@@ -360,10 +352,17 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 			builder.addCommand(command);
 		}
 		if(builder.isEmpty()) {
-			log.info("No command in txn");
+			log.info("No command in txn for model '" + this.getID() + "'");
 			return null;
 		}
-		return builder.build();
+		XTransaction txn = builder.build();
+		if(log.isTraceEnabled()) {
+			log.trace("Commands in txn for model '" + this.getID() + "'");
+			for(XAtomicCommand atomicCommand : txn) {
+				log.trace("  Command " + atomicCommand);
+			}
+		}
+		return txn;
 	}
 	
 	public boolean hasChanges() {

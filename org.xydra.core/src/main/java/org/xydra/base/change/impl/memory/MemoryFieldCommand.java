@@ -140,17 +140,17 @@ public class MemoryFieldCommand extends MemoryAtomicCommand implements XFieldCom
 	public String toString() {
 		String suffix = "";
 		if(isForced())
-			suffix += " (forced)";
+			suffix += "' (forced)";
 		else
-			suffix += " r" + getRevisionNumber();
+			suffix += "' r" + getRevisionNumber();
 		suffix += " @" + getTarget();
 		switch(getChangeType()) {
 		case ADD:
-			return "FieldCommand: ADD " + this.newValue + suffix;
+			return "FieldCommand: ADD '" + this.newValue + suffix;
 		case REMOVE:
-			return "FieldCommand: REMOVE value " + suffix;
+			return "FieldCommand: REMOVE value '" + suffix;
 		case CHANGE:
-			return "FieldCommand: CHANGE value to " + this.newValue + suffix;
+			return "FieldCommand: CHANGE value to '" + this.newValue + suffix;
 		default:
 			throw new RuntimeException("this field event should have never been created");
 		}

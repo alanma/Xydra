@@ -150,13 +150,13 @@ public class MemoryModelCommand extends MemoryAtomicCommand implements XModelCom
 	
 	@Override
 	public String toString() {
-		String str = "ModelCommand: " + getChangeType() + " " + this.objectId;
+		String str = "ModelCommand: " + getChangeType() + " '" + this.objectId;
 		if(isForced())
-			str += " (forced)";
+			str += "' (forced)";
 		else if(getChangeType() == ChangeType.ADD)
-			str += " (safe)";
+			str += "' (safe)";
 		else
-			str += " r" + getRevisionNumber();
+			str += "' r" + getRevisionNumber();
 		str += " @" + getTarget();
 		return str;
 	}

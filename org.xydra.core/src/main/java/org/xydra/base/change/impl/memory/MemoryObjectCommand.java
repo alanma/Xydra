@@ -144,13 +144,13 @@ public class MemoryObjectCommand extends MemoryAtomicCommand implements XObjectC
 	
 	@Override
 	public String toString() {
-		String str = "ObjectCommand: " + getChangeType() + " " + this.fieldId;
+		String str = "ObjectCommand: " + getChangeType() + " '" + this.fieldId;
 		if(isForced())
-			str += " (forced)";
+			str += "' (forced)";
 		else if(getChangeType() == ChangeType.ADD)
-			str += " (safe)";
+			str += "' (safe)";
 		else
-			str += " r" + getRevisionNumber();
+			str += "' r" + getRevisionNumber();
 		str += " @" + getTarget();
 		return str;
 	}

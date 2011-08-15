@@ -159,13 +159,13 @@ public class MemoryRepositoryCommand extends MemoryAtomicCommand implements XRep
 	
 	@Override
 	public String toString() {
-		String str = "RepositoryCommand: " + getChangeType() + " " + this.modelId;
+		String str = "RepositoryCommand: " + getChangeType() + " '" + this.modelId;
 		if(isForced())
-			str += " (forced)";
+			str += "' (forced)";
 		else if(getChangeType() == ChangeType.ADD)
-			str += " (safe)";
+			str += "' (safe)";
 		else
-			str += " r" + getRevisionNumber();
+			str += "' r" + getRevisionNumber();
 		str += " @" + getTarget();
 		return str;
 	}
