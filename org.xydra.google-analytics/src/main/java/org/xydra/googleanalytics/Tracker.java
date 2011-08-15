@@ -122,7 +122,7 @@ public class Tracker {
 	 */
 	public void track(FocusPoint focusPoint, String refererURL, UserInfo userinfo, GaEvent gaEvent) {
 		log.debug("Tracking asynchronously focusPoint=" + focusPoint.getContentTitle());
-		
+		assert userinfo.getDomainName() != null;
 		UrchinCookie cookie = new UrchinCookie(userinfo);
 		String hostname = userinfo.getHostName();
 		trackLowLevel(hostname, focusPoint, refererURL, cookie.getCookieString(), gaEvent);
