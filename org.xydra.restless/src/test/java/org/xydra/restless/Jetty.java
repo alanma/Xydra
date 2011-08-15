@@ -28,6 +28,7 @@ import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.restless.utils.HostUtils;
 
 
 /**
@@ -254,7 +255,8 @@ public class Jetty {
 		}
 		
 		try {
-			return new URI("http://localhost:" + this.port + "/").resolve(contextPath + "/");
+			return new URI("http://" + HostUtils.getLocalHostname() + ":" + this.port + "/")
+			        .resolve(contextPath + "/");
 		} catch(URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
