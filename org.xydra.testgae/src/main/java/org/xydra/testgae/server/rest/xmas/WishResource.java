@@ -86,7 +86,7 @@ public class WishResource {
 		
 		// create txn
 		DiffWritableModel txnModel = new DiffWritableModel(Xmas.createModel(repoStr,
-		        XX.toId(listStr)), true);
+		        XX.toId(listStr)));
 		WishList wishList = new WishList(txnModel);
 		// manipulate txn
 		wishList.removeWish(XX.toId(wishStr));
@@ -113,7 +113,7 @@ public class WishResource {
 		
 		// create txn
 		DiffWritableModel txnModel = new DiffWritableModel(Xmas.createModel(repoStr,
-		        XX.toId(listStr)), true);
+		        XX.toId(listStr)));
 		WishList wishList = new WishList(txnModel);
 		// manipulate txn
 		wishList.editWishName(XX.toId(wishStr), name);
@@ -140,7 +140,7 @@ public class WishResource {
 		
 		// create txn
 		DiffWritableModel txnModel = new DiffWritableModel(Xmas.createModel(repoStr,
-		        XX.toId(listStr)), true);
+		        XX.toId(listStr)));
 		WishList wishList = new WishList(txnModel);
 		// manipulate txn
 		int price = Integer.parseInt(priceStr);
@@ -168,7 +168,7 @@ public class WishResource {
 		
 		// create txn
 		DiffWritableModel txnModel = new DiffWritableModel(Xmas.createModel(repoStr,
-		        XX.toId(listStr)), true);
+		        XX.toId(listStr)));
 		WishList wishList = new WishList(txnModel);
 		// manipulate txn
 		wishList.editWishUrl(XX.toId(wishStr), urlStr);

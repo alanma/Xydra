@@ -62,7 +62,7 @@ public class WishlistResource {
 		        + System.currentTimeMillis() + "\n");
 		int wishesCount = Integer.parseInt(wishesStr);
 		XWritableModel model = Xmas.createModel(repoStr, XX.toId(list));
-		DiffWritableModel txnModel = new DiffWritableModel(model, true);
+		DiffWritableModel txnModel = new DiffWritableModel(model);
 		WishList wishList = new WishList(txnModel);
 		wishList.addDemoData(wishesCount, w);
 		XTransaction txn = txnModel.toTransaction();
@@ -89,7 +89,7 @@ public class WishlistResource {
 		w.write("Deleting all wishes.");
 		// create txn
 		DiffWritableModel txnModel = new DiffWritableModel(
-		        Xmas.createModel(repoStr, XX.toId(list)), true);
+		        Xmas.createModel(repoStr, XX.toId(list)));
 		WishList wishList = new WishList(txnModel);
 		// manipulate txn
 		wishList.removeAllWishes(w);
