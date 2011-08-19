@@ -8,13 +8,14 @@ import static org.junit.Assert.fail;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Exchanger;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.testgae.Operation;
 import org.xydra.testgae.OperationWorker;
 import org.xydra.testgae.shared.HttpUtils;
@@ -30,6 +31,7 @@ import org.xydra.testgae.shared.SimulatedUser;
 public class RemoteBenchmark {
 	protected String absoluteUrl;
 	protected String dataUrl;
+	private static final Logger log = LoggerFactory.getLogger(HttpUtils.class);
 	
 	@Before
 	public void setupBenchmark() {
@@ -111,24 +113,42 @@ public class RemoteBenchmark {
 		        + "/xmas/repo1/add?lists=1&wishes=1000"));
 	}
 	
-	@Ignore
 	@Test
 	public void testBenchmarkAddingOneWish() {
+		this.benchmarkOperation(OperationEnum.ADD, 10, 100);
+	}
+	
+	@Test
+	public void testBenchmarkDeletingOneWish() {
+		this.benchmarkOperation(OperationEnum.DELETE, 10, 100);
+	}
+	
+	private enum OperationEnum {
+		ADD, DELETE;
+	}
+	
+	@Test
+	public void benchmarkOperation(OperationEnum operation, int numberOfThreads,
+	        int operationsPerThread) {
 		
-		// Multiple Threads
+		OperationWorker[] workers = new OperationWorker[numberOfThreads];
 		
-		int numberOfWorkers = 10;
-		int operationCount = 100;
-		
-		OperationWorker[] workers = new OperationWorker[numberOfWorkers];
-		
-		System.out.println("Starting threads");
+		log.info("Starting threads");
 		for(int i = 0; i < workers.length; i++) {
 			String listStr = addList("/repo1");
-			workers[i] = new OperationWorker(operationCount, new AddOperation(this.absoluteUrl
-			        + listStr));
 			
-			// System.out.println("Starting thread " + i + ".");
+			switch(operation) {
+			case ADD:
+				workers[i] = new OperationWorker(operationsPerThread, new AddWishOperation(
+				        this.absoluteUrl + listStr));
+				break;
+			case DELETE:
+				workers[i] = new OperationWorker(operationsPerThread, new DeleteWishOperation(
+				        this.absoluteUrl + listStr));
+				break;
+			}
+			
+			log.info("Starting thread " + i + ".");
 			workers[i].start();
 		}
 		
@@ -149,32 +169,31 @@ public class RemoteBenchmark {
 		} while(!workersFinished);
 		
 		double threadsAvgTime = 0l;
-		int threadsAddExceptions = 0;
-		int threadsClearExceptions = 0;
+		int threadsOperationExceptions = 0;
+		int threadsOtherExceptions = 0;
 		for(int i = 0; i < workers.length; i++) {
-			AddOperation operation = (AddOperation)workers[i].getOperation();
-			threadsAvgTime += operation.getTimesSum();
-			threadsAddExceptions += operation.getAddExceptions();
-			threadsClearExceptions += operation.getClearExceptions();
+			Operation tempOp = workers[i].getOperation();
+			threadsAvgTime += tempOp.getTimesSum();
+			threadsOperationExceptions += tempOp.getOperationExceptions();
+			threadsOtherExceptions += tempOp.getOtherExceptions();
 		}
 		
-		int threadsSuccessfulOperations = (numberOfWorkers * operationCount) - threadsAddExceptions;
+		int threadsSuccessfulOperations = (numberOfThreads * operationsPerThread)
+		        - threadsOperationExceptions;
 		
 		threadsAvgTime = threadsAvgTime / threadsSuccessfulOperations;
 		
-		// Single Thread
-		
 		// Results
-		
+		// TODO improve output of results
 		System.out.println(" -------- Multiple Threads ---------");
 		System.out.println("Added " + threadsSuccessfulOperations
 		        + " wishes sequentially. Average time (in ms) to add one wish: " + threadsAvgTime);
-		System.out.println("Number of exceptions while adding wishes: " + threadsAddExceptions);
+		System.out.println("Number of exceptions while adding wishes: "
+		        + threadsOperationExceptions);
 		System.out.println("Number of exceptions while clearing the list: "
-		        + threadsClearExceptions);
+		        + threadsOtherExceptions);
 	}
 	
-	@Ignore
 	@Test
 	public void testBenchmarkAddingOneWishOneThread() {
 		String listStr = addList("/repo1");
@@ -213,39 +232,8 @@ public class RemoteBenchmark {
 		System.out.println("Number of exceptions while clearing the list: " + clearExceptions);
 	}
 	
-	@Ignore
-	@Test
-	public void testBenchmarkDeletingOneWish() {
-		List<Long> times = new LinkedList<Long>();
-		
-		String listStr = addList("/repo1");
-		
-		for(int i = 0; i < 1000; i++) {
-			if(i % 100 == 0) {
-				System.out.println("Deleting " + i + "th wish.");
-			}
-			
-			String wishStr = addWishToEmptyList(this.absoluteUrl + listStr);
-			
-			long time = System.currentTimeMillis();
-			assertTrue(HttpUtils.makeGetRequest(this.absoluteUrl + wishStr + "/delete"));
-			time = System.currentTimeMillis() - time;
-			
-			times.add(time);
-			
-		}
-		
-		double avgTime = 0l;
-		for(long time : times) {
-			avgTime += time;
-		}
-		
-		avgTime = avgTime / 1000;
-		
-		System.out.println("Average time (in ms) to delete one wish: " + avgTime);
-	}
+	// ----------------- Helper Methods ------------------------
 	
-	// Helper Methods
 	private String addList(String repoIdStr) {
 		String response = HttpUtils.getRequestAsStringResponse(this.absoluteUrl + "/xmas"
 		        + repoIdStr + "/add?lists=1&wishes=0");
@@ -279,15 +267,14 @@ public class RemoteBenchmark {
 		return lines[0];
 	}
 	
-	private class AddOperation implements Operation {
+	private class AddWishOperation implements Operation {
 		private String listUrl;
 		private int addExceptions;
 		private int clearExceptions;
-		private List<Long> times;
+		private long timesSum;
 		
-		public AddOperation(String listUrl) {
+		public AddWishOperation(String listUrl) {
 			this.listUrl = listUrl;
-			this.times = new LinkedList<Long>();
 		}
 		
 		public void doOperation() {
@@ -298,7 +285,7 @@ public class RemoteBenchmark {
 				
 				System.out.println(time);
 				
-				this.times.add(time);
+				this.timesSum += time;
 			} catch(Exception e) {
 				this.addExceptions++;
 			}
@@ -311,18 +298,58 @@ public class RemoteBenchmark {
 		}
 		
 		public long getTimesSum() {
-			long result = 0l;
-			for(long time : this.times) {
-				result += time;
-			}
-			return result;
+			return this.timesSum;
 		}
 		
-		public int getAddExceptions() {
+		public int getOperationExceptions() {
 			return this.addExceptions;
 		}
 		
-		public int getClearExceptions() {
+		public int getOtherExceptions() {
+			return this.clearExceptions;
+		}
+	}
+	
+	private class DeleteWishOperation implements Operation {
+		private String listUrl;
+		private int deleteExceptions;
+		private int clearExceptions;
+		private long timesSum;
+		
+		public DeleteWishOperation(String listUrl) {
+			this.listUrl = listUrl;
+		}
+		
+		public void doOperation() {
+			try {
+				// add wish
+				String wishStr = addWishToEmptyList(this.listUrl);
+				
+				long time = System.currentTimeMillis();
+				assertTrue(HttpUtils.makeGetRequest(this.listUrl + wishStr + "/delete"));
+				time = System.currentTimeMillis() - time;
+				
+				this.timesSum += time;
+			} catch(Exception e) {
+				this.deleteExceptions++;
+			}
+			
+			try {
+				assertTrue(HttpUtils.makeGetRequest(this.listUrl + "/clear"));
+			} catch(Exception e) {
+				this.clearExceptions++;
+			}
+		}
+		
+		public long getTimesSum() {
+			return this.timesSum;
+		}
+		
+		public int getOperationExceptions() {
+			return this.deleteExceptions;
+		}
+		
+		public int getOtherExceptions() {
 			return this.clearExceptions;
 		}
 	}

@@ -9,5 +9,14 @@ package org.xydra.testgae;
  * 
  */
 public interface Operation {
+	
+	// TODO Comment
+	
 	public void doOperation();
+	
+	public int getOperationExceptions();
+	
+	public int getOtherExceptions();
+	
+	public long getTimesSum();
 }
