@@ -5,6 +5,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -30,8 +33,9 @@ import org.xydra.testgae.shared.SimulatedUser;
  */
 public class RemoteBenchmark {
 	protected String absoluteUrl;
-	protected String dataUrl;
+	protected String path;
 	private static final Logger log = LoggerFactory.getLogger(HttpUtils.class);
+	final static String lineSeparator = System.getProperty("line.separator");
 	
 	@Before
 	public void setupBenchmark() {
@@ -115,21 +119,22 @@ public class RemoteBenchmark {
 	
 	@Test
 	public void testBenchmarkAddingOneWish() {
-		this.benchmarkOperation(OperationEnum.ADD, 10, 100);
+		this.benchmarkOperation(OperationEnum.ADD, 10, 1, this.path + "testBenchmarkAddingOneWish"
+		        + ".txt");
 	}
 	
 	@Test
 	public void testBenchmarkDeletingOneWish() {
-		this.benchmarkOperation(OperationEnum.DELETE, 10, 100);
+		this.benchmarkOperation(OperationEnum.DELETE, 10, 1, this.path
+		        + "testBenchmarkAddingOneWish" + ".txt");
 	}
 	
 	private enum OperationEnum {
 		ADD, DELETE;
 	}
 	
-	@Test
 	public void benchmarkOperation(OperationEnum operation, int numberOfThreads,
-	        int operationsPerThread) {
+	        int operationsPerThread, String filePath) {
 		
 		OperationWorker[] workers = new OperationWorker[numberOfThreads];
 		
@@ -183,15 +188,22 @@ public class RemoteBenchmark {
 		
 		threadsAvgTime = threadsAvgTime / threadsSuccessfulOperations;
 		
-		// Results
-		// TODO improve output of results
-		System.out.println(" -------- Multiple Threads ---------");
-		System.out.println("Added " + threadsSuccessfulOperations
-		        + " wishes sequentially. Average time (in ms) to add one wish: " + threadsAvgTime);
-		System.out.println("Number of exceptions while adding wishes: "
-		        + threadsOperationExceptions);
-		System.out.println("Number of exceptions while clearing the list: "
-		        + threadsOtherExceptions);
+		// Output Results in a simple CSV format
+		try {
+			BufferedWriter out = new BufferedWriter(new FileWriter(filePath, true));
+			
+			out.write("#Threads:, " + numberOfThreads + ", ");
+			out.write("#Operations:, " + operationsPerThread + ", ");
+			out.write("#Successful Operations:, " + threadsSuccessfulOperations + ", ");
+			out.write("Average Time (ms):, " + threadsAvgTime + ", ");
+			out.write("#Operation Exceptions:, " + threadsOperationExceptions + ", ");
+			out.write("#Other Exceptions:, " + threadsOtherExceptions);
+			out.write(lineSeparator);
+			
+			out.close();
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@Test

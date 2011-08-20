@@ -14,6 +14,6 @@ public class RemoteBenchmarkOnLocalhost extends RemoteBenchmark {
 	@Before
 	public void setup() {
 		this.absoluteUrl = "http://localhost:8787";
+		this.path = "local";
 	}
-	
 }
