@@ -167,10 +167,10 @@ public class UrchinUrl {
 			// Function:X10 Data Parameter
 			// Example:Value is encoded.
 			// example: 5(category*action*optional_label)(12)
-			String utmeValue = "5(" + Utils.urlencode(gaEvent.category) + "*"
-			        + Utils.urlencode(gaEvent.action);
+			String utmeValue = "5(" + Utils.urlencode(debrace(gaEvent.category)) + "*"
+			        + Utils.urlencode(debrace(gaEvent.action));
 			if(gaEvent.optionalLabel != null) {
-				utmeValue += "*" + Utils.urlencode(gaEvent.optionalLabel);
+				utmeValue += "*" + Utils.urlencode(debrace(gaEvent.optionalLabel));
 			}
 			utmeValue += ")";
 			if(gaEvent.optionalValue != -1) {
@@ -222,6 +222,14 @@ public class UrchinUrl {
 		 */
 
 		return url.toString();
+	}
+	
+	/**
+	 * @param withBraces
+	 * @return a string that contains no round braces
+	 */
+	private static String debrace(String withBraces) {
+		return withBraces.replace('(', '[').replace(')', ']');
 	}
 	
 	private static void appendIfNotEmpty(StringBuffer url, String key, String value,
