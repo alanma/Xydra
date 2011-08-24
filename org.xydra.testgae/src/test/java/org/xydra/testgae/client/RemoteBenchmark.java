@@ -213,7 +213,7 @@ public class RemoteBenchmark {
 	
 	@Test
 	public void testCompareAddingOneWishTransactionAndSequential() {
-		for(int i = 1; i < 100; i++) {
+		for(int i = 1; i < 100; i += 50) {
 			addingWishesOneThreadInTransaction(i, 1000, "CompareAddingOneWishInTransaction.txt");
 			addingWishesOneThreadInTransaction(i, 1000, "CompareAddingOneWishSequential.txt");
 		}
