@@ -57,8 +57,6 @@ public class ReadCachingWritableRepository extends AbstractDelegatingWritableRep
 		return readCachingModel;
 	}
 	
-	// FIXME here---------------
-	
 	@Override
 	public Iterator<XID> iterator() {
 		return modelIds().iterator();
