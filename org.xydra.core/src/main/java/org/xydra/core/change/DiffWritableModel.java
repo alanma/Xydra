@@ -352,7 +352,7 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 			builder.addCommand(command);
 		}
 		if(builder.isEmpty()) {
-			log.info("No command in txn for model '" + this.getID() + "'");
+			log.debug("No command in txn for model '" + this.getID() + "'");
 			return null;
 		}
 		XTransaction txn = builder.build();

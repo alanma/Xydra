@@ -151,6 +151,27 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 			return AbstractDelegatingWritableModel.this.object_removeField(this.objectId, fieldId);
 		}
 		
+		@Override
+		public String toString() {
+			StringBuffer buf = new StringBuffer();
+			buf.append("XObject '").append(this.getAddress().toString()).append("' <br/>\n");
+			if(!this.isEmpty()) {
+				for(XID fieldId : this) {
+					buf.append("* '").append(fieldId.toString()).append("' = ");
+					XWritableField field = this.getField(fieldId);
+					if(field == null) {
+						buf.append("NULL");
+					} else {
+						String value = field.getValue() == null ? "null" : field.getValue()
+						        .toString();
+						buf.append("'").append(value).append("'");
+					}
+					buf.append(" <br/>\n");
+				}
+			}
+			return buf.toString();
+		}
+		
 	}
 	
 	public abstract XWritableObject createObject(XID objectId);

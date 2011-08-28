@@ -1,6 +1,7 @@
 package org.xydra.core.change;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -13,11 +14,18 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
 
+/**
+ * A read-caching repository.
+ * 
+ * @author xamde
+ */
 public class ReadCachingWritableRepository extends AbstractDelegatingWritableRepository {
 	
 	private static final Logger log = LoggerFactory.getLogger(ReadCachingWritableRepository.class);
 	
 	private boolean prefetchModels;
+	
+	private boolean knowsAllModelsIds = false;
 	
 	/**
 	 * @param baseRepository ..
@@ -29,15 +37,27 @@ public class ReadCachingWritableRepository extends AbstractDelegatingWritableRep
 		this.prefetchModels = prefetchModels;
 	}
 	
+	protected Set<XID> knownExistingModelIds = new HashSet<XID>();
+	
+	protected Set<XID> knownNonExistingModelIds = new HashSet<XID>();
+	
 	protected Map<XID,ReadCachingWritableModel> map = new HashMap<XID,ReadCachingWritableModel>();
 	
 	@Override
 	public XWritableModel createModel(XID modelId) {
-		XWritableModel baseModel = this.baseRepository.createModel(modelId);
-		ReadCachingWritableModel readCachingModel = new ReadCachingWritableModel(baseModel, true);
-		this.map.put(modelId, readCachingModel);
+		ReadCachingWritableModel readCachingModel = this.map.get(modelId);
+		if(readCachingModel == null) {
+			// we never read it => created it & cache it
+			XWritableModel baseModel = this.baseRepository.createModel(modelId);
+			readCachingModel = new ReadCachingWritableModel(baseModel, true);
+			this.map.put(modelId, readCachingModel);
+			this.knownExistingModelIds.add(modelId);
+			this.knownNonExistingModelIds.remove(modelId);
+		}
 		return readCachingModel;
 	}
+	
+	// FIXME here---------------
 	
 	@Override
 	public Iterator<XID> iterator() {
@@ -45,9 +65,12 @@ public class ReadCachingWritableRepository extends AbstractDelegatingWritableRep
 	}
 	
 	private Set<XID> modelIds() {
-		Set<XID> set = IndexUtils.toSet(this.map.keySet().iterator());
-		set.addAll(IndexUtils.toSet(this.baseRepository.iterator()));
-		return set;
+		if(!this.knowsAllModelsIds) {
+			this.knownExistingModelIds = IndexUtils.toSet(this.map.keySet().iterator());
+			this.knownExistingModelIds.addAll(IndexUtils.toSet(this.baseRepository.iterator()));
+			this.knowsAllModelsIds = true;
+		}
+		return this.knownExistingModelIds;
 	}
 	
 	@Override
@@ -64,6 +87,11 @@ public class ReadCachingWritableRepository extends AbstractDelegatingWritableRep
 	public XWritableModel getModel(XID modelId) {
 		XWritableModel model = this.map.get(modelId);
 		if(model == null) {
+			/* prevent asking base again for models that simply don't exists */
+			if(this.knownNonExistingModelIds.contains(model)) {
+				return null;
+			}
+			/* ask base */
 			model = this.baseRepository.getModel(modelId);
 			if(model != null) {
 				log.info("Model '" + modelId + "' not found in cache, but in base.");
@@ -72,6 +100,7 @@ public class ReadCachingWritableRepository extends AbstractDelegatingWritableRep
 				this.map.put(modelId, cacheModel);
 				return cacheModel;
 			} else {
+				this.knownNonExistingModelIds.add(modelId);
 				log.info("Model '" + modelId + "' not found in cache & not in base.");
 			}
 		}
@@ -80,6 +109,8 @@ public class ReadCachingWritableRepository extends AbstractDelegatingWritableRep
 	
 	@Override
 	public boolean removeModel(XID modelId) {
+		this.knownExistingModelIds.remove(modelId);
+		this.knownNonExistingModelIds.add(modelId);
 		return this.map.remove(modelId) != null | this.baseRepository.removeModel(modelId);
 	}
 	
