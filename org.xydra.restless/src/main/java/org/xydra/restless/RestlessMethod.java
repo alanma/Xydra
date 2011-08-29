@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -113,6 +114,8 @@ public class RestlessMethod {
 			
 			int boundNamedParameterNumber = 0;
 			boolean hasHttpServletResponseParameter = false;
+			final String uniqueRequestId = reuseOrCeateUniqueRequestIdentifier(urlParameter,
+			        cookieMap);
 			for(Class<?> requiredParamType : method.getParameterTypes()) {
 				
 				// try to fill each parameter
@@ -138,6 +141,10 @@ public class RestlessMethod {
 						
 						public HttpServletRequest getRequest() {
 							return req;
+						}
+						
+						public String getRequestIdentifier() {
+							return uniqueRequestId;
 						}
 					};
 					javaMethodArgs.add(restlessContext);
@@ -272,6 +279,11 @@ public class RestlessMethod {
 						public HttpServletRequest getRequest() {
 							return req;
 						}
+						
+						public String getRequestIdentifier() {
+							return uniqueRequestId;
+						}
+						
 					};
 					
 					boolean handled = false;
@@ -446,4 +458,26 @@ public class RestlessMethod {
 		}
 	}
 	
+	public static String createUniqueRequestIdentifier() {
+		return UUID.randomUUID().toString();
+	}
+	
+	/**
+	 * Note: POST-parameters are ignored.
+	 * 
+	 * @param urlParameter
+	 * @param cookieMap
+	 * @return an existing request id found in URL parameters or cookies.
+	 */
+	private String reuseOrCeateUniqueRequestIdentifier(Map<String,String> urlParameter,
+	        Map<String,String> cookieMap) {
+		String requestId = urlParameter.get(IRestlessContext.PARAM_REQUEST_ID);
+		if(requestId == null) {
+			requestId = cookieMap.get(IRestlessContext.PARAM_REQUEST_ID);
+		}
+		if(requestId == null) {
+			requestId = createUniqueRequestIdentifier();
+		}
+		return requestId;
+	}
 }
