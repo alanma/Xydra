@@ -118,7 +118,6 @@ public class GaeConfigurationResource {
 		w.flush();
 		// first extract validUtc
 		String validUntilUtcStr = params.get(GaeConfiguration.PROP_VALID_UTC);
-		params.remove(GaeConfiguration.PROP_VALID_UTC);
 		
 		Map<String,String> changeMap = XydraConfigUtils.getChanges(gaeConf.map(), params);
 		boolean changes = false;
@@ -210,9 +209,9 @@ public class GaeConfigurationResource {
 		w.write(", value = <input type='text' name='__protoValue' value='' /><br />");
 		
 		long now = System.currentTimeMillis();
-		long in1Minute = now + (60 * 60000);
-		long in1Hour = now + (60 * 60000);
-		long in1Day = now + (24 * 60 * 60000);
+		long in1Minute = now + (60 * 1000);
+		long in1Hour = now + (60 * 60 * 1000);
+		long in1Day = now + (24 * 60 * 60 * 1000);
 		w.write("Valid for "
 
 		+ "<input type='radio' name='" + GaeConfiguration.PROP_VALID_UTC + "' value='" + in1Minute
