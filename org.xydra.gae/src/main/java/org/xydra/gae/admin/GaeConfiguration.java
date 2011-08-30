@@ -5,8 +5,6 @@ import java.util.Map;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.store.XydraRuntime;
-import org.xydra.store.impl.gae.GaeAssert;
 import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.impl.gae.GaeUtils;
 
@@ -16,11 +14,19 @@ import com.google.appengine.api.datastore.KeyFactory;
 
 
 /**
+ * Configuration data for all GAE application instances.
+ * 
  * A simple map-like configuration object that can be put in datastore and
- * memcache. Has a 'time to live' to minimize data store hits.
+ * memcache. Has a 'time to live' to minimise data store hits.
+ * 
+ * This config information can be manipulated via the
+ * {@link GaeConfigurationResource}.
+ * 
+ * It is the responsibility of each instance to periodically call <code>
+ * GaeConfigurationManager.getCurrentConfiguration().applyIfNecessary();
+ * </code>
  * 
  * @author xamde
- * 
  */
 public class GaeConfiguration {
 	
@@ -28,25 +34,9 @@ public class GaeConfiguration {
 	
 	public static final String PROP_VALID_UTC = "validUntilUTC";
 	
-	public static final String PROP_ASSERT = "assert";
-	
-	public static final String PROP_USEMEMCACHE = "usememcache";
-	
 	private static final long serialVersionUID = 1L;
+	
 	private static final Key KEY_CONF = KeyFactory.createKey("XCONF", "GaeConfig");
-	
-	/** first 60 seconds after boot this config is valid */
-	public static final GaeConfiguration DEFAULT = GaeConfiguration.createWithLifetime(6 * 1000);
-	
-	public static final long CONFIG_APPLY_INTERVAL = 45 * 1000;
-	
-	static {
-		DEFAULT.map().put(GaeConfiguration.PROP_ASSERT, "false");
-		DEFAULT.map().put(GaeConfiguration.PROP_USEMEMCACHE, "true");
-		// no PROP_CLEARMEMCACHE_NOW
-		DEFAULT.map().put(XydraRuntime.PROP_MEMCACHESTATS, "false");
-		DEFAULT.map().put(XydraRuntime.PROP_PERSISTENCESTATS, "false");
-	}
 	
 	/** Internal state */
 	private Map<String,String> map = new HashMap<String,String>();
@@ -62,23 +52,6 @@ public class GaeConfiguration {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		GaeConfiguration conf = new GaeConfiguration();
 		conf.setValidUntilUTC(System.currentTimeMillis() + lifetimeInMs);
-		return conf;
-	}
-	
-	/**
-	 * Maybe found in memcache or data store. If coming from memcache and too
-	 * old, a fresh one is fetched from data store and put in memcache.
-	 * 
-	 * @return a valid {@link GaeConfiguration}.
-	 */
-	public static synchronized GaeConfiguration getInstance() {
-		GaeConfiguration conf = GaeConfiguration.load();
-		if(conf == null) {
-			/* no configuration set, using defaults */
-			conf = GaeConfiguration.DEFAULT;
-			store(conf);
-		}
-		assert conf != null;
 		return conf;
 	}
 	
@@ -99,15 +72,17 @@ public class GaeConfiguration {
 	}
 	
 	/**
-	 * Persist given {@link GaeConfiguration} in data store
-	 * 
-	 * @param conf to be stored.
+	 * Persist this {@link GaeConfiguration} in data store
 	 */
-	public static void store(GaeConfiguration conf) {
-		if(!conf.map.containsKey(PROP_VALID_UTC)) {
+	public void store() {
+		assertConsistetState();
+		GaeUtils.putEntityAsync(toEntity());
+	}
+	
+	public void assertConsistetState() {
+		if(!this.map.containsKey(PROP_VALID_UTC)) {
 			throw new IllegalStateException("Missing " + PROP_VALID_UTC);
 		}
-		GaeUtils.putEntityAsync(conf.toEntity());
 	}
 	
 	private Entity toEntity() {
@@ -120,7 +95,8 @@ public class GaeConfiguration {
 	}
 	
 	/**
-	 * @return {@link GaeConfiguration} from data store.
+	 * @return {@link GaeConfiguration} from data store. It might be out of
+	 *         date.
 	 */
 	public static GaeConfiguration load() {
 		Entity entity = GaeUtils.getEntity(KEY_CONF);
@@ -128,27 +104,27 @@ public class GaeConfiguration {
 			log.warn("No gaeConfiguration in datastore.");
 			return null;
 		}
+		// else:
 		GaeConfiguration conf = new GaeConfiguration();
 		for(String key : entity.getProperties().keySet()) {
 			String value = (String)entity.getProperty(key);
 			conf.map.put(key, value);
 		}
-		if(!conf.map.containsKey(PROP_VALID_UTC)) {
-			throw new IllegalStateException("Missing " + PROP_VALID_UTC);
-		}
+		conf.assertConsistetState();
 		conf.validUntilUTC = Long.parseLong(conf.map.get(PROP_VALID_UTC));
-		if(!conf.isStillValid()) {
-			log.warn("Freshly loaded GaeConfiguration is already out of date. Setting time to live to 60 seconds");
-			conf.setValidUntilUTC(System.currentTimeMillis() + 60 * 1000);
-			store(conf);
-		}
 		return conf;
 	}
 	
+	/**
+	 * @return how many ms is this config still valid
+	 */
 	public long getTimeToLive() {
 		return this.validUntilUTC - System.currentTimeMillis();
 	}
 	
+	/**
+	 * @return UTC time-point when this config expires
+	 */
 	public long getValidUntilUTC() {
 		return this.validUntilUTC;
 	}
@@ -172,46 +148,7 @@ public class GaeConfiguration {
 		return Boolean.parseBoolean(value);
 	}
 	
-	/**
-	 * Force a running instance to apply the current configuration to
-	 * XydraRuntime.
-	 * 
-	 * This method should be called in every servlet handler. More precisely
-	 * call <code>
-	 * GaeConfigurationResource.getCurrentConfiguration().applyIfNecessary();
-	 * </code>
-	 * 
-	 * The current configuration is distributed via data store, memcache and
-	 * timeToLive. It it applied only by means of this method.
-	 */
-	public void applyIfNecessary() {
-		long ago = System.currentTimeMillis() - XydraRuntime.getLastTimeInitialisedAt();
-		if(ago >= CONFIG_APPLY_INTERVAL) {
-			apply();
-		}
-	}
-	
-	public void apply() {
-		// assertions
-		boolean gaeAssert = getAsBoolean(PROP_ASSERT);
-		GaeAssert.setEnabled(gaeAssert);
-		// memcache
-		boolean usememcache = getAsBoolean(PROP_USEMEMCACHE);
-		GaeUtils.setUseMemCache(usememcache);
-		// memcache stats
-		boolean memcachestats = getAsBoolean(XydraRuntime.PROP_MEMCACHESTATS);
-		setBooleanRuntimeConfigProperty(XydraRuntime.PROP_MEMCACHESTATS, memcachestats);
-		// memcache stats
-		boolean persistencestats = getAsBoolean(XydraRuntime.PROP_PERSISTENCESTATS);
-		setBooleanRuntimeConfigProperty(XydraRuntime.PROP_PERSISTENCESTATS, persistencestats);
-	}
-	
-	private static void setBooleanRuntimeConfigProperty(String property, boolean newValue) {
-		String s = XydraRuntime.getConfigMap().get(property);
-		boolean currentValue = Boolean.parseBoolean(s);
-		if(newValue != currentValue) {
-			XydraRuntime.getConfigMap().put(property, newValue + "");
-			XydraRuntime.forceReInitialisation();
-		}
+	public void setLifetime(long ms) {
+		setValidUntilUTC(System.currentTimeMillis() + ms);
 	}
 }

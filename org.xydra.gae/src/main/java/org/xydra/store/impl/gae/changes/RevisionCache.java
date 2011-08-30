@@ -103,7 +103,7 @@ class RevisionCache {
 		
 		/** Local VM cache of the "current" revision number. */
 		private long value;
-		/** Age of Local VM cache of the "current" revision number. */
+		/** Creation date of Local VM cache of the "current" revision number. */
 		private long time;
 		
 		/**
@@ -169,6 +169,11 @@ class RevisionCache {
 			if(writeMemcache) {
 				RevisionCache.this.writeToMemcache();
 			}
+		}
+		
+		public void clear() {
+			this.value = 0;
+			this.time = 0;
 		}
 	}
 	
@@ -285,6 +290,12 @@ class RevisionCache {
 	 */
 	protected void setLastTaken(long l) {
 		this.lastTaken.setLocalValue(l);
+	}
+	
+	public void clear() {
+		this.committed.clear();
+		this.current.clear();
+		this.lastTaken.clear();
 	}
 	
 }

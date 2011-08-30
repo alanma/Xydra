@@ -33,6 +33,7 @@ import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.GetEventsRequest;
+import org.xydra.store.XydraRuntime;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.gae.GaeOperation;
 import org.xydra.store.impl.gae.GaeUtils;
@@ -119,7 +120,7 @@ import com.google.appengine.api.datastore.Transaction;
  * @author dscharrer
  * 
  */
-public class GaeChangesService {
+public class GaeChangesService implements org.xydra.store.XydraRuntime.Listener {
 	
 	private static final Logger log = LoggerFactory.getLogger(GaeChangesService.class);
 	
@@ -146,6 +147,11 @@ public class GaeChangesService {
 	public GaeChangesService(XAddress modelAddr) {
 		this.modelAddr = modelAddr;
 		this.revCache = new RevisionCache(modelAddr);
+		/*
+		 * register for configuration change events, so that we can flush our
+		 * caches if requested
+		 */
+		XydraRuntime.addListener(this);
 	}
 	
 	/**
@@ -954,6 +960,18 @@ public class GaeChangesService {
 		}
 		
 		return GaeEvents.getValue(this.modelAddr, rev, transindex);
+	}
+	
+	@Override
+	public void onXydraRuntimeInit() {
+		log.info("onXydraRuntimeInit");
+		resetAllCaches();
+	}
+	
+	public void resetAllCaches() {
+		log.info("Clearing local vm cache for changes service " + this.modelAddr);
+		this.committedChangeCache.clear();
+		this.revCache.clear();
 	}
 	
 }
