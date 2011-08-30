@@ -1,7 +1,9 @@
 package org.xydra.store;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
@@ -50,6 +52,8 @@ public class XydraRuntime {
 	/**
 	 * To enable or disable memcache completely in the {@link XydraPersistence}
 	 * instances.
+	 * 
+	 * FIXME clarify in docu differences to GaeConfigSetings.USE_MEMCACHE
 	 */
 	public static final String PROP_USEMEMCACHE = "useMemcacheInPersistenceImpl";
 	
@@ -135,7 +139,7 @@ public class XydraRuntime {
 					platformRuntime = xPlatformInstance;
 					platformInitialised = true;
 					log.info("Using default platform "
-					        + xPlatformInstance.getClass().getCanonicalName());
+					        + platformRuntime.getClass().getCanonicalName());
 				} catch(ClassCastException e) {
 					log.warn("Found the class with name " + PLATFORM_CLASS
 					        + " but it is not implementing " + XydraPlatformRuntime.class, e);
@@ -212,6 +216,7 @@ public class XydraRuntime {
 		memcacheInstance = null;
 		persistenceInstanceCache.clear();
 		platformInitialised = false;
+		fireOnInitialisaion();
 	}
 	
 	public static long getLastTimeInitialisedAt() {
@@ -228,6 +233,25 @@ public class XydraRuntime {
 	 */
 	public static String getInstanceId() {
 		return INSTANCE_ID;
+	}
+	
+	public static interface Listener {
+		/**
+		 * Called whenever the XydraRuntime is initialised
+		 */
+		void onXydraRuntimeInit();
+	}
+	
+	private static transient Set<Listener> listeners = new HashSet<Listener>();
+	
+	public static void addListener(Listener listener) {
+		listeners.add(listener);
+	}
+	
+	private static void fireOnInitialisaion() {
+		for(Listener l : listeners) {
+			l.onXydraRuntimeInit();
+		}
 	}
 	
 }
