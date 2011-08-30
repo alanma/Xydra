@@ -29,6 +29,8 @@ public class GaePlatformRuntime implements XydraPlatformRuntime {
 	
 	static {
 		log.info("Configuring default gae conf");
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		
 		/* Set default values for GaeConf */
 		GaeConfiguration defaultConf = GaeConfigurationManager.getDefaultConfiguration();
 		defaultConf.map().put(GaeConfigSettings.PROP_ASSERT, "");
