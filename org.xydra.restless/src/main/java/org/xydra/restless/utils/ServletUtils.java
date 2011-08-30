@@ -277,12 +277,13 @@ public class ServletUtils {
 		while(en.hasMoreElements()) {
 			String name = (String)en.nextElement();
 			String[] values = req.getParameterValues(name);
-			if(values.length > 1) {
-				throw new IllegalStateException("param '" + name
-				        + "' has more than one value, namely " + values);
-			}
 			String value = null;
 			if(values.length > 0) {
+				if(values.length > 1) {
+					log.warn("param '" + name + "' has more than one value, namely " + values
+					        + ". Using last one.");
+					value = values[values.length - 1];
+				}
 				value = values[0];
 			}
 			map.put(urldecode(name), urldecode(value));

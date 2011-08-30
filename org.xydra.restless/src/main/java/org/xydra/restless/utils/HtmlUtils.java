@@ -15,11 +15,9 @@ import javax.servlet.http.HttpServletResponse;
 public class HtmlUtils {
 	
 	public static void writeHtmlHeaderOpenBody(Writer w, String title) throws IOException {
-		w.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"\r\n"
-		        + "		          \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n"
+		w.write("<!DOCTYPE html>\r\n"
 
-		        + "<html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n" + "<head>\r\n" + "<title>"
-		        + title + "</title>\r\n"
+		+ "<html>\r\n" + "<head>\r\n" + "<title>" + title + "</title>\r\n"
 		        + "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\r\n"
 		        + "</head>\r\n"
 
