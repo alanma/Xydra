@@ -56,6 +56,7 @@ public class GaeConfiguration {
 	}
 	
 	private GaeConfiguration() {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 	}
 	
 	public void setValidUntilUTC(long validUntilUTC) {
@@ -111,7 +112,12 @@ public class GaeConfiguration {
 			conf.map.put(key, value);
 		}
 		conf.assertConsistetState();
-		conf.validUntilUTC = Long.parseLong(conf.map.get(PROP_VALID_UTC));
+		try {
+			conf.validUntilUTC = Long.parseLong(conf.map.get(PROP_VALID_UTC));
+		} catch(NumberFormatException e) {
+			log.warn("Bad config in store, setting time to live to 1 minute");
+			conf.validUntilUTC = System.currentTimeMillis() + (60 * 1000);
+		}
 		return conf;
 	}
 	
