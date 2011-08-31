@@ -14,6 +14,9 @@ public class GaeAssert {
 	
 	private static final Logger log = LoggerFactory.getLogger(GaeAssert.class);
 	
+	/**
+	 * Runtime-config setting to enable or disable assertion on this instance
+	 */
 	private static boolean enabled = false;
 	
 	public static void enable() {
