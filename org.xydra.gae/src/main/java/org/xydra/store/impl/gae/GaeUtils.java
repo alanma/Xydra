@@ -127,7 +127,8 @@ public class GaeUtils {
 			// try first to get from memcache
 			cachedEntity = (Entity)XydraRuntime.getMemcache().get(key);
 			if(cachedEntity != null) {
-				log.debug("Getting entity " + key.toString() + " from MemCache");
+				log.debug("Getting entity " + key.toString() + " from MemCache "
+				        + XydraRuntime.getMemcache().getClass().getCanonicalName());
 				if(!cachedEntity.equals(NULL_ENTITY)) {
 					return cachedEntity;
 				}
@@ -190,7 +191,8 @@ public class GaeUtils {
 			// try first to get from memcache
 			Entity cachedEntity = (Entity)XydraRuntime.getMemcache().get(key);
 			if(cachedEntity != null) {
-				log.debug("Getting entity " + key.toString() + " from MemCache");
+				log.debug("Getting entity " + key.toString() + " from MemCache "
+				        + XydraRuntime.getMemcache().getClass().getCanonicalName());
 				if(cachedEntity.equals(NULL_ENTITY)) {
 					log.debug("--> null");
 					return new AsyncEntity(null);
@@ -219,7 +221,8 @@ public class GaeUtils {
 			// try first to get from memcache
 			Entity memcachedEntity = (Entity)XydraRuntime.getMemcache().get(key);
 			if(memcachedEntity != null) {
-				log.debug("Getting entity " + key.toString() + " from MemCache");
+				log.debug("Getting entity " + key.toString() + " from MemCache "
+				        + XydraRuntime.getMemcache().getClass().getCanonicalName());
 				if(memcachedEntity.equals(NULL_ENTITY)) {
 					log.debug("--> null");
 					return null;

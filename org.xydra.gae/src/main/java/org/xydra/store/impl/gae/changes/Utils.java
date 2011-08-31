@@ -31,8 +31,8 @@ public class Utils {
 	 * of a key 'foo' we query for all items in the range
 	 * 'foo'+lowest_possible_key until 'foo'+highest_possible_key.
 	 * 
-	 * Implementation note: Using a High Redundancy data store on AppEngine,
-	 * this method may return and out-dated children list.
+	 * TODO Implementation note: Using a High Redundancy data store on
+	 * AppEngine, this method may return and out-dated children list.
 	 * 
 	 * @param address a repository, model or object address. Fields have no
 	 *            children.
