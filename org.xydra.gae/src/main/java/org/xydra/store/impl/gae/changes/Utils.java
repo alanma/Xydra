@@ -5,6 +5,8 @@ import java.util.Set;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.store.impl.gae.GaeOperation;
 import org.xydra.store.impl.gae.GaeUtils;
 
@@ -16,12 +18,14 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 
 
 /**
- * Constains some static algorithms
+ * Contains some static algorithms
  * 
  * @author dscharrer
  * @author xamde
  */
 public class Utils {
+	
+	private static final Logger log = LoggerFactory.getLogger(Utils.class);
 	
 	private static final String PROP_KEY = "__key__";
 	
@@ -70,6 +74,9 @@ public class Utils {
 			assert address.equals(childAddr.getParent());
 			childIds.add(getEntityId(childAddr));
 		}
+		
+		log.trace(address.toURI() + " has " + childIds.size() + " found by query");
+		
 		return childIds;
 	}
 	
