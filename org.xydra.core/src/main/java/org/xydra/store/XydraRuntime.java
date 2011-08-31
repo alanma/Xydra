@@ -132,6 +132,7 @@ public class XydraRuntime {
 		// try to load dynamically
 		try {
 			Class<?> platformClass = Class.forName(PLATFORM_CLASS);
+			log.info("Instantiated. Now casting...");
 			try {
 				Object platformInstance = platformClass.newInstance();
 				try {
