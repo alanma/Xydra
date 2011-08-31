@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.xydra.gae.AboutAppEngine;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.store.IMemCache;
 
 import com.google.appengine.api.memcache.Expiration;
@@ -12,7 +15,6 @@ import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheService.SetPolicy;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.api.memcache.Stats;
-import com.google.appengine.api.utils.SystemProperty;
 
 
 /**
@@ -22,18 +24,18 @@ import com.google.appengine.api.utils.SystemProperty;
  */
 public class GaeLowLevelMemCache implements IMemCache {
 	
+	private static final Logger log = LoggerFactory.getLogger(GaeLowLevelMemCache.class);
+	
 	private MemcacheService memcacheService;
 	/* used to prefix all keys */
+	@SuppressWarnings("unused")
 	private String appVersion;
 	
 	@GaeOperation()
 	public GaeLowLevelMemCache() {
 		this.memcacheService = MemcacheServiceFactory.getMemcacheService();
 		// format: user-chosen-versionId-from-appengine-xml '.' timestamp
-		this.appVersion = SystemProperty.applicationVersion.get();
-		if(this.appVersion == null) {
-			this.appVersion = "devmode";
-		}
+		this.appVersion = AboutAppEngine.getVersion();
 	}
 	
 	@Override
@@ -105,7 +107,10 @@ public class GaeLowLevelMemCache implements IMemCache {
 	@Override
 	@GaeOperation(memcacheRead = true)
 	public Object get(Object key) {
-		return this.memcacheService.get(keyUniqueForCurrentAppVersion(key));
+		Object o = this.memcacheService.get(keyUniqueForCurrentAppVersion(key));
+		log.trace("get key '" + key + "' => "
+		        + (o == null ? "null" : o.getClass().getCanonicalName() + "=" + o.toString()));
+		return o;
 	}
 	
 	@Override
