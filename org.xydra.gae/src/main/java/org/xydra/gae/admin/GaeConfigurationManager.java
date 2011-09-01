@@ -75,7 +75,8 @@ public class GaeConfigurationManager {
 		} else {
 			log.info("Loaded config from backend.");
 			if(!conf.isStillValid()) {
-				log.info("Config was no longer valid. Extending lifetime for 1 minute. Persisting that.");
+				log
+				        .info("Config was no longer valid. Extending lifetime for 1 minute. Persisting that.");
 				conf.setLifetime(ONE_MINUTE);
 				conf.store();
 			}

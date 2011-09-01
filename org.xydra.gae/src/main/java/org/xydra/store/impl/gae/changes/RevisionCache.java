@@ -62,6 +62,9 @@ class RevisionCache {
 		if(!USE_MEMCACHE)
 			return;
 		
+		@SuppressWarnings("all")
+		boolean deadCode = USE_MEMCACHE;
+		
 		long[] entity = new long[] { this.current.getValue(false, false),
 		        this.committed.getValue(false, false), this.lastTaken.getValue(false, false) };
 		IMemCache cache = XydraRuntime.getMemcache();
@@ -78,8 +81,12 @@ class RevisionCache {
 	
 	@SuppressWarnings("unused")
 	private void loadFromMemcache() {
+		
 		if(!USE_MEMCACHE)
 			return;
+		
+		@SuppressWarnings("all")
+		boolean deadCode = USE_MEMCACHE;
 		
 		IMemCache cache = XydraRuntime.getMemcache();
 		long[] entity = (long[])cache.get(this.memcacheKey);

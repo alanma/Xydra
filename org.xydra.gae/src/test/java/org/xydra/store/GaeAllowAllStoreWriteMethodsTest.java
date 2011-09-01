@@ -22,6 +22,7 @@ public class GaeAllowAllStoreWriteMethodsTest extends AbstractAllowAllStoreWrite
 		return X.getCommandFactory();
 	}
 	
+	@Override
 	@Before
 	public void setUp() {
 		GaeTestfixer.enable();

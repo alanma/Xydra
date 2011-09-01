@@ -12,9 +12,9 @@ import org.xydra.store.IMemCache;
 
 import com.google.appengine.api.memcache.Expiration;
 import com.google.appengine.api.memcache.MemcacheService;
-import com.google.appengine.api.memcache.MemcacheService.SetPolicy;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.api.memcache.Stats;
+import com.google.appengine.api.memcache.MemcacheService.SetPolicy;
 
 
 /**
@@ -34,7 +34,6 @@ public class GaeLowLevelMemCache implements IMemCache {
 	@GaeOperation()
 	public GaeLowLevelMemCache() {
 		this.memcacheService = MemcacheServiceFactory.getMemcacheService();
-		// format: user-chosen-versionId-from-appengine-xml '.' timestamp
 		this.appVersion = AboutAppEngine.getVersion();
 	}
 	
@@ -172,8 +171,8 @@ public class GaeLowLevelMemCache implements IMemCache {
 	@Override
 	// Expires in 10 days. There is no default.
 	public void putIfValueIsNull(Object key, Object entityToBeCached) {
-		this.memcacheService.put(key, entityToBeCached,
-		        Expiration.byDeltaSeconds(60 * 60 * 24 * 10), SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
+		this.memcacheService.put(key, entityToBeCached, Expiration
+		        .byDeltaSeconds(60 * 60 * 24 * 10), SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
 	}
 	
 }

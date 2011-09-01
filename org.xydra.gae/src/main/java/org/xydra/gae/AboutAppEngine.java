@@ -36,4 +36,12 @@ public class AboutAppEngine {
 		return inProduction() || inDevelopment();
 	}
 	
+	/**
+	 * format: user-chosen-versionId-from-appengine-xml '.' timestamp
+	 */
+	public static String getVersion() {
+		
+		return SystemProperty.applicationVersion.get();
+	}
+	
 }
