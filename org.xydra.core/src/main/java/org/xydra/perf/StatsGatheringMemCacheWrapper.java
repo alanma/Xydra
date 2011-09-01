@@ -126,10 +126,12 @@ public class StatsGatheringMemCacheWrapper implements IMemCache {
 		return this.base.entrySet();
 	}
 	
+	@Override
 	public boolean equals(Object o) {
 		return this.base.equals(o);
 	}
 	
+	@Override
 	public int hashCode() {
 		return this.base.hashCode();
 	}

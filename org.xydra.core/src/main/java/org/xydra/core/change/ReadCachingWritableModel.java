@@ -216,10 +216,12 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 		return this.idsAsSet().isEmpty();
 	}
 	
+	@Override
 	public Iterator<XID> iterator() {
 		return this.idsAsSet().iterator();
 	}
 	
+	@Override
 	protected XWritableField object_createField(XID objectId, XID fieldId) {
 		assert objectId != null;
 		assert fieldId != null;
@@ -231,6 +233,7 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 		return new WrappedField(objectId, fieldId);
 	}
 	
+	@Override
 	protected boolean object_hasField(XID objectId, XID fieldId) {
 		assert objectId != null;
 		assert fieldId != null;
@@ -252,16 +255,19 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 		}
 	}
 	
+	@Override
 	protected boolean object_isEmpty(XID objectId) {
 		assert objectId != null;
 		return object_idsAsSet(objectId).isEmpty();
 	}
 	
+	@Override
 	protected Iterator<XID> object_iterator(XID objectId) {
 		assert objectId != null;
 		return object_idsAsSet(objectId).iterator();
 	}
 	
+	@Override
 	protected boolean object_removeField(XID objectId, XID fieldId) {
 		assert objectId != null;
 		assert fieldId != null;
@@ -304,6 +310,7 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 		return set;
 	}
 	
+	@Override
 	public boolean removeObject(XID objectId) {
 		assert objectId != null;
 		// deIndex

@@ -19,10 +19,12 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 	private ReadCachingWritableRepository readRepo;
 	private DiffWritableRepository diffRepo;
 	
+	@Override
 	public XAddress getAddress() {
 		return this.diffRepo.getAddress();
 	}
 	
+	@Override
 	public XID getID() {
 		return this.diffRepo.getID();
 	}

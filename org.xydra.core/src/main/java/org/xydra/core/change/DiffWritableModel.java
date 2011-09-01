@@ -169,18 +169,20 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	}
 	
 	protected Set<XID> idsAsSet() {
-		return IndexUtils.diff(this.base.iterator(), this.added.key1Iterator(),
-		        this.removed.key1Iterator());
+		return IndexUtils.diff(this.base.iterator(), this.added.key1Iterator(), this.removed
+		        .key1Iterator());
 	}
 	
 	public boolean isEmpty() {
 		return this.idsAsSet().isEmpty();
 	}
 	
+	@Override
 	public Iterator<XID> iterator() {
 		return this.idsAsSet().iterator();
 	}
 	
+	@Override
 	protected XWritableField object_createField(XID objectId, XID fieldId) {
 		assert objectId != null;
 		assert fieldId != null;
@@ -192,6 +194,7 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 		return new WrappedField(objectId, fieldId);
 	}
 	
+	@Override
 	protected boolean object_hasField(XID objectId, XID fieldId) {
 		assert objectId != null;
 		assert fieldId != null;
@@ -207,16 +210,19 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 		return this.base.hasObject(objectId) && this.base.getObject(objectId).hasField(fieldId);
 	}
 	
+	@Override
 	protected boolean object_isEmpty(XID objectId) {
 		assert objectId != null;
 		return object_idsAsSet(objectId).isEmpty();
 	}
 	
+	@Override
 	protected Iterator<XID> object_iterator(XID objectId) {
 		assert objectId != null;
 		return object_idsAsSet(objectId).iterator();
 	}
 	
+	@Override
 	protected boolean object_removeField(XID objectId, XID fieldId) {
 		assert objectId != null;
 		assert fieldId != null;
@@ -256,6 +262,7 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 		return set;
 	}
 	
+	@Override
 	public boolean removeObject(XID objectId) {
 		assert objectId != null;
 		if(this.added.containsKey(new EqualsConstraint<XID>(objectId), new Wildcard<XID>())) {
@@ -334,8 +341,8 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 		Collections.sort(list, new Comparator<XAtomicCommand>() {
 			@Override
 			public int compare(XAtomicCommand a, XAtomicCommand b) {
-				return b.getChangedEntity().getAddressedType()
-				        .compareTo(a.getChangedEntity().getAddressedType());
+				return b.getChangedEntity().getAddressedType().compareTo(
+				        a.getChangedEntity().getAddressedType());
 			}
 		});
 		
