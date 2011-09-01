@@ -213,14 +213,23 @@ public class RemoteBenchmark {
 	
 	@Test
 	public void testCompareAddingOneWishTransactionAndSequential() {
-		for(int i = 1; i < 100; i += 50) {
-			addingWishesOneThreadInTransaction(i, 1000, "CompareAddingOneWishInTransaction.txt");
-			addingWishesOneThreadInTransaction(i, 1000, "CompareAddingOneWishSequential.txt");
+		for(int i = 50; i <= 100; i += 10) {
+			System.out.println(i);
+			addingWishesOneThreadInTransaction(i, 10, this.path
+			        + "CompareAddingOneWishInTransaction" + i + ".txt");
+			addingWishesOneThreadSequentially(i, 10, this.path + "CompareAddingOneWishSequential"
+			        + i + ".txt");
 		}
 	}
 	
 	public void addingWishesOneThreadInTransaction(int wishes, int operations, String filePath) {
 		String listStr = addList("/repo1");
+		
+		// in total 6 tries to create a list... if it doesn't work, this test
+		// fails
+		for(int i = 0; i < 5 & listStr == null; i++) {
+			listStr = addList("/repo1");
+		}
 		
 		int addExceptions = 0;
 		int clearExceptions = 0;
@@ -251,25 +260,21 @@ public class RemoteBenchmark {
 		avgTime = avgTime / successfulOperations;
 		
 		// Output Results in a simple CSV format
-		try {
-			BufferedWriter out = new BufferedWriter(new FileWriter(this.path
-			        + "BenchmarkAddingOneWishOneThread.txt", true));
-			out.write("#Operations:, " + operations + ", ");
-			out.write("#Successful Operations:, " + successfulOperations + ", ");
-			out.write("Average Time (ms):, " + avgTime + ", ");
-			out.write("#Operation Exceptions:, " + addExceptions + ", ");
-			out.write("#Other Exceptions:, " + clearExceptions);
-			out.write(lineSeparator);
-			
-			out.close();
-		} catch(IOException e) {
-			e.printStackTrace();
-		}
+		outputResults(filePath, operations, wishes, successfulOperations, avgTime, addExceptions,
+		        clearExceptions);
 		
 	}
 	
 	public void addingWishesOneThreadSequentially(int wishes, int operations, String filePath) {
 		String listStr = addList("/repo1");
+		
+		// in total 6 tries to create a list... if it doesn't work, this test
+		// fails
+		for(int i = 0; i < 5 & listStr == null; i++) {
+			listStr = addList("/repo1");
+		}
+		
+		assertNotNull(listStr);
 		
 		int addExceptions = 0;
 		int clearExceptions = 0;
@@ -279,7 +284,7 @@ public class RemoteBenchmark {
 		for(int i = 0; i < operations; i++) {
 			try {
 				long time = System.currentTimeMillis();
-				for(int j = 0; i < wishes; j++) {
+				for(int j = 0; j < wishes; j++) {
 					assertTrue(HttpUtils.makeGetRequest(this.absoluteUrl + listStr
 					        + "/add?wishes=1"));
 				}
@@ -303,28 +308,79 @@ public class RemoteBenchmark {
 		avgTime = avgTime / successfulOperations;
 		
 		// Output Results in a simple CSV format
+		outputResults(filePath, operations, wishes, successfulOperations, avgTime, addExceptions,
+		        clearExceptions);
+	}
+	
+	public void deletingWishesOneThreadInTransaction(int operations, String filePath) {
+		String listStr = addList("/repo1");
+		
+		// in total 6 tries to create a list... if it doesn't work, this test
+		// fails
+		for(int i = 0; i < 5 & listStr == null; i++) {
+			listStr = addList("/repo1");
+		}
+		
+		int addExceptions = 0;
+		int clearExceptions = 0;
+		int counter = 0;
+		
+		double avgTime = 0;
+		for(int i = 0; i < operations; i++) {
+			try {
+				String wishStr = addWishToEmptyList(this.absoluteUrl + listStr);
+				
+				long time = System.currentTimeMillis();
+				assertTrue(HttpUtils.makeGetRequest(this.absoluteUrl + listStr + wishStr
+				        + "/delete"));
+				time = System.currentTimeMillis() - time;
+				
+				avgTime += time;
+				counter++;
+			} catch(Exception e) {
+				addExceptions++;
+			}
+		}
+		
+		int successfulOperations = (operations - addExceptions);
+		avgTime = avgTime / successfulOperations;
+		
+		// Output Results in a simple CSV format
+		outputResults(filePath, operations, 1, successfulOperations, avgTime, addExceptions,
+		        clearExceptions);
+		
+	}
+	
+	// ----------------- Helper Methods ------------------------
+	
+	private void outputResults(String filePath, int operations, int wishes, int successfulOps,
+	        double avgTime, int opExceps, int otherExceps) {
+		// Output Results in a simple CSV format
 		try {
-			BufferedWriter out = new BufferedWriter(new FileWriter(this.path
-			        + "BenchmarkAddingOneWishOneThread.txt", true));
+			BufferedWriter out = new BufferedWriter(new FileWriter(filePath, true));
 			out.write("#Operations:, " + operations + ", ");
-			out.write("#Successful Operations:, " + successfulOperations + ", ");
+			out.write("#Wishes per Op.:, " + wishes + ", ");
+			out.write("#Successful Operations:, " + successfulOps + ", ");
 			out.write("Average Time (ms):, " + avgTime + ", ");
-			out.write("#Operation Exceptions:, " + addExceptions + ", ");
-			out.write("#Other Exceptions:, " + clearExceptions);
+			out.write("#Operation Exceptions:, " + opExceps + ", ");
+			out.write("#Other Exceptions:, " + otherExceps);
 			out.write(lineSeparator);
 			
 			out.close();
 		} catch(IOException e) {
 			e.printStackTrace();
 		}
-		
 	}
 	
-	// ----------------- Helper Methods ------------------------
-	
 	private String addList(String repoIdStr) {
-		String response = HttpUtils.getRequestAsStringResponse(this.absoluteUrl + "/xmas"
-		        + repoIdStr + "/add?lists=1&wishes=0");
+		String response = null;
+		try {
+			response = HttpUtils.getRequestAsStringResponse(this.absoluteUrl + "/xmas" + repoIdStr
+			        + "/add?lists=1&wishes=0");
+		} catch(Exception e) {
+			return null;
+		}
+		assertNotNull(response);
 		
 		String[] lines = response.split("\n");
 		
