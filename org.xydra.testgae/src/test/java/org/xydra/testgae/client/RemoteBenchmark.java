@@ -222,13 +222,42 @@ public class RemoteBenchmark {
 		}
 	}
 	
+	@Test
+	public void testCompareAddingOneWishInTransactionWithInitialWishes() {
+		for(int iterations = 0; iterations < 30; iterations++) {
+			System.out.println("Iterations #: " + iterations);
+			addingWishesOneThreadInTransaction(10, 10, 30, this.path
+			        + "CompareAddingOneWishInTransactionWithInitialWishes" + 30 + ".txt");
+			addingWishesOneThreadInTransaction(10, 10, 70, this.path
+			        + "CompareAddingOneWishInTransactionWithInitialWishes" + 70 + ".txt");
+			addingWishesOneThreadInTransaction(10, 10, 80, this.path
+			        + "CompareAddingOneWishInTransactionWithInitialWishes" + 80 + ".txt");
+			addingWishesOneThreadInTransaction(10, 10, 90, this.path
+			        + "CompareAddingOneWishInTransactionWithInitialWishes" + 90 + ".txt");
+			addingWishesOneThreadInTransaction(10, 10, 100, this.path
+			        + "CompareAddingOneWishInTransactionWithInitialWishes" + 100 + ".txt");
+			
+			// for(int i = 10; i <= 100; i += 10) {
+			// System.out.println(i);
+			// addingWishesOneThreadInTransaction(10, 10, i, this.path
+			// + "CompareAddingOneWishInTransactionWithInitialWishes" + i +
+			// ".txt");
+			// }
+		}
+	}
+	
 	public void addingWishesOneThreadInTransaction(int wishes, int operations, String filePath) {
-		String listStr = addList("/repo1");
+		addingWishesOneThreadInTransaction(wishes, operations, 0, filePath);
+	}
+	
+	public void addingWishesOneThreadInTransaction(int wishes, int operations, int initialWishes,
+	        String filePath) {
+		String listStr = addList("/repo1", initialWishes);
 		
 		// in total 6 tries to create a list... if it doesn't work, this test
 		// fails
 		for(int i = 0; i < 5 & listStr == null; i++) {
-			listStr = addList("/repo1");
+			listStr = addList("/repo1", initialWishes);
 		}
 		
 		int addExceptions = 0;
@@ -260,8 +289,8 @@ public class RemoteBenchmark {
 		avgTime = avgTime / successfulOperations;
 		
 		// Output Results in a simple CSV format
-		outputResults(filePath, operations, wishes, successfulOperations, avgTime, addExceptions,
-		        clearExceptions);
+		outputResults(filePath, initialWishes, operations, wishes, successfulOperations, avgTime,
+		        addExceptions, clearExceptions);
 		
 	}
 	
@@ -308,8 +337,8 @@ public class RemoteBenchmark {
 		avgTime = avgTime / successfulOperations;
 		
 		// Output Results in a simple CSV format
-		outputResults(filePath, operations, wishes, successfulOperations, avgTime, addExceptions,
-		        clearExceptions);
+		outputResults(filePath, 0, operations, wishes, successfulOperations, avgTime,
+		        addExceptions, clearExceptions);
 	}
 	
 	public void deletingWishesOneThreadInTransaction(int operations, String filePath) {
@@ -346,18 +375,19 @@ public class RemoteBenchmark {
 		avgTime = avgTime / successfulOperations;
 		
 		// Output Results in a simple CSV format
-		outputResults(filePath, operations, 1, successfulOperations, avgTime, addExceptions,
+		outputResults(filePath, 0, operations, 1, successfulOperations, avgTime, addExceptions,
 		        clearExceptions);
 		
 	}
 	
 	// ----------------- Helper Methods ------------------------
 	
-	private void outputResults(String filePath, int operations, int wishes, int successfulOps,
-	        double avgTime, int opExceps, int otherExceps) {
+	private void outputResults(String filePath, int initialWishes, int operations, int wishes,
+	        int successfulOps, double avgTime, int opExceps, int otherExceps) {
 		// Output Results in a simple CSV format
 		try {
 			BufferedWriter out = new BufferedWriter(new FileWriter(filePath, true));
+			out.write("#Initial Wishes:, " + initialWishes + ", ");
 			out.write("#Operations:, " + operations + ", ");
 			out.write("#Wishes per Op.:, " + wishes + ", ");
 			out.write("#Successful Operations:, " + successfulOps + ", ");
@@ -373,10 +403,14 @@ public class RemoteBenchmark {
 	}
 	
 	private String addList(String repoIdStr) {
+		return addList(repoIdStr, 0);
+	}
+	
+	private String addList(String repoIdStr, int initialWishes) {
 		String response = null;
 		try {
 			response = HttpUtils.getRequestAsStringResponse(this.absoluteUrl + "/xmas" + repoIdStr
-			        + "/add?lists=1&wishes=0");
+			        + "/add?lists=1&wishes=" + initialWishes);
 		} catch(Exception e) {
 			return null;
 		}
