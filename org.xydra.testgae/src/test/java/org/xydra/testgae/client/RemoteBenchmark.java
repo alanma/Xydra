@@ -212,6 +212,14 @@ public class RemoteBenchmark {
 	}
 	
 	@Test
+	public void testBenchmarkDeletingOneWishOneThread() {
+		for(int i = 0; i < 30; i++) {
+			System.out.println("Iteration #" + i);
+			deletingWishesOneThreadInTransaction(1000, "BenchmarkDeletingOneWishOneThread.txt");
+		}
+	}
+	
+	@Test
 	public void testCompareAddingOneWishTransactionAndSequential() {
 		for(int i = 50; i <= 100; i += 10) {
 			System.out.println(i);
@@ -247,7 +255,7 @@ public class RemoteBenchmark {
 	}
 	
 	public void addingWishesOneThreadInTransaction(int wishes, int operations, String filePath) {
-		addingWishesOneThreadInTransaction(wishes, operations, 0, filePath);
+		addingWishesOneThreadInTransaction(operations, 0, filePath);
 	}
 	
 	public void addingWishesOneThreadInTransaction(int wishes, int operations, int initialWishes,
@@ -415,6 +423,7 @@ public class RemoteBenchmark {
 			return null;
 		}
 		assertNotNull(response);
+		System.out.println("Response: " + response);
 		
 		String[] lines = response.split("\n");
 		
