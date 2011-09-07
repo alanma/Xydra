@@ -100,7 +100,8 @@ public class Page {
 			return ul;
 		}
 		
-		public String toHtml(String indent) {
+		@Override
+        public String toHtml(String indent) {
 			return Page.renderToHtml(indent, this.first, RenderMode.Block, this.tag, Page.toHtml(
 			        "  " + indent, this.children), this.attributes.toArray(new Attribute[0]));
 		}
@@ -294,7 +295,8 @@ public class Page {
 			this.renderMode = renderMode;
 		}
 		
-		public String toHtml(String indent) {
+		@Override
+        public String toHtml(String indent) {
 			return Page.renderToHtml(indent, false, this.renderMode, this.tag, Page.toHtml("",
 			        this.children), this.attributes.toArray(new Attribute[0]));
 		}

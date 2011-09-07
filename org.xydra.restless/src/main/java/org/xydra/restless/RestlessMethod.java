@@ -131,19 +131,23 @@ public class RestlessMethod {
 				} else if(requiredParamType.equals(IRestlessContext.class)) {
 					IRestlessContext restlessContext = new IRestlessContext() {
 						
-						public Restless getRestless() {
+						@Override
+                        public Restless getRestless() {
 							return restless;
 						}
 						
-						public HttpServletResponse getResponse() {
+						@Override
+                        public HttpServletResponse getResponse() {
 							return res;
 						}
 						
-						public HttpServletRequest getRequest() {
+						@Override
+                        public HttpServletRequest getRequest() {
 							return req;
 						}
 						
-						public String getRequestIdentifier() {
+						@Override
+                        public String getRequestIdentifier() {
 							return uniqueRequestId;
 						}
 					};
@@ -271,19 +275,23 @@ public class RestlessMethod {
 					
 					IRestlessContext context = new IRestlessContext() {
 						
-						public Restless getRestless() {
+						@Override
+                        public Restless getRestless() {
 							return restless;
 						}
 						
-						public HttpServletResponse getResponse() {
+						@Override
+                        public HttpServletResponse getResponse() {
 							return res;
 						}
 						
-						public HttpServletRequest getRequest() {
+						@Override
+                        public HttpServletRequest getRequest() {
 							return req;
 						}
 						
-						public String getRequestIdentifier() {
+						@Override
+                        public String getRequestIdentifier() {
 							return uniqueRequestId;
 						}
 						
