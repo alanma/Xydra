@@ -73,6 +73,7 @@ class TweakedRequest extends HttpServletRequestWrapper {
 	}
 	
 	static boolean isLocalhost(String serverName) {
+		// TODO add case where localhost is accessed as http://computername:1234
 		return serverName.equals("localhost") || serverName.equals("127.0.0.1");
 	}
 	
