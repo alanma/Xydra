@@ -14,7 +14,8 @@ public class TestTextsearch {
 		PTSImpl<PayloadObject> pts = new PTSImpl<PayloadObject>();
 		pts.configure(" ", " ", new Normaliser() {
 			
-			public String normalise(String raw) {
+			@Override
+            public String normalise(String raw) {
 				String n = raw.toLowerCase();
 				n.replace("é", "e");
 				return n;

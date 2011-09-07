@@ -17,7 +17,8 @@ public class PTSImpl<V> implements PragmaticTextSearch<V> {
 		// + this.substringMatches.size() + " substrings indexed.");
 	}
 
-	public Iterator<V> search(String token) {
+	@Override
+    public Iterator<V> search(String token) {
 		if (token.length() == 1 || token.length() == 2) {
 			return this.prefixIndex.search(token);
 		} else {
@@ -25,7 +26,8 @@ public class PTSImpl<V> implements PragmaticTextSearch<V> {
 		}
 	}
 
-	public void clear() {
+	@Override
+    public void clear() {
 		this.prefixIndex.clear();
 		this.substringIndex.clear();
 	}
@@ -33,19 +35,22 @@ public class PTSImpl<V> implements PragmaticTextSearch<V> {
 	/* (non-Javadoc)
 	 * @see de.xam.ptextsearch.PragmaticTextSearch#configure(java.lang.String, java.lang.String, de.xam.ptextsearch.PragmaticTextSearch.Normaliser)
 	 */
-	public void configure(String prefixSplitRegex, String substringSplitRegex, Normaliser normaliser) {
+	@Override
+    public void configure(String prefixSplitRegex, String substringSplitRegex, Normaliser normaliser) {
 		this.prefixIndex = new PrefixIndex<V>(1, 2);
 		this.substringIndex = new SubstringIndex<V>(3, 20);
 		this.prefixIndex.configure(prefixSplitRegex, normaliser);
 		this.substringIndex.configure(substringSplitRegex, normaliser);
 	}
 
-	public void deIndex(V identifier, String text) {
+	@Override
+    public void deIndex(V identifier, String text) {
 		this.prefixIndex.deIndex(identifier, text);
 		this.substringIndex.deIndex(identifier, text);
 	}
 
-	public void index(V identifier, String text) {
+	@Override
+    public void index(V identifier, String text) {
 		this.prefixIndex.index(identifier, text);
 		this.substringIndex.index(identifier, text);
 	}
