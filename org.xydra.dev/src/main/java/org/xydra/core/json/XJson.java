@@ -224,7 +224,8 @@ public class XJson {
 			return this.tempList != null;
 		}
 		
-		public void arrayEnd() {
+		@Override
+        public void arrayEnd() {
 			if(this.parseState != ParseState.FIELD)
 				return;
 			
@@ -305,7 +306,8 @@ public class XJson {
 			this.tempList = null;
 		}
 		
-		public void arrayStart() {
+		@Override
+        public void arrayStart() {
 			if(this.parseState != ParseState.FIELD)
 				return;
 			
@@ -314,7 +316,8 @@ public class XJson {
 			this.tempList = new LinkedList<Object>();
 		}
 		
-		public void objectEnd() {
+		@Override
+        public void objectEnd() {
 			switch(this.parseState) {
 			case REPO:
 				// done parsing
@@ -334,11 +337,13 @@ public class XJson {
 			}
 		}
 		
-		public void objectStart() {
+		@Override
+        public void objectStart() {
 			// we use onKey() instead
 		}
 		
-		public void onBoolean(boolean b) {
+		@Override
+        public void onBoolean(boolean b) {
 			assert this.parseState == ParseState.FIELD;
 			if(inValueArray()) {
 				this.tempList.add(b);
@@ -349,7 +354,8 @@ public class XJson {
 			}
 		}
 		
-		public void onDouble(double d) {
+		@Override
+        public void onDouble(double d) {
 			assert this.parseState == ParseState.FIELD;
 			if(inValueArray()) {
 				this.tempList.add(d);
@@ -360,7 +366,8 @@ public class XJson {
 			}
 		}
 		
-		public void onInteger(int i) {
+		@Override
+        public void onInteger(int i) {
 			assert this.parseState == ParseState.FIELD;
 			if(inValueArray()) {
 				this.tempList.add(i);
@@ -371,7 +378,8 @@ public class XJson {
 			}
 		}
 		
-		public void onKey(String key) {
+		@Override
+        public void onKey(String key) {
 			XID xid = X.getIDProvider().fromString(key);
 			switch(this.parseState) {
 			case REPO: // add model
@@ -394,7 +402,8 @@ public class XJson {
 			}
 		}
 		
-		public void onLong(long l) {
+		@Override
+        public void onLong(long l) {
 			assert this.parseState == ParseState.FIELD;
 			if(inValueArray()) {
 				this.tempList.add(l);
@@ -405,7 +414,8 @@ public class XJson {
 			}
 		}
 		
-		public void onNull() {
+		@Override
+        public void onNull() {
 			switch(this.parseState) {
 			case REPO:
 			case MODEL:
@@ -416,7 +426,8 @@ public class XJson {
 			}
 		}
 		
-		public void onString(String s) {
+		@Override
+        public void onString(String s) {
 			assert this.parseState == ParseState.FIELD : "In " + this.parseState
 			        + " while parsing '" + s + "'";
 			if(inValueArray()) {
