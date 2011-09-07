@@ -37,11 +37,24 @@ public class AboutAppEngine {
 	}
 	
 	/**
-	 * format: user-chosen-versionId-from-appengine-xml '.' timestamp
+	 * @return The major version number for the currently running version of the
+	 *         application plus a timestamp at which it was deployed. This is
+	 *         not just the version identifier string you specify in
+	 *         appengine-web.xml.
+	 *         
+	 *         Format: user-chosen-versionId-from-appengine-xml '.' timestamp
 	 */
 	public static String getVersion() {
-		
-		return SystemProperty.applicationVersion.get();
+		String version = SystemProperty.applicationVersion.get();
+		if(version == null) {
+			version = "devmode";
+		}
+		return version;
+	}
+	
+	@SuppressWarnings("deprecation")
+	public static String getInstanceId() {
+		return SystemProperty.instanceReplicaId.get();
 	}
 	
 }
