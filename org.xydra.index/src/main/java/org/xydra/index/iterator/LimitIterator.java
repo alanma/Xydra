@@ -30,7 +30,8 @@ public class LimitIterator<E> implements ClosableIterator<E> {
 		this.count = 0;
 	}
 	
-	public boolean hasNext() {
+	@Override
+    public boolean hasNext() {
 		if(this.count == this.limit) {
 			return false;
 		}
@@ -38,7 +39,8 @@ public class LimitIterator<E> implements ClosableIterator<E> {
 		return this.nextItem != null;
 	}
 	
-	public E next() {
+	@Override
+    public E next() {
 		if(this.count == this.limit) {
 			return null;
 		}
@@ -49,7 +51,8 @@ public class LimitIterator<E> implements ClosableIterator<E> {
 		return result;
 	}
 	
-	public void remove() {
+	@Override
+    public void remove() {
 		throw new UnsupportedOperationException();
 	}
 	
@@ -63,7 +66,8 @@ public class LimitIterator<E> implements ClosableIterator<E> {
 		}
 	}
 	
-	public void close() {
+	@Override
+    public void close() {
 		if(this.base instanceof ClosableIterator<?>) {
 			((ClosableIterator<E>)this.base).close();
 		}

@@ -21,19 +21,23 @@ public abstract class AbstractTransformingIterator<I, O> implements ClosableIter
 		this.base = base;
 	}
 	
-	public boolean hasNext() {
+	@Override
+    public boolean hasNext() {
 		return this.base.hasNext();
 	}
 	
-	public O next() {
+	@Override
+    public O next() {
 		return this.transform(this.base.next());
 	}
 	
-	public void remove() {
+	@Override
+    public void remove() {
 		this.base.remove();
 	}
 	
-	public void close() {
+	@Override
+    public void close() {
 		if(this.base instanceof ClosableIterator<?>) {
 			((ClosableIterator<? extends I>)this.base).close();
 		}

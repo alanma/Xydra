@@ -21,21 +21,25 @@ public class ClosableIteratorAdapter<T> implements ClosableIterator<T> {
 		this.iterator = it;
 	}
 	
-	public void close() {
+	@Override
+    public void close() {
 		if(this.iterator instanceof ClosableIterator<?>) {
 			((ClosableIterator<? extends T>)this.iterator).close();
 		}
 	}
 	
-	public boolean hasNext() {
+	@Override
+    public boolean hasNext() {
 		return this.iterator.hasNext();
 	}
 	
-	public T next() {
+	@Override
+    public T next() {
 		return this.iterator.next();
 	}
 	
-	public void remove() {
+	@Override
+    public void remove() {
 		this.iterator.remove();
 	}
 	

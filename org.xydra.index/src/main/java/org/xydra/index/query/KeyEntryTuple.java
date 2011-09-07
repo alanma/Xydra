@@ -6,7 +6,8 @@ public class KeyEntryTuple<K, E> extends Pair<K,E> implements HasEntry<E> {
 		super(key, entry);
 	}
 	
-	public E getEntry() {
+	@Override
+    public E getEntry() {
 		return getSecond();
 	}
 	

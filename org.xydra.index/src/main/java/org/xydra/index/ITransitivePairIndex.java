@@ -51,13 +51,15 @@ public interface ITransitivePairIndex<K> extends IPairIndex<K,K> {
 	 * 
 	 * @throws CycleException if adding the pair would close a cycle
 	 */
-	void index(K k1, K k2) throws CycleException;
+	@Override
+    void index(K k1, K k2) throws CycleException;
 	
 	/**
 	 * This iterates over the defined pairs, not the implied ones.
 	 * 
 	 * @return an Iterator.
 	 */
-	Iterator<Pair<K,K>> iterator();
+	@Override
+    Iterator<Pair<K,K>> iterator();
 	
 }

@@ -24,19 +24,22 @@ public abstract class AbstractCascadedIterator<B, E> implements Iterator<E> {
 		this.base = base;
 	}
 	
-	public boolean hasNext() {
+	@Override
+    public boolean hasNext() {
 		this.lookAhead();
 		return this.nextEntry != null;
 	}
 	
-	public E next() {
+	@Override
+    public E next() {
 		this.lookAhead();
 		E result = this.nextEntry;
 		this.nextEntry = null;
 		return result;
 	}
 	
-	public void remove() {
+	@Override
+    public void remove() {
 		throw new UnsupportedOperationException();
 	}
 	

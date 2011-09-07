@@ -22,19 +22,22 @@ public abstract class AbstractFilteringIterator<E> implements Iterator<E> {
 		this.base = base;
 	}
 	
-	public boolean hasNext() {
+	@Override
+    public boolean hasNext() {
 		this.lookAhead();
 		return this.hasNext;
 	}
 	
-	public E next() {
+	@Override
+    public E next() {
 		E result = this.nextItem;
 		this.hasNext = false;
 		this.lookAhead();
 		return result;
 	}
 	
-	public void remove() {
+	@Override
+    public void remove() {
 		throw new UnsupportedOperationException();
 	}
 	

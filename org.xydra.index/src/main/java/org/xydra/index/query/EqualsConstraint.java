@@ -18,11 +18,13 @@ public class EqualsConstraint<E> implements Constraint<E> {
 		return this.expect;
 	}
 	
-	public boolean isStar() {
+	@Override
+    public boolean isStar() {
 		return false;
 	}
 	
-	public boolean matches(E element) {
+	@Override
+    public boolean matches(E element) {
 		return this.expect == element || (this.expect != null && this.expect.equals(element));
 	}
 	

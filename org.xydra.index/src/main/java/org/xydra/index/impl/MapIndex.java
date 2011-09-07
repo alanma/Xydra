@@ -32,27 +32,33 @@ public class MapIndex<K, E> implements IMapIndex<K,E> {
 		this.index = new HashMap<K,E>();
 	}
 	
-	public boolean containsKey(K key) {
+	@Override
+    public boolean containsKey(K key) {
 		return this.index.containsKey(key);
 	}
 	
-	public void deIndex(K key1) {
+	@Override
+    public void deIndex(K key1) {
 		this.index.remove(key1);
 	}
 	
-	public void index(K key1, E entry) {
+	@Override
+    public void index(K key1, E entry) {
 		this.index.put(key1, entry);
 	}
 	
-	public Iterator<E> iterator() {
+	@Override
+    public Iterator<E> iterator() {
 		return this.index.values().iterator();
 	}
 	
-	public E lookup(K key) {
+	@Override
+    public E lookup(K key) {
 		return this.index.get(key);
 	}
 	
-	public boolean containsKey(Constraint<K> c1) {
+	@Override
+    public boolean containsKey(Constraint<K> c1) {
 		if(c1.isStar())
 			return !isEmpty();
 		else {
@@ -61,7 +67,8 @@ public class MapIndex<K, E> implements IMapIndex<K,E> {
 		}
 	}
 	
-	public Iterator<KeyEntryTuple<K,E>> tupleIterator(Constraint<K> c1) {
+	@Override
+    public Iterator<KeyEntryTuple<K,E>> tupleIterator(Constraint<K> c1) {
 		if(c1.isStar()) {
 			return new AbstractTransformingIterator<Map.Entry<K,E>,KeyEntryTuple<K,E>>(this.index
 			        .entrySet().iterator()) {
@@ -87,11 +94,13 @@ public class MapIndex<K, E> implements IMapIndex<K,E> {
 		
 	}
 	
-	public void clear() {
+	@Override
+    public void clear() {
 		this.index.clear();
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		return this.index.isEmpty();
 	}
 	
@@ -100,7 +109,8 @@ public class MapIndex<K, E> implements IMapIndex<K,E> {
 		return this.index.toString();
 	}
 	
-	public Iterator<K> keyIterator() {
+	@Override
+    public Iterator<K> keyIterator() {
 		return this.index.keySet().iterator();
 	}
 	

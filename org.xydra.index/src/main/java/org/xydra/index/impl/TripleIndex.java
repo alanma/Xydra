@@ -52,13 +52,15 @@ public class TripleIndex<K, L, M> implements ITripleIndex<K,L,M> {
 		this.index_s_p_o_stmt = new MapMapSetIndex<K,L,M>(new SmallEntrySetFactory<M>());
 	}
 	
-	public void clear() {
+	@Override
+    public void clear() {
 		this.index_o_s_stmt.clear();
 		this.index_p_o_stmt.clear();
 		this.index_s_p_o_stmt.clear();
 	}
 	
-	public boolean contains(Constraint<K> c1, Constraint<L> c2, Constraint<M> c3) {
+	@Override
+    public boolean contains(Constraint<K> c1, Constraint<L> c2, Constraint<M> c3) {
 		// deal with the eight patterns
 		if(
 		// spo -> s_p_o
@@ -100,13 +102,15 @@ public class TripleIndex<K, L, M> implements ITripleIndex<K,L,M> {
 		return this.contains(c1, c2, c3);
 	}
 	
-	public void deIndex(K s, L p, M o) {
+	@Override
+    public void deIndex(K s, L p, M o) {
 		this.index_s_p_o_stmt.deIndex(s, p, o);
 		this.index_o_s_stmt.deIndex(o, s);
 		this.index_p_o_stmt.deIndex(p, o);
 	}
 	
-	public void dump() {
+	@Override
+    public void dump() {
 		System.out.println("Dumping s-p-o-index (there are others)");
 		Iterator<KeyKeyEntryTuple<K,L,M>> it = this.index_s_p_o_stmt.tupleIterator(
 		        new Wildcard<K>(), new Wildcard<L>(), new Wildcard<M>());
@@ -123,7 +127,8 @@ public class TripleIndex<K, L, M> implements ITripleIndex<K,L,M> {
 	 * @return an {@link Iterator} over all {@link KeyKeyEntryTuple} that match
 	 *         the given constraints
 	 */
-	public Iterator<KeyKeyEntryTuple<K,L,M>> getTriples(Constraint<K> c1, Constraint<L> c2,
+	@Override
+    public Iterator<KeyKeyEntryTuple<K,L,M>> getTriples(Constraint<K> c1, Constraint<L> c2,
 	        Constraint<M> c3) {
 		if(c1 == null)
 			throw new IllegalArgumentException("c1 was null");
@@ -136,20 +141,23 @@ public class TripleIndex<K, L, M> implements ITripleIndex<K,L,M> {
 		return tupleIterator;
 	}
 	
-	public void index(K s, L p, M o) {
+	@Override
+    public void index(K s, L p, M o) {
 		this.index_s_p_o_stmt.index(s, p, o);
 		this.index_o_s_stmt.index(o, s);
 		this.index_p_o_stmt.index(p, o);
 	}
 	
-	public IMapMapSetDiff<K,L,M> computeDiff(ITripleIndex<K,L,M> other) {
+	@Override
+    public IMapMapSetDiff<K,L,M> computeDiff(ITripleIndex<K,L,M> other) {
 		TripleIndex<K,L,M> otherIndex = (TripleIndex<K,L,M>)other;
 		IMapMapSetDiff<K,L,M> spoDiff = this.index_s_p_o_stmt
 		        .computeDiff(otherIndex.index_s_p_o_stmt);
 		return spoDiff;
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		return this.index_s_p_o_stmt.isEmpty();
 	}
 	

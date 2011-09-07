@@ -46,32 +46,39 @@ abstract public class AbstractStoredTransitivePairIndex<K> implements ITransitiv
 		this.implied = this.fact.createInstance();
 	}
 	
-	public boolean implies(Constraint<K> c1, Constraint<K> c2) {
+	@Override
+    public boolean implies(Constraint<K> c1, Constraint<K> c2) {
 		return this.implied.contains(c1, c2);
 	}
 	
-	public Iterator<Pair<K,K>> transitiveIterator(Constraint<K> c1, Constraint<K> c2) {
+	@Override
+    public Iterator<Pair<K,K>> transitiveIterator(Constraint<K> c1, Constraint<K> c2) {
 		return this.implied.constraintIterator(c1, c2);
 	}
 	
-	public Iterator<Pair<K,K>> constraintIterator(Constraint<K> c1, Constraint<K> c2) {
+	@Override
+    public Iterator<Pair<K,K>> constraintIterator(Constraint<K> c1, Constraint<K> c2) {
 		return this.direct.constraintIterator(c1, c2);
 	}
 	
-	public boolean contains(Constraint<K> c1, Constraint<K> c2) {
+	@Override
+    public boolean contains(Constraint<K> c1, Constraint<K> c2) {
 		return this.direct.contains(c1, c2);
 	}
 	
-	public void clear() {
+	@Override
+    public void clear() {
 		this.direct.clear();
 		this.implied.clear();
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		return this.direct.isEmpty();
 	}
 	
-	public void index(K k1, K k2) {
+	@Override
+    public void index(K k1, K k2) {
 		
 		if(completesCycle(k1, k2))
 			throw new CycleException();
@@ -92,7 +99,8 @@ abstract public class AbstractStoredTransitivePairIndex<K> implements ITransitiv
 	 */
 	abstract public void addImplied(K k1, K k2);
 	
-	public void deIndex(K k1, K k2) {
+	@Override
+    public void deIndex(K k1, K k2) {
 		
 		this.direct.deIndex(k1, k2);
 		
@@ -140,15 +148,18 @@ abstract public class AbstractStoredTransitivePairIndex<K> implements ITransitiv
 		return this;
 	}
 	
-	public Iterator<Pair<K,K>> iterator() {
+	@Override
+    public Iterator<Pair<K,K>> iterator() {
 		return constraintIterator(new Wildcard<K>(), new Wildcard<K>());
 	}
 	
-	public Iterator<K> key1Iterator() {
+	@Override
+    public Iterator<K> key1Iterator() {
 		return this.direct.key1Iterator();
 	}
 	
-	public Iterator<K> key2Iterator() {
+	@Override
+    public Iterator<K> key2Iterator() {
 		return this.direct.key2Iterator();
 	}
 	

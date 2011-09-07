@@ -19,16 +19,19 @@ public class SingleValueIterator<E> implements Iterator<E> {
 		this.singleEntry = singleEntry;
 	}
 	
-	public boolean hasNext() {
+	@Override
+    public boolean hasNext() {
 		return !this.done && (this.singleEntry != null);
 	}
 	
-	public E next() {
+	@Override
+    public E next() {
 		this.done = true;
 		return this.singleEntry;
 	}
 	
-	public void remove() {
+	@Override
+    public void remove() {
 		throw new UnsupportedOperationException();
 	}
 	

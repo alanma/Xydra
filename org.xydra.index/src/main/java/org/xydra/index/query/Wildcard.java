@@ -7,11 +7,13 @@ package org.xydra.index.query;
  */
 public class Wildcard<K> implements Constraint<K> {
 	
-	public boolean isStar() {
+	@Override
+    public boolean isStar() {
 		return true;
 	}
 	
-	public boolean matches(K element) {
+	@Override
+    public boolean matches(K element) {
 		return true;
 	}
 	

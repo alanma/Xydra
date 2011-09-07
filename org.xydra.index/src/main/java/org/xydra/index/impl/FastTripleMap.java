@@ -34,7 +34,8 @@ public class FastTripleMap<K, L, M, E> implements IMapMapMapIndex<K,L,M,E> {
 		this.idx_k3_k1_k2 = new MapMapMapIndex<M,K,L,E>();
 	}
 	
-	public boolean containsKey(Constraint<K> c1, Constraint<L> c2, Constraint<M> c3) {
+	@Override
+    public boolean containsKey(Constraint<K> c1, Constraint<L> c2, Constraint<M> c3) {
 		if(c2.isStar() ? c3.isStar() : !c1.isStar())
 			return this.idx_k1_k2_k3.containsKey(c1, c2, c3);
 		if(!c2.isStar())
@@ -42,23 +43,27 @@ public class FastTripleMap<K, L, M, E> implements IMapMapMapIndex<K,L,M,E> {
 		return this.idx_k3_k1_k2.containsKey(c3, c1, c2);
 	}
 	
-	public void deIndex(K key1, L key2, M key3) {
+	@Override
+    public void deIndex(K key1, L key2, M key3) {
 		this.idx_k1_k2_k3.deIndex(key1, key2, key3);
 		this.idx_k2_k3_k1.deIndex(key2, key3, key1);
 		this.idx_k3_k1_k2.deIndex(key3, key1, key2);
 	}
 	
-	public void index(K key1, L key2, M key3, E entry) {
+	@Override
+    public void index(K key1, L key2, M key3, E entry) {
 		this.idx_k1_k2_k3.index(key1, key2, key3, entry);
 		this.idx_k2_k3_k1.index(key2, key3, key1, entry);
 		this.idx_k3_k1_k2.index(key3, key1, key2, entry);
 	}
 	
-	public E lookup(K key1, L key2, M key3) {
+	@Override
+    public E lookup(K key1, L key2, M key3) {
 		return this.idx_k1_k2_k3.lookup(key1, key2, key3);
 	}
 	
-	public Iterator<KeyKeyKeyEntryTuple<K,L,M,E>> tupleIterator(Constraint<K> c1, Constraint<L> c2,
+	@Override
+    public Iterator<KeyKeyKeyEntryTuple<K,L,M,E>> tupleIterator(Constraint<K> c1, Constraint<L> c2,
 	        Constraint<M> c3) {
 		
 		// Permute the constraints to that all EqualsConstraint come before the
@@ -73,15 +78,18 @@ public class FastTripleMap<K, L, M, E> implements IMapMapMapIndex<K,L,M,E> {
 				
 				private KeyKeyKeyEntryTuple<K,L,M,E> last;
 				
-				public boolean hasNext() {
+				@Override
+                public boolean hasNext() {
 					return it.hasNext();
 				}
 				
-				public KeyKeyKeyEntryTuple<K,L,M,E> next() {
+				@Override
+                public KeyKeyKeyEntryTuple<K,L,M,E> next() {
 					return this.last = it.next();
 				}
 				
-				public void remove() {
+				@Override
+                public void remove() {
 					it.remove();
 					if(this.last != null) {
 						FastTripleMap.this.idx_k2_k3_k1.deIndex(this.last.getKey2(), this.last
@@ -100,17 +108,20 @@ public class FastTripleMap<K, L, M, E> implements IMapMapMapIndex<K,L,M,E> {
 				
 				private KeyKeyKeyEntryTuple<L,M,K,E> last;
 				
-				public boolean hasNext() {
+				@Override
+                public boolean hasNext() {
 					return it.hasNext();
 				}
 				
-				public KeyKeyKeyEntryTuple<K,L,M,E> next() {
+				@Override
+                public KeyKeyKeyEntryTuple<K,L,M,E> next() {
 					this.last = it.next();
 					return new KeyKeyKeyEntryTuple<K,L,M,E>(this.last.getKey3(), this.last
 					        .getKey1(), this.last.getKey2(), this.last.getEntry());
 				}
 				
-				public void remove() {
+				@Override
+                public void remove() {
 					it.remove();
 					if(this.last != null) {
 						FastTripleMap.this.idx_k1_k2_k3.deIndex(this.last.getKey3(), this.last
@@ -129,17 +140,20 @@ public class FastTripleMap<K, L, M, E> implements IMapMapMapIndex<K,L,M,E> {
 			
 			private KeyKeyKeyEntryTuple<M,K,L,E> last;
 			
-			public boolean hasNext() {
+			@Override
+            public boolean hasNext() {
 				return it.hasNext();
 			}
 			
-			public KeyKeyKeyEntryTuple<K,L,M,E> next() {
+			@Override
+            public KeyKeyKeyEntryTuple<K,L,M,E> next() {
 				this.last = it.next();
 				return new KeyKeyKeyEntryTuple<K,L,M,E>(this.last.getKey2(), this.last.getKey3(),
 				        this.last.getKey1(), this.last.getEntry());
 			}
 			
-			public void remove() {
+			@Override
+            public void remove() {
 				it.remove();
 				if(this.last != null) {
 					FastTripleMap.this.idx_k1_k2_k3.deIndex(this.last.getKey2(), this.last
@@ -152,13 +166,15 @@ public class FastTripleMap<K, L, M, E> implements IMapMapMapIndex<K,L,M,E> {
 		};
 	}
 	
-	public void clear() {
+	@Override
+    public void clear() {
 		this.idx_k1_k2_k3.clear();
 		this.idx_k2_k3_k1.clear();
 		this.idx_k3_k1_k2.clear();
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		return this.idx_k1_k2_k3.isEmpty();
 	}
 	
@@ -194,15 +210,18 @@ public class FastTripleMap<K, L, M, E> implements IMapMapMapIndex<K,L,M,E> {
 		return this.idx_k1_k2_k3.toString();
 	}
 	
-	public Iterator<K> key1Iterator() {
+	@Override
+    public Iterator<K> key1Iterator() {
 		return this.idx_k1_k2_k3.key1Iterator();
 	}
 	
-	public Iterator<L> key2Iterator() {
+	@Override
+    public Iterator<L> key2Iterator() {
 		return this.idx_k2_k3_k1.key1Iterator();
 	}
 	
-	public Iterator<M> key3Iterator() {
+	@Override
+    public Iterator<M> key3Iterator() {
 		return this.idx_k3_k1_k2.key1Iterator();
 	}
 	

@@ -34,7 +34,8 @@ public class BagUnionIterator<E> extends AbstractCascadedIterator<Iterator<? ext
 		return element;
 	}
 	
-	public void close() {
+	@Override
+    public void close() {
 		if(this.smallIt instanceof ClosableIterator<?>) {
 			((ClosableIterator<? extends E>)this.smallIt).close();
 		}

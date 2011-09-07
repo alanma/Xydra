@@ -46,31 +46,36 @@ public class TripleSetIndexImpl<K, L, M, E> implements TripleSetIndex<K,L,M,E> {
 		this.index_s_p_o_stmt = new MapMapMapSetIndex<K,L,M,E>(entrySetFactory);
 	}
 	
-	public void clear() {
+	@Override
+    public void clear() {
 		this.index_o_s_stmt.clear();
 		this.index_p_o_stmt.clear();
 		this.index_s_p_o_stmt.clear();
 	}
 	
-	public boolean contains(Constraint<K> c1, Constraint<L> c2, Constraint<M> c3) {
+	@Override
+    public boolean contains(Constraint<K> c1, Constraint<L> c2, Constraint<M> c3) {
 		Iterator<E> it = this.lookup(c1, c2, c3);
 		boolean result = it.hasNext();
 		return result;
 	}
 	
-	public void deIndex(K s, L p, M o, E entry) {
+	@Override
+    public void deIndex(K s, L p, M o, E entry) {
 		this.index_s_p_o_stmt.deIndex(s, p, o, entry);
 		this.index_o_s_stmt.deIndex(o, s, entry);
 		this.index_p_o_stmt.deIndex(p, o, entry);
 	}
 	
-	public void index(K s, L p, M o, E entry) {
+	@Override
+    public void index(K s, L p, M o, E entry) {
 		this.index_s_p_o_stmt.index(s, p, o, entry);
 		this.index_o_s_stmt.index(o, s, entry);
 		this.index_p_o_stmt.index(p, o, entry);
 	}
 	
-	public Iterator<E> iterator() {
+	@Override
+    public Iterator<E> iterator() {
 		return this.index_o_s_stmt.iterator();
 	}
 	
@@ -80,7 +85,8 @@ public class TripleSetIndexImpl<K, L, M, E> implements TripleSetIndex<K,L,M,E> {
 	 * @param c3 constraint for component 3 of triple (object)
 	 * @return all matching entities for (c1,c2,c3)
 	 */
-	public Iterator<E> lookup(Constraint<K> c1, Constraint<L> c2, Constraint<M> c3) {
+	@Override
+    public Iterator<E> lookup(Constraint<K> c1, Constraint<L> c2, Constraint<M> c3) {
 		// deal with the eight patterns
 		
 		if(

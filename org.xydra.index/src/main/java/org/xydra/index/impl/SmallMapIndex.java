@@ -24,26 +24,31 @@ public class SmallMapIndex<K, E> implements IMapIndex<K,E> {
 	
 	KeyEntryTuple<K,E> tuple;
 	
-	public boolean containsKey(K key) {
+	@Override
+    public boolean containsKey(K key) {
 		return this.tuple != null && XI.equals(key, this.tuple.getKey());
 	}
 	
-	public boolean containsKey(Constraint<K> c1) {
+	@Override
+    public boolean containsKey(Constraint<K> c1) {
 		return this.tuple != null && c1.matches(this.tuple.getKey());
 	}
 	
-	public void deIndex(K key1) {
+	@Override
+    public void deIndex(K key1) {
 		if(containsKey(key1))
 			this.tuple = null;
 	}
 	
-	public void index(K key1, E entry) {
+	@Override
+    public void index(K key1, E entry) {
 		if(this.tuple != null && !containsKey(key1))
 			throw new IndexFullException();
 		this.tuple = new KeyEntryTuple<K,E>(key1, entry);
 	}
 	
-	public Iterator<E> iterator() {
+	@Override
+    public Iterator<E> iterator() {
 		if(this.tuple == null)
 			return new NoneIterator<E>();
 		return new SingleValueIterator<E>(this.tuple.getEntry()) {
@@ -54,13 +59,15 @@ public class SmallMapIndex<K, E> implements IMapIndex<K,E> {
 		};
 	}
 	
-	public E lookup(K key) {
+	@Override
+    public E lookup(K key) {
 		if(!containsKey(key))
 			return null;
 		return this.tuple.getEntry();
 	}
 	
-	public Iterator<KeyEntryTuple<K,E>> tupleIterator(Constraint<K> c1) {
+	@Override
+    public Iterator<KeyEntryTuple<K,E>> tupleIterator(Constraint<K> c1) {
 		if(!containsKey(c1))
 			return new NoneIterator<KeyEntryTuple<K,E>>();
 		return new SingleValueIterator<KeyEntryTuple<K,E>>(this.tuple) {
@@ -71,11 +78,13 @@ public class SmallMapIndex<K, E> implements IMapIndex<K,E> {
 		};
 	}
 	
-	public void clear() {
+	@Override
+    public void clear() {
 		this.tuple = null;
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		return this.tuple == null;
 	}
 	
@@ -87,7 +96,8 @@ public class SmallMapIndex<K, E> implements IMapIndex<K,E> {
 			return "{" + this.tuple.getKey() + "=" + this.tuple.getEntry() + "}";
 	}
 	
-	public Iterator<K> keyIterator() {
+	@Override
+    public Iterator<K> keyIterator() {
 		if(isEmpty())
 			return new NoneIterator<K>();
 		return new SingleValueIterator<K>(this.tuple.getKey());

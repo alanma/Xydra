@@ -14,19 +14,23 @@ public class NoneIterator<E> implements ClosableIterator<E> {
 	
 	private static final long serialVersionUID = 8727531049551996167L;
 	
-	public void close() {
+	@Override
+    public void close() {
 		// NoneIterator needs not to be closed
 	}
 	
-	public boolean hasNext() {
+	@Override
+    public boolean hasNext() {
 		return false;
 	}
 	
-	public E next() {
+	@Override
+    public E next() {
 		return null;
 	}
 	
-	public void remove() {
+	@Override
+    public void remove() {
 		// nothing to do
 	}
 	

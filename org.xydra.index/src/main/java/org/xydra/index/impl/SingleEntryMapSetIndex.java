@@ -29,11 +29,13 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K,E> implements 
 		super(key, value);
 	}
 	
-	public void clear() {
+	@Override
+    public void clear() {
 		this.empty = true;
 	}
 	
-	public boolean containsKey(K key) {
+	@Override
+    public boolean containsKey(K key) {
 		return !this.empty && XI.equals(key, getKey());
 	}
 	
@@ -48,7 +50,8 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K,E> implements 
 			return null;
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		return this.empty;
 	}
 	
@@ -56,7 +59,8 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K,E> implements 
 		return isEmpty() ? 0 : 1;
 	}
 	
-	public Iterator<E> constraintIterator(Constraint<K> c1) {
+	@Override
+    public Iterator<E> constraintIterator(Constraint<K> c1) {
 		if(!isEmpty() && c1.matches(getKey())) {
 			return new SingleValueIterator<E>(getEntry());
 		} else {
@@ -64,7 +68,8 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K,E> implements 
 		}
 	}
 	
-	public boolean contains(Constraint<K> c1, Constraint<E> entryConstraint) {
+	@Override
+    public boolean contains(Constraint<K> c1, Constraint<E> entryConstraint) {
 		
 		if(isEmpty()) {
 			return false;
@@ -79,11 +84,13 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K,E> implements 
 		return entryConstraint.matches(getEntry());
 	}
 	
-	public void deIndex(K key1, E entry) {
+	@Override
+    public void deIndex(K key1, E entry) {
 		this.clear();
 	}
 	
-	public void deIndex(K key1) {
+	@Override
+    public void deIndex(K key1) {
 		/*
 		 * This implementation can at most store a single entry, so clear is
 		 * correct
@@ -91,11 +98,13 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K,E> implements 
 		this.clear();
 	}
 	
-	public void index(K key1, E entry) {
+	@Override
+    public void index(K key1, E entry) {
 		throw new UnsupportedOperationException();
 	}
 	
-	public Iterator<KeyEntryTuple<K,E>> tupleIterator(Constraint<K> c1,
+	@Override
+    public Iterator<KeyEntryTuple<K,E>> tupleIterator(Constraint<K> c1,
 	        Constraint<E> entryConstraint) {
 		if(contains(c1, entryConstraint)) {
 			return new SingleValueIterator<KeyEntryTuple<K,E>>(this);
@@ -104,7 +113,8 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K,E> implements 
 		}
 	}
 	
-	public IMapSetDiff<K,E> computeDiff(IMapSetIndex<K,E> otherFuture) {
+	@Override
+    public IMapSetDiff<K,E> computeDiff(IMapSetIndex<K,E> otherFuture) {
 		SingleEntryMapSetDiff<K,E> diff = new SingleEntryMapSetDiff<K,E>();
 		
 		if(this.getKey() == null) {
@@ -137,17 +147,20 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K,E> implements 
 		
 		protected IMapSetIndex<K,E> added, removed;
 		
-		public IMapSetIndex<K,E> getAdded() {
+		@Override
+        public IMapSetIndex<K,E> getAdded() {
 			return this.added;
 		}
 		
-		public IMapSetIndex<K,E> getRemoved() {
+		@Override
+        public IMapSetIndex<K,E> getRemoved() {
 			return this.removed;
 		}
 		
 	}
 	
-	public Iterator<K> keyIterator() {
+	@Override
+    public Iterator<K> keyIterator() {
 		return new SingleValueIterator<K>(getKey());
 	}
 	

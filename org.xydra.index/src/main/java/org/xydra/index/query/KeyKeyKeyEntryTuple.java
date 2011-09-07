@@ -14,7 +14,8 @@ public class KeyKeyKeyEntryTuple<K, L, M, E> implements HasEntry<E> {
 		this.entry = entry;
 	}
 	
-	public E getEntry() {
+	@Override
+    public E getEntry() {
 		return this.entry;
 	}
 	

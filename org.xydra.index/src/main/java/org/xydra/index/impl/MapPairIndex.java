@@ -31,19 +31,23 @@ public class MapPairIndex<K, L> implements IPairIndex<K,L> {
 		this.index = new MapSetIndex<K,L>(new FastEntrySetFactory<L>());
 	}
 	
-	public void clear() {
+	@Override
+    public void clear() {
 		this.index.clear();
 	}
 	
-	public void index(K k1, L k2) {
+	@Override
+    public void index(K k1, L k2) {
 		this.index.index(k1, k2);
 	}
 	
-	public void deIndex(K k1, L k2) {
+	@Override
+    public void deIndex(K k1, L k2) {
 		this.index.deIndex(k1, k2);
 	}
 	
-	public Iterator<Pair<K,L>> constraintIterator(Constraint<K> c1, Constraint<L> c2) {
+	@Override
+    public Iterator<Pair<K,L>> constraintIterator(Constraint<K> c1, Constraint<L> c2) {
 		
 		return new AbstractTransformingIterator<KeyEntryTuple<K,L>,Pair<K,L>>(this.index
 		        .tupleIterator(c1, c2)) {
@@ -57,11 +61,13 @@ public class MapPairIndex<K, L> implements IPairIndex<K,L> {
 		
 	}
 	
-	public boolean contains(Constraint<K> c1, Constraint<L> c2) {
+	@Override
+    public boolean contains(Constraint<K> c1, Constraint<L> c2) {
 		return this.index.contains(c1, c2);
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		return this.index.isEmpty();
 	}
 	
@@ -70,15 +76,18 @@ public class MapPairIndex<K, L> implements IPairIndex<K,L> {
 		return this.index.toString();
 	}
 	
-	public Iterator<Pair<K,L>> iterator() {
+	@Override
+    public Iterator<Pair<K,L>> iterator() {
 		return constraintIterator(new Wildcard<K>(), new Wildcard<L>());
 	}
 	
-	public Iterator<K> key1Iterator() {
+	@Override
+    public Iterator<K> key1Iterator() {
 		return this.index.keyIterator();
 	}
 	
-	public Iterator<L> key2Iterator() {
+	@Override
+    public Iterator<L> key2Iterator() {
 		return new AbstractTransformingIterator<Pair<K,L>,L>(iterator()) {
 			
 			@Override

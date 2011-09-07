@@ -36,31 +36,38 @@ public class LowercaseStringKeyMapIndex<E> implements IMapIndex<String,E> {
 		                + ") for comparing strings and evaluating search expressions.");
 	}
 	
-	public void clear() {
+	@Override
+    public void clear() {
 		this.map.clear();
 	}
 	
-	public boolean containsKey(String key) {
+	@Override
+    public boolean containsKey(String key) {
 		return this.map.containsKey(this.normalise(key));
 	}
 	
-	public void deIndex(String key) {
+	@Override
+    public void deIndex(String key) {
 		this.map.remove(this.normalise(key));
 	}
 	
-	public void index(String key, E entry) {
+	@Override
+    public void index(String key, E entry) {
 		this.map.put(this.normalise(key), entry);
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		return this.map.isEmpty();
 	}
 	
-	public Iterator<E> iterator() {
+	@Override
+    public Iterator<E> iterator() {
 		return this.map.values().iterator();
 	}
 	
-	public E lookup(String key) {
+	@Override
+    public E lookup(String key) {
 		return this.map.get(this.normalise(key));
 	}
 	
@@ -68,7 +75,8 @@ public class LowercaseStringKeyMapIndex<E> implements IMapIndex<String,E> {
 		return key.toLowerCase(Locale.GERMAN);
 	}
 	
-	public boolean containsKey(Constraint<String> c1) {
+	@Override
+    public boolean containsKey(Constraint<String> c1) {
 		if(c1.isStar())
 			return isEmpty();
 		else {
@@ -77,7 +85,8 @@ public class LowercaseStringKeyMapIndex<E> implements IMapIndex<String,E> {
 		}
 	}
 	
-	public Iterator<KeyEntryTuple<String,E>> tupleIterator(Constraint<String> c1) {
+	@Override
+    public Iterator<KeyEntryTuple<String,E>> tupleIterator(Constraint<String> c1) {
 		if(c1.isStar()) {
 			return new AbstractTransformingIterator<Map.Entry<String,E>,KeyEntryTuple<String,E>>(
 			        this.map.entrySet().iterator()) {
@@ -98,7 +107,8 @@ public class LowercaseStringKeyMapIndex<E> implements IMapIndex<String,E> {
 		
 	}
 	
-	public Iterator<String> keyIterator() {
+	@Override
+    public Iterator<String> keyIterator() {
 		return this.map.keySet().iterator();
 	}
 	

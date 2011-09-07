@@ -13,7 +13,8 @@ import org.xydra.index.IEntrySet;
  */
 public class SmallEntrySetFactory<E> implements Factory<IEntrySet<E>> {
 	
-	public IEntrySet<E> createInstance() {
+	@Override
+    public IEntrySet<E> createInstance() {
 		return new SmallSetIndex<E>();
 	}
 	

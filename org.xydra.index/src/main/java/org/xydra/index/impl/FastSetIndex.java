@@ -23,16 +23,19 @@ public class FastSetIndex<E> extends HashSet<E> implements IEntrySet<E> {
 	// this.clear();
 	// }
 	
-	public void deIndex(E entry) {
+	@Override
+    public void deIndex(E entry) {
 		this.remove(entry);
 	}
 	
-	public void index(E entry) {
+	@Override
+    public void index(E entry) {
 		this.add(entry);
 	}
 	
 	/* we cannot call contains() on other, so we need this */
-	public IEntrySetDiff<E> computeDiff(IEntrySet<E> other) {
+	@Override
+    public IEntrySetDiff<E> computeDiff(IEntrySet<E> other) {
 		FastSetDiff<E> diff = new FastSetDiff<E>();
 		diff.added = new FastSetIndex<E>();
 		diff.removed = new FastSetIndex<E>();
@@ -59,17 +62,20 @@ public class FastSetIndex<E> extends HashSet<E> implements IEntrySet<E> {
 		
 		protected FastSetIndex<E> added, removed;
 		
-		public IEntrySet<E> getAdded() {
+		@Override
+        public IEntrySet<E> getAdded() {
 			return this.added;
 		}
 		
-		public IEntrySet<E> getRemoved() {
+		@Override
+        public IEntrySet<E> getRemoved() {
 			return this.removed;
 		}
 		
 	}
 	
-	public Iterator<E> constraintIterator(Constraint<E> entryConstraint) {
+	@Override
+    public Iterator<E> constraintIterator(Constraint<E> entryConstraint) {
 		if(entryConstraint.isStar()) {
 			return iterator();
 		} else {

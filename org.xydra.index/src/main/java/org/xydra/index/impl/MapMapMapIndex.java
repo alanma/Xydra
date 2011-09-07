@@ -41,7 +41,8 @@ public class MapMapMapIndex<K, L, M, E> implements IMapMapMapIndex<K,L,M,E> {
 		this.index = new SmallMapIndex<K,IMapMapIndex<L,M,E>>();
 	}
 	
-	public boolean containsKey(Constraint<K> c1, Constraint<L> c2, Constraint<M> c3) {
+	@Override
+    public boolean containsKey(Constraint<K> c1, Constraint<L> c2, Constraint<M> c3) {
 		if(c1.isStar()) {
 			if(c2.isStar() && c3.isStar())
 				return !isEmpty();
@@ -60,7 +61,8 @@ public class MapMapMapIndex<K, L, M, E> implements IMapMapMapIndex<K,L,M,E> {
 		return map.containsKey(c2, c3);
 	}
 	
-	public void deIndex(K key1, L key2, M key3) {
+	@Override
+    public void deIndex(K key1, L key2, M key3) {
 		IMapMapIndex<L,M,E> map = this.index.lookup(key1);
 		if(map == null)
 			return;
@@ -69,7 +71,8 @@ public class MapMapMapIndex<K, L, M, E> implements IMapMapMapIndex<K,L,M,E> {
 			this.index.deIndex(key1);
 	}
 	
-	public void index(K key1, L key2, M key3, E entry) {
+	@Override
+    public void index(K key1, L key2, M key3, E entry) {
 		IMapMapIndex<L,M,E> map = this.index.lookup(key1);
 		if(map == null) {
 			map = new MapMapIndex<L,M,E>();
@@ -90,14 +93,16 @@ public class MapMapMapIndex<K, L, M, E> implements IMapMapMapIndex<K,L,M,E> {
 		map.index(key2, key3, entry);
 	}
 	
-	public E lookup(K key1, L key2, M key3) {
+	@Override
+    public E lookup(K key1, L key2, M key3) {
 		IMapMapIndex<L,M,E> map = this.index.lookup(key1);
 		if(map == null)
 			return null;
 		return map.lookup(key2, key3);
 	}
 	
-	public Iterator<KeyKeyKeyEntryTuple<K,L,M,E>> tupleIterator(Constraint<K> c1, Constraint<L> c2,
+	@Override
+    public Iterator<KeyKeyKeyEntryTuple<K,L,M,E>> tupleIterator(Constraint<K> c1, Constraint<L> c2,
 	        Constraint<M> c3) {
 		if(c1.isStar())
 			return new CascadingIterator<K,L,M,E>(this.index.tupleIterator(c1), c2, c3);
@@ -126,7 +131,8 @@ public class MapMapMapIndex<K, L, M, E> implements IMapMapMapIndex<K,L,M,E> {
 			this.c2 = c2;
 		}
 		
-		public boolean hasNext() {
+		@Override
+        public boolean hasNext() {
 			
 			// if the inner constraint is (*,*) we can assume that inner maps
 			// always have at least one element
@@ -151,7 +157,8 @@ public class MapMapMapIndex<K, L, M, E> implements IMapMapMapIndex<K,L,M,E> {
 			this.inner = this.map.tupleIterator(this.c1, this.c2);
 		}
 		
-		public KeyKeyKeyEntryTuple<K,L,M,E> next() {
+		@Override
+        public KeyKeyKeyEntryTuple<K,L,M,E> next() {
 			
 			while(this.inner == null || !this.inner.hasNext()) {
 				if(!this.outer.hasNext())
@@ -168,7 +175,8 @@ public class MapMapMapIndex<K, L, M, E> implements IMapMapMapIndex<K,L,M,E> {
 			        tuple.getEntry());
 		}
 		
-		public void remove() {
+		@Override
+        public void remove() {
 			
 			// should also remove when last != inner, but can't as outer already
 			// is at the next inner map and modifying the map outside of the
@@ -199,17 +207,20 @@ public class MapMapMapIndex<K, L, M, E> implements IMapMapMapIndex<K,L,M,E> {
 			this.base = map.tupleIterator(c1, c2);
 		}
 		
-		public void remove() {
+		@Override
+        public void remove() {
 			this.base.remove();
 			if(this.map.isEmpty())
 				MapMapMapIndex.this.index.deIndex(this.key1);
 		}
 		
-		public boolean hasNext() {
+		@Override
+        public boolean hasNext() {
 			return this.base.hasNext();
 		}
 		
-		public KeyKeyKeyEntryTuple<K,L,M,E> next() {
+		@Override
+        public KeyKeyKeyEntryTuple<K,L,M,E> next() {
 			KeyKeyEntryTuple<L,M,E> in = this.base.next();
 			if(in == null)
 				return null;
@@ -219,11 +230,13 @@ public class MapMapMapIndex<K, L, M, E> implements IMapMapMapIndex<K,L,M,E> {
 		
 	}
 	
-	public void clear() {
+	@Override
+    public void clear() {
 		this.index.clear();
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		return this.index.isEmpty();
 	}
 	
@@ -232,11 +245,13 @@ public class MapMapMapIndex<K, L, M, E> implements IMapMapMapIndex<K,L,M,E> {
 		return this.index.toString();
 	}
 	
-	public Iterator<K> key1Iterator() {
+	@Override
+    public Iterator<K> key1Iterator() {
 		return this.index.keyIterator();
 	}
 	
-	public Iterator<L> key2Iterator() {
+	@Override
+    public Iterator<L> key2Iterator() {
 		return new AbstractCascadedIterator<IMapMapIndex<L,M,E>,L>(this.index.iterator()) {
 			
 			@Override
@@ -247,7 +262,8 @@ public class MapMapMapIndex<K, L, M, E> implements IMapMapMapIndex<K,L,M,E> {
 		};
 	}
 	
-	public Iterator<M> key3Iterator() {
+	@Override
+    public Iterator<M> key3Iterator() {
 		return new AbstractCascadedIterator<IMapMapIndex<L,M,E>,M>(this.index.iterator()) {
 			
 			@Override

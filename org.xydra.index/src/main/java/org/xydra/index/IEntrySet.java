@@ -14,7 +14,8 @@ import org.xydra.index.query.Constraint;
  */
 public interface IEntrySet<E> extends IIndex, Iterable<E> {
 	
-	public Iterator<E> iterator();
+	@Override
+    public Iterator<E> iterator();
 	
 	void deIndex(E entry);
 	

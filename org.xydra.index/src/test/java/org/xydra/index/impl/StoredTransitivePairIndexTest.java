@@ -16,7 +16,8 @@ public class StoredTransitivePairIndexTest extends AbstractTransitivePairIndexTe
 		this.index = this.idx = new StoredTransitivePairIndex<Integer>(
 		        new PairIndex<Integer,Integer>(), new Factory<IPairIndex<Integer,Integer>>() {
 			        
-			        public IPairIndex<Integer,Integer> createInstance() {
+			        @Override
+                    public IPairIndex<Integer,Integer> createInstance() {
 				        return new MapPairIndex<Integer,Integer>();
 			        }
 			        

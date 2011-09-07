@@ -37,22 +37,26 @@ public class PairIndex<K, L> implements IPairIndex<K,L> {
 		this.index_k2_k1 = new MapSetIndex<L,K>(new FastEntrySetFactory<K>());
 	}
 	
-	public void clear() {
+	@Override
+    public void clear() {
 		this.index_k1_k2.clear();
 		this.index_k2_k1.clear();
 	}
 	
-	public void index(K k1, L k2) {
+	@Override
+    public void index(K k1, L k2) {
 		this.index_k1_k2.index(k1, k2);
 		this.index_k2_k1.index(k2, k1);
 	}
 	
-	public void deIndex(K k1, L k2) {
+	@Override
+    public void deIndex(K k1, L k2) {
 		this.index_k1_k2.deIndex(k1, k2);
 		this.index_k2_k1.deIndex(k2, k1);
 	}
 	
-	public Iterator<Pair<K,L>> constraintIterator(Constraint<K> c1, Constraint<L> c2) {
+	@Override
+    public Iterator<Pair<K,L>> constraintIterator(Constraint<K> c1, Constraint<L> c2) {
 		
 		if(!c1.isStar() || c2.isStar()) {
 			return new AbstractTransformingIterator<KeyEntryTuple<K,L>,Pair<K,L>>(this.index_k1_k2
@@ -77,7 +81,8 @@ public class PairIndex<K, L> implements IPairIndex<K,L> {
 		
 	}
 	
-	public boolean contains(Constraint<K> c1, Constraint<L> c2) {
+	@Override
+    public boolean contains(Constraint<K> c1, Constraint<L> c2) {
 		
 		if(!c1.isStar())
 			return this.index_k1_k2.contains(c1, c2);
@@ -86,7 +91,8 @@ public class PairIndex<K, L> implements IPairIndex<K,L> {
 		
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		return this.index_k1_k2.isEmpty();
 	}
 	
@@ -111,15 +117,18 @@ public class PairIndex<K, L> implements IPairIndex<K,L> {
 		return this.index_k1_k2.toString();
 	}
 	
-	public Iterator<Pair<K,L>> iterator() {
+	@Override
+    public Iterator<Pair<K,L>> iterator() {
 		return constraintIterator(new Wildcard<K>(), new Wildcard<L>());
 	}
 	
-	public Iterator<K> key1Iterator() {
+	@Override
+    public Iterator<K> key1Iterator() {
 		return this.index_k1_k2.keyIterator();
 	}
 	
-	public Iterator<L> key2Iterator() {
+	@Override
+    public Iterator<L> key2Iterator() {
 		return this.index_k2_k1.keyIterator();
 	}
 	
