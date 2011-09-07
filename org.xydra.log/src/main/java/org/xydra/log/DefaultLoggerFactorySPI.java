@@ -2,7 +2,8 @@ package org.xydra.log;
 
 public class DefaultLoggerFactorySPI implements ILoggerFactorySPI {
 	
-	public Logger getLogger(String name, ILogListener logListener) {
+	@Override
+    public Logger getLogger(String name, ILogListener logListener) {
 		return new DefaultLogger(name);
 	}
 	
