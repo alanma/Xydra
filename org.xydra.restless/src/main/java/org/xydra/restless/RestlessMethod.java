@@ -167,17 +167,20 @@ public class RestlessMethod {
 						                + methodReference(this.instanceOrClass, method)
 						                + "' for which there have no RestlessParameter been defined.");
 					}
-					assert this.requiredNamedParameter.length > boundNamedParameterNumber : "Require "
-					        + this.requiredNamedParameter.length
-					        + " named parameters in method '"
-					        + Restless.toClass(this.instanceOrClass).getCanonicalName()
-					        + ":"
-					        + method.getName()
-					        + "', processed "
-					        + boundNamedParameterNumber
-					        + " parameters from request so far. Required parameters: "
-					        + this.requiredNamedParameter
-					        + ". I.e. your Java method wants more parameters than defined in your restless() method.";
+					if(this.requiredNamedParameter.length <= boundNamedParameterNumber) {
+						throw new IllegalArgumentException(
+						        "Require "
+						                + this.requiredNamedParameter.length
+						                + " named parameters in method '"
+						                + Restless.toClass(this.instanceOrClass).getCanonicalName()
+						                + ":"
+						                + method.getName()
+						                + "', processed "
+						                + boundNamedParameterNumber
+						                + " parameters from request so far. Required parameters: "
+						                + this.requiredNamedParameter
+						                + ". I.e. your Java method wants more parameters than defined in your restless() method.");
+					}
 					RestlessParameter param = this.requiredNamedParameter[boundNamedParameterNumber];
 					
 					Object value = null;
