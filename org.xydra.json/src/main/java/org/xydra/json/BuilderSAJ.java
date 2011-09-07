@@ -15,7 +15,8 @@ public class BuilderSAJ implements SAJ {
 	public BuilderSAJ() {
 	}
 	
-	public void arrayEnd() {
+	@Override
+    public void arrayEnd() {
 		assert !this.parsed.isEmpty() && this.parsed.peek().getClass().equals(JSONArray.class);
 		if(this.parsed.size() > 1) {
 			this.result = this.parsed.peek();
@@ -23,13 +24,15 @@ public class BuilderSAJ implements SAJ {
 		this.parsed.pop();
 	}
 	
-	public void arrayStart() throws JSONException {
+	@Override
+    public void arrayStart() throws JSONException {
 		JSONArray jsonArray = new JSONArray();
 		linkToParent(jsonArray);
 		this.parsed.push(jsonArray);
 	}
 	
-	public void objectEnd() {
+	@Override
+    public void objectEnd() {
 		assert !this.parsed.isEmpty() && this.parsed.peek().getClass().equals(JSONObject.class);
 		if(this.parsed.size() > 1) {
 			this.result = this.parsed.peek();
@@ -37,7 +40,8 @@ public class BuilderSAJ implements SAJ {
 		this.parsed.pop();
 	}
 	
-	public void objectStart() throws JSONException {
+	@Override
+    public void objectStart() throws JSONException {
 		JSONObject jsonObject = new JSONObject();
 		linkToParent(jsonObject);
 		this.parsed.push(jsonObject);
@@ -62,36 +66,43 @@ public class BuilderSAJ implements SAJ {
 		}
 	}
 	
-	public void onBoolean(boolean b) throws JSONException {
+	@Override
+    public void onBoolean(boolean b) throws JSONException {
 		Boolean bool = new Boolean(b);
 		linkToParent(bool);
 	}
 	
-	public void onDouble(double d) throws JSONException {
+	@Override
+    public void onDouble(double d) throws JSONException {
 		Double doub = new Double(d);
 		linkToParent(doub);
 	}
 	
-	public void onInteger(int i) throws JSONException {
+	@Override
+    public void onInteger(int i) throws JSONException {
 		Integer in = new Integer(i);
 		linkToParent(in);
 	}
 	
-	public void onKey(String key) {
+	@Override
+    public void onKey(String key) {
 		assert this.key == null;
 		this.key = key;
 	}
 	
-	public void onLong(long l) throws JSONException {
+	@Override
+    public void onLong(long l) throws JSONException {
 		Long lo = new Long(l);
 		linkToParent(lo);
 	}
 	
-	public void onNull() throws JSONException {
+	@Override
+    public void onNull() throws JSONException {
 		linkToParent(null);
 	}
 	
-	public void onString(String s) throws JSONException {
+	@Override
+    public void onString(String s) throws JSONException {
 		linkToParent(s);
 	}
 	

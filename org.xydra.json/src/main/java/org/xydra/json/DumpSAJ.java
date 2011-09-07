@@ -6,12 +6,14 @@ public class DumpSAJ implements SAJ {
 	
 	private String indent = "";
 	
-	public void arrayEnd() {
+	@Override
+    public void arrayEnd() {
 		decreaseIndent();
 		System.out.println(this.indent + "]");
 	}
 	
-	public void arrayStart() {
+	@Override
+    public void arrayStart() {
 		System.out.println(this.indent + "[");
 		increaseIndent();
 	}
@@ -24,41 +26,50 @@ public class DumpSAJ implements SAJ {
 		this.indent = this.indent + "  ";
 	}
 	
-	public void objectEnd() {
+	@Override
+    public void objectEnd() {
 		decreaseIndent();
 		System.out.println(this.indent + "}");
 	}
 	
-	public void objectStart() {
+	@Override
+    public void objectStart() {
 		System.out.println(this.indent + "{");
 		increaseIndent();
 	}
 	
-	public void onBoolean(boolean b) {
+	@Override
+    public void onBoolean(boolean b) {
 		System.out.println(this.indent + "bool : " + b);
 	}
 	
-	public void onDouble(double d) {
+	@Override
+    public void onDouble(double d) {
 		System.out.println(this.indent + "double : " + d);
 	}
 	
-	public void onInteger(int i) {
+	@Override
+    public void onInteger(int i) {
 		System.out.println(this.indent + "int : " + i);
 	}
 	
-	public void onKey(String key) {
+	@Override
+    public void onKey(String key) {
 		System.out.println(this.indent + "key : '" + key + "'");
 	}
 	
-	public void onLong(long l) {
+	@Override
+    public void onLong(long l) {
 		System.out.println(this.indent + "long : " + l);
 	}
 	
-	public void onNull() {
+	@Override
+    public void onNull() {
 		System.out.println(this.indent + "null");
 	}
 	
-	public void onString(String s) {
+	@Override
+    public void onString(String s) {
 		System.out.println(this.indent + "string : '" + s + "'");
 	}
 	
