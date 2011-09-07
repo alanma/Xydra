@@ -170,7 +170,8 @@ public interface ISparseTable extends Iterable<Row>, IRowHandler {
 	void incrementValue(String row, String column, int increment) throws WrongDatatypeException;
 	
 	/* implement Iterable */
-	Iterator<Row> iterator();
+	@Override
+    Iterator<Row> iterator();
 	
 	/**
 	 * Removes all rows that match the given RowFilter.

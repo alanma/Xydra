@@ -21,7 +21,8 @@ class Cell implements ICell {
 	 * 
 	 * @see org.xydra.csv.impl.memory.ICell#appendString(java.lang.String, int)
 	 */
-	public void appendString(String s, int maximalFieldLength) {
+	@Override
+    public void appendString(String s, int maximalFieldLength) {
 		int sLen = this.value == null ? 0 : this.value.length();
 		// if we have any space left
 		if(sLen < maximalFieldLength) {
@@ -39,7 +40,8 @@ class Cell implements ICell {
 	 * 
 	 * @see org.xydra.csv.impl.memory.ICell#getValue()
 	 */
-	public String getValue() {
+	@Override
+    public String getValue() {
 		return this.value;
 	}
 	
@@ -48,7 +50,8 @@ class Cell implements ICell {
 	 * 
 	 * @see org.xydra.csv.impl.memory.ICell#getValueAsDouble()
 	 */
-	public double getValueAsDouble() throws WrongDatatypeException {
+	@Override
+    public double getValueAsDouble() throws WrongDatatypeException {
 		return TypeHandler.asDouble(this.value);
 	}
 	
@@ -57,7 +60,8 @@ class Cell implements ICell {
 	 * 
 	 * @see org.xydra.csv.impl.memory.ICell#getValueAsLong()
 	 */
-	public long getValueAsLong() throws WrongDatatypeException {
+	@Override
+    public long getValueAsLong() throws WrongDatatypeException {
 		return TypeHandler.asLong(this.value);
 	}
 	
@@ -66,7 +70,8 @@ class Cell implements ICell {
 	 * 
 	 * @see org.xydra.csv.impl.memory.ICell#incrementValue(int)
 	 */
-	public void incrementValue(int increment) throws WrongDatatypeException {
+	@Override
+    public void incrementValue(int increment) throws WrongDatatypeException {
 		long l = getValueAsLong();
 		l = l + increment;
 		this.value = "" + l;
@@ -77,7 +82,8 @@ class Cell implements ICell {
 	 * 
 	 * @see org.xydra.csv.impl.memory.ICell#setValue(java.lang.String, boolean)
 	 */
-	public void setValue(String value, boolean initial) {
+	@Override
+    public void setValue(String value, boolean initial) {
 		if(initial && this.value != null) {
 			throw new IllegalStateException("Value was not null but '" + this.value
 			        + "' so could not set to '" + value + "'");

@@ -17,7 +17,8 @@ public abstract class AbstractRow extends AbstractReadableRow implements IRow {
 	 * @see
 	 * org.xydra.csv.impl.memory.IRow#addAll(org.xydra.csv.impl.memory.IRow)
 	 */
-	public void addAll(IReadableRow otherRow) {
+	@Override
+    public void addAll(IReadableRow otherRow) {
 		for(String colName : otherRow.getColumnNames()) {
 			this.setValue(colName, otherRow.getValue(colName), true);
 		}
@@ -31,7 +32,8 @@ public abstract class AbstractRow extends AbstractReadableRow implements IRow {
 	 * @see org.xydra.csv.impl.memory.IRow#appendValue(java.lang.String,
 	 * java.lang.String, int)
 	 */
-	public void appendValue(String columnName, String value, int maximalFieldLength) {
+	@Override
+    public void appendValue(String columnName, String value, int maximalFieldLength) {
 		if(value == null || value.equals("")) {
 			// nothing to set, keep table sparse
 		} else {
@@ -50,7 +52,8 @@ public abstract class AbstractRow extends AbstractReadableRow implements IRow {
 	 * 
 	 * @see org.xydra.csv.impl.memory.IRow#incrementValue(java.lang.String, int)
 	 */
-	public void incrementValue(String columnName, int increment) {
+	@Override
+    public void incrementValue(String columnName, int increment) {
 		if(increment == 0) {
 			// nothing to set, keep table sparse
 		} else {
@@ -70,7 +73,8 @@ public abstract class AbstractRow extends AbstractReadableRow implements IRow {
 	 * @see org.xydra.csv.impl.memory.IRow#setValue(java.lang.String, long,
 	 * boolean)
 	 */
-	public void setValue(String columnName, long value, boolean initial) {
+	@Override
+    public void setValue(String columnName, long value, boolean initial) {
 		if(value == 0) {
 			// nothing to set, keep table sparse
 		} else {
@@ -89,7 +93,8 @@ public abstract class AbstractRow extends AbstractReadableRow implements IRow {
 	 * @see org.xydra.csv.impl.memory.IRow#setValue(java.lang.String,
 	 * java.lang.String, boolean)
 	 */
-	public void setValue(String columnName, String value, boolean initial) {
+	@Override
+    public void setValue(String columnName, String value, boolean initial) {
 		if(value == null) {
 			// nothing to set, keep table sparse
 		} else {

@@ -16,7 +16,8 @@ public abstract class AbstractReadableRow implements IReadableRow {
 		this.key = key;
 	}
 	
-	public String getKey() {
+	@Override
+    public String getKey() {
 		return this.key;
 	}
 	
@@ -38,7 +39,8 @@ public abstract class AbstractReadableRow implements IReadableRow {
 	 * 
 	 * @see org.xydra.csv.impl.memory.IRow#getValue(java.lang.String)
 	 */
-	public String getValue(String columnName) {
+	@Override
+    public String getValue(String columnName) {
 		ICell cell = getOrCreateCell(columnName, false);
 		return cell == null ? "null" : cell.getValue();
 	}
@@ -50,7 +52,8 @@ public abstract class AbstractReadableRow implements IReadableRow {
 	 * 
 	 * @see org.xydra.csv.impl.memory.IRow#getValueAsDouble(java.lang.String)
 	 */
-	public double getValueAsDouble(String columnName) {
+	@Override
+    public double getValueAsDouble(String columnName) {
 		ICell cell = getOrCreateCell(columnName, false);
 		
 		if(cell == null) {
@@ -65,7 +68,8 @@ public abstract class AbstractReadableRow implements IReadableRow {
 	 * 
 	 * @see org.xydra.csv.impl.memory.IRow#getValueAsLong(java.lang.String)
 	 */
-	public long getValueAsLong(String columnName) {
+	@Override
+    public long getValueAsLong(String columnName) {
 		ICell cell = getOrCreateCell(columnName, false);
 		
 		if(cell == null) {
