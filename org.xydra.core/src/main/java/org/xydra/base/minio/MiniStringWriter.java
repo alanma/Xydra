@@ -17,17 +17,21 @@ public class MiniStringWriter implements MiniWriter {
 	
 	private StringBuffer buf = new StringBuffer();
 	
-	public void close() throws MiniIOException {
+	@Override
+    public void close() throws MiniIOException {
 	}
 	
-	public void flush() throws MiniIOException {
+	@Override
+    public void flush() throws MiniIOException {
 	}
 	
-	public void write(String string) throws MiniIOException {
+	@Override
+    public void write(String string) throws MiniIOException {
 		this.buf.append(string);
 	}
 	
-	public void write(char c) throws MiniIOException {
+	@Override
+    public void write(char c) throws MiniIOException {
 		this.buf.append(c);
 	}
 	

@@ -102,14 +102,16 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 		}
 	}
 	
-	public void clear() {
+	@Override
+    public void clear() {
 		this.persistence.clear();
 		if(this.active) {
 			java("this.p.clear();");
 		}
 	}
 	
-	public long executeCommand(XID actorId, XCommand command) {
+	@Override
+    public long executeCommand(XID actorId, XCommand command) {
 		if(this.active) {
 			stacktrace();
 			String var = getVar();
@@ -487,7 +489,8 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 		return "var" + this.varCount++;
 	}
 	
-	public List<XEvent> getEvents(XAddress address, long beginRevision, long endRevision) {
+	@Override
+    public List<XEvent> getEvents(XAddress address, long beginRevision, long endRevision) {
 		if(this.active) {
 			String var = getVar();
 			java("List<XEvent> " + var + " = this.p.getEvents( " + toJava(address) + ", "
@@ -497,7 +500,8 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 		return this.persistence.getEvents(address, beginRevision, endRevision);
 	}
 	
-	public Set<XID> getModelIds() {
+	@Override
+    public Set<XID> getModelIds() {
 		if(this.active) {
 			String var = getVar();
 			java("Set<XID> " + var + " = p.getModelIds();");
@@ -506,7 +510,8 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 		return this.persistence.getModelIds();
 	}
 	
-	public long getModelRevision(XAddress address) {
+	@Override
+    public long getModelRevision(XAddress address) {
 		if(this.active) {
 			String var = getVar();
 			java("long " + var + " = this.p.getModelRevision(" + toJava(address) + ");");
@@ -515,7 +520,8 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 		return this.persistence.getModelRevision(address);
 	}
 	
-	public XWritableModel getModelSnapshot(XAddress address) {
+	@Override
+    public XWritableModel getModelSnapshot(XAddress address) {
 		if(this.active) {
 			String var = getVar();
 			java("XWritableModel " + var + " = this.p.getModelSnapshot(" + toJava(address) + ");");
@@ -524,7 +530,8 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 		return this.persistence.getModelSnapshot(address);
 	}
 	
-	public XWritableObject getObjectSnapshot(XAddress address) {
+	@Override
+    public XWritableObject getObjectSnapshot(XAddress address) {
 		if(this.active) {
 			String var = getVar();
 			java("XWritableObject " + var + " = this.p.getObjectSnapshot(" + toJava(address) + ");");
@@ -533,7 +540,8 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 		return this.persistence.getObjectSnapshot(address);
 	}
 	
-	public XID getRepositoryId() {
+	@Override
+    public XID getRepositoryId() {
 		if(this.active) {
 			String var = getVar();
 			java("XID " + var + " = this.p.getRepositoryId();");
@@ -544,7 +552,8 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 			return this.persistence.getRepositoryId();
 	}
 	
-	public boolean hasModel(XID modelId) {
+	@Override
+    public boolean hasModel(XID modelId) {
 		if(this.active) {
 			String var = getVar();
 			java("boolean " + var + " = this.p.hasModel(" + toJava(modelId) + ");");

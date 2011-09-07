@@ -25,13 +25,15 @@ public class MemoryIDSetValue extends MemorySetValue<XID> implements XIDSetValue
 		super(contents);
 	}
 	
-	public XIDSetValue add(XID entry) {
+	@Override
+    public XIDSetValue add(XID entry) {
 		MemoryIDSetValue v = new MemoryIDSetValue(this.set);
 		v.set.add(entry);
 		return v;
 	}
 	
-	public XID[] contents() {
+	@Override
+    public XID[] contents() {
 		return toArray(new XID[size()]);
 	}
 	
@@ -45,13 +47,15 @@ public class MemoryIDSetValue extends MemorySetValue<XID> implements XIDSetValue
 		return getHashCode();
 	}
 	
-	public XIDSetValue remove(XID entry) {
+	@Override
+    public XIDSetValue remove(XID entry) {
 		MemoryIDSetValue v = new MemoryIDSetValue(this.set);
 		v.set.remove(entry);
 		return v;
 	}
 	
-	public XID[] toArray() {
+	@Override
+    public XID[] toArray() {
 		return contents();
 	}
 	

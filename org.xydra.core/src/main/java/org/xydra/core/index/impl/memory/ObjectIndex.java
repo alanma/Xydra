@@ -36,7 +36,8 @@ public class ObjectIndex extends AbstractObjectIndex implements IObjectIndex {
 		super(fieldId, indexObject);
 	}
 	
-	public void deindex(XReadableObject xo) {
+	@Override
+    public void deindex(XReadableObject xo) {
 		XReadableField field = xo.getField(this.fieldId);
 		XValue keyValue = field.getValue();
 		deindex(keyValue, xo.getID());
@@ -59,7 +60,8 @@ public class ObjectIndex extends AbstractObjectIndex implements IObjectIndex {
 		}
 	}
 	
-	public void index(XReadableObject xo) {
+	@Override
+    public void index(XReadableObject xo) {
 		XReadableField field = xo.getField(this.fieldId);
 		XValue keyValue = field.getValue();
 		index(keyValue, xo.getID());
@@ -86,7 +88,8 @@ public class ObjectIndex extends AbstractObjectIndex implements IObjectIndex {
 	 * org.xydra.core.ext.index.IObjectIndex#lookup(org.xydra.core.model.XModel,
 	 * org.xydra.core.value.XValue)
 	 */
-	public Set<XWritableObject> lookup(XWritableModel model, XValue indexKey) {
+	@Override
+    public Set<XWritableObject> lookup(XWritableModel model, XValue indexKey) {
 		Set<XID> ids = lookupIDs(indexKey);
 		Set<XWritableObject> objects = new HashSet<XWritableObject>();
 		for(XID id : ids) {

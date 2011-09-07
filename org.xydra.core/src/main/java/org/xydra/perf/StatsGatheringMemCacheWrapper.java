@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.xydra.store.IMemCache;
+import org.xydra.store.impl.memory.LocalMemcache.IdentifiableImpl;
 
 
 /**
@@ -32,17 +33,21 @@ public class StatsGatheringMemCacheWrapper implements IMemCache {
 		INSTANCE = this;
 	}
 	
-	public int size() {
+	@Override
+    public int size() {
 		return this.base.size();
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		return this.base.isEmpty();
 	}
 	
-	public boolean containsKey(Object key) {
+	@Override
+    public boolean containsKey(Object key) {
+		assert key instanceof String;
 		count("containsKey");
-		return this.base.containsKey(key);
+		return this.base.containsKey(key instanceof String ? key : key.toString());
 	}
 	
 	private void count(String action) {
@@ -54,23 +59,32 @@ public class StatsGatheringMemCacheWrapper implements IMemCache {
 		}
 	}
 	
-	public boolean containsValue(Object value) {
+	@Override
+    public boolean containsValue(Object value) {
 		count("containsValue");
 		return this.base.containsValue(value);
 	}
 	
-	public Object get(Object key) {
+	@Override
+    public Object get(Object key) {
+		assert key instanceof String;
 		count("get");
-		Object value = this.base.get(key);
+		String usedKey;
+		if(key instanceof String) {
+			usedKey = (String)key;
+		} else {
+			usedKey = key.toString();
+		}
+		Object value = this.base.get(usedKey);
 		this.mapstats.recordGet(key.toString(), value != null, 1);
 		return value;
 	}
 	
 	@Override
-	public Map<Object,Object> getAll(Collection<Object> keys) {
+	public Map<String,Object> getAll(Collection<String> keys) {
 		count("getAll");
-		Map<Object,Object> result = new HashMap<Object,Object>();
-		for(Object key : keys) {
+		Map<String,Object> result = new HashMap<String,Object>();
+		for(String key : keys) {
 			Object value = this.base.get(key);
 			this.mapstats.recordGet(key.toString(), value != null, keys.size());
 			if(value != null) {
@@ -80,30 +94,34 @@ public class StatsGatheringMemCacheWrapper implements IMemCache {
 		return result;
 	}
 	
-	public Object put(Object key, Object value) {
+	@Override
+    public Object put(String key, Object value) {
 		count("put");
 		this.mapstats.recordPut(key.toString(), value);
 		return this.base.put(key, value);
 	}
 	
 	@Override
-	public void putIfValueIsNull(Object key, Object value) {
+	public void putIfValueIsNull(String key, Object value) {
 		count("putIfValueIsNull");
 		this.mapstats.recordPut(key.toString(), value);
 		this.base.putIfValueIsNull(key, value);
 	}
 	
-	public Object remove(Object key) {
+	@Override
+    public Object remove(Object key) {
 		count("remove");
 		return this.base.remove(key);
 	}
 	
-	public void putAll(Map<? extends Object,? extends Object> m) {
+	@Override
+    public void putAll(Map<? extends String,? extends Object> m) {
 		count("putAll");
 		this.base.putAll(m);
 	}
 	
-	public void clear() {
+	@Override
+    public void clear() {
 		count("clear");
 		this.base.clear();
 		// clear also stats
@@ -111,28 +129,31 @@ public class StatsGatheringMemCacheWrapper implements IMemCache {
 		this.mapstats.clear();
 	}
 	
-	public Set<Object> keySet() {
+	@Override
+    public Set<String> keySet() {
 		count("keySet");
 		return this.base.keySet();
 	}
 	
-	public Collection<Object> values() {
+	@Override
+    public Collection<Object> values() {
 		count("values");
 		return this.base.values();
 	}
 	
-	public Set<java.util.Map.Entry<Object,Object>> entrySet() {
+	@Override
+    public Set<java.util.Map.Entry<String,Object>> entrySet() {
 		count("entrySet");
 		return this.base.entrySet();
 	}
 	
 	@Override
-	public boolean equals(Object o) {
+    public boolean equals(Object o) {
 		return this.base.equals(o);
 	}
 	
 	@Override
-	public int hashCode() {
+    public int hashCode() {
 		return this.base.hashCode();
 	}
 	
@@ -157,6 +178,39 @@ public class StatsGatheringMemCacheWrapper implements IMemCache {
 		buf.append(this.base.stats() + "<br />\n");
 		
 		return buf.toString();
+	}
+	
+	@Override
+	public boolean putIfUntouched(String key, IdentifiableValue oldValue, Object newValue) {
+		count("putIfUntouched");
+		synchronized(this.base) {
+			Object current = get(key);
+			if(current.equals(oldValue.getValue())) {
+				// indirect count
+				put(key, newValue);
+				return true;
+			} else {
+				return false;
+			}
+		}
+	}
+	
+	@Override
+	public IdentifiableValue getIdentifiable(String key) {
+		// no counting needed
+		Object o = get(key);
+		return new IdentifiableImpl(o);
+	}
+	
+	@Override
+	public Map<String,Long> incrementAll(Map<String,Long> offsets, long initialValue) {
+		count("incrementAll");
+		Map<String,Long> result = new HashMap<String,Long>();
+		result = this.base.incrementAll(offsets, initialValue);
+		for(java.util.Map.Entry<String,Long> entry : result.entrySet()) {
+			this.mapstats.recordPut(entry.getKey(), entry.getValue());
+		}
+		return result;
 	}
 	
 }

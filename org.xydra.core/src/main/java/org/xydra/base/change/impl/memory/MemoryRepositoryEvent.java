@@ -72,6 +72,7 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	 *            not be null
 	 * @param modelId The {@link XID} of the removed {@link XModel} - must not
 	 *            be null
+	 * @param modelRevison TODO document
 	 * @return An {@link XRepositoryEvent} of the add-type
 	 * @throws IllegalArgumentException if the given {@link XAddress} doesn't
 	 *             refer to an {@link XRepository}, if the given modelId is null
@@ -140,7 +141,8 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 		return true;
 	}
 	
-	public XAddress getChangedEntity() {
+	@Override
+    public XAddress getChangedEntity() {
 		return XX.resolveModel(getTarget(), getModelId());
 	}
 	

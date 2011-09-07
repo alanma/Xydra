@@ -115,7 +115,8 @@ public class MiniBufferedReader extends AbstractMiniReader implements MiniReader
 	 *         reached
 	 * @exception MiniIOException If an I/O error occurs
 	 */
-	public int read() throws MiniIOException {
+	@Override
+    public int read() throws MiniIOException {
 		synchronized(this.lock) {
 			ensureOpen();
 			for(;;) {
@@ -220,7 +221,8 @@ public class MiniBufferedReader extends AbstractMiniReader implements MiniReader
 	 * 
 	 * @exception MiniIOException If an I/O error occurs
 	 */
-	public int read(char cbuf[], int off, int len) throws MiniIOException {
+	@Override
+    public int read(char cbuf[], int off, int len) throws MiniIOException {
 		synchronized(this.lock) {
 			ensureOpen();
 			if((off < 0) || (off > cbuf.length) || (len < 0) || ((off + len) > cbuf.length)
@@ -384,7 +386,8 @@ public class MiniBufferedReader extends AbstractMiniReader implements MiniReader
 	 * 
 	 * @exception MiniIOException If an I/O error occurs
 	 */
-	public boolean ready() throws MiniIOException {
+	@Override
+    public boolean ready() throws MiniIOException {
 		synchronized(this.lock) {
 			ensureOpen();
 			
@@ -413,7 +416,8 @@ public class MiniBufferedReader extends AbstractMiniReader implements MiniReader
 	/**
 	 * Tell whether this stream supports the mark() operation, which it does.
 	 */
-	public boolean markSupported() {
+	@Override
+    public boolean markSupported() {
 		return true;
 	}
 	
@@ -431,7 +435,8 @@ public class MiniBufferedReader extends AbstractMiniReader implements MiniReader
 	 * @exception IllegalArgumentException If readAheadLimit is < 0
 	 * @exception MiniIOException If an I/O error occurs
 	 */
-	public void mark(int readAheadLimit) throws MiniIOException {
+	@Override
+    public void mark(int readAheadLimit) throws MiniIOException {
 		if(readAheadLimit < 0) {
 			throw new IllegalArgumentException("Read-ahead limit < 0");
 		}
@@ -449,7 +454,8 @@ public class MiniBufferedReader extends AbstractMiniReader implements MiniReader
 	 * @exception MiniIOException If the stream has never been marked, or if the
 	 *                mark has been invalidated
 	 */
-	public void reset() throws MiniIOException {
+	@Override
+    public void reset() throws MiniIOException {
 		synchronized(this.lock) {
 			ensureOpen();
 			if(this.markedChar < 0)
@@ -465,7 +471,8 @@ public class MiniBufferedReader extends AbstractMiniReader implements MiniReader
 	 * 
 	 * @exception MiniIOException If an I/O error occurs
 	 */
-	public void close() throws MiniIOException {
+	@Override
+    public void close() throws MiniIOException {
 		synchronized(this.lock) {
 			if(this.in == null)
 				return;

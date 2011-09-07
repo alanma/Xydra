@@ -32,15 +32,18 @@ public class MemoryGroupEvent implements XGroupEvent {
 		this.group = group;
 	}
 	
-	public XID getActor() {
+	@Override
+    public XID getActor() {
 		return this.actor;
 	}
 	
-	public ChangeType getChangeType() {
+	@Override
+    public ChangeType getChangeType() {
 		return this.type;
 	}
 	
-	public XID getGroup() {
+	@Override
+    public XID getGroup() {
 		return this.group;
 	}
 	

@@ -149,7 +149,7 @@ public interface XydraPersistence {
 	/**
 	 * @return the XID of this {@link XydraPersistence}. This helps a client to
 	 *         differentiate among several {@link XydraPersistence}
-	 *         implementations, e.g. when synchronising between several ov them.
+	 *         implementations, e.g. when synchronising between several of them.
 	 */
 	XID getRepositoryId();
 	

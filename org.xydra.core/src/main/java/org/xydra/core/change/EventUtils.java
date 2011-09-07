@@ -37,6 +37,7 @@ public class EventUtils {
 	 * @param event to be applied
 	 */
 	public static void applyEvent(XRevWritableModel model, XEvent event) {
+		assert event != null;
 		if(event instanceof XTransactionEvent) {
 			for(XEvent txnEvent : ((XTransactionEvent)event)) {
 				if(txnEvent.isImplied()) {
@@ -45,7 +46,7 @@ public class EventUtils {
 				applyEvent(model, txnEvent);
 			}
 		} else {
-			assert event instanceof XAtomicEvent;
+			assert event instanceof XAtomicEvent : event.getClass().getCanonicalName();
 			XAtomicEvent atomicEvent = (XAtomicEvent)event;
 			
 			if(atomicEvent instanceof XRepositoryEvent) {
@@ -160,7 +161,15 @@ public class EventUtils {
 		assert event.getChangedEntity().equals(model.getAddress());
 		switch(event.getChangeType()) {
 		case ADD: {
-			assert model.isEmpty() : " event " + event;
+			/*
+			 * if this triggers a bug repo.clear might have failed -- maybe a
+			 * test -only problem
+			 */
+			if(!model.isEmpty()) {
+				throw new IllegalStateException(
+				        "Cannot apply repository ADD event to non-empty model "
+				                + model.getAddress() + " " + model.getRevisionNumber());
+			}
 			model.setRevisionNumber(event.getRevisionNumber());
 			break;
 		}

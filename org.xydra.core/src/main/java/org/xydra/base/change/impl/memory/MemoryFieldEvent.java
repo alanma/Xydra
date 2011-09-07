@@ -267,11 +267,13 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 		return true;
 	}
 	
-	public XAddress getChangedEntity() {
+	@Override
+    public XAddress getChangedEntity() {
 		return getTarget();
 	}
 	
-	public XValue getNewValue() {
+	@Override
+    public XValue getNewValue() {
 		return this.newValue;
 	}
 	

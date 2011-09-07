@@ -38,23 +38,28 @@ public class LocalMemcache implements IMemCache {
 	
 	private static final byte[] NULL_VALUE = "null_value".getBytes();
 	
-	public int size() {
+	@Override
+    public int size() {
 		return this.internalMap.size();
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		return this.internalMap.isEmpty();
 	}
 	
-	public boolean containsKey(Object key) {
+	@Override
+    public boolean containsKey(Object key) {
 		return this.internalMap.containsKey(key);
 	}
 	
-	public boolean containsValue(Object value) {
+	@Override
+    public boolean containsValue(Object value) {
 		return this.internalMap.containsValue(valueToStored(value));
 	}
 	
-	public Object get(Object key) {
+	@Override
+    public Object get(Object key) {
 		byte[] bytes = this.internalMap.get(key);
 		if(bytes == null) {
 			return null;
@@ -63,7 +68,8 @@ public class LocalMemcache implements IMemCache {
 		return result;
 	}
 	
-	public Object put(Object key, Object value) {
+	@Override
+    public Object put(String key, Object value) {
 		controlCacheSize();
 		// transform null value & clone value
 		byte[] oldValue = this.internalMap.put(key, valueToStored(value));
@@ -120,26 +126,31 @@ public class LocalMemcache implements IMemCache {
 		}
 	}
 	
-	public Object remove(Object key) {
+	@Override
+    public Object remove(Object key) {
 		return this.internalMap.remove(key);
 	}
 	
-	public void putAll(Map<? extends Object,? extends Object> m) {
+	@Override
+    public void putAll(Map<? extends String,? extends Object> m) {
 		// transform values implicitly
-		for(Map.Entry<? extends Object,? extends Object> entry : m.entrySet()) {
+		for(Map.Entry<? extends String,? extends Object> entry : m.entrySet()) {
 			this.put(entry.getKey(), entry.getValue());
 		}
 	}
 	
-	public void clear() {
+	@Override
+    public void clear() {
 		this.internalMap.clear();
 	}
 	
-	public Set<Object> keySet() {
+	@Override
+    public Set<String> keySet() {
 		return this.internalMap.keySet();
 	}
 	
-	public Collection<Object> values() {
+	@Override
+    public Collection<Object> values() {
 		// transform null values
 		List<Object> result = new LinkedList<Object>();
 		for(byte[] o : this.internalMap.values()) {
@@ -148,10 +159,11 @@ public class LocalMemcache implements IMemCache {
 		return result;
 	}
 	
-	public Set<java.util.Map.Entry<Object,Object>> entrySet() {
+	@Override
+    public Set<java.util.Map.Entry<String,Object>> entrySet() {
 		// transform null values
-		Map<Object,Object> result = new HashMap<Object,Object>();
-		for(Map.Entry<Object,byte[]> e : this.internalMap.entrySet()) {
+		Map<String,Object> result = new HashMap<String,Object>();
+		for(Map.Entry<String,byte[]> e : this.internalMap.entrySet()) {
 			result.put(e.getKey(), storedToValue(e.getValue()));
 		}
 		return result.entrySet();
@@ -167,11 +179,11 @@ public class LocalMemcache implements IMemCache {
 		return this.internalMap.hashCode();
 	}
 	
-	private ConcurrentHashMap<Object,byte[]> internalMap;
+	private ConcurrentHashMap<String,byte[]> internalMap;
 	
 	public LocalMemcache() {
 		log.info("Using LocalMemcache");
-		this.internalMap = new ConcurrentHashMap<Object,byte[]>();
+		this.internalMap = new ConcurrentHashMap<String,byte[]>();
 	}
 	
 	@Override
@@ -180,9 +192,9 @@ public class LocalMemcache implements IMemCache {
 	}
 	
 	@Override
-	public Map<Object,Object> getAll(Collection<Object> keys) {
-		Map<Object,Object> result = new HashMap<Object,Object>();
-		for(Object key : keys) {
+	public Map<String,Object> getAll(Collection<String> keys) {
+		Map<String,Object> result = new HashMap<String,Object>();
+		for(String key : keys) {
 			Object value = this.get(key);
 			if(value != null) {
 				result.put(key, value);
@@ -192,8 +204,75 @@ public class LocalMemcache implements IMemCache {
 	}
 	
 	@Override
-	public void putIfValueIsNull(Object key, Object value) {
+	public void putIfValueIsNull(String key, Object value) {
 		this.internalMap.putIfAbsent(key, valueToStored(value));
+	}
+	
+	public static class IdentifiableImpl implements IdentifiableValue {
+		
+		private Object o;
+		
+		public IdentifiableImpl(Object o) {
+			this.o = o;
+		}
+		
+		@Override
+		public Object getValue() {
+			return this.o;
+		}
+		
+	}
+	
+	@Override
+	public boolean putIfUntouched(String key, IdentifiableValue oldValue, Object newValue) {
+		synchronized(this.internalMap) {
+			Object current = get(key);
+			if(oldValue.getValue() == null) {
+				if(current == null) {
+					put(key, newValue);
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				if(current.equals(oldValue.getValue())) {
+					put(key, newValue);
+					return true;
+				} else {
+					return false;
+				}
+			}
+		}
+	}
+	
+	@Override
+	public IdentifiableValue getIdentifiable(String key) {
+		Object o = get(key);
+		return new IdentifiableImpl(o);
+	}
+	
+	@Override
+	public Map<String,Long> incrementAll(Map<String,Long> offsets, long initialValue) {
+		Map<String,Long> result = new HashMap<String,Long>();
+		synchronized(this.internalMap) {
+			for(java.util.Map.Entry<String,Long> entry : offsets.entrySet()) {
+				String key = entry.getKey();
+				byte[] valueBytes = this.internalMap.get(key);
+				long newValue;
+				if(valueBytes == null) {
+					newValue = initialValue;
+				} else {
+					Object value = storedToValue(valueBytes);
+					assert value instanceof Long;
+					long oldValue = (Long)value;
+					newValue = oldValue + entry.getValue();
+				}
+				result.put(key, newValue);
+				valueBytes = valueToStored(newValue);
+				this.internalMap.put(key, valueBytes);
+			}
+		}
+		return result;
 	}
 	
 }

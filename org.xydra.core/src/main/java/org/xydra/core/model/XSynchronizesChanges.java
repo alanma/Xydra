@@ -40,7 +40,8 @@ public interface XSynchronizesChanges extends IHasChangeLog, XExecutesCommands, 
 	 * @return the {@link XChangeLog} which is logging the {@link XEvent
 	 *         XEvents} which happen on this XSynchronizeChanges
 	 */
-	XChangeLog getChangeLog();
+	@Override
+    XChangeLog getChangeLog();
 	
 	// TODO document
 	XLocalChange[] getLocalChanges();

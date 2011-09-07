@@ -24,7 +24,8 @@ public class HookAuthorisationDatabase implements XAuthorisationDatabaseWitListe
 		this.authorisationDb = authorisationDatabase;
 	}
 	
-	public void addListener(XAccessListener listener) {
+	@Override
+    public void addListener(XAccessListener listener) {
 		this.authorisationDb.addListener(listener);
 	}
 	
@@ -34,7 +35,8 @@ public class HookAuthorisationDatabase implements XAuthorisationDatabaseWitListe
 	protected void beforeWrite() {
 	}
 	
-	public XAccessRightValue getAccessDefinition(XID actor, XAddress resource, XID access)
+	@Override
+    public XAccessRightValue getAccessDefinition(XID actor, XAddress resource, XID access)
 	        throws IllegalArgumentException {
 		beforeRead();
 		return this.authorisationDb.getAccessDefinition(actor, resource, access);
@@ -44,26 +46,31 @@ public class HookAuthorisationDatabase implements XAuthorisationDatabaseWitListe
 		return this.authorisationDb;
 	}
 	
-	public Set<XAccessRightDefinition> getDefinitions() {
+	@Override
+    public Set<XAccessRightDefinition> getDefinitions() {
 		beforeRead();
 		return this.authorisationDb.getDefinitions();
 	}
 	
-	public boolean isAccessDefined(XID actor, XAddress resource, XID access) {
+	@Override
+    public boolean isAccessDefined(XID actor, XAddress resource, XID access) {
 		beforeRead();
 		return this.authorisationDb.isAccessDefined(actor, resource, access);
 	}
 	
-	public void removeListener(XAccessListener listener) {
+	@Override
+    public void removeListener(XAccessListener listener) {
 		this.authorisationDb.removeListener(listener);
 	}
 	
-	public void resetAccess(XID actor, XAddress resource, XID access) {
+	@Override
+    public void resetAccess(XID actor, XAddress resource, XID access) {
 		beforeWrite();
 		this.authorisationDb.resetAccess(actor, resource, access);
 	}
 	
-	public void setAccess(XID actor, XAddress resource, XID access, boolean allowed) {
+	@Override
+    public void setAccess(XID actor, XAddress resource, XID access, boolean allowed) {
 		beforeWrite();
 		this.authorisationDb.setAccess(actor, resource, access, allowed);
 	}

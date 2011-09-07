@@ -9,11 +9,13 @@ import org.xydra.core.index.IUniqueObjectIndex;
 
 public class IndexFactoryImpl implements IIndexFactory {
 	
-	public IObjectIndex createObjectIndex(XID fieldId, XWritableObject indexObject) {
+	@Override
+    public IObjectIndex createObjectIndex(XID fieldId, XWritableObject indexObject) {
 		return new ObjectIndex(fieldId, indexObject);
 	}
 	
-	public IUniqueObjectIndex createUniqueObjectIndex(XID fieldId, XWritableObject indexObject) {
+	@Override
+    public IUniqueObjectIndex createUniqueObjectIndex(XID fieldId, XWritableObject indexObject) {
 		return new UniqueObjectIndex(fieldId, indexObject);
 	}
 }

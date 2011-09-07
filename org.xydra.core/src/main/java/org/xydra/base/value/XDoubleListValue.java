@@ -18,7 +18,8 @@ public interface XDoubleListValue extends XNumberListValue<Double> {
 	 * @return a new {@link XDoubleListValue} containing all entries from this
 	 *         value as well as the specified entry.
 	 */
-	XDoubleListValue add(Double entry);
+	@Override
+    XDoubleListValue add(Double entry);
 	
 	/**
 	 * Creates a new {@link XDoubleListValue} containing all entries from this
@@ -33,7 +34,8 @@ public interface XDoubleListValue extends XNumberListValue<Double> {
 	 * @throws IndexOutOfBoundsException if index is negative or greater than
 	 *             size()
 	 */
-	XDoubleListValue add(int index, Double entry);
+	@Override
+    XDoubleListValue add(int index, Double entry);
 	
 	/**
 	 * Returns the Double values as an array in the order they were added to the
@@ -56,7 +58,8 @@ public interface XDoubleListValue extends XNumberListValue<Double> {
 	 * @return a new {@link XDoubleListValue} containing all entries from this
 	 *         value except the given entry
 	 */
-	XDoubleListValue remove(Double entry);
+	@Override
+    XDoubleListValue remove(Double entry);
 	
 	/**
 	 * Creates a new {@link XDoubleListValue} containing all entries from this
@@ -70,6 +73,7 @@ public interface XDoubleListValue extends XNumberListValue<Double> {
 	 * @throws IndexOutOfBoundsException if index is negative or greater than or
 	 *             equal to size()
 	 */
-	XDoubleListValue remove(int index);
+	@Override
+    XDoubleListValue remove(int index);
 	
 }

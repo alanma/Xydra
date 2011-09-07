@@ -19,7 +19,8 @@ public interface XIDSetValue extends XSetValue<XID> {
 	 * @return a new {@link XIDSetValue} containing all entries from this value
 	 *         as well as the given entry
 	 */
-	XIDSetValue add(XID entry);
+	@Override
+    XIDSetValue add(XID entry);
 	
 	/**
 	 * Returns the contents of this XIDSetValue as an array.
@@ -38,6 +39,7 @@ public interface XIDSetValue extends XSetValue<XID> {
 	 * @return a new {@link XIDSetValue} containing all entries from this value
 	 *         expect the given entry
 	 */
-	XIDSetValue remove(XID entry);
+	@Override
+    XIDSetValue remove(XID entry);
 	
 }

@@ -37,7 +37,8 @@ public class MemoryChangeLogState implements XChangeLogState {
 		this.baseAddr = baseAddr;
 	}
 	
-	public void appendEvent(XEvent event) {
+	@Override
+    public void appendEvent(XEvent event) {
 		
 		if(event == null) {
 			this.events.add(null);
@@ -51,25 +52,30 @@ public class MemoryChangeLogState implements XChangeLogState {
 		}
 	}
 	
-	public XAddress getBaseAddress() {
+	@Override
+    public XAddress getBaseAddress() {
 		return this.baseAddr;
 	}
 	
-	public long getCurrentRevisionNumber() {
+	@Override
+    public long getCurrentRevisionNumber() {
 		return this.revisionNumber + this.events.size() - 1;
 	}
 	
-	public XEvent getEvent(long revisionNumber) {
+	@Override
+    public XEvent getEvent(long revisionNumber) {
 		XEvent event = this.events.get((int)(revisionNumber - this.revisionNumber));
 		assert event == null || event.getRevisionNumber() == revisionNumber;
 		return event;
 	}
 	
-	public long getFirstRevisionNumber() {
+	@Override
+    public long getFirstRevisionNumber() {
 		return this.revisionNumber;
 	}
 	
-	public void setFirstRevisionNumber(long rev) {
+	@Override
+    public void setFirstRevisionNumber(long rev) {
 		if(!this.events.isEmpty()) {
 			throw new IllegalStateException(
 			        "cannot set start revision number of non-empty change log");
@@ -83,7 +89,8 @@ public class MemoryChangeLogState implements XChangeLogState {
 		        + " currentRev=" + getCurrentRevisionNumber() + " events=" + this.events.toString();
 	}
 	
-	public boolean truncateToRevision(long revisionNumber) {
+	@Override
+    public boolean truncateToRevision(long revisionNumber) {
 		if(revisionNumber > getCurrentRevisionNumber()) {
 			return false;
 		}

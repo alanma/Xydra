@@ -235,7 +235,8 @@ public class SimpleSyntaxUtils {
 			sortedObjectIdS.add(objectId);
 		}
 		Collections.sort(sortedObjectIdS, new Comparator<XID>() {
-			public int compare(XID o1, XID o2) {
+			@Override
+            public int compare(XID o1, XID o2) {
 				return o1.toString().compareTo(o2.toString());
 			}
 		});
@@ -252,7 +253,8 @@ public class SimpleSyntaxUtils {
 					sortedFieldIdS.add(fieldId);
 				}
 				Collections.sort(sortedFieldIdS, new Comparator<XID>() {
-					public int compare(XID o1, XID o2) {
+					@Override
+                    public int compare(XID o1, XID o2) {
 						return o1.toString().compareTo(o2.toString());
 					}
 				});

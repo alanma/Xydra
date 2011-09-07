@@ -58,7 +58,8 @@ public class CachingOrMemoryAuthenticationDatabase implements XAuthenticationDat
 	/**
 	 * Clear this database and try to clear the underlying database as well.
 	 */
-	public void clear() {
+	@Override
+    public void clear() {
 		clearCache();
 		this.secondLevel.clear();
 	}

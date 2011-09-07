@@ -49,7 +49,8 @@ public interface XReadableRepository extends XEntity, Iterable<XID> {
 	 * @return an iterator over the {@link XID XIDs} of the child-models of this
 	 *         XBaseRepository.
 	 */
-	@ReadOperation
+	@Override
+    @ReadOperation
 	Iterator<XID> iterator();
 	
 }

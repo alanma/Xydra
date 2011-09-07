@@ -16,7 +16,8 @@ import com.google.gwt.core.client.EntryPoint;
  */
 public class DummyEntryPoint implements EntryPoint {
 	
-	public void onModuleLoad() {
+	@Override
+    public void onModuleLoad() {
 		XID actorId = XX.toId("gwt-moduleload");
 		X.createMemoryRepository(actorId).createModel(XX.createUniqueId()).createObject(
 		        XX.toId("hello world"));

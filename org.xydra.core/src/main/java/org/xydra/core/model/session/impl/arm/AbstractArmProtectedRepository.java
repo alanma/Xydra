@@ -42,35 +42,40 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 		assert arm != null;
 	}
 	
-	public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
+	@Override
+    public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
 		
 		checkReadAccess();
 		
 		return this.repo.addListenerForFieldEvents(changeListener);
 	}
 	
-	public boolean addListenerForModelEvents(XModelEventListener changeListener) {
+	@Override
+    public boolean addListenerForModelEvents(XModelEventListener changeListener) {
 		
 		checkReadAccess();
 		
 		return this.repo.addListenerForModelEvents(changeListener);
 	}
 	
-	public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
+	@Override
+    public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
 		
 		checkReadAccess();
 		
 		return this.repo.addListenerForObjectEvents(changeListener);
 	}
 	
-	public boolean addListenerForRepositoryEvents(XRepositoryEventListener changeListener) {
+	@Override
+    public boolean addListenerForRepositoryEvents(XRepositoryEventListener changeListener) {
 		
 		checkReadAccess();
 		
 		return this.repo.addListenerForRepositoryEvents(changeListener);
 	}
 	
-	public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
+	@Override
+    public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
 		
 		checkReadAccess();
 		
@@ -83,7 +88,8 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 		}
 	}
 	
-	public XProtectedModel createModel(XID modelId) {
+	@Override
+    public XProtectedModel createModel(XID modelId) {
 		
 		if(!this.arm.canWrite(this.actor, getAddress())) {
 			throw new AccessException(this.actor + " cannot write to " + getAddress());
@@ -96,7 +102,8 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 		return new ArmProtectedModel(model, getArmForModel(modelId), this.actor);
 	}
 	
-	public long executeCommand(XCommand command) {
+	@Override
+    public long executeCommand(XCommand command) {
 		
 		if(command instanceof XRepositoryCommand) {
 			return executeRepositoryCommand((XRepositoryCommand)command);
@@ -111,7 +118,8 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 		return this.repo.executeCommand(command);
 	}
 	
-	public long executeRepositoryCommand(XRepositoryCommand command) {
+	@Override
+    public long executeRepositoryCommand(XRepositoryCommand command) {
 		
 		if(!getArmForModel(command.getModelId()).canExecute(this.actor, command)) {
 			throw new AccessException(this.actor + " cannot execute " + command);
@@ -120,11 +128,13 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 		return this.repo.executeRepositoryCommand(command);
 	}
 	
-	public XID getActor() {
+	@Override
+    public XID getActor() {
 		return this.actor;
 	}
 	
-	public XAddress getAddress() {
+	@Override
+    public XAddress getAddress() {
 		return this.repo.getAddress();
 	}
 	
@@ -134,11 +144,13 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 	
 	abstract protected XAuthorisationManager getArmForModel(XID modelId);
 	
-	public XID getID() {
+	@Override
+    public XID getID() {
 		return this.repo.getID();
 	}
 	
-	public XProtectedModel getModel(XID modelId) {
+	@Override
+    public XProtectedModel getModel(XID modelId) {
 		
 		XAuthorisationManager modelArm = getArmForModel(modelId);
 		
@@ -156,48 +168,57 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 		return new ArmProtectedModel(model, modelArm, this.actor);
 	}
 	
-	public boolean hasModel(XID modelId) {
+	@Override
+    public boolean hasModel(XID modelId) {
 		
 		checkReadAccess();
 		
 		return this.repo.hasModel(modelId);
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		
 		checkReadAccess();
 		
 		return this.repo.isEmpty();
 	}
 	
-	public Iterator<XID> iterator() {
+	@Override
+    public Iterator<XID> iterator() {
 		
 		checkReadAccess();
 		
 		return this.repo.iterator();
 	}
 	
-	public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
+	@Override
+    public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
 		return this.repo.removeListenerForFieldEvents(changeListener);
 	}
 	
-	public boolean removeListenerForModelEvents(XModelEventListener changeListener) {
+	@Override
+    public boolean removeListenerForModelEvents(XModelEventListener changeListener) {
 		return this.repo.removeListenerForModelEvents(changeListener);
 	}
 	
-	public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
+	@Override
+    public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
 		return this.repo.removeListenerForObjectEvents(changeListener);
 	}
 	
-	public boolean removeListenerForRepositoryEvents(XRepositoryEventListener changeListener) {
+	@Override
+    public boolean removeListenerForRepositoryEvents(XRepositoryEventListener changeListener) {
 		return this.repo.removeListenerForRepositoryEvents(changeListener);
 	}
 	
-	public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
+	@Override
+    public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
 		return this.repo.removeListenerForTransactionEvents(changeListener);
 	}
 	
-	public boolean removeModel(XID modelId) {
+	@Override
+    public boolean removeModel(XID modelId) {
 		
 		if(!getArmForModel(modelId).canRemoveModel(this.actor, getAddress(), modelId)) {
 			throw new AccessException(this.actor + " cannot remove " + modelId + " from "

@@ -191,31 +191,38 @@ public abstract class AbstractTransactionEvent implements XTransactionEvent {
 		return true;
 	}
 	
-	public XID getActor() {
+	@Override
+    public XID getActor() {
 		return this.actor;
 	}
 	
-	public XAddress getChangedEntity() {
+	@Override
+    public XAddress getChangedEntity() {
 		return this.target;
 	}
 	
-	public ChangeType getChangeType() {
+	@Override
+    public ChangeType getChangeType() {
 		return ChangeType.TRANSACTION;
 	}
 	
-	public long getOldFieldRevision() {
+	@Override
+    public long getOldFieldRevision() {
 		return XEvent.RevisionOfEntityNotSet;
 	}
 	
-	public long getOldModelRevision() {
+	@Override
+    public long getOldModelRevision() {
 		return this.modelRevision;
 	}
 	
-	public long getOldObjectRevision() {
+	@Override
+    public long getOldObjectRevision() {
 		return this.objectRevision;
 	}
 	
-	public long getRevisionNumber() {
+	@Override
+    public long getRevisionNumber() {
 		
 		if(this.modelRevision >= 0) {
 			return this.modelRevision + 1;
@@ -228,7 +235,8 @@ public abstract class AbstractTransactionEvent implements XTransactionEvent {
 		return 0;
 	}
 	
-	public XAddress getTarget() {
+	@Override
+    public XAddress getTarget() {
 		return this.target;
 	}
 	
@@ -261,7 +269,8 @@ public abstract class AbstractTransactionEvent implements XTransactionEvent {
 		return result;
 	}
 	
-	public boolean inTransaction() {
+	@Override
+    public boolean inTransaction() {
 		// transactions never occur as events during transactions
 		return false;
 	}

@@ -18,7 +18,8 @@ public interface XBooleanListValue extends XListValue<Boolean> {
 	 * @return a new {@link XBooleanListValue} containing all entries from this
 	 *         value as well as the specified entry.
 	 */
-	XBooleanListValue add(Boolean entry);
+	@Override
+    XBooleanListValue add(Boolean entry);
 	
 	/**
 	 * Creates a new {@link XBooleanListValue} containing all entries from this
@@ -33,7 +34,8 @@ public interface XBooleanListValue extends XListValue<Boolean> {
 	 * @throws IndexOutOfBoundsException if index is negative or greater than
 	 *             size()
 	 */
-	XBooleanListValue add(int index, Boolean entry);
+	@Override
+    XBooleanListValue add(int index, Boolean entry);
 	
 	/**
 	 * Returns the boolean values as an array in the order they were added to
@@ -57,7 +59,8 @@ public interface XBooleanListValue extends XListValue<Boolean> {
 	 * @return a new {@link XBooleanListValue} containing all entries from this
 	 *         value except the given entry
 	 */
-	XBooleanListValue remove(Boolean entry);
+	@Override
+    XBooleanListValue remove(Boolean entry);
 	
 	/**
 	 * Creates a new {@link XBooleanListValue} containing all entries from this
@@ -71,6 +74,7 @@ public interface XBooleanListValue extends XListValue<Boolean> {
 	 * @throws IndexOutOfBoundsException if index is negative or greater than or
 	 *             equal to size()
 	 */
-	XBooleanListValue remove(int index);
+	@Override
+    XBooleanListValue remove(int index);
 	
 }

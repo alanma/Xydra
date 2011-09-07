@@ -37,7 +37,8 @@ public class MemoryLongListValue extends MemoryListValue<Long> implements XLongL
 		System.arraycopy(content, 0, this.list, 0, content.length);
 	}
 	
-	public XLongListValue add(int index, Long entry) {
+	@Override
+    public XLongListValue add(int index, Long entry) {
 		int size = this.list.length;
 		if(index < 0 || index > size) {
 			throw new IndexOutOfBoundsException();
@@ -49,11 +50,13 @@ public class MemoryLongListValue extends MemoryListValue<Long> implements XLongL
 		return v;
 	}
 	
-	public XLongListValue add(Long entry) {
+	@Override
+    public XLongListValue add(Long entry) {
 		return add(this.list.length, entry);
 	}
 	
-	public long[] contents() {
+	@Override
+    public long[] contents() {
 		long[] array = new long[this.list.length];
 		System.arraycopy(this.list, 0, array, 0, this.list.length);
 		return array;
@@ -65,7 +68,8 @@ public class MemoryLongListValue extends MemoryListValue<Long> implements XLongL
 		        && XI.equalsIterator(this.iterator(), ((XLongListValue)other).iterator());
 	}
 	
-	public Long get(int index) {
+	@Override
+    public Long get(int index) {
 		return this.list[index];
 	}
 	
@@ -74,7 +78,8 @@ public class MemoryLongListValue extends MemoryListValue<Long> implements XLongL
 		return Arrays.hashCode(this.list);
 	}
 	
-	public XLongListValue remove(int index) {
+	@Override
+    public XLongListValue remove(int index) {
 		int size = this.list.length;
 		if(index < 0 || index >= size) {
 			throw new IndexOutOfBoundsException();
@@ -85,7 +90,8 @@ public class MemoryLongListValue extends MemoryListValue<Long> implements XLongL
 		return v;
 	}
 	
-	public XLongListValue remove(Long entry) {
+	@Override
+    public XLongListValue remove(Long entry) {
 		int index = indexOf(entry);
 		if(index < 0) {
 			return this;
@@ -93,17 +99,20 @@ public class MemoryLongListValue extends MemoryListValue<Long> implements XLongL
 		return remove(index);
 	}
 	
-	public int size() {
+	@Override
+    public int size() {
 		return this.list.length;
 	}
 	
-	public Long[] toArray() {
+	@Override
+    public Long[] toArray() {
 		Long[] array = new Long[this.list.length];
 		fillArray(array);
 		return array;
 	}
 	
-	public Number[] toNumberArray() {
+	@Override
+    public Number[] toNumberArray() {
 		Number[] array = new Number[this.list.length];
 		int i = 0;
 		for(Number e : this) {

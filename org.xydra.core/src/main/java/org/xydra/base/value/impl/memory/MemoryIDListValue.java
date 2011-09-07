@@ -60,16 +60,19 @@ public class MemoryIDListValue extends MemoryListValue<XID> implements XIDListVa
 		System.arraycopy(content, 0, this.list, 0, content.length);
 	}
 	
-	public XIDListValue add(int index, XID entry) {
+	@Override
+    public XIDListValue add(int index, XID entry) {
 		XID[] newList = createArrayWithEntryInsertedAtPosition(this.list, index, entry);
 		return new MemoryIDListValue(newList);
 	}
 	
-	public XIDListValue add(XID entry) {
+	@Override
+    public XIDListValue add(XID entry) {
 		return add(this.list.length, entry);
 	}
 	
-	public XID[] contents() {
+	@Override
+    public XID[] contents() {
 		XID[] array = new XID[this.list.length];
 		System.arraycopy(this.list, 0, array, 0, this.list.length);
 		return array;
@@ -81,7 +84,8 @@ public class MemoryIDListValue extends MemoryListValue<XID> implements XIDListVa
 		        && XI.equalsIterator(this.iterator(), ((XIDListValue)other).iterator());
 	}
 	
-	public XID get(int index) {
+	@Override
+    public XID get(int index) {
 		return this.list[index];
 	}
 	
@@ -90,12 +94,14 @@ public class MemoryIDListValue extends MemoryListValue<XID> implements XIDListVa
 		return Arrays.hashCode(this.list);
 	}
 	
-	public XIDListValue remove(int index) {
+	@Override
+    public XIDListValue remove(int index) {
 		XID[] newList = createArrayWithEntryRemovedAtPosition(this.contents(), index);
 		return new MemoryIDListValue(newList);
 	}
 	
-	public XIDListValue remove(XID entry) {
+	@Override
+    public XIDListValue remove(XID entry) {
 		int index = indexOf(entry);
 		if(index < 0) {
 			return this;
@@ -103,11 +109,13 @@ public class MemoryIDListValue extends MemoryListValue<XID> implements XIDListVa
 		return remove(index);
 	}
 	
-	public int size() {
+	@Override
+    public int size() {
 		return this.list.length;
 	}
 	
-	public XID[] toArray() {
+	@Override
+    public XID[] toArray() {
 		return contents();
 	}
 	

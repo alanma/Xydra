@@ -25,7 +25,8 @@ public interface XAddressListValue extends XListValue<XAddress> {
 	 * @throws IndexOutOfBoundsException if index is negative or greater than
 	 *             size()
 	 */
-	XAddressListValue add(int index, XAddress entry);
+	@Override
+    XAddressListValue add(int index, XAddress entry);
 	
 	/**
 	 * Creates a new {@link XAddressListValue} containing all entries from this
@@ -37,7 +38,8 @@ public interface XAddressListValue extends XListValue<XAddress> {
 	 * @return a new {@link XAddressListValue} containing all entries from this
 	 *         value as well as the specified entry.
 	 */
-	XAddressListValue add(XAddress entry);
+	@Override
+    XAddressListValue add(XAddress entry);
 	
 	/**
 	 * Returns the {@link XID} values as an array in the order they were added
@@ -62,7 +64,8 @@ public interface XAddressListValue extends XListValue<XAddress> {
 	 * @throws IndexOutOfBoundsException if index is negative or greater than or
 	 *             equal to size()
 	 */
-	XAddressListValue remove(int index);
+	@Override
+    XAddressListValue remove(int index);
 	
 	/**
 	 * Creates a new {@link XAddressListValue} containing all entries from this
@@ -74,6 +77,7 @@ public interface XAddressListValue extends XListValue<XAddress> {
 	 * @return a new {@link XAddressListValue} containing all entries from this
 	 *         value except the given entry
 	 */
-	XAddressListValue remove(XAddress entry);
+	@Override
+    XAddressListValue remove(XAddress entry);
 	
 }

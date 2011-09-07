@@ -34,7 +34,8 @@ public interface XModelCommand extends XAtomicCommand {
 	 * @return the current revision number of the {@link XObject} which will be
 	 *         added/removed
 	 */
-	long getRevisionNumber();
+	@Override
+    long getRevisionNumber();
 	
 	/**
 	 * A forced add will succeed even if an {@link XObject} with the specified
@@ -51,6 +52,7 @@ public interface XModelCommand extends XAtomicCommand {
 	 * 
 	 * @return true, if this event is forced.
 	 */
-	boolean isForced();
+	@Override
+    boolean isForced();
 	
 }

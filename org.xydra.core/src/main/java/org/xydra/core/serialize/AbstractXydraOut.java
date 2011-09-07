@@ -17,7 +17,8 @@ abstract public class AbstractXydraOut implements XydraOut {
 	private boolean indent = true;
 	private boolean whitespace = false;
 	
-	public void enableWhitespace(boolean whitespace, boolean idententation) {
+	@Override
+    public void enableWhitespace(boolean whitespace, boolean idententation) {
 		this.whitespace = whitespace;
 		this.indent = idententation;
 	}
@@ -126,7 +127,8 @@ abstract public class AbstractXydraOut implements XydraOut {
 		}
 	}
 	
-	public void nullElement() {
+	@Override
+    public void nullElement() {
 		
 		checkCanAddChild();
 		
@@ -302,7 +304,8 @@ abstract public class AbstractXydraOut implements XydraOut {
 		}
 	}
 	
-	public String getData() {
+	@Override
+    public String getData() {
 		
 		if(this.current != null) {
 			error("cannot get result before closing all elements");
@@ -316,11 +319,13 @@ abstract public class AbstractXydraOut implements XydraOut {
 		return this.writer.toString();
 	}
 	
-	public boolean isClosed() {
+	@Override
+    public boolean isClosed() {
 		return this.current == null;
 	}
 	
-	public void flush() {
+	@Override
+    public void flush() {
 		this.writer.flush();
 	}
 	

@@ -137,7 +137,8 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 		return true;
 	}
 	
-	public XAddress getChangedEntity() {
+	@Override
+    public XAddress getChangedEntity() {
 		return XX.resolveObject(getTarget(), getObjectId());
 	}
 	

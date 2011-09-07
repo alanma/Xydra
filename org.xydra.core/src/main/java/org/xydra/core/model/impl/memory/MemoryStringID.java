@@ -30,7 +30,8 @@ public class MemoryStringID implements XID {
 		this.string = uriString;
 	}
 	
-	public int compareTo(XID o) {
+	@Override
+    public int compareTo(XID o) {
 		return this.toString().compareTo(o.toString());
 	}
 	

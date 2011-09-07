@@ -122,7 +122,8 @@ public class MemoryObjectCommand extends MemoryAtomicCommand implements XObjectC
 		return true;
 	}
 	
-	public XAddress getChangedEntity() {
+	@Override
+    public XAddress getChangedEntity() {
 		return XX.resolveField(getTarget(), getFieldId());
 	}
 	

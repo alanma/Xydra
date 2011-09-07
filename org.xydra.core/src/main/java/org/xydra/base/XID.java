@@ -23,6 +23,7 @@ public interface XID extends XSingleValue<XID>, Serializable, Comparable<XID> {
 	 *         compatibility with all kinds of back-ends such as Google
 	 *         AppEngine. {@link XIDProvider#fromString(String)}
 	 */
-	String toString();
+	@Override
+    String toString();
 	
 }

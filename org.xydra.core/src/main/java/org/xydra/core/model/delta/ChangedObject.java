@@ -192,7 +192,8 @@ public class ChangedObject implements XWritableObject {
 		return n;
 	}
 	
-	public XWritableField createField(XID fieldId) {
+	@Override
+    public XWritableField createField(XID fieldId) {
 		
 		XWritableField oldField = getField(fieldId);
 		if(oldField != null) {
@@ -229,7 +230,8 @@ public class ChangedObject implements XWritableObject {
 		
 	}
 	
-	public XAddress getAddress() {
+	@Override
+    public XAddress getAddress() {
 		return this.base.getAddress();
 	}
 	
@@ -244,7 +246,8 @@ public class ChangedObject implements XWritableObject {
 		return this.changed.values();
 	}
 	
-	public XWritableField getField(XID fieldId) {
+	@Override
+    public XWritableField getField(XID fieldId) {
 		assert fieldId != null;
 		assert this.base != null;
 		
@@ -275,7 +278,8 @@ public class ChangedObject implements XWritableObject {
 		return changedField;
 	}
 	
-	public XID getID() {
+	@Override
+    public XID getID() {
 		return this.base.getID();
 	}
 	
@@ -312,16 +316,19 @@ public class ChangedObject implements XWritableObject {
 	 * 
 	 * @return the revision number of the original {@link XReadableObject}
 	 */
-	public long getRevisionNumber() {
+	@Override
+    public long getRevisionNumber() {
 		return this.base.getRevisionNumber();
 	}
 	
-	public boolean hasField(XID fieldId) {
+	@Override
+    public boolean hasField(XID fieldId) {
 		return this.added.containsKey(fieldId)
 		        || (!this.removed.contains(fieldId) && this.base.hasField(fieldId));
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		
 		if(!this.added.isEmpty()) {
 			return false;
@@ -344,7 +351,8 @@ public class ChangedObject implements XWritableObject {
 		return true;
 	}
 	
-	public Iterator<XID> iterator() {
+	@Override
+    public Iterator<XID> iterator() {
 		
 		Iterator<XID> filtered = new AbstractFilteringIterator<XID>(this.base.iterator()) {
 			@Override
@@ -356,7 +364,8 @@ public class ChangedObject implements XWritableObject {
 		return new BagUnionIterator<XID>(filtered, this.added.keySet().iterator());
 	}
 	
-	public boolean removeField(XID fieldId) {
+	@Override
+    public boolean removeField(XID fieldId) {
 		
 		if(this.added.containsKey(fieldId)) {
 			

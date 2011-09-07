@@ -26,34 +26,41 @@ public class ReadableModelWithOneObject implements XReadableModel {
 		this.object = object;
 	}
 	
-	public XAddress getAddress() {
+	@Override
+    public XAddress getAddress() {
 		return this.address;
 	}
 	
-	public XID getID() {
+	@Override
+    public XID getID() {
 		return this.address.getModel();
 	}
 	
-	public XReadableObject getObject(XID objectId) {
+	@Override
+    public XReadableObject getObject(XID objectId) {
 		if(!this.object.getID().equals(objectId)) {
 			return null;
 		}
 		return this.object;
 	}
 	
-	public long getRevisionNumber() {
+	@Override
+    public long getRevisionNumber() {
 		throw new IllegalArgumentException();
 	}
 	
-	public boolean hasObject(XID objectId) {
+	@Override
+    public boolean hasObject(XID objectId) {
 		return this.object.getID().equals(objectId);
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		return false;
 	}
 	
-	public Iterator<XID> iterator() {
+	@Override
+    public Iterator<XID> iterator() {
 		return new SingleValueIterator<XID>(this.object.getID());
 	}
 	

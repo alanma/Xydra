@@ -33,7 +33,8 @@ public interface XLoggedModel extends XWritableModel, XSendsModelEvents, XSendsO
 	 * @return The {@link XLoggedObject} with the given {@link XID} or null, if
 	 *         no corresponding {@link XLoggedObject} exists
 	 */
-	@ReadOperation
+	@Override
+    @ReadOperation
 	XLoggedObject getObject(XID objectId);
 	
 }

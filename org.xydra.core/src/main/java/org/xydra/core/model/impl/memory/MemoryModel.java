@@ -149,7 +149,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		return log;
 	}
 	
-	public boolean addListenerForModelEvents(XModelEventListener changeListener) {
+	@Override
+    public boolean addListenerForModelEvents(XModelEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.modelChangeListenerCollection.add(changeListener);
 		}
@@ -171,7 +172,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		// models can always sync
 	}
 	
-	public MemoryObject createObject(XID objectId) {
+	@Override
+    public MemoryObject createObject(XID objectId) {
 		
 		XModelCommand command = MemoryModelCommand.createAddCommand(getAddress(), true, objectId);
 		
@@ -330,11 +332,13 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		}
 	}
 	
-	public long executeCommand(XCommand command) {
+	@Override
+    public long executeCommand(XCommand command) {
 		return executeCommand(command, null);
 	}
 	
-	public long executeCommand(XCommand command, XLocalChangeCallback callback) {
+	@Override
+    public long executeCommand(XCommand command, XLocalChangeCallback callback) {
 		
 		if(command instanceof XTransaction) {
 			return executeTransaction((XTransaction)command, callback);
@@ -348,7 +352,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		return object.executeCommand(command, callback);
 	}
 	
-	public long executeModelCommand(XModelCommand command) {
+	@Override
+    public long executeModelCommand(XModelCommand command) {
 		return executeModelCommand(command, null);
 	}
 	
@@ -477,7 +482,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		}
 	}
 	
-	public XAddress getAddress() {
+	@Override
+    public XAddress getAddress() {
 		return this.state.getAddress();
 	}
 	
@@ -497,7 +503,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		return this.father;
 	}
 	
-	public XID getID() {
+	@Override
+    public XID getID() {
 		synchronized(this.eventQueue) {
 			return this.state.getID();
 		}
@@ -585,7 +592,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		}
 	}
 	
-	public boolean hasObject(XID id) {
+	@Override
+    public boolean hasObject(XID id) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			return this.loadedObjects.containsKey(id) || this.state.hasObject(id);
@@ -599,14 +607,16 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		this.state.setRevisionNumber(newRevision);
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			return this.state.isEmpty();
 		}
 	}
 	
-	public Iterator<XID> iterator() {
+	@Override
+    public Iterator<XID> iterator() {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			return this.state.iterator();
@@ -632,13 +642,15 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		this.removed = true;
 	}
 	
-	public boolean removeListenerForModelEvents(XModelEventListener changeListener) {
+	@Override
+    public boolean removeListenerForModelEvents(XModelEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.modelChangeListenerCollection.remove(changeListener);
 		}
 	}
 	
-	public boolean removeObject(XID objectId) {
+	@Override
+    public boolean removeObject(XID objectId) {
 		
 		// no synchronization necessary here (except that in
 		// executeModelCommand())

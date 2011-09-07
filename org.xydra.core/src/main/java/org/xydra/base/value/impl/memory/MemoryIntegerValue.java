@@ -20,11 +20,13 @@ public class MemoryIntegerValue implements XIntegerValue {
 		this.content = content;
 	}
 	
-	public Number asNumber() {
+	@Override
+    public Number asNumber() {
 		return contents();
 	}
 	
-	public int contents() {
+	@Override
+    public int contents() {
 		return this.content;
 	}
 	

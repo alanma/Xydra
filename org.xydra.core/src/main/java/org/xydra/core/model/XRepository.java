@@ -40,7 +40,8 @@ public interface XRepository extends XWritableRepository, XSendsRepositoryEvents
 	 * @return the newly created {@link XModel} or the already existing
 	 *         {@link XModel} if the given {@link XID} was already taken
 	 */
-	@ModificationOperation
+	@Override
+    @ModificationOperation
 	XModel createModel(XID id);
 	
 	/**
@@ -95,7 +96,8 @@ public interface XRepository extends XWritableRepository, XSendsRepositoryEvents
 	 * @return the {@link XModel} with the given {@link XID} or null if no such
 	 *         {@link XModel} exists in this repository.
 	 */
-	@ReadOperation
+	@Override
+    @ReadOperation
 	XModel getModel(XID id);
 	
 	/**
@@ -116,7 +118,8 @@ public interface XRepository extends XWritableRepository, XSendsRepositoryEvents
 	 * @return true, if the specified {@link XModel} could be removed, false
 	 *         otherwise
 	 */
-	@ModificationOperation
+	@Override
+    @ModificationOperation
 	boolean removeModel(XID modelId);
 	
 	/**

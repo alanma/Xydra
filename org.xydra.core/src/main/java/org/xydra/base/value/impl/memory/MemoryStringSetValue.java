@@ -24,13 +24,15 @@ public class MemoryStringSetValue extends MemorySetValue<String> implements XStr
 		super(contents);
 	}
 	
-	public MemoryStringSetValue add(String entry) {
+	@Override
+    public MemoryStringSetValue add(String entry) {
 		MemoryStringSetValue v = new MemoryStringSetValue(this.set);
 		v.set.add(entry);
 		return v;
 	}
 	
-	public String[] contents() {
+	@Override
+    public String[] contents() {
 		return toArray(new String[size()]);
 	}
 	
@@ -44,13 +46,15 @@ public class MemoryStringSetValue extends MemorySetValue<String> implements XStr
 		return getHashCode();
 	}
 	
-	public MemoryStringSetValue remove(String entry) {
+	@Override
+    public MemoryStringSetValue remove(String entry) {
 		MemoryStringSetValue v = new MemoryStringSetValue(this.set);
 		v.set.remove(entry);
 		return v;
 	}
 	
-	public String[] toArray() {
+	@Override
+    public String[] toArray() {
 		return contents();
 	}
 	

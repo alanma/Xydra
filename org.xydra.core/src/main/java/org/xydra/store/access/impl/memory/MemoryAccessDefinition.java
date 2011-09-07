@@ -25,19 +25,23 @@ public class MemoryAccessDefinition implements XAccessRightDefinition {
 		this.allowed = allowed;
 	}
 	
-	public XID getAccess() {
+	@Override
+    public XID getAccess() {
 		return this.access;
 	}
 	
-	public XID getActor() {
+	@Override
+    public XID getActor() {
 		return this.actor;
 	}
 	
-	public XAddress getResource() {
+	@Override
+    public XAddress getResource() {
 		return this.resource;
 	}
 	
-	public boolean isAllowed() {
+	@Override
+    public boolean isAllowed() {
 		return this.allowed;
 	}
 	

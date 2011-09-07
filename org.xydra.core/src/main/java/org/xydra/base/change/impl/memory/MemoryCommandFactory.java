@@ -106,7 +106,8 @@ public class MemoryCommandFactory implements XCommandFactory {
 		return createAddFieldCommand(repositoryId, modelId, objectId, fieldId, false);
 	}
 	
-	public XObjectCommand createAddFieldCommand(XID repositoryId, XID modelId, XID objectId,
+	@Override
+    public XObjectCommand createAddFieldCommand(XID repositoryId, XID modelId, XID objectId,
 	        XID fieldId, boolean isForced) {
 		long revNr = XCommand.SAFE;
 		
@@ -132,7 +133,8 @@ public class MemoryCommandFactory implements XCommandFactory {
 		return createAddModelCommand(repositoryId, modelId, false);
 	}
 	
-	public XRepositoryCommand createAddModelCommand(XID repositoryId, XID modelId, boolean isForced) {
+	@Override
+    public XRepositoryCommand createAddModelCommand(XID repositoryId, XID modelId, boolean isForced) {
 		long revNr = XCommand.SAFE;
 		
 		if(isForced) {
@@ -188,7 +190,8 @@ public class MemoryCommandFactory implements XCommandFactory {
 		return createAddObjectCommand(repositoryId, modelId, objectId, false);
 	}
 	
-	public XModelCommand createAddObjectCommand(XID repositoryId, XID modelId, XID objectId,
+	@Override
+    public XModelCommand createAddObjectCommand(XID repositoryId, XID modelId, XID objectId,
 	        boolean isForced) {
 		long revNr = XCommand.SAFE;
 		
@@ -343,7 +346,8 @@ public class MemoryCommandFactory implements XCommandFactory {
 		        value, false);
 	}
 	
-	public XFieldCommand createAddValueCommand(XID repositoryId, XID modelId, XID objectId,
+	@Override
+    public XFieldCommand createAddValueCommand(XID repositoryId, XID modelId, XID objectId,
 	        XID fieldId, long fieldRevision, XValue value, boolean isForced) {
 		if(fieldRevision == XCommand.FORCED && !isForced) {
 			throw new IllegalArgumentException(
@@ -505,7 +509,8 @@ public class MemoryCommandFactory implements XCommandFactory {
 		        value, false);
 	}
 	
-	public XFieldCommand createChangeValueCommand(XID repositoryId, XID modelId, XID objectId,
+	@Override
+    public XFieldCommand createChangeValueCommand(XID repositoryId, XID modelId, XID objectId,
 	        XID fieldId, long fieldRevision, XValue value, boolean isForced) {
 		if(fieldRevision == XCommand.FORCED && !isForced) {
 			throw new IllegalArgumentException(
@@ -624,7 +629,8 @@ public class MemoryCommandFactory implements XCommandFactory {
 		        false);
 	}
 	
-	public XObjectCommand createRemoveFieldCommand(XID repositoryId, XID modelId, XID objectId,
+	@Override
+    public XObjectCommand createRemoveFieldCommand(XID repositoryId, XID modelId, XID objectId,
 	        XID fieldId, long fieldRevision, boolean isForced) {
 		if(fieldRevision == XCommand.FORCED && !isForced) {
 			throw new IllegalArgumentException(
@@ -659,7 +665,8 @@ public class MemoryCommandFactory implements XCommandFactory {
 		return createRemoveModelCommand(repositoryId, modelId, modelRevision, false);
 	}
 	
-	public XRepositoryCommand createRemoveModelCommand(XID repositoryId, XID modelId,
+	@Override
+    public XRepositoryCommand createRemoveModelCommand(XID repositoryId, XID modelId,
 	        long modelRevision, boolean isForced) {
 		if(modelRevision == XCommand.FORCED && !isForced) {
 			throw new IllegalArgumentException(
@@ -732,7 +739,8 @@ public class MemoryCommandFactory implements XCommandFactory {
 		return createRemoveObjectCommand(repositoryId, modelId, objectId, objectRevision, false);
 	}
 	
-	public XModelCommand createRemoveObjectCommand(XID repositoryId, XID modelId, XID objectId,
+	@Override
+    public XModelCommand createRemoveObjectCommand(XID repositoryId, XID modelId, XID objectId,
 	        long objectRevision, boolean isForced) {
 		if(objectRevision == XCommand.FORCED && !isForced) {
 			throw new IllegalArgumentException(
@@ -881,7 +889,8 @@ public class MemoryCommandFactory implements XCommandFactory {
 		        false);
 	}
 	
-	public XFieldCommand createRemoveValueCommand(XID repositoryId, XID modelId, XID objectId,
+	@Override
+    public XFieldCommand createRemoveValueCommand(XID repositoryId, XID modelId, XID objectId,
 	        XID fieldId, long fieldRevision, boolean isForced) {
 		if(fieldRevision == XCommand.FORCED && !isForced) {
 			throw new IllegalArgumentException(

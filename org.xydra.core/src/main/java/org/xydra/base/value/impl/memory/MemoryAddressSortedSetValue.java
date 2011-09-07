@@ -57,7 +57,8 @@ public class MemoryAddressSortedSetValue extends MemoryAddressListValue implemen
 		}
 	}
 	
-	public Set<XAddress> toSet() {
+	@Override
+    public Set<XAddress> toSet() {
 		Set<XAddress> copy = new HashSet<XAddress>();
 		XAddress[] list = this.contents();
 		for(int i = 0; i < list.length; i++) {
@@ -66,7 +67,8 @@ public class MemoryAddressSortedSetValue extends MemoryAddressListValue implemen
 		return copy;
 	}
 	
-	public SortedSet<XAddress> toSortedSet() {
+	@Override
+    public SortedSet<XAddress> toSortedSet() {
 		SortedSet<XAddress> copy = new TreeSet<XAddress>();
 		XAddress[] list = this.contents();
 		for(int i = 0; i < list.length; i++) {

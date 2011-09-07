@@ -232,7 +232,8 @@ public class MemoryReversibleFieldEvent extends MemoryFieldEvent implements XRev
 		this.oldValue = oldValue;
 	}
 	
-	public XValue getOldValue() {
+	@Override
+    public XValue getOldValue() {
 		return this.oldValue;
 	}
 	

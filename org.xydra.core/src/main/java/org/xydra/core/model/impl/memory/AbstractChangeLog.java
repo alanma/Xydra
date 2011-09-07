@@ -34,19 +34,22 @@ abstract public class AbstractChangeLog implements XChangeLog {
 			}
 		}
 		
-		public boolean hasNext() {
+		@Override
+        public boolean hasNext() {
 			getNext();
 			return this.next != null;
 		}
 		
-		public XEvent next() {
+		@Override
+        public XEvent next() {
 			XEvent event = this.next;
 			this.next = null;
 			getNext();
 			return event;
 		}
 		
-		public void remove() {
+		@Override
+        public void remove() {
 			throw new UnsupportedOperationException();
 		}
 		
@@ -54,7 +57,8 @@ abstract public class AbstractChangeLog implements XChangeLog {
 	
 	private static final long serialVersionUID = -1916889722140082523L;
 	
-	public synchronized Iterator<XEvent> getEventsBetween(long beginRevision, long endRevision) {
+	@Override
+    public synchronized Iterator<XEvent> getEventsBetween(long beginRevision, long endRevision) {
 		
 		long firstRev = getFirstRevisionNumber();
 		long curRev = getCurrentRevisionNumber();
@@ -83,11 +87,13 @@ abstract public class AbstractChangeLog implements XChangeLog {
 		return new EventIterator(begin, end);
 	}
 	
-	public Iterator<XEvent> getEventsSince(long revisionNumber) {
+	@Override
+    public Iterator<XEvent> getEventsSince(long revisionNumber) {
 		return getEventsBetween(revisionNumber, Long.MAX_VALUE);
 	}
 	
-	public Iterator<XEvent> getEventsUntil(long revisionNumber) {
+	@Override
+    public Iterator<XEvent> getEventsUntil(long revisionNumber) {
 		return getEventsBetween(0, revisionNumber);
 	}
 	

@@ -25,13 +25,15 @@ public class MemoryAddressSetValue extends MemorySetValue<XAddress> implements X
 		super(contents);
 	}
 	
-	public XAddressSetValue add(XAddress entry) {
+	@Override
+    public XAddressSetValue add(XAddress entry) {
 		MemoryAddressSetValue v = new MemoryAddressSetValue(this.set);
 		v.set.add(entry);
 		return v;
 	}
 	
-	public XAddress[] contents() {
+	@Override
+    public XAddress[] contents() {
 		return toArray(new XAddress[size()]);
 	}
 	
@@ -45,13 +47,15 @@ public class MemoryAddressSetValue extends MemorySetValue<XAddress> implements X
 		return getHashCode();
 	}
 	
-	public XAddressSetValue remove(XAddress entry) {
+	@Override
+    public XAddressSetValue remove(XAddress entry) {
 		MemoryAddressSetValue v = new MemoryAddressSetValue(this.set);
 		v.set.remove(entry);
 		return v;
 	}
 	
-	public XAddress[] toArray() {
+	@Override
+    public XAddress[] toArray() {
 		return contents();
 	}
 	

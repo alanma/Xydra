@@ -315,6 +315,8 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		BatchedResult<XReadableObject>[] result2 = callback3.getEffect();
 		assertNotNull(result2);
+		assertNotNull(result2[0]);
+		assertNotNull(result2[0].getResult());
 		assertEquals(objectId, result2[0].getResult().getID());
 		
 		// remove the object again

@@ -21,7 +21,8 @@ public interface XIntegerListValue extends XNumberListValue<Integer> {
 	 * @throws IndexOutOfBoundsException if index is negative or greater than
 	 *             size()
 	 */
-	XIntegerListValue add(int index, Integer entry);
+	@Override
+    XIntegerListValue add(int index, Integer entry);
 	
 	/**
 	 * Creates a new {@link XIntegerListValue} containing all entries from this
@@ -33,7 +34,8 @@ public interface XIntegerListValue extends XNumberListValue<Integer> {
 	 * @return a new {@link XIntegerListValue} containing all entries from this
 	 *         value as well as the specified entry.
 	 */
-	XIntegerListValue add(Integer entry);
+	@Override
+    XIntegerListValue add(Integer entry);
 	
 	/**
 	 * Returns the Integer values as an array in the order they were added to
@@ -59,7 +61,8 @@ public interface XIntegerListValue extends XNumberListValue<Integer> {
 	 * @throws IndexOutOfBoundsException if index is negative or greater than or
 	 *             equal to size()
 	 */
-	XIntegerListValue remove(int index);
+	@Override
+    XIntegerListValue remove(int index);
 	
 	/**
 	 * Creates a new {@link XIntegerListValue} containing all entries from this
@@ -71,6 +74,7 @@ public interface XIntegerListValue extends XNumberListValue<Integer> {
 	 * @return a new {@link XIntegerListValue} containing all entries from this
 	 *         value except the given entry
 	 */
-	XIntegerListValue remove(Integer entry);
+	@Override
+    XIntegerListValue remove(Integer entry);
 	
 }

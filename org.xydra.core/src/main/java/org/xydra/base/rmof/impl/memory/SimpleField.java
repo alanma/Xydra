@@ -75,7 +75,8 @@ public class SimpleField implements Serializable, XRevWritableField {
 		return this.value == null;
 	}
 	
-	public void setRevisionNumber(long rev) {
+	@Override
+    public void setRevisionNumber(long rev) {
 		this.revisionNumber = rev;
 	}
 	

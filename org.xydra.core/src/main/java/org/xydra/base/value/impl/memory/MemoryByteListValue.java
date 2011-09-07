@@ -37,11 +37,13 @@ public class MemoryByteListValue extends MemoryListValue<Byte> implements XByteL
 		this.list = new byte[length];
 	}
 	
-	public XByteListValue add(Byte entry) {
+	@Override
+    public XByteListValue add(Byte entry) {
 		return add(this.list.length, entry);
 	}
 	
-	public XByteListValue add(int index, Byte entry) {
+	@Override
+    public XByteListValue add(int index, Byte entry) {
 		int size = this.list.length;
 		if(index < 0 || index > size) {
 			throw new IndexOutOfBoundsException();
@@ -53,7 +55,8 @@ public class MemoryByteListValue extends MemoryListValue<Byte> implements XByteL
 		return v;
 	}
 	
-	public byte[] contents() {
+	@Override
+    public byte[] contents() {
 		byte[] array = new byte[this.list.length];
 		System.arraycopy(this.list, 0, array, 0, this.list.length);
 		return array;
@@ -65,7 +68,8 @@ public class MemoryByteListValue extends MemoryListValue<Byte> implements XByteL
 		        && XI.equalsIterator(this.iterator(), ((XByteListValue)other).iterator());
 	}
 	
-	public Byte get(int index) {
+	@Override
+    public Byte get(int index) {
 		return this.list[index];
 	}
 	
@@ -74,7 +78,8 @@ public class MemoryByteListValue extends MemoryListValue<Byte> implements XByteL
 		return Arrays.hashCode(this.list);
 	}
 	
-	public XByteListValue remove(Byte entry) {
+	@Override
+    public XByteListValue remove(Byte entry) {
 		int index = indexOf(entry);
 		if(index < 0) {
 			return this;
@@ -82,7 +87,8 @@ public class MemoryByteListValue extends MemoryListValue<Byte> implements XByteL
 		return remove(index);
 	}
 	
-	public XByteListValue remove(int index) {
+	@Override
+    public XByteListValue remove(int index) {
 		int size = this.list.length;
 		if(index < 0 || index >= size) {
 			throw new IndexOutOfBoundsException();
@@ -93,11 +99,13 @@ public class MemoryByteListValue extends MemoryListValue<Byte> implements XByteL
 		return v;
 	}
 	
-	public int size() {
+	@Override
+    public int size() {
 		return this.list.length;
 	}
 	
-	public Byte[] toArray() {
+	@Override
+    public Byte[] toArray() {
 		Byte[] array = new Byte[this.list.length];
 		fillArray(array);
 		return array;

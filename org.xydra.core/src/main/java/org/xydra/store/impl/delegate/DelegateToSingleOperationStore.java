@@ -126,7 +126,8 @@ public class DelegateToSingleOperationStore implements XydraStore {
 		this.singleOpStore = singleOpStore;
 	}
 	
-	public void checkLogin(XID actorId, String passwordHash, Callback<Boolean> callback)
+	@Override
+    public void checkLogin(XID actorId, String passwordHash, Callback<Boolean> callback)
 	        throws IllegalArgumentException {
 		DelegationUtils.assertNonNullActorAndPassword(actorId, passwordHash);
 		DelegationUtils.assertNonNullCallback(callback);
@@ -153,7 +154,8 @@ public class DelegateToSingleOperationStore implements XydraStore {
 	
 	private static final Callback<BatchedResult<Long>[]> defaultCommandsCallback = new DefaultCallback<Long>();
 	
-	public void executeCommands(XID actorId, String passwordHash, XCommand[] commands,
+	@Override
+    public void executeCommands(XID actorId, String passwordHash, XCommand[] commands,
 	        Callback<BatchedResult<Long>[]> callbackOrNull) throws IllegalArgumentException {
 		
 		DelegationUtils.assertNonNullActorAndPassword(actorId, passwordHash);
@@ -366,7 +368,8 @@ public class DelegateToSingleOperationStore implements XydraStore {
 		return multi;
 	}
 	
-	public void getModelIds(XID actorId, String passwordHash, Callback<Set<XID>> callback)
+	@Override
+    public void getModelIds(XID actorId, String passwordHash, Callback<Set<XID>> callback)
 	        throws IllegalArgumentException {
 		DelegationUtils.assertNonNullActorAndPassword(actorId, passwordHash);
 		DelegationUtils.assertNonNullCallback(callback);
@@ -487,14 +490,16 @@ public class DelegateToSingleOperationStore implements XydraStore {
 		}
 	}
 	
-	public void getRepositoryId(XID actorId, String passwordHash, Callback<XID> callback)
+	@Override
+    public void getRepositoryId(XID actorId, String passwordHash, Callback<XID> callback)
 	        throws IllegalArgumentException {
 		DelegationUtils.assertNonNullActorAndPassword(actorId, passwordHash);
 		DelegationUtils.assertNonNullCallback(callback);
 		this.singleOpStore.getRepositoryId(actorId, passwordHash, callback);
 	}
 	
-	public XydraStoreAdmin getXydraStoreAdmin() {
+	@Override
+    public XydraStoreAdmin getXydraStoreAdmin() {
 		return this.singleOpStore.getXydraStoreAdmin();
 	}
 	

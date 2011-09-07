@@ -24,7 +24,8 @@ public interface XIDListValue extends XListValue<XID> {
 	 * @throws IndexOutOfBoundsException if index is negative or greater than
 	 *             size()
 	 */
-	XIDListValue add(int index, XID entry);
+	@Override
+    XIDListValue add(int index, XID entry);
 	
 	/**
 	 * Creates a new {@link XIDListValue} containing all entries from this value
@@ -36,7 +37,8 @@ public interface XIDListValue extends XListValue<XID> {
 	 * @return a new {@link XIDListValue} containing all entries from this value
 	 *         as well as the specified entry.
 	 */
-	XIDListValue add(XID entry);
+	@Override
+    XIDListValue add(XID entry);
 	
 	/**
 	 * Returns the {@link XID} values as an array in the order they were added
@@ -60,7 +62,8 @@ public interface XIDListValue extends XListValue<XID> {
 	 * @throws IndexOutOfBoundsException if index is negative or greater than or
 	 *             equal to size()
 	 */
-	XIDListValue remove(int index);
+	@Override
+    XIDListValue remove(int index);
 	
 	/**
 	 * Creates a new {@link XIDListValue} containing all entries from this value
@@ -72,6 +75,7 @@ public interface XIDListValue extends XListValue<XID> {
 	 * @return a new {@link XIDListValue} containing all entries from this value
 	 *         except the given entry
 	 */
-	XIDListValue remove(XID entry);
+	@Override
+    XIDListValue remove(XID entry);
 	
 }

@@ -21,7 +21,8 @@ public interface XStringListValue extends XListValue<String> {
 	 * @throws IndexOutOfBoundsException if index is negative or greater than
 	 *             size()
 	 */
-	XStringListValue add(int index, String entry);
+	@Override
+    XStringListValue add(int index, String entry);
 	
 	/**
 	 * Creates a new {@link XStringListValue} containing all entries from this
@@ -33,7 +34,8 @@ public interface XStringListValue extends XListValue<String> {
 	 * @return a new {@link XStringListValue} containing all entries from this
 	 *         value as well as the specified entry.
 	 */
-	XStringListValue add(String entry);
+	@Override
+    XStringListValue add(String entry);
 	
 	/**
 	 * Returns the String values as an array in the order they were added to the
@@ -58,7 +60,8 @@ public interface XStringListValue extends XListValue<String> {
 	 * @throws IndexOutOfBoundsException if index is negative or greater than or
 	 *             equal to size()
 	 */
-	XStringListValue remove(int index);
+	@Override
+    XStringListValue remove(int index);
 	
 	/**
 	 * Creates a new {@link XStringListValue} containing all entries from this
@@ -70,6 +73,7 @@ public interface XStringListValue extends XListValue<String> {
 	 * @return a new {@link XStringListValue} containing all entries from this
 	 *         value except the given entry
 	 */
-	XStringListValue remove(String entry);
+	@Override
+    XStringListValue remove(String entry);
 	
 }

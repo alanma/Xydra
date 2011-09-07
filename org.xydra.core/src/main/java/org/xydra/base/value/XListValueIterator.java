@@ -22,11 +22,13 @@ public class XListValueIterator<E> implements Iterator<E> {
 		this.size = list.size();
 	}
 	
-	public boolean hasNext() {
+	@Override
+    public boolean hasNext() {
 		return ((this.index + 1) < this.size);
 	}
 	
-	public E next() {
+	@Override
+    public E next() {
 		if(hasNext()) {
 			return this.list.get(++this.index);
 		} else {
@@ -34,7 +36,8 @@ public class XListValueIterator<E> implements Iterator<E> {
 		}
 	}
 	
-	public void remove() {
+	@Override
+    public void remove() {
 		throw new UnsupportedOperationException(
 		        "XListValueIterators do not support the remove() method");
 	}

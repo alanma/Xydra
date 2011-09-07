@@ -243,16 +243,31 @@ public class XydraRuntime {
 		void onXydraRuntimeInit();
 	}
 	
-	private static transient Set<Listener> listeners = new HashSet<Listener>();
+	private static transient Set<Listener> staticListeners = new HashSet<Listener>();
 	
-	public static void addListener(Listener listener) {
-		listeners.add(listener);
+	private static transient Set<Listener> dynamicListeners = new HashSet<Listener>();
+	
+	public static void addStaticListener(Listener listener) {
+		staticListeners.add(listener);
+	}
+	
+	/**
+	 * Are notified only once.
+	 * 
+	 * @param listener never null
+	 */
+	public static void addDynamicListener(Listener listener) {
+		dynamicListeners.add(listener);
 	}
 	
 	private static void fireOnInitialisaion() {
-		for(Listener l : listeners) {
+		for(Listener l : staticListeners) {
 			l.onXydraRuntimeInit();
 		}
+		for(Listener l : dynamicListeners) {
+			l.onXydraRuntimeInit();
+		}
+		dynamicListeners.clear();
 	}
 	
 }

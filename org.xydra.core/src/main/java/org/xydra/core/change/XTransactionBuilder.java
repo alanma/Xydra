@@ -581,7 +581,8 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 *         currently part of the {@link XTransaction} which is being built
 	 *         by this transaction builder.
 	 */
-	public Iterator<XAtomicCommand> iterator() {
+	@Override
+    public Iterator<XAtomicCommand> iterator() {
 		return this.commands.iterator();
 	}
 	

@@ -152,7 +152,8 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		}
 	}
 	
-	public MemoryField createField(XID fieldId) {
+	@Override
+    public MemoryField createField(XID fieldId) {
 		
 		XObjectCommand command = MemoryObjectCommand.createAddCommand(getAddress(), true, fieldId);
 		
@@ -283,11 +284,13 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		}
 	}
 	
-	public long executeCommand(XCommand command) {
+	@Override
+    public long executeCommand(XCommand command) {
 		return executeCommand(command, null);
 	}
 	
-	public long executeCommand(XCommand command, XLocalChangeCallback callback) {
+	@Override
+    public long executeCommand(XCommand command, XLocalChangeCallback callback) {
 		if(command instanceof XTransaction) {
 			return executeTransaction((XTransaction)command, callback);
 		}
@@ -305,7 +308,8 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		throw new IllegalArgumentException("Unknown command type: " + command);
 	}
 	
-	public long executeObjectCommand(XObjectCommand command) {
+	@Override
+    public long executeObjectCommand(XObjectCommand command) {
 		return executeObjectCommand(command, null);
 	}
 	
@@ -390,7 +394,8 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		}
 	}
 	
-	public XAddress getAddress() {
+	@Override
+    public XAddress getAddress() {
 		synchronized(this.eventQueue) {
 			return this.state.getAddress();
 		}
@@ -404,7 +409,8 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 			return getRevisionNumber();
 	}
 	
-	public MemoryField getField(XID fieldId) {
+	@Override
+    public MemoryField getField(XID fieldId) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -425,7 +431,8 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		}
 	}
 	
-	public XID getID() {
+	@Override
+    public XID getID() {
 		synchronized(this.eventQueue) {
 			return this.state.getID();
 		}
@@ -496,7 +503,8 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		return new ReadableModelWithOneObject(this);
 	}
 	
-	public boolean hasField(XID id) {
+	@Override
+    public boolean hasField(XID id) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			return this.loadedFields.containsKey(id) || this.state.hasField(id);
@@ -539,21 +547,24 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		}
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			return this.state.isEmpty();
 		}
 	}
 	
-	public Iterator<XID> iterator() {
+	@Override
+    public Iterator<XID> iterator() {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			return this.state.iterator();
 		}
 	}
 	
-	public boolean removeField(XID fieldId) {
+	@Override
+    public boolean removeField(XID fieldId) {
 		
 		// no synchronization necessary here (except that in
 		// executeObjectCommand())

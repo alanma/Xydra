@@ -42,7 +42,8 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 		this.modelId = modelId;
 	}
 	
-	public XWritableObject createObject(XID objectId) {
+	@Override
+    public XWritableObject createObject(XID objectId) {
 		assert this.persistence.hasModel(this.modelId);
 		
 		XWritableObject object = this.getObject(objectId);
@@ -88,7 +89,8 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 		return events;
 	}
 	
-	public XWritableObject getObject(XID objectId) {
+	@Override
+    public XWritableObject getObject(XID objectId) {
 		if(hasObject(objectId)) {
 			// make sure changes to object are reflected in persistence
 			return new WritableObjectOnPersistence(this.persistence, this.executingActorId,
@@ -98,7 +100,8 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 		}
 	}
 	
-	public long getRevisionNumber() {
+	@Override
+    public long getRevisionNumber() {
 		XWritableModel snapshot = this.persistence.getModelSnapshot(getAddress());
 		if(snapshot == null) {
 			log.warn("Modelsnapshot for " + getAddress() + " is null");
@@ -107,7 +110,8 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 		return snapshot.getRevisionNumber();
 	}
 	
-	public boolean hasObject(XID objectId) {
+	@Override
+    public boolean hasObject(XID objectId) {
 		XAddress objectAddress = XX.resolveObject(getAddress(), objectId);
 		XWritableObject objectSnapshot = this.persistence.getObjectSnapshot(objectAddress);
 		if(objectSnapshot == null) {
@@ -123,11 +127,13 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 		this.lastRev = this.persistence.getModelRevision(this.getAddress());
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		return this.persistence.getModelSnapshot(getAddress()).isEmpty();
 	}
 	
-	public Iterator<XID> iterator() {
+	@Override
+    public Iterator<XID> iterator() {
 		XWritableModel modelSnapshot = this.persistence.getModelSnapshot(getAddress());
 		if(modelSnapshot == null || modelSnapshot.isEmpty()) {
 			return new NoneIterator<XID>();
@@ -135,7 +141,8 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 		return modelSnapshot.iterator();
 	}
 	
-	public boolean removeObject(XID objectId) {
+	@Override
+    public boolean removeObject(XID objectId) {
 		boolean result = hasObject(objectId);
 		XCommand command = X.getCommandFactory().createRemoveObjectCommand(
 		        this.persistence.getRepositoryId(), this.modelId, objectId, XCommand.FORCED, true);

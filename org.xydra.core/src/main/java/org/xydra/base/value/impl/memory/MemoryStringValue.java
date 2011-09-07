@@ -21,7 +21,8 @@ public class MemoryStringValue implements XStringValue {
 		this.string = string;
 	}
 	
-	public String contents() {
+	@Override
+    public String contents() {
 		return this.string;
 	}
 	

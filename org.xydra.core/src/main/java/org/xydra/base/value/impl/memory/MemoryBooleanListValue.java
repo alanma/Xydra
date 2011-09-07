@@ -38,11 +38,13 @@ public class MemoryBooleanListValue extends MemoryListValue<Boolean> implements 
 		this.list = new boolean[length];
 	}
 	
-	public XBooleanListValue add(Boolean entry) {
+	@Override
+    public XBooleanListValue add(Boolean entry) {
 		return add(this.list.length, entry);
 	}
 	
-	public XBooleanListValue add(int index, Boolean entry) {
+	@Override
+    public XBooleanListValue add(int index, Boolean entry) {
 		int size = this.list.length;
 		if(index < 0 || index > size) {
 			throw new IndexOutOfBoundsException();
@@ -54,7 +56,8 @@ public class MemoryBooleanListValue extends MemoryListValue<Boolean> implements 
 		return v;
 	}
 	
-	public boolean[] contents() {
+	@Override
+    public boolean[] contents() {
 		boolean[] array = new boolean[this.list.length];
 		System.arraycopy(this.list, 0, array, 0, this.list.length);
 		return array;
@@ -66,7 +69,8 @@ public class MemoryBooleanListValue extends MemoryListValue<Boolean> implements 
 		        && XI.equalsIterator(this.iterator(), ((XBooleanListValue)other).iterator());
 	}
 	
-	public Boolean get(int index) {
+	@Override
+    public Boolean get(int index) {
 		return this.list[index];
 	}
 	
@@ -75,7 +79,8 @@ public class MemoryBooleanListValue extends MemoryListValue<Boolean> implements 
 		return Arrays.hashCode(this.list);
 	}
 	
-	public XBooleanListValue remove(Boolean entry) {
+	@Override
+    public XBooleanListValue remove(Boolean entry) {
 		int index = indexOf(entry);
 		if(index < 0) {
 			return this;
@@ -83,7 +88,8 @@ public class MemoryBooleanListValue extends MemoryListValue<Boolean> implements 
 		return remove(index);
 	}
 	
-	public XBooleanListValue remove(int index) {
+	@Override
+    public XBooleanListValue remove(int index) {
 		int size = this.list.length;
 		if(index < 0 || index >= size) {
 			throw new IndexOutOfBoundsException();
@@ -94,11 +100,13 @@ public class MemoryBooleanListValue extends MemoryListValue<Boolean> implements 
 		return v;
 	}
 	
-	public int size() {
+	@Override
+    public int size() {
 		return this.list.length;
 	}
 	
-	public Boolean[] toArray() {
+	@Override
+    public Boolean[] toArray() {
 		Boolean[] array = new Boolean[this.list.length];
 		fillArray(array);
 		return array;

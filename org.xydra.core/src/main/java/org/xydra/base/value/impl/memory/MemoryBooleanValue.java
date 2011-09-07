@@ -20,7 +20,8 @@ public class MemoryBooleanValue implements XBooleanValue {
 		this.content = content;
 	}
 	
-	public boolean contents() {
+	@Override
+    public boolean contents() {
 		return this.content;
 	}
 	

@@ -56,7 +56,8 @@ public class ReadableModelOnStore implements XReadableModel, Serializable {
 		return this.address.getField();
 	}
 	
-	public XReadableObject getObject(XID objectId) {
+	@Override
+    public XReadableObject getObject(XID objectId) {
 		if(this.baseModel == null) {
 			return null;
 		}
@@ -69,15 +70,18 @@ public class ReadableModelOnStore implements XReadableModel, Serializable {
 		return this.baseModel.getRevisionNumber();
 	}
 	
-	public boolean hasObject(XID objectId) {
+	@Override
+    public boolean hasObject(XID objectId) {
 		return this.baseModel.hasObject(objectId);
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		return this.baseModel.isEmpty();
 	}
 	
-	public Iterator<XID> iterator() {
+	@Override
+    public Iterator<XID> iterator() {
 		return this.baseModel.iterator();
 	}
 	

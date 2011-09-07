@@ -218,7 +218,8 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 		return true;
 	}
 	
-	public XAddress getChangedEntity() {
+	@Override
+    public XAddress getChangedEntity() {
 		return XX.resolveField(getTarget(), getFieldId());
 	}
 	

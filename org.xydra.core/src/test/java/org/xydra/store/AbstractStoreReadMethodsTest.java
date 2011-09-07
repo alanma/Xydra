@@ -19,6 +19,7 @@ import org.xydra.base.change.XCommandFactory;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.log.DefaultLoggerFactorySPI;
+import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
 
@@ -42,6 +43,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		LoggerFactory.setLoggerFactorySPI(new DefaultLoggerFactorySPI());
 	}
 	
+	private static final Logger log = LoggerFactory.getLogger(AbstractStoreReadMethodsTest.class);
 	private XID correctUser, incorrectUser;
 	
 	protected String correctUserPass, incorrectUserPass;
@@ -82,6 +84,11 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		XID modelId1 = XX.toId("TestModel1");
 		XID modelId2 = XX.toId("TestModel2");
 		XID modelId3 = XX.toId("TestModel3");
+		
+		SynchronousTestCallback<Set<XID>> callback = new SynchronousTestCallback<Set<XID>>();
+		this.store.getModelIds(this.correctUser, this.correctUserPass, callback);
+		waitOnCallback(callback);
+		assert !callback.effect.contains(modelId1);
 		
 		XID objectId1 = XX.toId("TestObject1");
 		XID objectId2 = XX.toId("TestObject2");
@@ -142,7 +149,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			if(result[i].getResult() == XCommand.NOCHANGE) {
 				throw new RuntimeException(
 				        "ExecuteCommands did not work properly in setUp: command at index " + i
-				                + " did not change anything!");
+				                + " did not change anything! " + commands[i]);
 			}
 			
 			if(result[i].getException() != null) {
@@ -168,6 +175,97 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		this.objectAddresses = new XAddress[] { objectAddress1, objectAddress2, objectAddress3 };
 		this.notExistingObject = XX.toAddress(repoID, modelId1, XX.toId("TestObjectDoesntExist"),
 		        null);
+	}
+	
+	@Test
+	public void testBogus1() {
+		System.out.println("aaa1");
+		// all ok, just trigger @Before
+	}
+	
+	@Test
+	public void testBogus2() {
+		System.out.println("aaa2");
+		// all ok, just trigger @Before
+	}
+	
+	@Test
+	public void getRevs() {
+		SynchronousTestCallback<BatchedResult<Long>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		this.store.getModelRevisions(this.correctUser, this.correctUserPass, this.modelAddresses,
+		        revisionCallback);
+		assertTrue(this.waitOnCallback(revisionCallback));
+		assertNotNull(revisionCallback.getEffect());
+		assertNull(revisionCallback.getException());
+		BatchedResult<Long>[] revisionResult = revisionCallback.getEffect();
+		for(BatchedResult<Long> l : revisionResult) {
+			System.out.println("Got rev = " + l.getFirst() + " - " + l.getSecond() + " - "
+			        + l.getResult());
+		}
+	}
+	
+	// Test if it behaves correctly for addresses of XModels the user has
+	// access to
+	@Test
+	public void testGetModelRevisions() {
+		System.out.println("aaa3");
+		SynchronousTestCallback<BatchedResult<XReadableModel>[]> snapshotCallback = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
+		SynchronousTestCallback<BatchedResult<Long>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		
+		// Get revisions
+		this.store.getModelRevisions(this.correctUser, this.correctUserPass, this.modelAddresses,
+		        revisionCallback);
+		assertTrue(this.waitOnCallback(revisionCallback));
+		assertNotNull(revisionCallback.getEffect());
+		assertNull(revisionCallback.getException());
+		
+		// Get Model Snapshots to compare revision numbers
+		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, this.modelAddresses,
+		        snapshotCallback);
+		assertTrue(this.waitOnCallback(snapshotCallback));
+		assertNotNull(snapshotCallback.getEffect());
+		assertNull(snapshotCallback.getException());
+		
+		BatchedResult<XReadableModel>[] snapshotResult = snapshotCallback.getEffect();
+		assertEquals(this.modelAddresses.length, snapshotResult.length);
+		
+		BatchedResult<Long>[] revisionResult = revisionCallback.getEffect();
+		assertEquals(this.modelAddresses.length, revisionResult.length);
+		
+		// check order of returned snapshots
+		for(int i = 0; i < this.modelAddresses.length; i++) {
+			
+			// test addresses
+			assertNull("Unexpected exception: " + snapshotResult[i].getException(),
+			        snapshotResult[i].getException());
+			assertNotNull(snapshotResult[i].getResult());
+			assertEquals(this.modelAddresses[i], snapshotResult[i].getResult().getAddress());
+			
+			// compare revision numbers
+			assertNotNull(revisionResult[i].getResult());
+			assertNull(revisionResult[i].getException());
+			long revBySnapshot = snapshotResult[i].getResult().getRevisionNumber();
+			long revDirect = revisionResult[i].getResult();
+			assertEquals("" + snapshotResult[i].getResult().getAddress(), revDirect, revBySnapshot);
+		}
+	}
+	
+	/**
+	 * Tests for the checkLogin()-method
+	 */
+	
+	// basic functionality test for checkLogin
+	// Testing a login that should succeed
+	@Test
+	public void testCheckLoginSuccess() {
+		SynchronousTestCallback<Boolean> callback = new SynchronousTestCallback<Boolean>();
+		assert this.store != null;
+		this.store.checkLogin(this.correctUser, this.correctUserPass, callback);
+		
+		assertTrue(this.waitOnCallback(callback));
+		assertEquals(true, callback.getEffect());
+		assertNull(callback.getException());
+		
 	}
 	
 	/*
@@ -268,24 +366,6 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			fail();
 		} catch(IllegalArgumentException iae) {
 		}
-	}
-	
-	/**
-	 * Tests for the checkLogin()-method
-	 */
-	
-	// basic functionality test for checkLogin
-	// Testing a login that should succeed
-	@Test
-	public void testCheckLoginSuccess() {
-		SynchronousTestCallback<Boolean> callback = new SynchronousTestCallback<Boolean>();
-		assert this.store != null;
-		this.store.checkLogin(this.correctUser, this.correctUserPass, callback);
-		
-		assertTrue(this.waitOnCallback(callback));
-		assertEquals(true, callback.getEffect());
-		assertNull(callback.getException());
-		
 	}
 	
 	/*
@@ -468,50 +548,6 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		}
 	}
 	
-	// Test if it behaves correctly for addresses of XModels the user has
-	// access to
-	@Test
-	public void testGetModelRevisions() {
-		SynchronousTestCallback<BatchedResult<XReadableModel>[]> snapshotCallback = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
-		SynchronousTestCallback<BatchedResult<Long>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
-		
-		// Get revisions
-		this.store.getModelRevisions(this.correctUser, this.correctUserPass, this.modelAddresses,
-		        revisionCallback);
-		assertTrue(this.waitOnCallback(revisionCallback));
-		assertNotNull(revisionCallback.getEffect());
-		assertNull(revisionCallback.getException());
-		
-		// Get Model Snapshots to compare revision numbers
-		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, this.modelAddresses,
-		        snapshotCallback);
-		assertTrue(this.waitOnCallback(snapshotCallback));
-		assertNotNull(snapshotCallback.getEffect());
-		assertNull(snapshotCallback.getException());
-		
-		BatchedResult<XReadableModel>[] snapshotResult = snapshotCallback.getEffect();
-		assertEquals(this.modelAddresses.length, snapshotResult.length);
-		
-		BatchedResult<Long>[] revisionResult = revisionCallback.getEffect();
-		assertEquals(this.modelAddresses.length, revisionResult.length);
-		
-		// check order of returned snapshots
-		for(int i = 0; i < this.modelAddresses.length; i++) {
-			
-			// test addresses
-			assertNull("Unexpected exception: " + snapshotResult[i].getException(),
-			        snapshotResult[i].getException());
-			assertNotNull(snapshotResult[i].getResult());
-			assertEquals(this.modelAddresses[i], snapshotResult[i].getResult().getAddress());
-			
-			// compare revision numbers
-			assertNotNull(revisionResult[i].getResult());
-			assertNull(revisionResult[i].getException());
-			assertEquals((Long)snapshotResult[i].getResult().getRevisionNumber(),
-			        revisionResult[i].getResult());
-		}
-	}
-	
 	/**
 	 * Tests for the GetModelRevisions-Method
 	 */
@@ -609,7 +645,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	@Test
 	public void testGetModelRevisionsWrongAddress() {
 		SynchronousTestCallback<BatchedResult<Long>[]> callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
-		
+		log.warn("Expect three warnings because we ask with objectAdresses for modelRevisions");
 		this.store.getModelRevisions(this.correctUser, this.correctUserPass, this.objectAddresses,
 		        callback);
 		
@@ -1085,4 +1121,5 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		} catch(IllegalArgumentException iae) {
 		}
 	}
+	
 }

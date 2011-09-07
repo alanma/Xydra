@@ -42,7 +42,8 @@ public interface XObjectCommand extends XAtomicCommand {
 	 * @return the current revision number of the {@link XField} which will be
 	 *         added/removed
 	 */
-	long getRevisionNumber();
+	@Override
+    long getRevisionNumber();
 	
 	/**
 	 * A forced add will succeed even if an {@link XField} with the specified
@@ -59,6 +60,7 @@ public interface XObjectCommand extends XAtomicCommand {
 	 * 
 	 * @return true, if this event is forced.
 	 */
-	boolean isForced();
+	@Override
+    boolean isForced();
 	
 }

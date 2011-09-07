@@ -44,7 +44,8 @@ public interface XFieldCommand extends XAtomicCommand {
 	 * @return the current revision number of {@link XField} which value will be
 	 *         changed by this command
 	 */
-	long getRevisionNumber();
+	@Override
+    long getRevisionNumber();
 	
 	/**
 	 * @return the {@link XValue} set by this command. Always null for commands
@@ -67,6 +68,7 @@ public interface XFieldCommand extends XAtomicCommand {
 	 * 
 	 * @return true, if this event is forced.
 	 */
-	boolean isForced();
+	@Override
+    boolean isForced();
 	
 }

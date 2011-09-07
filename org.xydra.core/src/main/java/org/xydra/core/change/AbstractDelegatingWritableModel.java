@@ -57,7 +57,7 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 		
 		@Override
 		public long getRevisionNumber() {
-			log.warn("Returning UNDEFINED as revision number");
+			log.trace("Returning UNDEFINED as revision number");
 			return UNDEFINED;
 		}
 		
@@ -122,7 +122,7 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 		
 		@Override
 		public long getRevisionNumber() {
-			log.warn("Returning UNDEFINED as revision number");
+			log.trace("Returning UNDEFINED as revision number");
 			return UNDEFINED;
 		}
 		
@@ -174,7 +174,8 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 		
 	}
 	
-	public abstract XWritableObject createObject(XID objectId);
+	@Override
+    public abstract XWritableObject createObject(XID objectId);
 	
 	protected abstract XValue field_getValue(XID objectId, XID fieldId);
 	
@@ -187,11 +188,14 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 	
 	protected abstract boolean field_setValue(XID objectId, XID fieldId, XValue value);
 	
-	public abstract XAddress getAddress();
+	@Override
+    public abstract XAddress getAddress();
 	
-	public abstract XID getID();
+	@Override
+    public abstract XID getID();
 	
-	public XWritableObject getObject(XID objectId) {
+	@Override
+    public XWritableObject getObject(XID objectId) {
 		if(hasObject(objectId)) {
 			return new WrappedObject(objectId);
 		} else {
@@ -201,7 +205,7 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 	
 	@Override
 	public long getRevisionNumber() {
-		log.warn("Returning UNDEFINED as revision number");
+		log.trace("Returning UNDEFINED as revision number");
 		return UNDEFINED;
 	}
 	
@@ -213,7 +217,8 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 	@Override
 	public abstract boolean hasObject(XID objectId);
 	
-	public abstract Iterator<XID> iterator();
+	@Override
+    public abstract Iterator<XID> iterator();
 	
 	protected abstract XWritableField object_createField(XID objectId, XID fieldId);
 	
@@ -235,7 +240,8 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 	
 	protected abstract boolean object_removeField(XID objectId, XID fieldId);
 	
-	public abstract boolean removeObject(XID objectId);
+	@Override
+    public abstract boolean removeObject(XID objectId);
 	
 	protected XAddress resolveField(XID objectId, XID fieldId) {
 		assert objectId != null;

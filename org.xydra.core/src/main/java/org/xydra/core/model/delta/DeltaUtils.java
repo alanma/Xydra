@@ -157,7 +157,6 @@ public abstract class DeltaUtils {
 	 */
 	public static List<XAtomicEvent> createEvents(XAddress modelAddr,
 	        Pair<ChangedModel,ModelChange> change, XID actorId, long rev) {
-		
 		assert change != null;
 		
 		ChangedModel model = change.getFirst();
@@ -328,9 +327,14 @@ public abstract class DeltaUtils {
 			case REMOVE:
 				if((model == null || model.getRevisionNumber() != rc.getRevisionNumber())
 				        && !rc.isForced()) {
-					log.warn("Safe RepositoryCommand REMOVE failed");
+					log.warn("Safe RepositoryCommand REMOVE failed. Reason: "
+					        + (model == null ? "model is null" : "modelRevNr:"
+					                + model.getRevisionNumber() + " cmdRevNr:"
+					                + rc.getRevisionNumber() + " forced:" + rc.isForced()));
 					return null;
 				} else if(model != null) {
+					log.trace("Removing model " + model.getAddress() + " "
+					        + model.getRevisionNumber());
 					ChangedModel changedModel = new ChangedModel(model);
 					changedModel.clear();
 					return new Pair<ChangedModel,ModelChange>(changedModel, ModelChange.REMOVED);
@@ -361,5 +365,4 @@ public abstract class DeltaUtils {
 		}
 		
 	}
-	
 }

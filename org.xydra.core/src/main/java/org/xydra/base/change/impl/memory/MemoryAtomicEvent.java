@@ -72,11 +72,13 @@ abstract public class MemoryAtomicEvent implements XEvent {
 		        && this.target.equals(event.getTarget());
 	}
 	
-	public XID getActor() {
+	@Override
+    public XID getActor() {
 		return this.actor;
 	}
 	
-	public ChangeType getChangeType() {
+	@Override
+    public ChangeType getChangeType() {
 		return this.changeType;
 	}
 	
@@ -104,15 +106,18 @@ abstract public class MemoryAtomicEvent implements XEvent {
 		return this.target.getObject();
 	}
 	
-	public long getOldFieldRevision() {
+	@Override
+    public long getOldFieldRevision() {
 		return XEvent.RevisionOfEntityNotSet;
 	}
 	
-	public long getOldModelRevision() {
+	@Override
+    public long getOldModelRevision() {
 		return XEvent.RevisionOfEntityNotSet;
 	}
 	
-	public long getOldObjectRevision() {
+	@Override
+    public long getOldObjectRevision() {
 		return XEvent.RevisionOfEntityNotSet;
 	}
 	
@@ -145,7 +150,8 @@ abstract public class MemoryAtomicEvent implements XEvent {
 		return 0;
 	}
 	
-	public XAddress getTarget() {
+	@Override
+    public XAddress getTarget() {
 		return this.target;
 	}
 	
@@ -166,11 +172,13 @@ abstract public class MemoryAtomicEvent implements XEvent {
 		return result;
 	}
 	
-	public boolean inTransaction() {
+	@Override
+    public boolean inTransaction() {
 		return this.inTransaction;
 	}
 	
-	public boolean isImplied() {
+	@Override
+    public boolean isImplied() {
 		return this.implied;
 	}
 	

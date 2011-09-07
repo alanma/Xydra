@@ -67,7 +67,8 @@ public class MemoryAddress implements XAddress {
 		this.field = field;
 	}
 	
-	public int compareTo(XAddress other) {
+	@Override
+    public int compareTo(XAddress other) {
 		// compare repos
 		if(this.getRepository() == null) {
 			if(other.getRepository() != null) {
@@ -128,7 +129,8 @@ public class MemoryAddress implements XAddress {
 		return 0;
 	}
 	
-	public boolean contains(XAddress descendant) {
+	@Override
+    public boolean contains(XAddress descendant) {
 		
 		if(!XI.equals(this.repository, descendant.getRepository())) {
 			return false;
@@ -165,7 +167,8 @@ public class MemoryAddress implements XAddress {
 		        && XI.equals(this.field, other.getField());
 	}
 	
-	public boolean equalsOrContains(XAddress descendant) {
+	@Override
+    public boolean equalsOrContains(XAddress descendant) {
 		
 		if(!XI.equals(this.repository, descendant.getRepository())) {
 			return false;
@@ -190,7 +193,8 @@ public class MemoryAddress implements XAddress {
 		
 	}
 	
-	public XType getAddressedType() {
+	@Override
+    public XType getAddressedType() {
 		
 		if(this.field != null) {
 			// ???F => field
@@ -208,19 +212,23 @@ public class MemoryAddress implements XAddress {
 		}
 	}
 	
-	public XID getField() {
+	@Override
+    public XID getField() {
 		return this.field;
 	}
 	
-	public XID getModel() {
+	@Override
+    public XID getModel() {
 		return this.model;
 	}
 	
-	public XID getObject() {
+	@Override
+    public XID getObject() {
 		return this.object;
 	}
 	
-	public XAddress getParent() {
+	@Override
+    public XAddress getParent() {
 		
 		if(this.field != null) {
 			// ???F
@@ -259,7 +267,8 @@ public class MemoryAddress implements XAddress {
 		return null;
 	}
 	
-	public XID getRepository() {
+	@Override
+    public XID getRepository() {
 		return this.repository;
 	}
 	
@@ -283,7 +292,8 @@ public class MemoryAddress implements XAddress {
 		return hash;
 	}
 	
-	public boolean isParentOf(XAddress child) {
+	@Override
+    public boolean isParentOf(XAddress child) {
 		
 		if(!XI.equals(this.repository, child.getRepository())) {
 			return false;
@@ -319,7 +329,8 @@ public class MemoryAddress implements XAddress {
 	 * 
 	 *         Always starts with '/', never ends with '/'.
 	 */
-	public String toURI() {
+	@Override
+    public String toURI() {
 		StringBuffer uri = new StringBuffer();
 		
 		uri.append('/');

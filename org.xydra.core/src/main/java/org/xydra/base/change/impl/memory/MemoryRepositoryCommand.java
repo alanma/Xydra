@@ -137,7 +137,8 @@ public class MemoryRepositoryCommand extends MemoryAtomicCommand implements XRep
 		return true;
 	}
 	
-	public XAddress getChangedEntity() {
+	@Override
+    public XAddress getChangedEntity() {
 		return XX.resolveModel(getTarget(), getModelId());
 	}
 	

@@ -52,7 +52,8 @@ public interface XProtectedRepository extends XReadableRepository, XSendsReposit
 	 *             the necessary access rights (write access) to execute this
 	 *             method
 	 */
-	@ModificationOperation
+	@Override
+    @ModificationOperation
 	XProtectedModel createModel(XID id);
 	
 	/**
@@ -105,7 +106,8 @@ public interface XProtectedRepository extends XReadableRepository, XSendsReposit
 	 *             the necessary access rights (read access) to execute this
 	 *             method
 	 */
-	@ReadOperation
+	@Override
+    @ReadOperation
 	XProtectedModel getModel(XID id);
 	
 }

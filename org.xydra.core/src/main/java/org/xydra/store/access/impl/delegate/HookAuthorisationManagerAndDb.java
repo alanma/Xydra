@@ -33,7 +33,8 @@ public class HookAuthorisationManagerAndDb extends AbstractAuthorisationManager 
 		this.authorisationManager = authorisationManager;
 	}
 	
-	public void addListener(XAccessListener listener) {
+	@Override
+    public void addListener(XAccessListener listener) {
 		this.authorisationManager.getAuthorisationDatabase().addListener(listener);
 	}
 	
@@ -43,14 +44,16 @@ public class HookAuthorisationManagerAndDb extends AbstractAuthorisationManager 
 	protected void beforeWrite() {
 	}
 	
-	public XAccessRightValue getAccessDefinition(XID actor, XAddress resource, XID access)
+	@Override
+    public XAccessRightValue getAccessDefinition(XID actor, XAddress resource, XID access)
 	        throws IllegalArgumentException {
 		beforeRead();
 		return this.authorisationManager.getAuthorisationDatabase().getAccessDefinition(actor,
 		        resource, access);
 	}
 	
-	public Pair<Set<XID>,Set<XID>> getActorsWithPermission(XAddress resource, XID access) {
+	@Override
+    public Pair<Set<XID>,Set<XID>> getActorsWithPermission(XAddress resource, XID access) {
 		beforeRead();
 		return this.authorisationManager.getActorsWithPermission(resource, access);
 	}
@@ -64,51 +67,61 @@ public class HookAuthorisationManagerAndDb extends AbstractAuthorisationManager 
 		return this.authorisationManager;
 	}
 	
-	public Set<XAccessRightDefinition> getDefinitions() {
+	@Override
+    public Set<XAccessRightDefinition> getDefinitions() {
 		beforeRead();
 		return this.authorisationManager.getAuthorisationDatabase().getDefinitions();
 	}
 	
-	public XGroupDatabaseWithListeners getGroupDatabase() {
+	@Override
+    public XGroupDatabaseWithListeners getGroupDatabase() {
 		return this.authorisationManager.getGroupDatabase();
 	}
 	
-	public Pair<Set<XID>,Set<XID>> getPermissions(XID actor, XAddress resource) {
+	@Override
+    public Pair<Set<XID>,Set<XID>> getPermissions(XID actor, XAddress resource) {
 		beforeRead();
 		return this.authorisationManager.getPermissions(actor, resource);
 	}
 	
-	public XAccessRightValue hasAccess(XID actor, XAddress resource, XID access) {
+	@Override
+    public XAccessRightValue hasAccess(XID actor, XAddress resource, XID access) {
 		beforeRead();
 		return this.authorisationManager.hasAccess(actor, resource, access);
 	}
 	
-	public XAccessRightValue hasAccessToSubresource(XID actor, XAddress rootResource, XID access) {
+	@Override
+    public XAccessRightValue hasAccessToSubresource(XID actor, XAddress rootResource, XID access) {
 		beforeRead();
 		return this.authorisationManager.hasAccessToSubresource(actor, rootResource, access);
 	}
 	
-	public XAccessRightValue hasAccessToSubtree(XID actor, XAddress rootResource, XID access) {
+	@Override
+    public XAccessRightValue hasAccessToSubtree(XID actor, XAddress rootResource, XID access) {
 		beforeRead();
 		return this.authorisationManager.hasAccessToSubtree(actor, rootResource, access);
 	}
 	
-	public boolean isAccessDefined(XID actor, XAddress resource, XID access) {
+	@Override
+    public boolean isAccessDefined(XID actor, XAddress resource, XID access) {
 		beforeRead();
 		return this.authorisationManager.getAuthorisationDatabase().isAccessDefined(actor,
 		        resource, access);
 	}
 	
-	public void removeListener(XAccessListener listener) {
+	@Override
+    public void removeListener(XAccessListener listener) {
 		this.authorisationManager.getAuthorisationDatabase().removeListener(listener);
 	}
 	
-	public void resetAccess(XID actor, XAddress resource, XID access) {
+	@Override
+    public void resetAccess(XID actor, XAddress resource, XID access) {
 		beforeWrite();
 		this.authorisationManager.getAuthorisationDatabase().resetAccess(actor, resource, access);
 	}
 	
-	public void setAccess(XID actor, XAddress resource, XID access, boolean allowed) {
+	@Override
+    public void setAccess(XID actor, XAddress resource, XID access, boolean allowed) {
 		beforeWrite();
 		this.authorisationManager.getAuthorisationDatabase().setAccess(actor, resource, access,
 		        allowed);

@@ -32,7 +32,8 @@ public interface XLoggedObject extends XWritableObject, XSendsObjectEvents, XSen
 	 * @return The {@link XLoggedField} with the given {@link XID} or null, if
 	 *         no corresponding {@link XLoggedField} exists
 	 */
-	@ReadOperation
+	@Override
+    @ReadOperation
 	XLoggedField getField(XID fieldId);
 	
 }

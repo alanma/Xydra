@@ -19,7 +19,8 @@ public interface XListValue<E> extends XCollectionValue<E> {
 	 * @return a new {@link XListValue} containing all entries from this value
 	 *         as well as the specified entry.
 	 */
-	XListValue<E> add(E entry);
+	@Override
+    XListValue<E> add(E entry);
 	
 	/**
 	 * Creates a new {@link XListValue} containing all entries from this value
@@ -78,7 +79,8 @@ public interface XListValue<E> extends XCollectionValue<E> {
 	 * @return a new {@link XListValue} containing all entries from this value
 	 *         except the given entry
 	 */
-	XListValue<E> remove(E entry);
+	@Override
+    XListValue<E> remove(E entry);
 	
 	/**
 	 * Creates a new {@link XListValue} containing all entries from this value

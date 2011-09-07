@@ -20,11 +20,13 @@ public class MemoryLongValue implements XLongValue {
 		this.content = content;
 	}
 	
-	public Number asNumber() {
+	@Override
+    public Number asNumber() {
 		return contents();
 	}
 	
-	public long contents() {
+	@Override
+    public long contents() {
 		return this.content;
 	}
 	

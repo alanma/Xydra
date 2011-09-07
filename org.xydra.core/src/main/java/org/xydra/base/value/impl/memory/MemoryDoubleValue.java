@@ -20,11 +20,13 @@ public class MemoryDoubleValue implements XDoubleValue {
 		this.content = content;
 	}
 	
-	public Number asNumber() {
+	@Override
+    public Number asNumber() {
 		return contents();
 	}
 	
-	public double contents() {
+	@Override
+    public double contents() {
 		return this.content;
 	}
 	

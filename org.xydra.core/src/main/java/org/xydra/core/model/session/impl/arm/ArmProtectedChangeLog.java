@@ -71,18 +71,21 @@ public class ArmProtectedChangeLog implements XChangeLog {
 		}
 	}
 	
-	public XAddress getBaseAddress() {
+	@Override
+    public XAddress getBaseAddress() {
 		return this.log.getBaseAddress();
 	}
 	
-	public long getCurrentRevisionNumber() {
+	@Override
+    public long getCurrentRevisionNumber() {
 		
 		checkReadAccess();
 		
 		return this.log.getCurrentRevisionNumber();
 	}
 	
-	public XEvent getEventAt(long revisionNumber) {
+	@Override
+    public XEvent getEventAt(long revisionNumber) {
 		
 		XEvent event = this.log.getEventAt(revisionNumber);
 		
@@ -97,7 +100,8 @@ public class ArmProtectedChangeLog implements XChangeLog {
 		return event;
 	}
 	
-	public Iterator<XEvent> getEventsBetween(long beginRevision, long endRevision) {
+	@Override
+    public Iterator<XEvent> getEventsBetween(long beginRevision, long endRevision) {
 		return new AbstractTransformingIterator<XEvent,XEvent>(this.log.getEventsBetween(
 		        beginRevision, endRevision)) {
 			@Override
@@ -107,15 +111,18 @@ public class ArmProtectedChangeLog implements XChangeLog {
 		};
 	}
 	
-	public Iterator<XEvent> getEventsSince(long revisionNumber) {
+	@Override
+    public Iterator<XEvent> getEventsSince(long revisionNumber) {
 		return getEventsBetween(revisionNumber, Long.MAX_VALUE);
 	}
 	
-	public Iterator<XEvent> getEventsUntil(long revisionNumber) {
+	@Override
+    public Iterator<XEvent> getEventsUntil(long revisionNumber) {
 		return getEventsBetween(0, revisionNumber);
 	}
 	
-	public long getFirstRevisionNumber() {
+	@Override
+    public long getFirstRevisionNumber() {
 		
 		checkReadAccess();
 		

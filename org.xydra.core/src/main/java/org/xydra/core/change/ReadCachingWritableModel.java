@@ -212,7 +212,8 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 		return set;
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		return this.idsAsSet().isEmpty();
 	}
 	

@@ -38,62 +38,71 @@ public class StatsGatheringPersistenceWrapper implements XydraPersistence {
 	
 	private Stats stats = new Stats();
 	
-	public void clear() {
+	@Override
+    public void clear() {
 		Clock c = this.stats.startClock("clear");
 		this.basePersistence.clear();
 		c.stop();
 	}
 	
-	public long executeCommand(XID actorId, XCommand command) {
+	@Override
+    public long executeCommand(XID actorId, XCommand command) {
 		Clock c = this.stats.startClock("executeCommand");
 		long result = this.basePersistence.executeCommand(actorId, command);
 		c.stop();
 		return result;
 	}
 	
-	public List<XEvent> getEvents(XAddress address, long beginRevision, long endRevision) {
+	@Override
+    public List<XEvent> getEvents(XAddress address, long beginRevision, long endRevision) {
 		Clock c = this.stats.startClock("getEvents");
 		List<XEvent> result = this.basePersistence.getEvents(address, beginRevision, endRevision);
 		c.stop();
 		return result;
 	}
 	
-	public Set<XID> getModelIds() {
+	@Override
+    public Set<XID> getModelIds() {
 		Clock c = this.stats.startClock("getModelIds");
 		Set<XID> result = this.basePersistence.getModelIds();
 		c.stop();
 		return result;
 	}
 	
-	public long getModelRevision(XAddress address) {
+	@Override
+    public long getModelRevision(XAddress address) {
 		Clock c = this.stats.startClock("getModelRevision");
 		long result = this.basePersistence.getModelRevision(address);
 		c.stop();
 		return result;
 	}
 	
-	public XWritableModel getModelSnapshot(XAddress address) {
+	@Override
+    public XWritableModel getModelSnapshot(XAddress address) {
 		Clock c = this.stats.startClock("getModelSnapshot");
 		XWritableModel result = this.basePersistence.getModelSnapshot(address);
 		c.stop();
 		return result;
 	}
 	
-	public XWritableObject getObjectSnapshot(XAddress address) {
+	@Override
+    public XWritableObject getObjectSnapshot(XAddress address) {
 		Clock c = this.stats.startClock("getObjectSnapshot");
 		XWritableObject result = this.basePersistence.getObjectSnapshot(address);
 		c.stop();
 		return result;
 	}
 	
-	public XID getRepositoryId() {
+	@Override
+    public XID getRepositoryId() {
 		Clock c = this.stats.startClock("getRepositoryId");
 		XID result = this.basePersistence.getRepositoryId();
 		c.stop();
 		return result;
 	}
 	
-	public boolean hasModel(XID modelId) {
+	@Override
+    public boolean hasModel(XID modelId) {
 		Clock c = this.stats.startClock("hasModel");
 		boolean result = this.basePersistence.hasModel(modelId);
 		c.stop();

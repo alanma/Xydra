@@ -14,7 +14,8 @@ import org.xydra.store.impl.delegate.XydraPersistence;
  */
 public abstract class AbstractWritableOnPersistence implements IHasXAddress {
 	
-	public XAddress getAddress() {
+	@Override
+    public XAddress getAddress() {
 		return this.address;
 	}
 	

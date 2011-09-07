@@ -65,7 +65,8 @@ public class ChangeTest {
 			return this.fired;
 		}
 		
-		public void onChangeEvent(XFieldEvent event) {
+		@Override
+        public void onChangeEvent(XFieldEvent event) {
 			this.type = event.getChangeType();
 			this.repo = event.getRepositoryId();
 			this.model = event.getModelId();
@@ -106,7 +107,8 @@ public class ChangeTest {
 			return this.fired;
 		}
 		
-		public void onChangeEvent(XModelEvent event) {
+		@Override
+        public void onChangeEvent(XModelEvent event) {
 			this.type = event.getChangeType();
 			this.repo = event.getRepositoryId();
 			this.model = event.getModelId();
@@ -148,7 +150,8 @@ public class ChangeTest {
 			return this.fired;
 		}
 		
-		public void onChangeEvent(XObjectEvent event) {
+		@Override
+        public void onChangeEvent(XObjectEvent event) {
 			this.type = event.getChangeType();
 			this.repoID = event.getRepositoryId();
 			this.modelId = event.getModelId();
@@ -182,7 +185,8 @@ public class ChangeTest {
 			return this.fired;
 		}
 		
-		public void onChangeEvent(XRepositoryEvent event) {
+		@Override
+        public void onChangeEvent(XRepositoryEvent event) {
 			this.type = event.getChangeType();
 			this.repo = event.getRepositoryId();
 			this.fired = true;

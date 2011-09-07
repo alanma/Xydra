@@ -438,7 +438,8 @@ public class XModelBasics {
 		XModelEventListener modelListener = new XModelEventListener() {
 			int objectCount;
 			
-			public void onChangeEvent(XModelEvent event) {
+			@Override
+            public void onChangeEvent(XModelEvent event) {
 				if(event.getChangeType() == ChangeType.ADD) {
 					this.objectCount++;
 					log.info("Our model now holds " + this.objectCount + " XObjects!");
@@ -471,7 +472,8 @@ public class XModelBasics {
 
 		XObjectEventListener objectListener = new XObjectEventListener() {
 			
-			public void onChangeEvent(XObjectEvent event) {
+			@Override
+            public void onChangeEvent(XObjectEvent event) {
 				if(event.getChangeType() == ChangeType.ADD) {
 					log.info("An XField with ID " + event.getFieldId()
 					        + " was added to the XObject with ID " + event.getObjectId() + "!");

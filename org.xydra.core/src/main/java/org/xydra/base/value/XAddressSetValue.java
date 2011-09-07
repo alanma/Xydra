@@ -20,7 +20,8 @@ public interface XAddressSetValue extends XSetValue<XAddress> {
 	 * @return a new {@link XAddressSetValue} containing all entries from this
 	 *         value as well as the given entry
 	 */
-	XAddressSetValue add(XAddress entry);
+	@Override
+    XAddressSetValue add(XAddress entry);
 	
 	/**
 	 * Returns the contents of this XIDSetValue as an array.
@@ -39,6 +40,7 @@ public interface XAddressSetValue extends XSetValue<XAddress> {
 	 * @return a new {@link XAddressSetValue} containing all entries from this
 	 *         value expect the given entry
 	 */
-	XAddressSetValue remove(XAddress entry);
+	@Override
+    XAddressSetValue remove(XAddress entry);
 	
 }

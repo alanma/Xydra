@@ -22,7 +22,8 @@ public interface XIDSortedSetValue extends XIDSetValue {
 	 * @return a new {@link XIDSortedSetValue} containing all entries from this
 	 *         value as well as the given entry
 	 */
-	XIDSortedSetValue add(XID entry);
+	@Override
+    XIDSortedSetValue add(XID entry);
 	
 	/**
 	 * Returns the contents of this XIDSortedSetValue as an array.
@@ -33,7 +34,8 @@ public interface XIDSortedSetValue extends XIDSetValue {
 	 * @return an array containing the {@link XID} values of this
 	 *         XIDSortedSetValue in insertion order
 	 */
-	public XID[] contents();
+	@Override
+    public XID[] contents();
 	
 	/**
 	 * Creates a new {@link XIDSortedSetValue} containing all entries from this
@@ -43,7 +45,8 @@ public interface XIDSortedSetValue extends XIDSetValue {
 	 * @return a new {@link XIDSortedSetValue} containing all entries from this
 	 *         value expect the given entry
 	 */
-	XIDSortedSetValue remove(XID entry);
+	@Override
+    XIDSortedSetValue remove(XID entry);
 	
 	/**
 	 * Creates a {@link SortedSet} containing all {@link XID} entries in this

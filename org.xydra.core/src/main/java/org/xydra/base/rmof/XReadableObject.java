@@ -63,7 +63,8 @@ public interface XReadableObject extends XEntity, Iterable<XID> {
 	 *         XBaseObject.
 	 * @throws IllegalStateException if this object has already been removed
 	 */
-	@ReadOperation
+	@Override
+    @ReadOperation
 	Iterator<XID> iterator();
 	
 }

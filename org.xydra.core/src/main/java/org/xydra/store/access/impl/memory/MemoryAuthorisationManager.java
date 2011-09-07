@@ -112,7 +112,8 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 		
 	}
 	
-	synchronized public void addListener(XAccessListener listener) {
+	@Override
+    synchronized public void addListener(XAccessListener listener) {
 		this.listeners.add(listener);
 	}
 	
@@ -122,13 +123,15 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 		}
 	}
 	
-	synchronized public XAccessRightValue getAccessDefinition(XID actor, XAddress resource,
+	@Override
+    synchronized public XAccessRightValue getAccessDefinition(XID actor, XAddress resource,
 	        XID access) throws IllegalArgumentException {
 		Boolean b = this.rights.lookup(access, resource, actor);
 		return toAccessValue(b);
 	}
 	
-	synchronized public Pair<Set<XID>,Set<XID>> getActorsWithPermission(XAddress resource,
+	@Override
+    synchronized public Pair<Set<XID>,Set<XID>> getActorsWithPermission(XAddress resource,
 	        XID access) {
 		
 		Set<XID> allowed = new HashSet<XID>();
@@ -194,7 +197,8 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 		return this;
 	}
 	
-	synchronized public Set<XAccessRightDefinition> getDefinitions() {
+	@Override
+    synchronized public Set<XAccessRightDefinition> getDefinitions() {
 		AbstractTransformingIterator<KeyKeyKeyEntryTuple<XID,XAddress,XID,Boolean>,XAccessRightDefinition> it = new AbstractTransformingIterator<KeyKeyKeyEntryTuple<XID,XAddress,XID,Boolean>,XAccessRightDefinition>(
 		        this.rights.tupleIterator(new Wildcard<XID>(), new Wildcard<XAddress>(),
 		                new Wildcard<XID>())) {
@@ -218,7 +222,8 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 		return this.groups;
 	}
 	
-	synchronized public Pair<Set<XID>,Set<XID>> getPermissions(XID actor, XAddress resource) {
+	@Override
+    synchronized public Pair<Set<XID>,Set<XID>> getPermissions(XID actor, XAddress resource) {
 		
 		Set<XID> allowed = new HashSet<XID>();
 		Set<XID> denied = new HashSet<XID>();
@@ -239,7 +244,8 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 		return new Pair<Set<XID>,Set<XID>>(allowed, denied);
 	}
 	
-	synchronized public XAccessRightValue hasAccess(XID actor, XAddress resource, XID access) {
+	@Override
+    synchronized public XAccessRightValue hasAccess(XID actor, XAddress resource, XID access) {
 		// check if access is defined for this resource
 		XAccessRightValue def = accessForResource(actor, resource, access);
 		if(def.isDefined()) {
@@ -262,7 +268,8 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 		return XAccessRightValue.UNDEFINED;
 	}
 	
-	public XAccessRightValue hasAccessToSubresource(XID actor, XAddress rootResource, XID access) {
+	@Override
+    public XAccessRightValue hasAccessToSubresource(XID actor, XAddress rootResource, XID access) {
 		
 		// check if the actor has access to the root resource
 		XAccessRightValue def = hasAccess(actor, rootResource, access);
@@ -305,7 +312,8 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 		return def;
 	}
 	
-	synchronized public XAccessRightValue hasAccessToSubtree(XID actor, XAddress rootResource,
+	@Override
+    synchronized public XAccessRightValue hasAccessToSubtree(XID actor, XAddress rootResource,
 	        XID access) {
 		
 		// check if the actor has access to the root resource
@@ -373,16 +381,19 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 		return def;
 	}
 	
-	synchronized public boolean isAccessDefined(XID actor, XAddress resource, XID access) {
+	@Override
+    synchronized public boolean isAccessDefined(XID actor, XAddress resource, XID access) {
 		return this.rights.containsKey(new EqualsConstraint<XID>(access),
 		        new EqualsConstraint<XAddress>(resource), new EqualsConstraint<XID>(actor));
 	}
 	
-	synchronized public void removeListener(XAccessListener listener) {
+	@Override
+    synchronized public void removeListener(XAccessListener listener) {
 		this.listeners.remove(listener);
 	}
 	
-	synchronized public void resetAccess(XID actor, XAddress resource, XID access) {
+	@Override
+    synchronized public void resetAccess(XID actor, XAddress resource, XID access) {
 		XAccessRightValue old = getAccessDefinition(actor, resource, access);
 		if(!old.isDefined()) {
 			// no right defined => nothing to remove
@@ -393,7 +404,8 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 		        XAccessRightValue.UNDEFINED));
 	}
 	
-	synchronized public void setAccess(XID actor, XAddress resource, XID access, boolean allowed) {
+	@Override
+    synchronized public void setAccess(XID actor, XAddress resource, XID access, boolean allowed) {
 		XAccessRightValue old = getAccessDefinition(actor, resource, access);
 		XAccessRightValue na = toAccessValue(allowed);
 		if(old == na) {

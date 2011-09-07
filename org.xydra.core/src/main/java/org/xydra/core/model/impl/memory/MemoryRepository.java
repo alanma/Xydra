@@ -95,37 +95,43 @@ public class MemoryRepository extends AbstractEntity implements XRepository, Ser
 		this.transactionListenerCollection = new HashSet<XTransactionEventListener>();
 	}
 	
-	public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
+	@Override
+    public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
 		synchronized(this.fieldChangeListenerCollection) {
 			return this.fieldChangeListenerCollection.add(changeListener);
 		}
 	}
 	
-	public boolean addListenerForModelEvents(XModelEventListener changeListener) {
+	@Override
+    public boolean addListenerForModelEvents(XModelEventListener changeListener) {
 		synchronized(this.modelChangeListenerCollection) {
 			return this.modelChangeListenerCollection.add(changeListener);
 		}
 	}
 	
-	public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
+	@Override
+    public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
 		synchronized(this.objectChangeListenerCollection) {
 			return this.objectChangeListenerCollection.add(changeListener);
 		}
 	}
 	
-	public boolean addListenerForRepositoryEvents(XRepositoryEventListener changeListener) {
+	@Override
+    public boolean addListenerForRepositoryEvents(XRepositoryEventListener changeListener) {
 		synchronized(this.repoChangeListenerCollection) {
 			return this.repoChangeListenerCollection.add(changeListener);
 		}
 	}
 	
-	public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
+	@Override
+    public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
 		synchronized(this.transactionListenerCollection) {
 			return this.transactionListenerCollection.add(changeListener);
 		}
 	}
 	
-	public MemoryModel createModel(XID modelId) {
+	@Override
+    public MemoryModel createModel(XID modelId) {
 		
 		XRepositoryCommand command = MemoryRepositoryCommand.createAddCommand(getAddress(), true,
 		        modelId);
@@ -176,11 +182,13 @@ public class MemoryRepository extends AbstractEntity implements XRepository, Ser
 		return super.equals(object);
 	}
 	
-	public long executeCommand(XCommand command) {
+	@Override
+    public long executeCommand(XCommand command) {
 		return executeCommand(command, null);
 	}
 	
-	public long executeCommand(XCommand command, XLocalChangeCallback callback) {
+	@Override
+    public long executeCommand(XCommand command, XLocalChangeCallback callback) {
 		if(command instanceof XRepositoryCommand) {
 			return executeRepositoryCommand((XRepositoryCommand)command, callback);
 		}
@@ -205,7 +213,8 @@ public class MemoryRepository extends AbstractEntity implements XRepository, Ser
 		}
 	}
 	
-	public long executeRepositoryCommand(XRepositoryCommand command) {
+	@Override
+    public long executeRepositoryCommand(XRepositoryCommand command) {
 		return executeRepositoryCommand(command, null);
 	}
 	
@@ -358,15 +367,18 @@ public class MemoryRepository extends AbstractEntity implements XRepository, Ser
 		}
 	}
 	
-	public XAddress getAddress() {
+	@Override
+    public XAddress getAddress() {
 		return this.state.getAddress();
 	}
 	
-	public synchronized XID getID() {
+	@Override
+    public synchronized XID getID() {
 		return this.state.getID();
 	}
 	
-	@ReadOperation
+	@Override
+    @ReadOperation
 	public synchronized MemoryModel getModel(XID modelId) {
 		
 		MemoryModel model = this.loadedModels.get(modelId);
@@ -397,50 +409,59 @@ public class MemoryRepository extends AbstractEntity implements XRepository, Ser
 		return super.hashCode();
 	}
 	
-	public synchronized boolean hasModel(XID id) {
+	@Override
+    public synchronized boolean hasModel(XID id) {
 		return this.loadedModels.containsKey(id) || this.state.hasModel(id);
 	}
 	
-	public synchronized boolean isEmpty() {
+	@Override
+    public synchronized boolean isEmpty() {
 		return this.state.isEmpty();
 	}
 	
-	@ReadOperation
+	@Override
+    @ReadOperation
 	public synchronized Iterator<XID> iterator() {
 		return this.state.iterator();
 	}
 	
-	public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
+	@Override
+    public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
 		synchronized(this.fieldChangeListenerCollection) {
 			return this.fieldChangeListenerCollection.remove(changeListener);
 		}
 	}
 	
-	public boolean removeListenerForModelEvents(XModelEventListener changeListener) {
+	@Override
+    public boolean removeListenerForModelEvents(XModelEventListener changeListener) {
 		synchronized(this.modelChangeListenerCollection) {
 			return this.modelChangeListenerCollection.remove(changeListener);
 		}
 	}
 	
-	public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
+	@Override
+    public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
 		synchronized(this.objectChangeListenerCollection) {
 			return this.objectChangeListenerCollection.remove(changeListener);
 		}
 	}
 	
-	public boolean removeListenerForRepositoryEvents(XRepositoryEventListener changeListener) {
+	@Override
+    public boolean removeListenerForRepositoryEvents(XRepositoryEventListener changeListener) {
 		synchronized(this.repoChangeListenerCollection) {
 			return this.repoChangeListenerCollection.remove(changeListener);
 		}
 	}
 	
-	public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
+	@Override
+    public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
 		synchronized(this.transactionListenerCollection) {
 			return this.transactionListenerCollection.remove(changeListener);
 		}
 	}
 	
-	public boolean removeModel(XID modelId) {
+	@Override
+    public boolean removeModel(XID modelId) {
 		
 		// no synchronization necessary here (except that in
 		// executeRepositoryCommand())

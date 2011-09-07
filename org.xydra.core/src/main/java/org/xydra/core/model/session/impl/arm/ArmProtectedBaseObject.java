@@ -52,11 +52,13 @@ public class ArmProtectedBaseObject implements XReadableObject {
 		return this.actor;
 	}
 	
-	public XAddress getAddress() {
+	@Override
+    public XAddress getAddress() {
 		return this.object.getAddress();
 	}
 	
-	public XReadableField getField(XID fieldId) {
+	@Override
+    public XReadableField getField(XID fieldId) {
 		
 		checkCanKnowAboutField(fieldId);
 		
@@ -69,32 +71,37 @@ public class ArmProtectedBaseObject implements XReadableObject {
 		return new ArmProtectedBaseField(field, this.arm, this.actor);
 	}
 	
-	public XID getID() {
+	@Override
+    public XID getID() {
 		return this.object.getID();
 	}
 	
-	public long getRevisionNumber() {
+	@Override
+    public long getRevisionNumber() {
 		
 		checkReadAccess();
 		
 		return this.object.getRevisionNumber();
 	}
 	
-	public boolean hasField(XID fieldId) {
+	@Override
+    public boolean hasField(XID fieldId) {
 		
 		checkReadAccess();
 		
 		return this.object.hasField(fieldId);
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		
 		checkReadAccess();
 		
 		return this.object.isEmpty();
 	}
 	
-	public Iterator<XID> iterator() {
+	@Override
+    public Iterator<XID> iterator() {
 		
 		checkReadAccess();
 		

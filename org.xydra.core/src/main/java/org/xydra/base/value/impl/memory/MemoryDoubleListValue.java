@@ -38,11 +38,13 @@ public class MemoryDoubleListValue extends MemoryListValue<Double> implements XD
 		this.list = new double[length];
 	}
 	
-	public XDoubleListValue add(Double entry) {
+	@Override
+    public XDoubleListValue add(Double entry) {
 		return add(this.list.length, entry);
 	}
 	
-	public XDoubleListValue add(int index, Double entry) {
+	@Override
+    public XDoubleListValue add(int index, Double entry) {
 		int size = this.list.length;
 		if(index < 0 || index > size) {
 			throw new IndexOutOfBoundsException();
@@ -54,7 +56,8 @@ public class MemoryDoubleListValue extends MemoryListValue<Double> implements XD
 		return v;
 	}
 	
-	public double[] contents() {
+	@Override
+    public double[] contents() {
 		double[] array = new double[this.list.length];
 		System.arraycopy(this.list, 0, array, 0, this.list.length);
 		return array;
@@ -66,7 +69,8 @@ public class MemoryDoubleListValue extends MemoryListValue<Double> implements XD
 		        && XI.equalsIterator(this.iterator(), ((XDoubleListValue)other).iterator());
 	}
 	
-	public Double get(int index) {
+	@Override
+    public Double get(int index) {
 		return this.list[index];
 	}
 	
@@ -75,7 +79,8 @@ public class MemoryDoubleListValue extends MemoryListValue<Double> implements XD
 		return Arrays.hashCode(this.list);
 	}
 	
-	public XDoubleListValue remove(Double entry) {
+	@Override
+    public XDoubleListValue remove(Double entry) {
 		int index = indexOf(entry);
 		if(index < 0) {
 			return this;
@@ -83,7 +88,8 @@ public class MemoryDoubleListValue extends MemoryListValue<Double> implements XD
 		return remove(index);
 	}
 	
-	public XDoubleListValue remove(int index) {
+	@Override
+    public XDoubleListValue remove(int index) {
 		int size = this.list.length;
 		if(index < 0 || index >= size) {
 			throw new IndexOutOfBoundsException();
@@ -94,17 +100,20 @@ public class MemoryDoubleListValue extends MemoryListValue<Double> implements XD
 		return v;
 	}
 	
-	public int size() {
+	@Override
+    public int size() {
 		return this.list.length;
 	}
 	
-	public Double[] toArray() {
+	@Override
+    public Double[] toArray() {
 		Double[] array = new Double[this.list.length];
 		fillArray(array);
 		return array;
 	}
 	
-	public Number[] toNumberArray() {
+	@Override
+    public Number[] toNumberArray() {
 		Number[] array = new Number[this.list.length];
 		int i = 0;
 		for(Number e : this) {

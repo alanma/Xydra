@@ -55,23 +55,28 @@ public class HasChanged implements XRepositoryEventListener, XModelEventListener
 	
 	public boolean eventsReceived = false;
 	
-	public void onChangeEvent(XFieldEvent event) {
+	@Override
+    public void onChangeEvent(XFieldEvent event) {
 		this.eventsReceived = true;
 	}
 	
-	public void onChangeEvent(XModelEvent event) {
+	@Override
+    public void onChangeEvent(XModelEvent event) {
 		this.eventsReceived = true;
 	}
 	
-	public void onChangeEvent(XObjectEvent event) {
+	@Override
+    public void onChangeEvent(XObjectEvent event) {
 		this.eventsReceived = true;
 	}
 	
-	public void onChangeEvent(XRepositoryEvent event) {
+	@Override
+    public void onChangeEvent(XRepositoryEvent event) {
 		this.eventsReceived = true;
 	}
 	
-	public void onChangeEvent(XTransactionEvent event) {
+	@Override
+    public void onChangeEvent(XTransactionEvent event) {
 		this.eventsReceived = true;
 	}
 	

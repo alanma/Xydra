@@ -82,7 +82,8 @@ public class SimpleRepository implements XRevWritableRepository, Serializable {
 		return false;
 	}
 	
-	public void addModel(XRevWritableModel model) {
+	@Override
+    public void addModel(XRevWritableModel model) {
 		this.models.put(model.getID(), model);
 	}
 	

@@ -48,11 +48,13 @@ public class ChangedField implements XWritableField {
 		this.base = base;
 	}
 	
-	public XAddress getAddress() {
+	@Override
+    public XAddress getAddress() {
 		return this.base.getAddress();
 	}
 	
-	public XID getID() {
+	@Override
+    public XID getID() {
 		return this.base.getID();
 	}
 	
@@ -71,11 +73,13 @@ public class ChangedField implements XWritableField {
 	 * 
 	 * @return the revision number of the original {@link XReadableField}
 	 */
-	public long getRevisionNumber() {
+	@Override
+    public long getRevisionNumber() {
 		return this.base.getRevisionNumber();
 	}
 	
-	public XValue getValue() {
+	@Override
+    public XValue getValue() {
 		return this.value;
 	}
 	
@@ -87,11 +91,13 @@ public class ChangedField implements XWritableField {
 		return this.changed;
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		return this.value == null;
 	}
 	
-	public boolean setValue(XValue value) {
+	@Override
+    public boolean setValue(XValue value) {
 		// reset changed flag if the value is reset to the base field's value
 		boolean changes = !XI.equals(getValue(), value);
 		this.changed = !XI.equals(value, this.base.getValue());

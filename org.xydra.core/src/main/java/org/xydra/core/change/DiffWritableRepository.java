@@ -14,6 +14,8 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.index.IndexUtils;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
 
 /**
@@ -26,6 +28,8 @@ import org.xydra.index.IndexUtils;
  * 
  */
 public class DiffWritableRepository extends AbstractDelegatingWritableRepository {
+	
+	private static final Logger log = LoggerFactory.getLogger(DiffWritableRepository.class);
 	
 	public DiffWritableRepository(XWritableRepository baseRepository) {
 		super(baseRepository);
@@ -45,12 +49,13 @@ public class DiffWritableRepository extends AbstractDelegatingWritableRepository
 			return this.potentiallyChanged.get(modelId);
 		}
 		if(this.baseRepository.hasModel(modelId)) {
+			log.debug("model '" + modelId + "' existed already");
 			XWritableModel baseModel = this.baseRepository.getModel(modelId);
 			DiffWritableModel diffModel = new DiffWritableModel(baseModel);
 			this.potentiallyChanged.put(modelId, diffModel);
 			return diffModel;
 		} else {
-			// model did not exist yet
+			log.debug("model '" + modelId + "' did not exist yet");
 			DiffWritableModel diffModel = new DiffWritableModel(new SimpleModel(XX.toAddress(
 			        getID(), modelId, null, null)));
 			this.added.put(modelId, diffModel);
@@ -136,9 +141,19 @@ public class DiffWritableRepository extends AbstractDelegatingWritableRepository
 	
 	public String changesToString() {
 		StringBuffer buf = new StringBuffer();
+		for(XID modelId : this.added.keySet()) {
+			buf.append("=== ADDED " + modelId + " ===<br/>\n");
+			DiffWritableModel model = this.added.get(modelId);
+			for(XAtomicCommand command : model.toCommandList()) {
+				buf.append(" " + command + " <br/>\n");
+			}
+		}
+		for(XID modelId : this.removed) {
+			buf.append("=== REMOVED " + modelId + " ===<br/>\n");
+		}
 		for(DiffWritableModel model : this.potentiallyChanged.values()) {
 			if(model.hasChanges()) {
-				buf.append("=== " + model.getID() + " === <br/>\n");
+				buf.append("=== CHANGED " + model.getID() + " === <br/>\n");
 				for(XAtomicCommand command : model.toCommandList()) {
 					buf.append(" " + command + " <br/>\n");
 				}

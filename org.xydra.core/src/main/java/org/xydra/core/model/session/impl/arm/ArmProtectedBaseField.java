@@ -42,29 +42,34 @@ public class ArmProtectedBaseField implements XReadableField {
 		return this.actor;
 	}
 	
-	public XAddress getAddress() {
+	@Override
+    public XAddress getAddress() {
 		return this.field.getAddress();
 	}
 	
-	public XID getID() {
+	@Override
+    public XID getID() {
 		return this.field.getID();
 	}
 	
-	public long getRevisionNumber() {
+	@Override
+    public long getRevisionNumber() {
 		
 		checkReadAccess();
 		
 		return this.field.getRevisionNumber();
 	}
 	
-	public XValue getValue() {
+	@Override
+    public XValue getValue() {
 		
 		checkReadAccess();
 		
 		return this.field.getValue();
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		
 		checkReadAccess();
 		

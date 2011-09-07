@@ -102,19 +102,23 @@ public class MemoryTransaction implements XTransaction {
 		return true;
 	}
 	
-	public XAddress getChangedEntity() {
+	@Override
+    public XAddress getChangedEntity() {
 		return this.target;
 	}
 	
-	public ChangeType getChangeType() {
+	@Override
+    public ChangeType getChangeType() {
 		return ChangeType.TRANSACTION;
 	}
 	
-	public XAtomicCommand getCommand(int index) {
+	@Override
+    public XAtomicCommand getCommand(int index) {
 		return this.commands[index];
 	}
 	
-	public XAddress getTarget() {
+	@Override
+    public XAddress getTarget() {
 		return this.target;
 	}
 	
@@ -131,11 +135,13 @@ public class MemoryTransaction implements XTransaction {
 		return result;
 	}
 	
-	public Iterator<XAtomicCommand> iterator() {
+	@Override
+    public Iterator<XAtomicCommand> iterator() {
 		return Arrays.asList(this.commands).iterator();
 	}
 	
-	public int size() {
+	@Override
+    public int size() {
 		return this.commands.length;
 	}
 	

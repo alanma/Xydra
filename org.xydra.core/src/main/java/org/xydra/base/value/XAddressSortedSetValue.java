@@ -22,7 +22,8 @@ public interface XAddressSortedSetValue extends XAddressSetValue {
 	 * @return a new {@link XAddressSortedSetValue} containing all entries from
 	 *         this value as well as the given entry
 	 */
-	XAddressSortedSetValue add(XAddress entry);
+	@Override
+    XAddressSortedSetValue add(XAddress entry);
 	
 	/**
 	 * Returns the contents of this {@link XAddressSortedSetValue} as an array.
@@ -33,7 +34,8 @@ public interface XAddressSortedSetValue extends XAddressSetValue {
 	 * @return an array containing the {@link XAddress} values of this
 	 *         XAddressSortedSetValue in insertion order
 	 */
-	public XAddress[] contents();
+	@Override
+    public XAddress[] contents();
 	
 	/**
 	 * Creates a new {@link XAddressSortedSetValue} containing all entries from
@@ -43,7 +45,8 @@ public interface XAddressSortedSetValue extends XAddressSetValue {
 	 * @return a new {@link XAddressSortedSetValue} containing all entries from
 	 *         this value expect the given entry
 	 */
-	XAddressSortedSetValue remove(XAddress entry);
+	@Override
+    XAddressSortedSetValue remove(XAddress entry);
 	
 	/**
 	 * Creates a {@link SortedSet} containing all {@link XAddress} entries in

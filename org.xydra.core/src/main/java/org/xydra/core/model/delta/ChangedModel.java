@@ -233,7 +233,8 @@ public class ChangedModel implements XWritableModel {
 		return n;
 	}
 	
-	public XWritableObject createObject(XID objectId) {
+	@Override
+    public XWritableObject createObject(XID objectId) {
 		
 		XWritableObject oldObject = getObject(objectId);
 		if(oldObject != null) {
@@ -476,7 +477,8 @@ public class ChangedModel implements XWritableModel {
 		return true;
 	}
 	
-	public XAddress getAddress() {
+	@Override
+    public XAddress getAddress() {
 		return this.base.getAddress();
 	}
 	
@@ -489,7 +491,8 @@ public class ChangedModel implements XWritableModel {
 		return this.changed.values();
 	}
 	
-	public XID getID() {
+	@Override
+    public XID getID() {
 		return this.base.getID();
 	}
 	
@@ -502,7 +505,8 @@ public class ChangedModel implements XWritableModel {
 		return this.added.values();
 	}
 	
-	public XWritableObject getObject(XID objectId) {
+	@Override
+    public XWritableObject getObject(XID objectId) {
 		
 		XWritableObject newObject = this.added.get(objectId);
 		if(newObject != null) {
@@ -554,11 +558,13 @@ public class ChangedModel implements XWritableModel {
 	 * 
 	 * @return the revision number of the original {@link XReadableModel}
 	 */
-	public long getRevisionNumber() {
+	@Override
+    public long getRevisionNumber() {
 		return this.base.getRevisionNumber();
 	}
 	
-	public boolean hasObject(XID objectId) {
+	@Override
+    public boolean hasObject(XID objectId) {
 		if(this.added.containsKey(objectId))
 			return true;
 		if(this.removed.contains(objectId)) {
@@ -567,7 +573,8 @@ public class ChangedModel implements XWritableModel {
 		return this.base.hasObject(objectId);
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		
 		if(!this.added.isEmpty()) {
 			return false;
@@ -590,7 +597,8 @@ public class ChangedModel implements XWritableModel {
 		return true;
 	}
 	
-	public Iterator<XID> iterator() {
+	@Override
+    public Iterator<XID> iterator() {
 		
 		Iterator<XID> filtered = new AbstractFilteringIterator<XID>(this.base.iterator()) {
 			@Override
@@ -602,7 +610,8 @@ public class ChangedModel implements XWritableModel {
 		return new BagUnionIterator<XID>(filtered, this.added.keySet().iterator());
 	}
 	
-	public boolean removeObject(XID objectId) {
+	@Override
+    public boolean removeObject(XID objectId) {
 		
 		if(this.added.containsKey(objectId)) {
 			

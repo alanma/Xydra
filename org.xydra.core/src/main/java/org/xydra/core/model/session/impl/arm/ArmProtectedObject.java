@@ -33,28 +33,32 @@ public class ArmProtectedObject extends ArmProtectedBaseObject implements XProte
 		this.object = object;
 	}
 	
-	public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
+	@Override
+    public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
 		
 		checkReadAccess();
 		
 		return this.object.addListenerForFieldEvents(changeListener);
 	}
 	
-	public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
+	@Override
+    public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
 		
 		checkReadAccess();
 		
 		return this.object.addListenerForObjectEvents(changeListener);
 	}
 	
-	public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
+	@Override
+    public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
 		
 		checkReadAccess();
 		
 		return this.object.addListenerForTransactionEvents(changeListener);
 	}
 	
-	public XProtectedField createField(XID fieldId) {
+	@Override
+    public XProtectedField createField(XID fieldId) {
 		
 		if(!this.arm.canWrite(this.actor, getAddress())) {
 			throw new AccessException(this.actor + " cannot write to " + getAddress());
@@ -67,7 +71,8 @@ public class ArmProtectedObject extends ArmProtectedBaseObject implements XProte
 		return new ArmProtectedField(field, this.arm, this.actor);
 	}
 	
-	public long executeCommand(XCommand command) {
+	@Override
+    public long executeCommand(XCommand command) {
 		
 		if(!this.arm.canExecute(this.actor, command)) {
 			throw new AccessException(this.actor + " cannot execute " + command);
@@ -76,7 +81,8 @@ public class ArmProtectedObject extends ArmProtectedBaseObject implements XProte
 		return this.object.executeCommand(command);
 	}
 	
-	public long executeObjectCommand(XObjectCommand command) {
+	@Override
+    public long executeObjectCommand(XObjectCommand command) {
 		
 		if(!this.arm.canExecute(this.actor, command)) {
 			throw new AccessException(this.actor + " cannot execute " + command);
@@ -85,7 +91,8 @@ public class ArmProtectedObject extends ArmProtectedBaseObject implements XProte
 		return this.object.executeObjectCommand(command);
 	}
 	
-	public XChangeLog getChangeLog() {
+	@Override
+    public XChangeLog getChangeLog() {
 		return new ArmProtectedChangeLog(this.object.getChangeLog(), this.arm, this.actor);
 	}
 	
@@ -103,7 +110,8 @@ public class ArmProtectedObject extends ArmProtectedBaseObject implements XProte
 		return new ArmProtectedField(field, this.arm, this.actor);
 	}
 	
-	public boolean removeField(XID fieldId) {
+	@Override
+    public boolean removeField(XID fieldId) {
 		
 		if(!this.arm.canRemoveField(this.actor, getAddress(), fieldId)) {
 			throw new AccessException(this.actor + " cannot remove " + fieldId + " from "
@@ -113,15 +121,18 @@ public class ArmProtectedObject extends ArmProtectedBaseObject implements XProte
 		return this.object.removeField(fieldId);
 	}
 	
-	public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
+	@Override
+    public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
 		return this.object.removeListenerForFieldEvents(changeListener);
 	}
 	
-	public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
+	@Override
+    public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
 		return this.object.removeListenerForObjectEvents(changeListener);
 	}
 	
-	public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
+	@Override
+    public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
 		return this.object.removeListenerForTransactionEvents(changeListener);
 	}
 	

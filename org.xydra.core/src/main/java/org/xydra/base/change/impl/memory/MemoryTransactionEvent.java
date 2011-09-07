@@ -178,15 +178,18 @@ public class MemoryTransactionEvent extends AbstractTransactionEvent {
 		assert assertIsCorrect() : "impossible transaction event: " + toString();
 	}
 	
-	public XAtomicEvent getEvent(int index) {
+	@Override
+    public XAtomicEvent getEvent(int index) {
 		return this.events[index];
 	}
 	
-	public Iterator<XAtomicEvent> iterator() {
+	@Override
+    public Iterator<XAtomicEvent> iterator() {
 		return Arrays.asList(this.events).iterator();
 	}
 	
-	public int size() {
+	@Override
+    public int size() {
 		return this.events.length;
 	}
 	

@@ -18,7 +18,8 @@ public class MemoryFieldChangeListener implements XFieldEventListener {
 	
 	private static Logger log = LoggerFactory.getLogger(MemoryFieldChangeListener.class);
 	
-	public void onChangeEvent(XFieldEvent event) {
+	@Override
+    public void onChangeEvent(XFieldEvent event) {
 		log.info("Value of field " + event.getFieldId() + "with revision number "
 		        + event.getOldFieldRevision() + " changed to " + event.getNewValue());
 	}

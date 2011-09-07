@@ -128,7 +128,8 @@ public class MemoryModelCommand extends MemoryAtomicCommand implements XModelCom
 		return true;
 	}
 	
-	public XAddress getChangedEntity() {
+	@Override
+    public XAddress getChangedEntity() {
 		return XX.resolveObject(getTarget(), getObjectId());
 	}
 	

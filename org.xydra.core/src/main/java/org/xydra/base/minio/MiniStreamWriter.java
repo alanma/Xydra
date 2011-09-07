@@ -40,7 +40,8 @@ public class MiniStreamWriter implements MiniWriter {
 		}
 	}
 	
-	public void close() throws MiniIOException {
+	@Override
+    public void close() throws MiniIOException {
 		try {
 			this.w.close();
 		} catch(IOException e) {
@@ -48,7 +49,8 @@ public class MiniStreamWriter implements MiniWriter {
 		}
 	}
 	
-	public void flush() throws MiniIOException {
+	@Override
+    public void flush() throws MiniIOException {
 		try {
 			this.w.flush();
 		} catch(IOException e) {
@@ -56,7 +58,8 @@ public class MiniStreamWriter implements MiniWriter {
 		}
 	}
 	
-	public void write(String string) throws MiniIOException {
+	@Override
+    public void write(String string) throws MiniIOException {
 		try {
 			this.w.write(string);
 		} catch(IOException e) {
@@ -64,7 +67,8 @@ public class MiniStreamWriter implements MiniWriter {
 		}
 	}
 	
-	public void write(char c) throws MiniIOException {
+	@Override
+    public void write(char c) throws MiniIOException {
 		try {
 			this.w.write(c);
 		} catch(IOException e) {

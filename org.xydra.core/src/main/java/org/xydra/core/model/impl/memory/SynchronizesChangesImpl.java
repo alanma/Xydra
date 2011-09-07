@@ -90,19 +90,22 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 		this.transactionListenerCollection = new HashSet<XTransactionEventListener>();
 	}
 	
-	public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
+	@Override
+    public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.fieldChangeListenerCollection.add(changeListener);
 		}
 	}
 	
-	public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
+	@Override
+    public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.objectChangeListenerCollection.add(changeListener);
 		}
 	}
 	
-	public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
+	@Override
+    public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.transactionListenerCollection.add(changeListener);
 		}
@@ -360,7 +363,8 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 		}
 	}
 	
-	public XChangeLog getChangeLog() {
+	@Override
+    public XChangeLog getChangeLog() {
 		return this.eventQueue.getChangeLog();
 	}
 	
@@ -435,19 +439,22 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 	 */
 	protected abstract void incrementRevision();
 	
-	public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
+	@Override
+    public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.fieldChangeListenerCollection.remove(changeListener);
 		}
 	}
 	
-	public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
+	@Override
+    public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.objectChangeListenerCollection.remove(changeListener);
 		}
 	}
 	
-	public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
+	@Override
+    public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.transactionListenerCollection.remove(changeListener);
 		}
@@ -585,7 +592,8 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 		return true;
 	}
 	
-	public void rollback(long revision) {
+	@Override
+    public void rollback(long revision) {
 		
 		checkSync();
 		
@@ -767,7 +775,8 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 		}
 	}
 	
-	public boolean synchronize(XEvent[] remoteChanges) {
+	@Override
+    public boolean synchronize(XEvent[] remoteChanges) {
 		
 		boolean success = true;
 		boolean removedChanged;

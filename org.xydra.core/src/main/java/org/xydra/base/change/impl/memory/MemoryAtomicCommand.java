@@ -47,7 +47,8 @@ abstract public class MemoryAtomicCommand implements XAtomicCommand, Serializabl
 		        && this.target.equals(command.getTarget());
 	}
 	
-	public ChangeType getChangeType() {
+	@Override
+    public ChangeType getChangeType() {
 		return this.changeType;
 	}
 	
@@ -79,11 +80,13 @@ abstract public class MemoryAtomicCommand implements XAtomicCommand, Serializabl
 		return this.target.getRepository();
 	}
 	
-	public long getRevisionNumber() {
+	@Override
+    public long getRevisionNumber() {
 		return this.revision;
 	}
 	
-	public XAddress getTarget() {
+	@Override
+    public XAddress getTarget() {
 		return this.target;
 	}
 	
@@ -104,7 +107,8 @@ abstract public class MemoryAtomicCommand implements XAtomicCommand, Serializabl
 		return result;
 	}
 	
-	public boolean isForced() {
+	@Override
+    public boolean isForced() {
 		return this.revision == XCommand.FORCED;
 	}
 	

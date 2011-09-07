@@ -30,13 +30,15 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 		super(fieldId, indexObject);
 	}
 	
-	public void clear() {
+	@Override
+    public void clear() {
 		for(XID fieldId : this.indexObject) {
 			this.indexObject.removeField(fieldId);
 		}
 	}
 	
-	public boolean contains(XValue indexKey) {
+	@Override
+    public boolean contains(XValue indexKey) {
 		XID key = valueToXID(indexKey);
 		XWritableField indexField = this.indexObject.getField(key);
 		if(indexField == null) {
@@ -45,7 +47,8 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 		return true;
 	}
 	
-	public XID deindex(XReadableObject xo) {
+	@Override
+    public XID deindex(XReadableObject xo) {
 		XReadableField field = xo.getField(this.fieldId);
 		if(field == null) {
 			return null;
@@ -54,7 +57,8 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 		return deindex(keyValue);
 	}
 	
-	public XID deindex(XValue key) {
+	@Override
+    public XID deindex(XValue key) {
 		XID xid = valueToXID(key);
 		XWritableField indexField = this.indexObject.getField(xid);
 		if(indexField == null) {
@@ -69,7 +73,8 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 		return previous;
 	}
 	
-	public XID index(XReadableObject xo) {
+	@Override
+    public XID index(XReadableObject xo) {
 		if(xo == null) {
 			throw new IllegalArgumentException("Object may not be null");
 		}
@@ -98,13 +103,15 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 		return previous;
 	}
 	
-	public XWritableObject lookup(XWritableModel model, XValue indexKey) {
+	@Override
+    public XWritableObject lookup(XWritableModel model, XValue indexKey) {
 		XID id = lookupID(indexKey);
 		XWritableObject object = model.getObject(id);
 		return object;
 	}
 	
-	public XID lookupID(XValue indexKey) {
+	@Override
+    public XID lookupID(XValue indexKey) {
 		XID key = valueToXID(indexKey);
 		XWritableField indexField = this.indexObject.getField(key);
 		if(indexField == null) {

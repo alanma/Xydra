@@ -40,27 +40,33 @@ public class MemoryAccessEvent implements XAuthorisationEvent {
 		this.newAccess = newAccess;
 	}
 	
-	public XID getAccessType() {
+	@Override
+    public XID getAccessType() {
 		return this.access;
 	}
 	
-	public XID getActor() {
+	@Override
+    public XID getActor() {
 		return this.actor;
 	}
 	
-	public ChangeType getChangeType() {
+	@Override
+    public ChangeType getChangeType() {
 		return this.type;
 	}
 	
-	public XAccessRightValue getNewAccessValue() {
+	@Override
+    public XAccessRightValue getNewAccessValue() {
 		return this.newAccess;
 	}
 	
-	public XAccessRightValue getOldAccessValue() {
+	@Override
+    public XAccessRightValue getOldAccessValue() {
 		return this.oldAccess;
 	}
 	
-	public XAddress getResource() {
+	@Override
+    public XAddress getResource() {
 		return this.resource;
 	}
 	

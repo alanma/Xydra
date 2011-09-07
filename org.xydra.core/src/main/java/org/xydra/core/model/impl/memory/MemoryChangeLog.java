@@ -46,15 +46,18 @@ public class MemoryChangeLog extends AbstractChangeLog implements XChangeLog {
 		this.state.appendEvent(event);
 	}
 	
-	public XAddress getBaseAddress() {
+	@Override
+    public XAddress getBaseAddress() {
 		return this.state.getBaseAddress();
 	}
 	
-	synchronized public long getCurrentRevisionNumber() {
+	@Override
+    synchronized public long getCurrentRevisionNumber() {
 		return this.state.getCurrentRevisionNumber();
 	}
 	
-	synchronized public XEvent getEventAt(long revisionNumber) {
+	@Override
+    synchronized public XEvent getEventAt(long revisionNumber) {
 		if(revisionNumber < 0) {
 			throw new IllegalArgumentException("revisionNumber may not be less than zero");
 		}
@@ -74,7 +77,8 @@ public class MemoryChangeLog extends AbstractChangeLog implements XChangeLog {
 		return event;
 	}
 	
-	synchronized public long getFirstRevisionNumber() {
+	@Override
+    synchronized public long getFirstRevisionNumber() {
 		return this.state.getFirstRevisionNumber();
 	}
 	

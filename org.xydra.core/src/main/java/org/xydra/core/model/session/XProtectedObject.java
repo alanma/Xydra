@@ -45,7 +45,8 @@ public interface XProtectedObject extends XLoggedObject, XExecutesCommands {
 	 *             the necessary access rights (write access) to execute this
 	 *             method
 	 */
-	@ModificationOperation
+	@Override
+    @ModificationOperation
 	XProtectedField createField(XID fieldId);
 	
 	/**
@@ -98,7 +99,8 @@ public interface XProtectedObject extends XLoggedObject, XExecutesCommands {
 	 *             the necessary access rights (read access) to execute this
 	 *             method
 	 */
-	@ReadOperation
+	@Override
+    @ReadOperation
 	XProtectedField getField(XID fieldId);
 	
 }

@@ -55,7 +55,8 @@ public class MemoryIDSortedSetValue extends MemoryIDListValue implements XIDSort
 		}
 	}
 	
-	public Set<XID> toSet() {
+	@Override
+    public Set<XID> toSet() {
 		Set<XID> copy = new HashSet<XID>();
 		XID[] list = this.contents();
 		for(int i = 0; i < list.length; i++) {
@@ -64,7 +65,8 @@ public class MemoryIDSortedSetValue extends MemoryIDListValue implements XIDSort
 		return copy;
 	}
 	
-	public SortedSet<XID> toSortedSet() {
+	@Override
+    public SortedSet<XID> toSortedSet() {
 		SortedSet<XID> copy = new TreeSet<XID>();
 		XID[] list = this.contents();
 		for(int i = 0; i < list.length; i++) {

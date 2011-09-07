@@ -18,7 +18,8 @@ public interface XByteListValue extends XListValue<Byte> {
 	 * @return a new {@link XByteListValue} containing all entries from this
 	 *         value as well as the specified entry.
 	 */
-	XByteListValue add(Byte entry);
+	@Override
+    XByteListValue add(Byte entry);
 	
 	/**
 	 * Creates a new {@link XByteListValue} containing all entries from this
@@ -33,7 +34,8 @@ public interface XByteListValue extends XListValue<Byte> {
 	 * @throws IndexOutOfBoundsException if index is negative or greater than
 	 *             size()
 	 */
-	XByteListValue add(int index, Byte entry);
+	@Override
+    XByteListValue add(int index, Byte entry);
 	
 	/**
 	 * Returns the Byte values as an array in the order they were added to the
@@ -56,7 +58,8 @@ public interface XByteListValue extends XListValue<Byte> {
 	 * @return a new {@link XByteListValue} containing all entries from this
 	 *         value except the given entry
 	 */
-	XByteListValue remove(Byte entry);
+	@Override
+    XByteListValue remove(Byte entry);
 	
 	/**
 	 * Creates a new {@link XByteListValue} containing all entries from this
@@ -70,5 +73,6 @@ public interface XByteListValue extends XListValue<Byte> {
 	 * @throws IndexOutOfBoundsException if index is negative or greater than or
 	 *             equal to size()
 	 */
-	XByteListValue remove(int index);
+	@Override
+    XByteListValue remove(int index);
 }

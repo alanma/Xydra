@@ -22,7 +22,8 @@ class ForTestLocalChangeCallback implements XLocalChangeCallback {
 		return this.committed;
 	}
 	
-	synchronized public void onFailure() {
+	@Override
+    synchronized public void onFailure() {
 		
 		assert !this.committed : "double fail/apply detected";
 		
@@ -31,7 +32,8 @@ class ForTestLocalChangeCallback implements XLocalChangeCallback {
 		notifyAll();
 	}
 	
-	synchronized public void onSuccess(long revision) {
+	@Override
+    synchronized public void onSuccess(long revision) {
 		
 		assert !this.committed : "double fail/apply detected";
 		

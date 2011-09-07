@@ -62,16 +62,19 @@ public class MemoryAddressListValue extends MemoryListValue<XAddress> implements
 		System.arraycopy(content, 0, this.list, 0, content.length);
 	}
 	
-	public XAddressListValue add(int index, XAddress entry) {
+	@Override
+    public XAddressListValue add(int index, XAddress entry) {
 		XAddress[] newList = createArrayWithEntryInsertedAtPosition(this.list, index, entry);
 		return new MemoryAddressListValue(newList);
 	}
 	
-	public XAddressListValue add(XAddress entry) {
+	@Override
+    public XAddressListValue add(XAddress entry) {
 		return add(this.list.length, entry);
 	}
 	
-	public XAddress[] contents() {
+	@Override
+    public XAddress[] contents() {
 		XAddress[] array = new XAddress[this.list.length];
 		System.arraycopy(this.list, 0, array, 0, this.list.length);
 		return array;
@@ -83,7 +86,8 @@ public class MemoryAddressListValue extends MemoryListValue<XAddress> implements
 		        && XI.equalsIterator(this.iterator(), ((XAddressListValue)other).iterator());
 	}
 	
-	public XAddress get(int index) {
+	@Override
+    public XAddress get(int index) {
 		return this.list[index];
 	}
 	
@@ -92,12 +96,14 @@ public class MemoryAddressListValue extends MemoryListValue<XAddress> implements
 		return Arrays.hashCode(this.list);
 	}
 	
-	public XAddressListValue remove(int index) {
+	@Override
+    public XAddressListValue remove(int index) {
 		XAddress[] newList = createArrayWithEntryRemovedAtPosition(this.contents(), index);
 		return new MemoryAddressListValue(newList);
 	}
 	
-	public XAddressListValue remove(XAddress entry) {
+	@Override
+    public XAddressListValue remove(XAddress entry) {
 		int index = indexOf(entry);
 		if(index < 0) {
 			return this;
@@ -105,11 +111,13 @@ public class MemoryAddressListValue extends MemoryListValue<XAddress> implements
 		return remove(index);
 	}
 	
-	public int size() {
+	@Override
+    public int size() {
 		return this.list.length;
 	}
 	
-	public XAddress[] toArray() {
+	@Override
+    public XAddress[] toArray() {
 		return contents();
 	}
 	

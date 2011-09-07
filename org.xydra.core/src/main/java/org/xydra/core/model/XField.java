@@ -77,7 +77,8 @@ public interface XField extends XLoggedField, XWritableField, Serializable {
 	 * @return true, if this operation actually changed the current
 	 *         {@link XValue} of this field, false otherwise
 	 */
-	@ModificationOperation
+	@Override
+    @ModificationOperation
 	boolean setValue(XValue value);
 	
 	/**

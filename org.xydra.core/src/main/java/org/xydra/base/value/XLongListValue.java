@@ -21,7 +21,8 @@ public interface XLongListValue extends XNumberListValue<Long> {
 	 * @throws IndexOutOfBoundsException if index is negative or greater than
 	 *             size()
 	 */
-	XLongListValue add(int index, Long entry);
+	@Override
+    XLongListValue add(int index, Long entry);
 	
 	/**
 	 * Creates a new {@link XLongListValue} containing all entries from this
@@ -33,7 +34,8 @@ public interface XLongListValue extends XNumberListValue<Long> {
 	 * @return a new {@link XLongListValue} containing all entries from this
 	 *         value as well as the specified entry.
 	 */
-	XLongListValue add(Long entry);
+	@Override
+    XLongListValue add(Long entry);
 	
 	/**
 	 * Returns the Long values as an array in the order they were added to the
@@ -58,7 +60,8 @@ public interface XLongListValue extends XNumberListValue<Long> {
 	 * @throws IndexOutOfBoundsException if index is negative or greater than or
 	 *             equal to size()
 	 */
-	XLongListValue remove(int index);
+	@Override
+    XLongListValue remove(int index);
 	
 	/**
 	 * Creates a new {@link XLongListValue} containing all entries from this
@@ -70,6 +73,7 @@ public interface XLongListValue extends XNumberListValue<Long> {
 	 * @return a new {@link XLongListValue} containing all entries from this
 	 *         value except the given entry
 	 */
-	XLongListValue remove(Long entry);
+	@Override
+    XLongListValue remove(Long entry);
 	
 }

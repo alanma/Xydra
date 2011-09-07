@@ -37,7 +37,8 @@ public class MemoryIntegerListValue extends MemoryListValue<Integer> implements 
 		System.arraycopy(content, 0, this.list, 0, content.length);
 	}
 	
-	public XIntegerListValue add(int index, Integer entry) {
+	@Override
+    public XIntegerListValue add(int index, Integer entry) {
 		int size = this.list.length;
 		if(index < 0 || index > size) {
 			throw new IndexOutOfBoundsException();
@@ -49,11 +50,13 @@ public class MemoryIntegerListValue extends MemoryListValue<Integer> implements 
 		return v;
 	}
 	
-	public XIntegerListValue add(Integer entry) {
+	@Override
+    public XIntegerListValue add(Integer entry) {
 		return add(this.list.length, entry);
 	}
 	
-	public int[] contents() {
+	@Override
+    public int[] contents() {
 		int[] array = new int[this.list.length];
 		System.arraycopy(this.list, 0, array, 0, this.list.length);
 		return array;
@@ -65,7 +68,8 @@ public class MemoryIntegerListValue extends MemoryListValue<Integer> implements 
 		        && XI.equalsIterator(this.iterator(), ((XIntegerListValue)other).iterator());
 	}
 	
-	public Integer get(int index) {
+	@Override
+    public Integer get(int index) {
 		return this.list[index];
 	}
 	
@@ -74,7 +78,8 @@ public class MemoryIntegerListValue extends MemoryListValue<Integer> implements 
 		return Arrays.hashCode(this.list);
 	}
 	
-	public XIntegerListValue remove(int index) {
+	@Override
+    public XIntegerListValue remove(int index) {
 		int size = this.list.length;
 		if(index < 0 || index >= size) {
 			throw new IndexOutOfBoundsException();
@@ -85,7 +90,8 @@ public class MemoryIntegerListValue extends MemoryListValue<Integer> implements 
 		return v;
 	}
 	
-	public XIntegerListValue remove(Integer entry) {
+	@Override
+    public XIntegerListValue remove(Integer entry) {
 		int index = indexOf(entry);
 		if(index < 0) {
 			return this;
@@ -93,17 +99,20 @@ public class MemoryIntegerListValue extends MemoryListValue<Integer> implements 
 		return remove(index);
 	}
 	
-	public int size() {
+	@Override
+    public int size() {
 		return this.list.length;
 	}
 	
-	public Integer[] toArray() {
+	@Override
+    public Integer[] toArray() {
 		Integer[] array = new Integer[this.list.length];
 		fillArray(array);
 		return array;
 	}
 	
-	public Number[] toNumberArray() {
+	@Override
+    public Number[] toNumberArray() {
 		Number[] array = new Number[this.list.length];
 		int i = 0;
 		for(Number e : this) {

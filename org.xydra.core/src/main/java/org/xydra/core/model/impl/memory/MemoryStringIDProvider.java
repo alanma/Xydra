@@ -34,12 +34,14 @@ public class MemoryStringIDProvider implements XIDProvider {
 	 * but GWT doesn't support that class
 	 */
 
-	public XID createUniqueId() {
+	@Override
+    public XID createUniqueId() {
 		/* leading 'a' ensures legal XML name */
 		return new MemoryStringID("a" + UUID.uuid());
 	}
 	
-	public XAddress fromAddress(String address) {
+	@Override
+    public XAddress fromAddress(String address) {
 		
 		if(address == null) {
 			throw new IllegalArgumentException("address may not be null");
@@ -80,11 +82,13 @@ public class MemoryStringIDProvider implements XIDProvider {
 		return new MemoryAddress(repository, model, object, field);
 	}
 	
-	public XAddress fromComponents(XID repositoryId, XID modelId, XID objectId, XID fieldId) {
+	@Override
+    public XAddress fromComponents(XID repositoryId, XID modelId, XID objectId, XID fieldId) {
 		return new MemoryAddress(repositoryId, modelId, objectId, fieldId);
 	}
 	
-	public XID fromString(String uriString) {
+	@Override
+    public XID fromString(String uriString) {
 		if(!uriString.matches(nameRegex)) {
 			throw new IllegalArgumentException("'" + uriString
 			        + "' is not a valid XML name or contains ':', cannot create XID");

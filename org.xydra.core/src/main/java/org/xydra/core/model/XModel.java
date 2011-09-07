@@ -44,7 +44,8 @@ public interface XModel extends XLoggedModel, XWritableModel, Serializable, XSyn
 	 *         {@link XObject} if the given {@link XID} was already taken
 	 * @throws IllegalStateException if this model has already been removed
 	 */
-	@ModificationOperation
+	@Override
+    @ModificationOperation
 	XObject createObject(XID id);
 	
 	/**
@@ -86,7 +87,8 @@ public interface XModel extends XLoggedModel, XWritableModel, Serializable, XSyn
 	 *         corresponding {@link XObject} exists
 	 * @throws IllegalStateException if this model has already been removed
 	 */
-	@ReadOperation
+	@Override
+    @ReadOperation
 	XObject getObject(XID objectId);
 	
 	/**
@@ -99,7 +101,8 @@ public interface XModel extends XLoggedModel, XWritableModel, Serializable, XSyn
 	 *         in this XModel and could be removed
 	 * @throws IllegalStateException if this model has already been removed
 	 */
-	@ModificationOperation
+	@Override
+    @ModificationOperation
 	boolean removeObject(XID objectId);
 	
 	/**

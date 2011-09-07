@@ -33,7 +33,8 @@ public class XmlParser implements XydraParser {
 		return parser;
 	}
 	
-	public synchronized XydraElement parse(String string) {
+	@Override
+    public synchronized XydraElement parse(String string) {
 		InputSource is = new InputSource(new StringReader(string));
 		Document document;
 		try {

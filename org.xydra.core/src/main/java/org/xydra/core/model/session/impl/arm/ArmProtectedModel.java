@@ -34,35 +34,40 @@ public class ArmProtectedModel extends ArmProtectedBaseModel implements XProtect
 		this.model = model;
 	}
 	
-	public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
+	@Override
+    public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
 		
 		checkReadAccess();
 		
 		return this.model.addListenerForFieldEvents(changeListener);
 	}
 	
-	public boolean addListenerForModelEvents(XModelEventListener changeListener) {
+	@Override
+    public boolean addListenerForModelEvents(XModelEventListener changeListener) {
 		
 		checkReadAccess();
 		
 		return this.model.addListenerForModelEvents(changeListener);
 	}
 	
-	public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
+	@Override
+    public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
 		
 		checkReadAccess();
 		
 		return this.model.addListenerForObjectEvents(changeListener);
 	}
 	
-	public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
+	@Override
+    public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
 		
 		checkReadAccess();
 		
 		return this.model.addListenerForTransactionEvents(changeListener);
 	}
 	
-	public XProtectedObject createObject(XID objectId) {
+	@Override
+    public XProtectedObject createObject(XID objectId) {
 		
 		if(!this.arm.canWrite(this.actor, getAddress())) {
 			throw new AccessException(this.actor + " cannot write to " + getAddress());
@@ -75,7 +80,8 @@ public class ArmProtectedModel extends ArmProtectedBaseModel implements XProtect
 		return new ArmProtectedObject(object, this.arm, this.actor);
 	}
 	
-	public long executeCommand(XCommand command) {
+	@Override
+    public long executeCommand(XCommand command) {
 		
 		if(!this.arm.canExecute(this.actor, command)) {
 			throw new AccessException(this.actor + " cannot execute " + command);
@@ -84,7 +90,8 @@ public class ArmProtectedModel extends ArmProtectedBaseModel implements XProtect
 		return this.model.executeCommand(command);
 	}
 	
-	public long executeModelCommand(XModelCommand command) {
+	@Override
+    public long executeModelCommand(XModelCommand command) {
 		
 		if(!this.arm.canExecute(this.actor, command)) {
 			throw new AccessException(this.actor + " cannot execute " + command);
@@ -93,7 +100,8 @@ public class ArmProtectedModel extends ArmProtectedBaseModel implements XProtect
 		return this.model.executeModelCommand(command);
 	}
 	
-	public XChangeLog getChangeLog() {
+	@Override
+    public XChangeLog getChangeLog() {
 		return new ArmProtectedChangeLog(this.model.getChangeLog(), this.arm, this.actor);
 	}
 	
@@ -111,23 +119,28 @@ public class ArmProtectedModel extends ArmProtectedBaseModel implements XProtect
 		return new ArmProtectedObject(object, this.arm, this.actor);
 	}
 	
-	public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
+	@Override
+    public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
 		return this.model.removeListenerForFieldEvents(changeListener);
 	}
 	
-	public boolean removeListenerForModelEvents(XModelEventListener changeListener) {
+	@Override
+    public boolean removeListenerForModelEvents(XModelEventListener changeListener) {
 		return this.model.removeListenerForModelEvents(changeListener);
 	}
 	
-	public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
+	@Override
+    public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
 		return this.model.removeListenerForObjectEvents(changeListener);
 	}
 	
-	public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
+	@Override
+    public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
 		return this.model.removeListenerForTransactionEvents(changeListener);
 	}
 	
-	public boolean removeObject(XID objectId) {
+	@Override
+    public boolean removeObject(XID objectId) {
 		
 		if(!this.arm.canRemoveObject(this.actor, getAddress(), objectId)) {
 			throw new AccessException(this.actor + " cannot remove " + objectId + " from "

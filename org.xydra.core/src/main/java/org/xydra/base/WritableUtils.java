@@ -93,7 +93,7 @@ public class WritableUtils {
 			object = model.createObject(objectId);
 			changed = true;
 		}
-		assert model.hasObject(objectId);
+		assert model.hasObject(objectId) : model.getAddress() + " should have " + objectId;
 		return changed | setValue(object, fieldId, value);
 	}
 	

@@ -40,7 +40,8 @@ public interface XObject extends XLoggedObject, XWritableObject, XSynchronizesCh
 	 *         {@link XField} with this {@link XID}
 	 * @throws IllegalStateException if this object has already been removed
 	 */
-	@ModificationOperation
+	@Override
+    @ModificationOperation
 	XField createField(XID fieldId);
 	
 	/**
@@ -80,7 +81,8 @@ public interface XObject extends XLoggedObject, XWritableObject, XSynchronizesCh
 	 *         corresponding {@link XField} exists
 	 * @throws IllegalStateException if this object has already been removed
 	 */
-	@ReadOperation
+	@Override
+    @ReadOperation
 	XField getField(XID fieldId);
 	
 	/**
@@ -94,7 +96,8 @@ public interface XObject extends XLoggedObject, XWritableObject, XSynchronizesCh
 	 * @throws IllegalStateException if this object has already been removed
 	 *             itself
 	 */
-	@ModificationOperation
+	@Override
+    @ModificationOperation
 	boolean removeField(XID fieldId);
 	
 	/**

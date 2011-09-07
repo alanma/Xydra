@@ -173,7 +173,8 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 		        .key1Iterator());
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		return this.idsAsSet().isEmpty();
 	}
 	

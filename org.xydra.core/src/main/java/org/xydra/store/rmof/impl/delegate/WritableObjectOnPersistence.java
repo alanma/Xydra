@@ -27,7 +27,8 @@ public class WritableObjectOnPersistence extends AbstractWritableOnPersistence i
 		this.objectId = objectId;
 	}
 	
-	public XWritableField createField(XID fieldId) {
+	@Override
+    public XWritableField createField(XID fieldId) {
 		// assume model and object exist
 		XWritableField field = this.getField(fieldId);
 		if(field != null) {
@@ -50,7 +51,8 @@ public class WritableObjectOnPersistence extends AbstractWritableOnPersistence i
 		return this.address;
 	}
 	
-	public XWritableField getField(XID fieldId) {
+	@Override
+    public XWritableField getField(XID fieldId) {
 		if(hasField(fieldId)) {
 			// make sure changes to object are reflected in persistence
 			return new WritableFieldOnPersistence(this.persistence, this.executingActorId,
@@ -79,26 +81,31 @@ public class WritableObjectOnPersistence extends AbstractWritableOnPersistence i
 		// null, null)).getObject(this.objectId);
 	}
 	
-	public long getRevisionNumber() {
+	@Override
+    public long getRevisionNumber() {
 		return getObjectSnapshot().getRevisionNumber();
 	}
 	
-	public boolean hasField(XID fieldId) {
+	@Override
+    public boolean hasField(XID fieldId) {
 		XWritableObject snapshot = getObjectSnapshot();
 		return snapshot != null && snapshot.hasField(fieldId);
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		XWritableObject snapshot = getObjectSnapshot();
 		return snapshot == null || snapshot.isEmpty();
 	}
 	
-	public Iterator<XID> iterator() {
+	@Override
+    public Iterator<XID> iterator() {
 		XWritableObject snapshot = getObjectSnapshot();
 		return snapshot == null ? new NoneIterator<XID>() : snapshot.iterator();
 	}
 	
-	public boolean removeField(XID fieldId) {
+	@Override
+    public boolean removeField(XID fieldId) {
 		boolean result = hasField(fieldId);
 		XCommand command = X.getCommandFactory().createRemoveFieldCommand(
 		        this.persistence.getRepositoryId(), this.modelId, this.objectId, fieldId,

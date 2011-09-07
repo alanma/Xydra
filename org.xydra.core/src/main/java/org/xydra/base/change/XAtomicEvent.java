@@ -11,6 +11,7 @@ public interface XAtomicEvent extends XEvent {
 	 * 
 	 * Never returns {@link ChangeType#TRANSACTION}.
 	 */
-	ChangeType getChangeType();
+	@Override
+    ChangeType getChangeType();
 	
 }

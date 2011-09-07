@@ -21,7 +21,8 @@ public interface XNumberListValue<T extends Number> extends XListValue<T> {
 	 * @throws IndexOutOfBoundsException if index is negative or greater than
 	 *             size()
 	 */
-	XNumberListValue<T> add(int index, T entry);
+	@Override
+    XNumberListValue<T> add(int index, T entry);
 	
 	/**
 	 * Creates a new {@link XNumberListValue} containing all entries from this
@@ -33,7 +34,8 @@ public interface XNumberListValue<T extends Number> extends XListValue<T> {
 	 * @return a new {@link XNumberListValue} containing all entries from this
 	 *         value as well as the specified entry.
 	 */
-	XNumberListValue<T> add(T entry);
+	@Override
+    XNumberListValue<T> add(T entry);
 	
 	/**
 	 * Creates a new {@link XNumberListValue} containing all entries from this
@@ -47,7 +49,8 @@ public interface XNumberListValue<T extends Number> extends XListValue<T> {
 	 * @throws IndexOutOfBoundsException if index is negative or greater than or
 	 *             equal to size()
 	 */
-	XNumberListValue<T> remove(int index);
+	@Override
+    XNumberListValue<T> remove(int index);
 	
 	/**
 	 * Creates a new {@link XNumberListValue} containing all entries from this
@@ -59,7 +62,8 @@ public interface XNumberListValue<T extends Number> extends XListValue<T> {
 	 * @return a new {@link XNumberListValue} containing all entries from this
 	 *         value except the given entry
 	 */
-	XNumberListValue<T> remove(T entry);
+	@Override
+    XNumberListValue<T> remove(T entry);
 	
 	/**
 	 * Returns the Number values as an array in the order they were added to the

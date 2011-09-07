@@ -31,7 +31,8 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 	}
 	
 	/** First try to get model, if not found: create it. */
-	public XWritableModel createModel(XID modelId) {
+	@Override
+    public XWritableModel createModel(XID modelId) {
 		XWritableModel model = getModel(modelId);
 		if(model == null) {
 			XCommand command = X.getCommandFactory().createAddModelCommand(
@@ -59,7 +60,8 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 		return this.persistence.getRepositoryId();
 	}
 	
-	public XWritableModel getModel(XID modelId) {
+	@Override
+    public XWritableModel getModel(XID modelId) {
 		if(hasModel(modelId)) {
 			// make sure changes to model are reflected in persistence
 			return new WritableModelOnPersistence(this.persistence, this.executingActorId, modelId);
@@ -68,19 +70,23 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 		}
 	}
 	
-	public boolean hasModel(XID modelId) {
+	@Override
+    public boolean hasModel(XID modelId) {
 		return this.persistence.hasModel(modelId);
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		return this.persistence.getModelIds().isEmpty();
 	}
 	
-	public Iterator<XID> iterator() {
+	@Override
+    public Iterator<XID> iterator() {
 		return this.persistence.getModelIds().iterator();
 	}
 	
-	public boolean removeModel(XID modelId) {
+	@Override
+    public boolean removeModel(XID modelId) {
 		boolean result = hasModel(modelId);
 		// long modelRevision =
 		// this.persistence.getModelRevision(XX.resolveModel(getAddress(),

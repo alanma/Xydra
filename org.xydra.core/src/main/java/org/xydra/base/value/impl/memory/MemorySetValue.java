@@ -46,7 +46,8 @@ public abstract class MemorySetValue<E> implements XSetValue<E> {
 		return true;
 	}
 	
-	public boolean contains(E elem) {
+	@Override
+    public boolean contains(E elem) {
 		return this.set.contains(elem);
 	}
 	
@@ -54,30 +55,36 @@ public abstract class MemorySetValue<E> implements XSetValue<E> {
 		return this.set.hashCode();
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		return this.set.isEmpty();
 	}
 	
-	public Iterator<E> iterator() {
+	@Override
+    public Iterator<E> iterator() {
 		final Iterator<E> it = this.set.iterator();
 		return new Iterator<E>() {
 			
-			public boolean hasNext() {
+			@Override
+            public boolean hasNext() {
 				return it.hasNext();
 			}
 			
-			public E next() {
+			@Override
+            public E next() {
 				return it.next();
 			}
 			
-			public void remove() {
+			@Override
+            public void remove() {
 				throw new UnsupportedOperationException();
 			}
 			
 		};
 	}
 	
-	public int size() {
+	@Override
+    public int size() {
 		return this.set.size();
 	}
 	
@@ -85,7 +92,8 @@ public abstract class MemorySetValue<E> implements XSetValue<E> {
 		return this.set.toArray(a);
 	}
 	
-	public Set<E> toSet() {
+	@Override
+    public Set<E> toSet() {
 		Set<E> copy = new HashSet<E>();
 		copy.addAll(this.set);
 		return copy;

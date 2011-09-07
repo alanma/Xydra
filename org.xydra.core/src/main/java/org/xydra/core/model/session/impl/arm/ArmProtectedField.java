@@ -26,14 +26,16 @@ public class ArmProtectedField extends ArmProtectedBaseField implements XProtect
 		this.field = field;
 	}
 	
-	public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
+	@Override
+    public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
 		
 		checkReadAccess();
 		
 		return this.field.addListenerForFieldEvents(changeListener);
 	}
 	
-	public long executeFieldCommand(XFieldCommand command) {
+	@Override
+    public long executeFieldCommand(XFieldCommand command) {
 		
 		if(!this.arm.canExecute(this.actor, command)) {
 			throw new AccessException(this.actor + " cannot execute " + command);
@@ -42,11 +44,13 @@ public class ArmProtectedField extends ArmProtectedBaseField implements XProtect
 		return this.field.executeFieldCommand(command);
 	}
 	
-	public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
+	@Override
+    public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
 		return this.field.removeListenerForFieldEvents(changeListener);
 	}
 	
-	public boolean setValue(XValue value) {
+	@Override
+    public boolean setValue(XValue value) {
 		
 		if(!this.arm.canWrite(this.actor, getAddress())) {
 			throw new AccessException(this.actor + " cannot write to " + getAddress());

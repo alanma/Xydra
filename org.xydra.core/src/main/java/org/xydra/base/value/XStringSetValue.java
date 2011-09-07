@@ -16,7 +16,8 @@ public interface XStringSetValue extends XSetValue<String> {
 	 * @return a new {@link XStringSetValue} containing all entries from this
 	 *         value as well as the given entry
 	 */
-	XStringSetValue add(String entry);
+	@Override
+    XStringSetValue add(String entry);
 	
 	/**
 	 * Returns the contents of the XStringSetValue as an array.
@@ -35,6 +36,7 @@ public interface XStringSetValue extends XSetValue<String> {
 	 * @return a new {@link XStringSetValue} containing all entries from this
 	 *         value expect the given entry
 	 */
-	XStringSetValue remove(String entry);
+	@Override
+    XStringSetValue remove(String entry);
 	
 }

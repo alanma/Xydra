@@ -88,7 +88,8 @@ public class ChangeRecorder implements XRepositoryEventListener, XModelEventList
 		this.filter = filter;
 	}
 	
-	public void onChangeEvent(XFieldEvent event) {
+	@Override
+    public void onChangeEvent(XFieldEvent event) {
 		if(this.filter && event.inTransaction()) {
 			// ignore
 			return;
@@ -96,7 +97,8 @@ public class ChangeRecorder implements XRepositoryEventListener, XModelEventList
 		this.eventList.add(event);
 	}
 	
-	public void onChangeEvent(XModelEvent event) {
+	@Override
+    public void onChangeEvent(XModelEvent event) {
 		if(this.filter && event.inTransaction()) {
 			// ignore
 			return;
@@ -104,7 +106,8 @@ public class ChangeRecorder implements XRepositoryEventListener, XModelEventList
 		this.eventList.add(event);
 	}
 	
-	public void onChangeEvent(XObjectEvent event) {
+	@Override
+    public void onChangeEvent(XObjectEvent event) {
 		if(this.filter && event.inTransaction()) {
 			// ignore
 			return;
@@ -112,11 +115,13 @@ public class ChangeRecorder implements XRepositoryEventListener, XModelEventList
 		this.eventList.add(event);
 	}
 	
-	public void onChangeEvent(XRepositoryEvent event) {
+	@Override
+    public void onChangeEvent(XRepositoryEvent event) {
 		this.eventList.add(event);
 	}
 	
-	public void onChangeEvent(XTransactionEvent event) {
+	@Override
+    public void onChangeEvent(XTransactionEvent event) {
 		this.eventList.add(event);
 	}
 }

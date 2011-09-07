@@ -44,7 +44,8 @@ public interface XProtectedModel extends XLoggedModel, XExecutesCommands {
 	 *             the necessary access rights (write access) to execute this
 	 *             method
 	 */
-	@ModificationOperation
+	@Override
+    @ModificationOperation
 	XProtectedObject createObject(XID id);
 	
 	/**
@@ -94,7 +95,8 @@ public interface XProtectedModel extends XLoggedModel, XExecutesCommands {
 	 *             the necessary access rights (read access) to execute this
 	 *             method
 	 */
-	@ReadOperation
+	@Override
+    @ReadOperation
 	XProtectedObject getObject(XID objectId);
 	
 }
