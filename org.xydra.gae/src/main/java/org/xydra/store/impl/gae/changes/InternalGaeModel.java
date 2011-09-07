@@ -35,15 +35,18 @@ class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObject> im
 		assert modelAddr.getAddressedType() == XType.XMODEL;
 	}
 	
-	public XID getID() {
+	@Override
+    public XID getID() {
 		return getAddress().getModel();
 	}
 	
-	public XReadableObject getObject(XID objectId) {
+	@Override
+    public XReadableObject getObject(XID objectId) {
 		return getChild(objectId);
 	}
 	
-	public boolean hasObject(XID objectId) {
+	@Override
+    public boolean hasObject(XID objectId) {
 		return hasChild(objectId);
 	}
 	

@@ -179,6 +179,7 @@ class RevisionCache {
 			if(!USE_LOCALVM_CACHE) {
 				return false;
 			}
+			@SuppressWarnings("unused")
 			long now = System.currentTimeMillis();
 			return now < this.time + LOCAL_VM_CACHE_TIMEOUT;
 		}

@@ -50,11 +50,13 @@ class GaeFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 		this.fieldRevision = fieldRevision;
 	}
 	
-	public XAddress getChangedEntity() {
+	@Override
+    public XAddress getChangedEntity() {
 		return getTarget();
 	}
 	
-	public XValue getNewValue() {
+	@Override
+    public XValue getNewValue() {
 		return this.newValue.get();
 	}
 	

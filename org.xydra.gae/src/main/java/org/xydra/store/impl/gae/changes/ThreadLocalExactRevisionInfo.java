@@ -25,39 +25,45 @@ public class ThreadLocalExactRevisionInfo implements IRevisionInfo {
 		clear();
 	}
 	
-	public long getLastTaken(boolean mayAsk) {
+	@Override
+    public long getLastTaken(boolean mayAsk) {
 		if(this.lastTaken == NOT_SET && mayAsk) {
 			this.lastTaken = this.sharedMinimalRevisionInfo.getLastTaken(true);
 		}
 		return this.lastTaken;
 	}
 	
-	public void setLastTaken(long lastTaken) {
+	@Override
+    public void setLastTaken(long lastTaken) {
 		this.lastTaken = lastTaken;
 		this.sharedMinimalRevisionInfo.setLastTaken(lastTaken);
 	}
 	
-	public long getLastCommitted(boolean mayAsk) {
+	@Override
+    public long getLastCommitted(boolean mayAsk) {
 		if(this.lastCommitted == NOT_SET && mayAsk) {
 			this.lastCommitted = this.sharedMinimalRevisionInfo.getLastTaken(true);
 		}
 		return this.lastCommitted;
 	}
 	
-	public void setLastCommitted(long lastCommitted) {
+	@Override
+    public void setLastCommitted(long lastCommitted) {
 		this.lastCommitted = lastCommitted;
 		this.sharedMinimalRevisionInfo.setLastCommitted(lastCommitted);
 		RevisionInfoUtils.maintainInvariants(this, false);
 	}
 	
-	public long getCurrentRev(boolean mayAsk) {
+	@Override
+    public long getCurrentRev(boolean mayAsk) {
 		if(this.currentRev == NOT_SET && mayAsk) {
 			this.currentRev = this.sharedMinimalRevisionInfo.getCurrentRev(true);
 		}
 		return this.currentRev;
 	}
 	
-	public void setCurrentRev(long currentRev) {
+	@Override
+    public void setCurrentRev(long currentRev) {
 		this.currentRev = currentRev;
 		this.sharedMinimalRevisionInfo.setCurrentRev(currentRev);
 		RevisionInfoUtils.maintainInvariants(this, true);

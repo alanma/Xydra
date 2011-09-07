@@ -934,7 +934,8 @@ public class GaeChangesServiceImpl1 implements IGaeChangesService {
 	}
 	
 	/* TODO make this default visible and remove from interface */
-	public AsyncValue getValue(long rev, int transindex) {
+	@Override
+    public AsyncValue getValue(long rev, int transindex) {
 		
 		GaeChange change = getCachedChange(rev);
 		if(change != null) {

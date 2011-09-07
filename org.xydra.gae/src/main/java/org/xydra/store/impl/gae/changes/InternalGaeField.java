@@ -54,11 +54,13 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 		this.transindex = getTransIndex(fieldEntity);
 	}
 	
-	public long getRevisionNumber() {
+	@Override
+    public long getRevisionNumber() {
 		return this.fieldRev;
 	}
 	
-	public XValue getValue() {
+	@Override
+    public XValue getValue() {
 		if(this.value == null) {
 			// IMPROVE maybe get this when the field is fetched?
 			this.value = this.gcs.getValue(this.fieldRev, this.transindex);
@@ -66,15 +68,18 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 		return this.value.get();
 	}
 	
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		return this.transindex == GaeEvents.TRANSINDEX_NONE;
 	}
 	
-	public XAddress getAddress() {
+	@Override
+    public XAddress getAddress() {
 		return this.fieldAddr;
 	}
 	
-	public XID getID() {
+	@Override
+    public XID getID() {
 		return this.fieldAddr.getField();
 	}
 	

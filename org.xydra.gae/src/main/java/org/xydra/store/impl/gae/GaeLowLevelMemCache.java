@@ -217,7 +217,8 @@ public class GaeLowLevelMemCache implements IMemCache {
 			this.id = id;
 		}
 		
-		public Object getValue() {
+		@Override
+        public Object getValue() {
 			return this.id == null ? null : this.id.getValue();
 		}
 		

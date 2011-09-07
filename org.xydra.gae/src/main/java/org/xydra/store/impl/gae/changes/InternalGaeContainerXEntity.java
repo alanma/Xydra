@@ -56,7 +56,8 @@ abstract class InternalGaeContainerXEntity<C> extends InternalGaeXEntity {
 		return !iterator().hasNext();
 	}
 	
-	public XAddress getAddress() {
+	@Override
+    public XAddress getAddress() {
 		return this.addr;
 	}
 	

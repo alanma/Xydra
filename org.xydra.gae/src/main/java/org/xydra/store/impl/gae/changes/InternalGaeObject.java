@@ -105,15 +105,18 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 		return this.objectRev;
 	}
 	
-	public XID getID() {
+	@Override
+    public XID getID() {
 		return getAddress().getObject();
 	}
 	
-	public InternalGaeField getField(XID fieldId) {
+	@Override
+    public InternalGaeField getField(XID fieldId) {
 		return getChild(fieldId);
 	}
 	
-	public boolean hasField(XID fieldId) {
+	@Override
+    public boolean hasField(XID fieldId) {
 		return hasChild(fieldId);
 	}
 	
