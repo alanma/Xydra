@@ -298,13 +298,14 @@ public class GaeChange {
 		this.entity = entity;
 		this.rev = rev;
 		this.modelAddr = modelAddr;
-		assert KeyStructure.assertRevisionInKey(entity.getKey(), rev);
+		assert entity == GaeUtils.NULL_ENTITY
+		        || KeyStructure.assertRevisionInKey(entity.getKey(), rev);
 		clearCache();
 	}
 	
 	void reload(Transaction trans) {
 		assert !getStatus().isCommitted();
-		this.entity = GaeUtils.getEntity_MemcacheFirst_DatastoreFinal(this.entity.getKey(), trans);
+		this.entity = GaeUtils.getEntityFromDatastore(this.entity.getKey(), trans);
 		assert this.entity != null : "change entities should not vanish";
 		clearCache();
 	}
@@ -533,6 +534,12 @@ public class GaeChange {
 		}
 		
 		return this.event;
+	}
+	
+	@Override
+	public String toString() {
+		return "rev:" + this.rev + " lastAct:" + this.lastActivity + " status:" + this.status + " "
+		        + this.entity;
 	}
 	
 }

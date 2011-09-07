@@ -39,7 +39,7 @@ public class GaePlatformRuntime implements XydraPlatformRuntime {
 		defaultConf.map().put(XydraRuntime.PROP_MEMCACHESTATS, "");
 		defaultConf.map().put(XydraRuntime.PROP_PERSISTENCESTATS, "");
 		
-		XydraRuntime.addListener(new XydraRuntime.Listener() {
+		XydraRuntime.addStaticListener(new XydraRuntime.Listener() {
 			
 			@Override
 			public void onXydraRuntimeInit() {
@@ -73,7 +73,7 @@ public class GaePlatformRuntime implements XydraPlatformRuntime {
 						log.info("Instance conf: set key '" + key + "' = '" + value + "'");
 						XydraRuntime.getConfigMap().put(key, value);
 						// process individual gae instance config settings
-						requiresRuntimeInit |= handleClearLocalVmCache(key, value);
+						handleClearLocalVmCache(key, value);
 					}
 					requiresRuntimeInit |= key.equals(XydraRuntime.PROP_MEMCACHESTATS);
 					requiresRuntimeInit |= key.equals(XydraRuntime.PROP_PERSISTENCESTATS);
@@ -87,14 +87,9 @@ public class GaePlatformRuntime implements XydraPlatformRuntime {
 				}
 			}
 			
-			/**
-			 * @param value
-			 * @param value2
-			 * @return true if clear was performed.
-			 */
-			private boolean handleClearLocalVmCache(String key, String value) {
+			private void handleClearLocalVmCache(String key, String value) {
 				if(!key.equals(GaeConfigSettings.CLEAR_LOCAL_VM_CACHE)) {
-					return false;
+					return;
 				}
 				assert value != null;
 				assert !value.equals(XydraConfigUtils.EMPTY_VALUE);
@@ -104,27 +99,22 @@ public class GaePlatformRuntime implements XydraPlatformRuntime {
 				long lastExecuted = lastExecutedStr == null ? 0 : Long.parseLong(lastExecutedStr);
 				long clearRequested = Long.parseLong(value);
 				if(lastExecuted < clearRequested) {
-					/*
-					 * return value==true causes a XydraRuntime.forceInit, that
-					 * calls all listeners, which also calls
-					 * GaeChangesService#onXydraRuntimeInit
-					 */
-
+					log.trace("clearLocalVmCache requested with Nr. " + clearRequested
+					        + " lastExecuted: " + lastExecuted);
+					InstanceContext.clear();
 					// prevent executing twice
 					XydraRuntime.getConfigMap().put(
 					        GaeConfigSettings.CLEAR_LOCAL_VM_CACHE_LAST_EXECUTED,
 					        "" + clearRequested);
-					return true;
 				}
-				return false;
 			}
 		});
 	}
 	
 	@Override
 	public synchronized IMemCache getMemCache() {
-		log.info("Instantiating a new IMemcache instance.");
-		if(AboutAppEngine.inProduction()) {
+		log.info("INIT IMemcache instance.");
+		if(AboutAppEngine.onAppEngine()) {
 			return new GaeLowLevelMemCache();
 		} else {
 			return new LocalMemcache();
@@ -133,7 +123,7 @@ public class GaePlatformRuntime implements XydraPlatformRuntime {
 	
 	@Override
 	public XydraPersistence getPersistence(XID repositoryId) {
-		log.info("Instantiating a new XydraPersistence instance with id '" + repositoryId + "'.");
+		log.info("INIT XydraPersistence instance with id '" + repositoryId + "'.");
 		return new GaePersistence(repositoryId);
 	}
 	

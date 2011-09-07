@@ -23,8 +23,8 @@ import com.google.appengine.api.datastore.Transaction;
 
 
 /**
- * Internal helper class used by {@link GaeChangesService} to access the current
- * object state.
+ * Internal helper class used by {@link IGaeChangesService} to access the
+ * current object state.
  * 
  * @author dscharrer
  * 
@@ -41,7 +41,7 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 	 * datastore.
 	 * 
 	 * {@link InternalGaeObject}s are not constructed directly by
-	 * {@link GaeChangesService} but through
+	 * {@link IGaeChangesService} but through
 	 * {@link InternalGaeModel#getObject(XID)}.
 	 * 
 	 * @param locks The locks held by the current process. These are used to
@@ -49,7 +49,7 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 	 *            as to determine if we can calculate the object revision or if
 	 *            we have to return {@link XEvent#RevisionNotAvailable} instead.
 	 */
-	protected InternalGaeObject(GaeChangesService changesService, XAddress objectAddr,
+	protected InternalGaeObject(IGaeChangesService changesService, XAddress objectAddr,
 	        Entity objectEntity, GaeLocks locks) {
 		super(changesService, objectAddr, getSavedRevison(objectAddr, objectEntity, locks), locks);
 		assert KeyStructure.toAddress(objectEntity.getKey()).equals(objectAddr);
@@ -178,7 +178,7 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 		while(true) {
 			Transaction trans = GaeUtils.beginTransaction();
 			
-			Entity e = GaeUtils.getEntity_MemcacheFirst_DatastoreFinal(key, trans);
+			Entity e = GaeUtils.getEntityFromDatastore(key, trans);
 			assert e != null : "should not be removed while we hold a lock to a contained field";
 			long oldRev = (Long)e.getProperty(PROP_REVISION);
 			

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Future;
 
@@ -32,11 +33,13 @@ import org.xydra.core.model.delta.DeltaUtils;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.store.GetEventsRequest;
+import org.xydra.restless.utils.Clock;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.XydraStore;
+import org.xydra.store.impl.gae.DebugFormatter;
 import org.xydra.store.impl.gae.GaeOperation;
 import org.xydra.store.impl.gae.GaeUtils;
+import org.xydra.store.impl.gae.InstanceContext;
 import org.xydra.store.impl.gae.changes.GaeChange.Status;
 import org.xydra.store.impl.gae.changes.GaeEvents.AsyncValue;
 
@@ -120,9 +123,9 @@ import com.google.appengine.api.datastore.Transaction;
  * @author dscharrer
  * 
  */
-public class GaeChangesService implements org.xydra.store.XydraRuntime.Listener {
+public class GaeChangesServiceImpl2 implements IGaeChangesService {
 	
-	private static final Logger log = LoggerFactory.getLogger(GaeChangesService.class);
+	private static final Logger log = LoggerFactory.getLogger(GaeChangesServiceImpl2.class);
 	
 	private static final long serialVersionUID = -2080744796962188941L;
 	
@@ -141,65 +144,70 @@ public class GaeChangesService implements org.xydra.store.XydraRuntime.Listener 
 	// Implementation.
 	
 	private final XAddress modelAddr;
-	private final RevisionCache revCache;
+	private final RevisionCache2 revCache;
 	
 	@GaeOperation()
-	public GaeChangesService(XAddress modelAddr) {
+	public GaeChangesServiceImpl2(XAddress modelAddr) {
 		this.modelAddr = modelAddr;
-		this.revCache = new RevisionCache(modelAddr);
-		/*
-		 * register for configuration change events, so that we can flush our
-		 * caches if requested
-		 */
-		XydraRuntime.addListener(this);
+		this.revCache = new RevisionCache2(modelAddr);
 	}
 	
-	/**
-	 * Execute the given {@link XCommand} as a transaction.
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * // IMPROVE maybe let the caller provide an XID that can be used to check
-	 * // the status in case there is a GAE timeout?
-	 * 
-	 * @param command The command to execute. (can be a {@link XTransaction})
-	 * @param actorId The actor to log in the resulting event.
-	 * @return If the command executed successfully, the revision of the
-	 *         resulting {@link XEvent} or {@link XCommand#NOCHANGE} if the
-	 *         command din't change anything; {@link XCommand#FAILED} otherwise.
-	 * 
-	 * @throws VoluntaryTimeoutException if we came too close to the timeout
-	 *             while executing the command. A caller may catch this
-	 *             exception and try again, but doing so may just result in a
-	 *             timeout from GAE if TIME_CRITICAL is set to more than half
-	 *             the GAE timeout.
-	 * 
-	 * @see XydraStore#executeCommands(XID, String, XCommand[],
-	 *      org.xydra.store.Callback)
+	 * @see
+	 * org.xydra.store.impl.gae.changes.IGaeChangesService#executeCommand(org
+	 * .xydra.base.change.XCommand, org.xydra.base.XID)
 	 */
+	@Override
 	public long executeCommand(XCommand command, XID actorId) {
+		Clock c = new Clock().start();
 		assert this.modelAddr.equalsOrContains(command.getChangedEntity()) : "cannot handle command "
 		        + command + " - it does not address a model";
-		
+		c.stopAndStart("assert");
 		GaeLocks locks = GaeLocks.createLocks(command);
+		c.stopAndStart("createlocks");
 		
 		log.debug("Phase 1: grabRevisionAndRegister " + locks.size() + " locks");
 		GaeChange change = grabRevisionAndRegisterLocks(locks, actorId);
+		assert change.rev >= 0;
+		c.stopAndStart("grabRevisionAndRegisterLocks");
 		
 		// IMPROVE save command to be able to roll back in case of timeout while
 		// waiting for locks / checking preconditions?
 		
 		waitForLocks(change);
+		c.stopAndStart("waitForLocks");
 		
 		Pair<List<XAtomicEvent>,int[]> events = checkPreconditionsAndSaveEvents(change, command,
 		        actorId);
+		c.stopAndStart("checkPreconditionsAndSaveEvents");
 		if(events == null) {
+			log.info("Failed. Stats: " + c.getStats());
 			return XCommand.FAILED;
 		} else if(events.getFirst().isEmpty()) {
+			log.info("NOCHANGE. Stats: " + c.getStats());
 			// TODO maybe return revision?
 			return XCommand.NOCHANGE;
 		}
 		
 		executeAndUnlock(change, events);
+		c.stopAndStart("executeAndUnlock");
 		
+		// if(change.getStatus().isSuccess()) {
+		// XEvent event = change.getEvent();
+		// if(event.getChangedEntity().getAddressedType() == XType.XMODEL) {
+		// if(event.getChangeType() == ChangeType.ADD) {
+		// this.revCache.setModelExists(true);
+		// } else if(event.getChangeType() == ChangeType.REMOVE) {
+		// this.revCache.setModelExists(false);
+		// }
+		// }
+		// }
+		
+		// FIXME revCache.writeToMemcache();
+		
+		log.info("Success. Stats: " + c.getStats());
 		return change.rev;
 	}
 	
@@ -212,12 +220,17 @@ public class GaeChangesService implements org.xydra.store.XydraRuntime.Listener 
 	 * @return Information associated with the change such as the grabbed
 	 *         revision, the locks, the start time and the change {@link Entity}
 	 *         .
+	 * 
+	 *         Note: Reads revCache.lastTaken
 	 */
+	@GaeOperation(memcacheRead = true ,datastoreRead = true ,datastoreWrite = true ,memcacheWrite = true)
 	private GaeChange grabRevisionAndRegisterLocks(GaeLocks locks, XID actorId) {
-		
-		for(long rev = this.revCache.getLastTaken(true) + 1;; rev++) {
+		long lastTaken = this.revCache.getLastTaken();
+		assert lastTaken >= -1;
+		for(long rev = lastTaken + 1;; rev++) {
 			
-			if(getCachedChange(rev) != null) {
+			GaeChange cachedChange = getCachedChange(rev);
+			if(cachedChange != null) {
 				// Revision already taken.
 				continue;
 			}
@@ -228,6 +241,7 @@ public class GaeChangesService implements org.xydra.store.XydraRuntime.Listener 
 			/* use txn to do: avoid overwriting existing change entities */
 			Transaction trans = GaeUtils.beginTransaction();
 			
+			// TODO !!! try without memcache
 			Entity changeEntity = GaeUtils.getEntity_MemcachePositive_DatastoreFinal(key, trans);
 			
 			if(changeEntity == null) {
@@ -270,6 +284,7 @@ public class GaeChangesService implements org.xydra.store.XydraRuntime.Listener 
 				Status status = change.getStatus();
 				if(status.isCommitted()) {
 					cacheCommittedChange(change);
+					this.revCache.setCurrentModelRev(change.rev);
 				} else if(!status.canRollForward() && change.isTimedOut()) {
 					commit(change, Status.FailedTimeout);
 				}
@@ -287,8 +302,9 @@ public class GaeChangesService implements org.xydra.store.XydraRuntime.Listener 
 	 * @param change which lists a Set of required locks
 	 */
 	private void waitForLocks(GaeChange change) {
+		log.trace("waitForLocks: " + DebugFormatter.format(change));
 		
-		long commitedRev = this.revCache.getLastCommited(true);
+		long commitedRev = this.revCache.getLastCommited();
 		
 		// Track if we find a greater last commitedRev.
 		long newCommitedRev = -1;
@@ -395,8 +411,16 @@ public class GaeChangesService implements org.xydra.store.XydraRuntime.Listener 
 			// IMPROVE: maybe re-read commitedRev?
 		}
 		
-		log.info("Current working window size ["
-		        + (newCommitedRev >= 0 ? newCommitedRev : commitedRev) + "," + change.rev + "]");
+		// gather operations stats
+		if(log.isInfoEnabled()) {
+			long start = (newCommitedRev >= 0 ? newCommitedRev : commitedRev);
+			long end = change.rev;
+			long workingWindowSize = end - start;
+			if(workingWindowSize > 1) {
+				log.info("Current working window size = " + workingWindowSize + " [" + start + ","
+				        + end + "]");
+			}
+		}
 		
 		if(newCommitedRev >= 0) {
 			this.revCache.setLastCommited(newCommitedRev);
@@ -430,6 +454,7 @@ public class GaeChangesService implements org.xydra.store.XydraRuntime.Listener 
 		}
 		
 		List<XAtomicEvent> events = DeltaUtils.createEvents(this.modelAddr, c, actorId, change.rev);
+		log.trace("DeltaUtils generated " + events.size() + " events");
 		
 		int[] valueIds = null;
 		
@@ -566,7 +591,6 @@ public class GaeChangesService implements org.xydra.store.XydraRuntime.Listener 
 			
 		}
 		
-		// IMPROVE can this be made asynchronous?
 		for(XID objectId : objectsWithPossiblyUnsavedRev) {
 			if(!objectsWithSavedRev.contains(objectId)) {
 				XAddress objectAddr = XX.resolveObject(this.modelAddr, objectId);
@@ -581,12 +605,14 @@ public class GaeChangesService implements org.xydra.store.XydraRuntime.Listener 
 		
 		commit(change, Status.SuccessExecuted);
 		
-		// TODO do we really need to ask the memcache here?
-		if(this.revCache.getLastCommited(true) >= change.rev) {
-			updateCurrentRev(Math.max(change.rev,
-			// TODO do we really need to ask the memcache here?
-			        this.revCache.getCurrentModelRev(true)));
-		}
+		this.revCache.setCurrentModelRev(change.rev);
+		
+		// // TODO do we really need to ask the memcache here?
+		// if(this.revCache.getLastCommited(true) >= change.rev) {
+		// updateCurrentRev(Math.max(change.rev,
+		// // TODO do we really need to ask the memcache here?
+		// this.revCache.getCurrentModelRev(true)));
+		// }
 	}
 	
 	/**
@@ -609,7 +635,7 @@ public class GaeChangesService implements org.xydra.store.XydraRuntime.Listener 
 	 *         grabbed by another process.
 	 */
 	private boolean rollForward(GaeChange change) {
-		
+		log.trace("roll forward: " + change);
 		assert change.isTimedOut() && change.getStatus().canRollForward();
 		
 		// Try to "grab" the change entity to prevent multiple processes from
@@ -663,153 +689,323 @@ public class GaeChangesService implements org.xydra.store.XydraRuntime.Listener 
 		}
 		change.commit(status);
 		// TODO do we really need to ask the memcache here?
-		if(this.revCache.getLastCommited(true) == change.rev - 1) {
+		if(this.revCache.getLastCommited() == change.rev - 1) {
 			this.revCache.setLastCommited(change.rev);
 		}
 		cacheCommittedChange(change);
 	}
 	
-	private static final boolean useLocalVMCache = true;
-	private Map<Long,GaeChange> committedChangeCache = new HashMap<Long,GaeChange>();
+	private static final boolean USE_COMMITTED_CHANGE_CACHE = true;
 	
-	protected void cacheCommittedChange(GaeChange change) {
-		assert change.getStatus().isCommitted();
-		if(useLocalVMCache) {
-			log.trace("cache PUT " + this.modelAddr + " rev=" + change.rev + " := " + change);
-			synchronized(this.committedChangeCache) {
-				this.committedChangeCache.put(change.rev, change);
+	private static final String VM_COMMITED_CHANGES_CACHENAME = "[.c2]";
+	
+	private static final long NOT_FOUND = -3;
+	
+	// TODO experiment with MAX_BATCH_FETCH_SIZE
+	private static final int MAX_BATCH_FETCH_SIZE = 100;
+	
+	private static final long MAX_REVISION_NR = 1024;
+	
+	/**
+	 * Cache given change, if status is committed.
+	 * 
+	 * @param change TODO
+	 */
+	private void cacheCommittedChange(GaeChange change) {
+		if(USE_COMMITTED_CHANGE_CACHE) {
+			if(!change.getStatus().isCommitted()) {
+				return;
+			}
+			log.trace(DebugFormatter.dataPut(VM_COMMITED_CHANGES_CACHENAME + this.modelAddr, ""
+			        + change.rev, change));
+			Map<Long,GaeChange> committedChangeCache = getCommittedChangeCache();
+			synchronized(committedChangeCache) {
+				committedChangeCache.put(change.rev, change);
 			}
 		}
 	}
 	
 	private GaeChange getCachedChange(long rev) {
-		if(!useLocalVMCache) {
+		if(!USE_COMMITTED_CHANGE_CACHE) {
 			return null;
 		}
 		GaeChange change;
-		synchronized(this.committedChangeCache) {
-			change = this.committedChangeCache.get(rev);
-			
+		Map<Long,GaeChange> committedChangeCache = getCommittedChangeCache();
+		synchronized(committedChangeCache) {
+			change = committedChangeCache.get(rev);
 		}
 		if(change != null) {
 			assert change.getStatus().isCommitted();
 		}
-		log.trace("cache GET " + this.modelAddr + " rev=" + rev + " => " + change);
+		log.trace(DebugFormatter.dataGet(VM_COMMITED_CHANGES_CACHENAME + this.modelAddr, "" + rev,
+		        change));
 		return change;
 	}
 	
-	/**
-	 * @return the {@link XAddress} of the model managed by this
-	 *         {@link GaeChangesService} instance.
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.xydra.store.impl.gae.changes.IGaeChangesService#getModelAddress()
 	 */
+	@Override
 	public XAddress getModelAddress() {
 		return this.modelAddr;
 	}
 	
-	/**
-	 * @return the model's current revision number.
-	 * @see XydraStore#getModelRevisions(XID, String, XAddress[],
-	 *      org.xydra.store.Callback)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.xydra.store.impl.gae.changes.IGaeChangesService#getCurrentRevisionNumber
+	 * ()
 	 */
+	@Override
 	public long getCurrentRevisionNumber() {
-		
-		long currentRev = this.revCache.getCurrentModelRevIfSet(true);
-		if(currentRev != RevisionCache.NOT_SET) {
-			return currentRev;
+		long currentRev = this.revCache.getExactCurrentRev();
+		if(currentRev == IRevisionInfo.NOT_SET) {
+			// exact version not locally known
+			currentRev = this.revCache.getCurrentRev();
+			currentRev = updateCurrentRev(currentRev);
+			this.revCache.setCurrentModelRev(currentRev);
 		} else {
-			return updateCurrentRev(-1L);
+			// currentRev is locally exact defined
 		}
-	}
-	
-	private long updateCurrentRev(long lastCurrentRev) {
-		
-		long currentRev = lastCurrentRev;
-		long rev = currentRev;
-		
-		// Try to fetch one change past the last known "current" revision.
-		List<AsyncChange> batch = new ArrayList<AsyncChange>(1);
-		batch.add(getChangeAt(rev + 1));
-		
-		int pos = 0;
-		
-		long end = this.revCache.getLastCommitedIfSet(true);
-		if(end == RevisionCache.NOT_SET) {
-			end = Long.MAX_VALUE;
-		}
-		
-		for(; rev <= end; rev++) {
-			
-			GaeChange change = batch.get(pos).get();
-			if(change == null) {
-				break;
-			}
-			
-			Status status = change.getStatus();
-			if(!status.isCommitted()) {
-				if(change.isTimedOut()) {
-					if(handleTimeout(change)) {
-						change.reload();
-						rev--;
-						continue;
-					}
-				} else {
-					// Found the lastCommitedRev
-					break;
-				}
-			}
-			
-			// Only update the current revision if the command actually changed
-			// something.
-			if(status == Status.SuccessExecuted) {
-				currentRev = rev + 1;
-			}
-			
-			// Asynchronously fetch new change entities.
-			batch.set(pos, getChangeAt(rev + batch.size() + 1));
-			pos++;
-			if(pos == batch.size()) {
-				batch.add(getChangeAt(rev + batch.size() + 2));
-				pos = 0;
-			}
-			
-		}
-		
-		this.revCache.setLastCommited(rev);
-		this.revCache.setCurrentModelRev(currentRev);
-		
+		log.trace("currentRevNr = " + currentRev);
 		return currentRev;
 	}
 	
-	/**
-	 * Get the change at the specified revision number.
-	 */
-	public AsyncChange getChangeAt(long rev) {
-		
-		GaeChange change = getCachedChange(rev);
-		if(change != null) {
-			return new AsyncChange(change);
+	private long updateCurrentRev(long lastCurrentRev) {
+		log.trace("Updating rev from lastCurrentRev=" + lastCurrentRev + " ...");
+		int windowSize = 1;
+		long rev = NOT_FOUND;
+		long start = lastCurrentRev + 1;
+		long end;
+		while(rev == NOT_FOUND) {
+			log.trace("windowsize = " + windowSize);
+			end = start + windowSize - 1;
+			rev = updateCurrentRev_Step(start, end);
+			// adjust probe window
+			windowSize = windowSize * 2;
+			// avoid too big windows
+			if(windowSize > MAX_BATCH_FETCH_SIZE) {
+				windowSize = MAX_BATCH_FETCH_SIZE;
+			}
+			// move window
+			start = end + 1;
+		}
+		assert rev != NOT_FOUND : "found no rev nr";
+		this.revCache.setCurrentModelRev(rev);
+		log.trace("Updated rev from [" + lastCurrentRev + " ==> " + rev);
+		return rev;
+	}
+	
+	private long updateCurrentRev_Step(long beginRevInclusive, long endRevInclusive) {
+		log.debug("Update rev step [" + beginRevInclusive + "," + endRevInclusive + "]");
+		if(endRevInclusive >= MAX_REVISION_NR) {
+			log.warn("Checking for very high revision number: " + endRevInclusive);
 		}
 		
-		return new AsyncChange(this, rev);
+		/*
+		 * Try to fetch 'initialBatchFetchSize' changes past the last known
+		 * "current" revision and put them in the local vm cache.
+		 */
+		/* === Phase 1: Determine revisions not yet locally cached === */
+		Set<Long> locallyMissingRevs = computeLocallyMissingRevs(beginRevInclusive, endRevInclusive);
+		log.trace("missingRevs: " + locallyMissingRevs.size());
+		
+		/* === Phase 2+3: Ask Memcache + Datastore === */
+		fetchMissingRevisionsFromMemcacheAndDatastore(locallyMissingRevs);
+		log.trace("missingRevs after asking DS&MC: " + locallyMissingRevs.size());
+		
+		/* === Phase 4: Compute result from local cache === */
+		boolean foundEnd = false;
+		long currentRev = beginRevInclusive - 1;
+		for(long i = beginRevInclusive; i <= endRevInclusive; i++) {
+			GaeChange change = getCachedChange(i);
+			log.trace("change: " + change);
+			
+			// TODO careful: too much caching?
+			if(change == null) {
+				foundEnd = true;
+				break;
+			} else {
+				if(change.getStatus().isSuccess()) {
+					currentRev = i;
+				}
+			}
+		}
+		
+		if(foundEnd) {
+			log.trace("Step: return currentRev = " + currentRev);
+			return currentRev;
+		}
+		// else
+		assert locallyMissingRevs.size() == 0;
+		/* === Phase 5: go on */
+		/* We know these revisions are all committed */
+		this.revCache.setLastCommited(endRevInclusive);
+		/*
+		 * All revisions we looked at have been processed. Need to repeat the
+		 * process by looking at more revisions.
+		 */
+		return NOT_FOUND;
 	}
 	
 	/**
-	 * Fetch a range of events from the datastore.
-	 * 
-	 * See {@link GetEventsRequest} for parameters.
-	 * 
-	 * @return a list of events or null if this model was never created. The
-	 *         list might contain fewer elements than the range implies.
+	 * Fetch all given revisions from memcache and those not found there from
+	 * datastore. New revisions are added to local cache.
 	 * 
 	 * 
-	 * @see XydraStore#getEvents(XID, String, GetEventsRequest[],
-	 *      org.xydra.store.Callback)
 	 * 
-	 *      TODO Implementation should cache retrieved events in a localVmCache
-	 *      and never ask for them again.
+	 * @param locallyMissingRevs Caller is responsible not to ask for revisions
+	 *            already known locally. Removes all revisions that have been
+	 *            found from this set.
 	 */
+	private void fetchMissingRevisionsFromMemcacheAndDatastore(Set<Long> locallyMissingRevs) {
+		/* === Phase 2: Ask memcache === */
+		List<String> memcacheBatchRequest = new ArrayList<String>(locallyMissingRevs.size());
+		if(locallyMissingRevs.size() > 0) {
+			// prepare batch request
+			for(long askRev : locallyMissingRevs) {
+				Key key = KeyStructure.createChangeKey(getModelAddress(), askRev);
+				memcacheBatchRequest.add(KeyStructure.toString(key));
+			}
+			// batch request
+			Map<String,Object> memcacheResult = GaeUtils
+			        .getEntitiesFromMemcache(memcacheBatchRequest);
+			long newLastCommitted = -1;
+			for(Entry<String,Object> entry : memcacheResult.entrySet()) {
+				Key key = KeyStructure.toKey(entry.getKey());
+				Object v = entry.getValue();
+				assert v != null;
+				assert v instanceof Entity : v.getClass();
+				Entity entity = (Entity)v;
+				assert !entity.equals(GaeUtils.NULL_ENTITY) : "" + key;
+				long rev = KeyStructure.getRevisionFromChangeKey(key);
+				GaeChange change = new GaeChange(getModelAddress(), rev, entity);
+				assert change.getStatus() != null;
+				assert change.getStatus().isCommitted();
+				cacheCommittedChange(change);
+				if(change.rev > newLastCommitted) {
+					newLastCommitted = change.rev;
+				}
+				locallyMissingRevs.remove(change.rev);
+				log.debug("Found in memcache " + change.rev);
+			}
+			if(newLastCommitted >= 0) {
+				this.revCache.setLastCommited(newLastCommitted);
+			}
+			// re-use strings in memcacheBatchRequest: retain only *still*
+			// missing keys (neither locally found, nor in
+			// memcache)
+			memcacheBatchRequest.removeAll(memcacheResult.keySet());
+		} else {
+			// log.debug("All found in localVmCache");
+		}
+		
+		/* === Phase 3: Ask datastore === */
+		if(memcacheBatchRequest.size() > 0) {
+			// prepare batch request
+			List<Key> datastoreBatchRequest = new ArrayList<Key>(memcacheBatchRequest.size());
+			for(String keyStr : memcacheBatchRequest) {
+				Key key = KeyStructure.toKey(keyStr);
+				datastoreBatchRequest.add(key);
+			}
+			// execute batch request
+			Map<Key,Entity> datastoreResult = GaeUtils
+			        .getEntitiesFromDatastore(datastoreBatchRequest);
+			Map<String,Entity> memcacheBatchPut = new HashMap<String,Entity>();
+			long newLastTaken = -1;
+			long newLastCommitted = -1;
+			for(Entry<Key,Entity> entry : datastoreResult.entrySet()) {
+				Key key = entry.getKey();
+				Entity entity = entry.getValue();
+				assert entity != null;
+				assert entity != GaeUtils.NULL_ENTITY;
+				long revFromKey = KeyStructure.getRevisionFromChangeKey(key);
+				
+				// process status of change
+				GaeChange change = new GaeChange(getModelAddress(), revFromKey, entity);
+				Status status = change.getStatus();
+				if(status.isCommitted()) {
+					// use it
+					log.debug("Found in datastore, comitted " + change.rev);
+					memcacheBatchPut.put(KeyStructure.toString(key), entity);
+					cacheCommittedChange(change);
+					locallyMissingRevs.remove(revFromKey);
+					if(revFromKey > newLastCommitted) {
+						newLastCommitted = revFromKey;
+					}
+				} else {
+					if(change.isTimedOut()) {
+						log.debug("handle timed-out change " + change.rev);
+						handleTimeout(change);
+						// TODO why reload?
+						change.reload();
+						// change might be complete now
+						if(change.getStatus().isCommitted()) {
+							// use it
+							memcacheBatchPut.put(KeyStructure.toString(key), entity);
+							cacheCommittedChange(change);
+							locallyMissingRevs.remove(revFromKey);
+						} else {
+							log.warn("made no progress on time-out change " + change.rev);
+						}
+					} else {
+						assert status == Status.Creating || status == Status.Executing;
+						// don't cache
+					}
+					if(change.rev > newLastTaken) {
+						newLastTaken = change.rev;
+					}
+				}
+			}
+			if(newLastTaken >= 0) {
+				this.revCache.setLastTaken(newLastTaken);
+			}
+			if(newLastCommitted >= 0) {
+				this.revCache.setLastCommited(newLastCommitted);
+			}
+			
+			// update memcache IMPROVE do this async
+			XydraRuntime.getMemcache().putAll(memcacheBatchPut);
+		}
+	}
+	
+	/**
+	 * @param startRevInclusive
+	 * @param endRevInclusive
+	 * @return
+	 */
+	private Set<Long> computeLocallyMissingRevs(long startRevInclusive, long endRevInclusive) {
+		log.trace("computeLocallyMissingRevs [" + startRevInclusive + "," + endRevInclusive + "]");
+		Set<Long> locallyMissingRevs = new HashSet<Long>();
+		for(long i = startRevInclusive; i <= endRevInclusive; i++) {
+			// add key only if result not known locally yet
+			GaeChange change = this.getCachedChange(i);
+			if(change == null) {
+				locallyMissingRevs.add(i);
+			} else {
+				assert change.rev == i;
+				assert change.getStatus().isCommitted();
+				// log.trace("Already locally cached: " +
+				// DebugFormatter.format(change));
+			}
+		}
+		return locallyMissingRevs;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.xydra.store.impl.gae.changes.IGaeChangesService#getEventsBetween(
+	 * long, long)
+	 */
+	@Override
 	public List<XEvent> getEventsBetween(long beginRevision, long endRevision) {
-		log.debug("getEventsBetween [" + beginRevision + "," + endRevision + ") @"
+		log.debug("getEventsBetween [" + beginRevision + "," + endRevision + "] @"
 		        + getModelAddress());
 		/* sanity checks */
 		if(beginRevision < 0) {
@@ -838,88 +1034,34 @@ public class GaeChangesService implements org.xydra.store.XydraRuntime.Listener 
 		if(beginRevision > currentRev) {
 			return new ArrayList<XEvent>(0);
 		} else if(endRev > currentRev) {
+			log.debug("Adjusted endRev from " + endRev + " to " + currentRev);
 			endRev = currentRev;
 		}
 		
 		List<XEvent> events = new ArrayList<XEvent>();
 		
-		// Asynchronously fetch an initial batch of change entities
-		int initialBuffer = 1;
-		if(endRev <= currentRev) {
-			initialBuffer = (int)(endRev - begin + 1);
-		} else {
-			// IMPROVE maybe use an initial buffer size of currentRev - begin +
-			// 1?
-		}
-		List<AsyncChange> batch = new ArrayList<AsyncChange>(initialBuffer);
-		for(int i = 0; i < initialBuffer; i++) {
-			batch.add(getChangeAt(begin + i));
-		}
-		
-		int pos = 0;
-		
-		/*
-		 * Only update the currentRev cache value if we aren't skipping any
-		 * events.
-		 */
-		boolean trackCurrentRev = (begin <= currentRev);
-		
-		long rev = begin;
-		for(; rev <= endRev; rev++) {
-			
-			// Wait for the first change entities
-			GaeChange change = batch.get(pos).get();
-			if(change == null) {
-				// Found end of the change log
-				break;
-			}
-			
-			Status status = change.getStatus();
-			if(!status.isCommitted()) {
-				if(change.isTimedOut()) {
-					log.warn("Changed timed out " + change);
-					if(handleTimeout(change)) {
-						change.reload();
-						rev--;
-						continue;
-					}
-				} else {
-					// Found the lastCommitedRev
-					break;
+		Set<Long> locallyMissingRevs = computeLocallyMissingRevs(begin, endRev);
+		/* Ask Memcache + Datastore */
+		fetchMissingRevisionsFromMemcacheAndDatastore(locallyMissingRevs);
+		// construct result
+		long newRev = -1;
+		for(long i = begin; i <= endRev; i++) {
+			GaeChange change = getCachedChange(i);
+			// use only positive information
+			if(change != null) {
+				if(change.getStatus() == Status.SuccessExecuted) {
+					log.trace("Got event " + change.rev);
+					XEvent event = change.getEvent();
+					assert event != null : change;
+					events.add(event);
+					newRev = i;
 				}
+			} else {
+				log.trace("Change null or cached null " + i);
 			}
-			
-			XEvent event = change.getEvent();
-			if(event != null) {
-				// Something actually changed
-				if(trackCurrentRev) {
-					currentRev = rev;
-				}
-				events.add(event);
-			}
-			
-			// Asynchronously fetch new change entities.
-			if(rev + batch.size() <= endRev) {
-				batch.set(pos, getChangeAt(rev + batch.size()));
-			}
-			pos++;
-			if(pos == batch.size()) {
-				if(rev + batch.size() + 1 <= endRev) {
-					batch.add(getChangeAt(rev + batch.size() + 1));
-				}
-				pos = 0;
-			}
-			
 		}
-		
-		if(currentRev == -1) {
-			assert events.isEmpty();
-			return null;
-		}
-		
-		if(trackCurrentRev) {
-			this.revCache.setLastCommited(rev - 1);
-			this.revCache.setCurrentModelRev(currentRev);
+		if(newRev >= 0) {
+			this.revCache.setCurrentModelRev(newRev);
 		}
 		
 		return events;
@@ -932,6 +1074,7 @@ public class GaeChangesService implements org.xydra.store.XydraRuntime.Listener 
 	 * @return false if the entity could not be rolled forward.
 	 */
 	private boolean handleTimeout(GaeChange change) {
+		log.debug("handleTimeout: " + change);
 		if(change.getStatus().canRollForward()) {
 			rollForward(change);
 			return true;
@@ -941,7 +1084,8 @@ public class GaeChangesService implements org.xydra.store.XydraRuntime.Listener 
 		}
 	}
 	
-	AsyncValue getValue(long rev, int transindex) {
+	/* TODO make this default visible and remove from interface */
+	public AsyncValue getValue(long rev, int transindex) {
 		
 		GaeChange change = getCachedChange(rev);
 		if(change != null) {
@@ -962,15 +1106,25 @@ public class GaeChangesService implements org.xydra.store.XydraRuntime.Listener 
 		return GaeEvents.getValue(this.modelAddr, rev, transindex);
 	}
 	
-	@Override
-	public void onXydraRuntimeInit() {
-		log.info("onXydraRuntimeInit");
-		resetAllCaches();
+	@SuppressWarnings("unchecked")
+	private Map<Long,GaeChange> getCommittedChangeCache() {
+		String key = "changes:" + this.modelAddr;
+		Map<String,Object> instanceCache = InstanceContext.getInstanceCache();
+		Map<Long,GaeChange> committedChangeCache;
+		synchronized(instanceCache) {
+			committedChangeCache = (Map<Long,GaeChange>)instanceCache.get(key);
+			if(committedChangeCache == null) {
+				log.trace(DebugFormatter.init(VM_COMMITED_CHANGES_CACHENAME));
+				committedChangeCache = new HashMap<Long,GaeChange>();
+				InstanceContext.getInstanceCache().put(key, committedChangeCache);
+			}
+		}
+		return committedChangeCache;
 	}
 	
-	public void resetAllCaches() {
-		log.info("Clearing local vm cache for changes service " + this.modelAddr);
-		this.committedChangeCache.clear();
+	public void clear() {
+		log.info("Cleared. Make to sure to also clear memcache.");
+		this.getCommittedChangeCache().clear();
 		this.revCache.clear();
 	}
 	

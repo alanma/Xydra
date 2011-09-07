@@ -19,8 +19,8 @@ import com.google.appengine.api.datastore.Entity;
 
 
 /**
- * Internal helper class used by {@link GaeChangesService} to access the current
- * model state.
+ * Internal helper class used by {@link IGaeChangesService} to access the
+ * current model state.
  * 
  * Shared functionality between {@link InternalGaeModel} and
  * {@link InternalGaeObject}.
@@ -31,7 +31,7 @@ import com.google.appengine.api.datastore.Entity;
  */
 abstract class InternalGaeContainerXEntity<C> extends InternalGaeXEntity {
 	
-	private final GaeChangesService changesService;
+	private final IGaeChangesService changesService;
 	private final Map<XID,C> cachedChildren = new HashMap<XID,C>();
 	private final XAddress addr;
 	private Set<XID> cachedIds;
@@ -39,7 +39,7 @@ abstract class InternalGaeContainerXEntity<C> extends InternalGaeXEntity {
 	private final GaeLocks locks;
 	private final long rev;
 	
-	protected InternalGaeContainerXEntity(GaeChangesService changesService, XAddress addr,
+	protected InternalGaeContainerXEntity(IGaeChangesService changesService, XAddress addr,
 	        long rev, GaeLocks locks) {
 		assert rev >= 0
 		        || (rev == XEvent.RevisionNotAvailable && addr.getAddressedType() == XType.XOBJECT) : "rev="
@@ -111,7 +111,7 @@ abstract class InternalGaeContainerXEntity<C> extends InternalGaeXEntity {
 		return this.locks;
 	}
 	
-	protected GaeChangesService getChangesService() {
+	protected IGaeChangesService getChangesService() {
 		return this.changesService;
 	}
 	

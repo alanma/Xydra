@@ -14,6 +14,7 @@ import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.core.LoggerTestHelper;
 import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
+import org.xydra.store.impl.gae.InstanceContext;
 
 
 public class GaeStoreReadMethodsTest extends AbstractSecureStoreReadMethodsTest {
@@ -27,11 +28,11 @@ public class GaeStoreReadMethodsTest extends AbstractSecureStoreReadMethodsTest 
 	protected XydraStore getStore() {
 		GaeTestfixer.enable();
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		InstanceContext.clear();
 		
 		if(this.store == null) {
 			this.store = GaePersistence.get();
 		}
-		
 		return this.store;
 	}
 	
@@ -50,6 +51,16 @@ public class GaeStoreReadMethodsTest extends AbstractSecureStoreReadMethodsTest 
 			this.store.executeCommands(getCorrectUser(), getCorrectUserPasswordHash(),
 			        new XCommand[] { removeCommand }, null);
 		}
+		mids = new SynchronousTestCallback<Set<XID>>();
+		this.store.getModelIds(getCorrectUser(), getCorrectUserPasswordHash(), mids);
+		assertEquals(SynchronousTestCallback.SUCCESS, mids.waitOnCallback(Long.MAX_VALUE));
+		assert mids.effect.size() == 3;
+	}
+	
+	public static void main(String[] args) {
+		GaeStoreReadMethodsTest t = new GaeStoreReadMethodsTest();
+		t.setUp();
+		t.setUp();
 	}
 	
 }

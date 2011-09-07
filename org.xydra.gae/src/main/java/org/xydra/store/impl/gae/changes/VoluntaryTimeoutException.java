@@ -4,7 +4,7 @@ import org.xydra.store.InternalStoreException;
 
 
 /**
- * An exception thrown by {@link GaeChangesService} while executing commands to
+ * An exception thrown by {@link IGaeChangesService} while executing commands to
  * abort the change if we get to close to the timeout limit.
  * 
  * @author dscharrer

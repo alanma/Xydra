@@ -14,8 +14,8 @@ import com.google.appengine.api.datastore.Key;
 
 
 /**
- * Internal helper class used by {@link GaeChangesService} to access the current
- * model state.
+ * Internal helper class used by {@link IGaeChangesService} to access the
+ * current model state.
  * 
  * @author dscharrer
  * 

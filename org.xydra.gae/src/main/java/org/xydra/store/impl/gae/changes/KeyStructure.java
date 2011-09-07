@@ -15,7 +15,7 @@ import com.google.appengine.api.datastore.KeyFactory;
  * @author scharrer
  * 
  */
-class KeyStructure {
+public class KeyStructure {
 	
 	private static final String KIND_XVALUE = "XVALUE";
 	private static final String KIND_XCHANGE = "XCHANGE";
@@ -52,7 +52,7 @@ class KeyStructure {
 	 */
 	static Key createChangeKey(XAddress modelAddr, long revision) {
 		assert modelAddr.getAddressedType() == XType.XMODEL;
-		return KeyFactory.createKey(KIND_XCHANGE, modelAddr.toURI() + "/" + revision);
+		return KeyFactory.createKey(KIND_XCHANGE, revision + modelAddr.toURI());
 	}
 	
 	/**
@@ -65,7 +65,7 @@ class KeyStructure {
 	 */
 	static Key createValueKey(XAddress modelAddr, long rev, int transindex) {
 		assert modelAddr.getAddressedType() == XType.XMODEL;
-		return KeyFactory.createKey(KIND_XVALUE, modelAddr.toURI() + "/" + rev + "+" + transindex);
+		return KeyFactory.createKey(KIND_XVALUE, rev + "+" + transindex + "/" + modelAddr.toURI());
 	}
 	
 	/**
@@ -87,11 +87,37 @@ class KeyStructure {
 	 */
 	static boolean assertRevisionInKey(Key key, long rev) {
 		assert isChangeKey(key) : "key = " + key + " with kind " + key.getKind();
+		return getRevisionFromChangeKey(key) == rev;
+	}
+	
+	/**
+	 * @param key a non-null change key that has been created via
+	 *            {@link #createChangeKey(XAddress, long)}.
+	 * @return the revision number encoded in a change key.
+	 */
+	public static long getRevisionFromChangeKey(Key key) {
+		assert isChangeKey(key) : key.toString();
 		String keyStr = key.getName();
-		int p = keyStr.lastIndexOf("/");
-		assert p > 0;
-		String revStr = keyStr.substring(p + 1);
-		return (Long.parseLong(revStr) == rev);
+		return getRevisionFromChangeKey(keyStr);
+	}
+	
+	public static long getRevisionFromChangeKey(String keyStr) {
+		int p = keyStr.indexOf("/");
+		assert p > 0 : keyStr;
+		String revStr = keyStr.substring(0, p);
+		return Long.parseLong(revStr);
+	}
+	
+	public static String toString(Key key) {
+		return key.getKind() + "|" + key.getName();
+	}
+	
+	public static Key toKey(String key) {
+		int index = key.indexOf("|");
+		assert index > 0;
+		String kind = key.substring(0, index);
+		String name = key.substring(index + 1, key.length());
+		return KeyFactory.createKey(kind, name);
 	}
 	
 }

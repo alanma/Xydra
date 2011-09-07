@@ -23,7 +23,6 @@ import org.xydra.store.XydraStore;
 import org.xydra.store.XydraStoreAdmin;
 import org.xydra.store.impl.delegate.DelegatingSecureStore;
 import org.xydra.store.impl.delegate.XydraPersistence;
-import org.xydra.store.impl.gae.changes.GaeChangesService;
 import org.xydra.store.impl.gae.changes.InternalGaeXEntity;
 import org.xydra.store.impl.gae.changes.Utils;
 import org.xydra.store.impl.gae.changes.XIDLengthException;
@@ -39,6 +38,8 @@ import org.xydra.store.impl.gae.changes.XIDLengthException;
 @RunsInGWT(false)
 @RequiresAppEngine(true)
 public class GaePersistence implements XydraPersistence {
+	
+	public static final boolean CACHE_MODEL_PERSISTENCES = true;
 	
 	private static final int MAX_ID_LENGTH = 100;
 	
@@ -101,7 +102,6 @@ public class GaePersistence implements XydraPersistence {
 			throw new IllegalArgumentException("repoId was null");
 		}
 		checkIdLength(repoId);
-		
 		this.repoAddr = XX.toAddress(repoId, null, null, null);
 	}
 	
@@ -146,13 +146,16 @@ public class GaePersistence implements XydraPersistence {
 	
 	/**
 	 * @param modelId ..
-	 * @return the {@link GaeChangesService} responsible for managing the given
-	 *         modelId
+	 * @return the {@link GaeModelPersistence} responsible for managing the
+	 *         given modelId
 	 */
 	@GaeOperation()
 	private GaeModelPersistence getModelPersistence(XID modelId) {
 		synchronized(this.modelPersistenceMap) {
-			GaeModelPersistence modelPersistence = this.modelPersistenceMap.get(modelId);
+			GaeModelPersistence modelPersistence = null;
+			if(CACHE_MODEL_PERSISTENCES) {
+				modelPersistence = this.modelPersistenceMap.get(modelId);
+			}
 			if(modelPersistence == null) {
 				modelPersistence = new GaeModelPersistence(getModelAddress(modelId));
 				this.modelPersistenceMap.put(modelId, modelPersistence);
@@ -209,6 +212,7 @@ public class GaePersistence implements XydraPersistence {
 		if(address.getAddressedType() != XType.XOBJECT) {
 			throw new RequestException("address must refer to an object, was " + address);
 		}
+		// TODO getting object snapshots must be more performant
 		return getModelPersistence(address.getModel()).getObjectSnapshot(address.getObject());
 	}
 	

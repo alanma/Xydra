@@ -7,6 +7,7 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.impl.gae.DebugFormatter;
 import org.xydra.store.impl.gae.GaeOperation;
 import org.xydra.store.impl.gae.GaeUtils;
 
@@ -74,9 +75,8 @@ public class Utils {
 			assert address.equals(childAddr.getParent());
 			childIds.add(getEntityId(childAddr));
 		}
-		
-		log.trace(address.toURI() + " has " + childIds.size() + " found by query");
-		
+		log.trace(DebugFormatter.dataGet(GaeUtils.DATASTORE_NAME,
+		        "query-children:" + address.toURI(), DebugFormatter.format(childIds)));
 		return childIds;
 	}
 	

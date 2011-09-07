@@ -44,6 +44,12 @@ public class GaeConfiguration {
 	private transient long validUntilUTC;
 	
 	/**
+	 * Compile-time flag to disable or enable any usage of static variables
+	 * (local VM-wide caching)
+	 */
+	public static final boolean USE_LOCALVMCACHE = false;
+	
+	/**
 	 * @param lifetimeInMs ..
 	 * @return a {@link GaeConfiguration} that is valid for lifetimeInMs
 	 *         milliseconds from now on.

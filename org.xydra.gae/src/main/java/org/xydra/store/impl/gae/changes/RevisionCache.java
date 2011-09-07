@@ -1,9 +1,16 @@
 package org.xydra.store.impl.gae.changes;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.xydra.base.XAddress;
 import org.xydra.core.model.XModel;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.store.IMemCache;
 import org.xydra.store.XydraRuntime;
+import org.xydra.store.impl.gae.DebugFormatter;
 import org.xydra.store.impl.gae.GaeOperation;
 
 
@@ -12,6 +19,9 @@ import org.xydra.store.impl.gae.GaeOperation;
  * 
  * A model has a <em>current revision number</em>. It is incremented every time
  * a change operation succeeds. Not necessarily only one step.
+ * 
+ * All access to memcache has to triggered explicitly by caller of this class
+ * via {@link #loadFromMemcache()} and {@link #writeToMemcache()}.
  * 
  * TODO @Daniel make sure this is thread-safe
  * 
@@ -38,85 +48,137 @@ import org.xydra.store.impl.gae.GaeOperation;
  * 
  * Invariants: LAST_TAKEN >= COMMITTED >= CURRENT
  * 
- * IMPROVE on first fetch to memcache, fetch all 3 values
- * 
  * @author dscharrer
  * @author xamde
  */
 class RevisionCache {
 	
+	private static final Logger log = LoggerFactory.getLogger(RevisionCache.class);
+	
 	/**
 	 * How many milliseconds to consider the locally cached value valid
 	 */
-	private static final long LOCAL_VM_CACHE_TIMEOUT = 30 * 1000; // was 500
+	// FIXME !!! set good value. 10-100 = ok, 1000 - 100000000 = error.
+	private static final long LOCAL_VM_CACHE_TIMEOUT = 0;// 10 * 300 *
+	                                                     // 24 * 60
+	// * 60 * 1000;
+	
+	public static final boolean USE_LOCALVM_CACHE = false;
 	
 	protected static final long NOT_SET = -2L;
 	
-	/* IMPROVE experiment with this flag */
+	/**
+	 * Compile time flag to disable the functionality of
+	 * {@link #writeToMemcache()} and {@link #loadFromMemcache()}
+	 */
+	// FIXME !!! enable
 	private static final boolean USE_MEMCACHE = false;
 	
-	private String memcacheKey;
+	private static final String REVCACHE_NAME = "[.rc]";
+	
+	private final String memcacheKeyLastCommitted;
+	private final String memcacheKeyLastTaken;
+	private final String memcacheKeyCurrent;
+	private final ArrayList<String> memcacheKeys = new ArrayList<String>(3);
 	
 	@SuppressWarnings("unused")
-	private void writeToMemcache() {
+	void writeToMemcache() {
 		if(!USE_MEMCACHE)
 			return;
 		
-		@SuppressWarnings("all")
-		boolean deadCode = USE_MEMCACHE;
+		log.info("revcache.writememcache");
+		long incrCurrent = this.current.getDeltaSinceLastMemcacheAccess();
+		long incrLastTaken = this.lastTaken.getDeltaSinceLastMemcacheAccess();
+		long incrCommitted = this.committed.getDeltaSinceLastMemcacheAccess();
 		
-		long[] entity = new long[] { this.current.getValue(false, false),
-		        this.committed.getValue(false, false), this.lastTaken.getValue(false, false) };
 		IMemCache cache = XydraRuntime.getMemcache();
-		Object previous = cache.put(this.memcacheKey, entity);
-		// IMPROVE turn the assert cond. into a method
-		assert previous == null ||
-
-		((((long[])previous)[0] <= entity[0])
-
-		& (((long[])previous)[1] <= entity[1])
-
-		& (((long[])previous)[2] <= entity[2]));
+		
+		HashMap<String,Long> update = new HashMap<String,Long>();
+		update.put(this.memcacheKeyCurrent, incrCurrent);
+		update.put(this.memcacheKeyLastCommitted, incrCommitted);
+		update.put(this.memcacheKeyLastTaken, incrLastTaken);
+		cache.incrementAll(update, NOT_SET);
+		this.current.resetLoadedValue();
+		this.lastTaken.resetLoadedValue();
+		this.committed.resetLoadedValue();
 	}
 	
+	/**
+	 * @return true if loaded and local values have been overwritten
+	 */
 	@SuppressWarnings("unused")
-	private void loadFromMemcache() {
-		
+	boolean loadFromMemcache() {
 		if(!USE_MEMCACHE)
-			return;
-		
-		@SuppressWarnings("all")
-		boolean deadCode = USE_MEMCACHE;
+			return false;
 		
 		IMemCache cache = XydraRuntime.getMemcache();
-		long[] entity = (long[])cache.get(this.memcacheKey);
-		if(entity == null) {
+		
+		Map<String,Object> result = cache.getAll(this.memcacheKeys);
+		if(result.isEmpty()) {
 			this.current.setLocalValue(NOT_SET);
 			this.committed.setLocalValue(NOT_SET);
 			this.lastTaken.setLocalValue(NOT_SET);
 		} else {
-			assert entity.length == 3;
-			this.current.setLocalValue(entity[0]);
-			this.committed.setLocalValue(entity[1]);
-			this.lastTaken.setLocalValue(entity[2]);
+			assert result.containsKey(this.memcacheKeyLastCommitted);
+			assert result.containsKey(this.memcacheKeyCurrent);
+			assert result.containsKey(this.memcacheKeyLastTaken);
+			
+			long current = (Long)result.get(this.memcacheKeyCurrent);
+			this.current.setLoadedValue(current);
+			long committed = (Long)result.get(this.memcacheKeyLastCommitted);
+			this.committed.setLoadedValue(current);
+			long lastTaken = (Long)result.get(this.memcacheKeyLastTaken);
+			this.lastTaken.setLoadedValue(current);
 		}
+		return true;
 	}
 	
 	private class CachedLong {
-		private CachedLong() {
-			this.value = NOT_SET;
-			this.time = NOT_SET;
-		}
-		
 		/** Local VM cache of the "current" revision number. */
 		private long value;
 		/** Creation date of Local VM cache of the "current" revision number. */
 		private long time;
+		/** as loaded from memcache */
+		private long loadedValue = NOT_SET;
+		private final String name;
+		
+		private CachedLong(String name) {
+			this.name = name;
+			this.value = NOT_SET;
+			this.time = NOT_SET;
+		}
+		
+		public void resetLoadedValue() {
+			this.loadedValue = this.value;
+		}
+		
+		/**
+		 * @return 0 if no delta or never accessed memcache or no defined local
+		 *         value (expire time is ignored)
+		 */
+		public long getDeltaSinceLastMemcacheAccess() {
+			if(this.value == NOT_SET) {
+				return 0;
+			} else if(this.loadedValue == NOT_SET) {
+				return 0;
+			} else {
+				// both defined
+				return this.value - this.loadedValue;
+			}
+		}
+		
+		public void setLoadedValue(long value) {
+			this.loadedValue = value;
+			setLocalValue(value);
+		}
 		
 		/**
 		 * @return true if value cached in local JVM is not too old
 		 */
 		private boolean hasValidLocalValue() {
+			if(!USE_LOCALVM_CACHE) {
+				return false;
+			}
 			long now = System.currentTimeMillis();
 			return now < this.time + LOCAL_VM_CACHE_TIMEOUT;
 		}
@@ -125,12 +187,15 @@ class RevisionCache {
 		 * @param value
 		 * @return true if value changed
 		 */
-		private boolean setLocalValue(long value) {
+		private boolean setLocalValueIfHigher(long value) {
 			if(value < this.value) {
+				log.trace("Avoid setting " + this.value + " back to " + value);
 				return false;
-				// IMPROVE change caller code so that this doesnt happen maybe
-				// it never happens
 			}
+			return setLocalValue(value);
+		}
+		
+		private boolean setLocalValue(long value) {
 			this.time = System.currentTimeMillis();
 			if(value == this.value) {
 				return false;
@@ -142,16 +207,11 @@ class RevisionCache {
 		/**
 		 * @return cached value or NOT_SET
 		 */
-		private long getValue(boolean mayAskMemcache, boolean returnMinusOneForUndefined) {
+		private long getValue(boolean returnMinusOneForUndefined) {
 			synchronized(this) {
-				long value;
+				long value = NOT_SET;
 				if(this.hasValidLocalValue()) {
 					value = this.value;
-				} else if(mayAskMemcache) {
-					RevisionCache.this.loadFromMemcache();
-					value = this.value;
-				} else {
-					value = NOT_SET;
 				}
 				if(returnMinusOneForUndefined) {
 					if(value == NOT_SET) {
@@ -162,99 +222,116 @@ class RevisionCache {
 			}
 		}
 		
-		/**
-		 * @param value to set
-		 * @param writeMemcache if true, value is also written to memcache
-		 */
-		private void setValue(long value, boolean writeMemcache) {
-			if(value < this.value) {
-				return;
-				// IMPROVE change caller code so that this doesnt happen - maybe
-				// it never happens
-			}
-			setLocalValue(value);
-			if(writeMemcache) {
-				RevisionCache.this.writeToMemcache();
-			}
+		public void clear() {
+			this.value = NOT_SET;
+			this.time = 0;
+			this.loadedValue = NOT_SET;
 		}
 		
-		public void clear() {
-			this.value = 0;
-			this.time = 0;
+		@Override
+		public String toString() {
+			return this.name + "=" + this.value + " loaded:" + this.loadedValue + " time:"
+			        + this.time + " valid?" + hasValidLocalValue();
 		}
 	}
 	
-	private final CachedLong current, committed, lastTaken;
+	private final CachedLong current;
+	private final CachedLong committed;
+	private final CachedLong lastTaken;
+	
+	@Override
+	public String toString() {
+		return this.current.toString() + "\n" + this.committed.toString() + "\n"
+		        + this.lastTaken.toString() + "\n";
+	}
 	
 	@GaeOperation()
 	RevisionCache(XAddress modelAddr) {
-		this.memcacheKey = modelAddr + "-revisions";
+		this.memcacheKeyCurrent = modelAddr + "/rev-current";
+		this.memcacheKeyLastCommitted = modelAddr + "/rev-lastcommitted";
+		this.memcacheKeyLastTaken = modelAddr + "/rev-lasttaken";
+		this.memcacheKeys.add(this.memcacheKeyCurrent);
+		this.memcacheKeys.add(this.memcacheKeyLastCommitted);
+		this.memcacheKeys.add(this.memcacheKeyLastTaken);
 		// init caches
-		this.current = new CachedLong();
-		this.committed = new CachedLong();
-		this.lastTaken = new CachedLong();
+		this.current = new CachedLong("current");
+		this.committed = new CachedLong("committed");
+		this.lastTaken = new CachedLong("lastTaken");
 	}
 	
 	/**
-	 * @param mayAskMemcache ..
 	 * @return a cached value of the current revision number as defined by
-	 *         {@link GaeChangesService#getCurrentRevisionNumber()}.
+	 *         {@link IGaeChangesService#getCurrentRevisionNumber()}.
 	 * 
 	 *         The returned value may be less that the actual "current" revision
 	 *         number, but is guaranteed to never be greater.
 	 */
 	@GaeOperation(memcacheRead = true)
-	protected long getCurrentModelRev(boolean mayAskMemcache) {
-		return this.current.getValue(mayAskMemcache, true);
+	protected long getCurrentModelRev() {
+		long l = this.current.getValue(true);
+		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "current", l));
+		return l;
 	}
 	
 	/**
-	 * @param mayAskMemcache ..
 	 * @return a cached value of the current revision number as defined by
-	 *         {@link GaeChangesService#getCurrentRevisionNumber()} or NOT_SET.
+	 *         {@link IGaeChangesService#getCurrentRevisionNumber()} or NOT_SET.
 	 * 
 	 *         The returned value may be less that the actual "current" revision
 	 *         number, but is guaranteed to never be greater.
 	 */
 	@GaeOperation(memcacheRead = true)
-	protected long getCurrentModelRevIfSet(boolean mayAskMemcache) {
-		return this.current.getValue(mayAskMemcache, false);
+	protected long getCurrentModelRevIfSet() {
+		long l = this.current.getValue(false);
+		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "currentIfSet", l));
+		return l;
+	}
+	
+	protected long getLastTakenIfSet() {
+		long l = this.lastTaken.getValue(false);
+		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "lastTakenIfSet", l));
+		return l;
 	}
 	
 	/**
-	 * @param mayAskMemcache ..
 	 * @return a revision number such that all changes up to and including that
 	 *         revision number are guaranteed to be committed. This is not
 	 *         guaranteed to be the highest revision number that fits this
 	 *         requirement.
 	 */
 	@GaeOperation(memcacheRead = true)
-	protected long getLastCommited(boolean mayAskMemcache) {
-		return this.lastTaken.getValue(mayAskMemcache, true);
+	protected long getLastCommited() {
+		long l = this.lastTaken.getValue(true);
+		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "lastCommitted", l));
+		return l;
 	}
 	
-	protected long getLastCommitedIfSet(boolean mayAskMemcache) {
-		return this.committed.getValue(mayAskMemcache, false);
+	protected long getLastCommitedIfSet() {
+		long l = this.committed.getValue(false);
+		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "lastCommittedIfSet", l));
+		return l;
 	}
 	
 	/**
-	 * @param mayAskMemcache ..
 	 * @return the last known revision number that has been grabbed by a change.
 	 *         No guarantees are made that no higher revision numbers aren't
 	 *         taken already.
 	 */
-	protected long getLastTaken(boolean mayAskMemcache) {
-		return this.lastTaken.getValue(mayAskMemcache, true);
+	protected long getLastTaken() {
+		long l = this.lastTaken.getValue(true);
+		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "lastTaken", l));
+		return l;
 	}
 	
 	/**
-	 * Set a new value to be returned by {@link #getCurrentModelRev(boolean)}.
+	 * Set a new value to be returned by {@link #getCurrentModelRev()}.
 	 * 
 	 * @param l The value is set. It is ignored if the current cached value is
 	 *            less than this.
 	 */
 	protected void setCurrentModelRev(long l) {
-		boolean changes = this.current.setLocalValue(l);
+		log.trace(DebugFormatter.dataPut(REVCACHE_NAME, "current", l));
+		boolean changes = this.current.setLocalValueIfHigher(l);
 		if(changes) {
 			maintainInvariants(true);
 		}
@@ -262,44 +339,47 @@ class RevisionCache {
 	
 	private void maintainInvariants(boolean currentHasChanged) {
 		/* Make sure: current <= committed <= lastTaken */
-		long committed = this.committed.getValue(false, true);
+		long committed = this.committed.getValue(true);
 		if(currentHasChanged) {
-			long current = this.current.getValue(false, true);
+			long current = this.current.getValue(true);
 			if(current > committed) {
-				this.committed.setValue(current, true);
+				this.committed.setLocalValueIfHigher(current);
 				committed = current;
 			}
 		}
-		long lastTaken = this.lastTaken.getValue(false, true);
+		long lastTaken = this.lastTaken.getValue(true);
 		if(committed > lastTaken) {
-			this.lastTaken.setLocalValue(committed);
+			this.lastTaken.setLocalValueIfHigher(committed);
 		}
 	}
 	
 	/**
-	 * Set a new value to be returned by {@link #getLastCommited(boolean)}.
+	 * Set a new value to be returned by {@link #getLastCommited()}.
 	 * 
 	 * @param l The value is set. It is ignored if the current cached value is
 	 *            less than this.
 	 */
 	protected void setLastCommited(long l) {
-		boolean changes = this.committed.setLocalValue(l);
+		log.trace(DebugFormatter.dataPut(REVCACHE_NAME, "lastCommited", l));
+		boolean changes = this.committed.setLocalValueIfHigher(l);
 		if(changes) {
 			maintainInvariants(false);
 		}
 	}
 	
 	/**
-	 * Set a new value to be returned by {@link #getLastTaken(boolean)}.
+	 * Set a new value to be returned by {@link #getLastTaken()}.
 	 * 
 	 * @param l The value is set. It is ignored if the current cached value is
 	 *            less than this.
 	 */
 	protected void setLastTaken(long l) {
-		this.lastTaken.setLocalValue(l);
+		log.trace(DebugFormatter.dataPut(REVCACHE_NAME, "lastTaken", l));
+		this.lastTaken.setLocalValueIfHigher(l);
 	}
 	
-	public void clear() {
+	protected void clear() {
+		log.trace("revCache cleared");
 		this.committed.clear();
 		this.current.clear();
 		this.lastTaken.clear();

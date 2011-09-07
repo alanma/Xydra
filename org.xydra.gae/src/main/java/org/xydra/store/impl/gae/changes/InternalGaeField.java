@@ -21,8 +21,8 @@ import com.google.appengine.api.datastore.Key;
 
 
 /**
- * Internal helper class used by {@link GaeChangesService} to access the current
- * field state.
+ * Internal helper class used by {@link IGaeChangesService} to access the
+ * current field state.
  * 
  * @author dscharrer
  * 
@@ -31,7 +31,7 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 	
 	private static final String PROP_TRANSINDEX = "transindex";
 	
-	private final GaeChangesService gcs;
+	private final IGaeChangesService gcs;
 	private final XAddress fieldAddr;
 	private final long fieldRev;
 	private final int transindex;
@@ -42,11 +42,11 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 	 * datastore.
 	 * 
 	 * {@link InternalGaeField}s are not constructed directly by
-	 * {@link GaeChangesService} but through
+	 * {@link IGaeChangesService} but through
 	 * {@link InternalGaeObject#getField(XID)}.
 	 * 
 	 */
-	protected InternalGaeField(GaeChangesService gcs, XAddress fieldAddr, Entity fieldEntity) {
+	protected InternalGaeField(IGaeChangesService gcs, XAddress fieldAddr, Entity fieldEntity) {
 		this.gcs = gcs;
 		assert fieldAddr.getAddressedType() == XType.XFIELD;
 		this.fieldAddr = fieldAddr;

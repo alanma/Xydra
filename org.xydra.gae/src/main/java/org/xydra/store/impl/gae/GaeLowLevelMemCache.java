@@ -12,9 +12,9 @@ import org.xydra.store.IMemCache;
 
 import com.google.appengine.api.memcache.Expiration;
 import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheService.SetPolicy;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.api.memcache.Stats;
-import com.google.appengine.api.memcache.MemcacheService.SetPolicy;
 
 
 /**
@@ -26,6 +26,8 @@ public class GaeLowLevelMemCache implements IMemCache {
 	
 	private static final Logger log = LoggerFactory.getLogger(GaeLowLevelMemCache.class);
 	
+	private static final String MEMCACHE_NAME = "[=MC]";
+	
 	private MemcacheService memcacheService;
 	/* used to prefix all keys */
 	@SuppressWarnings("unused")
@@ -34,6 +36,7 @@ public class GaeLowLevelMemCache implements IMemCache {
 	@GaeOperation()
 	public GaeLowLevelMemCache() {
 		this.memcacheService = MemcacheServiceFactory.getMemcacheService();
+		// format: user-chosen-versionId-from-appengine-xml '.' timestamp
 		this.appVersion = AboutAppEngine.getVersion();
 	}
 	
@@ -69,11 +72,13 @@ public class GaeLowLevelMemCache implements IMemCache {
 	@Override
 	@GaeOperation(memcacheRead = true)
 	public boolean containsKey(Object key) {
-		return this.memcacheService.contains(keyUniqueForCurrentAppVersion(key));
+		assert key instanceof String;
+		String usedKey = (key instanceof String ? (String)key : key.toString());
+		return this.memcacheService.contains(keyUniqueForCurrentAppVersion(usedKey));
 	}
 	
 	@GaeOperation()
-	private Object keyUniqueForCurrentAppVersion(Object key) {
+	private String keyUniqueForCurrentAppVersion(String key) {
 		return key;
 		/*
 		 * TODO(stability) @Daniel: use a memcache key that is specific for a
@@ -106,16 +111,19 @@ public class GaeLowLevelMemCache implements IMemCache {
 	@Override
 	@GaeOperation(memcacheRead = true)
 	public Object get(Object key) {
-		Object o = this.memcacheService.get(keyUniqueForCurrentAppVersion(key));
-		log.trace("get key '" + key + "' => "
-		        + (o == null ? "null" : o.getClass().getCanonicalName() + "=" + o.toString()));
+		assert key instanceof String;
+		String usedKey = (key instanceof String ? (String)key : key.toString());
+		Object o = this.memcacheService.get(keyUniqueForCurrentAppVersion(usedKey));
+		log.debug(DebugFormatter.dataGet(MEMCACHE_NAME, usedKey, o));
 		return o;
 	}
 	
 	@Override
 	@GaeOperation(memcacheRead = true)
-	public Map<Object,Object> getAll(Collection<Object> keys) {
-		return this.memcacheService.getAll(keys);
+	public Map<String,Object> getAll(Collection<String> keys) {
+		Map<String,Object> result = this.memcacheService.getAll(keys);
+		log.debug(DebugFormatter.dataGet(MEMCACHE_NAME, keys, result));
+		return result;
 	}
 	
 	/**
@@ -125,36 +133,52 @@ public class GaeLowLevelMemCache implements IMemCache {
 	 */
 	@Override
 	@GaeOperation(memcacheWrite = true)
-	public Object put(Object key, Object value) {
+	public Object put(String key, Object value) {
+		log.debug(DebugFormatter.dataPut(MEMCACHE_NAME, key.toString(), value));
 		this.memcacheService.put(keyUniqueForCurrentAppVersion(key), value);
+		// does not hold in concurrent environment
+		assert this.memcacheService.get(keyUniqueForCurrentAppVersion(key)).equals(value);
+		assert this.memcacheService.get(key).equals(value);
 		return null;
 	}
 	
 	@Override
 	@GaeOperation(memcacheWrite = true)
 	public Object remove(Object key) {
-		return this.memcacheService.delete(keyUniqueForCurrentAppVersion(key));
+		assert key instanceof String;
+		String usedKey = (key instanceof String ? (String)key : key.toString());
+		log.debug(DebugFormatter.dataPut(MEMCACHE_NAME, usedKey, null));
+		return this.memcacheService.delete(keyUniqueForCurrentAppVersion(usedKey));
 	}
 	
 	@Override
 	@GaeOperation(memcacheWrite = true)
-	public void putAll(Map<? extends Object,? extends Object> m) {
-		// transform keys
-		Map<Object,Object> keyTransformedMap = new HashMap<Object,Object>();
-		for(java.util.Map.Entry<? extends Object,? extends Object> entry : m.entrySet()) {
-			keyTransformedMap.put(keyUniqueForCurrentAppVersion(entry.getKey()), entry.getValue());
+	public void putAll(Map<? extends String,? extends Object> m) {
+		if(m.isEmpty()) {
+			return;
 		}
+		log.debug(DebugFormatter.dataPut(MEMCACHE_NAME, m));
+		// transform keys
+		Map<String,Object> keyTransformedMap = new HashMap<String,Object>();
+		for(java.util.Map.Entry<? extends String,? extends Object> mapEntry : m.entrySet()) {
+			// FIXME relaxed assert
+			// !GaeUtils.NULL_ENTITY.equals(mapEntry.getValue());
+			keyTransformedMap.put(keyUniqueForCurrentAppVersion(mapEntry.getKey()),
+			        mapEntry.getValue());
+		}
+		// IMPROVE consider doing this in an async tread
 		this.memcacheService.putAll(keyTransformedMap);
 	}
 	
 	@Override
 	@GaeOperation(memcacheWrite = true)
 	public void clear() {
+		log.debug(DebugFormatter.init(MEMCACHE_NAME));
 		this.memcacheService.clearAll();
 	}
 	
 	@Override
-	public Set<Object> keySet() {
+	public Set<String> keySet() {
 		throw new UnsupportedOperationException("GaeMemcache does not support this");
 	}
 	
@@ -164,15 +188,81 @@ public class GaeLowLevelMemCache implements IMemCache {
 	}
 	
 	@Override
-	public Set<java.util.Map.Entry<Object,Object>> entrySet() {
+	public Set<java.util.Map.Entry<String,Object>> entrySet() {
 		throw new UnsupportedOperationException("GaeMemcache does not support this");
 	}
 	
 	@Override
 	// Expires in 10 days. There is no default.
-	public void putIfValueIsNull(Object key, Object entityToBeCached) {
-		this.memcacheService.put(key, entityToBeCached, Expiration
-		        .byDeltaSeconds(60 * 60 * 24 * 10), SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
+	public void putIfValueIsNull(String key, Object value) {
+		// FIXME reenable? assert
+		// !(KeyStructure.toKey(key).getKind().equals("XCHANGE") &&
+		// GaeUtils.NULL_ENTITY
+		// .equals(value)) : KeyStructure.toKey(key);
+		log.debug(DebugFormatter.dataPutIfNull(MEMCACHE_NAME, key, value));
+		this.memcacheService.put(key, value, Expiration.byDeltaSeconds(60 * 60 * 24 * 10),
+		        SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
+		if(log.isTraceEnabled()) {
+			log.trace(MEMCACHE_NAME + " now "
+			        + DebugFormatter.format(this.memcacheService.get(key)));
+		}
 	}
 	
+	private static class IdentifiableValueImpl implements IdentifiableValue {
+		
+		private com.google.appengine.api.memcache.MemcacheService.IdentifiableValue id;
+		
+		public IdentifiableValueImpl(
+		        com.google.appengine.api.memcache.MemcacheService.IdentifiableValue id) {
+			this.id = id;
+		}
+		
+		public Object getValue() {
+			return this.id == null ? null : this.id.getValue();
+		}
+		
+		public com.google.appengine.api.memcache.MemcacheService.IdentifiableValue getAppEngineInternal() {
+			return this.id;
+		}
+	}
+	
+	@Override
+	@GaeOperation(memcacheRead = true)
+	public IdentifiableValue getIdentifiable(String key) {
+		com.google.appengine.api.memcache.MemcacheService.IdentifiableValue id = this.memcacheService
+		        .getIdentifiable(keyUniqueForCurrentAppVersion(key));
+		log.debug(DebugFormatter.dataGet(MEMCACHE_NAME, key, id));
+		return new IdentifiableValueImpl(id);
+	}
+	
+	@Override
+	@GaeOperation(memcacheWrite = true)
+	public boolean putIfUntouched(String key, IdentifiableValue oldValue, Object newValue) {
+		assert oldValue instanceof IdentifiableValueImpl : "this cache can only handly its own impls "
+		        + oldValue.getClass().getCanonicalName();
+		IdentifiableValueImpl idImpl = (IdentifiableValueImpl)oldValue;
+		com.google.appengine.api.memcache.MemcacheService.IdentifiableValue gaeId = idImpl
+		        .getAppEngineInternal();
+		Expiration expiration = Expiration.byDeltaSeconds(60 * 60 * 24 * 10);
+		boolean result;
+		if(gaeId == null) {
+			log.debug(DebugFormatter.dataPutIfNull(MEMCACHE_NAME, key, newValue));
+			result = this.memcacheService.put(key, newValue, expiration,
+			        SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
+		} else {
+			log.debug(DebugFormatter.dataPutIfUntouched(MEMCACHE_NAME, key, oldValue, newValue));
+			result = this.memcacheService.putIfUntouched(key, gaeId, newValue, expiration);
+		}
+		if(log.isTraceEnabled()) {
+			log.trace(MEMCACHE_NAME + " now "
+			        + DebugFormatter.format(this.memcacheService.get(key)));
+		}
+		return result;
+		
+	}
+	
+	@Override
+	public Map<String,Long> incrementAll(Map<String,Long> offsets, long initialValue) {
+		return this.memcacheService.incrementAll(offsets, initialValue);
+	}
 }

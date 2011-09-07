@@ -304,7 +304,7 @@ class GaeEvents {
 		
 		if(transindex < TRANSINDEX_NONE) {
 			Key changeKey = KeyStructure.createChangeKey(modelAddr, revisionNumber);
-			return new AsyncValue(GaeUtils.getEntityAsync(changeKey), transindex);
+			return new AsyncValue(GaeUtils.getEntityAsync_MemcacheFirst_DatastoreFinal(changeKey), transindex);
 		} else {
 			return getExternalValue(modelAddr, revisionNumber, transindex);
 		}
@@ -313,7 +313,7 @@ class GaeEvents {
 	private static AsyncValue getExternalValue(XAddress modelAddr, long revisionNumber,
 	        int transindex) {
 		Key valueKey = KeyStructure.createValueKey(modelAddr, revisionNumber, transindex);
-		return new AsyncValue(GaeUtils.getEntityAsync(valueKey), transindex);
+		return new AsyncValue(GaeUtils.getEntityAsync_MemcacheFirst_DatastoreFinal(valueKey), transindex);
 	}
 	
 	/**

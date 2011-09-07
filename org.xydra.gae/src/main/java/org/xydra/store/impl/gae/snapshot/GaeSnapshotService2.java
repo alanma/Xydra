@@ -1,7 +1,6 @@
 package org.xydra.store.impl.gae.snapshot;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,9 +26,12 @@ import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.XydraRuntime;
+import org.xydra.store.impl.gae.DebugFormatter;
 import org.xydra.store.impl.gae.GaeOperation;
 import org.xydra.store.impl.gae.GaeUtils;
-import org.xydra.store.impl.gae.changes.GaeChangesService;
+import org.xydra.store.impl.gae.InstanceContext;
+import org.xydra.store.impl.gae.changes.IGaeChangesService;
+import org.xydra.store.impl.gae.changes.KeyStructure;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -51,7 +53,7 @@ import com.google.appengine.api.datastore.Text;
 public class GaeSnapshotService2 {
 	
 	private static final Logger log = LoggerFactory.getLogger(GaeSnapshotService2.class);
-	private final GaeChangesService changesService;
+	private final IGaeChangesService changesService;
 	private final XAddress modelAddress;
 	
 	private static final String KIND_SNAPSHOT = "XSNAPSHOT";
@@ -66,12 +68,35 @@ public class GaeSnapshotService2 {
 	 * @param modelAddress of which model is this the changes service
 	 * @param changesService The change log to load snapshots from.
 	 */
-	public GaeSnapshotService2(XAddress modelAddress, GaeChangesService changesService) {
+	public GaeSnapshotService2(XAddress modelAddress, IGaeChangesService changesService) {
 		this.modelAddress = modelAddress;
 		this.changesService = changesService;
 	}
 	
-	private SortedMap<Long,XReadableModel> localVmModelSnapshotsCache = new TreeMap<Long,XReadableModel>();
+	public static boolean USE_SNAPSHOT_CACHE = true;
+	
+	/**
+	 * For this model: revNr -> modelSnapshot
+	 * 
+	 * FIXME SCALE avoid growing large, keep only most recent version?
+	 */
+	@SuppressWarnings("unchecked")
+	private SortedMap<Long,XReadableModel> getModelSnapshotsCache() {
+		String key = "snapshots:" + this.changesService.getModelAddress();
+		Map<String,Object> instanceCache = InstanceContext.getInstanceCache();
+		SortedMap<Long,XReadableModel> modelSnapshotsCache;
+		synchronized(instanceCache) {
+			modelSnapshotsCache = (SortedMap<Long,XReadableModel>)instanceCache.get(key);
+			if(modelSnapshotsCache == null) {
+				log.trace("localVmcache for snapshots missing, creating one");
+				modelSnapshotsCache = new TreeMap<Long,XReadableModel>();
+				instanceCache.put(key, modelSnapshotsCache);
+			} else if(modelSnapshotsCache.size() > 100) {
+				modelSnapshotsCache.clear();
+			}
+		}
+		return modelSnapshotsCache;
+	}
 	
 	/**
 	 * Fast, imprecise.
@@ -84,9 +109,12 @@ public class GaeSnapshotService2 {
 	 */
 	synchronized public XWritableModel getSnapshotNewerOrAtRevision(long revisionNumber) {
 		/* look for all versions at this or higher revNrs */
-		SortedMap<Long,XReadableModel> matchOrNewer = this.localVmModelSnapshotsCache.subMap(
-		        revisionNumber, Long.MAX_VALUE);
-		if(matchOrNewer.isEmpty()) {
+		SortedMap<Long,XReadableModel> modelSnapshotsCache = getModelSnapshotsCache();
+		SortedMap<Long,XReadableModel> matchOrNewer;
+		synchronized(modelSnapshotsCache) {
+			matchOrNewer = modelSnapshotsCache.subMap(revisionNumber, Long.MAX_VALUE);
+		}
+		if(!USE_SNAPSHOT_CACHE || matchOrNewer.isEmpty()) {
 			// not cached
 			return getSnapshot(revisionNumber);
 		} else {
@@ -107,12 +135,16 @@ public class GaeSnapshotService2 {
 	 *         requested revisionNumber
 	 */
 	synchronized public XWritableModel getSnapshot(long requestedRevNr) {
-		assert requestedRevNr > 0 & this.changesService.getCurrentRevisionNumber() > 0;
-		log.debug("Get snapshot " + this.modelAddress + " " + requestedRevNr);
+		// assert requestedRevNr > 0 &
+		// this.changesService.getCurrentRevisionNumber() > 0 : "requested:"
+		// + requestedRevNr + " current:" +
+		// this.changesService.getCurrentRevisionNumber();
+		log.trace("Get snapshot " + this.modelAddress + " " + requestedRevNr);
 		
 		/* if localVmCache has exact requested version, use it */
 		XWritableModel cached = localVmCacheGet(requestedRevNr);
 		if(cached != null) {
+			log.trace("return locally cached");
 			return cached;
 		}
 		
@@ -132,7 +164,10 @@ public class GaeSnapshotService2 {
 	 */
 	@GaeOperation()
 	private XWritableModel localVmCacheGet(long requestedRevNr) {
-		XReadableModel cachedModel = this.localVmModelSnapshotsCache.get(requestedRevNr);
+		if(!USE_SNAPSHOT_CACHE)
+			return null;
+		
+		XReadableModel cachedModel = getModelSnapshotsCache().get(requestedRevNr);
 		if(cachedModel == null)
 			return null;
 		else {
@@ -152,11 +187,14 @@ public class GaeSnapshotService2 {
 	@GaeOperation(datastoreRead = true ,memcacheRead = true)
 	synchronized private XWritableModel getSnapshotFromMemcacheOrDatastore(long requestedRevNr) {
 		assert requestedRevNr > 0 & this.changesService.getCurrentRevisionNumber() > 0;
+		log.debug("getSnapshotFromMemcacheOrDatastore " + requestedRevNr);
 		// try to retrieve an exact match for the required revisionNumber
 		// memcache + datastore read
 		Key key = getSnapshotKey(requestedRevNr);
-		Object o = XydraRuntime.getMemcache().get(key);
+		Object o = XydraRuntime.getMemcache().get(KeyStructure.toString(key));
 		if(o != null) {
+			log.trace("return from memcache");
+			assert isConsistent(KeyStructure.toString(key), (XRevWritableModel)o);
 			XRevWritableModel snapshot = (XRevWritableModel)o;
 			assert snapshot.getRevisionNumber() == requestedRevNr;
 			localVmCachePut(snapshot);
@@ -165,6 +203,7 @@ public class GaeSnapshotService2 {
 		// else: look for direct match in datastore
 		Entity e = GaeUtils.getEntityFromDatastore(key);
 		if(e != null) {
+			log.trace("return from datastore");
 			Text xmlText = (Text)e.getProperty(PROP_XML);
 			if(xmlText == null) {
 				// model was null at that revision
@@ -187,7 +226,7 @@ public class GaeSnapshotService2 {
 	 */
 	@GaeOperation()
 	private void localVmCachePut(XRevWritableModel snapshot) {
-		this.localVmModelSnapshotsCache.put(snapshot.getRevisionNumber(),
+		getModelSnapshotsCache().put(snapshot.getRevisionNumber(),
 		        XCopyUtils.createSnapshot(snapshot));
 	}
 	
@@ -204,34 +243,40 @@ public class GaeSnapshotService2 {
 		        + requestedRevNr
 		        + " higher than latest model version "
 		        + this.changesService.getCurrentRevisionNumber();
+		log.debug("compute snapshot " + requestedRevNr);
 		
-		Map<Object,Object> batchResult = Collections.emptyMap();
+		Map<String,Object> batchResult = Collections.emptyMap();
 		long askNr = requestedRevNr - 1;
 		while(askNr >= 0 && batchResult.isEmpty()) {
 			// prepare a batch-fetch in the mem-cache
-			List<Object> keys = new LinkedList<Object>();
+			List<String> keys = new LinkedList<String>();
 			while(askNr >= 0 && keys.size() <= SNAPSHOT_PERSISTENCE_THRESHOLD) {
-				keys.add(getSnapshotKey(askNr));
+				keys.add(KeyStructure.toString(getSnapshotKey(askNr)));
 				askNr--;
 			}
 			// execute
 			batchResult = XydraRuntime.getMemcache().getAll(keys);
-			assert cacheResultIsConsistent(batchResult);
-			// batch result will usually contain 1 hits
-			if(askNr >= 0 && batchResult.size() != 1) {
-				/*
-				 * TODO IMPROVE make sure changes service puts every K versions
-				 * a snapshot in memcache
-				 */
-				log.info("Got a batch result from memcache when asking for snapshot with "
-				        + batchResult.size() + " entries for keys "
-				        + new ArrayList<Object>(keys).toArray());
-			}
-			// Pump all results (if any) to localVmcache
-			for(Object o : batchResult.values()) {
-				assert o instanceof XRevWritableModel;
-				XRevWritableModel snapshotFromMemcache = (XRevWritableModel)o;
-				localVmCachePut(snapshotFromMemcache);
+			assert cacheResultIsConsistent(batchResult) : "cache inconsistent, see logs";
+			if(batchResult.isEmpty()) {
+				// executeCommand should periodically create snapshots in
+				// memcache?
+			} else {
+				// batch result will usually contain 1 hits
+				if(askNr >= 0 && batchResult.size() != 1) {
+					/*
+					 * TODO IMPROVE make sure changes service puts every K
+					 * versions a snapshot in memcache
+					 */
+					log.info("Got a batch result of size " + batchResult.size()
+					        + " from memcache when asking for snapshot: "
+					        + DebugFormatter.format(keys));
+				}
+				// Pump all results (if any) to localVmcache
+				for(Object o : batchResult.values()) {
+					assert o instanceof XRevWritableModel;
+					XRevWritableModel snapshotFromMemcache = (XRevWritableModel)o;
+					localVmCachePut(snapshotFromMemcache);
+				}
 			}
 		}
 		
@@ -239,7 +284,7 @@ public class GaeSnapshotService2 {
 		
 		XRevWritableModel base;
 		if(batchResult.isEmpty()) {
-			// we start from scratch, nobody has ever saved a snapshot
+			log.trace("we start from scratch, nobody has ever saved a snapshot");
 			base = new SimpleModel(this.modelAddress);
 			base.setRevisionNumber(MODEL_DOES_NOT_EXIST);
 		} else {
@@ -249,22 +294,35 @@ public class GaeSnapshotService2 {
 			base = (XRevWritableModel)snapshotfromMemcache;
 			assert base.getAddress().equals(this.modelAddress);
 		}
+		log.debug("compute from " + base.getRevisionNumber() + " up to " + requestedRevNr);
 		
 		XRevWritableModel requestedSnapshot = computeSnapshotFromBase(base, requestedRevNr);
 		localVmCachePut(requestedSnapshot);
-		// cache it in memcache
-		XydraRuntime.getMemcache().put(this.getSnapshotKey(requestedSnapshot.getRevisionNumber()),
-		        requestedSnapshot);
+		// // cache it in memcache
+		// XydraRuntime.getMemcache().put(
+		// KeyStructure.toString(this.getSnapshotKey(requestedSnapshot.getRevisionNumber())),
+		// requestedSnapshot);
 		// return it
 		return requestedSnapshot;
 	}
 	
-	private boolean cacheResultIsConsistent(Map<Object,Object> batchResult) {
-		for(Entry<Object,Object> entry : batchResult.entrySet()) {
-			if(!entry.getKey().equals(
-			        getSnapshotKey(((XRevWritableModel)entry.getValue()).getRevisionNumber()))) {
+	private boolean cacheResultIsConsistent(Map<String,Object> batchResult) {
+		for(Entry<String,Object> entry : batchResult.entrySet()) {
+			String key = entry.getKey();
+			XRevWritableModel value = (XRevWritableModel)entry.getValue();
+			boolean consistent = isConsistent(key, value);
+			if(!consistent) {
 				return false;
 			}
+		}
+		return true;
+	}
+	
+	private boolean isConsistent(String key, XRevWritableModel value) {
+		String generatedKey = KeyStructure.toString(getSnapshotKey(value.getRevisionNumber()));
+		if(!key.equals(generatedKey)) {
+			log.warn("entry.key = " + key + " vs. gen.key = " + generatedKey);
+			return false;
 		}
 		return true;
 	}
@@ -293,7 +351,17 @@ public class GaeSnapshotService2 {
 		for(XEvent event : events) {
 			log.trace("Applying " + event);
 			EventUtils.applyEvent(baseModel, event);
+			
 			localVmCachePut(baseModel);
+			long rev = baseModel.getRevisionNumber();
+			// cache every 10th snapshot in memcache
+			if(rev % 10 == 0) {
+				// FIXME !!!baseModel.rev is adapted only by
+				// EventUtils.applyEvent(baseModel, event);
+				String key = KeyStructure.toString(getSnapshotKey(rev));
+				XydraRuntime.getMemcache().put(key, baseModel);
+				assert isConsistent(key, baseModel);
+			}
 		}
 		return baseModel;
 	}

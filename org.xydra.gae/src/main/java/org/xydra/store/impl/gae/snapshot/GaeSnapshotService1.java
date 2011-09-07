@@ -34,7 +34,7 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.gae.GaeUtils;
 import org.xydra.store.impl.gae.changes.AsyncChange;
-import org.xydra.store.impl.gae.changes.GaeChangesService;
+import org.xydra.store.impl.gae.changes.GaeChangesServiceImpl1;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -52,7 +52,7 @@ import com.google.appengine.api.datastore.Text;
 public class GaeSnapshotService1 {
 	
 	private static final Logger log = LoggerFactory.getLogger(GaeSnapshotService1.class);
-	private final GaeChangesService changesService;
+	private final GaeChangesServiceImpl1 changesService;
 	private final XAddress modelAddress;
 	
 	private static final String KIND_SNAPSHOT = "XSNAPSHOT";
@@ -68,7 +68,7 @@ public class GaeSnapshotService1 {
 	 * @param modelAddress ..
 	 * @param changesService The change log to load snapshots from.
 	 */
-	public GaeSnapshotService1(XAddress modelAddress, GaeChangesService changesService) {
+	public GaeSnapshotService1(XAddress modelAddress, GaeChangesServiceImpl1 changesService) {
 		this.modelAddress = modelAddress;
 		this.changesService = changesService;
 		this.snapshotRevKey = this.modelAddress + "-snapshot-Rev";

@@ -9,30 +9,35 @@ import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
-import org.xydra.store.impl.gae.changes.GaeChangesService;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
+import org.xydra.store.impl.gae.changes.GaeChangesServiceImpl2;
+import org.xydra.store.impl.gae.changes.IGaeChangesService;
 import org.xydra.store.impl.gae.snapshot.GaeSnapshotService2;
 
 
 /**
  * Xydra allows transaction only within one model. The GAE implementation
- * maintans one change log per model. This class keeps all access to a model
+ * maintains one change log per model. This class keeps all access to a model
  * within the datastore and memcache in one place.
  * 
  * Goal: If the datastore or memcache is called to read or write a certain
- * model, that access is triggered only here.
+ * model, that access is triggered only from here.
  * 
  * @author xamde
  * 
  */
 public class GaeModelPersistence {
 	
+	private static final Logger log = LoggerFactory.getLogger(GaeModelPersistence.class);
+	
 	private XAddress modelAddress;
-	private GaeChangesService changesService;
+	private IGaeChangesService changesService;
 	private GaeSnapshotService2 snapshotService;
 	
 	public GaeModelPersistence(XAddress modelAddress) {
 		this.modelAddress = modelAddress;
-		this.changesService = new GaeChangesService(this.modelAddress);
+		this.changesService = new GaeChangesServiceImpl2(this.modelAddress);
 		this.snapshotService = new GaeSnapshotService2(this.modelAddress, this.changesService);
 	}
 	
@@ -63,6 +68,7 @@ public class GaeModelPersistence {
 			return new SimpleModel(this.modelAddress);
 		}
 		XWritableModel snapshot = this.snapshotService.getSnapshot(currentRevNr);
+		log.trace("return snapshot rev " + currentRevNr + " for model " + this.modelAddress);
 		return snapshot;
 	}
 	

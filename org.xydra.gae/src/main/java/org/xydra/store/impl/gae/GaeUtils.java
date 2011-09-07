@@ -1,9 +1,12 @@
 package org.xydra.store.impl.gae;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -11,7 +14,10 @@ import java.util.concurrent.Future;
 import org.xydra.base.XAddress;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.IMemCache;
+import org.xydra.store.IMemCache.IdentifiableValue;
 import org.xydra.store.XydraRuntime;
+import org.xydra.store.impl.gae.changes.KeyStructure;
 
 import com.google.appengine.api.datastore.AsyncDatastoreService;
 import com.google.appengine.api.datastore.DatastoreService;
@@ -33,15 +39,19 @@ public class GaeUtils {
 	
 	private static final Logger log = LoggerFactory.getLogger(GaeUtils.class);
 	
-	private static AsyncDatastoreService datastore;
+	private static AsyncDatastoreService asyncDatastore;
 	
 	private static boolean useMemCacheInThisClass = true;
 	
+	public static final String DATASTORE_NAME = "[#DS]";
+	
 	/*
-	 * used only in test mode to be able to delete all entites from datastore
-	 * that have been created
+	 * used only in test mode to be able to delete all entities from datastore
+	 * that have been created (in this instance)
 	 */
-	private static Set<Key> storedKeys;
+	private static Set<Key> datastoreStoredKeys;
+	
+	private static DatastoreService syncDatastore;
 	
 	/**
 	 * @param b turn GAE MemCache off or on at runtime
@@ -90,7 +100,7 @@ public class GaeUtils {
 	 * A null-entity is required to cache the fact, that the datastore
 	 * <em>does not</em> contain a certain key
 	 */
-	private static final Entity NULL_ENTITY = new Entity(NULL_ENTITY_KIND, "null");
+	public static final Entity NULL_ENTITY = new Entity(NULL_ENTITY_KIND, "null");
 	
 	/**
 	 * @param <T> future type
@@ -120,35 +130,38 @@ public class GaeUtils {
 	@GaeOperation(memcacheRead = true ,memcacheWrite = true ,datastoreRead = true)
 	public static Entity getEntity_MemcachePositive_DatastoreFinal(Key key, Transaction trans) {
 		assert trans != null;
-		makeSureDatestoreServiceIsInitialised();
-		
-		Entity cachedEntity = null;
+		makeSureAsyncDatestoreServiceIsInitialised();
+		Entity e;
 		if(useMemCacheInThisClass) {
+			String keyStr = KeyStructure.toString(key);
+			IdentifiableValue cachedIdentifiable = null;
 			// try first to get from memcache
-			cachedEntity = (Entity)XydraRuntime.getMemcache().get(key);
-			if(cachedEntity != null) {
-				log.debug("Getting entity " + key.toString() + " from MemCache "
-				        + XydraRuntime.getMemcache().getClass().getCanonicalName());
-				if(!cachedEntity.equals(NULL_ENTITY)) {
-					return cachedEntity;
+			cachedIdentifiable = XydraRuntime.getMemcache().getIdentifiable(keyStr);
+			Entity entity = (Entity)cachedIdentifiable.getValue();
+			if(entity != null) {
+				if(!entity.equals(NULL_ENTITY)) {
+					return entity;
 				}
 			}
+			/*
+			 * IMPROVE use synchronous code for the synchronous parts -- /!\
+			 * gae-transactions might not work across the two datastore
+			 * interfaces
+			 */
+			Future<Entity> futureEntity = asyncDatastore.get(trans, key);
+			e = waitFor(futureEntity);
+			XydraRuntime.getMemcache().putIfUntouched(keyStr, cachedIdentifiable, e);
+		} else {
+			/*
+			 * IMPROVE use synchronous code for the synchronous parts -- /!\
+			 * gae-transactions might not work across the two datastore
+			 * interfaces
+			 */
+			Future<Entity> entity = asyncDatastore.get(trans, key);
+			e = waitFor(entity);
 		}
 		
-		log.debug("Getting entity " + key.toString() + " from GAE data store");
-		/*
-		 * IMPROVE use synchronous code for the synchronous parts -- /!\
-		 * gae-transations might not work across the two datastore interfaces
-		 */
-		Future<Entity> entity = datastore.get(trans, key);
-		Entity e = waitFor(entity);
-		if(useMemCacheInThisClass) {
-			updateCachedEntity(key, e);
-		}
-		if(e == null) {
-			log.debug("--> null");
-		}
-		
+		log.debug(DebugFormatter.dataGet(DATASTORE_NAME, KeyStructure.toString(key), e));
 		return e;
 	}
 	
@@ -177,24 +190,23 @@ public class GaeUtils {
 					updateCachedEntity(this.key, this.entity);
 				}
 				this.future = null;
+				log.debug("... async... Datastore(" + this.key + ") = " + this.entity);
 			}
 			return this.entity;
 		}
 		
 	}
 	
-	public static AsyncEntity getEntityAsync(Key key) {
+	public static AsyncEntity getEntityAsync_MemcacheFirst_DatastoreFinal(Key key) {
 		
-		makeSureDatestoreServiceIsInitialised();
+		makeSureAsyncDatestoreServiceIsInitialised();
 		
 		if(useMemCacheInThisClass) {
 			// try first to get from memcache
-			Entity cachedEntity = (Entity)XydraRuntime.getMemcache().get(key);
+			Entity cachedEntity = (Entity)XydraRuntime.getMemcache()
+			        .get(KeyStructure.toString(key));
 			if(cachedEntity != null) {
-				log.debug("Getting entity " + key.toString() + " from MemCache "
-				        + XydraRuntime.getMemcache().getClass().getCanonicalName());
 				if(cachedEntity.equals(NULL_ENTITY)) {
-					log.debug("--> null");
 					return new AsyncEntity(null);
 				} else {
 					return new AsyncEntity(cachedEntity);
@@ -202,10 +214,27 @@ public class GaeUtils {
 			}
 		}
 		
-		log.debug("Getting entity " + key.toString() + " from GAE data store");
-		Future<Entity> entity = datastore.get(key);
+		log.debug("Datastore(" + key.toString() + ") = ...async");
+		Future<Entity> entity = asyncDatastore.get(key);
 		
 		return new AsyncEntity(key, entity);
+	}
+	
+	/**
+	 * @param keys never null
+	 * @return a map with the mappings. See {@link IMemCache#getAll(Collection)}
+	 *         . Values might contain {@link #NULL_ENTITY}.
+	 */
+	public static Map<String,Object> getEntitiesFromMemcache(Collection<String> keys) {
+		assert keys != null;
+		Map<String,Object> memcachedEntities = null;
+		if(useMemCacheInThisClass) {
+			memcachedEntities = XydraRuntime.getMemcache().getAll(keys);
+		}
+		if(memcachedEntities == null) {
+			return Collections.emptyMap();
+		}
+		return memcachedEntities;
 	}
 	
 	/**
@@ -215,16 +244,14 @@ public class GaeUtils {
 	 * @return the GAE Entity for the given key from the store or null
 	 */
 	public static Entity getEntity_MemcacheFirst_DatastoreFinal(Key key, boolean useMemcache) {
-		makeSureDatestoreServiceIsInitialised();
+		makeSureAsyncDatestoreServiceIsInitialised();
 		
 		if(useMemCacheInThisClass && useMemcache) {
 			// try first to get from memcache
-			Entity memcachedEntity = (Entity)XydraRuntime.getMemcache().get(key);
+			Entity memcachedEntity = (Entity)XydraRuntime.getMemcache().get(
+			        KeyStructure.toString(key));
 			if(memcachedEntity != null) {
-				log.debug("Getting entity " + key.toString() + " from MemCache "
-				        + XydraRuntime.getMemcache().getClass().getCanonicalName());
 				if(memcachedEntity.equals(NULL_ENTITY)) {
-					log.debug("--> null");
 					return null;
 				} else {
 					return memcachedEntity;
@@ -232,14 +259,12 @@ public class GaeUtils {
 			}
 		}
 		
-		log.debug("Getting entity " + key.toString() + " from GAE data store");
-		Future<Entity> futureEntity = datastore.get(null, key);
+		Future<Entity> futureEntity = asyncDatastore.get(null, key);
 		Entity entityFromDatastore = waitFor(futureEntity);
+		log.debug(DebugFormatter.dataGet(DATASTORE_NAME, key.toString(), entityFromDatastore));
+		
 		if(useMemCacheInThisClass && useMemcache) {
 			updateCachedEntity(key, entityFromDatastore);
-		}
-		if(entityFromDatastore == null) {
-			log.debug("--> null");
 		}
 		return entityFromDatastore;
 	}
@@ -252,20 +277,17 @@ public class GaeUtils {
 	 * @param trans never null
 	 * @return the entity from datastore
 	 */
-	public static Entity getEntity_MemcacheFirst_DatastoreFinal(Key key, Transaction trans) {
+	public static Entity getEntityFromDatastore(Key key, Transaction trans) {
 		assert key != null;
 		assert trans != null;
-		makeSureDatestoreServiceIsInitialised();
+		makeSureAsyncDatestoreServiceIsInitialised();
 		
-		log.debug("Getting entity " + key.toString() + " from GAE data store");
-		Future<Entity> futureEntity = datastore.get(trans, key);
+		Future<Entity> futureEntity = asyncDatastore.get(trans, key);
 		Entity entityFromDatastore = waitFor(futureEntity);
 		if(useMemCacheInThisClass) {
 			updateCachedEntity(key, entityFromDatastore);
 		}
-		if(entityFromDatastore == null) {
-			log.debug("--> null");
-		}
+		log.debug(DebugFormatter.dataGet(DATASTORE_NAME, key.toString(), entityFromDatastore));
 		return entityFromDatastore;
 	}
 	
@@ -282,13 +304,22 @@ public class GaeUtils {
 		if(entityToBeCached_ == null) {
 			entityToBeCached_ = NULL_ENTITY;
 		}
-		XydraRuntime.getMemcache().putIfValueIsNull(key, entityToBeCached_);
+		XydraRuntime.getMemcache().putIfValueIsNull(KeyStructure.toString(key), entityToBeCached_);
 	}
 	
-	private static void makeSureDatestoreServiceIsInitialised() {
+	private static void makeSureAsyncDatestoreServiceIsInitialised() {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		if(datastore == null) {
-			datastore = DatastoreServiceFactory.getAsyncDatastoreService();
+		if(asyncDatastore == null) {
+			log.debug(DebugFormatter.init(DATASTORE_NAME));
+			asyncDatastore = DatastoreServiceFactory.getAsyncDatastoreService();
+		}
+	}
+	
+	private static void makeSureSyncDatestoreServiceIsInitialised() {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		if(syncDatastore == null) {
+			log.debug(DebugFormatter.init(DATASTORE_NAME));
+			syncDatastore = DatastoreServiceFactory.getDatastoreService();
 		}
 	}
 	
@@ -308,29 +339,30 @@ public class GaeUtils {
 	 * @param trans The transaction to write the entity in.
 	 */
 	public static void putEntity(Entity entity, Transaction trans) {
-		log.debug("putting " + entity.getKey());
-		makeSureDatestoreServiceIsInitialised();
-		Future<Key> result = datastore.put(trans, entity);
+		log.debug(DebugFormatter.dataPut(DATASTORE_NAME, KeyStructure.toString(entity.getKey()),
+		        entity));
+		makeSureAsyncDatestoreServiceIsInitialised();
+		Future<Key> result = asyncDatastore.put(trans, entity);
 		Key res = waitFor(result);
 		assert res != null;
 		if(GaeTestfixer.isEnabled()) {
 			makeSureStoredKeyInitialised();
-			storedKeys.add(res);
+			datastoreStoredKeys.add(res);
 		}
 		
 		if(useMemCacheInThisClass) {
 			// remove first from memcache
 			if(trans == null) {
-				XydraRuntime.getMemcache().put(entity.getKey(), entity);
+				XydraRuntime.getMemcache().put(KeyStructure.toString(entity.getKey()), entity);
 			} else {
-				XydraRuntime.getMemcache().remove(entity.getKey());
+				XydraRuntime.getMemcache().remove(KeyStructure.toString(entity.getKey()));
 			}
 		}
 	}
 	
 	private static void makeSureStoredKeyInitialised() {
-		if(storedKeys == null) {
-			storedKeys = new HashSet<Key>();
+		if(datastoreStoredKeys == null) {
+			datastoreStoredKeys = new HashSet<Key>();
 		}
 	}
 	
@@ -349,21 +381,23 @@ public class GaeUtils {
 	 * @param entity The entity to write to the datastore.
 	 */
 	public static Future<Key> putEntityAsync(Entity entity, Transaction trans) {
-		log.debug("putting (async) " + entity.getKey());
-		makeSureDatestoreServiceIsInitialised();
-		Future<Key> result = datastore.put(trans, entity);
+		log.debug(DebugFormatter.dataPut(DATASTORE_NAME + "...async...",
+		        KeyStructure.toString(entity.getKey()), entity));
+		makeSureAsyncDatestoreServiceIsInitialised();
+		Future<Key> result = asyncDatastore.put(trans, entity);
 		if(useMemCacheInThisClass) {
 			// remove first from memcache
+			String keyStr = KeyStructure.toString(entity.getKey());
 			if(trans == null) {
-				XydraRuntime.getMemcache().put(entity.getKey(), entity);
+				XydraRuntime.getMemcache().put(keyStr, entity);
 			} else {
-				XydraRuntime.getMemcache().remove(entity.getKey());
+				XydraRuntime.getMemcache().remove(keyStr);
 			}
 		}
 		if(GaeTestfixer.isEnabled()) {
 			makeSureStoredKeyInitialised();
 			Key key = waitFor(result);
-			storedKeys.add(key);
+			datastoreStoredKeys.add(key);
 		}
 		return result;
 	}
@@ -375,8 +409,8 @@ public class GaeUtils {
 	 */
 	public static Transaction beginTransaction() {
 		log.debug("-- begin transaction --");
-		makeSureDatestoreServiceIsInitialised();
-		Future<Transaction> trans = datastore.beginTransaction();
+		makeSureAsyncDatestoreServiceIsInitialised();
+		Future<Transaction> trans = asyncDatastore.beginTransaction();
 		return waitFor(trans);
 	}
 	
@@ -387,7 +421,7 @@ public class GaeUtils {
 	 */
 	public static void endTransaction(Transaction trans) throws ConcurrentModificationException {
 		log.debug("-- end transaction --");
-		makeSureDatestoreServiceIsInitialised();
+		makeSureAsyncDatestoreServiceIsInitialised();
 		trans.commit();
 	}
 	
@@ -399,7 +433,7 @@ public class GaeUtils {
 	public static Future<Void> endTransactionAsync(Transaction trans)
 	        throws ConcurrentModificationException {
 		log.debug("-- end transaction (async) --");
-		makeSureDatestoreServiceIsInitialised();
+		makeSureAsyncDatestoreServiceIsInitialised();
 		return trans.commitAsync();
 	}
 	
@@ -420,12 +454,12 @@ public class GaeUtils {
 	 */
 	public static Future<Void> deleteEntityAsync(Key key) {
 		log.debug("deleting (async) " + key);
-		makeSureDatestoreServiceIsInitialised();
+		makeSureAsyncDatestoreServiceIsInitialised();
 		if(useMemCacheInThisClass) {
 			// delete first in memcache
-			XydraRuntime.getMemcache().put(key, NULL_ENTITY);
+			XydraRuntime.getMemcache().put(KeyStructure.toString(key), NULL_ENTITY);
 		}
-		return datastore.delete(key);
+		return asyncDatastore.delete(key);
 	}
 	
 	/**
@@ -435,17 +469,17 @@ public class GaeUtils {
 	 * @param trans The transaction to remove the entity in.
 	 */
 	public static void deleteEntity(Key key, Transaction trans) {
-		log.debug("deleting " + key);
-		makeSureDatestoreServiceIsInitialised();
+		log.debug(DebugFormatter.dataPut(DATASTORE_NAME, key.toString(), null));
+		makeSureAsyncDatestoreServiceIsInitialised();
 		if(useMemCacheInThisClass) {
 			// delete first in memcache
 			if(trans == null) {
-				XydraRuntime.getMemcache().put(key, NULL_ENTITY);
+				XydraRuntime.getMemcache().put(KeyStructure.toString(key), NULL_ENTITY);
 			} else {
-				XydraRuntime.getMemcache().remove(key);
+				XydraRuntime.getMemcache().remove(KeyStructure.toString(key));
 			}
 		}
-		Future<Void> result = datastore.delete(trans, key);
+		Future<Void> result = asyncDatastore.delete(trans, key);
 		waitFor(result);
 	}
 	
@@ -470,9 +504,8 @@ public class GaeUtils {
 	 * @see DatastoreService#prepare(Transaction, Query)
 	 */
 	public static PreparedQuery prepareQuery(Query query, Transaction trans) {
-		log.debug("preparing query");
-		makeSureDatestoreServiceIsInitialised();
-		return datastore.prepare(trans, query);
+		makeSureAsyncDatestoreServiceIsInitialised();
+		return asyncDatastore.prepare(trans, query);
 	}
 	
 	/**
@@ -480,28 +513,30 @@ public class GaeUtils {
 	 *         all transactions are terminated properly.
 	 */
 	public static boolean transactionsActive() {
-		return !datastore.getActiveTransactions().isEmpty();
+		return !asyncDatastore.getActiveTransactions().isEmpty();
 	}
 	
 	/**
 	 * Delete ALL local data. Use with care.
 	 */
 	public static void clear() {
-		makeSureDatestoreServiceIsInitialised();
+		log.info("Datastore & Memcache CLEAR");
+		makeSureAsyncDatestoreServiceIsInitialised();
 		XydraRuntime.getMemcache().clear();
 		
 		if(GaeTestfixer.isEnabled()) {
 			makeSureStoredKeyInitialised();
-			log.info("Deleting " + storedKeys.size() + " entities (" + storedKeys
+			log.info("Deleting " + datastoreStoredKeys.size() + " entities (" + datastoreStoredKeys
 			        + ") from local GAE datastore");
-			Future<Void> result = datastore.delete(storedKeys);
+			Future<Void> result = asyncDatastore.delete(datastoreStoredKeys);
 			waitFor(result);
 			assert result.isDone();
-			for(Key key : storedKeys) {
-				Future<Entity> keyResult = datastore.get(key);
+			for(Key key : datastoreStoredKeys) {
+				Future<Entity> keyResult = asyncDatastore.get(key);
 				Entity e = waitFor(keyResult);
 				assert e == null;
 			}
+			datastoreStoredKeys.clear();
 		} else {
 			deleteAllDataOnLiveDatastore();
 		}
@@ -512,12 +547,12 @@ public class GaeUtils {
 		for(String kind : kinds) {
 			List<Key> keys = new LinkedList<Key>();
 			Query q = new Query(kind).setKeysOnly();
-			PreparedQuery pq = datastore.prepare(q);
+			PreparedQuery pq = asyncDatastore.prepare(q);
 			for(Entity entity : pq.asIterable()) {
 				keys.add(entity.getKey());
 			}
 			try {
-				datastore.delete(keys);
+				asyncDatastore.delete(keys);
 			} catch(Exception e) {
 				log.warn("Could not delete kind '" + kind + "'", e);
 			}
@@ -528,9 +563,10 @@ public class GaeUtils {
 	 * @return all kinds that do not start with '__'
 	 */
 	public static List<String> getAllKinds() {
-		makeSureDatestoreServiceIsInitialised();
+		makeSureAsyncDatestoreServiceIsInitialised();
 		List<String> kinds = new LinkedList<String>();
-		Iterable<Entity> statKinds = datastore.prepare(new Query("__Stat_Kind__")).asIterable();
+		Iterable<Entity> statKinds = asyncDatastore.prepare(new Query("__Stat_Kind__"))
+		        .asIterable();
 		for(Entity statKind : statKinds) {
 			String kind = statKind.getProperty("kind_name").toString();
 			if(!kind.startsWith("__")) {
@@ -538,6 +574,29 @@ public class GaeUtils {
 			}
 		}
 		return kinds;
+	}
+	
+	/**
+	 * Batch get.
+	 * 
+	 * Retrieves the set of Entities matching keys. The result Map will only
+	 * contain Keys for which Entities could be found.
+	 * 
+	 * Note: If there is a current transaction, this operation will execute
+	 * within that transaction. In this case it is up to the caller to commit or
+	 * rollback. If there is no current transaction, the behavior of this method
+	 * with respect to transactions will be determined by the
+	 * ImplicitTransactionManagementPolicy available on the
+	 * DatastoreServiceConfig.
+	 * 
+	 * @param keys never null
+	 * @return a mapping for all keys that could be found
+	 */
+	public static Map<Key,Entity> getEntitiesFromDatastore(Collection<Key> keys) {
+		makeSureSyncDatestoreServiceIsInitialised();
+		Map<Key,Entity> result = syncDatastore.get(keys);
+		log.debug(DebugFormatter.dataGet(DATASTORE_NAME, keys, result));
+		return result;
 	}
 	
 }

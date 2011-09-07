@@ -16,7 +16,7 @@ import org.xydra.store.impl.gae.GaeOperation;
 
 
 /**
- * Implementation of the lock semantics used by {@link GaeChangesService}.
+ * Implementation of the lock semantics used by {@link IGaeChangesService}.
  * 
  * Locks can be acquired for each part of the MOF tree.
  * 

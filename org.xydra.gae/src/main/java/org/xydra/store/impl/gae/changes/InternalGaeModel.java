@@ -20,8 +20,8 @@ import com.google.appengine.api.datastore.Key;
 
 
 /**
- * Internal helper class used by {@link GaeChangesService} to access the current
- * model state.
+ * Internal helper class used by {@link IGaeChangesService} to access the
+ * current model state.
  * 
  * @author dscharrer
  * 
@@ -29,7 +29,7 @@ import com.google.appengine.api.datastore.Key;
 class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObject> implements
         XReadableModel {
 	
-	private InternalGaeModel(GaeChangesService changesService, XAddress modelAddr, long modelRev,
+	private InternalGaeModel(IGaeChangesService changesService, XAddress modelAddr, long modelRev,
 	        GaeLocks locks) {
 		super(changesService, modelAddr, modelRev, locks);
 		assert modelAddr.getAddressedType() == XType.XMODEL;
@@ -70,7 +70,7 @@ class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObject> im
 	 *            {@link XEvent#RevisionNotAvailable} instead.
 	 * @return A {@link XModel} interface or null if the model doesn't exist.
 	 */
-	static InternalGaeModel get(GaeChangesService changesService, long modelRev, GaeLocks locks) {
+	static InternalGaeModel get(IGaeChangesService changesService, long modelRev, GaeLocks locks) {
 		
 		assert locks.canRead(changesService.getModelAddress());
 		Entity e = GaeUtils

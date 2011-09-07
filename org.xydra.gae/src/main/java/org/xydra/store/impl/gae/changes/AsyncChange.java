@@ -10,12 +10,14 @@ import com.google.appengine.api.datastore.Key;
 /**
  * Helper class to allow to load events asynchronously.
  * 
+ * Used exclusively with {@link GaeChangesServiceImpl1}.
+ * 
  * @author dscharrer
  * 
  */
 public class AsyncChange {
 	
-	private final GaeChangesService gcs;
+	private final GaeChangesServiceImpl1 gcs;
 	private final AsyncEntity future;
 	private final long rev;
 	private GaeChange change;
@@ -23,13 +25,13 @@ public class AsyncChange {
 	/**
 	 * Get the change at the specified revision number.
 	 */
-	protected AsyncChange(GaeChangesService gcs, long rev) {
+	protected AsyncChange(GaeChangesServiceImpl1 gcs, long rev) {
 		
 		this.gcs = gcs;
 		this.rev = rev;
 		
 		Key key = KeyStructure.createChangeKey(gcs.getModelAddress(), rev);
-		this.future = GaeUtils.getEntityAsync(key);
+		this.future = GaeUtils.getEntityAsync_MemcacheFirst_DatastoreFinal(key);
 	}
 	
 	protected AsyncChange(GaeChange change) {
@@ -52,9 +54,7 @@ public class AsyncChange {
 				return null;
 			}
 			this.change = new GaeChange(this.gcs.getModelAddress(), this.rev, changeEntity);
-			if(this.change.getStatus().isCommitted()) {
-				this.gcs.cacheCommittedChange(this.change);
-			}
+			this.gcs.cacheCommittedChange(this.change);
 		}
 		return this.change;
 	}
