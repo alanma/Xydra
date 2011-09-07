@@ -35,7 +35,8 @@ public class GaeLoggerFactorySPI implements ILoggerFactorySPI {
 		return factory.getLogger(name, logListener);
 	}
 	
-	public Logger getWrappedLogger(String name, String fullyQualifiedNameOfDelegatingLoggerClass) {
+	@Override
+    public Logger getWrappedLogger(String name, String fullyQualifiedNameOfDelegatingLoggerClass) {
 		return factory.getWrappedLogger(name, fullyQualifiedNameOfDelegatingLoggerClass);
 	}
 	
