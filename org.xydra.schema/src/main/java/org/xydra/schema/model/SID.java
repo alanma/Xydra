@@ -12,7 +12,8 @@ public class SID extends SValue {
 		this.value = value;
 	}
 	
-	public void toSyntax(StringBuffer buf) {
+	@Override
+    public void toSyntax(StringBuffer buf) {
 		buf.append(this.value.toString());
 	}
 	

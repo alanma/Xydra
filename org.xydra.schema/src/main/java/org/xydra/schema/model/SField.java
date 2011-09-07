@@ -15,7 +15,8 @@ public class SField implements ISyntax {
 	public SName name;
 	public SValue value;
 	
-	public void toSyntax(StringBuffer buf) {
+	@Override
+    public void toSyntax(StringBuffer buf) {
 		this.type.toSyntax(buf);
 		buf.append(" ");
 		this.name.toSyntax(buf);

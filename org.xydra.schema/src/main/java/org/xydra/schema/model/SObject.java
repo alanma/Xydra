@@ -21,7 +21,8 @@ public class SObject implements ISModel, ISyntax {
 	
 	public List<SField> fields = new ArrayList<SField>();
 	
-	public void toSyntax(StringBuffer buf) {
+	@Override
+    public void toSyntax(StringBuffer buf) {
 		this.name.toSyntax(buf);
 		buf.append(EQUAL);
 		buf.append(START);

@@ -11,7 +11,8 @@ public class SString extends SValue implements ISyntax {
 		this.value = value;
 	}
 	
-	public void toSyntax(StringBuffer buf) {
+	@Override
+    public void toSyntax(StringBuffer buf) {
 		buf.append(QUOTE);
 		buf.append(this.value);
 		buf.append(QUOTE);

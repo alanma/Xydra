@@ -29,7 +29,8 @@ public class SType implements ISyntax {
 		}
 	}
 	
-	public void toSyntax(StringBuffer buf) {
+	@Override
+    public void toSyntax(StringBuffer buf) {
 		buf.append(this.typeName);
 	}
 	

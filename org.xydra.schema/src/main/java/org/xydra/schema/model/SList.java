@@ -13,7 +13,8 @@ public class SList extends SValue implements ISyntax {
 	
 	public List<ISyntax> list = new ArrayList<ISyntax>();
 	
-	public void toSyntax(StringBuffer buf) {
+	@Override
+    public void toSyntax(StringBuffer buf) {
 		buf.append(START);
 		Iterator<ISyntax> it = this.list.iterator();
 		while(it.hasNext()) {
