@@ -17,33 +17,40 @@ public class UserInfoImpl implements UserInfo {
 	
 	private static Logger log = LoggerFactory.getLogger(UserInfoImpl.class);
 	
-	public long getCurrentSessionStartTime() {
+	@Override
+    public long getCurrentSessionStartTime() {
 		return Utils.getCurrentTimeInSeconds();
 	}
 	
-	public long getFirstVisitStartTime() {
+	@Override
+    public long getFirstVisitStartTime() {
 		return Utils.getCurrentTimeInSeconds();
 	}
 	
-	public long getLastVisitStartTime() {
+	@Override
+    public long getLastVisitStartTime() {
 		return Utils.getCurrentTimeInSeconds();
 	}
 	
-	public long getSessionCount() {
+	@Override
+    public long getSessionCount() {
 		return 1;
 	}
 	
-	public String getDomainName() {
+	@Override
+    public String getDomainName() {
 		return this.domainName;
 	}
 	
 	// TODO document what would be a legal value and re-enable in UrchinCookie
 	// code
-	public String getVar() {
+	@Override
+    public String getVar() {
 		return null;
 	}
 	
-	public String getHostName() {
+	@Override
+    public String getHostName() {
 		InetAddress addr;
 		String hostname = "(not set)";
 		try {
@@ -55,7 +62,8 @@ public class UserInfoImpl implements UserInfo {
 		return hostname;
 	}
 	
-	public long get31BitId() {
+	@Override
+    public long get31BitId() {
 		return Utils.random31bitInteger();
 	}
 	

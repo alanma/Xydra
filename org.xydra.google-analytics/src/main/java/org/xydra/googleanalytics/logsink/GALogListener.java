@@ -57,7 +57,8 @@ public class GALogListener implements ILogListener, UserInfo {
 		track(log, "error", msg, t);
 	}
 	
-	public long get31BitId() {
+	@Override
+    public long get31BitId() {
 		return this.thirtyOneBitId;
 	}
 	
@@ -66,7 +67,8 @@ public class GALogListener implements ILogListener, UserInfo {
 		return this.currentSessionStartTime;
 	}
 	
-	public String getDomainName() {
+	@Override
+    public String getDomainName() {
 		return this.domainName;
 	}
 	
@@ -75,7 +77,8 @@ public class GALogListener implements ILogListener, UserInfo {
 		return this.currentSessionStartTime;
 	}
 	
-	public String getHostName() {
+	@Override
+    public String getHostName() {
 		InetAddress addr;
 		String hostname = "(not set)";
 		try {
@@ -103,7 +106,8 @@ public class GALogListener implements ILogListener, UserInfo {
 	
 	// TODO document what would be a legal value and re-enable in UrchinCookie
 	// code
-	public String getVar() {
+	@Override
+    public String getVar() {
 		return null;
 	}
 	
