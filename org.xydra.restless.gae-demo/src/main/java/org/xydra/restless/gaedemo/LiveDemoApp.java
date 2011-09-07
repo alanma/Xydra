@@ -17,7 +17,8 @@ public class LiveDemoApp {
 		/** a rather useless exception handler */
 		r.addExceptionHandler(new RestlessExceptionHandler() {
 			
-			public boolean handleException(Throwable t, HttpServletRequest req,
+			@Override
+            public boolean handleException(Throwable t, HttpServletRequest req,
 			        HttpServletResponse res) {
 				System.err.println("Restless error");
 				throw new RuntimeException("" + req, t);
