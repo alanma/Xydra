@@ -1,5 +1,8 @@
 package org.xydra.log;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 
@@ -13,19 +16,25 @@ import com.google.gwt.core.client.GWT;
 public class LoggerFactory {
 	
 	private static ILoggerFactorySPI loggerFactorySPI;
-	private static ILogListener logListener_;
+	private static Set<ILogListener> logListeners_ = new HashSet<ILogListener>();
 	
 	public static final String ROOT_LOGGER_NAME = "org.xydra.log.system";
 	
 	/**
-	 * All log messages are also sent to a registered {@link ILogListener}
+	 * All log messages are also sent to a registered {@link ILogListener}.
 	 * 
 	 * @param logListener a listener to receive all log messages
 	 */
-	public static void setLogListener(ILogListener logListener) {
-		logListener_ = logListener;
+	public static void addLogListener(ILogListener logListener) {
+		logListeners_.add(logListener);
 		loggerFactorySPI.getLogger(ROOT_LOGGER_NAME, null).info(
 		        "Logging: Attached log listener " + logListener.getClass().getName());
+	}
+	
+	public static void removeLogListener(ILogListener logListener) {
+		logListeners_.remove(logListener);
+		loggerFactorySPI.getLogger(ROOT_LOGGER_NAME, null).info(
+		        "Logging: Removed log listener " + logListener.getClass().getName());
 	}
 	
 	/**
@@ -36,7 +45,7 @@ public class LoggerFactory {
 		if(loggerFactorySPI == null) {
 			init();
 		}
-		return loggerFactorySPI.getLogger(clazz.getName(), logListener_);
+		return loggerFactorySPI.getLogger(clazz.getName(), logListeners_);
 	}
 	
 	private static void init() {

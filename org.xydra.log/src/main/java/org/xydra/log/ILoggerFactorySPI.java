@@ -1,5 +1,8 @@
 package org.xydra.log;
 
+import java.util.Collection;
+
+
 public interface ILoggerFactorySPI {
 	
 	/**
@@ -21,7 +24,7 @@ public interface ILoggerFactorySPI {
 	 * @param name the name of the Logger to return
 	 * @param logListener if not null, send all log events also to listener
 	 */
-	Logger getLogger(String name, ILogListener logListener);
+	Logger getLogger(String name, Collection<ILogListener> logListeners);
 	
 	/**
 	 * OPTIONAL OPERATION
