@@ -38,7 +38,7 @@ public class TestGA {
 	public void testLoggingEvent() {
 		
 		GALogListener logListener = new GALogListener(GOOGLE_ANALYTICS_ID, "test.xydra.org");
-		LoggerFactory.setLogListener(logListener);
+		LoggerFactory.addLogListener(logListener);
 		Logger log = LoggerFactory.getLogger(TestGA.class);
 		log.debug("should not be logged in GA");
 		log.warn("should be logged in GA as warn");
