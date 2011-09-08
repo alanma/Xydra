@@ -1,5 +1,6 @@
 package org.xydra.log.gae;
 
+import java.util.Collection;
 import java.util.logging.LogRecord;
 
 import org.xydra.log.ILogListener;
@@ -24,17 +25,17 @@ import org.xydra.log.Logger;
 public class JulLogger extends Logger {
 	
 	private java.util.logging.Logger jul;
-	private ILogListener logListener;
+	private Collection<ILogListener> logListeners;
 	
 	public JulLogger(java.util.logging.Logger julLogger) {
 		super();
 		this.jul = julLogger;
 	}
 	
-	public JulLogger(java.util.logging.Logger julLogger, ILogListener logListener) {
+	public JulLogger(java.util.logging.Logger julLogger, Collection<ILogListener> logListeners) {
 		super();
 		this.jul = julLogger;
-		this.logListener = logListener;
+		this.logListeners = logListeners;
 	}
 	
 	public JulLogger(java.util.logging.Logger logger,
@@ -62,7 +63,7 @@ public class JulLogger extends Logger {
 		} catch(RuntimeException e) {
 			e.fillInStackTrace();
 			e.getStackTrace();
-			if(this.logListener == null) {
+			if(this.logListeners == null) {
 				record.setSourceClassName(e.getStackTrace()[3].getClassName());
 				record.setSourceMethodName(e.getStackTrace()[3].getMethodName());
 				record.setMessage(record.getMessage());
