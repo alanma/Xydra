@@ -103,9 +103,17 @@ public class LoggerFactory {
 	 * @param spi an {@link ILoggerFactorySPI} instance
 	 */
 	public static void setLoggerFactorySPI(ILoggerFactorySPI spi) {
-		loggerFactorySPI = spi;
-		loggerFactorySPI.getLogger(ROOT_LOGGER_NAME, null).info(
-		        "Logging: Configured XydraLog with " + spi.getClass().getName());
+		if(loggerFactorySPI == null || !loggerFactorySPI.getClass().equals(spi.getClass())) {
+			loggerFactorySPI = spi;
+			try {
+				throw new RuntimeException("CALLER");
+			} catch(Exception e) {
+				loggerFactorySPI.getLogger(ROOT_LOGGER_NAME, null).info(
+				        "Logging: Configured XydraLog with " + spi.getClass().getName());
+				e.fillInStackTrace();
+				e.printStackTrace();
+			}
+		}
 	}
 	
 }
