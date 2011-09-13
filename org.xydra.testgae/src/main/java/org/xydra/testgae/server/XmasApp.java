@@ -18,7 +18,8 @@ public class XmasApp {
 		/** a trivial exception handler */
 		r.addExceptionHandler(new RestlessExceptionHandler() {
 			
-			public boolean handleException(Throwable t, IRestlessContext context) {
+			@Override
+            public boolean handleException(Throwable t, IRestlessContext context) {
 				System.err.println("Restless error");
 				throw new RuntimeException("" + context.getRequest(), t);
 			}

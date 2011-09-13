@@ -158,12 +158,14 @@ public class JunitResource {
 		log.info("Asking for repo id...");
 		store.getRepositoryId(actorId, passwordHash, new Callback<XID>() {
 			
-			public void onSuccess(XID repoId) {
+			@Override
+            public void onSuccess(XID repoId) {
 				log.info("Success: " + repoId);
 				JunitResource.this.test1_repoId = repoId;
 			}
 			
-			public void onFailure(Throwable exception) {
+			@Override
+            public void onFailure(Throwable exception) {
 				log.info("Error:", exception);
 				throw new RuntimeException(exception);
 			}
@@ -180,12 +182,14 @@ public class JunitResource {
 		log.info("Asking for repo id...");
 		store.getRepositoryId(actorId, passwordHash, new Callback<XID>() {
 			
-			public void onSuccess(XID repoId) {
+			@Override
+            public void onSuccess(XID repoId) {
 				log.info("Success: " + repoId);
 				JunitResource.this.test1_repoId = repoId;
 			}
 			
-			public void onFailure(Throwable exception) {
+			@Override
+            public void onFailure(Throwable exception) {
 				log.info("Error:", exception);
 			}
 		});
