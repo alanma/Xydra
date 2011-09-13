@@ -14,6 +14,7 @@ import org.xydra.store.AccessException;
  **/
 public class XAccessExceptionHandler implements RestlessExceptionHandler {
 	
+	@Override
 	public boolean handleException(Throwable t, IRestlessContext context) {
 		
 		if(t instanceof AccessException) {
