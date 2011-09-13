@@ -7,7 +7,9 @@ import org.xydra.base.XID;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XTransaction;
+import org.xydra.store.Callback;
 import org.xydra.store.GetEventsRequest;
+import org.xydra.store.RevisionState;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.gae.changes.GaeEvents.AsyncValue;
 
@@ -32,10 +34,9 @@ public interface IGaeChangesService {
 	 *             timeout from GAE if TIME_CRITICAL is set to more than half
 	 *             the GAE timeout.
 	 * 
-	 * @see XydraStore#executeCommands(XID, String, XCommand[],
-	 *      org.xydra.store.Callback)
+	 * @see XydraStore#executeCommands(XID, String, XCommand[], Callback)
 	 */
-	long executeCommand(XCommand command, XID actorId);
+	RevisionState executeCommand(XCommand command, XID actorId);
 	
 	/**
 	 * @return the {@link XAddress} of the model managed by this
@@ -44,9 +45,10 @@ public interface IGaeChangesService {
 	XAddress getModelAddress();
 	
 	/**
-	 * @return the model's current revision number.
-	 * @see XydraStore#getModelRevisions(XID, String, XAddress[],
-	 *      org.xydra.store.Callback)
+	 * @return the model's current revision number. Non-existing models are
+	 *         signalled as {@link XCommand#FAILED}, i.e. those that have just
+	 *         been removed from the repository.
+	 * @see XydraStore#getModelRevisions(XID, String, XAddress[], Callback)
 	 */
 	long getCurrentRevisionNumber();
 	
@@ -68,5 +70,10 @@ public interface IGaeChangesService {
 	List<XEvent> getEventsBetween(long beginRevision, long endRevision);
 	
 	AsyncValue getValue(long fieldRev, int transindex);
+	
+	/**
+	 * @return true if model exists
+	 */
+	boolean exists();
 	
 }

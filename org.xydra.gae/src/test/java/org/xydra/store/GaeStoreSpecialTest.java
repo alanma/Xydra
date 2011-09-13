@@ -65,7 +65,8 @@ public class GaeStoreSpecialTest {
 		XCommand[] commands = { modelCommand1, objectCommand1, objectCommand2, objectCommand3 };
 		
 		for(XCommand command : commands) {
-			long result = this.pers.executeCommand(this.actorId, command);
+			RevisionState pair = this.pers.executeCommand(this.actorId, command);
+			long result = pair.revision();
 			assert result >= 0;
 			if(result == XCommand.FAILED) {
 				throw new RuntimeException(
@@ -87,8 +88,8 @@ public class GaeStoreSpecialTest {
 	public void deleteModel1() {
 		XCommand removeCommand = MemoryRepositoryCommand.createRemoveCommand(this.repoAddr,
 		        XCommand.FORCED, this.modelId1);
-		long l = this.pers.executeCommand(this.actorId, removeCommand);
-		assert l >= 0;
+		RevisionState l = this.pers.executeCommand(this.actorId, removeCommand);
+		assert l.revision() >= 0;
 		assert this.pers.getModelIds().size() == 0;
 	}
 	
@@ -107,10 +108,10 @@ public class GaeStoreSpecialTest {
 		doStuff();
 		deleteModel1();
 		doStuff();
-		long rev1 = this.pers.getModelRevision(this.modelAddress1);
-		assertEquals(13, rev1);
-		long rev2 = this.pers.getModelRevision(this.modelAddress1);
-		assertEquals(rev1, rev2);
+		RevisionState rev1 = this.pers.getModelRevision(this.modelAddress1);
+		assertEquals(13, rev1.revision());
+		RevisionState rev2 = this.pers.getModelRevision(this.modelAddress1);
+		assertEquals(rev1.revision(), rev2.revision());
 	}
 	
 }

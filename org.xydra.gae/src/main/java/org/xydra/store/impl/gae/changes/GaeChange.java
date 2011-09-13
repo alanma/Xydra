@@ -17,8 +17,11 @@ import org.xydra.gae.AboutAppEngine;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.impl.gae.AsyncDatastore;
 import org.xydra.store.impl.gae.GaeAssert;
-import org.xydra.store.impl.gae.GaeUtils;
+import org.xydra.store.impl.gae.GaeOperation;
+import org.xydra.store.impl.gae.Memcache;
+import org.xydra.store.impl.gae.SyncDatastore;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -180,6 +183,7 @@ public class GaeChange {
 		 *         the change entity.
 		 */
 		protected boolean hasEvents() {
+			// FIXME @Daniel: Why return true if Executing?
 			return (this == Executing || this == SuccessExecuted);
 		}
 		
@@ -215,7 +219,7 @@ public class GaeChange {
 	
 	public static final long GAE_WEB_REQUEST_TIMEOUT = 30000;
 	
-	public static final long APPLICATION_RESERVED_TIME = 10000;
+	public static final long APPLICATION_RESERVED_TIME = 20000;
 	
 	/**
 	 * timeout for changes in milliseconds
@@ -294,18 +298,20 @@ public class GaeChange {
 	 * version is not put back into the datastore.
 	 */
 	GaeChange(XAddress modelAddr, long rev, Entity entity) {
-		assert entity != null;
+		if(entity == null) {
+			throw new IllegalArgumentException("entity is null");
+		}
 		this.entity = entity;
 		this.rev = rev;
 		this.modelAddr = modelAddr;
-		assert entity == GaeUtils.NULL_ENTITY
+		assert entity == Memcache.NULL_ENTITY
 		        || KeyStructure.assertRevisionInKey(entity.getKey(), rev);
 		clearCache();
 	}
 	
 	void reload(Transaction trans) {
 		assert !getStatus().isCommitted();
-		this.entity = GaeUtils.getEntityFromDatastore(this.entity.getKey(), trans);
+		this.entity = SyncDatastore.getEntity(this.entity.getKey(), trans);
 		assert this.entity != null : "change entities should not vanish";
 		clearCache();
 	}
@@ -352,7 +358,7 @@ public class GaeChange {
 		this.locks = null;
 		this.entity.removeProperty(PROP_LOCKS);
 		setStatus(status);
-		GaeUtils.putEntity(this.entity);
+		SyncDatastore.putEntity(this.entity);
 	}
 	
 	/**
@@ -386,21 +392,21 @@ public class GaeChange {
 	 * @return the status code associated with the given change {@link Entity}.
 	 */
 	synchronized public Status getStatus() {
-		
 		if(this.status == null) {
-			Number n = (Number)this.entity.getProperty(PROP_STATUS);
-			if(n == null) {
+			Object o = this.entity.getProperty(PROP_STATUS);
+			// FIXME trying to find the NPE bug here...
+			if(o == null) {
 				try {
 					throw new RuntimeException("Tracing caller of getStatus()");
 				} catch(RuntimeException e) {
-					log.error("change entity without status", e);
+					log.error("Accessing a change entity without status", e);
 				}
 			}
+			Number n = (Number)o;
 			assert n != null : "All change entities should have a status";
 			int index = n.intValue();
 			this.status = Status.get(index);
 		}
-		
 		return this.status;
 	}
 	
@@ -441,7 +447,7 @@ public class GaeChange {
 		assert !getStatus().isCommitted();
 		long now = now();
 		if(now - this.lastActivity > TIME_CRITICAL) {
-			// TODO use a better exception type?
+			// IMPROVE use a better exception type?
 			throw new VoluntaryTimeoutException("voluntarily timing out to prevent"
 			        + " multiple processes working in the same thread; " + " start time was "
 			        + this.lastActivity + "; now is " + now);
@@ -460,10 +466,11 @@ public class GaeChange {
 	 * Asynchronously put this change entity into datastore within the given
 	 * transaction.
 	 */
+	@GaeOperation(datastoreWrite = true ,memcacheWrite = true)
 	protected void save(Transaction trans) {
 		assert !getStatus().isCommitted();
 		// Synchronized by endTransaction()
-		GaeUtils.putEntityAsync(this.entity, trans);
+		AsyncDatastore.putEntity(this.entity, trans);
 	}
 	
 	/**
@@ -474,7 +481,7 @@ public class GaeChange {
 		GaeAssert.gaeAssert(!getStatus().isCommitted(), "!getStatus().isCommitted()");
 		GaeAssert.gaeAssert(this.entity.getProperty("eventTypes") != null,
 		        "Trying to save changeEntity with PROP_EVENT_TYPES==null");
-		GaeUtils.putEntity(this.entity);
+		AsyncDatastore.putEntity(this.entity);
 	}
 	
 	/**

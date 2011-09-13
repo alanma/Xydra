@@ -11,6 +11,7 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.store.IMemCache;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.gae.DebugFormatter;
+import org.xydra.store.impl.gae.DebugFormatter.Timing;
 import org.xydra.store.impl.gae.GaeOperation;
 
 
@@ -51,6 +52,7 @@ import org.xydra.store.impl.gae.GaeOperation;
  * @author dscharrer
  * @author xamde
  */
+@Deprecated
 class RevisionCache {
 	
 	private static final Logger log = LoggerFactory.getLogger(RevisionCache.class);
@@ -71,7 +73,7 @@ class RevisionCache {
 	 * Compile time flag to disable the functionality of
 	 * {@link #writeToMemcache()} and {@link #loadFromMemcache()}
 	 */
-	// FIXME !!! enable
+	// FIXME !!! enable memcache in revCache
 	private static final boolean USE_MEMCACHE = false;
 	
 	private static final String REVCACHE_NAME = "[.rc]";
@@ -270,7 +272,7 @@ class RevisionCache {
 	@GaeOperation(memcacheRead = true)
 	protected long getCurrentModelRev() {
 		long l = this.current.getValue(true);
-		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "current", l));
+		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "current", l, Timing.Now));
 		return l;
 	}
 	
@@ -284,13 +286,13 @@ class RevisionCache {
 	@GaeOperation(memcacheRead = true)
 	protected long getCurrentModelRevIfSet() {
 		long l = this.current.getValue(false);
-		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "currentIfSet", l));
+		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "currentIfSet", l, Timing.Now));
 		return l;
 	}
 	
 	protected long getLastTakenIfSet() {
 		long l = this.lastTaken.getValue(false);
-		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "lastTakenIfSet", l));
+		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "lastTakenIfSet", l, Timing.Now));
 		return l;
 	}
 	
@@ -303,13 +305,13 @@ class RevisionCache {
 	@GaeOperation(memcacheRead = true)
 	protected long getLastCommited() {
 		long l = this.lastTaken.getValue(true);
-		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "lastCommitted", l));
+		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "lastCommitted", l, Timing.Now));
 		return l;
 	}
 	
 	protected long getLastCommitedIfSet() {
 		long l = this.committed.getValue(false);
-		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "lastCommittedIfSet", l));
+		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "lastCommittedIfSet", l, Timing.Now));
 		return l;
 	}
 	
@@ -320,7 +322,7 @@ class RevisionCache {
 	 */
 	protected long getLastTaken() {
 		long l = this.lastTaken.getValue(true);
-		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "lastTaken", l));
+		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "lastTaken", l, Timing.Now));
 		return l;
 	}
 	
@@ -331,7 +333,7 @@ class RevisionCache {
 	 *            less than this.
 	 */
 	protected void setCurrentModelRev(long l) {
-		log.trace(DebugFormatter.dataPut(REVCACHE_NAME, "current", l));
+		log.trace(DebugFormatter.dataPut(REVCACHE_NAME, "current", l, Timing.Now));
 		boolean changes = this.current.setLocalValueIfHigher(l);
 		if(changes) {
 			maintainInvariants(true);
@@ -361,7 +363,7 @@ class RevisionCache {
 	 *            less than this.
 	 */
 	protected void setLastCommited(long l) {
-		log.trace(DebugFormatter.dataPut(REVCACHE_NAME, "lastCommited", l));
+		log.trace(DebugFormatter.dataPut(REVCACHE_NAME, "lastCommited", l, Timing.Now));
 		boolean changes = this.committed.setLocalValueIfHigher(l);
 		if(changes) {
 			maintainInvariants(false);
@@ -375,7 +377,7 @@ class RevisionCache {
 	 *            less than this.
 	 */
 	protected void setLastTaken(long l) {
-		log.trace(DebugFormatter.dataPut(REVCACHE_NAME, "lastTaken", l));
+		log.trace(DebugFormatter.dataPut(REVCACHE_NAME, "lastTaken", l, Timing.Now));
 		this.lastTaken.setLocalValueIfHigher(l);
 	}
 	

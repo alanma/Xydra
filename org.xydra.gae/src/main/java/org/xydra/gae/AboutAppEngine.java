@@ -41,7 +41,7 @@ public class AboutAppEngine {
 	 *         application plus a timestamp at which it was deployed. This is
 	 *         not just the version identifier string you specify in
 	 *         appengine-web.xml.
-	 *         
+	 * 
 	 *         Format: user-chosen-versionId-from-appengine-xml '.' timestamp
 	 */
 	public static String getVersion() {
@@ -55,6 +55,11 @@ public class AboutAppEngine {
 	@SuppressWarnings("deprecation")
 	public static String getInstanceId() {
 		return SystemProperty.instanceReplicaId.get();
+	}
+	
+	public static String getThreadInfo() {
+		Thread ct = Thread.currentThread();
+		return ct.getId() + "-'" + ct.getName() + "'";
 	}
 	
 }

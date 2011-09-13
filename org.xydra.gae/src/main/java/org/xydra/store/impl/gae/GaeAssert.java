@@ -52,4 +52,16 @@ public class GaeAssert {
 		}
 	}
 	
+	/**
+	 * This method just returns, doing nothing if {@link GaeAssert#enable()} has
+	 * not been called from main code.
+	 * 
+	 * @param condition should evaluate to true if things run OK
+	 * @throws RuntimeException if GaeAssertions are on and the condition is
+	 *             false
+	 */
+	public static void gaeAssert(boolean condition) {
+		gaeAssert(condition, null);
+	}
+	
 }

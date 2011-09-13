@@ -9,6 +9,7 @@ import org.xydra.gae.AboutAppEngine;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.IMemCache;
+import org.xydra.store.impl.gae.DebugFormatter.Timing;
 
 import com.google.appengine.api.memcache.Expiration;
 import com.google.appengine.api.memcache.MemcacheService;
@@ -26,7 +27,7 @@ public class GaeLowLevelMemCache implements IMemCache {
 	
 	private static final Logger log = LoggerFactory.getLogger(GaeLowLevelMemCache.class);
 	
-	private static final String MEMCACHE_NAME = "[=MC]";
+	private static final String MEMCACHE_NAME = "[#=MC]";
 	
 	private MemcacheService memcacheService;
 	/* used to prefix all keys */
@@ -114,7 +115,7 @@ public class GaeLowLevelMemCache implements IMemCache {
 		assert key instanceof String;
 		String usedKey = (key instanceof String ? (String)key : key.toString());
 		Object o = this.memcacheService.get(keyUniqueForCurrentAppVersion(usedKey));
-		log.debug(DebugFormatter.dataGet(MEMCACHE_NAME, usedKey, o));
+		log.debug(DebugFormatter.dataGet(MEMCACHE_NAME, usedKey, o, Timing.Now));
 		return o;
 	}
 	
@@ -122,7 +123,7 @@ public class GaeLowLevelMemCache implements IMemCache {
 	@GaeOperation(memcacheRead = true)
 	public Map<String,Object> getAll(Collection<String> keys) {
 		Map<String,Object> result = this.memcacheService.getAll(keys);
-		log.debug(DebugFormatter.dataGet(MEMCACHE_NAME, keys, result));
+		log.debug(DebugFormatter.dataGet(MEMCACHE_NAME, keys, result, Timing.Now));
 		return result;
 	}
 	
@@ -134,7 +135,9 @@ public class GaeLowLevelMemCache implements IMemCache {
 	@Override
 	@GaeOperation(memcacheWrite = true)
 	public Object put(String key, Object value) {
-		log.debug(DebugFormatter.dataPut(MEMCACHE_NAME, key.toString(), value));
+		GaeAssert.gaeAssert(value != null, "value is null");
+		assert value != null;
+		log.debug(DebugFormatter.dataPut(MEMCACHE_NAME, key.toString(), value, Timing.Now));
 		this.memcacheService.put(keyUniqueForCurrentAppVersion(key), value);
 		// does not hold in concurrent environment
 		assert this.memcacheService.get(keyUniqueForCurrentAppVersion(key)).equals(value);
@@ -147,7 +150,7 @@ public class GaeLowLevelMemCache implements IMemCache {
 	public Object remove(Object key) {
 		assert key instanceof String;
 		String usedKey = (key instanceof String ? (String)key : key.toString());
-		log.debug(DebugFormatter.dataPut(MEMCACHE_NAME, usedKey, null));
+		log.debug(DebugFormatter.dataPut(MEMCACHE_NAME, usedKey, null, Timing.Now));
 		return this.memcacheService.delete(keyUniqueForCurrentAppVersion(usedKey));
 	}
 	
@@ -157,12 +160,14 @@ public class GaeLowLevelMemCache implements IMemCache {
 		if(m.isEmpty()) {
 			return;
 		}
-		log.debug(DebugFormatter.dataPut(MEMCACHE_NAME, m));
+		log.debug(DebugFormatter.dataPut(MEMCACHE_NAME, m, Timing.Now));
 		// transform keys
 		Map<String,Object> keyTransformedMap = new HashMap<String,Object>();
 		for(java.util.Map.Entry<? extends String,? extends Object> mapEntry : m.entrySet()) {
+			GaeAssert.gaeAssert(mapEntry.getValue() != null, "mapEntry.getValue() is null");
+			assert mapEntry.getValue() != null;
 			// FIXME relaxed assert
-			// !GaeUtils.NULL_ENTITY.equals(mapEntry.getValue());
+			// !Memcache.NULL_ENTITY.equals(mapEntry.getValue());
 			keyTransformedMap.put(keyUniqueForCurrentAppVersion(mapEntry.getKey()),
 			        mapEntry.getValue());
 		}
@@ -195,11 +200,13 @@ public class GaeLowLevelMemCache implements IMemCache {
 	@Override
 	// Expires in 10 days. There is no default.
 	public void putIfValueIsNull(String key, Object value) {
+		GaeAssert.gaeAssert(value != null, "value is null");
+		assert value != null;
 		// FIXME reenable? assert
 		// !(KeyStructure.toKey(key).getKind().equals("XCHANGE") &&
-		// GaeUtils.NULL_ENTITY
+		// Memcache.NULL_ENTITY
 		// .equals(value)) : KeyStructure.toKey(key);
-		log.debug(DebugFormatter.dataPutIfNull(MEMCACHE_NAME, key, value));
+		log.debug(DebugFormatter.dataPutIfNull(MEMCACHE_NAME, key, value, Timing.Now));
 		this.memcacheService.put(key, value, Expiration.byDeltaSeconds(60 * 60 * 24 * 10),
 		        SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
 		if(log.isTraceEnabled()) {
@@ -218,7 +225,7 @@ public class GaeLowLevelMemCache implements IMemCache {
 		}
 		
 		@Override
-        public Object getValue() {
+		public Object getValue() {
 			return this.id == null ? null : this.id.getValue();
 		}
 		
@@ -232,13 +239,15 @@ public class GaeLowLevelMemCache implements IMemCache {
 	public IdentifiableValue getIdentifiable(String key) {
 		com.google.appengine.api.memcache.MemcacheService.IdentifiableValue id = this.memcacheService
 		        .getIdentifiable(keyUniqueForCurrentAppVersion(key));
-		log.debug(DebugFormatter.dataGet(MEMCACHE_NAME, key, id));
+		log.debug(DebugFormatter.dataGet(MEMCACHE_NAME, key, id, Timing.Now));
 		return new IdentifiableValueImpl(id);
 	}
 	
 	@Override
 	@GaeOperation(memcacheWrite = true)
 	public boolean putIfUntouched(String key, IdentifiableValue oldValue, Object newValue) {
+		GaeAssert.gaeAssert(newValue != null, "newValue is null");
+		assert newValue != null;
 		assert oldValue instanceof IdentifiableValueImpl : "this cache can only handly its own impls "
 		        + oldValue.getClass().getCanonicalName();
 		IdentifiableValueImpl idImpl = (IdentifiableValueImpl)oldValue;
@@ -247,11 +256,12 @@ public class GaeLowLevelMemCache implements IMemCache {
 		Expiration expiration = Expiration.byDeltaSeconds(60 * 60 * 24 * 10);
 		boolean result;
 		if(gaeId == null) {
-			log.debug(DebugFormatter.dataPutIfNull(MEMCACHE_NAME, key, newValue));
+			log.debug(DebugFormatter.dataPutIfNull(MEMCACHE_NAME, key, newValue, Timing.Now));
 			result = this.memcacheService.put(key, newValue, expiration,
 			        SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
 		} else {
-			log.debug(DebugFormatter.dataPutIfUntouched(MEMCACHE_NAME, key, oldValue, newValue));
+			log.debug(DebugFormatter.dataPutIfUntouched(MEMCACHE_NAME, key, oldValue, newValue,
+			        Timing.Now));
 			result = this.memcacheService.putIfUntouched(key, gaeId, newValue, expiration);
 		}
 		if(log.isTraceEnabled()) {

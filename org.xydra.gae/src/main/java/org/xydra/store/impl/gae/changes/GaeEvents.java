@@ -25,9 +25,10 @@ import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.index.query.Pair;
+import org.xydra.store.impl.gae.AsyncDatastore;
+import org.xydra.store.impl.gae.AsyncDatastore.AsyncEntity;
 import org.xydra.store.impl.gae.GaeAssert;
-import org.xydra.store.impl.gae.GaeUtils;
-import org.xydra.store.impl.gae.GaeUtils.AsyncEntity;
+import org.xydra.store.impl.gae.GaeUtils2;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -304,7 +305,8 @@ class GaeEvents {
 		
 		if(transindex < TRANSINDEX_NONE) {
 			Key changeKey = KeyStructure.createChangeKey(modelAddr, revisionNumber);
-			return new AsyncValue(GaeUtils.getEntityAsync_MemcacheFirst_DatastoreFinal(changeKey), transindex);
+			return new AsyncValue(GaeUtils2.getEntityFromMemcacheAndAsyncDatatore(changeKey),
+			        transindex);
 		} else {
 			return getExternalValue(modelAddr, revisionNumber, transindex);
 		}
@@ -313,7 +315,7 @@ class GaeEvents {
 	private static AsyncValue getExternalValue(XAddress modelAddr, long revisionNumber,
 	        int transindex) {
 		Key valueKey = KeyStructure.createValueKey(modelAddr, revisionNumber, transindex);
-		return new AsyncValue(GaeUtils.getEntityAsync_MemcacheFirst_DatastoreFinal(valueKey), transindex);
+		return new AsyncValue(GaeUtils2.getEntityFromMemcacheAndAsyncDatatore(valueKey), transindex);
 	}
 	
 	/**
@@ -380,7 +382,7 @@ class GaeEvents {
 						        ae.getOldModelRevision() + 1, i);
 						Entity e = new Entity(k);
 						e.setUnindexedProperty(PROP_VALUE, value);
-						futures.add(GaeUtils.putEntityAsync(e));
+						futures.add(AsyncDatastore.putEntity(e));
 						values.add(VALUE_EXTERN);
 						valueIds[i] = i;
 					} else {

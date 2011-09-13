@@ -1,7 +1,9 @@
 package org.xydra.store.impl.gae.changes;
 
-import org.xydra.store.impl.gae.GaeUtils;
-import org.xydra.store.impl.gae.GaeUtils.AsyncEntity;
+import java.util.concurrent.Future;
+
+import org.xydra.store.impl.gae.AsyncDatastore;
+import org.xydra.store.impl.gae.FutureUtils;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -18,7 +20,7 @@ import com.google.appengine.api.datastore.Key;
 public class AsyncChange {
 	
 	private final GaeChangesServiceImpl1 gcs;
-	private final AsyncEntity future;
+	private final Future<Entity> future;
 	private final long rev;
 	private GaeChange change;
 	
@@ -31,7 +33,7 @@ public class AsyncChange {
 		this.rev = rev;
 		
 		Key key = KeyStructure.createChangeKey(gcs.getModelAddress(), rev);
-		this.future = GaeUtils.getEntityAsync_MemcacheFirst_DatastoreFinal(key);
+		this.future = AsyncDatastore.getEntity(key);
 	}
 	
 	protected AsyncChange(GaeChange change) {
@@ -49,7 +51,7 @@ public class AsyncChange {
 	public GaeChange get() {
 		
 		if(this.change == null) {
-			Entity changeEntity = this.future.get();
+			Entity changeEntity = FutureUtils.waitFor(this.future);
 			if(changeEntity == null) {
 				return null;
 			}

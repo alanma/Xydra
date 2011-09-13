@@ -49,7 +49,7 @@ public class GaePlatformRuntime implements XydraPlatformRuntime {
 				// memcache
 				boolean usememcache = XydraRuntime.getConfigMap().get(
 				        GaeConfigSettings.PROP_USEMEMCACHE) != null;
-				GaeUtils.setUseMemCache(usememcache);
+				Memcache.setUseMemCache(usememcache);
 			}
 		});
 		
@@ -83,6 +83,7 @@ public class GaePlatformRuntime implements XydraPlatformRuntime {
 				
 				if(requiresRuntimeInit) {
 					log.info("Changes require a XydraRuntime re-init");
+					InstanceContext.clear();
 					XydraRuntime.forceReInitialisation();
 				}
 			}
@@ -99,13 +100,15 @@ public class GaePlatformRuntime implements XydraPlatformRuntime {
 				long lastExecuted = lastExecutedStr == null ? 0 : Long.parseLong(lastExecutedStr);
 				long clearRequested = Long.parseLong(value);
 				if(lastExecuted < clearRequested) {
-					log.trace("clearLocalVmCache requested with Nr. " + clearRequested
+					log.info("clearLocalVmCache requested with Nr. " + clearRequested
 					        + " lastExecuted: " + lastExecuted);
 					InstanceContext.clear();
 					// prevent executing twice
 					XydraRuntime.getConfigMap().put(
 					        GaeConfigSettings.CLEAR_LOCAL_VM_CACHE_LAST_EXECUTED,
 					        "" + clearRequested);
+				} else {
+					log.info("No clearLocalVmCache necessary. lastExecuted = " + lastExecuted);
 				}
 			}
 		});

@@ -17,13 +17,13 @@ public class GaeAllowAllStoreReadMethodsTest extends AbstractAllowAllStoreReadMe
 		LoggerTestHelper.init();
 	}
 	
-	private XID repositoryId = XX.createUniqueId();
+	private XID repositoryId;
 	
 	@Override
 	protected XydraStore getStore() {
 		GaeTestfixer.enable();
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		
+		this.repositoryId = XX.createUniqueId();
 		if(this.store == null) {
 			this.store = getNewStore(new GaePersistence(this.repositoryId));
 		}

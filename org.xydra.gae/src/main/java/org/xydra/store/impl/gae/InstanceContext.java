@@ -4,6 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.xydra.gae.AboutAppEngine;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
+import org.xydra.store.impl.gae.changes.ThreadLocalExactRevisionInfo;
+
 
 /**
  * A context object that can be passed around during a single web request.
@@ -13,6 +18,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author xamde
  */
 public class InstanceContext {
+	
+	private static final Logger log = LoggerFactory.getLogger(InstanceContext.class);
 	
 	private static Map<String,Object> sharedCache;
 	
@@ -41,14 +48,11 @@ public class InstanceContext {
 		Map<String,Object> map;
 		if(threadContext == null) {
 			threadContext = new ThreadLocal<Map<String,Object>>();
-			map = threadContext.get();
-			if(map == null) {
-				map = new HashMap<String,Object>();
-				threadContext.set(map);
-			}
-			return map;
-		} else {
-			map = threadContext.get();
+		}
+		map = threadContext.get();
+		if(map == null) {
+			map = new HashMap<String,Object>();
+			threadContext.set(map);
 		}
 		return map;
 	}
@@ -60,6 +64,14 @@ public class InstanceContext {
 		if(threadContext == null) {
 			// done, cannot contain content
 		} else {
+			log.info("Clear ThreadLocal context of " + AboutAppEngine.getThreadInfo());
+			Map<String,Object> tc = getTheadContext();
+			for(String key : tc.keySet()) {
+				Object o = tc.get(key);
+				if(o instanceof ThreadLocalExactRevisionInfo) {
+					((ThreadLocalExactRevisionInfo)o).clear();
+				}
+			}
 			threadContext.set(null);
 		}
 	}

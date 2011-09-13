@@ -5,8 +5,9 @@ import java.util.Map;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.impl.gae.AsyncDatastore;
 import org.xydra.store.impl.gae.GaeTestfixer;
-import org.xydra.store.impl.gae.GaeUtils;
+import org.xydra.store.impl.gae.SyncDatastore;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -83,7 +84,7 @@ public class GaeConfiguration {
 	 */
 	public void store() {
 		assertConsistetState();
-		GaeUtils.putEntityAsync(toEntity());
+		AsyncDatastore.putEntity(toEntity());
 	}
 	
 	public void assertConsistetState() {
@@ -106,7 +107,7 @@ public class GaeConfiguration {
 	 *         date.
 	 */
 	public static GaeConfiguration load() {
-		Entity entity = GaeUtils.getEntity(KEY_CONF);
+		Entity entity = SyncDatastore.getEntity(KEY_CONF);
 		if(entity == null) {
 			log.warn("No gaeConfiguration in datastore.");
 			return null;

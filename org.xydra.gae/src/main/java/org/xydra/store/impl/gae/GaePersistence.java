@@ -19,6 +19,7 @@ import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.store.RequestException;
+import org.xydra.store.RevisionState;
 import org.xydra.store.XydraStore;
 import org.xydra.store.XydraStoreAdmin;
 import org.xydra.store.impl.delegate.DelegatingSecureStore;
@@ -123,11 +124,12 @@ public class GaePersistence implements XydraPersistence {
 	
 	@Override
 	public synchronized void clear() {
-		GaeUtils.clear();
+		SyncDatastore.clear();
+		Memcache.clear();
 	}
 	
 	@Override
-	public synchronized long executeCommand(XID actorId, XCommand command) {
+	public synchronized RevisionState executeCommand(XID actorId, XCommand command) {
 		if(actorId == null) {
 			throw new IllegalArgumentException("actorId was null");
 		}
@@ -188,12 +190,12 @@ public class GaePersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public synchronized long getModelRevision(XAddress address) {
+	public synchronized RevisionState getModelRevision(XAddress address) {
 		checkAddress(address);
 		if(address.getAddressedType() != XType.XMODEL) {
 			throw new RequestException("address must refer to a model, was " + address);
 		}
-		return getModelPersistence(address.getModel()).getCurrentRevisionNumber();
+		return getModelPersistence(address.getModel()).getModelRevision();
 	}
 	
 	@Override

@@ -159,13 +159,6 @@
 			</exclusions>
 		</dependency>
 
-		<!-- logging -->
-		<dependency>
-			<groupId>org.xydra</groupId>
-			<artifactId>log</artifactId>
-			<version>0.1.3</version>
-		</dependency>
-
 		<!-- devmode logging requires log4j libs! -->
 		<!-- compile dependencies -->
 		<dependency>

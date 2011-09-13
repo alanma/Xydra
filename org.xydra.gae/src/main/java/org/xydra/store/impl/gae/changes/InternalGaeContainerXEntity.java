@@ -13,7 +13,7 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
 import org.xydra.base.change.XEvent;
-import org.xydra.store.impl.gae.GaeUtils;
+import org.xydra.store.impl.gae.SyncDatastore;
 
 import com.google.appengine.api.datastore.Entity;
 
@@ -57,7 +57,7 @@ abstract class InternalGaeContainerXEntity<C> extends InternalGaeXEntity {
 	}
 	
 	@Override
-    public XAddress getAddress() {
+	public XAddress getAddress() {
 		return this.addr;
 	}
 	
@@ -81,7 +81,7 @@ abstract class InternalGaeContainerXEntity<C> extends InternalGaeXEntity {
 		XAddress childAddr = resolveChild(this.addr, fieldId);
 		assert this.locks.canRead(childAddr);
 		
-		Entity e = GaeUtils.getEntity(KeyStructure.createEntityKey(childAddr));
+		Entity e = SyncDatastore.getEntity(KeyStructure.createEntityKey(childAddr));
 		if(e == null) {
 			this.cachedMisses.add(fieldId);
 			return null;

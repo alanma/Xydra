@@ -7,6 +7,7 @@ import org.xydra.core.model.XModel;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.impl.gae.DebugFormatter;
+import org.xydra.store.impl.gae.DebugFormatter.Timing;
 import org.xydra.store.impl.gae.GaeOperation;
 import org.xydra.store.impl.gae.InstanceContext;
 
@@ -100,15 +101,9 @@ import org.xydra.store.impl.gae.InstanceContext;
  * </ol>
  * 
  * 
- * * All access to memcache has to triggered explicitly by caller of this class
- * via {@link #loadFromMemcache()} and {@link #writeToMemcache()}.
- * 
- * TODO @Daniel make sure this is thread-safe
- * 
- * @author dscharrer
  * @author xamde
  */
-class RevisionCache2 {
+public class RevisionCache2 {
 	
 	private static final Logger log = LoggerFactory.getLogger(RevisionCache2.class);
 	
@@ -116,23 +111,30 @@ class RevisionCache2 {
 	
 	private ThreadLocalExactRevisionInfo threadLocalExactRevisionInfo;
 	
-	@GaeOperation()
-	RevisionCache2(XAddress modelAddress) {
-		Map<String,Object> instanceContext = InstanceContext.getInstanceCache();
+	public static SharedMinimalRevisionInfo getSharedMinimalRevisionInfo(XAddress modelAddress) {
 		String smriKey = SharedMinimalRevisionInfo.getCacheName(modelAddress);
+		Map<String,Object> instanceContext = InstanceContext.getInstanceCache();
+		SharedMinimalRevisionInfo sharedMinimalRevisionInfo;
 		synchronized(instanceContext) {
-			SharedMinimalRevisionInfo sharedMinimalRevisionInfo = (SharedMinimalRevisionInfo)instanceContext
-			        .get(smriKey);
+			sharedMinimalRevisionInfo = (SharedMinimalRevisionInfo)instanceContext.get(smriKey);
 			if(sharedMinimalRevisionInfo == null) {
 				sharedMinimalRevisionInfo = new SharedMinimalRevisionInfo(modelAddress);
 				instanceContext.put(smriKey, sharedMinimalRevisionInfo);
 			}
-			Map<String,Object> threadContext = InstanceContext.getTheadContext();
+		}
+		return sharedMinimalRevisionInfo;
+	}
+	
+	@GaeOperation()
+	RevisionCache2(XAddress modelAddress) {
+		SharedMinimalRevisionInfo sharedMinimalRevisionInfo = getSharedMinimalRevisionInfo(modelAddress);
+		Map<String,Object> threadContext = InstanceContext.getTheadContext();
+		synchronized(threadContext) {
 			String tleriKey = ThreadLocalExactRevisionInfo.getCacheName(modelAddress);
 			this.threadLocalExactRevisionInfo = (ThreadLocalExactRevisionInfo)threadContext
 			        .get(tleriKey);
 			if(this.threadLocalExactRevisionInfo == null) {
-				this.threadLocalExactRevisionInfo = new ThreadLocalExactRevisionInfo(
+				this.threadLocalExactRevisionInfo = new ThreadLocalExactRevisionInfo(modelAddress,
 				        sharedMinimalRevisionInfo);
 				threadContext.put(tleriKey, this.threadLocalExactRevisionInfo);
 			}
@@ -154,7 +156,7 @@ class RevisionCache2 {
 		if(l == IRevisionInfo.NOT_SET) {
 			l = -1;
 		}
-		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "current", l));
+		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "current", l, Timing.Now));
 		return l;
 	}
 	
@@ -170,7 +172,7 @@ class RevisionCache2 {
 		if(l == IRevisionInfo.NOT_SET) {
 			l = -1;
 		}
-		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "lastCommitted", l));
+		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "lastCommitted", l, Timing.Now));
 		return l;
 	}
 	
@@ -184,7 +186,7 @@ class RevisionCache2 {
 		if(l == IRevisionInfo.NOT_SET) {
 			l = -1;
 		}
-		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "lastTaken", l));
+		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "lastTaken", l, Timing.Now));
 		return l;
 	}
 	
@@ -195,7 +197,7 @@ class RevisionCache2 {
 	 *            less than this.
 	 */
 	protected void setCurrentModelRev(long l) {
-		log.trace(DebugFormatter.dataPut(REVCACHE_NAME, "current", l));
+		log.trace(DebugFormatter.dataPut(REVCACHE_NAME, "current", l, Timing.Now));
 		this.threadLocalExactRevisionInfo.setCurrentRev(l);
 	}
 	
@@ -206,7 +208,7 @@ class RevisionCache2 {
 	 *            less than this.
 	 */
 	protected void setLastCommited(long l) {
-		log.trace(DebugFormatter.dataPut(REVCACHE_NAME, "lastCommited", l));
+		log.trace(DebugFormatter.dataPut(REVCACHE_NAME, "lastCommited", l, Timing.Now));
 		this.threadLocalExactRevisionInfo.setLastCommitted(l);
 	}
 	
@@ -217,7 +219,7 @@ class RevisionCache2 {
 	 *            less than this.
 	 */
 	protected void setLastTaken(long l) {
-		log.trace(DebugFormatter.dataPut(REVCACHE_NAME, "lastTaken", l));
+		log.trace(DebugFormatter.dataPut(REVCACHE_NAME, "lastTaken", l, Timing.Now));
 		this.threadLocalExactRevisionInfo.setLastTaken(l);
 	}
 	
@@ -227,7 +229,20 @@ class RevisionCache2 {
 	}
 	
 	public long getExactCurrentRev() {
-		return this.threadLocalExactRevisionInfo.getCurrentRev(false);
+		// FIXME PERF !! renable getExactCurrentRev
+		return -2;
+		// long l = this.threadLocalExactRevisionInfo.getCurrentRev(false);
+		// log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "current", l));
+		// return l;
+	}
+	
+	protected void setModelExists(boolean exists) {
+		log.trace("set model exists to " + exists);
+		this.threadLocalExactRevisionInfo.setModelExists(exists);
+	}
+	
+	public Boolean modelExists() {
+		return this.threadLocalExactRevisionInfo.modelExists();
 	}
 	
 }

@@ -13,7 +13,7 @@ import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XField;
-import org.xydra.store.impl.gae.GaeUtils;
+import org.xydra.store.impl.gae.AsyncDatastore;
 import org.xydra.store.impl.gae.changes.GaeEvents.AsyncValue;
 
 import com.google.appengine.api.datastore.Entity;
@@ -55,12 +55,12 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 	}
 	
 	@Override
-    public long getRevisionNumber() {
+	public long getRevisionNumber() {
 		return this.fieldRev;
 	}
 	
 	@Override
-    public XValue getValue() {
+	public XValue getValue() {
 		if(this.value == null) {
 			// IMPROVE maybe get this when the field is fetched?
 			this.value = this.gcs.getValue(this.fieldRev, this.transindex);
@@ -69,17 +69,17 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 	}
 	
 	@Override
-    public boolean isEmpty() {
+	public boolean isEmpty() {
 		return this.transindex == GaeEvents.TRANSINDEX_NONE;
 	}
 	
 	@Override
-    public XAddress getAddress() {
+	public XAddress getAddress() {
 		return this.fieldAddr;
 	}
 	
 	@Override
-    public XID getID() {
+	public XID getID() {
 		return this.fieldAddr.getField();
 	}
 	
@@ -106,7 +106,7 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 		Entity e = new Entity(KeyStructure.createEntityKey(fieldAddr));
 		e.setUnindexedProperty(PROP_REVISION, fieldRev);
 		e.setUnindexedProperty(PROP_TRANSINDEX, transindex);
-		return GaeUtils.putEntityAsync(e);
+		return AsyncDatastore.putEntity(e);
 	}
 	
 	/**

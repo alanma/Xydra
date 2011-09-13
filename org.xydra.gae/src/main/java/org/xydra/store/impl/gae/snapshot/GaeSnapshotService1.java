@@ -49,6 +49,7 @@ import com.google.appengine.api.datastore.Text;
  * @author dscharrer
  * 
  */
+@SuppressWarnings("deprecation")
 public class GaeSnapshotService1 {
 	
 	private static final Logger log = LoggerFactory.getLogger(GaeSnapshotService1.class);
@@ -154,7 +155,7 @@ public class GaeSnapshotService1 {
 		
 		CachedModel entry = new CachedModel();
 		
-		Entity snapshotEntity = GaeUtils.getEntity(getSnapshotKey());
+		Entity snapshotEntity = GaeUtils.getEntity_MemcacheFirst_DatastoreFinal(getSnapshotKey());
 		if(snapshotEntity == null) {
 			return entry;
 		}

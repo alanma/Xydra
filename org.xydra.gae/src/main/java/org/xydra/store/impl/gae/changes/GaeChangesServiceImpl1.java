@@ -32,8 +32,10 @@ import org.xydra.core.model.delta.DeltaUtils;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.RevisionState;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.gae.DebugFormatter;
+import org.xydra.store.impl.gae.DebugFormatter.Timing;
 import org.xydra.store.impl.gae.GaeOperation;
 import org.xydra.store.impl.gae.GaeUtils;
 import org.xydra.store.impl.gae.InstanceContext;
@@ -120,6 +122,7 @@ import com.google.appengine.api.datastore.Transaction;
  * @author dscharrer
  * 
  */
+@SuppressWarnings("deprecation")
 public class GaeChangesServiceImpl1 implements IGaeChangesService {
 	
 	private static final Logger log = LoggerFactory.getLogger(GaeChangesServiceImpl1.class);
@@ -157,7 +160,7 @@ public class GaeChangesServiceImpl1 implements IGaeChangesService {
 	 * .xydra.base.change.XCommand, org.xydra.base.XID)
 	 */
 	@Override
-	public long executeCommand(XCommand command, XID actorId) {
+	public RevisionState executeCommand(XCommand command, XID actorId) {
 		assert this.modelAddr.equalsOrContains(command.getChangedEntity()) : "cannot handle command "
 		        + command + " - it does not address a model";
 		
@@ -174,15 +177,21 @@ public class GaeChangesServiceImpl1 implements IGaeChangesService {
 		Pair<List<XAtomicEvent>,int[]> events = checkPreconditionsAndSaveEvents(change, command,
 		        actorId);
 		if(events == null) {
-			return XCommand.FAILED;
+			return new RevisionState(XCommand.FAILED, exists());
 		} else if(events.getFirst().isEmpty()) {
 			// TODO maybe return revision?
-			return XCommand.NOCHANGE;
+			return new RevisionState(XCommand.NOCHANGE, exists());
 		}
 		
 		executeAndUnlock(change, events);
 		
-		return change.rev;
+		return new RevisionState(change.rev, exists());
+	}
+	
+	@Override
+	public boolean exists() {
+		// FIXME implement!
+		return true;
 	}
 	
 	/**
@@ -285,7 +294,8 @@ public class GaeChangesServiceImpl1 implements IGaeChangesService {
 			}
 			
 			Key key = KeyStructure.createChangeKey(this.modelAddr, otherRev);
-			otherChange = new GaeChange(this.modelAddr, otherRev, GaeUtils.getEntity(key));
+			otherChange = new GaeChange(this.modelAddr, otherRev,
+			        GaeUtils.getEntity_MemcacheFirst_DatastoreFinal(key));
 			
 			// Check if the change is committed.
 			if(otherChange.getStatus().isCommitted()) {
@@ -667,7 +677,7 @@ public class GaeChangesServiceImpl1 implements IGaeChangesService {
 				return;
 			}
 			log.trace(DebugFormatter.dataPut(VM_COMMITED_CHANGES_CACHENAME + this.modelAddr, ""
-			        + change.rev, change));
+			        + change.rev, change, Timing.Now));
 			Map<Long,GaeChange> committedChangeCache = getCommittedChangeCache();
 			synchronized(committedChangeCache) {
 				committedChangeCache.put(change.rev, change);
@@ -689,7 +699,7 @@ public class GaeChangesServiceImpl1 implements IGaeChangesService {
 			assert change.getStatus().isCommitted();
 		}
 		log.trace(DebugFormatter.dataGet(VM_COMMITED_CHANGES_CACHENAME + this.modelAddr, "" + rev,
-		        change));
+		        change, Timing.Now));
 		return change;
 	}
 	
@@ -935,7 +945,7 @@ public class GaeChangesServiceImpl1 implements IGaeChangesService {
 	
 	/* TODO make this default visible and remove from interface */
 	@Override
-    public AsyncValue getValue(long rev, int transindex) {
+	public AsyncValue getValue(long rev, int transindex) {
 		
 		GaeChange change = getCachedChange(rev);
 		if(change != null) {

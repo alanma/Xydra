@@ -13,7 +13,8 @@ import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.core.model.XModel;
-import org.xydra.store.impl.gae.GaeUtils;
+import org.xydra.store.impl.gae.AsyncDatastore;
+import org.xydra.store.impl.gae.SyncDatastore;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -36,17 +37,17 @@ class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObject> im
 	}
 	
 	@Override
-    public XID getID() {
+	public XID getID() {
 		return getAddress().getModel();
 	}
 	
 	@Override
-    public XReadableObject getObject(XID objectId) {
+	public XReadableObject getObject(XID objectId) {
 		return getChild(objectId);
 	}
 	
 	@Override
-    public boolean hasObject(XID objectId) {
+	public boolean hasObject(XID objectId) {
 		return hasChild(objectId);
 	}
 	
@@ -76,8 +77,8 @@ class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObject> im
 	static InternalGaeModel get(IGaeChangesService changesService, long modelRev, GaeLocks locks) {
 		
 		assert locks.canRead(changesService.getModelAddress());
-		Entity e = GaeUtils
-		        .getEntity(KeyStructure.createEntityKey(changesService.getModelAddress()));
+		Entity e = SyncDatastore.getEntity(KeyStructure.createEntityKey(changesService
+		        .getModelAddress()));
 		if(e == null) {
 			return null;
 		}
@@ -102,7 +103,7 @@ class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObject> im
 		assert locks.canWrite(modelAddr);
 		assert modelAddr.getAddressedType() == XType.XMODEL;
 		Entity e = new Entity(KeyStructure.createEntityKey(modelAddr));
-		return GaeUtils.putEntityAsync(e);
+		return AsyncDatastore.putEntity(e);
 	}
 	
 	@Override

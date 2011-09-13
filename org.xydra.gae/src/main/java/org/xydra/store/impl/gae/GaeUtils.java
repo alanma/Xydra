@@ -17,6 +17,8 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.store.IMemCache;
 import org.xydra.store.IMemCache.IdentifiableValue;
 import org.xydra.store.XydraRuntime;
+import org.xydra.store.impl.gae.AsyncDatastore.AsyncEntity;
+import org.xydra.store.impl.gae.DebugFormatter.Timing;
 import org.xydra.store.impl.gae.changes.KeyStructure;
 
 import com.google.appengine.api.datastore.AsyncDatastoreService;
@@ -34,7 +36,9 @@ import com.google.appengine.api.datastore.Transaction;
  * 
  * @author voelkel
  * 
+ * @deprecated ...
  */
+@Deprecated
 public class GaeUtils {
 	
 	private static final Logger log = LoggerFactory.getLogger(GaeUtils.class);
@@ -72,6 +76,7 @@ public class GaeUtils {
 		return getConf();
 	}
 	
+	// TODO shift state info to XydraRuntime
 	public static String getConf() {
 		return "MemCache = " + useMemCacheInThisClass;
 	}
@@ -80,7 +85,8 @@ public class GaeUtils {
 	 * @param key The key of the entity to load.
 	 * @return the GAE Entity for the given key from the store or null
 	 */
-	public static Entity getEntity(Key key) {
+	@GaeOperation(memcacheRead = true ,datastoreRead = true ,memcacheWrite = true)
+	public static Entity getEntity_MemcacheFirst_DatastoreFinal(Key key) {
 		return getEntity_MemcacheFirst_DatastoreFinal(key, true);
 	}
 	
@@ -90,7 +96,8 @@ public class GaeUtils {
 	 * @param key The key of the entity to load.
 	 * @return the GAE Entity for the given key from the store or null
 	 */
-	public static Entity getEntityFromDatastore(Key key) {
+	@GaeOperation(memcacheRead = true ,datastoreRead = true ,memcacheWrite = true)
+	public static Entity getEntityFromDatastore_MemcacheFirst_DatastoreFinal(Key key) {
 		return getEntity_MemcacheFirst_DatastoreFinal(key, false);
 	}
 	
@@ -120,13 +127,14 @@ public class GaeUtils {
 	}
 	
 	/**
-	 * Similar to {@link #getEntity(Key)}
+	 * Similar to {@link #getEntity_MemcacheFirst_DatastoreFinal(Key)}
 	 * 
 	 * @param key .
 	 * @param trans never null
 	 * @return a non-null entity from the cache if available, without checking
 	 *         the datastore.
 	 */
+	@SuppressWarnings("null")
 	@GaeOperation(memcacheRead = true ,memcacheWrite = true ,datastoreRead = true)
 	public static Entity getEntity_MemcachePositive_DatastoreFinal(Key key, Transaction trans) {
 		assert trans != null;
@@ -136,7 +144,8 @@ public class GaeUtils {
 			String keyStr = KeyStructure.toString(key);
 			IdentifiableValue cachedIdentifiable = null;
 			// try first to get from memcache
-			cachedIdentifiable = XydraRuntime.getMemcache().getIdentifiable(keyStr);
+			IMemCache memcache = XydraRuntime.getMemcache();
+			cachedIdentifiable = memcache.getIdentifiable(keyStr);
 			Entity entity = (Entity)cachedIdentifiable.getValue();
 			if(entity != null) {
 				if(!entity.equals(NULL_ENTITY)) {
@@ -150,7 +159,22 @@ public class GaeUtils {
 			 */
 			Future<Entity> futureEntity = asyncDatastore.get(trans, key);
 			e = waitFor(futureEntity);
-			XydraRuntime.getMemcache().putIfUntouched(keyStr, cachedIdentifiable, e);
+			if(e != null) {
+				GaeAssert.gaeAssert(e != null, "e is null");
+				GaeAssert.gaeAssert(e != null, "e is null");
+				GaeAssert.gaeAssert(e != null, "e is null");
+				GaeAssert.gaeAssert(e != null, "e is null");
+				GaeAssert.gaeAssert(e != null, "e is null");
+				GaeAssert.gaeAssert(e != null, "e is null");
+				GaeAssert.gaeAssert(e != null, "e is null");
+				GaeAssert.gaeAssert(e != null, "e is null");
+				GaeAssert.gaeAssert(e != null, "e is null");
+				GaeAssert.gaeAssert(e != null, "e is null");
+				GaeAssert.gaeAssert(e != null, "e is null");
+				GaeAssert.gaeAssert(e != null, "e is null");
+				GaeAssert.gaeAssert(e != null, "e is null");
+				memcache.putIfUntouched(keyStr, cachedIdentifiable, e);
+			}
 		} else {
 			/*
 			 * IMPROVE use synchronous code for the synchronous parts -- /!\
@@ -161,40 +185,8 @@ public class GaeUtils {
 			e = waitFor(entity);
 		}
 		
-		log.debug(DebugFormatter.dataGet(DATASTORE_NAME, KeyStructure.toString(key), e));
+		log.debug(DebugFormatter.dataGet(DATASTORE_NAME, KeyStructure.toString(key), e, Timing.Now));
 		return e;
-	}
-	
-	public static class AsyncEntity {
-		
-		private Future<Entity> future;
-		private Entity entity;
-		private Key key;
-		
-		private AsyncEntity(Key key, Future<Entity> future) {
-			this.future = future;
-			this.entity = null;
-			this.key = key;
-		}
-		
-		private AsyncEntity(Entity entity) {
-			this.future = null;
-			this.entity = entity;
-			this.key = null;
-		}
-		
-		public Entity get() {
-			if(this.future != null) {
-				this.entity = waitFor(this.future);
-				if(useMemCacheInThisClass) {
-					updateCachedEntity(this.key, this.entity);
-				}
-				this.future = null;
-				log.debug("... async... Datastore(" + this.key + ") = " + this.entity);
-			}
-			return this.entity;
-		}
-		
 	}
 	
 	public static AsyncEntity getEntityAsync_MemcacheFirst_DatastoreFinal(Key key) {
@@ -223,8 +215,9 @@ public class GaeUtils {
 	/**
 	 * @param keys never null
 	 * @return a map with the mappings. See {@link IMemCache#getAll(Collection)}
-	 *         . Values might contain {@link #NULL_ENTITY}.
+	 *         . Values might contain {@link #NULL_ENTITY}. Never returns null.
 	 */
+	@GaeOperation(memcacheRead = true)
 	public static Map<String,Object> getEntitiesFromMemcache(Collection<String> keys) {
 		assert keys != null;
 		Map<String,Object> memcachedEntities = null;
@@ -243,6 +236,7 @@ public class GaeUtils {
 	 *            also enabled in this class)
 	 * @return the GAE Entity for the given key from the store or null
 	 */
+	@GaeOperation(memcacheRead = true ,datastoreRead = true ,memcacheWrite = true)
 	public static Entity getEntity_MemcacheFirst_DatastoreFinal(Key key, boolean useMemcache) {
 		makeSureAsyncDatestoreServiceIsInitialised();
 		
@@ -261,7 +255,8 @@ public class GaeUtils {
 		
 		Future<Entity> futureEntity = asyncDatastore.get(null, key);
 		Entity entityFromDatastore = waitFor(futureEntity);
-		log.debug(DebugFormatter.dataGet(DATASTORE_NAME, key.toString(), entityFromDatastore));
+		log.debug(DebugFormatter.dataGet(DATASTORE_NAME, key.toString(), entityFromDatastore,
+		        Timing.Now));
 		
 		if(useMemCacheInThisClass && useMemcache) {
 			updateCachedEntity(key, entityFromDatastore);
@@ -277,6 +272,7 @@ public class GaeUtils {
 	 * @param trans never null
 	 * @return the entity from datastore
 	 */
+	@GaeOperation(datastoreRead = true ,memcacheWrite = true)
 	public static Entity getEntityFromDatastore(Key key, Transaction trans) {
 		assert key != null;
 		assert trans != null;
@@ -287,7 +283,8 @@ public class GaeUtils {
 		if(useMemCacheInThisClass) {
 			updateCachedEntity(key, entityFromDatastore);
 		}
-		log.debug(DebugFormatter.dataGet(DATASTORE_NAME, key.toString(), entityFromDatastore));
+		log.debug(DebugFormatter.dataGet(DATASTORE_NAME, key.toString(), entityFromDatastore,
+		        Timing.Now));
 		return entityFromDatastore;
 	}
 	
@@ -328,8 +325,9 @@ public class GaeUtils {
 	 * 
 	 * @param entity The entity to write to the datastore.
 	 */
-	public static void putEntity(Entity entity) {
-		putEntity(entity, null);
+	public static void putEntityToDatastoreAndMemcache(Entity entity) {
+		GaeAssert.gaeAssert(entity != null, "entity is null");
+		putEntityToDatastoreAndMemcache(entity, null);
 	}
 	
 	/**
@@ -338,9 +336,11 @@ public class GaeUtils {
 	 * @param entity The entity to write to the datastore.
 	 * @param trans The transaction to write the entity in.
 	 */
-	public static void putEntity(Entity entity, Transaction trans) {
+	public static void putEntityToDatastoreAndMemcache(Entity entity, Transaction trans) {
+		GaeAssert.gaeAssert(entity != null, "entity is null");
+		assert entity != null;
 		log.debug(DebugFormatter.dataPut(DATASTORE_NAME, KeyStructure.toString(entity.getKey()),
-		        entity));
+		        entity, Timing.Started));
 		makeSureAsyncDatestoreServiceIsInitialised();
 		Future<Key> result = asyncDatastore.put(trans, entity);
 		Key res = waitFor(result);
@@ -371,8 +371,10 @@ public class GaeUtils {
 	 * 
 	 * @param entity The entity to write to the datastore.
 	 */
-	public static Future<Key> putEntityAsync(Entity entity) {
-		return putEntityAsync(entity, null);
+	public static Future<Key> putEntityAsyncToDatastoreAndMemcache(Entity entity) {
+		GaeAssert.gaeAssert(entity != null, "entity is null");
+		assert entity != null;
+		return putEntityAsyncToDatastoreAndMemcache(entity, null);
 	}
 	
 	/**
@@ -380,9 +382,12 @@ public class GaeUtils {
 	 * 
 	 * @param entity The entity to write to the datastore.
 	 */
-	public static Future<Key> putEntityAsync(Entity entity, Transaction trans) {
+	@GaeOperation(datastoreWrite = true ,memcacheWrite = true)
+	public static Future<Key> putEntityAsyncToDatastoreAndMemcache(Entity entity, Transaction trans) {
+		GaeAssert.gaeAssert(entity != null, "entity is null");
+		assert entity != null;
 		log.debug(DebugFormatter.dataPut(DATASTORE_NAME + "...async...",
-		        KeyStructure.toString(entity.getKey()), entity));
+		        KeyStructure.toString(entity.getKey()), entity, Timing.Started));
 		makeSureAsyncDatestoreServiceIsInitialised();
 		Future<Key> result = asyncDatastore.put(trans, entity);
 		if(useMemCacheInThisClass) {
@@ -407,6 +412,7 @@ public class GaeUtils {
 	 * 
 	 * @return The started transaction.
 	 */
+	@GaeOperation(datastoreWrite = true)
 	public static Transaction beginTransaction() {
 		log.debug("-- begin transaction --");
 		makeSureAsyncDatestoreServiceIsInitialised();
@@ -419,6 +425,7 @@ public class GaeUtils {
 	 * 
 	 * @param trans The transaction to commit.
 	 */
+	@GaeOperation(datastoreWrite = true)
 	public static void endTransaction(Transaction trans) throws ConcurrentModificationException {
 		log.debug("-- end transaction --");
 		makeSureAsyncDatestoreServiceIsInitialised();
@@ -430,6 +437,7 @@ public class GaeUtils {
 	 * 
 	 * @param trans The transaction to commit.
 	 */
+	@GaeOperation(datastoreWrite = true)
 	public static Future<Void> endTransactionAsync(Transaction trans)
 	        throws ConcurrentModificationException {
 		log.debug("-- end transaction (async) --");
@@ -442,8 +450,9 @@ public class GaeUtils {
 	 * 
 	 * @param key The entity to remove from the datastore.
 	 */
-	public static void deleteEntity(Key key) {
-		deleteEntity(key, null);
+	@GaeOperation(datastoreWrite = true ,memcacheWrite = true)
+	public static void deleteEntityFromMemcacheAndDatastore(Key key) {
+		deleteEntityFromMemcacheAndDatastore(key, null);
 	}
 	
 	/**
@@ -452,7 +461,8 @@ public class GaeUtils {
 	 * 
 	 * @param key The entity to remove from the datastore.
 	 */
-	public static Future<Void> deleteEntityAsync(Key key) {
+	@GaeOperation(datastoreWrite = true ,memcacheWrite = true)
+	public static Future<Void> deleteEntityFromMemcacheAndDatastoreAsync(Key key) {
 		log.debug("deleting (async) " + key);
 		makeSureAsyncDatestoreServiceIsInitialised();
 		if(useMemCacheInThisClass) {
@@ -468,8 +478,9 @@ public class GaeUtils {
 	 * @param key The entity to remove from the datastore.
 	 * @param trans The transaction to remove the entity in.
 	 */
-	public static void deleteEntity(Key key, Transaction trans) {
-		log.debug(DebugFormatter.dataPut(DATASTORE_NAME, key.toString(), null));
+	@GaeOperation(datastoreWrite = true ,memcacheWrite = true)
+	public static void deleteEntityFromMemcacheAndDatastore(Key key, Transaction trans) {
+		log.debug(DebugFormatter.dataPut(DATASTORE_NAME, key.toString(), null, Timing.Started));
 		makeSureAsyncDatestoreServiceIsInitialised();
 		if(useMemCacheInThisClass) {
 			// delete first in memcache
@@ -491,6 +502,7 @@ public class GaeUtils {
 	 * 
 	 * @see DatastoreService#prepare(Query)
 	 */
+	@GaeOperation()
 	public static PreparedQuery prepareQuery(Query query) {
 		return prepareQuery(query, null);
 	}
@@ -503,6 +515,7 @@ public class GaeUtils {
 	 * 
 	 * @see DatastoreService#prepare(Transaction, Query)
 	 */
+	@GaeOperation()
 	public static PreparedQuery prepareQuery(Query query, Transaction trans) {
 		makeSureAsyncDatestoreServiceIsInitialised();
 		return asyncDatastore.prepare(trans, query);
@@ -512,6 +525,7 @@ public class GaeUtils {
 	 * @return true if there are transactions active, so that tests can check if
 	 *         all transactions are terminated properly.
 	 */
+	@GaeOperation()
 	public static boolean transactionsActive() {
 		return !asyncDatastore.getActiveTransactions().isEmpty();
 	}
@@ -519,6 +533,7 @@ public class GaeUtils {
 	/**
 	 * Delete ALL local data. Use with care.
 	 */
+	@GaeOperation(datastoreWrite = true ,datastoreRead = true ,memcacheWrite = true)
 	public static void clear() {
 		log.info("Datastore & Memcache CLEAR");
 		makeSureAsyncDatestoreServiceIsInitialised();
@@ -542,6 +557,7 @@ public class GaeUtils {
 		}
 	}
 	
+	@GaeOperation(datastoreWrite = true)
 	private static void deleteAllDataOnLiveDatastore() {
 		List<String> kinds = getAllKinds();
 		for(String kind : kinds) {
@@ -562,6 +578,7 @@ public class GaeUtils {
 	/**
 	 * @return all kinds that do not start with '__'
 	 */
+	@GaeOperation(datastoreRead = true)
 	public static List<String> getAllKinds() {
 		makeSureAsyncDatestoreServiceIsInitialised();
 		List<String> kinds = new LinkedList<String>();
@@ -592,10 +609,11 @@ public class GaeUtils {
 	 * @param keys never null
 	 * @return a mapping for all keys that could be found
 	 */
+	@GaeOperation(datastoreRead = true)
 	public static Map<Key,Entity> getEntitiesFromDatastore(Collection<Key> keys) {
 		makeSureSyncDatestoreServiceIsInitialised();
 		Map<Key,Entity> result = syncDatastore.get(keys);
-		log.debug(DebugFormatter.dataGet(DATASTORE_NAME, keys, result));
+		log.debug(DebugFormatter.dataGet(DATASTORE_NAME, keys, result, Timing.Now));
 		return result;
 	}
 	

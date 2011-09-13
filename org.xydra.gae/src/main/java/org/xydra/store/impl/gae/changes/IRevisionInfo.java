@@ -33,4 +33,12 @@ public interface IRevisionInfo {
 	void setLastTaken(long lastTaken);
 	
 	void setCurrentRev(long currentRev);
+	
+	void setModelExists(boolean exists);
+	
+	/**
+	 * @return true if model exists; false if not; null if not known.
+	 */
+	Boolean modelExists();
+	
 }

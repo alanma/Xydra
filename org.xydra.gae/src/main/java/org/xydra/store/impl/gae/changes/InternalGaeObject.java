@@ -15,7 +15,8 @@ import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.store.impl.gae.GaeUtils;
+import org.xydra.store.impl.gae.AsyncDatastore;
+import org.xydra.store.impl.gae.SyncDatastore;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -106,17 +107,17 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 	}
 	
 	@Override
-    public XID getID() {
+	public XID getID() {
 		return getAddress().getObject();
 	}
 	
 	@Override
-    public InternalGaeField getField(XID fieldId) {
+	public InternalGaeField getField(XID fieldId) {
 		return getChild(fieldId);
 	}
 	
 	@Override
-    public boolean hasField(XID fieldId) {
+	public boolean hasField(XID fieldId) {
 		return hasChild(fieldId);
 	}
 	
@@ -148,7 +149,7 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 		assert objectAddr.getAddressedType() == XType.XOBJECT;
 		Entity e = new Entity(KeyStructure.createEntityKey(objectAddr));
 		e.setUnindexedProperty(PROP_REVISION, rev);
-		return GaeUtils.putEntityAsync(e);
+		return AsyncDatastore.putEntity(e);
 	}
 	
 	/**
@@ -179,9 +180,9 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 		Key key = KeyStructure.createEntityKey(objectAddr);
 		
 		while(true) {
-			Transaction trans = GaeUtils.beginTransaction();
+			Transaction trans = SyncDatastore.beginTransaction();
 			
-			Entity e = GaeUtils.getEntityFromDatastore(key, trans);
+			Entity e = SyncDatastore.getEntity(key, trans);
 			assert e != null : "should not be removed while we hold a lock to a contained field";
 			long oldRev = (Long)e.getProperty(PROP_REVISION);
 			
@@ -190,18 +191,18 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 			if(oldRev >= rev) {
 				
 				// Cleanup the transaction.
-				GaeUtils.endTransaction(trans);
+				SyncDatastore.endTransaction(trans);
 				
 				// object revision is already up to date
 				return;
 			}
 			
 			e.setUnindexedProperty(PROP_REVISION, rev);
-			GaeUtils.putEntityAsync(e, trans);
+			AsyncDatastore.putEntity(e, trans);
 			// Synchronized by endTransaction()
 			
 			try {
-				GaeUtils.endTransaction(trans);
+				SyncDatastore.endTransaction(trans);
 				
 				// Update successful.
 				return;

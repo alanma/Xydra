@@ -8,8 +8,9 @@ import org.xydra.base.XID;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.impl.gae.DebugFormatter;
+import org.xydra.store.impl.gae.DebugFormatter.Timing;
 import org.xydra.store.impl.gae.GaeOperation;
-import org.xydra.store.impl.gae.GaeUtils;
+import org.xydra.store.impl.gae.SyncDatastore;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -70,13 +71,13 @@ public class Utils {
 		
 		Query q = new Query(kind).addFilter(PROP_KEY, FilterOperator.GREATER_THAN, first)
 		        .addFilter(PROP_KEY, FilterOperator.LESS_THAN, last).setKeysOnly();
-		for(Entity e : GaeUtils.prepareQuery(q).asIterable()) {
+		for(Entity e : SyncDatastore.prepareQuery(q).asIterable()) {
 			XAddress childAddr = KeyStructure.toAddress(e.getKey());
 			assert address.equals(childAddr.getParent());
 			childIds.add(getEntityId(childAddr));
 		}
-		log.trace(DebugFormatter.dataGet(GaeUtils.DATASTORE_NAME,
-		        "query-children:" + address.toURI(), DebugFormatter.format(childIds)));
+		log.trace(DebugFormatter.dataGet(SyncDatastore.DATASTORE_NAME,
+		        "query-children:" + address.toURI(), DebugFormatter.format(childIds), Timing.Now));
 		return childIds;
 	}
 	

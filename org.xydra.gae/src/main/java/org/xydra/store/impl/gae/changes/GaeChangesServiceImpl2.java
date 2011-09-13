@@ -13,6 +13,7 @@ import java.util.concurrent.Future;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicEvent;
@@ -34,15 +35,21 @@ import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.utils.Clock;
+import org.xydra.store.RevisionState;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.gae.DebugFormatter;
+import org.xydra.store.impl.gae.DebugFormatter.Timing;
+import org.xydra.store.impl.gae.FutureUtils;
+import org.xydra.store.impl.gae.GaeAssert;
 import org.xydra.store.impl.gae.GaeOperation;
-import org.xydra.store.impl.gae.GaeUtils;
 import org.xydra.store.impl.gae.InstanceContext;
+import org.xydra.store.impl.gae.Memcache;
+import org.xydra.store.impl.gae.SyncDatastore;
 import org.xydra.store.impl.gae.changes.GaeChange.Status;
 import org.xydra.store.impl.gae.changes.GaeEvents.AsyncValue;
 
+import com.google.appengine.api.datastore.DatastoreTimeoutException;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
@@ -139,7 +146,8 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 	 * Maximum time to wait before re-checking the status of an event who's
 	 * locks we need.
 	 */
-	private static final long WAIT_MAX = 1000; // TODO set
+	// IMPROVE set WAIT_MAX cleverly
+	private static final long WAIT_MAX = 1000;
 	
 	// Implementation.
 	
@@ -160,7 +168,8 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 	 * .xydra.base.change.XCommand, org.xydra.base.XID)
 	 */
 	@Override
-	public long executeCommand(XCommand command, XID actorId) {
+	public RevisionState executeCommand(XCommand command, XID actorId) {
+		log.trace("Execute " + DebugFormatter.format(command));
 		Clock c = new Clock().start();
 		assert this.modelAddr.equalsOrContains(command.getChangedEntity()) : "cannot handle command "
 		        + command + " - it does not address a model";
@@ -184,31 +193,37 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		c.stopAndStart("checkPreconditionsAndSaveEvents");
 		if(events == null) {
 			log.info("Failed. Stats: " + c.getStats());
-			return XCommand.FAILED;
+			return new RevisionState(XCommand.FAILED, modelExists());
 		} else if(events.getFirst().isEmpty()) {
 			log.info("NOCHANGE. Stats: " + c.getStats());
-			// TODO maybe return revision?
-			return XCommand.NOCHANGE;
+			return new RevisionState(XCommand.NOCHANGE, modelExists());
 		}
 		
 		executeAndUnlock(change, events);
 		c.stopAndStart("executeAndUnlock");
+		assert change.getStatus().isCommitted() : "If we reach this line, change must be committed";
 		
-		// if(change.getStatus().isSuccess()) {
-		// XEvent event = change.getEvent();
-		// if(event.getChangedEntity().getAddressedType() == XType.XMODEL) {
-		// if(event.getChangeType() == ChangeType.ADD) {
-		// this.revCache.setModelExists(true);
-		// } else if(event.getChangeType() == ChangeType.REMOVE) {
-		// this.revCache.setModelExists(false);
-		// }
-		// }
-		// }
-		
-		// FIXME revCache.writeToMemcache();
+		// FIXME REENABLE revCache.writeToMemcache();
 		
 		log.info("Success. Stats: " + c.getStats());
-		return change.rev;
+		
+		/*
+		 * Compute if current model is existing. If last succesful event was not
+		 * a Model.REMOVE, it must exist.
+		 */
+		XEvent event = change.getEvent();
+		if(event instanceof XTransactionEvent) {
+			event = ((XTransactionEvent)event).getEvent(((XTransactionEvent)event).size() - 1);
+		}
+		boolean modelJustGotDeleted = event.getTarget().getAddressedType() == XType.XREPOSITORY
+		        && event.getChangeType() == ChangeType.REMOVE;
+		
+		return new RevisionState(change.rev, !modelJustGotDeleted);
+	}
+	
+	private boolean modelExists() {
+		// FIXME CALC
+		return true;
 	}
 	
 	/**
@@ -227,7 +242,8 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 	private GaeChange grabRevisionAndRegisterLocks(GaeLocks locks, XID actorId) {
 		long lastTaken = this.revCache.getLastTaken();
 		assert lastTaken >= -1;
-		for(long rev = lastTaken + 1;; rev++) {
+		long start = lastTaken + 1;
+		for(long rev = start;; rev++) {
 			
 			GaeChange cachedChange = getCachedChange(rev);
 			if(cachedChange != null) {
@@ -236,13 +252,11 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 			}
 			
 			// Try to grab this revision.
-			
 			Key key = KeyStructure.createChangeKey(this.modelAddr, rev);
 			/* use txn to do: avoid overwriting existing change entities */
-			Transaction trans = GaeUtils.beginTransaction();
+			Transaction trans = SyncDatastore.beginTransaction();
 			
-			// TODO !!! try without memcache
-			Entity changeEntity = GaeUtils.getEntity_MemcachePositive_DatastoreFinal(key, trans);
+			Entity changeEntity = SyncDatastore.getEntity(key, trans);
 			
 			if(changeEntity == null) {
 				
@@ -250,10 +264,14 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 				newChange.save(trans);
 				
 				try {
-					GaeUtils.endTransaction(trans);
+					SyncDatastore.endTransaction(trans);
 				} catch(ConcurrentModificationException cme) {
-					
-					log.info("failed to take revision: " + key);
+					/*
+					 * One cause: 'too much contention on these datastore
+					 * entities. please try again.'
+					 */
+					log.warn("ConcurrentModificationException");
+					log.info("failed to take revision: " + key, cme);
 					
 					// transaction failed as another process wrote to this
 					// entity
@@ -264,6 +282,13 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 					// Check this revision again
 					rev--;
 					continue;
+				} catch(DatastoreTimeoutException dte) {
+					log.warn("DatastoreTimeout");
+					log.info("failed to take revision: " + key, dte);
+					
+					// try this revision again
+					rev--;
+					continue;
 				}
 				
 				this.revCache.setLastTaken(rev);
@@ -272,12 +297,10 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 				return newChange;
 				
 			} else {
-				
-				GaeChange change = new GaeChange(this.modelAddr, rev, changeEntity);
-				
 				// Revision already taken.
 				
-				GaeUtils.endTransaction(trans);
+				GaeChange change = new GaeChange(this.modelAddr, rev, changeEntity);
+				SyncDatastore.endTransaction(trans);
 				
 				// Since we read the entity anyway, might as well use that
 				// information.
@@ -318,7 +341,12 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 			}
 			
 			Key key = KeyStructure.createChangeKey(this.modelAddr, otherRev);
-			otherChange = new GaeChange(this.modelAddr, otherRev, GaeUtils.getEntity(key));
+			Entity entityFromGae = SyncDatastore.getEntity(key);
+			if(entityFromGae == null) {
+				throw new IllegalStateException("Our change.rev=" + change.rev
+				        + " waits for locks. Check for " + otherRev + " got null from backend");
+			}
+			otherChange = new GaeChange(this.modelAddr, otherRev, entityFromGae);
 			
 			// Check if the change is committed.
 			if(otherChange.getStatus().isCommitted()) {
@@ -474,7 +502,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 			
 			// Wait on all changes.
 			for(Future<Key> future : res.getSecond()) {
-				GaeUtils.waitFor(future);
+				FutureUtils.waitFor(future);
 			}
 			
 			change.setStatus(Status.Executing);
@@ -501,15 +529,22 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 	 */
 	private void executeAndUnlock(GaeChange change, Pair<List<XAtomicEvent>,int[]> events) {
 		
-		/*
+		for(XAtomicEvent event : events.getFirst()) {
+			log.trace("executeAndUnlock event " + event.toString());
+		}
+		
+		/**
 		 * Track which object's revision numbers we have already saved and which
 		 * ones we still need to save.
 		 * 
 		 * This assumes that the events are minimal: A set of events are
-		 * "minimal", if: a) if there is an event of type RMOVE, the set
-		 * contains no other events for the same XEvent#getChangedEntity();, b)
-		 * no models, object or fields are added more than once. and c) the
-		 * value of no field is added/changed more than once. </ul>
+		 * "minimal", if:
+		 * <ol>
+		 * <li>a) if there is an event of type REMOVE, the set contains no other
+		 * events for the same XEvent#getChangedEntity();</li>
+		 * <li>b) no models, object or fields are added more than once. and</li>
+		 * <li>c) the value of no field is added/changed more than once.</li>
+		 * </ul>
 		 * 
 		 * Events generated from a ChangedModel (as used here and in the XModel
 		 * transaction code) are always minimal.
@@ -519,6 +554,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		
 		List<Future<?>> futures = new ArrayList<Future<?>>(events.getFirst().size());
 		
+		Boolean modelExists = null;
 		for(int i = 0; i < events.getFirst().size(); i++) {
 			XAtomicEvent event = events.getFirst().get(i);
 			
@@ -526,6 +562,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 			assert event.getRevisionNumber() == change.rev;
 			
 			if(event instanceof XFieldEvent) {
+				modelExists = true;
 				assert Arrays.asList(ChangeType.REMOVE, ChangeType.ADD, ChangeType.CHANGE)
 				        .contains(event.getChangeType());
 				
@@ -548,6 +585,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 				objectsWithSavedRev.add(event.getTarget().getObject());
 				
 			} else if(event instanceof XObjectEvent) {
+				modelExists = true;
 				if(event.getChangeType() == ChangeType.REMOVE) {
 					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(),
 					        change.getLocks()));
@@ -563,6 +601,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 				assert event.getTarget().getObject() != null;
 				
 			} else if(event instanceof XModelEvent) {
+				modelExists = true;
 				XID objectId = ((XModelEvent)event).getObjectId();
 				if(event.getChangeType() == ChangeType.REMOVE) {
 					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(),
@@ -580,10 +619,12 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 			} else {
 				assert event instanceof XRepositoryEvent;
 				if(event.getChangeType() == ChangeType.REMOVE) {
+					modelExists = false;
 					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(),
 					        change.getLocks()));
 				} else {
 					assert event.getChangeType() == ChangeType.ADD;
+					modelExists = true;
 					futures.add(InternalGaeModel.createModel(event.getChangedEntity(),
 					        change.getLocks()));
 				}
@@ -600,11 +641,15 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		}
 		
 		for(Future<?> future : futures) {
-			GaeUtils.waitFor(future);
+			FutureUtils.waitFor(future);
 		}
 		
 		commit(change, Status.SuccessExecuted);
 		
+		// update revCache
+		if(modelExists != null) {
+			this.revCache.setModelExists(modelExists);
+		}
 		this.revCache.setCurrentModelRev(change.rev);
 		
 		// // TODO do we really need to ask the memcache here?
@@ -640,7 +685,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		
 		// Try to "grab" the change entity to prevent multiple processes from
 		// rolling forward the same entity.
-		Transaction trans = GaeUtils.beginTransaction();
+		Transaction trans = SyncDatastore.beginTransaction();
 		
 		// We need to re-load the change in the transaction so we will notice
 		// when someone else modifies it.
@@ -650,7 +695,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 			// Cannot roll forward, change was grabbed by another process.
 			
 			// Cleanup the transaction.
-			GaeUtils.endTransaction(trans);
+			SyncDatastore.endTransaction(trans);
 			return false;
 		}
 		
@@ -660,7 +705,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		change.save(trans);
 		// Synchronized by endTransaction()
 		try {
-			GaeUtils.endTransaction(trans);
+			SyncDatastore.endTransaction(trans);
 		} catch(ConcurrentModificationException cme) {
 			// Cannot roll forward, change was grabbed by another process.
 			return false;
@@ -692,6 +737,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		if(this.revCache.getLastCommited() == change.rev - 1) {
 			this.revCache.setLastCommited(change.rev);
 		}
+		assert change.getStatus().isCommitted();
 		cacheCommittedChange(change);
 	}
 	
@@ -701,23 +747,23 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 	
 	private static final long NOT_FOUND = -3;
 	
-	// TODO experiment with MAX_BATCH_FETCH_SIZE
+	// IMPROVE experiment with MAX_BATCH_FETCH_SIZE
 	private static final int MAX_BATCH_FETCH_SIZE = 100;
 	
-	private static final long MAX_REVISION_NR = 1024;
+	private static final long MAX_REVISION_NR = 8 * 1024;
 	
 	/**
 	 * Cache given change, if status is committed.
 	 * 
-	 * @param change TODO
+	 * @param change to be cached
 	 */
 	private void cacheCommittedChange(GaeChange change) {
 		if(USE_COMMITTED_CHANGE_CACHE) {
-			if(!change.getStatus().isCommitted()) {
-				return;
-			}
+			assert change != null;
+			assert change.getStatus() != null;
+			assert change.getStatus().isCommitted();
 			log.trace(DebugFormatter.dataPut(VM_COMMITED_CHANGES_CACHENAME + this.modelAddr, ""
-			        + change.rev, change));
+			        + change.rev, change, Timing.Now));
 			Map<Long,GaeChange> committedChangeCache = getCommittedChangeCache();
 			synchronized(committedChangeCache) {
 				committedChangeCache.put(change.rev, change);
@@ -738,7 +784,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 			assert change.getStatus().isCommitted();
 		}
 		log.trace(DebugFormatter.dataGet(VM_COMMITED_CHANGES_CACHENAME + this.modelAddr, "" + rev,
-		        change));
+		        change, Timing.Now));
 		return change;
 	}
 	
@@ -764,14 +810,15 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 	public long getCurrentRevisionNumber() {
 		long currentRev = this.revCache.getExactCurrentRev();
 		if(currentRev == IRevisionInfo.NOT_SET) {
-			// exact version not locally known
+			log.trace("exact version not locally known");
 			currentRev = this.revCache.getCurrentRev();
+			log.trace("revCache = " + currentRev);
 			currentRev = updateCurrentRev(currentRev);
 			this.revCache.setCurrentModelRev(currentRev);
 		} else {
-			// currentRev is locally exact defined
+			log.trace("currentRev is locally exact defined");
 		}
-		log.trace("currentRevNr = " + currentRev);
+		log.trace("getCurrentRevisionNumber = " + currentRev);
 		return currentRev;
 	}
 	
@@ -816,22 +863,38 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		
 		/* === Phase 2+3: Ask Memcache + Datastore === */
 		fetchMissingRevisionsFromMemcacheAndDatastore(locallyMissingRevs);
-		log.trace("missingRevs after asking DS&MC: " + locallyMissingRevs.size());
+		log.trace("number of missingRevs after asking DS&MC: " + locallyMissingRevs.size());
 		
 		/* === Phase 4: Compute result from local cache === */
+		/* compute model exists from event before asking range */
 		boolean foundEnd = false;
 		long currentRev = beginRevInclusive - 1;
 		for(long i = beginRevInclusive; i <= endRevInclusive; i++) {
 			GaeChange change = getCachedChange(i);
-			log.trace("change: " + change);
+			log.trace("cached change " + i + ": " + change);
 			
 			// TODO careful: too much caching?
 			if(change == null) {
 				foundEnd = true;
 				break;
 			} else {
-				if(change.getStatus().isSuccess()) {
+				if(change.getStatus() == Status.SuccessExecuted) {
 					currentRev = i;
+					XEvent event = change.getEvent();
+					assert event != null;
+					if(event instanceof XTransactionEvent) {
+						// check only last event
+						XTransactionEvent txn = (XTransactionEvent)event;
+						assert txn.size() >= 1;
+						event = txn.getEvent(txn.size() - 1);
+						assert event != null;
+					}
+					if(event.getTarget().getAddressedType() == XType.XREPOSITORY
+					        && event.getChangeType() == ChangeType.REMOVE) {
+						this.revCache.setModelExists(false);
+					} else {
+						this.revCache.setModelExists(true);
+					}
 				}
 			}
 		}
@@ -872,20 +935,20 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 				memcacheBatchRequest.add(KeyStructure.toString(key));
 			}
 			// batch request
-			Map<String,Object> memcacheResult = GaeUtils
-			        .getEntitiesFromMemcache(memcacheBatchRequest);
+			Map<String,Object> memcacheResult = Memcache.getEntities(memcacheBatchRequest);
 			long newLastCommitted = -1;
 			for(Entry<String,Object> entry : memcacheResult.entrySet()) {
 				Key key = KeyStructure.toKey(entry.getKey());
 				Object v = entry.getValue();
+				GaeAssert.gaeAssert(v != null, "v!=null");
 				assert v != null;
 				assert v instanceof Entity : v.getClass();
 				Entity entity = (Entity)v;
-				assert !entity.equals(GaeUtils.NULL_ENTITY) : "" + key;
+				assert !entity.equals(Memcache.NULL_ENTITY) : "" + key;
 				long rev = KeyStructure.getRevisionFromChangeKey(key);
 				GaeChange change = new GaeChange(getModelAddress(), rev, entity);
 				assert change.getStatus() != null;
-				assert change.getStatus().isCommitted();
+				assert change.getStatus().isCommitted() : change.rev + " " + change.getStatus();
 				cacheCommittedChange(change);
 				if(change.rev > newLastCommitted) {
 					newLastCommitted = change.rev;
@@ -913,8 +976,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 				datastoreBatchRequest.add(key);
 			}
 			// execute batch request
-			Map<Key,Entity> datastoreResult = GaeUtils
-			        .getEntitiesFromDatastore(datastoreBatchRequest);
+			Map<Key,Entity> datastoreResult = SyncDatastore.getEntities(datastoreBatchRequest);
 			Map<String,Entity> memcacheBatchPut = new HashMap<String,Entity>();
 			long newLastTaken = -1;
 			long newLastCommitted = -1;
@@ -922,7 +984,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 				Key key = entry.getKey();
 				Entity entity = entry.getValue();
 				assert entity != null;
-				assert entity != GaeUtils.NULL_ENTITY;
+				assert entity != Memcache.NULL_ENTITY;
 				long revFromKey = KeyStructure.getRevisionFromChangeKey(key);
 				
 				// process status of change
@@ -938,12 +1000,18 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 						newLastCommitted = revFromKey;
 					}
 				} else {
+					// FIXME .......
+					log.warn("Change is " + change.getStatus() + " timeout?" + change.isTimedOut()
+					        + ". Dump: " + change + " ||| Now = " + System.currentTimeMillis());
 					if(change.isTimedOut()) {
 						log.debug("handle timed-out change " + change.rev);
-						handleTimeout(change);
-						// TODO why reload?
-						change.reload();
-						// change might be complete now
+						boolean success = handleTimeout(change);
+						// TODO @Daniel: why reload?
+						if(!success) {
+							change.reload();
+						}
+						// change might be complete now (we or another process
+						// might have done it)
 						if(change.getStatus().isCommitted()) {
 							// use it
 							memcacheBatchPut.put(KeyStructure.toString(key), entity);
@@ -954,6 +1022,8 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 						}
 					} else {
 						assert status == Status.Creating || status == Status.Executing;
+						log.warn("Change " + change.rev + " is still " + change.getStatus()
+						        + ". Not cached.");
 						// don't cache
 					}
 					if(change.rev > newLastTaken) {
@@ -1025,6 +1095,10 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		
 		/* adjust range */
 		long endRev = endRevision;
+		/*
+		 * ask one revision below requested to see the last
+		 * repocommand.removeModel if there was one
+		 */
 		long begin = beginRevision < 0 ? 0 : beginRevision;
 		long currentRev = getCurrentRevisionNumber();
 		if(currentRev == -1) {
@@ -1034,9 +1108,10 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		if(beginRevision > currentRev) {
 			return new ArrayList<XEvent>(0);
 		} else if(endRev > currentRev) {
-			log.debug("Adjusted endRev from " + endRev + " to " + currentRev);
 			endRev = currentRev;
 		}
+		
+		log.debug("Adjusted range [" + begin + "," + endRev + "]");
 		
 		List<XEvent> events = new ArrayList<XEvent>();
 		
@@ -1046,25 +1121,53 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		// construct result
 		long newRev = -1;
 		for(long i = begin; i <= endRev; i++) {
+			log.trace("Trying to find & apply event " + i);
 			GaeChange change = getCachedChange(i);
 			// use only positive information
 			if(change != null) {
 				if(change.getStatus() == Status.SuccessExecuted) {
-					log.trace("Got event " + change.rev);
+					log.trace("Change " + i + " rev=" + change.rev + " is successful");
 					XEvent event = change.getEvent();
 					assert event != null : change;
 					events.add(event);
 					newRev = i;
+				} else {
+					assert change.getStatus() != Status.Creating;
+					assert change.getStatus() != Status.Executing;
+					log.trace("Change " + i + " is " + change.getStatus().name());
 				}
 			} else {
-				log.trace("Change null or cached null " + i);
+				log.warn("==== Change " + i + " is null, was asking [" + begin + "," + endRev
+				        + "]. Retry.");
+				// FIXME RECHECK
+				Set<Long> set = new HashSet<Long>();
+				set.add(i);
+				fetchMissingRevisionsFromMemcacheAndDatastore(set);
+				Thread.yield();
+				i--;
+				continue;
+				
+				//
+				// throw new IllegalStateException("Change " + i +
+				// " null was asking [" + begin + ","
+				// + endRev + "]");
 			}
 		}
 		if(newRev >= 0) {
 			this.revCache.setCurrentModelRev(newRev);
 		}
 		
+		GaeAssert.gaeAssert(eventsAreWithinRange(events, begin, endRev));
+		
 		return events;
+	}
+	
+	private boolean eventsAreWithinRange(List<XEvent> events, long begin, long endRev) {
+		for(XEvent e : events) {
+			GaeAssert.gaeAssert(e.getRevisionNumber() >= begin);
+			GaeAssert.gaeAssert(e.getRevisionNumber() <= endRev);
+		}
+		return true;
 	}
 	
 	/**
@@ -1076,17 +1179,17 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 	private boolean handleTimeout(GaeChange change) {
 		log.debug("handleTimeout: " + change);
 		if(change.getStatus().canRollForward()) {
-			rollForward(change);
-			return true;
+			// FIXME Why return true if we just expect another thread to likely
+			// roll forward in the future?
+			return rollForward(change);
 		} else {
 			commit(change, Status.FailedTimeout);
 			return false;
 		}
 	}
 	
-	/* TODO make this default visible and remove from interface */
 	@Override
-    public AsyncValue getValue(long rev, int transindex) {
+	public AsyncValue getValue(long rev, int transindex) {
 		
 		GaeChange change = getCachedChange(rev);
 		if(change != null) {
@@ -1107,6 +1210,9 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		return GaeEvents.getValue(this.modelAddr, rev, transindex);
 	}
 	
+	/**
+	 * @return the instance-level cache of committed change objects
+	 */
 	@SuppressWarnings("unchecked")
 	private Map<Long,GaeChange> getCommittedChangeCache() {
 		String key = "changes:" + this.modelAddr;
@@ -1127,6 +1233,11 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		log.info("Cleared. Make to sure to also clear memcache.");
 		this.getCommittedChangeCache().clear();
 		this.revCache.clear();
+	}
+	
+	@Override
+	public boolean exists() {
+		return this.revCache.modelExists() != null && this.revCache.modelExists();
 	}
 	
 }

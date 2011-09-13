@@ -11,6 +11,7 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.RevisionState;
 import org.xydra.store.impl.gae.changes.GaeChangesServiceImpl2;
 import org.xydra.store.impl.gae.changes.IGaeChangesService;
 import org.xydra.store.impl.gae.snapshot.GaeSnapshotService2;
@@ -41,7 +42,7 @@ public class GaeModelPersistence {
 		this.snapshotService = new GaeSnapshotService2(this.modelAddress, this.changesService);
 	}
 	
-	public long executeCommand(XCommand command, XID actorId) {
+	public RevisionState executeCommand(XCommand command, XID actorId) {
 		return this.changesService.executeCommand(command, actorId);
 	}
 	
@@ -59,12 +60,16 @@ public class GaeModelPersistence {
 	
 	synchronized public XWritableModel getSnapshot() {
 		/* get fresh current revNr */
+		boolean modelExists = this.changesService.exists();
+		if(!modelExists) {
+			return null;
+		}
 		long currentRevNr = this.changesService.getCurrentRevisionNumber();
 		if(currentRevNr == -1) {
 			return null;
 		}
 		if(currentRevNr == 0) {
-			// model is empty
+			// model must be empty
 			return new SimpleModel(this.modelAddress);
 		}
 		XWritableModel snapshot = this.snapshotService.getSnapshot(currentRevNr);
@@ -89,6 +94,10 @@ public class GaeModelPersistence {
 			return null;
 		}
 		return modelSnapshot.getObject(objectId);
+	}
+	
+	public RevisionState getModelRevision() {
+		return new RevisionState(getCurrentRevisionNumber(), this.changesService.exists());
 	}
 	
 }

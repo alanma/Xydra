@@ -7,7 +7,8 @@ import org.xydra.base.XType;
 import org.xydra.base.rmof.XEntity;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
-import org.xydra.store.impl.gae.GaeUtils;
+import org.xydra.store.impl.gae.AsyncDatastore;
+import org.xydra.store.impl.gae.SyncDatastore;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -41,12 +42,12 @@ abstract public class InternalGaeXEntity implements XEntity {
 		assert modelOrObjectOrFieldAddr.getAddressedType() == XType.XMODEL
 		        || modelOrObjectOrFieldAddr.getAddressedType() == XType.XOBJECT
 		        || modelOrObjectOrFieldAddr.getAddressedType() == XType.XFIELD;
-		return GaeUtils.deleteEntityAsync(KeyStructure.createEntityKey(modelOrObjectOrFieldAddr));
+		return AsyncDatastore.deleteEntity(KeyStructure.createEntityKey(modelOrObjectOrFieldAddr));
 	}
 	
 	public static boolean exists(XAddress address) {
 		Key key = KeyStructure.createEntityKey(address);
-		Entity entity = GaeUtils.getEntity(key);
+		Entity entity = SyncDatastore.getEntity(key);
 		return (entity != null);
 	}
 	
