@@ -19,13 +19,16 @@ public class MemcacheResource {
 	public static void restless(Restless restless, String prefix) {
 		restless.addMethod(prefix + "/", "GET", MemcacheResource.class, "index", true);
 		restless.addMethod(prefix + "/stats", "GET", MemcacheResource.class, "stats", true);
+		restless.addMethod(prefix + "/clear", "GET", MemcacheResource.class, "clear", true);
 	}
 	
 	public void index(HttpServletResponse res) throws IOException {
 		Writer w = HtmlUtils.startHtmlPage(res, "GaeMyAdmin :: Memcache");
 		w.write(HtmlUtils.toOrderedList(Arrays.asList(
 
-		HtmlUtils.link("stats/", "Memcache Statistics")
+		HtmlUtils.link("/admin/memcache/stats/", "Memcache Statistics"),
+
+		HtmlUtils.link("/admin/memcache/clear/", "Clear Memcache")
 
 		)));
 		HtmlUtils.writeCloseBodyHtml(w);
@@ -63,6 +66,21 @@ public class MemcacheResource {
 			)));
 		}
 		w.flush();
+		HtmlUtils.writeCloseBodyHtml(w);
+	}
+	
+	public void clear(HttpServletResponse res) throws IOException {
+		Writer w = HtmlUtils.startHtmlPage(res, "GaeMyAdmin :: Memcache clear");
+		w.write("Clearing...");
+		w.flush();
+		
+		// Get a handle on the service itself
+		MemcacheService mcs = MemcacheServiceFactory.getMemcacheService();
+		mcs.clearAll();
+		
+		w.write("Done.");
+		w.flush();
+		
 		HtmlUtils.writeCloseBodyHtml(w);
 	}
 }
