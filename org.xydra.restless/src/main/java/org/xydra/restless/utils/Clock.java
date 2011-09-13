@@ -35,6 +35,10 @@ public class Clock {
 		return this;
 	}
 	
+	/**
+	 * @param name for clock entry
+	 * @return duration since last start in milliseconds
+	 */
 	public long stopAndGetDuration(String name) {
 		if(this.start == -1) {
 			throw new IllegalStateException("Cannot stop a clock that was never started.");
