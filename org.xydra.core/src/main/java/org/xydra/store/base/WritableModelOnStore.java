@@ -12,6 +12,7 @@ import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
+import org.xydra.store.RevisionState;
 import org.xydra.store.XydraStore;
 
 
@@ -40,7 +41,9 @@ public class WritableModelOnStore extends ReadableModelOnStore implements XWrita
 	}
 	
 	private boolean executeCommand(XCommand command) {
-		long result = ExecuteCommandsUtils.executeCommand(this.credentials, this.store, command);
+		RevisionState pair = ExecuteCommandsUtils.executeCommand(this.credentials, this.store,
+		        command);
+		long result = pair.revision();
 		if(result >= 0) {
 			load();
 			return true;

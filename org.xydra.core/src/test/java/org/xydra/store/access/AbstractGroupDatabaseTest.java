@@ -8,8 +8,6 @@ import org.junit.Test;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.core.LoggerTestHelper;
-import org.xydra.store.access.XA;
-import org.xydra.store.access.XGroupDatabaseWithListeners;
 
 
 /**

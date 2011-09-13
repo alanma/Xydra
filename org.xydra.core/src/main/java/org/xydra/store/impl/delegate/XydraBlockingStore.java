@@ -26,6 +26,7 @@ import org.xydra.store.GetEventsRequest;
 import org.xydra.store.InternalStoreException;
 import org.xydra.store.QuotaException;
 import org.xydra.store.RequestException;
+import org.xydra.store.RevisionState;
 import org.xydra.store.TimeoutException;
 import org.xydra.store.XydraStore;
 import org.xydra.store.XydraStoreAdmin;
@@ -194,7 +195,7 @@ public interface XydraBlockingStore {
 	 * @throws RequestException if the supplied arguments are considered
 	 *             syntactically or semantically invalid
 	 */
-	long executeCommand(XID actorId, String passwordHash, XCommand command)
+	RevisionState executeCommand(XID actorId, String passwordHash, XCommand command)
 	        throws IllegalArgumentException, QuotaException, AuthorisationException,
 	        AccessException, TimeoutException, ConnectionException, RequestException,
 	        InternalStoreException;
@@ -311,7 +312,7 @@ public interface XydraBlockingStore {
 	 * @throws RequestException if the supplied arguments are considered
 	 *             syntactically or semantically invalid
 	 */
-	long getModelRevision(XID actorId, String passwordHash, XAddress modelAddress)
+	RevisionState getModelRevision(XID actorId, String passwordHash, XAddress modelAddress)
 	        throws IllegalArgumentException, QuotaException, AuthorisationException,
 	        TimeoutException, ConnectionException, RequestException, InternalStoreException;
 	

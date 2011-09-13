@@ -268,12 +268,12 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	}
 	
 	@Override
-    public XAddress getChangedEntity() {
+	public XAddress getChangedEntity() {
 		return getTarget();
 	}
 	
 	@Override
-    public XValue getNewValue() {
+	public XValue getNewValue() {
 		return this.newValue;
 	}
 	
@@ -312,7 +312,7 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	
 	@Override
 	public String toString() {
-		String prefix = "FieldEvent by " + getActor() + ": ";
+		String prefix = "MemoryFieldEvent by " + getActor() + ": ";
 		String suffix = " @" + getTarget() + " r" + rev2str(this.modelRevision) + "/"
 		        + rev2str(this.objectRevision) + "/" + rev2str(this.fieldRevision);
 		switch(getChangeType()) {

@@ -12,6 +12,7 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.Callback;
 import org.xydra.store.GetEventsRequest;
+import org.xydra.store.RevisionState;
 import org.xydra.store.StoreException;
 import org.xydra.store.XydraStoreAdmin;
 
@@ -54,10 +55,11 @@ public class DelegateToBlockingStore implements XydraSingleOperationStore {
 	
 	@Override
 	public void executeCommand(XID actorId, String passwordHash, XCommand command,
-	        Callback<Long> callbackOrNull) throws IllegalArgumentException {
+	        Callback<RevisionState> callbackOrNull) throws IllegalArgumentException {
 		assert actorId != null;
 		try {
-			long result = this.blockingStore.executeCommand(actorId, passwordHash, command);
+			RevisionState result = this.blockingStore.executeCommand(actorId, passwordHash,
+			        command);
 			if(callbackOrNull != null) {
 				callbackOrNull.onSuccess(result);
 			}
@@ -99,11 +101,12 @@ public class DelegateToBlockingStore implements XydraSingleOperationStore {
 	
 	@Override
 	public void getModelRevision(XID actorId, String passwordHash, XAddress modelAddress,
-	        Callback<Long> callback) throws IllegalArgumentException {
+	        Callback<RevisionState> callback) throws IllegalArgumentException {
 		assert actorId != null;
 		assert callback != null;
 		try {
-			long result = this.blockingStore.getModelRevision(actorId, passwordHash, modelAddress);
+			RevisionState result = this.blockingStore.getModelRevision(actorId, passwordHash,
+			        modelAddress);
 			callback.onSuccess(result);
 		} catch(StoreException e) {
 			log.warn("Telling callback: ", e);

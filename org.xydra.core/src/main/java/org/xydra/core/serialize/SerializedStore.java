@@ -22,6 +22,7 @@ import org.xydra.store.GetEventsRequest;
 import org.xydra.store.InternalStoreException;
 import org.xydra.store.QuotaException;
 import org.xydra.store.RequestException;
+import org.xydra.store.RevisionState;
 import org.xydra.store.StoreException;
 import org.xydra.store.TimeoutException;
 import org.xydra.store.XydraStore;
@@ -160,8 +161,8 @@ public class SerializedStore {
 		
 	}
 	
-	public static void serializeCommandResults(BatchedResult<Long>[] commandRes, EventsRequest ger,
-	        BatchedResult<XEvent[]>[] eventsRes, XydraOut out) {
+	public static void serializeCommandResults(BatchedResult<RevisionState>[] commandRes,
+	        EventsRequest ger, BatchedResult<XEvent[]>[] eventsRes, XydraOut out) {
 		
 		out.open(ELEMENT_RESULTS);
 		
@@ -178,7 +179,7 @@ public class SerializedStore {
 	}
 	
 	public static void toCommandResults(XydraElement element, GetEventsRequest[] context,
-	        BatchedResult<Long>[] commandResults, BatchedResult<XEvent[]>[] eventResults) {
+	        BatchedResult<RevisionState>[] commandResults, BatchedResult<XEvent[]>[] eventResults) {
 		
 		SerializingUtils.checkElementType(element, ELEMENT_RESULTS);
 		
@@ -299,7 +300,7 @@ public class SerializedStore {
 		}
 	}
 	
-	public static void serializeModelRevisions(BatchedResult<Long>[] result, XydraOut out) {
+	public static void serializeModelRevisions(BatchedResult<RevisionState>[] result, XydraOut out) {
 		
 		out.open(ELEMENT_MODEL_REVISIONS);
 		out.child(NAME_REVISIONS);
@@ -308,31 +309,34 @@ public class SerializedStore {
 		
 	}
 	
-	public static void toModelRevisions(XydraElement element, BatchedResult<Long>[] res) {
+	public static void toModelRevisions(XydraElement element, BatchedResult<RevisionState>[] res) {
 		
 		SerializingUtils.checkElementType(element, ELEMENT_MODEL_REVISIONS);
 		
 		getRevisionListContents(element.getChild(NAME_REVISIONS), res);
 	}
 	
-	private static void setRevisionListContents(BatchedResult<Long>[] results, XydraOut out) {
+	private static void setRevisionListContents(BatchedResult<RevisionState>[] results, XydraOut out) {
 		
 		out.beginArray();
 		out.setDefaultType(ELEMENT_XREVISION);
 		
-		for(BatchedResult<Long> result : results) {
+		for(BatchedResult<RevisionState> result : results) {
 			if(result.getException() != null) {
 				serializeException(result.getException(), out);
 			} else {
 				assert result.getResult() != null;
-				out.value(result.getResult());
+				RevisionState revisionState = result.getResult();
+				long rev = revisionState.revision();
+				out.value(rev);
 			}
 		}
 		
 		out.endArray();
 	}
 	
-	private static void getRevisionListContents(XydraElement element, BatchedResult<Long>[] results) {
+	private static void getRevisionListContents(XydraElement element,
+	        BatchedResult<RevisionState>[] results) {
 		
 		int i = 0;
 		
@@ -347,7 +351,7 @@ public class SerializedStore {
 			
 			Throwable t = toException(result);
 			if(t != null) {
-				results[i] = new BatchedResult<Long>(t);
+				results[i] = new BatchedResult<RevisionState>(t);
 				continue;
 			}
 			
@@ -357,10 +361,13 @@ public class SerializedStore {
 				
 				long rev = SerializingUtils.toLong(result.getContent());
 				
-				results[i] = new BatchedResult<Long>(rev);
+				// FIXME IMPLEMENT!
+				boolean modelExists = true;
+				
+				results[i] = new BatchedResult<RevisionState>(new RevisionState(rev, modelExists));
 				
 			} catch(Throwable th) {
-				results[i] = new BatchedResult<Long>(th);
+				results[i] = new BatchedResult<RevisionState>(th);
 			}
 			
 		}

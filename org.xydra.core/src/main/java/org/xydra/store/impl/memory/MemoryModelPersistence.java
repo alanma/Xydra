@@ -17,6 +17,7 @@ import org.xydra.core.model.delta.DeltaUtils;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.RevisionState;
 
 
 /**
@@ -43,7 +44,7 @@ public class MemoryModelPersistence {
 		this.modelAddr = modelAddr;
 	}
 	
-	synchronized public long executeCommand(XID actorId, XCommand command) {
+	synchronized public RevisionState executeCommand(XID actorId, XCommand command) {
 		
 		long newRev = getRevisionNumber() + 1;
 		
@@ -53,7 +54,7 @@ public class MemoryModelPersistence {
 		        command);
 		if(change == null) {
 			// There was something wrong with the command.
-			return XCommand.FAILED;
+			return new RevisionState(XCommand.FAILED, this.exists());
 		}
 		
 		// Create events. Do this before we destroy any necessary information by
@@ -65,7 +66,7 @@ public class MemoryModelPersistence {
 		if(events.isEmpty()) {
 			// TODO take up a revision anyway with a null event to better test
 			// users of the API? (to mimic behaviour of the GAE implementation)
-			return XCommand.NOCHANGE;
+			return new RevisionState(XCommand.NOCHANGE, this.exists());
 		}
 		
 		XEvent event;
@@ -85,7 +86,7 @@ public class MemoryModelPersistence {
 		assert getRevisionNumber() == newRev;
 		assert this.model == null || this.model.getRevisionNumber() == newRev;
 		
-		return newRev;
+		return new RevisionState(newRev, this.exists());
 	}
 	
 	public boolean exists() {
@@ -162,6 +163,10 @@ public class MemoryModelPersistence {
 	
 	synchronized public long getRevisionNumber() {
 		return this.events.size() - 1;
+	}
+	
+	public RevisionState getModelRevision() {
+		return new RevisionState(getRevisionNumber(), exists());
 	}
 	
 }

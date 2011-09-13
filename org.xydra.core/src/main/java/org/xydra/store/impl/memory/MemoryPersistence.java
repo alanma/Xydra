@@ -15,6 +15,7 @@ import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.store.RequestException;
+import org.xydra.store.RevisionState;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -50,11 +51,11 @@ public class MemoryPersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public long executeCommand(XID actorId, XCommand command) {
+	public RevisionState executeCommand(XID actorId, XCommand command) {
 		XAddress address = command.getChangedEntity();
 		// caller asserts repoId matches address
 		MemoryModelPersistence modelPersistence = getModelPersistence(address.getModel());
-		long result = modelPersistence.executeCommand(actorId, command);
+		RevisionState result = modelPersistence.executeCommand(actorId, command);
 		
 		/*
 		 * DO NOT remove the MemoryModelPersistence from the model map, even if
@@ -105,13 +106,13 @@ public class MemoryPersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public long getModelRevision(XAddress address) {
+	public RevisionState getModelRevision(XAddress address) {
 		if(address.getAddressedType() != XType.XMODEL) {
 			throw new RequestException("must use a model address to get a model revison, was "
 			        + address);
 		}
 		// caller asserts repoId matches address
-		return getModelPersistence(address.getModel()).getRevisionNumber();
+		return getModelPersistence(address.getModel()).getModelRevision();
 	}
 	
 	@Override

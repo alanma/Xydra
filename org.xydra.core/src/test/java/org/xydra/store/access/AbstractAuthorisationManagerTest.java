@@ -9,10 +9,6 @@ import org.junit.Test;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
-import org.xydra.store.access.XA;
-import org.xydra.store.access.XAccessRightValue;
-import org.xydra.store.access.XAuthorisationManager;
-import org.xydra.store.access.XGroupDatabaseWithListeners;
 import org.xydra.store.access.impl.memory.MemoryAuthorisationManager;
 import org.xydra.store.access.impl.memory.MemoryGroupDatabase;
 

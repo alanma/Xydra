@@ -1,8 +1,8 @@
 package org.xydra.store;
 
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RequiresAppEngine;
 
 
 /**

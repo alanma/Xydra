@@ -16,9 +16,13 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.rmof.impl.memory.SimpleRepository;
 import org.xydra.base.value.XV;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
 
 public class DiffWritableModelTest {
+	
+	private static final Logger log = LoggerFactory.getLogger(DiffWritableModelTest.class);
 	
 	private SimpleModel base;
 	private DiffWritableModel diffModel;
@@ -48,7 +52,7 @@ public class DiffWritableModelTest {
 		
 		List<XAtomicCommand> list = this.diffModel.toCommandList();
 		for(XAtomicCommand ac : list) {
-			System.out.println(ac);
+			log.debug(ac.toString());
 		}
 		assertEquals(10, list.size());
 	}

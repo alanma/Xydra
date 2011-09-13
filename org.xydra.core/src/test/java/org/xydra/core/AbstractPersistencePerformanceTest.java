@@ -15,19 +15,25 @@ import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.core.change.RWCachingRepository;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.restless.utils.Clock;
+import org.xydra.store.RevisionState;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
 
 
 public abstract class AbstractPersistencePerformanceTest {
 	
+	private static final Logger log = LoggerFactory
+	        .getLogger(AbstractPersistencePerformanceTest.class);
+	
 	private static XID actorId = XX.toId("actor1");
 	private static int x = 3;
 	
 	@Before
 	public void setUp() {
-		System.out.println("Creating fresh persistence");
+		log.info("Creating fresh persistence");
 	}
 	
 	public abstract XydraPersistence createPersistence(XID repositoryId);
@@ -42,11 +48,13 @@ public abstract class AbstractPersistencePerformanceTest {
 		        repositoryId, modelId);
 		c.stopAndStart("create-cmd");
 		
-		long l = persistence.executeCommand(actorId, addModelCmd);
+		RevisionState pair = persistence.executeCommand(actorId, addModelCmd);
+		long l = pair.revision();
 		assertTrue("" + l, l >= 0);
 		c.stopAndStart("add-model");
 		
-		l = persistence.executeCommand(actorId, addModelCmd);
+		pair = persistence.executeCommand(actorId, addModelCmd);
+		l = pair.revision();
 		assertTrue("" + l, l < 0);
 		c.stopAndStart("add-model-again");
 		
@@ -60,16 +68,16 @@ public abstract class AbstractPersistencePerformanceTest {
 		c.stopAndStart("get-modelsnapshot2");
 		Set<XID> set = org.xydra.index.IndexUtils.toSet(snap.iterator());
 		assertEquals(x, set.size());
-		System.out.println(c.getStats());
+		log.info(c.getStats());
 	}
 	
 	private static void createObjects(XydraPersistence persistence, XID repositoryId, XID modelId,
 	        int ocount) {
 		for(int i = 0; i < ocount; i++) {
 			XID objectId = XX.toId("object" + i);
-			long l = persistence.executeCommand(actorId, X.getCommandFactory()
+			RevisionState l = persistence.executeCommand(actorId, X.getCommandFactory()
 			        .createForcedAddObjectCommand(repositoryId, modelId, objectId));
-			assertTrue(l >= 0);
+			assertTrue(l.revision() >= 0);
 		}
 	}
 	
@@ -90,7 +98,7 @@ public abstract class AbstractPersistencePerformanceTest {
 		
 		WritableRepositoryOnPersistence baseRepository = new WritableRepositoryOnPersistence(
 		        persistence, actorId);
-		RWCachingRepository repo = new RWCachingRepository(baseRepository, true);
+		RWCachingRepository repo = new RWCachingRepository(baseRepository, false);
 		
 		XID modelId = XX.toId("model1");
 		XWritableModel model = repo.createModel(modelId);
@@ -110,7 +118,7 @@ public abstract class AbstractPersistencePerformanceTest {
 		c.stopAndStart("commit");
 		
 		XAddress modelAddress = XX.toAddress(repositoryId, modelId, null, null);
-		long rev = persistence.getModelRevision(modelAddress);
+		long rev = persistence.getModelRevision(modelAddress).revision();
 		assertEquals("0=createModel,1=txnWithXObjects" + rev, 1, rev);
 		
 		XWritableModel snap = persistence.getModelSnapshot(modelAddress);
@@ -123,7 +131,7 @@ public abstract class AbstractPersistencePerformanceTest {
 		c.stopAndStart("get-modelsnapshot2");
 		set = org.xydra.index.IndexUtils.toSet(snap.iterator());
 		assertEquals(x, set.size());
-		System.out.println(c.getStats());
+		log.info(c.getStats());
 	}
 	
 }

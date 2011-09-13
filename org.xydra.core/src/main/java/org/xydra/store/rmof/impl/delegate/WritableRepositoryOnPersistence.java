@@ -11,6 +11,7 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.RevisionState;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -32,13 +33,13 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 	
 	/** First try to get model, if not found: create it. */
 	@Override
-    public XWritableModel createModel(XID modelId) {
+	public XWritableModel createModel(XID modelId) {
 		XWritableModel model = getModel(modelId);
 		if(model == null) {
 			XCommand command = X.getCommandFactory().createAddModelCommand(
 			        this.persistence.getRepositoryId(), modelId, true);
-			long l = this.persistence.executeCommand(this.executingActorId, command);
-			if(l < 0) {
+			RevisionState l = this.persistence.executeCommand(this.executingActorId, command);
+			if(l.revision() < 0) {
 				log.warn("creating model '" + modelId + "' failed with " + l);
 			}
 			model = getModel(modelId);
@@ -61,7 +62,7 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 	}
 	
 	@Override
-    public XWritableModel getModel(XID modelId) {
+	public XWritableModel getModel(XID modelId) {
 		if(hasModel(modelId)) {
 			// make sure changes to model are reflected in persistence
 			return new WritableModelOnPersistence(this.persistence, this.executingActorId, modelId);
@@ -71,30 +72,31 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 	}
 	
 	@Override
-    public boolean hasModel(XID modelId) {
+	public boolean hasModel(XID modelId) {
 		return this.persistence.hasModel(modelId);
 	}
 	
 	@Override
-    public boolean isEmpty() {
+	public boolean isEmpty() {
 		return this.persistence.getModelIds().isEmpty();
 	}
 	
 	@Override
-    public Iterator<XID> iterator() {
+	public Iterator<XID> iterator() {
 		return this.persistence.getModelIds().iterator();
 	}
 	
 	@Override
-    public boolean removeModel(XID modelId) {
+	public boolean removeModel(XID modelId) {
 		boolean result = hasModel(modelId);
 		// long modelRevision =
 		// this.persistence.getModelRevision(XX.resolveModel(getAddress(),
 		// modelId));
 		XCommand command = X.getCommandFactory().createRemoveModelCommand(
 		        this.persistence.getRepositoryId(), modelId, XCommand.FORCED, true);
-		long commandResult = this.persistence.executeCommand(this.executingActorId, command);
-		assert commandResult >= 0;
+		RevisionState commandResult = this.persistence.executeCommand(this.executingActorId,
+		        command);
+		assert commandResult.revision() >= 0;
 		return result;
 	}
 	

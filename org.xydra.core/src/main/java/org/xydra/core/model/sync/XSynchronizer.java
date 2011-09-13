@@ -29,6 +29,7 @@ import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.RequestException;
+import org.xydra.store.RevisionState;
 import org.xydra.store.XydraStore;
 
 
@@ -132,7 +133,7 @@ public class XSynchronizer {
 	}
 	
 	private class CommandsCallback extends
-	        SyncCallback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> {
+	        SyncCallback<Pair<BatchedResult<RevisionState>[],BatchedResult<XEvent[]>[]>> {
 		
 		protected long syncRev;
 		private List<XLocalChange> changes;
@@ -144,12 +145,13 @@ public class XSynchronizer {
 		}
 		
 		@Override
-		public void onSuccess(Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]> res) {
+		public void onSuccess(
+		        Pair<BatchedResult<RevisionState>[],BatchedResult<XEvent[]>[]> res) {
 			
 			assert res.getFirst().length == this.changes.size();
 			assert res.getSecond().length == 1;
 			
-			BatchedResult<Long>[] commandRess = res.getFirst();
+			BatchedResult<RevisionState>[] commandRess = res.getFirst();
 			BatchedResult<XEvent[]> eventsRes = res.getSecond()[0];
 			
 			XEvent[] events = eventsRes.getResult();
@@ -158,7 +160,7 @@ public class XSynchronizer {
 			boolean success = true;
 			for(int i = 0; i < commandRess.length; i++) {
 				
-				BatchedResult<Long> commandRes = commandRess[i];
+				BatchedResult<RevisionState> commandRes = commandRess[i];
 				
 				if(commandRes.getException() != null) {
 					assert commandRes.getResult() == null;
@@ -171,7 +173,8 @@ public class XSynchronizer {
 				} else {
 					
 					assert commandRes.getResult() != null;
-					long commandRev = commandRes.getResult();
+					RevisionState commandPair = commandRes.getResult();
+					long commandRev = commandPair.revision();
 					
 					// command successfully synchronized
 					if(commandRev >= 0) {
@@ -224,8 +227,8 @@ public class XSynchronizer {
 			
 			if(eventsRes.getException() != null) {
 				assert events == null;
-				log.error("sync: error getting events while sending command", eventsRes
-				        .getException());
+				log.error("sync: error getting events while sending command",
+				        eventsRes.getException());
 				if(this.sc != null) {
 					this.sc.onEventsError(eventsRes.getException());
 				}
@@ -350,8 +353,8 @@ public class XSynchronizer {
 			        ((XRepositoryCommand)ac).getModelId());
 		} else if(ac instanceof XModelCommand) {
 			assert ac.getChangeType() == ChangeType.REMOVE;
-			return MemoryModelCommand.createRemoveCommand(ac.getTarget(), rev, ((XModelCommand)ac)
-			        .getObjectId());
+			return MemoryModelCommand.createRemoveCommand(ac.getTarget(), rev,
+			        ((XModelCommand)ac).getObjectId());
 		} else if(ac instanceof XObjectCommand) {
 			assert ac.getChangeType() == ChangeType.REMOVE;
 			return MemoryObjectCommand.createRemoveCommand(ac.getTarget(), rev,
@@ -359,8 +362,8 @@ public class XSynchronizer {
 		} else if(ac instanceof XFieldCommand) {
 			switch(ac.getChangeType()) {
 			case ADD:
-				return MemoryFieldCommand.createAddCommand(ac.getTarget(), rev, ((XFieldCommand)ac)
-				        .getValue());
+				return MemoryFieldCommand.createAddCommand(ac.getTarget(), rev,
+				        ((XFieldCommand)ac).getValue());
 			case CHANGE:
 				return MemoryFieldCommand.createChangeCommand(ac.getTarget(), rev,
 				        ((XFieldCommand)ac).getValue());

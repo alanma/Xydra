@@ -88,6 +88,12 @@
 			<version>0.1.4-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>log.gae</artifactId>
+			<version>0.1.4-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
 
 		<!-- for testing the GWT compatibility -->
 		<dependency>

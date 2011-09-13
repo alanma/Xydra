@@ -5,9 +5,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.value.XIDListValue;

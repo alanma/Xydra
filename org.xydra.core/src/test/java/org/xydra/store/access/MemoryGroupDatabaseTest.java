@@ -1,6 +1,5 @@
 package org.xydra.store.access;
 
-import org.xydra.store.access.XGroupDatabaseWithListeners;
 import org.xydra.store.access.impl.memory.MemoryGroupDatabase;
 
 

@@ -2,8 +2,8 @@ package org.xydra.core.model.impl.memory;
 
 import java.util.Random;
 
-import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RequiresAppEngine;
+import org.xydra.annotations.RunsInGWT;
 
 
 /*

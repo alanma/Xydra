@@ -2,6 +2,7 @@ package org.xydra.store.base;
 
 import org.xydra.base.change.XCommand;
 import org.xydra.store.BatchedResult;
+import org.xydra.store.RevisionState;
 import org.xydra.store.StoreException;
 import org.xydra.store.WaitingCallback;
 import org.xydra.store.XydraStore;
@@ -24,8 +25,9 @@ public class ExecuteCommandsUtils {
 	 * @return the result of executing the command. See {@link XCommand} for
 	 *         values.
 	 */
-	public static long executeCommand(Credentials credentials, XydraStore store, XCommand command) {
-		WaitingCallback<BatchedResult<Long>[]> callback = new WaitingCallback<BatchedResult<Long>[]>();
+	public static RevisionState executeCommand(Credentials credentials, XydraStore store,
+	        XCommand command) {
+		WaitingCallback<BatchedResult<RevisionState>[]> callback = new WaitingCallback<BatchedResult<RevisionState>[]>();
 		
 		store.executeCommands(credentials.getActorId(), credentials.getPasswordHash(),
 		        new XCommand[] { command }, callback);
@@ -34,7 +36,7 @@ public class ExecuteCommandsUtils {
 			throw new StoreException("re-throw", callback.getException());
 		}
 		
-		BatchedResult<Long>[] res = callback.getResult();
+		BatchedResult<RevisionState>[] res = callback.getResult();
 		
 		assert res.length == 1;
 		assert res[0] != null;

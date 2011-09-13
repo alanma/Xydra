@@ -26,6 +26,7 @@ import org.xydra.store.GetEventsRequest;
 import org.xydra.store.InternalStoreException;
 import org.xydra.store.QuotaException;
 import org.xydra.store.RequestException;
+import org.xydra.store.RevisionState;
 import org.xydra.store.TimeoutException;
 import org.xydra.store.XydraStore;
 import org.xydra.store.XydraStoreAdmin;
@@ -213,7 +214,7 @@ public interface XydraSingleOperationStore {
 	 * @throws IllegalArgumentException if one of the given parameters is null.
 	 *             Only the callback may be null.
 	 */
-	void executeCommand(XID actorId, String passwordHash, XCommand command, Callback<Long> callback)
+	void executeCommand(XID actorId, String passwordHash, XCommand command, Callback<RevisionState> callback)
 	        throws IllegalArgumentException;
 	
 	/**
@@ -321,14 +322,14 @@ public interface XydraSingleOperationStore {
 	 *            model revision should be retrieved. Each {@link XAddress} must
 	 *            address an {@link XModel} (repositoryId/modelId/-/-).
 	 * @param callback Asynchronous callback to signal success or failure. On
-	 *            success, the revision number of the addressed model as a long.
-	 *            A non-existing model (and those for which the actorId has no
-	 *            read-access) is signaled as {@link XCommand#FAILED}. Must not
-	 *            be null.
+	 *            success, a pair: 1) the revision number of the addressed model
+	 *            as a long; Those for which the actorId has no read-access) are
+	 *            signalled as {@link XCommand#FAILED}. 2) true if the model
+	 *            exists. Callback must not be null.
 	 * @throws IllegalArgumentException if one of the given parameters is null.
 	 */
 	void getModelRevision(XID actorId, String passwordHash, XAddress modelAddress,
-	        Callback<Long> callback) throws IllegalArgumentException;
+	        Callback<RevisionState> callback) throws IllegalArgumentException;
 	
 	/**
 	 * Read current state.

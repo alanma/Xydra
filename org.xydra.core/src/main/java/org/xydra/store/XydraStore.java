@@ -223,7 +223,7 @@ public interface XydraStore {
 	 *             Only the callback may be null.
 	 */
 	void executeCommands(XID actorId, String passwordHash, XCommand[] commands,
-	        Callback<BatchedResult<Long>[]> callback) throws IllegalArgumentException;
+	        Callback<BatchedResult<RevisionState>[]> callback) throws IllegalArgumentException;
 	
 	/**
 	 * COMMANDS + EVENTS.
@@ -265,7 +265,7 @@ public interface XydraStore {
 	 */
 	void executeCommandsAndGetEvents(XID actorId, String passwordHash, XCommand[] commands,
 	        GetEventsRequest[] getEventRequests,
-	        Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback)
+	        Callback<Pair<BatchedResult<RevisionState>[],BatchedResult<XEvent[]>[]>> callback)
 	        throws IllegalArgumentException;
 	
 	/**
@@ -370,17 +370,19 @@ public interface XydraStore {
 	 *            model revision should be retrieved. Each {@link XAddress} must
 	 *            address an {@link XModel} (repositoryId/modelId/-/-).
 	 * @param callback Asynchronous callback to signal success or failure. On
-	 *            success, the returned array contains in the same order as in
-	 *            the request array (modelAddresses) the revision number of the
-	 *            addressed model as a long.
+	 *            success, an array of Pairs is returned. It is in the same
+	 *            order as in the request array (modelAddresses).
 	 * 
-	 *            Non-existing models (and those for which the actorId has no
-	 *            read-access) are signaled as {@link XCommand#FAILED}. For
-	 *            other models, the returned revision number is the number that
-	 *            can be used with
+	 *            Each first pair element contains the revision number of the
+	 *            addressed model as a long. The returned revision number is the
+	 *            number that can be used with
 	 *            {@link #getEvents(XID, String, GetEventsRequest[], Callback)}
-	 *            to retrieve the last event that happened to this mode. Must
-	 *            not be null.
+	 *            to retrieve the last event that happened to this model. Models
+	 *            for which the actorId has no read-access are signalled as
+	 *            {@link XCommand#FAILED}.
+	 * 
+	 *            The second pair element contains a boolean, if the model
+	 *            (currently) exists or not.
 	 * 
 	 *            Every successfully executed command that changes something
 	 *            increases the revision number. Unsuccessful commands or
@@ -390,7 +392,7 @@ public interface XydraStore {
 	 * @throws IllegalArgumentException if one of the given parameters is null.
 	 */
 	void getModelRevisions(XID actorId, String passwordHash, XAddress[] modelAddresses,
-	        Callback<BatchedResult<Long>[]> callback) throws IllegalArgumentException;
+	        Callback<BatchedResult<RevisionState>[]> callback) throws IllegalArgumentException;
 	
 	/**
 	 * Read current state.

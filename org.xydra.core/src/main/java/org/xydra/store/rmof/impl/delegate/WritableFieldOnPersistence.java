@@ -9,6 +9,7 @@ import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.value.XValue;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.RevisionState;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -42,17 +43,17 @@ public class WritableFieldOnPersistence extends AbstractWritableOnPersistence im
 			        this.persistence.getRepositoryId(), this.modelId, this.objectId, this.fieldId,
 			        XCommand.FORCED, true);
 		}
-		long result = this.persistence.executeCommand(this.executingActorId, command);
-		if(result == XCommand.FAILED) {
+		RevisionState result = this.persistence.executeCommand(this.executingActorId, command);
+		if(result.revision() == XCommand.FAILED) {
 			// TODO throw exception?
 			log.warn("Could not execute command " + command);
 			return false;
 		}
-		if(result == XCommand.NOCHANGE) {
+		if(result.revision() == XCommand.NOCHANGE) {
 			log.info("Command made no change " + command);
 			return false;
 		}
-		assert result >= 0;
+		assert result.revision() >= 0;
 		return true;
 	}
 	
@@ -112,16 +113,16 @@ public class WritableFieldOnPersistence extends AbstractWritableOnPersistence im
 		XCommand command = X.getCommandFactory().createAddValueCommand(
 		        this.persistence.getRepositoryId(), this.modelId, this.objectId, this.fieldId,
 		        XCommand.FORCED, value, true);
-		long result = this.persistence.executeCommand(this.executingActorId, command);
-		if(result == XCommand.FAILED) {
+		RevisionState result = this.persistence.executeCommand(this.executingActorId, command);
+		if(result.revision() == XCommand.FAILED) {
 			throw new RuntimeException("Could not execute set-value-initially for value " + value
 			        + ". Result was " + result);
 		}
-		if(result == XCommand.NOCHANGE) {
+		if(result.revision() == XCommand.NOCHANGE) {
 			throw new AssertionError(
 			        "How can the command to set a null value to something not work?");
 		}
-		assert result >= 0;
+		assert result.revision() >= 0;
 	}
 	
 	@Override

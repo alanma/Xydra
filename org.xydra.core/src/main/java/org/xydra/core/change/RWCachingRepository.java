@@ -1,6 +1,8 @@
 package org.xydra.core.change;
 
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -10,6 +12,7 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.RevisionState;
 import org.xydra.store.XydraRuntime;
 
 
@@ -27,32 +30,32 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 	private DiffWritableRepository diffRepo;
 	
 	@Override
-    public XAddress getAddress() {
+	public XAddress getAddress() {
 		return this.diffRepo.getAddress();
 	}
 	
 	@Override
-    public XID getID() {
+	public XID getID() {
 		return this.diffRepo.getID();
 	}
 	
 	@Override
-    public boolean hasModel(XID id) {
+	public boolean hasModel(XID id) {
 		return this.diffRepo.hasModel(id);
 	}
 	
 	@Override
-    public boolean isEmpty() {
+	public boolean isEmpty() {
 		return this.diffRepo.isEmpty();
 	}
 	
 	@Override
-    public XWritableModel getModel(XID modelId) {
+	public XWritableModel getModel(XID modelId) {
 		return this.diffRepo.getModel(modelId);
 	}
 	
 	@Override
-    public boolean removeModel(XID modelId) {
+	public boolean removeModel(XID modelId) {
 		return this.diffRepo.removeModel(modelId);
 	}
 	
@@ -104,7 +107,8 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 		for(DiffWritableModel addedModel : wcRepo.getAdded()) {
 			baseRepo.createModel(addedModel.getID());
 			XTransaction txn = addedModel.toTransaction();
-			int partialResult = executeTransacton(repositoryId, txn, actorId);
+			int partialResult = executeModelTransacton(repositoryId, addedModel.getID(), txn,
+			        actorId);
 			if(partialResult != 200) {
 				log.warn("In model '" + addedModel.getID() + "' could not execute txn: "
 				        + txnToString(txn));
@@ -113,7 +117,8 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 		}
 		for(DiffWritableModel potentiallyChangedModel : wcRepo.getPotentiallyChanged()) {
 			XTransaction txn = potentiallyChangedModel.toTransaction();
-			int partialResult = executeTransacton(repositoryId, txn, actorId);
+			int partialResult = executeModelTransacton(repositoryId,
+			        potentiallyChangedModel.getID(), txn, actorId);
 			if(partialResult != 200) {
 				log.warn("In model '" + potentiallyChangedModel.getID()
 				        + "' could not execute txn: " + txnToString(txn));
@@ -133,12 +138,16 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 	
 	/**
 	 * @param repositoryId
+	 * @param modelId
 	 * @param txn may be null
 	 * @param actorId
 	 */
-	private static int executeTransacton(XID repositoryId, XTransaction txn, XID actorId) {
+	private static int executeModelTransacton(XID repositoryId, XID modelId, XTransaction txn,
+	        XID actorId) {
 		if(txn != null) {
-			long l = XydraRuntime.getPersistence(repositoryId).executeCommand(actorId, txn);
+			RevisionState pair = XydraRuntime.getPersistence(repositoryId).executeCommand(
+			        actorId, txn);
+			long l = pair.revision();
 			if(l < 0) {
 				log.warn("Could not execute non-empty txn " + l + " for " + txn + " = "
 				        + txnToString(txn));
@@ -146,5 +155,22 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 			}
 		}
 		return 200;
+	}
+	
+	public Set<XID> getChangedModelIds() {
+		Set<XID> changedModelIds = new HashSet<XID>();
+		DiffWritableRepository wcRepo = this.getDiffWritableRepository();
+		for(XID id : wcRepo.getRemoved()) {
+			changedModelIds.add(id);
+		}
+		for(DiffWritableModel addedModel : wcRepo.getAdded()) {
+			changedModelIds.add(addedModel.getID());
+		}
+		for(DiffWritableModel potentiallyChangedModel : wcRepo.getPotentiallyChanged()) {
+			if(potentiallyChangedModel.hasChanges()) {
+				changedModelIds.add(potentiallyChangedModel.getID());
+			}
+		}
+		return changedModelIds;
 	}
 }

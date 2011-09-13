@@ -2,9 +2,9 @@ package org.xydra.core.index;
 
 import java.util.Set;
 
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;

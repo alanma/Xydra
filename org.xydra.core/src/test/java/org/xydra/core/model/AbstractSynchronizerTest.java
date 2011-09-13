@@ -43,6 +43,7 @@ import org.xydra.core.model.impl.memory.SynchronizesChangesImpl;
 import org.xydra.core.model.sync.XSynchronizer;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.GetEventsRequest;
+import org.xydra.store.RevisionState;
 import org.xydra.store.SynchronousTestCallback;
 import org.xydra.store.XydraStore;
 
@@ -95,8 +96,9 @@ abstract public class AbstractSynchronizerTest {
 		
 		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback;
 		callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
-		store.getEvents(actorId, passwordHash, new GetEventsRequest[] { new GetEventsRequest(model
-		        .getAddress(), startRev, Long.MAX_VALUE) }, callback);
+		store.getEvents(actorId, passwordHash,
+		        new GetEventsRequest[] { new GetEventsRequest(model.getAddress(), startRev,
+		                Long.MAX_VALUE) }, callback);
 		XEvent[] result = waitForSuccessBatched(callback);
 		Iterator<XEvent> remoteEvents = Arrays.asList(result).iterator();
 		
@@ -149,14 +151,14 @@ abstract public class AbstractSynchronizerTest {
 	 * errors.
 	 */
 	private void executeCommand(XCommand command) {
-		SynchronousTestCallback<BatchedResult<Long>[]> tc;
-		tc = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		SynchronousTestCallback<BatchedResult<RevisionState>[]> tc;
+		tc = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
 		
 		store.executeCommands(actorId, passwordHash, new XCommand[] { command }, tc);
 		
-		long res = waitForSuccessBatched(tc);
+		RevisionState res = waitForSuccessBatched(tc);
 		
-		assertTrue(res != XCommand.FAILED);
+		assertTrue(res.revision() != XCommand.FAILED);
 	}
 	
 	private XModel loadModel(XID modelId) {
@@ -232,8 +234,8 @@ abstract public class AbstractSynchronizerTest {
 			
 			assertNull(loadModelSnapshot(NEWMODEL_ID));
 			
-			XRepository repo = new MemoryRepository(actorId, passwordHash, this.repoAddr
-			        .getRepository());
+			XRepository repo = new MemoryRepository(actorId, passwordHash,
+			        this.repoAddr.getRepository());
 			
 			XModel model = repo.createModel(NEWMODEL_ID);
 			XSynchronizer sync = new XSynchronizer(model, store);
@@ -369,8 +371,8 @@ abstract public class AbstractSynchronizerTest {
 			assertNull(loadModelSnapshot(NEWMODEL_ID));
 			
 			// create a model
-			XRepository repo = new MemoryRepository(actorId, passwordHash, this.repoAddr
-			        .getRepository());
+			XRepository repo = new MemoryRepository(actorId, passwordHash,
+			        this.repoAddr.getRepository());
 			XModel model = repo.createModel(NEWMODEL_ID);
 			XSynchronizer sync = new XSynchronizer(model, store);
 			synchronize(sync);
@@ -430,8 +432,8 @@ abstract public class AbstractSynchronizerTest {
 			assertNull(loadModelSnapshot(NEWMODEL_ID));
 			
 			// create a model
-			XRepository repo = new MemoryRepository(actorId, passwordHash, this.repoAddr
-			        .getRepository());
+			XRepository repo = new MemoryRepository(actorId, passwordHash,
+			        this.repoAddr.getRepository());
 			XModel model = repo.createModel(NEWMODEL_ID);
 			XObject object = model.createObject(XX.toId("bob"));
 			XField field = object.createField(XX.toId("cookies"));
@@ -522,8 +524,8 @@ abstract public class AbstractSynchronizerTest {
 		
 		// make some remote changes
 		final XID cakesId = XX.toId("cakes");
-		XCommand command = MemoryObjectCommand.createAddCommand(this.model.getObject(
-		        DemoModelUtil.JOHN_ID).getAddress(), false, cakesId);
+		XCommand command = MemoryObjectCommand.createAddCommand(
+		        this.model.getObject(DemoModelUtil.JOHN_ID).getAddress(), false, cakesId);
 		executeCommand(command);
 		
 		// make more remote changes
@@ -539,8 +541,8 @@ abstract public class AbstractSynchronizerTest {
 		executeCommand(tb.buildCommand());
 		
 		// and some more remote changes
-		XCommand command2 = MemoryObjectCommand.createAddCommand(this.model.getObject(
-		        DemoModelUtil.PETER_ID).getAddress(), false, cakesId);
+		XCommand command2 = MemoryObjectCommand.createAddCommand(
+		        this.model.getObject(DemoModelUtil.PETER_ID).getAddress(), false, cakesId);
 		executeCommand(command2);
 		
 		// and even more remote changes

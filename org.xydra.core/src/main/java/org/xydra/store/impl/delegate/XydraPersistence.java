@@ -23,6 +23,7 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.store.GetEventsRequest;
+import org.xydra.store.RevisionState;
 import org.xydra.store.XydraStore;
 
 
@@ -82,7 +83,7 @@ public interface XydraPersistence {
 	 *            {@link XTransaction}.
 	 * @return a number indicating the result of executing the command.
 	 */
-	long executeCommand(XID actorId, XCommand command);
+	RevisionState executeCommand(XID actorId, XCommand command);
 	
 	/**
 	 * (Documentation copied from {@link GetEventsRequest})
@@ -126,11 +127,11 @@ public interface XydraPersistence {
 	
 	/**
 	 * @param address of an {@link XModel}
-	 * @return the current revision number of the addressed {@link XModel}. You
-	 *         may get a revision number even if the model does not exist. In
-	 *         this case, it did exist and just got deleted.
+	 * @return Pair.first: the current revision number of the addressed
+	 *         {@link XModel}. Pair.second: If the model currently exists or
+	 *         not.
 	 */
-	long getModelRevision(XAddress address);
+	RevisionState getModelRevision(XAddress address);
 	
 	/**
 	 * @param address of an {@link XModel}

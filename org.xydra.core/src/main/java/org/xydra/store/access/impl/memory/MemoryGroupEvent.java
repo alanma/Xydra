@@ -1,8 +1,8 @@
 package org.xydra.store.access.impl.memory;
 
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.XID;
 import org.xydra.base.change.ChangeType;
 import org.xydra.store.access.XAuthorisationEvent;

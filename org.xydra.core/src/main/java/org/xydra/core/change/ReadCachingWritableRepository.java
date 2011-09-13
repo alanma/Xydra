@@ -49,7 +49,7 @@ public class ReadCachingWritableRepository extends AbstractDelegatingWritableRep
 		if(readCachingModel == null) {
 			// we never read it => created it & cache it
 			XWritableModel baseModel = this.baseRepository.createModel(modelId);
-			readCachingModel = new ReadCachingWritableModel(baseModel, true);
+			readCachingModel = new ReadCachingWritableModel(baseModel, this.prefetchModels);
 			this.map.put(modelId, readCachingModel);
 			this.knownExistingModelIds.add(modelId);
 			this.knownNonExistingModelIds.remove(modelId);
@@ -72,8 +72,14 @@ public class ReadCachingWritableRepository extends AbstractDelegatingWritableRep
 	}
 	
 	@Override
-	public boolean hasModel(XID id) {
-		return modelIds().contains(id);
+	public boolean hasModel(XID modelId) {
+		return getModel(modelId) != null;
+		/*
+		 * This impl triggers gae.changes.Utils:73 findChildren() = a query that
+		 * is not cached.
+		 * 
+		 * return modelIds().contains(modelId);
+		 */
 	}
 	
 	@Override

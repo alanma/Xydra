@@ -15,6 +15,7 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.index.iterator.NoneIterator;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.RevisionState;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -43,7 +44,7 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	}
 	
 	@Override
-    public XWritableObject createObject(XID objectId) {
+	public XWritableObject createObject(XID objectId) {
 		assert this.persistence.hasModel(this.modelId);
 		
 		XWritableObject object = this.getObject(objectId);
@@ -53,8 +54,9 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 		// create in persistence
 		XCommand command = X.getCommandFactory().createAddObjectCommand(
 		        this.persistence.getRepositoryId(), this.modelId, objectId, true);
-		long commandResult = this.persistence.executeCommand(this.executingActorId, command);
-		assert commandResult >= 0 : "Command " + command + " returned " + commandResult;
+		RevisionState commandResult = this.persistence.executeCommand(this.executingActorId,
+		        command);
+		assert commandResult.revision() >= 0 : "Command " + command + " returned " + commandResult;
 		return getObject(objectId);
 	}
 	
@@ -79,7 +81,7 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	 */
 	public List<XEvent> getNewEvents() {
 		// get highestEvent
-		long currentRev = this.persistence.getModelRevision(this.getAddress());
+		long currentRev = this.persistence.getModelRevision(this.getAddress()).revision();
 		List<XEvent> events = null;
 		if(currentRev > this.lastRev) {
 			// get event between lastProcessed and highest
@@ -90,7 +92,7 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	}
 	
 	@Override
-    public XWritableObject getObject(XID objectId) {
+	public XWritableObject getObject(XID objectId) {
 		if(hasObject(objectId)) {
 			// make sure changes to object are reflected in persistence
 			return new WritableObjectOnPersistence(this.persistence, this.executingActorId,
@@ -101,7 +103,7 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	}
 	
 	@Override
-    public long getRevisionNumber() {
+	public long getRevisionNumber() {
 		XWritableModel snapshot = this.persistence.getModelSnapshot(getAddress());
 		if(snapshot == null) {
 			log.warn("Modelsnapshot for " + getAddress() + " is null");
@@ -111,7 +113,7 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	}
 	
 	@Override
-    public boolean hasObject(XID objectId) {
+	public boolean hasObject(XID objectId) {
 		XAddress objectAddress = XX.resolveObject(getAddress(), objectId);
 		XWritableObject objectSnapshot = this.persistence.getObjectSnapshot(objectAddress);
 		if(objectSnapshot == null) {
@@ -124,16 +126,16 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	 * Allows load() methods to init this model correctly.
 	 */
 	public void ignoreAllEventsUntilNow() {
-		this.lastRev = this.persistence.getModelRevision(this.getAddress());
+		this.lastRev = this.persistence.getModelRevision(this.getAddress()).revision();
 	}
 	
 	@Override
-    public boolean isEmpty() {
+	public boolean isEmpty() {
 		return this.persistence.getModelSnapshot(getAddress()).isEmpty();
 	}
 	
 	@Override
-    public Iterator<XID> iterator() {
+	public Iterator<XID> iterator() {
 		XWritableModel modelSnapshot = this.persistence.getModelSnapshot(getAddress());
 		if(modelSnapshot == null || modelSnapshot.isEmpty()) {
 			return new NoneIterator<XID>();
@@ -142,13 +144,14 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	}
 	
 	@Override
-    public boolean removeObject(XID objectId) {
+	public boolean removeObject(XID objectId) {
 		boolean result = hasObject(objectId);
 		XCommand command = X.getCommandFactory().createRemoveObjectCommand(
 		        this.persistence.getRepositoryId(), this.modelId, objectId, XCommand.FORCED, true);
-		long commandResult = this.persistence.executeCommand(this.executingActorId, command);
-		assert commandResult >= 0;
-		return result && commandResult >= 0;
+		RevisionState commandResult = this.persistence.executeCommand(this.executingActorId,
+		        command);
+		assert commandResult.revision() >= 0;
+		return result && commandResult.revision() >= 0;
 	}
 	
 	@Override

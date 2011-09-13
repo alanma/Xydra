@@ -10,6 +10,7 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.index.iterator.NoneIterator;
+import org.xydra.store.RevisionState;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -28,7 +29,7 @@ public class WritableObjectOnPersistence extends AbstractWritableOnPersistence i
 	}
 	
 	@Override
-    public XWritableField createField(XID fieldId) {
+	public XWritableField createField(XID fieldId) {
 		// assume model and object exist
 		XWritableField field = this.getField(fieldId);
 		if(field != null) {
@@ -52,7 +53,7 @@ public class WritableObjectOnPersistence extends AbstractWritableOnPersistence i
 	}
 	
 	@Override
-    public XWritableField getField(XID fieldId) {
+	public XWritableField getField(XID fieldId) {
 		if(hasField(fieldId)) {
 			// make sure changes to object are reflected in persistence
 			return new WritableFieldOnPersistence(this.persistence, this.executingActorId,
@@ -82,36 +83,37 @@ public class WritableObjectOnPersistence extends AbstractWritableOnPersistence i
 	}
 	
 	@Override
-    public long getRevisionNumber() {
+	public long getRevisionNumber() {
 		return getObjectSnapshot().getRevisionNumber();
 	}
 	
 	@Override
-    public boolean hasField(XID fieldId) {
+	public boolean hasField(XID fieldId) {
 		XWritableObject snapshot = getObjectSnapshot();
 		return snapshot != null && snapshot.hasField(fieldId);
 	}
 	
 	@Override
-    public boolean isEmpty() {
+	public boolean isEmpty() {
 		XWritableObject snapshot = getObjectSnapshot();
 		return snapshot == null || snapshot.isEmpty();
 	}
 	
 	@Override
-    public Iterator<XID> iterator() {
+	public Iterator<XID> iterator() {
 		XWritableObject snapshot = getObjectSnapshot();
 		return snapshot == null ? new NoneIterator<XID>() : snapshot.iterator();
 	}
 	
 	@Override
-    public boolean removeField(XID fieldId) {
+	public boolean removeField(XID fieldId) {
 		boolean result = hasField(fieldId);
 		XCommand command = X.getCommandFactory().createRemoveFieldCommand(
 		        this.persistence.getRepositoryId(), this.modelId, this.objectId, fieldId,
 		        XCommand.FORCED, true);
-		long commandResult = this.persistence.executeCommand(this.executingActorId, command);
-		assert commandResult >= 0;
+		RevisionState commandResult = this.persistence.executeCommand(this.executingActorId,
+		        command);
+		assert commandResult.revision() >= 0;
 		return result;
 	}
 	

@@ -170,6 +170,7 @@ public class XCopyUtils {
 		}
 		XRevWritableModel targetModel = new SimpleModel(sourceModel.getAddress());
 		copyDataAndRevisions(sourceModel, targetModel);
+		assert sourceModel.getRevisionNumber() == targetModel.getRevisionNumber();
 		return targetModel;
 	}
 	

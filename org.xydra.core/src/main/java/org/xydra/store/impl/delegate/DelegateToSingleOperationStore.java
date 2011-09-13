@@ -28,6 +28,7 @@ import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.RequestException;
+import org.xydra.store.RevisionState;
 import org.xydra.store.StoreException;
 import org.xydra.store.WaitingCallback;
 import org.xydra.store.XydraStore;
@@ -127,7 +128,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 	}
 	
 	@Override
-    public void checkLogin(XID actorId, String passwordHash, Callback<Boolean> callback)
+	public void checkLogin(XID actorId, String passwordHash, Callback<Boolean> callback)
 	        throws IllegalArgumentException {
 		DelegationUtils.assertNonNullActorAndPassword(actorId, passwordHash);
 		DelegationUtils.assertNonNullCallback(callback);
@@ -152,15 +153,16 @@ public class DelegateToSingleOperationStore implements XydraStore {
 		
 	}
 	
-	private static final Callback<BatchedResult<Long>[]> defaultCommandsCallback = new DefaultCallback<Long>();
+	private static final Callback<BatchedResult<RevisionState>[]> defaultCommandsCallback = new DefaultCallback<RevisionState>();
 	
 	@Override
-    public void executeCommands(XID actorId, String passwordHash, XCommand[] commands,
-	        Callback<BatchedResult<Long>[]> callbackOrNull) throws IllegalArgumentException {
+	public void executeCommands(XID actorId, String passwordHash, XCommand[] commands,
+	        Callback<BatchedResult<RevisionState>[]> callbackOrNull)
+	        throws IllegalArgumentException {
 		
 		DelegationUtils.assertNonNullActorAndPassword(actorId, passwordHash);
 		
-		Callback<BatchedResult<Long>[]> callback = callbackOrNull;
+		Callback<BatchedResult<RevisionState>[]> callback = callbackOrNull;
 		if(callback == null) {
 			callback = defaultCommandsCallback;
 		}
@@ -179,21 +181,24 @@ public class DelegateToSingleOperationStore implements XydraStore {
 		}
 	}
 	
-	private MultiOpCallback<Long> executeCommands(XID actorId, XCommand[] commands,
-	        Callback<BatchedResult<Long>[]> callback) {
+	private MultiOpCallback<RevisionState> executeCommands(XID actorId, XCommand[] commands,
+	        Callback<BatchedResult<RevisionState>[]> callback) {
 		
-		MultiOpCallback<Long> multi = new MultiOpCallback<Long>(commands.length, callback);
+		MultiOpCallback<RevisionState> multi = new MultiOpCallback<RevisionState>(
+		        commands.length, callback);
 		
 		@SuppressWarnings("unchecked")
-		SingleOpCallback<Long>[] soc = new SingleOpCallback[commands.length];
+		SingleOpCallback<RevisionState>[] soc = new SingleOpCallback[commands.length];
 		
 		// call n individual asynchronous single operations
 		for(int i = 0; i < commands.length; i++) {
-			soc[i] = new SingleOpCallback<Long>(multi, i);
+			soc[i] = new SingleOpCallback<RevisionState>(multi, i);
 			try {
 				XCommand command = fixCommand(soc, commands[i], i);
 				if(command == null) {
-					soc[i].onSuccess(XCommand.FAILED);
+					// FIXME compute if model exists (instead of simply saying
+					// false)
+					soc[i].onSuccess(new RevisionState(XCommand.FAILED, false));
 				} else {
 					this.singleOpStore.executeCommand(actorId, null, command, soc[i]);
 				}
@@ -206,7 +211,8 @@ public class DelegateToSingleOperationStore implements XydraStore {
 		return multi;
 	}
 	
-	private XCommand fixCommand(SingleOpCallback<Long>[] soc, XCommand command, int idx) {
+	private XCommand fixCommand(SingleOpCallback<RevisionState>[] soc, XCommand command,
+	        int idx) {
 		
 		if(command == null) {
 			throw new RequestException("command was null");
@@ -242,7 +248,8 @@ public class DelegateToSingleOperationStore implements XydraStore {
 		return MemoryTransaction.createTransaction(trans.getTarget(), fixedCommands);
 	}
 	
-	private XAtomicCommand fixAtomicCommand(SingleOpCallback<Long>[] soc, int i, XAtomicCommand ac) {
+	private XAtomicCommand fixAtomicCommand(SingleOpCallback<RevisionState>[] soc, int i,
+	        XAtomicCommand ac) {
 		
 		if(ac.isForced() || ac.getRevisionNumber() < XCommand.RELATIVE_REV) {
 			// not relative
@@ -260,10 +267,11 @@ public class DelegateToSingleOperationStore implements XydraStore {
 		
 		// wait for the result of the command we depend on
 		assert soc[index] != null;
-		Long rev = soc[index].getResult();
-		if(rev == null) {
+		RevisionState pair = soc[index].getResult();
+		if(pair == null) {
 			return null;
 		}
+		long rev = pair.revision();
 		
 		if(ac instanceof XRepositoryCommand) {
 			assert ac.getChangeType() == ChangeType.REMOVE;
@@ -298,7 +306,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 	@Override
 	public void executeCommandsAndGetEvents(XID actorId, String passwordHash, XCommand[] commands,
 	        GetEventsRequest[] getEventRequests,
-	        Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback)
+	        Callback<Pair<BatchedResult<RevisionState>[],BatchedResult<XEvent[]>[]>> callback)
 	        throws IllegalArgumentException {
 		
 		DelegationUtils.assertNonNullActorAndPassword(actorId, passwordHash);
@@ -310,13 +318,13 @@ public class DelegateToSingleOperationStore implements XydraStore {
 				return;
 			}
 			
-			MultiOpCallback<Long> res = executeCommands(actorId, commands, null);
-			BatchedResult<Long>[] revs = res.getResult();
+			MultiOpCallback<RevisionState> res = executeCommands(actorId, commands, null);
+			BatchedResult<RevisionState>[] revs = res.getResult();
 			
 			MultiOpCallback<XEvent[]> events = getEvents(actorId, getEventRequests, null);
 			
-			callback.onSuccess(new Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>(revs,
-			        events.getResult()));
+			callback.onSuccess(new Pair<BatchedResult<RevisionState>[],BatchedResult<XEvent[]>[]>(
+			        revs, events.getResult()));
 			
 		} catch(StoreException e) {
 			log.warn("Telling callback: ", e);
@@ -369,7 +377,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 	}
 	
 	@Override
-    public void getModelIds(XID actorId, String passwordHash, Callback<Set<XID>> callback)
+	public void getModelIds(XID actorId, String passwordHash, Callback<Set<XID>> callback)
 	        throws IllegalArgumentException {
 		DelegationUtils.assertNonNullActorAndPassword(actorId, passwordHash);
 		DelegationUtils.assertNonNullCallback(callback);
@@ -378,7 +386,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 	
 	@Override
 	public void getModelRevisions(XID actorId, String passwordHash, XAddress[] modelAddresses,
-	        Callback<BatchedResult<Long>[]> callback) throws IllegalArgumentException {
+	        Callback<BatchedResult<RevisionState>[]> callback) throws IllegalArgumentException {
 		
 		DelegationUtils.assertNonNullActorAndPassword(actorId, passwordHash);
 		DelegationUtils.assertNonNullCallback(callback);
@@ -391,11 +399,13 @@ public class DelegateToSingleOperationStore implements XydraStore {
 				return;
 			}
 			
-			MultiOpCallback<Long> multi = new MultiOpCallback<Long>(modelAddresses.length, callback);
+			MultiOpCallback<RevisionState> multi = new MultiOpCallback<RevisionState>(
+			        modelAddresses.length, callback);
 			
 			// call n individual asynchronous single operations
 			for(int i = 0; i < modelAddresses.length; i++) {
-				SingleOpCallback<Long> soc = new SingleOpCallback<Long>(multi, i);
+				SingleOpCallback<RevisionState> soc = new SingleOpCallback<RevisionState>(
+				        multi, i);
 				try {
 					this.singleOpStore.getModelRevision(actorId, null, modelAddresses[i], soc);
 				} catch(StoreException e) {
@@ -491,7 +501,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 	}
 	
 	@Override
-    public void getRepositoryId(XID actorId, String passwordHash, Callback<XID> callback)
+	public void getRepositoryId(XID actorId, String passwordHash, Callback<XID> callback)
 	        throws IllegalArgumentException {
 		DelegationUtils.assertNonNullActorAndPassword(actorId, passwordHash);
 		DelegationUtils.assertNonNullCallback(callback);
@@ -499,7 +509,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 	}
 	
 	@Override
-    public XydraStoreAdmin getXydraStoreAdmin() {
+	public XydraStoreAdmin getXydraStoreAdmin() {
 		return this.singleOpStore.getXydraStoreAdmin();
 	}
 	

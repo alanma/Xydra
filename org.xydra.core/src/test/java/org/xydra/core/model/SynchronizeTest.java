@@ -41,12 +41,12 @@ import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.core.model.impl.memory.SynchronizesChangesImpl;
-import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.SerializedCommand;
 import org.xydra.core.serialize.SerializedEvent;
+import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.XydraOut;
-import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.core.serialize.xml.XmlOut;
+import org.xydra.core.serialize.xml.XmlParser;
 
 
 /**

@@ -1,7 +1,7 @@
 package org.xydra.core.model.impl.memory;
 
-import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.RequiresAppEngine;
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XIDProvider;

@@ -67,7 +67,7 @@ public interface XReadableModel extends XEntity, Iterable<XID> {
 	 * @throws IllegalStateException if this model has already been removed
 	 */
 	@Override
-    @ReadOperation
+	@ReadOperation
 	Iterator<XID> iterator();
 	
 }

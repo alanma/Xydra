@@ -18,9 +18,9 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
-import org.xydra.log.DefaultLoggerFactorySPI;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.log.gae.Log4jLoggerFactory;
 
 
 /**
@@ -40,7 +40,7 @@ import org.xydra.log.LoggerFactory;
 public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	
 	static {
-		LoggerFactory.setLoggerFactorySPI(new DefaultLoggerFactorySPI());
+		LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
 	}
 	
 	private static final Logger log = LoggerFactory.getLogger(AbstractStoreReadMethodsTest.class);
@@ -120,13 +120,13 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		
 		XCommand[] commands = { modelCommand1, modelCommand2, modelCommand3, objectCommand1,
 		        objectCommand2, objectCommand3 };
-		SynchronousTestCallback<BatchedResult<Long>[]> commandCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		SynchronousTestCallback<BatchedResult<RevisionState>[]> commandCallback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
 		
 		this.store.executeCommands(this.correctUser, this.correctUserPass, commands,
 		        commandCallback);
 		waitOnCallback(commandCallback);
 		
-		BatchedResult<Long>[] result = commandCallback.getEffect();
+		BatchedResult<RevisionState>[] result = commandCallback.getEffect();
 		if(commandCallback.getException() != null) {
 			throw new RuntimeException(
 			        "ExecuteCommands did not work properly in setUp (threw an Exception), here's its message text: ",
@@ -139,14 +139,14 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		}
 		
 		for(int i = 0; i < result.length; i++) {
-			if(result[i].getResult() == XCommand.FAILED) {
+			if(result[i].getResult().revision() == XCommand.FAILED) {
 				throw new RuntimeException(
 				        "ExecuteCommands did not work properly in setUp: command at index " + i
 				                + " failed!");
 			}
 			// TODO is this check necessary?
 			// TODO this fails with the GaeStore which cannot be reset
-			if(result[i].getResult() == XCommand.NOCHANGE) {
+			if(result[i].getResult().revision() == XCommand.NOCHANGE) {
 				throw new RuntimeException(
 				        "ExecuteCommands did not work properly in setUp: command at index " + i
 				                + " did not change anything! " + commands[i]);
@@ -179,28 +179,25 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	
 	@Test
 	public void testBogus1() {
-		System.out.println("aaa1");
 		// all ok, just trigger @Before
 	}
 	
 	@Test
 	public void testBogus2() {
-		System.out.println("aaa2");
 		// all ok, just trigger @Before
 	}
 	
 	@Test
 	public void getRevs() {
-		SynchronousTestCallback<BatchedResult<Long>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		SynchronousTestCallback<BatchedResult<RevisionState>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
 		this.store.getModelRevisions(this.correctUser, this.correctUserPass, this.modelAddresses,
 		        revisionCallback);
 		assertTrue(this.waitOnCallback(revisionCallback));
 		assertNotNull(revisionCallback.getEffect());
 		assertNull(revisionCallback.getException());
-		BatchedResult<Long>[] revisionResult = revisionCallback.getEffect();
-		for(BatchedResult<Long> l : revisionResult) {
-			System.out.println("Got rev = " + l.getFirst() + " - " + l.getSecond() + " - "
-			        + l.getResult());
+		BatchedResult<RevisionState>[] revisionResult = revisionCallback.getEffect();
+		for(BatchedResult<RevisionState> l : revisionResult) {
+			log.trace("Got rev = " + l.getFirst() + " - " + l.getSecond() + " - " + l.getResult());
 		}
 	}
 	
@@ -208,9 +205,9 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	// access to
 	@Test
 	public void testGetModelRevisions() {
-		System.out.println("aaa3");
+		log.info("testGetModelRevisions");
 		SynchronousTestCallback<BatchedResult<XReadableModel>[]> snapshotCallback = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
-		SynchronousTestCallback<BatchedResult<Long>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		SynchronousTestCallback<BatchedResult<RevisionState>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
 		
 		// Get revisions
 		this.store.getModelRevisions(this.correctUser, this.correctUserPass, this.modelAddresses,
@@ -229,7 +226,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		BatchedResult<XReadableModel>[] snapshotResult = snapshotCallback.getEffect();
 		assertEquals(this.modelAddresses.length, snapshotResult.length);
 		
-		BatchedResult<Long>[] revisionResult = revisionCallback.getEffect();
+		BatchedResult<RevisionState>[] revisionResult = revisionCallback.getEffect();
 		assertEquals(this.modelAddresses.length, revisionResult.length);
 		
 		// check order of returned snapshots
@@ -245,7 +242,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			assertNotNull(revisionResult[i].getResult());
 			assertNull(revisionResult[i].getException());
 			long revBySnapshot = snapshotResult[i].getResult().getRevisionNumber();
-			long revDirect = revisionResult[i].getResult();
+			long revDirect = revisionResult[i].getResult().revision();
 			assertEquals("" + snapshotResult[i].getResult().getAddress(), revDirect, revBySnapshot);
 		}
 	}
@@ -487,7 +484,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	// Test IllegalArgumentException
 	@Test
 	public void testGetModelRevisionPassingNull() {
-		SynchronousTestCallback<BatchedResult<Long>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		SynchronousTestCallback<BatchedResult<RevisionState>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
 		
 		// first parameter equals null
 		try {
@@ -499,7 +496,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		}
 		
 		// second parameter equals null
-		revisionCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		revisionCallback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
 		
 		try {
 			this.store.getModelRevisions(this.correctUser, null, this.modelAddresses,
@@ -510,7 +507,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		}
 		
 		// third parameter equals null
-		revisionCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		revisionCallback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
 		
 		try {
 			this.store.getModelRevisions(this.correctUser, this.correctUserPass, null,
@@ -521,7 +518,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		}
 		
 		// all parameters equal null
-		revisionCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		revisionCallback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
 		
 		try {
 			this.store.getModelRevisions(null, null, null, revisionCallback);
@@ -562,9 +559,9 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			return;
 		}
 		
-		SynchronousTestCallback<BatchedResult<Long>[]> revisionCallback;
+		SynchronousTestCallback<BatchedResult<RevisionState>[]> revisionCallback;
 		
-		revisionCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		revisionCallback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
 		
 		this.store.getModelRevisions(this.incorrectUser, this.incorrectUserPass,
 		        this.modelAddresses, revisionCallback);
@@ -578,7 +575,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	@Test
 	public void testGetModelRevisionsMixedAddresses() {
 		SynchronousTestCallback<BatchedResult<XReadableModel>[]> snapshotCallback = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
-		SynchronousTestCallback<BatchedResult<Long>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		SynchronousTestCallback<BatchedResult<RevisionState>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
 		
 		XAddress[] tempArray = new XAddress[this.modelAddresses.length + 1];
 		System.arraycopy(this.modelAddresses, 0, tempArray, 0, this.modelAddresses.length);
@@ -599,7 +596,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		BatchedResult<XReadableModel>[] snapshotResult = snapshotCallback.getEffect();
 		assertEquals(tempArray.length, snapshotResult.length);
 		
-		BatchedResult<Long>[] revisionResult = revisionCallback.getEffect();
+		BatchedResult<RevisionState>[] revisionResult = revisionCallback.getEffect();
 		assertEquals(tempArray.length, revisionResult.length);
 		
 		// check order of returned snapshots
@@ -607,15 +604,15 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			if(i == this.modelAddresses.length) {
 				// this index contains an XAddress of a not existing XModel
 				assertNull(snapshotResult[i].getResult());
-				assertEquals((Long)XCommand.FAILED, revisionResult[i].getResult());
+				assertEquals(XCommand.FAILED, revisionResult[i].getResult().revision());
 				assertNull(revisionResult[i].getException());
 			} else {
 				assertEquals(this.modelAddresses[i], snapshotResult[i].getResult().getAddress());
 				
 				assertNotNull(revisionResult[i].getResult());
 				assertNull(revisionResult[i].getException());
-				assertEquals((Long)snapshotResult[i].getResult().getRevisionNumber(),
-				        revisionResult[i].getResult());
+				assertEquals(snapshotResult[i].getResult().getRevisionNumber(), revisionResult[i]
+				        .getResult().revision());
 			}
 		}
 		
@@ -626,7 +623,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	// exist
 	@Test
 	public void testGetModelRevisionsNotExistingModel() {
-		SynchronousTestCallback<BatchedResult<Long>[]> callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		SynchronousTestCallback<BatchedResult<RevisionState>[]> callback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
 		XAddress[] tempArray = new XAddress[] { this.notExistingModel };
 		
 		this.store.getModelRevisions(this.correctUser, this.correctUserPass, tempArray, callback);
@@ -635,16 +632,16 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		assertNotNull(callback.getEffect());
 		assertNull(callback.getException());
 		
-		BatchedResult<Long>[] result = callback.getEffect();
+		BatchedResult<RevisionState>[] result = callback.getEffect();
 		assertNotNull(result[0].getResult());
 		assertNull(result[0].getException());
-		assertEquals((Long)XCommand.FAILED, result[0].getResult());
+		assertEquals(XCommand.FAILED, result[0].getResult().revision());
 	}
 	
 	// Test if it behaves correctly for addresses that do not address an XModel
 	@Test
 	public void testGetModelRevisionsWrongAddress() {
-		SynchronousTestCallback<BatchedResult<Long>[]> callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		SynchronousTestCallback<BatchedResult<RevisionState>[]> callback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
 		log.warn("Expect three warnings because we ask with objectAdresses for modelRevisions");
 		this.store.getModelRevisions(this.correctUser, this.correctUserPass, this.objectAddresses,
 		        callback);
@@ -653,7 +650,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		assertNotNull(callback.getEffect());
 		assertNull(callback.getException());
 		
-		BatchedResult<Long>[] result = callback.getEffect();
+		BatchedResult<RevisionState>[] result = callback.getEffect();
 		
 		for(int i = 0; i < result.length; i++) {
 			// assertNotNull(result[i].getResult());
@@ -666,6 +663,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	// access to
 	@Test
 	public void testGetModelSnapshots() {
+		log.info("testGetModelSnapshots");
 		SynchronousTestCallback<BatchedResult<XReadableModel>[]> callback = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
 		
 		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, this.modelAddresses,

@@ -27,6 +27,7 @@ import org.xydra.store.GetEventsRequest;
 import org.xydra.store.InternalStoreException;
 import org.xydra.store.QuotaException;
 import org.xydra.store.RequestException;
+import org.xydra.store.RevisionState;
 import org.xydra.store.TimeoutException;
 import org.xydra.store.XydraStore;
 import org.xydra.store.XydraStoreAdmin;
@@ -135,12 +136,12 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 	}
 	
 	@Override
-    public void clear() {
+	public void clear() {
 		this.persistence.clear();
 	}
 	
 	@Override
-	public long executeCommand(XID actorId, String passwordHash, XCommand command)
+	public RevisionState executeCommand(XID actorId, String passwordHash, XCommand command)
 	        throws AccessException {
 		assert actorId != null;
 		authorise(actorId, passwordHash);
@@ -265,7 +266,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 	}
 	
 	@Override
-	public long getModelRevision(XID actorId, String passwordHash, XAddress address) {
+	public RevisionState getModelRevision(XID actorId, String passwordHash, XAddress address) {
 		assert actorId != null;
 		authorise(actorId, passwordHash);
 		if(address.getAddressedType() != XType.XMODEL) {
@@ -277,7 +278,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 		        || this.acm.getAuthorisationManager().canRead(actorId, address)) {
 			return this.persistence.getModelRevision(address);
 		} else {
-			return XCommand.FAILED;
+			return new RevisionState(XCommand.FAILED, false);
 		}
 	}
 	

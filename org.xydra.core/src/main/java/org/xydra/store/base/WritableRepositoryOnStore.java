@@ -13,6 +13,7 @@ import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.XWritableRepository;
+import org.xydra.store.RevisionState;
 import org.xydra.store.XydraStore;
 
 
@@ -42,7 +43,9 @@ public class WritableRepositoryOnStore extends ReadableRepositoryOnStore impleme
 	@Override
 	public XWritableModel createModel(XID modelId) {
 		XCommand command = X.getCommandFactory().createAddModelCommand(this.getID(), modelId, true);
-		long result = ExecuteCommandsUtils.executeCommand(this.credentials, this.store, command);
+		RevisionState pair = ExecuteCommandsUtils.executeCommand(this.credentials, this.store,
+		        command);
+		long result = pair.revision();
 		if(result >= 0) {
 			this.modelIds = null;
 			return this.getModel(modelId);
@@ -82,7 +85,9 @@ public class WritableRepositoryOnStore extends ReadableRepositoryOnStore impleme
 	public boolean removeModel(XID modelId) {
 		XCommand command = X.getCommandFactory().createRemoveModelCommand(this.getID(), modelId,
 		        this.getModel(modelId).getRevisionNumber(), true);
-		long result = ExecuteCommandsUtils.executeCommand(this.credentials, this.store, command);
+		RevisionState pair = ExecuteCommandsUtils.executeCommand(this.credentials, this.store,
+		        command);
+		long result = pair.revision();
 		if(result >= 0) {
 			this.modelIds = null;
 			return true;

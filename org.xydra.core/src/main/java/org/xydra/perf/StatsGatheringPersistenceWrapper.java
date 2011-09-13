@@ -15,6 +15,7 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.perf.Stats.Clock;
+import org.xydra.store.RevisionState;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -26,7 +27,8 @@ import org.xydra.store.impl.delegate.XydraPersistence;
  */
 public class StatsGatheringPersistenceWrapper implements XydraPersistence {
 	
-	private static final Logger log = LoggerFactory.getLogger(StatsGatheringPersistenceWrapper.class);
+	private static final Logger log = LoggerFactory
+	        .getLogger(StatsGatheringPersistenceWrapper.class);
 	
 	private XydraPersistence basePersistence;
 	
@@ -39,22 +41,22 @@ public class StatsGatheringPersistenceWrapper implements XydraPersistence {
 	private Stats stats = new Stats();
 	
 	@Override
-    public void clear() {
+	public void clear() {
 		Clock c = this.stats.startClock("clear");
 		this.basePersistence.clear();
 		c.stop();
 	}
 	
 	@Override
-    public long executeCommand(XID actorId, XCommand command) {
+	public RevisionState executeCommand(XID actorId, XCommand command) {
 		Clock c = this.stats.startClock("executeCommand");
-		long result = this.basePersistence.executeCommand(actorId, command);
+		RevisionState result = this.basePersistence.executeCommand(actorId, command);
 		c.stop();
 		return result;
 	}
 	
 	@Override
-    public List<XEvent> getEvents(XAddress address, long beginRevision, long endRevision) {
+	public List<XEvent> getEvents(XAddress address, long beginRevision, long endRevision) {
 		Clock c = this.stats.startClock("getEvents");
 		List<XEvent> result = this.basePersistence.getEvents(address, beginRevision, endRevision);
 		c.stop();
@@ -62,7 +64,7 @@ public class StatsGatheringPersistenceWrapper implements XydraPersistence {
 	}
 	
 	@Override
-    public Set<XID> getModelIds() {
+	public Set<XID> getModelIds() {
 		Clock c = this.stats.startClock("getModelIds");
 		Set<XID> result = this.basePersistence.getModelIds();
 		c.stop();
@@ -70,15 +72,15 @@ public class StatsGatheringPersistenceWrapper implements XydraPersistence {
 	}
 	
 	@Override
-    public long getModelRevision(XAddress address) {
+	public RevisionState getModelRevision(XAddress address) {
 		Clock c = this.stats.startClock("getModelRevision");
-		long result = this.basePersistence.getModelRevision(address);
+		RevisionState result = this.basePersistence.getModelRevision(address);
 		c.stop();
 		return result;
 	}
 	
 	@Override
-    public XWritableModel getModelSnapshot(XAddress address) {
+	public XWritableModel getModelSnapshot(XAddress address) {
 		Clock c = this.stats.startClock("getModelSnapshot");
 		XWritableModel result = this.basePersistence.getModelSnapshot(address);
 		c.stop();
@@ -86,7 +88,7 @@ public class StatsGatheringPersistenceWrapper implements XydraPersistence {
 	}
 	
 	@Override
-    public XWritableObject getObjectSnapshot(XAddress address) {
+	public XWritableObject getObjectSnapshot(XAddress address) {
 		Clock c = this.stats.startClock("getObjectSnapshot");
 		XWritableObject result = this.basePersistence.getObjectSnapshot(address);
 		c.stop();
@@ -94,7 +96,7 @@ public class StatsGatheringPersistenceWrapper implements XydraPersistence {
 	}
 	
 	@Override
-    public XID getRepositoryId() {
+	public XID getRepositoryId() {
 		Clock c = this.stats.startClock("getRepositoryId");
 		XID result = this.basePersistence.getRepositoryId();
 		c.stop();
@@ -102,7 +104,7 @@ public class StatsGatheringPersistenceWrapper implements XydraPersistence {
 	}
 	
 	@Override
-    public boolean hasModel(XID modelId) {
+	public boolean hasModel(XID modelId) {
 		Clock c = this.stats.startClock("hasModel");
 		boolean result = this.basePersistence.hasModel(modelId);
 		c.stop();

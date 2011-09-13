@@ -5,9 +5,9 @@ import java.util.Map;
 
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
+import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.XID;
 import org.xydra.store.access.XAuthenticationDatabase;
 

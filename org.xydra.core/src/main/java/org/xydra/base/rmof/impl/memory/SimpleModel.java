@@ -31,6 +31,15 @@ public class SimpleModel implements Serializable, XRevWritableModel {
 	private final XAddress address;
 	private final Map<XID,XRevWritableObject> objects;
 	private long revisionNumber;
+	private boolean modelExists = true;
+	
+	public boolean modelExists() {
+		return this.modelExists;
+	}
+	
+	public void setModelExists(boolean modelExists) {
+		this.modelExists = modelExists;
+	}
 	
 	public SimpleModel(XAddress address) {
 		this(address, XCommand.NEW);
@@ -126,6 +135,11 @@ public class SimpleModel implements Serializable, XRevWritableModel {
 	public boolean equals(Object other) {
 		return other instanceof XReadableModel
 		        && XCompareUtils.equalState(this, (XReadableModel)other);
+	}
+	
+	@Override
+	public String toString() {
+		return this.address + " [" + this.revisionNumber + "], " + this.objects.size() + " objects";
 	}
 	
 }

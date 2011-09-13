@@ -37,6 +37,7 @@ import org.xydra.store.GetEventsRequest;
 import org.xydra.store.InternalStoreException;
 import org.xydra.store.QuotaException;
 import org.xydra.store.RequestException;
+import org.xydra.store.RevisionState;
 import org.xydra.store.StoreException;
 import org.xydra.store.TimeoutException;
 
@@ -127,14 +128,15 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testCommandResultsSuccess() {
-		testCommandResults(new BatchedResult[] { result(42l) }, null);
+		testCommandResults(new BatchedResult[] { result(new RevisionState(42, true)) }, null);
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testCommandResultsMixed() {
-		testCommandResults(new BatchedResult[] { result(42l), preError(), result(-1l),
-		        storeError(), result(-2l) }, null);
+		testCommandResults(new BatchedResult[] { result(new RevisionState(42, true)), preError(),
+		        result(new RevisionState(-1, true)), storeError(),
+		        result(new RevisionState(-2, true)) }, null);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -248,12 +250,12 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		checkBatchedResult(eventRes, res2);
 	}
 	
-	private void testCommandResults(BatchedResult<Long>[] commandRes,
+	private void testCommandResults(BatchedResult<RevisionState>[] commandRes,
 	        BatchedResult<XEvent[]>[] eventRes) {
 		
 		assert commandRes != null;
 		
-		BatchedResult<Long>[] commands = preparePre(commandRes);
+		BatchedResult<RevisionState>[] commands = preparePre(commandRes);
 		
 		EventsRequest er = preparePreRequests(eventRes);
 		BatchedResult<XEvent[]>[] events = preparePreResults(eventRes);
@@ -261,7 +263,7 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		XydraOut out = create();
 		SerializedStore.serializeCommandResults(commands, er, events, out);
 		
-		BatchedResult<Long>[] res = preparePost(commandRes);
+		BatchedResult<RevisionState>[] res = preparePost(commandRes);
 		
 		GetEventsRequest[] req = preparePostRequests(eventRes);
 		BatchedResult<XEvent[]>[] res2 = preparePost(eventRes);
@@ -294,8 +296,8 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		return res;
 	}
 	
-	private static final GetEventsRequest dummyReq = new GetEventsRequest(XX
-	        .toAddress("/hello/world"), 0, Long.MAX_VALUE);
+	private static final GetEventsRequest dummyReq = new GetEventsRequest(
+	        XX.toAddress("/hello/world"), 0, Long.MAX_VALUE);
 	
 	@SuppressWarnings("unchecked")
 	private BatchedResult<XEvent[]>[] preparePreResults(BatchedResult<XEvent[]>[] eventRes) {
@@ -345,8 +347,8 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 			
 		}
 		
-		return new EventsRequest(except.toArray(new StoreException[except.size()]), ger
-		        .toArray(new GetEventsRequest[ger.size()]));
+		return new EventsRequest(except.toArray(new StoreException[except.size()]),
+		        ger.toArray(new GetEventsRequest[ger.size()]));
 	}
 	
 	private GetEventsRequest makeRequest(BatchedResult<XEvent[]> res) {
@@ -411,8 +413,8 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 			assertNotNull(actual.getResult());
 			if(expected.getResult().getClass().isArray()) {
 				assertTrue(expected.getResult().getClass().isArray());
-				assertTrue(Arrays.equals((Object[])actual.getResult(), (Object[])expected
-				        .getResult()));
+				assertTrue(Arrays.equals((Object[])actual.getResult(),
+				        (Object[])expected.getResult()));
 			} else {
 				assertFalse(expected.getResult().getClass().isArray());
 				assertEquals(expected.getResult(), actual.getResult());
@@ -531,16 +533,16 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		assertEquals(b, b2);
 	}
 	
-	private void testModelRevisions(BatchedResult<Long>[] revs) {
+	private void testModelRevisions(BatchedResult<RevisionState>[] revs) {
 		
 		assert revs != null;
 		
-		BatchedResult<Long>[] results = preparePre(revs);
+		BatchedResult<RevisionState>[] results = preparePre(revs);
 		
 		XydraOut out = create();
 		SerializedStore.serializeModelRevisions(results, out);
 		
-		BatchedResult<Long>[] res = preparePost(revs);
+		BatchedResult<RevisionState>[] res = preparePost(revs);
 		
 		XydraElement element = parse(out.getData());
 		assertNotNull(element);
@@ -604,14 +606,15 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testModelRevisionsSuccess() {
-		testModelRevisions(new BatchedResult[] { result(42l) });
+		testModelRevisions(new BatchedResult[] { result(new RevisionState(42, true)) });
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testModelRevisionsMixed() {
-		testModelRevisions(new BatchedResult[] { result(42l), preError(), result(-1l),
-		        storeError(), result(10l) });
+		testModelRevisions(new BatchedResult[] { result(new RevisionState(42, true)), preError(),
+		        result(new RevisionState(-1, true)), storeError(),
+		        result(new RevisionState(10, true)) });
 	}
 	
 	private static Object modelError() {
@@ -680,8 +683,8 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		}
 		
 		XydraOut out = create();
-		SerializedStore.serializeSnapshots(parseErrors, isModel, models
-		        .toArray(new BatchedResult[1]), objects.toArray(new BatchedResult[1]), out);
+		SerializedStore.serializeSnapshots(parseErrors, isModel,
+		        models.toArray(new BatchedResult[1]), objects.toArray(new BatchedResult[1]), out);
 		
 		XydraElement element = parse(out.getData());
 		assertNotNull(element);

@@ -28,11 +28,11 @@ import org.xydra.core.model.impl.memory.MemoryField;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryObject;
 import org.xydra.core.model.impl.memory.MemoryRepository;
-import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.SerializedModel;
+import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.XydraOut;
-import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.core.serialize.xml.XmlOut;
+import org.xydra.core.serialize.xml.XmlParser;
 
 
 /**

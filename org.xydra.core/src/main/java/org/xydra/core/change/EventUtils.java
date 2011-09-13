@@ -43,38 +43,44 @@ public class EventUtils {
 				if(txnEvent.isImplied()) {
 					continue;
 				}
-				applyEvent(model, txnEvent);
+				applyAtomicEvent(model, (XAtomicEvent)txnEvent, true);
 			}
 		} else {
 			assert event instanceof XAtomicEvent : event.getClass().getCanonicalName();
-			XAtomicEvent atomicEvent = (XAtomicEvent)event;
-			
-			if(atomicEvent instanceof XRepositoryEvent) {
-				assert event.getChangedEntity().equals(model.getAddress());
-				applyRepositoryEvent(model, (XRepositoryEvent)event);
-				return;
-			}
-			assert model.getRevisionNumber() >= 0;
-			model.setRevisionNumber(event.getRevisionNumber());
-			if(atomicEvent instanceof XModelEvent) {
-				assert event.getTarget().equals(model.getAddress());
-				applyModelEvent(model, (XModelEvent)event);
+			applyAtomicEvent(model, (XAtomicEvent)event, false);
+		}
+		model.setRevisionNumber(event.getRevisionNumber());
+	}
+	
+	private static void applyAtomicEvent(XRevWritableModel model, XAtomicEvent atomicEvent,
+	        boolean inTxn) {
+		assert atomicEvent != null;
+		
+		if(atomicEvent instanceof XRepositoryEvent) {
+			assert atomicEvent.getChangedEntity().equals(model.getAddress());
+			applyRepositoryEvent(model, (XRepositoryEvent)atomicEvent);
+			return;
+		}
+		assert model.getRevisionNumber() >= 0 : model.getRevisionNumber();
+		if(atomicEvent instanceof XModelEvent) {
+			assert atomicEvent.getTarget().equals(model.getAddress());
+			applyModelEvent(model, (XModelEvent)atomicEvent);
+		} else {
+			// object & field events
+			XRevWritableObject object = model.getObject(atomicEvent.getTarget().getObject());
+			assert object != null : "object null for event " + atomicEvent;
+			object.setRevisionNumber(atomicEvent.getRevisionNumber());
+			if(atomicEvent instanceof XObjectEvent) {
+				assert atomicEvent.getTarget().getParent().equals(model.getAddress());
+				applyObjectEvent(object, (XObjectEvent)atomicEvent);
 			} else {
-				// object & field events
-				XRevWritableObject object = model.getObject(event.getTarget().getObject());
-				assert object != null : "object null for event " + event;
-				object.setRevisionNumber(event.getRevisionNumber());
-				if(atomicEvent instanceof XObjectEvent) {
-					assert event.getTarget().getParent().equals(model.getAddress());
-					applyObjectEvent(object, (XObjectEvent)event);
-				} else {
-					assert atomicEvent instanceof XFieldEvent;
-					assert event.getTarget().getParent().getParent().equals(model.getAddress());
-					XFieldEvent fieldEvent = (XFieldEvent)event;
-					XRevWritableField field = object.getField(fieldEvent.getFieldId());
-					field.setRevisionNumber(event.getRevisionNumber());
-					applyFieldEvent(field, fieldEvent);
-				}
+				assert atomicEvent instanceof XFieldEvent;
+				assert atomicEvent.getTarget().getParent().getParent().equals(model.getAddress());
+				XFieldEvent fieldEvent = (XFieldEvent)atomicEvent;
+				XRevWritableField field = object.getField(fieldEvent.getFieldId());
+				assert field != null : "field is null";
+				field.setRevisionNumber(atomicEvent.getRevisionNumber());
+				applyFieldEvent(field, fieldEvent);
 			}
 		}
 	}
@@ -95,7 +101,7 @@ public class EventUtils {
 			field.setValue(event.getNewValue());
 			break;
 		case REMOVE:
-			assert !field.isEmpty();
+			assert !field.isEmpty() : "cannot remove value from empty field";
 			field.setValue(null);
 			break;
 		case TRANSACTION:
@@ -162,7 +168,7 @@ public class EventUtils {
 		switch(event.getChangeType()) {
 		case ADD: {
 			/*
-			 * if this triggers a bug repo.clear might have failed -- maybe a
+			 * if this triggers a bug, repo.clear might have failed -- maybe a
 			 * test -only problem
 			 */
 			if(!model.isEmpty()) {
@@ -174,7 +180,7 @@ public class EventUtils {
 			break;
 		}
 		case REMOVE: {
-			assert model.getRevisionNumber() >= 0;
+			assert model.getRevisionNumber() >= 0 : model.getRevisionNumber();
 			model.setRevisionNumber(MODEL_DOES_NOT_EXIST);
 			// clear model
 			List<XID> ids = new LinkedList<XID>();

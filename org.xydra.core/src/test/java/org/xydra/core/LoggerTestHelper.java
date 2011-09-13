@@ -1,7 +1,7 @@
 package org.xydra.core;
 
-import org.xydra.log.DefaultLoggerFactorySPI;
 import org.xydra.log.LoggerFactory;
+import org.xydra.log.gae.Log4jLoggerFactory;
 
 
 /**
@@ -13,7 +13,7 @@ public class LoggerTestHelper {
 	
 	public static synchronized void init() {
 		if(!initialized) {
-			LoggerFactory.setLoggerFactorySPI(new DefaultLoggerFactorySPI());
+			LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
 			initialized = true;
 		}
 	}
