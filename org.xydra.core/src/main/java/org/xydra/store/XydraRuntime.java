@@ -14,6 +14,7 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.perf.StatsGatheringMemCacheWrapper;
 import org.xydra.perf.StatsGatheringPersistenceWrapper;
+import org.xydra.store.XydraPlatformRuntime.XRequest;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.memory.MemoryRuntime;
 
@@ -268,6 +269,11 @@ public class XydraRuntime {
 			l.onXydraRuntimeInit();
 		}
 		dynamicListeners.clear();
+	}
+	
+	public XRequest startRequest() {
+		initialiseRuntimeOnce();
+		return platformRuntime.startRequest();
 	}
 	
 }
