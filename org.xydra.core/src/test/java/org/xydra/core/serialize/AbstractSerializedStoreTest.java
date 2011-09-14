@@ -128,15 +128,14 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testCommandResultsSuccess() {
-		testCommandResults(new BatchedResult[] { result(new RevisionState(42, true)) }, null);
+		testCommandResults(new BatchedResult[] { result(42l) }, null);
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testCommandResultsMixed() {
-		testCommandResults(new BatchedResult[] { result(new RevisionState(42, true)), preError(),
-		        result(new RevisionState(-1, true)), storeError(),
-		        result(new RevisionState(-2, true)) }, null);
+		testCommandResults(new BatchedResult[] { result(42l), preError(), result(-1l),
+		        storeError(), result(-2l) }, null);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -296,8 +295,8 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		return res;
 	}
 	
-	private static final GetEventsRequest dummyReq = new GetEventsRequest(
-	        XX.toAddress("/hello/world"), 0, Long.MAX_VALUE);
+	private static final GetEventsRequest dummyReq = new GetEventsRequest(XX
+	        .toAddress("/hello/world"), 0, Long.MAX_VALUE);
 	
 	@SuppressWarnings("unchecked")
 	private BatchedResult<XEvent[]>[] preparePreResults(BatchedResult<XEvent[]>[] eventRes) {
@@ -347,8 +346,8 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 			
 		}
 		
-		return new EventsRequest(except.toArray(new StoreException[except.size()]),
-		        ger.toArray(new GetEventsRequest[ger.size()]));
+		return new EventsRequest(except.toArray(new StoreException[except.size()]), ger
+		        .toArray(new GetEventsRequest[ger.size()]));
 	}
 	
 	private GetEventsRequest makeRequest(BatchedResult<XEvent[]> res) {
@@ -413,8 +412,8 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 			assertNotNull(actual.getResult());
 			if(expected.getResult().getClass().isArray()) {
 				assertTrue(expected.getResult().getClass().isArray());
-				assertTrue(Arrays.equals((Object[])actual.getResult(),
-				        (Object[])expected.getResult()));
+				assertTrue(Arrays.equals((Object[])actual.getResult(), (Object[])expected
+				        .getResult()));
 			} else {
 				assertFalse(expected.getResult().getClass().isArray());
 				assertEquals(expected.getResult(), actual.getResult());
@@ -683,8 +682,8 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		}
 		
 		XydraOut out = create();
-		SerializedStore.serializeSnapshots(parseErrors, isModel,
-		        models.toArray(new BatchedResult[1]), objects.toArray(new BatchedResult[1]), out);
+		SerializedStore.serializeSnapshots(parseErrors, isModel, models
+		        .toArray(new BatchedResult[1]), objects.toArray(new BatchedResult[1]), out);
 		
 		XydraElement element = parse(out.getData());
 		assertNotNull(element);

@@ -70,6 +70,8 @@ public class SerializedStore {
 	private static final String TYPE_STORE = "store";
 	private static final String NAME_XID = "xid";
 	private static final String TYPE_EVENTS = "xevents";
+	private static final String NAME_REVISION = "revision";
+	private static final String NAME_MODELEXISTS = "modelExists";
 	
 	public static void serializeException(Throwable t, XydraOut out) {
 		
@@ -169,7 +171,7 @@ public class SerializedStore {
 		out.open(ELEMENT_RESULTS);
 		
 		out.child(NAME_COMMANDRESULTS, ELEMENT_COMMANDRESULTS);
-		setRevisionListContents(commandRes, out);
+		setRevisionLongListContents(commandRes, out);
 		
 		if(eventsRes != null) {
 			out.child(NAME_EVENTRESULTS, ELEMENT_EVENTRESULTS);
@@ -190,7 +192,7 @@ public class SerializedStore {
 			throw new IllegalArgumentException("missing command results");
 		}
 		
-		getRevisionListContents(commandsEle, commandResults);
+		getRevisionLongListContents(commandsEle, commandResults);
 		
 		XydraElement eventsEle = element.getChild(NAME_EVENTRESULTS, ELEMENT_EVENTRESULTS);
 		if(eventResults != null && eventsEle != null) {
@@ -302,11 +304,11 @@ public class SerializedStore {
 		}
 	}
 	
-	public static void serializeModelRevisions(BatchedResult<Long>[] result, XydraOut out) {
+	public static void serializeModelRevisions(BatchedResult<RevisionState>[] result, XydraOut out) {
 		
 		out.open(ELEMENT_MODEL_REVISIONS);
 		out.child(NAME_REVISIONS);
-		setRevisionListContents(result, out);
+		setRevisionStateListContents(result, out);
 		out.close(ELEMENT_MODEL_REVISIONS);
 		
 	}
@@ -315,7 +317,7 @@ public class SerializedStore {
 		
 		SerializingUtils.checkElementType(element, ELEMENT_MODEL_REVISIONS);
 		
-		getRevisionListContents(element.getChild(NAME_REVISIONS), res);
+		getRevisionStateListContents(element.getChild(NAME_REVISIONS), res);
 	}
 	
 	/**
@@ -340,7 +342,7 @@ public class SerializedStore {
 	        XydraOut out) {
 		
 		out.beginArray();
-		out.setChildType(ELEMENT_REVISIONSTATE);
+		out.setDefaultType(ELEMENT_REVISIONSTATE);
 		
 		for(BatchedResult<RevisionState> result : results) {
 			if(result.getException() != null) {
@@ -352,9 +354,11 @@ public class SerializedStore {
 				boolean modelExists = revisionState.modelExists();
 				
 				out.open(ELEMENT_REVISIONSTATE);
-				// FIXME @Daniel Here...
 				
-				out.value(rev);
+				out.value(NAME_REVISION, ELEMENT_XREVISION, rev);
+				out.value(NAME_MODELEXISTS, ELEMENT_MODELEXISTS, modelExists);
+				
+				out.close(ELEMENT_REVISIONSTATE);
 			}
 		}
 		
@@ -384,12 +388,12 @@ public class SerializedStore {
 		out.endArray();
 	}
 	
-	private static void getRevisionListContents(XydraElement element,
+	private static void getRevisionStateListContents(XydraElement element,
 	        BatchedResult<RevisionState>[] results) {
 		
 		int i = 0;
 		
-		Iterator<XydraElement> it = element.getChildren(ELEMENT_XREVISION);
+		Iterator<XydraElement> it = element.getChildren(ELEMENT_REVISIONSTATE);
 		while(it.hasNext()) {
 			XydraElement result = it.next();
 			
@@ -406,17 +410,56 @@ public class SerializedStore {
 			
 			try {
 				
-				SerializingUtils.checkElementType(result, ELEMENT_XREVISION);
+				SerializingUtils.checkElementType(result, ELEMENT_REVISIONSTATE);
 				
-				long rev = SerializingUtils.toLong(result.getContent());
-				
-				// FIXME IMPLEMENT!
-				boolean modelExists = true;
+				long rev = SerializingUtils.toLong(result
+				        .getValue(NAME_REVISION, ELEMENT_XREVISION));
+				boolean modelExists = SerializingUtils.toBoolean(result.getValue(NAME_MODELEXISTS,
+				        ELEMENT_MODELEXISTS));
 				
 				results[i] = new BatchedResult<RevisionState>(new RevisionState(rev, modelExists));
 				
 			} catch(Throwable th) {
 				results[i] = new BatchedResult<RevisionState>(th);
+			}
+			
+		}
+		
+		for(; i < results.length; i++) {
+			assert results[i] != null;
+		}
+	}
+	
+	private static void getRevisionLongListContents(XydraElement element,
+	        BatchedResult<Long>[] results) {
+		
+		int i = 0;
+		
+		Iterator<XydraElement> it = element.getChildren(ELEMENT_XREVISION);
+		while(it.hasNext()) {
+			XydraElement result = it.next();
+			
+			while(results[i] != null) {
+				i++;
+			}
+			assert i < results.length;
+			
+			Throwable t = toException(result);
+			if(t != null) {
+				results[i] = new BatchedResult<Long>(t);
+				continue;
+			}
+			
+			try {
+				
+				SerializingUtils.checkElementType(result, ELEMENT_XREVISION);
+				
+				long rev = SerializingUtils.toLong(result.getContent());
+				
+				results[i] = new BatchedResult<Long>(rev);
+				
+			} catch(Throwable th) {
+				results[i] = new BatchedResult<Long>(th);
 			}
 			
 		}
