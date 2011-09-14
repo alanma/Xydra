@@ -51,11 +51,11 @@ public class MemoryPersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public RevisionState executeCommand(XID actorId, XCommand command) {
+	public long executeCommand(XID actorId, XCommand command) {
 		XAddress address = command.getChangedEntity();
 		// caller asserts repoId matches address
 		MemoryModelPersistence modelPersistence = getModelPersistence(address.getModel());
-		RevisionState result = modelPersistence.executeCommand(actorId, command);
+		long result = modelPersistence.executeCommand(actorId, command);
 		
 		/*
 		 * DO NOT remove the MemoryModelPersistence from the model map, even if

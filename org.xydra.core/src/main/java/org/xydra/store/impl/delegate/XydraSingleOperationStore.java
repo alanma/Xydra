@@ -214,7 +214,7 @@ public interface XydraSingleOperationStore {
 	 * @throws IllegalArgumentException if one of the given parameters is null.
 	 *             Only the callback may be null.
 	 */
-	void executeCommand(XID actorId, String passwordHash, XCommand command, Callback<RevisionState> callback)
+	void executeCommand(XID actorId, String passwordHash, XCommand command, Callback<Long> callback)
 	        throws IllegalArgumentException;
 	
 	/**

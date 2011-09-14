@@ -110,9 +110,9 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 			return;
 		}
 		
-		SynchronousTestCallback<BatchedResult<RevisionState>[]> callback;
+		SynchronousTestCallback<BatchedResult<Long>[]> callback;
 		
-		callback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
+		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		
 		XCommand[] commands = new XCommand[] { X.getCommandFactory().createAddModelCommand(
 		        this.repoId, XX.createUniqueId(), true) };
@@ -1265,7 +1265,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(modelAddress,
 		        modelRev + 1, modelRev + 1) };
 		
-		SynchronousTestCallback<Pair<BatchedResult<RevisionState>[],BatchedResult<XEvent[]>[]>> callback = new SynchronousTestCallback<Pair<BatchedResult<RevisionState>[],BatchedResult<XEvent[]>[]>>();
+		SynchronousTestCallback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback = new SynchronousTestCallback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>>();
 		
 		this.store.executeCommandsAndGetEvents(this.correctUser, this.correctUserPass, commands,
 		        request, callback);
@@ -1275,7 +1275,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNotNull(callback.getEffect().getFirst());
 		assertNotNull(callback.getEffect().getSecond());
 		
-		BatchedResult<RevisionState>[] commandResult = callback.getEffect().getFirst();
+		BatchedResult<Long>[] commandResult = callback.getEffect().getFirst();
 		BatchedResult<XEvent[]>[] eventResult = callback.getEffect().getSecond();
 		
 		assertEquals(1, commandResult.length);
@@ -1283,7 +1283,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		assertNotNull(commandResult[0].getResult());
 		assertNull(commandResult[0].getException());
-		assertEquals((modelRev + 1), commandResult[0].getResult().revision());
+		assertEquals((modelRev + 1), (long)commandResult[0].getResult());
 		
 		assertNotNull(eventResult[0].getResult());
 		assertNull(eventResult[0].getException());
@@ -1322,7 +1322,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(modelAddress,
 		        modelRev + 1, modelRev + 1) };
 		
-		SynchronousTestCallback<Pair<BatchedResult<RevisionState>[],BatchedResult<XEvent[]>[]>> callback = new SynchronousTestCallback<Pair<BatchedResult<RevisionState>[],BatchedResult<XEvent[]>[]>>();
+		SynchronousTestCallback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback = new SynchronousTestCallback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>>();
 		
 		this.store.executeCommandsAndGetEvents(this.correctUser, this.correctUserPass, commands,
 		        request, callback);
@@ -1332,7 +1332,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNotNull(callback.getEffect().getFirst());
 		assertNotNull(callback.getEffect().getSecond());
 		
-		BatchedResult<RevisionState>[] commandResult = callback.getEffect().getFirst();
+		BatchedResult<Long>[] commandResult = callback.getEffect().getFirst();
 		BatchedResult<XEvent[]>[] eventResult = callback.getEffect().getSecond();
 		
 		assertEquals(1, commandResult.length);
@@ -1340,7 +1340,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		assertNotNull(commandResult[0].getResult());
 		assertNull(commandResult[0].getException());
-		assertEquals((modelRev + 1), commandResult[0].getResult().revision());
+		assertEquals((modelRev + 1), (long)commandResult[0].getResult());
 		
 		assertNotNull(eventResult[0].getResult());
 		assertNull(eventResult[0].getException());
@@ -1384,7 +1384,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		        new GetEventsRequest(modelAddress, modelRev + 1, modelRev + 1),
 		        new GetEventsRequest(objectAddress, objectRev + 1, objectRev + 1) };
 		
-		SynchronousTestCallback<Pair<BatchedResult<RevisionState>[],BatchedResult<XEvent[]>[]>> callback = new SynchronousTestCallback<Pair<BatchedResult<RevisionState>[],BatchedResult<XEvent[]>[]>>();
+		SynchronousTestCallback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback = new SynchronousTestCallback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>>();
 		
 		this.store.executeCommandsAndGetEvents(this.correctUser, this.correctUserPass, commands,
 		        request, callback);
@@ -1394,7 +1394,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNotNull(callback.getEffect().getFirst());
 		assertNotNull(callback.getEffect().getSecond());
 		
-		BatchedResult<RevisionState>[] commandResult = callback.getEffect().getFirst();
+		BatchedResult<Long>[] commandResult = callback.getEffect().getFirst();
 		BatchedResult<XEvent[]>[] eventResult = callback.getEffect().getSecond();
 		
 		assertEquals(1, commandResult.length);
@@ -1402,7 +1402,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		assertNotNull(commandResult[0].getResult());
 		assertNull(commandResult[0].getException());
-		assertEquals((modelRev + 1), commandResult[0].getResult().revision());
+		assertEquals((modelRev + 1), (long)commandResult[0].getResult());
 		
 		assertNotNull(eventResult[0].getResult());
 		assertNull(eventResult[0].getException());
@@ -1453,7 +1453,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		        new GetEventsRequest(modelAddress, modelRev + 1, modelRev + 1),
 		        new GetEventsRequest(objectAddress, objectRev + 1, objectRev + 1) };
 		
-		SynchronousTestCallback<Pair<BatchedResult<RevisionState>[],BatchedResult<XEvent[]>[]>> callback = new SynchronousTestCallback<Pair<BatchedResult<RevisionState>[],BatchedResult<XEvent[]>[]>>();
+		SynchronousTestCallback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback = new SynchronousTestCallback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>>();
 		
 		this.store.executeCommandsAndGetEvents(this.correctUser, this.correctUserPass, commands,
 		        request, callback);
@@ -1463,7 +1463,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNotNull(callback.getEffect().getFirst());
 		assertNotNull(callback.getEffect().getSecond());
 		
-		BatchedResult<RevisionState>[] commandResult = callback.getEffect().getFirst();
+		BatchedResult<Long>[] commandResult = callback.getEffect().getFirst();
 		BatchedResult<XEvent[]>[] eventResult = callback.getEffect().getSecond();
 		
 		assertEquals(1, commandResult.length);
@@ -1471,7 +1471,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		assertNotNull(commandResult[0].getResult());
 		assertNull(commandResult[0].getException());
-		assertEquals((modelRev + 1), commandResult[0].getResult().revision());
+		assertEquals((modelRev + 1), (long)commandResult[0].getResult());
 		
 		assertNotNull(eventResult[0].getResult());
 		assertNull(eventResult[0].getException());
@@ -1498,7 +1498,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	 */
 	protected long[] executeSucceedingCommands(XCommand[] commands) {
 		
-		SynchronousTestCallback<BatchedResult<RevisionState>[]> callback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
+		SynchronousTestCallback<BatchedResult<Long>[]> callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		
 		this.store.executeCommands(this.correctUser, this.correctUserPass, commands, callback);
 		
@@ -1509,9 +1509,9 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		long[] revisions = new long[commands.length];
 		for(int i = 0; i < commands.length; i++) {
-			assertTrue((callback.getEffect())[i].getResult().revision() >= 0);
+			assertTrue((callback.getEffect())[i].getResult() >= 0);
 			assertNull((callback.getEffect())[i].getException());
-			revisions[i] = callback.getEffect()[i].getResult().revision();
+			revisions[i] = callback.getEffect()[i].getResult();
 		}
 		return revisions;
 	}
@@ -1530,7 +1530,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	 */
 	protected void executeFailingCommand(XCommand command) {
 		
-		SynchronousTestCallback<BatchedResult<RevisionState>[]> callback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
+		SynchronousTestCallback<BatchedResult<Long>[]> callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		
 		this.store.executeCommands(this.correctUser, this.correctUserPass,
 		        new XCommand[] { command }, callback);
@@ -1539,7 +1539,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNotNull(callback.getEffect());
 		assertTrue(callback.getEffect().length == 1);
 		assertNull(callback.getException());
-		assertTrue((callback.getEffect())[0].getResult().revision() == XCommand.FAILED);
+		assertTrue((callback.getEffect())[0].getResult() == XCommand.FAILED);
 		assertNull((callback.getEffect())[0].getException());
 	}
 	
@@ -1553,7 +1553,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	 */
 	protected void executeNochangeCommand(XCommand command) {
 		
-		SynchronousTestCallback<BatchedResult<RevisionState>[]> callback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
+		SynchronousTestCallback<BatchedResult<Long>[]> callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		
 		this.store.executeCommands(this.correctUser, this.correctUserPass,
 		        new XCommand[] { command }, callback);
@@ -1562,7 +1562,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNotNull(callback.getEffect());
 		assertTrue(callback.getEffect().length == 1);
 		assertNull(callback.getException());
-		assertTrue((callback.getEffect())[0].getResult().revision() == XCommand.NOCHANGE);
+		assertTrue((callback.getEffect())[0].getResult() == XCommand.NOCHANGE);
 		assertNull((callback.getEffect())[0].getException());
 	}
 	

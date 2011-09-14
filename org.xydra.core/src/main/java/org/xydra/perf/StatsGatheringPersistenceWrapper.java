@@ -48,9 +48,9 @@ public class StatsGatheringPersistenceWrapper implements XydraPersistence {
 	}
 	
 	@Override
-	public RevisionState executeCommand(XID actorId, XCommand command) {
+	public long executeCommand(XID actorId, XCommand command) {
 		Clock c = this.stats.startClock("executeCommand");
-		RevisionState result = this.basePersistence.executeCommand(actorId, command);
+		long result = this.basePersistence.executeCommand(actorId, command);
 		c.stop();
 		return result;
 	}

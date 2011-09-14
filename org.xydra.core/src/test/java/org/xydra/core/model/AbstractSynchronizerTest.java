@@ -43,7 +43,6 @@ import org.xydra.core.model.impl.memory.SynchronizesChangesImpl;
 import org.xydra.core.model.sync.XSynchronizer;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.GetEventsRequest;
-import org.xydra.store.RevisionState;
 import org.xydra.store.SynchronousTestCallback;
 import org.xydra.store.XydraStore;
 
@@ -151,14 +150,14 @@ abstract public class AbstractSynchronizerTest {
 	 * errors.
 	 */
 	private void executeCommand(XCommand command) {
-		SynchronousTestCallback<BatchedResult<RevisionState>[]> tc;
-		tc = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
+		SynchronousTestCallback<BatchedResult<Long>[]> tc;
+		tc = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		
 		store.executeCommands(actorId, passwordHash, new XCommand[] { command }, tc);
 		
-		RevisionState res = waitForSuccessBatched(tc);
+		long res = waitForSuccessBatched(tc);
 		
-		assertTrue(res.revision() != XCommand.FAILED);
+		assertTrue(res != XCommand.FAILED);
 	}
 	
 	private XModel loadModel(XID modelId) {

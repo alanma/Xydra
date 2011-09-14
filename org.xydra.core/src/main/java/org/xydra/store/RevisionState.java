@@ -1,5 +1,11 @@
 package org.xydra.store;
 
+/**
+ * 
+ * 
+ * @author xamde
+ * 
+ */
 public class RevisionState {
 	
 	private boolean modelExists;

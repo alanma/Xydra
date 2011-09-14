@@ -223,7 +223,7 @@ public interface XydraStore {
 	 *             Only the callback may be null.
 	 */
 	void executeCommands(XID actorId, String passwordHash, XCommand[] commands,
-	        Callback<BatchedResult<RevisionState>[]> callback) throws IllegalArgumentException;
+	        Callback<BatchedResult<Long>[]> callback) throws IllegalArgumentException;
 	
 	/**
 	 * COMMANDS + EVENTS.
@@ -265,7 +265,7 @@ public interface XydraStore {
 	 */
 	void executeCommandsAndGetEvents(XID actorId, String passwordHash, XCommand[] commands,
 	        GetEventsRequest[] getEventRequests,
-	        Callback<Pair<BatchedResult<RevisionState>[],BatchedResult<XEvent[]>[]>> callback)
+	        Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback)
 	        throws IllegalArgumentException;
 	
 	/**
@@ -306,8 +306,11 @@ public interface XydraStore {
 	 * 
 	 *            The resulting XEvent[][] array itself is never null. However,
 	 *            individual entries in the array can be null to indicate that
-	 *            the requested entity does not exist or the user is not allowed
-	 *            to read it.
+	 *            the requested entity does not exist (and never existed) or the
+	 *            user is not allowed to read it. It might however be the case,
+	 *            that the array is not null, contains a number of events and
+	 *            yet the entity is null, because the last event in its history
+	 *            was a REMOVE event that just removed this entity.
 	 * 
 	 * @throws IllegalArgumentException if any of the given parameters is null.
 	 */

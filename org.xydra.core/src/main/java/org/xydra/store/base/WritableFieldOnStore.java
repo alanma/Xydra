@@ -10,7 +10,6 @@ import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.base.value.XValue;
-import org.xydra.store.RevisionState;
 import org.xydra.store.XydraStore;
 
 
@@ -44,16 +43,15 @@ public class WritableFieldOnStore extends ReadableFieldOnStore implements XWrita
 			        this.address.getModel(), this.address.getObject(), this.address.getField(),
 			        this.getRevisionNumber(), true);
 		}
-		RevisionState result = ExecuteCommandsUtils.executeCommand(this.credentials,
-		        this.store, command);
-		if(result.revision() >= 0) {
-			this.baseField = new SimpleField(this.address, result.revision(), value);
+		long result = ExecuteCommandsUtils.executeCommand(this.credentials, this.store, command);
+		if(result >= 0) {
+			this.baseField = new SimpleField(this.address, result, value);
 			return true;
 		} else {
 			// something went wrong
-			if(result.revision() == XCommand.FAILED) {
+			if(result == XCommand.FAILED) {
 				throw new RuntimeException("Command failed");
-			} else if(result.revision() == XCommand.NOCHANGE) {
+			} else if(result == XCommand.NOCHANGE) {
 				return false;
 			} else {
 				throw new AssertionError("Cannot happen");

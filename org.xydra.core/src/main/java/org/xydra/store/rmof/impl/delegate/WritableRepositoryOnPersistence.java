@@ -11,7 +11,6 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.store.RevisionState;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -38,8 +37,8 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 		if(model == null) {
 			XCommand command = X.getCommandFactory().createAddModelCommand(
 			        this.persistence.getRepositoryId(), modelId, true);
-			RevisionState l = this.persistence.executeCommand(this.executingActorId, command);
-			if(l.revision() < 0) {
+			long l = this.persistence.executeCommand(this.executingActorId, command);
+			if(l < 0) {
 				log.warn("creating model '" + modelId + "' failed with " + l);
 			}
 			model = getModel(modelId);
@@ -94,9 +93,8 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 		// modelId));
 		XCommand command = X.getCommandFactory().createRemoveModelCommand(
 		        this.persistence.getRepositoryId(), modelId, XCommand.FORCED, true);
-		RevisionState commandResult = this.persistence.executeCommand(this.executingActorId,
-		        command);
-		assert commandResult.revision() >= 0;
+		long commandResult = this.persistence.executeCommand(this.executingActorId, command);
+		assert commandResult >= 0;
 		return result;
 	}
 	

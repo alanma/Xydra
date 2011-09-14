@@ -18,7 +18,6 @@ import org.xydra.core.change.RWCachingRepository;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.utils.Clock;
-import org.xydra.store.RevisionState;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
 
@@ -48,13 +47,11 @@ public abstract class AbstractPersistencePerformanceTest {
 		        repositoryId, modelId);
 		c.stopAndStart("create-cmd");
 		
-		RevisionState pair = persistence.executeCommand(actorId, addModelCmd);
-		long l = pair.revision();
+		long l = persistence.executeCommand(actorId, addModelCmd);
 		assertTrue("" + l, l >= 0);
 		c.stopAndStart("add-model");
 		
-		pair = persistence.executeCommand(actorId, addModelCmd);
-		l = pair.revision();
+		l = persistence.executeCommand(actorId, addModelCmd);
 		assertTrue("" + l, l < 0);
 		c.stopAndStart("add-model-again");
 		
@@ -75,9 +72,9 @@ public abstract class AbstractPersistencePerformanceTest {
 	        int ocount) {
 		for(int i = 0; i < ocount; i++) {
 			XID objectId = XX.toId("object" + i);
-			RevisionState l = persistence.executeCommand(actorId, X.getCommandFactory()
+			long l = persistence.executeCommand(actorId, X.getCommandFactory()
 			        .createForcedAddObjectCommand(repositoryId, modelId, objectId));
-			assertTrue(l.revision() >= 0);
+			assertTrue(l >= 0);
 		}
 	}
 	

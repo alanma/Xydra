@@ -120,13 +120,13 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		
 		XCommand[] commands = { modelCommand1, modelCommand2, modelCommand3, objectCommand1,
 		        objectCommand2, objectCommand3 };
-		SynchronousTestCallback<BatchedResult<RevisionState>[]> commandCallback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
+		SynchronousTestCallback<BatchedResult<Long>[]> commandCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		
 		this.store.executeCommands(this.correctUser, this.correctUserPass, commands,
 		        commandCallback);
 		waitOnCallback(commandCallback);
 		
-		BatchedResult<RevisionState>[] result = commandCallback.getEffect();
+		BatchedResult<Long>[] result = commandCallback.getEffect();
 		if(commandCallback.getException() != null) {
 			throw new RuntimeException(
 			        "ExecuteCommands did not work properly in setUp (threw an Exception), here's its message text: ",
@@ -139,14 +139,14 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		}
 		
 		for(int i = 0; i < result.length; i++) {
-			if(result[i].getResult().revision() == XCommand.FAILED) {
+			if(result[i].getResult() == XCommand.FAILED) {
 				throw new RuntimeException(
 				        "ExecuteCommands did not work properly in setUp: command at index " + i
 				                + " failed!");
 			}
 			// TODO is this check necessary?
 			// TODO this fails with the GaeStore which cannot be reset
-			if(result[i].getResult().revision() == XCommand.NOCHANGE) {
+			if(result[i].getResult() == XCommand.NOCHANGE) {
 				throw new RuntimeException(
 				        "ExecuteCommands did not work properly in setUp: command at index " + i
 				                + " did not change anything! " + commands[i]);

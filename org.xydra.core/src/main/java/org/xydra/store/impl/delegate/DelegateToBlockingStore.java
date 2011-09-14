@@ -55,11 +55,10 @@ public class DelegateToBlockingStore implements XydraSingleOperationStore {
 	
 	@Override
 	public void executeCommand(XID actorId, String passwordHash, XCommand command,
-	        Callback<RevisionState> callbackOrNull) throws IllegalArgumentException {
+	        Callback<Long> callbackOrNull) throws IllegalArgumentException {
 		assert actorId != null;
 		try {
-			RevisionState result = this.blockingStore.executeCommand(actorId, passwordHash,
-			        command);
+			long result = this.blockingStore.executeCommand(actorId, passwordHash, command);
 			if(callbackOrNull != null) {
 				callbackOrNull.onSuccess(result);
 			}

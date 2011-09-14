@@ -54,6 +54,8 @@ public class SerializedStore {
 	public static final String ELEMENT_COMMANDRESULTS = NAME_COMMANDRESULTS;
 	public static final String ELEMENT_MODEL_REVISIONS = NAME_REVISIONS;
 	public static final String ELEMENT_XREVISION = "xrevision";
+	public static final String ELEMENT_REVISIONSTATE = "revisionState";
+	public static final String ELEMENT_MODELEXISTS = "modelExists";
 	public static final String ELEMENT_RESULTS = "results";
 	public static final String ELEMENT_SNAPSHOTS = NAME_SNAPSHOTS;
 	public static final String ELEMENT_XERROR = "xerror";
@@ -161,8 +163,8 @@ public class SerializedStore {
 		
 	}
 	
-	public static void serializeCommandResults(BatchedResult<RevisionState>[] commandRes,
-	        EventsRequest ger, BatchedResult<XEvent[]>[] eventsRes, XydraOut out) {
+	public static void serializeCommandResults(BatchedResult<Long>[] commandRes, EventsRequest ger,
+	        BatchedResult<XEvent[]>[] eventsRes, XydraOut out) {
 		
 		out.open(ELEMENT_RESULTS);
 		
@@ -179,7 +181,7 @@ public class SerializedStore {
 	}
 	
 	public static void toCommandResults(XydraElement element, GetEventsRequest[] context,
-	        BatchedResult<RevisionState>[] commandResults, BatchedResult<XEvent[]>[] eventResults) {
+	        BatchedResult<Long>[] commandResults, BatchedResult<XEvent[]>[] eventResults) {
 		
 		SerializingUtils.checkElementType(element, ELEMENT_RESULTS);
 		
@@ -300,7 +302,7 @@ public class SerializedStore {
 		}
 	}
 	
-	public static void serializeModelRevisions(BatchedResult<RevisionState>[] result, XydraOut out) {
+	public static void serializeModelRevisions(BatchedResult<Long>[] result, XydraOut out) {
 		
 		out.open(ELEMENT_MODEL_REVISIONS);
 		out.child(NAME_REVISIONS);
@@ -316,10 +318,29 @@ public class SerializedStore {
 		getRevisionListContents(element.getChild(NAME_REVISIONS), res);
 	}
 	
-	private static void setRevisionListContents(BatchedResult<RevisionState>[] results, XydraOut out) {
+	/**
+	 * <pre>
+	 * 
+	 *  <xrevisionstate>
+	 *  <xrevision>13</xrevision>
+	 *  <modelexists>true</modelexists>
+	 *  </xrevisionstate>
+	 *  
+	 *  
+	 *  {
+	 * xrevision: 13,
+	 *  }
+	 * 
+	 * </pre>
+	 * 
+	 * @param results
+	 * @param out
+	 */
+	private static void setRevisionStateListContents(BatchedResult<RevisionState>[] results,
+	        XydraOut out) {
 		
 		out.beginArray();
-		out.setDefaultType(ELEMENT_XREVISION);
+		out.setChildType(ELEMENT_REVISIONSTATE);
 		
 		for(BatchedResult<RevisionState> result : results) {
 			if(result.getException() != null) {
@@ -328,6 +349,34 @@ public class SerializedStore {
 				assert result.getResult() != null;
 				RevisionState revisionState = result.getResult();
 				long rev = revisionState.revision();
+				boolean modelExists = revisionState.modelExists();
+				
+				out.open(ELEMENT_REVISIONSTATE);
+				// FIXME @Daniel Here...
+				
+				out.value(rev);
+			}
+		}
+		
+		out.endArray();
+	}
+	
+	/**
+	 * <pre>
+	 * &lt;xrevision&gt;13&lt;/xrevision&gt;
+	 * </pre>
+	 */
+	private static void setRevisionLongListContents(BatchedResult<Long>[] results, XydraOut out) {
+		
+		out.beginArray();
+		out.setDefaultType(ELEMENT_XREVISION);
+		
+		for(BatchedResult<Long> result : results) {
+			if(result.getException() != null) {
+				serializeException(result.getException(), out);
+			} else {
+				assert result.getResult() != null;
+				long rev = result.getResult();
 				out.value(rev);
 			}
 		}

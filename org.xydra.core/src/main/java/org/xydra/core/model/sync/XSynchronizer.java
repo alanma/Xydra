@@ -29,7 +29,6 @@ import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.RequestException;
-import org.xydra.store.RevisionState;
 import org.xydra.store.XydraStore;
 
 
@@ -133,7 +132,7 @@ public class XSynchronizer {
 	}
 	
 	private class CommandsCallback extends
-	        SyncCallback<Pair<BatchedResult<RevisionState>[],BatchedResult<XEvent[]>[]>> {
+	        SyncCallback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> {
 		
 		protected long syncRev;
 		private List<XLocalChange> changes;
@@ -145,13 +144,12 @@ public class XSynchronizer {
 		}
 		
 		@Override
-		public void onSuccess(
-		        Pair<BatchedResult<RevisionState>[],BatchedResult<XEvent[]>[]> res) {
+		public void onSuccess(Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]> res) {
 			
 			assert res.getFirst().length == this.changes.size();
 			assert res.getSecond().length == 1;
 			
-			BatchedResult<RevisionState>[] commandRess = res.getFirst();
+			BatchedResult<Long>[] commandRess = res.getFirst();
 			BatchedResult<XEvent[]> eventsRes = res.getSecond()[0];
 			
 			XEvent[] events = eventsRes.getResult();
@@ -160,7 +158,7 @@ public class XSynchronizer {
 			boolean success = true;
 			for(int i = 0; i < commandRess.length; i++) {
 				
-				BatchedResult<RevisionState> commandRes = commandRess[i];
+				BatchedResult<Long> commandRes = commandRess[i];
 				
 				if(commandRes.getException() != null) {
 					assert commandRes.getResult() == null;
@@ -173,8 +171,7 @@ public class XSynchronizer {
 				} else {
 					
 					assert commandRes.getResult() != null;
-					RevisionState commandPair = commandRes.getResult();
-					long commandRev = commandPair.revision();
+					long commandRev = commandRes.getResult();
 					
 					// command successfully synchronized
 					if(commandRev >= 0) {

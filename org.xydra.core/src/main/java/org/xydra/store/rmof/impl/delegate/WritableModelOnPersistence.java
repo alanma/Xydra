@@ -54,9 +54,8 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 		// create in persistence
 		XCommand command = X.getCommandFactory().createAddObjectCommand(
 		        this.persistence.getRepositoryId(), this.modelId, objectId, true);
-		RevisionState commandResult = this.persistence.executeCommand(this.executingActorId,
-		        command);
-		assert commandResult.revision() >= 0 : "Command " + command + " returned " + commandResult;
+		long commandResult = this.persistence.executeCommand(this.executingActorId, command);
+		assert commandResult >= 0 : "Command " + command + " returned " + commandResult;
 		return getObject(objectId);
 	}
 	
@@ -81,7 +80,8 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	 */
 	public List<XEvent> getNewEvents() {
 		// get highestEvent
-		long currentRev = this.persistence.getModelRevision(this.getAddress()).revision();
+		RevisionState rs = this.persistence.getModelRevision(this.getAddress());
+		long currentRev = rs.revision();
 		List<XEvent> events = null;
 		if(currentRev > this.lastRev) {
 			// get event between lastProcessed and highest
@@ -148,10 +148,9 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 		boolean result = hasObject(objectId);
 		XCommand command = X.getCommandFactory().createRemoveObjectCommand(
 		        this.persistence.getRepositoryId(), this.modelId, objectId, XCommand.FORCED, true);
-		RevisionState commandResult = this.persistence.executeCommand(this.executingActorId,
-		        command);
-		assert commandResult.revision() >= 0;
-		return result && commandResult.revision() >= 0;
+		long commandResult = this.persistence.executeCommand(this.executingActorId, command);
+		assert commandResult >= 0;
+		return result && commandResult >= 0;
 	}
 	
 	@Override

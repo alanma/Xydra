@@ -111,16 +111,16 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public RevisionState executeCommand(XID actorId, XCommand command) {
+	public long executeCommand(XID actorId, XCommand command) {
 		if(this.active) {
 			stacktrace();
 			String var = getVar();
 			java("long " + var + " = this.p.executeCommand(" + toJava(actorId) + ", "
 			        + toJava(command) + " );");
-			RevisionState result = this.persistence.executeCommand(actorId, command);
+			long result = this.persistence.executeCommand(actorId, command);
 			java("// result: "
-			        + ((result.revision() == XCommand.FAILED) ? "FAILED"
-			                : (result.revision() == XCommand.NOCHANGE ? "NOCHANGE" : result)));
+			        + ((result == XCommand.FAILED) ? "FAILED"
+			                : (result == XCommand.NOCHANGE ? "NOCHANGE" : result)));
 			if(!this.laxMode) {
 				java("expectedVsActual(" + result + "," + var + ");");
 			}

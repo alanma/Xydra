@@ -10,7 +10,6 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.index.iterator.NoneIterator;
-import org.xydra.store.RevisionState;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -111,9 +110,8 @@ public class WritableObjectOnPersistence extends AbstractWritableOnPersistence i
 		XCommand command = X.getCommandFactory().createRemoveFieldCommand(
 		        this.persistence.getRepositoryId(), this.modelId, this.objectId, fieldId,
 		        XCommand.FORCED, true);
-		RevisionState commandResult = this.persistence.executeCommand(this.executingActorId,
-		        command);
-		assert commandResult.revision() >= 0;
+		long commandResult = this.persistence.executeCommand(this.executingActorId, command);
+		assert commandResult >= 0;
 		return result;
 	}
 	

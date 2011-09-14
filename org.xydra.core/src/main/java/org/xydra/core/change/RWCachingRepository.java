@@ -12,7 +12,6 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.store.RevisionState;
 import org.xydra.store.XydraRuntime;
 
 
@@ -145,9 +144,7 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 	private static int executeModelTransacton(XID repositoryId, XID modelId, XTransaction txn,
 	        XID actorId) {
 		if(txn != null) {
-			RevisionState pair = XydraRuntime.getPersistence(repositoryId).executeCommand(
-			        actorId, txn);
-			long l = pair.revision();
+			long l = XydraRuntime.getPersistence(repositoryId).executeCommand(actorId, txn);
 			if(l < 0) {
 				log.warn("Could not execute non-empty txn " + l + " for " + txn + " = "
 				        + txnToString(txn));

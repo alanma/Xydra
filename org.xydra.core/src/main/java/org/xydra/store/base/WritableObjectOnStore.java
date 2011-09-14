@@ -11,7 +11,6 @@ import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableObject;
-import org.xydra.store.RevisionState;
 import org.xydra.store.XydraStore;
 
 
@@ -41,9 +40,7 @@ public class WritableObjectOnStore extends ReadableObjectOnStore implements XWri
 	}
 	
 	private boolean executeCommand(XCommand command) throws AssertionError {
-		RevisionState pair = ExecuteCommandsUtils.executeCommand(this.credentials, this.store,
-		        command);
-		long result = pair.revision();
+		long result = ExecuteCommandsUtils.executeCommand(this.credentials, this.store, command);
 		if(result >= 0) {
 			load();
 			return true;

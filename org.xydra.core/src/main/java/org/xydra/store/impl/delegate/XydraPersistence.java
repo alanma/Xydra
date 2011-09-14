@@ -83,7 +83,7 @@ public interface XydraPersistence {
 	 *            {@link XTransaction}.
 	 * @return a number indicating the result of executing the command.
 	 */
-	RevisionState executeCommand(XID actorId, XCommand command);
+	long executeCommand(XID actorId, XCommand command);
 	
 	/**
 	 * (Documentation copied from {@link GetEventsRequest})

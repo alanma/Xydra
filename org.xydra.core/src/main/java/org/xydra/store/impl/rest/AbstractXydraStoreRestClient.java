@@ -336,12 +336,12 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 		return out;
 	}
 	
-	private class ExecuteRequest extends Request<BatchedResult<RevisionState>[]> {
+	private class ExecuteRequest extends Request<BatchedResult<Long>[]> {
 		
 		private final XCommand[] commands;
 		
 		protected ExecuteRequest(XID actor, String password, XCommand[] commands,
-		        Callback<BatchedResult<RevisionState>[]> callback) {
+		        Callback<BatchedResult<Long>[]> callback) {
 			super(actor, password, callback);
 			this.commands = commands;
 		}
@@ -352,10 +352,10 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 		}
 		
 		@Override
-		protected BatchedResult<RevisionState>[] parse(XydraElement element) {
+		protected BatchedResult<Long>[] parse(XydraElement element) {
 			
 			@SuppressWarnings("unchecked")
-			BatchedResult<RevisionState>[] res = new BatchedResult[this.commands.length];
+			BatchedResult<Long>[] res = new BatchedResult[this.commands.length];
 			
 			SerializedStore.toCommandResults(element, null, res, null);
 			
@@ -366,7 +366,7 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 	
 	@Override
 	public void executeCommands(XID actor, String password, XCommand[] commands,
-	        Callback<BatchedResult<RevisionState>[]> callback) {
+	        Callback<BatchedResult<Long>[]> callback) {
 		new ExecuteRequest(actor, password, commands, callback).run();
 	}
 	
@@ -419,18 +419,15 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 	}
 	
 	private class ExecuteAndEventsRequest extends
-	        Request<Pair<BatchedResult<RevisionState>[],BatchedResult<XEvent[]>[]>> {
+	        Request<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> {
 		
 		private final XCommand[] commands;
 		private final GetEventsRequest[] getEventsRequests;
 		private final BatchedResult<XEvent[]>[] eventsRes;
 		
-		protected ExecuteAndEventsRequest(
-		        XID actor,
-		        String password,
-		        XCommand[] commands,
+		protected ExecuteAndEventsRequest(XID actor, String password, XCommand[] commands,
 		        GetEventsRequest[] getEventsRequests,
-		        Callback<Pair<BatchedResult<RevisionState>[],BatchedResult<XEvent[]>[]>> callback) {
+		        Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback) {
 			super(actor, password, callback);
 			this.commands = commands;
 			this.getEventsRequests = getEventsRequests;
@@ -452,17 +449,16 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 		}
 		
 		@Override
-		protected Pair<BatchedResult<RevisionState>[],BatchedResult<XEvent[]>[]> parse(
-		        XydraElement element) {
+		protected Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]> parse(XydraElement element) {
 			
 			@SuppressWarnings("unchecked")
-			BatchedResult<RevisionState>[] commandsRes = new BatchedResult[this.commands.length];
+			BatchedResult<Long>[] commandsRes = new BatchedResult[this.commands.length];
 			
 			SerializedStore.toCommandResults(element, this.getEventsRequests, commandsRes,
 			        this.eventsRes);
 			
-			return new Pair<BatchedResult<RevisionState>[],BatchedResult<XEvent[]>[]>(
-			        commandsRes, this.eventsRes);
+			return new Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>(commandsRes,
+			        this.eventsRes);
 		}
 		
 	}
@@ -470,7 +466,7 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 	@Override
 	public void executeCommandsAndGetEvents(XID actor, String password, XCommand[] commands,
 	        GetEventsRequest[] getEventsRequests,
-	        Callback<Pair<BatchedResult<RevisionState>[],BatchedResult<XEvent[]>[]>> callback) {
+	        Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback) {
 		new ExecuteAndEventsRequest(actor, password, commands, getEventsRequests, callback).run();
 	}
 	

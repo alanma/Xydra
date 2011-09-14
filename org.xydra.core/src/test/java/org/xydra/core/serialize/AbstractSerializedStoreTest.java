@@ -250,12 +250,12 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		checkBatchedResult(eventRes, res2);
 	}
 	
-	private void testCommandResults(BatchedResult<RevisionState>[] commandRes,
+	private void testCommandResults(BatchedResult<Long>[] commandRes,
 	        BatchedResult<XEvent[]>[] eventRes) {
 		
 		assert commandRes != null;
 		
-		BatchedResult<RevisionState>[] commands = preparePre(commandRes);
+		BatchedResult<Long>[] commands = preparePre(commandRes);
 		
 		EventsRequest er = preparePreRequests(eventRes);
 		BatchedResult<XEvent[]>[] events = preparePreResults(eventRes);
@@ -263,7 +263,7 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		XydraOut out = create();
 		SerializedStore.serializeCommandResults(commands, er, events, out);
 		
-		BatchedResult<RevisionState>[] res = preparePost(commandRes);
+		BatchedResult<Long>[] res = preparePost(commandRes);
 		
 		GetEventsRequest[] req = preparePostRequests(eventRes);
 		BatchedResult<XEvent[]>[] res2 = preparePost(eventRes);

@@ -195,7 +195,7 @@ public interface XydraBlockingStore {
 	 * @throws RequestException if the supplied arguments are considered
 	 *             syntactically or semantically invalid
 	 */
-	RevisionState executeCommand(XID actorId, String passwordHash, XCommand command)
+	long executeCommand(XID actorId, String passwordHash, XCommand command)
 	        throws IllegalArgumentException, QuotaException, AuthorisationException,
 	        AccessException, TimeoutException, ConnectionException, RequestException,
 	        InternalStoreException;

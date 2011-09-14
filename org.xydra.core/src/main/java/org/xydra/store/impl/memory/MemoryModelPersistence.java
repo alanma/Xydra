@@ -44,7 +44,7 @@ public class MemoryModelPersistence {
 		this.modelAddr = modelAddr;
 	}
 	
-	synchronized public RevisionState executeCommand(XID actorId, XCommand command) {
+	synchronized public long executeCommand(XID actorId, XCommand command) {
 		
 		long newRev = getRevisionNumber() + 1;
 		
@@ -54,7 +54,7 @@ public class MemoryModelPersistence {
 		        command);
 		if(change == null) {
 			// There was something wrong with the command.
-			return new RevisionState(XCommand.FAILED, this.exists());
+			return XCommand.FAILED;
 		}
 		
 		// Create events. Do this before we destroy any necessary information by
@@ -66,7 +66,7 @@ public class MemoryModelPersistence {
 		if(events.isEmpty()) {
 			// TODO take up a revision anyway with a null event to better test
 			// users of the API? (to mimic behaviour of the GAE implementation)
-			return new RevisionState(XCommand.NOCHANGE, this.exists());
+			return XCommand.NOCHANGE;
 		}
 		
 		XEvent event;
@@ -86,7 +86,7 @@ public class MemoryModelPersistence {
 		assert getRevisionNumber() == newRev;
 		assert this.model == null || this.model.getRevisionNumber() == newRev;
 		
-		return new RevisionState(newRev, this.exists());
+		return newRev;
 	}
 	
 	public boolean exists() {

@@ -6,6 +6,8 @@ import org.xydra.base.minio.MiniWriter;
 /**
  * An interface for writing XML-based or JSON-based streams.
  * 
+ * TODO @Daniel extend javadoc ;-)
+ * 
  * @author voelkel
  * @author dscharrer
  */
@@ -167,6 +169,12 @@ public interface XydraOut {
 	
 	void endMap();
 	
+	/**
+	 * Defines the type for the subsequent e.g. {@link #value(Object)} calls.
+	 * XML requires things to have names.
+	 * 
+	 * @param type
+	 */
 	void setDefaultType(String type);
 	
 	/**

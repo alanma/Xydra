@@ -141,7 +141,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 	}
 	
 	@Override
-	public RevisionState executeCommand(XID actorId, String passwordHash, XCommand command)
+	public long executeCommand(XID actorId, String passwordHash, XCommand command)
 	        throws AccessException {
 		assert actorId != null;
 		authorise(actorId, passwordHash);
