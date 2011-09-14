@@ -57,7 +57,7 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 		
 		@Override
 		public long getRevisionNumber() {
-			log.trace("Returning UNDEFINED as revision number");
+			log.debug("Returning UNDEFINED as revision number");
 			return UNDEFINED;
 		}
 		
@@ -122,7 +122,7 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 		
 		@Override
 		public long getRevisionNumber() {
-			log.trace("Returning UNDEFINED as revision number");
+			log.debug("Returning UNDEFINED as revision number");
 			return UNDEFINED;
 		}
 		
@@ -205,7 +205,7 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 	
 	@Override
 	public long getRevisionNumber() {
-		log.trace("Returning UNDEFINED as revision number");
+		log.debug("Returning UNDEFINED as revision number");
 		return UNDEFINED;
 	}
 	

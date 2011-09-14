@@ -333,7 +333,7 @@ public abstract class DeltaUtils {
 					                + rc.getRevisionNumber() + " forced:" + rc.isForced()));
 					return null;
 				} else if(model != null) {
-					log.trace("Removing model " + model.getAddress() + " "
+					log.debug("Removing model " + model.getAddress() + " "
 					        + model.getRevisionNumber());
 					ChangedModel changedModel = new ChangedModel(model);
 					changedModel.clear();

@@ -96,7 +96,7 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 		try {
 			this.w.write(string + "\n");
 			this.w.flush();
-			log.trace("EXE: " + string);
+			log.debug("EXE: " + string);
 		} catch(IOException e) {
 			throw new RuntimeException(e);
 		}

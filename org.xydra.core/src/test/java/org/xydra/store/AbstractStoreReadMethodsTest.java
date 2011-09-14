@@ -197,7 +197,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		assertNull(revisionCallback.getException());
 		BatchedResult<RevisionState>[] revisionResult = revisionCallback.getEffect();
 		for(BatchedResult<RevisionState> l : revisionResult) {
-			log.trace("Got rev = " + l.getFirst() + " - " + l.getSecond() + " - " + l.getResult());
+			log.debug("Got rev = " + l.getFirst() + " - " + l.getSecond() + " - " + l.getResult());
 		}
 	}
 	

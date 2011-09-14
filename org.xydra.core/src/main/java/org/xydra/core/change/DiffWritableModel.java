@@ -365,9 +365,9 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 		}
 		XTransaction txn = builder.build();
 		if(log.isTraceEnabled()) {
-			log.trace("Commands in txn for model '" + this.getID() + "'");
+			log.debug("Commands in txn for model '" + this.getID() + "'");
 			for(XAtomicCommand atomicCommand : txn) {
-				log.trace("  Command " + atomicCommand);
+				log.debug("  Command " + atomicCommand);
 			}
 		}
 		return txn;
