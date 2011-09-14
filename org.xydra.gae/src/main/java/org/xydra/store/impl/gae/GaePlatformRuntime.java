@@ -1,6 +1,8 @@
 package org.xydra.store.impl.gae;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.xydra.base.XID;
 import org.xydra.gae.AboutAppEngine;
@@ -130,4 +132,44 @@ public class GaePlatformRuntime implements XydraPlatformRuntime {
 		return new GaePersistence(repositoryId);
 	}
 	
+	@Override
+	public XRequest startRequest() {
+		
+		XRequest request = new XRequest() {
+			@Override
+			public void finish() {
+				synchronized(requestlisteners) {
+					for(XRequestListener listener : requestlisteners) {
+						listener.onRequestFinish(this);
+					}
+				}
+			}
+		};
+		synchronized(requestlisteners) {
+			for(XRequestListener listener : requestlisteners) {
+				listener.onRequestStart(request);
+			}
+		}
+		return request;
+	}
+	
+	public static interface XRequestListener {
+		void onRequestStart(XRequest request);
+		
+		void onRequestFinish(XRequest request);
+	}
+	
+	private static Set<XRequestListener> requestlisteners = new HashSet<XRequestListener>();
+	
+	public static void addRequestListener(XRequestListener listener) {
+		synchronized(requestlisteners) {
+			requestlisteners.add(listener);
+		}
+	}
+	
+	public static void removeRequestListener(XRequestListener listener) {
+		synchronized(requestlisteners) {
+			requestlisteners.remove(listener);
+		}
+	}
 }
