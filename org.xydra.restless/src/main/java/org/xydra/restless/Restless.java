@@ -332,7 +332,7 @@ public class Restless extends HttpServlet {
 		String uri = req.getRequestURI();
 		String path = req.getPathInfo();
 		String servletPath = uri.substring(0, uri.length() - path.length());
-		log.trace("uri=" + uri + "\npath=" + path + "->" + servletPath);
+		log.debug("uri=" + uri + "\npath=" + path + "->" + servletPath);
 		return servletPath;
 	}
 	

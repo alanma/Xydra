@@ -107,7 +107,7 @@ public class Jetty {
 			@Override
             public void doFilter(ServletRequest request, ServletResponse response,
 			        FilterChain filterChain) throws IOException, ServletException {
-				log.trace("JETTY Image GET " + ((HttpServletRequest)request).getRequestURI());
+				log.debug("JETTY Image GET " + ((HttpServletRequest)request).getRequestURI());
 				HttpServletResponseWrapper responseWrapper = new HttpServletResponseWrapper(
 				        (HttpServletResponse)response);
 				
