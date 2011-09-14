@@ -192,7 +192,7 @@ class RevisionCache {
 		 */
 		private boolean setLocalValueIfHigher(long value) {
 			if(value < this.value) {
-				log.trace("Avoid setting " + this.value + " back to " + value);
+				log.debug("Avoid setting " + this.value + " back to " + value);
 				return false;
 			}
 			return setLocalValue(value);
@@ -272,7 +272,7 @@ class RevisionCache {
 	@GaeOperation(memcacheRead = true)
 	protected long getCurrentModelRev() {
 		long l = this.current.getValue(true);
-		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "current", l, Timing.Now));
+		log.debug(DebugFormatter.dataGet(REVCACHE_NAME, "current", l, Timing.Now));
 		return l;
 	}
 	
@@ -286,13 +286,13 @@ class RevisionCache {
 	@GaeOperation(memcacheRead = true)
 	protected long getCurrentModelRevIfSet() {
 		long l = this.current.getValue(false);
-		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "currentIfSet", l, Timing.Now));
+		log.debug(DebugFormatter.dataGet(REVCACHE_NAME, "currentIfSet", l, Timing.Now));
 		return l;
 	}
 	
 	protected long getLastTakenIfSet() {
 		long l = this.lastTaken.getValue(false);
-		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "lastTakenIfSet", l, Timing.Now));
+		log.debug(DebugFormatter.dataGet(REVCACHE_NAME, "lastTakenIfSet", l, Timing.Now));
 		return l;
 	}
 	
@@ -305,13 +305,13 @@ class RevisionCache {
 	@GaeOperation(memcacheRead = true)
 	protected long getLastCommited() {
 		long l = this.lastTaken.getValue(true);
-		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "lastCommitted", l, Timing.Now));
+		log.debug(DebugFormatter.dataGet(REVCACHE_NAME, "lastCommitted", l, Timing.Now));
 		return l;
 	}
 	
 	protected long getLastCommitedIfSet() {
 		long l = this.committed.getValue(false);
-		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "lastCommittedIfSet", l, Timing.Now));
+		log.debug(DebugFormatter.dataGet(REVCACHE_NAME, "lastCommittedIfSet", l, Timing.Now));
 		return l;
 	}
 	
@@ -322,7 +322,7 @@ class RevisionCache {
 	 */
 	protected long getLastTaken() {
 		long l = this.lastTaken.getValue(true);
-		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "lastTaken", l, Timing.Now));
+		log.debug(DebugFormatter.dataGet(REVCACHE_NAME, "lastTaken", l, Timing.Now));
 		return l;
 	}
 	
@@ -333,7 +333,7 @@ class RevisionCache {
 	 *            less than this.
 	 */
 	protected void setCurrentModelRev(long l) {
-		log.trace(DebugFormatter.dataPut(REVCACHE_NAME, "current", l, Timing.Now));
+		log.debug(DebugFormatter.dataPut(REVCACHE_NAME, "current", l, Timing.Now));
 		boolean changes = this.current.setLocalValueIfHigher(l);
 		if(changes) {
 			maintainInvariants(true);
@@ -363,7 +363,7 @@ class RevisionCache {
 	 *            less than this.
 	 */
 	protected void setLastCommited(long l) {
-		log.trace(DebugFormatter.dataPut(REVCACHE_NAME, "lastCommited", l, Timing.Now));
+		log.debug(DebugFormatter.dataPut(REVCACHE_NAME, "lastCommited", l, Timing.Now));
 		boolean changes = this.committed.setLocalValueIfHigher(l);
 		if(changes) {
 			maintainInvariants(false);
@@ -377,12 +377,12 @@ class RevisionCache {
 	 *            less than this.
 	 */
 	protected void setLastTaken(long l) {
-		log.trace(DebugFormatter.dataPut(REVCACHE_NAME, "lastTaken", l, Timing.Now));
+		log.debug(DebugFormatter.dataPut(REVCACHE_NAME, "lastTaken", l, Timing.Now));
 		this.lastTaken.setLocalValueIfHigher(l);
 	}
 	
 	protected void clear() {
-		log.trace("revCache cleared");
+		log.debug("revCache cleared");
 		this.committed.clear();
 		this.current.clear();
 		this.lastTaken.clear();

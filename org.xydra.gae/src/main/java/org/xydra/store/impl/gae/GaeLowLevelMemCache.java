@@ -210,7 +210,7 @@ public class GaeLowLevelMemCache implements IMemCache {
 		this.memcacheService.put(key, value, Expiration.byDeltaSeconds(60 * 60 * 24 * 10),
 		        SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
 		if(log.isTraceEnabled()) {
-			log.trace(MEMCACHE_NAME + " now "
+			log.debug(MEMCACHE_NAME + " now "
 			        + DebugFormatter.format(this.memcacheService.get(key)));
 		}
 	}
@@ -265,7 +265,7 @@ public class GaeLowLevelMemCache implements IMemCache {
 			result = this.memcacheService.putIfUntouched(key, gaeId, newValue, expiration);
 		}
 		if(log.isTraceEnabled()) {
-			log.trace(MEMCACHE_NAME + " now "
+			log.debug(MEMCACHE_NAME + " now "
 			        + DebugFormatter.format(this.memcacheService.get(key)));
 		}
 		return result;

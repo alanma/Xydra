@@ -156,7 +156,7 @@ public class RevisionCache2 {
 		if(l == IRevisionInfo.NOT_SET) {
 			l = -1;
 		}
-		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "current", l, Timing.Now));
+		log.debug(DebugFormatter.dataGet(REVCACHE_NAME, "current", l, Timing.Now));
 		return l;
 	}
 	
@@ -172,7 +172,7 @@ public class RevisionCache2 {
 		if(l == IRevisionInfo.NOT_SET) {
 			l = -1;
 		}
-		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "lastCommitted", l, Timing.Now));
+		log.debug(DebugFormatter.dataGet(REVCACHE_NAME, "lastCommitted", l, Timing.Now));
 		return l;
 	}
 	
@@ -186,7 +186,7 @@ public class RevisionCache2 {
 		if(l == IRevisionInfo.NOT_SET) {
 			l = -1;
 		}
-		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "lastTaken", l, Timing.Now));
+		log.debug(DebugFormatter.dataGet(REVCACHE_NAME, "lastTaken", l, Timing.Now));
 		return l;
 	}
 	
@@ -197,7 +197,7 @@ public class RevisionCache2 {
 	 *            less than this.
 	 */
 	protected void setCurrentModelRev(long l) {
-		log.trace(DebugFormatter.dataPut(REVCACHE_NAME, "current", l, Timing.Now));
+		log.debug(DebugFormatter.dataPut(REVCACHE_NAME, "current", l, Timing.Now));
 		this.threadLocalExactRevisionInfo.setCurrentRev(l);
 	}
 	
@@ -208,7 +208,7 @@ public class RevisionCache2 {
 	 *            less than this.
 	 */
 	protected void setLastCommited(long l) {
-		log.trace(DebugFormatter.dataPut(REVCACHE_NAME, "lastCommited", l, Timing.Now));
+		log.debug(DebugFormatter.dataPut(REVCACHE_NAME, "lastCommited", l, Timing.Now));
 		this.threadLocalExactRevisionInfo.setLastCommitted(l);
 	}
 	
@@ -219,12 +219,12 @@ public class RevisionCache2 {
 	 *            less than this.
 	 */
 	protected void setLastTaken(long l) {
-		log.trace(DebugFormatter.dataPut(REVCACHE_NAME, "lastTaken", l, Timing.Now));
+		log.debug(DebugFormatter.dataPut(REVCACHE_NAME, "lastTaken", l, Timing.Now));
 		this.threadLocalExactRevisionInfo.setLastTaken(l);
 	}
 	
 	protected void clear() {
-		log.trace("revCache cleared");
+		log.debug("revCache cleared");
 		this.threadLocalExactRevisionInfo.clear();
 	}
 	
@@ -232,12 +232,12 @@ public class RevisionCache2 {
 		// FIXME PERF !! renable getExactCurrentRev
 		return -2;
 		// long l = this.threadLocalExactRevisionInfo.getCurrentRev(false);
-		// log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "current", l));
+		// log.debug(DebugFormatter.dataGet(REVCACHE_NAME, "current", l));
 		// return l;
 	}
 	
 	protected void setModelExists(boolean exists) {
-		log.trace("set model exists to " + exists);
+		log.debug("set model exists to " + exists);
 		this.threadLocalExactRevisionInfo.setModelExists(exists);
 	}
 	

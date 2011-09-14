@@ -66,7 +66,7 @@ public class GaeTestfixer {
 		
 		/* if enabled and in production: self-disable */
 		if(!checkedProduction) {
-			log.trace("Testing if we are on the real GAE in production...");
+			log.debug("Testing if we are on the real GAE in production...");
 			checkedProduction = true;
 			if(inProduction()) {
 				log.debug("Testfixer: Running on AppEngine in production: Auto-disabled test fixer.");
@@ -79,7 +79,7 @@ public class GaeTestfixer {
 			/* second check: can we load this class: 'LocalServiceTestHelper' ? */
 			try {
 				Class.forName("com.google.appengine.tools.development.testing.LocalServiceTestHelper");
-				log.trace("We can load the test classes.");
+				log.debug("We can load the test classes.");
 			} catch(ClassNotFoundException e) {
 				/* ah, we are in production */
 				log.warn(

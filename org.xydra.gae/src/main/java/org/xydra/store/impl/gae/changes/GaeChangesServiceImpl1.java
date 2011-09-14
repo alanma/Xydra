@@ -278,7 +278,7 @@ public class GaeChangesServiceImpl1 implements IGaeChangesService {
 	 * @param change which lists a Set of required locks
 	 */
 	private void waitForLocks(GaeChange change) {
-		log.trace("waitForLocks: " + DebugFormatter.format(change));
+		log.debug("waitForLocks: " + DebugFormatter.format(change));
 		
 		long commitedRev = this.revCache.getLastCommited();
 		
@@ -602,7 +602,7 @@ public class GaeChangesServiceImpl1 implements IGaeChangesService {
 	 *         grabbed by another process.
 	 */
 	private boolean rollForward(GaeChange change) {
-		log.trace("roll forward: " + change);
+		log.debug("roll forward: " + change);
 		assert change.isTimedOut() && change.getStatus().canRollForward();
 		
 		// Try to "grab" the change entity to prevent multiple processes from
@@ -676,7 +676,7 @@ public class GaeChangesServiceImpl1 implements IGaeChangesService {
 			if(!change.getStatus().isCommitted()) {
 				return;
 			}
-			log.trace(DebugFormatter.dataPut(VM_COMMITED_CHANGES_CACHENAME + this.modelAddr, ""
+			log.debug(DebugFormatter.dataPut(VM_COMMITED_CHANGES_CACHENAME + this.modelAddr, ""
 			        + change.rev, change, Timing.Now));
 			Map<Long,GaeChange> committedChangeCache = getCommittedChangeCache();
 			synchronized(committedChangeCache) {
@@ -698,7 +698,7 @@ public class GaeChangesServiceImpl1 implements IGaeChangesService {
 		if(change != null) {
 			assert change.getStatus().isCommitted();
 		}
-		log.trace(DebugFormatter.dataGet(VM_COMMITED_CHANGES_CACHENAME + this.modelAddr, "" + rev,
+		log.debug(DebugFormatter.dataGet(VM_COMMITED_CHANGES_CACHENAME + this.modelAddr, "" + rev,
 		        change, Timing.Now));
 		return change;
 	}
@@ -727,12 +727,12 @@ public class GaeChangesServiceImpl1 implements IGaeChangesService {
 		if(currentRev == RevisionCache.NOT_SET) {
 			currentRev = updateCurrentRev(-1L);
 		}
-		log.trace("currentRevNr = " + currentRev);
+		log.debug("currentRevNr = " + currentRev);
 		return currentRev;
 	}
 	
 	private long updateCurrentRev(long lastCurrentRev) {
-		log.trace("updateCurrentRev from " + lastCurrentRev);
+		log.debug("updateCurrentRev from " + lastCurrentRev);
 		long currentRev = lastCurrentRev;
 		long rev = currentRev;
 		
@@ -794,10 +794,10 @@ public class GaeChangesServiceImpl1 implements IGaeChangesService {
 		
 		GaeChange change = getCachedChange(rev);
 		if(change != null) {
-			log.trace("use locally cached change " + rev);
+			log.debug("use locally cached change " + rev);
 			return new AsyncChange(change);
 		}
-		log.trace("no locally cached change " + rev);
+		log.debug("no locally cached change " + rev);
 		return new AsyncChange(this, rev);
 	}
 	
@@ -933,7 +933,7 @@ public class GaeChangesServiceImpl1 implements IGaeChangesService {
 	 * @return false if the entity could not be rolled forward.
 	 */
 	private boolean handleTimeout(GaeChange change) {
-		log.trace("handleTimeout: " + change);
+		log.debug("handleTimeout: " + change);
 		if(change.getStatus().canRollForward()) {
 			rollForward(change);
 			return true;
@@ -974,7 +974,7 @@ public class GaeChangesServiceImpl1 implements IGaeChangesService {
 		synchronized(instanceCache) {
 			committedChangeCache = (Map<Long,GaeChange>)instanceCache.get(key);
 			if(committedChangeCache == null) {
-				log.trace(DebugFormatter.init(VM_COMMITED_CHANGES_CACHENAME));
+				log.debug(DebugFormatter.init(VM_COMMITED_CHANGES_CACHENAME));
 				committedChangeCache = new HashMap<Long,GaeChange>();
 				InstanceContext.getInstanceCache().put(key, committedChangeCache);
 			}

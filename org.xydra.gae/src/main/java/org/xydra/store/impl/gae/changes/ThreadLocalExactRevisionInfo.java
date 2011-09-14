@@ -39,7 +39,7 @@ public class ThreadLocalExactRevisionInfo implements IRevisionInfo {
 		if(this.lastTaken == NOT_SET && mayAsk) {
 			this.lastTaken = this.sharedMinimalRevisionInfo.getLastTaken(true);
 		}
-		log.trace(DebugFormatter.dataGet(DATASOURCENAME, "lastTaken", this.lastTaken, Timing.Now));
+		log.debug(DebugFormatter.dataGet(DATASOURCENAME, "lastTaken", this.lastTaken, Timing.Now));
 		return this.lastTaken;
 	}
 	
@@ -47,7 +47,7 @@ public class ThreadLocalExactRevisionInfo implements IRevisionInfo {
 	public void setLastTaken(long lastTaken) {
 		this.lastTaken = lastTaken;
 		this.sharedMinimalRevisionInfo.setLastTaken(lastTaken);
-		log.trace(DebugFormatter.dataPut(DATASOURCENAME, "lastTaken", lastTaken, Timing.Now)
+		log.debug(DebugFormatter.dataPut(DATASOURCENAME, "lastTaken", lastTaken, Timing.Now)
 		        + ". New values=" + this.toString());
 	}
 	
@@ -56,7 +56,7 @@ public class ThreadLocalExactRevisionInfo implements IRevisionInfo {
 		if(this.lastCommitted == NOT_SET && mayAsk) {
 			this.lastCommitted = this.sharedMinimalRevisionInfo.getLastCommitted(true);
 		}
-		log.trace(DebugFormatter.dataGet(DATASOURCENAME, "lastCommitted", this.lastCommitted,
+		log.debug(DebugFormatter.dataGet(DATASOURCENAME, "lastCommitted", this.lastCommitted,
 		        Timing.Now));
 		return this.lastCommitted;
 	}
@@ -66,7 +66,7 @@ public class ThreadLocalExactRevisionInfo implements IRevisionInfo {
 		this.lastCommitted = lastCommitted;
 		this.sharedMinimalRevisionInfo.setLastCommitted(lastCommitted);
 		RevisionInfoUtils.maintainInvariants(this, false);
-		log.trace(DebugFormatter
+		log.debug(DebugFormatter
 		        .dataPut(DATASOURCENAME, "lastCommitted", lastCommitted, Timing.Now)
 		        + ". New values=" + this.toString());
 	}
@@ -76,7 +76,7 @@ public class ThreadLocalExactRevisionInfo implements IRevisionInfo {
 		if(this.currentRev == NOT_SET && mayAsk) {
 			this.currentRev = this.sharedMinimalRevisionInfo.getCurrentRev(true);
 		}
-		log.trace(DebugFormatter.dataGet(DATASOURCENAME, "currentRev", this.currentRev, Timing.Now));
+		log.debug(DebugFormatter.dataGet(DATASOURCENAME, "currentRev", this.currentRev, Timing.Now));
 		return this.currentRev;
 	}
 	
@@ -85,7 +85,7 @@ public class ThreadLocalExactRevisionInfo implements IRevisionInfo {
 		this.currentRev = currentRev;
 		this.sharedMinimalRevisionInfo.setCurrentRev(currentRev);
 		RevisionInfoUtils.maintainInvariants(this, true);
-		log.trace(DebugFormatter.dataPut(DATASOURCENAME, "currentRev", currentRev, Timing.Now)
+		log.debug(DebugFormatter.dataPut(DATASOURCENAME, "currentRev", currentRev, Timing.Now)
 		        + ". New values=" + this.toString());
 	}
 	

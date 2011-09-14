@@ -201,7 +201,7 @@ public class GaeSnapshotService2 {
 		
 		XRevWritableModel base;
 		if(batchResult.isEmpty()) {
-			log.trace("we start from scratch, nobody has ever saved a snapshot");
+			log.debug("we start from scratch, nobody has ever saved a snapshot");
 			base = new SimpleModel(this.modelAddress);
 			base.setRevisionNumber(MODEL_DOES_NOT_EXIST);
 		} else {
@@ -246,7 +246,7 @@ public class GaeSnapshotService2 {
 		
 		// apply events to base
 		for(XEvent event : events) {
-			log.trace("Basemodel[" + baseModel.getRevisionNumber() + "], applying event["
+			log.debug("Basemodel[" + baseModel.getRevisionNumber() + "], applying event["
 			        + event.getRevisionNumber() + "]=" + event);
 			EventUtils.applyEvent(baseModel, event);
 			
@@ -278,7 +278,7 @@ public class GaeSnapshotService2 {
 		synchronized(instanceCache) {
 			modelSnapshotsCache = (SortedMap<Long,XReadableModel>)instanceCache.get(key);
 			if(modelSnapshotsCache == null) {
-				log.trace("localVmcache for snapshots missing, creating one");
+				log.debug("localVmcache for snapshots missing, creating one");
 				modelSnapshotsCache = new TreeMap<Long,XReadableModel>();
 				instanceCache.put(key, modelSnapshotsCache);
 			} else if(modelSnapshotsCache.size() > 100) {
@@ -301,12 +301,12 @@ public class GaeSnapshotService2 {
 		// this.changesService.getCurrentRevisionNumber() > 0 : "requested:"
 		// + requestedRevNr + " current:" +
 		// this.changesService.getCurrentRevisionNumber();
-		log.trace("Get snapshot " + this.modelAddress + " " + requestedRevNr);
+		log.debug("Get snapshot " + this.modelAddress + " " + requestedRevNr);
 		
 		/* if localVmCache has exact requested version, use it */
 		XWritableModel cached = localVmCacheGet(requestedRevNr);
 		if(cached != null) {
-			log.trace("return locally cached");
+			log.debug("return locally cached");
 			return cached;
 		}
 		
@@ -338,7 +338,7 @@ public class GaeSnapshotService2 {
 		if(USE_MEMCACHE) {
 			o = Memcache.get(snapshotKey);
 			if(o != null) {
-				log.trace("return from memcache");
+				log.debug("return from memcache");
 				if(o.equals(Memcache.NULL_ENTITY)) {
 					localVmCachePutNull(requestedRevNr);
 					return null;
@@ -353,7 +353,7 @@ public class GaeSnapshotService2 {
 		// else: look for direct match in datastore
 		Entity e = SyncDatastore.getEntity(snapshotKey);
 		if(e != null) {
-			log.trace("return from datastore");
+			log.debug("return from datastore");
 			Text xmlText = (Text)e.getProperty(PROP_XML);
 			if(xmlText == null) {
 				// model was null at that revision
@@ -397,7 +397,7 @@ public class GaeSnapshotService2 {
 		} else {
 			XReadableModel cached = matchOrNewer.values().iterator().next();
 			assert cached.getRevisionNumber() >= revisionNumber;
-			log.trace("re-using locamVmCache with revNr " + cached.getRevisionNumber() + " for "
+			log.debug("re-using locamVmCache with revNr " + cached.getRevisionNumber() + " for "
 			        + revisionNumber);
 			return XCopyUtils.createSnapshot(cached);
 		}

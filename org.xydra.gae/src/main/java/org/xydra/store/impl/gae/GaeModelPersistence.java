@@ -73,7 +73,7 @@ public class GaeModelPersistence {
 			return new SimpleModel(this.modelAddress);
 		}
 		XWritableModel snapshot = this.snapshotService.getSnapshot(currentRevNr);
-		log.trace("return snapshot rev " + currentRevNr + " for model " + this.modelAddress);
+		log.debug("return snapshot rev " + currentRevNr + " for model " + this.modelAddress);
 		return snapshot;
 	}
 	

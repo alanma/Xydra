@@ -76,7 +76,7 @@ public class Utils {
 			assert address.equals(childAddr.getParent());
 			childIds.add(getEntityId(childAddr));
 		}
-		log.trace(DebugFormatter.dataGet(SyncDatastore.DATASTORE_NAME,
+		log.debug(DebugFormatter.dataGet(SyncDatastore.DATASTORE_NAME,
 		        "query-children:" + address.toURI(), DebugFormatter.format(childIds), Timing.Now));
 		return childIds;
 	}

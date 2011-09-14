@@ -98,7 +98,7 @@ public class GaeSnapshotService1 {
 		log.debug("Get snapshot " + this.modelAddress + " " + revisionNumber);
 		/* if localVmCache has requested version or newer, use it */
 		if(this.localVmCache != null && this.localVmCache.revision >= revisionNumber) {
-			log.trace("re-using locamVmCache with revNr " + this.localVmCache.revision + " for "
+			log.debug("re-using locamVmCache with revNr " + this.localVmCache.revision + " for "
 			        + revisionNumber);
 			return XCopyUtils.createSnapshot(this.localVmCache.modelState);
 		}
@@ -316,7 +316,7 @@ public class GaeSnapshotService1 {
 		log.debug("-> updated to new rev=" + entry.revision);
 		assert entry.modelState == null || entry.modelState.getRevisionNumber() == entry.revision;
 		
-		log.trace("udated cached model " + this.modelAddress + " to newRev=" + entry.revision);
+		log.debug("udated cached model " + this.modelAddress + " to newRev=" + entry.revision);
 	}
 	
 	/**

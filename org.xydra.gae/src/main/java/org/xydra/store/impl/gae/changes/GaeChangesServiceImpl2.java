@@ -169,7 +169,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 	 */
 	@Override
 	public RevisionState executeCommand(XCommand command, XID actorId) {
-		log.trace("Execute " + DebugFormatter.format(command));
+		log.debug("Execute " + DebugFormatter.format(command));
 		Clock c = new Clock().start();
 		assert this.modelAddr.equalsOrContains(command.getChangedEntity()) : "cannot handle command "
 		        + command + " - it does not address a model";
@@ -325,7 +325,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 	 * @param change which lists a Set of required locks
 	 */
 	private void waitForLocks(GaeChange change) {
-		log.trace("waitForLocks: " + DebugFormatter.format(change));
+		log.debug("waitForLocks: " + DebugFormatter.format(change));
 		
 		long commitedRev = this.revCache.getLastCommited();
 		
@@ -482,7 +482,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		}
 		
 		List<XAtomicEvent> events = DeltaUtils.createEvents(this.modelAddr, c, actorId, change.rev);
-		log.trace("DeltaUtils generated " + events.size() + " events");
+		log.debug("DeltaUtils generated " + events.size() + " events");
 		
 		int[] valueIds = null;
 		
@@ -530,7 +530,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 	private void executeAndUnlock(GaeChange change, Pair<List<XAtomicEvent>,int[]> events) {
 		
 		for(XAtomicEvent event : events.getFirst()) {
-			log.trace("executeAndUnlock event " + event.toString());
+			log.debug("executeAndUnlock event " + event.toString());
 		}
 		
 		/**
@@ -680,7 +680,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 	 *         grabbed by another process.
 	 */
 	private boolean rollForward(GaeChange change) {
-		log.trace("roll forward: " + change);
+		log.debug("roll forward: " + change);
 		assert change.isTimedOut() && change.getStatus().canRollForward();
 		
 		// Try to "grab" the change entity to prevent multiple processes from
@@ -762,7 +762,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 			assert change != null;
 			assert change.getStatus() != null;
 			assert change.getStatus().isCommitted();
-			log.trace(DebugFormatter.dataPut(VM_COMMITED_CHANGES_CACHENAME + this.modelAddr, ""
+			log.debug(DebugFormatter.dataPut(VM_COMMITED_CHANGES_CACHENAME + this.modelAddr, ""
 			        + change.rev, change, Timing.Now));
 			Map<Long,GaeChange> committedChangeCache = getCommittedChangeCache();
 			synchronized(committedChangeCache) {
@@ -783,7 +783,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		if(change != null) {
 			assert change.getStatus().isCommitted();
 		}
-		log.trace(DebugFormatter.dataGet(VM_COMMITED_CHANGES_CACHENAME + this.modelAddr, "" + rev,
+		log.debug(DebugFormatter.dataGet(VM_COMMITED_CHANGES_CACHENAME + this.modelAddr, "" + rev,
 		        change, Timing.Now));
 		return change;
 	}
@@ -810,26 +810,26 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 	public long getCurrentRevisionNumber() {
 		long currentRev = this.revCache.getExactCurrentRev();
 		if(currentRev == IRevisionInfo.NOT_SET) {
-			log.trace("exact version not locally known");
+			log.debug("exact version not locally known");
 			currentRev = this.revCache.getCurrentRev();
-			log.trace("revCache = " + currentRev);
+			log.debug("revCache = " + currentRev);
 			currentRev = updateCurrentRev(currentRev);
 			this.revCache.setCurrentModelRev(currentRev);
 		} else {
-			log.trace("currentRev is locally exact defined");
+			log.debug("currentRev is locally exact defined");
 		}
-		log.trace("getCurrentRevisionNumber = " + currentRev);
+		log.debug("getCurrentRevisionNumber = " + currentRev);
 		return currentRev;
 	}
 	
 	private long updateCurrentRev(long lastCurrentRev) {
-		log.trace("Updating rev from lastCurrentRev=" + lastCurrentRev + " ...");
+		log.debug("Updating rev from lastCurrentRev=" + lastCurrentRev + " ...");
 		int windowSize = 1;
 		long rev = NOT_FOUND;
 		long start = lastCurrentRev + 1;
 		long end;
 		while(rev == NOT_FOUND) {
-			log.trace("windowsize = " + windowSize);
+			log.debug("windowsize = " + windowSize);
 			end = start + windowSize - 1;
 			rev = updateCurrentRev_Step(start, end);
 			// adjust probe window
@@ -843,7 +843,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		}
 		assert rev != NOT_FOUND : "found no rev nr";
 		this.revCache.setCurrentModelRev(rev);
-		log.trace("Updated rev from [" + lastCurrentRev + " ==> " + rev);
+		log.debug("Updated rev from [" + lastCurrentRev + " ==> " + rev);
 		return rev;
 	}
 	
@@ -859,11 +859,11 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		 */
 		/* === Phase 1: Determine revisions not yet locally cached === */
 		Set<Long> locallyMissingRevs = computeLocallyMissingRevs(beginRevInclusive, endRevInclusive);
-		log.trace("missingRevs: " + locallyMissingRevs.size());
+		log.debug("missingRevs: " + locallyMissingRevs.size());
 		
 		/* === Phase 2+3: Ask Memcache + Datastore === */
 		fetchMissingRevisionsFromMemcacheAndDatastore(locallyMissingRevs);
-		log.trace("number of missingRevs after asking DS&MC: " + locallyMissingRevs.size());
+		log.debug("number of missingRevs after asking DS&MC: " + locallyMissingRevs.size());
 		
 		/* === Phase 4: Compute result from local cache === */
 		/* compute model exists from event before asking range */
@@ -871,7 +871,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		long currentRev = beginRevInclusive - 1;
 		for(long i = beginRevInclusive; i <= endRevInclusive; i++) {
 			GaeChange change = getCachedChange(i);
-			log.trace("cached change " + i + ": " + change);
+			log.debug("cached change " + i + ": " + change);
 			
 			// TODO careful: too much caching?
 			if(change == null) {
@@ -900,7 +900,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		}
 		
 		if(foundEnd) {
-			log.trace("Step: return currentRev = " + currentRev);
+			log.debug("Step: return currentRev = " + currentRev);
 			return currentRev;
 		}
 		// else
@@ -1049,7 +1049,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 	 * @return
 	 */
 	private Set<Long> computeLocallyMissingRevs(long startRevInclusive, long endRevInclusive) {
-		log.trace("computeLocallyMissingRevs [" + startRevInclusive + "," + endRevInclusive + "]");
+		log.debug("computeLocallyMissingRevs [" + startRevInclusive + "," + endRevInclusive + "]");
 		Set<Long> locallyMissingRevs = new HashSet<Long>();
 		for(long i = startRevInclusive; i <= endRevInclusive; i++) {
 			// add key only if result not known locally yet
@@ -1059,7 +1059,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 			} else {
 				assert change.rev == i;
 				assert change.getStatus().isCommitted();
-				// log.trace("Already locally cached: " +
+				// log.debug("Already locally cached: " +
 				// DebugFormatter.format(change));
 			}
 		}
@@ -1121,12 +1121,12 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		// construct result
 		long newRev = -1;
 		for(long i = begin; i <= endRev; i++) {
-			log.trace("Trying to find & apply event " + i);
+			log.debug("Trying to find & apply event " + i);
 			GaeChange change = getCachedChange(i);
 			// use only positive information
 			if(change != null) {
 				if(change.getStatus() == Status.SuccessExecuted) {
-					log.trace("Change " + i + " rev=" + change.rev + " is successful");
+					log.debug("Change " + i + " rev=" + change.rev + " is successful");
 					XEvent event = change.getEvent();
 					assert event != null : change;
 					events.add(event);
@@ -1134,7 +1134,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 				} else {
 					assert change.getStatus() != Status.Creating;
 					assert change.getStatus() != Status.Executing;
-					log.trace("Change " + i + " is " + change.getStatus().name());
+					log.debug("Change " + i + " is " + change.getStatus().name());
 				}
 			} else {
 				log.warn("==== Change " + i + " is null, was asking [" + begin + "," + endRev
@@ -1221,7 +1221,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		synchronized(instanceCache) {
 			committedChangeCache = (Map<Long,GaeChange>)instanceCache.get(key);
 			if(committedChangeCache == null) {
-				log.trace(DebugFormatter.init(VM_COMMITED_CHANGES_CACHENAME));
+				log.debug(DebugFormatter.init(VM_COMMITED_CHANGES_CACHENAME));
 				committedChangeCache = new HashMap<Long,GaeChange>();
 				InstanceContext.getInstanceCache().put(key, committedChangeCache);
 			}

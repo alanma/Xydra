@@ -183,6 +183,10 @@ public class SharedMinimalRevisionInfo implements IRevisionInfo {
 			if(!USE_MEMCACHE) {
 				return;
 			}
+			if(this.value == null) {
+				// we don't know anything
+				return;
+			}
 			if(this.loadedValue == null || this.loadedValue.getValue() == null) {
 				// write if still null
 				IMemCache cache = XydraRuntime.getMemcache();
@@ -293,7 +297,7 @@ public class SharedMinimalRevisionInfo implements IRevisionInfo {
 	}
 	
 	public void writeToMemcache() {
-		log.trace("Write to memcache " + this.modelAddress);
+		log.debug("Write to memcache " + this.modelAddress);
 		this.lastTaken.writeToMemcache();
 		this.lastCommitted.writeToMemcache();
 		this.currentRev.writeToMemcache();
