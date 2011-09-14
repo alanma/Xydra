@@ -18,4 +18,13 @@ public class MemoryRuntime implements XydraPlatformRuntime {
 		return new MemoryPersistence(repositoryId);
 	}
 	
+	@Override
+	public XRequest startRequest() {
+		return new XRequest() {
+			@Override
+			public void finish() {
+			}
+		};
+	}
+	
 }
