@@ -18,7 +18,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 	private boolean whitespace = false;
 	
 	@Override
-    public void enableWhitespace(boolean whitespace, boolean idententation) {
+	public void enableWhitespace(boolean whitespace, boolean idententation) {
 		this.whitespace = whitespace;
 		this.indent = idententation;
 	}
@@ -128,7 +128,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 	}
 	
 	@Override
-    public void nullElement() {
+	public void nullElement() {
 		
 		checkCanAddChild();
 		
@@ -305,7 +305,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 	}
 	
 	@Override
-    public String getData() {
+	public String getData() {
 		
 		if(this.current != null) {
 			error("cannot get result before closing all elements");
@@ -320,12 +320,12 @@ abstract public class AbstractXydraOut implements XydraOut {
 	}
 	
 	@Override
-    public boolean isClosed() {
+	public boolean isClosed() {
 		return this.current == null;
 	}
 	
 	@Override
-    public void flush() {
+	public void flush() {
 		this.writer.flush();
 	}
 	
@@ -342,7 +342,9 @@ abstract public class AbstractXydraOut implements XydraOut {
 		check();
 		
 		if(this.current.type == Type.Element) {
-			error("must call child() before setChildType()");
+			error("must call child() before setDefaultType()");
+		} else if(this.current.type == Type.Entry) {
+			error("cannot set the (default) child type for individual map entries");
 		} else if(this.current.childType != null) {
 			error("can only set the child type once for each context");
 		} else if(this.current.hasContent()) {

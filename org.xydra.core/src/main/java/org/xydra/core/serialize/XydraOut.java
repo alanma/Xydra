@@ -6,65 +6,168 @@ import org.xydra.base.minio.MiniWriter;
 /**
  * An interface for writing XML-based or JSON-based streams.
  * 
- * TODO @Daniel extend javadoc ;-)
+ * <p>
+ * Encoding must start by opening the root element using {@link #open(String)}
+ * and must end by closing the root element using {@link #close(String)} with
+ * the same type.
+ * </p>
+ * 
+ * <p>
+ * Types of entities modeled by {@link XydraOut}:
+ * <ul>
+ * 
+ * <li><b>Element</b>: See {@link #open(String)}, {@link #close(String)},
+ * {@link #attribute(String, Object)} and {@link #child(String)} <br>
+ * Object with attributes and child entities. <br>
+ * Convenience functions:
+ * 
+ * <li><b>Array</b>: See {@link #beginArray()} and {@link #endArray()} <br>
+ * Ordered list of entities. <br>
+ * Convenience functions:
+ * 
+ * <li>Map: See {@link #beginMap(String)}, {@link #endMap()} and
+ * {@link #entry(String)} <br>
+ * Associative array mapping keys to entities. <br>
+ * Convenience functions:
+ * 
+ * <li>Value: See {@link #value(Object)}. <br>
+ * An atomic value: null, numbers, booleans and strings. <br>
+ * Convenience functions:
+ * 
+ * </ul>
+ * </p>
+ * 
+ * <p>
+ * The {@link #setChildType(String)} and {@link #setDefaultType(String)}
+ * functions can be used to fine-tune XML/JSON encodings of entities.
+ * </p>
+ * 
+ * <p>
+ * The {@link #enableWhitespace(boolean, boolean)} method allows to enable or
+ * disable additional formatting that will not influence the meaning of the
+ * output.
+ * </p>
+ * 
+ * <p>
+ * Data encoded using a {@link XydraOut} implementation can be decoded with a
+ * corresponding {@link XydraParser} implementation.
+ * </p>
  * 
  * @author voelkel
  * @author dscharrer
  */
 public interface XydraOut {
 	
+	/* Element */
+
 	/**
-	 * Start a new child element.
-	 * 
-	 * <p>
-	 * This method can be called when in the context of a child list or array.
-	 * No child elements can be added to elements that have a text content
-	 * created using {@link #content(String, Object)}.
-	 * </p>
+	 * Start a new element of the give type. Elements roughly resemble XML
+	 * elements and can have attributes and children. While elements are
+	 * powerful enough to encode all data structures, other entity types like
+	 * arrays and maps can allow a better encoding in some cases.
 	 * 
 	 * <p>
 	 * This method changes the context to a new element context.
 	 * </p>
 	 * 
 	 * <p>
-	 * For XML, this starts a new element tag.
+	 * For XML, this starts a new element tag: &lt;type&gt;
 	 * </p>
 	 * 
 	 * <p>
-	 * For JSON, elements are encoded as objects.
-	 * 
-	 * For typed child list or array contexts the type is not saved in the
-	 * object. For untyped child list and array contexts, the type is saved in
-	 * the "$type" property:
+	 * For JSON, elements are encoded as objects. If the current context does
+	 * not have a default child type or this element has a different type, the
+	 * element type is encoded in the "$type" property:
 	 * 
 	 * <pre>
 	 * { "$type": "type" ... }
 	 * </pre>
 	 * 
+	 * Otherwise, the element type is not encoded.
 	 * </p>
 	 * 
 	 * <p>
-	 * Child elements can be retrieved using
-	 * {@link XydraElement#getElement(String)} or
-	 * {@link XydraElement#getElement(String, int)} if created in an untyped
-	 * single-item child list, using
-	 * {@link XydraElement#getChild(String, String)} if created in a typed
-	 * single-item child list, using
-	 * {@link XydraElement#getChildrenByName(String)} when created in an untyped
-	 * multiple-item child list or array and using
-	 * {@link XydraElement#getValues(String, String)} when created in a typed
-	 * multiple-array child list or array.
+	 * Attributes can be set for the current element using
+	 * {@link #attribute(String, Object)}. No attributes can be set if the
+	 * current element already has any children.
+	 * </p>
+	 * 
+	 * <p>
+	 * Entities cannot be added directly to elements. Instead, a new (named)
+	 * child context must be created using {@link #child(String)}. Children and
+	 * attributes names share the same name-space. Exactly one entity can be
+	 * added to the child context using {@link #open(String)},
+	 * {@link #beginArray(String)}, {@link #beginMap(String)} or
+	 * {@link #value(Object)}.The child context is automatically closed and the
+	 * element context becomes active again once the child ends.
+	 * </p>
+	 * 
+	 * <p>
+	 * A child context is untyped by default. A child context can become typed
+	 * using the {@link #setDefaultType(String)} or
+	 * {@link #setChildType(String)} functions. Alternatively, the
+	 * {@link #child(String, String)} convenience function can be used to create
+	 * typed child contexts.
+	 * <p>
+	 * 
+	 * <p>
+	 * An element that has an untyped child {@link #value(Object)} cannot have
+	 * any other children. This concept is provided by the
+	 * {@link #content(String, Object)} convenience function and has a special
+	 * XML encoding:
+	 * 
+	 * <pre>
+	 * &lt;type&gt;value&lt;/type&gt;
+	 * </pre>
+	 * 
+	 * or if the value is null:
+	 * 
+	 * <pre>
+	 * &lt;element nullContent="true"/&gt;
+	 * </pre>
+	 * 
+	 * To add an untyped "null" that will allow other children, use
+	 * {@link #nullElement()}.
+	 * </p>
+	 * 
+	 * <p>
+	 * Attributes can be retrieved using
+	 * {@link XydraElement#getAttribute(String)}.
+	 * </p>
+	 * 
+	 * <p>
+	 * The element context must be closed by a corresponding call to
+	 * {@link #close(String)} with the same type.
+	 * </p>
+	 * 
+	 * <p>
+	 * Children can be retrieved using {@link XydraElement#getChild(String)},
+	 * {@link XydraElement#getChild(String, String)},
+	 * {@link XydraElement#getChildrenByName(String)},
+	 * {@link XydraElement#getChildrenByName(String, String)} and
+	 * {@link XydraElement#getChildrenByType(String, String)}
+	 * </p>
+	 * 
+	 * <p>
+	 * Child values can also be retrieved directly using
+	 * {@link XydraElement#getValue(String, int)},
+	 * {@link XydraElement#getValue(String, String)},
+	 * {@link XydraElement#getValues(String)} and
+	 * {@link XydraElement#getValues(String, String)}.
+	 * </p>
+	 * 
+	 * <p>
+	 * Child elements can also be retrieved using
+	 * {@link XydraElement#getElement(String)} and
+	 * {@link XydraElement#getElement(String, int)}
 	 * </p>
 	 * 
 	 * @param type The element type to open. This must be a valid XML element
-	 *            name and a unique type unique for all child lists and elements
-	 *            in the containing element. When in the context of an element,
-	 *            this mist also be a unique (for that element) attribute name.
-	 *            In that case,'isNull' and 'nullContent' are reserved names.
-	 *            Otherwise 'xnull' and 'xvalue' are reserved names.
+	 *            name. "xnull", "xmap", "xarray" and "xvalue" are reserved
+	 *            types.
 	 * 
-	 *            When in a typed context, this type must match that of the
-	 *            context.
+	 *            When the current context has type set using
+	 *            {@link #setChildType(String)}, this type must match.
 	 */
 	void open(String type);
 	
@@ -72,17 +175,28 @@ public interface XydraOut {
 	 * Set an attribute of the current element.
 	 * 
 	 * <p>
-	 * This method can only be called when in the context of an element for that
-	 * doesn't have any content, children and/or child list yet.
+	 * This method can only be called when in the context of an element that
+	 * doesn't have any children yet. Attributes and children of the same
+	 * element share a common namespace.
 	 * </p>
 	 * 
 	 * <p>
-	 * For XML, attributes are encoded as element attributes.
+	 * For XML, attributes are encoded as element attributes:
+	 * 
+	 * <pre>
+	 * &lt;element name="value"/&gt;
+	 * </pre>
+	 * 
 	 * </p>
 	 * 
 	 * <p>
 	 * For JSON, attributes are encoded as JSON null-, number-, boolean- or
-	 * string-properties.
+	 * string-properties:
+	 * 
+	 * <pre>
+	 * { "name": value }
+	 * </pre>
+	 * 
 	 * </p>
 	 * 
 	 * <p>
@@ -95,7 +209,7 @@ public interface XydraOut {
 	 *            differently. For everything else, the object's
 	 *            {@link T#toString()} method will determine the encoded string.
 	 * @param name The name for the attribute. This must not be null and a
-	 *            unique attribute name for this element. 'isNull' and
+	 *            unique attribute name for this element. '$type', 'isNull' and
 	 *            'nullContent' are reserved names. This must be a valid XML
 	 *            attribute name.
 	 * @param value The content to set. This must not be null.
@@ -103,231 +217,98 @@ public interface XydraOut {
 	<T> void attribute(String name, T value);
 	
 	/**
-	 * Start a new child list.
+	 * Add a child to the current element.
 	 * 
 	 * <p>
 	 * This method can only be called when in the context of an element.
+	 * Attributes and children of the same element share a common namespace.
 	 * </p>
 	 * 
 	 * <p>
-	 * This method changes the context to a new untyped child list context. If
-	 * this context allows multiple items depends on the parameter @param
-	 * multiple.
+	 * This method changes the context to a new untyped child context. The child
+	 * context can be made typed using {@link #setDefaultType(String)} or
+	 * {@link #setChildType(String)}. Alternatively, the
+	 * {@link #child(String, String)} convenience function can be used to create
+	 * typed child contexts.
 	 * </p>
 	 * 
 	 * <p>
-	 * For XML, this does not produce any direct output, only affects the
-	 * encoding of children.
+	 * Exactly one entity can be added to the child context using
+	 * {@link #open(String)}, {@link #beginArray(String)},
+	 * {@link #beginMap(String)} or {@link #value(Object)}.The child context is
+	 * automatically closed and the element context becomes active again once
+	 * the child ends.
+	 * </p>
+	 * 
+	 * <p>
+	 * For XML, child names are ignored and children are generally encoded using
+	 * an element:
+	 * 
+	 * <pre>
+	 * &lt;element&gt;
+	 *   &lt;child&gt;
+	 * &lt;element&gt;
+	 * </pre>
+	 * 
+	 * </p>
+	 * 
+	 * <p>
+	 * An element that has an untyped child {@link #value(Object)} cannot have
+	 * any other children. This concept is provided by the
+	 * {@link #content(String, Object)} convenience function and has a special
+	 * XML encoding:
+	 * 
+	 * <pre>
+	 * &lt;element&gt;value&lt;/element&gt;
+	 * </pre>
+	 * 
+	 * or if the value is null:
+	 * 
+	 * <pre>
+	 * &lt;element nullContent="true"/&gt;
+	 * </pre>
+	 * 
+	 * To add an untyped "null" that will allow other children, use
+	 * {@link #nullElement()}.
 	 * </p>
 	 * 
 	 * <p>
 	 * For JSON, this is encoded as a property with the given name. The value of
-	 * that property will be whatever is added as a child.
+	 * that property will be whatever is added as a child:
+	 * 
+	 * <pre>
+	 * { "name": child }
+	 * </pre>
+	 * 
 	 * </p>
 	 * 
 	 * <p>
-	 * Child elements can be retrieved using
-	 * {@link XydraElement#getElement(String)} or
-	 * {@link XydraElement#getElement(String, int)} if created in an single-item
-	 * child list or using {@link XydraElement#getChildrenByName(String)} when
-	 * created in an multiple-item child list.
+	 * Children can be retrieved using {@link XydraElement#getChild(String)},
+	 * {@link XydraElement#getChild(String, String)},
+	 * {@link XydraElement#getChildrenByName(String)},
+	 * {@link XydraElement#getChildrenByName(String, String)} and
+	 * {@link XydraElement#getChildrenByType(String, String)}
+	 * </p>
 	 * 
-	 * Arrays are retrieved as {@link XydraElement}s with no text content.
+	 * <p>
+	 * Child values can also be retrieved directly using
+	 * {@link XydraElement#getValue(String, int)},
+	 * {@link XydraElement#getValue(String, String)},
+	 * {@link XydraElement#getValues(String)} and
+	 * {@link XydraElement#getValues(String, String)}.
+	 * </p>
 	 * 
-	 * Values can be retrieved using {@link XydraElement#getValue(String, int)}
-	 * for single-item child lists or using
-	 * {@link XydraElement#getValues(String)} for multiple-item child lists.
+	 * <p>
+	 * Child elements can also be retrieved using
+	 * {@link XydraElement#getElement(String)} and
+	 * {@link XydraElement#getElement(String, int)}
 	 * </p>
 	 * 
 	 * @param name A name for the child list. This must not be null and a unique
-	 *            attribute name for this element. 'isNull' and 'nullContent'
-	 *            are reserved names.
-	 * @param multiple True to create a multiple-item child list, false to
-	 *            create a single-item child list.
-	 * 
-	 *            Single-item child list must contain exactly one child.
-	 * 
-	 *            Elements with a untyped multiple-item child list cannot have
-	 *            any other content or child lists.
+	 *            attribute name for this element. '$type', 'isNull' and
+	 *            'nullContent' are reserved names.
 	 */
 	void child(String name);
-	
-	/**
-	 * Set the child type for the current context,.
-	 * 
-	 * @param type The type of the child / children. This must be a valid XML
-	 *            element name and a unique type unique for all child lists and
-	 *            elements in the containing element.
-	 * 
-	 *            All elements in this child list must have this type.
-	 */
-	void setChildType(String type);
-	
-	void beginMap(String attribute);
-	
-	void entry(String id);
-	
-	void endMap();
-	
-	/**
-	 * Defines the type for the subsequent e.g. {@link #value(Object)} calls.
-	 * XML requires things to have names.
-	 * 
-	 * @param type
-	 */
-	void setDefaultType(String type);
-	
-	/**
-	 * Shortcut for:
-	 * 
-	 * <pre>
-	 * beginMap(attribute);
-	 * setChildType(type);
-	 * </pre>
-	 */
-	void beginMap(String attribute, String type);
-	
-	/**
-	 * Start a new array.
-	 * 
-	 * <p>
-	 * This method can only be called when in the context of a child list or
-	 * array.
-	 * </p>
-	 * 
-	 * <p>
-	 * This method changes the context to a new untyped array context (which
-	 * always allows multiple items).
-	 * </p>
-	 * 
-	 * <p>
-	 * For XML, this is mapped to a an element containing all entries of the
-	 * array.
-	 * 
-	 * If the array is created in a typed context with type 'type', it is
-	 * created as:
-	 * 
-	 * <pre>
-	 * &lt;type&gt;...&lt;/type&gt;
-	 * </pre>
-	 * 
-	 * if created in an untyped context, the array is created as
-	 * 
-	 * <pre>
-	 * &lt;xarray&gt;...&lt;/xarray&gt;
-	 * </pre>
-	 * 
-	 * </p>
-	 * 
-	 * <p>
-	 * For JSON, this is mapped to a native JSON array.
-	 * </p>
-	 * 
-	 * <p>
-	 * Arrays are retrieved as {@link XydraElement}s with no text content.
-	 * 
-	 * Child elements can be retrieved using
-	 * {@link XydraElement#getChildrenByName(String)} on the array element. The
-	 * name parameter is ignored.
-	 * 
-	 * Values can be retrieved using {@link XydraElement#getValues(String)} on
-	 * the array element. The name parameter is ignored.
-	 * </p>
-	 * 
-	 * @param type The type of the child list. This must be a valid XML element
-	 *            name and a unique type unique for all child lists and elements
-	 *            in the containing element.
-	 * 
-	 *            All elements in this child list must have this type.
-	 */
-	void beginArray();
-	
-	/**
-	 * Shortcut for:
-	 * 
-	 * <pre>
-	 * beginArray();
-	 * setChildType(type);
-	 * </pre>
-	 */
-	void beginArray(String type);
-	
-	/**
-	 * End the current array.
-	 * 
-	 * If an array has been started, this must be called before closing the
-	 * containing child list or array.
-	 */
-	void endArray();
-	
-	/**
-	 * Set the content of the current element.
-	 * 
-	 * <p>
-	 * This method can only be called when in the context of an array or child
-	 * list.
-	 * </p>
-	 * 
-	 * <p>
-	 * For XML, values are encoded as child elements.
-	 * 
-	 * In typed contexts using with a type 'type', values are encoded as:
-	 * 
-	 * <pre>
-	 * &lt;type&gt;value&lt;/type&gt;
-	 * </pre>
-	 * 
-	 * for non-null values. Null values are encoded as
-	 * 
-	 * <pre>
-	 * &lt;type isNull="true"/&gt;
-	 * </pre>
-	 * 
-	 * In untyped contexts, values are encoded as:
-	 * 
-	 * <pre>
-	 * &lt;xvalue&gt;value&lt;/xvalue&gt;
-	 * </pre>
-	 * 
-	 * for non-null values. Null values are encoded as
-	 * 
-	 * <pre>
-	 * &lt;xnull/&gt;
-	 * </pre>
-	 * 
-	 * </p>
-	 * 
-	 * <p>
-	 * For JSON, values are encoded as JSON null, number, boolean or string.
-	 * </p>
-	 * 
-	 * <p>
-	 * Values can be retrieved using {@link XydraElement#getValue(String, int)}
-	 * for untyped single-item contexts, using
-	 * {@link XydraElement#getValue(String, String)} for typed single-item
-	 * contexts, using {@link XydraElement#getValues(String)} for untyped
-	 * multiple-item contexts and using
-	 * {@link XydraElement#getValues(String, String)} for typed multiple-item
-	 * contexts. Array contexts are always multiple-item.
-	 * </p>
-	 * 
-	 * @param <T> The type of the value. Some types like {@link Boolean
-	 *            Booleans} and {@link Number Numbers} can be encoded
-	 *            differently. For everything else, the object's
-	 *            {@link T#toString()} method will determine the encoded string.
-	 * @param value The content to set. This can be null.
-	 */
-	<T> void value(T value);
-	
-	/**
-	 * Shortcut for:
-	 * 
-	 * <pre>
-	 * child(name);
-	 * value(content);
-	 * </pre>
-	 */
-	<T> void content(String name, T content);
 	
 	/**
 	 * Close the current element.
@@ -347,12 +328,334 @@ public interface XydraOut {
 	 */
 	void close(String type);
 	
+	/* Array */
+
+	/**
+	 * Start a new array. Arrays are ordered lists of arbitrary entities
+	 * (elements, arrays, maps or values).
+	 * 
+	 * <p>
+	 * This method changes the context to a new untyped array context. The array
+	 * context can be made typed using {@link #setDefaultType(String)} or
+	 * {@link #setChildType(String)}. Alternatively, the
+	 * {@link #beginArray(String)} convenience function can be used to create
+	 * typed arrays.
+	 * </p>
+	 * 
+	 * <p>
+	 * For XML, this is mapped to a an element containing all entries of the
+	 * array.
+	 * 
+	 * If the current context has a type set using
+	 * {@link #setDefaultType(String)} or {@link #setChildType(String)}, the
+	 * array is created as:
+	 * 
+	 * <pre>
+	 * &lt;type&gt;...&lt;/type&gt;
+	 * </pre>
+	 * 
+	 * otherwise, the array is created as
+	 * 
+	 * <pre>
+	 * &lt;xarray&gt;...&lt;/xarray&gt;
+	 * </pre>
+	 * 
+	 * Arrays added to an untyped child directly in an element are handled
+	 * specially: No element is created for the array and instead the array
+	 * entries are added directly inside the parent XML element. To distinguish
+	 * the array elements from other children of the parent, a common type can
+	 * be enforced for all entries in the array using
+	 * {@link #setChildType(String)} .
+	 * 
+	 * </p>
+	 * 
+	 * <p>
+	 * For JSON, this is mapped to a native JSON array:
+	 * 
+	 * <pre>
+	 * [...]
+	 * </pre>
+	 * 
+	 * </p>
+	 * 
+	 * <p>
+	 * Any number of arbitrary entities can be added to an array using
+	 * {@link #open(String)}, {@link #beginArray()}, {@link #beginMap(String)}
+	 * or {@link #value(Object)}.
+	 * </p>
+	 * 
+	 * <p>
+	 * The array context must be closed by a corresponding call to
+	 * {@link #endArray()}
+	 * </p>
+	 * 
+	 * <p>
+	 * Arrays are retrieved as {@link XydraElement}s with no text content and no
+	 * attributes. Child elements can be retrieved using
+	 * {@link XydraElement#getChildren()} or
+	 * {@link XydraElement#getChildren(String)}.
+	 * </p>
+	 * 
+	 * <p>
+	 * Value entries can be retrieved using {@link XydraElement#getValues()} on
+	 * the array element.
+	 * </p>
+	 * 
+	 */
+	void beginArray();
+	
+	/**
+	 * End the current array.
+	 * 
+	 * <p>
+	 * This method can only be called in the context of an array.
+	 * </p>
+	 * 
+	 * <p>
+	 * This method changes the context back to that which was active before the
+	 * corresponding {@link #beginArray()} call.
+	 * </p>
+	 */
+	void endArray();
+	
+	/* Map */
+
+	/**
+	 * Start a new map. Maps are an associative array with a unique key for each
+	 * entry.
+	 * 
+	 * <p>
+	 * This method changes the context to a new untyped map context. The map
+	 * context can be made typed using {@link #setDefaultType(String)} or
+	 * {@link #setChildType(String)}. Alternatively, the
+	 * {@link #beginMap(String, String)} convenience function can be used to
+	 * create typed arrays.
+	 * </p>
+	 * 
+	 * <p>
+	 * For XML, this is mapped to a an element containing all entries of the
+	 * map.
+	 * 
+	 * If the current context has a type set using
+	 * {@link #setDefaultType(String)} or {@link #setChildType(String)}, the
+	 * array is created as:
+	 * 
+	 * <pre>
+	 * &lt;type&gt;...&lt;/type&gt;
+	 * </pre>
+	 * 
+	 * otherwise, the map is created as
+	 * 
+	 * <pre>
+	 * &lt;xmap&gt;...&lt;/xmapy&gt;
+	 * </pre>
+	 * 
+	 * Maps added to an untyped child directly in an element are handled
+	 * specially: No element is created for the map and instead the entries are
+	 * added directly inside the parent XML element. To distinguish the map
+	 * entries from other children of the parent, a common type can be enforced
+	 * for all entries in the map using {@link #setChildType(String)} .
+	 * 
+	 * Keys are stored as a special attribute chosen by the attribute parameter
+	 * in the entities added to the map.
+	 * 
+	 * </p>
+	 * 
+	 * <p>
+	 * For JSON, this is mapped to a JSON object:
+	 * 
+	 * <pre>
+	 * { "key1": entity1, ... }
+	 * </pre>
+	 * 
+	 * </p>
+	 * 
+	 * <p>
+	 * No entities can be added directly to a map. Instead a new entry context
+	 * must be created using {@link #entry(String)} to specify the key for the
+	 * following entity. The entry context is automatically closed once the
+	 * associated entity ends.
+	 * </p>
+	 * 
+	 * <p>
+	 * The map context must be closed by a corresponding call to
+	 * {@link #endMap()}
+	 * </p>
+	 * 
+	 * <p>
+	 * Maps are retrieved as {@link XydraElement}s with no text content and no
+	 * attributes. Entries can be retrieved using
+	 * {@link XydraElement#getEntries(String)},
+	 * {@link XydraElement#getEntries(String, String)} or
+	 * {@link XydraElement#getEntriesByType(String, String)}.
+	 * </p>
+	 * 
+	 * @param attribute The name of the attribute to store keys in.
+	 * 
+	 */
+	void beginMap(String attribute);
+	
+	/**
+	 * Add an entry to the current map.
+	 * 
+	 * <p>
+	 * This method can only be called when in the context of a map.
+	 * </p>
+	 * 
+	 * <p>
+	 * This method changes the context to a new entry context. No type can be
+	 * set on an individual entry context. Instead, (default) types should be
+	 * set for the whole map.
+	 * </p>
+	 * 
+	 * <p>
+	 * Exactly one entity can be added to the entry context using
+	 * {@link #open(String)}, {@link #beginArray(String)},
+	 * {@link #beginMap(String)} or {@link #value(Object)}.The entry context is
+	 * automatically closed and the map context becomes active again once the
+	 * associated entity ends.
+	 * </p>
+	 * 
+	 * <p>
+	 * For XML, the key name is included in the associated entity as the
+	 * attribute specified by the {@link #beginMap(String)} call:
+	 * 
+	 * <pre>
+	 * &lt;entity1 attribute="key1"&gt;
+	 * &lt;entity2 attribute="key2"&gt;
+	 * &lt;entity3 attribute="key3"&gt;
+	 * ...
+	 * </pre>
+	 * 
+	 * </p>
+	 * 
+	 * <p>
+	 * For JSON, maps are encoded as native objects:
+	 * 
+	 * <pre>
+	 * { "key1": entity1, "key2": entity2, ... }
+	 * </pre>
+	 * 
+	 * </p>
+	 * 
+	 * <p>
+	 * Map entries can be retrieved using
+	 * {@link XydraElement#getEntries(String)},
+	 * {@link XydraElement#getEntries(String, String)} or
+	 * {@link XydraElement#getEntriesByType(String, String)}.
+	 * </p>
+	 * 
+	 * <p>
+	 * Values associated with a map entry can be retrieved using
+	 * {@link XydraElement#getContent()}.
+	 * </p>
+	 * 
+	 * @param key A key for the following entity.
+	 */
+	void entry(String key);
+	
+	/**
+	 * End the current map.
+	 * 
+	 * <p>
+	 * This method can only be called in the context of a map.
+	 * </p>
+	 * 
+	 * <p>
+	 * This method changes the context back to that which was active before the
+	 * corresponding {@link #beginMap(String)} call.
+	 * </p>
+	 */
+	void endMap();
+	
+	/* Value */
+
+	/**
+	 * Adds a value. Values are atomic types and can be stored differently
+	 * depending on their class.
+	 * 
+	 * <p>
+	 * For XML, values are encoded as child elements.
+	 * 
+	 * If a (default) type has been set for the current context, non-null values
+	 * are encoded as:
+	 * 
+	 * <pre>
+	 * &lt;type&gt;value&lt;/type&gt;
+	 * </pre>
+	 * 
+	 * In untyped contexts, values are encoded as:
+	 * 
+	 * <pre>
+	 * &lt;xvalue&gt;value&lt;/xvalue&gt;
+	 * </pre>
+	 * 
+	 * Null values are encoded as:
+	 * 
+	 * <pre>
+	 * &lt;xnull/&gt;
+	 * </pre>
+	 * 
+	 * unless the current context has a forced type (set by
+	 * {@link #setChildType(String)} and not {@link #setDefaultType(String)}),
+	 * in which case they are encoded as:
+	 * 
+	 * <pre>
+	 * &lt;type isNull="true"/&gt;
+	 * </pre>
+	 * 
+	 * for non-null values. Null values are encoded as
+	 * 
+	 * Values stored in an untyped child context directly inside an element are
+	 * handled specially: If there is any such value, the element cannot have
+	 * any other children. Also, the value is stored directly inside the parent
+	 * element:
+	 * 
+	 * <pre>
+	 * &lt;element&gt;value&lt;/element&gt;
+	 * </pre>
+	 * 
+	 * or if the value is null:
+	 * 
+	 * <pre>
+	 * &lt;element nullContent="true"/&gt;
+	 * </pre>
+	 * 
+	 * To add an untyped "null" that will allow other children, use
+	 * {@link #nullElement()}.
+	 * </p>
+	 * 
+	 * </p>
+	 * 
+	 * <p>
+	 * For JSON, values are encoded as JSON null, number, boolean or string.
+	 * </p>
+	 * 
+	 * <p>
+	 * Values can be retrieved using {@link XydraElement#getContent()},
+	 * {@link XydraElement#getContent(String)},
+	 * {@link XydraElement#getValue(String, int)},
+	 * {@link XydraElement#getValue(String, String)},
+	 * {@link XydraElement#getValues()}, {@link XydraElement#getValues(String)}
+	 * and {@link XydraElement#getValues(String, String)}.
+	 * </p>
+	 * 
+	 * @param <T> The type of the value. Some types like {@link Boolean
+	 *            Booleans} and {@link Number Numbers} can be encoded
+	 *            differently. For everything else, the object's
+	 *            {@link T#toString()} method will determine the encoded string.
+	 *            While this may affect the encoding, there is no guarantee that
+	 *            the decoded object will have the same type.
+	 * @param value The content to set. This can be null.
+	 */
+	<T> void value(T value);
+	
 	/**
 	 * Add a null element (one that will be parsed to null).
 	 * 
-	 * <p>
-	 * This method can be called when in the context of a child list or array.
-	 * </p>
+	 * This is almost like {@link #value(Object)} with a null parameter, but
+	 * always produces a new XML element, event in an untyped child context.
+	 * This allows other children to be added to the same (current) element.
 	 * 
 	 * <p>
 	 * This method does not change the context.
@@ -374,7 +677,7 @@ public interface XydraOut {
 	 * </p>
 	 * 
 	 * <p>
-	 * Null values can be retrieved like any other elements.
+	 * Null elements can be retrieved like any other element.
 	 * </p>
 	 * 
 	 * <p>
@@ -383,8 +686,103 @@ public interface XydraOut {
 	 */
 	void nullElement();
 	
+	/* Child type */
+
 	/**
-	 * @return True if all elements have been closed.
+	 * Set a forced child type for the current context.
+	 * 
+	 * This behaves like {@link #setDefaultType(String)} with two additions:
+	 * 
+	 * <p>
+	 * 1. child null entities / values will not be named &lt;xnull/&gt; but by
+	 * the specified type:
+	 * 
+	 * <pre>
+	 * &lt;type isNull="true"/&gt;
+	 * </pre>
+	 * 
+	 * </p>
+	 * 
+	 * <p>
+	 * 2. No entities with a type different from the specified one may be added
+	 * to the current context.
+	 * </p>
+	 * 
+	 * @param type The type to enforce for child entities.
+	 * 
+	 * @see #setDefaultType(String)
+	 */
+	void setChildType(String type);
+	
+	/**
+	 * Defines a default type for child entities of the current entity.
+	 * 
+	 * <p>
+	 * No type can be set for element or map entry contexts. Instead the
+	 * (default) type should be set for the element child or map contexts
+	 * respectively.
+	 * </p>
+	 * 
+	 * <p>
+	 * No type can be set after any child entities have been added and the type
+	 * can only be set once for each context. The type is not inherited by child
+	 * contexts.
+	 * </p>
+	 * 
+	 * <p>
+	 * Effects (XML):
+	 * 
+	 * <ul>
+	 * 
+	 * <li>Arrays, maps and values added to an entity child context always
+	 * create a new XML element - their contents are no longer inlined into the
+	 * parent element.
+	 * 
+	 * <li>The given type is used for array, map and value XML elements instead
+	 * of "xarray", "xmap" and "xvalue". Null values / elements still use
+	 * "xnull". To also use the given type when encoding null, use
+	 * {@link #setChildType(String)}.
+	 * 
+	 * </p>
+	 * 
+	 * <p>
+	 * Effects (JSON):
+	 * 
+	 * If the type of a child element matches the default type, it s not encoded
+	 * in the JSON output.
+	 * </p>
+	 * 
+	 * This does not prevent elements with different type from being added. To
+	 * enforce a common child type use {@link #setChildType(String)}.
+	 * 
+	 * @param defaultType The default type to use for child entities.
+	 */
+	void setDefaultType(String defaultType);
+	
+	/* Output */
+
+	/**
+	 * Output whitespace to make the result more readable.
+	 * 
+	 * @param whitespace True if whitespace should be produced, false if not.
+	 * @param idententation Also enable indentation. This requires whitespace to
+	 *            be enabled.
+	 */
+	void enableWhitespace(boolean whitespace, boolean idententation);
+	
+	/**
+	 * Flush the underlying {@link MiniWriter}.
+	 */
+	void flush();
+	
+	/**
+	 * @return the MIME content type of the produced output.
+	 */
+	String getContentType();
+	
+	/**
+	 * @return True if all elements have been closed, including the root
+	 *         element.
 	 */
 	boolean isClosed();
 	
@@ -400,22 +798,30 @@ public interface XydraOut {
 	 */
 	String getData();
 	
+	/* Convenience */
+
 	/**
-	 * Flush the underlying {@link MiniWriter}.
-	 */
-	void flush();
-	
-	/**
-	 * Output whitespace to make the result more readable.
+	 * Convenience method to start typed maps:
 	 * 
-	 * @param whitespace True if whitespace should be produced, false if not.
-	 * @param idententation Also enable indentation. This requires whitespace to
-	 *            be enabled.
+	 * <pre>
+	 * beginMap(attribute);
+	 * setChildType(type);
+	 * </pre>
 	 */
-	void enableWhitespace(boolean whitespace, boolean idententation);
+	void beginMap(String attribute, String type);
 	
 	/**
-	 * Shortcut for:
+	 * Convenience method to start typed arrays:
+	 * 
+	 * <pre>
+	 * beginArray();
+	 * setChildType(type);
+	 * </pre>
+	 */
+	void beginArray(String type);
+	
+	/**
+	 * Convenience method to start a typed child context:
 	 * 
 	 * <pre>
 	 * child(name);
@@ -428,14 +834,17 @@ public interface XydraOut {
 	void child(String name, String type);
 	
 	/**
-	 * Convenience method to add a value list.
+	 * Convenience method to add an untyped child value (aka. content):
 	 * 
-	 * <p>
-	 * This method can be only called when in the context of an element.
-	 * </p>
-	 * 
-	 * <p>
-	 * Shortcut for:
+	 * <pre>
+	 * child(name);
+	 * value(content);
+	 * </pre>
+	 */
+	<T> void content(String name, T content);
+	
+	/**
+	 * Convenience method to add a value list:
 	 * 
 	 * <pre>
 	 * child(name);
@@ -446,32 +855,6 @@ public interface XydraOut {
 	 * endArray();
 	 * </pre>
 	 * 
-	 * </p>
-	 * 
-	 * <p>
-	 * XML will look like
-	 * 
-	 * <pre>
-	 * &lt;type&gt;value1&lt;/type&gt;
-	 * &lt;type&gt;value2&lt;/type&gt;
-	 * ...
-	 * </pre>
-	 * 
-	 * </p>
-	 * 
-	 * <p>
-	 * JSON will look like:
-	 * 
-	 * <pre>
-	 * name: [ "value1", "value2", ... ]
-	 * </pre>
-	 * 
-	 * </p>
-	 * 
-	 * <p>
-	 * This can be decoded using {@link XydraElement#getValues(String, String)}
-	 * </p>
-	 * 
 	 * @see #child(String)
 	 * @see #beginArray()
 	 * @see #value(Object)
@@ -480,14 +863,9 @@ public interface XydraOut {
 	<T> void values(String name, String type, Iterable<T> values);
 	
 	/**
-	 * Convenience method to add a single value.
+	 * Convenience method to add a single value:
 	 * 
 	 * <p>
-	 * This method can be only called when in the context of an element.
-	 * </p>
-	 * 
-	 * <p>
-	 * Shortcut for:
 	 * 
 	 * <pre>
 	 * child(name, type);
@@ -496,80 +874,21 @@ public interface XydraOut {
 	 * 
 	 * </p>
 	 * 
-	 * <p>
-	 * XML will look like
-	 * 
-	 * <pre>
-	 * &lt;type&gt;value&lt;/type&gt;
-	 * </pre>
-	 * 
-	 * </p>
-	 * 
-	 * <p>
-	 * JSON will look like:
-	 * 
-	 * <pre>
-	 * name: "value"
-	 * </pre>
-	 * 
-	 * </p>
-	 * 
-	 * <p>
-	 * This can be decoded using {@link XydraElement#getValue(String, String)}
-	 * </p>
-	 * 
 	 * @see #child(String, String)
 	 * @see #value(Object)
 	 */
 	<T> void value(String name, String type, T value);
 	
 	/**
-	 * Convenience method to add an element without attributes or children.
+	 * Convenience method to add an element without attributes and exactly one
+	 * untyped child value:
 	 * 
 	 * <p>
-	 * This method can be called when in the context of an element or child
-	 * list.
-	 * </p>
-	 * 
-	 * <p>
-	 * Shortcut for:
 	 * 
 	 * <pre>
 	 * open(type);
 	 * content(name, content);
 	 * close(type);
-	 * </pre>
-	 * 
-	 * </p>
-	 * 
-	 * <p>
-	 * XML will look like
-	 * 
-	 * <pre>
-	 * &lt;type&gt;content&lt;/type&gt;
-	 * </pre>
-	 * 
-	 * </p>
-	 * 
-	 * <p>
-	 * JSON will look like (directly in other element):
-	 * 
-	 * <pre>
-	 * type: {
-	 *   name: "content"
-	 * }
-	 * </pre>
-	 * 
-	 * or (in a child list with the same type):
-	 * 
-	 * <pre>
-	 * { name: &quot;content&quot; }
-	 * </pre>
-	 * 
-	 * or (in a child list with no type):
-	 * 
-	 * <pre>
-	 * { "$type": "type", name: "content" }
 	 * </pre>
 	 * 
 	 * </p>
@@ -581,13 +900,10 @@ public interface XydraOut {
 	<T> void element(String type, String name, T content);
 	
 	/**
-	 * Convenience method to add an empty element without attributes.
-	 * 
-	 * This method can be called when in the context of an element or child
-	 * list.
+	 * Convenience method to add an empty element without attributes or
+	 * children:
 	 * 
 	 * <p>
-	 * Shortcut for:
 	 * 
 	 * <pre>
 	 * open(type);
@@ -596,45 +912,9 @@ public interface XydraOut {
 	 * 
 	 * </p>
 	 * 
-	 * <p>
-	 * XML will look like
-	 * 
-	 * <pre>
-	 * &lt;type/&gt;
-	 * </pre>
-	 * 
-	 * </p>
-	 * 
-	 * <p>
-	 * JSON will look like (directly in another element):
-	 * 
-	 * <pre>
-	 * type: {
-	 * }
-	 * </pre>
-	 * 
-	 * or (in a child list with the same type):
-	 * 
-	 * <pre>
-	 * {}
-	 * </pre>
-	 * 
-	 * or (in a child list with no type):
-	 * 
-	 * <pre>
-	 * { "$type": "type" }
-	 * </pre>
-	 * 
-	 * </p>
-	 * 
 	 * @see #open(String)
 	 * @see #close(String)
 	 */
 	<T> void element(String type);
-	
-	/**
-	 * @return the MIME content type of the produced output.
-	 */
-	String getContentType();
 	
 }
