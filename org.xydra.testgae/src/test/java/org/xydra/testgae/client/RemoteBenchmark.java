@@ -491,6 +491,7 @@ public class RemoteBenchmark {
 			return this.addExceptions;
 		}
 		
+		@Override
 		public int getOtherExceptions() {
 			return this.clearExceptions;
 		}
