@@ -36,8 +36,8 @@ public class ConsistencyTestClient extends Thread {
 		this.serverRootUrl = serverRootUrl;
 		BrowserVersion bv = BrowserVersion.getDefault();
 		bv.setApplicationName("ConsistencyTestClient");
-		bv.setApplicationCodeName("Favr");
-		bv.setApplicationVersion("20110828");
+		bv.setApplicationCodeName("TestGae");
+		bv.setApplicationVersion("20110914");
 		bv.setUserAgent("ConsistencyTestClient");
 		this.webClient = new WebClient(bv);
 		this.webClient.setJavaScriptEnabled(false);

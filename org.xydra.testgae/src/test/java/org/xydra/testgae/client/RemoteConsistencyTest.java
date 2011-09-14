@@ -10,7 +10,7 @@ public class RemoteConsistencyTest {
 	
 	private static final Logger log = LoggerFactory.getLogger(RemoteConsistencyTest.class);
 	
-	private static final String SERVER_ROOT = "http://app.calpano.com";
+	private static final String SERVER_ROOT = "http://testgae.latest.xydra-live.appspot.com";
 	
 	public static final int THREADS = 10;
 	
