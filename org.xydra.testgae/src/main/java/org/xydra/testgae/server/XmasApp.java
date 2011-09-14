@@ -4,6 +4,7 @@ import org.xydra.restless.IRestlessContext;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessExceptionHandler;
 import org.xydra.testgae.server.rest.AdminDashboardResource;
+import org.xydra.testgae.server.rest.ConsistencyTestResource;
 import org.xydra.testgae.server.rest.xmas.XmasResource;
 
 
@@ -19,7 +20,7 @@ public class XmasApp {
 		r.addExceptionHandler(new RestlessExceptionHandler() {
 			
 			@Override
-            public boolean handleException(Throwable t, IRestlessContext context) {
+			public boolean handleException(Throwable t, IRestlessContext context) {
 				System.err.println("Restless error");
 				throw new RuntimeException("" + context.getRequest(), t);
 			}
@@ -29,6 +30,8 @@ public class XmasApp {
 		AdminDashboardResource.restless(r, path);
 		
 		XmasResource.restless(r, path);
+		
+		ConsistencyTestResource.restless(r, path);
 	}
 	
 }
