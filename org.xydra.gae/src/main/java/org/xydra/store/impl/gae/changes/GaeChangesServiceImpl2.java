@@ -1066,13 +1066,6 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		return locallyMissingRevs;
 	}
 	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.xydra.store.impl.gae.changes.IGaeChangesService#getEventsBetween(
-	 * long, long)
-	 */
 	@Override
 	public List<XEvent> getEventsBetween(long beginRevision, long endRevision) {
 		log.debug("getEventsBetween [" + beginRevision + "," + endRevision + "] @"
@@ -1089,9 +1082,11 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		if(beginRevision > endRevision) {
 			throw new IllegalArgumentException("beginRevision may not be greater than endRevision");
 		}
-		if(endRevision <= 0) {
-			return new ArrayList<XEvent>(0);
-		}
+		// if(endRevision <= 0) {
+		// // TODO true? If beginRev=0 and endRev=0 event must be the model
+		// // creation event
+		// return new ArrayList<XEvent>(0);
+		// }
 		
 		/* adjust range */
 		long endRev = endRevision;
@@ -1237,7 +1232,48 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 	
 	@Override
 	public boolean exists() {
-		return this.revCache.modelExists() != null && this.revCache.modelExists();
+		Boolean thisThread = this.revCache.modelExists();
+		if(thisThread == null) {
+			// this thread local cache doesn't know it
+			log.debug("Re-calc existing status");
+			long rev = getCurrentRevisionNumber();
+			if(rev == -1) {
+				return false;
+			} else if(rev == 0) {
+				return true;
+			} else {
+				GaeAssert.gaeAssert(rev >= 1);
+				List<XEvent> events = getEventsBetween(rev, rev);
+				GaeAssert.gaeAssert(events.size() == 1);
+				XEvent e = events.get(0);
+				boolean modelExists;
+				if(e.getChangeType() == ChangeType.TRANSACTION) {
+					XTransactionEvent te = (XTransactionEvent)e;
+					XEvent e2 = te.getEvent(0);
+					modelExists = lastEventIndicatesModelExists(e2);
+				} else {
+					modelExists = lastEventIndicatesModelExists(e);
+				}
+				this.revCache.setModelExists(modelExists);
+				return modelExists;
+			}
+		} else {
+			// this thread knows it
+			boolean result = thisThread;
+			log.debug("This model " + this.modelAddr + " does " + (result ? "really" : "not")
+			        + " exist according to local thread info");
+			return result;
+		}
+	}
+	
+	private boolean lastEventIndicatesModelExists(XEvent e) {
+		GaeAssert.gaeAssert(e.getChangeType() != ChangeType.TRANSACTION);
+		if(e.getTarget().getAddressedType() == XType.XREPOSITORY) {
+			if(e.getChangeType() == ChangeType.REMOVE) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 }

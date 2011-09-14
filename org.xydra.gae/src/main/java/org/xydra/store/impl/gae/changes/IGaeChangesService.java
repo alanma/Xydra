@@ -55,17 +55,18 @@ public interface IGaeChangesService {
 	/**
 	 * Fetch a range of events from the datastore.
 	 * 
-	 * See {@link GetEventsRequest} for parameters.
-	 * 
-	 * @return a list of events or null if this model was never created. The
-	 *         list might contain fewer elements than the range implies.
-	 * 
+	 * See also {@link GetEventsRequest}.
 	 * 
 	 * @see XydraStore#getEvents(XID, String, GetEventsRequest[],
 	 *      org.xydra.store.Callback)
 	 * 
 	 *      TODO localVm Implementation should cache retrieved events in a
 	 *      localVmCache and never ask for them again.
+	 * 
+	 * @param beginRevision inclusive
+	 * @param endRevision inclusive
+	 * @return a list of events or null if this model was never created. The
+	 *         list might contain fewer elements than the range implies.
 	 */
 	List<XEvent> getEventsBetween(long beginRevision, long endRevision);
 	
