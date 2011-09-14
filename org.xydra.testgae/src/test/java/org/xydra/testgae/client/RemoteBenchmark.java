@@ -368,8 +368,7 @@ public class RemoteBenchmark {
 				String wishStr = addWishToEmptyList(this.absoluteUrl + listStr);
 				
 				long time = System.currentTimeMillis();
-				assertTrue(HttpUtils.makeGetRequest(this.absoluteUrl + listStr + wishStr
-				        + "/delete"));
+				assertTrue(HttpUtils.makeGetRequest(this.absoluteUrl + wishStr + "/delete"));
 				time = System.currentTimeMillis() - time;
 				
 				avgTime += time;
@@ -423,7 +422,6 @@ public class RemoteBenchmark {
 			return null;
 		}
 		assertNotNull(response);
-		System.out.println("Response: " + response);
 		
 		String[] lines = response.split("\n");
 		
@@ -465,7 +463,7 @@ public class RemoteBenchmark {
 		}
 		
 		@Override
-        public void doOperation() {
+		public void doOperation() {
 			try {
 				long time = System.currentTimeMillis();
 				assertTrue(HttpUtils.makeGetRequest(this.listUrl + "/add?wishes=1"));
@@ -484,17 +482,16 @@ public class RemoteBenchmark {
 		}
 		
 		@Override
-        public long getTimesSum() {
+		public long getTimesSum() {
 			return this.timesSum;
 		}
 		
 		@Override
-        public int getOperationExceptions() {
+		public int getOperationExceptions() {
 			return this.addExceptions;
 		}
 		
-		@Override
-        public int getOtherExceptions() {
+		public int getOtherExceptions() {
 			return this.clearExceptions;
 		}
 	}
@@ -510,7 +507,7 @@ public class RemoteBenchmark {
 		}
 		
 		@Override
-        public void doOperation() {
+		public void doOperation() {
 			try {
 				// add wish
 				String wishStr = addWishToEmptyList(this.listUrl);
@@ -532,17 +529,17 @@ public class RemoteBenchmark {
 		}
 		
 		@Override
-        public long getTimesSum() {
+		public long getTimesSum() {
 			return this.timesSum;
 		}
 		
 		@Override
-        public int getOperationExceptions() {
+		public int getOperationExceptions() {
 			return this.deleteExceptions;
 		}
 		
 		@Override
-        public int getOtherExceptions() {
+		public int getOtherExceptions() {
 			return this.clearExceptions;
 		}
 	}
