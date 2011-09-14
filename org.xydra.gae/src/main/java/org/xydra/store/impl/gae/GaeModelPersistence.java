@@ -42,7 +42,7 @@ public class GaeModelPersistence {
 		this.snapshotService = new GaeSnapshotService2(this.modelAddress, this.changesService);
 	}
 	
-	public RevisionState executeCommand(XCommand command, XID actorId) {
+	public long executeCommand(XCommand command, XID actorId) {
 		return this.changesService.executeCommand(command, actorId);
 	}
 	

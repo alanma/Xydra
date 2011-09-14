@@ -230,7 +230,7 @@ public class RevisionCache2 {
 	
 	public long getExactCurrentRev() {
 		// FIXME PERF !! renable getExactCurrentRev
-		return -2;
+		return IRevisionInfo.NOT_SET;
 		// long l = this.threadLocalExactRevisionInfo.getCurrentRev(false);
 		// log.debug(DebugFormatter.dataGet(REVCACHE_NAME, "current", l));
 		// return l;

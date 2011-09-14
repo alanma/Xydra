@@ -170,6 +170,7 @@ public class GaeSnapshotService2 {
 			}
 			// execute
 			if(USE_MEMCACHE) {
+				// FIXME ask only for 'possibly cached' (mod 10) numbers
 				batchResult = Memcache.getEntities(keys);
 				GaeAssert.gaeAssert(cacheResultIsConsistent(batchResult),
 				        "cache inconsistent, see logs");

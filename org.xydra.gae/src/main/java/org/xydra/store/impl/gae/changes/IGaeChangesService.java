@@ -9,7 +9,6 @@ import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XTransaction;
 import org.xydra.store.Callback;
 import org.xydra.store.GetEventsRequest;
-import org.xydra.store.RevisionState;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.gae.changes.GaeEvents.AsyncValue;
 
@@ -36,7 +35,7 @@ public interface IGaeChangesService {
 	 * 
 	 * @see XydraStore#executeCommands(XID, String, XCommand[], Callback)
 	 */
-	RevisionState executeCommand(XCommand command, XID actorId);
+	long executeCommand(XCommand command, XID actorId);
 	
 	/**
 	 * @return the {@link XAddress} of the model managed by this

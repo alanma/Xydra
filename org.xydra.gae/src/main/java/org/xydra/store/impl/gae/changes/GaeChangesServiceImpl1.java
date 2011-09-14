@@ -32,7 +32,6 @@ import org.xydra.core.model.delta.DeltaUtils;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.store.RevisionState;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.gae.DebugFormatter;
 import org.xydra.store.impl.gae.DebugFormatter.Timing;
@@ -160,7 +159,7 @@ public class GaeChangesServiceImpl1 implements IGaeChangesService {
 	 * .xydra.base.change.XCommand, org.xydra.base.XID)
 	 */
 	@Override
-	public RevisionState executeCommand(XCommand command, XID actorId) {
+	public long executeCommand(XCommand command, XID actorId) {
 		assert this.modelAddr.equalsOrContains(command.getChangedEntity()) : "cannot handle command "
 		        + command + " - it does not address a model";
 		
@@ -177,15 +176,15 @@ public class GaeChangesServiceImpl1 implements IGaeChangesService {
 		Pair<List<XAtomicEvent>,int[]> events = checkPreconditionsAndSaveEvents(change, command,
 		        actorId);
 		if(events == null) {
-			return new RevisionState(XCommand.FAILED, exists());
+			return XCommand.FAILED;
 		} else if(events.getFirst().isEmpty()) {
 			// TODO maybe return revision?
-			return new RevisionState(XCommand.NOCHANGE, exists());
+			return XCommand.NOCHANGE;
 		}
 		
 		executeAndUnlock(change, events);
 		
-		return new RevisionState(change.rev, exists());
+		return change.rev;
 	}
 	
 	@Override

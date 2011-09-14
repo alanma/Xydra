@@ -35,7 +35,6 @@ import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.utils.Clock;
-import org.xydra.store.RevisionState;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.gae.DebugFormatter;
@@ -168,7 +167,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 	 * .xydra.base.change.XCommand, org.xydra.base.XID)
 	 */
 	@Override
-	public RevisionState executeCommand(XCommand command, XID actorId) {
+	public long executeCommand(XCommand command, XID actorId) {
 		log.debug("Execute " + DebugFormatter.format(command));
 		Clock c = new Clock().start();
 		assert this.modelAddr.equalsOrContains(command.getChangedEntity()) : "cannot handle command "
@@ -193,10 +192,10 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		c.stopAndStart("checkPreconditionsAndSaveEvents");
 		if(events == null) {
 			log.info("Failed. Stats: " + c.getStats());
-			return new RevisionState(XCommand.FAILED, modelExists());
+			return XCommand.FAILED;
 		} else if(events.getFirst().isEmpty()) {
 			log.info("NOCHANGE. Stats: " + c.getStats());
-			return new RevisionState(XCommand.NOCHANGE, modelExists());
+			return XCommand.NOCHANGE;
 		}
 		
 		executeAndUnlock(change, events);
@@ -207,23 +206,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		
 		log.info("Success. Stats: " + c.getStats());
 		
-		/*
-		 * Compute if current model is existing. If last succesful event was not
-		 * a Model.REMOVE, it must exist.
-		 */
-		XEvent event = change.getEvent();
-		if(event instanceof XTransactionEvent) {
-			event = ((XTransactionEvent)event).getEvent(((XTransactionEvent)event).size() - 1);
-		}
-		boolean modelJustGotDeleted = event.getTarget().getAddressedType() == XType.XREPOSITORY
-		        && event.getChangeType() == ChangeType.REMOVE;
-		
-		return new RevisionState(change.rev, !modelJustGotDeleted);
-	}
-	
-	private boolean modelExists() {
-		// FIXME CALC
-		return true;
+		return change.rev;
 	}
 	
 	/**
@@ -928,7 +911,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 	private void fetchMissingRevisionsFromMemcacheAndDatastore(Set<Long> locallyMissingRevs) {
 		/* === Phase 2: Ask memcache === */
 		List<String> memcacheBatchRequest = new ArrayList<String>(locallyMissingRevs.size());
-		if(locallyMissingRevs.size() > 0) {
+		if(!locallyMissingRevs.isEmpty()) {
 			// prepare batch request
 			for(long askRev : locallyMissingRevs) {
 				Key key = KeyStructure.createChangeKey(getModelAddress(), askRev);
@@ -968,7 +951,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		}
 		
 		/* === Phase 3: Ask datastore === */
-		if(memcacheBatchRequest.size() > 0) {
+		if(!memcacheBatchRequest.isEmpty()) {
 			// prepare batch request
 			List<Key> datastoreBatchRequest = new ArrayList<Key>(memcacheBatchRequest.size());
 			for(String keyStr : memcacheBatchRequest) {
@@ -1004,9 +987,9 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 					log.warn("Change is " + change.getStatus() + " timeout?" + change.isTimedOut()
 					        + ". Dump: " + change + " ||| Now = " + System.currentTimeMillis());
 					if(change.isTimedOut()) {
-						log.debug("handle timed-out change " + change.rev);
+						/* Happens if we are updating the currentRev */
+						log.warn("handle timed-out change - WHY? " + change.rev);
 						boolean success = handleTimeout(change);
-						// TODO @Daniel: why reload?
 						if(!success) {
 							change.reload();
 						}
@@ -1082,11 +1065,6 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		if(beginRevision > endRevision) {
 			throw new IllegalArgumentException("beginRevision may not be greater than endRevision");
 		}
-		// if(endRevision <= 0) {
-		// // TODO true? If beginRev=0 and endRev=0 event must be the model
-		// // creation event
-		// return new ArrayList<XEvent>(0);
-		// }
 		
 		/* adjust range */
 		long endRev = endRevision;

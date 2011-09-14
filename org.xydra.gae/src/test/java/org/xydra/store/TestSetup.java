@@ -40,8 +40,7 @@ public class TestSetup {
 		XCommand[] commands = { modelCommand1, objectCommand1 };
 		
 		XID actorId = XX.toId("actor1");
-		this.store.executeCommands(actorId, "bla", commands,
-		        new CB<BatchedResult<RevisionState>[]>());
+		this.store.executeCommands(actorId, "bla", commands, new CB<BatchedResult<Long>[]>());
 	}
 	
 	@Test

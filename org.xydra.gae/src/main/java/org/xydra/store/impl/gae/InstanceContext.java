@@ -15,6 +15,8 @@ import org.xydra.store.impl.gae.changes.ThreadLocalExactRevisionInfo;
  * Within one request, it is considered OK to retrieve fresh data only once from
  * the back-end store.
  * 
+ * IMPROVE this is tooo generic maybe just explicitly put the things we use here
+ * 
  * @author xamde
  */
 public class InstanceContext {
@@ -44,12 +46,13 @@ public class InstanceContext {
 	/**
 	 * @return a map unique for each thread. Never null.
 	 */
-	public static synchronized Map<String,Object> getTheadContext() {
-		Map<String,Object> map;
-		if(threadContext == null) {
-			threadContext = new ThreadLocal<Map<String,Object>>();
+	public static Map<String,Object> getTheadContext() {
+		synchronized(InstanceContext.class) {
+			if(threadContext == null) {
+				threadContext = new ThreadLocal<Map<String,Object>>();
+			}
 		}
-		map = threadContext.get();
+		Map<String,Object> map = threadContext.get();
 		if(map == null) {
 			map = new HashMap<String,Object>();
 			threadContext.set(map);

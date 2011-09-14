@@ -129,7 +129,7 @@ public class GaePersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public synchronized RevisionState executeCommand(XID actorId, XCommand command) {
+	public synchronized long executeCommand(XID actorId, XCommand command) {
 		if(actorId == null) {
 			throw new IllegalArgumentException("actorId was null");
 		}
