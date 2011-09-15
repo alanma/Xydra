@@ -54,7 +54,7 @@ public class GaePersistenceTest {
 		
 		pers.executeCommand(ACTOR,
 		        MemoryRepositoryCommand.createAddCommand(repoAddr, true, modelId));
-		assertEquals(0, pers.getModelRevision(modelAddr));
+		assertEquals(new RevisionState(0, true), pers.getModelRevision(modelAddr));
 		assertTrue(pers.hasModel(modelId));
 		
 		log.info("###   ADD object ");
