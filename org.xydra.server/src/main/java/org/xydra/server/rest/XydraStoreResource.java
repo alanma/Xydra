@@ -24,10 +24,10 @@ import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.core.serialize.SerializedCommand;
 import org.xydra.core.serialize.SerializedStore;
+import org.xydra.core.serialize.SerializedStore.EventsRequest;
 import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.XydraParser;
-import org.xydra.core.serialize.SerializedStore.EventsRequest;
 import org.xydra.core.serialize.json.JsonOut;
 import org.xydra.core.serialize.json.JsonParser;
 import org.xydra.core.serialize.xml.XmlOut;
@@ -39,6 +39,7 @@ import org.xydra.restless.RestlessParameter;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.RequestException;
+import org.xydra.store.RevisionState;
 import org.xydra.store.StoreException;
 import org.xydra.store.WaitingCallback;
 import org.xydra.store.XydraStore;
@@ -431,7 +432,7 @@ public class XydraStoreResource {
 			}
 		}
 		
-		WaitingCallback<BatchedResult<Long>[]> callback = new WaitingCallback<BatchedResult<Long>[]>();
+		WaitingCallback<BatchedResult<RevisionState>[]> callback = new WaitingCallback<BatchedResult<RevisionState>[]>();
 		store.getModelRevisions(actorId, passwordHash, modelAddresses, callback);
 		
 		if(callback.getException() != null) {
