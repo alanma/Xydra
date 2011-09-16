@@ -84,7 +84,7 @@ public class TableTools {
 		}
 		
 		@Override
-        public Iterator<String> iterator() {
+		public Iterator<String> iterator() {
 			return this.keys.iterator();
 		}
 		
@@ -153,11 +153,11 @@ public class TableTools {
 			long processed = 0;
 			
 			@Override
-            public void afterRowInsertion(IRow row) {
+			public void afterRowInsertion(IRow row) {
 			}
 			
 			@Override
-            public boolean beforeRowInsertion(Row row) {
+			public boolean beforeRowInsertion(Row row) {
 				this.processed++;
 				if(this.processed % 1000 == 0) {
 					log.info("Read aggregating processed " + this.processed + " rows, aggregated "
@@ -208,6 +208,9 @@ public class TableTools {
 	 * 
 	 * TODO improve docu for this function
 	 * 
+	 * Only rows listed in sum, average, or range list are present in resulting
+	 * table.
+	 * 
 	 * @param sourceTable which table to process
 	 * @param keyList create groups of rows where columns have same values
 	 * @param sumList sum these columns up, for each group
@@ -218,24 +221,10 @@ public class TableTools {
 	 */
 	public static void groupBy(ICsvTable sourceTable, List<String> keyList, List<String> sumList,
 	        List<String> averageList, List<String> rangeList, ICsvTable targetTable) {
-		log.info("Determine set of values in key columns.");
 		NKeys keys = new NKeys(keyList);
 		NKeys sum = new NKeys(sumList);
 		NKeys average = new NKeys(averageList);
 		NKeys range = new NKeys(rangeList);
-		
-		/* for each key: determine set of occurring values */
-		Map<String,Set<String>> key2valueRange = new HashMap<String,Set<String>>();
-		for(IRow row : sourceTable) {
-			for(String key : keys) {
-				Set<String> valueRange = key2valueRange.get(key);
-				if(valueRange == null) {
-					valueRange = new HashSet<String>();
-					key2valueRange.put(key, valueRange);
-				}
-				valueRange.add(row.getValue(key));
-			}
-		}
 		
 		log.info("Re-sorting table into group tables.");
 		/* re-sort table into group tables */
@@ -363,7 +352,7 @@ public class TableTools {
 		}
 		for(File f : startDirectory.listFiles(new FileFilter() {
 			@Override
-            public boolean accept(File f) {
+			public boolean accept(File f) {
 				return f.isDirectory();
 			}
 		})) {
