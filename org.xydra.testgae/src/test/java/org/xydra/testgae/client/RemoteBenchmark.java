@@ -126,7 +126,7 @@ public class RemoteBenchmark {
 	@Test
 	public void testBenchmarkDeletingOneWish() {
 		this.benchmarkOperation(OperationEnum.DELETE, 10, 1, this.path
-		        + "testBenchmarkAddingOneWish" + ".txt");
+		        + "testBenchmarkDeletingOneWish" + ".txt");
 	}
 	
 	private enum OperationEnum {
@@ -215,7 +215,8 @@ public class RemoteBenchmark {
 	public void testBenchmarkDeletingOneWishOneThread() {
 		for(int i = 0; i < 30; i++) {
 			System.out.println("Iteration #" + i);
-			deletingWishesOneThreadInTransaction(1000, "BenchmarkDeletingOneWishOneThread.txt");
+			deletingWishesOneThreadInTransaction(1000, this.path
+			        + "BenchmarkDeletingOneWishOneThread.txt");
 		}
 	}
 	
@@ -379,6 +380,9 @@ public class RemoteBenchmark {
 		}
 		
 		int successfulOperations = (operations - addExceptions);
+		if(successfulOperations == 0) {
+			fail();
+		}
 		avgTime = avgTime / successfulOperations;
 		
 		// Output Results in a simple CSV format
