@@ -18,7 +18,7 @@ public abstract class AbstractRow extends AbstractReadableRow implements IRow {
 	 * org.xydra.csv.impl.memory.IRow#addAll(org.xydra.csv.impl.memory.IRow)
 	 */
 	@Override
-    public void addAll(IReadableRow otherRow) {
+	public void addAll(IReadableRow otherRow) {
 		for(String colName : otherRow.getColumnNames()) {
 			this.setValue(colName, otherRow.getValue(colName), true);
 		}
@@ -33,7 +33,7 @@ public abstract class AbstractRow extends AbstractReadableRow implements IRow {
 	 * java.lang.String, int)
 	 */
 	@Override
-    public void appendValue(String columnName, String value, int maximalFieldLength) {
+	public void appendValue(String columnName, String value, int maximalFieldLength) {
 		if(value == null || value.equals("")) {
 			// nothing to set, keep table sparse
 		} else {
@@ -53,7 +53,7 @@ public abstract class AbstractRow extends AbstractReadableRow implements IRow {
 	 * @see org.xydra.csv.impl.memory.IRow#incrementValue(java.lang.String, int)
 	 */
 	@Override
-    public void incrementValue(String columnName, int increment) {
+	public void incrementValue(String columnName, int increment) {
 		if(increment == 0) {
 			// nothing to set, keep table sparse
 		} else {
@@ -74,7 +74,7 @@ public abstract class AbstractRow extends AbstractReadableRow implements IRow {
 	 * boolean)
 	 */
 	@Override
-    public void setValue(String columnName, long value, boolean initial) {
+	public void setValue(String columnName, long value, boolean initial) {
 		if(value == 0) {
 			// nothing to set, keep table sparse
 		} else {
@@ -94,7 +94,7 @@ public abstract class AbstractRow extends AbstractReadableRow implements IRow {
 	 * java.lang.String, boolean)
 	 */
 	@Override
-    public void setValue(String columnName, String value, boolean initial) {
+	public void setValue(String columnName, String value, boolean initial) {
 		if(value == null) {
 			// nothing to set, keep table sparse
 		} else {
@@ -108,4 +108,14 @@ public abstract class AbstractRow extends AbstractReadableRow implements IRow {
 		}
 	}
 	
+	@Override
+	public void setValue(String columnName, double value, boolean initial) {
+		if(value == 0) {
+			// nothing to set, keep table sparse
+		} else {
+			String vStr = "" + value;
+			String germanValueString = vStr.replace(".", ",");
+			setValue(columnName, germanValueString, initial);
+		}
+	}
 }

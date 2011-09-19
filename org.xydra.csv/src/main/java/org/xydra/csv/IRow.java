@@ -36,4 +36,6 @@ public interface IRow extends IReadableRow {
 	 */
 	void setValue(String columnName, String value, boolean initial);
 	
+	void setValue(String columnName, double value, boolean initial);
+	
 }

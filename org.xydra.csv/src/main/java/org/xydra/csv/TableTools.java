@@ -14,6 +14,7 @@ import java.util.Set;
 
 import org.xydra.csv.impl.memory.CsvTable;
 import org.xydra.csv.impl.memory.Row;
+import org.xydra.csv.impl.memory.SparseTable;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
@@ -358,6 +359,37 @@ public class TableTools {
 		})) {
 			process(f, table, filenameFilter, processor);
 		}
+	}
+	
+	public static void transpose(SparseTable sourceTable, SparseTable targetTable) {
+		for(String sourceColumnName : sourceTable.getColumnNames()) {
+			for(IRow sourceRow : sourceTable) {
+				String value = sourceRow.getValue(sourceColumnName);
+				IRow targetRow = targetTable.getOrCreateRow(sourceColumnName, true);
+				targetRow.setValue(sourceRow.getKey(), value, true);
+			}
+		}
+	}
+	
+	public static void main(String[] args) throws IOException {
+		CsvTable test = new CsvTable();
+		Row row1 = test.getOrCreateRow("row-1", true);
+		row1.setValue("colA", "A1", true);
+		row1.setValue("colB", "B1", true);
+		row1.setValue("colC", "C1", true);
+		Row row2 = test.getOrCreateRow("row-2", true);
+		row2.setValue("colA", "A2", true);
+		row2.setValue("colB", "B2", true);
+		row2.setValue("colC", "C2", true);
+		Row row3 = test.getOrCreateRow("row-3", true);
+		row3.setValue("colA", "A3", true);
+		row3.setValue("colB", "B3", true);
+		row3.setValue("colC", "C3", true);
+		
+		test.dump();
+		CsvTable t = new CsvTable();
+		TableTools.transpose(test, t);
+		t.dump();
 	}
 	
 }
