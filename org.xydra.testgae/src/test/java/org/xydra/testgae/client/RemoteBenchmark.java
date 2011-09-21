@@ -215,7 +215,7 @@ public class RemoteBenchmark {
 	public void testBenchmarkDeletingOneWishOneThread() {
 		for(int i = 0; i < 30; i++) {
 			System.out.println("Iteration #" + i);
-			deletingWishesOneThreadInTransaction(1000, this.path
+			deletingWishesOneThreadInTransaction(100, this.path
 			        + "BenchmarkDeletingOneWishOneThread.txt");
 		}
 	}
