@@ -181,9 +181,17 @@ public class GaeChange {
 		/**
 		 * @return true if the given status indicates that events are stored in
 		 *         the change entity.
+		 * 
+		 *         Events are saved after preconditions have been checked, but
+		 *         before actually executing the changes. This is done so that
+		 *         the MOF tree can be restored to a consistent state (by
+		 *         rolling forward) if there is an error or timeout while
+		 *         executing.
+		 * 
+		 *         Thus, events are guaranteed to exist in both
+		 *         {@link #Executing} and {@link #SuccessExecuted} stages.
 		 */
 		protected boolean hasEvents() {
-			// FIXME @Daniel: Why return true if Executing?
 			return (this == Executing || this == SuccessExecuted);
 		}
 		
@@ -498,8 +506,8 @@ public class GaeChange {
 			Pair<XAtomicEvent[],int[]> res = GaeEvents.loadAtomicEvents(this.modelAddr, this.rev,
 			        getActor(), this.entity);
 			
-			this.events = new Pair<List<XAtomicEvent>,int[]>(Arrays.asList(res.getFirst()),
-			        res.getSecond());
+			this.events = new Pair<List<XAtomicEvent>,int[]>(Arrays.asList(res.getFirst()), res
+			        .getSecond());
 		}
 		return this.events;
 	}
