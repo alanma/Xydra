@@ -72,7 +72,7 @@ public class DebugFormatter {
 			return DebugFormatter
 			        .format((((com.google.appengine.api.memcache.MemcacheService.IdentifiableValue)value)
 			                .getValue()));
-		} else if(value instanceof Collection) {
+		} else if(value instanceof Collection<?>) {
 			StringBuffer buf = new StringBuffer("{");
 			for(Object o : ((Collection<?>)value)) {
 				buf.append(format(o) + "; ");
