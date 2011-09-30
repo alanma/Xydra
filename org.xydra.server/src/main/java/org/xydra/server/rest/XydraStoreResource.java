@@ -24,10 +24,10 @@ import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.core.serialize.SerializedCommand;
 import org.xydra.core.serialize.SerializedStore;
-import org.xydra.core.serialize.SerializedStore.EventsRequest;
 import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.XydraParser;
+import org.xydra.core.serialize.SerializedStore.EventsRequest;
 import org.xydra.core.serialize.json.JsonOut;
 import org.xydra.core.serialize.json.JsonParser;
 import org.xydra.core.serialize.xml.XmlOut;
@@ -46,6 +46,13 @@ import org.xydra.store.XydraStore;
 import org.xydra.store.impl.rest.XydraStoreRestInterface;
 
 
+/**
+ * A Restless resource exposing a REST API that allows implementing a remote
+ * {@link XydraStore}.
+ * 
+ * @author dscharrer
+ * 
+ */
 public class XydraStoreResource {
 	
 	private static class InitException extends RuntimeException {
