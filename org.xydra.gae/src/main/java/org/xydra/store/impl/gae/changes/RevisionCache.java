@@ -11,8 +11,8 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.store.IMemCache;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.gae.DebugFormatter;
-import org.xydra.store.impl.gae.DebugFormatter.Timing;
 import org.xydra.store.impl.gae.GaeOperation;
+import org.xydra.store.impl.gae.DebugFormatter.Timing;
 
 
 /**
@@ -62,7 +62,7 @@ class RevisionCache {
 	 */
 	// FIXME !!! set good value. 10-100 = ok, 1000 - 100000000 = error.
 	private static final long LOCAL_VM_CACHE_TIMEOUT = 0;// 10 * 300 *
-	                                                     // 24 * 60
+	// 24 * 60
 	// * 60 * 1000;
 	
 	public static final boolean USE_LOCALVM_CACHE = false;
@@ -85,8 +85,12 @@ class RevisionCache {
 	
 	@SuppressWarnings("unused")
 	void writeToMemcache() {
+		
 		if(!USE_MEMCACHE)
 			return;
+		
+		@SuppressWarnings("all")
+		boolean deadCode;
 		
 		log.info("revcache.writememcache");
 		long incrCurrent = this.current.getDeltaSinceLastMemcacheAccess();
@@ -110,8 +114,12 @@ class RevisionCache {
 	 */
 	@SuppressWarnings("unused")
 	boolean loadFromMemcache() {
+		
 		if(!USE_MEMCACHE)
 			return false;
+		
+		@SuppressWarnings("all")
+		boolean deadCode;
 		
 		IMemCache cache = XydraRuntime.getMemcache();
 		
@@ -178,10 +186,14 @@ class RevisionCache {
 		 * @return true if value cached in local JVM is not too old
 		 */
 		private boolean hasValidLocalValue() {
+			
 			if(!USE_LOCALVM_CACHE) {
 				return false;
 			}
-			@SuppressWarnings("unused")
+			
+			@SuppressWarnings("all")
+			boolean deadCode;
+			
 			long now = System.currentTimeMillis();
 			return now < this.time + LOCAL_VM_CACHE_TIMEOUT;
 		}
