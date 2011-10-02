@@ -50,9 +50,9 @@ import com.google.appengine.api.datastore.Text;
  * 
  */
 @SuppressWarnings("deprecation")
-public class GaeSnapshotService1 {
+public class GaeSnapshotServiceImpl1 extends AbstractGaeSnapshotServiceImpl {
 	
-	private static final Logger log = LoggerFactory.getLogger(GaeSnapshotService1.class);
+	private static final Logger log = LoggerFactory.getLogger(GaeSnapshotServiceImpl1.class);
 	private final GaeChangesServiceImpl1 changesService;
 	private final XAddress modelAddress;
 	
@@ -68,7 +68,7 @@ public class GaeSnapshotService1 {
 	/**
 	 * @param changesService The change log to load snapshots from.
 	 */
-	public GaeSnapshotService1(GaeChangesServiceImpl1 changesService) {
+	public GaeSnapshotServiceImpl1(GaeChangesServiceImpl1 changesService) {
 		this.modelAddress = changesService.getModelAddress();
 		this.changesService = changesService;
 		this.snapshotRevKey = this.modelAddress + "-snapshot-Rev";
@@ -93,7 +93,7 @@ public class GaeSnapshotService1 {
 	 * @return an {@link XReadableModel} by applying all events in the
 	 *         {@link XChangeLog}
 	 */
-	synchronized public XWritableModel getSnapshot(long revisionNumber) {
+	synchronized public XWritableModel getModelSnapshot(long revisionNumber) {
 		log.debug("Get snapshot " + this.modelAddress + " " + revisionNumber);
 		/* if localVmCache has requested version or newer, use it */
 		if(this.localVmCache != null && this.localVmCache.revision >= revisionNumber) {
@@ -408,6 +408,11 @@ public class GaeSnapshotService1 {
 		}
 		
 		return model;
+	}
+	
+	@Override
+	public XWritableModel getModelSnapshot(long revisionNumber, boolean precise) {
+		return getModelSnapshot(revisionNumber);
 	}
 	
 }

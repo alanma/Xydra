@@ -222,32 +222,30 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 	
 	private static final long MAX_REVISION_NR = 8 * 1024;
 	
+	/**
+	 * A new last committed change has been found - update revision caches.
+	 */
 	private void newCurrentRev(GaeChange change) {
 		
-		this.revCache.setLastCommited(change.rev);
+		assert change.getStatus().hasEvents();
+		assert change.getStatus().isSuccess();
 		
-		if(change.getStatus().hasEvents()) {
-			
-			assert change.getStatus().isSuccess();
-			
-			XEvent event = change.getEvent();
-			if(event instanceof XTransactionEvent) {
-				XTransactionEvent trans = (XTransactionEvent)event;
-				event = trans.getEvent(trans.size() - 1);
-			}
-			assert !event.isImplied();
-			
-			boolean modelExists = true;
-			if(event instanceof XRepositoryEvent) {
-				modelExists = (event.getChangeType() != ChangeType.REMOVE);
-			}
-			
-			synchronized(this.revCache) {
-				// TODO model exists is dependent on the current rev
-				this.revCache.setCurrentModelRev(change.rev);
-				this.revCache.setModelExists(modelExists);
-			}
-			
+		XEvent event = change.getEvent();
+		if(event instanceof XTransactionEvent) {
+			XTransactionEvent trans = (XTransactionEvent)event;
+			event = trans.getEvent(trans.size() - 1);
+		}
+		assert !event.isImplied();
+		
+		boolean modelExists = true;
+		if(event instanceof XRepositoryEvent) {
+			modelExists = (event.getChangeType() != ChangeType.REMOVE);
+		}
+		
+		synchronized(this.revCache) {
+			// TODO model exists is dependent on the current rev
+			this.revCache.setCurrentModelRev(change.rev);
+			this.revCache.setModelExists(modelExists);
 		}
 		
 	}
@@ -268,25 +266,36 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 			        + change.rev, change, Timing.Now));
 			Map<Long,GaeChange> committedChangeCache = getCommittedChangeCache();
 			synchronized(committedChangeCache) {
-				
 				committedChangeCache.put(change.rev, change);
-				
-				// Update the last committed revision pointer.
-				if(this.revCache.getLastCommited() == change.rev - 1) {
-					long lastCommitted = change.rev;
-					while(committedChangeCache.containsKey(lastCommitted + 1)) {
-						lastCommitted++;
+			}
+			
+			// Update the last committed and current revision pointer.
+			if(this.revCache.getLastCommited() == change.rev - 1) {
+				GaeChange current = change.getStatus().hasEvents() ? change : null;
+				for(long lastCommitted = change.rev;; lastCommitted++) {
+					
+					GaeChange currentChange = committedChangeCache.get(lastCommitted + 1);
+					if(currentChange == null) {
+						this.revCache.setLastCommited(lastCommitted);
+						if(current != null) {
+							newCurrentRev(current);
+						}
+						break;
 					}
-					GaeChange lastChange = (lastCommitted == change.rev) ? change
-					        : committedChangeCache.get(lastCommitted);
-					newCurrentRev(lastChange);
+					
+					if(currentChange.getStatus().hasEvents()) {
+						current = currentChange;
+					}
 				}
 			}
 			
 		} else {
-			// Update the last committed revision pointer.
+			// Update the last committed and current revision pointer.
 			if(this.revCache.getLastCommited() == change.rev - 1) {
-				newCurrentRev(change);
+				this.revCache.setLastCommited(change.rev);
+				if(change.getStatus().hasEvents()) {
+					newCurrentRev(change);
+				}
 			}
 		}
 	}

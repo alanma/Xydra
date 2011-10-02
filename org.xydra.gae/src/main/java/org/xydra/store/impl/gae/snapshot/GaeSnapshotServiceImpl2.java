@@ -57,7 +57,7 @@ import com.google.appengine.repackaged.com.google.common.collect.Iterators;
  * @author dscharrer
  * @author xamde
  */
-public class GaeSnapshotService2 {
+public class GaeSnapshotServiceImpl2 extends AbstractGaeSnapshotServiceImpl {
 	
 	private static final class NonexistantModel implements XReadableModel {
 		
@@ -104,7 +104,7 @@ public class GaeSnapshotService2 {
 	}
 	
 	private static final String KIND_SNAPSHOT = "XSNAPSHOT";
-	private static final Logger log = LoggerFactory.getLogger(GaeSnapshotService2.class);
+	private static final Logger log = LoggerFactory.getLogger(GaeSnapshotServiceImpl2.class);
 	
 	private static final long MODEL_DOES_NOT_EXIST = -1;
 	private static final NonexistantModel NONEXISTANT_MODEL = new NonexistantModel();
@@ -125,7 +125,7 @@ public class GaeSnapshotService2 {
 	/**
 	 * @param changesService The change log to load snapshots from.
 	 */
-	public GaeSnapshotService2(IGaeChangesService changesService) {
+	public GaeSnapshotServiceImpl2(IGaeChangesService changesService) {
 		this.modelAddress = changesService.getModelAddress();
 		this.changesService = changesService;
 	}
@@ -288,15 +288,7 @@ public class GaeSnapshotService2 {
 		return modelSnapshotsCache;
 	}
 	
-	/**
-	 * Precise, slower.
-	 * 
-	 * @param requestedRevNr of the returned snapshot
-	 * @return an {@link XReadableModel} by applying all events in the
-	 *         {@link XChangeLog} or null if the model was not present at the
-	 *         requested revisionNumber
-	 */
-	synchronized public XWritableModel getSnapshot(long requestedRevNr) {
+	synchronized public XWritableModel getModelSnapshot(long requestedRevNr) {
 		// assert requestedRevNr > 0 &
 		// this.changesService.getCurrentRevisionNumber() > 0 : "requested:"
 		// + requestedRevNr + " current:" +
@@ -375,16 +367,7 @@ public class GaeSnapshotService2 {
 		return KeyFactory.createKey(KIND_SNAPSHOT, this.modelAddress.toURI() + "/" + revNr);
 	}
 	
-	/**
-	 * Fast, imprecise.
-	 * 
-	 * @param revisionNumber which is the minimum revision number that the
-	 *            returned snapshot will have, i.e. the caller might get an even
-	 *            more recent snapshot
-	 * @return a snapshot with the given revisionNumber or a higher one. Or
-	 *         null, if snapshot was not present at requested revisionNumber.
-	 */
-	synchronized public XWritableModel getSnapshotNewerOrAtRevision(long revisionNumber) {
+	synchronized public XWritableModel getModelSnapshotNewerOrAtRevision(long revisionNumber) {
 		/* look for all versions at this or higher revNrs */
 		SortedMap<Long,XReadableModel> modelSnapshotsCache = getModelSnapshotsCache();
 		SortedMap<Long,XReadableModel> matchOrNewer;
@@ -393,7 +376,7 @@ public class GaeSnapshotService2 {
 		}
 		if(!USE_SNAPSHOT_CACHE || matchOrNewer.isEmpty()) {
 			// not cached
-			return getSnapshot(revisionNumber);
+			return getModelSnapshot(revisionNumber);
 		} else {
 			XReadableModel cached = matchOrNewer.values().iterator().next();
 			assert cached.getRevisionNumber() >= revisionNumber;
@@ -443,6 +426,15 @@ public class GaeSnapshotService2 {
 	
 	private void localVmCachePutNull(long revNr) {
 		getModelSnapshotsCache().put(revNr, NONEXISTANT_MODEL);
+	}
+	
+	@Override
+	public XWritableModel getModelSnapshot(long requestedRevNr, boolean precise) {
+		if(precise) {
+			return getModelSnapshot(requestedRevNr);
+		} else {
+			return getModelSnapshotNewerOrAtRevision(requestedRevNr);
+		}
 	}
 	
 }

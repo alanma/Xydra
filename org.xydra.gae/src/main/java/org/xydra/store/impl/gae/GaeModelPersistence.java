@@ -16,7 +16,8 @@ import org.xydra.store.impl.gae.changes.GaeChangesServiceImpl2;
 import org.xydra.store.impl.gae.changes.IGaeChangesService;
 import org.xydra.store.impl.gae.execute.GaeExecutionServiceImpl2;
 import org.xydra.store.impl.gae.execute.IGaeExecutionService;
-import org.xydra.store.impl.gae.snapshot.GaeSnapshotService2;
+import org.xydra.store.impl.gae.snapshot.GaeSnapshotServiceImpl2;
+import org.xydra.store.impl.gae.snapshot.IGaeSnapshotService;
 
 
 /**
@@ -36,13 +37,13 @@ public class GaeModelPersistence {
 	
 	private XAddress modelAddress;
 	private IGaeChangesService changesService;
-	private GaeSnapshotService2 snapshotService;
+	private IGaeSnapshotService snapshotService;
 	private IGaeExecutionService executionService;
 	
 	public GaeModelPersistence(XAddress modelAddress) {
 		this.modelAddress = modelAddress;
 		this.changesService = new GaeChangesServiceImpl2(this.modelAddress);
-		this.snapshotService = new GaeSnapshotService2(this.changesService);
+		this.snapshotService = new GaeSnapshotServiceImpl2(this.changesService);
 		this.executionService = new GaeExecutionServiceImpl2(this.changesService);
 	}
 	
@@ -76,7 +77,7 @@ public class GaeModelPersistence {
 			// model must be empty
 			return new SimpleModel(this.modelAddress);
 		}
-		XWritableModel snapshot = this.snapshotService.getSnapshot(currentRevNr);
+		XWritableModel snapshot = this.snapshotService.getModelSnapshot(currentRevNr, false);
 		log.debug("return snapshot rev " + currentRevNr + " for model " + this.modelAddress);
 		return snapshot;
 	}
