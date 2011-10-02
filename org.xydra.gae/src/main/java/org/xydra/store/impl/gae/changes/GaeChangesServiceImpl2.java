@@ -1,50 +1,38 @@
 package org.xydra.store.impl.gae.changes;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.Future;
+import java.util.Map.Entry;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
-import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
-import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldEvent;
-import org.xydra.base.change.XModelEvent;
-import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.change.XTransactionEvent;
-import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XModel;
-import org.xydra.core.model.delta.ChangedModel;
-import org.xydra.core.model.delta.DeltaUtils;
-import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.restless.utils.Clock;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.gae.DebugFormatter;
-import org.xydra.store.impl.gae.DebugFormatter.Timing;
-import org.xydra.store.impl.gae.FutureUtils;
 import org.xydra.store.impl.gae.GaeAssert;
 import org.xydra.store.impl.gae.GaeOperation;
 import org.xydra.store.impl.gae.InstanceContext;
 import org.xydra.store.impl.gae.Memcache;
 import org.xydra.store.impl.gae.SyncDatastore;
+import org.xydra.store.impl.gae.DebugFormatter.Timing;
 import org.xydra.store.impl.gae.changes.GaeChange.Status;
 import org.xydra.store.impl.gae.changes.GaeEvents.AsyncValue;
 
@@ -55,44 +43,21 @@ import com.google.appengine.api.datastore.Transaction;
 
 
 /**
- * A class responsible for executing and logging changes to a specific
- * {@link XModel} in the GAE datastore.
+ * A class responsible for managing a running log of executed and in-progress
+ * changes to a specific {@link XModel} in the GAE datastore.
  * 
  * This class is the core of the GAE {@link XydraStore} implementation.
  * 
  * Keys for XMODEL, XOBJECT and XFIELD entities are encoded according to
  * {@link KeyStructure#createEntityKey(XAddress)}.
  * 
- * There are five different kinds of GAE Entities that are used by this class:
- * <dl>
- * <dt>Entity type XMODEL</dt>
- * <dd>These are used to represent the internal state of a model and are managed
- * by {@link InternalGaeModel}. The model entities only store the repository
- * address (for queries). Individual objects are stored separately and the model
- * revision is not stored at all. In fact, the contained object might not all
- * correspond to the same object revision at the same time.</dd>
- * 
- * <dt>Entity type XOBJECT</dt>
- * <dd>Like XMODEL. Used to represent objects and managed by
- * {@link InternalGaeObject}. XOBJECT Entities store a revision number, but it
- * is not guaranteed to be up to date. An objects actual revision number can
- * only be calculated by locking the whole object and then calculating the
- * maximum of the stored revision and the revision numbers of all contained
- * fields.</dd>
- * 
- * <dt>Entity type XFIELD</dt>
- * <dd>They represent fields and are managed by {@link InternalGaeField}. The
- * value is not stored in the field entity. Instead, additionally to the field
- * revision, an index into the transaction (or zero) is stored that can be used
- * with {@link GaeEvents#getValue(XAddress, long, int)} to load the
- * {@link XValue}.</dd>
+ * There are two different kinds of GAE Entities that are used by this class:
  * 
  * 
- * <dt>Entity type XCHANGE</dt>
- * <dd>These represent a change to the model resulting from a single
- * {@link XCommand} (which may be a {@link XTransaction}). These entities
- * represent both an entry into the {@link XChangeLog} as well as a change that
- * is currently in progress. Keys are encoded according to
+ * <dt>Entity type XCHANGE</dt> <dd>These represent a change to the model
+ * resulting from a single {@link XCommand} (which may be a {@link XTransaction}
+ * ). These entities represent both an entry into the {@link XChangeLog} as well
+ * as a change that is currently in progress. Keys are encoded according to
  * {@link KeyStructure#createChangeKey(XAddress, long)}
  * 
  * The XCHANGE entities are managed by {@link GaeChange}. They store the status
@@ -104,10 +69,9 @@ import com.google.appengine.api.datastore.Transaction;
  * set before the change has reached {@link Status#Executing}.
  * 
  * 
- * <dt>Entity type XVALUE</dt>
- * <dd>Stores an {@link XValue} set by an {@link XFieldEvent} that was too large
- * to be stored directly in the corresponding XCHANGE entity. These are managed
- * by {@link GaeEvents}.
+ * <dt>Entity type XVALUE</dt> <dd>Stores an {@link XValue} set by an
+ * {@link XFieldEvent} that was too large to be stored directly in the
+ * corresponding XCHANGE entity. These are managed by {@link GaeEvents}.
  * 
  * </dd>
  * 
@@ -135,19 +99,6 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 	
 	private static final long serialVersionUID = -2080744796962188941L;
 	
-	/**
-	 * Initial time to wait before re-checking the status of an event who'se
-	 * locks we need.
-	 */
-	private static final long WAIT_INITIAL = 10;
-	
-	/**
-	 * Maximum time to wait before re-checking the status of an event who's
-	 * locks we need.
-	 */
-	// IMPROVE set WAIT_MAX cleverly
-	private static final long WAIT_MAX = 1000;
-	
 	// Implementation.
 	
 	private final XAddress modelAddr;
@@ -162,67 +113,11 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.xydra.store.impl.gae.changes.IGaeChangesService#executeCommand(org
-	 * .xydra.base.change.XCommand, org.xydra.base.XID)
-	 */
-	@Override
-	public long executeCommand(XCommand command, XID actorId) {
-		log.debug("Execute " + DebugFormatter.format(command));
-		Clock c = new Clock().start();
-		assert this.modelAddr.equalsOrContains(command.getChangedEntity()) : "cannot handle command "
-		        + command + " - it does not address a model";
-		c.stopAndStart("assert");
-		GaeLocks locks = GaeLocks.createLocks(command);
-		c.stopAndStart("createlocks");
-		
-		log.debug("Phase 1: grabRevisionAndRegister " + locks.size() + " locks");
-		GaeChange change = grabRevisionAndRegisterLocks(locks, actorId);
-		assert change.rev >= 0;
-		c.stopAndStart("grabRevisionAndRegisterLocks");
-		
-		// IMPROVE save command to be able to roll back in case of timeout while
-		// waiting for locks / checking preconditions?
-		
-		waitForLocks(change);
-		c.stopAndStart("waitForLocks");
-		
-		Pair<List<XAtomicEvent>,int[]> events = checkPreconditionsAndSaveEvents(change, command,
-		        actorId);
-		c.stopAndStart("checkPreconditionsAndSaveEvents");
-		if(events == null) {
-			log.info("Failed. Stats: " + c.getStats());
-			return XCommand.FAILED;
-		} else if(events.getFirst().isEmpty()) {
-			log.info("NOCHANGE. Stats: " + c.getStats());
-			return XCommand.NOCHANGE;
-		}
-		
-		executeAndUnlock(change, events);
-		c.stopAndStart("executeAndUnlock");
-		assert change.getStatus().isCommitted() : "If we reach this line, change must be committed";
-		
-		// FIXME REENABLE revCache.writeToMemcache();
-		
-		log.info("Success. Stats: " + c.getStats());
-		
-		return change.rev;
-	}
-	
-	/**
-	 * Grabs the lowest available revision number and registers a change for
-	 * that revision number with the provided locks.
-	 * 
-	 * @param locks which locks to get
-	 * @param actorId The actor to record in the change {@link Entity}.
-	 * @return Information associated with the change such as the grabbed
-	 *         revision, the locks, the start time and the change {@link Entity}
-	 *         .
-	 * 
-	 *         Note: Reads revCache.lastTaken
+	 * @see IGaeChangesService#grabRevisionAndRegisterLocks(GaeLocks, XID)
 	 */
 	@GaeOperation(memcacheRead = true ,datastoreRead = true ,datastoreWrite = true ,memcacheWrite = true)
-	private GaeChange grabRevisionAndRegisterLocks(GaeLocks locks, XID actorId) {
+	public GaeChange grabRevisionAndRegisterLocks(GaeLocks locks, XID actorId) {
+		
 		long lastTaken = this.revCache.getLastTaken();
 		assert lastTaken >= -1;
 		long start = lastTaken + 1;
@@ -290,7 +185,6 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 				Status status = change.getStatus();
 				if(status.isCommitted()) {
 					cacheCommittedChange(change);
-					this.revCache.setCurrentModelRev(change.rev);
 				} else if(!status.canRollForward() && change.isTimedOut()) {
 					commit(change, Status.FailedTimeout);
 				}
@@ -302,425 +196,18 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		// unreachable
 	}
 	
-	/**
-	 * Wait for all locks needed to execute the given change.
-	 * 
-	 * @param change which lists a Set of required locks
-	 */
-	private void waitForLocks(GaeChange change) {
-		log.debug("waitForLocks: " + DebugFormatter.format(change));
+	public void commit(GaeChange change, Status status) {
 		
-		long commitedRev = this.revCache.getLastCommited();
-		
-		// Track if we find a greater last commitedRev.
-		long newCommitedRev = -1;
-		
-		for(long otherRev = change.rev - 1; otherRev > commitedRev; otherRev--) {
-			
-			GaeChange otherChange = getCachedChange(otherRev);
-			if(otherChange != null) {
-				// Change already committed, so it won't conflict.
-				continue;
-			}
-			
-			Key key = KeyStructure.createChangeKey(this.modelAddr, otherRev);
-			Entity entityFromGae = SyncDatastore.getEntity(key);
-			if(entityFromGae == null) {
-				throw new IllegalStateException("Our change.rev=" + change.rev
-				        + " waits for locks. Check for " + otherRev + " got null from backend");
-			}
-			otherChange = new GaeChange(this.modelAddr, otherRev, entityFromGae);
-			
-			// Check if the change is committed.
-			if(otherChange.getStatus().isCommitted()) {
-				cacheCommittedChange(otherChange);
-				if(newCommitedRev < 0) {
-					newCommitedRev = otherRev;
-				}
-				// finished, so should have no locks
-				continue;
-			}
-			
-			// Check if the change needs conflicting locks.
-			if(!change.isConflicting(otherChange)) {
-				newCommitedRev = -1;
-				// not conflicting, so ignore
-				continue;
-			}
-			
-			/*
-			 * The otherChange is uncommitted and holds conflicting locks, so we
-			 * need to wait.
-			 * 
-			 * Waiting is done by sleeping increasing intervals and then
-			 * checking the change entity again.
-			 * 
-			 * The locks that we already "acquired" cannot be released before
-			 * entering the waiting mode, as releasing them before completely
-			 * executing our own change would allow other changes with
-			 * conflicting locks and a revision greater than ours to execute
-			 * before our own change.
-			 */
-			long waitTime = WAIT_INITIAL;
-			boolean timedOut;
-			while(!(timedOut = otherChange.isTimedOut())) {
-				
-				// IMPROVE save own command if waitTime is too long (so that we
-				// can be rolled forward in case of timeout)
-				try {
-					Thread.sleep(waitTime);
-				} catch(InterruptedException e) {
-					// ignore interrupt
-				}
-				// IMPROVE update own lastActivity?
-				
-				otherChange.reload();
-				
-				if(otherChange.getStatus().isCommitted()) {
-					cacheCommittedChange(otherChange);
-					// now finished, so should have no locks anymore
-					assert !otherChange.hasLocks();
-					break;
-				}
-				
-				// IMPROVE allow to update the locks and re-check them here?
-				
-				// increase wait time exponentially
-				waitTime *= 2;
-				if(waitTime > WAIT_MAX) {
-					waitTime = WAIT_MAX;
-				}
-			}
-			
-			if(timedOut) {
-				if(otherChange.getStatus().canRollForward()) {
-					// IMPROVE save own command so that we can be rolled
-					// forward in case of timeout
-					
-					// Don't catch any VoluntaryTimeoutException thrown while
-					// rolling forward, as rolling forward will have a start
-					// time equal to or greater than that of our own change. So
-					// if the roll forward is close to timeout, our own change
-					// is even more so.
-					
-					if(!rollForward(otherChange)) {
-						// Someone else grabbed the revision, check again if it
-						// is rolled forward.
-						otherRev++;
-						continue;
-					}
-				} else {
-					commit(otherChange, Status.FailedTimeout);
-				}
-			}
-			
-			// other change is now committed
-			if(newCommitedRev < 0) {
-				newCommitedRev = otherRev;
-			}
-			
-			// IMPROVE: maybe re-read commitedRev?
-		}
-		
-		// gather operations stats
-		if(log.isInfoEnabled()) {
-			long start = (newCommitedRev >= 0 ? newCommitedRev : commitedRev);
-			long end = change.rev;
-			long workingWindowSize = end - start;
-			if(workingWindowSize > 1) {
-				log.info("Current working window size = " + workingWindowSize + " [" + start + ","
-				        + end + "]");
-			}
-		}
-		
-		if(newCommitedRev >= 0) {
-			this.revCache.setLastCommited(newCommitedRev);
-		}
-	}
-	
-	/**
-	 * Check the preconditions required to execute the given command and write
-	 * the events that describe the transformation of the model into the new
-	 * state.
-	 * 
-	 * Assumes that we have all the required locks.
-	 * 
-	 * @param change The change that the command belongs to.
-	 * @param command
-	 * @param actorId The actor to log in the created events.
-	 * @return a copy of the created events or null if the command cannot be
-	 *         applied.
-	 */
-	private Pair<List<XAtomicEvent>,int[]> checkPreconditionsAndSaveEvents(GaeChange change,
-	        XCommand command, XID actorId) {
-		
-		XReadableModel currentModel = InternalGaeModel.get(this, change.rev - 1, change.getLocks());
-		
-		Pair<ChangedModel,DeltaUtils.ModelChange> c = DeltaUtils.executeCommand(currentModel,
-		        command);
-		if(c == null) {
-			change.giveUpIfTimeoutCritical();
-			commit(change, Status.FailedPreconditions);
-			return null;
-		}
-		
-		List<XAtomicEvent> events = DeltaUtils.createEvents(this.modelAddr, c, actorId, change.rev);
-		log.debug("DeltaUtils generated " + events.size() + " events");
-		
-		int[] valueIds = null;
-		
-		assert events != null;
-		
-		try {
-			
-			if(events.isEmpty()) {
-				change.giveUpIfTimeoutCritical();
-				commit(change, Status.SuccessNochange);
-				return new Pair<List<XAtomicEvent>,int[]>(events, null);
-			}
-			
-			Pair<int[],List<Future<Key>>> res = change.setEvents(events);
-			
-			valueIds = res.getFirst();
-			
-			// Wait on all changes.
-			for(Future<Key> future : res.getSecond()) {
-				FutureUtils.waitFor(future);
-			}
-			
-			change.setStatus(Status.Executing);
-			change.save();
-			
-			change.giveUpIfTimeoutCritical();
-			
-		} catch(VoluntaryTimeoutException vte) {
-			// Since we have not changed the status to EXEUTING, no thread will
-			// be able to roll this change forward and we might as well clean it
-			// up to prevent unnecessary waits.
-			commit(change, Status.FailedTimeout);
-		}
-		
-		return new Pair<List<XAtomicEvent>,int[]>(events, valueIds);
-	}
-	
-	/**
-	 * Apply the changes described by the given locks and free any locks held by
-	 * this change.
-	 * 
-	 * @param change
-	 * @param events
-	 */
-	private void executeAndUnlock(GaeChange change, Pair<List<XAtomicEvent>,int[]> events) {
-		
-		for(XAtomicEvent event : events.getFirst()) {
-			log.debug("executeAndUnlock event " + event.toString());
-		}
-		
-		/**
-		 * Track which object's revision numbers we have already saved and which
-		 * ones we still need to save.
-		 * 
-		 * This assumes that the events are minimal: A set of events are
-		 * "minimal", if:
-		 * <ol>
-		 * <li>a) if there is an event of type REMOVE, the set contains no other
-		 * events for the same XEvent#getChangedEntity();</li>
-		 * <li>b) no models, object or fields are added more than once. and</li>
-		 * <li>c) the value of no field is added/changed more than once.</li>
-		 * </ul>
-		 * 
-		 * Events generated from a ChangedModel (as used here and in the XModel
-		 * transaction code) are always minimal.
-		 */
-		Set<XID> objectsWithSavedRev = new HashSet<XID>();
-		Set<XID> objectsWithPossiblyUnsavedRev = new HashSet<XID>();
-		
-		List<Future<?>> futures = new ArrayList<Future<?>>(events.getFirst().size());
-		
-		Boolean modelExists = null;
-		for(int i = 0; i < events.getFirst().size(); i++) {
-			XAtomicEvent event = events.getFirst().get(i);
-			
-			assert this.modelAddr.equalsOrContains(event.getChangedEntity());
-			assert event.getRevisionNumber() == change.rev;
-			
-			if(event instanceof XFieldEvent) {
-				modelExists = true;
-				assert Arrays.asList(ChangeType.REMOVE, ChangeType.ADD, ChangeType.CHANGE)
-				        .contains(event.getChangeType());
-				
-				if(event.isImplied()) {
-					assert event.getChangeType() == ChangeType.REMOVE;
-					// removed by the XObjectEvent
-					continue;
-				}
-				
-				// Set the field as empty and containing the XValue stored
-				// at the specified transaction index.
-				futures.add(InternalGaeField.set(event.getTarget(), change.rev,
-				        events.getSecond()[i], change.getLocks()));
-				
-				assert !event.isImplied();
-				assert event.getTarget().getObject() != null;
-				// revision saved in changed field.
-				// this assumes (correctly) that the field is not also removed
-				// in the same transaction
-				objectsWithSavedRev.add(event.getTarget().getObject());
-				
-			} else if(event instanceof XObjectEvent) {
-				modelExists = true;
-				if(event.getChangeType() == ChangeType.REMOVE) {
-					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(),
-					        change.getLocks()));
-					// cannot save revision in the removed field
-					objectsWithPossiblyUnsavedRev.add(event.getTarget().getObject());
-				} else {
-					assert event.getChangeType() == ChangeType.ADD;
-					futures.add(InternalGaeField.set(event.getChangedEntity(), change.rev,
-					        change.getLocks()));
-					// revision saved in created field
-					objectsWithSavedRev.add(event.getTarget().getObject());
-				}
-				assert event.getTarget().getObject() != null;
-				
-			} else if(event instanceof XModelEvent) {
-				modelExists = true;
-				XID objectId = ((XModelEvent)event).getObjectId();
-				if(event.getChangeType() == ChangeType.REMOVE) {
-					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(),
-					        change.getLocks()));
-					// object removed, so revision is of no interest
-					objectsWithPossiblyUnsavedRev.remove(objectId);
-				} else {
-					assert event.getChangeType() == ChangeType.ADD;
-					futures.add(InternalGaeObject.createObject(event.getChangedEntity(),
-					        change.getLocks(), change.rev));
-					// revision saved in new object
-					objectsWithSavedRev.add(objectId);
-				}
-				
-			} else {
-				assert event instanceof XRepositoryEvent;
-				if(event.getChangeType() == ChangeType.REMOVE) {
-					modelExists = false;
-					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(),
-					        change.getLocks()));
-				} else {
-					assert event.getChangeType() == ChangeType.ADD;
-					modelExists = true;
-					futures.add(InternalGaeModel.createModel(event.getChangedEntity(),
-					        change.getLocks()));
-				}
-			}
-			
-		}
-		
-		for(XID objectId : objectsWithPossiblyUnsavedRev) {
-			if(!objectsWithSavedRev.contains(objectId)) {
-				XAddress objectAddr = XX.resolveObject(this.modelAddr, objectId);
-				
-				InternalGaeObject.updateObjectRev(objectAddr, change.getLocks(), change.rev);
-			}
-		}
-		
-		for(Future<?> future : futures) {
-			FutureUtils.waitFor(future);
-		}
-		
-		commit(change, Status.SuccessExecuted);
-		
-		// update revCache
-		if(modelExists != null) {
-			this.revCache.setModelExists(modelExists);
-		}
-		this.revCache.setCurrentModelRev(change.rev);
-		
-		// // TODO do we really need to ask the memcache here?
-		// if(this.revCache.getLastCommited(true) >= change.rev) {
-		// updateCurrentRev(Math.max(change.rev,
-		// // TODO do we really need to ask the memcache here?
-		// this.revCache.getCurrentModelRev(true)));
-		// }
-	}
-	
-	/**
-	 * Try to roll forward the change with the given revision number. All saved
-	 * events will be executed on the {@link InternalGaeModel}, after which the
-	 * locks held by the change are freed.
-	 * 
-	 * As multiple processes might try to roll forward the event at the same
-	 * time, the change is grabbed safely before rolling forward. If the change
-	 * was grabbed by another process first, false is returned.
-	 * 
-	 * It is the responsibility of the caller to make sure that the change has
-	 * enough information to be rolled forward (all events are saved). See
-	 * {@link Status#canRollForward(int)}.
-	 * 
-	 * @param rev The revision number of the change to roll forward.
-	 * @param key The key of the corresponding change entity.
-	 * 
-	 * @return True if the change was rolled forward or false if the change was
-	 *         grabbed by another process.
-	 */
-	private boolean rollForward(GaeChange change) {
-		log.debug("roll forward: " + change);
-		assert change.isTimedOut() && change.getStatus().canRollForward();
-		
-		// Try to "grab" the change entity to prevent multiple processes from
-		// rolling forward the same entity.
-		Transaction trans = SyncDatastore.beginTransaction();
-		
-		// We need to re-load the change in the transaction so we will notice
-		// when someone else modifies it.
-		change.reload(trans);
-		
-		if(!change.isTimedOut()) {
-			// Cannot roll forward, change was grabbed by another process.
-			
-			// Cleanup the transaction.
-			SyncDatastore.endTransaction(trans);
-			return false;
-		}
-		
-		// Grab the change.
-		change.registerActivity();
-		
-		change.save(trans);
-		// Synchronized by endTransaction()
-		try {
-			SyncDatastore.endTransaction(trans);
-		} catch(ConcurrentModificationException cme) {
-			// Cannot roll forward, change was grabbed by another process.
-			return false;
-		}
-		
-		assert change.getStatus().canRollForward();
-		assert change.getStatus() == Status.Executing;
-		
-		Pair<List<XAtomicEvent>,int[]> events = change.getAtomicEvents();
-		
-		executeAndUnlock(change, events);
-		
-		return true;
-	}
-	
-	/**
-	 * Mark the given change as committed.
-	 * 
-	 * @param status The new (and final) status.
-	 */
-	private void commit(GaeChange change, Status status) {
 		assert status.isCommitted();
 		assert !change.getStatus().isCommitted();
+		
 		if(status == Status.FailedTimeout) {
 			log.warn("Comitting timed out change " + change);
 		}
 		change.commit(status);
-		// TODO do we really need to ask the memcache here?
-		if(this.revCache.getLastCommited() == change.rev - 1) {
-			this.revCache.setLastCommited(change.rev);
-		}
-		assert change.getStatus().isCommitted();
+		
+		assert change.getStatus() == status;
+		
 		cacheCommittedChange(change);
 	}
 	
@@ -735,13 +222,45 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 	
 	private static final long MAX_REVISION_NR = 8 * 1024;
 	
+	private void newCurrentRev(GaeChange change) {
+		
+		this.revCache.setLastCommited(change.rev);
+		
+		if(change.getStatus().hasEvents()) {
+			
+			assert change.getStatus().isSuccess();
+			
+			XEvent event = change.getEvent();
+			if(event instanceof XTransactionEvent) {
+				XTransactionEvent trans = (XTransactionEvent)event;
+				event = trans.getEvent(trans.size() - 1);
+			}
+			assert !event.isImplied();
+			
+			boolean modelExists = true;
+			if(event instanceof XRepositoryEvent) {
+				modelExists = (event.getChangeType() != ChangeType.REMOVE);
+			}
+			
+			synchronized(this.revCache) {
+				// TODO model exists is dependent on the current rev
+				this.revCache.setCurrentModelRev(change.rev);
+				this.revCache.setModelExists(modelExists);
+			}
+			
+		}
+		
+	}
+	
 	/**
 	 * Cache given change, if status is committed.
 	 * 
 	 * @param change to be cached
 	 */
-	private void cacheCommittedChange(GaeChange change) {
+	public void cacheCommittedChange(GaeChange change) {
+		
 		if(USE_COMMITTED_CHANGE_CACHE) {
+			
 			assert change != null;
 			assert change.getStatus() != null;
 			assert change.getStatus().isCommitted();
@@ -749,7 +268,25 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 			        + change.rev, change, Timing.Now));
 			Map<Long,GaeChange> committedChangeCache = getCommittedChangeCache();
 			synchronized(committedChangeCache) {
+				
 				committedChangeCache.put(change.rev, change);
+				
+				// Update the last committed revision pointer.
+				if(this.revCache.getLastCommited() == change.rev - 1) {
+					long lastCommitted = change.rev;
+					while(committedChangeCache.containsKey(lastCommitted + 1)) {
+						lastCommitted++;
+					}
+					GaeChange lastChange = (lastCommitted == change.rev) ? change
+					        : committedChangeCache.get(lastCommitted);
+					newCurrentRev(lastChange);
+				}
+			}
+			
+		} else {
+			// Update the last committed revision pointer.
+			if(this.revCache.getLastCommited() == change.rev - 1) {
+				newCurrentRev(change);
 			}
 		}
 	}
@@ -768,6 +305,28 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		}
 		log.debug(DebugFormatter.dataGet(VM_COMMITED_CHANGES_CACHENAME + this.modelAddr, "" + rev,
 		        change, Timing.Now));
+		return change;
+	}
+	
+	public GaeChange getChange(long rev) {
+		
+		GaeChange change = getCachedChange(rev);
+		if(change != null) {
+			return change;
+		}
+		
+		Key key = KeyStructure.createChangeKey(this.modelAddr, rev);
+		Entity entityFromGae = SyncDatastore.getEntity(key);
+		if(entityFromGae == null) {
+			return null;
+		}
+		change = new GaeChange(this.modelAddr, rev, entityFromGae);
+		
+		// Cache the change if it is committed.
+		if(change.getStatus().isCommitted()) {
+			cacheCommittedChange(change);
+		}
+		
 		return change;
 	}
 	
@@ -1152,9 +711,10 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 	private boolean handleTimeout(GaeChange change) {
 		log.debug("handleTimeout: " + change);
 		if(change.getStatus().canRollForward()) {
-			// FIXME Why return true if we just expect another thread to likely
-			// roll forward in the future?
-			return rollForward(change);
+			// FIXME Roll forward the change or it will remain timed out (and
+			// hold back the "current" revision) until a conflicting change is
+			// executed.
+			return false;
 		} else {
 			commit(change, Status.FailedTimeout);
 			return false;
@@ -1252,6 +812,11 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 			}
 		}
 		return true;
+	}
+	
+	@Override
+	public long getLastCommited() {
+		return this.revCache.getLastCommited();
 	}
 	
 }

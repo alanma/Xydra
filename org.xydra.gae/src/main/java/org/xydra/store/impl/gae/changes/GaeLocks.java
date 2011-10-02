@@ -12,6 +12,7 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XTransaction;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
+import org.xydra.core.model.XObject;
 import org.xydra.store.impl.gae.GaeOperation;
 
 
@@ -26,7 +27,7 @@ import org.xydra.store.impl.gae.GaeOperation;
  * @author dscharrer
  * 
  */
-class GaeLocks {
+public class GaeLocks {
 	
 	private static final long serialVersionUID = 4334940263327007176L;
 	
@@ -42,7 +43,7 @@ class GaeLocks {
 	 * @param command The command to calculate the locks for.
 	 */
 	@GaeOperation()
-	protected static GaeLocks createLocks(XCommand command) {
+	public static GaeLocks createLocks(XCommand command) {
 		GaeLocks gaeLocks = new GaeLocks();
 		if(command instanceof XTransaction) {
 			
@@ -104,7 +105,7 @@ class GaeLocks {
 	 * @return true if the specified locks are sufficient to write to the entity
 	 *         at the given address.
 	 */
-	protected boolean canWrite(XAddress addr) {
+	public boolean canWrite(XAddress addr) {
 		for(XAddress lock : this.locks) {
 			if(lock.equalsOrContains(addr)) {
 				return true;
@@ -117,7 +118,7 @@ class GaeLocks {
 	 * @return true if the specified locks are sufficient to read from the
 	 *         entity at the given address.
 	 */
-	protected boolean canRead(XAddress addr) {
+	public boolean canRead(XAddress addr) {
 		for(XAddress lock : this.locks) {
 			if(addr.equalsOrContains(lock) || lock.contains(addr)) {
 				return true;
@@ -131,7 +132,7 @@ class GaeLocks {
 	 *         lock that is implied by the other set (wild-card locks are
 	 *         respected).
 	 */
-	protected boolean isConflicting(GaeLocks other) {
+	public boolean isConflicting(GaeLocks other) {
 		for(XAddress lock : this.locks) {
 			if(other.locks.contains(lock) || other.hasMoreGeneralLock(lock)) {
 				return true;
@@ -166,7 +167,7 @@ class GaeLocks {
 	 * @return true if the specified locks are sufficient to delete the entity
 	 *         at the given address.
 	 */
-	boolean canRemove(XAddress addr) {
+	public boolean canRemove(XAddress addr) {
 		return canWrite(addr);
 	}
 	

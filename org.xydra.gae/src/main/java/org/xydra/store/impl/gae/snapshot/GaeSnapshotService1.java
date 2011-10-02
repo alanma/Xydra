@@ -66,11 +66,10 @@ public class GaeSnapshotService1 {
 	private static final long SNAPSHOT_PERSISTENCE_THRESHOLD = 10;
 	
 	/**
-	 * @param modelAddress ..
 	 * @param changesService The change log to load snapshots from.
 	 */
-	public GaeSnapshotService1(XAddress modelAddress, GaeChangesServiceImpl1 changesService) {
-		this.modelAddress = modelAddress;
+	public GaeSnapshotService1(GaeChangesServiceImpl1 changesService) {
+		this.modelAddress = changesService.getModelAddress();
 		this.changesService = changesService;
 		this.snapshotRevKey = this.modelAddress + "-snapshot-Rev";
 	}

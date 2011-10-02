@@ -108,7 +108,7 @@ public class GaeChange {
 	 * @author dscharrer
 	 * 
 	 */
-	enum Status {
+	static public enum Status {
 		
 		/**
 		 * assigned revision
@@ -151,7 +151,7 @@ public class GaeChange {
 		 * @return true if the given status indicates that the change has failed
 		 *         to execute.
 		 */
-		protected boolean isFailure() {
+		public boolean isFailure() {
 			return (this == FailedPreconditions || this == FailedTimeout);
 		}
 		
@@ -159,14 +159,14 @@ public class GaeChange {
 		 * @return true if the given status indicates that the change has been
 		 *         successfully executed.
 		 */
-		protected boolean isSuccess() {
+		public boolean isSuccess() {
 			return (this == SuccessExecuted || this == SuccessNochange);
 		}
 		
 		/**
 		 * @return true, if the status is either "success" or "failed".
 		 */
-		protected boolean isCommitted() {
+		public boolean isCommitted() {
 			return (isSuccess() || isFailure());
 		}
 		
@@ -174,7 +174,7 @@ public class GaeChange {
 		 * @return true, if a change with the given status can be rolled
 		 *         forward, false otherwise.
 		 */
-		protected boolean canRollForward() {
+		public boolean canRollForward() {
 			return (this == Executing);
 		}
 		
@@ -191,7 +191,7 @@ public class GaeChange {
 		 *         Thus, events are guaranteed to exist in both
 		 *         {@link #Executing} and {@link #SuccessExecuted} stages.
 		 */
-		protected boolean hasEvents() {
+		public boolean hasEvents() {
 			return (this == Executing || this == SuccessExecuted);
 		}
 		
@@ -257,7 +257,7 @@ public class GaeChange {
 	
 	// non-static members
 	
-	protected final long rev;
+	public final long rev;
 	private long lastActivity;
 	private GaeLocks locks;
 	private final XAddress modelAddr;
@@ -271,7 +271,7 @@ public class GaeChange {
 	 * Construct a new change entity with the given properties. The entity is
 	 * created but not put into the datastore.
 	 */
-	GaeChange(XAddress modelAddr, long rev, GaeLocks locks, XID actorId) {
+	protected GaeChange(XAddress modelAddr, long rev, GaeLocks locks, XID actorId) {
 		
 		this.rev = rev;
 		this.locks = locks;
@@ -317,14 +317,14 @@ public class GaeChange {
 		clearCache();
 	}
 	
-	void reload(Transaction trans) {
+	public void reload(Transaction trans) {
 		assert !getStatus().isCommitted();
 		this.entity = SyncDatastore.getEntity(this.entity.getKey(), trans);
 		assert this.entity != null : "change entities should not vanish";
 		clearCache();
 	}
 	
-	void reload() {
+	public void reload() {
 		reload(null);
 	}
 	
@@ -348,7 +348,7 @@ public class GaeChange {
 	 * @return true if more than {@link #TIMEOUT} milliseconds elapsed since a
 	 *         thread started working with the given change entity
 	 */
-	protected boolean isTimedOut() {
+	public boolean isTimedOut() {
 		assert !getStatus().isCommitted();
 		if(this.lastActivity < 0) {
 			this.lastActivity = (Long)this.entity.getProperty(PROP_LAST_ACTIVITY);
@@ -372,7 +372,7 @@ public class GaeChange {
 	/**
 	 * Update the status of this change.
 	 */
-	protected void setStatus(Status status) {
+	public void setStatus(Status status) {
 		assert !getStatus().isCommitted();
 		this.status = status;
 		this.entity.setUnindexedProperty(PROP_STATUS, status.value);
@@ -421,11 +421,11 @@ public class GaeChange {
 	/**
 	 * @return true if the given change entity has any locks set.
 	 */
-	protected boolean hasLocks() {
+	public boolean hasLocks() {
 		return (this.locks != null || this.entity.getProperty(PROP_LOCKS) != null);
 	}
 	
-	protected void registerActivity() {
+	private void registerActivity() {
 		assert !getStatus().isCommitted();
 		this.lastActivity = now();
 		this.entity.setUnindexedProperty(PROP_LAST_ACTIVITY, this.lastActivity);
@@ -444,10 +444,9 @@ public class GaeChange {
 	 * prevent another process rolling forward our change while we are still
 	 * working on it.
 	 * 
-	 * @param lastActivity The time when we started working on the change.
 	 * @throws VoluntaryTimeoutException to abort the current change
 	 */
-	protected void giveUpIfTimeoutCritical() throws VoluntaryTimeoutException {
+	public void giveUpIfTimeoutCritical() throws VoluntaryTimeoutException {
 		/* Don't give up in development mode to let the debugger step through */
 		if(!AboutAppEngine.inProduction()) {
 			return;
@@ -462,7 +461,7 @@ public class GaeChange {
 		}
 	}
 	
-	protected Pair<int[],List<Future<Key>>> setEvents(List<XAtomicEvent> events) {
+	public Pair<int[],List<Future<Key>>> setEvents(List<XAtomicEvent> events) {
 		assert !getStatus().isCommitted();
 		Pair<int[],List<Future<Key>>> res = GaeEvents.saveEvents(this.modelAddr, this.entity,
 		        events);
@@ -475,8 +474,11 @@ public class GaeChange {
 	 * transaction.
 	 */
 	@GaeOperation(datastoreWrite = true ,memcacheWrite = true)
-	protected void save(Transaction trans) {
+	public void save(Transaction trans) {
 		assert !getStatus().isCommitted();
+		
+		registerActivity();
+		
 		// Synchronized by endTransaction()
 		AsyncDatastore.putEntity(this.entity, trans);
 	}
@@ -484,8 +486,11 @@ public class GaeChange {
 	/**
 	 * Put this change entity in the datastore.
 	 */
-	protected void save() {
+	public void save() {
 		assert !getStatus().isCommitted();
+		
+		registerActivity();
+		
 		GaeAssert.gaeAssert(!getStatus().isCommitted(), "!getStatus().isCommitted()");
 		GaeAssert.gaeAssert(this.entity.getProperty("eventTypes") != null,
 		        "Trying to save changeEntity with PROP_EVENT_TYPES==null");
@@ -498,7 +503,7 @@ public class GaeChange {
 	 * @return a List of {@link XAtomicEvent} which is stored as a number of GAE
 	 *         entities
 	 */
-	synchronized protected Pair<List<XAtomicEvent>,int[]> getAtomicEvents() {
+	synchronized public Pair<List<XAtomicEvent>,int[]> getAtomicEvents() {
 		
 		assert getStatus().hasEvents();
 		
@@ -512,7 +517,7 @@ public class GaeChange {
 		return this.events;
 	}
 	
-	boolean isConflicting(GaeChange otherChange) {
+	public boolean isConflicting(GaeChange otherChange) {
 		GaeLocks ourLocks = getLocks();
 		GaeLocks otherLocks = otherChange.getLocks();
 		assert ourLocks != null : "our locks should not be removed before change is commited";

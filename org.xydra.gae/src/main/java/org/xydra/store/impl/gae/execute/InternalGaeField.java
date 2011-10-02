@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.xydra.store.impl.gae.changes;
+package org.xydra.store.impl.gae.execute;
 
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -14,6 +14,10 @@ import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XField;
 import org.xydra.store.impl.gae.AsyncDatastore;
+import org.xydra.store.impl.gae.changes.GaeEvents;
+import org.xydra.store.impl.gae.changes.GaeLocks;
+import org.xydra.store.impl.gae.changes.IGaeChangesService;
+import org.xydra.store.impl.gae.changes.KeyStructure;
 import org.xydra.store.impl.gae.changes.GaeEvents.AsyncValue;
 
 import com.google.appengine.api.datastore.Entity;

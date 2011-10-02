@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.xydra.store.impl.gae.changes;
+package org.xydra.store.impl.gae.execute;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,6 +14,10 @@ import org.xydra.base.XID;
 import org.xydra.base.XType;
 import org.xydra.base.change.XEvent;
 import org.xydra.store.impl.gae.SyncDatastore;
+import org.xydra.store.impl.gae.changes.GaeLocks;
+import org.xydra.store.impl.gae.changes.IGaeChangesService;
+import org.xydra.store.impl.gae.changes.KeyStructure;
+import org.xydra.store.impl.gae.changes.Utils;
 
 import com.google.appengine.api.datastore.Entity;
 

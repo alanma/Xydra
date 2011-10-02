@@ -26,9 +26,9 @@ import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.index.query.Pair;
 import org.xydra.store.impl.gae.AsyncDatastore;
-import org.xydra.store.impl.gae.AsyncDatastore.AsyncEntity;
 import org.xydra.store.impl.gae.GaeAssert;
 import org.xydra.store.impl.gae.GaeUtils2;
+import org.xydra.store.impl.gae.AsyncDatastore.AsyncEntity;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -44,21 +44,21 @@ import com.google.appengine.api.datastore.Text;
  * {@link XValue XValues} whose XML-encoding is longer than
  * {@link #MAX_VALUE_SIZE} are stored in their own GAE entity.
  * 
- * The values stored for the events are also referenced by the internal field
- * state ({@link InternalGaeField}) by the revision number that set the value
- * and a special index indicating where the value is stored (as there could have
- * been multiple events in a transaction). A value of {@link #TRANSINDEX_NONE}
- * indicates that there is no value (null), a positive value (including 0)
- * indicates that the value is stored in it's own GAE entity and the value can
- * be used with {@link KeyStructure#createValueKey(XAddress, long, int)} to get
- * the key for that entity. All other values can be passed to
+ * The values stored for the events may also be referenced by the internal field
+ * state by the revision number that set the value and a special index
+ * indicating where the value is stored (as there could have been multiple
+ * events in a transaction). A value of {@link #TRANSINDEX_NONE} indicates that
+ * there is no value (null), a positive value (including 0) indicates that the
+ * value is stored in it's own GAE entity and the value can be used with
+ * {@link KeyStructure#createValueKey(XAddress, long, int)} to get the key for
+ * that entity. All other values can be passed to
  * {@link #getInternalValueId(int)} to get an index into the values (
  * {@link #PROP_EVENT_VALUES}) stored in the XCHANGE entity.
  * 
  * @author dscharrer
  * 
  */
-class GaeEvents {
+public class GaeEvents {
 	
 	/**
 	 * Enumeration to map between stored event type and {@link XEvent} types.
@@ -216,13 +216,13 @@ class GaeEvents {
 	private static final int MAX_VALUE_SIZE = 1024;
 	
 	// Parameter for getValue() to represent a null XValue.
-	protected static final int TRANSINDEX_NONE = -1;
+	public static final int TRANSINDEX_NONE = -1;
 	
 	/**
 	 * A reference to a (possibly asynchronously loaded) {@link XValue} stored
 	 * on the GAE datastore.
 	 */
-	static class AsyncValue {
+	public static class AsyncValue {
 		
 		private final AsyncEntity future;
 		private final int transIndex;
@@ -250,7 +250,7 @@ class GaeEvents {
 			this.transIndex = TRANSINDEX_NONE;
 		}
 		
-		XValue get() {
+		public XValue get() {
 			
 			if(this.value == null && this.transIndex != TRANSINDEX_NONE) {
 				

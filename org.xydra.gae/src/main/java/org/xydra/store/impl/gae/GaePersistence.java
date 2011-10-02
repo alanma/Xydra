@@ -24,9 +24,9 @@ import org.xydra.store.XydraStore;
 import org.xydra.store.XydraStoreAdmin;
 import org.xydra.store.impl.delegate.DelegatingSecureStore;
 import org.xydra.store.impl.delegate.XydraPersistence;
-import org.xydra.store.impl.gae.changes.InternalGaeXEntity;
 import org.xydra.store.impl.gae.changes.Utils;
 import org.xydra.store.impl.gae.changes.XIDLengthException;
+import org.xydra.store.impl.gae.execute.InternalGaeXEntity;
 
 
 /**

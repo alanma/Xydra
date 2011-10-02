@@ -14,6 +14,8 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.store.RevisionState;
 import org.xydra.store.impl.gae.changes.GaeChangesServiceImpl2;
 import org.xydra.store.impl.gae.changes.IGaeChangesService;
+import org.xydra.store.impl.gae.execute.GaeExecutionServiceImpl2;
+import org.xydra.store.impl.gae.execute.IGaeExecutionService;
 import org.xydra.store.impl.gae.snapshot.GaeSnapshotService2;
 
 
@@ -35,15 +37,17 @@ public class GaeModelPersistence {
 	private XAddress modelAddress;
 	private IGaeChangesService changesService;
 	private GaeSnapshotService2 snapshotService;
+	private IGaeExecutionService executionService;
 	
 	public GaeModelPersistence(XAddress modelAddress) {
 		this.modelAddress = modelAddress;
 		this.changesService = new GaeChangesServiceImpl2(this.modelAddress);
-		this.snapshotService = new GaeSnapshotService2(this.modelAddress, this.changesService);
+		this.snapshotService = new GaeSnapshotService2(this.changesService);
+		this.executionService = new GaeExecutionServiceImpl2(this.changesService);
 	}
 	
 	public long executeCommand(XCommand command, XID actorId) {
-		return this.changesService.executeCommand(command, actorId);
+		return this.executionService.executeCommand(command, actorId);
 	}
 	
 	public List<XEvent> getEventsBetween(XAddress address, long beginRevision, long endRevision) {

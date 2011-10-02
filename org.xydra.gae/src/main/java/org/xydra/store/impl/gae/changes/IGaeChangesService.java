@@ -6,36 +6,16 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
-import org.xydra.base.change.XTransaction;
 import org.xydra.store.Callback;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.XydraStore;
+import org.xydra.store.impl.gae.changes.GaeChange.Status;
 import org.xydra.store.impl.gae.changes.GaeEvents.AsyncValue;
+
+import com.google.appengine.api.datastore.Entity;
 
 
 public interface IGaeChangesService {
-	
-	/**
-	 * Execute the given {@link XCommand} as a transaction.
-	 * 
-	 * // IMPROVE maybe let the caller provide an XID that can be used to check
-	 * // the status in case there is a GAE timeout?
-	 * 
-	 * @param command The command to execute. (can be a {@link XTransaction})
-	 * @param actorId The actor to log in the resulting event.
-	 * @return If the command executed successfully, the revision of the
-	 *         resulting {@link XEvent} or {@link XCommand#NOCHANGE} if the
-	 *         command din't change anything; {@link XCommand#FAILED} otherwise.
-	 * 
-	 * @throws VoluntaryTimeoutException if we came too close to the timeout
-	 *             while executing the command. A caller may catch this
-	 *             exception and try again, but doing so may just result in a
-	 *             timeout from GAE if TIME_CRITICAL is set to more than half
-	 *             the GAE timeout.
-	 * 
-	 * @see XydraStore#executeCommands(XID, String, XCommand[], Callback)
-	 */
-	long executeCommand(XCommand command, XID actorId);
 	
 	/**
 	 * @return the {@link XAddress} of the model managed by this
@@ -75,5 +55,41 @@ public interface IGaeChangesService {
 	 * @return true if model exists
 	 */
 	boolean exists();
+	
+	/**
+	 * Grabs the lowest available revision number and registers a change for
+	 * that revision number with the provided locks.
+	 * 
+	 * @param locks which locks to get
+	 * @param actorId The actor to record in the change {@link Entity}.
+	 * @return Information associated with the change such as the grabbed
+	 *         revision, the locks, the start time and the change {@link Entity}
+	 *         .
+	 * 
+	 *         Note: Reads revCache.lastTaken
+	 */
+	GaeChange grabRevisionAndRegisterLocks(GaeLocks locks, XID actorId);
+	
+	/**
+	 * Cache given change, if status is committed.
+	 * 
+	 * @param change to be cached
+	 */
+	void cacheCommittedChange(GaeChange change);
+	
+	GaeChange getChange(long rev);
+	
+	/**
+	 * @return A revision number up to which all changes are guaranteed to be
+	 *         committed. This revision number may be cached and out-dated.
+	 */
+	long getLastCommited();
+	
+	/**
+	 * Mark the given change as committed.
+	 * 
+	 * @param status The new (and final) status.
+	 */
+	void commit(GaeChange change, Status status);
 	
 }

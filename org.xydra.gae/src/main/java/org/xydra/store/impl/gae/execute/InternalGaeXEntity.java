@@ -1,4 +1,4 @@
-package org.xydra.store.impl.gae.changes;
+package org.xydra.store.impl.gae.execute;
 
 import java.util.concurrent.Future;
 
@@ -9,6 +9,9 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.store.impl.gae.AsyncDatastore;
 import org.xydra.store.impl.gae.SyncDatastore;
+import org.xydra.store.impl.gae.changes.GaeLocks;
+import org.xydra.store.impl.gae.changes.IGaeChangesService;
+import org.xydra.store.impl.gae.changes.KeyStructure;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;

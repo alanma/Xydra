@@ -26,7 +26,7 @@ public class KeyStructure {
 	 * @return a GAE {@link Key} addressing an internal Xydra entity (not a
 	 *         snapshot entity)
 	 */
-	static Key createEntityKey(XAddress address) {
+	public static Key createEntityKey(XAddress address) {
 		String kind = address.getAddressedType().name();
 		Key key = KeyFactory.createKey(kind, address.toURI());
 		return key;
@@ -37,7 +37,7 @@ public class KeyStructure {
 	 * @return a Xydra {@link XAddress} from a entity (via
 	 *         {@link #createEntityKey(XAddress)}) GAE {@link Key}
 	 */
-	static XAddress toAddress(Key entityKey) {
+	public static XAddress toAddress(Key entityKey) {
 		String combinedKeyString = entityKey.getName();
 		XAddress address = XX.toAddress(combinedKeyString);
 		assert address.getAddressedType().toString().equals(entityKey.getKind());

@@ -6,9 +6,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.Map.Entry;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -123,11 +123,10 @@ public class GaeSnapshotService2 {
 	private final XAddress modelAddress;
 	
 	/**
-	 * @param modelAddress of which model is this the changes service
 	 * @param changesService The change log to load snapshots from.
 	 */
-	public GaeSnapshotService2(XAddress modelAddress, IGaeChangesService changesService) {
-		this.modelAddress = modelAddress;
+	public GaeSnapshotService2(IGaeChangesService changesService) {
+		this.modelAddress = changesService.getModelAddress();
 		this.changesService = changesService;
 	}
 	
@@ -242,8 +241,8 @@ public class GaeSnapshotService2 {
 		XRevWritableModel baseModel = XCopyUtils.createSnapshot(base);
 		
 		// get events between [ start, end )
-		List<XEvent> events = this.changesService.getEventsBetween(
-		        Math.max(baseModel.getRevisionNumber() + 1, 0), requestedRevNr);
+		List<XEvent> events = this.changesService.getEventsBetween(Math.max(baseModel
+		        .getRevisionNumber() + 1, 0), requestedRevNr);
 		
 		// apply events to base
 		for(XEvent event : events) {
