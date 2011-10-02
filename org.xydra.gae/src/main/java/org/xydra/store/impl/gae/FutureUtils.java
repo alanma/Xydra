@@ -3,7 +3,6 @@ package org.xydra.store.impl.gae;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -49,13 +48,12 @@ public class FutureUtils {
 			}
 			
 			@Override
-			public T get() throws InterruptedException, ExecutionException {
+			public T get() {
 				return value;
 			}
 			
 			@Override
-			public T get(long timeout, TimeUnit unit) throws InterruptedException,
-			        ExecutionException, TimeoutException {
+			public T get(long timeout, TimeUnit unit) {
 				return value;
 			}
 		};
