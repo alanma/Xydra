@@ -43,6 +43,12 @@ import com.google.appengine.api.datastore.Transaction;
 /**
  * A class responsible for executing changes for one model, in the datastore.
  * 
+ * This variant checks preconditions by maintaining and internal MOF tree of the
+ * "current" state. Parts of the MOF tree may correspond do different model
+ * revisions depending on which active change has locked that part. Modifying
+ * the MOF tree is a separate, final step after the preconditions have been
+ * checked and the resulting events saved. This last step can be rolled forward.
+ * 
  * In addition to the change entities used by the {@link IGaeChangesService},
  * this also stores it's own state:
  * 
@@ -89,8 +95,8 @@ public class GaeExecutionServiceImpl2 implements IGaeExecutionService {
 	
 	private static final Logger log = LoggerFactory.getLogger(GaeExecutionServiceImpl2.class);
 	
-	IGaeChangesService changes;
-	XAddress modelAddr;
+	private final IGaeChangesService changes;
+	private final XAddress modelAddr;
 	
 	/**
 	 * @param changes The change log used for the model to execute changes on.

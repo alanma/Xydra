@@ -86,8 +86,8 @@ public class GaeExecutionServiceImpl1 implements IGaeExecutionService {
 	
 	private static final Logger log = LoggerFactory.getLogger(GaeExecutionServiceImpl1.class);
 	
-	IGaeChangesService changes;
-	XAddress modelAddr;
+	private final IGaeChangesService changes;
+	private final XAddress modelAddr;
 	
 	/**
 	 * @param changes The change log used for the model to execute changes on.

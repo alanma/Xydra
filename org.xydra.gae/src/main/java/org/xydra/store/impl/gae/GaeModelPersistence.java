@@ -8,7 +8,6 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
-import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.RevisionState;
@@ -45,6 +44,10 @@ public class GaeModelPersistence {
 		this.changesService = new GaeChangesServiceImpl2(this.modelAddress);
 		this.snapshotService = new GaeSnapshotServiceImpl2(this.changesService);
 		this.executionService = new GaeExecutionServiceImpl2(this.changesService);
+		/*
+		 * this.executionService = new
+		 * GaeExecutionServiceImpl3(this.changesService, this.snapshotService);
+		 */
 	}
 	
 	public long executeCommand(XCommand command, XID actorId) {
@@ -70,13 +73,6 @@ public class GaeModelPersistence {
 			return null;
 		}
 		long currentRevNr = this.changesService.getCurrentRevisionNumber();
-		if(currentRevNr == -1) {
-			return null;
-		}
-		if(currentRevNr == 0) {
-			// model must be empty
-			return new SimpleModel(this.modelAddress);
-		}
 		XWritableModel snapshot = this.snapshotService.getModelSnapshot(currentRevNr, false);
 		log.debug("return snapshot rev " + currentRevNr + " for model " + this.modelAddress);
 		return snapshot;

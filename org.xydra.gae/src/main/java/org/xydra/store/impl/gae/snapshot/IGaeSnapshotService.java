@@ -1,11 +1,13 @@
 package org.xydra.store.impl.gae.snapshot;
 
+import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
+import org.xydra.base.rmof.XRevWritableField;
+import org.xydra.base.rmof.XRevWritableModel;
+import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.XWritableField;
-import org.xydra.base.rmof.XWritableModel;
-import org.xydra.base.rmof.XWritableObject;
 import org.xydra.core.model.XChangeLog;
 
 
@@ -20,7 +22,7 @@ public interface IGaeSnapshotService {
 	 *         {@link XChangeLog} or null if the model was not present at the
 	 *         requested revisionNumber
 	 */
-	public XWritableModel getModelSnapshot(long requestedRevNr, boolean precise);
+	public XRevWritableModel getModelSnapshot(long requestedRevNr, boolean precise);
 	
 	/**
 	 * @param modelRevisionNumber Revision of model the returned snapshot should
@@ -34,7 +36,8 @@ public interface IGaeSnapshotService {
 	 *         {@link XChangeLog} or null if the model was not present at the
 	 *         requested revisionNumber
 	 */
-	public XWritableObject getObjectSnapshot(long modelRevisionNumber, boolean precise, XID objectId);
+	public XRevWritableObject getObjectSnapshot(long modelRevisionNumber, boolean precise,
+	        XID objectId);
 	
 	/**
 	 * @param modelRevisionNumber Revision of model the returned snapshot should
@@ -48,7 +51,8 @@ public interface IGaeSnapshotService {
 	 *         {@link XChangeLog} or null if the model was not present at the
 	 *         requested revisionNumber
 	 */
-	public XWritableField getFieldSnapshot(long modelRevisionNumber, boolean precise, XID objectId,
-	        XID fieldId);
+	public XRevWritableField getFieldSnapshot(long modelRevisionNumber, boolean precise,
+	        XID objectId, XID fieldId);
 	
+	XAddress getModelAddress();
 }

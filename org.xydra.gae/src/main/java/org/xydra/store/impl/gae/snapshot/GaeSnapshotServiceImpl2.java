@@ -18,7 +18,6 @@ import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XRevWritableModel;
-import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
@@ -288,7 +287,7 @@ public class GaeSnapshotServiceImpl2 extends AbstractGaeSnapshotServiceImpl {
 		return modelSnapshotsCache;
 	}
 	
-	synchronized public XWritableModel getModelSnapshot(long requestedRevNr) {
+	synchronized public XRevWritableModel getModelSnapshot(long requestedRevNr) {
 		// assert requestedRevNr > 0 &
 		// this.changesService.getCurrentRevisionNumber() > 0 : "requested:"
 		// + requestedRevNr + " current:" +
@@ -296,7 +295,7 @@ public class GaeSnapshotServiceImpl2 extends AbstractGaeSnapshotServiceImpl {
 		log.debug("Get snapshot " + this.modelAddress + " " + requestedRevNr);
 		
 		/* if localVmCache has exact requested version, use it */
-		XWritableModel cached = localVmCacheGet(requestedRevNr);
+		XRevWritableModel cached = localVmCacheGet(requestedRevNr);
 		if(cached != null) {
 			log.debug("return locally cached");
 			return cached;
@@ -307,7 +306,7 @@ public class GaeSnapshotServiceImpl2 extends AbstractGaeSnapshotServiceImpl {
 		 * revisions, it might be faster to update it than to load a snapshot
 		 * from the memcache
 		 */
-		XWritableModel snapshot = getSnapshotFromMemcacheOrDatastore(requestedRevNr);
+		XRevWritableModel snapshot = getSnapshotFromMemcacheOrDatastore(requestedRevNr);
 		return snapshot;
 	}
 	
@@ -320,7 +319,7 @@ public class GaeSnapshotServiceImpl2 extends AbstractGaeSnapshotServiceImpl {
 	 *         null at that revision.
 	 */
 	@GaeOperation(datastoreRead = true ,memcacheRead = true)
-	synchronized private XWritableModel getSnapshotFromMemcacheOrDatastore(long requestedRevNr) {
+	synchronized private XRevWritableModel getSnapshotFromMemcacheOrDatastore(long requestedRevNr) {
 		assert requestedRevNr > 0 & this.changesService.getCurrentRevisionNumber() > 0;
 		log.debug("getSnapshotFromMemcacheOrDatastore " + requestedRevNr);
 		// try to retrieve an exact match for the required revisionNumber
@@ -367,7 +366,7 @@ public class GaeSnapshotServiceImpl2 extends AbstractGaeSnapshotServiceImpl {
 		return KeyFactory.createKey(KIND_SNAPSHOT, this.modelAddress.toURI() + "/" + revNr);
 	}
 	
-	synchronized public XWritableModel getModelSnapshotNewerOrAtRevision(long revisionNumber) {
+	synchronized public XRevWritableModel getModelSnapshotNewerOrAtRevision(long revisionNumber) {
 		/* look for all versions at this or higher revNrs */
 		SortedMap<Long,XReadableModel> modelSnapshotsCache = getModelSnapshotsCache();
 		SortedMap<Long,XReadableModel> matchOrNewer;
@@ -400,7 +399,7 @@ public class GaeSnapshotServiceImpl2 extends AbstractGaeSnapshotServiceImpl {
 	 * @return a copy of the cached model or null
 	 */
 	@GaeOperation()
-	private XWritableModel localVmCacheGet(long requestedRevNr) {
+	private XRevWritableModel localVmCacheGet(long requestedRevNr) {
 		if(!USE_SNAPSHOT_CACHE)
 			return null;
 		
@@ -429,12 +428,24 @@ public class GaeSnapshotServiceImpl2 extends AbstractGaeSnapshotServiceImpl {
 	}
 	
 	@Override
-	public XWritableModel getModelSnapshot(long requestedRevNr, boolean precise) {
+	public XRevWritableModel getModelSnapshot(long requestedRevNr, boolean precise) {
+		if(requestedRevNr == -1) {
+			return null;
+		}
+		if(requestedRevNr == 0) {
+			// model must be empty
+			return new SimpleModel(this.modelAddress);
+		}
 		if(precise) {
 			return getModelSnapshot(requestedRevNr);
 		} else {
 			return getModelSnapshotNewerOrAtRevision(requestedRevNr);
 		}
+	}
+	
+	@Override
+	public XAddress getModelAddress() {
+		return this.modelAddress;
 	}
 	
 }

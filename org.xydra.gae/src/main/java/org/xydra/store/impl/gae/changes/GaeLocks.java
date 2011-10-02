@@ -2,6 +2,7 @@ package org.xydra.store.impl.gae.changes;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -27,7 +28,7 @@ import org.xydra.store.impl.gae.GaeOperation;
  * @author dscharrer
  * 
  */
-public class GaeLocks {
+public class GaeLocks implements Iterable<XAddress> {
 	
 	private static final long serialVersionUID = 4334940263327007176L;
 	
@@ -176,6 +177,16 @@ public class GaeLocks {
 	 */
 	public int size() {
 		return this.locks.size();
+	}
+	
+	@Override
+	public Iterator<XAddress> iterator() {
+		return new ReadOnlyIterator<XAddress>(this.locks.iterator());
+	}
+	
+	@Override
+	public String toString() {
+		return encode().toString();
 	}
 	
 }

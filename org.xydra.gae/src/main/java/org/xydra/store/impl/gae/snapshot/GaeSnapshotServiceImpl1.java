@@ -17,7 +17,6 @@ import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
-import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
@@ -93,7 +92,7 @@ public class GaeSnapshotServiceImpl1 extends AbstractGaeSnapshotServiceImpl {
 	 * @return an {@link XReadableModel} by applying all events in the
 	 *         {@link XChangeLog}
 	 */
-	synchronized public XWritableModel getModelSnapshot(long revisionNumber) {
+	synchronized public XRevWritableModel getModelSnapshot(long revisionNumber) {
 		log.debug("Get snapshot " + this.modelAddress + " " + revisionNumber);
 		/* if localVmCache has requested version or newer, use it */
 		if(this.localVmCache != null && this.localVmCache.revision >= revisionNumber) {
@@ -411,8 +410,13 @@ public class GaeSnapshotServiceImpl1 extends AbstractGaeSnapshotServiceImpl {
 	}
 	
 	@Override
-	public XWritableModel getModelSnapshot(long revisionNumber, boolean precise) {
+	public XRevWritableModel getModelSnapshot(long revisionNumber, boolean precise) {
 		return getModelSnapshot(revisionNumber);
+	}
+	
+	@Override
+	public XAddress getModelAddress() {
+		return this.modelAddress;
 	}
 	
 }

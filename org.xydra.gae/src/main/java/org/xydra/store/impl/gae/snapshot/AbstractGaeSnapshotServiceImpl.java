@@ -1,18 +1,19 @@
 package org.xydra.store.impl.gae.snapshot;
 
 import org.xydra.base.XID;
-import org.xydra.base.rmof.XWritableField;
-import org.xydra.base.rmof.XWritableModel;
-import org.xydra.base.rmof.XWritableObject;
+import org.xydra.base.rmof.XRevWritableField;
+import org.xydra.base.rmof.XRevWritableModel;
+import org.xydra.base.rmof.XRevWritableObject;
 
 
 public abstract class AbstractGaeSnapshotServiceImpl implements IGaeSnapshotService {
 	
 	@Override
-	public XWritableField getFieldSnapshot(long modelRevisionNumber, boolean precise, XID objectId,
-	        XID fieldId) {
+	public XRevWritableField getFieldSnapshot(long modelRevisionNumber, boolean precise,
+	        XID objectId, XID fieldId) {
 		
-		XWritableObject objectSnapshot = getObjectSnapshot(modelRevisionNumber, precise, objectId);
+		XRevWritableObject objectSnapshot = getObjectSnapshot(modelRevisionNumber, precise,
+		        objectId);
 		if(objectSnapshot == null) {
 			return null;
 		}
@@ -21,7 +22,8 @@ public abstract class AbstractGaeSnapshotServiceImpl implements IGaeSnapshotServ
 	}
 	
 	@Override
-	public XWritableObject getObjectSnapshot(long modelRevisionNumber, boolean precise, XID objectId) {
+	public XRevWritableObject getObjectSnapshot(long modelRevisionNumber, boolean precise,
+	        XID objectId) {
 		
 		/*
 		 * IMPROVE(performance, defer) generate the object snapshot directly.
@@ -34,7 +36,7 @@ public abstract class AbstractGaeSnapshotServiceImpl implements IGaeSnapshotServ
 		 * Ideas 3: Easy to implement: If localVMcache has it, copy directly
 		 * just the object from it.
 		 */
-		XWritableModel modelSnapshot = getModelSnapshot(modelRevisionNumber, precise);
+		XRevWritableModel modelSnapshot = getModelSnapshot(modelRevisionNumber, precise);
 		if(modelSnapshot == null) {
 			return null;
 		}
