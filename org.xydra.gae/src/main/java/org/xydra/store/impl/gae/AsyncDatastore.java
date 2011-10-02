@@ -268,6 +268,7 @@ public class AsyncDatastore {
 		
 	}
 	
+	@SuppressWarnings("unused")
 	private static class FuturePutEntity extends DebugFuture<Entity,Key> {
 		public FuturePutEntity(Entity key, Future<Key> f) {
 			super(key, f);
@@ -292,6 +293,7 @@ public class AsyncDatastore {
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	private static class FutureDeleteEntity extends DebugFuture<Key,Void> {
 		public FutureDeleteEntity(Key key, Future<Void> f) {
 			super(key, f);
