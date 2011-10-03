@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Set;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.xydra.base.X;
@@ -18,6 +19,7 @@ import org.xydra.core.change.RWCachingRepository;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.utils.Clock;
+import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
 
@@ -31,14 +33,20 @@ public abstract class AbstractPersistencePerformanceTest {
 	private static int x = 3;
 	
 	@Before
-	public void setUp() {
+	public void before() {
 		log.info("Creating fresh persistence");
+	}
+	
+	@After
+	public void after() {
+		XydraRuntime.finishRequest();
 	}
 	
 	public abstract XydraPersistence createPersistence(XID repositoryId);
 	
 	@Test
 	public void testPerformanceDirect() {
+		log.info("TEST testPerformanceDirect");
 		XID repositoryId = XX.toId("testPerformanceDirect");
 		XydraPersistence persistence = createPersistence(repositoryId);
 		Clock c = new Clock().start();
@@ -89,15 +97,18 @@ public abstract class AbstractPersistencePerformanceTest {
 	
 	@Test
 	public void testPerformanceIndirect() {
+		log.info("TEST testPerformanceIndirect");
 		XID repositoryId = XX.toId("testPerformanceIndirect");
 		XydraPersistence persistence = createPersistence(repositoryId);
+		XID modelId = XX.toId("model1");
+		XAddress modelAddress = XX.toAddress(repositoryId, modelId, null, null);
+		
 		Clock c = new Clock().start();
 		
 		WritableRepositoryOnPersistence baseRepository = new WritableRepositoryOnPersistence(
 		        persistence, actorId);
 		RWCachingRepository repo = new RWCachingRepository(baseRepository, false);
 		
-		XID modelId = XX.toId("model1");
 		XWritableModel model = repo.createModel(modelId);
 		c.stopAndStart("add-model");
 		
@@ -114,9 +125,8 @@ public abstract class AbstractPersistencePerformanceTest {
 		assertEquals(200, result);
 		c.stopAndStart("commit");
 		
-		XAddress modelAddress = XX.toAddress(repositoryId, modelId, null, null);
 		long rev = persistence.getModelRevision(modelAddress).revision();
-		assertEquals("0=createModel,1=txnWithXObjects" + rev, 1, rev);
+		assertEquals("0=createModel,1=txnWithXObjects => expect 1 but is " + rev, 1, rev);
 		
 		XWritableModel snap = persistence.getModelSnapshot(modelAddress);
 		assert snap != null;

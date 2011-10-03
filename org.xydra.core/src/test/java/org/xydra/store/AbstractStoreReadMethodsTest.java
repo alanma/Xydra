@@ -57,7 +57,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	protected XydraStore store;
 	
 	@Before
-	public void setUp() {
+	public void before() {
 		this.store = this.getStore();
 		this.factory = this.getCommandFactory();
 		

@@ -55,7 +55,7 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 		XCommand command = X.getCommandFactory().createAddObjectCommand(
 		        this.persistence.getRepositoryId(), this.modelId, objectId, true);
 		long commandResult = this.persistence.executeCommand(this.executingActorId, command);
-		assert commandResult >= 0 : "Command " + command + " returned " + commandResult;
+		assert commandResult >= 0 : "Command " + command + " failed with " + commandResult;
 		return getObject(objectId);
 	}
 	

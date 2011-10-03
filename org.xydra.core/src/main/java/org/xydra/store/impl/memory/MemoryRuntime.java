@@ -19,12 +19,7 @@ public class MemoryRuntime implements XydraPlatformRuntime {
 	}
 	
 	@Override
-	public XRequest startRequest() {
-		return new XRequest() {
-			@Override
-			public void finish() {
-			}
-		};
+	public void finishRequest() {
 	}
 	
 }

@@ -51,21 +51,7 @@ public interface XydraPlatformRuntime {
 	 * 
 	 * A server implementation might wish to e.g. clear thread-local variables
 	 * to defend against a web container which is recycling threads.
-	 * 
-	 * @return an object representing the request.
 	 */
-	public XRequest startRequest();
-	
-	/**
-	 * A marker interface for a (web) request.
-	 */
-	public static interface XRequest {
-		/**
-		 * Tells the Xydra platform that this request finished. This allows the
-		 * platform to find a good moment to commit locally cached values back
-		 * to somewhere else.
-		 */
-		void finish();
-	}
+	public void finishRequest();
 	
 }

@@ -30,6 +30,8 @@ import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
 import org.xydra.index.query.Pair;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
 
 /**
@@ -54,6 +56,9 @@ import org.xydra.index.query.Pair;
  */
 
 public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
+	
+	private static final Logger log = LoggerFactory
+	        .getLogger(AbstractAllowAllStoreWriteMethodsTest.class);
 	
 	protected XID correctUser, incorrectUser, repoId;
 	
@@ -106,6 +111,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	// combinations
 	@Test
 	public void testExecuteCommandsBadAccount() {
+		log.info("TEST testExecuteCommandsBadAccount");
 		if(!this.incorrectActorExists) {
 			return;
 		}
@@ -123,6 +129,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNull(callback.getEffect());
 		assertNotNull(callback.getException());
 		assertTrue(callback.getException() instanceof AuthorisationException);
+		log.info("/TEST testExecuteCommandsBadAccount");
 	}
 	
 	/*

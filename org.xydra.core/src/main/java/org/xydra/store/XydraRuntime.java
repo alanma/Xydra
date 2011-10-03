@@ -14,7 +14,6 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.perf.StatsGatheringMemCacheWrapper;
 import org.xydra.perf.StatsGatheringPersistenceWrapper;
-import org.xydra.store.XydraPlatformRuntime.XRequest;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.memory.MemoryRuntime;
 
@@ -271,9 +270,18 @@ public class XydraRuntime {
 		dynamicListeners.clear();
 	}
 	
-	public XRequest startRequest() {
+	public static void finishRequest() {
+		log.info("Request finished.");
+		if(platformRuntime != null) {
+			platformRuntime.finishRequest();
+		} else {
+			throw new IllegalStateException(
+			        "Request finished, but XydraRuntime.init() was never directly or indirectly performed.");
+		}
+	}
+	
+	public static void init() {
 		initialiseRuntimeOnce();
-		return platformRuntime.startRequest();
 	}
 	
 }
