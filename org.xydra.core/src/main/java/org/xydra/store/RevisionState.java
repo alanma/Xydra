@@ -16,6 +16,9 @@ import java.io.Serializable;
 public class RevisionState implements Serializable {
 	
 	private static final long serialVersionUID = 2428661786025001891L;
+	
+	public static final RevisionState MODEL_DOES_NOT_EXIST_YET = new RevisionState(-1, false);
+	
 	private final boolean modelExists;
 	private final long revision;
 	
