@@ -1,5 +1,6 @@
 package org.xydra.store;
 
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.xydra.base.X;
 import org.xydra.base.XID;
@@ -15,6 +16,11 @@ public class GaeAllowAllStoreReadMethodsTest extends AbstractAllowAllStoreReadMe
 	@BeforeClass
 	public static void init() {
 		LoggerTestHelper.init();
+	}
+	
+	@After
+	public void after() {
+		XydraRuntime.finishRequest();
 	}
 	
 	private XID repositoryId;

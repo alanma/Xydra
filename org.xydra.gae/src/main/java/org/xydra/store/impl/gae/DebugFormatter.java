@@ -151,4 +151,7 @@ public class DebugFormatter {
 		return "INIT " + dataSourceName;
 	}
 	
+	public static String clear(String dataSourceName) {
+		return "CLEAR " + dataSourceName;
+	}
 }

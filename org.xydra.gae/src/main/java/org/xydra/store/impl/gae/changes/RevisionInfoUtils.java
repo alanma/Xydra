@@ -1,5 +1,6 @@
 package org.xydra.store.impl.gae.changes;
 
+@Deprecated
 public class RevisionInfoUtils {
 	
 	/**
@@ -11,17 +12,17 @@ public class RevisionInfoUtils {
 	 * @param currentHasChanged ..
 	 */
 	public static void maintainInvariants(IRevisionInfo revs, boolean currentHasChanged) {
-		long committed = revs.getLastCommitted(true);
+		long committed = revs.getLastCommitted();
 		if(currentHasChanged) {
-			long current = revs.getCurrentRev(true);
+			long current = revs.getCurrentRev();
 			if(current > committed) {
-				revs.setLastCommitted(current);
+				revs.setLastCommittedIfHigher(current);
 				committed = current;
 			}
 		}
-		long lastTaken = revs.getLastTaken(true);
+		long lastTaken = revs.getLastTaken();
 		if(committed > lastTaken) {
-			revs.setLastTaken(committed);
+			revs.setLastTakenIfHigher(committed);
 		}
 	}
 	

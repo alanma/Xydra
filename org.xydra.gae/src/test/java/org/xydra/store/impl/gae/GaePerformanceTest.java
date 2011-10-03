@@ -14,6 +14,7 @@ import org.xydra.core.AbstractPersistencePerformanceTest;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.log.gae.Log4jLoggerFactory;
+import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -28,6 +29,7 @@ public class GaePerformanceTest extends AbstractPersistencePerformanceTest {
 		GaeTestfixer.enable();
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		InstanceContext.clear();
+		XydraRuntime.init();
 		XydraPersistence p = new GaePersistence(repositoryId);
 		assert p.getModelIds().isEmpty();
 		return p;

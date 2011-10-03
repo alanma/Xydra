@@ -21,6 +21,12 @@ public class GaeStoreWriteMethodsTest extends AbstractSecureStoreWriteMethodsTes
 	@BeforeClass
 	public static void init() {
 		LoggerTestHelper.init();
+		XydraRuntime.init();
+	}
+	
+	@After
+	public void after() {
+		XydraRuntime.finishRequest();
 	}
 	
 	@Override

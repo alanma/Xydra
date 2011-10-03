@@ -101,4 +101,17 @@ public class GaeModelPersistence {
 		return new RevisionState(getCurrentRevisionNumber(), this.changesService.exists());
 	}
 	
+	@Override
+	public int hashCode() {
+		return this.modelAddress.hashCode();
+		
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		return other instanceof GaeModelPersistence
+		        && ((GaeModelPersistence)other).modelAddress.equals(this.modelAddress);
+		
+	}
+	
 }

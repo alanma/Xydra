@@ -15,7 +15,6 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.log.gae.Log4jLoggerFactory;
 import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
-import org.xydra.store.impl.gae.InstanceContext;
 
 
 public class GaeStoreReadMethodsTest extends AbstractSecureStoreReadMethodsTest {
@@ -31,7 +30,7 @@ public class GaeStoreReadMethodsTest extends AbstractSecureStoreReadMethodsTest 
 	protected XydraStore getStore() {
 		GaeTestfixer.enable();
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		InstanceContext.clear();
+		XydraRuntime.init();
 		
 		if(this.store == null) {
 			this.store = GaePersistence.get();
@@ -40,7 +39,7 @@ public class GaeStoreReadMethodsTest extends AbstractSecureStoreReadMethodsTest 
 	}
 	
 	@After
-	public void tearDown() {
+	public void after() {
 		SynchronousTestCallback<Set<XID>> mids = new SynchronousTestCallback<Set<XID>>();
 		this.store.getModelIds(getCorrectUser(), getCorrectUserPasswordHash(), mids);
 		assertEquals(SynchronousTestCallback.SUCCESS, mids.waitOnCallback(Long.MAX_VALUE));
@@ -62,8 +61,8 @@ public class GaeStoreReadMethodsTest extends AbstractSecureStoreReadMethodsTest 
 	
 	public static void main(String[] args) {
 		GaeStoreReadMethodsTest t = new GaeStoreReadMethodsTest();
-		t.setUp();
-		t.setUp();
+		t.before();
+		t.before();
 	}
 	
 }

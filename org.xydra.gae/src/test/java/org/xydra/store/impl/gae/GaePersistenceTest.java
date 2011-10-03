@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.xydra.base.XAddress;
@@ -36,6 +37,11 @@ public class GaePersistenceTest {
 		GaeTestfixer.enable();
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
+	}
+	
+	@After
+	public void tearDown() {
+		XydraRuntime.finishRequest();
 	}
 	
 	@Test
@@ -158,13 +164,15 @@ public class GaePersistenceTest {
 		pers.executeCommand(ACTOR,
 		        MemoryRepositoryCommand.createAddCommand(repoAddr, true, modelId));
 		assertEquals(3, pers.getModelRevision(modelAddr).revision());
+		assert pers.getModelIds().contains(modelId);
 		
 		// action: redundantly create model again
 		l = pers.executeCommand(ACTOR,
 		        MemoryRepositoryCommand.createAddCommand(repoAddr, true, modelId));
 		assert l == XCommand.NOCHANGE : l;
 		assert pers.getModelIds().contains(modelId);
-		assertEquals(4, pers.getModelRevision(modelAddr).revision());
+		assertEquals("nothing changed, so rev should stay the same", 3,
+		        pers.getModelRevision(modelAddr).revision());
 		assert pers.getModelSnapshot(modelAddr) != null;
 	}
 	

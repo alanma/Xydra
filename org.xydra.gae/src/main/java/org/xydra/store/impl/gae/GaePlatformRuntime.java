@@ -1,8 +1,6 @@
 package org.xydra.store.impl.gae;
 
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.xydra.base.XID;
 import org.xydra.gae.AboutAppEngine;
@@ -23,7 +21,7 @@ import org.xydra.store.impl.memory.LocalMemcache;
  * GAE implementation of {@link XydraPlatformRuntime}.
  * 
  * Maps memcache to Google AppEngine memcache service; {@link XydraPersistence}
- * to data store service.
+ * to Google AppEngine data store service.
  */
 public class GaePlatformRuntime implements XydraPlatformRuntime {
 	
@@ -133,43 +131,26 @@ public class GaePlatformRuntime implements XydraPlatformRuntime {
 	}
 	
 	@Override
-	public XRequest startRequest() {
-		
-		XRequest request = new XRequest() {
-			@Override
-			public void finish() {
-				synchronized(requestlisteners) {
-					for(XRequestListener listener : requestlisteners) {
-						listener.onRequestFinish(this);
-					}
-				}
-			}
-		};
-		synchronized(requestlisteners) {
-			for(XRequestListener listener : requestlisteners) {
-				listener.onRequestStart(request);
-			}
-		}
-		return request;
+	public void finishRequest() {
+		log.info("Request finished.");
+		InstanceContext.clearThreadContext();
 	}
-	
-	public static interface XRequestListener {
-		void onRequestStart(XRequest request);
-		
-		void onRequestFinish(XRequest request);
-	}
-	
-	private static Set<XRequestListener> requestlisteners = new HashSet<XRequestListener>();
-	
-	public static void addRequestListener(XRequestListener listener) {
-		synchronized(requestlisteners) {
-			requestlisteners.add(listener);
-		}
-	}
-	
-	public static void removeRequestListener(XRequestListener listener) {
-		synchronized(requestlisteners) {
-			requestlisteners.remove(listener);
-		}
-	}
+	// public static interface XRequestListener {
+	// void onRequestFinish();
+	// }
+	//
+	// private static Set<XRequestListener> requestlisteners = new
+	// HashSet<XRequestListener>();
+	//
+	// public static void addRequestListener(XRequestListener listener) {
+	// synchronized(requestlisteners) {
+	// requestlisteners.add(listener);
+	// }
+	// }
+	//
+	// public static void removeRequestListener(XRequestListener listener) {
+	// synchronized(requestlisteners) {
+	// requestlisteners.remove(listener);
+	// }
+	// }
 }

@@ -4,8 +4,10 @@ import java.util.Map;
 
 import org.xydra.base.XAddress;
 import org.xydra.core.model.XModel;
+import org.xydra.core.model.impl.memory.UUID;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.RevisionState;
 import org.xydra.store.impl.gae.DebugFormatter;
 import org.xydra.store.impl.gae.DebugFormatter.Timing;
 import org.xydra.store.impl.gae.GaeOperation;
@@ -13,6 +15,8 @@ import org.xydra.store.impl.gae.InstanceContext;
 
 
 /**
+ * This class is a facade and manager for the different revision caches.
+ * 
  * There is one revision cache per {@link XModel}. The revision cache is shared
  * among all objects within one Java Virtual Machine (by means of simple static
  * variables).
@@ -20,8 +24,8 @@ import org.xydra.store.impl.gae.InstanceContext;
  * The lifetime of the {@link RevisionCache2} itself is managed in the
  * {@link InstanceContext}, so that it can be managed better.
  * 
- * Within the revision cache, three values are managed: LastTaken, Committed,
- * and Current.
+ * Within the revision cache, four values are managed: LastTaken, Committed, and
+ * Current + modelExists.
  * 
  * A model has a <em>current revision number</em> (Current). It is incremented
  * every time a change operation succeeds. Not necessarily only one step.
@@ -51,9 +55,10 @@ import org.xydra.store.impl.gae.InstanceContext;
  * 
  * For each value, the revision cache maintains a shared minimal value, which
  * can be re-used among all threads as a starting point to compute the
- * thread-local variables. Once the thread-local exact values are set, the
- * shared minimal values should no longer be considered. This ensures a
- * read-your-own-writes behaviour within one instance.
+ * thread-local variables.
+ * 
+ * Each thread has its own view on currentRevision and modelExists. This ensures
+ * a read-your-own-writes behaviour within one instance.
  * 
  * A typical invocation sequence can look like this:
  * 
@@ -107,38 +112,31 @@ public class RevisionCache2 {
 	
 	private static final Logger log = LoggerFactory.getLogger(RevisionCache2.class);
 	
-	private static final String REVCACHE_NAME = "[.rc]";
+	private static final String REVCACHE_NAME = "[.rc-" + UUID.uuid(4) + "]";
 	
-	private ThreadLocalExactRevisionInfo threadLocalExactRevisionInfo;
+	private SharedRevisionManager sharedRevisionManager;
 	
-	public static SharedMinimalRevisionInfo getSharedMinimalRevisionInfo(XAddress modelAddress) {
-		String smriKey = SharedMinimalRevisionInfo.getCacheName(modelAddress);
+	private XAddress modelAddress;
+	
+	public static SharedRevisionManager getSharedRevisionManagerInstance(XAddress modelAddress) {
+		String key = SharedRevisionManager.getCacheName(modelAddress);
 		Map<String,Object> instanceContext = InstanceContext.getInstanceCache();
-		SharedMinimalRevisionInfo sharedMinimalRevisionInfo;
+		SharedRevisionManager sharedRevManager;
 		synchronized(instanceContext) {
-			sharedMinimalRevisionInfo = (SharedMinimalRevisionInfo)instanceContext.get(smriKey);
-			if(sharedMinimalRevisionInfo == null) {
-				sharedMinimalRevisionInfo = new SharedMinimalRevisionInfo(modelAddress);
-				instanceContext.put(smriKey, sharedMinimalRevisionInfo);
+			sharedRevManager = (SharedRevisionManager)instanceContext.get(key);
+			if(sharedRevManager == null) {
+				sharedRevManager = new SharedRevisionManager(modelAddress);
+				instanceContext.put(key, sharedRevManager);
 			}
 		}
-		return sharedMinimalRevisionInfo;
+		return sharedRevManager;
 	}
 	
 	@GaeOperation()
 	RevisionCache2(XAddress modelAddress) {
-		SharedMinimalRevisionInfo sharedMinimalRevisionInfo = getSharedMinimalRevisionInfo(modelAddress);
-		Map<String,Object> threadContext = InstanceContext.getTheadContext();
-		synchronized(threadContext) {
-			String tleriKey = ThreadLocalExactRevisionInfo.getCacheName(modelAddress);
-			this.threadLocalExactRevisionInfo = (ThreadLocalExactRevisionInfo)threadContext
-			        .get(tleriKey);
-			if(this.threadLocalExactRevisionInfo == null) {
-				this.threadLocalExactRevisionInfo = new ThreadLocalExactRevisionInfo(modelAddress,
-				        sharedMinimalRevisionInfo);
-				threadContext.put(tleriKey, this.threadLocalExactRevisionInfo);
-			}
-		}
+		log.debug(DebugFormatter.init(REVCACHE_NAME));
+		this.modelAddress = modelAddress;
+		this.sharedRevisionManager = getSharedRevisionManagerInstance(modelAddress);
 	}
 	
 	/**
@@ -152,7 +150,8 @@ public class RevisionCache2 {
 	 */
 	@GaeOperation(memcacheRead = true)
 	protected long getCurrentRev() {
-		long l = this.threadLocalExactRevisionInfo.getCurrentRev(true);
+		assertThreadRevisionInfoIsInitialised();
+		long l = this.getThreadContext().getCurrentRev();
 		if(l == IRevisionInfo.NOT_SET) {
 			l = -1;
 		}
@@ -168,7 +167,8 @@ public class RevisionCache2 {
 	 */
 	@GaeOperation(memcacheRead = true)
 	protected long getLastCommited() {
-		long l = this.threadLocalExactRevisionInfo.getLastCommitted(true);
+		assertThreadRevisionInfoIsInitialised();
+		long l = this.sharedRevisionManager.getLastCommitted();
 		if(l == IRevisionInfo.NOT_SET) {
 			l = -1;
 		}
@@ -182,7 +182,8 @@ public class RevisionCache2 {
 	 *         taken already.
 	 */
 	protected long getLastTaken() {
-		long l = this.threadLocalExactRevisionInfo.getLastTaken(true);
+		assertThreadRevisionInfoIsInitialised();
+		long l = this.sharedRevisionManager.getLastTaken();
 		if(l == IRevisionInfo.NOT_SET) {
 			l = -1;
 		}
@@ -196,9 +197,16 @@ public class RevisionCache2 {
 	 * @param l The value is set. It is ignored if the current cached value is
 	 *            less than this.
 	 */
-	protected void setCurrentModelRev(long l) {
-		log.debug(DebugFormatter.dataPut(REVCACHE_NAME, "current", l, Timing.Now));
-		this.threadLocalExactRevisionInfo.setCurrentRev(l);
+	protected void setCurrentModelRev(long l, boolean modelExists) {
+		setCurrentModelRev(new RevisionState(l, modelExists));
+	}
+	
+	protected void setCurrentModelRev(RevisionState revisionState) {
+		assert revisionState != null;
+		assertThreadRevisionInfoIsInitialised();
+		log.debug(DebugFormatter.dataPut(REVCACHE_NAME, "revState", revisionState, Timing.Now));
+		this.getThreadContext().setRevisionStateIfRevIsHigherAndNotNull(revisionState);
+		this.sharedRevisionManager.setCurrentRevisionStateIfRevIsHigher(revisionState);
 	}
 	
 	/**
@@ -208,8 +216,9 @@ public class RevisionCache2 {
 	 *            less than this.
 	 */
 	protected void setLastCommited(long l) {
+		assertThreadRevisionInfoIsInitialised();
 		log.debug(DebugFormatter.dataPut(REVCACHE_NAME, "lastCommited", l, Timing.Now));
-		this.threadLocalExactRevisionInfo.setLastCommitted(l);
+		this.sharedRevisionManager.setLastCommittedIfHigher(l);
 	}
 	
 	/**
@@ -219,30 +228,42 @@ public class RevisionCache2 {
 	 *            less than this.
 	 */
 	protected void setLastTaken(long l) {
+		assertThreadRevisionInfoIsInitialised();
 		log.debug(DebugFormatter.dataPut(REVCACHE_NAME, "lastTaken", l, Timing.Now));
-		this.threadLocalExactRevisionInfo.setLastTaken(l);
+		this.sharedRevisionManager.setLastTakenIfHigher(l);
 	}
 	
 	protected void clear() {
-		log.debug("revCache cleared");
-		this.threadLocalExactRevisionInfo.clear();
+		log.debug(DebugFormatter.clear(REVCACHE_NAME));
+		this.getThreadContext().clear();
+		this.sharedRevisionManager.clear();
 	}
 	
-	public long getExactCurrentRev() {
-		// FIXME PERF !! renable getExactCurrentRev
-		return IRevisionInfo.NOT_SET;
-		// long l = this.threadLocalExactRevisionInfo.getCurrentRev(false);
-		// log.debug(DebugFormatter.dataGet(REVCACHE_NAME, "current", l));
-		// return l;
+	protected Boolean modelExists() {
+		return getThreadContext().modelExists();
 	}
 	
-	protected void setModelExists(boolean exists) {
-		log.debug("set model exists to " + exists);
-		this.threadLocalExactRevisionInfo.setModelExists(exists);
+	protected RevisionState getRevisionState() {
+		return getThreadContext().getRevisionState();
 	}
 	
-	public Boolean modelExists() {
-		return this.threadLocalExactRevisionInfo.modelExists();
+	private ThreadRevisionInfo getThreadContext() {
+		assertThreadRevisionInfoIsInitialised();
+		return InstanceContext.getThreadContext().get(this.modelAddress.toString());
+	}
+	
+	public void assertThreadRevisionInfoIsInitialised() {
+		ThreadRevisionInfo threadRevInfo = InstanceContext.getThreadContext().get(
+		        this.modelAddress.toString());
+		if(threadRevInfo == null) {
+			// none created for this model yet
+			/* do we know something on this JVM instance we can use? Maybe null. */
+			RevisionState revisionState = this.sharedRevisionManager.getRevisionState();
+			threadRevInfo = new ThreadRevisionInfo(this.modelAddress);
+			threadRevInfo.setRevisionStateIfRevIsHigherAndNotNull(revisionState);
+			InstanceContext.getThreadContext().put(this.modelAddress.toString(), threadRevInfo);
+		}
+		assert InstanceContext.getThreadContext().get(this.modelAddress.toString()) != null;
 	}
 	
 }

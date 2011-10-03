@@ -26,13 +26,14 @@ import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.impl.gae.DebugFormatter;
-import org.xydra.store.impl.gae.GaeUtils;
+import org.xydra.store.impl.gae.FutureUtils;
+import org.xydra.store.impl.gae.SyncDatastore;
 import org.xydra.store.impl.gae.changes.GaeChange;
+import org.xydra.store.impl.gae.changes.GaeChange.Status;
 import org.xydra.store.impl.gae.changes.GaeEvents;
 import org.xydra.store.impl.gae.changes.GaeLocks;
 import org.xydra.store.impl.gae.changes.IGaeChangesService;
 import org.xydra.store.impl.gae.changes.VoluntaryTimeoutException;
-import org.xydra.store.impl.gae.changes.GaeChange.Status;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
@@ -247,8 +248,8 @@ public class GaeExecutionServiceImpl1 implements IGaeExecutionService {
 	private Pair<List<XAtomicEvent>,int[]> checkPreconditionsAndSaveEvents(GaeChange change,
 	        XCommand command, XID actorId) {
 		
-		XReadableModel currentModel = InternalGaeModel.get(this.changes, change.rev - 1, change
-		        .getLocks());
+		XReadableModel currentModel = InternalGaeModel.get(this.changes, change.rev - 1,
+		        change.getLocks());
 		
 		Pair<ChangedModel,DeltaUtils.ModelChange> c = DeltaUtils.executeCommand(currentModel,
 		        command);
@@ -278,7 +279,7 @@ public class GaeExecutionServiceImpl1 implements IGaeExecutionService {
 			
 			// Wait on all changes.
 			for(Future<Key> future : res.getSecond()) {
-				GaeUtils.waitFor(future);
+				FutureUtils.waitFor(future);
 			}
 			
 			change.setStatus(Status.Executing);
@@ -353,14 +354,14 @@ public class GaeExecutionServiceImpl1 implements IGaeExecutionService {
 				
 			} else if(event instanceof XObjectEvent) {
 				if(event.getChangeType() == ChangeType.REMOVE) {
-					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(), change
-					        .getLocks()));
+					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(),
+					        change.getLocks()));
 					// cannot save revision in the removed field
 					objectsWithPossiblyUnsavedRev.add(event.getTarget().getObject());
 				} else {
 					assert event.getChangeType() == ChangeType.ADD;
-					futures.add(InternalGaeField.set(event.getChangedEntity(), change.rev, change
-					        .getLocks()));
+					futures.add(InternalGaeField.set(event.getChangedEntity(), change.rev,
+					        change.getLocks()));
 					// revision saved in created field
 					objectsWithSavedRev.add(event.getTarget().getObject());
 				}
@@ -369,14 +370,14 @@ public class GaeExecutionServiceImpl1 implements IGaeExecutionService {
 			} else if(event instanceof XModelEvent) {
 				XID objectId = ((XModelEvent)event).getObjectId();
 				if(event.getChangeType() == ChangeType.REMOVE) {
-					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(), change
-					        .getLocks()));
+					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(),
+					        change.getLocks()));
 					// object removed, so revision is of no interest
 					objectsWithPossiblyUnsavedRev.remove(objectId);
 				} else {
 					assert event.getChangeType() == ChangeType.ADD;
-					futures.add(InternalGaeObject.createObject(event.getChangedEntity(), change
-					        .getLocks(), change.rev));
+					futures.add(InternalGaeObject.createObject(event.getChangedEntity(),
+					        change.getLocks(), change.rev));
 					// revision saved in new object
 					objectsWithSavedRev.add(objectId);
 				}
@@ -384,12 +385,12 @@ public class GaeExecutionServiceImpl1 implements IGaeExecutionService {
 			} else {
 				assert event instanceof XRepositoryEvent;
 				if(event.getChangeType() == ChangeType.REMOVE) {
-					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(), change
-					        .getLocks()));
+					futures.add(InternalGaeXEntity.remove(event.getChangedEntity(),
+					        change.getLocks()));
 				} else {
 					assert event.getChangeType() == ChangeType.ADD;
-					futures.add(InternalGaeModel.createModel(event.getChangedEntity(), change
-					        .getLocks()));
+					futures.add(InternalGaeModel.createModel(event.getChangedEntity(),
+					        change.getLocks()));
 				}
 			}
 			
@@ -405,7 +406,7 @@ public class GaeExecutionServiceImpl1 implements IGaeExecutionService {
 		}
 		
 		for(Future<?> future : futures) {
-			GaeUtils.waitFor(future);
+			FutureUtils.waitFor(future);
 		}
 		
 		this.changes.commit(change, Status.SuccessExecuted);
@@ -443,7 +444,7 @@ public class GaeExecutionServiceImpl1 implements IGaeExecutionService {
 		
 		// Try to "grab" the change entity to prevent multiple processes from
 		// rolling forward the same entity.
-		Transaction trans = GaeUtils.beginTransaction();
+		Transaction trans = SyncDatastore.beginTransaction();
 		
 		// We need to re-load the change in the transaction so we will notice
 		// when someone else modifies it.
@@ -453,7 +454,7 @@ public class GaeExecutionServiceImpl1 implements IGaeExecutionService {
 			// Cannot roll forward, change was grabbed by another process.
 			
 			// Cleanup the transaction.
-			GaeUtils.endTransaction(trans);
+			SyncDatastore.endTransaction(trans);
 			return false;
 		}
 		
@@ -461,7 +462,7 @@ public class GaeExecutionServiceImpl1 implements IGaeExecutionService {
 		change.save(trans);
 		// Synchronized by endTransaction()
 		try {
-			GaeUtils.endTransaction(trans);
+			SyncDatastore.endTransaction(trans);
 		} catch(ConcurrentModificationException cme) {
 			// Cannot roll forward, change was grabbed by another process.
 			return false;

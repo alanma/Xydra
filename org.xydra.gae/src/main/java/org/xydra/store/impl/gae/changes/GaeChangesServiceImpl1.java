@@ -20,11 +20,11 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.gae.DebugFormatter;
+import org.xydra.store.impl.gae.DebugFormatter.Timing;
 import org.xydra.store.impl.gae.GaeOperation;
 import org.xydra.store.impl.gae.GaeUtils;
 import org.xydra.store.impl.gae.InstanceContext;
 import org.xydra.store.impl.gae.SyncDatastore;
-import org.xydra.store.impl.gae.DebugFormatter.Timing;
 import org.xydra.store.impl.gae.changes.GaeChange.Status;
 import org.xydra.store.impl.gae.changes.GaeEvents.AsyncValue;
 
@@ -116,6 +116,7 @@ public class GaeChangesServiceImpl1 implements IGaeChangesService {
 	 *         revision, the locks, the start time and the change {@link Entity}
 	 *         .
 	 */
+	@Override
 	public GaeChange grabRevisionAndRegisterLocks(GaeLocks locks, XID actorId) {
 		
 		for(long rev = this.revCache.getLastTaken() + 1;; rev++) {
@@ -189,6 +190,7 @@ public class GaeChangesServiceImpl1 implements IGaeChangesService {
 	 * 
 	 * @param status The new (and final) status.
 	 */
+	@Override
 	public void commit(GaeChange change, Status status) {
 		assert status.isCommitted();
 		assert !change.getStatus().isCommitted();
@@ -212,6 +214,7 @@ public class GaeChangesServiceImpl1 implements IGaeChangesService {
 	 * 
 	 * @param change TODO
 	 */
+	@Override
 	public void cacheCommittedChange(GaeChange change) {
 		if(USE_COMMITTED_CHANGE_CACHE) {
 			if(!change.getStatus().isCommitted()) {
@@ -342,6 +345,7 @@ public class GaeChangesServiceImpl1 implements IGaeChangesService {
 		return new AsyncChange(this, rev);
 	}
 	
+	@Override
 	public GaeChange getChange(long rev) {
 		
 		GaeChange change = getCachedChange(rev);

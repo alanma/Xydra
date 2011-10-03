@@ -7,15 +7,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.xydra.gae.AboutAppEngine;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.store.impl.gae.changes.ThreadLocalExactRevisionInfo;
+import org.xydra.store.impl.gae.changes.ThreadRevisionInfo;
 
 
 /**
  * A context object that can be passed around during a single web request.
  * Within one request, it is considered OK to retrieve fresh data only once from
  * the back-end store.
- * 
- * IMPROVE this is tooo generic maybe just explicitly put the things we use here
  * 
  * @author xamde
  */
@@ -41,20 +39,24 @@ public class InstanceContext {
 		}
 	}
 	
-	private static ThreadLocal<Map<String,Object>> threadContext;
+	/**
+	 * A map from modelAddress to {@link ThreadRevisionInfo} for each
+	 * {@link Thread}
+	 */
+	private static ThreadLocal<Map<String,ThreadRevisionInfo>> threadContext;
 	
 	/**
 	 * @return a map unique for each thread. Never null.
 	 */
-	public static Map<String,Object> getTheadContext() {
+	public static Map<String,ThreadRevisionInfo> getThreadContext() {
 		synchronized(InstanceContext.class) {
 			if(threadContext == null) {
-				threadContext = new ThreadLocal<Map<String,Object>>();
+				threadContext = new ThreadLocal<Map<String,ThreadRevisionInfo>>();
 			}
 		}
-		Map<String,Object> map = threadContext.get();
+		Map<String,ThreadRevisionInfo> map = threadContext.get();
 		if(map == null) {
-			map = new HashMap<String,Object>();
+			map = new HashMap<String,ThreadRevisionInfo>();
 			threadContext.set(map);
 		}
 		return map;
@@ -68,12 +70,10 @@ public class InstanceContext {
 			// done, cannot contain content
 		} else {
 			log.info("Clear ThreadLocal context of " + AboutAppEngine.getThreadInfo());
-			Map<String,Object> tc = getTheadContext();
+			Map<String,ThreadRevisionInfo> tc = getThreadContext();
 			for(String key : tc.keySet()) {
-				Object o = tc.get(key);
-				if(o instanceof ThreadLocalExactRevisionInfo) {
-					((ThreadLocalExactRevisionInfo)o).clear();
-				}
+				ThreadRevisionInfo threadRevInfo = tc.get(key);
+				threadRevInfo.clear();
 			}
 			threadContext.set(null);
 		}

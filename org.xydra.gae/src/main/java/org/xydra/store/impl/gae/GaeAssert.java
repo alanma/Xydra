@@ -61,7 +61,7 @@ public class GaeAssert {
 	 *             false
 	 */
 	public static void gaeAssert(boolean condition) {
-		gaeAssert(condition, null);
+		gaeAssert(condition, "no message");
 	}
 	
 }

@@ -1,5 +1,17 @@
 package org.xydra.store.impl.gae.changes;
 
+import org.xydra.store.RevisionState;
+
+
+/**
+ * The invariant currentRev >= lastCommitted >= lastTaken is maintained at all
+ * times.
+ * 
+ * A defined currentRev requires a defined value for modelExists.
+ * 
+ * @author xamde
+ * 
+ */
 public interface IRevisionInfo {
 	
 	/**
@@ -8,37 +20,57 @@ public interface IRevisionInfo {
 	public static final long NOT_SET = -2L;
 	
 	/**
-	 * @param mayAsk true if method may ask a backing store for more info. False
-	 *            to use only local data.
-	 * @return lastCommited if defined {@link #NOT_SET} otherwise.
+	 * @return lastCommited if defined, {@link #NOT_SET} otherwise.
 	 */
-	long getLastCommitted(boolean mayAsk);
+	long getLastCommitted();
 	
 	/**
-	 * @param mayAsk true if method may ask a backing store for more info. False
-	 *            to use only local data.
-	 * @return lastTaken if defined {@link #NOT_SET} otherwise.
+	 * @return lastTaken if defined, {@link #NOT_SET} otherwise.
 	 */
-	long getLastTaken(boolean mayAsk);
+	long getLastTaken();
 	
 	/**
-	 * @param mayAsk true if method may ask a backing store for more info. False
-	 *            to use only local data.
-	 * @return currentReb if defined {@link #NOT_SET} otherwise.
+	 * @return currentReb if defined, {@link #NOT_SET} otherwise.
 	 */
-	long getCurrentRev(boolean mayAsk);
+	long getCurrentRev();
 	
-	void setLastCommitted(long lastCommitted);
+	/**
+	 * @return a {@link RevisionState} if known, null otherwise.
+	 */
+	public RevisionState getRevisionState();
 	
-	void setLastTaken(long lastTaken);
+	/**
+	 * Set the given value as the new internal value only if it is higher than
+	 * the current internal value.
+	 * 
+	 * @param lastCommitted
+	 */
+	void setLastCommittedIfHigher(long lastCommitted);
 	
-	void setCurrentRev(long currentRev);
+	/**
+	 * Set the given value as the new internal value only if it is higher than
+	 * the current internal value.
+	 * 
+	 * @param lastTaken
+	 */
+	void setLastTakenIfHigher(long lastTaken);
 	
-	void setModelExists(boolean exists);
+	/**
+	 * Set the given value as the new internal value only if it is higher than
+	 * the current internal value.
+	 * 
+	 * @param revisionState Can not be null.
+	 */
+	void setCurrentRevisionStateIfRevIsHigher(RevisionState revisionState);
 	
 	/**
 	 * @return true if model exists; false if not; null if not known.
 	 */
 	Boolean modelExists();
+	
+	/**
+	 * Reset to initial values that denote zero knowledge.
+	 */
+	void clear();
 	
 }

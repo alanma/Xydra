@@ -178,7 +178,7 @@ public class GaeLowLevelMemCache implements IMemCache {
 	@Override
 	@GaeOperation(memcacheWrite = true)
 	public void clear() {
-		log.debug(DebugFormatter.init(MEMCACHE_NAME));
+		log.debug(DebugFormatter.clear(MEMCACHE_NAME));
 		this.memcacheService.clearAll();
 	}
 	

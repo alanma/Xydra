@@ -20,6 +20,8 @@ public class TestSetup {
 	@Test
 	public void testSetup() throws Exception {
 		GaeTestfixer.enable();
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		XydraRuntime.init();
 		
 		XID repoId = XX.toId("repo1");
 		
@@ -41,11 +43,14 @@ public class TestSetup {
 		
 		XID actorId = XX.toId("actor1");
 		this.store.executeCommands(actorId, "bla", commands, new CB<BatchedResult<Long>[]>());
+		XydraRuntime.finishRequest();
 	}
 	
 	@Test
 	public void testSetupPersistence() throws Exception {
 		GaeTestfixer.enable();
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		XydraRuntime.init();
 		
 		XID repoId = XX.toId("repo1");
 		
@@ -64,11 +69,15 @@ public class TestSetup {
 		XID actorId = XX.toId("actor1");
 		pers.executeCommand(actorId, modelCommand1);
 		pers.executeCommand(actorId, objectCommand1);
+		XydraRuntime.finishRequest();
 	}
 	
 	@Test
 	public void testSetupPersistenceModelCommand() throws Exception {
 		GaeTestfixer.enable();
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		XydraRuntime.init();
+		
 		XID repoId = XX.toId("repo1");
 		XID actorId = XX.toId("actor1");
 		XID modelId1 = XX.toId("TestModel1");
@@ -83,6 +92,7 @@ public class TestSetup {
 		XCommand objectCommand1 = X.getCommandFactory().createAddObjectCommand(repoId, modelId1,
 		        objectId1, true);
 		pers.executeCommand(actorId, objectCommand1);
+		XydraRuntime.finishRequest();
 	}
 	
 	static class CB<T> implements Callback<T> {
