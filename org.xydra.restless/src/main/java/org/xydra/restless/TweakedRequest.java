@@ -3,7 +3,16 @@ package org.xydra.restless;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
+import org.xydra.restless.utils.HostUtils;
 
+
+/**
+ * A tweaked request that returns the server name with support for
+ * Restless.X_HOST_Override. For security reasons, this is only effective on
+ * localhost, where it simplified testing..
+ * 
+ * @author xamde
+ */
 class TweakedRequest extends HttpServletRequestWrapper {
 	
 	private boolean initalised = false;
@@ -72,9 +81,14 @@ class TweakedRequest extends HttpServletRequestWrapper {
 		
 	}
 	
+	/**
+	 * @param serverName
+	 * @return true if the servername denotes localhost be means of 'localhost',
+	 *         '127.0.0.1' or COMPUTERNAME
+	 */
 	static boolean isLocalhost(String serverName) {
-		// TODO add case where localhost is accessed as http://computername:1234
-		return serverName.equals("localhost") || serverName.equals("127.0.0.1");
+		return serverName.equals("localhost") || serverName.equals("127.0.0.1")
+		        || serverName.equals(HostUtils.getLocalHostname());
 	}
 	
 }
