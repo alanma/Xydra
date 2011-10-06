@@ -103,9 +103,9 @@ public abstract class AbstractRestClientReadMethodsTest extends AbstractStoreRea
 	
 	@Override
 	@Before
-	public void setUp() {
+	public void before() {
 		this.clientStore = new XydraStoreRestClient(storeapi, this.serializer, this.parser);
-		super.setUp();
+		super.before();
 	}
 	
 	@After
