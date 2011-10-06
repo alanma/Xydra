@@ -24,12 +24,14 @@ public class GaeLoggerFactorySPI implements ILoggerFactorySPI {
 	 * Create and register appropriate factory.
 	 */
 	public GaeLoggerFactorySPI() {
-		if(inProduction()) {
-			factory = new JulLoggerFactory();
-		} else {
-			factory = new Log4jLoggerFactory();
+		if(factory == null) {
+			if(inProduction()) {
+				factory = new JulLoggerFactory();
+			} else {
+				factory = new Log4jLoggerFactory();
+			}
+			LoggerFactory.setLoggerFactorySPI(factory);
 		}
-		LoggerFactory.setLoggerFactorySPI(factory);
 	}
 	
 	@Override
