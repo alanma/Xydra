@@ -109,7 +109,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 	@GaeOperation()
 	public GaeChangesServiceImpl2(XAddress modelAddr) {
 		this.modelAddr = modelAddr;
-		this.revCache = new RevisionCache2(modelAddr);
+		this.revCache = new RevisionCache2(modelAddr, this);
 	}
 	
 	/*
@@ -367,13 +367,13 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 			currentRev = updateCurrentRev(null);
 			this.revCache.setCurrentModelRev(currentRev);
 		} else {
-			log.debug("currentRev is locally exact defined");
+			log.debug("currentRev is locally defined and will not change during this request");
 		}
 		log.debug("getCurrentRevisionNumber = " + currentRev);
 		return currentRev.revision();
 	}
 	
-	private RevisionState updateCurrentRev(RevisionState lastCurrentRev) {
+	RevisionState updateCurrentRev(RevisionState lastCurrentRev) {
 		Pair<RevisionState,Boolean> current = new Pair<RevisionState,Boolean>(
 		        lastCurrentRev == null ? RevisionState.MODEL_DOES_NOT_EXIST_YET : lastCurrentRev,
 		        false);
@@ -777,6 +777,15 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		log.info("Cleared. Make to sure to also clear memcache.");
 		this.getCommittedChangeCache().clear();
 		this.revCache.clear();
+	}
+	
+	protected void initialiseThreadLocalRevisionState() {
+		// use current instance info
+		RevisionState currentRev = this.revCache.getRevisionState();
+		// update via GAE state (memcache&datastore)
+		currentRev = updateCurrentRev(currentRev);
+		// store in instance info and this thread
+		this.revCache.setCurrentModelRev(currentRev);
 	}
 	
 	@Override

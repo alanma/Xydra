@@ -118,6 +118,8 @@ public class RevisionCache2 {
 	
 	private XAddress modelAddress;
 	
+	private GaeChangesServiceImpl2 changesService;
+	
 	public static SharedRevisionManager getSharedRevisionManagerInstance(XAddress modelAddress) {
 		String key = SharedRevisionManager.getCacheName(modelAddress);
 		Map<String,Object> instanceContext = InstanceContext.getInstanceCache();
@@ -133,10 +135,11 @@ public class RevisionCache2 {
 	}
 	
 	@GaeOperation()
-	RevisionCache2(XAddress modelAddress) {
+	RevisionCache2(XAddress modelAddress, GaeChangesServiceImpl2 changesService) {
 		log.debug(DebugFormatter.init(REVCACHE_NAME));
 		this.modelAddress = modelAddress;
 		this.sharedRevisionManager = getSharedRevisionManagerInstance(modelAddress);
+		this.changesService = changesService;
 	}
 	
 	/**
@@ -256,12 +259,20 @@ public class RevisionCache2 {
 		ThreadRevisionInfo threadRevInfo = InstanceContext.getThreadContext().get(
 		        this.modelAddress.toString());
 		if(threadRevInfo == null) {
-			// none created for this model yet
 			/* do we know something on this JVM instance we can use? Maybe null. */
-			RevisionState revisionState = this.sharedRevisionManager.getRevisionState();
+			RevisionState currentRev = this.sharedRevisionManager.getRevisionState();
+			
+			// none created for this model yet, initialise empty
 			threadRevInfo = new ThreadRevisionInfo(this.modelAddress);
-			threadRevInfo.setRevisionStateIfRevIsHigherAndNotNull(revisionState);
+			threadRevInfo.setRevisionStateIfRevIsHigherAndNotNull(currentRev);
 			InstanceContext.getThreadContext().put(this.modelAddress.toString(), threadRevInfo);
+			
+			// IMPORTANT: update via GAE state (memcache&datastore)
+			currentRev = this.changesService.updateCurrentRev(currentRev);
+			threadRevInfo.setRevisionStateIfRevIsHigherAndNotNull(currentRev);
+			// store in instance info
+			this.sharedRevisionManager.setCurrentRevisionStateIfRevIsHigher(currentRev);
+			// use in this thread
 		}
 		assert InstanceContext.getThreadContext().get(this.modelAddress.toString()) != null;
 	}
