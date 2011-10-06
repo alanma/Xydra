@@ -22,6 +22,7 @@ import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XModel;
+import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.RevisionState;
@@ -373,35 +374,46 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 	}
 	
 	private RevisionState updateCurrentRev(RevisionState lastCurrentRev) {
-		RevisionState startingRev = lastCurrentRev == null ? RevisionState.MODEL_DOES_NOT_EXIST_YET
-		        : lastCurrentRev;
-		log.debug("Updating rev from lastCurrentRev=" + startingRev + " ...");
+		Pair<RevisionState,Boolean> current = new Pair<RevisionState,Boolean>(
+		        lastCurrentRev == null ? RevisionState.MODEL_DOES_NOT_EXIST_YET : lastCurrentRev,
+		        false);
+		log.debug("Updating rev from lastCurrentRev=" + current.getFirst() + " ...");
 		int windowSize = 1;
-		long start = startingRev.revision() + 1;
-		long end;
-		RevisionState rev = null;
-		while(rev == null) {
+		while(current.getSecond() == false) {
 			log.debug("windowsize = " + windowSize);
-			end = start + windowSize - 1;
-			rev = updateCurrentRev_Step(startingRev, end);
+			current = updateCurrentRev_Step(current.getFirst(), windowSize);
 			// adjust probe window
 			windowSize = windowSize * 2;
 			// avoid too big windows
 			if(windowSize > MAX_BATCH_FETCH_SIZE) {
 				windowSize = MAX_BATCH_FETCH_SIZE;
 			}
-			// move window
-			start = end + 1;
 		}
-		assert rev != null : "found no rev nr";
-		this.revCache.setCurrentModelRev(rev);
-		log.debug("Updated rev from [" + startingRev + " ==> " + rev);
-		return rev;
+		assert current.getSecond() == true;
+		assert current.getFirst() != null : "found no rev nr";
+		this.revCache.setCurrentModelRev(current.getFirst());
+		log.debug("Updated rev from [" + lastCurrentRev + " ==> " + current.getFirst());
+		return current.getFirst();
 	}
 	
-	private RevisionState updateCurrentRev_Step(RevisionState startingRevExclusive,
-	        long endRevInclusive) {
+	/**
+	 * Uses batch fetches in memcache and datastore to load missing changes.
+	 * 
+	 * @param startingRevExclusive the last known revision state of the model.
+	 *            Combines a revision number and a modelExists date. After this
+	 *            revision step it might turn out, that this revision is in fact
+	 *            the current revision.
+	 * @param endRevInclusive the highest revision number (inclusive) to check
+	 *            for in this revision update step
+	 * @return a Pair. First: A RevisionState with the current model revision
+	 *         within the checked window. The second part of the pair is true,
+	 *         if this revisionState is the current revision of the model, false
+	 *         otherwise.
+	 */
+	private Pair<RevisionState,Boolean> updateCurrentRev_Step(RevisionState startingRevExclusive,
+	        long windowSize) {
 		long beginRevInclusive = startingRevExclusive.revision() + 1;
+		long endRevInclusive = beginRevInclusive + windowSize - 1;
 		log.debug("Update rev step [" + beginRevInclusive + "," + endRevInclusive + "]");
 		if(endRevInclusive >= MAX_REVISION_NR) {
 			log.warn("Checking for very high revision number: " + endRevInclusive);
@@ -413,20 +425,19 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		 */
 		/* === Phase 1: Determine revisions not yet locally cached === */
 		Set<Long> locallyMissingRevs = computeLocallyMissingRevs(beginRevInclusive, endRevInclusive);
-		log.debug("missingRevs: " + locallyMissingRevs.size());
+		log.debug("locallyMissingRevs: " + locallyMissingRevs.size() + " of "
+		        + (endRevInclusive - beginRevInclusive + 1));
 		
 		/* === Phase 2+3: Ask Memcache + Datastore === */
 		fetchMissingRevisionsFromMemcacheAndDatastore(locallyMissingRevs);
 		log.debug("number of missingRevs after asking DS&MC: " + locallyMissingRevs.size());
 		
 		/* === Phase 4: Compute result from local cache === */
-		/* compute model exists from event before asking range */
 		boolean foundEnd = false;
-		long currentRev = beginRevInclusive - 1;
-		RevisionState revState = startingRevExclusive;
+		RevisionState currentRev = startingRevExclusive;
 		for(long i = beginRevInclusive; i <= endRevInclusive; i++) {
 			GaeChange change = getCachedChange(i);
-			log.debug("cached change " + i + ": " + change);
+			log.debug("cached change " + i + ": " + DebugFormatter.format(change));
 			
 			// TODO careful: too much caching?
 			if(change == null) {
@@ -434,29 +445,16 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 				break;
 			} else {
 				if(change.getStatus() == Status.SuccessExecuted) {
-					currentRev = i;
 					XEvent event = change.getEvent();
-					assert event != null;
-					if(event instanceof XTransactionEvent) {
-						// check only last event
-						XTransactionEvent txn = (XTransactionEvent)event;
-						assert txn.size() >= 1;
-						event = txn.getEvent(txn.size() - 1);
-						assert event != null;
-					}
-					if(event.getTarget().getAddressedType() == XType.XREPOSITORY
-					        && event.getChangeType() == ChangeType.REMOVE) {
-						revState = new RevisionState(currentRev, false);
-					} else {
-						revState = new RevisionState(currentRev, true);
-					}
+					boolean modelExist = eventIndicatesModelExists(event);
+					currentRev = new RevisionState(i, modelExist);
 				}
 			}
 		}
 		
 		if(foundEnd) {
-			log.debug("Step: return currentRev = " + revState);
-			return revState;
+			log.debug("Step: return currentRev = " + currentRev);
+			return new Pair<RevisionState,Boolean>(currentRev, true);
 		}
 		// else
 		assert locallyMissingRevs.size() == 0;
@@ -467,7 +465,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		 * All revisions we looked at have been processed. Need to repeat the
 		 * process by looking at more revisions.
 		 */
-		return null;
+		return new Pair<RevisionState,Boolean>(currentRev, false);
 	}
 	
 	/**
@@ -675,7 +673,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 					XEvent event = change.getEvent();
 					assert event != null : change;
 					events.add(event);
-					newRev = new RevisionState(i, lastEventIndicatesModelExists(event));
+					newRev = new RevisionState(i, eventIndicatesModelExists(event));
 				} else {
 					assert change.getStatus() != Status.Creating;
 					assert change.getStatus() != Status.Executing;
@@ -797,7 +795,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 				List<XEvent> events = getEventsBetween(rev, rev);
 				GaeAssert.gaeAssert(events.size() == 1);
 				XEvent e = events.get(0);
-				boolean modelExists = lastEventIndicatesModelExists(e);
+				boolean modelExists = eventIndicatesModelExists(e);
 				this.revCache.setCurrentModelRev(rev, modelExists);
 				return modelExists;
 			}
@@ -810,11 +808,14 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		}
 	}
 	
-	private boolean lastEventIndicatesModelExists(XEvent e) {
+	private boolean eventIndicatesModelExists(XEvent e) {
 		XEvent event = e;
 		if(e.getChangeType() == ChangeType.TRANSACTION) {
-			XTransactionEvent te = (XTransactionEvent)e;
-			event = te.getEvent(0);
+			// check only last event
+			XTransactionEvent txnEvent = (XTransactionEvent)e;
+			assert txnEvent.size() >= 1;
+			event = txnEvent.getEvent(txnEvent.size() - 1);
+			assert event != null;
 		}
 		GaeAssert.gaeAssert(event.getChangeType() != ChangeType.TRANSACTION);
 		if(event.getTarget().getAddressedType() == XType.XREPOSITORY) {
