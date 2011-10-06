@@ -176,11 +176,16 @@ public class Restless extends HttpServlet {
 	
 	private String loggerFactory;
 	
+	/**
+	 * Simulates the servlet context when run outside a servlet container
+	 */
 	private HashMap<String,Object> localContext;
 	
 	/**
 	 * If true, unhandled requests (for which no mapping is found) are delegated
 	 * to the 'default' servlet of the container.
+	 * 
+	 * Default is false.
 	 */
 	public static boolean DELEGATE_UNHANDLED_TO_DEFAULT = false;
 	

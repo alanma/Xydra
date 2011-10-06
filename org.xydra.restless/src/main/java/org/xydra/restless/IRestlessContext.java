@@ -4,6 +4,20 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 
+/**
+ * Provides convenient access to all meta-data available in Restless.
+ * 
+ * To reduce the number of injected parameters, this context also allows access
+ * to {@link HttpServletRequest} and {@link HttpServletResponse}, although those
+ * can be injected individually, too.
+ * 
+ * In addition, this class provides a unique request identifier
+ * {@link #getRequestIdentifier()}, a reference to Restless itself
+ * {@link #getRestless()}.
+ * 
+ * @author xamde
+ * 
+ */
 public interface IRestlessContext {
 	
 	/**

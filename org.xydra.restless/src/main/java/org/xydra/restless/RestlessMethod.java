@@ -132,22 +132,22 @@ public class RestlessMethod {
 					IRestlessContext restlessContext = new IRestlessContext() {
 						
 						@Override
-                        public Restless getRestless() {
+						public Restless getRestless() {
 							return restless;
 						}
 						
 						@Override
-                        public HttpServletResponse getResponse() {
+						public HttpServletResponse getResponse() {
 							return res;
 						}
 						
 						@Override
-                        public HttpServletRequest getRequest() {
+						public HttpServletRequest getRequest() {
 							return req;
 						}
 						
 						@Override
-                        public String getRequestIdentifier() {
+						public String getRequestIdentifier() {
 							return uniqueRequestId;
 						}
 					};
@@ -276,22 +276,22 @@ public class RestlessMethod {
 					IRestlessContext context = new IRestlessContext() {
 						
 						@Override
-                        public Restless getRestless() {
+						public Restless getRestless() {
 							return restless;
 						}
 						
 						@Override
-                        public HttpServletResponse getResponse() {
+						public HttpServletResponse getResponse() {
 							return res;
 						}
 						
 						@Override
-                        public HttpServletRequest getRequest() {
+						public HttpServletRequest getRequest() {
 							return req;
 						}
 						
 						@Override
-                        public String getRequestIdentifier() {
+						public String getRequestIdentifier() {
 							return uniqueRequestId;
 						}
 						
@@ -474,6 +474,12 @@ public class RestlessMethod {
 	}
 	
 	/**
+	 * Creates an identifier unique for the current request to assist
+	 * correlating web server responses with corresponding log files. To further
+	 * assist the common case of POST-redirect-GET, where the second get might
+	 * end up on a completely different machine, the request identifier can also
+	 * be set via a cookie or query parameter.
+	 * 
 	 * Note: POST-parameters are ignored.
 	 * 
 	 * @param urlParameter
