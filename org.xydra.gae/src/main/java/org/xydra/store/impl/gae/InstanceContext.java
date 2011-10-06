@@ -67,6 +67,7 @@ public class InstanceContext {
 	 */
 	public static synchronized void clearThreadContext() {
 		if(threadContext == null) {
+			log.info("ThreadLocal context is null, no clear necessary");
 			// done, cannot contain content
 		} else {
 			log.info("Clear ThreadLocal context of " + AboutAppEngine.getThreadInfo());

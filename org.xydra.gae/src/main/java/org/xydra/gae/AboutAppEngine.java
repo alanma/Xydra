@@ -1,5 +1,7 @@
 package org.xydra.gae;
 
+import org.xydra.store.XydraRuntime;
+
 import com.google.appengine.api.utils.SystemProperty;
 
 
@@ -54,7 +56,8 @@ public class AboutAppEngine {
 	
 	@SuppressWarnings("deprecation")
 	public static String getInstanceId() {
-		return SystemProperty.instanceReplicaId.get();
+		return "GAE:" + SystemProperty.instanceReplicaId.get() + ";Xydra:"
+		        + XydraRuntime.getInstanceId();
 	}
 	
 	public static String getThreadInfo() {

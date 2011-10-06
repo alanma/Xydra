@@ -135,6 +135,7 @@ public class GaePlatformRuntime implements XydraPlatformRuntime {
 		log.info("Request finished.");
 		InstanceContext.clearThreadContext();
 	}
+	
 	// public static interface XRequestListener {
 	// void onRequestFinish();
 	// }
@@ -153,4 +154,10 @@ public class GaePlatformRuntime implements XydraPlatformRuntime {
 	// requestlisteners.remove(listener);
 	// }
 	// }
+	
+	@Override
+	public void startRequest() {
+		log.info("Request started.");
+		InstanceContext.clearThreadContext();
+	}
 }
