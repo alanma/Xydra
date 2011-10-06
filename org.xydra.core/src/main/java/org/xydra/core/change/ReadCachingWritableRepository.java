@@ -12,6 +12,7 @@ import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.index.IndexUtils;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.impl.delegate.XydraPersistence;
 
 
 /**
@@ -27,6 +28,9 @@ public class ReadCachingWritableRepository extends AbstractDelegatingWritableRep
 	
 	private boolean knowsAllModelsIds = false;
 	
+	/** Only used for fast prefetching */
+	private XydraPersistence persistence;
+	
 	/**
 	 * @param baseRepository ..
 	 * @param prefetchModels if true, all new models are pre-fetched at first
@@ -35,6 +39,19 @@ public class ReadCachingWritableRepository extends AbstractDelegatingWritableRep
 	public ReadCachingWritableRepository(XWritableRepository baseRepository, boolean prefetchModels) {
 		super(baseRepository);
 		this.prefetchModels = prefetchModels;
+	}
+	
+	/**
+	 * Loads state much faster directly from snapshots.
+	 * 
+	 * @param baseRepository ..
+	 * @param persistence where to load snapshots from
+	 */
+	public ReadCachingWritableRepository(XWritableRepository baseRepository,
+	        XydraPersistence persistence) {
+		super(baseRepository);
+		this.prefetchModels = true;
+		this.persistence = persistence;
 	}
 	
 	protected Set<XID> knownExistingModelIds = new HashSet<XID>();
@@ -49,7 +66,10 @@ public class ReadCachingWritableRepository extends AbstractDelegatingWritableRep
 		if(readCachingModel == null) {
 			// we never read it => created it & cache it
 			XWritableModel baseModel = this.baseRepository.createModel(modelId);
-			readCachingModel = new ReadCachingWritableModel(baseModel, this.prefetchModels);
+			readCachingModel = this.persistence == null ? new ReadCachingWritableModel(baseModel,
+			        this.prefetchModels) :
+			// load much faster
+			        new ReadCachingWritableModel(baseModel, this.persistence);
 			this.map.put(modelId, readCachingModel);
 			this.knownExistingModelIds.add(modelId);
 			this.knownNonExistingModelIds.remove(modelId);
@@ -99,8 +119,15 @@ public class ReadCachingWritableRepository extends AbstractDelegatingWritableRep
 			model = this.baseRepository.getModel(modelId);
 			if(model != null) {
 				log.info("Model '" + modelId + "' not found in cache, but in base.");
-				ReadCachingWritableModel cacheModel = new ReadCachingWritableModel(model,
-				        this.prefetchModels);
+				
+				ReadCachingWritableModel cacheModel;
+				if(this.prefetchModels && this.persistence != null) {
+					// take the fast route
+					cacheModel = new ReadCachingWritableModel(model, this.persistence);
+				} else {
+					// normal, slow
+					cacheModel = new ReadCachingWritableModel(model, this.prefetchModels);
+				}
 				this.map.put(modelId, cacheModel);
 				return cacheModel;
 			} else {

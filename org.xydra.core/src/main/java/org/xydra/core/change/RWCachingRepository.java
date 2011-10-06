@@ -13,6 +13,8 @@ import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.XydraRuntime;
+import org.xydra.store.impl.delegate.XydraPersistence;
+import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
 
 
 /**
@@ -25,7 +27,7 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 	
 	private static final Logger log = LoggerFactory.getLogger(RWCachingRepository.class);
 	
-	private ReadCachingWritableRepository readRepo;
+	private ReadCachingWritableRepository2 readRepo;
 	private DiffWritableRepository diffRepo;
 	
 	@Override
@@ -59,8 +61,17 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 	}
 	
 	public RWCachingRepository(XWritableRepository baseRepository, boolean prefetchModels) {
+		super(null);
+		throw new IllegalAccessError();
+		// super(baseRepository);
+		// this.readRepo = new ReadCachingWritableRepository(baseRepository,
+		// prefetchModels);
+		// this.diffRepo = new DiffWritableRepository(this.readRepo);
+	}
+	
+	public RWCachingRepository(XWritableRepository baseRepository, XydraPersistence persistence) {
 		super(baseRepository);
-		this.readRepo = new ReadCachingWritableRepository(baseRepository, prefetchModels);
+		this.readRepo = new ReadCachingWritableRepository2(persistence);
 		this.diffRepo = new DiffWritableRepository(this.readRepo);
 	}
 	
@@ -78,7 +89,7 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 		return this.diffRepo;
 	}
 	
-	public ReadCachingWritableRepository getReadCachingWritableRepository() {
+	public ReadCachingWritableRepository2 getReadCachingWritableRepository() {
 		return this.readRepo;
 	}
 	
@@ -93,8 +104,10 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 	public static int commit(RWCachingRepository rwcRepo, XID actorId) {
 		XID repositoryId = rwcRepo.getID();
 		DiffWritableRepository wcRepo = rwcRepo.getDiffWritableRepository();
-		ReadCachingWritableRepository rcRepo = rwcRepo.getReadCachingWritableRepository();
-		XWritableRepository baseRepo = rcRepo.getBaseRepository();
+		
+		XydraPersistence persistence = XydraRuntime.getPersistence(repositoryId);
+		WritableRepositoryOnPersistence baseRepo = new WritableRepositoryOnPersistence(persistence,
+		        actorId);
 		
 		int result = 200;
 		for(XID id : wcRepo.getRemoved()) {

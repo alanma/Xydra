@@ -21,6 +21,7 @@ import org.xydra.index.query.Pair;
 import org.xydra.index.query.Wildcard;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.impl.delegate.XydraPersistence;
 
 
 /**
@@ -40,8 +41,12 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	
 	private static final Logger log = LoggerFactory.getLogger(ReadCachingWritableModel.class);
 	
-	private static final XID NONE = XX.toId("_NoIdReadCache");
+	private static final XID NOFIELD = XX.toId("_NoFieldReadCache");
 	
+	/**
+	 * Denote an object which has no known fields or a field of which the value
+	 * is not known.
+	 */
 	private static final XValue NOVALUE = XV.toValue("_NoValueReadCache");
 	
 	/**
@@ -82,9 +87,9 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 			this.retrieveAllObjectsIdsFromBaseAndCache();
 			Set<XID> ids = this.idsAsSet();
 			for(XID objectId : ids) {
-				this.retrieveAllFieldIdsOfObjectFromBaseAndCache(objectId);
+				this.retrieveAllFieldIdsOfObjectFromSourceAndCache(this.base, objectId);
 				for(XID fieldId : this.object_idsAsSet(objectId)) {
-					this.retrieveValueFromBaseAndCache(objectId, fieldId);
+					this.retrieveValueFromSourceAndCache(this.base, objectId, fieldId);
 				}
 			}
 			long stop = System.nanoTime();
@@ -93,10 +98,44 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 		}
 	}
 	
+	/**
+	 * Pre-fetches all model content at constructor call time from given
+	 * persistence via snapshots.
+	 * 
+	 * @param base any {@link XWritableModel}, should not be itself a
+	 *            {@link ReadCachingWritableModel}
+	 * @param persistence for loading snapsnots
+	 */
+	public ReadCachingWritableModel(final XWritableModel base, XydraPersistence persistence) {
+		assert base != null;
+		assert !(base instanceof ReadCachingWritableModel);
+		this.base = base;
+		this.cache = new MapMapIndex<XID,XID,XValue>();
+		// prefetching
+		long start = System.nanoTime();
+		
+		XWritableModel snapshot = persistence.getModelSnapshot(getAddress());
+		for(XID objectId : snapshot) {
+			this.cache.index(objectId, NOFIELD, NOVALUE);
+			this.retrieveAllFieldIdsOfObjectFromSourceAndCache(snapshot, objectId);
+			for(XID fieldId : this.object_idsAsSet(objectId)) {
+				this.retrieveValueFromSourceAndCache(snapshot, objectId, fieldId);
+			}
+		}
+		this.knowsAllObjectIds = true;
+		
+		long stop = System.nanoTime();
+		Set<XID> ids = this.idsAsSet();
+		log.info("Prefetching " + ids.size() + " objects in model '" + base.getID() + "' took "
+		        + ((stop - start) / 1000000) + "ms");
+	}
+	
 	@Override
 	public XWritableObject createObject(XID objectId) {
 		assert objectId != null;
-		this.cache.index(objectId, NONE, NOVALUE);
+		if(!hasObject(objectId)) {
+			this.cache.index(objectId, NOFIELD, NOVALUE);
+		}
 		return new WrappedObject(objectId);
 	}
 	
@@ -107,29 +146,43 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 		assert getObject(objectId).hasField(fieldId);
 		
 		Pair<XID,XID> p = new Pair<XID,XID>(objectId, fieldId);
+		XValue result;
 		if(this.fieldsOfWhichTheValueIsKnown.contains(p)) {
-			return this.cache.lookup(objectId, fieldId);
+			result = this.cache.lookup(objectId, fieldId);
 		} else {
-			return retrieveValueFromBaseAndCache(objectId, fieldId);
+			result = retrieveValueFromSourceAndCache(this.base, objectId, fieldId);
 		}
+		if(result != null && result.equals(NOVALUE)) {
+			return null;
+		}
+		
+		return result;
 	}
 	
-	private XValue retrieveValueFromBaseAndCache(XID objectId, XID fieldId) {
-		assert this.base != null;
+	private XValue retrieveValueFromSourceAndCache(XWritableModel sourceModel, XID objectId,
+	        XID fieldId) {
+		assert sourceModel != null;
 		/* base might never have seen object or field */
-		XWritableObject object = this.base.getObject(objectId);
-		if(object == null) {
+		XWritableObject sourceObject = sourceModel.getObject(objectId);
+		if(sourceObject == null) {
 			return null;
 		}
-		XWritableField field = object.getField(fieldId);
-		if(field == null) {
+		XWritableField sourceField = sourceObject.getField(fieldId);
+		if(sourceField == null) {
 			return null;
 		}
-		XValue result = field.getValue();
+		XValue sourceValue = sourceField.getValue();
+		assert sourceValue == null || !sourceValue.equals(NOVALUE);
+		assert sourceObject.getID().equals(objectId);
+		assert sourceField.getID().equals(fieldId);
 		// index also if null
-		this.cache.index(objectId, fieldId, result);
+		this.cache.index(objectId, fieldId, sourceValue);
 		this.fieldsOfWhichTheValueIsKnown.add(new Pair<XID,XID>(objectId, fieldId));
-		return result;
+		
+		assert field_getValue(objectId, fieldId) == null
+		        || !field_getValue(objectId, fieldId).equals(NOVALUE);
+		
+		return sourceValue;
 	}
 	
 	@Override
@@ -190,7 +243,7 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 			// else:
 			boolean b = this.base.hasObject(objectId);
 			// index
-			this.cache.index(objectId, NONE, NOVALUE);
+			this.cache.index(objectId, NOFIELD, NOVALUE);
 			return b;
 		}
 	}
@@ -206,14 +259,14 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	private Set<XID> retrieveAllObjectsIdsFromBaseAndCache() {
 		Set<XID> set = IndexUtils.toSet(this.base.iterator());
 		for(XID objectId : set) {
-			this.cache.index(objectId, NONE, NOVALUE);
+			this.cache.index(objectId, NOFIELD, NOVALUE);
 		}
 		this.knowsAllObjectIds = true;
 		return set;
 	}
 	
 	@Override
-    public boolean isEmpty() {
+	public boolean isEmpty() {
 		return this.idsAsSet().isEmpty();
 	}
 	
@@ -291,23 +344,24 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 			}
 			return set;
 		} else {
-			return retrieveAllFieldIdsOfObjectFromBaseAndCache(objectId);
+			return retrieveAllFieldIdsOfObjectFromSourceAndCache(this.base, objectId);
 		}
 	}
 	
-	private Set<XID> retrieveAllFieldIdsOfObjectFromBaseAndCache(XID objectId) {
+	private Set<XID> retrieveAllFieldIdsOfObjectFromSourceAndCache(XWritableModel sourceModel,
+	        XID objectId) {
 		Set<XID> set;
-		XWritableObject o = this.base.getObject(objectId);
-		if(o == null) {
+		XWritableObject sourceObject = sourceModel.getObject(objectId);
+		if(sourceObject == null) {
 			set = Collections.emptySet();
+		} else {
+			set = IndexUtils.toSet(sourceObject.iterator());
 			// index
 			for(XID fieldId : set) {
 				this.cache.index(objectId, fieldId, NOVALUE);
 			}
-			this.objectIdsOfWhichAllFieldIdsAreKnown.add(objectId);
-		} else {
-			set = IndexUtils.toSet(o.iterator());
 		}
+		this.objectIdsOfWhichAllFieldIdsAreKnown.add(objectId);
 		return set;
 	}
 	
