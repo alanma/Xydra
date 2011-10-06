@@ -116,6 +116,30 @@ public class RestlessMethod {
 			boolean hasHttpServletResponseParameter = false;
 			final String uniqueRequestId = reuseOrCeateUniqueRequestIdentifier(urlParameter,
 			        cookieMap);
+			// define context
+			IRestlessContext restlessContext = new IRestlessContext() {
+				
+				@Override
+				public Restless getRestless() {
+					return restless;
+				}
+				
+				@Override
+				public HttpServletResponse getResponse() {
+					return res;
+				}
+				
+				@Override
+				public HttpServletRequest getRequest() {
+					return req;
+				}
+				
+				@Override
+				public String getRequestIdentifier() {
+					return uniqueRequestId;
+				}
+			};
+			
 			for(Class<?> requiredParamType : method.getParameterTypes()) {
 				
 				// try to fill each parameter
@@ -129,28 +153,6 @@ public class RestlessMethod {
 				} else if(requiredParamType.equals(Restless.class)) {
 					javaMethodArgs.add(restless);
 				} else if(requiredParamType.equals(IRestlessContext.class)) {
-					IRestlessContext restlessContext = new IRestlessContext() {
-						
-						@Override
-						public Restless getRestless() {
-							return restless;
-						}
-						
-						@Override
-						public HttpServletResponse getResponse() {
-							return res;
-						}
-						
-						@Override
-						public HttpServletRequest getRequest() {
-							return req;
-						}
-						
-						@Override
-						public String getRequestIdentifier() {
-							return uniqueRequestId;
-						}
-					};
 					javaMethodArgs.add(restlessContext);
 					hasHttpServletResponseParameter = true;
 				} else {
@@ -247,9 +249,10 @@ public class RestlessMethod {
 			}
 			
 			try {
-				
+				// pre-run-event
+				restless.fireRequestStarted(restlessContext);
+				// run
 				Object result = invokeMethod(method, this.instanceOrClass, javaMethodArgs);
-				
 				if(!hasHttpServletResponseParameter) {
 					res.setContentType(Restless.MIME_TEXT_PLAIN + "; charset="
 					        + Restless.CHARSET_UTF8);
@@ -262,6 +265,8 @@ public class RestlessMethod {
 					}
 					w.flush();
 				}
+				// post-run-event
+				restless.fireRequestFinished(restlessContext);
 			} catch(InvocationTargetException e) {
 				Throwable cause = e.getCause();
 				if(cause instanceof RestlessException) {

@@ -8,9 +8,11 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
@@ -188,6 +190,8 @@ public class Restless extends HttpServlet {
 	 * Default is false.
 	 */
 	public static boolean DELEGATE_UNHANDLED_TO_DEFAULT = false;
+	
+	private Set<IRequestListener> requestListeners = new HashSet<IRequestListener>();
 	
 	/**
 	 * Register a handler that will receive exceptions thrown by the executed
@@ -809,4 +813,43 @@ public class Restless extends HttpServlet {
 		}
 	}
 	
+	/**
+	 * Gets notified before a request is send to a Java method (
+	 * {@link #onRequestStarted(IRestlessContext)}) and after the Java method
+	 * finished processing the request (
+	 * {@link #onRequestFinished(IRestlessContext)}).
+	 * 
+	 * Via {@link IRestlessContext#getRequestIdentifier()} a correlation from
+	 * start to finish can be achieved.
+	 * 
+	 * Implementations should have valid {@link #hashCode()} and
+	 * {@link #equals(Object)} methods.
+	 * 
+	 * @author xamde
+	 */
+	public static interface IRequestListener {
+		void onRequestStarted(IRestlessContext restlessContext);
+		
+		void onRequestFinished(IRestlessContext restlessContext);
+	}
+	
+	public void addRequestListener(IRequestListener requestListener) {
+		this.requestListeners.add(requestListener);
+	}
+	
+	public void removeRequestListener(IRequestListener requestListener) {
+		this.requestListeners.remove(requestListener);
+	}
+	
+	protected void fireRequestStarted(IRestlessContext restlessContext) {
+		for(IRequestListener requestListener : this.requestListeners) {
+			requestListener.onRequestStarted(restlessContext);
+		}
+	}
+	
+	protected void fireRequestFinished(IRestlessContext restlessContext) {
+		for(IRequestListener requestListener : this.requestListeners) {
+			requestListener.onRequestFinished(restlessContext);
+		}
+	}
 }
