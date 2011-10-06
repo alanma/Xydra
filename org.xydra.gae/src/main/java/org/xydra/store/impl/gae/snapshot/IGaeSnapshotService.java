@@ -41,7 +41,7 @@ public interface IGaeSnapshotService {
 	
 	/**
 	 * @param modelRevisionNumber Revision of model the returned snapshot should
-	 *            belong to. The revision number of the filed may be lower if
+	 *            belong to. The revision number of the field may be lower if
 	 *            the model revision was caused by changes to other parts of the
 	 *            containing object or model.
 	 * @param precise True if we need the snapshot for exactly the requested

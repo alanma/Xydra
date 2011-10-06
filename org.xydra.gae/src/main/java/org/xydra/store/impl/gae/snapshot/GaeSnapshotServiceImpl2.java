@@ -6,9 +6,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -240,13 +240,13 @@ public class GaeSnapshotServiceImpl2 extends AbstractGaeSnapshotServiceImpl {
 		XRevWritableModel baseModel = XCopyUtils.createSnapshot(base);
 		
 		// get events between [ start, end )
-		List<XEvent> events = this.changesService.getEventsBetween(Math.max(baseModel
-		        .getRevisionNumber() + 1, 0), requestedRevNr);
+		List<XEvent> events = this.changesService.getEventsBetween(
+		        Math.max(baseModel.getRevisionNumber() + 1, 0), requestedRevNr);
 		
 		// apply events to base
 		for(XEvent event : events) {
 			log.debug("Basemodel[" + baseModel.getRevisionNumber() + "], applying event["
-			        + event.getRevisionNumber() + "]=" + event);
+			        + event.getRevisionNumber() + "]=" + DebugFormatter.format(event));
 			EventUtils.applyEvent(baseModel, event);
 			
 			localVmCachePut(baseModel);
@@ -366,14 +366,24 @@ public class GaeSnapshotServiceImpl2 extends AbstractGaeSnapshotServiceImpl {
 		return KeyFactory.createKey(KIND_SNAPSHOT, this.modelAddress.toURI() + "/" + revNr);
 	}
 	
+	/**
+	 * @param revisionNumber will be equal or less than the revision of the
+	 *            returned snapshot
+	 * @return a model snapshot with the given revisionNumber of an even more
+	 *         recent one (with a higher revision number)
+	 */
 	synchronized public XRevWritableModel getModelSnapshotNewerOrAtRevision(long revisionNumber) {
+		if(!USE_SNAPSHOT_CACHE) {
+			return getModelSnapshot(revisionNumber);
+		}
+		
 		/* look for all versions at this or higher revNrs */
 		SortedMap<Long,XReadableModel> modelSnapshotsCache = getModelSnapshotsCache();
 		SortedMap<Long,XReadableModel> matchOrNewer;
 		synchronized(modelSnapshotsCache) {
 			matchOrNewer = modelSnapshotsCache.subMap(revisionNumber, Long.MAX_VALUE);
 		}
-		if(!USE_SNAPSHOT_CACHE || matchOrNewer.isEmpty()) {
+		if(matchOrNewer.isEmpty()) {
 			// not cached
 			return getModelSnapshot(revisionNumber);
 		} else {

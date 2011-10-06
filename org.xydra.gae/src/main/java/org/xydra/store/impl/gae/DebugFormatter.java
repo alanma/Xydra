@@ -48,12 +48,12 @@ public class DebugFormatter {
 	public static String dataGet(String dataSourceName, Collection<?> keys, Map<?,?> result,
 	        Timing timing) {
 		return timing((result.isEmpty() ? GET_BATCH_EMPTY : GET_BATCH) + " " + dataSourceName
-		        + "{ " + format(keys) + " } = " + format(result.values()), timing);
+		        + formatKey(keys) + " = " + format(result.values()), timing);
 	}
 	
 	public static String dataGet(String dataSourceName, String key, Object value, Timing timing) {
-		return timing((value == null ? GET_NULL : GET_VALUE) + " " + dataSourceName + "{ " + key
-		        + " } = " + format(value), timing);
+		return timing((value == null ? GET_NULL : GET_VALUE) + " " + dataSourceName
+		        + formatKey(key) + " = " + format(value), timing);
 	}
 	
 	public static String format(Object value) {
@@ -92,10 +92,10 @@ public class DebugFormatter {
 			return "Entity={" + buf.toString() + " }";
 		} else if(value instanceof GaeChange) {
 			GaeChange c = (GaeChange)value;
-			return "GaeChange {" + formatString(c.toString(), 500) + "}";
+			return "GaeChange {" + formatString(c.toString(), 140) + "}";
 		} else if(value instanceof XCommand) {
 			XCommand c = (XCommand)value;
-			return "Command {" + formatString(c.toString(), 500) + "}";
+			return "Command {" + formatString(c.toString(), 140) + "}";
 		} else if(value instanceof Long) {
 			return "{" + value + "}";
 		} else if(value instanceof Key) {
@@ -124,27 +124,31 @@ public class DebugFormatter {
 	}
 	
 	public static String dataPut(String dataSourceName, String key, Object value, Timing timing) {
-		return timing((value == null ? PUT_NULL : PUT_VALUE) + " " + dataSourceName + "{ " + key
-		        + " } -> " + format(value), timing);
+		return timing((value == null ? PUT_NULL : PUT_VALUE) + " " + dataSourceName
+		        + formatKey(key) + " -> " + format(value), timing);
 	}
 	
 	public static String dataPutIfNull(String dataSourceName, Object key, Object value,
 	        Timing timing) {
-		return timing((value == null ? "-USELESS-" : ">ifWasNull>") + " " + dataSourceName + "{ "
-		        + key + " } -> " + format(value), timing);
+		return timing((value == null ? "-USELESS-" : ">ifWasNull>") + " " + dataSourceName
+		        + formatKey(key) + " -> " + format(value), timing);
 	}
 	
 	public static String dataPutIfUntouched(String dataSourceName, Object key, Object oldValue,
 	        Object newValue, Timing timing) {
 		return timing((newValue == null ? "X-(untouched?)->" : ">>(untouched)>") + " "
-		        + dataSourceName + "{ " + key + " } ? " + format(oldValue) + " -> "
+		        + dataSourceName + formatKey(key) + " ? " + format(oldValue) + " -> "
 		        + format(newValue), timing);
 	}
 	
 	public static String dataPut(String dataSourceName, Map<? extends Object,? extends Object> map,
 	        Timing timing) {
-		return timing((map.isEmpty() ? PUT_BATCH_EMPTY : PUT_BATCH) + " " + dataSourceName + "{ "
-		        + format(map.keySet()) + " } -> " + format(map.values()), timing);
+		return timing((map.isEmpty() ? PUT_BATCH_EMPTY : PUT_BATCH) + " " + dataSourceName
+		        + formatKey(map.keySet()) + " -> " + format(map.values()), timing);
+	}
+	
+	private static final String formatKey(Object key) {
+		return "{'" + format(key) + "'}";
 	}
 	
 	public static String init(String dataSourceName) {
