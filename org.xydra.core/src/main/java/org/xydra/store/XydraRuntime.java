@@ -224,8 +224,8 @@ public class XydraRuntime {
 		return lastTimeInitialisedAt;
 	}
 	
-	/** A unique ID to distinguish several AppEngine instances */
-	public static final String INSTANCE_ID = UUID.uuid(9);
+	/** A unique ID to distinguish several XydraRuntime instances */
+	private static final String INSTANCE_ID = UUID.uuid(9);
 	
 	/**
 	 * @return a unique string identifying this runtime instance. Within one JVM
@@ -268,6 +268,17 @@ public class XydraRuntime {
 			l.onXydraRuntimeInit();
 		}
 		dynamicListeners.clear();
+	}
+	
+	public static void startRequest() {
+		log.info("Request started.");
+		if(platformRuntime != null) {
+			platformRuntime.startRequest();
+		}
+		/*
+		 * Don't do anyting if platform is not yet ready. Makes testing things
+		 * outside of servlet containers much easier.
+		 */
 	}
 	
 	public static void finishRequest() {

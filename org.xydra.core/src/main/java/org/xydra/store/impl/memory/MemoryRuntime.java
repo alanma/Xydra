@@ -22,4 +22,8 @@ public class MemoryRuntime implements XydraPlatformRuntime {
 	public void finishRequest() {
 	}
 	
+	@Override
+	public void startRequest() {
+	}
+	
 }

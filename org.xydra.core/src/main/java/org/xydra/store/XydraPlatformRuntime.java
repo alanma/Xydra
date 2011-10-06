@@ -47,11 +47,20 @@ public interface XydraPlatformRuntime {
 	public XydraPersistence getPersistence(XID repositoryId);
 	
 	/**
-	 * Signals the Xydra platform that a new (web) request has been started.
+	 * Signals the Xydra platform that the current (web) request has been
+	 * finished.
 	 * 
 	 * A server implementation might wish to e.g. clear thread-local variables
 	 * to defend against a web container which is recycling threads.
 	 */
 	public void finishRequest();
+	
+	/**
+	 * Signals the Xydra platform that a new (web) request has been started.
+	 * 
+	 * A server implementation might wish to e.g. clear thread-local variables
+	 * to defend against a web container which is recycling threads.
+	 */
+	public void startRequest();
 	
 }
