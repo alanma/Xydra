@@ -14,7 +14,10 @@ import org.xydra.core.model.XChangeLog;
 public interface IGaeSnapshotService {
 	
 	/**
-	 * @param requestedRevNr of the returned snapshot
+	 * @param requestedRevNr of the returned snapshot. This method assumes that
+	 *            this revision responds to a command that didn't fail (or is
+	 *            -1). The most common value (the "current" revision) satisfies
+	 *            that criteria.
 	 * @param precise True if we need the snapshot for exactly the requested
 	 *            revision number or false if the snapshot of a higher revision
 	 *            number can also be returned.
