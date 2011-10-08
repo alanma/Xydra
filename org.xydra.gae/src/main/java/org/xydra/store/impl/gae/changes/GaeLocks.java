@@ -60,7 +60,7 @@ public class GaeLocks implements Iterable<XAddress> {
 				tempLocks.add(lock);
 			}
 			for(XAddress lock : tempLocks) {
-				if(!gaeLocks.hasMoreGeneralLock(lock)) {
+				if(!hasMoreGeneralLock(tempLocks, lock)) {
 					gaeLocks.add(lock);
 				}
 			}
@@ -135,12 +135,12 @@ public class GaeLocks implements Iterable<XAddress> {
 	 */
 	public boolean isConflicting(GaeLocks other) {
 		for(XAddress lock : this.locks) {
-			if(other.locks.contains(lock) || other.hasMoreGeneralLock(lock)) {
+			if(other.locks.contains(lock) || hasMoreGeneralLock(other.locks, lock)) {
 				return true;
 			}
 		}
 		for(XAddress lock : other.locks) {
-			if(hasMoreGeneralLock(lock)) {
+			if(hasMoreGeneralLock(this.locks, lock)) {
 				return true;
 			}
 		}
@@ -153,10 +153,10 @@ public class GaeLocks implements Iterable<XAddress> {
 	 * @return true if the given set contains any locks that imply the given
 	 *         lock (but are not the same).
 	 */
-	private boolean hasMoreGeneralLock(XAddress lock) {
+	static private boolean hasMoreGeneralLock(Set<XAddress> locks, XAddress lock) {
 		XAddress l = lock.getParent();
 		while(l != null) {
-			if(this.locks.contains(l)) {
+			if(locks.contains(l)) {
 				return true;
 			}
 			l = l.getParent();

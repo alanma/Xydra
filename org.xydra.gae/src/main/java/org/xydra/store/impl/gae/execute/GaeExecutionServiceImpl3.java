@@ -120,6 +120,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 		if(exists) {
 			snapshot = getPartialSnapshot(snapshotRev, change.getLocks());
 		}
+		c.stopAndStart("getPartialSnapshot");
 		
 		snapshot = updateSnapshot(snapshot, snapshotRev, change);
 		c.stopAndStart("updateSnapshot");
