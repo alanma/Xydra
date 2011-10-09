@@ -14,14 +14,14 @@ import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.change.XTransactionEvent;
+import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
-import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
+import org.xydra.core.XCopyUtils;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.DeltaUtils;
-import org.xydra.core.util.DumpUtils;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -29,10 +29,10 @@ import org.xydra.restless.utils.Clock;
 import org.xydra.store.impl.gae.DebugFormatter;
 import org.xydra.store.impl.gae.FutureUtils;
 import org.xydra.store.impl.gae.changes.GaeChange;
-import org.xydra.store.impl.gae.changes.GaeChange.Status;
 import org.xydra.store.impl.gae.changes.GaeLocks;
 import org.xydra.store.impl.gae.changes.IGaeChangesService;
 import org.xydra.store.impl.gae.changes.VoluntaryTimeoutException;
+import org.xydra.store.impl.gae.changes.GaeChange.Status;
 import org.xydra.store.impl.gae.snapshot.IGaeSnapshotService;
 
 import com.google.appengine.api.datastore.Key;
@@ -112,20 +112,28 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 		
 		// IMPROVE save command to be able to roll back in case of timeout while
 		// waiting for locks / checking preconditions?
-		
 		long snapshotRev = this.changes.getCurrentRevisionNumber();
 		boolean exists = this.changes.exists(); // TODO exists depends on the
 		// revision number
 		
+		log.debug("Phase 2: getPartialSnapshot at " + snapshotRev);
 		XRevWritableModel snapshot = null;
 		if(exists) {
-			snapshot = getPartialSnapshot(snapshotRev, change.getLocks());
+			snapshot = this.snapshots.getPartialSnapshot(snapshotRev, change.getLocks());
 		}
 		c.stopAndStart("getPartialSnapshot");
 		
+		/*
+		 * IMPROVE we can ignore all changes in [currentRev + 1,
+		 * lastCommittedRev) as they either failed or didn't change anything,
+		 * but we need to make sure that there isn't a better currentRev <=
+		 * lastCommittedRev
+		 */
+		log.debug("Phase 3: updateSnapshot to " + (change.rev - 1));
 		snapshot = updateSnapshot(snapshot, snapshotRev, change);
 		c.stopAndStart("updateSnapshot");
 		
+		log.debug("Phase 4: checkPreconditionsAndSaveEvents");
 		long ret = checkPreconditionsAndSaveEvents(change, command, actorId, snapshot);
 		c.stopAndStart("checkPreconditionsAndSaveEvents");
 		
@@ -139,86 +147,14 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 	}
 	
 	/**
-	 * Get a snapshot that contains at least those parts specified by the given
-	 * locks.
-	 */
-	private XRevWritableModel getPartialSnapshot(long snapshotRev, GaeLocks locks) {
-		
-		if(locks.canWrite(this.modelAddr)) {
-			return this.snapshots.getModelSnapshot(snapshotRev, true);
-		}
-		
-		SimpleModel model = new SimpleModel(this.modelAddr);
-		
-		for(XAddress lock : locks) {
-			
-			switch(lock.getAddressedType()) {
-			
-			case XFIELD: {
-				/*
-				 * FIXME @Daniel wrong assert:
-				 * 
-				 * Given these locks: /obj1/field1 and /obj1/field2, the first
-				 * pass will add /obj1/field1 and via the fall-through then also
-				 * /obj1
-				 * 
-				 * The pass for /obj1/field2 will fail, because /obj1 is already
-				 * there.
-				 */
-				assert !model.hasObject(lock.getObject())
-				        || !model.getObject(lock.getObject()).hasField(lock.getField()) : "Either model has not the object of the lock OR the object of the model does not have the field. Lock ="
-				        + locks + "." + DumpUtils.dump("model", model);
-				XRevWritableField field = this.snapshots.getFieldSnapshot(snapshotRev, true,
-				        lock.getObject(), lock.getField());
-				XRevWritableObject object = model.getObject(lock.getObject());
-				if(field != null) {
-					if(object == null) {
-						object = model.createObject(lock.getObject());
-						object.setRevisionNumber(XEvent.RevisionNotAvailable);
-					}
-					object.addField(field);
-					break;
-				} else if(object != null) {
-					break;
-				} else {
-					/*
-					 * we don't know if the object exists but might need this
-					 * information, so we need to get the object snapshot
-					 * 
-					 * IMPROVE check if we actually need this info
-					 */
-				}
-			}
-				
-				//$FALL-THROUGH$
-			case XOBJECT: {
-				assert !model.hasObject(lock.getObject());
-				XRevWritableObject object = this.snapshots.getObjectSnapshot(snapshotRev, true,
-				        lock.getObject());
-				if(object != null) {
-					model.addObject(object);
-				}
-				break;
-			}
-				
-			default:
-				assert false : "invalid lock: " + locks;
-				
-			}
-		}
-		
-		return model;
-	}
-	
-	/**
 	 * Update all locked parts of the given snapshot. If some conflicting
 	 * changes are still executing, wait for them to finish.
 	 */
 	private XRevWritableModel updateSnapshot(XRevWritableModel snapshot, long snapshotRev,
 	        GaeChange change) {
-		log.debug("updateSnapshot: " + DebugFormatter.format(change));
 		
 		XRevWritableModel model = snapshot;
+		boolean copied = false;
 		
 		// IMPROVE use the last committed rev to skip failed / empty changes
 		
@@ -235,6 +171,11 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 				
 				// Check if the change needs conflicting locks.
 				if(!change.isConflicting(otherChange)) {
+					if(!copied) {
+						// IMPROVE use shallow copy.
+						model = XCopyUtils.createSnapshot(snapshot);
+						copied = true;
+					}
 					invalidateObjectRevisions(model, otherChange);
 					// not conflicting, so ignore
 					continue;
@@ -302,6 +243,11 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 				continue;
 			}
 			
+			if(!copied) {
+				// IMPROVE use shallow copy, apply event nondestructively.
+				model = XCopyUtils.createSnapshot(snapshot);
+				copied = true;
+			}
 			model = appplyEvent(model, otherChange.getEvent(), change.getLocks());
 		}
 		
@@ -316,7 +262,10 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 			}
 		}
 		
-		if(model != null) {
+		if(model != null && model.getRevisionNumber() != change.rev - 1) {
+			if(!copied) {
+				model = SimpleModel.shallowCopy(snapshot);
+			}
 			model.setRevisionNumber(change.rev - 1);
 		}
 		
@@ -445,7 +394,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 	 *         applied.
 	 */
 	private long checkPreconditionsAndSaveEvents(GaeChange change, XCommand command, XID actorId,
-	        XWritableModel snapshot) {
+	        XReadableModel snapshot) {
 		
 		Pair<ChangedModel,DeltaUtils.ModelChange> c = DeltaUtils.executeCommand(snapshot, command);
 		
