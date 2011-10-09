@@ -62,7 +62,7 @@ public class ConsistencyTestResource {
 		c.stopAndStart("init");
 		ServletUtils.headers(res, "text/html");
 		Writer w = res.getWriter();
-		String instance = XydraRuntime.INSTANCE_ID + "=" + AboutAppEngine.getThreadInfo();
+		String instance = XydraRuntime.getInstanceId() + "=" + AboutAppEngine.getThreadInfo();
 		log.info("instanceId=" + instance);
 		w.write("instance: " + instance);
 		c.stopAndStart("headers,getInstanceId");
@@ -92,7 +92,7 @@ public class ConsistencyTestResource {
 		c.stopAndStart("config");
 		ServletUtils.headers(res, "text/html");
 		Writer w = res.getWriter();
-		String instance = XydraRuntime.INSTANCE_ID + "+=" + AboutAppEngine.getThreadInfo();
+		String instance = XydraRuntime.getInstanceId() + "+=" + AboutAppEngine.getThreadInfo();
 		log.info("instanceId=" + instance);
 		c.stopAndStart("headers,getInstanceId");
 		w.write("<div style='"

@@ -54,7 +54,7 @@ public class SimpleOperationsTest {
 		// do something
 		XRepositoryCommand command = X.getCommandFactory().createForcedAddModelCommand(REPO_ID,
 		        MODEL1_ID);
-		long l = persistence.executeCommand(ACTOR_ID, command).revision();
+		long l = persistence.executeCommand(ACTOR_ID, command);
 		assertTrue("command should be successful" + l, l >= 0);
 		
 		// get persistence stats, they are rather simple
