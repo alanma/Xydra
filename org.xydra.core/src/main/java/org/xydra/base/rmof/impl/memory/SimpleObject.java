@@ -13,6 +13,7 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.XWritableObject;
+import org.xydra.core.util.DumpUtils;
 
 
 /**
@@ -106,6 +107,11 @@ public class SimpleObject implements Serializable, XRevWritableObject {
 	@Override
 	public XType getType() {
 		return XType.XOBJECT;
+	}
+	
+	@Override
+	public String toString() {
+		return DumpUtils.toStringBuffer(this).toString();
 	}
 	
 }

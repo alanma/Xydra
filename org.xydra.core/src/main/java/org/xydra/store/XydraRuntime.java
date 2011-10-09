@@ -286,8 +286,7 @@ public class XydraRuntime {
 		if(platformRuntime != null) {
 			platformRuntime.finishRequest();
 		} else {
-			throw new IllegalStateException(
-			        "Request finished, but XydraRuntime.init() was never directly or indirectly performed.");
+			log.warn("Request finished, but XydraRuntime.init() was never directly or indirectly performed.");
 		}
 	}
 	

@@ -44,14 +44,24 @@ public class DumpUtils {
 	 * </code>
 	 */
 	public static String dump(String label, XReadableModel model) {
+		log.info(label + " ** Model " + toStringBuffer(model));
+		return "";
+	}
+	
+	/**
+	 * @param model to be dumped to a String
+	 * @return the model as a human-readable String
+	 */
+	public static StringBuffer toStringBuffer(XReadableModel model) {
 		assert model != null;
 		assert model.getAddress().getAddressedType() == XType.XMODEL;
-		log.info(label + " ** Model " + model.getAddress() + " [" + model.getRevisionNumber() + "]");
+		StringBuffer buf = new StringBuffer();
+		buf.append(" ** Model " + model.getAddress() + " [" + model.getRevisionNumber() + "]");
 		for(XID objectId : model) {
 			XReadableObject object = model.getObject(objectId);
-			dump(label, object);
+			buf.append(toStringBuffer(object));
 		}
-		return "";
+		return buf;
 	}
 	
 	/**
@@ -62,15 +72,24 @@ public class DumpUtils {
 	 * </code>
 	 */
 	public static String dump(String label, XReadableObject object) {
+		log.info(label + toStringBuffer(object));
+		return "";
+	}
+	
+	/**
+	 * @param object to be dumped
+	 * @return given object as human-readable string
+	 */
+	public static StringBuffer toStringBuffer(XReadableObject object) {
 		assert object != null;
 		assert object.getAddress().getAddressedType() == XType.XOBJECT;
-		log.info(label + " *** Object " + object.getAddress() + " [" + object.getRevisionNumber()
-		        + "]");
+		StringBuffer buf = new StringBuffer();
+		buf.append("*** Object " + object.getAddress() + " [" + object.getRevisionNumber() + "]\n");
 		for(XID fieldId : object) {
 			XReadableField field = object.getField(fieldId);
-			dump(label, field);
+			buf.append(toStringBuffer(field));
 		}
-		return "";
+		return buf;
 	}
 	
 	/**
@@ -81,10 +100,20 @@ public class DumpUtils {
 	 * </code>
 	 */
 	public static String dump(String label, XReadableField field) {
+		log.info(label + toStringBuffer(field));
+		return "";
+	}
+	
+	/**
+	 * @param field to be dumped
+	 * @return the field as a human-readable String
+	 */
+	public static StringBuffer toStringBuffer(XReadableField field) {
 		assert field != null;
 		assert field.getAddress().getAddressedType() == XType.XFIELD;
-		log.info(label + " **** " + field.getAddress() + " = '" + field.getValue() + "' " + " ["
-		        + field.getRevisionNumber() + "]");
-		return "";
+		StringBuffer buf = new StringBuffer();
+		buf.append(" **** " + field.getAddress() + " = '" + field.getValue() + "' " + " ["
+		        + field.getRevisionNumber() + "]\n");
+		return buf;
 	}
 }
