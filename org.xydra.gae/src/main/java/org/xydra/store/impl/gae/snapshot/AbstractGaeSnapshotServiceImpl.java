@@ -49,6 +49,7 @@ public abstract class AbstractGaeSnapshotServiceImpl implements IGaeSnapshotServ
 		return modelSnapshot.getObject(objectId);
 	}
 	
+	@Override
 	public XRevWritableModel getPartialSnapshot(long snapshotRev, Iterable<XAddress> locks) {
 		
 		Iterator<XAddress> it = locks.iterator();
