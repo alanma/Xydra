@@ -37,6 +37,7 @@ public class SimpleModel implements Serializable, XRevWritableModel {
 		return this.modelExists;
 	}
 	
+	// TODO is this used?
 	public void setModelExists(boolean modelExists) {
 		this.modelExists = modelExists;
 	}
@@ -140,6 +141,30 @@ public class SimpleModel implements Serializable, XRevWritableModel {
 	@Override
 	public String toString() {
 		return this.address + " [" + this.revisionNumber + "], " + this.objects.size() + " objects";
+	}
+	
+	/**
+	 * @param model A model to copy.
+	 * @return A copy of the model. Both model share the same objects and fields
+	 *         but not the same object list or revision number.
+	 */
+	public static XRevWritableModel shallowCopy(XRevWritableModel model) {
+		
+		if(model == null) {
+			return null;
+		}
+		
+		SimpleModel result = new SimpleModel(model.getAddress());
+		
+		if(model instanceof SimpleModel) {
+			result.objects.putAll(((SimpleModel)model).objects);
+		} else {
+			for(XID xid : model) {
+				result.addObject(model.getObject(xid));
+			}
+		}
+		
+		return result;
 	}
 	
 }

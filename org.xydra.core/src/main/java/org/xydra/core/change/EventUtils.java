@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.xydra.base.XID;
+import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldEvent;
@@ -14,6 +15,9 @@ import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
+import org.xydra.base.rmof.impl.memory.SimpleField;
+import org.xydra.base.rmof.impl.memory.SimpleModel;
+import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.model.delta.DeltaUtils;
 
 
@@ -49,6 +53,7 @@ public class EventUtils {
 			assert event instanceof XAtomicEvent : event.getClass().getCanonicalName();
 			applyAtomicEvent(model, (XAtomicEvent)event, false);
 		}
+		// FIXME is this correct if the model was removed?
 		model.setRevisionNumber(event.getRevisionNumber());
 	}
 	
@@ -196,6 +201,80 @@ public class EventUtils {
 		case TRANSACTION:
 			throw new IllegalStateException("XRepositoryEvent cannot be this " + event);
 		}
+	}
+	
+	/**
+	 * Calculate the result of applying events to a model without changing the
+	 * original model but copying as little as possible.
+	 * 
+	 * @param model The original model.
+	 * @param event The events to apply.
+	 * 
+	 * @return The result after applying the events. This model may share object
+	 *         and/or fields with the original model, in which case modifying
+	 *         them will change both models.
+	 */
+	public static XRevWritableModel applyEventNonDestructive(XRevWritableModel model, XEvent event) {
+		assert event != null;
+		XRevWritableModel result;
+		if(event instanceof XTransactionEvent) {
+			XTransactionEvent trans = (XTransactionEvent)event;
+			
+			// If the wole model was removed, there is nothing else to process.
+			XAtomicEvent last = trans.getEvent(trans.size() - 1);
+			if(last instanceof XRepositoryEvent && last.getChangeType() == ChangeType.REMOVE) {
+				result = new SimpleModel(model.getAddress(), MODEL_DOES_NOT_EXIST);
+			} else {
+				
+				result = SimpleModel.shallowCopy(model);
+				
+				for(XAtomicEvent ae : ((XTransactionEvent)event)) {
+					if(ae.isImplied()) {
+						continue;
+					}
+					applyAtomicEventNonDestructive(model, result, ae, true);
+				}
+			}
+		} else {
+			assert event instanceof XAtomicEvent : event.getClass().getCanonicalName();
+			
+			result = SimpleModel.shallowCopy(model);
+			
+			applyAtomicEventNonDestructive(model, result, (XAtomicEvent)event, false);
+		}
+		assert result != model;
+		result.setRevisionNumber(event.getRevisionNumber());
+		return result;
+	}
+	
+	private static void applyAtomicEventNonDestructive(XRevWritableModel model,
+	        XRevWritableModel result, XAtomicEvent atomicEvent, boolean inTxn) {
+		assert atomicEvent != null;
+		
+		XID objectId = atomicEvent.getTarget().getObject();
+		if(objectId != null) {
+			assert result != null;
+			XRevWritableObject object = result.getObject(objectId);
+			XRevWritableObject srcObject = (model == null) ? null : model.getObject(objectId);
+			assert object != null;
+			if(object == srcObject) {
+				object = SimpleObject.shallowCopy(srcObject);
+				result.addObject(object);
+			}
+			XID fieldId = atomicEvent.getTarget().getField();
+			if(fieldId != null) {
+				XRevWritableField field = object.getField(fieldId);
+				XRevWritableField srcField = (srcObject == null) ? null : srcObject
+				        .getField(fieldId);
+				assert field != null;
+				if(field == srcField) {
+					object.addField(new SimpleField(srcField.getAddress(), srcField
+					        .getRevisionNumber(), srcField.getValue()));
+				}
+			}
+		}
+		
+		applyAtomicEvent(result, atomicEvent, inTxn);
 	}
 	
 }

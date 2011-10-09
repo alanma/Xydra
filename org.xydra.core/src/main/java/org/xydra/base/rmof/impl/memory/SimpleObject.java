@@ -114,4 +114,28 @@ public class SimpleObject implements Serializable, XRevWritableObject {
 		return DumpUtils.toStringBuffer(this).toString();
 	}
 	
+	/**
+	 * @param object An object to copy.
+	 * @return A copy of the object. Both objects share the same fields but not
+	 *         the same field list or revision number.
+	 */
+	public static SimpleObject shallowCopy(XRevWritableObject object) {
+		
+		if(object == null) {
+			return null;
+		}
+		
+		SimpleObject result = new SimpleObject(object.getAddress(), object.getRevisionNumber());
+		
+		if(object instanceof SimpleModel) {
+			result.fields.putAll(((SimpleObject)object).fields);
+		} else {
+			for(XID xid : object) {
+				result.addField(object.getField(xid));
+			}
+		}
+		
+		return result;
+	}
+	
 }
