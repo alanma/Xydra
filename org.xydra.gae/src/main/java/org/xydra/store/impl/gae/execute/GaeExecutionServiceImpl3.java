@@ -21,6 +21,7 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.DeltaUtils;
+import org.xydra.core.util.DumpUtils;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -28,10 +29,10 @@ import org.xydra.restless.utils.Clock;
 import org.xydra.store.impl.gae.DebugFormatter;
 import org.xydra.store.impl.gae.FutureUtils;
 import org.xydra.store.impl.gae.changes.GaeChange;
+import org.xydra.store.impl.gae.changes.GaeChange.Status;
 import org.xydra.store.impl.gae.changes.GaeLocks;
 import org.xydra.store.impl.gae.changes.IGaeChangesService;
 import org.xydra.store.impl.gae.changes.VoluntaryTimeoutException;
-import org.xydra.store.impl.gae.changes.GaeChange.Status;
 import org.xydra.store.impl.gae.snapshot.IGaeSnapshotService;
 
 import com.google.appengine.api.datastore.Key;
@@ -154,10 +155,21 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 			switch(lock.getAddressedType()) {
 			
 			case XFIELD: {
+				/*
+				 * FIXME @Daniel wrong assert:
+				 * 
+				 * Given these locks: /obj1/field1 and /obj1/field2, the first
+				 * pass will add /obj1/field1 and via the fall-through then also
+				 * /obj1
+				 * 
+				 * The pass for /obj1/field2 will fail, because /obj1 is already
+				 * there.
+				 */
 				assert !model.hasObject(lock.getObject())
-				        || !model.getObject(lock.getObject()).hasField(lock.getField());
-				XRevWritableField field = this.snapshots.getFieldSnapshot(snapshotRev, true, lock
-				        .getObject(), lock.getField());
+				        || !model.getObject(lock.getObject()).hasField(lock.getField()) : "Either model has not the object of the lock OR the object of the model does not have the field. Lock ="
+				        + locks + "." + DumpUtils.dump("model", model);
+				XRevWritableField field = this.snapshots.getFieldSnapshot(snapshotRev, true,
+				        lock.getObject(), lock.getField());
 				XRevWritableObject object = model.getObject(lock.getObject());
 				if(field != null) {
 					if(object == null) {
