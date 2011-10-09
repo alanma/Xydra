@@ -25,7 +25,7 @@ public interface IGaeSnapshotService {
 	 *         {@link XChangeLog} or null if the model was not present at the
 	 *         requested revisionNumber
 	 */
-	public XRevWritableModel getModelSnapshot(long requestedRevNr, boolean precise);
+	XRevWritableModel getModelSnapshot(long requestedRevNr, boolean precise);
 	
 	/**
 	 * @param modelRevisionNumber Revision of model the returned snapshot should
@@ -39,8 +39,7 @@ public interface IGaeSnapshotService {
 	 *         {@link XChangeLog} or null if the model was not present at the
 	 *         requested revisionNumber
 	 */
-	public XRevWritableObject getObjectSnapshot(long modelRevisionNumber, boolean precise,
-	        XID objectId);
+	XRevWritableObject getObjectSnapshot(long modelRevisionNumber, boolean precise, XID objectId);
 	
 	/**
 	 * @param modelRevisionNumber Revision of model the returned snapshot should
@@ -54,8 +53,17 @@ public interface IGaeSnapshotService {
 	 *         {@link XChangeLog} or null if the model was not present at the
 	 *         requested revisionNumber
 	 */
-	public XRevWritableField getFieldSnapshot(long modelRevisionNumber, boolean precise,
-	        XID objectId, XID fieldId);
+	XRevWritableField getFieldSnapshot(long modelRevisionNumber, boolean precise, XID objectId,
+	        XID fieldId);
+	
+	/**
+	 * Get a snapshot that contains at least those parts specified.
+	 * 
+	 * @return While this return is an {@link XRevWritableModel} so that it's
+	 *         parts can be added into other {@link XRevWritableModel}, it must
+	 *         not be modified.
+	 */
+	XRevWritableModel getPartialSnapshot(long modelRevisionNumber, Iterable<XAddress> parts);
 	
 	XAddress getModelAddress();
 }
