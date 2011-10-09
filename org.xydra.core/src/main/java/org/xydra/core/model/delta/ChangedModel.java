@@ -234,7 +234,7 @@ public class ChangedModel implements XWritableModel {
 	}
 	
 	@Override
-    public XWritableObject createObject(XID objectId) {
+	public XWritableObject createObject(XID objectId) {
 		
 		XWritableObject oldObject = getObject(objectId);
 		if(oldObject != null) {
@@ -303,28 +303,34 @@ public class ChangedModel implements XWritableModel {
 	 */
 	public boolean executeCommand(XFieldCommand command) {
 		
+		// FIXME
+		if(command.getChangeType() == ChangeType.CHANGE) {
+			log.debug("a change");
+		}
+		
 		XWritableObject object = getObject(command.getObjectId());
 		if(object == null) {
-			log.info("FieldCommand is invalid - object is null");
+			log.warn("{" + command + "} is invalid - object is null");
 			return false;
 		}
 		
 		XWritableField field = object.getField(command.getFieldId());
 		if(field == null) {
-			log.info("FieldCommand is invalid - field '" + command.getFieldId()
+			log.warn("{ " + command + "} is invalid - field '" + command.getFieldId()
 			        + "' not found in object '" + command.getObjectId() + "'");
 			return false;
 		}
 		
 		if(!command.isForced()) {
 			if(field.getRevisionNumber() != command.getRevisionNumber()) {
-				log.info("Safe FieldCommand is invalid (wrong revision) field="
+				log.warn("Safe FieldCommand {" + command + "} is invalid (wrong revision) field="
 				        + field.getRevisionNumber() + " command=" + command.getRevisionNumber());
 				return false;
 			}
 			// empty fields require an ADD command
 			if((command.getChangeType() == ChangeType.ADD) != field.isEmpty()) {
-				log.info("command is invalid (wrong type) command=ADD, field!=emtpy");
+				log.warn("command {" + command
+				        + "} is invalid (wrong type) command=ADD, field!=emtpy");
 				return false;
 			}
 		}
@@ -366,12 +372,13 @@ public class ChangedModel implements XWritableModel {
 			
 			if(object == null) {
 				// command is invalid or doesn't change anything
-				log.warn("XModelCommand REMOVE is invalid or doesn't change anything");
+				log.warn("XModelCommand REMOVE " + command
+				        + " is invalid or doesn't change anything");
 				return command.isForced();
 			}
 			if(object.getRevisionNumber() != command.getRevisionNumber() && !command.isForced()) {
 				// command is invalid
-				log.warn("Safe XModelCommand is invalid (revNr mismatch)");
+				log.warn("Safe XModelCommand " + command + " is invalid (revNr mismatch)");
 				return false;
 			}
 			// command is OK and removes an existing object
@@ -379,7 +386,7 @@ public class ChangedModel implements XWritableModel {
 			return true;
 			
 		default:
-			throw new AssertionError("impossible type for model commands");
+			throw new AssertionError("impossible type for model command " + command);
 		}
 		
 	}
@@ -408,7 +415,7 @@ public class ChangedModel implements XWritableModel {
 		
 		case ADD:
 			if(object.hasField(fieldId)) {
-				log.warn("XObjectCommand ADD is invalid or doesn't change anything");
+				log.warn("XObjectCommand ADD " + command + "is invalid or doesn't change anything");
 				return command.isForced();
 			}
 			// command is OK and adds a new field
@@ -426,7 +433,7 @@ public class ChangedModel implements XWritableModel {
 			}
 			if(field.getRevisionNumber() != command.getRevisionNumber() && !command.isForced()) {
 				// command is invalid
-				log.warn("Safe XObjectCommand REMOVE revNr mismatch");
+				log.warn("Safe XObjectCommand REMOVE " + command + " revNr mismatch");
 				return false;
 			}
 			// command is OK and removes an existing field
@@ -434,7 +441,7 @@ public class ChangedModel implements XWritableModel {
 			return true;
 			
 		default:
-			throw new AssertionError("impossible type for object commands");
+			throw new AssertionError("impossible type for object command " + command);
 		}
 		
 	}
@@ -478,7 +485,7 @@ public class ChangedModel implements XWritableModel {
 	}
 	
 	@Override
-    public XAddress getAddress() {
+	public XAddress getAddress() {
 		return this.base.getAddress();
 	}
 	
@@ -492,7 +499,7 @@ public class ChangedModel implements XWritableModel {
 	}
 	
 	@Override
-    public XID getID() {
+	public XID getID() {
 		return this.base.getID();
 	}
 	
@@ -506,7 +513,7 @@ public class ChangedModel implements XWritableModel {
 	}
 	
 	@Override
-    public XWritableObject getObject(XID objectId) {
+	public XWritableObject getObject(XID objectId) {
 		
 		XWritableObject newObject = this.added.get(objectId);
 		if(newObject != null) {
@@ -559,12 +566,12 @@ public class ChangedModel implements XWritableModel {
 	 * @return the revision number of the original {@link XReadableModel}
 	 */
 	@Override
-    public long getRevisionNumber() {
+	public long getRevisionNumber() {
 		return this.base.getRevisionNumber();
 	}
 	
 	@Override
-    public boolean hasObject(XID objectId) {
+	public boolean hasObject(XID objectId) {
 		if(this.added.containsKey(objectId))
 			return true;
 		if(this.removed.contains(objectId)) {
@@ -574,7 +581,7 @@ public class ChangedModel implements XWritableModel {
 	}
 	
 	@Override
-    public boolean isEmpty() {
+	public boolean isEmpty() {
 		
 		if(!this.added.isEmpty()) {
 			return false;
@@ -598,7 +605,7 @@ public class ChangedModel implements XWritableModel {
 	}
 	
 	@Override
-    public Iterator<XID> iterator() {
+	public Iterator<XID> iterator() {
 		
 		Iterator<XID> filtered = new AbstractFilteringIterator<XID>(this.base.iterator()) {
 			@Override
@@ -611,7 +618,7 @@ public class ChangedModel implements XWritableModel {
 	}
 	
 	@Override
-    public boolean removeObject(XID objectId) {
+	public boolean removeObject(XID objectId) {
 		
 		if(this.added.containsKey(objectId)) {
 			

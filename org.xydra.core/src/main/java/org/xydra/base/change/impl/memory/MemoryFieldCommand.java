@@ -118,12 +118,12 @@ public class MemoryFieldCommand extends MemoryAtomicCommand implements XFieldCom
 	}
 	
 	@Override
-    public XAddress getChangedEntity() {
+	public XAddress getChangedEntity() {
 		return getTarget();
 	}
 	
 	@Override
-    public XValue getValue() {
+	public XValue getValue() {
 		return this.newValue;
 	}
 	

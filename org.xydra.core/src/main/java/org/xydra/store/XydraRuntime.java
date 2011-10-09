@@ -220,6 +220,10 @@ public class XydraRuntime {
 		fireOnInitialisaion();
 	}
 	
+	/**
+	 * @return the last time the XydraRuntime was initialised. Value is UTC
+	 *         milliseconds (Unix time). -1 if never initialised.
+	 */
 	public static long getLastTimeInitialisedAt() {
 		return lastTimeInitialisedAt;
 	}
