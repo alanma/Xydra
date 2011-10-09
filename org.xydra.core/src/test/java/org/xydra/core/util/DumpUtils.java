@@ -44,7 +44,7 @@ public class DumpUtils {
 	 * </code>
 	 */
 	public static String dump(String label, XReadableModel model) {
-		log.info(label + " ** Model " + toStringBuffer(model));
+		log.info(label + "\n" + toStringBuffer(model));
 		return "";
 	}
 	
@@ -56,7 +56,7 @@ public class DumpUtils {
 		assert model != null;
 		assert model.getAddress().getAddressedType() == XType.XMODEL;
 		StringBuffer buf = new StringBuffer();
-		buf.append(" ** Model " + model.getAddress() + " [" + model.getRevisionNumber() + "]");
+		buf.append(" ** Model " + model.getAddress() + " [" + model.getRevisionNumber() + "]\n");
 		for(XID objectId : model) {
 			XReadableObject object = model.getObject(objectId);
 			buf.append(toStringBuffer(object));
@@ -72,7 +72,7 @@ public class DumpUtils {
 	 * </code>
 	 */
 	public static String dump(String label, XReadableObject object) {
-		log.info(label + toStringBuffer(object));
+		log.info(label + "\n" + toStringBuffer(object));
 		return "";
 	}
 	
@@ -100,7 +100,7 @@ public class DumpUtils {
 	 * </code>
 	 */
 	public static String dump(String label, XReadableField field) {
-		log.info(label + toStringBuffer(field));
+		log.info(label + "\n" + toStringBuffer(field));
 		return "";
 	}
 	
