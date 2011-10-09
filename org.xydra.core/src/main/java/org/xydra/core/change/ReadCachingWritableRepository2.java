@@ -67,9 +67,9 @@ public class ReadCachingWritableRepository2 implements XWritableRepository {
 	
 	@Override
 	public XWritableModel createModel(XID modelId) {
-		XWritableModel readCachingModel = this.map.get(modelId);
+		XWritableModel readCachingModel = getModel(modelId);
 		if(readCachingModel == null) {
-			throw new IllegalAccessError("This repo cannot do this");
+			throw new IllegalAccessError("This ReadCachingWritableRepository2 cannot create models");
 		}
 		return readCachingModel;
 	}

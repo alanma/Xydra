@@ -10,6 +10,7 @@ import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XValue;
+import org.xydra.core.util.DumpUtils;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
@@ -175,7 +176,7 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 	}
 	
 	@Override
-    public abstract XWritableObject createObject(XID objectId);
+	public abstract XWritableObject createObject(XID objectId);
 	
 	protected abstract XValue field_getValue(XID objectId, XID fieldId);
 	
@@ -189,13 +190,13 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 	protected abstract boolean field_setValue(XID objectId, XID fieldId, XValue value);
 	
 	@Override
-    public abstract XAddress getAddress();
+	public abstract XAddress getAddress();
 	
 	@Override
-    public abstract XID getID();
+	public abstract XID getID();
 	
 	@Override
-    public XWritableObject getObject(XID objectId) {
+	public XWritableObject getObject(XID objectId) {
 		if(hasObject(objectId)) {
 			return new WrappedObject(objectId);
 		} else {
@@ -218,7 +219,7 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 	public abstract boolean hasObject(XID objectId);
 	
 	@Override
-    public abstract Iterator<XID> iterator();
+	public abstract Iterator<XID> iterator();
 	
 	protected abstract XWritableField object_createField(XID objectId, XID fieldId);
 	
@@ -241,7 +242,7 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 	protected abstract boolean object_removeField(XID objectId, XID fieldId);
 	
 	@Override
-    public abstract boolean removeObject(XID objectId);
+	public abstract boolean removeObject(XID objectId);
 	
 	protected XAddress resolveField(XID objectId, XID fieldId) {
 		assert objectId != null;
@@ -256,7 +257,8 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 	
 	@Override
 	public String toString() {
-		return this.getID() + " (" + this.getClass().getName() + ") " + this.hashCode();
+		return this.getID() + " (" + this.getClass().getName() + ") " + this.hashCode() + " "
+		        + DumpUtils.toStringBuffer(this);
 	}
 	
 }

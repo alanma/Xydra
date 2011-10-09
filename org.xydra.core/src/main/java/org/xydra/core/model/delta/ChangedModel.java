@@ -303,11 +303,6 @@ public class ChangedModel implements XWritableModel {
 	 */
 	public boolean executeCommand(XFieldCommand command) {
 		
-		// FIXME
-		if(command.getChangeType() == ChangeType.CHANGE) {
-			log.debug("a change");
-		}
-		
 		XWritableObject object = getObject(command.getObjectId());
 		if(object == null) {
 			log.warn("{" + command + "} is invalid - object is null");
