@@ -31,7 +31,7 @@ import org.xydra.testgae.shared.SimulatedUser;
  * @author xamde
  * 
  */
-public class RemoteBenchmark {
+public abstract class RemoteBenchmark {
 	protected String absoluteUrl;
 	protected String path;
 	private static final Logger log = LoggerFactory.getLogger(HttpUtils.class);
