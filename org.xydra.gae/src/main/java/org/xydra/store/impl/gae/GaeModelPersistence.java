@@ -13,7 +13,7 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.store.RevisionState;
 import org.xydra.store.impl.gae.changes.GaeChangesServiceImpl2;
 import org.xydra.store.impl.gae.changes.IGaeChangesService;
-import org.xydra.store.impl.gae.execute.GaeExecutionServiceImpl2;
+import org.xydra.store.impl.gae.execute.GaeExecutionServiceImpl3;
 import org.xydra.store.impl.gae.execute.IGaeExecutionService;
 import org.xydra.store.impl.gae.snapshot.GaeSnapshotServiceImpl2;
 import org.xydra.store.impl.gae.snapshot.IGaeSnapshotService;
@@ -43,7 +43,8 @@ public class GaeModelPersistence {
 		this.modelAddress = modelAddress;
 		this.changesService = new GaeChangesServiceImpl2(this.modelAddress);
 		this.snapshotService = new GaeSnapshotServiceImpl2(this.changesService);
-		this.executionService = new GaeExecutionServiceImpl2(this.changesService);
+		this.executionService = new GaeExecutionServiceImpl3(this.changesService,
+		        this.snapshotService);
 		/*
 		 * this.executionService = new
 		 * GaeExecutionServiceImpl3(this.changesService, this.snapshotService);

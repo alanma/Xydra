@@ -107,6 +107,7 @@ public class GaeConfiguration {
 	 *         date.
 	 */
 	public static GaeConfiguration load() {
+		log.info("Load conf from data store. It might be out of date.");
 		Entity entity = SyncDatastore.getEntity(KEY_CONF);
 		if(entity == null) {
 			log.warn("No gaeConfiguration in datastore.");
