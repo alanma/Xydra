@@ -221,6 +221,15 @@ public abstract class RemoteBenchmark {
 	}
 	
 	@Test
+	public void testBenchmarkEditingOneWishOneThread() {
+		for(int i = 0; i < 30; i++) {
+			System.out.println("Iteration #" + i);
+			editingWishesOneThreadInTransaction(100, 0, this.path
+			        + "BenchmarkEditingOneWishOneThread.txt");
+		}
+	}
+	
+	@Test
 	public void testCompareAddingOneWishTransactionAndSequential() {
 		for(int i = 50; i <= 100; i += 10) {
 			System.out.println(i);
@@ -252,6 +261,18 @@ public abstract class RemoteBenchmark {
 			// + "CompareAddingOneWishInTransactionWithInitialWishes" + i +
 			// ".txt");
 			// }
+		}
+	}
+	
+	@Test
+	public void testBenchmarkEditingOneWishOneThreadWithInitialWishes() {
+		for(int i = 0; i < 30; i++) {
+			System.out.println("Iteration #" + i);
+			for(int j = 70; j <= 100; j += 10) {
+				System.out.println("#Initial Wishes: " + j);
+				editingWishesOneThreadInTransaction(100, j, this.path
+				        + "BenchmarkEditingOneWishOneThreadWithInitialWishes" + j + ".txt");
+			}
 		}
 	}
 	
@@ -391,6 +412,61 @@ public abstract class RemoteBenchmark {
 		
 	}
 	
+	public void editingWishesOneThreadInTransaction(int operations, int initialWishes,
+	        String filePath) {
+		String listStr = addList("/repo1", initialWishes);
+		
+		// in total 6 tries to create a list... if it doesn't work, this test
+		// fails
+		for(int i = 0; i < 5 & listStr == null; i++) {
+			listStr = addList("/repo1", initialWishes);
+		}
+		
+		double avgTime;
+		
+		do {
+			
+			int addExceptions = 0;
+			int clearExceptions = 0;
+			int counter = 0;
+			
+			avgTime = 0;
+			for(int i = 0; i < operations; i++) {
+				try {
+					String wishStr = addWish(this.absoluteUrl + listStr);
+					
+					long time = System.currentTimeMillis();
+					assertTrue(HttpUtils.makeGetRequest(this.absoluteUrl + wishStr
+					        + "/editName?name=performanceTest"));
+					time = System.currentTimeMillis() - time;
+					
+					avgTime += time;
+					counter++;
+				} catch(Exception e) {
+					addExceptions++;
+				}
+				
+				try {
+					assertTrue(HttpUtils.makeGetRequest(this.absoluteUrl + listStr + "/clear"));
+				} catch(Exception e) {
+					clearExceptions++;
+				}
+			}
+			
+			int successfulOperations = (operations - addExceptions);
+			avgTime = avgTime / successfulOperations;
+			
+			if(!Double.isNaN(avgTime)) {
+				// Output Results in a simple CSV format
+				outputResults(filePath, initialWishes, operations, 0, successfulOperations,
+				        avgTime, addExceptions, clearExceptions);
+			} else {
+				System.out.println("Was NaN - Starting over...");
+			}
+		} while(Double.isNaN(avgTime));
+		
+	}
+	
 	// ----------------- Helper Methods ------------------------
 	
 	private void outputResults(String filePath, int initialWishes, int operations, int wishes,
@@ -454,6 +530,16 @@ public abstract class RemoteBenchmark {
 		String[] lines = response.split("\n");
 		
 		return lines[0];
+	}
+	
+	private String addWish(String listUrlStr) {
+		assertTrue(HttpUtils.makeGetRequest(listUrlStr + "/add?wishes=1"));
+		
+		String response = HttpUtils.getRequestAsStringResponse(listUrlStr + "?format=urls");
+		
+		String[] lines = response.split("\n");
+		
+		return lines[lines.length - 1];
 	}
 	
 	private class AddWishOperation implements Operation {
