@@ -2,11 +2,19 @@ package org.xydra.gae.admin;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Iterator;
 import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
+import org.xydra.base.XID;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XTransactionEvent;
+import org.xydra.base.rmof.XReadableField;
+import org.xydra.base.rmof.XReadableObject;
+import org.xydra.base.value.XValue;
+import org.xydra.restless.utils.HtmlUtils;
 
 
 public class XydraHtmlUtils {
@@ -73,6 +81,30 @@ public class XydraHtmlUtils {
 
 		        + "</tr>\n");
 		
+	}
+	
+	/**
+	 * @param xo to be rendered as HTML
+	 * @return an HTML String representation of the given XObject
+	 */
+	public static String toHtml(XReadableObject xo) {
+		StringBuffer buf = new StringBuffer();
+		buf.append("<b>Object '");
+		buf.append(xo.getAddress());
+		buf.append("' [");
+		buf.append(xo.getRevisionNumber());
+		buf.append("]</b>\n");
+		SortedMap<String,String> map = new TreeMap<String,String>();
+		Iterator<XID> fieldIt = xo.iterator();
+		while(fieldIt.hasNext()) {
+			XID fieldId = fieldIt.next();
+			XReadableField field = xo.getField(fieldId);
+			assert field != null;
+			XValue value = field.getValue();
+			map.put(fieldId.toString(), (value == null ? "null" : value.toString()) + " rev "
+			        + field.getRevisionNumber());
+		}
+		return buf + HtmlUtils.toDefinitionList(map);
 	}
 	
 }
