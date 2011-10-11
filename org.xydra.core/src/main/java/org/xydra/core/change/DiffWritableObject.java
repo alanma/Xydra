@@ -20,12 +20,12 @@ import org.xydra.base.value.XValue;
 
 
 /**
- * A helper class to minimize the number and size of persistence accesses.
+ * A helper class to minimise the number and size of persistence accesses.
  * 
  * An implementation of {@link XWritableObject} that works as a diff on top of a
- * base {@link XWritableObject}. Via {@link #toCommandList()} a minimal list of
- * commands that changes the base model into the current state can be created.
- * The base model is changed at no times.
+ * base {@link XWritableObject}. Via {@link #toCommandList(boolean)} a minimal
+ * list of commands that changes the base model into the current state can be
+ * created. The base model is changed at no times.
  * 
  * @author xamde
  */
@@ -86,7 +86,7 @@ public class DiffWritableObject implements XWritableObject {
 		return set;
 	}
 	
-	/* representing added stuff */
+	/* representing added stuff (also changed values) */
 	private XWritableObject added;
 	
 	private final XWritableObject base;
@@ -253,32 +253,52 @@ public class DiffWritableObject implements XWritableObject {
 		}
 	}
 	
-	public List<XAtomicCommand> toCommandList() {
+	/**
+	 * @param forced if true, creates forced commands, otherwise safe commands
+	 *            are used.
+	 * @return this diff as a list of commands that mimic the state change since
+	 *         the creation of this diff object
+	 */
+	public List<XAtomicCommand> toCommandList(boolean forced) {
 		List<XAtomicCommand> list = new LinkedList<XAtomicCommand>();
 		
 		// remove
 		for(XID fId : this.removed) {
-			XWritableField f = getField(fId);
+			XAddress fAddress = XX.resolveField(getAddress(), fId);
 			// remove field
-			list.add(X.getCommandFactory().createForcedRemoveFieldCommand(f.getAddress()));
+			if(forced) {
+				list.add(X.getCommandFactory().createForcedRemoveFieldCommand(fAddress));
+			} else {
+				list.add(X.getCommandFactory().createSafeRemoveFieldCommand(fAddress,
+				        this.base.getField(fId).getRevisionNumber()));
+			}
 		}
 		
 		// add
 		for(XID fId : this.added) {
 			XWritableField f = getField(fId);
+			assert f != null;
 			// add field
+			// FIXME !!! handle 'forced'
 			list.add(X.getCommandFactory().createForcedAddFieldCommand(getAddress(), fId));
 			// set value
 			if(!f.isEmpty()) {
 				XValue currentValue = baseGetValue(fId);
 				if(currentValue == null) {
 					// add value
+					// FIXME !!! handle 'forced'
 					list.add(X.getCommandFactory().createForcedAddValueCommand(f.getAddress(),
 					        f.getValue()));
 				} else {
 					// change value
-					list.add(X.getCommandFactory().createForcedChangeValueCommand(f.getAddress(),
-					        f.getValue()));
+					if(forced) {
+						list.add(X.getCommandFactory().createForcedChangeValueCommand(
+						        f.getAddress(), f.getValue()));
+					} else {
+						list.add(X.getCommandFactory().createSafeChangeValueCommand(f.getAddress(),
+						        this.base.getField(fId).getRevisionNumber(), f.getValue()));
+					}
+					
 				}
 			}
 		}
@@ -286,9 +306,15 @@ public class DiffWritableObject implements XWritableObject {
 		return list;
 	}
 	
-	public XTransaction toTransaction() {
+	/**
+	 * @param forced if true, creates forced commands, otherwise safe commands
+	 *            are used.
+	 * @return this diffObject as a transaction. This object is in no way reset
+	 *         afterwards.
+	 */
+	public XTransaction toTransaction(boolean forced) {
 		XTransactionBuilder builder = new XTransactionBuilder(this.getAddress());
-		List<XAtomicCommand> list = toCommandList();
+		List<XAtomicCommand> list = toCommandList(forced);
 		for(XAtomicCommand command : list) {
 			builder.addCommand(command);
 		}
@@ -308,6 +334,15 @@ public class DiffWritableObject implements XWritableObject {
 	 */
 	public XWritableObject getBase() {
 		return this.base;
+	}
+	
+	@Override
+	public String toString() {
+		return "base: " + this.base.toString()
+
+		+ "\n added: " + this.added.toString()
+
+		+ "\n removed: " + this.removed.toString();
 	}
 	
 }
