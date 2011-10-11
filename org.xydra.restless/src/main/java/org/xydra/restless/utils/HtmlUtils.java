@@ -12,16 +12,35 @@ import java.util.Map.Entry;
 import javax.servlet.http.HttpServletResponse;
 
 
+/**
+ * Genereates some simple HTML5.
+ * 
+ * @author xamde
+ * 
+ */
 public class HtmlUtils {
 	
-	public static void writeHtmlHeaderOpenBody(Writer w, String title) throws IOException {
+	public static void writeHtmlHeaderOpenBody(Writer w, String title, HeadChild ... headChildren)
+	        throws IOException {
 		w.write("<!DOCTYPE html>\r\n"
 
-		+ "<html>\r\n" + "<head>\r\n" + "<title>" + title + "</title>\r\n"
-		        + "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\r\n"
-		        + "</head>\r\n"
+		+ "<html>\r\n"
 
-		        + "<body><div>\r\n");
+		+ "  <head>\r\n"
+
+		+ "    <title>" + title + "</title>\r\n"
+
+		+ "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\r\n");
+		
+		if(headChildren != null) {
+			for(HeadChild headChild : headChildren) {
+				w.write("    " + headChild.toString() + "\r\n");
+			}
+		}
+		
+		w.write("  </head>\r\n"
+
+		+ "<body><div>\r\n");
 	}
 	
 	/**
@@ -240,6 +259,87 @@ public class HtmlUtils {
 		
 	}
 	
+	public static class HeadLink implements HeadChild {
+		
+		private String href;
+		private String rel;
+		private String type;
+		
+		/**
+		 * @param href never null
+		 * @param rel can be null TODO when?
+		 * @param type never null
+		 */
+		public HeadLink(String href, String rel, String type) {
+			this.href = href;
+			this.rel = rel;
+			this.type = type;
+		}
+		
+		@Override
+		public String toString() {
+			return "<link"
+
+			+ attribute("href", this.href) + " "
+
+			+ attribute("rel", this.rel) + " "
+
+			+ attribute("type", this.type)
+
+			+ " />";
+		}
+		
+	}
+	
+	/**
+	 * Link a CSS file
+	 */
+	public static class HeadLinkStyle extends HeadLink {
+		
+		public HeadLinkStyle(String href) {
+			super(href, "stylesheet", "text/css");
+		}
+		
+	}
+	
+	/**
+	 * Elements that can be in the html HEAD element.
+	 */
+	public static interface HeadChild {
+	}
+	
+	/**
+	 * Link a JavaScript file
+	 */
+	public static class ScriptLink implements HeadChild {
+		
+		private String href;
+		
+		public ScriptLink(String href) {
+			this.href = href;
+		}
+		
+		@Override
+		public String toString() {
+			return "<script src=\"" + this.href + "\"></script>";
+		}
+		
+	}
+	
+	/**
+	 * @param name never null
+	 * @param value can be null
+	 * @return ' ' name '=' '"' value '"' OR the emtpy string if value is null.
+	 */
+	private static String attribute(String name, String value) {
+		assert name != null;
+		if(value != null) {
+			return " " + name + "=\"" + value + "\"";
+		} else {
+			return null;
+		}
+	}
+	
 	/**
 	 * Utility functions to turn a Map to HTML definition list
 	 * 
@@ -293,10 +393,11 @@ public class HtmlUtils {
 	 * @return a UTF-8 writer for the result stream
 	 * @throws IOException from underlying streams
 	 */
-	public static Writer startHtmlPage(HttpServletResponse res, String title) throws IOException {
+	public static Writer startHtmlPage(HttpServletResponse res, String title,
+	        HeadChild ... headChildren) throws IOException {
 		ServletUtils.headers(res, ServletUtils.CONTENTTYPE_TEXT_HTML);
 		Writer w = res.getWriter();
-		writeHtmlHeaderOpenBody(w, title);
+		writeHtmlHeaderOpenBody(w, title, headChildren);
 		w.flush();
 		return w;
 	}
