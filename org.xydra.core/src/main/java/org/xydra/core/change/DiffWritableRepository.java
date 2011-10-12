@@ -144,7 +144,7 @@ public class DiffWritableRepository extends AbstractDelegatingWritableRepository
 		for(XID modelId : this.added.keySet()) {
 			buf.append("=== ADDED " + modelId + " ===<br/>\n");
 			DiffWritableModel model = this.added.get(modelId);
-			for(XAtomicCommand command : model.toCommandList()) {
+			for(XAtomicCommand command : model.toCommandList(true)) {
 				buf.append(" " + command + " <br/>\n");
 			}
 		}
@@ -154,7 +154,7 @@ public class DiffWritableRepository extends AbstractDelegatingWritableRepository
 		for(DiffWritableModel model : this.potentiallyChanged.values()) {
 			if(model.hasChanges()) {
 				buf.append("=== CHANGED " + model.getID() + " === <br/>\n");
-				for(XAtomicCommand command : model.toCommandList()) {
+				for(XAtomicCommand command : model.toCommandList(true)) {
 					buf.append(" " + command + " <br/>\n");
 				}
 			}

@@ -17,6 +17,8 @@ import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.base.value.XValue;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
 
 /**
@@ -30,6 +32,8 @@ import org.xydra.base.value.XValue;
  * @author xamde
  */
 public class DiffWritableObject implements XWritableObject {
+	
+	private static final Logger log = LoggerFactory.getLogger(DiffWritableObject.class);
 	
 	private class WrappedField implements XWritableField {
 		
@@ -280,7 +284,12 @@ public class DiffWritableObject implements XWritableObject {
 			assert f != null;
 			// add field
 			// FIXME !!! handle 'forced'
-			list.add(X.getCommandFactory().createForcedAddFieldCommand(getAddress(), fId));
+			if(this.base.hasField(fId)) {
+				log.warn("No need to create '" + fId + "', field already in base.");
+			} else {
+				list.add(X.getCommandFactory().createForcedAddFieldCommand(getAddress(), fId));
+			}
+			
 			// set value
 			if(!f.isEmpty()) {
 				XValue currentValue = baseGetValue(fId);

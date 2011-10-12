@@ -50,7 +50,7 @@ public class DiffWritableModelTest {
 		bertObject.createField(fon).setValue(XV.toValue("456"));
 		bertObject.createField(mail).setValue(XV.toValue("b@ex.com"));
 		
-		List<XAtomicCommand> list = this.diffModel.toCommandList();
+		List<XAtomicCommand> list = this.diffModel.toCommandList(true);
 		for(XAtomicCommand ac : list) {
 			log.debug(ac.toString());
 		}
@@ -64,7 +64,7 @@ public class DiffWritableModelTest {
 		adamObject.createField(mail).setValue(XV.toValue("a@ex.com"));
 		this.diffModel.removeObject(adam);
 		
-		List<XAtomicCommand> list = this.diffModel.toCommandList();
+		List<XAtomicCommand> list = this.diffModel.toCommandList(true);
 		assertEquals(0, list.size());
 	}
 	
@@ -75,7 +75,7 @@ public class DiffWritableModelTest {
 		adamObject.createField(fon).setValue(XV.toValue("1234"));
 		adamObject.createField(fon).setValue(XV.toValue("12345"));
 		
-		List<XAtomicCommand> list = this.diffModel.toCommandList();
+		List<XAtomicCommand> list = this.diffModel.toCommandList(true);
 		assertEquals(3, list.size());
 	}
 	
@@ -83,7 +83,7 @@ public class DiffWritableModelTest {
 	public void testDeleteNonexistingField() {
 		XWritableObject adamObject = this.diffModel.createObject(adam);
 		adamObject.removeField(fon);
-		List<XAtomicCommand> list = this.diffModel.toCommandList();
+		List<XAtomicCommand> list = this.diffModel.toCommandList(true);
 		assertEquals(1, list.size());
 	}
 	
@@ -117,7 +117,7 @@ public class DiffWritableModelTest {
 		assertTrue(drepo.getModel(XX.toId("dmodel")).getObject(XX.toId("dobject"))
 		        .getField(XX.toId("dfield")).getValue().equals(XV.toValue("dvalue")));
 		DiffWritableModel diffModel = (DiffWritableModel)drepo.getModel(XX.toId("dmodel"));
-		List<XAtomicCommand> list = diffModel.toCommandList();
+		List<XAtomicCommand> list = diffModel.toCommandList(true);
 		assertEquals("add dobject, dfield, dvalue", 3, list.size());
 	}
 }

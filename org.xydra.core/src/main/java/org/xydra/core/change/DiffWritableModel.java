@@ -34,9 +34,9 @@ import org.xydra.log.LoggerFactory;
  * Does not support revision numbers.
  * 
  * An implementation of {@link XWritableModel} that works as a diff on top of a
- * base {@link XWritableModel}. Via {@link #toCommandList()} a minimal list of
- * commands that changes the base model into the current state can be created.
- * The base model is changed at no times.
+ * base {@link XWritableModel}. Via {@link #toCommandList(boolean)} a minimal
+ * list of commands that changes the base model into the current state can be
+ * created. The base model is changed at no times.
  * 
  * @author xamde
  */
@@ -169,12 +169,12 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	}
 	
 	protected Set<XID> idsAsSet() {
-		return IndexUtils.diff(this.base.iterator(), this.added.key1Iterator(), this.removed
-		        .key1Iterator());
+		return IndexUtils.diff(this.base.iterator(), this.added.key1Iterator(),
+		        this.removed.key1Iterator());
 	}
 	
 	@Override
-    public boolean isEmpty() {
+	public boolean isEmpty() {
 		return this.idsAsSet().isEmpty();
 	}
 	
@@ -282,7 +282,15 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 		}
 	}
 	
-	public List<XAtomicCommand> toCommandList() {
+	/**
+	 * @param forced if true, create forced commands
+	 * 
+	 *            TODO implement semantics of 'forced'
+	 * 
+	 * @return a list of commands which transform the base model given at
+	 *         creation time into this current model state
+	 */
+	public List<XAtomicCommand> toCommandList(boolean forced) {
 		List<XAtomicCommand> list = new LinkedList<XAtomicCommand>();
 		
 		// remove
@@ -307,8 +315,17 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 			KeyKeyEntryTuple<XID,XID,XValue> e = it.next();
 			if(e.getKey2().equals(NONE)) {
 				// add object
-				list.add(X.getCommandFactory().createForcedAddObjectCommand(getAddress(),
-				        e.getKey1()));
+				if(this.base.hasObject(e.getKey1())) {
+					log.warn("No need to create object '" + e.getKey1() + "', its already in base");
+				} else {
+					if(forced) {
+						list.add(X.getCommandFactory().createForcedAddObjectCommand(getAddress(),
+						        e.getKey1()));
+					} else {
+						list.add(X.getCommandFactory().createSafeAddObjectCommand(getAddress(),
+						        e.getKey1()));
+					}
+				}
 			} else if(e.getEntry().equals(NOVALUE)) {
 				// add empty field
 				list.add(X.getCommandFactory().createForcedAddFieldCommand(
@@ -342,8 +359,8 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 		Collections.sort(list, new Comparator<XAtomicCommand>() {
 			@Override
 			public int compare(XAtomicCommand a, XAtomicCommand b) {
-				return b.getChangedEntity().getAddressedType().compareTo(
-				        a.getChangedEntity().getAddressedType());
+				return b.getChangedEntity().getAddressedType()
+				        .compareTo(a.getChangedEntity().getAddressedType());
 			}
 		});
 		
@@ -355,7 +372,7 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	 */
 	public XTransaction toTransaction() {
 		XTransactionBuilder builder = new XTransactionBuilder(this.getAddress());
-		List<XAtomicCommand> list = toCommandList();
+		List<XAtomicCommand> list = toCommandList(true);
 		for(XAtomicCommand command : list) {
 			builder.addCommand(command);
 		}
