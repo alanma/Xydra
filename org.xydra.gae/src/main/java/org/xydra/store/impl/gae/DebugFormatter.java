@@ -32,6 +32,8 @@ public class DebugFormatter {
 	
 	private static final String LINE_END = "  <br/>\n";
 	private static final int MAX_VALUE_STR_LEN = 40;
+	/** More readable logs on AppEngine */
+	private static final String PREFIX = "\n";
 	
 	private static String timing(String s, Timing timing) {
 		switch(timing) {
@@ -47,13 +49,15 @@ public class DebugFormatter {
 	
 	public static String dataGet(String dataSourceName, Collection<?> keys, Map<?,?> result,
 	        Timing timing) {
-		return timing((result.isEmpty() ? GET_BATCH_EMPTY : GET_BATCH) + " " + dataSourceName
-		        + formatKey(keys) + " = " + format(result.values()), timing);
+		return PREFIX
+		        + timing((result.isEmpty() ? GET_BATCH_EMPTY : GET_BATCH) + " " + dataSourceName
+		                + formatKey(keys) + " = " + format(result.values()), timing);
 	}
 	
 	public static String dataGet(String dataSourceName, String key, Object value, Timing timing) {
-		return timing((value == null ? GET_NULL : GET_VALUE) + " " + dataSourceName
-		        + formatKey(key) + " = " + format(value), timing);
+		return PREFIX
+		        + timing((value == null ? GET_NULL : GET_VALUE) + " " + dataSourceName
+		                + formatKey(key) + " = " + format(value), timing);
 	}
 	
 	public static String format(Object value) {
@@ -124,27 +128,31 @@ public class DebugFormatter {
 	}
 	
 	public static String dataPut(String dataSourceName, String key, Object value, Timing timing) {
-		return timing((value == null ? PUT_NULL : PUT_VALUE) + " " + dataSourceName
-		        + formatKey(key) + " -> " + format(value), timing);
+		return PREFIX
+		        + timing((value == null ? PUT_NULL : PUT_VALUE) + " " + dataSourceName
+		                + formatKey(key) + " -> " + format(value), timing);
 	}
 	
 	public static String dataPutIfNull(String dataSourceName, Object key, Object value,
 	        Timing timing) {
-		return timing((value == null ? "-USELESS-" : ">ifWasNull>") + " " + dataSourceName
-		        + formatKey(key) + " -> " + format(value), timing);
+		return PREFIX
+		        + timing((value == null ? "-USELESS-" : ">ifWasNull>") + " " + dataSourceName
+		                + formatKey(key) + " -> " + format(value), timing);
 	}
 	
 	public static String dataPutIfUntouched(String dataSourceName, Object key, Object oldValue,
 	        Object newValue, Timing timing) {
-		return timing((newValue == null ? "X-(untouched?)->" : ">>(untouched)>") + " "
-		        + dataSourceName + formatKey(key) + " ? " + format(oldValue) + " -> "
-		        + format(newValue), timing);
+		return PREFIX
+		        + timing((newValue == null ? "X-(untouched?)->" : ">>(untouched)>") + " "
+		                + dataSourceName + formatKey(key) + " ? " + format(oldValue) + " -> "
+		                + format(newValue), timing);
 	}
 	
 	public static String dataPut(String dataSourceName, Map<? extends Object,? extends Object> map,
 	        Timing timing) {
-		return timing((map.isEmpty() ? PUT_BATCH_EMPTY : PUT_BATCH) + " " + dataSourceName
-		        + formatKey(map.keySet()) + " -> " + format(map.values()), timing);
+		return PREFIX
+		        + timing((map.isEmpty() ? PUT_BATCH_EMPTY : PUT_BATCH) + " " + dataSourceName
+		                + formatKey(map.keySet()) + " -> " + format(map.values()), timing);
 	}
 	
 	private static final String formatKey(Object key) {

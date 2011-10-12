@@ -425,19 +425,19 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		 */
 		/* === Phase 1: Determine revisions not yet locally cached === */
 		Set<Long> locallyMissingRevs = computeLocallyMissingRevs(beginRevInclusive, endRevInclusive);
-		log.debug("locallyMissingRevs: " + locallyMissingRevs.size() + " of "
+		log.trace("locallyMissingRevs: " + locallyMissingRevs.size() + " of "
 		        + (endRevInclusive - beginRevInclusive + 1));
 		
 		/* === Phase 2+3: Ask Memcache + Datastore === */
 		fetchMissingRevisionsFromMemcacheAndDatastore(locallyMissingRevs);
-		log.debug("number of missingRevs after asking DS&MC: " + locallyMissingRevs.size());
+		log.trace("number of missingRevs after asking DS&MC: " + locallyMissingRevs.size());
 		
 		/* === Phase 4: Compute result from local cache === */
 		boolean foundEnd = false;
 		RevisionState currentRev = startingRevExclusive;
 		for(long i = beginRevInclusive; i <= endRevInclusive; i++) {
 			GaeChange change = getCachedChange(i);
-			log.debug("cached change " + i + ": " + DebugFormatter.format(change));
+			log.trace("cached change " + i + ": " + DebugFormatter.format(change));
 			
 			// TODO careful: too much caching?
 			if(change == null) {
@@ -453,7 +453,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		}
 		
 		if(foundEnd) {
-			log.debug("Step: return currentRev = " + currentRev);
+			log.trace("Step: return currentRev = " + currentRev);
 			return new Pair<RevisionState,Boolean>(currentRev, true);
 		}
 		// else
