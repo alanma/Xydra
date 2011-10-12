@@ -22,19 +22,19 @@ public class GaeConfigurationManager {
 	
 	private static GaeConfiguration currentConf = null;
 	
-	private static final long ONE_MINUTE = 60 * 1000;
+	private static final long FIFTEEN_MINUTES = 15 * 60 * 1000;
 	
 	/**
 	 * The default configuration is valid for 60 seconds after instance boot.
 	 */
 	private static GaeConfiguration defaultConfiguration = GaeConfiguration
-	        .createWithLifetime(ONE_MINUTE);
+	        .createWithLifetime(FIFTEEN_MINUTES);
 	
 	/**
 	 * @return the default configuration. Changes to this config are effective.
 	 */
 	public static GaeConfiguration getDefaultConfiguration() {
-		defaultConfiguration.setLifetime(ONE_MINUTE);
+		defaultConfiguration.setLifetime(FIFTEEN_MINUTES);
 		assert defaultConfiguration.isStillValid();
 		return defaultConfiguration;
 	}
@@ -75,9 +75,8 @@ public class GaeConfigurationManager {
 		} else {
 			log.info("Loaded config from backend.");
 			if(!conf.isStillValid()) {
-				log
-				        .info("Config was no longer valid. Extending lifetime for 1 minute. Persisting that.");
-				conf.setLifetime(ONE_MINUTE);
+				log.info("Config was no longer valid. Extending lifetime for 1 minute. Persisting that.");
+				conf.setLifetime(FIFTEEN_MINUTES);
 				conf.store();
 			}
 		}

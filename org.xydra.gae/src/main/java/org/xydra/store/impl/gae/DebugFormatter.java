@@ -1,6 +1,9 @@
 package org.xydra.store.impl.gae;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -15,6 +18,10 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 
 
+/**
+ * @author xamde
+ * 
+ */
 public class DebugFormatter {
 	
 	public static enum Timing {
@@ -166,4 +173,15 @@ public class DebugFormatter {
 	public static String clear(String dataSourceName) {
 		return "CLEAR " + dataSourceName;
 	}
+	
+	/**
+	 * @return "2011-10-12 19:05:02.617" UTC time
+	 */
+	public static String currentTimeInGaeFormat() {
+		long ms = System.currentTimeMillis();
+		Date d = new Date(ms);
+		DateFormat df = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss.SSS");
+		return df.format(d);
+	}
+	
 }

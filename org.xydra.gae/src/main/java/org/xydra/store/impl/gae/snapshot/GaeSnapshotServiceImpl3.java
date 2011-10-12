@@ -27,6 +27,7 @@ import org.xydra.core.model.XChangeLog;
 import org.xydra.core.serialize.SerializedModel;
 import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.xml.XmlParser;
+import org.xydra.core.util.DebugUtils;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.impl.gae.DebugFormatter;
@@ -212,7 +213,7 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 			}
 			// execute
 			if(USE_MEMCACHE) {
-				// FIXME ask only for 'possibly cached' (mod 10) numbers
+				// TODO ask only for 'possibly cached' (mod 10) numbers
 				batchResult = Memcache.getEntities(keys);
 				GaeAssert.gaeAssert(cacheResultIsConsistent(batchResult),
 				        "cache inconsistent, see logs");
@@ -323,7 +324,7 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 	/**
 	 * For this model: revNr -> modelSnapshot
 	 * 
-	 * FIXME SCALE avoid growing large, keep only most recent version?
+	 * TODO SCALE avoid growing large, keep only most recent version?
 	 */
 	@SuppressWarnings("unchecked")
 	private SortedMap<Long,XRevWritableModel> getModelSnapshotsCache() {
@@ -343,11 +344,11 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 		return modelSnapshotsCache;
 	}
 	
+	/**
+	 * @param requestedRevNr ..
+	 * @return the requested model snapshot
+	 */
 	synchronized public XRevWritableModel getModelSnapshot(long requestedRevNr) {
-		// assert requestedRevNr > 0 &
-		// this.changesService.getCurrentRevisionNumber() > 0 : "requested:"
-		// + requestedRevNr + " current:" +
-		// this.changesService.getCurrentRevisionNumber();
 		log.debug("Get snapshot " + this.modelAddress + " rev " + requestedRevNr);
 		
 		/* if localVmCache has exact requested version, use it */
@@ -357,16 +358,28 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 			return XCopyUtils.createSnapshot(cached);
 		}
 		
+		return createModelSnapshot(requestedRevNr);
+	}
+	
+	/**
+	 * We know already that the requestedRevNr is not in the local vmCache
+	 * 
+	 * @param requestedRevNr
+	 * @return
+	 */
+	private XRevWritableModel createModelSnapshot(long requestedRevNr) {
 		// IMPROVE make this dependent on whether the needed changes are cached
 		// locally?
+		
 		for(long i = 1; i <= SNAPSHOT_LOAD_THRESHOLD; i++) {
-			XRevWritableModel oldCached = localVmCacheGet(requestedRevNr);
+			XRevWritableModel oldCached = localVmCacheGet(requestedRevNr - i);
 			if(oldCached != null) {
-				log.debug("Found cached rev " + oldCached.getRevisionNumber()
-				        + " and compute form there on");
+				log.debug("Found oldCached rev " + oldCached.getRevisionNumber()
+				        + " and will compute from there on");
 				return computeAndCacheSnapshotFromBase(requestedRevNr,
 				        XCopyUtils.createSnapshot(oldCached));
 			}
+			
 		}
 		
 		/*
@@ -453,7 +466,7 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 		}
 		if(matchOrNewer.isEmpty()) {
 			// not cached
-			return getModelSnapshot(revisionNumber);
+			return createModelSnapshot(revisionNumber);
 		} else {
 			XRevWritableModel cached = matchOrNewer.values().iterator().next();
 			assert cached.getRevisionNumber() >= revisionNumber;
@@ -480,6 +493,9 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 	private XRevWritableModel localVmCacheGet(long requestedRevNr) {
 		if(!USE_SNAPSHOT_CACHE)
 			return null;
+		
+		// FIXME
+		DebugUtils.dumpStacktrace();
 		
 		XRevWritableModel cachedModel = getModelSnapshotsCache().get(requestedRevNr);
 		

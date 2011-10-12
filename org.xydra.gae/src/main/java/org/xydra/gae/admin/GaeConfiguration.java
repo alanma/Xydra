@@ -123,8 +123,8 @@ public class GaeConfiguration {
 		try {
 			conf.validUntilUTC = Long.parseLong(conf.map.get(PROP_VALID_UTC));
 		} catch(NumberFormatException e) {
-			log.warn("Bad config in store, setting time to live to 1 minute");
-			conf.validUntilUTC = System.currentTimeMillis() + (60 * 1000);
+			log.warn("Bad config in store, setting time to live to 15 minutes");
+			conf.validUntilUTC = System.currentTimeMillis() + (15 * 60 * 1000);
 		}
 		return conf;
 	}
