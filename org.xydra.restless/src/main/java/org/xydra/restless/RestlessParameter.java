@@ -11,6 +11,8 @@ public class RestlessParameter {
 	Object defaultValue;
 	boolean isArray;
 	
+	public static final String DEFAULT_VALUE_NONE_BUT_REQUIRED = "missing_required_parameter";
+	
 	private static final String[] defaultArray = new String[0];
 	
 	/**
@@ -44,7 +46,11 @@ public class RestlessParameter {
 	 * @param name for binding it to variable names
 	 */
 	public RestlessParameter(String name) {
-		this(name, null);
+		this(name, DEFAULT_VALUE_NONE_BUT_REQUIRED);
+	}
+	
+	public boolean mustBeDefinedExplicitly() {
+		return this.defaultValue == DEFAULT_VALUE_NONE_BUT_REQUIRED;
 	}
 	
 }

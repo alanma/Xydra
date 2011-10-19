@@ -28,6 +28,8 @@ public class ServletUtils {
 	
 	public static final String HEADER_ACCEPT = "Accept";
 	
+	private static final String HEADER_REFERER = "Referer";
+	
 	public static final String CONTENTTYPE_APPLICATION_XHTML_XML = "application/xhtml+xml";
 	
 	public static final String CONTENTTYPE_TEXT_HTML = "text/html";
@@ -317,6 +319,14 @@ public class ServletUtils {
 			map.put(name, valueList);
 		}
 		return map;
+	}
+	
+	/**
+	 * @param req ..
+	 * @return the referrer header url or null
+	 */
+	public static String getReferrerUrl(HttpServletRequest req) {
+		return req.getHeader(HEADER_REFERER);
 	}
 	
 }

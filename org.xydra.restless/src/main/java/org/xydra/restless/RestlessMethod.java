@@ -197,7 +197,7 @@ public class RestlessMethod {
 					}
 					
 					/* 2) look in POST params and query params */
-					if(value == null) {
+					if(notSet(value)) {
 						String[] values = req.getParameterValues(param.name);
 						if(values != null) {
 							// handle POST and query param values
@@ -215,11 +215,22 @@ public class RestlessMethod {
 										buf.append(values[j]);
 										buf.append(", ");
 									}
-									log.warn("Multiple values for parameter '" + param.name
-									        + "' (values=" + buf.toString()
-									        + ") from queryString and POST params, using default ("
-									        + param.defaultValue + ")");
-									value = param.defaultValue;
+									
+									if(param.mustBeDefinedExplicitly()) {
+										throw new IllegalArgumentException(
+										        "Parameter '"
+										                + param.name
+										                + "' required but not explicitly defined. Found multiple values.");
+									} else {
+										log.warn("Multiple values for parameter '"
+										        + param.name
+										        + "' (values="
+										        + buf.toString()
+										        + ") from queryString and POST params, using default ("
+										        + param.defaultValue + ")");
+										value = param.defaultValue;
+									}
+									
 								} else {
 									value = uniqueValues.iterator().next();
 								}
@@ -231,13 +242,18 @@ public class RestlessMethod {
 					}
 					
 					/* 3) look in cookies */
-					if(value == null && !param.isArray) {
+					if(notSet(value) && !param.isArray) {
 						value = cookieMap.get(param.name);
 					}
 					
 					/* 4) use default */
-					if(value == null) {
-						value = param.defaultValue;
+					if(notSet(value)) {
+						if(param.mustBeDefinedExplicitly()) {
+							throw new IllegalArgumentException("Parameter '" + param.name
+							        + "' required but no explicitly defined. Found no value.");
+						} else {
+							value = param.defaultValue;
+						}
 					}
 					javaMethodArgs.add(value);
 					boundNamedParameterNumber++;
@@ -342,6 +358,10 @@ public class RestlessMethod {
 			}
 			
 		}
+	}
+	
+	private boolean notSet(Object value) {
+		return value == null || value.equals("");
 	}
 	
 	private String methodReference(Object instanceOrClass, Method method) {
