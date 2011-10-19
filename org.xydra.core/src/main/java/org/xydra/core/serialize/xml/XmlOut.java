@@ -12,6 +12,8 @@ import org.xydra.core.serialize.AbstractXydraOut;
 @RequiresAppEngine(false)
 public class XmlOut extends AbstractXydraOut {
 	
+	public static final String CONTENT_TYPE_XML = "application/xml";
+	
 	public XmlOut(MiniWriter writer) {
 		this(writer, true);
 	}
@@ -206,7 +208,7 @@ public class XmlOut extends AbstractXydraOut {
 	
 	@Override
 	public String getContentType() {
-		return "application/xml";
+		return CONTENT_TYPE_XML;
 	}
 	
 	@Override

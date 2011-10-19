@@ -14,6 +14,8 @@ import org.xydra.core.serialize.AbstractXydraOut;
 @RequiresAppEngine(false)
 public class JsonOut extends AbstractXydraOut {
 	
+	public static final String CONTENT_TYPE_JSON = "application/json";
+	
 	private final String callback;
 	
 	public JsonOut(MiniWriter writer) {
@@ -173,7 +175,7 @@ public class JsonOut extends AbstractXydraOut {
 	
 	@Override
 	public String getContentType() {
-		return "application/json";
+		return CONTENT_TYPE_JSON;
 	}
 	
 	@Override
