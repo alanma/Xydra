@@ -91,9 +91,9 @@ public class XydraHtmlUtils {
 		StringBuffer buf = new StringBuffer();
 		buf.append("<b>Object '");
 		buf.append(xo.getAddress());
-		buf.append("' [");
+		buf.append("' <span class='rev'>");
 		buf.append(xo.getRevisionNumber());
-		buf.append("]</b>\n");
+		buf.append("</span></b>\n");
 		SortedMap<String,String> map = new TreeMap<String,String>();
 		Iterator<XID> fieldIt = xo.iterator();
 		while(fieldIt.hasNext()) {
@@ -101,8 +101,8 @@ public class XydraHtmlUtils {
 			XReadableField field = xo.getField(fieldId);
 			assert field != null;
 			XValue value = field.getValue();
-			map.put(fieldId.toString(), (value == null ? "null" : value.toString()) + " rev "
-			        + field.getRevisionNumber());
+			map.put(fieldId.toString(), (value == null ? "null" : value.toString())
+			        + " <span class='rev'>" + field.getRevisionNumber() + "</span>");
 		}
 		return buf + HtmlUtils.toDefinitionList(map);
 	}
