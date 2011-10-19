@@ -394,4 +394,31 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 		return !this.added.isEmpty() || !this.removed.isEmpty();
 	}
 	
+	@Override
+	public long getRevisionNumber() {
+		log.debug("Returning outdated base-revision number");
+		return this.base.getRevisionNumber();
+	}
+	
+	@Override
+	protected long object_getRevisionNumber(XID objectId) {
+		XWritableObject object = this.base.getObject(objectId);
+		if(object == null) {
+			return UNDEFINED;
+		}
+		return object.getRevisionNumber();
+	}
+	
+	@Override
+	protected long field_getRevisionNumber(XID objectId, XID fieldId) {
+		XWritableObject object = this.base.getObject(objectId);
+		if(object == null) {
+			return UNDEFINED;
+		}
+		XWritableField field = object.getField(fieldId);
+		if(field == null) {
+			return UNDEFINED;
+		}
+		return field.getRevisionNumber();
+	}
 }

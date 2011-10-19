@@ -24,6 +24,7 @@ import org.xydra.log.LoggerFactory;
  */
 public abstract class AbstractDelegatingWritableModel implements XWritableModel {
 	
+	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory
 	        .getLogger(AbstractDelegatingWritableModel.class);
 	
@@ -58,8 +59,7 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 		
 		@Override
 		public long getRevisionNumber() {
-			log.debug("Returning UNDEFINED as revision number");
-			return UNDEFINED;
+			return field_getRevisionNumber(this.objectId, this.fieldId);
 		}
 		
 		@Override
@@ -122,12 +122,6 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 		}
 		
 		@Override
-		public long getRevisionNumber() {
-			log.debug("Returning UNDEFINED as revision number");
-			return UNDEFINED;
-		}
-		
-		@Override
 		public XType getType() {
 			return XType.XOBJECT;
 		}
@@ -173,12 +167,20 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 			return buf.toString();
 		}
 		
+		@Override
+		public long getRevisionNumber() {
+			return object_getRevisionNumber(this.objectId);
+		}
 	}
+	
+	protected abstract long object_getRevisionNumber(XID objectId);
 	
 	@Override
 	public abstract XWritableObject createObject(XID objectId);
 	
 	protected abstract XValue field_getValue(XID objectId, XID fieldId);
+	
+	protected abstract long field_getRevisionNumber(XID objectId, XID fieldId);
 	
 	protected boolean field_isEmpty(XID objectId, XID fieldId) {
 		assert hasObject(objectId);
@@ -202,12 +204,6 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 		} else {
 			return null;
 		}
-	}
-	
-	@Override
-	public long getRevisionNumber() {
-		log.debug("Returning UNDEFINED as revision number");
-		return UNDEFINED;
 	}
 	
 	@Override
