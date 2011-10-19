@@ -374,6 +374,31 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 	}
 	
 	RevisionState updateCurrentRev(RevisionState lastCurrentRev) {
+		// shortcut:
+		if(lastCurrentRev != null) {
+			// quickly look in datastore if this is simply still the current rev
+			// prepare batch request
+			long nextRev = lastCurrentRev.revision() + 1;
+			Key key = KeyStructure.createChangeKey(getModelAddress(), nextRev);
+			Entity e = SyncDatastore.getEntity(key);
+			if(e == null) {
+				// we won, we got it
+				log.info("lastCurrentRev = " + lastCurrentRev + " verified via datastore");
+				return lastCurrentRev;
+			} else {
+				// use information of entity
+				// process status of change
+				GaeChange change = new GaeChange(getModelAddress(), nextRev, e);
+				Status status = change.getStatus();
+				if(status.isCommitted()) {
+					// use it
+					cacheCommittedChange(change);
+				} else {
+					// TODO progress change
+				}
+			}
+		}
+		
 		Pair<RevisionState,Boolean> current = new Pair<RevisionState,Boolean>(
 		        lastCurrentRev == null ? RevisionState.MODEL_DOES_NOT_EXIST_YET : lastCurrentRev,
 		        false);
