@@ -29,10 +29,10 @@ import org.xydra.restless.utils.Clock;
 import org.xydra.store.impl.gae.DebugFormatter;
 import org.xydra.store.impl.gae.FutureUtils;
 import org.xydra.store.impl.gae.changes.GaeChange;
+import org.xydra.store.impl.gae.changes.GaeChange.Status;
 import org.xydra.store.impl.gae.changes.GaeLocks;
 import org.xydra.store.impl.gae.changes.IGaeChangesService;
 import org.xydra.store.impl.gae.changes.VoluntaryTimeoutException;
-import org.xydra.store.impl.gae.changes.GaeChange.Status;
 import org.xydra.store.impl.gae.snapshot.IGaeSnapshotService;
 
 import com.google.appengine.api.datastore.Key;
@@ -120,9 +120,10 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 		XRevWritableModel snapshot = null;
 		if(exists) {
 			snapshot = this.snapshots.getPartialSnapshot(snapshotRev, change.getLocks());
+			c.stopAndStart("getPartialSnapshot");
+			snapshot = XCopyUtils.createSnapshot(snapshot);
+			c.stopAndStart("copy");
 		}
-		c.stopAndStart("getPartialSnapshot");
-		
 		/*
 		 * IMPROVE we can ignore all changes in [currentRev + 1,
 		 * lastCommittedRev) as they either failed or didn't change anything,
