@@ -71,6 +71,11 @@ public class TestServer {
 		this.port = port;
 	}
 	
+	/**
+	 * @param contextPath of webapp
+	 * @param docRoot webapp root on local disc
+	 * @return absolute url of server + port + context
+	 */
 	public URI startServer(String contextPath, File docRoot) {
 		
 		if(this.server != null)
@@ -153,8 +158,8 @@ public class TestServer {
 		XTransactionBuilder tb2 = new XTransactionBuilder(modelAddr2);
 		DemoModelUtil.setupPhonebook(modelAddr2, tb2);
 		
-		store.executeCommands(actorId, passwordHash, new XCommand[] { createCommand2,
-		        tb2.buildCommand() }, null);
+		store.executeCommands(actorId, passwordHash,
+		        new XCommand[] { createCommand2, tb2.buildCommand() }, null);
 		
 		log.info("Started embedded Jetty server. User interface is at " + uri.toString());
 		

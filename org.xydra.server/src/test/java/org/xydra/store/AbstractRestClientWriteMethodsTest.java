@@ -1,16 +1,11 @@
 package org.xydra.store;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
-import java.io.File;
-import java.net.URI;
 import java.util.Set;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -24,20 +19,20 @@ import org.xydra.core.serialize.XydraParser;
 import org.xydra.core.serialize.XydraSerializer;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.server.test.TestServer;
-import org.xydra.store.access.XA;
-import org.xydra.store.access.XAuthenticationDatabase;
-import org.xydra.store.access.XAuthorisationManager;
 import org.xydra.store.impl.rest.XydraStoreRestClient;
 
 
 /**
- * Abstract test framework for Xydra REST APIs
+ * Abstract test framework for Xydra REST APIs.
+ * 
+ * Subclasses must overwrite {@link #getServerConfig()}.
  * 
  * @author dscharrer
  * 
  */
 public abstract class AbstractRestClientWriteMethodsTest extends AbstractStoreWriteMethodsTest {
+	
+	protected static ServerConfig serverconfig;
 	
 	abstract protected XydraSerializer getSerializer();
 	
@@ -45,6 +40,14 @@ public abstract class AbstractRestClientWriteMethodsTest extends AbstractStoreWr
 	
 	private final XydraSerializer serializer;
 	private final XydraParser parser;
+	
+	public static ServerConfig getServerConfig() {
+		if(serverconfig == null) {
+			throw new IllegalStateException(
+			        "Sublcasses must set the serverconfig in a static{...} block.");
+		}
+		return serverconfig;
+	}
 	
 	protected AbstractRestClientWriteMethodsTest() {
 		this.serializer = getSerializer();
@@ -59,57 +62,22 @@ public abstract class AbstractRestClientWriteMethodsTest extends AbstractStoreWr
 		return this.parser.parse(data);
 	}
 	
-	private static final String PASSWORD_TESTER = "secret";
-	
-	private static final XID ACTOR_TESTER = XX.toId("tester");
-	
+	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory
 	        .getLogger(AbstractRestClientWriteMethodsTest.class);
 	
 	private XydraStore clientStore;
-	private static TestServer server;
-	private static URI storeapi;
-	
-	@BeforeClass
-	public static void init() {
-		
-		// initialize Jersey
-		assertNull(server);
-		server = new TestServer(8973);
-		
-		URI apiprefix = server.startServer("/xydra", new File("src/main/webapp"));
-		
-		log.info("Using apiprefix = " + apiprefix.toASCIIString());
-		
-		/**
-		 * Note: resolve implicitly creates a sub-url as if it had started with
-		 * a '/'. However, local urls starting with a slash '/' are resolved as
-		 * the webapp root. Therefore we leave the slash out here.
-		 */
-		
-		storeapi = apiprefix.resolve("store/v1/");
-		log.info("Using store API url = " + storeapi.toASCIIString());
-		
-		XydraStore store = server.getStore();
-		
-		XydraStoreAdmin admin = store.getXydraStoreAdmin();
-		XAuthenticationDatabase auth = admin.getAccessControlManager().getAuthenticationDatabase();
-		auth.setPasswordHash(ACTOR_TESTER, PASSWORD_TESTER);
-		XAuthorisationManager access = admin.getAccessControlManager().getAuthorisationManager();
-		XAddress repoAddr = XX.toAddress(admin.getRepositoryId(), null, null, null);
-		access.getAuthorisationDatabase().setAccess(ACTOR_TESTER, repoAddr, XA.ACCESS_READ, true);
-		access.getAuthorisationDatabase().setAccess(ACTOR_TESTER, repoAddr, XA.ACCESS_WRITE, true);
-	}
 	
 	@Override
 	@Before
-	public void setUp() {
-		this.clientStore = new XydraStoreRestClient(storeapi, this.serializer, this.parser);
-		super.setUp();
+	public void before() {
+		this.clientStore = new XydraStoreRestClient(getServerConfig().absoluteURI, this.serializer,
+		        this.parser);
+		super.before();
 	}
 	
 	@After
-	public void tearDown() {
+	public void after() {
 		SynchronousTestCallback<Set<XID>> mids = new SynchronousTestCallback<Set<XID>>();
 		this.store.getModelIds(getCorrectUser(), getCorrectUserPasswordHash(), mids);
 		assertEquals(SynchronousTestCallback.SUCCESS, mids.waitOnCallback(Long.MAX_VALUE));
@@ -125,26 +93,6 @@ public abstract class AbstractRestClientWriteMethodsTest extends AbstractStoreWr
 		}
 	}
 	
-	@AfterClass
-	public static void cleanup() {
-		
-		XydraStore store = server.getStore();
-		
-		// cleanup access rights
-		XydraStoreAdmin admin = store.getXydraStoreAdmin();
-		XAuthenticationDatabase auth = admin.getAccessControlManager().getAuthenticationDatabase();
-		auth.setPasswordHash(ACTOR_TESTER, null);
-		XAuthorisationManager access = admin.getAccessControlManager().getAuthorisationManager();
-		XAddress repoAddr = XX.toAddress(admin.getRepositoryId(), null, null, null);
-		access.getAuthorisationDatabase().resetAccess(ACTOR_TESTER, repoAddr, XA.ACCESS_READ);
-		access.getAuthorisationDatabase().resetAccess(ACTOR_TESTER, repoAddr, XA.ACCESS_WRITE);
-		
-		// stop Jersey
-		server.stopServer();
-		server = null;
-		
-	}
-	
 	@Override
 	protected XCommandFactory getCommandFactory() {
 		return X.getCommandFactory();
@@ -152,12 +100,12 @@ public abstract class AbstractRestClientWriteMethodsTest extends AbstractStoreWr
 	
 	@Override
 	protected XID getCorrectUser() {
-		return ACTOR_TESTER;
+		return getServerConfig().testerActor;
 	}
 	
 	@Override
 	protected String getCorrectUserPasswordHash() {
-		return PASSWORD_TESTER;
+		return getServerConfig().testerPasswordHash;
 	}
 	
 	@Override
@@ -172,7 +120,7 @@ public abstract class AbstractRestClientWriteMethodsTest extends AbstractStoreWr
 	
 	@Override
 	protected XID getRepositoryId() {
-		return server.getStore().getXydraStoreAdmin().getRepositoryId();
+		return getServerConfig().mainRepositoryId;
 	}
 	
 	@Override

@@ -53,7 +53,7 @@ public class XydraRestServer {
 	/**
 	 * Setup the Xydra REST API.
 	 */
-	public void restless(Restless restless, String prefix) {
+	public static void restless(Restless restless, String prefix) {
 		
 		// configure
 		initializeServer(restless);
@@ -65,7 +65,7 @@ public class XydraRestServer {
 		XydraStoreResource.restless(restless, storePrefix);
 		
 		// for debugging purposes
-		restless.addMethod(prefix + "/ping", "GET", this, "ping", false);
+		restless.addMethod(prefix + "/ping", "GET", XydraRestServer.class, "ping", false);
 		AddDemoDataResource.restless(restless, prefix);
 		LogTestResource.restless(restless, prefix);
 	}
@@ -92,7 +92,8 @@ public class XydraRestServer {
 				        + storeClassName + "'", e);
 			}
 		} else {
-			throw new RuntimeException("no xydra store backend configured in web.xml");
+			throw new RuntimeException("no xydra store backend configured in web.xml. Set <"
+			        + INIT_PARAM_XYDRASTORE + "> to the classname of a XydraStore impl.");
 		}
 		
 		// store in context
@@ -102,7 +103,7 @@ public class XydraRestServer {
 		        + SERVLET_CONTEXT_ATTRIBUTE_XYDRASTORE + "'");
 	}
 	
-	public void ping(HttpServletResponse res) throws IOException {
+	public static void ping(HttpServletResponse res) throws IOException {
 		res.setStatus(200);
 		res.setContentType("text/plain");
 		res.setCharacterEncoding("utf-8");
