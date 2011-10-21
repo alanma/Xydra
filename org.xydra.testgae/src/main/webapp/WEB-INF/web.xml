@@ -20,6 +20,10 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 			<param-name>loggerFactory</param-name>
 			<param-value>org.xydra.log.gae.GaeLoggerFactorySPI</param-value>
 		</init-param>
+		<init-param>
+			<param-name>org.xydra.store</param-name>
+			<param-value>org.xydra.store.impl.gae.GaeAllowAllStore</param-value>
+		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 	<servlet-mapping>

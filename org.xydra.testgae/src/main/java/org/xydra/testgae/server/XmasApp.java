@@ -3,6 +3,8 @@ package org.xydra.testgae.server;
 import org.xydra.restless.IRestlessContext;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessExceptionHandler;
+import org.xydra.server.rest.XydraRestServer;
+import org.xydra.server.rest.XydraStoreResource;
 import org.xydra.testgae.server.rest.AdminDashboardResource;
 import org.xydra.testgae.server.rest.ConsistencyTestResource;
 import org.xydra.testgae.server.rest.xmas.XmasResource;
@@ -32,6 +34,12 @@ public class XmasApp {
 		XmasResource.restless(r, path);
 		
 		ConsistencyTestResource.restless(r, path);
+		
+		// additionally run xydra rest endpoint
+		
+		XydraRestServer.initializeServer(r);
+		
+		XydraStoreResource.restless(r, "/xydra/store/v1");
 	}
 	
 }
