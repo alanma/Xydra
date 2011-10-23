@@ -42,6 +42,7 @@ import org.xydra.store.RequestException;
 import org.xydra.store.RevisionState;
 import org.xydra.store.StoreException;
 import org.xydra.store.WaitingCallback;
+import org.xydra.store.XydraRuntime;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.rest.XydraStoreRestInterface;
 
@@ -131,6 +132,8 @@ public class XydraStoreResource {
 	}
 	
 	public boolean onException(Throwable t, IRestlessContext context) {
+		
+		XydraRuntime.finishRequest();
 		
 		if(t instanceof InitException) {
 			try {
@@ -255,6 +258,8 @@ public class XydraStoreResource {
 	public void checkLogin(IRestlessContext context, String actorIdStr, String passwordHash)
 	        throws Throwable {
 		
+		XydraRuntime.startRequest();
+		
 		XydraStore store = XydraRestServer.getStore(context.getRestless());
 		XID actorId = getActorId(actorIdStr);
 		
@@ -271,10 +276,14 @@ public class XydraStoreResource {
 		
 		out.flush();
 		
+		XydraRuntime.finishRequest();
+		
 	}
 	
 	public void executeCommands(IRestlessContext context, String actorIdStr, String passwordHash,
 	        String[] addresses, String[] from, String[] to) throws Throwable {
+		
+		XydraRuntime.startRequest();
 		
 		XydraStore store = XydraRestServer.getStore(context.getRestless());
 		XID actorId = getActorId(actorIdStr);
@@ -349,6 +358,7 @@ public class XydraStoreResource {
 		
 		out.flush();
 		
+		XydraRuntime.finishRequest();
 	}
 	
 	private EventsRequest parseEventsRequest(String[] addresses, String[] from, String[] to) {
@@ -402,6 +412,8 @@ public class XydraStoreResource {
 	public void getEvents(IRestlessContext context, String actorIdStr, String passwordHash,
 	        String[] addresses, String[] from, String[] to) throws Throwable {
 		
+		XydraRuntime.startRequest();
+		
 		XydraStore store = XydraRestServer.getStore(context.getRestless());
 		XID actorId = getActorId(actorIdStr);
 		
@@ -420,10 +432,14 @@ public class XydraStoreResource {
 		
 		out.flush();
 		
+		XydraRuntime.finishRequest();
+		
 	}
 	
 	public void getModelRevisions(IRestlessContext context, String actorIdStr, String passwordHash,
 	        String[] addresses) throws Throwable {
+		
+		XydraRuntime.startRequest();
 		
 		XydraStore store = XydraRestServer.getStore(context.getRestless());
 		XID actorId = getActorId(actorIdStr);
@@ -452,10 +468,14 @@ public class XydraStoreResource {
 		
 		out.flush();
 		
+		XydraRuntime.finishRequest();
+		
 	}
 	
 	public void getSnapshots(IRestlessContext context, String actorIdStr, String passwordHash,
 	        String[] addressStrs) throws Throwable {
+		
+		XydraRuntime.startRequest();
 		
 		XydraStore store = XydraRestServer.getStore(context.getRestless());
 		XID actorId = getActorId(actorIdStr);
@@ -514,10 +534,14 @@ public class XydraStoreResource {
 		
 		out.flush();
 		
+		XydraRuntime.finishRequest();
+		
 	}
 	
 	public void getModelIds(IRestlessContext context, String actorIdStr, String passwordHash)
 	        throws Throwable {
+		
+		XydraRuntime.startRequest();
 		
 		XydraStore store = XydraRestServer.getStore(context.getRestless());
 		XID actorId = getActorId(actorIdStr);
@@ -535,10 +559,14 @@ public class XydraStoreResource {
 		
 		out.flush();
 		
+		XydraRuntime.finishRequest();
+		
 	}
 	
 	public void getRepositoryId(IRestlessContext context, String actorIdStr, String passwordHash)
 	        throws Throwable {
+		
+		XydraRuntime.startRequest();
 		
 		XydraStore store = XydraRestServer.getStore(context.getRestless());
 		XID actorId = getActorId(actorIdStr);
@@ -555,6 +583,8 @@ public class XydraStoreResource {
 		SerializedStore.serializeRepositoryId(callback.getResult(), out);
 		
 		out.flush();
+		
+		XydraRuntime.finishRequest();
 		
 	}
 	
