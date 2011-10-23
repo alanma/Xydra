@@ -1,5 +1,9 @@
 package org.xydra.core.util;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.xydra.base.XID;
 import org.xydra.base.XType;
 import org.xydra.base.rmof.XReadableField;
@@ -56,12 +60,22 @@ public class DumpUtils {
 		assert model != null;
 		assert model.getAddress().getAddressedType() == XType.XMODEL;
 		StringBuffer buf = new StringBuffer();
-		buf.append(" ** Model " + model.getAddress() + " [" + model.getRevisionNumber() + "]\n");
-		for(XID objectId : model) {
+		buf.append("** Model   " + model.getAddress() + " [" + model.getRevisionNumber() + "]\n");
+		List<XID> ids = toSortedList(model);
+		for(XID objectId : ids) {
 			XReadableObject object = model.getObject(objectId);
 			buf.append(toStringBuffer(object));
 		}
 		return buf;
+	}
+	
+	private static List<XID> toSortedList(Iterable<XID> iterable) {
+		List<XID> list = new ArrayList<XID>();
+		for(XID id : iterable) {
+			list.add(id);
+		}
+		Collections.sort(list);
+		return list;
 	}
 	
 	/**
@@ -85,7 +99,8 @@ public class DumpUtils {
 		assert object.getAddress().getAddressedType() == XType.XOBJECT;
 		StringBuffer buf = new StringBuffer();
 		buf.append("*** Object " + object.getAddress() + " [" + object.getRevisionNumber() + "]\n");
-		for(XID fieldId : object) {
+		List<XID> ids = toSortedList(object);
+		for(XID fieldId : ids) {
 			XReadableField field = object.getField(fieldId);
 			buf.append(toStringBuffer(field));
 		}
@@ -112,7 +127,7 @@ public class DumpUtils {
 		assert field != null;
 		assert field.getAddress().getAddressedType() == XType.XFIELD;
 		StringBuffer buf = new StringBuffer();
-		buf.append(" **** " + field.getAddress() + " = '" + field.getValue() + "' " + " ["
+		buf.append("**** Field " + field.getAddress() + " = '" + field.getValue() + "' " + " ["
 		        + field.getRevisionNumber() + "]\n");
 		return buf;
 	}
