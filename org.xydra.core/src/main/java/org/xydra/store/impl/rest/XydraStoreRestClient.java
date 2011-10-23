@@ -32,8 +32,14 @@ public class XydraStoreRestClient extends AbstractXydraStoreRestClient {
 	
 	private final URI prefix;
 	
+	/**
+	 * @param apiLocation absolute url of Xydra REST endpoint
+	 * @param serializer ..
+	 * @param parser ..
+	 */
 	public XydraStoreRestClient(URI apiLocation, XydraSerializer serializer, XydraParser parser) {
 		super(serializer, parser);
+		assert apiLocation != null;
 		this.prefix = apiLocation;
 	}
 	
