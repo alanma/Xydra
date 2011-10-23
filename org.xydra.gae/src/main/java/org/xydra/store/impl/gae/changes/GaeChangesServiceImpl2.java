@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -29,12 +29,12 @@ import org.xydra.store.RevisionState;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.gae.DebugFormatter;
-import org.xydra.store.impl.gae.DebugFormatter.Timing;
 import org.xydra.store.impl.gae.GaeAssert;
 import org.xydra.store.impl.gae.GaeOperation;
 import org.xydra.store.impl.gae.InstanceContext;
 import org.xydra.store.impl.gae.Memcache;
 import org.xydra.store.impl.gae.SyncDatastore;
+import org.xydra.store.impl.gae.DebugFormatter.Timing;
 import org.xydra.store.impl.gae.changes.GaeChange.Status;
 import org.xydra.store.impl.gae.changes.GaeEvents.AsyncValue;
 
@@ -229,6 +229,9 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 	 */
 	private void newCurrentRev(GaeChange change) {
 		
+		log.debug("(r" + change.rev + ") {" + this.revCache.getCurrentRev() + "/"
+		        + getLastCommited() + "} new current rev");
+		
 		assert change.getStatus().hasEvents();
 		assert change.getStatus().isSuccess();
 		
@@ -246,6 +249,41 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		
 		synchronized(this.revCache) {
 			this.revCache.setCurrentModelRev(change.rev, modelExists);
+		}
+		
+	}
+	
+	private void updateCachedRevisions(GaeChange change) {
+		
+		assert change.getStatus().isCommitted();
+		
+		RevisionState state = this.revCache.getRevisionState();
+		
+		if(change.rev == getLastCommited() + 1) {
+			long newLastCommittedRev = change.rev;
+			Map<Long,GaeChange> committedChangeCache = getCommittedChangeCache();
+			GaeChange newCurrentChange = change.getStatus().hasEvents() ? change : null;
+			synchronized(committedChangeCache) {
+				GaeChange otherChange;
+				while((otherChange = committedChangeCache.get(newLastCommittedRev + 1)) != null) {
+					newLastCommittedRev++;
+					assert otherChange.rev == newLastCommittedRev;
+					if(otherChange.getStatus().hasEvents()) {
+						newCurrentChange = otherChange;
+					}
+				}
+			}
+			
+			log.debug("(r" + change.rev + ") {" + this.revCache.getCurrentRev() + "/"
+			        + getLastCommited() + "} new last committed rev " + newLastCommittedRev);
+			this.revCache.setLastCommited(newLastCommittedRev);
+			if(state != null && newCurrentChange != null && newCurrentChange.rev > state.revision()) {
+				newCurrentRev(newCurrentChange);
+			}
+			
+		} else if(state != null && change.getStatus().hasEvents()
+		        && change.rev <= getLastCommited() && change.rev > state.revision()) {
+			newCurrentRev(change);
 		}
 		
 	}
@@ -270,35 +308,9 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 				committedChangeCache.put(change.rev, change);
 			}
 			
-			// Update the last committed and current revision pointer.
-			if(this.revCache.getLastCommited() == change.rev - 1) {
-				GaeChange current = change.getStatus().hasEvents() ? change : null;
-				for(long lastCommitted = change.rev;; lastCommitted++) {
-					
-					GaeChange currentChange = committedChangeCache.get(lastCommitted + 1);
-					if(currentChange == null) {
-						this.revCache.setLastCommited(lastCommitted);
-						if(current != null) {
-							newCurrentRev(current);
-						}
-						break;
-					}
-					
-					if(currentChange.getStatus().hasEvents()) {
-						current = currentChange;
-					}
-				}
-			}
-			
-		} else {
-			// Update the last committed and current revision pointer.
-			if(this.revCache.getLastCommited() == change.rev - 1) {
-				this.revCache.setLastCommited(change.rev);
-				if(change.getStatus().hasEvents()) {
-					newCurrentRev(change);
-				}
-			}
 		}
+		
+		updateCachedRevisions(change);
 	}
 	
 	private GaeChange getCachedChange(long rev) {
@@ -311,6 +323,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 			change = committedChangeCache.get(rev);
 		}
 		if(change != null) {
+			updateCachedRevisions(change);
 			assert change.getStatus().isCommitted();
 		}
 		log.debug(DebugFormatter.dataGet(VM_COMMITED_CHANGES_CACHENAME + this.modelAddr, "" + rev,
