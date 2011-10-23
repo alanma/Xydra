@@ -50,7 +50,8 @@ public class XIDEditor extends AtomicXValueEditor<XID> implements KeyPressHandle
 		return xid;
 	}
 	
-	public void onKeyPress(KeyPressEvent e) {
+	@Override
+    public void onKeyPress(KeyPressEvent e) {
 		
 		char cc = e.getCharCode();
 		
@@ -85,7 +86,8 @@ public class XIDEditor extends AtomicXValueEditor<XID> implements KeyPressHandle
 		
 	}
 	
-	public void onKeyDown(KeyDownEvent e) {
+	@Override
+    public void onKeyDown(KeyDownEvent e) {
 		boolean allowed = true;
 		
 		switch(e.getNativeKeyCode()) {

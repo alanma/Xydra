@@ -35,7 +35,8 @@ public class XIntegerEditor extends AtomicXValueEditor<XIntegerValue> implements
 		return XV.toValue(v);
 	}
 	
-	public void onKeyPress(KeyPressEvent e) {
+	@Override
+    public void onKeyPress(KeyPressEvent e) {
 		
 		char cc = e.getCharCode();
 		

@@ -18,7 +18,8 @@ import com.google.gwt.xml.client.XMLParser;
 @RunsInGWT(true)
 public class GwtXmlParser implements XydraParser {
 	
-	public XydraElement parse(String xml) throws IllegalArgumentException {
+	@Override
+    public XydraElement parse(String xml) throws IllegalArgumentException {
 		
 		Document document;
 		try {

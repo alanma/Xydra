@@ -35,7 +35,8 @@ public class XDoubleEditor extends AtomicXValueEditor<XDoubleValue> implements K
 		return XV.toValue(v);
 	}
 	
-	public void onKeyPress(KeyPressEvent e) {
+	@Override
+    public void onKeyPress(KeyPressEvent e) {
 		
 		char cc = e.getCharCode();
 		

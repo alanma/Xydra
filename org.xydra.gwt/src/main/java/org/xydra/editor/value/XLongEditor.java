@@ -35,7 +35,8 @@ public class XLongEditor extends AtomicXValueEditor<XLongValue> implements KeyPr
 		return XV.toValue(v);
 	}
 	
-	public void onKeyPress(KeyPressEvent e) {
+	@Override
+    public void onKeyPress(KeyPressEvent e) {
 		
 		char cc = e.getCharCode();
 		

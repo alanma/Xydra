@@ -126,13 +126,15 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		this.inner.add(this.delete);
 		
 		this.edit.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent e) {
+			@Override
+            public void onClick(ClickEvent e) {
 				showEditor();
 			}
 		});
 		
 		this.delete.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent e) {
+			@Override
+            public void onClick(ClickEvent e) {
 				delete();
 			}
 		});
@@ -219,7 +221,8 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		
 	}
 	
-	public void onChangeEvent(XFieldEvent event) {
+	@Override
+    public void onChangeEvent(XFieldEvent event) {
 		log.info("editor: got " + event);
 		XValue value = event.getNewValue();
 		changeValue(value);
@@ -263,7 +266,8 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		this.cancel = new Button("Cancel");
 		this.inner.insert(this.cancel, this.innerIndex);
 		this.cancel.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent arg0) {
+			@Override
+            public void onClick(ClickEvent arg0) {
 				removeEditor();
 			}
 		});
@@ -271,7 +275,8 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		this.save = new Button("Save");
 		this.inner.insert(this.save, this.innerIndex);
 		this.save.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent arg0) {
+			@Override
+            public void onClick(ClickEvent arg0) {
 				saveValue();
 			}
 		});
@@ -279,7 +284,8 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		this.add = new Button("Add Entry");
 		this.inner.insert(this.add, this.innerIndex);
 		this.add.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent e) {
+			@Override
+            public void onClick(ClickEvent e) {
 				((XCollectionEditor<?,?>)XFieldEditor.this.editor).add();
 			}
 		});
@@ -309,7 +315,8 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		
 		this.inner.insert(this.type, this.innerIndex);
 		this.type.addChangeHandler(new ChangeHandler() {
-			public void onChange(ChangeEvent e) {
+			@Override
+            public void onChange(ChangeEvent e) {
 				typeChanged();
 			}
 		});

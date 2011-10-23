@@ -22,7 +22,8 @@ public class XBooleanEditor extends AtomicXValueEditor<XBooleanValue> {
 		// CheckBox doesn't seem to send change events
 		if(listener != null) {
 			this.editor.addClickHandler(new ClickHandler() {
-				public void onClick(ClickEvent e) {
+				@Override
+                public void onClick(ClickEvent e) {
 					onChange(null);
 				}
 			});

@@ -49,12 +49,14 @@ public class XModelEditor extends Composite implements XModelEventListener {
 		this.inner.add(this.add);
 		
 		this.add.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent e) {
+			@Override
+            public void onClick(ClickEvent e) {
 				final PopupPanel pp = new PopupPanel(false, true);
 				HorizontalPanel layout = new HorizontalPanel();
 				final Button add = new Button("Add Object");
 				final XIDEditor editor = new XIDEditor(null, new EditListener() {
-					public void newValue(XValue value) {
+					@Override
+                    public void newValue(XValue value) {
 						add.setEnabled(value != null && value instanceof XID
 						        && !XModelEditor.this.model.hasObject(((XID)value)));
 					}
@@ -66,13 +68,15 @@ public class XModelEditor extends Composite implements XModelEventListener {
 				layout.add(cancel);
 				pp.add(layout);
 				cancel.addClickHandler(new ClickHandler() {
-					public void onClick(ClickEvent e) {
+					@Override
+                    public void onClick(ClickEvent e) {
 						pp.hide();
 						pp.removeFromParent();
 					}
 				});
 				add.addClickHandler(new ClickHandler() {
-					public void onClick(ClickEvent e) {
+					@Override
+                    public void onClick(ClickEvent e) {
 						// TODO simplify this code block now that XID=XIDValue
 						XID value = editor.getValue();
 						if(value == null)
@@ -120,7 +124,8 @@ public class XModelEditor extends Composite implements XModelEventListener {
 		editor.removeFromParent();
 	}
 	
-	public void onChangeEvent(XModelEvent event) {
+	@Override
+    public void onChangeEvent(XModelEvent event) {
 		log.info("editor: got " + event);
 		if(event.getChangeType() == ChangeType.ADD) {
 			newObject(event.getObjectId());

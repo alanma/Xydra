@@ -59,11 +59,13 @@ public class XydraEditor implements EntryPoint {
 		}
 	};
 	
-	public void onModuleLoad() {
+	@Override
+    public void onModuleLoad() {
 		
 		// set uncaught exception handler
 		GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
-			public void onUncaughtException(Throwable throwable) {
+			@Override
+            public void onUncaughtException(Throwable throwable) {
 				
 				Throwable t = throwable;
 				
@@ -86,7 +88,8 @@ public class XydraEditor implements EntryPoint {
 		
 		// use a deferred command so that the handler catches init() exceptions
 		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-			public void execute() {
+			@Override
+            public void execute() {
 				init();
 			}
 		});
@@ -113,7 +116,8 @@ public class XydraEditor implements EntryPoint {
 		
 		load.addClickHandler(new ClickHandler() {
 			
-			public void onClick(ClickEvent arg0) {
+			@Override
+            public void onClick(ClickEvent arg0) {
 				loadData(address.getText());
 			}
 			

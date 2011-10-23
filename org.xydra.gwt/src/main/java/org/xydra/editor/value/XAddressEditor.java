@@ -51,7 +51,8 @@ public class XAddressEditor extends AtomicXValueEditor<XAddress> implements KeyP
 		return xid;
 	}
 	
-	public void onKeyPress(KeyPressEvent e) {
+	@Override
+    public void onKeyPress(KeyPressEvent e) {
 		
 		char cc = e.getCharCode();
 		
@@ -86,7 +87,8 @@ public class XAddressEditor extends AtomicXValueEditor<XAddress> implements KeyP
 		
 	}
 	
-	public void onKeyDown(KeyDownEvent e) {
+	@Override
+    public void onKeyDown(KeyDownEvent e) {
 		boolean allowed = true;
 		
 		switch(e.getNativeKeyCode()) {

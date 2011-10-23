@@ -39,7 +39,8 @@ abstract public class XCollectionEditor<E extends XValue, V extends XCollectionV
 		Button remove = new Button("-");
 		entry.add(remove);
 		remove.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent e) {
+			@Override
+            public void onClick(ClickEvent e) {
 				remove(entry, editor);
 			}
 		});
@@ -53,7 +54,8 @@ abstract public class XCollectionEditor<E extends XValue, V extends XCollectionV
 		changed();
 	}
 	
-	public void newValue(XValue value) {
+	@Override
+    public void newValue(XValue value) {
 		changed();
 	}
 	

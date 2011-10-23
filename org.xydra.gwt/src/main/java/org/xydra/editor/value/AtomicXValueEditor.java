@@ -31,12 +31,14 @@ abstract public class AtomicXValueEditor<E extends XValue> extends XValueEditor 
 		addStyleName("editor-xvalue-atomic");
 	}
 	
-	public void execute() {
+	@Override
+    public void execute() {
 		this.commandQueued = false;
 		this.listener.newValue(getValue());
 	}
 	
-	public void onChange(ChangeEvent e) {
+	@Override
+    public void onChange(ChangeEvent e) {
 		if(this.commandQueued)
 			return;
 		Scheduler.get().scheduleDeferred(this);

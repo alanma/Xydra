@@ -57,19 +57,22 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 			Button delete = new Button("Remove Object");
 			this.inner.add(delete);
 			delete.addClickHandler(new ClickHandler() {
-				public void onClick(ClickEvent e) {
+				@Override
+                public void onClick(ClickEvent e) {
 					delete();
 				}
 			});
 		}
 		
 		this.add.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent e) {
+			@Override
+            public void onClick(ClickEvent e) {
 				final PopupPanel pp = new PopupPanel(false, true);
 				HorizontalPanel layout = new HorizontalPanel();
 				final Button add = new Button("Add Field");
 				final XIDEditor editor = new XIDEditor(null, new EditListener() {
-					public void newValue(XValue value) {
+					@Override
+                    public void newValue(XValue value) {
 						add.setEnabled(value != null && value instanceof XID
 						        && !XObjectEditor.this.object.hasField(((XID)value)));
 					}
@@ -81,13 +84,15 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 				layout.add(cancel);
 				pp.add(layout);
 				cancel.addClickHandler(new ClickHandler() {
-					public void onClick(ClickEvent e) {
+					@Override
+                    public void onClick(ClickEvent e) {
 						pp.hide();
 						pp.removeFromParent();
 					}
 				});
 				add.addClickHandler(new ClickHandler() {
-					public void onClick(ClickEvent e) {
+					@Override
+                    public void onClick(ClickEvent e) {
 						// TODO simply this block now that XID=XIDValue
 						XID value = editor.getValue();
 						if(value == null)
@@ -133,7 +138,8 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 		editor.removeFromParent();
 	}
 	
-	public void onChangeEvent(XObjectEvent event) {
+	@Override
+    public void onChangeEvent(XObjectEvent event) {
 		log.info("editor: got " + event);
 		if(event.getChangeType() == ChangeType.ADD) {
 			newField(event.getFieldId());

@@ -116,11 +116,13 @@ public class GwtTestServer {
 		FilterHolder filterHolder = new FilterHolder();
 		filterHolder.setFilter(new Filter() {
 			
-			public void destroy() {
+			@Override
+            public void destroy() {
 				// do nothing
 			}
 			
-			public void doFilter(ServletRequest request, ServletResponse response,
+			@Override
+            public void doFilter(ServletRequest request, ServletResponse response,
 			        FilterChain filterChain) throws IOException, ServletException {
 				System.out.println("Jetty GET " + ((HttpServletRequest)request).getRequestURI());
 				HttpServletResponseWrapper responseWrapper = new HttpServletResponseWrapper(
@@ -146,7 +148,8 @@ public class GwtTestServer {
 				filterChain.doFilter(request, responseWrapper);
 			}
 			
-			public void init(FilterConfig filterConfig) {
+			@Override
+            public void init(FilterConfig filterConfig) {
 				// do nothing
 			}
 		});
