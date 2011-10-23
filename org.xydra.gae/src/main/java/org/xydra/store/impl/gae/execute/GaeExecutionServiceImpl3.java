@@ -29,10 +29,10 @@ import org.xydra.restless.utils.Clock;
 import org.xydra.store.impl.gae.DebugFormatter;
 import org.xydra.store.impl.gae.FutureUtils;
 import org.xydra.store.impl.gae.changes.GaeChange;
-import org.xydra.store.impl.gae.changes.GaeChange.Status;
 import org.xydra.store.impl.gae.changes.GaeLocks;
 import org.xydra.store.impl.gae.changes.IGaeChangesService;
 import org.xydra.store.impl.gae.changes.VoluntaryTimeoutException;
+import org.xydra.store.impl.gae.changes.GaeChange.Status;
 import org.xydra.store.impl.gae.snapshot.IGaeSnapshotService;
 
 import com.google.appengine.api.datastore.Key;
@@ -116,25 +116,29 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 		boolean exists = this.changes.exists(); // TODO exists depends on the
 		// revision number
 		
-		log.debug("Phase 2: getPartialSnapshot at " + snapshotRev);
+		log.debug("[r" + change.rev + "] Phase 2: getPartialSnapshot at {" + snapshotRev + "/"
+		        + this.changes.getLastCommited() + "}");
 		XRevWritableModel snapshot = null;
 		if(exists) {
 			snapshot = this.snapshots.getPartialSnapshot(snapshotRev, change.getLocks());
 			c.stopAndStart("getPartialSnapshot");
+			
+			// TODO this should not be needed ~Daniel
 			snapshot = XCopyUtils.createSnapshot(snapshot);
 			c.stopAndStart("copy");
 		}
+		
 		/*
 		 * IMPROVE we can ignore all changes in [currentRev + 1,
 		 * lastCommittedRev) as they either failed or didn't change anything,
 		 * but we need to make sure that there isn't a better currentRev <=
 		 * lastCommittedRev
 		 */
-		log.debug("Phase 3: updateSnapshot to " + (change.rev - 1));
+		log.debug("[r" + change.rev + "] Phase 3: updateSnapshot to " + (change.rev - 1));
 		snapshot = updateSnapshot(snapshot, snapshotRev, change);
 		c.stopAndStart("updateSnapshot");
 		
-		log.debug("Phase 4: checkPreconditionsAndSaveEvents");
+		log.debug("[r" + change.rev + "] Phase 4: checkPreconditionsAndSaveEvents");
 		long ret = checkPreconditionsAndSaveEvents(change, command, actorId, snapshot);
 		c.stopAndStart("checkPreconditionsAndSaveEvents");
 		
@@ -142,7 +146,12 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 		
 		// FIXME REENABLE revCache.writeToMemcache();
 		
-		log.info("Success. Stats: " + c.getStats());
+		log.info("[r"
+		        + change.rev
+		        + "] -> "
+		        + (ret == XCommand.FAILED ? "failed" : ret == XCommand.NOCHANGE ? "nochange"
+		                : "success") + " {" + this.changes.getCurrentRevisionNumber() + "/"
+		        + this.changes.getLastCommited() + "}. Stats: " + c.getStats());
 		
 		return ret;
 	}
@@ -258,8 +267,8 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 			long end = change.rev;
 			long workingWindowSize = end - start;
 			if(workingWindowSize > 1) {
-				log.info("Current working window size = " + workingWindowSize + " [" + start + ","
-				        + end + "]");
+				log.info("[r" + change.rev + "] Current working window size = " + workingWindowSize
+				        + " [" + start + "," + end + "]");
 			}
 		}
 		
@@ -406,7 +415,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 		}
 		
 		List<XAtomicEvent> events = DeltaUtils.createEvents(this.modelAddr, c, actorId, change.rev);
-		log.debug("DeltaUtils generated " + events.size() + " events");
+		log.debug("[r" + change.rev + "] DeltaUtils generated " + events.size() + " events");
 		
 		assert events != null;
 		
