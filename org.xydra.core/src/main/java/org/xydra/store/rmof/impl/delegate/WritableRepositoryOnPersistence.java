@@ -72,6 +72,7 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 	
 	@Override
 	public boolean hasModel(XID modelId) {
+		assert this.persistence != null;
 		return this.persistence.hasModel(modelId);
 	}
 	
