@@ -70,7 +70,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	protected long timeout;
 	
 	@Before
-	public void setUp() {
+	public void before() {
 		this.store = this.getStore();
 		this.factory = this.getCommandFactory();
 		
@@ -1509,7 +1509,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		this.store.executeCommands(this.correctUser, this.correctUserPass, commands, callback);
 		
-		assertTrue(this.waitOnCallback(callback));
+		assertTrue("Callback failed with " + callback.getException(), this.waitOnCallback(callback));
 		assertNotNull(callback.getEffect());
 		assertTrue(callback.getEffect().length == commands.length);
 		assertNull(callback.getException());

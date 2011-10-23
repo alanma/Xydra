@@ -88,6 +88,8 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		SynchronousTestCallback<Set<XID>> callback = new SynchronousTestCallback<Set<XID>>();
 		this.store.getModelIds(this.correctUser, this.correctUserPass, callback);
 		waitOnCallback(callback);
+		assert callback != null;
+		assert callback.effect != null;
 		assert !callback.effect.contains(modelId1);
 		
 		XID objectId1 = XX.toId("TestObject1");
@@ -607,6 +609,8 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 				assertEquals(XCommand.FAILED, revisionResult[i].getResult().revision());
 				assertNull(revisionResult[i].getException());
 			} else {
+				assertNotNull(snapshotResult[i]);
+				assertNotNull(snapshotResult[i].getResult());
 				assertEquals(this.modelAddresses[i], snapshotResult[i].getResult().getAddress());
 				
 				assertNotNull(revisionResult[i].getResult());
