@@ -33,14 +33,14 @@ public class WritableFieldOnPersistence extends AbstractWritableOnPersistence im
 	
 	private boolean changeValueTo(XValue value) {
 		XCommand command;
-		if(value != null) {
-			command = X.getCommandFactory().createChangeValueCommand(
-			        this.persistence.getRepositoryId(), this.modelId, this.objectId, this.fieldId,
-			        XCommand.FORCED, value, true);
-		} else {
+		if(value == null) {
 			command = X.getCommandFactory().createRemoveValueCommand(
 			        this.persistence.getRepositoryId(), this.modelId, this.objectId, this.fieldId,
 			        XCommand.FORCED, true);
+		} else {
+			command = X.getCommandFactory().createChangeValueCommand(
+			        this.persistence.getRepositoryId(), this.modelId, this.objectId, this.fieldId,
+			        XCommand.FORCED, value, true);
 		}
 		long result = this.persistence.executeCommand(this.executingActorId, command);
 		if(result == XCommand.FAILED) {
