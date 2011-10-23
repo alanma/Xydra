@@ -18,6 +18,12 @@ import org.xydra.core.XCopyUtils;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
+/**
+ * Makes it easier to use a remote {@link XydraStore} by using it like a
+ * {@link XydraPersistence}. Makes only sense for tests.
+ * 
+ * @author xamde
+ */
 public class PersistenceOnStore implements XydraPersistence {
 	
 	public PersistenceOnStore(XID actorId, String passwordHash, XydraStore store) {
