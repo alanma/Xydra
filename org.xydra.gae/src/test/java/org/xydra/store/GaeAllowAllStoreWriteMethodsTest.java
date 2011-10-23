@@ -24,10 +24,10 @@ public class GaeAllowAllStoreWriteMethodsTest extends AbstractAllowAllStoreWrite
 	
 	@Override
 	@Before
-	public void setUp() {
+	public void before() {
 		GaeTestfixer.enable();
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		super.setUp();
+		super.before();
 	}
 	
 	@Override

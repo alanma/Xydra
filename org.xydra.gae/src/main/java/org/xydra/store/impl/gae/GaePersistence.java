@@ -129,6 +129,7 @@ public class GaePersistence implements XydraPersistence {
 	@Override
 	public synchronized void clear() {
 		log.info("Clear");
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		SyncDatastore.clear();
 		Memcache.clear();
 	}
@@ -136,6 +137,7 @@ public class GaePersistence implements XydraPersistence {
 	@Override
 	public synchronized long executeCommand(XID actorId, XCommand command) {
 		log.debug(actorId + " executes command: " + DebugFormatter.format(command));
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		if(actorId == null) {
 			throw new IllegalArgumentException("actorId was null");
 		}
@@ -180,6 +182,7 @@ public class GaePersistence implements XydraPersistence {
 			throw new RequestException("address must specify a model, was " + address);
 		}
 		log.debug("getEvents for " + address + " [" + beginRevision + "," + endRevision + "]");
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		return getModelPersistence(address.getModel()).getEventsBetween(address, beginRevision,
 		        endRevision);
 	}
@@ -193,6 +196,7 @@ public class GaePersistence implements XydraPersistence {
 	@GaeOperation(datastoreRead = true)
 	public synchronized Set<XID> getModelIds() {
 		log.debug("getModelIds");
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		return Utils.findChildren(this.repoAddr);
 	}
 	
@@ -203,6 +207,7 @@ public class GaePersistence implements XydraPersistence {
 			throw new RequestException("address must refer to a model, was " + address);
 		}
 		log.debug("getModelRevision of " + address);
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		return getModelPersistence(address.getModel()).getModelRevision();
 	}
 	
@@ -213,6 +218,7 @@ public class GaePersistence implements XydraPersistence {
 			throw new RequestException("address must refer to a model, was " + address);
 		}
 		log.debug("get model snapshot of " + address);
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		return getModelPersistence(address.getModel()).getSnapshot();
 	}
 	
@@ -223,6 +229,7 @@ public class GaePersistence implements XydraPersistence {
 			throw new RequestException("address must refer to an object, was " + address);
 		}
 		log.debug("get object snapshot of " + address);
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		// TODO getting object snapshots must be more performant
 		return getModelPersistence(address.getModel()).getObjectSnapshot(address.getObject());
 	}
@@ -239,6 +246,7 @@ public class GaePersistence implements XydraPersistence {
 			throw new IllegalArgumentException("modelId was null");
 		}
 		log.debug("model '" + modelId + "' exists?");
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		return InternalGaeXEntity.exists(getModelAddress(modelId));
 	}
 	
