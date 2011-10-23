@@ -94,15 +94,14 @@ public class PersistenceRobot extends Thread {
 		this.fieldAddresses = new ArrayList<XAddress>();
 		
 		for(int i = 0; i < MODELS; i++) {
-			this.modelAddresses.add(XX.toAddress(this.repositoryId,
-			        XX.toId(MODELPREFIX + "model" + i), null, null));
+			this.modelAddresses.add(XX.toAddress(this.repositoryId, XX.toId(MODELPREFIX + "model"
+			        + i), null, null));
 			for(int j = 0; j < OBJECT_PER_MODEL; j++) {
-				this.objectAddresses.add(XX.toAddress(this.repositoryId,
-				        XX.toId(MODELPREFIX + "model" + i), XX.toId("object" + j), null));
+				this.objectAddresses.add(XX.toAddress(this.repositoryId, XX.toId(MODELPREFIX
+				        + "model" + i), XX.toId("object" + j), null));
 				for(int k = 0; k < FIELDS_PER_OBJECT; k++) {
-					this.fieldAddresses.add(XX.toAddress(this.repositoryId,
-					        XX.toId(MODELPREFIX + "model" + i), XX.toId("object" + j),
-					        XX.toId("field" + k)));
+					this.fieldAddresses.add(XX.toAddress(this.repositoryId, XX.toId(MODELPREFIX
+					        + "model" + i), XX.toId("object" + j), XX.toId("field" + k)));
 				}
 			}
 		}
@@ -179,6 +178,8 @@ public class PersistenceRobot extends Thread {
 			if(result >= 0 || result == XCommand.NOCHANGE) {
 				long localResult = this.local.executeCommand(this.executingActorId, cmd);
 				assert localResult >= 0 || result == XCommand.NOCHANGE;
+				log.debug(this.id + "> command executed with result remote=" + result + " local="
+				        + localResult);
 				// get snapshot and compare with local
 				compareSnapshotsFor(target);
 			} else {
@@ -229,8 +230,8 @@ public class PersistenceRobot extends Thread {
 	private XCommand createCommandToChangeField(XAddress target) {
 		assert target.getAddressedType() == XType.XFIELD;
 		
-		XWritableField field = this.localRepo.getModel(target.getModel())
-		        .getObject(target.getObject()).getField(target.getField());
+		XWritableField field = this.localRepo.getModel(target.getModel()).getObject(
+		        target.getObject()).getField(target.getField());
 		if(field.isEmpty()) {
 			log.debug(this.id + "> field " + target + " is empty, add value");
 			// create value
