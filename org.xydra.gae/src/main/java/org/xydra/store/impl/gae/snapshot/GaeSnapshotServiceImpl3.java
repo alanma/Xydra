@@ -6,9 +6,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -27,16 +27,15 @@ import org.xydra.core.model.XChangeLog;
 import org.xydra.core.serialize.SerializedModel;
 import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.xml.XmlParser;
-import org.xydra.core.util.DebugUtils;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.impl.gae.DebugFormatter;
+import org.xydra.store.impl.gae.DebugFormatter.Timing;
 import org.xydra.store.impl.gae.GaeAssert;
 import org.xydra.store.impl.gae.GaeOperation;
 import org.xydra.store.impl.gae.InstanceContext;
 import org.xydra.store.impl.gae.Memcache;
 import org.xydra.store.impl.gae.SyncDatastore;
-import org.xydra.store.impl.gae.DebugFormatter.Timing;
 import org.xydra.store.impl.gae.changes.IGaeChangesService;
 import org.xydra.store.impl.gae.changes.KeyStructure;
 
@@ -294,8 +293,8 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 		        + snapshot.getRevisionNumber() + " to rev=" + requestedRevNr);
 		
 		// get events between [ start, end )
-		List<XEvent> events = this.changesService.getEventsBetween(Math.max(snapshot
-		        .getRevisionNumber() + 1, 0), requestedRevNr);
+		List<XEvent> events = this.changesService.getEventsBetween(
+		        Math.max(snapshot.getRevisionNumber() + 1, 0), requestedRevNr);
 		
 		// apply events to base
 		for(XEvent event : events) {
@@ -491,9 +490,6 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 	private XRevWritableModel localVmCacheGet(long requestedRevNr) {
 		if(!USE_SNAPSHOT_CACHE)
 			return null;
-		
-		// FIXME
-		DebugUtils.dumpStacktrace();
 		
 		XRevWritableModel cachedModel = getModelSnapshotsCache().get(requestedRevNr);
 		
