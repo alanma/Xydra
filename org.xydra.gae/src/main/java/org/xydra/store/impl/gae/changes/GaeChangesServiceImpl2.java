@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -29,12 +29,12 @@ import org.xydra.store.RevisionState;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.gae.DebugFormatter;
+import org.xydra.store.impl.gae.DebugFormatter.Timing;
 import org.xydra.store.impl.gae.GaeAssert;
 import org.xydra.store.impl.gae.GaeOperation;
 import org.xydra.store.impl.gae.InstanceContext;
 import org.xydra.store.impl.gae.Memcache;
 import org.xydra.store.impl.gae.SyncDatastore;
-import org.xydra.store.impl.gae.DebugFormatter.Timing;
 import org.xydra.store.impl.gae.changes.GaeChange.Status;
 import org.xydra.store.impl.gae.changes.GaeEvents.AsyncValue;
 
@@ -323,6 +323,10 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 			change = committedChangeCache.get(rev);
 		}
 		if(change != null) {
+			/*
+			 * TODO @Daniel: Why update again at read-time. At write-time should
+			 * suffice, shouldn't it?
+			 */
 			updateCachedRevisions(change);
 			assert change.getStatus().isCommitted();
 		}
