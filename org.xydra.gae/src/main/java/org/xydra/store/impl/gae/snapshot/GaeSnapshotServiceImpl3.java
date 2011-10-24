@@ -6,9 +6,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.Map.Entry;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -31,12 +31,12 @@ import org.xydra.core.util.DebugUtils;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.impl.gae.DebugFormatter;
-import org.xydra.store.impl.gae.DebugFormatter.Timing;
 import org.xydra.store.impl.gae.GaeAssert;
 import org.xydra.store.impl.gae.GaeOperation;
 import org.xydra.store.impl.gae.InstanceContext;
 import org.xydra.store.impl.gae.Memcache;
 import org.xydra.store.impl.gae.SyncDatastore;
+import org.xydra.store.impl.gae.DebugFormatter.Timing;
 import org.xydra.store.impl.gae.changes.IGaeChangesService;
 import org.xydra.store.impl.gae.changes.KeyStructure;
 
@@ -205,8 +205,7 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 			while(askNr >= 0 && keys.size() <= SNAPSHOT_PERSISTENCE_THRESHOLD) {
 				XRevWritableModel model = localVmCacheGet(askNr);
 				if(model != null) {
-					return computeAndCacheSnapshotFromBase(requestedRevNr,
-					        XCopyUtils.createSnapshot(model));
+					return computeAndCacheSnapshotFromBase(requestedRevNr, model);
 				}
 				keys.add(KeyStructure.toString(getSnapshotKey(askNr)));
 				askNr--;
@@ -295,8 +294,8 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 		        + snapshot.getRevisionNumber() + " to rev=" + requestedRevNr);
 		
 		// get events between [ start, end )
-		List<XEvent> events = this.changesService.getEventsBetween(
-		        Math.max(snapshot.getRevisionNumber() + 1, 0), requestedRevNr);
+		List<XEvent> events = this.changesService.getEventsBetween(Math.max(snapshot
+		        .getRevisionNumber() + 1, 0), requestedRevNr);
 		
 		// apply events to base
 		for(XEvent event : events) {
@@ -355,7 +354,7 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 		XRevWritableModel cached = localVmCacheGet(requestedRevNr);
 		if(cached != null) {
 			log.debug("return locally cached");
-			return XCopyUtils.createSnapshot(cached);
+			return cached;
 		}
 		
 		return createModelSnapshot(requestedRevNr);
@@ -376,8 +375,7 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 			if(oldCached != null) {
 				log.debug("Found oldCached rev " + oldCached.getRevisionNumber()
 				        + " and will compute from there on");
-				return computeAndCacheSnapshotFromBase(requestedRevNr,
-				        XCopyUtils.createSnapshot(oldCached));
+				return computeAndCacheSnapshotFromBase(requestedRevNr, oldCached);
 			}
 			
 		}
@@ -538,9 +536,9 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 			return new SimpleModel(this.modelAddress);
 		}
 		if(precise) {
-			return getModelSnapshot(requestedRevNr);
+			return XCopyUtils.createSnapshot(getModelSnapshot(requestedRevNr));
 		} else {
-			return getModelSnapshotNewerOrAtRevision(requestedRevNr);
+			return XCopyUtils.createSnapshot(getModelSnapshotNewerOrAtRevision(requestedRevNr));
 		}
 	}
 	
