@@ -50,7 +50,7 @@ public class EventUtils {
 				applyAtomicEvent(model, (XAtomicEvent)txnEvent, true);
 			}
 		} else {
-			assert event instanceof XAtomicEvent : event.getClass().getCanonicalName();
+			assert event instanceof XAtomicEvent : event.getClass().getName();
 			applyAtomicEvent(model, (XAtomicEvent)event, false);
 		}
 		// FIXME is this correct if the model was removed?
@@ -236,7 +236,7 @@ public class EventUtils {
 				}
 			}
 		} else {
-			assert event instanceof XAtomicEvent : event.getClass().getCanonicalName();
+			assert event instanceof XAtomicEvent : event.getClass().getName();
 			
 			result = SimpleModel.shallowCopy(model);
 			
