@@ -47,8 +47,8 @@ public class XX {
 		if(objectAddress.getAddressedType() != XType.XOBJECT) {
 			throw new IllegalArgumentException(objectAddress + " is not an object address");
 		}
-		return toAddress(objectAddress.getRepository(), objectAddress.getModel(), objectAddress
-		        .getObject(), fieldId);
+		return toAddress(objectAddress.getRepository(), objectAddress.getModel(),
+		        objectAddress.getObject(), fieldId);
 	}
 	
 	/**
@@ -292,4 +292,19 @@ public class XX {
 		}
 	}
 	
+	public static XAddress resolveRepository(XID repositoryId) {
+		return toAddress(repositoryId, null, null, null);
+	}
+	
+	public static XAddress resolveModel(XID repositoryId, XID modelId) {
+		return toAddress(repositoryId, modelId, null, null);
+	}
+	
+	public static XAddress resolveObject(XID repositoryId, XID modelId, XID objectId) {
+		return toAddress(repositoryId, modelId, objectId, null);
+	}
+	
+	public static XAddress resolveField(XID repositoryId, XID modelId, XID objectId, XID fieldId) {
+		return toAddress(repositoryId, modelId, objectId, fieldId);
+	}
 }
