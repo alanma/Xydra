@@ -100,12 +100,12 @@ public class Jetty {
 		filterHolder.setFilter(new Filter() {
 			
 			@Override
-            public void destroy() {
+			public void destroy() {
 				// do nothing
 			}
 			
 			@Override
-            public void doFilter(ServletRequest request, ServletResponse response,
+			public void doFilter(ServletRequest request, ServletResponse response,
 			        FilterChain filterChain) throws IOException, ServletException {
 				log.debug("JETTY Image GET " + ((HttpServletRequest)request).getRequestURI());
 				HttpServletResponseWrapper responseWrapper = new HttpServletResponseWrapper(
@@ -132,25 +132,25 @@ public class Jetty {
 			}
 			
 			@Override
-            public void init(FilterConfig filterConfig) {
+			public void init(FilterConfig filterConfig) {
 				// do nothing
 			}
 		});
 		this.webapp.addFilter(filterHolder, "*.png", Handler.ALL);
 		this.webapp.addFilter(filterHolder, "*.gif", Handler.ALL);
-		this.webapp.addFilter(filterHolder, ".cache.*", Handler.ALL);
+		// this.webapp.addFilter(filterHolder, ".cache.*", Handler.ALL);
 		
 		// count requests
 		FilterHolder filterHolderForCounting = new FilterHolder();
 		filterHolderForCounting.setFilter(new Filter() {
 			
 			@Override
-            public void destroy() {
+			public void destroy() {
 				// do nothing
 			}
 			
 			@Override
-            public void doFilter(ServletRequest req, ServletResponse response,
+			public void doFilter(ServletRequest req, ServletResponse response,
 			        FilterChain filterChain) throws IOException, ServletException {
 				Jetty.this.requests++;
 				if(req instanceof HttpServletRequest) {
@@ -164,7 +164,7 @@ public class Jetty {
 			}
 			
 			@Override
-            public void init(FilterConfig filterConfig) {
+			public void init(FilterConfig filterConfig) {
 				// do nothing
 			}
 		});
@@ -177,50 +177,50 @@ public class Jetty {
 		this.webapp.getSecurityHandler().setUserRealm(new UserRealm() {
 			
 			@Override
-            public boolean reauthenticate(Principal user) {
+			public boolean reauthenticate(Principal user) {
 				return true;
 			}
 			
 			@Override
-            public Principal pushRole(Principal user, String role) {
+			public Principal pushRole(Principal user, String role) {
 				return user;
 			}
 			
 			@Override
-            public Principal popRole(Principal user) {
+			public Principal popRole(Principal user) {
 				return user;
 			}
 			
 			@Override
-            public void logout(Principal user) {
+			public void logout(Principal user) {
 			}
 			
 			@Override
-            public boolean isUserInRole(Principal user, String role) {
+			public boolean isUserInRole(Principal user, String role) {
 				return user.getName().equalsIgnoreCase("admin");
 			}
 			
 			@Override
-            public Principal getPrincipal(final String username) {
+			public Principal getPrincipal(final String username) {
 				return new Principal() {
 					@Override
-                    public String getName() {
+					public String getName() {
 						return username;
 					}
 				};
 			}
 			
 			@Override
-            public String getName() {
+			public String getName() {
 				return "dummyRealm";
 			}
 			
 			@Override
-            public void disassociate(Principal user) {
+			public void disassociate(Principal user) {
 			}
 			
 			@Override
-            public Principal authenticate(String username, Object credentials, Request request) {
+			public Principal authenticate(String username, Object credentials, Request request) {
 				return getPrincipal(username);
 			}
 		});
@@ -230,12 +230,12 @@ public class Jetty {
 		filterHolderForStaticContent.setFilter(new Filter() {
 			
 			@Override
-            public void destroy() {
+			public void destroy() {
 				// do nothing
 			}
 			
 			@Override
-            public void doFilter(ServletRequest req, ServletResponse response,
+			public void doFilter(ServletRequest req, ServletResponse response,
 			        FilterChain filterChain) throws IOException, ServletException {
 				if(req instanceof HttpServletRequest) {
 					HttpServletRequest hreq = (HttpServletRequest)req;
@@ -257,7 +257,7 @@ public class Jetty {
 			}
 			
 			@Override
-            public void init(FilterConfig filterConfig) {
+			public void init(FilterConfig filterConfig) {
 				// do nothing
 			}
 		});

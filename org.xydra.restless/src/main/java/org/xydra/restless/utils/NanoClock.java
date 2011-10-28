@@ -6,7 +6,7 @@ package org.xydra.restless.utils;
  * @author xamde
  * 
  */
-public class Clock {
+public class NanoClock {
 	
 	private StringBuffer stats = new StringBuffer();
 	
@@ -17,7 +17,7 @@ public class Clock {
 	 * @return itself to allow elegant fluent code like this
 	 *         <code>Clock c = new Clock().start();</code>
 	 */
-	public Clock start() {
+	public NanoClock start() {
 		this.start = System.nanoTime();
 		return this;
 	}
@@ -30,7 +30,7 @@ public class Clock {
 	/**
 	 * @param name for the statistics
 	 */
-	public Clock stop(String name) {
+	public NanoClock stop(String name) {
 		stopAndGetDuration(name);
 		return this;
 	}
@@ -60,7 +60,7 @@ public class Clock {
 	}
 	
 	public static void main(String[] args) {
-		Clock c = new Clock();
+		NanoClock c = new NanoClock();
 		c.start();
 		c.stop("a");
 		c.start();
@@ -72,7 +72,7 @@ public class Clock {
 		System.out.println(c.getStats());
 	}
 	
-	public Clock append(String s) {
+	public NanoClock append(String s) {
 		this.stats.append(s);
 		return this;
 	}

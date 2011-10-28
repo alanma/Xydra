@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.xydra.log.ILoggerFactorySPI;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.restless.utils.Clock;
+import org.xydra.restless.utils.NanoClock;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.ServletUtils;
 import org.xydra.restless.utils.XmlUtils;
@@ -419,7 +419,7 @@ public class Restless extends HttpServlet {
 	 */
 	@Override
 	public void init(ServletConfig servletConfig) {
-		Clock clock = new Clock();
+		NanoClock clock = new NanoClock();
 		clock.start();
 		try {
 			super.init(servletConfig);
@@ -534,7 +534,7 @@ public class Restless extends HttpServlet {
 	 * @return a String with statistics
 	 */
 	private String instatiateAndInit(String appClassName) {
-		Clock clock = new Clock();
+		NanoClock clock = new NanoClock();
 		clock.start();
 		try {
 			Class<?> clazz = Class.forName(appClassName);
