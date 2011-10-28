@@ -17,7 +17,7 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
-import org.xydra.restless.utils.Clock;
+import org.xydra.restless.utils.NanoClock;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.ServletUtils;
 import org.xydra.store.impl.gae.GaeTestfixer;
@@ -82,7 +82,7 @@ public class WishResource {
 		Writer w = HtmlUtils.startHtmlPage(res, "Delete");
 		w.write("Deleting<br />");
 		
-		Clock s1 = new Clock().start();
+		NanoClock s1 = new NanoClock().start();
 		
 		// create txn
 		DiffWritableModel txnModel = new DiffWritableModel(Xmas.createModel(repoStr,
@@ -109,7 +109,7 @@ public class WishResource {
 		Writer w = HtmlUtils.startHtmlPage(res, "Edit Name");
 		w.write("Renaming to " + name + " <br />");
 		
-		Clock s1 = new Clock().start();
+		NanoClock s1 = new NanoClock().start();
 		
 		// create txn
 		DiffWritableModel txnModel = new DiffWritableModel(Xmas.createModel(repoStr,
@@ -136,7 +136,7 @@ public class WishResource {
 		Writer w = HtmlUtils.startHtmlPage(res, "Edit Price");
 		w.write("Changig price to " + priceStr + " <br />");
 		
-		Clock s1 = new Clock().start();
+		NanoClock s1 = new NanoClock().start();
 		
 		// create txn
 		DiffWritableModel txnModel = new DiffWritableModel(Xmas.createModel(repoStr,
@@ -164,7 +164,7 @@ public class WishResource {
 		Writer w = HtmlUtils.startHtmlPage(res, "Edit URL");
 		w.write("Changing URL to " + urlStr + " <br />");
 		
-		Clock s1 = new Clock().start();
+		NanoClock s1 = new NanoClock().start();
 		
 		// create txn
 		DiffWritableModel txnModel = new DiffWritableModel(Xmas.createModel(repoStr,

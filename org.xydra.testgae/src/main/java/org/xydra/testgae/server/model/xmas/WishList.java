@@ -14,7 +14,7 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XV;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.restless.utils.Clock;
+import org.xydra.restless.utils.NanoClock;
 import org.xydra.restless.utils.HtmlUtils;
 
 
@@ -67,7 +67,7 @@ public class WishList implements Iterable<XID> {
 	}
 	
 	public void removeAllWishes(Writer writer) throws IOException {
-		Clock s1 = new Clock().start();
+		NanoClock s1 = new NanoClock().start();
 		Iterator<XID> it = this.model.iterator();
 		LinkedList<XID> list = new LinkedList<XID>();
 		while(it.hasNext()) {
@@ -94,7 +94,7 @@ public class WishList implements Iterable<XID> {
 	 * @return wish list as HTML
 	 */
 	public String toHtml() {
-		Clock s1 = new Clock().start();
+		NanoClock s1 = new NanoClock().start();
 		StringBuffer buf = new StringBuffer();
 		buf.append("<b>Wishlist " + this.model.getID() + "</b>");
 		buf.append("<ol>\n");
@@ -124,7 +124,7 @@ public class WishList implements Iterable<XID> {
 	 * @throws IOException if the writer has them
 	 */
 	public List<XID> addDemoData(int wishesCount, Writer writer) throws IOException {
-		Clock s1 = new Clock();
+		NanoClock s1 = new NanoClock();
 		s1.start();
 		List<XID> wishIds = new LinkedList<XID>();
 		for(int w = 1; w <= wishesCount; w++) {

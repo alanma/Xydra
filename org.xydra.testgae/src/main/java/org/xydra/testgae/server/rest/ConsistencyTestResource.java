@@ -21,7 +21,7 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.log.util.HtmlWriterLogListener;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
-import org.xydra.restless.utils.Clock;
+import org.xydra.restless.utils.NanoClock;
 import org.xydra.restless.utils.ServletUtils;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.delegate.XydraPersistence;
@@ -57,7 +57,7 @@ public class ConsistencyTestResource {
 	
 	public static void events(HttpServletRequest req, HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		Clock c = new Clock().start();
+		NanoClock c = new NanoClock().start();
 		GaeAssert.enable();
 		c.stopAndStart("init");
 		ServletUtils.headers(res, "text/html");
@@ -86,7 +86,7 @@ public class ConsistencyTestResource {
 	public static void get(String create, HttpServletRequest req, HttpServletResponse res)
 	        throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		Clock c = new Clock().start();
+		NanoClock c = new NanoClock().start();
 		GaeAssert.enable();
 		GaeConfigurationManager.assertValidGaeConfiguration();
 		c.stopAndStart("config");

@@ -2,7 +2,7 @@ package org.xydra.testgae.client;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.restless.utils.Clock;
+import org.xydra.restless.utils.NanoClock;
 
 
 @SuppressWarnings("unused")
@@ -17,7 +17,7 @@ public class RemoteConsistencyTest {
 	public static final int ROUNDS = 10;
 	
 	public static void main(String[] args) {
-		Clock c = new Clock().start();
+		NanoClock c = new NanoClock().start();
 		for(int i = 0; i < THREADS; i++) {
 			ConsistencyTestClient client = new ConsistencyTestClient(SERVER_ROOT, "thread-" + i
 			        + "-", ROUNDS);

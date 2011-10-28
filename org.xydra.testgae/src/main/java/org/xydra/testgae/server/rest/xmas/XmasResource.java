@@ -12,7 +12,7 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
-import org.xydra.restless.utils.Clock;
+import org.xydra.restless.utils.NanoClock;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.HtmlUtils.METHOD;
 import org.xydra.restless.utils.ServletUtils;
@@ -83,7 +83,7 @@ public class XmasResource {
 	 */
 	public void get(String repoStr, String view, String format, HttpServletResponse res)
 	        throws IOException {
-		Clock c = new Clock().start();
+		NanoClock c = new NanoClock().start();
 		log.info("Getting " + repoStr + "?view=" + view + "&format=" + format);
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		if(format.equals("urls")) {

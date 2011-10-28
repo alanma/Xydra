@@ -12,7 +12,7 @@ import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
-import org.xydra.restless.utils.Clock;
+import org.xydra.restless.utils.NanoClock;
 import org.xydra.restless.utils.ServletUtils;
 import org.xydra.testgae.server.model.xmas.WishList;
 import org.xydra.testgae.server.model.xmas.Xmas;
@@ -46,7 +46,7 @@ public class Benchmark {
 	
 	public static void runBenchmark(String repo, String list, int createInitially, int delete,
 	        int createAgain, Writer w) throws IOException {
-		Clock s1 = new Clock().start();
+		NanoClock s1 = new NanoClock().start();
 		
 		// create list
 		XWritableModel model = Xmas.getRepository(repo).createModel(XX.toId(list));

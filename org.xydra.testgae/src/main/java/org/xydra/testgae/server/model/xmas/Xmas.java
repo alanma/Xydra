@@ -12,7 +12,7 @@ import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.core.change.DiffWritableModel;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.restless.utils.Clock;
+import org.xydra.restless.utils.NanoClock;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
@@ -59,7 +59,7 @@ public class Xmas {
 		/* if there is no repo or the wrong one: init */
 		if(repo == null || (repoIdStr != null && !repo.getID().toString().equals(repoIdStr))) {
 			XID repoId = repoIdStr == null ? timebasedUniqueId() : XX.toId(repoIdStr);
-			Clock c = new Clock().start();
+			NanoClock c = new NanoClock().start();
 			
 			/* Create persistence */
 			persistence = new GaePersistence(repoId);
@@ -86,7 +86,7 @@ public class Xmas {
 	        throws IOException {
 		XWritableRepository repo = getRepository(repoStr);
 		writer.write("Adding to repository '" + repo.getID() + "'<br />\n");
-		Clock s2 = new Clock();
+		NanoClock s2 = new NanoClock();
 		s2.start();
 		for(int l = 0; l < listCount; l++) {
 			writer.write("Creating/loading model <br />\n");
@@ -145,7 +145,7 @@ public class Xmas {
 	 * @throws IOException if the writer has {@link IOException}
 	 */
 	public static void get(String repoStr, String view, Writer writer) throws IOException {
-		Clock s1 = new Clock();
+		NanoClock s1 = new NanoClock();
 		s1.start();
 		writer.write("<h2>All wishlists in repository '" + Xmas.getRepository(repoStr).getID()
 		        + "'</h2>\n");
