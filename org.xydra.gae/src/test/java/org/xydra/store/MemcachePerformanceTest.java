@@ -12,7 +12,7 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.base.value.XV;
 import org.xydra.perf.StatsGatheringMemCacheWrapper;
-import org.xydra.restless.utils.Clock;
+import org.xydra.restless.utils.NanoClock;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
@@ -39,7 +39,7 @@ public class MemcachePerformanceTest {
 		XWritableRepository gaeTestRepo = new WritableRepositoryOnPersistence(pers,
 		        XX.toId("testactor"));
 		
-		Clock c = new Clock().start();
+		NanoClock c = new NanoClock().start();
 		
 		XWritableModel model1 = gaeTestRepo.createModel(XX.toId("model1"));
 		XWritableObject object1 = model1.createObject(XX.toId("object1"));

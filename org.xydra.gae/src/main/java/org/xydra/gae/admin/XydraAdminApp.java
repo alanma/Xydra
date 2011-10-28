@@ -33,6 +33,7 @@ import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
  * 
  * @author xamde
  */
+@SuppressWarnings("deprecation")
 public class XydraAdminApp {
 	
 	private static String path;

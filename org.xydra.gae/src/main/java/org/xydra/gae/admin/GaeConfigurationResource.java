@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
-import org.xydra.restless.utils.Clock;
+import org.xydra.restless.utils.NanoClock;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.ServletUtils;
 import org.xydra.store.XydraConfigUtils;
@@ -77,7 +77,7 @@ public class GaeConfigurationResource {
 	public static void index(HttpServletRequest req, HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		GaeConfigurationManager.assertValidGaeConfiguration();
-		Clock c = new Clock().start();
+		NanoClock c = new NanoClock().start();
 		
 		ServletUtils.headers(res, ServletUtils.CONTENTTYPE_TEXT_HTML);
 		Writer w = res.getWriter();

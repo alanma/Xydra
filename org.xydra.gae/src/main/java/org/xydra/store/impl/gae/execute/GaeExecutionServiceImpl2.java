@@ -25,7 +25,7 @@ import org.xydra.core.model.delta.DeltaUtils;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.restless.utils.Clock;
+import org.xydra.restless.utils.NanoClock;
 import org.xydra.store.impl.gae.DebugFormatter;
 import org.xydra.store.impl.gae.FutureUtils;
 import org.xydra.store.impl.gae.SyncDatastore;
@@ -115,7 +115,7 @@ public class GaeExecutionServiceImpl2 implements IGaeExecutionService {
 	public long executeCommand(XCommand command, XID actorId) {
 		
 		log.debug("Execute " + DebugFormatter.format(command));
-		Clock c = new Clock().start();
+		NanoClock c = new NanoClock().start();
 		assert this.modelAddr.equalsOrContains(command.getChangedEntity()) : "cannot handle command "
 		        + command + " - it does not address a model";
 		c.stopAndStart("assert");

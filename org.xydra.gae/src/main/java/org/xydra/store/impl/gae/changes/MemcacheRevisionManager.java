@@ -8,6 +8,8 @@ import org.xydra.store.IMemCache.IdentifiableValue;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.gae.GaeOperation;
 
+import com.google.appengine.api.memcache.MemcacheServiceException;
+
 
 /**
  * Can read from and write to memcache.
@@ -23,7 +25,6 @@ public class MemcacheRevisionManager {
 	 * Compile time flag to disable the functionality of
 	 * {@link #writeToMemcache()} and {@link #loadFromMemcache()}
 	 */
-	// FIXME !!! test USE_MEMCACHE
 	private static final boolean USE_MEMCACHE = true;
 	
 	/**
@@ -101,7 +102,11 @@ public class MemcacheRevisionManager {
 		if(this.loadedValue == null || this.loadedValue.getValue() == null) {
 			// write if still null
 			IMemCache cache = XydraRuntime.getMemcache();
-			cache.putIfValueIsNull(getCacheName(), this.memcacheEntry);
+			try {
+				cache.putIfValueIsNull(getCacheName(), this.memcacheEntry);
+			} catch(MemcacheServiceException e) {
+				log.warn("Could not set revisions in memcache", e);
+			}
 		} else {
 			// write conditional
 			IMemCache cache = XydraRuntime.getMemcache();
