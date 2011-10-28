@@ -100,6 +100,17 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 				        + " " + message));
 				return;
 			}
+			// verify status code to avoid failing on parsing HTML error pages
+			if(code >= 400 && code < 500) {
+				this.callback.onFailure(new ConnectionException("client-side error " + code + " "
+				        + message));
+				return;
+			}
+			if(code >= 500 && code < 600) {
+				this.callback.onFailure(new ConnectionException("server-side error " + code + " "
+				        + message));
+				return;
+			}
 			
 			XydraElement element;
 			try {
