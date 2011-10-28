@@ -50,6 +50,10 @@ public class XydraRestServer {
 		        SERVLET_CONTEXT_ATTRIBUTE_XYDRASTORE);
 	}
 	
+	public static void setXydraStoreInServletContext(Restless restless, XydraStore store) {
+		restless.getServletContext().setAttribute(SERVLET_CONTEXT_ATTRIBUTE_XYDRASTORE, store);
+	}
+	
 	/**
 	 * Setup the Xydra REST API.
 	 */

@@ -20,7 +20,10 @@ import org.xydra.store.impl.delegate.XydraPersistence;
  * repositoryId) is called.
  * 
  * @author xamde
+ * @deprecated Use XydraRuntime.getPersistence instead od the servlet context
+ *             from XydraRestServer
  */
+@Deprecated
 public class ShareXydraPersistenceApp {
 	
 	private static final Logger log = LoggerFactory.getLogger(ShareXydraPersistenceApp.class);
