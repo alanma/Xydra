@@ -18,7 +18,7 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.core.change.RWCachingRepository;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.restless.utils.Clock;
+import org.xydra.restless.utils.NanoClock;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
@@ -49,7 +49,7 @@ public abstract class AbstractPersistencePerformanceTest {
 		log.info("TEST testPerformanceDirect");
 		XID repositoryId = XX.toId("testPerformanceDirect");
 		XydraPersistence persistence = createPersistence(repositoryId);
-		Clock c = new Clock().start();
+		NanoClock c = new NanoClock().start();
 		XID modelId = XX.toId("model1");
 		XRepositoryCommand addModelCmd = X.getCommandFactory().createForcedAddModelCommand(
 		        repositoryId, modelId);
@@ -103,7 +103,7 @@ public abstract class AbstractPersistencePerformanceTest {
 		XID modelId = XX.toId("model1");
 		XAddress modelAddress = XX.toAddress(repositoryId, modelId, null, null);
 		
-		Clock c = new Clock().start();
+		NanoClock c = new NanoClock().start();
 		
 		WritableRepositoryOnPersistence baseRepository = new WritableRepositoryOnPersistence(
 		        persistence, actorId);
