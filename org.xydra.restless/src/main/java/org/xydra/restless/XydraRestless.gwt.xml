@@ -1,0 +1,13 @@
+<!-- This GWT module def will prevent many irrelevant compile errors.
+     If another project includes the GAE sources jar AND also inherits
+     this module, only the classes mentioned below are attempted to compile. -->
+
+<!-- Inherit as 'org.xydra.restless.XydraRestless'  -->
+<module>
+	
+	<source path="" >
+		<include name="utils/XmlUtils.java" />
+		<include name="utils/SharedHtmlUtils.java" />
+	</source>
+	
+</module>
