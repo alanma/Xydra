@@ -8,7 +8,6 @@ import org.xydra.store.impl.rest.AbstractXydraStoreRestClient;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
-import com.google.gwt.http.client.URL;
 
 
 public class GwtXydraStoreRestClient extends AbstractXydraStoreRestClient {
@@ -30,8 +29,8 @@ public class GwtXydraStoreRestClient extends AbstractXydraStoreRestClient {
 		
 		@Override
 		public void onResponseReceived(com.google.gwt.http.client.Request request, Response response) {
-			this.request.onResponse(response.getText(), response.getStatusCode(), response
-			        .getStatusText());
+			this.request.onResponse(response.getText(), response.getStatusCode(),
+			        response.getStatusText());
 		}
 		
 	}
@@ -81,11 +80,6 @@ public class GwtXydraStoreRestClient extends AbstractXydraStoreRestClient {
 		} catch(com.google.gwt.http.client.RequestException re) {
 			req.onFailure(re);
 		}
-	}
-	
-	@Override
-	protected String urlencode(String string) {
-		return URL.encodeQueryString(string);
 	}
 	
 }
