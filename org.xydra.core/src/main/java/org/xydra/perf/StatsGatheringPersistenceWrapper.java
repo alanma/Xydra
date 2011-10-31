@@ -1,15 +1,16 @@
 package org.xydra.perf;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.util.List;
 import java.util.Set;
 
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
+import org.xydra.base.minio.MiniIOException;
+import org.xydra.base.minio.MiniStringWriter;
+import org.xydra.base.minio.MiniWriter;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.log.Logger;
@@ -25,6 +26,7 @@ import org.xydra.store.impl.delegate.XydraPersistence;
  * 
  * @author xamde
  */
+@RunsInGWT(true)
 public class StatsGatheringPersistenceWrapper implements XydraPersistence {
 	
 	private static final Logger log = LoggerFactory
@@ -112,16 +114,16 @@ public class StatsGatheringPersistenceWrapper implements XydraPersistence {
 	}
 	
 	public void dumpStats() {
-		StringWriter sw = new StringWriter();
+		MiniStringWriter sw = new MiniStringWriter();
 		try {
 			writeStats(sw);
-		} catch(IOException e) {
+		} catch(MiniIOException e) {
 			throw new RuntimeException(e);
 		}
-		log.info(sw.getBuffer().toString());
+		log.info(sw.toString());
 	}
 	
-	public void writeStats(Writer w) throws IOException {
+	public void writeStats(MiniWriter w) throws MiniIOException {
 		w.write("XydraPersistence stats ----------\n");
 		this.stats.writeStats(w);
 	}

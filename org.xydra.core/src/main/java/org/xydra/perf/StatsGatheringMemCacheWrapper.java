@@ -1,12 +1,14 @@
 package org.xydra.perf;
 
-import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.xydra.annotations.RunsInGWT;
+import org.xydra.base.minio.MiniIOException;
+import org.xydra.base.minio.MiniStreamWriter;
 import org.xydra.store.IMemCache;
 import org.xydra.store.impl.memory.LocalMemcache.IdentifiableImpl;
 
@@ -21,6 +23,7 @@ import org.xydra.store.impl.memory.LocalMemcache.IdentifiableImpl;
  * @author xamde
  * 
  */
+@RunsInGWT(false)
 public class StatsGatheringMemCacheWrapper implements IMemCache {
 	
 	private MapStats mapstats = new MapStats();
@@ -34,17 +37,17 @@ public class StatsGatheringMemCacheWrapper implements IMemCache {
 	}
 	
 	@Override
-    public int size() {
+	public int size() {
 		return this.base.size();
 	}
 	
 	@Override
-    public boolean isEmpty() {
+	public boolean isEmpty() {
 		return this.base.isEmpty();
 	}
 	
 	@Override
-    public boolean containsKey(Object key) {
+	public boolean containsKey(Object key) {
 		assert key instanceof String;
 		count("containsKey");
 		return this.base.containsKey(key instanceof String ? key : key.toString());
@@ -60,13 +63,13 @@ public class StatsGatheringMemCacheWrapper implements IMemCache {
 	}
 	
 	@Override
-    public boolean containsValue(Object value) {
+	public boolean containsValue(Object value) {
 		count("containsValue");
 		return this.base.containsValue(value);
 	}
 	
 	@Override
-    public Object get(Object key) {
+	public Object get(Object key) {
 		assert key instanceof String;
 		count("get");
 		String usedKey;
@@ -95,7 +98,7 @@ public class StatsGatheringMemCacheWrapper implements IMemCache {
 	}
 	
 	@Override
-    public Object put(String key, Object value) {
+	public Object put(String key, Object value) {
 		count("put");
 		this.mapstats.recordPut(key.toString(), value);
 		return this.base.put(key, value);
@@ -109,19 +112,19 @@ public class StatsGatheringMemCacheWrapper implements IMemCache {
 	}
 	
 	@Override
-    public Object remove(Object key) {
+	public Object remove(Object key) {
 		count("remove");
 		return this.base.remove(key);
 	}
 	
 	@Override
-    public void putAll(Map<? extends String,? extends Object> m) {
+	public void putAll(Map<? extends String,? extends Object> m) {
 		count("putAll");
 		this.base.putAll(m);
 	}
 	
 	@Override
-    public void clear() {
+	public void clear() {
 		count("clear");
 		this.base.clear();
 		// clear also stats
@@ -130,30 +133,30 @@ public class StatsGatheringMemCacheWrapper implements IMemCache {
 	}
 	
 	@Override
-    public Set<String> keySet() {
+	public Set<String> keySet() {
 		count("keySet");
 		return this.base.keySet();
 	}
 	
 	@Override
-    public Collection<Object> values() {
+	public Collection<Object> values() {
 		count("values");
 		return this.base.values();
 	}
 	
 	@Override
-    public Set<java.util.Map.Entry<String,Object>> entrySet() {
+	public Set<java.util.Map.Entry<String,Object>> entrySet() {
 		count("entrySet");
 		return this.base.entrySet();
 	}
 	
 	@Override
-    public boolean equals(Object o) {
+	public boolean equals(Object o) {
 		return this.base.equals(o);
 	}
 	
 	@Override
-    public int hashCode() {
+	public int hashCode() {
 		return this.base.hashCode();
 	}
 	
@@ -168,9 +171,9 @@ public class StatsGatheringMemCacheWrapper implements IMemCache {
 		buf.append("Access stats ===================================================== <br />\n");
 		try {
 			StringWriter sw = new StringWriter();
-			this.mapstats.writeStats(sw);
-			buf.append(sw.getBuffer().toString());
-		} catch(IOException e) {
+			this.mapstats.writeStats(new MiniStreamWriter(sw));
+			buf.append(sw.toString());
+		} catch(MiniIOException e) {
 			throw new RuntimeException(e);
 		}
 		

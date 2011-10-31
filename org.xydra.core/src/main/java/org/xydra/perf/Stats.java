@@ -1,9 +1,12 @@
 package org.xydra.perf;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+
+import org.xydra.base.minio.MiniIOException;
+import org.xydra.base.minio.MiniWriter;
+import org.xydra.sharedutils.SystemUtils;
+
+import com.google.common.collect.MapMaker;
 
 
 /**
@@ -21,13 +24,17 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Stats {
 	
-	public Map<String,Data> stats = new ConcurrentHashMap<String,Stats.Data>();
+	public Map<String,Data> stats =
+
+	new MapMaker().concurrencyLevel(1).initialCapacity(50).makeMap();
+	
+	// new ConcurrentHashMap<String,Stats.Data>();
 	
 	private static class Data {
 		public long count = 0;
 		public long duration = 0;
 		
-		public void writeStats(String name, Writer w) throws IOException {
+		public void writeStats(String name, MiniWriter w) throws MiniIOException {
 			long nsPerCall = this.count > 0 ? this.duration / this.count : -1;
 			w.write("  " + name + " called " + this.count + " times. Total: "
 			        + (this.duration / 1000) + " micros = " + (this.duration / 1000000)
@@ -42,11 +49,11 @@ public class Stats {
 		
 		public Clock(String name) {
 			this.name = name;
-			this.start = System.nanoTime();
+			this.start = SystemUtils.nanoTime();
 		}
 		
 		public void stop() {
-			long duration = System.nanoTime() - this.start;
+			long duration = SystemUtils.nanoTime() - this.start;
 			Data data = Stats.this.stats.get(this.name);
 			if(data == null) {
 				data = new Data();
@@ -62,7 +69,7 @@ public class Stats {
 		return c;
 	}
 	
-	public void writeStats(Writer w) throws IOException {
+	public void writeStats(MiniWriter w) throws MiniIOException {
 		for(String name : this.stats.keySet()) {
 			Data d = this.stats.get(name);
 			d.writeStats(name, w);

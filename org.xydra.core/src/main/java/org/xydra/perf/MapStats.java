@@ -1,14 +1,6 @@
 package org.xydra.perf;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
 import java.io.Serializable;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -18,8 +10,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.xydra.annotations.RunsInGWT;
+import org.xydra.base.minio.MiniIOException;
+import org.xydra.base.minio.MiniWriter;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.ReflectionUtils;
 
 
 /**
@@ -27,6 +23,7 @@ import org.xydra.log.LoggerFactory;
  * 
  * @author xamde
  */
+@RunsInGWT(true)
 public class MapStats {
 	
 	private static final Logger log = LoggerFactory.getLogger(MapStats.class);
@@ -61,10 +58,10 @@ public class MapStats {
 			else {
 				if(!(value instanceof Serializable)) {
 					log.warn("Could not estimate size of non-Serializable type "
-					        + value.getClass().getCanonicalName());
+					        + value.getClass().getName());
 					return 0;
 				} else
-					return MapStats.this.sizeOf((Serializable)value);
+					return ReflectionUtils.sizeOf((Serializable)value);
 			}
 		}
 		
@@ -75,7 +72,7 @@ public class MapStats {
 				return this.values.get(this.values.size() - 1);
 		}
 		
-		public void writeStats(Writer w) throws IOException {
+		public void writeStats(MiniWriter w) throws MiniIOException {
 			w.write("  " + this.key + " = " + this.entryGets + " gets, " + this.entryPuts
 			        + " puts, " + this.misses + " misses<br />\n");
 			// write actions per key
@@ -117,17 +114,18 @@ public class MapStats {
 			if(this.t == null)
 				return "  ";
 			else
-				return firstNLines(this.t, 7);
+				return ReflectionUtils.firstNLines(this.t, 7);
 		}
 		
-		public void writeStats(String whitespace, Writer w) throws IOException {
+		public void writeStats(String whitespace, MiniWriter w) throws MiniIOException {
 			w.write(whitespace
 			        + this.method
 			        + " '"
 			        + this.key
 			        + "'"
-			        + (this.value == null ? "" : " = '" + this.value.getClass().getCanonicalName()
-			                + "'") + "     <br/>\n" + stacktrace());
+			        + (this.value == null ? "" : " = '"
+			                + ReflectionUtils.getCanonicalName(this.value.getClass()) + "'")
+			        + "     <br/>\n" + stacktrace());
 		}
 	}
 	
@@ -157,25 +155,6 @@ public class MapStats {
 		}
 	}
 	
-	/**
-	 * @param obj to be estimated in size
-	 * @return estimated size by serialising to ObjectStream and counting bytes
-	 */
-	public long sizeOf(Serializable obj) {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		ObjectOutputStream oos;
-		try {
-			oos = new ObjectOutputStream(bos);
-			oos.writeObject(obj);
-			oos.close();
-			return bos.toByteArray().length;
-		} catch(IOException e) {
-			log.warn("Could not estimate size of object with type "
-			        + obj.getClass().getCanonicalName());
-			return 0;
-		}
-	}
-	
 	public void recordPut(String key, Object value) {
 		Entry e = this.statsMap.get(key);
 		if(e == null) {
@@ -196,7 +175,7 @@ public class MapStats {
 		return this.statsMap.size();
 	}
 	
-	public void writeStats(Writer w) throws IOException {
+	public void writeStats(MiniWriter w) throws MiniIOException {
 		Summary summary = calcSummary();
 		
 		int k = 10;
@@ -285,36 +264,6 @@ public class MapStats {
 		this.gets = 0;
 		this.puts = 0;
 		this.first_k_actions.clear();
-	}
-	
-	/**
-	 * @param t the {@link Throwable} to inspect
-	 * @param n number of lines
-	 * @return the first n lines of the given {@link Throwable} t, separated by
-	 *         new line characters + br tags
-	 */
-	public static String firstNLines(Throwable t, int n) {
-		StringWriter sw = new StringWriter();
-		t.printStackTrace(new PrintWriter(sw));
-		StringReader sr = new StringReader(sw.getBuffer().toString());
-		BufferedReader br = new BufferedReader(sr);
-		String line;
-		try {
-			// skip first 4 lines
-			line = br.readLine();
-			line = br.readLine();
-			line = br.readLine();
-			line = br.readLine();
-			line = br.readLine();
-			StringBuffer buf = new StringBuffer();
-			for(int i = 0; i < n; i++) {
-				buf.append(line + " <br />\n");
-				line = br.readLine();
-			}
-			return buf.toString();
-		} catch(IOException e) {
-			throw new RuntimeException(e);
-		}
 	}
 	
 }
