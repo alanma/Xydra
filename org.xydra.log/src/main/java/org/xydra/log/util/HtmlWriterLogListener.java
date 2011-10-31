@@ -52,7 +52,7 @@ public class HtmlWriterLogListener implements ILogListener {
 		this.buf.append(lastDotPart(log.toString()));
 		this.buf.append("<i>" + level + "</i> ");
 		if(t != null && t.length > 0) {
-			this.buf.append(" " + t.getClass().getCanonicalName());
+			this.buf.append(" " + t.getClass().getName());
 		} else {
 		}
 		this.buf.append("</span> ");
