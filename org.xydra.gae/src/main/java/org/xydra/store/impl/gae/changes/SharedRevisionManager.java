@@ -4,6 +4,8 @@ import org.xydra.base.XAddress;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.RevisionState;
+import org.xydra.store.XydraRuntime;
+import org.xydra.store.XydraRuntime.Listener;
 import org.xydra.store.impl.gae.DebugFormatter;
 import org.xydra.store.impl.gae.DebugFormatter.Timing;
 import org.xydra.store.impl.gae.GaeOperation;
@@ -52,6 +54,13 @@ public class SharedRevisionManager implements IRevisionInfo {
 		this.modelAddress = modelAddress;
 		this.sharedRevisionInfo = new RevisionInfo();
 		this.memcacheRevisionManager = new MemcacheRevisionManager(modelAddress);
+		XydraRuntime.addStaticListener(new Listener() {
+			
+			@Override
+			public void onXydraRuntimeInit() {
+				SharedRevisionManager.this.writeToMemcache();
+			}
+		});
 	}
 	
 	@Override

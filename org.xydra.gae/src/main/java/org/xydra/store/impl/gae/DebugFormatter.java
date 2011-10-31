@@ -1,27 +1,23 @@
 package org.xydra.store.impl.gae;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Map;
-import java.util.Map.Entry;
 
+import org.xydra.annotations.RunsInAppEngine;
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.change.XCommand;
+import org.xydra.sharedutils.ReflectionUtils;
 import org.xydra.store.IMemCache.IdentifiableValue;
-import org.xydra.store.impl.gae.changes.GaeChange;
-import org.xydra.store.impl.gae.changes.KeyStructure;
-
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
 
 
 /**
  * @author xamde
  * 
  */
+@RunsInGWT(true)
+@RunsInAppEngine(true)
 public class DebugFormatter {
 	
 	public static enum Timing {
@@ -79,10 +75,6 @@ public class DebugFormatter {
 			return format(o);
 		} else if(value instanceof XAddress) {
 			return "'" + value.toString() + "'";
-		} else if(value instanceof com.google.appengine.api.memcache.MemcacheService.IdentifiableValue) {
-			return DebugFormatter
-			        .format((((com.google.appengine.api.memcache.MemcacheService.IdentifiableValue)value)
-			                .getValue()));
 		} else if(value instanceof Collection<?>) {
 			StringBuffer buf = new StringBuffer("{");
 			for(Object o : ((Collection<?>)value)) {
@@ -90,29 +82,15 @@ public class DebugFormatter {
 			}
 			buf.append("}");
 			return buf.toString();
-		} else if(value instanceof Entity) {
-			Entity e = (Entity)value;
-			if(e.equals(Memcache.NULL_ENTITY)) {
-				return "NullEntity";
-			}
-			StringBuffer buf = new StringBuffer();
-			buf.append("key:" + e.getKey() + " ");
-			for(Entry<String,Object> a : e.getProperties().entrySet()) {
-				buf.append(a.getKey() + ": " + formatString(a.getValue().toString()) + "; ");
-			}
-			return "Entity={" + buf.toString() + " }";
-		} else if(value instanceof GaeChange) {
-			GaeChange c = (GaeChange)value;
-			return "GaeChange {" + formatString(c.toString(), 140) + "}";
 		} else if(value instanceof XCommand) {
 			XCommand c = (XCommand)value;
 			return "Command {" + formatString(c.toString(), 140) + "}";
 		} else if(value instanceof Long) {
 			return "{" + value + "}";
-		} else if(value instanceof Key) {
-			return KeyStructure.toString((Key)value);
+		} else if(GaeDebugFormatter.canHandle(value)) {
+			return GaeDebugFormatter.toString(value);
 		} else {
-			String s = value.getClass().getCanonicalName();
+			String s = ReflectionUtils.getCanonicalName(value.getClass());
 			String v = formatString(value.toString());
 			if(v.length() > 10) {
 				return s + " = {" + LINE_END + v + "}";
@@ -122,11 +100,11 @@ public class DebugFormatter {
 		}
 	}
 	
-	private static String formatString(String s) {
+	static String formatString(String s) {
 		return formatString(s, MAX_VALUE_STR_LEN);
 	}
 	
-	private static String formatString(String s, int maxLen) {
+	static String formatString(String s, int maxLen) {
 		if(s.length() <= maxLen) {
 			return s;
 		} else
@@ -172,16 +150,6 @@ public class DebugFormatter {
 	
 	public static String clear(String dataSourceName) {
 		return "CLEAR " + dataSourceName;
-	}
-	
-	/**
-	 * @return "2011-10-12 19:05:02.617" UTC time
-	 */
-	public static String currentTimeInGaeFormat() {
-		long ms = System.currentTimeMillis();
-		Date d = new Date(ms);
-		DateFormat df = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss.SSS");
-		return df.format(d);
 	}
 	
 }

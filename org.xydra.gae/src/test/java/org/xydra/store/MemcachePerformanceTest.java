@@ -34,7 +34,7 @@ public class MemcachePerformanceTest {
 		XydraRuntime.forceReInitialisation();
 		XydraPersistence pers = XydraRuntime.getPersistence(XX.toId("test-repo"));
 		assertNotNull(pers);
-		assertTrue(pers instanceof GaePersistence);
+		assertTrue("pers is " + pers.getClass().getCanonicalName(), pers instanceof GaePersistence);
 		
 		XWritableRepository gaeTestRepo = new WritableRepositoryOnPersistence(pers,
 		        XX.toId("testactor"));

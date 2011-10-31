@@ -96,6 +96,9 @@ public class MemcacheRevisionManager {
 		if(!USE_MEMCACHE) {
 			return;
 		}
+		
+		// TODO write only if local value is now higher than last written value
+		
 		// update locally
 		this.memcacheEntry = revisionInfo;
 		// update remote

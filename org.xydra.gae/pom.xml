@@ -30,6 +30,8 @@
 		<gae.home>
 			${settings.localRepository}/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}
         </gae.home>
+        
+		<gwt.version>2.3.0</gwt.version>
 
 	</properties>
 
@@ -238,6 +240,27 @@
 			<scope>compile</scope>
 		</dependency>
 
+		<!-- for testing the GWT compatibility -->
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-servlet</artifactId>
+			<version>${gwt.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-user</artifactId>
+			<version>${gwt.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gwt-log</groupId>
+			<artifactId>gwt-log</artifactId>
+			<version>3.1.2</version>
+			<scope>provided</scope>
+		</dependency>
+
+
 
 		<!-- no longer required / existing <dependency> <groupId>com.google.appengine</groupId> 
 			<artifactId>appengine-local-runtime</artifactId> <version>${gae.version}</version> 
@@ -324,6 +347,25 @@
 				<configuration>
 					<sdkDir>${gae.home}</sdkDir>
 				</configuration>
+			</plugin>
+			
+			<!--  For testing if it compiles well for GWT, too -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>gwt-maven-plugin</artifactId>
+				<version>2.1.0-1</version>
+				<configuration>
+					<module>org.xydra.store.impl.gae.XydraGae</module>
+				</configuration>
+				<executions>
+					<execution>
+						<id>gwt-test</id>
+						<phase>test</phase>
+						<goals>
+							<goal>test</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 
 		</plugins>
