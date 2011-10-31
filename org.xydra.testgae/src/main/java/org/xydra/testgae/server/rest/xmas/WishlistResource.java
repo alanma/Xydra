@@ -17,8 +17,8 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
 import org.xydra.restless.utils.HtmlUtils;
-import org.xydra.restless.utils.HtmlUtils.METHOD;
 import org.xydra.restless.utils.ServletUtils;
+import org.xydra.restless.utils.SharedHtmlUtils.METHOD;
 import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.testgae.server.model.xmas.WishList;
 import org.xydra.testgae.server.model.xmas.Xmas;
@@ -88,8 +88,7 @@ public class WishlistResource {
 		Writer w = HtmlUtils.startHtmlPage(res, "Delete Wishes");
 		w.write("Deleting all wishes.");
 		// create txn
-		DiffWritableModel txnModel = new DiffWritableModel(
-		        Xmas.createModel(repoStr, XX.toId(list)));
+		DiffWritableModel txnModel = new DiffWritableModel(Xmas.createModel(repoStr, XX.toId(list)));
 		WishList wishList = new WishList(txnModel);
 		// manipulate txn
 		wishList.removeAllWishes(w);

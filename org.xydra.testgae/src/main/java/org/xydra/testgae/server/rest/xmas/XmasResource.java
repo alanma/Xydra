@@ -12,10 +12,10 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
-import org.xydra.restless.utils.NanoClock;
 import org.xydra.restless.utils.HtmlUtils;
-import org.xydra.restless.utils.HtmlUtils.METHOD;
+import org.xydra.restless.utils.NanoClock;
 import org.xydra.restless.utils.ServletUtils;
+import org.xydra.restless.utils.SharedHtmlUtils.METHOD;
 import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.testgae.server.model.xmas.Xmas;
 
