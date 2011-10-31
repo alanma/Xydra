@@ -5,13 +5,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.net.URLEncoder;
 
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.core.serialize.XydraOut;
@@ -108,15 +106,6 @@ public class XydraStoreRestClient extends AbstractXydraStoreRestClient {
 			
 		} catch(IOException e) {
 			req.onFailure(e);
-		}
-	}
-	
-	@Override
-	protected String urlencode(String string) {
-		try {
-			return URLEncoder.encode(string, "UTF-8");
-		} catch(UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
 		}
 	}
 	

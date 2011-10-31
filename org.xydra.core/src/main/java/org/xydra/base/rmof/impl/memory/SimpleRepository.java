@@ -25,8 +25,14 @@ public class SimpleRepository implements XRevWritableRepository, Serializable {
 	
 	private static final long serialVersionUID = 5593443685935758227L;
 	
-	private final XAddress address;
-	private final Map<XID,XRevWritableModel> models = new HashMap<XID,XRevWritableModel>();
+	// not final for GWT serialisation
+	private XAddress address;
+	// not final for GWT serialisation
+	private Map<XID,XRevWritableModel> models = new HashMap<XID,XRevWritableModel>();
+	
+	/* Just for GWT */
+	protected SimpleRepository() {
+	}
 	
 	public SimpleRepository(XAddress address) {
 		assert address.getAddressedType() == XType.XREPOSITORY;
@@ -83,7 +89,7 @@ public class SimpleRepository implements XRevWritableRepository, Serializable {
 	}
 	
 	@Override
-    public void addModel(XRevWritableModel model) {
+	public void addModel(XRevWritableModel model) {
 		this.models.put(model.getID(), model);
 	}
 	

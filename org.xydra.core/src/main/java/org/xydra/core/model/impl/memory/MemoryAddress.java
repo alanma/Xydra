@@ -1,5 +1,7 @@
 package org.xydra.core.model.impl.memory;
 
+import java.io.Serializable;
+
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
@@ -16,14 +18,19 @@ import org.xydra.index.XI;
  * @author dscharrer
  * 
  */
-public class MemoryAddress implements XAddress {
+public class MemoryAddress implements XAddress, Serializable {
 	
 	private static final long serialVersionUID = -8011996037214695776L;
 	
-	private final XID field;
-	private final XID model;
-	private final XID object;
-	private final XID repository;
+	// all fields are non-final, so that this can be used as GWT-DTO
+	private XID field;
+	private XID model;
+	private XID object;
+	private XID repository;
+	
+	/** For GWT only */
+	protected MemoryAddress() {
+	}
 	
 	/**
 	 * Creates a new MemoryAddress.
@@ -68,7 +75,7 @@ public class MemoryAddress implements XAddress {
 	}
 	
 	@Override
-    public int compareTo(XAddress other) {
+	public int compareTo(XAddress other) {
 		// compare repos
 		if(this.getRepository() == null) {
 			if(other.getRepository() != null) {
@@ -130,7 +137,7 @@ public class MemoryAddress implements XAddress {
 	}
 	
 	@Override
-    public boolean contains(XAddress descendant) {
+	public boolean contains(XAddress descendant) {
 		
 		if(!XI.equals(this.repository, descendant.getRepository())) {
 			return false;
@@ -168,7 +175,7 @@ public class MemoryAddress implements XAddress {
 	}
 	
 	@Override
-    public boolean equalsOrContains(XAddress descendant) {
+	public boolean equalsOrContains(XAddress descendant) {
 		
 		if(!XI.equals(this.repository, descendant.getRepository())) {
 			return false;
@@ -194,7 +201,7 @@ public class MemoryAddress implements XAddress {
 	}
 	
 	@Override
-    public XType getAddressedType() {
+	public XType getAddressedType() {
 		
 		if(this.field != null) {
 			// ???F => field
@@ -213,22 +220,22 @@ public class MemoryAddress implements XAddress {
 	}
 	
 	@Override
-    public XID getField() {
+	public XID getField() {
 		return this.field;
 	}
 	
 	@Override
-    public XID getModel() {
+	public XID getModel() {
 		return this.model;
 	}
 	
 	@Override
-    public XID getObject() {
+	public XID getObject() {
 		return this.object;
 	}
 	
 	@Override
-    public XAddress getParent() {
+	public XAddress getParent() {
 		
 		if(this.field != null) {
 			// ???F
@@ -268,7 +275,7 @@ public class MemoryAddress implements XAddress {
 	}
 	
 	@Override
-    public XID getRepository() {
+	public XID getRepository() {
 		return this.repository;
 	}
 	
@@ -293,7 +300,7 @@ public class MemoryAddress implements XAddress {
 	}
 	
 	@Override
-    public boolean isParentOf(XAddress child) {
+	public boolean isParentOf(XAddress child) {
 		
 		if(!XI.equals(this.repository, child.getRepository())) {
 			return false;
@@ -330,7 +337,7 @@ public class MemoryAddress implements XAddress {
 	 *         Always starts with '/', never ends with '/'.
 	 */
 	@Override
-    public String toURI() {
+	public String toURI() {
 		StringBuffer uri = new StringBuffer();
 		
 		uri.append('/');

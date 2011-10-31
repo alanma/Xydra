@@ -27,9 +27,15 @@ public class SimpleObject implements Serializable, XRevWritableObject {
 	
 	private static final long serialVersionUID = 5593443685935758227L;
 	
-	private final XAddress address;
-	private final Map<XID,XRevWritableField> fields;
+	// not final for GWT serialisation
+	private XAddress address;
+	// not final for GWT serialisation
+	private Map<XID,XRevWritableField> fields;
 	private long revisionNumber;
+	
+	/** For GWT only! */
+	protected SimpleObject() {
+	}
 	
 	public SimpleObject(XAddress address) {
 		this(address, XCommand.NEW);

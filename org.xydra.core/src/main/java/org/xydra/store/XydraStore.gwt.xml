@@ -1,4 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.0.4//EN" "http://google-web-toolkit.googlecode.com/svn/tags/2.0.4/distro-source/core/src/gwt-module.dtd">
 <module>
+	
+	<super-source path="gwtemul" />
 	
 	<inherits name="org.xydra.base.XydraBase" />
 	
@@ -8,7 +12,6 @@
 		<exclude name="StatsPersistence.java" />
 		<exclude name="SynchronousTestCallback.java" />
 		<exclude name="WaitingCallback.java" /> <!-- uses Object.wait() -->
-		<exclude name="XydraRuntime.java" /> <!-- uses Class.forName() -->
 		<exclude name="base/ExecuteCommandsUtils.java" /> <!-- uses WaitingCallback -->
 		<exclude name="base/ReadableRepositoryOnStore.java" /> <!-- uses Thread -->
 		<exclude name="base/WritableRepositoryOnStore.java" /> <!-- uses ReadableRepositoryOnStore -->
@@ -23,6 +26,8 @@
 		<exclude name="impl/delegate/DelegatingSecureStore.java" /> <!-- uses DelegatingStore -->
 		<exclude name="impl/memory/AllowAllMemoryStore.java" /> <!-- uses DelegatingAllowAllStore -->
 		<exclude name="impl/memory/SecureMemoryStore.java" /> <!-- uses DelegatingSecureStore -->
+		<exclude name="impl/memory/MemoryRuntime.java" /> <!-- LocalMemcache -->
+		<exclude name="impl/memory/LocalMemcache.java" /> <!-- java.io -->
 		<exclude name="impl/rest/XydraStoreRestClient.java" /> <!-- uses java.io and java.net -->
 	</source>
 	

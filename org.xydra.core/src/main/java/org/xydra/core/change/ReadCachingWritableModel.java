@@ -13,6 +13,7 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
+import org.xydra.core.util.Clock;
 import org.xydra.index.IndexUtils;
 import org.xydra.index.impl.MapMapIndex;
 import org.xydra.index.query.EqualsConstraint;
@@ -83,7 +84,7 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 		this.base = base;
 		this.cache = new MapMapIndex<XID,XID,XValue>();
 		if(prefetchModel) {
-			long start = System.nanoTime();
+			Clock c = new Clock().start();
 			this.retrieveAllObjectsIdsFromBaseAndCache();
 			Set<XID> ids = this.idsAsSet();
 			for(XID objectId : ids) {
@@ -92,9 +93,8 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 					this.retrieveValueFromSourceAndCache(this.base, objectId, fieldId);
 				}
 			}
-			long stop = System.nanoTime();
 			log.info("Prefetching " + ids.size() + " objects in model '" + base.getID() + "' took "
-			        + ((stop - start) / 1000000) + "ms");
+			        + c.stopAndGetDuration("prefetech") + " ms");
 		}
 	}
 	
@@ -112,7 +112,7 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 		this.base = base;
 		this.cache = new MapMapIndex<XID,XID,XValue>();
 		// prefetching
-		long start = System.nanoTime();
+		Clock c = new Clock().start();
 		
 		XWritableModel snapshot = persistence.getModelSnapshot(getAddress());
 		for(XID objectId : snapshot) {
@@ -124,10 +124,9 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 		}
 		this.knowsAllObjectIds = true;
 		
-		long stop = System.nanoTime();
 		Set<XID> ids = this.idsAsSet();
 		log.info("Prefetching " + ids.size() + " objects in model '" + base.getID() + "' took "
-		        + ((stop - start) / 1000000) + "ms");
+		        + c.stopAndGetDuration("prefetech") + " ms");
 	}
 	
 	@Override

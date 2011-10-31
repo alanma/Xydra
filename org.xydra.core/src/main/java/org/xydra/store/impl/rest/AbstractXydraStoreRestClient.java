@@ -22,6 +22,7 @@ import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.XydraParser;
 import org.xydra.core.serialize.XydraSerializer;
 import org.xydra.index.query.Pair;
+import org.xydra.sharedutils.URLUtils;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.ConnectionException;
@@ -262,7 +263,9 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 		return sb.toString();
 	}
 	
-	abstract protected String urlencode(String string);
+	protected String urlencode(String string) {
+		return URLUtils.encode(string);
+	}
 	
 	private <T> void toBatchedResults(List<Object> snapshots, BatchedResult<T>[] result, XType type) {
 		

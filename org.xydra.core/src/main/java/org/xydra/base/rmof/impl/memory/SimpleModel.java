@@ -28,8 +28,10 @@ public class SimpleModel implements Serializable, XRevWritableModel {
 	
 	private static final long serialVersionUID = 5593443685935758227L;
 	
-	private final XAddress address;
-	private final Map<XID,XRevWritableObject> objects;
+	// not final for GWT serialisation
+	private XAddress address;
+	// not final for GWT serialisation
+	private Map<XID,XRevWritableObject> objects;
 	private long revisionNumber;
 	private boolean modelExists = true;
 	
@@ -40,6 +42,10 @@ public class SimpleModel implements Serializable, XRevWritableModel {
 	// TODO is this used?
 	public void setModelExists(boolean modelExists) {
 		this.modelExists = modelExists;
+	}
+	
+	/* Just for GWT */
+	protected SimpleModel() {
 	}
 	
 	public SimpleModel(XAddress address) {

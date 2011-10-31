@@ -60,9 +60,10 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 		return this.diffRepo.removeModel(modelId);
 	}
 	
+	@Deprecated
 	public RWCachingRepository(XWritableRepository baseRepository, boolean prefetchModels) {
 		super(null);
-		throw new IllegalAccessError();
+		throw new RuntimeException("illegal access - constructor deprecated");
 		// super(baseRepository);
 		// this.readRepo = new ReadCachingWritableRepository(baseRepository,
 		// prefetchModels);

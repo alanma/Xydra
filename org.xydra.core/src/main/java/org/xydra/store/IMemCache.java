@@ -3,7 +3,14 @@ package org.xydra.store;
 import java.util.Collection;
 import java.util.Map;
 
+import org.xydra.annotations.RunsInGWT;
 
+
+/**
+ * @author xamde
+ * 
+ */
+@RunsInGWT(true)
 public interface IMemCache extends Map<String,Object> {
 	
 	/**

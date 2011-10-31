@@ -39,27 +39,27 @@ public class LocalMemcache implements IMemCache {
 	private static final byte[] NULL_VALUE = "null_value".getBytes();
 	
 	@Override
-    public int size() {
+	public int size() {
 		return this.internalMap.size();
 	}
 	
 	@Override
-    public boolean isEmpty() {
+	public boolean isEmpty() {
 		return this.internalMap.isEmpty();
 	}
 	
 	@Override
-    public boolean containsKey(Object key) {
+	public boolean containsKey(Object key) {
 		return this.internalMap.containsKey(key);
 	}
 	
 	@Override
-    public boolean containsValue(Object value) {
+	public boolean containsValue(Object value) {
 		return this.internalMap.containsValue(valueToStored(value));
 	}
 	
 	@Override
-    public Object get(Object key) {
+	public Object get(Object key) {
 		byte[] bytes = this.internalMap.get(key);
 		if(bytes == null) {
 			return null;
@@ -69,7 +69,7 @@ public class LocalMemcache implements IMemCache {
 	}
 	
 	@Override
-    public Object put(String key, Object value) {
+	public Object put(String key, Object value) {
 		controlCacheSize();
 		// transform null value & clone value
 		byte[] oldValue = this.internalMap.put(key, valueToStored(value));
@@ -127,12 +127,12 @@ public class LocalMemcache implements IMemCache {
 	}
 	
 	@Override
-    public Object remove(Object key) {
+	public Object remove(Object key) {
 		return this.internalMap.remove(key);
 	}
 	
 	@Override
-    public void putAll(Map<? extends String,? extends Object> m) {
+	public void putAll(Map<? extends String,? extends Object> m) {
 		// transform values implicitly
 		for(Map.Entry<? extends String,? extends Object> entry : m.entrySet()) {
 			this.put(entry.getKey(), entry.getValue());
@@ -140,17 +140,17 @@ public class LocalMemcache implements IMemCache {
 	}
 	
 	@Override
-    public void clear() {
+	public void clear() {
 		this.internalMap.clear();
 	}
 	
 	@Override
-    public Set<String> keySet() {
+	public Set<String> keySet() {
 		return this.internalMap.keySet();
 	}
 	
 	@Override
-    public Collection<Object> values() {
+	public Collection<Object> values() {
 		// transform null values
 		List<Object> result = new LinkedList<Object>();
 		for(byte[] o : this.internalMap.values()) {
@@ -160,7 +160,7 @@ public class LocalMemcache implements IMemCache {
 	}
 	
 	@Override
-    public Set<java.util.Map.Entry<String,Object>> entrySet() {
+	public Set<java.util.Map.Entry<String,Object>> entrySet() {
 		// transform null values
 		Map<String,Object> result = new HashMap<String,Object>();
 		for(Map.Entry<String,byte[]> e : this.internalMap.entrySet()) {

@@ -354,7 +354,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 			// remember: this actually is an InModelTransactionField
 			assert field != null; // because "fieldExists" was true
 			assert field instanceof InObjectTransactionField : "field is instanceof "
-			        + field.getClass().getCanonicalName();
+			        + field.getClass().getName();
 			
 			// check revision number
 			if(!objectCommand.isForced()

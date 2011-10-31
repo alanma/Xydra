@@ -19,7 +19,13 @@ public class MemoryStringID implements XID {
 	
 	private static final long serialVersionUID = 3397013331330118533L;
 	
-	private final String string;
+	/** Impl Note: field is not final to allow GWT-Serialisation to work on uit */
+	private String string;
+	
+	/** Seems to be required for GWT? */
+	protected MemoryStringID() {
+		this.string = null;
+	}
 	
 	/**
 	 * No syntax checks are performed.
@@ -31,7 +37,7 @@ public class MemoryStringID implements XID {
 	}
 	
 	@Override
-    public int compareTo(XID o) {
+	public int compareTo(XID o) {
 		return this.toString().compareTo(o.toString());
 	}
 	

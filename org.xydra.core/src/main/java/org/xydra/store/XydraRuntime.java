@@ -12,8 +12,8 @@ import org.xydra.base.XID;
 import org.xydra.core.model.impl.memory.UUID;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.perf.StatsGatheringMemCacheWrapper;
 import org.xydra.perf.StatsGatheringPersistenceWrapper;
+import org.xydra.sharedutils.ReflectionUtils;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.memory.MemoryRuntime;
 
@@ -31,8 +31,6 @@ import org.xydra.store.impl.memory.MemoryRuntime;
  * constructor and be an instance of {@link XydraPlatformRuntime}</li>
  * <li>Use an in-memory platform as a fall-back</li>
  * </ol>
- * 
- * TODO GWT doesn't have Class.forName()
  * 
  * @author xamde
  */
@@ -74,26 +72,13 @@ public class XydraRuntime {
 	private static long lastTimeInitialisedAt = -1;
 	
 	/**
-	 * @param booleanString can be null
-	 * @return true if string is not null and equals true (case ignored).
-	 */
-	public static boolean isTrue(String booleanString) {
-		return booleanString != null && booleanString.equalsIgnoreCase("true");
-	}
-	
-	/**
 	 * @return a (potentially cached) instance of a IMemCache
 	 */
 	public static synchronized IMemCache getMemcache() {
 		initialiseRuntimeOnce();
 		if(memcacheInstance == null) {
 			memcacheInstance = platformRuntime.getMemCache();
-			
-			// if configured this way: wrap in StatsGatheringMemCacheWrapper
-			String memcacheStatsStr = configMap.get(PROP_MEMCACHESTATS);
-			if(isTrue(memcacheStatsStr)) {
-				memcacheInstance = new StatsGatheringMemCacheWrapper(memcacheInstance);
-			}
+			memcacheInstance = XydraRuntime_GwtEmulated.wrapOrReturn(configMap, memcacheInstance);
 		}
 		return memcacheInstance;
 	}
@@ -131,28 +116,19 @@ public class XydraRuntime {
 		lastTimeInitialisedAt = System.currentTimeMillis();
 		// try to load dynamically
 		try {
-			Class<?> platformClass = Class.forName(PLATFORM_CLASS);
-			log.info("Instantiated. Now casting...");
 			try {
-				Object platformInstance = platformClass.newInstance();
-				try {
-					XydraPlatformRuntime xPlatformInstance = (XydraPlatformRuntime)platformInstance;
-					platformRuntime = xPlatformInstance;
-					platformInitialised = true;
-					log.info("Using default platform "
-					        + platformRuntime.getClass().getCanonicalName());
-				} catch(ClassCastException e) {
-					log.warn("Found the class with name " + PLATFORM_CLASS
-					        + " but it is not implementing " + XydraPlatformRuntime.class, e);
-				}
-			} catch(InstantiationException e) {
+				XydraPlatformRuntime xPlatformInstance = (XydraPlatformRuntime)ReflectionUtils
+				        .createInstanceOfClass(PLATFORM_CLASS);
+				platformRuntime = xPlatformInstance;
+				platformInitialised = true;
+			} catch(ClassCastException e) {
 				log.warn("Found the class with name " + PLATFORM_CLASS
-				        + " but could not instantiate it", e);
-			} catch(IllegalAccessException e) {
-				log.warn("Found the class with name " + PLATFORM_CLASS
-				        + " but could not instantiate it", e);
+				        + " but it is not implementing " + XydraPlatformRuntime.class, e);
 			}
-		} catch(ClassNotFoundException e) {
+			log.info("Using default platform "
+			        + ReflectionUtils.getCanonicalName(platformRuntime.getClass()));
+		} catch(Exception e) {
+			log.warn("Could no instantiate " + PLATFORM_CLASS);
 			// so we fall back to defaults
 		}
 		

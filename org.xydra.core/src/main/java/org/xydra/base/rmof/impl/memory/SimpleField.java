@@ -23,9 +23,14 @@ public class SimpleField implements Serializable, XRevWritableField {
 	
 	private static final long serialVersionUID = -4704907115751969328L;
 	
-	private final XAddress address;
+	// not final for GWT
+	private XAddress address;
 	private long revisionNumber;
 	private XValue value;
+	
+	/* Just for GWT */
+	protected SimpleField() {
+	}
 	
 	public SimpleField(XAddress address) {
 		this(address, XCommand.NEW);
@@ -76,7 +81,7 @@ public class SimpleField implements Serializable, XRevWritableField {
 	}
 	
 	@Override
-    public void setRevisionNumber(long rev) {
+	public void setRevisionNumber(long rev) {
 		this.revisionNumber = rev;
 	}
 	

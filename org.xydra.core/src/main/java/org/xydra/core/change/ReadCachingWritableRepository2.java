@@ -69,7 +69,7 @@ public class ReadCachingWritableRepository2 implements XWritableRepository {
 	public XWritableModel createModel(XID modelId) {
 		XWritableModel readCachingModel = getModel(modelId);
 		if(readCachingModel == null) {
-			throw new IllegalAccessError("This ReadCachingWritableRepository2 cannot create models");
+			throw new RuntimeException("This ReadCachingWritableRepository2 cannot create models");
 		}
 		return readCachingModel;
 	}
@@ -132,7 +132,7 @@ public class ReadCachingWritableRepository2 implements XWritableRepository {
 	
 	@Override
 	public boolean removeModel(XID modelId) {
-		throw new IllegalAccessError("This repo cannot do this");
+		throw new RuntimeException("This repo cannot do this");
 	}
 	
 }
