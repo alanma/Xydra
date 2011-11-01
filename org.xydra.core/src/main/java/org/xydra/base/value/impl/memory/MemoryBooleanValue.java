@@ -1,5 +1,7 @@
 package org.xydra.base.value.impl.memory;
 
+import java.io.Serializable;
+
 import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XBooleanValue;
 
@@ -10,18 +12,23 @@ import org.xydra.base.value.XBooleanValue;
  * @author Kaidel
  * 
  */
-public class MemoryBooleanValue implements XBooleanValue {
+public class MemoryBooleanValue implements XBooleanValue, Serializable {
 	
 	private static final long serialVersionUID = 4401350466432317386L;
 	
-	private final Boolean content;
+	// non-final to be GWT-Serializable
+	private Boolean content;
+	
+	// empty constructor for GWT-Serializable
+	protected MemoryBooleanValue() {
+	}
 	
 	public MemoryBooleanValue(boolean content) {
 		this.content = content;
 	}
 	
 	@Override
-    public boolean contents() {
+	public boolean contents() {
 		return this.content;
 	}
 	
@@ -35,16 +42,6 @@ public class MemoryBooleanValue implements XBooleanValue {
 	}
 	
 	@Override
-	public int hashCode() {
-		return this.content.hashCode();
-	}
-	
-	@Override
-	public String toString() {
-		return Boolean.toString(this.content);
-	}
-	
-	@Override
 	public ValueType getType() {
 		return ValueType.Boolean;
 	}
@@ -52,6 +49,16 @@ public class MemoryBooleanValue implements XBooleanValue {
 	@Override
 	public Boolean getValue() {
 		return this.content;
+	}
+	
+	@Override
+	public int hashCode() {
+		return this.content.hashCode();
+	}
+	
+	@Override
+	public String toString() {
+		return Boolean.toString(this.content);
 	}
 	
 }

@@ -1,5 +1,7 @@
 package org.xydra.base.value.impl.memory;
 
+import java.io.Serializable;
+
 import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XIntegerValue;
 
@@ -10,23 +12,28 @@ import org.xydra.base.value.XIntegerValue;
  * @author Kaidel
  * 
  */
-public class MemoryIntegerValue implements XIntegerValue {
+public class MemoryIntegerValue implements XIntegerValue, Serializable {
 	
 	private static final long serialVersionUID = -7591305944744567132L;
 	
-	private final int content;
+	// non-final to be GWT-Serializable
+	private int content;
+	
+	// empty constructor for GWT-Serializable
+	protected MemoryIntegerValue() {
+	}
 	
 	public MemoryIntegerValue(int content) {
 		this.content = content;
 	}
 	
 	@Override
-    public Number asNumber() {
+	public Number asNumber() {
 		return contents();
 	}
 	
 	@Override
-    public int contents() {
+	public int contents() {
 		return this.content;
 	}
 	
@@ -40,16 +47,6 @@ public class MemoryIntegerValue implements XIntegerValue {
 	}
 	
 	@Override
-	public int hashCode() {
-		return this.content;
-	}
-	
-	@Override
-	public String toString() {
-		return Integer.toString(this.content);
-	}
-	
-	@Override
 	public ValueType getType() {
 		return ValueType.Integer;
 	}
@@ -57,6 +54,16 @@ public class MemoryIntegerValue implements XIntegerValue {
 	@Override
 	public Integer getValue() {
 		return this.content;
+	}
+	
+	@Override
+	public int hashCode() {
+		return this.content;
+	}
+	
+	@Override
+	public String toString() {
+		return Integer.toString(this.content);
 	}
 	
 }

@@ -1,5 +1,6 @@
 package org.xydra.base.value.impl.memory;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -14,11 +15,17 @@ import org.xydra.index.XI;
  * @author Kaidel
  * 
  */
-public class MemoryLongListValue extends MemoryListValue<Long> implements XLongListValue {
+public class MemoryLongListValue extends MemoryListValue<Long> implements XLongListValue,
+        Serializable {
 	
 	private static final long serialVersionUID = -3294191125211048647L;
 	
-	private final long[] list;
+	// non-final to be GWT-Serializable
+	private long[] list;
+	
+	// empty constructor for GWT-Serializable
+	protected MemoryLongListValue() {
+	}
 	
 	public MemoryLongListValue(Collection<Long> content) {
 		this.list = new long[content.size()];
@@ -38,7 +45,7 @@ public class MemoryLongListValue extends MemoryListValue<Long> implements XLongL
 	}
 	
 	@Override
-    public XLongListValue add(int index, Long entry) {
+	public XLongListValue add(int index, Long entry) {
 		int size = this.list.length;
 		if(index < 0 || index > size) {
 			throw new IndexOutOfBoundsException();
@@ -51,12 +58,12 @@ public class MemoryLongListValue extends MemoryListValue<Long> implements XLongL
 	}
 	
 	@Override
-    public XLongListValue add(Long entry) {
+	public XLongListValue add(Long entry) {
 		return add(this.list.length, entry);
 	}
 	
 	@Override
-    public long[] contents() {
+	public long[] contents() {
 		long[] array = new long[this.list.length];
 		System.arraycopy(this.list, 0, array, 0, this.list.length);
 		return array;
@@ -69,8 +76,18 @@ public class MemoryLongListValue extends MemoryListValue<Long> implements XLongL
 	}
 	
 	@Override
-    public Long get(int index) {
+	public Long get(int index) {
 		return this.list[index];
+	}
+	
+	@Override
+	public ValueType getComponentType() {
+		return ValueType.Long;
+	}
+	
+	@Override
+	public ValueType getType() {
+		return ValueType.LongList;
 	}
 	
 	@Override
@@ -79,7 +96,7 @@ public class MemoryLongListValue extends MemoryListValue<Long> implements XLongL
 	}
 	
 	@Override
-    public XLongListValue remove(int index) {
+	public XLongListValue remove(int index) {
 		int size = this.list.length;
 		if(index < 0 || index >= size) {
 			throw new IndexOutOfBoundsException();
@@ -91,7 +108,7 @@ public class MemoryLongListValue extends MemoryListValue<Long> implements XLongL
 	}
 	
 	@Override
-    public XLongListValue remove(Long entry) {
+	public XLongListValue remove(Long entry) {
 		int index = indexOf(entry);
 		if(index < 0) {
 			return this;
@@ -100,19 +117,19 @@ public class MemoryLongListValue extends MemoryListValue<Long> implements XLongL
 	}
 	
 	@Override
-    public int size() {
+	public int size() {
 		return this.list.length;
 	}
 	
 	@Override
-    public Long[] toArray() {
+	public Long[] toArray() {
 		Long[] array = new Long[this.list.length];
 		fillArray(array);
 		return array;
 	}
 	
 	@Override
-    public Number[] toNumberArray() {
+	public Number[] toNumberArray() {
 		Number[] array = new Number[this.list.length];
 		int i = 0;
 		for(Number e : this) {
@@ -124,16 +141,6 @@ public class MemoryLongListValue extends MemoryListValue<Long> implements XLongL
 	@Override
 	public String toString() {
 		return Arrays.toString(this.list);
-	}
-	
-	@Override
-	public ValueType getType() {
-		return ValueType.LongList;
-	}
-	
-	@Override
-	public ValueType getComponentType() {
-		return ValueType.Long;
 	}
 	
 }

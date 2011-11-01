@@ -1,5 +1,6 @@
 package org.xydra.base.value.impl.memory;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -14,11 +15,17 @@ import org.xydra.index.XI;
  * @author dscharrer
  * 
  */
-public class MemoryByteListValue extends MemoryListValue<Byte> implements XByteListValue {
+public class MemoryByteListValue extends MemoryListValue<Byte> implements XByteListValue,
+        Serializable {
 	
 	private static final long serialVersionUID = -674503742791516328L;
 	
-	private final byte[] list;
+	// non-final to be GWT-Serializable
+	private byte[] list;
+	
+	// empty constructor for GWT-Serializable
+	protected MemoryByteListValue() {
+	}
 	
 	public MemoryByteListValue(byte[] content) {
 		this.list = new byte[content.length];
@@ -38,12 +45,12 @@ public class MemoryByteListValue extends MemoryListValue<Byte> implements XByteL
 	}
 	
 	@Override
-    public XByteListValue add(Byte entry) {
+	public XByteListValue add(Byte entry) {
 		return add(this.list.length, entry);
 	}
 	
 	@Override
-    public XByteListValue add(int index, Byte entry) {
+	public XByteListValue add(int index, Byte entry) {
 		int size = this.list.length;
 		if(index < 0 || index > size) {
 			throw new IndexOutOfBoundsException();
@@ -56,7 +63,7 @@ public class MemoryByteListValue extends MemoryListValue<Byte> implements XByteL
 	}
 	
 	@Override
-    public byte[] contents() {
+	public byte[] contents() {
 		byte[] array = new byte[this.list.length];
 		System.arraycopy(this.list, 0, array, 0, this.list.length);
 		return array;
@@ -69,8 +76,18 @@ public class MemoryByteListValue extends MemoryListValue<Byte> implements XByteL
 	}
 	
 	@Override
-    public Byte get(int index) {
+	public Byte get(int index) {
 		return this.list[index];
+	}
+	
+	@Override
+	public ValueType getComponentType() {
+		return null;
+	}
+	
+	@Override
+	public ValueType getType() {
+		return ValueType.ByteList;
 	}
 	
 	@Override
@@ -79,7 +96,7 @@ public class MemoryByteListValue extends MemoryListValue<Byte> implements XByteL
 	}
 	
 	@Override
-    public XByteListValue remove(Byte entry) {
+	public XByteListValue remove(Byte entry) {
 		int index = indexOf(entry);
 		if(index < 0) {
 			return this;
@@ -88,7 +105,7 @@ public class MemoryByteListValue extends MemoryListValue<Byte> implements XByteL
 	}
 	
 	@Override
-    public XByteListValue remove(int index) {
+	public XByteListValue remove(int index) {
 		int size = this.list.length;
 		if(index < 0 || index >= size) {
 			throw new IndexOutOfBoundsException();
@@ -100,12 +117,12 @@ public class MemoryByteListValue extends MemoryListValue<Byte> implements XByteL
 	}
 	
 	@Override
-    public int size() {
+	public int size() {
 		return this.list.length;
 	}
 	
 	@Override
-    public Byte[] toArray() {
+	public Byte[] toArray() {
 		Byte[] array = new Byte[this.list.length];
 		fillArray(array);
 		return array;
@@ -114,16 +131,6 @@ public class MemoryByteListValue extends MemoryListValue<Byte> implements XByteL
 	@Override
 	public String toString() {
 		return Arrays.toString(this.list);
-	}
-	
-	@Override
-	public ValueType getType() {
-		return ValueType.ByteList;
-	}
-	
-	@Override
-	public ValueType getComponentType() {
-		return null;
 	}
 	
 }

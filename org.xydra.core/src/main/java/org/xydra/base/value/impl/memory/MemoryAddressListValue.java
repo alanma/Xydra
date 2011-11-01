@@ -1,5 +1,6 @@
 package org.xydra.base.value.impl.memory;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -17,7 +18,8 @@ import org.xydra.index.XI;
  * @author voelkel
  * 
  */
-public class MemoryAddressListValue extends MemoryListValue<XAddress> implements XAddressListValue {
+public class MemoryAddressListValue extends MemoryListValue<XAddress> implements XAddressListValue,
+        Serializable {
 	
 	private static final long serialVersionUID = -7641986388917629097L;
 	
@@ -46,7 +48,12 @@ public class MemoryAddressListValue extends MemoryListValue<XAddress> implements
 		return newList;
 	}
 	
-	private final XAddress[] list;
+	// non-final to be GWT-Serializable
+	private XAddress[] list;
+	
+	// empty constructor for GWT-Serializable
+	protected MemoryAddressListValue() {
+	}
 	
 	public MemoryAddressListValue(Collection<XAddress> content) {
 		this.list = content.toArray(new XAddress[content.size()]);
@@ -63,18 +70,18 @@ public class MemoryAddressListValue extends MemoryListValue<XAddress> implements
 	}
 	
 	@Override
-    public XAddressListValue add(int index, XAddress entry) {
+	public XAddressListValue add(int index, XAddress entry) {
 		XAddress[] newList = createArrayWithEntryInsertedAtPosition(this.list, index, entry);
 		return new MemoryAddressListValue(newList);
 	}
 	
 	@Override
-    public XAddressListValue add(XAddress entry) {
+	public XAddressListValue add(XAddress entry) {
 		return add(this.list.length, entry);
 	}
 	
 	@Override
-    public XAddress[] contents() {
+	public XAddress[] contents() {
 		XAddress[] array = new XAddress[this.list.length];
 		System.arraycopy(this.list, 0, array, 0, this.list.length);
 		return array;
@@ -87,43 +94,13 @@ public class MemoryAddressListValue extends MemoryListValue<XAddress> implements
 	}
 	
 	@Override
-    public XAddress get(int index) {
+	public XAddress get(int index) {
 		return this.list[index];
 	}
 	
 	@Override
-	public int hashCode() {
-		return Arrays.hashCode(this.list);
-	}
-	
-	@Override
-    public XAddressListValue remove(int index) {
-		XAddress[] newList = createArrayWithEntryRemovedAtPosition(this.contents(), index);
-		return new MemoryAddressListValue(newList);
-	}
-	
-	@Override
-    public XAddressListValue remove(XAddress entry) {
-		int index = indexOf(entry);
-		if(index < 0) {
-			return this;
-		}
-		return remove(index);
-	}
-	
-	@Override
-    public int size() {
-		return this.list.length;
-	}
-	
-	@Override
-    public XAddress[] toArray() {
-		return contents();
-	}
-	
-	@Override
-	public String toString() {
-		return Arrays.toString(this.list);
+	public ValueType getComponentType() {
+		return ValueType.Address;
 	}
 	
 	@Override
@@ -132,8 +109,38 @@ public class MemoryAddressListValue extends MemoryListValue<XAddress> implements
 	}
 	
 	@Override
-	public ValueType getComponentType() {
-		return ValueType.Address;
+	public int hashCode() {
+		return Arrays.hashCode(this.list);
+	}
+	
+	@Override
+	public XAddressListValue remove(int index) {
+		XAddress[] newList = createArrayWithEntryRemovedAtPosition(this.contents(), index);
+		return new MemoryAddressListValue(newList);
+	}
+	
+	@Override
+	public XAddressListValue remove(XAddress entry) {
+		int index = indexOf(entry);
+		if(index < 0) {
+			return this;
+		}
+		return remove(index);
+	}
+	
+	@Override
+	public int size() {
+		return this.list.length;
+	}
+	
+	@Override
+	public XAddress[] toArray() {
+		return contents();
+	}
+	
+	@Override
+	public String toString() {
+		return Arrays.toString(this.list);
 	}
 	
 }

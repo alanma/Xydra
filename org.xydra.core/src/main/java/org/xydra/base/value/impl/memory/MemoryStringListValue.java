@@ -1,5 +1,6 @@
 package org.xydra.base.value.impl.memory;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -14,11 +15,17 @@ import org.xydra.index.XI;
  * @author Kaidel
  * 
  */
-public class MemoryStringListValue extends MemoryListValue<String> implements XStringListValue {
+public class MemoryStringListValue extends MemoryListValue<String> implements XStringListValue,
+        Serializable {
 	
 	private static final long serialVersionUID = -1175161517909257560L;
 	
-	private final String[] list;
+	// non-final to be GWT-Serializable
+	private String[] list;
+	
+	// empty constructor for GWT-Serializable
+	protected MemoryStringListValue() {
+	}
 	
 	public MemoryStringListValue(Collection<String> content) {
 		this.list = content.toArray(new String[content.size()]);
@@ -34,7 +41,7 @@ public class MemoryStringListValue extends MemoryListValue<String> implements XS
 	}
 	
 	@Override
-    public XStringListValue add(int index, String entry) {
+	public XStringListValue add(int index, String entry) {
 		int size = this.list.length;
 		if(index < 0 || index > size) {
 			throw new IndexOutOfBoundsException();
@@ -47,12 +54,12 @@ public class MemoryStringListValue extends MemoryListValue<String> implements XS
 	}
 	
 	@Override
-    public XStringListValue add(String entry) {
+	public XStringListValue add(String entry) {
 		return add(this.list.length, entry);
 	}
 	
 	@Override
-    public String[] contents() {
+	public String[] contents() {
 		String[] array = new String[this.list.length];
 		System.arraycopy(this.list, 0, array, 0, this.list.length);
 		return array;
@@ -65,8 +72,18 @@ public class MemoryStringListValue extends MemoryListValue<String> implements XS
 	}
 	
 	@Override
-    public String get(int index) {
+	public String get(int index) {
 		return this.list[index];
+	}
+	
+	@Override
+	public ValueType getComponentType() {
+		return ValueType.String;
+	}
+	
+	@Override
+	public ValueType getType() {
+		return ValueType.StringList;
 	}
 	
 	@Override
@@ -75,7 +92,7 @@ public class MemoryStringListValue extends MemoryListValue<String> implements XS
 	}
 	
 	@Override
-    public XStringListValue remove(int index) {
+	public XStringListValue remove(int index) {
 		int size = this.list.length;
 		if(index < 0 || index >= size) {
 			throw new IndexOutOfBoundsException();
@@ -87,7 +104,7 @@ public class MemoryStringListValue extends MemoryListValue<String> implements XS
 	}
 	
 	@Override
-    public XStringListValue remove(String entry) {
+	public XStringListValue remove(String entry) {
 		int index = indexOf(entry);
 		if(index < 0) {
 			return this;
@@ -96,28 +113,18 @@ public class MemoryStringListValue extends MemoryListValue<String> implements XS
 	}
 	
 	@Override
-    public int size() {
+	public int size() {
 		return this.list.length;
 	}
 	
 	@Override
-    public String[] toArray() {
+	public String[] toArray() {
 		return contents();
 	}
 	
 	@Override
 	public String toString() {
 		return Arrays.toString(this.list);
-	}
-	
-	@Override
-	public ValueType getType() {
-		return ValueType.StringList;
-	}
-	
-	@Override
-	public ValueType getComponentType() {
-		return ValueType.String;
 	}
 	
 }

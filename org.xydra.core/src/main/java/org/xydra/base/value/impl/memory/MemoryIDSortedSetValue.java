@@ -1,5 +1,6 @@
 package org.xydra.base.value.impl.memory;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,9 +18,14 @@ import org.xydra.base.value.XIDSortedSetValue;
  * @author dscharrer, voelkel
  * 
  */
-public class MemoryIDSortedSetValue extends MemoryIDListValue implements XIDSortedSetValue {
+public class MemoryIDSortedSetValue extends MemoryIDListValue implements XIDSortedSetValue,
+        Serializable {
 	
 	private static final long serialVersionUID = -83885798275571937L;
+	
+	// empty constructor for GWT-Serializable
+	protected MemoryIDSortedSetValue() {
+	}
 	
 	public MemoryIDSortedSetValue(Collection<XID> contents) {
 		super(contents);
@@ -42,6 +48,11 @@ public class MemoryIDSortedSetValue extends MemoryIDListValue implements XIDSort
 	}
 	
 	@Override
+	public ValueType getType() {
+		return ValueType.IdSortedSet;
+	}
+	
+	@Override
 	public MemoryIDSortedSetValue remove(XID entry) {
 		// find it
 		int index = this.indexOf(entry);
@@ -56,7 +67,7 @@ public class MemoryIDSortedSetValue extends MemoryIDListValue implements XIDSort
 	}
 	
 	@Override
-    public Set<XID> toSet() {
+	public Set<XID> toSet() {
 		Set<XID> copy = new HashSet<XID>();
 		XID[] list = this.contents();
 		for(int i = 0; i < list.length; i++) {
@@ -66,18 +77,13 @@ public class MemoryIDSortedSetValue extends MemoryIDListValue implements XIDSort
 	}
 	
 	@Override
-    public SortedSet<XID> toSortedSet() {
+	public SortedSet<XID> toSortedSet() {
 		SortedSet<XID> copy = new TreeSet<XID>();
 		XID[] list = this.contents();
 		for(int i = 0; i < list.length; i++) {
 			copy.add(list[i]);
 		}
 		return copy;
-	}
-	
-	@Override
-	public ValueType getType() {
-		return ValueType.IdSortedSet;
 	}
 	
 }

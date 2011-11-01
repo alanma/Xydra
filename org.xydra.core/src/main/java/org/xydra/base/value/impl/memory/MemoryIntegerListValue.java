@@ -1,5 +1,6 @@
 package org.xydra.base.value.impl.memory;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -14,11 +15,17 @@ import org.xydra.index.XI;
  * @author Kaidel
  * 
  */
-public class MemoryIntegerListValue extends MemoryListValue<Integer> implements XIntegerListValue {
+public class MemoryIntegerListValue extends MemoryListValue<Integer> implements XIntegerListValue,
+        Serializable {
 	
 	private static final long serialVersionUID = -2698183990443882191L;
 	
-	private final int[] list;
+	// non-final to be GWT-Serializable
+	private int[] list;
+	
+	// empty constructor for GWT-Serializable
+	protected MemoryIntegerListValue() {
+	}
 	
 	public MemoryIntegerListValue(Collection<Integer> content) {
 		this.list = new int[content.size()];
@@ -38,7 +45,7 @@ public class MemoryIntegerListValue extends MemoryListValue<Integer> implements 
 	}
 	
 	@Override
-    public XIntegerListValue add(int index, Integer entry) {
+	public XIntegerListValue add(int index, Integer entry) {
 		int size = this.list.length;
 		if(index < 0 || index > size) {
 			throw new IndexOutOfBoundsException();
@@ -51,12 +58,12 @@ public class MemoryIntegerListValue extends MemoryListValue<Integer> implements 
 	}
 	
 	@Override
-    public XIntegerListValue add(Integer entry) {
+	public XIntegerListValue add(Integer entry) {
 		return add(this.list.length, entry);
 	}
 	
 	@Override
-    public int[] contents() {
+	public int[] contents() {
 		int[] array = new int[this.list.length];
 		System.arraycopy(this.list, 0, array, 0, this.list.length);
 		return array;
@@ -69,8 +76,18 @@ public class MemoryIntegerListValue extends MemoryListValue<Integer> implements 
 	}
 	
 	@Override
-    public Integer get(int index) {
+	public Integer get(int index) {
 		return this.list[index];
+	}
+	
+	@Override
+	public ValueType getComponentType() {
+		return ValueType.Integer;
+	}
+	
+	@Override
+	public ValueType getType() {
+		return ValueType.IntegerList;
 	}
 	
 	@Override
@@ -79,7 +96,7 @@ public class MemoryIntegerListValue extends MemoryListValue<Integer> implements 
 	}
 	
 	@Override
-    public XIntegerListValue remove(int index) {
+	public XIntegerListValue remove(int index) {
 		int size = this.list.length;
 		if(index < 0 || index >= size) {
 			throw new IndexOutOfBoundsException();
@@ -91,7 +108,7 @@ public class MemoryIntegerListValue extends MemoryListValue<Integer> implements 
 	}
 	
 	@Override
-    public XIntegerListValue remove(Integer entry) {
+	public XIntegerListValue remove(Integer entry) {
 		int index = indexOf(entry);
 		if(index < 0) {
 			return this;
@@ -100,19 +117,19 @@ public class MemoryIntegerListValue extends MemoryListValue<Integer> implements 
 	}
 	
 	@Override
-    public int size() {
+	public int size() {
 		return this.list.length;
 	}
 	
 	@Override
-    public Integer[] toArray() {
+	public Integer[] toArray() {
 		Integer[] array = new Integer[this.list.length];
 		fillArray(array);
 		return array;
 	}
 	
 	@Override
-    public Number[] toNumberArray() {
+	public Number[] toNumberArray() {
 		Number[] array = new Number[this.list.length];
 		int i = 0;
 		for(Number e : this) {
@@ -124,16 +141,6 @@ public class MemoryIntegerListValue extends MemoryListValue<Integer> implements 
 	@Override
 	public String toString() {
 		return Arrays.toString(this.list);
-	}
-	
-	@Override
-	public ValueType getType() {
-		return ValueType.IntegerList;
-	}
-	
-	@Override
-	public ValueType getComponentType() {
-		return ValueType.Integer;
 	}
 	
 }

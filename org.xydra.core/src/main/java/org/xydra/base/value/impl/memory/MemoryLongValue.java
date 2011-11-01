@@ -1,5 +1,7 @@
 package org.xydra.base.value.impl.memory;
 
+import java.io.Serializable;
+
 import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XLongValue;
 
@@ -10,23 +12,28 @@ import org.xydra.base.value.XLongValue;
  * @author Kaidel
  * 
  */
-public class MemoryLongValue implements XLongValue {
+public class MemoryLongValue implements XLongValue, Serializable {
 	
 	private static final long serialVersionUID = 2488255853315733958L;
 	
-	private final long content;
+	// non-final to be GWT-Serializable
+	private long content;
+	
+	// empty constructor for GWT-Serializable
+	protected MemoryLongValue() {
+	}
 	
 	public MemoryLongValue(long content) {
 		this.content = content;
 	}
 	
 	@Override
-    public Number asNumber() {
+	public Number asNumber() {
 		return contents();
 	}
 	
 	@Override
-    public long contents() {
+	public long contents() {
 		return this.content;
 	}
 	
@@ -40,16 +47,6 @@ public class MemoryLongValue implements XLongValue {
 	}
 	
 	@Override
-	public int hashCode() {
-		return (int)this.content;
-	}
-	
-	@Override
-	public String toString() {
-		return Long.toString(this.content);
-	}
-	
-	@Override
 	public ValueType getType() {
 		return ValueType.Long;
 	}
@@ -57,6 +54,16 @@ public class MemoryLongValue implements XLongValue {
 	@Override
 	public Long getValue() {
 		return this.content;
+	}
+	
+	@Override
+	public int hashCode() {
+		return (int)this.content;
+	}
+	
+	@Override
+	public String toString() {
+		return Long.toString(this.content);
 	}
 	
 }

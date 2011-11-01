@@ -1,5 +1,6 @@
 package org.xydra.base.value.impl.memory;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -15,11 +16,17 @@ import org.xydra.index.XI;
  * @author dscharrer
  * 
  */
-public class MemoryDoubleListValue extends MemoryListValue<Double> implements XDoubleListValue {
+public class MemoryDoubleListValue extends MemoryListValue<Double> implements XDoubleListValue,
+        Serializable {
 	
 	private static final long serialVersionUID = -2339822884334461166L;
 	
-	private final double[] list;
+	// non-final to be GWT-Serializable
+	private double[] list;
+	
+	// empty constructor for GWT-Serializable
+	protected MemoryDoubleListValue() {
+	}
 	
 	public MemoryDoubleListValue(Collection<Double> content) {
 		this.list = new double[content.size()];
@@ -39,12 +46,12 @@ public class MemoryDoubleListValue extends MemoryListValue<Double> implements XD
 	}
 	
 	@Override
-    public XDoubleListValue add(Double entry) {
+	public XDoubleListValue add(Double entry) {
 		return add(this.list.length, entry);
 	}
 	
 	@Override
-    public XDoubleListValue add(int index, Double entry) {
+	public XDoubleListValue add(int index, Double entry) {
 		int size = this.list.length;
 		if(index < 0 || index > size) {
 			throw new IndexOutOfBoundsException();
@@ -57,7 +64,7 @@ public class MemoryDoubleListValue extends MemoryListValue<Double> implements XD
 	}
 	
 	@Override
-    public double[] contents() {
+	public double[] contents() {
 		double[] array = new double[this.list.length];
 		System.arraycopy(this.list, 0, array, 0, this.list.length);
 		return array;
@@ -70,8 +77,18 @@ public class MemoryDoubleListValue extends MemoryListValue<Double> implements XD
 	}
 	
 	@Override
-    public Double get(int index) {
+	public Double get(int index) {
 		return this.list[index];
+	}
+	
+	@Override
+	public ValueType getComponentType() {
+		return ValueType.Double;
+	}
+	
+	@Override
+	public ValueType getType() {
+		return ValueType.DoubleList;
 	}
 	
 	@Override
@@ -80,7 +97,7 @@ public class MemoryDoubleListValue extends MemoryListValue<Double> implements XD
 	}
 	
 	@Override
-    public XDoubleListValue remove(Double entry) {
+	public XDoubleListValue remove(Double entry) {
 		int index = indexOf(entry);
 		if(index < 0) {
 			return this;
@@ -89,7 +106,7 @@ public class MemoryDoubleListValue extends MemoryListValue<Double> implements XD
 	}
 	
 	@Override
-    public XDoubleListValue remove(int index) {
+	public XDoubleListValue remove(int index) {
 		int size = this.list.length;
 		if(index < 0 || index >= size) {
 			throw new IndexOutOfBoundsException();
@@ -101,19 +118,19 @@ public class MemoryDoubleListValue extends MemoryListValue<Double> implements XD
 	}
 	
 	@Override
-    public int size() {
+	public int size() {
 		return this.list.length;
 	}
 	
 	@Override
-    public Double[] toArray() {
+	public Double[] toArray() {
 		Double[] array = new Double[this.list.length];
 		fillArray(array);
 		return array;
 	}
 	
 	@Override
-    public Number[] toNumberArray() {
+	public Number[] toNumberArray() {
 		Number[] array = new Number[this.list.length];
 		int i = 0;
 		for(Number e : this) {
@@ -125,16 +142,6 @@ public class MemoryDoubleListValue extends MemoryListValue<Double> implements XD
 	@Override
 	public String toString() {
 		return Arrays.toString(this.list);
-	}
-	
-	@Override
-	public ValueType getType() {
-		return ValueType.DoubleList;
-	}
-	
-	@Override
-	public ValueType getComponentType() {
-		return ValueType.Double;
 	}
 	
 }

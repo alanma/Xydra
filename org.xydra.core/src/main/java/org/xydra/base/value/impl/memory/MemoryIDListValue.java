@@ -1,5 +1,6 @@
 package org.xydra.base.value.impl.memory;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -16,7 +17,7 @@ import org.xydra.index.XI;
  * @author voelkel
  * 
  */
-public class MemoryIDListValue extends MemoryListValue<XID> implements XIDListValue {
+public class MemoryIDListValue extends MemoryListValue<XID> implements XIDListValue, Serializable {
 	
 	private static final long serialVersionUID = -7641986388917629097L;
 	
@@ -44,7 +45,12 @@ public class MemoryIDListValue extends MemoryListValue<XID> implements XIDListVa
 		return newList;
 	}
 	
-	private final XID[] list;
+	// non-final to be GWT-Serializable
+	private XID[] list;
+	
+	// empty constructor for GWT-Serializable
+	protected MemoryIDListValue() {
+	}
 	
 	public MemoryIDListValue(Collection<XID> content) {
 		this.list = content.toArray(new XID[content.size()]);
@@ -61,18 +67,18 @@ public class MemoryIDListValue extends MemoryListValue<XID> implements XIDListVa
 	}
 	
 	@Override
-    public XIDListValue add(int index, XID entry) {
+	public XIDListValue add(int index, XID entry) {
 		XID[] newList = createArrayWithEntryInsertedAtPosition(this.list, index, entry);
 		return new MemoryIDListValue(newList);
 	}
 	
 	@Override
-    public XIDListValue add(XID entry) {
+	public XIDListValue add(XID entry) {
 		return add(this.list.length, entry);
 	}
 	
 	@Override
-    public XID[] contents() {
+	public XID[] contents() {
 		XID[] array = new XID[this.list.length];
 		System.arraycopy(this.list, 0, array, 0, this.list.length);
 		return array;
@@ -85,43 +91,13 @@ public class MemoryIDListValue extends MemoryListValue<XID> implements XIDListVa
 	}
 	
 	@Override
-    public XID get(int index) {
+	public XID get(int index) {
 		return this.list[index];
 	}
 	
 	@Override
-	public int hashCode() {
-		return Arrays.hashCode(this.list);
-	}
-	
-	@Override
-    public XIDListValue remove(int index) {
-		XID[] newList = createArrayWithEntryRemovedAtPosition(this.contents(), index);
-		return new MemoryIDListValue(newList);
-	}
-	
-	@Override
-    public XIDListValue remove(XID entry) {
-		int index = indexOf(entry);
-		if(index < 0) {
-			return this;
-		}
-		return remove(index);
-	}
-	
-	@Override
-    public int size() {
-		return this.list.length;
-	}
-	
-	@Override
-    public XID[] toArray() {
-		return contents();
-	}
-	
-	@Override
-	public String toString() {
-		return Arrays.toString(this.list);
+	public ValueType getComponentType() {
+		return ValueType.Id;
 	}
 	
 	@Override
@@ -130,8 +106,38 @@ public class MemoryIDListValue extends MemoryListValue<XID> implements XIDListVa
 	}
 	
 	@Override
-	public ValueType getComponentType() {
-		return ValueType.Id;
+	public int hashCode() {
+		return Arrays.hashCode(this.list);
+	}
+	
+	@Override
+	public XIDListValue remove(int index) {
+		XID[] newList = createArrayWithEntryRemovedAtPosition(this.contents(), index);
+		return new MemoryIDListValue(newList);
+	}
+	
+	@Override
+	public XIDListValue remove(XID entry) {
+		int index = indexOf(entry);
+		if(index < 0) {
+			return this;
+		}
+		return remove(index);
+	}
+	
+	@Override
+	public int size() {
+		return this.list.length;
+	}
+	
+	@Override
+	public XID[] toArray() {
+		return contents();
+	}
+	
+	@Override
+	public String toString() {
+		return Arrays.toString(this.list);
 	}
 	
 }

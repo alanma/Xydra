@@ -1,5 +1,6 @@
 package org.xydra.base.value.impl.memory;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import org.xydra.base.value.XListValue;
@@ -14,12 +15,16 @@ import org.xydra.index.XI;
  * 
  * @param <E> collection base type, e.g. XInteger
  */
-public abstract class MemoryListValue<E> implements XListValue<E> {
+public abstract class MemoryListValue<E> implements XListValue<E>, Serializable {
 	
 	private static final long serialVersionUID = 7285839520276137162L;
 	
+	// empty constructor for GWT-Serializable
+	protected MemoryListValue() {
+	}
+	
 	@Override
-    public boolean contains(E elem) {
+	public boolean contains(E elem) {
 		int s = size();
 		for(int i = 0; i < s; i++) {
 			if(XI.equals(get(i), elem)) {
@@ -38,7 +43,7 @@ public abstract class MemoryListValue<E> implements XListValue<E> {
 	}
 	
 	@Override
-    public int indexOf(E elem) {
+	public int indexOf(E elem) {
 		int s = size();
 		for(int i = 0; i < s; i++) {
 			if(XI.equals(get(i), elem)) {
@@ -49,17 +54,17 @@ public abstract class MemoryListValue<E> implements XListValue<E> {
 	}
 	
 	@Override
-    public boolean isEmpty() {
+	public boolean isEmpty() {
 		return (size() == 0);
 	}
 	
 	@Override
-    public Iterator<E> iterator() {
+	public Iterator<E> iterator() {
 		return new XListValueIterator<E>(this);
 	}
 	
 	@Override
-    public int lastIndexOf(E elem) {
+	public int lastIndexOf(E elem) {
 		for(int i = size(); i >= 0; i--) {
 			if(XI.equals(get(i), elem)) {
 				return i;

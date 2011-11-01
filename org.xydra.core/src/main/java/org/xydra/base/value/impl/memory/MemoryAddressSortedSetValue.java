@@ -1,5 +1,6 @@
 package org.xydra.base.value.impl.memory;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -19,9 +20,13 @@ import org.xydra.base.value.XIDSortedSetValue;
  * 
  */
 public class MemoryAddressSortedSetValue extends MemoryAddressListValue implements
-        XAddressSortedSetValue {
+        XAddressSortedSetValue, Serializable {
 	
 	private static final long serialVersionUID = -83885798275571937L;
+	
+	// empty constructor for GWT-Serializable
+	protected MemoryAddressSortedSetValue() {
+	}
 	
 	public MemoryAddressSortedSetValue(Collection<XAddress> contents) {
 		super(contents);
@@ -44,6 +49,11 @@ public class MemoryAddressSortedSetValue extends MemoryAddressListValue implemen
 	}
 	
 	@Override
+	public ValueType getType() {
+		return ValueType.AddressSortedSet;
+	}
+	
+	@Override
 	public MemoryAddressSortedSetValue remove(XAddress entry) {
 		// find it
 		int index = this.indexOf(entry);
@@ -58,7 +68,7 @@ public class MemoryAddressSortedSetValue extends MemoryAddressListValue implemen
 	}
 	
 	@Override
-    public Set<XAddress> toSet() {
+	public Set<XAddress> toSet() {
 		Set<XAddress> copy = new HashSet<XAddress>();
 		XAddress[] list = this.contents();
 		for(int i = 0; i < list.length; i++) {
@@ -68,17 +78,12 @@ public class MemoryAddressSortedSetValue extends MemoryAddressListValue implemen
 	}
 	
 	@Override
-    public SortedSet<XAddress> toSortedSet() {
+	public SortedSet<XAddress> toSortedSet() {
 		SortedSet<XAddress> copy = new TreeSet<XAddress>();
 		XAddress[] list = this.contents();
 		for(int i = 0; i < list.length; i++) {
 			copy.add(list[i]);
 		}
 		return copy;
-	}
-	
-	@Override
-	public ValueType getType() {
-		return ValueType.AddressSortedSet;
 	}
 }

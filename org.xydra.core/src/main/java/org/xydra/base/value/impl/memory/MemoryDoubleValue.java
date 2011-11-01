@@ -1,5 +1,7 @@
 package org.xydra.base.value.impl.memory;
 
+import java.io.Serializable;
+
 import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XDoubleValue;
 
@@ -10,23 +12,28 @@ import org.xydra.base.value.XDoubleValue;
  * @author Kaidel
  * 
  */
-public class MemoryDoubleValue implements XDoubleValue {
+public class MemoryDoubleValue implements XDoubleValue, Serializable {
 	
 	private static final long serialVersionUID = -8067526366632112607L;
 	
-	private final Double content;
+	// non-final to be GWT-Serializable
+	private Double content;
+	
+	// empty constructor for GWT-Serializable
+	protected MemoryDoubleValue() {
+	}
 	
 	public MemoryDoubleValue(double content) {
 		this.content = content;
 	}
 	
 	@Override
-    public Number asNumber() {
+	public Number asNumber() {
 		return contents();
 	}
 	
 	@Override
-    public double contents() {
+	public double contents() {
 		return this.content;
 	}
 	
@@ -40,16 +47,6 @@ public class MemoryDoubleValue implements XDoubleValue {
 	}
 	
 	@Override
-	public int hashCode() {
-		return this.content.hashCode();
-	}
-	
-	@Override
-	public String toString() {
-		return Double.toString(this.content);
-	}
-	
-	@Override
 	public ValueType getType() {
 		return ValueType.Double;
 	}
@@ -57,6 +54,16 @@ public class MemoryDoubleValue implements XDoubleValue {
 	@Override
 	public Double getValue() {
 		return this.content;
+	}
+	
+	@Override
+	public int hashCode() {
+		return this.content.hashCode();
+	}
+	
+	@Override
+	public String toString() {
+		return Double.toString(this.content);
 	}
 	
 }

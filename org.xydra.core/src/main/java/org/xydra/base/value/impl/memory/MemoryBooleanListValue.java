@@ -1,5 +1,6 @@
 package org.xydra.base.value.impl.memory;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -15,11 +16,17 @@ import org.xydra.index.XI;
  * @author dscharrer
  * 
  */
-public class MemoryBooleanListValue extends MemoryListValue<Boolean> implements XBooleanListValue {
+public class MemoryBooleanListValue extends MemoryListValue<Boolean> implements XBooleanListValue,
+        Serializable {
 	
 	private static final long serialVersionUID = -2012063819510070665L;
 	
-	private final boolean[] list;
+	// non-final to be GWT-Serializable
+	private boolean[] list;
+	
+	// empty constructor for GWT-Serializable
+	protected MemoryBooleanListValue() {
+	}
 	
 	public MemoryBooleanListValue(boolean[] content) {
 		this.list = new boolean[content.length];
@@ -39,12 +46,12 @@ public class MemoryBooleanListValue extends MemoryListValue<Boolean> implements 
 	}
 	
 	@Override
-    public XBooleanListValue add(Boolean entry) {
+	public XBooleanListValue add(Boolean entry) {
 		return add(this.list.length, entry);
 	}
 	
 	@Override
-    public XBooleanListValue add(int index, Boolean entry) {
+	public XBooleanListValue add(int index, Boolean entry) {
 		int size = this.list.length;
 		if(index < 0 || index > size) {
 			throw new IndexOutOfBoundsException();
@@ -57,7 +64,7 @@ public class MemoryBooleanListValue extends MemoryListValue<Boolean> implements 
 	}
 	
 	@Override
-    public boolean[] contents() {
+	public boolean[] contents() {
 		boolean[] array = new boolean[this.list.length];
 		System.arraycopy(this.list, 0, array, 0, this.list.length);
 		return array;
@@ -70,8 +77,18 @@ public class MemoryBooleanListValue extends MemoryListValue<Boolean> implements 
 	}
 	
 	@Override
-    public Boolean get(int index) {
+	public Boolean get(int index) {
 		return this.list[index];
+	}
+	
+	@Override
+	public ValueType getComponentType() {
+		return ValueType.Boolean;
+	}
+	
+	@Override
+	public ValueType getType() {
+		return ValueType.BooleanList;
 	}
 	
 	@Override
@@ -80,7 +97,7 @@ public class MemoryBooleanListValue extends MemoryListValue<Boolean> implements 
 	}
 	
 	@Override
-    public XBooleanListValue remove(Boolean entry) {
+	public XBooleanListValue remove(Boolean entry) {
 		int index = indexOf(entry);
 		if(index < 0) {
 			return this;
@@ -89,7 +106,7 @@ public class MemoryBooleanListValue extends MemoryListValue<Boolean> implements 
 	}
 	
 	@Override
-    public XBooleanListValue remove(int index) {
+	public XBooleanListValue remove(int index) {
 		int size = this.list.length;
 		if(index < 0 || index >= size) {
 			throw new IndexOutOfBoundsException();
@@ -101,12 +118,12 @@ public class MemoryBooleanListValue extends MemoryListValue<Boolean> implements 
 	}
 	
 	@Override
-    public int size() {
+	public int size() {
 		return this.list.length;
 	}
 	
 	@Override
-    public Boolean[] toArray() {
+	public Boolean[] toArray() {
 		Boolean[] array = new Boolean[this.list.length];
 		fillArray(array);
 		return array;
@@ -115,16 +132,6 @@ public class MemoryBooleanListValue extends MemoryListValue<Boolean> implements 
 	@Override
 	public String toString() {
 		return Arrays.toString(this.list);
-	}
-	
-	@Override
-	public ValueType getType() {
-		return ValueType.BooleanList;
-	}
-	
-	@Override
-	public ValueType getComponentType() {
-		return ValueType.Boolean;
 	}
 	
 }

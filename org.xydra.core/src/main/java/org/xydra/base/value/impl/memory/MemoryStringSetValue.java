@@ -1,5 +1,6 @@
 package org.xydra.base.value.impl.memory;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 import org.xydra.base.value.ValueType;
@@ -12,9 +13,14 @@ import org.xydra.base.value.XStringSetValue;
  * @author dscharrer
  * 
  */
-public class MemoryStringSetValue extends MemorySetValue<String> implements XStringSetValue {
+public class MemoryStringSetValue extends MemorySetValue<String> implements XStringSetValue,
+        Serializable {
 	
 	private static final long serialVersionUID = -83885798275571937L;
+	
+	// empty constructor for GWT-Serializable
+	protected MemoryStringSetValue() {
+	}
 	
 	public MemoryStringSetValue(Collection<String> contents) {
 		super(contents);
@@ -25,14 +31,14 @@ public class MemoryStringSetValue extends MemorySetValue<String> implements XStr
 	}
 	
 	@Override
-    public MemoryStringSetValue add(String entry) {
+	public MemoryStringSetValue add(String entry) {
 		MemoryStringSetValue v = new MemoryStringSetValue(this.set);
 		v.set.add(entry);
 		return v;
 	}
 	
 	@Override
-    public String[] contents() {
+	public String[] contents() {
 		return toArray(new String[size()]);
 	}
 	
@@ -42,20 +48,8 @@ public class MemoryStringSetValue extends MemorySetValue<String> implements XStr
 	}
 	
 	@Override
-	public int hashCode() {
-		return getHashCode();
-	}
-	
-	@Override
-    public MemoryStringSetValue remove(String entry) {
-		MemoryStringSetValue v = new MemoryStringSetValue(this.set);
-		v.set.remove(entry);
-		return v;
-	}
-	
-	@Override
-    public String[] toArray() {
-		return contents();
+	public ValueType getComponentType() {
+		return ValueType.String;
 	}
 	
 	@Override
@@ -64,8 +58,20 @@ public class MemoryStringSetValue extends MemorySetValue<String> implements XStr
 	}
 	
 	@Override
-	public ValueType getComponentType() {
-		return ValueType.String;
+	public int hashCode() {
+		return getHashCode();
+	}
+	
+	@Override
+	public MemoryStringSetValue remove(String entry) {
+		MemoryStringSetValue v = new MemoryStringSetValue(this.set);
+		v.set.remove(entry);
+		return v;
+	}
+	
+	@Override
+	public String[] toArray() {
+		return contents();
 	}
 	
 }

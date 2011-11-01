@@ -1,5 +1,7 @@
 package org.xydra.base.value.impl.memory;
 
+import java.io.Serializable;
+
 import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XStringValue;
 import org.xydra.index.XI;
@@ -11,18 +13,23 @@ import org.xydra.index.XI;
  * @author voelkel
  * 
  */
-public class MemoryStringValue implements XStringValue {
+public class MemoryStringValue implements XStringValue, Serializable {
 	
-	private static final long serialVersionUID = -7239623174442190402L;
+	private static final long serialVersionUID = 6170350417779590305L;
 	
-	private final String string;
+	// non-final for GWT serialisation
+	private String string;
+	
+	// empty constructor for GWT-Serializable
+	protected MemoryStringValue() {
+	}
 	
 	public MemoryStringValue(String string) {
 		this.string = string;
 	}
 	
 	@Override
-    public String contents() {
+	public String contents() {
 		return this.string;
 	}
 	
@@ -36,16 +43,6 @@ public class MemoryStringValue implements XStringValue {
 	}
 	
 	@Override
-	public int hashCode() {
-		return this.string.hashCode();
-	}
-	
-	@Override
-	public String toString() {
-		return this.contents();
-	}
-	
-	@Override
 	public ValueType getType() {
 		return ValueType.String;
 	}
@@ -53,6 +50,16 @@ public class MemoryStringValue implements XStringValue {
 	@Override
 	public String getValue() {
 		return this.string;
+	}
+	
+	@Override
+	public int hashCode() {
+		return this.string.hashCode();
+	}
+	
+	@Override
+	public String toString() {
+		return this.contents();
 	}
 	
 }

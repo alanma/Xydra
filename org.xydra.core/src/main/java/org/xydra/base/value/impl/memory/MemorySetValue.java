@@ -1,5 +1,6 @@
 package org.xydra.base.value.impl.memory;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -17,11 +18,16 @@ import org.xydra.base.value.XSetValue;
  * 
  * @param <E> collection base type, e.g. XInteger
  */
-public abstract class MemorySetValue<E> implements XSetValue<E> {
+public abstract class MemorySetValue<E> implements XSetValue<E>, Serializable {
 	
 	private static final long serialVersionUID = -5921208010230423103L;
 	
-	protected final Set<E> set = new HashSet<E>();
+	// non-final to be GWT-Serializable
+	protected Set<E> set = new HashSet<E>();
+	
+	// empty constructor for GWT-Serializable
+	protected MemorySetValue() {
+	}
 	
 	public MemorySetValue(Collection<E> contents) {
 		this.set.addAll(contents);
@@ -47,7 +53,7 @@ public abstract class MemorySetValue<E> implements XSetValue<E> {
 	}
 	
 	@Override
-    public boolean contains(E elem) {
+	public boolean contains(E elem) {
 		return this.set.contains(elem);
 	}
 	
@@ -56,27 +62,27 @@ public abstract class MemorySetValue<E> implements XSetValue<E> {
 	}
 	
 	@Override
-    public boolean isEmpty() {
+	public boolean isEmpty() {
 		return this.set.isEmpty();
 	}
 	
 	@Override
-    public Iterator<E> iterator() {
+	public Iterator<E> iterator() {
 		final Iterator<E> it = this.set.iterator();
 		return new Iterator<E>() {
 			
 			@Override
-            public boolean hasNext() {
+			public boolean hasNext() {
 				return it.hasNext();
 			}
 			
 			@Override
-            public E next() {
+			public E next() {
 				return it.next();
 			}
 			
 			@Override
-            public void remove() {
+			public void remove() {
 				throw new UnsupportedOperationException();
 			}
 			
@@ -84,7 +90,7 @@ public abstract class MemorySetValue<E> implements XSetValue<E> {
 	}
 	
 	@Override
-    public int size() {
+	public int size() {
 		return this.set.size();
 	}
 	
@@ -93,7 +99,7 @@ public abstract class MemorySetValue<E> implements XSetValue<E> {
 	}
 	
 	@Override
-    public Set<E> toSet() {
+	public Set<E> toSet() {
 		Set<E> copy = new HashSet<E>();
 		copy.addAll(this.set);
 		return copy;

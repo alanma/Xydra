@@ -1,5 +1,6 @@
 package org.xydra.base.value.impl.memory;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 import org.xydra.base.XID;
@@ -13,9 +14,13 @@ import org.xydra.base.value.XIDSetValue;
  * @author dscharrer
  * 
  */
-public class MemoryIDSetValue extends MemorySetValue<XID> implements XIDSetValue {
+public class MemoryIDSetValue extends MemorySetValue<XID> implements XIDSetValue, Serializable {
 	
 	private static final long serialVersionUID = -83885798275571937L;
+	
+	// empty constructor for GWT-Serializable
+	protected MemoryIDSetValue() {
+	}
 	
 	public MemoryIDSetValue(Collection<XID> contents) {
 		super(contents);
@@ -26,14 +31,14 @@ public class MemoryIDSetValue extends MemorySetValue<XID> implements XIDSetValue
 	}
 	
 	@Override
-    public XIDSetValue add(XID entry) {
+	public XIDSetValue add(XID entry) {
 		MemoryIDSetValue v = new MemoryIDSetValue(this.set);
 		v.set.add(entry);
 		return v;
 	}
 	
 	@Override
-    public XID[] contents() {
+	public XID[] contents() {
 		return toArray(new XID[size()]);
 	}
 	
@@ -43,20 +48,8 @@ public class MemoryIDSetValue extends MemorySetValue<XID> implements XIDSetValue
 	}
 	
 	@Override
-	public int hashCode() {
-		return getHashCode();
-	}
-	
-	@Override
-    public XIDSetValue remove(XID entry) {
-		MemoryIDSetValue v = new MemoryIDSetValue(this.set);
-		v.set.remove(entry);
-		return v;
-	}
-	
-	@Override
-    public XID[] toArray() {
-		return contents();
+	public ValueType getComponentType() {
+		return ValueType.Id;
 	}
 	
 	@Override
@@ -65,8 +58,20 @@ public class MemoryIDSetValue extends MemorySetValue<XID> implements XIDSetValue
 	}
 	
 	@Override
-	public ValueType getComponentType() {
-		return ValueType.Id;
+	public int hashCode() {
+		return getHashCode();
+	}
+	
+	@Override
+	public XIDSetValue remove(XID entry) {
+		MemoryIDSetValue v = new MemoryIDSetValue(this.set);
+		v.set.remove(entry);
+		return v;
+	}
+	
+	@Override
+	public XID[] toArray() {
+		return contents();
 	}
 	
 }
