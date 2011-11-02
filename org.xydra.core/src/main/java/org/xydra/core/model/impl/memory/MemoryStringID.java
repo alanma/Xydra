@@ -1,5 +1,7 @@
 package org.xydra.core.model.impl.memory;
 
+import java.io.Serializable;
+
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XID;
@@ -15,16 +17,15 @@ import org.xydra.base.value.ValueType;
 
 @RunsInGWT(true)
 @RequiresAppEngine(false)
-public class MemoryStringID implements XID {
+public class MemoryStringID implements XID, Serializable {
 	
 	private static final long serialVersionUID = 3397013331330118533L;
 	
-	/** Impl Note: field is not final to allow GWT-Serialisation to work on uit */
+	/** Impl Note: field is not final to allow GWT-Serialisation to work on it */
 	private String string;
 	
 	/** Seems to be required for GWT? */
 	protected MemoryStringID() {
-		this.string = null;
 	}
 	
 	/**
