@@ -3,6 +3,8 @@ package org.xydra.restless.utils;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
@@ -24,6 +26,20 @@ public class HostUtils {
 			}
 		}
 		return hostname;
+	}
+	
+	/**
+	 * @param req ..
+	 * @return true if host indicated in 'req' is a local host
+	 */
+	public static boolean isLocalRequest(HttpServletRequest req) {
+		String serverName = req.getServerName();
+		log.debug("localhost = " + serverName);
+		if(serverName.equals("127.0.0.1") || serverName.equals("localhost")
+		        || serverName.equals(getLocalHostname())) {
+			return true;
+		}
+		return false;
 	}
 	
 }
