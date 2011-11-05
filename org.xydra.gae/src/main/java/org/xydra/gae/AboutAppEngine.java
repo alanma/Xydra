@@ -8,6 +8,9 @@ import com.google.appengine.api.utils.SystemProperty;
 /**
  * Information about AppEngine
  * 
+ * 
+ * TODO expose os.environ['INSTANCE_ID']
+ * 
  * @author voelkel
  */
 public class AboutAppEngine {
