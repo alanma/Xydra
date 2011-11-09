@@ -278,7 +278,9 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 			return false;
 		} else {
 			// base
-			return this.base.removeObject(objectId);
+			this.removed.index(objectId, NONE, NOVALUE);
+			return true;
+			// FIXME kill return this.base.removeObject(objectId);
 		}
 	}
 	
