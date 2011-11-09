@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.xydra.csv.ICell;
 import org.xydra.csv.IReadableRow;
@@ -15,6 +15,9 @@ public class SingleRow extends AbstractReadableRow implements IReadableRow {
 	
 	private Map<String,ICell> map = new HashMap<String,ICell>();
 	
+	/**
+	 * @param key (the row name)
+	 */
 	public SingleRow(final String key) {
 		super(key);
 	}

@@ -289,8 +289,9 @@ public class TableTools {
 				}
 				
 			}
-			// average
+			// average + stdev
 			for(String averageCol : average) {
+				// average
 				long longResult = 0;
 				double doubleResult = 0;
 				for(IRow groupRow : groupTable) {
@@ -304,8 +305,30 @@ public class TableTools {
 						}
 					}
 				}
-				targetRow.setValue(averageCol + "--average", ""
-				        + ((long)((longResult + doubleResult) / groupTable.rowCount())), true);
+				double ave = (longResult + doubleResult) / groupTable.rowCount();
+				targetRow.setValue(averageCol + "--average", "" + (long)ave, true);
+				
+				// standard derivation
+				double _sum = 0;
+				long n = 0;
+				for(IRow groupRow : groupTable) {
+					n++;
+					double delta = 0;
+					try {
+						delta = groupRow.getValueAsLong(averageCol) - ave;
+					} catch(WrongDatatypeException e) {
+						try {
+							delta = groupRow.getValueAsDouble(averageCol) - ave;
+						} catch(WrongDatatypeException e2) {
+							log.warn("Could not calculate average in col " + averageCol, e2);
+						}
+					}
+					delta = delta * delta;
+					_sum += delta;
+				}
+				double stdev = Math.sqrt(_sum / n);
+				targetRow.setValue(averageCol + "--stdev", "" + (long)stdev, true);
+				
 			}
 			// count value range
 			for(String rangeCol : range) {

@@ -20,6 +20,7 @@ import org.xydra.csv.ExcelLimitException;
 import org.xydra.csv.ICsvTable;
 import org.xydra.csv.IReadableRow;
 import org.xydra.csv.IRow;
+import org.xydra.csv.IRowHandler;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
@@ -127,7 +128,7 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable {
 	 * @throws IOException from System.out
 	 */
 	@Override
-    public void dump() throws IOException {
+	public void dump() throws IOException {
 		Writer writer = new OutputStreamWriter(System.out);
 		writeTo(writer);
 		writer.flush();
@@ -139,7 +140,7 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable {
 	 * @throws IOException from System.out
 	 */
 	@Override
-    public void dumpToLaTeX() throws IOException {
+	public void dumpToLaTeX() throws IOException {
 		OutputStreamWriter osw = new OutputStreamWriter(System.out);
 		toLaTeX(osw);
 	}
@@ -150,7 +151,7 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable {
 	 * @see org.xydra.csv.ICsvTable#readFrom(java.io.File)
 	 */
 	@Override
-    public void readFrom(File f) throws IOException {
+	public void readFrom(File f) throws IOException {
 		log.info("Reading CSV table from " + f.getAbsolutePath() + " Before: " + this.rowCount()
 		        + " rows and " + this.colCount() + " columns");
 		FileInputStream fos = new FileInputStream(f);
@@ -165,7 +166,7 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable {
 	 * @see org.xydra.csv.ICsvTable#readFrom(java.io.Reader)
 	 */
 	@Override
-    public void readFrom(Reader r, boolean create) throws IOException {
+	public void readFrom(Reader r, boolean create) throws IOException {
 		CsvReader csvReader = new CsvReader(r, this.readMaxRows);
 		Collection<String> columnNames = csvReader.readHeaders();
 		assert this.columnNames != null;
@@ -184,7 +185,7 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable {
 	 * @see org.xydra.csv.ICsvTable#setParamReadMaxRows(int)
 	 */
 	@Override
-    public void setParamReadMaxRows(int readMaxRows) {
+	public void setParamReadMaxRows(int readMaxRows) {
 		this.readMaxRows = readMaxRows;
 	}
 	
@@ -194,7 +195,7 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable {
 	 * @see org.xydra.csv.ICsvTable#setParamSplitWhenWritingLargeFiles(boolean)
 	 */
 	@Override
-    public void setParamSplitWhenWritingLargeFiles(boolean b) {
+	public void setParamSplitWhenWritingLargeFiles(boolean b) {
 		this.splitWhenWritingLargeFiles = b;
 	}
 	
@@ -204,7 +205,7 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable {
 	 * @see org.xydra.csv.ICsvTable#toLaTeX(java.io.Writer)
 	 */
 	@Override
-    public void toLaTeX(Writer w) throws IOException {
+	public void toLaTeX(Writer w) throws IOException {
 		// determine padding
 		Map<String,Integer> colName2maxLength = new HashMap<String,Integer>();
 		for(IRow row : this) {
@@ -266,7 +267,7 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable {
 	 * @see org.xydra.csv.ICsvTable#writeTo(java.io.File)
 	 */
 	@Override
-    public void writeTo(File f) throws FileNotFoundException {
+	public void writeTo(File f) throws FileNotFoundException {
 		log.info("Writing CSV table to " + f.getAbsolutePath());
 		FileOutputStream fos;
 		try {
@@ -323,7 +324,7 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable {
 	 * @see org.xydra.csv.ICsvTable#writeTo(java.io.Writer)
 	 */
 	@Override
-    public void writeTo(Writer w) throws IOException {
+	public void writeTo(Writer w) throws IOException {
 		log.info("Writing " + this.table.size() + " rows with " + this.columnNames.size()
 		        + " columns");
 		writeTo(w, 0, this.rowCount());
@@ -335,7 +336,7 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable {
 	 * @see org.xydra.csv.ICsvTable#writeTo(java.io.Writer, int, int)
 	 */
 	@Override
-    public void writeTo(Writer w, int startRow, int endRow) throws IOException, ExcelLimitException {
+	public void writeTo(Writer w, int startRow, int endRow) throws IOException, ExcelLimitException {
 		if(endRow - startRow > EXCEL_MAX_ROWS) {
 			throw new ExcelLimitException("Exceeding Excels limit of " + EXCEL_MAX_ROWS + " rows");
 		}
@@ -426,6 +427,15 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable {
 			}
 		}
 		w.write(SEMICOLON + "\n");
+	}
+	
+	@Override
+	public void writeTo(IRowHandler rowHandler) throws IOException {
+		rowHandler.handleHeaderRow(getColumnNames());
+		for(String rowName : this.rowNames) {
+			IRow row = this.getOrCreateRow(rowName, false);
+			rowHandler.handleRow(rowName, row);
+		}
 	}
 	
 }

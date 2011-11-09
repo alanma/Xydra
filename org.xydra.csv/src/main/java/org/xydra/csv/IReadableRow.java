@@ -11,10 +11,16 @@ import java.util.Set;
  * 
  * @author voelkel
  */
-public interface IReadableRow {
+public interface IReadableRow extends Iterable<ICell> {
 	
+	/**
+	 * @return the row key (= the row name)
+	 */
 	String getKey();
 	
+	/**
+	 * @return the row's content as a Set of Entrys
+	 */
 	Set<Entry<String,ICell>> entrySet();
 	
 	/**
@@ -42,6 +48,7 @@ public interface IReadableRow {
 	 */
 	long getValueAsLong(String columnName) throws WrongDatatypeException;
 	
+	@Override
 	Iterator<ICell> iterator();
 	
 }

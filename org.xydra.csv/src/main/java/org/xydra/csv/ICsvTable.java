@@ -76,6 +76,8 @@ public interface ICsvTable extends ISparseTable {
 	 */
 	void writeTo(Writer w) throws IOException;
 	
+	void writeTo(IRowHandler rowHandler) throws IOException;
+	
 	/**
 	 * Writes a non-sparse CSV version of this tables contents. Writes only the
 	 * data in [startRow,endRow).
