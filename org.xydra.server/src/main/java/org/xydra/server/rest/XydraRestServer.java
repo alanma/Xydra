@@ -18,6 +18,7 @@ import org.xydra.server.rest.demo.AddDemoDataResource;
 import org.xydra.server.rest.log.LogTestResource;
 import org.xydra.store.InternalStoreException;
 import org.xydra.store.XydraStore;
+import org.xydra.store.impl.delegate.XydraPersistence;
 
 
 /**
@@ -35,7 +36,17 @@ public class XydraRestServer {
 	
 	public static final String INIT_PARAM_XYDRASTORE = "org.xydra.store";
 	
+	/**
+	 * A defined key for storing a reference to a {@link XydraStore} in the
+	 * servlet context
+	 */
 	public static final String SERVLET_CONTEXT_ATTRIBUTE_XYDRASTORE = "org.xydra.store";
+	
+	/**
+	 * A defined key for storing a reference to a {@link XydraPersistence} in
+	 * the servlet context
+	 */
+	public static final String SERVLET_CONTEXT_ATTRIBUTE_XYDRA_PERSISTENCE = "org.xydra.persistence";
 	
 	public static XydraStore getStore(Restless restless) {
 		XydraStore store = getXydraStoreInternal(restless);
