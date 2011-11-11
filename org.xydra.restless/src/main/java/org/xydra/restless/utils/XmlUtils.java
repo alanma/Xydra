@@ -12,7 +12,7 @@ public class XmlUtils {
 		safe = safe.replace("<", "&lt;");
 		safe = safe.replace(">", "&gt;");
 		safe = safe.replace("'", "&apos;");
-		safe = safe.replace("\"", "&quto;");
+		safe = safe.replace("\"", "&quot;");
 		return safe;
 	}
 	
