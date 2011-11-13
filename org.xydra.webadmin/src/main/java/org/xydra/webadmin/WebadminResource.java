@@ -15,6 +15,7 @@ import org.xydra.restless.Restless;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.SharedHtmlUtils.HeadLinkStyle;
 import org.xydra.server.rest.XydraRestServer;
+import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.gae.changes.Utils;
 import org.xydra.webadmin.ModelResource.MStyle;
 
@@ -53,6 +54,8 @@ public class WebadminResource {
 	}
 	
 	public static void index(HttpServletResponse res) throws IOException {
+		XydraRuntime.startRequest();
+		
 		// find repositories in GAE datastore
 		Writer w = HtmlUtils.startHtmlPage(res, "XydraWebAdmin",
 		        new HeadLinkStyle("/s/xyadmin.css"));

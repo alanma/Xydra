@@ -48,6 +48,7 @@ import org.xydra.restless.utils.SharedHtmlUtils.HeadLinkStyle;
 import org.xydra.restless.utils.SharedHtmlUtils.METHOD;
 import org.xydra.server.util.XydraHtmlUtils;
 import org.xydra.store.RevisionState;
+import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -56,7 +57,7 @@ public class ModelResource {
 	public static final Logger log = LoggerFactory.getLogger(ModelResource.class);
 	
 	public static enum MStyle {
-		html, htmlevents, link, xml, json, xmlhtml
+		html, htmlrev, htmlevents, link, xml, json, xmlhtml
 	}
 	
 	public static void restless(Restless restless, String prefix) {
@@ -81,6 +82,8 @@ public class ModelResource {
 	
 	public static void index(String repoIdStr, String modelIdStr, String styleStr,
 	        String downloadStr, HttpServletRequest req, HttpServletResponse res) throws IOException {
+		XydraRuntime.startRequest();
+		
 		Clock c = new Clock().start();
 		XAddress modelAddress = XX.toAddress(XX.toId(repoIdStr), XX.toId(modelIdStr), null, null);
 		MStyle style = MStyle.valueOf(styleStr);
@@ -88,38 +91,48 @@ public class ModelResource {
 		
 		if(style == MStyle.xml || style == MStyle.xmlhtml || style == MStyle.json) {
 			XydraPersistence p = Utils.getPersistence(modelAddress.getRepository());
-			XWritableModel model = p.getModelSnapshot(modelAddress);
-			if(download) {
-				String name = modelAddress.getRepository() + "-" + modelAddress.getModel() + "-rev"
-				        + model.getRevisionNumber();
-				String archivename = Utils.filenameOfNow(name);
-				ZipOutputStream zos = Utils.toZipFileDownload(res, archivename);
-				
-				writeToZipstream(model, zos, style);
-				
-				zos.finish();
-			} else {
-				if(style == MStyle.xml | style == MStyle.xmlhtml) {
-					XmlSerializer serializer = new XmlSerializer();
-					ServletUtils.headers(req, res, 200, 1, serializer.getContentType());
-					Writer w = res.getWriter();
-					MiniWriter miniwriter = new MiniStreamWriter(w);
-					XydraOut out = serializer.create(miniwriter, false);
-					out.enableWhitespace(true, true);
-					// write xml header manually
-					w.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
-					if(style == MStyle.xmlhtml) {
-						// write link to xslt
-						w.write("<?xml-stylesheet type=\"text/xsl\" href=\"/s/xml-to-html.xsl\"?>\n");
+			RevisionState rev = p.getModelRevision(modelAddress);
+			log.debug(modelAddress + " rev=" + rev.revision() + " exists:" + rev.modelExists());
+			
+			if(rev.modelExists()) {
+				XWritableModel model = p.getModelSnapshot(modelAddress);
+				if(download) {
+					String name = modelAddress.getRepository() + "-" + modelAddress.getModel()
+					        + "-rev" + model.getRevisionNumber();
+					String archivename = Utils.filenameOfNow(name);
+					ZipOutputStream zos = Utils.toZipFileDownload(res, archivename);
+					
+					writeToZipstream(model, zos, style);
+					
+					zos.finish();
+				} else {
+					if(style == MStyle.xml | style == MStyle.xmlhtml) {
+						XmlSerializer serializer = new XmlSerializer();
+						ServletUtils.headers(req, res, 200, 1, serializer.getContentType());
+						Writer w = res.getWriter();
+						MiniWriter miniwriter = new MiniStreamWriter(w);
+						XydraOut out = serializer.create(miniwriter, false);
+						out.enableWhitespace(true, true);
+						// write xml header manually
+						w.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
+						if(style == MStyle.xmlhtml) {
+							// write link to xslt
+							w.write("<?xml-stylesheet type=\"text/xsl\" href=\"/s/xml-to-html.xsl\"?>\n");
+						}
+						// write xml content
+						SerializedModel.serialize(model, out);
+					} else if(style.equals("json")) {
+						JsonSerializer serializer = new JsonSerializer();
+						ServletUtils.headers(req, res, 200, 1, serializer.getContentType());
+						Writer w = res.getWriter();
+						serializeToWriter(model, serializer, w);
 					}
-					// write xml content
-					SerializedModel.serialize(model, out);
-				} else if(style.equals("json")) {
-					JsonSerializer serializer = new JsonSerializer();
-					ServletUtils.headers(req, res, 200, 1, serializer.getContentType());
-					Writer w = res.getWriter();
-					serializeToWriter(model, serializer, w);
 				}
+			} else {
+				Writer w = HtmlUtils.startHtmlPage(res, "Model does not exist", new HeadLinkStyle(
+				        "/s/xyadmin.css"));
+				w.write("<p>Model '" + modelAddress + "' does (currently) not exist.</p>");
+				HtmlUtils.endHtmlPage(w);
 			}
 		} else {
 			// html
@@ -138,6 +151,8 @@ public class ModelResource {
 	
 	public static void update(String repoIdStr, String modelIdStr, HttpServletRequest req,
 	        HttpServletResponse res) throws IOException {
+		XydraRuntime.startRequest();
+		
 		Clock c = new Clock().start();
 		XID repoId = XX.toId(repoIdStr);
 		
@@ -203,12 +218,15 @@ public class ModelResource {
 		out.enableWhitespace(true, true);
 		SerializedModel.serialize(model, out);
 		out.flush();
+		assert out.isClosed();
 	}
 	
 	public static void render(Writer w, XAddress modelAddress, MStyle style) throws IOException {
 		w.write(
 
 		HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.html, modelAddress.toString())
+
+		+ " | " + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.htmlrev, "Rev")
 
 		+ " | " + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.htmlevents, "Events")
 
@@ -224,7 +242,7 @@ public class ModelResource {
 
 		+ "<br/>\n");
 		
-		if(style == MStyle.htmlevents || style == MStyle.html) {
+		if(style == MStyle.htmlevents || style == MStyle.htmlrev || style == MStyle.html) {
 			
 			// upload form
 			w.write(""
@@ -232,15 +250,15 @@ public class ModelResource {
 			                .withInputSubmit("Upload and set as current state"));
 		}
 		
-		if(style == MStyle.htmlevents) {
-			// events
+		if(style == MStyle.htmlrev || style == MStyle.htmlevents) {
 			XydraPersistence p = Utils.getPersistence(modelAddress.getRepository());
 			RevisionState rev = p.getModelRevision(modelAddress);
 			w.write("rev=" + rev.revision() + " exists:" + rev.modelExists() + "<br/>\n");
 			w.flush();
-			
-			List<XEvent> events = p.getEvents(modelAddress, 0, rev.revision());
-			XydraHtmlUtils.writeEvents(events, w);
+			if(style == MStyle.htmlevents) {
+				List<XEvent> events = p.getEvents(modelAddress, 0, rev.revision());
+				XydraHtmlUtils.writeEvents(events, w);
+			}
 		}
 		
 	}

@@ -22,6 +22,7 @@ import org.xydra.restless.RestlessParameter;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.SharedHtmlUtils.HeadLinkStyle;
 import org.xydra.restless.utils.SharedHtmlUtils.METHOD;
+import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.webadmin.ModelResource.MStyle;
 import org.xydra.webadmin.ModelResource.SetStateResult;
@@ -41,7 +42,7 @@ public class RepositoryResource {
 	}
 	
 	public static enum RStyle {
-		html, xmlzip
+		html, htmlrevs, xmlzip
 	}
 	
 	/**
@@ -52,6 +53,8 @@ public class RepositoryResource {
 	 */
 	public static void index(String repoIdStr, String styleStr, HttpServletResponse res)
 	        throws IOException {
+		XydraRuntime.startRequest();
+		
 		Clock c = new Clock().start();
 		XAddress repoAddress = XX.resolveRepository(XX.toId(repoIdStr));
 		RStyle style = RStyle.valueOf(styleStr);
@@ -69,8 +72,13 @@ public class RepositoryResource {
 		} else {
 			// style HTML
 			Writer w = Utils.writeHeader(res, "Repo", repoAddress);
-			w.write(HtmlUtils.link(link(repoId) + "?style=" + RStyle.xmlzip.name(),
-			        "Download as xml.zip") + "<br/>\n");
+			w.write(
+
+			HtmlUtils.link(link(repoId) + "?style=" + RStyle.htmlrevs.name(), "With Revs")
+			        
+			        + " | "
+			        + HtmlUtils.link(link(repoId) + "?style=" + RStyle.xmlzip.name(),
+			                "Download as xml.zip") + "<br/>\n");
 			
 			// upload form
 			w.write(HtmlUtils.form(METHOD.POST, link(repoId)).withInputFile("backupfile")
@@ -80,7 +88,8 @@ public class RepositoryResource {
 				w.write("<h2>Model: " + modelId + "</h2>\n");
 				w.flush();
 				XAddress modelAddress = XX.toAddress(repoId, modelId, null, null);
-				ModelResource.render(w, modelAddress, MStyle.link);
+				ModelResource.render(w, modelAddress, style == RStyle.htmlrevs ? MStyle.htmlrev
+				        : MStyle.link);
 			}
 			w.flush();
 			w.close();
@@ -90,6 +99,8 @@ public class RepositoryResource {
 	
 	public static void update(String repoIdStr, HttpServletRequest req, HttpServletResponse res)
 	        throws IOException {
+		XydraRuntime.startRequest();
+		
 		Clock c = new Clock().start();
 		XID repoId = XX.toId(repoIdStr);
 		

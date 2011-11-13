@@ -26,6 +26,9 @@
 
 	<!-- Set caching to 1 day while things change frequently. Sample: '1d 1h' -->
 	<static-files>
+		<include path="/index.html" expiration="7d" />
+
+
 		<include path="/apple-touch-icon.png" expiration="7d" />
 		<include path="/apple-touch-icon_72.png" expiration="7d" />
 		<include path="/apple-touch-icon_114.png" expiration="7d" />
