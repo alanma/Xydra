@@ -7,7 +7,7 @@
 	<!-- Any file not excluded here (besides WEB-INF/** and **/*.jsp) are copied 
 		to Googles CDN. -->
 
-	<application>calpano-com</application>
+	<application>xydra-live</application>
 	<version>xyadmin</version>
 	<!-- Can be accessed as http://<the number here>.latest.calpano-com.appspot.com/ 
 		accessed without a certificate warning at https://checklist-dot-latest-dot-calpano-com.appspot.com/. -->
