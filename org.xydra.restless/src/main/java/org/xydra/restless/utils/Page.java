@@ -1,7 +1,6 @@
 package org.xydra.restless.utils;
 
 import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -101,9 +100,10 @@ public class Page {
 		}
 		
 		@Override
-        public String toHtml(String indent) {
-			return Page.renderToHtml(indent, this.first, RenderMode.Block, this.tag, Page.toHtml(
-			        "  " + indent, this.children), this.attributes.toArray(new Attribute[0]));
+		public String toHtml(String indent) {
+			return Page.renderToHtml(indent, this.first, RenderMode.Block, this.tag,
+			        Page.toHtml("  " + indent, this.children),
+			        this.attributes.toArray(new Attribute[0]));
 		}
 		
 	}
@@ -152,6 +152,7 @@ public class Page {
 		
 	}
 	
+	// TODO this does not run in GWT; universal function in xydra.core
 	public static String urlencode(String s) {
 		try {
 			return URLEncoder.encode(s, "utf-8");
@@ -296,9 +297,9 @@ public class Page {
 		}
 		
 		@Override
-        public String toHtml(String indent) {
-			return Page.renderToHtml(indent, false, this.renderMode, this.tag, Page.toHtml("",
-			        this.children), this.attributes.toArray(new Attribute[0]));
+		public String toHtml(String indent) {
+			return Page.renderToHtml(indent, false, this.renderMode, this.tag,
+			        Page.toHtml("", this.children), this.attributes.toArray(new Attribute[0]));
 		}
 	}
 	
@@ -325,8 +326,8 @@ public class Page {
 		
 		@Override
 		public String toHtml(String indent) {
-			return Page.renderToHtml(indent, false, RenderMode.InlineBlock, this.tag, this.content
-			        .toHtml(""));
+			return Page.renderToHtml(indent, false, RenderMode.InlineBlock, this.tag,
+			        this.content.toHtml(""));
 		}
 		
 	}
@@ -369,11 +370,6 @@ public class Page {
 	
 	public static interface ToHtml {
 		public String toHtml(String indent);
-	}
-	
-	public static Head htmlHead(Writer w) {
-		Html html = new Html();
-		return html.head();
 	}
 	
 	public static Head htmlHeadTitle(String title) {
@@ -459,14 +455,14 @@ public class Page {
 	}
 	
 	public static void main(String[] args) {
-		String s2 = Page.htmlHeadTitle("Hello World").endHeadStartBody().paragraph("Foo").form(
-		        METHOD.GET, "/my/url").inputText("Name: ", "name", "John Doe").inputSubmit(
-		        "Abschicken").endBodyEndHtml().toString();
+		String s2 = Page.htmlHeadTitle("Hello World").endHeadStartBody().paragraph("Foo")
+		        .form(METHOD.GET, "/my/url").inputText("Name: ", "name", "John Doe")
+		        .inputSubmit("Abschicken").endBodyEndHtml().toString();
 		System.out.println(s2);
 		
 		Form form = new Form(null, METHOD.GET, "/my/url");
-		String s3 = form.inputText("Name: ", "name", "John Doe").inputSubmit("Abschicken").toHtml(
-		        "");
+		String s3 = form.inputText("Name: ", "name", "John Doe").inputSubmit("Abschicken")
+		        .toHtml("");
 		System.out.println(s3);
 	}
 }

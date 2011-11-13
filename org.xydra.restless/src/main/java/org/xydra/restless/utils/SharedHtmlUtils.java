@@ -84,6 +84,36 @@ public class SharedHtmlUtils {
 		}
 	}
 	
+	public static class FileInput extends KeyValueInput {
+		
+		private int size;
+		
+		/**
+		 * @param name ..
+		 * @param size of file name field
+		 */
+		public FileInput(String name, int size) {
+			super(name, "");
+			this.size = size;
+		}
+		
+		@Override
+		public String toString() {
+			return super.name + ": <input" +
+
+			" type=\"file\"" +
+
+			" name=\"" + super.name + "\"" +
+
+			" value=\"" + this.value + "\"" +
+
+			" size=\"" + this.size + "\"" +
+
+			"/>";
+		}
+		
+	}
+	
 	public static class TextInput extends KeyValueInput {
 		
 		private int size;
@@ -156,6 +186,7 @@ public class SharedHtmlUtils {
 		private String action;
 		private METHOD method;
 		private List<Input> inputs = new LinkedList<SharedHtmlUtils.Input>();
+		private boolean hasFileInput = false;
 		
 		public Form(METHOD method, String action) {
 			this.method = method;
@@ -194,6 +225,16 @@ public class SharedHtmlUtils {
 		}
 		
 		/**
+		 * @param name input name
+		 * @return the {@link Form} for a fluent API
+		 */
+		public Form withInputFile(String name) {
+			this.inputs.add(new FileInput(name, 100));
+			this.hasFileInput = true;
+			return this;
+		}
+		
+		/**
 		 * @param name form name
 		 * @param value predefined form value
 		 * @param cols number of columns
@@ -213,12 +254,17 @@ public class SharedHtmlUtils {
 		@Override
 		public String toString() {
 			StringBuffer buf = new StringBuffer();
-			buf.append("<form action='" + this.action + "' method='" + this.method + "'>");
+			buf.append("<form action='" + this.action + "' method='" + this.method + "'"
+			        + (hasFileInput() ? " enctype='multipart/form-data'" : "") + ">");
 			for(Input input : this.inputs) {
 				buf.append(input.toString() + "\n");
 			}
 			buf.append("</form>");
 			return buf.toString();
+		}
+		
+		private boolean hasFileInput() {
+			return this.hasFileInput;
 		}
 		
 	}
