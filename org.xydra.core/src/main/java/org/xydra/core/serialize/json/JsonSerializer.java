@@ -30,4 +30,9 @@ public class JsonSerializer implements XydraSerializer {
 		return new JsonOut(writer);
 	}
 	
+	@Override
+	public String getContentType() {
+		return JsonOut.CONTENT_TYPE_JSON;
+	}
+	
 }

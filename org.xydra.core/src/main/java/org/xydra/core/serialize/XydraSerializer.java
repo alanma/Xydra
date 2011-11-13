@@ -18,8 +18,14 @@ public interface XydraSerializer {
 	XydraOut create();
 	
 	/**
+	 * @param writer to which to write
 	 * @return a {@link XydraOut} instance that writes to a {@link MiniWriter}.
 	 */
 	XydraOut create(MiniWriter writer);
+	
+	/**
+	 * @return the MIME content type of the produced output.
+	 */
+	String getContentType();
 	
 }

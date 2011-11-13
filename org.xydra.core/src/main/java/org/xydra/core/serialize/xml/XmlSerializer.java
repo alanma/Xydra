@@ -30,4 +30,13 @@ public class XmlSerializer implements XydraSerializer {
 		return new XmlOut(writer);
 	}
 	
+	public XydraOut create(MiniWriter writer, boolean writeHeader) {
+		return new XmlOut(writer, writeHeader);
+	}
+	
+	@Override
+	public String getContentType() {
+		return XmlOut.CONTENT_TYPE_XML;
+	}
+	
 }
