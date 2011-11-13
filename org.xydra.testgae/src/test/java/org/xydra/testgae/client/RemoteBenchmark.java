@@ -23,6 +23,7 @@ import org.xydra.testgae.shared.HttpUtils;
 public abstract class RemoteBenchmark {
 	protected String absoluteUrl;
 	protected String path;
+	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(HttpUtils.class);
 	final static String lineSeparator = System.getProperty("line.separator");
 	
