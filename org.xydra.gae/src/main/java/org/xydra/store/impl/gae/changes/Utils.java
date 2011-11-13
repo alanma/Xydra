@@ -1,10 +1,12 @@
 package org.xydra.store.impl.gae.changes;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.index.iterator.TransformingIterator;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.impl.gae.DebugFormatter;
@@ -92,5 +94,24 @@ public class Utils {
 			return address.getModel();
 		}
 		return address.getRepository();
+	}
+	
+	public static Iterator<XAddress> findModelAdresses() {
+		/*
+		 * lookup XCHANGE entities by query: SELECT __key__ FROM XCHANGE WHERE
+		 * __key__ < KEY('XCHANGE', '1')
+		 */
+		Query q = new Query(KeyStructure.KIND_XCHANGE).setKeysOnly().addFilter("__key__",
+		        FilterOperator.LESS_THAN, KeyFactory.createKey(KeyStructure.KIND_XCHANGE, "1"));
+		final Iterator<Entity> it = SyncDatastore.prepareQuery(q).asIterable().iterator();
+		
+		return new TransformingIterator<Entity,XAddress>(it,
+		        new TransformingIterator.Transformer<Entity,XAddress>() {
+			        
+			        @Override
+			        public XAddress transform(Entity in) {
+				        return KeyStructure.getAddressFromChangeKey(in.getKey());
+			        }
+		        });
 	}
 }

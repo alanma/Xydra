@@ -18,7 +18,7 @@ import com.google.appengine.api.datastore.KeyFactory;
 public class KeyStructure {
 	
 	private static final String KIND_XVALUE = "XVALUE";
-	private static final String KIND_XCHANGE = "XCHANGE";
+	static final String KIND_XCHANGE = "XCHANGE";
 	
 	/**
 	 * @param address The {@link XAddress} of the entity that the key should
@@ -53,6 +53,20 @@ public class KeyStructure {
 	static Key createChangeKey(XAddress modelAddr, long revision) {
 		assert modelAddr.getAddressedType() == XType.XMODEL;
 		return KeyFactory.createKey(KIND_XCHANGE, revision + modelAddr.toURI());
+	}
+	
+	/**
+	 * @param key must be a change key created via
+	 *            {@link #createChangeKey(XAddress, long)}
+	 * @return the XAddress part of the change key
+	 */
+	static XAddress getAddressFromChangeKey(Key key) {
+		assert key.getKind().equals(KIND_XCHANGE);
+		String name = key.getName();
+		int firstSlash = name.indexOf("/");
+		String address = name.substring(firstSlash);
+		XAddress xa = XX.toAddress(address);
+		return xa;
 	}
 	
 	/**
