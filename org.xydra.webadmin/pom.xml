@@ -198,4 +198,69 @@
 		<developerConnection>svn:https://xydra.googlecode.com/svn/trunk/org.xydra.webadmin</developerConnection>
 	</scm>
 	
+	<!-- Activate with ".... -P gae" -->
+	<profiles>
+		<profile>
+			<id>gae</id>
+
+			<pluginRepositories>
+
+				<!-- If this repo is active, GAE plugin is crap. <pluginRepository> <id>Codehaus 
+					Mojo Snapshot</id> <url>http://snapshots.repository.codehaus.org/</url> </pluginRepository> -->
+
+				<!-- Google App Engine (GAE) plugin repository -->
+				<pluginRepository>
+					<id>gae-plugin-repo</id>
+					<url>http://maven-gae-plugin.googlecode.com/svn/repository/</url>
+				</pluginRepository>
+
+			</pluginRepositories>
+			<repositories>
+				<!-- for GAE stuff ? -->
+				<repository>
+					<id>maven2-repository.dev.java.net</id>
+					<url>http://download.java.net/maven/2</url>
+					<layout>default</layout>
+				</repository>
+
+				<repository>
+					<id>mvnsearch</id>
+					<url>http://www.mvnsearch.org/maven2/</url>
+				</repository>
+
+			</repositories>
+
+			<build>
+				<plugins>
+					<!-- Google App Engine (GAE) plugin -->
+					<plugin>
+						<groupId>net.kindleit</groupId>
+						<artifactId>maven-gae-plugin</artifactId>
+						<version>0.8.2</version>
+						<configuration>
+							<sdkDir>${gae.home}</sdkDir>
+							<appDir>${project.build.directory}/war</appDir>
+							<unpackVersion>${gae.version}</unpackVersion>
+							<splitJars>true</splitJars>
+							<keepTempUploadDir>true</keepTempUploadDir>
+						</configuration>
+						<dependencies>
+							<dependency>
+								<groupId>net.kindleit</groupId>
+								<artifactId>gae-runtime</artifactId>
+								<version>${gae.version}</version>
+								<type>pom</type>
+							</dependency>
+						</dependencies>
+					</plugin>
+					<!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>gwt-maven-plugin</artifactId> 
+						<version>1.1</version> <configuration> <module>com.calpano.goaltaxi</module> 
+						<runTarget>com.calpano.goaltaxi.rest.GoalTaxiApp</runTarget> </configuration> 
+						</plugin> -->
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+	
+	
 </project>
