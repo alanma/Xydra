@@ -79,6 +79,12 @@
 			<artifactId>restless</artifactId>
 			<version>0.1.4-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>restless</artifactId>
+			<version>0.1.4-SNAPSHOT</version>
+			<type>test-jar</type>
+		</dependency>
 
 		<!--  Xydra Core -->
 		<dependency>
@@ -87,10 +93,10 @@
 			<version>0.1.4-SNAPSHOT</version>
 		</dependency>
 		
-		<!--  Xydra Server -->
+		<!--  Xydra GAE -->
 		<dependency>
 			<groupId>org.xydra</groupId>
-			<artifactId>server</artifactId>
+			<artifactId>gae</artifactId>
 			<version>0.1.4-SNAPSHOT</version>
 		</dependency>
 		

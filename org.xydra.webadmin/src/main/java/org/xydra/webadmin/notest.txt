@@ -1,0 +1,19 @@
+this project can be deployed as a standalone AppEngine app.
+
+It supports auto-discovery of repositories.
+
+It depends on Xydra.GAE.
+
+It works also locally, often via AboutAppengine
+
+Each model:
+- download as XML | JSON | CSV?
+- upload as XML | JSON | CSV?
+
+? with or without revisions?
+
+
+Create objects, delete objects, browse objects
+
+Robust
+
