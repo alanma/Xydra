@@ -23,6 +23,7 @@ import org.xydra.testgae.shared.HttpUtils;
 public abstract class RemoteBenchmark {
 	protected String absoluteUrl;
 	protected String path;
+	protected String currentRepo;
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(HttpUtils.class);
 	final static String lineSeparator = System.getProperty("line.separator");
@@ -30,37 +31,38 @@ public abstract class RemoteBenchmark {
 	@Test
 	public void testBenchmarkAddingOneWishOneThread() {
 		for(int i = 0; i < 100; i++) {
-			addingWishesOneThreadInTransaction(1, 1, "BenchmarkAddingOneWishOneThread.txt");
+			addingWishesOneThreadInTransaction(1, 1, "AddingOneWishOneThread", i);
 		}
 	}
 	
 	@Test
 	public void testBenchmarkDeletingOneWishOneThread() {
 		for(int i = 0; i < 100; i++) {
-			deletingWishesOneThreadInTransaction(1, this.path
-			        + "BenchmarkDeletingOneWishOneThread.txt");
+			deletingWishesOneThreadInTransaction(1, 0, "DeletingOneWishOneThread", i);
 		}
 	}
 	
 	@Test
 	public void testBenchmarkEditingOneWishOneThread() {
 		for(int i = 0; i < 100; i++) {
-			editingWishesOneThreadInTransaction(1, 0, this.path
-			        + "BenchmarkEditingOneWishOneThread.txt");
+			editingWishesOneThreadInTransaction(1, 0, "EditingOneWishOneThread", i);
 		}
 	}
 	
 	@Test
-	public void testCompareAddingMultipleWishesInTransaction() {
+	public void testAddingMultipleWishesInTransaction() {
 		for(int i = 0; i < 100; i++) {
+			System.out.println("Iteration: " + i);
 			for(int X = 10; X <= 80; X *= 2) {
-				addingWishesOneThreadInTransaction(X, 1, 0, this.path
-				        + "AddingMultipleWishesInTransaction" + X + ".txt");
+				System.out.println("X = " + X);
+				addingWishesOneThreadInTransaction(X, 1, 0,
+				        "AddingMultipleWishesInTransaction" + X, i);
 			}
 			
-			for(int X = 8; X <= 1024; X *= 2) {
-				addingWishesOneThreadInTransaction(X, 1, 0, this.path
-				        + "AddingMultipleWishesInTransaction" + X + ".txt");
+			for(int X = 8; X <= 256; X *= 2) {
+				System.out.println("X = " + X);
+				addingWishesOneThreadInTransaction(X, 1, 0,
+				        "AddingMultipleWishesInTransaction" + X, i);
 			}
 		}
 	}
@@ -68,14 +70,21 @@ public abstract class RemoteBenchmark {
 	@Test
 	public void testAddingWishesInTransactionWithInitialWishes() {
 		for(int i = 0; i < 100; i++) {
+			System.out.println("Iteration: " + i);
 			for(int X = 10; X <= 80; X *= 2) {
-				addingWishesOneThreadInTransaction(10, 1, X, this.path
-				        + "AddingWishesInTransactionWithInitialWishes" + X + ".txt");
+				System.out.println("X = " + X);
+				addingWishesOneThreadInTransaction(10, 1, X,
+				        "AddingWishesInTransactionWithInitialWishes" + X, i);
 			}
 			
-			for(int X = 8; X <= 1024; X *= 2) {
-				addingWishesOneThreadInTransaction(10, 1, X, this.path
-				        + "AddingWishesInTransactionWithInitialWishes" + X + ".txt");
+			// TODO Check 128,256, 512 and 1024 initial wishes again... seems
+			// like
+			// that's
+			// too much!
+			for(int X = 8; X < 128; X *= 2) {
+				System.out.println("X = " + X);
+				addingWishesOneThreadInTransaction(10, 1, X,
+				        "AddingWishesInTransactionWithInitialWishes" + X, i);
 			}
 		}
 	}
@@ -83,54 +92,69 @@ public abstract class RemoteBenchmark {
 	@Test
 	public void testBenchmarkEditingOneWishOneThreadWithInitialWishes() {
 		for(int i = 0; i < 100; i++) {
+			System.out.println("Iteration: " + i);
 			for(int X = 10; X <= 80; X *= 2) {
-				editingWishesOneThreadInTransaction(1, X, this.path
-				        + "EditingOneWishInTransactionWithInitialWishes" + X + ".txt");
+				System.out.println("X = " + X);
+				editingWishesOneThreadInTransaction(1, X,
+				        "EditingOneWishInTransactionWithInitialWishes" + X, i);
 			}
 			
 			for(int X = 8; X <= 1024; X *= 2) {
-				editingWishesOneThreadInTransaction(1, X, this.path
-				        + "EditingOneWishInTransactionWithInitialWishes" + X + ".txt");
+				System.out.println("X = " + X);
+				editingWishesOneThreadInTransaction(1, X,
+				        "EditingOneWishInTransactionWithInitialWishes" + X, i);
 			}
 		}
 	}
 	
-	public void addingWishesOneThreadInTransaction(int wishes, int operations, String filePath) {
-		addingWishesOneThreadInTransaction(wishes, operations, 0, filePath);
+	public void addingWishesOneThreadInTransaction(int wishes, int operations, String filePath,
+	        int iteration) {
+		addingWishesOneThreadInTransaction(wishes, operations, 0, filePath, iteration);
 	}
 	
 	public void addingWishesOneThreadInTransaction(int wishes, int operations, int initialWishes,
-	        String filePath) {
-		String listStr = addList("/repo1", initialWishes);
+	        String filePath, int iteration) {
+		this.currentRepo = "/repo" + System.currentTimeMillis();
+		
+		String listStr = addList(this.currentRepo, initialWishes);
 		
 		// in total 6 tries to create a list... if it doesn't work, this test
 		// fails
 		for(int i = 0; i < 5 & listStr == null; i++) {
-			listStr = addList("/repo1", initialWishes);
+			listStr = addList(this.currentRepo, initialWishes);
 		}
 		
 		int addExceptions = 0;
-		int clearExceptions = 0;
 		int counter = 0;
 		
 		double avgTime = 0;
 		for(int i = 0; i < operations; i++) {
 			try {
-				long time = System.currentTimeMillis();
-				assertTrue(HttpUtils.makeGetRequest(this.absoluteUrl + listStr + "/add?wishes="
-				        + wishes));
-				time = System.currentTimeMillis() - time;
+				long time = 0l;
+				boolean succGet = false;
+				
+				while(!succGet) {
+					
+					time = System.currentTimeMillis();
+					succGet = (HttpUtils.makeGetRequest(this.absoluteUrl + listStr + "/add?wishes="
+					        + wishes));
+					
+					if(!succGet) {
+						System.out.println("addingWishes: Failed GET-Request at iteration "
+						        + iteration + ", " + initialWishes
+						        + " initial wishes while adding " + wishes + " wishes");
+						
+						this.outputCriticalErrors(filePath, iteration, initialWishes, wishes);
+						this.wait(100);
+					} else {
+						time = System.currentTimeMillis() - time;
+					}
+				}
 				
 				avgTime += time;
 				counter++;
 			} catch(Exception e) {
 				addExceptions++;
-			}
-			
-			try {
-				assertTrue(HttpUtils.makeGetRequest(this.absoluteUrl + listStr + "/clear"));
-			} catch(Exception e) {
-				clearExceptions++;
 			}
 		}
 		
@@ -139,68 +163,23 @@ public abstract class RemoteBenchmark {
 		
 		// Output Results in a simple CSV format
 		outputResults(filePath, initialWishes, operations, wishes, successfulOperations, avgTime,
-		        addExceptions, clearExceptions);
+		        addExceptions);
 		
 	}
 	
-	public void addingWishesOneThreadSequentially(int wishes, int operations, String filePath) {
-		String listStr = addList("/repo1");
+	public void deletingWishesOneThreadInTransaction(int operations, int initialWishes,
+	        String filePath, int iteration) {
+		// TODO implement initial wishes mechanic
+		this.currentRepo = "/repo" + System.currentTimeMillis();
+		String listStr = addList(this.currentRepo);
 		
 		// in total 6 tries to create a list... if it doesn't work, this test
 		// fails
 		for(int i = 0; i < 5 & listStr == null; i++) {
-			listStr = addList("/repo1");
-		}
-		
-		assertNotNull(listStr);
-		
-		int addExceptions = 0;
-		int clearExceptions = 0;
-		int counter = 0;
-		
-		double avgTime = 0;
-		for(int i = 0; i < operations; i++) {
-			try {
-				long time = System.currentTimeMillis();
-				for(int j = 0; j < wishes; j++) {
-					assertTrue(HttpUtils.makeGetRequest(this.absoluteUrl + listStr
-					        + "/add?wishes=1"));
-				}
-				
-				time = System.currentTimeMillis() - time;
-				
-				avgTime += time;
-				counter++;
-			} catch(Exception e) {
-				addExceptions++;
-			}
-			
-			try {
-				assertTrue(HttpUtils.makeGetRequest(this.absoluteUrl + listStr + "/clear"));
-			} catch(Exception e) {
-				clearExceptions++;
-			}
-		}
-		
-		int successfulOperations = (operations - addExceptions);
-		avgTime = avgTime / successfulOperations;
-		
-		// Output Results in a simple CSV format
-		outputResults(filePath, 0, operations, wishes, successfulOperations, avgTime,
-		        addExceptions, clearExceptions);
-	}
-	
-	public void deletingWishesOneThreadInTransaction(int operations, String filePath) {
-		String listStr = addList("/repo1");
-		
-		// in total 6 tries to create a list... if it doesn't work, this test
-		// fails
-		for(int i = 0; i < 5 & listStr == null; i++) {
-			listStr = addList("/repo1");
+			listStr = addList(this.currentRepo);
 		}
 		
 		int addExceptions = 0;
-		int clearExceptions = 0;
 		int counter = 0;
 		
 		double avgTime = 0;
@@ -208,9 +187,24 @@ public abstract class RemoteBenchmark {
 			try {
 				String wishStr = addWishToEmptyList(this.absoluteUrl + listStr);
 				
-				long time = System.currentTimeMillis();
-				assertTrue(HttpUtils.makeGetRequest(this.absoluteUrl + wishStr + "/delete"));
-				time = System.currentTimeMillis() - time;
+				long time = 0l;
+				boolean succGet = false;
+				
+				while(!succGet) {
+					
+					time = System.currentTimeMillis();
+					succGet = HttpUtils.makeGetRequest(this.absoluteUrl + wishStr + "/delete");
+					
+					if(!succGet) {
+						System.out.println("deletingWishes: Failed GET-Request at iteration "
+						        + iteration + ", " + initialWishes
+						        + " initial wishes while deleting 1 wish");
+						this.outputCriticalErrors(filePath, iteration, initialWishes, 1);
+						this.wait(100);
+					} else {
+						time = System.currentTimeMillis() - time;
+					}
+				}
 				
 				avgTime += time;
 				counter++;
@@ -226,80 +220,96 @@ public abstract class RemoteBenchmark {
 		avgTime = avgTime / successfulOperations;
 		
 		// Output Results in a simple CSV format
-		outputResults(filePath, 0, operations, 1, successfulOperations, avgTime, addExceptions,
-		        clearExceptions);
+		outputResults(filePath, 0, operations, 1, successfulOperations, avgTime, addExceptions);
 		
 	}
 	
 	public void editingWishesOneThreadInTransaction(int operations, int initialWishes,
-	        String filePath) {
-		String listStr = addList("/repo1", initialWishes);
+	        String filePath, int iteration) {
+		this.currentRepo = "/repo" + System.currentTimeMillis();
+		String listStr = addList(this.currentRepo, initialWishes);
 		
 		// in total 6 tries to create a list... if it doesn't work, this test
 		// fails
 		for(int i = 0; i < 5 & listStr == null; i++) {
-			listStr = addList("/repo1", initialWishes);
+			listStr = addList(this.currentRepo, initialWishes);
 		}
 		
 		double avgTime;
 		
-		do {
-			
-			int addExceptions = 0;
-			int clearExceptions = 0;
-			int counter = 0;
-			
-			avgTime = 0;
-			for(int i = 0; i < operations; i++) {
-				try {
-					String wishStr = addWish(this.absoluteUrl + listStr);
+		int addExceptions = 0;
+		int counter = 0;
+		
+		avgTime = 0;
+		for(int i = 0; i < operations; i++) {
+			try {
+				String wishStr = addWish(this.absoluteUrl + listStr);
+				
+				long time = 0l;
+				boolean succGet = false;
+				
+				while(!succGet) {
 					
-					long time = System.currentTimeMillis();
-					assertTrue(HttpUtils.makeGetRequest(this.absoluteUrl + wishStr
-					        + "/editName?name=performanceTest"));
-					time = System.currentTimeMillis() - time;
+					time = System.currentTimeMillis();
+					succGet = HttpUtils.makeGetRequest(this.absoluteUrl + wishStr
+					        + "/editName?name=performanceTest");
 					
-					avgTime += time;
-					counter++;
-				} catch(Exception e) {
-					addExceptions++;
+					if(!succGet) {
+						System.out.println("editingWishes: Failed GET-Request at iteration "
+						        + iteration + ", " + initialWishes
+						        + " initial wishes while editing 1 wish");
+						this.outputCriticalErrors(filePath, iteration, initialWishes, 1);
+						this.wait(100);
+					} else {
+						time = System.currentTimeMillis() - time;
+					}
 				}
 				
-				try {
-					assertTrue(HttpUtils.makeGetRequest(this.absoluteUrl + listStr + "/clear"));
-				} catch(Exception e) {
-					clearExceptions++;
-				}
+				avgTime += time;
+				counter++;
+			} catch(Exception e) {
+				addExceptions++;
 			}
-			
-			int successfulOperations = (operations - addExceptions);
-			avgTime = avgTime / successfulOperations;
-			
-			if(!Double.isNaN(avgTime)) {
-				// Output Results in a simple CSV format
-				outputResults(filePath, initialWishes, operations, 0, successfulOperations,
-				        avgTime, addExceptions, clearExceptions);
-			} else {
-				System.out.println("Was NaN - Starting over...");
-			}
-		} while(Double.isNaN(avgTime));
+		}
+		
+		int successfulOperations = (operations - addExceptions);
+		avgTime = avgTime / successfulOperations;
+		
+		// Output Results in a simple CSV format
+		outputResults(filePath, initialWishes, operations, 0, successfulOperations, avgTime,
+		        addExceptions);
 		
 	}
 	
 	// ----------------- Helper Methods ------------------------
 	
 	private void outputResults(String filePath, int initialWishes, int operations, int wishes,
-	        int successfulOps, double avgTime, int opExceps, int otherExceps) {
+	        int successfulOps, double avgTime, int opExceps) {
 		// Output Results in a simple CSV format
 		try {
-			BufferedWriter out = new BufferedWriter(new FileWriter(filePath, true));
+			BufferedWriter out = new BufferedWriter(new FileWriter(this.path + filePath + ".txt",
+			        true));
 			out.write("#Initial Wishes:, " + initialWishes + ", ");
 			out.write("#Operations:, " + operations + ", ");
 			out.write("#Wishes per Op.:, " + wishes + ", ");
 			out.write("#Successful Operations:, " + successfulOps + ", ");
 			out.write("Average Time (ms):, " + avgTime + ", ");
 			out.write("#Operation Exceptions:, " + opExceps + ", ");
-			out.write("#Other Exceptions:, " + otherExceps);
+			out.write(lineSeparator);
+			
+			out.close();
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void outputCriticalErrors(String filePath, int iteration, int initialWishes, int wishes) {
+		// Output Results in a simple CSV format
+		try {
+			BufferedWriter out = new BufferedWriter(new FileWriter(this.path + filePath
+			        + "CriticalErrors.txt", true));
+			out.write("#Initial Wishes:, " + initialWishes + ", ");
+			out.write("#Wishes per Op.:, " + wishes + ", ");
 			out.write(lineSeparator);
 			
 			out.close();
@@ -336,7 +346,7 @@ public abstract class RemoteBenchmark {
 		}
 		assertNotNull(list);
 		assert list != null;
-		assertTrue(list.startsWith("/xmas/repo1/"));
+		assertTrue(list.startsWith("/xmas" + this.currentRepo + "/"));
 		
 		return list;
 	}
