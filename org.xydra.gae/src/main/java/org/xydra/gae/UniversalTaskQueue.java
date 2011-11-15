@@ -34,7 +34,7 @@ public class UniversalTaskQueue {
 	public static void enqueueTask(NamedDeferredTask task) {
 		if(AboutAppEngine.onAppEngine()) {
 			Queue queue = QueueFactory.getDefaultQueue();
-			queue.add(TaskOptions.Builder.withDefaults().param("id", task.getId()).payload(task));
+			queue.add(TaskOptions.Builder.withDefaults().header("id", task.getId()).payload(task));
 		} else {
 			// run immediately
 			task.run();
