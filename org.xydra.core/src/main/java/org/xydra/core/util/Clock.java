@@ -16,12 +16,15 @@ public class Clock {
 	/** -1 = not running */
 	private long start = -1;
 	
+	private long firstStart = -1;
+	
 	/**
 	 * @return itself to allow elegant fluent code like this
 	 *         <code>Clock c = new Clock().start();</code>
 	 */
 	public Clock start() {
 		this.start = System.currentTimeMillis();
+		this.firstStart = this.start;
 		return this;
 	}
 	
@@ -78,5 +81,13 @@ public class Clock {
 	public Clock append(String s) {
 		this.stats.append(s);
 		return this;
+	}
+	
+	/**
+	 * @return milliseconds elapsed since first start of this clock. -1 = clock
+	 *         was not started ever.
+	 */
+	public long getDurationSinceStart() {
+		return System.currentTimeMillis() - this.firstStart;
 	}
 }
