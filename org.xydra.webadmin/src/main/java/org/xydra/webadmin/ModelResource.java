@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -102,7 +103,7 @@ public class ModelResource {
 					String archivename = Utils.filenameOfNow(name);
 					ZipOutputStream zos = Utils.toZipFileDownload(res, archivename);
 					
-					writeToZipstream(model, zos, style);
+					writeToZipstreamDirectly(model, zos, style);
 					
 					zos.finish();
 				} else {
@@ -195,11 +196,14 @@ public class ModelResource {
 		w.close();
 	}
 	
-	static void writeToZipstream(XWritableModel model, ZipOutputStream zos, MStyle style)
-	        throws IOException {
-		String name = model.getID() + "-rev-" + model.getRevisionNumber();
+	static final String getStorageName(XID modelId, MStyle style) {
 		/** matches XFile.MODEL_SUFFIX for xml */
-		ZipEntry e = new ZipEntry(name + ".xmodel." + style);
+		return modelId + ".xmodel." + style;
+	}
+	
+	static void writeToZipstreamDirectly(XWritableModel model, ZipOutputStream zos, MStyle style)
+	        throws IOException {
+		ZipEntry e = new ZipEntry(getStorageName(model.getID(), style));
 		zos.putNextEntry(e);
 		OutputStreamWriter w = new OutputStreamWriter(zos);
 		XydraSerializer serializer = null;
@@ -210,6 +214,42 @@ public class ModelResource {
 		}
 		serializeToWriter(model, serializer, w);
 		zos.closeEntry();
+	}
+	
+	static void writeToZipstreamDirectly(XID modelId, MStyle style, String serialisation,
+	        ZipOutputStream zos) throws IOException {
+		ZipEntry e = new ZipEntry(getStorageName(modelId, style));
+		zos.putNextEntry(e);
+		OutputStreamWriter w = new OutputStreamWriter(zos);
+		w.write(serialisation);
+		w.flush();
+		zos.closeEntry();
+	}
+	
+	/**
+	 * Run this in a task queue
+	 * 
+	 * @param model
+	 * @param style
+	 * @return serialisation in given style
+	 * @throws IOException
+	 */
+	static String computeSerialisation(XWritableModel model, MStyle style) {
+		StringWriter sw = new StringWriter();
+		XydraSerializer serializer = null;
+		if(style == MStyle.xml) {
+			serializer = new XmlSerializer();
+		} else if(style == MStyle.json) {
+			serializer = new JsonSerializer();
+		}
+		serializeToWriter(model, serializer, sw);
+		try {
+			sw.close();
+		} catch(IOException e) {
+			throw new RuntimeException(e);
+		}
+		String serialised = sw.getBuffer().toString();
+		return serialised;
 	}
 	
 	private static void serializeToWriter(XReadableModel model, XydraSerializer serializer, Writer w) {

@@ -38,7 +38,9 @@
 				<xsl:value-of select="@revision" />
 			</span>
 			<ul>
-				<xsl:apply-templates select="*" />
+				<xsl:apply-templates select="*">
+					<xsl:sort select="@xid" />
+				</xsl:apply-templates>
 			</ul>
 		</div>
 	</xsl:template>
@@ -58,6 +60,7 @@
 						<th>Value</th>
 					</tr>
 					<xsl:for-each select="xfield">
+						<xsl:sort select="@xid" />
 						<tr>
 							<xsl:apply-templates select="." />
 						</tr>
@@ -114,17 +117,17 @@
 
 	<!-- Items -->
 	<xsl:template match="*[@isNull]">
-			<span class="null">NULL</span>
-			<span class="type">
-				<xsl:value-of select="name(.)" />
-			</span>
+		<span class="null">NULL</span>
+		<span class="type">
+			<xsl:value-of select="name(.)" />
+		</span>
 	</xsl:template>
 
 	<xsl:template match="*">
-			<xsl:value-of select="." />
-			<span class="type">
-				<xsl:value-of select="name(.)" />
-			</span>
+		<xsl:value-of select="." />
+		<span class="type">
+			<xsl:value-of select="name(.)" />
+		</span>
 	</xsl:template>
 
 

@@ -28,13 +28,6 @@ import org.xydra.webadmin.ModelResource.MStyle;
  * TODO ability to load from servletcontext via
  * {@link XydraRestServer#SERVLET_CONTEXT_ATTRIBUTE_XYDRA_PERSISTENCE}
  * 
- * 
- * -------- FIXME --------
- * 
- * 
- * /admin/io -> Import/Export; Add demo data
- * 
- * 
  * @author xamde
  */
 public class WebadminResource {
@@ -60,7 +53,7 @@ public class WebadminResource {
 		Writer w = HtmlUtils.startHtmlPage(res, "XydraWebAdmin",
 		        new HeadLinkStyle("/s/xyadmin.css"));
 		w.write(HtmlUtils.link("/admin" + XYADMIN + "/demo", "Add phonebook demo data") + "<br/>\n");
-		w.write("<h3>List of all models in all repositoriies</h3>");
+		w.write("<h3>List of all models in all repositories</h3>");
 		Iterator<XAddress> it = Utils.findModelAdresses();
 		while(it.hasNext()) {
 			XAddress modelAddress = it.next();
