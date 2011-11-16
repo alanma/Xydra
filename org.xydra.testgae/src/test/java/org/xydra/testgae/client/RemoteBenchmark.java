@@ -30,51 +30,51 @@ public abstract class RemoteBenchmark {
 	
 	@Test
 	public void testBenchmarkAddingOneWishOneThread() {
-		for(int i = 0; i < 100; i++) {
-			addingWishesOneThreadInTransaction(1, 1, "AddingOneWishOneThread", i);
+		for(int i = 0; i < 20; i++) {
+			addingWishesOneThreadInTransaction(1, 1, "20-AddingOneWishOneThread20", i);
 		}
 	}
 	
 	@Test
 	public void testBenchmarkDeletingOneWishOneThread() {
-		for(int i = 0; i < 100; i++) {
-			deletingWishesOneThreadInTransaction(1, 0, "DeletingOneWishOneThread", i);
+		for(int i = 0; i < 20; i++) {
+			deletingWishesOneThreadInTransaction(1, 0, "20-DeletingOneWishOneThread", i);
 		}
 	}
 	
 	@Test
 	public void testBenchmarkEditingOneWishOneThread() {
-		for(int i = 0; i < 100; i++) {
-			editingWishesOneThreadInTransaction(1, 0, "EditingOneWishOneThread", i);
+		for(int i = 0; i < 20; i++) {
+			editingWishesOneThreadInTransaction(1, 0, "20-EditingOneWishOneThread", i);
 		}
 	}
 	
 	@Test
 	public void testAddingMultipleWishesInTransaction() {
-		for(int i = 0; i < 100; i++) {
+		for(int i = 0; i < 20; i++) {
 			System.out.println("Iteration: " + i);
 			for(int X = 10; X <= 80; X *= 2) {
 				System.out.println("X = " + X);
-				addingWishesOneThreadInTransaction(X, 1, 0,
-				        "AddingMultipleWishesInTransaction" + X, i);
+				addingWishesOneThreadInTransaction(X, 1, 0, "20-AddingMultipleWishesInTransaction"
+				        + X, i);
 			}
 			
 			for(int X = 8; X <= 256; X *= 2) {
 				System.out.println("X = " + X);
-				addingWishesOneThreadInTransaction(X, 1, 0,
-				        "AddingMultipleWishesInTransaction" + X, i);
+				addingWishesOneThreadInTransaction(X, 1, 0, "20-AddingMultipleWishesInTransaction"
+				        + X, i);
 			}
 		}
 	}
 	
 	@Test
 	public void testAddingWishesInTransactionWithInitialWishes() {
-		for(int i = 0; i < 100; i++) {
+		for(int i = 0; i < 20; i++) {
 			System.out.println("Iteration: " + i);
 			for(int X = 10; X <= 80; X *= 2) {
 				System.out.println("X = " + X);
 				addingWishesOneThreadInTransaction(10, 1, X,
-				        "AddingWishesInTransactionWithInitialWishes" + X, i);
+				        "20-AddingWishesInTransactionWithInitialWishes" + X, i);
 			}
 			
 			// TODO Check 128,256, 512 and 1024 initial wishes again... seems
@@ -84,25 +84,26 @@ public abstract class RemoteBenchmark {
 			for(int X = 8; X < 128; X *= 2) {
 				System.out.println("X = " + X);
 				addingWishesOneThreadInTransaction(10, 1, X,
-				        "AddingWishesInTransactionWithInitialWishes" + X, i);
+				        "20-AddingWishesInTransactionWithInitialWishes" + X, i);
 			}
 		}
 	}
 	
 	@Test
 	public void testBenchmarkEditingOneWishOneThreadWithInitialWishes() {
-		for(int i = 0; i < 100; i++) {
+		for(int i = 0; i < 20; i++) {
 			System.out.println("Iteration: " + i);
 			for(int X = 10; X <= 80; X *= 2) {
 				System.out.println("X = " + X);
 				editingWishesOneThreadInTransaction(1, X,
-				        "EditingOneWishInTransactionWithInitialWishes" + X, i);
+				        "20-EditingOneWishInTransactionWithInitialWishes" + X, i);
 			}
 			
-			for(int X = 8; X <= 1024; X *= 2) {
+			// TODO Check higher values
+			for(int X = 8; X <= 256; X *= 2) {
 				System.out.println("X = " + X);
 				editingWishesOneThreadInTransaction(1, X,
-				        "EditingOneWishInTransactionWithInitialWishes" + X, i);
+				        "20-EditingOneWishInTransactionWithInitialWishes" + X, i);
 			}
 		}
 	}
@@ -138,6 +139,7 @@ public abstract class RemoteBenchmark {
 					time = System.currentTimeMillis();
 					succGet = (HttpUtils.makeGetRequest(this.absoluteUrl + listStr + "/add?wishes="
 					        + wishes));
+					time = System.currentTimeMillis() - time;
 					
 					if(!succGet) {
 						System.out.println("addingWishes: Failed GET-Request at iteration "
@@ -145,9 +147,7 @@ public abstract class RemoteBenchmark {
 						        + " initial wishes while adding " + wishes + " wishes");
 						
 						this.outputCriticalErrors(filePath, iteration, initialWishes, wishes);
-						this.wait(100);
-					} else {
-						time = System.currentTimeMillis() - time;
+						return;
 					}
 				}
 				
@@ -187,6 +187,15 @@ public abstract class RemoteBenchmark {
 			try {
 				String wishStr = addWishToEmptyList(this.absoluteUrl + listStr);
 				
+				if(wishStr == null) {
+					System.out.println("deletingWishes: Failed addWish-GET-Request at iteration "
+					        + iteration + ", " + initialWishes
+					        + " initial wishes in DeleteWishes-Test");
+					this.outputCriticalErrors(filePath + "AddWishToEmptyList", iteration,
+					        initialWishes, 1);
+					return;
+				}
+				
 				long time = 0l;
 				boolean succGet = false;
 				
@@ -194,15 +203,14 @@ public abstract class RemoteBenchmark {
 					
 					time = System.currentTimeMillis();
 					succGet = HttpUtils.makeGetRequest(this.absoluteUrl + wishStr + "/delete");
+					time = System.currentTimeMillis() - time;
 					
 					if(!succGet) {
 						System.out.println("deletingWishes: Failed GET-Request at iteration "
 						        + iteration + ", " + initialWishes
 						        + " initial wishes while deleting 1 wish");
 						this.outputCriticalErrors(filePath, iteration, initialWishes, 1);
-						this.wait(100);
-					} else {
-						time = System.currentTimeMillis() - time;
+						return;
 					}
 				}
 				
@@ -245,6 +253,15 @@ public abstract class RemoteBenchmark {
 			try {
 				String wishStr = addWish(this.absoluteUrl + listStr);
 				
+				if(wishStr == null) {
+					System.out
+					        .println("editingWishes: Failed addWish-GET-Request at iteration "
+					                + iteration + ", " + initialWishes
+					                + " initial wishes in EditWish-Test");
+					this.outputCriticalErrors(filePath + "AddWishGet", iteration, initialWishes, 1);
+					return;
+				}
+				
 				long time = 0l;
 				boolean succGet = false;
 				
@@ -253,15 +270,14 @@ public abstract class RemoteBenchmark {
 					time = System.currentTimeMillis();
 					succGet = HttpUtils.makeGetRequest(this.absoluteUrl + wishStr
 					        + "/editName?name=performanceTest");
+					time = System.currentTimeMillis() - time;
 					
 					if(!succGet) {
 						System.out.println("editingWishes: Failed GET-Request at iteration "
 						        + iteration + ", " + initialWishes
 						        + " initial wishes while editing 1 wish");
 						this.outputCriticalErrors(filePath, iteration, initialWishes, 1);
-						this.wait(100);
-					} else {
-						time = System.currentTimeMillis() - time;
+						return;
 					}
 				}
 				
@@ -352,7 +368,10 @@ public abstract class RemoteBenchmark {
 	}
 	
 	private String addWishToEmptyList(String listUrlStr) {
-		assertTrue(HttpUtils.makeGetRequest(listUrlStr + "/add?wishes=1"));
+		boolean succ = HttpUtils.makeGetRequest(listUrlStr + "/add?wishes=1");
+		if(!succ) {
+			return null;
+		}
 		
 		String response = HttpUtils.getRequestAsStringResponse(listUrlStr + "?format=urls");
 		
@@ -362,7 +381,10 @@ public abstract class RemoteBenchmark {
 	}
 	
 	private String addWish(String listUrlStr) {
-		assertTrue(HttpUtils.makeGetRequest(listUrlStr + "/add?wishes=1"));
+		boolean succ = HttpUtils.makeGetRequest(listUrlStr + "/add?wishes=1");
+		if(!succ) {
+			return null;
+		}
 		
 		String response = HttpUtils.getRequestAsStringResponse(listUrlStr + "?format=urls");
 		
