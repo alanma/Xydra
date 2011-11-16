@@ -14,7 +14,7 @@
 	<version>0.1.4-SNAPSHOT</version>
 	<!-- /!\ Needs to be 'jar' for 'mvn deploy' but 'war' for 'gae:deploy' -->
 	<packaging>jar</packaging>
-	<name>Xydra GAE Server</name>
+	<name>Xydra for Google AppEngine (GAE)</name>
 
 	<!-- Specify hard-coded project properties here -->
 	<properties>
