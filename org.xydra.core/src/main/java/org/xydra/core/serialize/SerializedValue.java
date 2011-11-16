@@ -250,20 +250,20 @@ public class SerializedValue {
 		} else if(elementName.equals(XBYTELIST_ELEMENT)) {
 			return XV.toValue(Base64.decode(getStringContent(element)));
 		} else if(elementName.equals(XIDSORTEDSET_ELEMENT)) {
-			return toISSV(element);
+			return toIdSortedSetValue(element);
 		} else if(elementName.equals(XADDRESSSORTEDSET_ELEMENT)) {
 			return XV.toAddressSortedSetValue(getAddressListContents(element));
 		}
 		throw new ParsingError(element, "Unexpected element for an XValue.");
 	}
 	
-	private static XValue toISSV(XydraElement element) {
+	private static XValue toIdSortedSetValue(XydraElement element) {
 		
 		List<XID> xids = getIdListContents(element);
 		
 		XValue value = XV.toIDSortedSetValue(xids);
 		
-		log.info(value.toString());
+		log.debug("Serialised XydraElement to '" + value.toString() + "'");
 		
 		return value;
 	}
