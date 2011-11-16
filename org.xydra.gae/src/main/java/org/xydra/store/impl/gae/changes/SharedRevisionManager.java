@@ -74,7 +74,7 @@ public class SharedRevisionManager implements IRevisionInfo {
 	public long getCurrentRev() {
 		synchronized(this) {
 			long result = this.sharedRevisionInfo.getCurrentRev();
-			log.debug(DebugFormatter.dataGet(DATASOURCENAME, "currentRev", result, Timing.Now));
+			log.trace(DebugFormatter.dataGet(DATASOURCENAME, "currentRev", result, Timing.Now));
 			return result;
 		}
 	}
@@ -83,7 +83,7 @@ public class SharedRevisionManager implements IRevisionInfo {
 	public long getLastCommitted() {
 		synchronized(this) {
 			long result = this.sharedRevisionInfo.getLastCommitted();
-			log.debug(DebugFormatter.dataGet(DATASOURCENAME, "lastCommited", result, Timing.Now));
+			log.trace(DebugFormatter.dataGet(DATASOURCENAME, "lastCommited", result, Timing.Now));
 			return result;
 		}
 	}
@@ -92,7 +92,7 @@ public class SharedRevisionManager implements IRevisionInfo {
 	public long getLastTaken() {
 		synchronized(this) {
 			long result = this.sharedRevisionInfo.getLastTaken();
-			log.debug(DebugFormatter.dataGet(DATASOURCENAME, "lastTaken", result, Timing.Now));
+			log.trace(DebugFormatter.dataGet(DATASOURCENAME, "lastTaken", result, Timing.Now));
 			return result;
 		}
 	}

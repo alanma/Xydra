@@ -158,7 +158,7 @@ public class RevisionCache2 {
 		if(l == IRevisionInfo.NOT_SET) {
 			l = -1;
 		}
-		log.debug(DebugFormatter.dataGet(REVCACHE_NAME, "current", l, Timing.Now));
+		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "current", l, Timing.Now));
 		return l;
 	}
 	
@@ -175,7 +175,7 @@ public class RevisionCache2 {
 		if(l == IRevisionInfo.NOT_SET) {
 			l = -1;
 		}
-		log.debug(DebugFormatter.dataGet(REVCACHE_NAME, "lastCommitted", l, Timing.Now));
+		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "lastCommitted", l, Timing.Now));
 		return l;
 	}
 	
@@ -190,7 +190,7 @@ public class RevisionCache2 {
 		if(l == IRevisionInfo.NOT_SET) {
 			l = -1;
 		}
-		log.debug(DebugFormatter.dataGet(REVCACHE_NAME, "lastTaken", l, Timing.Now));
+		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "lastTaken", l, Timing.Now));
 		return l;
 	}
 	
