@@ -330,7 +330,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 			updateCachedRevisions(change);
 			assert change.getStatus().isCommitted();
 		}
-		log.debug(DebugFormatter.dataGet(VM_COMMITED_CHANGES_CACHENAME + this.modelAddr, "" + rev,
+		log.trace(DebugFormatter.dataGet(VM_COMMITED_CHANGES_CACHENAME + this.modelAddr, "" + rev,
 		        change, Timing.Now));
 		return change;
 	}
@@ -391,8 +391,10 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 	}
 	
 	RevisionState updateCurrentRev(RevisionState lastCurrentRev) {
+		log.info("update currentRev from lastCurrentRev=" + lastCurrentRev);
 		// shortcut:
 		if(lastCurrentRev != null) {
+			log.debug("Check datastore if currentRev is still " + lastCurrentRev);
 			// quickly look in datastore if this is simply still the current rev
 			// prepare batch request
 			long nextRev = lastCurrentRev.revision() + 1;
@@ -416,6 +418,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 			}
 		}
 		
+		log.debug("Run normal update procedure");
 		Pair<RevisionState,Boolean> current = new Pair<RevisionState,Boolean>(
 		        lastCurrentRev == null ? RevisionState.MODEL_DOES_NOT_EXIST_YET : lastCurrentRev,
 		        false);
@@ -465,16 +468,17 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		 * Try to fetch 'initialBatchFetchSize' changes past the last known
 		 * "current" revision and put them in the local vm cache.
 		 */
-		/* === Phase 1: Determine revisions not yet locally cached === */
+		log.info("=== Phase 1: Determine revisions not yet locally cached; windowsize = "
+		        + windowSize);
 		Set<Long> locallyMissingRevs = computeLocallyMissingRevs(beginRevInclusive, endRevInclusive);
 		log.trace("locallyMissingRevs: " + locallyMissingRevs.size() + " of "
 		        + (endRevInclusive - beginRevInclusive + 1));
 		
-		/* === Phase 2+3: Ask Memcache + Datastore === */
+		log.info("=== Phase 2+3: Ask Memcache + Datastore ===");
 		fetchMissingRevisionsFromMemcacheAndDatastore(locallyMissingRevs);
 		log.trace("number of missingRevs after asking DS&MC: " + locallyMissingRevs.size());
 		
-		/* === Phase 4: Compute result from local cache === */
+		log.info("=== Phase 4: Compute result from local cache ===");
 		boolean foundEnd = false;
 		RevisionState currentRev = startingRevExclusive;
 		for(long i = beginRevInclusive; i <= endRevInclusive; i++) {
@@ -486,10 +490,29 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 				foundEnd = true;
 				break;
 			} else {
-				if(change.getStatus() == Status.SuccessExecuted) {
+				switch(change.getStatus()) {
+				case Creating:
+				case Executing: {
+					/* unclear if current version is affected by this. */
+				}
+					break;
+				case FailedTimeout: {
+					/* TODO what to do then? */
+					log.debug("Change " + i + " came from cache and is FailedTimeout");
+				}
+					break;
+				case SuccessExecuted: {
 					XEvent event = change.getEvent();
 					boolean modelExist = eventIndicatesModelExists(event);
 					currentRev = new RevisionState(i, modelExist);
+				}
+					break;
+				case FailedPreconditions:
+				case SuccessNochange: {
+					/* modelExists unchanged, revision incremented */
+					currentRev = new RevisionState(i, currentRev.modelExists());
+				}
+					break;
 				}
 			}
 		}
@@ -497,17 +520,17 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		if(foundEnd) {
 			log.trace("Step: return currentRev = " + currentRev);
 			return new Pair<RevisionState,Boolean>(currentRev, true);
+		} else {
+			assert locallyMissingRevs.size() == 0;
+			/* === Phase 5: go on */
+			/* We know these revisions are all committed */
+			this.revCache.setLastCommited(endRevInclusive);
+			/*
+			 * All revisions we looked at have been processed. Need to repeat
+			 * the process by looking at more revisions.
+			 */
+			return new Pair<RevisionState,Boolean>(currentRev, false);
 		}
-		// else
-		assert locallyMissingRevs.size() == 0;
-		/* === Phase 5: go on */
-		/* We know these revisions are all committed */
-		this.revCache.setLastCommited(endRevInclusive);
-		/*
-		 * All revisions we looked at have been processed. Need to repeat the
-		 * process by looking at more revisions.
-		 */
-		return new Pair<RevisionState,Boolean>(currentRev, false);
 	}
 	
 	/**
@@ -859,11 +882,11 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		}
 	}
 	
-	private boolean eventIndicatesModelExists(XEvent e) {
+	private boolean eventIndicatesModelExists(final XEvent e) {
 		XEvent event = e;
-		if(e.getChangeType() == ChangeType.TRANSACTION) {
+		if(event.getChangeType() == ChangeType.TRANSACTION) {
 			// check only last event
-			XTransactionEvent txnEvent = (XTransactionEvent)e;
+			XTransactionEvent txnEvent = (XTransactionEvent)event;
 			assert txnEvent.size() >= 1;
 			event = txnEvent.getEvent(txnEvent.size() - 1);
 			assert event != null;
