@@ -15,12 +15,11 @@
 		<version>2011.01.22</version>
 	</parent>
 
-	<!-- to find the parent -->
 	<repositories>
 		<repository>
-			<id>smyle-repo</id>
+			<id>xydra-repo</id>
 			<url>
-				https://smyle.repositoryhosting.com/svn/smyle_mavenrepo/trunk/mavenrepo
+				https://xydra.googlecode.com/svn/repository
 			</url>
 			<releases>
 				<enabled>true</enabled>
@@ -29,9 +28,9 @@
 			</releases>
 		</repository>
 		<repository>
-			<id>smyle-snap</id>
+			<id>xydra-snap</id>
 			<url>
-				https://smyle.repositoryhosting.com/svn/smyle_mavenrepo/trunk/mavensnap
+				https://xydra.googlecode.com/svn/snapshots
 			</url>
 			<snapshots>
 				<enabled>true</enabled>
@@ -40,7 +39,20 @@
 				<enabled>false</enabled>
 			</releases>
 		</repository>
+		<!-- For API VIZ -->
+		<repository>
+			<id>jboss.releases</id>
+			<name>JBoss releases</name>
+			<url>http://repository.jboss.org/maven2</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
 	</repositories>
+
 
 	<dependencies>
 
