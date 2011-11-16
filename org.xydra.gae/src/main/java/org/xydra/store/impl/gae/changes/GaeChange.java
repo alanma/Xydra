@@ -95,7 +95,7 @@ public class GaeChange {
 	 * 
 	 * <pre>
 	 * 
-	 *  Creating ------> FailedTimeout
+	 *  Creating ------> FailedTimeout ---> ...can be retried...
 	 *     |
 	 *     |----> Executing ----> SucessExecuted
 	 *     |
@@ -153,6 +153,13 @@ public class GaeChange {
 		 */
 		public boolean isFailure() {
 			return (this == FailedPreconditions || this == FailedTimeout);
+		}
+		
+		/**
+		 * @return true if state will never change again
+		 */
+		public boolean isTerminalState() {
+			return this == FailedPreconditions || isSuccess();
 		}
 		
 		/**
@@ -511,8 +518,8 @@ public class GaeChange {
 			Pair<XAtomicEvent[],int[]> res = GaeEvents.loadAtomicEvents(this.modelAddr, this.rev,
 			        getActor(), this.entity);
 			
-			this.events = new Pair<List<XAtomicEvent>,int[]>(Arrays.asList(res.getFirst()), res
-			        .getSecond());
+			this.events = new Pair<List<XAtomicEvent>,int[]>(Arrays.asList(res.getFirst()),
+			        res.getSecond());
 		}
 		return this.events;
 	}
