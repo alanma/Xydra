@@ -37,11 +37,11 @@
 			<span class="rev">
 				<xsl:value-of select="@revision" />
 			</span>
-			<ul>
+			<ol>
 				<xsl:apply-templates select="*">
 					<xsl:sort select="@xid" />
 				</xsl:apply-templates>
-			</ul>
+			</ol>
 		</div>
 	</xsl:template>
 

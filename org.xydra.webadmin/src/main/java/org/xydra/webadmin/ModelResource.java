@@ -72,6 +72,14 @@ public class ModelResource {
 
 		);
 		
+		restless.addMethod(prefix + "/{repoId}/{modelId}/command", "POST", ModelResource.class,
+		        "command", true,
+
+		        new RestlessParameter("repoId"), new RestlessParameter("modelId"),
+		        new RestlessParameter("cmd")
+
+		);
+		
 		restless.addMethod(prefix + "/{repoId}/{modelId}/", "POST", ModelResource.class, "update",
 		        true,
 
@@ -79,6 +87,28 @@ public class ModelResource {
 
 		);
 		
+	}
+	
+	public static void command(String repoIdStr, String modelIdStr, String cmdStr,
+	        HttpServletRequest req, HttpServletResponse res) {
+		XydraRuntime.startRequest();
+		
+		Clock c = new Clock().start();
+		XAddress modelAddress = XX.toAddress(XX.toId(repoIdStr), XX.toId(modelIdStr), null, null);
+		if(cmdStr.equals("delete")) {
+			// to delete: XMODEL: name=/gae-data/phonebook/-/-
+			
+			// to delete: XCHANGE: name=0/gae-data/phonebook
+			
+			/*
+			 * There is no query to bind them all:
+			 * 
+			 * SELECT __key__ FROM XCHANGE WHERE __key__ <
+			 * KEY('XCHANGE','0/gae-data/'+ modelId ...)
+			 */
+
+			// FIXME delete models completely!
+		}
 	}
 	
 	public static void index(String repoIdStr, String modelIdStr, String styleStr,

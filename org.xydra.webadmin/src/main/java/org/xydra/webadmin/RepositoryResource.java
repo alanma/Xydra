@@ -32,8 +32,6 @@ import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.webadmin.ModelResource.MStyle;
 import org.xydra.webadmin.ModelResource.SetStateResult;
 
-import com.google.appengine.api.taskqueue.DeferredTask;
-
 
 public class RepositoryResource {
 	
@@ -91,14 +89,19 @@ public class RepositoryResource {
 					Object u = XydraRuntime.getMemcache().get(PREFIX + repoId);
 					if(u != null) {
 						MemcacheSerialisedRepositoryEntry repoEntry = (MemcacheSerialisedRepositoryEntry)u;
+						log.debug("repoEntry.time = " + repoEntry.time + " vs. now = "
+						        + System.currentTimeMillis());
 						return repoEntry.time + maxMillisecondsAgo > System.currentTimeMillis();
 					} else {
+						log.debug("no age info found");
 						return false;
 					}
 				} else {
+					log.debug("l=" + l + " but modelCount = " + modelCount);
 					return false;
 				}
 			} else {
+				log.debug("No cound found for repo " + repoId + " in memcache");
 				// set key to 0
 				XydraRuntime.getMemcache().put(key, new Long(0));
 				return false;
@@ -107,6 +110,9 @@ public class RepositoryResource {
 		
 		public static void updateAllModels(long now, final XID repoId, List<XID> modelIdList,
 		        final MStyle style) {
+			String key = PREFIX + repoId + "-updatedModels";
+			XydraRuntime.getMemcache().put(key, new Long(0));
+			
 			MemcacheSerialisedRepositoryEntry repoEntry = new MemcacheSerialisedRepositoryEntry();
 			repoEntry.time = now;
 			repoEntry.modelIdList = modelIdList;
@@ -114,24 +120,33 @@ public class RepositoryResource {
 			
 			for(final XID modelId : modelIdList) {
 				// use task queue
-				UniversalTaskQueue.enqueueTask(new DeferredTask() {
+				UniversalTaskQueue.enqueueTask(new UniversalTaskQueue.NamedDeferredTask() {
 					
 					private static final long serialVersionUID = 1L;
 					
 					@Override
 					public void run() {
+						XAddress modelAddress = XX.resolveModel(repoId, modelId);
+						log.info("Executing update on " + modelAddress);
 						MemcacheSerialisedModelEntry modelEntry = new MemcacheSerialisedModelEntry();
 						modelEntry.time = System.currentTimeMillis();
 						XydraPersistence p = Utils.getPersistence(repoId);
-						XWritableModel model = p.getModelSnapshot(XX.resolveModel(repoId, modelId));
+						XWritableModel model = p.getModelSnapshot(modelAddress);
 						modelEntry.serialisation = ModelResource.computeSerialisation(model, style);
-						XydraRuntime.getMemcache().put(PREFIX + XX.resolveModel(repoId, modelId),
-						        modelEntry);
+						XydraRuntime.getMemcache().put(PREFIX + modelAddress, modelEntry);
 						// update count
 						XydraRuntime.getMemcache()
 						        .incrementAll(
 						                Collections.singletonMap(
 						                        PREFIX + repoId + "-updatedModels", 1l), 0);
+						Object count = XydraRuntime.getMemcache().get(
+						        PREFIX + repoId + "-updatedModels");
+						log.debug("Current count = " + count);
+					}
+					
+					@Override
+					public String getId() {
+						return modelId.toString();
 					}
 				});
 			}
@@ -157,6 +172,9 @@ public class RepositoryResource {
 	public static void index(String repoIdStr, String styleStr, HttpServletResponse res)
 	        throws IOException {
 		XydraRuntime.startRequest();
+		log.trace("logtest: trace");
+		log.debug("logtest: debug");
+		log.info("logtest: info");
 		
 		Clock c = new Clock().start();
 		XAddress repoAddress = XX.resolveRepository(XX.toId(repoIdStr));
@@ -168,8 +186,8 @@ public class RepositoryResource {
 			List<XID> modelIdList = new ArrayList<XID>(p.getModelIds());
 			Collections.sort(modelIdList);
 			int modelCount = modelIdList.size();
-			if(Cache.hasModelUpdateCountNotOlderThan(repoId, modelCount, 60000)) {
-				// all models have been updated at least once not too long ago
+			if(Cache.hasModelUpdateCountNotOlderThan(repoId, modelCount, 5 * 60 * 1000)) {
+				log.info("all models have been updated at least once not too long ago");
 				String archivename = Utils.filenameOfNow("repo-" + repoId);
 				ZipOutputStream zos = Utils.toZipFileDownload(res, archivename);
 				for(XID modelId : modelIdList) {
