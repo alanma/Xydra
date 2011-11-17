@@ -9,17 +9,14 @@ import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
-import org.xydra.base.change.XFieldEvent;
-import org.xydra.base.change.XModelEvent;
-import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XRepositoryEvent;
-import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.rmof.XReadableModel;
-import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
+import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.XCopyUtils;
+import org.xydra.core.change.EventUtils;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.DeltaUtils;
 import org.xydra.index.query.Pair;
@@ -164,7 +161,6 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 	        GaeChange change) {
 		
 		XRevWritableModel model = snapshot;
-		boolean copied = false;
 		
 		// IMPROVE use the last committed rev to skip failed / empty changes
 		
@@ -181,12 +177,11 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 				
 				// Check if the change needs conflicting locks.
 				if(!change.isConflicting(otherChange)) {
-					if(!copied) {
-						// IMPROVE use shallow copy.
-						model = XCopyUtils.createSnapshot(snapshot);
-						copied = true;
-					}
-					invalidateObjectRevisions(model, otherChange);
+					
+					// Mark any object revisions that we don't know as
+					// XEvent.RevisionNotAvailable
+					invalidateObjectRevisions(snapshot, model, otherChange.getLocks());
+					
 					// not conflicting, so ignore
 					continue;
 				}
@@ -253,12 +248,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 				continue;
 			}
 			
-			if(!copied) {
-				// IMPROVE use shallow copy, apply event nondestructively.
-				model = XCopyUtils.createSnapshot(snapshot);
-				copied = true;
-			}
-			model = appplyEvent(model, otherChange.getEvent(), change.getLocks());
+			model = EventUtils.applyEventNonDestructive(snapshot, model, otherChange.getEvent());
 		}
 		
 		// gather operations stats
@@ -273,7 +263,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 		}
 		
 		if(model != null && model.getRevisionNumber() != change.rev - 1) {
-			if(!copied) {
+			if(model == snapshot) {
 				model = SimpleModel.shallowCopy(snapshot);
 			}
 			model.setRevisionNumber(change.rev - 1);
@@ -282,111 +272,44 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 		return model;
 	}
 	
-	private XRevWritableModel applySingleEvent(XRevWritableModel snapshot, XAtomicEvent event,
-	        GaeLocks locks) {
-		
-		XRevWritableModel model = snapshot;
-		
-		XAddress changed = event.getChangedEntity();
-		if(!locks.canRead(changed)) {
-			XRevWritableObject object = model.getObject(changed.getObject());
-			if(object != null) {
-				object.setRevisionNumber(XEvent.RevisionNotAvailable);
-			}
-			return model;
-		}
-		
-		if(event instanceof XRepositoryEvent) {
-			if(event.getChangeType() == ChangeType.ADD) {
-				assert model == null;
-				return new SimpleModel(this.modelAddr);
-			} else {
-				assert model != null;
-				return null;
-			}
-		}
-		
-		assert model != null;
-		XID objectId = changed.getObject();
-		assert objectId != null;
-		
-		if(event instanceof XModelEvent) {
-			if(event.getChangeType() == ChangeType.ADD) {
-				assert !model.hasObject(objectId);
-				XRevWritableObject object = model.createObject(objectId);
-				object.setRevisionNumber(event.getRevisionNumber());
-			} else {
-				assert model.hasObject(objectId);
-				model.removeObject(objectId);
-			}
-			return model;
-		}
-		
-		XRevWritableObject object = model.getObject(objectId);
-		assert object != null;
-		XID fieldId = changed.getField();
-		assert fieldId != null;
-		
-		if(event instanceof XObjectEvent) {
-			if(event.getChangeType() == ChangeType.ADD) {
-				assert !object.hasField(fieldId);
-				XRevWritableField field = object.createField(fieldId);
-				field.setRevisionNumber(event.getRevisionNumber());
-				object.setRevisionNumber(event.getRevisionNumber());
-			} else {
-				assert object.hasField(fieldId);
-				object.removeField(fieldId);
-			}
-			return model;
-		}
-		
-		XRevWritableField field = object.getField(fieldId);
-		assert field != null;
-		assert event instanceof XFieldEvent;
-		
-		field.setValue(((XFieldEvent)event).getNewValue());
-		field.setRevisionNumber(event.getRevisionNumber());
-		object.setRevisionNumber(event.getRevisionNumber());
-		
-		return model;
-	}
-	
-	private XRevWritableModel appplyEvent(XRevWritableModel model, XEvent event, GaeLocks locks) {
-		
-		if(event instanceof XAtomicEvent) {
-			return applySingleEvent(model, (XAtomicEvent)event, locks);
-		}
-		
-		assert event instanceof XTransactionEvent;
-		XTransactionEvent trans = (XTransactionEvent)event;
-		
-		XRevWritableModel temp = model;
-		
-		for(XAtomicEvent ae : trans) {
-			temp = applySingleEvent(temp, ae, locks);
-		}
-		
-		return temp;
-	}
-	
-	private void invalidateObjectRevisions(XRevWritableModel model, GaeChange otherChange) {
+	/**
+	 * Mark all object revisions that could be updated by a change owning the
+	 * given locks as unknown. Any entities that are also in the reference model
+	 * are copied before being modified.
+	 */
+	private XRevWritableModel invalidateObjectRevisions(XReadableModel reference,
+	        XRevWritableModel model, GaeLocks locks) {
 		
 		if(model == null) {
-			return;
+			return null;
 		}
 		
-		for(XAddress lock : otherChange.getLocks()) {
+		XRevWritableModel result = model;
+		
+		for(XAddress lock : locks) {
 			
-			if(lock.getObject() == null) {
+			XID objectId = lock.getObject();
+			if(objectId == null) {
 				continue;
 			}
 			
-			XRevWritableObject object = model.getObject(lock.getObject());
-			if(object != null) {
-				object.setRevisionNumber(XEvent.RevisionNotAvailable);
+			XRevWritableObject object = result.getObject(lock.getObject());
+			if(object == null) {
+				continue;
 			}
 			
+			if(reference != null && object == reference.getObject(lock.getObject())) {
+				if(result == reference) {
+					result = SimpleModel.shallowCopy(result);
+				}
+				object = SimpleObject.shallowCopy(object);
+				result.addObject(object);
+			}
+			
+			object.setRevisionNumber(XEvent.RevisionNotAvailable);
 		}
+		
+		return result;
 	}
 	
 	/**
