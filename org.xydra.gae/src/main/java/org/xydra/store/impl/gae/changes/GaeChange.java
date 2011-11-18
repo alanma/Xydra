@@ -22,6 +22,7 @@ import org.xydra.store.impl.gae.GaeAssert;
 import org.xydra.store.impl.gae.GaeOperation;
 import org.xydra.store.impl.gae.Memcache;
 import org.xydra.store.impl.gae.SyncDatastore;
+import org.xydra.store.impl.gae.execute.GaeExecutionServiceImpl3;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -95,11 +96,23 @@ public class GaeChange {
 	 * 
 	 * <pre>
 	 * 
-	 *  Creating ------> FailedTimeout ---> ...can be retried...
+	 *  Creating ------> FailedTimeout
 	 *     |
 	 *     |----> Executing ----> SucessExecuted
 	 *     |
 	 *     |----> SuccessNochange
+	 *     |
+	 *     \----> FailedPreconditions
+	 * 
+	 * Since {@link GaeExecutionServiceImpl3}:
+	 * 
+	 *  Creating 
+	 *     |
+	 *     |----> SucessExecuted
+	 *     |
+	 *     |----> SuccessNochange
+	 *     |
+	 *     |----> FailedTimeout
 	 *     |
 	 *     \----> FailedPreconditions
 	 * 
@@ -114,6 +127,9 @@ public class GaeChange {
 		 * assigned revision
 		 * 
 		 * => waiting for locks / checking preconditions / writing events
+		 * 
+		 * Other thread should check age of the status and either wait for
+		 * anything OR if too old: Mark as FailedTimeout
 		 */
 		Creating(0),
 
@@ -123,10 +139,12 @@ public class GaeChange {
 		 * => applying changes
 		 * 
 		 * a.k.a. readyToExecute
+		 * 
+		 * @Deprecated in {@link GaeExecutionServiceImpl3}
 		 */
 		Executing(2),
 
-		/** changes made, locks freed */
+		/** changes made, locks freed. Current revision is now bigger. */
 		SuccessExecuted(3),
 
 		/** there was nothing to change, locks freed */
@@ -137,7 +155,7 @@ public class GaeChange {
 
 		/**
 		 * timed out before saving events (status was STATUS_CREATING), locks
-		 * freed
+		 * freed.
 		 */
 		FailedTimeout(101);
 		
@@ -157,7 +175,9 @@ public class GaeChange {
 		
 		/**
 		 * @return true if state will never change again
+		 * @deprecated use isCommited
 		 */
+		@Deprecated
 		public boolean isTerminalState() {
 			return this == FailedPreconditions || isSuccess();
 		}
@@ -171,7 +191,8 @@ public class GaeChange {
 		}
 		
 		/**
-		 * @return true, if the status is either "success" or "failed".
+		 * @return true, if the status is either "success" or "failed". A
+		 *         terminal state.
 		 */
 		public boolean isCommitted() {
 			return (isSuccess() || isFailure());
@@ -180,6 +201,8 @@ public class GaeChange {
 		/**
 		 * @return true, if a change with the given status can be rolled
 		 *         forward, false otherwise.
+		 * @deprecated Since {@link GaeExecutionServiceImpl3} there is no roll
+		 *             forward.
 		 */
 		public boolean canRollForward() {
 			return (this == Executing);

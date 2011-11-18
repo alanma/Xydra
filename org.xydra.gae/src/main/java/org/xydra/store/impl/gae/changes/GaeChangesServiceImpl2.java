@@ -396,6 +396,8 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		if(lastCurrentRev != null) {
 			log.debug("Check datastore if currentRev is still " + lastCurrentRev);
 			// quickly look in datastore if this is simply still the current rev
+			// TODO ask if lastCommited+1 is still empty
+			
 			// prepare batch request
 			long nextRev = lastCurrentRev.revision() + 1;
 			Key key = KeyStructure.createChangeKey(getModelAddress(), nextRev);
@@ -426,6 +428,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		int windowSize = 1;
 		while(current.getSecond() == false) {
 			log.debug("windowsize = " + windowSize);
+			// FIXME inline & fix it
 			current = updateCurrentRev_Step(current.getFirst(), windowSize);
 			// adjust probe window
 			windowSize = windowSize * 2;
@@ -480,7 +483,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		
 		log.info("=== Phase 4: Compute result from local cache ===");
 		boolean foundEnd = false;
-		RevisionState currentRev = startingRevExclusive;
+		RevisionState windowRev = startingRevExclusive;
 		for(long i = beginRevInclusive; i <= endRevInclusive; i++) {
 			GaeChange change = getCachedChange(i);
 			log.trace("cached change " + i + ": " + DebugFormatter.format(change));
@@ -504,13 +507,13 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 				case SuccessExecuted: {
 					XEvent event = change.getEvent();
 					boolean modelExist = eventIndicatesModelExists(event);
-					currentRev = new RevisionState(i, modelExist);
+					windowRev = new RevisionState(i, modelExist);
 				}
 					break;
 				case FailedPreconditions:
 				case SuccessNochange: {
 					/* modelExists unchanged, revision incremented */
-					currentRev = new RevisionState(i, currentRev.modelExists());
+					windowRev = new RevisionState(i, windowRev.modelExists());
 				}
 					break;
 				}
@@ -518,8 +521,8 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		}
 		
 		if(foundEnd) {
-			log.trace("Step: return currentRev = " + currentRev);
-			return new Pair<RevisionState,Boolean>(currentRev, true);
+			log.trace("Step: return currentRev = " + windowRev);
+			return new Pair<RevisionState,Boolean>(windowRev, true);
 		} else {
 			assert locallyMissingRevs.size() == 0;
 			/* === Phase 5: go on */
@@ -529,7 +532,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 			 * All revisions we looked at have been processed. Need to repeat
 			 * the process by looking at more revisions.
 			 */
-			return new Pair<RevisionState,Boolean>(currentRev, false);
+			return new Pair<RevisionState,Boolean>(windowRev, false);
 		}
 	}
 	
