@@ -26,10 +26,10 @@ import org.xydra.restless.utils.NanoClock;
 import org.xydra.store.impl.gae.DebugFormatter;
 import org.xydra.store.impl.gae.FutureUtils;
 import org.xydra.store.impl.gae.changes.GaeChange;
+import org.xydra.store.impl.gae.changes.GaeChange.Status;
 import org.xydra.store.impl.gae.changes.GaeLocks;
 import org.xydra.store.impl.gae.changes.IGaeChangesService;
 import org.xydra.store.impl.gae.changes.VoluntaryTimeoutException;
-import org.xydra.store.impl.gae.changes.GaeChange.Status;
 import org.xydra.store.impl.gae.snapshot.IGaeSnapshotService;
 
 import com.google.appengine.api.datastore.Key;
@@ -156,10 +156,16 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 	/**
 	 * Update all locked parts of the given snapshot. If some conflicting
 	 * changes are still executing, wait for them to finish.
+	 * 
+	 * @param snapshot TODO document why not read rev from this snapshot
+	 * @param snapshotRev
+	 * @param change
+	 * @return
 	 */
 	private XRevWritableModel updateSnapshot(XRevWritableModel snapshot, long snapshotRev,
 	        GaeChange change) {
 		
+		// FIXME makes no sense to use the same reference twice
 		XRevWritableModel model = snapshot;
 		
 		// IMPROVE use the last committed rev to skip failed / empty changes
@@ -248,7 +254,8 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 				continue;
 			}
 			
-			model = EventUtils.applyEventNonDestructive(snapshot, model, otherChange.getEvent());
+			// FIXME what do use here?
+			model = EventUtils.applyEventNonDestructive(snapshot, otherChange.getEvent());
 		}
 		
 		// gather operations stats
@@ -276,8 +283,13 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 	 * Mark all object revisions that could be updated by a change owning the
 	 * given locks as unknown. Any entities that are also in the reference model
 	 * are copied before being modified.
+	 * 
+	 * @param referenceModel
+	 * @param model
+	 * @param locks
+	 * @return
 	 */
-	private XRevWritableModel invalidateObjectRevisions(XReadableModel reference,
+	private XRevWritableModel invalidateObjectRevisions(XReadableModel referenceModel,
 	        XRevWritableModel model, GaeLocks locks) {
 		
 		if(model == null) {
@@ -298,8 +310,8 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 				continue;
 			}
 			
-			if(reference != null && object == reference.getObject(lock.getObject())) {
-				if(result == reference) {
+			if(referenceModel != null && object == referenceModel.getObject(lock.getObject())) {
+				if(result == referenceModel) {
 					result = SimpleModel.shallowCopy(result);
 				}
 				object = SimpleObject.shallowCopy(object);
