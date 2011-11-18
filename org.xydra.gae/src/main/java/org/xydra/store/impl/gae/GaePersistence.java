@@ -20,6 +20,7 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.InternalStoreException;
 import org.xydra.store.RequestException;
 import org.xydra.store.RevisionState;
 import org.xydra.store.XydraStore;
@@ -29,6 +30,10 @@ import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.changes.Utils;
 import org.xydra.store.impl.gae.changes.XIDLengthException;
 import org.xydra.store.impl.gae.execute.InternalGaeXEntity;
+
+import com.google.appengine.api.datastore.CommittedButStillApplyingException;
+import com.google.appengine.api.datastore.DatastoreFailureException;
+import com.google.appengine.api.datastore.DatastoreTimeoutException;
 
 
 /**
@@ -150,8 +155,16 @@ public class GaePersistence implements XydraPersistence {
 		XID modelId = command.getChangedEntity().getModel();
 		checkIdLength(modelId);
 		
-		// IMPROVE wrap GAE exceptions in InternalStoreExceptions
-		return getModelPersistence(modelId).executeCommand(command, actorId);
+		try {
+			return getModelPersistence(modelId).executeCommand(command, actorId);
+		} catch(DatastoreTimeoutException e) {
+			throw new InternalStoreException("Storage did not work - please retry", e, 503);
+		} catch(DatastoreFailureException e) {
+			throw new InternalStoreException("Storage failed. Don't retry.", e, 500);
+		} catch(CommittedButStillApplyingException e) {
+			throw new InternalStoreException(
+			        "Storage waiting for some work to complete - please retry", e, 503);
+		}
 	}
 	
 	/**
