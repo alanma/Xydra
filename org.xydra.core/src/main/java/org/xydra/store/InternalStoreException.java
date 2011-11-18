@@ -12,6 +12,7 @@ package org.xydra.store;
 public class InternalStoreException extends StoreException {
 	
 	private static final long serialVersionUID = -1316683211161143105L;
+	private int statusCode = 500;
 	
 	public InternalStoreException(String message) {
 		super(message);
@@ -19,6 +20,23 @@ public class InternalStoreException extends StoreException {
 	
 	public InternalStoreException(String message, Throwable cause) {
 		super(message, cause);
+	}
+	
+	/**
+	 * @param message ..
+	 * @param cause ..
+	 * @param statusCode a suggested HTTP status code
+	 */
+	public InternalStoreException(String message, Throwable cause, int statusCode) {
+		super(message, cause);
+		this.statusCode = statusCode;
+	}
+	
+	/**
+	 * @return a suggested HTTP status code
+	 */
+	public int getStatusCode() {
+		return this.statusCode;
 	}
 	
 }
