@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.restless.utils.NanoClock;
 import org.xydra.restless.utils.ServletUtils;
 
 
@@ -364,7 +365,7 @@ public class RestlessMethod {
 		return value == null || value.equals("");
 	}
 	
-	private String methodReference(Object instanceOrClass, Method method) {
+	private static String methodReference(Object instanceOrClass, Method method) {
 		Class<?> clazz;
 		if(instanceOrClass instanceof Class<?>) {
 			clazz = (Class<?>)instanceOrClass;
@@ -379,14 +380,33 @@ public class RestlessMethod {
 	        InvocationTargetException {
 		/* Instantiate only for non-static methods */
 		boolean isStatic = Modifier.isStatic(method.getModifiers());
+		NanoClock c = new NanoClock().start();
+		Object result;
 		if(isStatic) {
-			return method.invoke(null, javaMethodArgs.toArray(new Object[0]));
+			result = method.invoke(null, javaMethodArgs.toArray(new Object[0]));
 		} else {
 			Object instance = toInstance(instanceOrClass);
-			return method.invoke(instance, javaMethodArgs.toArray(new Object[0]));
+			result = method.invoke(instance, javaMethodArgs.toArray(new Object[0]));
 		}
+		long duration = c.stopAndGetDuration("method");
+		log.info("Invoked method '" + methodReference(instanceOrClass, method) + "' in " + duration
+		        + "ms");
+		return result;
 	}
 	
+	/**
+	 * Each class can provide its own local exception handler with a method
+	 * 'onException'. Injectable parameters are: Throwable and the usual
+	 * standard restless built-ins.
+	 * 
+	 * @param cause
+	 * @param instanceOrClass
+	 * @param context
+	 * @return
+	 * @throws InvocationTargetException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 */
 	private boolean callLocalExceptionHandler(Throwable cause, Object instanceOrClass,
 	        IRestlessContext context) throws InvocationTargetException, IllegalArgumentException,
 	        IllegalAccessException {
@@ -423,6 +443,14 @@ public class RestlessMethod {
 		return true;
 	}
 	
+	/**
+	 * Handle exceptions via handlers registered before at
+	 * {@link Restless#addExceptionHandler(RestlessExceptionHandler)}
+	 * 
+	 * @param cause
+	 * @param context
+	 * @return
+	 */
 	private boolean callGlobalExceptionHandlers(Throwable cause, IRestlessContext context) {
 		for(RestlessExceptionHandler handler : context.getRestless().exceptionHandlers) {
 			if(handler.handleException(cause, context)) {

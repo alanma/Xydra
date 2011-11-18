@@ -26,8 +26,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.xydra.log.ILoggerFactorySPI;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.restless.utils.NanoClock;
 import org.xydra.restless.utils.HtmlUtils;
+import org.xydra.restless.utils.NanoClock;
 import org.xydra.restless.utils.ServletUtils;
 import org.xydra.restless.utils.XmlUtils;
 
@@ -196,6 +196,8 @@ public class Restless extends HttpServlet {
 	/**
 	 * Register a handler that will receive exceptions thrown by the executed
 	 * REST methods.
+	 * 
+	 * @param handler a non-null {@link RestlessExceptionHandler}
 	 */
 	public void addExceptionHandler(RestlessExceptionHandler handler) {
 		this.exceptionHandlers.add(handler);
