@@ -16,7 +16,7 @@ public class GaeUtils2 {
 	public static AsyncEntity getEntityFromMemcacheAndAsyncDatatore(Key key) {
 		if(useMemCache) {
 			// try first to get from memcache
-			Entity cachedEntity = Memcache.get(key);
+			Entity cachedEntity = (Entity)Memcache.get(key);
 			if(cachedEntity != null) {
 				if(cachedEntity.equals(Memcache.NULL_ENTITY)) {
 					return new AsyncEntity(null);

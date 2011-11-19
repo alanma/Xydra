@@ -24,11 +24,11 @@ public class Memcache {
 	
 	private static boolean useMemache_ = true;
 	
-	public static Entity get(Key key) {
+	public static Object get(Key key) {
 		if(!useMemache_)
 			return null;
 		
-		return (Entity)XydraRuntime.getMemcache().get(KeyStructure.toString(key));
+		return XydraRuntime.getMemcache().get(KeyStructure.toString(key));
 	}
 	
 	/**

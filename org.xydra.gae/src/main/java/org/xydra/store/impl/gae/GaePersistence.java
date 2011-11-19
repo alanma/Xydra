@@ -108,6 +108,7 @@ public class GaePersistence implements XydraPersistence {
 	 */
 	@GaeOperation()
 	public GaePersistence(XID repoId) {
+		log.debug("static stuff done");
 		if(repoId == null) {
 			throw new IllegalArgumentException("repoId was null");
 		}

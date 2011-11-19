@@ -22,7 +22,6 @@ import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XModel;
-import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.RevisionState;
@@ -295,21 +294,17 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 	 */
 	@Override
 	public void cacheCommittedChange(GaeChange change) {
-		
 		if(USE_COMMITTED_CHANGE_CACHE) {
-			
 			assert change != null;
 			assert change.getStatus() != null;
 			assert change.getStatus().isCommitted();
-			log.debug(DebugFormatter.dataPut(VM_COMMITED_CHANGES_CACHENAME + this.modelAddr, ""
+			log.trace(DebugFormatter.dataPut(VM_COMMITED_CHANGES_CACHENAME + this.modelAddr, ""
 			        + change.rev, change, Timing.Now));
 			Map<Long,GaeChange> committedChangeCache = getCommittedChangeCache();
 			synchronized(committedChangeCache) {
 				committedChangeCache.put(change.rev, change);
 			}
-			
 		}
-		
 		updateCachedRevisions(change);
 	}
 	
@@ -381,7 +376,16 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		RevisionState currentRev = this.revCache.getRevisionState();
 		if(currentRev == null) {
 			log.debug("version not locally known");
-			currentRev = updateCurrentRev(null);
+			
+			// check memcache for a hint where to start searching
+			Object o = Memcache.get(KeyStructure.createRevCacheKey(this.modelAddr));
+			if(o == null) {
+				currentRev = updateCurrentRev(null);
+			} else {
+				RevisionState cachedRev = (RevisionState)o;
+				log.debug("Start from memcached revision = " + cachedRev);
+				currentRev = updateCurrentRev(cachedRev);
+			}
 			this.revCache.setCurrentModelRev(currentRev);
 		} else {
 			log.debug("currentRev is locally defined and will not change during this request");
@@ -390,46 +394,129 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 		return currentRev.revision();
 	}
 	
+	/**
+	 * Update the last given revision number
+	 * 
+	 * @param lastCurrentRev can be null
+	 * @return the new current revision number
+	 */
 	RevisionState updateCurrentRev(RevisionState lastCurrentRev) {
 		log.info("update currentRev from lastCurrentRev=" + lastCurrentRev);
-		// shortcut:
 		if(lastCurrentRev != null) {
-			log.debug("Check datastore if currentRev is still " + lastCurrentRev);
-			// quickly look in datastore if this is simply still the current rev
-			// TODO ask if lastCommited+1 is still empty
-			
-			// prepare batch request
+			log.debug("Check datastore if currentRev is still same as last non-null revision: "
+			        + lastCurrentRev);
 			long nextRev = lastCurrentRev.revision() + 1;
 			Key key = KeyStructure.createChangeKey(getModelAddress(), nextRev);
 			Entity e = SyncDatastore.getEntity(key);
 			if(e == null) {
-				// we won, we got it
-				log.info("lastCurrentRev = " + lastCurrentRev + " verified via datastore");
+				log.info("shortcut worked: lastCurrentRev = " + lastCurrentRev
+				        + " verified via datastore");
 				return lastCurrentRev;
 			} else {
-				// use information of entity
-				// process status of change
-				GaeChange change = new GaeChange(getModelAddress(), nextRev, e);
-				Status status = change.getStatus();
-				if(status.isCommitted()) {
-					// use it
-					cacheCommittedChange(change);
-				} else {
-					// TODO progress change
-				}
+				consumeChangeEntity(e, nextRev);
 			}
 		}
 		
-		log.debug("Run normal update procedure");
-		Pair<RevisionState,Boolean> current = new Pair<RevisionState,Boolean>(
-		        lastCurrentRev == null ? RevisionState.MODEL_DOES_NOT_EXIST_YET : lastCurrentRev,
-		        false);
-		log.debug("Updating rev from lastCurrentRev=" + current.getFirst() + " ...");
-		int windowSize = 1;
-		while(current.getSecond() == false) {
+		/*
+		 * current - the last known revision state of the model. Combines a
+		 * revision number and a modelExists date. Its a RevisionState with the
+		 * current model revision within the checked window. If 'foundEnd' is
+		 * true, then 'current' is the current revision of the model.
+		 */
+		RevisionState workingRev = lastCurrentRev == null ? RevisionState.MODEL_DOES_NOT_EXIST_YET
+		        : lastCurrentRev;
+		log.debug("Run normal update procedure. Updating rev from lastCurrentRev=" + workingRev
+		        + " ...");
+		int windowSize = 2;
+		while(true) {
+			/*
+			 * After this revision step it might turn out, that 'current' is in
+			 * fact the current revision.
+			 */
 			log.debug("windowsize = " + windowSize);
-			// FIXME inline & fix it
-			current = updateCurrentRev_Step(current.getFirst(), windowSize);
+			long beginRevInclusive = workingRev.revision() + 1;
+			/*
+			 * the highest revision number (inclusive) to check for in this
+			 * revision update step
+			 */
+			long endRevInclusive = beginRevInclusive + windowSize - 1;
+			if(endRevInclusive >= MAX_REVISION_NR) {
+				log.warn("Checking for very high revision number: " + endRevInclusive);
+			}
+			
+			/**
+			 * Uses batch fetches in memcache and datastore to load missing
+			 * changes.
+			 */
+			log.debug("Update rev step [" + beginRevInclusive + "," + endRevInclusive + "]");
+			
+			/*
+			 * Try to fetch 'initialBatchFetchSize' changes past the last known
+			 * "current" revision and put them in the local vm cache.
+			 */
+			log.info("=== Phase 1: Determine revisions not yet locally cached; windowsize = "
+			        + windowSize);
+			Set<Long> locallyMissingRevs = computeLocallyMissingRevs(beginRevInclusive,
+			        endRevInclusive);
+			log.trace("locallyMissingRevs: " + locallyMissingRevs.size() + " of "
+			        + (endRevInclusive - beginRevInclusive + 1));
+			
+			log.info("=== Phase 2: Ask Memcache + 3: Ask Datastore ===");
+			fetchMissingRevisionsFromMemcacheAndDatastore(locallyMissingRevs);
+			log.trace("number of missingRevs after asking DS&MC: " + locallyMissingRevs.size());
+			
+			log.info("=== Phase 4: Compute result from local cache ===");
+			for(long i = beginRevInclusive; i <= endRevInclusive; i++) {
+				GaeChange change = getCachedChange(i);
+				log.trace("cached change " + i + ": " + DebugFormatter.format(change));
+				if(change == null) {
+					log.debug("Found end at " + i + " return workingRev=" + workingRev);
+					this.revCache.setCurrentModelRev(workingRev);
+					log.debug("Updated rev from [" + lastCurrentRev + " ==> " + workingRev);
+					maybeCacheAsMinimalCurrentRev(workingRev);
+					return workingRev;
+				} else {
+					switch(change.getStatus()) {
+					case SuccessExecuted: {
+						XEvent event = change.getEvent();
+						boolean modelExist = eventIndicatesModelExists(event);
+						workingRev = new RevisionState(event.getRevisionNumber(), modelExist);
+						this.revCache.setLastCommited(i);
+						maybeCacheAsMinimalCurrentRev(workingRev);
+					}
+						break;
+					case Creating: {
+						/*
+						 * We cannot know if current version is affected by
+						 * this. Might succeed or fail.
+						 */
+						// FIXME yes?
+						log.debug("Found a 'Creating' change at " + i + " so we report rev="
+						        + workingRev);
+						this.revCache.setCurrentModelRev(workingRev);
+						maybeCacheAsMinimalCurrentRev(workingRev);
+						log.debug("Updated rev from [" + lastCurrentRev + " ==> " + workingRev);
+						return workingRev;
+					}
+					case Executing: {
+						GaeAssert.gaeAssert(false, "not used for GaeExecutionServiceImpl3");
+					}
+						break;
+					case FailedTimeout: {
+						log.debug("Change " + i + " came from cache and is FailedTimeout");
+						this.revCache.setLastCommited(i);
+					}
+						break;
+					case FailedPreconditions:
+					case SuccessNochange: {
+						/* modelExists unchanged, revision unchanged */
+						this.revCache.setLastCommited(i);
+					}
+						break;
+					}
+				}
+			}
+			
 			// adjust probe window
 			windowSize = windowSize * 2;
 			// avoid too big windows
@@ -437,102 +524,32 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 				windowSize = MAX_BATCH_FETCH_SIZE;
 			}
 		}
-		assert current.getSecond() == true;
-		assert current.getFirst() != null : "found no rev nr";
-		this.revCache.setCurrentModelRev(current.getFirst());
-		log.debug("Updated rev from [" + lastCurrentRev + " ==> " + current.getFirst());
-		return current.getFirst();
 	}
 	
 	/**
-	 * Uses batch fetches in memcache and datastore to load missing changes.
+	 * Cache every 20th revision
 	 * 
-	 * @param startingRevExclusive the last known revision state of the model.
-	 *            Combines a revision number and a modelExists date. After this
-	 *            revision step it might turn out, that this revision is in fact
-	 *            the current revision.
-	 * @param endRevInclusive the highest revision number (inclusive) to check
-	 *            for in this revision update step
-	 * @return a Pair. First: A RevisionState with the current model revision
-	 *         within the checked window. The second part of the pair is true,
-	 *         if this revisionState is the current revision of the model, false
-	 *         otherwise.
+	 * @param workingRev
 	 */
-	private Pair<RevisionState,Boolean> updateCurrentRev_Step(RevisionState startingRevExclusive,
-	        long windowSize) {
-		long beginRevInclusive = startingRevExclusive.revision() + 1;
-		long endRevInclusive = beginRevInclusive + windowSize - 1;
-		log.debug("Update rev step [" + beginRevInclusive + "," + endRevInclusive + "]");
-		if(endRevInclusive >= MAX_REVISION_NR) {
-			log.warn("Checking for very high revision number: " + endRevInclusive);
+	private void maybeCacheAsMinimalCurrentRev(RevisionState workingRev) {
+		if(workingRev.revision() % 20 == 0) {
+			Memcache.put(KeyStructure.createRevCacheKey(this.modelAddr), workingRev);
 		}
-		
-		/*
-		 * Try to fetch 'initialBatchFetchSize' changes past the last known
-		 * "current" revision and put them in the local vm cache.
-		 */
-		log.info("=== Phase 1: Determine revisions not yet locally cached; windowsize = "
-		        + windowSize);
-		Set<Long> locallyMissingRevs = computeLocallyMissingRevs(beginRevInclusive, endRevInclusive);
-		log.trace("locallyMissingRevs: " + locallyMissingRevs.size() + " of "
-		        + (endRevInclusive - beginRevInclusive + 1));
-		
-		log.info("=== Phase 2+3: Ask Memcache + Datastore ===");
-		fetchMissingRevisionsFromMemcacheAndDatastore(locallyMissingRevs);
-		log.trace("number of missingRevs after asking DS&MC: " + locallyMissingRevs.size());
-		
-		log.info("=== Phase 4: Compute result from local cache ===");
-		boolean foundEnd = false;
-		RevisionState windowRev = startingRevExclusive;
-		for(long i = beginRevInclusive; i <= endRevInclusive; i++) {
-			GaeChange change = getCachedChange(i);
-			log.trace("cached change " + i + ": " + DebugFormatter.format(change));
-			
-			// TODO careful: too much caching?
-			if(change == null) {
-				foundEnd = true;
-				break;
-			} else {
-				switch(change.getStatus()) {
-				case Creating:
-				case Executing: {
-					/* unclear if current version is affected by this. */
-				}
-					break;
-				case FailedTimeout: {
-					/* TODO what to do then? */
-					log.debug("Change " + i + " came from cache and is FailedTimeout");
-				}
-					break;
-				case SuccessExecuted: {
-					XEvent event = change.getEvent();
-					boolean modelExist = eventIndicatesModelExists(event);
-					windowRev = new RevisionState(i, modelExist);
-				}
-					break;
-				case FailedPreconditions:
-				case SuccessNochange: {
-					/* modelExists unchanged, revision incremented */
-					windowRev = new RevisionState(i, windowRev.modelExists());
-				}
-					break;
-				}
-			}
-		}
-		
-		if(foundEnd) {
-			log.trace("Step: return currentRev = " + windowRev);
-			return new Pair<RevisionState,Boolean>(windowRev, true);
+	}
+	
+	/**
+	 * Use information of entity; process status of change
+	 * 
+	 * @param e a GAE change entity, never null
+	 * @param rev
+	 */
+	private void consumeChangeEntity(Entity e, long rev) {
+		GaeChange change = new GaeChange(getModelAddress(), rev, e);
+		Status status = change.getStatus();
+		if(status.isCommitted()) {
+			cacheCommittedChange(change);
 		} else {
-			assert locallyMissingRevs.size() == 0;
-			/* === Phase 5: go on */
-			/* We know these revisions are all committed */
-			this.revCache.setLastCommited(endRevInclusive);
-			/*
-			 * All revisions we looked at have been processed. Need to repeat
-			 * the process by looking at more revisions.
-			 */
-			return new Pair<RevisionState,Boolean>(windowRev, false);
+			handleTimeout(change);
 		}
 	}
 	
@@ -575,7 +592,7 @@ public class GaeChangesServiceImpl2 implements IGaeChangesService {
 					newLastCommitted = change.rev;
 				}
 				locallyMissingRevs.remove(change.rev);
-				log.debug("Found in memcache " + change.rev);
+				log.trace("Found in memcache " + change.rev);
 			}
 			if(newLastCommitted >= 0) {
 				this.revCache.setLastCommited(newLastCommitted);

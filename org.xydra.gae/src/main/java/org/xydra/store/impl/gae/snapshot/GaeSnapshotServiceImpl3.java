@@ -3,7 +3,6 @@ package org.xydra.store.impl.gae.snapshot;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -145,7 +144,7 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 	
 	private static final long SNAPSHOT_PERSISTENCE_THRESHOLD = 10;
 	
-	private static final boolean USE_MEMCACHE = false;
+	private static final boolean USE_MEMCACHE = true;
 	
 	public static boolean USE_SNAPSHOT_CACHE = true;
 	
@@ -199,23 +198,30 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 		Map<String,Object> batchResult = Collections.emptyMap();
 		long askNr = requestedRevNr - 1;
 		while(askNr >= 0 && batchResult.isEmpty()) {
-			// prepare a batch-fetch in the mem-cache
-			List<String> keys = new LinkedList<String>();
-			while(askNr >= 0 && keys.size() <= SNAPSHOT_PERSISTENCE_THRESHOLD) {
+			// prepare a fetch in the mem-cache
+			String possiblyMemcachedKey = null;
+			int loops = 0;
+			while(askNr >= 0 && loops <= SNAPSHOT_PERSISTENCE_THRESHOLD) {
 				XRevWritableModel model = localVmCacheGet(askNr);
 				if(model != null) {
 					return computeAndCacheSnapshotFromBase(requestedRevNr, model);
 				}
-				keys.add(KeyStructure.toString(getSnapshotKey(askNr)));
+				if(revCanBeMemcached(askNr)) {
+					possiblyMemcachedKey = KeyStructure.toString(getSnapshotKey(askNr));
+				}
 				askNr--;
+				loops++;
 			}
 			// execute
 			if(USE_MEMCACHE) {
-				// TODO ask only for 'possibly cached' (mod 10) numbers
-				batchResult = Memcache.getEntities(keys);
+				batchResult = Memcache.getEntities(Collections.singleton(possiblyMemcachedKey));
+				GaeAssert.gaeAssert(batchResult.size() <= 1, "got 0 or 1 results");
 				GaeAssert.gaeAssert(cacheResultIsConsistent(batchResult),
 				        "cache inconsistent, see logs");
 				if(batchResult.isEmpty()) {
+					// memcache got flushed?
+					log.info("Memcache got flushed? Found no snapshot at " + possiblyMemcachedKey);
+					
 					// executeCommand should periodically create snapshots in
 					// memcache?
 				} else {
@@ -227,7 +233,7 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 						 */
 						log.info("Got a batch result of size " + batchResult.size()
 						        + " from memcache when asking for snapshot: "
-						        + DebugFormatter.format(keys));
+						        + DebugFormatter.format(possiblyMemcachedKey));
 					}
 					// Pump all results (if any) to localVmcache
 					for(Object o : batchResult.values()) {
@@ -305,12 +311,10 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 			
 			localVmCachePut(snapshot);
 			long rev = snapshot.getRevisionNumber();
-			// cache every 10th snapshot in memcache
-			if(rev % 10 == 0) {
+			if(USE_MEMCACHE && revCanBeMemcached(rev)) {
+				// cache every 10th snapshot in memcache
 				Key key = getSnapshotKey(rev);
-				if(USE_MEMCACHE) {
-					Memcache.put(key, snapshot);
-				}
+				Memcache.put(key, snapshot);
 				// TODO SCALE put also in datastore (async)
 				assert isConsistent(KeyStructure.toString(key), snapshot);
 			}
@@ -404,7 +408,7 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 		// memcache + datastore read
 		Key snapshotKey = getSnapshotKey(requestedRevNr);
 		Object o = null;
-		if(USE_MEMCACHE) {
+		if(USE_MEMCACHE && revCanBeMemcached(requestedRevNr)) {
 			o = Memcache.get(snapshotKey);
 			if(o != null) {
 				log.debug("return from memcache");
@@ -438,6 +442,10 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 		// else: need to compute snapshot from an older version
 		XRevWritableModel snapshot = computeSnapshot(requestedRevNr);
 		return snapshot;
+	}
+	
+	private boolean revCanBeMemcached(long requestedRevNr) {
+		return requestedRevNr % SNAPSHOT_PERSISTENCE_THRESHOLD == 0;
 	}
 	
 	private synchronized Key getSnapshotKey(long revNr) {

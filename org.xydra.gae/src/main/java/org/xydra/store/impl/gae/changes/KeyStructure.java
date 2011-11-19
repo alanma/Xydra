@@ -19,6 +19,7 @@ public class KeyStructure {
 	
 	private static final String KIND_XVALUE = "XVALUE";
 	static final String KIND_XCHANGE = "XCHANGE";
+	private static final String KIND_REVCACHE = "XREV";
 	
 	/**
 	 * @param address The {@link XAddress} of the entity that the key should
@@ -126,12 +127,20 @@ public class KeyStructure {
 		return key.getKind() + "|" + key.getName();
 	}
 	
+	/**
+	 * @param key must have format 'KIND|NAME'
+	 * @return a gae key
+	 */
 	public static Key toKey(String key) {
 		int index = key.indexOf("|");
 		assert index > 0;
 		String kind = key.substring(0, index);
 		String name = key.substring(index + 1, key.length());
 		return KeyFactory.createKey(kind, name);
+	}
+	
+	public static Key createRevCacheKey(XAddress modelAddr) {
+		return KeyFactory.createKey(KIND_REVCACHE, modelAddr + "-minCurrentRev");
 	}
 	
 }
