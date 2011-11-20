@@ -14,6 +14,6 @@ public class RemoteBenchmarkOnAppEngine extends RemoteBenchmark {
 	@Before
 	public void setup() {
 		this.absoluteUrl = "http://testgae20111105.xydra-live.appspot.com/logged";
-		this.path = "./PerformanceData/gae20111105-";
+		this.path = "./PerformanceData/gae20111105-20/";
 	}
 }
