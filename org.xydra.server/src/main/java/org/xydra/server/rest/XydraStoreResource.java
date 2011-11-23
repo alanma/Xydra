@@ -39,7 +39,7 @@ import org.xydra.restless.RestlessParameter;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.RequestException;
-import org.xydra.store.RevisionState;
+import org.xydra.store.ModelRevision;
 import org.xydra.store.StoreException;
 import org.xydra.store.WaitingCallback;
 import org.xydra.store.XydraRuntime;
@@ -455,7 +455,7 @@ public class XydraStoreResource {
 			}
 		}
 		
-		WaitingCallback<BatchedResult<RevisionState>[]> callback = new WaitingCallback<BatchedResult<RevisionState>[]>();
+		WaitingCallback<BatchedResult<ModelRevision>[]> callback = new WaitingCallback<BatchedResult<ModelRevision>[]>();
 		store.getModelRevisions(actorId, passwordHash, modelAddresses, callback);
 		
 		if(callback.getException() != null) {
