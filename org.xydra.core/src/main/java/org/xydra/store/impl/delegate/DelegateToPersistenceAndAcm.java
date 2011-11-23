@@ -27,7 +27,7 @@ import org.xydra.store.GetEventsRequest;
 import org.xydra.store.InternalStoreException;
 import org.xydra.store.QuotaException;
 import org.xydra.store.RequestException;
-import org.xydra.store.RevisionState;
+import org.xydra.store.ModelRevision;
 import org.xydra.store.TimeoutException;
 import org.xydra.store.XydraStore;
 import org.xydra.store.XydraStoreAdmin;
@@ -252,13 +252,18 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 		authorise(actorId, passwordHash);
 		Set<XID> modelIds = new HashSet<XID>();
 		synchronized(this.persistence) {
-			for(XID modelId : this.persistence.getModelIds()) {
-				// TODO can see all models you can know about? Seems plausible.
+			for(XID modelId : this.persistence.getManagedModelIds()) {
+				ModelRevision modelRev = this.persistence.getModelRevision(XX.resolveModel(
+				        this.repoId, modelId));
+				// TODO can see all models you can know about? Seems
+				// plausible.
 				// ~ max
 				if(triviallyAllowed(passwordHash)
 				        || this.acm.getAuthorisationManager().canKnowAboutModel(actorId,
 				                getRepositoryAddress(), modelId)) {
-					modelIds.add(modelId);
+					if(modelRev.modelExists()) {
+						modelIds.add(modelId);
+					}
 				}
 			}
 		}
@@ -266,7 +271,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 	}
 	
 	@Override
-	public RevisionState getModelRevision(XID actorId, String passwordHash, XAddress address) {
+	public ModelRevision getModelRevision(XID actorId, String passwordHash, XAddress address) {
 		assert actorId != null;
 		authorise(actorId, passwordHash);
 		if(address.getAddressedType() != XType.XMODEL) {
@@ -278,7 +283,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 		        || this.acm.getAuthorisationManager().canRead(actorId, address)) {
 			return this.persistence.getModelRevision(address);
 		} else {
-			return new RevisionState(XCommand.FAILED, false);
+			return new ModelRevision(XCommand.FAILED, false);
 		}
 	}
 	

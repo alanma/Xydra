@@ -191,14 +191,14 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	
 	@Test
 	public void getRevs() {
-		SynchronousTestCallback<BatchedResult<RevisionState>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
+		SynchronousTestCallback<BatchedResult<ModelRevision>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<ModelRevision>[]>();
 		this.store.getModelRevisions(this.correctUser, this.correctUserPass, this.modelAddresses,
 		        revisionCallback);
 		assertTrue(this.waitOnCallback(revisionCallback));
 		assertNotNull(revisionCallback.getEffect());
 		assertNull(revisionCallback.getException());
-		BatchedResult<RevisionState>[] revisionResult = revisionCallback.getEffect();
-		for(BatchedResult<RevisionState> l : revisionResult) {
+		BatchedResult<ModelRevision>[] revisionResult = revisionCallback.getEffect();
+		for(BatchedResult<ModelRevision> l : revisionResult) {
 			log.debug("Got rev = " + l.getFirst() + " - " + l.getSecond() + " - " + l.getResult());
 		}
 	}
@@ -209,7 +209,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	public void testGetModelRevisions() {
 		log.info("testGetModelRevisions");
 		SynchronousTestCallback<BatchedResult<XReadableModel>[]> snapshotCallback = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
-		SynchronousTestCallback<BatchedResult<RevisionState>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
+		SynchronousTestCallback<BatchedResult<ModelRevision>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<ModelRevision>[]>();
 		
 		// Get revisions
 		this.store.getModelRevisions(this.correctUser, this.correctUserPass, this.modelAddresses,
@@ -228,7 +228,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		BatchedResult<XReadableModel>[] snapshotResult = snapshotCallback.getEffect();
 		assertEquals(this.modelAddresses.length, snapshotResult.length);
 		
-		BatchedResult<RevisionState>[] revisionResult = revisionCallback.getEffect();
+		BatchedResult<ModelRevision>[] revisionResult = revisionCallback.getEffect();
 		assertEquals(this.modelAddresses.length, revisionResult.length);
 		
 		// check order of returned snapshots
@@ -486,7 +486,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	// Test IllegalArgumentException
 	@Test
 	public void testGetModelRevisionPassingNull() {
-		SynchronousTestCallback<BatchedResult<RevisionState>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
+		SynchronousTestCallback<BatchedResult<ModelRevision>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<ModelRevision>[]>();
 		
 		// first parameter equals null
 		try {
@@ -498,7 +498,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		}
 		
 		// second parameter equals null
-		revisionCallback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
+		revisionCallback = new SynchronousTestCallback<BatchedResult<ModelRevision>[]>();
 		
 		try {
 			this.store.getModelRevisions(this.correctUser, null, this.modelAddresses,
@@ -509,7 +509,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		}
 		
 		// third parameter equals null
-		revisionCallback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
+		revisionCallback = new SynchronousTestCallback<BatchedResult<ModelRevision>[]>();
 		
 		try {
 			this.store.getModelRevisions(this.correctUser, this.correctUserPass, null,
@@ -520,7 +520,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		}
 		
 		// all parameters equal null
-		revisionCallback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
+		revisionCallback = new SynchronousTestCallback<BatchedResult<ModelRevision>[]>();
 		
 		try {
 			this.store.getModelRevisions(null, null, null, revisionCallback);
@@ -561,9 +561,9 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			return;
 		}
 		
-		SynchronousTestCallback<BatchedResult<RevisionState>[]> revisionCallback;
+		SynchronousTestCallback<BatchedResult<ModelRevision>[]> revisionCallback;
 		
-		revisionCallback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
+		revisionCallback = new SynchronousTestCallback<BatchedResult<ModelRevision>[]>();
 		
 		this.store.getModelRevisions(this.incorrectUser, this.incorrectUserPass,
 		        this.modelAddresses, revisionCallback);
@@ -577,7 +577,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	@Test
 	public void testGetModelRevisionsMixedAddresses() {
 		SynchronousTestCallback<BatchedResult<XReadableModel>[]> snapshotCallback = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
-		SynchronousTestCallback<BatchedResult<RevisionState>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
+		SynchronousTestCallback<BatchedResult<ModelRevision>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<ModelRevision>[]>();
 		
 		XAddress[] tempArray = new XAddress[this.modelAddresses.length + 1];
 		System.arraycopy(this.modelAddresses, 0, tempArray, 0, this.modelAddresses.length);
@@ -598,7 +598,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		BatchedResult<XReadableModel>[] snapshotResult = snapshotCallback.getEffect();
 		assertEquals(tempArray.length, snapshotResult.length);
 		
-		BatchedResult<RevisionState>[] revisionResult = revisionCallback.getEffect();
+		BatchedResult<ModelRevision>[] revisionResult = revisionCallback.getEffect();
 		assertEquals(tempArray.length, revisionResult.length);
 		
 		// check order of returned snapshots
@@ -627,7 +627,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	// exist
 	@Test
 	public void testGetModelRevisionsNotExistingModel() {
-		SynchronousTestCallback<BatchedResult<RevisionState>[]> callback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
+		SynchronousTestCallback<BatchedResult<ModelRevision>[]> callback = new SynchronousTestCallback<BatchedResult<ModelRevision>[]>();
 		XAddress[] tempArray = new XAddress[] { this.notExistingModel };
 		
 		this.store.getModelRevisions(this.correctUser, this.correctUserPass, tempArray, callback);
@@ -636,7 +636,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		assertNotNull(callback.getEffect());
 		assertNull(callback.getException());
 		
-		BatchedResult<RevisionState>[] result = callback.getEffect();
+		BatchedResult<ModelRevision>[] result = callback.getEffect();
 		assertNotNull(result[0].getResult());
 		assertNull(result[0].getException());
 		assertEquals(XCommand.FAILED, result[0].getResult().revision());
@@ -645,7 +645,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	// Test if it behaves correctly for addresses that do not address an XModel
 	@Test
 	public void testGetModelRevisionsWrongAddress() {
-		SynchronousTestCallback<BatchedResult<RevisionState>[]> callback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
+		SynchronousTestCallback<BatchedResult<ModelRevision>[]> callback = new SynchronousTestCallback<BatchedResult<ModelRevision>[]>();
 		log.warn("Expect three warnings because we ask with objectAdresses for modelRevisions");
 		this.store.getModelRevisions(this.correctUser, this.correctUserPass, this.objectAddresses,
 		        callback);
@@ -654,7 +654,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		assertNotNull(callback.getEffect());
 		assertNull(callback.getException());
 		
-		BatchedResult<RevisionState>[] result = callback.getEffect();
+		BatchedResult<ModelRevision>[] result = callback.getEffect();
 		
 		for(int i = 0; i < result.length; i++) {
 			// assertNotNull(result[i].getResult());

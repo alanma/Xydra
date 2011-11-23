@@ -50,6 +50,7 @@ public class ModelAccessDatabaseOnWritableModel {
 	 * @param rightsModel which is decorated with a nice access DB API
 	 */
 	public ModelAccessDatabaseOnWritableModel(XWritableModel rightsModel) {
+		assert rightsModel != null;
 		this.rightsModel = rightsModel;
 	}
 	

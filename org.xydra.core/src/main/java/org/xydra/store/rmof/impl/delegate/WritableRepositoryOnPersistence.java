@@ -1,11 +1,14 @@
 package org.xydra.store.rmof.impl.delegate;
 
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
+import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableRepository;
@@ -35,15 +38,26 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 	public XWritableModel createModel(XID modelId) {
 		XWritableModel model = getModel(modelId);
 		if(model == null) {
+			assert !this.persistence.getModelRevision(getModelAddress(modelId)).modelExists();
+			
 			XCommand command = X.getCommandFactory().createAddModelCommand(
 			        this.persistence.getRepositoryId(), modelId, true);
 			long l = this.persistence.executeCommand(this.executingActorId, command);
 			if(l < 0) {
 				log.warn("creating model '" + modelId + "' failed with " + l);
 			}
+			assert this.persistence.getModelRevision(getModelAddress(modelId)).modelExists() : "model should exist "
+			        + this.persistence.getModelRevision(getModelAddress(modelId));
+			
 			model = getModel(modelId);
+			assert model != null;
 		}
 		return model;
+	}
+	
+	private XAddress getModelAddress(XID modelId) {
+		return X.getIDProvider().fromComponents(this.persistence.getRepositoryId(), modelId, null,
+		        null);
 	}
 	
 	@Override
@@ -73,17 +87,26 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 	@Override
 	public boolean hasModel(XID modelId) {
 		assert this.persistence != null;
-		return this.persistence.hasModel(modelId);
+		return this.persistence.hasManagedModel(modelId)
+		        && this.persistence.getModelRevision(
+		                XX.resolveModel(this.persistence.getRepositoryId(), modelId)).modelExists();
 	}
 	
 	@Override
 	public boolean isEmpty() {
-		return this.persistence.getModelIds().isEmpty();
+		return this.persistence.getManagedModelIds().isEmpty();
 	}
 	
 	@Override
 	public Iterator<XID> iterator() {
-		return this.persistence.getModelIds().iterator();
+		Set<XID> existingModelIds = new HashSet<XID>();
+		for(XID modelId : this.persistence.getManagedModelIds()) {
+			if(this.persistence.getModelRevision(
+			        XX.resolveModel(this.persistence.getRepositoryId(), modelId)).modelExists()) {
+				existingModelIds.add(modelId);
+			}
+		}
+		return existingModelIds.iterator();
 	}
 	
 	@Override

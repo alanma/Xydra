@@ -22,7 +22,7 @@ import org.xydra.store.GetEventsRequest;
 import org.xydra.store.InternalStoreException;
 import org.xydra.store.QuotaException;
 import org.xydra.store.RequestException;
-import org.xydra.store.RevisionState;
+import org.xydra.store.ModelRevision;
 import org.xydra.store.StoreException;
 import org.xydra.store.TimeoutException;
 import org.xydra.store.XydraStore;
@@ -304,7 +304,7 @@ public class SerializedStore {
 		}
 	}
 	
-	public static void serializeModelRevisions(BatchedResult<RevisionState>[] result, XydraOut out) {
+	public static void serializeModelRevisions(BatchedResult<ModelRevision>[] result, XydraOut out) {
 		
 		out.open(ELEMENT_MODEL_REVISIONS);
 		out.child(NAME_REVISIONS);
@@ -313,7 +313,7 @@ public class SerializedStore {
 		
 	}
 	
-	public static void toModelRevisions(XydraElement element, BatchedResult<RevisionState>[] res) {
+	public static void toModelRevisions(XydraElement element, BatchedResult<ModelRevision>[] res) {
 		
 		SerializingUtils.checkElementType(element, ELEMENT_MODEL_REVISIONS);
 		
@@ -338,18 +338,18 @@ public class SerializedStore {
 	 * @param results
 	 * @param out
 	 */
-	private static void setRevisionStateListContents(BatchedResult<RevisionState>[] results,
+	private static void setRevisionStateListContents(BatchedResult<ModelRevision>[] results,
 	        XydraOut out) {
 		
 		out.beginArray();
 		out.setDefaultType(ELEMENT_REVISIONSTATE);
 		
-		for(BatchedResult<RevisionState> result : results) {
+		for(BatchedResult<ModelRevision> result : results) {
 			if(result.getException() != null) {
 				serializeException(result.getException(), out);
 			} else {
 				assert result.getResult() != null;
-				RevisionState revisionState = result.getResult();
+				ModelRevision revisionState = result.getResult();
 				long rev = revisionState.revision();
 				boolean modelExists = revisionState.modelExists();
 				
@@ -389,7 +389,7 @@ public class SerializedStore {
 	}
 	
 	private static void getRevisionStateListContents(XydraElement element,
-	        BatchedResult<RevisionState>[] results) {
+	        BatchedResult<ModelRevision>[] results) {
 		
 		int i = 0;
 		
@@ -404,7 +404,7 @@ public class SerializedStore {
 			
 			Throwable t = toException(result);
 			if(t != null) {
-				results[i] = new BatchedResult<RevisionState>(t);
+				results[i] = new BatchedResult<ModelRevision>(t);
 				continue;
 			}
 			
@@ -417,10 +417,10 @@ public class SerializedStore {
 				boolean modelExists = SerializingUtils.toBoolean(result.getValue(NAME_MODELEXISTS,
 				        ELEMENT_MODELEXISTS));
 				
-				results[i] = new BatchedResult<RevisionState>(new RevisionState(rev, modelExists));
+				results[i] = new BatchedResult<ModelRevision>(new ModelRevision(rev, modelExists));
 				
 			} catch(Throwable th) {
-				results[i] = new BatchedResult<RevisionState>(th);
+				results[i] = new BatchedResult<ModelRevision>(th);
 			}
 			
 		}

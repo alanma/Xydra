@@ -501,17 +501,17 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public Set<XID> getModelIds() {
+	public Set<XID> getManagedModelIds() {
 		if(this.active) {
 			String var = getVar();
 			java("Set<XID> " + var + " = p.getModelIds();");
 			java("consume(" + var + ");");
 		}
-		return this.persistence.getModelIds();
+		return this.persistence.getManagedModelIds();
 	}
 	
 	@Override
-	public RevisionState getModelRevision(XAddress address) {
+	public ModelRevision getModelRevision(XAddress address) {
 		if(this.active) {
 			String var = getVar();
 			java("long " + var + " = this.p.getModelRevision(" + toJava(address) + ");");
@@ -553,13 +553,13 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public boolean hasModel(XID modelId) {
+	public boolean hasManagedModel(XID modelId) {
 		if(this.active) {
 			String var = getVar();
 			java("boolean " + var + " = this.p.hasModel(" + toJava(modelId) + ");");
 			java("consume(" + var + ");");
 		}
-		return this.persistence.hasModel(modelId);
+		return this.persistence.hasManagedModel(modelId);
 	}
 	
 	public static void main(String[] args) throws IOException {

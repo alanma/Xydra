@@ -395,7 +395,7 @@ public interface XydraStore {
 	 * @throws IllegalArgumentException if one of the given parameters is null.
 	 */
 	void getModelRevisions(XID actorId, String passwordHash, XAddress[] modelAddresses,
-	        Callback<BatchedResult<RevisionState>[]> callback) throws IllegalArgumentException;
+	        Callback<BatchedResult<ModelRevision>[]> callback) throws IllegalArgumentException;
 	
 	/**
 	 * Read current state.

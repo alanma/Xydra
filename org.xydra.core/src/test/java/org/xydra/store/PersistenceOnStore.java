@@ -43,7 +43,7 @@ public class PersistenceOnStore implements XydraPersistence {
 	
 	@Override
 	public void clear() {
-		for(XID modelId : getModelIds()) {
+		for(XID modelId : getManagedModelIds()) {
 			deleteModel(modelId);
 		}
 	}
@@ -90,7 +90,7 @@ public class PersistenceOnStore implements XydraPersistence {
 	}
 	
 	@Override
-	public Set<XID> getModelIds() {
+	public Set<XID> getManagedModelIds() {
 		SynchronousTestCallback<Set<XID>> callback = new SynchronousTestCallback<Set<XID>>();
 		this.store.getModelIds(this.actorId, this.passwordHash, callback);
 		if(callback.getException() != null) {
@@ -100,8 +100,8 @@ public class PersistenceOnStore implements XydraPersistence {
 	}
 	
 	@Override
-	public RevisionState getModelRevision(XAddress address) {
-		SynchronousTestCallback<BatchedResult<RevisionState>[]> callback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
+	public ModelRevision getModelRevision(XAddress address) {
+		SynchronousTestCallback<BatchedResult<ModelRevision>[]> callback = new SynchronousTestCallback<BatchedResult<ModelRevision>[]>();
 		this.store.getModelRevisions(this.actorId, this.passwordHash, new XAddress[] { address },
 		        callback);
 		Throwable e = callback.getException();
@@ -167,7 +167,7 @@ public class PersistenceOnStore implements XydraPersistence {
 	}
 	
 	@Override
-	public boolean hasModel(XID modelId) {
+	public boolean hasManagedModel(XID modelId) {
 		return getModelRevision(modeladdress(modelId)).modelExists();
 	}
 	

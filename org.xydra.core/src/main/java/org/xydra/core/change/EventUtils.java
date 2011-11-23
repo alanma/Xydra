@@ -62,7 +62,9 @@ public class EventUtils {
 	
 	private static void applyAtomicEvent(XRevWritableModel model, XAtomicEvent atomicEvent,
 	        boolean inTxn) {
+		assert model != null;
 		assert atomicEvent != null;
+		assert atomicEvent.getChangedEntity() != null;
 		
 		if(atomicEvent instanceof XRepositoryEvent) {
 			assert atomicEvent.getChangedEntity().equals(model.getAddress());
@@ -210,7 +212,7 @@ public class EventUtils {
 	 * Calculate the result of applying events to a model without changing the
 	 * original model but copying as little as possible.
 	 * 
-	 * @param model The original model.
+	 * @param model The original model. Never null.
 	 * @param event The events to apply.
 	 * 
 	 * @return The result after applying the events. This model may share object
@@ -218,6 +220,7 @@ public class EventUtils {
 	 *         them will change both models.
 	 */
 	public static XRevWritableModel applyEventNonDestructive(XRevWritableModel model, XEvent event) {
+		assert model != null;
 		return applyEventNonDestructive(model, model, event);
 	}
 	
@@ -238,6 +241,7 @@ public class EventUtils {
 	public static XRevWritableModel applyEventNonDestructive(XReadableModel reference,
 	        XRevWritableModel model, XEvent event) {
 		assert event != null;
+		assert model != null;
 		
 		XRevWritableModel result = model;
 		
@@ -279,6 +283,7 @@ public class EventUtils {
 	private static void applyAtomicEventNonDestructive(XReadableModel reference,
 	        XRevWritableModel model, XAtomicEvent atomicEvent, boolean inTxn) {
 		assert atomicEvent != null;
+		assert model != null;
 		
 		XID objectId = atomicEvent.getTarget().getObject();
 		if(objectId != null) {

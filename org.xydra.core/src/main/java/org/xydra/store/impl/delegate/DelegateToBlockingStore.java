@@ -12,7 +12,7 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.Callback;
 import org.xydra.store.GetEventsRequest;
-import org.xydra.store.RevisionState;
+import org.xydra.store.ModelRevision;
 import org.xydra.store.StoreException;
 import org.xydra.store.XydraStoreAdmin;
 
@@ -100,11 +100,11 @@ public class DelegateToBlockingStore implements XydraSingleOperationStore {
 	
 	@Override
 	public void getModelRevision(XID actorId, String passwordHash, XAddress modelAddress,
-	        Callback<RevisionState> callback) throws IllegalArgumentException {
+	        Callback<ModelRevision> callback) throws IllegalArgumentException {
 		assert actorId != null;
 		assert callback != null;
 		try {
-			RevisionState result = this.blockingStore.getModelRevision(actorId, passwordHash,
+			ModelRevision result = this.blockingStore.getModelRevision(actorId, passwordHash,
 			        modelAddress);
 			callback.onSuccess(result);
 		} catch(StoreException e) {

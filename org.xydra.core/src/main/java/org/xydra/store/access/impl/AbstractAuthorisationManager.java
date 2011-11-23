@@ -32,7 +32,7 @@ public abstract class AbstractAuthorisationManager implements XAuthorisationMana
 	}
 	
 	@Override
-    public boolean canExecute(XID actor, XCommand command) {
+	public boolean canExecute(XID actor, XCommand command) {
 		if(command instanceof XAtomicCommand) {
 			return canExecute(actor, (XAtomicCommand)command);
 		} else if(command instanceof XTransaction) {
@@ -91,57 +91,66 @@ public abstract class AbstractAuthorisationManager implements XAuthorisationMana
 	}
 	
 	@Override
-    public boolean canKnowAboutField(XID actor, XAddress objectAddr, XID fieldId) {
+	public boolean canKnowAboutField(XID actor, XAddress objectAddr, XID fieldId) {
 		XAddress fieldAddr = XX.resolveField(objectAddr, fieldId);
-		return hasAccess(actor, objectAddr, XA.ACCESS_READ).isAllowed()
-		        || hasAccess(actor, fieldAddr, XA.ACCESS_READ).isAllowed()
-		        || hasAccess(actor, fieldAddr, XA.ACCESS_WRITE).isAllowed();
+		return !isInternal(fieldId)
+		        && (hasAccess(actor, objectAddr, XA.ACCESS_READ).isAllowed()
+		                || hasAccess(actor, fieldAddr, XA.ACCESS_READ).isAllowed() || hasAccess(
+		                actor, fieldAddr, XA.ACCESS_WRITE).isAllowed());
 	}
 	
 	@Override
-    public boolean canKnowAboutModel(XID actor, XAddress repoAddr, XID modelId) {
+	public boolean canKnowAboutModel(XID actor, XAddress repoAddr, XID modelId) {
 		XAddress modelAddr = XX.resolveModel(repoAddr, modelId);
-		return hasAccess(actor, repoAddr, XA.ACCESS_READ).isAllowed()
-		        || hasAccessToSubresource(actor, modelAddr, XA.ACCESS_READ).isAllowed()
-		        || hasAccessToSubresource(actor, modelAddr, XA.ACCESS_WRITE).isAllowed();
+		boolean result = !isInternal(modelId)
+		        && (hasAccess(actor, repoAddr, XA.ACCESS_READ).isAllowed()
+		                || hasAccessToSubresource(actor, modelAddr, XA.ACCESS_READ).isAllowed() || hasAccessToSubresource(
+		                actor, modelAddr, XA.ACCESS_WRITE).isAllowed());
+		return result;
+	}
+	
+	private boolean isInternal(XID id) {
+		boolean result = id.toString().startsWith("internal--");
+		return result;
 	}
 	
 	@Override
-    public boolean canKnowAboutObject(XID actor, XAddress modelAddr, XID objectId) {
+	public boolean canKnowAboutObject(XID actor, XAddress modelAddr, XID objectId) {
 		XAddress objectAddr = XX.resolveObject(modelAddr, objectId);
-		return hasAccess(actor, modelAddr, XA.ACCESS_READ).isAllowed()
-		        || hasAccessToSubresource(actor, objectAddr, XA.ACCESS_READ).isAllowed()
-		        || hasAccessToSubresource(actor, objectAddr, XA.ACCESS_WRITE).isAllowed();
+		return !isInternal(objectId)
+		        && (hasAccess(actor, modelAddr, XA.ACCESS_READ).isAllowed()
+		                || hasAccessToSubresource(actor, objectAddr, XA.ACCESS_READ).isAllowed() || hasAccessToSubresource(
+		                actor, objectAddr, XA.ACCESS_WRITE).isAllowed());
 	}
 	
 	@Override
-    public boolean canRead(XID actor, XAddress resource) {
+	public boolean canRead(XID actor, XAddress resource) {
 		return hasAccess(actor, resource, XA.ACCESS_READ).isAllowed();
 	}
 	
 	@Override
-    public boolean canRemoveField(XID actor, XAddress objectAddr, XID fieldId) {
+	public boolean canRemoveField(XID actor, XAddress objectAddr, XID fieldId) {
 		XAddress fieldAddr = XX.resolveField(objectAddr, fieldId);
 		return hasAccess(actor, fieldAddr, XA.ACCESS_WRITE).isAllowed()
 		        && hasAccess(actor, objectAddr, XA.ACCESS_WRITE).isAllowed();
 	}
 	
 	@Override
-    public boolean canRemoveModel(XID actor, XAddress repoAddr, XID modelId) {
+	public boolean canRemoveModel(XID actor, XAddress repoAddr, XID modelId) {
 		XAddress modelAddr = XX.resolveModel(repoAddr, modelId);
 		return hasAccessToSubtree(actor, modelAddr, XA.ACCESS_WRITE).isAllowed()
 		        && hasAccess(actor, repoAddr, XA.ACCESS_WRITE).isAllowed();
 	}
 	
 	@Override
-    public boolean canRemoveObject(XID actor, XAddress modelAddr, XID objectId) {
+	public boolean canRemoveObject(XID actor, XAddress modelAddr, XID objectId) {
 		XAddress objectAddr = XX.resolveObject(modelAddr, objectId);
 		return hasAccessToSubtree(actor, objectAddr, XA.ACCESS_WRITE).isAllowed()
 		        && hasAccess(actor, modelAddr, XA.ACCESS_WRITE).isAllowed();
 	}
 	
 	@Override
-    public boolean canWrite(XID actor, XAddress resource) {
+	public boolean canWrite(XID actor, XAddress resource) {
 		return hasAccess(actor, resource, XA.ACCESS_WRITE).isAllowed();
 	}
 	

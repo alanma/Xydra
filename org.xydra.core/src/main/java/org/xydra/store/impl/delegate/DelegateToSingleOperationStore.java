@@ -28,7 +28,7 @@ import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.RequestException;
-import org.xydra.store.RevisionState;
+import org.xydra.store.ModelRevision;
 import org.xydra.store.StoreException;
 import org.xydra.store.WaitingCallback;
 import org.xydra.store.XydraStore;
@@ -376,7 +376,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 	
 	@Override
 	public void getModelRevisions(XID actorId, String passwordHash, XAddress[] modelAddresses,
-	        Callback<BatchedResult<RevisionState>[]> callback) throws IllegalArgumentException {
+	        Callback<BatchedResult<ModelRevision>[]> callback) throws IllegalArgumentException {
 		
 		DelegationUtils.assertNonNullActorAndPassword(actorId, passwordHash);
 		DelegationUtils.assertNonNullCallback(callback);
@@ -389,12 +389,12 @@ public class DelegateToSingleOperationStore implements XydraStore {
 				return;
 			}
 			
-			MultiOpCallback<RevisionState> multi = new MultiOpCallback<RevisionState>(
+			MultiOpCallback<ModelRevision> multi = new MultiOpCallback<ModelRevision>(
 			        modelAddresses.length, callback);
 			
 			// call n individual asynchronous single operations
 			for(int i = 0; i < modelAddresses.length; i++) {
-				SingleOpCallback<RevisionState> soc = new SingleOpCallback<RevisionState>(multi, i);
+				SingleOpCallback<ModelRevision> soc = new SingleOpCallback<ModelRevision>(multi, i);
 				try {
 					this.singleOpStore.getModelRevision(actorId, null, modelAddresses[i], soc);
 				} catch(StoreException e) {

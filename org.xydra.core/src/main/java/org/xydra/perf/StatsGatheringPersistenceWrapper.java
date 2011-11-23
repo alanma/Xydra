@@ -16,7 +16,7 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.perf.Stats.Clock;
-import org.xydra.store.RevisionState;
+import org.xydra.store.ModelRevision;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -66,17 +66,17 @@ public class StatsGatheringPersistenceWrapper implements XydraPersistence {
 	}
 	
 	@Override
-	public Set<XID> getModelIds() {
+	public Set<XID> getManagedModelIds() {
 		Clock c = this.stats.startClock("getModelIds");
-		Set<XID> result = this.basePersistence.getModelIds();
+		Set<XID> result = this.basePersistence.getManagedModelIds();
 		c.stop();
 		return result;
 	}
 	
 	@Override
-	public RevisionState getModelRevision(XAddress address) {
+	public ModelRevision getModelRevision(XAddress address) {
 		Clock c = this.stats.startClock("getModelRevision");
-		RevisionState result = this.basePersistence.getModelRevision(address);
+		ModelRevision result = this.basePersistence.getModelRevision(address);
 		c.stop();
 		return result;
 	}
@@ -106,9 +106,9 @@ public class StatsGatheringPersistenceWrapper implements XydraPersistence {
 	}
 	
 	@Override
-	public boolean hasModel(XID modelId) {
+	public boolean hasManagedModel(XID modelId) {
 		Clock c = this.stats.startClock("hasModel");
-		boolean result = this.basePersistence.hasModel(modelId);
+		boolean result = this.basePersistence.hasManagedModel(modelId);
 		c.stop();
 		return result;
 	}

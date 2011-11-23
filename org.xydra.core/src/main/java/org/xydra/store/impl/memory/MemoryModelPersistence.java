@@ -17,7 +17,7 @@ import org.xydra.core.model.delta.DeltaUtils;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.store.RevisionState;
+import org.xydra.store.ModelRevision;
 
 
 /**
@@ -165,8 +165,8 @@ public class MemoryModelPersistence {
 		return this.events.size() - 1;
 	}
 	
-	public RevisionState getModelRevision() {
-		return new RevisionState(getRevisionNumber(), exists());
+	public ModelRevision getModelRevision() {
+		return new ModelRevision(getRevisionNumber(), exists());
 	}
 	
 }

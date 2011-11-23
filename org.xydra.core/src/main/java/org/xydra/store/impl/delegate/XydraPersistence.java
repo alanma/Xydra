@@ -23,7 +23,7 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.store.GetEventsRequest;
-import org.xydra.store.RevisionState;
+import org.xydra.store.ModelRevision;
 import org.xydra.store.XydraStore;
 
 
@@ -121,9 +121,10 @@ public interface XydraPersistence {
 	
 	/**
 	 * @return a {@link Set} containing all XIDs of {@link XModel XModels} in
-	 *         this {@link XydraPersistence}.
+	 *         this {@link XydraPersistence}. The models do not necessarily
+	 *         exist right now, i.e. they might have been deleted already.
 	 */
-	Set<XID> getModelIds();
+	Set<XID> getManagedModelIds();
 	
 	/**
 	 * @param address of an {@link XModel}
@@ -131,7 +132,7 @@ public interface XydraPersistence {
 	 *         {@link XModel}. Pair.second: If the model currently exists or
 	 *         not.
 	 */
-	RevisionState getModelRevision(XAddress address);
+	ModelRevision getModelRevision(XAddress address);
 	
 	/**
 	 * @param address of an {@link XModel}
@@ -156,8 +157,9 @@ public interface XydraPersistence {
 	
 	/**
 	 * @param id
-	 * @return true if this persistence contains the given modelId.
+	 * @return true if this persistence has ever managed the given modelId. This
+	 *         does not imply that the model currently exists.
 	 */
-	boolean hasModel(XID modelId);
+	boolean hasManagedModel(XID modelId);
 	
 }

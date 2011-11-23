@@ -1646,7 +1646,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		XType type = address.getAddressedType();
 		
 		if(type == XType.XMODEL) {
-			SynchronousTestCallback<BatchedResult<RevisionState>[]> revCallback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
+			SynchronousTestCallback<BatchedResult<ModelRevision>[]> revCallback = new SynchronousTestCallback<BatchedResult<ModelRevision>[]>();
 			addresses = new XAddress[] { address };
 			this.store.getModelRevisions(this.correctUser, this.correctUserPass, addresses,
 			        revCallback);

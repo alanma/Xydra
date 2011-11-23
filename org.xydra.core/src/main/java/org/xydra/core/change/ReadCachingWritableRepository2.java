@@ -12,7 +12,6 @@ import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableRepository;
-import org.xydra.index.IndexUtils;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.impl.delegate.XydraPersistence;
@@ -81,7 +80,7 @@ public class ReadCachingWritableRepository2 implements XWritableRepository {
 	
 	private Set<XID> modelIds() {
 		if(!this.knowsAllModelsIds) {
-			this.knownExistingModelIds = IndexUtils.toSet(this.map.keySet().iterator());
+			this.knownExistingModelIds = this.persistence.getManagedModelIds();
 			this.knowsAllModelsIds = true;
 		}
 		return this.knownExistingModelIds;

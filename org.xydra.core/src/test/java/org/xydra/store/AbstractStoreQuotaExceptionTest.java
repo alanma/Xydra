@@ -219,12 +219,12 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	// Testing the quota exception for getModelRevisions
 	@Test
 	public void testGetModelRevisionsQuotaException() {
-		SynchronousTestCallback<BatchedResult<RevisionState>[]> callback = null;
+		SynchronousTestCallback<BatchedResult<ModelRevision>[]> callback = null;
 		XAddress[] tempArray = { XX.toAddress(XX.createUniqueId(), XX.createUniqueId(), null, null) };
 		
 		assert this.bfQuota > 0;
 		for(long l = 0; l < this.bfQuota + 1; l++) {
-			callback = new SynchronousTestCallback<BatchedResult<RevisionState>[]>();
+			callback = new SynchronousTestCallback<BatchedResult<ModelRevision>[]>();
 			
 			this.store.getModelRevisions(this.incorrectUser, this.incorrectUserPass, tempArray,
 			        callback);

@@ -37,7 +37,7 @@ import org.xydra.store.GetEventsRequest;
 import org.xydra.store.InternalStoreException;
 import org.xydra.store.QuotaException;
 import org.xydra.store.RequestException;
-import org.xydra.store.RevisionState;
+import org.xydra.store.ModelRevision;
 import org.xydra.store.StoreException;
 import org.xydra.store.TimeoutException;
 
@@ -532,16 +532,16 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		assertEquals(b, b2);
 	}
 	
-	private void testModelRevisions(BatchedResult<RevisionState>[] revs) {
+	private void testModelRevisions(BatchedResult<ModelRevision>[] revs) {
 		
 		assert revs != null;
 		
-		BatchedResult<RevisionState>[] results = preparePre(revs);
+		BatchedResult<ModelRevision>[] results = preparePre(revs);
 		
 		XydraOut out = create();
 		SerializedStore.serializeModelRevisions(results, out);
 		
-		BatchedResult<RevisionState>[] res = preparePost(revs);
+		BatchedResult<ModelRevision>[] res = preparePost(revs);
 		
 		XydraElement element = parse(out.getData());
 		assertNotNull(element);
@@ -605,15 +605,15 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testModelRevisionsSuccess() {
-		testModelRevisions(new BatchedResult[] { result(new RevisionState(42, true)) });
+		testModelRevisions(new BatchedResult[] { result(new ModelRevision(42, true)) });
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testModelRevisionsMixed() {
-		testModelRevisions(new BatchedResult[] { result(new RevisionState(42, true)), preError(),
-		        result(new RevisionState(-1, true)), storeError(),
-		        result(new RevisionState(10, true)) });
+		testModelRevisions(new BatchedResult[] { result(new ModelRevision(42, true)), preError(),
+		        result(new ModelRevision(-1, true)), storeError(),
+		        result(new ModelRevision(10, true)) });
 	}
 	
 	private static Object modelError() {

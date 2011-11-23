@@ -26,7 +26,7 @@ import org.xydra.store.GetEventsRequest;
 import org.xydra.store.InternalStoreException;
 import org.xydra.store.QuotaException;
 import org.xydra.store.RequestException;
-import org.xydra.store.RevisionState;
+import org.xydra.store.ModelRevision;
 import org.xydra.store.TimeoutException;
 import org.xydra.store.XydraStore;
 import org.xydra.store.XydraStoreAdmin;
@@ -329,7 +329,7 @@ public interface XydraSingleOperationStore {
 	 * @throws IllegalArgumentException if one of the given parameters is null.
 	 */
 	void getModelRevision(XID actorId, String passwordHash, XAddress modelAddress,
-	        Callback<RevisionState> callback) throws IllegalArgumentException;
+	        Callback<ModelRevision> callback) throws IllegalArgumentException;
 	
 	/**
 	 * Read current state.

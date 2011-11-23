@@ -29,7 +29,7 @@ import org.xydra.store.ConnectionException;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.InternalStoreException;
 import org.xydra.store.RequestException;
-import org.xydra.store.RevisionState;
+import org.xydra.store.ModelRevision;
 import org.xydra.store.XydraStore;
 import org.xydra.store.XydraStoreAdmin;
 
@@ -506,14 +506,14 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 		new ModelIdsRequest(actor, password, callback).run();
 	}
 	
-	private class RevisionsRequest extends Request<BatchedResult<RevisionState>[]> {
+	private class RevisionsRequest extends Request<BatchedResult<ModelRevision>[]> {
 		
 		private final XAddress[] modelAddresses;
-		private final BatchedResult<RevisionState>[] res;
+		private final BatchedResult<ModelRevision>[] res;
 		
 		@SuppressWarnings("unchecked")
 		protected RevisionsRequest(XID actor, String password, XAddress[] modelAddresses,
-		        Callback<BatchedResult<RevisionState>[]> callback) {
+		        Callback<BatchedResult<ModelRevision>[]> callback) {
 			super(actor, password, callback);
 			this.modelAddresses = modelAddresses;
 			if(this.modelAddresses == null) {
@@ -534,7 +534,7 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 		}
 		
 		@Override
-		protected BatchedResult<RevisionState>[] parse(XydraElement element) {
+		protected BatchedResult<ModelRevision>[] parse(XydraElement element) {
 			
 			SerializedStore.toModelRevisions(element, this.res);
 			
@@ -545,7 +545,7 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 	
 	@Override
 	public void getModelRevisions(XID actor, String password, XAddress[] modelAddresses,
-	        Callback<BatchedResult<RevisionState>[]> callback) {
+	        Callback<BatchedResult<ModelRevision>[]> callback) {
 		new RevisionsRequest(actor, password, modelAddresses, callback).run();
 	}
 	

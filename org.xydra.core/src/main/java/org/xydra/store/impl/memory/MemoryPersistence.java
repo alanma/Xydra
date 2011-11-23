@@ -15,7 +15,7 @@ import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.store.RequestException;
-import org.xydra.store.RevisionState;
+import org.xydra.store.ModelRevision;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -77,7 +77,7 @@ public class MemoryPersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public Set<XID> getModelIds() {
+	public Set<XID> getManagedModelIds() {
 		Set<XID> modelIds = new HashSet<XID>();
 		synchronized(this.models) {
 			for(Map.Entry<XID,MemoryModelPersistence> p : this.models.entrySet()) {
@@ -106,7 +106,7 @@ public class MemoryPersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public RevisionState getModelRevision(XAddress address) {
+	public ModelRevision getModelRevision(XAddress address) {
 		if(address.getAddressedType() != XType.XMODEL) {
 			throw new RequestException("must use a model address to get a model revison, was "
 			        + address);
@@ -141,7 +141,7 @@ public class MemoryPersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public boolean hasModel(XID modelId) {
+	public boolean hasManagedModel(XID modelId) {
 		synchronized(this.models) {
 			MemoryModelPersistence modelPersistence = this.models.get(modelId);
 			return modelPersistence != null && modelPersistence.exists();

@@ -143,8 +143,8 @@ public class PartialAuthorisationDatabaseOnWritableRepository implements XAccess
 			try {
 				Pair<XAddress,XID> pair = fromFieldId(fieldId);
 				XBooleanValue newAllowed = (XBooleanValue)fieldEvent.getNewValue();
-				fastDatabase.setAccess(event.getChangedEntity().getObject(), pair.getFirst(), pair
-				        .getSecond(), newAllowed.contents());
+				fastDatabase.setAccess(event.getChangedEntity().getObject(), pair.getFirst(),
+				        pair.getSecond(), newAllowed.contents());
 			} catch(IllegalArgumentException e) {
 				log.warn("Could not parse '" + fieldId + "' as encoded(XAddress/XID)");
 			}
@@ -168,8 +168,8 @@ public class PartialAuthorisationDatabaseOnWritableRepository implements XAccess
 			throw new IllegalArgumentException("Could not parse '" + fieldId
 			        + "' as XAddress/XID pair.");
 		}
-		return new Pair<XAddress,XID>(NamingUtils.decodeXAddress(parts[0]), NamingUtils
-		        .decodeXid(parts[1]));
+		return new Pair<XAddress,XID>(NamingUtils.decodeXAddress(parts[0]),
+		        NamingUtils.decodeXid(parts[1]));
 	}
 	
 	// TODO make non-public
@@ -264,6 +264,7 @@ public class PartialAuthorisationDatabaseOnWritableRepository implements XAccess
 			XWritableModel rightsModel = this.authorisationRepository.getModel(modelId);
 			if(rightsModel == null) {
 				rightsModel = this.authorisationRepository.createModel(modelId);
+				assert rightsModel != null;
 			}
 			modelAccessDb = new ModelAccessDatabaseOnWritableModel(rightsModel);
 			this.modelAccessDbs.put(modelId, modelAccessDb);

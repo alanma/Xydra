@@ -15,7 +15,7 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.index.iterator.NoneIterator;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.store.RevisionState;
+import org.xydra.store.ModelRevision;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -45,7 +45,7 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	
 	@Override
 	public XWritableObject createObject(XID objectId) {
-		assert this.persistence.hasModel(this.modelId);
+		assert this.persistence.hasManagedModel(this.modelId);
 		
 		XWritableObject object = this.getObject(objectId);
 		if(object != null) {
@@ -80,7 +80,7 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	 */
 	public List<XEvent> getNewEvents() {
 		// get highestEvent
-		RevisionState rs = this.persistence.getModelRevision(this.getAddress());
+		ModelRevision rs = this.persistence.getModelRevision(this.getAddress());
 		long currentRev = rs.revision();
 		List<XEvent> events = null;
 		if(currentRev > this.lastRev) {
