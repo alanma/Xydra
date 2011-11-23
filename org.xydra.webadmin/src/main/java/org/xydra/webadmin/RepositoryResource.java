@@ -183,7 +183,7 @@ public class RepositoryResource {
 		XydraPersistence p = Utils.getPersistence(repoId);
 		if(style == RStyle.xmlzip) {
 			long now = System.currentTimeMillis();
-			List<XID> modelIdList = new ArrayList<XID>(p.getModelIds());
+			List<XID> modelIdList = new ArrayList<XID>(p.getManagedModelIds());
 			Collections.sort(modelIdList);
 			int modelCount = modelIdList.size();
 			if(Cache.hasModelUpdateCountNotOlderThan(repoId, modelCount, 5 * 60 * 1000)) {
@@ -217,7 +217,7 @@ public class RepositoryResource {
 			w.write(HtmlUtils.form(METHOD.POST, link(repoId)).withInputFile("backupfile")
 			        .withInputSubmit("Upload and set as current state").toString());
 			
-			List<XID> modelIdList = new ArrayList<XID>(p.getModelIds());
+			List<XID> modelIdList = new ArrayList<XID>(p.getManagedModelIds());
 			Collections.sort(modelIdList);
 			for(XID modelId : modelIdList) {
 				w.write("<h2>Model: " + modelId + "</h2>\n");

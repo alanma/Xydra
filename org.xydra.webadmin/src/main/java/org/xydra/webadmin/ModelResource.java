@@ -48,7 +48,7 @@ import org.xydra.restless.utils.ServletUtils;
 import org.xydra.restless.utils.SharedHtmlUtils.HeadLinkStyle;
 import org.xydra.restless.utils.SharedHtmlUtils.METHOD;
 import org.xydra.server.util.XydraHtmlUtils;
-import org.xydra.store.RevisionState;
+import org.xydra.store.ModelRevision;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
@@ -122,7 +122,7 @@ public class ModelResource {
 		
 		if(style == MStyle.xml || style == MStyle.xmlhtml || style == MStyle.json) {
 			XydraPersistence p = Utils.getPersistence(modelAddress.getRepository());
-			RevisionState rev = p.getModelRevision(modelAddress);
+			ModelRevision rev = p.getModelRevision(modelAddress);
 			log.debug(modelAddress + " rev=" + rev.revision() + " exists:" + rev.modelExists());
 			
 			if(rev.modelExists()) {
@@ -322,7 +322,7 @@ public class ModelResource {
 		
 		if(style == MStyle.htmlrev || style == MStyle.htmlevents) {
 			XydraPersistence p = Utils.getPersistence(modelAddress.getRepository());
-			RevisionState rev = p.getModelRevision(modelAddress);
+			ModelRevision rev = p.getModelRevision(modelAddress);
 			w.write("rev=" + rev.revision() + " exists:" + rev.modelExists() + "<br/>\n");
 			w.flush();
 			if(style == MStyle.htmlevents) {
