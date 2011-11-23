@@ -31,7 +31,7 @@ public class GaePerformanceTest extends AbstractPersistencePerformanceTest {
 		InstanceContext.clear();
 		XydraRuntime.init();
 		XydraPersistence p = new GaePersistence(repositoryId);
-		assert p.getModelIds().isEmpty();
+		assert p.getManagedModelIds().isEmpty();
 		return p;
 	}
 	

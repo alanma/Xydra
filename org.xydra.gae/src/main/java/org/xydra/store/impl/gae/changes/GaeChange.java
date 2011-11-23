@@ -22,7 +22,6 @@ import org.xydra.store.impl.gae.GaeAssert;
 import org.xydra.store.impl.gae.GaeOperation;
 import org.xydra.store.impl.gae.Memcache;
 import org.xydra.store.impl.gae.SyncDatastore;
-import org.xydra.store.impl.gae.execute.GaeExecutionServiceImpl3;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -96,23 +95,13 @@ public class GaeChange {
 	 * 
 	 * <pre>
 	 * 
-	 *  Creating ------> FailedTimeout
-	 *     |
-	 *     |----> Executing ----> SucessExecuted
-	 *     |
-	 *     |----> SuccessNochange
-	 *     |
-	 *     \----> FailedPreconditions
-	 * 
-	 * Since {@link GaeExecutionServiceImpl3}:
-	 * 
 	 *  Creating 
 	 *     |
 	 *     |----> SucessExecuted
 	 *     |
 	 *     |----> SuccessNochange
 	 *     |
-	 *     |----> FailedTimeout
+	 *     |----> FailedTimeout (might also be set by another process)
 	 *     |
 	 *     \----> FailedPreconditions
 	 * 
@@ -132,17 +121,6 @@ public class GaeChange {
 		 * anything OR if too old: Mark as FailedTimeout
 		 */
 		Creating(0),
-
-		/**
-		 * got locks, preconditions checked, events written
-		 * 
-		 * => applying changes
-		 * 
-		 * a.k.a. readyToExecute
-		 * 
-		 * @Deprecated in {@link GaeExecutionServiceImpl3}
-		 */
-		Executing(2),
 
 		/** changes made, locks freed. Current revision is now bigger. */
 		SuccessExecuted(3),
@@ -174,15 +152,6 @@ public class GaeChange {
 		}
 		
 		/**
-		 * @return true if state will never change again
-		 * @deprecated use isCommited
-		 */
-		@Deprecated
-		public boolean isTerminalState() {
-			return this == FailedPreconditions || isSuccess();
-		}
-		
-		/**
 		 * @return true if the given status indicates that the change has been
 		 *         successfully executed.
 		 */
@@ -199,30 +168,16 @@ public class GaeChange {
 		}
 		
 		/**
-		 * @return true, if a change with the given status can be rolled
-		 *         forward, false otherwise.
-		 * @deprecated Since {@link GaeExecutionServiceImpl3} there is no roll
-		 *             forward.
-		 */
-		public boolean canRollForward() {
-			return (this == Executing);
-		}
-		
-		/**
 		 * @return true if the given status indicates that events are stored in
 		 *         the change entity.
 		 * 
-		 *         Events are saved after preconditions have been checked, but
-		 *         before actually executing the changes. This is done so that
-		 *         the MOF tree can be restored to a consistent state (by
-		 *         rolling forward) if there is an error or timeout while
-		 *         executing.
+		 *         Events are saved after preconditions have been checked.
 		 * 
-		 *         Thus, events are guaranteed to exist in both
-		 *         {@link #Executing} and {@link #SuccessExecuted} stages.
+		 *         Thus, events are guaranteed to exist in
+		 *         {@link #SuccessExecuted} stages.
 		 */
 		public boolean hasEvents() {
-			return (this == Executing || this == SuccessExecuted);
+			return this == SuccessExecuted;
 		}
 		
 		public static Status get(int value) {
@@ -230,9 +185,6 @@ public class GaeChange {
 			switch(value) {
 			case 0:
 				status = Creating;
-				break;
-			case 2:
-				status = Executing;
 				break;
 			case 3:
 				status = SuccessExecuted;
@@ -255,9 +207,11 @@ public class GaeChange {
 	
 	// timeouts
 	
-	public static final long GAE_WEB_REQUEST_TIMEOUT = 30000;
+	// adapted to latest GAE release as of 2011-11-22
+	public static final long GAE_WEB_REQUEST_TIMEOUT = 60 * 1000;
 	
-	public static final long APPLICATION_RESERVED_TIME = 20000;
+	// take up to 20 seconds for "other stuff" into account
+	public static final long APPLICATION_RESERVED_TIME = 20 * 1000;
 	
 	/**
 	 * timeout for changes in milliseconds
@@ -279,7 +233,7 @@ public class GaeChange {
 	 * However, setting this too close to TIMEOUT might result in two processes
 	 * executing the same change.
 	 */
-	private static final long TIME_CRITICAL = TIMEOUT - 3000;
+	private static final long TIME_CRITICAL = TIMEOUT - (3 * 1000);
 	
 	{
 		assert TIME_CRITICAL < TIMEOUT;
@@ -375,10 +329,13 @@ public class GaeChange {
 	}
 	
 	/**
+	 * May only be called on change entities that have NOT been commited yet.
+	 * 
 	 * @return true if more than {@link #TIMEOUT} milliseconds elapsed since a
 	 *         thread started working with the given change entity
 	 */
 	public boolean isTimedOut() {
+		GaeAssert.gaeAssert(!getStatus().isCommitted());
 		assert !getStatus().isCommitted();
 		if(this.lastActivity < 0) {
 			this.lastActivity = (Long)this.entity.getProperty(PROP_LAST_ACTIVITY);

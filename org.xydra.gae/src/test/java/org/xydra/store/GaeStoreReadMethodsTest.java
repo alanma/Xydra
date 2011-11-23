@@ -56,7 +56,7 @@ public class GaeStoreReadMethodsTest extends AbstractSecureStoreReadMethodsTest 
 		mids = new SynchronousTestCallback<Set<XID>>();
 		this.store.getModelIds(getCorrectUser(), getCorrectUserPasswordHash(), mids);
 		assertEquals(SynchronousTestCallback.SUCCESS, mids.waitOnCallback(Long.MAX_VALUE));
-		assert mids.effect.size() == 3;
+		assert mids.effect.size() == 0 : mids.effect.size();
 	}
 	
 	public static void main(String[] args) {

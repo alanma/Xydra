@@ -29,7 +29,6 @@ public abstract class AbstractGaeSnapshotServiceImpl implements IGaeSnapshotServ
 	@Override
 	public XRevWritableObject getObjectSnapshot(long modelRevisionNumber, boolean precise,
 	        XID objectId) {
-		
 		/*
 		 * IMPROVE(performance, defer) generate the object snapshot directly.
 		 * While reading the change events, one could skip reading large,

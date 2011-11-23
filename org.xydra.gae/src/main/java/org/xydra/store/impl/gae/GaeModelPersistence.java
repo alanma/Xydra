@@ -10,8 +10,8 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.store.RevisionState;
-import org.xydra.store.impl.gae.changes.GaeChangesServiceImpl2;
+import org.xydra.store.ModelRevision;
+import org.xydra.store.impl.gae.changes.GaeChangesServiceImpl3;
 import org.xydra.store.impl.gae.changes.IGaeChangesService;
 import org.xydra.store.impl.gae.execute.GaeExecutionServiceImpl3;
 import org.xydra.store.impl.gae.execute.IGaeExecutionService;
@@ -34,72 +34,78 @@ public class GaeModelPersistence {
 	
 	private static final Logger log = LoggerFactory.getLogger(GaeModelPersistence.class);
 	
-	private XAddress modelAddress;
-	private IGaeChangesService changesService;
-	private IGaeSnapshotService snapshotService;
-	private IGaeExecutionService executionService;
+	private final XAddress modelAddress;
+	private final IGaeChangesService changesService;
+	private final IGaeSnapshotService snapshotService;
+	private final IGaeExecutionService executionService;
+	private final RevisionManager revisionManager;
 	
 	public GaeModelPersistence(XAddress modelAddress) {
+		this.revisionManager = new RevisionManager(modelAddress);
 		this.modelAddress = modelAddress;
-		this.changesService = new GaeChangesServiceImpl2(this.modelAddress);
+		this.changesService = new GaeChangesServiceImpl3(this.modelAddress, this.revisionManager);
 		this.snapshotService = new GaeSnapshotServiceImpl3(this.changesService);
-		this.executionService = new GaeExecutionServiceImpl3(this.changesService,
-		        this.snapshotService);
-		/*
-		 * this.executionService = new
-		 * GaeExecutionServiceImpl3(this.changesService, this.snapshotService);
-		 */
+		this.executionService = new GaeExecutionServiceImpl3(this.revisionManager,
+		        this.changesService, this.snapshotService);
 	}
 	
 	public long executeCommand(XCommand command, XID actorId) {
+		assertInstanceRevisionNumberHasBeenInitialized();
 		return this.executionService.executeCommand(command, actorId);
 	}
 	
 	public List<XEvent> getEventsBetween(XAddress address, long beginRevision, long endRevision) {
-		/*
-		 * TODO(Complete Impl) filter events (objectevents, fieldevents) if
-		 * address is not a model address?
-		 */
-		return this.changesService.getEventsBetween(beginRevision, endRevision);
+		assertThreadLocalRevisionNumberIsUpToDate();
+		return this.changesService.getEventsBetween(address, beginRevision, endRevision);
 	}
 	
-	public long getCurrentRevisionNumber() {
-		return this.changesService.getCurrentRevisionNumber();
+	private void assertThreadLocalRevisionNumberIsUpToDate() {
+		if(this.revisionManager.isThreadLocallyDefined()) {
+			// fine
+		} else {
+			this.changesService.calculateCurrentModelRevision();
+		}
+	}
+	
+	private void assertInstanceRevisionNumberHasBeenInitialized() {
+		if(this.revisionManager.getInstanceRevisionState() == null) {
+			this.changesService.calculateCurrentModelRevision();
+		}
 	}
 	
 	synchronized public XWritableModel getSnapshot() {
-		/* get fresh current revNr */
-		boolean modelExists = this.changesService.exists();
-		if(!modelExists) {
+		assertThreadLocalRevisionNumberIsUpToDate();
+		ModelRevision currentRevision = this.revisionManager.getThreadLocalRevision();
+		if(!currentRevision.modelExists()) {
 			return null;
 		}
-		long currentRevNr = this.changesService.getCurrentRevisionNumber();
+		long currentRevNr = currentRevision.revision();
 		XWritableModel snapshot = this.snapshotService.getModelSnapshot(currentRevNr, false);
 		log.debug("return snapshot rev " + currentRevNr + " for model " + this.modelAddress);
 		return snapshot;
 	}
 	
 	public XWritableObject getObjectSnapshot(XID objectId) {
-		/*
-		 * IMPROVE(performance, defer) generate the object snapshot directly.
-		 * While reading the change events, one could skip reading large,
-		 * unaffected XVALUes.
-		 * 
-		 * Idea 2: Put object snapshots individually in a cache -- maybe only
-		 * large ones?
-		 * 
-		 * Ideas 3: Easy to implement: If localVMcache has it, copy directly
-		 * just the object from it.
-		 */
-		XWritableModel modelSnapshot = getSnapshot();
-		if(modelSnapshot == null) {
+		assertThreadLocalRevisionNumberIsUpToDate();
+		ModelRevision currentRevision = this.revisionManager.getThreadLocalRevision();
+		boolean modelExists = currentRevision.modelExists();
+		if(!modelExists) {
 			return null;
 		}
-		return modelSnapshot.getObject(objectId);
+		long currentRevNr = currentRevision.revision();
+		return this.snapshotService.getObjectSnapshot(currentRevNr, true, objectId);
 	}
 	
-	public RevisionState getModelRevision() {
-		return new RevisionState(getCurrentRevisionNumber(), this.changesService.exists());
+	/**
+	 * use thread-local caches to return the same revision number to the same
+	 * asking thread, until that thread terminates or does a change. Or
+	 * {@link InstanceContext#clearThreadContext()} is called.
+	 * 
+	 * @return the current {@link ModelRevision}
+	 */
+	public ModelRevision getModelRevision() {
+		assertThreadLocalRevisionNumberIsUpToDate();
+		return this.revisionManager.getThreadLocalRevision();
 	}
 	
 	@Override
@@ -113,6 +119,10 @@ public class GaeModelPersistence {
 		return other instanceof GaeModelPersistence
 		        && ((GaeModelPersistence)other).modelAddress.equals(this.modelAddress);
 		
+	}
+	
+	public boolean modelHasBeenManaged(XID modelId) {
+		return this.changesService.modelHasBeenManaged();
 	}
 	
 }

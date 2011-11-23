@@ -20,7 +20,7 @@ import org.xydra.core.util.DumpUtils;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.log.gae.Log4jLoggerFactory;
-import org.xydra.store.RevisionState;
+import org.xydra.store.ModelRevision;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
@@ -55,13 +55,13 @@ public class GaePersistenceTest {
 		XAddress repoAddr = XX.toAddress(pers.getRepositoryId(), null, null, null);
 		XAddress modelAddr = XX.resolveModel(repoAddr, modelId);
 		
-		assertFalse(pers.hasModel(modelId));
-		assertEquals(new RevisionState(-1L, false), pers.getModelRevision(modelAddr));
+		assertFalse(pers.hasManagedModel(modelId));
+		assertEquals(new ModelRevision(-1L, false), pers.getModelRevision(modelAddr));
 		
 		pers.executeCommand(ACTOR,
 		        MemoryRepositoryCommand.createAddCommand(repoAddr, true, modelId));
-		assertEquals(new RevisionState(0, true), pers.getModelRevision(modelAddr));
-		assertTrue(pers.hasModel(modelId));
+		assertEquals(new ModelRevision(0, true), pers.getModelRevision(modelAddr));
+		assertTrue(pers.hasManagedModel(modelId));
 		
 		log.info("###   ADD object ");
 		long l = pers.executeCommand(ACTOR,
@@ -78,7 +78,7 @@ public class GaePersistenceTest {
 		pers = new GaePersistence(XX.toId("test-repo-1"));
 		
 		log.info("###   hasModel?");
-		assertTrue(pers.hasModel(modelId));
+		assertTrue(pers.hasManagedModel(modelId));
 		log.info("###   getSnapshot");
 		XWritableModel modelSnapshot = pers.getModelSnapshot(modelAddr);
 		assertNotNull("snapshot " + modelAddr + " was null", modelSnapshot);
@@ -110,20 +110,21 @@ public class GaePersistenceTest {
 		XAddress repoAddr = XX.toAddress(pers.getRepositoryId(), null, null, null);
 		XAddress modelAddr = XX.resolveModel(repoAddr, modelId);
 		
-		assert !pers.getModelIds().contains(modelId);
-		assertEquals(new RevisionState(-1L, false), pers.getModelRevision(modelAddr));
+		assert !pers.getManagedModelIds().contains(modelId);
+		assertEquals(new ModelRevision(-1L, false), pers.getModelRevision(modelAddr));
 		
 		pers.executeCommand(ACTOR,
 		        MemoryRepositoryCommand.createAddCommand(repoAddr, true, modelId));
 		
-		assertEquals(new RevisionState(0L, true), pers.getModelRevision(modelAddr));
-		assert pers.getModelIds().contains(modelId);
+		assertEquals(new ModelRevision(0L, true), pers.getModelRevision(modelAddr));
+		assert pers.getManagedModelIds().contains(modelId);
 		
 		pers.executeCommand(ACTOR,
 		        MemoryRepositoryCommand.createRemoveCommand(repoAddr, -1, modelId));
 		
-		assertEquals(new RevisionState(1L, false), pers.getModelRevision(modelAddr));
-		assert !pers.getModelIds().contains(modelId);
+		assertEquals(new ModelRevision(1L, false), pers.getModelRevision(modelAddr));
+		
+		assert !pers.getModelRevision(modelAddr).modelExists();
 	}
 	
 	@Test
@@ -135,12 +136,12 @@ public class GaePersistenceTest {
 		XAddress repoAddr = XX.toAddress(pers.getRepositoryId(), null, null, null);
 		XAddress modelAddr = XX.resolveModel(repoAddr, modelId);
 		
-		assert !pers.getModelIds().contains(modelId);
+		assert !pers.getManagedModelIds().contains(modelId);
 		// action: create model
 		pers.executeCommand(ACTOR,
 		        MemoryRepositoryCommand.createAddCommand(repoAddr, true, modelId));
 		// post-conditions:
-		assert pers.getModelIds().contains(modelId);
+		assert pers.getManagedModelIds().contains(modelId);
 		assert !pers.getModelSnapshot(modelAddr).hasObject(objectId);
 		// action: create object in model
 		pers.executeCommand(ACTOR, MemoryModelCommand.createAddCommand(modelAddr, true, objectId));
@@ -158,19 +159,19 @@ public class GaePersistenceTest {
 		assertNull(
 		        "modelsnapshot should be null after repo command remove, but is "
 		                + pers.getModelRevision(modelAddr), pers.getModelSnapshot(modelAddr));
-		assert !pers.getModelIds().contains(modelId);
+		assert !pers.getModelRevision(modelAddr).modelExists();
 		
 		// action: re-create model
 		pers.executeCommand(ACTOR,
 		        MemoryRepositoryCommand.createAddCommand(repoAddr, true, modelId));
 		assertEquals(3, pers.getModelRevision(modelAddr).revision());
-		assert pers.getModelIds().contains(modelId);
+		assert pers.getModelRevision(modelAddr).modelExists();
 		
 		// action: redundantly create model again
 		l = pers.executeCommand(ACTOR,
 		        MemoryRepositoryCommand.createAddCommand(repoAddr, true, modelId));
 		assert l == XCommand.NOCHANGE : l;
-		assert pers.getModelIds().contains(modelId);
+		assert pers.getManagedModelIds().contains(modelId);
 		assertEquals("nothing changed, so rev should stay the same", 3,
 		        pers.getModelRevision(modelAddr).revision());
 		assert pers.getModelSnapshot(modelAddr) != null;
@@ -188,7 +189,7 @@ public class GaePersistenceTest {
 		XAddress modelAddr = XX.resolveModel(repoAddr, modelId);
 		
 		// assert absence
-		assert !pers.getModelIds().contains(modelId);
+		assert !pers.getManagedModelIds().contains(modelId);
 		// assert pers.getModelSnapshot(modelAddr) == null;
 		
 		// add model
@@ -196,7 +197,7 @@ public class GaePersistenceTest {
 		long l = pers.executeCommand(ACTOR,
 		        MemoryRepositoryCommand.createAddCommand(repoAddr, true, modelId));
 		assert l >= 0;
-		assert pers.getModelIds().contains(modelId);
+		assert pers.getManagedModelIds().contains(modelId);
 		assertEquals(0, pers.getModelRevision(modelAddr).revision());
 		
 		// remove model
@@ -204,7 +205,7 @@ public class GaePersistenceTest {
 		l = pers.executeCommand(ACTOR,
 		        MemoryRepositoryCommand.createRemoveCommand(repoAddr, 0, modelId));
 		assertEquals(1, l);
-		assert !pers.getModelIds().contains(modelId);
+		assert !pers.getModelRevision(modelAddr).modelExists();
 		// assert pers.getModelSnapshot(modelAddr) == null;
 		assertEquals(1, pers.getModelRevision(modelAddr).revision());
 		
@@ -213,7 +214,8 @@ public class GaePersistenceTest {
 		l = pers.executeCommand(ACTOR,
 		        MemoryRepositoryCommand.createAddCommand(repoAddr, true, modelId));
 		assert l >= 0 : l;
-		assert pers.getModelIds().contains(modelId);
+		assert pers.getModelRevision(modelAddr).modelExists();
+		assert pers.getManagedModelIds().contains(modelId);
 		assert pers.getModelSnapshot(modelAddr) != null;
 		assertEquals(2, pers.getModelRevision(modelAddr).revision());
 		
@@ -231,13 +233,13 @@ public class GaePersistenceTest {
 		XAddress modelAddr = XX.resolveModel(repoAddr, modelId);
 		
 		// assert absence
-		assert !pers.getModelIds().contains(modelId);
+		assert !pers.getManagedModelIds().contains(modelId);
 		
 		// add model & object
 		long l = pers.executeCommand(ACTOR,
 		        MemoryRepositoryCommand.createAddCommand(repoAddr, true, modelId));
 		assert l >= 0;
-		assert pers.getModelIds().contains(modelId);
+		assert pers.getManagedModelIds().contains(modelId);
 		assertEquals(0, pers.getModelRevision(modelAddr).revision());
 		l = pers.executeCommand(ACTOR,
 		        MemoryModelCommand.createAddCommand(modelAddr, true, objectId));
@@ -248,7 +250,8 @@ public class GaePersistenceTest {
 		l = pers.executeCommand(ACTOR,
 		        MemoryRepositoryCommand.createRemoveCommand(repoAddr, -1, modelId));
 		assert l >= 0 : l;
-		assert !pers.getModelIds().contains(modelId);
+		assert pers.getManagedModelIds().contains(modelId);
+		assert !pers.getModelRevision(modelAddr).modelExists();
 		// assert pers.getModelSnapshot(modelAddr) == null;
 		assertEquals(2, pers.getModelRevision(modelAddr).revision());
 		
@@ -256,7 +259,8 @@ public class GaePersistenceTest {
 		l = pers.executeCommand(ACTOR,
 		        MemoryRepositoryCommand.createAddCommand(repoAddr, true, modelId));
 		assert l >= 0;
-		assert pers.getModelIds().contains(modelId);
+		assert pers.getManagedModelIds().contains(modelId);
+		assert pers.getModelRevision(modelAddr).modelExists();
 		assertEquals(3, pers.getModelRevision(modelAddr).revision());
 		l = pers.executeCommand(ACTOR,
 		        MemoryModelCommand.createAddCommand(modelAddr, true, objectId));

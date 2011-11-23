@@ -2,14 +2,17 @@ package org.xydra.store.impl.gae.changes;
 
 import java.io.Serializable;
 
-import org.xydra.store.RevisionState;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
+import org.xydra.store.ModelRevision;
+import org.xydra.store.impl.gae.DebugFormatter;
+import org.xydra.store.impl.gae.DebugFormatter.Timing;
 
 
 /**
  * This class:
  * 
- * 1) Implements {@link IRevisionInfo} and maintains the invarian currentRev >=
- * lastCommitted >= lastTaken.
+ * Maintains these invariants: currentRev >= lastCommitted >= lastTaken.
  * 
  * 2) Is {@link Serializable} and can be used in MemCache.
  * 
@@ -18,22 +21,39 @@ import org.xydra.store.RevisionState;
  * 
  * 4) Is thread-safe.
  * 
- * @author xamde
+ * 5) ... is only relevant within the GAE implementation.
  * 
+ * A defined currentRev requires a defined value for modelExists.
+ * 
+ * @author xamde
  */
-public class RevisionInfo implements Serializable, IRevisionInfo {
+public class RevisionInfo implements Serializable {
+	
+	private static final Logger log = LoggerFactory.getLogger(RevisionInfo.class);
 	
 	private static final long serialVersionUID = -8537625185285087183L;
 	
 	/**
-	 * Create a revision info that knows nothing.
+	 * Returned if a value is not set.
 	 */
-	public RevisionInfo() {
+	public static final long NOT_SET = -2L;
+	
+	/**
+	 * Create a revision info that knows nothing.
+	 * 
+	 * @param datasourceName for debugging purposes
+	 */
+	public RevisionInfo(String datasourceName) {
+		this.datasourceName = datasourceName;
+		log.debug(DebugFormatter.init(this.datasourceName));
 		clear();
 	}
 	
-	@Override
+	/**
+	 * Reset to initial values that denote zero knowledge.
+	 */
 	public void clear() {
+		log.debug(DebugFormatter.clear(this.datasourceName));
 		this.revisionState = null;
 		this.lastCommitted = NOT_SET;
 		this.lastTaken = NOT_SET;
@@ -41,37 +61,72 @@ public class RevisionInfo implements Serializable, IRevisionInfo {
 	}
 	
 	/** can be null */
-	private RevisionState revisionState;
+	private GaeModelRevision revisionState;
 	private long lastCommitted;
 	private long lastTaken;
 	private int unsavedChanges;
 	
-	@Override
+	private String datasourceName;
+	
+	/**
+	 * @return lastCommited if defined, {@link #NOT_SET} otherwise.
+	 */
 	public synchronized long getLastCommitted() {
-		return this.lastCommitted;
+		synchronized(this) {
+			long result = this.lastCommitted;
+			log.trace(DebugFormatter.dataGet(this.datasourceName, "lastCommitted", result,
+			        Timing.Now));
+			return result;
+		}
 	}
 	
-	@Override
+	/**
+	 * @return lastTaken if defined, {@link #NOT_SET} otherwise.
+	 */
 	public synchronized long getLastTaken() {
-		return this.lastTaken;
+		synchronized(this) {
+			long result = this.lastTaken;
+			log.trace(DebugFormatter.dataGet(this.datasourceName, "lastTaken", result, Timing.Now));
+			return result;
+		}
 	}
 	
-	@Override
+	/**
+	 * @return currentRev if defined, {@link #NOT_SET} otherwise.
+	 */
 	public synchronized long getCurrentRev() {
-		return this.revisionState == null ? NOT_SET : this.revisionState.revision();
+		synchronized(this) {
+			long result = this.revisionState == null ? NOT_SET : this.revisionState.revision();
+			log.trace(DebugFormatter.dataGet(this.datasourceName, "currentRev", result, Timing.Now));
+			return result;
+		}
 	}
 	
-	@Override
-	public synchronized Boolean modelExists() {
-		return this.revisionState == null ? null : this.revisionState.modelExists();
+	/**
+	 * @return true if model exists; false if not; null if not known.
+	 */
+	public Boolean modelExists() {
+		synchronized(this) {
+			Boolean result = this.revisionState == null ? null : this.revisionState.modelExists();
+			log.debug(DebugFormatter
+			        .dataGet(this.datasourceName, "modelExists", result, Timing.Now));
+			return result;
+		}
 	}
 	
-	@Override
-	public synchronized void setCurrentRevisionStateIfRevIsHigher(RevisionState revisionState) {
+	/**
+	 * Set the given value as the new internal value only if it is higher than
+	 * the current internal value.
+	 * 
+	 * @param revisionState Can not be null.
+	 */
+	public synchronized void setCurrentModelRevisionIfRevIsHigher(GaeModelRevision revisionState) {
 		if(revisionState == null) {
 			throw new IllegalArgumentException("revisionState can not be null");
 		}
 		if(this.revisionState == null || revisionState.revision() > this.revisionState.revision()) {
+			log.debug(DebugFormatter.dataPut(this.datasourceName, "revisionState", revisionState,
+			        Timing.Now));
 			this.revisionState = revisionState;
 			this.unsavedChanges++;
 			// invariant: currentRev >= lastCommitted
@@ -79,9 +134,16 @@ public class RevisionInfo implements Serializable, IRevisionInfo {
 		}
 	}
 	
-	@Override
+	/**
+	 * Set the given value as the new internal value only if it is higher than
+	 * the current internal value.
+	 * 
+	 * @param lastCommitted ..
+	 */
 	public synchronized void setLastCommittedIfHigher(long lastCommitted) {
 		if(lastCommitted > this.lastCommitted) {
+			log.debug(DebugFormatter.dataPut(this.datasourceName, "lastCommitted", lastCommitted,
+			        Timing.Now));
 			this.lastCommitted = lastCommitted;
 			this.unsavedChanges++;
 			// invariant: lastCommitted >= lastTaken
@@ -89,9 +151,16 @@ public class RevisionInfo implements Serializable, IRevisionInfo {
 		}
 	}
 	
-	@Override
+	/**
+	 * Set the given value as the new internal value only if it is higher than
+	 * the current internal value.
+	 * 
+	 * @param lastTaken ..
+	 */
 	public synchronized void setLastTakenIfHigher(long lastTaken) {
 		if(lastTaken > this.lastTaken) {
+			log.debug(DebugFormatter.dataPut(this.datasourceName, "lastTaken", lastTaken,
+			        Timing.Now));
 			this.lastTaken = lastTaken;
 			this.unsavedChanges++;
 		}
@@ -105,9 +174,16 @@ public class RevisionInfo implements Serializable, IRevisionInfo {
 		this.unsavedChanges = 0;
 	}
 	
-	@Override
-	public RevisionState getRevisionState() {
-		return this.revisionState;
+	/**
+	 * @return a {@link ModelRevision} if known, null otherwise.
+	 */
+	public GaeModelRevision getRevisionState() {
+		synchronized(this) {
+			GaeModelRevision result = this.revisionState;
+			log.trace(DebugFormatter.dataGet(this.datasourceName, "revisionState", result,
+			        Timing.Now));
+			return result;
+		}
 	}
 	
 	@Override
@@ -115,6 +191,10 @@ public class RevisionInfo implements Serializable, IRevisionInfo {
 		return "{current:" + getCurrentRev() + ",lastTaken:" + getLastTaken() + ",lastCommitted:"
 		        + getLastCommitted() + ",modelExists:" + modelExists() + "}; unsavedChanges="
 		        + this.hasUnsavedChanges();
+	}
+	
+	public void setDatasourceName(String datasourceName) {
+		this.datasourceName = datasourceName;
 	}
 	
 }

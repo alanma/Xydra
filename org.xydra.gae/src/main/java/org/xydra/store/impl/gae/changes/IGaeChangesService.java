@@ -4,11 +4,12 @@ import java.util.List;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
-import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.store.Callback;
 import org.xydra.store.GetEventsRequest;
+import org.xydra.store.ModelRevision;
 import org.xydra.store.XydraStore;
+import org.xydra.store.impl.gae.RevisionManager;
 import org.xydra.store.impl.gae.changes.GaeChange.Status;
 import org.xydra.store.impl.gae.changes.GaeEvents.AsyncValue;
 
@@ -24,17 +25,13 @@ public interface IGaeChangesService {
 	XAddress getModelAddress();
 	
 	/**
-	 * @return the model's current revision number. Non-existing models are
-	 *         signalled as {@link XCommand#FAILED}, i.e. those that have just
-	 *         been removed from the repository.
-	 * @see XydraStore#getModelRevisions(XID, String, XAddress[], Callback)
-	 */
-	long getCurrentRevisionNumber();
-	
-	/**
 	 * Fetch a range of events from the datastore.
 	 * 
 	 * See also {@link GetEventsRequest}.
+	 * 
+	 * @param address TODO
+	 * @param beginRevision inclusive
+	 * @param endRevision inclusive
 	 * 
 	 * @see XydraStore#getEvents(XID, String, GetEventsRequest[],
 	 *      org.xydra.store.Callback)
@@ -42,19 +39,21 @@ public interface IGaeChangesService {
 	 *      TODO localVm Implementation should cache retrieved events in a
 	 *      localVmCache and never ask for them again.
 	 * 
-	 * @param beginRevision inclusive
-	 * @param endRevision inclusive
 	 * @return a list of events or null if this model was never created. The
 	 *         list might contain fewer elements than the range implies.
 	 */
-	List<XEvent> getEventsBetween(long beginRevision, long endRevision);
+	List<XEvent> getEventsBetween(XAddress address, long beginRevision, long endRevision);
 	
 	AsyncValue getValue(long fieldRev, int transindex);
 	
 	/**
-	 * @return true if model exists
+	 * Calculate with model change log and try to progress the currently known
+	 * current revision number (from {@link RevisionManager} The result is
+	 * stored in {@link RevisionManager} and returned for convenience.
+	 * 
+	 * @see XydraStore#getModelRevisions(XID, String, XAddress[], Callback)
 	 */
-	boolean exists();
+	ModelRevision calculateCurrentModelRevision();
 	
 	/**
 	 * Grabs the lowest available revision number and registers a change for
@@ -68,7 +67,7 @@ public interface IGaeChangesService {
 	 * 
 	 *         Note: Reads revCache.lastTaken
 	 */
-	GaeChange grabRevisionAndRegisterLocks(GaeLocks locks, XID actorId);
+	GaeChange grabRevisionAndRegisterLocks(long lastTaken, GaeLocks locks, XID actorId);
 	
 	/**
 	 * Cache given change, if status is committed.
@@ -80,16 +79,16 @@ public interface IGaeChangesService {
 	GaeChange getChange(long rev);
 	
 	/**
-	 * @return A revision number up to which all changes are guaranteed to be
-	 *         committed. This revision number may be cached and out-dated.
-	 */
-	long getLastCommited();
-	
-	/**
 	 * Mark the given change as committed.
 	 * 
 	 * @param status The new (and final) status.
 	 */
 	void commit(GaeChange change, Status status);
+	
+	/**
+	 * @return true if this model has ever been created in the store. Might have
+	 *         been deleted afterwards.
+	 */
+	boolean modelHasBeenManaged();
 	
 }

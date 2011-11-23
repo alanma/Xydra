@@ -17,11 +17,12 @@ import com.google.appengine.api.datastore.KeyFactory;
  */
 public class KeyStructure {
 	
-	private static final String KIND_XVALUE = "XVALUE";
-	static final String KIND_XCHANGE = "XCHANGE";
-	private static final String KIND_REVCACHE = "XREV";
+	public static final String KIND_XVALUE = "XVALUE";
+	public static final String KIND_XCHANGE = "XCHANGE";
 	
 	/**
+	 * Note: Only used by InternalGae(MOF)Entity
+	 * 
 	 * @param address The {@link XAddress} of the entity that the key should
 	 *            point to.
 	 * @return a GAE {@link Key} addressing an internal Xydra entity (not a
@@ -61,7 +62,7 @@ public class KeyStructure {
 	 *            {@link #createChangeKey(XAddress, long)}
 	 * @return the XAddress part of the change key
 	 */
-	static XAddress getAddressFromChangeKey(Key key) {
+	public static XAddress getAddressFromChangeKey(Key key) {
 		assert key.getKind().equals(KIND_XCHANGE);
 		String name = key.getName();
 		int firstSlash = name.indexOf("/");
@@ -137,10 +138,6 @@ public class KeyStructure {
 		String kind = key.substring(0, index);
 		String name = key.substring(index + 1, key.length());
 		return KeyFactory.createKey(kind, name);
-	}
-	
-	public static Key createRevCacheKey(XAddress modelAddr) {
-		return KeyFactory.createKey(KIND_REVCACHE, modelAddr + "-minCurrentRev");
 	}
 	
 }

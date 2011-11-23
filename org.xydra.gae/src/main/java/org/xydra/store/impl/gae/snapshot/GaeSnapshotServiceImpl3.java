@@ -53,7 +53,7 @@ import com.google.appengine.repackaged.com.google.common.collect.Iterators;
  * (revNr) contains a snapshot for a model with the given address and the given
  * revNr.
  * 
- * Differences compared to {@link GaeSnapshotServiceImpl2}
+ * Recent improvements:
  * <ul>
  * <li>Doesn't ask memcache or datastore when there is a snapshot in the local
  * vm cache that is less than n (=2) revisions older than the requested one.
@@ -184,15 +184,12 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 	 * found in memcache). Puts intermediary version in the respective caches.
 	 * 
 	 * @param requestedRevNr which is required but has no direct match in the
-	 *            datastore or memcache
+	 *            datastore or memcache FIXME !!! make sure too high numbers are
+	 *            handled well
 	 * @return a computed model snapshot
 	 */
 	private XRevWritableModel computeSnapshot(long requestedRevNr) {
 		assert requestedRevNr >= 0;
-		assert requestedRevNr <= this.changesService.getCurrentRevisionNumber() : "Requested snapshot version "
-		        + requestedRevNr
-		        + " higher than latest model version "
-		        + this.changesService.getCurrentRevisionNumber();
 		log.debug("compute snapshot " + requestedRevNr);
 		
 		Map<String,Object> batchResult = Collections.emptyMap();
@@ -299,7 +296,7 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 		        + snapshot.getRevisionNumber() + " to rev=" + requestedRevNr);
 		
 		// get events between [ start, end )
-		List<XEvent> events = this.changesService.getEventsBetween(
+		List<XEvent> events = this.changesService.getEventsBetween(this.modelAddress,
 		        Math.max(snapshot.getRevisionNumber() + 1, 0), requestedRevNr);
 		
 		// apply events to base
@@ -396,13 +393,14 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 	 * Implementation note: As XEntites are not {@link Serializable} by default,
 	 * an XML-serialisation is stored in data store and memcache.
 	 * 
-	 * @param requestedRevNr for which to retrieve a snapshot.
+	 * @param requestedRevNr for which to retrieve a snapshot. FIXME !!! make
+	 *            sure too high numbers are handled
 	 * @return a snapshot with the requested revisionNumber or null if model was
 	 *         null at that revision.
 	 */
 	@GaeOperation(datastoreRead = true ,memcacheRead = true)
 	synchronized private XRevWritableModel getSnapshotFromMemcacheOrDatastore(long requestedRevNr) {
-		assert requestedRevNr > 0 & this.changesService.getCurrentRevisionNumber() > 0;
+		assert requestedRevNr > 0;
 		log.debug("getSnapshotFromMemcacheOrDatastore " + requestedRevNr);
 		// try to retrieve an exact match for the required revisionNumber
 		// memcache + datastore read

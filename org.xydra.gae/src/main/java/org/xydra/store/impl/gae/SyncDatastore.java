@@ -171,6 +171,15 @@ public class SyncDatastore {
 		deleteAllDataOnLiveDatastore();
 	}
 	
+	public static void deleteAllEntitiesOneByOne() {
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		Query mydeleteq = new Query();
+		PreparedQuery pq = datastore.prepare(mydeleteq);
+		for(Entity result : pq.asIterable()) {
+			datastore.delete(result.getKey());
+		}
+	}
+	
 	@GaeOperation(datastoreWrite = true)
 	private static void deleteAllDataOnLiveDatastore() {
 		List<String> kinds = getAllKinds();

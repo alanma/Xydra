@@ -15,7 +15,6 @@ import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
-import org.xydra.core.XCopyUtils;
 import org.xydra.core.change.EventUtils;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.DeltaUtils;
@@ -23,8 +22,10 @@ import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.utils.NanoClock;
+import org.xydra.store.ModelRevision;
 import org.xydra.store.impl.gae.DebugFormatter;
 import org.xydra.store.impl.gae.FutureUtils;
+import org.xydra.store.impl.gae.RevisionManager;
 import org.xydra.store.impl.gae.changes.GaeChange;
 import org.xydra.store.impl.gae.changes.GaeChange.Status;
 import org.xydra.store.impl.gae.changes.GaeLocks;
@@ -41,11 +42,6 @@ import com.google.appengine.api.datastore.Key;
  * This variant checks preconditions by retrieving the latest snapshots and
  * updating those parts that the executing change has locked. There is no
  * separate executing step that can be rolled forward.
- * 
- * WARNING: Because this variant no longer maintains the internal MOF tree used
- * by older version, any model modified with {@link GaeExecutionServiceImpl3}
- * can no longer be correctly modified with {@link GaeExecutionServiceImpl2} or
- * {@link GaeExecutionServiceImpl1}.
  * 
  * There is no additional state stored in the GAE datastore besides that used by
  * the {@link IGaeChangesService} and {@link IGaeSnapshotService}
@@ -71,15 +67,19 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 	
 	private static final Logger log = LoggerFactory.getLogger(GaeExecutionServiceImpl3.class);
 	
+	private final RevisionManager revisionManager;
 	private final IGaeChangesService changes;
 	private final IGaeSnapshotService snapshots;
 	private final XAddress modelAddr;
 	
 	/**
+	 * @param revisionManager TODO
 	 * @param changes The change log used for the model to execute changes on.
 	 * @param snapshots A snapshot service for the model service
 	 */
-	public GaeExecutionServiceImpl3(IGaeChangesService changes, IGaeSnapshotService snapshots) {
+	public GaeExecutionServiceImpl3(RevisionManager revisionManager, IGaeChangesService changes,
+	        IGaeSnapshotService snapshots) {
+		this.revisionManager = revisionManager;
 		this.changes = changes;
 		this.modelAddr = changes.getModelAddress();
 		assert snapshots.getModelAddress() == this.modelAddr;
@@ -93,37 +93,53 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 	 */
 	@Override
 	public long executeCommand(XCommand command, XID actorId) {
+		assert this.revisionManager.getInstanceRevisionState() != null;
 		
 		log.debug("Execute " + DebugFormatter.format(command));
 		NanoClock c = new NanoClock().start();
 		assert this.modelAddr.equalsOrContains(command.getChangedEntity()) : "cannot handle command "
 		        + command + " - it does not address a model";
 		c.stopAndStart("assert");
+		
 		GaeLocks locks = GaeLocks.createLocks(command);
 		c.stopAndStart("createlocks");
 		
 		log.debug("Phase 1: grabRevisionAndRegister " + locks.size() + " locks");
-		GaeChange change = this.changes.grabRevisionAndRegisterLocks(locks, actorId);
+		GaeChange change = this.changes.grabRevisionAndRegisterLocks(
+		        this.revisionManager.getLastTaken(), locks, actorId);
 		assert change.rev >= 0;
 		c.stopAndStart("grabRevisionAndRegisterLocks");
 		
 		// IMPROVE save command to be able to roll back in case of timeout while
 		// waiting for locks / checking preconditions?
-		long snapshotRev = this.changes.getCurrentRevisionNumber();
-		boolean exists = this.changes.exists(); // TODO exists depends on the
-		// revision number
 		
+		ModelRevision modelRev = this.revisionManager.getInstanceRevisionState();
+		long snapshotRev = modelRev.revision();
 		log.debug("[r" + change.rev + "] Phase 2: getPartialSnapshot at {" + snapshotRev + "/"
-		        + this.changes.getLastCommited() + "}");
+		        + this.revisionManager.getLastCommited() + "}");
 		XRevWritableModel snapshot = null;
-		if(exists) {
+		if(modelRev.modelExists()) {
 			snapshot = this.snapshots.getPartialSnapshot(snapshotRev, change.getLocks());
 			c.stopAndStart("getPartialSnapshot");
-			
-			// TODO this should not be needed ~Daniel
-			snapshot = XCopyUtils.createSnapshot(snapshot);
-			c.stopAndStart("copy");
 		}
+		
+		// long snapshotRev = this.changes.getCurrentRevisionNumber();
+		// boolean exists = this.changes.exists(); // TODO exists depends on the
+		// // revision number
+		//
+		// log.debug("[r" + change.rev + "] Phase 2: getPartialSnapshot at {" +
+		// snapshotRev + "/"
+		// + this.changes.getLastCommited() + "}");
+		// XRevWritableModel snapshot = null;
+		// if(exists) {
+		// snapshot = this.snapshots.getPartialSnapshot(snapshotRev,
+		// change.getLocks());
+		// c.stopAndStart("getPartialSnapshot");
+		//
+		// // TODO this should not be needed ~Daniel
+		// snapshot = XCopyUtils.createSnapshot(snapshot);
+		// c.stopAndStart("copy");
+		// }
 		
 		/*
 		 * IMPROVE we can ignore all changes in [currentRev + 1,
@@ -131,12 +147,14 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 		 * but we need to make sure that there isn't a better currentRev <=
 		 * lastCommittedRev
 		 */
-		log.debug("[r" + change.rev + "] Phase 3: updateSnapshot to " + (change.rev - 1));
-		snapshot = updateSnapshot(snapshot, snapshotRev, change);
+		log.debug("[r" + change.rev + "] Phase 3: updateSnapshot to " + (change.rev - 1)
+		        + " and wait for locks");
+		XRevWritableModel workingModel = updateSnapshot(snapshot, snapshotRev, change);
 		c.stopAndStart("updateSnapshot");
 		
 		log.debug("[r" + change.rev + "] Phase 4: checkPreconditionsAndSaveEvents");
-		long ret = checkPreconditionsAndSaveEvents(change, command, actorId, snapshot);
+		long ret = checkPreconditionsAndSaveEvents(change, command, actorId, workingModel);
+		log.trace("result " + ret);
 		c.stopAndStart("checkPreconditionsAndSaveEvents");
 		
 		assert change.getStatus().isCommitted() : "If we reach this line, change must be committed";
@@ -147,8 +165,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 		        + change.rev
 		        + "] -> "
 		        + (ret == XCommand.FAILED ? "failed" : ret == XCommand.NOCHANGE ? "nochange"
-		                : "success") + " {" + this.changes.getCurrentRevisionNumber() + "/"
-		        + this.changes.getLastCommited() + "}. Stats: " + c.getStats());
+		                : "success") + " {" + modelRev + "}. Stats: " + c.getStats());
 		
 		return ret;
 	}
@@ -157,18 +174,20 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 	 * Update all locked parts of the given snapshot. If some conflicting
 	 * changes are still executing, wait for them to finish.
 	 * 
-	 * @param snapshot TODO document why not read rev from this snapshot
-	 * @param snapshotRev
-	 * @param change
-	 * @return
+	 * @param snapshot Can be null. Must be RevWritable so that parts of it can
+	 *            be copied into another RevWritableModel. See also
+	 *            {@link IGaeSnapshotService#getPartialSnapshot(long, Iterable)}
+	 * @param snapshotRev the revision of the given snapshot.
+	 * @param change never null
+	 * @return the resulting snapshot of applying the event TODO ....
 	 */
 	private XRevWritableModel updateSnapshot(XRevWritableModel snapshot, long snapshotRev,
 	        GaeChange change) {
-		
-		// FIXME makes no sense to use the same reference twice
-		XRevWritableModel model = snapshot;
+		XRevWritableModel workingModel = snapshot;
 		
 		// IMPROVE use the last committed rev to skip failed / empty changes
+		
+		// FIXME use silentLastCommited + 1
 		
 		for(long otherRev = snapshotRev + 1; otherRev < change.rev; otherRev++) {
 			
@@ -186,7 +205,8 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 					
 					// Mark any object revisions that we don't know as
 					// XEvent.RevisionNotAvailable
-					invalidateObjectRevisions(snapshot, model, otherChange.getLocks());
+					workingModel = invalidateObjectRevisions(snapshot, workingModel,
+					        otherChange.getLocks());
 					
 					// not conflicting, so ignore
 					continue;
@@ -238,11 +258,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 				}
 				
 				if(timedOut) {
-					if(otherChange.getStatus().canRollForward()) {
-						assert false;
-					} else {
-						this.changes.commit(otherChange, Status.FailedTimeout);
-					}
+					this.changes.commit(otherChange, Status.FailedTimeout);
 				}
 				
 			}
@@ -254,8 +270,9 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 				continue;
 			}
 			
-			// FIXME what do use here?
-			model = EventUtils.applyEventNonDestructive(snapshot, otherChange.getEvent());
+			// FIXME @Max: what to use here?
+			workingModel = EventUtils.applyEventNonDestructive(snapshot, workingModel,
+			        otherChange.getEvent());
 		}
 		
 		// gather operations stats
@@ -269,14 +286,14 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 			}
 		}
 		
-		if(model != null && model.getRevisionNumber() != change.rev - 1) {
-			if(model == snapshot) {
-				model = SimpleModel.shallowCopy(snapshot);
+		if(workingModel != null && workingModel.getRevisionNumber() != change.rev - 1) {
+			if(workingModel == snapshot) {
+				workingModel = SimpleModel.shallowCopy(snapshot);
 			}
-			model.setRevisionNumber(change.rev - 1);
+			workingModel.setRevisionNumber(change.rev - 1);
 		}
 		
-		return model;
+		return workingModel;
 	}
 	
 	/**
@@ -334,15 +351,13 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 	 * @param change The change that the command belongs to.
 	 * @param command
 	 * @param actorId The actor to log in the created events.
-	 * @param snapshot
+	 * @param snapshot on which the command is executed, can be null
 	 * @return a copy of the created events or null if the command cannot be
 	 *         applied.
 	 */
 	private long checkPreconditionsAndSaveEvents(GaeChange change, XCommand command, XID actorId,
 	        XReadableModel snapshot) {
-		
 		Pair<ChangedModel,DeltaUtils.ModelChange> c = DeltaUtils.executeCommand(snapshot, command);
-		
 		if(c == null) {
 			change.giveUpIfTimeoutCritical();
 			this.changes.commit(change, Status.FailedPreconditions);
@@ -351,17 +366,13 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 		
 		List<XAtomicEvent> events = DeltaUtils.createEvents(this.modelAddr, c, actorId, change.rev);
 		log.debug("[r" + change.rev + "] DeltaUtils generated " + events.size() + " events");
-		
 		assert events != null;
-		
 		try {
-			
 			if(events.isEmpty()) {
 				change.giveUpIfTimeoutCritical();
 				this.changes.commit(change, Status.SuccessNochange);
 				return XCommand.NOCHANGE;
 			}
-			
 			Pair<int[],List<Future<Key>>> res = change.setEvents(events);
 			
 			// Wait on all changes.
@@ -369,7 +380,8 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 				FutureUtils.waitFor(future);
 			}
 			
-			// FIXME GaePersistence uses the this entity for getModelIds() and
+			// FIXME DEPRECATED: GaePersistence uses the this entity for
+			// getModelIds() and
 			// hasModel()
 			XAtomicEvent first = events.get(0);
 			XAtomicEvent last = events.get(events.size() - 1);
@@ -381,7 +393,6 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 			}
 			
 			change.giveUpIfTimeoutCritical();
-			
 		} catch(VoluntaryTimeoutException vte) {
 			/*
 			 * Since we have not changed the status to EXEUTING, no thread will

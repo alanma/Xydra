@@ -17,6 +17,9 @@ public class LogUtils {
 	
 	private static final Logger log = LoggerFactory.getLogger(LogUtils.class);
 	
+	/**
+	 * Force loading log4j.properties in src/test/resources of current project
+	 */
 	public static void configureLog4j() {
 		File file = new File("./src/test/resources/log4j.properties");
 		if(!file.exists()) {

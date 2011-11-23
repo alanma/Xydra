@@ -4,28 +4,28 @@ import org.xydra.base.XAddress;
 import org.xydra.core.model.impl.memory.UUID;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.store.RevisionState;
 import org.xydra.store.impl.gae.DebugFormatter;
 import org.xydra.store.impl.gae.DebugFormatter.Timing;
 
 
 /**
- * ThreadLocal revision numbers.
+ * ThreadLocal revision numbers. Helps to keep revision numbers consistent
+ * within a single web request. Thread-local revisions are used, e.g., for
+ * getSnapshot() and getCurrentRevision() kind of requests.
  * 
  * @author xamde
- * 
  */
-public class ThreadRevisionInfo {
+public class ThreadRevisionState {
 	
 	public static final String DATASOURCENAME = "[.tl-" + UUID.uuid(4) + "]";
 	
-	private static final Logger log = LoggerFactory.getLogger(ThreadRevisionInfo.class);
+	private static final Logger log = LoggerFactory.getLogger(ThreadRevisionState.class);
 	
 	private XAddress modelAddress;
 	
-	private RevisionState revisionState;
+	private GaeModelRevision revisionState;
 	
-	public ThreadRevisionInfo(XAddress modelAddress) {
+	public ThreadRevisionState(XAddress modelAddress) {
 		this.modelAddress = modelAddress;
 		log.debug(DebugFormatter.init(DATASOURCENAME + "-" + this.modelAddress));
 		this.revisionState = null;
@@ -42,8 +42,13 @@ public class ThreadRevisionInfo {
 		return currentRev;
 	}
 	
+	/**
+	 * No logging
+	 * 
+	 * @return current rev
+	 */
 	private long getCurrentRev_internal() {
-		return this.revisionState == null ? IRevisionInfo.NOT_SET : this.revisionState.revision();
+		return this.revisionState == null ? RevisionInfo.NOT_SET : this.revisionState.revision();
 	}
 	
 	public Boolean modelExists() {
@@ -51,16 +56,12 @@ public class ThreadRevisionInfo {
 		return modelExists;
 	}
 	
-	public void setRevisionStateIfRevIsHigher(long currentRev, boolean modelExists) {
-		setRevisionStateIfRevIsHigherAndNotNull(new RevisionState(currentRev, modelExists));
-	}
-	
 	/**
 	 * // TODO Caller should also update instanceContext
 	 * 
 	 * @param revisionState can be null, but null is ignored
 	 */
-	public void setRevisionStateIfRevIsHigherAndNotNull(RevisionState revisionState) {
+	public void setRevisionStateIfRevIsHigherAndNotNull(GaeModelRevision revisionState) {
 		if(revisionState == null) {
 			return;
 		}
@@ -81,7 +82,7 @@ public class ThreadRevisionInfo {
 		        + (this.revisionState == null ? "null" : this.revisionState.toString());
 	}
 	
-	public RevisionState getRevisionState() {
+	public GaeModelRevision getRevisionState() {
 		return this.revisionState;
 	}
 	

@@ -2,8 +2,6 @@ package org.xydra.store;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Set;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xydra.base.X;
@@ -33,10 +31,6 @@ public class GaeStoreSpecialTest {
 	
 	public void doStuff() {
 		// creating some models
-		
-		Set<XID> modelids = this.pers.getModelIds();
-		assert !modelids.contains(this.modelId1);
-		
 		XID objectId1 = XX.toId("TestObject1");
 		XID objectId2 = XX.toId("TestObject2");
 		XID objectId3 = XX.toId("TestObject3");
@@ -89,7 +83,7 @@ public class GaeStoreSpecialTest {
 		        XCommand.FORCED, this.modelId1);
 		long l = this.pers.executeCommand(this.actorId, removeCommand);
 		assert l >= 0;
-		assert this.pers.getModelIds().size() == 0;
+		assert !this.pers.getModelRevision(this.modelAddress1).modelExists();
 	}
 	
 	@Test
@@ -107,9 +101,9 @@ public class GaeStoreSpecialTest {
 		doStuff();
 		deleteModel1();
 		doStuff();
-		RevisionState rev1 = this.pers.getModelRevision(this.modelAddress1);
+		ModelRevision rev1 = this.pers.getModelRevision(this.modelAddress1);
 		assertEquals(13, rev1.revision());
-		RevisionState rev2 = this.pers.getModelRevision(this.modelAddress1);
+		ModelRevision rev2 = this.pers.getModelRevision(this.modelAddress1);
 		assertEquals(rev1.revision(), rev2.revision());
 	}
 	

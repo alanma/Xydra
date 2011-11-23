@@ -34,7 +34,7 @@ public class Utils {
 	private static final String PROP_KEY = "__key__";
 	
 	/**
-	 * Asks the datastore via a query for all children of the given adress by
+	 * Asks the datastore via a query for all children of the given address by
 	 * using a clever query. The idea works like this: For finding all children
 	 * of a key 'foo' we query for all items in the range
 	 * 'foo'+lowest_possible_key until 'foo'+highest_possible_key.

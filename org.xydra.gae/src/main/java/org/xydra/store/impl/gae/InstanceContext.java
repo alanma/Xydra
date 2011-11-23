@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.xydra.gae.AboutAppEngine;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.store.impl.gae.changes.ThreadRevisionInfo;
+import org.xydra.store.impl.gae.changes.ThreadRevisionState;
 
 
 /**
@@ -28,35 +28,41 @@ public class InstanceContext {
 	 */
 	public static synchronized Map<String,Object> getInstanceCache() {
 		if(sharedCache == null) {
+			// FIXME !!! use Guava limited cache here
 			sharedCache = new ConcurrentHashMap<String,Object>();
 		}
 		return sharedCache;
 	}
 	
 	public static void clear() {
+		clearInstanceContext();
+		clearThreadContext();
+	}
+	
+	public static void clearInstanceContext() {
 		if(sharedCache != null) {
 			sharedCache.clear();
 		}
 	}
 	
 	/**
-	 * A map from modelAddress to {@link ThreadRevisionInfo} for each
+	 * A map from modelAddress to {@link ThreadRevisionState} for each
 	 * {@link Thread}
 	 */
-	private static ThreadLocal<Map<String,ThreadRevisionInfo>> threadContext;
+	private static ThreadLocal<Map<String,ThreadRevisionState>> threadContext;
 	
 	/**
 	 * @return a map unique for each thread. Never null.
 	 */
-	public static Map<String,ThreadRevisionInfo> getThreadContext() {
+	public static Map<String,ThreadRevisionState> getThreadContext() {
 		synchronized(InstanceContext.class) {
 			if(threadContext == null) {
-				threadContext = new ThreadLocal<Map<String,ThreadRevisionInfo>>();
+				threadContext = new ThreadLocal<Map<String,ThreadRevisionState>>();
 			}
 		}
-		Map<String,ThreadRevisionInfo> map = threadContext.get();
+		Map<String,ThreadRevisionState> map = threadContext.get();
 		if(map == null) {
-			map = new HashMap<String,ThreadRevisionInfo>();
+			map = new HashMap<String,ThreadRevisionState>();
 			threadContext.set(map);
 		}
 		return map;
@@ -71,10 +77,12 @@ public class InstanceContext {
 			// done, cannot contain content
 		} else {
 			log.info("Clear ThreadLocal context of " + AboutAppEngine.getThreadInfo());
-			Map<String,ThreadRevisionInfo> tc = getThreadContext();
+			Map<String,ThreadRevisionState> tc = getThreadContext();
 			for(String key : tc.keySet()) {
-				ThreadRevisionInfo threadRevInfo = tc.get(key);
-				threadRevInfo.clear();
+				ThreadRevisionState threadRevInfo = tc.get(key);
+				if(threadRevInfo != null) {
+					threadRevInfo.clear();
+				}
 			}
 			threadContext.set(null);
 		}

@@ -59,6 +59,11 @@ public interface IGaeSnapshotService {
 	/**
 	 * Get a snapshot that contains at least those parts specified.
 	 * 
+	 * @param modelRevisionNumber of the returned snapshot. This method assumes
+	 *            that this revision responds to a command that didn't fail (or
+	 *            is -1). The most common value (the "current" revision)
+	 *            satisfies that criteria.
+	 * @param parts ..
 	 * @return While this return is an {@link XRevWritableModel} so that it's
 	 *         parts can be added into other {@link XRevWritableModel}, it must
 	 *         not be modified.
