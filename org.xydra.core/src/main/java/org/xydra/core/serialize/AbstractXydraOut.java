@@ -380,7 +380,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 	}
 	
 	@Override
-	public <T> void element(String type) {
+	public void element(String type) {
 		open(type);
 		close(type);
 	}

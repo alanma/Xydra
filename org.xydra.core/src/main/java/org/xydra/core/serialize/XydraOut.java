@@ -915,6 +915,6 @@ public interface XydraOut {
 	 * @see #open(String)
 	 * @see #close(String)
 	 */
-	<T> void element(String type);
+	void element(String type);
 	
 }
