@@ -1,4 +1,3 @@
-#Initial Wishes:, 0, #Operations:, 10000, #Wishes per Op.:, 1, #Successful Operations:, 9928, Average Time (ms):, 591.8157735697018, #Operation Exceptions:, 72, #Other Exceptions:, 66
 #Initial Wishes:, 0, #Operations:, 1000, #Wishes per Op.:, 1, #Successful Operations:, 995, Average Time (ms):, 630.5145728643216, #Operation Exceptions:, 5, #Other Exceptions:, 10
 #Initial Wishes:, 0, #Operations:, 1000, #Wishes per Op.:, 1, #Successful Operations:, 1000, Average Time (ms):, 449.893, #Operation Exceptions:, 0, #Other Exceptions:, 0
 #Initial Wishes:, 0, #Operations:, 1000, #Wishes per Op.:, 1, #Successful Operations:, 997, Average Time (ms):, 478.66098294884654, #Operation Exceptions:, 3, #Other Exceptions:, 3
