@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -11,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.xydra.csv.impl.memory.CsvTable;
 import org.xydra.csv.impl.memory.Row;
@@ -48,25 +52,25 @@ public class TableTools {
 	 * 
 	 * @author voelkel
 	 */
-	private static class NKeys implements Iterable<String> {
-		final List<String> keys;
+	private static class CompoundKey implements Iterable<String>, Comparable<CompoundKey> {
+		final List<String> keyParts;
 		
-		public NKeys(List<String> keys) {
-			this.keys = keys;
+		public CompoundKey(List<String> keys) {
+			this.keyParts = keys;
 		}
 		
-		@SuppressWarnings("unused")
-		public boolean contains(String key) {
-			return this.keys.contains(key);
-		}
+		// @SuppressWarnings("unused")
+		// public boolean contains(String key) {
+		// return this.keys.contains(key);
+		// }
 		
 		@Override
 		public boolean equals(Object other) {
-			if(other instanceof NKeys) {
-				NKeys otherKey = (NKeys)other;
-				if(otherKey.keys.size() == this.keys.size()) {
-					for(int i = 0; i < this.keys.size(); i++) {
-						if(!this.keys.get(i).equals(otherKey.keys.get(i)))
+			if(other instanceof CompoundKey) {
+				CompoundKey otherKey = (CompoundKey)other;
+				if(otherKey.keyParts.size() == this.keyParts.size()) {
+					for(int i = 0; i < this.keyParts.size(); i++) {
+						if(!this.keyParts.get(i).equals(otherKey.keyParts.get(i)))
 							return false;
 					}
 					return true;
@@ -78,29 +82,61 @@ public class TableTools {
 		@Override
 		public int hashCode() {
 			int hash = 0;
-			for(int i = 0; i < this.keys.size(); i++) {
-				hash += this.keys.get(i).hashCode();
+			for(int i = 0; i < this.keyParts.size(); i++) {
+				hash += this.keyParts.get(i).hashCode();
 			}
 			return hash;
 		}
 		
 		@Override
 		public Iterator<String> iterator() {
-			return this.keys.iterator();
+			return this.keyParts.iterator();
 		}
 		
 		@Override
 		public String toString() {
 			StringBuffer buf = new StringBuffer();
-			for(int i = 0; i < this.keys.size(); i++) {
-				buf.append(this.keys.get(i));
-				if(i + 1 < this.keys.size()) {
+			for(int i = 0; i < this.keyParts.size(); i++) {
+				buf.append(this.keyParts.get(i));
+				if(i + 1 < this.keyParts.size()) {
 					buf.append("--");
 				}
 			}
 			return buf.toString();
 		}
+		
+		@Override
+		public int compareTo(CompoundKey other) {
+			return ALPHA_NUMERIC_COMPARATOR.compare(this.toString(), other.toString());
+		}
 	}
+	
+	public static Comparator<String> ALPHA_NUMERIC_COMPARATOR = new Comparator<String>() {
+		
+		@Override
+		public int compare(String a, String b) {
+			if(a == null) {
+				if(b == null) {
+					return 0;
+				} else {
+					return 1;
+				}
+			} else if(b == null) {
+				return -1;
+			}
+			
+			// experimental: try to treat both as numbers
+			try {
+				long aNum = Long.parseLong(a);
+				long bNum = Long.parseLong(b);
+				return (int)(aNum - bNum);
+			} catch(NumberFormatException e) {
+			}
+			
+			// else
+			return a.compareTo(b);
+		}
+	};
 	
 	/**
 	 * Represents a compound key consisting of two columns.
@@ -204,13 +240,58 @@ public class TableTools {
 	}
 	
 	/**
+	 * Group sourceTable by keys. I.e. for a table with four columns, A, B, C,
+	 * and D a groupBy with keyList= A and B would result in a map with
+	 * {@link CompoundKey} consisting of A and B and sub-tables containing only
+	 * columns C and D.
+	 * 
+	 * There are as many resulting tables as there are different combinations of
+	 * A-B pairs.
+	 * 
+	 * @param sourceTable which table to process
+	 * @param keyList create groups of rows where columns have same values
+	 * @return a Map with the resulting tables. The resulting tables have the
+	 *         columns listed in keyList merged into the {@link CompoundKey} and
+	 *         have been removed from the sub-tables.
+	 */
+	public static Map<CompoundKey,CsvTable> groupBy(ICsvTable sourceTable, List<String> keyList) {
+		CompoundKey keys = new CompoundKey(keyList);
+		
+		log.info("Re-sorting table into group tables.");
+		/* re-sort table into group tables */
+		long serialNumber = 1;
+		Map<CompoundKey,CsvTable> groups = new TreeMap<CompoundKey,CsvTable>();
+		for(IRow sourceRow : sourceTable) {
+			/* create compound key */
+			List<String> compoundRowNameList = new LinkedList<String>();
+			for(String key : keys) {
+				compoundRowNameList.add(sourceRow.getValue(key));
+			}
+			CompoundKey compoundRowName = new CompoundKey(compoundRowNameList);
+			CsvTable groupTable = groups.get(compoundRowName);
+			if(groupTable == null) {
+				groupTable = new CsvTable();
+				groups.put(compoundRowName, groupTable);
+			}
+			/* copy all columns which will later be used */
+			Set<String> relevantCols = new HashSet<String>();
+			relevantCols.addAll(sourceTable.getColumnNames());
+			IRow groupRow = groupTable.getOrCreateRow("" + serialNumber++, true);
+			for(String relevantCol : relevantCols) {
+				groupRow.setValue(relevantCol, sourceRow.getValue(relevantCol), true);
+			}
+		}
+		return groups;
+	}
+	
+	/**
 	 * Group sourceTable by keys. For each group, calculate sum, average and
 	 * count for the given columns.
 	 * 
 	 * TODO improve docu for this function
 	 * 
-	 * Only rows listed in sum, average, or range list are present in resulting
-	 * table.
+	 * Only columns listed in sum, average, or range list are present in
+	 * resulting table.
 	 * 
 	 * @param sourceTable which table to process
 	 * @param keyList create groups of rows where columns have same values
@@ -222,22 +303,22 @@ public class TableTools {
 	 */
 	public static void groupBy(ICsvTable sourceTable, List<String> keyList, List<String> sumList,
 	        List<String> averageList, List<String> rangeList, ICsvTable targetTable) {
-		NKeys keys = new NKeys(keyList);
-		NKeys sum = new NKeys(sumList);
-		NKeys average = new NKeys(averageList);
-		NKeys range = new NKeys(rangeList);
+		CompoundKey keys = new CompoundKey(keyList);
+		CompoundKey sum = new CompoundKey(sumList);
+		CompoundKey average = new CompoundKey(averageList);
+		CompoundKey range = new CompoundKey(rangeList);
 		
 		log.info("Re-sorting table into group tables.");
 		/* re-sort table into group tables */
 		long serialNumber = 1;
-		Map<NKeys,CsvTable> groups = new HashMap<NKeys,CsvTable>();
+		Map<CompoundKey,CsvTable> groups = new TreeMap<CompoundKey,CsvTable>();
 		for(IRow sourceRow : sourceTable) {
 			/* create compound key */
 			List<String> compoundRowNameList = new LinkedList<String>();
 			for(String key : keys) {
 				compoundRowNameList.add(sourceRow.getValue(key));
 			}
-			NKeys compoundRowName = new NKeys(compoundRowNameList);
+			CompoundKey compoundRowName = new CompoundKey(compoundRowNameList);
 			CsvTable groupTable = groups.get(compoundRowName);
 			if(groupTable == null) {
 				groupTable = new CsvTable();
@@ -245,9 +326,9 @@ public class TableTools {
 			}
 			/* copy all columns which will later be used */
 			Set<String> relevantCols = new HashSet<String>();
-			relevantCols.addAll(sum.keys);
-			relevantCols.addAll(average.keys);
-			relevantCols.addAll(range.keys);
+			relevantCols.addAll(sum.keyParts);
+			relevantCols.addAll(average.keyParts);
+			relevantCols.addAll(range.keyParts);
 			IRow groupRow = groupTable.getOrCreateRow("" + serialNumber++, true);
 			for(String relevantCol : relevantCols) {
 				groupRow.setValue(relevantCol, sourceRow.getValue(relevantCol), true);
@@ -256,11 +337,12 @@ public class TableTools {
 		
 		log.info("Aggregate group tables to target table.");
 		/* aggregate to targetTable */
-		for(NKeys groupKey : groups.keySet()) {
+		for(CompoundKey groupKey : groups.keySet()) {
+			log.info("Use groupKey " + groupKey);
 			IRow targetRow = targetTable.getOrCreateRow(groupKey.toString(), true);
 			// set key parts
-			for(int i = 0; i < keys.keys.size(); i++) {
-				targetRow.setValue(keys.keys.get(i), groupKey.keys.get(i), true);
+			for(int i = 0; i < keys.keyParts.size(); i++) {
+				targetRow.setValue(keys.keyParts.get(i), groupKey.keyParts.get(i), true);
 			}
 			ICsvTable groupTable = groups.get(groupKey);
 			// count
@@ -413,6 +495,33 @@ public class TableTools {
 		CsvTable t = new CsvTable();
 		TableTools.transpose(test, t);
 		t.dump();
+	}
+	
+	public static List<Row> sortByColumn(ISparseTable table, String sortKey) {
+		// get all rows
+		List<Row> rowList = new ArrayList<Row>();
+		for(Row row : table) {
+			rowList.add(row);
+		}
+		Collections.sort(rowList, new RowByColumnComparator(sortKey));
+		return rowList;
+	}
+	
+	public static class RowByColumnComparator implements Comparator<IRow> {
+		
+		public RowByColumnComparator(String sortCol) {
+			this.sortCol = sortCol;
+		}
+		
+		private String sortCol;
+		
+		@Override
+		public int compare(IRow a, IRow b) {
+			String aVal = a.getValue(this.sortCol);
+			String bVal = b.getValue(this.sortCol);
+			return TableTools.ALPHA_NUMERIC_COMPARATOR.compare(aVal, bVal);
+		}
+		
 	}
 	
 }

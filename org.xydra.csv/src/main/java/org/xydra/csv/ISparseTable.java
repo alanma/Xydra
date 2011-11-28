@@ -169,9 +169,13 @@ public interface ISparseTable extends Iterable<Row>, IRowHandler {
 	 */
 	void incrementValue(String row, String column, int increment) throws WrongDatatypeException;
 	
-	/* implement Iterable */
+	/**
+	 * See also {@link Iterable#iterator()}.
+	 * 
+	 * Some implementations return elements sorted by row key.
+	 */
 	@Override
-    Iterator<Row> iterator();
+	Iterator<Row> iterator();
 	
 	/**
 	 * Removes all rows that match the given RowFilter.

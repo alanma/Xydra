@@ -75,9 +75,9 @@ public class HtmlUsageExampleAndTest {
 		FileWriter fw = new FileWriter(new File("./target/sample.html"));
 		// add some CSS to have table border lines
 		fw.write("<style>\n" + "  table.csv * { border: 1px solid; } \n" + "</style>\n");
-		HtmlTool.writeToHtml(table, fw);
+		HtmlTool.writeToHtml(table, null, fw);
 		fw.write("<h2>results in</h2>");
-		HtmlTool.writeToHtml(target, fw);
+		HtmlTool.writeToHtml(target, null, fw);
 		fw.close();
 	}
 	

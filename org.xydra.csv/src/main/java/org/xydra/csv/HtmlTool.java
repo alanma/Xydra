@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.xydra.csv.impl.memory.Row;
+
 
 public class HtmlTool {
 	
@@ -13,10 +15,13 @@ public class HtmlTool {
 	 * Write the given table as simple HTML to the given writer.
 	 * 
 	 * @param table a table, never null
+	 * @param sortColName if this is not null, resulting HTML table will be
+	 *            sorted by the given column name
 	 * @param w never null
 	 * @throws IOException ...
 	 */
-	public static void writeToHtml(ISparseTable table, final Writer w) throws IOException {
+	public static void writeToHtml(ISparseTable table, String sortColName, final Writer w)
+	        throws IOException {
 		w.write("<table class='csv'>\n");
 		w.write("<tr>");
 		
@@ -30,7 +35,12 @@ public class HtmlTool {
 		}
 		w.write("</tr>\n");
 		
-		for(IRow row : table) {
+		Iterable<Row> rows = table;
+		if(sortColName != null) {
+			rows = TableTools.sortByColumn(table, sortColName);
+		}
+		
+		for(IRow row : rows) {
 			w.write("<tr>");
 			for(String colName : colNames) {
 				w.write("<td>" + htmlencode(row.getValue(colName)) + "</td>");

@@ -7,9 +7,10 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.xydra.csv.ExcelLimitException;
 import org.xydra.csv.ICell;
@@ -54,7 +55,7 @@ public class SparseTable implements ISparseTable {
 	/* maintain row insertion order */
 	protected List<String> rowNames = new LinkedList<String>();
 	
-	protected Map<String,Row> table = new HashMap<String,Row>();
+	protected Map<String,Row> table = new TreeMap<String,Row>();
 	
 	public SparseTable() {
 		this.columnNames = new TreeSet<String>();
@@ -114,7 +115,7 @@ public class SparseTable implements ISparseTable {
 	 * @see org.xydra.csv.ICsvTable#aggregate(java.lang.String[])
 	 */
 	@Override
-    public void aggregate(String[] keyColumnNames) {
+	public void aggregate(String[] keyColumnNames) {
 		// temporary index of occurring keys and their row
 		Map<String,Row> compoundKeys2row = new HashMap<String,Row>(this.rowCount());
 		Iterator<Row> rowIt = this.table.values().iterator();
@@ -181,7 +182,7 @@ public class SparseTable implements ISparseTable {
 	 * @see org.xydra.csv.ICsvTable#clear()
 	 */
 	@Override
-    public void clear() {
+	public void clear() {
 		this.rowNames.clear();
 		this.table.clear();
 	}
@@ -196,7 +197,7 @@ public class SparseTable implements ISparseTable {
 	 * @see org.xydra.csv.ICsvTable#drop(java.lang.String, java.lang.String)
 	 */
 	@Override
-    public ISparseTable drop(String columnName, String value) {
+	public ISparseTable drop(String columnName, String value) {
 		ISparseTable target = new SparseTable();
 		for(String rowName : this.rowNames) {
 			IRow sourceRow = this.getOrCreateRow(rowName, false);
@@ -217,7 +218,7 @@ public class SparseTable implements ISparseTable {
 	 * @see org.xydra.csv.ICsvTable#filter(java.lang.String, java.lang.String)
 	 */
 	@Override
-    public ISparseTable filter(String key, String value) {
+	public ISparseTable filter(String key, String value) {
 		ISparseTable target = new SparseTable();
 		for(String rowName : this.rowNames) {
 			IRow sourceRow = this.getOrCreateRow(rowName, false);
@@ -243,7 +244,7 @@ public class SparseTable implements ISparseTable {
 	 * @see org.xydra.csv.ICsvTable#getOrCreateRow(java.lang.String, boolean)
 	 */
 	@Override
-    public Row getOrCreateRow(String rowName, boolean create) {
+	public Row getOrCreateRow(String rowName, boolean create) {
 		Row row = this.table.get(rowName);
 		if(row == null && create) {
 			row = new Row(rowName, this);
@@ -268,7 +269,7 @@ public class SparseTable implements ISparseTable {
 	 * @see org.xydra.csv.ICsvTable#getValue(java.lang.String, java.lang.String)
 	 */
 	@Override
-    public String getValue(String row, String column) {
+	public String getValue(String row, String column) {
 		Row r = getOrCreateRow(row, false);
 		if(r == null) {
 			return null;
@@ -287,7 +288,7 @@ public class SparseTable implements ISparseTable {
 	 * java.lang.String, int)
 	 */
 	@Override
-    public void incrementValue(String row, String column, int increment)
+	public void incrementValue(String row, String column, int increment)
 	        throws WrongDatatypeException {
 		Row r = getOrCreateRow(row, true);
 		ICell c = r.getOrCreateCell(column, true);
@@ -327,7 +328,7 @@ public class SparseTable implements ISparseTable {
 	 * @see org.xydra.csv.ICsvTable#iterator()
 	 */
 	@Override
-    public Iterator<Row> iterator() {
+	public Iterator<Row> iterator() {
 		return this.table.values().iterator();
 	}
 	
@@ -337,7 +338,7 @@ public class SparseTable implements ISparseTable {
 	 * @see org.xydra.csv.ICsvTable#removeRowsMatching(org.xydra.csv.RowFilter)
 	 */
 	@Override
-    public void removeRowsMatching(RowFilter rowFilter) {
+	public void removeRowsMatching(RowFilter rowFilter) {
 		Iterator<Entry<String,Row>> it = this.table.entrySet().iterator();
 		while(it.hasNext()) {
 			Map.Entry<String,Row> entry = it.next();
@@ -353,7 +354,7 @@ public class SparseTable implements ISparseTable {
 	 * @see org.xydra.csv.ICsvTable#rowCount()
 	 */
 	@Override
-    public int rowCount() {
+	public int rowCount() {
 		return this.table.size();
 	}
 	
@@ -363,7 +364,7 @@ public class SparseTable implements ISparseTable {
 	 * @see org.xydra.csv.ICsvTable#setParamAggregateStrings(boolean)
 	 */
 	@Override
-    public void setParamAggregateStrings(boolean aggregateStrings) {
+	public void setParamAggregateStrings(boolean aggregateStrings) {
 		this.aggregateStrings = aggregateStrings;
 	}
 	
@@ -373,7 +374,7 @@ public class SparseTable implements ISparseTable {
 	 * @see org.xydra.csv.ICsvTable#setParamRestrictToExcelSize(boolean)
 	 */
 	@Override
-    public void setParamRestrictToExcelSize(boolean b) {
+	public void setParamRestrictToExcelSize(boolean b) {
 		this.restrictToExcelSize = b;
 	}
 	
@@ -389,7 +390,7 @@ public class SparseTable implements ISparseTable {
 	}
 	
 	@Override
-    public void setValueInitial(String rowName, String columnName, String value)
+	public void setValueInitial(String rowName, String columnName, String value)
 	        throws IllegalStateException {
 		IRow row = getOrCreateRow(rowName, true);
 		row.setValue(columnName, value, true);
@@ -401,7 +402,7 @@ public class SparseTable implements ISparseTable {
 	 * @see org.xydra.csv.ICsvTable#split(java.lang.String)
 	 */
 	@Override
-    public Map<String,SparseTable> split(String colName) {
+	public Map<String,SparseTable> split(String colName) {
 		Map<String,SparseTable> map = new HashMap<String,SparseTable>();
 		
 		for(String rowName : this.rowNames) {
@@ -427,7 +428,7 @@ public class SparseTable implements ISparseTable {
 	 * @see org.xydra.csv.ICsvTable#visitRows(org.xydra.csv.IRowVisitor)
 	 */
 	@Override
-    public void visitRows(IRowVisitor rowVisitor) {
+	public void visitRows(IRowVisitor rowVisitor) {
 		for(IRow row : this) {
 			rowVisitor.visit(row);
 		}

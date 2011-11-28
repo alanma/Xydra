@@ -18,6 +18,7 @@ import java.util.Map;
 
 import org.xydra.csv.ExcelLimitException;
 import org.xydra.csv.ICsvTable;
+import org.xydra.csv.ICsvTableFactory;
 import org.xydra.csv.IReadableRow;
 import org.xydra.csv.IRow;
 import org.xydra.csv.IRowHandler;
@@ -32,7 +33,7 @@ import org.xydra.log.LoggerFactory;
  * 
  * @author voelkel
  */
-public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable {
+public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable, ICsvTableFactory {
 	
 	private static Logger log = LoggerFactory.getLogger(CsvTable.class);
 	
@@ -436,6 +437,16 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable {
 			IRow row = this.getOrCreateRow(rowName, false);
 			rowHandler.handleRow(rowName, row);
 		}
+	}
+	
+	@Override
+	public ICsvTable createTable() {
+		return new CsvTable();
+	}
+	
+	@Override
+	public ICsvTable createTable(boolean maintainColumnInsertionOrder) {
+		return new CsvTable(maintainColumnInsertionOrder);
 	}
 	
 }
