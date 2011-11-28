@@ -150,7 +150,7 @@ public class PerformanceDataAnalyzer {
 				break;
 			}
 			
-			HtmlTool.writeToHtml(results, fw);
+			HtmlTool.writeToHtml(results, null, fw);
 			
 			// TODO write logic to only display this if Version 2 is measured
 			fw.write("<b>Attention</b>: Averages etc. for Version 2 were measured over averages of 1000 operations. "
@@ -191,7 +191,7 @@ public class PerformanceDataAnalyzer {
 		
 		/*
 		 * write data in csv table for each version to calculate averages etc -
-		 * multiple tabls are needed because the amount of data is not always
+		 * multiple tables are needed because the amount of data is not always
 		 * the same
 		 */
 		for(int i = 0; i < versions.length; i++) {
@@ -288,9 +288,9 @@ public class PerformanceDataAnalyzer {
 				// TODO tests not implemented
 			}
 			
-			HtmlTool.writeToHtml(dataResults, fw);
+			HtmlTool.writeToHtml(dataResults, "X", fw);
 			fw.write("<h2> Exceptions </h2>");
-			HtmlTool.writeToHtml(excepResults, fw);
+			HtmlTool.writeToHtml(excepResults, "X", fw);
 			
 			// TODO write logic to only display this if Version 2 is measured
 			fw.write("<b>Attention</b>: Averages etc. for Version 2 were measured over averages of 1000 operations. "
