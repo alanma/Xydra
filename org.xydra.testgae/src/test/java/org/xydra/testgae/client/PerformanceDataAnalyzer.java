@@ -27,6 +27,10 @@ public class PerformanceDataAnalyzer {
 	private static String[] versions = { "Version2", "gae20111105", "gae20111105-20" };
 	private static String fileName;
 	
+	/*
+	 * some unimportant change (max svn isn't working...)
+	 */
+
 	private enum Operations {
 		ADD, DELETE, EDIT
 	}
