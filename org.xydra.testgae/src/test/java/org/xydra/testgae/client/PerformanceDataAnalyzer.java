@@ -81,8 +81,8 @@ public class PerformanceDataAnalyzer {
 				 * Read data for the current version and write it in the CSV
 				 * table
 				 */
-				BufferedReader in = new BufferedReader(new FileReader(".src/main/data/Performance/"
-				        + versions[i] + path));
+				BufferedReader in = new BufferedReader(new FileReader(
+				        "./src/main/data/Performance/" + versions[i] + path));
 				
 				String currentLine = in.readLine();
 				int dataCount = 0;
