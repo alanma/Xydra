@@ -24,6 +24,9 @@ import org.xydra.csv.impl.memory.CsvTable;
  */
 
 public class PerformanceDataAnalyzer {
+	
+	public static final String DIR_DATA = "./src/main/data/Performance/";
+	
 	private static String[] versions = { "Version2", "gae20111105", "gae20111105-20" };
 	private static String fileName;
 	
@@ -81,8 +84,8 @@ public class PerformanceDataAnalyzer {
 				 * Read data for the current version and write it in the CSV
 				 * table
 				 */
-				BufferedReader in = new BufferedReader(new FileReader(
-				        "./src/main/data/Performance/" + versions[i] + path));
+				BufferedReader in = new BufferedReader(
+				        new FileReader(DIR_DATA + versions[i] + path));
 				
 				String currentLine = in.readLine();
 				int dataCount = 0;
@@ -131,7 +134,7 @@ public class PerformanceDataAnalyzer {
 		}
 		
 		try {
-			FileWriter fw = new FileWriter(new File("./PerformanceData/" + fileName), true);
+			FileWriter fw = new FileWriter(new File(DIR_DATA + fileName), true);
 			// add some CSS to have table border lines
 			fw.write("<style>\n" + "  table.csv * { border: 1px solid; } \n" + "</style>\n");
 			
@@ -202,8 +205,8 @@ public class PerformanceDataAnalyzer {
 					 * Read data for the current version and write it in the CSV
 					 * table
 					 */
-					BufferedReader in = new BufferedReader(new FileReader(
-					        ".src/main/data/Performance/" + versions[i] + path + X + ".txt"));
+					BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + versions[i]
+					        + path + X + ".txt"));
 					
 					String currentLine = in.readLine();
 					int dataCount = 0;
@@ -272,7 +275,7 @@ public class PerformanceDataAnalyzer {
 		}
 		
 		try {
-			FileWriter fw = new FileWriter(new File("./PerformanceData/" + fileName), true);
+			FileWriter fw = new FileWriter(new File(DIR_DATA + fileName), true);
 			// add some CSS to have table border lines
 			fw.write("<style>\n" + "  table.csv * { border: 1px solid; } \n" + "</style>\n");
 			
