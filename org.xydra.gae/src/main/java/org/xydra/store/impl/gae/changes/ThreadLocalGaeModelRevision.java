@@ -6,6 +6,7 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.impl.gae.DebugFormatter;
 import org.xydra.store.impl.gae.DebugFormatter.Timing;
+import org.xydra.store.impl.gae.RevisionManager;
 
 
 /**
@@ -15,25 +16,26 @@ import org.xydra.store.impl.gae.DebugFormatter.Timing;
  * 
  * @author xamde
  */
-public class ThreadRevisionState {
+public class ThreadLocalGaeModelRevision {
 	
 	public static final String DATASOURCENAME = "[.tl-" + UUID.uuid(4) + "]";
 	
-	private static final Logger log = LoggerFactory.getLogger(ThreadRevisionState.class);
+	private static final Logger log = LoggerFactory.getLogger(ThreadLocalGaeModelRevision.class);
 	
 	private XAddress modelAddress;
 	
-	private GaeModelRevision revisionState;
+	/** never null */
+	private GaeModelRevision gaeModelRev;
 	
-	public ThreadRevisionState(XAddress modelAddress) {
+	public ThreadLocalGaeModelRevision(XAddress modelAddress) {
 		this.modelAddress = modelAddress;
 		log.debug(DebugFormatter.init(DATASOURCENAME + "-" + this.modelAddress));
-		this.revisionState = null;
+		this.gaeModelRev = null;
 	}
 	
 	public void clear() {
 		log.debug(DebugFormatter.clear(DATASOURCENAME + "-" + this.modelAddress));
-		this.revisionState = null;
+		this.gaeModelRev = null;
 	}
 	
 	public long getCurrentRev() {
@@ -48,42 +50,30 @@ public class ThreadRevisionState {
 	 * @return current rev
 	 */
 	private long getCurrentRev_internal() {
-		return this.revisionState == null ? RevisionInfo.NOT_SET : this.revisionState.revision();
-	}
-	
-	public Boolean modelExists() {
-		Boolean modelExists = this.revisionState == null ? null : this.revisionState.modelExists();
-		return modelExists;
-	}
-	
-	/**
-	 * // TODO Caller should also update instanceContext
-	 * 
-	 * @param revisionState can be null, but null is ignored
-	 */
-	public void setRevisionStateIfRevIsHigherAndNotNull(GaeModelRevision revisionState) {
-		if(revisionState == null) {
-			return;
-		}
-		
-		if(this.revisionState == null || this.revisionState.revision() < revisionState.revision()) {
-			if(this.revisionState == null) {
-				log.debug(DATASOURCENAME + " was null");
-			}
-			this.revisionState = revisionState;
-			log.debug(DebugFormatter.dataPut(DATASOURCENAME, "currentRev",
-			        getCurrentRev_internal(), Timing.Now));
-		}
+		return this.gaeModelRev.getModelRevision() == null ? RevisionInfo.NOT_SET
+		        : this.gaeModelRev.getModelRevision().revision();
 	}
 	
 	@Override
 	public String toString() {
 		return DATASOURCENAME + "(" + this.modelAddress + ") = "
-		        + (this.revisionState == null ? "null" : this.revisionState.toString());
+		        + (this.gaeModelRev == null ? "null" : this.gaeModelRev.toString());
 	}
 	
-	public GaeModelRevision getRevisionState() {
-		return this.revisionState;
+	public GaeModelRevision getGaeModelRev() {
+		return this.gaeModelRev;
+	}
+	
+	/**
+	 * A caller that learned something new about revisions should also tell this
+	 * in the {@link RevisionManager#getInstanceRevisionInfo()}
+	 * 
+	 * @param gaeModelRevision never null
+	 */
+	public void setGaeModelRev(GaeModelRevision gaeModelRevision) {
+		this.gaeModelRev = gaeModelRevision;
+		log.debug(DebugFormatter.dataPut(DATASOURCENAME, "currentRev", getCurrentRev_internal(),
+		        Timing.Now));
 	}
 	
 }

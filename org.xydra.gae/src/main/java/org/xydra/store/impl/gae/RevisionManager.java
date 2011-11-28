@@ -3,32 +3,61 @@ package org.xydra.store.impl.gae;
 import java.util.Map;
 
 import org.xydra.base.XAddress;
-import org.xydra.core.model.impl.memory.UUID;
+import org.xydra.core.model.XModel;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.ModelRevision;
-import org.xydra.store.impl.gae.DebugFormatter.Timing;
 import org.xydra.store.impl.gae.changes.GaeModelRevision;
 import org.xydra.store.impl.gae.changes.RevisionInfo;
-import org.xydra.store.impl.gae.changes.ThreadRevisionState;
+import org.xydra.store.impl.gae.changes.ThreadLocalGaeModelRevision;
 
 
 /**
- * This class is a facade and manager for the different revision caches. It is
- * passive, i.e. does not trigger any kind of recalculation.
+ * The {@link RevisionManager} is
+ * <ol>
+ * <li>a facade and manager for the two revision caches: Instance-wide and
+ * Thread-local.</li>
+ * <li>passive, it does not trigger any kind of recalculation.</li>
+ * <li>one instance per {@link XModel}.</li>
+ * </ol>
  * 
- * There is one revision cache per {@link XModel}. The instance revision cache
- * is shared among all objects within one Java Virtual Machine via the
- * {@link InstanceContext}.
+ * The instance revision cache is shared among all objects within one Java
+ * Virtual Machine via the {@link InstanceContext}. Instance-wide shared state
+ * is managed as a {@link RevisionInfo}.
  * 
- * Four values are managed: LastTaken, Committed, and Current + modelExists.
+ * Thread-local state is a {@link ThreadLocalGaeModelRevision}.
+ * 
+ * ----
+ * 
+ * These values are managed:
+ * <ul>
+ * <li>LastTaken (shared on instance)</li>
+ * <li>LastCommitted (shared on instance)</li>
+ * <li>GaeModelRevision (shared on instance + each thread can have its own
+ * copy). {@link GaeModelRevision} has
+ * <ul>
+ * <li>LastSilentCommited</li>
+ * <li> {@link ModelRevision} (currentRevision + modelExists)</li>
+ * </ul>
+ * </li>
+ * </ul>
  * 
  * A model has a <em>current revision number</em> (Current). It is incremented
  * every time a change operation succeeds. Not necessarily only one step.
  * 
- * The order of revision number is this (highest numbers first):
+ * For each value, the revision cache maintains a shared minimal value, which
+ * can be re-used among all threads as a starting point to compute the
+ * thread-local variables.
  * 
- * Reality:
+ * Each thread has its own view on currentRevision and modelExists. This ensures
+ * a read-your-own-writes behaviour within one instance.
+ * 
+ * These invariants are true (lowercase = estimated values, uppercase = real
+ * values): currentRev <= CURRENT_REV; lastCommited <= LAST_COMMITED; lastTaken
+ * <= LAST_TAKEN; currentRev <= lastSilentCommitted <= lastCommited <=
+ * lastTaken; CURRENT_REV <= LAST_COMMITED <= LAST_TAKEN;
+ * 
+ * The following diagram shows an example:
  * 
  * <pre>
  * Possible Status: | Creating | SuccExe | SuccNoChg | FailPre | FailTimeout |
@@ -38,11 +67,10 @@ import org.xydra.store.impl.gae.changes.ThreadRevisionState;
  * r98              |    No change entity exists for this revision number    |
  * r97              |    No change entity exists for this revision number    |
  * 
- * LAST_TAKEN (L) = 95
+ * LAST_TAKEN (L) = 96
  * 
  * r96              |   ????????????????????????????????????????????????     |
  * r95              |   ????????????????????????????????????????????????     |
- * 
  * r94              |   xxx?????????????????????????????????????????????     |
  * 
  * COMMITTED (C) = 93 (the highest commit with no creating under it)
@@ -57,314 +85,104 @@ import org.xydra.store.impl.gae.changes.ThreadRevisionState;
  * r90              |   ---    |   xxx   |    --------------------------     |
  * r89              |   ---    |   ?????????????????????????????????????     |
  * r88              |   ---    |   ?????????????????????????????????????     |
+ * r87              |   ---    |   ?????????????????????????????????????     |
+ * r86              |   ---    |   ?????????????????????????????????????     |
+ * r85              |   ---    |   ?????????????????????????????????????     |
+ * 
+ * A potential lastSilentCommitted of the candidate A
+ * 
+ * r84              |   ---    |   ---??????????????????????????????????     |
+ * r83              |   ---    |   ---??????????????????????????????????     |
+ * r82              |   ---    |   ---??????????????????????????????????     |
+ * 
+ * A potential candidate A for a currentRev = 81
+ * 
+ * r81              |   ---    |   xxx??????????????????????????????????     |
+ * r80              |   ---    |   ?????????????????????????????????????     |
+ * r79              |   ---    |   ?????????????????????????????????????     |
+ * r78              |   ---    |   ?????????????????????????????????????     |
  * ...              |   ---    |   ?????????????????????????????????????     |
  * r00              |   ---    |   ?????????????????????????????????????     |
  * -----------------+----------+---------+-----------+---------+-------------+
  * </pre>
  * 
- * Invariants: LAST_TAKEN >= COMMITTED >= CURRENT
- * 
- * For each value, the revision cache maintains a shared minimal value, which
- * can be re-used among all threads as a starting point to compute the
- * thread-local variables.
- * 
- * Each thread has its own view on currentRevision and modelExists. This ensures
- * a read-your-own-writes behaviour within one instance.
- * 
- * A typical invocation sequence can look like this:
- * 
- * Syntax:
- * 
- * <pre>
- * L_ex  = revCache.lastTaken.exactValue
- * L_min = revCache.lastTaken.sharedMinimalValue
- * C_ex  = revCache.committed.exactValue
- * C_min = revCache.committed.sharedMinimalValue
- * R_ex  = revCache.currentRev.exactValue
- * R_min = revCache.currentRev.sharedMinimalValue
- * </pre>
- * 
- * <ol>
- * <li>On GAE instance 1: find next free revision number (to execute a command)
- * <ol>
- * <li>
- * 
- * <pre>
- * L = L_ex
- * If none set:
- *   L = L_min
- *     If none set: L_loaded = Load L from memcache. L_min = L_loaded.
- *     If L still undefined, use -1.
- * </pre>
- * 
- * </li>
- * <li>Ask datastore for all changes [L,X] until change(X) == null</li>
- * <li>R_ex = ... compute while traversing changes ...</li>
- * <li>Set L_ex=X-1 as thread-local exact value of lastTaken</li>
- * <li>Create and commit change(L_ex+1)</li>
- * <li>For (X=C,L,R): X_min.setIfHigher(X_ex)</li>
- * <li>
- * 
- * <pre>
- * For (X=C,L,R): 
- *   X_delta = X_loaded - X_min;
- *   If (X_delta > 0): memcache(x).increment(X_delta);
- * </pre>
- * 
- * </li>
- * </ol>
- * </li>
- * </ol>
- * 
- * 
  * @author xamde
- */
-/**
- * @author xamde
- * 
  */
 public class RevisionManager {
 	
 	private static final Logger log = LoggerFactory.getLogger(RevisionManager.class);
 	
-	private static final String REVCACHE_NAME = "[.revm-" + UUID.uuid(4) + "]";
+	private static final String REVMANAGER_NAME = "[.rev]";
 	
-	private XAddress modelAddress;
+	/** pointer to shared value, never null */
+	private transient RevisionInfo instanceRevInfo;
 	
-	private RevisionInfo instanceRevInfo;
+	private final XAddress modelAddress;
 	
-	/**
-	 * @param modelAddress ..
-	 * @return a reference to the shared {@link RevisionInfo} to manage the
-	 *         given model's revision state
-	 */
-	// TODO ready for lazy init
-	private static RevisionInfo getInstanceRevisionInfo(XAddress modelAddress) {
-		String key = modelAddress + "/revisions";
-		Map<String,Object> instanceContext = InstanceContext.getInstanceCache();
-		RevisionInfo instanceRevInfo;
-		synchronized(instanceContext) {
-			instanceRevInfo = (RevisionInfo)instanceContext.get(key);
-			if(instanceRevInfo == null) {
-				instanceRevInfo = new RevisionInfo(".instance-rev");
-				instanceContext.put(key, instanceRevInfo);
-			}
-		}
-		return instanceRevInfo;
-	}
+	private boolean isInitialized = false;
 	
 	/**
 	 * @param modelAddress ..
 	 */
 	@GaeOperation()
 	public RevisionManager(XAddress modelAddress) {
-		log.debug(DebugFormatter.init(REVCACHE_NAME));
+		log.debug(DebugFormatter.init(REVMANAGER_NAME));
 		this.modelAddress = modelAddress;
-		this.instanceRevInfo = getInstanceRevisionInfo(modelAddress);
-	}
-	
-	/**
-	 * @return a revision number such that all changes up to and including that
-	 *         revision number are guaranteed to be committed. This is not
-	 *         guaranteed to be the highest revision number that fits this
-	 *         requirement.
-	 */
-	@GaeOperation(memcacheRead = true)
-	public long getLastCommited() {
-		long l = this.instanceRevInfo.getLastCommitted();
-		if(l == RevisionInfo.NOT_SET) {
-			l = -1;
-		}
-		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "lastCommitted", l, Timing.Now));
-		return l;
-	}
-	
-	/**
-	 * @return the last known revision number that has been grabbed by a change.
-	 *         No guarantees are made that no higher revision numbers aren't
-	 *         taken already.
-	 */
-	public long getLastTaken() {
-		long l = this.instanceRevInfo.getLastTaken();
-		if(l == RevisionInfo.NOT_SET) {
-			l = -1;
-		}
-		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "lastTaken", l, Timing.Now));
-		return l;
-	}
-	
-	public long getLastSilentCommitted() {
-		long l = -1;
-		if(this.instanceRevInfo != null && this.instanceRevInfo.getRevisionState() != null) {
-			l = this.instanceRevInfo.getRevisionState().getLastSilentCommitted();
-			if(l == RevisionInfo.NOT_SET) {
-				l = -1;
+		String key = modelAddress + "/revisions";
+		Map<String,Object> instanceContext = InstanceContext.getInstanceCache();
+		synchronized(instanceContext) {
+			this.instanceRevInfo = (RevisionInfo)instanceContext.get(key);
+			if(this.instanceRevInfo == null) {
+				this.instanceRevInfo = new RevisionInfo(".instance-rev" + modelAddress);
+				instanceContext.put(key, this.instanceRevInfo);
 			}
 		}
-		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "lastSilentCommitted", l, Timing.Now));
-		return l;
-	}
-	
-	// /**
-	// * Set a new value to the instance cache. Does not influence already
-	// * initialised threadLocal numbers.
-	// *
-	// * @param revisionState The value to set. It is ignored if the current
-	// * cached value is bigger than this.
-	// */
-	// @Deprecated
-	// public void setBothCurrentModelRev(ModelRevision revisionState) {
-	// assert revisionState != null;
-	// log.debug(DebugFormatter.dataPut(REVCACHE_NAME, "revState",
-	// revisionState, Timing.Now));
-	// this.instanceRevInfo.setCurrentRevisionStateIfRevIsHigher(revisionState);
-	// /*
-	// * Same request-bound thread is making changes and doing requests here.
-	// * Update thread local.
-	// */
-	// if(this.hasThreadLocallyDefinedCurrentRevision()
-	// && (revisionState.revision() >
-	// this.getThreadRevState().getRevisionState()
-	// .revision())) {
-	// log.debug(DebugFormatter.dataPut(REVCACHE_NAME, "revisionState",
-	// revisionState,
-	// Timing.Now));
-	// setThreadRevState(revisionState);
-	// }
-	// }
-	
-	/**
-	 * Set a new value to be returned by {@link #getLastCommited()}.
-	 * 
-	 * @param l The value is set. It is ignored if the current cached value is
-	 *            less than this.
-	 */
-	public void setLastCommited(long l) {
-		log.debug(DebugFormatter.dataPut(REVCACHE_NAME, "lastCommited", l, Timing.Now));
-		this.instanceRevInfo.setLastCommittedIfHigher(l);
+		assert this.getInstanceRevisionInfo() != null;
+		assert this.getInstanceRevisionInfo().getGaeModelRevision() != null;
+		assert this.getInstanceRevisionInfo().getGaeModelRevision().getModelRevision() != null;
 	}
 	
 	/**
-	 * Set a new value to be returned by {@link #getLastTaken()}.
+	 * Does not calculate a new revision. Just returns thread-locally cached
+	 * revision. If not defined, thread-local cache is initialised from instance
+	 * cache, which can never be null
 	 * 
-	 * @param l The value is set. It is ignored if the current cached value is
-	 *            less than this.
+	 * @return thread-local {@link ModelRevision}, never null
 	 */
-	public void setLastTaken(long l) {
-		log.debug(DebugFormatter.dataPut(REVCACHE_NAME, "lastTaken", l, Timing.Now));
-		this.instanceRevInfo.setLastTakenIfHigher(l);
-	}
-	
-	/**
-	 * Clear instance cache for this model
-	 */
-	public void clearInstanceCache() {
-		log.debug(DebugFormatter.clear(REVCACHE_NAME));
-		this.instanceRevInfo.clear();
-		
-	}
-	
-	/**
-	 * Return value is thread-local after first call.
-	 * 
-	 * @return a cached value of the current revision
-	 * 
-	 *         The returned value may be less that the actual "current" revision
-	 *         number, but is guaranteed to never be greater.
-	 * 
-	 *         Non-existing models are signalled as -1.
-	 */
-	@GaeOperation(memcacheRead = true)
-	@Deprecated
-	protected long getCurrentRev() {
-		assert getThreadRevState() != null;
-		long l = this.getThreadRevState().getCurrentRev();
-		if(l == RevisionInfo.NOT_SET) {
-			l = -1;
+	public GaeModelRevision getThreadLocalGaeModelRev() {
+		ThreadLocalGaeModelRevision tlgmr = getThreadLocalGaeModelRevision_internal();
+		if(tlgmr == null) {
+			// init
+			ModelRevision modelRev = this.getInstanceRevisionInfo().getGaeModelRevision()
+			        .getModelRevision();
+			long silent = this.getInstanceRevisionInfo().getGaeModelRevision()
+			        .getLastSilentCommitted();
+			if(modelRev == null) {
+				modelRev = ModelRevision.MODEL_DOES_NOT_EXIST_YET;
+			}
+			assert modelRev != null;
+			GaeModelRevision gaeModelRev = new GaeModelRevision(silent, modelRev);
+			tlgmr = new ThreadLocalGaeModelRevision(this.modelAddress);
+			tlgmr.setGaeModelRev(gaeModelRev);
+			setThreadRevState(tlgmr);
 		}
-		log.trace(DebugFormatter.dataGet(REVCACHE_NAME, "current", l, Timing.Now));
-		return l;
-	}
-	
-	/**
-	 * @return a thread-locally defined {@link ModelRevision} or null, if none
-	 *         defined
-	 */
-	public GaeModelRevision getModelRevision() {
-		ThreadRevisionState trs = getThreadRevState();
-		if(trs == null) {
-			return null;
-		}
-		return trs.getRevisionState();
-	}
-	
-	@Deprecated
-	public boolean hasThreadLocallyDefinedCurrentRevision() {
-		return getThreadRevState() != null;
-	}
-	
-	boolean isThreadLocallyDefined() {
-		return getThreadRevState() != null;
+		assert tlgmr.getGaeModelRev() != null;
+		return tlgmr.getGaeModelRev();
 	}
 	
 	/**
 	 * @return ThreadRevisionState or null
 	 */
-	private ThreadRevisionState getThreadRevState() {
+	private ThreadLocalGaeModelRevision getThreadLocalGaeModelRevision_internal() {
 		return InstanceContext.getThreadContext().get(this.modelAddress.toString());
 	}
 	
-	/**
-	 * @param threadRevisionState can be null (to reset the tread local cache)
-	 */
-	private void setThreadRevState(ThreadRevisionState threadRevisionState) {
-		InstanceContext.getThreadContext().put(this.modelAddress.toString(), threadRevisionState);
-	}
-	
-	public RevisionInfo getRevisionInfo() {
-		RevisionInfo ri = new RevisionInfo("revMan-return");
-		ri.setLastTakenIfHigher(getLastTaken());
-		ri.setLastCommittedIfHigher(getLastCommited());
-		ri.setCurrentModelRevisionIfRevIsHigher(getModelRevision());
-		return ri;
-	}
-	
-	/**
-	 * @return the instance-wide {@link GaeModelRevision}, can be null
-	 */
-	public GaeModelRevision getInstanceRevisionState() {
-		return this.instanceRevInfo.getRevisionState();
-	}
-	
-	public RevisionInfo getInstanceRevisionInfo() {
-		return this.instanceRevInfo;
-	}
-	
-	@Override
-	public String toString() {
-		return "instance:" + this.instanceRevInfo + "\nthreadLocal:" + this.getThreadRevState();
-	}
-	
-	/**
-	 * FIXME WARN Does not calculate a new revision. Just looks in instance if
-	 * not thread-locally defined.
-	 * 
-	 * @return thread-local {@link ModelRevision}, can be null
-	 */
-	public ModelRevision getThreadLocalRevision() {
-		ThreadRevisionState trs = getThreadRevState();
-		if(trs == null) {
-			// init
-			GaeModelRevision modelRev = this.getInstanceRevisionState();
-			trs = new ThreadRevisionState(this.modelAddress);
-			trs.setRevisionStateIfRevIsHigherAndNotNull(modelRev);
-			setThreadRevState(trs);
-		}
-		return trs.getRevisionState();
+	boolean isThreadLocallyDefined() {
+		return getThreadLocalGaeModelRevision_internal() != null;
 	}
 	
 	public void resetThreadLocalRevisionNumber() {
-		ThreadRevisionState trs = getThreadRevState();
+		ThreadLocalGaeModelRevision trs = getThreadLocalGaeModelRevision_internal();
 		if(trs == null) {
 			// fine, keep it that way
 		} else {
@@ -372,18 +190,29 @@ public class RevisionManager {
 		}
 	}
 	
-	public void setCurrenModelRevIfHigher(GaeModelRevision newCurrentRevState) {
-		assert this.instanceRevInfo != null;
-		this.instanceRevInfo.setCurrentModelRevisionIfRevIsHigher(newCurrentRevState);
+	public RevisionInfo getInstanceRevisionInfo() {
+		return this.instanceRevInfo;
 	}
 	
-	public void setLastSilentCommittedIfHigher(long l) {
-		log.debug(DebugFormatter.dataPut(REVCACHE_NAME, "lastSilentCommitted", l, Timing.Now));
-		if(this.instanceRevInfo.getRevisionState() == null) {
-			this.instanceRevInfo
-			        .setCurrentModelRevisionIfRevIsHigher(GaeModelRevision.GAE_MODEL_DOES_NOT_EXIST_YET);
-		}
-		this.instanceRevInfo.getRevisionState().setLastSilentCommittedIfHigher(l);
+	/**
+	 * @param threadRevisionState can be null (to reset the tread local cache)
+	 */
+	private void setThreadRevState(ThreadLocalGaeModelRevision threadRevisionState) {
+		InstanceContext.getThreadContext().put(this.modelAddress.toString(), threadRevisionState);
+	}
+	
+	@Override
+	public String toString() {
+		return this.modelAddress + ":: instance:" + this.instanceRevInfo + "\nthreadLocal:"
+		        + this.getThreadLocalGaeModelRevision_internal();
+	}
+	
+	public boolean isInstanceModelRevisionInitialised() {
+		return this.isInitialized;
+	}
+	
+	public void markAsInitialised() {
+		this.isInitialized = true;
 	}
 	
 }

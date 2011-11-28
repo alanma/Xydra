@@ -551,6 +551,7 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 	
 	@Override
 	public XRevWritableModel getPartialSnapshot(long snapshotRev, Iterable<XAddress> locks) {
+		log.debug("getPartialSnapshot[" + snapshotRev + "]");
 		
 		if(snapshotRev == -1) {
 			return null;

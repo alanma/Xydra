@@ -12,6 +12,7 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.ModelRevision;
 import org.xydra.store.impl.gae.changes.GaeChangesServiceImpl3;
+import org.xydra.store.impl.gae.changes.GaeModelRevision;
 import org.xydra.store.impl.gae.changes.IGaeChangesService;
 import org.xydra.store.impl.gae.execute.GaeExecutionServiceImpl3;
 import org.xydra.store.impl.gae.execute.IGaeExecutionService;
@@ -68,14 +69,25 @@ public class GaeModelPersistence {
 	}
 	
 	private void assertInstanceRevisionNumberHasBeenInitialized() {
-		if(this.revisionManager.getInstanceRevisionState() == null) {
-			this.changesService.calculateCurrentModelRevision();
+		if(!this.revisionManager.isInstanceModelRevisionInitialised()) {
+			GaeModelRevision gaeModelRev = this.changesService.calculateCurrentModelRevision();
+			if(gaeModelRev.getModelRevision() == null) {
+				gaeModelRev = new GaeModelRevision(gaeModelRev.getLastSilentCommitted(),
+				        ModelRevision.MODEL_DOES_NOT_EXIST_YET);
+			}
+			this.revisionManager.getInstanceRevisionInfo().setCurrentModelRevisionIfRevIsHigher(
+			        gaeModelRev.getModelRevision());
+			this.revisionManager.getInstanceRevisionInfo().setLastSilentCommittedIfHigher(
+			        gaeModelRev.getLastSilentCommitted());
+			this.revisionManager.markAsInitialised();
 		}
+		assert this.revisionManager.isInstanceModelRevisionInitialised();
 	}
 	
 	synchronized public XWritableModel getSnapshot() {
 		assertThreadLocalRevisionNumberIsUpToDate();
-		ModelRevision currentRevision = this.revisionManager.getThreadLocalRevision();
+		ModelRevision currentRevision = this.revisionManager.getThreadLocalGaeModelRev()
+		        .getModelRevision();
 		if(!currentRevision.modelExists()) {
 			return null;
 		}
@@ -87,7 +99,8 @@ public class GaeModelPersistence {
 	
 	public XWritableObject getObjectSnapshot(XID objectId) {
 		assertThreadLocalRevisionNumberIsUpToDate();
-		ModelRevision currentRevision = this.revisionManager.getThreadLocalRevision();
+		ModelRevision currentRevision = this.revisionManager.getThreadLocalGaeModelRev()
+		        .getModelRevision();
 		boolean modelExists = currentRevision.modelExists();
 		if(!modelExists) {
 			return null;
@@ -105,7 +118,7 @@ public class GaeModelPersistence {
 	 */
 	public ModelRevision getModelRevision() {
 		assertThreadLocalRevisionNumberIsUpToDate();
-		return this.revisionManager.getThreadLocalRevision();
+		return this.revisionManager.getThreadLocalGaeModelRev().getModelRevision();
 	}
 	
 	@Override

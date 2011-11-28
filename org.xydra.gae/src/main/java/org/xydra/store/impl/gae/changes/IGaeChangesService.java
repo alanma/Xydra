@@ -7,7 +7,6 @@ import org.xydra.base.XID;
 import org.xydra.base.change.XEvent;
 import org.xydra.store.Callback;
 import org.xydra.store.GetEventsRequest;
-import org.xydra.store.ModelRevision;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.gae.RevisionManager;
 import org.xydra.store.impl.gae.changes.GaeChange.Status;
@@ -53,7 +52,7 @@ public interface IGaeChangesService {
 	 * 
 	 * @see XydraStore#getModelRevisions(XID, String, XAddress[], Callback)
 	 */
-	ModelRevision calculateCurrentModelRevision();
+	GaeModelRevision calculateCurrentModelRevision();
 	
 	/**
 	 * Grabs the lowest available revision number and registers a change for

@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.impl.gae.GaeTestfixer;
 
 
 /**
@@ -17,6 +18,10 @@ import org.xydra.log.LoggerFactory;
  * 
  */
 public class GaeConfigurationManager {
+	
+	static {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+	}
 	
 	private static final Logger log = LoggerFactory.getLogger(GaeConfigurationManager.class);
 	

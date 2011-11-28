@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.Map.Entry;
 
 import org.xydra.store.impl.gae.changes.GaeChange;
+import org.xydra.store.impl.gae.changes.GaeModelRevision;
 import org.xydra.store.impl.gae.changes.KeyStructure;
 
 import com.google.appengine.api.datastore.Entity;
@@ -27,6 +28,8 @@ public class GaeDebugFormatter {
 		|| o instanceof Entity
 
 		|| o instanceof com.google.appengine.api.memcache.MemcacheService.IdentifiableValue
+
+		|| o instanceof GaeModelRevision
 
 		|| o instanceof GaeChange;
 	}
@@ -53,6 +56,9 @@ public class GaeDebugFormatter {
 		} else if(value instanceof GaeChange) {
 			GaeChange c = (GaeChange)value;
 			return "GaeChange {" + DebugFormatter.formatString(c.toString(), 140) + "}";
+		} else if(value instanceof GaeModelRevision) {
+			GaeModelRevision g = (GaeModelRevision)value;
+			return "GaeModelRevision {" + DebugFormatter.formatString(g.toString(), 140) + "}";
 		}
 		
 		throw new IllegalAccessError("Cannot handle this, check via canHandle() before");

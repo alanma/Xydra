@@ -12,16 +12,13 @@ import org.xydra.store.impl.gae.DebugFormatter.Timing;
 /**
  * This class:
  * 
- * Maintains these invariants: currentRev >= lastCommitted >= lastTaken.
+ * 1) Maintains these invariants: currentRev >= lastCommitted >= lastTaken.
  * 
  * 2) Is {@link Serializable} and can be used in MemCache.
  * 
- * 3) Knows if it has internal knowledge that has not been saved yet. Methods:
- * {@link #hasUnsavedChanges()} and {@link #markChangesAsSaved()}.
+ * 3) Is thread-safe.
  * 
- * 4) Is thread-safe.
- * 
- * 5) ... is only relevant within the GAE implementation.
+ * 4) ... is only relevant within the GAE implementation.
  * 
  * A defined currentRev requires a defined value for modelExists.
  * 
@@ -31,12 +28,22 @@ public class RevisionInfo implements Serializable {
 	
 	private static final Logger log = LoggerFactory.getLogger(RevisionInfo.class);
 	
+	/**
+	 * Returned if a value is not set. For non-existing models or no known value
+	 * it's -1.
+	 */
+	public static final long NOT_SET = -1;
+	
 	private static final long serialVersionUID = -8537625185285087183L;
 	
-	/**
-	 * Returned if a value is not set.
-	 */
-	public static final long NOT_SET = -2L;
+	private String datasourceName;
+	
+	/** never null */
+	private GaeModelRevision gaeModelRev;
+	
+	private long lastCommitted;
+	
+	private long lastTaken;
 	
 	/**
 	 * Create a revision info that knows nothing.
@@ -45,8 +52,26 @@ public class RevisionInfo implements Serializable {
 	 */
 	public RevisionInfo(String datasourceName) {
 		this.datasourceName = datasourceName;
-		log.debug(DebugFormatter.init(this.datasourceName));
+		this.gaeModelRev = GaeModelRevision.createGaeModelRevDoesNotExistYet();
 		clear();
+	}
+	
+	/**
+	 * Create a revision info initialised with given values
+	 * 
+	 * @param datasourceName for debugging purposes
+	 * @param modelRev never null
+	 * @param lastCommited ..
+	 * @param lastTaken ..
+	 */
+	public RevisionInfo(String datasourceName, GaeModelRevision modelRev, long lastCommited,
+	        long lastTaken) {
+		assert modelRev != null;
+		this.datasourceName = datasourceName;
+		this.gaeModelRev = modelRev;
+		this.lastCommitted = lastCommited;
+		this.lastTaken = lastTaken;
+		log.debug(DebugFormatter.init(this.datasourceName));
 	}
 	
 	/**
@@ -54,19 +79,22 @@ public class RevisionInfo implements Serializable {
 	 */
 	public void clear() {
 		log.debug(DebugFormatter.clear(this.datasourceName));
-		this.revisionState = null;
+		this.gaeModelRev.clear();
 		this.lastCommitted = NOT_SET;
 		this.lastTaken = NOT_SET;
-		this.unsavedChanges = 0;
 	}
 	
-	/** can be null */
-	private GaeModelRevision revisionState;
-	private long lastCommitted;
-	private long lastTaken;
-	private int unsavedChanges;
-	
-	private String datasourceName;
+	/**
+	 * @return the {@link GaeModelRevision}, never null
+	 */
+	public GaeModelRevision getGaeModelRevision() {
+		synchronized(this) {
+			GaeModelRevision result = this.gaeModelRev;
+			log.trace(DebugFormatter
+			        .dataGet(this.datasourceName, "gaeModelRev", result, Timing.Now));
+			return result;
+		}
+	}
 	
 	/**
 	 * @return lastCommited if defined, {@link #NOT_SET} otherwise.
@@ -81,7 +109,9 @@ public class RevisionInfo implements Serializable {
 	}
 	
 	/**
-	 * @return lastTaken if defined, {@link #NOT_SET} otherwise.
+	 * @return the last known revision number that has been grabbed by a change.
+	 *         No guarantees are made that no higher revision numbers aren't
+	 *         taken already. Returns {@link #NOT_SET} if not known.
 	 */
 	public synchronized long getLastTaken() {
 		synchronized(this) {
@@ -91,47 +121,46 @@ public class RevisionInfo implements Serializable {
 		}
 	}
 	
-	/**
-	 * @return currentRev if defined, {@link #NOT_SET} otherwise.
-	 */
-	public synchronized long getCurrentRev() {
-		synchronized(this) {
-			long result = this.revisionState == null ? NOT_SET : this.revisionState.revision();
-			log.trace(DebugFormatter.dataGet(this.datasourceName, "currentRev", result, Timing.Now));
-			return result;
-		}
+	public void setCurrentModelRevisionIfRevIsHigher(ModelRevision modelRev) {
+		log.trace(DebugFormatter.dataPut(this.datasourceName, "gaeModelRev.currentRev", modelRev,
+		        Timing.Now));
+		this.getGaeModelRevision().setCurrentModelRevisionIfRevIsHigher(modelRev);
 	}
 	
-	/**
-	 * @return true if model exists; false if not; null if not known.
-	 */
-	public Boolean modelExists() {
-		synchronized(this) {
-			Boolean result = this.revisionState == null ? null : this.revisionState.modelExists();
-			log.debug(DebugFormatter
-			        .dataGet(this.datasourceName, "modelExists", result, Timing.Now));
-			return result;
-		}
+	// /**
+	// * Set the given value as the new internal value only if it is higher than
+	// * the current internal value.
+	// *
+	// * @param newGaeRev Can not be null.
+	// */
+	// public synchronized void
+	// setCurrentModelRevisionIfRevIsHigher(GaeModelRevision newGaeRev) {
+	// if(newGaeRev == null) {
+	// throw new IllegalArgumentException("revisionState can not be null");
+	// }
+	// assert newGaeRev != null;
+	// if(this.gaeModelRev.getModelRevision() == null
+	// || (newGaeRev.getModelRevision() != null &&
+	// newGaeRev.getModelRevision().revision() > this.gaeModelRev
+	// .getModelRevision().revision())) {
+	// log.debug(DebugFormatter.dataPut(this.datasourceName, "revisionState",
+	// newGaeRev,
+	// Timing.Now));
+	// this.gaeModelRev = newGaeRev;
+	// // invariant: currentRev >= lastCommitted
+	// setLastCommittedIfHigher(newGaeRev.getModelRevision().revision());
+	// }
+	// }
+	
+	void setDatasourceName(String datasourceName) {
+		this.datasourceName = datasourceName;
 	}
 	
-	/**
-	 * Set the given value as the new internal value only if it is higher than
-	 * the current internal value.
-	 * 
-	 * @param revisionState Can not be null.
-	 */
-	public synchronized void setCurrentModelRevisionIfRevIsHigher(GaeModelRevision revisionState) {
-		if(revisionState == null) {
-			throw new IllegalArgumentException("revisionState can not be null");
-		}
-		if(this.revisionState == null || revisionState.revision() > this.revisionState.revision()) {
-			log.debug(DebugFormatter.dataPut(this.datasourceName, "revisionState", revisionState,
-			        Timing.Now));
-			this.revisionState = revisionState;
-			this.unsavedChanges++;
-			// invariant: currentRev >= lastCommitted
-			setLastCommittedIfHigher(revisionState.revision());
-		}
+	protected void setGaeModelRev(GaeModelRevision gaeModelRev) {
+		assert gaeModelRev != null;
+		log.debug(DebugFormatter.dataPut(this.datasourceName, "gaeModelRev", gaeModelRev,
+		        Timing.Now));
+		this.gaeModelRev = gaeModelRev;
 	}
 	
 	/**
@@ -145,10 +174,15 @@ public class RevisionInfo implements Serializable {
 			log.debug(DebugFormatter.dataPut(this.datasourceName, "lastCommitted", lastCommitted,
 			        Timing.Now));
 			this.lastCommitted = lastCommitted;
-			this.unsavedChanges++;
 			// invariant: lastCommitted >= lastTaken
 			setLastTakenIfHigher(lastCommitted);
 		}
+	}
+	
+	public void setLastSilentCommittedIfHigher(long l) {
+		log.debug(DebugFormatter.dataPut(this.datasourceName, "gaeModelRev.lastSilentCommitted", l,
+		        Timing.Now));
+		this.getGaeModelRevision().setLastSilentCommittedIfHigher(l);
 	}
 	
 	/**
@@ -162,39 +196,60 @@ public class RevisionInfo implements Serializable {
 			log.debug(DebugFormatter.dataPut(this.datasourceName, "lastTaken", lastTaken,
 			        Timing.Now));
 			this.lastTaken = lastTaken;
-			this.unsavedChanges++;
-		}
-	}
-	
-	public synchronized boolean hasUnsavedChanges() {
-		return this.unsavedChanges > 0;
-	}
-	
-	public synchronized void markChangesAsSaved() {
-		this.unsavedChanges = 0;
-	}
-	
-	/**
-	 * @return a {@link ModelRevision} if known, null otherwise.
-	 */
-	public GaeModelRevision getRevisionState() {
-		synchronized(this) {
-			GaeModelRevision result = this.revisionState;
-			log.trace(DebugFormatter.dataGet(this.datasourceName, "revisionState", result,
-			        Timing.Now));
-			return result;
 		}
 	}
 	
 	@Override
 	public String toString() {
-		return "{current:" + getCurrentRev() + ",lastTaken:" + getLastTaken() + ",lastCommitted:"
-		        + getLastCommitted() + ",modelExists:" + modelExists() + "}; unsavedChanges="
-		        + this.hasUnsavedChanges();
+		return "{current:" + getGaeModelRevision() + "; lastTaken:" + getLastTaken()
+		        + ",lastCommitted:" + getLastCommitted() + "}";
 	}
 	
-	public void setDatasourceName(String datasourceName) {
-		this.datasourceName = datasourceName;
+	public boolean isBetterThan(RevisionInfo other) {
+		if(other == null)
+			return true;
+		
+		if(this.gaeModelRev.getLastSilentCommitted() > other.gaeModelRev.getLastSilentCommitted())
+			return true;
+		
+		if(other.gaeModelRev.getModelRevision() == null) {
+			if(this.gaeModelRev.getModelRevision() != null) {
+				return true;
+			} else {
+				// both have no modelRev and same lastSilentCommited
+				return this.lastTaken > other.lastTaken;
+			}
+		} else {
+			assert other.gaeModelRev.getModelRevision() != null;
+			return this.gaeModelRev.getModelRevision().isBetterThan(
+			        other.gaeModelRev.getModelRevision());
+		}
 	}
+	
+	// /**
+	// * @return currentRev if defined, {@link #NOT_SET} otherwise.
+	// */
+	// public synchronized long getCurrentRev() {
+	// synchronized(this) {
+	// long result = this.revisionState == null ? NOT_SET :
+	// this.revisionState.revision();
+	// log.trace(DebugFormatter.dataGet(this.datasourceName, "currentRev",
+	// result, Timing.Now));
+	// return result;
+	// }
+	// }
+	//
+	// /**
+	// * @return true if model exists; false if not; null if not known.
+	// */
+	// public Boolean modelExists() {
+	// synchronized(this) {
+	// Boolean result = this.revisionState == null ? null :
+	// this.revisionState.modelExists();
+	// log.debug(DebugFormatter
+	// .dataGet(this.datasourceName, "modelExists", result, Timing.Now));
+	// return result;
+	// }
+	// }
 	
 }

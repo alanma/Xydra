@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.xydra.gae.AboutAppEngine;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.store.impl.gae.changes.ThreadRevisionState;
+import org.xydra.store.impl.gae.changes.ThreadLocalGaeModelRevision;
 
 
 /**
@@ -46,23 +46,23 @@ public class InstanceContext {
 	}
 	
 	/**
-	 * A map from modelAddress to {@link ThreadRevisionState} for each
+	 * A map from modelAddress to {@link ThreadLocalGaeModelRevision} for each
 	 * {@link Thread}
 	 */
-	private static ThreadLocal<Map<String,ThreadRevisionState>> threadContext;
+	private static ThreadLocal<Map<String,ThreadLocalGaeModelRevision>> threadContext;
 	
 	/**
 	 * @return a map unique for each thread. Never null.
 	 */
-	public static Map<String,ThreadRevisionState> getThreadContext() {
+	public static Map<String,ThreadLocalGaeModelRevision> getThreadContext() {
 		synchronized(InstanceContext.class) {
 			if(threadContext == null) {
-				threadContext = new ThreadLocal<Map<String,ThreadRevisionState>>();
+				threadContext = new ThreadLocal<Map<String,ThreadLocalGaeModelRevision>>();
 			}
 		}
-		Map<String,ThreadRevisionState> map = threadContext.get();
+		Map<String,ThreadLocalGaeModelRevision> map = threadContext.get();
 		if(map == null) {
-			map = new HashMap<String,ThreadRevisionState>();
+			map = new HashMap<String,ThreadLocalGaeModelRevision>();
 			threadContext.set(map);
 		}
 		return map;
@@ -77,9 +77,9 @@ public class InstanceContext {
 			// done, cannot contain content
 		} else {
 			log.info("Clear ThreadLocal context of " + AboutAppEngine.getThreadInfo());
-			Map<String,ThreadRevisionState> tc = getThreadContext();
-			for(String key : tc.keySet()) {
-				ThreadRevisionState threadRevInfo = tc.get(key);
+			Map<String,ThreadLocalGaeModelRevision> tcMap = getThreadContext();
+			for(String key : tcMap.keySet()) {
+				ThreadLocalGaeModelRevision threadRevInfo = tcMap.get(key);
 				if(threadRevInfo != null) {
 					threadRevInfo.clear();
 				}

@@ -1,6 +1,9 @@
 package org.xydra.store.impl.gae.changes;
 
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
@@ -105,6 +108,8 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 	
 	private UniCache<RevisionInfo> unicache;
 	
+	private RevisionInfo backendCached = null;
+	
 	@GaeOperation()
 	public GaeChangesServiceImpl3(XAddress modelAddr, RevisionManager revisionManager) {
 		this.modelAddr = modelAddr;
@@ -169,13 +174,13 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 					continue;
 				}
 				
-				this.revManager.setLastTaken(rev);
+				this.revManager.getInstanceRevisionInfo().setLastTakenIfHigher(rev);
 				
 				// transaction succeeded, we have a revision
 				// progress current version
-				computeCurrenRevisionFromLocalCache(this.revManager.getInstanceRevisionState()
-				        .revision() + 1, rev,
-				        new CandidateRev(this.revManager.getInstanceRevisionState()));
+				computeCurrenRevisionFromLocalCache(start, rev, new CandidateRev(
+				        new GaeModelRevision(rev, this.revManager.getInstanceRevisionInfo()
+				                .getGaeModelRevision().getModelRevision())));
 				
 				return newChange;
 				
@@ -184,7 +189,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 				
 				GaeChange change = new GaeChange(this.modelAddr, rev, changeEntity);
 				SyncDatastore.endTransaction(trans);
-				this.revManager.setLastTaken(rev);
+				this.revManager.getInstanceRevisionInfo().setLastTakenIfHigher(rev);
 				
 				// Since we read the entity anyway, might as well use that
 				// information.
@@ -211,8 +216,9 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 		
 		if(status == Status.SuccessExecuted) {
 			boolean modelExists = eventIndicatesModelExists(change.getEvent());
+			this.revManager.getInstanceRevisionInfo().setLastSilentCommittedIfHigher(change.rev);
 			this.revManager.getInstanceRevisionInfo().setCurrentModelRevisionIfRevIsHigher(
-			        new GaeModelRevision(change.rev, modelExists, change.rev));
+			        new ModelRevision(change.rev, modelExists));
 			// invalidate thread local cache
 			this.revManager.resetThreadLocalRevisionNumber();
 		}
@@ -319,8 +325,14 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 			}
 		}
 		
-		this.revManager.setLastCommited(change.rev);
-		// FIXME kill updateCachedRevisions(change);
+		this.revManager.getInstanceRevisionInfo().setLastCommittedIfHigher(change.rev);
+	}
+	
+	private boolean hasCachedChange(long rev) {
+		Map<Long,GaeChange> committedChangeCache = getCommittedChangeCache();
+		synchronized(committedChangeCache) {
+			return committedChangeCache.containsKey(rev);
+		}
 	}
 	
 	private GaeChange getCachedChange(long rev) {
@@ -383,6 +395,8 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 	
 	private static final int[] WINDOW_SIZES = { 1, 8, 32, 128 };
 	
+	private static final boolean MEMCACHE_CHANGES = false;
+	
 	private String getRevisionCacheName() {
 		return KEY_CACHE_REVINFO + this.modelAddr;
 	}
@@ -391,6 +405,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 	 * @param change
 	 */
 	private void progressChange(GaeChange change) {
+		log.debug("Progressing change " + change);
 		if(change.isTimedOut()) {
 			log.debug("handleTimeout: " + change);
 			commit(change, Status.FailedTimeout);
@@ -418,53 +433,19 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 	 *            found from this set.
 	 */
 	private void fetchMissingRevisionsFromMemcacheAndDatastore(Set<Long> locallyMissingRevs) {
-		/* === Phase 2: Ask memcache === */
-		List<String> memcacheBatchRequest = new ArrayList<String>(locallyMissingRevs.size());
+		if(MEMCACHE_CHANGES) {
+			fetchMissingRevisionsFromMemcache(locallyMissingRevs);
+		}
+		fetchMissingRevisionsFromDatastore(locallyMissingRevs);
+	}
+	
+	private void fetchMissingRevisionsFromDatastore(Set<Long> locallyMissingRevs) {
+		/* === Phase 3: Ask datastore === */
 		if(!locallyMissingRevs.isEmpty()) {
 			// prepare batch request
-			for(long askRev : locallyMissingRevs) {
-				Key key = KeyStructure.createChangeKey(getModelAddress(), askRev);
-				memcacheBatchRequest.add(KeyStructure.toString(key));
-			}
-			// batch request
-			Map<String,Object> memcacheResult = Memcache.getEntities(memcacheBatchRequest);
-			long newLastCommitted = -1;
-			for(Entry<String,Object> entry : memcacheResult.entrySet()) {
-				Key key = KeyStructure.toKey(entry.getKey());
-				Object v = entry.getValue();
-				GaeAssert.gaeAssert(v != null, "v!=null");
-				assert v != null;
-				assert v instanceof Entity : v.getClass();
-				Entity entity = (Entity)v;
-				assert !entity.equals(Memcache.NULL_ENTITY) : "" + key;
-				long rev = KeyStructure.getRevisionFromChangeKey(key);
-				GaeChange change = new GaeChange(getModelAddress(), rev, entity);
-				assert change.getStatus() != null;
-				assert change.getStatus().isCommitted() : change.rev + " " + change.getStatus();
-				cacheCommittedChange(change);
-				if(change.rev > newLastCommitted) {
-					newLastCommitted = change.rev;
-				}
-				locallyMissingRevs.remove(change.rev);
-				log.trace("Found in memcache " + change.rev);
-			}
-			if(newLastCommitted >= 0) {
-				this.revManager.setLastCommited(newLastCommitted);
-			}
-			// re-use strings in memcacheBatchRequest: retain only *still*
-			// missing keys (neither locally found, nor in
-			// memcache)
-			memcacheBatchRequest.removeAll(memcacheResult.keySet());
-		} else {
-			// log.debug("All found in localVmCache");
-		}
-		
-		/* === Phase 3: Ask datastore === */
-		if(!memcacheBatchRequest.isEmpty()) {
-			// prepare batch request
-			List<Key> datastoreBatchRequest = new ArrayList<Key>(memcacheBatchRequest.size());
-			for(String keyStr : memcacheBatchRequest) {
-				Key key = KeyStructure.toKey(keyStr);
+			List<Key> datastoreBatchRequest = new ArrayList<Key>(locallyMissingRevs.size());
+			for(Long l : locallyMissingRevs) {
+				Key key = KeyStructure.createChangeKey(getModelAddress(), l);
 				datastoreBatchRequest.add(key);
 			}
 			// execute batch request
@@ -512,14 +493,61 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 				}
 			}
 			if(newLastTaken >= 0) {
-				this.revManager.setLastTaken(newLastTaken);
+				this.revManager.getInstanceRevisionInfo().setLastTakenIfHigher(newLastTaken);
 			}
 			if(newLastCommitted >= 0) {
-				this.revManager.setLastCommited(newLastCommitted);
+				this.revManager.getInstanceRevisionInfo()
+				        .setLastCommittedIfHigher(newLastCommitted);
 			}
 			
 			// update memcache IMPROVE do this async
-			XydraRuntime.getMemcache().putAll(memcacheBatchPut);
+			if(MEMCACHE_CHANGES) {
+				XydraRuntime.getMemcache().putAll(memcacheBatchPut);
+			}
+		}
+	}
+	
+	private void fetchMissingRevisionsFromMemcache(Set<Long> locallyMissingRevs) {
+		/* === Phase 2: Ask memcache === */
+		if(!locallyMissingRevs.isEmpty()) {
+			// prepare batch request
+			List<String> memcacheBatchRequest = new ArrayList<String>(locallyMissingRevs.size());
+			for(long askRev : locallyMissingRevs) {
+				Key key = KeyStructure.createChangeKey(getModelAddress(), askRev);
+				memcacheBatchRequest.add(KeyStructure.toString(key));
+			}
+			// batch request
+			Map<String,Object> memcacheResult = Memcache.getEntities(memcacheBatchRequest);
+			long newLastCommitted = -1;
+			for(Entry<String,Object> entry : memcacheResult.entrySet()) {
+				Key key = KeyStructure.toKey(entry.getKey());
+				Object v = entry.getValue();
+				GaeAssert.gaeAssert(v != null, "v!=null");
+				assert v != null;
+				assert v instanceof Entity : v.getClass();
+				Entity entity = (Entity)v;
+				assert !entity.equals(Memcache.NULL_ENTITY) : "" + key;
+				long rev = KeyStructure.getRevisionFromChangeKey(key);
+				GaeChange change = new GaeChange(getModelAddress(), rev, entity);
+				assert change.getStatus() != null;
+				assert change.getStatus().isCommitted() : change.rev + " " + change.getStatus();
+				cacheCommittedChange(change);
+				if(change.rev > newLastCommitted) {
+					newLastCommitted = change.rev;
+				}
+				locallyMissingRevs.remove(change.rev);
+				log.trace("Found in memcache " + change.rev);
+			}
+			if(newLastCommitted >= 0) {
+				this.revManager.getInstanceRevisionInfo().setLastSilentCommittedIfHigher(
+				        newLastCommitted);
+			}
+			// re-use strings in memcacheBatchRequest: retain only *still*
+			// missing keys (neither locally found, nor in
+			// memcache)
+			memcacheBatchRequest.removeAll(memcacheResult.keySet());
+		} else {
+			// log.debug("All found in localVmCache");
 		}
 	}
 	
@@ -533,15 +561,19 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 		Set<Long> locallyMissingRevs = new HashSet<Long>();
 		for(long i = startRevInclusive; i <= endRevInclusive; i++) {
 			// add key only if result not known locally yet
-			GaeChange change = this.getCachedChange(i);
-			if(change == null) {
+			if(!this.hasCachedChange(i)) {
 				locallyMissingRevs.add(i);
-			} else {
-				assert change.rev == i;
-				assert change.getStatus().isCommitted();
-				// log.debug("Already locally cached: " +
-				// DebugFormatter.format(change));
 			}
+			
+			// GaeChange change = this.getCachedChange(i);
+			// if(change == null) {
+			// locallyMissingRevs.add(i);
+			// } else {
+			// assert change.rev == i;
+			// assert change.getStatus().isCommitted();
+			// // log.debug("Already locally cached: " +
+			// // DebugFormatter.format(change));
+			// }
 		}
 		return locallyMissingRevs;
 	}
@@ -571,7 +603,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 		 * repocommand.removeModel if there was one
 		 */
 		long begin = beginRevision < 0 ? 0 : beginRevision;
-		long currentRev = this.revManager.getThreadLocalRevision().revision();
+		long currentRev = this.revManager.getThreadLocalGaeModelRev().getModelRevision().revision();
 		if(currentRev == -1) {
 			return null;
 		}
@@ -605,20 +637,40 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 					log.debug("Change " + i + " is " + change.getStatus().name());
 				}
 			} else {
-				log.warn("==== Change " + i + " is null, was asking [" + begin + "," + endRev
-				        + "]. Retry.");
-				// FIXME RECHECK
-				Set<Long> set = new HashSet<Long>();
-				set.add(i);
-				fetchMissingRevisionsFromMemcacheAndDatastore(set);
-				Thread.yield();
-				i--;
-				continue;
+				log.warn("==== Change "
+				        + i
+				        + " is null, was asking ["
+				        + begin
+				        + ","
+				        + endRev
+				        + "]. Retry. Current rev = "
+				        + this.revManager.getInstanceRevisionInfo().getGaeModelRevision()
+				                .getModelRevision());
 				
+				// FIXME kill
+				try {
+					renderChangeLog(this.modelAddr, new OutputStreamWriter(System.out));
+				} catch(IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				throw new RuntimeException("AAAAAA");
+				// break;
+				// FIXME !!!!
+				
+				// // FIXME RECHECK
+				// Set<Long> set = new HashSet<Long>();
+				// set.add(i);
+				// fetchMissingRevisionsFromMemcacheAndDatastore(set);
+				// Thread.yield();
+				// i--;
+				// continue;
 				//
-				// throw new IllegalStateException("Change " + i +
-				// " null was asking [" + begin + ","
-				// + endRev + "]");
+				// //
+				// // throw new IllegalStateException("Change " + i +
+				// // " null was asking [" + begin + ","
+				// // + endRev + "]");
 			}
 		}
 		GaeAssert.gaeAssert(eventsAreWithinRange(events, begin, endRev));
@@ -684,7 +736,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 		log.info("Cleared. Make to sure to also clear memcache.");
 		this.getCommittedChangeCache().clear();
 		this.revManager.resetThreadLocalRevisionNumber();
-		this.revManager.clearInstanceCache();
+		this.revManager.getInstanceRevisionInfo().clear();
 	}
 	
 	/**
@@ -727,29 +779,53 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 	static class UniCacheRevisionInfoEntryHandler implements
 	        UniCache.CacheEntryHandler<RevisionInfo> {
 		
+		private static final String CURR = "curr";
+		private static final String SILENT = "silent";
+		private static final String EXISTS = "exists";
+		private static final String COMM = "comm";
+		private static final String TAKEN = "taken";
+		
 		@Override
-		public Entity toEntity(Key datastoreKey, RevisionInfo entry) {
+		public Entity toEntity(Key datastoreKey, RevisionInfo revInfo) {
 			Entity e = new Entity(datastoreKey);
-			e.setProperty("curr", entry.getCurrentRev());
-			e.setProperty("silent", entry.getLastCommitted());
-			e.setProperty("exists", entry.modelExists());
-			e.setProperty("comm", entry.getLastCommitted());
-			e.setProperty("taken", entry.getLastTaken());
+			e.setProperty(SILENT, revInfo.getGaeModelRevision().getLastSilentCommitted());
+			ModelRevision modelRev = revInfo.getGaeModelRevision().getModelRevision();
+			if(modelRev != null) {
+				e.setProperty(CURR, modelRev.revision());
+				e.setProperty(EXISTS, modelRev.modelExists());
+			} else {
+				e.removeProperty(CURR);
+				e.removeProperty(EXISTS);
+			}
+			e.setProperty(COMM, revInfo.getLastCommitted());
+			e.setProperty(TAKEN, revInfo.getLastTaken());
 			return e;
 		}
 		
 		@Override
 		public RevisionInfo fromEntity(Entity e) {
-			RevisionInfo ri = new RevisionInfo("from-datastore");
-			long current = (Long)e.getProperty("curr");
-			long silent = (Long)e.getProperty("silent");
-			boolean exists = (Boolean)e.getProperty("exists");
-			GaeModelRevision revState = new GaeModelRevision(current, exists, silent);
-			ri.setCurrentModelRevisionIfRevIsHigher(revState);
-			long lastCommitted = (Long)e.getProperty("comm");
+			RevisionInfo ri = new RevisionInfo("from-datastore" + e.getKey().toString());
+			long silent = (Long)e.getProperty(SILENT);
+			ri.setLastSilentCommittedIfHigher(silent);
+			long lastCommitted = (Long)e.getProperty(COMM);
 			ri.setLastCommittedIfHigher(lastCommitted);
-			long lastTaken = (Long)e.getProperty("taken");
+			// FIXME !!! why can this property be missing?
+			Object oLastTaken = e.getProperty(TAKEN);
+			if(oLastTaken == null) {
+				log.warn("entity weird: " + DebugFormatter.format(e));
+			}
+			long lastTaken = (Long)oLastTaken;
 			ri.setLastTakenIfHigher(lastTaken);
+			ModelRevision modelRev = null;
+			if(e.hasProperty(CURR)) {
+				assert e.hasProperty(EXISTS);
+				long current = (Long)e.getProperty(CURR);
+				boolean modelExists = (Boolean)e.getProperty(EXISTS);
+				modelRev = new ModelRevision(current, modelExists);
+			}
+			GaeModelRevision gaeModelRev = new GaeModelRevision(silent, modelRev);
+			ri.setGaeModelRev(gaeModelRev);
+			log.debug("loaded from entity with curr=" + gaeModelRev);
 			return ri;
 		}
 		
@@ -768,35 +844,48 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 	}
 	
 	@Override
-	public ModelRevision calculateCurrentModelRevision() {
-		GaeModelRevision lastCurrentRev = this.revManager.getInstanceRevisionState();
+	public GaeModelRevision calculateCurrentModelRevision() {
+		GaeModelRevision lastCurrentRev = this.revManager.getInstanceRevisionInfo()
+		        .getGaeModelRevision();
+		assert lastCurrentRev.getModelRevision() != null;
 		log.info("Update currentRev from lastCurrentRev=" + lastCurrentRev);
 		/*
 		 * After this revision step it might turn out, that 'current' is in fact
 		 * the current revision.
 		 */
-		CandidateRev candidate = new CandidateRev(
-		        lastCurrentRev == null ? GaeModelRevision.GAE_MODEL_DOES_NOT_EXIST_YET
-		                : lastCurrentRev);
+		CandidateRev candidate = new CandidateRev(lastCurrentRev);
 		
 		int round = 0;
-		long attempts = 0;
-		boolean askedCaches = false;
-		long lastCheckedRev = this.revManager.getLastSilentCommitted();
+		long isolatedAttempts = 0;
+		boolean askedMemcacheOrDatastore = false;
+		long lastCheckedRev = this.revManager.getInstanceRevisionInfo().getGaeModelRevision()
+		        .getLastSilentCommitted();
 		log.debug("Start searching at " + lastCheckedRev + " with last rev being "
-		        + candidate.modelRev.revision());
+		        + candidate.gaeModelRev.getModelRevision());
 		while(true) {
-			if(!askedCaches && attempts > 16) {
-				log.info("Using cache after " + attempts + " attempts");
-				// TODO use caches
+			if(!askedMemcacheOrDatastore && isolatedAttempts > 16) {
+				log.info("Asking cache after " + isolatedAttempts + " attempts");
+				
 				RevisionInfo cachedRevInfo = getRevCache().get(getRevisionCacheName(),
 				        StorageOptions.create(false, true, true));
 				if(cachedRevInfo != null) {
-					candidate.modelRev = cachedRevInfo.getRevisionState();
-					lastCheckedRev = cachedRevInfo.getLastCommitted();
-					round = 0;
+					this.backendCached = cachedRevInfo;
+					ModelRevision cachedModelRev = cachedRevInfo.getGaeModelRevision()
+					        .getModelRevision();
+					if(cachedModelRev != null
+					        && cachedModelRev.revision() > candidate.gaeModelRev.getModelRevision()
+					                .revision()) {
+						candidate.gaeModelRev = cachedRevInfo.getGaeModelRevision();
+						assert cachedRevInfo.getLastCommitted() > lastCheckedRev;
+						lastCheckedRev = cachedRevInfo.getLastCommitted();
+						assert lastCheckedRev >= candidate.gaeModelRev.getModelRevision()
+						        .revision();
+						round = 0;
+						log.debug("Cached value is better than what we had. Now using "
+						        + candidate.gaeModelRev);
+					}
 				}
-				askedCaches = true;
+				askedMemcacheOrDatastore = true;
 			}
 			
 			int windowSize = windowsSizeForRound(round);
@@ -832,43 +921,58 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 			log.info("=== Phase 4: Compute result from local cache ===");
 			candidate = computeCurrenRevisionFromLocalCache(beginRevInclusive, endRevInclusive,
 			        candidate);
-			if(candidate.isFinalModelRev) {
-				return candidate.modelRev;
+			if(candidate.finalModelRev) {
+				return candidate.gaeModelRev;
 			}
-			attempts += windowSize;
+			lastCheckedRev = endRevInclusive;
+			isolatedAttempts += windowSize;
 			round++;
 		}
 	}
 	
 	private static class CandidateRev {
-		GaeModelRevision modelRev;
-		boolean isFinalModelRev = false;
+		GaeModelRevision gaeModelRev;
+		private boolean finalModelRev = false;
 		
-		public CandidateRev(GaeModelRevision modelRev) {
-			this.modelRev = modelRev;
+		/**
+		 * @param gaeModelRev never null
+		 */
+		public CandidateRev(GaeModelRevision gaeModelRev) {
+			assert gaeModelRev != null;
+			assert gaeModelRev.getModelRevision() != null;
+			this.gaeModelRev = gaeModelRev;
 		}
 		
 		@Override
 		public String toString() {
-			return this.modelRev + " finalRev?" + this.isFinalModelRev;
+			return this.gaeModelRev + " finalRev?" + this.finalModelRev;
 		}
 		
 		public void markAsFinalRev() {
-			this.isFinalModelRev = true;
+			this.finalModelRev = true;
+		}
+		
+		public boolean isFinalModelRev() {
+			return this.finalModelRev;
 		}
 		
 		public void setModelRev(GaeModelRevision modelRev) {
-			this.modelRev = modelRev;
+			this.gaeModelRev = modelRev;
 		}
 	}
 	
 	private CandidateRev computeCurrenRevisionFromLocalCache(long beginRevInclusive,
 	        long endRevInclusive, CandidateRev candidate) {
-		assert candidate.isFinalModelRev == false;
-		assert endRevInclusive - beginRevInclusive >= 0;
+		assert candidate.gaeModelRev.getModelRevision() != null;
+		assert candidate.isFinalModelRev() == false;
+		assert endRevInclusive - beginRevInclusive >= 0 : "begin:" + beginRevInclusive + ",end:"
+		        + endRevInclusive;
+		log.debug("ComputeFromCache candidate=" + candidate + " in range [" + beginRevInclusive
+		        + "," + endRevInclusive + "]");
 		for(long i = beginRevInclusive; i <= endRevInclusive; i++) {
 			GaeChange change = getCachedChange(i);
-			log.trace("cached change " + i + ": " + DebugFormatter.format(change));
+			// log.trace("cached change " + i + ": " +
+			// DebugFormatter.format(change));
 			if(change == null) {
 				// Validated a candidate revision
 				log.debug("Found end at " + i + " return workingRev=" + candidate);
@@ -882,14 +986,14 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 					XEvent event = change.getEvent();
 					boolean modelExist = eventIndicatesModelExists(event);
 					candidate.setModelRev(new GaeModelRevision(event.getRevisionNumber(),
-					        modelExist, i));
+					        new ModelRevision(i, modelExist)));
+					log.debug(this.modelAddr + ":: New currentRev candidate " + candidate);
 				}
 				
-				// Mostly irrelevant events
 				if(change.getStatus().isCommitted()) {
-					this.revManager.setLastCommited(i);
-					this.revManager.setLastSilentCommittedIfHigher(i);
-					candidate.modelRev.setLastSilentCommittedIfHigher(i);
+					this.revManager.getInstanceRevisionInfo().setLastCommittedIfHigher(i);
+					this.revManager.getInstanceRevisionInfo().setLastSilentCommittedIfHigher(i);
+					candidate.gaeModelRev.setLastSilentCommittedIfHigher(i);
 				} else {
 					// Validated a candidate revision
 					assert change.getStatus() == Status.Creating;
@@ -900,22 +1004,60 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 				}
 			}
 			
-			// cache? => shared with other threads
-			// TODO use these caches to speed up
-			if(this.revManager.getModelRevision() != null) {
-				getRevCache().put(getRevisionCacheName(), this.revManager.getRevisionInfo(),
-				        UniCache.StorageOptions.create(false, i % 16 == 0, i % 64 == 0));
+			boolean putInMemcache = i % 16 == 4;
+			boolean putInDatastore = i % 64 == 16;
+			if(putInMemcache || putInDatastore) {
+				StorageOptions storeOpts = UniCache.StorageOptions.create(false, putInMemcache,
+				        putInDatastore);
+				if(this.backendCached == null) {
+					// read cache first to prevent destroying good knowledge
+					this.backendCached = getRevCache().get(getRevisionCacheName(), storeOpts);
+				}
+				// share findings via memcache and datastore with other
+				// instances
+				RevisionInfo toBeCached = new RevisionInfo("toBeCached", candidate.gaeModelRev,
+				        this.revManager.getInstanceRevisionInfo().getLastCommitted(),
+				        this.revManager.getInstanceRevisionInfo().getLastTaken());
+				
+				if(toBeCached.isBetterThan(this.backendCached)) {
+					log.debug("this rev " + toBeCached + " is better than " + this.backendCached
+					        + " and thus will be cached");
+					getRevCache().put(getRevisionCacheName(), toBeCached, storeOpts);
+				}
+				
 			}
-			// done?
-			if(candidate.isFinalModelRev) {
-				this.revManager.setCurrenModelRevIfHigher(candidate.modelRev);
-				log.debug("Updated rev from [" + candidate + " ==> " + candidate.modelRev);
+			
+			// are we done?
+			if(candidate.finalModelRev) {
+				this.revManager.getInstanceRevisionInfo().setLastSilentCommittedIfHigher(
+				        candidate.gaeModelRev.getLastSilentCommitted());
+				this.revManager.getInstanceRevisionInfo().setCurrentModelRevisionIfRevIsHigher(
+				        candidate.gaeModelRev.getModelRevision());
+				log.debug("Updated rev from [" + candidate + " ==> " + candidate.gaeModelRev);
 				return candidate;
 			}
 		}
 		// default:
-		assert candidate.isFinalModelRev == false;
+		assert candidate.finalModelRev == false;
 		return candidate;
+	}
+	
+	public static void renderChangeLog(XAddress modelAddress, Writer w) throws IOException {
+		w.write("<h2>Changelog of " + modelAddress + "</h2>\n");
+		w.flush();
+		int i = 0;
+		RevisionManager rm = new RevisionManager(modelAddress);
+		GaeChangesServiceImpl3 changes = new GaeChangesServiceImpl3(modelAddress, rm);
+		GaeChange c = changes.getChange(i);
+		while(c != null) {
+			// render c
+			String s = DebugFormatter.format(c);
+			w.write(s + "<br/>\n");
+			w.flush();
+			i++;
+			c = changes.getChange(i);
+		}
+		w.write("End of changelog.<br/>\n");
 	}
 	
 }

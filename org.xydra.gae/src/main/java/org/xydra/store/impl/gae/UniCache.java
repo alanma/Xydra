@@ -39,7 +39,7 @@ public class UniCache<T> {
 	}
 	
 	/**
-	 * @param key ..
+	 * @param key must be unique
 	 * @param value ..
 	 * @param storeOpts where to put
 	 */
@@ -89,6 +89,10 @@ public class UniCache<T> {
 		return null;
 	}
 	
+	/**
+	 * @param s must be unique
+	 * @return a gae Key
+	 */
 	private static Key createCacheKey(String s) {
 		return KeyFactory.createKey("XCACHE", s);
 	}

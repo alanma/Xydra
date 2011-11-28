@@ -31,13 +31,18 @@ import com.google.appengine.api.datastore.KeyFactory;
  */
 public class GaeConfiguration {
 	
+	static {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		KEY_CONF = KeyFactory.createKey("XCONF", "GaeConfig");
+	}
+	
 	private static final Logger log = LoggerFactory.getLogger(GaeConfiguration.class);
 	
 	public static final String PROP_VALID_UTC = "validUntilUTC";
 	
 	private static final long serialVersionUID = 1L;
 	
-	private static final Key KEY_CONF = KeyFactory.createKey("XCONF", "GaeConfig");
+	private static final Key KEY_CONF;
 	
 	/** Internal state */
 	private Map<String,String> map = new HashMap<String,String>();

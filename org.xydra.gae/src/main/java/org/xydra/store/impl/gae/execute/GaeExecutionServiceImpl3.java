@@ -5,11 +5,9 @@ import java.util.concurrent.Future;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
-import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
-import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
@@ -22,13 +20,13 @@ import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.utils.NanoClock;
-import org.xydra.store.ModelRevision;
 import org.xydra.store.impl.gae.DebugFormatter;
 import org.xydra.store.impl.gae.FutureUtils;
 import org.xydra.store.impl.gae.RevisionManager;
 import org.xydra.store.impl.gae.changes.GaeChange;
 import org.xydra.store.impl.gae.changes.GaeChange.Status;
 import org.xydra.store.impl.gae.changes.GaeLocks;
+import org.xydra.store.impl.gae.changes.GaeModelRevision;
 import org.xydra.store.impl.gae.changes.IGaeChangesService;
 import org.xydra.store.impl.gae.changes.VoluntaryTimeoutException;
 import org.xydra.store.impl.gae.snapshot.IGaeSnapshotService;
@@ -93,7 +91,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 	 */
 	@Override
 	public long executeCommand(XCommand command, XID actorId) {
-		assert this.revisionManager.getInstanceRevisionState() != null;
+		assert this.revisionManager.isInstanceModelRevisionInitialised();
 		
 		log.debug("Execute " + DebugFormatter.format(command));
 		NanoClock c = new NanoClock().start();
@@ -105,20 +103,19 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 		c.stopAndStart("createlocks");
 		
 		log.debug("Phase 1: grabRevisionAndRegister " + locks.size() + " locks");
-		GaeChange change = this.changes.grabRevisionAndRegisterLocks(
-		        this.revisionManager.getLastTaken(), locks, actorId);
+		GaeChange change = this.changes.grabRevisionAndRegisterLocks(this.revisionManager
+		        .getInstanceRevisionInfo().getLastTaken(), locks, actorId);
 		assert change.rev >= 0;
 		c.stopAndStart("grabRevisionAndRegisterLocks");
 		
-		// IMPROVE save command to be able to roll back in case of timeout while
-		// waiting for locks / checking preconditions?
-		
-		ModelRevision modelRev = this.revisionManager.getInstanceRevisionState();
-		long snapshotRev = modelRev.revision();
+		GaeModelRevision gaeModelRev = this.revisionManager.getInstanceRevisionInfo()
+		        .getGaeModelRevision();
+		long snapshotRev = gaeModelRev.getModelRevision().revision();
 		log.debug("[r" + change.rev + "] Phase 2: getPartialSnapshot at {" + snapshotRev + "/"
-		        + this.revisionManager.getLastCommited() + "}");
+		        + this.revisionManager.getInstanceRevisionInfo().getLastCommitted() + "}");
+		
 		XRevWritableModel snapshot = null;
-		if(modelRev.modelExists()) {
+		if(gaeModelRev.getModelRevision().modelExists()) {
 			snapshot = this.snapshots.getPartialSnapshot(snapshotRev, change.getLocks());
 			c.stopAndStart("getPartialSnapshot");
 		}
@@ -165,7 +162,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 		        + change.rev
 		        + "] -> "
 		        + (ret == XCommand.FAILED ? "failed" : ret == XCommand.NOCHANGE ? "nochange"
-		                : "success") + " {" + modelRev + "}. Stats: " + c.getStats());
+		                : "success") + " {" + gaeModelRev + "}. Stats: " + c.getStats());
 		
 		return ret;
 	}
@@ -383,14 +380,18 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 			// FIXME DEPRECATED: GaePersistence uses the this entity for
 			// getModelIds() and
 			// hasModel()
-			XAtomicEvent first = events.get(0);
-			XAtomicEvent last = events.get(events.size() - 1);
-			if(last instanceof XRepositoryEvent && last.getChangeType() == ChangeType.REMOVE) {
-				FutureUtils.waitFor(InternalGaeXEntity.remove(this.modelAddr, change.getLocks()));
-			} else if(first instanceof XRepositoryEvent && first.getChangeType() == ChangeType.ADD) {
-				FutureUtils
-				        .waitFor(InternalGaeModel.createModel(this.modelAddr, change.getLocks()));
-			}
+			// XAtomicEvent first = events.get(0);
+			// XAtomicEvent last = events.get(events.size() - 1);
+			// if(last instanceof XRepositoryEvent && last.getChangeType() ==
+			// ChangeType.REMOVE) {
+			// FutureUtils.waitFor(InternalGaeXEntity.remove(this.modelAddr,
+			// change.getLocks()));
+			// } else if(first instanceof XRepositoryEvent &&
+			// first.getChangeType() == ChangeType.ADD) {
+			// FutureUtils
+			// .waitFor(InternalGaeModel.createModel(this.modelAddr,
+			// change.getLocks()));
+			// }
 			
 			change.giveUpIfTimeoutCritical();
 		} catch(VoluntaryTimeoutException vte) {
