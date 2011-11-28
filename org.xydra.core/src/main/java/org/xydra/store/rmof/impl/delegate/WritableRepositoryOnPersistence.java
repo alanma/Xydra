@@ -38,6 +38,7 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 	public XWritableModel createModel(XID modelId) {
 		XWritableModel model = getModel(modelId);
 		if(model == null) {
+			assert this.persistence.getModelRevision(getModelAddress(modelId)) != null;
 			assert !this.persistence.getModelRevision(getModelAddress(modelId)).modelExists();
 			
 			XCommand command = X.getCommandFactory().createAddModelCommand(

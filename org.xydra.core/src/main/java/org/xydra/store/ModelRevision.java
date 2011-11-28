@@ -63,4 +63,9 @@ public class ModelRevision implements Serializable {
 		return this.revision + (this.modelExists ? "yes" : "no");
 	}
 	
+	public boolean isBetterThan(ModelRevision other) {
+		assert other != null;
+		return this.revision > other.revision;
+	}
+	
 }
