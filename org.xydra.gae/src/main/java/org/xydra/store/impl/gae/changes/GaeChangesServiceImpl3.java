@@ -776,17 +776,17 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 		@Override
 		public Entity toEntity(Key datastoreKey, RevisionInfo revInfo) {
 			Entity e = new Entity(datastoreKey);
-			e.setProperty(SILENT, revInfo.getGaeModelRevision().getLastSilentCommitted());
+			e.setUnindexedProperty(SILENT, revInfo.getGaeModelRevision().getLastSilentCommitted());
 			ModelRevision modelRev = revInfo.getGaeModelRevision().getModelRevision();
 			if(modelRev != null) {
-				e.setProperty(CURR, modelRev.revision());
-				e.setProperty(EXISTS, modelRev.modelExists());
+				e.setUnindexedProperty(CURR, modelRev.revision());
+				e.setUnindexedProperty(EXISTS, modelRev.modelExists());
 			} else {
 				e.removeProperty(CURR);
 				e.removeProperty(EXISTS);
 			}
-			e.setProperty(COMM, revInfo.getLastCommitted());
-			e.setProperty(TAKEN, revInfo.getLastTaken());
+			e.setUnindexedProperty(COMM, revInfo.getLastCommitted());
+			e.setUnindexedProperty(TAKEN, revInfo.getLastTaken());
 			return e;
 		}
 		
@@ -909,6 +909,9 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 			candidate = computeCurrenRevisionFromLocalCache(beginRevInclusive, endRevInclusive,
 			        candidate);
 			if(candidate.finalModelRev) {
+				long rev = candidate.gaeModelRev.getModelRevision().revision();
+				log.info("Computed rev of " + this.modelAddr + " = " + rev
+				        + " DATA?i_type=rev&i_addr=" + this.modelAddr + "&rev=" + rev);
 				return candidate.gaeModelRev;
 			}
 			lastCheckedRev = endRevInclusive;

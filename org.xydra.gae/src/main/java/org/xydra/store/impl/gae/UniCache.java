@@ -97,15 +97,20 @@ public class UniCache<T> {
 		return KeyFactory.createKey("XCACHE", s);
 	}
 	
-	public static interface CacheEntryHandler<T> {
+	public static interface DatastoreEntryHandler<T> {
 		Entity toEntity(Key datastoreKey, T entry);
 		
 		T fromEntity(Entity entity);
-		
+	}
+	
+	public static interface MemcacheEntryHandler<T> {
 		Serializable toSerializable(T entry);
 		
 		T fromSerializable(Serializable s);
-		
+	}
+	
+	public static interface CacheEntryHandler<T> extends DatastoreEntryHandler<T>,
+	        MemcacheEntryHandler<T> {
 	}
 	
 }

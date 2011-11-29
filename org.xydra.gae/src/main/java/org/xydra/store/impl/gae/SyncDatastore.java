@@ -127,6 +127,12 @@ public class SyncDatastore {
 	/**
 	 * Prepares the given GAE query.
 	 * 
+	 * How-to:
+	 * 
+	 * <pre>
+	 * Query q = new Query(kind).addFilter(PROP_KEY, FilterOperator.GREATER_THAN, first).setKeysOnly();
+	 * </pre>
+	 * 
 	 * @param query The query to prepare.
 	 * @return a GAE prepared query
 	 * 
