@@ -460,6 +460,12 @@ public class RestlessMethod {
 		return false;
 	}
 	
+	/**
+	 * @param req never null
+	 * @param pathTemplate never null
+	 * @return a single map of key-value pairs extracted from the path-part of
+	 *         the request-URI
+	 */
 	public static Map<String,String> getUrlParametersAsMap(HttpServletRequest req,
 	        PathTemplate pathTemplate) {
 		Map<String,String> urlParameter = new HashMap<String,String>();

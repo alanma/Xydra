@@ -65,6 +65,7 @@ public class HtmlUtils extends SharedHtmlUtils {
 	 * 
 	 * @param res sets content type html + encoding UTF8
 	 * @param title HTML head - title
+	 * @param headChildren e.g. {@link SharedHtmlUtils.HeadLinkStyle}
 	 * @return a UTF-8 writer for the result stream
 	 * @throws IOException from underlying streams
 	 */
