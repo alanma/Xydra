@@ -389,7 +389,7 @@ public class GaeChange {
 	synchronized public Status getStatus() {
 		if(this.status == null) {
 			Object o = this.entity.getProperty(PROP_STATUS);
-			// FIXME trying to find the NPE bug here...
+			// trying to find the NPE bug here...
 			if(o == null) {
 				try {
 					throw new RuntimeException("Tracing caller of getStatus()");

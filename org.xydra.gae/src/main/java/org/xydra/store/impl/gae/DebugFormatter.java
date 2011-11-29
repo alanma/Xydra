@@ -76,12 +76,13 @@ public class DebugFormatter {
 		} else if(value instanceof XAddress) {
 			return "'" + value.toString() + "'";
 		} else if(value instanceof Collection<?>) {
-			StringBuffer buf = new StringBuffer("{");
-			for(Object o : ((Collection<?>)value)) {
+			Collection<?> coll = (Collection<?>)value;
+			StringBuffer buf = new StringBuffer("{" + coll.size() + "=");
+			for(Object o : coll) {
 				buf.append(format(o) + "; ");
 			}
 			buf.append("}");
-			return buf.toString();
+			return formatString(buf.toString(), 500);
 		} else if(value instanceof XCommand) {
 			XCommand c = (XCommand)value;
 			return "Command {" + formatString(c.toString(), 140) + "}";

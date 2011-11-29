@@ -393,8 +393,9 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 	 * Implementation note: As XEntites are not {@link Serializable} by default,
 	 * an XML-serialisation is stored in data store and memcache.
 	 * 
-	 * @param requestedRevNr for which to retrieve a snapshot. FIXME !!! make
-	 *            sure too high numbers are handled
+	 * @param requestedRevNr for which to retrieve a snapshot.
+	 * 
+	 *            FIXME !!! make sure too high numbers are handled
 	 * @return a snapshot with the requested revisionNumber or null if model was
 	 *         null at that revision.
 	 */

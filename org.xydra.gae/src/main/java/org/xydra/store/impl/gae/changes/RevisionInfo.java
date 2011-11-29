@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.store.ModelRevision;
 import org.xydra.store.impl.gae.DebugFormatter;
 import org.xydra.store.impl.gae.DebugFormatter.Timing;
 
@@ -121,11 +120,13 @@ public class RevisionInfo implements Serializable {
 		}
 	}
 	
-	public void setCurrentModelRevisionIfRevIsHigher(ModelRevision modelRev) {
-		log.trace(DebugFormatter.dataPut(this.datasourceName, "gaeModelRev.currentRev", modelRev,
-		        Timing.Now));
-		this.getGaeModelRevision().setCurrentModelRevisionIfRevIsHigher(modelRev);
-	}
+	// public void setCurrentModelRevisionIfRevIsHigher(ModelRevision modelRev)
+	// {
+	// log.trace(DebugFormatter.dataPut(this.datasourceName,
+	// "gaeModelRev.currentRev", modelRev,
+	// Timing.Now));
+	// this.getGaeModelRevision().setCurrentModelRevisionIfRevIsHigher(modelRev);
+	// }
 	
 	// /**
 	// * Set the given value as the new internal value only if it is higher than
@@ -179,11 +180,12 @@ public class RevisionInfo implements Serializable {
 		}
 	}
 	
-	public void setLastSilentCommittedIfHigher(long l) {
-		log.debug(DebugFormatter.dataPut(this.datasourceName, "gaeModelRev.lastSilentCommitted", l,
-		        Timing.Now));
-		this.getGaeModelRevision().setLastSilentCommittedIfHigher(l);
-	}
+	// public void setLastSilentCommittedIfHigher(long l) {
+	// log.debug(DebugFormatter.dataPut(this.datasourceName,
+	// "gaeModelRev.lastSilentCommitted", l,
+	// Timing.Now));
+	// this.getGaeModelRevision().setLastSilentCommittedIfHigher(l);
+	// }
 	
 	/**
 	 * Set the given value as the new internal value only if it is higher than
@@ -223,6 +225,19 @@ public class RevisionInfo implements Serializable {
 			assert other.gaeModelRev.getModelRevision() != null;
 			return this.gaeModelRev.getModelRevision().isBetterThan(
 			        other.gaeModelRev.getModelRevision());
+		}
+	}
+	
+	/**
+	 * @param gaeModelRev never null
+	 */
+	public void setCurrentGaeModelRevIfRevisionIsHigher(GaeModelRevision gaeModelRev) {
+		assert gaeModelRev.getModelRevision() != null;
+		if(gaeModelRev.getModelRevision().revision() > this.gaeModelRev.getModelRevision()
+		        .revision()) {
+			log.trace(DebugFormatter.dataPut(this.datasourceName, "gaeModelRev", gaeModelRev,
+			        Timing.Now));
+			this.gaeModelRev = gaeModelRev;
 		}
 	}
 	

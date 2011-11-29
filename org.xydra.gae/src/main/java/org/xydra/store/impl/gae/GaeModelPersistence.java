@@ -75,10 +75,8 @@ public class GaeModelPersistence {
 				gaeModelRev = new GaeModelRevision(gaeModelRev.getLastSilentCommitted(),
 				        ModelRevision.MODEL_DOES_NOT_EXIST_YET);
 			}
-			this.revisionManager.getInstanceRevisionInfo().setCurrentModelRevisionIfRevIsHigher(
-			        gaeModelRev.getModelRevision());
-			this.revisionManager.getInstanceRevisionInfo().setLastSilentCommittedIfHigher(
-			        gaeModelRev.getLastSilentCommitted());
+			this.revisionManager.getInstanceRevisionInfo().setCurrentGaeModelRevIfRevisionIsHigher(
+			        gaeModelRev);
 			this.revisionManager.markAsInitialised();
 		}
 		assert this.revisionManager.isInstanceModelRevisionInitialised();
