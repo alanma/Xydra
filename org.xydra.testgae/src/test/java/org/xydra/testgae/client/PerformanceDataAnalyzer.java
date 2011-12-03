@@ -23,7 +23,8 @@ import org.xydra.csv.impl.memory.CsvTable;
  */
 
 /*
- * TODO Check outputs (are they correct or not?!)
+ * TODO Check outputs (are they correct or not?!) TODO especially check averages
+ * of exceptions...
  */
 
 public class PerformanceDataAnalyzer {
@@ -367,27 +368,61 @@ public class PerformanceDataAnalyzer {
 			for(int i = 0; i < versions.length; i++, column++) {
 				avgTimes[i] = Double.parseDouble(dataTargets[i].getValue("" + rowX, "data"
 				        + "--average"));
-				avgResultRow.setValue(column + "-" + versions[i] + "--average (ms)", avgTimes[i],
-				        true);
-				
 				stdevs[i] = Double.parseDouble(dataTargets[i].getValue("" + rowX, "data"
 				        + "--stdev"));
-				stdevResultRow.setValue(column + "-" + versions[i] + "--stdev (ms)", stdevs[i],
-				        true);
 				
+				if(avgTimes[i] == -1) {
+					avgResultRow.setValue(column + "-" + versions[i] + "--average (ms)", "N/A",
+					        true);
+					stdevs[i] = -1.0; // stdev couldn't have been calculated
+					                  // correctly
+					
+				} else {
+					avgResultRow.setValue(column + "-" + versions[i] + "--average (ms)",
+					        avgTimes[i], true);
+				}
+				
+				if(stdevs[i] < 0 || stdevs[i] == null || Double.isInfinite(stdevs[i])) {
+					stdevResultRow.setValue(column + "-" + versions[i] + "--stdev (ms)", "N/A",
+					        true);
+				} else {
+					stdevResultRow.setValue(column + "-" + versions[i] + "--stdev (ms)", ""
+					        + stdevs[i], true);
+				}
+				
+				System.out.println(excepTargets[i].getValue("" + rowX, "data" + "--average"));
 				excepResultRow.setValue(column + "-" + versions[i] + "--excep",
-				        excepTargets[i].getValue("" + rowX, "data" + "--average"), true);
+				        ""
+				                + Double.parseDouble(excepTargets[i].getValue("" + rowX, "data"
+				                        + "--average")), true);
 			}
 			
 			// normalize
 			for(int i = 0; i < versions.length - 1; i++, column++) {
-				avgResultRow.setValue(column + "-" + versions[versions.length - 1] + "/"
-				        + versions[i] + "--average (%)", ""
-				        + (avgTimes[versions.length - 1] / avgTimes[i] * 100), true);
+				Double normAvg = avgTimes[versions.length - 1] / avgTimes[i] * 100;
+				if(avgTimes[versions.length - 1] < 0 || avgTimes[i] < 0) {
+					normAvg = -1.0;
+				}
 				
-				stdevResultRow.setValue(column + "-" + versions[versions.length - 1] + "/"
-				        + versions[i] + "--stdev (%)", ""
-				        + (stdevs[versions.length - 1] / stdevs[i] * 100), true);
+				Double normStdev = (stdevs[versions.length - 1] / stdevs[i]) * 100;
+				
+				if(normAvg < 0 || Double.isInfinite(normAvg)) {
+					avgResultRow.setValue(column + "-" + versions[versions.length - 1] + "/"
+					        + versions[i] + "--average (%)", "N/A", true);
+					normStdev = -1.0; // stdev couldn't have been calculated
+					                  // correctly
+				} else {
+					avgResultRow.setValue(column + "-" + versions[versions.length - 1] + "/"
+					        + versions[i] + "--average (%)", "" + normAvg, true);
+				}
+				
+				if(normStdev < 0 || Double.isInfinite(normStdev)) {
+					stdevResultRow.setValue(column + "-" + versions[versions.length - 1] + "/"
+					        + versions[i] + "--stdev (%)", "N/A", true);
+				} else {
+					stdevResultRow.setValue(column + "-" + versions[versions.length - 1] + "/"
+					        + versions[i] + "--stdev (%)", "" + normStdev, true);
+				}
 				
 			}
 		}
