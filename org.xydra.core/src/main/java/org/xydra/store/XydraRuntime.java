@@ -176,7 +176,8 @@ public class XydraRuntime {
 	 * @return the current configuration that can also be changed. Callers
 	 *         should issue a {@link #forceReInitialisation()} if this
 	 *         {@link XydraRuntime} instance has already handed out
-	 *         {@link IMemCache} or {@link XydraPersistence} instances.
+	 *         {@link IMemCache} or {@link XydraPersistence} instances. Never
+	 *         null.
 	 */
 	public static Map<String,String> getConfigMap() {
 		return configMap;

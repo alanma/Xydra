@@ -85,14 +85,14 @@ public class ReflectionUtils {
 		BufferedReader br = new BufferedReader(sr);
 		String line;
 		try {
-			// skip first 4 lines
+			// skip first 5 lines which or only the loggers themselves
 			line = br.readLine();
 			line = br.readLine();
 			line = br.readLine();
 			line = br.readLine();
 			line = br.readLine();
 			StringBuffer buf = new StringBuffer();
-			for(int i = 0; i < n; i++) {
+			for(int i = 0; i < n && line != null; i++) {
 				buf.append(line + " <br />\n");
 				line = br.readLine();
 			}
