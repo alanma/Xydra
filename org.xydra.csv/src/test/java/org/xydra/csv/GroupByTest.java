@@ -25,7 +25,7 @@ public class GroupByTest {
 		
 		CsvTable dataTarget = new CsvTable();
 		TableTools.groupBy(dataTable, Arrays.asList("X"), Collections.EMPTY_LIST,
-		        Arrays.asList("bbb", "aaa"), Collections.EMPTY_LIST, dataTarget);
+		        Arrays.asList("aaa"), Collections.EMPTY_LIST, dataTarget);
 		
 		// 8 + 5 = 13, Average should be 6.5
 		assertTrue(Double.parseDouble(dataTarget.getValue("" + 0, "aaa--average")) == 6.5);
