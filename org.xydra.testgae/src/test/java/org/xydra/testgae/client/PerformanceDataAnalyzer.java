@@ -16,15 +16,11 @@ import org.xydra.csv.impl.memory.CsvTable;
 
 
 /*
- * TODO Problems with CsvTables
- * 
- * 
- * - Averages cut of decimal point (parse as double works! FIXME)
+ * TODO Check outputs (are they correct or not?!)
  */
 
 /*
- * TODO Check outputs (are they correct or not?!) TODO especially check averages
- * of exceptions...
+ * TODO write mini-docu
  */
 
 public class PerformanceDataAnalyzer {
@@ -107,7 +103,7 @@ public class PerformanceDataAnalyzer {
 					// csv column 9 holds the data for the average time
 					if(!csvData[9].contains("NaN")) {
 						dataRow.setValue("X", "0", true);
-						dataRow.setValue("data", csvData[9], true);
+						dataRow.setValue("data", Double.parseDouble(csvData[9]), true);
 						
 						dataCount++;
 					}
@@ -413,7 +409,7 @@ public class PerformanceDataAnalyzer {
 					                  // correctly
 				} else {
 					avgResultRow.setValue(column + "-" + versions[versions.length - 1] + "/"
-					        + versions[i] + "--average (%)", "" + normAvg, true);
+					        + versions[i] + "--average (%)", round(normAvg), true);
 				}
 				
 				if(normStdev < 0 || Double.isInfinite(normStdev)) {
@@ -421,10 +417,17 @@ public class PerformanceDataAnalyzer {
 					        + versions[i] + "--stdev (%)", "N/A", true);
 				} else {
 					stdevResultRow.setValue(column + "-" + versions[versions.length - 1] + "/"
-					        + versions[i] + "--stdev (%)", "" + normStdev, true);
+					        + versions[i] + "--stdev (%)", round(normStdev), true);
 				}
 				
 			}
 		}
+	}
+	
+	// rounds to #.### format
+	private static String round(Double d) {
+		long rounded = (long)(d * 1000);
+		
+		return "" + rounded / 1000 + "." + rounded % 1000;
 	}
 }
