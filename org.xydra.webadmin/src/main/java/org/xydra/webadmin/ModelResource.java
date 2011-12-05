@@ -51,6 +51,7 @@ import org.xydra.server.util.XydraHtmlUtils;
 import org.xydra.store.ModelRevision;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.delegate.XydraPersistence;
+import org.xydra.store.impl.gae.changes.GaeChangesServiceImpl3;
 
 
 public class ModelResource {
@@ -58,7 +59,11 @@ public class ModelResource {
 	public static final Logger log = LoggerFactory.getLogger(ModelResource.class);
 	
 	public static enum MStyle {
-		html, htmlrev, htmlevents, link, xml, json, xmlhtml
+		html, htmlrev, htmlevents, link, xml, json, xmlhtml, /**
+		 * Direct output of
+		 * changelog
+		 */
+		htmlchanges
 	}
 	
 	public static void restless(Restless restless, String prefix) {
@@ -300,6 +305,8 @@ public class ModelResource {
 
 		+ " | " + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.htmlevents, "Events")
 
+		+ " | " + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.htmlchanges, "Change log")
+
 		+ " | " + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.xmlhtml, "XML-as-HTML")
 
 		+ " | " + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.xml, "XML")
@@ -328,6 +335,9 @@ public class ModelResource {
 			if(style == MStyle.htmlevents) {
 				List<XEvent> events = p.getEvents(modelAddress, 0, rev.revision());
 				XydraHtmlUtils.writeEvents(events, w);
+			} else if(style == MStyle.htmlchanges) {
+				GaeChangesServiceImpl3.renderChangeLog(modelAddress, w);
+				w.flush();
 			}
 		}
 		
