@@ -78,4 +78,38 @@ public class HtmlUtils extends SharedHtmlUtils {
 		return w;
 	}
 	
+	public static void writeInTheMiddleOfAResponse(Writer w, String messageHtml, String redirectUrl)
+	        throws IOException {
+		w.write("<div style='" + "position:absolute; left:20px; top:20px;" + "z-index: 1000;"
+		        + "padding: 10px;" + "background-color: #FFC;" + "font-family: sans-serif;"
+		        + "border: 1px solid #999;" + "max-width: 480px;" + "word-break: break-all;" +
+
+		        "'>");
+		w.write("<a style='" + "line-height: normal;" + "padding: 9px 14px 9px;"
+		        + "-webkit-border-radius: 6px;" + "font-size: 30px;" + "border: 2px solid;"
+		        + "text-align: center;" + "display: block;" + "min-height: 70px;"
+		        + "word-wrap: break-word;" + "color: white;" + "text-decoration: none;"
+		        + "border-radius: 2px;"
+		        + "border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);"
+
+		        + "color: white;" + "background-color: #0064CD;"
+
+		        + "background-image: -webkit-linear-gradient(top, #049cdb, #0064cd);"
+		        + "background-image: -o-linear-gradient(top, #049cdb, #0064cd);"
+		        + "background-image: linear-gradient(top, #049cdb, #0064cd);"
+
+		        + "text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);"
+
+		        + "' href='" + redirectUrl + "'>Oops. Click here to continue.</a><br/>");
+		w.write(messageHtml);
+		
+		w.write("<script type='text/javascript'>\n" + "function redir() { window.location = '"
+		        + redirectUrl + "'; }\n" + "setTimeout('redir()',5000);" + "</script>");
+		
+		// IMPROVE do automatic redirect after given time using plain js
+		w.write("</div>");
+		w.flush();
+		HtmlUtils.endHtmlPage(w);
+	}
+	
 }

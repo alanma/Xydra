@@ -359,11 +359,11 @@ public class SharedHtmlUtils {
 	 */
 	public static String toDefinitionList(Map<String,? extends Object> mapEntries) {
 		StringBuffer buf = new StringBuffer();
-		buf.append("<dl>");
+		buf.append("<dl>\n");
 		for(Entry<String,? extends Object> e : mapEntries.entrySet()) {
-			buf.append("<dt>" + e.getKey() + "</dt><dd>" + e.getValue() + "</dd>");
+			buf.append("<dt>" + e.getKey() + "</dt><dd>" + e.getValue() + "</dd>\n");
 		}
-		buf.append("</dl>");
+		buf.append("</dl>\n");
 		return buf.toString();
 	}
 	
@@ -375,11 +375,11 @@ public class SharedHtmlUtils {
 	 */
 	public static String toOrderedList(Collection<String> listEntries) {
 		StringBuffer buf = new StringBuffer();
-		buf.append("<ol>");
+		buf.append("<ol>\n");
 		for(String li : listEntries) {
-			buf.append("<li>" + li + "</li>");
+			buf.append("<li>" + li + "</li>\n");
 		}
-		buf.append("</ol>");
+		buf.append("</ol>\n");
 		return buf.toString();
 	}
 	

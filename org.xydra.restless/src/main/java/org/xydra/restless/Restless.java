@@ -495,6 +495,10 @@ public class Restless extends HttpServlet {
 	}
 	
 	private void initLoggerFactory() {
+		if(LoggerFactory.hasLoggerFactorySPI()) {
+			return;
+		}
+		
 		// try to instantiate
 		try {
 			Class<?> loggerFactoryClass = Class.forName(this.loggerFactory);
