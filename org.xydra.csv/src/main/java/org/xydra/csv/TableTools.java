@@ -414,7 +414,12 @@ public class TableTools {
 					_sum += delta;
 				}
 				double stdev = Math.sqrt(_sum / n);
-				targetRow.setValue(averageCol + "--stdev", "" + (long)stdev, true);
+				
+				// rounding to #.### format
+				long rStdev = (long)(stdev * 1000);
+				
+				targetRow.setValue(averageCol + "--stdev",
+				        "" + rStdev / 1000 + "." + rStdev % 1000, true);
 				
 			}
 			// count value range
