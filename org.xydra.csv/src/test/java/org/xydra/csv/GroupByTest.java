@@ -1,6 +1,6 @@
 package org.xydra.csv;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,6 +11,7 @@ import org.xydra.csv.impl.memory.CsvTable;
 
 public class GroupByTest {
 	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testRightHandDigit() {
 		CsvTable dataTable = new CsvTable();
@@ -28,6 +29,6 @@ public class GroupByTest {
 		        Arrays.asList("aaa"), Collections.EMPTY_LIST, dataTarget);
 		
 		// 8 + 5 = 13, Average should be 6.5
-		assertTrue(Double.parseDouble(dataTarget.getValue("" + 0, "aaa--average")) == 6.5);
+		assertEquals(6.5d, Double.parseDouble(dataTarget.getValue("" + 0, "aaa--average")), 0.01d);
 	}
 }
