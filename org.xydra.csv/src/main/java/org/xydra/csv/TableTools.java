@@ -388,7 +388,12 @@ public class TableTools {
 					}
 				}
 				double ave = (longResult + doubleResult) / groupTable.rowCount();
-				targetRow.setValue(averageCol + "--average", "" + (long)ave, true);
+				
+				// rounding to #.### format
+				long rAve = (long)(ave * 1000);
+				
+				targetRow.setValue(averageCol + "--average", "" + rAve / 1000 + "." + rAve % 1000,
+				        true);
 				
 				// standard derivation
 				double _sum = 0;
