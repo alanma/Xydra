@@ -106,14 +106,16 @@ public class LoggerFactory {
 		if(loggerFactorySPI == null || !loggerFactorySPI.getClass().equals(spi.getClass())) {
 			loggerFactorySPI = spi;
 			try {
-				throw new RuntimeException("CALLER");
+				throw new RuntimeException("+++ This is not an error. +++");
 			} catch(Exception e) {
-				loggerFactorySPI.getLogger(ROOT_LOGGER_NAME, null).info(
-				        "Logging: Configured XydraLog with " + spi.getClass().getName());
-				e.fillInStackTrace();
-				e.printStackTrace();
+				String msg = "Logging: Configured XydraLog with " + spi.getClass().getName();
+				loggerFactorySPI.getLogger(ROOT_LOGGER_NAME, null).info(msg, e);
 			}
 		}
+	}
+	
+	public static boolean hasLoggerFactorySPI() {
+		return loggerFactorySPI != null;
 	}
 	
 }
