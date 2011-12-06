@@ -15,8 +15,16 @@ import org.xydra.csv.TableTools;
 import org.xydra.csv.impl.memory.CsvTable;
 
 
-/*
- * TODO Check outputs (are they correct or not?!)
+/**
+ * This is a little program which evaluates the data which was collected by
+ * {@RemoteBenchmark}. {@RemoteBenchmark}
+ * automatically stores the data in the right subfolders. Execute this program
+ * like a normal program, the outpot will be stored in
+ * ./src/main/data/Performance/ with the file name "Evaluation" +
+ * System.currentTimeMillis() + ".html".
+ * 
+ * @author Kaidel
+ * 
  */
 
 /*
@@ -25,10 +33,31 @@ import org.xydra.csv.impl.memory.CsvTable;
 
 public class PerformanceDataAnalyzer {
 	
+	/**
+	 * The directory which contains the data which is to be evaluated.
+	 */
 	public static final String DIR_DATA = "./src/main/data/Performance/";
 	
+	/**
+	 * This array contains the names of the versions which are to be evaluated.
+	 * The Strings have to corresponded with the folder names in which the data
+	 * of the specific version is saved. To remove/add a version from the
+	 * evaluation process, just remove/add the specific String to this array.
+	 */
 	private static String[] versions = { "Version2", "gae20111105", "gae20111105-20" };
+	
+	/**
+	 * The filename of the file containing the evaluation results (set in main()
+	 * )
+	 */
 	private static String fileName;
+	
+	/**
+	 * The range of X in the tests, for example X = number of initial wishes
+	 * etc. - see the benchmarks for further information
+	 */
+	private static Integer[] range = new Integer[] { 8, 10, 16, 20, 32, 40, 64, 80, 128, 256, 512,
+	        1024 };
 	
 	private enum Operations {
 		ADD, DELETE, EDIT
@@ -37,14 +66,22 @@ public class PerformanceDataAnalyzer {
 	public static void main(String args[]) {
 		fileName = "Evaluation" + System.currentTimeMillis() + ".html";
 		
+		/*
+		 * Evaluate the data of the single operation tests, like adding one
+		 * single wish
+		 */
 		evaluateSingleOperationBenchmark(Operations.ADD);
 		evaluateSingleOperationBenchmark(Operations.DELETE);
 		evaluateSingleOperationBenchmark(Operations.EDIT);
 		
-		Integer[] range = new Integer[] { 8, 10, 16, 20, 32, 40, 64, 80, 128, 256 };
-		
+		/*
+		 * Evaluate the "add multiple wishes in transaction" benchmark
+		 */
 		evaluateAddingMultipleWishes(range);
 		
+		/*
+		 * Evaluate the "single operation with initial wishes" benchmarks
+		 */
 		evaluateSingleOperationWithInitialWishesBenchmarks(Operations.ADD, range);
 		evaluateSingleOperationWithInitialWishesBenchmarks(Operations.EDIT, range);
 	}
@@ -70,6 +107,7 @@ public class PerformanceDataAnalyzer {
 		
 		assert path != null;
 		
+		// add rows for average, standard deviation and exceptions
 		IRow avg = results.getOrCreateRow("avg", true);
 		IRow stdev = results.getOrCreateRow("stdev", true);
 		IRow excep = results.getOrCreateRow("Excep", true);
@@ -211,13 +249,14 @@ public class PerformanceDataAnalyzer {
 		
 		String path = null;
 		
+		// Get correct file name
 		switch(op) {
 		case ADD:
 			path = "AddingWishesInTransactionWithInitialWishes";
 			break;
 		case DELETE:
-			path = "DeletingWishesInTransactionWithInitialWishes";
-			break;
+			// at the moment no such benchmark exists
+			return;
 		case EDIT:
 			path = "EditingOneWishInTransactionWithInitialWishes";
 			break;
@@ -239,7 +278,7 @@ public class PerformanceDataAnalyzer {
 				heading = "<h1> Adding ten wishes with inital wishes </h1>";
 				break;
 			case DELETE:
-				// not implemented
+				// at the moment no such benchmark exists
 				return;
 			case EDIT:
 				heading = "<h1> Editing one wish with inital wishes </h1>";
@@ -325,6 +364,13 @@ public class PerformanceDataAnalyzer {
 					
 					in.close();
 				} catch(FileNotFoundException e) {
+					/*
+					 * Some values of X may not have been measured in older
+					 * versions, therefore write -1 in the tables. The code
+					 * later will see this and write "N/A" in the output to tell
+					 * this to the user.
+					 */
+
 					IRow dataRow = dataTables[i].getOrCreateRow(X + " " + 0, true);
 					dataRow.setValue("X", X, true);
 					dataRow.setValue("data", -1, true);
@@ -362,35 +408,61 @@ public class PerformanceDataAnalyzer {
 			Double[] stdevs = new Double[versions.length];
 			
 			for(int i = 0; i < versions.length; i++, column++) {
-				avgTimes[i] = Double.parseDouble(dataTargets[i].getValue("" + rowX, "data"
-				        + "--average"));
-				stdevs[i] = Double.parseDouble(dataTargets[i].getValue("" + rowX, "data"
-				        + "--stdev"));
+				try {
+					avgTimes[i] = Double.parseDouble(dataTargets[i].getValue("" + rowX, "data"
+					        + "--average"));
+				} catch(NullPointerException e) {
+					/*
+					 * Happens when each and every line in the read file has
+					 * "NaN" as the average time. This usual only happens when
+					 * every operation in the specific benchmark threw an
+					 * exception. Once again -1 is the marker for the later
+					 * code.
+					 */
+					avgTimes[i] = -1.0;
+				}
 				
+				try {
+					stdevs[i] = Double.parseDouble(dataTargets[i].getValue("" + rowX, "data"
+					        + "--stdev"));
+				} catch(NullPointerException e) {
+					/*
+					 * Happens when each and every line in the read file has
+					 * "NaN" as the average time. This usual only happens when
+					 * every operation in the specific benchmark threw an
+					 * exception. Once again -1 is the marker for the later
+					 * code.
+					 */
+					stdevs[i] = -1.0;
+				}
+				
+				// Check whether average was correctly calculated
 				if(avgTimes[i] == -1) {
-					avgResultRow.setValue(column + "-" + versions[i] + "--average (ms)", "N/A",
-					        true);
+					avgResultRow.setValue(column + "-" + versions[i] + " (ms)", "N/A", true);
 					stdevs[i] = -1.0; // stdev couldn't have been calculated
-					                  // correctly
+					                  // correctly if average wasn't calculated
+					                  // correclty.
 					
 				} else {
-					avgResultRow.setValue(column + "-" + versions[i] + "--average (ms)",
-					        avgTimes[i], true);
+					avgResultRow.setValue(column + "-" + versions[i] + " (ms)", avgTimes[i], true);
 				}
 				
+				// Check whether stdev was correctly calculated
 				if(stdevs[i] < 0 || stdevs[i] == null || Double.isInfinite(stdevs[i])) {
-					stdevResultRow.setValue(column + "-" + versions[i] + "--stdev (ms)", "N/A",
-					        true);
+					stdevResultRow.setValue(column + "-" + versions[i] + " (ms)", "N/A", true);
 				} else {
-					stdevResultRow.setValue(column + "-" + versions[i] + "--stdev (ms)", ""
-					        + stdevs[i], true);
+					stdevResultRow.setValue(column + "-" + versions[i] + " (ms)", "" + stdevs[i],
+					        true);
 				}
 				
-				System.out.println(excepTargets[i].getValue("" + rowX, "data" + "--average"));
-				excepResultRow.setValue(column + "-" + versions[i] + "--excep",
-				        ""
-				                + Double.parseDouble(excepTargets[i].getValue("" + rowX, "data"
-				                        + "--average")), true);
+				double excep = Double.parseDouble(excepTargets[i].getValue("" + rowX, "data"
+				        + "--average"));
+				// Check whether excep was correctly calculated
+				if(excep < 0) {
+					excepResultRow.setValue(column + "-" + versions[i], "N/A", true);
+				} else {
+					excepResultRow.setValue(column + "-" + versions[i], "" + excep, true);
+				}
 			}
 			
 			// normalize
@@ -404,20 +476,20 @@ public class PerformanceDataAnalyzer {
 				
 				if(normAvg < 0 || Double.isInfinite(normAvg)) {
 					avgResultRow.setValue(column + "-" + versions[versions.length - 1] + "/"
-					        + versions[i] + "--average (%)", "N/A", true);
+					        + versions[i] + " (%)", "N/A", true);
 					normStdev = -1.0; // stdev couldn't have been calculated
 					                  // correctly
 				} else {
 					avgResultRow.setValue(column + "-" + versions[versions.length - 1] + "/"
-					        + versions[i] + "--average (%)", round(normAvg), true);
+					        + versions[i] + " (%)", round(normAvg), true);
 				}
 				
 				if(normStdev < 0 || Double.isInfinite(normStdev)) {
 					stdevResultRow.setValue(column + "-" + versions[versions.length - 1] + "/"
-					        + versions[i] + "--stdev (%)", "N/A", true);
+					        + versions[i] + " (%)", "N/A", true);
 				} else {
 					stdevResultRow.setValue(column + "-" + versions[versions.length - 1] + "/"
-					        + versions[i] + "--stdev (%)", round(normStdev), true);
+					        + versions[i] + " (%)", round(normStdev), true);
 				}
 				
 			}
