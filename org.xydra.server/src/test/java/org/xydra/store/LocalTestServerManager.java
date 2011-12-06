@@ -7,7 +7,7 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XX;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.server.test.TestServer;
+import org.xydra.server.TestServer;
 import org.xydra.store.access.XA;
 import org.xydra.store.access.XAuthenticationDatabase;
 import org.xydra.store.access.XAuthorisationManager;

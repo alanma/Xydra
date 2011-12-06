@@ -9,7 +9,7 @@ import org.xydra.core.serialize.XydraParser;
 import org.xydra.core.serialize.XydraSerializer;
 import org.xydra.core.serialize.json.JsonParser;
 import org.xydra.core.serialize.json.JsonSerializer;
-import org.xydra.server.test.TestServer;
+import org.xydra.server.TestServer;
 import org.xydra.store.impl.memory.SecureMemoryStore;
 
 

@@ -1,4 +1,4 @@
-package org.xydra.server.test;
+package org.xydra.server;
 
 import java.io.File;
 import java.net.URI;
