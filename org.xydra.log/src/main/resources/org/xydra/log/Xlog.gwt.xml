@@ -4,9 +4,13 @@
 	<inherits name="com.google.gwt.user.User" />
 	
 	<!-- add gwt-log support -->
-	<inherits name='com.allen_sauer.gwt.log.gwt-log-impl' />
+	<inherits name='com.allen_sauer.gwt.log.gwt-log-ERROR' />
+	<define-property values="log_level" name="DEBUG"/>
 	
 	<source path="" >
-		<exclude name="XydraLogTest.java"/>
+		<exclude name="Log4jUtils.java"/>
+		<exclude name="**/*Test.java"/>
 	</source>
+	
+	<entry-point class="org.xydra.log.DummyEntryPoint"/>
 </module>
