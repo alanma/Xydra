@@ -5,14 +5,14 @@
 
 	<groupId>org.xydra</groupId>
 	<artifactId>log</artifactId>
-	<version>0.1.4-SNAPSHOT</version>
+	<version>${xydra.version}</version>
 	<packaging>jar</packaging>
 	<name>Xydra Log</name>
 
 	<parent>
 		<groupId>org.xydra</groupId>
 		<artifactId>maven-root</artifactId>
-		<version>2011.01.22</version>
+		<version>2011.12.05</version>
 	</parent>
 
 	<repositories>
@@ -28,103 +28,16 @@
 				<checksumPolicy>fail</checksumPolicy>
 			</releases>
 		</repository>
-		<!-- xydra snapshots -->
-		<repository>
-			<id>xydra-snap</id>
-			<url>
-				https://xydra.googlecode.com/svn/snapshots
-			</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
 	</repositories>
 
-	<properties>
-
-		<!-- convenience to define GWT version in one place -->
-		<gwt.version>2.3.0</gwt.version>
-
-	</properties>
-
 	<dependencies>
-
-		<!-- for compiling in GWT -->
+		<!-- for Log4jUtils -->
 		<dependency>
-			<groupId>com.google.gwt</groupId>
-			<artifactId>gwt-servlet</artifactId>
-			<version>${gwt.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.google.gwt</groupId>
-			<artifactId>gwt-user</artifactId>
-			<version>${gwt.version}</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- gwt-log -->
-		<dependency>
-			<groupId>com.google.code.gwt-log</groupId>
-			<artifactId>gwt-log</artifactId>
-			<version>3.1.2</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- testing dependencies -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<!-- for abstract tests in main -->
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
 			<scope>compile</scope>
-			<!-- version info taken from parent -->
 		</dependency>
-
 	</dependencies>
-
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>gwt-maven-plugin</artifactId>
-				<version>2.1.0-1</version>
-				<configuration>
-					<module>org.xydra.log.Xlog</module>
-				</configuration>
-				<executions>
-					<execution>
-						<id>gwt-test</id>
-						<phase>test</phase>
-						<goals>
-							<goal>compile</goal>
-							<goal>test</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-
-			<plugin>
-				<inherited>true</inherited>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-
-		</plugins>
-	</build>
 
 	<distributionManagement>
 		<!-- Add this to settings.xml <server> <id>xydra-repo</id> <username>xamde</username> 
@@ -141,7 +54,7 @@
 		</snapshotRepository>
 		<site>
 			<id>xydra-site</id>
-			<url>scp://${xydra.site}/${artifactId}</url>
+			<url>scp://${xydra.site}/${project.artifactId}</url>
 		</site>
 	</distributionManagement>
 
