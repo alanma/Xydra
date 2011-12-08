@@ -6,62 +6,17 @@
 	<parent>
 		<groupId>org.xydra</groupId>
 		<artifactId>maven-root</artifactId>
-		<version>2010.10.16</version>
+		<version>2011.12.05</version>
 	</parent>
 
 	<groupId>org.xydra</groupId>
 	<artifactId>remote-control-appengine</artifactId>
-	<version>0.1.2-SNAPSHOT</version>
+	<version>${xydra.version}</version>
 	<!--
 		/!\ Needs to be 'jar' for 'mvn deploy' but 'war' for 'gae:deploy'
 	-->
 	<packaging>war</packaging>
 	<name>Xydra gaeclient</name>
-
-	<!-- Specify hard-coded project properties here -->
-	<properties>
-
-		<!--
-			This is just for "eclipse:eclipse" goal to always attempt downloading
-			sources
-		-->
-		<downloadSources>false</downloadSources>
-
-		<!--
-			Specify AppEngine version for your project. It should match SDK
-			version pointed to by ${gae.home} property (Typically, one used by
-			your Eclipse plug-in)
-		-->
-		<gae.version>1.3.8</gae.version>
-		<!-- /!\ Must point to your local GAE/J installation -->
-		<gae.home>
-			${settings.localRepository}/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}
-        </gae.home>
-
-	</properties>
-
-	<pluginRepositories>
-
-		<!--
-			If this repo is active, GAE plugin is crap. <pluginRepository>
-			<id>Codehaus Mojo Snapshot</id>
-			<url>http://snapshots.repository.codehaus.org/</url>
-			</pluginRepository>
-		-->
-
-		<!--  Google App Engine (GAE) plugin repository -->
-		<pluginRepository>
-			<id>gae-plugin-repo</id>
-			<url>http://maven-gae-plugin.googlecode.com/svn/repository/</url>
-		</pluginRepository>
-
-		<pluginRepository>
-			<id>maven2-repository.dev.java.net</id>
-			<url>http://download.java.net/maven/2</url>
-			<layout>default</layout>
-		</pluginRepository>
-
-	</pluginRepositories>
 
 	<repositories>
 		<!-- xydra repo -->
@@ -76,64 +31,6 @@
 				<checksumPolicy>fail</checksumPolicy>
 			</releases>
 		</repository>
-		<!-- xydra snapshots -->
-		<repository>
-			<id>xydra-snap</id>
-			<url>
-				https://xydra.googlecode.com/svn/snapshots
-			</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
-		<!--  For API VIZ -->
-		<repository>
-			<id>jboss.releases</id>
-			<name>JBoss releases</name>
-			<url>http://repository.jboss.org/maven2</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-
-		<!--  Java.net repo for wagon-svn -->
-		<repository>
-			<id>javanet-repo</id>
-			<url>
-				http://download.java.net/maven/2
-			</url>
-			<releases>
-				<enabled>true</enabled>
-				<updatePolicy>always</updatePolicy>
-				<checksumPolicy>fail</checksumPolicy>
-			</releases>
-		</repository>
-
-		<!--
-			deprecated <repository> <id>maven-repository.dev.java.net</id>
-			<name>Java.net Maven 1 Repository (legacy)</name>
-			<url>http://download.java.net/maven/1</url> <layout>legacy</layout>
-			</repository>
-		-->
-
-		<!--  for GAE stuff -->
-		<repository>
-			<id>gae-repo</id>
-			<url>http://maven-gae-plugin.googlecode.com/svn/repository/</url>
-		</repository>
-
-		<repository>
-			<id>maven2-repository.dev.java.net</id>
-			<url>http://download.java.net/maven/2</url>
-			<layout>default</layout>
-		</repository>
-
 	</repositories>
 
 	<dependencies>
@@ -142,73 +39,12 @@
 		<dependency>
 			<groupId>org.mortbay.jetty</groupId>
 			<artifactId>jetty</artifactId>
-			<version>6.1.11</version>
 		</dependency>
 
 		<!-- logging -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
-			<version>0.1.2-SNAPSHOT</version>
-		</dependency>
-
-		<!-- testing dependencies -->
-		<dependency>
-			<scope>test</scope>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-		</dependency>
-
-		<!--
-			via
-			http://hobione.wordpress.com/2009/03/11/missing-comsuntoolsjar142/
-			<dependency> <groupId>com.sun</groupId>
-			<artifactId>tools</artifactId> <version>1.4.2</version>
-			<scope>system</scope>
-			<systemPath>${java.home}/../lib/tools.jar</systemPath> </dependency>
-		-->
-
-
-		<!--  Google App Engine -->
-		<dependency>
-			<groupId>com.google.appengine</groupId>
-			<artifactId>appengine-api-1.0-sdk</artifactId>
-			<version>${gae.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.appengine</groupId>
-			<artifactId>appengine-api-labs</artifactId>
-			<version>${gae.version}</version>
-			<scope>runtime,compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.google.appengine</groupId>
-			<artifactId>appengine-tools-sdk</artifactId>
-			<version>${gae.version}</version>
-			<scope>runtime,compile</scope>
-		</dependency>
-
-		<!--
-			J2EE Servlet API. We need it to compile IndexServlet class. You can
-			probably remove it, if you don't explicitly use Servlets
-		-->
-		<dependency>
-			<groupId>org.apache.geronimo.specs</groupId>
-			<artifactId>geronimo-servlet_2.5_spec</artifactId>
-			<version>1.2</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<!--
-			GAE libraries for local testing as described here:
-			http://code.google.com/appengine/docs/java/howto/unittesting.html
-		-->
-
-		<dependency>
-			<groupId>com.google.appengine</groupId>
-			<artifactId>appengine-api-stubs</artifactId>
-			<version>${gae.version}</version>
-			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -217,88 +53,14 @@
 			<version>${gae.version}</version>
 			<scope>compile</scope><!-- Don't ask -->
 		</dependency>
+		<dependency>
+			<groupId>com.google.appengine</groupId>
+			<artifactId>appengine-tools-sdk</artifactId>
+			<version>${gae.version}</version>
+			<scope>compile</scope>
+		</dependency>
 
 	</dependencies>
-
-	<build>
-
-		<!-- via  https://wagon-svn.dev.java.net/ -->
-		<extensions>
-			<extension>
-				<groupId>org.jvnet.wagon-svn</groupId>
-				<artifactId>wagon-svn</artifactId>
-				<version>1.9</version>
-			</extension>
-		</extensions>
-
-		<plugins>
-
-			<!-- set encoding to something not platform dependent -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>2.3</version>
-				<configuration>
-					<encoding>UTF-8</encoding>
-				</configuration>
-			</plugin>
-
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>${maven.compiler.source}</source>
-					<target>${maven.compiler.target}</target>
-					<encoding>UTF-8</encoding>
-				</configuration>
-			</plugin>
-
-			<!-- Jetty Plugin -->
-			<plugin>
-				<groupId>org.mortbay.jetty</groupId>
-				<artifactId>maven-jetty-plugin</artifactId>
-				<version>6.1.10</version>
-				<configuration>
-					<scanIntervalSeconds>10</scanIntervalSeconds>
-					<stopKey>foo</stopKey>
-					<stopPort>9999</stopPort>
-				</configuration>
-				<executions>
-					<execution>
-						<id>start-jetty</id>
-						<phase>pre-integration-test</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<scanIntervalSeconds>0</scanIntervalSeconds>
-							<daemon>true</daemon>
-						</configuration>
-					</execution>
-					<execution>
-						<id>stop-jetty</id>
-						<phase>post-integration-test</phase>
-						<goals>
-							<goal>stop</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-			<!-- Google App Engine (GAE) plugin -->
-			<plugin>
-				<groupId>net.kindleit</groupId>
-				<artifactId>maven-gae-plugin</artifactId>
-				<version>0.7.2</version>
-				<configuration>
-					<sdkDir>${gae.home}</sdkDir>
-				</configuration>
-			</plugin>
-
-		</plugins>
-	</build>
-
 
 	<distributionManagement>
 		<!--
