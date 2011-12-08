@@ -329,4 +329,17 @@ public class ServletUtils {
 		return req.getHeader(HEADER_REFERER);
 	}
 	
+	public static Map<String,String> parseQueryString(String q) {
+		Map<String,String> map = new HashMap<String,String>();
+		String[] pairs = q.split("\\&");
+		
+		for(String s : pairs) {
+			String[] parts = s.split("=");
+			String key = parts[0];
+			String value = parts.length > 1 ? parts[1] : null;
+			map.put(key, value);
+		}
+		return map;
+	}
+	
 }

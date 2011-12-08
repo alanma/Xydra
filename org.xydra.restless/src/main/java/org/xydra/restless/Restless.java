@@ -428,9 +428,8 @@ public class Restless extends HttpServlet {
 		} catch(ServletException e) {
 			throw new RuntimeException("Could not initialise super servlet", e);
 		}
-		clock.stop("super.init");
+		clock.stopAndStart("super.init");
 		
-		clock.start();
 		/**
 		 * Configuration option in web.xml to select class for logging back-end,
 		 * which must be an implementation of ILoggerFactorySPI.
@@ -439,11 +438,10 @@ public class Restless extends HttpServlet {
 		if(this.loggerFactory != null) {
 			initLoggerFactory();
 		}
-		clock.stop("logger-init");
+		clock.stopAndStart("logger-init");
 		
-		clock.start();
 		log = LoggerFactory.getLogger(Restless.class);
-		log.debug("Restless: Init. Using loggerFactory '" + this.loggerFactory + "'...");
+		log.info("Restless: Init. Using loggerFactory '" + this.loggerFactory + "'...");
 		
 		/** provide servletContext object for other parts of the application */
 		this.servletContext = servletConfig.getServletContext();
@@ -472,11 +470,15 @@ public class Restless extends HttpServlet {
 		clock.stop("param-parsing");
 		for(String appClassName : appClassNames) {
 			log.info("Restless: Loading restless app '" + appClassName + "'...");
-			clock.start();
-			String stats = instatiateAndInit(appClassName);
-			clock.stop("init-app-" + appClassName);
-			clock.append(" { ").append(stats).append(" } ");
-			log.debug("Restless: ... done loading restless app '" + appClassName + "'.");
+			try {
+				clock.start();
+				String stats = instatiateAndInit(appClassName);
+				clock.stop("init-app-" + appClassName);
+				clock.append(" { ").append(stats).append(" } ");
+				log.debug("Restless: ... done loading restless app '" + appClassName + "'.");
+			} catch(Exception e) {
+				log.error("Failed to init Restless app '" + appClassName + "' ", e);
+			}
 		}
 		
 		if(log.isDebugEnabled()) {
@@ -538,8 +540,9 @@ public class Restless extends HttpServlet {
 	/**
 	 * @param appClassName fully qualified java class name TODO make this faster
 	 * @return a String with statistics
+	 * @throws RuntimeException for many reflection-related issues
 	 */
-	private String instatiateAndInit(String appClassName) {
+	private String instatiateAndInit(String appClassName) throws RuntimeException {
 		NanoClock clock = new NanoClock();
 		clock.start();
 		try {
@@ -559,14 +562,23 @@ public class Restless extends HttpServlet {
 							restlessMethod.invoke(appInstance, this, "");
 							clock.stop(appClassName + "-invoke-restless-method");
 						} catch(IllegalArgumentException e) {
-							throw new RuntimeException("Class '" + appClassName
-							        + ".restless(Restless,String prefix)' failed", e);
+							throw new RuntimeException(
+							        "Class '"
+							                + appClassName
+							                + ".restless(Restless,String prefix)' failed with IllegalArgumentException",
+							        e);
 						} catch(IllegalAccessException e) {
-							throw new RuntimeException("Class '" + appClassName
-							        + ".restless(Restless,String prefix)' failed", e);
+							throw new RuntimeException(
+							        "Class '"
+							                + appClassName
+							                + ".restless(Restless,String prefix)' failed with IllegalAccessException",
+							        e);
 						} catch(InvocationTargetException e) {
-							throw new RuntimeException("Class '" + appClassName
-							        + ".restless(Restless,String prefix)' failed", e);
+							throw new RuntimeException(
+							        "Class '"
+							                + appClassName
+							                + ".restless(Restless,String prefix)' failed with InvocationTargetException",
+							        e);
 						}
 					} catch(NoSuchMethodException e) {
 						log.warn("Class '"
