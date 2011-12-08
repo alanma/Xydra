@@ -561,12 +561,6 @@
 								</goals>
 							</execution>
 							<execution>
-								<id>gwt-generate-async</id>
-								<goals>
-									<goal>generateAsync</goal>
-								</goals>
-							</execution>
-							<execution>
 								<id>gwt-test</id>
 								<phase>test</phase>
 								<goals>
