@@ -1,8 +1,6 @@
 package org.xydra.restless.gaedemo;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import org.xydra.restless.IRestlessContext;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessExceptionHandler;
 import org.xydra.restless.example.ExampleResource;
@@ -18,11 +16,12 @@ public class LiveDemoApp {
 		r.addExceptionHandler(new RestlessExceptionHandler() {
 			
 			@Override
-            public boolean handleException(Throwable t, HttpServletRequest req,
-			        HttpServletResponse res) {
+			public boolean handleException(Throwable t, IRestlessContext restlessContext) {
 				System.err.println("Restless error");
-				throw new RuntimeException("" + req, t);
+				throw new RuntimeException("Something went wrong for URI: "
+				        + restlessContext.getRequest().getRequestURI(), t);
 			}
+			
 		});
 		
 	}
