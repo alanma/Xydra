@@ -5,14 +5,14 @@
 
 	<groupId>org.xydra</groupId>
 	<artifactId>log.howto</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>${xydra.version}</version>
 	<packaging>jar</packaging>
 	<name>Xydra Log How-To</name>
 
 	<parent>
 		<groupId>org.xydra</groupId>
 		<artifactId>maven-root</artifactId>
-		<version>2011.01.22</version>
+		<version>2011.12.05</version>
 	</parent>
 
 	<repositories>
@@ -28,54 +28,7 @@
 				<checksumPolicy>fail</checksumPolicy>
 			</releases>
 		</repository>
-		<!-- xydra snapshots -->
-		<repository>
-			<id>xydra-snap</id>
-			<url>
-				https://xydra.googlecode.com/svn/snapshots
-			</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
-
-		<!-- for GAE stuff -->
-		<repository>
-			<id>gae-repo</id>
-			<url>http://maven-gae-plugin.googlecode.com/svn/repository/</url>
-		</repository>
-
 	</repositories>
-
-	<pluginRepositories>
-		<!-- Google App Engine (GAE) plugin repository -->
-		<pluginRepository>
-			<id>gae-plugin-repo</id>
-			<url>http://maven-gae-plugin.googlecode.com/svn/repository/</url>
-		</pluginRepository>
-	</pluginRepositories>
-
-	<properties>
-
-		<!-- convenience to define GWT version in one place -->
-		<gwt.version>2.0.0</gwt.version>
-
-		<!-- define a transient output directory for gwt -->
-		<gwt.output.directory>./war</gwt.output.directory>
-
-		<!-- Specify AppEngine version for your project. It should match SDK version 
-			pointed to by ${gae.home} property (Typically, one used by your Eclipse plug-in) -->
-		<gae.version>1.4.0</gae.version>
-		<!-- /!\ Must point to your local GAE/J installation -->
-		<gae.home>
-			${settings.localRepository}/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}
-        </gae.home>
-
-
-	</properties>
 
 	<dependencies>
 
@@ -83,37 +36,22 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
-			<version>0.1.3-SNAPSHOT</version>
 		</dependency>
 
 		<!-- This is only required for logging in GAE -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log.gae</artifactId>
-			<version>0.1.3-SNAPSHOT</version>
 		</dependency>
 
 		<!-- This is only required for logging in GWT -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
-			<version>0.1.3-SNAPSHOT</version>
+			<version>${xydra.version}</version>
 			<classifier>sources</classifier>
 		</dependency>
 
-		<!-- Only required for using GWT -->
-		<dependency>
-			<groupId>com.google.gwt</groupId>
-			<artifactId>gwt-servlet</artifactId>
-			<version>${gwt.version}</version>
-		</dependency>
-
-		<!-- Only required for using GWT -->
-		<dependency>
-			<groupId>com.google.gwt</groupId>
-			<artifactId>gwt-user</artifactId>
-			<version>${gwt.version}</version>
-		</dependency>
 
 		<!-- testing dependencies -->
 		<dependency>
@@ -123,52 +61,6 @@
 			<scope>compile</scope>
 			<!-- version info taken from parent -->
 		</dependency>
-
-		<!-- This is only required for logging in GWT -->
-		<!-- gwt-log -->
-		<dependency>
-			<groupId>com.google.code.gwt-log</groupId>
-			<artifactId>gwt-log</artifactId>
-			<version>3.0.3</version>
-		</dependency>
-
-
-		<!-- Google App Engine itself -->
-		<dependency>
-			<groupId>com.google.appengine</groupId>
-			<artifactId>appengine-api-1.0-sdk</artifactId>
-			<version>${gae.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.appengine</groupId>
-			<artifactId>appengine-api-labs</artifactId>
-			<version>${gae.version}</version>
-		</dependency>
-
-		<!-- J2EE Servlet API. We need it to compile IndexServlet class. You can 
-			probably remove it, if you don't explicitly use Servlets -->
-		<dependency>
-			<groupId>org.apache.geronimo.specs</groupId>
-			<artifactId>geronimo-servlet_2.5_spec</artifactId>
-			<version>1.2</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- GAE libraries for local testing as described here: http://code.google.com/appengine/docs/java/howto/unittesting.html -->
-		<dependency>
-			<groupId>com.google.appengine</groupId>
-			<artifactId>appengine-api-stubs</artifactId>
-			<version>${gae.version}</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.google.appengine</groupId>
-			<artifactId>appengine-testing</artifactId>
-			<version>${gae.version}</version>
-			<scope>test</scope><!-- Don't ask -->
-		</dependency>
-
 
 	</dependencies>
 
@@ -183,62 +75,17 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>gwt-maven-plugin</artifactId>
-				<version>1.2</version>
 				<configuration>
 					<runTarget>index.html</runTarget>
 					<output>${gwt.output.directory}</output>
 					<logLevel>INFO</logLevel>
 					<style>DETAILED</style>
 				</configuration>
-				<executions>
-					<execution>
-						<phase>process-classes</phase>
-						<configuration>
-							<extraJvmArgs>-Xmx512M -Xss1024k</extraJvmArgs>
-						</configuration>
-						<goals>
-							<goal>compile</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>gwt-test</id>
-						<phase>test</phase>
-						<goals>
-							<goal>test</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.0.2</version>
-				<configuration>
-					<source>${maven.compiler.source}</source>
-					<target>${maven.compiler.target}</target>
-					<encoding>UTF-8</encoding>
-					<!-- Fix for GWT issue #3439 -->
-					<excludes>
-						<exclude>javax/servlet/**</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
-
-			<!-- set encoding to something not platform dependent -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>2.3</version>
-				<configuration>
-					<encoding>UTF-8</encoding>
-				</configuration>
 			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.2</version>
 				<executions>
 					<!-- This execution copies the war folder to the gwt transient output 
 						directory -->
@@ -258,58 +105,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<configuration>
-					<!-- exclude files that don't need to be in the final war -->
-					<packagingExcludes>**/.*,**/.*/**,**/client/**,**/server/*</packagingExcludes>
-				</configuration>
-			</plugin>
-
-			<!-- Jetty Plugin -->
-			<plugin>
-				<groupId>org.mortbay.jetty</groupId>
-				<artifactId>maven-jetty-plugin</artifactId>
-				<version>6.1.10</version>
-				<configuration>
-					<scanIntervalSeconds>10</scanIntervalSeconds>
-					<stopKey>foo</stopKey>
-					<stopPort>9999</stopPort>
-				</configuration>
-				<executions>
-					<execution>
-						<id>start-jetty</id>
-						<phase>pre-integration-test</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<scanIntervalSeconds>0</scanIntervalSeconds>
-							<daemon>true</daemon>
-						</configuration>
-					</execution>
-					<execution>
-						<id>stop-jetty</id>
-						<phase>post-integration-test</phase>
-						<goals>
-							<goal>stop</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			
-			<!-- Google App Engine (GAE) plugin -->
-			<plugin>
-				<groupId>net.kindleit</groupId>
-				<artifactId>maven-gae-plugin</artifactId>
-				<version>0.7.3</version>
-				<configuration>
-					<sdkDir>${gae.home}</sdkDir>
-				</configuration>
-			</plugin>
-			
 
 		</plugins>
 	</build>
