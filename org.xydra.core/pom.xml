@@ -5,22 +5,15 @@
 
 	<groupId>org.xydra</groupId>
 	<artifactId>core</artifactId>
-	<version>0.1.4-SNAPSHOT</version>
+	<version>${xydra.version}</version>
 	<packaging>jar</packaging>
 	<name>Xydra Core</name>
 
 	<parent>
 		<groupId>org.xydra</groupId>
 		<artifactId>maven-root</artifactId>
-		<version>2011.01.22</version>
+		<version>2011.12.05</version>
 	</parent>
-
-	<properties>
-
-		<!-- convenience to define GWT version in one place -->
-		<gwt.version>2.3.0</gwt.version>
-
-	</properties>
 
 	<repositories>
 		<repository>
@@ -34,30 +27,6 @@
 				<checksumPolicy>fail</checksumPolicy>
 			</releases>
 		</repository>
-		<repository>
-			<id>xydra-snap</id>
-			<url>
-				https://xydra.googlecode.com/svn/snapshots
-			</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
-		<!-- For API VIZ -->
-		<repository>
-			<id>jboss.releases</id>
-			<name>JBoss releases</name>
-			<url>http://repository.jboss.org/maven2</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
 	</repositories>
 
 
@@ -67,60 +36,26 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>index</artifactId>
-			<version>0.1.4-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>index</artifactId>
-			<version>0.1.4-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
 
 		<!-- Xlog -->
 		<dependency>
 			<groupId>org.xydra</groupId>
-			<artifactId>log</artifactId>
-			<version>0.1.4-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.xydra</groupId>
-			<artifactId>log</artifactId>
-			<version>0.1.4-SNAPSHOT</version>
-			<classifier>sources</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.xydra</groupId>
 			<artifactId>log.gae</artifactId>
-			<version>0.1.4-SNAPSHOT</version>
 			<scope>test</scope>
-		</dependency>
-
-		<!-- for testing the GWT compatibility -->
-		<dependency>
-			<groupId>com.google.gwt</groupId>
-			<artifactId>gwt-servlet</artifactId>
-			<version>${gwt.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.google.gwt</groupId>
-			<artifactId>gwt-user</artifactId>
-			<version>${gwt.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.google.code.gwt-log</groupId>
-			<artifactId>gwt-log</artifactId>
-			<version>3.1.2</version>
-			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava-gwt</artifactId>
-			<version>10.0.1</version>
+			<!-- version info taken from parent -->
 		</dependency>
-		
+
 		<!-- testing dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -132,38 +67,26 @@
 
 		<dependency>
 			<groupId>org.xydra</groupId>
+			<artifactId>log</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>log</artifactId>
+			<classifier>sources</classifier>
+		</dependency>
+
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>log.gae</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.xydra</groupId>
 			<artifactId>restless</artifactId>
-			<version>0.1.4-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 
 	</dependencies>
-
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>gwt-maven-plugin</artifactId>
-				<version>2.1.0-1</version>
-				<configuration>
-				<!-- FIXME was gwt.GwtTest -->
-					<module>org.xydra.core.XydraCore</module>
-					<module>org.xydra.store.XydraStore</module>
-				</configuration>
-				<executions>
-					<execution>
-						<id>gwt-test</id>
-						<phase>test</phase>
-						<goals>
-							<goal>test</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-		</plugins>
-	</build>
 
 	<distributionManagement>
 		<!-- Add this to settings.xml <server> <id>xydra-repo</id> <username>xamde</username> 
