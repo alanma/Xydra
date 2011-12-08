@@ -5,14 +5,14 @@
 
 	<groupId>org.xydra</groupId>
 	<artifactId>json</artifactId>
-	<version>0.1.4-SNAPSHOT</version>
+	<version>${xydra.version}</version>
 	<packaging>jar</packaging>
 	<name>Xydra JSON support</name>
 
 	<parent>
 		<groupId>org.xydra</groupId>
 		<artifactId>maven-root</artifactId>
-		<version>2011.01.22</version>
+		<version>2011.12.05</version>
 	</parent>
 
 	<repositories>
@@ -28,46 +28,13 @@
 				<checksumPolicy>fail</checksumPolicy>
 			</releases>
 		</repository>
-		<!-- xydra snapshots -->
-		<repository>
-			<id>xydra-snap</id>
-			<url>
-				https://xydra.googlecode.com/svn/snapshots
-			</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
-		<!--  For API VIZ -->
-		<repository>
-			<id>jboss.releases</id>
-			<name>JBoss releases</name>
-			<url>http://repository.jboss.org/maven2</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
 	</repositories>
 
 	<properties>
 
-		<!-- convenience to define GWT version in one place -->
-		<gwt.version>2.3.0</gwt.version>
-		
-		<!-- define a transient output directory for gwt -->
-		<gwt.output.directory>./war</gwt.output.directory>
-		
 		<!-- the value of the rename-to attribute in your GWT module configuration -->
-		<gwt.module.alias>XydraJson</gwt.module.alias>
-		
-		<gwt.compiler.force>true</gwt.compiler.force>
-		
+<!-- 		<gwt.module.alias>XydraJson</gwt.module.alias>
+ -->		
 	</properties>	
 
 	<dependencies>
@@ -76,25 +43,21 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
-			<version>0.1.4-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
-			<version>0.1.4-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
 
 		<!--  Xydra index -->
-		<dependency>
+<!-- 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>index</artifactId>
-			<version>0.1.4-SNAPSHOT</version>
 		</dependency>
-		<dependency>
+ -->		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>index</artifactId>
-			<version>0.1.4-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
 
@@ -102,62 +65,9 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
-			<version>0.1.4-SNAPSHOT</version>
-		</dependency>
-
-		<!--  for testing the GWT compatibility -->
-		<dependency>
-			<groupId>com.google.gwt</groupId>
-			<artifactId>gwt-servlet</artifactId>
-			<version>${gwt.version}</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.google.gwt</groupId>
-			<artifactId>gwt-user</artifactId>
-			<version>${gwt.version}</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.google.code.gwt-log</groupId>
-			<artifactId>gwt-log</artifactId>
-			<version>3.1.2</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- testing dependencies -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<!-- version info taken from parent -->
 		</dependency>
 
 	</dependencies>
-
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>gwt-maven-plugin</artifactId>
-				<version>2.1.0-1</version>
-				<configuration>
-					<!-- this doesn't do anything as that project doesn't contain an entry point -->
-					<module>org.xydra.json.JSON</module>
-				</configuration>
-				<executions>
-					<execution>
-						<id>gwt-test</id>
-						<phase>test</phase>
-						<goals>
-							<goal>compile</goal>
-							<goal>test</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
 
 	<distributionManagement>
 		<!--
