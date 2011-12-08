@@ -5,17 +5,16 @@
 
 	<groupId>org.xydra</groupId>
 	<artifactId>textsearch</artifactId>
-	<version>0.1.3-SNAPSHOT</version>
+	<version>${xydra.version}</version>
 	<packaging>jar</packaging>
 	<name>Xydra Textsearch</name>
 
 	<parent>
 		<groupId>org.xydra</groupId>
 		<artifactId>maven-root</artifactId>
-		<version>2011.01.22</version>
+		<version>2011.12.05</version>
 	</parent>
-	
-	
+
 	<repositories>
 		<repository>
 			<id>xydra-repo</id>
@@ -29,66 +28,36 @@
 				<checksumPolicy>fail</checksumPolicy>
 			</releases>
 		</repository>
-		<repository>
-			<id>xydra-snap</id>
-			<url>https://xydra.googlecode.com/svn/snapshots</url>
-			<snapshots>
-				<enabled>true</enabled>
-				<updatePolicy>always</updatePolicy>
-				<checksumPolicy>fail</checksumPolicy>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
-		
 	</repositories>
 
 	<dependencies>
 
-		<!--  XIndex -->
+		<!-- XIndex -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>index</artifactId>
-			<version>0.1.3-SNAPSHOT</version>
 		</dependency>
 
 		<!-- This dependency is required whenever you use XydraLog -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
-			<version>0.1.3-SNAPSHOT</version>
 		</dependency>
-		
-		<!--  This is only required for logging in GWT -->
+
+		<!-- This is only required for logging in GWT -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
-			<version>0.1.3-SNAPSHOT</version>
 			<classifier>sources</classifier>
-		</dependency>
-
-		<!-- testing dependencies -->
-		<dependency>
-			<scope>test</scope>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.3.1</version>
 		</dependency>
 
 	</dependencies>
 
-
-
-
-		<distributionManagement>
-		<!--
-			Add this to settings.xml <server> <id>xydra-repo</id>
-			<username>xamde</username> <password>********</password> </server>
-			<server> <id>xydra-snap</id> <username>xamde</username>
-			<password>********</password> </server> <server> <id>xydra-site</id>
-			<username>xamde</username> <password>********</password> </server>
-		-->
+	<distributionManagement>
+		<!-- Add this to settings.xml <server> <id>xydra-repo</id> <username>xamde</username> 
+			<password>********</password> </server> <server> <id>xydra-snap</id> <username>xamde</username> 
+			<password>********</password> </server> <server> <id>xydra-site</id> <username>xamde</username> 
+			<password>********</password> </server> -->
 		<repository>
 			<id>xydra-repo</id>
 			<url>svn:https://xydra.googlecode.com/svn/repository</url>
