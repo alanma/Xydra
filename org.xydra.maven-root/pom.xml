@@ -4,7 +4,7 @@
 
 	<groupId>org.xydra</groupId>
 	<artifactId>maven-root</artifactId>
-	<version>2011.01.22</version>
+	<version>2011.12.05</version>
 	<packaging>pom</packaging>
 
 	<name>Xydra Maven Root</name>
@@ -16,13 +16,54 @@
 	</description>
 
 	<properties>
-		<!--  tell the compiler we use 1.6 -->
+		<!-- tell the compiler we use 1.6 -->
 		<maven.compiler.source>1.6</maven.compiler.source>
 		<maven.compiler.target>1.6</maven.compiler.target>
+
+		<xydra.version>0.1.5-SNAPSHOT</xydra.version>
+
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
 	</properties>
 
+	<repositories>
+		<repository>
+			<id>xydra-repo</id>
+			<url>
+				https://xydra.googlecode.com/svn/repository
+			</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</releases>
+		</repository>
+		<repository>
+			<id>xydra-snap</id>
+			<url>
+				https://xydra.googlecode.com/svn/snapshots
+			</url>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+			</snapshots>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+		</repository>
+
+	</repositories>
+
 	<build>
+
+		<!-- Support for deploying sites to scp://-Urls -->
 		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-ssh</artifactId>
+				<version>1.0-beta-6</version>
+			</extension>
 			<extension>
 				<groupId>org.jvnet.wagon-svn</groupId>
 				<artifactId>wagon-svn</artifactId>
@@ -31,13 +72,11 @@
 		</extensions>
 
 		<plugins>
-			<!--
-				the eclipse plugin tries to integrate missing sources to the
-				.classpath
-			-->
+			<!-- the eclipse plugin tries to integrate missing sources to the .classpath -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-eclipse-plugin</artifactId>
+				<version>2.8</version>
 				<configuration>
 					<downloadSources>true</downloadSources>
 				</configuration>
@@ -62,83 +101,19 @@
 					<source>${maven.compiler.source}</source>
 					<target>${maven.compiler.target}</target>
 					<encoding>UTF-8</encoding>
+					<!-- Fix for GWT issue #3439 -->
+					<excludes>
+						<exclude>javax/servlet/**</exclude>
+					</excludes>
 				</configuration>
 			</plugin>
 
-
-			<!--
-				build source packages for jars (but not for test jars)
-				http://garbuz.com/sm/content.php/articles/maven2_deploying_sources/
-			-->
-			<plugin>
-				<inherited>true</inherited>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-			<!-- use surefire version that works with Junit 4.x tests -->
-			<plugin>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.6</version>
-			</plugin>
-
-			<!--
-				configure site:stage and some display parameters for site generation
-			-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-site-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>site</goal>
-						</goals>
-						<configuration>
-							<!--  convenience param to disable reports -->
-							<generateReports>true</generateReports>
-							<!-- set encoding to UTF8 (not something platform dependent) -->
-							<sourceEncoding>UTF-8</sourceEncoding>
-							<inputEncoding>UTF-8</inputEncoding>
-							<outputEncoding>UTF-8</outputEncoding>
-						</configuration>
-					</execution>
-				</executions>
-				<configuration>
-					<!--  convenience param to disable reports -->
-					<generateReports>true</generateReports>
-					<inputEncoding>UTF-8</inputEncoding>
-					<outputEncoding>UTF-8</outputEncoding>
-					<stagingDirectory>../www-test</stagingDirectory>
-				</configuration>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.7</version>
 			</plugin>
 
-			<!--
-				bind the cobertura clean goal to the general clean goal as suggested
-				in the book: Better builds with maven, p.196
-			-->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>cobertura-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>clean</id>
-						<goals>
-							<goal>clean</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			
-			
-			
 			<!-- Deploy tests as a separate jar as explained at -->
 			<!-- http://maven.apache.org/guides/mini/guide-attached-tests.html -->
 			<plugin>
@@ -148,290 +123,844 @@
 				<executions>
 					<execution>
 						<goals>
+							<goal>jar</goal>
 							<goal>test-jar</goal>
 						</goals>
 					</execution>
 				</executions>
 			</plugin>
 
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.1.1</version>
+				<configuration>
+					<!-- exclude files that don't need to be in the final war -->
+					<packagingExcludes>
+						<!-- Exclude GWT stuff -->
+						**/client/*.*,
+						<!-- Exclude GAE stuff -->
+						WEB-INF/classes/**/*.*,
+						WEB-INF/lib/*-sources.jar,
+						WEB-INF/lib/*-tests.jar,
+						WEB-INF/lib/gwt-dev-*.jar,
+						WEB-INF/lib/gwt-user-*.jar,
+						WEB-INF/lib/appengine-testing-*.jar,
+						WEB-INF/lib/appengine-api-stubs-*.jar,
+						WEB-INF/lib/geronimo*.jar,
+						WEB-INF/lib/appengine-tools-sdk*.jar
+					</packagingExcludes>
+					<!-- Package classes in .jar, loads much faster on GAE -->
+					<!-- Before: _ah/warmup 200 5583ms-6673ms 3790cpu_ms-4796cpu_ms 173api_cpu_ms-223api_cpu_ms 
+						0kb - - [03/Nov/2011:10:21:12 -0700] "GET /_ah/warmup HTTP/1.1" 200 0 - - 
+						"checklist2.354378040378659338.calpano-com.appspot.com" ms=6673 cpu_ms=4797 
+						api_cpu_ms=223 cpm_usd=0.133263 -->
+					<!-- After: /_ah/warmup 200 5467ms 3930cpu_ms 173api_cpu_ms 0kb -->
+					<archiveClasses>true</archiveClasses>
+					<!-- Include GWT compiler output in the war -->
+					<!--<configuration> <webResources> <resource> <directory>${gwt.output.directory}/${gwt.module.alias}</directory> 
+						<targetPath>${gwt.module.alias}</targetPath> </resource> </webResources> 
+						</configuration> -->
+				</configuration>
+			</plugin>
+
 		</plugins>
 	</build>
 
-	<!-- configuration of reporting plugins to be displayed at the site -->
-	<reporting>
-		<plugins>
-			<!-- switch on only the reports we want to see -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>
-					maven-project-info-reports-plugin
-				</artifactId>
-				<reportSets>
-					<reportSet>
-						<reports>
-							<report>index</report>
-							<report>summary</report>
-							<report>dependency-convergence</report>
-							<report>project-team</report>
-							<report>mailing-list</report>
-							<report>dependencies</report>
-							<report>issue-tracking</report>
-							<report>license</report>
-							<!-- we don't want to use the follwing -->
-							<!-- <report>cim</report> -->
-							<!-- <report>scm</report> -->
-						</reports>
-					</reportSet>
-				</reportSets>
-			</plugin>
+	<dependencies>
 
+		<!-- testing dependencies -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<!-- Due to https://github.com/KentBeck/junit/issues/332 as of 2011-11-30 -->
+			<exclusions>
+				<exclusion>
+					<groupId>org.hamcrest</groupId>
+					<artifactId>hamcrest-core</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 
-			<!-- display surefire results on site -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-report-plugin</artifactId>
-			</plugin>
-
-			<!-- generates PMD and CDP reports - java sourcecode analyzer -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-pmd-plugin</artifactId>
-				<configuration>
-					<targetJdk>${maven.compiler.target}</targetJdk>
-				</configuration>
-			</plugin>
-
-			<!-- creates sources as html -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jxr-plugin</artifactId>
-				<configuration>
-					<!-- interlink them with the api-doc of the project -->
-					<linkJavadoc>true</linkJavadoc>
-				</configuration>
-			</plugin>
-
-			<!-- reports the defined tags -->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>taglist-maven-plugin</artifactId>
-				<version>2.4</version>
-				<!--  Latest version as of 2010-08-30 -->
-				<configuration>
-					<tags>
-						<tag>TODO</tag>
-						<tag>IMPROVE</tag>
-						<tag>FIXME</tag>
-						<tag>XXX</tag>
-						<tag>@@</tag>
-					</tags>
-					<encoding>UTF-8</encoding>
-				</configuration>
-			</plugin>
-
-			<!-- performs a jDepend metric analysis -->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>jdepend-maven-plugin</artifactId>
-			</plugin>
-
-			<!-- analyses test coverage of the project -->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>cobertura-maven-plugin</artifactId>
-			</plugin>
-
-			<!-- searching for bug patterns in java bytecode -->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>findbugs-maven-plugin</artifactId>
-				<configuration>
-					<xmlOutput>false</xmlOutput>
-					<xmlOutputDirectory>
-						target/findbugs
-					</xmlOutputDirectory>
-					<!--  High|Normal|Low|Exp|Ignore -->
-					<threshold>Normal</threshold>
-					<!--  Min|Default|Max -->
-					<effort>Default</effort>
-					<!--
-						<excludeFilterFile>findbugs-exclude.xml</excludeFilterFile>
-						<includeFilterFile>findbugs-include.xml</includeFilterFile>
-						<visitors>FindDeadLocalStores,UnreadFields</visitors>
-						<omitVisitors>FindDeadLocalStores,UnreadFields</omitVisitors>
-						<pluginList>/libs/fb-contrib/fb-contrib-2.8.0.jar</pluginList>
-					-->
-				</configuration>
-			</plugin>
-
-			<!--
-				informs on changes between releases needs a changes.xml file or a
-				jira bugtracker
-			-->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-changes-plugin</artifactId>
-
-				<!-- for JIRA report -->
-				<!--
-					<reportSets> <reportSet> <reports> <report>jira-report</report>
-					</reports> </reportSet> </reportSets>
-				-->
-
-				<!-- for changes.xml file report-->
-				<reportSets>
-					<reportSet>
-						<reports>
-							<report>changes-report</report>
-						</reports>
-					</reportSet>
-				</reportSets>
-			</plugin>
-
-
-			<!--
-				Get really nice JavaDocs with mvn compile javadoc:javadoc Read:
-				http://code.google.com/p/apiviz/#Maven_2_Integration You need to
-				install GraphViz locally first. Then set GRAPHVIZ_HOME to the /bin
-				directory of your local GraphViz installation.
-			-->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.7</version>
-				<configuration>
-					<doclet>org.jboss.apiviz.APIviz</doclet>
-					<docletArtifact>
-						<groupId>org.jboss.apiviz</groupId>
-						<artifactId>apiviz</artifactId>
-						<version>1.3.0.GA</version>
-					</docletArtifact>
-					<useStandardDocletOptions>true</useStandardDocletOptions>
-					<charset>UTF-8</charset>
-					<encoding>UTF-8</encoding>
-					<docencoding>UTF-8</docencoding>
-					<breakiterator>true</breakiterator>
-					<version>true</version>
-					<author>true</author>
-					<keywords>true</keywords>
-					<additionalparam>
-						-sourceclasspath ${project.build.outputDirectory}
-          			</additionalparam>
-					<!--
-						provide links to several famous projects see: Better builds with
-						maven, p.185
-					-->
-					<!--  do not aggregate javadocs from child elements-->
-					<links>
-						<link>
-							http://java.sun.com/j2se/1.5.0/docs/api/
-						</link>
-						<link>
-							http://jakarta.apache.org/commons/collections/apidocs-COLLECTIONS_3_0/
-						</link>
-						<link>http://www.junit.org/junit/javadoc/</link>
-						<link>
-							http://jakarta.apache.org/velocity/api/
-						</link>
-						<!--
-							aggregate java doc of sub-projects and provide links to several
-							famous projects see: Better builds with maven, p.185
-						-->
-						<link>
-							http://site.xydra.org/client/apidocs/
-						</link>
-						<link>
-							http://site.xydra.org/client-gwt/apidocs/
-						</link>
-						<link>
-							http://site.xydra.org/core/apidocs/
-						</link>
-						<link>
-							http://site.xydra.org/dev/apidocs/
-						</link>
-						<link>
-							http://site.xydra.org/gaeclient/apidocs/
-						</link>
-						<link>
-							http://site.xydra.org/gaemyadmin/apidocs/
-						</link>
-						<link>
-							http://site.xydra.org/index/apidocs/
-						</link>
-						<link>
-							http://site.xydra.org/log/apidocs/
-						</link>
-						<link>
-							http://site.xydra.org/log.howto/apidocs/
-						</link>
-						<link>
-							http://site.xydra.org/restless/apidocs/
-						</link>
-						<link>
-							http://site.xydra.org/schema/apidocs/
-						</link>
-						<link>
-							http://site.xydra.org/server/apidocs/
-						</link>
-						<link>
-							http://site.xydra.org/server-gae/apidocs/
-						</link>
-						<link>
-							http://site.xydra.org/textsearch/apidocs/
-						</link>
-						<link>
-							http://site.xydra.org/webadmin/apidocs/
-						</link>
-					</links>
-				</configuration>
-			</plugin>
-
-		</plugins>
-	</reporting>
-
+	</dependencies>
 
 	<!-- proposing dependencies and their versions -->
 	<dependencyManagement>
 		<dependencies>
-			<!-- common dependencies (useful utils)-->
+
+			<dependency>
+				<groupId>commons-httpclient</groupId>
+				<artifactId>commons-httpclient</artifactId>
+				<version>3.0.1</version>
+			</dependency>
+
+			<!-- common dependencies (useful utils) -->
 			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
-				<version>1.4</version>
+				<version>2.1</version>
 			</dependency>
 
 			<!-- logging dependencies -->
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
-				<version>1.5.0</version>
+				<version>1.6.4</version>
 			</dependency>
 
 			<dependency>
-				<scope>runtime</scope>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-log4j12</artifactId>
-				<version>1.5.0</version>
+				<version>1.6.4</version>
+				<scope>runtime</scope>
 			</dependency>
 
 			<dependency>
-				<scope>runtime</scope>
 				<groupId>log4j</groupId>
 				<artifactId>log4j</artifactId>
-				<version>1.2.14</version>
+				<version>1.2.16</version>
+				<scope>runtime</scope>
 			</dependency>
 
-			<!-- testing dependencies -->
 			<dependency>
-				<scope>test</scope>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
-				<version>4.8.2</version>
+				<version>4.10</version>
+				<scope>test</scope>
 			</dependency>
+
+			<dependency>
+				<groupId>org.mortbay.jetty</groupId>
+				<artifactId>jetty</artifactId>
+				<version>6.1.11</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava-gwt</artifactId>
+				<version>10.0.1</version>
+			</dependency>
+
+
+			<!-- +++ Propose Xydra version numbers (alpabetic order) +++ -->
+			<dependency>
+				<groupId>org.xydra</groupId>
+				<artifactId>core</artifactId>
+				<version>${xydra.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xydra</groupId>
+				<artifactId>core</artifactId>
+				<version>${xydra.version}</version>
+				<classifier>sources</classifier>
+			</dependency>
+			<dependency>
+				<groupId>org.xydra</groupId>
+				<artifactId>core</artifactId>
+				<version>${xydra.version}</version>
+				<type>test-jar</type>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.xydra</groupId>
+				<artifactId>csv</artifactId>
+				<version>${xydra.version}</version>
+			</dependency>
+			<!-- XIndex -->
+			<dependency>
+				<groupId>org.xydra</groupId>
+				<artifactId>index</artifactId>
+				<version>${xydra.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xydra</groupId>
+				<artifactId>index</artifactId>
+				<version>${xydra.version}</version>
+				<classifier>sources</classifier>
+			</dependency>
+			<dependency>
+				<groupId>org.xydra</groupId>
+				<artifactId>json</artifactId>
+				<version>${xydra.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xydra</groupId>
+				<artifactId>gae</artifactId>
+				<version>${xydra.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xydra</groupId>
+				<artifactId>gae</artifactId>
+				<version>${xydra.version}</version>
+				<type>test-jar</type>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.xydra</groupId>
+				<artifactId>gwt</artifactId>
+				<version>${xydra.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xydra</groupId>
+				<artifactId>log</artifactId>
+				<version>${xydra.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xydra</groupId>
+				<artifactId>log</artifactId>
+				<version>${xydra.version}</version>
+				<classifier>sources</classifier>
+			</dependency>
+			<dependency>
+				<groupId>org.xydra</groupId>
+				<artifactId>log</artifactId>
+				<version>${xydra.version}</version>
+				<type>test-jar</type>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.xydra</groupId>
+				<artifactId>log.gae</artifactId>
+				<version>${xydra.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xydra</groupId>
+				<artifactId>restless</artifactId>
+				<version>${xydra.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xydra</groupId>
+				<artifactId>restless</artifactId>
+				<version>${xydra.version}</version>
+				<type>test-jar</type>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.xydra</groupId>
+				<artifactId>server</artifactId>
+				<version>${xydra.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xydra</groupId>
+				<artifactId>server</artifactId>
+				<version>${xydra.version}</version>
+				<type>test-jar</type>
+				<scope>test</scope>
+			</dependency>
+
+			<!-- via http://hobione.wordpress.com/2009/03/11/missing-comsuntoolsjar142/ 
+				<dependency> <groupId>com.sun</groupId> <artifactId>tools</artifactId> <version>1.4.2</version> 
+				<scope>system</scope> <systemPath>${java.home}/../lib/tools.jar</systemPath> 
+				</dependency> -->
+
 		</dependencies>
 	</dependencyManagement>
 
-	<!--  Local settings to deploy *this* pom -->
+	<profiles>
+		<!-- _______________________ DETAILED __________ -->
+		<profile>
+			<id>detailed</id>
+			<properties>
+				<gwt.compiler.force>true</gwt.compiler.force>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>gwt-maven-plugin</artifactId>
+						<configuration>
+							<style>DETAILED</style>
+							<enableAssertions>true</enableAssertions>
+							<force>true</force>
+							<!-- Log even more: TRACE < DEBUG < SPAM < ALL -->
+							<logLevel>TRACE</logLevel>
+							<optimizationLevel>0</optimizationLevel>
+							<soycDetailed>true</soycDetailed>
+							<treeLogger>true</treeLogger>
+						</configuration>
+					</plugin>
+
+					<plugin>
+						<groupId>net.kindleit</groupId>
+						<artifactId>maven-gae-plugin</artifactId>
+						<version>0.9.2</version>
+						<configuration>
+							<keepTempUploadDir>true</keepTempUploadDir>
+							<days>30</days>
+							<outputFile>${project.build.directory}/gae.log</outputFile>
+							<!-- 0 = debug, info, warn, error, critical = 4 -->
+							<severity>0</severity>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<!-- _______________________ FAST_______________ -->
+		<profile>
+			<id>fast</id>
+			<properties>
+				<gwt.compiler.force>false</gwt.compiler.force>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>gwt-maven-plugin</artifactId>
+						<configuration>
+							<logLevel>INFO</logLevel>
+							<style>PRETTY</style>
+							<disableCastChecking>true</disableCastChecking>
+							<draftCompile>true</draftCompile>
+							<optimizationLevel>0</optimizationLevel>
+						</configuration>
+					</plugin>
+
+					<plugin>
+						<groupId>net.kindleit</groupId>
+						<artifactId>maven-gae-plugin</artifactId>
+						<version>0.9.2</version>
+						<configuration>
+							<disableUpdateCheck>true</disableUpdateCheck>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<!-- _______________________ PRODUCTION_______________ -->
+		<profile>
+			<id>production</id>
+			<properties>
+				<gwt.compiler.force>true</gwt.compiler.force>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>gwt-maven-plugin</artifactId>
+						<configuration>
+							<logLevel>TRACE</logLevel>
+							<style>OBFUSCATED</style>
+							<optimizationLevel>9</optimizationLevel>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+
+		</profile>
+		<!-- _______________________ GWT __________________________ -->
+		<profile>
+			<id>gwt</id>
+			<activation>
+				<file>
+					<exists>uses-gwt.marker</exists>
+				</file>
+			</activation>
+			<properties>
+				<!-- GWT version, should match version of gwt-maven-plugin -->
+				<gwt.version>2.4.0</gwt.version>
+
+				<!-- define a transient output directory for gwt -->
+				<gwt.output.directory>${project.build.directory}/war</gwt.output.directory>
+
+			</properties>
+			<dependencies>
+				<!-- gwt-dev is not here, on purpose -->
+				<dependency>
+					<groupId>com.google.gwt</groupId>
+					<artifactId>gwt-servlet</artifactId>
+					<version>${gwt.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>com.google.gwt</groupId>
+					<artifactId>gwt-user</artifactId>
+					<version>${gwt.version}</version>
+					<scope>provided</scope>
+					<!-- Transitive dependency to javax.validation required for tests in 
+						GWT -->
+				</dependency>
+				<dependency>
+					<groupId>com.google.gwt</groupId>
+					<artifactId>gwt-dev</artifactId>
+					<version>${gwt.version}</version>
+					<scope>test</scope>
+				</dependency>
+				<dependency>
+					<groupId>com.allen-sauer.gwt.log</groupId>
+					<artifactId>gwt-log</artifactId>
+					<version>3.1.6</version>
+				</dependency>
+
+			</dependencies>
+			<build>
+				<plugins>
+					<!-- build source packages for jars (but not for test jars) http://garbuz.com/sm/content.php/articles/maven2_deploying_sources/ -->
+					<plugin>
+						<inherited>true</inherited>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>2.1.2</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<phase>package</phase>
+								<goals>
+									<goal>jar-no-fork</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>gwt-maven-plugin</artifactId>
+						<version>2.4.0</version>
+						<!-- TODO: Add configuration to your pom. -->
+						<!-- Example: <configuration> <module>org.xydra.core.XydraCore</module> 
+							</configuration> -->
+						<configuration>
+							<!-- default setting: -->
+							<generateDirectory>${project.build.directory}/generated-sources/gwt</generateDirectory>
+							<!-- The directory into which extra, non-deployed files will be written. -->
+							<extra>${project.build.directory}/gwt-extra</extra>
+							<extraParam>true</extraParam>
+						</configuration>
+						<executions>
+							<execution>
+								<id>gwt-compile</id>
+								<phase>process-classes</phase>
+								<configuration>
+									<extraJvmArgs>-Xmx512M -Xss1024k</extraJvmArgs>
+								</configuration>
+								<goals>
+									<goal>compile</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>gwt-generate-async</id>
+								<goals>
+									<goal>generateAsync</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>gwt-test</id>
+								<phase>test</phase>
+								<goals>
+									<goal>test</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>2.11</version>
+						<executions>
+							<execution>
+								<phase>integration-test</phase>
+								<goals>
+									<goal>test</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+
+
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
+			<!-- _______________________ GAE __________________________ -->
+			<id>gae</id>
+			<activation>
+				<file>
+					<exists>uses-gae.marker</exists>
+				</file>
+			</activation>
+			<properties>
+				<!-- Specify AppEngine version for your project. It should match SDK 
+					version pointed to by ${gae.home} property (Typically, one used by your Eclipse 
+					plug-in) -->
+				<gae.version>1.6.0</gae.version>
+
+			</properties>
+			<build>
+				<plugins>
+					<!-- Google App Engine (GAE) plugin -->
+					<plugin>
+						<groupId>net.kindleit</groupId>
+						<artifactId>maven-gae-plugin</artifactId>
+						<version>0.9.2</version>
+						<configuration>
+							<splitJars>true</splitJars>
+						</configuration>
+						<!-- <dependencies> <dependency> <groupId>net.kindleit</groupId> <artifactId>gae-runtime</artifactId> 
+							<version>${gae.version}</version> <type>pom</type> </dependency> </dependencies> -->
+					</plugin>
+
+				</plugins>
+			</build>
+
+			<dependencies>
+				<!-- Google App Engine -->
+				<dependency>
+					<groupId>com.google.appengine</groupId>
+					<artifactId>appengine-api-1.0-sdk</artifactId>
+					<version>${gae.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>com.google.appengine</groupId>
+					<artifactId>appengine-api-labs</artifactId>
+					<version>${gae.version}</version>
+				</dependency>
+
+				<!-- J2EE Servlet API. -->
+				<dependency>
+					<groupId>org.apache.geronimo.specs</groupId>
+					<artifactId>geronimo-servlet_2.5_spec</artifactId>
+					<version>1.2</version>
+					<scope>provided</scope>
+				</dependency>
+
+				<!-- GAE libraries for local testing as described here: http://code.google.com/appengine/docs/java/howto/unittesting.html -->
+				<dependency>
+					<groupId>com.google.appengine</groupId>
+					<artifactId>appengine-api-stubs</artifactId>
+					<version>${gae.version}</version>
+					<scope>test</scope>
+				</dependency>
+
+				<dependency>
+					<groupId>com.google.appengine</groupId>
+					<artifactId>appengine-testing</artifactId>
+					<version>${gae.version}</version>
+					<scope>test</scope>
+				</dependency>
+
+			</dependencies>
+		</profile>
+
+		<profile>
+			<!-- ___________________ Site generation ___________________ -->
+			<id>site</id>
+			<repositories>
+				<!-- For API VIZ -->
+				<repository>
+					<id>jboss.releases</id>
+					<name>JBoss releases</name>
+					<url>http://repository.jboss.org/maven2</url>
+					<releases>
+						<enabled>true</enabled>
+					</releases>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</repository>
+			</repositories>
+			<pluginRepositories>
+				<pluginRepository>
+					<id>semweb4j-repo</id>
+					<name>Semweb4j.org maven repo</name>
+					<url>http://semweb4j.org/repo/</url>
+					<releases>
+						<enabled>true</enabled>
+						<updatePolicy>always</updatePolicy>
+						<checksumPolicy>fail</checksumPolicy>
+					</releases>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</pluginRepository>
+				<pluginRepository>
+					<id>semweb4j-snapshots</id>
+					<name>Semweb4j.org maven snapshots</name>
+					<url>http://semweb4j.org/snapshots/</url>
+					<releases>
+						<enabled>false</enabled>
+					</releases>
+					<snapshots>
+						<enabled>true</enabled>
+						<updatePolicy>always</updatePolicy>
+						<checksumPolicy>fail</checksumPolicy>
+					</snapshots>
+				</pluginRepository>
+			</pluginRepositories>
+			<build>
+				<plugins>
+					<!-- use surefire version that works with Junit 4.x tests -->
+					<plugin>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>2.11</version>
+					</plugin>
+
+					<!-- configure site:stage and some display parameters for site generation -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-site-plugin</artifactId>
+						<executions>
+							<execution>
+								<goals>
+									<goal>site</goal>
+								</goals>
+								<configuration>
+									<!-- convenience param to disable reports -->
+									<generateReports>true</generateReports>
+									<!-- set encoding to UTF8 (not something platform dependent) -->
+									<sourceEncoding>UTF-8</sourceEncoding>
+									<inputEncoding>UTF-8</inputEncoding>
+									<outputEncoding>UTF-8</outputEncoding>
+								</configuration>
+							</execution>
+						</executions>
+						<configuration>
+							<!-- convenience param to disable reports -->
+							<generateReports>true</generateReports>
+							<inputEncoding>UTF-8</inputEncoding>
+							<outputEncoding>UTF-8</outputEncoding>
+							<stagingDirectory>../www-test</stagingDirectory>
+						</configuration>
+					</plugin>
+
+					<!-- bind the cobertura clean goal to the general clean goal as suggested 
+						in the book: Better builds with maven, p.196 -->
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>cobertura-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>clean</id>
+								<goals>
+									<goal>clean</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+
+				</plugins>
+			</build>
+
+			<!-- configuration of reporting plugins to be displayed at the site -->
+			<reporting>
+				<plugins>
+					<!-- switch on only the reports we want to see -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>
+					maven-project-info-reports-plugin
+				</artifactId>
+						<reportSets>
+							<reportSet>
+								<reports>
+									<report>index</report>
+									<report>summary</report>
+									<report>dependency-convergence</report>
+									<report>project-team</report>
+									<report>mailing-list</report>
+									<report>dependencies</report>
+									<report>issue-tracking</report>
+									<report>license</report>
+									<!-- we don't want to use the follwing -->
+									<!-- <report>cim</report> -->
+									<!-- <report>scm</report> -->
+								</reports>
+							</reportSet>
+						</reportSets>
+					</plugin>
+
+
+					<!-- display surefire results on site -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-report-plugin</artifactId>
+					</plugin>
+
+					<!-- generates PMD and CDP reports - java sourcecode analyzer -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-pmd-plugin</artifactId>
+						<configuration>
+							<targetJdk>${maven.compiler.target}</targetJdk>
+						</configuration>
+					</plugin>
+
+					<!-- creates sources as html -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-jxr-plugin</artifactId>
+						<configuration>
+							<!-- interlink them with the api-doc of the project -->
+							<linkJavadoc>true</linkJavadoc>
+						</configuration>
+					</plugin>
+
+					<!-- reports the defined tags -->
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>taglist-maven-plugin</artifactId>
+						<version>2.4</version>
+						<!-- Latest version as of 2010-08-30 -->
+						<configuration>
+							<tags>
+								<tag>TODO</tag>
+								<tag>IMPROVE</tag>
+								<tag>FIXME</tag>
+								<tag>XXX</tag>
+								<tag>@@</tag>
+							</tags>
+							<encoding>UTF-8</encoding>
+						</configuration>
+					</plugin>
+
+					<!-- performs a jDepend metric analysis -->
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>jdepend-maven-plugin</artifactId>
+					</plugin>
+
+					<!-- analyses test coverage of the project -->
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>cobertura-maven-plugin</artifactId>
+					</plugin>
+
+					<!-- searching for bug patterns in java bytecode -->
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>findbugs-maven-plugin</artifactId>
+						<configuration>
+							<xmlOutput>false</xmlOutput>
+							<xmlOutputDirectory>
+								target/findbugs
+					</xmlOutputDirectory>
+							<!-- High|Normal|Low|Exp|Ignore -->
+							<threshold>Normal</threshold>
+							<!-- Min|Default|Max -->
+							<effort>Default</effort>
+							<!-- <excludeFilterFile>findbugs-exclude.xml</excludeFilterFile> <includeFilterFile>findbugs-include.xml</includeFilterFile> 
+								<visitors>FindDeadLocalStores,UnreadFields</visitors> <omitVisitors>FindDeadLocalStores,UnreadFields</omitVisitors> 
+								<pluginList>/libs/fb-contrib/fb-contrib-2.8.0.jar</pluginList> -->
+						</configuration>
+					</plugin>
+
+					<!-- informs on changes between releases needs a changes.xml file or 
+						a jira bugtracker -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-changes-plugin</artifactId>
+
+						<!-- for JIRA report -->
+						<!-- <reportSets> <reportSet> <reports> <report>jira-report</report> 
+							</reports> </reportSet> </reportSets> -->
+
+						<!-- for changes.xml file report -->
+						<reportSets>
+							<reportSet>
+								<reports>
+									<report>changes-report</report>
+								</reports>
+							</reportSet>
+						</reportSets>
+					</plugin>
+
+
+					<!-- Get really nice JavaDocs with mvn compile javadoc:javadoc Read: 
+						http://code.google.com/p/apiviz/#Maven_2_Integration You need to install 
+						GraphViz locally first. Then set GRAPHVIZ_HOME to the /bin directory of your 
+						local GraphViz installation. -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>2.7</version>
+						<configuration>
+							<doclet>org.jboss.apiviz.APIviz</doclet>
+							<docletArtifact>
+								<groupId>org.jboss.apiviz</groupId>
+								<artifactId>apiviz</artifactId>
+								<version>1.3.0.GA</version>
+							</docletArtifact>
+							<useStandardDocletOptions>true</useStandardDocletOptions>
+							<charset>UTF-8</charset>
+							<encoding>UTF-8</encoding>
+							<docencoding>UTF-8</docencoding>
+							<breakiterator>true</breakiterator>
+							<version>true</version>
+							<author>true</author>
+							<keywords>true</keywords>
+							<additionalparam>
+								-sourceclasspath
+								${project.build.outputDirectory}
+          			</additionalparam>
+							<!-- provide links to several famous projects see: Better builds with 
+								maven, p.185 -->
+							<!-- do not aggregate javadocs from child elements -->
+							<links>
+								<link>
+									http://java.sun.com/j2se/1.5.0/docs/api/
+						</link>
+								<link>
+									http://jakarta.apache.org/commons/collections/apidocs-COLLECTIONS_3_0/
+						</link>
+								<link>http://www.junit.org/junit/javadoc/</link>
+								<link>
+									http://jakarta.apache.org/velocity/api/
+						</link>
+								<!-- aggregate java doc of sub-projects and provide links to several 
+									famous projects see: Better builds with maven, p.185 -->
+								<link>
+									http://site.xydra.org/core/apidocs/
+						</link>
+								<link>
+									http://site.xydra.org/dev/apidocs/
+						</link>
+								<link>
+									http://site.xydra.org/gae/apidocs/
+						</link>
+								<link>
+									http://site.xydra.org/gwt/apidocs/
+						</link>
+								<link>
+									http://site.xydra.org/gaemyadmin/apidocs/
+						</link>
+								<link>
+									http://site.xydra.org/index/apidocs/
+						</link>
+								<link>
+									http://site.xydra.org/log/apidocs/
+						</link>
+								<link>
+									http://site.xydra.org/log.howto/apidocs/
+						</link>
+								<link>
+									http://site.xydra.org/restless/apidocs/
+						</link>
+								<link>
+									http://site.xydra.org/schema/apidocs/
+						</link>
+								<link>
+									http://site.xydra.org/server/apidocs/
+						</link>
+								<link>
+									http://site.xydra.org/server/apidocs/
+						</link>
+								<link>
+									http://site.xydra.org/textsearch/apidocs/
+						</link>
+								<link>
+									http://site.xydra.org/webadmin/apidocs/
+						</link>
+							</links>
+						</configuration>
+					</plugin>
+
+				</plugins>
+			</reporting>
+
+		</profile>
+
+	</profiles>
+
+	<!-- Local settings to deploy *this* pom -->
 	<distributionManagement>
 		<downloadUrl>http://code.google.com/p/xydra/downloads/list</downloadUrl>
 		<repository>
@@ -446,7 +975,7 @@
 		</snapshotRepository>
 		<site>
 			<id>xydra-site</id>
-			<url>scp://${xydra.site}/${artifactId}</url>
+			<url>scp://${xydra.site}/${project.artifactId}</url>
 		</site>
 	</distributionManagement>
 
