@@ -5,33 +5,25 @@
 
 	<groupId>org.xydra</groupId>
 	<artifactId>webadmin</artifactId>
-	<version>0.1.4-SNAPSHOT</version>
+	<version>${xydra.version}</version>
 	<packaging>war</packaging>
 	<name>Xydra Webadmin</name>
 
 	<parent>
 		<groupId>org.xydra</groupId>
 		<artifactId>maven-root</artifactId>
-		<version>2011.01.22</version>
+		<version>2011.12.05</version>
 	</parent>
 
 	<properties>
 
-		<!-- convenience to define GWT version in one place -->
-		<gwt.version>2.3.0</gwt.version>
-
 		<!-- define a transient output directory for gwt -->
-		<gwt.output.directory>${project.build.directory}/war</gwt.output.directory>
-
+<!-- 		<gwt.output.directory>${project.build.directory}/war</gwt.output.directory>
+ -->
 		<!-- the value of the rename-to attribute in your GWT module configuration -->
-		<gwt.module.alias>gwt</gwt.module.alias>
+<!-- 		<gwt.module.alias>gwt</gwt.module.alias>
 		<gwt.compiler.force>true</gwt.compiler.force>
-
-		<!-- Specify AppEngine version for your project. It should match SDK version 
-			pointed to by ${gae.home} property (Typically, one used by your Eclipse plug-in) -->
-		<gae.version>1.5.0.1</gae.version>
-
-
+ -->
 	</properties>
 
 	<repositories>
@@ -47,47 +39,33 @@
 				<checksumPolicy>fail</checksumPolicy>
 			</releases>
 		</repository>
-		<!-- xydra snapshots -->
-		<repository>
-			<id>xydra-snap</id>
-			<url>
-				https://xydra.googlecode.com/svn/snapshots
-			</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
 	</repositories>
 
 	<dependencies>
-
-		<!-- test -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
 
 		<!-- test server -->
 		<dependency>
 			<groupId>org.mortbay.jetty</groupId>
 			<artifactId>jetty</artifactId>
-			<version>6.1.11</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>csv</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>json</artifactId>
 		</dependency>
 
 		<!-- RESTless -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>restless</artifactId>
-			<version>0.1.4-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>restless</artifactId>
-			<version>0.1.4-SNAPSHOT</version>
 			<type>test-jar</type>
 		</dependency>
 
@@ -95,14 +73,18 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
-			<version>0.1.4-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>core</artifactId>
+			<type>test-jar</type>
+			<scope>compile</scope>
 		</dependency>
 
 		<!-- Xydra GAE -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>gae</artifactId>
-			<version>0.1.4-SNAPSHOT</version>
 		</dependency>
 
 		<!-- FileUpload utilities from http://commons.apache.org/fileupload/ -->
@@ -118,80 +100,9 @@
 
 		<plugins>
 
-			<!-- http://maven.apache.org/plugins/maven-war-plugin/ -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<version>2.1.1</version>
-				<configuration>
-					<!-- Package classes in .jar, loads much faster on GAE -->
-					<!-- Before: _ah/warmup 200 5583ms-6673ms 3790cpu_ms-4796cpu_ms 173api_cpu_ms-223api_cpu_ms 
-						0kb - - [03/Nov/2011:10:21:12 -0700] "GET /_ah/warmup HTTP/1.1" 200 0 - - 
-						"checklist2.354378040378659338.calpano-com.appspot.com" ms=6673 cpu_ms=4797 
-						api_cpu_ms=223 cpm_usd=0.133263 -->
-					<!-- After:  /_ah/warmup 200 5467ms 3930cpu_ms 173api_cpu_ms 0kb -->
-					<archiveClasses>true</archiveClasses>
-
-
-					<!-- The directory for the generated WAR. Default value is: ${project.build.directory}. -->
-					<!-- <outputDirectory></outputDirectory> -->
-
-					<!-- The name of the generated WAR. Default value is: ${project.build.finalName}. -->
-					<!--<warName>war</warName> --><!-- Single directory for extra files to include in the WAR. This is 
-						where you place your JSP files. Default value is: ${basedir}/src/main/webapp. -->
-					<!-- <warSourceDirectory></warSourceDirectory> -->
-
-					<!-- The directory where the webapp is built. Default value is: ${project.build.directory}/${project.build.finalName}. -->
-					<webappDirectory>${project.build.directory}/war</webappDirectory>
-					<packagingExcludes>
-						WEB-INF/classes/**/*.*,
-						WEB-INF/lib/*-sources.jar,
-						WEB-INF/lib/*-tests.jar,
-						WEB-INF/lib/gwt-dev-*.jar,
-						WEB-INF/lib/gwt-user-*.jar,
-						WEB-INF/lib/appengine-testing-*.jar,
-						WEB-INF/lib/appengine-api-stubs-*.jar,
-						WEB-INF/lib/geronimo*.jar,
-						WEB-INF/lib/appengine-tools-sdk*.jar
-					</packagingExcludes>
-
-
-					<webXml>src/main/webapp/WEB-INF/web.xml</webXml>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>${maven.compiler.source}</source>
-					<target>${maven.compiler.target}</target>
-					<encoding>UTF-8</encoding>
-					<!-- Fix for GWT issue #3439 -->
-					<excludes>
-						<exclude>javax/servlet/**</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.2</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.2</version>
 				<executions>
 					<!-- This execution copies the war folder to the gwt transient output 
 						directory -->
@@ -210,15 +121,6 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<!-- Include GWT compiler output in the war -->
-				<!--<configuration> <webResources> <resource> <directory>${gwt.output.directory}/${gwt.module.alias}</directory> 
-					<targetPath>${gwt.module.alias}</targetPath> </resource> </webResources> 
-					</configuration> -->
 			</plugin>
 
 		</plugins>
@@ -247,70 +149,5 @@
 		<connection>svn:https://xydra.googlecode.com/svn/trunk/org.xydra.webadmin</connection>
 		<developerConnection>svn:https://xydra.googlecode.com/svn/trunk/org.xydra.webadmin</developerConnection>
 	</scm>
-
-	<!-- Activate with ".... -P gae" -->
-	<profiles>
-		<profile>
-			<id>gae</id>
-
-			<pluginRepositories>
-
-				<!-- If this repo is active, GAE plugin is crap. <pluginRepository> <id>Codehaus 
-					Mojo Snapshot</id> <url>http://snapshots.repository.codehaus.org/</url> </pluginRepository> -->
-
-				<!-- Google App Engine (GAE) plugin repository -->
-				<pluginRepository>
-					<id>gae-plugin-repo</id>
-					<url>http://maven-gae-plugin.googlecode.com/svn/repository/</url>
-				</pluginRepository>
-
-			</pluginRepositories>
-			<repositories>
-				<!-- for GAE stuff ? -->
-				<repository>
-					<id>maven2-repository.dev.java.net</id>
-					<url>http://download.java.net/maven/2</url>
-					<layout>default</layout>
-				</repository>
-
-				<repository>
-					<id>mvnsearch</id>
-					<url>http://www.mvnsearch.org/maven2/</url>
-				</repository>
-
-			</repositories>
-
-			<build>
-				<plugins>
-					<!-- Google App Engine (GAE) plugin -->
-					<plugin>
-						<groupId>net.kindleit</groupId>
-						<artifactId>maven-gae-plugin</artifactId>
-						<version>0.8.2</version>
-						<configuration>
-							<sdkDir>${gae.home}</sdkDir>
-							<appDir>${project.build.directory}/war</appDir>
-							<unpackVersion>${gae.version}</unpackVersion>
-							<splitJars>true</splitJars>
-							<keepTempUploadDir>true</keepTempUploadDir>
-						</configuration>
-						<dependencies>
-							<dependency>
-								<groupId>net.kindleit</groupId>
-								<artifactId>gae-runtime</artifactId>
-								<version>${gae.version}</version>
-								<type>pom</type>
-							</dependency>
-						</dependencies>
-					</plugin>
-					<!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>gwt-maven-plugin</artifactId> 
-						<version>1.1</version> <configuration> <module>com.calpano.goaltaxi</module> 
-						<runTarget>com.calpano.goaltaxi.rest.GoalTaxiApp</runTarget> </configuration> 
-						</plugin> -->
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
-
 
 </project>
