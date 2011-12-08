@@ -59,7 +59,7 @@ public class Wikisyntax {
 	 * __bold__ and ''italic''
 	 * </pre>
 	 * 
-	 * @param wikisyntax
+	 * @param wikisyntax never null
 	 * @return the resulting HTML
 	 */
 	public static String toHtml(String wikisyntax) {
