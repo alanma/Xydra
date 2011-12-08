@@ -42,6 +42,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>core</artifactId>
+			<type>test-jar</type>
+		</dependency>
+
+		<dependency>
 			<groupId>net.java.dev.javacc</groupId>
 			<artifactId>javacc</artifactId>
 			<version>5.0</version>
