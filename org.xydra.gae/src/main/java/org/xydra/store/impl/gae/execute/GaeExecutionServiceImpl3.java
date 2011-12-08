@@ -156,8 +156,6 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 		
 		assert change.getStatus().isCommitted() : "If we reach this line, change must be committed";
 		
-		// FIXME REENABLE revCache.writeToMemcache();
-		
 		log.info("[r"
 		        + change.rev
 		        + "] -> "
@@ -267,7 +265,6 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 				continue;
 			}
 			
-			// FIXME @Max: what to use here?
 			workingModel = EventUtils.applyEventNonDestructive(snapshot, workingModel,
 			        otherChange.getEvent());
 		}
@@ -376,22 +373,6 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 			for(Future<Key> future : res.getSecond()) {
 				FutureUtils.waitFor(future);
 			}
-			
-			// FIXME DEPRECATED: GaePersistence uses the this entity for
-			// getModelIds() and
-			// hasModel()
-			// XAtomicEvent first = events.get(0);
-			// XAtomicEvent last = events.get(events.size() - 1);
-			// if(last instanceof XRepositoryEvent && last.getChangeType() ==
-			// ChangeType.REMOVE) {
-			// FutureUtils.waitFor(InternalGaeXEntity.remove(this.modelAddr,
-			// change.getLocks()));
-			// } else if(first instanceof XRepositoryEvent &&
-			// first.getChangeType() == ChangeType.ADD) {
-			// FutureUtils
-			// .waitFor(InternalGaeModel.createModel(this.modelAddr,
-			// change.getLocks()));
-			// }
 			
 			change.giveUpIfTimeoutCritical();
 		} catch(VoluntaryTimeoutException vte) {

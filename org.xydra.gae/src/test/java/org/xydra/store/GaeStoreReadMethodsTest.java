@@ -13,6 +13,7 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.log.LoggerFactory;
 import org.xydra.log.gae.Log4jLoggerFactory;
+import org.xydra.log.util.Log4jUtils;
 import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
 
@@ -23,7 +24,7 @@ public class GaeStoreReadMethodsTest extends AbstractSecureStoreReadMethodsTest 
 	public static void init() {
 		// LoggerTestHelper.init();
 		LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
-		LogUtils.configureLog4j();
+		Log4jUtils.configureLog4j();
 	}
 	
 	@Override
