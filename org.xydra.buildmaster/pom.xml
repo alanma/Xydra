@@ -31,6 +31,10 @@
 		<module>../org.xydra.index/</module>
 		<!-- DONE -->
 
+		<!-- Depends on: .log -->
+		<module>../org.xydra.csv/</module>
+		<!-- DONE -->
+
 		<!-- Depends on .index, .log -->
 		<module>../org.xydra.textsearch/</module>
 		<!-- DONE -->
@@ -70,6 +74,10 @@
 		<!-- Documentation. Depends on: .core -->
 		<module>../org.xydra.doc/</module>
 		<!-- DONE -->
+		
+
+		<module>../org.xydra.google-analytics/</module>
+		
 
 		<!-- Experimental. Depends on: .core -->
 <!-- 		<module>../org.xydra.schema/</module>
