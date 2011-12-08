@@ -2,6 +2,8 @@ package org.xydra.googleanalytics.logsink;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.xydra.googleanalytics.FocusPoint;
 import org.xydra.googleanalytics.GaEvent;
@@ -17,6 +19,11 @@ import org.xydra.log.Logger;
  * events.
  * 
  * To avoid endless loops, this class uses no Logger itself.
+ * 
+ * Syntax for data logging via GA?key=val&...
+ * 
+ * Recognised key names are: 'category', 'action', 'label', and 'value'.
+ * Category and action are mandatory.
  * 
  * @author voelkel
  */
@@ -58,7 +65,7 @@ public class GALogListener implements ILogListener, UserInfo {
 	}
 	
 	@Override
-    public long get31BitId() {
+	public long get31BitId() {
 		return this.thirtyOneBitId;
 	}
 	
@@ -68,7 +75,7 @@ public class GALogListener implements ILogListener, UserInfo {
 	}
 	
 	@Override
-    public String getDomainName() {
+	public String getDomainName() {
 		return this.domainName;
 	}
 	
@@ -78,7 +85,7 @@ public class GALogListener implements ILogListener, UserInfo {
 	}
 	
 	@Override
-    public String getHostName() {
+	public String getHostName() {
 		InetAddress addr;
 		String hostname = "(not set)";
 		try {
@@ -107,12 +114,15 @@ public class GALogListener implements ILogListener, UserInfo {
 	// TODO document what would be a legal value and re-enable in UrchinCookie
 	// code
 	@Override
-    public String getVar() {
+	public String getVar() {
 		return null;
 	}
 	
 	@Override
 	public void info(Logger log, String msg) {
+		if(hasGaData(msg)) {
+			trackData(log, "info", msg);
+		}
 	}
 	
 	@Override
@@ -135,8 +145,41 @@ public class GALogListener implements ILogListener, UserInfo {
 		track(log, new GaEvent(logLevel, msg));
 	}
 	
+	/**
+	 * @param log ..
+	 * @param logLevel ..
+	 * @param msg must have format 'bla bla bla GA?key=val?key=val' (end)
+	 */
+	private void trackData(Logger log, String logLevel, String msg) {
+		assert hasGaData(msg);
+		String dataPart = msg.substring(msg.indexOf(GA_URI) + GA_URI.length());
+		Map<String,String> dataMap = parseQueryString(dataPart);
+		GaEvent gaEvent;
+		String category = dataMap.get("category");
+		assert category != null;
+		String action = dataMap.get("action");
+		assert action != null;
+		String optionalLabel = dataMap.get("label");
+		String optionalValue = dataMap.get("value");
+		int value = -1;
+		if(optionalValue != null) {
+			value = Integer.parseInt(optionalValue);
+		}
+		if(optionalLabel == null) {
+			gaEvent = new GaEvent(category, action);
+		} else {
+			if(value == -1) {
+				gaEvent = new GaEvent(category, action, optionalLabel);
+			} else {
+				gaEvent = new GaEvent(category, action, optionalLabel, value);
+			}
+		}
+		
+		track(log, gaEvent);
+	}
+	
 	private void track(Logger log, String logLevel, String msg, Throwable t) {
-		track(log, new GaEvent(logLevel, msg, t.getMessage()));
+		track(log, new GaEvent(logLevel, t.getClass().getCanonicalName(), t.getMessage()));
 	}
 	
 	@Override
@@ -147,6 +190,25 @@ public class GALogListener implements ILogListener, UserInfo {
 	@Override
 	public void warn(Logger log, String msg, Throwable t) {
 		trace(log, "info", t);
+	}
+	
+	public static final String GA_URI = "GA?";
+	
+	public static boolean hasGaData(String s) {
+		return s.contains(GA_URI);
+	}
+	
+	public static Map<String,String> parseQueryString(String q) {
+		Map<String,String> map = new HashMap<String,String>();
+		String[] pairs = q.split("\\&");
+		
+		for(String s : pairs) {
+			String[] parts = s.split("=");
+			String key = parts[0];
+			String value = parts.length > 1 ? parts[1] : null;
+			map.put(key, value);
+		}
+		return map;
 	}
 	
 }
