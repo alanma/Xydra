@@ -25,9 +25,9 @@ import org.xydra.store.AuthorisationException;
 import org.xydra.store.ConnectionException;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.InternalStoreException;
+import org.xydra.store.ModelRevision;
 import org.xydra.store.QuotaException;
 import org.xydra.store.RequestException;
-import org.xydra.store.ModelRevision;
 import org.xydra.store.TimeoutException;
 import org.xydra.store.XydraStore;
 import org.xydra.store.XydraStoreAdmin;
@@ -58,7 +58,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 	
 	private XAccessControlManager acm;
 	private XydraPersistence persistence;
-	private transient XID repoId;
+	private transient XID repoIdCached;
 	
 	/**
 	 * @param persistence used to persists data (who would have guessed that :-)
@@ -71,8 +71,13 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 			throw new IllegalArgumentException("Access Control Manager may not be null");
 		}
 		this.acm = acm;
-		// speed up
-		this.repoId = this.persistence.getRepositoryId();
+	}
+	
+	private XID getRepoId() {
+		if(this.repoIdCached == null) {
+			this.repoIdCached = this.persistence.getRepositoryId();
+		}
+		return this.repoIdCached;
 	}
 	
 	/**
@@ -129,9 +134,9 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 	}
 	
 	private void checkRepoId(XAddress address) {
-		if(!this.repoId.equals(address.getRepository())) {
+		if(!this.getRepoId().equals(address.getRepository())) {
 			throw new IllegalArgumentException("wrong repository ID: was " + address
-			        + " but expected " + this.repoId);
+			        + " but expected " + this.getRepoId());
 		}
 	}
 	
@@ -254,7 +259,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 		synchronized(this.persistence) {
 			for(XID modelId : this.persistence.getManagedModelIds()) {
 				ModelRevision modelRev = this.persistence.getModelRevision(XX.resolveModel(
-				        this.repoId, modelId));
+				        this.getRepoId(), modelId));
 				// TODO can see all models you can know about? Seems
 				// plausible.
 				// ~ max
@@ -366,14 +371,14 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 	
 	private XAddress getRepositoryAddress() {
 		// TODO cache it
-		return X.getIDProvider().fromComponents(this.repoId, null, null, null);
+		return X.getIDProvider().fromComponents(this.getRepoId(), null, null, null);
 	}
 	
 	@Override
 	public XID getRepositoryId(XID actorId, String passwordHash) {
 		assert actorId != null;
 		authorise(actorId, passwordHash);
-		return this.repoId;
+		return this.getRepoId();
 	}
 	
 	@Override
@@ -389,7 +394,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 	
 	@Override
 	public XID getRepositoryId() {
-		return this.repoId;
+		return this.getRepoId();
 	}
 	
 }
