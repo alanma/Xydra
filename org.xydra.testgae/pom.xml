@@ -6,47 +6,14 @@
 	<parent>
 		<groupId>org.xydra</groupId>
 		<artifactId>maven-root</artifactId>
-		<version>2011.01.22</version>
+		<version>2011.12.05</version>
 	</parent>
 
 	<groupId>org.xydra</groupId>
 	<artifactId>testgae</artifactId>
-	<version>0.1.4-SNAPSHOT</version>
+	<version>${xydra.version}</version>
 	<packaging>war</packaging>
 	<name>Xydra Test GAE</name>
-
-	<!-- Specify hard-coded project properties here -->
-	<properties>
-
-		<!-- This is just for "eclipse:eclipse" goal to always attempt downloading 
-			sources -->
-		<downloadSources>false</downloadSources>
-
-		<!-- Specify AppEngine version for your project. It should match SDK version 
-			pointed to by ${gae.home} property (Typically, one used by your Eclipse plug-in) -->
-		<gae.version>1.5.0.1</gae.version>
-		<!-- /!\ Must point to your local GAE/J installation -->
-		<gae.home>
-			${settings.localRepository}/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}
-        </gae.home>
-
-	</properties>
-
-	<pluginRepositories>
-
-		<pluginRepository>
-			<id>maven2-repository.dev.java.net</id>
-			<url>http://download.java.net/maven/2</url>
-			<layout>default</layout>
-		</pluginRepository>
-
-		<!-- Google App Engine (GAE) plugin repository -->
-		<pluginRepository>
-			<id>gae-plugin-repo</id>
-			<url>http://maven-gae-plugin.googlecode.com/svn/repository/</url>
-		</pluginRepository>
-
-	</pluginRepositories>
 
 	<repositories>
 		<!-- xydra repo -->
@@ -61,65 +28,18 @@
 				<checksumPolicy>fail</checksumPolicy>
 			</releases>
 		</repository>
-		<!-- xydra snapshots -->
-		<repository>
-			<id>xydra-snap</id>
-			<url>
-				https://xydra.googlecode.com/svn/snapshots
-			</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
-		<!-- For API VIZ -->
-		<repository>
-			<id>jboss.releases</id>
-			<name>JBoss releases</name>
-			<url>http://repository.jboss.org/maven2</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-
-		<!-- Java.net repo for wagon-svn -->
-		<repository>
-			<id>javanet-repo</id>
-			<url>
-				http://download.java.net/maven/2
-			</url>
-			<releases>
-				<enabled>true</enabled>
-				<updatePolicy>always</updatePolicy>
-				<checksumPolicy>fail</checksumPolicy>
-			</releases>
-		</repository>
-
-		<!-- for GAE stuff -->
-		<repository>
-			<id>gae-repo</id>
-			<url>http://maven-gae-plugin.googlecode.com/svn/repository/</url>
-		</repository>
-
-		<repository>
-			<id>maven2-repository.dev.java.net</id>
-			<url>http://download.java.net/maven/2</url>
-			<layout>default</layout>
-		</repository>
-
 	</repositories>
 
 	<dependencies>
 
 		<dependency>
 			<groupId>org.xydra</groupId>
+			<artifactId>csv</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.xydra</groupId>
 			<artifactId>gae</artifactId>
-			<version>0.1.4-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.google.gwt</groupId>
@@ -134,7 +54,6 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>gae</artifactId>
-			<version>0.1.4-SNAPSHOT</version>
 			<type>test-jar</type>
 			<exclusions>
 				<exclusion>
@@ -146,12 +65,6 @@
 					<artifactId>gwt-user</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>compile</scope>
 		</dependency>
 
 		<!-- Depend on tests in core as explained in -->
@@ -159,14 +72,12 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
-			<version>0.1.4-SNAPSHOT</version>
 			<type>test-jar</type>
 		</dependency>
 
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>restless</artifactId>
-			<version>0.1.4-SNAPSHOT</version>
 			<type>test-jar</type>
 		</dependency>
 
@@ -174,62 +85,20 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
-			<version>0.1.4-SNAPSHOT</version>
-		</dependency>
-
-
-
-		<!-- Google App Engine -->
-		<dependency>
-			<groupId>com.google.appengine</groupId>
-			<artifactId>appengine-api-1.0-sdk</artifactId>
-			<version>${gae.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.appengine</groupId>
-			<artifactId>appengine-api-labs</artifactId>
-			<version>${gae.version}</version>
-		</dependency>
-
-		<!-- J2EE Servlet API. We need it to compile IndexServlet class. You can 
-			probably remove it, if you don't explicitly use Servlets -->
-		<dependency>
-			<groupId>org.apache.geronimo.specs</groupId>
-			<artifactId>geronimo-servlet_2.5_spec</artifactId>
-			<version>1.2</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- GAE libraries for local testing as described here: http://code.google.com/appengine/docs/java/howto/unittesting.html -->
-
-		<dependency>
-			<groupId>com.google.appengine</groupId>
-			<artifactId>appengine-api-stubs</artifactId>
-			<version>${gae.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.google.appengine</groupId>
-			<artifactId>appengine-testing</artifactId>
-			<version>${gae.version}</version>
-			<scope>test</scope><!-- Don't ask -->
 		</dependency>
 
 		<!-- used by local Jetty and local AppEngine -->
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
-			<version>1.2.14</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.5.11</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.5.11</version>
 		</dependency>
 
 		<dependency>
@@ -239,85 +108,7 @@
 			<scope>test</scope>
 		</dependency>
 
-
-
 	</dependencies>
-
-	<build>
-
-		<!-- via https://wagon-svn.dev.java.net/ -->
-		<!-- <extensions> <extension> <groupId>org.jvnet.wagon-svn</groupId> <artifactId>wagon-svn</artifactId> 
-			<version>1.9</version> </extension> <extension> <groupId>org.apache.maven.wagon</groupId> 
-			<artifactId>wagon-ssh-external</artifactId> <version>1.0-beta-2</version> 
-			</extension> </extensions> -->
-		<plugins>
-
-			<!-- set encoding to something not platform dependent -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>2.3</version>
-				<configuration>
-					<encoding>UTF-8</encoding>
-				</configuration>
-			</plugin>
-
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>${maven.compiler.source}</source>
-					<target>${maven.compiler.target}</target>
-					<encoding>UTF-8</encoding>
-				</configuration>
-			</plugin>
-
-			<!-- Google App Engine (GAE) plugin -->
-			<plugin>
-				<groupId>net.kindleit</groupId>
-				<artifactId>maven-gae-plugin</artifactId>
-				<version>0.8.4</version>
-				<configuration>
-					<sdkDir>${gae.home}</sdkDir>
-				</configuration>
-			</plugin>
-
-			<!-- http://maven.apache.org/plugins/maven-war-plugin/ -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<version>2.1.1</version>
-				<configuration>
-					<!-- The file containing the webapp structure cache. Default value is: 
-						${project.build.directory}/war/work/webapp-cache.xml. -->
-					<cacheFile>${project.build.directory}/temp/webapp-cache.xml</cacheFile>
-
-					<!-- The directory for the generated WAR. Default value is: ${project.build.directory}. -->
-					<!-- <outputDirectory></outputDirectory> -->
-
-					<!-- The name of the generated WAR. Default value is: ${project.build.finalName}. -->
-					<!--<warName>war</warName> --><!-- Single directory for extra files to include in the WAR. This is 
-						where you place your JSP files. Default value is: ${basedir}/src/main/webapp. -->
-					<!-- <warSourceDirectory></warSourceDirectory> -->
-
-					<!-- The directory where the webapp is built. Default value is: ${project.build.directory}/${project.build.finalName}. --><!-- <webappDirectory>war</webappDirectory> -->
-					<packagingExcludes>
-						WEB-INF/lib/*-sources.jar,
-						WEB-INF/lib/gwt-dev-*.jar,
-						WEB-INF/lib/gwt-user-*.jar,
-						WEB-INF/lib/appengine-testing-*.jar,
-						WEB-INF/lib/appengine-api-stubs-*.jar,
-						WEB-INF/lib/geronimo*.jar,
-						WEB-INF/lib/appengine-tools-sdk*.jar
-					</packagingExcludes>
-				</configuration>
-			</plugin>
-
-
-		</plugins>
-	</build>
-
 
 	<distributionManagement>
 		<!-- Add this to settings.xml <server> <id>xydra-repo</id> <username>xamde</username> 
