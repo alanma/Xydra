@@ -45,6 +45,7 @@
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
 			<type>test-jar</type>
+			<scope>compile</scope>
 		</dependency>
 
 		<!-- RESTless -->
