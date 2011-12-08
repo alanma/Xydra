@@ -5,14 +5,14 @@
 
 	<groupId>org.xydra</groupId>
 	<artifactId>csv</artifactId>
-	<version>0.1.4-SNAPSHOT</version>
+	<version>${xydra.version}</version>
 	<packaging>jar</packaging>
 	<name>csv</name>
 
 	<parent>
 		<groupId>org.xydra</groupId>
 		<artifactId>maven-root</artifactId>
-		<version>2011.01.22</version>
+		<version>2011.12.05</version>
 	</parent>
 
 	<repositories>
@@ -27,30 +27,6 @@
 				<checksumPolicy>fail</checksumPolicy>
 			</releases>
 		</repository>
-		<repository>
-			<id>xydra-snap</id>
-			<url>
-				https://xydra.googlecode.com/svn/snapshots
-			</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</repository>
-		<!-- For API VIZ -->
-		<repository>
-			<id>jboss.releases</id>
-			<name>JBoss releases</name>
-			<url>http://repository.jboss.org/maven2</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
 	</repositories>
 
 
@@ -59,62 +35,15 @@
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>1.4</version>
 		</dependency>
 
 		<!-- logging dependencies -->
-
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
-			<version>0.1.4-SNAPSHOT</version>
-			<scope>compile</scope>
-		</dependency>
-
-		<!--  for LogConfManager -->
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.14</version>
-			<scope>compile</scope>
-		</dependency>
-
-		<!-- testing dependencies -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
 		</dependency>
 
 	</dependencies>
-
-	<pluginRepositories>
-		<pluginRepository>
-			<id>semweb4j-repo</id>
-			<name>Semweb4j.org maven repo</name>
-			<url>http://semweb4j.org/repo/</url>
-			<releases>
-				<enabled>true</enabled>
-				<updatePolicy>always</updatePolicy>
-				<checksumPolicy>fail</checksumPolicy>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</pluginRepository>
-		<pluginRepository>
-			<id>semweb4j-snapshots</id>
-			<name>Semweb4j.org maven snapshots</name>
-			<url>http://semweb4j.org/snapshots/</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-				<updatePolicy>always</updatePolicy>
-				<checksumPolicy>fail</checksumPolicy>
-			</snapshots>
-		</pluginRepository>
-	</pluginRepositories>
 
 	<distributionManagement>
 		<!-- Add this to settings.xml <server> <id>xydra-repo</id> <username>xamde</username> 
@@ -131,7 +60,7 @@
 		</snapshotRepository>
 		<site>
 			<id>xydra-site</id>
-			<url>scp://${xydra.site}/${artifactId}</url>
+			<url>scp://${xydra.site}/${project.artifactId}</url>
 		</site>
 	</distributionManagement>
 
