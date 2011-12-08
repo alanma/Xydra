@@ -59,12 +59,21 @@ public class PerformanceDataAnalyzer {
 	private static Integer[] range = new Integer[] { 8, 10, 16, 20, 32, 40, 64, 80, 128, 256, 512,
 	        1024 };
 	
+	private static boolean version2Exists;
+	
 	private enum Operations {
 		ADD, DELETE, EDIT
 	}
 	
 	public static void main(String args[]) {
 		fileName = "Evaluation" + System.currentTimeMillis() + ".html";
+		
+		// check if "Version2" is one of the versions
+		for(int i = 0; i < versions.length; i++) {
+			if(versions[i].equals("Version2")) {
+				version2Exists = true;
+			}
+		}
 		
 		/*
 		 * Evaluate the data of the single operation tests, like adding one
@@ -116,6 +125,8 @@ public class PerformanceDataAnalyzer {
 		stdev.setValue("", "Standard Deviation (ms)", true);
 		excep.setValue("", "Average Amount of Exceptions", true);
 		
+		int version2Operations = 0;
+		
 		for(int i = 0; i < versions.length; i++) {
 			CsvTable dataTable = new CsvTable(true);
 			CsvTable excepTable = new CsvTable(true);
@@ -131,6 +142,11 @@ public class PerformanceDataAnalyzer {
 				String currentLine = in.readLine();
 				int dataCount = 0;
 				int excepCount = 0;
+				
+				if(versions[i].equals("Version2")) {
+					String[] data = currentLine.split(",");
+					version2Operations = Integer.parseInt(data[3].replaceAll(" ", ""));
+				}
 				
 				while(currentLine != null) {
 					String[] csvData = currentLine.split(",");
@@ -192,10 +208,12 @@ public class PerformanceDataAnalyzer {
 			}
 			
 			HtmlTool.writeToHtml(results, null, fw);
-			
-			// TODO write logic to only display this if Version 2 is measured
-			fw.write("<b>Attention</b>: Averages etc. for Version 2 were measured over averages of 1000 operations. "
-			        + "Other Versions build their average over single exceutions of the given operation.");
+			if(version2Exists) {
+				fw.write("<b>Attention</b>: Averages etc. for Version 2 were measured over averages of "
+				        + version2Operations
+				        + " operations. "
+				        + "Other Versions build their average over single exceutions of the given operation.");
+			}
 			
 			fw.write("\n  <hr />  \n");
 			
@@ -213,6 +231,25 @@ public class PerformanceDataAnalyzer {
 		
 		String path = "/AddingMultipleWishesInTransaction";
 		
+		int version2Operations = 0;
+		
+		if(version2Exists) {
+			try {
+				BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + "Version2/" + path
+				        + "10.txt"));
+				
+				String currentLine = in.readLine();
+				
+				String[] data = currentLine.split(",");
+				version2Operations = Integer.parseInt(data[3].replaceAll(" ", ""));
+				
+				in.close();
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+			
+		}
+		
 		collectDataAndEvaluate(path, range, avgResults, stdevResults, excepResults);
 		
 		try {
@@ -222,6 +259,13 @@ public class PerformanceDataAnalyzer {
 			
 			fw.write("<h1> Adding Multiple Wishes </h1>");
 			
+			if(version2Exists) {
+				fw.write("<b>Attention</b>: Averages etc. for Version 2 were measured over averages of "
+				        + version2Operations
+				        + " operations. "
+				        + "Other Versions build their average over single exceutions of the given operation.");
+			}
+			
 			fw.write("<h3> Average Times </h3>");
 			HtmlTool.writeToHtml(avgResults, "0-X", fw);
 			fw.write("<h3> Standard Deviation of Averages </h3>");
@@ -229,9 +273,6 @@ public class PerformanceDataAnalyzer {
 			fw.write("<h3> Exceptions </h3>");
 			HtmlTool.writeToHtml(excepResults, "0-X", fw);
 			
-			// TODO write logic to only display this if Version 2 is measured
-			fw.write("<b>Attention</b>: Averages etc. for Version 2 were measured over averages of 1000 operations. "
-			        + "Other Versions build their average over single exceutions of the given operation.");
 			fw.write("\n  <hr />  \n");
 			
 			fw.close();
@@ -264,6 +305,25 @@ public class PerformanceDataAnalyzer {
 		
 		assert path != null;
 		
+		int version2Operations = 0;
+		
+		if(version2Exists) {
+			try {
+				BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + "Version2/" + path
+				        + "10.txt"));
+				
+				String currentLine = in.readLine();
+				
+				String[] data = currentLine.split(",");
+				version2Operations = Integer.parseInt(data[3].replaceAll(" ", ""));
+				
+				in.close();
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+			
+		}
+		
 		collectDataAndEvaluate(path, range, avgResults, stdevResults, excepResults);
 		
 		try {
@@ -288,6 +348,12 @@ public class PerformanceDataAnalyzer {
 			assert heading != null;
 			
 			fw.write(heading);
+			if(version2Exists) {
+				fw.write("<b>Attention</b>: Averages etc. for Version 2 were measured over averages of "
+				        + version2Operations
+				        + " operations. "
+				        + "Other Versions build their average over single exceutions of the given operation.");
+			}
 			
 			fw.write("<h3> Average Times </h3>");
 			HtmlTool.writeToHtml(avgResults, "0-X", fw);
@@ -296,9 +362,6 @@ public class PerformanceDataAnalyzer {
 			fw.write("<h3> Exceptions </h3>");
 			HtmlTool.writeToHtml(excepResults, "0-X", fw);
 			
-			// TODO write logic to only display this if Version 2 is measured
-			fw.write("<b>Attention</b>: Averages etc. for Version 2 were measured over averages of 1000 operations. "
-			        + "Other Versions build their average over single exceutions of the given operation.");
 			fw.write("\n  <hr />  \n");
 			
 			fw.close();
