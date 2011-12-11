@@ -1,0 +1,21 @@
+<!DOCTYPE module PUBLIC "//gwt-module/" "http://google-web-toolkit.googlecode.com/svn/tags/1.6.2/distro-source/core/src/gwt-module.dtd">
+<module>
+
+	<super-source path="emulate" />
+	
+	<!-- Inherit the core Web Toolkit stuff. -->
+	<inherits name='com.google.gwt.user.User'/>
+	
+	<!-- Inherit Xydra Logging -->
+	<inherits name='org.xydra.log.Xlog'/>
+	
+	<source path="">
+		<exclude name="**/*Test.java" />
+		<exclude name="**/Test*.java" />
+		<!-- Exclude java.io.File users -->
+		<exclude name="**/CsvTable.java" />
+		<exclude name="**/LatexMain.java" />
+		<exclude name="**/TableTools.java" />
+	</source>
+	
+</module>

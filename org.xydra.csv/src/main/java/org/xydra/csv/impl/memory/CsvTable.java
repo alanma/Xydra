@@ -21,7 +21,6 @@ import org.xydra.csv.ICsvTable;
 import org.xydra.csv.ICsvTableFactory;
 import org.xydra.csv.IReadableRow;
 import org.xydra.csv.IRow;
-import org.xydra.csv.IRowHandler;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
@@ -33,54 +32,16 @@ import org.xydra.log.LoggerFactory;
  * 
  * @author voelkel
  */
-public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable, ICsvTableFactory {
+public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactory {
 	
 	private static Logger log = LoggerFactory.getLogger(CsvTable.class);
 	
-	private static final String COLUMNNAME_ROW = "ROW";
-	
-	private static final String SEMICOLON = ";";
-	
-	/**
-	 * @param s
-	 * @param fieldLength number of characters to be used to write the filed,
-	 *            excess characters are truncated, missing characters are filled
-	 *            with spaces.
-	 * @return a String in LaTeX-safe encoding
-	 */
-	static String latexEncode(String s, int fieldLength) {
-		String s2 = s;
-		if(s == null) {
-			s2 = "";
-		} else if(s.equals("null")) {
-			s2 = "";
-		}
-		
-		while(s2.length() < fieldLength) {
-			s2 = " " + s2;
-		}
-		
-		return s2;
+	public CsvTable(boolean maintainColumnInsertionOrder) {
+		super(maintainColumnInsertionOrder);
 	}
-	
-	// TODO make setParam-able
-	private String defaultEncoding = "ISO-8859-1";
-	
-	private int readMaxRows = -1;
-	
-	private boolean splitWhenWritingLargeFiles = false;
 	
 	public CsvTable() {
 		super();
-	}
-	
-	/**
-	 * @param maintainColumnInsertionOrder if true, the insertion order of
-	 *            columns is maintained. If false, the default automatic
-	 *            alphabetic sorting is on.
-	 */
-	public CsvTable(boolean maintainColumnInsertionOrder) {
-		super(maintainColumnInsertionOrder);
 	}
 	
 	/**
@@ -138,26 +99,6 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable, I
 			tableRow.addAll(row);
 			row = csvReader.readDataRow();
 		}
-	}
-	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.ICsvTable#setParamReadMaxRows(int)
-	 */
-	@Override
-	public void setParamReadMaxRows(int readMaxRows) {
-		this.readMaxRows = readMaxRows;
-	}
-	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.ICsvTable#setParamSplitWhenWritingLargeFiles(boolean)
-	 */
-	@Override
-	public void setParamSplitWhenWritingLargeFiles(boolean b) {
-		this.splitWhenWritingLargeFiles = b;
 	}
 	
 	/*
@@ -388,15 +329,6 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable, I
 			}
 		}
 		w.write(SEMICOLON + "\n");
-	}
-	
-	@Override
-	public void writeTo(IRowHandler rowHandler) throws IOException {
-		rowHandler.handleHeaderRow(getColumnNames());
-		for(String rowName : this.rowNames) {
-			IRow row = this.getOrCreateRow(rowName, false);
-			rowHandler.handleRow(rowName, row);
-		}
 	}
 	
 	@Override

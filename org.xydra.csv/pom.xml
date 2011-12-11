@@ -42,6 +42,11 @@
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>log</artifactId>
+			<classifier>sources</classifier>
+		</dependency>
 
 	</dependencies>
 

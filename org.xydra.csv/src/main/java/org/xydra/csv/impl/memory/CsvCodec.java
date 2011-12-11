@@ -1,5 +1,10 @@
 package org.xydra.csv.impl.memory;
 
+/**
+ * @author xamde
+ * 
+ *         Runs in GWT
+ */
 public class CsvCodec {
 	
 	public static String excelDecode(String encoded) {
