@@ -89,7 +89,7 @@ public class CsvReader {
 		}
 		this.colNames = new ArrayList<String>(headers.length);
 		for(String s : headers) {
-			String decoded = CsvTable.excelDecode(s);
+			String decoded = CsvCodec.excelDecode(s);
 			this.colNames.add(decoded == null ? "" : decoded);
 		}
 		this.lineNumber = 1;
@@ -117,12 +117,12 @@ public class CsvReader {
 			}
 			
 			// prepare row
-			String rowName = CsvTable.excelDecode(datas[0]);
+			String rowName = CsvCodec.excelDecode(datas[0]);
 			row = new SingleRow(rowName);
 			for(int i = 1; i < this.colNames.size(); i++) {
 				try {
-					String value = CsvTable.excelDecode(datas[i]);
-					String colName = CsvTable.excelDecode(this.colNames.get(i));
+					String value = CsvCodec.excelDecode(datas[i]);
+					String colName = CsvCodec.excelDecode(this.colNames.get(i));
 					row.setValue(colName, value, true);
 				} catch(IllegalStateException e) {
 					throw new IllegalArgumentException("Line " + this.lineNumber

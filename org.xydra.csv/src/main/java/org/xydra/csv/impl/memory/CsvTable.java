@@ -41,46 +41,6 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable, I
 	
 	private static final String SEMICOLON = ";";
 	
-	public static String excelDecode(String encoded) {
-		if(encoded.equals("") || encoded.equals("\"\"")) {
-			return null;
-		}
-		
-		String decoded = encoded;
-		if(encoded.startsWith("\"") && encoded.endsWith("\"")) {
-			decoded = decoded.substring(1, encoded.length() - 1);
-		}
-		// unescape
-		decoded = decoded.replace("\"\"", "\"");
-		return decoded;
-	}
-	
-	/**
-	 * Use safe CSV encoding, that is, surround by " and escape all quotes.
-	 * 
-	 * Enclosing all fields in quotes is not strictly required, but lets Excel
-	 * open an CSV file with default settings without mangling e.g. dates.
-	 * 
-	 * @param value to be encoded
-	 */
-	public static String excelEncode(String value) {
-		if(value == null) {
-			return "\"\"";
-		}
-		
-		String escaped;
-		if(value.contains("\"")) {
-			escaped = value.replace("\"", "\"\"");
-		} else {
-			escaped = value;
-		}
-		
-		escaped = escaped.replace("\n", "§N");
-		escaped = escaped.replace("\r", "§R");
-		
-		return "\"" + escaped + "\"";
-	}
-	
 	/**
 	 * @param s
 	 * @param fieldLength number of characters to be used to write the filed,
@@ -400,12 +360,12 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable, I
 	}
 	
 	public static void writeHeaderRow(Writer w, Collection<String> columnNames) throws IOException {
-		w.write(excelEncode(COLUMNNAME_ROW));
+		w.write(CsvCodec.excelEncode(COLUMNNAME_ROW));
 		Iterator<String> colIt = columnNames.iterator();
 		int writtenCols = 0;
 		while(colIt.hasNext() && writtenCols < EXCEL_MAX_COLS) {
 			String columnName = colIt.next();
-			w.write(SEMICOLON + excelEncode(columnName));
+			w.write(SEMICOLON + CsvCodec.excelEncode(columnName));
 			writtenCols++;
 			if(writtenCols == EXCEL_MAX_COLS) {
 				log.warn("Reached Excels limit of " + EXCEL_MAX_COLS + " columns");
@@ -416,12 +376,12 @@ public class CsvTable extends SparseTable implements Iterable<Row>, ICsvTable, I
 	
 	public static void writeRow(Writer w, Collection<String> columnNames, String rowName,
 	        IReadableRow row) throws IOException {
-		w.write(excelEncode(rowName));
+		w.write(CsvCodec.excelEncode(rowName));
 		Iterator<String> colIt = columnNames.iterator();
 		int writtenCols = 0;
 		while(colIt.hasNext() && writtenCols < EXCEL_MAX_COLS) {
 			String columnName = colIt.next();
-			w.write(SEMICOLON + excelEncode(row.getValue(columnName)));
+			w.write(SEMICOLON + CsvCodec.excelEncode(row.getValue(columnName)));
 			writtenCols++;
 			if(writtenCols == EXCEL_MAX_COLS) {
 				log.warn("Reached Excels limit of " + EXCEL_MAX_COLS + " columns");
