@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.xydra.csv.IReadableRow;
@@ -29,46 +28,6 @@ public class CsvReader {
 		this.readMaxRows = readMaxRows;
 	}
 	
-	private static String[] splitAtUnquotedSemicolon(String line) {
-		boolean inQuote = false;
-		int index = 0;
-		List<String> result = new LinkedList<String>();
-		StringBuffer currentString = new StringBuffer();
-		while(index < line.length()) {
-			char c = line.charAt(index);
-			switch(c) {
-			case '\"': {
-				if(inQuote) {
-					inQuote = false;
-				} else {
-					inQuote = true;
-				}
-				currentString.append(c);
-			}
-				break;
-			case ';': {
-				if(inQuote) {
-					// just copy over
-					currentString.append(c);
-				} else {
-					// terminate current string
-					result.add(currentString.toString());
-					currentString = new StringBuffer();
-				}
-			}
-				break;
-			default: {
-				// just copy over
-				currentString.append(c);
-			}
-				break;
-			}
-			index++;
-		}
-		result.add(currentString.toString());
-		return result.toArray(new String[result.size()]);
-	}
-	
 	/**
 	 * @return the names of all header rows. These rows are used for subsequent
 	 *         calls.
@@ -83,7 +42,7 @@ public class CsvReader {
 			throw new IllegalArgumentException("CVS file has no content, not even headers");
 		}
 		// read header
-		String[] headers = splitAtUnquotedSemicolon(line);
+		String[] headers = CsvCodec.splitAtUnquotedSemicolon(line);
 		if(headers.length < 1) {
 			throw new IllegalArgumentException("Found no first column");
 		}
@@ -109,7 +68,7 @@ public class CsvReader {
 							 * maybe we have to limit the number of read lines
 							 */
 		(this.readMaxRows == -1 || this.lineNumber < this.readMaxRows)) {
-			String[] datas = splitAtUnquotedSemicolon(line);
+			String[] datas = CsvCodec.splitAtUnquotedSemicolon(line);
 			if(this.colNames.size() != datas.length) {
 				throw new IllegalArgumentException("Line " + this.lineNumber + ": Header length ("
 				        + this.colNames.size() + ") is different from data length (" + datas.length
