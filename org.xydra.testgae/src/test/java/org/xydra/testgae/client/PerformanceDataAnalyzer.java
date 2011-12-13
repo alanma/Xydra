@@ -28,7 +28,8 @@ import org.xydra.csv.impl.memory.CsvTable;
  */
 
 /*
- * TODO write mini-docu
+ * TODO Fix output of critical error table, check if it works correctly and
+ * create files for the critical error that were measured by hand
  */
 
 public class PerformanceDataAnalyzer {
@@ -120,10 +121,12 @@ public class PerformanceDataAnalyzer {
 		IRow avg = results.getOrCreateRow("avg", true);
 		IRow stdev = results.getOrCreateRow("stdev", true);
 		IRow excep = results.getOrCreateRow("Excep", true);
+		IRow critEr = results.getOrCreateRow("Critical Errors", true);
 		
 		avg.setValue("", "Average (ms)", true);
 		stdev.setValue("", "Standard Deviation (ms)", true);
 		excep.setValue("", "Average Amount of Exceptions", true);
+		critEr.setValue("", "Average Amount of Critical Errors (i.e 404)", true);
 		
 		int version2Operations = 0;
 		
@@ -131,6 +134,7 @@ public class PerformanceDataAnalyzer {
 			CsvTable dataTable = new CsvTable(true);
 			CsvTable excepTable = new CsvTable(true);
 			
+			int dataCount = 0;
 			try {
 				/*
 				 * Read data for the current version and write it in the CSV
@@ -140,7 +144,6 @@ public class PerformanceDataAnalyzer {
 				        + path + ".txt"));
 				
 				String currentLine = in.readLine();
-				int dataCount = 0;
 				int excepCount = 0;
 				
 				if(versions[i].equals("Version2")) {
@@ -188,6 +191,48 @@ public class PerformanceDataAnalyzer {
 			} catch(IOException e) {
 				e.printStackTrace();
 			}
+			
+			try {
+				BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + versions[i] + "/"
+				        + path + "CriticalErrors.txt"));
+				
+				/*
+				 * The file for the critical errors only contains the lines when
+				 * a critical errors happened, therefore the average amount of
+				 * cirital errors can be calculated by counting its number of
+				 * rows and dividing it by the amount of data (which was
+				 * measured in the previous block)
+				 */
+
+				String currentLine = in.readLine();
+				
+				int count = 0;
+				
+				while(currentLine != null) {
+					count++;
+					currentLine = in.readLine();
+				}
+				
+				critEr.setValue(versions[i], (double)(count) / dataCount, true);
+				
+				in.close();
+				
+			} catch(IOException e) {
+				if(versions[i].equals("Version2")) {
+					/*
+					 * critical errors weren't measured for version 2
+					 */
+					critEr.setValue(versions[i], "N/A", true);
+				} else {
+					/*
+					 * The file for critical errors is only created when one
+					 * happens, therefore if no such file exists, no critical
+					 * error happened
+					 */
+
+					critEr.setValue(versions[i], "0", true);
+				}
+			}
 		}
 		
 		try {
@@ -228,6 +273,7 @@ public class PerformanceDataAnalyzer {
 		CsvTable avgResults = new CsvTable(true);
 		CsvTable stdevResults = new CsvTable(true);
 		CsvTable excepResults = new CsvTable(true);
+		CsvTable critErResults = new CsvTable(true);
 		
 		String path = "/AddingMultipleWishesInTransaction";
 		
@@ -250,7 +296,7 @@ public class PerformanceDataAnalyzer {
 			
 		}
 		
-		collectDataAndEvaluate(path, range, avgResults, stdevResults, excepResults);
+		collectDataAndEvaluate(path, range, avgResults, stdevResults, excepResults, critErResults);
 		
 		try {
 			FileWriter fw = new FileWriter(new File(DIR_DATA + fileName), true);
@@ -272,6 +318,8 @@ public class PerformanceDataAnalyzer {
 			HtmlTool.writeToHtml(stdevResults, "0-X", fw);
 			fw.write("<h3> Exceptions </h3>");
 			HtmlTool.writeToHtml(excepResults, "0-X", fw);
+			fw.write("<h3> Critical Errors </h3>");
+			HtmlTool.writeToHtml(critErResults, "0-X", fw);
 			
 			fw.write("\n  <hr />  \n");
 			
@@ -287,6 +335,7 @@ public class PerformanceDataAnalyzer {
 		CsvTable avgResults = new CsvTable(true);
 		CsvTable stdevResults = new CsvTable(true);
 		CsvTable excepResults = new CsvTable(true);
+		CsvTable critErResults = new CsvTable(true);
 		
 		String path = null;
 		
@@ -324,7 +373,7 @@ public class PerformanceDataAnalyzer {
 			
 		}
 		
-		collectDataAndEvaluate(path, range, avgResults, stdevResults, excepResults);
+		collectDataAndEvaluate(path, range, avgResults, stdevResults, excepResults, critErResults);
 		
 		try {
 			FileWriter fw = new FileWriter(new File(DIR_DATA + fileName), true);
@@ -361,6 +410,8 @@ public class PerformanceDataAnalyzer {
 			HtmlTool.writeToHtml(stdevResults, "0-X", fw);
 			fw.write("<h3> Exceptions </h3>");
 			HtmlTool.writeToHtml(excepResults, "0-X", fw);
+			fw.write("<h3> Critical Errors </h3>");
+			HtmlTool.writeToHtml(critErResults, "0-X", fw);
 			
 			fw.write("\n  <hr />  \n");
 			
@@ -373,7 +424,7 @@ public class PerformanceDataAnalyzer {
 	
 	@SuppressWarnings("unchecked")
 	public static void collectDataAndEvaluate(String path, Integer[] range, CsvTable avgResults,
-	        CsvTable stdevResults, CsvTable excepResults) {
+	        CsvTable stdevResults, CsvTable excepResults, CsvTable critErResults) {
 		CsvTable dataTables[] = new CsvTable[versions.length];
 		CsvTable excepTables[] = new CsvTable[versions.length];
 		
@@ -391,6 +442,7 @@ public class PerformanceDataAnalyzer {
 			
 			for(int X : range) {
 				
+				int dataCount = 0;
 				try {
 					/*
 					 * Read data for the current version and write it in the CSV
@@ -400,7 +452,7 @@ public class PerformanceDataAnalyzer {
 					        + "/" + path + X + ".txt"));
 					
 					String currentLine = in.readLine();
-					int dataCount = 0;
+					
 					int excepCount = 0;
 					
 					while(currentLine != null) {
@@ -444,6 +496,51 @@ public class PerformanceDataAnalyzer {
 					
 				} catch(IOException e) {
 					e.printStackTrace();
+				}
+				
+				IRow critEr = critErResults.getOrCreateRow(X + " " + 0, true);
+				critEr.setValue("X", X, false);
+				
+				try {
+					BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + versions[i]
+					        + "/" + path + "CriticalErrors.txt"));
+					
+					/*
+					 * The file for the critical errors only contains the lines
+					 * when a critical errors happened, therefore the average
+					 * amount of cirital errors can be calculated by counting
+					 * its number of rows and dividing it by the amount of data
+					 * (which was measured in the previous block)
+					 */
+
+					String currentLine = in.readLine();
+					
+					int count = 0;
+					
+					while(currentLine != null) {
+						count++;
+						currentLine = in.readLine();
+					}
+					
+					critEr.setValue(versions[i], (double)(count) / dataCount, true);
+					
+					in.close();
+					
+				} catch(IOException e) {
+					if(versions[i].equals("Version2")) {
+						/*
+						 * critical errors weren't measured for version 2
+						 */
+						critEr.setValue(versions[i], "N/A", true);
+					} else {
+						/*
+						 * The file for critical errors is only created when one
+						 * happens, therefore if no such file exists, no
+						 * critical error happened
+						 */
+
+						critEr.setValue(versions[i], "0", true);
+					}
 				}
 			}
 			

@@ -191,8 +191,7 @@ public abstract class RemoteBenchmark {
 					System.out.println("deletingWishes: Failed addWish-GET-Request at iteration "
 					        + iteration + ", " + initialWishes
 					        + " initial wishes in DeleteWishes-Test");
-					this.outputCriticalErrors(filePath + "AddWishToEmptyList", iteration,
-					        initialWishes, 1);
+					this.outputCriticalErrors(filePath, iteration, initialWishes, 1);
 					return;
 				}
 				
@@ -258,7 +257,7 @@ public abstract class RemoteBenchmark {
 					        .println("editingWishes: Failed addWish-GET-Request at iteration "
 					                + iteration + ", " + initialWishes
 					                + " initial wishes in EditWish-Test");
-					this.outputCriticalErrors(filePath + "AddWishGet", iteration, initialWishes, 1);
+					this.outputCriticalErrors(filePath + initialWishes, iteration, initialWishes, 1);
 					return;
 				}
 				
@@ -276,7 +275,8 @@ public abstract class RemoteBenchmark {
 						System.out.println("editingWishes: Failed GET-Request at iteration "
 						        + iteration + ", " + initialWishes
 						        + " initial wishes while editing 1 wish");
-						this.outputCriticalErrors(filePath, iteration, initialWishes, 1);
+						this.outputCriticalErrors(filePath + initialWishes, iteration,
+						        initialWishes, 1);
 						return;
 					}
 				}
