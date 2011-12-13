@@ -67,19 +67,18 @@ public class ServletUtils {
 	public static void headersXhtmlViaConneg(HttpServletRequest req, HttpServletResponse res,
 	        int status, long cachingInMinutes) {
 		String chosenContentType = conneg(req);
-		headers(req, res, status, cachingInMinutes, chosenContentType);
+		headers(res, status, cachingInMinutes, chosenContentType);
 	}
 	
 	/**
-	 * @param req ..
 	 * @param res ..
 	 * @param status if 0 no header is set.
 	 * @param cachingInMinutes if 0 no header is set. If -1, caching is
 	 *            explicitly disabled via headers. Positive numbers are the time
 	 *            to cache the response in minutes.
 	 */
-	public static void headers(HttpServletRequest req, HttpServletResponse res, int status,
-	        long cachingInMinutes, String contentType) {
+	public static void headers(HttpServletResponse res, int status, long cachingInMinutes,
+	        String contentType) {
 		res.setCharacterEncoding("utf-8");
 		res.setContentType(contentType);
 		if(status > 0) {

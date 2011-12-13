@@ -78,6 +78,15 @@ public class HtmlUtils extends SharedHtmlUtils {
 		return w;
 	}
 	
+	public static Writer startHtmlPage(HttpServletResponse res, int statusCode, String title,
+	        HeadChild ... headChildren) throws IOException {
+		ServletUtils.headers(res, statusCode, -1, ServletUtils.CONTENTTYPE_TEXT_HTML);
+		Writer w = res.getWriter();
+		writeHtmlHeaderOpenBody(w, title, headChildren);
+		w.flush();
+		return w;
+	}
+	
 	public static void writeInTheMiddleOfAResponse(Writer w, String messageHtml, String redirectUrl)
 	        throws IOException {
 		w.write("<div style='" + "position:absolute; left:20px; top:20px;" + "z-index: 1000;"
