@@ -27,11 +27,6 @@ import org.xydra.csv.impl.memory.CsvTable;
  * 
  */
 
-/*
- * TODO Fix output of critical error table, check if it works correctly and
- * create files for the critical error that were measured by hand
- */
-
 public class PerformanceDataAnalyzer {
 	
 	/**
@@ -439,6 +434,7 @@ public class PerformanceDataAnalyzer {
 		for(int i = 0; i < versions.length; i++) {
 			dataTables[i] = new CsvTable(true);
 			excepTables[i] = new CsvTable(true);
+			boolean testNotExecuted = false;
 			
 			for(int X : range) {
 				
@@ -486,6 +482,8 @@ public class PerformanceDataAnalyzer {
 					 * this to the user.
 					 */
 
+					testNotExecuted = true;
+					
 					IRow dataRow = dataTables[i].getOrCreateRow(X + " " + 0, true);
 					dataRow.setValue("X", X, true);
 					dataRow.setValue("data", -1, true);
@@ -499,16 +497,16 @@ public class PerformanceDataAnalyzer {
 				}
 				
 				IRow critEr = critErResults.getOrCreateRow(X + " " + 0, true);
-				critEr.setValue("X", X, false);
+				critEr.setValue("0-X", X, false);
 				
 				try {
 					BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + versions[i]
-					        + "/" + path + "CriticalErrors.txt"));
+					        + "/" + path + X + "CriticalErrors.txt"));
 					
 					/*
 					 * The file for the critical errors only contains the lines
 					 * when a critical errors happened, therefore the average
-					 * amount of cirital errors can be calculated by counting
+					 * amount of critical errors can be calculated by counting
 					 * its number of rows and dividing it by the amount of data
 					 * (which was measured in the previous block)
 					 */
@@ -522,7 +520,17 @@ public class PerformanceDataAnalyzer {
 						currentLine = in.readLine();
 					}
 					
-					critEr.setValue(versions[i], (double)(count) / dataCount, true);
+					if(dataCount == 0) {
+						/*
+						 * No data was measured, but critical errors were
+						 * measured, hence every execution resulted in a
+						 * critical error
+						 */
+						critEr.setValue((i + 1) + "-" + versions[i], "1.0", true);
+					} else {
+						critEr.setValue((i + 1) + "-" + versions[i], round((double)(count)
+						        / dataCount), true);
+					}
 					
 					in.close();
 					
@@ -531,15 +539,31 @@ public class PerformanceDataAnalyzer {
 						/*
 						 * critical errors weren't measured for version 2
 						 */
-						critEr.setValue(versions[i], "N/A", true);
+						critEr.setValue((i + 1) + "-" + versions[i], "N/A", true);
 					} else {
-						/*
-						 * The file for critical errors is only created when one
-						 * happens, therefore if no such file exists, no
-						 * critical error happened
-						 */
+						if(testNotExecuted) {
+							/*
+							 * Test wasn't executed, so if no file for critical
+							 * errors exists data for critical errors wasn't
+							 * measured either (it might happen that not data
+							 * for average times etc., but critical error data
+							 * exists, for example when every execution of the
+							 * test fails with a critical error, the critical
+							 * error file will be written, whereas normal data
+							 * will never be written, since it can't be
+							 * measured)
+							 */
+							critEr.setValue((i + 1) + "-" + versions[i], "N/A", true);
+						} else {
+							/*
+							 * Test was executed and the file for critical
+							 * errors doesn't exist. The file is only created
+							 * when a critical error happens, therefore if no
+							 * such file exists, no critical error happened
+							 */
 
-						critEr.setValue(versions[i], "0", true);
+							critEr.setValue((i + 1) + "-" + versions[i], "0", true);
+						}
 					}
 				}
 			}
