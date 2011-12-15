@@ -1,14 +1,9 @@
 package org.xydra.testgae.client;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import org.junit.Test;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.testgae.shared.HttpUtils;
@@ -24,86 +19,68 @@ public abstract class RemoteBenchmark {
 	protected String absoluteUrl;
 	protected String path;
 	protected String currentRepo;
+	protected int iterations;
+	
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(HttpUtils.class);
 	final static String lineSeparator = System.getProperty("line.separator");
 	
-	@Test
 	public void testBenchmarkAddingOneWishOneThread() {
-		for(int i = 0; i < 20; i++) {
-			addingWishesOneThreadInTransaction(1, 1, "20-AddingOneWishOneThread20", i);
+		for(int i = 0; i < this.iterations; i++) {
+			addingWishesOneThreadInTransaction(1, 1, "AddingOneWishOneThread", i);
 		}
 	}
 	
-	@Test
 	public void testBenchmarkDeletingOneWishOneThread() {
-		for(int i = 0; i < 20; i++) {
-			deletingWishesOneThreadInTransaction(1, 0, "20-DeletingOneWishOneThread", i);
+		for(int i = 0; i < this.iterations; i++) {
+			deletingWishesOneThreadInTransaction(1, 0, "DeletingOneWishOneThread", i);
 		}
 	}
 	
-	@Test
 	public void testBenchmarkEditingOneWishOneThread() {
-		for(int i = 0; i < 20; i++) {
-			editingWishesOneThreadInTransaction(1, 0, "20-EditingOneWishOneThread", i);
+		for(int i = 0; i < this.iterations; i++) {
+			editingWishesOneThreadInTransaction(1, 0, "EditingOneWishOneThread", i);
 		}
 	}
 	
-	@Test
 	public void testAddingMultipleWishesInTransaction() {
-		for(int i = 0; i < 20; i++) {
-			System.out.println("Iteration: " + i);
+		for(int i = 0; i < this.iterations; i++) {
 			for(int X = 10; X <= 80; X *= 2) {
-				System.out.println("X = " + X);
-				addingWishesOneThreadInTransaction(X, 1, 0, "20-AddingMultipleWishesInTransaction"
-				        + X, i);
+				addingWishesOneThreadInTransaction(X, 1, 0,
+				        "AddingMultipleWishesInTransaction" + X, i);
 			}
 			
-			for(int X = 8; X <= 256; X *= 2) {
-				System.out.println("X = " + X);
-				addingWishesOneThreadInTransaction(X, 1, 0, "20-AddingMultipleWishesInTransaction"
-				        + X, i);
+			for(int X = 8; X <= 1024; X *= 2) {
+				addingWishesOneThreadInTransaction(X, 1, 0,
+				        "AddingMultipleWishesInTransaction" + X, i);
 			}
 		}
 	}
 	
-	@Test
 	public void testAddingWishesInTransactionWithInitialWishes() {
-		for(int i = 0; i < 20; i++) {
-			System.out.println("Iteration: " + i);
+		for(int i = 0; i < this.iterations; i++) {
 			for(int X = 10; X <= 80; X *= 2) {
-				System.out.println("X = " + X);
 				addingWishesOneThreadInTransaction(10, 1, X,
-				        "20-AddingWishesInTransactionWithInitialWishes" + X, i);
+				        "AddingWishesInTransactionWithInitialWishes" + X, i);
 			}
 			
-			// TODO Check 128,256, 512 and 1024 initial wishes again... seems
-			// like
-			// that's
-			// too much!
-			for(int X = 8; X < 128; X *= 2) {
-				System.out.println("X = " + X);
+			for(int X = 8; X <= 1024; X *= 2) {
 				addingWishesOneThreadInTransaction(10, 1, X,
-				        "20-AddingWishesInTransactionWithInitialWishes" + X, i);
+				        "AddingWishesInTransactionWithInitialWishes" + X, i);
 			}
 		}
 	}
 	
-	@Test
 	public void testBenchmarkEditingOneWishOneThreadWithInitialWishes() {
-		for(int i = 0; i < 20; i++) {
-			System.out.println("Iteration: " + i);
+		for(int i = 0; i < this.iterations; i++) {
 			for(int X = 10; X <= 80; X *= 2) {
-				System.out.println("X = " + X);
 				editingWishesOneThreadInTransaction(1, X,
-				        "20-EditingOneWishInTransactionWithInitialWishes" + X, i);
+				        "EditingOneWishInTransactionWithInitialWishes" + X, i);
 			}
 			
-			// TODO Check higher values
-			for(int X = 8; X <= 256; X *= 2) {
-				System.out.println("X = " + X);
+			for(int X = 8; X <= 1024; X *= 2) {
 				editingWishesOneThreadInTransaction(1, X,
-				        "20-EditingOneWishInTransactionWithInitialWishes" + X, i);
+				        "EditingOneWishInTransactionWithInitialWishes" + X, i);
 			}
 		}
 	}
@@ -221,9 +198,7 @@ public abstract class RemoteBenchmark {
 		}
 		
 		int successfulOperations = (operations - addExceptions);
-		if(successfulOperations == 0) {
-			fail();
-		}
+		
 		avgTime = avgTime / successfulOperations;
 		
 		// Output Results in a simple CSV format
@@ -346,7 +321,7 @@ public abstract class RemoteBenchmark {
 		} catch(Exception e) {
 			return null;
 		}
-		assertNotNull(response);
+		assert response != null;
 		
 		String[] lines = response.split("\n");
 		
@@ -360,9 +335,8 @@ public abstract class RemoteBenchmark {
 				found = true;
 			}
 		}
-		assertNotNull(list);
 		assert list != null;
-		assertTrue(list.startsWith("/xmas" + this.currentRepo + "/"));
+		assert list.startsWith("/xmas" + this.currentRepo + "/");
 		
 		return list;
 	}

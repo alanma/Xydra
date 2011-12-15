@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 
 import org.xydra.csv.HtmlTool;
 import org.xydra.csv.IRow;
@@ -19,7 +20,7 @@ import org.xydra.csv.impl.memory.CsvTable;
  * This is a little program which evaluates the data which was collected by
  * {@RemoteBenchmark}. {@RemoteBenchmark}
  * automatically stores the data in the right subfolders. Execute this program
- * like a normal program, the outpot will be stored in
+ * like a normal program, the output will be stored in
  * ./src/main/data/Performance/ with the file name "Evaluation" +
  * System.currentTimeMillis() + ".html".
  * 
@@ -33,14 +34,6 @@ public class PerformanceDataAnalyzer {
 	 * The directory which contains the data which is to be evaluated.
 	 */
 	public static final String DIR_DATA = "./src/main/data/Performance/";
-	
-	/**
-	 * This array contains the names of the versions which are to be evaluated.
-	 * The Strings have to corresponded with the folder names in which the data
-	 * of the specific version is saved. To remove/add a version from the
-	 * evaluation process, just remove/add the specific String to this array.
-	 */
-	private static String[] versions = { "Version2", "gae20111105", "gae20111105-20" };
 	
 	/**
 	 * The filename of the file containing the evaluation results (set in main()
@@ -62,6 +55,55 @@ public class PerformanceDataAnalyzer {
 	}
 	
 	public static void main(String args[]) {
+		evaluateBenchmark(new String[] { "Version2", "gae20111105", "gae20111105-20" });
+		
+		/*
+		 * 
+		 * Last url: "http://testgae20111105.xydra-live.appspot.com/logged";
+		 * 
+		 * Last label: "gae20111105-20";
+		 */
+
+	}
+	
+	/**
+	 * Runs and evaluates the benchmarks
+	 * 
+	 * @param versionUrl url of the current appengine version
+	 * @param versionLabel label for the version (will be used in the output and
+	 *            as foldername)
+	 * @param oldVersions array of old versions which measured data is to be
+	 *            compared with the new data
+	 * @param iterations number of iterations for the benchmarks
+	 */
+	
+	public static void runAndEvaluateBenchmark(String versionUrl, String versionLabel,
+	        String[] oldVersions, int iterations) {
+		
+		RemoteBenchmarkOnAppEngine benchmark = new RemoteBenchmarkOnAppEngine(versionUrl, DIR_DATA
+		        + versionLabel + "/", iterations);
+		
+		benchmark.executeAllBenchmarks();
+		
+		String versions[] = new String[oldVersions.length + 1];
+		
+		for(int i = 0; i < versions.length; i++) {
+			if(i < oldVersions.length) {
+				versions[i] = oldVersions[i];
+			} else {
+				versions[i] = versionLabel;
+			}
+		}
+		
+		evaluateBenchmark(versions);
+	}
+	
+	/**
+	 * Evaluates the measured data
+	 * 
+	 * @param versions array of versions of which the data is to be measured
+	 */
+	public static void evaluateBenchmark(String[] versions) {
 		fileName = "Evaluation" + System.currentTimeMillis() + ".html";
 		
 		// check if "Version2" is one of the versions
@@ -75,24 +117,24 @@ public class PerformanceDataAnalyzer {
 		 * Evaluate the data of the single operation tests, like adding one
 		 * single wish
 		 */
-		evaluateSingleOperationBenchmark(Operations.ADD);
-		evaluateSingleOperationBenchmark(Operations.DELETE);
-		evaluateSingleOperationBenchmark(Operations.EDIT);
+		evaluateSingleOperationBenchmark(versions, Operations.ADD);
+		evaluateSingleOperationBenchmark(versions, Operations.DELETE);
+		evaluateSingleOperationBenchmark(versions, Operations.EDIT);
 		
 		/*
 		 * Evaluate the "add multiple wishes in transaction" benchmark
 		 */
-		evaluateAddingMultipleWishes(range);
+		evaluateAddingMultipleWishes(versions, range);
 		
 		/*
 		 * Evaluate the "single operation with initial wishes" benchmarks
 		 */
-		evaluateSingleOperationWithInitialWishesBenchmarks(Operations.ADD, range);
-		evaluateSingleOperationWithInitialWishesBenchmarks(Operations.EDIT, range);
+		evaluateSingleOperationWithInitialWishesBenchmarks(versions, Operations.ADD, range);
+		evaluateSingleOperationWithInitialWishesBenchmarks(versions, Operations.EDIT, range);
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static void evaluateSingleOperationBenchmark(Operations op) {
+	public static void evaluateSingleOperationBenchmark(String[] versions, Operations op) {
 		CsvTable results = new CsvTable(true);
 		
 		String path = null;
@@ -117,11 +159,13 @@ public class PerformanceDataAnalyzer {
 		IRow stdev = results.getOrCreateRow("stdev", true);
 		IRow excep = results.getOrCreateRow("Excep", true);
 		IRow critEr = results.getOrCreateRow("Critical Errors", true);
+		IRow amount = results.getOrCreateRow("Amount of data", true);
 		
 		avg.setValue("", "Average (ms)", true);
 		stdev.setValue("", "Standard Deviation (ms)", true);
 		excep.setValue("", "Average Amount of Exceptions", true);
 		critEr.setValue("", "Average Amount of Critical Errors (i.e 404)", true);
+		amount.setValue("", "Amount of data", true);
 		
 		int version2Operations = 0;
 		
@@ -174,6 +218,7 @@ public class PerformanceDataAnalyzer {
 				
 				avg.setValue(versions[i], dataTarget.getValue("" + 0, "data" + "--average"), true);
 				stdev.setValue(versions[i], dataTarget.getValue("" + 0, "data" + "--stdev"), true);
+				amount.setValue(versions[i], dataCount, true);
 				
 				CsvTable excepTarget = new CsvTable();
 				TableTools.groupBy(excepTable, Arrays.asList("X"), Collections.EMPTY_LIST,
@@ -264,7 +309,7 @@ public class PerformanceDataAnalyzer {
 		
 	}
 	
-	public static void evaluateAddingMultipleWishes(Integer[] range) {
+	public static void evaluateAddingMultipleWishes(String[] versions, Integer[] range) {
 		CsvTable avgResults = new CsvTable(true);
 		CsvTable stdevResults = new CsvTable(true);
 		CsvTable excepResults = new CsvTable(true);
@@ -291,7 +336,8 @@ public class PerformanceDataAnalyzer {
 			
 		}
 		
-		collectDataAndEvaluate(path, range, avgResults, stdevResults, excepResults, critErResults);
+		collectDataAndEvaluate(versions, path, range, avgResults, stdevResults, excepResults,
+		        critErResults);
 		
 		try {
 			FileWriter fw = new FileWriter(new File(DIR_DATA + fileName), true);
@@ -325,8 +371,8 @@ public class PerformanceDataAnalyzer {
 		
 	}
 	
-	public static void evaluateSingleOperationWithInitialWishesBenchmarks(Operations op,
-	        Integer[] range) {
+	public static void evaluateSingleOperationWithInitialWishesBenchmarks(String[] versions,
+	        Operations op, Integer[] range) {
 		CsvTable avgResults = new CsvTable(true);
 		CsvTable stdevResults = new CsvTable(true);
 		CsvTable excepResults = new CsvTable(true);
@@ -368,7 +414,8 @@ public class PerformanceDataAnalyzer {
 			
 		}
 		
-		collectDataAndEvaluate(path, range, avgResults, stdevResults, excepResults, critErResults);
+		collectDataAndEvaluate(versions, path, range, avgResults, stdevResults, excepResults,
+		        critErResults);
 		
 		try {
 			FileWriter fw = new FileWriter(new File(DIR_DATA + fileName), true);
@@ -418,13 +465,16 @@ public class PerformanceDataAnalyzer {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static void collectDataAndEvaluate(String path, Integer[] range, CsvTable avgResults,
-	        CsvTable stdevResults, CsvTable excepResults, CsvTable critErResults) {
+	public static void collectDataAndEvaluate(String[] versions, String path, Integer[] range,
+	        CsvTable avgResults, CsvTable stdevResults, CsvTable excepResults,
+	        CsvTable critErResults) {
 		CsvTable dataTables[] = new CsvTable[versions.length];
 		CsvTable excepTables[] = new CsvTable[versions.length];
 		
 		CsvTable dataTargets[] = new CsvTable[versions.length];
 		CsvTable excepTargets[] = new CsvTable[versions.length];
+		
+		HashMap<Integer,Integer> dataCounts[] = new HashMap[versions.length];
 		
 		/*
 		 * write data in csv table for each version to calculate averages etc -
@@ -434,6 +484,7 @@ public class PerformanceDataAnalyzer {
 		for(int i = 0; i < versions.length; i++) {
 			dataTables[i] = new CsvTable(true);
 			excepTables[i] = new CsvTable(true);
+			dataCounts[i] = new HashMap<Integer,Integer>();
 			boolean testNotExecuted = false;
 			
 			for(int X : range) {
@@ -495,6 +546,8 @@ public class PerformanceDataAnalyzer {
 				} catch(IOException e) {
 					e.printStackTrace();
 				}
+				
+				dataCounts[i].put(X, dataCount);
 				
 				IRow critEr = critErResults.getOrCreateRow(X + " " + 0, true);
 				critEr.setValue("0-X", X, false);
@@ -629,6 +682,14 @@ public class PerformanceDataAnalyzer {
 					
 				} else {
 					avgResultRow.setValue(column + "-" + versions[i] + " (ms)", avgTimes[i], true);
+				}
+				
+				Integer dataCount = dataCounts[i].get(rowX);
+				System.out.println(dataCount);
+				if(dataCount == 0) {
+					avgResultRow.setValue(column + "-" + versions[i] + "- Amount", "N/A", true);
+				} else {
+					avgResultRow.setValue(column + "-" + versions[i] + "- Amount", dataCount, true);
 				}
 				
 				// Check whether stdev was correctly calculated

@@ -11,9 +11,24 @@ import org.junit.Before;
  */
 public class RemoteBenchmarkOnAppEngine extends RemoteBenchmark {
 	
+	public RemoteBenchmarkOnAppEngine(String absoluteUrl, String path, int iterations) {
+		this.absoluteUrl = absoluteUrl;
+		this.path = path;
+		this.iterations = iterations;
+	}
+	
+	public void executeAllBenchmarks() {
+		testBenchmarkAddingOneWishOneThread();
+		testBenchmarkDeletingOneWishOneThread();
+		testBenchmarkEditingOneWishOneThread();
+		testAddingMultipleWishesInTransaction();
+		testAddingWishesInTransactionWithInitialWishes();
+		testBenchmarkEditingOneWishOneThreadWithInitialWishes();
+		
+	}
+	
 	@Before
 	public void setup() {
-		this.absoluteUrl = "http://testgae20111105.xydra-live.appspot.com/logged";
-		this.path = "./PerformanceData/gae20111105-20/";
+		
 	}
 }
