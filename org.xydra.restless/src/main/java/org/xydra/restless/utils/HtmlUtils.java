@@ -87,8 +87,30 @@ public class HtmlUtils extends SharedHtmlUtils {
 		return w;
 	}
 	
-	public static void writeInTheMiddleOfAResponse(Writer w, String messageHtml, String redirectUrl)
-	        throws IOException {
+	/**
+	 * @param redirectUrl never null
+	 * @param redirectWaitMs >= 0
+	 * @return a script snippet
+	 */
+	public static String scriptRedirect(String redirectUrl, int redirectWaitMs) {
+		return "<script type='text/javascript'>\n" // .
+		        + "function redir() { \n" // .
+		        + "if( (window.location+'').indexOf('#error')==-1) { window.location = '"
+		        + redirectUrl + "#error" + "'; }\n" // .
+		        + "}\n" // .
+		        + "setTimeout('redir()'," + redirectWaitMs + ");\n"// .
+		        + "</script>\n";// .
+	}
+	
+	/**
+	 * @param w never null
+	 * @param messageHtml never null
+	 * @param redirectUrl never null
+	 * @param redirectWaitMs TODO
+	 * @throws IOException ...
+	 */
+	public static void writeInTheMiddleOfAResponse(Writer w, String messageHtml,
+	        String redirectUrl, int redirectWaitMs) throws IOException {
 		w.write("<div style='" + "position:absolute; left:20px; top:20px;" + "z-index: 1000;"
 		        + "padding: 10px;" + "background-color: #FFC;" + "font-family: sans-serif;"
 		        + "border: 1px solid #999;" + "max-width: 480px;" + "word-break: break-all;" +
@@ -111,11 +133,7 @@ public class HtmlUtils extends SharedHtmlUtils {
 
 		        + "' href='" + redirectUrl + "'>Oops. Click here to continue.</a><br/>");
 		w.write(messageHtml);
-		
-		w.write("<script type='text/javascript'>\n" + "function redir() { window.location = '"
-		        + redirectUrl + "'; }\n" + "setTimeout('redir()',5000);" + "</script>");
-		
-		// IMPROVE do automatic redirect after given time using plain js
+		w.write(scriptRedirect(redirectUrl, redirectWaitMs));
 		w.write("</div>");
 		w.flush();
 		HtmlUtils.endHtmlPage(w);
