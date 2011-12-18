@@ -44,9 +44,9 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	
 	private static final Logger log = LoggerFactory.getLogger(DiffWritableModel.class);
 	
-	private static final XID NONE = XX.toId("_NoId_DWModel");
+	static final XID NONE = XX.toId("_NoId_DWModel");
 	
-	private static final XValue NOVALUE = XV.toValue("_NoValue_DWModel");
+	static final XValue NOVALUE = XV.toValue("_NoValue_DWModel");
 	
 	/*
 	 * Each index has the structure (object, field, value) with the notion to
@@ -169,8 +169,10 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	}
 	
 	protected Set<XID> idsAsSet() {
-		return IndexUtils.diff(this.base.iterator(), this.added.key1Iterator(),
+		Set<XID> set = IndexUtils.diff(this.base.iterator(), this.added.key1Iterator(),
 		        this.removed.key1Iterator());
+		set.remove(NONE);
+		return set;
 	}
 	
 	@Override
@@ -260,6 +262,7 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 			set.add(entry.getKey2());
 		}
 		// done
+		set.remove(NONE);
 		return set;
 	}
 	

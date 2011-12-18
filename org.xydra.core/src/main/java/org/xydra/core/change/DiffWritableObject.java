@@ -206,16 +206,9 @@ public class DiffWritableObject implements XWritableObject {
 		}
 	}
 	
-	protected Set<XID> ids() {
-		Set<XID> set = toSet(this.base.iterator());
-		set.removeAll(toSet(this.removed.iterator()));
-		set.addAll(toSet(this.added.iterator()));
-		return set;
-	}
-	
 	@Override
 	public boolean isEmpty() {
-		return this.ids().isEmpty();
+		return this.fieldIds().isEmpty();
 	}
 	
 	protected boolean isEmpty(XID objectId) {
@@ -224,7 +217,7 @@ public class DiffWritableObject implements XWritableObject {
 	
 	@Override
 	public Iterator<XID> iterator() {
-		return this.ids().iterator();
+		return this.fieldIds().iterator();
 	}
 	
 	protected Iterator<XID> iterator(XID objectId) {
@@ -233,10 +226,10 @@ public class DiffWritableObject implements XWritableObject {
 	
 	protected Set<XID> fieldIds() {
 		Set<XID> set = new HashSet<XID>();
-		
 		set.addAll(toSet(this.base.iterator()));
 		set.removeAll(toSet(this.removed.iterator()));
 		set.addAll(toSet(this.added.iterator()));
+		set.remove(DiffWritableModel.NONE);
 		return set;
 	}
 	
