@@ -127,4 +127,8 @@ public class CsvCodec {
 		return sb.toString();
 	}
 	
+	// public static void main(String[] args) {
+	// System.out.println(excelDecodeRow(excelEncodeRow(Arrays.asList("\"a\"",
+	// null, "c"))));
+	// }
 }
