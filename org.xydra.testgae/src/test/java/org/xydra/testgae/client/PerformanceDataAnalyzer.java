@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -57,10 +58,18 @@ public class PerformanceDataAnalyzer {
 	public static void main(String args[]) {
 		final String[] oldVersions = new String[] { "Version2", "gae20111105", "gae20111105-20" };
 		
-		runAndEvaluateBenchmark("http://testgae20111219.xydra-live.appspot.com/", "20111219",
-		        oldVersions, 20);
+		String url = "http://testgae20111219.xydra-live.appspot.com/";
+		String newVersion = "20111219";
+		ArrayList<String> list = new ArrayList<String>();
+		list.add(newVersion);
+		for(String old : oldVersions) {
+			list.add(old);
+		}
+		final String[] allVersions = list.toArray(new String[0]);
 		
-		// evaluateBenchmark();
+		// runAndEvaluateBenchmark(url, newVersion, oldVersions, 20);
+		
+		evaluateBenchmark(allVersions);
 		
 		/*
 		 * 
