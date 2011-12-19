@@ -61,10 +61,11 @@ public class PerformanceDataAnalyzer {
 		String url = "http://testgae20111219.xydra-live.appspot.com/";
 		String newVersion = "20111219";
 		ArrayList<String> list = new ArrayList<String>();
-		list.add(newVersion);
+		
 		for(String old : oldVersions) {
 			list.add(old);
 		}
+		list.add(newVersion);
 		final String[] allVersions = list.toArray(new String[0]);
 		
 		// runAndEvaluateBenchmark(url, newVersion, oldVersions, 20);
@@ -230,16 +231,18 @@ public class PerformanceDataAnalyzer {
 				TableTools.groupBy(dataTable, Arrays.asList("X"), Collections.EMPTY_LIST,
 				        Arrays.asList("data"), Collections.EMPTY_LIST, dataTarget);
 				
-				avg.setValue(versions[i], dataTarget.getValue("" + 0, "data" + "--average"), true);
-				stdev.setValue(versions[i], dataTarget.getValue("" + 0, "data" + "--stdev"), true);
-				amount.setValue(versions[i], dataCount, true);
+				avg.setValue(i + "-" + versions[i], dataTarget.getValue("" + 0, "data"
+				        + "--average"), true);
+				stdev.setValue(i + "-" + versions[i], dataTarget.getValue("" + 0, "data"
+				        + "--stdev"), true);
+				amount.setValue(i + "-" + versions[i], dataCount, true);
 				
 				CsvTable excepTarget = new CsvTable();
 				TableTools.groupBy(excepTable, Arrays.asList("X"), Collections.EMPTY_LIST,
 				        Arrays.asList("data"), Collections.EMPTY_LIST, excepTarget);
 				
-				excep.setValue(versions[i], excepTarget.getValue("" + 0, "data" + "--average"),
-				        true);
+				excep.setValue(i + "-" + versions[i], excepTarget.getValue("" + 0, "data"
+				        + "--average"), true);
 				
 				in.close();
 			} catch(IOException e) {
@@ -267,7 +270,7 @@ public class PerformanceDataAnalyzer {
 					currentLine = in.readLine();
 				}
 				
-				critEr.setValue(versions[i], (double)(count) / dataCount, true);
+				critEr.setValue(i + "-" + versions[i], (double)(count) / dataCount, true);
 				
 				in.close();
 				
@@ -276,7 +279,7 @@ public class PerformanceDataAnalyzer {
 					/*
 					 * critical errors weren't measured for version 2
 					 */
-					critEr.setValue(versions[i], "N/A", true);
+					critEr.setValue(i + "-" + versions[i], "N/A", true);
 				} else {
 					/*
 					 * The file for critical errors is only created when one
@@ -284,7 +287,7 @@ public class PerformanceDataAnalyzer {
 					 * error happened
 					 */
 
-					critEr.setValue(versions[i], "0", true);
+					critEr.setValue(i + "-" + versions[i], "0", true);
 				}
 			}
 		}
