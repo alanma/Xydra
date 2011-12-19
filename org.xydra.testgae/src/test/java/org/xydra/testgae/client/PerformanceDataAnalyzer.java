@@ -57,7 +57,8 @@ public class PerformanceDataAnalyzer {
 	public static void main(String args[]) {
 		final String[] oldVersions = new String[] { "Version2", "gae20111105", "gae20111105-20" };
 		
-		runAndEvaluateBenchmark("", "20111219", oldVersions, 20);
+		runAndEvaluateBenchmark("http://testgae20111219.xydra-live.appspot.com/", "20111219",
+		        oldVersions, 20);
 		
 		// evaluateBenchmark();
 		

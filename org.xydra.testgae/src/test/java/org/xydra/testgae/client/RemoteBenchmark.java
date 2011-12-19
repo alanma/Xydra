@@ -1,6 +1,7 @@
 package org.xydra.testgae.client;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -278,8 +279,12 @@ public abstract class RemoteBenchmark {
 	        int successfulOps, double avgTime, int opExceps) {
 		// Output Results in a simple CSV format
 		try {
-			BufferedWriter out = new BufferedWriter(new FileWriter(this.path + filePath + ".txt",
-			        true));
+			File f = new File(this.path + filePath + ".txt");
+			if(!f.exists()) {
+				f.getParentFile().mkdirs();
+				f.createNewFile();
+			}
+			BufferedWriter out = new BufferedWriter(new FileWriter(f, true));
 			out.write("#Initial Wishes:, " + initialWishes + ", ");
 			out.write("#Operations:, " + operations + ", ");
 			out.write("#Wishes per Op.:, " + wishes + ", ");
@@ -297,8 +302,12 @@ public abstract class RemoteBenchmark {
 	private void outputCriticalErrors(String filePath, int iteration, int initialWishes, int wishes) {
 		// Output Results in a simple CSV format
 		try {
-			BufferedWriter out = new BufferedWriter(new FileWriter(this.path + filePath
-			        + "CriticalErrors.txt", true));
+			File f = new File(this.path + filePath + "CriticalErrors.txt");
+			if(!f.exists()) {
+				f.getParentFile().mkdirs();
+				f.createNewFile();
+			}
+			BufferedWriter out = new BufferedWriter(new FileWriter(f, true));
 			out.write("#Initial Wishes:, " + initialWishes + ", ");
 			out.write("#Wishes per Op.:, " + wishes + ", ");
 			out.write(lineSeparator);
