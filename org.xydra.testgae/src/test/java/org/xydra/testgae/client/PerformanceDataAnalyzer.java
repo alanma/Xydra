@@ -55,7 +55,11 @@ public class PerformanceDataAnalyzer {
 	}
 	
 	public static void main(String args[]) {
-		evaluateBenchmark(new String[] { "Version2", "gae20111105", "gae20111105-20" });
+		final String[] oldVersions = new String[] { "Version2", "gae20111105", "gae20111105-20" };
+		
+		runAndEvaluateBenchmark("", "20111219", oldVersions, 20);
+		
+		// evaluateBenchmark();
 		
 		/*
 		 * 
