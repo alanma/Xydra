@@ -1,7 +1,9 @@
 package org.xydra.testgae.client;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -16,72 +18,115 @@ import org.xydra.testgae.shared.HttpUtils;
  * @author xamde
  * 
  */
+
+/**
+ * TODO there's a lot of copied code -> refactor
+ * 
+ * TODO comment
+ */
 public abstract class RemoteBenchmark {
 	protected String absoluteUrl;
 	protected String path;
 	protected String currentRepo;
 	protected int iterations;
+	protected int maxAmount;
 	
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(HttpUtils.class);
 	final static String lineSeparator = System.getProperty("line.separator");
 	
 	public void testBenchmarkAddingOneWishOneThread() {
-		for(int i = 0; i < this.iterations; i++) {
-			addingWishesOneThreadInTransaction(1, 1, "AddingOneWishOneThread", i);
+		String fileName = "AddingOneWishOneThread";
+		
+		int amount = this.getAmountOfMeasuredData(fileName);
+		
+		for(int i = 0; i < this.iterations && (amount + i) < this.maxAmount; i++) {
+			addingWishesOneThreadInTransaction(1, 1, fileName, i);
 		}
 	}
 	
 	public void testBenchmarkDeletingOneWishOneThread() {
-		for(int i = 0; i < this.iterations; i++) {
-			deletingWishesOneThreadInTransaction(1, 0, "DeletingOneWishOneThread", i);
+		String fileName = "DeletingOneWishOneThread";
+		
+		int amount = this.getAmountOfMeasuredData(fileName);
+		
+		for(int i = 0; i < this.iterations && (amount + i) < this.maxAmount; i++) {
+			deletingWishesOneThreadInTransaction(1, 0, fileName, i);
 		}
 	}
 	
 	public void testBenchmarkEditingOneWishOneThread() {
-		for(int i = 0; i < this.iterations; i++) {
+		String fileName = "EditingOneWishOneThread";
+		
+		int amount = this.getAmountOfMeasuredData(fileName);
+		
+		for(int i = 0; i < this.iterations && (amount + i) < this.maxAmount; i++) {
 			editingWishesOneThreadInTransaction(1, 0, "EditingOneWishOneThread", i);
 		}
 	}
 	
 	public void testAddingMultipleWishesInTransaction() {
-		for(int i = 0; i < this.iterations; i++) {
-			for(int X = 10; X <= 80; X *= 2) {
-				addingWishesOneThreadInTransaction(X, 1, 0,
-				        "AddingMultipleWishesInTransaction" + X, i);
-			}
+		String fileName = "AddingMultipleWishesInTransaction";
+		
+		for(int X = 10; X <= 80; X *= 2) {
 			
-			for(int X = 8; X <= 1024; X *= 2) {
-				addingWishesOneThreadInTransaction(X, 1, 0,
-				        "AddingMultipleWishesInTransaction" + X, i);
+			int amount = this.getAmountOfMeasuredData(fileName + X);
+			
+			for(int i = 0; i < this.iterations && (amount + i) < this.maxAmount; i++) {
+				addingWishesOneThreadInTransaction(X, 1, 0, fileName + X, i);
+			}
+		}
+		
+		for(int X = 8; X <= 1024; X *= 2) {
+			
+			int amount = this.getAmountOfMeasuredData(fileName + X);
+			
+			for(int i = 0; i < this.iterations && (amount + i) < this.maxAmount; i++) {
+				addingWishesOneThreadInTransaction(X, 1, 0, fileName + X, i);
 			}
 		}
 	}
 	
 	public void testAddingWishesInTransactionWithInitialWishes() {
-		for(int i = 0; i < this.iterations; i++) {
-			for(int X = 10; X <= 80; X *= 2) {
-				addingWishesOneThreadInTransaction(10, 1, X,
-				        "AddingWishesInTransactionWithInitialWishes" + X, i);
-			}
+		String fileName = "AddingWishesInTransactionWithInitialWishes";
+		
+		for(int X = 10; X <= 80; X *= 2) {
 			
-			for(int X = 8; X <= 1024; X *= 2) {
-				addingWishesOneThreadInTransaction(10, 1, X,
-				        "AddingWishesInTransactionWithInitialWishes" + X, i);
+			int amount = this.getAmountOfMeasuredData(fileName + X);
+			
+			for(int i = 0; i < this.iterations && (amount + i) < this.maxAmount; i++) {
+				addingWishesOneThreadInTransaction(X, 1, 0, fileName + X, i);
+			}
+		}
+		
+		for(int X = 8; X <= 1024; X *= 2) {
+			
+			int amount = this.getAmountOfMeasuredData(fileName + X);
+			
+			for(int i = 0; i < this.iterations && (amount + i) < this.maxAmount; i++) {
+				addingWishesOneThreadInTransaction(X, 1, 0, fileName + X, i);
 			}
 		}
 	}
 	
 	public void testBenchmarkEditingOneWishOneThreadWithInitialWishes() {
-		for(int i = 0; i < this.iterations; i++) {
-			for(int X = 10; X <= 80; X *= 2) {
-				editingWishesOneThreadInTransaction(1, X,
-				        "EditingOneWishInTransactionWithInitialWishes" + X, i);
-			}
+		String fileName = "EditingOneWishInTransactionWithInitialWishes";
+		
+		for(int X = 10; X <= 80; X *= 2) {
 			
-			for(int X = 8; X <= 1024; X *= 2) {
-				editingWishesOneThreadInTransaction(1, X,
-				        "EditingOneWishInTransactionWithInitialWishes" + X, i);
+			int amount = this.getAmountOfMeasuredData(fileName + X);
+			
+			for(int i = 0; i < this.iterations && (amount + i) < this.maxAmount; i++) {
+				addingWishesOneThreadInTransaction(X, 1, 0, fileName + X, i);
+			}
+		}
+		
+		for(int X = 8; X <= 1024; X *= 2) {
+			
+			int amount = this.getAmountOfMeasuredData(fileName + X);
+			
+			for(int i = 0; i < this.iterations && (amount + i) < this.maxAmount; i++) {
+				addingWishesOneThreadInTransaction(X, 1, 0, fileName + X, i);
 			}
 		}
 	}
@@ -299,6 +344,26 @@ public abstract class RemoteBenchmark {
 		}
 	}
 	
+	private int getAmountOfMeasuredData(String filePath) {
+		try {
+			BufferedReader in = new BufferedReader(new FileReader(this.path + filePath + ".txt"));
+			
+			String currentLine = in.readLine();
+			int count = 0;
+			while(currentLine != null) {
+				count++;
+				currentLine = in.readLine();
+			}
+			
+			return count;
+			
+		} catch(IOException e) {
+			// no data measured
+			return 0;
+		}
+		
+	}
+	
 	private void outputCriticalErrors(String filePath, int iteration, int initialWishes, int wishes) {
 		// Output Results in a simple CSV format
 		try {
@@ -357,6 +422,9 @@ public abstract class RemoteBenchmark {
 		}
 		
 		String response = HttpUtils.getRequestAsStringResponse(listUrlStr + "?format=urls");
+		if(response == null) {
+			return null;
+		}
 		
 		String[] lines = response.split("\n");
 		
@@ -370,6 +438,9 @@ public abstract class RemoteBenchmark {
 		}
 		
 		String response = HttpUtils.getRequestAsStringResponse(listUrlStr + "?format=urls");
+		if(response == null) {
+			return null;
+		}
 		
 		String[] lines = response.split("\n");
 		

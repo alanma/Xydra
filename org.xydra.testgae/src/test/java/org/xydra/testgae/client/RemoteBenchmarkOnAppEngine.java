@@ -11,10 +11,11 @@ import org.junit.Before;
  */
 public class RemoteBenchmarkOnAppEngine extends RemoteBenchmark {
 	
-	public RemoteBenchmarkOnAppEngine(String absoluteUrl, String path, int iterations) {
+	public RemoteBenchmarkOnAppEngine(String absoluteUrl, String path, int iterations, int maxAmount) {
 		this.absoluteUrl = absoluteUrl;
 		this.path = path;
 		this.iterations = iterations;
+		this.maxAmount = maxAmount;
 	}
 	
 	public void executeAllBenchmarks() {

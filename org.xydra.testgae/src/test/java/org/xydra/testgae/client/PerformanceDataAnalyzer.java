@@ -68,7 +68,7 @@ public class PerformanceDataAnalyzer {
 		list.add(newVersion);
 		final String[] allVersions = list.toArray(new String[0]);
 		
-		// runAndEvaluateBenchmark(url, newVersion, oldVersions, 20);
+		runAndEvaluateBenchmark(url, newVersion, oldVersions, 20, 20);
 		
 		evaluateBenchmark(allVersions);
 		
@@ -90,13 +90,24 @@ public class PerformanceDataAnalyzer {
 	 * @param oldVersions array of old versions which measured data is to be
 	 *            compared with the new data
 	 * @param iterations number of iterations for the benchmarks
+	 * @param maxAmount maximum amount of data which is to be collected for the
+	 *            benchmarks. The benchmarks will first measure how much data
+	 *            was already collected, then check if the given maxAmount was
+	 *            already met/exceeded. If not, the benchmarks will be executed
+	 *            at most "iteration" times, while maxAmount is still the limit.
+	 * 
+	 *            For example, one benchmark already measured 4 sets of data,
+	 *            maxAmount is set to 10 and iterations is also set to ten. In
+	 *            this case, the given benchmark will only be executed 6 times
+	 *            (although iterations was set to 10), so the maxAmount limit is
+	 *            not exceeded.
 	 */
 	
 	public static void runAndEvaluateBenchmark(String versionUrl, String versionLabel,
-	        String[] oldVersions, int iterations) {
+	        String[] oldVersions, int iterations, int maxAmount) {
 		
 		RemoteBenchmarkOnAppEngine benchmark = new RemoteBenchmarkOnAppEngine(versionUrl, DIR_DATA
-		        + versionLabel + "/", iterations);
+		        + versionLabel + "/", iterations, maxAmount);
 		
 		benchmark.executeAllBenchmarks();
 		

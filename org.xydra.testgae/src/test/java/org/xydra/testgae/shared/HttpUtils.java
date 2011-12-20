@@ -68,12 +68,17 @@ public class HttpUtils {
 			in.close();
 			log.info("GOT CONTENT " + absoluteUrl + " " + content.length() + " chars");
 			return content;
+		} catch(AssertionError e) {
+			// for example if returned status is 500
+			return null;
 		} catch(Exception e) {
 			// In case of an unexpected exception you may want to abort
 			// the HTTP request in order to shut down the underlying
 			// connection immediately.
 			httpget.abort();
-			throw new RuntimeException("Failed on " + absoluteUrl, e);
+			log.info("Failed on " + absoluteUrl, e);
+			
+			return null;
 		}
 	}
 	
