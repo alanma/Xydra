@@ -169,6 +169,8 @@ public abstract class RemoteBenchmark {
 						        + iteration + ", " + initialWishes
 						        + " initial wishes while adding " + wishes + " wishes");
 						
+						this.outputResults(filePath, initialWishes, operations, initialWishes, 0,
+						        Double.NaN, 1);
 						this.outputCriticalErrors(filePath, iteration, initialWishes, wishes);
 						return;
 					}
@@ -214,6 +216,7 @@ public abstract class RemoteBenchmark {
 					System.out.println("deletingWishes: Failed addWish-GET-Request at iteration "
 					        + iteration + ", " + initialWishes
 					        + " initial wishes in DeleteWishes-Test");
+					this.outputResults(filePath, 0, operations, 1, 0, Double.NaN, 1);
 					this.outputCriticalErrors(filePath, iteration, initialWishes, 1);
 					return;
 				}
@@ -231,6 +234,7 @@ public abstract class RemoteBenchmark {
 						System.out.println("deletingWishes: Failed GET-Request at iteration "
 						        + iteration + ", " + initialWishes
 						        + " initial wishes while deleting 1 wish");
+						this.outputResults(filePath, 0, operations, 1, 0, Double.NaN, 1);
 						this.outputCriticalErrors(filePath, iteration, initialWishes, 1);
 						return;
 					}
@@ -278,6 +282,7 @@ public abstract class RemoteBenchmark {
 					        .println("editingWishes: Failed addWish-GET-Request at iteration "
 					                + iteration + ", " + initialWishes
 					                + " initial wishes in EditWish-Test");
+					this.outputResults(filePath, initialWishes, operations, 0, 0, Double.NaN, 1);
 					this.outputCriticalErrors(filePath + initialWishes, iteration, initialWishes, 1);
 					return;
 				}
@@ -296,6 +301,7 @@ public abstract class RemoteBenchmark {
 						System.out.println("editingWishes: Failed GET-Request at iteration "
 						        + iteration + ", " + initialWishes
 						        + " initial wishes while editing 1 wish");
+						this.outputResults(filePath, initialWishes, operations, 0, 0, Double.NaN, 1);
 						this.outputCriticalErrors(filePath + initialWishes, iteration,
 						        initialWishes, 1);
 						return;
