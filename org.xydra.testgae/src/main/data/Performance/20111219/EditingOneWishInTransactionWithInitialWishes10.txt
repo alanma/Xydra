@@ -9,3 +9,6 @@
 #Initial Wishes:, 10, #Operations:, 1, #Wishes per Op.:, 0, #Successful Operations:, 1, Average Time (ms):, 250.0, #Operation Exceptions:, 0, 
 #Initial Wishes:, 10, #Operations:, 1, #Wishes per Op.:, 0, #Successful Operations:, 1, Average Time (ms):, 407.0, #Operation Exceptions:, 0, 
 #Initial Wishes:, 10, #Operations:, 1, #Wishes per Op.:, 0, #Successful Operations:, 1, Average Time (ms):, 469.0, #Operation Exceptions:, 0, 
+#Initial Wishes:, 0, #Operations:, 1, #Wishes per Op.:, 10, #Successful Operations:, 1, Average Time (ms):, 1451.0, #Operation Exceptions:, 0, 
+#Initial Wishes:, 0, #Operations:, 1, #Wishes per Op.:, 10, #Successful Operations:, 1, Average Time (ms):, 729.0, #Operation Exceptions:, 0, 
+#Initial Wishes:, 0, #Operations:, 1, #Wishes per Op.:, 10, #Successful Operations:, 1, Average Time (ms):, 443.0, #Operation Exceptions:, 0, 
