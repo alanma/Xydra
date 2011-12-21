@@ -10,6 +10,7 @@ import java.io.IOException;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.testgae.shared.HttpUtils;
+import org.xydra.testgae.shared.Operations;
 
 
 /**
@@ -23,6 +24,7 @@ import org.xydra.testgae.shared.HttpUtils;
  * TODO there's a lot of copied code -> refactor
  * 
  * TODO comment
+ * 
  */
 public abstract class RemoteBenchmark {
 	protected String absoluteUrl;
@@ -30,54 +32,30 @@ public abstract class RemoteBenchmark {
 	protected String currentRepo;
 	protected int iterations;
 	protected int maxAmount;
+	protected Integer[] range;
 	
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(HttpUtils.class);
 	final static String lineSeparator = System.getProperty("line.separator");
 	
-	public void testBenchmarkAddingOneWishOneThread() {
-		String fileName = "AddingOneWishOneThread";
-		
-		int amount = this.getAmountOfMeasuredData(fileName);
-		
-		for(int i = 0; i < this.iterations && (amount + i) < this.maxAmount; i++) {
-			addingWishesOneThreadInTransaction(1, 1, fileName, i);
-		}
+	// - Benchmarks -
+	
+	public void benchmarkAddingOneWishOneThread() {
+		runSingleOperationBenchmark(Operations.ADD, "AddingOneWishOneThread");
 	}
 	
-	public void testBenchmarkDeletingOneWishOneThread() {
-		String fileName = "DeletingOneWishOneThread";
-		
-		int amount = this.getAmountOfMeasuredData(fileName);
-		
-		for(int i = 0; i < this.iterations && (amount + i) < this.maxAmount; i++) {
-			deletingWishesOneThreadInTransaction(1, 0, fileName, i);
-		}
+	public void benchmarkDeletingOneWishOneThread() {
+		runSingleOperationBenchmark(Operations.DELETE, "DeletingOneWishOneThread");
 	}
 	
-	public void testBenchmarkEditingOneWishOneThread() {
-		String fileName = "EditingOneWishOneThread";
-		
-		int amount = this.getAmountOfMeasuredData(fileName);
-		
-		for(int i = 0; i < this.iterations && (amount + i) < this.maxAmount; i++) {
-			editingWishesOneThreadInTransaction(1, 0, "EditingOneWishOneThread", i);
-		}
+	public void benchmarkEditingOneWishOneThread() {
+		runSingleOperationBenchmark(Operations.EDIT, "EditingOneWishOneThread");
 	}
 	
-	public void testAddingMultipleWishesInTransaction() {
+	public void benchmarkAddingMultipleWishesInTransaction() {
 		String fileName = "AddingMultipleWishesInTransaction";
 		
-		for(int X = 10; X <= 80; X *= 2) {
-			
-			int amount = this.getAmountOfMeasuredData(fileName + X);
-			
-			for(int i = 0; i < this.iterations && (amount + i) < this.maxAmount; i++) {
-				addingWishesOneThreadInTransaction(X, 1, 0, fileName + X, i);
-			}
-		}
-		
-		for(int X = 8; X <= 1024; X *= 2) {
+		for(int X : this.range) {
 			
 			int amount = this.getAmountOfMeasuredData(fileName + X);
 			
@@ -87,46 +65,68 @@ public abstract class RemoteBenchmark {
 		}
 	}
 	
-	public void testAddingWishesInTransactionWithInitialWishes() {
+	public void benchmarkAddingWishesInTransactionWithInitialWishes() {
 		String fileName = "AddingWishesInTransactionWithInitialWishes";
 		
-		for(int X = 10; X <= 80; X *= 2) {
+		for(int X : this.range) {
 			
 			int amount = this.getAmountOfMeasuredData(fileName + X);
 			
 			for(int i = 0; i < this.iterations && (amount + i) < this.maxAmount; i++) {
-				addingWishesOneThreadInTransaction(X, 1, 0, fileName + X, i);
-			}
-		}
-		
-		for(int X = 8; X <= 1024; X *= 2) {
-			
-			int amount = this.getAmountOfMeasuredData(fileName + X);
-			
-			for(int i = 0; i < this.iterations && (amount + i) < this.maxAmount; i++) {
-				addingWishesOneThreadInTransaction(X, 1, 0, fileName + X, i);
+				addingWishesOneThreadInTransaction(10, 1, X, fileName + X, i);
 			}
 		}
 	}
 	
-	public void testBenchmarkEditingOneWishOneThreadWithInitialWishes() {
+	public void benchmarkEditingOneWishOneThreadWithInitialWishes() {
 		String fileName = "EditingOneWishInTransactionWithInitialWishes";
 		
-		for(int X = 10; X <= 80; X *= 2) {
+		for(int X : this.range) {
 			
 			int amount = this.getAmountOfMeasuredData(fileName + X);
 			
 			for(int i = 0; i < this.iterations && (amount + i) < this.maxAmount; i++) {
-				addingWishesOneThreadInTransaction(X, 1, 0, fileName + X, i);
+				editingWishesOneThreadInTransaction(1, X, fileName + X, i);
 			}
 		}
+	}
+	
+	// - Benchmark Execution Code -
+	
+	public void runSingleOperationBenchmark(Operations operation, String fileName) {
+		int amount = this.getAmountOfMeasuredData(fileName);
 		
-		for(int X = 8; X <= 1024; X *= 2) {
+		for(int i = 0; i < this.iterations && (amount + i) < this.maxAmount; i++) {
+			switch(operation) {
+			case ADD:
+				addingWishesOneThreadInTransaction(1, 1, fileName, i);
+				break;
 			
+			case DELETE:
+				deletingWishesOneThreadInTransaction(1, 0, fileName, i);
+				break;
+			case EDIT:
+				editingWishesOneThreadInTransaction(1, 0, fileName, i);
+				break;
+			}
+		}
+	}
+	
+	public void testSingleOperationWithInitialWishes(Operations operation, String fileName) {
+		for(int X : this.range) {
 			int amount = this.getAmountOfMeasuredData(fileName + X);
 			
 			for(int i = 0; i < this.iterations && (amount + i) < this.maxAmount; i++) {
-				addingWishesOneThreadInTransaction(X, 1, 0, fileName + X, i);
+				switch(operation) {
+				case ADD:
+					addingWishesOneThreadInTransaction(10, 1, X, fileName + X, i);
+					break;
+				case DELETE:
+					break; // no such benchmark implemented at this time
+				case EDIT:
+					editingWishesOneThreadInTransaction(1, X, fileName + X, i);
+					break;
+				}
 			}
 		}
 	}
@@ -135,6 +135,9 @@ public abstract class RemoteBenchmark {
 	        int iteration) {
 		addingWishesOneThreadInTransaction(wishes, operations, 0, filePath, iteration);
 	}
+	
+	// TODO Maybe the following three benchmarks can be merged to one generic
+	// benchmark?
 	
 	public void addingWishesOneThreadInTransaction(int wishes, int operations, int initialWishes,
 	        String filePath, int iteration) {
@@ -157,23 +160,20 @@ public abstract class RemoteBenchmark {
 				long time = 0l;
 				boolean succGet = false;
 				
-				while(!succGet) {
+				time = System.currentTimeMillis();
+				succGet = (HttpUtils.makeGetRequest(this.absoluteUrl + listStr + "/add?wishes="
+				        + wishes));
+				time = System.currentTimeMillis() - time;
+				
+				if(!succGet) {
+					System.out.println("addingWishes: Failed GET-Request at iteration " + iteration
+					        + ", " + initialWishes + " initial wishes while adding " + wishes
+					        + " wishes");
 					
-					time = System.currentTimeMillis();
-					succGet = (HttpUtils.makeGetRequest(this.absoluteUrl + listStr + "/add?wishes="
-					        + wishes));
-					time = System.currentTimeMillis() - time;
-					
-					if(!succGet) {
-						System.out.println("addingWishes: Failed GET-Request at iteration "
-						        + iteration + ", " + initialWishes
-						        + " initial wishes while adding " + wishes + " wishes");
-						
-						this.outputResults(filePath, initialWishes, operations, initialWishes, 0,
-						        Double.NaN, 1);
-						this.outputCriticalErrors(filePath, iteration, initialWishes, wishes);
-						return;
-					}
+					this.outputResults(filePath, initialWishes, operations, initialWishes, 0,
+					        Double.NaN, 1);
+					this.outputCriticalErrors(filePath, iteration, initialWishes, wishes);
+					return;
 				}
 				
 				avgTime += time;
@@ -224,20 +224,17 @@ public abstract class RemoteBenchmark {
 				long time = 0l;
 				boolean succGet = false;
 				
-				while(!succGet) {
-					
-					time = System.currentTimeMillis();
-					succGet = HttpUtils.makeGetRequest(this.absoluteUrl + wishStr + "/delete");
-					time = System.currentTimeMillis() - time;
-					
-					if(!succGet) {
-						System.out.println("deletingWishes: Failed GET-Request at iteration "
-						        + iteration + ", " + initialWishes
-						        + " initial wishes while deleting 1 wish");
-						this.outputResults(filePath, 0, operations, 1, 0, Double.NaN, 1);
-						this.outputCriticalErrors(filePath, iteration, initialWishes, 1);
-						return;
-					}
+				time = System.currentTimeMillis();
+				succGet = HttpUtils.makeGetRequest(this.absoluteUrl + wishStr + "/delete");
+				time = System.currentTimeMillis() - time;
+				
+				if(!succGet) {
+					System.out.println("deletingWishes: Failed GET-Request at iteration "
+					        + iteration + ", " + initialWishes
+					        + " initial wishes while deleting 1 wish");
+					this.outputResults(filePath, 0, operations, 1, 0, Double.NaN, 1);
+					this.outputCriticalErrors(filePath, iteration, initialWishes, 1);
+					return;
 				}
 				
 				avgTime += time;
@@ -290,22 +287,18 @@ public abstract class RemoteBenchmark {
 				long time = 0l;
 				boolean succGet = false;
 				
-				while(!succGet) {
-					
-					time = System.currentTimeMillis();
-					succGet = HttpUtils.makeGetRequest(this.absoluteUrl + wishStr
-					        + "/editName?name=performanceTest");
-					time = System.currentTimeMillis() - time;
-					
-					if(!succGet) {
-						System.out.println("editingWishes: Failed GET-Request at iteration "
-						        + iteration + ", " + initialWishes
-						        + " initial wishes while editing 1 wish");
-						this.outputResults(filePath, initialWishes, operations, 0, 0, Double.NaN, 1);
-						this.outputCriticalErrors(filePath + initialWishes, iteration,
-						        initialWishes, 1);
-						return;
-					}
+				time = System.currentTimeMillis();
+				succGet = HttpUtils.makeGetRequest(this.absoluteUrl + wishStr
+				        + "/editName?name=performanceTest");
+				time = System.currentTimeMillis() - time;
+				
+				if(!succGet) {
+					System.out.println("editingWishes: Failed GET-Request at iteration "
+					        + iteration + ", " + initialWishes
+					        + " initial wishes while editing 1 wish");
+					this.outputResults(filePath, initialWishes, operations, 0, 0, Double.NaN, 1);
+					this.outputCriticalErrors(filePath + initialWishes, iteration, initialWishes, 1);
+					return;
 				}
 				
 				avgTime += time;

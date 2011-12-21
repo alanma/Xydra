@@ -15,6 +15,7 @@ import org.xydra.csv.HtmlTool;
 import org.xydra.csv.IRow;
 import org.xydra.csv.TableTools;
 import org.xydra.csv.impl.memory.CsvTable;
+import org.xydra.testgae.shared.Operations;
 
 
 /**
@@ -50,10 +51,6 @@ public class PerformanceDataAnalyzer {
 	        1024 };
 	
 	private static boolean version2Exists;
-	
-	private enum Operations {
-		ADD, DELETE, EDIT
-	}
 	
 	public static void main(String args[]) {
 		final String[] oldVersions = new String[] { "Version2", "gae20111105", "gae20111105-20" };
@@ -107,7 +104,7 @@ public class PerformanceDataAnalyzer {
 	        String[] oldVersions, int iterations, int maxAmount) {
 		
 		RemoteBenchmarkOnAppEngine benchmark = new RemoteBenchmarkOnAppEngine(versionUrl, DIR_DATA
-		        + versionLabel + "/", iterations, maxAmount);
+		        + versionLabel + "/", iterations, maxAmount, range);
 		
 		benchmark.executeAllBenchmarks();
 		
