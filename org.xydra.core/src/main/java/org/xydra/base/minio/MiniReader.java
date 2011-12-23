@@ -8,7 +8,15 @@ public interface MiniReader {
 	
 	int read();
 	
-	int read(char[] buffer, int pos, int i);
+	/**
+	 * @param cbuf Destination buffer
+	 * @param off Offset at which to start writing characters
+	 * @param len Maximum number of characters to read
+	 * 
+	 * @return The number of characters read, or -1 if the end of the stream has
+	 *         been reached
+	 */
+	int read(char[] cbuf, int off, int len);
 	
 	void mark(int maxValue);
 	

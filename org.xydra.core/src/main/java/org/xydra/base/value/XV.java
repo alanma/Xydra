@@ -570,4 +570,8 @@ public class XV {
 			stream.xid((XID)value);
 		}
 	}
+	
+	public static XValue toStringListValue(String ... strings) {
+		return toStringSetValue(strings);
+	}
 }
