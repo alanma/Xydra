@@ -1,6 +1,5 @@
 package org.xydra.testgae.client;
 
-import org.junit.Before;
 
 
 /**
@@ -11,9 +10,8 @@ import org.junit.Before;
  */
 public class RemoteBenchmarkOnLocalhost extends RemoteBenchmark {
 	
-	@Before
-	public void setup() {
-		this.absoluteUrl = "http://localhost:8787";
-		this.path = "local";
+	public RemoteBenchmarkOnLocalhost(String absoluteUrl, String path, int iterations,
+	        int maxAmount, Integer[] range) {
+		super(absoluteUrl, path, iterations, maxAmount, range);
 	}
 }
