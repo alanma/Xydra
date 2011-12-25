@@ -53,8 +53,9 @@ public class ReadCachingWritableRepository2 implements XWritableRepository {
 	 * Loads state much faster directly from snapshots.
 	 * 
 	 * @param persistence where to load snapshots from
+	 * @param prefetchModels TODO
 	 */
-	public ReadCachingWritableRepository2(XydraPersistence persistence) {
+	public ReadCachingWritableRepository2(XydraPersistence persistence, boolean prefetchModels) {
 		this.persistence = persistence;
 	}
 	

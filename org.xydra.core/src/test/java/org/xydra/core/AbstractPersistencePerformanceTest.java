@@ -107,7 +107,7 @@ public abstract class AbstractPersistencePerformanceTest {
 		
 		WritableRepositoryOnPersistence baseRepository = new WritableRepositoryOnPersistence(
 		        persistence, actorId);
-		RWCachingRepository repo = new RWCachingRepository(baseRepository, persistence);
+		RWCachingRepository repo = new RWCachingRepository(baseRepository, persistence, true);
 		
 		XWritableModel model = repo.createModel(modelId);
 		c.stopAndStart("add-model");
