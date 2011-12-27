@@ -26,7 +26,6 @@ import org.xydra.testgae.shared.Operations;
  * 
  * TODO comment
  * 
- * TODO how to use @link with protected variables?
  */
 public abstract class RemoteBenchmark {
 	
@@ -106,7 +105,8 @@ public abstract class RemoteBenchmark {
 	
 	/**
 	 * Benchmarks adding X wishes to an empty list in a transaction for all
-	 * values given in the {@link RemoteBenchmark#range} parameter
+	 * values given in the 'range'-parameter of the constructor
+	 * {@link RemoteBenchmark#RemoteBenchmark(String, String, int, int, Integer[])}
 	 */
 	public void benchmarkAddingMultipleWishesInTransaction() {
 		String fileName = "AddingMultipleWishesInTransaction";
@@ -123,8 +123,8 @@ public abstract class RemoteBenchmark {
 	
 	/**
 	 * Benchmarks adding one wish in a transaction to a list with X initial
-	 * wishes for all values X given in the {@link RemoteBenchmark#range}
-	 * parameter.
+	 * wishes for all values X given in the 'range'-parameter of the constructor
+	 * {@link RemoteBenchmark#RemoteBenchmark(String, String, int, int, Integer[])}
 	 */
 	public void benchmarkAddingWishesInTransactionWithInitialWishes() {
 		String fileName = "AddingWishesInTransactionWithInitialWishes";
@@ -133,8 +133,9 @@ public abstract class RemoteBenchmark {
 	
 	/**
 	 * Benchmarks editing one wish in a list with X initial wishes in a
-	 * transaction for all values X given in the {@link RemoteBenchmark#range}
-	 * parameter.
+	 * transaction for all values X given in the 'range'-parameter of the
+	 * constructor
+	 * {@link RemoteBenchmark#RemoteBenchmark(String, String, int, int, Integer[])}
 	 */
 	public void benchmarkEditingOneWishInTransactionWithInitialWishes() {
 		String fileName = "EditingOneWishInTransactionWithInitialWishes";
@@ -148,7 +149,7 @@ public abstract class RemoteBenchmark {
 	 * one single wish to an empty list" benchmark
 	 * {@link RemoteBenchmark#benchmarkAddingWishesInTransactionWithInitialWishes()}
 	 * 
-	 * @param operation the operation which "sinlge operation"-type benchmark is
+	 * @param operation the operation which "single operation"-type benchmark is
 	 *            to be executed
 	 * @param fileName the name of the file in which the measured data is to be
 	 *            saved
