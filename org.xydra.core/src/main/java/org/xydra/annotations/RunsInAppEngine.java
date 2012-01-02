@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
  * AppEngine has no notion of files.
  */
 @Retention(RetentionPolicy.SOURCE)
-@Target(ElementType.TYPE)
+@Target({ ElementType.TYPE, ElementType.METHOD })
 public @interface RunsInAppEngine {
 	boolean value();
 }

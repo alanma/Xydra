@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * GWT.
  */
 @Retention(RetentionPolicy.SOURCE)
-@Target(ElementType.TYPE)
+@Target({ ElementType.TYPE, ElementType.METHOD })
 public @interface RequiresAppEngine {
 	boolean value();
 }
