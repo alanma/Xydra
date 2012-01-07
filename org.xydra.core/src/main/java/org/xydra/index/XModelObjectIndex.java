@@ -16,15 +16,26 @@ import org.xydra.index.impl.MapSetIndex;
 
 public class XModelObjectIndex {
 	private XAddress address;
-	private IMapSetIndex<String,XAddress> objectIndex;
+	private XValueIndexer indexer;
 	
 	public XModelObjectIndex(XModel model) {
 		// TODO which kind of factory is best suited?
-		this.objectIndex = new MapSetIndex<String,XAddress>(new FastEntrySetFactory<XAddress>());
+		IMapSetIndex<String,XAddress> objectIndex = new MapSetIndex<String,XAddress>(
+		        new FastEntrySetFactory<XAddress>());
+		this.indexer = new SimpleValueIndexer(objectIndex);
+		
 		this.index(model);
 	}
 	
-	public void index(XModel model) {
+	public XModelObjectIndex(XModel model, XValueIndexer indexer) {
+		this.indexer = indexer;
+		
+		this.index(model);
+		
+	}
+	
+	// should only be executed once (document this!)
+	private void index(XModel model) {
 		if(this.address != null) {
 			this.address = model.getAddress();
 		} else {
@@ -41,10 +52,6 @@ public class XModelObjectIndex {
 	private void index(XObject object) {
 		XAddress objectAddress = object.getAddress();
 		for(XID fieldId : object) {
-			/*
-			 * TODO also check revision numbers of the fields? Maybe thats
-			 * slower than just going through their values?
-			 */
 			XField field = object.getField(fieldId);
 			index(objectAddress, field);
 		}
@@ -68,7 +75,12 @@ public class XModelObjectIndex {
 	
 	public void index(XAddress objectAddress, XField field) {
 		XValue value = field.getValue();
-		XValueIndexer.indexValue(this.objectIndex, objectAddress, value);
+		this.indexer.indexValue(objectAddress, value);
+	}
+	
+	public void deIndex(XAddress objectAddress, XField field) {
+		XValue value = field.getValue();
+		this.indexer.deIndexValue(objectAddress, value);
 	}
 	
 }

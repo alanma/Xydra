@@ -25,368 +25,314 @@ import org.xydra.base.value.XValue;
  * TODO Document
  */
 
-public class XValueIndexer {
+public abstract class XValueIndexer {
+	private IMapSetIndex<String,XAddress> index;
 	
-	public static void indexValue(IMapSetIndex<String,XAddress> index, XAddress address,
-	        XValue value) {
+	public XValueIndexer(IMapSetIndex<String,XAddress> index) {
+		this.index = index;
+	}
+	
+	public void indexValue(XAddress address, XValue value) {
 		switch(value.getType()) {
 		case Address:
-			indexAddress(index, address, (XAddress)value);
+			indexAddress(address, (XAddress)value);
 			break;
 		case AddressList: // Fall-Through
 		case AddressSet: // Fall-Through
 		case AddressSortedSet:
-			indexAddressArray(index, address, ((XAddressSortedSetValue)value).contents());
+			indexAddressArray(address, ((XAddressSortedSetValue)value).contents());
 			break;
 		case Boolean:
-			indexBoolean(index, address, ((XBooleanValue)value).contents());
+			indexBoolean(address, ((XBooleanValue)value).contents());
 			break;
 		case BooleanList:
-			indexBooleanArray(index, address, ((XBooleanListValue)value).contents());
+			indexBooleanArray(address, ((XBooleanListValue)value).contents());
 			break;
 		case ByteList:
-			indexByteArray(index, address, ((XByteListValue)value).contents());
+			indexByteArray(address, ((XByteListValue)value).contents());
 			break;
 		case Double:
-			indexDouble(index, address, ((XDoubleValue)value).contents());
+			indexDouble(address, ((XDoubleValue)value).contents());
 			break;
 		case DoubleList:
-			indexDoubleArray(index, address, ((XDoubleListValue)value).contents());
+			indexDoubleArray(address, ((XDoubleListValue)value).contents());
 			break;
 		case Id:
-			indexId(index, address, (XID)value);
+			indexId(address, (XID)value);
 			break;
 		case IdList:
-			indexIdArray(index, address, ((XIDListValue)value).contents());
+			indexIdArray(address, ((XIDListValue)value).contents());
 			break;
 		case IdSet:
-			indexIdArray(index, address, ((XIDSetValue)value).contents());
+			indexIdArray(address, ((XIDSetValue)value).contents());
 			break;
 		case IdSortedSet:
-			indexIdArray(index, address, ((XIDSortedSetValue)value).contents());
+			indexIdArray(address, ((XIDSortedSetValue)value).contents());
 			break;
 		case Integer:
-			indexInteger(index, address, ((XIntegerValue)value).contents());
+			indexInteger(address, ((XIntegerValue)value).contents());
 			break;
 		case IntegerList:
-			indexIntegerArray(index, address, ((XIntegerListValue)value).contents());
+			indexIntegerArray(address, ((XIntegerListValue)value).contents());
 			break;
 		case Long:
-			indexLong(index, address, ((XLongValue)value).contents());
+			indexLong(address, ((XLongValue)value).contents());
 			break;
 		case LongList:
-			indexLongArray(index, address, ((XLongListValue)value).contents());
+			indexLongArray(address, ((XLongListValue)value).contents());
 			break;
 		case String:
-			indexString(index, address, ((XStringValue)value).contents());
+			indexString(address, ((XStringValue)value).contents());
 			break;
 		case StringList:
-			indexStringArray(index, address, ((XStringListValue)value).contents());
+			indexStringArray(address, ((XStringListValue)value).contents());
 			break;
 		case StringSet:
-			indexStringArray(index, address, ((XStringSetValue)value).contents());
+			indexStringArray(address, ((XStringSetValue)value).contents());
 			break;
 		}
 	}
 	
-	public static void deIndexValue(IMapSetIndex<String,XAddress> index, XAddress address,
-	        XValue value) {
+	public void deIndexValue(XAddress address, XValue value) {
 		switch(value.getType()) {
 		case Address:
-			deIndexAddress(index, address, (XAddress)value);
+			deIndexAddress(address, (XAddress)value);
 			break;
 		case AddressList: // Fall-Through
 		case AddressSet: // Fall-Through
 		case AddressSortedSet:
-			deIndexAddressArray(index, address, ((XAddressSortedSetValue)value).contents());
+			deIndexAddressArray(address, ((XAddressSortedSetValue)value).contents());
 			break;
 		case Boolean:
-			deIndexBoolean(index, address, ((XBooleanValue)value).contents());
+			deIndexBoolean(address, ((XBooleanValue)value).contents());
 			break;
 		case BooleanList:
-			deIndexBooleanArray(index, address, ((XBooleanListValue)value).contents());
+			deIndexBooleanArray(address, ((XBooleanListValue)value).contents());
 			break;
 		case ByteList:
-			deIndexByteArray(index, address, ((XByteListValue)value).contents());
+			deIndexByteArray(address, ((XByteListValue)value).contents());
 			break;
 		case Double:
-			deIndexDouble(index, address, ((XDoubleValue)value).contents());
+			deIndexDouble(address, ((XDoubleValue)value).contents());
 			break;
 		case DoubleList:
-			deIndexDoubleArray(index, address, ((XDoubleListValue)value).contents());
+			deIndexDoubleArray(address, ((XDoubleListValue)value).contents());
 			break;
 		case Id:
-			deIndexId(index, address, (XID)value);
+			deIndexId(address, (XID)value);
 			break;
 		case IdList:
-			deIndexIdArray(index, address, ((XIDListValue)value).contents());
+			deIndexIdArray(address, ((XIDListValue)value).contents());
 			break;
 		case IdSet:
-			deIndexIdArray(index, address, ((XIDSetValue)value).contents());
+			deIndexIdArray(address, ((XIDSetValue)value).contents());
 			break;
 		case IdSortedSet:
-			deIndexIdArray(index, address, ((XIDSortedSetValue)value).contents());
+			deIndexIdArray(address, ((XIDSortedSetValue)value).contents());
 			break;
 		case Integer:
-			deIndexInteger(index, address, ((XIntegerValue)value).contents());
+			deIndexInteger(address, ((XIntegerValue)value).contents());
 			break;
 		case IntegerList:
-			deIndexIntegerArray(index, address, ((XIntegerListValue)value).contents());
+			deIndexIntegerArray(address, ((XIntegerListValue)value).contents());
 			break;
 		case Long:
-			deIndexLong(index, address, ((XLongValue)value).contents());
+			deIndexLong(address, ((XLongValue)value).contents());
 			break;
 		case LongList:
-			deIndexLongArray(index, address, ((XLongListValue)value).contents());
+			deIndexLongArray(address, ((XLongListValue)value).contents());
 			break;
 		case String:
-			deIndexString(index, address, ((XStringValue)value).contents());
+			deIndexString(address, ((XStringValue)value).contents());
 			break;
 		case StringList:
-			deIndexStringArray(index, address, ((XStringListValue)value).contents());
+			deIndexStringArray(address, ((XStringListValue)value).contents());
 			break;
 		case StringSet:
-			deIndexStringArray(index, address, ((XStringSetValue)value).contents());
+			deIndexStringArray(address, ((XStringSetValue)value).contents());
 			break;
 		}
 	}
 	
-	public static void indexStringArray(IMapSetIndex<String,XAddress> index, XAddress address,
-	        String[] values) {
+	public void indexStringArray(XAddress address, String[] values) {
 		for(String str : values) {
-			indexString(index, address, str);
+			indexString(address, str);
 		}
 	}
 	
-	public static void deIndexStringArray(IMapSetIndex<String,XAddress> index, XAddress address,
-	        String[] values) {
+	public void deIndexStringArray(XAddress address, String[] values) {
 		for(String str : values) {
-			deIndexString(index, address, str);
+			deIndexString(address, str);
 		}
 	}
 	
-	public static void indexLongArray(IMapSetIndex<String,XAddress> index, XAddress address,
-	        long[] values) {
+	public void indexLongArray(XAddress address, long[] values) {
 		for(long l : values) {
-			indexLong(index, address, l);
+			indexLong(address, l);
 		}
 	}
 	
-	public static void deIndexLongArray(IMapSetIndex<String,XAddress> index, XAddress address,
-	        long[] values) {
+	public void deIndexLongArray(XAddress address, long[] values) {
 		for(long l : values) {
-			deIndexLong(index, address, l);
+			deIndexLong(address, l);
 		}
 	}
 	
-	public static void indexLong(IMapSetIndex<String,XAddress> index, XAddress address, Long value) {
-		index.index(getLongIndexString(value), address);
+	public void indexLong(XAddress address, Long value) {
+		this.index.index(getLongIndexString(value), address);
 	}
 	
-	public static void deIndexLong(IMapSetIndex<String,XAddress> index, XAddress address, Long value) {
-		index.deIndex(getLongIndexString(value), address);
+	public void deIndexLong(XAddress address, Long value) {
+		this.index.deIndex(getLongIndexString(value), address);
 	}
 	
-	public static void indexIntegerArray(IMapSetIndex<String,XAddress> index, XAddress address,
-	        int[] values) {
+	public void indexIntegerArray(XAddress address, int[] values) {
 		for(Integer i : values) {
-			indexInteger(index, address, i);
+			indexInteger(address, i);
 		}
 	}
 	
-	public static void deIndexIntegerArray(IMapSetIndex<String,XAddress> index, XAddress address,
-	        int[] values) {
+	public void deIndexIntegerArray(XAddress address, int[] values) {
 		for(Integer i : values) {
-			deIndexInteger(index, address, i);
+			deIndexInteger(address, i);
 		}
 	}
 	
-	public static void indexInteger(IMapSetIndex<String,XAddress> index, XAddress address, int value) {
-		index.index(getIntegerIndexString(value), address);
+	public void indexInteger(XAddress address, int value) {
+		this.index.index(getIntegerIndexString(value), address);
 	}
 	
-	public static void deIndexInteger(IMapSetIndex<String,XAddress> index, XAddress address,
-	        int value) {
-		index.deIndex(getIntegerIndexString(value), address);
+	public void deIndexInteger(XAddress address, int value) {
+		this.index.deIndex(getIntegerIndexString(value), address);
 	}
 	
-	public static void indexIdArray(IMapSetIndex<String,XAddress> index, XAddress address,
-	        XID[] values) {
+	public void indexIdArray(XAddress address, XID[] values) {
 		for(XID id : values) {
-			indexId(index, address, id);
+			indexId(address, id);
 		}
 	}
 	
-	public static void deIndexIdArray(IMapSetIndex<String,XAddress> index, XAddress address,
-	        XID[] values) {
+	public void deIndexIdArray(XAddress address, XID[] values) {
 		for(XID id : values) {
-			deIndexId(index, address, id);
+			deIndexId(address, id);
 		}
 	}
 	
-	public static void indexDoubleArray(IMapSetIndex<String,XAddress> index, XAddress address,
-	        double[] values) {
+	public void indexDoubleArray(XAddress address, double[] values) {
 		for(Double d : values) {
-			indexDouble(index, address, d);
+			indexDouble(address, d);
 		}
 	}
 	
-	public static void deIndexDoubleArray(IMapSetIndex<String,XAddress> index, XAddress address,
-	        double[] values) {
+	public void deIndexDoubleArray(XAddress address, double[] values) {
 		for(Double d : values) {
-			deIndexDouble(index, address, d);
+			deIndexDouble(address, d);
 		}
 	}
 	
-	public static void indexDouble(IMapSetIndex<String,XAddress> index, XAddress address,
-	        double value) {
-		index.index(getDoubleIndexString(value), address);
+	public void indexDouble(XAddress address, double value) {
+		this.index.index(getDoubleIndexString(value), address);
 	}
 	
-	public static void deIndexDouble(IMapSetIndex<String,XAddress> index, XAddress address,
-	        double value) {
-		index.index(getDoubleIndexString(value), address);
+	public void deIndexDouble(XAddress address, double value) {
+		this.index.index(getDoubleIndexString(value), address);
 	}
 	
-	public static void indexByteArray(IMapSetIndex<String,XAddress> index, XAddress address,
-	        byte[] values) {
+	public void indexByteArray(XAddress address, byte[] values) {
 		for(Byte b : values) {
-			indexByte(index, address, b);
+			indexByte(address, b);
 		}
 	}
 	
-	public static void deIndexByteArray(IMapSetIndex<String,XAddress> index, XAddress address,
-	        byte[] values) {
+	public void deIndexByteArray(XAddress address, byte[] values) {
 		for(Byte b : values) {
-			deIndexByte(index, address, b);
+			deIndexByte(address, b);
 		}
 	}
 	
-	public static void indexByte(IMapSetIndex<String,XAddress> index, XAddress address, byte value) {
-		index.index(getByteIndexString(value), address);
+	public void indexByte(XAddress address, byte value) {
+		this.index.index(getByteIndexString(value), address);
 	}
 	
-	public static void deIndexByte(IMapSetIndex<String,XAddress> index, XAddress address, byte value) {
-		index.deIndex(getByteIndexString(value), address);
+	public void deIndexByte(XAddress address, byte value) {
+		this.index.deIndex(getByteIndexString(value), address);
 	}
 	
-	public static void indexBooleanArray(IMapSetIndex<String,XAddress> index, XAddress address,
-	        boolean[] values) {
+	public void indexBooleanArray(XAddress address, boolean[] values) {
 		for(Boolean b : values) {
-			indexBoolean(index, address, b);
+			indexBoolean(address, b);
 		}
 	}
 	
-	public static void deIndexBooleanArray(IMapSetIndex<String,XAddress> index, XAddress address,
-	        boolean[] values) {
+	public void deIndexBooleanArray(XAddress address, boolean[] values) {
 		for(Boolean b : values) {
-			deIndexBoolean(index, address, b);
+			deIndexBoolean(address, b);
 		}
 	}
 	
-	public static void indexBoolean(IMapSetIndex<String,XAddress> index, XAddress address,
-	        boolean value) {
-		index.index(getBooleanIndexString(value), address);
+	public void indexBoolean(XAddress address, boolean value) {
+		this.index.index(getBooleanIndexString(value), address);
 	}
 	
-	public static void deIndexBoolean(IMapSetIndex<String,XAddress> index, XAddress address,
-	        boolean value) {
-		index.deIndex(getBooleanIndexString(value), address);
+	public void deIndexBoolean(XAddress address, boolean value) {
+		this.index.deIndex(getBooleanIndexString(value), address);
 	}
 	
-	public static void indexString(IMapSetIndex<String,XAddress> index, XAddress address,
-	        String value) {
+	public void indexString(XAddress address, String value) {
 		for(String word : getStringIndexStrings(value)) {
-			index.index(word, address);
+			this.index.index(word, address);
 		}
 	}
 	
-	public static void deIndexString(IMapSetIndex<String,XAddress> index, XAddress address,
-	        String value) {
+	public void deIndexString(XAddress address, String value) {
 		for(String word : getStringIndexStrings(value)) {
-			index.deIndex(word, address);
+			this.index.deIndex(word, address);
 		}
 	}
 	
-	public static void indexId(IMapSetIndex<String,XAddress> index, XAddress address, XID id) {
-		index.index(getIdIndexString(id), address);
+	public void indexId(XAddress address, XID id) {
+		this.index.index(getIdIndexString(id), address);
 	}
 	
-	public static void deIndexId(IMapSetIndex<String,XAddress> index, XAddress address, XID id) {
-		index.deIndex(getIdIndexString(id), address);
+	public void deIndexId(XAddress address, XID id) {
+		this.index.deIndex(getIdIndexString(id), address);
 	}
 	
-	public static void indexAddressArray(IMapSetIndex<String,XAddress> index, XAddress address,
-	        XAddress[] values) {
+	public void indexAddressArray(XAddress address, XAddress[] values) {
 		for(XAddress adr : values) {
-			indexAddress(index, address, adr);
+			indexAddress(address, adr);
 		}
 	}
 	
-	public static void deIndexAddressArray(IMapSetIndex<String,XAddress> index, XAddress address,
-	        XAddress[] values) {
+	public void deIndexAddressArray(XAddress address, XAddress[] values) {
 		for(XAddress adr : values) {
-			deIndexAddress(index, address, adr);
+			deIndexAddress(address, adr);
 		}
 	}
 	
-	public static void indexAddress(IMapSetIndex<String,XAddress> index, XAddress address,
-	        XAddress value) {
-		index.index(getAddressIndexString(value), address);
+	public void indexAddress(XAddress address, XAddress value) {
+		this.index.index(getAddressIndexString(value), address);
 	}
 	
-	public static void deIndexAddress(IMapSetIndex<String,XAddress> index, XAddress address,
-	        XAddress value) {
-		index.deIndex(getAddressIndexString(value), address);
+	public void deIndexAddress(XAddress address, XAddress value) {
+		this.index.deIndex(getAddressIndexString(value), address);
 	}
 	
 	// ---- Methods returning the index strings ----
 	
-	/*
-	 * TODO Indexing is rather naive at the moment...
-	 */
-
-	public static String getLongIndexString(Long value) {
-		return "" + value;
-	}
+	public abstract String getLongIndexString(Long value);
 	
-	public static String getIntegerIndexString(Integer value) {
-		return "" + value;
-	}
+	public abstract String getIntegerIndexString(Integer value);
 	
-	public static String getDoubleIndexString(Double value) {
-		return "" + value;
-	}
+	public abstract String getDoubleIndexString(Double value);
 	
-	public static String getByteIndexString(Byte value) {
-		return "" + value;
-	}
+	public abstract String getByteIndexString(Byte value);
 	
-	public static String getBooleanIndexString(Boolean value) {
-		return "" + value;
-	}
+	public abstract String getBooleanIndexString(Boolean value);
 	
-	public static String[] getStringIndexStrings(String value) {
-		// TODO How to deal with punctuation marks etc? (is this the right
-		// regex?)
-		String[] words = value.split("\\W]");
-		String[] indexes = new String[words.length];
-		
-		for(int i = 0; i < indexes.length; i++) {
-			indexes[i] = words[i].toLowerCase();
-		}
-		
-		return indexes;
-	}
+	public abstract String[] getStringIndexStrings(String value);
 	
-	public static String getIdIndexString(XID value) {
-		return "" + value.toString();
-	}
+	public abstract String getIdIndexString(XID value);
 	
-	public static String getAddressIndexString(XAddress value) {
-		/*
-		 * TODO Maybe index the single IDs too?
-		 */
-		return "" + value.toString();
-	}
+	public abstract String getAddressIndexString(XAddress value);
 }
