@@ -119,7 +119,7 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 		XCommand command = X.getCommandFactory().createRemoveModelCommand(
 		        this.persistence.getRepositoryId(), modelId, XCommand.FORCED, true);
 		long commandResult = this.persistence.executeCommand(this.executingActorId, command);
-		assert commandResult >= 0;
+		assert commandResult >= 0 : commandResult;
 		return result;
 	}
 	
