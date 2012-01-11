@@ -1,4 +1,4 @@
-package org.xydra.index;
+package org.xydra.valueindex;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -19,6 +19,7 @@ import org.xydra.base.value.XStringListValue;
 import org.xydra.base.value.XStringSetValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XValue;
+import org.xydra.index.IMapSetIndex;
 
 
 /*

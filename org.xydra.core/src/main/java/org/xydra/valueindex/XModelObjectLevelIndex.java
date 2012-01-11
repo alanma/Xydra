@@ -1,4 +1,4 @@
-package org.xydra.index;
+package org.xydra.valueindex;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -12,6 +12,7 @@ import org.xydra.core.change.XModelEventListener;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
+import org.xydra.index.IMapSetIndex;
 import org.xydra.index.impl.FastEntrySetFactory;
 import org.xydra.index.impl.MapSetIndex;
 

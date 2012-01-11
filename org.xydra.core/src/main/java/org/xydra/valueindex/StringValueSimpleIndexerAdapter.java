@@ -1,7 +1,8 @@
-package org.xydra.index;
+package org.xydra.valueindex;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.index.IMapSetIndex;
 
 
 // TODO Document
