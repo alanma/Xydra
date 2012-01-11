@@ -16,6 +16,7 @@ import org.xydra.restless.Restless;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.SharedHtmlUtils.HeadLinkStyle;
 import org.xydra.store.impl.delegate.XydraPersistence;
+import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
 
 
@@ -30,6 +31,7 @@ public class DemoResource {
 	}
 	
 	public static void demo(HttpServletResponse res) throws IOException {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		Writer w = HtmlUtils.startHtmlPage(res, "Demo", new HeadLinkStyle("/s/xyadmin.css"));
 		w.write("Generating demodata...");
 		w.flush();

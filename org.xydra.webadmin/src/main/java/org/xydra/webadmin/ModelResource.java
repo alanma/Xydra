@@ -51,6 +51,7 @@ import org.xydra.server.util.XydraHtmlUtils;
 import org.xydra.store.ModelRevision;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.delegate.XydraPersistence;
+import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.impl.gae.changes.GaeChangesServiceImpl3;
 
 
@@ -96,6 +97,7 @@ public class ModelResource {
 	
 	public static void command(String repoIdStr, String modelIdStr, String cmdStr,
 	        HttpServletRequest req, HttpServletResponse res) {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		XydraRuntime.startRequest();
 		
 		Clock c = new Clock().start();
@@ -118,6 +120,7 @@ public class ModelResource {
 	
 	public static void index(String repoIdStr, String modelIdStr, String styleStr,
 	        String downloadStr, HttpServletRequest req, HttpServletResponse res) throws IOException {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		XydraRuntime.startRequest();
 		
 		Clock c = new Clock().start();
@@ -187,6 +190,7 @@ public class ModelResource {
 	
 	public static void update(String repoIdStr, String modelIdStr, HttpServletRequest req,
 	        HttpServletResponse res) throws IOException {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		XydraRuntime.startRequest();
 		
 		Clock c = new Clock().start();

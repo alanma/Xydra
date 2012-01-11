@@ -6,7 +6,8 @@
 	<groupId>org.xydra</groupId>
 	<artifactId>webadmin</artifactId>
 	<version>${xydra.version}</version>
-	<packaging>war</packaging>
+	<!-- 'war' for web deployment, 'jar' for maven deploy -->
+	<packaging>jar</packaging>
 	<name>Xydra Webadmin</name>
 
 	<parent>

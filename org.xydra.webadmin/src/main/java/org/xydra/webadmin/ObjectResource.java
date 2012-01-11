@@ -14,6 +14,7 @@ import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
 import org.xydra.server.util.XydraHtmlUtils;
 import org.xydra.store.impl.delegate.XydraPersistence;
+import org.xydra.store.impl.gae.GaeTestfixer;
 
 
 public class ObjectResource {
@@ -34,6 +35,7 @@ public class ObjectResource {
 	
 	public static void index(String repoIdStr, String modelIdStr, String objectIdStr, String style,
 	        HttpServletResponse res) throws IOException {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		XAddress objectAddress = XX.toAddress(XX.toId(repoIdStr), XX.toId(modelIdStr),
 		        XX.toId(objectIdStr), null);
 		Writer w = Utils.writeHeader(res, "Object", objectAddress);

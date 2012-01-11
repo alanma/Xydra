@@ -29,6 +29,7 @@ import org.xydra.restless.utils.SharedHtmlUtils.HeadLinkStyle;
 import org.xydra.restless.utils.SharedHtmlUtils.METHOD;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.delegate.XydraPersistence;
+import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.webadmin.ModelResource.MStyle;
 import org.xydra.webadmin.ModelResource.SetStateResult;
 
@@ -171,6 +172,7 @@ public class RepositoryResource {
 	 */
 	public static void index(String repoIdStr, String styleStr, HttpServletResponse res)
 	        throws IOException {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		XydraRuntime.startRequest();
 		log.trace("logtest: trace");
 		log.debug("logtest: debug");
@@ -242,6 +244,7 @@ public class RepositoryResource {
 	
 	public static void update(String repoIdStr, HttpServletRequest req, HttpServletResponse res)
 	        throws IOException {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		XydraRuntime.startRequest();
 		
 		Clock c = new Clock().start();
