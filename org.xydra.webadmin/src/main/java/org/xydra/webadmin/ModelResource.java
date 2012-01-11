@@ -144,7 +144,7 @@ public class ModelResource {
 				} else {
 					if(style == MStyle.xml | style == MStyle.xmlhtml) {
 						XmlSerializer serializer = new XmlSerializer();
-						ServletUtils.headers(req, res, 200, 1, serializer.getContentType());
+						ServletUtils.headers(res, 200, 1, serializer.getContentType());
 						Writer w = res.getWriter();
 						MiniWriter miniwriter = new MiniStreamWriter(w);
 						XydraOut out = serializer.create(miniwriter, false);
@@ -159,7 +159,7 @@ public class ModelResource {
 						SerializedModel.serialize(model, out);
 					} else if(style.equals("json")) {
 						JsonSerializer serializer = new JsonSerializer();
-						ServletUtils.headers(req, res, 200, 1, serializer.getContentType());
+						ServletUtils.headers(res, 200, 1, serializer.getContentType());
 						Writer w = res.getWriter();
 						serializeToWriter(model, serializer, w);
 					}
