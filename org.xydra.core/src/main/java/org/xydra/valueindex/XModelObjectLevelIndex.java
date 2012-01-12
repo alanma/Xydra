@@ -1,14 +1,14 @@
 package org.xydra.valueindex;
 
+import java.util.HashSet;
+
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.base.XX;
-import org.xydra.base.change.ChangeType;
-import org.xydra.base.change.XFieldEvent;
-import org.xydra.base.change.XModelEvent;
+import org.xydra.base.rmof.XReadableField;
+import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.value.XValue;
-import org.xydra.core.change.XFieldEventListener;
-import org.xydra.core.change.XModelEventListener;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
@@ -16,9 +16,6 @@ import org.xydra.index.IMapSetIndex;
 import org.xydra.index.impl.FastEntrySetFactory;
 import org.xydra.index.impl.MapSetIndex;
 
-
-// TODO implement listeners which can be registered on XModels to keep the
-// contents of the index up to date
 
 public class XModelObjectLevelIndex {
 	private XValueIndexer indexer;
@@ -63,7 +60,43 @@ public class XModelObjectLevelIndex {
 		}
 	}
 	
-	public void index(XField field) {
+	public void updateIndex(XReadableObject oldObject, XReadableObject newObject) {
+		XAddress address = oldObject.getAddress();
+		
+		if(!address.equals(newObject.getAddress())) {
+			throw new RuntimeException("oldObject and newObject do not have the same address.");
+		}
+		
+		if(newObject.getRevisionNumber() > oldObject.getRevisionNumber()) {
+			// objects changed
+			
+			HashSet<XID> intersection = new HashSet<XID>();
+			
+			for(XID id : oldObject) {
+				XReadableField oldField = oldObject.getField(id);
+				
+				if(newObject.hasField(id)) {
+					intersection.add(id);
+					
+					XReadableField newField = newObject.getField(id);
+					
+					updateIndexWithoutCheck(address, oldField, newField);
+				} else {
+					// field was completely removed
+					deIndex(address, oldField);
+				}
+			}
+			
+			for(XID id : newObject) {
+				if(!intersection.contains(id)) {
+					// field is new
+					index(address, newObject.getField(id));
+				}
+			}
+		}
+	}
+	
+	public void index(XReadableField field) {
 		XAddress fieldAddress = field.getAddress();
 		XAddress objectAddress = XX.resolveObject(fieldAddress.getRepository(),
 		        fieldAddress.getModel(), fieldAddress.getObject());
@@ -71,19 +104,48 @@ public class XModelObjectLevelIndex {
 		index(objectAddress, field);
 	}
 	
-	public void deIndex(XObject object) {
+	public void updateIndex(XAddress objectAddress, XReadableField oldField, XReadableField newField) {
+		XAddress address = oldField.getAddress();
+		
+		if(objectAddress.getAddressedType() != XType.XOBJECT) {
+			throw new RuntimeException("objectAddress is no valid Object-XAddress, but an "
+			        + objectAddress.getAddressedType() + "-Address.");
+		}
+		
+		if(!address.equals(newField.getAddress())) {
+			throw new RuntimeException("oldField and newField do not have the same address.");
+		}
+	}
+	
+	// TODO find better name
+	private void updateIndexWithoutCheck(XAddress objectAddress, XReadableField oldField,
+	        XReadableField newField) {
+		if(newField.getRevisionNumber() > oldField.getRevisionNumber()) {
+			// value of field was changed
+			deIndex(objectAddress, oldField);
+			index(objectAddress, newField);
+		}
+	}
+	
+	public void deIndex(XReadableObject object) {
 		XAddress objectAddress = object.getAddress();
 		for(XID fieldId : object) {
-			XField field = object.getField(fieldId);
+			XReadableField field = object.getField(fieldId);
 			deIndex(objectAddress, field);
 		}
 	}
 	
 	public void deIndexObjectByAddress(XAddress objectAddress) {
+		if(objectAddress.getAddressedType() != XType.XOBJECT) {
+			throw new RuntimeException("objectAddress is no valid Object-XAddress, but an "
+			        + objectAddress.getAddressedType() + "-Address.");
+		}
+		
+		// TODO implement
 		// this.indexer.deIndex(objectAddress);
 	}
 	
-	public void deIndex(XField field) {
+	public void deIndex(XReadableField field) {
 		XAddress fieldAddress = field.getAddress();
 		XAddress objectAddress = XX.resolveObject(fieldAddress.getRepository(),
 		        fieldAddress.getModel(), fieldAddress.getObject());
@@ -91,9 +153,26 @@ public class XModelObjectLevelIndex {
 		deIndex(objectAddress, field);
 	}
 	
-	public void index(XAddress objectAddress, XField field) {
+	public void index(XAddress objectAddress, XReadableField field) {
+		if(objectAddress.getAddressedType() != XType.XOBJECT) {
+			throw new RuntimeException("objectAddress is no valid Object-XAddress, but an "
+			        + objectAddress.getAddressedType() + "-Address.");
+		}
+		
 		XValue value = field.getValue();
 		this.indexer.indexValue(objectAddress, value);
+	}
+	
+	public void updateIndex(XAddress objectAddress, XValue oldValue, XValue newValue) {
+		if(objectAddress.getAddressedType() != XType.XOBJECT) {
+			throw new RuntimeException("objectAddress is no valid Object-XAddress, but an "
+			        + objectAddress.getAddressedType() + "-Address.");
+		}
+		
+		if(!oldValue.equals(newValue)) {
+			this.indexer.deIndexValue(objectAddress, oldValue);
+			this.indexer.indexValue(objectAddress, newValue);
+		}
 	}
 	
 	/*
@@ -101,55 +180,8 @@ public class XModelObjectLevelIndex {
 	 * another field which has the same value - how to handle this? Idea: Maybe
 	 * add a counter how often it was indexed?!
 	 */
-	public void deIndex(XAddress objectAddress, XField field) {
+	public void deIndex(XAddress objectAddress, XReadableField field) {
 		XValue value = field.getValue();
 		this.indexer.deIndexValue(objectAddress, value);
 	}
-	
-	public class XModelObjectLevelIndexModelEventListener implements XModelEventListener {
-		
-		@Override
-		public void onChangeEvent(XModelEvent event) {
-			ChangeType type = event.getChangeType();
-			
-			/*
-			 * Only the REMOVE-type is interesting, since adding an object adds
-			 * no new values and there is no CHANGE-/TRANSACTION-type event for
-			 * objects
-			 */
-			if(type == ChangeType.REMOVE) {
-				deIndexObjectByAddress(event.getChangedEntity());
-			}
-		}
-	}
-	
-	// TODO Document why no ObjectEventListener is needed
-	
-	public class XModelObjectLevelIndexFieldEventListener implements XFieldEventListener {
-		
-		@Override
-		public void onChangeEvent(XFieldEvent event) {
-			ChangeType type = event.getChangeType();
-			XAddress fieldAdr = event.getChangedEntity();
-			XAddress objectAdr = XX.resolveObject(fieldAdr.getRepository(), fieldAdr.getModel(),
-			        fieldAdr.getField());
-			XValue newValue = event.getNewValue();
-			
-			switch(type) {
-			case ADD:
-				XModelObjectLevelIndex.this.indexer.indexValue(objectAdr, newValue);
-				break;
-			case REMOVE:
-				/*
-				 * TODO How to handle removes? The event doesn't hold the old
-				 * value... Same goes for the change-type, because it also
-				 * involves a remove-op
-				 */
-			case CHANGE:
-			case TRANSACTION:
-				break;
-			}
-		}
-	}
-	
 }
