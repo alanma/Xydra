@@ -11,7 +11,8 @@ public class SimpleValueIndexer extends StringValueSimpleIndexerAdapter {
 		super(index);
 	}
 	
-	public String[] getStringIndexStrings(String value) {
+	@Override
+    public String[] getStringIndexStrings(String value) {
 		String[] words = value.split("[\\W]");
 		String[] indexes = new String[words.length];
 		

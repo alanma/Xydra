@@ -18,31 +18,38 @@ public abstract class StringValueSimpleIndexerAdapter extends XValueIndexer {
 	 * TODO Indexing is rather naive at the moment...
 	 */
 
-	public String getLongIndexString(Long value) {
+	@Override
+    public String getLongIndexString(Long value) {
 		return "" + value;
 	}
 	
-	public String getIntegerIndexString(Integer value) {
+	@Override
+    public String getIntegerIndexString(Integer value) {
 		return "" + value;
 	}
 	
-	public String getDoubleIndexString(Double value) {
+	@Override
+    public String getDoubleIndexString(Double value) {
 		return "" + value;
 	}
 	
-	public String getByteIndexString(Byte value) {
+	@Override
+    public String getByteIndexString(Byte value) {
 		return "" + value;
 	}
 	
-	public String getBooleanIndexString(Boolean value) {
+	@Override
+    public String getBooleanIndexString(Boolean value) {
 		return "" + value;
 	}
 	
-	public String getIdIndexString(XID value) {
+	@Override
+    public String getIdIndexString(XID value) {
 		return "" + value.toString();
 	}
 	
-	public String getAddressIndexString(XAddress value) {
+	@Override
+    public String getAddressIndexString(XAddress value) {
 		/*
 		 * TODO Maybe index the single IDs too?
 		 */
