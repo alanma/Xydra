@@ -112,7 +112,7 @@ public class ConsistencyTestResource {
 		InstanceContext.clearThreadContext();
 		c.stopAndStart("init");
 		// FIXME next 3 lines takes 98% of CPU time
-		RWCachingRepository repo = new RWCachingRepository(nakedRepo, persistence);
+		RWCachingRepository repo = new RWCachingRepository(nakedRepo, persistence, true);
 		c.stopAndStart("prefetch");
 		XWritableModel model = repo.createModel(ctId);
 		c.stopAndStart("create-model");
