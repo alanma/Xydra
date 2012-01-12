@@ -95,6 +95,7 @@ public class ModelResource {
 		
 	}
 	
+	@SuppressWarnings("unused")
 	public static void command(String repoIdStr, String modelIdStr, String cmdStr,
 	        HttpServletRequest req, HttpServletResponse res) {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
