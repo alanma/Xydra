@@ -99,36 +99,6 @@
 
 	</dependencies>
 
-	<build>
-
-		<plugins>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<!-- This execution copies the war folder to the gwt transient output 
-						directory -->
-					<execution>
-						<id>war-folder-creation</id>
-						<phase>process-resources</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<tasks>
-								<copy todir="${gwt.output.directory}">
-									<fileset dir="${basedir}/src/main/webapp" />
-								</copy>
-							</tasks>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
-		</plugins>
-	</build>
-
 	<distributionManagement>
 		<!-- Add this to settings.xml <server> <id>xydra-repo</id> <username>xamde</username> 
 			<password>********</password> </server> <server> <id>xydra-snap</id> <username>xamde</username> 
