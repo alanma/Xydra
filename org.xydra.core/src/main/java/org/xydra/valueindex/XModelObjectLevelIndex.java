@@ -22,9 +22,10 @@ public class XModelObjectLevelIndex {
 	
 	public XModelObjectLevelIndex(XModel model) {
 		// TODO which kind of factory is best suited?
+		// FIXME
 		IMapSetIndex<String,XAddress> objectIndex = new MapSetIndex<String,XAddress>(
 		        new FastEntrySetFactory<XAddress>());
-		this.indexer = new SimpleValueIndexer(objectIndex);
+		// this.indexer = new SimpleValueIndexer(objectIndex);
 		
 		this.index(model);
 	}

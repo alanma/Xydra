@@ -8,7 +8,7 @@ import org.xydra.index.IMapSetIndex;
 // TODO Document
 
 public abstract class StringValueSimpleIndexerAdapter extends XValueIndexer {
-	public StringValueSimpleIndexerAdapter(IMapSetIndex<String,XAddress> index) {
+	public StringValueSimpleIndexerAdapter(IMapSetIndex<String,AddressValueCounterTriple> index) {
 		super(index);
 	}
 	
@@ -19,37 +19,37 @@ public abstract class StringValueSimpleIndexerAdapter extends XValueIndexer {
 	 */
 
 	@Override
-    public String getLongIndexString(Long value) {
+	public String getLongIndexString(Long value) {
 		return "" + value;
 	}
 	
 	@Override
-    public String getIntegerIndexString(Integer value) {
+	public String getIntegerIndexString(Integer value) {
 		return "" + value;
 	}
 	
 	@Override
-    public String getDoubleIndexString(Double value) {
+	public String getDoubleIndexString(Double value) {
 		return "" + value;
 	}
 	
 	@Override
-    public String getByteIndexString(Byte value) {
+	public String getByteIndexString(Byte value) {
 		return "" + value;
 	}
 	
 	@Override
-    public String getBooleanIndexString(Boolean value) {
+	public String getBooleanIndexString(Boolean value) {
 		return "" + value;
 	}
 	
 	@Override
-    public String getIdIndexString(XID value) {
+	public String getIdIndexString(XID value) {
 		return "" + value.toString();
 	}
 	
 	@Override
-    public String getAddressIndexString(XAddress value) {
+	public String getAddressIndexString(XAddress value) {
 		/*
 		 * TODO Maybe index the single IDs too?
 		 */
