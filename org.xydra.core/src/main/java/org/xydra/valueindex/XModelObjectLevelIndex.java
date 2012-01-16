@@ -22,10 +22,9 @@ public class XModelObjectLevelIndex {
 	
 	public XModelObjectLevelIndex(XModel model) {
 		// TODO which kind of factory is best suited?
-		// FIXME
-		IMapSetIndex<String,XAddress> objectIndex = new MapSetIndex<String,XAddress>(
-		        new FastEntrySetFactory<XAddress>());
-		// this.indexer = new SimpleValueIndexer(objectIndex);
+		IMapSetIndex<String,AddressValueCounterTriple> objectIndex = new MapSetIndex<String,AddressValueCounterTriple>(
+		        new FastEntrySetFactory<AddressValueCounterTriple>());
+		this.indexer = new SimpleValueIndexer(objectIndex);
 		
 		this.index(model);
 	}
@@ -176,11 +175,6 @@ public class XModelObjectLevelIndex {
 		}
 	}
 	
-	/*
-	 * FIXME this deindexes the value completely, although there might still be
-	 * another field which has the same value - how to handle this? Idea: Maybe
-	 * add a counter how often it was indexed?!
-	 */
 	public void deIndex(XAddress objectAddress, XReadableField field) {
 		XValue value = field.getValue();
 		this.indexer.deIndexValue(objectAddress, value);
