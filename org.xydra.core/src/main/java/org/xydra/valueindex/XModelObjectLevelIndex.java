@@ -1,6 +1,7 @@
 package org.xydra.valueindex;
 
 import java.util.HashSet;
+import java.util.List;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -178,5 +179,11 @@ public class XModelObjectLevelIndex {
 	public void deIndex(XAddress objectAddress, XReadableField field) {
 		XValue value = field.getValue();
 		this.indexer.deIndexValue(objectAddress, value);
+	}
+	
+	public List<XAddress> search(String key) {
+		// TODO implement as "1 Token Search"
+		
+		return null;
 	}
 }

@@ -31,10 +31,6 @@ import org.xydra.index.query.EqualsConstraint;
  * TODO Document
  */
 
-/*
- * FIXME Remove the comments and finish implementing new index system
- */
-
 public abstract class XValueIndexer {
 	private IMapSetIndex<String,AddressValueCounterTriple> index;
 	
