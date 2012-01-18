@@ -1,6 +1,8 @@
 package org.xydra.valueindex;
 
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.xydra.base.XAddress;
@@ -16,25 +18,27 @@ import org.xydra.core.model.XObject;
 import org.xydra.index.IMapSetIndex;
 import org.xydra.index.impl.FastEntrySetFactory;
 import org.xydra.index.impl.MapSetIndex;
+import org.xydra.index.query.EqualsConstraint;
 
 
 public class XModelObjectLevelIndex {
 	private XValueIndexer indexer;
+	private IMapSetIndex<String,ValueIndexEntry> index;
 	
 	public XModelObjectLevelIndex(XModel model) {
-		// TODO which kind of factory is best suited?
-		IMapSetIndex<String,AddressValueCounterTriple> objectIndex = new MapSetIndex<String,AddressValueCounterTriple>(
-		        new FastEntrySetFactory<AddressValueCounterTriple>());
-		this.indexer = new SimpleValueIndexer(objectIndex);
+		// TODO change it to our own implementation as soon as it's ready
+		this.index = new MapSetIndex<String,ValueIndexEntry>(
+		        new FastEntrySetFactory<ValueIndexEntry>());
+		this.indexer = new SimpleValueIndexer(this.index);
 		
 		this.index(model);
 	}
 	
 	public XModelObjectLevelIndex(XModel model, XValueIndexer indexer) {
 		this.indexer = indexer;
+		this.index = indexer.getIndex();
 		
 		this.index(model);
-		
 	}
 	
 	// should only be executed once (document this!) - executing more than once
@@ -182,8 +186,16 @@ public class XModelObjectLevelIndex {
 	}
 	
 	public List<XAddress> search(String key) {
-		// TODO implement as "1 Token Search"
+		// IMPROVE rather simple search algorithm at the moment...
+		LinkedList<XAddress> list = new LinkedList<XAddress>();
 		
-		return null;
+		EqualsConstraint<String> constraint = new EqualsConstraint<String>(key);
+		Iterator<ValueIndexEntry> iterator = this.index.constraintIterator(constraint);
+		
+		while(iterator.hasNext()) {
+			list.add(iterator.next().getAddress());
+		}
+		
+		return list;
 	}
 }
