@@ -5,14 +5,13 @@ import org.xydra.base.value.XValue;
 
 
 // TODO Document
-// TODO Find better name?
 
-public class AddressValueCounterTriple {
+public class ValueIndexEntry {
 	private XAddress address;
 	private XValue value;
 	private Integer counter;
 	
-	public AddressValueCounterTriple(XAddress address, XValue value, Integer counter) {
+	public ValueIndexEntry(XAddress address, XValue value, Integer counter) {
 		this.address = address;
 		this.value = value;
 		this.counter = counter;
