@@ -11,7 +11,7 @@ import org.xydra.index.query.KeyEntryTuple;
  * TODO Implement & Document
  */
 
-public class StringValueIndex implements IMapSetIndex<String,AddressValueCounterTriple> {
+public class StringValueIndex implements IMapSetIndex<String,ValueIndexEntry> {
 	private static final long serialVersionUID = -5366154192053454730L;
 	
 	private StringMap map;
@@ -33,14 +33,14 @@ public class StringValueIndex implements IMapSetIndex<String,AddressValueCounter
 	}
 	
 	@Override
-	public Iterator<AddressValueCounterTriple> constraintIterator(Constraint<String> c1) {
+	public Iterator<ValueIndexEntry> constraintIterator(Constraint<String> c1) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	
 	@Override
 	public boolean contains(Constraint<String> c1,
-	        Constraint<AddressValueCounterTriple> entryConstraint) {
+	        Constraint<ValueIndexEntry> entryConstraint) {
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -52,7 +52,7 @@ public class StringValueIndex implements IMapSetIndex<String,AddressValueCounter
 	}
 	
 	@Override
-	public void deIndex(String key1, AddressValueCounterTriple entry) {
+	public void deIndex(String key1, ValueIndexEntry entry) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -64,14 +64,14 @@ public class StringValueIndex implements IMapSetIndex<String,AddressValueCounter
 	}
 	
 	@Override
-	public void index(String key1, AddressValueCounterTriple entry) {
+	public void index(String key1, ValueIndexEntry entry) {
 		// TODO Auto-generated method stub
 		
 	}
 	
 	@Override
-	public Iterator<KeyEntryTuple<String,AddressValueCounterTriple>> tupleIterator(
-	        Constraint<String> c1, Constraint<AddressValueCounterTriple> entryConstraint) {
+	public Iterator<KeyEntryTuple<String,ValueIndexEntry>> tupleIterator(
+	        Constraint<String> c1, Constraint<ValueIndexEntry> entryConstraint) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -83,8 +83,8 @@ public class StringValueIndex implements IMapSetIndex<String,AddressValueCounter
 	}
 	
 	@Override
-	public org.xydra.index.IMapSetIndex.IMapSetDiff<String,AddressValueCounterTriple> computeDiff(
-	        IMapSetIndex<String,AddressValueCounterTriple> otherFuture) {
+	public org.xydra.index.IMapSetIndex.IMapSetDiff<String,ValueIndexEntry> computeDiff(
+	        IMapSetIndex<String,ValueIndexEntry> otherFuture) {
 		// TODO Auto-generated method stub
 		return null;
 	}

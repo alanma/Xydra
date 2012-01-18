@@ -8,7 +8,7 @@ import org.xydra.index.IMapSetIndex;
 // TODO Document
 
 public abstract class StringValueSimpleIndexerAdapter extends XValueIndexer {
-	public StringValueSimpleIndexerAdapter(IMapSetIndex<String,AddressValueCounterTriple> index) {
+	public StringValueSimpleIndexerAdapter(IMapSetIndex<String,ValueIndexEntry> index) {
 		super(index);
 	}
 	

@@ -32,10 +32,14 @@ import org.xydra.index.query.EqualsConstraint;
  */
 
 public abstract class XValueIndexer {
-	private IMapSetIndex<String,AddressValueCounterTriple> index;
+	private IMapSetIndex<String,ValueIndexEntry> index;
 	
-	public XValueIndexer(IMapSetIndex<String,AddressValueCounterTriple> index) {
+	public XValueIndexer(IMapSetIndex<String,ValueIndexEntry> index) {
 		this.index = index;
+	}
+	
+	public IMapSetIndex<String,ValueIndexEntry> getIndex() {
+		return this.index;
 	}
 	
 	public void indexValue(XAddress objectAddress, XValue value) {
@@ -337,11 +341,11 @@ public abstract class XValueIndexer {
 	
 	private void incrementIndexEntry(String key, XAddress address, XValue value) {
 		EqualsConstraint<String> constraint = new EqualsConstraint<String>(key);
-		Iterator<AddressValueCounterTriple> iterator = this.index.constraintIterator(constraint);
+		Iterator<ValueIndexEntry> iterator = this.index.constraintIterator(constraint);
 		
 		boolean found = false;
 		while(!found && iterator.hasNext()) {
-			AddressValueCounterTriple triple = iterator.next();
+			ValueIndexEntry triple = iterator.next();
 			
 			if(triple.equalAddressAndValue(address, value)) {
 				found = true;
@@ -351,18 +355,18 @@ public abstract class XValueIndexer {
 		
 		if(!found) {
 			// no entry found -> add one
-			AddressValueCounterTriple entry = new AddressValueCounterTriple(address, value, 1);
+			ValueIndexEntry entry = new ValueIndexEntry(address, value, 1);
 			this.index.index(key, entry);
 		}
 	}
 	
 	private void decrementIndexEntry(String key, XAddress address, XValue value) {
 		EqualsConstraint<String> constraint = new EqualsConstraint<String>(key);
-		Iterator<AddressValueCounterTriple> iterator = this.index.constraintIterator(constraint);
+		Iterator<ValueIndexEntry> iterator = this.index.constraintIterator(constraint);
 		
 		boolean found = false;
 		while(!found && iterator.hasNext()) {
-			AddressValueCounterTriple triple = iterator.next();
+			ValueIndexEntry triple = iterator.next();
 			
 			if(triple.equalAddressAndValue(address, value)) {
 				found = true;
