@@ -65,6 +65,10 @@ public class XModelObjectLevelIndex {
 		}
 	}
 	
+	/*
+	 * TODO Is this API really useful? To use it, somebody would always need to
+	 * make a copy of the object before it is changed...
+	 */
 	public void updateIndex(XReadableObject oldObject, XReadableObject newObject) {
 		XAddress address = oldObject.getAddress();
 		
