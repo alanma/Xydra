@@ -1,6 +1,8 @@
 package org.xydra.valueindex;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -106,6 +108,126 @@ public abstract class XValueIndexer {
 			indexStringArray(objectAddress, value, ((XStringSetValue)value).contents());
 			break;
 		}
+	}
+	
+	public List<String> getIndexStrings(XValue value) {
+		ArrayList<String> list = new ArrayList<String>();
+		
+		switch(value.getType()) {
+		case Address:
+			list.add(getAddressIndexString((XAddress)value));
+			break;
+		
+		case AddressList:
+			for(XAddress addr : ((XAddressListValue)value).contents()) {
+				list.add(getAddressIndexString(addr));
+			}
+			break;
+		
+		case AddressSet:
+			for(XAddress addr : ((XAddressSetValue)value).contents()) {
+				list.add(getAddressIndexString(addr));
+			}
+			break;
+		
+		case AddressSortedSet:
+			for(XAddress addr : ((XAddressSortedSetValue)value).contents()) {
+				list.add(getAddressIndexString(addr));
+			}
+			break;
+		
+		case Boolean:
+			list.add(getBooleanIndexString(((XBooleanValue)value).contents()));
+			break;
+		
+		case BooleanList:
+			for(Boolean bool : ((XBooleanListValue)value).contents()) {
+				list.add(getBooleanIndexString(bool));
+			}
+			break;
+		
+		case ByteList:
+			for(Byte b : ((XByteListValue)value).contents()) {
+				list.add(getByteIndexString(b));
+			}
+			break;
+		
+		case Double:
+			list.add(getDoubleIndexString(((XDoubleValue)value).contents()));
+			break;
+		
+		case DoubleList:
+			for(Double d : ((XDoubleListValue)value).contents()) {
+				list.add(getDoubleIndexString(d));
+			}
+			break;
+		
+		case Id:
+			list.add(getIdIndexString((XID)value));
+			break;
+		
+		case IdList:
+			for(XID id : ((XIDListValue)value).contents()) {
+				list.add(getIdIndexString(id));
+			}
+			break;
+		case IdSet:
+			for(XID id : ((XIDSetValue)value).contents()) {
+				list.add(getIdIndexString(id));
+			}
+			break;
+		
+		case IdSortedSet:
+			for(XID id : ((XIDSortedSetValue)value).contents()) {
+				list.add(getIdIndexString(id));
+			}
+			break;
+		
+		case Integer:
+			list.add(getIntegerIndexString(((XIntegerValue)value).contents()));
+			break;
+		
+		case IntegerList:
+			for(Integer i : ((XIntegerListValue)value).contents()) {
+				list.add(getIntegerIndexString(i));
+			}
+			break;
+		
+		case Long:
+			list.add(getLongIndexString(((XLongValue)value).contents()));
+			break;
+		
+		case LongList:
+			for(Long l : ((XLongListValue)value).contents()) {
+				list.add(getLongIndexString(l));
+			}
+			break;
+		
+		case String:
+			for(String s : getStringIndexStrings(((XStringValue)value).contents())) {
+				list.add(s);
+			}
+			break;
+		
+		case StringList:
+			for(String s1 : ((XStringListValue)value).contents()) {
+				for(String s2 : getStringIndexStrings(s1)) {
+					list.add(s2);
+				}
+			}
+			break;
+		
+		case StringSet:
+			for(String s1 : ((XStringSetValue)value).contents()) {
+				for(String s2 : getStringIndexStrings(s1)) {
+					list.add(s2);
+				}
+			}
+			break;
+		
+		}
+		
+		return list;
 	}
 	
 	public void deIndexValue(XAddress address, XValue value) {

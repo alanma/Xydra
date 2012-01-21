@@ -124,6 +124,10 @@ public class XModelObjectLevelIndex {
 		if(!address.equals(newField.getAddress())) {
 			throw new RuntimeException("oldField and newField do not have the same address.");
 		}
+		
+		/*
+		 * TODO Implement!
+		 */
 	}
 	
 	// TODO find better name
