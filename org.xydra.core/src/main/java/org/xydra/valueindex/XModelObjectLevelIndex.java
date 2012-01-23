@@ -9,6 +9,7 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
+import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.value.XValue;
@@ -65,10 +66,6 @@ public class XModelObjectLevelIndex {
 		}
 	}
 	
-	/*
-	 * TODO Is this API really useful? To use it, somebody would always need to
-	 * make a copy of the object before it is changed...
-	 */
 	public void updateIndex(XReadableObject oldObject, XReadableObject newObject) {
 		XAddress address = oldObject.getAddress();
 		
@@ -105,6 +102,10 @@ public class XModelObjectLevelIndex {
 		}
 	}
 	
+	public void updateIndex(XEvent event) {
+		// TODO implement event-api
+	}
+	
 	public void index(XReadableField field) {
 		XAddress fieldAddress = field.getAddress();
 		XAddress objectAddress = XX.resolveObject(fieldAddress.getRepository(),
@@ -125,9 +126,7 @@ public class XModelObjectLevelIndex {
 			throw new RuntimeException("oldField and newField do not have the same address.");
 		}
 		
-		/*
-		 * TODO Implement!
-		 */
+		updateIndexWithoutCheck(objectAddress, oldField, newField);
 	}
 	
 	// TODO find better name
