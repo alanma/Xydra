@@ -87,7 +87,7 @@ public abstract class XModelObjectLevelIndexTest {
 	
 	@Test
 	public void testUpdateIndexObjectAddValue() {
-		String valueString = "This is a string which shouldn't exist as value in the oldModel";
+		String valueString = "Firstvaluestringwhichshoudlntexistinbothmodels";
 		XValue value = X.getValueFactory().createStringValue(valueString);
 		
 		// check that no entry for valueString exists in the old index
@@ -130,5 +130,250 @@ public abstract class XModelObjectLevelIndexTest {
 		}
 	}
 	
-	// TODO write test for deleting a value which exists multiple times
+	@Test
+	public void testUpdateIndexObjectDeleteMultiplyExistingValue() {
+		String valueString = "Firstvaluestringwhichshoudlntexistinbothmodels";
+		XValue value = X.getValueFactory().createStringValue(valueString);
+		List<String> indexStrings = this.newIndexer.getIndexStrings(value);
+		
+		XObject oldJohn = this.oldModel.getObject(DemoModelUtil.JOHN_ID);
+		XObject newJohn = this.newModel.getObject(DemoModelUtil.JOHN_ID);
+		
+		XID id1 = XX.createUniqueId();
+		XID id2 = XX.createUniqueId();
+		
+		XField newField1 = newJohn.createField(id1);
+		XField newField2 = newJohn.createField(id2);
+		
+		newField1.setValue(value);
+		newField2.setValue(value);
+		
+		// update index and update the old model, so that it can be used again
+		this.newIndex.updateIndex(oldJohn, newJohn);
+		
+		for(String s : indexStrings) {
+			List<XAddress> addresses = this.newIndex.search(s);
+			assertEquals(1, addresses.size());
+			assertTrue(addresses.contains(newJohn.getAddress()));
+		}
+		
+		XField oldField1 = oldJohn.createField(id1);
+		XField oldField2 = oldJohn.createField(id2);
+		
+		oldField1.setValue(value);
+		oldField2.setValue(value);
+		
+		// Remove value once, update, and check again
+		newField1.setValue(null);
+		
+		this.newIndex.updateIndex(oldJohn, newJohn);
+		
+		for(String s : indexStrings) {
+			List<XAddress> addresses = this.newIndex.search(s);
+			/*
+			 * The value should still be indexed, since it existed multiple
+			 * times
+			 */
+
+			assertEquals(1, addresses.size());
+			assertTrue(addresses.contains(newJohn.getAddress()));
+		}
+		
+		oldField1.setValue(null);
+		
+		// Remove value completely
+		
+		newField2.setValue(null);
+		
+		this.newIndex.updateIndex(oldJohn, newJohn);
+		
+		for(String s : indexStrings) {
+			List<XAddress> addresses = this.newIndex.search(s);
+			/*
+			 * The value should be completely deindexed now
+			 */
+
+			assertTrue(addresses.isEmpty());
+		}
+	}
+	
+	@Test
+	public void testUpdateIndexObjectChangeValue() {
+		String valueString = "Firstvaluestringwhichshoudlntexistinbothmodels";
+		XValue value = X.getValueFactory().createStringValue(valueString);
+		List<String> indexStrings = this.newIndexer.getIndexStrings(value);
+		
+		XObject oldJohn = this.oldModel.getObject(DemoModelUtil.JOHN_ID);
+		XObject newJohn = this.newModel.getObject(DemoModelUtil.JOHN_ID);
+		
+		// Change an existing value, update index, and check whether no entry
+		// exists any more or not
+		XField titleField = newJohn.getField(DemoModelUtil.TITLE_ID);
+		XValue oldValue = titleField.getValue();
+		List<String> oldIndexStrings = this.newIndexer.getIndexStrings(oldValue);
+		
+		titleField.setValue(value);
+		this.newIndex.updateIndex(oldJohn, newJohn);
+		
+		// make sure the old value was deindexed
+		for(String s : oldIndexStrings) {
+			List<XAddress> found = this.newIndex.search(s);
+			assertTrue(found.isEmpty());
+		}
+		
+		// make sure the new value was indexed
+		for(String s : indexStrings) {
+			List<XAddress> found = this.newIndex.search(s);
+			assertEquals(1, found.size());
+			assertEquals(newJohn.getAddress(), found.get(0));
+		}
+	}
+	
+	@Test
+	public void testUpdateIndexFieldAddValue() {
+		String valueString = "Firstvaluestringwhichshoudlntexistinbothmodels";
+		XValue value = X.getValueFactory().createStringValue(valueString);
+		
+		// check that no entry for valueString exists in the old index
+		List<XAddress> oldList = this.oldIndex.search(valueString);
+		assertTrue(oldList.isEmpty());
+		
+		XObject oldJohn = this.oldModel.getObject(DemoModelUtil.JOHN_ID);
+		XObject newJohn = this.newModel.getObject(DemoModelUtil.JOHN_ID);
+		
+		// add the new value, update index and check whether an entry exists or
+		// not
+		XID id = XX.createUniqueId();
+		
+		XField oldField = oldJohn.createField(id);
+		XField newField = newJohn.createField(id);
+		newField.setValue(value);
+		
+		this.newIndex.updateIndex(newJohn.getAddress(), oldField, newField);
+		
+		List<XAddress> newList = this.newIndex.search(valueString);
+		assertEquals(1, newList.size());
+		assertEquals(newJohn.getAddress(), newList.get(0));
+	}
+	
+	@Test
+	public void testUpdateIndexFieldDeleteValue() {
+		XObject oldJohn = this.oldModel.getObject(DemoModelUtil.JOHN_ID);
+		XObject newJohn = this.newModel.getObject(DemoModelUtil.JOHN_ID);
+		
+		// Remove an existing value, update index, and check whether no entry
+		// exists any more or not
+		XField oldTitleField = oldJohn.getField(DemoModelUtil.TITLE_ID);
+		XField newTitleField = newJohn.getField(DemoModelUtil.TITLE_ID);
+		XValue value = newTitleField.getValue();
+		List<String> indexStrings = this.newIndexer.getIndexStrings(value);
+		
+		newTitleField.setValue(null);
+		this.newIndex.updateIndex(newJohn.getAddress(), oldTitleField, newTitleField);
+		
+		for(String s : indexStrings) {
+			List<XAddress> found = this.newIndex.search(s);
+			assertTrue(found.isEmpty());
+		}
+	}
+	
+	@Test
+	public void testUpdateIndexFieldDeleteMultiplyExistingValue() {
+		String valueString = "Firstvaluestringwhichshoudlntexistinbothmodels";
+		XValue value = X.getValueFactory().createStringValue(valueString);
+		List<String> indexStrings = this.newIndexer.getIndexStrings(value);
+		
+		XObject oldJohn = this.oldModel.getObject(DemoModelUtil.JOHN_ID);
+		XObject newJohn = this.newModel.getObject(DemoModelUtil.JOHN_ID);
+		
+		XID id1 = XX.createUniqueId();
+		XID id2 = XX.createUniqueId();
+		
+		XField newField1 = newJohn.createField(id1);
+		XField newField2 = newJohn.createField(id2);
+		
+		newField1.setValue(value);
+		newField2.setValue(value);
+		
+		// update index and update the old model, so that it can be used again
+		this.newIndex.updateIndex(oldJohn, newJohn);
+		
+		for(String s : indexStrings) {
+			List<XAddress> addresses = this.newIndex.search(s);
+			assertEquals(1, addresses.size());
+			assertTrue(addresses.contains(newJohn.getAddress()));
+		}
+		
+		XField oldField1 = oldJohn.createField(id1);
+		XField oldField2 = oldJohn.createField(id2);
+		
+		oldField1.setValue(value);
+		oldField2.setValue(value);
+		
+		// Remove value once, update, and check again
+		newField1.setValue(null);
+		
+		this.newIndex.updateIndex(newJohn.getAddress(), oldField1, newField1);
+		
+		for(String s : indexStrings) {
+			List<XAddress> addresses = this.newIndex.search(s);
+			/*
+			 * The value should still be indexed, since it existed multiple
+			 * times
+			 */
+
+			assertEquals(1, addresses.size());
+			assertTrue(addresses.contains(newJohn.getAddress()));
+		}
+		
+		oldField1.setValue(null);
+		
+		// Remove value completely
+		
+		newField2.setValue(null);
+		
+		this.newIndex.updateIndex(newJohn.getAddress(), oldField2, newField2);
+		
+		for(String s : indexStrings) {
+			List<XAddress> addresses = this.newIndex.search(s);
+			/*
+			 * The value should be completely deindexed now
+			 */
+
+			assertTrue(addresses.isEmpty());
+		}
+	}
+	
+	@Test
+	public void testUpdateIndexFieldChangeValue() {
+		String valueString = "Firstvaluestringwhichshoudlntexistinbothmodels";
+		XValue value = X.getValueFactory().createStringValue(valueString);
+		List<String> indexStrings = this.newIndexer.getIndexStrings(value);
+		
+		XObject oldJohn = this.oldModel.getObject(DemoModelUtil.JOHN_ID);
+		XObject newJohn = this.newModel.getObject(DemoModelUtil.JOHN_ID);
+		
+		// Change an existing value, update index, and check whether no entry
+		// exists any more or not
+		XField oldTitleField = oldJohn.getField(DemoModelUtil.TITLE_ID);
+		XField newTitleField = newJohn.getField(DemoModelUtil.TITLE_ID);
+		XValue oldValue = newTitleField.getValue();
+		List<String> oldIndexStrings = this.newIndexer.getIndexStrings(oldValue);
+		
+		newTitleField.setValue(value);
+		this.newIndex.updateIndex(newJohn.getAddress(), oldTitleField, newTitleField);
+		
+		// make sure the old value was deindexed
+		for(String s : oldIndexStrings) {
+			List<XAddress> found = this.newIndex.search(s);
+			assertTrue(found.isEmpty());
+		}
+		
+		// make sure the new value was indexed
+		for(String s : indexStrings) {
+			List<XAddress> found = this.newIndex.search(s);
+			assertEquals(1, found.size());
+			assertEquals(newJohn.getAddress(), found.get(0));
+		}
+	}
 }

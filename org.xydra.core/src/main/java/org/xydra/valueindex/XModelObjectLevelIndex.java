@@ -114,6 +114,7 @@ public class XModelObjectLevelIndex {
 		index(objectAddress, field);
 	}
 	
+	// TODO why is there an xaddress parameter here and in the next method?
 	public void updateIndex(XAddress objectAddress, XReadableField oldField, XReadableField newField) {
 		XAddress address = oldField.getAddress();
 		
@@ -127,6 +128,18 @@ public class XModelObjectLevelIndex {
 		}
 		
 		updateIndexWithoutCheck(objectAddress, oldField, newField);
+	}
+	
+	public void updateIndex(XAddress objectAddress, XValue oldValue, XValue newValue) {
+		if(objectAddress.getAddressedType() != XType.XOBJECT) {
+			throw new RuntimeException("objectAddress is no valid Object-XAddress, but an "
+			        + objectAddress.getAddressedType() + "-Address.");
+		}
+		
+		if(!oldValue.equals(newValue)) {
+			this.indexer.deIndexValue(objectAddress, oldValue);
+			this.indexer.indexValue(objectAddress, newValue);
+		}
 	}
 	
 	// TODO find better name
@@ -173,18 +186,6 @@ public class XModelObjectLevelIndex {
 		
 		XValue value = field.getValue();
 		this.indexer.indexValue(objectAddress, value);
-	}
-	
-	public void updateIndex(XAddress objectAddress, XValue oldValue, XValue newValue) {
-		if(objectAddress.getAddressedType() != XType.XOBJECT) {
-			throw new RuntimeException("objectAddress is no valid Object-XAddress, but an "
-			        + objectAddress.getAddressedType() + "-Address.");
-		}
-		
-		if(!oldValue.equals(newValue)) {
-			this.indexer.deIndexValue(objectAddress, oldValue);
-			this.indexer.indexValue(objectAddress, newValue);
-		}
 	}
 	
 	public void deIndex(XAddress objectAddress, XReadableField field) {
