@@ -42,6 +42,13 @@ public class AboutAppEngine {
 	}
 	
 	/**
+	 * @return true if running without GAE mode; technically: !onAppEngine()
+	 */
+	public static boolean notOnAppengine() {
+		return !inProduction() || !inDevelopment();
+	}
+	
+	/**
 	 * @return The major version number for the currently running version of the
 	 *         application plus a timestamp at which it was deployed. This is
 	 *         not just the version identifier string you specify in
