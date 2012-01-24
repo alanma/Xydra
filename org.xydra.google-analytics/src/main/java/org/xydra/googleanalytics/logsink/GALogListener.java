@@ -20,10 +20,12 @@ import org.xydra.log.Logger;
  * 
  * To avoid endless loops, this class uses no Logger itself.
  * 
- * Syntax for data logging via GA?key=val&...
+ * <h3>Syntax</h3> Syntax for data logging via GA?key=val&...
  * 
  * Recognised key names are: 'category', 'action', 'label', and 'value'.
  * Category and action are mandatory.
+ * 
+ * Level debug is NEVER logging anything.
  * 
  * @author voelkel
  */
@@ -48,10 +50,16 @@ public class GALogListener implements ILogListener, UserInfo {
 	
 	@Override
 	public void debug(Logger log, String msg) {
+		if(hasGaData(msg)) {
+			trackData(log, "info", msg);
+		}
 	}
 	
 	@Override
 	public void debug(Logger log, String msg, Throwable t) {
+		if(hasGaData(msg)) {
+			trackData(log, "info", msg);
+		}
 	}
 	
 	@Override
@@ -127,20 +135,42 @@ public class GALogListener implements ILogListener, UserInfo {
 	
 	@Override
 	public void info(Logger log, String msg, Throwable t) {
+		if(hasGaData(msg)) {
+			trackData(log, "info", msg);
+		}
 	}
 	
 	@Override
 	public void trace(Logger log, String msg) {
+		if(hasGaData(msg)) {
+			trackData(log, "info", msg);
+		}
 	}
 	
 	@Override
 	public void trace(Logger log, String msg, Throwable t) {
+		if(hasGaData(msg)) {
+			trackData(log, "info", msg);
+		}
 	}
 	
+	/**
+	 * @param log
+	 * @param gaEvent
+	 * @deprecated use explicit logging syntax GAE?... (see class comment)
+	 */
+	@Deprecated
 	private void track(Logger log, GaEvent gaEvent) {
 		this.tracker.track(new FocusPoint(log.toString()), "-", this, gaEvent);
 	}
 	
+	/**
+	 * @param log
+	 * @param logLevel
+	 * @param msg
+	 * @deprecated use explicit logging syntax GAE?... (see class comment)
+	 */
+	@Deprecated
 	private void track(Logger log, String logLevel, String msg) {
 		track(log, new GaEvent(logLevel, msg));
 	}
