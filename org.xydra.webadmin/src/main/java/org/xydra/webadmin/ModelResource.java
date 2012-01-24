@@ -161,7 +161,7 @@ public class ModelResource {
 						}
 						// write xml content
 						SerializedModel.serialize(model, out);
-					} else if(style.equals("json")) {
+					} else if(style == MStyle.json) {
 						JsonSerializer serializer = new JsonSerializer();
 						ServletUtils.headers(res, 200, 1, serializer.getContentType());
 						Writer w = res.getWriter();
@@ -303,6 +303,8 @@ public class ModelResource {
 	
 	public static void render(Writer w, XAddress modelAddress, MStyle style) throws IOException {
 		w.write(
+
+		HtmlUtils.link(modelAddress.getRepository().toString()) + " | " +
 
 		HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.html, modelAddress.toString())
 

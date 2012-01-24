@@ -133,6 +133,8 @@ public class RepositoryResource {
 						modelEntry.time = System.currentTimeMillis();
 						XydraPersistence p = Utils.getPersistence(repoId);
 						XWritableModel model = p.getModelSnapshot(modelAddress);
+						
+						// TODO keep serialisation if no changes
 						modelEntry.serialisation = ModelResource.computeSerialisation(model, style);
 						XydraRuntime.getMemcache().put(PREFIX + modelAddress, modelEntry);
 						// update count
@@ -202,7 +204,7 @@ public class RepositoryResource {
 				Cache.updateAllModels(now, repoId, modelIdList, MStyle.xml);
 				// show a download link
 				Writer w = Utils.writeHeader(res, "Repo", repoAddress);
-				w.write("Generating export in the background. Reload this page in 5 minutes.");
+				w.write("Generating export in the background. Reload this page before 5 minutes elapse (and watch task queue of this app/version to finish).");
 			}
 		} else {
 			// style HTML

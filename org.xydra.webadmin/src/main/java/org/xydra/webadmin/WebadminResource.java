@@ -56,6 +56,7 @@ public class WebadminResource {
 		        new HeadLinkStyle("/s/xyadmin.css"));
 		w.write(HtmlUtils.link("/admin" + XYADMIN + "/demo", "Add phonebook demo data") + "<br/>\n");
 		w.write("<h3>List of all models in all repositories</h3>");
+		w.write("<p>Got to ../admin/xyadmin/{repo-id}/</p>");
 		Iterator<XAddress> it = Utils.findModelAdresses();
 		while(it.hasNext()) {
 			XAddress modelAddress = it.next();
