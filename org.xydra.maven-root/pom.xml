@@ -410,7 +410,7 @@
 						<artifactId>maven-gae-plugin</artifactId>
 						<version>0.9.2</version>
 						<configuration>
-							<keepTempUploadDir>true</keepTempUploadDir>
+							<keepTempUploadDir>false</keepTempUploadDir>
 							<days>30</days>
 							<outputFile>${project.build.directory}/gae.log</outputFile>
 							<!-- 0 = debug, info, warn, error, critical = 4 -->
