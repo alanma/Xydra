@@ -79,22 +79,21 @@ public class ReflectionUtils {
 	 *         new line characters + br tags
 	 */
 	public static String firstNLines(Throwable t, int n) {
-		StringWriter sw = new StringWriter();
-		t.printStackTrace(new PrintWriter(sw));
-		StringReader sr = new StringReader(sw.getBuffer().toString());
-		BufferedReader br = new BufferedReader(sr);
-		String line;
+		BufferedReader br = toBufferedReader(t);
+		int lines = 0;
 		try {
-			// skip first 5 lines which or only the loggers themselves
-			line = br.readLine();
-			line = br.readLine();
-			line = br.readLine();
-			line = br.readLine();
-			line = br.readLine();
+			// skip first 4 lines which are only the loggers themselves
+			br.readLine();
+			br.readLine();
+			br.readLine();
+			br.readLine();
 			StringBuffer buf = new StringBuffer();
-			for(int i = 0; i < n && line != null; i++) {
-				buf.append(line + " <br />\n");
-				line = br.readLine();
+			lines += append(br, buf, n);
+			Throwable cause = t.getCause();
+			while(lines < n && cause != null) {
+				br = toBufferedReader(cause);
+				lines += append(br, buf, n - lines);
+				cause = t.getCause();
 			}
 			return buf.toString();
 		} catch(IOException e) {
@@ -102,4 +101,29 @@ public class ReflectionUtils {
 		}
 	}
 	
+	private static BufferedReader toBufferedReader(Throwable t) {
+		StringWriter sw = new StringWriter();
+		t.printStackTrace(new PrintWriter(sw));
+		StringReader sr = new StringReader(sw.getBuffer().toString());
+		BufferedReader br = new BufferedReader(sr);
+		return br;
+	}
+	
+	/**
+	 * @param br
+	 * @param buf
+	 * @param remainingMaxLines
+	 * @return number of output lines generated
+	 * @throws IOException
+	 */
+	private static int append(BufferedReader br, StringBuffer buf, int remainingMaxLines)
+	        throws IOException {
+		String line = br.readLine();
+		int lines;
+		for(lines = 0; lines < remainingMaxLines && line != null; lines++) {
+			buf.append(line + " <br />\n");
+			line = br.readLine();
+		}
+		return lines;
+	}
 }
