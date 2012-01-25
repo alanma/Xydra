@@ -19,6 +19,7 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.impl.gae.AsyncDatastore;
 import org.xydra.store.impl.gae.GaeAssert;
+import org.xydra.store.impl.gae.GaeConstants;
 import org.xydra.store.impl.gae.GaeOperation;
 import org.xydra.store.impl.gae.Memcache;
 import org.xydra.store.impl.gae.SyncDatastore;
@@ -207,9 +208,6 @@ public class GaeChange {
 	
 	// timeouts
 	
-	// adapted to latest GAE release as of 2011-11-22
-	public static final long GAE_WEB_REQUEST_TIMEOUT = 60 * 1000;
-	
 	// take up to 20 seconds for "other stuff" into account
 	public static final long APPLICATION_RESERVED_TIME = 20 * 1000;
 	
@@ -220,7 +218,8 @@ public class GaeChange {
 	 * A too long timeout however might cause the model to "starve" as processes
 	 * are be aborted by GAE while waiting for other changes.
 	 * */
-	private static final long TIMEOUT = GAE_WEB_REQUEST_TIMEOUT - APPLICATION_RESERVED_TIME;
+	private static final long TIMEOUT = GaeConstants.GAE_WEB_REQUEST_TIMEOUT
+	        - APPLICATION_RESERVED_TIME;
 	
 	/**
 	 * critical time (in milliseconds) after which a process will voluntarily

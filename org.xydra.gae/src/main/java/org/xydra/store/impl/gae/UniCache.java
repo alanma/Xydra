@@ -12,6 +12,8 @@ import com.google.appengine.api.datastore.KeyFactory;
 /**
  * A universal cache system for instanceCache, memcache and datastore.
  * 
+ * Datastore entries are stored as kind "XCACHE".
+ * 
  * @author xamde
  * 
  * @param <T> type
@@ -23,6 +25,15 @@ public class UniCache<T> {
 		boolean memcache;
 		boolean datastore;
 		
+		/**
+		 * @param instance true if value should be stored in local instance
+		 *            cache
+		 * @param memcache true if value should be stored in shared but volatile
+		 *            memcache
+		 * @param datastore true if value should be stored in persistent but
+		 *            slow datastore
+		 * @return options objects
+		 */
 		public static StorageOptions create(boolean instance, boolean memcache, boolean datastore) {
 			StorageOptions so = new StorageOptions();
 			so.instance = instance;
