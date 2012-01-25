@@ -75,4 +75,12 @@ public class AboutAppEngine {
 		return ct.getId() + "-'" + ct.getName() + "'";
 	}
 	
+	public static String getApplicationId() {
+		String id = SystemProperty.applicationId.get();
+		if(id == null) {
+			id = "devmode";
+		}
+		return id;
+	}
+	
 }
