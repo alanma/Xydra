@@ -58,20 +58,27 @@ public class SerialisationCache {
 	
 	public static class ModelEntryCacheHandler implements UniCache.CacheEntryHandler<ModelEntry> {
 		
+		private static final String PROP_REV = "rev";
+		private static final String PROP_SERIALISATION = "serial";
+		
 		@Override
 		public Entity toEntity(Key datastoreKey, ModelEntry entry) {
 			Entity e = new Entity(datastoreKey);
-			e.setUnindexedProperty("rev", entry.rev);
+			e.setUnindexedProperty(PROP_REV, entry.rev);
 			Text text = new Text(entry.serialisation);
-			e.setUnindexedProperty("serialisation", text);
+			e.setUnindexedProperty(PROP_SERIALISATION, text);
 			return e;
 		}
 		
 		@Override
 		public ModelEntry fromEntity(Entity entity) {
 			ModelEntry e = new ModelEntry();
-			e.rev = (Long)entity.getProperty("rev");
-			e.serialisation = ((Text)entity.getProperty("serialisation")).getValue();
+			e.rev = (Long)entity.getProperty(PROP_REV);
+			e.serialisation = ((Text)entity.getProperty(PROP_SERIALISATION)).getValue();
+			// TODO this fix required?
+			if(e.serialisation == null) {
+				e.serialisation = "";
+			}
 			return e;
 		}
 		
@@ -135,40 +142,20 @@ public class SerialisationCache {
 	 *         is working on it
 	 */
 	public static boolean updateAllModels(final XID repoId, List<XID> modelIdList,
-	        final MStyle style, boolean useTaskQueue, final boolean cacheInInstance,
-	        final boolean cacheInMemcache, final boolean cacheInDatastore) {
-		log.info("Options: useTaskQueue=" + useTaskQueue + "; cacheInInstance=" + cacheInInstance
-		        + "; cacheInMemcache=" + cacheInMemcache + "; cacheInDatastore=" + cacheInDatastore
-		        + "<br/>\n");
+	        final MStyle style, boolean giveUp, boolean useTaskQueue,
+	        final boolean cacheInInstance, final boolean cacheInMemcache,
+	        final boolean cacheInDatastore) {
+		log.info("Updating " + modelIdList.size() + " models. Options: useTaskQueue="
+		        + useTaskQueue + "; cacheInInstance=" + cacheInInstance + "; cacheInMemcache="
+		        + cacheInMemcache + "; cacheInDatastore=" + cacheInDatastore + "<br/>\n");
 		Progress p = new Progress();
 		p.startTime();
+		/*
+		 * TODO by adding a batch-get-current-model-rev method to xydra-gae this
+		 * could be significantly speed-up
+		 */
 		for(final XID modelId : modelIdList) {
-			
-			UniversalTaskQueue.NamedDeferredTask task = new UniversalTaskQueue.NamedDeferredTask() {
-				
-				private static final long serialVersionUID = 1L;
-				
-				@Override
-				public void run() {
-					XAddress modelAddress = XX.resolveModel(repoId, modelId);
-					XydraPersistence persistence = Utils.getPersistence(repoId);
-					XWritableModel model = persistence.getModelSnapshot(modelAddress);
-					String key = PREFIX + modelAddress;
-					StorageOptions storeOpts = StorageOptions.create(cacheInInstance,
-					        cacheInMemcache, cacheInDatastore);
-					ModelEntry modelEntry = new ModelEntry();
-					log.info("Computing serialisation of " + modelAddress + "["
-					        + model.getRevisionNumber() + "]");
-					modelEntry.serialisation = ModelResource.computeSerialisation(model, style);
-					modelEntry.rev = model.getRevisionNumber();
-					MODELS.put(key, modelEntry, storeOpts);
-				}
-				
-				@Override
-				public String getId() {
-					return modelId.toString();
-				}
-			};
+			log.info("Updating " + modelId);
 			
 			// first round?
 			if(p.getProgress() > 3) {
@@ -176,44 +163,83 @@ public class SerialisationCache {
 				long msLeftToGo = p.willTakeMsUntilProgressIs(modelIdList.size());
 				long msWeRanAlready = p.getMsSinceStart();
 				long totalTimeRequired = msWeRanAlready + msLeftToGo;
-				if(totalTimeRequired + 2000 > GaeConstants.GAE_WEB_REQUEST_TIMEOUT) {
+				if(giveUp && totalTimeRequired + 2000 > GaeConstants.GAE_WEB_REQUEST_TIMEOUT) {
 					log.warn("We won't make it if we continue like this. Total time required = "
 					        + totalTimeRequired + " ms. Giving up.");
 					return false;
 				}
-			} else {
-				// proceed as normal
-				XAddress modelAddress = XX.resolveModel(repoId, modelId);
-				log.info("Inspecting serialisation of " + modelAddress);
-				XydraPersistence persistence = Utils.getPersistence(repoId);
-				String key = PREFIX + modelAddress;
-				StorageOptions storeOpts = StorageOptions.create(cacheInInstance, cacheInMemcache,
-				        cacheInDatastore);
-				ModelEntry cached = MODELS.get(key, storeOpts);
-				if(cached != null
-				        && cached.getRev() == persistence.getModelRevision(modelAddress).revision()) {
-					// cache is up-to-date
-				} else {
-					// re-compute
-					if(useTaskQueue) {
-						UniversalTaskQueue.enqueueTask(task);
-					} else {
-						task.run();
-					}
+				if(msWeRanAlready + 2000 > GaeConstants.GAE_WEB_REQUEST_TIMEOUT) {
+					log.warn("Only 2 seconds left. Total time required = " + totalTimeRequired
+					        + " ms. Giving up.");
+					return false;
 				}
-				p.makeProgress(1);
 			}
+			// proceed as normal
+			XAddress modelAddress = XX.resolveModel(repoId, modelId);
+			String key = PREFIX + modelAddress;
+			StorageOptions storeOpts = StorageOptions.create(cacheInInstance, cacheInMemcache,
+			        cacheInDatastore);
 			
+			log.info("Inspecting serialisation of " + modelAddress);
+			XydraPersistence persistence = Utils.getPersistence(repoId);
+			ModelEntry cached = MODELS.get(key, storeOpts);
+			if(cached != null
+			        && cached.getRev() == persistence.getModelRevision(modelAddress).revision()) {
+				// cache is up-to-date
+			} else {
+				// re-compute
+				UniversalTaskQueue.NamedDeferredTask task = new UniversalTaskQueue.NamedDeferredTask() {
+					
+					private static final long serialVersionUID = 1L;
+					
+					@Override
+					public void run() {
+						XAddress modelAddress = XX.resolveModel(repoId, modelId);
+						String key = PREFIX + modelAddress;
+						StorageOptions storeOpts = StorageOptions.create(cacheInInstance,
+						        cacheInMemcache, cacheInDatastore);
+						
+						log.info("Computing serialisation of " + modelAddress);
+						XydraPersistence persistence = Utils.getPersistence(repoId);
+						XWritableModel model = persistence.getModelSnapshot(modelAddress);
+						long rev = model.getRevisionNumber();
+						String ser = ModelResource.computeSerialisation(model, style);
+						if(ser == null) {
+							log.warn("Serialisation of model " + modelAddress + " is null");
+						}
+						ModelEntry modelEntry = new ModelEntry();
+						modelEntry.init(rev, ser);
+						MODELS.put(key, modelEntry, storeOpts);
+					}
+					
+					@Override
+					public String getId() {
+						return modelId.toString();
+					}
+				};
+				if(useTaskQueue) {
+					UniversalTaskQueue.enqueueTask(task);
+				} else {
+					task.run();
+				}
+			}
+			p.makeProgress(1);
 		}
-		return true;
+		log.info("Processed " + p.getProgress() + " models out of " + modelIdList.size());
+		return !useTaskQueue;
 	}
 	
 	public static String getSerialisation(XAddress modelAddress, StorageOptions storeOpts) {
 		String key = PREFIX + modelAddress;
 		ModelEntry modelEntry = SerialisationCache.MODELS.get(key, storeOpts);
 		if(modelEntry == null) {
-			throw new RuntimeException("memcache was null for " + modelAddress
-			        + ". Maybe better use datastore instead?");
+			log.debug("Cache was null for " + modelAddress + ". Options used: " + storeOpts);
+			return null;
+		}
+		if(modelEntry.serialisation == null) {
+			log.debug("Serialisation in cache was null for " + modelAddress + ". Options used: "
+			        + storeOpts);
+			return null;
 		}
 		return modelEntry.serialisation;
 	}

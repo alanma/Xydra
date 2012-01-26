@@ -8,7 +8,15 @@
 	<version>${xydra.version}</version>
 	<!-- 'war' for web deployment, 'jar' for maven deploy -->
 	<!--  For embedding, make sure to have the static file /s/xml-to-html.xsl 
-	and /s/xyadmin.css -->
+	and /s/xyadmin.css 
+	
+	/!\
+	If you do this wrong and try to deploy, you'll get an exception like:
+	com.google.apphosting.utils.config.AppEngineWebXmlReader readAppEngineWebXml
+	Received exception processing .../webadmin-0.1.5-SNAPSHOT\WEB-INF/appengine-web.xml
+	com.google.apphosting.utils.config.AppEngineConfigException: Could not locate ...\webadmin-0.1.5-SNAPSHOT\WEB-INF\appengine-web.xml
+	Bad configuration: Could not locate ... Please see the logs
+	-->
 	<packaging>jar</packaging>
 	<name>Xydra Webadmin</name>
 

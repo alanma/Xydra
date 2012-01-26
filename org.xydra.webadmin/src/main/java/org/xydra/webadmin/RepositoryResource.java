@@ -48,21 +48,24 @@ public class RepositoryResource {
 		        new RestlessParameter("repoId"),
 		        new RestlessParameter("style", RStyle.html.name()),
 
-		        new RestlessParameter("useTaskQueue", "true"),
+		        new RestlessParameter("useTaskQueue", "false"),
 
-		        new RestlessParameter("cacheInInstance", "true"), new RestlessParameter(
-		                "cacheInMemcache", "true"),
+		        new RestlessParameter("cacheInInstance", "true"),
 
-		        new RestlessParameter("cacheInDatastore", "true")
+		        new RestlessParameter("cacheInMemcache", "false"),
+
+		        new RestlessParameter("cacheInDatastore", "false")
 
 		);
+		
+		// cacheInInstance=true&cacheInMemcache=false&cacheInDatastore=true
 		
 		restless.addMethod(prefix + "/{repoId}/", "POST", RepositoryResource.class, "update", true,
 		        new RestlessParameter("repoId"));
 	}
 	
 	public static enum RStyle {
-		html, htmlrevs, xmlzip
+		html, htmlrevs, xmlzip, xmldump
 	}
 	
 	/**
@@ -92,29 +95,41 @@ public class RepositoryResource {
 		RStyle style = RStyle.valueOf(styleStr);
 		XID repoId = XX.toId(repoIdStr);
 		XydraPersistence p = Utils.getPersistence(repoId);
-		if(style == RStyle.xmlzip) {
+		if(style == RStyle.xmlzip || style == RStyle.xmldump) {
 			List<XID> modelIdList = new ArrayList<XID>(p.getManagedModelIds());
 			// TODO we can use paging here to split work; BUT number of models
 			// might change.
 			Collections.sort(modelIdList);
 			boolean allUpToDate = SerialisationCache.updateAllModels(repoId, modelIdList,
-			        MStyle.xml, useTaskQueue, cacheInInstance, cacheInMemcache, cacheInDatastore);
+			        MStyle.xml, false, useTaskQueue, cacheInInstance, cacheInMemcache,
+			        cacheInDatastore);
 			if(allUpToDate) {
 				log.info("All model serialisations are up-to-date, generating zip");
 				String archivename = Utils.filenameOfNow("repo-" + repoId);
-				ZipOutputStream zos = Utils.toZipFileDownload(res, archivename);
-				for(XID modelId : modelIdList) {
-					XAddress modelAddress = XX.resolveModel(repoId, modelId);
-					String serialisation = SerialisationCache.getSerialisation(modelAddress,
-					        storeOpts);
-					ModelResource.writeToZipstreamDirectly(modelId, MStyle.xml, serialisation, zos);
+				if(style == RStyle.xmlzip) {
+					ZipOutputStream zos = Utils.toZipFileDownload(res, archivename);
+					for(XID modelId : modelIdList) {
+						XAddress modelAddress = XX.resolveModel(repoId, modelId);
+						String serialisation = SerialisationCache.getSerialisation(modelAddress,
+						        storeOpts);
+						ModelResource.writeToZipstreamDirectly(modelId, MStyle.xml, serialisation,
+						        zos);
+					}
+					zos.finish();
+				} else {
+					Writer w = HtmlUtils.startHtmlPage(res, "Xyadmin XML dump of repo " + repoId);
+					for(XID modelId : modelIdList) {
+						XAddress modelAddress = XX.resolveModel(repoId, modelId);
+						String serialisation = SerialisationCache.getSerialisation(modelAddress,
+						        storeOpts);
+						w.write(serialisation);
+					}
 				}
-				zos.finish();
 			} else {
 				Writer w = HtmlUtils.startHtmlPage(res, "Xyadmin Repo " + repoId);
 				w.write("Generating serialisations took too long. Watch task queue to finish and consider using different caching params.<br/>\n");
 				w.write(HtmlUtils.form(METHOD.GET, "").withHiddenInputText("", repoIdStr)
-				        .withHiddenInputText("", styleStr)
+				        .withHiddenInputText("style", styleStr)
 				        .withInputText("useTaskQueue", useTaskQueueStr)
 				        .withInputText("cacheInInstance", cacheInInstanceStr)
 				        .withInputText("cacheInMemcache", cacheInMemcacheStr)
@@ -130,7 +145,13 @@ public class RepositoryResource {
 			        
 			        + " | "
 			        + HtmlUtils.link(link(repoId) + "?style=" + RStyle.xmlzip.name(),
-			                "Download as xml.zip") + "<br/>\n");
+			                "Download as xml.zip")
+			        
+			        + " | "
+			        + HtmlUtils.link(link(repoId) + "?style=" + RStyle.xmldump.name(),
+			                "Dump as xml")
+
+			        + "<br/>\n");
 			
 			// upload form
 			w.write(HtmlUtils.form(METHOD.POST, link(repoId)).withInputFile("backupfile")

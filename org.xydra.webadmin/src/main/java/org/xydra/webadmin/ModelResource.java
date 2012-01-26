@@ -304,27 +304,39 @@ public class ModelResource {
 	public static void render(Writer w, XAddress modelAddress, MStyle style) throws IOException {
 		w.write(
 
-		HtmlUtils.link(modelAddress.getRepository().toString()) + " | " +
+		HtmlUtils.link("/admin" + WebadminResource.XYADMIN + "/"
+		        + modelAddress.getRepository().toString())
+		        + " | "
+		        +
 
-		HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.html, modelAddress.toString())
+		        HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.html,
+		                modelAddress.toString())
+		        
+		        + " | "
+		        + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.htmlrev, "Rev")
+		        
+		        + " | "
+		        + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.htmlevents, "Events")
+		        
+		        + " | "
+		        + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.htmlchanges, "Change log")
+		        
+		        + " | "
+		        + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.xmlhtml, "XML-as-HTML")
+		        
+		        + " | "
+		        + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.xml, "XML")
+		        
+		        + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.xml + "&download=true",
+		                ".zip")
+		        
+		        + " | "
+		        + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.json, "JSON")
+		        
+		        + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.json + "&download=true",
+		                ".zip")
 
-		+ " | " + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.htmlrev, "Rev")
-
-		+ " | " + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.htmlevents, "Events")
-
-		+ " | " + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.htmlchanges, "Change log")
-
-		+ " | " + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.xmlhtml, "XML-as-HTML")
-
-		+ " | " + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.xml, "XML")
-
-		+ HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.xml + "&download=true", ".zip")
-
-		+ " | " + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.json, "JSON")
-
-		+ HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.json + "&download=true", ".zip")
-
-		+ "<br/>\n");
+		        + "<br/>\n");
 		
 		if(style == MStyle.htmlevents || style == MStyle.htmlrev || style == MStyle.html) {
 			
