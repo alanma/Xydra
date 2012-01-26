@@ -2,7 +2,6 @@ package org.xydra.webadmin;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,9 +16,8 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XReadableModel;
-import org.xydra.base.rmof.XWritableModel;
 import org.xydra.core.util.Clock;
-import org.xydra.gae.UniversalTaskQueue;
+import org.xydra.core.util.ConfigUtils;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
@@ -30,10 +28,16 @@ import org.xydra.restless.utils.SharedHtmlUtils.METHOD;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
+import org.xydra.store.impl.gae.UniCache.StorageOptions;
 import org.xydra.webadmin.ModelResource.MStyle;
 import org.xydra.webadmin.ModelResource.SetStateResult;
 
 
+/**
+ * Can list all models in a repo; provides import/export for a whole model.
+ * 
+ * @author xamde
+ */
 public class RepositoryResource {
 	
 	public static final Logger log = LoggerFactory.getLogger(RepositoryResource.class);
@@ -41,7 +45,17 @@ public class RepositoryResource {
 	public static void restless(Restless restless, String prefix) {
 		
 		restless.addMethod(prefix + "/{repoId}/", "GET", RepositoryResource.class, "index", true,
-		        new RestlessParameter("repoId"), new RestlessParameter("style", RStyle.html.name()));
+		        new RestlessParameter("repoId"),
+		        new RestlessParameter("style", RStyle.html.name()),
+
+		        new RestlessParameter("useTaskQueue", "true"),
+
+		        new RestlessParameter("cacheInInstance", "true"), new RestlessParameter(
+		                "cacheInMemcache", "true"),
+
+		        new RestlessParameter("cacheInDatastore", "true")
+
+		);
 		
 		restless.addMethod(prefix + "/{repoId}/", "POST", RepositoryResource.class, "update", true,
 		        new RestlessParameter("repoId"));
@@ -51,134 +65,27 @@ public class RepositoryResource {
 		html, htmlrevs, xmlzip
 	}
 	
-	private static class Cache {
-		
-		private static final String PREFIX = "Serialised-";
-		
-		/**
-		 * Key = ModelAddress
-		 */
-		static class MemcacheSerialisedModelEntry implements Serializable {
-			private static final long serialVersionUID = -5945996390176658690L;
-			@SuppressWarnings("unused")
-			long time;
-			String serialisation;
-		}
-		
-		/**
-		 * Key = RepoId
-		 */
-		static class MemcacheSerialisedRepositoryEntry implements Serializable {
-			private static final long serialVersionUID = -3810056351260882859L;
-			long time;
-			@SuppressWarnings("unused")
-			List<XID> modelIdList;
-		}
-		
-		/**
-		 * RepoId + '-updatedModels'
-		 */
-		
-		public static boolean hasModelUpdateCountNotOlderThan(XID repoId, int modelCount,
-		        int maxMillisecondsAgo) {
-			String key = PREFIX + repoId + "-updatedModels";
-			Object o = XydraRuntime.getMemcache().get(key);
-			if(o != null) {
-				Long l = (Long)o;
-				if(l == modelCount) {
-					// check age
-					Object u = XydraRuntime.getMemcache().get(PREFIX + repoId);
-					if(u != null) {
-						MemcacheSerialisedRepositoryEntry repoEntry = (MemcacheSerialisedRepositoryEntry)u;
-						log.debug("repoEntry.time = " + repoEntry.time + " vs. now = "
-						        + System.currentTimeMillis());
-						return repoEntry.time + maxMillisecondsAgo > System.currentTimeMillis();
-					} else {
-						log.debug("no age info found");
-						return false;
-					}
-				} else {
-					log.debug("l=" + l + " but modelCount = " + modelCount);
-					return false;
-				}
-			} else {
-				log.debug("No cound found for repo " + repoId + " in memcache");
-				// set key to 0
-				XydraRuntime.getMemcache().put(key, new Long(0));
-				return false;
-			}
-		}
-		
-		public static void updateAllModels(long now, final XID repoId, List<XID> modelIdList,
-		        final MStyle style) {
-			String key = PREFIX + repoId + "-updatedModels";
-			XydraRuntime.getMemcache().put(key, new Long(0));
-			
-			MemcacheSerialisedRepositoryEntry repoEntry = new MemcacheSerialisedRepositoryEntry();
-			repoEntry.time = now;
-			repoEntry.modelIdList = modelIdList;
-			XydraRuntime.getMemcache().put(Cache.PREFIX + repoId, repoEntry);
-			
-			for(final XID modelId : modelIdList) {
-				// use task queue
-				UniversalTaskQueue.enqueueTask(new UniversalTaskQueue.NamedDeferredTask() {
-					
-					private static final long serialVersionUID = 1L;
-					
-					@Override
-					public void run() {
-						XAddress modelAddress = XX.resolveModel(repoId, modelId);
-						log.info("Executing update on " + modelAddress);
-						MemcacheSerialisedModelEntry modelEntry = new MemcacheSerialisedModelEntry();
-						modelEntry.time = System.currentTimeMillis();
-						XydraPersistence p = Utils.getPersistence(repoId);
-						XWritableModel model = p.getModelSnapshot(modelAddress);
-						
-						// TODO keep serialisation if no changes
-						modelEntry.serialisation = ModelResource.computeSerialisation(model, style);
-						XydraRuntime.getMemcache().put(PREFIX + modelAddress, modelEntry);
-						// update count
-						XydraRuntime.getMemcache()
-						        .incrementAll(
-						                Collections.singletonMap(
-						                        PREFIX + repoId + "-updatedModels", 1l), 0);
-						Object count = XydraRuntime.getMemcache().get(
-						        PREFIX + repoId + "-updatedModels");
-						log.debug("Current count = " + count);
-					}
-					
-					@Override
-					public String getId() {
-						return modelId.toString();
-					}
-				});
-			}
-		}
-		
-		public static String getSerialisation(XAddress modelAddress) {
-			MemcacheSerialisedModelEntry modelEntry = (MemcacheSerialisedModelEntry)XydraRuntime
-			        .getMemcache().get(PREFIX + modelAddress);
-			if(modelEntry == null) {
-				throw new RuntimeException("memcache was null for " + modelAddress
-				        + ". Maybe better use datastore instead?");
-			}
-			return modelEntry.serialisation;
-		}
-	}
-	
 	/**
 	 * @param repoIdStr never null
 	 * @param styleStr see {@link RStyle}
 	 * @param res ..
 	 * @throws IOException ...
 	 */
-	public static void index(String repoIdStr, String styleStr, HttpServletResponse res)
-	        throws IOException {
+	public static void index(String repoIdStr, String styleStr, String useTaskQueueStr,
+	        String cacheInInstanceStr, String cacheInMemcacheStr, String cacheInDatastoreStr,
+	        HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		XydraRuntime.startRequest();
 		log.trace("logtest: trace");
 		log.debug("logtest: debug");
 		log.info("logtest: info");
+		
+		boolean useTaskQueue = ConfigUtils.isTrue(useTaskQueueStr);
+		boolean cacheInInstance = ConfigUtils.isTrue(cacheInInstanceStr);
+		boolean cacheInMemcache = ConfigUtils.isTrue(cacheInMemcacheStr);
+		boolean cacheInDatastore = ConfigUtils.isTrue(cacheInDatastoreStr);
+		StorageOptions storeOpts = StorageOptions.create(cacheInInstance, cacheInMemcache,
+		        cacheInDatastore);
 		
 		Clock c = new Clock().start();
 		XAddress repoAddress = XX.resolveRepository(XX.toId(repoIdStr));
@@ -186,25 +93,33 @@ public class RepositoryResource {
 		XID repoId = XX.toId(repoIdStr);
 		XydraPersistence p = Utils.getPersistence(repoId);
 		if(style == RStyle.xmlzip) {
-			long now = System.currentTimeMillis();
 			List<XID> modelIdList = new ArrayList<XID>(p.getManagedModelIds());
+			// TODO we can use paging here to split work; BUT number of models
+			// might change.
 			Collections.sort(modelIdList);
-			int modelCount = modelIdList.size();
-			if(Cache.hasModelUpdateCountNotOlderThan(repoId, modelCount, 5 * 60 * 1000)) {
-				log.info("all models have been updated at least once not too long ago");
+			boolean allUpToDate = SerialisationCache.updateAllModels(repoId, modelIdList,
+			        MStyle.xml, useTaskQueue, cacheInInstance, cacheInMemcache, cacheInDatastore);
+			if(allUpToDate) {
+				log.info("All model serialisations are up-to-date, generating zip");
 				String archivename = Utils.filenameOfNow("repo-" + repoId);
 				ZipOutputStream zos = Utils.toZipFileDownload(res, archivename);
 				for(XID modelId : modelIdList) {
 					XAddress modelAddress = XX.resolveModel(repoId, modelId);
-					String serialisation = Cache.getSerialisation(modelAddress);
+					String serialisation = SerialisationCache.getSerialisation(modelAddress,
+					        storeOpts);
 					ModelResource.writeToZipstreamDirectly(modelId, MStyle.xml, serialisation, zos);
 				}
 				zos.finish();
 			} else {
-				Cache.updateAllModels(now, repoId, modelIdList, MStyle.xml);
-				// show a download link
-				Writer w = Utils.writeHeader(res, "Repo", repoAddress);
-				w.write("Generating export in the background. Reload this page before 5 minutes elapse (and watch task queue of this app/version to finish).");
+				Writer w = HtmlUtils.startHtmlPage(res, "Xyadmin Repo " + repoId);
+				w.write("Generating serialisations took too long. Watch task queue to finish and consider using different caching params.<br/>\n");
+				w.write(HtmlUtils.form(METHOD.GET, "").withHiddenInputText("", repoIdStr)
+				        .withHiddenInputText("", styleStr)
+				        .withInputText("useTaskQueue", useTaskQueueStr)
+				        .withInputText("cacheInInstance", cacheInInstanceStr)
+				        .withInputText("cacheInMemcache", cacheInMemcacheStr)
+				        .withInputText("cacheInDatastore", cacheInDatastoreStr)
+				        .withInputSubmit("Retry").toString());
 			}
 		} else {
 			// style HTML
