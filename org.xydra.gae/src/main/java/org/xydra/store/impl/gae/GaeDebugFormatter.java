@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map.Entry;
 
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.store.impl.gae.changes.GaeChange;
 import org.xydra.store.impl.gae.changes.GaeModelRevision;
 import org.xydra.store.impl.gae.changes.KeyStructure;
@@ -20,6 +21,8 @@ import com.google.appengine.api.datastore.Key;
  * @author xamde
  * 
  */
+// Runs in GWT via a super-source
+@RunsInGWT(false)
 public class GaeDebugFormatter {
 	
 	public static boolean canHandle(Object o) {
