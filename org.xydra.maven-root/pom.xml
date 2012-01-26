@@ -137,7 +137,7 @@
 				<configuration>
 					<!-- exclude files that don't need to be in the final war -->
 					<packagingExcludes>
-						<!-- Exclude GWT stuff -->
+						<!-- Exclude GWT source code -->
 						**/client/*.*,
 						<!-- Exclude GAE stuff -->
 						WEB-INF/classes/**/*.*,
@@ -617,7 +617,6 @@
 						<!-- <dependencies> <dependency> <groupId>net.kindleit</groupId> <artifactId>gae-runtime</artifactId> 
 							<version>${gae.version}</version> <type>pom</type> </dependency> </dependencies> -->
 					</plugin>
-
 				</plugins>
 			</build>
 
