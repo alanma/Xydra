@@ -2,6 +2,8 @@ package org.xydra.store.impl.gae;
 
 import java.io.Serializable;
 
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.store.XydraRuntime;
 
 import com.google.appengine.api.datastore.Entity;
@@ -19,6 +21,8 @@ import com.google.appengine.api.datastore.KeyFactory;
  * @param <T> type
  */
 public class UniCache<T> {
+	
+	public static final Logger log = LoggerFactory.getLogger(UniCache.class);
 	
 	public static class StorageOptions {
 		boolean instance;
@@ -40,6 +44,12 @@ public class UniCache<T> {
 			so.memcache = memcache;
 			so.datastore = datastore;
 			return so;
+		}
+		
+		@Override
+		public String toString() {
+			return "instance:" + this.instance + "," + "memcache:" + this.memcache + ","
+			        + "datastore:" + this.datastore;
 		}
 	}
 	
@@ -80,12 +90,14 @@ public class UniCache<T> {
 		if(storeOpts.instance) {
 			Object o = InstanceContext.getInstanceCache().get(key);
 			if(o != null) {
+				log.debug("Return " + key + " from instance cache");
 				return (T)o;
 			}
 		}
 		if(storeOpts.memcache) {
 			Object o = XydraRuntime.getMemcache().get(key);
 			if(o != null) {
+				log.debug("Return " + key + " from memcache");
 				return this.entryHandler.fromSerializable((Serializable)o);
 			}
 		}
@@ -93,10 +105,12 @@ public class UniCache<T> {
 			Key datastoreKey = createCacheKey(key);
 			Entity entity = SyncDatastore.getEntity(datastoreKey);
 			if(entity != null) {
+				log.debug("Return " + key + " from datastore XCACHE entity");
 				return this.entryHandler.fromEntity(entity);
 			}
 		}
 		
+		log.debug(key + " not found in any cache. Opts: " + storeOpts);
 		return null;
 	}
 	
