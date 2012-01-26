@@ -1,17 +1,9 @@
 package org.xydra.core.serialize.rdf;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
-import org.xydra.base.XX;
-import org.xydra.base.minio.MiniStreamWriter;
 import org.xydra.base.minio.MiniWriter;
 import org.xydra.base.value.ValueType;
-import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
-import org.xydra.core.model.XField;
-import org.xydra.core.model.XModel;
-import org.xydra.core.model.XObject;
-import org.xydra.core.model.impl.memory.MemoryModel;
 
 
 public class NTriplesWriter {
@@ -82,18 +74,6 @@ public class NTriplesWriter {
 		default:
 			throw new AssertionError("");
 		}
-	}
-	
-	public static void main(String[] args) {
-		MiniWriter writer = new MiniStreamWriter(System.out);
-		NTriplesWriter nt = new NTriplesWriter(writer, "http://localhost:8765/admin/rdf");
-		XID actorId = XX.toId("actor");
-		XModel model = new MemoryModel(actorId, "secret", XX.toId("model1"));
-		XObject john = model.createObject(XX.toId("john"));
-		XField phone = john.createField(XX.toId("phone"));
-		phone.setValue(XV.toValue(1877));
-		nt.triple(john.getAddress(), phone.getAddress(), model.getAddress());
-		nt.flush();
 	}
 	
 	public void flush() {

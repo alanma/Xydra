@@ -16,6 +16,7 @@
 		<exclude name="model/tutorial/*" />
 		<exclude name="serialize/xml/XmlElement.java" />
 		<exclude name="serialize/xml/XmlParser.java" />
+		<exclude name="util/RegExUtil.java" />
 	</source>
 	
 </module>
