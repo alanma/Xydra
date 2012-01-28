@@ -160,7 +160,7 @@ public class XModelObjectLevelIndex {
 		}
 	}
 	
-	public void deIndexObjectByAddress(XAddress objectAddress) {
+	public void deIndex(XAddress objectAddress) {
 		if(objectAddress.getAddressedType() != XType.XOBJECT) {
 			throw new RuntimeException("objectAddress is no valid Object-XAddress, but an "
 			        + objectAddress.getAddressedType() + "-Address.");

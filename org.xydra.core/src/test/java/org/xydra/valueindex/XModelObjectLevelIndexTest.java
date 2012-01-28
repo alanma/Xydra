@@ -1,6 +1,7 @@
 package org.xydra.valueindex;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
@@ -16,6 +17,8 @@ import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectEvent;
+import org.xydra.base.rmof.XReadableField;
+import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.value.XValue;
 import org.xydra.core.DemoModelUtil;
 import org.xydra.core.model.XField;
@@ -678,6 +681,64 @@ public abstract class XModelObjectLevelIndexTest {
 		for(String s : indexStrings) {
 			List<XAddress> found = this.newIndex.search(s);
 			assertTrue(found.isEmpty());
+		}
+	}
+	
+	@Test
+	public void testDeIndexObject() {
+		XReadableObject newJohn = this.newModel.getObject(DemoModelUtil.JOHN_ID);
+		this.newIndex.deIndex(newJohn);
+		
+		testIfObjectWasDeIndexed(newJohn);
+	}
+	
+	@Test
+	public void testDeIndexObjectByAddress() {
+		XReadableObject newJohn = this.newModel.getObject(DemoModelUtil.JOHN_ID);
+		this.newIndex.deIndex(newJohn.getAddress());
+		
+		testIfObjectWasDeIndexed(newJohn);
+	}
+	
+	@Test
+	public void testDeIndexField() {
+		XReadableObject newJohn = this.newModel.getObject(DemoModelUtil.JOHN_ID);
+		
+		for(XID fieldId : newJohn) {
+			XReadableField field = newJohn.getField(fieldId);
+			this.newIndex.deIndex(field);
+		}
+		
+		// deindexing all fields equals deindexing the whole object
+		testIfObjectWasDeIndexed(newJohn);
+	}
+	
+	@Test
+	public void testDeIndexFieldWithAddress() {
+		XReadableObject newJohn = this.newModel.getObject(DemoModelUtil.JOHN_ID);
+		XAddress johnAddress = newJohn.getAddress();
+		
+		for(XID fieldId : newJohn) {
+			XReadableField field = newJohn.getField(fieldId);
+			this.newIndex.deIndex(johnAddress, field);
+		}
+		
+		// deindexing all fields equals deindexing the whole object
+		testIfObjectWasDeIndexed(newJohn);
+	}
+	
+	private void testIfObjectWasDeIndexed(XReadableObject object) {
+		XAddress objectAddress = object.getAddress();
+		
+		for(XID fieldId : object) {
+			XValue value = object.getField(fieldId).getValue();
+			List<String> indexStrings = this.newIndexer.getIndexStrings(value);
+			
+			for(String s : indexStrings) {
+				List<XAddress> addresses = this.newIndex.search(s);
+				
+				assertFalse(addresses.contains(objectAddress));
+			}
 		}
 	}
 }
