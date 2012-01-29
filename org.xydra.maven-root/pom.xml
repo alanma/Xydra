@@ -548,6 +548,7 @@
 							<!-- The directory into which extra, non-deployed files will be written. -->
 							<extra>${project.build.directory}/gwt-extra</extra>
 							<extraParam>true</extraParam>
+							<workDir>${project.build.directory}/gwt-compile-temp</workDir>
 						</configuration>
 						<executions>
 							<execution>
