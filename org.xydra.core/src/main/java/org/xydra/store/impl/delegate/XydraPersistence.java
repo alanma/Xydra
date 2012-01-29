@@ -130,7 +130,7 @@ public interface XydraPersistence {
 	 * @param address of an {@link XModel}
 	 * @return Pair.first: the current revision number of the addressed
 	 *         {@link XModel}. Pair.second: If the model currently exists or
-	 *         not.
+	 *         not. Or return null if not known.
 	 */
 	ModelRevision getModelRevision(XAddress address);
 	
