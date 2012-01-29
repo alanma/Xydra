@@ -7,7 +7,6 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableModel;
-import org.xydra.core.util.Clock;
 import org.xydra.gae.UniversalTaskQueue;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -92,42 +91,6 @@ public class SerialisationCache {
 			return (ModelEntry)s;
 		}
 		
-	}
-	
-	public static class Progress {
-		private Clock clock = new Clock();
-		private long count = 0;
-		
-		public void startTime() {
-			this.clock.start();
-		}
-		
-		public void makeProgress(long howMuch) {
-			this.count += howMuch;
-		}
-		
-		public double getMsPerProgress() {
-			return ((double)this.clock.getDurationSinceStart()) / ((double)this.count);
-		}
-		
-		public long willTakeMsUntilProgressIs(long howMuchTotal) {
-			return (long)(howMuchTotal * getMsPerProgress());
-		}
-		
-		public long getProgress() {
-			return this.count;
-		}
-		
-		public long getMsSinceStart() {
-			return this.clock.getDurationSinceStart();
-		}
-		
-		@Override
-		public String toString() {
-			return "Running for " + getMsSinceStart() + "ms and made " + this.count
-			        + " progress; that's " + getMsPerProgress() + "ms for each.";
-			
-		}
 	}
 	
 	/**

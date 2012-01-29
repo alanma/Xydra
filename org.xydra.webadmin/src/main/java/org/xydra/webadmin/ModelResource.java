@@ -58,6 +58,7 @@ import org.xydra.store.impl.gae.changes.GaeChangesServiceImpl3;
 public class ModelResource {
 	
 	public static final Logger log = LoggerFactory.getLogger(ModelResource.class);
+	private static final String UTF8 = "UTF-8";
 	
 	public static enum MStyle {
 		html, htmlrev, htmlevents, link, xml, json, xmlhtml, /**
@@ -221,7 +222,7 @@ public class ModelResource {
 			        + "] ...</br>");
 			w.flush();
 			
-			SetStateResult result = ModelResource.setStateFrom(repoId, model);
+			SetStateResult result = ModelResource.setStateFrom(repoId, model, false);
 			log.info("" + result);
 			c.stopAndStart("applied-" + model.getID());
 			w.write("... applied to server repository " + result + ".</br>");
@@ -245,7 +246,7 @@ public class ModelResource {
 	        throws IOException {
 		ZipEntry e = new ZipEntry(getStorageName(model.getID(), style));
 		zos.putNextEntry(e);
-		OutputStreamWriter w = new OutputStreamWriter(zos);
+		OutputStreamWriter w = new OutputStreamWriter(zos, UTF8);
 		XydraSerializer serializer = null;
 		if(style == MStyle.xml) {
 			serializer = new XmlSerializer();
@@ -260,7 +261,7 @@ public class ModelResource {
 	        ZipOutputStream zos) throws IOException {
 		ZipEntry e = new ZipEntry(getStorageName(modelId, style));
 		zos.putNextEntry(e);
-		OutputStreamWriter w = new OutputStreamWriter(zos);
+		OutputStreamWriter w = new OutputStreamWriter(zos, UTF8);
 		w.write(serialisation);
 		w.flush();
 		zos.closeEntry();
@@ -380,15 +381,28 @@ public class ModelResource {
 	/**
 	 * @param repoId where to add
 	 * @param model which has a weird address with NO repositoryId
+	 * @param overwriteIfSameRevPresent TODO
 	 * @return some statistical information
 	 */
-	public static SetStateResult setStateFrom(XID repoId, XReadableModel model) {
+	public static SetStateResult setStateFrom(XID repoId, XReadableModel model,
+	        boolean overwriteIfSameRevPresent) {
 		log.debug("Set state from " + model.getAddress() + " to " + repoId);
 		XydraPersistence p = Utils.getPersistence(repoId);
 		SetStateResult result = new SetStateResult();
 		
 		XID actor = XX.toId("ModelResource");
 		XAddress modelAddress = XX.resolveModel(repoId, model.getID());
+		
+		ModelRevision modelRev = p.getModelRevision(modelAddress);
+		if(modelRev != null) {
+			if(!overwriteIfSameRevPresent && model.getRevisionNumber() == modelRev.revision()) {
+				log.debug("Model already stored.");
+				result.changes = false;
+				result.modelExisted = true;
+				return result;
+			}
+		}
+		// else
 		XReadableModel oldModel = p.getModelSnapshot(modelAddress);
 		if(oldModel != null) {
 			result.modelExisted = true;
@@ -437,7 +451,7 @@ public class ModelResource {
 		assert name.endsWith(XFile.MODEL_SUFFIX);
 		
 		// Read the file into a string.
-		Reader r = new InputStreamReader(zis, "UTF-8");
+		Reader r = new InputStreamReader(zis, UTF8);
 		String xml = IOUtils.toString(r);
 		
 		// Parse the model.

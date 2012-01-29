@@ -18,6 +18,7 @@ import org.xydra.base.XX;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.core.util.Clock;
 import org.xydra.core.util.ConfigUtils;
+import org.xydra.gae.UniversalUrlFetch;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
@@ -44,6 +45,14 @@ public class RepositoryResource {
 	
 	public static void restless(Restless restless, String prefix) {
 		
+		restless.addMethod(prefix + "/{repoId}", "GET", RepositoryResource.class, "foreach", true,
+
+		new RestlessParameter("repoId"),
+
+		new RestlessParameter("foreachmodel")
+
+		);
+		
 		restless.addMethod(prefix + "/{repoId}/", "GET", RepositoryResource.class, "index", true,
 		        new RestlessParameter("repoId"),
 		        new RestlessParameter("style", RStyle.html.name()),
@@ -62,10 +71,38 @@ public class RepositoryResource {
 		
 		restless.addMethod(prefix + "/{repoId}/", "POST", RepositoryResource.class, "update", true,
 		        new RestlessParameter("repoId"));
+		
 	}
 	
 	public static enum RStyle {
 		html, htmlrevs, xmlzip, xmldump
+	}
+	
+	public static void foreach(String repoId, String foreachmodel, HttpServletResponse res)
+	        throws IOException {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		XydraRuntime.startRequest();
+		Writer w = HtmlUtils.startHtmlPage(res, "For-each model");
+		w.write("For-each model in repo " + repoId + " use param " + foreachmodel + "<br/>\n");
+		w.flush();
+		XydraPersistence p = Utils.getPersistence(XX.toId(repoId));
+		List<XID> modelIdList = new ArrayList<XID>(p.getManagedModelIds());
+		Collections.sort(modelIdList);
+		Progress progress = new Progress();
+		progress.startTime();
+		for(XID modelId : modelIdList) {
+			String urlStr = foreachmodel + "?modelAddress=" + modelId;
+			w.write("Calling " + urlStr + " ... ");
+			w.flush();
+			UniversalUrlFetch.callUrlAsync(urlStr);
+			progress.makeProgress(1);
+			w.write(" fired. Seconds left: "
+			        + (progress.willTakeMsUntilProgressIs(modelIdList.size()) / 1000) + "<br/>\n");
+			w.flush();
+		}
+		w.write("Done with all.<br/>\n");
+		w.flush();
+		XydraRuntime.finishRequest();
 	}
 	
 	/**
@@ -178,6 +215,7 @@ public class RepositoryResource {
 			w.close();
 		}
 		log.info(c.stop("index").getStats());
+		XydraRuntime.finishRequest();
 	}
 	
 	public static void update(String repoIdStr, HttpServletRequest req, HttpServletResponse res)
@@ -210,7 +248,7 @@ public class RepositoryResource {
 			        + "] ...</br>");
 			w.flush();
 			
-			SetStateResult result = ModelResource.setStateFrom(repoId, model);
+			SetStateResult result = ModelResource.setStateFrom(repoId, model, false);
 			log.info("" + result);
 			c.stopAndStart("applied-" + model.getID());
 			modelExisted += result.modelExisted ? 1 : 0;
@@ -223,10 +261,11 @@ public class RepositoryResource {
 		w.write("... Done</br>");
 		String stats = "Restored: " + restored + ", existed before: " + modelExisted
 		        + ", noChangesIn:" + modelsWithChanges;
-		w.write(stats + "</br>");
+		w.write(stats + " " + c.getStats() + "</br>");
 		w.flush();
 		w.close();
 		log.info("Stats: " + stats + " " + c.getStats());
+		XydraRuntime.finishRequest();
 	}
 	
 	public static String link(XID repoId) {
