@@ -11,7 +11,7 @@ import com.google.appengine.api.taskqueue.TaskOptions;
 
 
 /**
- * TODO try to get this to run on appengine, in plain java
+ * TODO try to get this to run on gwt
  * 
  * @author xamde
  * 

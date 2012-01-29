@@ -112,7 +112,7 @@ public class GaeModelPersistence {
 	 * asking thread, until that thread terminates or does a change. Or
 	 * {@link InstanceContext#clearThreadContext()} is called.
 	 * 
-	 * @return the current {@link ModelRevision}
+	 * @return the current {@link ModelRevision} or null
 	 */
 	public ModelRevision getModelRevision() {
 		assertThreadLocalRevisionNumberIsUpToDate();
