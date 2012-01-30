@@ -83,7 +83,7 @@ public class RegExUtil {
 	public static final String JAVA_PUNCT = "\\p{Punct}";
 	
 	/** Java + ECMA, same as {@link #JAVA_PUNCT} */
-	public static final String PUNCT = "[!\"#$%&'()*+,-./:;<=>?@\\[\\\\]^_`{|}~]";
+	public static final String PUNCT = "[-!\"#$%&'()*+,./:;<=>?@\\[\\\\]^_`{|}~]";
 	
 	/** ECMA: '[ \t]' */
 	public static final String JAVA_BLANK = "\\p{Blank}";
