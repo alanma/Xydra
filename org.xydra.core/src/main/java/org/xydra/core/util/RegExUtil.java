@@ -56,6 +56,10 @@ public class RegExUtil {
 		return result;
 	}
 	
+	/**
+	 * Character class for UniCode punctuation (all planes with 'punctuation' in
+	 * their name)
+	 */
 	public static final String UNIVERSAL_PUNCTUATION = "[\\u2000-\\u206F\\u2070-\\u209F\\u20A0-\\u20CF\\u2E00-\\u2E7F\\u3000-\\u303F]";
 	
 	/** ECMA: Within ASCII: '[a-z]' */
