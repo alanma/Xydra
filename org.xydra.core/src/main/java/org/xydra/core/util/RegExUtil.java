@@ -9,6 +9,13 @@ import org.xydra.annotations.RunsInGWT;
  * Syntax defined in <a
  * href="http://www.w3.org/TR/xpath-functions/#regex-syntax">here</a> and most
  * is taken from <a href="http://www.w3.org/TR/xmlschema-2/#regexs">here</a>.
+ * 
+ * Note on ECMA script regex: Always escape '/' as '\/' (in Java: '\\/') to
+ * avoid it being interpreted as a regex delimiter.
+ * 
+ * Take care of these characters in character classes: ']' can only be the first
+ * char; '-' should be the last char; '^' may not be the first char, put in
+ * middle.
  */
 @RunsInGWT(true)
 public class RegExUtil {
@@ -82,8 +89,10 @@ public class RegExUtil {
 	/** One of <tt>!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~<tt> */
 	public static final String JAVA_PUNCT = "\\p{Punct}";
 	
-	/** Java + ECMA, same as {@link #JAVA_PUNCT} */
-	public static final String PUNCT = "[-!\"#$%&'()*+,./:;<=>?@\\[\\\\]^_`{|}~]";
+	/**
+	 * Java + ECMA, same as {@link #JAVA_PUNCT}
+	 */
+	public static final String PUNCT = "[-!\"#$%&'()*+,.\\/:;<=>?@\\[\\\\]^_`{|}~]";
 	
 	/** ECMA: '[ \t]' */
 	public static final String JAVA_BLANK = "\\p{Blank}";
