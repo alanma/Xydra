@@ -14,6 +14,7 @@ import org.xydra.index.query.KeyEntryTuple;
 public class StringValueIndex implements IMapSetIndex<String,ValueIndexEntry> {
 	private static final long serialVersionUID = -5366154192053454730L;
 	
+	@SuppressWarnings("unused")
 	private StringMap map;
 	
 	public StringValueIndex(StringMap map) {
@@ -39,8 +40,7 @@ public class StringValueIndex implements IMapSetIndex<String,ValueIndexEntry> {
 	}
 	
 	@Override
-	public boolean contains(Constraint<String> c1,
-	        Constraint<ValueIndexEntry> entryConstraint) {
+	public boolean contains(Constraint<String> c1, Constraint<ValueIndexEntry> entryConstraint) {
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -70,8 +70,8 @@ public class StringValueIndex implements IMapSetIndex<String,ValueIndexEntry> {
 	}
 	
 	@Override
-	public Iterator<KeyEntryTuple<String,ValueIndexEntry>> tupleIterator(
-	        Constraint<String> c1, Constraint<ValueIndexEntry> entryConstraint) {
+	public Iterator<KeyEntryTuple<String,ValueIndexEntry>> tupleIterator(Constraint<String> c1,
+	        Constraint<ValueIndexEntry> entryConstraint) {
 		// TODO Auto-generated method stub
 		return null;
 	}
