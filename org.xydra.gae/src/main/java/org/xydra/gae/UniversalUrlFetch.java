@@ -29,10 +29,12 @@ public class UniversalUrlFetch {
 			URLFetchService service = URLFetchServiceFactory.getURLFetchService();
 			service.fetchAsync(new URL(urlStr));
 		} else {
+			// TODO dont keep connections open (maybe we do that here)
 			HttpGet request = new HttpGet(urlStr);
 			DefaultHttpClient httpClient = new DefaultHttpClient();
 			try {
 				httpClient.execute(request);
+				request.abort();
 			} catch(ClientProtocolException e) {
 				throw new RuntimeException(e);
 			}
