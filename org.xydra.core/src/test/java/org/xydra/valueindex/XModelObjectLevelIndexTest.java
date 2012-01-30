@@ -44,12 +44,13 @@ public abstract class XModelObjectLevelIndexTest {
 	/*
 	 * TODO initialize the index and indexer!
 	 */
-	private XModelObjectLevelIndex oldIndex;
-	private XModelObjectLevelIndex newIndex;
-	private XValueIndexer oldIndexer;
-	private XValueIndexer newIndexer;
+	protected XModelObjectLevelIndex oldIndex;
+	protected XModelObjectLevelIndex newIndex;
+	protected XValueIndexer oldIndexer;
+	protected XValueIndexer newIndexer;
 	
-	public abstract void initializeIndex(XModel model, XValueIndexer indexer);
+	public abstract void initializeIndexes(XModel oldModel, XModel newModel,
+	        XValueIndexer oldIndexer, XValueIndexer newIndexer);
 	
 	public abstract void initializeIndexers();
 	
@@ -69,8 +70,7 @@ public abstract class XModelObjectLevelIndexTest {
 		
 		initializeIndexers();
 		
-		initializeIndex(this.oldModel, this.oldIndexer);
-		initializeIndex(this.newModel, this.newIndexer);
+		initializeIndexes(this.oldModel, this.newModel, this.oldIndexer, this.newIndexer);
 	}
 	
 	@Test
