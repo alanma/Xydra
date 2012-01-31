@@ -53,6 +53,9 @@ public abstract class StringValueSimpleIndexerAdapter extends XValueIndexer {
 		/*
 		 * TODO Maybe index the single IDs too?
 		 */
+		if(value == null) {
+			return "null";
+		}
 		return "" + value.toString();
 	}
 }

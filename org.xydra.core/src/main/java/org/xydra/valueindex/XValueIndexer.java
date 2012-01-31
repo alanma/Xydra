@@ -33,6 +33,10 @@ import org.xydra.index.query.EqualsConstraint;
  * TODO Document
  */
 
+/*
+ * FIXME Deal with "null" values!! (make it consistent)
+ */
+
 public abstract class XValueIndexer {
 	private IMapSetIndex<String,ValueIndexEntry> index;
 	
@@ -45,73 +49,82 @@ public abstract class XValueIndexer {
 	}
 	
 	public void indexValue(XAddress objectAddress, XValue value) {
-		switch(value.getType()) {
-		case Address:
-			indexAddress(objectAddress, value, (XAddress)value);
-			break;
-		case AddressList:
-			indexAddressArray(objectAddress, value, ((XAddressListValue)value).contents());
-			break;
-		
-		case AddressSet:
-			indexAddressArray(objectAddress, value, ((XAddressSetValue)value).contents());
-			break;
-		case AddressSortedSet:
-			indexAddressArray(objectAddress, value, ((XAddressSortedSetValue)value).contents());
-			break;
-		case Boolean:
-			indexBoolean(objectAddress, value, ((XBooleanValue)value).contents());
-			break;
-		case BooleanList:
-			indexBooleanArray(objectAddress, value, ((XBooleanListValue)value).contents());
-			break;
-		case ByteList:
-			indexByteArray(objectAddress, value, ((XByteListValue)value).contents());
-			break;
-		case Double:
-			indexDouble(objectAddress, value, ((XDoubleValue)value).contents());
-			break;
-		case DoubleList:
-			indexDoubleArray(objectAddress, value, ((XDoubleListValue)value).contents());
-			break;
-		case Id:
-			indexId(objectAddress, value, (XID)value);
-			break;
-		case IdList:
-			indexIdArray(objectAddress, value, ((XIDListValue)value).contents());
-			break;
-		case IdSet:
-			indexIdArray(objectAddress, value, ((XIDSetValue)value).contents());
-			break;
-		case IdSortedSet:
-			indexIdArray(objectAddress, value, ((XIDSortedSetValue)value).contents());
-			break;
-		case Integer:
-			indexInteger(objectAddress, value, ((XIntegerValue)value).contents());
-			break;
-		case IntegerList:
-			indexIntegerArray(objectAddress, value, ((XIntegerListValue)value).contents());
-			break;
-		case Long:
-			indexLong(objectAddress, value, ((XLongValue)value).contents());
-			break;
-		case LongList:
-			indexLongArray(objectAddress, value, ((XLongListValue)value).contents());
-			break;
-		case String:
-			indexString(objectAddress, value, ((XStringValue)value).contents());
-			break;
-		case StringList:
-			indexStringArray(objectAddress, value, ((XStringListValue)value).contents());
-			break;
-		case StringSet:
-			indexStringArray(objectAddress, value, ((XStringSetValue)value).contents());
-			break;
+		if(value == null) {
+			indexString(objectAddress, value, "null");
+		} else {
+			switch(value.getType()) {
+			case Address:
+				indexAddress(objectAddress, value, (XAddress)value);
+				break;
+			case AddressList:
+				indexAddressArray(objectAddress, value, ((XAddressListValue)value).contents());
+				break;
+			
+			case AddressSet:
+				indexAddressArray(objectAddress, value, ((XAddressSetValue)value).contents());
+				break;
+			case AddressSortedSet:
+				indexAddressArray(objectAddress, value, ((XAddressSortedSetValue)value).contents());
+				break;
+			case Boolean:
+				indexBoolean(objectAddress, value, ((XBooleanValue)value).contents());
+				break;
+			case BooleanList:
+				indexBooleanArray(objectAddress, value, ((XBooleanListValue)value).contents());
+				break;
+			case ByteList:
+				indexByteArray(objectAddress, value, ((XByteListValue)value).contents());
+				break;
+			case Double:
+				indexDouble(objectAddress, value, ((XDoubleValue)value).contents());
+				break;
+			case DoubleList:
+				indexDoubleArray(objectAddress, value, ((XDoubleListValue)value).contents());
+				break;
+			case Id:
+				indexId(objectAddress, value, (XID)value);
+				break;
+			case IdList:
+				indexIdArray(objectAddress, value, ((XIDListValue)value).contents());
+				break;
+			case IdSet:
+				indexIdArray(objectAddress, value, ((XIDSetValue)value).contents());
+				break;
+			case IdSortedSet:
+				indexIdArray(objectAddress, value, ((XIDSortedSetValue)value).contents());
+				break;
+			case Integer:
+				indexInteger(objectAddress, value, ((XIntegerValue)value).contents());
+				break;
+			case IntegerList:
+				indexIntegerArray(objectAddress, value, ((XIntegerListValue)value).contents());
+				break;
+			case Long:
+				indexLong(objectAddress, value, ((XLongValue)value).contents());
+				break;
+			case LongList:
+				indexLongArray(objectAddress, value, ((XLongListValue)value).contents());
+				break;
+			case String:
+				indexString(objectAddress, value, ((XStringValue)value).contents());
+				break;
+			case StringList:
+				indexStringArray(objectAddress, value, ((XStringListValue)value).contents());
+				break;
+			case StringSet:
+				indexStringArray(objectAddress, value, ((XStringSetValue)value).contents());
+				break;
+			}
 		}
 	}
 	
 	public List<String> getIndexStrings(XValue value) {
 		ArrayList<String> list = new ArrayList<String>();
+		
+		if(value == null) {
+			list.add("null");
+			return list;
+		}
 		
 		switch(value.getType()) {
 		case Address:

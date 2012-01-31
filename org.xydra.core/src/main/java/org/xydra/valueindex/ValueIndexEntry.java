@@ -12,6 +12,10 @@ public class ValueIndexEntry {
 	private Integer counter;
 	
 	public ValueIndexEntry(XAddress address, XValue value, Integer counter) {
+		if(address == null || counter == null) {
+			throw new RuntimeException("address or counter must not be null");
+		}
+		
 		this.address = address;
 		this.value = value;
 		this.counter = counter;
@@ -38,6 +42,19 @@ public class ValueIndexEntry {
 	}
 	
 	public boolean equalAddressAndValue(XAddress address, XValue value) {
+		if(address == null) {
+			return false;
+		}
+		
+		if(this.value == null) {
+			if(value != null) {
+				return false;
+			} else {
+				return this.address.equals(address);
+			}
+			
+		}
+		
 		return this.address.equals(address) && this.value.equals(value);
 	}
 }

@@ -225,7 +225,7 @@ public abstract class XModelObjectLevelIndexTest {
 			XEvent event = listener.event;
 			
 			assertTrue(event instanceof XFieldEvent);
-			assertEquals(ChangeType.ADD, event.getChangeType());
+			assertEquals(ChangeType.REMOVE, event.getChangeType());
 			assertEquals(newTitleField.getAddress(), event.getChangedEntity());
 			
 			this.newIndex.updateIndex(event);
