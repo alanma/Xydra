@@ -2,6 +2,7 @@ package org.xydra.webadmin;
 
 import org.xydra.core.util.Clock;
 
+
 public class Progress {
 	private Clock clock = new Clock();
 	private long count = 0;
@@ -19,7 +20,7 @@ public class Progress {
 	}
 	
 	public long willTakeMsUntilProgressIs(long howMuchTotal) {
-		return (long)(howMuchTotal * getMsPerProgress());
+		return (long)(howMuchTotal * getMsPerProgress()) - getMsSinceStart();
 	}
 	
 	public long getProgress() {

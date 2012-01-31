@@ -49,7 +49,11 @@ public class RepositoryResource {
 
 		new RestlessParameter("repoId"),
 
-		new RestlessParameter("foreachmodel")
+		new RestlessParameter("foreachmodel"),
+
+		new RestlessParameter("username", null),
+
+		new RestlessParameter("password", "")
 
 		);
 		
@@ -78,25 +82,38 @@ public class RepositoryResource {
 		html, htmlrevs, xmlzip, xmldump
 	}
 	
-	public static void foreach(String repoId, String foreachmodel, HttpServletResponse res)
-	        throws IOException {
+	/**
+	 * @param repoId never null
+	 * @param foreachmodel a URL to be called for each model. Will get appended
+	 *            a param 'modelAddress' with the currents model's address
+	 * @param username if not null, is used for basic authentication against url
+	 *            in foreachmodel
+	 * @param password if not null, is used for basic authentication against url
+	 *            in foreachmodel
+	 * @param res where to print status infos
+	 * @throws IOException ...
+	 */
+	public static void foreach(String repoId, String foreachmodel, String username,
+	        String password, HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		XydraRuntime.startRequest();
 		Writer w = HtmlUtils.startHtmlPage(res, "For-each model");
 		w.write("For-each model in repo " + repoId + " use param " + foreachmodel + "<br/>\n");
 		w.flush();
-		XydraPersistence p = Utils.getPersistence(XX.toId(repoId));
+		XID repositoryId = XX.toId(repoId);
+		XydraPersistence p = Utils.getPersistence(repositoryId);
 		List<XID> modelIdList = new ArrayList<XID>(p.getManagedModelIds());
 		Collections.sort(modelIdList);
 		Progress progress = new Progress();
 		progress.startTime();
 		for(XID modelId : modelIdList) {
-			String urlStr = foreachmodel + "?modelAddress=" + modelId;
+			XAddress modelAddress = XX.resolveModel(repositoryId, modelId);
+			String urlStr = foreachmodel + "?modelAddress=" + modelAddress;
 			w.write("Calling " + urlStr + " ... ");
 			w.flush();
-			UniversalUrlFetch.callUrlAsync(urlStr);
+			int result = UniversalUrlFetch.callUrl(urlStr, username, password);
 			progress.makeProgress(1);
-			w.write(" fired. Seconds left: "
+			w.write(" => " + result + ". Seconds left: "
 			        + (progress.willTakeMsUntilProgressIs(modelIdList.size()) / 1000) + "<br/>\n");
 			w.flush();
 		}
