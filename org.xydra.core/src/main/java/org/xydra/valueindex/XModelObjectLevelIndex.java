@@ -195,9 +195,15 @@ public class XModelObjectLevelIndex {
 	
 	public List<XAddress> search(String key) {
 		// IMPROVE rather simple search algorithm at the moment...
+		
+		/*
+		 * the index uses lower case strings only, so we need to transform the
+		 * given key appropriately
+		 */
+		String indexKey = key.toLowerCase();
 		LinkedList<XAddress> list = new LinkedList<XAddress>();
 		
-		EqualsConstraint<String> constraint = new EqualsConstraint<String>(key);
+		EqualsConstraint<String> constraint = new EqualsConstraint<String>(indexKey);
 		Iterator<ValueIndexEntry> iterator = this.index.constraintIterator(constraint);
 		
 		while(iterator.hasNext()) {

@@ -50,6 +50,7 @@ public abstract class XValueIndexer {
 	
 	public void indexValue(XAddress objectAddress, XValue value) {
 		if(value == null) {
+			// TODO handle null values (consistently in the whole indexer)
 			indexString(objectAddress, value, "null");
 		} else {
 			switch(value.getType()) {
@@ -244,67 +245,71 @@ public abstract class XValueIndexer {
 	}
 	
 	public void deIndexValue(XAddress address, XValue value) {
-		switch(value.getType()) {
-		case Address:
-			deIndexAddress(address, value, (XAddress)value);
-			break;
-		case AddressList:
-			deIndexAddressArray(address, value, ((XAddressListValue)value).contents());
-			break;
-		case AddressSet:
-			deIndexAddressArray(address, value, ((XAddressSetValue)value).contents());
-			break;
-		case AddressSortedSet:
-			deIndexAddressArray(address, value, ((XAddressSortedSetValue)value).contents());
-			break;
-		case Boolean:
-			deIndexBoolean(address, value, ((XBooleanValue)value).contents());
-			break;
-		case BooleanList:
-			deIndexBooleanArray(address, value, ((XBooleanListValue)value).contents());
-			break;
-		case ByteList:
-			deIndexByteArray(address, value, ((XByteListValue)value).contents());
-			break;
-		case Double:
-			deIndexDouble(address, value, ((XDoubleValue)value).contents());
-			break;
-		case DoubleList:
-			deIndexDoubleArray(address, value, ((XDoubleListValue)value).contents());
-			break;
-		case Id:
-			deIndexId(address, value, (XID)value);
-			break;
-		case IdList:
-			deIndexIdArray(address, value, ((XIDListValue)value).contents());
-			break;
-		case IdSet:
-			deIndexIdArray(address, value, ((XIDSetValue)value).contents());
-			break;
-		case IdSortedSet:
-			deIndexIdArray(address, value, ((XIDSortedSetValue)value).contents());
-			break;
-		case Integer:
-			deIndexInteger(address, value, ((XIntegerValue)value).contents());
-			break;
-		case IntegerList:
-			deIndexIntegerArray(address, value, ((XIntegerListValue)value).contents());
-			break;
-		case Long:
-			deIndexLong(address, value, ((XLongValue)value).contents());
-			break;
-		case LongList:
-			deIndexLongArray(address, value, ((XLongListValue)value).contents());
-			break;
-		case String:
-			deIndexString(address, value, ((XStringValue)value).contents());
-			break;
-		case StringList:
-			deIndexStringArray(address, value, ((XStringListValue)value).contents());
-			break;
-		case StringSet:
-			deIndexStringArray(address, value, ((XStringSetValue)value).contents());
-			break;
+		if(value == null) {
+			// TODO handle null values
+		} else {
+			switch(value.getType()) {
+			case Address:
+				deIndexAddress(address, value, (XAddress)value);
+				break;
+			case AddressList:
+				deIndexAddressArray(address, value, ((XAddressListValue)value).contents());
+				break;
+			case AddressSet:
+				deIndexAddressArray(address, value, ((XAddressSetValue)value).contents());
+				break;
+			case AddressSortedSet:
+				deIndexAddressArray(address, value, ((XAddressSortedSetValue)value).contents());
+				break;
+			case Boolean:
+				deIndexBoolean(address, value, ((XBooleanValue)value).contents());
+				break;
+			case BooleanList:
+				deIndexBooleanArray(address, value, ((XBooleanListValue)value).contents());
+				break;
+			case ByteList:
+				deIndexByteArray(address, value, ((XByteListValue)value).contents());
+				break;
+			case Double:
+				deIndexDouble(address, value, ((XDoubleValue)value).contents());
+				break;
+			case DoubleList:
+				deIndexDoubleArray(address, value, ((XDoubleListValue)value).contents());
+				break;
+			case Id:
+				deIndexId(address, value, (XID)value);
+				break;
+			case IdList:
+				deIndexIdArray(address, value, ((XIDListValue)value).contents());
+				break;
+			case IdSet:
+				deIndexIdArray(address, value, ((XIDSetValue)value).contents());
+				break;
+			case IdSortedSet:
+				deIndexIdArray(address, value, ((XIDSortedSetValue)value).contents());
+				break;
+			case Integer:
+				deIndexInteger(address, value, ((XIntegerValue)value).contents());
+				break;
+			case IntegerList:
+				deIndexIntegerArray(address, value, ((XIntegerListValue)value).contents());
+				break;
+			case Long:
+				deIndexLong(address, value, ((XLongValue)value).contents());
+				break;
+			case LongList:
+				deIndexLongArray(address, value, ((XLongListValue)value).contents());
+				break;
+			case String:
+				deIndexString(address, value, ((XStringValue)value).contents());
+				break;
+			case StringList:
+				deIndexStringArray(address, value, ((XStringListValue)value).contents());
+				break;
+			case StringSet:
+				deIndexStringArray(address, value, ((XStringSetValue)value).contents());
+				break;
+			}
 		}
 	}
 	
