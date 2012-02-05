@@ -202,31 +202,42 @@ public abstract class XModelObjectLevelIndexTest {
 		XObject oldJohn = this.oldModel.getObject(DemoModelUtil.JOHN_ID);
 		XObject newJohn = this.newModel.getObject(DemoModelUtil.JOHN_ID);
 		
-		// Remove an existing value, update index, and check whether no entry
-		// exists any more or not
-		XField oldTitleField = oldJohn.getField(DemoModelUtil.TITLE_ID);
-		XField newTitleField = newJohn.getField(DemoModelUtil.TITLE_ID);
-		XValue value = newTitleField.getValue();
+		// Add not yet existing value, update index, remove it again, update
+		// index and check whether no entry for this value exists anymore or
+		// not
+		
+		XID testId = X.getIDProvider().createUniqueId();
+		String valueString = "Firstvaluestringwhichshoudlntexistinbothmodels";
+		XValue value = X.getValueFactory().createStringValue(valueString);
 		List<String> indexStrings = this.newIndexer.getIndexStrings(value);
+		
+		XField oldField = oldJohn.createField(testId);
+		XField newField = newJohn.createField(testId);
+		
+		newField.setValue(value);
+		
+		this.newIndex.updateIndex(oldJohn, newJohn);
+		
+		oldField.setValue(value);
 		
 		DummyFieldEventListener listener = new DummyFieldEventListener();
 		newJohn.addListenerForFieldEvents(listener);
 		
-		newTitleField.setValue(null);
+		newField.setValue(null);
 		
 		switch(type) {
 		case XOBJECT:
 			this.newIndex.updateIndex(oldJohn, newJohn);
 			break;
 		case XFIELD:
-			this.newIndex.updateIndex(newJohn.getAddress(), oldTitleField, newTitleField);
+			this.newIndex.updateIndex(newJohn.getAddress(), oldField, newField);
 			break;
 		case XEVENT:
 			XEvent event = listener.event;
 			
 			assertTrue(event instanceof XFieldEvent);
 			assertEquals(ChangeType.REMOVE, event.getChangeType());
-			assertEquals(newTitleField.getAddress(), event.getChangedEntity());
+			assertEquals(newField.getAddress(), event.getChangedEntity());
 			
 			this.newIndex.updateIndex(event);
 			break;
@@ -366,76 +377,58 @@ public abstract class XModelObjectLevelIndexTest {
 	}
 	
 	private void testUpdateIndexChangeValue(TestType type) {
-		String valueString = "Firstvaluestringwhichshoudlntexistinbothmodels";
-		XValue value = X.getValueFactory().createStringValue(valueString);
-		List<String> indexStrings = this.newIndexer.getIndexStrings(value);
+		String valueString1 = "Firstvaluestringwhichshoudlntexistinbothmodels";
+		XValue value1 = X.getValueFactory().createStringValue(valueString1);
+		List<String> indexStrings1 = this.newIndexer.getIndexStrings(value1);
+		
+		String valueString2 = "Anothervaluestringwhichshouldntexistanywhere";
+		XValue value2 = X.getValueFactory().createStringValue(valueString2);
+		List<String> indexStrings2 = this.newIndexer.getIndexStrings(value2);
 		
 		XObject oldJohn = this.oldModel.getObject(DemoModelUtil.JOHN_ID);
 		XObject newJohn = this.newModel.getObject(DemoModelUtil.JOHN_ID);
 		
-		// Change an existing value, update index, and check whether no entry
-		// exists any more or not
-		XField oldTitleField = oldJohn.getField(DemoModelUtil.TITLE_ID);
-		XField newTitleField = newJohn.getField(DemoModelUtil.TITLE_ID);
-		XValue oldValue = newTitleField.getValue();
-		List<String> oldIndexStrings = this.newIndexer.getIndexStrings(oldValue);
+		XID id = X.getIDProvider().createUniqueId();
+		XField oldField = oldJohn.createField(id);
+		XField newField = newJohn.createField(id);
+		
+		newField.setValue(value1);
+		this.newIndex.updateIndex(oldJohn, newJohn);
+		
+		oldField.setValue(value1);
 		
 		DummyFieldEventListener listener = new DummyFieldEventListener();
 		newJohn.addListenerForFieldEvents(listener);
 		
-		newTitleField.setValue(value);
+		newField.setValue(value2);
 		
 		switch(type) {
 		case XOBJECT:
 			this.newIndex.updateIndex(oldJohn, newJohn);
 			break;
 		case XFIELD:
-			this.newIndex.updateIndex(newJohn.getAddress(), oldTitleField, newTitleField);
+			this.newIndex.updateIndex(newJohn.getAddress(), oldField, newField);
 			break;
 		case XEVENT:
 			XEvent event = listener.event;
 			assertTrue(event instanceof XFieldEvent);
 			assertEquals(ChangeType.CHANGE, event.getChangeType());
-			assertEquals(newTitleField.getAddress(), event.getChangedEntity());
+			assertEquals(newField.getAddress(), event.getChangedEntity());
 			
 			this.newIndex.updateIndex(event);
 		}
 		
 		// make sure the old value was deindexed
-		for(String s : oldIndexStrings) {
+		for(String s : indexStrings1) {
 			List<XAddress> found = this.newIndex.search(s);
 			assertTrue(found.isEmpty());
 		}
 		
 		// make sure the new value was indexed
-		for(String s : indexStrings) {
+		for(String s : indexStrings2) {
 			List<XAddress> found = this.newIndex.search(s);
 			assertEquals(1, found.size());
 			assertEquals(newJohn.getAddress(), found.get(0));
-		}
-	}
-	
-	@Test
-	public void testUpdateIndexObjectRemoveObject() {
-		String valueString = "Firstvaluestringwhichshoudlntexistinbothmodels";
-		XValue value = X.getValueFactory().createStringValue(valueString);
-		List<String> indexStrings = this.newIndexer.getIndexStrings(value);
-		
-		XObject oldJohn = this.oldModel.getObject(DemoModelUtil.JOHN_ID);
-		XObject newJohn = this.newModel.getObject(DemoModelUtil.JOHN_ID);
-		
-		XID id = X.getIDProvider().createUniqueId();
-		newJohn.createField(id).setValue(value);
-		
-		this.newIndex.updateIndex(oldJohn, newJohn);
-		oldJohn.createField(id).setValue(value);
-		
-		this.newModel.removeObject(DemoModelUtil.JOHN_ID);
-		this.newIndex.updateIndex(oldJohn, newJohn);
-		
-		for(String s : indexStrings) {
-			List<XAddress> found = this.newIndex.search(s);
-			assertTrue(found.isEmpty());
 		}
 	}
 	
