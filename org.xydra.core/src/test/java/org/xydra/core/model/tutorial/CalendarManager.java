@@ -80,7 +80,6 @@ public class CalendarManager {
 		
 		CalendarManager cm = new CalendarManager();
 		cm.registerNewUser("john", "superman");
-		// FIXME it seems the event is not added properly
 		cm.addEvent("john", "superman", "Brush Teeth", "at home", 2010, 4, 14,
 		        "Brush teeth for 2 minutes", 2200, 2203);
 		String events = cm.getEvents("john", "superman", "john", 2000, 1, 1, 2020, 12, 31);
@@ -94,7 +93,7 @@ public class CalendarManager {
 		
 		// alice looks up johns events
 		String aliceEvents = cm.getEvents("alice", "wonderwomen", "john", 2000, 1, 1, 2020, 12, 31);
-		log.info(aliceEvents);
+		log.info("alice: " + aliceEvents);
 		
 	}
 	
@@ -315,8 +314,8 @@ public class CalendarManager {
 			XObject event = userCalendar.getObject(eventID);
 			
 			int eventYear = ((XIntegerValue)event.getField(yearFieldId).getValue()).contents();
-			int eventMonth = ((XIntegerValue)event.getField(yearFieldId).getValue()).contents();
-			int eventDay = ((XIntegerValue)event.getField(yearFieldId).getValue()).contents();
+			int eventMonth = ((XIntegerValue)event.getField(monthFieldId).getValue()).contents();
+			int eventDay = ((XIntegerValue)event.getField(dayFieldId).getValue()).contents();
 			
 			if(eventYear >= beginYear && eventYear <= endYear) {
 				if(eventMonth >= beginMonth && eventMonth <= endMonth) {
