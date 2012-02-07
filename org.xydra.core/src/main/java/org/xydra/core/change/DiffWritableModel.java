@@ -29,7 +29,7 @@ import org.xydra.log.LoggerFactory;
 
 
 /**
- * A helper class to minimize the number and size of persistence accesses.
+ * A helper class to minimise the number and size of persistence accesses.
  * 
  * Does not support revision numbers.
  * 
@@ -44,17 +44,22 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	
 	private static final Logger log = LoggerFactory.getLogger(DiffWritableModel.class);
 	
-	static final XID NONE = XX.toId("_NoId_DWModel");
+	/** use two underscores to get sorted alphabetically even before _ids */
+	static final XID NONE = XX.toId("__NoId_DWModel");
 	
-	static final XValue NOVALUE = XV.toValue("_NoValue_DWModel");
+	static final XValue NOVALUE = XV.toValue("__NoValue_DWModel");
 	
 	/*
 	 * Each index has the structure (object, field, value) with the notion to
-	 * represent content in this model within a given repository.
+	 * represent added/removed content in this model within a given repository.
 	 * 
-	 * An object without fields is represented as (objectId, NONE, NOVALUE).
+	 * An added/removed, empty object without fields is represented as
+	 * (objectId, NONE, NOVALUE).
 	 * 
-	 * A field without values is (objectId, fieldId, NOVALUE).
+	 * An added/removed, empty field without values is represented as (objectId,
+	 * fieldId, NOVALUE).
+	 * 
+	 * A added/removed value is represented as (objectId, fieldId, value).
 	 */
 	MapMapIndex<XID,XID,XValue> added, removed;
 	
@@ -358,7 +363,7 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 		
 		/*
 		 * Make sure model commands come before object commands; object commands
-		 * come before field commands. This avoid e.g. deleting a field before
+		 * come before field commands. This avoids e.g. deleting a field before
 		 * deleting its object parent.
 		 */
 		Collections.sort(list, new Comparator<XAtomicCommand>() {
@@ -426,4 +431,5 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 		}
 		return field.getRevisionNumber();
 	}
+	
 }
