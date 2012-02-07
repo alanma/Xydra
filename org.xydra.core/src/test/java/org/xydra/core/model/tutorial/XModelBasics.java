@@ -221,8 +221,6 @@ public class XModelBasics {
 		
 		// granting write access to the user with the XID user1ID on model
 		
-		// FIXME use small local ID and Address interface
-		
 		// arm.setAccess(user1ID, XA.ACCESS_WRITE, true, XID...path);
 		
 		arm.getAuthorisationDatabase()
@@ -320,9 +318,6 @@ public class XModelBasics {
 		
 		XModel model = repository.getModel(modelId);
 		assertNotNull(model);
-		
-		// FIXME max: consider using adapter pattern for transactions
-		// ITransactionAdapter t = model.getAdapter(ITransactionAdapter.class);
 		
 		// adding the objects
 		XID object1ID = XX.createUniqueId();
@@ -439,7 +434,7 @@ public class XModelBasics {
 			int objectCount;
 			
 			@Override
-            public void onChangeEvent(XModelEvent event) {
+			public void onChangeEvent(XModelEvent event) {
 				if(event.getChangeType() == ChangeType.ADD) {
 					this.objectCount++;
 					log.info("Our model now holds " + this.objectCount + " XObjects!");
@@ -473,7 +468,7 @@ public class XModelBasics {
 		XObjectEventListener objectListener = new XObjectEventListener() {
 			
 			@Override
-            public void onChangeEvent(XObjectEvent event) {
+			public void onChangeEvent(XObjectEvent event) {
 				if(event.getChangeType() == ChangeType.ADD) {
 					log.info("An XField with ID " + event.getFieldId()
 					        + " was added to the XObject with ID " + event.getObjectId() + "!");
@@ -486,7 +481,6 @@ public class XModelBasics {
 		};
 		
 		// add it to the model
-		// TODO as adapter?
 		model.addListenerForObjectEvents(objectListener);
 		
 		// lets add and remove an XField to the object that the model still
@@ -567,8 +561,6 @@ public class XModelBasics {
 		
 		// getting the transaction
 		XTransaction transaction = transBuilder.build();
-		// FIXME Bjoern
-		// transaction.execute(model)
 		
 		// executing the transaction on the model
 		model.executeCommand(transaction);
