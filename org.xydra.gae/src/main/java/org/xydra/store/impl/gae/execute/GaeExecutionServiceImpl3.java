@@ -156,12 +156,19 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 		
 		assert change.getStatus().isCommitted() : "If we reach this line, change must be committed";
 		
-		log.info("[r"
-		        + change.rev
-		        + "] -> "
-		        + (ret == XCommand.FAILED ? "failed" : ret == XCommand.NOCHANGE ? "nochange"
-		                : "success") + " {" + gaeModelRev + "}. Stats: " + c.getStats());
-		
+		if (log.isInfoEnabled() || ret == XCommand.FAILED && log.isWarnEnabled() ) {
+			String msg = "[r"
+			        + change.rev
+			        + "] -> "
+			        + (ret == XCommand.FAILED ? "failed" : ret == XCommand.NOCHANGE ? "nochange"
+			                : "success") + " {" + gaeModelRev + "}. Stats: " + c.getStats();
+			if (ret == XCommand.FAILED) {
+				log.warn(msg);
+			} else {
+				log.info(msg);
+			}
+
+		}
 		return ret;
 	}
 	
@@ -355,6 +362,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 		if(c == null) {
 			change.giveUpIfTimeoutCritical();
 			this.changes.commit(change, Status.FailedPreconditions);
+			log.info("Failed preconditions");
 			return XCommand.FAILED;
 		}
 		
@@ -365,6 +373,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 			if(events.isEmpty()) {
 				change.giveUpIfTimeoutCritical();
 				this.changes.commit(change, Status.SuccessNochange);
+				log.debug("No change");
 				return XCommand.NOCHANGE;
 			}
 			Pair<int[],List<Future<Key>>> res = change.setEvents(events);
