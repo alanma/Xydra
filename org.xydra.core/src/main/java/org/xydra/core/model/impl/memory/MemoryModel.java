@@ -67,8 +67,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	 */
 	protected MemoryModel(XID actorId, String passwordHash, MemoryRepository father,
 	        XRevWritableModel modelState, XChangeLogState log) {
-		super(new MemoryEventManager(actorId, passwordHash, new MemoryChangeLog(log), modelState
-		        .getRevisionNumber()));
+		super(new MemoryEventManager(actorId, passwordHash, new MemoryChangeLog(log),
+		        modelState.getRevisionNumber()));
 		assert log != null;
 		
 		this.state = modelState;
@@ -150,7 +150,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	}
 	
 	@Override
-    public boolean addListenerForModelEvents(XModelEventListener changeListener) {
+	public boolean addListenerForModelEvents(XModelEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.modelChangeListenerCollection.add(changeListener);
 		}
@@ -173,7 +173,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	}
 	
 	@Override
-    public MemoryObject createObject(XID objectId) {
+	public MemoryObject createObject(XID objectId) {
 		
 		XModelCommand command = MemoryModelCommand.createAddCommand(getAddress(), true, objectId);
 		
@@ -333,12 +333,12 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	}
 	
 	@Override
-    public long executeCommand(XCommand command) {
+	public long executeCommand(XCommand command) {
 		return executeCommand(command, null);
 	}
 	
 	@Override
-    public long executeCommand(XCommand command, XLocalChangeCallback callback) {
+	public long executeCommand(XCommand command, XLocalChangeCallback callback) {
 		
 		if(command instanceof XTransaction) {
 			return executeTransaction((XTransaction)command, callback);
@@ -353,7 +353,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	}
 	
 	@Override
-    public long executeModelCommand(XModelCommand command) {
+	public long executeModelCommand(XModelCommand command) {
 		return executeModelCommand(command, null);
 	}
 	
@@ -483,7 +483,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	}
 	
 	@Override
-    public XAddress getAddress() {
+	public XAddress getAddress() {
 		return this.state.getAddress();
 	}
 	
@@ -504,7 +504,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	}
 	
 	@Override
-    public XID getID() {
+	public XID getID() {
 		synchronized(this.eventQueue) {
 			return this.state.getID();
 		}
@@ -593,7 +593,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	}
 	
 	@Override
-    public boolean hasObject(XID id) {
+	public boolean hasObject(XID id) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			return this.loadedObjects.containsKey(id) || this.state.hasObject(id);
@@ -608,7 +608,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	}
 	
 	@Override
-    public boolean isEmpty() {
+	public boolean isEmpty() {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			return this.state.isEmpty();
@@ -616,7 +616,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	}
 	
 	@Override
-    public Iterator<XID> iterator() {
+	public Iterator<XID> iterator() {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			return this.state.iterator();
@@ -643,14 +643,14 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	}
 	
 	@Override
-    public boolean removeListenerForModelEvents(XModelEventListener changeListener) {
+	public boolean removeListenerForModelEvents(XModelEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.modelChangeListenerCollection.remove(changeListener);
 		}
 	}
 	
 	@Override
-    public boolean removeObject(XID objectId) {
+	public boolean removeObject(XID objectId) {
 		
 		// no synchronization necessary here (except that in
 		// executeModelCommand())
@@ -710,7 +710,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	
 	@Override
 	public String toString() {
-		return this.state.toString();
+		return this.getID() + " rev[" + this.getRevisionNumber() + "]";
 	}
 	
 	@Override

@@ -131,7 +131,7 @@ public class MemoryField extends AbstractEntity implements XField, Serializable 
 	 */
 	
 	@Override
-    public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
+	public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.fieldChangeListenerCollection.add(changeListener);
 		}
@@ -166,7 +166,7 @@ public class MemoryField extends AbstractEntity implements XField, Serializable 
 	}
 	
 	@Override
-    public long executeFieldCommand(XFieldCommand command) {
+	public long executeFieldCommand(XFieldCommand command) {
 		return executeFieldCommand(command, null);
 	}
 	
@@ -283,7 +283,7 @@ public class MemoryField extends AbstractEntity implements XField, Serializable 
 	}
 	
 	@Override
-    public XAddress getAddress() {
+	public XAddress getAddress() {
 		synchronized(this.eventQueue) {
 			return this.state.getAddress();
 		}
@@ -294,7 +294,7 @@ public class MemoryField extends AbstractEntity implements XField, Serializable 
 	 *             MemoryField was already removed
 	 */
 	@Override
-    @ReadOperation
+	@ReadOperation
 	public XID getID() {
 		synchronized(this.eventQueue) {
 			return this.state.getID();
@@ -367,7 +367,7 @@ public class MemoryField extends AbstractEntity implements XField, Serializable 
 	 *             MemoryField was already removed
 	 */
 	@Override
-    @ReadOperation
+	@ReadOperation
 	public XValue getValue() {
 		synchronized(this.eventQueue) {
 			checkRemoved();
@@ -401,7 +401,7 @@ public class MemoryField extends AbstractEntity implements XField, Serializable 
 	}
 	
 	@Override
-    public boolean isEmpty() {
+	public boolean isEmpty() {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			return this.getValue() == null;
@@ -418,7 +418,7 @@ public class MemoryField extends AbstractEntity implements XField, Serializable 
 	 */
 	
 	@Override
-    public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
+	public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.fieldChangeListenerCollection.remove(changeListener);
 		}
@@ -443,7 +443,7 @@ public class MemoryField extends AbstractEntity implements XField, Serializable 
 	 *             MemoryField was already removed
 	 */
 	@Override
-    @ModificationOperation
+	@ModificationOperation
 	public boolean setValue(XValue newValue) {
 		
 		// no synchronization necessary here (except that in
@@ -522,7 +522,7 @@ public class MemoryField extends AbstractEntity implements XField, Serializable 
 	
 	@Override
 	public String toString() {
-		return this.getID() + "-v" + this.getRevisionNumber();
+		return this.getID() + " rev[" + this.getRevisionNumber() + "]";
 	}
 	
 	@Override

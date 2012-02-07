@@ -153,7 +153,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	}
 	
 	@Override
-    public MemoryField createField(XID fieldId) {
+	public MemoryField createField(XID fieldId) {
 		
 		XObjectCommand command = MemoryObjectCommand.createAddCommand(getAddress(), true, fieldId);
 		
@@ -263,9 +263,9 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		
 		if(field.getValue() != null) {
 			assert inTrans;
-			XReversibleFieldEvent event = MemoryReversibleFieldEvent.createRemoveEvent(actor, field
-			        .getAddress(), field.getValue(), modelRev, getRevisionNumber(), field
-			        .getRevisionNumber(), inTrans, true);
+			XReversibleFieldEvent event = MemoryReversibleFieldEvent.createRemoveEvent(actor,
+			        field.getAddress(), field.getValue(), modelRev, getRevisionNumber(),
+			        field.getRevisionNumber(), inTrans, true);
 			this.eventQueue.enqueueFieldEvent(field, event);
 		}
 		
@@ -285,12 +285,12 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	}
 	
 	@Override
-    public long executeCommand(XCommand command) {
+	public long executeCommand(XCommand command) {
 		return executeCommand(command, null);
 	}
 	
 	@Override
-    public long executeCommand(XCommand command, XLocalChangeCallback callback) {
+	public long executeCommand(XCommand command, XLocalChangeCallback callback) {
 		if(command instanceof XTransaction) {
 			return executeTransaction((XTransaction)command, callback);
 		}
@@ -309,7 +309,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	}
 	
 	@Override
-    public long executeObjectCommand(XObjectCommand command) {
+	public long executeObjectCommand(XObjectCommand command) {
 		return executeObjectCommand(command, null);
 	}
 	
@@ -395,7 +395,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	}
 	
 	@Override
-    public XAddress getAddress() {
+	public XAddress getAddress() {
 		synchronized(this.eventQueue) {
 			return this.state.getAddress();
 		}
@@ -410,7 +410,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	}
 	
 	@Override
-    public MemoryField getField(XID fieldId) {
+	public MemoryField getField(XID fieldId) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -432,7 +432,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	}
 	
 	@Override
-    public XID getID() {
+	public XID getID() {
 		synchronized(this.eventQueue) {
 			return this.state.getID();
 		}
@@ -504,7 +504,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	}
 	
 	@Override
-    public boolean hasField(XID id) {
+	public boolean hasField(XID id) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			return this.loadedFields.containsKey(id) || this.state.hasField(id);
@@ -548,7 +548,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	}
 	
 	@Override
-    public boolean isEmpty() {
+	public boolean isEmpty() {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			return this.state.isEmpty();
@@ -556,7 +556,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	}
 	
 	@Override
-    public Iterator<XID> iterator() {
+	public Iterator<XID> iterator() {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			return this.state.iterator();
@@ -564,7 +564,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	}
 	
 	@Override
-    public boolean removeField(XID fieldId) {
+	public boolean removeField(XID fieldId) {
 		
 		// no synchronization necessary here (except that in
 		// executeObjectCommand())
@@ -671,7 +671,8 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	@ReadOperation
 	@Override
 	public String toString() {
-		return this.getID() + "-v" + this.getRevisionNumber() + " " + this.state.toString();
+		return this.getID() + " rev[" + this.getRevisionNumber() + "]" + " "
+		        + this.state.toString();
 	}
 	
 	@Override
