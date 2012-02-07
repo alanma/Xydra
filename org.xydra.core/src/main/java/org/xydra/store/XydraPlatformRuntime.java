@@ -63,4 +63,9 @@ public interface XydraPlatformRuntime {
 	 */
 	public void startRequest();
 	
+	/**
+	 * @return a short descriptive name if platform implementation
+	 */
+	public String getName();
+	
 }
