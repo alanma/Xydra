@@ -9,7 +9,13 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
+import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XEvent;
+import org.xydra.base.change.XFieldEvent;
+import org.xydra.base.change.XModelEvent;
+import org.xydra.base.change.XObjectEvent;
+import org.xydra.base.change.XRepositoryEvent;
+import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.value.XValue;
@@ -103,7 +109,50 @@ public class XModelObjectLevelIndex {
 	}
 	
 	public void updateIndex(XEvent event) {
-		// TODO implement event-api
+		if(event instanceof XTransactionEvent) {
+			XTransactionEvent trans = (XTransactionEvent)event;
+			for(XAtomicEvent e : trans) {
+				updateIndex(e);
+			}
+		} else if(event instanceof XModelEvent) {
+			this.updateIndex((XModelEvent)event);
+		} else if(event instanceof XObjectEvent) {
+			/*
+			 * since the index only stores Object-Addresses, it is unclear how
+			 * an REMOVE-Object-Event should be handled, since the index does
+			 * not have any access to the model/object etc. nor does it save the
+			 * fields address. Since the REMOVE case is the only one that is
+			 * interesting here (ADD events don't change any values) it's better
+			 * to discard XObjectEvents here.
+			 */
+			throw new RuntimeException("updateIndex cannot handle XObjectEvents");
+		} else if(event instanceof XFieldEvent) {
+			this.updateIndex((XFieldEvent)event);
+		} else {
+			assert event instanceof XRepositoryEvent;
+			
+			throw new RuntimeException("updateIndex cannnot handle XRepositoryEvents");
+		}
+	}
+	
+	public void updateIndex(XModelEvent event) {
+		switch(event.getChangeType()) {
+		case ADD:
+			// ADD events don't change any fields, so we don't need to do
+			// anything here
+			break;
+		case REMOVE:
+			XAddress removedObjAdr = event.getChangedEntity();
+			this.deIndex(removedObjAdr);
+			break;
+		case CHANGE: // CHANGE and TRANSACTION are not possible for XModelEvents
+		case TRANSACTION:
+			break;
+		}
+	}
+	
+	public void updateIndex(XFieldEvent event) {
+		// TODO implement
 	}
 	
 	public void index(XReadableField field) {
