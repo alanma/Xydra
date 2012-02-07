@@ -28,6 +28,7 @@ import org.xydra.base.minio.MiniStreamWriter;
 import org.xydra.base.minio.MiniWriter;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XWritableModel;
+import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.core.XFile;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.XModel;
@@ -49,7 +50,6 @@ import org.xydra.restless.utils.SharedHtmlUtils.HeadLinkStyle;
 import org.xydra.restless.utils.SharedHtmlUtils.METHOD;
 import org.xydra.server.util.XydraHtmlUtils;
 import org.xydra.store.ModelRevision;
-import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.impl.gae.changes.GaeChangesServiceImpl3;
@@ -100,7 +100,6 @@ public class ModelResource {
 	public static void command(String repoIdStr, String modelIdStr, String cmdStr,
 	        HttpServletRequest req, HttpServletResponse res) {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		XydraRuntime.startRequest();
 		
 		Clock c = new Clock().start();
 		XAddress modelAddress = XX.toAddress(XX.toId(repoIdStr), XX.toId(modelIdStr), null, null);
@@ -123,7 +122,6 @@ public class ModelResource {
 	public static void index(String repoIdStr, String modelIdStr, String styleStr,
 	        String downloadStr, HttpServletRequest req, HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		XydraRuntime.startRequest();
 		
 		Clock c = new Clock().start();
 		XAddress modelAddress = XX.toAddress(XX.toId(repoIdStr), XX.toId(modelIdStr), null, null);
@@ -193,7 +191,6 @@ public class ModelResource {
 	public static void update(String repoIdStr, String modelIdStr, HttpServletRequest req,
 	        HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		XydraRuntime.startRequest();
 		
 		Clock c = new Clock().start();
 		XID repoId = XX.toId(repoIdStr);
@@ -371,17 +368,20 @@ public class ModelResource {
 	static class SetStateResult {
 		boolean modelExisted = false;
 		boolean changes = false;
+		String debug;
 		
 		@Override
 		public String toString() {
-			return "modelExisted?" + this.modelExisted + " changes?" + this.changes;
+			return "modelExisted?" + this.modelExisted + " changes?" + this.changes + " debugInfo:"
+			        + this.debug;
 		}
 	}
 	
 	/**
 	 * @param repoId where to add
 	 * @param model which has a weird address with NO repositoryId
-	 * @param overwriteIfSameRevPresent TODO
+	 * @param overwriteIfSameRevPresent if true, content in repo is overwritten
+	 *            even if the same revNr is found
 	 * @return some statistical information
 	 */
 	public static SetStateResult setStateFrom(XID repoId, XReadableModel model,
@@ -399,6 +399,7 @@ public class ModelResource {
 				log.debug("Model already stored.");
 				result.changes = false;
 				result.modelExisted = true;
+				result.debug = "modelAlreadyStored";
 				return result;
 			}
 		}
@@ -407,12 +408,13 @@ public class ModelResource {
 		if(oldModel != null) {
 			result.modelExisted = true;
 		} else {
+			result.modelExisted = false;
 			// FIXME concurrency: move createCommand into transaction
 			XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(
 			        XX.resolveRepository(repoId), XCommand.FORCED, model.getID());
 			long cmdResult = p.executeCommand(actor, createCommand);
 			assert cmdResult >= 0;
-			oldModel = p.getModelSnapshot(modelAddress);
+			oldModel = new SimpleModel(modelAddress, 0);
 		}
 		assert oldModel != null;
 		
@@ -423,10 +425,11 @@ public class ModelResource {
 			if(result.modelExisted) {
 				result.changes = false;
 			} else {
-				// only change: creating the new empty model
+				// only 1 change: creating the new empty model
 				result.changes = true;
 			}
 		} else {
+			result.changes = true;
 			long cmdResult = p.executeCommand(actor, tb.build());
 			if(cmdResult == XCommand.FAILED) {
 				/*

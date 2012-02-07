@@ -26,7 +26,6 @@ import org.xydra.restless.RestlessParameter;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.SharedHtmlUtils.HeadLinkStyle;
 import org.xydra.restless.utils.SharedHtmlUtils.METHOD;
-import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.impl.gae.UniCache.StorageOptions;
@@ -45,20 +44,9 @@ public class RepositoryResource {
 	
 	public static void restless(Restless restless, String prefix) {
 		
-		restless.addMethod(prefix + "/{repoId}", "GET", RepositoryResource.class, "foreach", true,
-
-		new RestlessParameter("repoId"),
-
-		new RestlessParameter("foreachmodel"),
-
-		new RestlessParameter("username", null),
-
-		new RestlessParameter("password", "")
-
-		);
-		
 		restless.addMethod(prefix + "/{repoId}/", "GET", RepositoryResource.class, "index", true,
 		        new RestlessParameter("repoId"),
+
 		        new RestlessParameter("style", RStyle.html.name()),
 
 		        new RestlessParameter("useTaskQueue", "false"),
@@ -71,6 +59,17 @@ public class RepositoryResource {
 
 		);
 		
+		restless.addMethod(prefix + "/{repoId}/", "GET", RepositoryResource.class, "foreach", true,
+
+		new RestlessParameter("repoId"),
+
+		new RestlessParameter("foreachmodel"),
+
+		new RestlessParameter("username", null),
+
+		new RestlessParameter("password", "")
+
+		);
 		// cacheInInstance=true&cacheInMemcache=false&cacheInDatastore=true
 		
 		restless.addMethod(prefix + "/{repoId}/", "POST", RepositoryResource.class, "update", true,
@@ -96,7 +95,6 @@ public class RepositoryResource {
 	public static void foreach(String repoId, String foreachmodel, String username,
 	        String password, HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		XydraRuntime.startRequest();
 		Writer w = HtmlUtils.startHtmlPage(res, "For-each model");
 		w.write("For-each model in repo " + repoId + " use param " + foreachmodel + "<br/>\n");
 		w.flush();
@@ -111,7 +109,7 @@ public class RepositoryResource {
 			String urlStr = foreachmodel + "?modelAddress=" + modelAddress;
 			w.write("Calling " + urlStr + " ... ");
 			w.flush();
-			int result = UniversalUrlFetch.callUrl(urlStr, username, password);
+			int result = UniversalUrlFetch.callUrl(urlStr, username, password, true);
 			progress.makeProgress(1);
 			w.write(" => " + result + ". Seconds left: "
 			        + (progress.willTakeMsUntilProgressIs(modelIdList.size()) / 1000) + "<br/>\n");
@@ -119,7 +117,6 @@ public class RepositoryResource {
 		}
 		w.write("Done with all.<br/>\n");
 		w.flush();
-		XydraRuntime.finishRequest();
 	}
 	
 	/**
@@ -132,7 +129,7 @@ public class RepositoryResource {
 	        String cacheInInstanceStr, String cacheInMemcacheStr, String cacheInDatastoreStr,
 	        HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		XydraRuntime.startRequest();
+		log.info("index");
 		log.trace("logtest: trace");
 		log.debug("logtest: debug");
 		log.info("logtest: info");
@@ -232,13 +229,11 @@ public class RepositoryResource {
 			w.close();
 		}
 		log.info(c.stop("index").getStats());
-		XydraRuntime.finishRequest();
 	}
 	
 	public static void update(String repoIdStr, HttpServletRequest req, HttpServletResponse res)
 	        throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		XydraRuntime.startRequest();
 		
 		Clock c = new Clock().start();
 		XID repoId = XX.toId(repoIdStr);
@@ -275,14 +270,13 @@ public class RepositoryResource {
 			w.write("... applied to server repository " + result + "</br>");
 			w.flush();
 		}
-		w.write("... Done</br>");
 		String stats = "Restored: " + restored + ", existed before: " + modelExisted
 		        + ", noChangesIn:" + modelsWithChanges;
 		w.write(stats + " " + c.getStats() + "</br>");
+		log.debug("Stats: " + stats + " " + c.getStats());
+		w.write("... Done</br>");
 		w.flush();
 		w.close();
-		log.info("Stats: " + stats + " " + c.getStats());
-		XydraRuntime.finishRequest();
 	}
 	
 	public static String link(XID repoId) {

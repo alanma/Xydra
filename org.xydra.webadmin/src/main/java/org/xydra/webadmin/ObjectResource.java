@@ -47,8 +47,10 @@ public class ObjectResource {
 	public static void render(Writer w, XAddress objectAddress, String style) throws IOException {
 		XydraPersistence p = Utils.getPersistence(objectAddress.getRepository());
 		XWritableObject obj = p.getObjectSnapshot(objectAddress);
-		w.write("rev=" + obj.getRevisionNumber() + "<br/>\n");
-		w.write(XydraHtmlUtils.toHtml(obj));
+		if(obj != null) {
+			w.write("rev=" + obj.getRevisionNumber() + "<br/>\n");
+			w.write(XydraHtmlUtils.toHtml(obj));
+		}
 		w.flush();
 	}
 	
