@@ -106,6 +106,7 @@ public class XydraRuntime {
 	 * @param persistence ..
 	 */
 	public static synchronized void setPersistence(XID repositoryId, XydraPersistence persistence) {
+		initialiseRuntimeOnce();
 		persistenceInstanceCache.put(repositoryId, persistence);
 	}
 	
@@ -125,7 +126,7 @@ public class XydraRuntime {
 				log.warn("Found the class with name " + PLATFORM_CLASS
 				        + " but it is not implementing " + XydraPlatformRuntime.class, e);
 			}
-			log.info("Using default platform "
+			log.info("Using platform " + platformRuntime.getName() + " loaded from "
 			        + ReflectionUtils.getCanonicalName(platformRuntime.getClass()));
 		} catch(Exception e) {
 			log.warn("Could no instantiate " + PLATFORM_CLASS);
@@ -257,7 +258,7 @@ public class XydraRuntime {
 			platformRuntime.startRequest();
 		}
 		/*
-		 * Don't do anyting if platform is not yet ready. Makes testing things
+		 * Don't do anything if platform is not yet ready. Makes testing things
 		 * outside of servlet containers much easier.
 		 */
 	}
