@@ -346,7 +346,7 @@ public class APITest {
 	
 	private XID actorId = XX.toId("AbstractTestAPI");
 	
-	private String password = null; // TODO where to get this?
+	private String password = null; // TODO auth: where to get this?
 	
 	{
 		LoggerTestHelper.init();
@@ -632,20 +632,20 @@ public class APITest {
 	@Test
 	public void testSaveAndLoadModel() {
 		XModel model = new MemoryModel(this.actorId, this.password, XX.createUniqueId());
-		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId()).setValue(
-		        XV.toValue(true));
-		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId()).setValue(
-		        XV.toValue("Test!"));
-		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId()).setValue(
-		        XV.toValue(false));
-		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId()).setValue(
-		        XV.toValue(42));
-		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId()).setValue(
-		        XV.toValue(0L));
-		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId()).setValue(
-		        XV.toValue(3.14159265));
-		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId()).setValue(
-		        XV.toValue("Another Test!"));
+		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId())
+		        .setValue(XV.toValue(true));
+		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId())
+		        .setValue(XV.toValue("Test!"));
+		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId())
+		        .setValue(XV.toValue(false));
+		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId())
+		        .setValue(XV.toValue(42));
+		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId())
+		        .setValue(XV.toValue(0L));
+		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId())
+		        .setValue(XV.toValue(3.14159265));
+		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId())
+		        .setValue(XV.toValue("Another Test!"));
 		
 		XydraOut out = new XmlOut();
 		SerializedModel.serialize(model, out);
@@ -763,17 +763,17 @@ public class APITest {
 		// targetModel) - -
 		model = repo.createModel(XX.createUniqueId());
 		// add some content
-		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId()).setValue(
-		        XV.toValue("Test"));
+		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId())
+		        .setValue(XV.toValue("Test"));
 		
-		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId()).setValue(
-		        XV.toValue("Test2"));
+		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId())
+		        .setValue(XV.toValue("Test2"));
 		
-		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId()).setValue(
-		        XV.toValue("Test3"));
+		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId())
+		        .setValue(XV.toValue("Test3"));
 		
-		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId()).setValue(
-		        XV.toValue("Test4"));
+		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId())
+		        .setValue(XV.toValue("Test4"));
 		
 		model.createObject(XX.createUniqueId()).createField(XX.createUniqueId());
 		
