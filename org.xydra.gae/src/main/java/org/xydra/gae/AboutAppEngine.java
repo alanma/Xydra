@@ -83,4 +83,14 @@ public class AboutAppEngine {
 		return id;
 	}
 	
+	public static String inModeAsString() {
+		if(inProduction()) {
+			return "inProduction";
+		} else if(inDevelopment()) {
+			return "inDevelopment";
+		} else {
+			return "notOnAppengine";
+		}
+	}
+	
 }
