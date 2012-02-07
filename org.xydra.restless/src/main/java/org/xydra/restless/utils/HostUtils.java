@@ -28,6 +28,16 @@ public class HostUtils {
 		return hostname;
 	}
 	
+	public static int getRequestPort(HttpServletRequest req) {
+		return req.getServerPort();
+	}
+	
+	public static String getServernameWithPort(HttpServletRequest req) {
+		int port = getRequestPort(req);
+		String hostname = isLocalRequest(req) ? getLocalHostname() : req.getServerName();
+		return hostname + (port == 80 ? "" : ":" + port);
+	}
+	
 	/**
 	 * @param req ..
 	 * @return true if host indicated in 'req' is a local host
