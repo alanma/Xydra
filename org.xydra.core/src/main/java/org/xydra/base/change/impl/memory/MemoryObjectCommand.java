@@ -49,7 +49,7 @@ public class MemoryObjectCommand extends MemoryAtomicCommand implements XObjectC
 	 * @param target The target of this command - object {@link XID} must not be
 	 *            null, field {@link XID} has to be null
 	 * @param fieldRevision Must be {@link XCommand#FORCED} or
-	 *            {@link XCommand#SAFE} to determine the behavior of this
+	 *            {@link XCommand#SAFE} to determine the behaviour of this
 	 *            command.
 	 * @param fieldId The {@link XID} for the {@link XField} which is to be
 	 *            added
@@ -123,7 +123,7 @@ public class MemoryObjectCommand extends MemoryAtomicCommand implements XObjectC
 	}
 	
 	@Override
-    public XAddress getChangedEntity() {
+	public XAddress getChangedEntity() {
 		return XX.resolveField(getTarget(), getFieldId());
 	}
 	
@@ -145,7 +145,7 @@ public class MemoryObjectCommand extends MemoryAtomicCommand implements XObjectC
 	
 	@Override
 	public String toString() {
-		String str = "ObjectCommand: " + getChangeType() + " '" + this.fieldId;
+		String str = "\nObjectCommand: " + getChangeType() + " '" + this.fieldId;
 		if(isForced())
 			str += "' (forced)";
 		else if(getChangeType() == ChangeType.ADD)

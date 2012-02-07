@@ -129,7 +129,7 @@ public class MemoryModelCommand extends MemoryAtomicCommand implements XModelCom
 	}
 	
 	@Override
-    public XAddress getChangedEntity() {
+	public XAddress getChangedEntity() {
 		return XX.resolveObject(getTarget(), getObjectId());
 	}
 	
@@ -151,7 +151,7 @@ public class MemoryModelCommand extends MemoryAtomicCommand implements XModelCom
 	
 	@Override
 	public String toString() {
-		String str = "ModelCommand: " + getChangeType() + " '" + this.objectId;
+		String str = "\nModelCommand: " + getChangeType() + " '" + this.objectId;
 		if(isForced())
 			str += "' (forced)";
 		else if(getChangeType() == ChangeType.ADD)
