@@ -143,7 +143,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		long modelRev = executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(
 		        this.repoId, modelId, true));
 		
-		// TODO check that the returned revision matches getModelRevisions
+		// FIXME check that the returned revision matches getModelRevisions
 		
 		// check if the model was created
 		SynchronousTestCallback<BatchedResult<XReadableModel>[]> callback2 = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
@@ -262,7 +262,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		}
 	}
 	
-	// TODO Test "noChange"-cases
+	// FIXME Test "noChange"-cases
 	
 	/*
 	 * Tests for ModelCommands

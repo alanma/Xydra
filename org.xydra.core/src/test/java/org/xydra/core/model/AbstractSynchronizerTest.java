@@ -755,7 +755,7 @@ abstract public class AbstractSynchronizerTest {
 	/**
 	 * Wait for the given callback and check that there were no errors.
 	 * 
-	 * TODO this could also be of use to other store tests
+	 * TODO arch: this could also be of use to other store tests
 	 * 
 	 * @return the result passed to the callback.
 	 */
@@ -771,7 +771,7 @@ abstract public class AbstractSynchronizerTest {
 	 * Wait for the given callback and check that there were no errors and
 	 * exactly one batched result.
 	 * 
-	 * TODO this could also be of use to other store tests
+	 * TODO arch: this could also be of use to other store tests
 	 * 
 	 * @return the result passed to the callback.
 	 */

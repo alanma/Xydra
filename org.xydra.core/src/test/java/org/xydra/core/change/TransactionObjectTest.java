@@ -28,7 +28,7 @@ import org.xydra.core.model.impl.memory.MemoryRepository;
 
 
 /*
- * TODO Maybe test executing transactions more thoroughly
+ * TODO txn: Maybe test executing transactions more thoroughly
  */
 
 public class TransactionObjectTest {

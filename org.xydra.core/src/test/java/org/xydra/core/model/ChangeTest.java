@@ -66,7 +66,7 @@ public class ChangeTest {
 		}
 		
 		@Override
-        public void onChangeEvent(XFieldEvent event) {
+		public void onChangeEvent(XFieldEvent event) {
 			this.type = event.getChangeType();
 			this.repo = event.getRepositoryId();
 			this.model = event.getModelId();
@@ -108,7 +108,7 @@ public class ChangeTest {
 		}
 		
 		@Override
-        public void onChangeEvent(XModelEvent event) {
+		public void onChangeEvent(XModelEvent event) {
 			this.type = event.getChangeType();
 			this.repo = event.getRepositoryId();
 			this.model = event.getModelId();
@@ -151,7 +151,7 @@ public class ChangeTest {
 		}
 		
 		@Override
-        public void onChangeEvent(XObjectEvent event) {
+		public void onChangeEvent(XObjectEvent event) {
 			this.type = event.getChangeType();
 			this.repoID = event.getRepositoryId();
 			this.modelId = event.getModelId();
@@ -186,7 +186,7 @@ public class ChangeTest {
 		}
 		
 		@Override
-        public void onChangeEvent(XRepositoryEvent event) {
+		public void onChangeEvent(XRepositoryEvent event) {
 			this.type = event.getChangeType();
 			this.repo = event.getRepositoryId();
 			this.fired = true;
@@ -201,7 +201,7 @@ public class ChangeTest {
 	
 	private XID actorId = XX.toId("AbstractChangeTest");
 	
-	private String password = null; // TODO where to get this?
+	private String password = null; // TODO auth: where to get this?
 	
 	{
 		LoggerTestHelper.init();
@@ -386,8 +386,8 @@ public class ChangeTest {
 		assertEquals("check if the event has the right type", ChangeType.ADD, listener1.getType());
 		assertEquals("check if the object of the event is the right one", object1.getID(),
 		        listener1.getObject());
-		assertEquals("listener1.getModel() is not null but " + listener1.getModelId(), listener1
-		        .getModelId(), null);
+		assertEquals("listener1.getModel() is not null but " + listener1.getModelId(),
+		        listener1.getModelId(), null);
 		assertEquals(listener1.getRepositoryId(), null);
 		listener1.reset();
 		

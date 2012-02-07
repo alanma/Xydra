@@ -97,8 +97,8 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		XID objectId3 = XX.toId("TestObject3");
 		
 		/*
-		 * FIXME In a secure store you need to give the correctUser the rights
-		 * to access these models and objects -
+		 * TODO auth: In a secure store you need to give the correctUser the
+		 * rights to access these models and objects -
 		 */
 		/*
 		 * Comment by me: this should not be done by this abstract test, but
@@ -146,7 +146,6 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 				        "ExecuteCommands did not work properly in setUp: command at index " + i
 				                + " failed!");
 			}
-			// TODO is this check necessary?
 			// TODO this fails with the GaeStore which cannot be reset
 			if(result[i].getResult() == XCommand.NOCHANGE) {
 				throw new RuntimeException(
@@ -620,7 +619,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			}
 		}
 		
-		// TODO Maybe test more complex mixes?
+		// IMPROVE Maybe test more complex mixes?
 	}
 	
 	// Test if it behaves correctly for addresses of XModels that don't
@@ -743,7 +742,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 				assertEquals(this.modelAddresses[i], result[i].getResult().getAddress());
 			}
 		}
-		// TODO Maybe test more complex mixes? (use objectadresses too?)
+		// IMPROVE Maybe test more complex mixes? (use objectadresses too?)
 	}
 	
 	// Test if it behaves correctly for addresses of XModels that don't
@@ -929,7 +928,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			}
 		}
 		
-		// TODO Maybe test more complex mixes?
+		// IMPROVE Maybe test more complex mixes?
 	}
 	
 	// Test if it behaves correctly for addresses of XObjects that don't

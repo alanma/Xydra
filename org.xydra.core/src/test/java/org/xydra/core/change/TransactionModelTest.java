@@ -29,7 +29,7 @@ import org.xydra.core.model.impl.memory.MemoryRepository;
 
 
 /*
- * TODO maybe test executing transactions more thoroughly
+ * TODO txn: maybe test executing transactions more thoroughly
  */
 
 public class TransactionModelTest {
@@ -71,11 +71,11 @@ public class TransactionModelTest {
 	/*
 	 * for commit():
 	 * 
-	 * TODO check cases were something that already existed gets deleted and
-	 * something new with the same address gets added (see if the old thing is
-	 * actually replaced by something new)
+	 * TODO txn: check cases were something that already existed gets deleted
+	 * and something new with the same address gets added (see if the old thing
+	 * is actually replaced by something new)
 	 * 
-	 * TODO maybe check forced commands in transactions
+	 * TODO txn: maybe check forced commands in transactions
 	 */
 
 	@Test
@@ -392,8 +392,7 @@ public class TransactionModelTest {
 		XAddress randomObjectAddress = XX.toAddress(XX.createUniqueId(), XX.createUniqueId(),
 		        XX.createUniqueId(), null);
 		
-		XCommand objectCommand = factory.createAddFieldCommand(randomObjectAddress, newId,
-		        false);
+		XCommand objectCommand = factory.createAddFieldCommand(randomObjectAddress, newId, false);
 		
 		long result = this.transModel.executeCommand(objectCommand, callback);
 		assertEquals(XCommand.FAILED, result);
@@ -403,8 +402,7 @@ public class TransactionModelTest {
 		assertTrue(callback.failed);
 		assertNull(callback.revision);
 		
-		XCommand fieldCommand = factory
-		        .createAddFieldCommand(randomFieldAddress, newId, false);
+		XCommand fieldCommand = factory.createAddFieldCommand(randomFieldAddress, newId, false);
 		
 		result = this.transModel.executeCommand(fieldCommand, callback);
 		assertEquals(XCommand.FAILED, result);
