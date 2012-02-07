@@ -133,7 +133,7 @@ public class GaePlatformRuntime implements XydraPlatformRuntime {
 	@Override
 	public void finishRequest() {
 		log.info("Request finished.");
-		InstanceContext.clearThreadContext();
+		// InstanceContext.clearThreadContext();
 	}
 	
 	// public static interface XRequestListener {
@@ -159,5 +159,10 @@ public class GaePlatformRuntime implements XydraPlatformRuntime {
 	public void startRequest() {
 		log.info("Request started.");
 		InstanceContext.clearThreadContext();
+	}
+	
+	@Override
+	public String getName() {
+		return "GAE-" + AboutAppEngine.inModeAsString();
 	}
 }
