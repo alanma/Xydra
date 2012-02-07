@@ -29,11 +29,9 @@ import org.xydra.log.LoggerFactory;
  * Helper class for executing commands and generating matching events.
  * 
  * @author dscharrer
- * 
  */
 public abstract class DeltaUtils {
 	
-	// TODO: Whenever a command fails, make sure to log why
 	private static final Logger log = LoggerFactory.getLogger(DeltaUtils.class);
 	
 	/**
@@ -318,6 +316,7 @@ public abstract class DeltaUtils {
 				if(model == null) {
 					return new Pair<ChangedModel,ModelChange>(null, ModelChange.CREATED);
 				} else if(rc.isForced()) {
+					log.info("Command is forced, but there is no change");
 					return new Pair<ChangedModel,ModelChange>(null, ModelChange.NOCHANGE);
 				} else {
 					log.warn("Safe RepositoryCommand ADD failed; model!=null");
@@ -339,6 +338,7 @@ public abstract class DeltaUtils {
 					changedModel.clear();
 					return new Pair<ChangedModel,ModelChange>(changedModel, ModelChange.REMOVED);
 				} else {
+					log.info("There is no change");
 					return new Pair<ChangedModel,ModelChange>(null, ModelChange.NOCHANGE);
 				}
 				
@@ -357,6 +357,7 @@ public abstract class DeltaUtils {
 			
 			// apply changes to the delta-model
 			if(!changedModel.executeCommand(command)) {
+				log.info("Could not execute command on ChangedModel");
 				return null;
 			}
 			
