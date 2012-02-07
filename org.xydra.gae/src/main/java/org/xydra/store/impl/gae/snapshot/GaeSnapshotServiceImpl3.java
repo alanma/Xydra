@@ -199,9 +199,10 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 			String possiblyMemcachedKey = null;
 			int loops = 0;
 			while(askNr >= 0 && loops <= SNAPSHOT_PERSISTENCE_THRESHOLD) {
-				XRevWritableModel model = localVmCacheGet(askNr);
-				if(model != null) {
-					return computeAndCacheSnapshotFromBase(requestedRevNr, model);
+				// TODO With Daniel: do we really allow null here?
+				XRevWritableModel modelOrNull = localVmCacheGet(askNr);
+				if(modelOrNull != null) {
+					return computeAndCacheSnapshotFromBase(requestedRevNr, modelOrNull);
 				}
 				if(revCanBeMemcached(askNr)) {
 					possiblyMemcachedKey = KeyStructure.toString(getSnapshotKey(askNr));
@@ -264,12 +265,14 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 	
 	/**
 	 * @param requestedRevNr
-	 * @param base content will be changes
+	 * @param base content will be changed; never null
 	 * @return a snapshot in revision 'requestedRevNr' by applying changes to
 	 *         given base model
 	 */
 	private XRevWritableModel computeAndCacheSnapshotFromBase(long requestedRevNr,
 	        XRevWritableModel base) {
+		assert base != null;
+		assert this.modelAddress.equals(base.getAddress());
 		XRevWritableModel requestedSnapshot = computeSnapshotFromBase(base, requestedRevNr);
 		localVmCachePut(requestedSnapshot);
 		// // cache it in memcache
@@ -284,11 +287,14 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 	 * Compute a snapshot by applying all events that happened between base's
 	 * revision and the requested revisionNumber.
 	 * 
-	 * @param base might have revNr == -1; content *will* be changed.
+	 * @param base might have revNr == -1; content *will* be changed. Never
+	 *            null.
 	 * @param requestedRevNr
 	 * @return a serialisable, computed snapshot
 	 */
 	private XRevWritableModel computeSnapshotFromBase(XRevWritableModel base, long requestedRevNr) {
+		assert base != null;
+		assert base.getRevisionNumber() < requestedRevNr : "otherwise it makes no sense to compute it";
 		GaeAssert.gaeAssert(requestedRevNr > 0);
 		XRevWritableModel snapshot = base;
 		GaeAssert.gaeAssert(requestedRevNr > snapshot.getRevisionNumber());
@@ -296,8 +302,9 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 		        + snapshot.getRevisionNumber() + " to rev=" + requestedRevNr);
 		
 		// get events between [ start, end )
-		List<XEvent> events = this.changesService.getEventsBetween(this.modelAddress,
-		        Math.max(snapshot.getRevisionNumber() + 1, 0), requestedRevNr);
+		long start = Math.max(snapshot.getRevisionNumber() + 1, 0);
+		List<XEvent> events = this.changesService.getEventsBetween(this.modelAddress, start,
+		        requestedRevNr);
 		
 		// apply events to base
 		for(XEvent event : events) {
