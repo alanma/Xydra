@@ -93,9 +93,10 @@ public class RestlessMethod {
 	 * 
 	 * @param req never null
 	 * @param res never null
+	 * @return true if method launched succesfully, i.e. parameters matched
 	 * @throws IOException if result writing fails
 	 */
-	public void run(final Restless restless, final HttpServletRequest req,
+	public boolean run(final Restless restless, final HttpServletRequest req,
 	        final HttpServletResponse res) throws IOException {
 		Method method = Restless.methodByName(this.instanceOrClass, this.methodName);
 		if(method == null) {
@@ -250,8 +251,9 @@ public class RestlessMethod {
 					/* 4) use default */
 					if(notSet(value)) {
 						if(param.mustBeDefinedExplicitly()) {
-							throw new IllegalArgumentException("Parameter '" + param.name
+							log.debug("Parameter '" + param.name
 							        + "' required but no explicitly defined. Found no value.");
+							return false;
 						} else {
 							value = param.defaultValue;
 						}
@@ -259,8 +261,8 @@ public class RestlessMethod {
 					javaMethodArgs.add(value);
 					boundNamedParameterNumber++;
 					if(boundNamedParameterNumber > this.requiredNamedParameter.length) {
-						throw new IllegalArgumentException(
-						        "More non-trivial parameter required by Java method than mapped via RestlessParameters");
+						log.debug("More non-trivial parameter required by Java method than mapped via RestlessParameters");
+						return false;
 					}
 				}
 			}
@@ -359,6 +361,7 @@ public class RestlessMethod {
 			}
 			
 		}
+		return true;
 	}
 	
 	private boolean notSet(Object value) {

@@ -654,7 +654,6 @@ public class Restless extends HttpServlet {
 		
 		boolean foundPath = false;
 		boolean foundMethod = false;
-		boolean mayAccess = false;
 		
 		/* Determine HTTP method --------------------- */
 		// look in HTTP header
@@ -670,63 +669,35 @@ public class Restless extends HttpServlet {
 		
 		/* Find RestlessMethod to be called ------------------ */
 		// look through all registered methods
-		boolean secureAccess = requestIsViaAdminUrl(reqHandedDown);
-		
+		boolean reqViaAdminUrl = requestIsViaAdminUrl(reqHandedDown);
+		boolean couldStartMethod = false;
 		for(RestlessMethod restlessMethod : this.methods) {
-			
 			/*
 			 * if secure access, ignore all public methods. if insecure access,
 			 * ignore all secure methods: Skip all restlessMethods that may not
 			 * be accessed
 			 */
-			if((secureAccess && restlessMethod.adminOnly)
-			        || (!secureAccess && !restlessMethod.adminOnly)) {
+			if(reqViaAdminUrl == restlessMethod.adminOnly) {
 				// if path matches
 				if(restlessMethod.pathTemplate.matches(path)) {
 					foundPath = true;
 					// and HTTP method matches
 					if(httpMethod.equalsIgnoreCase(restlessMethod.httpMethod)) {
 						foundMethod = true;
-						if(restlessMethod.adminOnly) {
-							// check security
-							if(requestIsViaAdminUrl(reqHandedDown)) {
-								// calling from potentially secured url, run
-								mayAccess = true;
-								try {
-									restlessMethod.run(this, reqHandedDown, res);
-								} catch(IOException e) {
-									throw new RuntimeException(e);
-								}
-							} else {
-								// access denied
-								mayAccess = false;
-								log.warn("Someone tried to access '" + path + "'");
-							}
-						} else {
-							mayAccess = true;
-							// just run
-							try {
-								restlessMethod.run(this, reqHandedDown, res);
-							} catch(IOException e) {
-								throw new RuntimeException(e);
-							}
+						try {
+							couldStartMethod = restlessMethod.run(this, reqHandedDown, res);
+						} catch(IOException e) {
+							throw new RuntimeException(e);
 						}
-						break;
+						if(couldStartMethod) {
+							break;
+						}
 					}
 				}
 			}
 		}
 		
-		if(foundMethod) {
-			if(!mayAccess) {
-				String msg = "Forbidden. Admin parts must be accessed via /admin.";
-				log.warn(msg);
-				try {
-					res.sendError(403, msg);
-				} catch(IOException e) {
-				}
-			}
-		} else {
+		if(!foundMethod) {
 			if(DELEGATE_UNHANDLED_TO_DEFAULT) {
 				try {
 					delegateToDefaultServlet(reqHandedDown, res);
@@ -740,7 +711,7 @@ public class Restless extends HttpServlet {
 				        + "-request path '"
 				        + path
 				        + "'. "
-				        + (foundPath ? "Found at least a path mapping (wrong HTTP method or missing parameters)."
+				        + (foundPath ? "Found at least one path mapping (wrong HTTP method or missing parameters)."
 				                : "Found not even a path mapping. Check your Restless App and web.xml.");
 				log.warn(msg);
 				try {
