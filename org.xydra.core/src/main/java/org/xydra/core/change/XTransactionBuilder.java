@@ -1,12 +1,15 @@
 package org.xydra.core.change;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
+import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XFieldCommand;
@@ -158,7 +161,9 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * @throws IllegalArgumentException if this builders target doesn't contain
 	 *             the given {@link XAddress} or if the given revision number is
 	 *             neither {@link XCommand#SAFE} or {@link XCommand#FORCED}.
+	 * @deprecated Untested code, might work.
 	 */
+	@Deprecated
 	public void addEntity(XAddress address, long revision) {
 		if(revision != XCommand.SAFE && revision != XCommand.FORCED) {
 			throw new IllegalArgumentException(
@@ -214,11 +219,15 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 *             {@link XModel}.
 	 */
 	public void addField(XAddress objectAddr, XReadableField newField) {
+		assert createsNoTargetAddressTwice(newField.getAddress()) : newField.getAddress();
 		addField(objectAddr, XCommand.SAFE, newField.getID());
+		assert createsNoTargetAddressTwice(newField.getAddress()) : newField.getAddress() + ""
+		        + this.commands;
 		if(newField.getValue() != null) {
 			XAddress fieldAddr = XX.resolveField(objectAddr, newField.getID());
 			addValue(fieldAddr, XCommand.NEW, newField.getValue());
 		}
+		assert createsNoTargetAddressTwice(newField.getAddress()) : newField.getAddress();
 	}
 	
 	/**
@@ -273,8 +282,10 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	public void addObject(XAddress modelAddr, XReadableObject newObject) {
 		XAddress objectAddr = XX.resolveObject(modelAddr, newObject.getID());
 		addObject(modelAddr, XCommand.SAFE, newObject.getID());
+		assert createsNoTargetAddressTwice(newObject.getAddress()) : newObject.getAddress();
 		for(XID newFieldId : newObject) {
 			addField(objectAddr, newObject.getField(newFieldId));
+			assert createsNoTargetAddressTwice(newObject.getAddress()) : newObject.getAddress();
 		}
 	}
 	
@@ -332,18 +343,27 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 */
 	public void applyChanges(ChangedObject object) {
 		
+		assert createsNoTargetAddressTwice(object.getAddress());
+		
 		for(XID fieldId : object.getRemovedFields()) {
 			XReadableField field = object.getOldField(fieldId);
 			removeField(field);
 		}
 		
+		assert createsNoTargetAddressTwice(object.getAddress());
+		
 		for(XReadableField field : object.getNewFields()) {
 			addField(object.getAddress(), field);
 		}
 		
+		assert createsNoTargetAddressTwice(object.getAddress());
+		
 		for(ChangedField field : object.getChangedFields()) {
 			applyChanges(field);
 		}
+		
+		assert createsNoTargetAddressTwice(object.getAddress());
+		
 	}
 	
 	/**
@@ -362,19 +382,31 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * {@link ChangedModel} will not impact the execution of this transaction.
 	 */
 	public void applyChanges(ChangedModel model) {
+		assert model.checkSetInvariants();
+		assert createsNoTargetAddressTwice(model.getAddress());
 		
 		for(XID objectId : model.getRemovedObjects()) {
 			XReadableObject object = model.getOldObject(objectId);
 			removeObject(object);
 		}
 		
+		assert model.checkSetInvariants();
+		assert createsNoTargetAddressTwice(model.getAddress());
+		
 		for(XReadableObject object : model.getNewObjects()) {
 			addObject(model.getAddress(), object);
 		}
 		
+		assert model.checkSetInvariants();
+		assert createsNoTargetAddressTwice(model.getAddress()) : model.getID();
+		
+		// FIXME bug is here
 		for(ChangedObject object : model.getChangedObjects()) {
 			applyChanges(object);
 		}
+		
+		assert model.checkSetInvariants();
+		assert createsNoTargetAddressTwice(model.getAddress());
 		
 	}
 	
@@ -387,7 +419,22 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 *         builder.
 	 */
 	public XTransaction build() {
+		
+		// FIXME remove duplicate commands
+		
 		return MemoryTransaction.createTransaction(this.target, this.commands);
+	}
+	
+	private boolean createsNoTargetAddressTwice(XAddress targetAddress) {
+		Set<XAddress> toBeCreated = new HashSet<XAddress>();
+		for(XAtomicCommand cmd : this.commands) {
+			if(cmd.getChangeType() == ChangeType.ADD && cmd.getTarget() != cmd.getChangedEntity()) {
+				XAddress t = cmd.getChangedEntity();
+				assert !toBeCreated.contains(t) : targetAddress;
+				toBeCreated.add(t);
+			}
+		}
+		return true;
 	}
 	
 	/**
@@ -582,7 +629,7 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 *         by this transaction builder.
 	 */
 	@Override
-    public Iterator<XAtomicCommand> iterator() {
+	public Iterator<XAtomicCommand> iterator() {
 		return this.commands.iterator();
 	}
 	
@@ -660,7 +707,9 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * 
 	 * @throws IllegalArgumentException if this builders target doesn't contain
 	 *             the entity with the given {@link XAddress}.
+	 * @deprecated Untested code, might work.
 	 */
+	@Deprecated
 	public void removeEntity(XAddress address, long revision) {
 		if(revision != XCommand.SAFE && revision != XCommand.FORCED) {
 			throw new IllegalArgumentException(
@@ -668,9 +717,9 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 			                + revision);
 		}
 		if(address.getField() == null) {
-			addObject(address.getParent(), revision, address.getObject());
+			removeObject(address.getParent(), revision, address.getObject());
 		} else {
-			addField(address.getParent(), revision, address.getField());
+			removeField(address.getParent(), revision, address.getField());
 		}
 	}
 	
@@ -706,8 +755,8 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 *             oldField.
 	 */
 	public void removeField(XReadableField oldField) {
-		removeField(oldField.getAddress().getParent(), oldField.getRevisionNumber(), oldField
-		        .getID());
+		removeField(oldField.getAddress().getParent(), oldField.getRevisionNumber(),
+		        oldField.getID());
 	}
 	
 	/**
@@ -743,8 +792,8 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 *             oldObject or its parent {@link XModel}.
 	 */
 	public void removeObject(XReadableObject oldObject) {
-		removeObject(oldObject.getAddress().getParent(), oldObject.getRevisionNumber(), oldObject
-		        .getID());
+		removeObject(oldObject.getAddress().getParent(), oldObject.getRevisionNumber(),
+		        oldObject.getID());
 	}
 	
 	/**
