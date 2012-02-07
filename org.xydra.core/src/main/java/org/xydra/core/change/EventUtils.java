@@ -133,7 +133,8 @@ public class EventUtils {
 			break;
 		}
 		case REMOVE: {
-			assert object.hasField(event.getFieldId());
+			assert object.hasField(event.getFieldId()) : "object " + object.getAddress()
+			        + " should have field " + event.getFieldId();
 			object.removeField(event.getFieldId());
 			break;
 		}
@@ -256,6 +257,7 @@ public class EventUtils {
 				
 				if(result == reference) {
 					result = SimpleModel.shallowCopy(result);
+					assert result != model : "copied";
 				}
 				
 				for(XAtomicEvent ae : ((XTransactionEvent)event)) {
@@ -275,7 +277,6 @@ public class EventUtils {
 			applyAtomicEventNonDestructive(reference, result, (XAtomicEvent)event, false);
 		}
 		
-		assert result != model;
 		result.setRevisionNumber(event.getRevisionNumber());
 		return result;
 	}
@@ -308,6 +309,7 @@ public class EventUtils {
 		}
 		
 		applyAtomicEvent(model, atomicEvent, inTxn);
+		assert reference != model : "just applied event " + atomicEvent + " inTxn?" + inTxn;
 	}
 	
 }
