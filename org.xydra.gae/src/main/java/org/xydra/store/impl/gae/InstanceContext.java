@@ -77,6 +77,11 @@ public class InstanceContext {
 			// done, cannot contain content
 		} else {
 			log.info("Clear ThreadLocal context of " + AboutAppEngine.getThreadInfo());
+			
+			/*
+			 * For those threads that have already access to this object we need
+			 * to null out the content
+			 */
 			Map<String,ThreadLocalGaeModelRevision> tcMap = getThreadContext();
 			for(String key : tcMap.keySet()) {
 				ThreadLocalGaeModelRevision threadRevInfo = tcMap.get(key);
@@ -84,6 +89,7 @@ public class InstanceContext {
 					threadRevInfo.clear();
 				}
 			}
+			
 			threadContext.set(null);
 		}
 	}
