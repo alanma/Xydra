@@ -1,8 +1,6 @@
 package org.xydra.core.change;
 
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -10,6 +8,7 @@ import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableRepository;
+import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.XydraRuntime;
@@ -28,7 +27,7 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 	private static final Logger log = LoggerFactory.getLogger(RWCachingRepository.class);
 	
 	private ReadCachingWritableRepository2 readRepo;
-	private DiffWritableRepository diffRepo;
+	private ChangedRepository diffRepo;
 	
 	@Override
 	public XAddress getAddress() {
@@ -64,7 +63,7 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 	        boolean prefetchModels) {
 		super(baseRepository);
 		this.readRepo = new ReadCachingWritableRepository2(persistence, prefetchModels);
-		this.diffRepo = new DiffWritableRepository(this.readRepo);
+		this.diffRepo = new ChangedRepository(this.readRepo);
 	}
 	
 	@Override
@@ -77,7 +76,7 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 		return this.diffRepo.iterator();
 	}
 	
-	public DiffWritableRepository getDiffWritableRepository() {
+	public ChangedRepository getDiffWritableRepository() {
 		return this.diffRepo;
 	}
 	
@@ -93,40 +92,56 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 	 * @param actorId ..
 	 * @return the command result. 200 = OK, 500-599 = error.
 	 */
-	public static int commit(RWCachingRepository rwcRepo, XID actorId) {
+	public synchronized static int commit(RWCachingRepository rwcRepo, XID actorId) {
 		XID repositoryId = rwcRepo.getID();
-		DiffWritableRepository wcRepo = rwcRepo.getDiffWritableRepository();
+		ChangedRepository diffRepo = rwcRepo.getDiffWritableRepository();
 		
 		XydraPersistence persistence = XydraRuntime.getPersistence(repositoryId);
 		WritableRepositoryOnPersistence baseRepo = new WritableRepositoryOnPersistence(persistence,
 		        actorId);
 		
 		int result = 200;
-		for(XID id : wcRepo.getRemoved()) {
+		for(XID id : diffRepo.getRemoved()) {
 			boolean partialResult = baseRepo.removeModel(id);
 			if(!partialResult) {
+				// TODO use GA?...
 				log.warn("Could not remove model '" + id + "' while comitting");
 			}
 		}
-		for(DiffWritableModel addedModel : wcRepo.getAdded()) {
+		for(ChangedModel addedModel : diffRepo.getAdded()) {
 			baseRepo.createModel(addedModel.getID());
-			XTransaction txn = addedModel.toTransaction();
-			int partialResult = executeModelTransacton(repositoryId, addedModel.getID(), txn,
-			        actorId);
-			if(partialResult != 200) {
-				log.warn("In model '" + addedModel.getID() + "' could not execute txn: "
-				        + txnToString(txn));
-				result = partialResult;
+			if(addedModel.hasChanges()) {
+				XTransactionBuilder builder = new XTransactionBuilder(addedModel.getAddress());
+				builder.applyChanges(addedModel);
+				XTransaction txn = builder.build();
+				
+				// FIXME check txn that no object is created twice
+				
+				// XTransaction txn = addedModel.toTransaction();
+				int partialResult = executeModelTransacton(repositoryId, addedModel.getID(), txn,
+				        actorId);
+				if(partialResult != 200) {
+					log.warn("In model '" + addedModel.getID() + "' could not execute txn: "
+					        + txnToString(txn));
+					result = partialResult;
+				}
 			}
 		}
-		for(DiffWritableModel potentiallyChangedModel : wcRepo.getPotentiallyChanged()) {
-			XTransaction txn = potentiallyChangedModel.toTransaction();
-			int partialResult = executeModelTransacton(repositoryId,
-			        potentiallyChangedModel.getID(), txn, actorId);
-			if(partialResult != 200) {
-				log.warn("In model '" + potentiallyChangedModel.getID()
-				        + "' could not execute txn: " + txnToString(txn));
-				result = partialResult;
+		for(ChangedModel potentiallyChangedModel : diffRepo.getPotentiallyChanged()) {
+			if(potentiallyChangedModel.hasChanges()) {
+				XTransactionBuilder builder = new XTransactionBuilder(
+				        potentiallyChangedModel.getAddress());
+				builder.applyChanges(potentiallyChangedModel);
+				XTransaction txn = builder.build();
+				
+				// XTransaction txn = potentiallyChangedModel.toTransaction();
+				int partialResult = executeModelTransacton(repositoryId,
+				        potentiallyChangedModel.getID(), txn, actorId);
+				if(partialResult != 200) {
+					log.warn("In model '" + potentiallyChangedModel.getID()
+					        + "' could not execute txn: " + txnToString(txn));
+					result = partialResult;
+				}
 			}
 		}
 		return result;
@@ -159,20 +174,22 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 		return 200;
 	}
 	
-	public Set<XID> getChangedModelIds() {
-		Set<XID> changedModelIds = new HashSet<XID>();
-		DiffWritableRepository wcRepo = this.getDiffWritableRepository();
-		for(XID id : wcRepo.getRemoved()) {
-			changedModelIds.add(id);
-		}
-		for(DiffWritableModel addedModel : wcRepo.getAdded()) {
-			changedModelIds.add(addedModel.getID());
-		}
-		for(DiffWritableModel potentiallyChangedModel : wcRepo.getPotentiallyChanged()) {
-			if(potentiallyChangedModel.hasChanges()) {
-				changedModelIds.add(potentiallyChangedModel.getID());
-			}
-		}
-		return changedModelIds;
-	}
+	// @Deprecated
+	// public Set<XID> getChangedModelIds() {
+	// Set<XID> changedModelIds = new HashSet<XID>();
+	// DiffWritableRepository wcRepo = this.getDiffWritableRepository();
+	// for(XID id : wcRepo.getRemoved()) {
+	// changedModelIds.add(id);
+	// }
+	// for(DiffWritableModel addedModel : wcRepo.getAdded()) {
+	// changedModelIds.add(addedModel.getID());
+	// }
+	// for(DiffWritableModel potentiallyChangedModel :
+	// wcRepo.getPotentiallyChanged()) {
+	// if(potentiallyChangedModel.hasChanges()) {
+	// changedModelIds.add(potentiallyChangedModel.getID());
+	// }
+	// }
+	// return changedModelIds;
+	// }
 }
