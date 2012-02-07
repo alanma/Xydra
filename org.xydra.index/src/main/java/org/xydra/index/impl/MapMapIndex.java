@@ -39,7 +39,7 @@ public class MapMapIndex<K, L, E> implements IMapMapIndex<K,L,E> {
 	}
 	
 	@Override
-    public boolean containsKey(Constraint<K> c1, Constraint<L> c2) {
+	public boolean containsKey(Constraint<K> c1, Constraint<L> c2) {
 		if(c1.isStar()) {
 			if(c2.isStar())
 				return !isEmpty();
@@ -65,7 +65,7 @@ public class MapMapIndex<K, L, E> implements IMapMapIndex<K,L,E> {
 	}
 	
 	@Override
-    public void deIndex(K key1, L key2) {
+	public void deIndex(K key1, L key2) {
 		IMapIndex<L,E> map = this.index.lookup(key1);
 		if(map == null)
 			return;
@@ -75,7 +75,7 @@ public class MapMapIndex<K, L, E> implements IMapMapIndex<K,L,E> {
 	}
 	
 	@Override
-    public void index(K key1, L key2, E entry) {
+	public void index(K key1, L key2, E entry) {
 		IMapIndex<L,E> map = this.index.lookup(key1);
 		if(map == null) {
 			map = new SmallMapIndex<L,E>();
@@ -108,7 +108,7 @@ public class MapMapIndex<K, L, E> implements IMapMapIndex<K,L,E> {
 	}
 	
 	@Override
-    public E lookup(K key1, L key2) {
+	public E lookup(K key1, L key2) {
 		IMapIndex<L,E> map = this.index.lookup(key1);
 		if(map == null)
 			return null;
@@ -116,7 +116,7 @@ public class MapMapIndex<K, L, E> implements IMapMapIndex<K,L,E> {
 	}
 	
 	@Override
-    public Iterator<KeyKeyEntryTuple<K,L,E>> tupleIterator(Constraint<K> c1, Constraint<L> c2) {
+	public Iterator<KeyKeyEntryTuple<K,L,E>> tupleIterator(Constraint<K> c1, Constraint<L> c2) {
 		if(c1.isStar())
 			return new CascadingIterator<K,L,E>(this.index.tupleIterator(c1), c2);
 		K key1 = ((EqualsConstraint<K>)c1).getKey();
@@ -141,7 +141,7 @@ public class MapMapIndex<K, L, E> implements IMapMapIndex<K,L,E> {
 		}
 		
 		@Override
-        public boolean hasNext() {
+		public boolean hasNext() {
 			
 			// if the inner constraint is * we can assume that inner maps
 			// always have at least one element
@@ -167,7 +167,7 @@ public class MapMapIndex<K, L, E> implements IMapMapIndex<K,L,E> {
 		}
 		
 		@Override
-        public KeyKeyEntryTuple<K,L,E> next() {
+		public KeyKeyEntryTuple<K,L,E> next() {
 			
 			while(this.inner == null || !this.inner.hasNext()) {
 				if(!this.outer.hasNext())
@@ -184,7 +184,7 @@ public class MapMapIndex<K, L, E> implements IMapMapIndex<K,L,E> {
 		}
 		
 		@Override
-        public void remove() {
+		public void remove() {
 			
 			// should also remove when last != inner, but can't as outer already
 			// is at the next inner map and modifying the map outside of the
@@ -215,19 +215,19 @@ public class MapMapIndex<K, L, E> implements IMapMapIndex<K,L,E> {
 		}
 		
 		@Override
-        public void remove() {
+		public void remove() {
 			this.base.remove();
 			if(this.map.isEmpty())
 				MapMapIndex.this.index.deIndex(this.key1);
 		}
 		
 		@Override
-        public boolean hasNext() {
+		public boolean hasNext() {
 			return this.base.hasNext();
 		}
 		
 		@Override
-        public KeyKeyEntryTuple<K,L,E> next() {
+		public KeyKeyEntryTuple<K,L,E> next() {
 			KeyEntryTuple<L,E> in = this.base.next();
 			if(in == null)
 				return null;
@@ -237,12 +237,12 @@ public class MapMapIndex<K, L, E> implements IMapMapIndex<K,L,E> {
 	}
 	
 	@Override
-    public void clear() {
+	public void clear() {
 		this.index.clear();
 	}
 	
 	@Override
-    public boolean isEmpty() {
+	public boolean isEmpty() {
 		return this.index.isEmpty();
 	}
 	
@@ -252,12 +252,12 @@ public class MapMapIndex<K, L, E> implements IMapMapIndex<K,L,E> {
 	}
 	
 	@Override
-    public Iterator<K> key1Iterator() {
+	public Iterator<K> key1Iterator() {
 		return this.index.keyIterator();
 	}
 	
 	@Override
-    public Iterator<L> key2Iterator() {
+	public Iterator<L> key2Iterator() {
 		return new AbstractCascadedIterator<IMapIndex<L,E>,L>(this.index.iterator()) {
 			
 			@Override
@@ -266,5 +266,17 @@ public class MapMapIndex<K, L, E> implements IMapMapIndex<K,L,E> {
 			}
 			
 		};
+	}
+	
+	public boolean containsTuple(K key1, L key2, E entry) {
+		IMapIndex<L,E> entry1 = this.index.lookup(key1);
+		if(entry == null) {
+			return false;
+		}
+		E entry2 = entry1.lookup(key2);
+		if(entry2 == null) {
+			return false;
+		}
+		return entry2.equals(entry);
 	}
 }
