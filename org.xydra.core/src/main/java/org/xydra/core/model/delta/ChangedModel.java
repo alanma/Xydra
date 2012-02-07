@@ -1,5 +1,6 @@
 package org.xydra.core.model.delta;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -42,6 +43,8 @@ import org.xydra.log.LoggerFactory;
  * rather on a sort of copy that emulates the passed {@link XReadableModel}. A
  * ChangedModel provides methods to compare the current state to the state the
  * passed {@link XReadableModel} was in at creation time.
+ * 
+ * De-facto this class defines the semantics of executing commands.
  * 
  * @author dscharrer
  * 
@@ -180,6 +183,13 @@ public class ChangedModel implements XWritableModel {
 	}
 	
 	/**
+	 * @return true there are changes compared to the initially supplied model
+	 */
+	public boolean hasChanges() {
+		return countCommandsNeeded(1) > 0;
+	}
+	
+	/**
 	 * Count the number of {@link XEvent XEvents} that would be needed to log
 	 * the transformation of the original {@link XReadableModel} to the current
 	 * state which is represented by this ChangedModel.
@@ -251,6 +261,7 @@ public class ChangedModel implements XWritableModel {
 			this.removed.remove(objectId);
 			ChangedObject newObject = new ChangedObject(object);
 			newObject.clear();
+			assert newObject.getID().equals(object.getID());
 			this.changed.put(objectId, newObject);
 			
 			assert checkSetInvariants();
@@ -355,7 +366,8 @@ public class ChangedModel implements XWritableModel {
 		case ADD:
 			if(hasObject(objectId)) {
 				// command is invalid or doesn't change anything
-				log.warn("XModelCommand ADDs object '" + objectId + "' which is already there");
+				log.warn("XModelCommand " + command + " ADDs object '" + objectId
+				        + "' which is already there");
 				return command.isForced();
 			}
 			// command is OK and adds a new object
@@ -410,7 +422,8 @@ public class ChangedModel implements XWritableModel {
 		
 		case ADD:
 			if(object.hasField(fieldId)) {
-				log.warn("XObjectCommand ADD " + command + "is invalid or doesn't change anything");
+				log.warn(command + " object has already field '" + fieldId + "' and foced="
+				        + command.isForced());
 				return command.isForced();
 			}
 			// command is OK and adds a new field
@@ -423,7 +436,7 @@ public class ChangedModel implements XWritableModel {
 			if(field == null) {
 				// command is invalid or doesn't change anything
 				log.warn("XObjectCommand REMOVE '" + command
-				        + "'is invalid or doesn't change anything");
+				        + "'is invalid or doesn't change anything, forced=" + command.isForced());
 				return command.isForced();
 			}
 			if(field.getRevisionNumber() != command.getRevisionNumber() && !command.isForced()) {
@@ -453,7 +466,7 @@ public class ChangedModel implements XWritableModel {
 	 *         otherwise
 	 * 
 	 *         TODO it might be a good idea to tell the caller of this method
-	 *         which commands of the transaction where executed and not only
+	 *         which commands of the transaction were executed and not only
 	 *         return false
 	 */
 	public boolean executeCommand(XTransaction transaction) {
@@ -504,7 +517,14 @@ public class ChangedModel implements XWritableModel {
 	 *         {@link XReadableModel}
 	 */
 	public Iterable<SimpleObject> getNewObjects() {
+		assert containsAllDifferentElements(this.added.values()) : "duplicates found";
 		return this.added.values();
+	}
+	
+	private <T> boolean containsAllDifferentElements(Collection<T> c) {
+		Set<T> set = new HashSet<T>();
+		set.addAll(c);
+		return set.size() == c.size();
 	}
 	
 	@Override
@@ -530,6 +550,7 @@ public class ChangedModel implements XWritableModel {
 			return null;
 		}
 		changedObject = new ChangedObject(object);
+		assert changedObject.getID().equals(object.getID());
 		this.changed.put(objectId, changedObject);
 		
 		assert checkSetInvariants();
