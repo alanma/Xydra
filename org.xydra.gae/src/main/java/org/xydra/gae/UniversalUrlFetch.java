@@ -40,10 +40,11 @@ public class UniversalUrlFetch {
 	 * @param urlStr never null
 	 * @param username if not null, will be used for HTTP Basic Authentication
 	 * @param password if not null, will be used for HTTP Basic Authentication
+	 * @param async TODO implement: if true, run asynchronously
 	 * @return the HTTP status code
 	 * @throws IOException ...
 	 */
-	public static int callUrl(String urlStr, String username, String password) throws IOException {
+	public static int callUrl(String urlStr, String username, String password, boolean async) throws IOException {
 		log.info("Calling URL '" + urlStr + "'");
 		boolean doBasicAuth = username != null && password != null;
 		String encodedAuth = null;
