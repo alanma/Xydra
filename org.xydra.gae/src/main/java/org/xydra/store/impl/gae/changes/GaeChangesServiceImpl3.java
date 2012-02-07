@@ -215,9 +215,13 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 		
 		if(status == Status.SuccessExecuted) {
 			boolean modelExists = eventIndicatesModelExists(change.getEvent());
-			GaeModelRevision gmr = new GaeModelRevision(change.rev, new ModelRevision(change.rev,
-			        modelExists));
-			this.revManager.getInstanceRevisionInfo().setCurrentGaeModelRevIfRevisionIsHigher(gmr);
+			// FIXME concept: new revision can be lower, there might be
+			// uncommitted
+			// intermediary versions
+			GaeModelRevision gaeModelRev = new GaeModelRevision(change.rev, new ModelRevision(
+			        change.rev, modelExists));
+			this.revManager.getInstanceRevisionInfo().setCurrentGaeModelRevIfRevisionIsHigher(
+			        gaeModelRev);
 			// invalidate thread local cache
 			this.revManager.resetThreadLocalRevisionNumber();
 		}
@@ -602,8 +606,10 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 		 * repocommand.removeModel if there was one
 		 */
 		long begin = beginRevision < 0 ? 0 : beginRevision;
+		// FIXME concept: better use real current number here?
 		long currentRev = this.revManager.getThreadLocalGaeModelRev().getModelRevision().revision();
 		if(currentRev == -1) {
+			log.info("Current rev==-1, return null from " + currentRev);
 			return null;
 		}
 		// Don't try to get more events than there actually are.
