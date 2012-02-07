@@ -5,6 +5,12 @@ import java.io.Serializable;
 import org.xydra.store.ModelRevision;
 
 
+/**
+ * Contains a {@link ModelRevision} and a lastSilentCommit number
+ * 
+ * @author xamde
+ * 
+ */
 public class GaeModelRevision implements Serializable {
 	
 	public static final GaeModelRevision createGaeModelRevDoesNotExistYet() {
@@ -33,6 +39,7 @@ public class GaeModelRevision implements Serializable {
 	 *            <li>for all x | r <= x <= lastCommited: x.status ==
 	 *            {SuccessNoChange | FailedPreconditions | FailedTimeout }</li>
 	 *            </ol>
+	 *            . Use {@link RevisionInfo#NOT_SET} if not known.
 	 * @param modelRev can be null if not known
 	 */
 	public GaeModelRevision(long lastSilentCommitted, ModelRevision modelRev) {
