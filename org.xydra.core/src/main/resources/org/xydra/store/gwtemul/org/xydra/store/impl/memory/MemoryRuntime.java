@@ -26,4 +26,9 @@ public class MemoryRuntime implements XydraPlatformRuntime {
 	public void startRequest() {
 	}
 	
+	@Override
+	public String getName() {
+		return "MemoryRuntime-GWTEmul";
+	}
+	
 }
