@@ -114,6 +114,8 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 		log.debug("[r" + change.rev + "] Phase 2: getPartialSnapshot at {" + snapshotRev + "/"
 		        + this.revisionManager.getInstanceRevisionInfo().getLastCommitted() + "}");
 		
+		// FIXME !!!
+		
 		XRevWritableModel snapshot = null;
 		if(gaeModelRev.getModelRevision().modelExists()) {
 			snapshot = this.snapshots.getPartialSnapshot(snapshotRev, change.getLocks());
@@ -156,18 +158,18 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 		
 		assert change.getStatus().isCommitted() : "If we reach this line, change must be committed";
 		
-		if (log.isInfoEnabled() || ret == XCommand.FAILED && log.isWarnEnabled() ) {
+		if(log.isInfoEnabled() || ret == XCommand.FAILED && log.isWarnEnabled()) {
 			String msg = "[r"
 			        + change.rev
 			        + "] -> "
 			        + (ret == XCommand.FAILED ? "failed" : ret == XCommand.NOCHANGE ? "nochange"
 			                : "success") + " {" + gaeModelRev + "}. Stats: " + c.getStats();
-			if (ret == XCommand.FAILED) {
+			if(ret == XCommand.FAILED) {
 				log.warn(msg);
 			} else {
 				log.info(msg);
 			}
-
+			
 		}
 		return ret;
 	}

@@ -306,6 +306,12 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 		List<XEvent> events = this.changesService.getEventsBetween(this.modelAddress, start,
 		        requestedRevNr);
 		
+		// FIXME
+		if(events == null) {
+			log.warn("There are no events for " + this.modelAddress + " in range [" + start + ","
+			        + requestedRevNr + "]");
+		}
+		
 		// apply events to base
 		for(XEvent event : events) {
 			log.debug("Basemodel[" + snapshot.getRevisionNumber() + "], applying event["
