@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0" 
+xmlns:wadl="http://research.sun.com/wadl/2006/10" xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+xmlns:html="http://www.w3.org/1999/xhtml" xmlns:exsl="http://exslt.org/common" xmlns:ns="urn:namespace" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+extension-element-prefixes="exsl" xmlns="http://www.w3.org/1999/xhtml" exclude-result-prefixes="xsl wadl xs html ns">
+
 <!--
   wadl_documentation.xsl (2008-12-09)
 
@@ -26,7 +32,6 @@
     - link to or include non-schema variable type defs (as a separate list?)
     - @href error handling
 -->
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0" xmlns:wadl="http://research.sun.com/wadl/2006/10" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:exsl="http://exslt.org/common" xmlns:ns="urn:namespace" extension-element-prefixes="exsl" xmlns="http://www.w3.org/1999/xhtml" exclude-result-prefixes="xsl wadl xs html ns">
 
     <xsl:output method="html" encoding="UTF-8" indent="yes" doctype-public="-//W3C//DTD XHTML 1.0 Transitional//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"/>
 

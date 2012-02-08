@@ -59,7 +59,6 @@ public class WritableRepositoryOnStore extends ReadableRepositoryOnStore impleme
 	}
 	
 	@Override
-	@SuppressWarnings("deprecation")
 	public XWritableModel getModel(XID modelId) {
 		XReadableModel baseModel = super.getModel(modelId);
 		if(baseModel == null) {

@@ -42,7 +42,7 @@ import org.xydra.store.access.impl.delegate.ISendHookEvents;
 @RequiresAppEngine(false)
 public class MemoryGroupDatabase implements XGroupDatabaseWithListeners, ISendHookEvents {
 	
-	private static final long serialVersionUID = 4404147651476087029L;
+	public static final long serialVersionUID = 4404147651476087029L;
 	
 	private final Set<IHookListener> hookListeners;
 	// map of actor->group relationships

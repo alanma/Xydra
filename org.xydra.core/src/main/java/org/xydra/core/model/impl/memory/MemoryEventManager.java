@@ -275,7 +275,6 @@ public class MemoryEventManager implements Serializable {
 	 *        the current MemoryEventQueue (value can be retrieved from
 	 *        getNextPosition())
 	 */
-	@SuppressWarnings("null")
 	protected void createTransactionEvent(XID actor, MemoryModel model, MemoryObject object,
 	        int since) {
 		

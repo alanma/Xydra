@@ -254,7 +254,7 @@ public class MapStats {
 			for(java.util.Map.Entry<String,Entry> e : MapStats.this.statsMap.entrySet()) {
 				size += e.getValue().currentValueSize();
 			}
-			return -1;
+			return size;
 		}
 		
 	}

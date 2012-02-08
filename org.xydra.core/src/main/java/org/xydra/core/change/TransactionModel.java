@@ -59,7 +59,7 @@ import org.xydra.core.model.impl.memory.MemoryObject;
  */
 public class TransactionModel extends AbstractEntity implements XWritableModel {
 	
-	private static final long serialVersionUID = -5636313889791653240L;
+	public static final long serialVersionUID = -5636313889791653240L;
 	
 	private MemoryModel baseModel;
 	private long revisionNumber;

@@ -16,7 +16,7 @@ import org.xydra.store.access.XAuthorisationManager;
 
 public abstract class AbstractAuthorisationManager implements XAuthorisationManager {
 	
-	private static final long serialVersionUID = 8774282865481424604L;
+	public static final long serialVersionUID = 8774282865481424604L;
 	
 	public boolean canExecute(XID actor, XAtomicCommand command) {
 		if(command instanceof XFieldCommand) {

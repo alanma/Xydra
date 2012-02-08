@@ -64,7 +64,6 @@ class SerializingUtils {
 		return XX.toId(toString(getRequiredAttribute(element, XID_ATTRIBUTE)));
 	}
 	
-	@SuppressWarnings("null")
 	protected static XAddress getAddress(XydraElement element, XAddress context) {
 		
 		boolean match = (context != null);
@@ -88,7 +87,6 @@ class SerializingUtils {
 		return XX.toAddress(repoId, modelId, objectId, fieldId);
 	}
 	
-	@SuppressWarnings("null")
 	protected static void setAddress(XAddress target, XydraOut out, XAddress context) {
 		
 		boolean match = (context != null);
