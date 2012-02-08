@@ -1,6 +1,5 @@
 package org.xydra.index.impl;
 
-import java.util.HashSet;
 import java.util.Iterator;
 
 import org.xydra.index.IMapMapMapIndex;
@@ -28,7 +27,6 @@ public class FastTripleMap<K, L, M, E> implements IMapMapMapIndex<K,L,M,E> {
 	protected transient IMapMapMapIndex<M,K,L,E> idx_k3_k1_k2;
 	
 	public FastTripleMap() {
-		new HashSet<K>();
 		this.idx_k1_k2_k3 = new MapMapMapIndex<K,L,M,E>();
 		this.idx_k2_k3_k1 = new MapMapMapIndex<L,M,K,E>();
 		this.idx_k3_k1_k2 = new MapMapMapIndex<M,K,L,E>();
