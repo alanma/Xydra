@@ -15,8 +15,6 @@ import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldEvent;
-import org.xydra.base.change.XModelEvent;
-import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.value.XValue;
@@ -174,7 +172,7 @@ public abstract class XModelObjectLevelIndexTest {
 			assertEquals(ChangeType.ADD, event.getChangeType());
 			assertEquals(newField.getAddress(), event.getChangedEntity());
 			
-			this.newIndex.updateIndex(event);
+			this.newIndex.updateIndex((XFieldEvent)event, null);
 			break;
 		}
 		
@@ -239,7 +237,7 @@ public abstract class XModelObjectLevelIndexTest {
 			assertEquals(ChangeType.REMOVE, event.getChangeType());
 			assertEquals(newField.getAddress(), event.getChangedEntity());
 			
-			this.newIndex.updateIndex(event);
+			this.newIndex.updateIndex((XFieldEvent)event, value);
 			break;
 		}
 		
@@ -315,7 +313,7 @@ public abstract class XModelObjectLevelIndexTest {
 			assertEquals(ChangeType.REMOVE, event.getChangeType());
 			assertEquals(newField1.getAddress(), event.getChangedEntity());
 			
-			this.newIndex.updateIndex(event);
+			this.newIndex.updateIndex((XFieldEvent)event, value);
 		}
 		
 		for(String s : indexStrings) {
@@ -348,7 +346,7 @@ public abstract class XModelObjectLevelIndexTest {
 			assertEquals(ChangeType.REMOVE, event.getChangeType());
 			assertEquals(newField2.getAddress(), event.getChangedEntity());
 			
-			this.newIndex.updateIndex(oldJohn, newJohn);
+			this.newIndex.updateIndex((XFieldEvent)event, value);
 		}
 		
 		for(String s : indexStrings) {
@@ -415,7 +413,7 @@ public abstract class XModelObjectLevelIndexTest {
 			assertEquals(ChangeType.CHANGE, event.getChangeType());
 			assertEquals(newField.getAddress(), event.getChangedEntity());
 			
-			this.newIndex.updateIndex(event);
+			this.newIndex.updateIndex((XFieldEvent)event, value1);
 		}
 		
 		// make sure the old value was deindexed
@@ -457,84 +455,9 @@ public abstract class XModelObjectLevelIndexTest {
 	}
 	
 	@Test
-	public void testUpdateIndexEventRemoveObject() {
-		String valueString = "Firstvaluestringwhichshoudlntexistinbothmodels";
-		XValue value = X.getValueFactory().createStringValue(valueString);
-		List<String> indexStrings = this.newIndexer.getIndexStrings(value);
-		
-		XObject oldJohn = this.oldModel.getObject(DemoModelUtil.JOHN_ID);
-		XObject newJohn = this.newModel.getObject(DemoModelUtil.JOHN_ID);
-		
-		XID id = X.getIDProvider().createUniqueId();
-		newJohn.createField(id).setValue(value);
-		
-		this.newIndex.updateIndex(oldJohn, newJohn);
-		oldJohn.createField(id).setValue(value);
-		
-		DummyModelEventListener listener = new DummyModelEventListener();
-		this.newModel.addListenerForModelEvents(listener);
-		
-		this.newModel.removeObject(DemoModelUtil.JOHN_ID);
-		
-		XEvent event = listener.event;
-		assertTrue(event instanceof XModelEvent);
-		assertEquals(ChangeType.REMOVE, event.getChangeType());
-		assertEquals(newJohn.getAddress(), event.getChangedEntity());
-		
-		this.newIndex.updateIndex(event);
-		
-		for(String s : indexStrings) {
-			List<XAddress> found = this.newIndex.search(s);
-			assertTrue(found.isEmpty());
-		}
-	}
-	
-	@Test
-	public void testUpdateIndexEventRemoveField() {
-		String valueString = "Firstvaluestringwhichshoudlntexistinbothmodels";
-		XValue value = X.getValueFactory().createStringValue(valueString);
-		List<String> indexStrings = this.newIndexer.getIndexStrings(value);
-		
-		XObject oldJohn = this.oldModel.getObject(DemoModelUtil.JOHN_ID);
-		XObject newJohn = this.newModel.getObject(DemoModelUtil.JOHN_ID);
-		
-		XID id = X.getIDProvider().createUniqueId();
-		XField newField = newJohn.createField(id);
-		newField.setValue(value);
-		
-		this.newIndex.updateIndex(oldJohn, newJohn);
-		oldJohn.createField(id).setValue(value);
-		
-		DummyObjectEventListener listener = new DummyObjectEventListener();
-		newJohn.addListenerForObjectEvents(listener);
-		
-		newJohn.removeField(id);
-		
-		XEvent event = listener.event;
-		assertTrue(event instanceof XObjectEvent);
-		assertEquals(ChangeType.REMOVE, event.getChangeType());
-		assertEquals(newField.getAddress(), event.getChangedEntity());
-		
-		this.newIndex.updateIndex(oldJohn, newJohn);
-		
-		for(String s : indexStrings) {
-			List<XAddress> found = this.newIndex.search(s);
-			assertTrue(found.isEmpty());
-		}
-	}
-	
-	@Test
 	public void testDeIndexObject() {
 		XReadableObject newJohn = this.newModel.getObject(DemoModelUtil.JOHN_ID);
 		this.newIndex.deIndex(newJohn);
-		
-		testIfObjectWasDeIndexed(newJohn);
-	}
-	
-	@Test
-	public void testDeIndexObjectByAddress() {
-		XReadableObject newJohn = this.newModel.getObject(DemoModelUtil.JOHN_ID);
-		this.newIndex.deIndex(newJohn.getAddress());
 		
 		testIfObjectWasDeIndexed(newJohn);
 	}
