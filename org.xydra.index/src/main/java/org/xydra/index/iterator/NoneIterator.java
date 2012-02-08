@@ -12,8 +12,6 @@ package org.xydra.index.iterator;
  */
 public class NoneIterator<E> implements ClosableIterator<E> {
 	
-	private static final long serialVersionUID = 8727531049551996167L;
-	
 	@Override
     public void close() {
 		// NoneIterator needs not to be closed

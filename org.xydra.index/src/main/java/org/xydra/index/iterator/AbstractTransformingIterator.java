@@ -11,10 +11,6 @@ import java.util.Iterator;
  */
 public abstract class AbstractTransformingIterator<I, O> implements ClosableIterator<O> {
 	
-	/**
-     * 
-     */
-    private static final long serialVersionUID = 6606331134434363937L;
 	Iterator<? extends I> base;
 	
 	public AbstractTransformingIterator(Iterator<? extends I> base) {

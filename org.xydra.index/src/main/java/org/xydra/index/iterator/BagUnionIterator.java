@@ -15,10 +15,6 @@ import java.util.Iterator;
 public class BagUnionIterator<E> extends AbstractCascadedIterator<Iterator<? extends E>,E>
         implements ClosableIterator<E> {
 	
-	/**
-     * 
-     */
-	private static final long serialVersionUID = 4262577002849575566L;
 	private Iterator<? extends E> smallIt;
 	private Iterator<? extends E> largeIt;
 	

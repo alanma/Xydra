@@ -13,8 +13,6 @@ import java.util.Iterator;
  */
 public class ClosableIteratorAdapter<T> implements ClosableIterator<T> {
 	
-	private static final long serialVersionUID = -5135133229964853452L;
-	
 	private Iterator<? extends T> iterator;
 	
 	public ClosableIteratorAdapter(Iterator<? extends T> it) {
