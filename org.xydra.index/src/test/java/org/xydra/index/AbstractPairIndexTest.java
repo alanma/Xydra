@@ -148,7 +148,7 @@ public abstract class AbstractPairIndexTest extends TestCase {
 		
 	}
 	
-	@SuppressWarnings("boxing")
+	@SuppressWarnings({ "boxing", "static-method" })
 	protected Pair<Integer,Integer> makePair(Random rnd, int nKeys) {
 		int na = rnd.nextInt(nKeys);
 		int nb = rnd.nextInt(nKeys);

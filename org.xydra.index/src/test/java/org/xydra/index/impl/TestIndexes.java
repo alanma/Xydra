@@ -26,6 +26,7 @@ public class TestIndexes extends TestCase {
 		return list;
 	}
 	
+	@SuppressWarnings("static-method")
 	@Test
 	public void testMapSetIndex() {
 		Factory<IEntrySet<String>> entrySetFactory = new FastEntrySetFactory<String>();
@@ -57,6 +58,7 @@ public class TestIndexes extends TestCase {
 		
 	}
 	
+	@SuppressWarnings("static-method")
 	@Test
 	public void testMapMapSetIndex() {
 		Factory<IEntrySet<String>> entrySetFactory = new FastEntrySetFactory<String>();
