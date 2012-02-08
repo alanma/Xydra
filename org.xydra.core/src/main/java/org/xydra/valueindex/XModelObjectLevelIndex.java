@@ -9,13 +9,7 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
-import org.xydra.base.change.XAtomicEvent;
-import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldEvent;
-import org.xydra.base.change.XModelEvent;
-import org.xydra.base.change.XObjectEvent;
-import org.xydra.base.change.XRepositoryEvent;
-import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.value.XValue;
@@ -27,6 +21,12 @@ import org.xydra.index.impl.FastEntrySetFactory;
 import org.xydra.index.impl.MapSetIndex;
 import org.xydra.index.query.EqualsConstraint;
 
+
+/*
+ * TODO Keep in mind that it will NOT be possible to iterate over all existing
+ * keys in the planned implementation, so do not use keyIterator etc. on the
+ * index
+ */
 
 public class XModelObjectLevelIndex {
 	private XValueIndexer indexer;
@@ -108,51 +108,50 @@ public class XModelObjectLevelIndex {
 		}
 	}
 	
-	public void updateIndex(XEvent event) {
-		if(event instanceof XTransactionEvent) {
-			XTransactionEvent trans = (XTransactionEvent)event;
-			for(XAtomicEvent e : trans) {
-				updateIndex(e);
-			}
-		} else if(event instanceof XModelEvent) {
-			this.updateIndex((XModelEvent)event);
-		} else if(event instanceof XObjectEvent) {
-			/*
-			 * since the index only stores Object-Addresses, it is unclear how
-			 * an REMOVE-Object-Event should be handled, since the index does
-			 * not have any access to the model/object etc. nor does it save the
-			 * fields address. Since the REMOVE case is the only one that is
-			 * interesting here (ADD events don't change any values) it's better
-			 * to discard XObjectEvents here.
-			 */
-			throw new RuntimeException("updateIndex cannot handle XObjectEvents");
-		} else if(event instanceof XFieldEvent) {
-			this.updateIndex((XFieldEvent)event);
-		} else {
-			assert event instanceof XRepositoryEvent;
-			
-			throw new RuntimeException("updateIndex cannnot handle XRepositoryEvents");
-		}
-	}
-	
-	public void updateIndex(XModelEvent event) {
+	/*
+	 * deIndex methods for event types apart from XFieldEvents are not possible,
+	 * because:
+	 * 
+	 * XModelEvents: Only the REMOVE-Case is interesting here. We would need to
+	 * remove a complete object only by it's address, which is not possible,
+	 * because we do not have the possibility to iterate over all keys (to look
+	 * up the entry which contain the object address) nor do we have the
+	 * possibility to look up the values which were stored in the XObject.
+	 * 
+	 * XObjectEvents: Only the REMOVE-Case is interesting here. We would need to
+	 * remove a complete field only by it's address. The argumentation why this
+	 * is not possible is analogous to the argumentation for XModelEvents.
+	 * 
+	 * XTransactionEvents: Typically contain both XModel- and XObjectEvents,
+	 * which cannot be handled. Transaction consisting only of XFieldEvents also
+	 * cannot be handled, since the Transaction contains no information over the
+	 * removed values etc., which is needed for deindexing.
+	 */
+
+	public void updateIndex(XFieldEvent event, XValue oldValue) {
+		/*
+		 * TODO is it a good idea to put the removed value as a parameter?
+		 */
+
+		XAddress objectAddress = XX.resolveObject(event.getRepositoryId(), event.getModelId(),
+		        event.getObjectId());
+		
 		switch(event.getChangeType()) {
 		case ADD:
-			// ADD events don't change any fields, so we don't need to do
-			// anything here
+			XValue addedValue = event.getNewValue();
+			this.indexer.indexValue(objectAddress, addedValue);
 			break;
 		case REMOVE:
-			XAddress removedObjAdr = event.getChangedEntity();
-			this.deIndex(removedObjAdr);
+			this.indexer.deIndexValue(objectAddress, oldValue);
 			break;
-		case CHANGE: // CHANGE and TRANSACTION are not possible for XModelEvents
-		case TRANSACTION:
+		case CHANGE:
+			this.indexer.deIndexValue(objectAddress, oldValue);
+			addedValue = event.getNewValue();
+			this.indexer.indexValue(objectAddress, addedValue);
+			break;
+		case TRANSACTION: // TRANSACTION is not possible for XFieldEvents
 			break;
 		}
-	}
-	
-	public void updateIndex(XFieldEvent event) {
-		// TODO implement
 	}
 	
 	public void index(XReadableField field) {
@@ -207,16 +206,6 @@ public class XModelObjectLevelIndex {
 			XReadableField field = object.getField(fieldId);
 			deIndex(objectAddress, field);
 		}
-	}
-	
-	public void deIndex(XAddress objectAddress) {
-		if(objectAddress.getAddressedType() != XType.XOBJECT) {
-			throw new RuntimeException("objectAddress is no valid Object-XAddress, but an "
-			        + objectAddress.getAddressedType() + "-Address.");
-		}
-		
-		// TODO implement
-		// this.indexer.deIndex(objectAddress);
 	}
 	
 	public void deIndex(XReadableField field) {
