@@ -43,17 +43,17 @@ public class LowercaseStringKeyMapIndex<E> implements IMapIndex<String,E> {
 	
 	@Override
     public boolean containsKey(String key) {
-		return this.map.containsKey(this.normalise(key));
+		return this.map.containsKey(LowercaseStringKeyMapIndex.normalise(key));
 	}
 	
 	@Override
     public void deIndex(String key) {
-		this.map.remove(this.normalise(key));
+		this.map.remove(LowercaseStringKeyMapIndex.normalise(key));
 	}
 	
 	@Override
     public void index(String key, E entry) {
-		this.map.put(this.normalise(key), entry);
+		this.map.put(LowercaseStringKeyMapIndex.normalise(key), entry);
 	}
 	
 	@Override
@@ -68,10 +68,10 @@ public class LowercaseStringKeyMapIndex<E> implements IMapIndex<String,E> {
 	
 	@Override
     public E lookup(String key) {
-		return this.map.get(this.normalise(key));
+		return this.map.get(LowercaseStringKeyMapIndex.normalise(key));
 	}
 	
-	private String normalise(String key) {
+	private static String normalise(String key) {
 		return key.toLowerCase(Locale.GERMAN);
 	}
 	
