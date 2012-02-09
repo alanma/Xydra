@@ -247,6 +247,7 @@ public abstract class XValueIndexer {
 	public void deIndexValue(XAddress address, XValue value) {
 		if(value == null) {
 			// TODO handle null values
+			deIndexString(address, value, "null");
 		} else {
 			switch(value.getType()) {
 			case Address:
@@ -472,11 +473,13 @@ public abstract class XValueIndexer {
 	public void indexAddress(XAddress objectAddress, XValue value, XAddress address) {
 		String key = getAddressIndexString(address);
 		
-		this.incrementIndexEntry(key, objectAddress, address);
+		this.incrementIndexEntry(key, objectAddress, value);
 	}
 	
 	public void deIndexAddress(XAddress objectAddress, XValue value, XAddress address) {
-		this.decrementIndexEntry(getAddressIndexString(address), objectAddress, value);
+		String key = getAddressIndexString(address);
+		
+		this.decrementIndexEntry(key, objectAddress, value);
 	}
 	
 	private void incrementIndexEntry(String key, XAddress address, XValue value) {
