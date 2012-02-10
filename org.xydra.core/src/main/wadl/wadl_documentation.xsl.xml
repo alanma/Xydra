@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0" 
-xmlns:wadl="http://research.sun.com/wadl/2006/10" xmlns:xs="http://www.w3.org/2001/XMLSchema" 
-xmlns:html="http://www.w3.org/1999/xhtml" xmlns:exsl="http://exslt.org/common" xmlns:ns="urn:namespace" 
+<xsl:stylesheet 
+exclude-result-prefixes="xsl wadl xs html ns"
+extension-element-prefixes="exsl" 
+version="1.0" 
+xmlns="http://www.w3.org/1999/xhtml" 
+xmlns:exsl="http://exslt.org/common" 
+xmlns:html="http://www.w3.org/1999/xhtml" 
+xmlns:ns="urn:namespace" 
+xmlns:wadl="http://research.sun.com/wadl/2006/10" 
+xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
+xmlns:xs="http://www.w3.org/2001/XMLSchema" 
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-extension-element-prefixes="exsl" xmlns="http://www.w3.org/1999/xhtml" exclude-result-prefixes="xsl wadl xs html ns">
+xsi:schemaLocation="http://www.w3.org/1999/XSL/Transform http://www.w3.org/2007/schema-for-xslt20.xsd"
+>
 
 <!--
   wadl_documentation.xsl (2008-12-09)
